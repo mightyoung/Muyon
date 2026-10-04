@@ -75,14 +75,14 @@ void main() {
       await manager.close();
       manager = StorageManager(root.path);
       final newer = ModuleSchema(
-        version: 2,
-        definitionDigest: 'v2',
+        version: 3,
+        definitionDigest: 'v3',
         migrations: [
           ...WorkspaceRepository.schema.migrations,
           ModuleMigration(
-            version: 2,
-            id: 'v2',
-            definitionDigest: 'v2',
+            version: 3,
+            id: 'v3',
+            definitionDigest: 'v3',
             migrate: (db) {
               db.execute('CREATE TABLE doomed(x)');
               throw StateError('Migration fails');

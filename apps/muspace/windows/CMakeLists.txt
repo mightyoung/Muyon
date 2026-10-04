@@ -55,6 +55,9 @@ add_subdirectory("runner")
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
+# Pin the same inference runtime as Android/macOS; never pick an ambient DLL.
+set(USE_SYSTEM_ONNXRUNTIME OFF CACHE BOOL "Use pinned ONNX Runtime" FORCE)
+set(ONNXRUNTIME_VERSION "1.23.0" CACHE STRING "Pinned inference runtime" FORCE)
 include(flutter/generated_plugins.cmake)
 
 

@@ -13,6 +13,7 @@ import '../platform/file_gateway.dart';
 import '../workspace/import_coordinator.dart';
 import 'bootstrap.dart';
 import 'research_tools_page.dart';
+import '../screens/platform_shell.dart';
 
 class MuSpaceApp extends StatefulWidget {
   const MuSpaceApp({super.key, required this.host});
@@ -23,10 +24,37 @@ class MuSpaceApp extends StatefulWidget {
 
 class _MuSpaceAppState extends State<MuSpaceApp> {
   ThemeMode mode = ThemeMode.system;
+  final navigator = GlobalKey<NavigatorState>();
   late final AppLifecycleListener lifecycle;
   @override
   void initState() {
     super.initState();
+    widget.host.approveInquiryModelRequest = (preview) async {
+      final context = navigator.currentContext;
+      if (!mounted || context == null) return false;
+      return await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('确认 Folio 本次模型请求'),
+              content: SingleChildScrollView(
+                child: SelectableText(
+                  '模型：${preview.profile.modelId}\n位置：${preview.profile.location.name}\n端点：${preview.endpoint}\n摘要：${preview.bodyDigest}\n发送内容：\n${preview.body}',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('取消'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('仅发送这一次'),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+    };
     lifecycle = AppLifecycleListener(
       onExitRequested: () async {
         await widget.host.close();
@@ -44,35 +72,48 @@ class _MuSpaceAppState extends State<MuSpaceApp> {
   @override
   void dispose() {
     lifecycle.dispose();
+    widget.host.approveInquiryModelRequest = null;
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'MuSpace',
-    debugShowCheckedModeBanner: false,
-    locale: const Locale('zh'),
-    supportedLocales: const [Locale('zh'), Locale('en')],
-    localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff356859)),
-      useMaterial3: true,
-    ),
-    darkTheme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xff356859),
-        brightness: Brightness.dark,
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: widget.host.foundation,
+    builder: (context, _) => MaterialApp(
+      title: 'Miyono',
+      navigatorKey: navigator,
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          disableAnimations:
+              MediaQuery.of(context).disableAnimations ||
+              widget.host.workspaces.setting('reduceMotion') == true,
+        ),
+        child: child!,
       ),
-      useMaterial3: true,
-    ),
-    themeMode: mode,
-    home: WorkspacePage(
-      host: widget.host,
+      locale: const Locale('zh'),
+      supportedLocales: const [Locale('zh'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff356859)),
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xff356859),
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
       themeMode: mode,
-      onTheme: (value) async {
-        await widget.host.workspaces.setSetting('theme', value.name);
-        if (mounted) setState(() => mode = value);
-      },
+      home: PlatformShell(
+        host: widget.host,
+        themeMode: mode,
+        onTheme: (value) async {
+          await widget.host.workspaces.setSetting('theme', value.name);
+          if (mounted) setState(() => mode = value);
+        },
+      ),
     ),
   );
 }

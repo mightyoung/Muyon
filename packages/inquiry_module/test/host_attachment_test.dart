@@ -21,7 +21,100 @@ class HostSecrets implements InquirySecretStore {
   }
 }
 
+class HostModelSettings implements InquiryModelSettingsBridge {
+  @override
+  String baseUrl = 'https://host.example/v1';
+  @override
+  String model = 'shared-model';
+  bool configured = true;
+  @override
+  Future<bool> hasCredential() async => configured;
+  @override
+  Future<void> save({
+    required String baseUrl,
+    required String model,
+    String? apiKey,
+  }) async {
+    this.baseUrl = baseUrl;
+    this.model = model;
+    if (apiKey != null) configured = apiKey.isNotEmpty;
+  }
+}
+
 void main() {
+  test('shared model settings and factory override legacy config with task cancellation', () async {
+    final directory = Directory.systemTemp.createTempSync('inquiry-model-host');
+    final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+    createSchema(db);
+    AiJobStore.initializeSchema(jobsDb);
+    final jobs = AiJobStore.attach(jobsDb);
+    final settings = HostModelSettings();
+    final secrets = HostSecrets();
+    AiCancellation? receivedCancellation;
+    final runtime = InquiryRuntime.attach(
+      store: Store.attach(
+        db,
+        device: 'host',
+        backgroundExecutor: <T>(action) async => await action(),
+      ),
+      dataDirectory: directory,
+      aiJobs: jobs,
+      secrets: secrets,
+      initialSettings: {
+        'ai_base_url': 'https://legacy.example',
+        'ai_model': 'legacy',
+      },
+      sharedModelSettings: settings,
+      sharedLlmFactory: ({cancellation}) async {
+        receivedCancellation = cancellation;
+        return LlmClient(
+          LlmConfig(
+            apiKey: '',
+            baseUrl: settings.baseUrl,
+            model: settings.model,
+          ),
+          transport: (body) async => {
+            'choices': [
+              {
+                'message': {'content': 'shared result'},
+              },
+            ],
+          },
+        );
+      },
+    );
+    addTearDown(() async {
+      await runtime.close();
+      jobs.close();
+      db.close();
+      jobsDb.close();
+      directory.deleteSync(recursive: true);
+    });
+    expect(runtime.state.aiBaseUrl, settings.baseUrl);
+    expect(runtime.state.aiModel, 'shared-model');
+    await runtime.state.saveAi(
+      baseUrl: 'https://updated.example/v1',
+      model: 'new-shared',
+      apiKey: 'private',
+    );
+    expect(settings.model, 'new-shared');
+    expect(runtime.state.aiModel, 'new-shared');
+    expect(secrets.values, isEmpty);
+    expect(File('${directory.path}/settings.json').existsSync(), isFalse);
+    expect(await runtime.state.hasAiKey(), isTrue);
+    final token = AiCancellation();
+    final result = await runtime.state.runAiTask(
+      AiTask.clauseReading,
+      {},
+      (client) => client.complete([
+        {'role': 'user', 'content': 'test'},
+      ]),
+      cancellation: token,
+    );
+    expect(result['content'], 'shared result');
+    expect(identical(receivedCancellation, token), isTrue);
+    expect(runtime.state.aiTasks.single.status, 'ready');
+  });
   test(
     'host attachment does not create private databases or auto-start LAN',
     () async {

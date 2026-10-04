@@ -9,6 +9,24 @@ import 'package:supplier_core/supplier_core.dart';
 
 import '../platform/storage_manager.dart';
 import '../services/models/secret_store.dart';
+import '../services/models/model_gateway.dart';
+import '../services/models/profile_repository.dart';
+
+class InquiryModelApprovalPreview {
+  InquiryModelApprovalPreview({
+    required this.profile,
+    required Map<String, Object?> body,
+  }) : body = freezeJsonMap(body),
+       bodyDigest = sha256.convert(utf8.encode(jsonEncode(body))).toString();
+  final ModelProfile profile;
+  Uri get endpoint => profile.endpoint;
+  final Map<String, Object?> body;
+  final String bodyDigest;
+}
+
+typedef InquiryModelApproval = Future<bool> Function(
+  InquiryModelApprovalPreview preview,
+);
 
 /// The host adapts Folio's existing transaction owner; it does not rewrite its
 /// cross-project supplier/project relationships into research scopes.
@@ -53,6 +71,10 @@ class InquiryPlugin {
   static Future<InquiryPlugin> open(
     StorageManager storage, {
     required String deviceId,
+    required ProfileRepository modelProfiles,
+    required OpenAiModelGateway modelGateway,
+    InquiryModelApproval? approveModelRequest,
+    MethodChannelSecretStore modelSecrets = const MethodChannelSecretStore(),
   }) async {
     final database = await storage.open('inquiry', schema);
     final jobsDatabase = await storage.open('inquiry_jobs', jobsSchema);
@@ -75,12 +97,20 @@ class InquiryPlugin {
             jsonDecode(settingsFile.readAsStringSync()) as Map,
           )
         : <String, Object?>{};
+    final models = InquiryHostModels(
+      profiles: modelProfiles,
+      gateway: modelGateway,
+      secrets: modelSecrets,
+      approve: approveModelRequest,
+    );
     final runtime = InquiryRuntime.attach(
       store: store,
       dataDirectory: root,
       aiJobs: jobs,
       secrets: const _InquirySecrets(),
       initialSettings: settings,
+      sharedModelSettings: models,
+      sharedLlmFactory: models.createClient,
     );
     return InquiryPlugin._(runtime, jobs);
   }
@@ -88,6 +118,146 @@ class InquiryPlugin {
   Future<void> close() async {
     await runtime.close();
     jobs.close();
+  }
+}
+
+/// Adapts source business logic to the one host model/credential authority.
+class InquiryHostModels implements InquiryModelSettingsBridge {
+  InquiryHostModels({
+    required this.profiles,
+    required this.gateway,
+    this.secrets = const MethodChannelSecretStore(),
+    this.approve,
+  });
+  final ProfileRepository profiles;
+  final OpenAiModelGateway gateway;
+  final MethodChannelSecretStore secrets;
+  final InquiryModelApproval? approve;
+
+  ModelProfile? get active {
+    final id = profiles.workspaces.setting('activeModelProfileId');
+    return profiles
+        .all()
+        .where(
+          (profile) => profile.id == id && profile.purpose == ModelPurpose.chat,
+        )
+        .firstOrNull;
+  }
+
+  String _base(ModelProfile profile) {
+    final endpoint = profile.endpoint.toString();
+    const suffix = '/chat/completions';
+    return endpoint.endsWith(suffix)
+        ? endpoint.substring(0, endpoint.length - suffix.length)
+        : endpoint;
+  }
+
+  @override
+  String get baseUrl => active == null ? '' : _base(active!);
+  @override
+  String get model => active?.modelId ?? '';
+  @override
+  Future<bool> hasCredential() async {
+    final profile = active;
+    if (profile == null) return false;
+    if (profile.credentialRef == null) {
+      return profile.location == ModelLocation.local;
+    }
+    return (await gateway.secrets.read(profile.credentialRef!))?.isNotEmpty ??
+        false;
+  }
+
+  @override
+  Future<void> save({
+    required String baseUrl,
+    required String model,
+    String? apiKey,
+  }) async {
+    final prior = active;
+    final base = baseUrl.trim().replaceFirst(RegExp(r'/+$'), '');
+    final endpoint = prior != null && base == _base(prior)
+        ? prior.endpoint
+        : Uri.parse(
+            base.endsWith('/chat/completions')
+                ? base
+                : '$base/chat/completions',
+          );
+    final local = ['localhost', '127.0.0.1', '::1'].contains(endpoint.host);
+    final location = local
+        ? ModelLocation.local
+        : prior?.endpoint.host == endpoint.host &&
+              prior?.location == ModelLocation.ownDevice
+        ? ModelLocation.ownDevice
+        : ModelLocation.remote;
+    final id = prior?.id ?? 'inquiry-${DateTime.now().microsecondsSinceEpoch}';
+    final reference = prior?.credentialRef ?? 'model-$id';
+    final profile = ModelProfile(
+      id: id,
+      endpoint: endpoint,
+      location: location,
+      modelId: model.trim(),
+      endpointIdentity: endpoint.toString(),
+      credentialRef:
+          local &&
+              prior?.credentialRef == null &&
+              (apiKey == null || apiKey.isEmpty)
+          ? null
+          : reference,
+      cloudProxy: prior?.cloudProxy ?? false,
+    );
+    if (apiKey != null) {
+      if (apiKey.isEmpty) {
+        await secrets.remove(reference);
+      } else {
+        await secrets.write(reference, apiKey);
+      }
+    }
+    await profiles.save(profile);
+    await profiles.workspaces.setSetting('activeModelProfileId', id);
+  }
+
+  Future<LlmClient?> createClient({AiCancellation? cancellation}) async {
+    final profile = active;
+    if (profile == null) return null;
+    final sourceToken = cancellation ?? AiCancellation();
+    return LlmClient(
+      LlmConfig(
+        apiKey: '',
+        baseUrl: profile.endpoint.toString(),
+        model: profile.modelId,
+      ),
+      transport: (body) async {
+        sourceToken.check();
+        final preview = InquiryModelApprovalPreview(
+          profile: profile,
+          body: body,
+        );
+        final token = ModelCancellation();
+        final remove = sourceToken.onCancel(token.cancel);
+        try {
+          return await gateway.request(
+            profile: profile,
+            payload: preview.body,
+            cancellation: token,
+            beforeSend: () async {
+              sourceToken.check();
+              if (approve == null || !await approve!(preview)) {
+                throw LlmException('本次模型请求未获宿主确认');
+              }
+              sourceToken.check();
+              // A profile switch during a dialog invalidates its frozen request.
+              if (active == null ||
+                  jsonEncode(active!.toJson()) !=
+                      jsonEncode(profile.toJson())) {
+                throw LlmException('模型配置已变更，请重新发起请求');
+              }
+            },
+          );
+        } finally {
+          remove();
+        }
+      },
+    );
   }
 }
 

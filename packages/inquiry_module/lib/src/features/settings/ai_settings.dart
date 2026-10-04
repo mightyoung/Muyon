@@ -40,9 +40,15 @@ class _AiSettingsState extends State<AiSettings> {
   Future<void> _save() async {
     if (busy) return;
     final url = base.text.trim().replaceFirst(RegExp(r'/+$'), '');
-    if (!url.startsWith('https://')) {
+    final uri = Uri.tryParse(url);
+    final loopback =
+        uri != null && {'localhost', '127.0.0.1', '::1'}.contains(uri.host);
+    if (uri == null ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        !(uri.scheme == 'https' || uri.scheme == 'http' && loopback)) {
       return setState(() {
-        status = '服务地址需要以 https:// 开头';
+        status = '使用 HTTPS 地址；本机 localhost 或回环地址可使用 HTTP';
         statusOk = false;
       });
     }

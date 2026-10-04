@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muspace/app/bootstrap.dart';
-import 'package:muspace/services/search/search_service.dart';
+import 'package:muspace/services/knowledge/research_search_adapter.dart';
 import 'package:muspace/workspace/import_coordinator.dart';
 import 'package:muspace_module_api/muspace_module_api.dart';
 
@@ -33,9 +33,8 @@ void main() {
           prepared,
           await coordinator.record(prepared),
         );
-        final index = await host.storage.open('search', SearchService.schema);
-        final search = SearchService(
-          index,
+        final search = ResearchSearchAdapter(
+          host.services.knowledge,
           host.workspaces,
           host.research!.store,
         );

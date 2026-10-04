@@ -4,6 +4,8 @@ import 'dart:io';
 
 enum ModelLocation { local, ownDevice, remote }
 
+enum ModelPurpose { chat, embedding }
+
 abstract interface class SecretStore {
   Future<String?> read(String reference);
 }
@@ -23,6 +25,7 @@ class ModelProfile {
     required this.endpointIdentity,
     this.credentialRef,
     this.cloudProxy = false,
+    this.purpose = ModelPurpose.chat,
   }) {
     if (!endpoint.hasAuthority ||
         endpoint.userInfo.isNotEmpty ||
@@ -52,6 +55,7 @@ class ModelProfile {
   final String endpointIdentity;
   final String? credentialRef;
   final bool cloudProxy;
+  final ModelPurpose purpose;
   Map<String, Object?> toJson() => {
     'id': id,
     'endpoint': endpoint.toString(),
@@ -60,6 +64,7 @@ class ModelProfile {
     'endpointIdentity': endpointIdentity,
     'credentialRef': credentialRef,
     'cloudProxy': cloudProxy,
+    'purpose': purpose.name,
   };
 }
 
@@ -108,6 +113,92 @@ class OpenAiModelGateway {
     ModelCancellation? cancellation,
     Future<void> Function()? beforeSend,
   }) async {
+    if (profile.purpose != ModelPurpose.chat) {
+      throw StateError('Model profile is not configured for chat');
+    }
+    final decoded = await request(
+      profile: profile,
+      payload: {
+        'model': profile.modelId,
+        'messages': messages,
+        'stream': false,
+      },
+      cancellation: cancellation,
+      beforeSend: beforeSend,
+    );
+    final content = (decoded['choices'] as List).first['message']['content'];
+    if (content is! String || content.trim().isEmpty) {
+      throw const FormatException('Empty model response');
+    }
+    return content;
+  }
+
+  /// Endpoint is explicit in the profile; no URL rewriting or provider fallback.
+  Future<List<List<double>>> embed({
+    required ModelProfile profile,
+    required List<String> texts,
+    ModelCancellation? cancellation,
+    required Future<void> Function() beforeSend,
+  }) async {
+    if (profile.purpose != ModelPurpose.embedding) {
+      throw StateError('Model profile is not configured for embeddings');
+    }
+    if (texts.isEmpty ||
+        texts.length > 128 ||
+        texts.fold<int>(0, (n, s) => n + s.length) > 256000) {
+      throw ArgumentError('Embedding input exceeds bounds');
+    }
+    final decoded = await request(
+      profile: profile,
+      payload: {
+        'model': profile.modelId,
+        'input': texts,
+        'encoding_format': 'float',
+      },
+      cancellation: cancellation,
+      beforeSend: beforeSend,
+    );
+    final data = decoded['data'];
+    if (data is! List || data.length != texts.length) {
+      throw const FormatException('Invalid embedding response count');
+    }
+    final result = List<List<double>?>.filled(texts.length, null);
+    int? dimension;
+    for (final item in data) {
+      if (item is! Map || item['index'] is! int || item['embedding'] is! List) {
+        throw const FormatException('Invalid embedding response');
+      }
+      final index = item['index'] as int;
+      final values = (item['embedding'] as List).map((n) {
+        if (n is! num || !n.isFinite) {
+          throw const FormatException('Non-finite embedding');
+        }
+        return n.toDouble();
+      }).toList();
+      if (index < 0 ||
+          index >= result.length ||
+          result[index] != null ||
+          values.isEmpty ||
+          values.length > 65536 ||
+          (dimension != null && dimension != values.length)) {
+        throw const FormatException('Invalid embedding dimensions/index');
+      }
+      dimension = values.length;
+      result[index] = values;
+    }
+    return result.cast<List<double>>();
+  }
+
+  Future<Map<String, dynamic>> request({
+    required ModelProfile profile,
+    required Map<String, Object?> payload,
+    ModelCancellation? cancellation,
+    Future<void> Function()? beforeSend,
+  }) async {
+    final frozenPayload = jsonEncode(payload);
+    if (utf8.encode(frozenPayload).length > 2 * 1024 * 1024) {
+      throw ArgumentError('Model payload too large');
+    }
     final token = cancellation ?? ModelCancellation();
     token.check();
     final client = _clientFactory();
@@ -123,9 +214,9 @@ class OpenAiModelGateway {
             (credential == null || credential.isEmpty)) {
           throw StateError('credential_unavailable');
         }
-        final request = await client.postUrl(profile.endpoint);
         if (beforeSend != null) await beforeSend();
         token.check();
+        final request = await client.postUrl(profile.endpoint);
         request.followRedirects = false;
         request.headers.contentType = ContentType.json;
         if (credential != null) {
@@ -134,13 +225,7 @@ class OpenAiModelGateway {
             'Bearer $credential',
           );
         }
-        request.write(
-          jsonEncode({
-            'model': profile.modelId,
-            'messages': messages,
-            'stream': false,
-          }),
-        );
+        request.write(frozenPayload);
         final response = await request.close();
         if (response.statusCode != 200) {
           throw HttpException('model_http_${response.statusCode}');
@@ -155,12 +240,7 @@ class OpenAiModelGateway {
         }
         token.check();
         final decoded = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
-        final content =
-            (decoded['choices'] as List).first['message']['content'];
-        if (content is! String || content.trim().isEmpty) {
-          throw const FormatException('Empty model response');
-        }
-        return content;
+        return decoded;
       })().timeout(timeout);
     } on TimeoutException {
       token.cancel();

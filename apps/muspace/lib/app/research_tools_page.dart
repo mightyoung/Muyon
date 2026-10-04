@@ -11,6 +11,7 @@ import '../services/models/model_gateway.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/secret_store.dart';
 import '../services/search/search_service.dart';
+import '../services/knowledge/research_search_adapter.dart';
 import 'bootstrap.dart';
 
 class ResearchToolsPage extends StatefulWidget {
@@ -57,17 +58,13 @@ class _ResearchToolsPageState extends State<ResearchToolsPage> {
 
   Future<void> _load() async {
     try {
-      final connection = await widget.host.storage.open(
-        'search',
-        SearchService.schema,
-      );
-      final service = SearchService(
-        connection,
+      final service = ResearchSearchAdapter(
+        widget.host.services.knowledge,
         widget.host.workspaces,
         widget.host.research!.store,
       );
       final assistant = QaService(
-        gateway: OpenAiModelGateway(const MethodChannelSecretStore()),
+        gateway: widget.host.services.gateway,
         executions: executions,
         evidenceProvider: (context, question) async {
           final hits = await service.search(

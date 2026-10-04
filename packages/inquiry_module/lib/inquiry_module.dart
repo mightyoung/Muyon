@@ -5,11 +5,14 @@ import 'package:supplier_core/supplier_core.dart';
 
 import 'src/app/app_state.dart';
 import 'src/app/secret_store.dart';
+import 'src/app/shared_models.dart';
 import 'src/app/shell.dart';
 import 'src/app/theme.dart';
 
 export 'src/app/app_state.dart' show AppState;
 export 'src/app/secret_store.dart' show InquirySecretStore;
+export 'src/app/shared_models.dart';
+export 'src/features/records/open_record.dart' show openRecord;
 
 class InquiryRuntime {
   InquiryRuntime.attach({
@@ -17,12 +20,16 @@ class InquiryRuntime {
     required Directory dataDirectory,
     required AiJobStore aiJobs,
     required InquirySecretStore secrets,
+    SharedLlmFactory? sharedLlmFactory,
+    InquiryModelSettingsBridge? sharedModelSettings,
     Map<String, Object?> initialSettings = const {},
   }) : state = AppState.attach(
          store: store,
          dataDir: dataDirectory,
          aiJobs: aiJobs,
          secrets: secrets,
+         sharedLlmFactory: sharedLlmFactory,
+         sharedModelSettings: sharedModelSettings,
          initialSettings: initialSettings,
        );
   final AppState state;

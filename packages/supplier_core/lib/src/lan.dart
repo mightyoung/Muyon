@@ -141,6 +141,7 @@ class LanNode {
   final LanLimits _limits;
   final _peers = <String, LanPeer>{};
   final _requests = <Future<void>>{};
+  final _outbound = <HttpClient, Completer<void>>{};
   final _uploads = <StreamIterator<List<int>>>{};
   final _uploadsByAddress = <String, int>{};
   int _reservedBytes = 0;
@@ -165,9 +166,14 @@ class LanNode {
     _timer.cancel();
     _peerNotification?.cancel();
     _udp.close();
+    final outgoing = Map<HttpClient, Completer<void>>.of(_outbound);
+    for (final client in outgoing.keys) {
+      client.close(force: true);
+    }
     await Future.wait(_uploads.toList().map((u) => u.cancel()));
     await _http.close(force: true);
     await Future.wait(_requests.toList());
+    await Future.wait(outgoing.values.map((done) => done.future));
   }
 
   void _expirePeers() {
@@ -433,7 +439,7 @@ class LanNode {
 
   /// Looks up a device by address when discovery can't see it.
   Future<LanPeer> probe(String host, {int port = lanHttpPort}) async {
-    final client = _client();
+    final client = _outboundClient();
     try {
       final m = await (() async {
         final req = await client.get(host, port, '/hello');
@@ -468,13 +474,19 @@ class LanNode {
     } on TimeoutException {
       throw LanException('连接 $host 超时');
     } finally {
-      client.close(force: true);
+      _finishOutbound(client);
     }
   }
 
   /// Sends [file] to [to]; completes once the device has stored it.
-  Future<void> push(LanPeer to, String file) async {
-    final client = _client();
+  /// Progress counts bytes handed to the HTTP stream. Reaching `total` still
+  /// requires a successful receiver response before this future completes.
+  Future<void> push(
+    LanPeer to,
+    String file, {
+    void Function(int sent, int total)? onProgress,
+  }) async {
+    final client = _outboundClient();
     try {
       await (() async {
         final req = await client.post(to.address, to.port, '/push');
@@ -485,7 +497,15 @@ class LanNode {
           ..contentLength = length
           ..set('x-siq-id', id)
           ..set('x-siq-name', Uri.encodeComponent(name));
-        await req.addStream(File(file).openRead());
+        var sent = 0;
+        onProgress?.call(sent, length);
+        await req.addStream(
+          File(file).openRead().map((chunk) {
+            sent += chunk.length;
+            onProgress?.call(sent, length);
+            return chunk;
+          }),
+        );
         final res = await req.close();
         await _responseBytes(res);
         if (res.statusCode != HttpStatus.ok) {
@@ -503,7 +523,19 @@ class LanNode {
     } on FormatException {
       throw LanException('来自 ${to.name} 的响应无效');
     } finally {
-      client.close(force: true);
+      _finishOutbound(client);
     }
+  }
+
+  HttpClient _outboundClient() {
+    if (_stopped) throw LanException('局域网已关闭');
+    final client = _client();
+    _outbound[client] = Completer<void>();
+    return client;
+  }
+
+  void _finishOutbound(HttpClient client) {
+    client.close(force: true);
+    _outbound.remove(client)?.complete();
   }
 }

@@ -10,3 +10,4 @@ build/
 .omx/
 .omx-state-locks/
 .omx-state-locks.identity.json
+.ocr-validation/

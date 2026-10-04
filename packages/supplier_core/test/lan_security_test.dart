@@ -304,4 +304,76 @@ void main() {
       await server.close(force: true);
     }
   });
+  test('stop aborts and drains an outgoing push instead of waiting for transfer timeout', () async {
+    final node = await start();
+    final file = File('${node.inbox.path}/out')..writeAsBytesSync([1]);
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final arrived = Completer<void>();
+    server.listen((request) async {
+      await request.drain<void>();
+      arrived.complete();
+      // Deliberately leave the response pending for the normal 15-minute limit.
+    });
+    addTearDown(() => server.close(force: true));
+    final peer = LanPeer(
+      'remote',
+      'Remote',
+      '127.0.0.1',
+      server.port,
+      DateTime.now(),
+    );
+    final sending = expectLater(
+      node.push(peer, file.path),
+      throwsA(isA<LanException>()),
+    );
+    await arrived.future.timeout(const Duration(seconds: 3));
+    await node.stop().timeout(const Duration(seconds: 3));
+    await sending;
+    await expectLater(node.push(peer, file.path), throwsA(isA<LanException>()));
+    await expectLater(
+      node.probe('127.0.0.1', port: server.port),
+      throwsA(isA<LanException>()),
+    );
+  });
+  test('push progress is monotonic and full byte count still awaits receiver response', () async {
+    final node = await start();
+    final bytes = List<int>.generate(256 * 1024 + 7, (i) => i % 251);
+    final file = File('${node.inbox.path}/progress')..writeAsBytesSync(bytes);
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final received = Completer<List<int>>();
+    final release = Completer<void>();
+    server.listen((request) async {
+      received.complete(
+        await request.fold<List<int>>([], (all, chunk) => all..addAll(chunk)),
+      );
+      await release.future;
+      request.response.statusCode = HttpStatus.ok;
+      await request.response.close();
+    });
+    addTearDown(() async {
+      if (!release.isCompleted) release.complete();
+      await server.close(force: true);
+    });
+    final progress = <(int, int)>[];
+    var completed = false;
+    final sending = node
+        .push(
+          LanPeer('remote', 'Remote', '127.0.0.1', server.port, DateTime.now()),
+          file.path,
+          onProgress: (sent, total) => progress.add((sent, total)),
+        )
+        .then((_) => completed = true);
+    expect(await received.future.timeout(const Duration(seconds: 3)), bytes);
+    expect(progress.length, greaterThan(2));
+    expect(progress.first, (0, bytes.length));
+    expect(progress.last, (bytes.length, bytes.length));
+    for (var i = 1; i < progress.length; i++) {
+      expect(progress[i].$1, greaterThan(progress[i - 1].$1));
+      expect(progress[i].$2, bytes.length);
+    }
+    expect(completed, isFalse);
+    release.complete();
+    await sending.timeout(const Duration(seconds: 3));
+    expect(completed, isTrue);
+  });
 }

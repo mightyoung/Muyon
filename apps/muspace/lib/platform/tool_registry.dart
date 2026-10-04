@@ -103,8 +103,9 @@ class ToolRegistry {
       );
     }
     _Schema.check(descriptor.parameterSchema, root: true);
-    if (descriptor.resultSchema.isNotEmpty)
+    if (descriptor.resultSchema.isNotEmpty) {
       _Schema.check(descriptor.resultSchema, root: true);
+    }
     _tools[descriptor.toolId] = _Tool(
       RegisteredToolInfo(
         providerId: providerId,
@@ -146,11 +147,12 @@ class ToolRegistry {
 
   Future<PreparedToolCall> prepare(ToolCallRequest request) async {
     final tool = _require(request.toolId);
-    if (!tool.info.available)
+    if (!tool.info.available) {
       throw ToolPlatformException(
         'unavailable',
         tool.info.unavailableReason ?? 'Tool is unavailable',
       );
+    }
     if (!tool.supportedScopes.contains(request.scope.kind)) {
       throw const ToolPlatformException(
         'scope_mismatch',
@@ -165,14 +167,27 @@ class ToolRegistry {
         'External calls require an explicit destination',
       );
     }
-    final scope = await resolveScope(request.scope);
+    var scope = await resolveScope(request.scope);
     if (_canonical(scope.requested.toJson()) !=
-            _canonical(request.scope.toJson()) ||
-        (tool.dataModuleIds != null &&
-            !tool.dataModuleIds!.containsAll(scope.moduleIds))) {
+        _canonical(request.scope.toJson())) {
       throw const ToolPlatformException(
         'scope_mismatch',
         'Resolved data does not match requested scope or allowed modules',
+      );
+    }
+    if (tool.dataModuleIds != null &&
+        !tool.dataModuleIds!.containsAll(scope.moduleIds)) {
+      if (request.scope.kind == AssistantScopeKind.selectedObjects) {
+        throw const ToolPlatformException(
+          'scope_mismatch',
+          'Selected objects include unsupported modules',
+        );
+      }
+      scope = ResolvedAssistantScope(
+        requested: request.scope,
+        objects: scope.objects
+            .where((ref) => tool.dataModuleIds!.contains(ref.moduleId))
+            .toList(),
       );
     }
     final parameterDigest = _digest(request.parameters);
@@ -261,11 +276,12 @@ class ToolRegistry {
     token.throwIfCancelled();
     final active = _active[request.replayKey];
     if (active != null) {
-      if (active.identity != prepared.identityDigest)
+      if (active.identity != prepared.identityDigest) {
         throw const ToolPlatformException(
           'idempotency_conflict',
           'Replay key belongs to another request',
         );
+      }
       return active.result;
     }
     final completer = Completer<ToolCallResult>();
@@ -290,6 +306,16 @@ class ToolRegistry {
   ) async {
     final request = prepared.request;
     final tool = _require(request.toolId);
+    DateTime? approvalDeadline;
+    void checkAuthorization() {
+      if (approvalDeadline != null && !clock().isBefore(approvalDeadline!)) {
+        throw const ToolPlatformException(
+          'approval_expired',
+          'Host approval expired before the effect',
+        );
+      }
+    }
+
     final cached = await database.write((db) {
       token.throwIfCancelled();
       final rows = db.select(
@@ -335,6 +361,9 @@ class ToolRegistry {
           "UPDATE tool_approvals SET state='consumed',consumed_at=? WHERE id=?",
           [clock().toUtc().toIso8601String(), request.approvalId],
         );
+        approvalDeadline = DateTime.parse(
+          grants.single['expires_at'] as String,
+        );
       }
       db.execute(
         'INSERT INTO tool_invocation_receipts VALUES(?,?,?,?,?,NULL)',
@@ -361,11 +390,13 @@ class ToolRegistry {
         );
       }
       token.throwIfCancelled();
+      checkAuthorization();
       result = await tool.handler(
         ToolCallContext(
           request: request,
           resolvedScope: current.resolvedScope,
           cancellation: token,
+          checkAuthorization: checkAuthorization,
         ),
       );
       token.throwIfCancelled();
@@ -373,17 +404,17 @@ class ToolRegistry {
         if (tool.info.descriptor.resultSchema.isNotEmpty) {
           _Schema.validate(tool.info.descriptor.resultSchema, result.data);
         }
-        if (tool.validateResult != null) {
-          await tool.validateResult!(current.resolvedScope, result);
-        } else if (result.objectRefs.any(
-              (ref) => !current.resolvedScope.contains(ref),
-            ) ||
-            result.artifactRefs.isNotEmpty) {
-          throw const ToolPlatformException(
-            'result_scope_mismatch',
-            'Result references require host-verified scope',
-          );
-        }
+      }
+      if (tool.validateResult != null) {
+        await tool.validateResult!(current.resolvedScope, result);
+      } else if (result.objectRefs.any(
+            (ref) => !current.resolvedScope.contains(ref),
+          ) ||
+          result.artifactRefs.isNotEmpty) {
+        throw const ToolPlatformException(
+          'result_scope_mismatch',
+          'Result references require host-verified scope',
+        );
       }
       token.throwIfCancelled();
     } on ToolCancelled {
@@ -490,16 +521,18 @@ class _Schema {
         check(Map<String, Object?>.from(child as Map), depth: depth + 1);
       }
     }
-    if (schema['items'] != null)
+    if (schema['items'] != null) {
       check(
         Map<String, Object?>.from(schema['items'] as Map),
         depth: depth + 1,
       );
-    if (types.contains('array') && schema['items'] == null)
+    }
+    if (types.contains('array') && schema['items'] == null) {
       throw const ToolPlatformException(
         'invalid_schema',
         'Array item schema required',
       );
+    }
     if (schema['additionalProperties'] != null &&
         schema['additionalProperties'] is! bool) {
       throw const ToolPlatformException(
@@ -580,8 +613,9 @@ class _Schema {
     if (schema['enum'] is List &&
         !(schema['enum'] as List).any(
           (allowed) => _canonical(allowed) == _canonical(value),
-        ))
+        )) {
       invalid();
+    }
     if (value is Map<String, Object?>) {
       final properties = Map<String, Object?>.from(
         schema['properties'] as Map? ?? {},
@@ -589,8 +623,9 @@ class _Schema {
       if (value.length > 1024 ||
           (schema['required'] as List? ?? []).any(
             (key) => !value.containsKey(key),
-          ))
+          )) {
         invalid();
+      }
       for (final entry in value.entries) {
         if (!properties.containsKey(entry.key)) {
           if (schema['additionalProperties'] != true) invalid();
@@ -606,8 +641,9 @@ class _Schema {
     if (value is List) {
       if (value.length > 4096 ||
           value.length < (schema['minItems'] as int? ?? 0) ||
-          value.length > (schema['maxItems'] as int? ?? 4096))
+          value.length > (schema['maxItems'] as int? ?? 4096)) {
         invalid();
+      }
       for (final item in value) {
         validate(
           Map<String, Object?>.from(schema['items'] as Map),
@@ -619,11 +655,14 @@ class _Schema {
     if (value is String &&
         (value.length > 65536 ||
             value.length < (schema['minLength'] as int? ?? 0) ||
-            value.length > (schema['maxLength'] as int? ?? 65536)))
+            value.length > (schema['maxLength'] as int? ?? 65536))) {
       invalid();
+    }
     if (value is num &&
         ((schema['minimum'] != null && value < (schema['minimum'] as num)) ||
-            (schema['maximum'] != null && value > (schema['maximum'] as num))))
+            (schema['maximum'] != null &&
+                value > (schema['maximum'] as num)))) {
       invalid();
+    }
   }
 }

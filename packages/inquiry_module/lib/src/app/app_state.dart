@@ -7,6 +7,7 @@ import 'package:supplier_core/supplier_core.dart';
 
 import 'errors.dart';
 import 'secret_store.dart';
+import 'shared_models.dart';
 
 export 'errors.dart' show friendlyError;
 
@@ -27,6 +28,8 @@ class AppState extends ChangeNotifier {
     required this.dataDir,
     required AiJobStore aiJobs,
     required InquirySecretStore secrets,
+    this.sharedLlmFactory,
+    this.sharedModelSettings,
     Map<String, Object?> initialSettings = const {},
   }) : _settings = {
          ...initialSettings,
@@ -37,12 +40,20 @@ class AppState extends ChangeNotifier {
        // ignore: prefer_initializing_formals
        _aiJobs = aiJobs,
        _secure = secrets,
-       _ownsJobs = false;
+       _ownsJobs = false {
+    if ((sharedLlmFactory == null) != (sharedModelSettings == null)) {
+      throw ArgumentError(
+        'Shared model factory and settings must be supplied together',
+      );
+    }
+  }
 
   @visibleForTesting
   AppState.test(this.store, this.dataDir)
     : _settings = {'device_name': store.device},
       _secure = const PlatformInquirySecrets(),
+      sharedLlmFactory = null,
+      sharedModelSettings = null,
       _ownsJobs = true;
 
   final Store store;
@@ -50,6 +61,8 @@ class AppState extends ChangeNotifier {
   final Map<String, Object?> _settings;
   final InquirySecretStore _secure;
   final bool _ownsJobs;
+  final SharedLlmFactory? sharedLlmFactory;
+  final InquiryModelSettingsBridge? sharedModelSettings;
   final _pendingAiTasks = <Future<void>>{};
   AiJobStore? _aiJobs;
   bool _restoring = false;
@@ -89,7 +102,8 @@ class AppState extends ChangeNotifier {
     void Function(String)? onCreated,
   }) async {
     if (_disposed || _restoring) throw LlmException('资料库当前不可用，请稍后开始AI任务');
-    final client = await llm();
+    final token = cancellation ?? AiCancellation();
+    final client = await llm(cancellation: token);
     cancellation?.check();
     if (_disposed || _restoring) throw LlmException('资料库当前不可用，请稍后开始AI任务');
     if (client == null) throw LlmException('还没有配置 AI 服务，请在设置中填写 API Key');
@@ -100,7 +114,7 @@ class AppState extends ChangeNotifier {
       throw LlmException('任务输入已变化，请以新输入开始，不可套用旧检查点');
     }
     if (_hasAiReceipt(job.id)) throw LlmException('此任务已经确认入库，不能重复执行');
-    final session = _jobs.start(job.id, cancellation: cancellation);
+    final session = _jobs.start(job.id, cancellation: token);
     final pending = Completer<void>();
     _pendingAiTasks.add(pending.future);
     try {
@@ -401,8 +415,12 @@ class AppState extends ChangeNotifier {
   // never in the database, so it cannot travel inside exchange files.
   static const _keyName = 'llm_api_key';
 
-  String get aiBaseUrl => setting('ai_base_url') ?? 'https://api.deepseek.com';
-  String get aiModel => setting('ai_model') ?? 'deepseek-flash';
+  String get aiBaseUrl =>
+      sharedModelSettings?.baseUrl ??
+      setting('ai_base_url') ??
+      'https://api.deepseek.com';
+  String get aiModel =>
+      sharedModelSettings?.model ?? setting('ai_model') ?? 'deepseek-flash';
 
   bool get assistantWebEnabled => setting('assistant_web') == '1';
   set assistantWebEnabled(bool value) =>
@@ -499,6 +517,9 @@ class AppState extends ChangeNotifier {
 
   Future<bool> hasAiKey() async {
     try {
+      if (sharedModelSettings != null) {
+        return await sharedModelSettings!.hasCredential();
+      }
       return (await _secure.read(key: _keyName))?.isNotEmpty ?? false;
     } catch (_) {
       return false; // secure storage unavailable counts as "not configured"
@@ -510,6 +531,15 @@ class AppState extends ChangeNotifier {
     required String model,
     String? apiKey,
   }) async {
+    if (sharedModelSettings != null) {
+      await sharedModelSettings!.save(
+        baseUrl: baseUrl,
+        model: model,
+        apiKey: apiKey,
+      );
+      notifyListeners();
+      return;
+    }
     if (apiKey != null) {
       apiKey.isEmpty
           ? await _secure.delete(key: _keyName)
@@ -520,7 +550,10 @@ class AppState extends ChangeNotifier {
   }
 
   /// Null when no key is configured.
-  Future<LlmClient?> llm() async {
+  Future<LlmClient?> llm({AiCancellation? cancellation}) async {
+    if (sharedLlmFactory != null) {
+      return sharedLlmFactory!(cancellation: cancellation);
+    }
     final String? key;
     try {
       key = await _secure.read(key: _keyName);

@@ -53,20 +53,27 @@ void main() {
     },
   );
 
-  testWidgets('MuSpace opens Folio first with one MaterialApp', (tester) async {
+  testWidgets('platform opens the complete Folio module with one MaterialApp', (
+    tester,
+  ) async {
     final root = Directory.systemTemp.createTempSync('muspace-inquiry-ui-');
-    final host = await MuSpaceHost.open(root.path);
+    addTearDown(() {
+      if (root.existsSync()) root.deleteSync(recursive: true);
+    });
+    final host = (await tester.runAsync(() => MuSpaceHost.open(root.path)))!;
     try {
-      await host.activateInquiry();
+      await tester.runAsync(() => host.activateInquiry());
       await tester.pumpWidget(MuSpaceApp(host: host));
       await tester.pumpAndSettle();
       expect(find.byType(MaterialApp), findsOneWidget);
+      await tester.tap(find.text('Folio · 询价台账'));
+      await tester.pumpAndSettle();
       expect(find.byType(InquiryHome), findsOneWidget);
       expect(find.text('MuSpace · Folio'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     } finally {
-      await host.close();
+      await tester.runAsync(() => host.close());
       root.deleteSync(recursive: true);
     }
   });

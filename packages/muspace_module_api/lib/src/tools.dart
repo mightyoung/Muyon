@@ -127,16 +127,24 @@ class ToolCallContext {
     required this.request,
     required this.resolvedScope,
     required this.cancellation,
+    this.checkAuthorization,
   });
   final ToolCallRequest request;
   final ResolvedAssistantScope resolvedScope;
   final ToolCancellationToken cancellation;
+  final void Function()? checkAuthorization;
+
+  /// Call immediately before an external effect after asynchronous preparation.
+  void checkBeforeEffect() {
+    cancellation.throwIfCancelled();
+    checkAuthorization?.call();
+  }
 
   /// Recheck cancellation inside the queued short transaction, immediately
   /// before a domain commit. Async preparation belongs before this method.
   Future<T> write<T>(ManagedDatabase database, T Function(Database) body) =>
       database.write((db) {
-        cancellation.throwIfCancelled();
+        checkBeforeEffect();
         return body(db);
       });
 }

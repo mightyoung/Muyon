@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.mightyoung" "\0"
-            VALUE "FileDescription", "muspace" "\0"
+            VALUE "FileDescription", "Miyono" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "muspace" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.mightyoung. All rights reserved." "\0"
             VALUE "OriginalFilename", "muspace.exe" "\0"
-            VALUE "ProductName", "muspace" "\0"
+            VALUE "ProductName", "Miyono" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

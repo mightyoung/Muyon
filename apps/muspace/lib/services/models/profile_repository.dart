@@ -17,6 +17,7 @@ class ProfileRepository {
           endpointIdentity: item['endpointIdentity'] as String,
           credentialRef: item['credentialRef'] as String?,
           cloudProxy: item['cloudProxy'] as bool? ?? false,
+          purpose: ModelPurpose.values.byName(item['purpose'] as String? ?? 'chat'),
         ),
     ];
   }
@@ -29,5 +30,10 @@ class ProfileRepository {
       'modelProfiles',
       profiles.map((p) => p.toJson()).toList(),
     );
+  }
+
+  Future<void> remove(String id) async {
+    await workspaces.setSetting('modelProfiles',
+      all().where((profile) => profile.id != id).map((p) => p.toJson()).toList());
   }
 }

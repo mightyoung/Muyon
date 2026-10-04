@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:muspace_module_api/muspace_module_api.dart';
 import 'package:uuid/uuid.dart';
+
 import '../platform/foundation_repository.dart';
 
 class Workspace {
