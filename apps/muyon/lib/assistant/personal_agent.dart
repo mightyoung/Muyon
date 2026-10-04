@@ -156,6 +156,8 @@ class PersonalAgent {
       if (candidateIds.contains(t.descriptor.toolId))
         {
           'toolId': t.descriptor.toolId,
+          if (t.descriptor.description.isNotEmpty)
+            'description': t.descriptor.description,
           'effect': t.descriptor.effect.name,
           'parameters': t.descriptor.parameterSchema,
         },

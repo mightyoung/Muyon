@@ -70,6 +70,7 @@ class ToolDescriptor {
     this.supportsCancel = false,
     this.supportsPause = false,
     this.supportsResume = false,
+    this.description = '',
   }) : parameterSchema = freezeJsonMap(parameterSchema),
        resultSchema = freezeJsonMap(resultSchema),
        contextTypes = Set.unmodifiable(contextTypes);
@@ -83,6 +84,10 @@ class ToolDescriptor {
   final bool supportsCancel;
   final bool supportsPause;
   final bool supportsResume;
+
+  /// What the tool does, shown to people and to the model for selection.
+  /// Untrusted when it comes from an external server; never an authorization.
+  final String description;
 }
 
 class Invocation {
