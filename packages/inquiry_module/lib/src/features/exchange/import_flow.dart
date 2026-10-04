@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
+
 import 'package:supplier_core/supplier_core.dart';
 
 import '../../app/app_state.dart';
@@ -68,9 +69,8 @@ Future<String?> _plain(
       passphrase = null;
     } on FormatException catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(friendlyError(e.message))));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(friendlyError(e.message))));
       }
       return null;
     }
@@ -156,14 +156,14 @@ Future<({bool done, String? message})> reviewAndRestore(
       context: context,
       builder: (_) => AlertDialog(
         scrollable: true,
-        title: const Text('整库恢复预览'),
+        title: Text(state.isHosted ? '询价资料替换预览' : '整库恢复预览'),
         content: SizedBox(
           width: 440,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('备份中的有效记录：'),
+              Text(state.isHosted ? '交换快照中的有效询价记录：' : '备份中的有效记录：'),
               const SizedBox(height: 10),
               for (final entry in counts.entries)
                 Padding(
@@ -173,7 +173,11 @@ Future<({bool done, String? message})> reviewAndRestore(
                   ),
                 ),
               const SizedBox(height: 12),
-              const Text('继续后，本机当前资料库将被这份备份完整替换。'),
+              Text(
+                state.isHosted
+                    ? '继续后，仅替换本机询价业务资料，不会恢复其他模块、AI任务或应用设置；现有询价AI任务会失效，共享文件夹同步将暂停。'
+                    : '继续后，本机当前资料库将被这份备份完整替换。',
+              ),
             ],
           ),
         ),
@@ -196,11 +200,11 @@ Future<({bool done, String? message})> reviewAndRestore(
       context: context,
       builder: (_) => AlertDialog(
         scrollable: true,
-        title: const Text('确认替换整个资料库？'),
-        content: const SizedBox(
+        title: Text(state.isHosted ? '确认替换询价资料？' : '确认替换整个资料库？'),
+        content: SizedBox(
           width: 440,
           child: Text(
-            '备份之后新增或修改的本机数据会从当前资料库消失。恢复前会自动保存一份本机完整备份。'
+            '${state.isHosted ? '快照之后新增或修改的询价资料会消失。替换前会自动保存一份询价资料快照；不会恢复其他模块、AI任务或应用设置。' : '备份之后新增或修改的本机数据会从当前资料库消失。恢复前会自动保存一份本机完整备份。'}'
             '共享文件夹同步将暂停，避免其他设备的数据立即重新合并；检查无误后可手动重新启用。',
           ),
         ),
@@ -211,7 +215,7 @@ Future<({bool done, String? message})> reviewAndRestore(
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('确认整库恢复'),
+            child: Text(state.isHosted ? '确认替换询价资料' : '确认整库恢复'),
           ),
         ],
       ),
@@ -225,12 +229,12 @@ Future<({bool done, String? message})> reviewAndRestore(
       transitionDuration: AppMotion.duration(context),
       barrierDismissible: false,
       barrierColor: Colors.black54,
-      barrierLabel: '整库恢复进行中',
-      pageBuilder: (_, _, _) => const PopScope(
+      barrierLabel: state.isHosted ? '询价资料替换进行中' : '整库恢复进行中',
+      pageBuilder: (_, _, _) => PopScope(
         canPop: false,
         child: AlertDialog(
-          title: Text('正在恢复资料库'),
-          content: SizedBox(
+          title: Text(state.isHosted ? '正在替换询价资料' : '正在恢复资料库'),
+          content: const SizedBox(
             width: 360,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -253,7 +257,12 @@ Future<({bool done, String? message})> reviewAndRestore(
       final err = await state.writeInBackground(_restoreJob(plain, backupPath));
       if (err != null) return (done: true, message: '恢复失败：$err');
       state.store.clockSeen();
-      return (done: true, message: '整库恢复完成；恢复前备份保存在 $backupPath。共享文件夹同步已暂停');
+      return (
+        done: true,
+        message: state.isHosted
+            ? '询价资料替换完成；替换前快照保存在 $backupPath。共享文件夹同步已暂停'
+            : '整库恢复完成；恢复前备份保存在 $backupPath。共享文件夹同步已暂停',
+      );
     } on Object catch (e) {
       return (done: true, message: '恢复失败：$e');
     } finally {

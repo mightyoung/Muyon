@@ -10,19 +10,25 @@ import 'package:path_provider/path_provider.dart';
 import '../../app/motion.dart';
 import 'ontology_payload.dart';
 
-typedef OntologyViewBuilder =
-    Widget Function(BuildContext context, OntologyViewConfiguration config);
+typedef OntologyViewBuilder = Widget Function(
+  BuildContext context,
+  OntologyViewConfiguration config,
+);
 
 /// A small boundary also used by widget tests instead of a native platform view.
 class OntologyViewConfiguration {
   const OntologyViewConfiguration({
     required this.payload,
+    this.userDataDirectory,
     required this.onSelect,
     required this.onRendered,
     required this.onError,
   });
 
   final Map<String, Object?> payload;
+
+  /// Host-owned native cache directory; null only for standalone graph callers.
+  final String? userDataDirectory;
   final ValueChanged<String> onSelect;
   final VoidCallback onRendered;
   final ValueChanged<String> onError;
@@ -36,6 +42,7 @@ class OntologyGraphHost extends StatefulWidget {
     required this.onSelect,
     required this.fallback,
     this.viewBuilder,
+    this.userDataDirectory,
   });
 
   final Map<String, int> counts;
@@ -43,6 +50,7 @@ class OntologyGraphHost extends StatefulWidget {
   final ValueChanged<String> onSelect;
   final Widget fallback;
   final OntologyViewBuilder? viewBuilder;
+  final String? userDataDirectory;
 
   @override
   State<OntologyGraphHost> createState() => _OntologyGraphHostState();
@@ -109,6 +117,7 @@ class _OntologyGraphHostState extends State<OntologyGraphHost> {
     if (!_supported) return widget.fallback;
     final attempt = _attempt;
     final config = OntologyViewConfiguration(
+      userDataDirectory: widget.userDataDirectory,
       payload: ontologyHostPayload(
         counts: widget.counts,
         selected: widget.selected,
@@ -189,28 +198,31 @@ class _OntologyWebView extends StatefulWidget {
   State<_OntologyWebView> createState() => _OntologyWebViewState();
 }
 
-/// One WebView2 environment for the whole app: creating it is the slowest
-/// step of opening the graph on Windows, and every graph view can share it.
-Future<WebViewEnvironment>? _windowsEnvironment;
+/// Reuse a WebView2 environment only for graph views in the same data root.
+final _windowsEnvironments = <String, Future<WebViewEnvironment>>{};
 
-Future<WebViewEnvironment> _sharedWindowsEnvironment() =>
-    _windowsEnvironment ??=
-        () async {
-          if (await WebViewEnvironment.getAvailableVersion() == null) {
-            throw StateError('WebView2 unavailable');
-          }
-          final support = await getApplicationSupportDirectory();
-          final dir = Directory(
-            '${support.path}${Platform.pathSeparator}ontology_webview',
-          );
-          await dir.create(recursive: true);
-          return WebViewEnvironment.create(
-            settings: WebViewEnvironmentSettings(userDataFolder: dir.path),
-          );
-        }().catchError((Object error) {
-          _windowsEnvironment = null; // a later attempt may succeed
-          throw error;
-        });
+Future<WebViewEnvironment> _sharedWindowsEnvironment(
+  String? ownedDirectory,
+) async {
+  final path =
+      ownedDirectory ??
+      '${(await getApplicationSupportDirectory()).path}${Platform.pathSeparator}ontology_webview';
+  return _windowsEnvironments
+      .putIfAbsent(path, () async {
+        if (await WebViewEnvironment.getAvailableVersion() == null) {
+          throw StateError('WebView2 unavailable');
+        }
+        final dir = Directory(path);
+        await dir.create(recursive: true);
+        return WebViewEnvironment.create(
+          settings: WebViewEnvironmentSettings(userDataFolder: dir.path),
+        );
+      })
+      .catchError((Object error) {
+        _windowsEnvironments.remove(path); // A later attempt may succeed.
+        throw error;
+      });
+}
 
 class _OntologyWebViewState extends State<_OntologyWebView> {
   InAppWebViewController? _controller;
@@ -229,7 +241,11 @@ class _OntologyWebViewState extends State<_OntologyWebView> {
 
   Future<void> _prepare() async {
     try {
-      if (Platform.isWindows) _environment = await _sharedWindowsEnvironment();
+      if (Platform.isWindows) {
+        _environment = await _sharedWindowsEnvironment(
+          widget.config.userDataDirectory,
+        );
+      }
       if (mounted) setState(() => _prepared = true);
     } catch (error, stack) {
       developer.log(

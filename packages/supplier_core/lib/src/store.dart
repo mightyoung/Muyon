@@ -266,6 +266,11 @@ class Store {
     DateTime Function()? clock,
   }) : clock = clock ?? DateTime.now,
        _ownsDatabase = false {
+    if (backgroundExecutor == null) {
+      throw ArgumentError(
+        'Hosted supplier storage requires a background executor',
+      );
+    }
     registerFunctions(db);
     if (_schemaOf(db) != schemaVersion)
       throw StateError('Unsupported supplier schema');
@@ -274,6 +279,10 @@ class Store {
   final StoreBackgroundExecutor? backgroundExecutor;
   final bool _ownsDatabase;
 
+  /// Attached stores cannot use the standalone background connection fallback.
+  bool get isHostManaged => !_ownsDatabase;
+
+  /// Opens a live database only for standalone applications and tests.
   factory Store.open(
     String path, {
     required String device,

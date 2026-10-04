@@ -41,6 +41,11 @@ class AppState extends ChangeNotifier {
        _aiJobs = aiJobs,
        _secure = secrets,
        _ownsJobs = false {
+    if (!store.isHostManaged || !aiJobs.isHostManaged) {
+      throw ArgumentError(
+        'Hosted inquiry requires host-managed business and task stores',
+      );
+    }
     if ((sharedLlmFactory == null) != (sharedModelSettings == null)) {
       throw ArgumentError(
         'Shared model factory and settings must be supplied together',
@@ -205,6 +210,9 @@ class AppState extends ChangeNotifier {
     super.dispose();
   }
 
+  /// Hosted applications coordinate full-app backups themselves.
+  bool get isHosted => !_ownsJobs;
+
   String get backupDir => '${dataDir.path}/backups';
 
   /// Why today's automatic backup failed, shown in settings; null if fine.
@@ -213,6 +221,7 @@ class AppState extends ChangeNotifier {
   // Runs in the background after the window opens. A failed backup must not
   // stop the app; it is reported in settings instead.
   Future<void> backupNow() async {
+    if (isHosted) return;
     final dir = backupDir;
     try {
       await store.inBackground(_backupJob(dir));

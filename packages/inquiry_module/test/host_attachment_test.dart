@@ -42,6 +42,47 @@ class HostModelSettings implements InquiryModelSettingsBridge {
 }
 
 void main() {
+  test('host attachment rejects stores with standalone database ownership', () {
+    final directory = Directory.systemTemp.createTempSync('inquiry-host-guard');
+    final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+    createSchema(db);
+    AiJobStore.initializeSchema(jobsDb);
+    addTearDown(() {
+      db.close();
+      jobsDb.close();
+      directory.deleteSync(recursive: true);
+    });
+    expect(
+      () => AppState.attach(
+        store: Store(db, device: 'standalone'),
+        dataDir: directory,
+        aiJobs: AiJobStore.attach(jobsDb),
+        secrets: HostSecrets(),
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => Store.attach(db, device: 'host', backgroundExecutor: null),
+      throwsArgumentError,
+    );
+    final standaloneJobs = AiJobStore.open(
+      '${directory.path}/standalone-jobs.db',
+    );
+    addTearDown(standaloneJobs.close);
+    expect(
+      () => AppState.attach(
+        store: Store.attach(
+          db,
+          device: 'host',
+          backgroundExecutor: <T>(action) async => await action(),
+        ),
+        dataDir: directory,
+        aiJobs: standaloneJobs,
+        secrets: HostSecrets(),
+      ),
+      throwsArgumentError,
+    );
+  });
   test('shared model settings and factory override legacy config with task cancellation', () async {
     final directory = Directory.systemTemp.createTempSync('inquiry-model-host');
     final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
@@ -147,6 +188,9 @@ void main() {
       expect(runtime.state.lan, isNull);
       expect(runtime.state.lanVisible, isFalse);
       expect(runtime.state.aiTasks, isEmpty);
+      await runtime.state.backupNow();
+      expect(Directory(runtime.state.backupDir).existsSync(), isFalse);
+      expect(File("${directory.path}/ai-jobs.sqlite").existsSync(), isFalse);
       await runtime.state.saveExchangePassphrase('secret-value');
       expect(await runtime.state.exchangePassphrase(), 'secret-value');
       expect(
