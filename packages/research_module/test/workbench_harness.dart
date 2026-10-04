@@ -37,5 +37,3 @@ class WorkbenchApp extends StatelessWidget {
     ),
   );
 }
-
-
