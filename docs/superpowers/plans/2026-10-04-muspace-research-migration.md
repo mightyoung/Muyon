@@ -1,0 +1,59 @@
+# MuSpace 首科研迁入子计划（修订 4）
+
+状态：仅规划，顺序审查状态见[Architect](../../reviews/2026-10-04-muspace-revision4-architect-review.md)及[Critic](../../reviews/2026-10-04-muspace-revision4-critic-review.md)。无实现/安装/构建/执行授权。本计划替代旧 D0–D3 等待式迁入方案。
+
+设计：[具体设计](../specs/2026-10-03-muspace-v0.1-design.md)。测试：[验收规范](2026-10-03-muspace-research-migration-test-spec.md)。上下文：`.omx/context/muspace-research-migration-20261003.md`。复杂度 HIGH；先后顺序以真实科研闭环为准。
+
+## 任务 0：冻结可复现迁入输入
+
+输入：research-workbench 当前 HEAD 与现有 tests，MuSpace 旧 docs。改动位置：未来 `docs/implementation/research-source-manifest.md`、`docs/implementation/research-feature-matrix.md`、`packages/research_module/NOTICE`。记录源路径、提交、tracked dirty、许可和包版本，复制迁入所需源码/测试清单，不复制数据目录/密钥/构建产物；无独立许可声明时记录本人项目来源并查第三方许可。
+
+验收：设计中列出的全部页面/codec/任务结果/关系/提纲都有原路径、目标路径、测试和阶段；运行原基线 tests 的结果单列，不将旧报告当本次通过。输入变化先更新 manifest，不能把多个 worktree 随意合并。产物：冻结清单及原功能基线报告。依赖：执行阶段开始，实际源码可读。
+
+## 任务 1：建立能承载真实模块的主体与存储
+
+输入：任务 0 + 设计 §4–6。位置：拟建 `apps/muspace`、`packages/muspace_module_api`、主库 schema、StorageManager/ModuleRegistry/WorkspaceRepository；测试 `apps/muspace/test/{storage_manager,module_registry,workspace_binding}_test.dart`。本任务定义无绑定ModuleRuntime、prepare/commit create/refresh、冻结输入身份、主intent/本receipt和每库同步write队列合同及治理表约束。原有 Flutter/sqlite3/PDF 依赖兼容核验后锁版本，不顺便升级所有依赖。
+
+验收：唯一 MaterialApp；可创建/重开工作区；注册科研并在首次打开时由 MuSpace 建 research.sqlite；重复 open 只有同一连接；迁移失败只禁用科研；工作区无绑定显示明确空态。主库与本库更新间注入中断可恢复绑定和 schema 目录，无第二项目。产物：可运行主体与数据库治理，先用最小测试模块验证故障，不能据此宣布 M1。依赖：0。
+
+## 任务 2：迁入科研完整代码并解开应用级所有权
+
+输入：冻结源码及任务1合同。位置：`packages/research_module/lib/src/{core,app,reader,relations}`、ResearchModule/ResearchSession/ResearchServices/ResearchSchema；移入现有测试并适配路径。将原 main/MaterialApp/全局项目选择职责留宿主；store 改 attach，迁移列表归模块声明，连接关闭归宿主。改造旧importResearch预分配create/已有refresh，文件与解析异步prepare在事务外；旧store/exchange BEGIN拆外层队列入口和无BEGIN内部操作，事务body无await，项目/业务/receipt/序列同提交。任务包四分支归属与结果taskId+revision核对在此实现。先保留业务算法和 codec，UI 直接修改 SQL 的路径改通过受 scope 约束的服务，不在宿主重写领域规则。
+
+验收：六业务区都在 MuSpace 内可达，Reader/写作/关系可打开；不存在独立旧 app 启动依赖或读取兄弟目录；旧 project fallback 删除；两个工作区资料不混合。已迁入原测试无新增回归，M1主链新增恢复/并发/归属测试通过；M2其余分支新增验收继续在任务4完成，不倒置为M1前置。产物：真实科研模块可挂载，并保留所有功能的跟踪行。依赖：1；UI 资源整理可与 1 并行，最终绑定串行。
+
+## 任务 3：跑通首个真实科研闭环 M1
+
+输入：用户已有且有权使用的 research-workflow/research-skill 产物或在执行阶段按现有格式生成的真实研究项目，不以纯合成数据替代最终验收。位置：模块导入、reader、task/results、writing、平台 FileGateway；`integration_test/research_journey_test.dart`、真实验收记录。
+
+顺序：新建工作区 → 导入真实研究包和论文 → 打开 PDF/Markdown → 保存页码引句与人工笔记 → 创建任务并导出 → 将任务交给另一设备运行或人工执行 → 导回真实结果/日志/附件 → 明确评估并接纳 → 加入提纲导出有证据报告 → 同源研究包再导入 → 退出重开核对笔记、接纳、提纲和源文件。任何现有代码缺陷直接作为迁入任务修复，不把修复挂到不可控外部 D 项。
+
+验收：macOS/Android 每端作为 MuSpace 入口运行该链；至少一次实际跨设备任务/结果交换，不要求新传输协议。回传结果 taskId/revision 与原任务一致，结果附件 hash 与结果包manifest一致；新生成日志不需与原任务输入附件hash相同。接纳后报告包含对应证据；重导入不丢人工记录、不产生错误项目。无绑定create、异输入复用号拒绝、并发双击、各提交点中断、A准备时B写笔记且A失败不回滚B、四分支收任务与错scope收结果是M1必测。PDF 精确文本锚点和新解析进度未实现则不要求、不宣称。产物：真实闭环包、操作日志、hash、截图及应用/设备版本。依赖：2。
+
+## 任务 4：补齐科研现有全流程 M2 与可恢复目录
+
+输入：任务 0 功能矩阵。位置：skill panels/bridge、claim drafts、experiment export、run comparison/assessment、relations、outline、projection_changes/reconciler、重导入。处理包来源冲突、手工绑定、未知字段保真、旧笔记关联、任务修订/同 run 回传等现有行为。平台对象目录通过领域变更队列更新，打开时复核域事实。
+
+验收：功能矩阵每行有当前测试/设备证据或具体后置决定；不存在被“统一能力”名义遗漏的操作。目录写入前后进程中断可重建，无业务丢失；跨工作区晚到结果不串页。LAN 明文入口不算已正式迁入，保留资产并交后续通信规格，M2 明确为本地科研全流程范围。产物：全量迁入矩阵与回归报告。依赖：3；非主链页面回归可在 2 后独立推进，不延迟 M1。
+
+## 任务 5：完成首交付验收和下一阶段交接
+
+输入：M1/M2 测试与设备记录。位置：`docs/acceptance/muspace-research-migration.md`。执行测试规范，报告实际设备、包版本、失败重现与修复；未拿到 Android/Mac 设备或 Xcode 时保留对应未验状态，不能把 build 当实机通过。将 Windows 构建交接到 V0.1 主计划 P7，同期发布验证不得漏项。
+
+验收：M1 硬条件全部有证据才能称“首个真实科研闭环已交付”；M2 全矩阵完成后才称“现有本地科研流程迁入完成”。停止条件为对应里程碑证据完整且无破坏数据/项目隔离的已知问题，普通后续新能力不阻止闭环完成。产物：交付报告、可复现构建说明和剩余清单。依赖：3；M2 总结还依赖4。
+
+## 与完整版本的交接
+
+本子计划只定义M1/M2。完成后按[V0.1主计划](2026-10-03-muspace-v0.1-implementation.md)P2–P7补齐检索、问答、卡、完整研究包和跨端验收；Windows构建在P7，不是无期限后置。完整询价在V0.1后。最小上下文/工具/权限/结果/执行记录合同按主计划P0与迁入任务1同步确定，不要求M1实现真实模型。
+
+执行职责：平台executor拥有apps/API/storage；科研executor拥有module；test-engineer拥有独立测试夹具与验收，公共接口单owner。仅明确执行hand-off后进入实施，本轮不执行。
+
+## 三项预演风险
+
+1. 壳能打开但真实科研卡在任务返入：用任务 3 做第一里程碑，保留原 codec/接纳规则，缺陷在本仓闭环内修复；不靠 mock 结项。
+2. 主库显示成功而研究库未提交，或异步导入回滚其他写：冻结输入与预分配ID、本库同事务回执、平台对账、每库同步事务队列，注入提交点中断及并发写，绝不依赖跨库原子性或嵌套BEGIN。
+3. 切换工作区后旧页面/回调写新项目：session 固定 scope，所有服务核对归属，禁用首项目 fallback，测试晚到回调与重开。
+
+## 验证命令（未来执行，不是已运行）
+
+在科研源目录先 `flutter test` 记录基线。目标模块完成后，在 `packages/research_module` 运行 `flutter analyze`、`flutter test`；在 `apps/muspace` 运行 `flutter analyze`、`flutter test`、`flutter test integration_test/research_journey_test.dart -d <device-id>`，分别记录 macOS 和 Android。构建执行 `flutter build macos --release`、`flutter build apk --release`。有可用 Windows 环境后 `flutter build windows --release`。首次命令前确认 flutter/pubspec 与设备存在；缺环境记 blocked，不能伪造成功或静默安装。

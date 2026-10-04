@@ -1,0 +1,5 @@
+Derived from software-cost-calculator/apps/supplier_app at
+b35eccbe9ddf458a6538fa107baa9b456972a4f8 (origin/main, 2026-10-04).
+MIT license retained in LICENSE. Business pages retained; standalone main and
+window initialization are not used by the MuSpace adapter. Host attachment
+injects database, task storage, data root and namespaced system secrets.

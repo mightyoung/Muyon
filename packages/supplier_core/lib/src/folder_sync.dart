@@ -1,0 +1,153 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'crypto_file.dart';
+import 'exchange.dart';
+import 'store.dart';
+
+/// Outcome of one pass over a shared folder. [seen] is what the caller
+/// keeps for the next pass (file name -> modified time and size).
+class FolderSync {
+  FolderSync(this.imported, this.failed, this.seen);
+  final List<String> imported;
+  final Map<String, String> failed;
+  final Map<String, String> seen;
+}
+
+const _own = '(own)';
+
+/// Name of the file in the shared folder that announces a new version.
+const updateManifest = '版本.json';
+const maxUpdateNoticeBytes = 64 * 1024;
+
+class UpdateNotice {
+  UpdateNotice(this.version, this.notes, this.file);
+  final String version;
+  final String? notes, file;
+}
+
+extension FolderSyncing on Store {
+  /// Syncs through a folder every device can reach (network share, NAS or
+  /// a cloud-drive folder). Each device writes only its own file, so the
+  /// drive never sees two writers of one file. Other devices' files are
+  /// imported first, so the file written afterwards carries everything
+  /// this device knows and new data spreads in one round. A file is read
+  /// again only when its time or size changed; unreadable files (damaged,
+  /// still uploading) are reported and retried next time.
+  // ponytail: every device keeps a full snapshot in the folder (N x database
+  // size); switch to per-device change files if the folder gets too large.
+  ///
+  /// With [passphrase], this device's file is written encrypted and
+  /// encrypted files of others are decrypted. Plain files are rejected in
+  /// this mode; legacy files can still be imported manually after review.
+  Future<FolderSync> syncWithFolder(
+    String dir, {
+    required String ownName,
+    required Map<String, String> seen,
+    String? passphrase,
+  }) async {
+    final next = Map.of(seen);
+    final imported = <String>[];
+    final failed = <String, String>{};
+    final files =
+        Directory(dir)
+            .listSync()
+            .whereType<File>()
+            .where((f) => f.path.endsWith('.siq'))
+            .toList()
+          ..sort((a, b) => a.path.compareTo(b.path));
+    for (final f in files) {
+      final name = f.uri.pathSegments.last;
+      if (name == ownName) continue;
+      final stat = f.statSync();
+      final mark = '${stat.modified.toUtc().toIso8601String()}|${stat.size}';
+      if (seen[name] == mark) continue;
+      final temp = Directory.systemTemp.createTempSync('siq-sync');
+      try {
+        if (isEncryptedExchange(f.path)) {
+          if (passphrase == null) {
+            failed[name] = '文件已加密，需要在本机设置相同的交换口令';
+            continue;
+          }
+          importFrom(await decryptExchange(f.path, passphrase, temp));
+        } else {
+          if (passphrase != null) {
+            failed[name] = '已启用交换口令，自动同步不接受未加密文件；可手动预览导入';
+            continue;
+          }
+          importFrom(f.path);
+        }
+        imported.add(name);
+        next[name] = mark;
+      } on Object catch (e) {
+        failed[name] = e is FormatException ? e.message : '$e';
+      } finally {
+        temp.deleteSync(recursive: true);
+      }
+    }
+    // Rewrite our file only when this device's data changed: a fresh time
+    // stamp would make every other device read it again.
+    final r = db.select('SELECT max(at) AS at, count(*) AS n FROM change_log');
+    final state = '${r.first['at']}|${r.first['n']}';
+    final mode = passphrase == null ? 'plain' : 'encrypted';
+    if (next[_own] != '$state|$mode' || !File('$dir/$ownName').existsSync()) {
+      passphrase == null
+          ? exportTo('$dir/$ownName')
+          : await exportEncryptedTo('$dir/$ownName', passphrase);
+      next[_own] = '$state|$mode';
+    }
+    return FolderSync(imported, failed, next);
+  }
+}
+
+/// A newer version announced in [dir], or null. Versions compare by their
+/// numeric parts ("1.0.12" > "1.0.5").
+UpdateNotice? readUpdate(String dir, {required String current}) {
+  final file = File('$dir/$updateManifest');
+  try {
+    // Use one handle and a bounded read, not a path size check followed by an
+    // unbounded read: shared-folder writers can replace or grow the file.
+    final input = file.openSync();
+    final bytes = BytesBuilder(copy: false);
+    try {
+      if (input.lengthSync() > maxUpdateNoticeBytes) return null;
+      while (bytes.length <= maxUpdateNoticeBytes) {
+        final remaining = maxUpdateNoticeBytes + 1 - bytes.length;
+        final chunk = input.readSync(remaining < 4096 ? remaining : 4096);
+        if (chunk.isEmpty) break;
+        bytes.add(chunk);
+      }
+    } finally {
+      input.closeSync();
+    }
+    if (bytes.length > maxUpdateNoticeBytes) return null;
+    final m =
+        jsonDecode(utf8.decode(bytes.takeBytes())) as Map<String, Object?>;
+    final version = m['version'] as String;
+    final notes = m['notes'] as String?, name = m['file'] as String?;
+    if (version.isEmpty ||
+        version.length > 128 ||
+        version.split(RegExp(r'[.+-]')).length > 16 ||
+        (notes != null && notes.length > 8192) ||
+        (name != null && name.length > 1024)) {
+      return null;
+    }
+    if (compareVersions(version, current) <= 0) return null;
+    return UpdateNotice(version, notes, name);
+  } on Object {
+    return null; // a malformed announcement is ignored, not fatal
+  }
+}
+
+int compareVersions(String a, String b) {
+  List<int> parts(String v) => [
+    for (final p in v.split(RegExp(r'[.+-]'))) int.tryParse(p) ?? 0,
+  ];
+  final x = parts(a), y = parts(b);
+  for (var i = 0; i < x.length || i < y.length; i++) {
+    final d = (i < x.length ? x[i] : 0).compareTo(i < y.length ? y[i] : 0);
+    if (d != 0) return d;
+  }
+  return 0;
+}
