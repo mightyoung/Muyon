@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:research_module/src/core/lan_transfer.dart';
+import 'package:research_module/src/core/store.dart';
 
 void main() {
   test(
@@ -10,6 +11,8 @@ void main() {
     () async {
       final temp = Directory.systemTemp.createTempSync('lan-transfer-');
       addTearDown(() => temp.deleteSync(recursive: true));
+      final store = WorkbenchStore.open(temp.path);
+      addTearDown(store.close);
       final source = File(p.join(temp.path, 'task.zip'))
         ..writeAsBytesSync([1, 2, 3, 4]);
       final session = await LanShareSession.start(
@@ -44,6 +47,8 @@ void main() {
     () async {
       final temp = Directory.systemTemp.createTempSync('lan-redirect-');
       addTearDown(() => temp.deleteSync(recursive: true));
+      final store = WorkbenchStore.open(temp.path);
+      addTearDown(store.close);
       final target = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       final source = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       addTearDown(() async {
@@ -78,6 +83,8 @@ void main() {
   test('a paired LAN share accepts only one concurrent download', () async {
     final temp = Directory.systemTemp.createTempSync('lan-one-shot-');
     addTearDown(() => temp.deleteSync(recursive: true));
+    final store = WorkbenchStore.open(temp.path);
+    addTearDown(store.close);
     final source = File(p.join(temp.path, 'large.zip'));
     final writer = source.openSync(mode: FileMode.write);
     final chunk = List<int>.filled(1024 * 1024, 7);
@@ -118,4 +125,3 @@ void main() {
     expect(secondSucceeded, false);
   });
 }
-
