@@ -574,6 +574,7 @@ class _WorkspacePageState extends State<WorkspacePage> {
                     store: session!.store,
                     projectId: session!.binding.nativeProjectId,
                     importTaskThroughHost: _task,
+                    hosted: true,
                   ),
           ),
         ],

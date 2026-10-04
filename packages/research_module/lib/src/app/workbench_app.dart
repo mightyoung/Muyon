@@ -29,9 +29,14 @@ class ResearchHome extends StatelessWidget {
     this.pickImportFile,
     this.saveExportFile,
     this.importTaskThroughHost,
+    this.hosted = false,
   });
   final WorkbenchStore store;
   final String projectId;
+
+  /// Running inside the Muyon host: devices exchange research packages through
+  /// the host transfer service, so the standalone plaintext LAN page is hidden.
+  final bool hosted;
   final Future<void> Function(String path)? importTaskThroughHost;
   final Future<String> Function(String path)? loadMarkdown;
   final Future<String?> Function(List<String> extensions)? pickImportFile;
@@ -46,6 +51,7 @@ class ResearchHome extends StatelessWidget {
     pickImportFile: pickImportFile,
     saveExportFile: saveExportFile,
     importTaskThroughHost: importTaskThroughHost,
+    hosted: hosted,
   );
 }
 
@@ -58,9 +64,11 @@ class _ScopedResearchHome extends StatefulWidget {
     this.pickImportFile,
     this.saveExportFile,
     this.importTaskThroughHost,
+    this.hosted = false,
   });
   final WorkbenchStore store;
   final String projectId;
+  final bool hosted;
   final Future<void> Function(String path)? importTaskThroughHost;
   final Future<String> Function(String path)? loadMarkdown;
   final Future<String?> Function(List<String> extensions)? pickImportFile;
@@ -270,6 +278,7 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
   }
 
   Future<void> openLan() async {
+    if (widget.hosted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => LanTransferPage(
@@ -290,11 +299,12 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
       appBar: AppBar(
         title: Text(wide ? '研究工作台 · ${labels[section]}' : labels[section]),
         actions: [
-          IconButton(
-            tooltip: '局域网传输',
-            onPressed: openLan,
-            icon: const Icon(Icons.wifi_tethering_outlined),
-          ),
+          if (!widget.hosted)
+            IconButton(
+              tooltip: '局域网传输',
+              onPressed: openLan,
+              icon: const Icon(Icons.wifi_tethering_outlined),
+            ),
           PopupMenuButton<String>(
             tooltip: '导入材料',
             onSelected: (v) => switch (v) {

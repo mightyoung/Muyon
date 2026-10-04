@@ -54,6 +54,7 @@ CREATE TABLE change_log(sequence INTEGER PRIMARY KEY AUTOINCREMENT, project_id T
         return ResearchHome(
           store: research.store,
           projectId: research.binding.nativeProjectId,
+          hosted: true,
         );
       },
     ),
