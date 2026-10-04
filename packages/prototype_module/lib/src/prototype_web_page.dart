@@ -1,7 +1,11 @@
+import 'dart:collection';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import 'resource_policy.dart';
 import 'web_guard.dart';
 
 /// Bridge channel a prototype may use to propose feedback; the person still
@@ -33,13 +37,36 @@ typedef PrototypeWebViewBuilder = Widget Function(PrototypeWebConfig config);
 /// handlers are only registered for channels in the spec.
 Widget defaultPrototypeWebView(PrototypeWebConfig config) {
   final root = config.spec.allowedRoots.first;
+  final policy = PrototypeResourcePolicy(config.spec);
   return InAppWebView(
     initialUrlRequest: URLRequest(url: WebUri.uri(config.spec.entry)),
+    // Every platform: CSP before the page's own resources are parsed.
+    initialUserScripts: UnmodifiableListView([
+      UserScript(
+        source: policy.cspUserScriptSource(),
+        injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
+        forMainFrameOnly: false,
+      ),
+    ]),
     initialSettings: InAppWebViewSettings(
       javaScriptEnabled: true,
       javaScriptCanOpenWindowsAutomatically: false,
       supportMultipleWindows: false,
       useShouldOverrideUrlLoading: true,
+      // Sub-resource interception: Android and Windows (WebView2).
+      useShouldInterceptRequest: true,
+      // Apple platforms: block-all rule list with the version root exempted.
+      contentBlockers: [
+        for (final rule in policy.contentBlockerRules())
+          ContentBlocker(
+            trigger: ContentBlockerTrigger(urlFilter: rule.urlFilter),
+            action: ContentBlockerAction(
+              type: rule.block
+                  ? ContentBlockerActionType.BLOCK
+                  : ContentBlockerActionType.IGNORE_PREVIOUS_RULES,
+            ),
+          ),
+      ],
       allowFileAccess: true,
       allowFileAccessFromFileURLs: false,
       allowUniversalAccessFromFileURLs: false,
@@ -58,6 +85,17 @@ Widget defaultPrototypeWebView(PrototypeWebConfig config) {
       }
       config.onBlocked(url);
       return NavigationActionPolicy.CANCEL;
+    },
+    shouldInterceptRequest: (controller, request) async {
+      final url = request.url.toString();
+      if (policy.allowsResource(url)) return null;
+      config.onBlocked(url);
+      return WebResourceResponse(
+        contentType: 'text/plain',
+        data: Uint8List(0),
+        statusCode: 403,
+        reasonPhrase: 'Blocked by Muyon',
+      );
     },
     onCreateWindow: (controller, action) async {
       config.onBlocked(action.request.url?.toString() ?? '(new window)');
