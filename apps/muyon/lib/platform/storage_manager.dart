@@ -89,6 +89,47 @@ class StorageManager {
   /// forget to record it. Set once the host database is available.
   SchemaOpened? onOpened;
   SchemaFailed? onFailed;
+
+  static final Set<String> _openRoots = {};
+
+  /// Whether a manager in this process holds [rootPath]. Other processes are
+  /// excluded by the application lock file.
+  static bool isOpen(String rootPath) =>
+      _openRoots.contains(p.canonicalize(rootPath));
+
+  Future<void>? _gate;
+
+  /// Runs [body] with every open database's write queue held at once and new
+  /// opens deferred, so no commit lands mid-snapshot. [body] receives the
+  /// open connections by module id and must not write through their queues.
+  Future<T> quiesce<T>(
+    Future<T> Function(Map<String, ManagedConnection> open) body,
+  ) async {
+    if (_closing) throw StateError('Storage is closing');
+    while (_gate != null) {
+      await _gate;
+    }
+    final done = Completer<void>();
+    _gate = done.future;
+    try {
+      for (final pending in _opening.values.toList()) {
+        try {
+          await pending;
+        } catch (_) {
+          /* Failed opens are not part of the snapshot. */
+        }
+      }
+      final open = Map.of(_connections);
+      Future<T> hold(List<ManagedConnection> rest) => rest.isEmpty
+          ? body(open)
+          : rest.first.exclusiveAsync((_) => hold(rest.sublist(1)));
+      return await hold(open.values.toList());
+    } finally {
+      _gate = null;
+      done.complete();
+    }
+  }
+
   final Map<String, Future<ManagedConnection>> _opening = {};
   final Map<String, ManagedConnection> _connections = {};
   bool _closing = false;
@@ -113,6 +154,8 @@ class StorageManager {
 
   Future<ManagedConnection> open(String moduleId, ModuleSchema schema) {
     if (_closing) return Future.error(StateError('Storage is closing'));
+    final gate = _gate;
+    if (gate != null) return gate.then((_) => open(moduleId, schema));
     if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(moduleId)) {
       return Future.error(ArgumentError.value(moduleId, 'moduleId'));
     }
@@ -142,6 +185,7 @@ class StorageManager {
       try {
         lock.lockSync(FileLock.exclusive);
         _applicationLock = lock;
+        _openRoots.add(p.canonicalize(rootPath));
       } catch (_) {
         lock.closeSync();
         throw StateError('Muyon data is already open in another process');
@@ -246,6 +290,7 @@ class StorageManager {
     }
     _connections.clear();
     _opening.clear();
+    if (_applicationLock != null) _openRoots.remove(p.canonicalize(rootPath));
     _applicationLock?.closeSync();
     _applicationLock = null;
   }

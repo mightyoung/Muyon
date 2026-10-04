@@ -63,26 +63,32 @@ void main() {
     root.deleteSync(recursive: true);
   });
 
-  test('applies upserts and deletes in order and advances the cursor', () async {
-    await put('a', 'Alpha');
-    await put('b', 'Beta');
-    await put('a', 'Alpha 2');
-    await remove('b');
-    await projections.sync('cards', cards.raw);
-    expect(catalog(), {'a': 'Alpha 2'});
-    expect(projections.cursor('cards'), 4);
-  });
+  test(
+    'applies upserts and deletes in order and advances the cursor',
+    () async {
+      await put('a', 'Alpha');
+      await put('b', 'Beta');
+      await put('a', 'Alpha 2');
+      await remove('b');
+      await projections.sync('cards', cards.raw);
+      expect(catalog(), {'a': 'Alpha 2'});
+      expect(projections.cursor('cards'), 4);
+    },
+  );
 
-  test('replay and overlapping runs are idempotent and never resurrect', () async {
-    await put('a', 'Alpha');
-    final early = projections.sync('cards', cards.raw);
-    await remove('a');
-    final late = projections.sync('cards', cards.raw);
-    await Future.wait([early, late]);
-    await projections.sync('cards', cards.raw);
-    expect(catalog(), isEmpty);
-    expect(projections.cursor('cards'), 2);
-  });
+  test(
+    'replay and overlapping runs are idempotent and never resurrect',
+    () async {
+      await put('a', 'Alpha');
+      final early = projections.sync('cards', cards.raw);
+      await remove('a');
+      final late = projections.sync('cards', cards.raw);
+      await Future.wait([early, late]);
+      await projections.sync('cards', cards.raw);
+      expect(catalog(), isEmpty);
+      expect(projections.cursor('cards'), 2);
+    },
+  );
 
   test('modules without a change log are skipped', () async {
     final plain = await storage.open(
