@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '../../platform/outbound_ledger.dart';
+
 enum ModelLocation { local, ownDevice, remote }
 
 enum ModelPurpose { chat, embedding }
@@ -101,8 +103,13 @@ class OpenAiModelGateway {
     this.timeout = const Duration(seconds: 45),
     this.maxResponseBytes = 2 * 1024 * 1024,
     HttpClient Function()? clientFactory,
+    this.ledger,
   }) : _clientFactory = clientFactory ?? HttpClient.new;
   final SecretStore secrets;
+
+  /// Records every request before it is sent; when set, a failed record
+  /// means the request is not sent.
+  final OutboundLedger? ledger;
   final Duration timeout;
   final int maxResponseBytes;
   final HttpClient Function() _clientFactory;
@@ -112,6 +119,7 @@ class OpenAiModelGateway {
     required List<Map<String, String>> messages,
     ModelCancellation? cancellation,
     Future<void> Function()? beforeSend,
+    String caller = 'chat',
   }) async {
     if (profile.purpose != ModelPurpose.chat) {
       throw StateError('Model profile is not configured for chat');
@@ -125,6 +133,7 @@ class OpenAiModelGateway {
       },
       cancellation: cancellation,
       beforeSend: beforeSend,
+      caller: caller,
     );
     final content = (decoded['choices'] as List).first['message']['content'];
     if (content is! String || content.trim().isEmpty) {
@@ -139,6 +148,7 @@ class OpenAiModelGateway {
     required List<String> texts,
     ModelCancellation? cancellation,
     required Future<void> Function() beforeSend,
+    String caller = 'embedding',
   }) async {
     if (profile.purpose != ModelPurpose.embedding) {
       throw StateError('Model profile is not configured for embeddings');
@@ -157,6 +167,7 @@ class OpenAiModelGateway {
       },
       cancellation: cancellation,
       beforeSend: beforeSend,
+      caller: caller,
     );
     final data = decoded['data'];
     if (data is! List || data.length != texts.length) {
@@ -194,8 +205,13 @@ class OpenAiModelGateway {
     required Map<String, Object?> payload,
     ModelCancellation? cancellation,
     Future<void> Function()? beforeSend,
+    String caller = 'model',
   }) async {
     final frozenPayload = jsonEncode(payload);
+    final items = payload['messages'] ?? payload['input'];
+    String? recordId;
+    var sent = false;
+    int? httpStatus;
     if (utf8.encode(frozenPayload).length > 2 * 1024 * 1024) {
       throw ArgumentError('Model payload too large');
     }
@@ -216,6 +232,13 @@ class OpenAiModelGateway {
         }
         if (beforeSend != null) await beforeSend();
         token.check();
+        recordId = await ledger?.begin(
+          caller: caller,
+          profile: profile,
+          payload: frozenPayload,
+          itemCount: items is List ? items.length : 1,
+        );
+        token.check();
         final request = await client.postUrl(profile.endpoint);
         request.followRedirects = false;
         request.headers.contentType = ContentType.json;
@@ -226,7 +249,9 @@ class OpenAiModelGateway {
           );
         }
         request.write(frozenPayload);
+        sent = true;
         final response = await request.close();
+        httpStatus = response.statusCode;
         if (response.statusCode != 200) {
           throw HttpException('model_http_${response.statusCode}');
         }
@@ -240,14 +265,44 @@ class OpenAiModelGateway {
         }
         token.check();
         final decoded = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+        await _finish(recordId, 'succeeded', httpStatus, null);
         return decoded;
       })().timeout(timeout);
     } on TimeoutException {
       token.cancel();
+      await _finish(recordId, 'timeout', httpStatus, _when(sent));
+      rethrow;
+    } catch (error) {
+      final status = token.isCancelled ? 'cancelled' : 'failed';
+      await _finish(
+        recordId,
+        status,
+        httpStatus,
+        token.isCancelled ? _when(sent) : '$error',
+      );
       rethrow;
     } finally {
       token.remove(abort);
       abort();
+    }
+  }
+
+  static String _when(bool sent) => sent
+      ? 'Stopped after the request was sent; the endpoint may have processed it'
+      : 'Stopped before the request was sent';
+
+  Future<void> _finish(
+    String? id,
+    String status,
+    int? httpStatus,
+    String? error,
+  ) async {
+    if (id == null) return;
+    try {
+      await ledger!.finish(id, status, httpStatus: httpStatus, error: error);
+    } catch (_) {
+      // Left as 'sending'; recoverInterrupted() marks it on next start. The
+      // request's own result/error is what the caller must see.
     }
   }
 }

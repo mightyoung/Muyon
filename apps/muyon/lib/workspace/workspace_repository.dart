@@ -4,6 +4,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/outbound_ledger.dart';
 
 class Workspace {
   const Workspace(this.id, this.title);
@@ -16,8 +17,8 @@ class WorkspaceRepository {
   final ManagedDatabase database;
 
   static final schema = ModuleSchema(
-    version: 4,
-    definitionDigest: 'foundation-v4',
+    version: 5,
+    definitionDigest: 'foundation-v5',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -52,6 +53,12 @@ CREATE TABLE execution_records(id TEXT PRIMARY KEY,state TEXT NOT NULL,payload T
         definitionDigest: 'foundation-v4',
         migrate: (db) =>
             db.execute('ALTER TABLE import_intents ADD COLUMN last_error TEXT'),
+      ),
+      ModuleMigration(
+        version: 5,
+        id: 'outbound-requests',
+        definitionDigest: 'foundation-v5',
+        migrate: OutboundLedger.createTable,
       ),
     ],
   );

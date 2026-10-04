@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/platform/storage_manager.dart';
@@ -416,4 +417,66 @@ void main() {
       expect(db.raw.select('SELECT * FROM domain_writes'), isEmpty);
     },
   );
+
+  group('effect point decides cancel/failure wording', () {
+    Future<ToolCallResult> run(
+      ToolEffect effect,
+      Future<ToolCallResult> Function(ToolCallContext) handler, {
+      ToolCancellationToken? cancellation,
+    }) async {
+      register(effect: effect, handler: handler);
+      final external = effect == ToolEffect.network;
+      final base = request(destination: external ? 'https://x.test' : null);
+      final approved = effect == ToolEffect.read
+          ? base
+          : base.withApproval(
+              await registry.approve(await registry.prepare(base)),
+            );
+      return registry.invoke(approved, cancellation: cancellation);
+    }
+
+    test(
+      'cancel after the effect point is interrupted, never "undone"',
+      () async {
+        final token = ToolCancellationToken();
+        final result = await run(ToolEffect.network, (context) async {
+          context.checkBeforeEffect();
+          token.cancel(); // remote call is in flight when the user cancels
+          context.cancellation.throwIfCancelled();
+          return ToolCallResult(status: ToolCallStatus.succeeded, summary: 'x');
+        }, cancellation: token);
+        expect(result.status, ToolCallStatus.interrupted);
+        expect(result.summary, contains('may already have happened'));
+        expect(result.summary, contains('not undone'));
+      },
+    );
+
+    test('failure after an external effect is uncertain, not failed', () async {
+      final result = await run(ToolEffect.network, (context) async {
+        context.checkBeforeEffect();
+        throw const SocketException('connection reset');
+      });
+      expect(result.status, ToolCallStatus.interrupted);
+      expect(result.summary, contains('verify'));
+    });
+
+    test('cancel before the effect point says nothing was executed', () async {
+      final token = ToolCancellationToken();
+      final result = await run(ToolEffect.network, (context) async {
+        token.cancel(); // user cancels while the provider is still preparing
+        context.checkBeforeEffect();
+        return ToolCallResult(status: ToolCallStatus.succeeded, summary: 'x');
+      }, cancellation: token);
+      expect(result.status, ToolCallStatus.cancelled);
+      expect(result.summary, contains('No write or external action'));
+    });
+
+    test('read tools never report uncertain effects', () async {
+      final result = await run(ToolEffect.read, (context) async {
+        context.checkBeforeEffect();
+        throw StateError('boom');
+      });
+      expect(result.status, ToolCallStatus.failed);
+    });
+  });
 }

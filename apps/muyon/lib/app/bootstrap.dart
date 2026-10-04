@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 
 import '../platform/file_gateway.dart';
+import '../platform/outbound_ledger.dart';
 import '../platform/projection_service.dart';
 import '../platform/schema_catalog.dart';
 import '../platform/storage_manager.dart';
@@ -37,6 +38,7 @@ class MuyonHost {
   late final PublicServices services;
   late final PersonalAgent personalAgent;
   late final ProjectionService projections;
+  late final OutboundLedger outbound;
   Future<bool> Function(InquiryModelApprovalPreview preview)?
   approveInquiryModelRequest;
   ResearchRuntime? research;
@@ -127,6 +129,8 @@ class MuyonHost {
       );
       host.foundation = FoundationRepository(database);
       host.projections = ProjectionService(database);
+      host.outbound = OutboundLedger(database);
+      await host.outbound.recoverInterrupted();
       host.memoryReview = MemoryReviewService(host.foundation);
       await host.foundation.recoverInterrupted();
       var device = host.workspaces.setting('deviceId') as String?;
@@ -141,7 +145,10 @@ class MuyonHost {
       host.services = await PublicServices.open(
         storage: storage,
         workspaces: host.workspaces,
-        gateway: OpenAiModelGateway(const MethodChannelSecretStore()),
+        gateway: OpenAiModelGateway(
+          const MethodChannelSecretStore(),
+          ledger: host.outbound,
+        ),
         tools: host.tools,
       );
       host.services.transfer.onPendingReceived = () {

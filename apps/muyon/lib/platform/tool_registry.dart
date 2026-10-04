@@ -379,6 +379,8 @@ class ToolRegistry {
     });
     if (cached != null) return cached;
     ToolCallResult result;
+    var effectReached = false;
+    final effectful = tool.info.accessLevel != ToolAccessLevel.read;
     try {
       token.throwIfCancelled();
       // Re-resolve immediately before dispatch, including after queue waits.
@@ -396,7 +398,11 @@ class ToolRegistry {
           request: request,
           resolvedScope: current.resolvedScope,
           cancellation: token,
-          checkAuthorization: checkAuthorization,
+          // Passing this check means the provider is about to cause its effect.
+          checkAuthorization: () {
+            checkAuthorization();
+            effectReached = true;
+          },
         ),
       );
       token.throwIfCancelled();
@@ -418,17 +424,19 @@ class ToolRegistry {
       }
       token.throwIfCancelled();
     } on ToolCancelled {
-      result = ToolCallResult(
-        status: ToolCallStatus.cancelled,
-        summary: 'Cancelled subsequent processing; completed external effects are not rolled back.',
-      );
+      result = effectful && effectReached
+          ? _uncertain('Cancelled after the effect started')
+          : ToolCallResult(
+              status: ToolCallStatus.cancelled,
+              summary: 'Cancelled. No write or external action was executed.',
+            );
     } catch (error) {
-      result = ToolCallResult(
-        status: ToolCallStatus.failed,
-        summary: error is ToolPlatformException
-            ? error.toString()
-            : 'Tool execution failed',
-      );
+      final reason = error is ToolPlatformException
+          ? error.toString()
+          : 'Tool execution failed';
+      result = effectful && effectReached
+          ? _uncertain(reason)
+          : ToolCallResult(status: ToolCallStatus.failed, summary: reason);
     }
     result = result.forInvocation(request.invocationId);
     await database.write(
@@ -439,6 +447,16 @@ class ToolRegistry {
     );
     return result;
   }
+
+  /// Outcome unknown: the write/external effect may have happened. A local
+  /// cancel cannot undo it, so the caller must verify before any retry.
+  static ToolCallResult _uncertain(String reason) => ToolCallResult(
+    status: ToolCallStatus.interrupted,
+    summary:
+        '$reason. The write or external action may already have happened and '
+        'is not undone by cancelling here; verify its actual result before '
+        'starting a new attempt.',
+  );
 
   List<ToolCallResult> history({String? toolId}) => [
     for (final row in database.raw.select(

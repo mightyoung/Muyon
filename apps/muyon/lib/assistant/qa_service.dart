@@ -186,6 +186,7 @@ class QaService {
       token.check();
       final raw = await gateway.chat(
         profile: request.profile,
+        caller: 'research.qa',
         cancellation: token,
         beforeSend: () async {
           if (!await evidenceValidator(request.context, request.evidence)) {

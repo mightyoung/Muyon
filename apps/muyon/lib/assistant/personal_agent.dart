@@ -375,6 +375,7 @@ class PersonalAgent {
           for (final m in task.payload['messages'] as List)
             Map<String, String>.from(m as Map),
         ],
+        caller: 'assistant',
         cancellation: token,
         beforeSend: () async {
           if (_closing ||
