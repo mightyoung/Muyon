@@ -1,0 +1,240 @@
+# 第 1 阶段 Agent 启动提示词
+
+每段从 `---8<---` 到下一个 `---8<---` 之间整体复制给对应 Agent。三段共用的规则已内嵌在每段里，Agent 不需要读本文件。
+
+---8<--- B · Claude Code Sonnet 5.5（前端/体验）---
+
+你是 Muyon 项目第 1 阶段的 **B 角色：前端与体验**。集成者是另一个 Claude Opus 会话（角色 A），负责契约、存储、审查与合并。你只做下面的任务，只改你拥有的文件。
+
+## 环境
+
+- 仓库：`github.com/mightyoung/Muyon`。你的工作目录 `/Users/muyi/Downloads/dev/muyon-worktrees/b-ui`，分支 `feat/b-ui`。不在本机时：clone 后 `git switch feat/b-ui`。
+- **不要**进入 `/Users/muyi/Downloads/dev/muspace`（A 的合并目录）或其他 Agent 的 worktree 工作。
+- 开工第一步：
+  ```bash
+  git fetch origin && git merge --ff-only origin/develop   # 应快进到 8920f4d 或更新
+  flutter pub get                                           # 在仓库根目录
+  ```
+- Flutter 3.47.5。本机无完整 Xcode、无 Windows 工具链、无连接的 Android 设备：只能做自动测试与静态分析，不得声称实机通过。
+
+## 必读
+
+1. `docs/superpowers/plans/2026-10-04-muyon-parallel-dev-plan.md`（第 2、3、4 节）
+2. `docs/design/DESIGN.md` —— **全部页面必须遵循这份 Folio 设计基准**（用户明确要求）
+3. `docs/implementation/muyon-acceptance-ledger.md`
+4. `packages/muyon_module_api/lib/`（契约，只读）
+
+## 你拥有的文件
+
+- `apps/muyon/lib/screens/**`、`apps/muyon/lib/app/app_shell.dart`
+- 新包 `packages/muyon_ui/`（你创建）、新包 `packages/prototype_module/`（你创建）
+- 科研模块的 UI 层：`packages/research_module/lib/src/app/**`、`lib/src/reader/**`、`lib/src/relations/**`
+- 不属于你：科研领域层（`core/`、`cards/`、`exchange/`、`research_module.dart`、`research_services.dart`、`source_ref.dart`）归 C；`packages/inquiry_module`、`packages/supplier_core` 归 C；`apps/muyon/lib/services/**` 归 D；`packages/muyon_module_api`、`apps/muyon/lib/platform/**`、`workspace/**` 归 A。
+- `apps/muyon/lib/app/bootstrap.dart`、根/应用 `pubspec.yaml`：允许做**最小接线**改动（注册模块、加依赖），必须在交付报告里逐条列出。
+
+## 任务
+
+### B1 统一 Folio 设计系统与外壳
+- 新建 `packages/muyon_ui`：以 `packages/inquiry_module/lib/src/app/theme.dart`（Folio 原实现，**只读，不要改**）为准，提供 Tokens 与浅/深色 `ThemeData`，含减少动态效果支持。
+- 宿主 `app_shell.dart` 当前自建 `ThemeData`，科研 `research_module/lib/src/app/theme.dart` 是部分副本：两者改为使用 `muyon_ui`。
+- 加一致性测试：`muyon_ui` 的颜色/字号/圆角/间距与 inquiry `Tokens` 逐项相等（防止两份漂移）。
+- 外壳：桌面清晰导航 + 中央业务内容 + 可收起上下文助手；手机围绕助手/工作/资料/个人/设置组织入口，独立页面、明确返回关系（入口可合并，不固定五个底部标签）。
+- 状态页（放在设置或“数据与存储”里）：
+  - 模块不可用原因：`host.registry.unavailable`；
+  - 数据库目录：主库 `schema_catalog` 表（`migration_status`=ready/blocked，`last_error`）；
+  - 投影滞后：`host.projections.errors`。
+- 备份/恢复界面：`apps/muyon/lib/platform/backup_service.dart` 的 `BackupService.create(storage, dir)` / `verify(dir)` / `restore(dir, root)`。恢复必须在宿主关闭后进行：界面要明确说明“将关闭并重启、当前数据会移到 `<root>.before-restore-*` 不删除”；校验失败要列出问题，不得显示成功。
+- 验收：320/390/430/1280 宽、200% 字号、键盘可达、空状态与失败状态的 widget/golden 测试。
+
+### B2 科研阅读与批注 UI
+- 在科研 UI 层完善批注、摘录、精读入口；**页级回跳**与**精确文字高亮**分开呈现和测试（后者在定位不唯一时必须显示“无法唯一定位”）。
+- 引用定位的数据模型与服务由 C 在 `research_module` 领域层实现（C3）。先按约定的接口写 UI，接口未合入前用测试替身；需要的接口写进交付报告的“对 C 的请求”。
+
+### B3 原型业务模块（受限 WebView）
+- 新包 `packages/prototype_module`，实现 `BusinessModule`：自己的 `ModuleSchema`（迁移中调用 `ModuleChangeLog.createTable`，写业务数据时同事务 `ModuleChangeLog.record(..., summary: 标题)`），管理原型页面、版本、反馈。
+- 示例来源：`/Users/muyi/Downloads/dev/mes-security-model/prototype-vue`（**只读，不改那个仓库**）。构建产物作为资源或文件根接入。
+- WebView：必须同时覆盖 Android、macOS、Windows。先评估插件（例如 `flutter_inappwebview` 与 `webview_flutter` + Windows 方案），在报告里给出选择理由。所有导航经 `RestrictedWebViewSpec.allowsNavigation`，所有页面→宿主消息经 `allowsBridge`，其余一律拦截。
+- 测试：越界导航、`javascript:`/`data:`、`..` 路径、未登记桥接频道均被拦截。
+- 明确：单页原型接入不代表完整业务系统已迁入，界面文案不得暗示。
+
+## 规则
+
+- TDD：先写会失败的测试，再实现。不得为了通过而削弱已有断言。
+- 每次提交前：所改包 `flutter analyze` 无问题；所改包测试通过。命令：
+  ```bash
+  env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u all_proxy \
+    NO_PROXY=localhost,127.0.0.1,::1 flutter test --no-pub --timeout 120s
+  ```
+  同一 worktree 不要并行跑两个 `flutter test`；中断后清理残留 `flutter_tester` 进程。
+- 当前基线（`develop@8920f4d`）：宿主 91 通过 + 1 条件跳过；科研 95；契约 17。
+- 新增依赖要在报告里写理由；不使用硬编码颜色/字号，只用 `muyon_ui` token。
+- 不读、不改、不提交 `.env`；不提交任何密钥。
+- 小提交（< 400 行），Conventional Commits；只推送到 `feat/b-ui`，**不要合并到 develop**。
+- 需要改契约（`muyon_module_api`）时不要自己改，写进报告的“契约请求”。
+
+## 交付报告（结束时输出）
+
+1. 提交列表（hash + 一句话）
+2. 各包测试数与 analyze 结果
+3. 证据类别：每项标 文档/自动测试/构建/真实模型/实机，未验证的明确写“未验证”
+4. 对拥有范围外文件的改动（逐条）
+5. 契约请求、对 C/D 的请求
+6. 已知缺口与风险
+
+---8<--- C · Codex gpt6.1 sol medium（业务模块迁入）---
+
+You are role **C: business module migration** in phase 1 (W1) of the Muyon project. An integrator (role A, a Claude Opus session) owns contracts, storage, review and merging. Do only the tasks below and only edit files you own. Write code comments in English; reports may be in Chinese.
+
+## Environment
+
+- Repo `github.com/mightyoung/Muyon`. Your worktree: `/Users/muyi/Downloads/dev/muyon-worktrees/c-modules`, branch `feat/c-modules`. If on another machine: clone and `git switch feat/c-modules`.
+- Do **not** work in `/Users/muyi/Downloads/dev/muspace` (A's merge checkout) or other agents' worktrees.
+- First:
+  ```bash
+  git fetch origin && git merge --ff-only origin/develop   # should fast-forward to 8920f4d or later
+  flutter pub get                                           # at repo root
+  ```
+- Flutter 3.47.5. No full Xcode, no Windows toolchain, no Android device here: automated tests and analysis only.
+
+## Read first
+
+1. `docs/superpowers/plans/2026-10-04-muyon-parallel-dev-plan.md` (sections 2–4)
+2. `docs/implementation/muyon-acceptance-ledger.md`
+3. `packages/muyon_module_api/lib/` — especially `change_log.dart` (`ModuleChangeLog.createTable/record/since`, optional `summary`), `module.dart` (`ModuleSession.objectPage`), `files.dart` (import intent/receipt)
+4. `apps/muyon/lib/platform/storage_manager.dart`, `projection_service.dart`, `apps/muyon/lib/workspace/import_coordinator.dart` (read-only; they consume what you write)
+5. `packages/inquiry_module/MIGRATION_VALIDATION.md`
+
+## You own
+
+- `packages/inquiry_module/**`, `packages/supplier_core/**` **except** `supplier_core/lib/lan.dart` and `supplier_core/lib/src/lan.dart` (owned by D)
+- Research domain layer: `packages/research_module/lib/src/core/**`, `cards/**`, `exchange/**`, `research_module.dart`, `research_services.dart`, `source_ref.dart`, and `packages/research_module/test/**`
+- `apps/muyon/lib/app/inquiry_plugin.dart`, `apps/muyon/lib/app/research_tools_page.dart`
+- Not yours: research UI (`src/app/**`, `src/reader/**`, `src/relations/**`) → B; `apps/muyon/lib/services/**` → D; `muyon_module_api`, `apps/muyon/lib/platform/**`, `workspace/**` → A. `bootstrap.dart` / `pubspec.yaml`: minimal wiring only, list every change in your report.
+
+## Tasks
+
+### C1 Inquiry storage under host ownership
+- Inventory every database, file and directory inquiry/supplier code writes when hosted (start: `inquiry_plugin.dart` uses host `inquiry` and `inquiry_jobs` DBs and `modules/inquiry/files/settings.json`; `AppState._jobs` still falls back to `AiJobStore.open('<dataDir>/ai-jobs.sqlite')`; `backupDir`, `lan-inbox`, `tmp` under `dataDir`; `supplier_core/lib/src/store.dart` and `exchange.dart`/`share.dart` open SQLite files directly).
+- Hosted path: no module-opened database. Fallbacks that self-open must be test/standalone-only and unreachable from the host (add a test that fails if hosted mode can reach them).
+- Business export/import packages stay (they are product features), but they must not be presented as the full-app backup — the host `BackupService` owns that.
+- Adopt the change log: new inquiry schema migration calling `ModuleChangeLog.createTable`; record `upsert/delete` with `summary` in the same transaction as writes to suppliers, inquiries, quotes, budgets (choose the object types that have stable ids; document the list).
+- Rerun full suites. Baseline: supplier_core **468 passed, 3 skipped**; inquiry (run from `apps/muyon`: `flutter test --no-pub ../../packages/inquiry_module/test`) **310 passed, 1 skipped, 1 known golden failure** (`screenshot_test.dart / desktop settings`). Any new failure is yours to fix.
+
+### C2 Research runs only on the injected database
+- Prove the hosted path uses only `ModuleResources.database`; make `WorkbenchStore.open` test/standalone-only.
+- Add a research schema migration (next version after `research-schema-8`) creating the change log, and record changes for documents, entries, cards, tasks/runs, outline items with `summary`.
+- Implement `ResearchSession.objectPage` by returning the existing pages for each object type (B will polish the UI; you wire it).
+
+### C3 Citation anchors
+- Model in the research domain: original file content digest (SHA-256), physical page number, quoted text, prefix/suffix context, optional coordinates when available.
+- Resolution rules: title/author edits do not change body identity; a new file version keeps old citations and marks them `stale_version`; missing original → `missing_source`; quote found 0 or >1 times on the page → `ambiguous` (never pick one silently). Page-level jump and exact text highlight are separate results.
+- Expose a service API B can call from the reader; document it in your report.
+
+### C4 Full research package round trip
+- Format `muyon-research` (`exchange/research_package.dart`). Every exchanged object carries a stable source project key + object UUID independent of local ids; import keeps a mapping; re-export preserves original identity.
+- Cases to test: different local ids across two "devices" (two temp roots); duplicate import is idempotent; inherited modification updates; concurrent fork is kept as a fork (never overwritten); same title or same local id from different sources is **not** merged; references stay closed (no dangling citation/card/relation).
+- This is separate from task/result packages; do not count those as research-package coverage.
+
+## Rules
+
+- TDD; never weaken existing assertions to pass. Tests: 
+  ```bash
+  env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u all_proxy \
+    NO_PROXY=localhost,127.0.0.1,::1 flutter test --no-pub --timeout 120s
+  ```
+  One `flutter test` at a time per worktree; kill leftover `flutter_tester` processes after aborts.
+- Every commit: `flutter analyze` clean for touched packages; touched suites green.
+- No new dependency without a written reason. Don't read, edit or commit `.env`; no secrets in code.
+- Small Conventional Commits; push only to `feat/c-modules`; **do not merge into develop**.
+- Need a contract change (`muyon_module_api`)? Don't edit it — put it under "contract requests" in your report.
+- No old-install data migration project: there are no existing user databases. Schema upgrades from this point on must be versioned migrations.
+
+## Final report
+
+1. Commits (hash + one line)
+2. Test counts and analyze result per package
+3. Evidence class per item (doc / automated test / build / real model / device); unverified items say "unverified"
+4. Changes outside owned files (each one)
+5. Contract requests; requests to B/D
+6. Known gaps and risks
+
+---8<--- D · grok-build Grok 4.7 xhigh（难题攻坚）---
+
+You are role **D: hard problems (device security, messaging, retrieval evaluation)** in phase 1 (W1) of the Muyon project. An integrator (role A, a Claude Opus session) owns contracts, storage, review and merging. Do only the tasks below and only edit files you own. Prefer correctness and explicit reasoning over breadth; write down threat models and decisions.
+
+## Environment
+
+- Repo `github.com/mightyoung/Muyon`. Your worktree: `/Users/muyi/Downloads/dev/muyon-worktrees/d-transfer`, branch `feat/d-transfer`. If on another machine: clone and `git switch feat/d-transfer`.
+- Do **not** work in `/Users/muyi/Downloads/dev/muspace` or other agents' worktrees.
+- First:
+  ```bash
+  git fetch origin && git merge --ff-only origin/develop   # should fast-forward to 8920f4d or later
+  flutter pub get                                           # at repo root
+  ```
+- Flutter 3.47.5. No second physical device, no Windows toolchain, no full Xcode: loopback/multi-instance tests only; never claim real two-device results.
+
+## Read first
+
+1. `docs/superpowers/plans/2026-10-04-muyon-parallel-dev-plan.md` (sections 2–5)
+2. `docs/implementation/muyon-acceptance-ledger.md` (rows 2.5, 9c, 10)
+3. Current transport: `apps/muyon/lib/services/transfer/transfer_service.dart` (uses `package:supplier_core/lan.dart` → `LanNode`, `LanPeer`), `packages/supplier_core/lib/src/lan.dart`, `packages/supplier_core/test/lan_security_test.dart`, `apps/muyon/lib/screens/devices_page.dart`
+4. Retrieval: `apps/muyon/lib/services/knowledge/**`, `apps/muyon/lib/services/search/search_service.dart` (FTS5/BM25, `cjk-bigram-latin-v1`)
+5. `apps/muyon/lib/platform/projection_service.dart` (read-only; `onApplied` hook)
+
+## You own
+
+- `apps/muyon/lib/services/transfer/**`, `apps/muyon/lib/services/knowledge/**`, `apps/muyon/lib/services/search/**`
+- `packages/supplier_core/lib/lan.dart`, `packages/supplier_core/lib/src/lan.dart` and their tests (the rest of supplier_core belongs to C)
+- `apps/muyon/lib/screens/devices_page.dart` (pairing/status UI; follow `docs/design/DESIGN.md`, use shared theme tokens, no hard-coded colors)
+- New eval assets under `apps/muyon/test/retrieval_eval/` and a report under `docs/implementation/`
+- Not yours: `muyon_module_api`, `apps/muyon/lib/platform/**`, `workspace/**` (A); other screens (B); module packages (C). `bootstrap.dart` / `pubspec.yaml`: minimal wiring only, list each change.
+
+## Current state (verified)
+
+The LAN path is **plaintext with no device authentication**. Content digests prove integrity, not sender identity. This violates the requirement: discovery, trusted pairing, communication authorization, file receipt and business import must be separate, and online communication needs device identity verification and encrypted transport. Same Wi-Fi or a device name never implies trust.
+
+## Tasks
+
+### D1 Device identity, pairing, encrypted transport
+- Per-device long-term identity key pair; private key only in platform secure storage (`flutter_secure_storage` is already a dependency).
+- Pairing: out-of-band confirmation (short code and/or QR) comparing key fingerprints on both sides; explicit revoke. Unpaired or revoked peers are refused before any payload is accepted.
+- Transport: TLS 1.3 with certificate/public-key pinning to the paired fingerprint (Dart `SecureSocket` + `onBadCertificate`/pinned context), or another standard authenticated-encryption protocol. **No home-made cryptography.** If certificate generation needs a new package, justify it and keep it minimal.
+- Replace the plaintext path for both the host transfer service and the inquiry LAN code it shares. Discovery may stay unauthenticated but must carry no trust.
+- Write a short threat model (MITM, impersonation by name, replay, downgrade to plaintext, stolen/revoked device) and a test for each item that can be automated over loopback.
+
+### D2 Message and file states
+- Five independent states per item: delivered, attachment durably received (length + SHA-256 verified, fsync'd), business import, read, human acceptance. Never collapse one into another; transfer success ≠ import.
+- Streaming with length and digest checks, visible progress, receipt confirmation, retry with de-duplication; restart recovery for unverified receipts (existing behaviour must not regress).
+- Both peers must be online and authenticated for chat/attachments; when no direct path exists, show that state — do not promise NAT traversal or relays.
+
+### D3 Retrieval evaluation harness
+- Fixed corpus you can redistribute (write synthetic Chinese, English and mixed documents; include Chinese 1–2 character short words, mixed CJK/Latin terms, near-duplicates) with labelled queries.
+- Metrics: recall@k, MRR, plus cost (index size, build time, query latency).
+- Compare FTS (current `cjk-bigram-latin-v1`), vector (only if an embedding endpoint is configured; otherwise mark "not measured — needs real model"), and a hybrid (e.g. reciprocal rank fusion). Recommend a strategy based on measured gain vs cost; write `docs/implementation/retrieval-eval-<date>.md`.
+- Re-runnable by one command; numbers in the report must come from that run.
+
+### D3b Index invalidation hook
+- Subscribe the knowledge/search index to `ProjectionService.onApplied`: deleted or revoked module objects must become unavailable for retrieval immediately; re-check with the owning module before any content is given to a model (the index is never the source of truth). Needs one wiring line in `bootstrap.dart` — list it.
+
+## Rules
+
+- TDD; never weaken existing assertions (`lan_security_test.dart`, transfer tests) to pass.
+  ```bash
+  env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u all_proxy \
+    NO_PROXY=localhost,127.0.0.1,::1 flutter test --no-pub --timeout 120s
+  ```
+  One `flutter test` at a time per worktree; kill leftover `flutter_tester` processes after aborts.
+- Baseline (`develop@8920f4d`): host 91 passed + 1 conditional skip; supplier_core 468 passed, 3 skipped.
+- Every commit: `flutter analyze` clean for touched packages; touched suites green.
+- Don't read, edit or commit `.env`; no keys or secrets in code, tests or logs.
+- Small Conventional Commits; push only to `feat/d-transfer`; **do not merge into develop**.
+- Need a contract change? Don't edit `muyon_module_api` — put it under "contract requests".
+
+## Final report
+
+1. Commits (hash + one line)
+2. Test counts and analyze result per package
+3. Threat model summary and which threats are covered by automated tests
+4. Evidence class per item (doc / automated test / build / real model / device); unverified items say "unverified"
+5. New dependencies with reasons; changes outside owned files
+6. Contract requests; requests to B/C; known gaps and risks
