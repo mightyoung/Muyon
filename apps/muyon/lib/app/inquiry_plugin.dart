@@ -302,6 +302,7 @@ class InquiryHostModels implements InquiryModelSettingsBridge {
         final remove = sourceToken.onCancel(token.cancel);
         try {
           return await gateway.request(
+            caller: 'inquiry',
             profile: profile,
             payload: preview.body,
             cancellation: token,
