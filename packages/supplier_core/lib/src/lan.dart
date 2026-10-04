@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'lan_identity.dart';
+
+export 'lan_identity.dart';
+
 /// UDP port devices announce themselves on, and the HTTP port pushes go to
 /// (typed by hand when broadcasts don't get through).
 const lanDiscoveryPort = 47810, lanHttpPort = 47811;
@@ -34,18 +38,45 @@ class LanLimits {
 }
 
 class LanPeer {
-  LanPeer(this.id, this.name, this.address, this.port, this.seen);
+  LanPeer(
+    this.id,
+    this.name,
+    this.address,
+    this.port,
+    this.seen, {
+    this.announcedFingerprint = '',
+    this.fingerprint = '',
+    this.certificatePem = '',
+  });
   final String id, name, address;
   final int port;
   final DateTime seen;
+
+  /// Fingerprint carried by discovery. Discovery is not trust.
+  final String announcedFingerprint;
+
+  /// Fingerprint of the certificate actually presented on the TLS connection.
+  /// Empty until [LanNode.probe]. Never implied by [announcedFingerprint].
+  final String fingerprint;
+  final String certificatePem;
 }
 
 /// A file another device pushed, saved under the inbox until the user
 /// accepts or declines it.
 class LanPush {
-  LanPush(this.fromId, this.fromName, this.address, this.path, this.at);
+  LanPush(
+    this.fromId,
+    this.fromName,
+    this.address,
+    this.path,
+    this.at, {
+    this.senderFingerprint = '',
+  });
   final String fromId, fromName, address, path;
   final DateTime at;
+
+  /// Paired fingerprint that signed the payload. Empty is not a sender.
+  final String senderFingerprint;
 }
 
 class LanException implements Exception {
@@ -57,20 +88,26 @@ class LanException implements Exception {
 
 /// This device on the local network: announces itself over UDP broadcast,
 /// answers announcements so devices that miss broadcasts (Android) still
-/// learn about us, and receives pushes over HTTP. Nothing is imported here:
-/// pushes wait in [inbox] for the user.
+/// learn about us, and receives pushes over TLS. Discovery carries a
+/// fingerprint and no trust. Payloads are accepted only from a paired,
+/// unrevoked peer. Nothing is imported here: pushes wait in [inbox].
 class LanNode {
   LanNode._(
     this.id,
     this.name,
     this.inbox,
+    this.identity,
     this._http,
     this._udp,
     this._discoveryPort,
     this._onPush,
     this._onPeers,
     this._limits,
-  );
+    this._secrets,
+    Map<String, String> paired,
+    Set<String> revoked,
+  ) : _paired = paired,
+      _revoked = revoked;
 
   static Future<LanNode> start({
     required String id,
@@ -81,14 +118,18 @@ class LanNode {
     int discoveryPort = lanDiscoveryPort,
     int httpPort = lanHttpPort,
     LanLimits limits = const LanLimits(),
+    LanSecretStore? secrets,
+    DeviceIdentity? identity,
   }) async {
     inbox.createSync(recursive: true);
+    final resolved = identity ?? await _loadIdentity(secrets);
+    final trust = await _loadTrust(secrets);
     HttpServer http;
     try {
-      http = await HttpServer.bind(InternetAddress.anyIPv4, httpPort);
+      http = await _bind(resolved, httpPort);
     } on SocketException {
       // Port taken (a second copy of the app): discovery still finds us.
-      http = await HttpServer.bind(InternetAddress.anyIPv4, 0);
+      http = await _bind(resolved, 0);
     }
     final RawDatagramSocket udp;
     try {
@@ -106,12 +147,16 @@ class LanNode {
       id,
       name,
       inbox,
+      resolved,
       http,
       udp,
       discoveryPort,
       onPush,
       onPeers,
       limits,
+      secrets,
+      trust.$1,
+      trust.$2,
     );
     http.listen((request) {
       final pending = node._serve(request);
@@ -133,12 +178,21 @@ class LanNode {
 
   final String id, name;
   final Directory inbox;
+  final DeviceIdentity identity;
   final HttpServer _http;
   final RawDatagramSocket _udp;
   final int _discoveryPort;
   final void Function(LanPush) _onPush;
   final void Function()? _onPeers;
   final LanLimits _limits;
+  final LanSecretStore? _secrets;
+  final Map<String, String> _paired;
+  final Set<String> _revoked;
+  final _usedNonces = <String>[];
+  final _usedNonceSet = <String>{};
+  final _seenMessages = <String>[];
+  final _seenMessageSet = <String>{};
+  final _pushAuth = <HttpRequest, _PushAuth>{};
   final _peers = <String, LanPeer>{};
   final _requests = <Future<void>>{};
   final _outbound = <HttpClient, Completer<void>>{};
@@ -152,6 +206,94 @@ class LanNode {
 
   int get httpPort => _http.port;
   int get discoveryPort => _udp.port;
+
+  bool isPaired(String fingerprint) =>
+      fingerprint.isNotEmpty &&
+      _paired.containsKey(fingerprint) &&
+      !_revoked.contains(fingerprint);
+
+  /// Records an out-of-band confirmation. [confirmedCode] is the short code,
+  /// the fingerprint, or the QR payload read from the other device's screen.
+  void confirmPeer({
+    required String fingerprint,
+    required String confirmedCode,
+    required String certificatePem,
+  }) {
+    if (_revoked.contains(fingerprint)) {
+      throw LanException('该设备已撤销');
+    }
+    if (DeviceIdentity.fingerprintOfPem(certificatePem) != fingerprint ||
+        !DeviceIdentity.codeMatches(fingerprint, confirmedCode)) {
+      throw LanException('核对码与证书不一致');
+    }
+    _paired[fingerprint] = certificatePem;
+    unawaited(_persistTrust());
+  }
+
+  void revoke(String fingerprint) {
+    _paired.remove(fingerprint);
+    _revoked.add(fingerprint);
+    unawaited(_persistTrust());
+  }
+
+  static Future<HttpServer> _bind(DeviceIdentity identity, int port) {
+    final context = SecurityContext(withTrustedRoots: false)
+      ..useCertificateChainBytes(utf8.encode(identity.certificatePem))
+      ..usePrivateKeyBytes(utf8.encode(identity.privateKeyPem));
+    return HttpServer.bindSecure(InternetAddress.anyIPv4, port, context);
+  }
+
+  static Future<DeviceIdentity> _loadIdentity(LanSecretStore? secrets) async {
+    final raw = await secrets?.read('lan-identity');
+    if (raw != null) {
+      final json = jsonDecode(raw);
+      if (json is Map) {
+        return DeviceIdentity.restore(
+          certificatePem: json['certificatePem'] as String,
+          privateKeyPem: json['privateKeyPem'] as String,
+        );
+      }
+    }
+    final created = DeviceIdentity.generate();
+    if (secrets != null) {
+      await secrets.write('lan-identity', jsonEncode(created.toJson()));
+    }
+    return created;
+  }
+
+  static Future<(Map<String, String>, Set<String>)> _loadTrust(
+    LanSecretStore? secrets,
+  ) async {
+    final raw = await secrets?.read('lan-trust');
+    if (raw == null) return (<String, String>{}, <String>{});
+    final json = jsonDecode(raw);
+    if (json is! Map) return (<String, String>{}, <String>{});
+    final paired = <String, String>{};
+    final stored = json['paired'];
+    if (stored is Map) {
+      stored.forEach((key, value) {
+        if (key is String && value is String) paired[key] = value;
+      });
+    }
+    final revoked = <String>{};
+    final denied = json['revoked'];
+    if (denied is List) {
+      for (final item in denied) {
+        if (item is String) revoked.add(item);
+      }
+    }
+    paired.removeWhere((fingerprint, _) => revoked.contains(fingerprint));
+    return (paired, revoked);
+  }
+
+  Future<void> _persistTrust() async {
+    final secrets = _secrets;
+    if (secrets == null) return;
+    await secrets.write(
+      'lan-trust',
+      jsonEncode({'paired': _paired, 'revoked': _revoked.toList()}),
+    );
+  }
 
   /// Devices heard from recently, by name.
   List<LanPeer> get peers {
@@ -197,6 +339,8 @@ class LanNode {
       'id': id,
       'name': name,
       'port': httpPort,
+      // Public fingerprint only. Hearing it does not make this device trusted.
+      'fp': identity.fingerprint,
       if (reply) 'reply': true,
     }),
   );
@@ -272,12 +416,24 @@ class LanNode {
       _expirePeers();
       final isNew = !_peers.containsKey(m['id']);
       if (isNew && _peers.length >= _limits.maxPeers) continue;
+      final announced = m['fp'] is String ? m['fp']! as String : '';
+      final previous = _peers[m['id']];
+      // A repeated announcement must not erase a fingerprint verified by probe.
+      // A changed announcement drops that verification; the trust store stays.
+      final stillVerified =
+          previous != null &&
+          previous.fingerprint.isNotEmpty &&
+          previous.fingerprint == announced &&
+          isPaired(previous.fingerprint);
       _peers[m['id']! as String] = LanPeer(
         m['id']! as String,
         m['name']! as String,
         d.address.address,
         m['port']! as int,
         DateTime.now(),
+        announcedFingerprint: announced,
+        fingerprint: stillVerified ? previous.fingerprint : '',
+        certificatePem: stillVerified ? previous.certificatePem : '',
       );
       if (isNew && m['reply'] != true) {
         try {
@@ -305,9 +461,24 @@ class LanNode {
     try {
       if (req.method == 'GET' && req.uri.path == '/hello') {
         res.headers.contentType = ContentType.json;
-        res.write(jsonEncode({'siq': 1, 'id': id, 'name': name}));
+        res.write(
+          jsonEncode({
+            'siq': 1,
+            'id': id,
+            'name': name,
+            'fingerprint': identity.fingerprint,
+            'certificate': identity.certificatePem,
+          }),
+        );
       } else if (req.method == 'POST' && req.uri.path == '/push') {
-        await _acceptPush(req);
+        final auth = _authorizePush(req);
+        if (auth == null) return;
+        _pushAuth[req] = auth;
+        try {
+          await _acceptPush(req);
+        } finally {
+          _pushAuth.remove(req);
+        }
       } else {
         res.statusCode = HttpStatus.notFound;
       }
@@ -327,7 +498,38 @@ class LanNode {
     }
   }
 
+  _PushAuth? _authorizePush(HttpRequest req) {
+    final fingerprint = req.headers.value('x-muyon-fp') ?? '';
+    final nonce = req.headers.value('x-muyon-nonce') ?? '';
+    final messageId = req.headers.value('x-muyon-msg') ?? '';
+    final signature = req.headers.value('x-muyon-sig') ?? '';
+    if (!isPaired(fingerprint) ||
+        nonce.isEmpty ||
+        messageId.isEmpty ||
+        signature.isEmpty) {
+      req.response.statusCode = HttpStatus.unauthorized;
+      req.response.persistentConnection = false;
+      return null;
+    }
+    if (_usedNonceSet.contains(nonce) || _seenMessageSet.contains(messageId)) {
+      req.response.statusCode = HttpStatus.conflict;
+      req.response.persistentConnection = false;
+      return null;
+    }
+    _remember(_usedNonces, _usedNonceSet, nonce);
+    _remember(_seenMessages, _seenMessageSet, messageId);
+    return _PushAuth(fingerprint, nonce, messageId, signature);
+  }
+
+  void _remember(List<String> order, Set<String> seen, String value) {
+    seen.add(value);
+    order.add(value);
+    if (order.length <= 4096) return;
+    seen.remove(order.removeAt(0));
+  }
+
   Future<void> _acceptPush(HttpRequest req) async {
+    final auth = _pushAuth[req];
     final length = req.contentLength;
     if (length <= 0 || length > maxPushBytes) {
       req.response.statusCode = HttpStatus.requestEntityTooLarge;
@@ -356,6 +558,7 @@ class LanNode {
     _uploadsByAddress[address] = active + 1;
     _reservedBytes += length;
     var timedOut = false;
+    final hasher = Sha256Sink();
     final deadline = Timer(_limits.transferTimeout, () {
       timedOut = true;
       unawaited(input.cancel());
@@ -372,12 +575,31 @@ class LanNode {
         final chunk = input.current;
         received += chunk.length;
         if (received > length) throw const FormatException('too long');
+        hasher.add(chunk);
         await sink.writeFrom(chunk);
       }
+      await sink.flush();
       await sink.close();
       sink = null;
       if (timedOut || _stopped) throw const FormatException('transfer stopped');
       if (received != length) throw const FormatException('cut short');
+      if (auth == null) throw const FormatException('missing sender proof');
+      final bodyHash = hasher.close();
+      final certificate = _paired[auth.fingerprint];
+      final proofOk =
+          certificate != null &&
+          DeviceIdentity.verify(
+            DeviceIdentity.publicKeyFromCertificate(certificate),
+            pushBinding(
+              fingerprint: auth.fingerprint,
+              nonce: auth.nonce,
+              messageId: auth.messageId,
+              length: length,
+              bodyHash: bodyHash,
+            ),
+            auth.signature,
+          );
+      if (!proofOk) throw const FormatException('sender proof rejected');
       // Move out of the unique staging directory: callers delete only the file.
       final finalFile = await file.rename('${staging.path}.siq');
       try {
@@ -390,6 +612,7 @@ class LanNode {
             address,
             finalFile.path,
             at,
+            senderFingerprint: auth.fingerprint,
           ),
         );
         retained = true;
@@ -423,13 +646,30 @@ class LanNode {
     }
   }
 
-  static HttpClient _client() =>
-      HttpClient()..connectionTimeout = const Duration(seconds: 5);
+  HttpClient _client({
+    required bool acceptPresented,
+    required bool Function(String fingerprint) pinned,
+  }) {
+    final client = HttpClient(context: SecurityContext(withTrustedRoots: false))
+      ..connectionTimeout = const Duration(seconds: 5)
+      ..badCertificateCallback = (certificate, host, port) {
+        final fingerprint = DeviceIdentity.fingerprintOfDer(certificate.der);
+        if (acceptPresented) {
+          pinned(fingerprint);
+          return true;
+        }
+        return pinned(fingerprint);
+      };
+    return client;
+  }
 
-  static Future<List<int>> _responseBytes(HttpClientResponse response) async {
+  static Future<List<int>> _responseBytes(
+    HttpClientResponse response, [
+    int limit = 8192,
+  ]) async {
     final bytes = <int>[];
     await for (final chunk in response) {
-      if (bytes.length + chunk.length > 4096) {
+      if (bytes.length + chunk.length > limit) {
         throw const FormatException('response too large');
       }
       bytes.addAll(chunk);
@@ -438,26 +678,47 @@ class LanNode {
   }
 
   /// Looks up a device by address when discovery can't see it.
+  ///
+  /// The presented certificate is observed so the user can compare its
+  /// fingerprint. This does not pair the peer and must not carry a payload.
   Future<LanPeer> probe(String host, {int port = lanHttpPort}) async {
-    final client = _outboundClient();
+    var presented = '';
+    final client = _outboundClient(
+      acceptPresented: true,
+      pinned: (fingerprint) {
+        presented = fingerprint;
+        return true;
+      },
+    );
     try {
       final m = await (() async {
-        final req = await client.get(host, port, '/hello');
+        final req = await client.getUrl(Uri.parse('https://$host:$port/hello'));
         req.followRedirects = false;
         final res = await req.close();
         if (res.statusCode != HttpStatus.ok) throw const FormatException();
-        final decoded = jsonDecode(utf8.decode(await _responseBytes(res)));
+        final decoded = jsonDecode(
+          utf8.decode(await _responseBytes(res, 8192)),
+        );
         if (decoded is! Map<String, Object?> || !_validIdentity(decoded)) {
           throw const FormatException();
         }
         return decoded;
       })().timeout(_limits.probeTimeout);
+      final certificate = m['certificate'];
+      if (presented.isEmpty ||
+          certificate is! String ||
+          DeviceIdentity.fingerprintOfPem(certificate) != presented) {
+        throw const FormatException();
+      }
       final peer = LanPeer(
         m['id']! as String,
         m['name']! as String,
         host,
         port,
         DateTime.now(),
+        announcedFingerprint: presented,
+        fingerprint: presented,
+        certificatePem: certificate,
       );
       _expirePeers();
       if (_stopped) throw LanException('局域网已关闭');
@@ -485,18 +746,51 @@ class LanNode {
     LanPeer to,
     String file, {
     void Function(int sent, int total)? onProgress,
+    String? messageId,
+    String? nonce,
   }) async {
-    final client = _outboundClient();
+    final fingerprint = to.fingerprint;
+    if (!isPaired(fingerprint)) {
+      throw LanException('未配对或已撤销，拒绝发送');
+    }
+    final client = _outboundClient(
+      acceptPresented: false,
+      pinned: (presented) => presented == fingerprint,
+    );
     try {
       await (() async {
-        final req = await client.post(to.address, to.port, '/push');
-        req.followRedirects = false;
         final length = File(file).lengthSync();
+        final hasher = Sha256Sink();
+        await for (final chunk in File(file).openRead()) {
+          hasher.add(chunk);
+        }
+        final bodyHash = hasher.close();
+        final chosenNonce = nonce ?? randomToken();
+        final chosenMessage = messageId ?? randomToken();
+        final req = await client.postUrl(
+          Uri.parse('https://${to.address}:${to.port}/push'),
+        );
+        req.followRedirects = false;
         req.headers
           ..contentType = ContentType.binary
           ..contentLength = length
           ..set('x-siq-id', id)
-          ..set('x-siq-name', Uri.encodeComponent(name));
+          ..set('x-siq-name', Uri.encodeComponent(name))
+          ..set('x-muyon-fp', identity.fingerprint)
+          ..set('x-muyon-nonce', chosenNonce)
+          ..set('x-muyon-msg', chosenMessage)
+          ..set(
+            'x-muyon-sig',
+            identity.sign(
+              pushBinding(
+                fingerprint: identity.fingerprint,
+                nonce: chosenNonce,
+                messageId: chosenMessage,
+                length: length,
+                bodyHash: bodyHash,
+              ),
+            ),
+          );
         var sent = 0;
         onProgress?.call(sent, length);
         await req.addStream(
@@ -527,9 +821,12 @@ class LanNode {
     }
   }
 
-  HttpClient _outboundClient() {
+  HttpClient _outboundClient({
+    required bool acceptPresented,
+    required bool Function(String fingerprint) pinned,
+  }) {
     if (_stopped) throw LanException('局域网已关闭');
-    final client = _client();
+    final client = _client(acceptPresented: acceptPresented, pinned: pinned);
     _outbound[client] = Completer<void>();
     return client;
   }
@@ -538,4 +835,9 @@ class LanNode {
     client.close(force: true);
     _outbound.remove(client)?.complete();
   }
+}
+
+class _PushAuth {
+  const _PushAuth(this.fingerprint, this.nonce, this.messageId, this.signature);
+  final String fingerprint, nonce, messageId, signature;
 }
