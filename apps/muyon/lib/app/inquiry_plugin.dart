@@ -35,8 +35,8 @@ class InquiryPlugin {
   final InquiryRuntime runtime;
   final AiJobStore jobs;
   static final schema = ModuleSchema(
-    version: 1,
-    definitionDigest: _digest('inquiry-host-v1:domain12'),
+    version: 2,
+    definitionDigest: _digest('inquiry-host-v2:domain12:change-log'),
     migrations: [
       ModuleMigration(
         version: 1,
@@ -46,6 +46,72 @@ class InquiryPlugin {
           registerFunctions(db);
           createSchema(db);
           ensureSearchIndex(db);
+        },
+      ),
+      ModuleMigration(
+        version: 2,
+        id: 'inquiry-host-v2-change-log',
+        definitionDigest: _digest('inquiry-host-v2:domain12:change-log'),
+        migrate: (db) {
+          ModuleChangeLog.createTable(db);
+          // SQL triggers cover raw exchange/merge writes as well as Store.save.
+          // Their records commit or roll back with the domain row, without
+          // invoking reentrant SQL from a SQLite user-defined function.
+          for (final type in const [
+            'supplier',
+            'inquiry',
+            'quotation',
+            'project',
+            'project_item',
+          ]) {
+            String scope(String row) => type == 'project'
+                ? '$row.id'
+                : "json_extract($row.data, '\$.project_id')";
+            String summary(String row) =>
+                "coalesce(json_extract($row.data, '\$.name'), "
+                "json_extract($row.data, '\$.title'), "
+                "json_extract($row.data, '\$.subject'), "
+                "json_extract($row.data, '\$.code'), $row.id)";
+            String record(String row, String op) =>
+                'INSERT INTO ${ModuleChangeLog.table}'
+                '(object_type,object_id,native_project_id,revision_ref,'
+                'op,summary,recorded_at) VALUES('
+                "'$type',$row.id,${scope(row)},CAST($row.version AS TEXT),"
+                "$op,${summary(row)},strftime('%Y-%m-%dT%H:%M:%fZ','now'));";
+            final upsert = record(
+              'new',
+              "CASE WHEN new.deleted=1 THEN 'delete' ELSE 'upsert' END",
+            );
+            db.execute(
+              'CREATE TRIGGER muyon_${type}_ai AFTER INSERT ON $type '
+              'BEGIN $upsert END',
+            );
+            // Remove the old scoped projection when an object changes project.
+            db.execute(
+              'CREATE TRIGGER muyon_${type}_au AFTER UPDATE ON $type '
+              'BEGIN INSERT INTO ${ModuleChangeLog.table}'
+              '(object_type,object_id,native_project_id,revision_ref,'
+              'op,summary,recorded_at) '
+              "SELECT '$type',old.id,${scope('old')},"
+              "CAST(old.version AS TEXT),'delete',${summary('old')},"
+              "strftime('%Y-%m-%dT%H:%M:%fZ','now') "
+              "WHERE ${scope('old')} IS NOT ${scope('new')}; $upsert END",
+            );
+            db.execute(
+              'CREATE TRIGGER muyon_${type}_ad AFTER DELETE ON $type '
+              "BEGIN ${record('old', "'delete'")} END",
+            );
+            // Existing rows must become discoverable when upgrading from v1.
+            db.execute(
+              'INSERT INTO ${ModuleChangeLog.table}'
+              '(object_type,object_id,native_project_id,revision_ref,'
+              'op,summary,recorded_at) '
+              "SELECT '$type',$type.id,${scope(type)},"
+              "CAST($type.version AS TEXT),"
+              "CASE WHEN deleted=1 THEN 'delete' ELSE 'upsert' END,"
+              "${summary(type)},strftime('%Y-%m-%dT%H:%M:%fZ','now') FROM $type",
+            );
+          }
         },
       ),
     ],
