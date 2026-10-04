@@ -165,4 +165,19 @@ void main() {
     expect(spec.allowsBridge('muyon.feedback'), isTrue);
     expect(spec.allowsBridge('other'), isFalse);
   });
+
+  final mes = Directory(
+    '/Users/muyi/Downloads/dev/mes-security-model/prototype-vue/dist',
+  );
+  test(
+    'the real mes prototype build imports and stays inside its root',
+    () async {
+      final v = await store.importBuild(sourceDir: mes.path, title: 'MES');
+      expect(File(p.join(v.directory, 'index.html')).existsSync(), isTrue);
+      expect(v.fileCount, greaterThan(2));
+      final spec = store.specFor(v);
+      expect(spec.allowsNavigation(spec.entry.resolve('assets/x.js')), isTrue);
+    },
+    skip: mes.existsSync() ? false : 'mes-security-model build not present',
+  );
 }
