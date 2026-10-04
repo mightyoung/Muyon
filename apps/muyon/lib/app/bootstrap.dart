@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 
 import '../platform/file_gateway.dart';
+import '../platform/projection_service.dart';
 import '../platform/schema_catalog.dart';
 import '../platform/storage_manager.dart';
 import '../workspace/import_coordinator.dart';
@@ -35,6 +36,7 @@ class MuyonHost {
   late final ToolRegistry tools;
   late final PublicServices services;
   late final PersonalAgent personalAgent;
+  late final ProjectionService projections;
   Future<bool> Function(InquiryModelApprovalPreview preview)?
   approveInquiryModelRequest;
   ResearchRuntime? research;
@@ -124,6 +126,7 @@ class MuyonHost {
         CapabilityRegistry(),
       );
       host.foundation = FoundationRepository(database);
+      host.projections = ProjectionService(database);
       host.memoryReview = MemoryReviewService(host.foundation);
       await host.foundation.recoverInterrupted();
       var device = host.workspaces.setting('deviceId') as String?;
@@ -195,6 +198,10 @@ class MuyonHost {
         approveModelRequest: (preview) =>
             approveInquiryModelRequest?.call(preview) ?? Future.value(false),
       );
+      projections.watch(
+        'inquiry',
+        await storage.open('inquiry', InquiryPlugin.schema),
+      );
       await workspaces.database.write((db) {
         db.execute('INSERT OR REPLACE INTO module_registry VALUES(?,?,?)', [
           'inquiry',
@@ -222,6 +229,7 @@ class MuyonHost {
       final files = FileGateway(
         p.join(storage.rootPath, 'modules', 'research', 'files'),
       );
+      projections.watch('research', connection);
       research = await module.activate(
         ModuleResources(
           database: connection,

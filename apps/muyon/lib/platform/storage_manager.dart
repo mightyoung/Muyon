@@ -14,6 +14,10 @@ class ManagedConnection implements ManagedDatabase {
   final Database raw;
   Future<void> _tail = Future<void>.value();
   bool _closing = false;
+
+  /// Called after every committed write (and every exclusive operation), so
+  /// derived projections can catch up without each caller remembering to.
+  void Function()? onCommit;
   Future<void>? _closeFuture;
 
   @override
@@ -31,6 +35,7 @@ class ManagedConnection implements ManagedDatabase {
         }
         raw.execute('COMMIT');
         result.complete(value);
+        onCommit?.call();
       } catch (error, stack) {
         if (begun) raw.execute('ROLLBACK');
         result.completeError(error, stack);
@@ -55,6 +60,7 @@ class ManagedConnection implements ManagedDatabase {
     _tail = _tail.then((_) async {
       try {
         result.complete(await body(raw));
+        onCommit?.call();
       } catch (error, stack) {
         result.completeError(error, stack);
       }

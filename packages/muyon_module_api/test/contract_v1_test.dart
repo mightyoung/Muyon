@@ -21,13 +21,15 @@ void main() {
     );
 
     test('records in order and reads back after a cursor', () {
-      ModuleChangeLog.record(db, ref('a'), ChangeOp.upsert);
+      ModuleChangeLog.record(db, ref('a'), ChangeOp.upsert, summary: 'A');
       ModuleChangeLog.record(db, ref('b'), ChangeOp.upsert);
       ModuleChangeLog.record(db, ref('a'), ChangeOp.delete);
       final all = ModuleChangeLog.since(db, 'research', 0);
       expect(all.map((c) => c.ref.objectId), ['a', 'b', 'a']);
       expect(all.last.op, ChangeOp.delete);
       expect(all.first.ref, ref('a'));
+      expect(all.first.summary, 'A');
+      expect(all[1].summary, isNull);
       final tail = ModuleChangeLog.since(db, 'research', all[1].sequence);
       expect(tail.single.op, ChangeOp.delete);
     });
@@ -109,6 +111,9 @@ void main() {
     );
     expect(manifest.requiredDependencies, ['research']);
     expect(manifest.optionalDependencies, ['inquiry']);
-    expect(() => manifest.optionalDependencies.add('x'), throwsUnsupportedError);
+    expect(
+      () => manifest.optionalDependencies.add('x'),
+      throwsUnsupportedError,
+    );
   });
 }

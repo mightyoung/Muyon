@@ -10,11 +10,15 @@ class ModuleChange {
     required this.ref,
     required this.op,
     required this.recordedAt,
+    this.summary,
   });
   final int sequence;
   final ObjectRef ref;
   final ChangeOp op;
   final DateTime recordedAt;
+
+  /// Display hint for directories (e.g. title). Never a source of truth.
+  final String? summary;
 }
 
 /// Business change records for derived projections (object directory, search).
@@ -36,16 +40,25 @@ CREATE TABLE $table(
   revision_ref TEXT,
   content_digest TEXT,
   op TEXT NOT NULL CHECK(op IN ('upsert','delete')),
+  summary TEXT,
   recorded_at TEXT NOT NULL
 )''');
 
-  static void record(Database db, ObjectRef ref, ChangeOp op, {DateTime? at}) {
-    if (ref.moduleId.isEmpty || ref.objectType.isEmpty || ref.objectId.isEmpty) {
+  static void record(
+    Database db,
+    ObjectRef ref,
+    ChangeOp op, {
+    String? summary,
+    DateTime? at,
+  }) {
+    if (ref.moduleId.isEmpty ||
+        ref.objectType.isEmpty ||
+        ref.objectId.isEmpty) {
       throw ArgumentError.value(ref, 'ref', 'Incomplete object reference');
     }
     db.execute(
       'INSERT INTO $table(object_type,object_id,native_project_id,revision_ref,'
-      'content_digest,op,recorded_at) VALUES(?,?,?,?,?,?,?)',
+      'content_digest,op,summary,recorded_at) VALUES(?,?,?,?,?,?,?,?)',
       [
         ref.objectType,
         ref.objectId,
@@ -53,6 +66,7 @@ CREATE TABLE $table(
         ref.revisionRef,
         ref.contentDigest,
         op.name,
+        summary,
         (at ?? DateTime.now()).toUtc().toIso8601String(),
       ],
     );
@@ -80,6 +94,7 @@ CREATE TABLE $table(
         ),
         op: ChangeOp.values.byName(row['op'] as String),
         recordedAt: DateTime.parse(row['recorded_at'] as String),
+        summary: row['summary'] as String?,
       ),
   ];
 }
