@@ -40,17 +40,23 @@ class PersonalAgent {
   }
 
   List<Map<String, Object?>> _memories(AssistantScope scope) => [
-    for (final m in repository.memories())
-      if (m.verified &&
-          (m.scope.kind == AssistantScopeKind.global ||
-              digest(m.scope.toJson()) == digest(scope.toJson())))
-        {
-          "id": m.id,
-          "content": m.content,
-          "source": m.source,
-          "revision": m.revision,
-          "scope": m.scope.toJson(),
-        },
+    for (final m in repository.memoriesFor(scope))
+      {
+        "id": m.id,
+        "content": m.content,
+        "source": m.source,
+        "revision": m.revision,
+        "scope": m.scope.toJson(),
+      },
+    for (final experience in repository.experiencesFor(scope))
+      {
+        "id": experience.id,
+        "content": experience.content,
+        "source": experience.source,
+        "revision": experience.revision,
+        "scope": experience.scope.toJson(),
+        "kind": "experience",
+      },
   ];
   static String digest(Object? value) =>
       sha256.convert(utf8.encode(jsonEncode(value))).toString();

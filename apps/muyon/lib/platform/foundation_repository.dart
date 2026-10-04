@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
 import 'tool_registry.dart';
@@ -37,17 +39,74 @@ class PersonalMemory {
     this.scope,
     this.sourceRef,
     this.verified,
-    this.revision,
-  );
+    this.revision, {
+    DateTime? createdAt,
+    this.disabled = false,
+    this.kind = 'fact',
+    this.inference = false,
+    List<Map<String, Object?>> lineage = const [],
+  }) : createdAt = createdAt ?? updatedAt,
+       lineage = List.unmodifiable(lineage);
   final String id, content, source;
-  final DateTime updatedAt;
+  final DateTime createdAt, updatedAt;
   final DateTime? expiresAt;
   final AssistantScope scope;
   final ObjectRef? sourceRef;
   final bool verified;
   final int revision;
+  final bool disabled, inference;
+  final String kind;
+  final List<Map<String, Object?>> lineage;
   bool get isExpired =>
       expiresAt != null && !DateTime.now().toUtc().isBefore(expiresAt!);
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'content': content,
+    'source': source,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+    'updatedAt': updatedAt.toUtc().toIso8601String(),
+    'expiresAt': expiresAt?.toUtc().toIso8601String(),
+    'scope': scope.toJson(),
+    'sourceRef': sourceRef?.toJson(),
+    'verified': verified,
+    'revision': revision,
+    'disabled': disabled,
+    'kind': kind,
+    'inference': inference,
+    'lineage': lineage,
+  };
+}
+
+class ExperienceEntry {
+  ExperienceEntry({
+    required this.id,
+    required this.content,
+    required this.source,
+    required this.scope,
+    required this.status,
+    required this.evidence,
+    required this.revision,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  final String id, content, source, status;
+  final AssistantScope scope;
+  final List<Map<String, Object?>> evidence;
+  final int revision;
+  final DateTime createdAt, updatedAt;
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'content': content,
+    'source': source,
+    'scope': scope.toJson(),
+    'status': status,
+    'evidence': evidence,
+    'revision': revision,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+    'updatedAt': updatedAt.toUtc().toIso8601String(),
+  };
 }
 
 class FoundationNotification {
@@ -225,39 +284,70 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
     notifyListeners();
   }
 
-  List<PersonalMemory> memories({bool includeExpired = false}) => [
-    for (final r in database.raw.select(
+  static const memoryKinds = {'source', 'fact', 'topic', 'summary'};
+
+  List<PersonalMemory> memories({
+    bool includeExpired = false,
+    bool includeDisabled = false,
+  }) => [
+    for (final memory in _allMemories())
+      if ((includeExpired || !memory.isExpired) &&
+          (includeDisabled || !memory.disabled))
+        memory,
+  ];
+
+  /// Enabled, unexpired, verified memories visible to [scope].
+  List<PersonalMemory> memoriesFor(AssistantScope scope) => [
+    for (final memory in memories())
+      if (memory.verified && _visible(memory.scope, scope)) memory,
+  ];
+
+  List<PersonalMemory> _allMemories() => [
+    for (final row in database.raw.select(
       'SELECT * FROM memories ORDER BY updated_at DESC',
     ))
-      if (includeExpired ||
-          r['expires_at'] == null ||
-          DateTime.now().toUtc().isBefore(
-            DateTime.parse(r['expires_at'] as String),
-          ))
-        PersonalMemory(
-          r['id'] as String,
-          r['content'] as String,
-          r['source'] as String,
-          DateTime.parse(r['updated_at'] as String),
-          r['expires_at'] == null
-              ? null
-              : DateTime.parse(r['expires_at'] as String),
-          AssistantScope.fromJson(
+      _memory(row),
+  ];
+
+  PersonalMemory _memory(Row row) => PersonalMemory(
+    row['id'] as String,
+    row['content'] as String,
+    row['source'] as String,
+    DateTime.parse(row['updated_at'] as String),
+    row['expires_at'] == null
+        ? null
+        : DateTime.parse(row['expires_at'] as String),
+    AssistantScope.fromJson(
+      Map<String, Object?>.from(jsonDecode(row['scope_json'] as String) as Map),
+    ),
+    row['source_ref'] == null
+        ? null
+        : objectRefFromJson(
             Map<String, Object?>.from(
-              jsonDecode(r['scope_json'] as String) as Map,
+              jsonDecode(row['source_ref'] as String) as Map,
             ),
           ),
-          r['source_ref'] == null
-              ? null
-              : objectRefFromJson(
-                  Map<String, Object?>.from(
-                    jsonDecode(r['source_ref'] as String) as Map,
-                  ),
-                ),
-          r['verified'] == 1,
-          r['revision'] as int,
-        ),
-  ];
+    row['verified'] == 1,
+    row['revision'] as int,
+    createdAt: DateTime.parse(row['created_at'] as String),
+    disabled: (row['disabled'] as int? ?? 0) == 1,
+    kind: (row['kind'] as String?) ?? 'fact',
+    inference: (row['inference'] as int? ?? 0) == 1,
+    lineage: [
+      for (final item
+          in jsonDecode(row['lineage_json'] as String? ?? '[]') as List)
+        Map<String, Object?>.from(item as Map),
+    ],
+  );
+
+  bool _visible(AssistantScope item, AssistantScope request) =>
+      item.kind == AssistantScopeKind.global ||
+      jsonEncode(item.toJson()) == jsonEncode(request.toJson());
+
+  static String contentHash(String content) => sha256
+      .convert(utf8.encode(content.trim().replaceAll(RegExp(r'\s+'), ' ')))
+      .toString();
+
   Future<String> saveMemory({
     String? id,
     required String content,
@@ -266,14 +356,27 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
     AssistantScope scope = const AssistantScope.global(),
     ObjectRef? sourceRef,
     bool verified = true,
+    bool disabled = false,
+    String kind = 'fact',
+    bool inference = false,
+    List<Map<String, Object?>> lineage = const [],
   }) async {
     if (content.trim().isEmpty || source.trim().isEmpty) {
       throw ArgumentError('Memory requires content and source');
     }
+    if (!memoryKinds.contains(kind)) throw ArgumentError('Unknown memory kind');
     final key = id ?? _id(), now = _now();
-    await database.write(
-      (db) => db.execute(
-        'INSERT INTO memories VALUES(?,?,?,?,?,?,?,?,?,1) ON CONFLICT(id) DO UPDATE SET content=excluded.content,source=excluded.source,updated_at=excluded.updated_at,expires_at=excluded.expires_at,scope_json=excluded.scope_json,source_ref=excluded.source_ref,verified=excluded.verified,revision=memories.revision+1',
+    await database.write((db) {
+      final blocked = db.select(
+        "SELECT reason FROM memory_tombstones WHERE id=? AND kind='memory' ORDER BY rowid DESC LIMIT 1",
+        [key],
+      );
+      if (blocked.isNotEmpty && blocked.first['reason'] == 'deleted') {
+        throw StateError('已删除的记忆不会被重新写入');
+      }
+      db.execute(
+        'INSERT INTO memories(id,content,source,created_at,updated_at,expires_at,scope_json,source_ref,verified,revision,disabled,kind,inference,lineage_json) VALUES(?,?,?,?,?,?,?,?,?,1,?,?,?,?) '
+        'ON CONFLICT(id) DO UPDATE SET content=excluded.content,source=excluded.source,updated_at=excluded.updated_at,expires_at=excluded.expires_at,scope_json=excluded.scope_json,source_ref=excluded.source_ref,verified=excluded.verified,revision=memories.revision+1,disabled=excluded.disabled,kind=excluded.kind,inference=excluded.inference,lineage_json=excluded.lineage_json',
         [
           key,
           content.trim(),
@@ -284,19 +387,393 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
           jsonEncode(scope.toJson()),
           sourceRef == null ? null : jsonEncode(sourceRef.toJson()),
           verified ? 1 : 0,
+          disabled ? 1 : 0,
+          kind,
+          inference ? 1 : 0,
+          jsonEncode(lineage),
         ],
-      ),
-    );
+      );
+    });
     notifyListeners();
     return key;
   }
 
-  Future<void> deleteMemory(String id) async {
-    await database.write(
-      (db) => db.execute('DELETE FROM memories WHERE id=?', [id]),
-    );
+  Future<void> setMemoryDisabled(String id, bool disabled) async {
+    await database.write((db) {
+      final rows = db.select('SELECT * FROM memories WHERE id=?', [id]);
+      if (rows.isEmpty) throw StateError('记忆不存在');
+      final memory = _memory(rows.single);
+      db.execute(
+        'UPDATE memories SET disabled=?, revision=revision+1, updated_at=? WHERE id=?',
+        [disabled ? 1 : 0, _now(), id],
+      );
+      _tombstone(
+        db,
+        id: id,
+        kind: 'memory',
+        revision: memory.revision + 1,
+        reason: disabled ? 'disabled' : 'enabled',
+        scopeJson: jsonEncode(memory.scope.toJson()),
+        contentHash: contentHash(memory.content),
+      );
+    });
     notifyListeners();
   }
+
+  Future<void> narrowMemoryScope(String id, AssistantScope scope) async {
+    await database.write((db) {
+      final rows = db.select('SELECT * FROM memories WHERE id=?', [id]);
+      if (rows.isEmpty) throw StateError('记忆不存在');
+      final memory = _memory(rows.single);
+      if (!_narrows(memory.scope, scope)) {
+        throw ArgumentError('新范围没有变窄');
+      }
+      final now = _now();
+      final encoded = jsonEncode(scope.toJson());
+      db.execute(
+        'UPDATE memories SET scope_json=?, revision=revision+1, updated_at=? WHERE id=?',
+        [encoded, now, id],
+      );
+      for (final row in db.select('SELECT id, lineage_json FROM memories')) {
+        if (row['id'] == id || !_cites(row['lineage_json'] as String, id)) {
+          continue;
+        }
+        db.execute(
+          'UPDATE memories SET scope_json=?, revision=revision+1, updated_at=? WHERE id=?',
+          [encoded, now, row['id']],
+        );
+      }
+      for (final row in db.select(
+        'SELECT id, evidence_json FROM experiences',
+      )) {
+        if (!_cites(row['evidence_json'] as String, id)) continue;
+        db.execute(
+          'UPDATE experiences SET scope_json=?, revision=revision+1, updated_at=? WHERE id=?',
+          [encoded, now, row['id']],
+        );
+      }
+    });
+    notifyListeners();
+  }
+
+  Future<void> deleteMemory(String id) async {
+    await database.write((db) => _deleteMemoryTree(db, id));
+    notifyListeners();
+  }
+
+  void _deleteMemoryTree(Database db, String id) {
+    final pending = <String>[id];
+    final seen = <String>{};
+    while (pending.isNotEmpty) {
+      final current = pending.removeLast();
+      if (!seen.add(current)) continue;
+      final rows = db.select('SELECT * FROM memories WHERE id=?', [current]);
+      if (rows.isNotEmpty) {
+        final memory = _memory(rows.single);
+        _tombstone(
+          db,
+          id: current,
+          kind: 'memory',
+          revision: memory.revision,
+          reason: 'deleted',
+          scopeJson: jsonEncode(memory.scope.toJson()),
+          contentHash: contentHash(memory.content),
+        );
+        db.execute('DELETE FROM memories WHERE id=?', [current]);
+      }
+      for (final row in db.select('SELECT id, lineage_json FROM memories')) {
+        if (_cites(row['lineage_json'] as String, current)) {
+          pending.add(row['id'] as String);
+        }
+      }
+      for (final row in db.select('SELECT * FROM experiences')) {
+        if (!_cites(row['evidence_json'] as String, current)) continue;
+        _tombstone(
+          db,
+          id: row['id'] as String,
+          kind: 'experience',
+          revision: row['revision'] as int,
+          reason: 'deleted',
+          scopeJson: row['scope_json'] as String,
+          contentHash: contentHash(row['content'] as String),
+        );
+        db.execute(
+          "UPDATE experiences SET status='retired', revision=revision+1, updated_at=? WHERE id=?",
+          [_now(), row['id']],
+        );
+      }
+    }
+  }
+
+  bool deletedContent(String content) {
+    final hash = contentHash(content);
+    return database.raw.select(
+      "SELECT 1 FROM memory_tombstones WHERE reason='deleted' AND content_hash=? LIMIT 1",
+      [hash],
+    ).isNotEmpty;
+  }
+
+  List<ExperienceEntry> experiences({
+    bool includeUnverified = false,
+    bool includeRetired = false,
+  }) => [
+    for (final entry in _allExperiences())
+      if ((includeRetired || entry.status != 'retired') &&
+          (includeUnverified || entry.status == 'verified'))
+        entry,
+  ];
+
+  List<ExperienceEntry> experiencesFor(AssistantScope scope) => [
+    for (final entry in experiences())
+      if (_visible(entry.scope, scope)) entry,
+  ];
+
+  ExperienceEntry? experience(String id) {
+    for (final entry in _allExperiences()) {
+      if (entry.id == id) return entry;
+    }
+    return null;
+  }
+
+  List<ExperienceEntry> _allExperiences() => [
+    for (final row in database.raw.select(
+      'SELECT * FROM experiences ORDER BY updated_at DESC',
+    ))
+      _experience(row),
+  ];
+
+  ExperienceEntry _experience(Row row) => ExperienceEntry(
+    id: row['id'] as String,
+    content: row['content'] as String,
+    source: row['source'] as String,
+    scope: AssistantScope.fromJson(
+      Map<String, Object?>.from(jsonDecode(row['scope_json'] as String) as Map),
+    ),
+    status: row['status'] as String,
+    evidence: [
+      for (final item in jsonDecode(row['evidence_json'] as String) as List)
+        Map<String, Object?>.from(item as Map),
+    ],
+    revision: row['revision'] as int,
+    createdAt: DateTime.parse(row['created_at'] as String),
+    updatedAt: DateTime.parse(row['updated_at'] as String),
+  );
+
+  Future<String> saveExperience({
+    String? id,
+    required String content,
+    required String source,
+    AssistantScope scope = const AssistantScope.global(),
+    required List<Map<String, Object?>> evidence,
+  }) async {
+    if (content.trim().isEmpty || source.trim().isEmpty) {
+      throw ArgumentError('Experience requires content and source');
+    }
+    if (deletedContent(content)) {
+      throw StateError('已删除的内容不会被重新写入');
+    }
+    final key = id ?? _id(), now = _now();
+    await database.write((db) {
+      final existing = db.select('SELECT status FROM experiences WHERE id=?', [
+        key,
+      ]);
+      if (existing.isNotEmpty) throw StateError('经验已存在');
+      db.execute(
+        'INSERT INTO experiences(id,content,source,scope_json,status,evidence_json,revision,created_at,updated_at) VALUES(?,?,?,?,?,?,1,?,?)',
+        [
+          key,
+          content.trim(),
+          source.trim(),
+          jsonEncode(scope.toJson()),
+          'candidate',
+          jsonEncode(evidence),
+          now,
+          now,
+        ],
+      );
+    });
+    notifyListeners();
+    return key;
+  }
+
+  Future<void> verifyExperience(String id) async {
+    await database.write((db) {
+      final rows = db.select('SELECT status FROM experiences WHERE id=?', [id]);
+      if (rows.isEmpty || rows.single['status'] != 'candidate') {
+        throw StateError('只有候选经验可以确认');
+      }
+      db.execute(
+        "UPDATE experiences SET status='verified', revision=revision+1, updated_at=? WHERE id=?",
+        [_now(), id],
+      );
+    });
+    notifyListeners();
+  }
+
+  Future<void> retireExperience(String id) async {
+    await database.write((db) {
+      final rows = db.select('SELECT * FROM experiences WHERE id=?', [id]);
+      if (rows.isEmpty) throw StateError('经验不存在');
+      final row = rows.single;
+      if (row['status'] == 'retired') return;
+      _tombstone(
+        db,
+        id: id,
+        kind: 'experience',
+        revision: (row['revision'] as int) + 1,
+        reason: 'retired',
+        scopeJson: row['scope_json'] as String,
+        contentHash: contentHash(row['content'] as String),
+      );
+      db.execute(
+        "UPDATE experiences SET status='retired', revision=revision+1, updated_at=? WHERE id=?",
+        [_now(), id],
+      );
+    });
+    notifyListeners();
+  }
+
+  /// Replaces memories, experiences and tombstones. Used to revert one Dream run.
+  Future<void> restoreOrganizationSnapshot(
+    Map<String, Object?> snapshot,
+  ) async {
+    final memories = (snapshot['memories'] as List).cast<Map>();
+    final experienceRows = (snapshot['experiences'] as List).cast<Map>();
+    final tombstones = (snapshot['tombstones'] as List).cast<Map>();
+    await database.write((db) {
+      db.execute('DELETE FROM memories');
+      db.execute('DELETE FROM experiences');
+      db.execute('DELETE FROM memory_tombstones');
+      for (final raw in memories) {
+        final memory = Map<String, Object?>.from(raw);
+        db.execute(
+          'INSERT INTO memories(id,content,source,created_at,updated_at,expires_at,scope_json,source_ref,verified,revision,disabled,kind,inference,lineage_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+          [
+            memory['id'],
+            memory['content'],
+            memory['source'],
+            memory['createdAt'],
+            memory['updatedAt'],
+            memory['expiresAt'],
+            jsonEncode(memory['scope']),
+            memory['sourceRef'] == null
+                ? null
+                : jsonEncode(memory['sourceRef']),
+            memory['verified'] == true ? 1 : 0,
+            memory['revision'],
+            memory['disabled'] == true ? 1 : 0,
+            memory['kind'],
+            memory['inference'] == true ? 1 : 0,
+            jsonEncode(memory['lineage']),
+          ],
+        );
+      }
+      for (final raw in experienceRows) {
+        final entry = Map<String, Object?>.from(raw);
+        db.execute(
+          'INSERT INTO experiences(id,content,source,scope_json,status,evidence_json,revision,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)',
+          [
+            entry['id'],
+            entry['content'],
+            entry['source'],
+            jsonEncode(entry['scope']),
+            entry['status'],
+            jsonEncode(entry['evidence']),
+            entry['revision'],
+            entry['createdAt'],
+            entry['updatedAt'],
+          ],
+        );
+      }
+      for (final raw in tombstones) {
+        final tombstone = Map<String, Object?>.from(raw);
+        db.execute(
+          'INSERT INTO memory_tombstones(id,kind,revision,reason,scope_json,content_hash,created_at) VALUES(?,?,?,?,?,?,?)',
+          [
+            tombstone['id'],
+            tombstone['kind'],
+            tombstone['revision'],
+            tombstone['reason'],
+            tombstone['scopeJson'],
+            tombstone['contentHash'],
+            tombstone['createdAt'],
+          ],
+        );
+      }
+    });
+    notifyListeners();
+  }
+
+  Map<String, Object?> organizationSnapshot() => {
+    'memories': [for (final memory in _allMemories()) memory.toJson()],
+    'experiences': [for (final entry in _allExperiences()) entry.toJson()],
+    'tombstones': [
+      for (final row in database.raw.select(
+        'SELECT * FROM memory_tombstones ORDER BY rowid',
+      ))
+        {
+          'id': row['id'],
+          'kind': row['kind'],
+          'revision': row['revision'],
+          'reason': row['reason'],
+          'scopeJson': row['scope_json'],
+          'contentHash': row['content_hash'],
+          'createdAt': row['created_at'],
+        },
+    ],
+  };
+
+  void _tombstone(
+    Database db, {
+    required String id,
+    required String kind,
+    required int revision,
+    required String reason,
+    required String? scopeJson,
+    required String contentHash,
+  }) {
+    db.execute(
+      'INSERT INTO memory_tombstones(id,kind,revision,reason,scope_json,content_hash,created_at) VALUES(?,?,?,?,?,?,?)',
+      [id, kind, revision, reason, scopeJson, contentHash, _now()],
+    );
+  }
+
+  bool _cites(String encoded, String id) {
+    final decoded = jsonDecode(encoded);
+    if (decoded is! List) return false;
+    for (final item in decoded) {
+      if (item is Map && item['id'] == id) return true;
+    }
+    return false;
+  }
+
+  bool _narrows(AssistantScope from, AssistantScope to) {
+    if (jsonEncode(from.toJson()) == jsonEncode(to.toJson())) return false;
+    const rank = {
+      AssistantScopeKind.global: 2,
+      AssistantScopeKind.workspace: 1,
+      AssistantScopeKind.selectedObjects: 0,
+    };
+    if (rank[to.kind]! > rank[from.kind]!) return false;
+    if (from.kind == AssistantScopeKind.global) return to.kind != from.kind;
+    if (from.kind == AssistantScopeKind.workspace &&
+        to.kind == AssistantScopeKind.selectedObjects) {
+      return to.workspaceId == from.workspaceId;
+    }
+    if (from.kind == AssistantScopeKind.selectedObjects &&
+        to.kind == AssistantScopeKind.selectedObjects) {
+      final next = to.objects.map(_identity).toSet();
+      final previous = from.objects.map(_identity).toSet();
+      return next.isNotEmpty &&
+          next.length < previous.length &&
+          previous.containsAll(next) &&
+          to.workspaceId == from.workspaceId;
+    }
+    return false;
+  }
+
+  String _identity(ObjectRef ref) =>
+      '${ref.moduleId}\u0000${ref.objectType}\u0000${ref.nativeProjectId}\u0000${ref.objectId}';
 
   List<FoundationNotification> notifications({bool unreadOnly = false}) => [
     for (final r in database.raw.select(
