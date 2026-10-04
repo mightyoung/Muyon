@@ -282,3 +282,23 @@ Additional task from the invocation-path audit:
 **G1-D — the host transfer carries research packages.** The research workbench had its own plaintext LAN channel (`research_module/lib/src/core/lan_transfer.dart`); C makes it unreachable when hosted and B removes its UI entry. Your encrypted, paired transport (D1) must therefore be able to send a research package file (`muyon-research` format) to a paired device, with its five independent states (D2). On the receiving side, a verified package is offered for import into the research module only after the user accepts it; receipt or verification never triggers an import by itself, and a transferred package never grants execution permission. Add a loopback test: send a research package → verified receipt → stays pending until accepted → hand-off to an injected import callback exactly once (idempotent on retry).
 
 Report this under the same final-report format with its evidence class.
+
+---
+
+# 追加：D1–D3 合入审查意见（给 Grok）
+
+---8<--- 追加 · D（Grok）· 审查意见 ---
+
+Your D1–D3 work was reviewed and merged into `develop` at `7a45815` (full `scripts/verify.sh` green: supplier_core 475 + 3 skipped, host 117 + 1 conditional skip). Thank you — the pairing, pinning, sender signature over the body hash, staged-then-verified receipt and five independent states are what the requirement asked for.
+
+Sync first: `git fetch origin && git merge --ff-only origin/develop` (your branch is already contained in it). Keep working on `feat/d-transfer`; push there only; A merges.
+
+Three review items:
+
+**R1 — Enforce TLS 1.3 as the minimum (must fix).** `docs/implementation/lan-threat-model.md` says TLS 1.3, but neither the server context in `LanNode._bind` nor the client `HttpClient(context: SecurityContext(withTrustedRoots: false))` sets `minimumTlsProtocolVersion`, so Dart's default (TLS 1.2) applies. Set `TlsProtocolVersion.tls1_3` on both. Add a test that fails if either context allows less than 1.3; if a real TLS 1.2-only handshake cannot be produced portably from Dart, test the context construction through a small factory and say so in the threat model. Update the threat model table with this row.
+
+**R2 — Make the retrieval evaluation able to discriminate (should fix).** With 18 short documents every strategy reaches recall@10 = 1.0, so the comparison says little. Grow the redistributable synthetic corpus (aim for a few hundred documents) with harder cases: many near-duplicates, 1-character Chinese queries against long documents, mixed CJK/Latin product codes, and distractors sharing bigrams. Keep the one-command re-run and regenerate `docs/implementation/retrieval-eval-<date>.md` from that run. Also add an optional mode that reads a local corpus directory and an embedding endpoint from environment variables (e.g. `MUYON_EVAL_CORPUS_DIR`, `MUYON_EMBEDDING_ENDPOINT`) so it can later run on the user's real papers; never commit those documents or their text, only aggregate numbers. Keep "not measured" wherever a real model or real corpus was not used.
+
+**R3 — Decide replay protection across restarts (assess, then fix or document).** Nonces and message ids are remembered in memory (4096 entries) and lost on restart. Network replay is already blocked by TLS with pinning, so the remaining case is a paired device re-sending an old signed push after the receiver restarts. Either (a) persist seen message ids with their receipts for a bounded window and add a signed timestamp to the push binding with an accept window (bump the binding to `muyon-push-v2`), or (b) argue in the threat model why receipts' existing duplicate detection makes this harmless. Include a test for whichever you choose.
+
+Report in the same final-report format: commits, test counts, evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"), changes outside owned files, and any contract requests.
