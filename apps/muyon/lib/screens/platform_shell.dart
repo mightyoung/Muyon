@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:inquiry_module/inquiry_module.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:prototype_module/prototype_module.dart';
 import 'package:research_module/research_module.dart';
 import 'package:uuid/uuid.dart';
 
@@ -99,6 +100,24 @@ class _PlatformShellState extends State<PlatformShell> {
       ),
     );
     if (mounted) setState(() {});
+  }
+
+  Future<void> openPrototype() async {
+    PrototypeRuntime? runtime;
+    await action(() async {
+      await host.activatePrototype();
+      runtime = host.prototype;
+      if (runtime == null) {
+        throw StateError('原型模块不可用：${host.prototypeError ?? '未知原因'}');
+      }
+    });
+    final opened = runtime;
+    if (opened == null || !mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PrototypeHome(store: opened.store),
+      ),
+    );
   }
 
   Future<void> openObject(ObjectRef ref) async {
