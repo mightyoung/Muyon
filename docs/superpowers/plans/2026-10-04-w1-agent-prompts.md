@@ -302,3 +302,70 @@ Three review items:
 **R3 — Decide replay protection across restarts (assess, then fix or document).** Nonces and message ids are remembered in memory (4096 entries) and lost on restart. Network replay is already blocked by TLS with pinning, so the remaining case is a paired device re-sending an old signed push after the receiver restarts. Either (a) persist seen message ids with their receipts for a bounded window and add a signed timestamp to the push binding with an accept window (bump the binding to `muyon-push-v2`), or (b) argue in the threat model why receipts' existing duplicate detection makes this harmless. Include a test for whichever you choose.
 
 Report in the same final-report format: commits, test counts, evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"), changes outside owned files, and any contract requests.
+
+---
+
+# 第 2 阶段：D4–D6 启动提示词（给 Grok）
+
+---8<--- D · Grok · 第 2 阶段（D4–D6）---
+
+You are role **D** again, now for phase 2 (W2) of Muyon. Finish the review items R1–R3 first if they are not done. An integrator (role A, a Claude Opus session) owns contracts, the host database schema, review and merging. Prefer correctness and written reasoning over breadth.
+
+## Environment
+
+- Worktree `/Users/muyi/Downloads/dev/muyon-worktrees/d-transfer`, branch `feat/d-transfer`; push only there; A merges. Never work in `/Users/muyi/Downloads/dev/muspace` or other agents' worktrees.
+- Sync first: `git fetch origin && git merge origin/develop` (develop is at `2107c8b` or later).
+- Gate before every push: `scripts/verify.sh` (all packages analyzed, all suites; the only allowed failure is the documented inquiry `desktop settings` golden). Current baseline: module_api 17, research 95, supplier_core 475 + 3 skipped, host 117 + 1 conditional skip, inquiry 310 + 1 skipped.
+- The machine is shared and often heavily loaded: run one `flutter test`/build at a time in your worktree, and never run a release build and tests concurrently in the same directory.
+
+## Read first
+
+- Requirement text for these tasks (sections 2.1, 7, 8 of the product requirements, summarised in `docs/superpowers/specs/2026-10-04-muspace-product-and-architecture-overview.md`; product name is now Muyon).
+- `apps/muyon/lib/platform/foundation_repository.dart` (`memories` table, `PersonalMemory`), `platform/memory_review.dart` (current read-only duplicate/"changed key" candidates), `assistant/personal_agent.dart`, `assistant/tool_selection.dart` (`ToolSelectionStrategy`, `RuleAndModelToolSelection`), `assistant/execution_store.dart`.
+- `apps/muyon/lib/platform/outbound_ledger.dart` (every model request is recorded before sending; pass a `caller`), `platform/tool_registry.dart` (approvals; effect point), `platform/projection_service.dart` (`onApplied`).
+- `docs/implementation/invocation-path-audit.md`, `docs/implementation/muyon-acceptance-ledger.md` (rows 2.1d, 2.1e, 7, 8).
+
+## Ownership for this phase
+
+- Yours: new `apps/muyon/lib/assistant/dream/**`, new `apps/muyon/lib/assistant/selection_eval/**`, `apps/muyon/lib/platform/memory_review.dart`, `apps/muyon/lib/assistant/tool_selection.dart`, `apps/muyon/lib/services/transfer/**`, `services/knowledge/**`, `services/search/**`, `supplier_core/lib/lan.dart` + `src/lan.dart` + `src/lan_identity.dart`, their tests, and `apps/muyon/test/**` files you create.
+- **Explicit exception granted by A:** you may (1) append new migrations at the end of `WorkspaceRepository.schema` in `apps/muyon/lib/workspace/workspace_repository.dart` (next version after the current one; never edit or reorder existing migrations; bump `version`/`definitionDigest` accordingly), and (2) add memory/experience methods to `FoundationRepository`. List every such change in your report; A renumbers on merge if another branch also added a migration.
+- Not yours: `packages/muyon_module_api` (contract requests go in your report), other `platform/**` files, `screens/**` (B builds the memory/experience UI from your API), module packages (C).
+
+## Tasks
+
+### D4 Memory, experience and background organization ("Dream")
+
+Requirement (section 8): manage raw sources, domain facts, topic memories, summaries and experience entries separately. Business facts stay in their modules; memory only references them. Each memory carries source, scope, time, revision and a **fact vs. inference** flag. Users can correct, **disable**, delete and expire. Deleting or narrowing scope must propagate to later organization and to retrieval. Background organization does incremental summarization, de-duplication, summary updates, conflict identification and experience candidates; it records what it changed and what it consumed, can be reviewed and reverted, and **never widens permissions**. Experiences are verified before they influence tasks; one success never becomes a general rule.
+
+Deliver:
+- Schema (host migrations): disabled state, fact/inference kind, experience entries with status (candidate → verified → retired), a change journal for organization runs (run id, inputs by id+revision, outputs, model/profile used if any, outbound record ids, token/time cost, status), and tombstones so deleted or disabled content is never reintroduced.
+- A `DreamService` (name yours) that runs incrementally (only memories changed since the last run), offline rules first (exact/normalized duplicates, explicit key/value changes). Model-assisted steps (summary, semantic conflict, experience candidates) run **only** when the user enabled them with an explicitly chosen model profile; requests go through `OpenAiModelGateway` with `caller: 'dream'` and therefore appear in `outbound_requests`; no implicit remote endpoint.
+- Every proposal is a reviewable candidate with its evidence (memory ids + revisions). Accepting applies it; reverting a run restores the prior state exactly. Conflicts are shown with their sources, never auto-resolved.
+- The assistant uses only enabled, unexpired, in-scope memories and only **verified** experiences; disabled/deleted ones disappear immediately from assistant context and from retrieval.
+- Dream holds no tool approvals and cannot call write/external tools; prove it with a test.
+- Mobile/desktop background limits: runs are resumable and idempotent; an interrupted run is marked interrupted, not done.
+
+### D5 Cross-device task coordination
+
+Requirement (sections 2.2 and 10): a task package names task identity, input version, executing device, permission scope and expected result. Importing or receiving never authorizes execution; the receiver authorizes locally. Online scheduling must make execution ownership, status queries and duplicate-execution control explicit so the two ends never both run the same operation.
+
+Deliver, on top of your paired TLS channel (business task execution itself stays in the research module, owned by C; use an injected executor):
+- An ownership record per (task id, input revision): offered → accepted-by(device) → running → succeeded/failed/cancelled, with a single owner at a time (lease or equivalent) and an idempotency key so a retried offer or a duplicate delivery never causes a second run.
+- A status-query message between paired devices; when the peer is unreachable the state is shown as unreachable/unknown, never as failed or done.
+- Results return attached to the task id + revision; a late or duplicate result does not overwrite a newer one.
+- Loopback tests: duplicate offer, both sides trying to accept, receiver restart mid-run, sender asking status while offline, late duplicate result.
+
+### D6 Tool-selection evaluation
+
+Requirement (section 7): keep the selection layer replaceable; evaluate a limited set of candidate methods including **Jev and Laya**, keep rule and LLM fallbacks; choosing a tool, generating parameters, authorization and execution stay separate; model confidence never replaces a permission decision; no production decision model is chosen yet.
+
+- **Jev and Laya are not defined anywhere in this repository.** Do not invent what they are. If you can identify them unambiguously from public sources, cite the source in the report and implement them as `ToolSelectionStrategy` candidates. If not, build the harness with pluggable slots, run it with the baselines, and put "need definition of Jev/Laya from the user" at the top of your report.
+- Fixed task set (checked in, redistributable) over the real registered tools: prompts with the expected tool or "no tool", including ambiguous and adversarial prompts (e.g. text that asks the assistant to approve itself or pick a write tool).
+- Metrics per strategy: top-1 / top-k selection accuracy, false selection of write/external tools, abstention quality, latency and cost. Baselines: the current `RuleAndModelToolSelection` offline rule, and the LLM selector (only when a real model endpoint is configured; otherwise "not measured").
+- One-command re-run; report in `docs/implementation/tool-selection-eval-<date>.md`. The evaluation recommends; it never switches the production strategy by itself.
+
+## Rules
+
+- TDD; never weaken existing assertions. Do not read, edit or commit `.env`; no secrets in code, tests or logs.
+- No new dependency without a written reason.
+- Report format as before: commits; test counts per package; evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"); changes outside owned files (including each host migration); contract requests; requests to B/C; known gaps and risks.
