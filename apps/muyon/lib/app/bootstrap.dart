@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 
 import '../platform/file_gateway.dart';
+import '../platform/schema_catalog.dart';
 import '../platform/storage_manager.dart';
 import '../workspace/import_coordinator.dart';
 import '../workspace/workspace_repository.dart';
@@ -24,12 +25,7 @@ import 'inquiry_plugin.dart';
 import 'package:uuid/uuid.dart';
 
 class MuyonHost {
-  MuyonHost._(
-    this.storage,
-    this.workspaces,
-    this.registry,
-    this.capabilities,
-  );
+  MuyonHost._(this.storage, this.workspaces, this.registry, this.capabilities);
   final StorageManager storage;
   final WorkspaceRepository workspaces;
   final ModuleRegistry registry;
@@ -118,10 +114,8 @@ class MuyonHost {
   static Future<MuyonHost> open(String rootPath) async {
     final storage = StorageManager(rootPath);
     try {
-      final database = await storage.open(
-        'muyon',
-        WorkspaceRepository.schema,
-      );
+      final database = await storage.open('muyon', WorkspaceRepository.schema);
+      await SchemaCatalog.attach(storage, database);
       await ExecutionStore(database).recoverInterrupted();
       final host = MuyonHost._(
         storage,
@@ -201,24 +195,12 @@ class MuyonHost {
         approveModelRequest: (preview) =>
             approveInquiryModelRequest?.call(preview) ?? Future.value(false),
       );
-      final connection = await storage.open('inquiry', InquiryPlugin.schema);
       await workspaces.database.write((db) {
         db.execute('INSERT OR REPLACE INTO module_registry VALUES(?,?,?)', [
           'inquiry',
           'ready',
           null,
         ]);
-        db.execute(
-          'INSERT OR REPLACE INTO schema_catalog VALUES(?,?,?,?,?,?)',
-          [
-            'inquiry',
-            InquiryPlugin.schema.version,
-            InquiryPlugin.schema.definitionDigest,
-            connection.raw.userVersion,
-            StorageManager.structureDigest(connection.raw),
-            'ready',
-          ],
-        );
       });
       inquiryError = null;
     } catch (e) {
@@ -256,17 +238,6 @@ class MuyonHost {
           'ready',
           null,
         ]);
-        db.execute(
-          'INSERT OR REPLACE INTO schema_catalog VALUES(?,?,?,?,?,?)',
-          [
-            'research',
-            module.schema.version,
-            module.schema.definitionDigest,
-            connection.raw.userVersion,
-            StorageManager.structureDigest(connection.raw),
-            'ready',
-          ],
-        );
       });
       final coordinator = ImportCoordinator(workspaces);
       for (final intent in coordinator.pending('research')) {

@@ -12,11 +12,7 @@ Future<void> main() async {
   try {
     const configured = String.fromEnvironment('MUYON_DATA_DIR');
     final root = configured.isEmpty
-        ? p.join(
-            (await getApplicationSupportDirectory()).path,
-            'muyon',
-            'data',
-          )
+        ? p.join((await getApplicationSupportDirectory()).path, 'muyon', 'data')
         : Directory(configured).absolute.path;
     final host = await MuyonHost.open(root);
     runApp(MuyonApp(host: host));

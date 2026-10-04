@@ -95,7 +95,7 @@ void main() {
       manager = StorageManager(root.path);
       db = await manager.open('muyon', WorkspaceRepository.schema);
       workspaces = WorkspaceRepository(db);
-      expect(db.raw.userVersion, 2);
+      expect(db.raw.userVersion, WorkspaceRepository.schema.version);
       expect(workspaces.all().single.id, workspace.id);
       expect(workspaces.setting('deviceId'), 'original-device');
       expect(workspaces.setting('theme'), 'dark');
@@ -150,7 +150,7 @@ void main() {
         db.raw
             .select('SELECT version FROM schema_migrations ORDER BY version')
             .map((r) => r['version']),
-        [1, 2],
+        [for (final m in WorkspaceRepository.schema.migrations) m.version],
       );
       await manager.close();
       manager = StorageManager(root.path);

@@ -16,8 +16,8 @@ class WorkspaceRepository {
   final ManagedDatabase database;
 
   static final schema = ModuleSchema(
-    version: 2,
-    definitionDigest: 'foundation-v2',
+    version: 3,
+    definitionDigest: 'foundation-v3',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -39,6 +39,13 @@ CREATE TABLE execution_records(id TEXT PRIMARY KEY,state TEXT NOT NULL,payload T
         },
       ),
       FoundationRepository.migration,
+      ModuleMigration(
+        version: 3,
+        id: 'schema-catalog-errors',
+        definitionDigest: 'foundation-v3',
+        migrate: (db) =>
+            db.execute('ALTER TABLE schema_catalog ADD COLUMN last_error TEXT'),
+      ),
     ],
   );
 

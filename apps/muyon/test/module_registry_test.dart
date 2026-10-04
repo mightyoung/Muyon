@@ -46,10 +46,7 @@ void main() {
       'cycle_b',
     });
     expect(registry.unavailable['needs_missing'], contains('ghost'));
-    expect(
-      () => registry.require('needs_old'),
-      throwsA(isA<StateError>()),
-    );
+    expect(() => registry.require('needs_old'), throwsA(isA<StateError>()));
     expect(registry.modules.map((m) => m.manifest.id), {
       'research',
       'optional',

@@ -74,15 +74,16 @@ void main() {
       await WorkspaceRepository(owner).create('persist');
       await manager.close();
       manager = StorageManager(root.path);
+      final next = WorkspaceRepository.schema.version + 1;
       final newer = ModuleSchema(
-        version: 3,
-        definitionDigest: 'v3',
+        version: next,
+        definitionDigest: 'next',
         migrations: [
           ...WorkspaceRepository.schema.migrations,
           ModuleMigration(
-            version: 3,
-            id: 'v3',
-            definitionDigest: 'v3',
+            version: next,
+            id: 'next',
+            definitionDigest: 'next',
             migrate: (db) {
               db.execute('CREATE TABLE doomed(x)');
               throw StateError('Migration fails');
@@ -91,10 +92,7 @@ void main() {
         ],
       );
       await expectLater(manager.open('muyon', newer), throwsStateError);
-      final reopened = await manager.open(
-        'muyon',
-        WorkspaceRepository.schema,
-      );
+      final reopened = await manager.open('muyon', WorkspaceRepository.schema);
       expect(WorkspaceRepository(reopened).all().single.title, 'persist');
       expect(
         reopened.raw.select(

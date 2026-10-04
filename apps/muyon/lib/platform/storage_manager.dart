@@ -63,9 +63,26 @@ class ManagedConnection implements ManagedDatabase {
   }
 }
 
+typedef SchemaOpened = Future<void> Function(
+  String moduleId,
+  ModuleSchema schema,
+  Database db,
+);
+typedef SchemaFailed = Future<void> Function(
+  String moduleId,
+  ModuleSchema schema,
+  int? observedVersion,
+  Object error,
+);
+
 class StorageManager {
   StorageManager(this.rootPath);
   final String rootPath;
+
+  /// Catalog hooks; every open result passes through here so no caller can
+  /// forget to record it. Set once the host database is available.
+  SchemaOpened? onOpened;
+  SchemaFailed? onFailed;
   final Map<String, Future<ManagedConnection>> _opening = {};
   final Map<String, ManagedConnection> _connections = {};
   bool _closing = false;
@@ -126,9 +143,10 @@ class StorageManager {
     }
     final db = sqlite3.open(p.join(directory.path, '$moduleId.sqlite'));
     final owner = ManagedConnection(db);
+    int? observed;
     try {
       db.execute('PRAGMA foreign_keys=ON');
-      final version = db.userVersion;
+      final version = observed = db.userVersion;
       if (version > schema.version) {
         throw StateError('unsupported_schema: v$version > v${schema.version}');
       }
@@ -190,11 +208,18 @@ class StorageManager {
           [schema.definitionDigest, structureDigest(database)],
         );
       });
+      await onOpened?.call(moduleId, schema, db);
       _connections[moduleId] = owner;
       return owner;
-    } catch (_) {
+    } catch (error) {
       await owner.close();
       _opening.remove(moduleId);
+      try {
+        await onFailed?.call(moduleId, schema, observed, error);
+      } catch (_) {
+        // The open error below is the one callers must see; a catalog write
+        // failure here (e.g. host closing) must not replace it.
+      }
       rethrow;
     }
   }
