@@ -123,4 +123,37 @@ void main() {
     expect(applied, ['upsert:a', 'delete:a', 'upsert:b']);
     expect(projections.errors, isEmpty);
   });
+
+  test('project-less (global) objects are catalogued and removable', () async {
+    const supplier = ObjectRef(
+      moduleId: 'cards',
+      objectType: 'supplier',
+      objectId: 's1',
+    );
+    await cards.write(
+      (db) => ModuleChangeLog.record(
+        db,
+        supplier,
+        ChangeOp.upsert,
+        summary: 'Acme Pumps',
+      ),
+    );
+    await projections.sync('cards', cards.raw);
+    final rows = host.raw.select(
+      "SELECT project_id,summary FROM object_catalog WHERE object_type='supplier'",
+    );
+    expect(rows.single['project_id'], ProjectionService.globalProject);
+    expect(rows.single['summary'], 'Acme Pumps');
+
+    await cards.write(
+      (db) => ModuleChangeLog.record(db, supplier, ChangeOp.delete),
+    );
+    await projections.sync('cards', cards.raw);
+    expect(
+      host.raw.select(
+        "SELECT * FROM object_catalog WHERE object_type='supplier'",
+      ),
+      isEmpty,
+    );
+  });
 }
