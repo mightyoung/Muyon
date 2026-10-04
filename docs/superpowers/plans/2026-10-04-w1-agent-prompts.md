@@ -118,7 +118,7 @@ You are role **C: business module migration** in phase 1 (W1) of the Muyon proje
 - Hosted path: no module-opened database. Fallbacks that self-open must be test/standalone-only and unreachable from the host (add a test that fails if hosted mode can reach them).
 - Business export/import packages stay (they are product features), but they must not be presented as the full-app backup — the host `BackupService` owns that.
 - Adopt the change log: new inquiry schema migration calling `ModuleChangeLog.createTable`; record `upsert/delete` with `summary` in the same transaction as writes to suppliers, inquiries, quotes, budgets (choose the object types that have stable ids; document the list).
-- Rerun full suites. Baseline: supplier_core **468 passed, 3 skipped**; inquiry (run from `apps/muyon`: `flutter test --no-pub ../../packages/inquiry_module/test`) **310 passed, 1 skipped, 1 known golden failure** (`screenshot_test.dart / desktop settings`). Any new failure is yours to fix.
+- Rerun full suites. Baseline: supplier_core **467 passed, 3 skipped**; inquiry (run from `apps/muyon`: `flutter test --no-pub ../../packages/inquiry_module/test`) **310 passed, 1 skipped, 1 known golden failure** (`screenshot_test.dart / desktop settings`). Any new failure is yours to fix.
 
 ### C2 Research runs only on the injected database
 - Prove the hosted path uses only `ModuleResources.database`; make `WorkbenchStore.open` test/standalone-only.
@@ -224,7 +224,7 @@ The LAN path is **plaintext with no device authentication**. Content digests pro
     NO_PROXY=localhost,127.0.0.1,::1 flutter test --no-pub --timeout 120s
   ```
   One `flutter test` at a time per worktree; kill leftover `flutter_tester` processes after aborts.
-- Baseline (`develop@8920f4d`): host 91 passed + 1 conditional skip; supplier_core 468 passed, 3 skipped.
+- Baseline (`develop@8920f4d`): host 91 passed + 1 conditional skip; supplier_core 467 passed, 3 skipped.
 - Every commit: `flutter analyze` clean for touched packages; touched suites green.
 - Don't read, edit or commit `.env`; no keys or secrets in code, tests or logs.
 - Small Conventional Commits; push only to `feat/d-transfer`; **do not merge into develop**.

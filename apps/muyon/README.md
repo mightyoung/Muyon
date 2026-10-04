@@ -9,8 +9,10 @@ flutter run -d macos
 flutter run -d windows
 flutter run -d <android-device-id>
 flutter test --no-pub
-flutter build apk --release --no-pub
+flutter build apk --release
 ```
+
+发布构建不要加 `--no-pub`：测试运行会把开发依赖（如 `integration_test`）写进被忽略的 `GeneratedPluginRegistrant.java`，只有执行 pub 步骤的构建才会按发布模式重新生成，否则 Java 编译失败。不要在同一目录同时跑测试和发布构建。
 
 运行桌面目标需对应平台开发工具；macOS 需完整 Xcode。Android 生成包目前使用开发签名，只用于本地验证。
 
