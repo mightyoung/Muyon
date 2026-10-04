@@ -8,6 +8,7 @@ import 'package:muyon/services/knowledge/knowledge_service.dart';
 import 'package:muyon/services/knowledge/embedding_service.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/transfer/transfer_service.dart';
+import 'package:supplier_core/lan.dart';
 import 'package:muyon/services/ocr/paddle_ocr_service.dart';
 import 'package:muyon/services/ocr/ocr_geometry.dart';
 import 'package:image/image.dart' as img;
@@ -222,11 +223,13 @@ void main() {
   test('transfer stop waits for startup and supports reopening', () async {
     final transfer = TransferService(db, '${temp.path}/lifecycle');
     addTearDown(transfer.close);
+    final secrets = MemoryLanSecretStore();
     final starting = transfer.start(
       deviceId: 'test-device',
       deviceName: 'test',
       discoveryPort: 0,
       httpPort: 0,
+      secrets: secrets,
     );
     final stopping = transfer.close();
     await Future.wait([starting, stopping]);
@@ -236,6 +239,7 @@ void main() {
       deviceName: 'test',
       discoveryPort: 0,
       httpPort: 0,
+      secrets: secrets,
     );
     expect(transfer.listening, isTrue);
     await transfer.close();

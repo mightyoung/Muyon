@@ -115,10 +115,13 @@ Future<void> registerPublicTools(
     call,
   ) async {
     final docs = selected(call);
-    final hits = await services.knowledge.search(
-      call.request.parameters['query'] as String,
-      documentIds: docs.map((d) => d.id).toList(),
-    );
+    final hits = [
+      for (final hit in await services.knowledge.search(
+        call.request.parameters['query'] as String,
+        documentIds: docs.map((d) => d.id).toList(),
+      ))
+        if (await services.knowledge.allowModelContent(hit.sourceRef)) hit,
+    ];
     return done('找到 ${hits.length} 条本地资料', {
       'hits': [
         for (final hit in hits)
