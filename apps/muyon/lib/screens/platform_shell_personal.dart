@@ -302,8 +302,20 @@ extension _PersonalSections on _PlatformShellState {
         }),
       ),
       ListTile(
-        title: const Text('私有存储'),
-        subtitle: SelectableText(host.storage.rootPath),
+        title: const Text('数据与存储'),
+        subtitle: Text(host.storage.rootPath),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => page(
+          '数据与存储',
+          DataStoragePage(
+            readStatus: () => StorageStatus.read(host),
+            createBackup: (target) => host.trackOperation(
+              () => BackupService.create(host.storage, target),
+            ),
+            restore: widget.onRestore,
+            pickDirectory: widget.pickDirectory,
+          ),
+        ),
       ),
       const Text('模型与数据去向'),
       DropdownButtonFormField<String>(

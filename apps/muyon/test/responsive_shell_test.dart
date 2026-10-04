@@ -32,6 +32,7 @@ void main() {
               host: host,
               themeMode: ThemeMode.light,
               onTheme: (_) {},
+              onRestore: (_) async {},
             ),
           ),
         );

@@ -17,6 +17,9 @@ import '../services/models/secret_store.dart';
 import 'assistant_page.dart';
 import 'devices_page.dart';
 import 'knowledge_preview.dart';
+import 'data_storage_page.dart';
+import 'storage_status.dart';
+import '../platform/backup_service.dart';
 
 part 'platform_shell_home.dart';
 part 'platform_shell_knowledge.dart';
@@ -28,10 +31,16 @@ class PlatformShell extends StatefulWidget {
     required this.host,
     required this.themeMode,
     required this.onTheme,
+    required this.onRestore,
+    this.pickDirectory = pickDirectoryWithDialog,
   });
   final MuyonHost host;
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onTheme;
+
+  /// Closes the host, restores a verified backup and reopens (see MuyonApp).
+  final Future<void> Function(String backupDir) onRestore;
+  final PickDirectory pickDirectory;
   @override
   State<PlatformShell> createState() => _PlatformShellState();
 }
