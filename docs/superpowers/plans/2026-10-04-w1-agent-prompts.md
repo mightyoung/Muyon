@@ -301,6 +301,8 @@ Three review items:
 
 **R3 — Decide replay protection across restarts (assess, then fix or document).** Nonces and message ids are remembered in memory (4096 entries) and lost on restart. Network replay is already blocked by TLS with pinning, so the remaining case is a paired device re-sending an old signed push after the receiver restarts. Either (a) persist seen message ids with their receipts for a bounded window and add a signed timestamp to the push binding with an accept window (bump the binding to `muyon-push-v2`), or (b) argue in the threat model why receipts' existing duplicate detection makes this harmless. Include a test for whichever you choose.
 
+**R4 — Tests must not rewrite tracked files (must fix).** `apps/muyon/test/retrieval_eval/retrieval_eval_test.dart` writes `docs/implementation/retrieval-eval-2026-10-04.md` on every `flutter test` run, so ordinary test runs dirty the repository and overwrite the committed numbers with load-dependent timings. Keep the assertions in the test, but write the report only when explicitly asked (e.g. `MUYON_WRITE_EVAL_REPORT=1`, or a separate script under `scripts/`), and document that command in the report header.
+
 Report in the same final-report format: commits, test counts, evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"), changes outside owned files, and any contract requests.
 
 ---

@@ -65,9 +65,7 @@ abstract final class McpAdapter {
     final skipped = <String, String>{};
     String? cursor;
     for (var page = 0; page < _maxPages; page++) {
-      final result = await client.rpc('tools/list', {
-        'cursor': ?cursor,
-      });
+      final result = await client.rpc('tools/list', {'cursor': ?cursor});
       for (final raw in result['tools'] as List? ?? const []) {
         final tool = Map<String, Object?>.from(raw as Map);
         final name = tool['name'];
