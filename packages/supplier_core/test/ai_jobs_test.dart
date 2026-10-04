@@ -146,7 +146,11 @@ void main() {
 
   test('SIGKILL releases owner and preserves completed WAL step', () async {
     final path = '${dir.path}/crashed.sqlite';
-    final process = await Process.start(Platform.resolvedExecutable, [
+    // Under `flutter test` the runner is flutter_tester, which cannot `run`.
+    final dart = Platform.resolvedExecutable.endsWith('flutter_tester')
+        ? 'dart'
+        : Platform.resolvedExecutable;
+    final process = await Process.start(dart, [
       'run',
       'test/fixtures/ai_job_crash.dart',
       path,
@@ -156,6 +160,10 @@ void main() {
     final id = await process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
+        // `dart run` may prefix stdout with "Running build hooks..." (no newline).
+        .map(RegExp(r'[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}').stringMatch)
+        .where((id) => id != null)
+        .cast<String>()
         .first
         .timeout(const Duration(seconds: 90));
     expect(process.kill(ProcessSignal.sigkill), isTrue);

@@ -26,6 +26,8 @@
 
 ## 1. 需要用户决策的问题（阻塞项标 ★）
 
+> **2026-10-04 决策**：用户确认全部按建议执行；追加要求全部页面沿用 software-cost-calculator `DESIGN.md`（Folio）风格。问题 4（实机设备）与问题 8（验收素材、模型端点）仍待用户提供，不阻塞 W0/W1，阻塞 W3。
+
 1. ★ **命名统一**：采用 Muyon 并重命名目录/包/Bundle ID/主库文件名？当前无旧用户数据，现在改成本最低。建议：W0 一次性改完，界面、包名、库名统一为 Muyon。
 2. ★ **基线提交**：main 上 65 个未提交变更能否整体提交为 `feat: foundation baseline`？不提交无法开 worktree 并行。
 3. ★ **设备安全方案**：在线通信改为「配对时交换 Ed25519 身份公钥（二维码/短码人工比对）+ TLS 1.3 自签证书钉扎」，还是 Noise_XX？建议 TLS 钉扎（Dart `SecureSocket` 原生可用，不加依赖）。
@@ -60,12 +62,12 @@
 - W0-1 提交基线；建 `develop` 分支；每角色一个 worktree/分支：`feat/a-*`、`feat/b-*`、`feat/c-*`、`feat/d-*`。
 - W0-2 重命名 MuSpace/Miyono → Muyon（目录、包、Bundle ID、`muyon.sqlite`、文档引用）。全量测试通过后才放行 W1。
 - W0-3 契约 v1 冻结（`muyon_module_api`）新增：
-  - `ModuleManifest` 依赖声明（必要/可选 + 版本范围）与宿主启动校验，失败只禁用该模块；
-  - `ModuleChangeLog`：业务库事务内写变更记录（object ref、op、revision），宿主幂等拉取更新对象目录/检索投影；
-  - 对象跳转注册 `ObjectRouteResolver`、通知/进度声明；
-  - `RestrictedWebViewSpec`：允许的资源根、导航白名单、桥接消息 schema；
-  - `DeviceIdentity`/`TrustedPeer` 数据类型（供 D 实现）。
-- W0-4 拆分 `platform_shell.dart`（交给 B，W0 内完成，纯搬移不改行为）。
+  - `ModuleManifest.optionalDependencies`；宿主 `ModuleRegistry` 对 API 版本不符、缺失/不可用必要依赖、依赖环只标记该模块不可用（`unavailable` 附原因），不再让整个应用启动失败；
+  - `ModuleChangeLog`：模块在自己的迁移里建表，在业务写事务内 `record`；宿主用游标 `since` 幂等更新投影；
+  - `ModuleSession.objectPage(context, ref)`：对象跳转到业务页面；
+  - `RestrictedWebViewSpec`：允许根（https/file、路径边界、拒绝 `..`/javascript/data）、桥接频道白名单。
+  - 不进契约：设备身份（D 在宿主 `services/transfer` 内实现）；通知/进度声明（出现第二个真实使用者时再加）。
+- W0-4 拆分 `platform_shell.dart`：已由 A 完成（纯搬移，part + 扩展，388/193/248/372 行）。
 - W0-5 建立需求→证据验收账本（`docs/implementation/muyon-acceptance-ledger.md`），每条需求标注：文档审查 / 自动测试 / 平台构建 / 真实模型 / 真机业务 五类证据。
 
 **门禁**：契约 v1 合并、全量测试绿、`flutter analyze` 无问题。
@@ -78,7 +80,7 @@
 | A2 | A | 变更记录→对象目录/检索投影幂等更新；删除/撤回使投影失效；取材前回领域服务核对 | 重复事件、删除后取材被拒 |
 | A3 | A | 宿主备份/恢复协调器（SQLite backup API + 文件仓清单一致快照） | 写入中备份可恢复且一致 |
 | A4 | A | 首次导入通用化：主库意图 + 业务库回执 + 绑定对账（科研、询价共用） | 每个中断点恢复不重复创建 |
-| B1 | B | 设计系统 token（浅/深色、阅读排版、减少动效）；桌面导航+可收起助手；手机独立页面与返回关系 | 320/390/1280 宽、200% 字号 golden |
+| B1 | B | **统一 Folio 设计风格**（用户指定，基准 [docs/design/DESIGN.md](../../design/DESIGN.md)）：以 `inquiry_module/lib/src/app/theme.dart` 为唯一实现，抽成共享主题（Tokens + 明暗 ThemeData），宿主 `app_shell.dart` 自建 ThemeData 与科研 `theme.dart` 副本改为引用它，原型模块同样使用；桌面导航+可收起助手；手机独立页面与返回关系；模块不可用原因展示 | 320/390/1280 宽、200% 字号 golden；三处主题 token 一致性测试 |
 | B2 | B | 科研阅读：批注/摘录/精读 UI，页级回跳与文字高亮分开呈现 | widget 测试 |
 | B3 | B | 原型模块 `prototype_module`：受限 WebView（资源根、导航拦截、桥接白名单），页面/版本/反馈管理；接入 mes-security-model 构建产物 | 导航越界、未注册桥接消息被拒 |
 | C1 | C | 询价存储适配：supplier 库与 ai-jobs 库由宿主打开/登记/升级；backups/settings/lan-inbox 改走宿主服务；原 465/309 回归重跑 | 原回归 + 宿主目录登记测试 |
@@ -117,12 +119,14 @@
 
 ## 4. 协作规则
 
-1. **契约先行**：`muyon_module_api` 只有 A 能改；其他人需要新接口时提 issue，A 在 24h 内合入或拒绝。契约变更后各分支 rebase。
-2. **文件所有权**：按第 2 节独占目录；`bootstrap.dart`、`pubspec.yaml` 由 A 合并时统一修改。
-3. **分支/PR**：小 PR（< 400 行），每个 PR 附测试与证据类别；A 审查后合入 `develop`，W 阶段门禁通过后合 `main`。
-4. **测试**：TDD；每 PR 必须 `flutter analyze` 无问题 + 本包测试绿；不得为通过而改测试。
-5. **证据诚实**：构建成功 ≠ 业务验收；合成测试 ≠ 真机；固定语料通过 ≠ 普遍正确。账本中未验证项保持“未验证”。
-6. **并行冲突热点**：`bootstrap.dart`（模块注册）、`app_shell/platform_shell`（导航）、`tool_registry.dart`（工具注册）。规避：模块与工具通过各自 plugin 文件注册，宿主只加一行接线，由 A 合并。
+0. **禁止共用工作目录**（W0 实际发生过冲突）：每个 Agent 必须在自己的 `git worktree` + 分支中工作，构建产物也各在各的 worktree；主目录只由 A 用于合并。
+1. **设计风格**：所有新页面遵循 [docs/design/DESIGN.md](../../design/DESIGN.md)（Folio），只用共享主题 token，不在页面内硬编码颜色/字号。
+2. **契约先行**：`muyon_module_api` 只有 A 能改；其他人需要新接口时提 issue，A 在 24h 内合入或拒绝。契约变更后各分支 rebase。
+3. **文件所有权**：按第 2 节独占目录；`bootstrap.dart`、`pubspec.yaml` 由 A 合并时统一修改。
+4. **分支/PR**：小 PR（< 400 行），每个 PR 附测试与证据类别；A 审查后合入 `develop`，W 阶段门禁通过后合 `main`。
+5. **测试**：TDD；每 PR 必须 `flutter analyze` 无问题 + 本包测试绿；不得为通过而改测试。
+6. **证据诚实**：构建成功 ≠ 业务验收；合成测试 ≠ 真机；固定语料通过 ≠ 普遍正确。账本中未验证项保持“未验证”。
+7. **并行冲突热点**：`bootstrap.dart`（模块注册）、`app_shell/platform_shell`（导航）、`tool_registry.dart`（工具注册）。规避：模块与工具通过各自 plugin 文件注册，宿主只加一行接线，由 A 合并。
 
 ---
 

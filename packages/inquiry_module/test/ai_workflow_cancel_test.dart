@@ -15,7 +15,7 @@ class TestState extends AppState {
   TestState(super.store, super.dataDir, this.client) : super.test();
   final LlmClient client;
   @override
-  Future<LlmClient?> llm() async => client;
+  Future<LlmClient?> llm({AiCancellation? cancellation}) async => client;
   @override
   Future<bool> hasAiKey() async => true;
   @override

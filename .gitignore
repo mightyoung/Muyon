@@ -11,3 +11,6 @@ build/
 .omx-state-locks/
 .omx-state-locks.identity.json
 .ocr-validation/
+.env
+.env.*
+**/test/failures/

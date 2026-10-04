@@ -18,11 +18,16 @@ class ModuleManifest {
     this.apiVersion = 1,
     this.packageRevision = '0.1.0',
     List<String> requiredDependencies = const [],
-  }) : requiredDependencies = List.unmodifiable(requiredDependencies);
+    List<String> optionalDependencies = const [],
+  }) : requiredDependencies = List.unmodifiable(requiredDependencies),
+       optionalDependencies = List.unmodifiable(optionalDependencies);
   final String id;
   final int apiVersion;
   final String packageRevision;
   final List<String> requiredDependencies;
+
+  /// Used when present; a missing optional dependency never disables the module.
+  final List<String> optionalDependencies;
 }
 
 class ModuleRoute {
@@ -54,6 +59,10 @@ abstract interface class ModuleRuntime {
 
 abstract interface class ModuleSession {
   Future<ObjectView?> resolve(ObjectRef ref);
+
+  /// Business page for a resolved object, or null when the module has no
+  /// dedicated page for this type. Callers resolve the ref first.
+  Widget? objectPage(BuildContext context, ObjectRef ref);
   Future<void> flush();
   Future<void> dispose();
 }

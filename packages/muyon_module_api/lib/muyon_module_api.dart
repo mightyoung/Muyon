@@ -8,3 +8,5 @@ export 'src/context.dart';
 export 'src/capabilities.dart';
 export 'src/assistant_scope.dart';
 export 'src/tools.dart';
+export 'src/change_log.dart';
+export 'src/restricted_web.dart';

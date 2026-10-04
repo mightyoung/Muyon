@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/widgets.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 
@@ -382,4 +383,9 @@ class ResearchSession implements ModuleSession {
   Future<void> dispose() async {
     _disposed = true;
   }
+
+  // Dedicated object pages are wired in W1 (C track); resolve() stays the
+  // authoritative existence/scope check.
+  @override
+  Widget? objectPage(BuildContext context, ObjectRef ref) => null;
 }

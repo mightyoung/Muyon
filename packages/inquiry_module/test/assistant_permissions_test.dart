@@ -13,7 +13,7 @@ class _State extends AppState {
   _State(super.store, super.dataDir, this.client) : super.test();
   final LlmClient client;
   @override
-  Future<LlmClient?> llm() async => client;
+  Future<LlmClient?> llm({AiCancellation? cancellation}) async => client;
 }
 
 Map<String, Object?> _reply(Map<String, Object?> message) => {

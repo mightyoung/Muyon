@@ -234,8 +234,8 @@ class MuyonHost {
 
   Future<void> _activateResearch() async {
     if (research != null) return;
-    final module = registry.require('research');
     try {
+      final module = registry.require('research');
       final connection = await storage.open('research', module.schema);
       final files = FileGateway(
         p.join(storage.rootPath, 'modules', 'research', 'files'),

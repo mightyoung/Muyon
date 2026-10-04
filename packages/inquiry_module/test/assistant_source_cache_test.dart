@@ -9,7 +9,7 @@ class _State extends AppState {
   _State(super.store, super.dataDir) : super.test();
 
   @override
-  Future<LlmClient?> llm() async => LlmClient(
+  Future<LlmClient?> llm({AiCancellation? cancellation}) async => LlmClient(
     const LlmConfig(apiKey: 'fake'),
     transport: (_) async =>
         throw StateError('Cache recovery must not call a model'),
