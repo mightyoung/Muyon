@@ -12,6 +12,8 @@ import '../core/research_skill.dart';
 import '../core/store.dart';
 import 'entry_picker.dart';
 import '../app/outline_link_dialog.dart';
+import 'source_jump_banner.dart';
+import 'source_locator.dart';
 
 /// Reads the imported snapshot; notes are separate records, never source edits.
 class ReaderPage extends StatefulWidget {
@@ -23,6 +25,9 @@ class ReaderPage extends StatefulWidget {
     this.loadMarkdown,
     this.initialPageIndex = 0,
     this.initialQuote = '',
+    this.initialContextBefore,
+    this.initialContextAfter,
+    this.locator,
   });
   final WorkbenchStore store;
   final ResearchDocument document;
@@ -30,6 +35,12 @@ class ReaderPage extends StatefulWidget {
   final Future<String> Function(String path)? loadMarkdown;
   final int initialPageIndex;
   final String initialQuote;
+  final String? initialContextBefore;
+  final String? initialContextAfter;
+
+  /// Finds [initialQuote] on the initial page. Without one, following a source
+  /// reference only does the page-level jump and says so.
+  final QuoteLocator? locator;
 
   @override
   State<ReaderPage> createState() => _ReaderPageState();
@@ -50,6 +61,8 @@ class _ReaderPageState extends State<ReaderPage> {
   int _pageCount = 0;
   bool _notesVisible = false;
   String? _entryId;
+  QuoteLocation? _location;
+  bool _bannerVisible = false;
 
   @override
   void initState() {
@@ -57,10 +70,59 @@ class _ReaderPageState extends State<ReaderPage> {
     _page = widget.initialPageIndex + 1;
     _pageNumber.text = '$_page';
     _quote.text = widget.initialQuote;
+    _bannerVisible =
+        widget.document.isPdf &&
+        (widget.initialQuote.isNotEmpty || widget.initialPageIndex > 0);
     _markdown = widget.document.isPdf
         ? Future.value('')
         : (widget.loadMarkdown?.call(widget.document.absolutePath) ??
               File(widget.document.absolutePath).readAsString());
+  }
+
+  Future<void> _locateQuote() async {
+    if (!_bannerVisible || widget.initialQuote.isEmpty) {
+      if (mounted && _bannerVisible) {
+        setState(() => _location = const PageOnly('来源没有可查找的原文片段'));
+      }
+      return;
+    }
+    final locator = widget.locator;
+    QuoteLocation result;
+    if (locator == null) {
+      result = const PageOnly('当前版本尚不支持文字定位');
+    } else {
+      try {
+        result = await locator.locate(
+          pageIndex: widget.initialPageIndex,
+          quote: widget.initialQuote,
+          contextBefore: widget.initialContextBefore,
+          contextAfter: widget.initialContextAfter,
+        );
+      } catch (error) {
+        result = PageOnly('定位失败：$error');
+      }
+    }
+    if (mounted) setState(() => _location = result);
+  }
+
+  void _paintHighlight(Canvas canvas, Rect pageRect, PdfPage page) {
+    final location = _location;
+    if (location is! ExactMatch || page.pageNumber != location.pageIndex + 1) {
+      return;
+    }
+    final paint = Paint()
+      ..color = Theme.of(context).colorScheme.primary.withValues(alpha: 0.3);
+    for (final r in location.rects) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          pageRect.left + r.left * pageRect.width,
+          pageRect.top + r.top * pageRect.height,
+          r.width * pageRect.width,
+          r.height * pageRect.height,
+        ),
+        paint,
+      );
+    }
   }
 
   @override
@@ -560,6 +622,12 @@ class _ReaderPageState extends State<ReaderPage> {
     if (widget.document.isPdf) {
       return Column(
         children: [
+          if (_bannerVisible)
+            SourceJumpBanner(
+              pageNumber: widget.initialPageIndex + 1,
+              location: _location,
+              onDismiss: () => setState(() => _bannerVisible = false),
+            ),
           Material(
             color: Theme.of(context).colorScheme.surface,
             child: Padding(
@@ -614,8 +682,10 @@ class _ReaderPageState extends State<ReaderPage> {
                 onViewerReady: (document, controller) {
                   if (mounted) {
                     setState(() => _pageCount = document.pages.length);
+                    _locateQuote();
                   }
                 },
+                pagePaintCallbacks: [_paintHighlight],
                 onPageChanged: (page) {
                   if (mounted && page != null) setState(() => _page = page);
                 },
