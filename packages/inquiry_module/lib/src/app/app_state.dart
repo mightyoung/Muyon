@@ -214,7 +214,7 @@ class AppState extends ChangeNotifier {
   }
 
   /// Hosted applications coordinate full-app backups themselves.
-  bool get isHosted => !_ownsJobs;
+  bool get isHosted => _isHosted;
 
   String get backupDir => '${dataDir.path}/backups';
 

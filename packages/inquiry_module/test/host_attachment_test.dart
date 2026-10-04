@@ -42,6 +42,55 @@ class HostModelSettings implements InquiryModelSettingsBridge {
 }
 
 void main() {
+  test(
+    'host-owned task storage reports hosted and survives state disposal',
+    () {
+      final directory = Directory.systemTemp.createTempSync(
+        'inquiry-host-identity',
+      );
+      final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+      createSchema(db);
+      AiJobStore.initializeSchema(jobsDb);
+      final jobs = AiJobStore.attach(jobsDb);
+      addTearDown(() {
+        jobs.close();
+        db.close();
+        jobsDb.close();
+        directory.deleteSync(recursive: true);
+      });
+      final state = AppState.attach(
+        store: Store.attach(
+          db,
+          device: 'host',
+          backgroundExecutor: <T>(action) async => await action(),
+        ),
+        dataDir: directory,
+        aiJobs: jobs,
+        secrets: HostSecrets(),
+      );
+      expect(state.isHosted, isTrue);
+      expect(state.aiTasks, isEmpty);
+      state.dispose();
+      expect(jobs.jobs, isEmpty);
+      expect(jobsDb.select('PRAGMA quick_check').single.values.single, 'ok');
+    },
+  );
+
+  test('standalone test state reports standalone', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'inquiry-test-identity',
+    );
+    final db = sqlite3.openInMemory();
+    createSchema(db);
+    final state = AppState.test(Store(db, device: 'standalone'), directory);
+    addTearDown(() {
+      state.dispose();
+      db.close();
+      directory.deleteSync(recursive: true);
+    });
+    expect(state.isHosted, isFalse);
+  });
+
   test('host attachment rejects stores with standalone database ownership', () {
     final directory = Directory.systemTemp.createTempSync('inquiry-host-guard');
     final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
