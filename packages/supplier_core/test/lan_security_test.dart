@@ -6,6 +6,8 @@ import 'package:supplier_core/src/lan.dart';
 import 'package:test/test.dart';
 
 void main() {
+  final clients = <LanNode, DeviceIdentity>{};
+
   Future<LanNode> start({
     LanLimits limits = const LanLimits(),
     void Function(LanPush)? onPush,
@@ -26,14 +28,49 @@ void main() {
       await node.stop();
       dir.deleteSync(recursive: true);
     });
+    final client = DeviceIdentity.generate();
+    node.confirmPeer(
+      fingerprint: client.fingerprint,
+      confirmedCode: client.shortCode,
+      certificatePem: client.certificatePem,
+    );
+    clients[node] = client;
     return node;
   }
 
+  bool pins(LanNode node, X509Certificate certificate) =>
+      DeviceIdentity.fingerprintOfDer(certificate.der) ==
+      node.identity.fingerprint;
+
   Future<int> post(LanNode node, List<int> bytes) async {
-    final client = HttpClient();
+    final sender = clients[node]!;
+    final client = HttpClient(context: SecurityContext(withTrustedRoots: false))
+      ..badCertificateCallback = (certificate, host, port) =>
+          pins(node, certificate);
     try {
-      final req = await client.post('127.0.0.1', node.httpPort, '/push');
+      final nonce = randomToken();
+      final messageId = randomToken();
+      final req = await client.postUrl(
+        Uri.parse('https://127.0.0.1:${node.httpPort}/push'),
+      );
+      req.followRedirects = false;
       req.contentLength = bytes.length;
+      req.headers
+        ..set('x-muyon-fp', sender.fingerprint)
+        ..set('x-muyon-nonce', nonce)
+        ..set('x-muyon-msg', messageId)
+        ..set(
+          'x-muyon-sig',
+          sender.sign(
+            pushBinding(
+              fingerprint: sender.fingerprint,
+              nonce: nonce,
+              messageId: messageId,
+              length: bytes.length,
+              bodyHash: sha256Hex(bytes),
+            ),
+          ),
+        );
       req.add(bytes);
       final res = await req.close();
       await res.drain<void>();
@@ -43,11 +80,23 @@ void main() {
     }
   }
 
-  Future<Socket> partial(LanNode node, {int length = 100}) async {
-    final socket = await Socket.connect('127.0.0.1', node.httpPort);
+  Future<SecureSocket> partial(LanNode node, {int length = 100}) async {
+    final sender = clients[node]!;
+    final socket = await SecureSocket.connect(
+      '127.0.0.1',
+      node.httpPort,
+      context: SecurityContext(withTrustedRoots: false),
+      onBadCertificate: (certificate) => pins(node, certificate),
+    );
+    final nonce = randomToken();
     socket.write(
       'POST /push HTTP/1.1\r\nHost: localhost\r\n'
-      'Content-Length: $length\r\nConnection: close\r\n\r\nx',
+      'Content-Length: $length\r\n'
+      'x-muyon-fp: ${sender.fingerprint}\r\n'
+      'x-muyon-nonce: $nonce\r\n'
+      'x-muyon-msg: $nonce-msg\r\n'
+      'x-muyon-sig: AA==\r\n'
+      'Connection: close\r\n\r\nx',
     );
     await socket.flush();
     addTearDown(socket.destroy);
@@ -260,12 +309,38 @@ void main() {
     },
   );
 
+  Future<HttpServer> bindTls(DeviceIdentity identity) {
+    final context = SecurityContext(withTrustedRoots: false)
+      ..useCertificateChainBytes(utf8.encode(identity.certificatePem))
+      ..usePrivateKeyBytes(utf8.encode(identity.privateKeyPem));
+    return HttpServer.bindSecure(InternetAddress.loopbackIPv4, 0, context);
+  }
+
+  Future<LanPeer> trustServer(LanNode node, DeviceIdentity identity, int port) {
+    node.confirmPeer(
+      fingerprint: identity.fingerprint,
+      confirmedCode: identity.shortCode,
+      certificatePem: identity.certificatePem,
+    );
+    return Future.value(
+      LanPeer(
+        'remote',
+        'Remote',
+        '127.0.0.1',
+        port,
+        DateTime.now(),
+        fingerprint: identity.fingerprint,
+        certificatePem: identity.certificatePem,
+      ),
+    );
+  }
+
   test('probe bounds malformed, oversized and stalled responses', () async {
     final node = await start(
       limits: const LanLimits(probeTimeout: Duration(milliseconds: 100)),
     );
-    for (final body in ['[]', 'x' * 5000, null]) {
-      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    for (final body in ['[]', 'x' * 9000, null]) {
+      final server = await bindTls(DeviceIdentity.generate());
       server.listen((req) async {
         if (body != null) {
           req.response.write(body);
@@ -288,16 +363,14 @@ void main() {
       limits: const LanLimits(transferTimeout: Duration(milliseconds: 100)),
     );
     final file = File('${node.inbox.path}/out')..writeAsBytesSync([1]);
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final identity = DeviceIdentity.generate();
+    final server = await bindTls(identity);
     server.listen((req) {
       req.drain<void>();
     });
     try {
       await expectLater(
-        node.push(
-          LanPeer('remote', 'Remote', '127.0.0.1', server.port, DateTime.now()),
-          file.path,
-        ),
+        node.push(await trustServer(node, identity, server.port), file.path),
         throwsA(isA<LanException>()),
       );
     } finally {
@@ -307,7 +380,8 @@ void main() {
   test('stop aborts and drains an outgoing push instead of waiting for transfer timeout', () async {
     final node = await start();
     final file = File('${node.inbox.path}/out')..writeAsBytesSync([1]);
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final identity = DeviceIdentity.generate();
+    final server = await bindTls(identity);
     final arrived = Completer<void>();
     server.listen((request) async {
       await request.drain<void>();
@@ -315,13 +389,7 @@ void main() {
       // Deliberately leave the response pending for the normal 15-minute limit.
     });
     addTearDown(() => server.close(force: true));
-    final peer = LanPeer(
-      'remote',
-      'Remote',
-      '127.0.0.1',
-      server.port,
-      DateTime.now(),
-    );
+    final peer = await trustServer(node, identity, server.port);
     final sending = expectLater(
       node.push(peer, file.path),
       throwsA(isA<LanException>()),
@@ -339,7 +407,8 @@ void main() {
     final node = await start();
     final bytes = List<int>.generate(256 * 1024 + 7, (i) => i % 251);
     final file = File('${node.inbox.path}/progress')..writeAsBytesSync(bytes);
-    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final identity = DeviceIdentity.generate();
+    final server = await bindTls(identity);
     final received = Completer<List<int>>();
     final release = Completer<void>();
     server.listen((request) async {
@@ -358,7 +427,7 @@ void main() {
     var completed = false;
     final sending = node
         .push(
-          LanPeer('remote', 'Remote', '127.0.0.1', server.port, DateTime.now()),
+          await trustServer(node, identity, server.port),
           file.path,
           onProgress: (sent, total) => progress.add((sent, total)),
         )

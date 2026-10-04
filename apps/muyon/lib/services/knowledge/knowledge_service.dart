@@ -58,10 +58,72 @@ class KnowledgeService {
   final ManagedDatabase database;
   final String rootPath;
   final DocumentParser parser;
+
+  /// Live check against the owning module. The index is not a source of truth.
+  Future<bool> Function(ObjectRef ref)? confirmSource;
+
+  /// One bootstrap assignment: remember [confirm] and return the projection hook.
+  void Function(String moduleId, List<ModuleChange> applied) followProjections(
+    Future<bool> Function(ObjectRef ref) confirm,
+  ) {
+    confirmSource = confirm;
+    return invalidateApplied;
+  }
+
+  /// Deletes indexed copies of module objects that were deleted or revoked.
+  /// Runs before the hook returns, so a following search cannot see them.
+  void invalidateApplied(String moduleId, List<ModuleChange> applied) {
+    final doomed = [
+      for (final change in applied)
+        if (change.ref.moduleId == moduleId &&
+            (change.op == ChangeOp.delete || change.summary == 'revoked'))
+          change.ref,
+    ];
+    if (doomed.isEmpty) return;
+    final matches = [
+      for (final doc in documents())
+        if (doomed.any((ref) => _sameObject(doc.source, ref))) doc,
+    ];
+    if (matches.isEmpty) return;
+    database.raw.execute('BEGIN IMMEDIATE');
+    try {
+      for (final doc in matches) {
+        _removeIndex(doc.id);
+        database.raw.execute('DELETE FROM knowledge_documents WHERE id=?', [
+          doc.id,
+        ]);
+      }
+      database.raw.execute('COMMIT');
+    } catch (_) {
+      database.raw.execute('ROLLBACK');
+      rethrow;
+    }
+    for (final doc in matches) {
+      final dir = Directory(p.dirname(doc.path));
+      if (p.isWithin(rootPath, dir.path) && dir.existsSync()) {
+        dir.deleteSync(recursive: true);
+      }
+    }
+  }
+
+  /// Module-owned text may reach a model only after the module still has it.
+  /// A private knowledge file has no other owner.
+  Future<bool> allowModelContent(ObjectRef ref) async {
+    if (ref.moduleId == 'knowledge') return true;
+    final confirm = confirmSource;
+    if (confirm == null) return false;
+    return confirm(ref);
+  }
+
+  static bool _sameObject(ObjectRef source, ObjectRef change) =>
+      source.moduleId == change.moduleId &&
+      source.objectType == change.objectType &&
+      source.objectId == change.objectId &&
+      source.nativeProjectId == change.nativeProjectId;
   static const maxFileBytes = 128 * 1024 * 1024;
   static final schema = ModuleSchema(
-    version: 2,
-    definitionDigest: 'public-knowledge-v2',
+    version: 3,
+    definitionDigest: 'public-knowledge-v3',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -83,6 +145,25 @@ CREATE TABLE transfer_receipts(digest TEXT PRIMARY KEY,receipt_id TEXT NOT NULL,
         migrate: (db) => db.execute(
           'CREATE TABLE knowledge_ocr(document_id TEXT NOT NULL,page_index INTEGER NOT NULL,source_digest TEXT NOT NULL,metadata TEXT NOT NULL,PRIMARY KEY(document_id,page_index))',
         ),
+      ),
+      ModuleMigration(
+        version: 3,
+        id: 'public-knowledge-v3',
+        definitionDigest: 'public-knowledge-v3',
+        migrate: (db) => db.execute('''
+CREATE TABLE transfer_items(
+  item_id TEXT PRIMARY KEY,
+  peer_fingerprint TEXT NOT NULL,
+  path TEXT,
+  delivered INTEGER NOT NULL DEFAULT 0,
+  attachment_state TEXT NOT NULL,
+  attachment_length INTEGER,
+  attachment_sha256 TEXT,
+  imported INTEGER NOT NULL DEFAULT 0,
+  read_at TEXT,
+  acceptance TEXT NOT NULL DEFAULT 'pending',
+  created_at TEXT NOT NULL
+)'''),
       ),
     ],
   );
