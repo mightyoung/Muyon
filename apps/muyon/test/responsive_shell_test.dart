@@ -45,6 +45,16 @@ void main() {
           find.byType(AssistantPage),
           width >= 1250 ? findsOneWidget : findsNothing,
         );
+        if (width >= 1250) {
+          await tester.tap(find.byTooltip('收起助手'));
+          await tester.pumpAndSettle();
+          expect(find.byType(AssistantPage), findsNothing);
+          await tester.tap(find.byTooltip('展开助手'));
+          await tester.pumpAndSettle();
+          expect(find.byType(AssistantPage), findsOneWidget);
+        } else {
+          expect(find.byTooltip('收起助手'), findsNothing);
+        }
         expect(tester.takeException(), isNull);
         for (final label in ['助手', '资料', '工具', '工作台']) {
           await tester.tap(

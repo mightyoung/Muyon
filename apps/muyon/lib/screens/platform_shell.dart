@@ -50,6 +50,7 @@ class _PlatformShellState extends State<PlatformShell> {
   final query = TextEditingController();
   String? error;
   bool busy = false;
+  bool assistantOpen = true;
   List<Map<String, Object?>> hits = [];
   MuyonHost get host => widget.host;
   FoundationRepository get repo => host.foundation;
@@ -341,6 +342,17 @@ class _PlatformShellState extends State<PlatformShell> {
           appBar: AppBar(
             title: const Text('Muyon'),
             actions: [
+              if (section != 1 && size.maxWidth >= 1250)
+                IconButton(
+                  tooltip: assistantOpen ? '收起助手' : '展开助手',
+                  onPressed: () =>
+                      setState(() => assistantOpen = !assistantOpen),
+                  icon: Icon(
+                    assistantOpen
+                        ? Icons.chevron_right
+                        : Icons.auto_awesome_outlined,
+                  ),
+                ),
               IconButton(
                 tooltip: '消息中心',
                 onPressed: () => page('消息中心', notifications()),
@@ -377,7 +389,7 @@ class _PlatformShellState extends State<PlatformShell> {
                     ),
                     const VerticalDivider(width: 1),
                     Expanded(child: body),
-                    if (section != 1 && size.maxWidth >= 1250)
+                    if (section != 1 && size.maxWidth >= 1250 && assistantOpen)
                       SizedBox(width: 360, child: assistant()),
                   ],
                 )
