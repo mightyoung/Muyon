@@ -27,6 +27,8 @@ void main() {
     addTearDown(() async {
       await node.stop();
       dir.deleteSync(recursive: true);
+      final seen = File('${dir.path}.seen-pushes.json');
+      if (seen.existsSync()) seen.deleteSync();
     });
     final client = DeviceIdentity.generate();
     node.confirmPeer(
@@ -44,12 +46,13 @@ void main() {
 
   Future<int> post(LanNode node, List<int> bytes) async {
     final sender = clients[node]!;
-    final client = HttpClient(context: SecurityContext(withTrustedRoots: false))
+    final client = HttpClient(context: lanTlsContext())
       ..badCertificateCallback = (certificate, host, port) =>
           pins(node, certificate);
     try {
       final nonce = randomToken();
       final messageId = randomToken();
+      final sentAt = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
       final req = await client.postUrl(
         Uri.parse('https://127.0.0.1:${node.httpPort}/push'),
       );
@@ -59,6 +62,7 @@ void main() {
         ..set('x-muyon-fp', sender.fingerprint)
         ..set('x-muyon-nonce', nonce)
         ..set('x-muyon-msg', messageId)
+        ..set('x-muyon-ts', '$sentAt')
         ..set(
           'x-muyon-sig',
           sender.sign(
@@ -66,6 +70,7 @@ void main() {
               fingerprint: sender.fingerprint,
               nonce: nonce,
               messageId: messageId,
+              sentAtUnix: sentAt,
               length: bytes.length,
               bodyHash: sha256Hex(bytes),
             ),
@@ -85,16 +90,18 @@ void main() {
     final socket = await SecureSocket.connect(
       '127.0.0.1',
       node.httpPort,
-      context: SecurityContext(withTrustedRoots: false),
+      context: lanTlsContext(),
       onBadCertificate: (certificate) => pins(node, certificate),
     );
     final nonce = randomToken();
+    final sentAt = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
     socket.write(
       'POST /push HTTP/1.1\r\nHost: localhost\r\n'
       'Content-Length: $length\r\n'
       'x-muyon-fp: ${sender.fingerprint}\r\n'
       'x-muyon-nonce: $nonce\r\n'
       'x-muyon-msg: $nonce-msg\r\n'
+      'x-muyon-ts: $sentAt\r\n'
       'x-muyon-sig: AA==\r\n'
       'Connection: close\r\n\r\nx',
     );
