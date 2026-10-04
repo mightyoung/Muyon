@@ -42,7 +42,7 @@
 
 | # | 需求 | 状态 | 已有证据 | 缺口 |
 |---|---|---|---|---|
-| 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`、`execution_recovery_test` | 审计 A5，MCP 适配 A6，Jev/Laya 评估 D6 |
+| 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`（含效应点后取消/失败记为 interrupted）、`execution_recovery_test`、`outbound_ledger_test`、`mcp_adapter_test`；D：[调用路径审计](invocation-path-audit.md) | 审计缺口 G1–G5 归 C/D；MCP 服务器配置与“数据去向”界面 → B；Jev/Laya 评估 D6 |
 | 8 | 记忆/经验/Dream、撤回传递 | ❌/🟡 | 见 2.1d/e | D4 |
 | 9a | 模型端点显式、凭据安全存储、无隐式回退 | 🟡 | T：`model_gateway_test`、`profile_routing_test` | M 真实端点 → W3 |
 | 9b | PDF 文字层优先 + PaddleOCR | 🟡 | M：ONNX 参考推理（`public_services_validation.md`） | Flutter 原生 R 三端 → W3 |
@@ -68,3 +68,10 @@
 - A4 `34b8e39`：`ImportCoordinator.recover/abandon`；主库 v4。
 - 宿主 91 通过 + 1 条件跳过；module_api 17；research 95；analyze 无问题。
 - 未做：启动时主动扫描未打开的模块库（目录在该库下次打开时修正，避免为对账额外打开业务库）；备份/恢复与目录状态的界面；`ManagedDatabase.raw` 仍可被模块绕过队列写入（靠契约与审查约束）。
+
+## W2-A 记录（2026-10-04，分支 `feat/a-agent`）
+
+- A5 `d14fd71`：调用路径审计（缺口 G1–G7 及负责人见 `invocation-path-audit.md`）；取消/失败按效应点如实表述；模型出站记录 `outbound_requests`（主库 v5），记录失败则不发送。
+- A6：`McpAdapter` 把 MCP 工具作为 network 效应工具接入宿主注册表；契约 `ToolDescriptor.description`。
+- 宿主 106 通过 + 1 条件跳过；module_api 17；research 95；inquiry 310 + 1 跳过 + 1 已知 golden 差异；analyze 无问题。
+- 未做：MCP 服务器配置持久化与连接界面（等 B 的设置页）；OCR 模型下载未纳入出站记录（G6）。
