@@ -18,6 +18,7 @@ import '../platform/foundation_repository.dart';
 import '../platform/memory_review.dart';
 import '../platform/tool_registry.dart';
 import '../platform/business_tools.dart';
+import '../services/knowledge/index_invalidation.dart';
 import '../services/public_services.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/secret_store.dart';
@@ -150,6 +151,13 @@ class MuyonHost {
           ledger: host.outbound,
         ),
         tools: host.tools,
+      );
+      host.projections.onApplied = host.services.knowledge.followProjections(
+        (ref) => confirmIndexedSource(
+          ref,
+          research: () => host.research,
+          inquiry: () => host.inquiry,
+        ),
       );
       host.services.transfer.onPendingReceived = () {
         if (host._closing) return;

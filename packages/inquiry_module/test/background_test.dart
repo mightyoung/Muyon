@@ -125,6 +125,16 @@ void main() {
     );
     addTearDown(other.stop);
     final peer = await state.lan!.probe('127.0.0.1', port: other.httpPort);
+    state.lan!.confirmPeer(
+      fingerprint: peer.fingerprint,
+      confirmedCode: other.identity.shortCode,
+      certificatePem: peer.certificatePem,
+    );
+    other.confirmPeer(
+      fingerprint: state.lan!.identity.fingerprint,
+      confirmedCode: state.lan!.identity.shortCode,
+      certificatePem: state.lan!.identity.certificatePem,
+    );
     expect(
       await state.pushTo(peer, {
         'project': [pro],

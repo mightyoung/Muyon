@@ -114,6 +114,16 @@ void main() {
 
     final found = await a.probe('127.0.0.1', port: b.httpPort);
     expect(found.name, '仓库平板');
+    a.confirmPeer(
+      fingerprint: found.fingerprint,
+      confirmedCode: b.identity.shortCode,
+      certificatePem: found.certificatePem,
+    );
+    b.confirmPeer(
+      fingerprint: a.identity.fingerprint,
+      confirmedCode: a.identity.shortCode,
+      certificatePem: a.identity.certificatePem,
+    );
     final file = File('${tmp.path}/x.siq')..writeAsBytesSync([1, 2, 3, 4]);
     await a.push(found, file.path);
     final got = await pushes.stream.first;

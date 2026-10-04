@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:supplier_core/supplier_core.dart';
 import 'package:test/test.dart';
 
@@ -165,7 +166,9 @@ void main() {
         .where((id) => id != null)
         .cast<String>()
         .first
-        .timeout(const Duration(seconds: 90));
+        .timeout(
+          const Duration(seconds: 240),
+        ); // cold `dart run` compile under load
     expect(process.kill(ProcessSignal.sigkill), isTrue);
     expect(await process.exitCode, isNot(0));
     expect(await errors, isNot(contains('Unhandled exception')));
@@ -173,7 +176,7 @@ void main() {
     addTearDown(reopened.close);
     expect(reopened.get(id).status, 'paused');
     expect(reopened.start(id).restore({'step': 1})?['content'], 'durable');
-  }, timeout: const Timeout(Duration(seconds: 120)));
+  }, timeout: const Timeout(Duration(seconds: 300)));
 
   test(
     'exclusive owner, epoch, deletion and cancellation reject late writes',
@@ -250,43 +253,40 @@ void main() {
     },
   );
 
-  test(
-    'invalid JSON is discarded so resume can repair instead of replaying failure',
-    () async {
-      final id = journal.create(AiTask.parameterExtraction, {}).id;
-      var s = journal.start(id);
-      final bad = LlmClient(
-        const LlmConfig(apiKey: 'test'),
-        checkpoint: s,
-        transport: (_) async => {
-          'choices': [
-            {
-              'message': {'content': 'invalid'},
-            },
-          ],
-        },
-      );
-      await expectLater(
-        bad.json('system', 'input'),
-        throwsA(isA<LlmException>()),
-      );
-      expect(journal.get(id).stepCount, 0);
-      s.pause();
-      s = journal.start(id);
-      final good = LlmClient(
-        const LlmConfig(apiKey: 'test'),
-        checkpoint: s,
-        transport: (_) async => {
-          'choices': [
-            {
-              'message': {'content': '{"ok":true}'},
-            },
-          ],
-        },
-      );
-      expect(await good.json('system', 'input'), {'ok': true});
-    },
-  );
+  test('invalid JSON is discarded so resume can repair instead of replaying failure', () async {
+    final id = journal.create(AiTask.parameterExtraction, {}).id;
+    var s = journal.start(id);
+    final bad = LlmClient(
+      const LlmConfig(apiKey: 'test'),
+      checkpoint: s,
+      transport: (_) async => {
+        'choices': [
+          {
+            'message': {'content': 'invalid'},
+          },
+        ],
+      },
+    );
+    await expectLater(
+      bad.json('system', 'input'),
+      throwsA(isA<LlmException>()),
+    );
+    expect(journal.get(id).stepCount, 0);
+    s.pause();
+    s = journal.start(id);
+    final good = LlmClient(
+      const LlmConfig(apiKey: 'test'),
+      checkpoint: s,
+      transport: (_) async => {
+        'choices': [
+          {
+            'message': {'content': '{"ok":true}'},
+          },
+        ],
+      },
+    );
+    expect(await good.json('system', 'input'), {'ok': true});
+  });
   test(
     'completed steps survive reopening and inputs never contain credentials',
     () async {

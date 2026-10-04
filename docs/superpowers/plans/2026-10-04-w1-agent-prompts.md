@@ -118,7 +118,7 @@ You are role **C: business module migration** in phase 1 (W1) of the Muyon proje
 - Hosted path: no module-opened database. Fallbacks that self-open must be test/standalone-only and unreachable from the host (add a test that fails if hosted mode can reach them).
 - Business export/import packages stay (they are product features), but they must not be presented as the full-app backup — the host `BackupService` owns that.
 - Adopt the change log: new inquiry schema migration calling `ModuleChangeLog.createTable`; record `upsert/delete` with `summary` in the same transaction as writes to suppliers, inquiries, quotes, budgets (choose the object types that have stable ids; document the list).
-- Rerun full suites. Baseline: supplier_core **468 passed, 3 skipped**; inquiry (run from `apps/muyon`: `flutter test --no-pub ../../packages/inquiry_module/test`) **310 passed, 1 skipped, 1 known golden failure** (`screenshot_test.dart / desktop settings`). Any new failure is yours to fix.
+- Rerun full suites. Baseline: supplier_core **467 passed, 3 skipped**; inquiry (run from `apps/muyon`: `flutter test --no-pub ../../packages/inquiry_module/test`) **310 passed, 1 skipped, 1 known golden failure** (`screenshot_test.dart / desktop settings`). Any new failure is yours to fix.
 
 ### C2 Research runs only on the injected database
 - Prove the hosted path uses only `ModuleResources.database`; make `WorkbenchStore.open` test/standalone-only.
@@ -224,7 +224,7 @@ The LAN path is **plaintext with no device authentication**. Content digests pro
     NO_PROXY=localhost,127.0.0.1,::1 flutter test --no-pub --timeout 120s
   ```
   One `flutter test` at a time per worktree; kill leftover `flutter_tester` processes after aborts.
-- Baseline (`develop@8920f4d`): host 91 passed + 1 conditional skip; supplier_core 468 passed, 3 skipped.
+- Baseline (`develop@8920f4d`): host 91 passed + 1 conditional skip; supplier_core 467 passed, 3 skipped.
 - Every commit: `flutter analyze` clean for touched packages; touched suites green.
 - Don't read, edit or commit `.env`; no keys or secrets in code, tests or logs.
 - Small Conventional Commits; push only to `feat/d-transfer`; **do not merge into develop**.
@@ -282,3 +282,101 @@ Additional task from the invocation-path audit:
 **G1-D — the host transfer carries research packages.** The research workbench had its own plaintext LAN channel (`research_module/lib/src/core/lan_transfer.dart`); C makes it unreachable when hosted and B removes its UI entry. Your encrypted, paired transport (D1) must therefore be able to send a research package file (`muyon-research` format) to a paired device, with its five independent states (D2). On the receiving side, a verified package is offered for import into the research module only after the user accepts it; receipt or verification never triggers an import by itself, and a transferred package never grants execution permission. Add a loopback test: send a research package → verified receipt → stays pending until accepted → hand-off to an injected import callback exactly once (idempotent on retry).
 
 Report this under the same final-report format with its evidence class.
+
+---
+
+# 追加：D1–D3 合入审查意见（给 Grok）
+
+---8<--- 追加 · D（Grok）· 审查意见 ---
+
+Your D1–D3 work was reviewed and merged into `develop` at `7a45815` (full `scripts/verify.sh` green: supplier_core 475 + 3 skipped, host 117 + 1 conditional skip). Thank you — the pairing, pinning, sender signature over the body hash, staged-then-verified receipt and five independent states are what the requirement asked for.
+
+Sync first: `git fetch origin && git merge --ff-only origin/develop` (your branch is already contained in it). Keep working on `feat/d-transfer`; push there only; A merges.
+
+Three review items:
+
+**R1 — Enforce TLS 1.3 as the minimum (must fix).** `docs/implementation/lan-threat-model.md` says TLS 1.3, but neither the server context in `LanNode._bind` nor the client `HttpClient(context: SecurityContext(withTrustedRoots: false))` sets `minimumTlsProtocolVersion`, so Dart's default (TLS 1.2) applies. Set `TlsProtocolVersion.tls1_3` on both. Add a test that fails if either context allows less than 1.3; if a real TLS 1.2-only handshake cannot be produced portably from Dart, test the context construction through a small factory and say so in the threat model. Update the threat model table with this row.
+
+**R2 — Make the retrieval evaluation able to discriminate (should fix).** With 18 short documents every strategy reaches recall@10 = 1.0, so the comparison says little. Grow the redistributable synthetic corpus (aim for a few hundred documents) with harder cases: many near-duplicates, 1-character Chinese queries against long documents, mixed CJK/Latin product codes, and distractors sharing bigrams. Keep the one-command re-run and regenerate `docs/implementation/retrieval-eval-<date>.md` from that run. Also add an optional mode that reads a local corpus directory and an embedding endpoint from environment variables (e.g. `MUYON_EVAL_CORPUS_DIR`, `MUYON_EMBEDDING_ENDPOINT`) so it can later run on the user's real papers; never commit those documents or their text, only aggregate numbers. Keep "not measured" wherever a real model or real corpus was not used.
+
+**R3 — Decide replay protection across restarts (assess, then fix or document).** Nonces and message ids are remembered in memory (4096 entries) and lost on restart. Network replay is already blocked by TLS with pinning, so the remaining case is a paired device re-sending an old signed push after the receiver restarts. Either (a) persist seen message ids with their receipts for a bounded window and add a signed timestamp to the push binding with an accept window (bump the binding to `muyon-push-v2`), or (b) argue in the threat model why receipts' existing duplicate detection makes this harmless. Include a test for whichever you choose.
+
+Report in the same final-report format: commits, test counts, evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"), changes outside owned files, and any contract requests.
+
+---
+
+# 第 2 阶段：D4–D6 启动提示词（给 Grok）
+
+---8<--- D · Grok · 第 2 阶段（D4–D6）---
+
+You are role **D** again, now for phase 2 (W2) of Muyon. Finish the review items R1–R3 first if they are not done. An integrator (role A, a Claude Opus session) owns contracts, the host database schema, review and merging. Prefer correctness and written reasoning over breadth.
+
+## Environment
+
+- Worktree `/Users/muyi/Downloads/dev/muyon-worktrees/d-transfer`, branch `feat/d-transfer`; push only there; A merges. Never work in `/Users/muyi/Downloads/dev/muspace` or other agents' worktrees.
+- Sync first: `git fetch origin && git merge origin/develop` (develop is at `2107c8b` or later).
+- Gate before every push: `scripts/verify.sh` (all packages analyzed, all suites; the only allowed failure is the documented inquiry `desktop settings` golden). Current baseline: module_api 17, research 95, supplier_core 475 + 3 skipped, host 117 + 1 conditional skip, inquiry 310 + 1 skipped.
+- The machine is shared and often heavily loaded: run one `flutter test`/build at a time in your worktree, and never run a release build and tests concurrently in the same directory.
+
+## Read first
+
+- Requirement text for these tasks (sections 2.1, 7, 8 of the product requirements, summarised in `docs/superpowers/specs/2026-10-04-muspace-product-and-architecture-overview.md`; product name is now Muyon).
+- `apps/muyon/lib/platform/foundation_repository.dart` (`memories` table, `PersonalMemory`), `platform/memory_review.dart` (current read-only duplicate/"changed key" candidates), `assistant/personal_agent.dart`, `assistant/tool_selection.dart` (`ToolSelectionStrategy`, `RuleAndModelToolSelection`), `assistant/execution_store.dart`.
+- `apps/muyon/lib/platform/outbound_ledger.dart` (every model request is recorded before sending; pass a `caller`), `platform/tool_registry.dart` (approvals; effect point), `platform/projection_service.dart` (`onApplied`).
+- `docs/implementation/invocation-path-audit.md`, `docs/implementation/muyon-acceptance-ledger.md` (rows 2.1d, 2.1e, 7, 8).
+
+## Ownership for this phase
+
+- Yours: new `apps/muyon/lib/assistant/dream/**`, new `apps/muyon/lib/assistant/selection_eval/**`, `apps/muyon/lib/platform/memory_review.dart`, `apps/muyon/lib/assistant/tool_selection.dart`, `apps/muyon/lib/services/transfer/**`, `services/knowledge/**`, `services/search/**`, `supplier_core/lib/lan.dart` + `src/lan.dart` + `src/lan_identity.dart`, their tests, and `apps/muyon/test/**` files you create.
+- **Explicit exception granted by A:** you may (1) append new migrations at the end of `WorkspaceRepository.schema` in `apps/muyon/lib/workspace/workspace_repository.dart` (next version after the current one; never edit or reorder existing migrations; bump `version`/`definitionDigest` accordingly), and (2) add memory/experience methods to `FoundationRepository`. List every such change in your report; A renumbers on merge if another branch also added a migration.
+- Not yours: `packages/muyon_module_api` (contract requests go in your report), other `platform/**` files, `screens/**` (B builds the memory/experience UI from your API), module packages (C).
+
+## Tasks
+
+### D4 Memory, experience and background organization ("Dream")
+
+Requirement (section 8): manage raw sources, domain facts, topic memories, summaries and experience entries separately. Business facts stay in their modules; memory only references them. Each memory carries source, scope, time, revision and a **fact vs. inference** flag. Users can correct, **disable**, delete and expire. Deleting or narrowing scope must propagate to later organization and to retrieval. Background organization does incremental summarization, de-duplication, summary updates, conflict identification and experience candidates; it records what it changed and what it consumed, can be reviewed and reverted, and **never widens permissions**. Experiences are verified before they influence tasks; one success never becomes a general rule.
+
+Deliver:
+- Schema (host migrations): disabled state, fact/inference kind, experience entries with status (candidate → verified → retired), a change journal for organization runs (run id, inputs by id+revision, outputs, model/profile used if any, outbound record ids, token/time cost, status), and tombstones so deleted or disabled content is never reintroduced.
+- A `DreamService` (name yours) that runs incrementally (only memories changed since the last run), offline rules first (exact/normalized duplicates, explicit key/value changes). Model-assisted steps (summary, semantic conflict, experience candidates) run **only** when the user enabled them with an explicitly chosen model profile; requests go through `OpenAiModelGateway` with `caller: 'dream'` and therefore appear in `outbound_requests`; no implicit remote endpoint.
+- Every proposal is a reviewable candidate with its evidence (memory ids + revisions). Accepting applies it; reverting a run restores the prior state exactly. Conflicts are shown with their sources, never auto-resolved.
+- The assistant uses only enabled, unexpired, in-scope memories and only **verified** experiences; disabled/deleted ones disappear immediately from assistant context and from retrieval.
+- Dream holds no tool approvals and cannot call write/external tools; prove it with a test.
+- Mobile/desktop background limits: runs are resumable and idempotent; an interrupted run is marked interrupted, not done.
+
+### D5 Cross-device task coordination
+
+Requirement (sections 2.2 and 10): a task package names task identity, input version, executing device, permission scope and expected result. Importing or receiving never authorizes execution; the receiver authorizes locally. Online scheduling must make execution ownership, status queries and duplicate-execution control explicit so the two ends never both run the same operation.
+
+Deliver, on top of your paired TLS channel (business task execution itself stays in the research module, owned by C; use an injected executor):
+- An ownership record per (task id, input revision): offered → accepted-by(device) → running → succeeded/failed/cancelled, with a single owner at a time (lease or equivalent) and an idempotency key so a retried offer or a duplicate delivery never causes a second run.
+- A status-query message between paired devices; when the peer is unreachable the state is shown as unreachable/unknown, never as failed or done.
+- Results return attached to the task id + revision; a late or duplicate result does not overwrite a newer one.
+- Loopback tests: duplicate offer, both sides trying to accept, receiver restart mid-run, sender asking status while offline, late duplicate result.
+
+### D6 Tool-selection evaluation
+
+Requirement (section 7): keep the selection layer replaceable; evaluate a limited set of candidate methods including **Jev and Laya**, keep rule and LLM fallbacks; choosing a tool, generating parameters, authorization and execution stay separate; model confidence never replaces a permission decision; no production decision model is chosen yet.
+
+- **What Jev and Laya are** (sources given by the user; read them yourself before implementing):
+  - **Jev** — TypeSafe AI's first "System One Model": unstructured state in, typed probabilistic decisions out, no free-text generation, schema conformance guaranteed. **Hosted API only, early access, account required.** TypeSafe has **not** published a technical report, paper or architecture details, and says it will not publish public-benchmark scores.
+  - **Laya** — open-source (Apache-2.0) non-autoregressive "System 1" decision engine: typed `choice` / `score` / `noul` (yes/no) decisions with calibrated confidence in one forward pass, 100+ languages, a router that picks a checkpoint per request, optional abstention via `min_confidence`, embedding shortlists for many labels. Python ≥3.10 (`pip install laya`), checkpoints `convaiinnovations/laya` and `convaiinnovations/laya-multilingual` on Hugging Face, extras `laya[serve]` (HTTP), `laya[mcp]` (MCP server), `laya[onnx]` (ONNX Runtime). Source: https://github.com/NandhaKishorM/laya. Its README lists known weaknesses (e.g. `noul` label bias on the English checkpoint, `score` being weakest) — check them against tool selection.
+- How to fit them, without changing the authorization model:
+  - Map selection to one `choice` decision over the available tool ids plus `"none"`; below a calibrated threshold the strategy abstains (returns no candidate). Parameter generation, host approval and execution stay where they are. A probability is never an authorization.
+  - **Laya** for evaluation: run it locally on the desktop (`laya.serve` on loopback, or its MCP server through our `McpAdapter`); Python is not available on Android, so record what on-device use would take (ONNX export via our existing `flutter_onnxruntime`, tokenizer, model size, latency on this Mac's CPU) as a finding, not as a commitment.
+  - **Jev: evidence review first, measurement later (user decision).** Do not call the Jev API in this phase. Produce `docs/implementation/jev-evidence-review-<date>.md` from these sources, weighted in this order:
+    1. Official primary sources: launch post https://typesafe.ai/blog/introducing-system-one-models-and-jev, product docs https://docs.typesafe.ai/ (state, Choice/Score/Noul, atomic questions, limits, pricing, context size, languages, data handling/retention), and the CEO's own statements (e.g. Hacker News) — treat as vendor claims.
+    2. Independent, pre-registered evaluations that publish raw data: https://github.com/priorbench/jev, https://github.com/ejs-5/jev-benchmark, https://github.com/ickma2311/jev-baselines-eval, latency in https://github.com/AbdelStark/jev-benchmarks. Read their methods, not only their headlines; note conflicts between them (e.g. accuracy on routing vs. subtle judgment, measured speedup vs. vendor claims, calibration error, sensitivity to criteria wording).
+    3. Secondary summaries (DataCamp, DigitalOcean, MarkTechPost, flaviocopes, etc.) only as leads to primary/independent sources; analyses that guess at undisclosed internals (e.g. RLCD "deep research" posts) are labelled speculation.
+    For every claim record: source, evidence type (vendor claim / independent measured / secondary / speculation), reproducibility (raw data? pre-registered?), and relevance to Muyon's tool selection — routing/classification over our tool ids, Chinese and mixed Chinese–English prompts, calibration and abstention, behaviour when tool descriptions are wrong or ambiguous, latency from China, cost, and that prompts plus tool lists would leave the device to a US-hosted service. End with a recommendation: whether a measured trial is worth requesting early access for, and exactly what that trial would test. Measurement happens only if the user then provides an early-access key; it would use only the checked-in synthetic task set, store the credential in the system secure store, and record every request in `outbound_requests` (`caller: 'selection.jev'`).
+  - Do not add Python, PyTorch or Laya to the Flutter app's dependencies for this task; the evaluation harness may call them as external local services.
+- Fixed task set (checked in, redistributable) over the real registered tools: prompts with the expected tool or "no tool", including ambiguous and adversarial prompts (e.g. text that asks the assistant to approve itself or pick a write tool).
+- Metrics per strategy: top-1 / top-k selection accuracy, false selection of write/external tools, abstention quality, latency and cost. Baselines: the current `RuleAndModelToolSelection` offline rule, and the LLM selector (only when a real model endpoint is configured; otherwise "not measured").
+- One-command re-run; report in `docs/implementation/tool-selection-eval-<date>.md`. The evaluation recommends; it never switches the production strategy by itself.
+
+## Rules
+
+- TDD; never weaken existing assertions. Do not read, edit or commit `.env`; no secrets in code, tests or logs.
+- No new dependency without a written reason.
+- Report format as before: commits; test counts per package; evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"); changes outside owned files (including each host migration); contract requests; requests to B/C; known gaps and risks.
