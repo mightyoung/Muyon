@@ -33,10 +33,10 @@
 | 5.1 | 模块注册 ID/版本/必要与可选依赖 | ✅ | T：`contract_v1_test` | — |
 | 5.2 | 通知/进度声明 | ❌ | — | 有真实需求时加入契约（A） |
 | 6.1 | 主库 + 每模块业务库 | 🟡 | T：`storage_manager_test` | 询价 `ai-jobs.sqlite` 等自开库 → C1 |
-| 6.2 | 宿主统一建库/升级、漂移阻止启用 | 🟡 | T：`storage_manager_test`、`storage_recovery_test` | 启动对账 → A1 |
-| 6.3 | 单写队列、首次导入意图+回执+对账、派生投影 | 🟡 | T：导入恢复；契约 `ModuleChangeLog` | 投影消费 → A2，通用导入 → A4 |
+| 6.2 | 宿主统一建库/升级、漂移阻止启用 | 🟡 | T：`storage_manager_test`、`storage_recovery_test`、`schema_catalog_test`（每次打开按真实状态登记，高版本/漂移/迁移失败记为 blocked 且不改库） | 设置页展示目录与阻止原因 → B；R → W3 |
+| 6.3 | 单写队列、首次导入意图+回执+对账、派生投影 | 🟡 | T：`projection_service_test`（幂等、重放、删除不复活、提交后自动追赶）、`import_recovery_test`（按回执绑定、冲突隔离、放弃前核对回执） | 模块写入变更记录 → C；检索索引消费 `onApplied` → D |
 | 6.4 | 稳定身份、修订、引用锚（摘要+页码+引句） | 🟡 | 卡片修订 ID（research） | C3/C4 |
-| 6.5 | 派生数据失效、一致备份恢复 | ❌ | — | A2/A3 |
+| 6.5 | 派生数据失效、一致备份恢复 | 🟡 | T：`backup_service_test`（冻结写队列+VACUUM INTO、文件清单 SHA-256、篡改/缺失/越界路径检出、关闭后恢复且旧数据移开不删） | 备份/恢复 UI → B；检索索引失效 → D；R → W3 |
 
 ## 七～十二、执行、记忆、模型、通信、体验、质量
 
@@ -59,3 +59,12 @@
   - inquiry 8 个测试替身未跟随 `AppState.llm({cancellation})` 签名更新，导致编译失败；
   - supplier `SIGKILL` 用例在 `flutter test` 下用 `flutter_tester` 启动子进程，且新 SDK 的 `dart run` 在 stdout 前缀 `Running build hooks...`。
 - 已知未解决：inquiry `screenshot_test.dart / desktop settings` golden 差异（迁入时已记录，原代码复现）。
+
+## W1-A 记录（2026-10-04，分支 `feat/a-storage`）
+
+- A1 `63356f5`：目录由 StorageManager 回调统一登记（含此前未登记的 `inquiry_jobs`、`public_knowledge` 与主库自身）。主库 v3。
+- A2 `79a448d`：`ProjectionService` 把模块变更记录投影到 `object_catalog`；契约 `record` 增加可选 `summary`。
+- A3 `733f273`：`BackupService.create/verify/restore`，`StorageManager.quiesce`。
+- A4 `34b8e39`：`ImportCoordinator.recover/abandon`；主库 v4。
+- 宿主 91 通过 + 1 条件跳过；module_api 17；research 95；analyze 无问题。
+- 未做：启动时主动扫描未打开的模块库（目录在该库下次打开时修正，避免为对账额外打开业务库）；备份/恢复与目录状态的界面；`ManagedDatabase.raw` 仍可被模块绕过队列写入（靠契约与审查约束）。
