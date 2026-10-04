@@ -94,4 +94,4 @@
 - D5：`TaskCoordinator` 与 `task_coordinator_test` 3 项通过，含一次配对 TLS 投递。接收不执行。启动流程未接线。
 - D6：离线规则评测见工具选择报告。Laya 未安装，记 not measured。Jev 只写了证据审查，未调用 API。
 - 同一天 `origin/develop` 的 `4925b99` 是给 B、C 的审查意见，没有新的 D 任务，已合入。
-- 已知未跑：本段写入时 `scripts/verify.sh` 尚未作为合入门禁重跑。下面的提交说明以当时的单套测试为准。
+- 门禁 `scripts/verify.sh` 退出码 0：analyze 五个包无问题。module_api 17，research 95，supplier_core 478 + 3 跳过，host 131 + 1 条件跳过，inquiry 310 + 1 跳过，另有 1 个已知 golden（脚本只放行 `screenshot_test.dart: desktop settings`）。普通测试没有改写评测报告。
