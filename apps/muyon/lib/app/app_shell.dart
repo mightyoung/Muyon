@@ -319,10 +319,7 @@ class _WorkspacePageState extends State<WorkspacePage> {
     );
     final coordinator = ImportCoordinator(host.workspaces);
     // Recover committed imports before deciding whether a source is unowned.
-    for (final intent in coordinator.pending('research')) {
-      final receipt = await runtime.receipt(intent.operationId);
-      if (receipt != null) await coordinator.activate(receipt);
-    }
+    await coordinator.recover('research', runtime);
     final owner = host.workspaces.ownerWorkspace('research', task.projectId);
     final current = host.workspaces.binding(selected, 'research');
     var targetWorkspace = selected;

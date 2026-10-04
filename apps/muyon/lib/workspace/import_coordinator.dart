@@ -59,7 +59,7 @@ class ImportCoordinator {
         if (pending.isNotEmpty) {
           throw StateError('An import is pending; recover or retry it first');
         }
-        db.execute('INSERT INTO import_intents VALUES(?,?,?,?,?,?,?,?)', [
+        db.execute('INSERT INTO import_intents VALUES(?,?,?,?,?,?,?,?,NULL)', [
           intent.operationId,
           intent.workspaceId,
           intent.moduleId,
@@ -107,6 +107,56 @@ class ImportCoordinator {
     );
   });
 
+  /// Startup/activation reconciliation for [moduleId]:
+  /// - module committed (receipt exists) → bind once and mark complete;
+  /// - module never committed → left pending for retry or [abandon];
+  /// - binding no longer possible → marked `conflict` with the reason, so one
+  ///   bad intent neither blocks the module nor the workspace.
+  Future<ImportRecovery> recover(String moduleId, ModuleRuntime runtime) async {
+    final activated = <String>[];
+    final awaiting = <String>[];
+    final conflicts = <String, String>{};
+    for (final intent in pending(moduleId)) {
+      final receipt = await runtime.receipt(intent.operationId);
+      if (receipt == null) {
+        awaiting.add(intent.operationId);
+        continue;
+      }
+      try {
+        await activate(receipt);
+        activated.add(intent.operationId);
+      } on StateError catch (error) {
+        conflicts[intent.operationId] = error.message;
+        await _close(intent.operationId, 'conflict', error.message);
+      }
+    }
+    return ImportRecovery(activated, awaiting, conflicts);
+  }
+
+  /// Gives up a pending import the module never committed. Refuses when a
+  /// receipt exists: that import happened and must be recovered instead.
+  Future<void> abandon(
+    String moduleId,
+    ModuleRuntime runtime,
+    String operationId,
+  ) async {
+    if (!pending(moduleId).any((i) => i.operationId == operationId)) {
+      throw StateError('No pending import $operationId');
+    }
+    if (await runtime.receipt(operationId) != null) {
+      throw StateError('Import was committed; recover it instead');
+    }
+    await _close(operationId, 'abandoned', null);
+  }
+
+  Future<void> _close(String operationId, String status, String? error) =>
+      workspaces.database.write(
+        (db) => db.execute(
+          "UPDATE import_intents SET status=?, last_error=? WHERE operation_id=? AND status='pending'",
+          [status, error, operationId],
+        ),
+      );
+
   List<ImportIntent> pending(String moduleId) => [
     for (final row in workspaces.database.raw.select(
       "SELECT * FROM import_intents WHERE module_id=? AND status='pending'",
@@ -131,4 +181,13 @@ class ImportCoordinator {
     await activate(receipt);
     return receipt;
   }
+}
+
+class ImportRecovery {
+  const ImportRecovery(this.activated, this.awaitingCommit, this.conflicts);
+  final List<String> activated;
+  final List<String> awaitingCommit;
+
+  /// Operation id → reason the binding could not be made.
+  final Map<String, String> conflicts;
 }

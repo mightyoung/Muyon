@@ -247,10 +247,13 @@ class MuyonHost {
           null,
         ]);
       });
-      final coordinator = ImportCoordinator(workspaces);
-      for (final intent in coordinator.pending('research')) {
-        final receipt = await research!.receipt(intent.operationId);
-        if (receipt != null) await coordinator.activate(receipt);
+      final recovery = await ImportCoordinator(workspaces)
+          .recover('research', research!);
+      if (recovery.conflicts.isNotEmpty) {
+        await foundation.notify(
+          title: '导入未能完成绑定',
+          body: recovery.conflicts.values.join('\n'),
+        );
       }
       researchError = null;
     } catch (error) {
