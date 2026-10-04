@@ -6,8 +6,8 @@ version: 0.1.0+1
 environment:
   sdk: '^3.13.0'
 dependencies:
-  muspace_module_api:
-    path: ../muspace_module_api
+  muyon_module_api:
+    path: ../muyon_module_api
   flutter:
     sdk: flutter
   flutter_localizations:

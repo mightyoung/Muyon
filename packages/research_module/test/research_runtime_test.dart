@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muspace_module_api/muspace_module_api.dart';
+import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:research_module/research_module.dart';
 import 'package:sqlite3/sqlite3.dart';
 

@@ -12,7 +12,7 @@ and an embedded shell with no window controls. The new public entry point is
 The original source test suite, screenshots and referenced graph/icon fixtures
 are retained. Test package imports and fixture locations were adapted; generated
 review images now go to a test temporary directory instead of source directories.
-Run UI tests from `apps/muspace` so they load the host's original asset keys:
+Run UI tests from `apps/muyon` so they load the host's original asset keys:
 
 ```sh
 env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u all_proxy \

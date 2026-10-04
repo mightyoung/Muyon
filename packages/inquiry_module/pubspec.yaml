@@ -1,5 +1,5 @@
 name: inquiry_module
-description: MuSpace supplier inquiry module, migrated from frozen Folio source.
+description: Muyon supplier inquiry module, migrated from frozen Folio source.
 publish_to: none
 version: 0.1.0
 resolution: workspace

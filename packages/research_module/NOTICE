@@ -2,4 +2,4 @@ Research Module includes the research-workbench source and regression tests.
 Source: /Users/muyi/Downloads/dev/research-workbench (frozen source identity is
 recorded in docs/implementation/research-source-manifest.md in the host repo).
 The original MIT license and copyright notice are preserved in LICENSE.
-MuSpace changes separate host lifecycle, workspace scope and import commits.
+Muyon changes separate host lifecycle, workspace scope and import commits.

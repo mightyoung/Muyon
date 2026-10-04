@@ -1,6 +1,6 @@
-# Miyono 个人助手与共享平台建设记录
+# Muyon 个人助手与共享平台建设记录
 
-日期：2026-10-04。依据用户最新提供的初始需求，优先建设个人 AI 助手、统一基础平台与公共能力。MuSpace 保留为仓库、包名及数据库标识，界面显示 Miyono。Folio 与科研模块继续保留完整业务页面，作为共享平台的实际调用场景。
+日期：2026-10-04。依据用户提供的初始需求，优先建设个人 AI 助手、统一基础平台与公共能力。初始需求使用 Miyono 名称；实机测试期间并行工作把应用迁到 `apps/muyon`、API 包迁到 `packages/muyon_module_api`，当前 Android 包名为 `com.mightyoung.muyon`，Dart 入口为 `MuyonHost/MuyonApp`。本轮保留这些改动并重新核验。Folio 与科研模块继续保留完整业务页面，作为共享平台的实际调用场景。
 
 这是本地实现与验证记录。不是完整总体产品、三端实机或发布验收声明。
 
@@ -41,9 +41,11 @@
 
 ## 交付与平台验收
 
-Android 最终构建正在验证，结果将追加在下方。构建开始前已结束全部 Flutter 测试，避免测试与发布构建改写同一生成插件注册文件。
+改名前 Android release 构建已通过，179,740,586 字节，SHA-256 `a6df21a9f5d98a027f6c6077a005f7becdbced5e95f157c0d997af295981942f`，包名 `com.mightyoung.muspace`、显示名 Miyono、minSdk24/targetSdk36。ZIP 16 KB 对齐检查通过；64 位原生库 ELF LOAD 均至少 16 KB 对齐，32 位 `armeabi-v7a/libpdfium.so` 为 4 KB，不能据此宣称所有 ABI 的 16 KB 实机兼容。改名后的最终产物将另行记录。
 
-当前 `adb devices` 未发现连接设备。macOS 仅有 CommandLineTools，`xcodebuild` 明确要求完整 Xcode；Windows 无本机工具链。三端原生 OCR、最低系统、真实双设备通信、系统凭据、文件保存/重开与设备性能不能在本环境中声明通过。
+最初未连接设备；用户随后连接 vivo V2324A（Android16，实际内存页大小 4096）。改名前的发布包已成功安装并启动，工作台截图核验通过。新 Muyon 包名的原生集成测试已编译，但首次安装被系统返回 `INSTALL_FAILED_ABORTED: User rejected permissions` 阻塞；未运行测试不能记为通过，已向用户请求继续安装确认。已有 Miyono 应用与数据未删除。实机测试采用独立缓存数据库，官方固定模型与生成的中英文金额图片，不操作生产业务库。
+
+macOS 仅有 CommandLineTools，`xcodebuild` 明确要求完整 Xcode；Windows 无本机工具链。三端原生 OCR、最低系统、真实双设备通信、系统凭据、文件保存/重开与设备性能仍按各自证据记录，不能由构建或参考推理替代。
 
 本次 ONNX Flutter 依赖要求 **macOS 14+**，宿主工程已同步配置；这改变了旧 Folio 的 macOS 12 兼容范围。Windows 首轮配置固定 ORT 1.23 x64 下载路线，尚待原生包哈希/分发及实际构建验收，不能宣称 Windows ARM64 支持。
 
@@ -51,11 +53,12 @@ Android 当前构建链保留已验证的 AGP 8.11.1/Kotlin 2.2.20/Gradle 9.3.1�
 
 ## 主要代码位置
 
-- `apps/muspace/lib/screens/`：平台工作台、助手、设备与资料预览。
-- `apps/muspace/lib/assistant/`：宿主个人任务与可替换工具选择。
-- `apps/muspace/lib/platform/`：主库、范围/工具/审批回执及只读记忆整理。
-- `apps/muspace/lib/services/`：共享知识、向量、OCR、模型与交换。
-- `apps/muspace/lib/app/inquiry_plugin.dart`、`packages/inquiry_module/lib/src/app/shared_models.dart`：成熟 Folio 实际共享模型适配。
+- `apps/muyon/lib/screens/`：平台工作台、助手、设备与资料预览。
+- `apps/muyon/lib/assistant/`：宿主个人任务与可替换工具选择。
+- `apps/muyon/lib/platform/`：主库、范围/工具/审批回执及只读记忆整理。
+- `apps/muyon/lib/services/`：共享知识、向量、OCR、模型与交换。
+- `apps/muyon/lib/app/inquiry_plugin.dart`、`packages/inquiry_module/lib/src/app/shared_models.dart`：成熟 Folio 实际共享模型适配。
+- `apps/muyon/integration_test/platform_device_test.dart`：原生 OCR/离线索引/导航/任务重开的独立缓存实机验收。
 - `packages/supplier_core/lib/lan.dart`：轻量 LAN 出口；原 LAN 协议的关闭排空/可见字节进度扩展。
 
 原需求、修订 4 共识、源基线与历史迁入验收文件均保留。没有提交、推送、CI、合并或正式发布声明。

@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:muspace_module_api/muspace_module_api.dart';
+import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:research_module/src/cards/card_store.dart';
 import 'package:research_module/src/cards/canonical_json.dart';
 import 'package:research_module/src/exchange/research_package.dart';

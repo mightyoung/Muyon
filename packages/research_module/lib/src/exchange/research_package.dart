@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart' hide ZLibDecoder;
 import 'package:crypto/crypto.dart';
-import 'package:muspace_module_api/muspace_module_api.dart';
+import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../cards/card_store.dart';
@@ -144,7 +144,7 @@ class ResearchPackageExchange {
           output[path] = utf8.encode(canonicalJson(value));
       final origin = store.origin(projectId);
       json('manifest.json', {
-        'packageType': 'muspace-research',
+        'packageType': 'muyon-research',
         'schemaVersion': 1,
         'packageId': const Uuid().v4(),
         'sourceProjectId': projectId,
@@ -280,7 +280,7 @@ class ResearchPackageExchange {
     final manifest = Map<String, Object?>.from(
       readJson('manifest.json') as Map,
     );
-    if (manifest['packageType'] != 'muspace-research' ||
+    if (manifest['packageType'] != 'muyon-research' ||
         manifest['schemaVersion'] != 1) {
       throw const FormatException('Unsupported research package');
     }

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
-import 'package:muspace_module_api/muspace_module_api.dart';
+import 'package:muyon_module_api/muyon_module_api.dart';
 
 import 'models.dart';
 import 'research_skill.dart' show evidenceKinds;

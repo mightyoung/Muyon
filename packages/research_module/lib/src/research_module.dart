@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
-import 'package:muspace_module_api/muspace_module_api.dart';
+import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 
 import 'app/workbench_app.dart';
@@ -85,7 +85,7 @@ class ResearchRuntime implements ModuleRuntime {
         target.binding.nativeProjectId != task.projectId) {
       throw StateError('Task native project ID must be preserved');
     }
-    final metadata = File(p.join(task.snapshot.path, '.muspace-import.json'));
+    final metadata = File(p.join(task.snapshot.path, '.muyon-import.json'));
     if (await metadata.exists()) {
       throw const FormatException('Reserved import metadata path');
     }
@@ -127,7 +127,7 @@ class ResearchRuntime implements ModuleRuntime {
     final frozen = await resources.files.freeze(input);
     final snapshot = await ResearchExchange(store).prepareResearch(frozen.path);
     final metadata = File(
-      p.join(snapshot.snapshot.path, '.muspace-import.json'),
+      p.join(snapshot.snapshot.path, '.muyon-import.json'),
     );
     if (await metadata.exists()) {
       throw const FormatException('Reserved import metadata path');
@@ -252,7 +252,7 @@ class ResearchRuntime implements ModuleRuntime {
         if (entity is File) contents[entity.path] = await entity.readAsBytes();
       }
       metadata = jsonDecode(
-        utf8.decode(contents[p.join(absolute, '.muspace-import.json')]!),
+        utf8.decode(contents[p.join(absolute, '.muyon-import.json')]!),
       ) as Map;
       data = PreparedResearchSnapshot(
         Directory(absolute),
