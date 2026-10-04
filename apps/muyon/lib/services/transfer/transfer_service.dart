@@ -2,10 +2,22 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:supplier_core/lan.dart';
 import 'package:uuid/uuid.dart';
+
+/// Private key and paired certificates. Plain files are not a substitute.
+class FlutterLanSecretStore implements LanSecretStore {
+  const FlutterLanSecretStore();
+  static const _storage = FlutterSecureStorage();
+  @override
+  Future<String?> read(String key) => _storage.read(key: 'muyon-lan-$key');
+  @override
+  Future<void> write(String key, String value) =>
+      _storage.write(key: 'muyon-lan-$key', value: value);
+}
 
 class TransferReceipt {
   const TransferReceipt(this.id, this.digest, this.paths, this.receivedAt);
@@ -14,8 +26,32 @@ class TransferReceipt {
   final DateTime receivedAt;
 }
 
-/// Explicit package exchange, also used over the existing supplier LAN stack.
-/// LAN is opt-in and plaintext; no listener starts during host construction.
+/// Five states that must not be collapsed into one another.
+class TransferItem {
+  const TransferItem({
+    required this.id,
+    required this.peerFingerprint,
+    required this.path,
+    required this.delivered,
+    required this.attachmentState,
+    required this.attachmentLength,
+    required this.attachmentSha256,
+    required this.imported,
+    required this.readAt,
+    required this.acceptance,
+  });
+  final String id, peerFingerprint, attachmentState, acceptance;
+  final String? path, attachmentSha256, readAt;
+  final bool delivered, imported;
+  final int? attachmentLength;
+
+  /// A transferred package never grants permission to execute it.
+  bool get grantsExecution => false;
+}
+
+/// Explicit package exchange over the paired TLS LAN stack.
+/// Listening is opt-in. No listener starts during host construction.
+/// Delivery, durable receipt, import, read and human acceptance stay separate.
 class TransferService {
   TransferService(this.database, this.rootPath);
   final ManagedDatabase database;
@@ -31,6 +67,11 @@ class TransferService {
   final List<String> pendingReceivedPaths = [];
   void Function()? onPendingReceived;
 
+  /// Called once when a person accepts a verified package. Not called on receipt.
+  void Function(TransferItem item)? onAccepted;
+  Future<void> _items = Future<void>.value();
+  Future<void> get itemsSettled => _items;
+
   /// Restores only bounded, regular inbox files. Receipt acceptance is separate
   /// from business import, and already accepted bytes are never offered again.
   Future<void> initialize() => _serialize(() async {
@@ -40,6 +81,12 @@ class TransferService {
       return;
     }
     final accepted = receipts().map((receipt) => receipt.digest).toSet();
+    final acceptedItems = {
+      for (final row in database.raw.select(
+        "SELECT attachment_sha256 FROM transfer_items WHERE acceptance='accepted' AND attachment_sha256 IS NOT NULL",
+      ))
+        row['attachment_sha256'] as String,
+    };
     final pending = <String>[];
     var inspected = 0;
     var candidates = 0;
@@ -66,7 +113,9 @@ class TransferService {
         }
 
         final digest = (await sha256.bind(bounded()).first).toString();
-        if (!accepted.contains(digest)) pending.add(file.path);
+        if (!accepted.contains(digest) && !acceptedItems.contains(digest)) {
+          pending.add(file.path);
+        }
       } on FileSystemException {
         // A removed/incomplete file is retried on the next initialization.
       } on FormatException {
@@ -94,6 +143,123 @@ class TransferService {
         DateTime.parse(row['received_at'] as String),
       ),
   ];
+
+  void _notePush(LanPush push) {
+    if (push.senderFingerprint.isEmpty) return;
+    if (pendingReceivedPaths.length < maxFiles &&
+        !pendingReceivedPaths.contains(push.path)) {
+      pendingReceivedPaths.add(push.path);
+      onPendingReceived?.call();
+    }
+    _items = _items.then((_) => _insertReceived(push));
+  }
+
+  Future<void> _insertReceived(LanPush push) async {
+    final file = File(push.path);
+    if (!await file.exists()) return;
+    final bytes = await file.readAsBytes();
+    final digest = sha256.convert(bytes).toString();
+    await database.write((db) {
+      final existing = db.select(
+        'SELECT item_id FROM transfer_items WHERE path=? OR attachment_sha256=?',
+        [push.path, digest],
+      );
+      if (existing.isNotEmpty) return;
+      db.execute('INSERT INTO transfer_items VALUES(?,?,?,?,?,?,?,?,?,?,?)', [
+        const Uuid().v4(),
+        push.senderFingerprint,
+        push.path,
+        1,
+        'durable',
+        bytes.length,
+        digest,
+        0,
+        null,
+        'pending',
+        DateTime.now().toUtc().toIso8601String(),
+      ]);
+    });
+  }
+
+  List<TransferItem> items() => [
+    for (final row in database.raw.select(
+      'SELECT * FROM transfer_items ORDER BY created_at',
+    ))
+      TransferItem(
+        id: row['item_id'] as String,
+        peerFingerprint: row['peer_fingerprint'] as String,
+        path: row['path'] as String?,
+        delivered: row['delivered'] == 1,
+        attachmentState: row['attachment_state'] as String,
+        attachmentLength: row['attachment_length'] as int?,
+        attachmentSha256: row['attachment_sha256'] as String?,
+        imported: row['imported'] == 1,
+        readAt: row['read_at'] as String?,
+        acceptance: row['acceptance'] as String,
+      ),
+  ];
+
+  Future<void> markRead(String itemId) => database.write((db) {
+    db.execute(
+      'UPDATE transfer_items SET read_at=? WHERE item_id=? AND read_at IS NULL',
+      [DateTime.now().toUtc().toIso8601String(), itemId],
+    );
+  });
+
+  /// Human acceptance. Idempotent: the import hand-off runs at most once.
+  /// Acceptance does not set [TransferItem.imported].
+  Future<void> acceptItem(String itemId) async {
+    final item = await database.write((db) {
+      final rows = db.select('SELECT * FROM transfer_items WHERE item_id=?', [
+        itemId,
+      ]);
+      if (rows.isEmpty || rows.single['acceptance'] != 'pending') return null;
+      db.execute(
+        "UPDATE transfer_items SET acceptance='accepted' WHERE item_id=?",
+        [itemId],
+      );
+      final row = rows.single;
+      return TransferItem(
+        id: row['item_id'] as String,
+        peerFingerprint: row['peer_fingerprint'] as String,
+        path: row['path'] as String?,
+        delivered: row['delivered'] == 1,
+        attachmentState: row['attachment_state'] as String,
+        attachmentLength: row['attachment_length'] as int?,
+        attachmentSha256: row['attachment_sha256'] as String?,
+        imported: row['imported'] == 1,
+        readAt: row['read_at'] as String?,
+        acceptance: 'accepted',
+      );
+    });
+    if (item == null) return;
+    onAccepted?.call(item);
+  }
+
+  /// Records business import after human acceptance. Receipt alone cannot call this.
+  Future<void> markImported(String itemId) => database.write((db) {
+    final rows = db.select(
+      'SELECT acceptance FROM transfer_items WHERE item_id=?',
+      [itemId],
+    );
+    if (rows.isEmpty || rows.single['acceptance'] != 'accepted') {
+      throw StateError('已核验收妥，尚未人工接纳，不能导入');
+    }
+    db.execute(
+      'UPDATE transfer_items SET imported=1 WHERE item_id=? AND imported=0',
+      [itemId],
+    );
+  });
+
+  /// True when [bytes] are a `muyon-research` package. The bytes stay opaque here.
+  static bool isResearchPackage(List<int> bytes) {
+    try {
+      final value = jsonDecode(utf8.decode(bytes));
+      return value is Map && value['packageType'] == 'muyon-research';
+    } on FormatException {
+      return false;
+    }
+  }
 
   String _safe(String name) {
     if (name.isEmpty ||
@@ -200,6 +366,13 @@ class TransferService {
 
     final previous = existing();
     if (previous != null) return previous;
+    final tracked = database.raw.select(
+      'SELECT acceptance FROM transfer_items WHERE path=? OR attachment_sha256=?',
+      [path, digest],
+    );
+    if (tracked.isNotEmpty && tracked.first['acceptance'] != 'accepted') {
+      throw StateError('已核验收妥，尚未人工接纳，不能导入');
+    }
     final files = _decodePackage(bytes);
     checkCancelled?.call();
     final id = const Uuid().v4();
@@ -225,6 +398,10 @@ class TransferService {
           jsonEncode(paths),
           now.toIso8601String(),
         ]);
+        db.execute(
+          'UPDATE transfer_items SET imported=1 WHERE path=? OR attachment_sha256=?',
+          [path, digest],
+        );
         return TransferReceipt(id, digest, List.unmodifiable(paths), now);
       });
       if (result.id != id) await directory.delete(recursive: true);
@@ -297,26 +474,49 @@ class TransferService {
     return files;
   }
 
+  int? get httpPort => _node?.httpPort;
+  String? get localShortCode => _node?.identity.shortCode;
+  String? get localQrPayload => _node?.identity.qrPayload;
+  bool isPaired(LanPeer peer) => _node?.isPaired(peer.fingerprint) ?? false;
+
+  Future<LanPeer> probe(String host, {int port = lanHttpPort}) {
+    final node = _node;
+    if (node == null) throw StateError('Device communication is disabled');
+    return node.probe(host, port: port);
+  }
+
+  void confirmPeer({
+    required String fingerprint,
+    required String confirmedCode,
+    required String certificatePem,
+  }) {
+    final node = _node;
+    if (node == null) throw StateError('Device communication is disabled');
+    node.confirmPeer(
+      fingerprint: fingerprint,
+      confirmedCode: confirmedCode,
+      certificatePem: certificatePem,
+    );
+  }
+
+  void revoke(String fingerprint) => _node?.revoke(fingerprint);
+
   Future<void> start({
     required String deviceId,
     required String deviceName,
     int? discoveryPort,
     int? httpPort,
+    LanSecretStore? secrets,
   }) => _serialize(() async {
     if (_node != null) return;
     _node = await LanNode.start(
       id: deviceId,
       name: deviceName,
       inbox: Directory(p.join(rootPath, 'inbox')),
-      onPush: (push) {
-        if (pendingReceivedPaths.length < maxFiles &&
-            !pendingReceivedPaths.contains(push.path)) {
-          pendingReceivedPaths.add(push.path);
-          onPendingReceived?.call();
-        }
-      },
+      onPush: _notePush,
       discoveryPort: discoveryPort ?? lanDiscoveryPort,
       httpPort: httpPort ?? lanHttpPort,
+      secrets: secrets ?? const FlutterLanSecretStore(),
     );
   });
   Future<String> freezeForSend(
@@ -340,14 +540,20 @@ class TransferService {
         'Outgoing package differs from approved bytes',
       );
     }
-    final members = _decodePackage(bytes);
-    if (allowedMembers != null &&
-        members.entries.any(
-          (entry) =>
-              allowedMembers[entry.key] !=
-              sha256.convert(entry.value).toString(),
-        )) {
-      throw StateError('Outgoing bytes are outside approved source scope');
+    if (isResearchPackage(bytes)) {
+      if (allowedMembers != null) {
+        throw const FormatException('Research package has no transfer members');
+      }
+    } else {
+      final members = _decodePackage(bytes);
+      if (allowedMembers != null &&
+          members.entries.any(
+            (entry) =>
+                allowedMembers[entry.key] !=
+                sha256.convert(entry.value).toString(),
+          )) {
+        throw StateError('Outgoing bytes are outside approved source scope');
+      }
     }
     checkBeforeEffect?.call();
     final frozen = File(p.join(rootPath, 'sending', const Uuid().v4()));
@@ -367,6 +573,14 @@ class TransferService {
   }) async {
     final node = _node;
     if (node == null) throw StateError('Device communication is disabled');
+    if (!node.isPaired(peer.fingerprint)) {
+      throw StateError('未配对或已撤销');
+    }
+    final online = node.peers.any(
+      (candidate) =>
+          candidate.id == peer.id && candidate.address == peer.address,
+    );
+    if (!online) throw StateError('对方不在线，没有中继');
     final frozen = await freezeForSend(
       verifiedPackagePath,
       expectedDigest: expectedDigest,

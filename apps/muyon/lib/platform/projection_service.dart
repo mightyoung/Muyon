@@ -20,6 +20,11 @@ class ProjectionService {
   final ManagedDatabase host;
   static const _batch = 500;
 
+  /// `project_id` value for objects that belong to no project (e.g. inquiry
+  /// suppliers). The column is part of the primary key and SQLite treats NULLs
+  /// as distinct, so a fixed sentinel keeps global rows unique.
+  static const globalProject = '';
+
   /// Downstream invalidation hook (e.g. search index), called after commit.
   void Function(String moduleId, List<ModuleChange> applied)? onApplied;
 
@@ -79,9 +84,7 @@ class ProjectionService {
 
   static void _apply(Database h, String moduleId, ModuleChange change) {
     final ref = change.ref;
-    final project = ref.nativeProjectId;
-    // Catalog rows are project-scoped; project-less objects are not listed.
-    if (project == null) return;
+    final project = ref.nativeProjectId ?? globalProject;
     if (change.op == ChangeOp.delete) {
       h.execute(
         'DELETE FROM object_catalog WHERE module_id=? AND project_id=? AND object_type=? AND object_id=?',

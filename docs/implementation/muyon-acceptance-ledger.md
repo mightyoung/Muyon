@@ -19,9 +19,9 @@
 | 2.2c | 执行过程、分支、接纳/否定理由、不确定性 | 🟡 | T：research run assessment | W3 链路验收 |
 | 2.2d | 任务/实验导出到另一设备并导回 | 🟡 | T：任务包/结果包（迁入） | 授权语义 C6，R 双设备 → W3 |
 | 2.2e | 完整研究包交换（不同本地 ID、分叉、重复导入） | 🟡 | T：`research_package_test` | 往返/分叉矩阵 → C4 |
-| 2.3 | 询价完整业务 + 受控只读/计算工具 | 🟡 | T：supplier 466 + 3 跳过、inquiry 历史 309（见下方 W0 记录） | 写操作工具化 C5，存储接管 C1 |
+| 2.3 | 询价完整业务 + 受控只读/计算工具 | 🟡 | T：supplier 467 + 3 跳过、inquiry 历史 309（见下方 W0 记录） | 写操作工具化 C5，存储接管 C1 |
 | 2.4 | 原型业务 + 受限 WebView | ❌ | 契约 `RestrictedWebViewSpec`（T：`contract_v1_test`） | B3 |
-| 2.5 | 设备互传、一对一聊天、五态独立 | 🟡 | T：设备协议 12 项 | **明文无认证** → D1/D2 |
+| 2.5 | 设备互传、一对一聊天、五态独立 | 🟡 | T：`lan_trust_test`、`lan_security_test`、`transfer_states_test`（配对后 TLS 证书固定 + 发送方签名；送达/落盘/导入/已读/接纳五态独立；研究包接纳后只导入一次）；D：[威胁模型](lan-threat-model.md) | 真实双设备 R；TLS 最低版本显式 1.3、一对一文字聊天界面 → D；在线直连不可达时的状态展示 |
 
 ## 三～六、设计与架构
 
@@ -34,9 +34,9 @@
 | 5.2 | 通知/进度声明 | ❌ | — | 有真实需求时加入契约（A） |
 | 6.1 | 主库 + 每模块业务库 | 🟡 | T：`storage_manager_test` | 询价 `ai-jobs.sqlite` 等自开库 → C1 |
 | 6.2 | 宿主统一建库/升级、漂移阻止启用 | 🟡 | T：`storage_manager_test`、`storage_recovery_test`、`schema_catalog_test`（每次打开按真实状态登记，高版本/漂移/迁移失败记为 blocked 且不改库） | 设置页展示目录与阻止原因 → B；R → W3 |
-| 6.3 | 单写队列、首次导入意图+回执+对账、派生投影 | 🟡 | T：`projection_service_test`（幂等、重放、删除不复活、提交后自动追赶）、`import_recovery_test`（按回执绑定、冲突隔离、放弃前核对回执） | 模块写入变更记录 → C；检索索引消费 `onApplied` → D |
+| 6.3 | 单写队列、首次导入意图+回执+对账、派生投影 | 🟡 | T：`projection_service_test`（幂等、重放、删除不复活、提交后自动追赶）、`import_recovery_test`（按回执绑定、冲突隔离、放弃前核对回执） | 模块写入变更记录 → C；检索索引已接 `onApplied`（`index_invalidation_test`） |
 | 6.4 | 稳定身份、修订、引用锚（摘要+页码+引句） | 🟡 | 卡片修订 ID（research） | C3/C4 |
-| 6.5 | 派生数据失效、一致备份恢复 | 🟡 | T：`backup_service_test`（冻结写队列+VACUUM INTO、文件清单 SHA-256、篡改/缺失/越界路径检出、关闭后恢复且旧数据移开不删） | 备份/恢复 UI → B；检索索引失效 → D；R → W3 |
+| 6.5 | 派生数据失效、一致备份恢复 | 🟡 | T：`backup_service_test`（冻结写队列+VACUUM INTO、文件清单 SHA-256、篡改/缺失/越界路径检出、关闭后恢复且旧数据移开不删）；`index_invalidation_test`（对象删除/撤回即从检索移除，取材前回模块核对） | 备份/恢复 UI → B；R → W3 |
 
 ## 七～十二、执行、记忆、模型、通信、体验、质量
 
@@ -46,9 +46,9 @@
 | 8 | 记忆/经验/Dream、撤回传递 | ❌/🟡 | 见 2.1d/e | D4 |
 | 9a | 模型端点显式、凭据安全存储、无隐式回退 | 🟡 | T：`model_gateway_test`、`profile_routing_test` | M 真实端点 → W3 |
 | 9b | PDF 文字层优先 + PaddleOCR | 🟡 | M：ONNX 参考推理（`public_services_validation.md`） | Flutter 原生 R 三端 → W3 |
-| 9c | 关键词/全文/向量/组合检索、中文短词 | 🟡 | T：FTS5/向量 | 评测台 D3，混合检索按结论 |
+| 9c | 关键词/全文/向量/组合检索、中文短词 | 🟡 | T：FTS5/向量；`retrieval_eval_test`（[评测报告](retrieval-eval-2026-10-04.md)：18 篇合成语料，结论保持 cjk-bigram + 单字扫描） | 语料过小（recall@10 全部 1.0，无区分度）；向量与真实论文 M 未测 → 待用户提供端点与论文后重测 |
 | 9d | 限定资料问答：定位、断言支持、应答/拒答 | 🟡 | T：引用校验 | M 评测 → W3 |
-| 10 | 发现/配对/授权/接收/导入分离，加密认证 | ❌ | — | D1/D2/D5 |
+| 10 | 发现/配对/授权/接收/导入分离，加密认证 | 🟡 | T：同 2.5；发现不授予信任、未配对/已撤销拒收、明文握手失败 | TLS 1.3 下限未显式设置（默认允许 1.2）；nonce 防重放仅内存 4096 条；在线任务调度 D5；双设备 R |
 | 11 | 统一设计系统（Folio DESIGN.md）、窄屏/大字体/键盘 | 🟡 | D：[DESIGN.md](../design/DESIGN.md)；T：320–1280 宽、200% 字号 | 宿主/科研主题统一 → B1 |
 | 12 | 科研完整链、失败矩阵、三端构建/实机 | ❌ | B：Android APK（开发签名，历史） | W3；需用户提供 macOS(Xcode)/Windows/Android 设备 |
 
@@ -75,3 +75,11 @@
 - A6：`McpAdapter` 把 MCP 工具作为 network 效应工具接入宿主注册表；契约 `ToolDescriptor.description`。
 - 宿主 106 通过 + 1 条件跳过；module_api 17；research 95；inquiry 310 + 1 跳过 + 1 已知 golden 差异；analyze 无问题。
 - 未做：MCP 服务器配置持久化与连接界面（等 B 的设置页）；OCR 模型下载未纳入出站记录（G6）。
+
+## W1-D 合入记录（2026-10-04，`develop@7a45815`）
+
+- D1 `fdf781d`：设备身份（P-256 自签证书，私钥经 `FlutterLanSecretStore` 进系统安全存储）、指纹比对配对、撤销；TLS 证书固定 + 发送方 ECDSA 签名（指纹/nonce/消息 ID/长度/正文哈希）；明文通道移除。新依赖 `basic_utils`。
+- D2 `7904df9`：五态独立；研究包接纳后经注入回调只导入一次，不授予执行权（含 G1-D）；索引随投影删除/撤回失效。
+- D3 `afe96e7`：检索评测台与报告。
+- 合并验证（`scripts/verify.sh`）：module_api 17、research 95、supplier_core 475 + 3 跳过、host 117 + 1 条件跳过、inquiry 310 + 1 跳过 + 已知 golden 差异；analyze 全部无问题。
+- 审查意见（已转 D）：TLS 最低版本未显式 1.3；评测语料过小；双设备实机未验证。
