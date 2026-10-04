@@ -238,3 +238,47 @@ The LAN path is **plaintext with no device authentication**. Content digests pro
 4. Evidence class per item (doc / automated test / build / real model / device); unverified items say "unverified"
 5. New dependencies with reasons; changes outside owned files
 6. Contract requests; requests to B/C; known gaps and risks
+
+---
+
+# 追加任务：W2-A 调用路径审计发现（G1–G5）
+
+来源：[invocation-path-audit.md](../../implementation/invocation-path-audit.md)。`develop` 已更新到 `649740b`（含 W2-A：效应点结果表述、出站记录、MCP 适配、契约 `ToolDescriptor.description`）。三段分别追加发给对应 Agent；正在进行的第 1 阶段任务不受影响，可在其后或穿插完成。
+
+---8<--- 追加 · B（Sonnet）---
+
+`develop` 已更新到 `649740b`。先同步：`git fetch origin && git merge origin/develop`（有冲突时保留双方意图，在报告中说明）。契约新增 `ToolDescriptor.description`（可选）。
+
+追加任务 **G1-B：隐藏科研局域网传输入口**
+- 背景：`packages/research_module/lib/src/app/lan_transfer_page.dart`（经 `workbench_app.dart` 约 275 行可达）使用 `core/lan_transfer.dart` 的独立局域网通道：明文、无设备认证，违反需求第十节“在线通信需要设备身份验证和加密传输”。这是宿主传输与询价局域网之外的第三条设备通道。
+- 要求：在 Muyon 宿主中运行时，科研工作台不再显示或打开该页面；设备间传递研究包统一走宿主“设备”页（D 负责传输，导入仍经科研导入流程）。若入口位置需要替换，指向宿主设备页，文案不得暗示已加密或已认证，除非 D 的实现已合入。
+- 测试：宿主模式下科研工作台的 widget 树中找不到该入口，路由无法到达该页面。
+- 不改 `core/lan_transfer.dart`（归 C）。
+
+---8<--- 追加 · C（Codex）---
+
+`develop` is now at `649740b`. Sync first: `git fetch origin && git merge origin/develop` (on conflicts keep both intents and explain in your report). Contract addition: optional `ToolDescriptor.description` (shown to the model for tool selection; untrusted when external). New host pieces you can read: `apps/muyon/lib/platform/outbound_ledger.dart` (every model request is recorded before sending), `mcp_adapter.dart`, and the effect-point rule in `tool_registry.dart` (call `context.checkBeforeEffect()` right before any write or external effect; cancel/error after it is reported as `interrupted`).
+
+Additional tasks from the invocation-path audit:
+
+**G1-C — research LAN channel must not be reachable when hosted.** `packages/research_module/lib/src/core/lan_transfer.dart` is a third, plaintext, unauthenticated device channel. Make it standalone-only: unreachable from the hosted module (add a test that fails if the hosted path can start its receiver or sender). Research packages travel between devices through the host transfer service (D) and are imported through the normal research import flow after user acceptance. B hides the UI entry; do not edit `src/app/**`.
+
+**G2 — inquiry assistant web fetch** (`supplier_core/lib/src/assistant_web_tools.dart`, reachable from the inquiry ask page). Its network traffic bypasses the host. Either register it with the host `ToolRegistry` as a `ToolEffect.network` tool (explicit destination, per-call host approval, receipt), or route it through a host-provided, recorded channel. Keep the existing user review step. Call `checkBeforeEffect()` immediately before the request.
+
+**G3 — supplier hub publishing** (`supplier_core/lib/src/hub.dart`, reachable from `features/hub/hub_publish.dart`). Same treatment as G2. Publishing is an external write: if the outcome is uncertain (timeout, connection reset after sending), query the hub for the actual state before allowing a retry; never report a local cancel as a remote rollback.
+
+**G4 — standalone `LlmClient` unreachable when hosted** (`inquiry_module/lib/src/app/app_state.dart` ~line 564). When the host injects the shared model factory, the module's own client must not be constructible on any hosted path. Add a test.
+
+**G5 — name the caller in outbound records.** In `apps/muyon/lib/app/inquiry_plugin.dart` pass `caller: 'inquiry'` to `gateway.request(...)` so inquiry model traffic is identifiable in `outbound_requests`. Add an assertion in `test/inquiry_shared_models_test.dart` (construct the gateway with an `OutboundLedger`).
+
+Report these under the same final-report format, one line each with evidence class.
+
+---8<--- 追加 · D（Grok）---
+
+`develop` is now at `649740b`. Sync first: `git fetch origin && git merge origin/develop` (on conflicts keep both intents and explain in your report). New host pieces: `apps/muyon/lib/platform/outbound_ledger.dart`, `mcp_adapter.dart`, and the effect-point rule in `tool_registry.dart`.
+
+Additional task from the invocation-path audit:
+
+**G1-D — the host transfer carries research packages.** The research workbench had its own plaintext LAN channel (`research_module/lib/src/core/lan_transfer.dart`); C makes it unreachable when hosted and B removes its UI entry. Your encrypted, paired transport (D1) must therefore be able to send a research package file (`muyon-research` format) to a paired device, with its five independent states (D2). On the receiving side, a verified package is offered for import into the research module only after the user accepts it; receipt or verification never triggers an import by itself, and a transferred package never grants execution permission. Add a loopback test: send a research package → verified receipt → stays pending until accepted → hand-off to an injected import callback exactly once (idempotent on retry).
+
+Report this under the same final-report format with its evidence class.
