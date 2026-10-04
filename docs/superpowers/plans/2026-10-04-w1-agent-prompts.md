@@ -301,6 +301,8 @@ Three review items:
 
 **R3 — Decide replay protection across restarts (assess, then fix or document).** Nonces and message ids are remembered in memory (4096 entries) and lost on restart. Network replay is already blocked by TLS with pinning, so the remaining case is a paired device re-sending an old signed push after the receiver restarts. Either (a) persist seen message ids with their receipts for a bounded window and add a signed timestamp to the push binding with an accept window (bump the binding to `muyon-push-v2`), or (b) argue in the threat model why receipts' existing duplicate detection makes this harmless. Include a test for whichever you choose.
 
+**R4 — Tests must not rewrite tracked files (must fix).** `apps/muyon/test/retrieval_eval/retrieval_eval_test.dart` writes `docs/implementation/retrieval-eval-2026-10-04.md` on every `flutter test` run, so ordinary test runs dirty the repository and overwrite the committed numbers with load-dependent timings. Keep the assertions in the test, but write the report only when explicitly asked (e.g. `MUYON_WRITE_EVAL_REPORT=1`, or a separate script under `scripts/`), and document that command in the report header.
+
 Report in the same final-report format: commits, test counts, evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"), changes outside owned files, and any contract requests.
 
 ---
@@ -380,3 +382,37 @@ Requirement (section 7): keep the selection layer replaceable; evaluate a limite
 - TDD; never weaken existing assertions. Do not read, edit or commit `.env`; no secrets in code, tests or logs.
 - No new dependency without a written reason.
 - Report format as before: commits; test counts per package; evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"); changes outside owned files (including each host migration); contract requests; requests to B/C; known gaps and risks.
+
+---
+
+# 追加：第 1 阶段审查意见（给 Sonnet、Codex）
+
+---8<--- 追加 · B（Sonnet）· 审查意见 ---
+
+Your branch `feat/b-ui` (B1, B2, B3, G1-B; 7 commits up to `2c310f5`) was reviewed. Strong work: `muyon_ui` with a token-parity test, the data & storage page (catalog, unavailable modules, projection errors), an honest backup → verify → close → restore → reopen flow, the reader's separate page-jump and text-highlight outcomes, G1-B, and a prototype WebView that denies new windows and permissions, runs incognito without cache, and checks every top-level navigation.
+
+Sync first: `git fetch origin && git merge origin/develop` (develop is at `ce928c2` or later). Before every push run `scripts/verify.sh` and make sure it leaves the working tree clean.
+
+Two items must be fixed before B3 can be merged:
+
+**B-R1 — Wire the prototype module into the app.** Today `packages/prototype_module` is not a dependency of `apps/muyon` and is not in `ModuleRegistry`, so users cannot reach it. Add the dependency, register `PrototypeModule()` alongside `ResearchModule()` in `bootstrap.dart`, activate it through the host the same way research is (`storage.open('prototype', module.schema)`, `module_registry` status, `projections.watch('prototype', connection)`, failures recorded instead of thrown), and give it an entry in the shell navigation. Keep the `bootstrap.dart` change minimal and list it in your report. Add a widget test that opens the prototype entry from the shell and a host test that a broken prototype database disables only that module.
+
+**B-R2 — Restrict sub-resource loads, not only navigations.** `shouldOverrideUrlLoading` sees top-level navigations only; `fetch`/XHR, images, scripts, styles and frames loaded by the page can still reach any host, which does not meet "限制资源访问" and could combine with bridge channels to send data out. Block every request outside the spec's allowed roots on each target platform (Android, macOS, Windows):
+- inject a strict Content-Security-Policy at document start (e.g. a `UserScript` adding a `<meta http-equiv="Content-Security-Policy">` that only allows the prototype root, with `connect-src` limited to it and no remote origins), and
+- use the plugin's request interception where the platform supports it (e.g. `useShouldInterceptRequest`/`shouldInterceptRequest` on Android, content blockers on Apple platforms; check what `flutter_inappwebview` 6.1.5 offers for WebView2 on Windows).
+Document per platform which layer enforces the rule and what could only be verified on a real device (mark it "unverified"). Unit-test the policy generator and the guard's decision for sub-resource URLs (remote `https`, `data:`, `blob:`, `..`, other `file` paths).
+
+Also list in your report the two small edits outside your ownership (`research_module.dart`, `devices_page.dart`).
+
+---8<--- 追加 · C（Codex）· 审查意见 ---
+
+Your three inquiry commits were reviewed from your local branch: `81078bd` (SQL triggers record supplier/inquiry/quotation/project/project_item changes in the change log, including raw exchange/merge writes, with a backfill on upgrade — good design), `4a38562` (hosted mode requires host-managed stores; the ontology WebView cache moves under the module directory; hosted wording no longer presents the inquiry snapshot as a full backup), `091c79c` (G4/G5).
+
+**C-R0 — Your push did not reach GitHub.** `origin/feat/c-modules` is still `3bff397` (W0); your local branch is 23 commits ahead (`0b7ce95`). Run `git push origin feat/c-modules`, then confirm with `git ls-remote origin refs/heads/feat/c-modules` that the hash equals `git rev-parse HEAD`. Report the hash.
+
+**C-R1 — One hosted flag, not two.** `AppState` now has both `isHosted => !_ownsJobs` (from `4a38562`) and `_isHosted` (from `091c79c`). Make `isHosted` return `_isHosted`, derive nothing else from `_ownsJobs` for hosting decisions, and add a test that a hosted state with host-owned jobs reports hosted.
+
+Notes:
+- Suppliers have no project; A changed the projection so project-less objects are now catalogued under `ProjectionService.globalProject` (`''`). No change needed on your side.
+- Commit the in-progress research work (C2 change log, `ResearchSession.objectPage`, G1-C standalone-only LAN) as small commits with a short body each, run `scripts/verify.sh`, push, then continue with C3 (citation anchors), C4 (research package round trip), G2 and G3.
+- Before every push: `scripts/verify.sh` green and a clean working tree.
