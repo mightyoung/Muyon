@@ -56,7 +56,7 @@ void main() {
           expect(find.byTooltip('收起助手'), findsNothing);
         }
         expect(tester.takeException(), isNull);
-        for (final label in ['助手', '资料', '工具', '工作台']) {
+        for (final label in ['助手', '资料', '我的', '工作台']) {
           await tester.tap(
             find.descendant(of: navigation, matching: find.text(label)),
           );

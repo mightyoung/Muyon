@@ -291,6 +291,43 @@ class _PlatformShellState extends State<PlatformShell> {
     if (mounted) setState(() {});
   }
 
+  /// Phone-first hub: every destination opens as its own page with a back
+  /// button. Wide layouts also keep these as top-bar shortcuts.
+  Widget mine() => list([
+    Text('我的', style: Theme.of(context).textTheme.titleLarge),
+    const SizedBox(height: 8),
+    card(
+      '个人中心',
+      '任务、记忆与个人助手设置',
+      () => page('个人中心', personal()),
+      Icons.person_outline,
+    ),
+    card(
+      '消息中心',
+      '通知与待处理事项',
+      () => page('消息中心', notifications()),
+      Icons.notifications_outlined,
+    ),
+    card(
+      '系统设置',
+      '外观、模型与数据去向',
+      () => page('系统设置', settings()),
+      Icons.settings_outlined,
+    ),
+    card(
+      '数据与存储',
+      '模块状态、备份与恢复',
+      () => page('数据与存储', storagePage()),
+      Icons.storage_outlined,
+    ),
+    card(
+      '接口与工具',
+      '宿主注册的工具与调用',
+      () => page('接口与工具', tools()),
+      Icons.extension_outlined,
+    ),
+  ]);
+
   Widget list(Iterable<Widget> children) =>
       ListView(padding: const EdgeInsets.all(16), children: children.toList());
   Widget card(String title, String detail, VoidCallback tap, IconData icon) =>
@@ -308,7 +345,7 @@ class _PlatformShellState extends State<PlatformShell> {
     listenable: repo,
     builder: (context, _) => LayoutBuilder(
       builder: (context, size) {
-        final bodies = [home, () => assistant(), knowledge, tools];
+        final bodies = [home, () => assistant(), knowledge, mine];
         final body = Column(
           children: [
             if (busy) const LinearProgressIndicator(),
@@ -333,10 +370,7 @@ class _PlatformShellState extends State<PlatformShell> {
             label: '助手',
           ),
           NavigationDestination(icon: Icon(Icons.folder_outlined), label: '资料'),
-          NavigationDestination(
-            icon: Icon(Icons.extension_outlined),
-            label: '工具',
-          ),
+          NavigationDestination(icon: Icon(Icons.person_outline), label: '我的'),
         ];
         return Scaffold(
           appBar: AppBar(
@@ -353,21 +387,23 @@ class _PlatformShellState extends State<PlatformShell> {
                         : Icons.auto_awesome_outlined,
                   ),
                 ),
-              IconButton(
-                tooltip: '消息中心',
-                onPressed: () => page('消息中心', notifications()),
-                icon: const Icon(Icons.notifications_outlined),
-              ),
-              IconButton(
-                tooltip: '个人中心',
-                onPressed: () => page('个人中心', personal()),
-                icon: const Icon(Icons.person_outline),
-              ),
-              IconButton(
-                tooltip: '系统设置',
-                onPressed: () => page('系统设置', settings()),
-                icon: const Icon(Icons.settings_outlined),
-              ),
+              if (size.maxWidth >= 900) ...[
+                IconButton(
+                  tooltip: '消息中心',
+                  onPressed: () => page('消息中心', notifications()),
+                  icon: const Icon(Icons.notifications_outlined),
+                ),
+                IconButton(
+                  tooltip: '个人中心',
+                  onPressed: () => page('个人中心', personal()),
+                  icon: const Icon(Icons.person_outline),
+                ),
+                IconButton(
+                  tooltip: '系统设置',
+                  onPressed: () => page('系统设置', settings()),
+                  icon: const Icon(Icons.settings_outlined),
+                ),
+              ],
             ],
           ),
           body: size.maxWidth >= 900
