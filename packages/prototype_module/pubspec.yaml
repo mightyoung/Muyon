@@ -1,0 +1,25 @@
+name: prototype_module
+description: Prototype pages shown in a restricted WebView, with versions and feedback.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  muyon_module_api:
+    path: ../muyon_module_api
+  muyon_ui:
+    path: ../muyon_ui
+  flutter_inappwebview: 6.1.5
+  sqlite3: 3.6.0
+  path: 1.9.1
+  crypto: 3.0.7
+  uuid: 4.5.3
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
