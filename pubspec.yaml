@@ -8,3 +8,4 @@ workspace:
   - packages/research_module
   - packages/supplier_core
   - packages/inquiry_module
+  - packages/muyon_ui

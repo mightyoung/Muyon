@@ -178,7 +178,7 @@ class _ReaderPageState extends State<ReaderPage> {
                 const SizedBox(height: 8),
                 SelectableText(
                   const JsonEncoder.withIndent('  ').convert(match.single.data),
-                  style: const TextStyle(fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),

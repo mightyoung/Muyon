@@ -1,0 +1,18 @@
+name: muyon_ui
+description: Folio design tokens, themes and motion helpers shared by the Muyon host and modules.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  inquiry_module:
+    path: ../inquiry_module
+flutter:
+  uses-material-design: true

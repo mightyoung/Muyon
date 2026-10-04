@@ -361,11 +361,11 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
                         ),
                       ),
                     const Spacer(),
-                    const Padding(
-                      padding: EdgeInsets.all(20),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
                       child: Text(
                         '本地资料库\n文件交换 · 无云依赖',
-                        style: TextStyle(fontSize: 12),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
                   ],
@@ -429,9 +429,9 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 '让研究材料成为连续的工作',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
               const Text(
@@ -461,9 +461,9 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 '支持 Markdown、JSONL 与相对附件。源材料不会被修改。',
-                style: TextStyle(fontSize: 12),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),
@@ -946,7 +946,7 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
                 const SizedBox(height: 8),
                 SelectableText(
                   const JsonEncoder.withIndent('  ').convert(d),
-                  style: const TextStyle(fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (group != null && group.older.isNotEmpty)
                   RevisionHistory(older: group.older),
@@ -1050,7 +1050,7 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
               const SizedBox(height: 8),
               SelectableText(
                 '任务 ID：${t.id}',
-                style: const TextStyle(fontSize: 12),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
               Wrap(

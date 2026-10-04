@@ -144,7 +144,7 @@ class _DevicesPageState extends State<DevicesPage> {
   Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.all(16),
     children: [
-      const Text('本人设备与在线通信', style: TextStyle(fontSize: 22)),
+      Text('本人设备与在线通信', style: Theme.of(context).textTheme.titleLarge),
       const Text(
         '仅在本人可信局域网启用。当前连接为明文，设备名称不是身份认证；收到的文件进入待核验区。跨网络可以使用数据包和自选传递渠道。',
       ),

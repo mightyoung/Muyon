@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   muyon_module_api:
     path: ../../packages/muyon_module_api
+  muyon_ui:
+    path: ../../packages/muyon_ui
   research_module:
     path: ../../packages/research_module
   inquiry_module:

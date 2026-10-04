@@ -4,6 +4,7 @@ import 'dart:ui' show AppExitResponse;
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:muyon_ui/muyon_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 import 'package:inquiry_module/inquiry_module.dart';
@@ -94,17 +95,8 @@ class _MuyonAppState extends State<MuyonApp> {
       locale: const Locale('zh'),
       supportedLocales: const [Locale('zh'), Locale('en')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff356859)),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xff356859),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      theme: muyonTheme(Brightness.light),
+      darkTheme: muyonTheme(Brightness.dark),
       themeMode: mode,
       home: PlatformShell(
         host: widget.host,
