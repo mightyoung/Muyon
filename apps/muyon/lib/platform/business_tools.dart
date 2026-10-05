@@ -6,6 +6,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:supplier_core/supplier_core.dart';
 
 import '../app/bootstrap.dart';
+import 'inquiry_write_tools.dart';
 
 String objectIdentity(ObjectRef ref) => jsonEncode([
   ref.moduleId,
@@ -173,6 +174,7 @@ Future<ResolvedAssistantScope> resolveAssistantScope(
 
 void registerBusinessTools(MuyonHost host) {
   final registry = host.tools;
+  registerInquiryWriteTools(host);
   // Reuse the mature application's actual query, comparison, budget and
   // matching rules, rather than rebuilding simplified calculations.
   for (final definition in agentTools) {
