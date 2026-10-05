@@ -42,7 +42,8 @@ for entry in "${suites[@]}"; do
   summary=$(echo "$log" | grep -E "All tests passed|Some tests failed|All other tests passed" | tail -1 | sed -E 's/^[0-9:]+ //')
   unexpected=$(echo "$log" | grep -E "\[E\]$" | sed -E 's/^[0-9:]+ [+~0-9 -]+: //; s/ \[E\]$//' | sort -u | while read -r failure; do
     known=0
-    for k in "${KNOWN_FAILURES[@]}"; do [[ "$failure" == *"$k"* ]] && known=1; done
+    # bash 3.2 (macOS) treats an empty array as unbound under set -u.
+    for k in ${KNOWN_FAILURES[@]+"${KNOWN_FAILURES[@]}"}; do [[ "$failure" == *"$k"* ]] && known=1; done
     [[ $known -eq 0 ]] && echo "$failure"
   done)
   if [[ -z "$summary" ]]; then
