@@ -192,6 +192,30 @@ void main() {
   }
 
   test(
+    'revocation after preparation prevents all canonical commit effects',
+    () async {
+      await sample();
+      final bytes = await sender.exportBytes('mac-project', ['local-card']);
+      var accepted = true;
+      final prepared = receiver.prepareBytes(
+        bytes,
+        target('android-project'),
+        checkBeforeCommit: () {
+          if (!accepted) throw StateError('Acceptance revoked');
+        },
+      );
+      accepted = false;
+      await expectLater(
+        commit(receiver, prepared, 'revoked'),
+        throwsStateError,
+      );
+      expect(secondDb.raw.select('SELECT * FROM projects'), isEmpty);
+      expect(secondDb.raw.select('SELECT * FROM rk_cards'), isEmpty);
+      expect(secondDb.raw.select('SELECT * FROM rk_import_receipts'), isEmpty);
+    },
+  );
+
+  test(
     'roundtrip remaps local IDs retains canonical parents and bytes',
     () async {
       final original = await sample();
