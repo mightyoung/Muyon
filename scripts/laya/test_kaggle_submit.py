@@ -14,11 +14,11 @@ class SubmitGuards(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             metrics = root / "stage1-metrics.json"
-            metrics.write_text(json.dumps({"gate1": "fail"}), encoding="utf-8")
+            metrics.write_text(json.dumps({"gate1b": "fail"}), encoding="utf-8")
             missing = root / "absent.env"
             with self.assertRaises(SystemExit) as caught:
                 kaggle_submit.submit(metrics=metrics, env_file=missing)
-            self.assertIn("GATE1 fail", str(caught.exception))
+            self.assertIn("GATE1b fail", str(caught.exception))
             self.assertFalse(missing.exists())
 
     def test_missing_metrics_stop_before_the_env_file(self):
@@ -27,7 +27,7 @@ class SubmitGuards(unittest.TestCase):
             missing_env = Path(tmp) / "absent.env"
             with self.assertRaises(SystemExit) as caught:
                 kaggle_submit.submit(metrics=missing_metrics, env_file=missing_env)
-            self.assertIn("stage1 metrics missing", str(caught.exception))
+            self.assertIn("stage1b metrics missing", str(caught.exception))
 
     def test_read_token_uses_only_the_named_key(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -23,19 +23,26 @@ def _row(category, choice, expected, confidence, noul=0.9, dangerous=None):
 
 
 class OptionText(unittest.TestCase):
-    def test_glosses_cover_the_registered_tools_and_hide_ids(self):
+    def test_options_are_read_only_and_keep_the_tool_id(self):
         selection = contract.load_json(SELECTION)
         glosses = contract.load_json(HERE / "glosses.json")["glosses"]
-        id_to_key, key_to_id, criteria = contract.build_options(selection["tools"], glosses)
-        self.assertEqual(len(criteria), len(selection["tools"]) + 1)
-        self.assertEqual(key_to_id["opt00"], "none")
-        rendered = "\n".join(criteria.values())
-        for tool in selection["tools"]:
-            self.assertNotIn(tool["id"], rendered)
-            self.assertNotIn(tool["id"], id_to_key[tool["id"]])
-            self.assertIn(tool["description"], criteria[id_to_key[tool["id"]]])
-            self.assertIn(glosses[tool["id"]], criteria[id_to_key[tool["id"]]])
-        self.assertEqual(len(set(id_to_key.values())), len(id_to_key))
+        readable = contract.read_only_tools(selection["tools"])
+        self.assertGreater(len(readable), 0)
+        self.assertLess(len(readable), len(selection["tools"]))
+        id_to_key, key_to_id, criteria = contract.build_options(readable, glosses)
+        self.assertEqual(key_to_id["none"], "none")
+        self.assertEqual(key_to_id["knowledge.search"], "knowledge.search")
+        self.assertIn("搜索本地资料", criteria["knowledge.search"])
+        self.assertIn(glosses["knowledge.search"], criteria["knowledge.search"])
+        self.assertEqual(len(criteria), len(readable) + 1)
+        with self.assertRaises(ValueError):
+            contract.build_options(selection["tools"], glosses)
+        choice, rejected = contract.accept_choice("knowledge.delete", set(key_to_id) - {"none"})
+        self.assertEqual(choice, "none")
+        self.assertTrue(rejected)
+        kept, kept_rejected = contract.accept_choice("knowledge.search", {"knowledge.search"})
+        self.assertEqual(kept, "knowledge.search")
+        self.assertFalse(kept_rejected)
 
     def test_negation_set_does_not_copy_the_eval_prompts(self):
         selection = contract.load_json(SELECTION)
@@ -62,7 +69,7 @@ class Scoring(unittest.TestCase):
         self.assertTrue(judged["falseWrite"])
         self.assertFalse(contract.judge_row(rows[1], 1.0)["falseWrite"])
 
-    def test_per_category_thresholds_keep_a_safe_category_usable(self):
+    def test_one_global_threshold_abstains_rather_than_splitting_by_category(self):
         exact = [_row("exact", "inquiry.query", "inquiry.query", 0.60, dangerous=["knowledge.delete"]) for _ in range(3)]
         for index, row in enumerate(exact):
             row["id"] = f"exact-{index}"
@@ -73,13 +80,11 @@ class Scoring(unittest.TestCase):
         for index, row in enumerate(adversarial):
             row["id"] = f"adversarial-{index}"
         rows = exact + adversarial
-        global_threshold, by_category, _sweep = contract.category_thresholds(rows, min_rows=3)
-        self.assertEqual(global_threshold, 1.0)
-        self.assertEqual(by_category["exact"]["threshold"], 0.6)
-        self.assertEqual(by_category["adversarial"]["threshold"], 1.0)
-        scored = contract.apply_category_thresholds(rows, global_threshold, by_category)
+        threshold, _sweep = contract.choose_threshold(rows)
+        self.assertEqual(threshold, 1.0)
+        scored = contract.apply_threshold(rows, threshold)
         self.assertEqual(scored["falseWrite"], 0)
-        self.assertEqual(scored["top1"], 6)
+        self.assertEqual(scored["top1"], 3)
 
     def test_noul_cut_is_raised_only_when_it_removes_false_writes_without_losing_hits(self):
         rows = []
@@ -107,7 +112,7 @@ class Scoring(unittest.TestCase):
                 )
             )
             rows[-1]["id"] = f"trap-{index}"
-        best, _table = contract.select_noul_threshold(rows, min_rows=3)
+        best, _table = contract.select_noul_threshold(rows)
         self.assertGreater(best["noulThreshold"], 0.1)
         self.assertLessEqual(best["noulThreshold"], 0.9)
         self.assertEqual(best["falseWrite"], 0)
@@ -116,10 +121,17 @@ class Scoring(unittest.TestCase):
         self.assertTrue(all(row["noulDeclined"] for row in rewritten if row["id"].startswith("trap-")))
         self.assertTrue(all(not row["noulDeclined"] for row in rewritten if row["id"].startswith("safe-")))
 
-    def test_gate_requires_held_out_adversarial_and_negation(self):
-        self.assertTrue(contract.gate1(held_false_write=0, adversarial_false_write=0, negation_false_write=0))
-        self.assertFalse(contract.gate1(held_false_write=0, adversarial_false_write=0, negation_false_write=1))
-        self.assertFalse(contract.gate1(held_false_write=1, adversarial_false_write=0, negation_false_write=0))
+    def test_gate_requires_zero_false_writes_and_the_baseline_top1(self):
+        ok = dict(held_false_write=0, adversarial_false_write=0, negation_false_write=0, held_top1=46, held_tasks=93)
+        self.assertTrue(contract.gate1b(**ok))
+        self.assertFalse(contract.gate1b(**{**ok, "held_top1": 45}))
+        self.assertFalse(contract.gate1b(**{**ok, "negation_false_write": 1}))
+        self.assertFalse(contract.gate1b(**{**ok, "held_tasks": 92}))
+
+    def test_noul_is_kept_only_when_held_out_top1_rises(self):
+        self.assertTrue(contract.keep_noul(without_top1=46, with_top1=47, with_false_write=0))
+        self.assertFalse(contract.keep_noul(without_top1=46, with_top1=46, with_false_write=0))
+        self.assertFalse(contract.keep_noul(without_top1=46, with_top1=50, with_false_write=1))
 
     def test_split_matches_sorted_index(self):
         rows = [{"id": f"t{index:02d}", "category": "exact"} for index in range(6)]

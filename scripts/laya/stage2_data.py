@@ -163,7 +163,7 @@ def _example(rng: random.Random, tools: list[dict], full: dict[str, str], id_to_
     others = [tool_id for tool_id in trainable if tool_id != expected]
     width = rng.randint(4, 7)
     picked = rng.sample(others, k=min(width, len(others)))
-    keys = ["opt00"]
+    keys = [contract.NONE_ID]
     if expected != contract.NONE_ID:
         keys.append(id_to_key[expected])
     keys.extend(id_to_key[tool_id] for tool_id in picked)
@@ -199,9 +199,13 @@ def generate(selection: dict, glosses: dict[str, str], eval_prompts: list[str]) 
     missing = [tool_id for tool_id in HELD_OUT_TOOLS if tool_id not in known]
     if missing:
         raise ValueError(f"held-out tools are not registered: {missing}")
-    id_to_key, _key_to_id, full = contract.build_options(tools, glosses)
-    trainable = [tool for tool in tools if tool["id"] not in HELD_OUT_TOOLS]
-    by_id = {tool["id"]: tool for tool in trainable}
+    option_tools = [
+        tool for tool in tools if tool["effect"] == contract.READ_EFFECT and tool["id"] not in HELD_OUT_TOOLS
+    ]
+    id_to_key, _key_to_id, full = contract.build_options(option_tools, glosses)
+    trainable = option_tools
+    refusal_tools = [tool for tool in tools if tool["id"] not in HELD_OUT_TOOLS]
+    by_id = {tool["id"]: tool for tool in option_tools}
     rng = random.Random(SEED)
     seen: set[str] = set()
     rows: list[dict] = []
@@ -214,7 +218,7 @@ def generate(selection: dict, glosses: dict[str, str], eval_prompts: list[str]) 
             return False
         seen.add(contract.normalize_text(prompt))
         rows.append(
-            _example(rng, tools, full, id_to_key, expected, prompt, category, len(rows) + 1)
+            _example(rng, option_tools, full, id_to_key, expected, prompt, category, len(rows) + 1)
         )
         return True
 
@@ -248,7 +252,7 @@ def generate(selection: dict, glosses: dict[str, str], eval_prompts: list[str]) 
             guard += 1
             if guard > PLAN[category] * 40:
                 raise RuntimeError(f"could not fill {category}")
-            tool = rng.choice(trainable)
+            tool = rng.choice(refusal_tools)
             noun = rng.choice(NOUNS)
             accept(category, contract.NONE_ID, _refusal(rng, category, tool["description"], noun))
 
