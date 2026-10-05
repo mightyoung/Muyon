@@ -662,3 +662,54 @@ Keep the two-step `noul` gate only if it improves the held-out result; report wi
 **Gate 1b:** false write/external = 0 on held-out, adversarial and negation sets; held-out top-1 ≥ 46/93 (the D-R6 baseline) on the same 93 tasks, counting a correct "none"/abstain as correct as before; report per category (for reading only, not for thresholds), calibration buckets and latency. If it passes, continue to stage 2 (Kaggle) with the same four rules — the fine-tuned model is also only offered read-only tools, and its threshold is again fitted on training data only. If it fails, stop and report.
 
 Commit scripts and numbers as before; numbers stay in `~/.cache/muyon-eval/` and the summary goes into the evaluation report and ledger. Never commit `.env` or its contents.
+
+---
+
+# 追加：Grok 第 2 阶段合入后的三项跟进（opencode / Sonnet / Grok）
+
+Grok 的 D-R5（跨设备任务接入启动）、D-R7（140 题评测集）、D-R9（一对一聊天后端）、Laya 脚本已审查合入 `develop@6aa63d2`。
+
+---8<--- 追加 · E（opencode）· E6 给所有工具补中文说明 ---
+
+背景：契约里 `ToolDescriptor.description` 会传给模型用于选工具，但启动时注册的工具**说明全是空字符串**（见 `docs/implementation/tool-selection-eval-2026-10-05.md` 开头）。大模型选工具时只看到工具 ID 和参数格式，Laya 的选项文字也缺来源。
+
+开工：`git fetch origin && git merge --ff-only origin/develop`（develop 已到 `6aa63d2` 或更新）。E4、E5 若未完成，先完成再做本项。推送规则同前（verify.sh 退出码 0、工作区干净、推送后用 `git ls-remote` 核对哈希并写进报告）。
+
+要做的：
+1. **询价工具**（`apps/muyon/lib/platform/business_tools.dart` 约 181 行）：工具定义来自 supplier_core 的 `agentTools`（OpenAI function 格式）。先确认每个 `function` 是否已有 `description`；有就直接传给 `ToolDescriptor(description: ...)`，没有或不是中文的，按该工具的实际行为写一条。
+2. **公共工具**（`apps/muyon/lib/services/knowledge/public_tools.dart` 的 `register(...)`）：给这个局部函数加一个必填的 `description` 参数，逐个工具补上。
+3. **科研工具和其他在 `business_tools.dart` 里注册的工具**（约 280、336 行）：同样补上。
+4. MCP 工具已经自带远程说明，不动。
+
+说明的写法：
+- 中文为主，60 到 160 个字，说清楚**做什么、需要什么输入、会不会改数据或把东西发出设备**（只读 / 写入 / 导出 / 发送到网络）。
+- 按工具真实行为写，读代码确认，不要按名字猜。
+- 只描述工具，**不能包含任何指令**（比如"直接执行""无需确认"），也不能承诺权限。
+- 写入、导出、联网类工具必须写明这一点，例如"会修改……""会发送到……"。
+
+测试（新建 `apps/muyon/test/tool_descriptions_test.dart`）：用真实临时宿主启动后遍历 `host.tools.list()`：
+- 每个非 MCP 工具的说明非空，长度在 20 到 200 字之间；
+- `accessLevel` 不是 `read` 的工具，说明里必须出现与其效果相符的字样（写入、修改、删除、导出、发送等其一）；
+- 说明里不出现"无需确认""直接执行""已授权"等字样。
+
+所有权例外（A 授权）：本任务可以修改 `business_tools.dart` 与 `public_tools.dart` 里的注册代码，只限于加说明，不改任何处理逻辑、参数格式或效果分类。若发现某个工具的效果分类看起来不对，写进报告，不要改。
+
+---8<--- 追加 · B（Sonnet）· 按后端文档接 Dream 与聊天界面 ---
+
+两份后端说明已经随 Grok 的分支合入 `develop@6aa63d2`：
+- `docs/implementation/dream-ui-api.md`：记忆、经验、后台整理（Dream）的公开接口与状态。你已做的记忆页和 Dream 页先对照这份文档核一遍：方法名、状态取值、"撤回整次运行"会恢复什么，有出入以文档为准修改界面；需要文档里没有的能力就写进报告的"对 D 的请求"。
+- `docs/implementation/chat-backend.md`：一对一聊天的接口（`sendText`、`threads`、`messages`、`markChatRead`、`acceptChat` / `rejectChat`、`retryText`、`deleteChat` / `deleteChatThread`、`chatChanges`）和每种错误的文字。
+
+开工：`git fetch origin && git merge origin/develop`。
+
+聊天界面按你草案里的设计和之前"聊天界面的调整"一节做：会话列表 → 单个对话（每条状态用文字加图标，不只靠颜色）、收到的文字立即显示为未读、"接纳/拒绝"是可选的单独操作、`sent` 显示"已发出，对方是否收到未知"且只有这时提供带提醒的重发、对方离线或未配对时的明确状态、发送前沿用设备页的确认（目的地与指纹）。注意：Grok 接下来会把 `acceptChat`、`rejectChat`、`retryText`、`deleteChat` 改成同时接收对方设备指纹，界面调用处请按"对方设备 + 消息 ID"传参，届时以 `chat-backend.md` 更新后的签名为准。
+
+测试：用真实临时宿主或注入的替身覆盖上面每种状态，320/390/430/1280 宽度与 200% 字号。推送前 `scripts/verify.sh` 通过、工作区干净，推送后用 `git ls-remote origin refs/heads/feat/b-ui` 核对哈希。
+
+---8<--- 追加 · D（Grok）· D-R9b 聊天按"对方设备 + 消息 ID"定位 ---
+
+Your D-R5, D-R7, D-R9 and Laya scripts were reviewed and merged into `develop` at `6aa63d2` (host 218 + 1 conditional skip, Python 17 tests, analyze clean). The chat backend matches the spec; `chat-backend.md` is clear.
+
+One fix: `chat_messages` is keyed by `(peer_fingerprint, message_id)`, but `acceptChat`, `rejectChat`, `retryText` and `deleteChat` take only `messageId` and throw when it is not unique. Change them to take `(peerFingerprint, messageId)` so a collision between peers can never block an action, keep the "not found" error for an unknown pair, update `chat-backend.md` with the final signatures, and add a test where two peers use the same `messageId` and each action affects only its own row. B is told to call them with both values.
+
+Priority: after D-R8b (Laya stage 1 redo) is running or done; it is small. Push only to `feat/d-transfer`, verify with `git ls-remote` after pushing.
