@@ -804,9 +804,9 @@ Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到
 
 开工：在你的分支上 `git merge origin/wip/g3-handoff` 再 `git merge origin/develop`，解决冲突后先让它编译通过。所有权：`packages/inquiry_module/lib/src/features/hub/**`、`packages/supplier_core/lib/src/hub*.dart`、`apps/muyon/lib/app/inquiry_hub_authority.dart` 及相关测试。**Codex 自己目录里的同一批文件不要再动**（已经交接）。测试：未确认不发送；确认后发送一次；发送后中断 → "结果未知" → 查询远端已生效则不重发、未生效才允许重试；取消在副作用前则不发送。推送前 `scripts/verify.sh` 通过、工作区干净，推送后核对远端哈希。
 
----8<--- 追加 · D（Grok）· D-R10 取消后的真实状态与聊天测试偶发失败 ---
+---8<--- 追加 · B（Sonnet）· D-R10 取消后的真实状态与聊天测试偶发失败（原派 Grok，Grok 额度用完后转给 Sonnet） ---
 
-开工：`git fetch origin && git merge origin/develop`（`develop` 已到 `30c18f7`）。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。** 排在 D-R8c 训练数据修正之后，或在等 Kaggle 训练时做。
+开工：`git fetch origin && git merge origin/develop`（`develop` 已到 `30c18f7`）。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。** Grok 额度已用完，这一项由 Sonnet 接手，排在 C5 → G3 → C6 之后。在你自己的分支 `feat/b-ui` 上做；`personal_agent.dart` 和 `transfer_chat_backend_test.dart` 这一轮归你。
 
 ### 1. 执行中取消不得记为"已取消"（需求第二节：暂停、取消、恢复按工具实际能力开放；不确定结果不得冒充确定结果）
 

@@ -89,3 +89,17 @@ D-R6 的 `laya-metrics.json` 只有汇总，没有逐题预测。同一 67 题�
 内核随后到达 `KernelWorkerStatus.COMPLETE`。日志里是两块 Tesla T4（各 15.6 GB），`cuda True gpus 2`。预处理 1973 行全部留下，`dropped 0`。训练 4 个 epoch，`train_manifest.json` 的 `worldSize` 是 2，`nTrain` 1776，温度校准留出 `nCalib` 197，用时 390.117 秒。四个 epoch 的平均损失是 2.1032、0.8845、0.4340、0.2548。选择温度拟合为 1.977373。`rl_agent_config.json` 里嵌套的 `training.world_size` 仍是基座原来的 1，这次运行以清单和日志的 2 为准。输出里有 `NO_HUB_PUSH`，内容是 “Hub push disabled. Weights stay in the kernel output.” 没有推到 Hub。
 
 最终权重在 `~/.cache/muyon-eval/models/laya-muyon-tool-selection/laya-muyon-tool-selection/model.safetensors`，643835524 字节，SHA-256 `ef9dbf9aee506e00eb061a0989a468578eebe5b74352696cafc5c66fe994005f`。滚动检查点那份重复权重没有下载。本机当时还有别人的 `scripts/verify.sh`，67 题打分和 D-R6 重测还没有开始。门禁 2 还没有结论。
+
+## 门禁 2：第 1 版微调实测（A，2026-10-05）
+
+`scripts/laya/stage2_score.py`，本机 CPU、4 线程、离线；权重 SHA-256 与下载记录一致。先用 `baseline67.py` 重测 D-R6：留出 93 题仍是 46/93、误选 0（可比），同一 67 题 39/67，p50 291.9 ms。
+
+第 1 版（4 轮）：阈值在本机验证折上按 67 题的格子重加权拟合为 0.25。67 题 top-1 **54/67**（D-R6 39，阶段 1b 27）；chinese 12/12、mixed 11/12、paraphrase 6/12（阶段 1b 都是 0/12）；exact 11/12、adversarial 6/6、misleading 5/7、ambiguous 3/6；写入/外发误选 0；p50 330.0 ms（≤ 1.5 × 291.9）。置信度分档 [0.9,1) 34 题对 32，[0.5,0.9) 23 对 17，[0,0.5) 10 对 5。对抗题 10/10。验证折未加权 391/494。
+
+按当时写的门禁规则判为通过，但**不可用**：否定题集 8/24（阶段 1b 24/24）。"不要在本地资料里搜索"选了 `knowledge.search`（0.83），"不要去算这个项目的成本预算"选了 `inquiry.project_budget`（1.0）。只读工具在助手里无需确认即执行，用户明确禁止的动作会被执行。原因是训练集有 300 行"否定一件、要另一件"，几乎没有"只禁止、不要求"的行，模型学成了"动作词 → 该工具"。门禁原先只要求否定集误选写入为 0，是 A 的疏漏。
+
+改正：
+- 门禁 2 增加"否定集 top-1 ≥ 90%"（`stage2_score.py` 的 `NEGATION_MIN_SHARE`）。
+- 生成器新增 `negate-only` 类 300 行（中英；单禁止、双禁止、"我没让你……"），标签 none，不提留出工具；追加在最后，原 2467 行不变。与评测集和否定集的字符 5-gram 最大 Jaccard 0.4167 / 0.25，复述检查通过。
+- 第 2 版（同样 4 轮）已在 Kaggle 训练完成，待下载核对后打分；之后按用户意见训练 8 轮并保存第 4、6、8 轮，只用验证折挑轮数。
+- 第 3 阶段（ONNX）在门禁 2 真正通过前不开始。

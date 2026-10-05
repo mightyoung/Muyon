@@ -1,6 +1,6 @@
 {
   "seed": 20261007,
-  "items": 2467,
+  "items": 2767,
   "generatedByCategory": {
     "natural": 360,
     "english": 300,
@@ -10,7 +10,8 @@
     "misleading": 200,
     "none": 300,
     "ambiguous": 120,
-    "urgent-write": 180
+    "urgent-write": 180,
+    "negate-only": 300
   },
   "byCategory": {
     "natural": 426,
@@ -22,23 +23,24 @@
     "none": 300,
     "ambiguous": 120,
     "urgent-write": 180,
+    "negate-only": 300,
     "mixed-natural": 3,
     "none-natural": 14
   },
   "byLabel": {
     "read": 1797,
-    "none": 670
+    "none": 970
   },
-  "fullOptionRows": 1469,
+  "fullOptionRows": 1649,
   "fullOptionWidth": 16,
-  "distinctRequests": 2467,
+  "distinctRequests": 2767,
   "heldOutTools": [
     "inquiry.project_budget",
     "ocr.recognize",
     "transfer.export",
     "embedding.search"
   ],
-  "rejectedAsNearDuplicate": 1291,
+  "rejectedAsNearDuplicate": 1350,
   "rejectedDescriptionCopies": 7,
   "exactEvalMatches": 0,
   "maxEvalJaccard": 0.4167,
@@ -87,14 +89,14 @@
     "supp-a-0123"
   ],
   "byStratum": {
-    "none|en": 28,
-    "none|mixed": 1,
-    "none|zh": 641,
+    "none|en": 98,
+    "none|mixed": 22,
+    "none|zh": 850,
     "read|en": 308,
     "read|mixed": 464,
     "read|zh": 1025
   },
-  "distinctMaskedPatterns": 1583,
+  "distinctMaskedPatterns": 1813,
   "evalSources": [
     "apps/muyon/lib/assistant/selection_eval/selection_set.json",
     "scripts/laya/negation_set.json"

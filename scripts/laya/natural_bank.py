@@ -942,6 +942,50 @@ def draw_misleading(rng: random.Random) -> tuple[str, str]:
     return f"{ask}。{rng.choice(MISLEADING_READ_TAILS)}", tool
 
 
+# Forbid a read action and ask for nothing: the answer is none. Without these
+# rows the model learned "action word present -> that tool" from the
+# negate-one-ask-another rows and picked the very tool the user forbade.
+# Held-out tools (budget, OCR, export, embedding search) are never named here.
+NEGATE_ONLY_ZH_ACTS = [
+    "搜{e}", "去名录里找{e}", "查{e}的报价", "比价", "比{e}的价", "排{e}的可选报价",
+    "做数据体检", "查单位缺失", "翻本地资料", "在资料里找{e}", "打开{e}的详情",
+    "调{e}的记录", "列出引用{e}的单子", "统计待询价的物料", "按字段筛{e}",
+    "看比价矩阵", "匹配{e}的物料", "看{e}的规格分类", "看数据模型", "预览要发出去的向量文本",
+    "看科研笔记", "翻{e}项目的文档",
+]
+NEGATE_ONLY_ZH_FRAMES = [
+    "不要{a}", "先别{a}", "别{a}了", "{a}就不用了", "暂时不{a}", "这次不用{a}",
+    "我没让你{a}", "{a}先免了", "不用帮我{a}", "先不{a}，等我通知", "今天不{a}",
+    "别{a}，也别{b}", "不要{a}，{b}也不用", "{a}和{b}都先停着", "谁让你{a}了？先停",
+]
+NEGATE_ONLY_EN_ACTS = [
+    "search for {e}", "compare the quotes", "rank the quotes for {e}", "run the data check",
+    "look through my local docs", "open the {e} record", "list orders that point at {e}",
+    "count the items waiting for quotes", "match {e} to a product", "show the quote matrix",
+    "preview the text that would be embedded", "open the research notes",
+]
+NEGATE_ONLY_EN_FRAMES = [
+    "don't {a}", "no need to {a}", "please don't {a} yet", "I didn't ask you to {a}",
+    "hold off, don't {a}", "do not {a} today", "don't {a} and don't {b}",
+]
+_NEGATE_ONLY_E = ["宏达", "蝶阀", "密封件", "冷却塔", "闸阀", "二期改造", "P-27", "电缆", "主泵"]
+_NEGATE_ONLY_E_EN = ["Hongda", "butterfly valve", "seal kit", "cooling tower", "P-27", "cable"]
+
+
+def draw_negate_only(rng: random.Random) -> tuple[str, str]:
+    english = rng.random() < 0.25
+    acts, frames, names, noise = (
+        (NEGATE_ONLY_EN_ACTS, NEGATE_ONLY_EN_FRAMES, _NEGATE_ONLY_E_EN, _en_noise)
+        if english
+        else (NEGATE_ONLY_ZH_ACTS, NEGATE_ONLY_ZH_FRAMES, _NEGATE_ONLY_E, _zh_noise)
+    )
+    first, second = rng.sample(acts, 2)
+    text = rng.choice(frames).format(
+        a=first.format(e=rng.choice(names)), b=second.format(e=rng.choice(names))
+    )
+    return noise(rng, text), "none"
+
+
 def mask_entities() -> list[str]:
     found: list[str] = []
     for table in (ZH, EN, MIXED):
@@ -969,4 +1013,5 @@ DRAWS = {
     "none": draw_none,
     "ambiguous": draw_ambiguous,
     "misleading": draw_misleading,
+    "negate-only": draw_negate_only,
 }

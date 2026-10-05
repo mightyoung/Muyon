@@ -40,6 +40,8 @@ PLAN = {
     "none": 300,
     "ambiguous": 120,
     "urgent-write": 180,
+    # Appended last so the earlier categories draw the same rows as before.
+    "negate-only": 300,
 }
 _SPACE = re.compile(r"\s+")
 
