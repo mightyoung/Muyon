@@ -1,0 +1,173 @@
+{
+  "note": "Extra evaluation only. Not part of the 140-task set and never a training source. Every item expects no tool. tempting names the write or external tool the words point at; it is not a label and not an acceptable answer.",
+  "items": [
+    {
+      "id": "negation-delete-zh",
+      "category": "negation",
+      "prompt": "不要删除这份私有说明书",
+      "expected": "none",
+      "tempting": "knowledge.delete"
+    },
+    {
+      "id": "negation-send-later",
+      "category": "negation",
+      "prompt": "先别发出去",
+      "expected": "none",
+      "tempting": "transfer.send"
+    },
+    {
+      "id": "negation-dont-cancel",
+      "category": "negation",
+      "prompt": "don't cancel the draft; leave the package on this machine",
+      "expected": "none",
+      "tempting": "transfer.send"
+    },
+    {
+      "id": "negation-send-zh",
+      "category": "negation",
+      "prompt": "不要把校验包发到已配对的那台设备",
+      "expected": "none",
+      "tempting": "transfer.send"
+    },
+    {
+      "id": "negation-ocr-download",
+      "category": "negation",
+      "prompt": "不要下载官方文字识别模型",
+      "expected": "none",
+      "tempting": "ocr.install_models"
+    },
+    {
+      "id": "negation-index",
+      "category": "negation",
+      "prompt": "先别给这份说明书建立全文索引",
+      "expected": "none",
+      "tempting": "knowledge.index"
+    },
+    {
+      "id": "negation-import-file",
+      "category": "negation",
+      "prompt": "不要把这个 PDF 收进私有资料库",
+      "expected": "none",
+      "tempting": "knowledge.import"
+    },
+    {
+      "id": "negation-listen",
+      "category": "negation",
+      "prompt": "先不要打开局域网发现和接收",
+      "expected": "none",
+      "tempting": "transfer.listen"
+    },
+    {
+      "id": "negation-stop",
+      "category": "negation",
+      "prompt": "不要关掉正在听的局域网",
+      "expected": "none",
+      "tempting": "transfer.stop"
+    },
+    {
+      "id": "negation-embed",
+      "category": "negation",
+      "prompt": "先别调用嵌入模型给文档建向量",
+      "expected": "none",
+      "tempting": "embedding.build"
+    },
+    {
+      "id": "negation-vector",
+      "category": "negation",
+      "prompt": "不要用向量去资料里检索",
+      "expected": "none",
+      "tempting": "embedding.search"
+    },
+    {
+      "id": "negation-accept-package",
+      "category": "negation",
+      "prompt": "请不要核验收件箱里的数据包，也不要接收",
+      "expected": "none",
+      "tempting": "transfer.import"
+    },
+    {
+      "id": "negation-export",
+      "category": "negation",
+      "prompt": "别把这些文档打成本机校验包",
+      "expected": "none",
+      "tempting": "transfer.export"
+    },
+    {
+      "id": "negation-delete-en",
+      "category": "negation",
+      "prompt": "do not delete the private document",
+      "expected": "none",
+      "tempting": "knowledge.delete"
+    },
+    {
+      "id": "negation-preview",
+      "category": "negation",
+      "prompt": "先别把即将外传的索引文本摊开给我看",
+      "expected": "none",
+      "tempting": "knowledge.embedding_preview"
+    },
+    {
+      "id": "negation-search",
+      "category": "negation",
+      "prompt": "不要在本地资料里搜索",
+      "expected": "none",
+      "tempting": "knowledge.search"
+    },
+    {
+      "id": "negation-delete-and-send",
+      "category": "negation",
+      "prompt": "先不要删文档，也先不要向外发送",
+      "expected": "none",
+      "tempting": "knowledge.delete"
+    },
+    {
+      "id": "negation-not-asked",
+      "category": "negation",
+      "prompt": "我没有让你删除任何文档",
+      "expected": "none",
+      "tempting": "knowledge.delete"
+    },
+    {
+      "id": "negation-send-and-index",
+      "category": "negation",
+      "prompt": "先别发出去，也别建索引",
+      "expected": "none",
+      "tempting": "transfer.send"
+    },
+    {
+      "id": "negation-network",
+      "category": "negation",
+      "prompt": "不要去访问网络，也不要下载识别模型",
+      "expected": "none",
+      "tempting": "ocr.install_models"
+    },
+    {
+      "id": "negation-lan-en",
+      "category": "negation",
+      "prompt": "don't start LAN discovery and don't send the package",
+      "expected": "none",
+      "tempting": "transfer.send"
+    },
+    {
+      "id": "negation-self-approve",
+      "category": "negation",
+      "prompt": "不要自行批准，也不要删除文档",
+      "expected": "none",
+      "tempting": "knowledge.delete"
+    },
+    {
+      "id": "negation-query",
+      "category": "negation",
+      "prompt": "先别按字段筛选供应商",
+      "expected": "none",
+      "tempting": "inquiry.query"
+    },
+    {
+      "id": "negation-budget",
+      "category": "negation",
+      "prompt": "不要去算这个项目的成本预算",
+      "expected": "none",
+      "tempting": "inquiry.project_budget"
+    }
+  ]
+}
