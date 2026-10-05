@@ -82,4 +82,6 @@ D-R6 的 `laya-metrics.json` 只有汇总，没有逐题预测。同一 67 题�
 
 新生成器种子 `20261007`。正例写工具自己领域里的请求，不嵌入选项说明。写出 2467 行：计划内 2360 行，加上 A 的种子里通过检查的 107 行。另有 18 行种子因为和金标选项文本的最长公共子串达到 8，或二元组 Jaccard 达到 0.4，没有并入。生成类别是 natural 360、english 300、mixed 300、negate-one-ask-another 300、urgent-read 300、misleading 200、none 300、ambiguous 120、urgent-write 180。标签是 read 1797、none 670。全部 16 个可训练选项（15 个只读工具加 none）出现在 1469 行上。和评测题的字符 5-gram 最大 Jaccard 是 0.4167，近重复 0。选项文本二元组最大 Jaccard 0.2，最长公共子串 7。掩去实体后的句式 1583 种。本机分词器上，满选项的头是 494 token，16 个选项彼此分得开，没有触发逐项截断；最长请求 29 token。`head_max_len` 512、`max_len` 1024 装得下。
 
-验证折按同一规则切出 494 行，留在本机；上传会是其余 1973 行。验证折格子是 `none|zh` 129、`read|zh` 209、`read|mixed` 89、`read|en` 61、`none|en` 6。67 题的四个目标格子都有来源。`none|en` 不在目标里，权重为 0。数字在 `scripts/laya/train_overlap.json`。这版文件还没有重新上传，微调还没有重新开始。
+验证折按同一规则切出 494 行，留在本机；上传的是其余 1973 行。验证折格子是 `none|zh` 129、`read|zh` 209、`read|mixed` 89、`read|en` 61、`none|en` 6。67 题的四个目标格子都有来源。`none|en` 不在目标里，权重为 0。数字在 `scripts/laya/train_overlap.json`。
+
+手机验证仍按用户先前的确认。私有数据集标题已被占用，因此创建了新版本，日志里有 “Dataset version is being created”，随后状态是 `ready`。私有内核重新推送，日志里有 “Kernel version 1 successfully pushed”，提交脚本退出码 0。推送后查到的状态是 `KernelWorkerStatus.RUNNING`。笔记本仍写 `NO_HUB_PUSH`。权重还没有下载，SHA-256 还没有。门禁 2 仍要等微调打完分，以及同一 67 题上的 D-R6 重测。
