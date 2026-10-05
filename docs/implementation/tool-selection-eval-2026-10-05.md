@@ -85,3 +85,7 @@ D-R6 的 `laya-metrics.json` 只有汇总，没有逐题预测。同一 67 题�
 验证折按同一规则切出 494 行，留在本机；上传的是其余 1973 行。验证折格子是 `none|zh` 129、`read|zh` 209、`read|mixed` 89、`read|en` 61、`none|en` 6。67 题的四个目标格子都有来源。`none|en` 不在目标里，权重为 0。数字在 `scripts/laya/train_overlap.json`。
 
 手机验证仍按用户先前的确认。私有数据集标题已被占用，因此创建了新版本，日志里有 “Dataset version is being created”，随后状态是 `ready`。私有内核重新推送，日志里有 “Kernel version 1 successfully pushed”，提交脚本退出码 0。推送后查到的状态是 `KernelWorkerStatus.RUNNING`。笔记本仍写 `NO_HUB_PUSH`。权重还没有下载，SHA-256 还没有。门禁 2 仍要等微调打完分，以及同一 67 题上的 D-R6 重测。
+
+内核随后到达 `KernelWorkerStatus.COMPLETE`。日志里是两块 Tesla T4（各 15.6 GB），`cuda True gpus 2`。预处理 1973 行全部留下，`dropped 0`。训练 4 个 epoch，`train_manifest.json` 的 `worldSize` 是 2，`nTrain` 1776，温度校准留出 `nCalib` 197，用时 390.117 秒。四个 epoch 的平均损失是 2.1032、0.8845、0.4340、0.2548。选择温度拟合为 1.977373。`rl_agent_config.json` 里嵌套的 `training.world_size` 仍是基座原来的 1，这次运行以清单和日志的 2 为准。输出里有 `NO_HUB_PUSH`，内容是 “Hub push disabled. Weights stay in the kernel output.” 没有推到 Hub。
+
+最终权重在 `~/.cache/muyon-eval/models/laya-muyon-tool-selection/laya-muyon-tool-selection/model.safetensors`，643835524 字节，SHA-256 `ef9dbf9aee506e00eb061a0989a468578eebe5b74352696cafc5c66fe994005f`。滚动检查点那份重复权重没有下载。本机当时还有别人的 `scripts/verify.sh`，67 题打分和 D-R6 重测还没有开始。门禁 2 还没有结论。
