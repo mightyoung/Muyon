@@ -6,8 +6,9 @@
 #       `summary: N ok, N warn, N fail, N skip`；加 --json 时改为输出 JSON。
 # 退出码：有任何 FAIL 时为 1，否则为 0。
 #
-# 安全：不打印、不记录任何密钥（只写“已设置/未设置”）；只发 GET /models；
-#       不写任何文件、不修改环境、不安装任何东西。
+# 安全：不打印、不记录任何密钥（只写“已设置/未设置”）；密钥不进命令行参数
+#       （经标准输入交给 curl）；只发 GET /models；不写任何文件、不修改环境、
+#       不安装任何东西。
 # 兼容：macOS 自带 bash 3.2 与 Linux bash（不用关联数组、mapfile、${var,,}）。
 #       注意：bash 3.2 会把 $VAR 后紧跟的非 ASCII 字节并入变量名，
 #       所有变量展开一律写成 ${VAR} 形式。
@@ -24,6 +25,11 @@ done
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+
+HAS_PYTHON3=1
+if ! command -v python3 >/dev/null 2>&1; then
+  HAS_PYTHON3=0
+fi
 
 # 内部字段分隔符（ASCII US，0x1f），只在内存里使用
 US=$(printf '\037')
@@ -77,6 +83,8 @@ fi
 # ----------------------------------------------------------------- devices
 if [ -z "$FLUTTER_BIN" ]; then
   add_check WARN devices "flutter 不可用，无法枚举设备"
+elif [ "$HAS_PYTHON3" -eq 0 ]; then
+  add_check WARN devices "缺少 python3，无法解析设备列表"
 else
   DEVICES_JSON=$(flutter devices --machine 2>/dev/null)
   DEVICES_RC=$?
@@ -87,8 +95,10 @@ else
 import json
 import sys
 
+text = sys.stdin.read()
+start = text.find("[")
 try:
-    data = json.load(sys.stdin)
+    data = json.loads(text[start:]) if start != -1 else []
 except Exception:
     print("__UNPARSEABLE__")
     sys.exit(0)
@@ -167,6 +177,7 @@ MODEL_ID=$(env_value MUYON_EVAL_MODEL_ID)
 MODEL_KEY=$(env_value MUYON_EVAL_MODEL_KEY)
 MODEL_ENV_STATUS=SKIP
 MODEL_IS_REMOTE=0
+IS_LOOPBACK=0
 
 if [ -z "$MODEL_ENDPOINT" ] && [ -z "$MODEL_ID" ]; then
   add_check SKIP model-env "未配置真实模型，只能跑夹具"
@@ -175,30 +186,47 @@ elif [ -z "$MODEL_ENDPOINT" ] || [ -z "$MODEL_ID" ]; then
   add_check FAIL model-env "MUYON_EVAL_MODEL_ENDPOINT 与 MUYON_EVAL_MODEL_ID 必须同时设置"
   MODEL_ENV_STATUS=FAIL
 else
-  IS_LOOPBACK=0
-  case "$MODEL_ENDPOINT" in
-    localhost|localhost:*|localhost/*|127.0.0.1|127.0.0.1:*|127.0.0.1/*) IS_LOOPBACK=1 ;;
-    http://localhost|http://localhost:*|http://localhost/*) IS_LOOPBACK=1 ;;
-    https://localhost|https://localhost:*|https://localhost/*) IS_LOOPBACK=1 ;;
-    http://127.0.0.1|http://127.0.0.1:*|http://127.0.0.1/*) IS_LOOPBACK=1 ;;
-    https://127.0.0.1|https://127.0.0.1:*|https://127.0.0.1/*) IS_LOOPBACK=1 ;;
-    http://\[::1\]|http://\[::1\]:*|http://\[::1\]/*) IS_LOOPBACK=1 ;;
-    https://\[::1\]|https://\[::1\]:*|https://\[::1\]/*) IS_LOOPBACK=1 ;;
+  # F1：取 authority（scheme:// 之后、第一个 / ? # 之前），用户信息一律拒绝；
+  # 主机名做精确匹配，只认 localhost、127.0.0.1、[::1]，避免 userinfo 绕过。
+  EP_AUTH="$MODEL_ENDPOINT"
+  case "$EP_AUTH" in
+    *://*) EP_AUTH=${EP_AUTH#*://} ;;
   esac
-  IS_HTTPS=0
-  case "$MODEL_ENDPOINT" in
-    https://*) IS_HTTPS=1 ;;
-  esac
-  if [ "$IS_LOOPBACK" -eq 1 ]; then
-    add_check OK model-env "本机端点已配置"
-    MODEL_ENV_STATUS=OK
-  elif [ "$IS_HTTPS" -eq 1 ]; then
-    add_check OK model-env "远程端点（HTTPS）已配置"
-    MODEL_ENV_STATUS=OK
-    MODEL_IS_REMOTE=1
-  else
-    add_check FAIL model-env "远程端点必须使用 HTTPS"
+  EP_AUTH=${EP_AUTH%%[/?#]*}
+
+  if [ "${EP_AUTH#*@}" != "$EP_AUTH" ]; then
+    add_check FAIL model-env "端点不应包含用户信息"
     MODEL_ENV_STATUS=FAIL
+  else
+    EP_HOST="$EP_AUTH"
+    case "$EP_HOST" in
+      \[*)
+        EP_INNER=${EP_HOST#*[}
+        EP_INNER=${EP_INNER%%]*}
+        EP_HOST="[${EP_INNER}]"
+        ;;
+      *)
+        EP_HOST=${EP_HOST%:*}
+        ;;
+    esac
+    case "$EP_HOST" in
+      localhost|127.0.0.1|\[::1\]) IS_LOOPBACK=1 ;;
+    esac
+    IS_HTTPS=0
+    case "$MODEL_ENDPOINT" in
+      https://*) IS_HTTPS=1 ;;
+    esac
+    if [ "$IS_LOOPBACK" -eq 1 ]; then
+      add_check OK model-env "本机端点已配置"
+      MODEL_ENV_STATUS=OK
+    elif [ "$IS_HTTPS" -eq 1 ]; then
+      add_check OK model-env "远程端点（HTTPS）已配置"
+      MODEL_ENV_STATUS=OK
+      MODEL_IS_REMOTE=1
+    else
+      add_check FAIL model-env "远程端点必须使用 HTTPS"
+      MODEL_ENV_STATUS=FAIL
+    fi
   fi
 fi
 
@@ -225,14 +253,27 @@ fi
 
 # ----------------------------------------------------------------- model-reach
 if [ "$MODEL_ENV_STATUS" = "OK" ] && [ "$MODEL_KEY_STATUS" = "OK" ]; then
-  MODELS_URL=$(printf '%s' "$MODEL_ENDPOINT" | sed -e 's#/chat/completions$##')
+  # F5：先去尾部斜杠，再剥离 /chat/completions，避免得到 //models
+  MODELS_URL=$(printf '%s' "$MODEL_ENDPOINT" | sed -e 's#/*$##' -e 's#/chat/completions$##')
   MODELS_URL="$MODELS_URL/models"
-  if [ -n "$MODEL_KEY" ]; then
-    HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 \
-      -H "Authorization: Bearer $MODEL_KEY" "$MODELS_URL" 2>/dev/null)
+  # F2：密钥经标准输入（curl -K -）传递，不进命令行参数；
+  # F4：回环端点加 --noproxy '*'，避免本机请求（含密钥）经代理转发。
+  if [ "$IS_LOOPBACK" -eq 1 ]; then
+    if [ -n "$MODEL_KEY" ]; then
+      ESC_KEY=$(printf '%s' "$MODEL_KEY" | sed 's/\\/\\\\/g; s/"/\\"/g')
+      HTTP_CODE=$(printf 'header = "Authorization: Bearer %s"\n' "$ESC_KEY" \
+        | curl -sS -o /dev/null -w '%{http_code}' --max-time 10 --noproxy '*' -K - "$MODELS_URL" 2>/dev/null)
+    else
+      HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 --noproxy '*' "$MODELS_URL" 2>/dev/null)
+    fi
   else
-    HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 \
-      "$MODELS_URL" 2>/dev/null)
+    if [ -n "$MODEL_KEY" ]; then
+      ESC_KEY=$(printf '%s' "$MODEL_KEY" | sed 's/\\/\\\\/g; s/"/\\"/g')
+      HTTP_CODE=$(printf 'header = "Authorization: Bearer %s"\n' "$ESC_KEY" \
+        | curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -K - "$MODELS_URL" 2>/dev/null)
+    else
+      HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$MODELS_URL" 2>/dev/null)
+    fi
   fi
   case "$HTTP_CODE" in
     200) add_check OK model-reach "GET models 返回 200" ;;
@@ -246,6 +287,10 @@ fi
 
 # ----------------------------------------------------------------- 输出
 if [ "$JSON_MODE" -eq 1 ]; then
+  if [ "$HAS_PYTHON3" -eq 0 ]; then
+    printf 'doctor: --json 需要 python3，但未找到 python3\n' >&2
+    exit 1
+  fi
   printf '%s\n' "$CHECKS_BLOB" | python3 -c '
 import json
 import sys
