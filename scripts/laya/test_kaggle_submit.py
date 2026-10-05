@@ -10,24 +10,73 @@ import kaggle_submit
 
 
 class SubmitGuards(unittest.TestCase):
-    def test_gate_failure_does_not_open_the_env_file(self):
+    def test_a_write_target_stops_before_the_env_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            metrics = root / "stage1-metrics.json"
-            metrics.write_text(json.dumps({"gate1b": "fail"}), encoding="utf-8")
+            train = root / "train_set.jsonl"
+            train.write_text(
+                json.dumps({
+                    "id": "train-0001",
+                    "expected": "knowledge.delete",
+                    "state": {"request": "删掉这份档案"},
+                    "questions": {"tool": {"criteria": {"none": "没有"}}},
+                }) + "\n",
+                encoding="utf-8",
+            )
+            overlap = root / "train_overlap.json"
+            overlap.write_text(
+                json.dumps({
+                    "exactEvalMatches": 0,
+                    "nearDuplicatesAtOrAbove0.5": 0,
+                    "maxEvalJaccard": 0.2,
+                    "heldOutLeaks": [],
+                }),
+                encoding="utf-8",
+            )
             missing = root / "absent.env"
             with self.assertRaises(SystemExit) as caught:
-                kaggle_submit.submit(metrics=metrics, env_file=missing)
-            self.assertIn("GATE1b fail", str(caught.exception))
+                kaggle_submit.submit(
+                    env_file=missing,
+                    train_path=train,
+                    overlap_path=overlap,
+                    selection_path=kaggle_submit.stage2_data.SELECTION,
+                )
+            self.assertIn("not read-only", str(caught.exception))
             self.assertFalse(missing.exists())
 
-    def test_missing_metrics_stop_before_the_env_file(self):
+    def test_missing_overlap_stops_before_the_env_file(self):
         with tempfile.TemporaryDirectory() as tmp:
-            missing_metrics = Path(tmp) / "no-metrics.json"
-            missing_env = Path(tmp) / "absent.env"
+            root = Path(tmp)
+            train = root / "train_set.jsonl"
+            train.write_text("{}\n", encoding="utf-8")
+            missing_env = root / "absent.env"
             with self.assertRaises(SystemExit) as caught:
-                kaggle_submit.submit(metrics=missing_metrics, env_file=missing_env)
-            self.assertIn("stage1b metrics missing", str(caught.exception))
+                kaggle_submit.submit(
+                    env_file=missing_env,
+                    train_path=train,
+                    overlap_path=root / "no-overlap.json",
+                    selection_path=kaggle_submit.stage2_data.SELECTION,
+                )
+            self.assertIn("overlap report missing", str(caught.exception))
+            self.assertFalse(missing_env.exists())
+
+    def test_real_training_reaches_the_token_check_without_a_gate1b_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env_file = Path(tmp) / "empty.env"
+            env_file.write_text("OTHER_SECRET=leave-this\n", encoding="utf-8")
+            with self.assertRaises(SystemExit) as caught:
+                kaggle_submit.submit(env_file=env_file)
+            self.assertIn("Kaggle-apikey is missing", str(caught.exception))
+
+    def test_upload_omits_the_validation_split(self):
+        rows = kaggle_submit.upload_rows(kaggle_submit.HERE / "train_set.jsonl")
+        training, validation = kaggle_submit.gate.validation_split(
+            kaggle_submit.gate.load_jsonl(kaggle_submit.HERE / "train_set.jsonl")
+        )
+        self.assertEqual([row["id"] for row in rows], [row["id"] for row in training])
+        self.assertGreaterEqual(len(rows), 1000)
+        self.assertTrue(validation)
+        self.assertTrue({row["id"] for row in rows}.isdisjoint({row["id"] for row in validation}))
 
     def test_read_token_uses_only_the_named_key(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -44,6 +93,15 @@ class SubmitGuards(unittest.TestCase):
             path.write_text("Kaggle-apikey=not-a-token\n", encoding="utf-8")
             with self.assertRaises(SystemExit):
                 kaggle_submit.read_token(path)
+
+    def test_status_line_ignores_the_version_warning(self):
+        text = (
+            "Warning: Looks like you're using an outdated `kaggle` version "
+            "(installed: 2.0.0), please consider upgrading to the latest version (2.2.2)\n"
+            "ready\n"
+        )
+        self.assertEqual(kaggle_submit.status_line(text), "ready")
+        self.assertEqual(kaggle_submit.status_line("error\n"), "error")
 
     def test_scrub_removes_a_token(self):
         self.assertNotIn("KGAT_exampletoken", kaggle_submit.scrub("denied KGAT_exampletoken"))

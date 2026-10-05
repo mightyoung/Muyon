@@ -20,10 +20,18 @@ class TrainingSet(unittest.TestCase):
 
     def test_size_categories_and_seed(self):
         self.assertGreaterEqual(self.report["items"], 1000)
-        self.assertEqual(self.report["seed"], 20261005)
+        self.assertEqual(self.report["seed"], 20261007)
         self.assertEqual(sum(self.report["byCategory"].values()), self.report["items"])
         for category, count in data.PLAN.items():
-            self.assertEqual(self.report["byCategory"][category], count)
+            self.assertEqual(self.report["generatedByCategory"][category], count)
+        self.assertGreaterEqual(self.report["supplementRows"], 100)
+        self.assertGreaterEqual(self.report["fullOptionRows"] * 2, self.report["items"])
+        self.assertEqual(self.report["distinctRequests"], self.report["items"])
+        self.assertEqual(self.report["descriptionCopiesAtOrAbove0.4"], 0)
+        self.assertEqual(self.report["descriptionSpansAtOrAbove8"], 0)
+        self.assertLess(self.report["maxDescriptionBigramJaccard"], 0.4)
+        self.assertLess(self.report["maxDescriptionCommonSpan"], 8)
+        self.assertGreaterEqual(self.report["distinctMaskedPatterns"], 800)
 
     def test_no_eval_copy_and_no_held_out_tool(self):
         self.assertEqual(self.report["exactEvalMatches"], 0)
@@ -52,7 +60,9 @@ class TrainingSet(unittest.TestCase):
             else:
                 self.assertEqual(probs["none"], 0.0)
                 self.assertEqual(effects[row["expected"]], "read")
-                self.assertEqual(row["category"] in {"chinese", "mixed", "paraphrase"}, True)
+                self.assertNotIn(row["category"], {"none", "ambiguous", "urgent-write", "none-natural"})
+            shown = criteria[row["expected"]]
+            self.assertFalse(data.copies_option_text(row["state"]["request"], shown))
 
     def test_committed_file_matches_the_generator(self):
         path = HERE / "train_set.jsonl"
