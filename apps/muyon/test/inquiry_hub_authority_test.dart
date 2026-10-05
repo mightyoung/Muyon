@@ -527,7 +527,7 @@ void channelTests() {
                 return;
               }
               if (failure == 'timeout') {
-                await Future<void>.delayed(const Duration(milliseconds: 120));
+                await Future<void>.delayed(const Duration(milliseconds: 2500));
               }
               request.response.statusCode = 503;
               request.response.write('{}');
@@ -543,7 +543,11 @@ void channelTests() {
             authority: authority,
             journal: journal,
             review: (p, c) => review(p, c),
-            timeout: const Duration(milliseconds: 80),
+            // Only the timeout case may time out; a loaded machine must not
+            // turn the 503 and reset cases into timeouts.
+            timeout: failure == 'timeout'
+                ? const Duration(milliseconds: 300)
+                : const Duration(seconds: 10),
           );
           try {
             final c = native();
