@@ -1,3 +1,5 @@
+import 'hub_confirmation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:supplier_core/supplier_core.dart';
 
@@ -19,7 +21,12 @@ Future<void> showHubPublish(
 }) async {
   final HubClient? client;
   try {
-    client = await state.hub();
+    client = await state.hub(
+      review: reviewHubRequest(context),
+      validateView: () {
+        if (!context.mounted) throw HubException('发布页面已关闭');
+      },
+    );
   } on HubException catch (e) {
     if (context.mounted) toast(context, e.message);
     return;
@@ -74,6 +81,12 @@ class _PublishDialogState extends State<_PublishDialog> {
     _prepare();
   }
 
+  @override
+  void dispose() {
+    widget.client.cancellation.cancel();
+    super.dispose();
+  }
+
   Future<void> _prepare() async {
     setState(() {
       busy = true;
@@ -103,7 +116,7 @@ class _PublishDialogState extends State<_PublishDialog> {
     if (d == null || busy) return;
     setState(() => busy = true);
     try {
-      final receipt = await widget.client.publish(d.draft);
+      final receipt = await widget.client.publish(d.draft, origin: d.origin);
       if (mounted) Navigator.pop(context, receipt['revision'] as int?);
     } on HubException catch (e) {
       if (mounted) {

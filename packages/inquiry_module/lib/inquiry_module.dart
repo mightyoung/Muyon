@@ -23,6 +23,8 @@ class InquiryRuntime {
     SharedLlmFactory? sharedLlmFactory,
     InquiryModelSettingsBridge? sharedModelSettings,
     AssistantWebAuthority? webAuthority,
+    HubAuthority? hubAuthority,
+    HubPublicationJournal? hubJournal,
     Map<String, Object?> initialSettings = const {},
   }) : state = AppState.attach(
          store: store,
@@ -32,6 +34,8 @@ class InquiryRuntime {
          sharedLlmFactory: sharedLlmFactory,
          sharedModelSettings: sharedModelSettings,
          webAuthority: webAuthority,
+         hubAuthority: hubAuthority,
+         hubJournal: hubJournal,
          initialSettings: initialSettings,
        );
   final AppState state;

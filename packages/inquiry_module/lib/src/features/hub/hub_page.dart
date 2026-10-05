@@ -1,3 +1,5 @@
+import 'hub_confirmation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:supplier_core/supplier_core.dart';
 
@@ -48,7 +50,12 @@ class _HubPageState extends State<HubPage> {
       error = null;
     });
     try {
-      final client = await widget.state.hub();
+      final client = await widget.state.hub(
+        review: reviewHubRequest(context),
+        validateView: () {
+          if (!mounted) throw HubException('资料中心页面已关闭');
+        },
+      );
       if (client == null) {
         if (mounted) setState(() => rows = null);
         return;
@@ -310,7 +317,12 @@ class _HubDetailState extends State<HubDetail> {
   Future<void> _load() async {
     setState(() => error = null);
     try {
-      final client = await widget.state.hub();
+      final client = await widget.state.hub(
+        review: reviewHubRequest(context),
+        validateView: () {
+          if (!mounted) throw HubException('资料中心页面已关闭');
+        },
+      );
       if (client == null) throw HubException('还没有连接公司资料中心');
       final r = widget.row;
       final p = await client.publication(r.origin, r.publicationId);
