@@ -22,3 +22,17 @@ python3 scripts/laya/test_stage1_contract.py
 结果写到 `~/.cache/muyon-eval/stage1-metrics.json`。门禁 1：留出折、对抗题、否定集上的写入/外发误选都是 0。失败则退出码 2，不开始 Kaggle。
 
 140 题文件仍然只用于评测。本阶段不读 `.env`。
+
+## 第二阶段：Kaggle 微调
+
+`train_set.jsonl` 是合成题，不包含 140 题，也不包含整段留出的工具。`train_overlap.json` 记录和评测题的字符 5-gram 最大 Jaccard。
+
+`laya_finetune_tool_selection_kaggle.ipynb` 用多语检查点 `convaiinnovations/laya-multilingual` 的修订 `1720e3e3357cfe1e281542e223f8273b0890ca34`，`laya==0.3.27`，两块 GPU。它不推送到 Hugging Face Hub，最后写 `NO_HUB_PUSH`。
+
+只有门禁 1 的结果是 `pass` 时才提交。脚本只读 `.env` 里的 `Kaggle-apikey`，放进子进程的 `KAGGLE_API_TOKEN`，输出里的 `KGAT_` 会被抹掉。数据集和笔记本都是私有的，加速器是 `NvidiaTeslaT4`（GPU T4 ×2），并打开网络以便下载公开基座。
+
+```bash
+python3 scripts/laya/test_stage2_data.py
+python3 scripts/laya/test_kaggle_submit.py
+python3 scripts/laya/kaggle_submit.py
+```
