@@ -105,15 +105,11 @@ void main() {
       final paths = typed['paths_to']! as Map<String, Object?>;
       expect(paths, isNotEmpty);
       expect(paths.keys, isNot(contains('supplier')));
-      final toProject = paths['project']! as List;
-      expect(toProject, hasLength(1));
-      final first = toProject.first as Map<String, Object?>;
-      expect(first['hops'], 2);
-      final steps = first['steps']! as List;
-      expect((steps.first as Map)['link'], 'inquiry.supplier_ids');
-      expect((steps.first as Map)['via'], 'related');
-      expect((steps.last as Map)['link'], 'inquiry.project_id');
-      expect((steps.last as Map)['via'], 'get');
+      expect(
+        paths['project'],
+        'related inquiry.supplier_ids → get inquiry.project_id',
+      );
+      expect(typed['paths_to_format'], isA<String>());
 
       final plain = run('describe', {})! as Map<String, Object?>;
       expect(plain.containsKey('paths_to'), isFalse);
