@@ -1,5 +1,7 @@
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import 'scheme_loader.dart';
+
 /// Why a navigation or bridge call was refused; shown in logs and tests.
 enum GuardVerdict { allowed, blockedNavigation, blockedBridge }
 
@@ -16,8 +18,13 @@ class PrototypeWebGuard {
 
   static final _dotSegment = RegExp(r'(^|[/\\])(\.|%2e|%2E){2}([/\\]|$)');
 
+  late final _loader = PrototypeSchemeLoader(spec);
+
   bool allowsNavigation(String rawUrl) {
     if (rawUrl == 'about:blank') return true;
+    if (rawUrl.toLowerCase().startsWith('$prototypeScheme:')) {
+      return _loader.toFileUrl(rawUrl) != null;
+    }
     if (_dotSegment.hasMatch(rawUrl)) return false;
     final Uri uri;
     try {
