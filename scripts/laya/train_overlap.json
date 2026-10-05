@@ -16,13 +16,12 @@
     "transfer.export",
     "embedding.search"
   ],
-  "rejectedAsNearDuplicate": 233,
+  "rejectedAsNearDuplicate": 314,
   "exactEvalMatches": 0,
   "maxEvalJaccard": 0.2174,
   "nearDuplicatesAtOrAbove0.5": 0,
   "heldOutLeaks": [],
   "trainableTools": [
-    "embedding.build",
     "inquiry.compare_quotes",
     "inquiry.data_quality",
     "inquiry.describe",
@@ -35,17 +34,9 @@
     "inquiry.related",
     "inquiry.search",
     "inquiry.spec_classes",
-    "knowledge.delete",
     "knowledge.embedding_preview",
-    "knowledge.import",
-    "knowledge.index",
     "knowledge.search",
-    "ocr.install_models",
-    "research.objects",
-    "transfer.import",
-    "transfer.listen",
-    "transfer.send",
-    "transfer.stop"
+    "research.objects"
   ],
   "evalSources": [
     "apps/muyon/lib/assistant/selection_eval/selection_set.json",

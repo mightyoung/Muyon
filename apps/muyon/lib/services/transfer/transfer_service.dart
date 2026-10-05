@@ -805,17 +805,26 @@ class TransferService {
     if (changed > 0) _emitChat();
   }
 
-  Future<void> acceptChat(String messageId) =>
-      _setAcceptance(messageId, 'accepted');
+  Future<void> acceptChat(String peerFingerprint, String messageId) =>
+      _setAcceptance(peerFingerprint, messageId, 'accepted');
 
-  Future<void> rejectChat(String messageId) =>
-      _setAcceptance(messageId, 'rejected');
+  Future<void> rejectChat(String peerFingerprint, String messageId) =>
+      _setAcceptance(peerFingerprint, messageId, 'rejected');
 
   /// Explicit resend of a `failed` row, or of `sent` older than
   /// [chatSentRetryAfter]. The same message id is used, so the receiver keeps
-  /// one row. This never runs from a timer.
-  Future<ChatMessage> retryText(String messageId) async {
-    final message = _single(messageId, direction: 'out', missing: '消息不存在');
+  /// one row. The peer fingerprint selects which row, so two peers can share
+  /// a message id. This never runs from a timer.
+  Future<ChatMessage> retryText(
+    String peerFingerprint,
+    String messageId,
+  ) async {
+    final message = _single(
+      peerFingerprint,
+      messageId,
+      direction: 'out',
+      missing: '消息不存在',
+    );
     if (message.sendState == 'delivered') {
       throw StateError('对方已确认保存，不能重发');
     }
@@ -843,11 +852,19 @@ class TransferService {
     return _message(message.peerFingerprint, message.id);
   }
 
-  /// Removes the local row only. The peer is not told.
-  Future<void> deleteChat(String messageId) async {
-    _single(messageId, direction: null, missing: '消息不存在');
+  /// Removes the local row for this peer and message id. The peer is not told.
+  Future<void> deleteChat(String peerFingerprint, String messageId) async {
+    _single(
+      peerFingerprint,
+      messageId,
+      direction: null,
+      missing: '消息不存在',
+    );
     await database.write((db) {
-      db.execute('DELETE FROM chat_messages WHERE message_id=?', [messageId]);
+      db.execute(
+        'DELETE FROM chat_messages WHERE peer_fingerprint=? AND message_id=?',
+        [peerFingerprint, messageId],
+      );
     });
     _emitChat();
   }
@@ -902,13 +919,15 @@ class TransferService {
           .firstWhere((message) => message.id == messageId);
 
   ChatMessage _single(
+    String peerFingerprint,
     String messageId, {
     required String? direction,
     required String missing,
   }) {
     final matches = [
       for (final message in _allMessages())
-        if (message.id == messageId &&
+        if (message.peerFingerprint == peerFingerprint &&
+            message.id == messageId &&
             (direction == null || message.direction == direction))
           message,
     ];
@@ -916,13 +935,22 @@ class TransferService {
     return matches.single;
   }
 
-  Future<void> _setAcceptance(String messageId, String acceptance) async {
-    final message = _single(messageId, direction: 'in', missing: '消息不存在');
+  Future<void> _setAcceptance(
+    String peerFingerprint,
+    String messageId,
+    String acceptance,
+  ) async {
+    final message = _single(
+      peerFingerprint,
+      messageId,
+      direction: 'in',
+      missing: '消息不存在',
+    );
     if (message.acceptance == acceptance) return;
     await database.write((db) {
       db.execute(
         'UPDATE chat_messages SET acceptance=? WHERE peer_fingerprint=? AND message_id=? AND direction=?',
-        [acceptance, message.peerFingerprint, messageId, 'in'],
+        [acceptance, peerFingerprint, messageId, 'in'],
       );
     });
     _emitChat();

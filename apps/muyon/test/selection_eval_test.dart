@@ -159,6 +159,50 @@ void main() {
       }
     },
   );
+
+  test('a read-only Laya strategy cannot return a write or external tool', () {
+    final tools = evaluationTools();
+    List<RegisteredToolInfo>? seen;
+    final strategy = ReadOnlyLayaToolSelection((prompt, readOnly) {
+      seen = readOnly;
+      return prompt.trim();
+    });
+
+    ToolSelection ask(String prompt) => strategy.select(
+      prompt: prompt,
+      scope: const AssistantScope.global(),
+      availableTools: tools,
+      modelAvailable: true,
+    );
+
+    final deleted = ask('knowledge.delete');
+    expect(seen, isNotNull);
+    expect(
+      seen!.map((tool) => tool.descriptor.toolId),
+      isNot(contains('knowledge.delete')),
+    );
+    expect(
+      seen!.every((tool) => tool.accessLevel == ToolAccessLevel.read),
+      isTrue,
+    );
+    expect(seen!.map((tool) => tool.descriptor.toolId), contains('knowledge.search'));
+    expect(deleted.candidateIds, isEmpty);
+    expect(deleted.ruleToolId, isNull);
+    expect(choiceFromRule(deleted).abstains, isTrue);
+
+    final sent = ask('transfer.send');
+    expect(sent.candidateIds, isNot(contains('transfer.send')));
+    expect(sent.ruleToolId, isNull);
+
+    final exported = ask('transfer.export');
+    expect(exported.candidateIds, isEmpty);
+    expect(exported.ruleToolId, isNull);
+
+    final search = ask('knowledge.search');
+    expect(search.candidateIds, ['knowledge.search']);
+    expect(search.ruleToolId, 'knowledge.search');
+    expect(choiceFromRule(search).abstains, isFalse);
+  });
 }
 
 String _layaLine() {

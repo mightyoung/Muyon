@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/services/knowledge/knowledge_service.dart';
+import 'package:muyon/services/transfer/chat_log.dart';
 import 'package:muyon/services/transfer/transfer_service.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:supplier_core/lan.dart';
@@ -110,7 +111,7 @@ void main() {
       expect(left.messages(rightPeer.fingerprint).single.sendState, 'sent');
 
       await expectLater(
-        left.retryText(sent.id),
+        left.retryText(rightPeer.fingerprint, sent.id),
         throwsA(
           isA<StateError>().having(
             (e) => e.message,
@@ -120,16 +121,20 @@ void main() {
         ),
       );
       await leftDb.write((db) {
-        db.execute("UPDATE chat_messages SET sent_at=? WHERE message_id=?", [
-          DateTime.now()
-              .toUtc()
-              .subtract(const Duration(minutes: 5))
-              .toIso8601String(),
-          sent.id,
-        ]);
+        db.execute(
+          'UPDATE chat_messages SET sent_at=? WHERE peer_fingerprint=? AND message_id=?',
+          [
+            DateTime.now()
+                .toUtc()
+                .subtract(const Duration(minutes: 5))
+                .toIso8601String(),
+            rightPeer.fingerprint,
+            sent.id,
+          ],
+        );
       });
       right.acknowledgeChatDelivery = true;
-      await left.retryText(sent.id);
+      await left.retryText(rightPeer.fingerprint, sent.id);
       await until(
         () =>
             left.messages(rightPeer.fingerprint).single.sendState ==
@@ -145,13 +150,13 @@ void main() {
       expect(right.threads().single.unread, 0);
       expect(left.messages(rightPeer.fingerprint), hasLength(1));
 
-      await right.acceptChat(sent.id);
+      await right.acceptChat(leftPeer.fingerprint, sent.id);
       expect(
         right.messages(leftPeer.fingerprint).single.acceptance,
         'accepted',
       );
       expect(right.items(), isEmpty);
-      await right.rejectChat(sent.id);
+      await right.rejectChat(leftPeer.fingerprint, sent.id);
       expect(
         right.messages(leftPeer.fingerprint).single.acceptance,
         'rejected',
@@ -167,7 +172,7 @@ void main() {
           isA<StateError>().having((e) => e.message, 'message', '未配对或已撤销'),
         ),
       );
-      await left.deleteChat(sent.id);
+      await left.deleteChat(rightPeer.fingerprint, sent.id);
       expect(left.messages(rightPeer.fingerprint), isEmpty);
       expect(right.messages(leftPeer.fingerprint), hasLength(1));
     },
@@ -288,4 +293,133 @@ void main() {
       );
     },
   );
+
+  test('the same message id on two peers stays on its own row', () async {
+    final db = openDb();
+    addTearDown(db.close);
+    final service = TransferService(db, '${temp.path}/collide');
+    addTearDown(service.close);
+    final created = DateTime.utc(2026, 10, 5);
+    ChatLog.insertInbound(
+      db.raw,
+      peerFingerprint: 'peer-a',
+      messageId: 'shared',
+      body: '来自甲',
+      createdAt: created,
+      receivedAt: created,
+    );
+    ChatLog.insertInbound(
+      db.raw,
+      peerFingerprint: 'peer-b',
+      messageId: 'shared',
+      body: '来自乙',
+      createdAt: created,
+      receivedAt: created,
+    );
+    ChatLog.insertOutbound(
+      db.raw,
+      peerFingerprint: 'peer-a',
+      messageId: 'shared-out',
+      body: '甲发出',
+      createdAt: created,
+    );
+    ChatLog.insertOutbound(
+      db.raw,
+      peerFingerprint: 'peer-b',
+      messageId: 'shared-out',
+      body: '乙发出',
+      createdAt: created,
+    );
+    db.raw.execute(
+      "UPDATE chat_messages SET send_state='delivered' WHERE peer_fingerprint=? AND message_id=?",
+      ['peer-a', 'shared-out'],
+    );
+    db.raw.execute(
+      "UPDATE chat_messages SET send_state='failed' WHERE peer_fingerprint=? AND message_id=?",
+      ['peer-b', 'shared-out'],
+    );
+
+    await service.acceptChat('peer-a', 'shared');
+    expect(
+      service.messages('peer-a').singleWhere((m) => m.id == 'shared').acceptance,
+      'accepted',
+    );
+    expect(
+      service.messages('peer-b').singleWhere((m) => m.id == 'shared').acceptance,
+      'none',
+    );
+    await service.rejectChat('peer-b', 'shared');
+    expect(
+      service.messages('peer-b').singleWhere((m) => m.id == 'shared').acceptance,
+      'rejected',
+    );
+    expect(
+      service.messages('peer-a').singleWhere((m) => m.id == 'shared').acceptance,
+      'accepted',
+    );
+    await expectLater(
+      service.acceptChat('peer-missing', 'shared'),
+      throwsA(
+        isA<StateError>().having((error) => error.message, 'message', '消息不存在'),
+      ),
+    );
+
+    await expectLater(
+      service.retryText('peer-a', 'shared-out'),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          '对方已确认保存，不能重发',
+        ),
+      ),
+    );
+    await expectLater(
+      service.retryText('peer-b', 'shared-out'),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          '对方不在线，没有中继',
+        ),
+      ),
+    );
+    expect(
+      service.messages('peer-a').singleWhere((m) => m.id == 'shared-out').sendState,
+      'delivered',
+    );
+    expect(
+      service.messages('peer-b').singleWhere((m) => m.id == 'shared-out').sendState,
+      'failed',
+    );
+    expect(
+      service.messages('peer-b').singleWhere((m) => m.id == 'shared-out').body,
+      '乙发出',
+    );
+
+    await service.deleteChat('peer-a', 'shared');
+    expect(
+      service.messages('peer-a').where((m) => m.id == 'shared'),
+      isEmpty,
+    );
+    expect(
+      service.messages('peer-b').singleWhere((m) => m.id == 'shared').body,
+      '来自乙',
+    );
+    await service.deleteChat('peer-b', 'shared-out');
+    expect(
+      service.messages('peer-b').where((m) => m.id == 'shared-out'),
+      isEmpty,
+    );
+    expect(
+      service.messages('peer-a').singleWhere((m) => m.id == 'shared-out').body,
+      '甲发出',
+    );
+    await expectLater(
+      service.deleteChat('peer-a', 'shared'),
+      throwsA(
+        isA<StateError>().having((error) => error.message, 'message', '消息不存在'),
+      ),
+    );
+  });
 }

@@ -48,3 +48,37 @@ class RuleAndModelToolSelection implements ToolSelectionStrategy {
     );
   }
 }
+
+/// Laya may propose a read-only tool only. Write, export and network tools are
+/// removed before the chooser sees them, and a named write or external id is
+/// dropped even if the chooser returns one. This is not the production
+/// selector, and nothing here calls Laya.
+class ReadOnlyLayaToolSelection implements ToolSelectionStrategy {
+  const ReadOnlyLayaToolSelection(this._choose);
+
+  final String? Function(String prompt, List<RegisteredToolInfo> readOnly)
+  _choose;
+
+  @override
+  String get id => 'laya-readonly-v1';
+
+  @override
+  ToolSelection select({
+    required String prompt,
+    required AssistantScope scope,
+    required List<RegisteredToolInfo> availableTools,
+    required bool modelAvailable,
+  }) {
+    final readOnly = [
+      for (final tool in availableTools)
+        if (tool.available && tool.accessLevel == ToolAccessLevel.read) tool,
+    ];
+    final allow = readOnly.map((tool) => tool.descriptor.toolId).toSet();
+    final named = _choose(prompt, readOnly);
+    final chosen = named != null && allow.contains(named) ? named : null;
+    return ToolSelection(
+      candidateIds: chosen == null ? const <String>[] : <String>[chosen],
+      ruleToolId: chosen,
+    );
+  }
+}
