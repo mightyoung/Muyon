@@ -24,6 +24,7 @@ class ResearchTaskBridge {
 
   static const maxPackageBytes = 8 * 1024 * 1024;
   static const maxResultBytes = 32 * 1024 * 1024;
+  static const maxResultJsonBytes = 1024 * 1024;
   static const _taskKind = 'research-task';
   static const _resultKind = 'research-result';
 
@@ -278,7 +279,15 @@ class ResearchTaskBridge {
             .where((f) => f.isFile && p.basename(f.name) == 'result.json')
             .toList();
         if (files.length != 1) return '结果压缩包必须恰好包含一个 result.json';
+        // Results arrive from another device and are checked automatically;
+        // refuse before inflating so a small archive cannot expand in memory.
+        if (files.single.size > maxResultJsonBytes) {
+          return '结果压缩包里的 result.json 过大';
+        }
         json = files.single.content as List<int>;
+        if (json.length > maxResultJsonBytes) {
+          return '结果压缩包里的 result.json 过大';
+        }
       }
       final data = jsonDecode(utf8.decode(json));
       if (data is! Map ||

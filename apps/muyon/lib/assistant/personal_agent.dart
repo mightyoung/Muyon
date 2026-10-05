@@ -479,8 +479,6 @@ class PersonalAgent {
           return;
         }
         rethrow;
-      } finally {
-        _toolActive.remove(task.id);
       }
       final cancelRequested =
           _cancelRequested.remove(task.id) || token.isCancelled;
@@ -537,10 +535,11 @@ class PersonalAgent {
           },
         ],
       });
-      if (task.profileId == null) {
+      if (task.profileId == null || cancelRequested) {
         // A cancel request that arrived after the tool finished must not
-        // discard its real result; the state guard still lets only one of
-        // cancel and completion land.
+        // discard its real result, and it ends the task here: no further
+        // model request after the person cancelled. The state guard still
+        // lets only one of cancel and completion land.
         await _finish(
           updated,
           '${result.summary}$lateCancel\n${jsonEncode(result.data)}',
@@ -550,6 +549,10 @@ class PersonalAgent {
         await _waitForModel(updated);
       }
     } finally {
+      // Held until the outcome is written: a cancel in between must only
+      // signal, never take the "not started" path and write `cancelled`.
+      _toolActive.remove(task.id);
+      _cancelRequested.remove(task.id);
       _toolTokens.remove(task.id);
     }
   }
@@ -596,16 +599,20 @@ class PersonalAgent {
   /// ends `cancelled` (stopped before the effect), `interrupted` (the effect
   /// may have happened) or with the real result.
   Future<void> cancel(String id) async {
-    final task = repository.task(id);
+    var task = repository.task(id);
     if (task == null || task.terminal) return;
     if (_toolActive.contains(id)) {
       _cancelRequested.add(id);
       _toolTokens[id]?.cancel();
-      await repository.updateTask(
+      final marked = await repository.updateTask(
         task.copy({'stage': 'cancelling'}),
         expected: {PersonalTaskState.running},
       );
-      return;
+      if (marked) return;
+      // The tool outcome was written first (for example the task now waits
+      // for the next model turn): cancel what follows like any other task.
+      task = repository.task(id);
+      if (task == null || task.terminal) return;
     }
     _modelTokens[id]?.cancel();
     _toolTokens[id]?.cancel();

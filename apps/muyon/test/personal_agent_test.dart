@@ -188,6 +188,79 @@ void main() {
     },
   );
 
+  test('cancel during or after a model-chosen tool ends the task with no further model turn', () async {
+    for (var round = 0; round < 12; round++) {
+      final id = 'slow$round';
+      final past = Completer<void>(), release = Completer<void>();
+      tools.register(
+        providerId: 'test',
+        descriptor: ToolDescriptor(
+          toolId: id,
+          moduleId: 'test',
+          effect: ToolEffect.write,
+          supportsCancel: true,
+          parameterSchema: {
+            'type': 'object',
+            'properties': <String, Object?>{},
+            'additionalProperties': false,
+          },
+        ),
+        handler: (context) async {
+          context.checkBeforeEffect();
+          past.complete();
+          await release.future;
+          return ToolCallResult(
+            status: ToolCallStatus.succeeded,
+            summary: 'written',
+            data: {'value': 1},
+            objectRefs: [ref],
+          );
+        },
+      );
+      var sent = 0;
+      final fixture = await server((_) async {
+        sent++;
+        return '{"type":"tool","toolId":"$id","parameters":{}}';
+      });
+      final c = await repo.createConversation();
+      var task = await agent.start(
+        conversationId: c.id,
+        prompt: 'write it',
+        profile: fixture.$2,
+      );
+      await confirm(task);
+      task = repo.task(task.id)!;
+      final running = confirm(task);
+      await past.future;
+      // Release and cancel in the same turn, in alternating order.
+      if (round.isEven) {
+        release.complete();
+        unawaited(agent.cancel(task.id));
+      } else {
+        unawaited(agent.cancel(task.id));
+        release.complete();
+      }
+      await running;
+      final deadline = DateTime.now().add(const Duration(seconds: 10));
+      while (!repo.task(task.id)!.terminal) {
+        if (DateTime.now().isAfter(deadline)) {
+          fail('round $round stuck in ${repo.task(task.id)!.state}');
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      final after = repo.task(task.id)!;
+      expect(
+        [PersonalTaskState.succeeded, PersonalTaskState.interrupted],
+        contains(after.state),
+        reason: 'round $round',
+      );
+      if (after.state == PersonalTaskState.succeeded) {
+        expect(after.payload['summary'], contains('written'));
+      }
+      expect(sent, 1, reason: 'no further model turn after the cancel');
+    }
+  });
+
   test(
     'write requires one host confirmation; pause resume gets new attempt',
     () async {
@@ -409,34 +482,37 @@ void main() {
     expect(task.payload['candidateIds'], ['read']);
   });
 
-  test('internal channels are never offered to the selection strategy', () async {
-    tools.register(
-      providerId: 'test',
-      descriptor: ToolDescriptor(
-        toolId: 'internal',
-        moduleId: 'test',
-        effect: ToolEffect.network,
-        modelSelectable: false,
-        parameterSchema: {
-          'type': 'object',
-          'properties': <String, Object?>{},
-          'additionalProperties': false,
-        },
-      ),
-      handler: (context) async => throw StateError('not reachable'),
-    );
-    final strategy = _CapturingStrategy();
-    agent = PersonalAgent(
-      repository: repo,
-      gateway: OpenAiModelGateway(UnavailableSecretStore()),
-      tools: tools,
-      selectionStrategy: strategy,
-    );
-    final c = await repo.createConversation();
-    await agent.start(conversationId: c.id, prompt: 'internal');
-    expect(strategy.offered, containsAll(['read', 'write']));
-    expect(strategy.offered, isNot(contains('internal')));
-  });
+  test(
+    'internal channels are never offered to the selection strategy',
+    () async {
+      tools.register(
+        providerId: 'test',
+        descriptor: ToolDescriptor(
+          toolId: 'internal',
+          moduleId: 'test',
+          effect: ToolEffect.network,
+          modelSelectable: false,
+          parameterSchema: {
+            'type': 'object',
+            'properties': <String, Object?>{},
+            'additionalProperties': false,
+          },
+        ),
+        handler: (context) async => throw StateError('not reachable'),
+      );
+      final strategy = _CapturingStrategy();
+      agent = PersonalAgent(
+        repository: repo,
+        gateway: OpenAiModelGateway(UnavailableSecretStore()),
+        tools: tools,
+        selectionStrategy: strategy,
+      );
+      final c = await repo.createConversation();
+      await agent.start(conversationId: c.id, prompt: 'internal');
+      expect(strategy.offered, containsAll(['read', 'write']));
+      expect(strategy.offered, isNot(contains('internal')));
+    },
+  );
 
   test('model cannot propose outside frozen candidates even if strategy later changes', () async {
     final strategy = _SelectedReadStrategy();

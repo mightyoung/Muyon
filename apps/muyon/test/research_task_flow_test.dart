@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive.dart';
+
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
@@ -256,6 +258,26 @@ void main() {
           rev,
           resultFile(task, revision: 9),
         ),
+        throwsFormatException,
+      );
+      // A small archive whose result.json inflates past 1 MB is refused
+      // before it is read into memory.
+      final padded = utf8.encode(
+        jsonEncode({
+          'taskId': task.id,
+          'taskRevision': task.revision,
+          'logs': List.filled(40000, 'x' * 40),
+        }),
+      );
+      final zip = File(p.join(root.path, 'bomb.zip'))
+        ..writeAsBytesSync(
+          ZipEncoder().encodeBytes(
+            Archive()..addFile(ArchiveFile.bytes('result.json', padded)),
+          ),
+        );
+      expect(zip.lengthSync(), lessThan(100 * 1024));
+      await expectLater(
+        b.researchTasks.submitResult(task.id, rev, zip.path),
         throwsFormatException,
       );
       expect(b.tasks.stateOf(task.id, rev), 'running');
