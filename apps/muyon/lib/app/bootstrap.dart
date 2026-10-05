@@ -242,6 +242,7 @@ class MuyonHost {
         deviceId: device,
         modelProfiles: ProfileRepository(workspaces),
         modelGateway: services.gateway,
+        tools: tools,
         approveModelRequest: (preview) =>
             approveInquiryModelRequest?.call(preview) ?? Future.value(false),
       );

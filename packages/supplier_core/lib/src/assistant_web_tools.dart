@@ -8,14 +8,51 @@ import 'ai_runtime.dart';
 import 'assistant_toolset.dart';
 import 'assistant_web_catalog.dart';
 
-typedef AssistantWebResolver =
-    Future<List<InternetAddress>> Function(String host);
-typedef AssistantWebTransport =
-    Future<AssistantWebResponse> Function(
-      Uri uri,
-      List<InternetAddress> checkedAddresses,
-      AiCancellation cancellation,
-    );
+typedef AssistantWebResolver = Future<List<InternetAddress>> Function(
+  String host,
+);
+typedef AssistantWebTransport = Future<AssistantWebResponse> Function(
+  Uri uri,
+  List<InternetAddress> checkedAddresses,
+  AiCancellation cancellation,
+);
+
+/// Immutable host-issued preview. Text/model parameters cannot issue a grant.
+class AssistantWebApprovalPreview {
+  const AssistantWebApprovalPreview({
+    required this.destination,
+    required this.invocationId,
+    required this.parameterDigest,
+  });
+  final Uri destination;
+  final String invocationId;
+  final String parameterDigest;
+}
+
+/// A durable host outcome; local cancellation cannot undo a started request.
+class AssistantWebAuthorityFailure implements Exception {
+  const AssistantWebAuthorityFailure({required this.interrupted});
+  final bool interrupted;
+}
+
+typedef AssistantWebReview = Future<bool> Function(
+  AssistantWebApprovalPreview preview,
+  AiCancellation cancellation,
+);
+
+/// Application-owned channel; platform classes stay in the host adapter.
+/// The operation includes DNS, transport and bounded body consumption so the
+/// durable receipt describes the complete hop, including interrupted reads.
+abstract class AssistantWebAuthority {
+  Future<T> run<T>({
+    required Uri destination,
+    required String sessionId,
+    required AiCancellation cancellation,
+    required AssistantWebReview? review,
+    required void Function() validateSession,
+    required Future<T> Function(void Function() checkBeforeEffect) operation,
+  });
+}
 
 /// Transport injections are application-owned, never supplied by a tool call.
 class AssistantWebResponse {
@@ -44,8 +81,13 @@ class AssistantWebTools implements AssistantToolset {
     Duration timeout = const Duration(seconds: 20),
     List<AssistantWebSnapshot> restoredSnapshots = const [],
     this.onSnapshot,
+    this.hosted = false,
+    this.sessionId = '',
+    this.authority,
+    this.review,
+    this.validateSession,
   }) : _resolver = resolver ?? InternetAddress.lookup,
-       _transport = transport ?? _request,
+       _transport = transport,
        _timeout = timeout > const Duration(seconds: 20)
            ? const Duration(seconds: 20)
            : timeout {
@@ -55,7 +97,12 @@ class AssistantWebTools implements AssistantToolset {
   }
 
   final AssistantWebResolver _resolver;
-  final AssistantWebTransport _transport;
+  final AssistantWebTransport? _transport;
+  final bool hosted;
+  final String sessionId;
+  final AssistantWebAuthority? authority;
+  final AssistantWebReview? review;
+  final void Function()? validateSession;
   final Duration _timeout;
   final _pages = <String, _Page>{};
   final _snapshots = <String, AssistantWebSnapshot>{};
@@ -130,27 +177,26 @@ class AssistantWebTools implements AssistantToolset {
     cancellation.check();
     final operation = AiCancellation();
     final detach = cancellation.onCancel(operation.cancel);
-    var timedOut = false;
-    final timer = Timer(_timeout, () {
-      timedOut = true;
-      operation.cancel('网页请求超时');
-    });
+    final budget = _WebBudget(_timeout, operation);
     try {
-      final result = await operation.wait(_execute(name, arguments, operation));
+      final result = await _execute(name, arguments, operation, budget);
       cancellation.check();
       return result;
     } catch (error) {
       cancellation.check();
       return jsonEncode({
-        'error': timedOut
+        'error': budget.timedOut
             ? '网页请求超时，请稍后重试或选择其他来源。'
             : error is _WebError
             ? error.message
             : '无法读取公开网页。请检查网络、HTTPS 地址及站点可用性后重试。',
         'untrusted': true,
+        if (error is AssistantWebAuthorityFailure && error.interrupted)
+          'network_outcome': 'interrupted',
+        if (error is AssistantWebAuthorityFailure && error.interrupted)
+          'notice': '请求可能已发生；本地停止不代表远端撤销。',
       });
     } finally {
-      timer.cancel();
       detach();
       operation.cancel();
     }
@@ -160,6 +206,7 @@ class AssistantWebTools implements AssistantToolset {
     String name,
     Map<String, Object?> args,
     AiCancellation cancel,
+    _WebBudget budget,
   ) async {
     switch (name) {
       case 'web_search':
@@ -171,6 +218,7 @@ class AssistantWebTools implements AssistantToolset {
         final loaded = await _load(
           Uri.https('www.bing.com', '/search', {'format': 'rss', 'q': query}),
           cancel,
+          budget,
         );
         if (RegExp(
           r'<!\s*(DOCTYPE|ENTITY)',
@@ -229,7 +277,11 @@ class AssistantWebTools implements AssistantToolset {
         return jsonEncode(result);
       case 'web_fetch':
         _keys(args, {'url'});
-        final loaded = await _load(_url(_string(args, 'url', 2048)), cancel);
+        final loaded = await _load(
+          _url(_string(args, 'url', 2048)),
+          cancel,
+          budget,
+        );
         final plain = loaded.contentType == 'text/plain';
         final parsed = plain
             ? (
@@ -355,62 +407,104 @@ class AssistantWebTools implements AssistantToolset {
     }
   }
 
-  Future<_Loaded> _load(Uri initial, AiCancellation cancel) async {
+  Future<_Loaded> _load(
+    Uri initial,
+    AiCancellation cancel,
+    _WebBudget budget,
+  ) async {
     var uri = initial;
     for (var redirects = 0; redirects <= 3; redirects++) {
       cancel.check();
       uri = _url(uri.toString());
-      final literal = InternetAddress.tryParse(_host(uri));
-      final addresses = literal == null
-          ? await cancel.wait(_resolver(_host(uri)))
-          : [literal];
-      cancel.check();
-      if (addresses.isEmpty || addresses.any((a) => !_public(a)))
-        throw _WebError('仅允许解析到公网地址的 HTTPS 站点。');
-      final response = await cancel.wait(
-        _transport(uri, List.unmodifiable(addresses), cancel),
-      );
-      final detach = cancel.onCancel(response.close);
-      try {
+      final destination = uri;
+      Future<_Loaded?> hop(void Function() checkBeforeEffect) async {
+        checkBeforeEffect();
+        final literal = InternetAddress.tryParse(_host(destination));
+        final addresses = literal == null
+            ? await cancel.wait(_resolver(_host(destination)))
+            : [literal];
         cancel.check();
-        if ([301, 302, 303, 307, 308].contains(response.statusCode)) {
-          if (redirects == 3 || response.location == null)
-            throw _WebError('网页重定向过多或缺少目标。');
-          uri = _url(uri.resolve(response.location!).toString());
-          continue;
-        }
-        if (response.statusCode != 200)
-          throw _WebError('站点返回 HTTP ${response.statusCode}；请使用其他公开来源。');
-        final type = response.contentType.split(';').first.trim().toLowerCase();
-        if (!{
-          'text/html',
-          'text/plain',
-          'application/rss+xml',
-          'application/xml',
-          'text/xml',
-        }.contains(type)) {
-          throw _WebError('仅支持 HTML、纯文本和 RSS/XML 网页。');
-        }
-        final bytes = <int>[];
-        await cancel.wait(() async {
-          await for (final chunk in response.body) {
-            cancel.check();
-            if (bytes.length + chunk.length > maxBodyBytes)
-              throw _WebError('网页超过 512 KiB 限制，请选择更小的页面。');
-            bytes.addAll(chunk);
-          }
-        }());
-        cancel.check();
-        return _Loaded(
-          uri,
-          type,
-          utf8.decode(bytes, allowMalformed: true),
-          DateTime.now().toUtc().toIso8601String(),
+        if (addresses.isEmpty || addresses.any((a) => !_public(a)))
+          throw _WebError('仅允许解析到公网地址的 HTTPS 站点。');
+        checkBeforeEffect();
+        final response = await cancel.wait(
+          _transport == null
+              ? _request(
+                  destination,
+                  List.unmodifiable(addresses),
+                  cancel,
+                  checkBeforeEffect,
+                )
+              : _transport(destination, List.unmodifiable(addresses), cancel),
         );
-      } finally {
-        detach();
-        response.close();
+        final detach = cancel.onCancel(response.close);
+        try {
+          checkBeforeEffect();
+          if ([301, 302, 303, 307, 308].contains(response.statusCode)) {
+            if (redirects == 3 || response.location == null)
+              throw _WebError('网页重定向过多或缺少目标。');
+            uri = _url(uri.resolve(response.location!).toString());
+            return null;
+          }
+          if (response.statusCode != 200)
+            throw _WebError('站点返回 HTTP ${response.statusCode}；请使用其他公开来源。');
+          final type = response.contentType
+              .split(';')
+              .first
+              .trim()
+              .toLowerCase();
+          if (!{
+            'text/html',
+            'text/plain',
+            'application/rss+xml',
+            'application/xml',
+            'text/xml',
+          }.contains(type)) {
+            throw _WebError('仅支持 HTML、纯文本和 RSS/XML 网页。');
+          }
+          final bytes = <int>[];
+          await cancel.wait(() async {
+            await for (final chunk in response.body) {
+              checkBeforeEffect();
+              if (bytes.length + chunk.length > maxBodyBytes)
+                throw _WebError('网页超过 512 KiB 限制，请选择更小的页面。');
+              bytes.addAll(chunk);
+            }
+          }());
+          checkBeforeEffect();
+          return _Loaded(
+            uri,
+            type,
+            utf8.decode(bytes, allowMalformed: true),
+            DateTime.now().toUtc().toIso8601String(),
+          );
+        } finally {
+          detach();
+          response.close();
+        }
       }
+
+      void check() {
+        cancel.check();
+        validateSession?.call();
+      }
+
+      final channel = authority;
+      if (hosted && channel == null) {
+        throw _WebError('宿主未提供已记录的联网通道，尚未发送请求。');
+      }
+      final loaded = channel == null
+          ? await budget.run(() => hop(check))
+          : await channel.run<_Loaded?>(
+              destination: destination,
+              sessionId: sessionId,
+              cancellation: cancel,
+              review: review,
+              validateSession: check,
+              operation: (guard) => budget.run(() => hop(guard)),
+            );
+      cancel.check();
+      if (loaded != null) return loaded;
     }
     throw _WebError('网页重定向过多。');
   }
@@ -419,6 +513,7 @@ class AssistantWebTools implements AssistantToolset {
     Uri uri,
     List<InternetAddress> addresses,
     AiCancellation cancel,
+    void Function() checkBeforeEffect,
   ) async {
     final client = HttpClient()
       ..connectionTimeout = const Duration(seconds: 20)
@@ -431,6 +526,7 @@ class AssistantWebTools implements AssistantToolset {
       if (address.host != _host(target)) {
         throw _WebError('解析结果没有保留原始主机名，无法安全校验 TLS。');
       }
+      checkBeforeEffect();
       final task = await SecureSocket.startConnect(address, target.port);
       final detach = cancel.onCancel(task.cancel);
       unawaited(
@@ -450,6 +546,7 @@ class AssistantWebTools implements AssistantToolset {
     }
 
     try {
+      checkBeforeEffect();
       final request = await cancel.wait(client.getUrl(uri));
       request.followRedirects = false;
       request.headers.set(
@@ -457,6 +554,7 @@ class AssistantWebTools implements AssistantToolset {
         'text/html, text/plain, application/rss+xml, application/xml, text/xml',
       );
       request.headers.set(HttpHeaders.userAgentHeader, 'FolioAssistant/1.0');
+      checkBeforeEffect();
       final response = await cancel.wait(request.close());
       return AssistantWebResponse(
         statusCode: response.statusCode,
@@ -530,6 +628,34 @@ class AssistantWebTools implements AssistantToolset {
     if (b[0] == 0x3f && b[1] == 0xff && b[2] < 0x10)
       return false; // documentation /20
     return true;
+  }
+}
+
+/// One cumulative I/O budget across all hops; host preparation and human review
+/// do not consume it. Every DNS/request/body wait remains cancellable.
+class _WebBudget {
+  _WebBudget(this.remaining, this.cancellation);
+  Duration remaining;
+  final AiCancellation cancellation;
+  bool timedOut = false;
+  Future<T> run<T>(Future<T> Function() operation) async {
+    if (remaining <= Duration.zero) {
+      timedOut = true;
+      cancellation.cancel('网页请求超时');
+    }
+    cancellation.check();
+    final elapsed = Stopwatch()..start();
+    final timer = Timer(remaining, () {
+      timedOut = true;
+      cancellation.cancel('网页请求超时');
+    });
+    try {
+      return await operation();
+    } finally {
+      timer.cancel();
+      elapsed.stop();
+      remaining -= elapsed.elapsed;
+    }
   }
 }
 
