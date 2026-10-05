@@ -29,6 +29,11 @@ class PersonalAgent {
   final ToolSelectionStrategy selectionStrategy;
   final _modelTokens = <String, ModelCancellation>{};
   final _toolTokens = <String, ToolCancellationToken>{};
+
+  /// Tasks whose tool call is under way (between dispatch and the registry's
+  /// receipt). Cancelling one of these only signals; the receipt decides.
+  final _toolActive = <String>{};
+  final _cancelRequested = <String>{};
   final _operations = <String, Future<void>>{};
   bool _closing = false;
   final _activeStarts = <Future<PersonalTask>>{};
@@ -458,12 +463,55 @@ class PersonalAgent {
           repository.task(task.id)?.state != PersonalTaskState.running) {
         return;
       }
-      final result = await tools.invoke(request, cancellation: token);
-      token.throwIfCancelled();
+      _toolActive.add(task.id);
+      final ToolCallResult result;
+      try {
+        result = await tools.invoke(request, cancellation: token);
+      } on ToolCancelled {
+        // Stopped before dispatch: nothing ran.
+        _cancelRequested.remove(task.id);
+        await _settle(task, PersonalTaskState.cancelled, null);
+        return;
+      } catch (_) {
+        // The registry refused or failed before any effect.
+        if (_cancelRequested.remove(task.id)) {
+          await _settle(task, PersonalTaskState.cancelled, null);
+          return;
+        }
+        rethrow;
+      } finally {
+        _toolActive.remove(task.id);
+      }
+      final cancelRequested =
+          _cancelRequested.remove(task.id) || token.isCancelled;
       if (_closing ||
           repository.task(task.id)?.state != PersonalTaskState.running) {
         return;
       }
+      final readOnly =
+          tools.inspect(request.toolId)?.accessLevel == ToolAccessLevel.read;
+      if (cancelRequested && readOnly) {
+        // A read tool has no external side effect, so the person's cancel wins
+        // whatever it returned; its result is discarded.
+        await _settle(task, PersonalTaskState.cancelled, null);
+        return;
+      }
+      if (result.status == ToolCallStatus.cancelled) {
+        await _settle(task, PersonalTaskState.cancelled, null);
+        return;
+      }
+      if (result.status == ToolCallStatus.interrupted) {
+        // The effect may have happened; the receipt is the truth, not "cancelled".
+        await _settle(
+          task,
+          PersonalTaskState.interrupted,
+          cancelRequested
+              ? '已请求取消，但操作可能已生效，重试前请先核实。${result.summary}'
+              : '操作结果未知，重试前请先核实。${result.summary}',
+        );
+        return;
+      }
+      final lateCancel = cancelRequested ? '（取消请求晚于完成）' : '';
       if (result.status != ToolCallStatus.succeeded) {
         await _fail(task, result.summary);
         return;
@@ -474,7 +522,7 @@ class PersonalAgent {
       }.toList();
       final updated = task.copy({
         'references': refs.map((r) => r.toJson()).toList(),
-        'summary': result.summary,
+        'summary': '${result.summary}$lateCancel',
         'messages': [
           ...task.payload['messages'] as List,
           {
@@ -490,11 +538,13 @@ class PersonalAgent {
         ],
       });
       if (task.profileId == null) {
+        // A cancel request that arrived after the tool finished must not
+        // discard its real result; the state guard still lets only one of
+        // cancel and completion land.
         await _finish(
           updated,
-          '${result.summary}\n${jsonEncode(result.data)}',
+          '${result.summary}$lateCancel\n${jsonEncode(result.data)}',
           refs,
-          canCommit: () => !token.isCancelled,
         );
       } else {
         await _waitForModel(updated);
@@ -540,17 +590,55 @@ class PersonalAgent {
     }
   }
 
+  /// Before a tool call is under way (waiting for confirmation, queued, model
+  /// phase) this ends the task as `cancelled`. Once the tool call started it
+  /// only sends the signal: the registry's receipt decides whether the task
+  /// ends `cancelled` (stopped before the effect), `interrupted` (the effect
+  /// may have happened) or with the real result.
   Future<void> cancel(String id) async {
+    final task = repository.task(id);
+    if (task == null || task.terminal) return;
+    if (_toolActive.contains(id)) {
+      _cancelRequested.add(id);
+      _toolTokens[id]?.cancel();
+      await repository.updateTask(
+        task.copy({'stage': 'cancelling'}),
+        expected: {PersonalTaskState.running},
+      );
+      return;
+    }
     _modelTokens[id]?.cancel();
     _toolTokens[id]?.cancel();
-    final task = repository.task(id);
-    if (task != null) {
-      await repository.updateTask(
-        task.copy({
-          'state': 'cancelled',
-          'stage': 'cancelled',
-          'waitingFor': null,
-        }),
+    await repository.updateTask(
+      task.copy({
+        'state': 'cancelled',
+        'stage': 'cancelled',
+        'waitingFor': null,
+      }),
+    );
+  }
+
+  /// Final state of a running task from a tool outcome. Guarded so it cannot
+  /// overwrite a state another path already wrote.
+  Future<void> _settle(
+    PersonalTask task,
+    PersonalTaskState state,
+    String? error,
+  ) async {
+    final saved = await repository.updateTask(
+      task.copy({
+        'state': state.name,
+        'stage': state.name,
+        'waitingFor': null,
+        'error': ?error,
+      }),
+      expected: {PersonalTaskState.running},
+    );
+    if (saved && state == PersonalTaskState.interrupted) {
+      await repository.notify(
+        title: '助手任务结果未知',
+        body: error ?? '',
+        taskId: task.id,
       );
     }
   }

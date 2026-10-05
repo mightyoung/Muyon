@@ -434,7 +434,9 @@ class _AssistantPageState extends State<AssistantPage> {
                                         .catchError(_error),
                                     child: const Text('暂停'),
                                   ),
-                                if (!task.terminal)
+                                if (!task.terminal && task.stage == 'cancelling')
+                                  const Text('取消中…')
+                                else if (!task.terminal)
                                   TextButton(
                                     onPressed: () => widget.agent
                                         .cancel(task.id)

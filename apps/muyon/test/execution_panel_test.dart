@@ -69,6 +69,7 @@ void main() {
     String? error,
     String? summary,
     String? owner,
+    String stage = 'queued',
     List<ObjectRef> refs = const [],
   }) => tester.runAsync(
     () => host.workspaces.database.write(
@@ -83,6 +84,7 @@ void main() {
             error: error,
             summary: summary,
             owner: owner,
+            stage: stage,
             refs: refs,
           ),
         ),
@@ -211,6 +213,23 @@ void main() {
       }
     }
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a cancel request in flight shows 取消中… and no second cancel', (
+    tester,
+  ) async {
+    resize(tester, 390);
+    await open(tester);
+    await addTask(
+      tester,
+      'task-cancelling',
+      PersonalTaskState.running,
+      stage: 'cancelling',
+    );
+    await tester.pumpWidget(page());
+    await tester.pumpAndSettle();
+    expect(find.text('取消中…'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '取消'), findsNothing);
   });
 
   testWidgets('interrupted states say the outcome is unknown', (tester) async {

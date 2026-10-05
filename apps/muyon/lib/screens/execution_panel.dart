@@ -73,7 +73,8 @@ class _TaskCard extends StatelessWidget {
     final tokens = MuyonTokens.of(context);
     final theme = Theme.of(context);
     final platformOwned = task.payload['owner'] == 'platform';
-    final canCancel = !task.terminal && !platformOwned;
+    final cancelling = task.stage == 'cancelling';
+    final canCancel = !task.terminal && !platformOwned && !cancelling;
     final canPause =
         task.state == PersonalTaskState.waitingConfirmation && !platformOwned;
     final canResume =
@@ -156,12 +157,13 @@ class _TaskCard extends StatelessWidget {
                     '平台任务：在设备页面查看，不支持逐项暂停或恢复。',
                     style: theme.textTheme.bodySmall,
                   )
-                else if (canCancel || canPause || canResume) ...[
+                else if (canCancel || canPause || canResume || cancelling) ...[
                   const SizedBox(height: MuyonTokens.space2),
                   Wrap(
                     spacing: MuyonTokens.space2,
                     runSpacing: MuyonTokens.space2,
                     children: [
+                      if (cancelling && !task.terminal) const Text('取消中…'),
                       if (canCancel)
                         OutlinedButton.icon(
                           onPressed: () => onCancel(task),
