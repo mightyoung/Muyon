@@ -15,8 +15,9 @@
 #     crashed or hung suite also fails.
 #  3. Keeps going after a failure so one run reports every broken step, then
 #     exits non-zero at the end. Prints a final CI SUMMARY line.
-#  4. Prints failing test output in full (the workflow uploads the whole log as
-#     an artifact), instead of only one summary line per suite.
+#  4. Prints a failing suite's output (everything but the progress lines of
+#     passing tests; the workflow also uploads the whole log as an artifact),
+#     instead of only one summary line per suite.
 #  5. Does not depend on macOS bash 3.2 quirks (no empty-array workarounds).
 set -uo pipefail
 
@@ -64,7 +65,9 @@ for entry in "${suites[@]}"; do
     echo "test     $name: ok  $summary"
   else
     echo "test     $name: FAILED (exit $code)  ${summary:-NO SUMMARY (crashed or hung)}"
-    echo "$log" | grep -E "\[E\]$|Expected:|Actual:|EXCEPTION|Error:" | sed 's/^/           /'
+    # Everything except the per-test progress lines of passing tests, so load
+    # errors and stack traces stay visible.
+    echo "$log" | grep -vE '^[0-9]+:[0-9]+ \+[0-9]+( ~[0-9]+)?( -[0-9]+)?: .*[^]]$' | sed 's/^/           /'
     status=1; failed+=("test:$name")
   fi
 done
