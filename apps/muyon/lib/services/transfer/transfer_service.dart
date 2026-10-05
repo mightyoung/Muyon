@@ -8,6 +8,8 @@ import 'package:path/path.dart' as p;
 import 'package:supplier_core/lan.dart';
 import 'package:uuid/uuid.dart';
 
+import 'task_coordinator.dart';
+
 /// Private key and paired certificates. Plain files are not a substitute.
 class FlutterLanSecretStore implements LanSecretStore {
   const FlutterLanSecretStore();
@@ -67,6 +69,9 @@ class TransferService {
   final List<String> pendingReceivedPaths = [];
   void Function()? onPendingReceived;
 
+  /// Task envelopes are routed here and are not import receipts.
+  Future<void> Function(Map<String, Object?> envelope)? onTaskEnvelope;
+
   /// Called once when a person accepts a verified package. Not called on receipt.
   void Function(TransferItem item)? onAccepted;
   Future<void> _items = Future<void>.value();
@@ -96,6 +101,7 @@ class TransferService {
           FileSystemEntityType.file) {
         continue;
       }
+      if (TaskCoordinator.decodeFile(entity.path) != null) continue;
       candidates++;
       try {
         final file = File(entity.path);
@@ -132,6 +138,47 @@ class TransferService {
       maxFiles = 100;
   bool get listening => _node != null;
   List<LanPeer> get peers => _node?.peers ?? [];
+
+  List<LanPeer> pairedOnline() {
+    final node = _node;
+    if (node == null) return const [];
+    return [
+      for (final peer in node.peers)
+        if (node.isPaired(peer.fingerprint)) peer,
+    ];
+  }
+
+  /// Pushes a task envelope to every paired device currently visible.
+  /// This does not authorize execution on either side.
+  Future<void> sendTaskEnvelope(Map<String, Object?> envelope) async {
+    final node = _node;
+    if (node == null) throw StateError('Device communication is disabled');
+    final targets = pairedOnline();
+    if (targets.isEmpty) throw StateError('对方不在线，没有中继');
+    final file = File(p.join(rootPath, 'tasks', const Uuid().v4()));
+    await file.parent.create(recursive: true);
+    await file.writeAsString(jsonEncode(envelope), flush: true);
+    try {
+      for (final peer in targets) {
+        await node.push(peer, file.path);
+      }
+    } finally {
+      if (await file.exists()) await file.delete();
+    }
+  }
+
+  Future<void> deliverPendingTaskEnvelopes() async {
+    final inbox = Directory(p.join(rootPath, 'inbox'));
+    if (!await inbox.exists()) return;
+    await for (final entity in inbox.list(followLinks: false)) {
+      if (entity is! File) continue;
+      final decoded = TaskCoordinator.decodeFile(entity.path);
+      if (decoded == null) continue;
+      await onTaskEnvelope?.call(decoded);
+      if (await entity.exists()) await entity.delete();
+    }
+  }
+
   List<TransferReceipt> receipts() => [
     for (final row in database.raw.select(
       'SELECT * FROM transfer_receipts ORDER BY received_at DESC',
@@ -146,6 +193,18 @@ class TransferService {
 
   void _notePush(LanPush push) {
     if (push.senderFingerprint.isEmpty) return;
+    final task = TaskCoordinator.decodeFile(push.path);
+    if (task != null) {
+      final handler = onTaskEnvelope;
+      if (handler != null) {
+        _items = _items.then((_) async {
+          await handler(task);
+          final file = File(push.path);
+          if (await file.exists()) await file.delete();
+        });
+      }
+      return;
+    }
     if (pendingReceivedPaths.length < maxFiles &&
         !pendingReceivedPaths.contains(push.path)) {
       pendingReceivedPaths.add(push.path);
