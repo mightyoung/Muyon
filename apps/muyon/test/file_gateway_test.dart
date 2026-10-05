@@ -47,10 +47,7 @@ void main() {
       SelectedInput(path: source.path, displayName: 'project'),
     );
     expect(File(p.join(frozen.path, 'a.txt')).readAsStringSync(), 'a');
-    expect(
-      File(p.join(frozen.path, 'sub', 'b.txt')).readAsStringSync(),
-      'b',
-    );
+    expect(File(p.join(frozen.path, 'sub', 'b.txt')).readAsStringSync(), 'b');
 
     Link(p.join(source.path, 'link')).createSync(p.join(source.path, 'a.txt'));
     await expectLater(
