@@ -63,3 +63,15 @@ Jev：not measured — evidence review only, no API call
 把留出折的阈值从 0 扫到 1，最高是 0.50 时的 29/93。这次扫描没有用来拟合，也到不了 46。阈值 0 时，49 道期望只读的题对了 15 道。三道精确 id 没有在 1.0 命中：`exact-inquiry-describe` 选了 `inquiry.spec_classes`（0.9998），`exact-inquiry-search` 选了 `inquiry.spec_classes`（0.9794），`exact-inquiry-query` 选了 `research.objects`（0.6969）。
 
 生产策略仍是 `registered-rule-model-v1`。`ReadOnlyLayaToolSelection`（`laya-readonly-v1`）在提问前只保留 `ToolAccessLevel.read`。模型点名写入或外发 id 时，结果里也不会出现这个 id。
+
+## 阶段 2 改正后的可比子集（2026-10-05）
+
+手机验证已由用户确认。D-R8c 把打分改到只读选择器能够回答的 67 道留出题：期望只读 49，期望 none 18。另外仍看对抗题和否定集。26 道期望写入或联网的留出题不再拿来和 D-R6 的 46/93 比。
+
+阶段 1b 的逐题预测还在 `stage1b-metrics.json`。同一阈值 1.0、只做选择，滤到这 67 题是 top-1 27/67，写入/外发误选 0，弃权 58。分类：chinese 0/12，mixed 0/12，paraphrase 0/12，exact 9/12，ambiguous 6/6，adversarial 6/6，misleading 6/7。这 27 分和原先 93 题上的 27 分是同一批命中；被拿掉的 26 题当时都没答对。阈值打到 0 时，这 67 题仍是 27/67，但分类不同：chinese 2/12，mixed 3/12，paraphrase 1/12。门禁 2 用来比较的是阈值 1.0 的正式分数。
+
+D-R6 的 `laya-metrics.json` 只有汇总，没有逐题预测。同一 67 题的基线要用原来的提问重测：29 个标签（工具 id 加中文说明，外加 none），阈值固定为已经公布的 0.95，不重新拟合。重测先核对留出 93 题是否仍是 46/93、误选 0。对上之后，67 题的数字才和 D-R6 可比。没对上就单独写明，不把它当成基线。
+
+67 题的标签和语言格子是 `none|zh` 18、`read|zh` 25、`read|mixed` 12、`read|en` 12。语言按请求里的汉字和拉丁字母判定，不用评测类别当语言。决定阈值改在训练验证折上拟合：2240 行按 id 排序，下标能被 5 整除的 448 行留在本机，不上传。这 448 行的格子是 `none|zh` 197、`read|zh` 141、`read|mixed` 99、`none|mixed` 11。英文格子对不上（`read|en` 12），不把这份比例摊到其他语言。`none|mixed` 不在 67 题的目标里，权重为 0。上传 1792 行。微调权重回到本机之后才用这个加权验证折选阈值。140 题和否定集不参与拟合。
+
+门禁 2 还没有结论：微调还没打完分，D-R6 的 67 题基线也还没重测。阶段 3 未开始。生产策略没有切换。

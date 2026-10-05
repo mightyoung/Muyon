@@ -15,9 +15,11 @@ import sys
 import time
 from pathlib import Path
 
+import stage2_data
+import stage2_threshold as gate
+
 HERE = Path(__file__).resolve().parent
 ENV_FILE = Path("/Users/muyi/Downloads/dev/muspace/.env")
-METRICS = Path.home() / ".cache/muyon-eval/stage1b-metrics.json"
 PYTHON = "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3"
 KAGGLE = "/Library/Frameworks/Python.framework/Versions/3.12/bin/kaggle"
 DATASET_SLUG = "muyon-laya-tool-choices"
@@ -32,13 +34,39 @@ def scrub(text: str) -> str:
     return TOKEN_RE.sub("KGAT_[redacted]", text)
 
 
-def require_gate(path: Path) -> None:
-    if not path.is_file():
-        raise SystemExit("stage1b metrics missing; not starting Kaggle")
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    gate = payload.get("gate1b")
-    if gate != "pass":
-        raise SystemExit(f"GATE1b {gate}; not starting Kaggle")
+def require_stage2(train_path: Path, overlap_path: Path, selection_path: Path) -> dict:
+    """D-R8c starts Stage 2 without treating a failed gate 1b as a pass.
+
+    The check is the training file, the leakage report, and the 67-task
+    definition. It does not read stage1b-metrics.json and it does not open .env.
+    """
+    if not train_path.is_file():
+        raise SystemExit("training file missing; not starting Kaggle")
+    if not overlap_path.is_file():
+        raise SystemExit("overlap report missing; not starting Kaggle")
+    if not selection_path.is_file():
+        raise SystemExit("selection set missing; not starting Kaggle")
+    try:
+        rows = gate.load_jsonl(train_path)
+        overlap = json.loads(overlap_path.read_text(encoding="utf-8"))
+        selection = json.loads(selection_path.read_text(encoding="utf-8"))
+        gate.assert_read_only_targets(rows, selection["tools"], set(stage2_data.HELD_OUT_TOOLS))
+        gate.assert_overlap(overlap)
+        gate.assert_answerable_mix(selection["tasks"], selection["tools"])
+        training, validation = gate.validation_split(rows)
+        if len(training) < 1000 or not validation:
+            raise ValueError(f"upload {len(training)} validation {len(validation)}")
+        report = gate.reweight(
+            validation,
+            gate.target_mix(selection["tasks"], selection["tools"]),
+            text_of=lambda row: row["state"]["request"],
+            expected_of=lambda row: row["expected"],
+        )
+    except (OSError, json.JSONDecodeError, KeyError, ValueError) as error:
+        raise SystemExit(f"{error}; not starting Kaggle") from None
+    report["uploadRows"] = len(training)
+    report["validationRows"] = len(validation)
+    return report
 
 
 def read_token(path: Path) -> str:
@@ -84,9 +112,16 @@ def username_from_token(token: str) -> str:
     return user
 
 
-def _write_dataset(folder: Path, user: str) -> None:
+def upload_rows(train_path: Path) -> list[dict]:
+    """The decision-threshold split stays local. Kaggle trains on the rest."""
+    _training, _validation = gate.validation_split(gate.load_jsonl(train_path))
+    return _training
+
+
+def _write_dataset(folder: Path, user: str, train_path: Path) -> None:
     folder.mkdir(parents=True)
-    shutil.copyfile(HERE / "train_set.jsonl", folder / "train_set.jsonl")
+    lines = [json.dumps(row, ensure_ascii=False) for row in upload_rows(train_path)]
+    (folder / "train_set.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
     metadata = {
         "title": DATASET_TITLE,
         "id": f"{user}/{DATASET_SLUG}",
@@ -137,8 +172,20 @@ def _dataset_ready(token: str, ref: str) -> None:
         time.sleep(30)
 
 
-def submit(metrics: Path = METRICS, env_file: Path = ENV_FILE) -> int:
-    require_gate(metrics)
+def submit(
+    env_file: Path = ENV_FILE,
+    train_path: Path = HERE / "train_set.jsonl",
+    overlap_path: Path = HERE / "train_overlap.json",
+    selection_path: Path = stage2_data.SELECTION,
+) -> int:
+    report = require_stage2(train_path, overlap_path, selection_path)
+    print(
+        "stage2 mix "
+        f"upload={report['uploadRows']} validation={report['validationRows']} "
+        f"target={report['targetCounts']} source={report['sourceCounts']} "
+        f"unmatched={report['unmatchedTarget']} dropped={report['droppedSource']}",
+        flush=True,
+    )
     token = read_token(env_file)
     user = username_from_token(token)
     print(f"kaggle user: {user}", flush=True)
@@ -148,7 +195,7 @@ def submit(metrics: Path = METRICS, env_file: Path = ENV_FILE) -> int:
     dataset = root / "dataset"
     kernel = root / "kernel"
     try:
-        _write_dataset(dataset, user)
+        _write_dataset(dataset, user, train_path)
         created = run_scrubbed(
             [KAGGLE, "datasets", "create", "-p", str(dataset), "--keep-tabular"],
             token,

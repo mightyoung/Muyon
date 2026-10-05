@@ -26,14 +26,17 @@ python3 scripts/laya/test_stage1_contract.py
 
 ## 第二阶段：Kaggle 微调
 
-`train_set.jsonl` 是合成题，不包含 140 题，也不包含整段留出的工具。`train_overlap.json` 记录和评测题的字符 5-gram 最大 Jaccard。
+`train_set.jsonl` 是合成题，不包含 140 题，也不包含整段留出的工具。目标只有只读工具 id 和 `none`。写入或联网请求的标签是 `none`。`train_overlap.json` 记录和评测题的字符 5-gram 最大 Jaccard。
+
+门禁 1b 不再挡住这一步。D-R8c 改为只给只读选择器能回答的 67 道留出题打分（49 道期望只读，18 道期望 none），外加对抗题和否定集。决定阈值不在这 67 题上拟合，也不再在整份训练集上拟合。按训练行 id 排序，下标能被 5 整除的行留在本机，作为验证折；上传到 Kaggle 的是其余行。验证折按「只读 / none」和请求语言（中文、中英混合、英文）重加权，使加权后的比例对齐那 67 题里训练数据能够覆盖的格子。训练集没有英文请求，67 题里的 12 道英文精确 id 记为对不上，不把它们的比例摊到别的语言上。权重为 0 的格子不参与拟合。拟合规则仍是：先要求写入/外发误选为 0，再取更高的加权 top-1，再取更高的阈值。微调权重下载到本机之后才做这次拟合。
 
 `laya_finetune_tool_selection_kaggle.ipynb` 用多语检查点 `convaiinnovations/laya-multilingual` 的修订 `1720e3e3357cfe1e281542e223f8273b0890ca34`，`laya==0.3.27`，两块 GPU。它不推送到 Hugging Face Hub，最后写 `NO_HUB_PUSH`。
 
-只有 `stage1b-metrics.json` 里的门禁 1b 是 `pass` 时才提交。脚本只读 `.env` 里的 `Kaggle-apikey`，放进子进程的 `KAGGLE_API_TOKEN`，输出里的 `KGAT_` 会被抹掉。数据集和笔记本都是私有的，加速器是 `NvidiaTeslaT4`（GPU T4 ×2），并打开网络以便下载公开基座。
+提交前检查训练标签、泄漏报告和 67 题的 49/18 划分。失败就不读 `.env`。通过之后才读 `Kaggle-apikey`，放进子进程的 `KAGGLE_API_TOKEN`，输出里的 `KGAT_` 会被抹掉。数据集和笔记本都是私有的，加速器是 `NvidiaTeslaT4`（GPU T4 ×2），并打开网络以便下载公开基座。
 
 ```bash
 python3 scripts/laya/test_stage2_data.py
+python3 scripts/laya/test_stage2_threshold.py
 python3 scripts/laya/test_kaggle_submit.py
 python3 scripts/laya/kaggle_submit.py
 ```
