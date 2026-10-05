@@ -5,6 +5,7 @@ import 'compare.dart';
 import 'data_quality.dart';
 import 'inquiries.dart';
 import 'ontology.dart';
+import 'ontology_paths.dart';
 import 'record_query.dart';
 import 'search.dart';
 import 'spec_compare.dart';
@@ -341,6 +342,16 @@ extension AgentTools on Store {
       };
     }
     final t = ontology[type] ?? invalid('type', 'unknown object type');
+    final pathsTo = <String, Object?>{};
+    for (final other in ontology.keys) {
+      if (other == type) continue;
+      // E9: one shortest path per destination. Two paths per destination made
+      // several small type cards more than 3x larger; measured sizes are in
+      // the E9 delivery report.
+      final paths = ontologyPaths(type, other, limit: 1);
+      if (paths.isEmpty) continue;
+      pathsTo[other] = [for (final path in paths) path.toJson()];
+    }
     return {
       ...t.toJson(),
       'links_out': [
@@ -351,6 +362,7 @@ extension AgentTools on Store {
         for (final l in links)
           if (l.to == type) l.toJson(),
       ],
+      'paths_to': pathsTo,
     };
   }
 
