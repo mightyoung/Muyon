@@ -31,6 +31,8 @@ class AppState extends ChangeNotifier {
     this.sharedLlmFactory,
     this.sharedModelSettings,
     this.webAuthority,
+    this.hubAuthority,
+    this.hubJournal,
     Map<String, Object?> initialSettings = const {},
   }) : _settings = {
          ...initialSettings,
@@ -62,6 +64,8 @@ class AppState extends ChangeNotifier {
       sharedLlmFactory = null,
       sharedModelSettings = null,
       webAuthority = null,
+      hubAuthority = null,
+      hubJournal = null,
       _ownsJobs = true,
       _isHosted = false;
 
@@ -74,6 +78,9 @@ class AppState extends ChangeNotifier {
   final SharedLlmFactory? sharedLlmFactory;
   final InquiryModelSettingsBridge? sharedModelSettings;
   final AssistantWebAuthority? webAuthority;
+  final HubAuthority? hubAuthority;
+  final HubPublicationJournal? hubJournal;
+  int _hubGeneration = 0;
   final _pendingAiTasks = <Future<void>>{};
   AiJobStore? _aiJobs;
   bool _restoring = false;
@@ -617,6 +624,7 @@ class AppState extends ChangeNotifier {
 
   /// [token] null keeps the saved one, empty deletes it.
   Future<void> saveHub({required String? address, String? token}) async {
+    _hubGeneration++;
     if (token != null) {
       token.isEmpty
           ? await _secure.delete(key: _hubTokenName)
@@ -626,7 +634,12 @@ class AppState extends ChangeNotifier {
   }
 
   /// Null when no hub is configured.
-  Future<HubClient?> hub() async {
+  Future<HubClient?> hub({
+    HubReview? review,
+    AiCancellation? cancellation,
+    void Function()? validateView,
+  }) async {
+    final generation = _hubGeneration;
     final address = hubAddress;
     if (address == null) return null;
     final String? token;
@@ -635,7 +648,25 @@ class AppState extends ChangeNotifier {
     } catch (e) {
       throw HubException('无法读取系统安全存储中的中心访问令牌（$e）');
     }
-    return HubClient(parseHubAddress(address), token: token);
+    return HubClient(
+      parseHubAddress(address),
+      token: token,
+      hosted: _isHosted,
+      authority: hubAuthority,
+      journal: hubJournal,
+      review: review,
+      cancellation: cancellation,
+      validateSession: () {
+        if (_closing ||
+            _disposed ||
+            _restoring ||
+            generation != _hubGeneration ||
+            address != hubAddress) {
+          throw HubException('中心配置或资料会话已变化，请重新开始');
+        }
+        validateView?.call();
+      },
+    );
   }
 
   void changed() {

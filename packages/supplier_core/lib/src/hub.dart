@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'ai_runtime.dart';
+import 'hub_channel.dart';
+export 'hub_channel.dart';
+
 import 'quotation.dart';
 import 'store.dart';
 import 'values.dart';
@@ -65,15 +69,50 @@ class HubClient {
     this.base, {
     this.token,
     this.timeout = const Duration(seconds: 20),
-  });
+    this.hosted = false,
+    this.authority,
+    this.review,
+    this.journal,
+    this.validateSession,
+    AiCancellation? cancellation,
+    HubTransport? transport,
+  }) : cancellation = cancellation ?? AiCancellation(),
+       transport = transport ?? _native;
+  final bool hosted;
+  final HubAuthority? authority;
+  final HubReview? review;
+  final HubPublicationJournal? journal;
+  final void Function()? validateSession;
+  final AiCancellation cancellation;
+  final HubTransport transport;
+  String? _origin;
+
+  void _check() {
+    if (base.userInfo.isNotEmpty ||
+        base.hasQuery ||
+        base.hasFragment ||
+        base.host.isEmpty ||
+        !['http', 'https'].contains(base.scheme)) {
+      throw HubException('中心地址不合法；凭据只能从安全存储传入');
+    }
+    cancellation.check();
+    validateSession?.call();
+    if (hosted && (authority == null || journal == null)) {
+      throw HubException('宿主未提供资料中心授权通道或发布日志');
+    }
+  }
+
   final Uri base;
   final String? token;
   final Duration timeout;
 
   static const _maxResponse = 8 * 1024 * 1024;
 
-  Future<Map<String, Object?>> status() async =>
-      (await _send('GET', '/v1/status'))!;
+  Future<Map<String, Object?>> status() async {
+    final result = (await _send('GET', '/v1/status'))!;
+    _origin = result['center_id'] as String?;
+    return result;
+  }
 
   Future<List<HubSummary>> search({
     String q = '',
@@ -120,8 +159,132 @@ class HubClient {
     await _send('POST', '/v1/publications/preview', body: draft);
   }
 
-  Future<Map<String, Object?>> publish(Map<String, Object?> draft) async =>
-      (await _send('POST', '/v1/publications', body: draft))!;
+  Future<Map<String, Object?>> publish(
+    Map<String, Object?> draft, {
+    String? origin,
+  }) async {
+    // Freeze before the first asynchronous boundary, including approval.
+    final frozen =
+        HubRequest('POST', base, draft).body! as Map<String, Object?>;
+    _check();
+    String? attempt;
+    var sent = false;
+    final log = journal;
+    try {
+      if (log != null) {
+        final boundOrigin = origin ?? _origin;
+        if (boundOrigin == null || boundOrigin != _origin)
+          throw HubException('请先核对中心身份和发布版本');
+        final digest = await hubDigest(frozen);
+        _check();
+        final prior = log.read(
+          base.toString(),
+          frozen['publication_id']! as String,
+        );
+        if (prior?['state'] == 'applied' &&
+            prior?['origin'] == boundOrigin &&
+            prior?['payload_digest'] == digest) {
+          final actual = await publication(
+            boundOrigin,
+            frozen['publication_id']! as String,
+          );
+          _check();
+          if (actual != null &&
+              actual['origin'] == boundOrigin &&
+              await hubDigest({
+                    for (final key in const [
+                      'publication_id',
+                      'revision',
+                      'withdrawn',
+                      'root',
+                      'records',
+                    ])
+                      key: actual[key],
+                  }) ==
+                  digest) {
+            _check();
+            return {'revision': prior!['revision'], 'already_applied': true};
+          }
+          throw HubException('历史发布已完成，但中心当前内容已变化；请重新核对，不会重复发送旧版本');
+        }
+        attempt = await log.reserve(
+          base.toString(),
+          boundOrigin,
+          frozen,
+          digest,
+        );
+        _check();
+      }
+      final result = (await _send(
+        'POST',
+        '/v1/publications',
+        body: frozen,
+        beforeSend: () => sent = true,
+      ))!;
+      if (result['revision'] != frozen['revision']) {
+        throw HubException('中心未返回匹配的发布版本');
+      }
+      _check();
+      if (attempt != null) await log!.applied(attempt);
+      return result;
+    } catch (error) {
+      if (attempt != null && !sent) {
+        try {
+          await log!.noSend(attempt);
+        } catch (_) {
+          throw HubException('本次未发送，但本地发布日志未能确认；请重新核验');
+        }
+      }
+      if (sent && log != null) {
+        throw HubException('发布结果尚未确认，可能已写入中心。请核验中心状态；取消不代表远端撤回。');
+      }
+      if (error is HubException) rethrow;
+      throw HubException('本次发布未发送；本地记录或授权不可用');
+    }
+  }
+
+  /// A query is separately reviewed and recorded. Absence is NOT proof that
+  /// an earlier in-flight write cannot still commit; no unsafe retry unlock.
+  Future<bool> reconcile(String id) async {
+    _check();
+    final log = journal;
+    final attempt = log?.read(base.toString(), id);
+    final elsewhere = log?.unresolved(id);
+    if (elsewhere != null && elsewhere['endpoint'] != base.toString()) {
+      throw HubException(
+        '此资料在 ${elsewhere['endpoint']} 仍有待确认发布，请恢复原中心配置并核验，不能换地址绕过重试限制',
+      );
+    }
+    if (attempt == null || attempt['state'] == 'applied') return true;
+    final remote = await publication(attempt['origin']! as String, id);
+    _check();
+    if (remote != null &&
+        remote['origin'] == attempt['origin'] &&
+        remote['publication_id'] == id &&
+        remote['revision'] == attempt['revision']) {
+      final business = {
+        for (final key in const [
+          'publication_id',
+          'revision',
+          'withdrawn',
+          'root',
+          'records',
+        ])
+          key: remote[key],
+      };
+      if (await hubDigest(business) == attempt['payload_digest']) {
+        _check();
+        await log!.applied(attempt['attempt_id']! as String);
+        return true;
+      }
+    }
+    if (remote != null) await log!.conflict(attempt['attempt_id']! as String);
+    throw HubException(
+      remote == null
+          ? '中心暂未查到该发布，但先前请求仍可能晚到；保持阻止重试，需中心提供终态凭证。'
+          : '中心内容与待确认发布不同；保持阻止重试，需核对冲突并取得先前请求终态。',
+    );
+  }
 
   Future<Map<String, Object?>?> _send(
     String method,
@@ -129,49 +292,139 @@ class HubClient {
     Map<String, String>? query,
     Object? body,
     bool missingIsNull = false,
+    void Function()? beforeSend,
   }) async {
     final uri = base.replace(path: '${base.path}$path', queryParameters: query);
-    final client = HttpClient()..connectionTimeout = timeout;
+    final frozen = HubRequest(method, uri, body);
     try {
-      final request = await client.openUrl(method, uri).timeout(timeout);
-      request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-      if (token case final t? when t.isNotEmpty) {
-        request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $t');
+      _check();
+      if (hubAddressIsPlainRemote(base)) {
+        throw HubException('远程资料中心必须使用 HTTPS，避免资料和令牌明文传输');
       }
-      if (body != null) {
-        request.headers.contentType = ContentType.json;
-        request.add(utf8.encode(jsonEncode(body)));
+      Future<Map<String, Object?>?> operation(void Function() guard) async {
+        guard();
+        final response = await cancellation.wait(
+          transport(
+            frozen,
+            token,
+            timeout,
+            cancellation,
+            guard,
+            beforeSend ?? () {},
+          ),
+        );
+        guard();
+        if (response.bytes.length > _maxResponse)
+          throw HubException('中心返回的数据过大');
+        if (missingIsNull && response.statusCode == 404) return null;
+        Map<String, Object?>? json;
+        try {
+          final decoded = jsonDecode(utf8.decode(response.bytes));
+          if (decoded is Map) json = decoded.cast<String, Object?>();
+        } on FormatException {
+          json = null;
+        }
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          if (json == null) throw HubException('中心返回的内容无法识别，请确认地址指向公司资料中心');
+          if (frozen.publishes &&
+              json['revision'] != (frozen.body as Map)['revision']) {
+            throw HubException('中心未返回匹配的发布版本');
+          }
+          return json;
+        }
+        throw HubException(_failure(response.statusCode, json));
       }
-      final response = await request.close().timeout(timeout);
-      final bytes = <int>[];
-      await for (final chunk in response.timeout(timeout)) {
-        bytes.addAll(chunk);
-        if (bytes.length > _maxResponse) throw HubException('中心返回的数据过大');
-      }
-      if (missingIsNull && response.statusCode == 404) return null;
-      Map<String, Object?>? json;
-      try {
-        final decoded = jsonDecode(utf8.decode(bytes));
-        if (decoded is Map) json = decoded.cast<String, Object?>();
-      } on FormatException {
-        json = null;
-      }
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (json == null) throw HubException('中心返回的内容无法识别，请确认地址指向公司资料中心');
-        return json;
-      }
-      throw HubException(_failure(response.statusCode, json));
+
+      return authority == null
+          ? await operation(_check)
+          : await authority!.run(
+              request: frozen,
+              review: review,
+              cancellation: cancellation,
+              validateSession: _check,
+              operation: operation,
+            );
     } on HubException {
       rethrow;
-    } on TimeoutException {
-      throw HubException('连接公司资料中心超时，请检查网络或稍后再试');
-    } on SocketException catch (e) {
-      throw HubException('连不上公司资料中心（${e.osError?.message ?? e.message}）');
-    } on HandshakeException {
-      throw HubException('中心的 HTTPS 证书无法验证，请联系管理员');
-    } on HttpException catch (e) {
-      throw HubException('与中心通信失败：${e.message}');
+    } catch (_) {
+      // Transport and provider exceptions can contain request data or secrets.
+      throw HubException('资料中心请求未完成或授权已失效，请核对连接和授权');
+    }
+  }
+
+  static Future<HubResponse> _native(
+    HubRequest frozen,
+    String? token,
+    Duration timeout,
+    AiCancellation cancel,
+    void Function() guard,
+    void Function() beforeSend,
+  ) async {
+    var active = true;
+    final authorityGuard = guard;
+    void check() {
+      if (!active) throw HubException('资料中心请求已结束');
+      authorityGuard();
+    }
+
+    final client = HttpClient()
+      ..connectionTimeout = timeout
+      ..findProxy = (_) => 'DIRECT';
+    client.connectionFactory = (uri, proxyHost, proxyPort) async {
+      check();
+      final addresses = await cancel.wait(InternetAddress.lookup(uri.host));
+      check();
+      final address = addresses.first;
+      final task = uri.scheme == 'https'
+          ? await SecureSocket.startConnect(address, uri.port)
+          : await Socket.startConnect(address, uri.port);
+      final detach = cancel.onCancel(task.cancel);
+      unawaited(
+        task.socket.then<void>(
+          (_) => detach(),
+          onError: (Object _, StackTrace __) {
+            detach();
+          },
+        ),
+      );
+      return task;
+    };
+    final detach = cancel.onCancel(() => client.close(force: true));
+    try {
+      Future<HubResponse> exchange() async {
+        check();
+        final request = await cancel.wait(
+          client.openUrl(frozen.method, frozen.destination),
+        );
+        check();
+        request.followRedirects = false;
+        request.headers.set(HttpHeaders.acceptHeader, 'application/json');
+        if (token != null && token.isNotEmpty) {
+          request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
+        }
+        if (frozen.encodedBody != null)
+          request.headers.contentType = ContentType.json;
+        check();
+        beforeSend();
+        if (frozen.encodedBody != null)
+          request.add(utf8.encode(frozen.encodedBody!));
+        check();
+        final response = await cancel.wait(request.close());
+        check();
+        final bytes = <int>[];
+        await for (final chunk in response) {
+          check();
+          bytes.addAll(chunk);
+          if (bytes.length > _maxResponse) throw HubException('中心返回的数据过大');
+        }
+        check();
+        return HubResponse(response.statusCode, bytes);
+      }
+
+      return await cancel.wait(exchange().timeout(timeout));
     } finally {
+      active = false;
+      detach();
       client.close(force: true);
     }
   }
@@ -303,10 +556,16 @@ Map<String, Object?> buildHubPublication(
 /// current copy: a record is published under its own id, so republishing
 /// after an edit becomes the next revision instead of a second entry.
 class HubDraft {
-  HubDraft(this.draft, {required this.upToDate, required this.previous});
+  HubDraft(
+    Map<String, Object?> draft, {
+    required this.upToDate,
+    required this.previous,
+    this.origin,
+  }) : draft = HubRequest('POST', Uri(), draft).body! as Map<String, Object?>;
   final Map<String, Object?> draft;
+  final String? origin;
 
-  /// The hub already has exactly these record versions.
+  /// The hub already has the complete frozen business content.
   final bool upToDate;
 
   /// The hub's latest revision, 0 when never published.
@@ -325,6 +584,7 @@ Future<HubDraft> prepareHubPublication(
 }) async {
   final center = (await client.status())['center_id'];
   if (center is! String) throw HubException('中心状态缺少中心编号，请确认地址指向公司资料中心');
+  await client.reconcile(id);
   final current = await client.publication(center, id);
   Map<String, Object?> build(int revision) => buildHubPublication(
     store,
@@ -336,20 +596,41 @@ Future<HubDraft> prepareHubPublication(
   );
   final previous = (current?['revision'] as int?) ?? 0;
   final fresh = build(previous + 1);
-  Set<String> versions(Object? records) => {
-    for (final r in (records as List? ?? const []))
-      '${(r as Map)['entity_type']}:${r['entity_id']}:${r['source_version']}',
-  };
   final same =
       current != null &&
+      current['origin'] == center &&
       current['withdrawn'] != true &&
-      versions(current['records']).length ==
-          versions(fresh['records']).length &&
-      versions(current['records']).containsAll(versions(fresh['records']));
+      hubCanonical({
+            for (final key in const [
+              'publication_id',
+              'revision',
+              'withdrawn',
+              'root',
+              'records',
+            ])
+              key: current[key],
+          }) ==
+          hubCanonical(build(previous));
   if (!same) await client.preview(fresh);
   return HubDraft(
     same ? build(previous) : fresh,
     upToDate: same,
     previous: previous,
+    origin: center,
   );
 }
+
+class HubResponse {
+  HubResponse(this.statusCode, this.bytes);
+  final int statusCode;
+  final List<int> bytes;
+}
+
+typedef HubTransport = Future<HubResponse> Function(
+  HubRequest request,
+  String? token,
+  Duration timeout,
+  AiCancellation cancellation,
+  void Function() checkBeforeEffect,
+  void Function() beforeSend,
+);

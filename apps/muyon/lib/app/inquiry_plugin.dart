@@ -10,6 +10,7 @@ import 'package:supplier_core/supplier_core.dart';
 import '../platform/storage_manager.dart';
 import '../platform/tool_registry.dart';
 import 'inquiry_web_authority.dart';
+import 'inquiry_hub_authority.dart';
 import '../services/models/secret_store.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/profile_repository.dart';
@@ -33,7 +34,13 @@ typedef InquiryModelApproval = Future<bool> Function(
 /// The host adapts Folio's existing transaction owner; it does not rewrite its
 /// cross-project supplier/project relationships into research scopes.
 class InquiryPlugin {
-  InquiryPlugin._(this.runtime, this.jobs, this._webAuthority);
+  InquiryPlugin._(
+    this.runtime,
+    this.jobs,
+    this._webAuthority,
+    this._hubAuthority,
+  );
+  final InquiryHubAuthority? _hubAuthority;
   final InquiryWebAuthority? _webAuthority;
   final InquiryRuntime runtime;
   final AiJobStore jobs;
@@ -119,6 +126,18 @@ class InquiryPlugin {
       ),
     ],
   );
+  static final hubSchema = ModuleSchema(
+    version: 1,
+    definitionDigest: _digest('inquiry-hub-v1:durable-attempts'),
+    migrations: [
+      ModuleMigration(
+        version: 1,
+        id: 'inquiry-hub-v1',
+        definitionDigest: _digest('inquiry-hub-v1:durable-attempts'),
+        migrate: HubPublicationJournal.initializeSchema,
+      ),
+    ],
+  );
   static final jobsSchema = ModuleSchema(
     version: 1,
     definitionDigest: _digest('inquiry-jobs-host-v1'),
@@ -148,6 +167,11 @@ class InquiryPlugin {
   }) async {
     final database = await storage.open('inquiry', schema);
     final jobsDatabase = await storage.open('inquiry_jobs', jobsSchema);
+    final hubDatabase = await storage.open('inquiry_hub', hubSchema);
+    final hubJournal = HubPublicationJournal(
+      hubDatabase.raw,
+      write: hubDatabase.write,
+    );
     // Recovery is an open-time operation, also for an already migrated job DB.
     await jobsDatabase.write(AiJobStore.initializeSchema);
     final jobs = AiJobStore.attach(jobsDatabase.raw);
@@ -174,6 +198,7 @@ class InquiryPlugin {
       approve: approveModelRequest,
     );
     final webAuthority = tools == null ? null : InquiryWebAuthority(tools);
+    final hubAuthority = tools == null ? null : InquiryHubAuthority(tools);
     final runtime = InquiryRuntime.attach(
       store: store,
       dataDirectory: root,
@@ -183,12 +208,15 @@ class InquiryPlugin {
       sharedModelSettings: models,
       sharedLlmFactory: models.createClient,
       webAuthority: webAuthority,
+      hubAuthority: hubAuthority,
+      hubJournal: hubJournal,
     );
-    return InquiryPlugin._(runtime, jobs, webAuthority);
+    return InquiryPlugin._(runtime, jobs, webAuthority, hubAuthority);
   }
 
   Future<void> close() async {
     _webAuthority?.disable();
+    _hubAuthority?.disable();
     await runtime.close();
     jobs.close();
   }

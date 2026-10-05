@@ -1,3 +1,5 @@
+import 'hub_confirmation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:supplier_core/supplier_core.dart';
 
@@ -83,7 +85,12 @@ class _HubSettingsState extends State<HubSettings> {
   });
 
   Future<void> _test() => _run(() async {
-    final client = await widget.state.hub();
+    final client = await widget.state.hub(
+      review: reviewHubRequest(context),
+      validateView: () {
+        if (!mounted) throw HubException('资料中心页面已关闭');
+      },
+    );
     if (client == null) throw HubException('请先填写并保存中心地址');
     _say('正在连接…');
     final s = await client.status();
