@@ -937,3 +937,41 @@ Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到
 - 如果第 1 步改成自定义 scheme：给路径解析补单元测试，覆盖 `..`、`%2e%2e`、其它版本目录、绝对路径、空路径，以及允许根内的正常文件。
 
 所有权：`packages/prototype_module/**`、`apps/muyon/lib/platform/prototype_tools.dart`、注册它需要的一行调用，以及 `docs/implementation/prototype-resource-policy.md`。验收台账由 A 更新，你在报告里给出每条证据（测试名、提交、真机结果）。
+
+---8<--- 追加 · E（opencode）· E11 研究对象的业务页（objectPage）与统一打开入口 ---
+
+开工：`git fetch origin && git merge --ff-only origin/develop`。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。** 在你的分支 `feat/e-support` 上做。**提交后一定要推送**，上次 E10 提交了没推送。
+
+背景（需求第三节"双入口"：助手结果能回到对应业务页面）：助手回答和执行面板里的对象引用，点开后走 `apps/muyon/lib/screens/platform_shell.dart` 的 `openObject`。现在只有两种对象有业务页：
+- 知识库文档；
+- 研究模块的 `document`。这一条是在 shell 里写死的，直接读 `host.research!.store`。
+
+研究模块的 `entry`、`outline`、`section`、`task`、`run`、`card` 都能被 `ResearchSession.resolve` 解析，但点开只显示一段原始 JSON。`ResearchSession.objectPage`（`packages/research_module/lib/src/research_module.dart`）对这些类型返回 `null`。
+
+### 1. 研究对象的只读详情页
+新建 `packages/research_module/lib/src/app/object_pages.dart`，给上面 6 种对象各做一个**只读**详情页，数据只从 `WorkbenchStore` 读，查询方式参考 `ResearchSession.resolve` 里对应类型的 SQL：
+- `entry`：类型（文献/主张/候选等，用 `research_kinds.dart` 里已有的中文名）、标题、正文或摘要、来源。
+- `outline` / `section`：标题、所属提纲、正文。
+- `task`：标题、修订号、状态、说明。
+- `run`：所属任务和修订号、状态、评价（接纳/否定和理由）。没有就不显示，不要编造。
+- `card`：正文（Markdown 按纯文本显示即可）、修订号、引用列表。
+
+要求：
+- 用 `muyon_ui` 现有的组件和间距。窄屏单列，不另做宽屏布局。
+- 页面上**不放任何编辑、删除、接纳按钮**。编辑仍在研究工作台里做，这一轮不加跳转。
+- 引用里的 `revisionRef` 指向的是旧修订时，显示那个修订的内容，并标明"不是最新修订"。
+- 然后在 `ResearchSession.objectPage` 里按类型返回这些页面。保持现有规则：先重新校验引用（`_resolve(ref) == null` 时返回 `null`），模块不对、项目不对、id 不存在、修订或摘要不匹配时都返回 `null`。
+
+### 2. shell 统一走 `objectPage`
+新建 `apps/muyon/lib/platform/object_pages.dart`，写一个函数：给定 `ObjectRef`，找到它所属的工作区绑定（遍历 `host.workspaces.all()`，用 `host.workspaces.binding(id, ref.moduleId)`，要求 `nativeProjectId` 一致），用对应模块的运行时 `openSession(binding)` 打开会话，再调用 `objectPage`。会话在页面关闭后 `dispose`。
+- `openObject` 里，研究模块的对象（包括 `document`）都改走这个函数，删掉写死的研究 `document` 分支。阅读器加右侧助手的布局要保留：把原来包在 `ReaderPage` 外面的 `Scaffold` 和 `LayoutBuilder` 留在 shell 里，只把正文换成 `objectPage` 返回的组件。
+- 找不到绑定，或 `objectPage` 返回 `null` 时，退回现有的 JSON 页面，行为不变。
+- 知识库文档和询价对象的分支**不动**：询价没有 `ModuleSession`，它的"在业务页面查看与编辑"按钮保留。
+- 原型模块的 `objectPage` 由 Sonnet 在 2.4 里实现。如果原型对象没有工作区绑定、这个函数用不上，**不要自己造绑定**，在报告里写清楚缺什么。
+
+### 测试
+- `packages/research_module/test/research_runtime_test.dart`：现在有一条断言要求非 `document` 类型的 `objectPage` 返回 `null`（理由写的是 "B-owned focused page ... is unavailable"）。把它改成：6 种类型各返回对应的详情页类型。其余的 `null` 断言（模块不对、另一个项目、id 不存在、修订或摘要无效）全部保留。
+- 新增 widget 测试：每种详情页至少渲染出标题。旧修订显示"不是最新修订"。`run` 没有评价时不显示评价区。
+- `apps/muyon`：在真实临时宿主上，`openObject` 打开研究 `entry`，显示的是详情页而不是 JSON；打开研究 `document` 仍是阅读器加助手；对象被删除或没有绑定时退回 JSON 页；关闭页面后会话已 `dispose`。
+
+所有权：上面两个新文件；`research_module.dart` 里的 `objectPage` 方法和必要的导出；`platform_shell.dart` 里的 `openObject`；对应测试。**不要改** `packages/prototype_module/**`（Sonnet 正在做），不要改研究工作台（`workbench_app.dart`）。报告里列出每种对象页显示了哪些字段，以及第 2 步对原型对象的结论。
