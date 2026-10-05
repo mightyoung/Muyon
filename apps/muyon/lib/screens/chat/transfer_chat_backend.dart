@@ -104,22 +104,21 @@ class TransferChatBackend extends ChangeNotifier implements ChatBackend {
   Future<void> markRead(String peerFingerprint) =>
       service.markChatRead(peerFingerprint);
 
-  // The backend currently addresses these by message id alone; D-R9b adds the
-  // peer. Pass it through here when the signatures change.
+  // Chat rows are keyed by (peer, message id); a shared id never crosses peers.
   @override
   Future<void> accept(String peerFingerprint, String messageId) =>
-      service.acceptChat(messageId);
+      service.acceptChat(peerFingerprint, messageId);
   @override
   Future<void> reject(String peerFingerprint, String messageId) =>
-      service.rejectChat(messageId);
+      service.rejectChat(peerFingerprint, messageId);
   @override
   Future<void> retry(String peerFingerprint, String messageId) async {
-    await service.retryText(messageId);
+    await service.retryText(peerFingerprint, messageId);
   }
 
   @override
   Future<void> delete(String peerFingerprint, String messageId) =>
-      service.deleteChat(messageId);
+      service.deleteChat(peerFingerprint, messageId);
   @override
   Future<void> deleteThread(String peerFingerprint) =>
       service.deleteChatThread(peerFingerprint);
