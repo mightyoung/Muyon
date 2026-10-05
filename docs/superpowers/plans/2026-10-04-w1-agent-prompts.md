@@ -803,3 +803,25 @@ Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到
 - 先读 Codex 的半成品，能沿用就沿用，不合适的直接改；在报告里说明保留了哪些、改了哪些。
 
 开工：在你的分支上 `git merge origin/wip/g3-handoff` 再 `git merge origin/develop`，解决冲突后先让它编译通过。所有权：`packages/inquiry_module/lib/src/features/hub/**`、`packages/supplier_core/lib/src/hub*.dart`、`apps/muyon/lib/app/inquiry_hub_authority.dart` 及相关测试。**Codex 自己目录里的同一批文件不要再动**（已经交接）。测试：未确认不发送；确认后发送一次；发送后中断 → "结果未知" → 查询远端已生效则不重发、未生效才允许重试；取消在副作用前则不发送。推送前 `scripts/verify.sh` 通过、工作区干净，推送后核对远端哈希。
+
+---8<--- 追加 · D（Grok）· D-R10 取消后的真实状态与聊天测试偶发失败 ---
+
+开工：`git fetch origin && git merge origin/develop`（`develop` 已到 `30c18f7`）。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。** 排在 D-R8c 训练数据修正之后，或在等 Kaggle 训练时做。
+
+### 1. 执行中取消不得记为"已取消"（需求第二节：暂停、取消、恢复按工具实际能力开放；不确定结果不得冒充确定结果）
+
+现状（`apps/muyon/lib/assistant/personal_agent.dart`）：
+- `cancel(id)` 取消模型和工具令牌后，**无条件**把任务写成 `cancelled`（`updateTask` 没有 `expected`）。
+- `_runTool` 在 `tools.invoke` 返回后执行 `token.throwIfCancelled()`；任务已不是 `running` 时直接返回。所以工具已越过副作用点（`checkBeforeEffect` 之后）时，注册表回执是 `interrupted` 或 `succeeded`，任务却显示"已取消"，回执和结果都不会写回任务。
+- 助手页（`assistant_page.dart`）和新的执行面板（`execution_panel.dart`）对任何非终态任务都提供"取消"。
+
+要求：
+- 等待确认、排队、模型生成阶段、工具尚未越过副作用点时取消，仍记 `cancelled`。
+- 工具调用已开始后取消：发出取消信号，但任务的最终状态**以注册表回执为准**——副作用前停下 → `cancelled`；回执是 `interrupted` 或工具不支持取消（`supportsCancel == false`）且已越过副作用点 → `interrupted`，错误写明"已请求取消，但操作可能已生效，重试前请先核实"；若工具实际成功，按实际结果记录并注明"取消请求晚于完成"。只读工具可以简单处理为 `cancelled`（无外部副作用），但要在代码里写明理由。
+- 状态写入使用 `expected` 守卫，避免取消与工具完成互相覆盖；不重放、不自动重试任何操作。
+- 界面文字只在助手和执行面板里改最少的地方（例如"取消中…"），不要重做界面。
+- 测试（真实临时宿主 + 注册表）：确认前取消 → `cancelled` 且处理函数未调用；副作用前取消 → `cancelled`；处理函数越过 `checkBeforeEffect` 后取消 → `interrupted` 且回执一致；不支持取消的写工具执行中取消 → `interrupted`；只读工具执行中取消的行为与代码注释一致；取消和完成同时发生时只有一个结果落库。
+
+### 2. `transfer_chat_backend_test` 在高负载下偶发失败
+
+`apps/muyon/test/transfer_chat_backend_test.dart` 的 "adapter maps send, delivery, read, acceptance and delete"：A 跑整体验证时它失败过一次，单独重跑 3 次都通过；opencode 也在负载高时遇到过。找出依赖时序的地方（固定等待、轮询次数、计时器），改成等待明确的状态或事件。**不得**放宽断言、跳过测试，或把它加入 `KNOWN_FAILURES`。验证：在机器有负载时（例如同时跑另一个测试套件）连续跑 20 次全部通过，把命令和结果写进报告。
