@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/dream/dream_service.dart';
@@ -147,7 +146,7 @@ void main() {
       final finder = find.text('停用').at(0);
       await tester.ensureVisible(finder);
       await tester.tap(finder);
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
       await tester.pumpAndSettle();
       final memory = repo.memories(includeDisabled: true).single;
       expect(memory.disabled, isTrue);
