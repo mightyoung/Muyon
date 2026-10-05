@@ -599,3 +599,40 @@ Your chat backend draft was accepted with changes; D is implementing it. What ch
 - Dedupe is per (peer, message id); no read receipts go to the peer.
 - `sent` with an unknown outcome is a real, persistent state: show it as "已发出，对方是否收到未知", and only offer retry with the warning you proposed.
 Wait for D's final API document before wiring; you can build the screens now against a fake.
+
+---
+
+# 追加：E 角色第二批任务（给 opencode）
+
+---8<--- 追加 · E（opencode）· E4–E5 ---
+
+你的 E1–E3 已审查并合入 `develop`（`c547fcf`）：数据去向页、MCP 服务器页、平台层覆盖率 83.9% → 90.1%，只加测试不改产品代码，报告也写得准确。下面是第二批任务。
+
+开工：`git fetch origin && git merge --ff-only origin/develop`。推送前 `scripts/verify.sh` 退出码为 0、运行后 `git status` 干净；推送后用 `git ls-remote origin refs/heads/feat/e-support` 核对远端哈希等于 `git rev-parse HEAD`，在报告里写出哈希。规则同上一份提示词（不改 `.env`、不加依赖、小提交、只推送到 `feat/e-support`、不合并到 develop）。机器负载很高，同一时间只跑一个测试或构建。
+
+### E4 消除验证脚本里唯一的"已知失败"
+
+`scripts/verify.sh` 一直放行询价模块 `packages/inquiry_module/test/screenshot_test.dart` 的 `desktop settings` 截图失败。按 `packages/inquiry_module/MIGRATION_VALIDATION.md` 的记录，这是当前 Flutter SDK 渲染变化造成的：与冻结的基准图相差 158 个像素（0.02%），位置在一个下拉箭头上，原始未改动的代码也能复现。A 已决定更新这张基准图，因为长期放行会掩盖这个测试以后真正的回归。
+
+步骤（必须按顺序，任何一步不符合就停下并报告，不要更新）：
+1. 在 `apps/muyon` 下运行该测试，取得实际渲染图和差异图（`test/failures/` 下，已被 git 忽略），核对差异仍然只在那个下拉箭头附近，像素数不超过约 0.05%。把你看到的差异位置和像素数写进报告。
+2. 只更新这一张基准图：`flutter test --update-goldens --plain-name 'desktop settings' ../../packages/inquiry_module/test/screenshot_test.dart`，其他基准图一张都不能变（用 `git status` 确认只有这一个 PNG 改动）。
+3. 记录旧图和新图的 SHA-256，追加到 `MIGRATION_VALIDATION.md` 的那一节，写明日期、Flutter 版本和原因；不要删掉原来的记录。
+4. 从 `scripts/verify.sh` 的 `KNOWN_FAILURES` 里移除这一条（保留数组本身，留空），并确认 `verify.sh` 在没有任何失败时仍然输出 ok、退出码 0。
+
+所有权例外（A 授权）：本任务可以改这一张基准图、`MIGRATION_VALIDATION.md` 和 `scripts/verify.sh` 的那一行，不改询价模块的任何代码和其他测试。
+
+### E5 助手层测试覆盖率
+
+范围：`apps/muyon/lib/assistant/` 下的 `action_gate.dart`、`execution_store.dart`、`personal_agent.dart`、`qa_service.dart`、`tool_selection.dart`。**不碰** `assistant/dream/**` 和 `assistant/selection_eval/**`（Grok 正在改）。
+- 用与 E3 相同的方法统计行覆盖率，追加到 `docs/implementation/coverage-<日期>.md`（新日期就新建文件，命令可复用）。
+- 低于 80% 的文件补测试，**只加测试，不改产品代码**。优先覆盖这些行为：取消与中断后的状态、模型请求被拒绝或失败时不保存答案、引用不在冻结证据内时拒绝、范围变化后拒绝发送、工具选择只给候选不授权。
+- 发现疑似缺陷不要顺手修，写进报告由 A 判断。不得削弱或删除已有断言。
+
+## 交付报告
+
+1. 提交列表和远端核对过的哈希
+2. E4：差异位置与像素数、新旧图 SHA-256、`verify.sh` 运行结果
+3. E5：覆盖率前后对比、新增测试数、疑似缺陷
+4. 拥有范围外的改动（逐条）
+5. 各项证据类别（文档 / 自动测试 / 构建 / 真实模型 / 实机），未验证的写"未验证"
