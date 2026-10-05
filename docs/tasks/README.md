@@ -17,8 +17,9 @@
 | P0-3 询价 North Star 链路 | `task/p0-3-north-star` | [P0-3.md](P0-3.md) | senior | — | 审查：需修复 F1～F4、F8，在 `review/P0-3` 上修（先做） |
 | P0-2 LLM 原生工具调用基线 | `task/p0-2-llm-baseline` | [P0-2.md](P0-2.md) | senior | P0-3 之后 | 审查：需修复 F1～F5，在 `review/P0-2` 上修（P0-3 之后） |
 | P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | engineer | B 2.4 之后 | 已转交（含 WIP） |
-| P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 审查：需修复 F1～F3，在 `review/P0-J1` 上修（见该分支 `docs/tasks/P0-J1-review.md`） |
-| P0-4 真机与真实模型取证 | `task/p0-4-evidence`（待建） | [P0-4.md](P0-4.md) | engineer | P0-1、P0-2、P0-3、P0-J1 合入 | 待依赖 |
+| P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 已合入（[审查](P0-J1-review.md)） |
+| P0-J2 自检脚本安全加固 | `task/p0-j2-doctor-hardening` | [P0-J2.md](P0-J2.md) | junior | — | 待转交 |
+| P0-4 真机与真实模型取证 | `task/p0-4-evidence`（待建） | [P0-4.md](P0-4.md) | engineer | P0-1、P0-2、P0-3、P0-J1 合入（P0-J1 已合入） | 待依赖 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` | `2026-10-04-w1-agent-prompts.md`「追加 · B（Sonnet）· 2.4」 | engineer | — | 在途（据交接：13 个文件改动未提交，验收口径见 [审查](HANDOVER-A-review.md)） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` | `2026-10-04-w1-agent-prompts.md`「追加 · E（opencode）· E11」 | junior | — | 在途（据交接：8 个文件改动未提交，验收口径见 [审查](HANDOVER-A-review.md)） |
 
