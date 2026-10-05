@@ -8,6 +8,10 @@ class FakeChatBackend extends ChangeNotifier implements ChatBackend {
   final List<String> sentBodies = [];
   final List<String> retried = [];
   Object? sendError;
+  @override
+  Duration sentRetryAfter = const Duration(minutes: 2);
+  @override
+  bool listening = true;
   var _n = 0;
 
   void addThread(
@@ -43,6 +47,7 @@ class FakeChatBackend extends ChangeNotifier implements ChatBackend {
     required String body,
     SendState? state,
     DateTime? readAt,
+    DateTime? sentAt,
     Acceptance acceptance = Acceptance.none,
     String? error,
   }) {
@@ -54,6 +59,7 @@ class FakeChatBackend extends ChangeNotifier implements ChatBackend {
         body: body,
         createdAt: DateTime.utc(2026, 10, 5, 9, _n),
         sendState: state,
+        sentAt: sentAt ?? (state == null ? null : DateTime.now().toUtc()),
         readAt: readAt,
         acceptance: acceptance,
         error: error,
@@ -123,6 +129,7 @@ class FakeChatBackend extends ChangeNotifier implements ChatBackend {
     direction: m.direction,
     body: m.body,
     createdAt: m.createdAt,
+    sentAt: m.sentAt,
     sendState: state ?? m.sendState,
     acceptance: acceptance ?? m.acceptance,
     readAt: readAt ?? m.readAt,
@@ -140,19 +147,27 @@ class FakeChatBackend extends ChangeNotifier implements ChatBackend {
   }
 
   @override
-  Future<void> accept(String id) async =>
-      _replace(id, (m) => _copy(m, acceptance: Acceptance.accepted));
+  String? destination(String peer) =>
+      (_threads[peer]?.online ?? false) ? '192.168.1.8:47825' : null;
+
+  final List<String> acceptedKeys = [];
   @override
-  Future<void> reject(String id) async =>
+  Future<void> accept(String peer, String id) async {
+    acceptedKeys.add('$peer/$id');
+    _replace(id, (m) => _copy(m, acceptance: Acceptance.accepted));
+  }
+
+  @override
+  Future<void> reject(String peer, String id) async =>
       _replace(id, (m) => _copy(m, acceptance: Acceptance.rejected));
   @override
-  Future<void> retry(String id) async {
+  Future<void> retry(String peer, String id) async {
     retried.add(id);
     _replace(id, (m) => _copy(m, state: SendState.queued));
   }
 
   @override
-  Future<void> delete(String id) async {
+  Future<void> delete(String peer, String id) async {
     for (final list in _messages.values) {
       list.removeWhere((m) => m.id == id);
     }

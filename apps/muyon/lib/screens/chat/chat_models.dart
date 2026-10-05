@@ -21,6 +21,7 @@ class ChatMessage {
     required this.direction,
     required this.body,
     required this.createdAt,
+    this.sentAt,
     this.sendState,
     this.acceptance = Acceptance.none,
     this.readAt,
@@ -29,6 +30,9 @@ class ChatMessage {
   final String id, peerFingerprint, body;
   final ChatDirection direction;
   final DateTime createdAt;
+
+  /// When the bytes were written (outgoing); used to time the retry offer.
+  final DateTime? sentAt;
   final SendState? sendState;
   final Acceptance acceptance;
   final DateTime? readAt;
@@ -55,23 +59,37 @@ class ChatThread {
 abstract interface class ChatBackend implements Listenable {
   static const maxBodyLength = 16000;
 
+  /// How long a `sent` message must wait before a retry is allowed.
+  Duration get sentRetryAfter;
+
+  /// Whether device communication is switched on at all.
+  bool get listening;
+
+  /// Conversations, plus paired online devices that have no messages yet.
   List<ChatThread> threads();
   List<ChatMessage> messages(String peerFingerprint);
   ChatThread? thread(String peerFingerprint);
+
+  /// Where a message to this peer would go (`address:port`), or null when the
+  /// peer is not currently reachable. Shown in the send confirmation.
+  String? destination(String peerFingerprint);
 
   /// Fails immediately for an offline or unpaired peer (no relay, no queue).
   Future<void> sendText(String peerFingerprint, String body);
 
   /// Local only; no read receipt reaches the peer.
   Future<void> markRead(String peerFingerprint);
-  Future<void> accept(String messageId);
-  Future<void> reject(String messageId);
 
-  /// Explicit. Allowed for `failed`, and for `sent` after the backend's
-  /// timeout; the receiver de-duplicates.
-  Future<void> retry(String messageId);
+  /// Optional and independent of read. Never imports or executes anything.
+  /// Messages are addressed by (peer, message id): ids are only unique per peer.
+  Future<void> accept(String peerFingerprint, String messageId);
+  Future<void> reject(String peerFingerprint, String messageId);
+
+  /// Explicit. Allowed for `failed`, and for `sent` after [sentRetryAfter];
+  /// the receiver de-duplicates.
+  Future<void> retry(String peerFingerprint, String messageId);
 
   /// Local records only; the peer is unaffected.
-  Future<void> delete(String messageId);
+  Future<void> delete(String peerFingerprint, String messageId);
   Future<void> deleteThread(String peerFingerprint);
 }

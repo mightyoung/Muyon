@@ -109,10 +109,7 @@ class _DataFlowPageState extends State<DataFlowPage> {
           const SizedBox(height: MuyonTokens.space4),
           _filters(tokens),
           const SizedBox(height: MuyonTokens.space4),
-          _Section(
-            title: '模型与外部请求',
-            child: _requestsView(tokens, theme, data),
-          ),
+          _Section(title: '模型与外部请求', child: _requestsView(tokens, theme, data)),
           _Section(
             title: '工具调用记录',
             child: _toolCallsView(tokens, theme, data.toolCalls),
@@ -195,9 +192,7 @@ class _DataFlowPageState extends State<DataFlowPage> {
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final row in rows) _RequestCard(row: row),
-      ],
+      children: [for (final row in rows) _RequestCard(row: row)],
     );
   }
 
@@ -217,8 +212,7 @@ class _DataFlowPageState extends State<DataFlowPage> {
             title: call.summary,
             subtitle: [
               '工具调用 · ${_callStatus(call.status)}',
-              if (call.status == ToolCallStatus.interrupted)
-                '结果未知，重试前请先核实。',
+              if (call.status == ToolCallStatus.interrupted) '结果未知，重试前请先核实。',
             ].join('\n'),
           ),
       ],

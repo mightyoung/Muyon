@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:muyon_ui/muyon_ui.dart';
 
@@ -22,6 +24,7 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
   final input = TextEditingController();
   String? error;
   bool sending = false;
+  Timer? _tick;
 
   ChatBackend get backend => widget.backend;
 
@@ -29,11 +32,16 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
   void initState() {
     super.initState();
     backend.addListener(_changed);
+    // The retry offer for an unconfirmed message depends on elapsed time.
+    _tick = Timer.periodic(const Duration(seconds: 20), (_) {
+      if (mounted) setState(() {});
+    });
     _markRead();
   }
 
   @override
   void dispose() {
+    _tick?.cancel();
     backend.removeListener(_changed);
     input.dispose();
     super.dispose();
@@ -63,6 +71,19 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
   Future<void> _send() async {
     final body = input.text.trim();
     if (body.isEmpty || sending) return;
+    final thread = backend.thread(widget.peerFingerprint);
+    final where = backend.destination(widget.peerFingerprint);
+    if (thread == null || where == null) {
+      setState(() => error = '对方不在线，没有中继');
+      return;
+    }
+    final ok = await _confirm(
+      '发送给 ${thread.peerName}',
+      '目的地：$where\n核对指纹：${thread.peerFingerprint}\n文字：$body\n'
+          '仅发给已配对设备。“已发出”不等于对方已收到，收到也不会被当作命令执行。',
+      '发送这一次',
+    );
+    if (!ok || !mounted) return;
     setState(() => sending = true);
     await _guard(() async {
       await backend.sendText(widget.peerFingerprint, body);
@@ -101,12 +122,12 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
       );
       if (!ok) return;
     }
-    await _guard(() => backend.retry(m.id));
+    await _guard(() => backend.retry(m.peerFingerprint, m.id));
   }
 
   Future<void> _deleteMessage(ChatMessage m) async {
     final ok = await _confirm('删除这条消息？', '只删除本机上的记录，对方设备上的不受影响。', '删除');
-    if (ok) await _guard(() => backend.delete(m.id));
+    if (ok) await _guard(() => backend.delete(m.peerFingerprint, m.id));
   }
 
   Future<void> _deleteThread() async {
@@ -184,12 +205,21 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
                     itemCount: messages.length,
                     itemBuilder: (context, i) => _Bubble(
                       message: messages[i],
+                      retryAfter: backend.sentRetryAfter,
                       onRetry: () => _retry(messages[i]),
                       onDelete: () => _deleteMessage(messages[i]),
-                      onAccept: () =>
-                          _guard(() => backend.accept(messages[i].id)),
-                      onReject: () =>
-                          _guard(() => backend.reject(messages[i].id)),
+                      onAccept: () => _guard(
+                        () => backend.accept(
+                          widget.peerFingerprint,
+                          messages[i].id,
+                        ),
+                      ),
+                      onReject: () => _guard(
+                        () => backend.reject(
+                          widget.peerFingerprint,
+                          messages[i].id,
+                        ),
+                      ),
                     ),
                   ),
           ),
@@ -261,12 +291,14 @@ class _ChatThreadPageState extends State<ChatThreadPage> {
 class _Bubble extends StatelessWidget {
   const _Bubble({
     required this.message,
+    required this.retryAfter,
     required this.onRetry,
     required this.onDelete,
     required this.onAccept,
     required this.onReject,
   });
   final ChatMessage message;
+  final Duration retryAfter;
   final VoidCallback onRetry, onDelete, onAccept, onReject;
 
   (IconData, String, bool) _delivery(SendState state) => switch (state) {
@@ -287,7 +319,12 @@ class _Bubble extends StatelessWidget {
     final mine = message.direction == ChatDirection.outgoing;
     final state = message.sendState;
     final delivery = mine && state != null ? _delivery(state) : null;
-    final canRetry = state == SendState.failed || state == SendState.sent;
+    final waited = message.sentAt == null
+        ? Duration.zero
+        : DateTime.now().toUtc().difference(message.sentAt!.toUtc());
+    final sentRetryable = state == SendState.sent && waited >= retryAfter;
+    final sentTooNew = state == SendState.sent && !sentRetryable;
+    final canRetry = state == SendState.failed || sentRetryable;
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
@@ -354,6 +391,11 @@ class _Bubble extends StatelessWidget {
                   children: [
                     if (canRetry)
                       TextButton(onPressed: onRetry, child: const Text('重发')),
+                    if (sentTooNew)
+                      Text(
+                        '约 ${(retryAfter - waited).inMinutes + 1} 分钟后可重发',
+                        style: theme.textTheme.bodySmall,
+                      ),
                     if (!mine && message.acceptance == Acceptance.none) ...[
                       TextButton(
                         onPressed: onAccept,

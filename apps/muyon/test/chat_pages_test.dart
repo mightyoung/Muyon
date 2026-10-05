@@ -139,6 +139,15 @@ void main() {
       await tester.pump();
       await tester.tap(find.byTooltip('发送'));
       await tester.pumpAndSettle();
+      expect(find.textContaining('目的地：192.168.1.8:47825'), findsOneWidget);
+      expect(find.textContaining('核对指纹：$peer'), findsOneWidget);
+      expect(
+        backend.sentBodies,
+        isEmpty,
+        reason: 'nothing sent before confirm',
+      );
+      await tester.tap(find.text('发送这一次'));
+      await tester.pumpAndSettle();
       expect(backend.sentBodies, ['你好']);
       expect(find.text('已发出，对方是否收到未知'), findsOneWidget);
       expect(
@@ -200,6 +209,8 @@ void main() {
       await tester.pump();
       await tester.tap(find.byTooltip('发送'));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('发送这一次'));
+      await tester.pumpAndSettle();
       expect(find.textContaining('连接失败'), findsOneWidget);
       expect(
         tester.widget<TextField>(find.byType(TextField)).controller!.text,
@@ -207,7 +218,25 @@ void main() {
       );
     });
 
-    testWidgets('retry of an unknown-outcome message asks first', (
+    testWidgets('cancelling the send confirmation sends nothing', (
+      tester,
+    ) async {
+      size(tester, 390);
+      await tester.pumpWidget(thread());
+      await tester.enterText(find.byType(TextField), '不发');
+      await tester.pump();
+      await tester.tap(find.byTooltip('发送'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('取消'));
+      await tester.pumpAndSettle();
+      expect(backend.sentBodies, isEmpty);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        '不发',
+      );
+    });
+
+    testWidgets('a fresh unconfirmed message offers no retry yet', (
       tester,
     ) async {
       size(tester, 390);
@@ -216,6 +245,22 @@ void main() {
         direction: ChatDirection.outgoing,
         body: 'x',
         state: SendState.sent,
+      );
+      await tester.pumpWidget(thread());
+      expect(find.text('重发'), findsNothing);
+      expect(find.textContaining('分钟后可重发'), findsOneWidget);
+    });
+
+    testWidgets('retry of an old unconfirmed message asks first', (
+      tester,
+    ) async {
+      size(tester, 390);
+      backend.add(
+        peer,
+        direction: ChatDirection.outgoing,
+        body: 'x',
+        state: SendState.sent,
+        sentAt: DateTime.now().toUtc().subtract(const Duration(minutes: 5)),
       );
       await tester.pumpWidget(thread());
       await tapText(tester, '重发');
@@ -255,6 +300,9 @@ void main() {
       await tapText(tester, '标记为已接纳');
       expect(find.textContaining('不会导入或执行'), findsOneWidget);
       expect(backend.messages(peer).single.acceptance, Acceptance.accepted);
+      expect(backend.acceptedKeys, [
+        '$peer/m1',
+      ], reason: 'addressed by peer and message id');
       expect(find.text('标记为已接纳'), findsNothing);
     });
 

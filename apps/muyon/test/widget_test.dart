@@ -26,7 +26,7 @@ void main() {
       for (final item in [
         ('助手', find.byType(AssistantPage)),
         ('资料', find.text('数据与知识')),
-        ('我的', find.text('接口与工具')),
+        ('我的', find.text('接口与工具', skipOffstage: false)),
       ]) {
         await tester.tap(
           find.descendant(
@@ -46,7 +46,12 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('个人助手'), findsOneWidget);
-      // Phone hub: each entry is its own page with a back button.
+      // Phone hub: each entry is its own page with a back button. A tall
+      // surface keeps tiles clear of the bottom navigation bar.
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationBar),
@@ -54,14 +59,24 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      for (final entry in [
-        ('接口与工具', find.text('页面与助手调用同一注册表；参数与权限由宿主校验。')),
-        ('数据与存储', find.text('备份与恢复')),
-        ('系统设置', find.text('外观')),
+      for (final entry in const [
+        ('接口与工具', '页面与助手调用同一注册表；参数与权限由宿主校验。'),
+        ('数据与存储', '备份与恢复'),
+        ('系统设置', '外观'),
+        ('设备聊天', '只在本人已配对、同时在线的设备之间发送文字，没有中继。聊天内容不会授予任何操作权限，也不会自动进入助手上下文。'),
+        ('记忆与整理', '整理'),
       ]) {
-        await tester.tap(find.text(entry.$1).first);
+        final tile = find
+            .widgetWithText(ListTile, entry.$1, skipOffstage: false)
+            .first;
+        await tester.ensureVisible(tile);
+        await tester.tap(tile);
         await tester.pumpAndSettle();
-        expect(entry.$2, findsWidgets, reason: entry.$1);
+        expect(
+          find.text(entry.$2, skipOffstage: false),
+          findsWidgets,
+          reason: entry.$1,
+        );
         await tester.tap(find.byTooltip('返回'));
         await tester.pumpAndSettle();
         expect(find.text('个人中心'), findsOneWidget, reason: 'back to hub');

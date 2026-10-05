@@ -81,17 +81,13 @@ class HostMcpServerStore implements McpServerStore {
   }
 
   Future<void> _write(List<McpServerRecord> servers) =>
-      host.workspaces.setSetting(
-        'mcpServers',
-        [for (final server in servers) server.toJson()],
-      );
+      host.workspaces.setSetting('mcpServers', [
+        for (final server in servers) server.toJson(),
+      ]);
 
   @override
   Future<void> save(McpServerRecord record, String token) async {
-    await _write([
-      ...load().where((server) => server.id != record.id),
-      record,
-    ]);
+    await _write([...load().where((server) => server.id != record.id), record]);
     if (token.isNotEmpty) {
       await secrets.write(record.tokenRef, token);
     }
@@ -322,9 +318,7 @@ class _McpServersPageState extends State<McpServersPage> {
               style: theme.textTheme.bodySmall,
             ),
             Text(
-              record.credentialRef == null
-                  ? '无访问令牌'
-                  : '已保存令牌（系统安全存储）',
+              record.credentialRef == null ? '无访问令牌' : '已保存令牌（系统安全存储）',
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: MuyonTokens.space2),
