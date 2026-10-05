@@ -182,6 +182,13 @@ SelectionScore scoreRule(ToolSelectionStrategy strategy) {
   );
 }
 
+/// Abstaining is correct only when the task expects "none"; a choice is
+/// correct only when it is the expected registered id.
+bool choiceIsCorrect(SelectionTask task, ChoiceDecision decision) =>
+    decision.abstains
+    ? task.expected == 'none'
+    : decision.toolId == task.expected;
+
 /// Scores one decision per task of [selectionTasks], in order. Shared by the
 /// offline rule and model strategies so their numbers are comparable.
 SelectionScore scoreChoices({
@@ -216,9 +223,7 @@ SelectionScore scoreChoices({
         category.abstained++;
       }
     }
-    final hit = choseNone
-        ? task.expected == 'none'
-        : decision.toolId == task.expected;
+    final hit = choiceIsCorrect(task, decision);
     if (hit) {
       top1++;
       topK++;
@@ -238,10 +243,7 @@ SelectionScore scoreChoices({
         : _confidenceBucket(decision.confidence);
     final bucket = buckets[label]!;
     bucket.tasks++;
-    final correct = decision.abstains
-        ? task.expected == 'none'
-        : decision.toolId == task.expected;
-    if (correct) bucket.correct++;
+    if (hit) bucket.correct++;
   }
   return SelectionScore(
     strategyId: strategyId,
