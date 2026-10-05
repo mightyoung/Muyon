@@ -14,6 +14,9 @@ class InquiryWebAuthority implements AssistantWebAuthority {
         toolId: toolId,
         moduleId: 'inquiry',
         effect: ToolEffect.network,
+        description:
+            '询价模块内部通道：经宿主一次性确认后，向一个网址发出只读 GET 请求，响应最多 512 KB。'
+            '会联网并把该网址发送出去，不上传本机数据；仅供询价模块内部使用。',
         supportsCancel: true,
         parameterSchema: {
           'type': 'object',
