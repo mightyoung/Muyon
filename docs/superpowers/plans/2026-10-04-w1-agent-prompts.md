@@ -825,3 +825,37 @@ Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到
 ### 2. `transfer_chat_backend_test` 在高负载下偶发失败
 
 `apps/muyon/test/transfer_chat_backend_test.dart` 的 "adapter maps send, delivery, read, acceptance and delete"：A 跑整体验证时它失败过一次，单独重跑 3 次都通过；opencode 也在负载高时遇到过。找出依赖时序的地方（固定等待、轮询次数、计时器），改成等待明确的状态或事件。**不得**放宽断言、跳过测试，或把它加入 `KNOWN_FAILURES`。验证：在机器有负载时（例如同时跑另一个测试套件）连续跑 20 次全部通过，把命令和结果写进报告。
+
+---8<--- 追加 · E（opencode）· E9 本体对象关联路径 ---
+
+开工：`git fetch origin && git merge --ff-only origin/develop`。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。**
+
+背景：模型现在要找"供应商和项目预算怎么关联"这类问题，只能反复调用 `describe` 和 `related` 去试。本体结构图很小（`packages/supplier_core/lib/src/ontology.dart`：11 种对象、22 条关系 `links`），可以先把对象之间的关联路径算好，放进 `describe` 的输出里交给模型参考。**只做这一步，不新增工具。**
+
+### 1. 纯函数：算出关联路径
+新建 `packages/supplier_core/lib/src/ontology_paths.dart`，并从包入口导出：
+- `List<OntologyPath> ontologyPaths(String from, String to, {int maxHops = 3, int limit = 2})`：用广度优先搜索列出 `from` 到 `to` 之间最短的几条**简单路径**（不重复经过同一种对象），最多 `maxHops` 步，最多返回 `limit` 条。
+- 每条 `LinkType` 都可以双向走：
+  - 正向 `out`：从 `link.from` 的记录读字段 `link.field`，用 `get` 拿到 `link.to` 的记录；
+  - 反向 `in`：从 `link.to` 的记录出发，用 `related`（参数 `link` = `link.name`）列出 `link.from` 的记录。
+- 每一步记录：`link`（名称）、`direction`（`out`/`in`）、`from`、`to`、`many`、`via`（`get` 或 `related`）。
+- 结果必须**确定**：先按步数排序，同样步数再按各步 link 名称的字典序。`from == to` 或类型未知时，返回空列表还是抛错，你定一种，在注释里写清楚。
+- 用标准库实现，不加依赖。
+
+### 2. 放进 `describe(type)` 的输出
+在 `agent_tools.dart` 的 `_describe(type)` 里，带 `type` 的分支增加 `paths_to`：对每个其他对象类型，列出 3 步以内最短的至多 2 条路径（到不了就不列）。
+- **不改**任何工具的 id、说明文字和参数结构。Laya 训练数据和评测都依赖这些。
+- 不带 `type` 的分支保持不变。
+- 在报告里写出每种类型 `describe(type)` 输出 JSON 改动前后的大小。任何一种超过改动前的 3 倍，就把 `limit` 降到 1，并说明原因。
+
+### 3. 测试（`packages/supplier_core/test/ontology_paths_test.dart`）
+- 对真实本体的每一对类型都计算：每一步都能在 `links` 里找到；`out` 步的 `from` 等于 `link.from`，`in` 步的 `from` 等于 `link.to`；相邻两步首尾相接；没有重复经过的对象；步数不超过 `maxHops`。
+- 同样输入跑两次，结果完全相同。
+- 从真实本体里挑一对你能手工核对的类型（例如供应商 → 项目），把期望路径写死在测试里。
+- `describe(type)` 输出含 `paths_to`，`describe()` 输出不变；不得改动现有测试的断言。
+
+### 不做
+- 不新增多层关联查询工具。新工具会改变工具清单，会影响 Laya 的训练选项和评测集，要等 Laya 第 2 阶段结果出来后由 A 决定。
+- 不改记录查询（`record_query.dart`）。
+
+所有权：`packages/supplier_core/lib/src/ontology_paths.dart`、`agent_tools.dart` 里的 `_describe`、包入口导出一行、新测试文件。
