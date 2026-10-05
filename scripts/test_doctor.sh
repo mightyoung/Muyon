@@ -72,6 +72,18 @@ FAKE_JAVA
 
 cat > "$FAKE_BIN/curl" <<'FAKE_CURL'
 #!/usr/bin/env bash
+has_k=0
+for a in "$@"; do
+  if [ "$a" = "-K" ]; then
+    has_k=1
+  fi
+done
+if [ -n "${FAKE_CURL_ARGS_FILE:-}" ]; then
+  printf '%s\n' "$@" > "$FAKE_CURL_ARGS_FILE"
+  if [ "$has_k" -eq 1 ]; then
+    cat > "${FAKE_CURL_ARGS_FILE}.stdin"
+  fi
+fi
 printf '%s\n' "${FAKE_CURL_CODE:-200}"
 exit 0
 FAKE_CURL
@@ -84,7 +96,7 @@ run_doctor() {
   doctor_mode="$1"
   shift
   OUT=$(env -i PATH="$FAKE_BIN:$PATH" HOME="$HOME" \
-    "$@" bash "$DOCTOR" $doctor_mode 2>&1)
+    "$@" bash "$DOCTOR" $doctor_mode < /dev/null 2>&1)
   RC=$?
 }
 
@@ -149,7 +161,7 @@ else
 fi
 
 # ------------------------------------------------------------------ 场景 6
-# 设置密钥后，整个输出（包括 --json）里找不到密钥
+# 密钥不出现在任何输出里；--json 可解析且包含 model-key 检查项
 SECRET="sk-test-secret"
 run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
   MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1" \
@@ -161,10 +173,27 @@ run_doctor --json FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
   MUYON_EVAL_MODEL_ID="test-model" \
   MUYON_EVAL_MODEL_KEY="$SECRET"
 OUT_JSON="$OUT"
-if printf '%s' "$OUT_HUMAN" | grep -qF "$SECRET" || printf '%s' "$OUT_JSON" | grep -qF "$SECRET"; then
-  fail "密钥不出现在任何输出里"
+SCENARIO6_OK=1
+if printf '%s' "$OUT_HUMAN" | grep -qF "$SECRET"; then
+  SCENARIO6_OK=0
+fi
+if printf '%s' "$OUT_JSON" | grep -qF "$SECRET"; then
+  SCENARIO6_OK=0
+fi
+if ! printf '%s' "$OUT_JSON" | python3 -c '
+import json
+import sys
+
+data = json.load(sys.stdin)
+names = [c.get("name") for c in data.get("checks", [])]
+sys.exit(0 if "model-key" in names else 1)
+' 2>/dev/null; then
+  SCENARIO6_OK=0
+fi
+if [ "$SCENARIO6_OK" -eq 1 ]; then
+  pass "密钥不出现在任何输出里，--json 可解析且含 model-key 检查项"
 else
-  pass "密钥不出现在任何输出里"
+  fail "密钥不出现在任何输出里，--json 可解析且含 model-key 检查项"
 fi
 
 # ------------------------------------------------------------------ 场景 7
@@ -176,6 +205,72 @@ if line_is "$(printf 'WARN\tproxy')" && [ "$RC" -eq 0 ]; then
 else
   fail "设置代理变量时 proxy 为 WARN 且退出码 0"
   printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 8
+# 只设 endpoint、不设 id 时 model-env 为 FAIL 且退出码 1
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1"
+if line_is "$(printf 'FAIL\tmodel-env')" && [ "$RC" -eq 1 ]; then
+  pass "只设 endpoint 不设 id 时 model-env 为 FAIL 且退出码 1"
+else
+  fail "只设 endpoint 不设 id 时 model-env 为 FAIL 且退出码 1"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 9
+# 只设小写 https_proxy 时 proxy 为 WARN
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  https_proxy="http://127.0.0.1:9"
+if line_is "$(printf 'WARN\tproxy')" && [ "$RC" -eq 0 ]; then
+  pass "只设小写 https_proxy 时 proxy 为 WARN"
+else
+  fail "只设小写 https_proxy 时 proxy 为 WARN"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 10
+# 带用户信息的端点时 model-env 为 FAIL（F1 的例子）
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  MUYON_EVAL_MODEL_ENDPOINT="http://localhost:x@evil.example.com/v1" \
+  MUYON_EVAL_MODEL_ID="test-model"
+if line_is "$(printf 'FAIL\tmodel-env')" && [ "$RC" -eq 1 ]; then
+  pass "带用户信息的端点时 model-env 为 FAIL"
+else
+  fail "带用户信息的端点时 model-env 为 FAIL"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 11
+# 假 curl 收到的请求为 GET <base>/models，且参数里没有密钥
+ARGS_FILE="$TMP_DIR/curl-args.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1/chat/completions" \
+  MUYON_EVAL_MODEL_ID="test-model" \
+  MUYON_EVAL_MODEL_KEY="dummy-key-for-test"
+ARGS_OK=1
+if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" != "https://api.example.com/v1/models" ]; then
+  ARGS_OK=0
+fi
+if grep -qE -- '^(-X|-d|--data)' "$ARGS_FILE" 2>/dev/null; then
+  ARGS_OK=0
+fi
+if grep -qF "dummy-key-for-test" "$ARGS_FILE" 2>/dev/null; then
+  ARGS_OK=0
+fi
+if ! grep -qF "Bearer dummy-key-for-test" "${ARGS_FILE}.stdin" 2>/dev/null; then
+  ARGS_OK=0
+fi
+if [ "$ARGS_OK" -eq 1 ]; then
+  pass "假 curl 收到的请求为 GET <base>/models 且参数不含密钥"
+else
+  fail "假 curl 收到的请求为 GET <base>/models 且参数不含密钥"
+  printf '    curl 参数:\n'
+  sed 's/^/    /' "$ARGS_FILE" 2>/dev/null
+  printf '    curl stdin:\n'
+  sed 's/^/    /' "${ARGS_FILE}.stdin" 2>/dev/null
 fi
 
 # ------------------------------------------------------------------ 汇总
