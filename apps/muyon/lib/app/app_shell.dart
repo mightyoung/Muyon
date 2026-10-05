@@ -4,20 +4,34 @@ import 'dart:ui' show AppExitResponse;
 
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:muyon_ui/muyon_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 import 'package:inquiry_module/inquiry_module.dart';
 import 'package:uuid/uuid.dart';
 
+import '../platform/backup_service.dart';
 import '../platform/file_gateway.dart';
 import '../workspace/import_coordinator.dart';
 import 'bootstrap.dart';
 import 'research_tools_page.dart';
+import '../screens/data_storage_page.dart';
 import '../screens/platform_shell.dart';
 
 class MuyonApp extends StatefulWidget {
-  const MuyonApp({super.key, required this.host});
+  const MuyonApp({
+    super.key,
+    required this.host,
+    this.openHost,
+    this.pickDirectory = pickDirectoryWithDialog,
+  });
   final MuyonHost host;
+
+  /// Reopens the data directory after a restore; defaults to [MuyonHost.open].
+  final Future<MuyonHost> Function(String rootPath)? openHost;
+
+  /// Folder picker for backup and restore; replaced in tests.
+  final PickDirectory pickDirectory;
   @override
   State<MuyonApp> createState() => _MuyonAppState();
 }
@@ -25,11 +39,15 @@ class MuyonApp extends StatefulWidget {
 class _MuyonAppState extends State<MuyonApp> {
   ThemeMode mode = ThemeMode.system;
   final navigator = GlobalKey<NavigatorState>();
+  final messenger = GlobalKey<ScaffoldMessengerState>();
   late final AppLifecycleListener lifecycle;
-  @override
-  void initState() {
-    super.initState();
-    widget.host.approveInquiryModelRequest = (preview) async {
+  late MuyonHost host = widget.host;
+  int generation = 0;
+  bool restoring = false;
+  String? fatal;
+
+  void _attach(MuyonHost value) {
+    value.approveInquiryModelRequest = (preview) async {
       final context = navigator.currentContext;
       if (!mounted || context == null) return false;
       return await showDialog<bool>(
@@ -55,66 +73,143 @@ class _MuyonAppState extends State<MuyonApp> {
           ) ??
           false;
     };
+    mode = ThemeMode.values.byName(
+      value.workspaces.setting('theme') as String? ?? 'system',
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _attach(host);
     lifecycle = AppLifecycleListener(
       onExitRequested: () async {
-        await widget.host.close();
+        await host.close();
         return AppExitResponse.exit;
       },
       onDetach: () {
-        widget.host.close();
+        host.close();
       },
-    );
-    mode = ThemeMode.values.byName(
-      widget.host.workspaces.setting('theme') as String? ?? 'system',
     );
   }
 
   @override
   void dispose() {
     lifecycle.dispose();
-    widget.host.approveInquiryModelRequest = null;
+    host.approveInquiryModelRequest = null;
     super.dispose();
   }
 
+  /// Close, restore, reopen. The page tree is replaced by a plain progress
+  /// screen first so nothing keeps listening to the host being closed. If the
+  /// restore fails, the original data is reopened and the failure is shown.
+  Future<void> _restore(String backupDir) async {
+    final root = host.storage.rootPath;
+    final closing = host;
+    setState(() => restoring = true);
+    await WidgetsBinding.instance.endOfFrame;
+    closing.approveInquiryModelRequest = null;
+    String? failure;
+    String? previous;
+    try {
+      await closing.close();
+      previous = await BackupService.restore(backupDir, root);
+    } catch (error) {
+      failure = '$error';
+    }
+    try {
+      final reopened = await (widget.openHost ?? MuyonHost.open)(root);
+      _attach(reopened);
+      if (!mounted) return;
+      setState(() {
+        host = reopened;
+        generation++;
+        restoring = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        messenger.currentState?.showSnackBar(
+          SnackBar(
+            duration: const Duration(seconds: 12),
+            content: Text(
+              failure == null
+                  ? '已从备份恢复并重启。原数据保留在 $previous'
+                  : '恢复失败，已重新打开原数据：$failure',
+            ),
+          ),
+        );
+      });
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          fatal =
+              '无法重新打开 Muyon：$error'
+              '${failure == null ? '' : '\n恢复也失败了：$failure'}'
+              '${previous == null ? '' : '\n原数据保留在 $previous'}';
+          restoring = false;
+        });
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
-    listenable: widget.host.foundation,
-    builder: (context, _) => MaterialApp(
-      title: 'Muyon',
-      navigatorKey: navigator,
-      debugShowCheckedModeBanner: false,
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          disableAnimations:
-              MediaQuery.of(context).disableAnimations ||
-              widget.host.workspaces.setting('reduceMotion') == true,
-        ),
-        child: child!,
+  Widget build(BuildContext context) => MaterialApp(
+    // A new key drops pushed routes, which would still read the closed host.
+    key: ValueKey((generation, restoring)),
+    title: 'Muyon',
+    navigatorKey: navigator,
+    scaffoldMessengerKey: messenger,
+    debugShowCheckedModeBanner: false,
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        disableAnimations:
+            MediaQuery.of(context).disableAnimations ||
+            (!restoring &&
+                fatal == null &&
+                host.workspaces.setting('reduceMotion') == true),
       ),
-      locale: const Locale('zh'),
-      supportedLocales: const [Locale('zh'), Locale('en')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff356859)),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xff356859),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: mode,
-      home: PlatformShell(
-        host: widget.host,
-        themeMode: mode,
-        onTheme: (value) async {
-          await widget.host.workspaces.setSetting('theme', value.name);
-          if (mounted) setState(() => mode = value);
-        },
-      ),
+      child: child!,
     ),
+    locale: const Locale('zh'),
+    supportedLocales: const [Locale('zh'), Locale('en')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    theme: muyonTheme(Brightness.light),
+    darkTheme: muyonTheme(Brightness.dark),
+    themeMode: mode,
+    home: fatal != null
+        ? Scaffold(
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: SelectableText(fatal!),
+              ),
+            ),
+          )
+        : restoring
+        ? const Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(semanticsLabel: '正在恢复'),
+                  SizedBox(height: 16),
+                  Text('正在关闭 Muyon 并从备份恢复…'),
+                ],
+              ),
+            ),
+          )
+        : ListenableBuilder(
+            listenable: host.foundation,
+            builder: (context, _) => PlatformShell(
+              host: host,
+              themeMode: mode,
+              onRestore: _restore,
+              pickDirectory: widget.pickDirectory,
+              onTheme: (value) async {
+                await host.workspaces.setSetting('theme', value.name);
+                if (mounted) setState(() => mode = value);
+              },
+            ),
+          ),
   );
 }
 
@@ -574,6 +669,7 @@ class _WorkspacePageState extends State<WorkspacePage> {
                     store: session!.store,
                     projectId: session!.binding.nativeProjectId,
                     importTaskThroughHost: _task,
+                    hosted: true,
                   ),
           ),
         ],

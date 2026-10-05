@@ -118,9 +118,8 @@ void main() {
     expect(assessed.status, 'completed');
     expect(assessed.accepted, isFalse);
 
-    final path = await ResearchExchange(
-      store,
-    ).exportSkillExperiment(assessed, temp.path);
+    final path = await ResearchExchange(store)
+        .exportSkillExperiment(assessed, temp.path);
     final lines = File(path).readAsLinesSync();
     expect(lines, hasLength(1));
     final record = jsonDecode(lines.single) as Map<String, dynamic>;
@@ -138,9 +137,8 @@ void main() {
 
     Future<Map<String, dynamic>> exportAgain() async => jsonDecode(
       File(
-        await ResearchExchange(
-          store,
-        ).exportSkillExperiment(store.runs('p').single, temp.path),
+        await ResearchExchange(store)
+            .exportSkillExperiment(store.runs('p').single, temp.path),
       ).readAsLinesSync().single,
     );
     final same = await exportAgain();
@@ -435,4 +433,3 @@ void main() {
     },
   );
 }
-

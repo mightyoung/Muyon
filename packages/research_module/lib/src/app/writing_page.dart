@@ -183,7 +183,7 @@ class _WritingPageState extends State<WritingPage> {
         ),
         subtitle: note != null && note.$2.quote.isNotEmpty
             ? Text('“${note.$2.quote}”', maxLines: 2)
-            : SelectableText(id, style: const TextStyle(fontSize: 11)),
+            : SelectableText(id, style: Theme.of(context).textTheme.bodySmall),
         onTap: entry != null
             ? () => widget.onShowEntry(entry)
             : note != null

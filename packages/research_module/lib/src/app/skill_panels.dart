@@ -68,7 +68,7 @@ class RevisionHistory extends StatelessWidget {
           children: [
             SelectableText(
               const JsonEncoder.withIndent('  ').convert(e.data),
-              style: const TextStyle(fontSize: 12),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),
@@ -255,4 +255,3 @@ Future<void> showDraftSummary(BuildContext context, ClaimDraftExport result) =>
         ],
       ),
     );
-
