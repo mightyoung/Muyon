@@ -17,7 +17,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ENV_FILE = Path("/Users/muyi/Downloads/dev/muspace/.env")
-METRICS = Path.home() / ".cache/muyon-eval/stage1-metrics.json"
+METRICS = Path.home() / ".cache/muyon-eval/stage1b-metrics.json"
 PYTHON = "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3"
 KAGGLE = "/Library/Frameworks/Python.framework/Versions/3.12/bin/kaggle"
 DATASET_SLUG = "muyon-laya-tool-choices"
@@ -34,11 +34,11 @@ def scrub(text: str) -> str:
 
 def require_gate(path: Path) -> None:
     if not path.is_file():
-        raise SystemExit("stage1 metrics missing; not starting Kaggle")
+        raise SystemExit("stage1b metrics missing; not starting Kaggle")
     payload = json.loads(path.read_text(encoding="utf-8"))
-    gate = payload.get("gate1")
+    gate = payload.get("gate1b")
     if gate != "pass":
-        raise SystemExit(f"GATE1 {gate}; not starting Kaggle")
+        raise SystemExit(f"GATE1b {gate}; not starting Kaggle")
 
 
 def read_token(path: Path) -> str:

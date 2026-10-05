@@ -43,11 +43,15 @@ class TrainingSet(unittest.TestCase):
             probs = row["gold"]["tool"]["probabilities"]
             self.assertEqual(set(criteria), set(probs))
             self.assertEqual(sum(probs.values()), 1.0)
-            self.assertIn("opt00", criteria)
+            self.assertIn("none", criteria)
+            offered = set(criteria) - {"none"}
+            effects = {tool["id"]: tool["effect"] for tool in self.selection["tools"]}
+            self.assertTrue(all(effects[tool_id] == "read" for tool_id in offered))
             if row["expected"] == "none":
-                self.assertEqual(probs["opt00"], 1.0)
+                self.assertEqual(probs["none"], 1.0)
             else:
-                self.assertEqual(probs["opt00"], 0.0)
+                self.assertEqual(probs["none"], 0.0)
+                self.assertEqual(effects[row["expected"]], "read")
                 self.assertEqual(row["category"] in {"chinese", "mixed", "paraphrase"}, True)
 
     def test_committed_file_matches_the_generator(self):
