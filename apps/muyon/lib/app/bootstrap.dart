@@ -15,6 +15,7 @@ import '../workspace/workspace_repository.dart';
 import 'module_registry.dart';
 import 'research_tools_page.dart' show AcceptedResearchImports;
 import '../assistant/execution_store.dart';
+import '../assistant/dream/dream_service.dart';
 import '../assistant/personal_agent.dart';
 import '../platform/foundation_repository.dart';
 import '../platform/memory_review.dart';
@@ -40,6 +41,7 @@ class MuyonHost {
   late final ToolRegistry tools;
   late final PublicServices services;
   late final PersonalAgent personalAgent;
+  late final DreamService dream;
   late final ProjectionService projections;
   late final OutboundLedger outbound;
   Future<bool> Function(InquiryModelApprovalPreview preview)?
@@ -184,6 +186,10 @@ class MuyonHost {
         gateway: host.services.gateway,
         tools: host.tools,
         executionDeviceId: device,
+      );
+      host.dream = DreamService(
+        host.foundation,
+        gateway: host.services.gateway,
       );
       registerBusinessTools(host);
       host.capabilities.register('knowledge', host.services.knowledge);
