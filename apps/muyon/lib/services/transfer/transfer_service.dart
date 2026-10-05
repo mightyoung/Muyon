@@ -177,7 +177,7 @@ class TransferService {
         await node.push(peer, file.path);
       }
     } finally {
-      if (await file.exists()) await file.delete();
+      await _removeIfPresent(file);
     }
   }
 
@@ -189,7 +189,7 @@ class TransferService {
       final decoded = TaskCoordinator.decodeFile(entity.path);
       if (decoded == null) continue;
       await onTaskEnvelope?.call(decoded);
-      if (await entity.exists()) await entity.delete();
+      await _removeIfPresent(entity);
     }
   }
 
@@ -214,7 +214,7 @@ class TransferService {
         _items = _items.then((_) async {
           await handler(task);
           final file = File(push.path);
-          if (await file.exists()) await file.delete();
+          await _removeIfPresent(file);
         });
       }
       return;
@@ -996,7 +996,7 @@ class TransferService {
       _emitChat();
       rethrow;
     } finally {
-      if (await file.exists()) await file.delete();
+      await _removeIfPresent(file);
     }
   }
 
@@ -1052,10 +1052,22 @@ class TransferService {
       } catch (_) {
         // The inbound row is already durable. The sender stays at `sent`.
       } finally {
-        if (await ack.exists()) await ack.delete();
+        await _removeIfPresent(ack);
       }
     } finally {
-      if (await file.exists()) await file.delete();
+      await _removeIfPresent(file);
+    }
+  }
+
+  /// The receiving side also clears pushed files, and a delete can race with
+  /// that or with shutdown. A file that is already gone is the goal, not an
+  /// error: an exception here would also stall every later receipt queued
+  /// behind it in [_items].
+  static Future<void> _removeIfPresent(FileSystemEntity entity) async {
+    try {
+      await entity.delete();
+    } on PathNotFoundException {
+      // already removed
     }
   }
 
