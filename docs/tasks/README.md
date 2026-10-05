@@ -16,12 +16,13 @@
 | HANDOVER-A 原 leader 交接 | `task/handover-a` | [HANDOVER-A.md](HANDOVER-A.md) | A | — | 已完成（[审查通过](HANDOVER-A-review.md)） |
 | P0-3 询价 North Star 链路 | `task/p0-3-north-star` | [P0-3.md](P0-3.md) | senior | — | 审查第 2 轮：F1～F8 已修复，需再修 R2-A～D（`review/P0-3`，先做） |
 | P0-2 LLM 原生工具调用基线 | `task/p0-2-llm-baseline` | [P0-2.md](P0-2.md) | senior | P0-3 之后 | 已合入（[审查](P0-2-review.md)） |
-| P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | engineer | B 2.4 之后 | 已交付，核实中（`review/P0-1`；GitHub Actions 第 2 次运行通过） |
+| P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | junior（修复） | E11 之后 | 审查：方案 A 去掉 tag 排除，修复改由 junior 在 `review/P0-1` 上做 |
 | P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 已合入（[审查](P0-J1-review.md)） |
 | P0-J2 自检脚本安全加固 | `task/p0-j2-doctor-hardening` | [P0-J2.md](P0-J2.md) | junior | — | 已合入（[审查](P0-J2-review.md)） |
 | P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | P0-3 修复之后 | 已派发 |
 | P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | 待转交 |
-| P0-4 真机与真实模型取证 | `task/p0-4-evidence`（待建） | [P0-4.md](P0-4.md) | engineer | P0-1、P0-2、P0-3、P0-J1 合入（P0-J1、P0-2 已合入） | 待依赖 |
+| P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | P0-S1 之后 | 待转交 |
+| P0-4 真机与真实模型取证 | `task/p0-4-evidence`（待建） | [P0-4.md](P0-4.md) | engineer | P0-3 合入（P0-2、P0-J1 已合入；P0-1 不再是前置） | 待依赖 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → 修复在 `review/B-2.4` | `2026-10-04-w1-agent-prompts.md`「追加 · B（Sonnet）· 2.4」；审查见 `review/B-2.4` 上的 `docs/tasks/B-2.4-review.md` | engineer | — | 审查：需修复 S1～S3、S5、S7（S6 待 E11） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` | `2026-10-04-w1-agent-prompts.md`「追加 · E（opencode）· E11」 | junior | — | 在途（据交接：8 个文件改动未提交，验收口径见 [审查](HANDOVER-A-review.md)） |
 
