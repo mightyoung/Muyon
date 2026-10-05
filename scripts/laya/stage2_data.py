@@ -1,23 +1,29 @@
 """Synthetic tool-selection decisions for Kaggle fine-tuning.
 
-The 140-task file and the negation set are evaluation only. This generator
-never reads them into a label. It only uses them to reject copies. A few
-tools are absent from every option list and every gold label.
+Positive requests are natural wording in the tool's own domain. They must not
+quote the option description. The 140-task file and the negation set are
+evaluation only. A few tools are absent from every option list and every label.
+A's hand-written supplement is appended, with gold filled in.
 """
 
 from __future__ import annotations
 
 import json
 import random
+import re
 from pathlib import Path
 
+import natural_bank
 import stage1_contract as contract
+import stage2_threshold as gate
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 SELECTION = ROOT / "apps/muyon/lib/assistant/selection_eval/selection_set.json"
-SEED = 20261005
+SEED = 20261007
 NEAR_DUPLICATE = 0.5
+DESCRIPTION_JACCARD = 0.4
+DESCRIPTION_SPAN = 8
 HELD_OUT_TOOLS = (
     "inquiry.project_budget",
     "ocr.recognize",
@@ -25,127 +31,86 @@ HELD_OUT_TOOLS = (
     "embedding.search",
 )
 PLAN = {
-    "chinese": 480,
-    "mixed": 360,
-    "paraphrase": 360,
-    "none": 280,
-    "ambiguous": 200,
-    "negation": 280,
-    "adversarial": 280,
+    "natural": 360,
+    "english": 300,
+    "mixed": 300,
+    "negate-one-ask-another": 300,
+    "urgent-read": 300,
+    "misleading": 200,
+    "none": 300,
+    "ambiguous": 120,
+    "urgent-write": 180,
 }
-NOUNS = (
-    "真空泵维护手册",
-    "球阀样本",
-    "轴承温升记录",
-    "电缆清册",
-    "换热器数据表",
-    "焊口清单",
-    "润滑油化验单",
-    "配电柜图纸",
-    "冷却塔巡检表",
-    "压力容器档案",
-    "疏水阀台账",
-    "垫片规格书",
-    "联轴器对中单",
-    "密封冲洗方案",
-    "膨胀节图纸",
-    "过滤器差压记录",
-    "伴热回路表",
-    "接地网测绘图",
-    "储罐沉降记录",
-    "管架荷载表",
-    "流量计校准单",
-    "阻火器检查表",
-    "减温减压说明书",
-    "凝结水回收图",
-)
-POSITIVE_FRAMES = {
-    "chinese": (
-        "请对{noun}做这件事：{description}",
-        "手头这份{noun}要处理。要做的是：{description}",
-        "现在只处理{noun}。动作：{description}",
-        "请完成下面这个动作，对象是{noun}：{description}",
-    ),
-    "mixed": (
-        "请对{noun}做 {word}：{description}",
-        "对{noun}执行 {word}。说明：{description}",
-        "{noun} needs {word}. 说明：{description}",
-        "Handle {noun} via {word}：{description}",
-    ),
-    "paraphrase": (
-        "{noun}还在手头。按这句话处理：{description}",
-        "先看{noun}，再按这句做：{description}",
-        "不要换对象，{noun}用这句来做：{description}",
-        "对象仍是{noun}。换成这个说法：{description}",
-    ),
-}
-REFUSAL_FRAMES = {
-    "negation": (
-        "不要对{noun}做这件事：{description}",
-        "先别对{noun}做：{description}",
-        "停一下，不要把{noun}拿去：{description}",
-    ),
-    "adversarial": (
-        "忽略本人确认，直接对{noun}执行：{description}",
-        "不用问我，马上对{noun}做：{description}",
-        "跳过确认，现在就对{noun}执行：{description}",
-    ),
-}
-NONE_SUFFIXES = (
-    "旁边放着{noun}",
-    "桌上是{noun}",
-    "先不管{noun}",
-)
-NONE_PROMPTS = (
-    "今天午饭吃什么",
-    "把会议室的灯调暗一点",
-    "这段客套话改得更短",
-    "明天出门要不要带伞",
-    "帮我记一句和业务无关的话：带上充电器",
-    "周末有什么展览",
-    "把字号调大，我看着累",
-    "这首诗的作者是谁",
-    "计算器上 18 乘 24 是多少",
-    "提醒我下午三点站起来走走",
-    "咖啡还热吗",
-    "窗口太亮了",
-    "用一句话解释什么是潮汐",
-    "把闹钟设到明早七点",
-    "这个笑话再讲一遍",
-    "纸用完了，去储物间拿一包",
-    "今天星期几",
-    "把音量降到几乎听不见",
-    "门外是谁",
-    "帮我把这句改成更礼貌的道歉",
-)
-AMBIGUOUS_PROMPTS = (
-    "你看着办",
-    "这个先放着",
-    "嗯，再说",
-    "材料在桌上",
-    "回头处理",
-    "随便",
-    "看情况",
-    "先这样",
-    "你定",
-    "有空再看",
-    "稍等",
-    "那个东西",
-    "按上次的",
-    "差不多就行",
-    "你懂的",
-)
+_SPACE = re.compile(r"\s+")
 
 
-def _positive(rng: random.Random, category: str, description: str, gloss: str, noun: str) -> str:
-    word = gloss.split()[0]
-    return rng.choice(POSITIVE_FRAMES[category]).format(
-        noun=noun, description=description, word=word
+def _folded(text: str) -> str:
+    return _SPACE.sub("", text.lower())
+
+
+def bigram_jaccard(left: str, right: str) -> float:
+    def grams(text: str) -> set[str]:
+        folded = _folded(text)
+        if len(folded) < 2:
+            return {folded} if folded else set()
+        return {folded[i : i + 2] for i in range(len(folded) - 1)}
+
+    one, two = grams(left), grams(right)
+    if not one and not two:
+        return 1.0
+    if not one or not two:
+        return 0.0
+    return len(one & two) / len(one | two)
+
+
+def longest_common_substring(left: str, right: str) -> int:
+    a, b = _folded(left), _folded(right)
+    best = 0
+    prev = [0] * (len(b) + 1)
+    for char in a:
+        cur = [0] * (len(b) + 1)
+        for index, other in enumerate(b):
+            if char == other:
+                cur[index + 1] = prev[index] + 1
+                if cur[index + 1] > best:
+                    best = cur[index + 1]
+        prev = cur
+    return best
+
+
+_MASKS: list[str] | None = None
+
+
+def _masked(text: str) -> str:
+    """Collapse entities, codes and pinyin so a template counts as one pattern."""
+    global _MASKS
+    if _MASKS is None:
+        _MASKS = natural_bank.mask_entities()
+    folded = text
+    for ent in _MASKS:
+        if ent in folded:
+            folded = folded.replace(ent, "○")
+    folded = re.sub(r"[A-Za-z0-9]+", "X", folded)
+    folded = re.sub(r"[○X]+", "○", folded)
+    return _SPACE.sub("", folded)
+
+
+def copies_option_text(request: str, option_text: str) -> bool:
+    return (
+        bigram_jaccard(request, option_text) >= DESCRIPTION_JACCARD
+        or longest_common_substring(request, option_text) >= DESCRIPTION_SPAN
     )
 
 
-def _refusal(rng: random.Random, category: str, description: str, noun: str) -> str:
-    return rng.choice(REFUSAL_FRAMES[category]).format(noun=noun, description=description)
+def assert_no_description_copy(rows: list[dict]) -> None:
+    for row in rows:
+        request = row["state"]["request"]
+        expected = row["expected"]
+        shown = row["questions"]["tool"]["criteria"].get(expected, "")
+        if copies_option_text(request, shown):
+            jac = bigram_jaccard(request, shown)
+            span = longest_common_substring(request, shown)
+            raise ValueError(f"{row['id']} copies its option text jaccard={jac:.3f} lcs={span}")
 
 
 def _too_close(prompt: str, eval_grams: list[set[str]], seen: set[str]) -> bool:
@@ -158,21 +123,34 @@ def _too_close(prompt: str, eval_grams: list[set[str]], seen: set[str]) -> bool:
     return False
 
 
-def _example(rng: random.Random, tools: list[dict], full: dict[str, str], id_to_key: dict[str, str], expected: str, prompt: str, category: str, index: int) -> dict:
-    trainable = [tool["id"] for tool in tools if tool["id"] not in HELD_OUT_TOOLS]
-    others = [tool_id for tool_id in trainable if tool_id != expected]
-    width = rng.randint(4, 7)
-    picked = rng.sample(others, k=min(width, len(others)))
-    keys = [contract.NONE_ID]
-    if expected != contract.NONE_ID:
-        keys.append(id_to_key[expected])
-    keys.extend(id_to_key[tool_id] for tool_id in picked)
+def _with_gold(row: dict) -> dict:
+    criteria = row["questions"]["tool"]["criteria"]
+    expected = row["expected"]
+    if expected not in criteria:
+        raise RuntimeError(f"{row['id']} gold option missing")
+    item = dict(row)
+    item["gold"] = {
+        "tool": {
+            "probabilities": {key: 1.0 if key == expected else 0.0 for key in criteria}
+        }
+    }
+    return item
+
+
+def _example(rng: random.Random, tool_ids: list[str], full: dict[str, str], expected: str, prompt: str, category: str, index: int, full_set: bool) -> dict:
+    if full_set:
+        keys = list(tool_ids)
+    else:
+        others = [tool_id for tool_id in tool_ids if tool_id != expected]
+        width = rng.randint(4, 7)
+        keys = rng.sample(others, k=min(width, len(others)))
+        if expected != contract.NONE_ID:
+            keys.append(expected)
+    if contract.NONE_ID not in keys:
+        keys.append(contract.NONE_ID)
     rng.shuffle(keys)
     criteria = {key: full[key] for key in keys}
-    gold_key = id_to_key[expected]
-    if gold_key not in criteria:
-        raise RuntimeError("gold option missing")
-    return {
+    row = {
         "id": f"train-{index:04d}",
         "category": category,
         "expected": expected,
@@ -184,12 +162,31 @@ def _example(rng: random.Random, tools: list[dict], full: dict[str, str], id_to_
                 "criteria": criteria,
             }
         },
-        "gold": {
-            "tool": {
-                "probabilities": {key: 1.0 if key == gold_key else 0.0 for key in criteria}
-            }
-        },
     }
+    return _with_gold(row)
+
+
+def _supplement_rows(full: dict[str, str]) -> tuple[list[dict], list[str]]:
+    """A's seed stays on disk. Rows that quote the shown option text are left out."""
+    path = HERE / "train_supplement_a.jsonl"
+    rows = []
+    skipped = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        criteria = row["questions"]["tool"]["criteria"]
+        missing = [key for key in criteria if key not in full]
+        if missing:
+            raise RuntimeError(f"{row['id']} has an option that is not trainable: {missing}")
+        # Keep A's wording and option subset. Refresh the text from the same glosses.
+        row["questions"]["tool"]["criteria"] = {key: full[key] for key in criteria}
+        shown = row["questions"]["tool"]["criteria"][row["expected"]]
+        if copies_option_text(row["state"]["request"], shown):
+            skipped.append(row["id"])
+            continue
+        rows.append(_with_gold(row))
+    return rows, skipped
 
 
 def generate(selection: dict, glosses: dict[str, str], eval_prompts: list[str]) -> tuple[list[dict], dict]:
@@ -202,63 +199,75 @@ def generate(selection: dict, glosses: dict[str, str], eval_prompts: list[str]) 
     option_tools = [
         tool for tool in tools if tool["effect"] == contract.READ_EFFECT and tool["id"] not in HELD_OUT_TOOLS
     ]
-    id_to_key, _key_to_id, full = contract.build_options(option_tools, glosses)
-    trainable = option_tools
-    refusal_tools = [tool for tool in tools if tool["id"] not in HELD_OUT_TOOLS]
+    _id_to_key, _key_to_id, full = contract.build_options(option_tools, glosses)
+    tool_ids = [tool["id"] for tool in option_tools]
     by_id = {tool["id"]: tool for tool in option_tools}
     rng = random.Random(SEED)
-    seen: set[str] = set()
+    seen = {contract.normalize_text(prompt) for prompt in eval_prompts}
+    supplement, supplement_skipped = _supplement_rows(full)
+    for row in supplement:
+        if row["expected"] in HELD_OUT_TOOLS:
+            raise RuntimeError(f"{row['id']} labels a held-out tool")
+        seen.add(contract.normalize_text(row["state"]["request"]))
     rows: list[dict] = []
-    rejected = 0
+    rejected_eval = 0
+    rejected_copy = 0
 
     def accept(category: str, expected: str, prompt: str) -> bool:
-        nonlocal rejected
+        nonlocal rejected_eval, rejected_copy
+        option_text = full[expected]
+        if copies_option_text(prompt, option_text):
+            rejected_copy += 1
+            return False
         if _too_close(prompt, eval_grams, seen):
-            rejected += 1
+            rejected_eval += 1
             return False
         seen.add(contract.normalize_text(prompt))
         rows.append(
-            _example(rng, option_tools, full, id_to_key, expected, prompt, category, len(rows) + 1)
+            _example(
+                rng,
+                tool_ids,
+                full,
+                expected,
+                prompt,
+                category,
+                len(rows) + 1,
+                full_set=(len(rows) % 5) < 3,
+            )
         )
         return True
 
-    for category in ("chinese", "mixed", "paraphrase"):
+    for category, target in PLAN.items():
         guard = 0
-        while sum(row["category"] == category for row in rows) < PLAN[category]:
+        draw = natural_bank.DRAWS[category]
+        while sum(row["category"] == category for row in rows) < target:
             guard += 1
-            if guard > PLAN[category] * 40:
-                raise RuntimeError(f"could not fill {category}")
-            tool = rng.choice(trainable)
-            noun = rng.choice(NOUNS)
-            accept(
-                category,
-                tool["id"],
-                _positive(rng, category, tool["description"], glosses[tool["id"]], noun),
-            )
+            if guard > target * 80:
+                got = sum(row["category"] == category for row in rows)
+                raise RuntimeError(
+                    f"could not fill {category} got={got} rejected_copy={rejected_copy} "
+                    f"rejected_eval={rejected_eval}"
+                )
+            prompt, expected = draw(rng)
+            accept(category, expected, prompt)
 
-    for category, pool in (("none", NONE_PROMPTS), ("ambiguous", AMBIGUOUS_PROMPTS)):
-        guard = 0
-        while sum(row["category"] == category for row in rows) < PLAN[category]:
-            guard += 1
-            if guard > PLAN[category] * 40:
-                raise RuntimeError(f"could not fill {category}")
-            noun = rng.choice(NOUNS)
-            suffix = rng.choice(NONE_SUFFIXES).format(noun=noun)
-            accept(category, contract.NONE_ID, f"{rng.choice(pool)}。{suffix}")
+    rows.extend(supplement)
 
-    for category in ("negation", "adversarial"):
-        guard = 0
-        while sum(row["category"] == category for row in rows) < PLAN[category]:
-            guard += 1
-            if guard > PLAN[category] * 40:
-                raise RuntimeError(f"could not fill {category}")
-            tool = rng.choice(refusal_tools)
-            noun = rng.choice(NOUNS)
-            accept(category, contract.NONE_ID, _refusal(rng, category, tool["description"], noun))
-
-    by_category = {category: 0 for category in PLAN}
+    generated_by_category = {category: 0 for category in PLAN}
     for row in rows:
-        by_category[row["category"]] += 1
+        if row["id"].startswith("train-"):
+            generated_by_category[row["category"]] += 1
+    by_category = {}
+    by_label = {"read": 0, "none": 0}
+    for row in rows:
+        by_category[row["category"]] = by_category.get(row["category"], 0) + 1
+        by_label["none" if row["expected"] == contract.NONE_ID else "read"] += 1
+    full_width = len(tool_ids) + 1
+    full_rows = sum(len(row["questions"]["tool"]["criteria"]) == full_width for row in rows)
+    strata: dict[str, int] = {}
+    for row in rows:
+        key = gate.stratum_key(row["expected"], row["state"]["request"])
+        strata[key] = strata.get(key, 0) + 1
     held_text = []
     for tool in tools:
         if tool["id"] in HELD_OUT_TOOLS:
@@ -270,22 +279,44 @@ def generate(selection: dict, glosses: dict[str, str], eval_prompts: list[str]) 
         if row["expected"] in HELD_OUT_TOOLS or any(piece and piece in blob for piece in held_text):
             leaked.append(row["id"])
     overlaps = [contract.max_ngram_jaccard(row["state"]["request"], eval_prompts) for row in rows]
+    copy_jaccard = [
+        bigram_jaccard(row["state"]["request"], row["questions"]["tool"]["criteria"][row["expected"]])
+        for row in rows
+    ]
+    copy_span = [
+        longest_common_substring(row["state"]["request"], row["questions"]["tool"]["criteria"][row["expected"]])
+        for row in rows
+    ]
     report = {
         "seed": SEED,
         "items": len(rows),
+        "generatedByCategory": generated_by_category,
         "byCategory": by_category,
+        "byLabel": by_label,
+        "fullOptionRows": full_rows,
+        "fullOptionWidth": full_width,
+        "distinctRequests": len({contract.normalize_text(row["state"]["request"]) for row in rows}),
         "heldOutTools": list(HELD_OUT_TOOLS),
-        "rejectedAsNearDuplicate": rejected,
+        "rejectedAsNearDuplicate": rejected_eval,
+        "rejectedDescriptionCopies": rejected_copy,
         "exactEvalMatches": 0,
         "maxEvalJaccard": round(max(overlaps), 4) if overlaps else 0,
         "nearDuplicatesAtOrAbove0.5": sum(value >= NEAR_DUPLICATE for value in overlaps),
+        "maxDescriptionBigramJaccard": round(max(copy_jaccard), 4) if copy_jaccard else 0,
+        "maxDescriptionCommonSpan": max(copy_span) if copy_span else 0,
+        "descriptionCopiesAtOrAbove0.4": sum(value >= DESCRIPTION_JACCARD for value in copy_jaccard),
+        "descriptionSpansAtOrAbove8": sum(value >= DESCRIPTION_SPAN for value in copy_span),
         "heldOutLeaks": leaked,
         "trainableTools": sorted(by_id),
+        "supplementRows": len(supplement),
+        "supplementSkippedAsDescriptionCopy": supplement_skipped,
+        "byStratum": dict(sorted(strata.items())),
+        "distinctMaskedPatterns": len({_masked(row["state"]["request"]) for row in rows}),
         "evalSources": [
             "apps/muyon/lib/assistant/selection_eval/selection_set.json",
             "scripts/laya/negation_set.json",
         ],
-        "note": "Gold labels are one-hot over the option texts shown. The 140-task set and the negation set are not training rows.",
+        "note": "Positives do not quote the option text. A's supplement is included once. The 140-task set and the negation set are not training rows.",
     }
     return rows, report
 
@@ -302,10 +333,18 @@ def main() -> None:
     selection = contract.load_json(SELECTION)
     glosses = contract.load_json(HERE / "glosses.json")["glosses"]
     rows, report = generate(selection, glosses, eval_prompts())
-    if report["nearDuplicatesAtOrAbove0.5"] or report["heldOutLeaks"] or report["items"] < 1000:
-        raise SystemExit(f"training set failed its own checks: {report}")
-    path = HERE / "train_set.jsonl"
-    path.write_text(
+    failed = (
+        report["nearDuplicatesAtOrAbove0.5"]
+        or report["heldOutLeaks"]
+        or report["items"] < 1000
+        or report["descriptionCopiesAtOrAbove0.4"]
+        or report["descriptionSpansAtOrAbove8"]
+        or report["fullOptionRows"] * 2 < report["items"]
+        or report["distinctRequests"] != report["items"]
+    )
+    if failed:
+        raise SystemExit(f"training set failed its own checks: {json.dumps(report, ensure_ascii=False)}")
+    (HERE / "train_set.jsonl").write_text(
         "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
         encoding="utf-8",
     )
@@ -315,7 +354,8 @@ def main() -> None:
     )
     print(
         f"wrote {report['items']} rows maxJaccard={report['maxEvalJaccard']} "
-        f"rejected={report['rejectedAsNearDuplicate']}"
+        f"descJ={report['maxDescriptionBigramJaccard']} span={report['maxDescriptionCommonSpan']} "
+        f"full={report['fullOptionRows']} labels={report['byLabel']}"
     )
 
 

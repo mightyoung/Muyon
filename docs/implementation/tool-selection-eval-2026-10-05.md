@@ -77,3 +77,9 @@ D-R6 的 `laya-metrics.json` 只有汇总，没有逐题预测。同一 67 题�
 门禁 2 还没有结论：微调还没打完分，D-R6 的 67 题基线也还没重测。阶段 3 未开始。生产策略没有切换。
 
 私有数据集 `amurdaddy/muyon-laya-tool-choices` 已上传 1792 行合成题。标题已被占用时改为创建新版本，版本说明是 “Synthetic tool-choice rows”。状态解析原先把 CLI 的版本警告和 `ready` 粘成一行，第一轮因此没有推内核；修正后数据集状态是 `ready`，私有内核 `amurdaddy/muyon-laya-tool-finetune` 第 1 版已推送。推送后的状态是 `KernelWorkerStatus.RUNNING`。加速器元数据是 `NvidiaTeslaT4`，笔记本要求两块 GPU，并写 `NO_HUB_PUSH`。凭证只进了子进程的 `KAGGLE_API_TOKEN`。权重还没有下载，SHA-256 还没有。
+
+训练数据审查要求先修生成器，所以上面那个内核已经删掉。删除命令退出码 0；之后查询会话状态是 403。数据集里留下的仍是引用选项说明的 1792 行，不能再拿去训练。
+
+新生成器种子 `20261007`。正例写工具自己领域里的请求，不嵌入选项说明。写出 2467 行：计划内 2360 行，加上 A 的种子里通过检查的 107 行。另有 18 行种子因为和金标选项文本的最长公共子串达到 8，或二元组 Jaccard 达到 0.4，没有并入。生成类别是 natural 360、english 300、mixed 300、negate-one-ask-another 300、urgent-read 300、misleading 200、none 300、ambiguous 120、urgent-write 180。标签是 read 1797、none 670。全部 16 个可训练选项（15 个只读工具加 none）出现在 1469 行上。和评测题的字符 5-gram 最大 Jaccard 是 0.4167，近重复 0。选项文本二元组最大 Jaccard 0.2，最长公共子串 7。掩去实体后的句式 1583 种。本机分词器上，满选项的头是 494 token，16 个选项彼此分得开，没有触发逐项截断；最长请求 29 token。`head_max_len` 512、`max_len` 1024 装得下。
+
+验证折按同一规则切出 494 行，留在本机；上传会是其余 1973 行。验证折格子是 `none|zh` 129、`read|zh` 209、`read|mixed` 89、`read|en` 61、`none|en` 6。67 题的四个目标格子都有来源。`none|en` 不在目标里，权重为 0。数字在 `scripts/laya/train_overlap.json`。这版文件还没有重新上传，微调还没有重新开始。

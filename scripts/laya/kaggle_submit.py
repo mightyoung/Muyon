@@ -51,7 +51,12 @@ def require_stage2(train_path: Path, overlap_path: Path, selection_path: Path) -
         overlap = json.loads(overlap_path.read_text(encoding="utf-8"))
         selection = json.loads(selection_path.read_text(encoding="utf-8"))
         gate.assert_read_only_targets(rows, selection["tools"], set(stage2_data.HELD_OUT_TOOLS))
+        stage2_data.assert_no_description_copy(rows)
         gate.assert_overlap(overlap)
+        if overlap.get("descriptionCopiesAtOrAbove0.4") or overlap.get("descriptionSpansAtOrAbove8"):
+            raise ValueError("training requests copy option text")
+        if overlap.get("fullOptionRows", 0) * 2 < overlap.get("items", 0):
+            raise ValueError("fewer than half the rows show the full option set")
         gate.assert_answerable_mix(selection["tasks"], selection["tools"])
         training, validation = gate.validation_split(rows)
         if len(training) < 1000 or not validation:

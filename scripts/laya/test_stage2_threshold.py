@@ -51,11 +51,11 @@ class Mix(unittest.TestCase):
             text_of=lambda row: row["state"]["request"],
             expected_of=lambda row: row["expected"],
         )
-        self.assertEqual(report["unmatchedTarget"], {"read|en": 12})
         self.assertIn("read|zh", report["supported"])
         self.assertIn("read|mixed", report["supported"])
+        self.assertIn("read|en", report["supported"])
         self.assertIn("none|zh", report["supported"])
-        self.assertNotIn("read|en", report["sourceCounts"])
+        self.assertEqual(report["unmatchedTarget"], {})
         weighted = {}
         for key, weight in zip(report["keys"], report["weights"]):
             weighted[key] = weighted.get(key, 0.0) + weight
