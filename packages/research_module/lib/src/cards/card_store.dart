@@ -267,17 +267,28 @@ class CardStore {
         ]);
       });
 
-  SourceAvailability sourceAvailability(String projectId, SourceRef source) {
+  /// Checks scope before reading any original byte or invoking a parser.
+  CitationDocument? citationDocument(String projectId, SourceRef source) {
     requireObject(projectId, source.documentRef);
     final rows = db.select(
-      'SELECT digest FROM rk_documents WHERE object_key=? AND deleted=0',
-      [source.documentRef.token],
+      'SELECT digest,bytes,deleted FROM rk_documents WHERE object_key=? AND digest=?',
+      [source.documentRef.token, source.contentDigest],
     );
-    return source.availability(
-      exists: rows.isNotEmpty,
-      currentDigest: rows.isEmpty ? null : rows.single['digest'] as String,
+    if (rows.isEmpty || rows.single['deleted'] == 1) return null;
+    final bytes = Uint8List.fromList(rows.single['bytes'] as List<int>);
+    if (sha256.convert(bytes).toString() != source.contentDigest) return null;
+    return CitationDocument(
+      contentDigest: source.contentDigest,
+      bytes: bytes.asUnmodifiableView(),
+      availability: rows.single['deleted'] == 0
+          ? SourceAvailability.pageLevel
+          : SourceAvailability.replaced,
     );
   }
+
+  SourceAvailability sourceAvailability(String projectId, SourceRef source) =>
+      citationDocument(projectId, source)?.availability ??
+      SourceAvailability.missing;
 
   Future<ResearchCard> save({
     required String projectId,
@@ -390,4 +401,16 @@ class CardStore {
         .map((r) => get(projectId, r['local_object_id'] as String)!)
         .toList();
   }
+}
+
+/// Verified immutable bytes of a persisted original version.
+class CitationDocument {
+  const CitationDocument({
+    required this.contentDigest,
+    required this.bytes,
+    required this.availability,
+  });
+  final String contentDigest;
+  final Uint8List bytes;
+  final SourceAvailability availability;
 }

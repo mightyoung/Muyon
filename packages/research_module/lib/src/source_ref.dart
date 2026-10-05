@@ -56,7 +56,10 @@ class SourceRef {
     this.contextBefore,
     this.contextAfter,
     this.parserVersion,
-  }) {
+    List<SourceBox>? coordinates,
+  }) : coordinates = coordinates == null
+           ? null
+           : List.unmodifiable(coordinates) {
     if (documentRef.objectType != 'document' ||
         pageIndex < 0 ||
         pageIndex > 9007199254740991 ||
@@ -64,6 +67,9 @@ class SourceRef {
       throw const FormatException('Invalid source reference');
     }
     validateUnicode(quote);
+    if (contextBefore != null) validateUnicode(contextBefore!);
+    if (contextAfter != null) validateUnicode(contextAfter!);
+    if (parserVersion != null) validateUnicode(parserVersion!);
   }
   final ObjectKey documentRef;
   final String contentDigest;
@@ -72,6 +78,10 @@ class SourceRef {
   final String? contextBefore;
   final String? contextAfter;
   final String? parserVersion;
+
+  /// Fractions of the physical page, from its top-left corner.
+  /// Evidence only: the resolver never trusts stored boxes as parser proof.
+  final List<SourceBox>? coordinates;
   Map<String, Object?> toJson() => {
     'documentRef': documentRef.toJson(),
     'contentDigest': contentDigest,
@@ -80,6 +90,8 @@ class SourceRef {
     'contextBefore': contextBefore,
     'contextAfter': contextAfter,
     'parserVersion': parserVersion,
+    if (coordinates != null)
+      'coordinates': coordinates!.map((box) => box.toJson()).toList(),
   };
   factory SourceRef.fromJson(Map<String, Object?> json) => SourceRef(
     documentRef: ObjectKey.fromJson(
@@ -91,6 +103,14 @@ class SourceRef {
     contextBefore: json['contextBefore'] as String?,
     contextAfter: json['contextAfter'] as String?,
     parserVersion: json['parserVersion'] as String?,
+    coordinates: json['coordinates'] == null
+        ? null
+        : (json['coordinates'] as List)
+              .map(
+                (box) =>
+                    SourceBox.fromJson(Map<String, Object?>.from(box as Map)),
+              )
+              .toList(),
   );
   SourceAvailability availability({
     required bool exists,
@@ -103,3 +123,47 @@ class SourceRef {
 }
 
 enum SourceAvailability { missing, replaced, pageLevel }
+
+/// A finite, positive-area rectangle in normalized physical page coordinates.
+class SourceBox {
+  SourceBox({
+    required this.left,
+    required this.top,
+    required this.right,
+    required this.bottom,
+  }) {
+    if (![
+          left,
+          top,
+          right,
+          bottom,
+        ].every((v) => v.isFinite && v >= 0 && v <= 1) ||
+        left >= right ||
+        top >= bottom) {
+      throw const FormatException('Invalid normalized source coordinates');
+    }
+  }
+  final double left, top, right, bottom;
+  Map<String, Object?> toJson() => {
+    'left': left,
+    'top': top,
+    'right': right,
+    'bottom': bottom,
+  };
+  factory SourceBox.fromJson(Map<String, Object?> json) {
+    const fields = {'left', 'top', 'right', 'bottom'};
+    if (json.length != fields.length ||
+        json.keys.toSet().difference(fields).isNotEmpty ||
+        fields.any((key) => json[key] is! num)) {
+      throw const FormatException(
+        'Invalid normalized source coordinate fields',
+      );
+    }
+    return SourceBox(
+      left: (json['left'] as num).toDouble(),
+      top: (json['top'] as num).toDouble(),
+      right: (json['right'] as num).toDouble(),
+      bottom: (json['bottom'] as num).toDouble(),
+    );
+  }
+}
