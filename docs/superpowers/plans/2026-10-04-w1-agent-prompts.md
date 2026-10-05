@@ -799,7 +799,63 @@ Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到
 要求（需求第五、七节与调用路径审计 G3）：
 - 供应商中心发布是**对外写操作**。像 G2 一样，经宿主工具注册表注册为 `ToolEffect.network`（或 export）通道：明确目的地、每次宿主一次性确认、持久回执，在副作用前调用 `checkBeforeEffect()`。参考已合入的 `apps/muyon/lib/app/inquiry_web_authority.dart`。
 - **结果不确定时先查询远端再决定**：超时、连接在发送后中断等情况，状态记为"结果未知"，先向中心查询这次发布是否已生效，再允许重试；绝不自动重发；本地取消不得显示为"远端已撤销"。
-- 给这个内部通道写清楚说明（会把哪些数据发到哪里），A 会加"不提供给模型选择"的标记。
+- 给这个内部通道写清楚说明（会把哪些数据发到哪里），并在 `ToolDescriptor` 上设 `modelSelectable: false`（A 已加这个字段，个人助理不会把它交给模型或选择策略；参考 `inquiry_web_authority.dart`）。
 - 先读 Codex 的半成品，能沿用就沿用，不合适的直接改；在报告里说明保留了哪些、改了哪些。
 
 开工：在你的分支上 `git merge origin/wip/g3-handoff` 再 `git merge origin/develop`，解决冲突后先让它编译通过。所有权：`packages/inquiry_module/lib/src/features/hub/**`、`packages/supplier_core/lib/src/hub*.dart`、`apps/muyon/lib/app/inquiry_hub_authority.dart` 及相关测试。**Codex 自己目录里的同一批文件不要再动**（已经交接）。测试：未确认不发送；确认后发送一次；发送后中断 → "结果未知" → 查询远端已生效则不重发、未生效才允许重试；取消在副作用前则不发送。推送前 `scripts/verify.sh` 通过、工作区干净，推送后核对远端哈希。
+
+---8<--- 追加 · D（Grok）· D-R10 取消后的真实状态与聊天测试偶发失败 ---
+
+开工：`git fetch origin && git merge origin/develop`（`develop` 已到 `30c18f7`）。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。** 排在 D-R8c 训练数据修正之后，或在等 Kaggle 训练时做。
+
+### 1. 执行中取消不得记为"已取消"（需求第二节：暂停、取消、恢复按工具实际能力开放；不确定结果不得冒充确定结果）
+
+现状（`apps/muyon/lib/assistant/personal_agent.dart`）：
+- `cancel(id)` 取消模型和工具令牌后，**无条件**把任务写成 `cancelled`（`updateTask` 没有 `expected`）。
+- `_runTool` 在 `tools.invoke` 返回后执行 `token.throwIfCancelled()`；任务已不是 `running` 时直接返回。所以工具已越过副作用点（`checkBeforeEffect` 之后）时，注册表回执是 `interrupted` 或 `succeeded`，任务却显示"已取消"，回执和结果都不会写回任务。
+- 助手页（`assistant_page.dart`）和新的执行面板（`execution_panel.dart`）对任何非终态任务都提供"取消"。
+
+要求：
+- 等待确认、排队、模型生成阶段、工具尚未越过副作用点时取消，仍记 `cancelled`。
+- 工具调用已开始后取消：发出取消信号，但任务的最终状态**以注册表回执为准**——副作用前停下 → `cancelled`；回执是 `interrupted` 或工具不支持取消（`supportsCancel == false`）且已越过副作用点 → `interrupted`，错误写明"已请求取消，但操作可能已生效，重试前请先核实"；若工具实际成功，按实际结果记录并注明"取消请求晚于完成"。只读工具可以简单处理为 `cancelled`（无外部副作用），但要在代码里写明理由。
+- 状态写入使用 `expected` 守卫，避免取消与工具完成互相覆盖；不重放、不自动重试任何操作。
+- 界面文字只在助手和执行面板里改最少的地方（例如"取消中…"），不要重做界面。
+- 测试（真实临时宿主 + 注册表）：确认前取消 → `cancelled` 且处理函数未调用；副作用前取消 → `cancelled`；处理函数越过 `checkBeforeEffect` 后取消 → `interrupted` 且回执一致；不支持取消的写工具执行中取消 → `interrupted`；只读工具执行中取消的行为与代码注释一致；取消和完成同时发生时只有一个结果落库。
+
+### 2. `transfer_chat_backend_test` 在高负载下偶发失败
+
+`apps/muyon/test/transfer_chat_backend_test.dart` 的 "adapter maps send, delivery, read, acceptance and delete"：A 跑整体验证时它失败过一次，单独重跑 3 次都通过；opencode 也在负载高时遇到过。找出依赖时序的地方（固定等待、轮询次数、计时器），改成等待明确的状态或事件。**不得**放宽断言、跳过测试，或把它加入 `KNOWN_FAILURES`。验证：在机器有负载时（例如同时跑另一个测试套件）连续跑 20 次全部通过，把命令和结果写进报告。
+
+---8<--- 追加 · E（opencode）· E9 本体对象关联路径 ---
+
+开工：`git fetch origin && git merge --ff-only origin/develop`。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。**
+
+背景：模型现在要找"供应商和项目预算怎么关联"这类问题，只能反复调用 `describe` 和 `related` 去试。本体结构图很小（`packages/supplier_core/lib/src/ontology.dart`：11 种对象、22 条关系 `links`），可以先把对象之间的关联路径算好，放进 `describe` 的输出里交给模型参考。**只做这一步，不新增工具。**
+
+### 1. 纯函数：算出关联路径
+新建 `packages/supplier_core/lib/src/ontology_paths.dart`，并从包入口导出：
+- `List<OntologyPath> ontologyPaths(String from, String to, {int maxHops = 3, int limit = 2})`：用广度优先搜索列出 `from` 到 `to` 之间最短的几条**简单路径**（不重复经过同一种对象），最多 `maxHops` 步，最多返回 `limit` 条。
+- 每条 `LinkType` 都可以双向走：
+  - 正向 `out`：从 `link.from` 的记录读字段 `link.field`，用 `get` 拿到 `link.to` 的记录；
+  - 反向 `in`：从 `link.to` 的记录出发，用 `related`（参数 `link` = `link.name`）列出 `link.from` 的记录。
+- 每一步记录：`link`（名称）、`direction`（`out`/`in`）、`from`、`to`、`many`、`via`（`get` 或 `related`）。
+- 结果必须**确定**：先按步数排序，同样步数再按各步 link 名称的字典序。`from == to` 或类型未知时，返回空列表还是抛错，你定一种，在注释里写清楚。
+- 用标准库实现，不加依赖。
+
+### 2. 放进 `describe(type)` 的输出
+在 `agent_tools.dart` 的 `_describe(type)` 里，带 `type` 的分支增加 `paths_to`：对每个其他对象类型，列出 3 步以内最短的至多 2 条路径（到不了就不列）。
+- **不改**任何工具的 id、说明文字和参数结构。Laya 训练数据和评测都依赖这些。
+- 不带 `type` 的分支保持不变。
+- 在报告里写出每种类型 `describe(type)` 输出 JSON 改动前后的大小。任何一种超过改动前的 3 倍，就把 `limit` 降到 1，并说明原因。
+
+### 3. 测试（`packages/supplier_core/test/ontology_paths_test.dart`）
+- 对真实本体的每一对类型都计算：每一步都能在 `links` 里找到；`out` 步的 `from` 等于 `link.from`，`in` 步的 `from` 等于 `link.to`；相邻两步首尾相接；没有重复经过的对象；步数不超过 `maxHops`。
+- 同样输入跑两次，结果完全相同。
+- 从真实本体里挑一对你能手工核对的类型（例如供应商 → 项目），把期望路径写死在测试里。
+- `describe(type)` 输出含 `paths_to`，`describe()` 输出不变；不得改动现有测试的断言。
+
+### 不做
+- 不新增多层关联查询工具。新工具会改变工具清单，会影响 Laya 的训练选项和评测集，要等 Laya 第 2 阶段结果出来后由 A 决定。
+- 不改记录查询（`record_query.dart`）。
+
+所有权：`packages/supplier_core/lib/src/ontology_paths.dart`、`agent_tools.dart` 里的 `_describe`、包入口导出一行、新测试文件。

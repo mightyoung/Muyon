@@ -71,6 +71,7 @@ class ToolDescriptor {
     this.supportsPause = false,
     this.supportsResume = false,
     this.description = '',
+    this.modelSelectable = true,
   }) : parameterSchema = freezeJsonMap(parameterSchema),
        resultSchema = freezeJsonMap(resultSchema),
        contextTypes = Set.unmodifiable(contextTypes);
@@ -88,6 +89,11 @@ class ToolDescriptor {
   /// What the tool does, shown to people and to the model for selection.
   /// Untrusted when it comes from an external server; never an authorization.
   final String description;
+
+  /// False for internal channels that only an application closure may invoke
+  /// (for example a module's recorded web channel). Such tools are never
+  /// offered to a selection strategy or model.
+  final bool modelSelectable;
 }
 
 class Invocation {

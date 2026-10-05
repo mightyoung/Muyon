@@ -32,6 +32,22 @@ class _SelectedReadStrategy implements ToolSelectionStrategy {
   );
 }
 
+class _CapturingStrategy implements ToolSelectionStrategy {
+  final offered = <String>[];
+  @override
+  String get id => 'test-capture';
+  @override
+  ToolSelection select({
+    required String prompt,
+    required AssistantScope scope,
+    required List<RegisteredToolInfo> availableTools,
+    required bool modelAvailable,
+  }) {
+    offered.addAll(availableTools.map((t) => t.descriptor.toolId));
+    return ToolSelection(candidateIds: const []);
+  }
+}
+
 void main() {
   late Directory dir;
   late StorageManager storage;
@@ -391,6 +407,35 @@ void main() {
     expect(calls, 1);
     expect(task.payload['strategyId'], 'test-read-selection');
     expect(task.payload['candidateIds'], ['read']);
+  });
+
+  test('internal channels are never offered to the selection strategy', () async {
+    tools.register(
+      providerId: 'test',
+      descriptor: ToolDescriptor(
+        toolId: 'internal',
+        moduleId: 'test',
+        effect: ToolEffect.network,
+        modelSelectable: false,
+        parameterSchema: {
+          'type': 'object',
+          'properties': <String, Object?>{},
+          'additionalProperties': false,
+        },
+      ),
+      handler: (context) async => throw StateError('not reachable'),
+    );
+    final strategy = _CapturingStrategy();
+    agent = PersonalAgent(
+      repository: repo,
+      gateway: OpenAiModelGateway(UnavailableSecretStore()),
+      tools: tools,
+      selectionStrategy: strategy,
+    );
+    final c = await repo.createConversation();
+    await agent.start(conversationId: c.id, prompt: 'internal');
+    expect(strategy.offered, containsAll(['read', 'write']));
+    expect(strategy.offered, isNot(contains('internal')));
   });
 
   test('model cannot propose outside frozen candidates even if strategy later changes', () async {

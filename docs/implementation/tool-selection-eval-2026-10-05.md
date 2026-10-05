@@ -63,3 +63,29 @@ Jev：not measured — evidence review only, no API call
 把留出折的阈值从 0 扫到 1，最高是 0.50 时的 29/93。这次扫描没有用来拟合，也到不了 46。阈值 0 时，49 道期望只读的题对了 15 道。三道精确 id 没有在 1.0 命中：`exact-inquiry-describe` 选了 `inquiry.spec_classes`（0.9998），`exact-inquiry-search` 选了 `inquiry.spec_classes`（0.9794），`exact-inquiry-query` 选了 `research.objects`（0.6969）。
 
 生产策略仍是 `registered-rule-model-v1`。`ReadOnlyLayaToolSelection`（`laya-readonly-v1`）在提问前只保留 `ToolAccessLevel.read`。模型点名写入或外发 id 时，结果里也不会出现这个 id。
+
+## 阶段 2 改正后的可比子集（2026-10-05）
+
+手机验证已由用户确认。D-R8c 把打分改到只读选择器能够回答的 67 道留出题：期望只读 49，期望 none 18。另外仍看对抗题和否定集。26 道期望写入或联网的留出题不再拿来和 D-R6 的 46/93 比。
+
+阶段 1b 的逐题预测还在 `stage1b-metrics.json`。同一阈值 1.0、只做选择，滤到这 67 题是 top-1 27/67，写入/外发误选 0，弃权 58。分类：chinese 0/12，mixed 0/12，paraphrase 0/12，exact 9/12，ambiguous 6/6，adversarial 6/6，misleading 6/7。这 27 分和原先 93 题上的 27 分是同一批命中；被拿掉的 26 题当时都没答对。阈值打到 0 时，这 67 题仍是 27/67，但分类不同：chinese 2/12，mixed 3/12，paraphrase 1/12。门禁 2 用来比较的是阈值 1.0 的正式分数。
+
+D-R6 的 `laya-metrics.json` 只有汇总，没有逐题预测。同一 67 题的基线要用原来的提问重测：29 个标签（工具 id 加中文说明，外加 none），阈值固定为已经公布的 0.95，不重新拟合。重测先核对留出 93 题是否仍是 46/93、误选 0。对上之后，67 题的数字才和 D-R6 可比。没对上就单独写明，不把它当成基线。
+
+67 题的标签和语言格子是 `none|zh` 18、`read|zh` 25、`read|mixed` 12、`read|en` 12。语言按请求里的汉字和拉丁字母判定，不用评测类别当语言。决定阈值改在训练验证折上拟合：2240 行按 id 排序，下标能被 5 整除的 448 行留在本机，不上传。这 448 行的格子是 `none|zh` 197、`read|zh` 141、`read|mixed` 99、`none|mixed` 11。英文格子对不上（`read|en` 12），不把这份比例摊到其他语言。`none|mixed` 不在 67 题的目标里，权重为 0。上传 1792 行。微调权重回到本机之后才用这个加权验证折选阈值。140 题和否定集不参与拟合。
+
+门禁 2 还没有结论：微调还没打完分，D-R6 的 67 题基线也还没重测。阶段 3 未开始。生产策略没有切换。
+
+私有数据集 `amurdaddy/muyon-laya-tool-choices` 已上传 1792 行合成题。标题已被占用时改为创建新版本，版本说明是 “Synthetic tool-choice rows”。状态解析原先把 CLI 的版本警告和 `ready` 粘成一行，第一轮因此没有推内核；修正后数据集状态是 `ready`，私有内核 `amurdaddy/muyon-laya-tool-finetune` 第 1 版已推送。推送后的状态是 `KernelWorkerStatus.RUNNING`。加速器元数据是 `NvidiaTeslaT4`，笔记本要求两块 GPU，并写 `NO_HUB_PUSH`。凭证只进了子进程的 `KAGGLE_API_TOKEN`。权重还没有下载，SHA-256 还没有。
+
+训练数据审查要求先修生成器，所以上面那个内核已经删掉。删除命令退出码 0；之后查询会话状态是 403。数据集里留下的仍是引用选项说明的 1792 行，不能再拿去训练。
+
+新生成器种子 `20261007`。正例写工具自己领域里的请求，不嵌入选项说明。写出 2467 行：计划内 2360 行，加上 A 的种子里通过检查的 107 行。另有 18 行种子因为和金标选项文本的最长公共子串达到 8，或二元组 Jaccard 达到 0.4，没有并入。生成类别是 natural 360、english 300、mixed 300、negate-one-ask-another 300、urgent-read 300、misleading 200、none 300、ambiguous 120、urgent-write 180。标签是 read 1797、none 670。全部 16 个可训练选项（15 个只读工具加 none）出现在 1469 行上。和评测题的字符 5-gram 最大 Jaccard 是 0.4167，近重复 0。选项文本二元组最大 Jaccard 0.2，最长公共子串 7。掩去实体后的句式 1583 种。本机分词器上，满选项的头是 494 token，16 个选项彼此分得开，没有触发逐项截断；最长请求 29 token。`head_max_len` 512、`max_len` 1024 装得下。
+
+验证折按同一规则切出 494 行，留在本机；上传的是其余 1973 行。验证折格子是 `none|zh` 129、`read|zh` 209、`read|mixed` 89、`read|en` 61、`none|en` 6。67 题的四个目标格子都有来源。`none|en` 不在目标里，权重为 0。数字在 `scripts/laya/train_overlap.json`。
+
+手机验证仍按用户先前的确认。私有数据集标题已被占用，因此创建了新版本，日志里有 “Dataset version is being created”，随后状态是 `ready`。私有内核重新推送，日志里有 “Kernel version 1 successfully pushed”，提交脚本退出码 0。推送后查到的状态是 `KernelWorkerStatus.RUNNING`。笔记本仍写 `NO_HUB_PUSH`。权重还没有下载，SHA-256 还没有。门禁 2 仍要等微调打完分，以及同一 67 题上的 D-R6 重测。
+
+内核随后到达 `KernelWorkerStatus.COMPLETE`。日志里是两块 Tesla T4（各 15.6 GB），`cuda True gpus 2`。预处理 1973 行全部留下，`dropped 0`。训练 4 个 epoch，`train_manifest.json` 的 `worldSize` 是 2，`nTrain` 1776，温度校准留出 `nCalib` 197，用时 390.117 秒。四个 epoch 的平均损失是 2.1032、0.8845、0.4340、0.2548。选择温度拟合为 1.977373。`rl_agent_config.json` 里嵌套的 `training.world_size` 仍是基座原来的 1，这次运行以清单和日志的 2 为准。输出里有 `NO_HUB_PUSH`，内容是 “Hub push disabled. Weights stay in the kernel output.” 没有推到 Hub。
+
+最终权重在 `~/.cache/muyon-eval/models/laya-muyon-tool-selection/laya-muyon-tool-selection/model.safetensors`，643835524 字节，SHA-256 `ef9dbf9aee506e00eb061a0989a468578eebe5b74352696cafc5c66fe994005f`。滚动检查点那份重复权重没有下载。本机当时还有别人的 `scripts/verify.sh`，67 题打分和 D-R6 重测还没有开始。门禁 2 还没有结论。

@@ -13,7 +13,7 @@ import '../platform/storage_manager.dart';
 import '../workspace/import_coordinator.dart';
 import '../workspace/workspace_repository.dart';
 import 'module_registry.dart';
-import 'research_tools_page.dart' show AcceptedResearchImports;
+import 'accepted_research_imports.dart';
 import '../assistant/execution_store.dart';
 import '../assistant/dream/dream_service.dart';
 import '../assistant/personal_agent.dart';

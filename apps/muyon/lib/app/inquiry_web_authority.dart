@@ -18,6 +18,8 @@ class InquiryWebAuthority implements AssistantWebAuthority {
             '询价模块内部通道：经宿主一次性确认后，向一个网址发出只读 GET 请求，响应最多 512 KB。'
             '会联网并把该网址发送出去，不上传本机数据；仅供询价模块内部使用。',
         supportsCancel: true,
+        modelSelectable: false,
+        description: '询价模块内部的联网通道：只执行宿主已确认的单次网页读取，不提供给模型选择。',
         parameterSchema: {
           'type': 'object',
           'properties': {
