@@ -93,7 +93,14 @@ void main() {
     return host.workspaces.database.write(
       (db) => db.execute(
         'INSERT INTO tool_invocation_receipts VALUES(?,?,?,?,?,?)',
-        ['rk-$n', 'inv-$n', 'digest', toolId, status.name, jsonEncode(result.toJson())],
+        [
+          'rk-$n',
+          'inv-$n',
+          'digest',
+          toolId,
+          status.name,
+          jsonEncode(result.toJson()),
+        ],
       ),
     );
   });
@@ -132,12 +139,13 @@ void main() {
   }) => MaterialApp(
     theme: muyonTheme(brightness),
     builder: (context, child) => MediaQuery(
-      data: MediaQuery.of(
-        context,
-      ).copyWith(textScaler: TextScaler.linear(scale)),
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: TextScaler.linear(scale)),
       child: child!,
     ),
-    home: Scaffold(body: DataFlowPage(host: host, read: read)),
+    home: Scaffold(
+      body: DataFlowPage(host: host, read: read),
+    ),
   );
 
   void resize(WidgetTester tester, double width) {
@@ -165,12 +173,7 @@ void main() {
       status: 'succeeded',
       itemCount: 3,
     );
-    await request(
-      tester,
-      caller: 'dream',
-      status: 'failed',
-      profile: remote,
-    );
+    await request(tester, caller: 'dream', status: 'failed', profile: remote);
     await request(tester, caller: 'embedding', status: 'sending');
     await request(tester, caller: 'research.qa', status: 'interrupted');
     await tester.pumpWidget(page());
@@ -214,11 +217,7 @@ void main() {
     expect(find.textContaining('assistant · '), findsNothing);
     expect(find.textContaining('dream · 失败'), findsOneWidget);
 
-    await pickFilter(
-      tester,
-      const ValueKey('data-flow-status-filter'),
-      '成功',
-    );
+    await pickFilter(tester, const ValueKey('data-flow-status-filter'), '成功');
     expect(find.textContaining('dream · 失败'), findsNothing);
     expect(find.text('没有符合筛选的记录。'), findsOneWidget);
 
@@ -267,15 +266,9 @@ void main() {
     expect(find.textContaining('已列出 3 家供应商'), findsOneWidget);
     expect(find.textContaining('工具调用 · 成功'), findsOneWidget);
     expect(find.textContaining('工具调用 · 中断（结果未知）'), findsOneWidget);
-    expect(
-      find.textContaining('结果未知，重试前请先核实'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('结果未知，重试前请先核实'), findsOneWidget);
     expect(find.text('批准记录'), findsOneWidget);
-    expect(
-      find.textContaining('https://mcp.example.com/mcp'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('https://mcp.example.com/mcp'), findsOneWidget);
     expect(find.textContaining('已发放'), findsOneWidget);
     expect(find.textContaining('已使用'), findsOneWidget);
     expect(find.textContaining('本地'), findsOneWidget);

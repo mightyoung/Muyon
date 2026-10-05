@@ -6,6 +6,7 @@ import '../assistant/dream/dream_service.dart';
 import '../platform/foundation_repository.dart';
 import '../services/models/model_gateway.dart';
 import 'dream_section.dart';
+import 'experience_section.dart';
 
 enum MemoryFilter { all, active, disabled, expired }
 
@@ -96,7 +97,7 @@ class _MemoryPageState extends State<MemoryPage> {
       builder: (context) => AlertDialog(
         title: const Text('删除这条记忆？'),
         content: Text(
-          '“${_short(memory.content)}”将被永久删除，由它整理出的内容也会一并删除。'
+          '“${_short(memory.content)}”将被永久删除，由它整理出的内容会一并删除，依据它的经验会被退役。'
           '已删除的内容不会被整理功能重新写入。此操作不能撤销。',
         ),
         actions: [
@@ -202,6 +203,8 @@ class _MemoryPageState extends State<MemoryPage> {
             ),
           ),
         const Divider(height: MuyonTokens.space6 * 2),
+        ExperienceSection(repo: widget.repo),
+        const Divider(height: MuyonTokens.space6 * 2),
         DreamSection(
           dream: widget.dream,
           repo: widget.repo,
@@ -249,7 +252,7 @@ class _MemoryCard extends StatelessWidget {
             ),
             const SizedBox(height: MuyonTokens.space1),
             Text(
-              '来源：${memory.source}'
+              '${scopeLabel(memory.scope)} · 来源：${memory.source}'
               '${memory.expiresAt == null ? '' : ' · 过期 ${memory.expiresAt!.toLocal().toString().split(' ').first}'}',
               style: theme.textTheme.bodySmall,
             ),

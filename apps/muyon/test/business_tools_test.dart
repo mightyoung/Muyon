@@ -143,10 +143,7 @@ void main() {
       revisionRef: '999',
     );
     await expectLater(
-      resolveAssistantScope(
-        host,
-        AssistantScope.selectedObjects([stale]),
-      ),
+      resolveAssistantScope(host, AssistantScope.selectedObjects([stale])),
       throwsStateError,
     );
 
@@ -158,9 +155,7 @@ void main() {
     );
     expect(
       afterDelete.objects
-          .singleWhere(
-            (ref) => ref.objectId == documentRef.objectId,
-          )
+          .singleWhere((ref) => ref.objectId == documentRef.objectId)
           .contentDigest,
       'missing',
     );
@@ -181,10 +176,7 @@ void main() {
     );
     expect(get.status, ToolCallStatus.succeeded);
     expect(get.summary, isNotEmpty);
-    expect(
-      get.objectRefs.any((ref) => ref.objectId == supplierId),
-      isTrue,
-    );
+    expect(get.objectRefs.any((ref) => ref.objectId == supplierId), isTrue);
 
     final budget = await host.tools.invoke(
       ToolCallRequest(

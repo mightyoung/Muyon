@@ -25,6 +25,7 @@ Future<void> registerPublicTools(
   };
   void register(
     String id,
+    String description,
     ToolEffect effect,
     Map<String, Object?> fields,
     Future<ToolCallResult> Function(ToolCallContext) handler, {
@@ -38,6 +39,7 @@ Future<void> registerPublicTools(
         toolId: id,
         moduleId: 'knowledge',
         effect: effect,
+        description: description,
         parameterSchema: {
           'type': 'object',
           'properties': fields,
@@ -111,7 +113,13 @@ Future<void> registerPublicTools(
     return token;
   }
 
-  register('knowledge.search', ToolEffect.read, {'query': string}, (
+  register(
+    'knowledge.search',
+    '在本次范围的本地资料中做全文检索，返回标题、页码、文本片段与匹配分数。'
+        '只读取本机索引与原文，不修改数据，也不发送到设备外。',
+    ToolEffect.read,
+    {'query': string},
+    (
     call,
   ) async {
     final docs = selected(call);
@@ -135,7 +143,13 @@ Future<void> registerPublicTools(
       ],
     }, hits.map((h) => h.sourceRef).toSet().toList());
   });
-  register('knowledge.index', ToolEffect.write, docFields, (call) async {
+  register(
+    'knowledge.index',
+    '重建指定资料的本地全文索引，摘要与分页随原文更新。'
+        '会写入本机索引数据；不修改原始文件，也不发送到设备外。',
+    ToolEffect.write,
+    docFields,
+    (call) async {
     final doc = scoped(call);
     await fresh(call, doc);
     await services.knowledge.index(
@@ -144,7 +158,13 @@ Future<void> registerPublicTools(
     );
     return done('索引已更新', {'documentId': doc.id}, [doc.source]);
   });
-  register('knowledge.delete', ToolEffect.write, docFields, (call) async {
+  register(
+    'knowledge.delete',
+    '删除宿主私有资料库中的这份文档副本及其索引。'
+        '会修改本机数据并移除该副本；不影响用户原始文件，也不发送到设备外。',
+    ToolEffect.write,
+    docFields,
+    (call) async {
     final doc = scoped(call);
     await fresh(call, doc);
     await services.knowledge.delete(
@@ -155,6 +175,8 @@ Future<void> registerPublicTools(
   });
   register(
     'knowledge.import',
+    '把指定路径的文件导入宿主私有资料库，并登记来源摘要与来源引用。'
+        '会写入本机资料库；只在本机读取该文件，不发送到设备外。',
     ToolEffect.write,
     {'path': string, 'sourceDigest': digest},
     (call) async {
@@ -180,7 +202,13 @@ Future<void> registerPublicTools(
     },
     scopes: {AssistantScopeKind.global},
   );
-  register('knowledge.embedding_preview', ToolEffect.read, docFields, (
+  register(
+    'knowledge.embedding_preview',
+    '预览这份资料中将要外传用于向量化的文本摘要与大小，便于人工核对。'
+        '只读取本机内容，不发送任何数据。',
+    ToolEffect.read,
+    docFields,
+    (
     call,
   ) async {
     final doc = scoped(call);
@@ -191,6 +219,8 @@ Future<void> registerPublicTools(
   });
   register(
     'embedding.build',
+    '为指定资料建立向量：会把选定的文本摘要发送到已确认的向量模型端点，并把结果写入本机索引。'
+        '需要端点、模型与文本摘要参数。',
     ToolEffect.network,
     {...docFields, ...profileFields, 'textDigest': digest},
     (call) async {
@@ -216,6 +246,8 @@ Future<void> registerPublicTools(
   );
   register(
     'embedding.search',
+    '用向量模型做语义检索：会把查询文本发送到已确认的向量模型端点，'
+        '返回本机资料的匹配片段，不修改业务数据。',
     ToolEffect.network,
     {'query': string, ...profileFields},
     (call) async {
@@ -246,7 +278,13 @@ Future<void> registerPublicTools(
       }, hits.map((h) => h.sourceRef).toSet().toList());
     },
   );
-  register('ocr.install_models', ToolEffect.network, {}, (call) async {
+  register(
+    'ocr.install_models',
+    '从 PaddlePaddle 官方地址下载 OCR 模型，校验固定摘要后安装到本机。'
+        '会联网下载文件并写入本机模型目录，不上传任何本地内容。',
+    ToolEffect.network,
+    {},
+    (call) async {
     if (call.request.destination != 'https://huggingface.co/PaddlePaddle') {
       throw StateError(
         'Model download destination must be official PaddlePaddle',
@@ -259,6 +297,8 @@ Future<void> registerPublicTools(
   });
   register(
     'ocr.recognize',
+    '在本机对指定 PDF 或图片做文字识别，扫描页自动 OCR，返回文本、置信度与坐标。'
+        '只读取本机文件，不联网，也不修改业务数据。',
     ToolEffect.read,
     docFields,
     (call) async {
@@ -317,7 +357,13 @@ Future<void> registerPublicTools(
     available: await services.ocr.available(),
     reason: '需要先安装已固定且校验通过的官方模型；不上传图像',
   );
-  register('transfer.export', ToolEffect.write, {}, (call) async {
+  register(
+    'transfer.export',
+    '把已选资料导出为本机校验包，返回路径与摘要，供随后发送。'
+        '会在本机生成新文件；此步不发送，也不修改原始资料。',
+    ToolEffect.write,
+    {},
+    (call) async {
     final docs = selected(call);
     if (docs.isEmpty) throw StateError('Select documents to export');
     for (final doc in docs) {
@@ -335,6 +381,8 @@ Future<void> registerPublicTools(
   });
   register(
     'transfer.import',
+    '把本机收件区的校验包接收进私有收件区并登记回执。'
+        '会写入本机文件；不自动导入业务数据，需人工接纳，也不联网。',
     ToolEffect.write,
     {'path': string, 'sourceDigest': digest},
     (call) async {
@@ -358,6 +406,8 @@ Future<void> registerPublicTools(
   );
   register(
     'transfer.listen',
+    '开启局域网发现与接收监听，等待已配对设备连接并接收其发送的文件（当前传输为明文）。'
+        '会开放本机网络端口；接收内容需人工导入。',
     ToolEffect.network,
     {'deviceId': string, 'deviceName': string},
     (call) async {
@@ -372,13 +422,21 @@ Future<void> registerPublicTools(
       return done('已开启局域网发现与接收；传输未加密，接收文件等待人工导入');
     },
   );
-  register('transfer.stop', ToolEffect.write, {}, (call) async {
+  register(
+    'transfer.stop',
+    '关闭局域网监听并停止接收，不影响已接收的文件。'
+        '会修改本机网络监听状态。',
+    ToolEffect.write,
+    {},
+    (call) async {
     call.checkBeforeEffect();
     await services.transfer.close();
     return done('局域网监听已关闭');
   });
   register(
     'transfer.send',
+    '把已确认的本机校验包发送给指定已配对设备。'
+        '会通过网络把文件发出本机；收件方仍需人工接纳，业务导入不会自动发生。',
     ToolEffect.network,
     {'path': string, 'sourceDigest': digest, 'peerId': string},
     (call) async {

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/dream/dream_service.dart';
@@ -75,7 +74,7 @@ void main() {
       );
 
   void size(WidgetTester tester, double w) {
-    tester.view.physicalSize = Size(w, 1400);
+    tester.view.physicalSize = Size(w, 3000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -147,7 +146,7 @@ void main() {
       final finder = find.text('停用').at(0);
       await tester.ensureVisible(finder);
       await tester.tap(finder);
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
       await tester.pumpAndSettle();
       final memory = repo.memories(includeDisabled: true).single;
       expect(memory.disabled, isTrue);
@@ -250,6 +249,74 @@ void main() {
     await tapText(tester, '有效');
     expect(find.text('有效一条'), findsOneWidget);
     expect(find.text('过期一条'), findsNothing);
+  });
+
+  group('experiences', () {
+    testWidgets('a candidate is hidden from the assistant until confirmed', (
+      tester,
+    ) async {
+      size(tester, 390);
+      final memoryId = await repo.saveMemory(content: '依据一', source: 's');
+      await repo.saveExperience(
+        content: '先核对单位再比价',
+        source: 'dream',
+        evidence: [
+          {'id': memoryId, 'revision': 1},
+        ],
+      );
+      await tester.pumpWidget(app());
+      expect(find.text('先核对单位再比价', skipOffstage: false), findsOneWidget);
+      expect(
+        find.textContaining('候选（助手暂不使用）', skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(repo.experiencesFor(const AssistantScope.global()), isEmpty);
+      await tapText(tester, '确认');
+      expect(repo.experiencesFor(const AssistantScope.global()), hasLength(1));
+      expect(find.textContaining('已核实', skipOffstage: false), findsOneWidget);
+    });
+
+    testWidgets('retire asks first, then removes it from the assistant', (
+      tester,
+    ) async {
+      size(tester, 390);
+      final id = await repo.saveExperience(
+        content: '旧经验',
+        source: 'dream',
+        evidence: const [],
+      );
+      await repo.verifyExperience(id);
+      await tester.pumpWidget(app());
+      await tapText(tester, '退役');
+      expect(find.textContaining('不能撤销'), findsWidgets);
+      await tapText(tester, '取消');
+      expect(repo.experiencesFor(const AssistantScope.global()), hasLength(1));
+      await tapText(tester, '退役');
+      await tester.tap(find.widgetWithText(FilledButton, '退役'));
+      await tester.pumpAndSettle();
+      expect(repo.experiencesFor(const AssistantScope.global()), isEmpty);
+      expect(find.textContaining('已退役', skipOffstage: false), findsOneWidget);
+    });
+
+    testWidgets('deleting a memory retires experiences built on it', (
+      tester,
+    ) async {
+      size(tester, 390);
+      final memoryId = await repo.saveMemory(content: '源头', source: 's');
+      final id = await repo.saveExperience(
+        content: '派生经验',
+        source: 'dream',
+        evidence: [
+          {'id': memoryId, 'revision': 1},
+        ],
+      );
+      await repo.verifyExperience(id);
+      await tester.pumpWidget(app());
+      await tapText(tester, '删除');
+      expect(find.textContaining('依据它的经验会被退役'), findsOneWidget);
+      await tapText(tester, '永久删除');
+      expect(repo.experience(id)!.status, 'retired');
+    });
   });
 
   group('Dream', () {

@@ -57,42 +57,45 @@ void main() {
     expect(review.conflicts.single, hasLength(2));
   });
 
-  test('service refreshes after repository changes and dispose stops it', () async {
-    final database = ManagedConnection(sqlite3.openInMemory());
-    for (final migration in WorkspaceRepository.schema.migrations) {
-      migration.migrate(database.raw);
-    }
-    final repository = FoundationRepository(database);
-    final service = MemoryReviewService(repository);
-    addTearDown(() async {
+  test(
+    'service refreshes after repository changes and dispose stops it',
+    () async {
+      final database = ManagedConnection(sqlite3.openInMemory());
+      for (final migration in WorkspaceRepository.schema.migrations) {
+        migration.migrate(database.raw);
+      }
+      final repository = FoundationRepository(database);
+      final service = MemoryReviewService(repository);
+      addTearDown(() async {
+        service.dispose();
+        repository.dispose();
+        await database.close();
+      });
+
+      expect(service.current.duplicates, isEmpty);
+      await repository.saveMemory(
+        content: '默认供应商：甲公司',
+        source: '本人手动确认',
+        scope: const AssistantScope.global(),
+      );
+      await repository.saveMemory(
+        content: '默认供应商：甲公司',
+        source: '会议记录',
+        scope: const AssistantScope.global(),
+      );
+      // The service debounces and refreshes after the repository notifies.
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      expect(service.current.duplicates.single, hasLength(2));
+
       service.dispose();
-      repository.dispose();
-      await database.close();
-    });
-
-    expect(service.current.duplicates, isEmpty);
-    await repository.saveMemory(
-      content: '默认供应商：甲公司',
-      source: '本人手动确认',
-      scope: const AssistantScope.global(),
-    );
-    await repository.saveMemory(
-      content: '默认供应商：甲公司',
-      source: '会议记录',
-      scope: const AssistantScope.global(),
-    );
-    // The service debounces and refreshes after the repository notifies.
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    expect(service.current.duplicates.single, hasLength(2));
-
-    service.dispose();
-    await repository.saveMemory(
-      content: '默认供应商：甲公司',
-      source: '第三人',
-      scope: const AssistantScope.global(),
-    );
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    // A disposed service no longer recomputes: the stale proposal stays 2.
-    expect(service.current.duplicates.single, hasLength(2));
-  });
+      await repository.saveMemory(
+        content: '默认供应商：甲公司',
+        source: '第三人',
+        scope: const AssistantScope.global(),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+      // A disposed service no longer recomputes: the stale proposal stays 2.
+      expect(service.current.duplicates.single, hasLength(2));
+    },
+  );
 }

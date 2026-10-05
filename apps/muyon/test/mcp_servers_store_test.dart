@@ -141,7 +141,9 @@ class _FakeMcp {
               'inputSchema': {
                 'type': 'object',
                 'oneOf': [
-                  {'required': ['a']},
+                  {
+                    'required': ['a'],
+                  },
                 ],
               },
             },

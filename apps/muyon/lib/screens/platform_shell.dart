@@ -22,6 +22,7 @@ import 'data_storage_page.dart';
 import 'data_flow_page.dart';
 import 'mcp_servers_page.dart';
 import 'memory_page.dart';
+import 'chat/chat_entry_page.dart';
 import 'storage_status.dart';
 import '../platform/backup_service.dart';
 
@@ -329,6 +330,18 @@ class _PlatformShellState extends State<PlatformShell> {
       '通知与待处理事项',
       () => page('消息中心', notifications()),
       Icons.notifications_outlined,
+    ),
+    card(
+      '设备聊天',
+      '本人已配对设备之间的文字',
+      () => page('设备聊天', ChatEntryPage(host: host)),
+      Icons.forum_outlined,
+    ),
+    card(
+      '记忆与整理',
+      '查看、停用、删除记忆；整理建议与撤回',
+      () => page('记忆', memoryPage()),
+      Icons.psychology_alt_outlined,
     ),
     card(
       '系统设置',

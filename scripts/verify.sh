@@ -6,8 +6,10 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# Pre-existing, documented in packages/inquiry_module/MIGRATION_VALIDATION.md.
-KNOWN_FAILURES=("screenshot_test.dart: desktop settings")
+# Empty: the former `screenshot_test.dart: desktop settings` allow-list entry
+# was removed on 2026-10-05 by updating that golden baseline. See
+# packages/inquiry_module/MIGRATION_VALIDATION.md.
+KNOWN_FAILURES=()
 
 # Local proxies break Flutter's localhost test websocket.
 unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
@@ -40,7 +42,8 @@ for entry in "${suites[@]}"; do
   summary=$(echo "$log" | grep -E "All tests passed|Some tests failed|All other tests passed" | tail -1 | sed -E 's/^[0-9:]+ //')
   unexpected=$(echo "$log" | grep -E "\[E\]$" | sed -E 's/^[0-9:]+ [+~0-9 -]+: //; s/ \[E\]$//' | sort -u | while read -r failure; do
     known=0
-    for k in "${KNOWN_FAILURES[@]}"; do [[ "$failure" == *"$k"* ]] && known=1; done
+    # bash 3.2 (macOS) treats an empty array as unbound under set -u.
+    for k in ${KNOWN_FAILURES[@]+"${KNOWN_FAILURES[@]}"}; do [[ "$failure" == *"$k"* ]] && known=1; done
     [[ $known -eq 0 ]] && echo "$failure"
   done)
   if [[ -z "$summary" ]]; then
