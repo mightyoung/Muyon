@@ -161,9 +161,10 @@ class _AssistantPageState extends State<AssistantPage> {
   }
 
   Future<void> _tool() async {
+    // Internal channels only run inside their module's reviewed flow.
     final available = widget.agent.tools
         .list()
-        .where((t) => t.available)
+        .where((t) => t.available && t.descriptor.modelSelectable)
         .toList();
     if (available.isEmpty) {
       _error('当前没有可用工具');
@@ -434,7 +435,8 @@ class _AssistantPageState extends State<AssistantPage> {
                                         .catchError(_error),
                                     child: const Text('暂停'),
                                   ),
-                                if (!task.terminal && task.stage == 'cancelling')
+                                if (!task.terminal &&
+                                    task.stage == 'cancelling')
                                   const Text('取消中…')
                                 else if (!task.terminal)
                                   TextButton(

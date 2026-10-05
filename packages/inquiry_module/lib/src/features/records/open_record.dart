@@ -46,7 +46,13 @@ Future<void> openRecord(
               backgroundColor: Tokens.canvas,
               title: Text(project?['name'] as String? ?? '项目'),
             ),
-            body: ProjectDetail(state: state, projectId: projectId),
+            // Same breakpoint as the projects page: a phone gets the compact
+            // layout, the desktop table overflows to zero width there.
+            body: ProjectDetail(
+              state: state,
+              projectId: projectId,
+              compact: MediaQuery.sizeOf(context).width < 1000,
+            ),
           ),
         ),
       );
