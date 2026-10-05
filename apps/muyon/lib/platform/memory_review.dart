@@ -17,7 +17,9 @@ class MemoryReviewService {
   }
 
   void _refresh() {
-    current = MemoryReview(repository.memories(includeExpired: true));
+    current = MemoryReview(
+      repository.memories(includeExpired: true, includeDisabled: true),
+    );
   }
 
   void dispose() {
@@ -32,6 +34,10 @@ class MemoryReview {
     final groups = <String, List<PersonalMemory>>{};
     final assertions = <String, List<PersonalMemory>>{};
     for (final memory in memories) {
+      if (memory.disabled) {
+        disabled.add(memory);
+        continue;
+      }
       if (memory.isExpired) {
         expired.add(memory);
         continue;
@@ -58,7 +64,7 @@ class MemoryReview {
       ),
     );
   }
-  final List<PersonalMemory> expired = [];
+  final List<PersonalMemory> expired = [], disabled = [];
   final List<List<PersonalMemory>> duplicates = [], conflicts = [];
   final List<String> summary = [];
 }

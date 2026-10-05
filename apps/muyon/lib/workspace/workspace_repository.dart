@@ -17,8 +17,8 @@ class WorkspaceRepository {
   final ManagedDatabase database;
 
   static final schema = ModuleSchema(
-    version: 5,
-    definitionDigest: 'foundation-v5',
+    version: 6,
+    definitionDigest: 'foundation-v6',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -59,6 +59,73 @@ CREATE TABLE execution_records(id TEXT PRIMARY KEY,state TEXT NOT NULL,payload T
         id: 'outbound-requests',
         definitionDigest: 'foundation-v5',
         migrate: OutboundLedger.createTable,
+      ),
+      ModuleMigration(
+        version: 6,
+        id: 'dream-and-transfer-tasks',
+        definitionDigest: 'foundation-v6',
+        migrate: (db) {
+          db.execute('''
+ALTER TABLE memories ADD COLUMN disabled INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE memories ADD COLUMN kind TEXT NOT NULL DEFAULT 'fact';
+ALTER TABLE memories ADD COLUMN inference INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE memories ADD COLUMN lineage_json TEXT NOT NULL DEFAULT '[]';
+CREATE TABLE experiences(
+  id TEXT PRIMARY KEY,
+  content TEXT NOT NULL,
+  source TEXT NOT NULL,
+  scope_json TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN ('candidate','verified','retired')),
+  evidence_json TEXT NOT NULL,
+  revision INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE TABLE memory_tombstones(
+  id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  revision INTEGER NOT NULL,
+  reason TEXT NOT NULL,
+  scope_json TEXT,
+  content_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE dream_runs(
+  id TEXT PRIMARY KEY,
+  status TEXT NOT NULL CHECK(status IN ('running','done','interrupted','reverted','failed')),
+  inputs_json TEXT NOT NULL,
+  seen_json TEXT NOT NULL,
+  outputs_json TEXT NOT NULL,
+  snapshot_json TEXT NOT NULL,
+  model_profile_id TEXT,
+  outbound_ids_json TEXT NOT NULL,
+  token_cost INTEGER,
+  token_cost_estimated INTEGER NOT NULL DEFAULT 1,
+  elapsed_ms INTEGER,
+  started_at TEXT NOT NULL,
+  finished_at TEXT
+);
+CREATE TABLE dream_proposals(
+  id TEXT PRIMARY KEY,
+  run_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  evidence_json TEXT NOT NULL,
+  payload_json TEXT NOT NULL,
+  status TEXT NOT NULL CHECK(status IN ('proposed','accepted','reverted'))
+);
+CREATE TABLE transfer_tasks(
+  task_id TEXT NOT NULL,
+  input_revision TEXT NOT NULL,
+  idempotency_key TEXT NOT NULL UNIQUE,
+  state TEXT NOT NULL,
+  owner_device_id TEXT,
+  result_seq INTEGER NOT NULL DEFAULT 0,
+  result_json TEXT,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY(task_id, input_revision)
+);
+''');
+        },
       ),
     ],
   );

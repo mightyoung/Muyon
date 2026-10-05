@@ -12,8 +12,8 @@
 | 2.1a | 主对话/专题对话、桌面并排、手机独立页 | 🟡 | T：`responsive_shell_test`、`personal_agent_test` | R 三端 → W3 |
 | 2.1b | 当前页面/选中对象范围、切换项目同步 | 🟡 | T：`foundation_scope_test`、`qa_scope_test` | 切换项目同步的 UI 测试 → B4 |
 | 2.1c | 执行可视（目标/进度/设备/等待/错误/产物），关闭聊天保留 | 🟡 | T：`execution_recovery_test` | 执行面板 → B4 |
-| 2.1d | 有来源记忆：查看/修改/停用/删除/过期 | 🟡 | T：`personal_agent_test` 记忆用例 | 停用、撤回传递派生数据 → D4/B5 |
-| 2.1e | 后台整理/Dream 不扩权 | ❌ | 只读重复候选（`memory_review.dart`） | D4 |
+| 2.1d | 有来源记忆：查看/修改/停用/删除/过期 | 🟡 | T：`personal_agent_test` 记忆用例；`dream_test`（停用后不进助手上下文；删除沿 lineage 传递并挡住同一 id 与已删除经验正文；范围收窄传递；过期与停用默认不返回） | 查看/修改界面 → B5；真实模型整理 M 未测 |
+| 2.1e | 后台整理/Dream 不扩权 | 🟡 | T：`dream_test`（无档案不发网；显式档案才记 `caller=dream`；冲突不能接受；已注册写入工具不被调用，审批与回执表保持空） | 整理界面与由用户发起的运行 → B；启动流程不自动跑 Dream |
 | 2.2a | 研究成果导入/手机阅读/论文/批注/检索/限定问答/引用回跳 | 🟡 | T：research 95 项、`search_test`、`qa_scope_test` | 引用锚 C3，批注 UI B2，R → W3 |
 | 2.2b | 问题/方向/证据/实验/结论/卡/提纲关联，关系图/比较/报告 | 🟡 | T：research 95 项（迁入） | R → W3 |
 | 2.2c | 执行过程、分支、接纳/否定理由、不确定性 | 🟡 | T：research run assessment | W3 链路验收 |
@@ -21,7 +21,7 @@
 | 2.2e | 完整研究包交换（不同本地 ID、分叉、重复导入） | 🟡 | T：`research_package_test` | 往返/分叉矩阵 → C4 |
 | 2.3 | 询价完整业务 + 受控只读/计算工具 | 🟡 | T：supplier 467 + 3 跳过、inquiry 历史 309（见下方 W0 记录） | 写操作工具化 C5，存储接管 C1 |
 | 2.4 | 原型业务 + 受限 WebView | ❌ | 契约 `RestrictedWebViewSpec`（T：`contract_v1_test`） | B3 |
-| 2.5 | 设备互传、一对一聊天、五态独立 | 🟡 | T：`lan_trust_test`、`lan_security_test`、`transfer_states_test`（配对后 TLS 证书固定 + 发送方签名；送达/落盘/导入/已读/接纳五态独立；研究包接纳后只导入一次）；D：[威胁模型](lan-threat-model.md) | 真实双设备 R；TLS 最低版本显式 1.3、一对一文字聊天界面 → D；在线直连不可达时的状态展示 |
+| 2.5 | 设备互传、一对一聊天、五态独立 | 🟡 | T：`lan_trust_test`、`lan_security_test`、`transfer_states_test`（配对后 TLS 证书固定 + 发送方签名；`f1c27be` 起两端 `minimumTlsProtocolVersion` 为 TLS 1.3，重启后 5 分钟窗口内的消息 id 持久拒绝；送达/落盘/导入/已读/接纳五态独立；研究包接纳后只导入一次）；D：[威胁模型](lan-threat-model.md) | 真实双设备 R；一对一文字聊天界面 → B |
 
 ## 三～六、设计与架构
 
@@ -42,13 +42,13 @@
 
 | # | 需求 | 状态 | 已有证据 | 缺口 |
 |---|---|---|---|---|
-| 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`（含效应点后取消/失败记为 interrupted）、`execution_recovery_test`、`outbound_ledger_test`、`mcp_adapter_test`；D：[调用路径审计](invocation-path-audit.md) | 审计缺口 G1–G5 归 C/D；MCP 服务器配置与“数据去向”界面 → B；Jev/Laya 评估 D6 |
-| 8 | 记忆/经验/Dream、撤回传递 | ❌/🟡 | 见 2.1d/e | D4 |
+| 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`（含效应点后取消/失败记为 interrupted）、`execution_recovery_test`、`outbound_ledger_test`、`mcp_adapter_test`；D：[调用路径审计](invocation-path-audit.md)、[工具选择评测](tool-selection-eval-2026-10-05.md)（离线规则 top-1 8/11，写入/外发误选 0，未切换生产策略）、[Jev 证据审查](jev-evidence-review-2026-10-05.md) | 审计缺口 G1–G5 归 C/D；MCP 服务器配置与“数据去向”界面 → B；Jev API 与 Laya 均未实测（M） |
+| 8 | 记忆/经验/Dream、撤回传递 | 🟡 | 见 2.1d/e | 界面 → B；模型整理 M 未测 |
 | 9a | 模型端点显式、凭据安全存储、无隐式回退 | 🟡 | T：`model_gateway_test`、`profile_routing_test` | M 真实端点 → W3 |
 | 9b | PDF 文字层优先 + PaddleOCR | 🟡 | M：ONNX 参考推理（`public_services_validation.md`） | Flutter 原生 R 三端 → W3 |
-| 9c | 关键词/全文/向量/组合检索、中文短词 | 🟡 | T：FTS5/向量；`retrieval_eval_test`（[评测报告](retrieval-eval-2026-10-04.md)：18 篇合成语料，结论保持 cjk-bigram + 单字扫描） | 语料过小（recall@10 全部 1.0，无区分度）；向量与真实论文 M 未测 → 待用户提供端点与论文后重测 |
+| 9c | 关键词/全文/向量/组合检索、中文短词 | 🟡 | T：FTS5/向量；`retrieval_eval_test`（[300 篇评测](retrieval-eval-2026-10-05.md)：current recall@10 0.961，bigram 0.830，「泵」recall@5 为 0.714 对 0.000；结论仍保持 cjk-bigram + 单字扫描。18 篇历史结果仍在 [retrieval-eval-2026-10-04.md](retrieval-eval-2026-10-04.md)，普通测试不再改写报告） | 向量与真实论文 M 未测 → 待用户提供端点与论文后重测 |
 | 9d | 限定资料问答：定位、断言支持、应答/拒答 | 🟡 | T：引用校验 | M 评测 → W3 |
-| 10 | 发现/配对/授权/接收/导入分离，加密认证 | 🟡 | T：同 2.5；发现不授予信任、未配对/已撤销拒收、明文握手失败 | TLS 1.3 下限未显式设置（默认允许 1.2）；nonce 防重放仅内存 4096 条；在线任务调度 D5；双设备 R |
+| 10 | 发现/配对/授权/接收/导入分离，加密认证 | 🟡 | T：同 2.5；发现不授予信任、未配对/已撤销拒收、明文握手失败；`task_coordinator_test`（重复 offer、双方接受只执行一次、中途重启不二次执行、对端不可达为 unknown、较新结果保留；配对 TLS 投递任务信封不执行） | 双设备 R。内存 nonce 上限仍是 4096，另有重启后的 seen 文件与 5 分钟签名时间窗。启动流程尚未路由任务信封；业务执行仍属 C |
 | 11 | 统一设计系统（Folio DESIGN.md）、窄屏/大字体/键盘 | 🟡 | D：[DESIGN.md](../design/DESIGN.md)；T：320–1280 宽、200% 字号 | 宿主/科研主题统一 → B1 |
 | 12 | 科研完整链、失败矩阵、三端构建/实机 | ❌ | B：Android APK（开发签名，历史） | W3；需用户提供 macOS(Xcode)/Windows/Android 设备 |
 
@@ -83,3 +83,15 @@
 - D3 `afe96e7`：检索评测台与报告。
 - 合并验证（`scripts/verify.sh`）：module_api 17、research 95、supplier_core 475 + 3 跳过、host 117 + 1 条件跳过、inquiry 310 + 1 跳过 + 已知 golden 差异；analyze 全部无问题。
 - 审查意见（已转 D）：TLS 最低版本未显式 1.3；评测语料过小；双设备实机未验证。
+
+## W2-D 自验收（2026-10-05，`feat/d-transfer`，合入前）
+
+对照上表 D 负责的行。没有真实第二台设备，没有真实嵌入模型，没有 Jev 密钥，所以这些行保持 🟡，不标 ✅。T 不代替 R 或 M。
+
+- R1 / R3：`f1c27be`。TLS 下限与持久防重放见 2.5、10。Dart 没有可移植的「仅 TLS 1.2」握手，测试锁的是共享 `lanTlsContext()`。
+- R2 / R4：300 篇合成语料的报告只在 `MUYON_WRITE_EVAL_REPORT=1` 时写回。无该变量的 `retrieval_eval_test` 已通过，且不改写 `retrieval-eval-2026-10-05.md`。向量行保持 `not measured — needs real model`。
+- D4：主库迁移 v6（`dream-and-transfer-tasks`，只追加，不改旧迁移）。`DreamService` 与 `dream_test` 6 项通过。`personal_agent.dart` 改为经 `memoriesFor` / `experiencesFor` 取上下文；`personal_agent_test` 与 `foundation_integration_test` 共 13 项通过。
+- D5：`TaskCoordinator` 与 `task_coordinator_test` 3 项通过，含一次配对 TLS 投递。接收不执行。启动流程未接线。
+- D6：离线规则评测见工具选择报告。Laya 未安装，记 not measured。Jev 只写了证据审查，未调用 API。
+- 同一天 `origin/develop` 的 `4925b99` 是给 B、C 的审查意见，没有新的 D 任务，已合入。
+- 门禁 `scripts/verify.sh` 退出码 0：analyze 五个包无问题。module_api 17，research 95，supplier_core 478 + 3 跳过，host 131 + 1 条件跳过，inquiry 310 + 1 跳过，另有 1 个已知 golden（脚本只放行 `screenshot_test.dart: desktop settings`）。普通测试没有改写评测报告。

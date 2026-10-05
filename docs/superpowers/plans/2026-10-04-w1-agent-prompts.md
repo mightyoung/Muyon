@@ -416,3 +416,30 @@ Notes:
 - Suppliers have no project; A changed the projection so project-less objects are now catalogued under `ProjectionService.globalProject` (`''`). No change needed on your side.
 - Commit the in-progress research work (C2 change log, `ResearchSession.objectPage`, G1-C standalone-only LAN) as small commits with a short body each, run `scripts/verify.sh`, push, then continue with C3 (citation anchors), C4 (research package round trip), G2 and G3.
 - Before every push: `scripts/verify.sh` green and a clean working tree.
+
+---
+
+# 追加：D4–D6 合入后的遗留（给 Grok）
+
+---8<--- 追加 · D（Grok）· D4–D6 遗留 ---
+
+Your R1–R4 and D4–D6 work was reviewed and merged into `develop` at `df76e83` (full `scripts/verify.sh` green: supplier_core 478 + 3 skipped, host 151 + 1 conditional skip; tests no longer rewrite tracked files). The Jev evidence review is excellent — its stop conditions are exactly what we need. Your ledger edits were accurate and appropriately conservative.
+
+Sync first: `git fetch origin && git merge --ff-only origin/develop`. Keep working on `feat/d-transfer`; push only there; A merges. The machine is shared and often heavily loaded: never run Laya, a build and `flutter test` at the same time; cap Laya CPU threads (e.g. `LAYA_THREADS=4`).
+
+Three follow-ups:
+
+**D-R5 — Wire cross-device task coordination into the app.** Your ledger says `TaskCoordinator` is not wired into startup, so users cannot use it yet. Create it in host startup next to `TransferService` (minimal `bootstrap.dart` change, listed in your report), route incoming offers/status queries/results from the paired transport to it, and show per-task ownership and state (offered / accepted-by / running / done / unreachable) on the devices page you own. Receiving an offer must still never execute anything: execution only after local authorization through an injected executor (research execution itself remains C's). Add a host-level test: two hosts over loopback, one offer, both sides try to accept, exactly one runs; the sender sees "unreachable" when the peer is closed, never "failed" or "done".
+
+**D-R6 — Actually measure Laya on this Mac.** The kickoff asked for a local run; the report says "not installed". Do it now, outside the Flutter app:
+- Create a Python ≥3.10 virtual environment **outside the repository** (e.g. under `~/.cache/muyon-eval/`), `pip install "laya[serve]"` (or `laya[mcp]` and reach it through our `McpAdapter`), and run it on loopback only. Never commit the environment, checkpoints or downloaded files; never add Python, PyTorch or Laya to Flutter dependencies.
+- Evaluate tool selection as one `choice` over the available tool ids plus `"none"`, with abstention below a threshold you calibrate on part of the task set and test on the rest. Record the exact package version, checkpoint names and revisions, thread count and CPU latency (p50/p95) on this machine.
+- Check the README's stated weaknesses that matter here (label bias, behaviour on Chinese and mixed Chinese–English prompts, many-label shortlisting).
+- Record what on-device use would take: ONNX export size, whether our existing `flutter_onnxruntime` can run it, the tokenizer it needs, and CPU latency of the ONNX model on this Mac. Findings only, no app integration.
+- Only the checked-in synthetic task set is sent to Laya. If installation or the model download fails, report the exact error and keep "not measured".
+
+**D-R7 — A task set that can tell strategies apart.** 11 prompts over 20 of the registered tools are too few. Grow the checked-in, redistributable task set to at least 100 labelled prompts covering every tool actually registered at startup (knowledge, embedding, OCR, transfer, research and all inquiry read/compute tools), with explicit "none" cases, Chinese, mixed Chinese–English, paraphrases, ambiguous requests, wrong/misleading tool descriptions, and adversarial prompts (asking the assistant to approve itself or switch to a write/external tool). Report metrics per category, not only totals, plus calibration (accuracy vs. confidence buckets) for any probabilistic strategy. Re-run the offline rule, Laya (D-R6), and the LLM selector only if a real endpoint is configured; Jev stays "evidence review only" until the user provides a key. Regenerate `docs/implementation/tool-selection-eval-<date>.md` with `MUYON_WRITE_EVAL_REPORT=1`; ordinary test runs must not rewrite it.
+
+Also list the public API B needs to build the memory / experience / Dream review UI (method names, states, what "revert run" restores), so A can hand it to B.
+
+Report in the same final-report format: commits; test counts per package; evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"); changes outside owned files; new dependencies (none expected in the app); contract requests; known gaps and risks.
