@@ -18,6 +18,8 @@ void main() {
     addTearDown(() async {
       await started.stop();
       dir.deleteSync(recursive: true);
+      final seen = File('${dir.path}.seen-pushes.json');
+      if (seen.existsSync()) seen.deleteSync();
     });
     return started;
   }
@@ -186,6 +188,101 @@ void main() {
       expect(File(received.single).readAsBytesSync(), [4, 5, 6]);
     },
   );
+
+  test('tls context refuses versions below 1.3', () {
+    final context = lanTlsContext();
+    expect(context.minimumTlsProtocolVersion, TlsProtocolVersion.tls1_3);
+    // Dart exposes no maximum protocol version, so a TLS 1.2-only handshake
+    // cannot be produced portably. The listener and the client both use
+    // lanTlsContext, which is what this assertion locks.
+  });
+
+  test('a push signed outside the accept window is refused', () async {
+    final alice = await node('alice');
+    final bob = await node('bob');
+    await pair(alice, bob);
+    final seen = await alice.probe('127.0.0.1', port: bob.httpPort);
+    final file = File('${alice.inbox.path}/stale')..writeAsBytesSync([1]);
+    final stale =
+        DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000 -
+        pushAcceptWindow.inSeconds -
+        30;
+    await expectLater(
+      alice.push(
+        seen,
+        file.path,
+        messageId: 'old',
+        nonce: 'old',
+        sentAtUnix: stale,
+      ),
+      throwsA(isA<LanException>()),
+    );
+    expect(bob.inbox.listSync().where((e) => e is File), isEmpty);
+  });
+
+  test('replay after restart is refused from the persisted window', () async {
+    final aliceStore = MemoryLanSecretStore();
+    final bobStore = MemoryLanSecretStore();
+    final aliceDir = Directory.systemTemp.createTempSync('lan-replay-a-');
+    final bobDir = Directory.systemTemp.createTempSync('lan-replay-b-');
+    final received = <String>[];
+    Future<LanNode> startBob() => LanNode.start(
+      id: 'bob',
+      name: 'bob',
+      inbox: bobDir,
+      onPush: (push) => received.add(push.path),
+      discoveryPort: 0,
+      httpPort: 0,
+      secrets: bobStore,
+    );
+    final alice = await LanNode.start(
+      id: 'alice',
+      name: 'alice',
+      inbox: aliceDir,
+      onPush: (_) {},
+      discoveryPort: 0,
+      httpPort: 0,
+      secrets: aliceStore,
+    );
+    var bob = await startBob();
+    addTearDown(() async {
+      await alice.stop();
+      await bob.stop();
+      aliceDir.deleteSync(recursive: true);
+      bobDir.deleteSync(recursive: true);
+      for (final path in [
+        '${aliceDir.path}.seen-pushes.json',
+        '${bobDir.path}.seen-pushes.json',
+      ]) {
+        final file = File(path);
+        if (file.existsSync()) file.deleteSync();
+      }
+    });
+    await pair(alice, bob);
+    final first = await alice.probe('127.0.0.1', port: bob.httpPort);
+    final file = File('${aliceDir.path}/once')..writeAsBytesSync([7, 8]);
+    await alice.push(
+      first,
+      file.path,
+      messageId: 'msg-restart',
+      nonce: 'nonce-restart',
+    );
+    expect(received, hasLength(1));
+    await bob.stop();
+    bob = await startBob();
+    final again = await alice.probe('127.0.0.1', port: bob.httpPort);
+    await expectLater(
+      alice.push(
+        again,
+        file.path,
+        messageId: 'msg-restart',
+        nonce: 'nonce-restart',
+      ),
+      throwsA(isA<LanException>()),
+    );
+    expect(received, hasLength(1));
+    expect(bobDir.listSync().whereType<File>(), hasLength(1));
+  });
 
   test('plaintext is not accepted', () async {
     final bob = await node('bob');

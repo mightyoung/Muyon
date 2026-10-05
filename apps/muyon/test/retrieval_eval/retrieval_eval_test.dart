@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -8,8 +9,22 @@ import 'package:sqlite3/sqlite3.dart';
 void main() {
   test('retrieval eval measures lexical strategies and writes the report', () {
     final root = _repoRoot();
-    final corpus = _corpus();
-    final queries = _queries();
+    final reportFile = File(
+      p.join(
+        root.path,
+        'docs',
+        'implementation',
+        'retrieval-eval-2026-10-05.md',
+      ),
+    );
+    final beforeReport = reportFile.existsSync()
+        ? reportFile.readAsStringSync()
+        : null;
+    final external = _externalCorpus(
+      Platform.environment['MUYON_EVAL_CORPUS_DIR'],
+    );
+    final corpus = external?.docs ?? _corpus();
+    final queries = external?.queries ?? _queries();
     final out = Directory.systemTemp.createTempSync('retrieval-eval-');
     try {
       final current = _measure(
@@ -44,32 +59,88 @@ void main() {
         expect(metric.buildMs, greaterThanOrEqualTo(0));
         expect(metric.queryMs, greaterThanOrEqualTo(0));
       }
-      expect(current.perQuery['泵'], greaterThan(bigram.perQuery['泵']!));
-      expect(current.recallAt10, greaterThan(bigram.recallAt10));
+      if (external == null) {
+        expect(corpus, hasLength(greaterThanOrEqualTo(300)));
+        expect(current.perQuery['泵'], greaterThan(bigram.perQuery['泵']!));
+        expect(current.recallAt10, greaterThan(bigram.recallAt10));
+        expect(current.recallAt10, lessThan(1));
+      }
       final endpoint = Platform.environment['MUYON_EMBEDDING_ENDPOINT'];
-      expect(endpoint, anyOf(isNull, isEmpty));
+      final vector = endpoint == null || endpoint.isEmpty
+          ? 'not measured — needs real model'
+          : 'not measured — endpoint is set, but this run does not send document text';
       final recommendation = _recommend(metrics);
       final report = _report(
         metrics: metrics,
         recommendation: recommendation,
-        vector: 'not measured — needs real model',
+        vector: vector,
+        documents: corpus.length,
+        corpusLabel: external == null ? '可再分发的合成语料' : '外部目录中的语料（正文不写入本报告）',
       );
-      final file = File(
-        p.join(
-          root.path,
-          'docs',
-          'implementation',
-          'retrieval-eval-2026-10-04.md',
-        ),
-      );
-      file.writeAsStringSync(report);
-      final written = file.readAsStringSync();
-      expect(written, contains(recommendation));
-      expect(written, contains('not measured — needs real model'));
-      expect(written, contains(current.recallAt5.toStringAsFixed(3)));
-      expect(written, contains('cjk-bigram-latin-v1'));
+      expect(report, contains(recommendation));
+      expect(report, contains(vector));
+      expect(report, contains(current.recallAt5.toStringAsFixed(3)));
+      expect(report, contains('cjk-bigram-latin-v1'));
+      expect(report, contains('MUYON_WRITE_EVAL_REPORT=1'));
+      if (Platform.environment['MUYON_WRITE_EVAL_REPORT'] == '1') {
+        reportFile.writeAsStringSync(report);
+        expect(reportFile.readAsStringSync(), report);
+      } else {
+        final after = reportFile.existsSync()
+            ? reportFile.readAsStringSync()
+            : null;
+        expect(after, beforeReport);
+      }
     } finally {
       out.deleteSync(recursive: true);
+    }
+  });
+
+  test('external corpus is counted and its text stays out of the report', () {
+    final dir = Directory.systemTemp.createTempSync('eval-corpus-');
+    try {
+      expect(() => _externalCorpus(dir.path), throwsStateError);
+      Directory(p.join(dir.path, 'docs')).createSync();
+      const secret = '机密正文不应出现在报告XYZ';
+      File(p.join(dir.path, 'docs', 'paper.txt')).writeAsStringSync(secret);
+      File(p.join(dir.path, 'queries.json')).writeAsStringSync(
+        jsonEncode([
+          {
+            'text': '查询甲',
+            'relevant': ['paper'],
+          },
+        ]),
+      );
+      final loaded = _externalCorpus(dir.path)!;
+      expect(loaded.docs.single.id, 'paper');
+      expect(loaded.queries.single.relevant, {'paper'});
+      const metric = _Metric(
+        recallAt1: 0.0,
+        recallAt5: 0.0,
+        recallAt10: 0.0,
+        mrr: 0.0,
+        indexBytes: 1,
+        buildMs: 0.0,
+        queryMs: 0.0,
+        perQuery: {'查询甲': 0.0},
+        rankings: {},
+      );
+      final report = _report(
+        metrics: {
+          'current': metric,
+          'fts-bigram-only': metric,
+          'unigram': metric,
+          'hybrid': metric,
+        },
+        recommendation: '保持',
+        vector: 'not measured — needs real model',
+        documents: loaded.docs.length,
+        corpusLabel: '外部目录中的语料（正文不写入本报告）',
+      );
+      expect(report, isNot(contains(secret)));
+      expect(report, contains('共 1 篇'));
+    } finally {
+      dir.deleteSync(recursive: true);
     }
   });
 }
@@ -123,28 +194,7 @@ class _Metric {
   final Map<String, List<String>> rankings;
 }
 
-List<_Doc> _corpus() => const [
-  _Doc('pump-zh', '离心泵的材料和密封成本需要核对'),
-  _Doc('pump-en', 'centrifugal pump material and seal cost'),
-  _Doc('pump-mix', '离心泵 ISO9001 质量手册 Q=100m3/h'),
-  _Doc('valve', '闸阀采购清单，不含泵'),
-  _Doc('cost', '项目成本与报价表'),
-  _Doc('quality', '质量检查记录'),
-  _Doc('near-a', '数据分析显示模型 Evidence recall 稳定'),
-  _Doc('near-b', '数据分析显示模型 Evidence recall 基本稳定'),
-  _Doc('short-pump', '泵'),
-  _Doc('alpha', 'supplier alpha 材料成本'),
-  _Doc('walk', '今日天气晴朗 suitable for a walk'),
-  _Doc('bm25', 'BM25 检索对中文短词 cost 不总是可靠'),
-  _Doc('two-char', '成本核算单'),
-  _Doc('one-long', '这台设备是泵'),
-  _Doc('english', 'The retrieval benchmark uses labelled queries'),
-  _Doc('acme', '供应商 ACME-泵业 联系人'),
-  _Doc('secret', '研究另一份未选资料 secret token'),
-  _Doc('pump-again', '离心泵的材料和密封成本需要再次核对'),
-];
-
-List<_Query> _queries() => const [
+List<_Query> _queries() => [
   _Query('泵', {
     'pump-zh',
     'pump-mix',
@@ -165,7 +215,96 @@ List<_Query> _queries() => const [
   _Query('闸阀', {'valve'}),
   _Query('walk', {'walk'}),
   _Query('Q=100', {'pump-mix'}),
+  _Query('汞', {
+    for (var i = 0; i < 12; i++) 'hg-${i.toString().padLeft(2, '0')}',
+  }),
+  _Query('kappa9', {
+    for (var i = 0; i < 16; i++) 'kappa-${i.toString().padLeft(2, '0')}',
+  }),
 ];
+
+List<_Doc> _corpus() {
+  final docs = <_Doc>[
+    const _Doc('pump-zh', '离心泵的材料和密封成本需要核对'),
+    const _Doc('pump-en', 'centrifugal pump material and seal cost'),
+    const _Doc('pump-mix', '离心泵 ISO9001 质量手册 Q=100m3/h'),
+    const _Doc('valve', '闸阀采购清单，不含泵'),
+    const _Doc('cost', '项目成本与报价表'),
+    const _Doc('quality', '质量检查记录'),
+    const _Doc('near-a', '数据分析显示模型 Evidence recall 稳定'),
+    const _Doc('near-b', '数据分析显示模型 Evidence recall 基本稳定'),
+    const _Doc('short-pump', '泵'),
+    const _Doc('alpha', 'supplier alpha 材料成本'),
+    const _Doc('walk', '今日天气晴朗 suitable for a walk'),
+    const _Doc('bm25', 'BM25 检索对中文短词 cost 不总是可靠'),
+    const _Doc('two-char', '成本核算单'),
+    const _Doc('one-long', '这台设备是泵'),
+    const _Doc('english', 'The retrieval benchmark uses labelled queries'),
+    const _Doc('acme', '供应商 ACME-泵业 联系人'),
+    const _Doc('secret', '研究另一份未选资料 secret token'),
+    const _Doc('pump-again', '离心泵的材料和密封成本需要再次核对'),
+  ];
+  for (var i = 0; i < 12; i++) {
+    final id = 'hg-${i.toString().padLeft(2, '0')}';
+    docs.add(_Doc(id, '长篇设备说明第$i节。${'管道法兰垫片螺栓库存备注。' * 40}本段出现一次汞。收尾只重复垫片与螺栓。'));
+  }
+  for (var i = 0; i < 16; i++) {
+    docs.add(
+      _Doc(
+        'kappa-${i.toString().padLeft(2, '0')}',
+        'kappa9 规格说明 版本$i 仅编号不同，其余句子保持原样。',
+      ),
+    );
+  }
+  for (var i = 0; i < 254; i++) {
+    docs.add(
+      _Doc(
+        'cat-${i.toString().padLeft(3, '0')}',
+        '目录条目$i：阀门垫片与法兰螺栓的库存备注，编号 CAT$i。邻近条目只改一个编号。',
+      ),
+    );
+  }
+  return docs;
+}
+
+class _ExternalCorpus {
+  const _ExternalCorpus(this.docs, this.queries);
+  final List<_Doc> docs;
+  final List<_Query> queries;
+}
+
+/// `queries.json` is a list of `{text, relevant}`. Each id is a `docs/<id>.txt`
+/// file. The report stores counts only, never these bytes.
+_ExternalCorpus? _externalCorpus(String? dir) {
+  if (dir == null || dir.isEmpty) return null;
+  final root = Directory(dir);
+  final spec = File(p.join(root.path, 'queries.json'));
+  if (!spec.existsSync()) {
+    throw StateError('MUYON_EVAL_CORPUS_DIR has no queries.json');
+  }
+  final decoded = jsonDecode(spec.readAsStringSync());
+  if (decoded is! List) throw StateError('queries.json must be a list');
+  final queries = <_Query>[];
+  for (final item in decoded) {
+    final map = Map<String, Object?>.from(item as Map);
+    queries.add(
+      _Query(
+        map['text'] as String,
+        (map['relevant'] as List).cast<String>().toSet(),
+      ),
+    );
+  }
+  final docs = <_Doc>[];
+  final folder = Directory(p.join(root.path, 'docs'));
+  for (final entity in folder.listSync()) {
+    if (entity is! File || !entity.path.endsWith('.txt')) continue;
+    docs.add(
+      _Doc(p.basenameWithoutExtension(entity.path), entity.readAsStringSync()),
+    );
+  }
+  if (docs.isEmpty) throw StateError('external corpus has no documents');
+  return _ExternalCorpus(docs, queries);
+}
 
 List<String> _unigramTokens(String text) {
   final values = <String>[];
@@ -389,23 +528,36 @@ String _report({
   required Map<String, _Metric> metrics,
   required String recommendation,
   required String vector,
+  required int documents,
+  required String corpusLabel,
 }) {
-  final pump = [
-    for (final name in ['current', 'fts-bigram-only', 'unigram', 'hybrid'])
-      '$name ${metrics[name]!.perQuery['泵']!.toStringAsFixed(3)}',
-  ].join('；');
+  final pumpRecall = metrics['current']!.perQuery['泵'];
+  final pump = pumpRecall == null
+      ? '本语料没有查询「泵」'
+      : [
+          for (final name in [
+            'current',
+            'fts-bigram-only',
+            'unigram',
+            'hybrid',
+          ])
+            '$name ${metrics[name]!.perQuery['泵']!.toStringAsFixed(3)}',
+        ].join('；');
   return '''
-# 检索评测 2026-10-04
+# 检索评测 2026-10-05
 
-数字来自 `apps/muyon/test/retrieval_eval/retrieval_eval_test.dart` 这一次运行。语料是可再分发的合成中文、英文和中英混合短文，含 1–2 字中文、中英混排和近重复。没有使用外部模型。
+数字来自 `apps/muyon/test/retrieval_eval/retrieval_eval_test.dart` 这一次运行，共 $documents 篇。语料：$corpusLabel。`retrieval-eval-2026-10-04.md` 是 18 篇短文的历史结果，本文件不改写它。文档正文不会写入本报告。
 
-重跑：
+重跑并写回本文件。普通 `flutter test` 不带 `MUYON_WRITE_EVAL_REPORT=1`，因此不会改这个文件：
 
 ```bash
 env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u all_proxy \\
   NO_PROXY=localhost,127.0.0.1,::1 \\
+  MUYON_WRITE_EVAL_REPORT=1 \\
   flutter test --no-pub --timeout 120s apps/muyon/test/retrieval_eval/retrieval_eval_test.dart
 ```
+
+可选：`MUYON_EVAL_CORPUS_DIR` 指向含 `queries.json` 与 `docs/<id>.txt` 的本地目录。`MUYON_EMBEDDING_ENDPOINT` 只改变下面的向量说明；这次运行不发送文档正文。
 
 | 策略 | recall@1 | recall@5 | recall@10 | MRR | 索引字节 | 建索引 ms | 查询均值 ms |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -419,8 +571,8 @@ env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u al
 
 $recommendation
 
-这 18 篇短文上的建索引时间受 SQLite 启动影响，不能外推到大库。策略取舍以 recall、MRR 和索引字节为准。
+这 $documents 篇上的建索引时间受 SQLite 启动和机器负载影响，不能外推到用户的真实文库。策略取舍以 recall、MRR 和索引字节为准。
 
-向量检索没有测量：环境变量 `MUYON_EMBEDDING_ENDPOINT` 未配置，不能用真实模型冒充数字。
+向量：$vector
 ''';
 }

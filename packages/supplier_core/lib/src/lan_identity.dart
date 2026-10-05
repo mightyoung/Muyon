@@ -146,15 +146,16 @@ class DeviceIdentity {
   }
 }
 
-/// Bytes the sender signs. A different body, length, nonce or sender fails.
+/// Bytes the sender signs. A different body, length, time, nonce or sender fails.
 List<int> pushBinding({
   required String fingerprint,
   required String nonce,
   required String messageId,
+  required int sentAtUnix,
   required int length,
   required String bodyHash,
 }) => utf8.encode(
-  'muyon-push-v1\n$fingerprint\n$nonce\n$messageId\n$length\n$bodyHash',
+  'muyon-push-v2\n$fingerprint\n$nonce\n$messageId\n$sentAtUnix\n$length\n$bodyHash',
 );
 
 String randomToken() {

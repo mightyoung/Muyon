@@ -13,6 +13,16 @@ const lanDiscoveryPort = 47810, lanHttpPort = 47811;
 /// Largest push accepted.
 const maxPushBytes = 300 * 1024 * 1024;
 
+/// Signed push time must fall inside this window. Older signatures are
+/// refused even if the process that first saw them has exited.
+const pushAcceptWindow = Duration(minutes: 5);
+
+/// Listener and client contexts. Dart exposes a minimum version but no
+/// portable maximum, so a TLS 1.2-only handshake cannot be staged here.
+SecurityContext lanTlsContext() =>
+    SecurityContext(withTrustedRoots: false)
+      ..minimumTlsProtocolVersion = TlsProtocolVersion.tls1_3;
+
 /// A device is listed while its announcements keep arriving.
 const _announceEvery = Duration(seconds: 3),
     _forgetAfter = Duration(seconds: 10);
@@ -173,6 +183,7 @@ class LanNode {
     );
     node._timer = Timer.periodic(_announceEvery, (_) => node._tick());
     unawaited(node._tick());
+    node._loadSeenPushes();
     return node;
   }
 
@@ -237,7 +248,7 @@ class LanNode {
   }
 
   static Future<HttpServer> _bind(DeviceIdentity identity, int port) {
-    final context = SecurityContext(withTrustedRoots: false)
+    final context = lanTlsContext()
       ..useCertificateChainBytes(utf8.encode(identity.certificatePem))
       ..usePrivateKeyBytes(utf8.encode(identity.privateKeyPem));
     return HttpServer.bindSecure(InternetAddress.anyIPv4, port, context);
@@ -498,27 +509,69 @@ class LanNode {
     }
   }
 
+  File get _seenPushFile => File('${inbox.path}.seen-pushes.json');
+  final _persistedMessages = <String, int>{};
+
+  void _loadSeenPushes() {
+    final file = _seenPushFile;
+    if (!file.existsSync()) return;
+    Object? decoded;
+    try {
+      decoded = jsonDecode(file.readAsStringSync());
+    } on FormatException {
+      return;
+    } on FileSystemException {
+      return;
+    }
+    if (decoded is! Map) return;
+    final now = _unixNow();
+    for (final entry in decoded.entries) {
+      final at = entry.value;
+      if (entry.key.isEmpty || at is! int) continue;
+      if ((now - at).abs() > pushAcceptWindow.inSeconds) continue;
+      _persistedMessages[entry.key] = at;
+    }
+  }
+
+  void _rememberPersisted(String messageId, int sentAtUnix) {
+    final now = _unixNow();
+    _persistedMessages.removeWhere(
+      (_, at) => (now - at).abs() > pushAcceptWindow.inSeconds,
+    );
+    _persistedMessages[messageId] = sentAtUnix;
+    _seenPushFile.writeAsStringSync(
+      jsonEncode(_persistedMessages),
+      flush: true,
+    );
+  }
+
   _PushAuth? _authorizePush(HttpRequest req) {
     final fingerprint = req.headers.value('x-muyon-fp') ?? '';
     final nonce = req.headers.value('x-muyon-nonce') ?? '';
     final messageId = req.headers.value('x-muyon-msg') ?? '';
     final signature = req.headers.value('x-muyon-sig') ?? '';
+    final sentAtUnix = int.tryParse(req.headers.value('x-muyon-ts') ?? '');
+    final now = _unixNow();
     if (!isPaired(fingerprint) ||
         nonce.isEmpty ||
         messageId.isEmpty ||
-        signature.isEmpty) {
+        signature.isEmpty ||
+        sentAtUnix == null ||
+        (now - sentAtUnix).abs() > pushAcceptWindow.inSeconds) {
       req.response.statusCode = HttpStatus.unauthorized;
       req.response.persistentConnection = false;
       return null;
     }
-    if (_usedNonceSet.contains(nonce) || _seenMessageSet.contains(messageId)) {
+    if (_usedNonceSet.contains(nonce) ||
+        _seenMessageSet.contains(messageId) ||
+        _persistedMessages.containsKey(messageId)) {
       req.response.statusCode = HttpStatus.conflict;
       req.response.persistentConnection = false;
       return null;
     }
     _remember(_usedNonces, _usedNonceSet, nonce);
     _remember(_seenMessages, _seenMessageSet, messageId);
-    return _PushAuth(fingerprint, nonce, messageId, signature);
+    return _PushAuth(fingerprint, nonce, messageId, sentAtUnix, signature);
   }
 
   void _remember(List<String> order, Set<String> seen, String value) {
@@ -594,12 +647,14 @@ class LanNode {
               fingerprint: auth.fingerprint,
               nonce: auth.nonce,
               messageId: auth.messageId,
+              sentAtUnix: auth.sentAtUnix,
               length: length,
               bodyHash: bodyHash,
             ),
             auth.signature,
           );
       if (!proofOk) throw const FormatException('sender proof rejected');
+      _rememberPersisted(auth.messageId, auth.sentAtUnix);
       // Move out of the unique staging directory: callers delete only the file.
       final finalFile = await file.rename('${staging.path}.siq');
       try {
@@ -650,7 +705,7 @@ class LanNode {
     required bool acceptPresented,
     required bool Function(String fingerprint) pinned,
   }) {
-    final client = HttpClient(context: SecurityContext(withTrustedRoots: false))
+    final client = HttpClient(context: lanTlsContext())
       ..connectionTimeout = const Duration(seconds: 5)
       ..badCertificateCallback = (certificate, host, port) {
         final fingerprint = DeviceIdentity.fingerprintOfDer(certificate.der);
@@ -748,6 +803,7 @@ class LanNode {
     void Function(int sent, int total)? onProgress,
     String? messageId,
     String? nonce,
+    int? sentAtUnix,
   }) async {
     final fingerprint = to.fingerprint;
     if (!isPaired(fingerprint)) {
@@ -767,6 +823,7 @@ class LanNode {
         final bodyHash = hasher.close();
         final chosenNonce = nonce ?? randomToken();
         final chosenMessage = messageId ?? randomToken();
+        final chosenSentAt = sentAtUnix ?? _unixNow();
         final req = await client.postUrl(
           Uri.parse('https://${to.address}:${to.port}/push'),
         );
@@ -779,6 +836,7 @@ class LanNode {
           ..set('x-muyon-fp', identity.fingerprint)
           ..set('x-muyon-nonce', chosenNonce)
           ..set('x-muyon-msg', chosenMessage)
+          ..set('x-muyon-ts', '$chosenSentAt')
           ..set(
             'x-muyon-sig',
             identity.sign(
@@ -786,6 +844,7 @@ class LanNode {
                 fingerprint: identity.fingerprint,
                 nonce: chosenNonce,
                 messageId: chosenMessage,
+                sentAtUnix: chosenSentAt,
                 length: length,
                 bodyHash: bodyHash,
               ),
@@ -838,6 +897,15 @@ class LanNode {
 }
 
 class _PushAuth {
-  const _PushAuth(this.fingerprint, this.nonce, this.messageId, this.signature);
+  const _PushAuth(
+    this.fingerprint,
+    this.nonce,
+    this.messageId,
+    this.sentAtUnix,
+    this.signature,
+  );
   final String fingerprint, nonce, messageId, signature;
+  final int sentAtUnix;
 }
+
+int _unixNow() => DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
