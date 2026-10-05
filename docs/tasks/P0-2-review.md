@@ -2,7 +2,7 @@
 
 审查对象：`task/p0-2-llm-baseline` @ `8b8eb9c` · 审查：leader（代码核实由 Sonnet 子代理执行）· 日期：2026-10-06
 
-**结论：修复后合并。** 正确性没有阻断项。F1、F2 两项应改，F3 因为关系到 P0-4 的取证质量，本轮一并修改，F4 顺手处理。
+**结论：修复后合并。** 正确性没有阻断项。F1、F2、F5 三项应改，F3 因为关系到 P0-4 的取证质量，本轮一并修改，F4 顺手处理。
 
 ## 范围
 相对 `develop`，三点 diff 只有 3 个文件：`selection_eval.dart`、新增的 `llm_selection_eval.dart`、新增的 `test/llm_selection_eval_test.dart`。没有修改已有测试和已有文档；`tool-selection-eval-2026-10-05.md` 中 LLM 一行仍是 not measured。✅
@@ -45,6 +45,10 @@ dart:io 的 `HttpClient` 默认会使用 `https_proxy` 与 `HTTPS_PROXY`，子�
 ### F4（顺手处理）
 - `test/llm_selection_eval_test.dart` 没有通过 `dart format`。只格式化这个文件。
 - 可选：加一个连接被拒绝时的夹具测试。
+
+### F5（应改，leader 在审查 P0-3 时追加）导出了环境变量就会静默调用真实模型
+只要 shell 里导出了 `MUYON_EVAL_MODEL_ENDPOINT` 与 `MUYON_EVAL_MODEL_ID`，普通的 `flutter test` 或 `scripts/verify.sh` 就会对 140 题发出真实请求，产生费用。P0-3 也有同样的问题，两处统一处理。
+**修复：** 只有同时设置 `MUYON_EVAL_REAL=1` 才进行真实运行。只设置了模型变量、没有这个开关时跳过，跳过原因写明需要这个开关。顶部注释中的命令同步加上这个开关。
 
 ## 修复方式
 1. 执行者（senior）检出 `review/P0-2`，先合并最新的 `develop`（只有文档改动），再修复上面各项，提交并推送到该分支。
