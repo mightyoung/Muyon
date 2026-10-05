@@ -160,21 +160,48 @@ List<RegisteredToolInfo> evaluationTools() => loadSelectionSet().tools;
 List<SelectionTask> get selectionTasks => loadSelectionSet().tasks;
 
 SelectionScore scoreRule(ToolSelectionStrategy strategy) {
+  final tools = evaluationTools();
+  final watch = Stopwatch()..start();
+  final decisions = [
+    for (final task in selectionTasks)
+      choiceFromRule(
+        strategy.select(
+          prompt: task.prompt,
+          scope: const AssistantScope.global(),
+          availableTools: tools,
+          modelAvailable: false,
+        ),
+      ),
+  ];
+  watch.stop();
+  return scoreChoices(
+    strategyId: strategy.id,
+    decisions: decisions,
+    latencyMs: watch.elapsedMicroseconds / 1000,
+    cost: '0',
+  );
+}
+
+/// Scores one decision per task of [selectionTasks], in order. Shared by the
+/// offline rule and model strategies so their numbers are comparable.
+SelectionScore scoreChoices({
+  required String strategyId,
+  required List<ChoiceDecision> decisions,
+  required double latencyMs,
+  required String cost,
+}) {
   final tasks = selectionTasks;
+  if (decisions.length != tasks.length) {
+    throw ArgumentError('One decision per selection task is required');
+  }
   final tools = evaluationTools();
   final byId = {for (final tool in tools) tool.descriptor.toolId: tool};
-  final watch = Stopwatch()..start();
   var top1 = 0, topK = 0, falseWrite = 0, shouldAbstain = 0, abstained = 0;
   final categories = <String, _CategoryAcc>{};
   final buckets = {for (final label in _bucketOrder) label: _BucketAcc(label)};
-  for (final task in tasks) {
-    final selection = strategy.select(
-      prompt: task.prompt,
-      scope: const AssistantScope.global(),
-      availableTools: tools,
-      modelAvailable: false,
-    );
-    final decision = choiceFromRule(selection);
+  for (var i = 0; i < tasks.length; i++) {
+    final task = tasks[i];
+    final decision = decisions[i];
     final choseNone = decision.abstains;
     final category = categories.putIfAbsent(
       task.category,
@@ -216,17 +243,16 @@ SelectionScore scoreRule(ToolSelectionStrategy strategy) {
         : decision.toolId == task.expected;
     if (correct) bucket.correct++;
   }
-  watch.stop();
   return SelectionScore(
-    strategyId: strategy.id,
+    strategyId: strategyId,
     tasks: tasks.length,
     top1: top1,
     topK: topK,
     falseWriteOrExternal: falseWrite,
     shouldAbstain: shouldAbstain,
     abstained: abstained,
-    latencyMs: watch.elapsedMicroseconds / 1000,
-    cost: '0',
+    latencyMs: latencyMs,
+    cost: cost,
     byCategory: [
       for (final name in _categoryOrder)
         if (categories.containsKey(name)) categories[name]!.toScore(),
