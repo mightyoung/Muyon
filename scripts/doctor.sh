@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# P0-J1 取证环境自检（只读）。
+# P0-J1 取证环境自检（只读）；P0-J2 安全加固。
 #
 # 用法：bash scripts/doctor.sh [--json]
 # 输出：每项一行「状态 <TAB> 检查名 <TAB> 说明」，最后一行汇总
@@ -7,8 +7,9 @@
 # 退出码：有任何 FAIL 时为 1，否则为 0。
 #
 # 安全：不打印、不记录任何密钥（只写“已设置/未设置”）；密钥不进命令行参数
-#       （经标准输入交给 curl）；只发 GET /models；不写任何文件、不修改环境、
-#       不安装任何东西。
+#       （经标准输入交给 curl）；端点必须显式以 http:// 或 https:// 开头；
+#       密钥含换行/回车时直接拒绝；只发 GET /models；不写任何文件、
+#       不修改环境、不安装任何东西。
 # 兼容：macOS 自带 bash 3.2 与 Linux bash（不用关联数组、mapfile、${var,,}）。
 #       注意：bash 3.2 会把 $VAR 后紧跟的非 ASCII 字节并入变量名，
 #       所有变量展开一律写成 ${VAR} 形式。
@@ -186,46 +187,57 @@ elif [ -z "$MODEL_ENDPOINT" ] || [ -z "$MODEL_ID" ]; then
   add_check FAIL model-env "MUYON_EVAL_MODEL_ENDPOINT 与 MUYON_EVAL_MODEL_ID 必须同时设置"
   MODEL_ENV_STATUS=FAIL
 else
-  # F1：取 authority（scheme:// 之后、第一个 / ? # 之前），用户信息一律拒绝；
-  # 主机名做精确匹配，只认 localhost、127.0.0.1、[::1]，避免 userinfo 绕过。
-  EP_AUTH="$MODEL_ENDPOINT"
-  case "$EP_AUTH" in
-    *://*) EP_AUTH=${EP_AUTH#*://} ;;
+  # P0-J2：端点必须显式以 http:// 或 https:// 开头，否则 :// 出现在
+  # 字符串其它位置时可能把远程端点伪装成本机（解析 authority 之前先判）。
+  case "$MODEL_ENDPOINT" in
+    http://*|https://*) EP_SCHEME_OK=1 ;;
+    *) EP_SCHEME_OK=0 ;;
   esac
-  EP_AUTH=${EP_AUTH%%[/?#]*}
-
-  if [ "${EP_AUTH#*@}" != "$EP_AUTH" ]; then
-    add_check FAIL model-env "端点不应包含用户信息"
+  if [ "$EP_SCHEME_OK" -eq 0 ]; then
+    add_check FAIL model-env "端点必须以 http:// 或 https:// 开头"
     MODEL_ENV_STATUS=FAIL
   else
-    EP_HOST="$EP_AUTH"
-    case "$EP_HOST" in
-      \[*)
-        EP_INNER=${EP_HOST#*[}
-        EP_INNER=${EP_INNER%%]*}
-        EP_HOST="[${EP_INNER}]"
-        ;;
-      *)
-        EP_HOST=${EP_HOST%:*}
-        ;;
+    # F1：取 authority（scheme:// 之后、第一个 / ? # 之前），用户信息一律
+    # 拒绝；主机名做精确匹配，只认 localhost、127.0.0.1、[::1]。
+    EP_AUTH="$MODEL_ENDPOINT"
+    case "$EP_AUTH" in
+      *://*) EP_AUTH=${EP_AUTH#*://} ;;
     esac
-    case "$EP_HOST" in
-      localhost|127.0.0.1|\[::1\]) IS_LOOPBACK=1 ;;
-    esac
-    IS_HTTPS=0
-    case "$MODEL_ENDPOINT" in
-      https://*) IS_HTTPS=1 ;;
-    esac
-    if [ "$IS_LOOPBACK" -eq 1 ]; then
-      add_check OK model-env "本机端点已配置"
-      MODEL_ENV_STATUS=OK
-    elif [ "$IS_HTTPS" -eq 1 ]; then
-      add_check OK model-env "远程端点（HTTPS）已配置"
-      MODEL_ENV_STATUS=OK
-      MODEL_IS_REMOTE=1
-    else
-      add_check FAIL model-env "远程端点必须使用 HTTPS"
+    EP_AUTH=${EP_AUTH%%[/?#]*}
+
+    if [ "${EP_AUTH#*@}" != "$EP_AUTH" ]; then
+      add_check FAIL model-env "端点不应包含用户信息"
       MODEL_ENV_STATUS=FAIL
+    else
+      EP_HOST="$EP_AUTH"
+      case "$EP_HOST" in
+        \[*)
+          EP_INNER=${EP_HOST#*[}
+          EP_INNER=${EP_INNER%%]*}
+          EP_HOST="[${EP_INNER}]"
+          ;;
+        *)
+          EP_HOST=${EP_HOST%:*}
+          ;;
+      esac
+      case "$EP_HOST" in
+        localhost|127.0.0.1|\[::1\]) IS_LOOPBACK=1 ;;
+      esac
+      IS_HTTPS=0
+      case "$MODEL_ENDPOINT" in
+        https://*) IS_HTTPS=1 ;;
+      esac
+      if [ "$IS_LOOPBACK" -eq 1 ]; then
+        add_check OK model-env "本机端点已配置"
+        MODEL_ENV_STATUS=OK
+      elif [ "$IS_HTTPS" -eq 1 ]; then
+        add_check OK model-env "远程端点（HTTPS）已配置"
+        MODEL_ENV_STATUS=OK
+        MODEL_IS_REMOTE=1
+      else
+        add_check FAIL model-env "远程端点必须使用 HTTPS"
+        MODEL_ENV_STATUS=FAIL
+      fi
     fi
   fi
 fi
@@ -238,42 +250,52 @@ if [ "$MODEL_ENV_STATUS" = "SKIP" ]; then
 elif [ "$MODEL_ENV_STATUS" = "FAIL" ]; then
   add_check SKIP model-key "模型配置无效，无法判断"
   MODEL_KEY_STATUS=SKIP
-elif [ "$MODEL_IS_REMOTE" -eq 1 ]; then
-  if [ -n "$MODEL_KEY" ]; then
-    add_check OK model-key "远程端点，密钥已设置"
-    MODEL_KEY_STATUS=OK
-  else
-    add_check FAIL model-key "远程端点需要设置 MUYON_EVAL_MODEL_KEY"
-    MODEL_KEY_STATUS=FAIL
-  fi
 else
-  add_check OK model-key "本机端点不需要密钥"
-  MODEL_KEY_STATUS=OK
+  # P0-J2：密钥含换行或回车时，注入 curl 配置行的风险不可接受，直接拒绝。
+  KEY_BAD=0
+  case "$MODEL_KEY" in
+    *$'\n'*|*$'\r'*) KEY_BAD=1 ;;
+  esac
+  if [ "$KEY_BAD" -eq 1 ]; then
+    add_check FAIL model-key "密钥含换行或回车字符"
+    MODEL_KEY_STATUS=FAIL
+  elif [ "$MODEL_IS_REMOTE" -eq 1 ]; then
+    if [ -n "$MODEL_KEY" ]; then
+      add_check OK model-key "远程端点，密钥已设置"
+      MODEL_KEY_STATUS=OK
+    else
+      add_check FAIL model-key "远程端点需要设置 MUYON_EVAL_MODEL_KEY"
+      MODEL_KEY_STATUS=FAIL
+    fi
+  else
+    add_check OK model-key "本机端点不需要密钥"
+    MODEL_KEY_STATUS=OK
+  fi
 fi
 
 # ----------------------------------------------------------------- model-reach
 if [ "$MODEL_ENV_STATUS" = "OK" ] && [ "$MODEL_KEY_STATUS" = "OK" ]; then
-  # F5：先去尾部斜杠，再剥离 /chat/completions，避免得到 //models
+  # F5/P0-J2：先去尾部斜杠，再剥离 /chat/completions，避免得到 //models
   MODELS_URL=$(printf '%s' "$MODEL_ENDPOINT" | sed -e 's#/*$##' -e 's#/chat/completions$##')
   MODELS_URL="$MODELS_URL/models"
-  # F2：密钥经标准输入（curl -K -）传递，不进命令行参数；
-  # F4：回环端点加 --noproxy '*'，避免本机请求（含密钥）经代理转发。
+
+  # F4/P0-J2：回环端点绕过代理；其余保持系统代理设置。可选参数放数组里，
+  # 空数组在 set -u 下用 ${arr[@]+...} 展开（bash 3.2 兼容）。
+  CURL_EXTRA=()
   if [ "$IS_LOOPBACK" -eq 1 ]; then
-    if [ -n "$MODEL_KEY" ]; then
-      ESC_KEY=$(printf '%s' "$MODEL_KEY" | sed 's/\\/\\\\/g; s/"/\\"/g')
-      HTTP_CODE=$(printf 'header = "Authorization: Bearer %s"\n' "$ESC_KEY" \
-        | curl -sS -o /dev/null -w '%{http_code}' --max-time 10 --noproxy '*' -K - "$MODELS_URL" 2>/dev/null)
-    else
-      HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 --noproxy '*' "$MODELS_URL" 2>/dev/null)
-    fi
+    CURL_EXTRA=(--noproxy '*')
+  fi
+
+  # F2/P0-J2：密钥经标准输入（curl -K -）传递，不进命令行参数；URL 经
+  # --url 传入（防以 - 开头的端点被当成选项），协议限定 http/https。
+  if [ -n "$MODEL_KEY" ]; then
+    ESC_KEY=$(printf '%s' "$MODEL_KEY" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    HTTP_CODE=$(printf 'header = "Authorization: Bearer %s"\n' "$ESC_KEY" \
+      | curl -sS -o /dev/null -w '%{http_code}' --max-time 10 --proto '=http,https' \
+        ${CURL_EXTRA[@]+"${CURL_EXTRA[@]}"} -K - --url "$MODELS_URL" 2>/dev/null)
   else
-    if [ -n "$MODEL_KEY" ]; then
-      ESC_KEY=$(printf '%s' "$MODEL_KEY" | sed 's/\\/\\\\/g; s/"/\\"/g')
-      HTTP_CODE=$(printf 'header = "Authorization: Bearer %s"\n' "$ESC_KEY" \
-        | curl -sS -o /dev/null -w '%{http_code}' --max-time 10 -K - "$MODELS_URL" 2>/dev/null)
-    else
-      HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$MODELS_URL" 2>/dev/null)
-    fi
+    HTTP_CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 --proto '=http,https' \
+      ${CURL_EXTRA[@]+"${CURL_EXTRA[@]}"} --url "$MODELS_URL" 2>/dev/null)
   fi
   case "$HTTP_CODE" in
     200) add_check OK model-reach "GET models 返回 200" ;;
