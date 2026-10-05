@@ -22,7 +22,7 @@
 | P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | P0-3 修复之后 | 已派发 |
 | P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | 待转交 |
 | P0-4 真机与真实模型取证 | `task/p0-4-evidence`（待建） | [P0-4.md](P0-4.md) | engineer | P0-1、P0-2、P0-3、P0-J1 合入（P0-J1、P0-2 已合入） | 待依赖 |
-| B 2.4 原型补齐（冻结前在途） | `feat/b-ui` | `2026-10-04-w1-agent-prompts.md`「追加 · B（Sonnet）· 2.4」 | engineer | — | 已交付，核实中（`review/B-2.4`） |
+| B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → 修复在 `review/B-2.4` | `2026-10-04-w1-agent-prompts.md`「追加 · B（Sonnet）· 2.4」；审查见 `review/B-2.4` 上的 `docs/tasks/B-2.4-review.md` | engineer | — | 审查：需修复 S1～S3、S5、S7（S6 待 E11） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` | `2026-10-04-w1-agent-prompts.md`「追加 · E（opencode）· E11」 | junior | — | 在途（据交接：8 个文件改动未提交，验收口径见 [审查](HANDOVER-A-review.md)） |
 
 已停用：过渡集成分支 `feat/p0-ci-llm-baseline` 不再使用，合入目标统一为 `develop`。
