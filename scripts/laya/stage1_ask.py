@@ -49,14 +49,16 @@ def other_heavy_jobs() -> list[str]:
         capture_output=True,
         text=True,
     ).stdout
-    me = str(os.getpid())
+    # The launching shell's command line contains this file's name. Skipping
+    # that parent keeps a wrapper from looking like a second measurement.
+    skip = {str(os.getpid()), str(os.getppid())}
     hits = []
     for line in listed.splitlines():
         stripped = line.strip()
         if not stripped:
             continue
         pid, _, _command = stripped.partition(" ")
-        if pid == me:
+        if pid in skip:
             continue
         if any(token in stripped for token in ("flutter_tester", "scripts/verify.sh", "stage1_ask.py")):
             hits.append(stripped)
