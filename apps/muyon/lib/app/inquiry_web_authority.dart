@@ -15,6 +15,8 @@ class InquiryWebAuthority implements AssistantWebAuthority {
         moduleId: 'inquiry',
         effect: ToolEffect.network,
         supportsCancel: true,
+        modelSelectable: false,
+        description: '询价模块内部的联网通道：只执行宿主已确认的单次网页读取，不提供给模型选择。',
         parameterSchema: {
           'type': 'object',
           'properties': {

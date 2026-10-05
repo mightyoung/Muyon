@@ -799,7 +799,7 @@ Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到
 要求（需求第五、七节与调用路径审计 G3）：
 - 供应商中心发布是**对外写操作**。像 G2 一样，经宿主工具注册表注册为 `ToolEffect.network`（或 export）通道：明确目的地、每次宿主一次性确认、持久回执，在副作用前调用 `checkBeforeEffect()`。参考已合入的 `apps/muyon/lib/app/inquiry_web_authority.dart`。
 - **结果不确定时先查询远端再决定**：超时、连接在发送后中断等情况，状态记为"结果未知"，先向中心查询这次发布是否已生效，再允许重试；绝不自动重发；本地取消不得显示为"远端已撤销"。
-- 给这个内部通道写清楚说明（会把哪些数据发到哪里），A 会加"不提供给模型选择"的标记。
+- 给这个内部通道写清楚说明（会把哪些数据发到哪里），并在 `ToolDescriptor` 上设 `modelSelectable: false`（A 已加这个字段，个人助理不会把它交给模型或选择策略；参考 `inquiry_web_authority.dart`）。
 - 先读 Codex 的半成品，能沿用就沿用，不合适的直接改；在报告里说明保留了哪些、改了哪些。
 
 开工：在你的分支上 `git merge origin/wip/g3-handoff` 再 `git merge origin/develop`，解决冲突后先让它编译通过。所有权：`packages/inquiry_module/lib/src/features/hub/**`、`packages/supplier_core/lib/src/hub*.dart`、`apps/muyon/lib/app/inquiry_hub_authority.dart` 及相关测试。**Codex 自己目录里的同一批文件不要再动**（已经交接）。测试：未确认不发送；确认后发送一次；发送后中断 → "结果未知" → 查询远端已生效则不重发、未生效才允许重试；取消在副作用前则不发送。推送前 `scripts/verify.sh` 通过、工作区干净，推送后核对远端哈希。

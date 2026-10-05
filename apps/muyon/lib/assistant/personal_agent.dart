@@ -81,7 +81,7 @@ class PersonalAgent {
       throw StateError('scope_mismatch');
     }
     final available = List<RegisteredToolInfo>.unmodifiable(
-      tools.list().where((t) => t.available),
+      tools.list().where((t) => t.available && t.descriptor.modelSelectable),
     );
     final selection = selectionStrategy.select(
       prompt: prompt.trim(),
