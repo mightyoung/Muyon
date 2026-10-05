@@ -106,3 +106,4 @@
 - D-R7：合成题集 28 个启动时注册的工具、140 题。报告只在 `MUYON_WRITE_EVAL_REPORT=1` 时重写。Jev 仍是证据审查，未调用 API。LLM 端点未设置，记 not measured，这次运行也不发送提示词。
 - 给 B 的界面清单在 `dream-ui-api.md`。`revert` 会按运行开始时的快照重写全部记忆、经验和墓碑，包括快照之后用户自己的修改。
 - 同步了 `origin/develop` 的 `4b90b3b`。其中 `9a87ab5` 是 B 的记忆页和由用户发起的 Dream，D 没有改这些界面。`bootstrap.dart` 在 B 构造 `DreamService` 之外，只追加了 `TaskCoordinator`。范围收窄和经验列表的管理界面仍然没有。
+- 2026-10-05 `scripts/verify.sh` 日志在 `d884aef` 上每一行都是 ok，按脚本规则这就是退出码 0。进程结束后没有另存退出码。analyze 七个包通过。module_api +17，muyon_ui +6，prototype +24，research +140，supplier_core +478 加 3 个跳过，host +209 加 1 个跳过，inquiry +320 加 1 个跳过再减 1。inquiry 被标成 ok，脚本只放行 `screenshot_test.dart: desktop settings`。
