@@ -58,8 +58,11 @@ library;
 
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import '../../services/models/credential_redaction.dart';
 import '../../services/models/model_gateway.dart';
 import 'selection_eval.dart';
+
+export '../../services/models/credential_redaction.dart' show redactCredentials;
 
 /// Fixed before measurement. States product behavior, not labels: call one
 /// tool only when it directly serves the request, ask when the request is
@@ -261,17 +264,6 @@ LlmChoice parseLlmResponse(
     promptTokens: usage is Map ? _count(usage['prompt_tokens']) : null,
     completionTokens: usage is Map ? _count(usage['completion_tokens']) : null,
   );
-}
-
-/// Error text safe to print or write to a report. A malformed key makes
-/// dart:io quote the whole `Authorization` header in its exception, and a
-/// partial mask can miss part of a key that contains spaces, so any message
-/// mentioning a bearer token or authorization is withheld entirely.
-String redactCredentials(Object error) {
-  final text = '$error';
-  return RegExp('bearer|authorization', caseSensitive: false).hasMatch(text)
-      ? '${error.runtimeType}: details withheld (may contain the credential)'
-      : text;
 }
 
 /// Asks the model once for [prompt]. Errors are returned, never thrown, so one

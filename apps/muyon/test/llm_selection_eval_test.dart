@@ -672,7 +672,10 @@ void main() {
       );
       expect(choice.error, isNotNull);
       expect(choice.error, isNot(contains('SECRET')));
-      expect(choice.error, contains('details withheld'));
+      // Since P0-S1 the gateway refuses such a key before any request
+      // (credential_invalid); the withheld-text path past that check is
+      // covered in credential_redaction_test.dart.
+      expect(choice.error, contains('credential_invalid'));
       final run = scoreLlmChoices(
         profile: profile,
         choices: [
