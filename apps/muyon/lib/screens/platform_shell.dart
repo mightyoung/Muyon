@@ -94,13 +94,17 @@ class _PlatformShellState extends State<PlatformShell> {
         conversationId: conversationId,
         onOpenReference: openObject,
       );
-  Widget executionPanel() => ExecutionPanel(
-    tasks: repo.tasks(),
-    onCancel: (task) => action(() => host.personalAgent.cancel(task.id)),
-    onPause: (task) => action(() => host.personalAgent.pause(task.id)),
-    onResume: (task) =>
-        action(() => host.personalAgent.resume(task.id).then((_) {})),
-    onOpenObject: openObject,
+  // Rebuild from the repository so a pushed mobile page never shows stale state.
+  Widget executionPanel() => ListenableBuilder(
+    listenable: repo,
+    builder: (context, _) => ExecutionPanel(
+      tasks: repo.tasks(),
+      onCancel: (task) => action(() => host.personalAgent.cancel(task.id)),
+      onPause: (task) => action(() => host.personalAgent.pause(task.id)),
+      onResume: (task) =>
+          action(() => host.personalAgent.resume(task.id).then((_) {})),
+      onOpenObject: openObject,
+    ),
   );
   Future<void> openModule(String module) async {
     await Navigator.of(context).push(
