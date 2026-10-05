@@ -122,6 +122,9 @@ void main() {
   test(
     'real task offer parsing receive and transfer acceptance never execute',
     () async {
+      // A task envelope is not a transfer package. The host records the offer
+      // and drops the file, so there is no item whose acceptance could import
+      // or execute it.
       await receive(
         utf8.encode(
           jsonEncode({
@@ -134,38 +137,17 @@ void main() {
           }),
         ),
       );
-      final envelope = TaskCoordinator.decodeFile(
-        receiver.services.transfer.items().single.path!,
-      );
-      expect(envelope, isNotNull);
-      var executions = 0;
-      final tasks = TaskCoordinator(
-        database: receiver.workspaces.database,
-        deviceId: 'receiver',
-        send: (_) async {},
-        executor: (_) async {
-          executions++;
-          throw StateError('Receiving a task must not execute it');
-        },
-      );
-      await tasks.receive(envelope!);
-      expect(tasks.stateOf('task-1', 'revision-1'), 'offered');
-      expect(executions, 0);
-      await receiver.services.transfer.acceptItem(
-        receiver.services.transfer.items().single.id,
-      );
-      await receiver.acceptedResearchImports.settled;
-      expect(executions, 0);
-      expect(tasks.stateOf('task-1', 'revision-1'), 'offered');
+      expect(receiver.services.transfer.items(), isEmpty);
+      expect(receiver.services.transfer.pendingReceivedPaths, isEmpty);
+      expect(receiver.tasks.stateOf('task-1', 'revision-1'), 'offered');
       expect(
         receiver.foundation.notifications().any((n) => n.title == '研究包未导入'),
         isFalse,
       );
+      expect(receiver.workspaces.all(), isEmpty);
       await restart();
-      final item = receiver.services.transfer.items().single;
-      expect(item.acceptance, 'accepted');
-      expect(item.imported, isFalse);
-      expect(item.grantsExecution, isFalse);
+      expect(receiver.services.transfer.items(), isEmpty);
+      expect(receiver.tasks.stateOf('task-1', 'revision-1'), 'offered');
       expect(receiver.workspaces.all(), isEmpty);
       expect(
         receiver.research!.store.db.select('SELECT * FROM rk_import_receipts'),
