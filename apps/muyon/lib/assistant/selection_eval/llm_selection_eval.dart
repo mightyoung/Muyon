@@ -350,6 +350,15 @@ LlmSelectionRun scoreLlmChoices({
 String _escape(String text) =>
     text.replaceAll('|', r'\|').replaceAll(RegExp(r'\s+'), ' ');
 
+/// Endpoint as written to a committed report: scheme, host, port and path
+/// only, so a key in user info or the query string never reaches `docs/`.
+String reportEndpoint(Uri endpoint) => Uri(
+  scheme: endpoint.scheme,
+  host: endpoint.host,
+  port: endpoint.hasPort ? endpoint.port : null,
+  path: endpoint.path,
+).toString();
+
 /// Report for one model run. Kept separate from the rule report so a model
 /// run never rewrites the offline baseline or the Laya record.
 String llmSelectionReport(LlmSelectionRun run, {required DateTime at}) {
@@ -370,7 +379,7 @@ String llmSelectionReport(LlmSelectionRun run, {required DateTime at}) {
     '',
     '| 项 | 值 |',
     '|---|---|',
-    '| 端点 | `${run.profile.endpoint}`（${run.profile.location.name}） |',
+    '| 端点 | `${reportEndpoint(run.profile.endpoint)}`（${run.profile.location.name}） |',
     '| 模型 | `${run.profile.modelId}` |',
     '| 温度 | ${run.temperature ?? '未设置（服务端默认）'} |',
     '| 协议 | OpenAI 兼容 `tools` + `tool_choice: auto`，无工具调用记为 none；函数名把 `.` 编码为 `__`，只认发出去的名字 |',

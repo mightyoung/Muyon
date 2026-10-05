@@ -565,6 +565,19 @@ void main() {
     );
   });
 
+  test('the report endpoint drops user info and the query string', () {
+    expect(
+      reportEndpoint(
+        Uri.parse('https://user:sk-secret@api.example.com/v1/chat/completions?key=sk-secret'),
+      ),
+      'https://api.example.com/v1/chat/completions',
+    );
+    expect(
+      reportEndpoint(Uri.parse('http://127.0.0.1:11434/v1/chat/completions')),
+      'http://127.0.0.1:11434/v1/chat/completions',
+    );
+  });
+
   test('the environment profile is local for loopback and HTTPS otherwise', () {
     final local = evalProfileFromEnvironment({
       'MUYON_EVAL_MODEL_ENDPOINT': 'http://127.0.0.1:11434/v1',
