@@ -891,3 +891,49 @@ Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到
 `scripts/laya/test_check_confirm_set.py`：构造会触发每条检查的小样例，断言脚本能拒绝。
 
 所有权：上述三个新文件。不要改其他 Laya 文件。报告里写：各类数量、语言比例、最大相似度，以及你确认没有查看禁止的文件。
+
+---8<--- 追加 · B（Sonnet）· 2.4 原型业务补齐：实机加载、手机适配、助手只读工具 ---
+
+开工：`git fetch origin && git merge origin/develop`（`develop` 已到 `34d051b`）。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。** 在你自己的分支 `feat/b-ui` 上做。
+
+背景（需求第二节第 4 条）：要能组织、展示、管理业务原型（例如 mes-security-model），承接页面、版本、反馈管理；已有 Vue 页面通过受限 WebView 接入，限制资源访问、导航和宿主桥接，**适配桌面与手机**；单页原型接入不能当作完整业务系统已迁入的证明。
+
+已有（你在 B3 / B-R1 / B-R2 做的，已合入）：`packages/prototype_module` 的页面、版本、反馈存储与界面；导航守卫；只开放 `feedbackChannel` 一个桥接频道；CSP 加请求拦截或内容拦截规则；模块已在 `bootstrap.dart` 注册。台账 2.4 仍是 ❌，因为下面几项没有证据。**不要重做已有部分。**
+
+### 1. 先在真机上确认原型能真正打开（最高优先级，结论决定后面怎么改）
+
+`docs/implementation/prototype-resource-policy.md` 里有 4 条标为"未验证"。其中最关键的是：Vite 构建的 `type="module"` 脚本能不能在 `file://` 下加载。很多 WebView 会因为跨源规则拒绝 `file://` 下的模块脚本，那样页面会是空白。
+
+- 用 `/Users/muyi/Downloads/dev/mes-security-model/prototype-vue/dist` 导入（**那个仓库只读，不改、不重新构建**）。
+- 用户已经连好 Android 真机（`adb devices` 可见），加上本机 macOS。逐条验证那 4 条，每条记录平台、做法和结果（页面是否渲染、越界链接 / 远程 `fetch` / 其它目录文件是否被拦截）。没有设备的平台（Windows）照实写"未验证"。
+- 如果模块脚本在 `file://` 下加载不了：
+  - 改用插件提供的自定义 scheme 加载（例如 `resourceCustomSchemes` 加 `onLoadResourceWithCustomScheme`，从当前版本根目录读文件返回），保证允许根判定、路径越界检查、CSP 和桥接白名单仍然只有一个来源（`RestrictedWebViewSpec`）。
+  - 先查清 `flutter_inappwebview` 6.1.5 在 Android、macOS、Windows 上分别支持什么，写进报告。
+  - **禁止**：打开 `allowUniversalAccessFromFileURLs`、`allowFileAccessFromFileURLs`；在本机起 HTTP 服务；放宽 CSP 去允许远程源。
+- 把结果写回 `prototype-resource-policy.md` 的平台表和"未验证"一节，不要删掉仍未验证的条目。
+
+### 2. 手机适配
+
+现在的原型列表、详情、网页三个界面都没按屏幕宽度处理。按 `muyon_ui` 现有的断点和组件（参考已有页面在手机上的写法，例如 `openRecord` 打开项目时的手机布局），在窄屏上把列表和详情改成单列、可返回，网页页面全屏显示且保留返回和"记录反馈"入口。不要重做界面风格。在 Android 真机上截图，作为证据放进报告（截图本身不提交）。
+
+### 3. 助手能查询原型（只读）
+
+参考 `apps/muyon/lib/platform/business_tools.dart` 的注册方式，新建 `apps/muyon/lib/platform/prototype_tools.dart`，注册 `ToolEffect.read` 工具，中文说明写清楚返回什么：
+- `prototype.list_pages`：页面列表（标题、版本数、反馈数、最新版本）。
+- `prototype.page_detail`：一个页面的版本列表和反馈列表。
+- 结果里的对象都带 `ObjectRef`（模块 `prototype`，类型 `page` / `version` / `feedback`），助手的回答能跳回对应页面。
+
+同时实现 `PrototypeSession.objectPage`，现在返回 `null`：`page` 打开页面详情，`version` 打开对应版本的网页，`feedback` 打开所属页面并定位到这条反馈。`resolve` 补上 `feedback` 类型。
+
+**不加写工具**：新建页面、导入版本、记录反馈仍由用户在页面里操作，助手不能代办。**不要改** `apps/muyon/lib/assistant/selection_eval/**` 和 `scripts/laya/**`（Laya 门禁正在用固定的工具集评测）。
+
+### 4. 文案
+
+界面上不能出现暗示"MES 系统已迁入"的说法。原型列表的空状态和页面说明里写明这是原型展示。
+
+### 测试
+- `prototype_module`：窄屏和宽屏各一个 widget 测试（列表 → 详情 → 返回）；`objectPage` 和 `resolve` 对三种对象都能打开，未知 id 返回 `null`。
+- `apps/muyon`：两个工具在真实临时宿主上能返回数据和 `ObjectRef`；`effect` 都是 `read`；没有注册任何写入或外发的原型工具。
+- 如果第 1 步改成自定义 scheme：给路径解析补单元测试，覆盖 `..`、`%2e%2e`、其它版本目录、绝对路径、空路径，以及允许根内的正常文件。
+
+所有权：`packages/prototype_module/**`、`apps/muyon/lib/platform/prototype_tools.dart`、注册它需要的一行调用，以及 `docs/implementation/prototype-resource-policy.md`。验收台账由 A 更新，你在报告里给出每条证据（测试名、提交、真机结果）。
