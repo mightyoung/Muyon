@@ -55,10 +55,11 @@ class NorthStarModelSettings {
       northStarSetting('MUYON_EVAL_MODEL_ENDPOINT') != null ||
       northStarSetting('MUYON_EVAL_MODEL_ID') != null;
 
-  /// A real model is used only with `MUYON_EVAL_REAL=1` as well, so exported
-  /// model variables never turn a plain `flutter test` into paid requests.
-  static bool get realRequested =>
-      northStarSetting('MUYON_EVAL_REAL') == '1' && modelVariablesSet;
+  /// A real model is used only with `MUYON_EVAL_REAL=1`, so exported model
+  /// variables never turn a plain `flutter test` into paid requests. Once the
+  /// switch is set the run is a real-model run: missing variables fail it
+  /// rather than quietly falling back to the fixture.
+  static bool get realRequested => northStarSetting('MUYON_EVAL_REAL') == '1';
 
   /// Null for the fixture. Errors never quote the configured values: a
   /// malformed endpoint may carry a credential.
@@ -68,7 +69,8 @@ class NorthStarModelSettings {
     final model = northStarSetting('MUYON_EVAL_MODEL_ID');
     if (endpoint == null || model == null) {
       throw StateError(
-        'Set both MUYON_EVAL_MODEL_ENDPOINT and MUYON_EVAL_MODEL_ID, or neither',
+        'MUYON_EVAL_REAL=1 is set but MUYON_EVAL_MODEL_ENDPOINT and '
+        'MUYON_EVAL_MODEL_ID are not both set',
       );
     }
     final uri = Uri.tryParse(endpoint);

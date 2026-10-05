@@ -117,7 +117,7 @@ class NorthStarInquiryChain {
       evidence['passed'] = true;
     } catch (error, stack) {
       evidence['passed'] = false;
-      evidence['failure'] = '$error';
+      evidence['failure'] = redactCredentials('$error');
       evidence['failureStack'] = stack
           .toString()
           .split('\n')
@@ -246,7 +246,13 @@ class NorthStarInquiryChain {
       reason: 'Read tools never need or receive a write approval',
     );
     expect(countRows(store, 'inquiry'), 1, reason: 'Reads must not write');
-    checkReadResults(readReceipts, evidence, requireAll: settings == null);
+    // Both modes: each question must have been answered by the inquiry read
+    // tool whose result can be checked against the seed, so a run answered
+    // by an unrelated read tool is never booked as evidence for 2.3.
+    await _step(
+      'read.results',
+      () async => checkReadResults(readReceipts, evidence),
+    );
 
     // Write: a topic conversation over the records the person selected.
     final selected = await _step('scope.select', () async {
@@ -432,7 +438,17 @@ class NorthStarInquiryChain {
           .last
           .references
           .length;
-    if (phase == 'read') _requireReadTool(host, task, entry, receiptsBefore);
+    if (phase == 'read') {
+      // The task's own failure (HTTP error, bad response, refused tool) is
+      // the reason to report, not the missing read receipt that follows it.
+      if (task.state != PersonalTaskState.succeeded) {
+        throw StateError(
+          'Read question ${task.id} ended ${task.state.name}: '
+          '${redactCredentials(task.error ?? 'no error recorded')}',
+        );
+      }
+      _requireReadTool(host, task, entry, receiptsBefore);
+    }
     return task;
   }
 

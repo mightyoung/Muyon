@@ -20,51 +20,59 @@ const _seededComparisons = {
 };
 
 /// Whatever the model asked, the registered tools return the module's own
-/// numbers: the cheapest quote per seeded line, and budget cost
-/// 100×11.80 + 20×45.00 = 2080 over both lines. Checked on every matching
-/// receipt. With [requireAll] (the fixture, which asks both questions) both
-/// checks must have run, so a changed tool result cannot skip them silently.
+/// numbers: the cheapest quote per seeded line (each returned group is
+/// matched on its own prices), and budget cost 100×11.80 + 20×45.00 = 2080
+/// over both lines. Both checks must have run, for the fixture and a real
+/// model alike; the evidence lists what was checked even when one fails.
 void checkReadResults(
   List<Map<String, Object?>> receipts,
-  Map<String, Object?> evidence, {
-  required bool requireAll,
-}) {
+  Map<String, Object?> evidence,
+) {
   final checked = <String>[];
+  evidence['readResultsChecked'] = checked;
   for (final receipt in receipts) {
     final result = jsonDecode(receipt['result_json'] as String) as Map;
     final output = result['data'] as Map?;
     if (output == null) continue;
     if (receipt['tool_id'] == 'inquiry.compare_quotes') {
-      final quotes = [
-        for (final g in (output['result'] as List?) ?? const [])
-          ...((g as Map)['quotes'] as List).cast<Map>(),
-      ];
-      final prices = [
-        for (final q in quotes) double.parse(q['price'] as String),
-      ]..sort();
-      final expected = _seededComparisons[prices.join(',')];
-      if (expected != null) {
+      for (final group in (output['result'] as List?) ?? const []) {
+        final quotes = ((group as Map)['quotes'] as List).cast<Map>();
+        final prices = [
+          for (final q in quotes) double.parse(q['price'] as String),
+        ]..sort();
+        final expected = _seededComparisons[prices.join(',')];
+        if (expected == null) continue;
         final lowest = quotes.singleWhere((q) => q['lowest'] == true);
         expect(lowest['supplier'], expected.$1);
         expect(double.parse(lowest['price'] as String), expected.$2);
-        checked.add('compare_quotes');
+        if (!checked.contains('compare_quotes')) checked.add('compare_quotes');
       }
     }
     if (receipt['tool_id'] == 'inquiry.project_budget' &&
         output['cost'] != null) {
       expect(output['total'], 2, reason: 'Both seeded budget lines');
       expect(double.parse(output['cost'] as String), 2080);
-      checked.add('project_budget');
+      if (!checked.contains('project_budget')) checked.add('project_budget');
     }
   }
-  if (requireAll) {
-    expect(checked.toSet(), {
-      'compare_quotes',
-      'project_budget',
-    }, reason: 'Fixture read results must match the seeded data');
+  final missing = [
+    for (final name in const ['compare_quotes', 'project_budget'])
+      if (!checked.contains(name)) name,
+  ];
+  if (missing.isNotEmpty) {
+    throw StateError(
+      'Read results not checked against the seed: missing '
+      '${missing.join(', ')} (a matching inquiry read tool result is required)',
+    );
   }
-  evidence['readResultsChecked'] = checked;
 }
+
+/// Error text safe for evidence and output: a message that mentions a bearer
+/// token or authorization is withheld entirely.
+String redactCredentials(String text) =>
+    RegExp('bearer|authorization', caseSensitive: false).hasMatch(text)
+    ? 'details withheld (may contain the credential)'
+    : text;
 
 /// Every offered, proposed and executed tool is registered; exactly one write
 /// ran; one succeeded ledger row per confirmed model send; with the fixture,
