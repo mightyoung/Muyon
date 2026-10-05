@@ -13,6 +13,7 @@ import '../platform/storage_manager.dart';
 import '../workspace/import_coordinator.dart';
 import '../workspace/workspace_repository.dart';
 import 'module_registry.dart';
+import 'research_tools_page.dart' show AcceptedResearchImports;
 import '../assistant/execution_store.dart';
 import '../assistant/personal_agent.dart';
 import '../platform/foundation_repository.dart';
@@ -43,6 +44,7 @@ class MuyonHost {
   late final OutboundLedger outbound;
   Future<bool> Function(InquiryModelApprovalPreview preview)?
   approveInquiryModelRequest;
+  late final AcceptedResearchImports acceptedResearchImports;
   ResearchRuntime? research;
   String? researchError;
   PrototypeRuntime? prototype;
@@ -155,6 +157,8 @@ class MuyonHost {
         ),
         tools: host.tools,
       );
+      host.acceptedResearchImports = AcceptedResearchImports(host);
+      host.services.transfer.onAccepted = host.acceptedResearchImports.accept;
       host.projections.onApplied = host.services.knowledge.followProjections(
         (ref) => confirmIndexedSource(
           ref,
@@ -274,6 +278,7 @@ class MuyonHost {
           body: recovery.conflicts.values.join('\n'),
         );
       }
+      await acceptedResearchImports.reconcileCommitted(research!);
       researchError = null;
     } catch (error) {
       research = null;
