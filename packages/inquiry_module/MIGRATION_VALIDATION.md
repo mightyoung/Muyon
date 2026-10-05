@@ -51,3 +51,28 @@ migrated renders are byte-identical:
 The frozen golden is preserved. This is an existing source/current-SDK visual
 baseline failure, not a passing screenshot acceptance claim. No physical-device,
 release or real-model acceptance follows from the local tests.
+
+## Golden baseline update (2026-10-05)
+
+A decided to update this one golden instead of keeping the known failure in
+`scripts/verify.sh`, because a permanent allow-list entry would also hide real
+regressions of this screenshot later.
+
+Re-ran the failing test on Flutter 3.47.5 (stable, framework revision
+`6a19cca564`, 2026-09-17) from `apps/muyon`. The only difference is still the
+dropdown arrow next to “改前逐次确认”: bounding box (431,649)–(480,668) in the
+1280×800 render, 158 pixels = 0.0154% (below the ~0.05% review threshold). No
+other pixels differ; the arrow glyph is unchanged, only its horizontal position.
+
+- Previous golden SHA-256:
+  `24c143a01b5c250a03b9936cbf59f28c82a37b35909f03f77379eeeb3a3cf50c`
+- New golden SHA-256:
+  `3f51c7a531a4fc403840bfb0aa007f04f8cb93b462ad409b4c673590de638090`
+  (byte-identical to the rendered PNG recorded in the section above)
+- Update command:
+  `cd apps/muyon && flutter test --update-goldens --plain-name 'desktop settings' ../../packages/inquiry_module/test/screenshot_test.dart`
+- Only `packages/inquiry_module/test/screens/desktop_settings.png` changed;
+  `scripts/verify.sh` no longer lists this test in `KNOWN_FAILURES`.
+
+The earlier record is kept as history. This is a local SDK rendering baseline
+update, not physical-device, release or real-model acceptance.

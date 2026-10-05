@@ -6,8 +6,10 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-# Pre-existing, documented in packages/inquiry_module/MIGRATION_VALIDATION.md.
-KNOWN_FAILURES=("screenshot_test.dart: desktop settings")
+# Empty: the former `screenshot_test.dart: desktop settings` allow-list entry
+# was removed on 2026-10-05 by updating that golden baseline. See
+# packages/inquiry_module/MIGRATION_VALIDATION.md.
+KNOWN_FAILURES=()
 
 # Local proxies break Flutter's localhost test websocket.
 unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
