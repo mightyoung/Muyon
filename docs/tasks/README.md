@@ -8,5 +8,5 @@
 |---|---|---|---|---|---|
 | P0-1 PR/push 自动门禁 | `p0-1-ci` | [P0-1.md](P0-1.md) | engineer（Sonnet） | senior（Opus） | 进行中 |
 | P0-2 LLM 原生工具调用基线 | `feat/p0-2-llm-selection-baseline` | [P0-2.md](P0-2.md) | senior（Opus） | engineer（Sonnet） | 进行中 |
-| P0-3 询价 North Star 链路 | `worktree-agent-aeed2e9750de4aa36` | [P0-3.md](P0-3.md) | senior（Opus） | engineer（Sonnet） | 进行中 |
-| P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior（opencode） | engineer（Sonnet） | 待领取 |
+| P0-3 询价 North Star 链路 | `feat/p0-3-north-star-inquiry` | [P0-3.md](P0-3.md) | senior（Opus） | engineer（Sonnet） | 进行中 |
+| P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior（opencode） | engineer（Sonnet） | 已转交 opencode |
