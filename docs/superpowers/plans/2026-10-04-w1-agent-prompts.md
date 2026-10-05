@@ -514,3 +514,88 @@ Report in the same final-report format: commits; test counts per package; eviden
 4. 拥有范围外的改动（逐条）
 5. 覆盖率数字（前后对比）与发现的疑似缺陷
 6. 已知缺口与风险
+
+---
+
+# 追加：Laya 专门化（给 Grok）
+
+---8<--- 追加 · D（Grok）· D-R8 Laya 专门化 ---
+
+**Priority:** first finish, verify and push your current D-R5 / D-R6 / D-R7 work. Start this only afterwards.
+
+Your D-R6 measurement (held-out 93 tasks: top-1 46/93, false write/external 0, adversarial and ambiguous all abstained, Chinese 5/18, mixed 6/18, paraphrase 1/19, ≥0.9-confidence answers 28/29 correct, CPU p50 ≈ 440 ms) shows Laya is safe but abstains on most Chinese, mixed and paraphrased requests. Its README says it is "a fast base to specialise, not a zero-shot decision engine" and ships a fine-tuning pipeline. The user has decided to try specialisation, **with training on Kaggle**. Work in three stages; each stage ends with a report and stops if its gate fails.
+
+Where things live: training and evaluation scripts and the **synthetic** training data under `scripts/laya/` (committed, redistributable, no user data). Python environments, checkpoints, Kaggle outputs and downloaded weights stay **outside the repository** (e.g. `~/.cache/muyon-eval/`), never committed. Do not add Python, PyTorch or Laya to the Flutter app.
+
+### Stage 1 — Better questions, no training
+
+Before any training, fix how the question is asked; this may close much of the gap:
+1. Options carry the **Chinese tool description** (plus a short English gloss), not the raw tool id; keep ids only as opaque keys. The README says choice labels are rendered verbatim and boolean-like labels bias answers.
+2. Raise `head_max_len` for the multilingual checkpoint as needed, and add an **embedding shortlist** (`predict_shortlist`) so the option budget stays above a sane token count per option as the tool list grows (MCP tools make it dynamic).
+3. **Per-category calibration** (temperature fitting or per-category thresholds) instead of one global 0.95; optionally a two-step question ("does this need a tool?" `noul`, then `choice` over the shortlist).
+4. Add a **negation set** (e.g. "不要删除…", "先别发出去", "don't cancel…"); the README documents a case where negated requests chose the destructive option at 0.9998.
+
+Gate 1: on the held-out split, false selection of write/external tools stays **0**, including adversarial and negation items. Report per-category top-1, abstention, calibration (accuracy per confidence bucket) and latency against your D-R6 baseline.
+
+### Stage 2 — Fine-tune on Kaggle
+
+- **Training data:** generate ≥1,000 labelled synthetic requests yourself (no external model needed) from the registered tools' descriptions: Chinese, mixed Chinese–English, paraphrases, "none", ambiguous, negation and adversarial cases. Labels are description-conditioned (the model chooses among the option texts it is shown, with random subsets and random order of tools per example), so it learns to read descriptions rather than memorise ids.
+- **No leakage:** the existing 140-task evaluation set is never used for training. Check exact and near-duplicate overlap (normalised text n-gram similarity) between training and evaluation sets and report it. Hold out a few **tools** entirely from training to measure generalisation to unseen tools.
+- **Kaggle:** use the official `notebooks/laya_finetune_typed_decisions_2xT4_kaggle.ipynb` flow (RLCD training, calibration temperatures, evaluation). Kaggle credentials: the user put a Kaggle API token (new `KGAT_…` format) in `/Users/muyi/Downloads/dev/muspace/.env` under the key `Kaggle-apikey` (the file also holds other secrets; it is git-ignored). The key name contains `-`, so do **not** `source` the file. Read only that one key with a small script and pass it to the Kaggle CLI/API **as an environment variable of that subprocess only** (check the installed `kaggle` package's docs for the variable it expects for `KGAT_` tokens, e.g. `KAGGLE_API_TOKEN`). Never print it, log it, write it to another file, put it in a notebook, or commit it; never read the other keys in that file. Upload only the synthetic data, as a **private** Kaggle dataset. **Do not push** the resulting checkpoint to the Hugging Face Hub (disable the notebook's push step, or push only to a private repo if the user explicitly provides a token for that); download the weights to `~/.cache/muyon-eval/models/` and record their SHA-256.
+- Record: base checkpoint and revision, Laya version, notebook version, hyperparameters, seed, GPU type and training time, dataset size per category.
+
+Gate 2 (proposed targets — **the user must confirm or change them**; report against them either way): false write/external **0** on held-out, adversarial and negation; held-out Chinese, mixed and paraphrase top-1 each ≥ 0.70; overall held-out top-1 ≥ 0.80; unseen-tool top-1 ≥ 0.60; ECE ≤ 0.10 after calibration; CPU p50 on this Mac no worse than 1.5× the D-R6 baseline.
+
+### Stage 3 — Feasibility only, no app integration
+
+- Export the fine-tuned model to ONNX using the repository's export script from the Laya **source tree** (the PyPI wheel lacks `scripts/export_onnx.py`), with the README's per-tensor quantisation default; record file size, whether our `flutter_onnxruntime` 1.8.5 can load it, the tokenizer needed, and CPU latency on this Mac, and confirm the ONNX outputs agree with the PyTorch model on the evaluation set.
+- Write `docs/implementation/laya-specialisation-<date>.md`: what changed per stage, all numbers, gate results, costs, risks (tool-list drift, negation, distribution shift from synthetic to real requests), and a recommendation. Integration into the app is a separate decision by the user.
+
+Rules as before: evidence classes (doc / automated test / build / real model / device; unverified stays "unverified"); no secrets anywhere; one heavy job at a time on this shared machine; push only to `feat/d-transfer`; A merges.
+
+**What you need from the user (put at the top of your report when you reach Stage 2):** the Kaggle account must be phone-verified (required for GPU sessions). If the token in `.env` is rejected or lacks permission, report the exact error message (without the token) and stop; do not ask for the token in chat.
+
+---
+
+# 追加：一对一文字聊天后端（B 草案经 A 审定，给 Grok；附给 Sonnet 的界面调整）
+
+B's draft is `docs/implementation/chat-interface-draft.md` on `feat/b-ui` (`91deaba`). A accepted it with the changes below; this section is the binding spec.
+
+---8<--- 追加 · D（Grok）· D-R9 一对一文字聊天后端 ---
+
+**Priority:** after your current D-R5 / D-R6 / D-R7 work is committed, verified and pushed; before D-R8 Stage 2 (Kaggle training). Commit what you already have in small commits first — the machine rebooted once today and uncommitted work is at risk.
+
+Requirement: online one-to-one text chat and attachments between the user's own paired devices; reachability, send progress, receipt confirmation and results visible; delivery, durable receipt, business import, read and human acceptance recorded separately; both peers online, authenticated, reachable; no promise of relay or NAT traversal.
+
+Today the `message` field of a transfer package is dropped at verification/import and sent text is not recorded, so the UI has no history and no delivery state. Build the backend so B can build the UI.
+
+**Storage.** A new migration in `KnowledgeService.schema` (the database `TransferService` already uses, next to `transfer_items`), so message state and transfer receipts commit through the same write queue. Not the host main database. Table `chat_messages`:
+- `peer_fingerprint`, `message_id` (sender-generated UUID) — **unique together**; dedupe on the pair, never on `message_id` alone.
+- `direction` `out`/`in`; `body` ≤ 16,000 characters (same limit as the package `message`); `created_at` (sender clock, display only); local `sent_at` / `received_at` for ordering.
+- `send_state` (out only): `queued` → `sent` (bytes written) → `delivered` (peer confirmed it durably stored), or `failed` + `error`.
+- `read_at` (local only). `acceptance` (in only): `none` / `accepted` / `rejected` — see below.
+
+**Semantics (binding):**
+1. Text travels only over the existing paired TLS channel to a paired, online, unrevoked peer, through the same checks as `send`. Offline peer → fail immediately with "no relay", no queueing. Revoked pairing → history stays readable, sending is refused.
+2. `delivered` only after the receiver's durable-store acknowledgement on the authenticated connection. If the connection drops or times out after `sent`, the state stays `sent` (outcome unknown): **never auto-retry, never mark failed**. `retry(messageId)` is explicit, allowed for `failed` and for `sent` older than a timeout; the receiver's dedupe makes it safe.
+3. **Inbound text is shown in the conversation immediately** as unread (these are the user's own paired devices). `acceptance` is a separate, optional state used only when the user turns a message into business data (e.g. attaches it to a project); `accept`/`reject` never import or execute anything. Read and acceptance stay independent.
+4. Chat text is untrusted data: it never grants tool permission (`grantsExecution == false`), is never auto-added to assistant context, and is reachable by the assistant only through a registered read tool with an explicit scope (not part of this task).
+5. No read receipts are sent to the peer; `read_at` is local.
+6. The `message` of a transfer package is also written to `chat_messages` as an inbound message linked to that package; the package's import/acceptance stays independent of the message.
+7. Local delete (`delete`, `deleteThread`) removes local records only; the peer is unaffected.
+8. Receiving a message uses the existing `onPendingReceived` notification path.
+
+**API on `TransferService`** (names may be adjusted; document final ones): `sendText(peer, body)`, `threads()` (per peer: last message, unread count, online, paired, peer name), `messages(peerFingerprint)`, `markRead(peerFingerprint)`, `accept(messageId)`, `reject(messageId)`, `retry(messageId)`, `delete(messageId)`, `deleteThread(peerFingerprint)`, and a change notification (`Stream` or `ChangeNotifier`).
+
+**Tests (loopback, two hosts):** send → `sent` → `delivered` → shown unread on the receiver; duplicate delivery of the same (peer, id) keeps one row; drop after `sent` stays `sent` with no auto-retry; explicit retry is deduplicated; offline peer fails immediately; revoked pairing refuses to send but keeps history; accept/reject change only `acceptance`; package message appears in chat without changing package import state; nothing reaches the tool registry or assistant context.
+
+Report the final API (names, states, errors) in `docs/implementation/chat-interface-draft.md`'s follow-up section or a new `chat-backend.md`, so B can build against it.
+
+---8<--- 追加 · B（Sonnet）· 聊天界面的调整 ---
+
+Your chat backend draft was accepted with changes; D is implementing it. What changes for the UI:
+- Inbound text appears in the conversation **immediately as unread**; there is no per-message "pending acceptance" gate. "Accept / reject" becomes an optional action used when turning a message into business data (e.g. attaching to a project), and is shown as its own state, separate from read.
+- Storage is in the transfer service's database, not the host main database (no effect on your UI code).
+- Dedupe is per (peer, message id); no read receipts go to the peer.
+- `sent` with an unknown outcome is a real, persistent state: show it as "已发出，对方是否收到未知", and only offer retry with the warning you proposed.
+Wait for D's final API document before wiring; you can build the screens now against a fake.
