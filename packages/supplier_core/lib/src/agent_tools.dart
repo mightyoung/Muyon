@@ -5,6 +5,7 @@ import 'compare.dart';
 import 'data_quality.dart';
 import 'inquiries.dart';
 import 'ontology.dart';
+import 'ontology_paths.dart';
 import 'record_query.dart';
 import 'search.dart';
 import 'spec_compare.dart';
@@ -341,6 +342,19 @@ extension AgentTools on Store {
       };
     }
     final t = ontology[type] ?? invalid('type', 'unknown object type');
+    // E9: one shortest path per destination, written as one line of steps
+    // ("related inquiry.supplier_ids → get inquiry.project_id"). Step objects
+    // made small type cards more than 3x larger; the measured sizes are in the
+    // acceptance ledger.
+    final pathsTo = <String, String>{};
+    for (final other in ontology.keys) {
+      if (other == type) continue;
+      final paths = ontologyPaths(type, other, limit: 1);
+      if (paths.isEmpty) continue;
+      pathsTo[other] = [
+        for (final step in paths.single.steps) '${step.via} ${step.link}',
+      ].join(' → ');
+    }
     return {
       ...t.toJson(),
       'links_out': [
@@ -351,6 +365,8 @@ extension AgentTools on Store {
         for (final l in links)
           if (l.to == type) l.toJson(),
       ],
+      'paths_to': pathsTo,
+      'paths_to_format': 'get 链接名：读本记录的该字段再取目标；related 链接名：列出通过该链接引用本记录的记录',
     };
   }
 

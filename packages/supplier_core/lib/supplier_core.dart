@@ -27,6 +27,7 @@ export 'src/material_import.dart';
 export 'src/mcp_server.dart';
 export 'src/merge.dart';
 export 'src/ontology.dart';
+export 'src/ontology_paths.dart';
 export 'src/product_params.dart';
 export 'src/project.dart';
 export 'src/project_export.dart';
