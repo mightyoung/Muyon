@@ -1,74 +1,6 @@
 part of 'platform_shell.dart';
 
 extension _PersonalSections on _PlatformShellState {
-  Future<void> editMemory([PersonalMemory? memory]) async {
-    final content = TextEditingController(text: memory?.content);
-    final source = TextEditingController(text: memory?.source ?? '本人手动确认');
-    final expiry = TextEditingController(
-      text: memory?.expiresAt?.toIso8601String().split('T').first,
-    );
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('有来源的个人记忆'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: content,
-                maxLines: 4,
-                decoration: const InputDecoration(labelText: '偏好、背景、决定或已验证经验'),
-              ),
-              TextField(
-                controller: source,
-                decoration: const InputDecoration(
-                  labelText: '来源（原文、对象、记录或本人确认）',
-                ),
-              ),
-              TextField(
-                controller: expiry,
-                decoration: const InputDecoration(
-                  labelText: '过期日期 YYYY-MM-DD（可留空）',
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('保存'),
-          ),
-        ],
-      ),
-    );
-    if (saved == true) {
-      await action(
-        () => repo
-            .saveMemory(
-              id: memory?.id,
-              content: content.text,
-              source: source.text,
-              scope: memory?.scope ?? const AssistantScope.global(),
-              sourceRef: memory?.sourceRef,
-              verified: memory?.verified ?? true,
-              expiresAt: expiry.text.trim().isEmpty
-                  ? null
-                  : DateTime.parse(expiry.text.trim()),
-            )
-            .then((_) {}),
-      );
-    }
-    content.dispose();
-    source.dispose();
-    expiry.dispose();
-  }
-
   Widget personal() => ListenableBuilder(
     listenable: repo,
     builder: (context, _) => list([
@@ -104,67 +36,13 @@ extension _PersonalSections on _PlatformShellState {
           }),
         ),
       ),
-      const Text('记忆保留来源与过期状态；模型建议不会自动扩大操作权限。'),
-      FilledButton.icon(
-        onPressed: () => editMemory(),
-        icon: const Icon(Icons.add),
-        label: const Text('添加记忆'),
+      ListTile(
+        leading: const Icon(Icons.psychology_alt_outlined),
+        title: const Text('记忆与整理'),
+        subtitle: const Text('查看、编辑、停用、删除记忆；整理建议与撤回'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => page('记忆', memoryPage()),
       ),
-      for (final memory in repo.memories(includeExpired: true))
-        ListTile(
-          title: Text(memory.content),
-          subtitle: Text(
-            '${memory.source}\n${memory.isExpired ? '已过期' : '有效'} ${memory.expiresAt ?? ''}',
-          ),
-          isThreeLine: true,
-          onTap: () => editMemory(memory),
-          trailing: IconButton(
-            tooltip: '删除记忆',
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => action(() => repo.deleteMemory(memory.id)),
-          ),
-        ),
-      const Divider(),
-      const Text('记忆整理'),
-      const Text('后台按来源记录生成只读整理候选，保留全部来源，等待本人处理；不自动扩大操作权限。'),
-      OutlinedButton.icon(
-        icon: const Icon(Icons.fact_check_outlined),
-        label: const Text('查看整理建议与来源摘要'),
-        onPressed: () {
-          final review = host.memoryReview.current;
-          page(
-            '记忆整理预览',
-            list([
-              Text(
-                '重复候选 ${review.duplicates.length} 组 · 内容变化候选 ${review.conflicts.length} 组 · 过期 ${review.expired.length} 条',
-              ),
-              const Text('内容变化仅提示复核，不代表已确认矛盾；摘要逐条保留来源，不生成新事实。'),
-              for (final group in review.duplicates) ...[
-                const Text('相同内容，来源需要逐一保留或人工合并'),
-                for (final memory in group)
-                  ListTile(
-                    title: Text(memory.content),
-                    subtitle: Text(memory.source),
-                    onTap: () => editMemory(memory),
-                  ),
-              ],
-              for (final group in review.conflicts) ...[
-                const Text('同一属性出现不同内容，请检查决定是否发生变化'),
-                for (final memory in group)
-                  ListTile(
-                    title: Text(memory.content),
-                    subtitle: Text(memory.source),
-                    onTap: () => editMemory(memory),
-                  ),
-              ],
-              const Divider(),
-              const Text('有效记忆与来源摘要'),
-              SelectableText(review.summary.join('\n\n')),
-            ]),
-          );
-        },
-      ),
-      const Text('Dream、语义矛盾识别和自动经验提炼仍属于后续增强。'),
     ]),
   );
   Future<void> addProfile() async {
@@ -279,6 +157,15 @@ extension _PersonalSections on _PlatformShellState {
     model.dispose();
     secret.dispose();
   }
+
+  Widget memoryPage() => MemoryPage(
+    repo: repo,
+    dream: host.dream,
+    profiles: () => [
+      for (final p in profiles.all())
+        if (p.purpose == ModelPurpose.chat) p,
+    ],
+  );
 
   Widget storagePage() => DataStoragePage(
     readStatus: () => StorageStatus.read(host),
