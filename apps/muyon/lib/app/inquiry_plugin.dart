@@ -8,6 +8,8 @@ import 'package:path/path.dart' as p;
 import 'package:supplier_core/supplier_core.dart';
 
 import '../platform/storage_manager.dart';
+import '../platform/tool_registry.dart';
+import 'inquiry_web_authority.dart';
 import '../services/models/secret_store.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/profile_repository.dart';
@@ -31,7 +33,8 @@ typedef InquiryModelApproval = Future<bool> Function(
 /// The host adapts Folio's existing transaction owner; it does not rewrite its
 /// cross-project supplier/project relationships into research scopes.
 class InquiryPlugin {
-  InquiryPlugin._(this.runtime, this.jobs);
+  InquiryPlugin._(this.runtime, this.jobs, this._webAuthority);
+  final InquiryWebAuthority? _webAuthority;
   final InquiryRuntime runtime;
   final AiJobStore jobs;
   static final schema = ModuleSchema(
@@ -139,6 +142,7 @@ class InquiryPlugin {
     required String deviceId,
     required ProfileRepository modelProfiles,
     required OpenAiModelGateway modelGateway,
+    ToolRegistry? tools,
     InquiryModelApproval? approveModelRequest,
     MethodChannelSecretStore modelSecrets = const MethodChannelSecretStore(),
   }) async {
@@ -169,6 +173,7 @@ class InquiryPlugin {
       secrets: modelSecrets,
       approve: approveModelRequest,
     );
+    final webAuthority = tools == null ? null : InquiryWebAuthority(tools);
     final runtime = InquiryRuntime.attach(
       store: store,
       dataDirectory: root,
@@ -177,11 +182,13 @@ class InquiryPlugin {
       initialSettings: settings,
       sharedModelSettings: models,
       sharedLlmFactory: models.createClient,
+      webAuthority: webAuthority,
     );
-    return InquiryPlugin._(runtime, jobs);
+    return InquiryPlugin._(runtime, jobs, webAuthority);
   }
 
   Future<void> close() async {
+    _webAuthority?.disable();
     await runtime.close();
     jobs.close();
   }

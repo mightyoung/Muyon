@@ -40,7 +40,10 @@ class _State extends AppState {
   @override
   Future<LlmClient?> llm({AiCancellation? cancellation}) async => client;
   @override
-  AssistantWebTools createAssistantWebTools(String jobId) => AssistantWebTools(
+  AssistantWebTools createAssistantWebTools(
+    String jobId, {
+    AssistantWebReview? review,
+  }) => AssistantWebTools(
     resolver: (_) async => [InternetAddress('93.184.216.34')],
     transport: (uri, addresses, cancellation) async {
       networkRequests++;

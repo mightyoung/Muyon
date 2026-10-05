@@ -30,6 +30,7 @@ class AppState extends ChangeNotifier {
     required InquirySecretStore secrets,
     this.sharedLlmFactory,
     this.sharedModelSettings,
+    this.webAuthority,
     Map<String, Object?> initialSettings = const {},
   }) : _settings = {
          ...initialSettings,
@@ -60,6 +61,7 @@ class AppState extends ChangeNotifier {
       _secure = const PlatformInquirySecrets(),
       sharedLlmFactory = null,
       sharedModelSettings = null,
+      webAuthority = null,
       _ownsJobs = true,
       _isHosted = false;
 
@@ -71,6 +73,7 @@ class AppState extends ChangeNotifier {
   final bool _isHosted;
   final SharedLlmFactory? sharedLlmFactory;
   final InquiryModelSettingsBridge? sharedModelSettings;
+  final AssistantWebAuthority? webAuthority;
   final _pendingAiTasks = <Future<void>>{};
   AiJobStore? _aiJobs;
   bool _restoring = false;
@@ -462,10 +465,26 @@ class AppState extends ChangeNotifier {
   String _webCacheKey(String id) => 'assistant_web_sources:${jsonEncode(id)}';
 
   /// A host-owned factory also gives UI tests a bounded transport seam.
-  AssistantWebTools createAssistantWebTools(String jobId) => AssistantWebTools(
-    restoredSnapshots: assistantWebSnapshots(jobId),
-    onSnapshot: (source) => saveAssistantWebSnapshot(jobId, source),
-  );
+  AssistantWebTools createAssistantWebTools(
+    String jobId, {
+    AssistantWebReview? review,
+  }) {
+    final permission = assistantPermission;
+    return AssistantWebTools(
+      hosted: _isHosted,
+      sessionId: jobId,
+      authority: webAuthority,
+      review: review,
+      validateSession: () {
+        validateAssistantSession(jobId);
+        if (!assistantWebEnabled || assistantPermission != permission) {
+          throw LlmException('联网或助手权限已变化，请重新开始任务');
+        }
+      },
+      restoredSnapshots: assistantWebSnapshots(jobId),
+      onSnapshot: (source) => saveAssistantWebSnapshot(jobId, source),
+    );
+  }
 
   List<AssistantWebSnapshot> assistantWebSnapshots(String jobId) {
     validateAssistantSession(jobId);
@@ -515,7 +534,9 @@ class AppState extends ChangeNotifier {
 
   /// Conversation actions validate a running job, rather than a ready draft.
   void validateAssistantSession(String id) {
-    if (_disposed || _restoring) throw LlmException('资料库当前不可用，操作已停止');
+    if (_disposed || _restoring || _closing) {
+      throw LlmException('资料库当前不可用，操作已停止');
+    }
     final job = _jobs.get(id);
     if (job.epoch != _jobs.epoch || job.status != 'running') {
       throw LlmException('任务已经失效，请重新开始并确认操作');

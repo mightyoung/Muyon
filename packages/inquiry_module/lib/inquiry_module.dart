@@ -22,6 +22,7 @@ class InquiryRuntime {
     required InquirySecretStore secrets,
     SharedLlmFactory? sharedLlmFactory,
     InquiryModelSettingsBridge? sharedModelSettings,
+    AssistantWebAuthority? webAuthority,
     Map<String, Object?> initialSettings = const {},
   }) : state = AppState.attach(
          store: store,
@@ -30,6 +31,7 @@ class InquiryRuntime {
          secrets: secrets,
          sharedLlmFactory: sharedLlmFactory,
          sharedModelSettings: sharedModelSettings,
+         webAuthority: webAuthority,
          initialSettings: initialSettings,
        );
   final AppState state;
