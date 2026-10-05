@@ -20,6 +20,7 @@ import 'devices_page.dart';
 import 'knowledge_preview.dart';
 import 'data_storage_page.dart';
 import 'data_flow_page.dart';
+import 'execution_panel.dart';
 import 'mcp_servers_page.dart';
 import 'memory_page.dart';
 import 'chat/chat_entry_page.dart';
@@ -56,6 +57,7 @@ class _PlatformShellState extends State<PlatformShell> {
   String? error;
   bool busy = false;
   bool assistantOpen = true;
+  bool executionOpen = false;
   List<Map<String, Object?>> hits = [];
   MuyonHost get host => widget.host;
   FoundationRepository get repo => host.foundation;
@@ -92,6 +94,14 @@ class _PlatformShellState extends State<PlatformShell> {
         conversationId: conversationId,
         onOpenReference: openObject,
       );
+  Widget executionPanel() => ExecutionPanel(
+    tasks: repo.tasks(),
+    onCancel: (task) => action(() => host.personalAgent.cancel(task.id)),
+    onPause: (task) => action(() => host.personalAgent.pause(task.id)),
+    onResume: (task) =>
+        action(() => host.personalAgent.resume(task.id).then((_) {})),
+    onOpenObject: openObject,
+  );
   Future<void> openModule(String module) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -332,6 +342,12 @@ class _PlatformShellState extends State<PlatformShell> {
       Icons.notifications_outlined,
     ),
     card(
+      '执行面板',
+      '助手任务的目标、进度与产物',
+      () => page('执行面板', executionPanel()),
+      Icons.fact_check_outlined,
+    ),
+    card(
       '设备聊天',
       '本人已配对设备之间的文字',
       () => page('设备聊天', ChatEntryPage(host: host)),
@@ -424,6 +440,12 @@ class _PlatformShellState extends State<PlatformShell> {
                 ),
               if (size.maxWidth >= 900) ...[
                 IconButton(
+                  tooltip: executionOpen ? '收起执行面板' : '执行面板',
+                  onPressed: () =>
+                      setState(() => executionOpen = !executionOpen),
+                  icon: const Icon(Icons.fact_check_outlined),
+                ),
+                IconButton(
                   tooltip: '消息中心',
                   onPressed: () => page('消息中心', notifications()),
                   icon: const Icon(Icons.notifications_outlined),
@@ -462,6 +484,8 @@ class _PlatformShellState extends State<PlatformShell> {
                     Expanded(child: body),
                     if (section != 1 && size.maxWidth >= 1250 && assistantOpen)
                       SizedBox(width: 360, child: assistant()),
+                    if (executionOpen)
+                      SizedBox(width: 360, child: executionPanel()),
                   ],
                 )
               : body,
