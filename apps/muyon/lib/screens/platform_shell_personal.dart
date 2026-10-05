@@ -286,6 +286,7 @@ extension _PersonalSections on _PlatformShellState {
         host.trackOperation(() => BackupService.create(host.storage, target)),
     restore: widget.onRestore,
     pickDirectory: widget.pickDirectory,
+    dataFlow: DataFlowPage(host: host),
   );
 
   Widget settings() => ListenableBuilder(

@@ -19,6 +19,7 @@ import 'assistant_page.dart';
 import 'devices_page.dart';
 import 'knowledge_preview.dart';
 import 'data_storage_page.dart';
+import 'data_flow_page.dart';
 import 'storage_status.dart';
 import '../platform/backup_service.dart';
 

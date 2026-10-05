@@ -23,6 +23,8 @@ class DataStoragePage extends StatefulWidget {
     this.pickDirectory = pickDirectoryWithDialog,
     this.verify = BackupService.verify,
     this.clock = DateTime.now,
+    this.dataFlow,
+    this.mcpServers,
   });
 
   final StorageStatus Function() readStatus;
@@ -36,6 +38,11 @@ class DataStoragePage extends StatefulWidget {
   final PickDirectory pickDirectory;
   final Future<List<String>> Function(String backupDir) verify;
   final DateTime Function() clock;
+
+  /// Entry points owned by the shell: 数据去向 and MCP server pages. Passed as
+  /// widgets so this page keeps no direct host dependency.
+  final Widget? dataFlow;
+  final Widget? mcpServers;
 
   @override
   State<DataStoragePage> createState() => _DataStoragePageState();
@@ -248,9 +255,54 @@ class _DataStoragePageState extends State<DataStoragePage> {
             ],
           ),
         ),
+        if (widget.dataFlow != null || widget.mcpServers != null)
+          _Section(
+            title: '数据去向与外部工具',
+            child: Material(
+              type: MaterialType.transparency,
+              child: Column(
+                children: [
+                  if (widget.dataFlow != null)
+                    _entry(
+                      context,
+                      '数据去向',
+                      '模型请求与工具调用实际发到了哪里',
+                      widget.dataFlow!,
+                    ),
+                  if (widget.mcpServers != null)
+                    _entry(
+                      context,
+                      'MCP 服务器',
+                      '添加并连接外部工具服务器',
+                      widget.mcpServers!,
+                    ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }
+
+  Widget _entry(
+    BuildContext context,
+    String title,
+    String detail,
+    Widget body,
+  ) => ListTile(
+    contentPadding: EdgeInsets.zero,
+    title: Text(title),
+    subtitle: Text(detail),
+    trailing: const Icon(Icons.chevron_right),
+    onTap: () => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: Text(title)),
+          body: body,
+        ),
+      ),
+    ),
+  );
 }
 
 class _Section extends StatelessWidget {
