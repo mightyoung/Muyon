@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../integration_test/support/north_star_chain.dart';
 
-/// Inquiry North Star chain, headless. Without `MUYON_EVAL_MODEL_*` a loopback
+/// Inquiry North Star chain, headless. Without `MUYON_EVAL_REAL=1` a loopback
 /// fixture model answers and the evidence is labelled "fixture" (not M/R
 /// evidence). See docs/implementation/north-star-inquiry-runbook.md.
 void main() {

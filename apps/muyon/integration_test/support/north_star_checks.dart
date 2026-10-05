@@ -21,11 +21,14 @@ const _seededComparisons = {
 
 /// Whatever the model asked, the registered tools return the module's own
 /// numbers: the cheapest quote per seeded line, and budget cost
-/// 100×11.80 + 20×45.00 = 2080. Checked on every matching receipt.
+/// 100×11.80 + 20×45.00 = 2080 over both lines. Checked on every matching
+/// receipt. With [requireAll] (the fixture, which asks both questions) both
+/// checks must have run, so a changed tool result cannot skip them silently.
 void checkReadResults(
   List<Map<String, Object?>> receipts,
-  Map<String, Object?> evidence,
-) {
+  Map<String, Object?> evidence, {
+  required bool requireAll,
+}) {
   final checked = <String>[];
   for (final receipt in receipts) {
     final result = jsonDecode(receipt['result_json'] as String) as Map;
@@ -48,11 +51,17 @@ void checkReadResults(
       }
     }
     if (receipt['tool_id'] == 'inquiry.project_budget' &&
-        output['cost'] != null &&
-        output['total'] == 2) {
+        output['cost'] != null) {
+      expect(output['total'], 2, reason: 'Both seeded budget lines');
       expect(double.parse(output['cost'] as String), 2080);
       checked.add('project_budget');
     }
+  }
+  if (requireAll) {
+    expect(checked.toSet(), {
+      'compare_quotes',
+      'project_budget',
+    }, reason: 'Fixture read results must match the seeded data');
   }
   evidence['readResultsChecked'] = checked;
 }

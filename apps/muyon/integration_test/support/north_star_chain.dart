@@ -6,15 +6,17 @@
 // model round and every write is confirmed with the digest the host showed,
 // and nothing is written before that confirmation.
 //
-// Model: `MUYON_EVAL_MODEL_ENDPOINT` + `MUYON_EVAL_MODEL_ID` (+ optional
-// `MUYON_EVAL_MODEL_KEY`, `MUYON_EVAL_MODEL_LOCATION`), read from
-// `--dart-define` first and the process environment second. Without them a
+// Model: `MUYON_EVAL_REAL=1` with `MUYON_EVAL_MODEL_ENDPOINT` +
+// `MUYON_EVAL_MODEL_ID` (+ optional `MUYON_EVAL_MODEL_KEY`,
+// `MUYON_EVAL_MODEL_LOCATION`), read from `--dart-define` first and the
+// process environment second. Without the switch a
 // loopback fixture model scripted by this driver answers, and the evidence
 // says so: a fixture run is not real-model (M) or real-device (R) evidence.
 // See docs/implementation/north-star-inquiry-runbook.md.
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/assistant/personal_agent.dart';
@@ -69,8 +71,16 @@ class NorthStarInquiryChain {
 
   Future<void> run() async {
     _clock.start();
-    final settings = NorthStarModelSettings.fromEnvironment();
-    final real = settings != null;
+    // Decided before parsing so a bad configuration still yields evidence of
+    // the run that was asked for.
+    final real = NorthStarModelSettings.realRequested;
+    if (!real && NorthStarModelSettings.modelVariablesSet) {
+      debugPrint(
+        'North Star: model variables found but MUYON_EVAL_REAL=1 is not set; '
+        'running with the fixture model.',
+      );
+    }
+    NorthStarModelSettings? settings;
     evidence
       ..['kind'] = 'muyon-north-star-inquiry'
       ..['schema'] = 1
@@ -96,6 +106,7 @@ class NorthStarInquiryChain {
       ..['steps'] = _steps
       ..['tasks'] = _taskEvidence;
     try {
+      settings = NorthStarModelSettings.fromEnvironment();
       if (!real) _fixture = await FixtureModelServer.start();
       if (settings?.key != null) {
         bindEnvSecretStore(
@@ -134,8 +145,8 @@ class NorthStarInquiryChain {
     final store = host.inquiry!.runtime.state.store;
     final data = await _step('inquiry.seed', () async => seedInquiry(store));
     evidence['seed'] = {
-      'suppliers': 2,
-      'budgetLines': 2,
+      'suppliers': countRows(store, 'supplier'),
+      'budgetLines': countRows(store, 'project_item'),
       'quotations': countRows(store, 'quotation'),
       'inquiries': countRows(store, 'inquiry'),
     };
@@ -184,7 +195,7 @@ class NorthStarInquiryChain {
       FixtureModelServer.tool('inquiry.compare_quotes', {
         'product_id': data.cableProduct,
       }),
-      FixtureModelServer.answer('电缆最低可用报价来自北极星乙线缆。', citeType: 'product'),
+      FixtureModelServer.answer('电缆最低可用报价来自北极星乙线缆。', citeType: 'quotation'),
     ]);
     final compare = await _step(
       'assistant.read.compare_quotes',
@@ -219,19 +230,23 @@ class NorthStarInquiryChain {
     for (final task in [compare, budget]) {
       expect(task.state, PersonalTaskState.succeeded, reason: task.error);
     }
+    if (settings == null) {
+      for (final entry in _taskEvidence) {
+        expect(
+          entry['answerReferences'],
+          greaterThan(0),
+          reason: 'Fixture answer for ${entry['id']} cites its tool result',
+        );
+      }
+    }
     final readReceipts = receiptRows(host);
-    expect(
-      readReceipts.where((r) => r['state'] == 'succeeded'),
-      isNotEmpty,
-      reason: 'Read questions must be answered through a registered tool',
-    );
     expect(
       approvalRows(host),
       isEmpty,
       reason: 'Read tools never need or receive a write approval',
     );
     expect(countRows(store, 'inquiry'), 1, reason: 'Reads must not write');
-    checkReadResults(readReceipts, evidence);
+    checkReadResults(readReceipts, evidence, requireAll: settings == null);
 
     // Write: a topic conversation over the records the person selected.
     final selected = await _step('scope.select', () async {
@@ -359,6 +374,7 @@ class NorthStarInquiryChain {
     Store? store,
   }) async {
     final agent = host.personalAgent;
+    final receiptsBefore = receiptRows(host).length;
     var task = await agent.start(
       conversationId: conversationId,
       prompt: prompt,
@@ -416,7 +432,34 @@ class NorthStarInquiryChain {
           .last
           .references
           .length;
+    if (phase == 'read') _requireReadTool(host, task, entry, receiptsBefore);
     return task;
+  }
+
+  /// Each read question on its own must have gone through a registered
+  /// read-only tool that succeeded; an answer from the model alone fails the
+  /// run, so it can never be booked as evidence that tools answered.
+  void _requireReadTool(
+    MuyonHost host,
+    PersonalTask task,
+    Map<String, Object?> entry,
+    int receiptsBefore,
+  ) {
+    final reads = [
+      for (final r in receiptRows(host).skip(receiptsBefore))
+        if (r['state'] == 'succeeded' &&
+            host.tools.inspect(r['tool_id'] as String)?.accessLevel ==
+                ToolAccessLevel.read)
+          r['tool_id'] as String,
+    ];
+    entry['readReceipts'] = reads;
+    if (proposedTools(task).isEmpty || reads.isEmpty) {
+      throw StateError(
+        'Read question ${task.id} was answered without a registered read '
+        'tool (proposed ${proposedTools(task)}, succeeded read receipts '
+        '$reads)',
+      );
+    }
   }
 
   Future<void> _approveWrite(
@@ -462,12 +505,27 @@ class NorthStarInquiryChain {
         .single;
     expect(receipt['state'], 'succeeded', reason: '${receipt['result_json']}');
     expect(receipt['identity_digest'], digest);
+    final approvalMs = watch.elapsedMilliseconds;
+    final afterApproval = countRows(store, 'inquiry');
+    // The approval is single-use: confirming the same preview again is
+    // refused and writes nothing more.
+    await expectLater(
+      host.personalAgent.confirm(task.id, requestDigest: digest),
+      throwsStateError,
+    );
+    expect(countRows(store, 'inquiry'), afterApproval);
+    expect(approvalRows(host), hasLength(1));
+    expect(
+      receiptRows(host).where((r) => r['tool_id'] == call['toolId']),
+      hasLength(1),
+    );
     evidence['write'] = {
       'toolId': call['toolId'],
       'inquiriesBeforeApproval': inquiries,
-      'inquiriesAfterApproval': countRows(store, 'inquiry'),
+      'inquiriesAfterApproval': afterApproval,
       'wrongDigestRefused': true,
-      'approvalToResultMs': watch.elapsedMilliseconds,
+      'repeatConfirmRefused': true,
+      'approvalToResultMs': approvalMs,
     };
   }
 }

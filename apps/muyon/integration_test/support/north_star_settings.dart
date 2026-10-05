@@ -14,6 +14,7 @@ const _defineLocation = String.fromEnvironment('MUYON_EVAL_MODEL_LOCATION');
 const _defineEvidence = String.fromEnvironment('MUYON_EVIDENCE_OUT');
 const _defineDevice = String.fromEnvironment('MUYON_EVAL_DEVICE_LABEL');
 const _defineCommit = String.fromEnvironment('MUYON_EVAL_COMMIT');
+const _defineReal = String.fromEnvironment('MUYON_EVAL_REAL');
 
 /// `--dart-define` wins (it is the only channel that reaches an app on a
 /// device); the process environment is the fallback for desktop and headless.
@@ -26,6 +27,7 @@ String? northStarSetting(String name) {
     'MUYON_EVIDENCE_OUT' => _defineEvidence,
     'MUYON_EVAL_DEVICE_LABEL' => _defineDevice,
     'MUYON_EVAL_COMMIT' => _defineCommit,
+    'MUYON_EVAL_REAL' => _defineReal,
     _ => '',
   };
   if (defined.trim().isNotEmpty) return defined.trim();
@@ -48,22 +50,49 @@ class NorthStarModelSettings {
   final ModelLocation location;
   final String source;
 
+  /// Model variables are set, whether or not the real run is switched on.
+  static bool get modelVariablesSet =>
+      northStarSetting('MUYON_EVAL_MODEL_ENDPOINT') != null ||
+      northStarSetting('MUYON_EVAL_MODEL_ID') != null;
+
+  /// A real model is used only with `MUYON_EVAL_REAL=1` as well, so exported
+  /// model variables never turn a plain `flutter test` into paid requests.
+  static bool get realRequested =>
+      northStarSetting('MUYON_EVAL_REAL') == '1' && modelVariablesSet;
+
+  /// Null for the fixture. Errors never quote the configured values: a
+  /// malformed endpoint may carry a credential.
   static NorthStarModelSettings? fromEnvironment() {
+    if (!realRequested) return null;
     final endpoint = northStarSetting('MUYON_EVAL_MODEL_ENDPOINT');
     final model = northStarSetting('MUYON_EVAL_MODEL_ID');
-    if (endpoint == null && model == null) return null;
     if (endpoint == null || model == null) {
       throw StateError(
         'Set both MUYON_EVAL_MODEL_ENDPOINT and MUYON_EVAL_MODEL_ID, or neither',
       );
     }
-    final uri = Uri.parse(endpoint);
+    final uri = Uri.tryParse(endpoint);
+    if (uri == null ||
+        !uri.hasScheme ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        uri.hasQuery ||
+        uri.hasFragment) {
+      throw StateError(
+        'MUYON_EVAL_MODEL_ENDPOINT must be an absolute URL without user info, '
+        'query or fragment (value not shown)',
+      );
+    }
     final named = northStarSetting('MUYON_EVAL_MODEL_LOCATION');
-    final location = named != null
-        ? ModelLocation.values.byName(named)
-        : ['localhost', '127.0.0.1', '::1'].contains(uri.host)
-        ? ModelLocation.local
-        : ModelLocation.remote;
+    final location = named == null
+        ? ['localhost', '127.0.0.1', '::1'].contains(uri.host)
+              ? ModelLocation.local
+              : ModelLocation.remote
+        : ModelLocation.values.where((l) => l.name == named).firstOrNull ??
+              (throw StateError(
+                'MUYON_EVAL_MODEL_LOCATION must be one of '
+                '${ModelLocation.values.map((l) => l.name).join('/')}',
+              ));
     return NorthStarModelSettings._(
       uri,
       model,
