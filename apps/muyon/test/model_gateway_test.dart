@@ -24,6 +24,46 @@ ModelProfile localProfile(HttpServer server, {String? credentialRef}) =>
     );
 
 void main() {
+  test('a provider base URL is completed to the chat or embeddings path', () {
+    Uri done(String url, [ModelPurpose purpose = ModelPurpose.chat]) =>
+        completeModelEndpoint(Uri.parse(url), purpose);
+    expect(
+      '${done('https://api.deepseek.com')}',
+      'https://api.deepseek.com/chat/completions',
+    );
+    expect(
+      '${done('https://api.deepseek.com/')}',
+      'https://api.deepseek.com/chat/completions',
+    );
+    expect(
+      '${done('http://127.0.0.1:11434/v1')}',
+      'http://127.0.0.1:11434/v1/chat/completions',
+    );
+    expect(
+      '${done('https://api.example.com/v1/', ModelPurpose.embedding)}',
+      'https://api.example.com/v1/embeddings',
+    );
+    // A full or custom path is used exactly as given.
+    expect(
+      '${done('https://api.example.com/v1/chat/completions')}',
+      'https://api.example.com/v1/chat/completions',
+    );
+    expect(
+      '${done('https://gw.example.com/openai/deployments/x/chat')}',
+      'https://gw.example.com/openai/deployments/x/chat',
+    );
+    final stored = ModelProfile(
+      id: 'p',
+      endpoint: Uri.parse('https://api.deepseek.com'),
+      location: ModelLocation.remote,
+      modelId: 'm',
+      endpointIdentity: 'deepseek',
+      credentialRef: 'r',
+    );
+    expect('${stored.endpoint}', 'https://api.deepseek.com/chat/completions');
+    expect(stored.toJson()['endpoint'], '${stored.endpoint}');
+  });
+
   test('real HTTP sends frozen model, bearer and parses chat subset', () async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => server.close(force: true));

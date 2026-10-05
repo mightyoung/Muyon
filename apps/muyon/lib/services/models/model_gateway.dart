@@ -18,32 +18,43 @@ class UnavailableSecretStore implements SecretStore {
   Future<String?> read(String reference) async => null;
 }
 
+/// OpenAI-compatible providers document a base URL ("https://api.deepseek.com"
+/// or ".../v1"); the request goes to its chat or embeddings path. A base URL
+/// is completed here so the stored profile, the consent preview and the
+/// request all show the same full URL. Any other path is used as given.
+Uri completeModelEndpoint(Uri endpoint, ModelPurpose purpose) {
+  final path = endpoint.path.replaceAll(RegExp(r'/+$'), '');
+  if (path.isNotEmpty && !RegExp(r'^/v\d+$').hasMatch(path)) return endpoint;
+  final tail = purpose == ModelPurpose.chat ? 'chat/completions' : 'embeddings';
+  return endpoint.replace(path: '$path/$tail');
+}
+
 class ModelProfile {
   ModelProfile({
     required this.id,
-    required this.endpoint,
+    required Uri endpoint,
     required this.location,
     required this.modelId,
     required this.endpointIdentity,
     this.credentialRef,
     this.cloudProxy = false,
     this.purpose = ModelPurpose.chat,
-  }) {
-    if (!endpoint.hasAuthority ||
-        endpoint.userInfo.isNotEmpty ||
-        endpoint.fragment.isNotEmpty ||
-        endpoint.query.isNotEmpty ||
-        !['http', 'https'].contains(endpoint.scheme) ||
+  }) : endpoint = completeModelEndpoint(endpoint, purpose) {
+    if (!this.endpoint.hasAuthority ||
+        this.endpoint.userInfo.isNotEmpty ||
+        this.endpoint.fragment.isNotEmpty ||
+        this.endpoint.query.isNotEmpty ||
+        !['http', 'https'].contains(this.endpoint.scheme) ||
         modelId.trim().isEmpty ||
         id.isEmpty ||
         endpointIdentity.isEmpty) {
       throw ArgumentError('Invalid model profile');
     }
-    if (location == ModelLocation.remote && endpoint.scheme != 'https') {
+    if (location == ModelLocation.remote && this.endpoint.scheme != 'https') {
       throw ArgumentError('Remote endpoints require HTTPS');
     }
     if (location == ModelLocation.local &&
-        !['localhost', '127.0.0.1', '::1'].contains(endpoint.host)) {
+        !['localhost', '127.0.0.1', '::1'].contains(this.endpoint.host)) {
       throw ArgumentError('Local endpoints must be loopback');
     }
     if (location != ModelLocation.local && credentialRef == null) {

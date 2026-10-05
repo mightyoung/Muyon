@@ -97,8 +97,10 @@ extension _PersonalSections on _PlatformShellState {
                 TextField(
                   controller: endpoint,
                   decoration: const InputDecoration(
-                    labelText: '完整端点 URL',
-                    hintText: 'http://127.0.0.1:11434/v1/chat/completions',
+                    labelText: '端点 URL',
+                    hintText:
+                        'https://api.deepseek.com 或 http://127.0.0.1:11434/v1',
+                    helperText: '只填到域名或 /v1 时自动补全对话或向量路径',
                   ),
                 ),
                 TextField(

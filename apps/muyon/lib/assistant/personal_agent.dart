@@ -370,8 +370,15 @@ class PersonalAgent {
           final approval = await tools.approve(prepared);
           await _runTool(task, prepared.request.withApproval(approval));
         }
-      } catch (_) {
-        await _fail(task, '执行失败；请检查端点、工具权限或资料范围后新建尝试');
+      } catch (error) {
+        // Name the cause (e.g. model_http_404) so a wrong endpoint or model
+        // name can be fixed. Credentials never appear in these messages.
+        final cause = '$error'.replaceAll(RegExp(r'\s+'), ' ');
+        await _fail(
+          task,
+          '执行失败（${cause.length > 160 ? '${cause.substring(0, 160)}…' : cause}）；'
+          '请检查端点、模型名称、工具权限或资料范围后新建尝试',
+        );
       }
     });
     _operations[taskId] = future;
