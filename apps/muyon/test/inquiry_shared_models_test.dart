@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/inquiry_plugin.dart';
 import 'package:muyon/platform/storage_manager.dart';
+import 'package:muyon/platform/outbound_ledger.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/models/profile_repository.dart';
 import 'package:muyon/services/models/secret_store.dart';
@@ -30,6 +31,7 @@ class MemoryModelSecrets extends MethodChannelSecretStore {
 
 void main() {
   late ManagedConnection database;
+  late OutboundLedger ledger;
   late ProfileRepository profiles;
   late MemoryModelSecrets secrets;
   late HttpServer server;
@@ -40,10 +42,16 @@ void main() {
     database.raw.execute(
       'CREATE TABLE settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)',
     );
+    OutboundLedger.createTable(database.raw);
+    ledger = OutboundLedger(database);
     profiles = ProfileRepository(WorkspaceRepository(database));
     secrets = MemoryModelSecrets();
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    gateway = OpenAiModelGateway(secrets, timeout: const Duration(seconds: 3));
+    gateway = OpenAiModelGateway(
+      secrets,
+      ledger: ledger,
+      timeout: const Duration(seconds: 3),
+    );
     profile = ModelProfile(
       id: 'active',
       endpoint: Uri.parse(
@@ -167,6 +175,12 @@ void main() {
     expect(response['content'], 'answer');
     expect(response['tool_calls'], isNotEmpty);
     expect(approvals, 1);
+    final record = ledger.recent().single;
+    expect(record['caller'], 'inquiry');
+    expect(record['status'], 'succeeded');
+    expect(record['profile_id'], profile.id);
+    expect(record['endpoint'], profile.endpoint.toString());
+    expect(record['payload_sha256'], approved.bodyDigest);
   });
 
   test(

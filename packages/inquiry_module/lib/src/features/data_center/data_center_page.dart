@@ -94,6 +94,8 @@ class _DataCenterPageState extends State<DataCenterPage> {
                   // Switching tabs must not reload the web view.
                   _KeepAlive(
                     child: OntologyGraphHost(
+                      userDataDirectory:
+                          '${widget.state.dataDir.path}/ontology_webview',
                       counts: counts,
                       selected: selected,
                       onSelect: (t) => setState(() => selected = t),

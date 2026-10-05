@@ -35,6 +35,7 @@ class AiJobStore {
   final RandomAccessFile? _lock;
   final String? _path;
   bool get _ownsDatabase => _lock != null;
+  bool get isHostManaged => !_ownsDatabase;
 
   /// Host owns schema initialization, connection and lock/lifetime policy.
   AiJobStore.attach(Database database) : this._(database, null, null);
@@ -42,6 +43,7 @@ class AiJobStore {
   final _active = <String, AiJobSession>{};
   var _closed = false;
 
+  /// Standalone/test entry point; hosted inquiry requires [attach].
   static AiJobStore open(String path) {
     final file = File(path);
     file.parent.createSync(recursive: true);

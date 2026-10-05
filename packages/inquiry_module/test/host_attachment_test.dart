@@ -42,6 +42,148 @@ class HostModelSettings implements InquiryModelSettingsBridge {
 }
 
 void main() {
+  test(
+    'host-owned task storage reports hosted and survives state disposal',
+    () {
+      final directory = Directory.systemTemp.createTempSync(
+        'inquiry-host-identity',
+      );
+      final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+      createSchema(db);
+      AiJobStore.initializeSchema(jobsDb);
+      final jobs = AiJobStore.attach(jobsDb);
+      addTearDown(() {
+        jobs.close();
+        db.close();
+        jobsDb.close();
+        directory.deleteSync(recursive: true);
+      });
+      final state = AppState.attach(
+        store: Store.attach(
+          db,
+          device: 'host',
+          backgroundExecutor: <T>(action) async => await action(),
+        ),
+        dataDir: directory,
+        aiJobs: jobs,
+        secrets: HostSecrets(),
+      );
+      expect(state.isHosted, isTrue);
+      expect(state.aiTasks, isEmpty);
+      state.dispose();
+      expect(jobs.jobs, isEmpty);
+      expect(jobsDb.select('PRAGMA quick_check').single.values.single, 'ok');
+    },
+  );
+
+  test('standalone test state reports standalone', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'inquiry-test-identity',
+    );
+    final db = sqlite3.openInMemory();
+    createSchema(db);
+    final state = AppState.test(Store(db, device: 'standalone'), directory);
+    addTearDown(() {
+      state.dispose();
+      db.close();
+      directory.deleteSync(recursive: true);
+    });
+    expect(state.isHosted, isFalse);
+  });
+
+  test('host attachment rejects stores with standalone database ownership', () {
+    final directory = Directory.systemTemp.createTempSync('inquiry-host-guard');
+    final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+    createSchema(db);
+    AiJobStore.initializeSchema(jobsDb);
+    addTearDown(() {
+      db.close();
+      jobsDb.close();
+      directory.deleteSync(recursive: true);
+    });
+    expect(
+      () => AppState.attach(
+        store: Store(db, device: 'standalone'),
+        dataDir: directory,
+        aiJobs: AiJobStore.attach(jobsDb),
+        secrets: HostSecrets(),
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => Store.attach(db, device: 'host', backgroundExecutor: null),
+      throwsArgumentError,
+    );
+    final standaloneJobs = AiJobStore.open(
+      '${directory.path}/standalone-jobs.db',
+    );
+    addTearDown(standaloneJobs.close);
+    expect(
+      () => AppState.attach(
+        store: Store.attach(
+          db,
+          device: 'host',
+          backgroundExecutor: <T>(action) async => await action(),
+        ),
+        dataDir: directory,
+        aiJobs: standaloneJobs,
+        secrets: HostSecrets(),
+      ),
+      throwsArgumentError,
+    );
+  });
+  for (final mode in ['absent', 'unconfigured', 'failed']) {
+    test(
+      'hosted models never use legacy credentials when factory is $mode',
+      () async {
+        final directory = Directory.systemTemp.createTempSync(
+          'inquiry-model-guard',
+        );
+        final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+        createSchema(db);
+        AiJobStore.initializeSchema(jobsDb);
+        final jobs = AiJobStore.attach(jobsDb);
+        final secrets = HostSecrets();
+        final failure = StateError('Host model unavailable');
+        final runtime = InquiryRuntime.attach(
+          store: Store.attach(
+            db,
+            device: 'host',
+            backgroundExecutor: <T>(action) async => await action(),
+          ),
+          dataDirectory: directory,
+          aiJobs: jobs,
+          secrets: secrets,
+          sharedModelSettings: mode == 'absent' ? null : HostModelSettings(),
+          sharedLlmFactory: mode == 'absent'
+              ? null
+              : ({cancellation}) async {
+                  if (mode == 'failed') throw failure;
+                  return null;
+                },
+        );
+        addTearDown(() async {
+          await runtime.close();
+          jobs.close();
+          db.close();
+          jobsDb.close();
+          directory.deleteSync(recursive: true);
+        });
+        // Legacy credentials must not turn a missing host model into a client.
+        secrets.values['llm_api_key'] = 'legacy-key';
+        await runtime.state.saveAi(
+          baseUrl: 'http://127.0.0.1:1/v1',
+          model: 'legacy',
+          apiKey: 'legacy-key',
+        );
+        if (mode == 'failed') {
+          await expectLater(runtime.state.llm(), throwsA(same(failure)));
+        } else {
+          expect(await runtime.state.llm(), isNull);
+        }
+      },
+    );
+  }
   test('shared model settings and factory override legacy config with task cancellation', () async {
     final directory = Directory.systemTemp.createTempSync('inquiry-model-host');
     final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
@@ -147,6 +289,9 @@ void main() {
       expect(runtime.state.lan, isNull);
       expect(runtime.state.lanVisible, isFalse);
       expect(runtime.state.aiTasks, isEmpty);
+      await runtime.state.backupNow();
+      expect(Directory(runtime.state.backupDir).existsSync(), isFalse);
+      expect(File("${directory.path}/ai-jobs.sqlite").existsSync(), isFalse);
       await runtime.state.saveExchangePassphrase('secret-value');
       expect(await runtime.state.exchangePassphrase(), 'secret-value');
       expect(

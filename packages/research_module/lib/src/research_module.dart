@@ -8,17 +8,19 @@ import 'package:path/path.dart' as p;
 
 import 'app/workbench_app.dart';
 import 'core/exchange.dart';
+import 'core/change_log.dart';
 import 'core/store.dart';
 import 'cards/card_store.dart';
 import 'research_services.dart';
+import 'reader/reader_page.dart';
 
 class ResearchModule implements BusinessModule {
   @override
   ModuleManifest get manifest => ModuleManifest(id: 'research');
   @override
   ModuleSchema get schema => ModuleSchema(
-    version: 8,
-    definitionDigest: 'research-schema-8',
+    version: 9,
+    definitionDigest: 'research-schema-9',
     migrations: [
       for (var i = 0; i < WorkbenchStore.migrations.length; i++)
         ModuleMigration(
@@ -41,6 +43,12 @@ CREATE TABLE change_log(sequence INTEGER PRIMARY KEY AUTOINCREMENT, project_id T
         id: 'research-8',
         definitionDigest: 'research-schema-8',
         migrate: installResearchKnowledgeSchema,
+      ),
+      ModuleMigration(
+        version: 9,
+        id: 'research-9',
+        definitionDigest: 'research-schema-9',
+        migrate: installResearchChangeLog,
       ),
     ],
   );
@@ -128,9 +136,7 @@ class ResearchRuntime implements ModuleRuntime {
     if (target.binding.moduleId != 'research') throw StateError('Wrong module');
     final frozen = await resources.files.freeze(input);
     final snapshot = await ResearchExchange(store).prepareResearch(frozen.path);
-    final metadata = File(
-      p.join(snapshot.snapshot.path, '.muyon-import.json'),
-    );
+    final metadata = File(p.join(snapshot.snapshot.path, '.muyon-import.json'));
     if (await metadata.exists()) {
       throw const FormatException('Reserved import metadata path');
     }
@@ -352,27 +358,104 @@ class ResearchSession implements ModuleSession {
   }
 
   @override
-  Future<ObjectView?> resolve(ObjectRef ref) async {
+  Future<ObjectView?> resolve(ObjectRef ref) async => _resolve(ref);
+
+  ObjectView? _resolve(ObjectRef ref) {
     ensureActive();
     if (ref.moduleId != 'research' ||
         ref.nativeProjectId != binding.nativeProjectId) {
       return null;
     }
-    if (ref.objectType == 'document') {
-      final doc = store
-          .documents(binding.nativeProjectId)
-          .where((d) => d.id == ref.objectId)
-          .firstOrNull;
-      if (doc != null) return ObjectView(ref: ref, title: doc.relativePath);
+    final project = binding.nativeProjectId;
+    final id = ref.objectId;
+    ObjectView? view(String title, {String? revision, String? digest}) {
+      if ((ref.revisionRef != null && ref.revisionRef != revision) ||
+          (ref.contentDigest != null && ref.contentDigest != digest)) {
+        return null;
+      }
+      return ObjectView(ref: ref, title: title);
     }
-    if (ref.objectType == 'entry') {
-      final entry = store
-          .entries(binding.nativeProjectId)
-          .where((e) => e.id == ref.objectId)
-          .firstOrNull;
-      if (entry != null) return ObjectView(ref: ref, title: entry.title);
+
+    switch (ref.objectType) {
+      case 'document':
+        final rows = store.db.select(
+          'SELECT relative_path,sha256 FROM documents WHERE id=? AND project_id=?',
+          [id, project],
+        );
+        if (rows.isNotEmpty) {
+          return view(
+            rows.single['relative_path'] as String,
+            digest: rows.single['sha256'] as String?,
+          );
+        }
+        final canonical = store.db.select(
+          'SELECT d.file_name,d.digest FROM rk_documents d JOIN canonical_object_map m ON m.object_key=d.object_key WHERE m.local_object_id=? AND m.local_project_id=? AND m.object_type=? AND d.deleted=0',
+          [id, project, 'document'],
+        );
+        if (canonical.length != 1) return null;
+        return view(
+          canonical.single['file_name'] as String,
+          digest: canonical.single['digest'] as String,
+        );
+      case 'entry':
+      case 'outline':
+      case 'section':
+        final (table, title) = switch (ref.objectType) {
+          'entry' => ('entries', 'title'),
+          'outline' => ('outline', 'heading'),
+          _ => ('sections', 'heading'),
+        };
+        final rows = store.db.select(
+          'SELECT $title FROM $table WHERE id=? AND project_id=?',
+          [id, project],
+        );
+        return rows.isEmpty ? null : view(rows.single[title] as String? ?? id);
+      case 'task':
+        final rows = store.db.select(
+          'SELECT title,revision FROM tasks WHERE id=? AND project_id=? '
+          '${ref.revisionRef == null ? '' : 'AND CAST(revision AS TEXT)=? '}ORDER BY revision DESC LIMIT 1',
+          [id, project, if (ref.revisionRef != null) ref.revisionRef],
+        );
+        return rows.isEmpty
+            ? null
+            : view(
+                rows.single['title'] as String? ?? id,
+                revision: '${rows.single['revision']}',
+              );
+      case 'run':
+        final rows = store.db.select(
+          'SELECT t.title,r.status,r.task_revision FROM runs r JOIN tasks t ON t.id=r.task_id AND t.revision=r.task_revision WHERE r.id=? AND t.project_id=?',
+          [id, project],
+        );
+        return rows.isEmpty
+            ? null
+            : view(
+                '${rows.single['title']} — ${rows.single['status']}',
+                revision: '${rows.single['task_revision']}',
+              );
+      case 'card':
+        final rows = store.db.select(
+          'SELECT v.envelope,v.revision_id,v.digest FROM canonical_object_map m '
+          'JOIN rk_cards c ON c.object_key=m.object_key '
+          'JOIN rk_revisions v ON v.object_key=m.object_key AND v.revision_id=${ref.revisionRef == null ? 'c.head_revision_id' : '?'} '
+          'WHERE m.local_object_id=? AND m.local_project_id=? AND m.object_type=?',
+          [if (ref.revisionRef != null) ref.revisionRef, id, project, 'card'],
+        );
+        if (rows.isEmpty) return null;
+        final body =
+            (jsonDecode(rows.single['envelope'] as String)
+                    as Map)['bodyMarkdown']
+                as String;
+        return view(
+          body.isEmpty
+              ? id
+              : body.substring(0, body.length > 240 ? 240 : body.length),
+          revision: rows.single['revision_id'] as String,
+          digest: rows.single['digest'] as String,
+        );
+      default:
+        return null;
     }
-    return null;
   }
 
   @override
@@ -385,8 +468,19 @@ class ResearchSession implements ModuleSession {
     _disposed = true;
   }
 
-  // Dedicated object pages are wired in W1 (C track); resolve() stays the
-  // authoritative existence/scope check.
+  /// Recheck at navigation time: a previously resolved reference can be stale.
+  /// Other object types need B-owned focused UI entry points before wiring.
   @override
-  Widget? objectPage(BuildContext context, ObjectRef ref) => null;
+  Widget? objectPage(BuildContext context, ObjectRef ref) {
+    if (_resolve(ref) == null || ref.objectType != 'document') return null;
+    final document = store
+        .documents(binding.nativeProjectId)
+        .where((doc) => doc.id == ref.objectId)
+        .firstOrNull;
+    // Canonical package documents have bytes but no existing ReaderPage file
+    // adapter yet. Do not advertise a project overview as their object page.
+    return document == null
+        ? null
+        : ReaderPage(store: store, document: document);
+  }
 }

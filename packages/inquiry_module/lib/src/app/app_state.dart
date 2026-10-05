@@ -40,7 +40,13 @@ class AppState extends ChangeNotifier {
        // ignore: prefer_initializing_formals
        _aiJobs = aiJobs,
        _secure = secrets,
-       _ownsJobs = false {
+       _ownsJobs = false,
+       _isHosted = true {
+    if (!store.isHostManaged || !aiJobs.isHostManaged) {
+      throw ArgumentError(
+        'Hosted inquiry requires host-managed business and task stores',
+      );
+    }
     if ((sharedLlmFactory == null) != (sharedModelSettings == null)) {
       throw ArgumentError(
         'Shared model factory and settings must be supplied together',
@@ -54,13 +60,15 @@ class AppState extends ChangeNotifier {
       _secure = const PlatformInquirySecrets(),
       sharedLlmFactory = null,
       sharedModelSettings = null,
-      _ownsJobs = true;
+      _ownsJobs = true,
+      _isHosted = false;
 
   final Store store;
   final Directory dataDir;
   final Map<String, Object?> _settings;
   final InquirySecretStore _secure;
   final bool _ownsJobs;
+  final bool _isHosted;
   final SharedLlmFactory? sharedLlmFactory;
   final InquiryModelSettingsBridge? sharedModelSettings;
   final _pendingAiTasks = <Future<void>>{};
@@ -205,6 +213,9 @@ class AppState extends ChangeNotifier {
     super.dispose();
   }
 
+  /// Hosted applications coordinate full-app backups themselves.
+  bool get isHosted => _isHosted;
+
   String get backupDir => '${dataDir.path}/backups';
 
   /// Why today's automatic backup failed, shown in settings; null if fine.
@@ -213,6 +224,7 @@ class AppState extends ChangeNotifier {
   // Runs in the background after the window opens. A failed backup must not
   // stop the app; it is reported in settings instead.
   Future<void> backupNow() async {
+    if (isHosted) return;
     final dir = backupDir;
     try {
       await store.inBackground(_backupJob(dir));
@@ -549,11 +561,13 @@ class AppState extends ChangeNotifier {
     saveSetting('ai_model', model);
   }
 
-  /// Null when no key is configured.
+  /// Null when the host has no model configured, or standalone has no key.
   Future<LlmClient?> llm({AiCancellation? cancellation}) async {
     if (sharedLlmFactory != null) {
       return sharedLlmFactory!(cancellation: cancellation);
     }
+    // Hosted models must fail closed instead of using legacy credentials.
+    if (_isHosted) return null;
     final String? key;
     try {
       key = await _secure.read(key: _keyName);

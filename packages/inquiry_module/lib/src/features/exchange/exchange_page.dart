@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
+
 import 'package:supplier_core/supplier_core.dart';
 
 import '../../widgets/app_icon.dart';
@@ -140,7 +141,9 @@ class _ExchangePageState extends State<ExchangePage> {
         panel(
           Icons.upload_file_outlined,
           '导出交换文件',
-          '生成本机全部数据的快照（.siq），发给其他设备导入即可合并。也可留作备份，之后通过整库恢复回到这个时间点。',
+          state.isHosted
+              ? '生成询价业务资料的交换快照（.siq），发给其他设备导入即可合并，也可用于替换询价资料。不包含其他模块、任务或应用设置；完整应用备份由 Muyon 宿主管理。'
+              : '生成本机全部数据的快照（.siq），发给其他设备导入即可合并。也可留作备份，之后通过整库恢复回到这个时间点。',
           FilledButton(
             onPressed: busy ? null : _export,
             child: const Text('导出交换文件'),
@@ -157,11 +160,13 @@ class _ExchangePageState extends State<ExchangePage> {
         ),
         panel(
           Icons.settings_backup_restore_outlined,
-          '从备份恢复整个资料库',
-          '将本机资料库完整替换为所选备份。适合回到旧状态；恢复前会自动另存本机资料库，并经过两次确认。',
+          state.isHosted ? '从交换快照替换询价资料' : '从备份恢复整个资料库',
+          state.isHosted
+              ? '仅将询价业务资料替换为所选快照，不会恢复其他模块、AI任务或应用设置。替换前会另存询价资料，并使现有询价AI任务失效、暂停共享文件夹同步。'
+              : '将本机资料库完整替换为所选备份。适合回到旧状态；恢复前会自动另存本机资料库，并经过两次确认。',
           OutlinedButton(
             onPressed: busy ? null : _restore,
-            child: const Text('选择备份并恢复'),
+            child: Text(state.isHosted ? '选择快照并替换' : '选择备份并恢复'),
           ),
         ),
       ];

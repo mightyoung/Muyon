@@ -100,8 +100,8 @@ void _checkExchangeSchema(Database connection, String schema) {
 }
 
 extension Exchange on Store {
-  /// Writes a consistent snapshot. The same file is the weekly exchange file
-  /// and the backup: importing it into an empty database restores it.
+  /// Writes a consistent supplier business snapshot for exchange or replacement.
+  /// This excludes host state and other modules; full-app backup is host-owned.
   void exportTo(String path) {
     final part = '$path.part';
     final partial = File(part);
@@ -112,6 +112,14 @@ extension Exchange on Store {
       dropSearchIndex(copy);
       // Host migration bookkeeping is local implementation state. Preserve the
       // original data-only supplier format and its strict import allowlist.
+      // Host projections are local derived state, not exchange schema.
+      for (final row in copy.select(
+        "SELECT name FROM sqlite_schema WHERE type='trigger' AND name GLOB 'muyon_*'",
+      )) {
+        final name = (row['name'] as String).replaceAll('"', '""');
+        copy.execute('DROP TRIGGER "$name"');
+      }
+      copy.execute('DROP TABLE IF EXISTS muyon_change_log');
       copy.execute('DROP TABLE IF EXISTS host_schema_state');
       copy.execute('DROP TABLE IF EXISTS schema_migrations');
       copy.userVersion = 0;

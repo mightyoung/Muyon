@@ -97,6 +97,10 @@ void main() {
       }
 
       await tester.pumpWidget(app(false));
+      expect(
+        current!.userDataDirectory,
+        '${state.dataDir.path}/ontology_webview',
+      );
       expect(current!.payload['selected'], 'quotation');
       current!.onRendered();
       await tester.pump();
