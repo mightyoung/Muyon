@@ -22,6 +22,7 @@ import '../platform/memory_review.dart';
 import '../platform/tool_registry.dart';
 import '../platform/business_tools.dart';
 import '../services/knowledge/index_invalidation.dart';
+import '../services/transfer/task_coordinator.dart';
 import '../services/public_services.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/secret_store.dart';
@@ -41,6 +42,7 @@ class MuyonHost {
   late final ToolRegistry tools;
   late final PublicServices services;
   late final PersonalAgent personalAgent;
+  late final TaskCoordinator tasks;
   late final DreamService dream;
   late final ProjectionService projections;
   late final OutboundLedger outbound;
@@ -123,7 +125,10 @@ class MuyonHost {
     }
   }
 
-  static Future<MuyonHost> open(String rootPath) async {
+  static Future<MuyonHost> open(
+    String rootPath, {
+    Future<String> Function(TaskOffer offer)? taskExecutor,
+  }) async {
     final storage = StorageManager(rootPath);
     try {
       final database = await storage.open('muyon', WorkspaceRepository.schema);
@@ -191,6 +196,19 @@ class MuyonHost {
         host.foundation,
         gateway: host.services.gateway,
       );
+      host.tasks = TaskCoordinator(
+        database: database,
+        deviceId: device,
+        send: host.services.transfer.sendTaskEnvelope,
+        executor:
+            taskExecutor ??
+            ((offer) => Future<String>.error(
+              StateError('研究任务的执行仍由科研模块在本地授权后进行：${offer.taskId}'),
+            )),
+        peerReachable: () => host.services.transfer.pairedOnline().isNotEmpty,
+      );
+      host.services.transfer.onTaskEnvelope = host.tasks.receive;
+      await host.services.transfer.deliverPendingTaskEnvelopes();
       registerBusinessTools(host);
       host.capabilities.register('knowledge', host.services.knowledge);
       host.capabilities.register('models', host.services.gateway);

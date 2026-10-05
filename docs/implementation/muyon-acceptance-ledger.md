@@ -12,8 +12,8 @@
 | 2.1a | 主对话/专题对话、桌面并排、手机独立页 | 🟡 | T：`responsive_shell_test`、`personal_agent_test` | R 三端 → W3 |
 | 2.1b | 当前页面/选中对象范围、切换项目同步 | 🟡 | T：`foundation_scope_test`、`qa_scope_test` | 切换项目同步的 UI 测试 → B4 |
 | 2.1c | 执行可视（目标/进度/设备/等待/错误/产物），关闭聊天保留 | 🟡 | T：`execution_recovery_test` | 执行面板 → B4 |
-| 2.1d | 有来源记忆：查看/修改/停用/删除/过期 | 🟡 | T：`personal_agent_test` 记忆用例；`dream_test`（停用后不进助手上下文；删除沿 lineage 传递并挡住同一 id 与已删除经验正文；范围收窄传递；过期与停用默认不返回） | 查看/修改界面 → B5；真实模型整理 M 未测 |
-| 2.1e | 后台整理/Dream 不扩权 | 🟡 | T：`dream_test`（无档案不发网；显式档案才记 `caller=dream`；冲突不能接受；已注册写入工具不被调用，审批与回执表保持空） | 整理界面与由用户发起的运行 → B；启动流程不自动跑 Dream |
+| 2.1d | 有来源记忆：查看/修改/停用/删除/过期 | 🟡 | T：`personal_agent_test` 记忆用例；`dream_test`（停用后不进助手上下文；删除沿 lineage 传递并挡住同一 id 与已删除经验正文；范围收窄传递；过期与停用默认不返回）；`memory_page_test`；D：[记忆与整理接口](dream-ui-api.md) | 记忆页已能查看/修改/停用/删除/过期（develop `9a87ab5`，B 的界面）。范围收窄还没有界面。真实模型整理 M 未测 |
+| 2.1e | 后台整理/Dream 不扩权 | 🟡 | T：`dream_test`（无档案不发网；显式档案才记 `caller=dream`；冲突不能接受；已注册写入工具不被调用，审批与回执表保持空）；`memory_page_test`；D：[记忆与整理接口](dream-ui-api.md)（`MuyonHost.open` 只构造 `DreamService`，不调用 `run()`） | 整理区已能由用户发起运行、接受和撤回（develop `9a87ab5`）。启动流程不自动跑 Dream。真实模型整理 M 未测 |
 | 2.2a | 研究成果导入/手机阅读/论文/批注/检索/限定问答/引用回跳 | 🟡 | T：research 95 项、`search_test`、`qa_scope_test` | 引用锚 C3，批注 UI B2，R → W3 |
 | 2.2b | 问题/方向/证据/实验/结论/卡/提纲关联，关系图/比较/报告 | 🟡 | T：research 95 项（迁入） | R → W3 |
 | 2.2c | 执行过程、分支、接纳/否定理由、不确定性 | 🟡 | T：research run assessment | W3 链路验收 |
@@ -42,13 +42,13 @@
 
 | # | 需求 | 状态 | 已有证据 | 缺口 |
 |---|---|---|---|---|
-| 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`（含效应点后取消/失败记为 interrupted）、`execution_recovery_test`、`outbound_ledger_test`、`mcp_adapter_test`；D：[调用路径审计](invocation-path-audit.md)、[工具选择评测](tool-selection-eval-2026-10-05.md)（离线规则 top-1 8/11，写入/外发误选 0，未切换生产策略）、[Jev 证据审查](jev-evidence-review-2026-10-05.md) | 审计缺口 G1–G5 归 C/D；MCP 服务器配置与“数据去向”界面 → B；Jev API 与 Laya 均未实测（M） |
-| 8 | 记忆/经验/Dream、撤回传递 | 🟡 | 见 2.1d/e | 界面 → B；模型整理 M 未测 |
+| 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`（含效应点后取消/失败记为 interrupted）、`execution_recovery_test`、`outbound_ledger_test`、`mcp_adapter_test`；D：[调用路径审计](invocation-path-audit.md)、[工具选择评测](tool-selection-eval-2026-10-05.md)（140 题。离线规则 top-1 54/140，其中精确 id 28/28，中文/中英/释义为 0；写入/外发误选 0，弃权质量 26/26，本次规则延迟 3.330 ms，费用 0，未切换生产策略。Laya `laya==0.3.27`，检查点 `convaiinnovations/laya-multilingual` 修订 `1720e3e3357cfe1e281542e223f8273b0890ca34`，4 线程，进程内 CPU、无监听端口：校准阈值 0.95，留出集 top-1 46/93，误写 0，p50 439.113 ms，p95 817.457 ms。ONNX 未导出）、[Jev 证据审查](jev-evidence-review-2026-10-05.md) | 审计缺口 G1–G5 归 C/D；MCP 服务器配置与“数据去向”界面 → B；Jev API 未调用；Laya 的概率不是授权，生产策略未切换；ONNX 未导出 |
+| 8 | 记忆/经验/Dream、撤回传递 | 🟡 | 见 2.1d/e | 记忆页和由用户发起的整理已在 develop `9a87ab5`。范围收窄、经验列表管理界面还没有。模型整理 M 未测 |
 | 9a | 模型端点显式、凭据安全存储、无隐式回退 | 🟡 | T：`model_gateway_test`、`profile_routing_test` | M 真实端点 → W3 |
 | 9b | PDF 文字层优先 + PaddleOCR | 🟡 | M：ONNX 参考推理（`public_services_validation.md`） | Flutter 原生 R 三端 → W3 |
 | 9c | 关键词/全文/向量/组合检索、中文短词 | 🟡 | T：FTS5/向量；`retrieval_eval_test`（[300 篇评测](retrieval-eval-2026-10-05.md)：current recall@10 0.961，bigram 0.830，「泵」recall@5 为 0.714 对 0.000；结论仍保持 cjk-bigram + 单字扫描。18 篇历史结果仍在 [retrieval-eval-2026-10-04.md](retrieval-eval-2026-10-04.md)，普通测试不再改写报告） | 向量与真实论文 M 未测 → 待用户提供端点与论文后重测 |
 | 9d | 限定资料问答：定位、断言支持、应答/拒答 | 🟡 | T：引用校验 | M 评测 → W3 |
-| 10 | 发现/配对/授权/接收/导入分离，加密认证 | 🟡 | T：同 2.5；发现不授予信任、未配对/已撤销拒收、明文握手失败；`task_coordinator_test`（重复 offer、双方接受只执行一次、中途重启不二次执行、对端不可达为 unknown、较新结果保留；配对 TLS 投递任务信封不执行） | 双设备 R。内存 nonce 上限仍是 4096，另有重启后的 seen 文件与 5 分钟签名时间窗。启动流程尚未路由任务信封；业务执行仍属 C |
+| 10 | 发现/配对/授权/接收/导入分离，加密认证 | 🟡 | T：同 2.5；发现不授予信任、未配对/已撤销拒收、明文握手失败；`task_coordinator_test`（重复 offer、双方接受只执行一次、中途重启不二次执行、对端不可达为 unknown、较新结果保留；配对 TLS 投递任务信封不执行）；`task_host_test`（两台宿主回环：一次 offer 不执行，双方接受后只有较低设备 id 的注入执行器跑一次，关闭对端后查询为 unknown，本地状态不被改成失败或完成）；`chat_backend_test`（文字经配对 TLS：`sent` 不自动重发也不改成失败，显式 `retryText` 后对方去重并回 `delivered`；离线不落行；撤销配对后历史仍在且拒绝再发；包内 `message` 进聊天且 `imported` 仍为 false；文字不进工具注册表、记忆或经验） | 双设备 R。内存 nonce 上限仍是 4096，另有重启后的 seen 文件与 5 分钟签名时间窗。聊天界面 → B，接口见 [chat-backend.md](chat-backend.md)。科研导入的 `onAccepted` 已由 C/E 接到人工接纳之后。替换执行器之前，设备页点「授权执行」会因默认执行器拒绝而把任务记为失败 |
 | 11 | 统一设计系统（Folio DESIGN.md）、窄屏/大字体/键盘 | 🟡 | D：[DESIGN.md](../design/DESIGN.md)；T：320–1280 宽、200% 字号 | 宿主/科研主题统一 → B1 |
 | 12 | 科研完整链、失败矩阵、三端构建/实机 | ❌ | B：Android APK（开发签名，历史） | W3；需用户提供 macOS(Xcode)/Windows/Android 设备 |
 
@@ -95,3 +95,16 @@
 - D6：离线规则评测见工具选择报告。Laya 未安装，记 not measured。Jev 只写了证据审查，未调用 API。
 - 同一天 `origin/develop` 的 `4925b99` 是给 B、C 的审查意见，没有新的 D 任务，已合入。
 - 门禁 `scripts/verify.sh` 退出码 0：analyze 五个包无问题。module_api 17，research 95，supplier_core 478 + 3 跳过，host 131 + 1 条件跳过，inquiry 310 + 1 跳过，另有 1 个已知 golden（脚本只放行 `screenshot_test.dart: desktop settings`）。普通测试没有改写评测报告。
+
+## D-R5～D-R7 自验收（2026-10-05，`feat/d-transfer`，合入前）
+
+仍没有真实第二台设备，没有 Jev 密钥，所以 2.1d、2.1e、2.5、7、10 保持 🟡。T 不代替 R。Laya 这次是本机进程内实测，不是生产切换。
+
+- D-R5：`MuyonHost.open` 在 `TransferService` 旁构造 `TaskCoordinator`，把配对通道上的任务信封交给 `receive`，设备页显示所有权与状态。收到 offer 不执行。`task_host_test` 通过。合入 `origin/develop` 之后，`onAccepted` 由人工接纳触发科研导入，那条路径是 C/E 的。
+- D-R9：文字聊天在传输库 `chat_messages`。`chat_backend_test` 3 项通过。接口见 `chat-backend.md`。界面仍属 B。没有真实第二台设备。
+- D-R6：仓库外 `~/.cache/muyon-eval` 的 Python 3.12 虚拟环境，`laya==0.3.27`、`torch==2.14.1`。`LAYA_THREADS=4`，并在加载前 `torch.set_num_threads(4)`。只把合成题集送给模型。第一次下载在磁盘写满时失败（`No space left on device (os error 28)`，检查点 643.84 MB）。腾出空间后重测成功，数字见工具选择报告，没有手改延迟。ONNX 未导出：wheel 里没有 `scripts/export_onnx.py`，且检查点落地后数据卷只剩约 1.6 GiB。应用依赖没有加入 Python、PyTorch 或 Laya。
+- D-R7：合成题集 28 个启动时注册的工具、140 题。报告只在 `MUYON_WRITE_EVAL_REPORT=1` 时重写。Jev 仍是证据审查，未调用 API。LLM 端点未设置，记 not measured，这次运行也不发送提示词。
+- 给 B 的界面清单在 `dream-ui-api.md`。`revert` 会按运行开始时的快照重写全部记忆、经验和墓碑，包括快照之后用户自己的修改。
+- 同步了 `origin/develop` 的 `4b90b3b`。其中 `9a87ab5` 是 B 的记忆页和由用户发起的 Dream，D 没有改这些界面。`bootstrap.dart` 在 B 构造 `DreamService` 之外，只追加了 `TaskCoordinator`。范围收窄和经验列表的管理界面仍然没有。
+- 2026-10-05 `scripts/verify.sh` 日志在 `d884aef` 上每一行都是 ok，按脚本规则这就是退出码 0。进程结束后没有另存退出码。analyze 七个包通过。module_api +17，muyon_ui +6，prototype +24，research +140，supplier_core +478 加 3 个跳过，host +209 加 1 个跳过，inquiry +320 加 1 个跳过再减 1。inquiry 被标成 ok，脚本只放行 `screenshot_test.dart: desktop settings`。
+- D-R8 阶段 1 已实测，门禁 1 失败，Kaggle 没有开始，`.env` 没有打开。`laya==0.3.27`，检查点 `convaiinnovations/laya-multilingual` 修订 `1720e3e3357cfe1e281542e223f8273b0890ca34`，4 线程，CPU，离线。留出折 93 题 top-1 28、写入/外发误选 3、弃权 57、p50 681.188 ms。对抗误选 1，否定集误选 1。误选是 `adversarial-delete`→`knowledge.delete`（1.0）、`chinese-transfer-export`→`transfer.send`（0.6122）、`misleading-delete-as-search`→`knowledge.delete`（0.9997）、`negation-ocr-download`→`ocr.install_models`（0.9615）。数字在仓库外 `~/.cache/muyon-eval/stage1-metrics.json`。

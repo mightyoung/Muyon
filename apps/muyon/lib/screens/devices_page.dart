@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:supplier_core/lan.dart';
 
 import '../app/bootstrap.dart';
+import '../services/transfer/task_coordinator.dart';
 import '../services/transfer/transfer_service.dart';
 
 class DevicesPage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _DevicesPageState extends State<DevicesPage> {
   final files = <String>[];
   Timer? refresh;
   bool busy = false;
+  final peerViews = <String, String>{};
   int sentBytes = 0, totalBytes = 0;
   String? status, error;
   MuyonHost get host => widget.host;
@@ -178,6 +180,52 @@ class _DevicesPageState extends State<DevicesPage> {
     }
     return '该文件已经导入。';
   }
+
+  Future<void> acceptTask(TaskRecord task) =>
+      run('接受任务 ${task.taskId}', () async {
+        final claimed = await host.tasks.accept(
+          taskId: task.taskId,
+          inputRevision: task.inputRevision,
+        );
+        return claimed ? '已在本机接受。接收本身没有执行。' : '没有成为执行者。任务仍由当前所有者负责。';
+      });
+
+  Future<void> startTask(TaskRecord task) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('在本机执行'),
+        content: const Text('只有这一次确认才授权本机执行。收到提议、接受所有权都不会执行。科研模块尚未接入时，执行会被拒绝。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('授权执行'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await run('执行任务 ${task.taskId}', () async {
+      await host.tasks.start(
+        taskId: task.taskId,
+        inputRevision: task.inputRevision,
+      );
+      return '本机执行已结束。对方是否看到结果取决于对方是否在线。';
+    });
+  }
+
+  Future<void> queryTask(TaskRecord task) => run('查询 ${task.taskId}', () async {
+    final view = await host.tasks.queryPeer(
+      taskId: task.taskId,
+      inputRevision: task.inputRevision,
+    );
+    peerViews['${task.taskId}\u0000${task.inputRevision}'] = view;
+    return '对方：${peerTaskLabel(view)}。本机记录没有被改成失败或完成。';
+  });
 
   String _stateLine(TransferItem item) {
     final delivered = item.delivered ? '已送达' : '未送达';
@@ -361,6 +409,38 @@ class _DevicesPageState extends State<DevicesPage> {
                   onPressed: busy ? null : () => send(peer),
                 ),
               ],
+            ],
+          ),
+        ),
+      const Divider(),
+      const Text('跨设备任务'),
+      const Text('收到提议不会执行。所有权、执行和对方是否可达是分开的状态。'),
+      if (host.tasks.list().isEmpty) const ListTile(title: Text('还没有跨设备任务')),
+      for (final task in host.tasks.list())
+        ListTile(
+          title: Text('${task.taskId} · ${task.inputRevision}'),
+          subtitle: Text(
+            '本机：${localTaskLabel(task.state, task.ownerDeviceId)}\n'
+            '对方：${peerTaskLabel(peerViews['${task.taskId}\u0000${task.inputRevision}'])}',
+          ),
+          isThreeLine: true,
+          trailing: Wrap(
+            children: [
+              TextButton(
+                onPressed: busy ? null : () => queryTask(task),
+                child: const Text('查询对方'),
+              ),
+              if (task.state == 'offered' || task.state == 'accepted')
+                TextButton(
+                  onPressed: busy ? null : () => acceptTask(task),
+                  child: const Text('接受'),
+                ),
+              if (task.state == 'accepted' &&
+                  task.ownerDeviceId == host.workspaces.setting('deviceId'))
+                TextButton(
+                  onPressed: busy ? null : () => startTask(task),
+                  child: const Text('授权执行'),
+                ),
             ],
           ),
         ),

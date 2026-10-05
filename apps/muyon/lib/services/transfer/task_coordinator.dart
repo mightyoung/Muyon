@@ -204,6 +204,18 @@ class TaskCoordinator {
     return rows.isEmpty ? null : rows.single;
   }
 
+  List<TaskRecord> list() => [
+    for (final row in database.raw.select(
+      'SELECT * FROM transfer_tasks ORDER BY updated_at DESC, task_id',
+    ))
+      TaskRecord(
+        taskId: row['task_id'] as String,
+        inputRevision: row['input_revision'] as String,
+        state: row['state'] as String,
+        ownerDeviceId: row['owner_device_id'] as String?,
+      ),
+  ];
+
   String? stateOf(String taskId, String inputRevision) =>
       _local(taskId, inputRevision)?['state'] as String?;
 
@@ -280,6 +292,41 @@ class TaskCoordinator {
 
   String _now() => DateTime.now().toUtc().toIso8601String();
 }
+
+class TaskRecord {
+  const TaskRecord({
+    required this.taskId,
+    required this.inputRevision,
+    required this.state,
+    required this.ownerDeviceId,
+  });
+  final String taskId, inputRevision, state;
+  final String? ownerDeviceId;
+}
+
+/// Local record. This is not the peer's answer.
+String localTaskLabel(String? state, String? owner) => switch (state) {
+  'offered' => '已提议',
+  'accepted' => '已由 ${owner ?? '未知设备'} 接受',
+  'running' => '执行中',
+  'succeeded' => '完成',
+  'failed' => '失败',
+  'cancelled' => '已取消',
+  _ => '未知',
+};
+
+/// Peer query. `unknown` stays unreachable and is never failed or done.
+String peerTaskLabel(String? peerView) => switch (peerView) {
+  null => '尚未查询',
+  'unknown' => '不可达',
+  'offered' => '已提议',
+  'accepted' => '已接受',
+  'running' => '执行中',
+  'succeeded' => '完成',
+  'failed' => '失败',
+  'cancelled' => '已取消',
+  _ => peerView,
+};
 
 class TaskOffer {
   const TaskOffer({
