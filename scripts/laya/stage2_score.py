@@ -32,6 +32,11 @@ MODELS = {
         CACHE / "models/laya-muyon-tool-selection/laya-muyon-tool-selection",
         "ef9dbf9aee506e00eb061a0989a468578eebe5b74352696cafc5c66fe994005f",
     ),
+    # v2: same 4 epochs, plus 300 negate-only rows (label none).
+    "v2": (
+        CACHE / "models/laya-muyon-tool-selection-v2/laya-muyon-tool-selection",
+        "719e30265c3dcb28799178e1fed8015ac521a1033671ec8c80ea40925337f9b9",
+    ),
 }
 VERSION = sys.argv[1] if len(sys.argv) > 1 else "v1"
 MODEL, WEIGHTS_SHA256 = MODELS[VERSION]

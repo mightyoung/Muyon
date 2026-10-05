@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -11,6 +12,8 @@ TRAIN = HERE / "train_ddp.py"
 MODEL_ID = "convaiinnovations/laya-multilingual"
 REVISION = "1720e3e3357cfe1e281542e223f8273b0890ca34"
 OUTPUT_DIR = "/kaggle/working/laya-muyon-tool-selection"
+# Epochs for this run; baked into the notebook when it is built.
+EPOCHS = int(os.environ.get("MUYON_EPOCHS", "4"))
 
 
 def _code(source: str) -> dict:
@@ -150,7 +153,7 @@ if n_gpu < 2:
     raise SystemExit("need GPU T4 x2 (machine_shape NvidiaTeslaT4)")
 
 OUTPUT_DIR = "{OUTPUT_DIR}"
-cmd = f"torchrun --standalone --nproc_per_node=2 /kaggle/working/train_ddp.py {{model_dir}} {{OUTPUT_DIR}}"
+cmd = f"MUYON_EPOCHS={EPOCHS} torchrun --standalone --nproc_per_node=2 /kaggle/working/train_ddp.py {{model_dir}} {{OUTPUT_DIR}}"
 print(cmd)
 !{{cmd}}
 '''

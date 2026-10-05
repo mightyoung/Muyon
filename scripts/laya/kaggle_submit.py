@@ -15,6 +15,7 @@ import sys
 import time
 from pathlib import Path
 
+import kaggle_notebook
 import stage2_data
 import stage2_threshold as gate
 
@@ -139,7 +140,12 @@ def _write_dataset(folder: Path, user: str, train_path: Path) -> None:
 
 def _write_kernel(folder: Path, user: str) -> None:
     folder.mkdir(parents=True)
-    shutil.copyfile(HERE / "laya_finetune_tool_selection_kaggle.ipynb", folder / "notebook.ipynb")
+    # Built at submit time so MUYON_EPOCHS applies; with the default it equals
+    # the committed laya_finetune_tool_selection_kaggle.ipynb.
+    (folder / "notebook.ipynb").write_text(
+        json.dumps(kaggle_notebook.notebook(), ensure_ascii=False, indent=1) + "\n",
+        encoding="utf-8",
+    )
     metadata = {
         "id": f"{user}/{KERNEL_SLUG}",
         "title": KERNEL_TITLE,

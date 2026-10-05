@@ -105,7 +105,7 @@ def main():
     train_items = train_items[:len(train_items) // world_size * world_size]
     my_items = train_items[rank::world_size]
     
-    EPOCHS = 4
+    EPOCHS = int(os.environ.get("MUYON_EPOCHS", "4"))  # set per run by the notebook
     MICRO_BATCH = 8      # 8 sequences per forward pass per GPU
     GRAD_ACCUM = 4       # Effective batch across 2 GPUs = 64 sequences (8 * 2 * 4)
     GROUP_SIZE = 4       # GRPO baseline samples
