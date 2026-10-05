@@ -774,3 +774,32 @@ Corrected rules for stage 2:
 4. **Kaggle**: as in D-R8 (private dataset, synthetic data only, no Hub push, weights to `~/.cache/muyon-eval/models/` with SHA-256, token only from `.env` key `Kaggle-apikey` into the subprocess).
 5. **Gate 2**: false write/external stays 0 everywhere (by construction plus measured); on the 67-task subset, top-1 clearly above both the D-R6 baseline and stage 1b on the same subset, with Chinese, mixed and paraphrase each improving; calibration reported; CPU p50 on this Mac ≤ 1.5× the D-R6 figure. Report numbers even if the gate fails.
 Then stage 3 (ONNX feasibility) as in D-R8. Integration stays a separate user decision.
+
+---
+
+# 追加：训练数据审查结论（给 Grok）与 G3 交接（给 Sonnet）
+
+---8<--- 追加 · D（Grok）· D-R8c 补充：训练数据必须先修 ---
+
+A reviewed `scripts/laya/train_set.jsonl` (2,240 rows) before stage 2. Training on it as it is would most likely teach shortcuts. Fix the generator before any Kaggle run:
+
+1. **Positives quote the option description verbatim** ("按这句做：为某项目的某物料选可用报价，从低到高"); the "paraphrase" category only changes the prefix. The model learns to find the description text, not the user's intent — exactly why paraphrase scores 0. Real requests and the evaluation set use natural wording ("在本地资料里查离心泵的安装说明"). **Positive requests must never contain the option description or a near copy of it** (add a check: no long common substring / bigram Jaccard ≥ 0.4 between a request and its gold description).
+2. **Low diversity**: 427 distinct patterns after masking nouns, and every positive is glued to an unrelated industrial document name ("焊口清单"). Write natural, varied requests per tool in the tool's own domain (suppliers, quotes, materials, projects, papers, documents), with different verbs, lengths and registers, typos and pinyin where realistic.
+3. **"不要/先别 …" is always none**: add "negate one action, ask for another read action" → the asked read tool, so "不要" is not a shortcut to none.
+4. **Urgent or "skip confirmation" wrappers around a read request are labelled none**: for a read-only selector, urgency does not change which read tool fits, and safety comes from the read-only restriction. Wrapped read requests → the read tool; wrapped write/send/approve requests → none.
+5. **No English-only requests and no "misleading description" category** (the evaluation set has 10 misleading items). Add both.
+6. **Option count**: training rows show 5–9 options; serving shows every read-only tool plus none. Make at least half of the rows use the full option set.
+
+A wrote a hand-authored seed in `scripts/laya/supplement_a.py` → `train_supplement_a.jsonl` (125 rows: natural, English, mixed, negate-one-ask-another, urgent-read, natural none; half with the full option set; max bigram Jaccard 0.357 against evaluation and negation sets; no held-out tool). Use it as style reference and include it in training (it may be up-weighted), but it is far too small alone — generate several hundred natural requests per category in the same spirit. Keep all existing leakage checks, add the description-copy check from item 1, and report the new category and label mix. Regenerate `train_overlap.json`.
+
+---8<--- 追加 · B（Sonnet）· 接手 G3 供应商中心发布 ---
+
+Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到分支 `wip/g3-handoff`（`e8aaebd`，基于 `feat/c-modules@fe56c1a`）：改了 7 个文件、新增 5 个文件（`inquiry_hub_authority.dart`、`hub_confirmation.dart`、`hub_channel.dart` 及两份测试）。**未审查、未验证，可能编译不过。** 排在 C5 之后、C6 之前做。
+
+要求（需求第五、七节与调用路径审计 G3）：
+- 供应商中心发布是**对外写操作**。像 G2 一样，经宿主工具注册表注册为 `ToolEffect.network`（或 export）通道：明确目的地、每次宿主一次性确认、持久回执，在副作用前调用 `checkBeforeEffect()`。参考已合入的 `apps/muyon/lib/app/inquiry_web_authority.dart`。
+- **结果不确定时先查询远端再决定**：超时、连接在发送后中断等情况，状态记为"结果未知"，先向中心查询这次发布是否已生效，再允许重试；绝不自动重发；本地取消不得显示为"远端已撤销"。
+- 给这个内部通道写清楚说明（会把哪些数据发到哪里），A 会加"不提供给模型选择"的标记。
+- 先读 Codex 的半成品，能沿用就沿用，不合适的直接改；在报告里说明保留了哪些、改了哪些。
+
+开工：在你的分支上 `git merge origin/wip/g3-handoff` 再 `git merge origin/develop`，解决冲突后先让它编译通过。所有权：`packages/inquiry_module/lib/src/features/hub/**`、`packages/supplier_core/lib/src/hub*.dart`、`apps/muyon/lib/app/inquiry_hub_authority.dart` 及相关测试。**Codex 自己目录里的同一批文件不要再动**（已经交接）。测试：未确认不发送；确认后发送一次；发送后中断 → "结果未知" → 查询远端已生效则不重发、未生效才允许重试；取消在副作用前则不发送。推送前 `scripts/verify.sh` 通过、工作区干净，推送后核对远端哈希。
