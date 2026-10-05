@@ -636,3 +636,29 @@ Wait for D's final API document before wiring; you can build the screens now aga
 3. E5：覆盖率前后对比、新增测试数、疑似缺陷
 4. 拥有范围外的改动（逐条）
 5. 各项证据类别（文档 / 自动测试 / 构建 / 真实模型 / 实机），未验证的写"未验证"
+
+---
+
+# 追加：Laya 第 1 阶段重做（给 Grok）
+
+---8<--- 追加 · D（Grok）· D-R8b 第 1 阶段重做 ---
+
+Your stage-1 run (`1c2bf81`, `~/.cache/muyon-eval/stage1-metrics.json`) was reviewed. You did the right things procedurally: you stopped at the failed gate, did not start Kaggle and did not open `.env`; `kaggle_submit.py` reads only the `Kaggle-apikey` line, scrubs other Kaggle variables and passes the token only to the subprocess. The failure comes from the stage-1 design, not from Laya itself. Held-out top-1 fell from 46/93 (D-R6 baseline) to 28/93 and false write/external rose from 0 to 3, because:
+
+1. **The embedding shortlist dropped the right answer**: `shortlistRecall.evalExpectedKept` is 67/140. Mean-pooling the decision checkpoint's encoder is not a retrieval embedder.
+2. **Per-category thresholds are not usable in production**: categories such as adversarial, misleading or paraphrase are labels of the evaluation set; a real request does not announce them. They were also fitted on 2–10 tasks each, which is why the fit split showed 0 false writes and the held-out split showed 3.
+3. **Options lost the tool id**: the `exact` category fell from 16/19 to 4/19.
+4. **Confidence is not a safety signal in this format**: `knowledge.delete` was chosen at 1.0 for a delete request; only 2 of 8 held-out answers at confidence 1.0 were correct.
+
+Redo stage 1 with these four changes (the user approved them):
+
+1. **No embedding shortlist.** Send all eligible tools as options; the 2,048-token head already fits them. If the tool list later outgrows the head, a shortlist may only come back as a lexical retriever (e.g. BM25 over id + description) with measured recall ≥ 0.95 of the expected tool on the evaluation set.
+2. **One global threshold** (at most additional buckets that are observable at runtime, such as detected script/language — never evaluation categories). **Fit it on the synthetic training set** (`scripts/laya/train_set.jsonl`), and use the 140-task evaluation set, the adversarial set and the negation set only for the final measurement. Report the fitted value and the fit/eval split explicitly.
+3. **Option text = tool id + Chinese description** (plus the short English gloss if it helps), so requests that name a tool still match.
+4. **Structural safety: Laya proposes only read-only tools.** Tools whose effect is write, export or network are never in Laya's options. They stay reachable through the explicit-id rule and the LLM selector, and every call still needs host approval. Enforce this in the selection strategy (filter by `RegisteredToolInfo.accessLevel == ToolAccessLevel.read` before building the question) and add a test that a Laya strategy can never return a write/external tool id even if the model output names one. With this, "false write/external = 0" holds by construction; still report it.
+
+Keep the two-step `noul` gate only if it improves the held-out result; report with and without it.
+
+**Gate 1b:** false write/external = 0 on held-out, adversarial and negation sets; held-out top-1 ≥ 46/93 (the D-R6 baseline) on the same 93 tasks, counting a correct "none"/abstain as correct as before; report per category (for reading only, not for thresholds), calibration buckets and latency. If it passes, continue to stage 2 (Kaggle) with the same four rules — the fine-tuned model is also only offered read-only tools, and its threshold is again fitted on training data only. If it fails, stop and report.
+
+Commit scripts and numbers as before; numbers stay in `~/.cache/muyon-eval/` and the summary goes into the evaluation report and ledger. Never commit `.env` or its contents.
