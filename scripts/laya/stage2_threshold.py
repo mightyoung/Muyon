@@ -161,6 +161,25 @@ def choose_threshold_weighted(rows: list[dict], weights: list[float]):
     return best["threshold"], sweep
 
 
+def choose_threshold_one_se(rows: list[dict], weights: list[float]):
+    """Highest threshold whose weighted top-1 is within one standard error of the best.
+
+    The validation fold barely separates thresholds (a few tenths of a point),
+    so "best weighted top-1" alone drifts to the lowest threshold and lets
+    low-confidence picks through. Within statistical noise of the best, prefer
+    abstaining. The standard error uses the unweighted row count. Zero
+    unweighted false writes is still required first.
+    """
+    _best, sweep = choose_threshold_weighted(rows, weights)
+    if not sweep:
+        return 1.0, sweep, 0.0
+    safe = [point for point in sweep if point["falseWrite"] == 0] or sweep
+    top = max(point["top1"] for point in safe)
+    stderr = (top * (1 - top) / max(1, len(rows))) ** 0.5
+    chosen = max(point["threshold"] for point in safe if point["top1"] >= top - stderr)
+    return chosen, sweep, stderr
+
+
 def assert_read_only_targets(rows: list[dict], tools: list[dict], held_out: set[str]) -> None:
     effects = {tool["id"]: tool["effect"] for tool in tools}
     read_ids = {tool_id for tool_id, effect in effects.items() if effect == contract.READ_EFFECT}

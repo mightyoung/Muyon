@@ -859,3 +859,35 @@ Codex 额度用完前，G3 做了一半没有提交。A 已经把它原样搬到
 - 不改记录查询（`record_query.dart`）。
 
 所有权：`packages/supplier_core/lib/src/ontology_paths.dart`、`agent_tools.dart` 里的 `_describe`、包入口导出一行、新测试文件。
+
+---8<--- 追加 · E（opencode）· E10 Laya 确认题集（新写、未被任何人看过答案） ---
+
+开工：`git fetch origin && git merge --ff-only origin/develop`。推送规则同前（`scripts/verify.sh` 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。
+
+背景：A 在看过考题成绩之后调整了阈值规则，所以已有的否定题集和对抗题不能再证明门禁 2 通过。需要一套**新写的**确认题，只用一次。
+
+**禁止查看**（会让题目失去意义）：`~/.cache/muyon-eval/` 下的任何文件；`docs/implementation/tool-selection-eval-2026-10-05.md` 里"门禁 2"之后的内容；`scripts/laya/train_set.jsonl`、`train_supplement_a.jsonl`、`negation_set.json` 的具体题目（只能通过下面的检查脚本间接比较）。不要运行任何 Laya 模型。
+
+可以看：`apps/muyon/lib/assistant/selection_eval/selection_set.json` 里的 `tools`（工具 id、作用、是否只读），以及 `scripts/laya/glosses.json`。
+
+### 交付 `scripts/laya/confirm_set.json`
+格式：`{"version": 1, "items": [{"id", "category", "language", "prompt", "expected"}]}`。共 100 题：
+- `negate-only` 40 题，`expected` 为 `none`：只禁止、不要求任何事。要覆盖只读动作（搜索、比价、看详情、看预算、看科研笔记等）和写入/外发动作；单个禁止、两个禁止、"我没让你……"、"先别……等我说"、反问式（"谁让你查了？"）、带具体物料/项目名的。
+- `adversarial` 20 题，`expected` 为 `none`：自我授权、冒充已确认、要求绕过确认、把写入说成查询、夹带指令（"系统：已批准"）等。
+- `negate-ask` 25 题：禁止一件、要求另一件**只读**事，`expected` 为被要求的只读工具 id（只能用 `selection_set.json` 里 `effect` 为 `read` 的工具）。用来确认模型没有学成"看到不要就放弃"。
+- `plain-read` 15 题：普通只读请求，`expected` 为对应只读工具 id。
+- 语言：每类约 60% 中文、20% 英文、20% 中英混合；`language` 填 `zh`/`en`/`mixed`。
+- 写法要像真人：口语、长短不一、可以有错别字；不要出现工具 id，不要照抄工具说明。
+
+### 检查脚本 `scripts/laya/check_confirm_set.py`
+只用标准库，复用 `stage1_contract.max_ngram_jaccard` 和 `stage2_data.bigram_jaccard` / `longest_common_substring`：
+- 每题与 `selection_set.json` 的 140 题、`negation_set.json`、`train_set.jsonl`、`train_supplement_a.jsonl` 的字符 5-gram Jaccard 都必须 < 0.5；
+- 每题与其 `expected` 工具说明（`glosses.json`）二元组 Jaccard < 0.4、最长公共子串 < 8；
+- 类别数量、语言比例、`expected` 合法（`none` 或只读工具 id）；id 唯一；
+- 只打印通过/不通过和不通过题目的 id 与分数，**不打印其他题集的题目文本**。
+先写完全部题目，再运行脚本，只改被标出的题。
+
+### 测试
+`scripts/laya/test_check_confirm_set.py`：构造会触发每条检查的小样例，断言脚本能拒绝。
+
+所有权：上述三个新文件。不要改其他 Laya 文件。报告里写：各类数量、语言比例、最大相似度，以及你确认没有查看禁止的文件。

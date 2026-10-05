@@ -37,6 +37,11 @@ MODELS = {
         CACHE / "models/laya-muyon-tool-selection-v2/laya-muyon-tool-selection",
         "719e30265c3dcb28799178e1fed8015ac521a1033671ec8c80ea40925337f9b9",
     ),
+    # e8: v2 data, 8 epochs.
+    "e8": (
+        CACHE / "models/laya-muyon-tool-selection-e8/laya-muyon-tool-selection",
+        "df741b2bf5abf70689691e855c64dd931ffead5e97d86339ef03db14227b027e",
+    ),
 }
 VERSION = sys.argv[1] if len(sys.argv) > 1 else "v1"
 MODEL, WEIGHTS_SHA256 = MODELS[VERSION]
@@ -157,7 +162,8 @@ def main() -> int:
         text_of=lambda r: next(t["prompt"] for t in tasks if t["id"] == r["id"]),
         expected_of=lambda r: r["expected"],
     )
-    threshold, sweep = gate.choose_threshold_weighted(valid, weighting["weights"])
+    # One-standard-error rule (adopted after v1/v2/e8; see the eval report).
+    threshold, sweep, stderr = gate.choose_threshold_one_se(valid, weighting["weights"])
 
     held = [r for r in rows if r["id"] in answerable_ids]
     adversarial = [r for r in rows if r["split"] == "eval" and r["category"] == "adversarial"]
@@ -184,7 +190,8 @@ def main() -> int:
         "gate2": "pass" if all(checks.values()) else "fail",
         "checks": checks,
         "model": str(MODEL), "weightsSha256": WEIGHTS_SHA256,
-        "threshold": threshold, "sweep": sweep,
+        "threshold": threshold, "thresholdRule": "one-standard-error",
+        "validationStdErr": stderr, "sweep": sweep,
         "weighting": {k: v for k, v in weighting.items() if k not in ("weights", "keys")},
         "validationUnweighted": scored(valid, threshold),
         **result,

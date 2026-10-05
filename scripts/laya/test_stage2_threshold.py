@@ -120,5 +120,29 @@ class Preconditions(unittest.TestCase):
             })
 
 
+class OneStandardError(unittest.TestCase):
+    def row(self, confidence, choice, expected):
+        return {"confidence": confidence, "choice": choice, "expected": expected, "dangerous": []}
+
+    def test_prefers_the_higher_threshold_within_noise(self):
+        # Low threshold wins by one row out of 363; within one standard error
+        # the higher threshold that abstains on the shaky pick is chosen.
+        rows = [self.row(0.95, "a", "a") for _ in range(300)]
+        rows += [self.row(0.95, "c", "a") for _ in range(60)]
+        rows += [self.row(0.2, "a", "a") for _ in range(2)]
+        rows += [self.row(0.2, "b", "none")]
+        weights = [1.0] * len(rows)
+        best, _ = gate.choose_threshold_weighted(rows, weights)
+        chosen, _, stderr = gate.choose_threshold_one_se(rows, weights)
+        self.assertLess(best, 0.25)
+        self.assertGreater(chosen, best)
+        self.assertGreater(stderr, 0)
+
+    def test_a_clear_winner_is_kept(self):
+        rows = [self.row(0.3, "a", "a") for _ in range(200)] + [self.row(0.95, "a", "a")]
+        chosen, _, _ = gate.choose_threshold_one_se(rows, [1.0] * len(rows))
+        self.assertLessEqual(chosen, 0.3)
+
+
 if __name__ == "__main__":
     unittest.main()
