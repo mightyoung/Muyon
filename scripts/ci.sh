@@ -18,7 +18,9 @@
 #  4. Prints a failing suite's output (everything but the progress lines of
 #     passing tests; the workflow also uploads the whole log as an artifact),
 #     instead of only one summary line per suite.
-#  5. Does not depend on macOS bash 3.2 quirks (no empty-array workarounds).
+#  5. Forces `--reporter compact`: on GitHub Actions flutter switches to its
+#     `github` reporter, which has no "All tests passed!" line to check.
+#  6. Does not depend on macOS bash 3.2 quirks (no empty-array workarounds).
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -57,7 +59,7 @@ suites=(
 )
 for entry in "${suites[@]}"; do
   IFS='|' read -r name dir target <<<"$entry"
-  log=$(cd "$ROOT/$dir" && flutter test --no-pub --timeout 120s --exclude-tags "$EXCLUDE_TAGS" "$target" 2>&1; echo "exit=$?")
+  log=$(cd "$ROOT/$dir" && flutter test --no-pub --reporter compact --timeout 120s --exclude-tags "$EXCLUDE_TAGS" "$target" 2>&1; echo "exit=$?")
   code=${log##*exit=}
   log=$(echo "$log" | tr '\r' '\n')
   summary=$(echo "$log" | grep -E "All tests passed|Some tests failed|All other tests passed" | tail -1 | sed -E 's/^[0-9:]+ //')
