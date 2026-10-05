@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,9 +6,11 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
+import 'package:sqlite3/sqlite3.dart';
 import 'package:supplier_core/lan.dart';
 import 'package:uuid/uuid.dart';
 
+import 'chat_log.dart';
 import 'task_coordinator.dart';
 
 /// Private key and paired certificates. Plain files are not a substitute.
@@ -72,6 +75,16 @@ class TransferService {
   /// Task envelopes are routed here and are not import receipts.
   Future<void> Function(Map<String, Object?> envelope)? onTaskEnvelope;
 
+  /// Production leaves this on. Tests can stop the delivery acknowledgement
+  /// so a successful push stays `sent` instead of becoming `delivered`.
+  bool acknowledgeChatDelivery = true;
+
+  /// `sent` may be retried only after this age. There is no automatic retry.
+  Duration chatSentRetryAfter = const Duration(minutes: 2);
+
+  final _chatEvents = StreamController<void>.broadcast();
+  Stream<void> get chatChanges => _chatEvents.stream;
+
   /// Called once when a person accepts a verified package. Not called on receipt.
   void Function(TransferItem item)? onAccepted;
   Future<void> _items = Future<void>.value();
@@ -102,6 +115,7 @@ class TransferService {
         continue;
       }
       if (TaskCoordinator.decodeFile(entity.path) != null) continue;
+      if (ChatLog.decodeFile(entity.path) != null) continue;
       candidates++;
       try {
         final file = File(entity.path);
@@ -205,6 +219,11 @@ class TransferService {
       }
       return;
     }
+    final chat = ChatLog.decodeFile(push.path);
+    if (chat != null) {
+      _items = _items.then((_) => _receiveChat(push, chat));
+      return;
+    }
     if (pendingReceivedPaths.length < maxFiles &&
         !pendingReceivedPaths.contains(push.path)) {
       pendingReceivedPaths.add(push.path);
@@ -218,26 +237,79 @@ class TransferService {
     if (!await file.exists()) return;
     final bytes = await file.readAsBytes();
     final digest = sha256.convert(bytes).toString();
-    await database.write((db) {
+    final noted = await database.write((db) {
       final existing = db.select(
         'SELECT item_id FROM transfer_items WHERE path=? OR attachment_sha256=?',
         [push.path, digest],
       );
-      if (existing.isNotEmpty) return;
-      db.execute('INSERT INTO transfer_items VALUES(?,?,?,?,?,?,?,?,?,?,?)', [
-        const Uuid().v4(),
-        push.senderFingerprint,
-        push.path,
-        1,
-        'durable',
-        bytes.length,
-        digest,
-        0,
-        null,
-        'pending',
-        DateTime.now().toUtc().toIso8601String(),
-      ]);
+      final itemId = existing.isEmpty
+          ? const Uuid().v4()
+          : existing.single['item_id'] as String;
+      if (existing.isEmpty) {
+        db.execute('INSERT INTO transfer_items VALUES(?,?,?,?,?,?,?,?,?,?,?)', [
+          itemId,
+          push.senderFingerprint,
+          push.path,
+          1,
+          'durable',
+          bytes.length,
+          digest,
+          0,
+          null,
+          'pending',
+          DateTime.now().toUtc().toIso8601String(),
+        ]);
+      }
+      return _recordPackageMessage(
+        db,
+        peerFingerprint: push.senderFingerprint,
+        bytes: bytes,
+        itemId: itemId,
+      );
     });
+    if (noted) {
+      _emitChat();
+      onPendingReceived?.call();
+    }
+  }
+
+  /// Package text becomes a chat row. The transfer item's import flag is not
+  /// changed here. A manifest without a sender clock uses the local receive time.
+  bool _recordPackageMessage(
+    Database db, {
+    required String peerFingerprint,
+    required List<int> bytes,
+    required String itemId,
+  }) {
+    Map? manifest;
+    try {
+      final decoded = jsonDecode(utf8.decode(bytes));
+      if (decoded is Map) manifest = decoded;
+    } on FormatException {
+      return false;
+    }
+    if (manifest == null || manifest['format'] != 'muyon-transfer-v1') {
+      return false;
+    }
+    final body = manifest['message'];
+    final packageId = manifest['packageId'];
+    if (body is! String ||
+        body.isEmpty ||
+        body.length > ChatLog.maxBody ||
+        packageId is! String ||
+        !RegExp(r'^[0-9a-fA-F-]{36}$').hasMatch(packageId)) {
+      return false;
+    }
+    final now = DateTime.now().toUtc();
+    return ChatLog.insertInbound(
+      db,
+      peerFingerprint: peerFingerprint,
+      messageId: packageId,
+      body: body,
+      createdAt: now,
+      receivedAt: now,
+      packageItemId: itemId,
+    );
   }
 
   List<TransferItem> items() => [
@@ -662,11 +734,306 @@ class TransferService {
     }
   }
 
+  Future<ChatMessage> sendText(LanPeer peer, String body) async {
+    _requireText(body);
+    final node = _requireSendable(peer);
+    final messageId = const Uuid().v4();
+    final created = DateTime.now().toUtc();
+    await database.write((db) {
+      ChatLog.insertOutbound(
+        db,
+        peerFingerprint: peer.fingerprint,
+        messageId: messageId,
+        body: body,
+        createdAt: created,
+      );
+    });
+    _emitChat();
+    await _pushText(
+      node,
+      peer,
+      messageId: messageId,
+      body: body,
+      createdAt: created,
+      peerFingerprint: peer.fingerprint,
+    );
+    return _message(peer.fingerprint, messageId);
+  }
+
+  List<ChatThread> threads() {
+    final node = _node;
+    final grouped = <String, List<ChatMessage>>{};
+    for (final message in _allMessages()) {
+      grouped.putIfAbsent(message.peerFingerprint, () => []).add(message);
+    }
+    return [
+      for (final entry in grouped.entries)
+        ChatThread(
+          peerFingerprint: entry.key,
+          peerName: _peerByFingerprint(entry.key)?.name,
+          last: entry.value.last,
+          unread: entry.value
+              .where(
+                (message) =>
+                    message.direction == 'in' && message.readAt == null,
+              )
+              .length,
+          online:
+              node != null &&
+              _peerByFingerprint(entry.key) != null &&
+              node.isPaired(entry.key),
+          paired: node?.isPaired(entry.key) ?? false,
+        ),
+    ];
+  }
+
+  List<ChatMessage> messages(String peerFingerprint) => [
+    for (final message in _allMessages())
+      if (message.peerFingerprint == peerFingerprint) message,
+  ];
+
+  /// Local read time only. Nothing is sent to the peer.
+  Future<void> markChatRead(String peerFingerprint) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    final changed = await database.write((db) {
+      db.execute(
+        "UPDATE chat_messages SET read_at=? WHERE peer_fingerprint=? AND direction='in' AND read_at IS NULL",
+        [now, peerFingerprint],
+      );
+      return db.updatedRows;
+    });
+    if (changed > 0) _emitChat();
+  }
+
+  Future<void> acceptChat(String messageId) =>
+      _setAcceptance(messageId, 'accepted');
+
+  Future<void> rejectChat(String messageId) =>
+      _setAcceptance(messageId, 'rejected');
+
+  /// Explicit resend of a `failed` row, or of `sent` older than
+  /// [chatSentRetryAfter]. The same message id is used, so the receiver keeps
+  /// one row. This never runs from a timer.
+  Future<ChatMessage> retryText(String messageId) async {
+    final message = _single(messageId, direction: 'out', missing: '消息不存在');
+    if (message.sendState == 'delivered') {
+      throw StateError('对方已确认保存，不能重发');
+    }
+    if (message.sendState == 'sent') {
+      final sentAt = message.sentAt;
+      if (sentAt == null ||
+          DateTime.now().toUtc().difference(sentAt.toUtc()) <
+              chatSentRetryAfter) {
+        throw StateError('发出结果未知，尚未到可重发时间');
+      }
+    } else if (message.sendState != 'failed' && message.sendState != 'queued') {
+      throw StateError('这条文字不能重发');
+    }
+    final peer = _peerByFingerprint(message.peerFingerprint);
+    if (peer == null) throw StateError('对方不在线，没有中继');
+    final node = _requireSendable(peer);
+    await _pushText(
+      node,
+      peer,
+      messageId: message.id,
+      body: message.body,
+      createdAt: message.createdAt,
+      peerFingerprint: message.peerFingerprint,
+    );
+    return _message(message.peerFingerprint, message.id);
+  }
+
+  /// Removes the local row only. The peer is not told.
+  Future<void> deleteChat(String messageId) async {
+    _single(messageId, direction: null, missing: '消息不存在');
+    await database.write((db) {
+      db.execute('DELETE FROM chat_messages WHERE message_id=?', [messageId]);
+    });
+    _emitChat();
+  }
+
+  /// Removes every local row for this peer. The peer is not told.
+  Future<void> deleteChatThread(String peerFingerprint) async {
+    await database.write((db) {
+      db.execute('DELETE FROM chat_messages WHERE peer_fingerprint=?', [
+        peerFingerprint,
+      ]);
+    });
+    _emitChat();
+  }
+
   Future<void> close() => _serialize(() async {
     final node = _node;
     _node = null;
     await node?.stop();
+    if (!_chatEvents.isClosed) await _chatEvents.close();
   });
+
+  void _requireText(String body) {
+    if (body.isEmpty) throw ArgumentError('文字不能为空');
+    if (body.length > ChatLog.maxBody) throw ArgumentError('文字超过 16000 字');
+  }
+
+  LanNode _requireSendable(LanPeer peer) {
+    final node = _node;
+    if (node == null) throw StateError('Device communication is disabled');
+    if (!node.isPaired(peer.fingerprint)) throw StateError('未配对或已撤销');
+    final online = node.peers.any(
+      (candidate) =>
+          candidate.id == peer.id && candidate.address == peer.address,
+    );
+    if (!online) throw StateError('对方不在线，没有中继');
+    return node;
+  }
+
+  LanPeer? _peerByFingerprint(String fingerprint) {
+    final node = _node;
+    if (node == null) return null;
+    for (final peer in node.peers) {
+      if (peer.fingerprint == fingerprint) return peer;
+    }
+    return null;
+  }
+
+  List<ChatMessage> _allMessages() => ChatLog.list(database.raw);
+
+  ChatMessage _message(String peerFingerprint, String messageId) =>
+      messages(peerFingerprint)
+          .firstWhere((message) => message.id == messageId);
+
+  ChatMessage _single(
+    String messageId, {
+    required String? direction,
+    required String missing,
+  }) {
+    final matches = [
+      for (final message in _allMessages())
+        if (message.id == messageId &&
+            (direction == null || message.direction == direction))
+          message,
+    ];
+    if (matches.length != 1) throw StateError(missing);
+    return matches.single;
+  }
+
+  Future<void> _setAcceptance(String messageId, String acceptance) async {
+    final message = _single(messageId, direction: 'in', missing: '消息不存在');
+    if (message.acceptance == acceptance) return;
+    await database.write((db) {
+      db.execute(
+        'UPDATE chat_messages SET acceptance=? WHERE peer_fingerprint=? AND message_id=? AND direction=?',
+        [acceptance, message.peerFingerprint, messageId, 'in'],
+      );
+    });
+    _emitChat();
+  }
+
+  Future<void> _pushText(
+    LanNode node,
+    LanPeer peer, {
+    required String messageId,
+    required String body,
+    required DateTime createdAt,
+    required String peerFingerprint,
+  }) async {
+    final file = File(p.join(rootPath, 'chat-out', const Uuid().v4()));
+    await file.parent.create(recursive: true);
+    await file.writeAsString(
+      jsonEncode({
+        'muyon': ChatLog.marker,
+        'type': 'text',
+        'messageId': messageId,
+        'body': body,
+        'createdAt': createdAt.toUtc().toIso8601String(),
+      }),
+      flush: true,
+    );
+    try {
+      await node.push(peer, file.path);
+      final sentAt = DateTime.now().toUtc().toIso8601String();
+      await database.write((db) {
+        db.execute(
+          "UPDATE chat_messages SET send_state='sent', sent_at=?, error=NULL WHERE peer_fingerprint=? AND message_id=? AND direction='out' AND send_state!='delivered'",
+          [sentAt, peerFingerprint, messageId],
+        );
+      });
+      _emitChat();
+    } catch (error) {
+      await database.write((db) {
+        db.execute(
+          "UPDATE chat_messages SET send_state='failed', error=? WHERE peer_fingerprint=? AND message_id=? AND direction='out' AND send_state!='delivered'",
+          ['$error', peerFingerprint, messageId],
+        );
+      });
+      _emitChat();
+      rethrow;
+    } finally {
+      if (await file.exists()) await file.delete();
+    }
+  }
+
+  Future<void> _receiveChat(LanPush push, Map<String, Object?> envelope) async {
+    final file = File(push.path);
+    try {
+      if (push.senderFingerprint.isEmpty) return;
+      if (envelope['type'] == 'delivered') {
+        final changed = await database.write((db) {
+          db.execute(
+            "UPDATE chat_messages SET send_state='delivered', error=NULL WHERE peer_fingerprint=? AND message_id=? AND direction='out'",
+            [push.senderFingerprint, envelope['messageId']],
+          );
+          return db.updatedRows;
+        });
+        if (changed > 0) _emitChat();
+        return;
+      }
+      final created = DateTime.tryParse(envelope['createdAt'] as String);
+      final now = DateTime.now().toUtc();
+      final inserted = await database.write(
+        (db) => ChatLog.insertInbound(
+          db,
+          peerFingerprint: push.senderFingerprint,
+          messageId: envelope['messageId'] as String,
+          body: envelope['body'] as String,
+          createdAt: created?.toUtc() ?? now,
+          receivedAt: now,
+        ),
+      );
+      if (inserted) {
+        _emitChat();
+        onPendingReceived?.call();
+      }
+      if (!acknowledgeChatDelivery) return;
+      final peer = _peerByFingerprint(push.senderFingerprint);
+      final node = _node;
+      if (peer == null || node == null || !node.isPaired(peer.fingerprint)) {
+        return;
+      }
+      final ack = File(p.join(rootPath, 'chat-out', const Uuid().v4()));
+      await ack.parent.create(recursive: true);
+      await ack.writeAsString(
+        jsonEncode({
+          'muyon': ChatLog.marker,
+          'type': 'delivered',
+          'messageId': envelope['messageId'],
+        }),
+        flush: true,
+      );
+      try {
+        await node.push(peer, ack.path);
+      } catch (_) {
+        // The inbound row is already durable. The sender stays at `sent`.
+      } finally {
+        if (await ack.exists()) await ack.delete();
+      }
+    } finally {
+      if (await file.exists()) await file.delete();
+    }
+  }
+
+  void _emitChat() {
+    if (!_chatEvents.isClosed) _chatEvents.add(null);
+  }
 }
 
 const _maxZipEntries = 4096;

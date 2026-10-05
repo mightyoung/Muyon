@@ -48,7 +48,7 @@
 | 9b | PDF 文字层优先 + PaddleOCR | 🟡 | M：ONNX 参考推理（`public_services_validation.md`） | Flutter 原生 R 三端 → W3 |
 | 9c | 关键词/全文/向量/组合检索、中文短词 | 🟡 | T：FTS5/向量；`retrieval_eval_test`（[300 篇评测](retrieval-eval-2026-10-05.md)：current recall@10 0.961，bigram 0.830，「泵」recall@5 为 0.714 对 0.000；结论仍保持 cjk-bigram + 单字扫描。18 篇历史结果仍在 [retrieval-eval-2026-10-04.md](retrieval-eval-2026-10-04.md)，普通测试不再改写报告） | 向量与真实论文 M 未测 → 待用户提供端点与论文后重测 |
 | 9d | 限定资料问答：定位、断言支持、应答/拒答 | 🟡 | T：引用校验 | M 评测 → W3 |
-| 10 | 发现/配对/授权/接收/导入分离，加密认证 | 🟡 | T：同 2.5；发现不授予信任、未配对/已撤销拒收、明文握手失败；`task_coordinator_test`（重复 offer、双方接受只执行一次、中途重启不二次执行、对端不可达为 unknown、较新结果保留；配对 TLS 投递任务信封不执行）；`task_host_test`（两台宿主回环：一次 offer 不执行，双方接受后只有较低设备 id 的注入执行器跑一次，关闭对端后查询为 unknown，本地状态不被改成失败或完成） | 双设备 R。内存 nonce 上限仍是 4096，另有重启后的 seen 文件与 5 分钟签名时间窗。科研导入的 `onAccepted` 仍未设置，业务执行属 C。替换执行器之前，设备页点「授权执行」会因默认执行器拒绝而把任务记为失败 |
+| 10 | 发现/配对/授权/接收/导入分离，加密认证 | 🟡 | T：同 2.5；发现不授予信任、未配对/已撤销拒收、明文握手失败；`task_coordinator_test`（重复 offer、双方接受只执行一次、中途重启不二次执行、对端不可达为 unknown、较新结果保留；配对 TLS 投递任务信封不执行）；`task_host_test`（两台宿主回环：一次 offer 不执行，双方接受后只有较低设备 id 的注入执行器跑一次，关闭对端后查询为 unknown，本地状态不被改成失败或完成）；`chat_backend_test`（文字经配对 TLS：`sent` 不自动重发也不改成失败，显式 `retryText` 后对方去重并回 `delivered`；离线不落行；撤销配对后历史仍在且拒绝再发；包内 `message` 进聊天且 `imported` 仍为 false；文字不进工具注册表、记忆或经验） | 双设备 R。内存 nonce 上限仍是 4096，另有重启后的 seen 文件与 5 分钟签名时间窗。聊天界面 → B，接口见 [chat-backend.md](chat-backend.md)。科研导入的 `onAccepted` 已由 C/E 接到人工接纳之后。替换执行器之前，设备页点「授权执行」会因默认执行器拒绝而把任务记为失败 |
 | 11 | 统一设计系统（Folio DESIGN.md）、窄屏/大字体/键盘 | 🟡 | D：[DESIGN.md](../design/DESIGN.md)；T：320–1280 宽、200% 字号 | 宿主/科研主题统一 → B1 |
 | 12 | 科研完整链、失败矩阵、三端构建/实机 | ❌ | B：Android APK（开发签名，历史） | W3；需用户提供 macOS(Xcode)/Windows/Android 设备 |
 
@@ -100,7 +100,8 @@
 
 仍没有真实第二台设备，没有 Jev 密钥，所以 2.1d、2.1e、2.5、7、10 保持 🟡。T 不代替 R。Laya 这次是本机进程内实测，不是生产切换。
 
-- D-R5：`MuyonHost.open` 在 `TransferService` 旁构造 `TaskCoordinator`，把配对通道上的任务信封交给 `receive`，设备页显示所有权与状态。收到 offer 不执行。`task_host_test` 通过。`onAccepted` 仍为空，科研导入仍属 C。
+- D-R5：`MuyonHost.open` 在 `TransferService` 旁构造 `TaskCoordinator`，把配对通道上的任务信封交给 `receive`，设备页显示所有权与状态。收到 offer 不执行。`task_host_test` 通过。合入 `origin/develop` 之后，`onAccepted` 由人工接纳触发科研导入，那条路径是 C/E 的。
+- D-R9：文字聊天在传输库 `chat_messages`。`chat_backend_test` 3 项通过。接口见 `chat-backend.md`。界面仍属 B。没有真实第二台设备。
 - D-R6：仓库外 `~/.cache/muyon-eval` 的 Python 3.12 虚拟环境，`laya==0.3.27`、`torch==2.14.1`。`LAYA_THREADS=4`，并在加载前 `torch.set_num_threads(4)`。只把合成题集送给模型。第一次下载在磁盘写满时失败（`No space left on device (os error 28)`，检查点 643.84 MB）。腾出空间后重测成功，数字见工具选择报告，没有手改延迟。ONNX 未导出：wheel 里没有 `scripts/export_onnx.py`，且检查点落地后数据卷只剩约 1.6 GiB。应用依赖没有加入 Python、PyTorch 或 Laya。
 - D-R7：合成题集 28 个启动时注册的工具、140 题。报告只在 `MUYON_WRITE_EVAL_REPORT=1` 时重写。Jev 仍是证据审查，未调用 API。LLM 端点未设置，记 not measured，这次运行也不发送提示词。
 - 给 B 的界面清单在 `dream-ui-api.md`。`revert` 会按运行开始时的快照重写全部记忆、经验和墓碑，包括快照之后用户自己的修改。
