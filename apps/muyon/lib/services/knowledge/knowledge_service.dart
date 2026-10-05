@@ -122,8 +122,8 @@ class KnowledgeService {
       source.nativeProjectId == change.nativeProjectId;
   static const maxFileBytes = 128 * 1024 * 1024;
   static final schema = ModuleSchema(
-    version: 3,
-    definitionDigest: 'public-knowledge-v3',
+    version: 4,
+    definitionDigest: 'public-knowledge-v4',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -163,6 +163,27 @@ CREATE TABLE transfer_items(
   read_at TEXT,
   acceptance TEXT NOT NULL DEFAULT 'pending',
   created_at TEXT NOT NULL
+)'''),
+      ),
+      ModuleMigration(
+        version: 4,
+        id: 'public-knowledge-v4',
+        definitionDigest: 'public-knowledge-v4',
+        migrate: (db) => db.execute('''
+CREATE TABLE chat_messages(
+  peer_fingerprint TEXT NOT NULL,
+  message_id TEXT NOT NULL,
+  direction TEXT NOT NULL,
+  body TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  sent_at TEXT,
+  received_at TEXT,
+  send_state TEXT,
+  error TEXT,
+  read_at TEXT,
+  acceptance TEXT NOT NULL DEFAULT 'none',
+  package_item_id TEXT,
+  PRIMARY KEY (peer_fingerprint, message_id)
 )'''),
       ),
     ],
