@@ -251,8 +251,16 @@ class TransferService {
     );
   });
 
-  /// True when [bytes] are a `muyon-research` package. The bytes stay opaque here.
+  /// True when [bytes] are a `muyon-research` document, or a zip whose
+  /// `manifest.json` says so. The bytes stay opaque; nothing is imported.
   static bool isResearchPackage(List<int> bytes) {
+    if (bytes.length >= 4 &&
+        bytes[0] == 0x50 &&
+        bytes[1] == 0x4b &&
+        bytes[2] == 0x03 &&
+        bytes[3] == 0x04) {
+      return _zipManifestType(bytes) == 'muyon-research';
+    }
     try {
       final value = jsonDecode(utf8.decode(bytes));
       return value is Map && value['packageType'] == 'muyon-research';
@@ -600,4 +608,161 @@ class TransferService {
     _node = null;
     await node?.stop();
   });
+}
+
+const _maxZipEntries = 4096;
+const _maxManifestBytes = 8 * 1024 * 1024;
+
+/// `packageType` from a single `manifest.json`, or null when the zip is not a
+/// readable research archive. Only store and raw-deflate are read, and only
+/// that one entry. An oversized or inconsistent manifest is not a package.
+String? _zipManifestType(List<int> bytes) {
+  final eocd = _eocdOffset(bytes);
+  if (eocd == null) return null;
+  if (_u16(bytes, eocd + 4) != 0 || _u16(bytes, eocd + 6) != 0) return null;
+  final entries = _u16(bytes, eocd + 8);
+  final total = _u16(bytes, eocd + 10);
+  final cdSize = _u32(bytes, eocd + 12);
+  final cdOffset = _u32(bytes, eocd + 16);
+  if (entries != total ||
+      entries > _maxZipEntries ||
+      entries == 0xffff ||
+      cdSize == 0xffffffff ||
+      cdOffset == 0xffffffff ||
+      cdOffset > bytes.length ||
+      cdSize > bytes.length - cdOffset) {
+    return null;
+  }
+  var cursor = cdOffset;
+  final end = cdOffset + cdSize;
+  String? packageType;
+  var sawManifest = false;
+  for (var i = 0; i < entries; i++) {
+    if (cursor + 46 > end || _u32(bytes, cursor) != 0x02014b50) return null;
+    final flags = _u16(bytes, cursor + 8);
+    final method = _u16(bytes, cursor + 10);
+    final crc = _u32(bytes, cursor + 16);
+    final compSize = _u32(bytes, cursor + 20);
+    final uncompSize = _u32(bytes, cursor + 24);
+    final nameLen = _u16(bytes, cursor + 28);
+    final extraLen = _u16(bytes, cursor + 30);
+    final commentLen = _u16(bytes, cursor + 32);
+    final localOffset = _u32(bytes, cursor + 42);
+    final nameStart = cursor + 46;
+    final next = nameStart + nameLen + extraLen + commentLen;
+    if (next > end) return null;
+    final name = _zipName(bytes.sublist(nameStart, nameStart + nameLen), flags);
+    cursor = next;
+    if (name != 'manifest.json') continue;
+    if (sawManifest ||
+        (flags & 1) != 0 ||
+        (method != 0 && method != 8) ||
+        compSize > _maxManifestBytes ||
+        uncompSize > _maxManifestBytes) {
+      return null;
+    }
+    sawManifest = true;
+    final plain = _manifestBytes(
+      bytes,
+      localOffset: localOffset,
+      method: method,
+      crc: crc,
+      compSize: compSize,
+      uncompSize: uncompSize,
+      name: utf8.encode('manifest.json'),
+    );
+    if (plain == null) return null;
+    try {
+      final value = jsonDecode(utf8.decode(plain));
+      final type = value is Map ? value['packageType'] : null;
+      packageType = type is String ? type : null;
+    } on FormatException {
+      return null;
+    }
+  }
+  if (!sawManifest || cursor != end) return null;
+  return packageType;
+}
+
+int? _eocdOffset(List<int> bytes) {
+  if (bytes.length < 22) return null;
+  final earliest = bytes.length > 22 + 65535 ? bytes.length - 22 - 65535 : 0;
+  for (var i = bytes.length - 22; i >= earliest; i--) {
+    if (_u32(bytes, i) != 0x06054b50) continue;
+    if (i + 22 + _u16(bytes, i + 20) == bytes.length) return i;
+  }
+  return null;
+}
+
+String? _zipName(List<int> name, int flags) {
+  try {
+    return (flags & 0x800) != 0 ? utf8.decode(name) : latin1.decode(name);
+  } on FormatException {
+    return null;
+  }
+}
+
+List<int>? _manifestBytes(
+  List<int> bytes, {
+  required int localOffset,
+  required int method,
+  required int crc,
+  required int compSize,
+  required int uncompSize,
+  required List<int> name,
+}) {
+  if (localOffset < 0 || localOffset + 30 > bytes.length) return null;
+  if (_u32(bytes, localOffset) != 0x04034b50) return null;
+  final localFlags = _u16(bytes, localOffset + 6);
+  if (_u16(bytes, localOffset + 8) != method || (localFlags & 1) != 0) {
+    return null;
+  }
+  final nameLen = _u16(bytes, localOffset + 26);
+  final extraLen = _u16(bytes, localOffset + 28);
+  final nameStart = localOffset + 30;
+  final dataStart = nameStart + nameLen + extraLen;
+  if (nameLen != name.length || dataStart > bytes.length) return null;
+  for (var i = 0; i < nameLen; i++) {
+    if (bytes[nameStart + i] != name[i]) return null;
+  }
+  final described = (localFlags & 8) == 0;
+  if (described &&
+      (_u32(bytes, localOffset + 14) != crc ||
+          _u32(bytes, localOffset + 18) != compSize ||
+          _u32(bytes, localOffset + 22) != uncompSize)) {
+    return null;
+  }
+  if (dataStart + compSize > bytes.length) return null;
+  final compressed = bytes.sublist(dataStart, dataStart + compSize);
+  List<int> plain;
+  try {
+    plain = method == 8
+        ? ZLibDecoder(raw: true).convert(compressed)
+        : compressed;
+  } on Exception {
+    return null;
+  }
+  if (plain.length != uncompSize || _crc32(plain) != crc) return null;
+  return plain;
+}
+
+int _u16(List<int> bytes, int offset) =>
+    bytes[offset] | (bytes[offset + 1] << 8);
+
+int _u32(List<int> bytes, int offset) =>
+    bytes[offset] |
+    (bytes[offset + 1] << 8) |
+    (bytes[offset + 2] << 16) |
+    (bytes[offset + 3] << 24);
+
+int _crc32(List<int> data) {
+  var crc = 0xffffffff;
+  for (final byte in data) {
+    crc ^= byte;
+    for (var bit = 0; bit < 8; bit++) {
+      final mask = -(crc & 1);
+      crc = (crc >> 1) ^ (0xedb88320 & mask);
+    }
+  }
+  return (crc ^ 0xffffffff) & 0xffffffff;
 }
