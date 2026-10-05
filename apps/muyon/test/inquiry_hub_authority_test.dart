@@ -25,7 +25,12 @@ void main() {
         final channel = host.tools.inspect('inquiry.hub.request');
         expect(channel, isNotNull);
         expect(channel!.descriptor.effect, ToolEffect.network);
-        expect(channel.descriptor.description, contains('write'));
+        final description = channel.descriptor.description;
+        expect(description, contains('远端写入'));
+        expect(description, contains('发送'));
+        expect(description, contains('不会自动重发'));
+        expect(description.length, inInclusiveRange(20, 200));
+        expect(description, isNot(contains('无需确认')));
       } finally {
         await host.close();
         root.deleteSync(recursive: true);
@@ -307,6 +312,18 @@ void channelTests() {
         },
       );
     }
+    test('cancel before the effect sends nothing and leaves nothing pending', () async {
+      final cancel = AiCancellation();
+      final c = await ready(cancel: cancel);
+      cancel.cancel();
+      await expectLater(c.publish(draft()), throwsA(anything));
+      expect(posts, 0);
+      expect(
+        journal.read(base.toString(), draft()['publication_id']! as String),
+        isNull,
+        reason: 'no attempt may block a later, separately reviewed publication',
+      );
+    });
     test('lost success reconciles exact business data after reopen and never reposts', () async {
       final c = await ready();
       transport = (r, t, d, c, g, s) async {

@@ -14,7 +14,9 @@ class InquiryHubAuthority implements HubAuthority {
         toolId: toolId,
         moduleId: 'inquiry',
         effect: ToolEffect.network,
-        description: 'External hub request; publication POST is a remote write',
+        description:
+            '资料中心内部通道：经宿主一次性确认后联网访问资料中心。发布会把你选定的供应商、物料和报价资料'
+            '发送到该中心，属于远端写入；结果不确定时先向中心查询，不会自动重发。仅供询价模块内部使用。',
         supportsCancel: true,
         parameterSchema: {
           'type': 'object',
