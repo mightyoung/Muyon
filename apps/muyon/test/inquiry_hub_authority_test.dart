@@ -25,6 +25,7 @@ void main() {
         final channel = host.tools.inspect('inquiry.hub.request');
         expect(channel, isNotNull);
         expect(channel!.descriptor.effect, ToolEffect.network);
+        expect(channel.descriptor.modelSelectable, isFalse);
         final description = channel.descriptor.description;
         expect(description, contains('远端写入'));
         expect(description, contains('发送'));
