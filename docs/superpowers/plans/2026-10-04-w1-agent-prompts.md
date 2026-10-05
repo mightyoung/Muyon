@@ -443,3 +443,74 @@ Three follow-ups:
 Also list the public API B needs to build the memory / experience / Dream review UI (method names, states, what "revert run" restores), so A can hand it to B.
 
 Report in the same final-report format: commits; test counts per package; evidence class per item (doc / automated test / build / real model / device; unverified stays "unverified"); changes outside owned files; new dependencies (none expected in the app); contract requests; known gaps and risks.
+
+---
+
+# 新角色 E：opencode（DeepSeek v4.1 flash）启动提示词
+
+分工依据：速度快、成本低，适合范围明确、接口现成、可用测试验收的任务；不承担安全协议、架构取舍和长链推理。
+
+---8<--- E · opencode · 启动 ---
+
+你是 Muyon 项目的 **E 角色：支援开发**。集成者 A（另一个 Claude Opus 会话）负责契约、主库结构、审查与合并。只做下面的任务，只改你拥有的文件。
+
+## 环境
+
+- 仓库 `github.com/mightyoung/Muyon`。你的工作目录 `/Users/muyi/Downloads/dev/muyon-worktrees/e-support`，分支 `feat/e-support`。**不要**进入 `/Users/muyi/Downloads/dev/muspace` 或其他 Agent 的目录。
+- 开工：`git fetch origin && git merge --ff-only origin/develop`，然后在仓库根目录 `flutter pub get`。
+- 每次推送前必须运行 `scripts/verify.sh`，退出码为 0，且运行后 `git status` 干净。推送后执行 `git ls-remote origin refs/heads/feat/e-support`，确认远端哈希等于 `git rev-parse HEAD`，并在报告里写出这个哈希（之前有 Agent 以为推送成功但实际没有）。
+- 机器多人共用、负载经常很高：同一时间只跑一个 `flutter test` 或构建；中断后清理残留的 `flutter_tester` 进程。
+- 只做自动测试与静态分析，不声称实机通过。
+
+## 必读
+
+1. `docs/superpowers/plans/2026-10-04-muyon-parallel-dev-plan.md`（第 2、4 节协作规则）
+2. `docs/design/DESIGN.md`（所有页面遵循 Folio 风格；只用 `packages/muyon_ui` 的 token，不硬编码颜色和字号）
+3. `apps/muyon/lib/platform/outbound_ledger.dart`、`tool_registry.dart`、`mcp_adapter.dart`
+4. `apps/muyon/lib/services/models/secret_store.dart`
+5. `apps/muyon/lib/screens/data_storage_page.dart`（参考它的结构与测试写法）
+
+## 你拥有的文件
+
+- 新建：`apps/muyon/lib/screens/data_flow_page.dart`、`apps/muyon/lib/screens/mcp_servers_page.dart`，以及对应的 `apps/muyon/test/*` 新测试文件。
+- 允许的最小改动（每处都要在报告里列出）：在 `data_storage_page.dart` 加入口（一两行）；在 `apps/muyon/lib/app/bootstrap.dart` 加最少的接线。
+- 不属于你：`packages/muyon_module_api`、`apps/muyon/lib/platform/**`（只读调用，不改）、其他页面、各业务模块包。需要改这些地方时写进报告的"请求"一节，由 A 处理。
+
+## 任务
+
+### E1 "数据去向"页面
+用户要能看清"数据实际发到了哪里、工具做了什么"。
+- 列出 `host.outbound.recent()`：时间、调用方（assistant / research.qa / embedding / inquiry / dream …）、端点、本机还是远程、是否经云代理、模型、载荷大小与条数、状态（sending / succeeded / failed / cancelled / timeout / interrupted）、错误说明。**不显示载荷内容**（记录里本来就没有）。
+- 列出工具调用：`host.tools.history()` 的状态与摘要；需要批准和目的地信息时只读查询主库 `tool_approvals` 表（`destination`、`issued_at`、`expires_at`、`state`）。
+- 状态用文字加图标区分，不只靠颜色；`interrupted` 必须写明"结果未知，重试前请先核实"。
+- 支持按调用方和状态筛选；空状态与读取失败状态都要有明确文案。
+- 测试：用真实的临时宿主（参考 `acceptance_failure_matrix_test.dart`）插入各种状态的记录，断言显示正确；320 与 1280 宽度、200% 字号下不溢出。
+
+### E2 MCP 服务器配置页
+- 新增、编辑、删除服务器：`id`、`endpoint`、可选的令牌。配置（不含令牌）以 JSON 存到 `host.workspaces.setSetting('mcpServers', ...)`；令牌只通过 `MethodChannelSecretStore.write/remove` 写入系统安全存储，引用名用 `mcp-<id>`。
+- 输入校验沿用 `McpServerConfig` 的规则（https 或本机 http、简单 id），错误就地提示。
+- "连接"按钮调用 `McpAdapter.connect(host.tools, config, secrets: ...)`，显示已注册的工具与跳过原因。**只在用户点击时连接，启动时不自动联网。**
+- 删除服务器时：删除配置与令牌，并用 `host.tools.setAvailability(toolId, available: false, reason: '服务器已移除')` 停用它注册过的工具（注册表没有注销接口，不要去改注册表）。
+- 页面写明：调用这些工具会把参数发给该服务器，每次调用都要你确认。
+- 测试：用本地假 MCP 服务器（可参考 `test/mcp_adapter_test.dart` 里的 `_FakeMcp`）覆盖：保存与重新读取配置、令牌不出现在设置 JSON 里、连接后工具出现、删除后工具变为不可用；安全存储在测试中用注入的替身。
+
+### E3 平台层测试覆盖率
+- 运行 `flutter test --coverage`（在 `apps/muyon`），统计 `lib/platform/**`、`lib/workspace/**`、`lib/services/models/**` 各文件的行覆盖率，写入 `docs/implementation/coverage-<日期>.md`（附可重复运行的命令）。
+- 对低于 80% 的文件补测试，**只加测试，不改产品代码**。发现疑似缺陷时不要顺手修，写进报告，由 A 判断。
+- 不得削弱或删除已有断言。
+
+## 规则
+
+- 先写测试，再实现。所改包 `flutter analyze` 无问题。
+- 不读、不改、不提交 `.env`；代码、测试、日志里不出现密钥。
+- 不新增依赖；确实需要时写明理由，等 A 同意。
+- 小提交（每个不超过约 400 行），Conventional Commits 格式，提交说明写一两句原因。只推送到 `feat/e-support`，**不要合并到 develop**。
+
+## 交付报告
+
+1. 提交列表（哈希 + 一句话）和远端核对过的哈希
+2. 各包测试数与 analyze 结果
+3. 每项的证据类别（文档 / 自动测试 / 构建 / 真实模型 / 实机），没验证的写"未验证"
+4. 拥有范围外的改动（逐条）
+5. 覆盖率数字（前后对比）与发现的疑似缺陷
+6. 已知缺口与风险

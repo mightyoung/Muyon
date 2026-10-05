@@ -50,6 +50,7 @@
 | **B 前端/体验** | Claude Code Sonnet 5.5 Medium | 设计系统、桌面/手机外壳、科研阅读批注 UI、原型模块与受限 WebView | `apps/muyon/lib/screens/`、`apps/muyon/lib/app/`（除 plugin 接线）、`packages/prototype_module/` |
 | **C 业务模块迁入** | Codex gpt6.1 sol Medium | 询价/科研存储适配、研究包往返、引用锚、业务工具注册，测试密集型实现 | `packages/inquiry_module/`、`packages/supplier_core/`、`packages/research_module/`、`apps/muyon/lib/app/*_plugin.dart` |
 | **D 难题攻坚** | grok-build Grok 4.7 xhigh | 设备身份与加密传输、跨设备任务归属、检索评测与混合检索、Dream/记忆一致性 | `apps/muyon/lib/services/transfer/`、`services/knowledge/`、`services/search/`、`apps/muyon/lib/assistant/memory*`、`platform/memory_review.dart` |
+| **E 支援开发** | opencode DeepSeek v4.1 flash | 范围明确、接口现成、可测试验收的任务：数据去向页、MCP 配置页、平台层测试覆盖率 | `apps/muyon/lib/screens/data_flow_page.dart`、`mcp_servers_page.dart` 及其测试；覆盖率报告 |
 
 理由：Grok xhigh 推理深但慢，只给边界清晰、需深推敲的协议与算法；Codex 擅长按明确规格大批量改造并补测试；Sonnet 做 UI 迭代快；Opus 守契约与一致性，不承担大块实现。
 
