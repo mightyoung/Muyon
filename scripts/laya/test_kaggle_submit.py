@@ -94,6 +94,15 @@ class SubmitGuards(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 kaggle_submit.read_token(path)
 
+    def test_status_line_ignores_the_version_warning(self):
+        text = (
+            "Warning: Looks like you're using an outdated `kaggle` version "
+            "(installed: 2.0.0), please consider upgrading to the latest version (2.2.2)\n"
+            "ready\n"
+        )
+        self.assertEqual(kaggle_submit.status_line(text), "ready")
+        self.assertEqual(kaggle_submit.status_line("error\n"), "error")
+
     def test_scrub_removes_a_token(self):
         self.assertNotIn("KGAT_exampletoken", kaggle_submit.scrub("denied KGAT_exampletoken"))
         self.assertIn("redacted", kaggle_submit.scrub("denied KGAT_exampletoken"))

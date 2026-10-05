@@ -155,11 +155,22 @@ def _write_kernel(folder: Path, user: str) -> None:
     )
 
 
+def status_line(text: str) -> str:
+    """The CLI prints a version warning before the one-word status."""
+    lines = []
+    for line in scrub(text).splitlines():
+        stripped = line.strip().lower()
+        if not stripped or stripped.startswith("warning:"):
+            continue
+        lines.append(stripped)
+    return lines[-1] if lines else ""
+
+
 def _dataset_ready(token: str, ref: str) -> None:
     deadline = time.time() + 20 * 60
     while True:
         result = run_scrubbed([KAGGLE, "datasets", "status", ref], token)
-        status = scrub(result.stdout).strip().lower()
+        status = status_line(result.stdout + "\n" + result.stderr)
         print(f"dataset status: {status or 'empty'}", flush=True)
         if result.returncode != 0:
             raise SystemExit(f"dataset status failed ({result.returncode})")
