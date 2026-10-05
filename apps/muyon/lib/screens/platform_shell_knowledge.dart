@@ -15,7 +15,7 @@ extension _KnowledgeSections on _PlatformShellState {
   }
 
   Widget knowledge() => list([
-    const Text('数据与知识', style: TextStyle(fontSize: 24)),
+    Text('数据与知识', style: Theme.of(context).textTheme.titleLarge),
     const Text('原文件与来源对象保留；全文检索无需模型。扫描图片的 OCR 状态单独显示。'),
     const SizedBox(height: 10),
     Wrap(
@@ -230,7 +230,7 @@ extension _KnowledgeSections on _PlatformShellState {
   }
 
   Widget tools() => list([
-    const Text('接口与工具', style: TextStyle(fontSize: 24)),
+    Text('接口与工具', style: Theme.of(context).textTheme.titleLarge),
     const Text('页面与助手调用同一注册表；参数与权限由宿主校验。'),
     for (final info in host.tools.list())
       Card(

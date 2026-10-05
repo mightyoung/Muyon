@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:archive/archive.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -22,91 +23,83 @@ void main() {
     store.close();
     temp.deleteSync(recursive: true);
   });
-  test(
-    'research snapshot, task revision, result acceptance and report round trip',
-    () async {
-      final source = Directory(p.join(temp.path, 'source'))..createSync();
-      File(
-        p.join(source.path, 'README.md'),
-      ).writeAsStringSync('# Source\nUnchanged original');
-      File(p.join(source.path, 'claims.jsonl')).writeAsStringSync(
-        '${jsonEncode({'id': 'claim-1', 'title': 'A conditional claim', 'status': 'needs_review', 'rev': 2})}\n',
+  test('research snapshot, task revision, result acceptance and report round trip', () async {
+    final source = Directory(p.join(temp.path, 'source'))..createSync();
+    File(p.join(source.path, 'README.md'))
+        .writeAsStringSync('# Source\nUnchanged original');
+    File(p.join(source.path, 'claims.jsonl')).writeAsStringSync(
+      '${jsonEncode({'id': 'claim-1', 'title': 'A conditional claim', 'status': 'needs_review', 'rev': 2})}\n',
+    );
+    final project = await exchange.importResearch(source.path);
+    final entry = store.entries(project.id).single;
+    expect(entry.data['status'], 'needs_review');
+    expect(
+      store.documents(project.id).single.absolutePath,
+      startsWith(store.rootPath),
+    );
+    final task = store.saveTask(
+      projectId: project.id,
+      title: 'Evaluate',
+      goal: 'Compare same inputs',
+      spec: {
+        'parameters': {'seed': 7},
+        'dataReferences': ['dataset:1'],
+        'codeReference': 'commit:abc',
+        'environment': 'python 3.11',
+        'expectedResults': ['scores.json'],
+        'command': 'manual-only',
+      },
+    );
+    final zip = await exchange.exportTask(task, temp.path);
+    final archive = ZipDecoder().decodeBytes(await File(zip).readAsBytes());
+    final template = jsonDecode(
+      utf8.decode(
+        archive.findFile('result-template.json')!.content as List<int>,
+      ),
+    ) as Map<String, dynamic>;
+    expect(template['taskRevision'], 1);
+    final revised = store.saveTask(
+      id: task.id,
+      projectId: project.id,
+      title: task.title,
+      goal: 'New goal',
+      spec: {'seed': 8},
+    );
+    expect(revised.revision, 2);
+    expect(store.taskRevision(task.id, 1)!.goal, task.goal);
+    final result = File(p.join(temp.path, 'result.json'))
+      ..writeAsStringSync(
+        jsonEncode({
+          ...template,
+          'metrics': {'accuracy': 0.75},
+        }),
       );
-      final project = await exchange.importResearch(source.path);
-      final entry = store.entries(project.id).single;
-      expect(entry.data['status'], 'needs_review');
-      expect(
-        store.documents(project.id).single.absolutePath,
-        startsWith(store.rootPath),
-      );
-      final task = store.saveTask(
-        projectId: project.id,
-        title: 'Evaluate',
-        goal: 'Compare same inputs',
-        spec: {
-          'parameters': {'seed': 7},
-          'dataReferences': ['dataset:1'],
-          'codeReference': 'commit:abc',
-          'environment': 'python 3.11',
-          'expectedResults': ['scores.json'],
-          'command': 'manual-only',
-        },
-      );
-      final zip = await exchange.exportTask(task, temp.path);
-      final archive = ZipDecoder().decodeBytes(await File(zip).readAsBytes());
-      final template =
-          jsonDecode(
-                utf8.decode(
-                  archive.findFile('result-template.json')!.content
-                      as List<int>,
-                ),
-              )
-              as Map<String, dynamic>;
-      expect(template['taskRevision'], 1);
-      final revised = store.saveTask(
-        id: task.id,
-        projectId: project.id,
-        title: task.title,
-        goal: 'New goal',
-        spec: {'seed': 8},
-      );
-      expect(revised.revision, 2);
-      expect(store.taskRevision(task.id, 1)!.goal, task.goal);
-      final result = File(p.join(temp.path, 'result.json'))
-        ..writeAsStringSync(
-          jsonEncode({
-            ...template,
-            'metrics': {'accuracy': 0.75},
-          }),
-        );
-      final run = await exchange.importResult(result.path);
-      expect(run.accepted, false);
-      expect(run.taskRevision, 1);
-      expect((await exchange.importResult(result.path)).id, run.id);
-      expect(store.runs(project.id).length, 1);
-      store.acceptRun(run.id);
-      store.addOutline(project.id, 'Evidence', entry.id);
-      store.addOutline(project.id, 'Experiment', run.id);
-      store.saveNote(
-        store.documents(project.id).single.id,
-        'section 1',
-        'Need replication',
-      );
-      final report = File(
-        await exchange.exportReport(project.id, temp.path),
-      ).readAsStringSync();
-      expect(report, contains('needs_review'));
-      expect(report, contains('0.75'));
-      expect(report, contains('Need replication'));
-      expect(
-        File(p.join(source.path, 'README.md')).readAsStringSync(),
-        '# Source\nUnchanged original',
-      );
-      store.close();
-      store = WorkbenchStore.open(p.join(temp.path, 'app'));
-      expect(store.runs(project.id).single.accepted, true);
-    },
-  );
+    final run = await exchange.importResult(result.path);
+    expect(run.accepted, false);
+    expect(run.taskRevision, 1);
+    expect((await exchange.importResult(result.path)).id, run.id);
+    expect(store.runs(project.id).length, 1);
+    store.acceptRun(run.id);
+    store.addOutline(project.id, 'Evidence', entry.id);
+    store.addOutline(project.id, 'Experiment', run.id);
+    store.saveNote(
+      store.documents(project.id).single.id,
+      'section 1',
+      'Need replication',
+    );
+    final report = File(await exchange.exportReport(project.id, temp.path))
+        .readAsStringSync();
+    expect(report, contains('needs_review'));
+    expect(report, contains('0.75'));
+    expect(report, contains('Need replication'));
+    expect(
+      File(p.join(source.path, 'README.md')).readAsStringSync(),
+      '# Source\nUnchanged original',
+    );
+    store.close();
+    store = WorkbenchStore.open(p.join(temp.path, 'app'));
+    expect(store.runs(project.id).single.accepted, true);
+  });
   test('unsafe archive is rejected without retained snapshot', () async {
     final archive = Archive()..addFile(ArchiveFile('../escape.md', 1, [65]));
     final input = File(p.join(temp.path, 'unsafe.zip'))
@@ -138,14 +131,12 @@ void main() {
     final oldRoot = p.join(temp.path, 'old');
     Directory(oldRoot).createSync();
     final legacy = sqlite3.open(p.join(oldRoot, 'workbench.sqlite'));
-    legacy.execute(
-      '''CREATE TABLE projects(id TEXT PRIMARY KEY,title TEXT,question TEXT,next_step TEXT);
+    legacy.execute('''CREATE TABLE projects(id TEXT PRIMARY KEY,title TEXT,question TEXT,next_step TEXT);
 CREATE TABLE documents(id TEXT PRIMARY KEY,project_id TEXT,relative_path TEXT,absolute_path TEXT);
 CREATE TABLE tasks(id TEXT,revision INTEGER,project_id TEXT,title TEXT,goal TEXT,spec TEXT,PRIMARY KEY(id,revision));
 CREATE TABLE runs(id TEXT PRIMARY KEY,task_id TEXT,task_revision INTEGER,status TEXT,accepted INTEGER,data TEXT);
 INSERT INTO projects VALUES('p1','P','','');
-INSERT INTO tasks VALUES('t1',1,'p1','T','G','{}');''',
-    );
+INSERT INTO tasks VALUES('t1',1,'p1','T','G','{}');''');
     legacy.execute('INSERT INTO documents VALUES(?,?,?,?)', [
       'd1',
       'p1',
@@ -314,9 +305,8 @@ INSERT INTO tasks VALUES('t1',1,'p1','T','G','{}');''',
     expect(note.pageNumber, 5);
     expect(note.quote, 'The final cohort included 42 participants.');
     store.addOutline(project.id, 'Methods evidence', note.id as String);
-    final report = File(
-      await exchange.exportReport(project.id, temp.path),
-    ).readAsStringSync();
+    final report = File(await exchange.exportReport(project.id, temp.path))
+        .readAsStringSync();
     expect(report, contains('paper.md'));
     expect(report, contains('p. 5'));
     expect(report, contains('The final cohort included 42 participants.'));
@@ -402,9 +392,8 @@ INSERT INTO tasks VALUES('t1',1,'p1','T','G','{}');''',
     () async {
       final source = Directory(p.join(temp.path, 'real'))..createSync();
       File(p.join(source.path, 'README.md')).writeAsStringSync('# Real');
-      File(
-        p.join(source.path, 'claims.jsonl'),
-      ).writeAsStringSync('${jsonEncode({'id': 'c1', 'rev': 1})}\n');
+      File(p.join(source.path, 'claims.jsonl'))
+          .writeAsStringSync('${jsonEncode({'id': 'c1', 'rev': 1})}\n');
       final project = await exchange.importResearch(source.path);
 
       final empty = Directory(p.join(temp.path, 'empty'))..createSync();
@@ -452,9 +441,8 @@ INSERT INTO tasks VALUES('t1',1,'p1','T','G','{}');''',
   test('re-import reclassifies legacy other rows in place', () async {
     final source = Directory(p.join(temp.path, 'legacy'))..createSync();
     final tension = {'id': 't1', 'rev': 1, 'observation': 'state leak'};
-    File(
-      p.join(source.path, 'tensions.jsonl'),
-    ).writeAsStringSync('${jsonEncode(tension)}\n');
+    File(p.join(source.path, 'tensions.jsonl'))
+        .writeAsStringSync('${jsonEncode(tension)}\n');
     final project = await exchange.importResearch(source.path);
     final entry = store.entries(project.id).single;
     // Simulate an import made before tensions were a recognised kind.
@@ -522,9 +510,8 @@ INSERT INTO tasks VALUES('t1',1,'p1','T','G','{}');''',
       final notedVersions = after.where((d) => d.relativePath == 'noted.md');
       expect(notedVersions, hasLength(2));
       expect(
-        File(
-          notedVersions.firstWhere((d) => d.id == notedDoc.id).absolutePath,
-        ).readAsStringSync(),
+        File(notedVersions.firstWhere((d) => d.id == notedDoc.id).absolutePath)
+            .readAsStringSync(),
         'v1',
       );
       expect(notedVersions.last.id, isNot(notedDoc.id));
@@ -561,11 +548,8 @@ INSERT INTO tasks VALUES('t1',1,'p1','T','G','{}');''',
       absolutePath: path,
     );
     expect(
-      currentVersions([
-        doc('a1', 'a.md'),
-        doc('a2', 'a.md'),
-        doc('b', 'b.md'),
-      ]).map((d) => d.id),
+      currentVersions([doc('a1', 'a.md'), doc('a2', 'a.md'), doc('b', 'b.md')])
+          .map((d) => d.id),
       ['a2', 'b'],
     );
   });
@@ -615,4 +599,3 @@ PRAGMA user_version=3;
     expect(WorkbenchStore.schemaVersion, 6);
   });
 }
-

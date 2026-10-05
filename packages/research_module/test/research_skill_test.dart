@@ -159,19 +159,16 @@ void main() {
     expect(out, endsWith('[claims/c3@1](wbref:claims/c3@1)'));
   });
 
-  test(
-    'same-named JSONL outside research/ is not an authoritative log',
-    () async {
-      final files = skillProject()
-        ..['backup/claims.jsonl'] =
-            '${jsonEncode({'schema_version': 2, 'id': 'c1', 'rev': 9, 'statement': '备份'})}\n';
-      final project = await exchange.importResearch(write(files).path);
-      final claims = store.entries(project.id, kind: 'claims');
-      expect(claims.map(revOf), isNot(contains(9)));
-      expect(revOf(revisionGroups(claims).single.current), 2);
-      expect(store.entries(project.id, kind: 'other').single.title, '备份');
-    },
-  );
+  test('same-named JSONL outside research/ is not an authoritative log', () async {
+    final files = skillProject()
+      ..['backup/claims.jsonl'] =
+          '${jsonEncode({'schema_version': 2, 'id': 'c1', 'rev': 9, 'statement': '备份'})}\n';
+    final project = await exchange.importResearch(write(files).path);
+    final claims = store.entries(project.id, kind: 'claims');
+    expect(claims.map(revOf), isNot(contains(9)));
+    expect(revOf(revisionGroups(claims).single.current), 2);
+    expect(store.entries(project.id, kind: 'other').single.title, '备份');
+  });
 
   test('links deliverable references outside code', () {
     const md =
@@ -328,34 +325,31 @@ void main() {
     expect(drafts.skipped, isEmpty);
   });
 
-  test(
-    'manual binding choices survive a refresh with the same ambiguity',
-    () async {
-      final files = skillProject()
-        ..['research/papers.jsonl'] =
-            '${skillProject()['research/papers.jsonl']}${jsonEncode({'schema_version': 2, 'id': 'p1-dup', 'rev': 1, 'source_id': 's1', 'source_rev': 1, 'arxiv_id': '2301.00001', 'version': 'v1', 'title': '重复登记'})}\n';
-      final dir = write(files);
-      final project = await exchange.importResearch(dir.path);
-      final pdf = store.documents(project.id).firstWhere((d) => d.isPdf);
-      expect(
-        store
-            .bindings(project.id)
-            .where((b) => b.documentId == pdf.id)
-            .every((b) => b.ambiguous),
-        isTrue,
-      );
-      store.confirmBinding(pdf.id, 'p1-v1');
-      await exchange.importResearch(dir.path, intoProjectId: project.id);
-      final left = store
+  test('manual binding choices survive a refresh with the same ambiguity', () async {
+    final files = skillProject()
+      ..['research/papers.jsonl'] =
+          '${skillProject()['research/papers.jsonl']}${jsonEncode({'schema_version': 2, 'id': 'p1-dup', 'rev': 1, 'source_id': 's1', 'source_rev': 1, 'arxiv_id': '2301.00001', 'version': 'v1', 'title': '重复登记'})}\n';
+    final dir = write(files);
+    final project = await exchange.importResearch(dir.path);
+    final pdf = store.documents(project.id).firstWhere((d) => d.isPdf);
+    expect(
+      store
           .bindings(project.id)
           .where((b) => b.documentId == pdf.id)
-          .single;
-      expect(
-        (left.paperId, left.ambiguous, left.method),
-        ('p1-v1', false, 'arxiv_manifest+manual'),
-      );
-    },
-  );
+          .every((b) => b.ambiguous),
+      isTrue,
+    );
+    store.confirmBinding(pdf.id, 'p1-v1');
+    await exchange.importResearch(dir.path, intoProjectId: project.id);
+    final left = store
+        .bindings(project.id)
+        .where((b) => b.documentId == pdf.id)
+        .single;
+    expect(
+      (left.paperId, left.ambiguous, left.method),
+      ('p1-v1', false, 'arxiv_manifest+manual'),
+    );
+  });
 
   test('confirming a binding leaves other projects alone', () async {
     final a = await exchange.importResearch(write(skillProject(), 'a').path);
@@ -435,4 +429,3 @@ void main() {
     );
   });
 }
-

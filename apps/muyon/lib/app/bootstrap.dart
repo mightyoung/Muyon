@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
+import 'package:prototype_module/prototype_module.dart';
 import 'package:research_module/research_module.dart';
 
 import '../platform/file_gateway.dart';
@@ -44,6 +45,8 @@ class MuyonHost {
   approveInquiryModelRequest;
   ResearchRuntime? research;
   String? researchError;
+  PrototypeRuntime? prototype;
+  String? prototypeError;
   InquiryPlugin? inquiry;
   String? inquiryError;
   bool _closing = false;
@@ -125,7 +128,7 @@ class MuyonHost {
       final host = MuyonHost._(
         storage,
         WorkspaceRepository(database),
-        ModuleRegistry([ResearchModule()]),
+        ModuleRegistry([ResearchModule(), PrototypeModule()]),
         CapabilityRegistry(),
       );
       host.foundation = FoundationRepository(database);
@@ -192,6 +195,7 @@ class MuyonHost {
   }
 
   Future<void>? _activating;
+  Future<void>? _activatingPrototype;
   Future<void>? _openingInquiry;
   Future<void> activateInquiry() {
     if (_closing) return Future.error(StateError('Host is closing'));
@@ -284,12 +288,59 @@ class MuyonHost {
     }
   }
 
+  /// Opens the prototype module on first use. A failure is recorded in
+  /// [prototypeError] and `module_registry`; the host and other modules keep
+  /// working, and the next call retries.
+  Future<void> activatePrototype() {
+    if (_closing) return Future.error(StateError('Host is closing'));
+    return _activatingPrototype ??= _activatePrototype();
+  }
+
+  Future<void> _activatePrototype() async {
+    if (prototype != null) return;
+    try {
+      final module = registry.require(prototypeModuleId);
+      final connection = await storage.open(prototypeModuleId, module.schema);
+      projections.watch(prototypeModuleId, connection);
+      prototype = await module.activate(
+        ModuleResources(
+          database: connection,
+          files: FileGateway(
+            p.join(storage.rootPath, 'modules', prototypeModuleId, 'files'),
+          ),
+          capabilities: capabilities.forModule(
+            prototypeModuleId,
+            allowed: const {},
+          ),
+        ),
+      ) as PrototypeRuntime;
+      await workspaces.database.write(
+        (db) => db.execute(
+          'INSERT OR REPLACE INTO module_registry VALUES(?,?,?)',
+          [prototypeModuleId, 'ready', null],
+        ),
+      );
+      prototypeError = null;
+    } catch (error) {
+      prototype = null;
+      prototypeError = error.toString();
+      await workspaces.database.write(
+        (db) => db.execute(
+          'INSERT OR REPLACE INTO module_registry VALUES(?,?,?)',
+          [prototypeModuleId, 'failed', prototypeError],
+        ),
+      );
+      _activatingPrototype = null;
+    }
+  }
+
   Future<void> close() => _closeFuture ??= _close();
   Future<void> _close() async {
     _closing = true;
     await personalAgent.close();
     await _openingInquiry;
     await _activating;
+    await _activatingPrototype;
     await inquiry?.close();
     await services.transfer.close();
     await Future.wait(_platformOperations.toList());

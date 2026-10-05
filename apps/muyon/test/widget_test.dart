@@ -26,7 +26,7 @@ void main() {
       for (final item in [
         ('助手', find.byType(AssistantPage)),
         ('资料', find.text('数据与知识')),
-        ('工具', find.text('页面与助手调用同一注册表；参数与权限由宿主校验。')),
+        ('我的', find.text('接口与工具')),
       ]) {
         await tester.tap(
           find.descendant(
@@ -46,6 +46,26 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('个人助手'), findsOneWidget);
+      // Phone hub: each entry is its own page with a back button.
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text('我的'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final entry in [
+        ('接口与工具', find.text('页面与助手调用同一注册表；参数与权限由宿主校验。')),
+        ('数据与存储', find.text('备份与恢复')),
+        ('系统设置', find.text('外观')),
+      ]) {
+        await tester.tap(find.text(entry.$1).first);
+        await tester.pumpAndSettle();
+        expect(entry.$2, findsWidgets, reason: entry.$1);
+        await tester.tap(find.byTooltip('返回'));
+        await tester.pumpAndSettle();
+        expect(find.text('个人中心'), findsOneWidget, reason: 'back to hub');
+      }
       await tester.pumpWidget(const SizedBox());
     } finally {
       await tester.runAsync(() => host.close());

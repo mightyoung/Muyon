@@ -12,10 +12,10 @@ env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u al
 
 | 策略 | recall@1 | recall@5 | recall@10 | MRR | 索引字节 | 建索引 ms | 查询均值 ms |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| current（cjk-bigram-latin-v1 + 单字扫描） | 0.779 | 0.976 | 1.000 | 1.000 | 40960 | 37.5 | 0.659 |
-| fts-bigram-only（同一分词器，没有单字扫描） | 0.767 | 0.917 | 0.917 | 0.917 | 40960 | 25.0 | 0.174 |
-| unigram（单字 + 拉丁词） | 0.779 | 0.976 | 1.000 | 1.000 | 32768 | 31.9 | 0.157 |
-| hybrid（current 与 unigram 的 RRF，k=60） | 0.779 | 0.976 | 1.000 | 1.000 | 73728 | 70.5 | 0.816 |
+| current（cjk-bigram-latin-v1 + 单字扫描） | 0.779 | 0.976 | 1.000 | 1.000 | 40960 | 569.2 | 3.981 |
+| fts-bigram-only（同一分词器，没有单字扫描） | 0.767 | 0.917 | 0.917 | 0.917 | 40960 | 177.9 | 1.008 |
+| unigram（单字 + 拉丁词） | 0.779 | 0.976 | 1.000 | 1.000 | 32768 | 232.9 | 1.246 |
+| hybrid（current 与 unigram 的 RRF，k=60） | 0.779 | 0.976 | 1.000 | 1.000 | 73728 | 808.3 | 5.228 |
 | vector | not measured — needs real model | | | | | |
 
 查询「泵」的 recall@5：current 0.714；fts-bigram-only 0.000；unigram 0.714；hybrid 0.714。

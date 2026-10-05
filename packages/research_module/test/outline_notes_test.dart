@@ -128,9 +128,8 @@ void main() {
       throwsFormatException,
     );
 
-    final report = File(
-      await exchange.exportReport(projectId, temp.path),
-    ).readAsStringSync();
+    final report = File(await exchange.exportReport(projectId, temp.path))
+        .readAsStringSync();
     expect(report.indexOf('## Method'), lessThan(report.indexOf('### Key')));
     expect(report, contains('Rework resets completion state.'));
     expect(report, contains('证据支持程度：部分支持'));
@@ -200,4 +199,3 @@ PRAGMA user_version=4;
     expect(rows.where((r) => r['section_id'] == sections.first.id).length, 2);
   });
 }
-

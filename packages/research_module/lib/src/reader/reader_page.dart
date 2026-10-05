@@ -13,6 +13,11 @@ import '../core/store.dart';
 import 'entry_picker.dart';
 import '../app/outline_link_dialog.dart';
 
+import 'package:muyon_ui/muyon_ui.dart';
+
+import 'source_jump_banner.dart';
+import 'source_locator.dart';
+
 /// Reads the imported snapshot; notes are separate records, never source edits.
 class ReaderPage extends StatefulWidget {
   const ReaderPage({
@@ -23,6 +28,9 @@ class ReaderPage extends StatefulWidget {
     this.loadMarkdown,
     this.initialPageIndex = 0,
     this.initialQuote = '',
+    this.initialContextBefore,
+    this.initialContextAfter,
+    this.locator,
   });
   final WorkbenchStore store;
   final ResearchDocument document;
@@ -30,6 +38,12 @@ class ReaderPage extends StatefulWidget {
   final Future<String> Function(String path)? loadMarkdown;
   final int initialPageIndex;
   final String initialQuote;
+  final String? initialContextBefore;
+  final String? initialContextAfter;
+
+  /// Finds [initialQuote] on the initial page. Without one, following a source
+  /// reference only does the page-level jump and says so.
+  final QuoteLocator? locator;
 
   @override
   State<ReaderPage> createState() => _ReaderPageState();
@@ -41,6 +55,8 @@ class _ReaderPageState extends State<ReaderPage> {
   final _pageNumber = TextEditingController();
   final _quote = TextEditingController();
   final _note = TextEditingController();
+  final _noteFocus = FocusNode();
+  String _selection = '';
   final _doesNotSupport = TextEditingController();
   String? _evidenceKind;
   // Bumped after saving so the evidence dropdown rebuilds empty.
@@ -50,6 +66,8 @@ class _ReaderPageState extends State<ReaderPage> {
   int _pageCount = 0;
   bool _notesVisible = false;
   String? _entryId;
+  QuoteLocation? _location;
+  bool _bannerVisible = false;
 
   @override
   void initState() {
@@ -57,10 +75,120 @@ class _ReaderPageState extends State<ReaderPage> {
     _page = widget.initialPageIndex + 1;
     _pageNumber.text = '$_page';
     _quote.text = widget.initialQuote;
+    _bannerVisible =
+        widget.document.isPdf &&
+        (widget.initialQuote.isNotEmpty || widget.initialPageIndex > 0);
     _markdown = widget.document.isPdf
         ? Future.value('')
         : (widget.loadMarkdown?.call(widget.document.absolutePath) ??
               File(widget.document.absolutePath).readAsString());
+  }
+
+  Future<void> _locateQuote() async {
+    if (!_bannerVisible || widget.initialQuote.isEmpty) {
+      if (mounted && _bannerVisible) {
+        setState(() => _location = const PageOnly('来源没有可查找的原文片段'));
+      }
+      return;
+    }
+    final locator = widget.locator;
+    QuoteLocation result;
+    if (locator == null) {
+      result = const PageOnly('当前版本尚不支持文字定位');
+    } else {
+      try {
+        result = await locator.locate(
+          pageIndex: widget.initialPageIndex,
+          quote: widget.initialQuote,
+          contextBefore: widget.initialContextBefore,
+          contextAfter: widget.initialContextAfter,
+        );
+      } catch (error) {
+        result = PageOnly('定位失败：$error');
+      }
+    }
+    if (mounted) setState(() => _location = result);
+  }
+
+  static const _maxQuote = 2000;
+
+  void _setSelection(String text) {
+    final trimmed = text.trim();
+    if (trimmed == _selection || !mounted) return;
+    setState(() => _selection = trimmed);
+  }
+
+  /// Opens the notes form. With [useSelection] the selected text becomes the
+  /// quote (and, in a PDF, the current page the locator); the person still
+  /// writes and saves the note themselves.
+  void _startAnnotation({required bool useSelection}) {
+    if (useSelection && _selection.isNotEmpty) {
+      _quote.text = _selection.length > _maxQuote
+          ? _selection.substring(0, _maxQuote)
+          : _selection;
+    }
+    if (widget.document.isPdf) {
+      _locator.text = 'p. $_page';
+      _pageNumber.text = '$_page';
+    }
+    setState(() => _notesVisible = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _noteFocus.requestFocus();
+    });
+  }
+
+  Widget _selectionBar() {
+    final tokens = MuyonTokens.of(context);
+    final long = _selection.length > _maxQuote;
+    return Material(
+      color: tokens.accentTint,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(
+              long
+                  ? '已选中 ${_selection.length} 字（摘录将截取前 $_maxQuote 字）'
+                  : '已选中 ${_selection.length} 字',
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: tokens.accentDeep),
+            ),
+            FilledButton.tonalIcon(
+              onPressed: () => _startAnnotation(useSelection: true),
+              icon: const Icon(Icons.format_quote_outlined),
+              label: const Text('摘录并批注'),
+            ),
+            TextButton(
+              onPressed: () => setState(() => _selection = ''),
+              child: const Text('取消选择'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _paintHighlight(Canvas canvas, Rect pageRect, PdfPage page) {
+    final location = _location;
+    if (location is! ExactMatch || page.pageNumber != location.pageIndex + 1) {
+      return;
+    }
+    final paint = Paint()
+      ..color = Theme.of(context).colorScheme.primary.withValues(alpha: 0.3);
+    for (final r in location.rects) {
+      canvas.drawRect(
+        Rect.fromLTWH(
+          pageRect.left + r.left * pageRect.width,
+          pageRect.top + r.top * pageRect.height,
+          r.width * pageRect.width,
+          r.height * pageRect.height,
+        ),
+        paint,
+      );
+    }
   }
 
   @override
@@ -69,6 +197,7 @@ class _ReaderPageState extends State<ReaderPage> {
     _pageNumber.dispose();
     _quote.dispose();
     _note.dispose();
+    _noteFocus.dispose();
     _doesNotSupport.dispose();
     super.dispose();
   }
@@ -178,7 +307,7 @@ class _ReaderPageState extends State<ReaderPage> {
                 const SizedBox(height: 8),
                 SelectableText(
                   const JsonEncoder.withIndent('  ').convert(match.single.data),
-                  style: const TextStyle(fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
             ),
@@ -453,6 +582,7 @@ class _ReaderPageState extends State<ReaderPage> {
         const SizedBox(height: 12),
         TextField(
           controller: _note,
+          focusNode: _noteFocus,
           minLines: 3,
           maxLines: 7,
           decoration: const InputDecoration(
@@ -560,6 +690,13 @@ class _ReaderPageState extends State<ReaderPage> {
     if (widget.document.isPdf) {
       return Column(
         children: [
+          if (_selection.isNotEmpty) _selectionBar(),
+          if (_bannerVisible)
+            SourceJumpBanner(
+              pageNumber: widget.initialPageIndex + 1,
+              location: _location,
+              onDismiss: () => setState(() => _bannerVisible = false),
+            ),
           Material(
             color: Theme.of(context).colorScheme.surface,
             child: Padding(
@@ -614,8 +751,18 @@ class _ReaderPageState extends State<ReaderPage> {
                 onViewerReady: (document, controller) {
                   if (mounted) {
                     setState(() => _pageCount = document.pages.length);
+                    _locateQuote();
                   }
                 },
+                pagePaintCallbacks: [_paintHighlight],
+                textSelectionParams: PdfTextSelectionParams(
+                  onTextSelectionChange: (selection) async {
+                    final text = selection.hasSelectedText
+                        ? await selection.getSelectedText()
+                        : '';
+                    _setSelection(text);
+                  },
+                ),
                 onPageChanged: (page) {
                   if (mounted && page != null) setState(() => _page = page);
                 },
@@ -634,22 +781,41 @@ class _ReaderPageState extends State<ReaderPage> {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: Markdown(
-              data: linkSkillRefs(snapshot.data!),
-              selectable: true,
-              padding: const EdgeInsets.all(28),
-              imageBuilder: _image,
-              onTapLink: (text, href, title) => _openLink(href),
-              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
-                  .copyWith(
-                    p: Theme.of(context).textTheme.bodyLarge
-                        ?.copyWith(height: 1.7),
+        return Column(
+          children: [
+            if (_selection.isNotEmpty) _selectionBar(),
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Markdown(
+                    data: linkSkillRefs(snapshot.data!),
+                    selectable: true,
+                    onSelectionChanged: (text, selection, cause) {
+                      final all = text ?? '';
+                      if (selection.isCollapsed ||
+                          selection.start < 0 ||
+                          selection.end > all.length) {
+                        _setSelection('');
+                      } else {
+                        _setSelection(
+                          all.substring(selection.start, selection.end),
+                        );
+                      }
+                    },
+                    padding: const EdgeInsets.all(28),
+                    imageBuilder: _image,
+                    onTapLink: (text, href, title) => _openLink(href),
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context))
+                        .copyWith(
+                          p: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(height: 1.7),
+                        ),
                   ),
+                ),
+              ),
             ),
-          ),
+          ],
         );
       },
     );
@@ -660,6 +826,11 @@ class _ReaderPageState extends State<ReaderPage> {
     appBar: AppBar(
       title: Text(widget.document.title),
       actions: [
+        IconButton(
+          tooltip: '新建批注',
+          icon: const Icon(Icons.edit_note_outlined),
+          onPressed: () => _startAnnotation(useSelection: false),
+        ),
         IconButton(
           tooltip: _notesVisible ? '返回阅读' : '来源与精读笔记',
           icon: Icon(

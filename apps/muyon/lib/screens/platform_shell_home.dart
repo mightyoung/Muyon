@@ -52,6 +52,12 @@ extension _HomeSections on _PlatformShellState {
       () => openModule('research'),
       Icons.menu_book_outlined,
     ),
+    card(
+      '原型页面',
+      '导入单页原型，评审版本并记录反馈（不是完整业务系统）',
+      openPrototype,
+      Icons.web_outlined,
+    ),
     if (host.workspaces.all().isNotEmpty) ...[
       const Divider(),
       Text('项目与工作区', style: Theme.of(context).textTheme.titleMedium),

@@ -29,9 +29,14 @@ class ResearchHome extends StatelessWidget {
     this.pickImportFile,
     this.saveExportFile,
     this.importTaskThroughHost,
+    this.hosted = false,
   });
   final WorkbenchStore store;
   final String projectId;
+
+  /// Running inside the Muyon host: devices exchange research packages through
+  /// the host transfer service, so the standalone plaintext LAN page is hidden.
+  final bool hosted;
   final Future<void> Function(String path)? importTaskThroughHost;
   final Future<String> Function(String path)? loadMarkdown;
   final Future<String?> Function(List<String> extensions)? pickImportFile;
@@ -46,6 +51,7 @@ class ResearchHome extends StatelessWidget {
     pickImportFile: pickImportFile,
     saveExportFile: saveExportFile,
     importTaskThroughHost: importTaskThroughHost,
+    hosted: hosted,
   );
 }
 
@@ -58,9 +64,11 @@ class _ScopedResearchHome extends StatefulWidget {
     this.pickImportFile,
     this.saveExportFile,
     this.importTaskThroughHost,
+    this.hosted = false,
   });
   final WorkbenchStore store;
   final String projectId;
+  final bool hosted;
   final Future<void> Function(String path)? importTaskThroughHost;
   final Future<String> Function(String path)? loadMarkdown;
   final Future<String?> Function(List<String> extensions)? pickImportFile;
@@ -270,6 +278,7 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
   }
 
   Future<void> openLan() async {
+    if (widget.hosted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => LanTransferPage(
@@ -290,11 +299,12 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
       appBar: AppBar(
         title: Text(wide ? '研究工作台 · ${labels[section]}' : labels[section]),
         actions: [
-          IconButton(
-            tooltip: '局域网传输',
-            onPressed: openLan,
-            icon: const Icon(Icons.wifi_tethering_outlined),
-          ),
+          if (!widget.hosted)
+            IconButton(
+              tooltip: '局域网传输',
+              onPressed: openLan,
+              icon: const Icon(Icons.wifi_tethering_outlined),
+            ),
           PopupMenuButton<String>(
             tooltip: '导入材料',
             onSelected: (v) => switch (v) {
@@ -351,11 +361,11 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
                         ),
                       ),
                     const Spacer(),
-                    const Padding(
-                      padding: EdgeInsets.all(20),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
                       child: Text(
                         '本地资料库\n文件交换 · 无云依赖',
-                        style: TextStyle(fontSize: 12),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ),
                   ],
@@ -419,9 +429,9 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
                 color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 '让研究材料成为连续的工作',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
               const Text(
@@ -451,9 +461,9 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
                 ],
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 '支持 Markdown、JSONL 与相对附件。源材料不会被修改。',
-                style: TextStyle(fontSize: 12),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ),
@@ -936,7 +946,7 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
                 const SizedBox(height: 8),
                 SelectableText(
                   const JsonEncoder.withIndent('  ').convert(d),
-                  style: const TextStyle(fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 if (group != null && group.older.isNotEmpty)
                   RevisionHistory(older: group.older),
@@ -1040,7 +1050,7 @@ class _ScopedResearchHomeState extends State<_ScopedResearchHome> {
               const SizedBox(height: 8),
               SelectableText(
                 '任务 ID：${t.id}',
-                style: const TextStyle(fontSize: 12),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
               Wrap(

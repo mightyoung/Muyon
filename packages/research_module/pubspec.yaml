@@ -8,6 +8,8 @@ environment:
 dependencies:
   muyon_module_api:
     path: ../muyon_module_api
+  muyon_ui:
+    path: ../muyon_ui
   flutter:
     sdk: flutter
   flutter_localizations:
