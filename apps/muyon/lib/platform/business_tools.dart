@@ -184,6 +184,7 @@ void registerBusinessTools(MuyonHost host) {
         toolId: 'inquiry.$name',
         moduleId: 'inquiry',
         effect: ToolEffect.read,
+        description: '${function['description'] ?? ''}',
         parameterSchema: _businessSchema(function['parameters'] as Map),
       ),
       supportedScopes: {AssistantScopeKind.global},
@@ -283,6 +284,9 @@ void registerBusinessTools(MuyonHost host) {
       toolId: 'research.objects',
       moduleId: 'research',
       effect: ToolEffect.read,
+      description:
+          '在本次范围内检索科研对象：项目、文档和研究条目，按标题子串过滤，最多返回 50 条引用与标题。'
+          '只读取本机科研库，不修改数据，也不发送到设备外。',
       parameterSchema: {
         'type': 'object',
         'properties': {
@@ -339,6 +343,9 @@ void registerBusinessTools(MuyonHost host) {
       toolId: 'inquiry.object',
       moduleId: 'inquiry',
       effect: ToolEffect.read,
+      description:
+          '按类型与 id 读取一条本次范围内的询价业务记录（供应商、物料、报价、项目等），返回记录字段。'
+          '只读取本机询价库，不修改数据，也不发送到设备外。',
       parameterSchema: {
         'type': 'object',
         'properties': {
