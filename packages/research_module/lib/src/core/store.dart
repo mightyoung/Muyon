@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
 import 'models.dart';
+import 'standalone_access.dart';
 import 'research_skill.dart' show evidenceKinds;
 import 'skill_bridge.dart';
 export 'outline_store.dart';
@@ -69,12 +71,15 @@ class WorkbenchStore {
     required String rootPath,
     required Database database,
     ManagedDatabase? managed,
-  }) => WorkbenchStore._(
-    p.absolute(rootPath),
-    database,
-    ownsDatabase: false,
-    managed: managed,
-  );
+  }) {
+    rootPath = ResearchRootOwnership.registerHosted(rootPath);
+    return WorkbenchStore._(
+      p.absolute(rootPath),
+      database,
+      ownsDatabase: false,
+      managed: managed,
+    );
+  }
   final String rootPath;
   final Database db;
 
@@ -123,7 +128,11 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
       List.unmodifiable(_migrations);
   static int get schemaVersion => _migrations.length;
 
+  /// Standalone/test-only opener. Hosted activation must use [attach].
+  /// Registered host roots cannot be reopened, including through path aliases.
+  @visibleForTesting
   static WorkbenchStore open(String rootPath) {
+    rootPath = ResearchRootOwnership.requireNotHosted(rootPath);
     Directory(rootPath).createSync(recursive: true);
     final db = sqlite3.open(p.join(rootPath, 'workbench.sqlite'));
     try {
@@ -133,6 +142,7 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
       db.close();
       rethrow;
     }
+    ResearchRootOwnership.registerStandalone(rootPath);
     return WorkbenchStore._(p.absolute(rootPath), db);
   }
 

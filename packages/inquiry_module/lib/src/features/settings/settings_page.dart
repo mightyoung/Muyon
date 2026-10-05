@@ -152,6 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   /// Daily snapshots, newest seven kept. Full restore is separate from merge.
   String _backups() {
+    if (widget.state.isHosted) return '完整应用备份由 Muyon 宿主统一管理；询价交换文件仅包含询价业务资料。';
     final error = widget.state.backupError;
     if (error != null) return '今天的自动备份失败：$error';
     final dir = Directory(widget.state.backupDir);

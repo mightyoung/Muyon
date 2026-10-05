@@ -6,6 +6,8 @@ import 'dart:math';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
+import 'standalone_access.dart';
+
 /// Serves exactly one user-selected frozen file, after an explicit start.
 /// No listener exists until [start] is called by the user interface.
 class LanShareSession {
@@ -14,6 +16,7 @@ class LanShareSession {
     this._sessionDirectory,
     this._file,
     this.code,
+    this._lease,
   );
 
   static const maxBytes = 150 * 1024 * 1024;
@@ -21,6 +24,8 @@ class LanShareSession {
   final Directory _sessionDirectory;
   final File _file;
   final String code;
+  final ResearchTransferLease _lease;
+  Future<void>? _stopping;
   Timer? _expiry;
   StreamSubscription<HttpRequest>? _requests;
   bool _active = true;
@@ -35,43 +40,58 @@ class LanShareSession {
     InternetAddress? bindAddress,
     Duration lifetime = const Duration(minutes: 10),
   }) async {
-    if (lifetime <= Duration.zero || lifetime > const Duration(minutes: 10)) {
-      throw const FormatException(
-        'LAN share lifetime must be at most 10 minutes',
-      );
-    }
-    if (await FileSystemEntity.type(file.path, followLinks: false) !=
-        FileSystemEntityType.file) {
-      throw const FormatException('Select a regular file to share');
-    }
-    if (await file.length() > maxBytes) {
-      throw const FormatException('Selected file exceeds 150 MiB');
-    }
-    final directory = Directory(
-      p.join(stagingDirectory.path, const Uuid().v4()),
+    stagingDirectory = Directory(
+      ResearchRootOwnership.requireStandalone(stagingDirectory.path),
     );
-    await directory.create(recursive: true);
+    file = File(ResearchRootOwnership.requireNotHosted(file.path));
+    final lease = ResearchRootOwnership.acquireTransfer(
+      stagingDirectory.path,
+      source: file.path,
+    );
+    Directory? directory;
+    HttpServer? server;
+    var handedOff = false;
     try {
+      if (lifetime <= Duration.zero || lifetime > const Duration(minutes: 10)) {
+        throw const FormatException(
+          'LAN share lifetime must be at most 10 minutes',
+        );
+      }
+      if (await FileSystemEntity.type(file.path, followLinks: false) !=
+          FileSystemEntityType.file) {
+        throw const FormatException('Select a regular file to share');
+      }
+      if (await file.length() > maxBytes) {
+        throw const FormatException('Selected file exceeds 150 MiB');
+      }
+      directory = Directory(p.join(stagingDirectory.path, const Uuid().v4()));
+      await directory.create(recursive: true);
       final frozen = await file.copy(
         p.join(directory.path, p.basename(file.path)),
       );
-      final server = await HttpServer.bind(
-        bindAddress ?? InternetAddress.anyIPv4,
-        0,
-      );
+      server = await HttpServer.bind(bindAddress ?? InternetAddress.anyIPv4, 0);
       final random = Random.secure();
       final code = base64Url
           .encode(List<int>.generate(18, (_) => random.nextInt(256)))
           .replaceAll('=', '');
-      final session = LanShareSession._(server, directory, frozen, code);
+      final session = LanShareSession._(server, directory, frozen, code, lease);
       session._requests = server.listen(session._handle);
       session._expiry = Timer(lifetime, () {
         unawaited(session.stop());
       });
+      handedOff = true;
       return session;
-    } catch (_) {
-      await directory.delete(recursive: true);
-      rethrow;
+    } finally {
+      if (!handedOff) {
+        try {
+          await server?.close(force: true);
+          if (directory != null && await directory.exists()) {
+            await directory.delete(recursive: true);
+          }
+        } finally {
+          lease.release();
+        }
+      }
     }
   }
 
@@ -102,14 +122,22 @@ class LanShareSession {
     }
   }
 
-  Future<void> stop() async {
-    if (!_active) return;
+  Future<void> stop() => _stopping ??= _stop();
+
+  Future<void> _stop() async {
     _active = false;
     _expiry?.cancel();
-    await _requests?.cancel();
-    await _server.close(force: true);
-    if (await _sessionDirectory.exists()) {
-      await _sessionDirectory.delete(recursive: true);
+    try {
+      try {
+        await _requests?.cancel();
+      } finally {
+        await _server.close(force: true);
+      }
+      if (await _sessionDirectory.exists()) {
+        await _sessionDirectory.delete(recursive: true);
+      }
+    } finally {
+      _lease.release();
     }
   }
 
@@ -148,16 +176,22 @@ class LanTransferReceiver {
     required String code,
     required Directory destination,
   }) async {
-    if (url.scheme != 'http' || url.port < 1 || !isLocalIpv4(url.host)) {
-      throw const FormatException('Enter an IPv4 address on the local network');
-    }
-    if (code.trim().isEmpty) {
-      throw const FormatException('Pair code is required');
-    }
-    final client = HttpClient()
-      ..connectionTimeout = const Duration(seconds: 10);
+    destination = Directory(
+      ResearchRootOwnership.requireStandalone(destination.path),
+    );
+    final lease = ResearchRootOwnership.acquireTransfer(destination.path);
+    HttpClient? client;
     File? target;
     try {
+      if (url.scheme != 'http' || url.port < 1 || !isLocalIpv4(url.host)) {
+        throw const FormatException(
+          'Enter an IPv4 address on the local network',
+        );
+      }
+      if (code.trim().isEmpty) {
+        throw const FormatException('Pair code is required');
+      }
+      client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
       final request = await client.getUrl(
         url.replace(path: '/transfer', query: '', fragment: ''),
       );
@@ -198,8 +232,11 @@ class LanTransferReceiver {
       if (target != null && await target.exists()) await target.delete();
       rethrow;
     } finally {
-      client.close(force: true);
+      try {
+        client?.close(force: true);
+      } finally {
+        lease.release();
+      }
     }
   }
 }
-
