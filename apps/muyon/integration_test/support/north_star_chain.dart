@@ -9,314 +9,29 @@
 // Model: `MUYON_EVAL_MODEL_ENDPOINT` + `MUYON_EVAL_MODEL_ID` (+ optional
 // `MUYON_EVAL_MODEL_KEY`, `MUYON_EVAL_MODEL_LOCATION`), read from
 // `--dart-define` first and the process environment second. Without them a
-// loopback fixture model scripted by this file answers, and the evidence says
-// so: a fixture run is not real-model (M) or real-device (R) evidence.
+// loopback fixture model scripted by this driver answers, and the evidence
+// says so: a fixture run is not real-model (M) or real-device (R) evidence.
+// See docs/implementation/north-star-inquiry-runbook.md.
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/assistant/personal_agent.dart';
-import 'package:muyon/platform/business_tools.dart';
 import 'package:muyon/platform/foundation_repository.dart';
+import 'package:muyon/platform/business_tools.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/models/profile_repository.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:supplier_core/supplier_core.dart';
 
-const _defineEndpoint = String.fromEnvironment('MUYON_EVAL_MODEL_ENDPOINT');
-const _defineModel = String.fromEnvironment('MUYON_EVAL_MODEL_ID');
-const _defineKey = String.fromEnvironment('MUYON_EVAL_MODEL_KEY');
-const _defineLocation = String.fromEnvironment('MUYON_EVAL_MODEL_LOCATION');
-const _defineEvidence = String.fromEnvironment('MUYON_EVIDENCE_OUT');
-const _defineDevice = String.fromEnvironment('MUYON_EVAL_DEVICE_LABEL');
-const _defineCommit = String.fromEnvironment('MUYON_EVAL_COMMIT');
+import 'north_star_checks.dart';
+import 'north_star_fixture_model.dart';
+import 'north_star_records.dart';
+import 'north_star_seed.dart';
+import 'north_star_settings.dart';
 
-/// `--dart-define` wins (it is the only channel that reaches an app on a
-/// device); the process environment is the fallback for desktop and headless.
-String? northStarSetting(String name) {
-  final defined = switch (name) {
-    'MUYON_EVAL_MODEL_ENDPOINT' => _defineEndpoint,
-    'MUYON_EVAL_MODEL_ID' => _defineModel,
-    'MUYON_EVAL_MODEL_KEY' => _defineKey,
-    'MUYON_EVAL_MODEL_LOCATION' => _defineLocation,
-    'MUYON_EVIDENCE_OUT' => _defineEvidence,
-    'MUYON_EVAL_DEVICE_LABEL' => _defineDevice,
-    'MUYON_EVAL_COMMIT' => _defineCommit,
-    _ => '',
-  };
-  if (defined.trim().isNotEmpty) return defined.trim();
-  final env = Platform.environment[name];
-  return env == null || env.trim().isEmpty ? null : env.trim();
-}
-
-
-/// Real model settings, or null for the fixture.
-class NorthStarModelSettings {
-  NorthStarModelSettings._(
-    this.endpoint,
-    this.modelId,
-    this.key,
-    this.location,
-    this.source,
-  );
-  final Uri endpoint;
-  final String modelId;
-  final String? key;
-  final ModelLocation location;
-  final String source;
-
-  static NorthStarModelSettings? fromEnvironment() {
-    final endpoint = northStarSetting('MUYON_EVAL_MODEL_ENDPOINT');
-    final model = northStarSetting('MUYON_EVAL_MODEL_ID');
-    if (endpoint == null && model == null) return null;
-    if (endpoint == null || model == null) {
-      throw StateError(
-        'Set both MUYON_EVAL_MODEL_ENDPOINT and MUYON_EVAL_MODEL_ID, or neither',
-      );
-    }
-    final uri = Uri.parse(endpoint);
-    final named = northStarSetting('MUYON_EVAL_MODEL_LOCATION');
-    final location = named != null
-        ? ModelLocation.values.byName(named)
-        : ['localhost', '127.0.0.1', '::1'].contains(uri.host)
-        ? ModelLocation.local
-        : ModelLocation.remote;
-    return NorthStarModelSettings._(
-      uri,
-      model,
-      northStarSetting('MUYON_EVAL_MODEL_KEY'),
-      location,
-      _defineEndpoint.trim().isNotEmpty ? 'dart-define' : 'environment',
-    );
-  }
-}
-
-/// Reads the eval key from settings only; it never reaches the platform
-/// keychain, the database, the evidence or the log.
-class EnvSecretStore implements SecretStore {
-  EnvSecretStore(this.reference, this.value);
-  final String reference;
-  final String? value;
-  @override
-  Future<String?> read(String reference) async =>
-      reference == this.reference ? value : null;
-}
-
-const northStarCredentialRef = 'north-star-eval-key';
-
-/// The host reads credentials through `MethodChannelSecretStore`
-/// (`com.mightyoung.muyon/secrets`). For the test run that channel is answered
-/// by [EnvSecretStore], so the key is used for this run only. Windows keeps
-/// credentials through FFI and is not covered by this binding.
-void bindEnvSecretStore(EnvSecretStore store) {
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(
-        const MethodChannel('com.mightyoung.muyon/secrets'),
-        (call) async => call.method == 'read'
-            ? store.read((call.arguments as Map)['reference'] as String)
-            : null,
-      );
-}
-
-void unbindEnvSecretStore() {
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(
-        const MethodChannel('com.mightyoung.muyon/secrets'),
-        null,
-      );
-}
-
-typedef FixtureTurn =
-    Map<String, Object?> Function(List<Map<String, Object?>> messages);
-
-/// Loopback OpenAI-compatible endpoint that answers from a script. It only
-/// returns protocol JSON the assistant expects; it never touches the host.
-class FixtureModelServer {
-  FixtureModelServer._(this._server) {
-    _server.listen(_handle);
-  }
-  final HttpServer _server;
-  final _turns = <FixtureTurn>[];
-  final bodies = <String>[];
-  final errors = <String>[];
-
-  static Future<FixtureModelServer> start() async => FixtureModelServer._(
-    await HttpServer.bind(InternetAddress.loopbackIPv4, 0),
-  );
-
-  Uri get endpoint => Uri.parse('http://127.0.0.1:${_server.port}/v1');
-  int get pending => _turns.length;
-
-  void script(List<FixtureTurn> turns) => _turns.addAll(turns);
-
-  Future<void> _handle(HttpRequest request) async {
-    final body = await utf8.decoder.bind(request).join();
-    bodies.add(body);
-    try {
-      if (_turns.isEmpty) throw StateError('fixture has no scripted turn');
-      final decoded = jsonDecode(body) as Map<String, Object?>;
-      final messages = [
-        for (final m in decoded['messages'] as List)
-          Map<String, Object?>.from(m as Map),
-      ];
-      final reply = _turns.removeAt(0)(messages);
-      request.response.headers.contentType = ContentType.json;
-      request.response.write(
-        jsonEncode({
-          'choices': [
-            {
-              'message': {'role': 'assistant', 'content': jsonEncode(reply)},
-            },
-          ],
-        }),
-      );
-    } catch (error) {
-      errors.add('$error');
-      request.response.statusCode = 500;
-      request.response.write('fixture: $error');
-    }
-    await request.response.close();
-  }
-
-  Future<void> close() => _server.close(force: true);
-
-  /// The model's system message lists the tools it was offered.
-  static List<String> offeredTools(List<Map<String, Object?>> messages) {
-    final system = jsonDecode(messages.first['content'] as String) as Map;
-    return [for (final t in system['tools'] as List) (t as Map)['toolId']];
-  }
-
-  /// Proposes [toolId] only if the host offered it in this request.
-  static FixtureTurn tool(String toolId, Map<String, Object?> parameters) =>
-      (messages) {
-        if (!offeredTools(messages).contains(toolId)) {
-          throw StateError('$toolId was not offered to the model');
-        }
-        return {'type': 'tool', 'toolId': toolId, 'parameters': parameters};
-      };
-
-  /// Answers citing the latest tool result's citations of [objectType].
-  static FixtureTurn answer(String text, {String? citeType}) => (messages) {
-    final last = jsonDecode(messages.last['content'] as String) as Map;
-    if (last['trustedToolResult'] == null) {
-      throw StateError('answer turn expects a tool result first');
-    }
-    final citations = [
-      for (final c in last['citations'] as List)
-        if (citeType == null ||
-            ((c as Map)['reference'] as Map)['objectType'] == citeType)
-          (c as Map)['citationId'] as String,
-    ];
-    return {
-      'type': 'answer',
-      'answer': '[夹具回答，不是真实模型] $text',
-      'citationIds': citations.take(3).toList(),
-    };
-  };
-}
-
-/// Ids of the seeded inquiry data.
-class NorthStarFixtureData {
-  NorthStarFixtureData({
-    required this.projectId,
-    required this.supplierA,
-    required this.supplierB,
-    required this.cableItem,
-    required this.trayItem,
-    required this.cableProduct,
-    required this.firstInquiry,
-  });
-  final String projectId, supplierA, supplierB, cableItem, trayItem;
-  final String cableProduct, firstInquiry;
-}
-
-/// Seeds through the inquiry module's own Store functions, the same way
-/// `inquiry_write_tools_test` and `business_tools_test` do.
-NorthStarFixtureData seedInquiry(Store store) {
-  Map<String, Object?> supplier(String name) => {
-    'name': name,
-    'aliases': <String>[],
-    'address': null,
-    'categories': <String>[],
-    'notes': null,
-    'merged_into': null,
-    'rating': null,
-    'rating_note': null,
-  };
-  Map<String, Object?> item(
-    String projectId,
-    String name,
-    String qty,
-    String unitCost,
-  ) => {
-    'project_id': projectId,
-    'category': 'material',
-    'product_id': null,
-    'name': name,
-    'qty': qty,
-    'unit': '米',
-    'quotation_id': null,
-    'unit_cost': unitCost,
-    'unit_price': null,
-    'notes': null,
-  };
-  final supplierA = store.save('supplier', supplier('北极星甲电气'));
-  final supplierB = store.save('supplier', supplier('北极星乙线缆'));
-  final projectId = store.save('project', {
-    'code': 'NS-1',
-    'name': '北极星验收项目',
-    'status': 'active',
-    'type': 'market',
-    'level': 'A',
-    'customer': null,
-    'contract_no': null,
-    'contract_amount': null,
-    'department': null,
-    'leader': null,
-    'start_date': null,
-    'end_date': null,
-    'currency': 'CNY',
-    'tax_mode': 'included',
-    'markup_rate': '0',
-    'notes': null,
-  });
-  final cable = store.save('project_item', item(projectId, '电缆', '100', '11.80'));
-  final tray = store.save('project_item', item(projectId, '桥架', '20', '45.00'));
-  final inquiry = store.createInquiry(
-    projectId,
-    '首轮询价',
-    itemIds: [cable, tray],
-    supplierIds: [supplierA, supplierB],
-  );
-  const context = (inquirer: '北极星验收', asOf: null);
-  for (final (itemId, supplierId, price) in [
-    (cable, supplierA, '12.50'),
-    (cable, supplierB, '11.80'),
-    (tray, supplierA, '45.00'),
-    (tray, supplierB, '47.20'),
-  ]) {
-    store.quoteForInquiry(
-      inquiry,
-      itemId,
-      supplierId,
-      price: price,
-      context: context,
-    );
-  }
-  return NorthStarFixtureData(
-    projectId: projectId,
-    supplierA: supplierA,
-    supplierB: supplierB,
-    cableItem: cable,
-    trayItem: tray,
-    cableProduct: store.get('project_item', cable)!.data['product_id']!
-        as String,
-    firstInquiry: inquiry,
-  );
-}
+export 'north_star_evidence.dart' show publishNorthStarEvidence;
 
 /// Runs the chain against a fresh data directory [rootPath] and fills
 /// [evidence]. Throws (after recording the failure) when an invariant breaks.
@@ -383,14 +98,20 @@ class NorthStarInquiryChain {
     try {
       if (!real) _fixture = await FixtureModelServer.start();
       if (settings?.key != null) {
-        bindEnvSecretStore(EnvSecretStore(northStarCredentialRef, settings!.key));
+        bindEnvSecretStore(
+          EnvSecretStore(northStarCredentialRef, settings!.key),
+        );
       }
       await _chain(settings);
       evidence['passed'] = true;
     } catch (error, stack) {
       evidence['passed'] = false;
       evidence['failure'] = '$error';
-      evidence['failureStack'] = stack.toString().split('\n').take(8).join('\n');
+      evidence['failureStack'] = stack
+          .toString()
+          .split('\n')
+          .take(8)
+          .join('\n');
       rethrow;
     } finally {
       try {
@@ -415,8 +136,8 @@ class NorthStarInquiryChain {
     evidence['seed'] = {
       'suppliers': 2,
       'budgetLines': 2,
-      'quotations': _count(store, 'quotation'),
-      'inquiries': _count(store, 'inquiry'),
+      'quotations': countRows(store, 'quotation'),
+      'inquiries': countRows(store, 'inquiry'),
     };
 
     final profile = await _step('model.profile', () async {
@@ -446,7 +167,7 @@ class NorthStarInquiryChain {
       return profiles.all().singleWhere((p) => p.id == profile.id);
     });
     evidence['model'] = {
-      'endpoint': profile.endpoint.toString(),
+      'endpoint': evidenceEndpoint(profile.endpoint),
       'modelId': profile.modelId,
       'location': profile.location.name,
       'credential': profile.credentialRef == null ? 'none' : 'env (not stored)',
@@ -498,19 +219,19 @@ class NorthStarInquiryChain {
     for (final task in [compare, budget]) {
       expect(task.state, PersonalTaskState.succeeded, reason: task.error);
     }
-    final readReceipts = _receipts(host);
+    final readReceipts = receiptRows(host);
     expect(
       readReceipts.where((r) => r['state'] == 'succeeded'),
       isNotEmpty,
       reason: 'Read questions must be answered through a registered tool',
     );
     expect(
-      _approvals(host),
+      approvalRows(host),
       isEmpty,
       reason: 'Read tools never need or receive a write approval',
     );
-    expect(_count(store, 'inquiry'), 1, reason: 'Reads must not write');
-    _checkReadResults(readReceipts, data);
+    expect(countRows(store, 'inquiry'), 1, reason: 'Reads must not write');
+    checkReadResults(readReceipts, evidence);
 
     // Write: a topic conversation over the records the person selected.
     final selected = await _step('scope.select', () async {
@@ -575,7 +296,7 @@ class NorthStarInquiryChain {
     expect(record!.data['project_id'], data.projectId);
     expect(record.data['status'], 'open');
     if (settings == null) expect(record.data['title'], title);
-    expect(_count(store, 'inquiry'), 2);
+    expect(countRows(store, 'inquiry'), 2);
     expect(evidence['write'], isNotNull, reason: 'The write was approved');
     final lastAnswer = host.foundation.messages(topic.id).last;
     expect(lastAnswer.role, 'assistant');
@@ -588,10 +309,16 @@ class NorthStarInquiryChain {
 
     // Invariants over everything this run recorded.
     final before = await _step('invariants', () async {
-      _checkInvariants(host, registered);
-      return _snapshot(host);
+      checkInvariants(
+        host,
+        registered,
+        taskEvidence: _taskEvidence,
+        fixture: _fixture,
+        evidence: evidence,
+      );
+      return recordSnapshot(host);
     });
-    evidence['beforeReopen'] = _counts(before);
+    evidence['beforeReopen'] = snapshotCounts(before);
 
     await _step('host.close', host.close);
     _host = null;
@@ -603,8 +330,8 @@ class NorthStarInquiryChain {
       final reopened = reopenedStore.get('inquiry', inquiryId);
       expect(reopened, isNotNull, reason: 'Written inquiry survives reopen');
       expect(reopened!.data, record.data);
-      final after = _snapshot(host);
-      evidence['afterReopen'] = _counts(after);
+      final after = recordSnapshot(host);
+      evidence['afterReopen'] = snapshotCounts(after);
       for (final key in before.keys) {
         expect(
           jsonEncode(after[key]),
@@ -665,7 +392,9 @@ class NorthStarInquiryChain {
         final call = task.payload['toolCall'] as Map;
         final toolId = call['toolId'] as String;
         final info = host.tools.inspect(toolId);
-        if (phase != 'write' || info == null || toolId != 'inquiry.create_inquiry') {
+        if (phase != 'write' ||
+            info == null ||
+            toolId != 'inquiry.create_inquiry') {
           await agent.cancel(task.id);
           throw StateError(
             'Model proposed $toolId in the $phase phase; not approved',
@@ -680,8 +409,8 @@ class NorthStarInquiryChain {
       ..['stage'] = task.stage
       ..['rounds'] = task.payload['round']
       ..['error'] = task.error
-      ..['tools'] = _proposedTools(task)
-      ..['answerPreview'] = _preview(task.summary)
+      ..['tools'] = proposedTools(task)
+      ..['answerPreview'] = previewText(task.summary)
       ..['answerReferences'] = host.foundation
           .messages(conversationId)
           .last
@@ -699,20 +428,24 @@ class NorthStarInquiryChain {
     final call = task.payload['toolCall'] as Map;
     final invocation = call['invocationId'] as String;
     final digest = task.payload['requestDigest'] as String;
-    final inquiries = _count(store, 'inquiry');
+    final inquiries = countRows(store, 'inquiry');
     expect(task.payload['toolIdentityDigest'], digest);
     expect(
-      _receipts(host).where((r) => r['invocation_id'] == invocation),
+      receiptRows(host).where((r) => r['invocation_id'] == invocation),
       isEmpty,
       reason: 'Nothing ran before approval',
     );
-    expect(_approvals(host), isEmpty, reason: 'No approval before the person');
+    expect(
+      approvalRows(host),
+      isEmpty,
+      reason: 'No approval before the person',
+    );
     // A confirmation for any other preview is refused and writes nothing.
     await expectLater(
       host.personalAgent.confirm(task.id, requestDigest: '0' * 64),
       throwsStateError,
     );
-    expect(_count(store, 'inquiry'), inquiries);
+    expect(countRows(store, 'inquiry'), inquiries);
     expect(
       host.foundation.task(task.id)!.state,
       PersonalTaskState.waitingConfirmation,
@@ -720,11 +453,11 @@ class NorthStarInquiryChain {
     final watch = Stopwatch()..start();
     await host.personalAgent.confirm(task.id, requestDigest: digest);
     entry['toolConfirmations'] = (entry['toolConfirmations'] as int) + 1;
-    final approvals = _approvals(host);
+    final approvals = approvalRows(host);
     expect(approvals, hasLength(1));
     expect(approvals.single['state'], 'consumed');
     expect(approvals.single['identity_digest'], digest);
-    final receipt = _receipts(host)
+    final receipt = receiptRows(host)
         .where((r) => r['invocation_id'] == invocation)
         .single;
     expect(receipt['state'], 'succeeded', reason: '${receipt['result_json']}');
@@ -732,220 +465,9 @@ class NorthStarInquiryChain {
     evidence['write'] = {
       'toolId': call['toolId'],
       'inquiriesBeforeApproval': inquiries,
-      'inquiriesAfterApproval': _count(store, 'inquiry'),
+      'inquiriesAfterApproval': countRows(store, 'inquiry'),
       'wrongDigestRefused': true,
       'approvalToResultMs': watch.elapsedMilliseconds,
     };
   }
-
-  /// Whatever the model asked, the registered tools return the module's own
-  /// numbers: cable is cheapest at 北极星乙线缆 11.8; budget cost 100×11.80 +
-  /// 20×45.00 = 2080. Checked on every matching receipt.
-  void _checkReadResults(
-    List<Map<String, Object?>> receipts,
-    NorthStarFixtureData data,
-  ) {
-    final checked = <String>[];
-    for (final receipt in receipts) {
-      final result = jsonDecode(receipt['result_json'] as String) as Map;
-      final output = result['data'] as Map?;
-      if (output == null) continue;
-      if (receipt['tool_id'] == 'inquiry.compare_quotes' &&
-          jsonEncode(output).contains(data.cableProduct) == false) {
-        final groups = output['result'] as List?;
-        final quotes = [
-          for (final g in groups ?? const [])
-            ...((g as Map)['quotes'] as List),
-        ];
-        if (quotes.length == 2) {
-          final lowest = quotes.singleWhere((q) => (q as Map)['lowest'] == true);
-          expect((lowest as Map)['supplier'], '北极星乙线缆');
-          expect(double.parse(lowest['price'] as String), 11.8);
-          checked.add('compare_quotes');
-        }
-      }
-      if (receipt['tool_id'] == 'inquiry.project_budget' &&
-          output['cost'] != null &&
-          output['total'] == 2) {
-        expect(double.parse(output['cost'] as String), 2080);
-        checked.add('project_budget');
-      }
-    }
-    evidence['readResultsChecked'] = checked;
-  }
-
-  void _checkInvariants(MuyonHost host, Set<String> registered) {
-    final tasks = host.foundation.tasks();
-    final modelRounds = <String>[];
-    for (final task in tasks) {
-      expect(task.state, PersonalTaskState.succeeded, reason: task.id);
-      final system =
-          jsonDecode(
-                ((task.payload['messages'] as List).first as Map)['content']
-                    as String,
-              )
-              as Map;
-      for (final offered in system['tools'] as List) {
-        expect(registered, contains((offered as Map)['toolId']));
-      }
-      for (final toolId in _proposedTools(task)) {
-        expect(registered, contains(toolId), reason: 'proposed tool');
-      }
-      modelRounds.add('${task.payload['round']}');
-    }
-    final receipts = _receipts(host);
-    for (final receipt in receipts) {
-      expect(registered, contains(receipt['tool_id']));
-      expect(receipt['state'], 'succeeded');
-    }
-    final writes = receipts.where(
-      (r) =>
-          host.tools.inspect(r['tool_id'] as String)!.accessLevel !=
-          ToolAccessLevel.read,
-    );
-    expect(writes, hasLength(1), reason: 'Exactly one approved write');
-    final ledger = _ledger(host);
-    final confirmations = _taskEvidence.fold<int>(
-      0,
-      (n, t) => n + (t['modelConfirmations'] as int),
-    );
-    expect(ledger, hasLength(confirmations), reason: 'One row per model send');
-    for (final row in ledger) {
-      expect(row['status'], 'succeeded', reason: '${row['error']}');
-      expect(row['caller'], 'assistant');
-      expect(row['http_status'], 200);
-    }
-    if (_fixture != null) {
-      expect(_fixture!.errors, isEmpty);
-      expect(_fixture!.pending, 0, reason: 'Every scripted turn was used');
-      // The ledger digests exactly the bytes the endpoint received.
-      expect(
-        ledger.map((r) => r['payload_sha256']).toSet(),
-        _fixture!.bodies
-            .map((b) => sha256.convert(utf8.encode(b)).toString())
-            .toSet(),
-      );
-    }
-    evidence['ledger'] = {
-      'rows': ledger.length,
-      'statuses': _histogram(ledger.map((r) => '${r['status']}')),
-      'bytesSent': ledger.fold<int>(0, (n, r) => n + (r['payload_bytes'] as int)),
-    };
-    evidence['receipts'] = {
-      'rows': receipts.length,
-      'byTool': _histogram(receipts.map((r) => '${r['tool_id']}')),
-    };
-  }
-
-  static List<String> _proposedTools(PersonalTask task) => [
-    for (final m in task.payload['messages'] as List)
-      if ((m as Map)['role'] == 'assistant')
-        if (_tryJson(m['content'] as String) case {
-          'type': 'tool',
-          'toolId': final String id,
-        })
-          id,
-  ];
-
-  static Object? _tryJson(String text) {
-    try {
-      return jsonDecode(text);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  static String? _preview(String? text) => text == null
-      ? null
-      : text.length > 200
-      ? '${text.substring(0, 200)}…'
-      : text;
-
-  static Map<String, int> _histogram(Iterable<String> values) {
-    final out = <String, int>{};
-    for (final v in values) {
-      out[v] = (out[v] ?? 0) + 1;
-    }
-    return out;
-  }
-
-  static int _count(Store store, String type) =>
-      store.db
-              .select('SELECT COUNT(*) c FROM $type WHERE deleted=0')
-              .first['c']
-          as int;
-
-  static List<Map<String, Object?>> _rows(MuyonHost host, String sql) => [
-    for (final row in host.foundation.database.raw.select(sql))
-      Map<String, Object?>.from(row),
-  ];
-
-  static List<Map<String, Object?>> _receipts(MuyonHost host) =>
-      _rows(host, 'SELECT * FROM tool_invocation_receipts ORDER BY rowid');
-  static List<Map<String, Object?>> _approvals(MuyonHost host) =>
-      _rows(host, 'SELECT * FROM tool_approvals ORDER BY rowid');
-  static List<Map<String, Object?>> _ledger(MuyonHost host) =>
-      _rows(host, 'SELECT * FROM outbound_requests ORDER BY rowid');
-
-  /// Everything that must be identical after close and reopen.
-  static Map<String, Object?> _snapshot(MuyonHost host) => {
-    'conversations': [
-      for (final c in host.foundation.conversations())
-        {
-          'id': c.id,
-          'title': c.title,
-          'scope': c.scope.toJson(),
-          'messages': [
-            for (final m in host.foundation.messages(c.id))
-              {
-                'id': m.id,
-                'role': m.role,
-                'content': m.content,
-                'references': m.references.map((r) => r.toJson()).toList(),
-              },
-          ],
-        },
-    ],
-    'tasks': [for (final t in host.foundation.tasks()) t.payload],
-    'receipts': _receipts(host),
-    'approvals': _approvals(host),
-    'outboundRequests': _ledger(host),
-  };
-
-  static Map<String, Object?> _counts(Map<String, Object?> snapshot) => {
-    'conversations': (snapshot['conversations'] as List).length,
-    'messages': (snapshot['conversations'] as List).fold<int>(
-      0,
-      (n, c) => n + ((c as Map)['messages'] as List).length,
-    ),
-    'tasks': (snapshot['tasks'] as List).length,
-    'receipts': (snapshot['receipts'] as List).length,
-    'approvals': (snapshot['approvals'] as List).length,
-    'outboundRequests': (snapshot['outboundRequests'] as List).length,
-  };
-}
-
-/// Writes [evidence] to `MUYON_EVIDENCE_OUT` when set (relative paths resolve
-/// against [baseDir] when given) and prints it in numbered chunks so it
-/// survives device log line limits. Returns the written path, if any.
-Future<String?> publishNorthStarEvidence(
-  Map<String, Object?> evidence, {
-  String? baseDir,
-  void Function(String line) log = print,
-}) async {
-  final text = jsonEncode(evidence);
-  const size = 700;
-  final chunks = (text.length + size - 1) ~/ size;
-  for (var i = 0; i < chunks; i++) {
-    final end = (i + 1) * size < text.length ? (i + 1) * size : text.length;
-    log('MUYON_NORTH_STAR_EVIDENCE[${i + 1}/$chunks] ${text.substring(i * size, end)}');
-  }
-  final out = northStarSetting('MUYON_EVIDENCE_OUT');
-  if (out == null) return null;
-  final path = File(out).isAbsolute || baseDir == null ? out : '$baseDir/$out';
-  final file = File(path);
-  await file.parent.create(recursive: true);
-  await file.writeAsString(const JsonEncoder.withIndent('  ').convert(evidence));
-  log('MUYON_NORTH_STAR_EVIDENCE_FILE $path');
-  return path;
 }
