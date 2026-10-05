@@ -12,7 +12,8 @@ import '../cards/canonical_json.dart';
 import '../source_ref.dart';
 
 class PreparedResearchPackage extends PreparedImport {
-  PreparedResearchPackage._({
+  PreparedResearchPackage._(
+    this._checkBeforeCommit, {
     required super.target,
     required super.inputDigest,
     required super.stagingToken,
@@ -24,6 +25,7 @@ class PreparedResearchPackage extends PreparedImport {
        heads = Map.unmodifiable(heads),
        _documents = Map.unmodifiable(documents);
   final String originProjectKey;
+  final void Function()? _checkBeforeCommit;
   final Map<String, CardRevision> revisions;
   final Map<String, String> heads;
   final Map<String, _Document> _documents;
@@ -214,6 +216,7 @@ class ResearchPackageExchange {
     List<int> bytes,
     ImportTarget target, {
     String? stagingToken,
+    void Function()? checkBeforeCommit,
   }) {
     if (target.binding.moduleId != 'research' ||
         bytes.length > maxArchiveBytes) {
@@ -424,6 +427,7 @@ class ResearchPackageExchange {
       throw const FormatException('Project manifest mismatch');
     }
     return PreparedResearchPackage._(
+      checkBeforeCommit,
       target: target,
       inputDigest: digest,
       stagingToken: stagingToken ?? digest,
@@ -438,6 +442,8 @@ class ResearchPackageExchange {
     PreparedResearchPackage prepared,
     ImportIntent intent,
   ) => store.database.write((db) {
+    // The host may revoke acceptance while this transaction is queued.
+    prepared._checkBeforeCommit?.call();
     if (!prepared.matches(intent)) throw StateError('Import identity mismatch');
     final identity = canonicalJson({
       'operationId': intent.operationId,

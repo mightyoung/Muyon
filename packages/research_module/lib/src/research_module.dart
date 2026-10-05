@@ -11,6 +11,7 @@ import 'core/exchange.dart';
 import 'core/change_log.dart';
 import 'core/store.dart';
 import 'cards/card_store.dart';
+import 'exchange/research_package.dart';
 import 'research_services.dart';
 import 'reader/reader_page.dart';
 
@@ -191,7 +192,30 @@ class ResearchRuntime implements ModuleRuntime {
       'SELECT * FROM import_receipts WHERE operation_id=?',
       [operationId],
     );
-    if (rows.isEmpty) return null;
+    if (rows.isEmpty) {
+      final canonical = store.db.select(
+        'SELECT * FROM rk_import_receipts WHERE operation_id=?',
+        [operationId],
+      );
+      if (canonical.isEmpty) return null;
+      final row = canonical.single;
+      final identity = jsonDecode(row['identity'] as String) as Map;
+      return ImportReceipt(
+        intent: ImportIntent(
+          operationId: identity['operationId'] as String,
+          workspaceId: identity['workspaceId'] as String,
+          moduleId: identity['moduleId'] as String,
+          targetProjectId: identity['targetProjectId'] as String,
+          kind: ImportKind.values.byName(identity['kind'] as String),
+          inputDigest: identity['inputDigest'] as String,
+          stagingToken: identity['stagingToken'] as String,
+        ),
+        result: Map<String, Object?>.from(
+          jsonDecode(row['result'] as String) as Map,
+        ),
+        committedAt: DateTime.parse(row['committed_at'] as String),
+      );
+    }
     final row = rows.single;
     final id = jsonDecode(row['identity'] as String) as List;
     return ImportReceipt(
@@ -218,6 +242,11 @@ class ResearchRuntime implements ModuleRuntime {
   ) async {
     if (!input.matches(intent) || intent.moduleId != 'research') {
       throw StateError('Import identity mismatch');
+    }
+    // Canonical ZIP imports use the same host intent/receipt protocol.
+    if (input is PreparedResearchPackage) {
+      return ResearchPackageExchange(CardStore(resources.database))
+          .commitImport(input, intent);
     }
     final identity = _identity(intent);
     ImportReceipt? receipt() {
