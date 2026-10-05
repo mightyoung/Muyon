@@ -496,12 +496,26 @@ void main() {
             ),
             isNull,
           );
-          if (object.objectType != 'document' ||
-              object.objectId == 'same-doc') {
+          if (object.objectType == 'document') {
+            // 'doc-a' is this session's document (asserted below); 'same-doc'
+            // belongs to the other project, so it has no page here.
             expect(
               sessionA.objectPage(context, object),
-              isNull,
-              reason: 'B-owned focused page or canonical reader adapter is unavailable',
+              object.objectId == 'same-doc' ? isNull : isA<ReaderPage>(),
+            );
+          } else {
+            expect(
+              sessionA.objectPage(context, object)?.runtimeType,
+              switch (object.objectType) {
+                'entry' => ResearchEntryPage,
+                'outline' => ResearchOutlinePage,
+                'section' => ResearchSectionPage,
+                'task' => ResearchTaskPage,
+                'run' => ResearchRunPage,
+                'card' => ResearchCardPage,
+                _ => null,
+              },
+              reason: object.objectType,
             );
           }
         }

@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:inquiry_module/inquiry_module.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:prototype_module/prototype_module.dart';
-import 'package:research_module/research_module.dart';
 import 'package:uuid/uuid.dart';
 
 import '../app/app_shell.dart';
 import '../app/bootstrap.dart';
 import '../assistant/execution_store.dart';
 import '../platform/foundation_repository.dart';
+import '../platform/object_pages.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/secret_store.dart';
@@ -189,64 +189,64 @@ class _PlatformShellState extends State<PlatformShell> {
         );
         return;
       }
-      if (current.moduleId == 'research' && current.objectType == 'document') {
-        final document = host.research!.store
-            .documents(current.nativeProjectId!)
-            .firstWhere((d) => d.id == current.objectId);
-        await Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (context) => Scaffold(
-              appBar: AppBar(
-                title: Text(document.relativePath),
-                actions: [
-                  IconButton(
-                    tooltip: '针对当前论文使用助手',
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => Scaffold(
-                          appBar: AppBar(title: const Text('论文专题对话')),
-                          body: assistant(
-                            scope: AssistantScope.selectedObjects([current]),
-                          ),
-                        ),
-                      ),
-                    ),
-                    icon: const Icon(Icons.chat_outlined),
-                  ),
-                ],
-              ),
-              body: LayoutBuilder(
-                builder: (context, size) => size.maxWidth >= 1100
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: ReaderPage(
-                              store: host.research!.store.scoped(
-                                current.nativeProjectId!,
+      if (current.moduleId == 'research') {
+        final opened = await openModuleObjectPage(context, host, current);
+        if (opened != null) {
+          try {
+            if (!mounted) return;
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => Scaffold(
+                  appBar: AppBar(
+                    title: Text(opened.title),
+                    actions: [
+                      IconButton(
+                        tooltip: '针对当前对象使用助手',
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => Scaffold(
+                              appBar: AppBar(title: const Text('专题对话')),
+                              body: assistant(
+                                scope: AssistantScope.selectedObjects([
+                                  current,
+                                ]),
                               ),
-                              document: document,
                             ),
                           ),
-                          SizedBox(
-                            width: 360,
-                            child: assistant(
-                              scope: AssistantScope.selectedObjects([current]),
-                            ),
-                          ),
-                        ],
-                      )
-                    : ReaderPage(
-                        store: host.research!.store.scoped(
-                          current.nativeProjectId!,
                         ),
-                        document: document,
+                        icon: const Icon(Icons.chat_outlined),
                       ),
+                    ],
+                  ),
+                  body: LayoutBuilder(
+                    builder: (context, size) => size.maxWidth >= 1100
+                        ? Row(
+                            children: [
+                              Expanded(child: opened.page),
+                              SizedBox(
+                                width: 360,
+                                child: assistant(
+                                  scope: AssistantScope.selectedObjects([
+                                    current,
+                                  ]),
+                                ),
+                              ),
+                            ],
+                          )
+                        : opened.page,
+                  ),
+                ),
               ),
-            ),
-          ),
-        );
-        return;
+            );
+          } finally {
+            // The session lives only while the object page is open.
+            await opened.dispose();
+          }
+          return;
+        }
+        // No binding or no object page: fall through to the JSON page below.
       }
+      if (!mounted) return;
       final data = current.moduleId == 'inquiry'
           ? host.inquiry!.runtime.state.store
                 .get(current.objectType, current.objectId)
