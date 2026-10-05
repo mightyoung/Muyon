@@ -5,21 +5,45 @@
 /// offline baseline's `scoreChoices`, so the numbers are comparable.
 ///
 /// Normal `flutter test` runs only loopback fixtures and never sends a prompt
-/// to a real model. To measure a real model and write
+/// to a real model: the real run needs `MUYON_EVAL_REAL=1` in addition to the
+/// model variables, so exported model variables alone never cost anything.
+/// To measure a real model and write
 /// `docs/implementation/tool-selection-llm-baseline-<slug>.md` (one file per
 /// model, see [llmReportSlug]; `deepseek-chat` → `...-deepseek-chat.md`,
-/// `qwen3:8b` → `...-qwen3-8b.md`), run from the repo root. A loopback
+/// `qwen3:8b` → `...-qwen3-8b.md`), run from `apps/muyon`. A loopback
 /// endpoint is treated as local and needs no key (for example
 /// `MUYON_EVAL_MODEL_ENDPOINT=http://127.0.0.1:11434/v1 MUYON_EVAL_MODEL_ID=qwen3:8b`
 /// without the key line); any other endpoint must be HTTPS and needs
-/// `MUYON_EVAL_MODEL_KEY`. `MUYON_EVAL_MODEL_TEMPERATURE` is optional and left
-/// to the provider default when unset. The proxy variables are unset only for
-/// Flutter's localhost test channel; the gateway connects directly either way.
+/// `MUYON_EVAL_MODEL_KEY` (visible ASCII only). Optional:
+/// `MUYON_EVAL_MODEL_TEMPERATURE` (provider default when unset) and
+/// `MUYON_EVAL_MODEL_TIMEOUT_SECONDS` (per request, default 45; raise it for
+/// reasoning or slow local models, since a timeout is scored as an error).
+///
+/// Proxies: the gateway uses dart:io `HttpClient`, which honours
+/// `HTTPS_PROXY`/`https_proxy` and `NO_PROXY`. Without a proxy (or when the
+/// endpoint is reachable directly), unset them all:
 ///
 /// ```bash
-/// cd apps/muyon && \
 /// env -u HTTP_PROXY -u HTTPS_PROXY -u ALL_PROXY -u http_proxy -u https_proxy -u all_proxy \
 ///   NO_PROXY=localhost,127.0.0.1,::1 \
+///   MUYON_EVAL_REAL=1 \
+///   MUYON_EVAL_MODEL_ENDPOINT=https://api.deepseek.com \
+///   MUYON_EVAL_MODEL_ID=deepseek-chat \
+///   MUYON_EVAL_MODEL_KEY="$DEEPSEEK_API_KEY" \
+///   MUYON_EVAL_MODEL_TIMEOUT_SECONDS=90 \
+///   MUYON_WRITE_EVAL_REPORT=1 \
+///   flutter test --no-pub test/llm_selection_eval_test.dart --plain-name 'real model'
+/// ```
+///
+/// When the endpoint is reachable only through a proxy, keep `HTTPS_PROXY`
+/// (the model request goes through it) and set
+/// `NO_PROXY=localhost,127.0.0.1,::1` so Flutter's local test channel still
+/// connects directly:
+///
+/// ```bash
+/// env -u ALL_PROXY -u all_proxy \
+///   NO_PROXY=localhost,127.0.0.1,::1 no_proxy=localhost,127.0.0.1,::1 \
+///   MUYON_EVAL_REAL=1 \
 ///   MUYON_EVAL_MODEL_ENDPOINT=https://api.deepseek.com \
 ///   MUYON_EVAL_MODEL_ID=deepseek-chat \
 ///   MUYON_EVAL_MODEL_KEY="$DEEPSEEK_API_KEY" \
@@ -239,6 +263,17 @@ LlmChoice parseLlmResponse(
   );
 }
 
+/// Error text safe to print or write to a report. A malformed key makes
+/// dart:io quote the whole `Authorization` header in its exception, and a
+/// partial mask can miss part of a key that contains spaces, so any message
+/// mentioning a bearer token or authorization is withheld entirely.
+String redactCredentials(Object error) {
+  final text = '$error';
+  return RegExp('bearer|authorization', caseSensitive: false).hasMatch(text)
+      ? '${error.runtimeType}: details withheld (may contain the credential)'
+      : text;
+}
+
 /// Asks the model once for [prompt]. Errors are returned, never thrown, so one
 /// failed request does not end the run.
 Future<LlmChoice> chooseWithModel({
@@ -276,7 +311,7 @@ Future<LlmChoice> chooseWithModel({
     );
   } catch (error) {
     watch.stop();
-    final text = '$error'.replaceAll(RegExp(r'\s+'), ' ');
+    final text = redactCredentials(error).replaceAll(RegExp(r'\s+'), ' ');
     return LlmChoice(
       taskId: taskId,
       latencyMs: watch.elapsedMicroseconds / 1000,

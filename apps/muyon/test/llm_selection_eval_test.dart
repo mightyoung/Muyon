@@ -22,11 +22,22 @@ class EnvironmentSecretStore implements SecretStore {
 
 const _keyVariable = 'MUYON_EVAL_MODEL_KEY';
 
+/// A key that dart:io can put in a header unchanged. Anything else (a
+/// trailing `\r`, full-width characters) makes header setting throw with the
+/// whole `Bearer <key>` in the message, so it is refused before any request.
+final _visibleAscii = RegExp(r'^[\x21-\x7E]+$');
+
 /// Loopback endpoints are local; any other endpoint is remote, which
 /// [ModelProfile] requires to be HTTPS and authenticated.
 ModelProfile evalProfileFromEnvironment(Map<String, String> environment) {
   final endpoint = Uri.parse(environment['MUYON_EVAL_MODEL_ENDPOINT']!.trim());
-  final hasKey = (environment[_keyVariable] ?? '').isNotEmpty;
+  final key = environment[_keyVariable] ?? '';
+  final hasKey = key.isNotEmpty;
+  if (hasKey && !_visibleAscii.hasMatch(key)) {
+    throw ArgumentError(
+      '$_keyVariable must be visible ASCII only (value not shown)',
+    );
+  }
   final local = ['localhost', '127.0.0.1', '::1'].contains(endpoint.host);
   if (!local && !hasKey) {
     throw ArgumentError('A remote endpoint needs $_keyVariable');
@@ -39,6 +50,37 @@ ModelProfile evalProfileFromEnvironment(Map<String, String> environment) {
     endpointIdentity: endpoint.host,
     credentialRef: hasKey ? _keyVariable : null,
   );
+}
+
+/// Per-request timeout: `MUYON_EVAL_MODEL_TIMEOUT_SECONDS`, else the
+/// gateway default of 45 s.
+Duration evalTimeoutFromEnvironment(Map<String, String> environment) {
+  final raw = (environment['MUYON_EVAL_MODEL_TIMEOUT_SECONDS'] ?? '').trim();
+  if (raw.isEmpty) return const Duration(seconds: 45);
+  final seconds = int.tryParse(raw);
+  if (seconds == null || seconds <= 0) {
+    throw ArgumentError(
+      'MUYON_EVAL_MODEL_TIMEOUT_SECONDS must be a positive whole number',
+    );
+  }
+  return Duration(seconds: seconds);
+}
+
+/// Why the real run is skipped, or null when it runs. Model variables alone
+/// are not enough: `MUYON_EVAL_REAL=1` must be set as well, so an exported
+/// configuration never turns a plain `flutter test` into paid requests.
+String? realRunSkipReason(Map<String, String> environment) {
+  final configured =
+      (environment['MUYON_EVAL_MODEL_ENDPOINT'] ?? '').trim().isNotEmpty &&
+      (environment['MUYON_EVAL_MODEL_ID'] ?? '').trim().isNotEmpty;
+  final enabled = environment['MUYON_EVAL_REAL'] == '1';
+  if (configured && enabled) return null;
+  if (configured) {
+    return 'model variables are set but MUYON_EVAL_REAL=1 is not; '
+        'set it to send the 140 prompts to the real model';
+  }
+  return 'set MUYON_EVAL_REAL=1, MUYON_EVAL_MODEL_ENDPOINT and '
+      'MUYON_EVAL_MODEL_ID to run';
 }
 
 typedef _Reply = FutureOr<void> Function(
@@ -568,7 +610,9 @@ void main() {
   test('the report endpoint drops user info and the query string', () {
     expect(
       reportEndpoint(
-        Uri.parse('https://user:sk-secret@api.example.com/v1/chat/completions?key=sk-secret'),
+        Uri.parse(
+          'https://user:sk-secret@api.example.com/v1/chat/completions?key=sk-secret',
+        ),
       ),
       'https://api.example.com/v1/chat/completions',
     );
@@ -576,6 +620,129 @@ void main() {
       reportEndpoint(Uri.parse('http://127.0.0.1:11434/v1/chat/completions')),
       'http://127.0.0.1:11434/v1/chat/completions',
     );
+  });
+
+  test('a malformed key is refused up front and never reaches the error, '
+      'the report or the output', () async {
+    const key = 'sk-north-SECRET-42\r';
+    const widened = 'sk-north　SECRET-42';
+    for (final bad in [key, widened]) {
+      expect(
+        () => evalProfileFromEnvironment({
+          'MUYON_EVAL_MODEL_ENDPOINT': 'https://api.example.com/v1',
+          'MUYON_EVAL_MODEL_ID': 'm',
+          _keyVariable: bad,
+        }),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => '$e',
+            'message',
+            allOf(isNot(contains('SECRET')), contains('value not shown')),
+          ),
+        ),
+      );
+    }
+    // Past the up-front check (as if it were bypassed), the header error that
+    // quotes the key is withheld from the choice and so from the report.
+    var requests = 0;
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    addTearDown(() => server.close(force: true));
+    server.listen((request) async {
+      requests++;
+      await utf8.decoder.bind(request).join();
+      _json(request.response, _noCall());
+      await request.response.close();
+    });
+    for (final bad in [key, widened]) {
+      final environment = {_keyVariable: bad};
+      final profile = ModelProfile(
+        id: 'bad-key',
+        endpoint: Uri.parse('http://127.0.0.1:${server.port}/v1'),
+        location: ModelLocation.local,
+        modelId: 'm',
+        endpointIdentity: 'bad-key',
+        credentialRef: _keyVariable,
+      );
+      final choice = await chooseWithModel(
+        gateway: OpenAiModelGateway(EnvironmentSecretStore(environment)),
+        profile: profile,
+        tools: evaluationTools(),
+        taskId: 't',
+        prompt: 'x',
+      );
+      expect(choice.error, isNotNull);
+      expect(choice.error, isNot(contains('SECRET')));
+      expect(choice.error, contains('details withheld'));
+      final run = scoreLlmChoices(
+        profile: profile,
+        choices: [
+          for (final task in selectionTasks)
+            task.id == selectionTasks.first.id
+                ? choice
+                : LlmChoice(taskId: task.id, latencyMs: 1),
+        ],
+      );
+      expect(
+        llmSelectionReport(run, at: DateTime.utc(2026)),
+        isNot(contains('SECRET')),
+      );
+    }
+    expect(requests, 0, reason: 'the malformed header is never sent');
+    expect(
+      redactCredentials(const FormatException('Bearer abc def')),
+      isNot(contains('abc')),
+    );
+    expect(
+      redactCredentials(StateError('connection refused')),
+      'Bad state: connection refused',
+    );
+  });
+
+  test('timeout comes from MUYON_EVAL_MODEL_TIMEOUT_SECONDS', () {
+    expect(evalTimeoutFromEnvironment({}), const Duration(seconds: 45));
+    expect(
+      evalTimeoutFromEnvironment({'MUYON_EVAL_MODEL_TIMEOUT_SECONDS': '120'}),
+      const Duration(seconds: 120),
+    );
+    for (final bad in ['0', '-5', '1.5', 'abc']) {
+      expect(
+        () => evalTimeoutFromEnvironment({
+          'MUYON_EVAL_MODEL_TIMEOUT_SECONDS': bad,
+        }),
+        throwsArgumentError,
+      );
+    }
+  });
+
+  test('a real run needs MUYON_EVAL_REAL=1 besides the model variables', () {
+    const model = {
+      'MUYON_EVAL_MODEL_ENDPOINT': 'https://api.example.com/v1',
+      'MUYON_EVAL_MODEL_ID': 'm',
+    };
+    expect(realRunSkipReason(model), contains('MUYON_EVAL_REAL=1 is not'));
+    expect(realRunSkipReason({...model, 'MUYON_EVAL_REAL': 'true'}), isNotNull);
+    expect(realRunSkipReason({...model, 'MUYON_EVAL_REAL': '1'}), isNull);
+    expect(realRunSkipReason({'MUYON_EVAL_REAL': '1'}), isNotNull);
+    expect(realRunSkipReason({}), contains('MUYON_EVAL_REAL=1'));
+  });
+
+  test('a refused connection is an error, never a none', () async {
+    final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    final port = server.port;
+    await server.close(force: true);
+    final choice = await _ask(
+      ModelProfile(
+        id: 'closed',
+        endpoint: Uri.parse('http://127.0.0.1:$port/v1'),
+        location: ModelLocation.local,
+        modelId: 'm',
+        endpointIdentity: 'closed',
+      ),
+      'x',
+    );
+    expect(choice.error, isNotNull);
+    expect(choice.decision.abstains, isFalse);
+    expect(choice.shown, '<error>');
   });
 
   test('the environment profile is local for loopback and HTTPS otherwise', () {
@@ -647,9 +814,7 @@ void main() {
   );
 
   final environment = Platform.environment;
-  final configured =
-      (environment['MUYON_EVAL_MODEL_ENDPOINT'] ?? '').trim().isNotEmpty &&
-      (environment['MUYON_EVAL_MODEL_ID'] ?? '').trim().isNotEmpty;
+  final skipReason = realRunSkipReason(environment);
   test(
     'real model: native tool-calling baseline on the selection set',
     () async {
@@ -672,7 +837,10 @@ void main() {
       final guarded = _evalReports(root);
 
       final run = await scoreLlm(
-        gateway: OpenAiModelGateway(EnvironmentSecretStore(environment)),
+        gateway: OpenAiModelGateway(
+          EnvironmentSecretStore(environment),
+          timeout: evalTimeoutFromEnvironment(environment),
+        ),
         profile: profile,
         temperature: temperature,
         onProgress: (done, total) {
@@ -702,9 +870,7 @@ void main() {
       final after = _evalReports(root)..remove(out?.path);
       expect(after, {...guarded}..remove(out?.path));
     },
-    skip: configured
-        ? false
-        : 'set MUYON_EVAL_MODEL_ENDPOINT and MUYON_EVAL_MODEL_ID to run',
+    skip: skipReason ?? false,
     timeout: const Timeout(Duration(hours: 2)),
   );
 }
