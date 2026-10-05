@@ -713,3 +713,64 @@ Your D-R5, D-R7, D-R9 and Laya scripts were reviewed and merged into `develop` a
 One fix: `chat_messages` is keyed by `(peer_fingerprint, message_id)`, but `acceptChat`, `rejectChat`, `retryText` and `deleteChat` take only `messageId` and throw when it is not unique. Change them to take `(peerFingerprint, messageId)` so a collision between peers can never block an action, keep the "not found" error for an unknown pair, update `chat-backend.md` with the final signatures, and add a test where two peers use the same `messageId` and each action affects only its own row. B is told to call them with both values.
 
 Priority: after D-R8b (Laya stage 1 redo) is running or done; it is small. Push only to `feat/d-transfer`, verify with `git ls-remote` after pushing.
+
+---
+
+# 追加：Codex 额度用完后的重新分工与 Laya 第 2 阶段
+
+Codex（C 角色）额度已用完。它已合入的工作：C1、C2、C3、G1-C、G4、G5、C-R1、研究包接纳后导入；本轮合入：C4（研究包往返，`6686d7b`）、G2（询价网页请求经宿主一次性确认，`fe56c1a`）。**未完成：G3 供应商中心发布**（Codex 工作目录里约 430 行未提交改动，原样保留，等 Codex 恢复后完成，其他人不要动 `features/hub/**`、`supplier_core/lib/src/hub*.dart`）。C5、C6 改由 Sonnet 接手。
+
+---8<--- 追加 · B（Sonnet）· 接手 C5、C6 ---
+
+Codex 的额度用完了，C5、C6 由你接手。开工：`git fetch origin && git merge origin/develop`。
+
+**所有权（A 授权，仅限本任务）**：可以修改 `packages/inquiry_module/**`（**不含** `lib/src/features/hub/**`，那里有 Codex 未提交的 G3）、`packages/supplier_core/**`（不含 `src/hub*.dart`、`src/lan*.dart`）、科研领域层（`packages/research_module/lib/src/core/**`、`exchange/**`、`research_module.dart`）、`apps/muyon/lib/app/inquiry_plugin.dart`、`apps/muyon/lib/platform/business_tools.dart`，以及 C6 需要的 `apps/muyon/lib/services/transfer/task_coordinator.dart` 的最小改动。每一处都在报告里列出。**只格式化你改过的文件**，不要重排别人的文件；每个提交写一两句说明原因。
+
+### C5 询价写操作工具化（经宿主确认）
+
+现状：询价的只读查询、比较、规格匹配、预算计算已注册为工具（`business_tools.dart` 里的 `inquiry.*`，来自 supplier_core 的 `agentTools`）。写操作只能在页面上做。
+- 从询价模块**已有的、页面正在使用的领域写操作**里挑 3–5 个最常用的（例如新建询价单、录入或修改报价、修改预算条目数量），注册为 `ToolEffect.write` 工具。**不新写业务规则**：校验、金额计算和状态变化全部调用模块现有函数，与页面走同一条代码路径。
+- 每个工具：参数 schema 严格；`context.write(...)` 或在副作用前调用 `context.checkBeforeEffect()`；新建或修改的对象通过 `validateResult` 校验属于当前询价项目范围；工具说明写清"会修改……"（E6 的测试会检查）。
+- 宿主确认弹窗里要能看到将要发生的准确改动（对象、字段、旧值 → 新值），这由批准预览承担。
+- 测试（每个工具）：未批准不能执行；批准后执行一次；在副作用前取消则数据不变；模块校验不通过时失败且数据不变；结果引用超出范围被拒绝；变更记录里出现对应对象。
+- 另外：G2 注册的 `inquiry.web.request` 是询价模块内部的联网通道，没有说明。给它补一条说明（写明会联网、仅供询价模块内部使用），A 会另外加一个"不提供给模型选择"的标记。
+
+### C6 研究任务跨设备执行（本机授权后）
+
+现状：`TaskCoordinator`（D 已接入启动）负责"同一任务同一版本只有一个执行者"、状态查询和结果回传；执行器默认拒绝。科研模块已有 `exchange.dart` 的 `exportTask`、`importTask`、`exportResult`、`importResult`。
+在 Muyon 里，"执行研究任务"不是程序自己去跑实验，而是：
+1. 接收方在设备页（或任务列表）看到"已提议"的研究任务，**由用户明确授权**后，把任务包导入本机科研模块，成为一个待完成的任务，绑定 (task id, input revision)。收到、导入都**不会**自动运行任何东西。
+2. 用户在本机完成任务（手动或借助外部研究工具），在科研页导出结果。
+3. 这个结果通过协调器按 (task id, input revision) 发回发起方，发起方用 `importResult` 接到原任务上，进入人工评估。
+**关键语义**：协调器目前把"执行器返回"记为完成。研究任务耗时长，"已导入科研"不能显示为"完成"。请对 `task_coordinator.dart` 做最小改动：把"开始执行"和"提交结果"分成两步（例如 `start` 只导入并进入 running，`complete(taskId, inputRevision, result)` 在用户导出结果时调用），进程重启后 running 状态保持，不重复导入；迟到或重复的结果仍被忽略。把改动写进报告，D 会复核。
+测试（两台环回宿主）：提议 → 接收方未授权时科研里没有这个任务 → 授权后出现且未运行 → 导出结果 → 发起方原任务收到结果 → 重复发送结果只接一次 → 中途重启不重复导入。
+
+推送前 `scripts/verify.sh` 退出码 0、工作区干净；推送后 `git ls-remote origin refs/heads/feat/b-ui` 核对哈希。
+
+---8<--- 追加 · E（opencode）· E7–E8 ---
+
+开工：`git fetch origin && git merge --ff-only origin/develop`。推送规则同前（verify.sh 退出码 0、工作区干净、推送后核对远端哈希并写进报告）。**只格式化你改过的文件。**
+
+### E7 助手执行面板
+
+需求第二节：助手要"展示目标、进度、运行设备、等待原因、错误、执行结果与产物；关闭聊天后保留执行记录；暂停、取消、恢复按工具实际能力开放"。
+- 新建 `apps/muyon/lib/screens/execution_panel.dart`：列出 `host.foundation` 里的个人任务（读 `apps/muyon/lib/platform/foundation_repository.dart` 和 `apps/muyon/lib/assistant/personal_agent.dart` 找到任务、状态和操作的现有接口），每条显示目标、阶段、运行设备、等待原因（例如"等待你确认"）、错误、结果摘要和产物引用（点击能回到对象，用 shell 已有的 `openObject`）。
+- 操作按钮只在任务和工具**实际支持**时出现：取消、暂停、恢复（恢复要新确认，不重放不可逆操作——沿用 `PersonalAgent` 现有行为，不改它）。`interrupted` 状态写明"结果未知，重试前请先核实"。
+- 入口：桌面放在助手旁边可展开，手机作为独立页面；需要改 `platform_shell*.dart` 时只加最少的入口代码并在报告里列出。
+- 测试：用真实临时宿主制造各状态的任务，断言显示和按钮是否出现正确；320/1280 宽度、200% 字号。
+
+### E8 把研究包导入协调逻辑移出页面文件
+
+`AcceptedResearchImports` 目前写在 `apps/muyon/lib/app/research_tools_page.dart` 这个页面文件里。把它原样移到新文件 `apps/muyon/lib/app/accepted_research_imports.dart`，更新 `bootstrap.dart` 和测试里的导入。**纯移动，不改任何逻辑**；`git diff -M` 应显示为移动加少量导入变化。`accepted_research_import_test.dart` 必须不改断言照样通过。
+
+---8<--- 追加 · D（Grok）· D-R8c 进入第 2 阶段（Kaggle 训练），门禁改正 ---
+
+Your D-R8b stage 1b (`e4ab83c`, `5b34659`) and D-R9b (`7c80ac1`) are being merged. Stage 1b met the safety goal — false write/external 0 on held-out, adversarial 10/10 and negation 24/24 — and showed that question design alone cannot fix Chinese, mixed and paraphrase requests (0/18, 0/18, 0/19 even before thresholding). **A's gate 1b was wrong**: 26 of the 93 held-out tasks expect write or network tools, which a read-only Laya can never answer, so comparing against the all-tools 46/93 baseline was unfair. And a threshold fitted on the synthetic training set came out at 1.0 because that set's label mix differs from real requests. The user approved moving on to stage 2.
+
+Corrected rules for stage 2:
+1. **Evaluation subset**: score only the 67 held-out tasks Laya may answer (49 expecting a read-only tool + 18 expecting none), plus the adversarial and negation sets. Recompute the D-R6 baseline and the stage-1b result on the **same 67** so all three are comparable.
+2. **Threshold**: fit on a validation split carved from the training data whose label mix (read-only vs. none, and per language) is re-weighted to match the 67-task evaluation subset; report the mix. Never fit on the evaluation sets.
+3. **Training data**: only read-only tool ids and "none" as targets (write/network requests map to "none" for this selector). Keep the existing leakage checks and the held-out tools.
+4. **Kaggle**: as in D-R8 (private dataset, synthetic data only, no Hub push, weights to `~/.cache/muyon-eval/models/` with SHA-256, token only from `.env` key `Kaggle-apikey` into the subprocess).
+5. **Gate 2**: false write/external stays 0 everywhere (by construction plus measured); on the 67-task subset, top-1 clearly above both the D-R6 baseline and stage 1b on the same subset, with Chinese, mixed and paraphrase each improving; calibration reported; CPU p50 on this Mac ≤ 1.5× the D-R6 figure. Report numbers even if the gate fails.
+Then stage 3 (ONNX feasibility) as in D-R8. Integration stays a separate user decision.

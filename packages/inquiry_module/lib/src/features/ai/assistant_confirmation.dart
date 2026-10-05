@@ -37,15 +37,40 @@ Future<bool> confirmAssistantNetwork(
       false;
 }
 
+/// First-party review of the exact immutable host preview, for every hop.
+Future<bool> confirmAssistantWebHostRequest(
+  BuildContext context,
+  AssistantWebApprovalPreview preview,
+  AiCancellation cancellation, {
+  void Function()? onStopTask,
+}) async {
+  cancellation.check();
+  return await showDialog<bool>(
+        context: context,
+        builder: (_) => _ActionDialog(
+          null,
+          cancellation,
+          onStopTask: onStopTask,
+          networkTitle: '宿主确认本次网页请求',
+          networkDetails:
+              'GET ${preview.destination}\n'
+              '本次确认仅适用于此地址；重定向将再次确认。',
+        ),
+      ) ??
+      false;
+}
+
 class _ActionDialog extends StatefulWidget {
   const _ActionDialog(
     this.preview,
     this.cancellation, {
     this.networkTitle,
     this.networkDetails,
+    this.onStopTask,
   });
   final AssistantActionPreview? preview;
   final AiCancellation cancellation;
+  final void Function()? onStopTask;
   final String? networkTitle, networkDetails;
 
   @override
@@ -167,7 +192,12 @@ class _ActionDialogState extends State<_ActionDialog> {
 
   List<Widget> _actions(String label) => [
     TextButton(
-      onPressed: () => widget.cancellation.cancel(),
+      onPressed: () {
+        // Only explicit user task-stop reaches the owner. Request cancellation
+        // still dismisses this dialog independently (timeout/stale/cleanup).
+        widget.onStopTask?.call();
+        widget.cancellation.cancel();
+      },
       child: const Text('停止任务'),
     ),
     TextButton(

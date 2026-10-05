@@ -251,7 +251,15 @@ class _AskPageState extends State<AskPage> {
             }
           }
 
-          web = widget.state.createAssistantWebTools(id);
+          web = widget.state.createAssistantWebTools(
+            id,
+            review: (preview, cancel) => confirmAssistantWebHostRequest(
+              context,
+              preview,
+              cancel,
+              onStopTask: cancellation.cancel,
+            ),
+          );
           procurement = AssistantProcurementTools(
             widget.state.store,
             web: web!,

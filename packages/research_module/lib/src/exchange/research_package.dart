@@ -20,14 +20,17 @@ class PreparedResearchPackage extends PreparedImport {
     required this.originProjectKey,
     required Map<String, CardRevision> revisions,
     required Map<String, String> heads,
+    required List<RevisionRef> forks,
     required Map<String, _Document> documents,
   }) : revisions = Map.unmodifiable(revisions),
        heads = Map.unmodifiable(heads),
+       forks = List.unmodifiable(forks),
        _documents = Map.unmodifiable(documents);
   final String originProjectKey;
   final void Function()? _checkBeforeCommit;
   final Map<String, CardRevision> revisions;
   final Map<String, String> heads;
+  final List<RevisionRef> forks;
   final Map<String, _Document> _documents;
 }
 
@@ -57,6 +60,8 @@ class ResearchPackageExchange {
       store.requireProject(projectId);
       final revisions = <String, CardRevision>{};
       final heads = <String, String>{};
+      final forks = <RevisionRef>[];
+      final pending = <String>[];
       final documents = <String, _Document>{};
       void visitCard(ObjectKey key) {
         store.requireObject(projectId, key);
@@ -66,7 +71,17 @@ class ResearchPackageExchange {
           [key.token],
         );
         if (rows.isEmpty) throw StateError('Missing related card');
-        heads[key.token] = rows.single['head_revision_id'] as String;
+        final head = rows.single['head_revision_id'] as String;
+        heads[key.token] = head;
+        pending.add(head);
+        for (final row in store.db.select(
+          'SELECT revision_id FROM rk_conflicts WHERE object_key=? AND revision_id<>? ORDER BY revision_id',
+          [key.token, head],
+        )) {
+          final id = row['revision_id'] as String;
+          forks.add(RevisionRef(objectKey: key, revisionId: id));
+          pending.add(id);
+        }
       }
 
       for (final id in cardIds) {
@@ -75,7 +90,6 @@ class ResearchPackageExchange {
         visitCard(card.revision.objectKey);
       }
       if (heads.isEmpty) throw StateError('Select at least one card');
-      final pending = heads.values.toList();
       for (var index = 0; index < pending.length; index++) {
         final id = pending[index];
         if (revisions.containsKey(id)) continue;
@@ -113,7 +127,6 @@ class ResearchPackageExchange {
         for (final relation in revision.relations) {
           if (relation.target.objectType == 'card') {
             visitCard(relation.target);
-            pending.add(heads[relation.target.token]!);
           } else if (relation.target.objectType == 'document') {
             document(relation.target, null);
           } else {
@@ -159,6 +172,8 @@ class ResearchPackageExchange {
               },
             )
             .toList(),
+        // Absent in legacy schema-1 packages: no advertised forks.
+        if (forks.isNotEmpty) 'forks': forks.map((f) => f.toJson()).toList(),
         'revisions': revisions.values
             .map((r) => {'envelope': r.toJson(), 'digest': r.contentDigest})
             .toList(),
@@ -331,6 +346,39 @@ class ResearchPackageExchange {
       }
       heads[key.token] = head;
     }
+    final rawForks = manifest.containsKey('forks')
+        ? manifest['forks']
+        : const [];
+    if (rawForks is! List) {
+      throw const FormatException('Invalid fork list');
+    }
+    final forks = <RevisionRef>[];
+    final forkIds = <String>{};
+    for (final raw in rawForks) {
+      if (raw is! Map ||
+          raw.length != 2 ||
+          raw['ObjectKey'] is! Map ||
+          raw['revisionId'] is! String) {
+        throw const FormatException('Invalid fork reference');
+      }
+      final rawKey = raw['ObjectKey'] as Map;
+      if (rawKey.length != 3 ||
+          [
+            'originProjectKey',
+            'objectType',
+            'objectUuid',
+          ].any((field) => rawKey[field] is! String)) {
+        throw const FormatException('Invalid fork object key');
+      }
+      final fork = RevisionRef.fromJson(Map<String, Object?>.from(raw));
+      if (!heads.containsKey(fork.objectKey.token) ||
+          revisions[fork.revisionId]?.objectKey != fork.objectKey ||
+          heads[fork.objectKey.token] == fork.revisionId ||
+          !forkIds.add(fork.revisionId)) {
+        throw const FormatException('Invalid fork identity');
+      }
+      forks.add(fork);
+    }
     for (final raw in manifest['documents'] as List) {
       final row = Map<String, Object?>.from(raw as Map);
       final key = ObjectKey.fromJson(
@@ -396,7 +444,9 @@ class ResearchPackageExchange {
       }
       for (final relation in revision.relations) {
         if (!heads.containsKey(relation.target.token) &&
-            !documents.values.any((d) => d.key == relation.target)) {
+            !documents.values.any(
+              (d) => d.key == relation.target && d.current,
+            )) {
           throw const FormatException('Dangling relation');
         }
       }
@@ -405,6 +455,9 @@ class ResearchPackageExchange {
 
     for (final head in heads.values) {
       visit(head);
+    }
+    for (final fork in forks) {
+      visit(fork.revisionId);
     }
     if (colors.length != revisions.length) {
       throw const FormatException('Unreachable revision');
@@ -434,6 +487,7 @@ class ResearchPackageExchange {
       originProjectKey: origin,
       revisions: revisions,
       heads: heads,
+      forks: forks,
       documents: documents,
     );
   }
@@ -530,6 +584,15 @@ class ResearchPackageExchange {
         document.bytes,
         document.current && !hasCurrent ? 0 : 2,
       ]);
+      // A citation-only import may already have this digest as historical.
+      // Restore it only when no local current version wins; explicit deletion
+      // remains unavailable and must fail required closure below.
+      if (document.current && !hasCurrent) {
+        db.execute(
+          'UPDATE rk_documents SET deleted=0 WHERE object_key=? AND digest=? AND deleted=2',
+          [document.key.token, document.digest],
+        );
+      }
     }
     for (final revision in prepared.revisions.values) {
       store.insertRevision(revision);
@@ -546,7 +609,19 @@ class ResearchPackageExchange {
       return false;
     }
 
+    // Count newly retained forks for this operation; receipt replay returns the
+    // original count, while a fresh duplicate operation contributes zero.
     var conflicts = 0;
+    void retainFork(String key, String revisionId) {
+      if (db.select(
+        'SELECT 1 FROM rk_conflicts WHERE object_key=? AND revision_id=?',
+        [key, revisionId],
+      ).isEmpty) {
+        db.execute('INSERT INTO rk_conflicts VALUES(?,?)', [key, revisionId]);
+        conflicts++;
+      }
+    }
+
     for (final head in prepared.heads.entries) {
       final rows = db.select(
         'SELECT head_revision_id FROM rk_cards WHERE object_key=?',
@@ -562,11 +637,47 @@ class ResearchPackageExchange {
             [head.value, head.key],
           );
         } else if (!ancestor(head.value, current)) {
-          db.execute('INSERT OR IGNORE INTO rk_conflicts VALUES(?,?)', [
-            head.key,
-            head.value,
-          ]);
-          conflicts++;
+          retainFork(head.key, head.value);
+        }
+      }
+    }
+    // An advertised fork is retained, even if it descends from our active head.
+    // It never participates in choosing that head. A returned fork may already
+    // be our active branch, in which case no self-conflict is created.
+    for (final fork in prepared.forks) {
+      final current = db.select(
+        'SELECT head_revision_id FROM rk_cards WHERE object_key=?',
+        [fork.objectKey.token],
+      ).single['head_revision_id'];
+      if (current != fork.revisionId) {
+        retainFork(fork.objectKey.token, fork.revisionId);
+      }
+    }
+    for (final key in prepared.heads.keys) {
+      db.execute(
+        'DELETE FROM rk_conflicts WHERE object_key=? AND revision_id=(SELECT head_revision_id FROM rk_cards WHERE object_key=?)',
+        [key, key],
+      );
+    }
+    // Preparation validates package closure; local current/deletion policy may
+    // still prevent a referenced version from being usable after reconciliation.
+    // Check heads, forks and ancestors before the receipt makes this durable.
+    for (final revision in prepared.revisions.values) {
+      for (final citation in revision.citations) {
+        if (store.citationDocument(projectId, citation.source) == null) {
+          throw StateError('Citation source closure unavailable after import');
+        }
+      }
+      for (final relation in revision.relations) {
+        if (relation.target.objectType == 'document' &&
+            db.select(
+                  'SELECT 1 FROM rk_documents WHERE object_key=? AND deleted=0',
+                  [relation.target.token],
+                ).length !=
+                1) {
+          throw StateError(
+            'Document relation closure unavailable after import',
+          );
         }
       }
     }
