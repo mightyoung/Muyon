@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
+import 'package:research_module/research_module.dart';
 import 'package:supplier_core/lan.dart';
 
 import '../app/bootstrap.dart';
@@ -190,12 +191,21 @@ class _DevicesPageState extends State<DevicesPage> {
         return claimed ? '已在本机接受。接收本身没有执行。' : '没有成为执行者。任务仍由当前所有者负责。';
       });
 
+  bool _research(TaskRecord task) =>
+      host.researchTasks.isResearchTask(task.taskId, task.inputRevision);
+
   Future<void> startTask(TaskRecord task) async {
+    final research = _research(task);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('在本机执行'),
-        content: const Text('只有这一次确认才授权本机执行。收到提议、接受所有权都不会执行。科研模块尚未接入时，执行会被拒绝。'),
+        title: Text(research ? '导入本机科研' : '在本机执行'),
+        content: Text(
+          research
+              ? '只有这一次确认才授权把这个研究任务说明导入本机科研模块。收到提议、接受所有权都不会导入，'
+                    '导入后也不会运行任何东西：由你在科研页自己完成，再导出结果并回传。'
+              : '只有这一次确认才授权本机执行。收到提议、接受所有权都不会执行。',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -203,19 +213,132 @@ class _DevicesPageState extends State<DevicesPage> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('授权执行'),
+            child: Text(research ? '授权导入' : '授权执行'),
           ),
         ],
       ),
     );
     if (confirmed != true) return;
-    await run('执行任务 ${task.taskId}', () async {
-      await host.tasks.start(
-        taskId: task.taskId,
-        inputRevision: task.inputRevision,
+    await run(
+      research ? '导入研究任务 ${task.taskId}' : '执行任务 ${task.taskId}',
+      () async {
+        await host.tasks.start(
+          taskId: task.taskId,
+          inputRevision: task.inputRevision,
+        );
+        return research
+            ? '已导入本机科研，任务进入“执行中”，但没有运行任何东西。完成后请导出结果并在这里提交。'
+            : '本机执行已结束。对方是否看到结果取决于对方是否在线。';
+      },
+    );
+  }
+
+  /// The person exported a result from the research page; send it back.
+  Future<void> submitTaskResult(TaskRecord task) async {
+    final picked = await FilePicker.pickFiles(
+      dialogTitle: '选择科研页导出的结果（.zip 或 .json）',
+      allowedExtensions: const ['zip', 'json'],
+      type: FileType.custom,
+    );
+    final path = picked.isEmpty ? null : picked.first.path;
+    if (path == null) return;
+    await run('提交结果 ${task.taskId}', () async {
+      await host.researchTasks.submitResult(
+        task.taskId,
+        task.inputRevision,
+        path,
       );
-      return '本机执行已结束。对方是否看到结果取决于对方是否在线。';
+      return '结果已提交并发给发起设备。对方是否收到取决于对方是否在线；本机已记为完成。';
     });
+  }
+
+  Future<void> importTaskResult(TaskRecord task) =>
+      run('导入结果 ${task.taskId}', () async {
+        final runId = await host.researchTasks.importReturnedResult(
+          task.taskId,
+          task.inputRevision,
+        );
+        return '结果已接到原任务上（运行 $runId），等待你在科研页人工评估；没有被当作已验证的结论。';
+      });
+
+  Future<void> offerResearchTask() async {
+    await host.activateResearch();
+    final store = host.research?.store;
+    if (store == null) {
+      setState(() => error = host.researchError ?? '科研模块不可用');
+      return;
+    }
+    final tasks = [
+      for (final project in store.projects()) ...store.tasks(project.id),
+    ];
+    if (!mounted) return;
+    final chosen = await showDialog<ResearchTask>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('提议哪个研究任务？'),
+        children: [
+          if (tasks.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(24),
+              child: Text('科研模块里还没有任务。先在科研页创建任务。'),
+            ),
+          for (final task in tasks)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, task),
+              child: Text('${task.title} · 版本 ${task.revision}'),
+            ),
+        ],
+      ),
+    );
+    if (chosen == null || !mounted) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('提议给已配对设备'),
+        content: Text(
+          '将把「${chosen.title}」版本 ${chosen.revision} 的任务说明包发给所有在线的已配对设备。'
+          '说明包只含目标和参数，不含代码或数据，对方不会自动导入或运行。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('提议'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await run('提议研究任务', () async {
+      await host.researchTasks.offer(chosen);
+      return '已提议。对方接受并授权导入之前，什么都不会发生。';
+    });
+  }
+
+  String _taskLocalLabel(TaskRecord task) {
+    if (_research(task) && task.state == 'running') {
+      return '已导入本机科研，等待你完成并回传结果（没有在运行）';
+    }
+    if (task.state == 'succeeded' && task.ownerDeviceId != null) {
+      final self = task.ownerDeviceId == host.workspaces.setting('deviceId');
+      if (self && _research(task)) return '结果已提交给发起设备';
+      if (!self &&
+          host.researchTasks.hasReturnedResult(
+            task.taskId,
+            task.inputRevision,
+          )) {
+        return host.researchTasks.resultImported(
+              task.taskId,
+              task.inputRevision,
+            )
+            ? '收到结果，已接到原任务'
+            : '收到对方回传的结果，尚未导入科研';
+      }
+    }
+    return localTaskLabel(task.state, task.ownerDeviceId);
   }
 
   Future<void> queryTask(TaskRecord task) => run('查询 ${task.taskId}', () async {
@@ -415,12 +538,17 @@ class _DevicesPageState extends State<DevicesPage> {
       const Divider(),
       const Text('跨设备任务'),
       const Text('收到提议不会执行。所有权、执行和对方是否可达是分开的状态。'),
+      OutlinedButton.icon(
+        onPressed: busy ? null : offerResearchTask,
+        icon: const Icon(Icons.science_outlined),
+        label: const Text('提议研究任务'),
+      ),
       if (host.tasks.list().isEmpty) const ListTile(title: Text('还没有跨设备任务')),
       for (final task in host.tasks.list())
         ListTile(
           title: Text('${task.taskId} · ${task.inputRevision}'),
           subtitle: Text(
-            '本机：${localTaskLabel(task.state, task.ownerDeviceId)}\n'
+            '本机：${_taskLocalLabel(task)}\n'
             '对方：${peerTaskLabel(peerViews['${task.taskId}\u0000${task.inputRevision}'])}',
           ),
           isThreeLine: true,
@@ -439,7 +567,27 @@ class _DevicesPageState extends State<DevicesPage> {
                   task.ownerDeviceId == host.workspaces.setting('deviceId'))
                 TextButton(
                   onPressed: busy ? null : () => startTask(task),
-                  child: const Text('授权执行'),
+                  child: Text(_research(task) ? '授权导入科研' : '授权执行'),
+                ),
+              if (task.state == 'running' &&
+                  _research(task) &&
+                  task.ownerDeviceId == host.workspaces.setting('deviceId'))
+                TextButton(
+                  onPressed: busy ? null : () => submitTaskResult(task),
+                  child: const Text('提交结果'),
+                ),
+              if (task.state == 'succeeded' &&
+                  host.researchTasks.hasReturnedResult(
+                    task.taskId,
+                    task.inputRevision,
+                  ) &&
+                  !host.researchTasks.resultImported(
+                    task.taskId,
+                    task.inputRevision,
+                  ))
+                TextButton(
+                  onPressed: busy ? null : () => importTaskResult(task),
+                  child: const Text('导入结果到科研'),
                 ),
             ],
           ),

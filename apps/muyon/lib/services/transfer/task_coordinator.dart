@@ -12,12 +12,35 @@ class TaskCoordinator {
     required this.send,
     required this.executor,
     bool Function()? peerReachable,
+    this.onOfferAttachment,
+    this.onResultReceived,
   }) : peerReachable = peerReachable ?? (() => true);
   final ManagedDatabase database;
   final String deviceId;
   final Future<void> Function(Map<String, Object?> envelope) send;
-  final Future<String> Function(TaskOffer offer) executor;
+
+  /// Returns the result when it is available at once. Returning null means the
+  /// work was started but finishes later; the task stays `running` until
+  /// [complete] is called (e.g. a research task the person finishes by hand).
+  final Future<String?> Function(TaskOffer offer) executor;
   final bool Function() peerReachable;
+
+  /// Called once when a new offer arrives with an attachment (the task
+  /// package). Receiving never starts anything.
+  final Future<void> Function(
+    String taskId,
+    String inputRevision,
+    Map<String, Object?> attachment,
+  )?
+  onOfferAttachment;
+
+  /// Called once per newly applied result (late and duplicate ones are not).
+  final Future<void> Function(
+    String taskId,
+    String inputRevision,
+    String result,
+  )?
+  onResultReceived;
   static const marker = 'muyon-task-v1';
 
   static Map<String, Object?>? decodeFile(String path) {
@@ -36,16 +59,18 @@ class TaskCoordinator {
     required String taskId,
     required String inputRevision,
     required String idempotencyKey,
+    Map<String, Object?>? attachment,
   }) async {
     if (!await _insertOffer(taskId, inputRevision, idempotencyKey)) return;
-    await send(
-      _message(
+    await send({
+      ..._message(
         'offer',
         taskId: taskId,
         inputRevision: inputRevision,
         idempotencyKey: idempotencyKey,
       ),
-    );
+      'attachment': ?attachment,
+    });
   }
 
   Future<void> receive(Map<String, Object?> envelope) async {
@@ -56,11 +81,19 @@ class TaskCoordinator {
     final inputRevision = envelope['inputRevision'] as String;
     switch (envelope['type']) {
       case 'offer':
-        await _insertOffer(
+        final isNew = await _insertOffer(
           taskId,
           inputRevision,
           envelope['idempotencyKey'] as String,
         );
+        final attachment = envelope['attachment'];
+        if (isNew && attachment is Map) {
+          await onOfferAttachment?.call(
+            taskId,
+            inputRevision,
+            Map<String, Object?>.from(attachment),
+          );
+        }
       case 'accept':
         await _noteAccept(
           envelope['deviceId'] as String,
@@ -68,12 +101,20 @@ class TaskCoordinator {
           inputRevision,
         );
       case 'result':
+        final before = _local(taskId, inputRevision)?['result_seq'];
         await applyResult(
           taskId: taskId,
           inputRevision: inputRevision,
           seq: envelope['seq'] as int,
           result: envelope['result'] as String,
         );
+        if (_local(taskId, inputRevision)?['result_seq'] != before) {
+          await onResultReceived?.call(
+            taskId,
+            inputRevision,
+            envelope['result'] as String,
+          );
+        }
       case 'status':
         return;
       default:
@@ -140,12 +181,15 @@ class TaskCoordinator {
     if (offer == null) return;
     try {
       final result = await executor(offer);
-      await applyResult(
-        taskId: taskId,
-        inputRevision: inputRevision,
-        seq: 1,
-        result: result,
-      );
+      // null: started, finishes later through [complete]; stays running.
+      if (result != null) {
+        await applyResult(
+          taskId: taskId,
+          inputRevision: inputRevision,
+          seq: 1,
+          result: result,
+        );
+      }
     } catch (error) {
       await database.write((db) {
         db.execute(
@@ -155,6 +199,41 @@ class TaskCoordinator {
       });
       rethrow;
     }
+  }
+
+  /// Second step of a task whose [executor] returned null: the owner submits
+  /// the result for the running task and it is sent to the offering device.
+  /// Only the owner of a `running` task can complete it, and only once.
+  Future<bool> complete({
+    required String taskId,
+    required String inputRevision,
+    required String result,
+  }) async {
+    final key = await database.write((db) {
+      final row = _row(db, taskId, inputRevision);
+      if (row == null ||
+          row['owner_device_id'] != deviceId ||
+          row['state'] != 'running') {
+        return null;
+      }
+      db.execute(
+        "UPDATE transfer_tasks SET state='succeeded', result_seq=1, result_json=?, updated_at=? WHERE task_id=? AND input_revision=?",
+        [result, _now(), taskId, inputRevision],
+      );
+      return row['idempotency_key'] as String;
+    });
+    if (key == null) return false;
+    await send(
+      _message(
+        'result',
+        taskId: taskId,
+        inputRevision: inputRevision,
+        idempotencyKey: key,
+        seq: 1,
+        result: result,
+      ),
+    );
+    return true;
   }
 
   Future<void> applyResult({

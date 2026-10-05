@@ -28,6 +28,7 @@ import '../services/models/model_gateway.dart';
 import '../services/models/secret_store.dart';
 import '../services/models/profile_repository.dart';
 import 'inquiry_plugin.dart';
+import 'research_task_bridge.dart';
 
 import 'package:uuid/uuid.dart';
 
@@ -43,6 +44,7 @@ class MuyonHost {
   late final PublicServices services;
   late final PersonalAgent personalAgent;
   late final TaskCoordinator tasks;
+  late final ResearchTaskBridge researchTasks;
   late final DreamService dream;
   late final ProjectionService projections;
   late final OutboundLedger outbound;
@@ -127,7 +129,7 @@ class MuyonHost {
 
   static Future<MuyonHost> open(
     String rootPath, {
-    Future<String> Function(TaskOffer offer)? taskExecutor,
+    Future<String?> Function(TaskOffer offer)? taskExecutor,
   }) async {
     final storage = StorageManager(rootPath);
     try {
@@ -196,16 +198,15 @@ class MuyonHost {
         host.foundation,
         gateway: host.services.gateway,
       );
+      host.researchTasks = ResearchTaskBridge(host);
       host.tasks = TaskCoordinator(
         database: database,
         deviceId: device,
         send: host.services.transfer.sendTaskEnvelope,
-        executor:
-            taskExecutor ??
-            ((offer) => Future<String>.error(
-              StateError('研究任务的执行仍由科研模块在本地授权后进行：${offer.taskId}'),
-            )),
+        executor: taskExecutor ?? host.researchTasks.start,
         peerReachable: () => host.services.transfer.pairedOnline().isNotEmpty,
+        onOfferAttachment: host.researchTasks.saveOfferAttachment,
+        onResultReceived: host.researchTasks.saveReturnedResult,
       );
       host.services.transfer.onTaskEnvelope = host.tasks.receive;
       await host.services.transfer.deliverPendingTaskEnvelopes();
