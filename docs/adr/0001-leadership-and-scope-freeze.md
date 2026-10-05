@@ -31,7 +31,7 @@
 
 - 所有提交由 leader 按 [docs/tasks/REVIEW.md](../tasks/REVIEW.md) 审查，审查结论写在 `review/<编号>` 分支上。
 - 审查通过后由 leader 合入 `develop`。
-- `main` 保持不动，何时更新由用户决定。
+- `main` 保持不动，何时更新由用户决定。用户 2026-10-06 决定：第一阶段退出前不更新 `main`，PR #1（`develop` → `main`）与 PR #2（`ci/manual-verify` → `main`）保持开放。
 
 ### 4. 范围冻结（至第一阶段退出为止）
 
@@ -65,3 +65,9 @@
 - 同一时间只有一个规划与合并的入口，验收账本只由 leader 修改。
 - 云端不再产生开发用量。本地 agent 的产出必须推送到任务分支，leader 才能审查。
 - 冻结期间新需求先记录，第一阶段退出后再排期。
+
+## 后续记录
+
+- 2026-10-06：A 的交接审查通过（[HANDOVER-A-review.md](../tasks/HANDOVER-A-review.md)）。
+- 用户确认删除 6 个已合入或没有内容的远端分支：`review/b-ui`、`review/c-modules`、`wip/g3-handoff`、`feat/a-acceptance`、`feat/a-agent`、`feat/a-storage`。云端会话的代理禁止删除远端分支，由用户在本机执行。
+- 保留 `feat/c-modules` 与 `feat/d-transfer`，等 Codex、Grok 恢复额度后继续使用；保留 `ci/manual-verify`（PR #2）。
