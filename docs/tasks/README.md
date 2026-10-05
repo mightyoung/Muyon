@@ -14,10 +14,10 @@
 | 任务 | 分支 | 说明 | 执行 | 依赖 | 状态 |
 |---|---|---|---|---|---|
 | HANDOVER-A 原 leader 交接 | `task/handover-a` | [HANDOVER-A.md](HANDOVER-A.md) | A | — | 已完成（[审查通过](HANDOVER-A-review.md)） |
-| P0-3 询价 North Star 链路 | `task/p0-3-north-star` | [P0-3.md](P0-3.md) | senior | — | 已转交（含 WIP） |
-| P0-2 LLM 原生工具调用基线 | `task/p0-2-llm-baseline` | [P0-2.md](P0-2.md) | senior | P0-3 之后 | 已转交（含 WIP） |
+| P0-3 询价 North Star 链路 | `task/p0-3-north-star` | [P0-3.md](P0-3.md) | senior | — | 已交付，核实中（`review/P0-3`） |
+| P0-2 LLM 原生工具调用基线 | `task/p0-2-llm-baseline` | [P0-2.md](P0-2.md) | senior | P0-3 之后 | 已交付，核实中（`review/P0-2`） |
 | P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | engineer | B 2.4 之后 | 已转交（含 WIP） |
-| P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 已转交 |
+| P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 审查：需修复 F1～F3，在 `review/P0-J1` 上修（见该分支 `docs/tasks/P0-J1-review.md`） |
 | P0-4 真机与真实模型取证 | `task/p0-4-evidence`（待建） | [P0-4.md](P0-4.md) | engineer | P0-1、P0-2、P0-3、P0-J1 合入 | 待依赖 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` | `2026-10-04-w1-agent-prompts.md`「追加 · B（Sonnet）· 2.4」 | engineer | — | 在途（据交接：13 个文件改动未提交，验收口径见 [审查](HANDOVER-A-review.md)） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` | `2026-10-04-w1-agent-prompts.md`「追加 · E（opencode）· E11」 | junior | — | 在途（据交接：8 个文件改动未提交，验收口径见 [审查](HANDOVER-A-review.md)） |
