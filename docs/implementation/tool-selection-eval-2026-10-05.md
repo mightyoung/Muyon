@@ -75,3 +75,5 @@ D-R6 的 `laya-metrics.json` 只有汇总，没有逐题预测。同一 67 题�
 67 题的标签和语言格子是 `none|zh` 18、`read|zh` 25、`read|mixed` 12、`read|en` 12。语言按请求里的汉字和拉丁字母判定，不用评测类别当语言。决定阈值改在训练验证折上拟合：2240 行按 id 排序，下标能被 5 整除的 448 行留在本机，不上传。这 448 行的格子是 `none|zh` 197、`read|zh` 141、`read|mixed` 99、`none|mixed` 11。英文格子对不上（`read|en` 12），不把这份比例摊到其他语言。`none|mixed` 不在 67 题的目标里，权重为 0。上传 1792 行。微调权重回到本机之后才用这个加权验证折选阈值。140 题和否定集不参与拟合。
 
 门禁 2 还没有结论：微调还没打完分，D-R6 的 67 题基线也还没重测。阶段 3 未开始。生产策略没有切换。
+
+私有数据集 `amurdaddy/muyon-laya-tool-choices` 已上传 1792 行合成题。标题已被占用时改为创建新版本，版本说明是 “Synthetic tool-choice rows”。状态解析原先把 CLI 的版本警告和 `ready` 粘成一行，第一轮因此没有推内核；修正后数据集状态是 `ready`，私有内核 `amurdaddy/muyon-laya-tool-finetune` 第 1 版已推送。推送后的状态是 `KernelWorkerStatus.RUNNING`。加速器元数据是 `NvidiaTeslaT4`，笔记本要求两块 GPU，并写 `NO_HUB_PUSH`。凭证只进了子进程的 `KAGGLE_API_TOKEN`。权重还没有下载，SHA-256 还没有。
