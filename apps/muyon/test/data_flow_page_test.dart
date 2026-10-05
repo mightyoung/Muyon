@@ -325,7 +325,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('the data & storage page exposes the data-flow entry', (
+  testWidgets('the data & storage page exposes both platform entries', (
     tester,
   ) async {
     resize(tester, 390);
@@ -344,6 +344,7 @@ void main() {
             restore: (_) async {},
             pickDirectory: (_) async => null,
             dataFlow: const Scaffold(body: Text('去向内容')),
+            mcpServers: const Scaffold(body: Text('服务器内容')),
           ),
         ),
       ),
@@ -353,6 +354,12 @@ void main() {
     await tester.tap(find.text('数据去向'));
     await tester.pumpAndSettle();
     expect(find.text('去向内容'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('MCP 服务器'));
+    await tester.tap(find.text('MCP 服务器'));
+    await tester.pumpAndSettle();
+    expect(find.text('服务器内容'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

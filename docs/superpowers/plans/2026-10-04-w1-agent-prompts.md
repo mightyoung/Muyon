@@ -599,3 +599,66 @@ Your chat backend draft was accepted with changes; D is implementing it. What ch
 - Dedupe is per (peer, message id); no read receipts go to the peer.
 - `sent` with an unknown outcome is a real, persistent state: show it as "已发出，对方是否收到未知", and only offer retry with the warning you proposed.
 Wait for D's final API document before wiring; you can build the screens now against a fake.
+
+---
+
+# 追加：E 角色第二批任务（给 opencode）
+
+---8<--- 追加 · E（opencode）· E4–E5 ---
+
+你的 E1–E3 已审查并合入 `develop`（`c547fcf`）：数据去向页、MCP 服务器页、平台层覆盖率 83.9% → 90.1%，只加测试不改产品代码，报告也写得准确。下面是第二批任务。
+
+开工：`git fetch origin && git merge --ff-only origin/develop`。推送前 `scripts/verify.sh` 退出码为 0、运行后 `git status` 干净；推送后用 `git ls-remote origin refs/heads/feat/e-support` 核对远端哈希等于 `git rev-parse HEAD`，在报告里写出哈希。规则同上一份提示词（不改 `.env`、不加依赖、小提交、只推送到 `feat/e-support`、不合并到 develop）。机器负载很高，同一时间只跑一个测试或构建。
+
+### E4 消除验证脚本里唯一的"已知失败"
+
+`scripts/verify.sh` 一直放行询价模块 `packages/inquiry_module/test/screenshot_test.dart` 的 `desktop settings` 截图失败。按 `packages/inquiry_module/MIGRATION_VALIDATION.md` 的记录，这是当前 Flutter SDK 渲染变化造成的：与冻结的基准图相差 158 个像素（0.02%），位置在一个下拉箭头上，原始未改动的代码也能复现。A 已决定更新这张基准图，因为长期放行会掩盖这个测试以后真正的回归。
+
+步骤（必须按顺序，任何一步不符合就停下并报告，不要更新）：
+1. 在 `apps/muyon` 下运行该测试，取得实际渲染图和差异图（`test/failures/` 下，已被 git 忽略），核对差异仍然只在那个下拉箭头附近，像素数不超过约 0.05%。把你看到的差异位置和像素数写进报告。
+2. 只更新这一张基准图：`flutter test --update-goldens --plain-name 'desktop settings' ../../packages/inquiry_module/test/screenshot_test.dart`，其他基准图一张都不能变（用 `git status` 确认只有这一个 PNG 改动）。
+3. 记录旧图和新图的 SHA-256，追加到 `MIGRATION_VALIDATION.md` 的那一节，写明日期、Flutter 版本和原因；不要删掉原来的记录。
+4. 从 `scripts/verify.sh` 的 `KNOWN_FAILURES` 里移除这一条（保留数组本身，留空），并确认 `verify.sh` 在没有任何失败时仍然输出 ok、退出码 0。
+
+所有权例外（A 授权）：本任务可以改这一张基准图、`MIGRATION_VALIDATION.md` 和 `scripts/verify.sh` 的那一行，不改询价模块的任何代码和其他测试。
+
+### E5 助手层测试覆盖率
+
+范围：`apps/muyon/lib/assistant/` 下的 `action_gate.dart`、`execution_store.dart`、`personal_agent.dart`、`qa_service.dart`、`tool_selection.dart`。**不碰** `assistant/dream/**` 和 `assistant/selection_eval/**`（Grok 正在改）。
+- 用与 E3 相同的方法统计行覆盖率，追加到 `docs/implementation/coverage-<日期>.md`（新日期就新建文件，命令可复用）。
+- 低于 80% 的文件补测试，**只加测试，不改产品代码**。优先覆盖这些行为：取消与中断后的状态、模型请求被拒绝或失败时不保存答案、引用不在冻结证据内时拒绝、范围变化后拒绝发送、工具选择只给候选不授权。
+- 发现疑似缺陷不要顺手修，写进报告由 A 判断。不得削弱或删除已有断言。
+
+## 交付报告
+
+1. 提交列表和远端核对过的哈希
+2. E4：差异位置与像素数、新旧图 SHA-256、`verify.sh` 运行结果
+3. E5：覆盖率前后对比、新增测试数、疑似缺陷
+4. 拥有范围外的改动（逐条）
+5. 各项证据类别（文档 / 自动测试 / 构建 / 真实模型 / 实机），未验证的写"未验证"
+
+---
+
+# 追加：Laya 第 1 阶段重做（给 Grok）
+
+---8<--- 追加 · D（Grok）· D-R8b 第 1 阶段重做 ---
+
+Your stage-1 run (`1c2bf81`, `~/.cache/muyon-eval/stage1-metrics.json`) was reviewed. You did the right things procedurally: you stopped at the failed gate, did not start Kaggle and did not open `.env`; `kaggle_submit.py` reads only the `Kaggle-apikey` line, scrubs other Kaggle variables and passes the token only to the subprocess. The failure comes from the stage-1 design, not from Laya itself. Held-out top-1 fell from 46/93 (D-R6 baseline) to 28/93 and false write/external rose from 0 to 3, because:
+
+1. **The embedding shortlist dropped the right answer**: `shortlistRecall.evalExpectedKept` is 67/140. Mean-pooling the decision checkpoint's encoder is not a retrieval embedder.
+2. **Per-category thresholds are not usable in production**: categories such as adversarial, misleading or paraphrase are labels of the evaluation set; a real request does not announce them. They were also fitted on 2–10 tasks each, which is why the fit split showed 0 false writes and the held-out split showed 3.
+3. **Options lost the tool id**: the `exact` category fell from 16/19 to 4/19.
+4. **Confidence is not a safety signal in this format**: `knowledge.delete` was chosen at 1.0 for a delete request; only 2 of 8 held-out answers at confidence 1.0 were correct.
+
+Redo stage 1 with these four changes (the user approved them):
+
+1. **No embedding shortlist.** Send all eligible tools as options; the 2,048-token head already fits them. If the tool list later outgrows the head, a shortlist may only come back as a lexical retriever (e.g. BM25 over id + description) with measured recall ≥ 0.95 of the expected tool on the evaluation set.
+2. **One global threshold** (at most additional buckets that are observable at runtime, such as detected script/language — never evaluation categories). **Fit it on the synthetic training set** (`scripts/laya/train_set.jsonl`), and use the 140-task evaluation set, the adversarial set and the negation set only for the final measurement. Report the fitted value and the fit/eval split explicitly.
+3. **Option text = tool id + Chinese description** (plus the short English gloss if it helps), so requests that name a tool still match.
+4. **Structural safety: Laya proposes only read-only tools.** Tools whose effect is write, export or network are never in Laya's options. They stay reachable through the explicit-id rule and the LLM selector, and every call still needs host approval. Enforce this in the selection strategy (filter by `RegisteredToolInfo.accessLevel == ToolAccessLevel.read` before building the question) and add a test that a Laya strategy can never return a write/external tool id even if the model output names one. With this, "false write/external = 0" holds by construction; still report it.
+
+Keep the two-step `noul` gate only if it improves the held-out result; report with and without it.
+
+**Gate 1b:** false write/external = 0 on held-out, adversarial and negation sets; held-out top-1 ≥ 46/93 (the D-R6 baseline) on the same 93 tasks, counting a correct "none"/abstain as correct as before; report per category (for reading only, not for thresholds), calibration buckets and latency. If it passes, continue to stage 2 (Kaggle) with the same four rules — the fine-tuned model is also only offered read-only tools, and its threshold is again fitted on training data only. If it fails, stop and report.
+
+Commit scripts and numbers as before; numbers stay in `~/.cache/muyon-eval/` and the summary goes into the evaluation report and ledger. Never commit `.env` or its contents.
