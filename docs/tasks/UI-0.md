@@ -2,7 +2,7 @@
 
 分支 `task/ui-0-baseline`（由 leader 从 `develop` 创建）· 执行 本地 engineer · 审查 leader · 依赖 无（只读，不改代码）
 
-设计依据：[ui-redesign-brief-2026-10-06.md](../design/ui-redesign-brief-2026-10-06.md)。范围冻结期内允许（只截图、只写文档）。
+设计依据：[ui-redesign-brief-2026-10-06.md](../design/ui-redesign-brief-2026-10-06.md)。按 ADR-0001 与 [tasks/README](README.md) 看板，**UI-0 在第一阶段退出后派发**（用户 2026-10-06）；任务卡里原「冻结期内允许」仅指若用户书面开例外时的只读截图——**默认以看板「第一阶段之后」为准**。本次合入仅权威设计文档，不派发本任务。
 
 ## 目标
 为 UI 重设计留一份**可复核的现状基线**，并核对设计稿 §2 的问题 D1–D9 是否属实、有无遗漏。设计稿的问题判断来自读代码，没有运行应用。
