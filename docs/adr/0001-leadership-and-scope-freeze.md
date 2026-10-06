@@ -77,3 +77,4 @@
 - 2026-10-06：用户决定第一阶段**不安装 Xcode**，macOS 设备集成测试写「未验证」；退出标准第 1 项的真机证据以 Android（vivo V2324A）为准。
 - 2026-10-06：PR #3 把 UI 重设计稿（`docs/design/ui-redesign-brief-2026-10-06.md`）和任务说明 UI-0、UI-1 合入 `develop`。用户决定 **UI-0、UI-1 放到第一阶段之后**，冻结期内不派发、不建任务分支。
 - 2026-10-06：新增成员 **engineer2 = grokbot**（Grok，**云端环境**，没有 Flutter）。**不派构建与验证类工作**（analyze、测试、变异、真机、取证）；适合静态核对、文档与证据审阅、脚本类任务；它的复核只作预审，涉及 analyze、测试、变异、真机的结论仍由 leader 派有 Flutter 的子代理重跑后给出。
+- 2026-10-06：Xcode 27 已安装，用户已执行 `xcodebuild -runFirstLaunch`。**修订上面的 Xcode 决定**：macOS 设备证据纳入 P0-4，但**不阻塞**第一阶段退出；退出标准第 1 项仍以 Android（vivo V2324A）为准。
