@@ -127,3 +127,24 @@
 3. 合入后更新本文件正式复核结论，并处理 P0-S2（基于本分支，需再合 develop 后核实）。
 
 本段为工程师2号预审记录，**非正式合入批准**。
+
+## 第 3 轮复核（2026-10-06，leader；核实子代理在本机 Flutter 3.47.5 上重跑）
+
+对象 `review/P0-S1` @ `3b237d7`（代码在 `2409e9a`，`3952783` 合并 develop）。**结论：通过，合入。** 上面工程师2号的静态预审与本轮结论一致。
+
+| 项 | 结论 | 依据 |
+|---|---|---|
+| R1（阻断）网关解析失败不引用响应体 | 满足 | `model_gateway.dart:290-299` 固定为 `model_response_not_json` / `model_response_not_object`；测试 `credential_redaction_callers_test.dart:156-195`（164 字符密钥，任意 12 字符片段） |
+| R2 助手不引用模型原文 | 满足 | `personal_agent.dart:427-432` 固定为 `model_reply_not_json`，协议容错行为未变；测试 `callers_test.dart:197-236` |
+| R3 科研页测试快速失败 | 满足 | 去掉校验后约 15 秒失败（执行者自述约 1 秒），不再是 10 分钟超时 |
+| R4 8 字符以下不做值替换 | 满足 | `credential_redaction.dart:18,31`；单测 `credential_redaction_test.dart:95-127` |
+| R5 | 满足 | `HttpOverrides` 在 tearDown 恢复；注释已改正 |
+| 合并 `3952783` | 正确 | `platform_shell.dart` 两条 import 各一次、按字母序；与当前 develop 无冲突 |
+
+- **探针**（11 个临时用例，全部通过）：回环服务器返回 200，密钥 164 字符；正文为非 JSON（密钥在开头、在末尾）、截断的 JSON、合法 JSON 但不是对象、结构不对的对象；模型 content 回显密钥。网关错误、账本、`task.error`、`task.payload`、通知、会话中都没有密钥的任意 12 字符片段；服务器确实被访问；回显密钥的回复没有变成工具提议或写入。
+- **变异**：撤回 R1、撤回 R2、去掉科研页校验，对应测试都失败；还原后通过。
+- **重跑**：`flutter analyze` `No issues found!`；宿主全量 `+433 ~2 -2`。2 个失败是 `research_object_open_test.dart` 的两例，在干净 develop 上同名、同方式失败（第二例是第一例超时后的连带失败），与本分支无关，另开 [P0-F2](P0-F2.md)。
+
+**可选（记录）**
+- `model_gateway.dart:288` 注释提到不存在的 `maskSecret`，应为 `redactCredentials`。
+- `research_tools_page.dart:353-357` 在 `showDialog` 返回后立即 dispose 输入框 controller，退出动画期间报「used after being disposed」（develop 原有缺陷，与 F8 同类），第一阶段之后处理。
