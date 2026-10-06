@@ -25,6 +25,6 @@
 | P0-3c 询价链路判定收尾（低优先级） | `task/p0-3c-chain-per-question` | [P0-3c.md](P0-3c.md) | senior | P0-F1 之后 | 待转交 |
 | P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | 依赖已齐（B 2.4 修复之后做） | 待转交 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → 修复在 `review/B-2.4` | `2026-10-04-w1-agent-prompts.md`「追加 · B（Sonnet）· 2.4」；审查见 `review/B-2.4` 上的 `docs/tasks/B-2.4-review.md` | engineer | — | 审查：需修复 S1～S3、S5、S7（S6 待 E11） |
-| E11 研究对象页（冻结前在途） | `feat/e-support` | `2026-10-04-w1-agent-prompts.md`「追加 · E（opencode）· E11」 | junior | — | 已交付（`35d622f`），核实中（`review/E11`） |
+| E11 研究对象页（冻结前在途） | `feat/e-support` → 修复在 `review/E11` | `2026-10-04-w1-agent-prompts.md`「追加 · E（opencode）· E11」；审查见 `review/E11` 上的 `docs/tasks/E11-review.md` | junior | P0-1 修复之后 | 审查：需修复 F1～F3、F5（S6 原型跳转第一阶段搁置） |
 
 已停用：过渡集成分支 `feat/p0-ci-llm-baseline` 不再使用，合入目标统一为 `develop`。
