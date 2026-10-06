@@ -6,6 +6,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart';
 import '../platform/tool_registry.dart';
 import 'tool_selection.dart';
@@ -372,8 +373,9 @@ class PersonalAgent {
         }
       } catch (error) {
         // Name the cause (e.g. model_http_404) so a wrong endpoint or model
-        // name can be fixed. Credentials never appear in these messages.
-        final cause = '$error'.replaceAll(RegExp(r'\s+'), ' ');
+        // name can be fixed. The text is stored on the task, shown and sent
+        // as a notification, so anything that may quote a key is withheld.
+        final cause = redactCredentials(error).replaceAll(RegExp(r'\s+'), ' ');
         await _fail(
           task,
           '执行失败（${cause.length > 160 ? '${cause.substring(0, 160)}…' : cause}）；'

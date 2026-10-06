@@ -9,6 +9,7 @@ import 'package:research_module/research_module.dart';
 
 import '../assistant/execution_store.dart';
 import '../assistant/qa_service.dart';
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/secret_store.dart';
@@ -275,6 +276,7 @@ class _ResearchToolsPageState extends State<ResearchToolsPage> {
     final token = TextEditingController();
     var location = ModelLocation.local;
     var cloudProxy = false;
+    String? tokenError;
     final save = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -307,7 +309,13 @@ class _ResearchToolsPageState extends State<ResearchToolsPage> {
                   obscureText: true,
                   autocorrect: false,
                   enableSuggestions: false,
-                  decoration: const InputDecoration(labelText: '密钥（仅写入系统密钥库）'),
+                  decoration: InputDecoration(
+                    labelText: '密钥（仅写入系统密钥库）',
+                    errorText: tokenError,
+                  ),
+                  onChanged: (_) {
+                    if (tokenError != null) setDialog(() => tokenError = null);
+                  },
                 ),
                 CheckboxListTile(
                   value: cloudProxy,
@@ -323,7 +331,12 @@ class _ResearchToolsPageState extends State<ResearchToolsPage> {
               child: const Text('取消'),
             ),
             FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              // Same rule as the model settings: a key that could never be
+              // sent is refused, not trimmed and not stored.
+              onPressed: () =>
+                  token.text.isNotEmpty && !isSendableCredential(token.text)
+                  ? setDialog(() => tokenError = invalidCredentialMessage)
+                  : Navigator.pop(context, true),
               child: const Text('保存'),
             ),
           ],

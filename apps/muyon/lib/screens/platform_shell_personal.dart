@@ -52,6 +52,7 @@ extension _PersonalSections on _PlatformShellState {
     final secret = TextEditingController();
     var location = ModelLocation.local;
     var purpose = ModelPurpose.chat;
+    String? secretError;
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -110,9 +111,13 @@ extension _PersonalSections on _PlatformShellState {
                 TextField(
                   controller: secret,
                   obscureText: true,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'API Key（仅存入系统凭据）',
+                    errorText: secretError,
                   ),
+                  onChanged: (_) {
+                    if (secretError != null) update(() => secretError = null);
+                  },
                 ),
                 const Text('非本机端点需要凭据；远程使用 HTTPS。不会自动切换到其他模型。'),
               ],
@@ -124,7 +129,12 @@ extension _PersonalSections on _PlatformShellState {
               child: const Text('取消'),
             ),
             FilledButton(
-              onPressed: () => Navigator.pop(context, true),
+              // A key with a line break, space or full-width character could
+              // never be sent; refuse it rather than trimming it silently.
+              onPressed: () =>
+                  secret.text.isNotEmpty && !isSendableCredential(secret.text)
+                  ? update(() => secretError = invalidCredentialMessage)
+                  : Navigator.pop(context, true),
               child: const Text('保存'),
             ),
           ],

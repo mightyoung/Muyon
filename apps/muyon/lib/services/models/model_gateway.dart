@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../platform/outbound_ledger.dart';
+import 'credential_redaction.dart';
 
 enum ModelLocation { local, ownDevice, remote }
 
@@ -221,6 +222,7 @@ class OpenAiModelGateway {
     final frozenPayload = jsonEncode(payload);
     final items = payload['messages'] ?? payload['input'];
     String? recordId;
+    String? usedCredential;
     var sent = false;
     int? httpStatus;
     if (utf8.encode(frozenPayload).length > 2 * 1024 * 1024) {
@@ -241,6 +243,13 @@ class OpenAiModelGateway {
             (credential == null || credential.isEmpty)) {
           throw StateError('credential_unavailable');
         }
+        // Checked before approval and before the ledger row: a key dart:io
+        // cannot put in a header would otherwise fail with the whole header,
+        // key included, in the exception text.
+        if (credential != null && !isSendableCredential(credential)) {
+          throw StateError('credential_invalid');
+        }
+        usedCredential = credential;
         if (beforeSend != null) await beforeSend();
         token.check();
         recordId = await ledger?.begin(
@@ -283,14 +292,23 @@ class OpenAiModelGateway {
       token.cancel();
       await _finish(recordId, 'timeout', httpStatus, _when(sent));
       rethrow;
-    } catch (error) {
+    } catch (error, stack) {
       final status = token.isCancelled ? 'cancelled' : 'failed';
       await _finish(
         recordId,
         status,
         httpStatus,
-        token.isCancelled ? _when(sent) : '$error',
+        token.isCancelled
+            ? _when(sent)
+            : redactCredentials(error, secret: usedCredential),
       );
+      // Callers store and show error text (tasks, notifications, receipts);
+      // an error that quotes the key, or a header carrying it, leaves the
+      // gateway already redacted.
+      final safe = redactCredentials(error, secret: usedCredential);
+      if (safe != '$error') {
+        Error.throwWithStackTrace(StateError(safe), stack);
+      }
       rethrow;
     } finally {
       token.remove(abort);

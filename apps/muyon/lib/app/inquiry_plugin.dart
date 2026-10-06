@@ -12,6 +12,7 @@ import '../platform/tool_registry.dart';
 import 'inquiry_web_authority.dart';
 import 'inquiry_hub_authority.dart';
 import '../services/models/secret_store.dart';
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/profile_repository.dart';
 
@@ -306,6 +307,9 @@ class InquiryHostModels implements InquiryModelSettingsBridge {
           : reference,
       cloudProxy: prior?.cloudProxy ?? false,
     );
+    if (apiKey != null && apiKey.isNotEmpty && !isSendableCredential(apiKey)) {
+      throw ArgumentError(invalidCredentialMessage);
+    }
     if (apiKey != null) {
       if (apiKey.isEmpty) {
         await secrets.remove(reference);
