@@ -222,6 +222,7 @@ class OpenAiModelGateway {
     final frozenPayload = jsonEncode(payload);
     final items = payload['messages'] ?? payload['input'];
     String? recordId;
+    String? usedCredential;
     var sent = false;
     int? httpStatus;
     if (utf8.encode(frozenPayload).length > 2 * 1024 * 1024) {
@@ -248,6 +249,7 @@ class OpenAiModelGateway {
         if (credential != null && !isSendableCredential(credential)) {
           throw StateError('credential_invalid');
         }
+        usedCredential = credential;
         if (beforeSend != null) await beforeSend();
         token.check();
         recordId = await ledger?.begin(
@@ -296,12 +298,16 @@ class OpenAiModelGateway {
         recordId,
         status,
         httpStatus,
-        token.isCancelled ? _when(sent) : redactCredentials(error),
+        token.isCancelled
+            ? _when(sent)
+            : redactCredentials(error, secret: usedCredential),
       );
       // Callers store and show error text (tasks, notifications, receipts);
-      // an error that may quote the key leaves the gateway already redacted.
-      if (mayContainCredential('$error')) {
-        Error.throwWithStackTrace(StateError(redactCredentials(error)), stack);
+      // an error that quotes the key, or a header carrying it, leaves the
+      // gateway already redacted.
+      final safe = redactCredentials(error, secret: usedCredential);
+      if (safe != '$error') {
+        Error.throwWithStackTrace(StateError(safe), stack);
       }
       rethrow;
     } finally {

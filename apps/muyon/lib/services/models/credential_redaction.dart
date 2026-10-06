@@ -17,10 +17,15 @@ const invalidCredentialMessage = '密钥含不可见或非 ASCII 字符，请重
 /// Whether [text] may quote a credential.
 bool mayContainCredential(String text) => _credentialMention.hasMatch(text);
 
-/// Text of [error] safe to store, log, notify or show: unchanged unless it may
-/// quote a credential, then only the error type and a fixed note.
-String redactCredentials(Object error) {
-  final text = error is String ? error : '$error';
+/// Text of [error] safe to store, log, notify or show. Any occurrence of
+/// [secret] (the credential actually used, when known) becomes `<redacted>`,
+/// covering an endpoint that echoes the key in its response; then text that
+/// may still quote a credential keeps only the error type and a fixed note.
+String redactCredentials(Object error, {String? secret}) {
+  var text = error is String ? error : '$error';
+  if (secret != null && secret.isNotEmpty) {
+    text = text.replaceAll(secret, '<redacted>');
+  }
   if (!mayContainCredential(text)) return text;
   final type = error is String ? 'Error' : '${error.runtimeType}';
   return '$type: details withheld (may contain the credential)';

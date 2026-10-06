@@ -642,8 +642,10 @@ void main() {
         ),
       );
     }
-    // Past the up-front check (as if it were bypassed), the header error that
-    // quotes the key is withheld from the choice and so from the report.
+    // The gateway refuses such a key before any request (credential_invalid),
+    // so neither the choice nor the report can carry it. The eval's own
+    // redaction of a header error that quotes the key is covered with a
+    // gateway that skips its checks in credential_redaction_test.dart.
     var requests = 0;
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => server.close(force: true));
@@ -672,9 +674,8 @@ void main() {
       );
       expect(choice.error, isNotNull);
       expect(choice.error, isNot(contains('SECRET')));
-      // Since P0-S1 the gateway refuses such a key before any request
-      // (credential_invalid); the withheld-text path past that check is
-      // covered in credential_redaction_test.dart.
+      // Since P0-S1 the gateway refuses such a key before any request.
+      // chooseWithModel's own redaction is tested separately (see above).
       expect(choice.error, contains('credential_invalid'));
       final run = scoreLlmChoices(
         profile: profile,
