@@ -3,7 +3,9 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 
 import 'prototype_screens.dart';
+import 'models.dart';
 import 'prototype_store.dart';
+import 'prototype_web_page.dart';
 
 /// Business module for single-page prototypes shown in a restricted WebView.
 class PrototypeModule implements BusinessModule {
@@ -81,13 +83,24 @@ class PrototypeSession implements ModuleSession {
         final page = store.pages().where((x) => x.id == ref.objectId);
         if (page.isEmpty) return null;
         return ObjectView(ref: ref, title: page.first.title);
+      case 'feedback':
+        final feedback = store.feedbackById(ref.objectId);
+        if (feedback == null) return null;
+        final page = store.pages().where((x) => x.id == feedback.pageId);
+        if (page.isEmpty) return null;
+        return ObjectView(
+          ref: ref,
+          title: '${page.first.title} 反馈',
+          summary: feedback.text,
+        );
       case 'version':
         final version = store.version(ref.objectId);
         if (version == null) return null;
-        final page = store.pages().firstWhere((x) => x.id == version.pageId);
+        final page = store.pages().where((x) => x.id == version.pageId);
+        if (page.isEmpty) return null;
         return ObjectView(
           ref: ref,
-          title: '${page.title} ${version.label}',
+          title: '${page.first.title} ${version.label}',
           summary:
               '${version.fileCount} 个文件 · ${p.basename(version.directory)}',
         );
@@ -96,7 +109,47 @@ class PrototypeSession implements ModuleSession {
   }
 
   @override
-  Widget? objectPage(BuildContext context, ObjectRef ref) => null;
+  Widget? objectPage(BuildContext context, ObjectRef ref) {
+    if (ref.moduleId != prototypeModuleId) return null;
+    final store = runtime.store;
+    PrototypePage? pageOf(String id) =>
+        store.pages().where((x) => x.id == id).firstOrNull;
+    switch (ref.objectType) {
+      case 'page':
+        final page = pageOf(ref.objectId);
+        return page == null ? null : _detail(store, page);
+      case 'version':
+        final version = store.version(ref.objectId);
+        final page = version == null ? null : pageOf(version.pageId);
+        if (version == null || page == null) return null;
+        return PrototypeWebPage(
+          store: store,
+          version: version,
+          title: page.title,
+          webViewBuilder: defaultPrototypeWebView,
+        );
+      case 'feedback':
+        final feedback = store.feedbackById(ref.objectId);
+        final page = feedback == null ? null : pageOf(feedback.pageId);
+        return page == null
+            ? null
+            : _detail(store, page, focusFeedbackId: feedback!.id);
+    }
+    return null;
+  }
+
+  Widget _detail(
+    PrototypeStore store,
+    PrototypePage page, {
+    String? focusFeedbackId,
+  }) => PrototypeDetail(
+    store: store,
+    page: page,
+    pickDirectory: pickBuildDirectory,
+    webViewBuilder: defaultPrototypeWebView,
+    focusFeedbackId: focusFeedbackId,
+  );
+
   @override
   Future<void> flush() async {}
   @override

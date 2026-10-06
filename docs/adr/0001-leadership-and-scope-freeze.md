@@ -71,3 +71,7 @@
 - 2026-10-06：A 的交接审查通过（[HANDOVER-A-review.md](../tasks/HANDOVER-A-review.md)）。
 - 用户确认删除 6 个已合入或没有内容的远端分支：`review/b-ui`、`review/c-modules`、`wip/g3-handoff`、`feat/a-acceptance`、`feat/a-agent`、`feat/a-storage`。云端会话的代理禁止删除远端分支，由用户在本机执行。
 - 保留 `feat/c-modules` 与 `feat/d-transfer`，等 Codex、Grok 恢复额度后继续使用；保留 `ci/manual-verify`（PR #2）。
+- 2026-10-06：S6（原型对象从助手回答跳回原型页）在第一阶段**明确搁置**。原型对象没有工作区绑定；最小接法需要临时绑定，与「不自造绑定」冲突，另一种做法需要新接口。第一阶段之后排期。见 `review/E11` 上的 `docs/tasks/E11-review.md`。
+- 2026-10-06：用户告知上述 6 个远端分支已删除；leader 复查发现仍在远端，尚未删除。
+- 2026-10-06：接任 leader（本机会话）在用户确认后删除了上述 6 个远端分支，`git ls-remote` 复查均已不存在。删除前核对：`review/b-ui`、`review/c-modules` 各只多一个合并提交，两个父提交都已在 `develop` 中，没有独有内容。
+- 2026-10-06：用户决定第一阶段**不安装 Xcode**，macOS 设备集成测试写「未验证」；退出标准第 1 项的真机证据以 Android（vivo V2324A）为准。

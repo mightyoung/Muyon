@@ -130,6 +130,22 @@ class PrototypeStore {
       ),
   ];
 
+  PrototypeFeedback? feedbackById(String id) {
+    final rows = database.raw.select(
+      'SELECT * FROM prototype_feedback WHERE id=?',
+      [id],
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.first;
+    return PrototypeFeedback(
+      id: row['id'] as String,
+      pageId: row['page_id'] as String,
+      versionId: row['version_id'] as String,
+      text: row['body'] as String,
+      createdAt: DateTime.parse(row['created_at'] as String),
+    );
+  }
+
   /// Copies a built single-page prototype into the module and records it as a
   /// new page, or as a new version of [pageId]. The folder must contain
   /// `index.html`; symbolic links are refused so a build cannot point outside

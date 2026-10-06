@@ -1,6 +1,6 @@
 # 任务派发索引
 
-决定与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)，计划见 [第一阶段执行计划](../superpowers/plans/2026-10-05-phase0-plan.md)。**当前处于范围冻结期**，只做 ADR-0001 允许的工作。
+**leader 已交接，接任者先读 [HANDOVER-LEADER.md](HANDOVER-LEADER.md)。** 决定与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)，计划见 [第一阶段执行计划](../superpowers/plans/2026-10-05-phase0-plan.md)。**当前处于范围冻结期**，只做 ADR-0001 允许的工作。
 
 ## 规则
 
@@ -14,14 +14,20 @@
 | 任务 | 分支 | 说明 | 执行 | 依赖 | 状态 |
 |---|---|---|---|---|---|
 | HANDOVER-A 原 leader 交接 | `task/handover-a` | [HANDOVER-A.md](HANDOVER-A.md) | A | — | 已完成（[审查通过](HANDOVER-A-review.md)） |
-| P0-3 询价 North Star 链路 | `task/p0-3-north-star` | [P0-3.md](P0-3.md) | senior | — | 审查第 2 轮：F1～F8 已修复，需再修 R2-A～D（`review/P0-3`，先做） |
+| P0-3 询价 North Star 链路 | `task/p0-3-north-star` | [P0-3.md](P0-3.md) | senior | — | 已合入（[审查](P0-3-review.md)，三轮） |
 | P0-2 LLM 原生工具调用基线 | `task/p0-2-llm-baseline` | [P0-2.md](P0-2.md) | senior | P0-3 之后 | 已合入（[审查](P0-2-review.md)） |
-| P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | engineer | B 2.4 之后 | 已转交（含 WIP） |
+| P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | junior（修复） | — | 已合入（[审查](P0-1-review.md)，两轮） |
 | P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 已合入（[审查](P0-J1-review.md)） |
-| P0-J2 自检脚本安全加固 | `task/p0-j2-doctor-hardening` | [P0-J2.md](P0-J2.md) | junior | — | 待转交 |
-| P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | P0-3 修复之后 | 已派发 |
-| P0-4 真机与真实模型取证 | `task/p0-4-evidence`（待建） | [P0-4.md](P0-4.md) | engineer | P0-1、P0-2、P0-3、P0-J1 合入（P0-J1、P0-2 已合入） | 待依赖 |
-| B 2.4 原型补齐（冻结前在途） | `feat/b-ui` | `2026-10-04-w1-agent-prompts.md`「追加 · B（Sonnet）· 2.4」 | engineer | — | 在途（据交接：13 个文件改动未提交，验收口径见 [审查](HANDOVER-A-review.md)） |
-| E11 研究对象页（冻结前在途） | `feat/e-support` | `2026-10-04-w1-agent-prompts.md`「追加 · E（opencode）· E11」 | junior | — | 在途（据交接：8 个文件改动未提交，验收口径见 [审查](HANDOVER-A-review.md)） |
+| P0-J2 自检脚本安全加固 | `task/p0-j2-doctor-hardening` | [P0-J2.md](P0-J2.md) | junior | — | 已合入（[审查](P0-J2-review.md)） |
+| P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | — | **第 2 轮复核未通过**：长密钥回显仍泄露（R1 阻断）、R2、R3，交回 senior 在 `review/P0-S1` 修复（[审查](P0-S1-review.md)，在审查分支上） |
+| P0-S2 MCP 令牌凭据脱敏 | `task/p0-s2-mcp-token-redaction` | [P0-S2.md](P0-S2.md) | senior | — | 已交付（`fccc318`，含 P0-S1）；**等 P0-S1 合入后再合并 develop 并核实** |
+| P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | 待转交 |
+| P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | — | 已合入（[审查](P0-F1-review.md)） |
+| P0-3c 询价链路判定收尾（低优先级） | `task/p0-3c-chain-per-question` | [P0-3c.md](P0-3c.md) | senior | — | 已合入（[审查](P0-3c-review.md)） |
+| P0-3d 助手协议对真实模型的容错（D1） | `task/p0-3d-protocol-robustness` | [P0-3d.md](P0-3d.md) | senior | P0-S1 合入之后 | 待转交（排在 P0-S1 修复之后） |
+| E11b 研究对象页收尾（小） | `task/e11b-object-page-tests` | [E11b.md](E11b.md) | junior | P0-1 修复之后、P0-J3 之前 | **可转交**（P0-1 已合入） |
+| P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | — | 第一批已审（[审查](P0-4-review.md)，在审查分支上）：基线可入账；两次链路都失败（D1）、无真机证据。S1～S4 交回 engineer；下一批等 P0-3d 合入 |
+| B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
+| E11 研究对象页（冻结前在途） | `feat/e-support` → `review/E11` | [审查](E11-review.md) | junior | — | 已合入（两轮；S6 第一阶段搁置） |
 
 已停用：过渡集成分支 `feat/p0-ci-llm-baseline` 不再使用，合入目标统一为 `develop`。

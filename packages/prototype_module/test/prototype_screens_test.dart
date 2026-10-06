@@ -6,6 +6,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_ui/muyon_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:prototype_module/prototype_module.dart';
+import 'package:prototype_module/src/prototype_screens.dart';
 import 'package:prototype_module/src/prototype_store.dart';
 import 'package:sqlite3/sqlite3.dart';
 
@@ -123,6 +124,55 @@ void main() {
     expect(store.feedback(store.pages().single.id).single.text, '页面里的反馈');
   });
 
+  for (final w in [390.0, 1280.0]) {
+    testWidgets('list, detail and back at $w', (tester) async {
+      size(tester, w);
+      await tester.runAsync(
+        () => store.importBuild(sourceDir: build.path, title: 'MES 原型'),
+      );
+      await tester.pumpWidget(app());
+      await tester.tap(find.text('MES 原型'));
+      await tester.pumpAndSettle();
+      expect(find.text('打开 v1'), findsOneWidget);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('导入原型构建'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('web page keeps back and a record-feedback entry', (
+    tester,
+  ) async {
+    size(tester, 390);
+    final v = await tester.runAsync(
+      () => store.importBuild(sourceDir: build.path, title: 'MES 原型'),
+    );
+    await tester.pumpWidget(app());
+    await tester.tap(find.text('MES 原型'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('打开 v1'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsOneWidget);
+    await tester.tap(find.byTooltip('记录反馈'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '手机上按钮太小');
+    await tester.runAsync(() async {
+      await tester.tap(find.text('保存'));
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
+    await tester.pumpAndSettle();
+    expect(store.feedback(v!.pageId).single.text, '手机上按钮太小');
+    expect(store.feedback(v.pageId).single.versionId, v.id);
+  });
+
+  testWidgets('empty state says this is a prototype showcase', (tester) async {
+    size(tester, 390);
+    await tester.pumpWidget(app());
+    expect(find.textContaining('原型展示'), findsWidgets);
+    expect(find.textContaining('不代表完整业务系统'), findsOneWidget);
+  });
+
   testWidgets('import failure is shown, never listed', (tester) async {
     size(tester, 390);
     File(p.join(build.path, 'index.html')).deleteSync();
@@ -176,6 +226,114 @@ void main() {
       isNull,
     );
     expect(await runtime.receipt('x'), isNull);
+  });
+
+  testWidgets('every object type resolves and opens; unknown ids do not', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: Text('x')));
+    final context = tester.element(find.text('x'));
+    final runtime = PrototypeRuntime(
+      ModuleResources(
+        database: _Db(),
+        files: _Files(p.join(tmp.path, 'mod2')),
+        capabilities: CapabilityRegistry().forModule('prototype', allowed: {}),
+      ),
+    );
+    final v = (await tester.runAsync(
+      () => runtime.store.importBuild(sourceDir: build.path, title: 'T'),
+    ))!;
+    final fb = (await tester.runAsync(
+      () => runtime.store.addFeedback(versionId: v.id, text: '太小'),
+    ))!;
+    final session = (await tester.runAsync(
+      () => runtime.openSession(
+        const WorkspaceBinding(
+          workspaceId: 'w',
+          moduleId: 'prototype',
+          nativeProjectId: 'n',
+        ),
+      ),
+    ))!;
+    ObjectRef ref(String type, String id) =>
+        ObjectRef(moduleId: 'prototype', objectType: type, objectId: id);
+    final page = ref('page', v.pageId);
+    final version = ref('version', v.id);
+    final feedback = ref('feedback', fb.id);
+    expect((await tester.runAsync(() => session.resolve(page)))!.title, 'T');
+    expect(
+      (await tester.runAsync(() => session.resolve(version)))!.title,
+      'T v1',
+    );
+    expect(
+      (await tester.runAsync(() => session.resolve(feedback)))!.summary,
+      '太小',
+    );
+    expect(session.objectPage(context, page), isA<PrototypeDetail>());
+    expect(session.objectPage(context, version), isA<PrototypeWebPage>());
+    final opened = session.objectPage(context, feedback);
+    expect(opened, isA<PrototypeDetail>());
+    expect((opened! as PrototypeDetail).focusFeedbackId, fb.id);
+    for (final type in ['page', 'version', 'feedback']) {
+      final ghost = ref(type, 'ghost');
+      expect(
+        await tester.runAsync(() => session.resolve(ghost)),
+        isNull,
+        reason: type,
+      );
+      expect(session.objectPage(context, ghost), isNull, reason: type);
+    }
+    expect(session.objectPage(context, ref('other', v.id)), isNull);
+  });
+
+  testWidgets('a feedback reference opens its page with that entry marked', (
+    tester,
+  ) async {
+    size(tester, 390);
+    final runtime = PrototypeRuntime(
+      ModuleResources(
+        database: _Db(),
+        files: _Files(p.join(tmp.path, 'mod3')),
+        capabilities: CapabilityRegistry().forModule('prototype', allowed: {}),
+      ),
+    );
+    final v = await tester.runAsync(
+      () => runtime.store.importBuild(sourceDir: build.path, title: 'T'),
+    );
+    final fb = await tester.runAsync(
+      () => runtime.store.addFeedback(versionId: v!.id, text: '定位到我'),
+    );
+    final session = await tester.runAsync(
+      () => runtime.openSession(
+        const WorkspaceBinding(
+          workspaceId: 'w',
+          moduleId: 'prototype',
+          nativeProjectId: 'n',
+        ),
+      ),
+    );
+    late Widget page;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: muyonTheme(Brightness.light),
+        home: Builder(
+          builder: (context) {
+            page = session!.objectPage(
+              context,
+              ObjectRef(
+                moduleId: 'prototype',
+                objectType: 'feedback',
+                objectId: fb!.id,
+              ),
+            )!;
+            return page;
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final tile = tester.widget<ListTile>(find.widgetWithText(ListTile, '定位到我'));
+    expect(tile.selected, isTrue);
   });
 }
 

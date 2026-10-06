@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# P0-J1 `scripts/doctor.sh` 的场景测试。
+# P0-J1 `scripts/doctor.sh` 的场景测试；P0-J2 增加安全加固场景。
 # 用临时目录里的假 flutter / adb / java / curl 模拟环境；
 # 不依赖网络、不依赖真实 Flutter。全部场景通过 → 退出 0，否则退出 1。
 
@@ -271,6 +271,206 @@ else
   sed 's/^/    /' "$ARGS_FILE" 2>/dev/null
   printf '    curl stdin:\n'
   sed 's/^/    /' "${ARGS_FILE}.stdin" 2>/dev/null
+fi
+
+# ------------------------------------------------------------------ 场景 12
+# 无 scheme 的端点（: // 出现在路径里）为 FAIL 且不调用 curl
+ARGS_FILE="$TMP_DIR/curl-args-12.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="127.0.0.2:18082/x://localhost/v1" \
+  MUYON_EVAL_MODEL_ID="test-model"
+S12_OK=1
+if ! line_is "$(printf 'FAIL\tmodel-env')"; then
+  S12_OK=0
+fi
+if [ "$RC" -ne 1 ]; then
+  S12_OK=0
+fi
+if [ -f "$ARGS_FILE" ]; then
+  S12_OK=0
+fi
+if [ "$S12_OK" -eq 1 ]; then
+  pass "无 scheme 的端点（127.0.0.2:18082/x://localhost/v1）为 FAIL 且不调用 curl"
+else
+  fail "无 scheme 的端点（127.0.0.2:18082/x://localhost/v1）为 FAIL 且不调用 curl"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 13
+# 非 http(s) 端点（ftp://）为 FAIL 且不调用 curl
+ARGS_FILE="$TMP_DIR/curl-args-13.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="ftp://localhost/v1" \
+  MUYON_EVAL_MODEL_ID="test-model"
+S13_OK=1
+if ! line_is "$(printf 'FAIL\tmodel-env')"; then
+  S13_OK=0
+fi
+if [ "$RC" -ne 1 ]; then
+  S13_OK=0
+fi
+if [ -f "$ARGS_FILE" ]; then
+  S13_OK=0
+fi
+if [ "$S13_OK" -eq 1 ]; then
+  pass "非 http(s) 端点（ftp://localhost/v1）为 FAIL 且不调用 curl"
+else
+  fail "非 http(s) 端点（ftp://localhost/v1）为 FAIL 且不调用 curl"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 14
+# 密钥含换行时为 FAIL、不调用 curl 且输出不含密钥
+ARGS_FILE="$TMP_DIR/curl-args-14.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1" \
+  MUYON_EVAL_MODEL_ID="test-model" \
+  MUYON_EVAL_MODEL_KEY=$'sk-line1\nsk-line2'
+S14_OK=1
+if ! line_is "$(printf 'FAIL\tmodel-key')"; then
+  S14_OK=0
+fi
+if [ "$RC" -ne 1 ]; then
+  S14_OK=0
+fi
+if [ -f "$ARGS_FILE" ]; then
+  S14_OK=0
+fi
+if printf '%s' "$OUT" | grep -qF "sk-line1"; then
+  S14_OK=0
+fi
+if [ "$S14_OK" -eq 1 ]; then
+  pass "密钥含换行时为 FAIL、不调用 curl 且输出不含密钥"
+else
+  fail "密钥含换行时为 FAIL、不调用 curl 且输出不含密钥"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 15
+# 本机端点（有密钥）：参数含 --noproxy 和 *，URL 为 <base>/models
+ARGS_FILE="$TMP_DIR/curl-args-15.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="http://localhost:11434/v1/chat/completions" \
+  MUYON_EVAL_MODEL_ID="test-model" \
+  MUYON_EVAL_MODEL_KEY="dummy-key-for-test"
+S15_OK=1
+if ! grep -qxF -- "--noproxy" "$ARGS_FILE" 2>/dev/null; then
+  S15_OK=0
+fi
+if ! grep -qxF -- "*" "$ARGS_FILE" 2>/dev/null; then
+  S15_OK=0
+fi
+if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" != "http://localhost:11434/v1/models" ]; then
+  S15_OK=0
+fi
+if [ "$S15_OK" -eq 1 ]; then
+  pass "本机端点（有密钥）请求 <base>/models 且带 --noproxy *"
+else
+  fail "本机端点（有密钥）请求 <base>/models 且带 --noproxy *"
+  printf '    curl 参数:\n'
+  sed 's/^/    /' "$ARGS_FILE" 2>/dev/null
+fi
+
+# ------------------------------------------------------------------ 场景 16
+# 本机端点（无密钥）：参数含 --noproxy 和 *、无 -K，URL 为 <base>/models
+ARGS_FILE="$TMP_DIR/curl-args-16.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="http://localhost:11434/v1/chat/completions" \
+  MUYON_EVAL_MODEL_ID="test-model"
+S16_OK=1
+if ! grep -qxF -- "--noproxy" "$ARGS_FILE" 2>/dev/null; then
+  S16_OK=0
+fi
+if ! grep -qxF -- "*" "$ARGS_FILE" 2>/dev/null; then
+  S16_OK=0
+fi
+if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" != "http://localhost:11434/v1/models" ]; then
+  S16_OK=0
+fi
+if grep -qxF -- "-K" "$ARGS_FILE" 2>/dev/null; then
+  S16_OK=0
+fi
+if [ "$S16_OK" -eq 1 ]; then
+  pass "本机端点（无密钥）请求 <base>/models、带 --noproxy * 且无 -K"
+else
+  fail "本机端点（无密钥）请求 <base>/models、带 --noproxy * 且无 -K"
+  printf '    curl 参数:\n'
+  sed 's/^/    /' "$ARGS_FILE" 2>/dev/null
+fi
+
+# ------------------------------------------------------------------ 场景 17
+# localhost.evil.com 按远程处理并 FAIL（需要 HTTPS）
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  MUYON_EVAL_MODEL_ENDPOINT="http://localhost.evil.com/v1" \
+  MUYON_EVAL_MODEL_ID="test-model"
+if line_is "$(printf 'FAIL\tmodel-env')" && [ "$RC" -eq 1 ]; then
+  pass "localhost.evil.com 按远程处理并 FAIL"
+else
+  fail "localhost.evil.com 按远程处理并 FAIL"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 18
+# [::1] 端点判为本机并 OK
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  MUYON_EVAL_MODEL_ENDPOINT="http://[::1]:8080/v1" \
+  MUYON_EVAL_MODEL_ID="test-model"
+if line_is "$(printf 'OK\tmodel-env\t本机端点已配置')" && [ "$RC" -eq 0 ]; then
+  pass "[::1] 端点判为本机并 OK"
+else
+  fail "[::1] 端点判为本机并 OK"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 19
+# 密钥转义：sk-a"b\c 经 stdin 传递（转义形式或等价原文）
+ARGS_FILE="$TMP_DIR/curl-args-19.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1" \
+  MUYON_EVAL_MODEL_ID="test-model" \
+  MUYON_EVAL_MODEL_KEY='sk-a"b\c'
+S19_OK=0
+if grep -qF 'Bearer sk-a\"b\\c' "${ARGS_FILE}.stdin" 2>/dev/null; then
+  S19_OK=1
+fi
+if grep -qF 'Bearer sk-a"b\c' "${ARGS_FILE}.stdin" 2>/dev/null; then
+  S19_OK=1
+fi
+if [ "$S19_OK" -eq 1 ]; then
+  pass "密钥转义后经 stdin 传递"
+else
+  fail "密钥转义后经 stdin 传递"
+  printf '    curl stdin:\n'
+  sed 's/^/    /' "${ARGS_FILE}.stdin" 2>/dev/null
+fi
+
+# ------------------------------------------------------------------ 场景 20
+# 端点末尾带 /：请求 https://api.example.com/v1/models
+ARGS_FILE="$TMP_DIR/curl-args-20.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1/" \
+  MUYON_EVAL_MODEL_ID="test-model" \
+  MUYON_EVAL_MODEL_KEY="dummy-key-for-test"
+if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" = "https://api.example.com/v1/models" ]; then
+  pass "端点末尾斜杠被正确剥离"
+else
+  fail "端点末尾斜杠被正确剥离"
+  printf '    curl 参数:\n'
+  sed 's/^/    /' "$ARGS_FILE" 2>/dev/null
 fi
 
 # ------------------------------------------------------------------ 汇总

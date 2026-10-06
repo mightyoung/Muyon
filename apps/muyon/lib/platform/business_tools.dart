@@ -7,6 +7,7 @@ import 'package:supplier_core/supplier_core.dart';
 
 import '../app/bootstrap.dart';
 import 'inquiry_write_tools.dart';
+import 'prototype_tools.dart';
 
 String objectIdentity(ObjectRef ref) => jsonEncode([
   ref.moduleId,
@@ -125,6 +126,9 @@ Future<ResolvedAssistantScope> resolveAssistantScope(
       }
     }
   }
+  await host.activatePrototype();
+  final prototype = host.prototype?.store;
+  if (prototype != null) prototypeScopeRefs(prototype).forEach(add);
   for (final document in host.services.knowledge.documents()) {
     if (await host.services.knowledge.isCurrent(document.id)) {
       final ref = document.source;
@@ -175,6 +179,7 @@ Future<ResolvedAssistantScope> resolveAssistantScope(
 void registerBusinessTools(MuyonHost host) {
   final registry = host.tools;
   registerInquiryWriteTools(host);
+  registerPrototypeTools(host);
   // Reuse the mature application's actual query, comparison, budget and
   // matching rules, rather than rebuilding simplified calculations.
   for (final definition in agentTools) {
