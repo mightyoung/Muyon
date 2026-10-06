@@ -1,6 +1,6 @@
 # 任务派发索引
 
-决定与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)，计划见 [第一阶段执行计划](../superpowers/plans/2026-10-05-phase0-plan.md)。**当前处于范围冻结期**，只做 ADR-0001 允许的工作。
+**leader 已交接，接任者先读 [HANDOVER-LEADER.md](HANDOVER-LEADER.md)。** 决定与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)，计划见 [第一阶段执行计划](../superpowers/plans/2026-10-05-phase0-plan.md)。**当前处于范围冻结期**，只做 ADR-0001 允许的工作。
 
 ## 规则
 
@@ -19,10 +19,10 @@
 | P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | junior（修复） | E11 之后 | 审查：方案 A 去掉 tag 排除，修复改由 junior 在 `review/P0-1` 上做 |
 | P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 已合入（[审查](P0-J1-review.md)） |
 | P0-J2 自检脚本安全加固 | `task/p0-j2-doctor-hardening` | [P0-J2.md](P0-J2.md) | junior | — | 已合入（[审查](P0-J2-review.md)） |
-| P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | — | 修复已交付（`ee9843d`），复核中 |
-| P0-S2 MCP 令牌凭据脱敏 | `task/p0-s2-mcp-token-redaction` | [P0-S2.md](P0-S2.md) | senior | — | 已交付（`fccc318`，含 P0-S1），核实中（`review/P0-S2`） |
+| P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | — | 修复已交付（`ee9843d`），**复核被中断，待接任 leader 重做** |
+| P0-S2 MCP 令牌凭据脱敏 | `task/p0-s2-mcp-token-redaction` | [P0-S2.md](P0-S2.md) | senior | — | 已交付（`fccc318`，含 P0-S1），**核实被中断，待重做** |
 | P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | 待转交 |
-| P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | — | 已交付（`8de0ca3`），核实中（`review/P0-F1`） |
+| P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | — | 已交付（`8de0ca3`），**核实被中断，待重做** |
 | P0-3c 询价链路判定收尾（低优先级） | `task/p0-3c-chain-per-question` | [P0-3c.md](P0-3c.md) | senior | — | 已合入（[审查](P0-3c-review.md)） |
 | E11b 研究对象页收尾（小） | `task/e11b-object-page-tests` | [E11b.md](E11b.md) | junior | P0-1 修复之后、P0-J3 之前 | 待转交 |
 | P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | 依赖已齐（B 2.4 修复之后做） | 待转交 |
