@@ -48,3 +48,17 @@ D1（deepseek-chat 在预算题上不按助手协议回答 JSON：一次纯文�
 2. Android 真机 vivo V2324A 链路（设备重新连接后）；运行后卸载测试包；
 3. `bash scripts/ci.sh` 一次，附摘要行；
 4. macOS 设备集成测试需要 Xcode，是否安装由用户决定；没有则继续写「未验证」。
+
+## 第 2 批（`1afffeb`，2026-10-06）
+
+新增 Android 真机链路证据 `north-star-android-deepseek-chat.json`，并按上文修改汇总与两个无头 JSON。只改证据和文档。
+
+| 项 | 结论 |
+|---|---|
+| 密钥 | 4 个改动文件中密钥完整值、首尾 12 位均 0 命中；`sk-`、`Bearer`、`/Users/` 0 命中 |
+| Android 真机 | `evidenceClass: real-model`，`device.platform: android`，`binding: integration_test`（vivo V2324A，Android 16）；**`passed: false`**：比价题成功（`inquiry.compare_quotes`），预算题第一轮就是 `<｜｜DSML｜｜ calls>`，0 轮、无工具，与 D1 相同。测试包已卸载 |
+| S1 | 路径已替换为 `<repo>` 并注明；「运行时 `git status`」一句未补，记录，不阻塞 |
+| S2～S4 | 已补：注明早于 P0-3c、run2 原因、verify 未设置 `MUYON_EVAL_MODEL_*` |
+| macOS 设备 | 未执行成功：Xcode 已装，但需要用户执行 `sudo xcodebuild -runFirstLaunch` |
+
+**结论：按收口原则合入第一、二批。** 基线报告作为退出标准第 2 项的 M 证据；三次链路运行（两次无头、一次 Android）都是 `passed: false`，作为 D1 的负面证据保留，不计入 2.3。退出标准第 1 项仍等 P0-3d 合入后在 Android 真机重跑。
