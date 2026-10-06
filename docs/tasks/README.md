@@ -19,7 +19,7 @@
 | P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | junior（修复） | — | 已合入（[审查](P0-1-review.md)，两轮） |
 | P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 已合入（[审查](P0-J1-review.md)） |
 | P0-J2 自检脚本安全加固 | `task/p0-j2-doctor-hardening` | [P0-J2.md](P0-J2.md) | junior | — | 已合入（[审查](P0-J2-review.md)） |
-| P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | — | **第 2 轮复核未通过**：长密钥回显仍泄露（R1 阻断）、R2、R3，交回 senior 在 `review/P0-S1` 修复（[审查](P0-S1-review.md)，在审查分支上） |
+| P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | — | 修复已交付（`2409e9a`），**第 3 轮复核待做**（见 HANDOVER-LEADER 第 0 节） |
 | P0-S2 MCP 令牌凭据脱敏 | `task/p0-s2-mcp-token-redaction` | [P0-S2.md](P0-S2.md) | senior | — | 已交付（`fccc318`，含 P0-S1）；**等 P0-S1 合入后再合并 develop 并核实** |
 | P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | 待转交 |
 | P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | — | 已合入（[审查](P0-F1-review.md)） |

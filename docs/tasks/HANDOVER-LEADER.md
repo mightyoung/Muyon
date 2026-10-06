@@ -1,102 +1,97 @@
-# leader 交接（第一阶段进行中）
+# leader 交接（第一阶段进行中，第 2 次交接）
 
-交接时间：2026-10-06 · 交出：云端 leader（线上额度将尽）· 接收：接任 leader · `develop` 基线：本文件所在提交
+交接时间：2026-10-06 晚 · 交出：本机 leader 会话（接任自云端 leader）· 接收：新的本机 leader 会话 · `develop` 基线：本文件所在提交
 
-**先读这三份：**
-- [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)：角色分工、派发方式、范围冻结、第一阶段退出标准
+**先读：**
+- [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)：角色、派发、范围冻结、退出标准；末尾「后续记录」里有今天的所有用户决定
 - [任务索引 README.md](README.md)
-- [审查清单 REVIEW.md](REVIEW.md)
+- [审查清单 REVIEW.md](REVIEW.md)：**审查模型分工今天改过**，见第 1 节
 
-背景材料是[深度研究报告](../reviews/2026-10-05-muyon-deep-review-and-optimization.md)和[第一阶段计划](../superpowers/plans/2026-10-05-phase0-plan.md)。
+## 0. 交接时仍在途的核实（最先处理）
 
-## 0. 交接时刚到、尚未审查的推送（最先处理）
+旧会话派出的两个 Opus 核实子代理在交接时**还没回报**。新会话收不到它们的结果，请**直接用 Sonnet 重做**，不要等：
 
-| 分支 | 提交 | 内容 | 下一步 |
-|---|---|---|---|
-| `review/P0-1` | `ad5cb70` | junior 的 P0-1 修复：去掉 screenshot tag 排除并整理门禁脚本，只改 `scripts/ci.sh`（+20/−13） | 派 Sonnet 轻量复核：确认按方案 A 修改、完成 F4～F6、Actions 在该分支的运行结果，以及本机 `ci.sh` 的摘要。通过后合入，退出标准第 3 项即达成 |
-| `task/p0-4-evidence` | `f535db4` | engineer 的 P0-4 取证（第一批）：模型 `deepseek-chat`，包括 `verify.sh`、工具选择基线报告 `tool-selection-llm-baseline-deepseek-chat.md`、链路无头运行、证据汇总 `p0-evidence-2026-10.md`，共 4 个文件 | 建 `review/P0-4`，按第 5 节审查；Sonnet 足够，重点查密钥和证据字段。提交说明只提到无头运行，**macOS 设备和 Android 真机的链路证据可能还没完成**，需要向 engineer 确认是否还有后续提交 |
+| 任务 | 审查分支 @ 提交 | 重做方式 |
+|---|---|---|
+| **P0-S1** 第 3 轮定向复核 | `review/P0-S1` @ `3b237d7`（代码在 `2409e9a`，`3952783` 合并了 develop；`3b237d7` 只加了 grokbot 的静态预审） | `reviewer-sonnet-high`。要求见 `P0-S1-review.md`「复核（2026-10-06…）」一节 R1～R5：164 字符长密钥探针（含密钥在正文末尾、合法 JSON 非对象两个变体），撤回 R1、R2、科研页校验三处变异，`platform_shell.dart` 合并结果，`flutter analyze` 与宿主全量 |
+| **E11b** 研究对象页收尾 | `review/E11b` @ `14db9dc`（3 个文件，+120/−5，范围已核对符合） | `reviewer-sonnet-medium`。N1 变异（删掉 `object_pages.dart` finally 中的 dispose）、N4 变异（截断改为按 UTF-16）、analyze、research_module 全量、`research_object_open_test.dart`（加 `--timeout 90s`） |
+
+**已知背景，两份核实都会碰到：** `apps/muyon/test/research_object_open_test.dart` 中「an object without a binding falls back to the JSON page」「the helper returns null without a binding and disposes」两例，在干净 `develop` 上就是 10 分钟超时（Linux Actions [run 37420884434](https://github.com/mightyoung/Muyon/actions/runs/37420884434)，host `+420 ~2 -2`）。**`develop` 的 CI 门禁从 P0-1 合入起一直是红的**，根因是 E11 在门禁存在之前合入。所以：
+- 只因这两例失败，不阻塞 P0-S1、E11b 合入（核实时确认失败的只有这两例、且与 develop 相同）；
+- 要尽快另开一个小修复任务（建议编号 **P0-F2**，派 senior；它刚在 P0-S1 R3 修过同类问题：假时间里等真实 IO 导致挂到 10 分钟）。修复要排在任何再改这个测试文件的任务之前。先让核实子代理给出根因初诊，再写任务说明。
 
 ## 1. 工作方式（照此延续）
 
-- **角色**：leader 负责拆解、派发、审查、合入 `develop`、维护验收账本。实现与真机取证全部交给用户本地的 agent：senior = Opus，engineer = Sonnet，junior = opencode。云端不做开发；用户已要求节省线上额度。
-- **派发**：一个任务一个分支 `task/<编号>`，说明放在分支内固定位置 `docs/tasks/<编号>.md`。说明写好后，交给用户转发，并给出一句可以直接转发的话。
-- **审查**：
-  1. 从任务分支的最终提交建立 `review/<编号>`。
-  2. **代码核实交给子代理**，leader 不在主线程里运行或通读代码。复杂或高风险的用 Opus，常规的用 Sonnet；子代理只回报，不提交。
-  3. leader 把结论写进审查分支的 `docs/tasks/<编号>-review.md`，按「阻断 / 应改 / 可选」分级。
-  4. 需要修改的交回执行者，在审查分支上修。修完做定向复核，不重做全量审查。
-- **合入**：
-  1. `git merge --no-ff origin/review/<编号>` 合入 `develop`。
-  2. 合入后**核对任务自己改动的文件与审查版本逐字一致**（`git diff origin/review/<编号> HEAD -- <该任务的文件>` 应为 0 行）。
-  3. 更新任务索引并推送。
-- **收口原则**：同一任务已经审了两三轮，剩下的只是低概率问题或测试缺口时，先合入，另开小任务跟进，并写进审查文件，避免反复评审。
-- **环境注意**：
-  - 云端会话的 git 代理禁止删除远端分支（HTTP 403，不能重试或绕过），删除要请用户在本机执行。
-  - Agent 工具的 `isolation: worktree` 曾经从初始提交（只有 LICENSE）建出工作区。请手动 `git worktree add` 建在 `.claude/worktrees/` 下，再把路径告诉子代理；`.claude/worktrees/` 已写进 `.git/info/exclude`。
-  - 本容器装有 Flutter 3.47.5（`/opt/sdk/flutter/bin`）。重开会话后这套环境可能不在了，需要按原来的方法重新下载。
-  - `flutter pub get` 需要代理；跑测试时要去掉代理，并设置 `NO_PROXY=localhost,127.0.0.1,::1`。
-- **门禁**：GitHub Actions 可用（P0-1 分支上第 2 次运行在 Linux 通过，约 8 分钟）。`verify.sh` 和 `ci.sh` 都把 analyzer 的 info 当作失败。
+- **角色**（见 ADR-0001 与 README）：
+  - senior = Opus（本机，有 Flutter）
+  - engineer = Sonnet（本机，有 Flutter，负责真机取证；Android vivo V2324A，macOS 已装 Xcode 27）
+  - **engineer2 = grokbot**（Grok，**云端，没有 Flutter**）：只派静态核对、文档与证据审阅；**不派任何构建与验证工作**（用户明确要求）。它的复核只算预审
+  - junior = opencode（本机）
+- **派发**：一个任务一个分支 `task/<编号>`，说明在 `docs/tasks/<编号>.md`（先提交到 `develop`，再从 `develop` 建任务分支）。给用户一句可直接转发的话。
+- **审查**（REVIEW.md 已更新）：
+  - 默认用 **Sonnet 5.5 子代理**：`reviewer-sonnet-high`（安全、并发、数据一致性、跨模块）、`reviewer-sonnet-medium`（单模块代码与测试）、`reviewer-sonnet-low`（脚本、文档、证据字段）。定义在本机 `~/.claude/agents/`，写死 `model: claude-sonnet-5-5`。**用户认为用 Opus 审查是浪费**，Opus 只在 Sonnet 结论有分歧或问题特别难时用。
+  - 也可**交叉派给非作者成员**：engineer、junior 可做构建与测试类核实；grokbot 只做静态。
+  - 不要用 `model: "sonnet"`/`"opus"` 别名：`~/.claude/settings.json` 把别名映射到 MiniMax，`sonnet` 会 404。
+  - leader 不在主线程运行或通读代码；结论写入 `review/<编号>` 上的 `docs/tasks/<编号>-review.md`，按「阻断 / 应改 / 可选」分级。
+- **合入**：`git merge --no-ff origin/review/<编号>` → 核对任务文件与审查版本逐字一致（diff 为 0 行）→ 更新索引 → 推送。收口原则照旧：审过两三轮只剩低概率问题时先合入、另开小任务。
+- **本机环境要点**：
+  - 本会话的钩子**不允许写其他工作树**。leader 的审查文档写在自己的工作树里（切到 `review/<编号>` 提交推送，再切回 `develop`）；子代理在 `/tmp` 下用 `git archive` 导出的副本里跑测试、变异和探针，用完删除。
+  - 如果 `git` 报 Xcode 许可错误（exit 69），命令前加 `DEVELOPER_DIR=/Library/Developer/CommandLineTools`。许可目前已接受，`xcodebuild -runFirstLaunch` 也已完成。
+  - 跑测试时取消代理，并设 `NO_PROXY=localhost,127.0.0.1,::1`。
+  - 加压测试必须用 `trap` 回收 `yes` 进程。今天曾发现 32 个孤儿 `yes` 跑了约 3 小时（负载约 190），已清理。
+  - `verify.sh`、`ci.sh` 都把 analyzer 的 info 当失败。
 
 ## 2. 已合入 `develop`
 
-| 任务 | 合入方式 | 审查 |
-|---|---|---|
-| HANDOVER-A 原 leader 交接 | `fd0676a` | [HANDOVER-A-review.md](HANDOVER-A-review.md) |
-| P0-J1 自检脚本 | cherry-pick 148e031..abaf047（原分支基于停用的集成分支） | [P0-J1-review.md](P0-J1-review.md) |
-| P0-J2 自检脚本加固 | merge | [P0-J2-review.md](P0-J2-review.md) |
-| P0-2 LLM 原生工具调用基线（代码） | merge `5e72ac1` | [P0-2-review.md](P0-2-review.md) |
-| P0-3 询价 North Star 链路 | merge | [P0-3-review.md](P0-3-review.md) |
-| P0-3c 逐题判定 | merge | [P0-3c-review.md](P0-3c-review.md) |
-| B 2.4 原型补齐 | merge `f870cb8` | [B-2.4-review.md](B-2.4-review.md) |
-| E11 研究对象页 | merge | [E11-review.md](E11-review.md) |
+| 任务 | 审查 |
+|---|---|
+| HANDOVER-A、P0-J1、P0-J2、P0-2、P0-3、P0-3c、B 2.4、E11 | 见各自审查文件（第 1 次交接前合入） |
+| **P0-1** 自动门禁（`ada9487`） | [P0-1-review.md](P0-1-review.md) |
+| **P0-F1** 不稳定的局域网测试（`c20355b`） | [P0-F1-review.md](P0-F1-review.md)：根因成立，`stop()` 无竞态 |
+| **P0-4 第一、二批证据**（`76c23b2`、`34ca1da`） | [P0-4-review.md](P0-4-review.md)：基线可入账；三次链路都因 D1 失败 |
 
-## 3. 进行中的任务（按执行者）
+## 3. 进行中的任务
 
-| 任务 | 分支 / 最新提交 | 状态与下一步 |
+| 任务 | 分支 / 提交 | 状态与下一步 |
 |---|---|---|
-| **P0-S1** 模型网关凭据脱敏 | `review/P0-S1` @ `f7f0b36` | **复核未通过**（接任 leader，2026-10-06）：N2 对常见长度密钥无效（`FormatException` 截断源文本，R1 阻断），另有 R2、R3。已交回 senior。修完定向复核长密钥探针，再合入。 |
-| **P0-S2** MCP 令牌脱敏 | `task/p0-s2-mcp-token-redaction` @ `fccc318`（已合并 `review/P0-S1`） | 已交付，**核实被中断，需要重做**，派 Opus，说明见 [P0-S2.md](P0-S2.md)。中断前已知：55 个探针全部通过；变异测试还没跑。本任务的改动范围用 `git diff origin/review/P0-S1 HEAD -- apps` 查看，它**又改了一次** `credential_redaction.dart`，要确认没有削弱 P0-S1 的效果。另外要看 MCP 工具结果里如果回显了令牌，是否会进入助手、模型或账本。 |
-| **P0-F1** 不稳定的局域网测试 | `review/P0-F1` | **已合入**（审查见 [P0-F1-review.md](P0-F1-review.md)）：根因成立，`stop()` 无竞态。 |
-| **P0-1** 自动门禁 | `review/P0-1` | **已合入**（`ada9487`，复核见 [P0-1-review.md](P0-1-review.md)）。 |
-| **E11b** 研究对象页收尾 | `task/e11b-object-page-tests` | 待 junior 做（排在 P0-1 之后）：补辅助函数在返回 null 时 dispose 会话的测试，修卡片标题。见 [E11b.md](E11b.md)。 |
-| **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | 待 junior 做（排在 E11b 之后）。做完后自检脚本不再开新任务。 |
-| **P0-4** 真机与真实模型取证 | `review/P0-4` @ `8e9cd42` | 第一批已审：基线可作退出标准第 2 项证据；两次无头链路都 `passed:false`（D1），没有真机证据。S1～S4 交回 engineer；D1 另开 P0-3d。下一批在 P0-3d 合入后的 develop 上做。 |
+| **P0-S1** 凭据脱敏 | `review/P0-S1` @ `3b237d7` | 第 3 轮复核待重做（第 0 节）。通过后合入，**合入后才能开始 P0-3d 和 P0-S2**。 |
+| **P0-3d** 助手协议容错（D1） | `task/p0-3d-protocol-robustness` @ `ff9625a` | 说明见 [P0-3d.md](P0-3d.md)。**第一阶段关键路径**：不修就拿不到 `passed: true` 的链路证据。P0-S1 合入后转发给 senior：「检出 `task/p0-3d-protocol-robustness`，先 `git merge origin/develop`，阅读 `docs/tasks/P0-3d.md` 并按要求执行，提交并推送到该分支，不要合并 develop。」 |
+| **P0-S2** MCP 令牌脱敏 | `task/p0-s2-mcp-token-redaction` @ `fccc318`（基于旧的 `review/P0-S1`） | P0-S1 合入后，让 senior 在该分支合并 `develop`，再派 `reviewer-sonnet-high` 核实。说明见 [P0-S2.md](P0-S2.md)；要点：用 `git diff origin/develop...HEAD -- apps` 看本任务改动，确认它对 `credential_redaction.dart` 的修改没有削弱 P0-S1（尤其 R1 的固定错误文本和 R4 的 8 字符下限）；MCP 工具结果回显令牌时是否会进入助手、模型或账本。 |
+| **E11b** | `review/E11b` @ `14db9dc` | 核实待重做（第 0 节）。通过后合入，然后把 **P0-J3** 转给 junior。 |
+| **P0-F2**（建议新开） | — | 修 `research_object_open_test.dart` 两个 10 分钟超时，让 `develop` 门禁变绿。见第 0 节。 |
+| **P0-4** 真机与真实模型取证 | `review/P0-4`（engineer 现在推到这里） | engineer 正在跑 **macOS 设备链路**（预算题预计仍因 D1 失败，照常入库为负面证据）。P0-3d 合入后，在 Android 和 macOS 各重跑一次链路，加一次 `bash scripts/ci.sh`。 |
+| **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | 排在 E11b 合入之后，junior。 |
 
 ## 4. 第一阶段退出标准（ADR-0001 §5）
 
 | # | 标准 | 状态 |
 |---|---|---|
-| 1 | 询价链路至少有一个真机、一个真实模型的证据入账 | Android 真机已跑通流程但因 D1 失败；等 P0-3d 合入后重跑 |
-| 2 | LLM 工具选择基线至少有一个真实模型的数字 | **已达成**（P0-4 第一、二批合入；deepseek-chat top-1 66/140，误选写入/外发 0） |
-| 3 | 自动门禁可用 | **已达成**（P0-1 合入，`ada9487`） |
-| 4 | B 2.4 与 E11 合入，或明确搁置 | **已达成**（S6 已搁置） |
-| 5 | 验收账本按证据更新 | 等 P0-4 回报后由 leader 统一更新（见第 6 节） |
+| 1 | 询价链路至少有一个真机、一个真实模型的证据入账 | **未达成**：Android 真机已跑通流程，但预算题因 D1 失败。等 P0-3d 合入后在 Android 重跑。macOS 纳入但不阻塞。 |
+| 2 | LLM 工具选择基线至少有一个真实模型的数字 | **已达成**：deepseek-chat top-1 66/140，误选写入/外发 0，弃权 26/26 |
+| 3 | 自动门禁可用 | **已达成**（P0-1）；但门禁目前因 E11 两个超时是红的，见 P0-F2 |
+| 4 | B 2.4 与 E11 合入，或明确搁置 | **已达成** |
+| 5 | 验收账本按证据更新 | 第一阶段退出时由 leader 一次性完成（第 6 节） |
 
-## 5. P0-4 回报后的审查要点
+## 5. P0-4 之后批次的审查要点
 
-1. 证据中**不得出现密钥**。逐个文件 grep；端点只保留到路径。
-2. **基线报告**：`docs/implementation/tool-selection-llm-baseline-<slug>.md`。每个模型只跑一次，不挑结果。核对 top-1、误选写入或外发、弃权质量、p50/p95、用量。
-3. **链路证据**：`docs/evidence/2026-10-p0/north-star-<平台>-<slug>.json`。
-   - `evidenceClass` 必须是 `real-model`，`passed: true`；
-   - `readResultsChecked` 必须同时包含 `compare_quotes` 和 `project_budget`；
-   - P0-3c 已合入，逐题判定由程序强制执行，只需确认证据里的 `tasks[].tools` 与此一致；
-   - `write.repeatConfirmRefused` 为 true。
-4. **真机与平台**：Android 与 macOS 分别记录；Windows 写「未验证」。
-5. 执行 `verify.sh` 时**不得导出** `MUYON_EVAL_REAL`。
-6. 核实同样交给子代理，例如让 Sonnet 校验 JSON 字段、检查有没有密钥、确认数字能由报告复现。leader 不在主线程读大文件。
+1. 证据中不得出现密钥：用 `.env` 中密钥的完整值和首尾各 12 位逐文件 grep，只报命中数；端点只保留到路径；本机路径替换为 `<repo>`。
+2. 链路证据 `docs/evidence/2026-10-p0/north-star-<平台>-<slug>.json`：`evidenceClass: real-model`、`passed: true`；`readResultsChecked` 同时含 `compare_quotes` 和 `project_budget`；`tasks[].tools` 与逐题判定一致；`write.repeatConfirmRefused` 为 true；运行代码必须是含 P0-3c、P0-3d 的 `develop`。
+3. 每次运行都如实入库，不挑结果。Android、macOS 分开记录；Windows 写「未验证」。
+4. 执行 `verify.sh` 时不得导出 `MUYON_EVAL_REAL`。Android 运行后要卸载测试包，因为 `--dart-define` 会把密钥编进构建。
+5. 证据字段核对派 `reviewer-sonnet-low`，或交叉派给 grokbot 做静态部分。
 
 ## 6. 验收账本待更新（第一阶段退出时一次性完成）
 
-文件：`docs/implementation/muyon-acceptance-ledger.md`，只由 leader 修改。
+文件：`docs/implementation/muyon-acceptance-ledger.md`，只由 leader 修改。可让 grokbot 起草初稿，leader 定稿。
 
 | 行 | 更新内容 |
 |---|---|
 | 2.3、7、9a | 按 P0-4 证据补 M、R 证据。9a 只能写「端点显式，本次运行没有写出密钥」，钥匙串没有经过实机验证。 |
 | 2.4 | B 2.4 已合入；Android 16 真机结论见 `prototype-resource-policy.md`（`file:` 链接由 Chromium 自己拒绝，没有经过守卫）；macOS 渲染和 Windows 未验证（Windows 很可能打不开）。 |
 | 3.1 | E11：研究对象经 `objectPage` 打开业务页。task、run、card、outline、section 页面上的助手，在调用工具时会报错（不在目录内，见 E11 审查 N3）。原型对象从助手回答跳转属于 S6，已搁置。 |
-| 7 | P0-2 评测已有真实运行能力；工具选择真实基线的数字来自 P0-4。 |
-| 12 | 把 P0-1 门禁、P0-4 真机结果补入「三端构建与实机」。 |
-| 凭据 | P0-S1、P0-S2 合入后，补上凭据脱敏的证据。 |
+| 7 | P0-2 评测已有真实运行能力；工具选择真实基线 deepseek-chat top-1 66/140（P0-4）。 |
+| 12 | 把 P0-1 门禁、P0-4 真机结果（Android 必有，macOS 视结果）补入「三端构建与实机」。 |
+| 凭据 | P0-S1、P0-S2 合入后，补上凭据脱敏的证据（含长密钥回显探针）。 |
 
 ## 7. 已记录、待第一阶段之后排期的事项
 
@@ -104,20 +99,25 @@
 - **E11 N3**：研究详情页上的助手范围不在宿主目录内。要么扩充目录，要么让助手绕过目录关卡。这属于设计决定。
 - **P0-3c 可选项**：只读题没调用工具时，`failure` 里缺题名；交叉工具测试在导出 `MUYON_EVAL_REAL=1` 时不再隔离。
 - **P0-2、P0-S1 可选项**：脱敏只匹配关键词，`x-api-key`、`api_key=` 未覆盖；`addProfile` 中 controller 提前 dispose（原有缺陷）。
-- **深度研究报告第 6 节**：Agent 内核 v2、分级授权、记忆、统一检索、外壳重构等，都是第一阶段之后的路线。
-- **UI-0、UI-1**（UI 重设计，PR #3 合入的设计稿与任务说明）：用户 2026-10-06 决定放到第一阶段之后。
+- **P0-F1 可选项**：测试注释可写明守的是「stop 返回前上传已结束并清理」；显式取消上传（lan.dart:326）对该测试是冗余的。
+- **P0-1 可选项**：三个文件上的 `@Tags(['screenshot'])` 已无脚本使用。
+- **深度研究报告第 6 节**：Agent 内核 v2、分级授权、记忆、统一检索、外壳重构等。
+- **UI-0、UI-1**（UI 重设计，PR #3 合入的设计稿与任务说明）：用户决定放到第一阶段之后。
 
 ## 8. 需要用户处理或决定的事
 
-- ~~本机删除 6 个远端分支~~：**已完成**（2026-10-06，接任 leader 删除并复查，见 ADR-0001 后续记录）。
-- ~~本机执行 `chmod 600 .env`~~：**已完成**（2026-10-06）。
-- `main` 在第一阶段退出前不动；PR #1 与 PR #2 保持开放。
-- 停用但仍在远端的分支，可以在合适时机请用户删除：`feat/p0-ci-llm-baseline`，以及各 `task/*` 和 `review/*` 中已合入的分支。
+- `main` 在第一阶段退出前不动；PR #1、#2 保持开放。
+- 已完成：删除 6 个远端分支、`chmod 600 .env`、接受 Xcode 许可并完成 `-runFirstLaunch`。
+- 可在合适时机请用户删除的停用分支：`feat/p0-ci-llm-baseline`，以及已合入的 `task/*`、`review/*`（P0-1、P0-2、P0-3、P0-3c、P0-F1、P0-J1、P0-J2、HANDOVER-A、B-2.4、E11 等）。leader 在本机可以直接删，但要先征得用户同意。
+- 旧会话执行命令时，曾把 `~/.claude/settings.json` 里的 MiniMax `ANTHROPIC_AUTH_TOKEN` 打印进会话记录（只在本机）。是否轮换由用户决定。
 
 ## 9. 接任后的建议顺序
 
-1. 重建环境（Flutter 3.47.5），`git fetch`，按本文件核对各分支哈希。
-2. 重新派核实：P0-S1（定向）→ 通过则合入 → P0-S2 → 合入；P0-F1 可以并行核实。
-3. 等 junior 交回 P0-1 → 轻量复核 → 合入，满足退出标准第 3 项；随后是 E11b、P0-J3。
-4. 等 engineer 交回 P0-4 → 按第 5 节审查 → 合入证据 → 按第 6 节更新验收账本。
-5. 对照第 4 节确认退出标准全部满足，向用户报告第一阶段结束；之后的路线和排期请用户决定。
+1. `git fetch`，按本文件核对各分支哈希；确认 `reviewer-sonnet-*` 子代理可用（试调一次）。
+2. 用 Sonnet 重做第 0 节两份核实，并让 P0-S1 那份附上两个超时的根因初诊。
+3. P0-S1 通过 → 合入 → 转发 P0-3d 给 senior（关键路径）→ 让 senior 把 `develop` 合进 P0-S2，再核实、合入。
+4. E11b 通过 → 合入 → 转发 P0-J3 给 junior。
+5. 按初诊写 P0-F2，派 senior，修好后 `develop` 门禁应变绿。
+6. 收 engineer 的 macOS 设备批次 → 审查 → 合入。
+7. P0-3d 合入 → engineer 在 Android（必需）和 macOS 重跑链路 → 审查 → 合入，退出标准第 1 项达成。
+8. 更新验收账本（第 6 节）→ 对照第 4 节确认全部达成 → 向用户报告第一阶段结束，之后的路线（第 7 节、UI-0/UI-1）请用户排期。
