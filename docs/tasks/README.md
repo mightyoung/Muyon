@@ -24,9 +24,9 @@
 | P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | 待转交（排在 P0-F2 之后） |
 | P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | — | 已合入（[审查](P0-F1-review.md)） |
 | P0-3c 询价链路判定收尾（低优先级） | `task/p0-3c-chain-per-question` | [P0-3c.md](P0-3c.md) | senior | — | 已合入（[审查](P0-3c-review.md)） |
-| P0-3d 助手协议对真实模型的容错（D1） | `task/p0-3d-protocol-robustness` | [P0-3d.md](P0-3d.md) | senior | P0-S1 合入之后 | **可转交**（P0-S1 已合入；第一阶段关键路径） |
+| P0-3d 助手协议对真实模型的容错（D1） | `task/p0-3d-protocol-robustness` | [P0-3d.md](P0-3d.md) | senior | P0-S1 合入之后 | 已交付（`32ed849`），审查中（`review/P0-3d`）；开发验证：真实 deepseek 无头链路 3/3 通过 |
 | P0-F2 修复研究对象页测试的两个 10 分钟超时（门禁变绿） | `task/p0-f2-object-open-timeout` | [P0-F2.md](P0-F2.md) | junior | E11b 合入之后 | 待转交 |
-| E11b 研究对象页收尾（小） | `task/e11b-object-page-tests` | [E11b.md](E11b.md) | junior | P0-1 修复之后、P0-J3 之前 | 已交付（`14db9dc`），核实中（`review/E11b`） |
+| E11b 研究对象页收尾（小） | `task/e11b-object-page-tests` | [E11b.md](E11b.md) | junior | P0-1 修复之后、P0-J3 之前 | 已交付（`14db9dc`），核实中（Sonnet 重做，Opus 那次因额度中断） |
 | P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | — | 第一、二批已合入（[审查](P0-4-review.md)）：基线 = 退出标准第 2 项证据；三次链路（无头 ×2、Android）都因 D1 失败。下一批等 P0-3d 合入后在 Android 重跑 |
 | UI-0 现状截图与走查 | （未建） | [UI-0.md](UI-0.md) | engineer | 第一阶段之后 | **第一阶段之后**（用户 2026-10-06 决定） |
 | UI-1 设计系统 | （未建） | [UI-1.md](UI-1.md) | senior | UI-0 | **第一阶段之后** |
