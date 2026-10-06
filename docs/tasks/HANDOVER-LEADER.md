@@ -9,6 +9,13 @@
 
 背景材料是[深度研究报告](../reviews/2026-10-05-muyon-deep-review-and-optimization.md)和[第一阶段计划](../superpowers/plans/2026-10-05-phase0-plan.md)。
 
+## 0. 交接时刚到、尚未审查的推送（最先处理）
+
+| 分支 | 提交 | 内容 | 下一步 |
+|---|---|---|---|
+| `review/P0-1` | `ad5cb70` | junior 的 P0-1 修复：去掉 screenshot tag 排除并整理门禁脚本，只改 `scripts/ci.sh`（+20/−13） | 派 Sonnet 轻量复核：确认按方案 A 修改、完成 F4～F6、Actions 在该分支的运行结果，以及本机 `ci.sh` 的摘要。通过后合入，退出标准第 3 项即达成 |
+| `task/p0-4-evidence` | `f535db4` | engineer 的 P0-4 取证（第一批）：模型 `deepseek-chat`，包括 `verify.sh`、工具选择基线报告 `tool-selection-llm-baseline-deepseek-chat.md`、链路无头运行、证据汇总 `p0-evidence-2026-10.md`，共 4 个文件 | 建 `review/P0-4`，按第 5 节审查；Sonnet 足够，重点查密钥和证据字段。提交说明只提到无头运行，**macOS 设备和 Android 真机的链路证据可能还没完成**，需要向 engineer 确认是否还有后续提交 |
+
 ## 1. 工作方式（照此延续）
 
 - **角色**：leader 负责拆解、派发、审查、合入 `develop`、维护验收账本。实现与真机取证全部交给用户本地的 agent：senior = Opus，engineer = Sonnet，junior = opencode。云端不做开发；用户已要求节省线上额度。
