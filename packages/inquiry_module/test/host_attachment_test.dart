@@ -1,0 +1,340 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:inquiry_module/inquiry_module.dart';
+import 'package:sqlite3/sqlite3.dart';
+import 'package:supplier_core/supplier_core.dart';
+
+class HostSecrets implements InquirySecretStore {
+  final values = <String, String>{};
+  @override
+  Future<String?> read({required String key}) async => values[key];
+  @override
+  Future<void> write({required String key, required String value}) async {
+    values[key] = value;
+  }
+
+  @override
+  Future<void> delete({required String key}) async {
+    values.remove(key);
+  }
+}
+
+class HostModelSettings implements InquiryModelSettingsBridge {
+  @override
+  String baseUrl = 'https://host.example/v1';
+  @override
+  String model = 'shared-model';
+  bool configured = true;
+  @override
+  Future<bool> hasCredential() async => configured;
+  @override
+  Future<void> save({
+    required String baseUrl,
+    required String model,
+    String? apiKey,
+  }) async {
+    this.baseUrl = baseUrl;
+    this.model = model;
+    if (apiKey != null) configured = apiKey.isNotEmpty;
+  }
+}
+
+void main() {
+  test(
+    'host-owned task storage reports hosted and survives state disposal',
+    () {
+      final directory = Directory.systemTemp.createTempSync(
+        'inquiry-host-identity',
+      );
+      final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+      createSchema(db);
+      AiJobStore.initializeSchema(jobsDb);
+      final jobs = AiJobStore.attach(jobsDb);
+      addTearDown(() {
+        jobs.close();
+        db.close();
+        jobsDb.close();
+        directory.deleteSync(recursive: true);
+      });
+      final state = AppState.attach(
+        store: Store.attach(
+          db,
+          device: 'host',
+          backgroundExecutor: <T>(action) async => await action(),
+        ),
+        dataDir: directory,
+        aiJobs: jobs,
+        secrets: HostSecrets(),
+      );
+      expect(state.isHosted, isTrue);
+      expect(state.aiTasks, isEmpty);
+      state.dispose();
+      expect(jobs.jobs, isEmpty);
+      expect(jobsDb.select('PRAGMA quick_check').single.values.single, 'ok');
+    },
+  );
+
+  test('standalone test state reports standalone', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'inquiry-test-identity',
+    );
+    final db = sqlite3.openInMemory();
+    createSchema(db);
+    final state = AppState.test(Store(db, device: 'standalone'), directory);
+    addTearDown(() {
+      state.dispose();
+      db.close();
+      directory.deleteSync(recursive: true);
+    });
+    expect(state.isHosted, isFalse);
+  });
+
+  test('host attachment rejects stores with standalone database ownership', () {
+    final directory = Directory.systemTemp.createTempSync('inquiry-host-guard');
+    final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+    createSchema(db);
+    AiJobStore.initializeSchema(jobsDb);
+    addTearDown(() {
+      db.close();
+      jobsDb.close();
+      directory.deleteSync(recursive: true);
+    });
+    expect(
+      () => AppState.attach(
+        store: Store(db, device: 'standalone'),
+        dataDir: directory,
+        aiJobs: AiJobStore.attach(jobsDb),
+        secrets: HostSecrets(),
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => Store.attach(db, device: 'host', backgroundExecutor: null),
+      throwsArgumentError,
+    );
+    final standaloneJobs = AiJobStore.open(
+      '${directory.path}/standalone-jobs.db',
+    );
+    addTearDown(standaloneJobs.close);
+    expect(
+      () => AppState.attach(
+        store: Store.attach(
+          db,
+          device: 'host',
+          backgroundExecutor: <T>(action) async => await action(),
+        ),
+        dataDir: directory,
+        aiJobs: standaloneJobs,
+        secrets: HostSecrets(),
+      ),
+      throwsArgumentError,
+    );
+  });
+  for (final mode in ['absent', 'unconfigured', 'failed']) {
+    test(
+      'hosted models never use legacy credentials when factory is $mode',
+      () async {
+        final directory = Directory.systemTemp.createTempSync(
+          'inquiry-model-guard',
+        );
+        final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+        createSchema(db);
+        AiJobStore.initializeSchema(jobsDb);
+        final jobs = AiJobStore.attach(jobsDb);
+        final secrets = HostSecrets();
+        final failure = StateError('Host model unavailable');
+        final runtime = InquiryRuntime.attach(
+          store: Store.attach(
+            db,
+            device: 'host',
+            backgroundExecutor: <T>(action) async => await action(),
+          ),
+          dataDirectory: directory,
+          aiJobs: jobs,
+          secrets: secrets,
+          sharedModelSettings: mode == 'absent' ? null : HostModelSettings(),
+          sharedLlmFactory: mode == 'absent'
+              ? null
+              : ({cancellation}) async {
+                  if (mode == 'failed') throw failure;
+                  return null;
+                },
+        );
+        addTearDown(() async {
+          await runtime.close();
+          jobs.close();
+          db.close();
+          jobsDb.close();
+          directory.deleteSync(recursive: true);
+        });
+        // Legacy credentials must not turn a missing host model into a client.
+        secrets.values['llm_api_key'] = 'legacy-key';
+        await runtime.state.saveAi(
+          baseUrl: 'http://127.0.0.1:1/v1',
+          model: 'legacy',
+          apiKey: 'legacy-key',
+        );
+        if (mode == 'failed') {
+          await expectLater(runtime.state.llm(), throwsA(same(failure)));
+        } else {
+          expect(await runtime.state.llm(), isNull);
+        }
+      },
+    );
+  }
+  test('shared model settings and factory override legacy config with task cancellation', () async {
+    final directory = Directory.systemTemp.createTempSync('inquiry-model-host');
+    final db = sqlite3.openInMemory(), jobsDb = sqlite3.openInMemory();
+    createSchema(db);
+    AiJobStore.initializeSchema(jobsDb);
+    final jobs = AiJobStore.attach(jobsDb);
+    final settings = HostModelSettings();
+    final secrets = HostSecrets();
+    AiCancellation? receivedCancellation;
+    final runtime = InquiryRuntime.attach(
+      store: Store.attach(
+        db,
+        device: 'host',
+        backgroundExecutor: <T>(action) async => await action(),
+      ),
+      dataDirectory: directory,
+      aiJobs: jobs,
+      secrets: secrets,
+      initialSettings: {
+        'ai_base_url': 'https://legacy.example',
+        'ai_model': 'legacy',
+      },
+      sharedModelSettings: settings,
+      sharedLlmFactory: ({cancellation}) async {
+        receivedCancellation = cancellation;
+        return LlmClient(
+          LlmConfig(
+            apiKey: '',
+            baseUrl: settings.baseUrl,
+            model: settings.model,
+          ),
+          transport: (body) async => {
+            'choices': [
+              {
+                'message': {'content': 'shared result'},
+              },
+            ],
+          },
+        );
+      },
+    );
+    addTearDown(() async {
+      await runtime.close();
+      jobs.close();
+      db.close();
+      jobsDb.close();
+      directory.deleteSync(recursive: true);
+    });
+    expect(runtime.state.aiBaseUrl, settings.baseUrl);
+    expect(runtime.state.aiModel, 'shared-model');
+    await runtime.state.saveAi(
+      baseUrl: 'https://updated.example/v1',
+      model: 'new-shared',
+      apiKey: 'private',
+    );
+    expect(settings.model, 'new-shared');
+    expect(runtime.state.aiModel, 'new-shared');
+    expect(secrets.values, isEmpty);
+    expect(File('${directory.path}/settings.json').existsSync(), isFalse);
+    expect(await runtime.state.hasAiKey(), isTrue);
+    final token = AiCancellation();
+    final result = await runtime.state.runAiTask(
+      AiTask.clauseReading,
+      {},
+      (client) => client.complete([
+        {'role': 'user', 'content': 'test'},
+      ]),
+      cancellation: token,
+    );
+    expect(result['content'], 'shared result');
+    expect(identical(receivedCancellation, token), isTrue);
+    expect(runtime.state.aiTasks.single.status, 'ready');
+  });
+  test(
+    'host attachment does not create private databases or auto-start LAN',
+    () async {
+      final directory = Directory.systemTemp.createTempSync('inquiry-host');
+      final db = sqlite3.openInMemory();
+      final jobsDb = sqlite3.openInMemory();
+      addTearDown(() {
+        db.close();
+        jobsDb.close();
+        directory.deleteSync(recursive: true);
+      });
+      createSchema(db);
+      AiJobStore.initializeSchema(jobsDb);
+      Future<T> execute<T>(FutureOr<T> Function() action) async =>
+          await action();
+      final store = Store.attach(
+        db,
+        device: 'host',
+        backgroundExecutor: execute,
+      );
+      final jobs = AiJobStore.attach(jobsDb);
+      final secrets = HostSecrets();
+      final runtime = InquiryRuntime.attach(
+        store: store,
+        dataDirectory: directory,
+        aiJobs: jobs,
+        secrets: secrets,
+        initialSettings: {'lan_visible': '1'},
+      );
+      expect(runtime.state.lan, isNull);
+      expect(runtime.state.lanVisible, isFalse);
+      expect(runtime.state.aiTasks, isEmpty);
+      await runtime.state.backupNow();
+      expect(Directory(runtime.state.backupDir).existsSync(), isFalse);
+      expect(File("${directory.path}/ai-jobs.sqlite").existsSync(), isFalse);
+      await runtime.state.saveExchangePassphrase('secret-value');
+      expect(await runtime.state.exchangePassphrase(), 'secret-value');
+      expect(
+        directory.listSync().whereType<File>().map(
+          (f) => f.uri.pathSegments.last,
+        ),
+        ['settings.json'],
+      );
+      expect(
+        File('${directory.path}/settings.json').readAsStringSync(),
+        isNot(contains('secret-value')),
+      );
+      final started = Completer<void>();
+      final finish = Completer<void>();
+      final writing = runtime.state.writeInBackground((store) async {
+        started.complete();
+        await finish.future;
+        store.db.execute("INSERT INTO meta VALUES('drained','yes')");
+      });
+      await started.future;
+      var closed = false;
+      final closing = runtime.close().then((_) => closed = true);
+      final blocked = await runtime.state.writeInBackground((store) {
+        fail('Closing runtime accepted a new write');
+      });
+      expect(blocked, isNotNull);
+      expect(
+        runtime.state.write(
+          (_) => fail('Closing runtime accepted a sync write'),
+        ),
+        isNotNull,
+      );
+      expect(closed, isFalse);
+      finish.complete();
+      await writing;
+      await closing;
+      expect(
+        db.select("SELECT value FROM meta WHERE key='drained'").single['value'],
+        'yes',
+      );
+      expect(db.select('PRAGMA quick_check').single.values.single, 'ok');
+      expect(jobs.jobs, isEmpty);
+      jobs.close();
+    },
+  );
+}

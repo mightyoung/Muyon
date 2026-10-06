@@ -1,0 +1,12 @@
+name: muyon_workspace
+publish_to: none
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+workspace:
+  - apps/muyon
+  - packages/muyon_module_api
+  - packages/research_module
+  - packages/supplier_core
+  - packages/inquiry_module
+  - packages/muyon_ui
+  - packages/prototype_module

@@ -1,0 +1,116 @@
+{
+  "collected_on": "2026-10-03",
+  "scope": "read-only document/code inspection; no new runtime validation; no personal screenshots copied",
+  "snapshots": [
+    {
+      "source": "/Users/muyi/Downloads/dev/research-workbench/artifacts/final-2026-10-02/native-2026-10-03/acceptance.md",
+      "source_sha256": "2afb11363b84fa6937e154813ecefac9a051bc40e9467ceefc6c94cef17da5b5",
+      "snapshot": "research-android-synthetic-acceptance.md",
+      "snapshot_sha256": "2afb11363b84fa6937e154813ecefac9a051bc40e9467ceefc6c94cef17da5b5",
+      "kind": "full-report",
+      "collected_on": "2026-10-03"
+    },
+    {
+      "source": "/Users/muyi/Downloads/dev/research-workbench/docs/verification.md",
+      "source_sha256": "dfade60c378b6dc2d454c47ab78508f695c3146750e20086f1ba8d6d5db4bbbb",
+      "snapshot": "research-verification-excerpts.md",
+      "snapshot_sha256": "ad149cfcf17c16d47a9ac1af975cc3fa7c630076974307fb8400bbf602f8fb2a",
+      "kind": "verbatim-excerpt",
+      "collected_on": "2026-10-03"
+    },
+    {
+      "source": "/Users/muyi/Downloads/dev/workspace-architecture-spike/VUE-NARROW-RESULT.zh.md",
+      "source_sha256": "b19024c38b14f02e22ea36004a61eff15c431bd0ec7c960f1ca7be47c2d0d130",
+      "snapshot": "vue-narrow-boundaries-excerpts.md",
+      "snapshot_sha256": "89c97f10a4b029b294b682b63290bcfef95d30a749ca02240e9d9b973b492887",
+      "kind": "verbatim-excerpt",
+      "collected_on": "2026-10-03"
+    },
+    {
+      "source": "/Users/muyi/Downloads/dev/software-cost-calculator/docs/verification/release-matrix.md",
+      "source_sha256": "c188fb86a3fe0a83463dc86428abf804085ce0d02cd853e286b3d3c64fb008b1",
+      "snapshot": "supplier-release-evidence-excerpts.md",
+      "snapshot_sha256": "03889e9ce185d662b47847a882083419e69f8e1fc4b55bad629ffe2478f9162a",
+      "kind": "verbatim-excerpt",
+      "collected_on": "2026-10-03"
+    }
+  ],
+  "observed_files_not_copied": [
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/pubspec.yaml",
+      "sha256": "d0c888b6c1aea08d028b2281f70f0626f708bd6ff2335d414a83f546fa53f98d"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/pubspec.lock",
+      "sha256": "0db187f6291fee8bcc5b5be90a69f2253e8fed427be3432c7d6f03897a7f7ea1"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/lib/reader/reader_page.dart",
+      "sha256": "64c654fd1eec3a7206d9a83d400545b7ab940e1adef308146ecbba3cc42cebe1"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/lib/core/store.dart",
+      "sha256": "29ee2b15efe9f31f1603740f2922378d618fb92b00038c0406957297c759c10e"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/lib/core/lan_transfer.dart",
+      "sha256": "15e97865b2d1b32dc3cbe5439ba9c5d65526e7c0766c222bc989103184465d22"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/docs/superpowers/specs/2026-10-03-research-reading-upgrade-design.md",
+      "sha256": "0a5e6aff35eeb3c70a3c6f9fb49e146a3274a1f1d956f6601939567eb95d66c9"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/docs/superpowers/specs/2026-10-03-integrated-research-case-design.md",
+      "sha256": "2a51d14548a1e31c1b79a5c6687a4a2f893732c25bb8ec11c991991958181d52"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/docs/superpowers/plans/2026-10-03-research-case-reading-implementation.md",
+      "sha256": "2798436a13b553772be2bbd7757279d4dfa17fd688b8001e8f004e0d6c87362f"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/.worktrees/research-case-reading/test/case_store_test.dart",
+      "sha256": "8b860140c645cc4ed487f9e25d651740e091a38eed6b032098c5cdfb1fae8b1f"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/research-workbench/.worktrees/research-case-reading/lib/core/store.dart",
+      "sha256": "1c7178657db4fe92e9b53c2f24d0c7c24562122d37b1fb7c4b4f27a0ec586736"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator/packages/supplier_core/pubspec.yaml",
+      "sha256": "afecb34ce6a62462061d106cab81ab30a669da656c612193e523e58172e0276f"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator/packages/supplier_core/lib/src/domain/revision.dart",
+      "sha256": "e6842cd473de5755f12f3aab84480dfb1e9fde731124c51a9a4249efb9852c6a"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator/packages/supplier_core/lib/src/domain/revision_graph.dart",
+      "sha256": "176c5fa1c7c1e72e512f2faab19550bc4577f05aa9037b5c8ffeb75565b1976b"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator/docs/verification/release-matrix.md",
+      "sha256": "c188fb86a3fe0a83463dc86428abf804085ce0d02cd853e286b3d3c64fb008b1"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator/docs/verification/android-main-ui-20260930.md",
+      "sha256": "c74f034b3b7254a0cd49c7dd6394d50a7a4e6e4e78f625b0a54fc16862772545"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator-hubfix/packages/supplier_core/pubspec.yaml",
+      "sha256": "03fd3ef952580393746665b282dbbdf67bed515ae54bed0ac0be41a7bcf897c2"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator-hubfix/packages/supplier_core/bin/siq_mcp.dart",
+      "sha256": "f8989b545f9b65a51567647ec27ce29c1fc2481df5b216a7feefd75fa3129051"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator-hubfix/packages/supplier_core/lib/src/mcp_server.dart",
+      "sha256": "e29415577c8690a9a3340aa90bd9565539bee181ac145fc0ec648fbce3332908"
+    },
+    {
+      "path": "/Users/muyi/Downloads/dev/software-cost-calculator-hubfix/packages/supplier_core/lib/src/agent_tools.dart",
+      "sha256": "b082630164060c354a6f9e5a4a5b5daaa071a9905d3a3410357c5828faa796bd"
+    }
+  ]
+}

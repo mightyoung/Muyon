@@ -1,0 +1,4 @@
+PP-OCRv5_mobile models are downloaded on explicit installation into the host's
+private model directory. Official fixed revisions and SHA-256 digests are
+declared in services/ocr/ocr_models.dart. Models: PaddlePaddle, Apache-2.0.
+This directory contains metadata, not unverified or substitute model weights.

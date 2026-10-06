@@ -1,0 +1,33 @@
+{
+  "note": "Short English glosses for the checked-in tool descriptions. The rendered option is the Chinese description plus this gloss. Tool ids stay out of the option text.",
+  "glosses": {
+    "knowledge.search": "search local documents",
+    "knowledge.index": "build a full-text index for a document",
+    "knowledge.delete": "delete a private document",
+    "knowledge.import": "import a local file into the private library",
+    "knowledge.embedding_preview": "preview index text that would be sent, without sending it",
+    "embedding.build": "call an embedding model to vectorize a document",
+    "embedding.search": "search documents by vector",
+    "ocr.install_models": "download the official OCR models onto this machine",
+    "ocr.recognize": "recognize text on this machine without uploading the image",
+    "transfer.export": "build a checksum package on this machine without sending it",
+    "transfer.import": "verify a data package and accept it",
+    "transfer.listen": "start LAN discovery and receiving",
+    "transfer.stop": "stop LAN listening",
+    "transfer.send": "send a checksum package to a paired device",
+    "inquiry.describe": "describe the data model, its objects, relations, and fields",
+    "inquiry.search": "find a material, supplier, or project by keyword",
+    "inquiry.get": "read one record by id, including a deleted record",
+    "inquiry.query": "filter one kind of record by field and count the matches",
+    "inquiry.related": "follow relations to records that cite one record",
+    "inquiry.compare_quotes": "group and compare every quote for one material",
+    "inquiry.quote_options": "list usable quotes for one project material, lowest first",
+    "inquiry.project_budget": "show a project cost budget: quantity, price, amount, and margin",
+    "inquiry.data_quality": "check data quality for conflicts, duplicates, and unknown units",
+    "inquiry.spec_classes": "read the parameter dictionary of equipment templates",
+    "inquiry.match_item": "match materials to a technical requirement",
+    "inquiry.inquiry_matrix": "show the quote matrix of budget lines by supplier",
+    "inquiry.object": "read one business object by type and id",
+    "research.objects": "read research projects, documents, or items in scope by title"
+  }
+}

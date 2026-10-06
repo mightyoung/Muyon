@@ -1,0 +1,7 @@
+Derived from software-cost-calculator/packages/supplier_core at
+b35eccbe9ddf458a6538fa107baa9b456972a4f8 (origin/main, 2026-10-04).
+MIT license retained in LICENSE. Changes: host-owned database attachment,
+injected background executor, task-store attachment, archive 4.0.9 API adapter.
+The ZIP central-directory checks, native bounded inflate, CRC and actual-output
+limits are retained; archive's unbounded content decoder is not used.
+The test dependency accepts ^1.31.0 to match the host Flutter SDK's test_api pin.

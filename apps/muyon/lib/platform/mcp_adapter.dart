@@ -1,0 +1,254 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:muyon_module_api/muyon_module_api.dart';
+
+import '../services/models/model_gateway.dart' show SecretStore;
+import 'tool_registry.dart';
+
+/// One external MCP server reached over Streamable HTTP.
+class McpServerConfig {
+  McpServerConfig({
+    required this.id,
+    required this.endpoint,
+    this.credentialRef,
+  }) {
+    final loopback = ['localhost', '127.0.0.1', '::1'].contains(endpoint.host);
+    if (!RegExp(r'^[a-z][a-z0-9_-]{0,31}$').hasMatch(id) ||
+        !endpoint.hasAuthority ||
+        endpoint.userInfo.isNotEmpty ||
+        endpoint.fragment.isNotEmpty ||
+        !(endpoint.scheme == 'https' ||
+            (endpoint.scheme == 'http' && loopback))) {
+      throw ArgumentError(
+        'MCP server needs a simple id and an https '
+        '(or loopback http) endpoint',
+      );
+    }
+  }
+  final String id;
+  final Uri endpoint;
+
+  /// Secret store reference for a bearer token; the token is never stored here.
+  final String? credentialRef;
+}
+
+class McpConnection {
+  McpConnection(this.config, this.registered, this.skipped);
+  final McpServerConfig config;
+  final List<String> registered;
+
+  /// Remote tool name → why it was not registered (e.g. unsupported schema).
+  final Map<String, String> skipped;
+}
+
+/// Adapts MCP tools into the host [ToolRegistry]. The protocol stays at this
+/// edge: each remote tool becomes an ordinary `network`-effect tool, so it
+/// gets parameter validation, a per-call host approval bound to the server
+/// as destination, a persistent receipt, and effect-aware cancel/failure
+/// wording like every other tool. Internal module contracts do not change.
+abstract final class McpAdapter {
+  static const protocolVersion = '2025-06-18';
+  static const _maxPages = 20;
+  static const _maxDescription = 500;
+
+  static Future<McpConnection> connect(
+    ToolRegistry registry,
+    McpServerConfig config, {
+    required SecretStore secrets,
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final client = _McpClient(config, secrets, timeout);
+    await client.initialize();
+    final registered = <String>[];
+    final skipped = <String, String>{};
+    String? cursor;
+    for (var page = 0; page < _maxPages; page++) {
+      final result = await client.rpc('tools/list', {'cursor': ?cursor});
+      for (final raw in result['tools'] as List? ?? const []) {
+        final tool = Map<String, Object?>.from(raw as Map);
+        final name = tool['name'];
+        if (name is! String ||
+            !RegExp(r'^[A-Za-z0-9_.-]{1,64}$').hasMatch(name)) {
+          skipped['$name'] = 'Unsupported tool name';
+          continue;
+        }
+        final toolId = 'mcp.${config.id}.$name';
+        final description = '${tool['description'] ?? ''}';
+        try {
+          registry.register(
+            providerId: 'mcp:${config.id}',
+            descriptor: ToolDescriptor(
+              toolId: toolId,
+              moduleId: 'mcp',
+              effect: ToolEffect.network,
+              parameterSchema: Map<String, Object?>.from(
+                (tool['inputSchema'] as Map?) ?? const {'type': 'object'},
+              ),
+              supportsCancel: true,
+              description: description.length > _maxDescription
+                  ? description.substring(0, _maxDescription)
+                  : description,
+            ),
+            // Remote tools receive only their parameters, never local objects.
+            supportedScopes: const {AssistantScopeKind.global},
+            dataModuleIds: const {},
+            handler: (context) => _call(client, name, context),
+          );
+          registered.add(toolId);
+        } catch (error) {
+          skipped[name] = '$error';
+        }
+      }
+      cursor = result['nextCursor'] as String?;
+      if (cursor == null) break;
+    }
+    return McpConnection(config, registered, skipped);
+  }
+
+  static Future<ToolCallResult> _call(
+    _McpClient client,
+    String name,
+    ToolCallContext context,
+  ) async {
+    final destination = context.request.destination;
+    if (destination != client.config.endpoint.origin) {
+      return ToolCallResult(
+        status: ToolCallStatus.failed,
+        summary: 'Approved destination $destination is not this MCP server',
+      );
+    }
+    context.checkBeforeEffect();
+    final result = await client.rpc('tools/call', {
+      'name': name,
+      'arguments': context.request.parameters,
+    }, cancellation: context.cancellation);
+    final text = [
+      for (final item in result['content'] as List? ?? const [])
+        if (item is Map && item['type'] == 'text') '${item['text']}',
+    ].join('\n');
+    final summary = text.length > 2000 ? '${text.substring(0, 2000)}…' : text;
+    return ToolCallResult(
+      status: result['isError'] == true
+          ? ToolCallStatus.failed
+          : ToolCallStatus.succeeded,
+      summary: summary.isEmpty ? '(no text content)' : summary,
+      data: {
+        'text': summary,
+        if (result['structuredContent'] is Map)
+          'structured': result['structuredContent'],
+      },
+    );
+  }
+}
+
+class _McpClient {
+  _McpClient(this.config, this.secrets, this.timeout);
+  final McpServerConfig config;
+  final SecretStore secrets;
+  final Duration timeout;
+  static const _maxBytes = 1024 * 1024;
+  String? _session;
+  var _nextId = 1;
+
+  Future<void> initialize() async {
+    await rpc('initialize', {
+      'protocolVersion': McpAdapter.protocolVersion,
+      'capabilities': <String, Object?>{},
+      'clientInfo': {'name': 'muyon', 'version': '0.1.0'},
+    });
+    await _post({'jsonrpc': '2.0', 'method': 'notifications/initialized'});
+  }
+
+  Future<Map<String, Object?>> rpc(
+    String method,
+    Map<String, Object?> params, {
+    ToolCancellationToken? cancellation,
+  }) async {
+    final id = _nextId++;
+    final reply = await _post({
+      'jsonrpc': '2.0',
+      'id': id,
+      'method': method,
+      'params': params,
+    }, cancellation: cancellation);
+    if (reply == null || reply['id'] != id) {
+      throw const FormatException('MCP reply missing or mismatched');
+    }
+    final error = reply['error'];
+    if (error is Map) {
+      throw StateError('MCP error ${error['code']}: ${error['message']}');
+    }
+    return Map<String, Object?>.from(reply['result'] as Map? ?? const {});
+  }
+
+  Future<Map<String, Object?>?> _post(
+    Map<String, Object?> message, {
+    ToolCancellationToken? cancellation,
+  }) async {
+    final client = HttpClient()..connectionTimeout = timeout;
+    unawaited(
+      cancellation?.whenCancelled.then((_) => client.close(force: true)),
+    );
+    try {
+      return await (() async {
+        final request = await client.postUrl(config.endpoint);
+        request.followRedirects = false;
+        request.headers
+          ..contentType = ContentType.json
+          ..set(HttpHeaders.acceptHeader, 'application/json, text/event-stream')
+          ..set('MCP-Protocol-Version', McpAdapter.protocolVersion);
+        if (_session != null) request.headers.set('Mcp-Session-Id', _session!);
+        if (config.credentialRef != null) {
+          final token = await secrets.read(config.credentialRef!);
+          if (token == null || token.isEmpty) {
+            throw StateError('credential_unavailable');
+          }
+          request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
+        }
+        request.write(jsonEncode(message));
+        final response = await request.close();
+        _session = response.headers.value('mcp-session-id') ?? _session;
+        if (response.statusCode == 202) {
+          await response.drain<void>();
+          return null;
+        }
+        if (response.statusCode != 200) {
+          await response.drain<void>();
+          throw HttpException('mcp_http_${response.statusCode}');
+        }
+        final bytes = <int>[];
+        await for (final chunk in response) {
+          if (bytes.length + chunk.length > _maxBytes) {
+            throw StateError('mcp_response_too_large');
+          }
+          bytes.addAll(chunk);
+        }
+        final body = utf8.decode(bytes);
+        final type = response.headers.contentType?.mimeType;
+        return type == 'text/event-stream'
+            ? _fromEvents(body, message['id'])
+            : Map<String, Object?>.from(jsonDecode(body) as Map);
+      })().timeout(timeout);
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  /// First SSE `data:` JSON-RPC message answering [id].
+  static Map<String, Object?>? _fromEvents(String body, Object? id) {
+    for (final event in body.split(RegExp(r'\r?\n\r?\n'))) {
+      final data = [
+        for (final line in event.split(RegExp(r'\r?\n')))
+          if (line.startsWith('data:')) line.substring(5).trimLeft(),
+      ].join('\n');
+      if (data.isEmpty) continue;
+      final decoded = jsonDecode(data);
+      if (decoded is Map && decoded['id'] == id) {
+        return Map<String, Object?>.from(decoded);
+      }
+    }
+    return null;
+  }
+}
