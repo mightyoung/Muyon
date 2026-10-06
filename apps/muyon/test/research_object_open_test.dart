@@ -116,11 +116,15 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
   }
 
-  Future<void> settle(WidgetTester tester) async {
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 50)),
-    );
-    await tester.pumpAndSettle();
+  /// Bounded pumping that tolerates pages which keep a loading indicator
+  /// (a reader may keep loading, so pumpAndSettle would never return).
+  Future<void> pumpFrames(WidgetTester tester, {int rounds = 10}) async {
+    for (var i = 0; i < rounds; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
   }
 
   /// The shell resolves the reference and activates modules on the real event
@@ -156,7 +160,9 @@ void main() {
     await tester.tap(find.text('执行面板'));
     await tester.pumpAndSettle();
     await tester.tap(find.text(tile));
-    await settle(tester);
+    // The pushed page may keep a loading indicator (the reader does), so pump
+    // a bounded number of frames instead of pumpAndSettle here.
+    await pumpFrames(tester);
   }
 
   ObjectRef entryRef([String id = 'e1']) => ObjectRef(
@@ -172,6 +178,8 @@ void main() {
     resize(tester, 390);
     await open(tester);
     await seed(tester);
+    final spy = _RecordingRuntime(host.research!.resources);
+    host.research = spy;
     await addTaskRef(tester, 'task-entry', entryRef());
 
     await openFromPanel(tester, 'research · entry');
@@ -185,6 +193,19 @@ void main() {
     expect(tester.takeException(), isNull);
 
     await closePage(tester);
+
+    // The shell disposed the session it opened for this page (review F3).
+    expect(spy.sessions, hasLength(1));
+    await expectLater(
+      spy.sessions.single.resolve(entryRef()),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          'Session disposed',
+        ),
+      ),
+    );
   });
 
   testWidgets('openObject keeps the reader and assistant for documents', (
@@ -193,22 +214,69 @@ void main() {
     resize(tester, 1280);
     await open(tester);
     await seed(tester);
-    await addTaskRef(
-      tester,
-      'task-doc',
-      const ObjectRef(
-        moduleId: 'research',
-        objectType: 'document',
-        objectId: 'd1',
-        nativeProjectId: 'p1',
-      ),
+    const docRef = ObjectRef(
+      moduleId: 'research',
+      objectType: 'document',
+      objectId: 'd1',
+      nativeProjectId: 'p1',
     );
+    final spy = _RecordingRuntime(host.research!.resources);
+    host.research = spy;
+    await addTaskRef(tester, 'task-doc', docRef);
 
     await openFromPanel(tester, 'research · document');
     await waitFor(tester, find.byType(ReaderPage));
 
     expect(find.byType(ReaderPage), findsOneWidget);
     expect(find.byType(AssistantPage), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await closePage(tester);
+
+    // The shell disposed the session it opened for this page (review F3).
+    expect(spy.sessions, hasLength(1));
+    await expectLater(
+      spy.sessions.single.resolve(docRef),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          'Session disposed',
+        ),
+      ),
+    );
+  });
+
+  testWidgets('openObject shows the research task page for task refs', (
+    tester,
+  ) async {
+    resize(tester, 390);
+    await open(tester);
+    await seed(tester);
+    await tester.runAsync(() async {
+      host.research!.store.db.execute(
+        "INSERT INTO tasks(id,revision,project_id,title,goal,spec) "
+        "VALUES('t1',1,'p1','任务甲','任务目标','{}')",
+      );
+    });
+    await addTaskRef(
+      tester,
+      'task-task',
+      const ObjectRef(
+        moduleId: 'research',
+        objectType: 'task',
+        objectId: 't1',
+        nativeProjectId: 'p1',
+      ),
+    );
+
+    await openFromPanel(tester, 'research · task');
+    await waitFor(tester, find.byType(ResearchTaskPage));
+
+    expect(find.byType(ResearchTaskPage), findsOneWidget);
+    expect(find.text('任务甲'), findsWidgets);
+    expect(find.text('r1'), findsOneWidget);
+    expect(find.textContaining('"moduleId"'), findsNothing);
     expect(tester.takeException(), isNull);
 
     await closePage(tester);
@@ -291,4 +359,18 @@ void main() {
     );
     expect(deleted, isNull);
   });
+}
+
+/// Captures the sessions the shell opens, so tests can prove they are
+/// disposed after the object page closes (review F3).
+class _RecordingRuntime extends ResearchRuntime {
+  _RecordingRuntime(super.resources);
+  final List<ResearchSession> sessions = [];
+
+  @override
+  Future<ResearchSession> openSession(WorkspaceBinding binding) async {
+    final session = await super.openSession(binding);
+    sessions.add(session);
+    return session;
+  }
 }

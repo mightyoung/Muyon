@@ -204,6 +204,12 @@ void main() {
         expectedHead: null,
         bodyMarkdown: 'Card',
       );
+      final longCard = await CardStore(database).save(
+        projectId: 'native-a',
+        cardId: 'long-card',
+        expectedHead: null,
+        bodyMarkdown: '长' * 100,
+      );
       final session = await runtime.openSession(binding);
       ObjectRef ref(
         String type,
@@ -246,6 +252,17 @@ void main() {
         isNull,
       );
       expect(await session.resolve(ref('card', 'c', project: 'other')), isNull);
+      // Long card bodies are truncated for the app bar (review F10).
+      final longTitle = (await session.resolve(
+        ref(
+          'card',
+          'long-card',
+          revision: longCard.revision.revisionId,
+          digest: longCard.revision.contentDigest,
+        ),
+      ))!.title;
+      expect(longTitle.length, 61);
+      expect(longTitle.endsWith('…'), isTrue);
     },
   );
 
@@ -327,6 +344,80 @@ void main() {
       expect(changes.last.op, ChangeOp.delete);
     },
   );
+
+  testWidgets('task page shows the run status of its own revision', (
+    tester,
+  ) async {
+    late BuildContext context;
+    await tester.pumpWidget(
+      Builder(
+        builder: (c) {
+          context = c;
+          return const SizedBox();
+        },
+      ),
+    );
+    await tester.runAsync(() async {
+      database.raw.execute(
+        "INSERT INTO projects(id,title,question,next_step) VALUES('native-a','A','','')",
+      );
+      final store = runtime.store;
+      final task = await store.write(
+        () => store.saveTask(
+          projectId: 'native-a',
+          title: 'First',
+          goal: '',
+          spec: {},
+        ),
+      );
+      final taskV2 = await store.write(
+        () => store.saveTask(
+          id: task.id,
+          projectId: 'native-a',
+          title: 'Latest',
+          goal: '',
+          spec: {},
+        ),
+      );
+      final runV1 = await store.write(() => store.startManualRun(task));
+      final runV2 = await store.write(() => store.startManualRun(taskV2));
+      await store.write(() {
+        store.updateManualRun(
+          runV1.id,
+          status: 'failed',
+          metrics: const <String, dynamic>{},
+          log: '',
+          conclusion: '',
+        );
+        store.updateManualRun(
+          runV2.id,
+          status: 'completed',
+          metrics: const <String, dynamic>{},
+          log: '',
+          conclusion: '',
+        );
+      });
+      final session = await runtime.openSession(binding);
+      ObjectRef ref(String type, String id, {String? revision}) => ObjectRef(
+        moduleId: 'research',
+        objectType: type,
+        objectId: id,
+        nativeProjectId: 'native-a',
+        revisionRef: revision,
+      );
+      final first = session.objectPage(
+        context,
+        ref('task', task.id, revision: '1'),
+      ) as ResearchTaskPage;
+      final latest =
+          session.objectPage(context, ref('task', task.id)) as ResearchTaskPage;
+      expect(first.revisionRunStatus, 'failed');
+      expect(latest.revisionRunStatus, 'completed');
+      expect(first.isLatestRevision, isFalse);
+      expect(latest.isLatestRevision, isTrue);
+      await session.dispose();
+    });
+  });
 
   testWidgets(
     'scope and version checks cover reused local IDs and unavailable focused pages',
@@ -498,7 +589,8 @@ void main() {
           );
           if (object.objectType == 'document') {
             // 'doc-a' is this session's document (asserted below); 'same-doc'
-            // belongs to the other project, so it has no page here.
+            // is a canonical package document with no reader adapter, so it
+            // has no page here.
             expect(
               sessionA.objectPage(context, object),
               object.objectId == 'same-doc' ? isNull : isA<ReaderPage>(),

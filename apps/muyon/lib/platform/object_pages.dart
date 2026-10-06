@@ -27,37 +27,38 @@ class ModuleObjectPage {
 ///
 /// Returns null on any missing piece (no binding, unavailable runtime, deleted
 /// object, stale revision or digest), so the caller keeps its JSON fallback.
-/// This helper never creates a workspace binding.
+/// This helper never creates a workspace binding, and it hands the session to
+/// the caller only on success; every other path disposes it.
 Future<ModuleObjectPage?> openModuleObjectPage(
   BuildContext context,
   MuyonHost host,
   ObjectRef ref,
 ) async {
-  for (final workspace in host.workspaces.all()) {
-    final binding = host.workspaces.binding(workspace.id, ref.moduleId);
-    if (binding == null || binding.nativeProjectId != ref.nativeProjectId) {
-      continue;
-    }
-    try {
-      final runtime = await _runtimeFor(host, ref.moduleId);
-      if (runtime == null) return null;
-      final session = await runtime.openSession(binding);
-      final view = await session.resolve(ref);
-      if (!context.mounted) {
-        await session.dispose();
-        return null;
-      }
-      final page = view == null ? null : session.objectPage(context, ref);
-      if (view == null || page == null) {
-        await session.dispose();
-        return null;
-      }
-      return ModuleObjectPage(view.title, page, session);
-    } catch (_) {
-      return null;
-    }
+  final projectId = ref.nativeProjectId;
+  if (projectId == null) return null;
+  final workspaceId = host.workspaces.ownerWorkspace(ref.moduleId, projectId);
+  if (workspaceId == null) return null;
+  final binding = host.workspaces.binding(workspaceId, ref.moduleId);
+  if (binding == null || binding.nativeProjectId != projectId) {
+    return null;
   }
-  return null;
+  final runtime = await _runtimeFor(host, ref.moduleId);
+  if (runtime == null) return null;
+  final session = await runtime.openSession(binding);
+  var transferred = false;
+  try {
+    final view = await session.resolve(ref);
+    if (!context.mounted) return null;
+    final page = view == null ? null : session.objectPage(context, ref);
+    if (view == null || page == null) return null;
+    transferred = true;
+    return ModuleObjectPage(view.title, page, session);
+  } catch (_) {
+    return null;
+  } finally {
+    // The session must not outlive this call unless the caller took it.
+    if (!transferred) await session.dispose();
+  }
 }
 
 Future<ModuleRuntime?> _runtimeFor(MuyonHost host, String moduleId) async {

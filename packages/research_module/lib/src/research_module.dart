@@ -497,10 +497,12 @@ class ResearchSession implements ModuleSession {
             (jsonDecode(rows.single['envelope'] as String)
                     as Map)['bodyMarkdown']
                 as String;
+        // The shell shows this title in its app bar; keep it short (review
+        // F10).
         return view(
           body.isEmpty
               ? id
-              : body.substring(0, body.length > 240 ? 240 : body.length),
+              : (body.length > 60 ? '${body.substring(0, 60)}…' : body),
           revision: rows.single['revision_id'] as String,
           digest: rows.single['digest'] as String,
         );
@@ -598,13 +600,16 @@ class ResearchSession implements ModuleSession {
                   [id],
                 ).first['latest']
                 as int?;
+        // The status belongs to the shown revision, not to the latest run of
+        // the task (review F1).
         final runStatus = store.db.select(
-          'SELECT status FROM runs WHERE task_id=? ORDER BY rowid DESC LIMIT 1',
-          [id],
+          'SELECT status FROM runs WHERE task_id=? AND task_revision=? '
+          'ORDER BY rowid DESC LIMIT 1',
+          [id, task.revision],
         );
         return ResearchTaskPage(
           task: task,
-          latestRunStatus: runStatus.isEmpty
+          revisionRunStatus: runStatus.isEmpty
               ? null
               : runStatus.single['status'] as String,
           isLatestRevision: task.revision == latest,

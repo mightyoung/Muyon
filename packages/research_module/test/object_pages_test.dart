@@ -47,11 +47,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('提纲标题'), findsOneWidget);
+    expect(find.text('所属段落'), findsOneWidget);
     expect(find.text('段落一'), findsOneWidget);
     expect(find.text('来源 · 论文 A'), findsOneWidget);
   });
 
-  testWidgets('section page shows heading, outline and argument', (
+  testWidgets('section page shows heading, owning project and argument', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -65,6 +66,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('段落一'), findsOneWidget);
+    expect(find.text('所属项目'), findsOneWidget);
     expect(find.text('项目甲'), findsOneWidget);
     expect(find.text('论述内容'), findsOneWidget);
   });
@@ -83,7 +85,7 @@ void main() {
             revision: 2,
             spec: {},
           ),
-          latestRunStatus: 'completed',
+          revisionRunStatus: 'completed',
           isLatestRevision: true,
         ),
       ),
@@ -143,9 +145,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('任务标题'), findsWidgets);
+    expect(find.text('所属任务'), findsNothing);
     expect(find.text('r2'), findsOneWidget);
     expect(find.text('completed'), findsOneWidget);
     expect(find.text('已接纳为证据'), findsOneWidget);
+    expect(find.text('研究结论'), findsOneWidget);
+    expect(find.textContaining('研究结论：'), findsNothing);
     expect(find.textContaining('支持'), findsOneWidget);
     expect(find.textContaining('证据一致'), findsOneWidget);
   });
@@ -208,5 +213,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('研究卡'), findsOneWidget);
     expect(find.text('不是最新修订'), findsOneWidget);
+  });
+
+  testWidgets('card page truncates a long title with an ellipsis', (
+    tester,
+  ) async {
+    final long = '长' * 100;
+    await tester.pumpWidget(
+      page(
+        ResearchCardPage(
+          bodyMarkdown: '$long\n\n正文',
+          revisionId: 'rev-1',
+          citations: const [],
+          isLatestRevision: true,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('${'长' * 60}…'), findsOneWidget);
   });
 }

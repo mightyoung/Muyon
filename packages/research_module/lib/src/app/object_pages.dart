@@ -51,7 +51,7 @@ class ResearchOutlinePage extends StatelessWidget {
     title: heading,
     children: [
       if (sectionHeading != null && sectionHeading!.isNotEmpty)
-        _Field('所属提纲', sectionHeading!),
+        _Field('所属段落', sectionHeading!),
       if (content != null && content!.isNotEmpty) _Field('正文', content!),
     ],
   );
@@ -72,7 +72,7 @@ class ResearchSectionPage extends StatelessWidget {
   Widget build(BuildContext context) => _Page(
     title: heading,
     children: [
-      _Field('所属提纲', projectTitle),
+      _Field('所属项目', projectTitle),
       if (argument.isNotEmpty) _Field('正文', argument),
     ],
   );
@@ -82,11 +82,11 @@ class ResearchTaskPage extends StatelessWidget {
   const ResearchTaskPage({
     super.key,
     required this.task,
-    this.latestRunStatus,
+    this.revisionRunStatus,
     required this.isLatestRevision,
   });
   final ResearchTask task;
-  final String? latestRunStatus;
+  final String? revisionRunStatus;
   final bool isLatestRevision;
 
   @override
@@ -95,7 +95,7 @@ class ResearchTaskPage extends StatelessWidget {
     children: [
       _Field('修订号', 'r${task.revision}'),
       if (!isLatestRevision) const _StaleRevision(),
-      if (latestRunStatus != null) _Field('状态', latestRunStatus!),
+      if (revisionRunStatus != null) _Field('状态', revisionRunStatus!),
       if (task.goal.isNotEmpty) _Field('说明', task.goal),
     ],
   );
@@ -115,17 +115,17 @@ class ResearchRunPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final assessment = assessmentSummary(run);
+    final assessmentText = _withoutSummaryLabel(assessment);
     final hasAssessment = assessment != null || run.accepted;
     return _Page(
       title: taskTitle,
       children: [
-        _Field('所属任务', taskTitle),
         _Field('修订号', 'r${run.taskRevision}'),
         if (!isLatestRevision) const _StaleRevision(),
         _Field('状态', run.status),
         if (hasAssessment) ...[
           _Field('评价', run.accepted ? '已接纳为证据' : '未接纳为证据'),
-          if (assessment != null) _Field('研究结论', assessment),
+          if (assessmentText != null) _Field('研究结论', assessmentText),
         ],
       ],
     );
@@ -216,11 +216,19 @@ String _firstText(Map<String, dynamic> data, List<String> keys) {
   return '';
 }
 
+/// `assessmentSummary` already begins with the field label; drop it when the
+/// summary is shown under its own label.
+String? _withoutSummaryLabel(String? summary) {
+  const label = '研究结论：';
+  if (summary == null || !summary.startsWith(label)) return summary;
+  return summary.substring(label.length);
+}
+
 String _cardTitle(String bodyMarkdown) {
   for (final line in bodyMarkdown.split('\n')) {
     final trimmed = line.replaceFirst(RegExp(r'^#+\s*'), '').trim();
     if (trimmed.isNotEmpty) {
-      return trimmed.length > 60 ? trimmed.substring(0, 60) : trimmed;
+      return trimmed.length > 60 ? '${trimmed.substring(0, 60)}…' : trimmed;
     }
   }
   return '研究卡';

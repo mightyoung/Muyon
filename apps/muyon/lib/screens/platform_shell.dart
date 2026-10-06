@@ -140,6 +140,63 @@ class _PlatformShellState extends State<PlatformShell> {
 
   Future<void> openObject(ObjectRef ref) async {
     await action(() async {
+      // Research objects open through their module session first: the host
+      // catalog only carries project/document/entry, so resolveScope would
+      // reject task/run/card/outline/section (review F2). A null result (no
+      // binding, deleted object, stale revision or digest) falls back to the
+      // catalog check and the JSON page below, exactly as before.
+      if (ref.moduleId == 'research') {
+        final opened = await openModuleObjectPage(context, host, ref);
+        if (opened != null) {
+          try {
+            if (!mounted) return;
+            await Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => Scaffold(
+                  appBar: AppBar(
+                    title: Text(opened.title),
+                    actions: [
+                      IconButton(
+                        tooltip: '针对当前对象使用助手',
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => Scaffold(
+                              appBar: AppBar(title: const Text('专题对话')),
+                              body: assistant(
+                                scope: AssistantScope.selectedObjects([ref]),
+                              ),
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(Icons.chat_outlined),
+                      ),
+                    ],
+                  ),
+                  body: LayoutBuilder(
+                    builder: (context, size) => size.maxWidth >= 1100
+                        ? Row(
+                            children: [
+                              Expanded(child: opened.page),
+                              SizedBox(
+                                width: 360,
+                                child: assistant(
+                                  scope: AssistantScope.selectedObjects([ref]),
+                                ),
+                              ),
+                            ],
+                          )
+                        : opened.page,
+                  ),
+                ),
+              ),
+            );
+          } finally {
+            // The session lives only while the object page is open.
+            await opened.dispose();
+          }
+          return;
+        }
+      }
       final resolved = await host.tools.resolveScope(
         AssistantScope.selectedObjects([ref]),
       );
@@ -188,63 +245,6 @@ class _PlatformShellState extends State<PlatformShell> {
           ),
         );
         return;
-      }
-      if (current.moduleId == 'research') {
-        final opened = await openModuleObjectPage(context, host, current);
-        if (opened != null) {
-          try {
-            if (!mounted) return;
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => Scaffold(
-                  appBar: AppBar(
-                    title: Text(opened.title),
-                    actions: [
-                      IconButton(
-                        tooltip: '针对当前对象使用助手',
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => Scaffold(
-                              appBar: AppBar(title: const Text('专题对话')),
-                              body: assistant(
-                                scope: AssistantScope.selectedObjects([
-                                  current,
-                                ]),
-                              ),
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(Icons.chat_outlined),
-                      ),
-                    ],
-                  ),
-                  body: LayoutBuilder(
-                    builder: (context, size) => size.maxWidth >= 1100
-                        ? Row(
-                            children: [
-                              Expanded(child: opened.page),
-                              SizedBox(
-                                width: 360,
-                                child: assistant(
-                                  scope: AssistantScope.selectedObjects([
-                                    current,
-                                  ]),
-                                ),
-                              ),
-                            ],
-                          )
-                        : opened.page,
-                  ),
-                ),
-              ),
-            );
-          } finally {
-            // The session lives only while the object page is open.
-            await opened.dispose();
-          }
-          return;
-        }
-        // No binding or no object page: fall through to the JSON page below.
       }
       if (!mounted) return;
       final data = current.moduleId == 'inquiry'
