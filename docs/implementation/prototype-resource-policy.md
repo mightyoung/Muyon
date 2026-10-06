@@ -42,6 +42,7 @@
 | 1b | 同上，改用 `muyon-proto://` | Android | 同一探测页和真实 MES 页 | **能**（`moduleScript=ran`）；真实页面完整渲染（来源健康列表） |
 | 2 | `<meta>` CSP 在页面自身资源解析前是否生效 | Android | 探测页读取 `meta[http-equiv=Content-Security-Policy]` | 存在（`cspMeta=present`）。是否先于页面资源解析：脚本在 `AT_DOCUMENT_START` 注入，页面内联脚本运行时已存在；更早的外部资源无法单独区分，**严格意义上仍未验证** |
 | 3 | 越界访问是否被拦截 | Android | 探测页：远程图片、远程 `fetch`、`data:` 图片、其它目录图片与文件、自身文件 `fetch` | 全部拦截（`blocked`）；允许根内图片正常加载（`LOADED`）；日志有对应 `onBlocked` |
+| 3b | 点击指向允许根之外的顶层链接（S7） | Android（vivo V2324A，Android 16，调试包） | 原型页含三个链接：`https://example.com/`、`file:///etc/hosts`、根内 `inner.html`；在手机上逐个点击，读 logcat 与 `onBlocked` 日志 | 远程链接：守卫拦截，日志 `BLOCKED https://example.com/`，界面横幅“已拦截越界访问”，页面不跳转。`file:///etc/hosts`：**由 Chromium 自行拒绝**（控制台 `Not allowed to load local resource: file:///etc/hosts`），页面不变，**没有走到我们的守卫**，所以守卫对 `file:` 顶层导航的拦截在这条路径上没有被实机执行。根内链接：正常打开（`INNER PAGE OK`） |
 | 4 | Windows `shouldInterceptRequest` 覆盖范围 / 自定义 scheme | Windows | — | **未验证**（本轮没有 Windows 设备） |
 | 5 | WKWebView 内容拦截规则、自定义 scheme、CSP | macOS / iOS | — | **未验证**：本机没有安装 Xcode，`flutter run -d macos` 报 "Xcode not installed" |
 
