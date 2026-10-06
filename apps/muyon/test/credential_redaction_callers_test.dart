@@ -217,10 +217,16 @@ void main() {
       prompt: '你好',
       profile: _local(9),
     );
-    await agent.confirm(
-      task.id,
-      requestDigest: task.payload['requestDigest'] as String,
-    );
+    // Since P0-3d one corrective round is requested (and confirmed) before
+    // the task fails; the model keeps echoing, so both rounds are rejected.
+    for (var round = 0; round < 2; round++) {
+      task = repo.task(task.id)!;
+      expect(task.stage, 'model');
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+    }
     task = repo.task(task.id)!;
     expect(task.state, PersonalTaskState.failed);
     expect(task.error, contains('model_reply_not_json'));

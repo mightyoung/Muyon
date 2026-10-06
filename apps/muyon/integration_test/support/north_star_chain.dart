@@ -456,7 +456,12 @@ class NorthStarInquiryChain {
       ..['rounds'] = task.payload['round']
       ..['error'] = task.error
       ..['tools'] = proposedTools(task)
-      ..['answerPreview'] = previewText(task.summary)
+      // The summary holds the last tool's description until an answer is
+      // finished, so only a succeeded task's summary is the model's answer.
+      ..['answerPreview'] = task.state == PersonalTaskState.succeeded
+          ? previewText(task.summary)
+          : null
+      ..['protocolCorrections'] = task.payload['protocolCorrections'] ?? 0
       ..['answerReferences'] = host.foundation
           .messages(conversationId)
           .last
