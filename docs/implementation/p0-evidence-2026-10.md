@@ -119,6 +119,8 @@ exit=0
 
 ## 其他说明
 
+- **运行时的工作区与 `git status`**：三次链路运行的 `commit` 字段是手工传入的（`MUYON_EVAL_COMMIT`）。两次 macOS 无头运行时，工作区是 `6d21831` 上的干净检出：运行前 `git status --short` 没有任何输出，运行产生的只有本批的未跟踪证据文件，没有已跟踪文件改动。Android 真机运行时工作区是 `f535db4`（`task/p0-4-evidence`，与 `origin` 一致，`git status` 干净）；`f535db4` 比 `6d21831` 只多证据与报告文档，没有代码改动，所以被测代码与 `6d21831` 相同。Android 运行之后我又尝试过一次 macOS 构建，它会让 Flutter 改动 `apps/muyon/macos` 下的 `xcconfig` 并生成 `Podfile`，那是构建副产物，已还原删除，没有提交，也不属于这三次运行。
+
 - 证据 JSON 里调用栈中的本机绝对路径（含用户名）已替换成 `<repo>`，其余内容未改。
 
 - 建议仍然在 Android 上跑一次时注意：设备运行要用 `--dart-define` 传密钥，**密钥会被编进这次构建的测试包**。运行后要卸载测试包，不要分发构建产物。
