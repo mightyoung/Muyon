@@ -25,7 +25,7 @@
 | P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | — | 已交付（`8de0ca3`），核实中（`review/P0-F1`） |
 | P0-3c 询价链路判定收尾（低优先级） | `task/p0-3c-chain-per-question` | [P0-3c.md](P0-3c.md) | senior | — | 已交付（`8e752b7`），核实中（`review/P0-3c`） |
 | P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | 依赖已齐（B 2.4 修复之后做） | 待转交 |
-| B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → 修复在 `review/B-2.4` | 审查见 `review/B-2.4` 上的 `docs/tasks/B-2.4-review.md` | engineer | — | 第 3 轮修复已交付（`a56b053`），复核中 |
+| B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` → 修复在 `review/E11` | 审查见 `review/E11` 上的 `docs/tasks/E11-review.md` | junior | — | 修复已交付（`52a2d5f`），复核中（S6 第一阶段搁置） |
 
 已停用：过渡集成分支 `feat/p0-ci-llm-baseline` 不再使用，合入目标统一为 `develop`。
