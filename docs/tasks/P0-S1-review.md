@@ -100,3 +100,30 @@
 2. 回报中附：analyze 结果、新增测试名称、宿主全量测试数量。
 3. leader 派子代理定向复核 R1～R3（长密钥探针重跑）。
 4. P0-S2 基于本分支，需要在 P0-S1 合入后再合并一次 `develop`，然后核实。
+
+## 工程师2号定向复核（2026-10-06，待 leader 确认）
+
+复核对象：`review/P0-S1` @ `2409e9a`（含 `3952783` merge develop）· 复核：工程师2号（静态核对代码与测试；本机未装 Flutter，未重跑 `flutter test` / 变异）· 日期：2026-10-06（上海时间）
+
+**建议结论：R1～R3 从代码与测试上看已满足审查要求，建议 leader 确认后合入；全量测试中 2 个超时需 leader 裁定是否放行。**
+
+| 项 | 结论 | 依据 |
+|---|---|---|
+| R1 解析失败不带源文本；长密钥无片段泄露 | **满足（静态）** | `model_gateway.dart`：`jsonDecode` 失败抛 `const FormatException('model_response_not_json')`；非 Map 抛 `model_response_not_object`，均不引用响应体。`credential_redaction_callers_test.dart`：`_longSecret` 长度 ≥80（164），`_noFragmentOf` 断言 thrown 与 ledger `error` 均无 12 字符片段，且含 `model_response_not_json`。 |
+| R2 助手非 JSON 回复不引用原文 | **满足（静态）** | `personal_agent.dart`：`jsonDecode(text)` 失败抛 `const FormatException('model_reply_not_json')`，注释写明只改错误文本、仍拒绝回复。测试「assistant does not quote a non-JSON model reply…」用含长密钥的非 JSON 正文，断言 `task.error` 含 `model_reply_not_json`，且 task / 通知 / 会话消息均无密钥片段。 |
+| R3 科研页保存测试不再靠 10 分钟超时 | **满足（静态）** | 同一文件 widget 测试：打开对话框与点「保存」均在 `tester.runAsync` 内；保存后有限 `pump`，先断言 `invalidCredentialMessage`、对话框仍在、钥匙串未写入。注释说明若缺校验会在约 1 秒内失败而非假时间挂死。 |
+| R4 短密钥不值替换 | **已做（可选）** | `credential_redaction.dart`：`minRedactedSecretLength = 8`，仅 `secret.length >= 8` 时 `replaceAll`。 |
+| R5 注释 / HttpOverrides / secret 单测 | **已做（可选）** | 回显测试 `addTearDown` 恢复 `HttpOverrides`；另有 `secret:` 参数单元测试（见 `credential_redaction_test.dart`）。 |
+| develop 合并冲突 | **已解决** | `3952783` merge develop；`platform_shell.dart` import 按字母序保留双方行（执行者自述，本轮未再 diff develop）。 |
+
+### 未在本轮复现的项（请 leader / 有 Flutter 的环境补跑）
+1. `flutter analyze`（apps/muyon）与宿主全量 `flutter test`：工程师2号环境无 Flutter，采信 `2409e9a` 提交说明：`No issues found!`；全量 `+433 ~2 -2`。
+2. 变异测试：提交说明称撤回 R1 / R2 / 去掉科研校验后对应测试分别在约 5s / 6s / 1s 失败；本轮未亲手改坏重跑。
+3. **开放问题（合入裁定）**：2 个失败均在 `research_object_open_test.dart`（10 分钟超时）。执行者称在干净 `develop` @ `738cd69` 上同样失败（E11 旧问题）。若 leader 在 develop 上复现一致，建议**放行合入**并把跟进记入 E11b 或另开任务；若无法复现，则本分支需再查。
+
+### 给 leader 的确认清单
+1. 在有 Flutter 3.47.5 的环境检出 `2409e9a`，跑长密钥回显探针与上述三个定向测试。
+2. 确认 `research_object_open_test` 两例在 `develop` 上同样超时后，决定是否 `--no-ff` 合入 `develop`。
+3. 合入后更新本文件正式复核结论，并处理 P0-S2（基于本分支，需再合 develop 后核实）。
+
+本段为工程师2号预审记录，**非正式合入批准**。
