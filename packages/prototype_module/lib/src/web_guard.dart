@@ -1,32 +1,30 @@
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import 'scheme_loader.dart';
+
 /// Why a navigation or bridge call was refused; shown in logs and tests.
 enum GuardVerdict { allowed, blockedNavigation, blockedBridge }
 
-/// Decides what a prototype page may load and say to the host.
+/// Decides what a prototype page may navigate to and say to the host.
 ///
-/// It tightens [RestrictedWebViewSpec]: any `..` or encoded dot segment in the
-/// raw URL, embedded credentials, and every scheme other than `file`/`https`
-/// are refused before the spec's allowed-root check runs. `about:blank` is the
-/// only non-file page a WebView needs to start from and is allowed.
+/// Navigation is limited to prototype-scheme URLs that [PrototypeSchemeLoader]
+/// maps strictly inside the version root (dot segments, encoded separators,
+/// bad encodings, credentials and ports are all refused there) plus
+/// `about:blank`, which a WebView starts from.
 class PrototypeWebGuard {
   PrototypeWebGuard(this.spec);
 
   final RestrictedWebViewSpec spec;
 
-  static final _dotSegment = RegExp(r'(^|[/\\])(\.|%2e|%2E){2}([/\\]|$)');
+  late final _loader = PrototypeSchemeLoader(spec);
 
+  /// Only `about:blank` and prototype-scheme URLs that map inside the version
+  /// root. `file:` and `https:` top-level navigation is refused outright: the
+  /// page itself is loaded through the scheme, so nothing legitimate needs it.
   bool allowsNavigation(String rawUrl) {
     if (rawUrl == 'about:blank') return true;
-    if (_dotSegment.hasMatch(rawUrl)) return false;
-    final Uri uri;
-    try {
-      uri = Uri.parse(rawUrl);
-    } on FormatException {
-      return false;
-    }
-    if (uri.userInfo.isNotEmpty) return false;
-    return spec.allowsNavigation(uri);
+    if (!rawUrl.toLowerCase().startsWith('$prototypeScheme:')) return false;
+    return _loader.toFileUrl(rawUrl) != null;
   }
 
   /// Page → host messages. Only registered channels pass; the payload is
