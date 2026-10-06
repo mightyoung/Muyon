@@ -108,8 +108,8 @@
 
 ## 8. 需要用户处理或决定的事
 
-- 本机删除 6 个远端分支：`review/b-ui`、`review/c-modules`、`wip/g3-handoff`、`feat/a-acceptance`、`feat/a-agent`、`feat/a-storage`。2026-10-06 用户告知已删除，但 leader 用 `git ls-remote` 复查，6 个分支**仍在远端**。很可能只删了本地分支。需要在本机执行 `git push origin --delete …` 后再次核实。
-- 本机执行 `chmod 600 .env`。
+- ~~本机删除 6 个远端分支~~：**已完成**（2026-10-06，接任 leader 删除并复查，见 ADR-0001 后续记录）。
+- ~~本机执行 `chmod 600 .env`~~：**已完成**（2026-10-06）。
 - `main` 在第一阶段退出前不动；PR #1 与 PR #2 保持开放。
 - 停用但仍在远端的分支，可以在合适时机请用户删除：`feat/p0-ci-llm-baseline`，以及各 `task/*` 和 `review/*` 中已合入的分支。
 
