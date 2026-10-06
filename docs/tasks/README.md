@@ -19,13 +19,14 @@
 | P0-1 PR/push 自动门禁 | `task/p0-1-ci` | [P0-1.md](P0-1.md) | junior（修复） | — | 已合入（[审查](P0-1-review.md)，两轮） |
 | P0-J1 取证环境自检脚本 | `task/p0-j1-env-doctor` | [P0-J1.md](P0-J1.md) | junior | — | 已合入（[审查](P0-J1-review.md)） |
 | P0-J2 自检脚本安全加固 | `task/p0-j2-doctor-hardening` | [P0-J2.md](P0-J2.md) | junior | — | 已合入（[审查](P0-J2-review.md)） |
-| P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | — | 修复已交付（`ee9843d`），**复核被中断，待接任 leader 重做** |
-| P0-S2 MCP 令牌凭据脱敏 | `task/p0-s2-mcp-token-redaction` | [P0-S2.md](P0-S2.md) | senior | — | 已交付（`fccc318`，含 P0-S1），**核实被中断，待重做** |
+| P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | — | **第 2 轮复核未通过**：长密钥回显仍泄露（R1 阻断）、R2、R3，交回 senior 在 `review/P0-S1` 修复（[审查](P0-S1-review.md)，在审查分支上） |
+| P0-S2 MCP 令牌凭据脱敏 | `task/p0-s2-mcp-token-redaction` | [P0-S2.md](P0-S2.md) | senior | — | 已交付（`fccc318`，含 P0-S1）；**等 P0-S1 合入后再合并 develop 并核实** |
 | P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | 待转交 |
 | P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | — | 已交付（`8de0ca3`），**核实被中断，待重做** |
 | P0-3c 询价链路判定收尾（低优先级） | `task/p0-3c-chain-per-question` | [P0-3c.md](P0-3c.md) | senior | — | 已合入（[审查](P0-3c-review.md)） |
+| P0-3d 助手协议对真实模型的容错（D1） | `task/p0-3d-protocol-robustness` | [P0-3d.md](P0-3d.md) | senior | P0-S1 合入之后 | 待转交（排在 P0-S1 修复之后） |
 | E11b 研究对象页收尾（小） | `task/e11b-object-page-tests` | [E11b.md](E11b.md) | junior | P0-1 修复之后、P0-J3 之前 | **可转交**（P0-1 已合入） |
-| P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | — | 第一批证据已推送（`f535db4`，deepseek-chat，含无头运行），待审查；真机部分待确认 |
+| P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | — | 第一批已审（[审查](P0-4-review.md)，在审查分支上）：基线可入账；两次链路都失败（D1）、无真机证据。S1～S4 交回 engineer；下一批等 P0-3d 合入 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` → `review/E11` | [审查](E11-review.md) | junior | — | 已合入（两轮；S6 第一阶段搁置） |
 
