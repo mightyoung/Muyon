@@ -56,11 +56,11 @@ P0-S1 第 3 轮复核已在交接前完成并合入。旧会话派出的 **E11b 
 | 任务 | 分支 / 提交 | 状态与下一步 |
 |---|---|---|
 | **P0-S1** 凭据脱敏 | — | **已合入**（第 3 轮复核通过）。 |
-| **P0-3d** 助手协议容错（D1） | `task/p0-3d-protocol-robustness` @ `ff9625a` | 说明见 [P0-3d.md](P0-3d.md)。**第一阶段关键路径**，P0-S1 已合入，可以开始。转发给 senior：「检出 `task/p0-3d-protocol-robustness`，先 `git merge origin/develop`，阅读 `docs/tasks/P0-3d.md` 并按要求执行，提交并推送到该分支，不要合并 develop。」审查派 `reviewer-sonnet-high`（安全约束：不合规回复不能变成提议或写入、重试上限、错误不引用原文）。 |
+| **P0-3d** 助手协议容错（D1） | — | **已合入**（[审查](P0-3d-review.md)）。测试缺口转 **P0-3e**（senior）：「检出 `task/p0-3e-protocol-tests`，阅读 `docs/tasks/P0-3e.md` 并按要求执行，提交并推送到该分支，不要合并 develop。」审查派 `reviewer-sonnet-medium`。 |
 | **P0-S2** MCP 令牌脱敏 | `task/p0-s2-mcp-token-redaction` @ `fccc318`（基于旧的 `review/P0-S1`） | P0-S1 已合入。转发给 senior（排在 P0-3d 之后或并行）：「检出 `task/p0-s2-mcp-token-redaction`，`git merge origin/develop` 解决冲突（`credential_redaction.dart` 以 develop 上 P0-S1 的最终版为准，保留 R1 固定错误文本与 R4 的 8 字符下限），跑 analyze 与宿主全量，推送并回报。」然后派 `reviewer-sonnet-high` 核实。说明见 [P0-S2.md](P0-S2.md)；要点：确认没有削弱 P0-S1；MCP 工具结果回显令牌时是否会进入助手、模型或账本。 |
 | **E11b** | `review/E11b` @ `14db9dc` | 核实待重做（第 0 节）。通过后合入，然后转发 **P0-F2** 给 junior。 |
 | **P0-F2** 两个 10 分钟超时 | `task/p0-f2-object-open-timeout` | 说明见 [P0-F2.md](P0-F2.md)，根因已查清，一行修复。**E11b 合入后**转发给 junior：「检出 `task/p0-f2-object-open-timeout`，先 `git merge origin/develop`，阅读 `docs/tasks/P0-F2.md` 并按要求执行，提交并推送到该分支，不要合并 develop，回报附 Actions 运行链接。」审查派 `reviewer-sonnet-low`，看 Actions 是否变绿。 |
-| **P0-4** 真机与真实模型取证 | `review/P0-4`（engineer 现在推到这里） | engineer 正在跑 **macOS 设备链路**（预算题预计仍因 D1 失败，照常入库为负面证据）。P0-3d 合入后，在 Android 和 macOS 各重跑一次链路，加一次 `bash scripts/ci.sh`。 |
+| **P0-4** 真机与真实模型取证 | `review/P0-4` | P0-3d 已合入。engineer 在含 P0-3d 的 `develop` 上，Android（必需）与 macOS 各重跑一次链路，加一次 `ci.sh`（本机 inquiry 截图因 macOS 27 渲染漂移会失败，如实记录）。审查按第 5 节，字段核对派 `reviewer-sonnet-low`。 |
 | **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | 排在 P0-F2 合入之后，junior。 |
 
 ## 4. 第一阶段退出标准（ADR-0001 §5）
@@ -115,7 +115,7 @@ P0-S1 第 3 轮复核已在交接前完成并合入。旧会话派出的 **E11b 
 ## 9. 接任后的建议顺序
 
 1. `git fetch`，按本文件核对各分支哈希；确认 `reviewer-sonnet-*` 子代理可用（试调一次）。
-2. 确认用户已把 **P0-3d** 转给 senior（关键路径，P0-S1 已合入）。转发语见第 3 节。
+2. P0-3d 已合入：确认用户已把 P0-4 正式重跑转给 engineer、P0-3e 转给 senior。
 3. 用 Sonnet 重做 E11b 核实 → 合入 → 转发 **P0-F2** 给 junior；P0-F2 合入后 `develop` 门禁应变绿，再转发 P0-J3。
 4. senior 把 `develop` 合进 P0-S2 后，派 `reviewer-sonnet-high` 核实 → 合入。
 5. 收 engineer 的 macOS 设备批次 → 审查 → 合入。
