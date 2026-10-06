@@ -3,6 +3,7 @@ import 'package:muyon_ui/muyon_ui.dart';
 
 import '../app/bootstrap.dart';
 import '../platform/mcp_adapter.dart';
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart' show SecretStore;
 import '../services/models/secret_store.dart';
 
@@ -151,7 +152,7 @@ class _McpServersPageState extends State<McpServersPage> {
     try {
       return widget.store.load();
     } catch (failure) {
-      error = '读取配置失败：$failure';
+      error = '读取配置失败：${redactCredentials(failure)}';
       return [];
     }
   }
@@ -210,7 +211,8 @@ class _McpServersPageState extends State<McpServersPage> {
     } catch (failure) {
       if (mounted) {
         setState(() {
-          connectErrors[record.id] = '$failure';
+          // Shown on the page: never the token, even if an error quotes it.
+          connectErrors[record.id] = redactCredentials(failure);
           busy = false;
         });
       }
@@ -254,7 +256,7 @@ class _McpServersPageState extends State<McpServersPage> {
     } catch (failure) {
       if (mounted) {
         setState(() {
-          error = '移除失败：$failure';
+          error = '移除失败：${redactCredentials(failure)}';
           busy = false;
         });
       }
@@ -405,6 +407,7 @@ class _ServerDialogState extends State<_ServerDialog> {
   final TextEditingController tokenController = TextEditingController();
   String? idError;
   String? endpointError;
+  String? tokenError;
   String? saveError;
   bool saving = false;
 
@@ -430,10 +433,15 @@ class _ServerDialogState extends State<_ServerDialog> {
       idMessage = '已存在同名服务器。';
     }
     final endpointMessage = widget.endpointProblem(endpoint);
-    if (idMessage != null || endpointMessage != null) {
+    // Same rule as model keys: refuse, do not trim, never store or echo it.
+    final tokenMessage = token.isNotEmpty && !isSendableCredential(token)
+        ? invalidCredentialMessage
+        : null;
+    if (idMessage != null || endpointMessage != null || tokenMessage != null) {
       setState(() {
         idError = idMessage;
         endpointError = endpointMessage;
+        tokenError = tokenMessage;
       });
       return;
     }
@@ -458,7 +466,7 @@ class _ServerDialogState extends State<_ServerDialog> {
     } catch (failure) {
       setState(() {
         saving = false;
-        saveError = '保存失败：$failure';
+        saveError = '保存失败：${redactCredentials(failure)}';
       });
     }
   }
@@ -498,6 +506,7 @@ class _ServerDialogState extends State<_ServerDialog> {
                 labelText: widget.existing?.credentialRef == null
                     ? '访问令牌（可选）'
                     : '访问令牌（已保存，留空保持不变）',
+                errorText: tokenError,
               ),
             ),
             const SizedBox(height: MuyonTokens.space2),

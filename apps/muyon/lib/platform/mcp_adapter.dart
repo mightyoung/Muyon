@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart' show SecretStore;
 import 'tool_registry.dart';
 
@@ -128,7 +129,11 @@ abstract final class McpAdapter {
       for (final item in result['content'] as List? ?? const [])
         if (item is Map && item['type'] == 'text') '${item['text']}',
     ].join('\n');
-    final summary = text.length > 2000 ? '${text.substring(0, 2000)}…' : text;
+    // A server that echoes the token must not get it into receipts or the UI.
+    final masked = maskSecret(text, client.token);
+    final summary = masked.length > 2000
+        ? '${masked.substring(0, 2000)}…'
+        : masked;
     return ToolCallResult(
       status: result['isError'] == true
           ? ToolCallStatus.failed
@@ -152,16 +157,39 @@ class _McpClient {
   String? _session;
   var _nextId = 1;
 
+  /// Token used for this server's requests, kept to redact echoes of it.
+  String? token;
+
+  /// Errors leave the client without the token: a malformed header quotes it,
+  /// and a server may echo it in an error or a response body.
+  Future<T> _redacting<T>(Future<T> Function() body) async {
+    try {
+      return await body();
+    } catch (error, stack) {
+      final safe = redactCredentials(error, secret: token);
+      if (safe != '$error') Error.throwWithStackTrace(StateError(safe), stack);
+      rethrow;
+    }
+  }
+
   Future<void> initialize() async {
     await rpc('initialize', {
       'protocolVersion': McpAdapter.protocolVersion,
       'capabilities': <String, Object?>{},
       'clientInfo': {'name': 'muyon', 'version': '0.1.0'},
     });
-    await _post({'jsonrpc': '2.0', 'method': 'notifications/initialized'});
+    await _redacting(
+      () => _post({'jsonrpc': '2.0', 'method': 'notifications/initialized'}),
+    );
   }
 
   Future<Map<String, Object?>> rpc(
+    String method,
+    Map<String, Object?> params, {
+    ToolCancellationToken? cancellation,
+  }) => _redacting(() => _rpc(method, params, cancellation: cancellation));
+
+  Future<Map<String, Object?>> _rpc(
     String method,
     Map<String, Object?> params, {
     ToolCancellationToken? cancellation,
@@ -193,6 +221,19 @@ class _McpClient {
     );
     try {
       return await (() async {
+        // Read and check the token before connecting: a token that cannot be
+        // sent in a header is refused without any request.
+        String? bearer;
+        if (config.credentialRef != null) {
+          bearer = await secrets.read(config.credentialRef!);
+          if (bearer == null || bearer.isEmpty) {
+            throw StateError('credential_unavailable');
+          }
+          if (!isSendableCredential(bearer)) {
+            throw StateError('mcp_token_invalid');
+          }
+          token = bearer;
+        }
         final request = await client.postUrl(config.endpoint);
         request.followRedirects = false;
         request.headers
@@ -200,12 +241,11 @@ class _McpClient {
           ..set(HttpHeaders.acceptHeader, 'application/json, text/event-stream')
           ..set('MCP-Protocol-Version', McpAdapter.protocolVersion);
         if (_session != null) request.headers.set('Mcp-Session-Id', _session!);
-        if (config.credentialRef != null) {
-          final token = await secrets.read(config.credentialRef!);
-          if (token == null || token.isEmpty) {
-            throw StateError('credential_unavailable');
-          }
-          request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
+        if (bearer != null) {
+          request.headers.set(
+            HttpHeaders.authorizationHeader,
+            'Bearer $bearer',
+          );
         }
         request.write(jsonEncode(message));
         final response = await request.close();

@@ -22,14 +22,19 @@ bool mayContainCredential(String text) => _credentialMention.hasMatch(text);
 /// covering an endpoint that echoes the key in its response; then text that
 /// may still quote a credential keeps only the error type and a fixed note.
 String redactCredentials(Object error, {String? secret}) {
-  var text = error is String ? error : '$error';
-  if (secret != null && secret.isNotEmpty) {
-    text = text.replaceAll(secret, '<redacted>');
-  }
+  final text = maskSecret(error is String ? error : '$error', secret);
   if (!mayContainCredential(text)) return text;
   final type = error is String ? 'Error' : '${error.runtimeType}';
   return '$type: details withheld (may contain the credential)';
 }
+
+/// [text] with every occurrence of [secret] replaced by `<redacted>`. For
+/// content that is not an error (e.g. a remote tool result that echoes the
+/// key), where the keyword rule of [redactCredentials] would hide too much.
+String maskSecret(String text, String? secret) =>
+    secret == null || secret.isEmpty
+    ? text
+    : text.replaceAll(secret, '<redacted>');
 
 /// A credential dart:io can put in a header unchanged: visible ASCII only, no
 /// spaces, line breaks or full-width characters.
