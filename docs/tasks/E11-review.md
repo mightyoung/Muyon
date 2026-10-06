@@ -78,3 +78,39 @@ catch-all 吞掉了异常，`openSession` 之后如果 `objectPage` 抛出异常
 
 ## 修复方式
 执行者（junior）检出 `review/E11`，按上文修复，提交并推送到 `review/E11`。回报中附 analyze 结果、research_module 与宿主的测试数量，以及新增测试的名称。leader 派子代理定向复核后，合入 `develop`。
+
+---
+
+## 复核（2026-10-06，`52a2d5f`，Opus 子代理）
+
+**结论：通过，合入 `develop`。** F1、F2、F3、F5 以及顺手修的 F7、F8、F10 都已正确完成。唯一的测试缺口（N1）放到后续小任务 [E11b](E11b.md)。
+
+- **范围**：7 个文件，都在 E11 负责的范围内；宿主目录（`business_tools.dart`）、prototype_module、`workbench_app.dart` 都没有改动。
+- **已有测试**：`research_runtime_test.dart` 只删了旧的 F8 注释，其余都是新增内容。原有的 24 个 isNull、5 个 isNotNull 全部保留。
+- **F1**：SQL 加上了 `AND task_revision=?`，r1 和 r2 页面各自显示自己的状态，并补了测试。
+- **F2**：研究对象的引用先走 `openModuleObjectPage`，返回 null 时才回退到目录或 JSON 页。
+  - task、run、card、outline、section 都能打开各自的页面；
+  - 过期的引用会显示明确的错误，不抛异常，会话会被释放；
+  - **安全探针**：拿其他项目的 id 伪造引用，或者引用未绑定的项目，都显示不出对方的内容。原因有三：辅助函数要求 `ownerWorkspace` 且绑定的项目一致，`_resolve` 拒绝项目不一致的引用，每条查询都按项目过滤；
+  - 知识库和询价分支没有改动，阅读器加助手的布局保留。
+- **F3**：关闭 entry 详情页和阅读器后，测试都断言了 `Session disposed`。
+- **F5**：辅助函数改为 try/finally 加转移标记，并改用 `ownerWorkspace`。探针确认 `objectPage` 或 `resolve` 抛异常时会话都会被释放。
+- **F7、F10**：标签已改正；卡片的标题和 AppBar 截到 60 个字符并加省略号。
+- **回归**：
+  - analyze 零问题；
+  - `dart format` 无改动；
+  - research_module +210；
+  - `research_object_open_test` +5；
+  - 宿主全量 +401 ~1。
+- **变异测试**：
+  - 去掉修订过滤：被测试抓到；
+  - 改回先走目录：被测试抓到；
+  - 去掉外壳的 dispose：被测试抓到；
+  - **去掉辅助函数的 finally-dispose：测试仍然通过**（见 N1）。
+
+### 后续
+- **N1（应改）→ E11b**：辅助函数在返回 null 的路径上释放会话，这一点没有测试守护。代码本身正确，探针已确认，所以合入后再补测试。
+- **N3（记录进验收账本）**：task、run、card、outline、section 页面上的助手面板，范围是 `selectedObjects([ref])`，而这几类对象不在宿主目录里，所以在这些页面里一调用工具就会报 `Selected object is missing…`。这是之前决定「不扩充目录」带来的结果，第一阶段之后与目录方案一起处理。
+- **N4（可选）→ E11b**：卡片 AppBar 标题用的是原始 Markdown，保留了 `# ` 和换行；`substring` 可能把 emoji 截成两半。
+- **N2（只记录）**：outline 页的「所属段落」在真实数据中总是与标题相同，可以考虑相同时不显示。
+- **提示**：`_runtimeFor` 和 `openSession` 出错时，表现为外壳报错，而不是返回 null 再回退。用户两种情况下都会看到错误。文档注释里「任何缺失都返回 null」的说法略有夸大。
