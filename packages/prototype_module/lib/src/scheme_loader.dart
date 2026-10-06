@@ -85,7 +85,12 @@ class PrototypeSchemeLoader {
       return null;
     }
     if (!p.isWithin(realRoot, real)) return null;
-    return (data: await target.readAsBytes(), contentType: mimeFor(file.path));
+    // Read the resolved location, not the original path, so a link swapped in
+    // after the check cannot redirect the read.
+    return (
+      data: await File(real).readAsBytes(),
+      contentType: mimeFor(file.path),
+    );
   }
 
   static const _mime = {

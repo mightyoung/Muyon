@@ -52,7 +52,7 @@
 
 - macOS：页面能否通过 `muyon-proto` 正常渲染（自定义 scheme 请求在 WKWebView 上的行为）。
 
-- Windows：自定义 scheme 是否可用（原生未见实现，很可能不可用，届时原型页面在 Windows 上打不开，需要另选方案）；`shouldInterceptRequest` 的覆盖范围。
+- Windows：自定义 scheme 是否可用。插件原生有实现，但 Windows 设置里没有 `resourceCustomSchemes`，WebView2 也只为通过 `WebViewEnvironmentSettings.customSchemeRegistrations` 注册过的 scheme 触发请求事件，而代码没有创建这个环境，所以很可能打不开，需要另选方案；`shouldInterceptRequest` 的覆盖范围。
 - macOS / iOS：自定义 scheme 请求是否经过内容拦截规则；CSP 是否生效。
 - 三个平台上 CSP 是否先于页面的**外部**资源解析（Android 只验证了 `<meta>` 存在和越界请求被拦）。
 

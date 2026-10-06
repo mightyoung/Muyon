@@ -138,6 +138,13 @@ void main() {
       expect(await loader.read('muyon-proto://page/rel.txt'), isNull);
     });
 
+    test('a link to a sibling whose name starts with the root name', () async {
+      final v10 = Directory(p.join(tmp.path, 'p1', 'v10'))..createSync();
+      File(p.join(v10.path, 'a.txt')).writeAsStringSync('x');
+      Link(p.join(v1(), 'v10link')).createSync(v10.path);
+      expect(await loader.read('muyon-proto://page/v10link/a.txt'), isNull);
+    });
+
     test('a link that stays inside the root still works', () async {
       Link(p.join(v1(), 'alias.js'))
           .createSync(p.join(v1(), 'assets', 'app.js'));

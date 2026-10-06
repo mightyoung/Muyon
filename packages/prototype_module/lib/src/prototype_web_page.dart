@@ -46,7 +46,12 @@ Widget defaultPrototypeWebView(PrototypeWebConfig config) {
   final policy = PrototypeResourcePolicy(config.spec);
   final loader = PrototypeSchemeLoader(config.spec);
   Future<({Uint8List data, String contentType})?> serve(String url) async {
-    final file = policy.allowsResource(url) ? await loader.read(url) : null;
+    ({Uint8List data, String contentType})? file;
+    try {
+      file = policy.allowsResource(url) ? await loader.read(url) : null;
+    } catch (_) {
+      file = null; // any read error is a refusal (403 / empty response)
+    }
     if (file == null) config.onBlocked(url);
     return file;
   }
