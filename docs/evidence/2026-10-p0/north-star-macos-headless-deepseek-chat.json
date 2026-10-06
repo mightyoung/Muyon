@@ -1,0 +1,103 @@
+{
+  "kind": "muyon-north-star-inquiry",
+  "schema": 1,
+  "startedAt": "2026-10-06T03:03:34.770686Z",
+  "evidenceClass": "real-model",
+  "realModelEvidence": true,
+  "note": "Real model endpoint; assertions are invariants only (registered tools, write only after approval, survives reopen, ledger rows).",
+  "commit": "6d21831",
+  "device": {
+    "platform": "macos",
+    "osVersion": "Version 26.5.2 (Build 25F84)",
+    "dart": "3.13.4",
+    "processors": 8,
+    "label": "macOS host, headless flutter_test",
+    "binding": "flutter_test (headless)"
+  },
+  "steps": [
+    {
+      "name": "host.open",
+      "ok": true,
+      "ms": 1408
+    },
+    {
+      "name": "inquiry.activate",
+      "ok": true,
+      "ms": 225
+    },
+    {
+      "name": "inquiry.seed",
+      "ok": true,
+      "ms": 1899
+    },
+    {
+      "name": "model.profile",
+      "ok": true,
+      "ms": 114
+    },
+    {
+      "name": "assistant.read.compare_quotes",
+      "ok": true,
+      "ms": 3259
+    },
+    {
+      "name": "assistant.read.project_budget",
+      "ok": false,
+      "ms": 2430
+    }
+  ],
+  "tasks": [
+    {
+      "phase": "read",
+      "id": "cd68ff97-a575-46ed-b105-7d1c497840d3",
+      "modelConfirmations": 2,
+      "toolConfirmations": 0,
+      "state": "succeeded",
+      "stage": "completed",
+      "rounds": 2,
+      "error": null,
+      "tools": [
+        "inquiry.compare_quotes"
+      ],
+      "answerPreview": "物料「电缆」目前只有一组可比口径（CNY、含税、单位：米），共 2 条报价，均已返回（未截断）：\n\n| 供应商 | 单价（元/米） | 是否可用 | 是否最低 | 起订量 | 报价日期 |\n|---|---|---|---|---|---|\n| 北极星乙线缆 | 11.8 | 是 | 是 | 1 | 2026-10-06 |\n| 北极星甲电气 | 12.5 | 是 | 否 | 1 | 2026-1…",
+      "answerReferences": 2,
+      "readReceipts": [
+        "inquiry.compare_quotes"
+      ]
+    },
+    {
+      "phase": "read",
+      "id": "c5e38329-723c-4356-a065-5cd324e2de2d",
+      "modelConfirmations": 2,
+      "toolConfirmations": 0,
+      "state": "failed",
+      "stage": "failed",
+      "rounds": 1,
+      "error": "执行失败（FormatException: Unexpected character (at character 1) 项目「北极星验收项目」的成本预算：成本合计 2080 元，销售合计 2080 元，毛利 0 元。全部 2 行均已返回（未截断），全部为材料类。 ^ ）；请检查端点、模型名称、工具权限或资料范围后新建尝试",
+      "tools": [
+        "inquiry.project_budget"
+      ],
+      "answerPreview": "项目成本预算：各行数量、成本单价、销售单价、金额和提示，分类小计、成本合计、销售合计、毛利。汇总覆盖全部行，limit 控制明细行数，见 total/returned/truncated；完整原始明细用 related 带 snapshot 分页",
+      "answerReferences": 0
+    }
+  ],
+  "seed": {
+    "suppliers": 2,
+    "budgetLines": 2,
+    "quotations": 4,
+    "inquiries": 1
+  },
+  "model": {
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "modelId": "deepseek-chat",
+    "location": "remote",
+    "credential": "env (not stored)",
+    "configuredBy": "environment"
+  },
+  "registeredTools": 34,
+  "passed": false,
+  "failure": "Bad state: Read question c5e38329-723c-4356-a065-5cd324e2de2d ended failed: 执行失败（FormatException: Unexpected character (at character 1) 项目「北极星验收项目」的成本预算：成本合计 2080 元，销售合计 2080 元，毛利 0 元。全部 2 行均已返回（未截断），全部为材料类。 ^ ）；请检查端点、模型名称、工具权限或资料范围后新建尝试",
+  "failureStack": "#0      NorthStarInquiryChain._drive (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:445:9)\n<asynchronous suspension>\n#1      NorthStarInquiryChain._step (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:61:22)\n<asynchronous suspension>\n#2      NorthStarInquiryChain._chain (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:218:20)\n<asynchronous suspension>\n#3      NorthStarInquiryChain.run (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:116:7)\n<asynchronous suspension>",
+  "finishedAt": "2026-10-06T03:03:44.156810Z",
+  "totalMs": 9387
+}

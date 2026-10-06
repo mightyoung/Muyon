@@ -1,0 +1,101 @@
+{
+  "kind": "muyon-north-star-inquiry",
+  "schema": 1,
+  "startedAt": "2026-10-06T03:04:25.206668Z",
+  "evidenceClass": "real-model",
+  "realModelEvidence": true,
+  "note": "Real model endpoint; assertions are invariants only (registered tools, write only after approval, survives reopen, ledger rows).",
+  "commit": "6d21831",
+  "device": {
+    "platform": "macos",
+    "osVersion": "Version 26.5.2 (Build 25F84)",
+    "dart": "3.13.4",
+    "processors": 8,
+    "label": "macOS host, headless flutter_test",
+    "binding": "flutter_test (headless)"
+  },
+  "steps": [
+    {
+      "name": "host.open",
+      "ok": true,
+      "ms": 1878
+    },
+    {
+      "name": "inquiry.activate",
+      "ok": true,
+      "ms": 119
+    },
+    {
+      "name": "inquiry.seed",
+      "ok": true,
+      "ms": 3123
+    },
+    {
+      "name": "model.profile",
+      "ok": true,
+      "ms": 132
+    },
+    {
+      "name": "assistant.read.compare_quotes",
+      "ok": true,
+      "ms": 3405
+    },
+    {
+      "name": "assistant.read.project_budget",
+      "ok": false,
+      "ms": 802
+    }
+  ],
+  "tasks": [
+    {
+      "phase": "read",
+      "id": "29cbd917-e09a-4c69-ab09-68e8bc503006",
+      "modelConfirmations": 2,
+      "toolConfirmations": 0,
+      "state": "succeeded",
+      "stage": "completed",
+      "rounds": 2,
+      "error": null,
+      "tools": [
+        "inquiry.compare_quotes"
+      ],
+      "answerPreview": "物料「电缆」共有 2 条可比报价（口径一致：CNY、含税、单位「米」，均可用、起订量 1），最低价是**北极星乙线缆**的 **11.8 元/米**。\n\n- 北极星乙线缆：11.8 元/米（最低）\n- 北极星甲电气：12.5 元/米\n\n该口径历史数据（2 条）：最低 11.8、平均 12.15、最高 12.5。两组报价的列表均完整（truncated=false）。本次仅做查询，未修改任何数据。",
+      "answerReferences": 2,
+      "readReceipts": [
+        "inquiry.compare_quotes"
+      ]
+    },
+    {
+      "phase": "read",
+      "id": "c59344c2-84d3-4062-a965-8c06786b326c",
+      "modelConfirmations": 1,
+      "toolConfirmations": 0,
+      "state": "failed",
+      "stage": "failed",
+      "rounds": 0,
+      "error": "执行失败（FormatException: Unexpected character (at character 1) <｜｜DSML｜｜ calls> ^ ）；请检查端点、模型名称、工具权限或资料范围后新建尝试",
+      "tools": [],
+      "answerPreview": null,
+      "answerReferences": 0
+    }
+  ],
+  "seed": {
+    "suppliers": 2,
+    "budgetLines": 2,
+    "quotations": 4,
+    "inquiries": 1
+  },
+  "model": {
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "modelId": "deepseek-chat",
+    "location": "remote",
+    "credential": "env (not stored)",
+    "configuredBy": "environment"
+  },
+  "registeredTools": 34,
+  "passed": false,
+  "failure": "Bad state: Read question c59344c2-84d3-4062-a965-8c06786b326c ended failed: 执行失败（FormatException: Unexpected character (at character 1) <｜｜DSML｜｜ calls> ^ ）；请检查端点、模型名称、工具权限或资料范围后新建尝试",
+  "failureStack": "#0      NorthStarInquiryChain._drive (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:445:9)\n<asynchronous suspension>\n#1      NorthStarInquiryChain._step (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:61:22)\n<asynchronous suspension>\n#2      NorthStarInquiryChain._chain (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:218:20)\n<asynchronous suspension>\n#3      NorthStarInquiryChain.run (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:116:7)\n<asynchronous suspension>",
+  "finishedAt": "2026-10-06T03:04:34.828974Z",
+  "totalMs": 9623
+}
