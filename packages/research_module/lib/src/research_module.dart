@@ -497,12 +497,8 @@ class ResearchSession implements ModuleSession {
             (jsonDecode(rows.single['envelope'] as String)
                     as Map)['bodyMarkdown']
                 as String;
-        // The shell shows this title in its app bar; keep it short (review
-        // F10).
         return view(
-          body.isEmpty
-              ? id
-              : (body.length > 60 ? '${body.substring(0, 60)}…' : body),
+          _cardTitle(body, fallback: id),
           revision: rows.single['revision_id'] as String,
           digest: rows.single['digest'] as String,
         );
@@ -709,5 +705,21 @@ class ResearchSession implements ModuleSession {
       if (page is int) '第${page + 1}页',
       if (quote.isNotEmpty) '“$quote”',
     ].where((part) => part.isNotEmpty).join(' · ');
+  }
+
+  /// Card app bar title (review N4): the first non-empty line without heading
+  /// marks, truncated to 60 characters with an ellipsis. Truncation is by rune
+  /// so surrogate pairs (emoji) stay whole.
+  static String _cardTitle(String bodyMarkdown, {required String fallback}) {
+    for (final line in bodyMarkdown.split('\n')) {
+      final trimmed = line.replaceFirst(RegExp(r'^#+\s*'), '').trim();
+      if (trimmed.isNotEmpty) {
+        final runes = trimmed.runes.toList();
+        return runes.length > 60
+            ? '${String.fromCharCodes(runes.take(60))}…'
+            : trimmed;
+      }
+    }
+    return fallback;
   }
 }
