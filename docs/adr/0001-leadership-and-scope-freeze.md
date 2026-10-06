@@ -72,3 +72,4 @@
 - 用户确认删除 6 个已合入或没有内容的远端分支：`review/b-ui`、`review/c-modules`、`wip/g3-handoff`、`feat/a-acceptance`、`feat/a-agent`、`feat/a-storage`。云端会话的代理禁止删除远端分支，由用户在本机执行。
 - 保留 `feat/c-modules` 与 `feat/d-transfer`，等 Codex、Grok 恢复额度后继续使用；保留 `ci/manual-verify`（PR #2）。
 - 2026-10-06：S6（原型对象从助手回答跳回原型页）在第一阶段**明确搁置**。原型对象没有工作区绑定；最小接法需要临时绑定，与「不自造绑定」冲突，另一种做法需要新接口。第一阶段之后排期。见 `review/E11` 上的 `docs/tasks/E11-review.md`。
+- 2026-10-06：上述 6 个远端分支已由用户删除，leader 已核实。
