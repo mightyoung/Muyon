@@ -9,16 +9,16 @@
 
 ## 0. 交接时仍在途的核实（最先处理）
 
-旧会话派出的两个 Opus 核实子代理在交接时**还没回报**。新会话收不到它们的结果，请**直接用 Sonnet 重做**，不要等：
+P0-S1 第 3 轮复核已在交接前完成并合入。旧会话派出的 **E11b 核实**（Opus 子代理）在交接时还没回报，新会话收不到它的结果，请**直接用 Sonnet 重做**，不要等：
 
 | 任务 | 审查分支 @ 提交 | 重做方式 |
 |---|---|---|
-| **P0-S1** 第 3 轮定向复核 | `review/P0-S1` @ `3b237d7`（代码在 `2409e9a`，`3952783` 合并了 develop；`3b237d7` 只加了 grokbot 的静态预审） | `reviewer-sonnet-high`。要求见 `P0-S1-review.md`「复核（2026-10-06…）」一节 R1～R5：164 字符长密钥探针（含密钥在正文末尾、合法 JSON 非对象两个变体），撤回 R1、R2、科研页校验三处变异，`platform_shell.dart` 合并结果，`flutter analyze` 与宿主全量 |
-| **E11b** 研究对象页收尾 | `review/E11b` @ `14db9dc`（3 个文件，+120/−5，范围已核对符合） | `reviewer-sonnet-medium`。N1 变异（删掉 `object_pages.dart` finally 中的 dispose）、N4 变异（截断改为按 UTF-16）、analyze、research_module 全量、`research_object_open_test.dart`（加 `--timeout 90s`） |
+| **E11b** 研究对象页收尾 | `review/E11b` @ `14db9dc`（3 个文件，+120/−5，范围已核对符合） | `reviewer-sonnet-medium`。N1 变异（删掉 `object_pages.dart` finally 中的 dispose）、N4 变异（截断改为按 UTF-16）、analyze、research_module 全量、`research_object_open_test.dart` |
 
-**已知背景，两份核实都会碰到：** `apps/muyon/test/research_object_open_test.dart` 中「an object without a binding falls back to the JSON page」「the helper returns null without a binding and disposes」两例，在干净 `develop` 上就是 10 分钟超时（Linux Actions [run 37420884434](https://github.com/mightyoung/Muyon/actions/runs/37420884434)，host `+420 ~2 -2`）。**`develop` 的 CI 门禁从 P0-1 合入起一直是红的**，根因是 E11 在门禁存在之前合入。所以：
-- 只因这两例失败，不阻塞 P0-S1、E11b 合入（核实时确认失败的只有这两例、且与 develop 相同）；
-- 要尽快另开一个小修复任务（建议编号 **P0-F2**，派 senior；它刚在 P0-S1 R3 修过同类问题：假时间里等真实 IO 导致挂到 10 分钟）。修复要排在任何再改这个测试文件的任务之前。先让核实子代理给出根因初诊，再写任务说明。
+**已知背景：** `apps/muyon/test/research_object_open_test.dart` 中「an object without a binding falls back to the JSON page」在干净 `develop` 上 10 分钟超时，「the helper returns null without a binding and disposes」是它的连带失败（`'!inTest': is not true`）。**`develop` 的 CI 门禁从 P0-1 合入起一直是红的**（Linux Actions [run 37420884434](https://github.com/mightyoung/Muyon/actions/runs/37420884434)，host `+420 ~2 -2`）。
+- 根因已查清：测试在假时间区域里创建了数据库写入队列的 Future，tearDown 在 `runAsync` 里再写库时死锁；不是产品缺陷。详见 [P0-F2.md](P0-F2.md)。
+- 只因这两例失败，不阻塞 E11b 合入（确认失败的只有这两例，且与 develop 相同）。注意：`testWidgets` 用 binding 自己的 10 分钟上限，`--timeout` 不起作用。
+- 修复是 **P0-F2**（junior，一行改动），排在 E11b 合入之后、P0-J3 之前。
 
 ## 1. 工作方式（照此延续）
 
@@ -48,19 +48,20 @@
 | HANDOVER-A、P0-J1、P0-J2、P0-2、P0-3、P0-3c、B 2.4、E11 | 见各自审查文件（第 1 次交接前合入） |
 | **P0-1** 自动门禁（`ada9487`） | [P0-1-review.md](P0-1-review.md) |
 | **P0-F1** 不稳定的局域网测试（`c20355b`） | [P0-F1-review.md](P0-F1-review.md)：根因成立，`stop()` 无竞态 |
+| **P0-S1** 凭据脱敏（三轮） | [P0-S1-review.md](P0-S1-review.md)：长密钥回显探针、三处变异均通过 |
 | **P0-4 第一、二批证据**（`76c23b2`、`34ca1da`） | [P0-4-review.md](P0-4-review.md)：基线可入账；三次链路都因 D1 失败 |
 
 ## 3. 进行中的任务
 
 | 任务 | 分支 / 提交 | 状态与下一步 |
 |---|---|---|
-| **P0-S1** 凭据脱敏 | `review/P0-S1` @ `3b237d7` | 第 3 轮复核待重做（第 0 节）。通过后合入，**合入后才能开始 P0-3d 和 P0-S2**。 |
-| **P0-3d** 助手协议容错（D1） | `task/p0-3d-protocol-robustness` @ `ff9625a` | 说明见 [P0-3d.md](P0-3d.md)。**第一阶段关键路径**：不修就拿不到 `passed: true` 的链路证据。P0-S1 合入后转发给 senior：「检出 `task/p0-3d-protocol-robustness`，先 `git merge origin/develop`，阅读 `docs/tasks/P0-3d.md` 并按要求执行，提交并推送到该分支，不要合并 develop。」 |
-| **P0-S2** MCP 令牌脱敏 | `task/p0-s2-mcp-token-redaction` @ `fccc318`（基于旧的 `review/P0-S1`） | P0-S1 合入后，让 senior 在该分支合并 `develop`，再派 `reviewer-sonnet-high` 核实。说明见 [P0-S2.md](P0-S2.md)；要点：用 `git diff origin/develop...HEAD -- apps` 看本任务改动，确认它对 `credential_redaction.dart` 的修改没有削弱 P0-S1（尤其 R1 的固定错误文本和 R4 的 8 字符下限）；MCP 工具结果回显令牌时是否会进入助手、模型或账本。 |
-| **E11b** | `review/E11b` @ `14db9dc` | 核实待重做（第 0 节）。通过后合入，然后把 **P0-J3** 转给 junior。 |
-| **P0-F2**（建议新开） | — | 修 `research_object_open_test.dart` 两个 10 分钟超时，让 `develop` 门禁变绿。见第 0 节。 |
+| **P0-S1** 凭据脱敏 | — | **已合入**（第 3 轮复核通过）。 |
+| **P0-3d** 助手协议容错（D1） | `task/p0-3d-protocol-robustness` @ `ff9625a` | 说明见 [P0-3d.md](P0-3d.md)。**第一阶段关键路径**，P0-S1 已合入，可以开始。转发给 senior：「检出 `task/p0-3d-protocol-robustness`，先 `git merge origin/develop`，阅读 `docs/tasks/P0-3d.md` 并按要求执行，提交并推送到该分支，不要合并 develop。」审查派 `reviewer-sonnet-high`（安全约束：不合规回复不能变成提议或写入、重试上限、错误不引用原文）。 |
+| **P0-S2** MCP 令牌脱敏 | `task/p0-s2-mcp-token-redaction` @ `fccc318`（基于旧的 `review/P0-S1`） | P0-S1 已合入。转发给 senior（排在 P0-3d 之后或并行）：「检出 `task/p0-s2-mcp-token-redaction`，`git merge origin/develop` 解决冲突（`credential_redaction.dart` 以 develop 上 P0-S1 的最终版为准，保留 R1 固定错误文本与 R4 的 8 字符下限），跑 analyze 与宿主全量，推送并回报。」然后派 `reviewer-sonnet-high` 核实。说明见 [P0-S2.md](P0-S2.md)；要点：确认没有削弱 P0-S1；MCP 工具结果回显令牌时是否会进入助手、模型或账本。 |
+| **E11b** | `review/E11b` @ `14db9dc` | 核实待重做（第 0 节）。通过后合入，然后转发 **P0-F2** 给 junior。 |
+| **P0-F2** 两个 10 分钟超时 | `task/p0-f2-object-open-timeout` | 说明见 [P0-F2.md](P0-F2.md)，根因已查清，一行修复。**E11b 合入后**转发给 junior：「检出 `task/p0-f2-object-open-timeout`，先 `git merge origin/develop`，阅读 `docs/tasks/P0-F2.md` 并按要求执行，提交并推送到该分支，不要合并 develop，回报附 Actions 运行链接。」审查派 `reviewer-sonnet-low`，看 Actions 是否变绿。 |
 | **P0-4** 真机与真实模型取证 | `review/P0-4`（engineer 现在推到这里） | engineer 正在跑 **macOS 设备链路**（预算题预计仍因 D1 失败，照常入库为负面证据）。P0-3d 合入后，在 Android 和 macOS 各重跑一次链路，加一次 `bash scripts/ci.sh`。 |
-| **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | 排在 E11b 合入之后，junior。 |
+| **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | 排在 P0-F2 合入之后，junior。 |
 
 ## 4. 第一阶段退出标准（ADR-0001 §5）
 
@@ -114,10 +115,9 @@
 ## 9. 接任后的建议顺序
 
 1. `git fetch`，按本文件核对各分支哈希；确认 `reviewer-sonnet-*` 子代理可用（试调一次）。
-2. 用 Sonnet 重做第 0 节两份核实，并让 P0-S1 那份附上两个超时的根因初诊。
-3. P0-S1 通过 → 合入 → 转发 P0-3d 给 senior（关键路径）→ 让 senior 把 `develop` 合进 P0-S2，再核实、合入。
-4. E11b 通过 → 合入 → 转发 P0-J3 给 junior。
-5. 按初诊写 P0-F2，派 senior，修好后 `develop` 门禁应变绿。
-6. 收 engineer 的 macOS 设备批次 → 审查 → 合入。
-7. P0-3d 合入 → engineer 在 Android（必需）和 macOS 重跑链路 → 审查 → 合入，退出标准第 1 项达成。
-8. 更新验收账本（第 6 节）→ 对照第 4 节确认全部达成 → 向用户报告第一阶段结束，之后的路线（第 7 节、UI-0/UI-1）请用户排期。
+2. 确认用户已把 **P0-3d** 转给 senior（关键路径，P0-S1 已合入）。转发语见第 3 节。
+3. 用 Sonnet 重做 E11b 核实 → 合入 → 转发 **P0-F2** 给 junior；P0-F2 合入后 `develop` 门禁应变绿，再转发 P0-J3。
+4. senior 把 `develop` 合进 P0-S2 后，派 `reviewer-sonnet-high` 核实 → 合入。
+5. 收 engineer 的 macOS 设备批次 → 审查 → 合入。
+6. P0-3d 合入 → engineer 在 Android（必需）和 macOS 重跑链路 → 审查 → 合入，退出标准第 1 项达成。
+7. 更新验收账本（第 6 节）→ 对照第 4 节确认全部达成 → 向用户报告第一阶段结束，之后的路线（第 7 节、UI-0/UI-1）请用户排期。
