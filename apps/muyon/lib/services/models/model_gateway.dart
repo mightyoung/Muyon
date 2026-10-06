@@ -284,7 +284,19 @@ class OpenAiModelGateway {
           bytes.addAll(chunk);
         }
         token.check();
-        final decoded = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+        // The parser quotes (and truncates) the body in its message, so an
+        // endpoint echoing the key could leak part of it past maskSecret.
+        // Fail with a fixed reason instead of the source text.
+        final Object? parsed;
+        try {
+          parsed = jsonDecode(utf8.decode(bytes));
+        } on FormatException {
+          throw const FormatException('model_response_not_json');
+        }
+        if (parsed is! Map<String, dynamic>) {
+          throw const FormatException('model_response_not_object');
+        }
+        final decoded = parsed;
         await _finish(recordId, 'succeeded', httpStatus, null);
         return decoded;
       })().timeout(timeout);

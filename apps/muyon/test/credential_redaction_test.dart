@@ -92,6 +92,40 @@ void main() {
       expect(redactCredentials('credential_invalid'), 'credential_invalid');
     });
 
+    test('replaces the known secret value, only when it is 8+ chars', () {
+      const secret = 'sk-a.b*c(d)[e]';
+      expect(
+        redactCredentials(
+          StateError('invalid key $secret here'),
+          secret: secret,
+        ),
+        'Bad state: invalid key <redacted> here',
+      );
+      expect(
+        redactCredentials('echo $secret', secret: secret),
+        'echo <redacted>',
+      );
+      // Value first, then the keyword rule still applies.
+      expect(
+        redactCredentials('Bearer $secret', secret: secret),
+        'Error: details withheld (may contain the credential)',
+      );
+      // Too short to replace: unrelated text is left alone.
+      expect(
+        redactCredentials('a model_http_400', secret: 'a'),
+        'a model_http_400',
+      );
+      expect(
+        redactCredentials('x 1234567 y', secret: '1234567'),
+        'x 1234567 y',
+      );
+      expect(
+        redactCredentials('x 12345678 y', secret: '12345678'),
+        'x <redacted> y',
+      );
+      expect(redactCredentials('plain', secret: null), 'plain');
+    });
+
     test('sendable credentials are visible ASCII only', () {
       expect(isSendableCredential('sk-abc_123.XYZ'), isTrue);
       for (final bad in [..._badKeys, '', 'sk-abc\n', 'sk-ａbc']) {

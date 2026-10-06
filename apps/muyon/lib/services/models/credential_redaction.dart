@@ -14,6 +14,9 @@ final _visibleAscii = RegExp(r'^[\x21-\x7E]+$');
 /// Shown instead of a key that cannot be sent in a header. Never echoes it.
 const invalidCredentialMessage = '密钥含不可见或非 ASCII 字符，请重新粘贴';
 
+/// Shortest credential value [redactCredentials] replaces by value.
+const minRedactedSecretLength = 8;
+
 /// Whether [text] may quote a credential.
 bool mayContainCredential(String text) => _credentialMention.hasMatch(text);
 
@@ -23,7 +26,9 @@ bool mayContainCredential(String text) => _credentialMention.hasMatch(text);
 /// may still quote a credential keeps only the error type and a fixed note.
 String redactCredentials(Object error, {String? secret}) {
   var text = error is String ? error : '$error';
-  if (secret != null && secret.isNotEmpty) {
+  // Too short a secret would mask unrelated text everywhere (and is no real
+  // credential), so only values of [minRedactedSecretLength]+ are replaced.
+  if (secret != null && secret.length >= minRedactedSecretLength) {
     text = text.replaceAll(secret, '<redacted>');
   }
   if (!mayContainCredential(text)) return text;

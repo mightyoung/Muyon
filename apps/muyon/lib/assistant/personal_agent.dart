@@ -422,7 +422,14 @@ class PersonalAgent {
           repository.task(task.id)?.state != PersonalTaskState.running) {
         return;
       }
-      final response = jsonDecode(text) as Map<String, dynamic>;
+      // Only the error text changes here: the reply is still rejected as
+      // before, but without quoting the model's text (it may echo a key).
+      final Map<String, dynamic> response;
+      try {
+        response = jsonDecode(text) as Map<String, dynamic>;
+      } on FormatException {
+        throw const FormatException('model_reply_not_json');
+      }
       final advanced = task.copy({
         'round': (task.payload['round'] as int) + 1,
         'messages': [
