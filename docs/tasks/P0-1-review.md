@@ -66,3 +66,22 @@
 ## 修复方式
 1. 执行者（junior）检出 `review/P0-1`，只修改 `scripts/ci.sh`，提交并推送。
 2. 推送后，GitHub Actions 会在 `review/P0-1` 上自动运行。回报中附上：运行链接与结论，以及本机运行 `bash scripts/ci.sh` 的摘要行。
+
+## 复核（2026-10-06，接任 leader；核实子代理 Opus）
+
+修复提交 `ad5cb70`，只改 `scripts/ci.sh`（+20/−13）。**结论：通过，合入。**
+
+| 项 | 结论 | 依据 |
+|---|---|---|
+| 方案 A（去掉 tag 排除、改注释） | 满足 | `ci.sh:68` 不再带 `--exclude-tags`；`ci.sh:7-13` 注释与 `skip: !hasFont` 一致 |
+| F4 代理注释位置 | 满足 | `ci.sh:33-36` |
+| F5 汇总行用实际计数 | 满足 | 计数器 `ci.sh:39-74`，汇总 `ci.sh:85` |
+| F6 analyze 加 `--no-pub` | 满足 | `ci.sh:44` |
+
+- **Actions**：[run 37402435889](https://github.com/mightyoung/Muyon/actions/runs/37402435889)（`ad5cb70`）success，job 约 7 分 42 秒；`CI SUMMARY: OK (analyze 7/7, test 7/7 suites)`，inquiry `+276 ~47`，与方案 A 预期一致。
+- **本机**（macOS，bash 3.2.57）：`CI SUMMARY: OK (analyze 7/7, test 7/7 suites)`，退出码 0；inquiry `+322 ~1`（本机有字体，golden 实跑）。
+- **假绿检查**：临时注入一个失败测试和一个只报 info 的 analyzer 问题，ci.sh 跑完全部步骤，输出 `CI SUMMARY: FAILED (analyze:packages/muyon_ui test:muyon_ui)`，退出码 1；已还原。
+
+**记录（可选，不阻塞）：**
+- F3 修正：`lan_security_test.dart` 的不稳定用例**在 Actions 上也失败过**（[run 37352148641](https://github.com/mightyoung/Muyon/actions/runs/37352148641)，`93c4c86`，`SocketException: Broken pipe`）。上文「在 Actions 上通过」不准确；该证据已转入 P0-F1 审查，P0-F1 应尽快合入，避免门禁偶发变红。
+- 三个文件上的 `@Tags(['screenshot'])` 已无脚本使用，第一阶段之后可清理。
