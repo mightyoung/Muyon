@@ -16,7 +16,7 @@
    - 一张询价单和 4 条报价：电缆 甲 12.50 / 乙 11.80，桥架 甲 45.00 / 乙 47.20。
 3. 在主对话里问两个只读问题：比较报价、项目预算。
    - 每一轮模型调用都和界面一样：读取 `requestDigest` 后再 `confirm`。
-   - 断言**逐题**进行：每道只读题都必须提出至少一个工具，并且这道题至少有一条成功的只读工具回执。任何一题由模型直接作答、没有经过工具，整次运行就失败，失败原因写进证据。
+   - 断言**逐题**进行：每道只读题都必须提出至少一个工具，并且这道题至少有一条成功的只读工具回执。任何一题由模型直接作答、没有经过工具，整次运行就失败，失败原因写进证据。比价题还必须用 `inquiry.compare_quotes`，预算题必须用 `inquiry.project_budget`，用别的工具或借另一道题的回执都会失败，`failure` 写明是哪道题缺了哪个工具。
    - 没有产生写入审批；询价单数量不变。
    - 工具返回的数值和种子数据一致：最低价、两条预算行、预算成本 2080。无论夹具还是真实模型，这两项核对都必须实际执行（步骤 `read.results`），缺了哪项会写进 `failure`。只读任务本身失败时（例如 HTTP 错误、坏响应、被拒绝的工具），`failure` 记录的是任务自己的状态和错误。
 4. 在选中 5 个对象的专题对话里，请助手用 `inquiry.create_inquiry` 新建一张询价单。
@@ -61,7 +61,7 @@ MUYON_EVIDENCE_OUT=/tmp/north-star-fixture.json flutter test test/north_star_inq
 
 ### 2. 桌面加真实模型（无头，用环境变量）
 
-真实模型必须同时设置 `MUYON_EVAL_REAL=1`。只设置了 `MUYON_EVAL_MODEL_*`、没有这个开关时，仍按夹具运行，并在输出里提示一次。这样 shell 里导出了模型变量，也不会让普通的 `flutter test` 或 `scripts/verify.sh` 发出真实请求。
+真实模型必须同时设置 `MUYON_EVAL_REAL=1`。只设置了 `MUYON_EVAL_MODEL_*`、没有这个开关时，仍按夹具运行，并在输出里提示一次。这样 shell 里导出了模型变量，也不会让普通的 `flutter test` 或 `scripts/verify.sh` 发出真实请求。开关只接受 `1`：设成其他值（例如 `true`）时会提示「MUYON_EVAL_REAL 只接受 1」，然后照常按夹具运行。
 
 ```bash
 MUYON_EVAL_REAL=1 MUYON_EVAL_MODEL_ENDPOINT=https://<提供方>/v1 MUYON_EVAL_MODEL_ID=<模型 id> MUYON_EVAL_MODEL_KEY=<密钥> MUYON_EVIDENCE_OUT=/tmp/north-star-real.json MUYON_EVAL_COMMIT=$(git rev-parse --short HEAD) flutter test test/north_star_inquiry_test.dart
@@ -120,7 +120,7 @@ JSON，`kind` 为 `muyon-north-star-inquiry`，`schema` 为 1。主要字段：
 
 | 账本行 | 夹具、无头 | 真实模型、桌面 | 设备（夹具或真实模型） |
 |---|---|---|---|
-| 2.3 询价完整业务和受控工具 | T：只读工具返回模块自己的结果；审批后的写入能在库里查到 | 再加 M：真实模型对**每一道**只读题都经已注册的只读工具作答（运行逐题强制），而且 `readResultsChecked` 同时包含 `compare_quotes` 和 `project_budget`，即两道题都用了能核对种子数据的询价只读工具（运行强制）；还要能选对写入工具 | 再加 R |
+| 2.3 询价完整业务和受控工具 | T：只读工具返回模块自己的结果；审批后的写入能在库里查到 | 再加 M：运行逐题强制——比价题必须有 `inquiry.compare_quotes` 的成功回执，预算题必须有 `inquiry.project_budget` 的成功回执（另一道题用了这个工具不算），而且 `readResultsChecked` 同时包含两项；还要能选对写入工具。不需要再人工逐题核对工具 | 再加 R |
 | 7 统一调用路径和审批 | T：先给出摘要再执行；错误摘要被拒；审批只能用一次；回执、账本和重开后一致 | 同左，并加上真实网络的出站账本 | 再加 R |
 | 9a 模型端点显式、凭据安全 | 只有 T，而且只能证明端点显式记账 | M：端点是显式配置的，账本 HTTP 200，本次运行没有写出密钥。不能证明系统钥匙串的安全性，因为测试里的密钥通道是模拟的 | 再加 R（同样不涉及钥匙串）；Windows 除外 |
 
