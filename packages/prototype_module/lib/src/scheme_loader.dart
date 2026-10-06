@@ -52,7 +52,15 @@ class PrototypeSchemeLoader {
         uri.userInfo.isNotEmpty) {
       return null;
     }
-    final rel = uri.pathSegments.where((s) => s.isNotEmpty).join('/');
+    final String rel;
+    try {
+      // Decoding throws on invalid UTF-8 such as `%c0%ae`; that is a refusal.
+      rel = uri.pathSegments.where((s) => s.isNotEmpty).join('/');
+    } on FormatException {
+      return null;
+    } on ArgumentError {
+      return null;
+    }
     if (rel.isEmpty) return null;
     final path = p.normalize(p.join(_rootPath, rel));
     if (!p.isWithin(_rootPath, path)) return null;
@@ -66,6 +74,17 @@ class PrototypeSchemeLoader {
     if (file == null) return null;
     final target = File.fromUri(file);
     if (!await target.exists()) return null;
+    // The path text is inside the root; a symbolic link could still lead out
+    // of it, so compare the fully resolved locations.
+    final String real;
+    final String realRoot;
+    try {
+      real = await target.resolveSymbolicLinks();
+      realRoot = await Directory(_rootPath).resolveSymbolicLinks();
+    } on FileSystemException {
+      return null;
+    }
+    if (!p.isWithin(realRoot, real)) return null;
     return (data: await target.readAsBytes(), contentType: mimeFor(file.path));
   }
 

@@ -69,4 +69,80 @@ void main() {
       expect(await loader.read(bad), isNull, reason: bad);
     }
   });
+  test('invalid percent-encoding is a refusal, never an exception', () async {
+    for (final bad in [
+      'muyon-proto://page/%c0%ae/index.html',
+      'muyon-proto://page/%ff',
+      'muyon-proto://page/assets/%e0%80%af/app.js',
+    ]) {
+      expect(() => loader.toFileUrl(bad), returnsNormally, reason: bad);
+      expect(loader.toFileUrl(bad), isNull, reason: bad);
+      expect(await loader.read(bad), isNull, reason: bad);
+    }
+    // Malformed escapes that still decode stay literal names inside the root.
+    for (final odd in ['muyon-proto://page/%', 'muyon-proto://page/%zz']) {
+      expect(() => loader.toFileUrl(odd), returnsNormally, reason: odd);
+      expect(await loader.read(odd), isNull, reason: odd);
+    }
+  });
+
+  test('sibling directories with a similar name stay out of reach', () async {
+    final v10 = Directory(p.join(tmp.path, 'p1', 'v10'))..createSync();
+    File(p.join(v10.path, 'a.txt')).writeAsStringSync('x');
+    final evil = Directory(p.join(tmp.path, 'p1', 'v1-evil'))..createSync();
+    File(p.join(evil.path, 'a.txt')).writeAsStringSync('x');
+    for (final bad in [
+      'muyon-proto://page/../v10/a.txt',
+      'muyon-proto://page/../v1-evil/a.txt',
+      'muyon-proto://page/v10/a.txt',
+      'muyon-proto://page/v1-evil/a.txt',
+    ]) {
+      expect(await loader.read(bad), isNull, reason: bad);
+    }
+  });
+
+  test('an absolute path never maps outside the root', () async {
+    final outside = p.join(tmp.path, 'p1', 'v2', 'secret.txt');
+    expect(File(outside).existsSync(), isTrue);
+    final root = p.join(tmp.path, 'p1', 'v1');
+    for (final url in [
+      'muyon-proto://page/$outside',
+      'muyon-proto://page//$outside',
+    ]) {
+      final file = loader.toFileUrl(url);
+      expect(
+        file == null || p.isWithin(root, file.toFilePath()),
+        isTrue,
+        reason: url,
+      );
+      expect(await loader.read(url), isNull, reason: url);
+    }
+  });
+
+  group('symbolic links cannot lead out of the root', () {
+    final v1 = () => p.join(tmp.path, 'p1', 'v1');
+    final v2 = () => p.join(tmp.path, 'p1', 'v2');
+
+    test('a file link to a file outside', () async {
+      Link(p.join(v1(), 'leak.txt')).createSync(p.join(v2(), 'secret.txt'));
+      expect(await loader.read('muyon-proto://page/leak.txt'), isNull);
+    });
+
+    test('a directory link to a directory outside', () async {
+      Link(p.join(v1(), 'dir')).createSync(v2());
+      expect(await loader.read('muyon-proto://page/dir/secret.txt'), isNull);
+    });
+
+    test('a relative link that climbs out', () async {
+      Link(p.join(v1(), 'rel.txt')).createSync('../v2/secret.txt');
+      expect(await loader.read('muyon-proto://page/rel.txt'), isNull);
+    });
+
+    test('a link that stays inside the root still works', () async {
+      Link(p.join(v1(), 'alias.js'))
+          .createSync(p.join(v1(), 'assets', 'app.js'));
+      final js = await loader.read('muyon-proto://page/alias.js');
+      expect(String.fromCharCodes(js!.data), '1');
+    });
+  });
 }

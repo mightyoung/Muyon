@@ -7,7 +7,7 @@
 实机（Android）确认：Vite 构建的 `type="module"` 脚本在 `file://` 下**不执行**（页面空白，探测页 `moduleScript=NOT-RAN`；不是被我们的策略拦的，WebView 自己拒绝）。因此页面改由 `muyon-proto://page/<版本目录内相对路径>` 加载：
 
 - `PrototypeSchemeLoader`（`scheme_loader.dart`）把 URL 映射回允许根内的 `file:` 路径，再交给 `RestrictedWebViewSpec.allowsNavigation` 判定；任何一步失败都返回空（不读文件）。
-- 拒绝：原始 URL 含 `..`、`%2e%2e`、`%2f`、`%5c`、`%00`、反斜杠；host 不是 `page`；带端口或用户信息；空路径；映射后不在允许根内；文件不存在或是目录。
+- 拒绝：原始 URL 含 `..`、`%2e%2e`、`%2f`、`%5c`、`%00`，或 `..\` 形式的路径；非法的百分号编码（例如 `%c0%ae`）按拒绝处理，不抛异常；host 不是 `page`；带端口或用户信息；空路径；映射后不在允许根内；文件不存在或是目录；**符号链接解析后落在允许根之外**（读取前对文件与根目录都做 `resolveSymbolicLinks` 再比较，防止应用数据目录里的链接逃出）。
 - 没有打开 `allowUniversalAccessFromFileURLs` / `allowFileAccessFromFileURLs`，WebView 自身 `allowFileAccess: false`；没有本机 HTTP 服务；CSP 没有放宽到任何远程源。
 - 子资源只允许 `muyon-proto://page/…` 且映射后在允许根内。`file:`、远程 `https`/`http`、`data:`、`blob:`、`about:`、`javascript:`、`ws(s):`、`ftp:` 一律拒绝。
 - 已知取舍：严格拒绝 `data:` 后，MES 原型样式表里的一个内联小图（`url(data:image/png…)`）不会显示。`fetch` 受 `connect-src 'none'` 限制，原型页面不能读取自己的文件。
@@ -16,8 +16,8 @@
 
 | 项 | Android | Windows (WebView2) | macOS / iOS (WKWebView) |
 |---|---|---|---|
-| 自定义 scheme 提供文件 | **`useShouldInterceptRequest` 打开时，插件在 `shouldInterceptRequest` 里提前返回，永远走不到 `onLoadResourceWithCustomScheme`**；所以在 `shouldInterceptRequest` 里直接返回允许的文件（200）、其余 403 | Dart 侧有 `onLoadResourceWithCustomScheme`，**原生 C++ 里没有找到对应实现**（源码检索无结果），当前判断为不支持，**未验证** | `resourceCustomSchemes` + `onLoadResourceWithCustomScheme`（`CustomSchemeHandler.swift`），**未验证** |
-| `IGNORE_PREVIOUS_RULES` 内容拦截动作 | **构造即抛异常**（Apple 专用），原型页面直接红屏打不开——这是本轮实机发现的缺陷，已改为只在 iOS/macOS 构造内容拦截规则 | 同 Android | 可用 |
+| 自定义 scheme 提供文件 | **`useShouldInterceptRequest` 打开时，插件在 `shouldInterceptRequest` 里提前返回，永远走不到 `onLoadResourceWithCustomScheme`**；所以在 `shouldInterceptRequest` 里直接返回允许的文件（200）、其余 403 | 插件的 Windows 实现存在（`in_app_webview.cpp:844-902`），但有两处缺口：Windows 设置里没有 `resourceCustomSchemes`；WebView2 只为**事先注册**的 scheme 触发 `WebResourceRequested`，注册要走 `WebViewEnvironmentSettings.customSchemeRegistrations`，而我们的代码没有创建这个环境。因此 Windows 上原型页面**很可能打不开**，**未验证** | `resourceCustomSchemes` + `onLoadResourceWithCustomScheme`（`CustomSchemeHandler.swift`），**未验证** |
+| `IGNORE_PREVIOUS_RULES` 内容拦截动作 | **构造即抛异常**（Apple 专用），原型页面直接红屏打不开——这是本轮实机发现的缺陷，已改为只在 iOS/macOS 构造内容拦截规则 | 未验证（预期同 Android，已不构造） | 可用 |
 
 ## 各平台由哪一层执行
 
@@ -48,6 +48,8 @@
 另外在设备上看到的：`getDefaultProguardFile` 与新版 AGP 不兼容的构建问题只出现在新建的探测工程里，仓库里的 `apps/muyon` 用的是固定的 AGP 8.11.1，不受影响。
 
 ## 仍未验证
+
+- macOS：页面能否通过 `muyon-proto` 正常渲染（自定义 scheme 请求在 WKWebView 上的行为）。
 
 - Windows：自定义 scheme 是否可用（原生未见实现，很可能不可用，届时原型页面在 Windows 上打不开，需要另选方案）；`shouldInterceptRequest` 的覆盖范围。
 - macOS / iOS：自定义 scheme 请求是否经过内容拦截规则；CSP 是否生效。

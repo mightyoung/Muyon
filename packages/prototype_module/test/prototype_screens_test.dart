@@ -6,7 +6,9 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_ui/muyon_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:prototype_module/prototype_module.dart';
+import 'package:prototype_module/src/prototype_screens.dart';
 import 'package:prototype_module/src/prototype_store.dart';
+import 'package:prototype_module/src/prototype_web_page.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 class _Db implements ManagedDatabase {
@@ -268,9 +270,11 @@ void main() {
       (await tester.runAsync(() => session.resolve(feedback)))!.summary,
       '太小',
     );
-    for (final r in [page, version, feedback]) {
-      expect(session.objectPage(context, r), isNotNull, reason: '$r');
-    }
+    expect(session.objectPage(context, page), isA<PrototypeDetail>());
+    expect(session.objectPage(context, version), isA<PrototypeWebPage>());
+    final opened = session.objectPage(context, feedback);
+    expect(opened, isA<PrototypeDetail>());
+    expect((opened! as PrototypeDetail).focusFeedbackId, fb.id);
     for (final type in ['page', 'version', 'feedback']) {
       final ghost = ref(type, 'ghost');
       expect(

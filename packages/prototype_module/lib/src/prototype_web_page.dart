@@ -96,9 +96,13 @@ Widget defaultPrototypeWebView(PrototypeWebConfig config) {
     ),
     shouldOverrideUrlLoading: (controller, action) async {
       final url = action.request.url?.toString() ?? '';
-      if (config.guard.allowsNavigation(url)) {
-        return NavigationActionPolicy.ALLOW;
-      }
+      // The plugin lets a navigation through when this callback throws, so any
+      // error in the guard has to end as a refusal.
+      var allowed = false;
+      try {
+        allowed = config.guard.allowsNavigation(url);
+      } catch (_) {}
+      if (allowed) return NavigationActionPolicy.ALLOW;
       config.onBlocked(url);
       return NavigationActionPolicy.CANCEL;
     },
@@ -106,12 +110,12 @@ Widget defaultPrototypeWebView(PrototypeWebConfig config) {
     // requests to this callback.
     onLoadResourceWithCustomScheme: (controller, request) async {
       final file = await serve(request.url.toString());
-      return file == null
-          ? null
-          : CustomSchemeResponse(
-              data: file.data,
-              contentType: file.contentType,
-            );
+      // A null answer would leave the request pending forever on Apple
+      // platforms, so a refusal is an empty response.
+      return CustomSchemeResponse(
+        data: file?.data ?? Uint8List(0),
+        contentType: file?.contentType ?? 'text/plain',
+      );
     },
     // Android and Windows: with `useShouldInterceptRequest` the plugin never
     // reaches the custom-scheme callback, so allowed prototype files are served

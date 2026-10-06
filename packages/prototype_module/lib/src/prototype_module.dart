@@ -86,19 +86,21 @@ class PrototypeSession implements ModuleSession {
       case 'feedback':
         final feedback = store.feedbackById(ref.objectId);
         if (feedback == null) return null;
-        final page = store.pages().firstWhere((x) => x.id == feedback.pageId);
+        final page = store.pages().where((x) => x.id == feedback.pageId);
+        if (page.isEmpty) return null;
         return ObjectView(
           ref: ref,
-          title: '${page.title} 反馈',
+          title: '${page.first.title} 反馈',
           summary: feedback.text,
         );
       case 'version':
         final version = store.version(ref.objectId);
         if (version == null) return null;
-        final page = store.pages().firstWhere((x) => x.id == version.pageId);
+        final page = store.pages().where((x) => x.id == version.pageId);
+        if (page.isEmpty) return null;
         return ObjectView(
           ref: ref,
-          title: '${page.title} ${version.label}',
+          title: '${page.first.title} ${version.label}',
           summary:
               '${version.fileCount} 个文件 · ${p.basename(version.directory)}',
         );
