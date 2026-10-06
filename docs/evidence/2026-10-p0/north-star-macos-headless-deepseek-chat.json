@@ -97,7 +97,7 @@
   "registeredTools": 34,
   "passed": false,
   "failure": "Bad state: Read question c5e38329-723c-4356-a065-5cd324e2de2d ended failed: 执行失败（FormatException: Unexpected character (at character 1) 项目「北极星验收项目」的成本预算：成本合计 2080 元，销售合计 2080 元，毛利 0 元。全部 2 行均已返回（未截断），全部为材料类。 ^ ）；请检查端点、模型名称、工具权限或资料范围后新建尝试",
-  "failureStack": "#0      NorthStarInquiryChain._drive (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:445:9)\n<asynchronous suspension>\n#1      NorthStarInquiryChain._step (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:61:22)\n<asynchronous suspension>\n#2      NorthStarInquiryChain._chain (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:218:20)\n<asynchronous suspension>\n#3      NorthStarInquiryChain.run (file:///Users/muyi/Downloads/dev/muyon-worktrees/b-ui/apps/muyon/integration_test/support/north_star_chain.dart:116:7)\n<asynchronous suspension>",
+  "failureStack": "#0      NorthStarInquiryChain._drive (file://<repo>/apps/muyon/integration_test/support/north_star_chain.dart:445:9)\n<asynchronous suspension>\n#1      NorthStarInquiryChain._step (file://<repo>/apps/muyon/integration_test/support/north_star_chain.dart:61:22)\n<asynchronous suspension>\n#2      NorthStarInquiryChain._chain (file://<repo>/apps/muyon/integration_test/support/north_star_chain.dart:218:20)\n<asynchronous suspension>\n#3      NorthStarInquiryChain.run (file://<repo>/apps/muyon/integration_test/support/north_star_chain.dart:116:7)\n<asynchronous suspension>",
   "finishedAt": "2026-10-06T03:03:44.156810Z",
   "totalMs": 9387
 }
