@@ -56,7 +56,7 @@
 |---|---|---|
 | **P0-S1** 模型网关凭据脱敏 | `review/P0-S1` @ `f7f0b36` | **复核未通过**（接任 leader，2026-10-06）：N2 对常见长度密钥无效（`FormatException` 截断源文本，R1 阻断），另有 R2、R3。已交回 senior。修完定向复核长密钥探针，再合入。 |
 | **P0-S2** MCP 令牌脱敏 | `task/p0-s2-mcp-token-redaction` @ `fccc318`（已合并 `review/P0-S1`） | 已交付，**核实被中断，需要重做**，派 Opus，说明见 [P0-S2.md](P0-S2.md)。中断前已知：55 个探针全部通过；变异测试还没跑。本任务的改动范围用 `git diff origin/review/P0-S1 HEAD -- apps` 查看，它**又改了一次** `credential_redaction.dart`，要确认没有削弱 P0-S1 的效果。另外要看 MCP 工具结果里如果回显了令牌，是否会进入助手、模型或账本。 |
-| **P0-F1** 不稳定的局域网测试 | `task/p0-f1-lan-flaky-test` @ `8de0ca3`（只改测试，+22/−1） | 已交付，**核实被中断，需要重做**，派 Opus。要点：先在 develop 上测出基线失败率（云端沙箱曾 14 次失败 11 次）；判断根因结论对不对，**`stop()` 是否本身就有竞态**，如果有，只修测试就是掩盖问题；不能加 sleep、加长超时或重试；单测循环 50 次，加压再跑 20 次；把 `stop()` 改坏后，测试必须失败。 |
+| **P0-F1** 不稳定的局域网测试 | `review/P0-F1` | **已合入**（审查见 [P0-F1-review.md](P0-F1-review.md)）：根因成立，`stop()` 无竞态。 |
 | **P0-1** 自动门禁 | `review/P0-1` | **已合入**（`ada9487`，复核见 [P0-1-review.md](P0-1-review.md)）。 |
 | **E11b** 研究对象页收尾 | `task/e11b-object-page-tests` | 待 junior 做（排在 P0-1 之后）：补辅助函数在返回 null 时 dispose 会话的测试，修卡片标题。见 [E11b.md](E11b.md)。 |
 | **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | 待 junior 做（排在 E11b 之后）。做完后自检脚本不再开新任务。 |
