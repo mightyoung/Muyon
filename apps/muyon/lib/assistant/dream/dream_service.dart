@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../platform/foundation_repository.dart';
 import '../../platform/memory_review.dart';
+import '../../services/models/credential_redaction.dart';
 import '../../services/models/model_gateway.dart';
 
 /// Background organization. It proposes; it does not grant tools or widen scope.
@@ -137,7 +138,7 @@ class DreamService {
         outbound: _outboundIds().toList(),
         tokenCost: null,
         elapsedMs: clock.elapsedMilliseconds,
-        error: '$error',
+        error: redactCredentials(error),
       );
       rethrow;
     }

@@ -6,6 +6,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart';
 import '../platform/tool_registry.dart';
 import 'tool_selection.dart';
@@ -372,8 +373,9 @@ class PersonalAgent {
         }
       } catch (error) {
         // Name the cause (e.g. model_http_404) so a wrong endpoint or model
-        // name can be fixed. Credentials never appear in these messages.
-        final cause = '$error'.replaceAll(RegExp(r'\s+'), ' ');
+        // name can be fixed. The text is stored on the task, shown and sent
+        // as a notification, so anything that may quote a key is withheld.
+        final cause = redactCredentials(error).replaceAll(RegExp(r'\s+'), ' ');
         await _fail(
           task,
           '执行失败（${cause.length > 160 ? '${cause.substring(0, 160)}…' : cause}）；'
@@ -420,7 +422,14 @@ class PersonalAgent {
           repository.task(task.id)?.state != PersonalTaskState.running) {
         return;
       }
-      final response = jsonDecode(text) as Map<String, dynamic>;
+      // Only the error text changes here: the reply is still rejected as
+      // before, but without quoting the model's text (it may echo a key).
+      final Map<String, dynamic> response;
+      try {
+        response = jsonDecode(text) as Map<String, dynamic>;
+      } on FormatException {
+        throw const FormatException('model_reply_not_json');
+      }
       final advanced = task.copy({
         'round': (task.payload['round'] as int) + 1,
         'messages': [

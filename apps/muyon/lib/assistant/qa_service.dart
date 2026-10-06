@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart';
 import 'action_gate.dart';
 import 'execution_store.dart';
@@ -280,6 +281,6 @@ class QaService {
       : error is FormatException
       ? 'invalid_model_response'
       : error is StateError
-      ? error.message
+      ? redactCredentials(error.message)
       : 'model_request_failed';
 }

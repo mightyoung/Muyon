@@ -12,6 +12,7 @@ import '../app/bootstrap.dart';
 import '../assistant/execution_store.dart';
 import '../platform/foundation_repository.dart';
 import '../platform/object_pages.dart';
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/secret_store.dart';
