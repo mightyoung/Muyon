@@ -5,7 +5,7 @@
 ## 规则
 
 - **派发**：每个任务一个分支，任务说明在该分支的固定位置 `docs/tasks/<编号>.md`。执行者检出分支、阅读说明、只在该分支提交并推送，不合并到 `develop`。
-- **执行**：实现与真机取证都由本地 agent 执行。senior engineer = Opus，engineer = Sonnet，junior = opencode。云端不运行开发任务。
+- **执行**：实现与真机取证都由本地 agent 执行。senior engineer = Opus，engineer = Sonnet，engineer2 = grokbot（无 Flutter，做静态核对与文档类任务），junior = opencode。云端不运行开发任务。
 - **审查**：由 leader 进行。任务完成后，leader 从任务分支的最终提交建立 `review/<编号>`，在该分支写入 `docs/tasks/<编号>-review.md`，清单见 [REVIEW.md](REVIEW.md)。需要修改时，执行者检出审查分支修复并推送；leader 复审通过后合入 `develop`。
 - **自查**：执行者提交前，先按 [REVIEW.md](REVIEW.md) 的「必做」逐项自查。
 
