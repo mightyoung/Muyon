@@ -99,3 +99,28 @@
 
 ### 复核方式
 修完推送后，leader 派子代理定向复跑 `http500`、`bad_json`、`unrelated_read_tool`、`skip_tool_budget` 探针，加上 R2-C 的配置、无头链路和 analyze，不再做全量审查。
+
+---
+
+## 第 2 轮复核（2026-10-06，`4eeea6f`，Opus 子代理）
+
+**结论：通过，合入 `develop`。**
+- **范围**：只改了 `integration_test/support/` 下 3 个文件和运行手册，没有改动生产代码。
+- **R2-A 通过**：失败原因现在如实记录（经过脱敏）：
+  - HTTP 500：`HttpException: model_http_500`；
+  - 坏 JSON：`FormatException`；
+  - 未注册工具，以及只读阶段提出写入：「工具参数、可用性或范围校验未通过」；
+  - 只读工具执行失败：`Tool execution failed`。
+
+  证据和测试输出中都没有密钥。
+- **R2-B 通过**：用无关工具回答预算题时，结果为 `passed:false`，失败原因写明缺少 `project_budget` 的核对；诚实的模型能通过。运行手册第 123 行写明，2.3 的 M 证据要求两项核对都完成。
+- **R2-C 通过**：以下情况都会失败并写明原因：只设置了 `REAL=1`；变量名拼错；变量名写错；只通过 `--dart-define` 传入 `REAL=1`。不加开关时仍然跑夹具。
+- **R2-D 通过**：两种变异下，`read.results` 均为 `ok:false`，`readResultsChecked` 照常写出。
+- **措辞**：运行手册第 73 行已改正。
+- **回归**：analyze 无问题，`dart format` 无改动；无头链路连跑 2 次都通过；各项对抗探针仍然如实失败。
+
+## 留作后续
+- **N1（应改，低概率）→ P0-3c**：「每道题都必须经由对应工具作答」目前是两题合并判定。探针 `cross_tools` 中，比价题只用了 `knowledge.search`，预算题却额外调用了 `compare_quotes`，结果判为通过。真实模型不太可能这样作答。**在 P0-3c 修复之前，leader 审查 P0-4 证据时，会逐题核对 `tasks[].tools`：比价题必须包含 `inquiry.compare_quotes`，预算题必须包含 `inquiry.project_budget`。不满足的运行不记为 2.3 的 M 证据。**
+- **N2（可选）→ 并入 P0-S1 审查**：端点在 200 响应体中回显密钥时，`FormatException` 的文本会带上密钥，进入证据的 `failure`、`tasks[].error` 和测试输出。根本修复是在网关层把已配置的密钥值从错误文本中清除。P0-4 提交证据前，要求用 grep 确认其中不含密钥。
+- **N3（可选）→ P0-3c**：`MUYON_EVAL_REAL=true`（任何非 `1` 的值）且没有设置模型变量时，会静默跑夹具。证据的类型标注是诚实的。
+- **N4（可选）→ P0-3c**：伪造写入时，`assistant.write.create_inquiry` 这一步仍显示 `ok:true`，与 R2-D 修复前的问题同类。
