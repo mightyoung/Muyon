@@ -54,3 +54,34 @@
 
 ## 处理
 退回 senior：在 `review/P0-S2` 上修 F1（阻断）、F2、F4，提交并推送，回报附 analyze、宿主全量，以及每处新守护对应的变异结果。复审派 `reviewer-sonnet-high`。
+
+---
+
+## 第二轮（2026-10-07，云端 Sonnet 子代理修复）
+
+senior 未开始修复；用户指示改由云端 Sonnet 5.5 子代理修复（ADR-0001 后续记录）。F3 由 leader 按用户授权决定：**显示与错误文本遮盖、保存时不阻塞提示、存储不变**。
+
+| 提交 | 内容 |
+|---|---|
+| `4645fbb` | F1：`structuredContent` 脱敏；F2：非 JSON 响应体固定为 `mcp_response_not_json`；F4：5 处脱敏各补守护 |
+| `915a366` | F3：凭据类查询参数在卡片上显示为 `••••`，连接 / 移除 / 保存 / 适配器错误文本替换为 `<redacted>`，保存时 SnackBar 提示，存储不变 |
+| `df29420` | R1：`structuredContent` 改为递归遍历替换（含键），不再先序列化；O1：参数名补 `passwd`、`x-api-key`、`access_key`、`private_key`、`jwt` 及 `_key` / `-key` / 驼峰 `Key` 后缀；O2：`tools/list` 描述注册前脱敏 |
+
+### 核实（独立 Sonnet 子代理，两轮）
+| 项 | 结论 |
+|---|---|
+| 范围 | `mcp_adapter.dart`、`mcp_servers_page.dart`、`credential_redaction.dart`（仅 P0-S2 首轮新增 `maskSecret`）、测试与本文件；没有修改已有测试 |
+| F1 端到端探针 | 回环 MCP 服务器 + 脚本网关 + 完整 `PersonalAgent` 链路；服务器在文本、`structuredContent` 值 / 嵌套值 / 键、工具描述中回显令牌；扫描第二次模型请求体、整个 sqlite 库、注册表描述，按 12 字符窗口检查原文、JSON 转义一次 / 两次。164 字符令牌与含 `"`、`\` 的 41 字符令牌**全部 0 命中**（第一轮后者曾泄漏，即 R1） |
+| F2 | ≥80 字符令牌，JSON 与 SSE 两种非 JSON 响应体，错误文本无任何 12 字符片段 |
+| 变异 | 共 14 处（F1、R1、F2、F4 五处、F3 卡片 / 连接错误 / 保存提示、O1、O2），删除后均有测试失败 |
+| P0-S1 | `credential_redaction.dart` 已有逻辑未改，相关测试通过 |
+| 运行 | `flutter analyze` 无问题；宿主全量 `+473 ~2: All tests passed!`；`mcp_token_redaction_test` +23 |
+
+### 已知限制（记录，不阻塞）
+- 地址查询参数里的凭据仍以明文保存在工作区设置 `mcpServers`，编辑对话框显示原值，请求时随 URL 发出；遮盖只覆盖页面显示与错误文本，按配置值（≥8 字符）与完整 URL 匹配，被服务器或代理改写形式（base64、重新编码）的值匹配不到。改存系统安全存储需要改存储结构，排到第二阶段可选项。
+- 参数名匹配是启发式：`X-Amz-Signature` 一类带前缀的签名参数仍不遮；`tokenizer` 会被多遮（无害）。
+- 工具 `inputSchema` 中回显令牌未脱敏（与 O2 同类，可能性更低）。
+- `McpServersPage._readServers` 在首次 build 中设置 `error`，读取失败的提示要到下一次重建才显示（界面缺陷，不是泄漏）。
+
+## 结论（第二轮）
+**合入。** F1（阻断）已修复并经端到端探针确认；F2、F3、F4、R1、O1、O2 均有测试与变异守护。上面四条限制转入第二阶段可选项。
