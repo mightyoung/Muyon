@@ -142,7 +142,9 @@ abstract final class McpAdapter {
       data: {
         'text': summary,
         if (result['structuredContent'] is Map)
-          'structured': result['structuredContent'],
+          'structured': jsonDecode(
+            maskSecret(jsonEncode(result['structuredContent']), client.token),
+          ),
       },
     );
   }
@@ -269,10 +271,20 @@ class _McpClient {
         final type = response.headers.contentType?.mimeType;
         return type == 'text/event-stream'
             ? _fromEvents(body, message['id'])
-            : Map<String, Object?>.from(jsonDecode(body) as Map);
+            : Map<String, Object?>.from(_decode(body) as Map);
       })().timeout(timeout);
     } finally {
       client.close(force: true);
+    }
+  }
+
+  /// JSON of a response body. A parse failure quotes part of the body, which a
+  /// server may have filled with the token, so the error is fixed text.
+  static Object? _decode(String text) {
+    try {
+      return jsonDecode(text);
+    } on FormatException {
+      throw const FormatException('mcp_response_not_json');
     }
   }
 
@@ -284,7 +296,7 @@ class _McpClient {
           if (line.startsWith('data:')) line.substring(5).trimLeft(),
       ].join('\n');
       if (data.isEmpty) continue;
-      final decoded = jsonDecode(data);
+      final decoded = _decode(data);
       if (decoded is Map && decoded['id'] == id) {
         return Map<String, Object?>.from(decoded);
       }
