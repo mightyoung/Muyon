@@ -36,7 +36,7 @@
 | K-2b 测试连接、流式显示与预设（外围） | `task/k-2b-probe-stream-ui` | [K-2.md](K-2.md) | Sonnet 子代理 | K-3b 合入 | 已合入（[审查](K-2b-review.md)，两轮） |
 | K-4 执行记录事件化（后端） | `task/k-4-task-events` | [K-4.md](K-4.md) | Sonnet 子代理 | K-3b 合入 | 已合入（[审查](K-4-review.md)，三轮） |
 | REG-1 模块契约 v2 与三层插件（ADR-0004） | `task/reg-1-contract-v2-adr` | [REG-1.md](REG-1.md) | Sonnet 子代理 | 评估文档（2026-10-07） | 已合入（[审查](REG-1-review.md)，两轮）；**ADR-0004 已采纳**（用户 2026-10-07，Q1～Q13 全部按建议） |
-| FOLIO-BYPASS 宿主模式下 `bypass` 按写入要确认读取 | `task/folio-bypass` | [FOLIO-BYPASS.md](FOLIO-BYPASS.md) | implementer-sonnet | ADR-0004 Q12 | **已派发**（安全修复，优先） |
+| FOLIO-BYPASS 宿主模式下 `bypass` 按写入要确认读取 | `task/folio-bypass` | [FOLIO-BYPASS.md](FOLIO-BYPASS.md) | junior | ADR-0004 Q12 | **已派发**（安全修复，优先） |
 | REG-2a 外传工具入账（`outbound_tool_requests`，四条通道） | `task/reg-2a-outbound-tool-ledger` | [REG-2a.md](REG-2a.md) | Codex | ADR-0004 已采纳 | **已派发** |
 | REG-2b 通用模块激活、能力授予、范围单点 | `task/reg-2b-module-host` | [REG-2b.md](REG-2b.md) | implementer-sonnet | ADR-0004 已采纳 | **已派发** |
 | E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](E-1-review.md)，三轮）；真实模型基线待有密钥者运行 |

@@ -1,6 +1,6 @@
 # FOLIO-BYPASS 宿主模式下 Folio 的 `bypass` 按「写入要确认」读取
 
-分支 `task/folio-bypass` · 依据：[ADR-0004](../adr/0004-module-contract-v2.md) §12.1 Q12、§10.1 · 执行：`implementer-sonnet`（leader 派发）· 审查：leader（`reviewer-sonnet-high`）· 阶段：第二阶段，安全修复，优先
+分支 `task/folio-bypass` · 依据：[ADR-0004](../adr/0004-module-contract-v2.md) §12.1 Q12、§10.1 · 执行：junior（opencode）· 审查：leader（`reviewer-sonnet-high`）· 阶段：第二阶段，安全修复，优先
 
 ## 背景
 宿主模式下，Folio 自带助手的 `assistant_permission = bypass` 档会让写入免确认（`ask_page.dart:220` 的 `autoApprove`、`assistant_actions.dart:321`）。导入的供应商文本经提示注入，就能驱动对 7 类询价记录的增改删。这些写入能从回收站恢复，但不留宿主回执。REG-4c 会彻底禁用这一档并隐藏助手，在那之前先用本任务堵住。
