@@ -73,6 +73,25 @@ class ModuleRegistry {
   /// Module id → human-readable reason, for settings and module status UI.
   Map<String, String> get unavailable => Map.unmodifiable(_unavailable);
 
+  /// Optional dependencies are best effort. Omit an optional wait edge when
+  /// its target can reach the caller in the declared dependency graph; all
+  /// required edges are already cycle-checked by the constructor.
+  bool canAwaitOptional(String caller, String dependency) {
+    final visited = <String>{};
+    bool reachesCaller(String id) {
+      if (id == caller) return true;
+      if (!visited.add(id)) return false;
+      final manifest = _modules[id]?.manifest;
+      if (manifest == null) return false;
+      return [
+        ...manifest.requiredDependencies,
+        ...manifest.optionalDependencies,
+      ].any(reachesCaller);
+    }
+
+    return !reachesCaller(dependency);
+  }
+
   BusinessModule require(String id) =>
       _modules[id] ??
       (throw StateError(_unavailable[id] ?? 'Unknown module: $id'));

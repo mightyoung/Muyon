@@ -89,6 +89,8 @@ class _Slot {
   /// Set when the module could not be wired (for example its tools): it will
   /// not activate until the host restarts.
   String? blocked;
+  int epoch = 0;
+  bool revoking = false;
 }
 
 /// The one way a module becomes usable (ADR-0004 §6.1). Activation is
@@ -119,7 +121,13 @@ class ModuleHost implements ModuleLink {
   final Map<String, _Slot> _slots = {};
   final Map<String, List<String>> _toolIds = {};
   final _changes = StreamController<ModuleStateChange>.broadcast();
+  final _runs = <Future<ModuleState>>{};
   var _closing = false;
+  var _accepting = true;
+
+  /// Freeze public activation admission while the host drains local work
+  /// admitted before shutdown. Its existing dependency graph may still finish.
+  void stopAdmission() => _accepting = false;
   Future<void>? _closeFuture;
 
   _Slot _slot(String id) => _slots.putIfAbsent(id, _Slot.new);
@@ -257,16 +265,46 @@ class ModuleHost implements ModuleLink {
   /// returned state, recorded in `module_registry`, and the next call retries.
   @override
   Future<ModuleState> activate(String id) {
-    if (_closing) return Future.error(StateError('Host is closing'));
-    final slot = _slot(id);
-    return slot.inflight ??= _activate(id, slot);
+    if (!_accepting) return Future.error(StateError('Host is closing'));
+    return _admit(id);
   }
 
-  Future<ModuleState> _activate(String id, _Slot slot) async {
+  Future<ModuleState> _admit(String id) {
+    if (_closing) return Future.error(StateError('Host is closing'));
+    final slot = _slot(id);
+    if (slot.revoking) return Future.value(slot.state);
+    final existing = slot.inflight;
+    if (existing != null) return existing;
+    final epoch = ++slot.epoch;
+    final run = _activate(id, slot, epoch);
+    slot.inflight = run;
+    _runs.add(run);
+    unawaited(
+      run.then<void>(
+        (_) {
+          _runs.remove(run);
+        },
+        onError: (Object error, StackTrace stack) {
+          _runs.remove(run);
+        },
+      ),
+    );
+    return run;
+  }
+
+  bool _current(_Slot slot, int epoch) =>
+      !_closing && !slot.revoking && slot.epoch == epoch;
+
+  void _checkCurrent(_Slot slot, int epoch) {
+    if (!_current(slot, epoch)) throw _Refused('Activation authority ended');
+  }
+
+  Future<ModuleState> _activate(String id, _Slot slot, int epoch) async {
     final bridge = _legacy[id];
     final external = bridge?.externalActivate;
     if (external != null) {
       final reason = await external();
+      if (!_current(slot, epoch)) return slot.state;
       _set(
         id,
         reason == null
@@ -283,11 +321,14 @@ class ModuleHost implements ModuleLink {
     try {
       final blocked = slot.blocked;
       if (blocked != null) throw StateError(blocked);
-      await _open(id, slot, bridge);
+      await _open(id, slot, bridge, epoch);
+      _checkCurrent(slot, epoch);
       _set(id, const ModuleState(ModuleStatus.ready));
       await _record(id, 'ready', null);
+      _checkCurrent(slot, epoch);
       _restore(id);
     } catch (error) {
+      if (!_current(slot, epoch)) return slot.state;
       slot.runtime = null;
       final reason = error is _Refused ? error.message : error.toString();
       _set(id, ModuleState(ModuleStatus.failed, reason));
@@ -300,11 +341,18 @@ class ModuleHost implements ModuleLink {
     return slot.state;
   }
 
-  Future<void> _open(String id, _Slot slot, LegacyModuleBridge? bridge) async {
+  Future<void> _open(
+    String id,
+    _Slot slot,
+    LegacyModuleBridge? bridge,
+    int epoch,
+  ) async {
+    _checkCurrent(slot, epoch);
     final module = registry.require(id);
     final manifest = module.manifest;
     for (final dependency in manifest.requiredDependencies) {
-      final state = await activate(dependency);
+      final state = await _admit(dependency);
+      _checkCurrent(slot, epoch);
       if (state.status != ModuleStatus.ready) {
         throw _Refused(
           'Required module $dependency is unavailable: ${state.reason}',
@@ -312,18 +360,23 @@ class ModuleHost implements ModuleLink {
       }
     }
     for (final dependency in manifest.optionalDependencies) {
-      if (registry.unavailable.containsKey(dependency)) continue;
+      if (registry.unavailable.containsKey(dependency) ||
+          !registry.canAwaitOptional(id, dependency)) {
+        continue;
+      }
       try {
         registry.require(dependency);
       } on StateError {
         continue;
       }
-      await activate(dependency);
+      await _admit(dependency);
+      _checkCurrent(slot, epoch);
     }
     final decisions = bridge != null && manifest.apiVersion == 1
         ? GrantPolicy.legacy(id, bridge.grants)
         : GrantPolicy.decide(manifest, revoked: grants.revoked(id));
     await grants.record(id, decisions);
+    _checkCurrent(slot, epoch);
     final refused = [
       for (final d in decisions)
         if (!d.granted && d.required) d.capability,
@@ -340,11 +393,13 @@ class ModuleHost implements ModuleLink {
         if (!d.granted) d.capability,
     };
     final connection = await storage.open(id, module.schema);
+    _checkCurrent(slot, epoch);
     final auxiliary = <String, ManagedDatabase>{
       if (module is BusinessModuleV2)
         for (final schema in module.auxiliarySchemas)
           schema.id: await storage.open(schema.id, schema.schema),
     };
+    _checkCurrent(slot, epoch);
     if (_hasChangeLog(connection.raw)) projections.watch(id, connection);
     final runtime = await module.activate(
       ModuleResources(
@@ -354,10 +409,12 @@ class ModuleHost implements ModuleLink {
           id,
           allowed: granted,
           denied: denied,
+          isActive: () => _current(slot, epoch),
         ),
         auxiliary: auxiliary,
       ),
     );
+    _checkCurrent(slot, epoch);
     slot.runtime = runtime;
     if (manifest.features.contains(ModuleFeature.importPipeline)) {
       final recovery = await ImportCoordinator(workspaces).recover(id, runtime);
@@ -385,23 +442,34 @@ class ModuleHost implements ModuleLink {
   /// `capability_revoked` and its tools become unavailable; the grant stays
   /// denied on later activations.
   Future<void> revokeCapability(String id, String capability) async {
-    await grants.revoke(id, capability);
     final slot = _slot(id);
+    ++slot.epoch;
+    slot.revoking = true;
     slot.runtime = null;
     slot.inflight = null;
     final reason = 'capability_revoked: $capability';
     _set(id, ModuleState(ModuleStatus.failed, reason));
     _withdraw(id, reason);
+    tools.cancelProvider(id);
+    // Remain fail closed if durable revocation fails; a successful retry is
+    // required before any new activation may be admitted.
+    await grants.revoke(id, capability);
     await _record(id, 'failed', reason);
+    slot.revoking = false;
   }
 
   Future<void> close() => _closeFuture ??= _close();
   Future<void> _close() async {
+    stopAdmission();
     _closing = true;
-    for (final slot in _slots.values.toList()) {
-      final inflight = slot.inflight;
-      if (inflight != null) await inflight;
+    for (final entry in _slots.entries.toList()) {
+      ++entry.value.epoch;
+      entry.value.runtime = null;
+      _withdraw(entry.key, 'Host is closing');
     }
+    final drainingTools = tools.close();
+    await Future.wait(_runs.toList());
+    await drainingTools;
     for (final id in _slots.keys.toList()) {
       _slots[id]!.runtime = null;
       _set(id, const ModuleState(ModuleStatus.closed));

@@ -126,9 +126,32 @@ class _PlatformShellState extends State<PlatformShell> {
   }
 
   /// Opens a declared section on its own page (ADR-0004 §6.4). The page is
-  /// whatever the section's builder returns; activation, retry and failure
-  /// display belong to that page, as they did for the hard-coded cards.
+  /// whatever the section's builder returns. v2 receives an active runtime;
+  /// v1 keeps its existing bridge/page activation behavior.
   Future<void> openSection(String moduleId, ModuleSection section) async {
+    final v2 = host.registry.modules.any(
+      (module) => module.manifest.id == moduleId && module is BusinessModuleV2,
+    );
+    if (v2) {
+      ModuleState state;
+      try {
+        state = await host.modules.activate(moduleId);
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('模块暂不可用')));
+        }
+        return;
+      }
+      if (!mounted) return;
+      if (state.status != ModuleStatus.ready) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('模块暂不可用：${state.reason ?? moduleId}')),
+        );
+        return;
+      }
+    }
+    if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => section.builder(

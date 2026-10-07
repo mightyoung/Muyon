@@ -18,8 +18,10 @@ void main() {
   late Directory root;
   late Directory source;
   late MuyonHost host;
+  String? researchWorkspace;
 
   setUp(() async {
+    researchWorkspace = null;
     root = Directory.systemTemp.createTempSync('scope-diff-');
     source = Directory.systemTemp.createTempSync('scope-diff-src-');
     host = await MuyonHost.open(p.join(root.path, 'data'));
@@ -60,7 +62,6 @@ void main() {
     'notes': null,
   };
 
-  late String researchWorkspace;
   late String supplierId;
   late String projectId;
 
@@ -145,10 +146,12 @@ void main() {
   Future<void> everyScope(String phase) async {
     final all = await everything();
     await agree('$phase: global', const AssistantScope.global());
-    await agree(
-      '$phase: research workspace',
-      AssistantScope.workspace(researchWorkspace),
-    );
+    if (researchWorkspace case final workspace?) {
+      await agree(
+        '$phase: research workspace',
+        AssistantScope.workspace(workspace),
+      );
+    }
     for (final workspace in host.workspaces.all()) {
       await agree(
         '$phase: workspace ${workspace.title}',

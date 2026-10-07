@@ -390,12 +390,17 @@ class MuyonHost {
   Future<void> close() => _closeFuture ??= _close();
   Future<void> _close() async {
     _closing = true;
+    modules.stopAdmission();
+    // Withdraw external tool authority immediately, but finish local imports
+    // already admitted by the person before invalidating their runtimes.
+    final closingTools = tools.close();
     await personalAgent.close();
     await _openingInquiry;
-    await modules.close();
-    await inquiry?.close();
     await services.transfer.close();
     await Future.wait(_platformOperations.toList());
+    await modules.close();
+    await closingTools;
+    await inquiry?.close();
     await services.close();
     memoryReview.dispose();
     foundation.dispose();

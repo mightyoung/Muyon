@@ -7,6 +7,8 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
+import 'host_schema_compatibility.dart';
+
 /// The sole connection and transaction owner of one physical database.
 class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
   ManagedConnection(this.raw);
@@ -221,16 +223,26 @@ class StorageManager {
         database.execute(
           'CREATE TABLE IF NOT EXISTS host_schema_state(singleton INTEGER PRIMARY KEY CHECK(singleton=1),definition_digest TEXT NOT NULL,structure_digest TEXT NOT NULL)',
         );
+        final repaired =
+            moduleId == 'muyon' &&
+            HostSchemaCompatibility.prepare(database, schema, structureDigest);
         var current = version;
         for (final migration in schema.migrations) {
           if (migration.version <= current) {
             final rows = database.select(
-              'SELECT migration_id,definition_digest FROM schema_migrations WHERE version=?',
+              'SELECT migration_id,definition_digest,applied_at FROM schema_migrations WHERE version=?',
               [migration.version],
             );
             if (rows.isEmpty ||
-                rows.first['migration_id'] != migration.id ||
-                rows.first['definition_digest'] != migration.definitionDigest) {
+                (rows.first['migration_id'] != migration.id &&
+                    !(repaired &&
+                        migration.version == 9 &&
+                        migration.id == HostSchemaCompatibility.canonical &&
+                        rows.first['migration_id'] ==
+                            HostSchemaCompatibility.reserved)) ||
+                rows.first['definition_digest'] != migration.definitionDigest ||
+                rows.first['applied_at'] is! String ||
+                DateTime.tryParse(rows.first['applied_at'] as String) == null) {
               throw StateError('Migration history drift');
             }
             continue;
@@ -249,6 +261,26 @@ class StorageManager {
         }
         if (current != schema.version) {
           throw StateError('Incomplete migrations');
+        }
+        if (database
+                .select('SELECT COUNT(*) AS n FROM schema_migrations')
+                .single['n'] !=
+            current) {
+          throw StateError('Migration history drift');
+        }
+        if (repaired) {
+          HostSchemaCompatibility.validateCompleted(
+            database,
+            current,
+            structureDigest,
+          );
+        } else if (moduleId == 'muyon' &&
+            HostSchemaCompatibility.isCanonicalTarget(schema)) {
+          HostSchemaCompatibility.validateCanonical(
+            database,
+            current,
+            structureDigest,
+          );
         }
         if (database.select('PRAGMA foreign_key_check').isNotEmpty) {
           throw StateError('Invalid foreign keys');

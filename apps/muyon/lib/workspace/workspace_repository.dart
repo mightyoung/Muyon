@@ -146,7 +146,7 @@ CREATE TABLE transfer_tasks(
         version: 9,
         id: 'outbound-tool-requests',
         definitionDigest: 'foundation-v9',
-        migrate: OutboundToolLedger.migrate,
+        migrate: OutboundToolLedger.createTable,
       ),
       ModuleMigration(
         version: 10,

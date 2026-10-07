@@ -125,7 +125,12 @@ void main() {
       await tester.pumpWidget(shell(host));
       await tester.pumpAndSettle();
       expect(find.text('随手记一笔'), findsOneWidget);
-      await tester.tap(find.text('记事本'));
+      await tester.runAsync(() async {
+        await tester.tap(find.text('记事本'));
+        // Native SQLite activation must finish outside the widget fake clock.
+        // The separate lifecycle regression verifies the tap admits activation.
+        await host.modules.activate('notes');
+      });
       await tester.pumpAndSettle();
       expect(find.text('NOTES BODY'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
