@@ -77,3 +77,17 @@ D1（deepseek-chat 在预算题上不按助手协议回答 JSON：一次纯文�
 | 可选 | 报告中「两道只读题各自的 `tasks[].tools`」表格各行列数不一致，记录，不处理 |
 
 **结论：合入。** 本批证明 macOS 设备上可以构建和运行，但不计入 2.3 的 M 证据。退出标准第 1 项仍然要等 engineer 在含 P0-3d 的 `develop` 上正式重跑。
+
+## 第 3 批之二（`8c51b41`，2026-10-07，P0-3d 之后，macOS 设备）
+
+新增 `north-star-macos-deepseek-chat-p03d.json`，报告里新增「第 3 批」一节。只改证据和文档。核实由 `reviewer-sonnet-low` 执行。Android 没有运行（手机未连接）。
+
+| 项 | 结论 |
+|---|---|
+| 密钥 | 两个改动文件中，两个密钥的完整值、首尾 12 位均 0 命中；`sk-`、`Bearer`、`/Users/` 也是 0；端点只写到路径。两个 `build/macos` 和应用沙盒容器里 0 命中 |
+| 运行代码 | `commit: d635a1e`，含 P0-3d（`ebc9bf6`）。`ebc9bf6..d635a1e` 在 `apps/`、`packages/` 下的改动都来自已合入的 E11b，没有未审代码 |
+| 链路 | **`passed: true`**，13 个步骤全部 ok。`readResultsChecked` 同时含比价和预算。三题的 `tools` 依次是 `compare_quotes`、`project_budget`、`create_inquiry`，都 `succeeded`，各 2 轮，协议纠正 0 次。审批前 1 张、审批后 2 张；错误摘要被拒、重复确认被拒；`reopenIdentical: true`；账本 6 行全部 `succeeded`，发送 139699 字节 |
+| 诚实 | 只跑了一次，没有挑选结果；`ci.sh` 的失败如实记录：host 的 `-3` 是 P0-F2 已在 develop 修复的挂起（`d635a1e` 不含 P0-F2），inquiry 的 `-46` 是 macOS 27 的 golden 漂移 |
+| 可选（leader 已补） | 在 D1 一节加了一句，指向第 3 批；措辞是「这次没有复现」，不说「已修复」 |
+
+**结论：合入，作为 2.3 的「R（设备）+ M」证据。** 这是 D1 在 P0-3d 之后的第一次通过，样本只有一次。Android 运行等手机连接后补上。
