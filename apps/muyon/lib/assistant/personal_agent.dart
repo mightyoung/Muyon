@@ -11,8 +11,11 @@ import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/model_provider.dart';
 import '../services/models/openai_compat_provider.dart';
+import '../services/models/token_estimate.dart';
 import '../services/models/tool_names.dart';
 import '../platform/tool_registry.dart';
+import 'agent_budget.dart';
+import 'agent_event_sink.dart';
 import 'model_request_gate.dart';
 import 'request_view.dart';
 import 'tool_selection.dart';
@@ -25,16 +28,35 @@ class PersonalAgent {
     required this.gateway,
     required this.tools,
     this.executionDeviceId = 'this-device',
-    this.maxRounds = 4,
+    int? maxRounds,
+    Budget budget = const Budget(),
+    AgentEventSink? events,
     this.selectionStrategy = const RuleAndModelToolSelection(),
     this.gate = const AlwaysConfirmGate(),
     this.provider = const OpenAiCompatProvider(),
-  });
+    DateTime Function()? clock,
+  }) : budget = maxRounds == null
+           ? budget
+           : Budget(
+               maxSteps: maxRounds,
+               maxActive: budget.maxActive,
+               maxTokens: budget.maxTokens,
+               maxCallsPerStep: budget.maxCallsPerStep,
+               maxCardCalls: budget.maxCardCalls,
+               requestCap: budget.requestCap,
+             ),
+       events = events ?? PayloadEventSink(repository),
+       _clock = clock ?? DateTime.now;
   final FoundationRepository repository;
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;
   final String executionDeviceId;
-  final int maxRounds;
+  final Budget budget;
+
+  /// Old name of `budget.maxSteps`.
+  int get maxRounds => budget.maxSteps;
+  final AgentEventSink events;
+  final DateTime Function() _clock;
   final ToolSelectionStrategy selectionStrategy;
   final ModelRequestGate gate;
 
@@ -123,7 +145,7 @@ class PersonalAgent {
         .messages(conversationId)
         .where((m) => m.role == 'user' || m.role == 'assistant')
         .toList();
-    final now = DateTime.now().toUtc().toIso8601String();
+    final now = _clock().toUtc().toIso8601String();
     var task = PersonalTask({
       'kind': 'personal',
       'executionId': const Uuid().v4(),
@@ -180,7 +202,7 @@ class PersonalAgent {
         );
       }
     } else {
-      await _waitForModel(task);
+      await _advance(task);
     }
     task = repository.task(task.id)!;
     return task;
@@ -240,7 +262,7 @@ class PersonalAgent {
     if (_closing) throw StateError('Assistant is closing');
     final c = repository.conversation(conversationId);
     if (c == null) throw StateError('Unknown conversation');
-    final now = DateTime.now().toUtc().toIso8601String();
+    final now = _clock().toUtc().toIso8601String();
     final task = PersonalTask({
       'kind': 'personal',
       'executionId': const Uuid().v4(),
@@ -305,16 +327,51 @@ class PersonalAgent {
     };
   }
 
-  Future<void> _waitForModel(PersonalTask task) async {
-    if ((task.payload['round'] as int) >= maxRounds) {
-      await _fail(task, '工具轮次达到上限');
+  /// S0 (ADR-0005 §6.2): what the task may still use is checked before
+  /// anything is built; a spent budget ends it with a summary, no request.
+  Future<void> _advance(PersonalTask task) async {
+    final usage = BudgetUsage.fromPayload(task.payload);
+    final kind = budget.exhausted(usage);
+    if (kind != null) {
+      await _exhausted(task, kind, usage);
       return;
     }
+    await _waitForModel(task);
+  }
+
+  /// The task ends `failed` with what the receipts show was done and what was
+  /// not; the host writes it, not the model, and nothing more is sent. The
+  /// step case keeps the old "轮次" wording.
+  Future<void> _exhausted(
+    PersonalTask task,
+    BudgetKind kind,
+    BudgetUsage usage,
+  ) async {
+    final reason = switch (kind) {
+      BudgetKind.steps => '工具轮次达到上限（${usage.steps}/${budget.maxSteps} 步）',
+      BudgetKind.activeTime =>
+        '活动时长达到上限（${usage.active.inSeconds}/${budget.maxActive.inSeconds} 秒）',
+      BudgetKind.tokens =>
+        'token 预算耗尽（${usage.tokens}/${budget.maxTokens}${usage.estimated ? '，含估算' : ''}）',
+    };
+    final log = [
+      for (final e in task.payload['toolLog'] as List? ?? const [])
+        '${(e as Map)['toolId']}（${e['status']}）${e['summary']}',
+    ];
+    await _fail(
+      task,
+      '$reason。${log.isEmpty ? '没有已完成的工具调用。' : '已完成：${log.join('；')}。'}'
+      '尚未得到最终答案；可点“继续”新建尝试，预算重新计算。',
+      code: 'budget_${kind.name}',
+    );
+  }
+
+  Future<void> _waitForModel(PersonalTask task) async {
     final preview = {
       'endpoint': _profile(task).endpoint.toString(),
       'profile': _previewProfile(task),
       'scope': task.scope.toJson(),
-      'messages': buildRequestView(task.payload['messages'] as List),
+      'messages': _view(task),
       'dataCategories': ['conversation', 'memories', 'tool_results'],
       // Native mode sends more than the messages; the person confirms that
       // too, so the tools and the mode are part of the digest.
@@ -322,6 +379,9 @@ class PersonalAgent {
         'mode': 'native',
         'tools': task.payload['nativeTools'],
       },
+      // Only when the token budget is nearly spent: the request is then
+      // limited to what is left, and the person sees the limit too.
+      'maxOutputTokens': ?_outputCap(task),
     };
     if (utf8.encode(jsonEncode(preview)).length > 256 * 1024) {
       await _fail(task, '上下文过大，请缩小范围');
@@ -351,7 +411,7 @@ class PersonalAgent {
         'waitingFor': '确认向所选端点发送以下内容',
         'preview': preview,
         'requestDigest': digest(preview),
-        'expiresAt': DateTime.now()
+        'expiresAt': _clock()
             .toUtc()
             .add(const Duration(minutes: 5))
             .toIso8601String(),
@@ -420,7 +480,7 @@ class PersonalAgent {
         'waitingFor': prepared.info.accessLevel == ToolAccessLevel.read
             ? null
             : '确认工具操作',
-        'expiresAt': DateTime.now()
+        'expiresAt': _clock()
             .toUtc()
             .add(const Duration(minutes: 5))
             .toIso8601String(),
@@ -445,7 +505,7 @@ class PersonalAgent {
       if (task == null ||
           task.state != PersonalTaskState.waitingConfirmation ||
           task.payload['requestDigest'] != requestDigest ||
-          !DateTime.now().toUtc().isBefore(
+          !_clock().toUtc().isBefore(
             DateTime.parse(task.payload['expiresAt'] as String),
           )) {
         throw StateError('stale_confirmation');
@@ -500,7 +560,7 @@ class PersonalAgent {
         repository.task(task.id)?.state != PersonalTaskState.running) {
       throw StateError('cancelled');
     }
-    if (!DateTime.now().toUtc().isBefore(
+    if (!_clock().toUtc().isBefore(
           DateTime.parse(task.payload['expiresAt'] as String),
         ) ||
         task.payload['memoryDigest'] != digest(_memories(task.scope))) {
@@ -524,15 +584,18 @@ class PersonalAgent {
         await _runNative(task, token, profile);
         return;
       }
+      final started = _clock();
       final String text;
+      Usage? usage;
       if (profile.capabilities.streaming) {
-        text = await _streamCompat(task, token, profile);
+        final reply = await _streamCompat(task, token, profile);
+        text = reply.text.toString();
+        usage = reply.usage;
       } else {
         text = await gateway.chat(
           profile: profile,
           messages: [
-            for (final m in task.payload['messages'] as List)
-              Map<String, String>.from(m as Map),
+            for (final m in _view(task)) Map<String, String>.from(m as Map),
           ],
           caller: 'assistant',
           cancellation: token,
@@ -544,15 +607,17 @@ class PersonalAgent {
           repository.task(task.id)?.state != PersonalTaskState.running) {
         return;
       }
+      // What this response used is charged whatever it turns out to be.
+      final billed = _bill(task, started, replyText: text, usage: usage);
       final response = _protocolReply(text);
       if (response == null) {
         // Prose, native tool-call markup or a wrong shape is never acted on.
         // At most one corrective round, confirmed like any other; then a
         // fixed reason that does not quote the model (it may echo a key).
-        await _correctOrFail(task, notJson: _notJson(text));
+        await _correctOrFail(billed, notJson: _notJson(text));
         return;
       }
-      final advanced = task.copy({
+      final advanced = billed.copy({
         'round': (task.payload['round'] as int) + 1,
         'messages': [
           ...task.payload['messages'] as List,
@@ -599,10 +664,7 @@ class PersonalAgent {
     final native = profile.capabilities.nativeTools;
     return ModelRequest(
       profile: profile,
-      messages: [
-        for (final m in buildRequestView(task.payload['messages'] as List))
-          ModelMessage.fromJson(m as Map),
-      ],
+      messages: [for (final m in _view(task)) ModelMessage.fromJson(m as Map)],
       tools: native
           ? [
               for (final t in task.payload['nativeTools'] as List)
@@ -613,6 +675,8 @@ class PersonalAgent {
                 ),
             ]
           : const [],
+      maxOutputTokens:
+          (task.payload['preview'] as Map?)?['maxOutputTokens'] as int?,
       // Compatibility mode asks for one JSON object per reply (P0-3d).
       jsonObject: !native,
       caller: 'assistant',
@@ -634,6 +698,8 @@ class PersonalAgent {
         request: _modelRequest(task, profile),
         cancellation: token,
         beforeSend: () => _beforeSend(task),
+        // The smaller of what is left of the active budget and 5 minutes.
+        maxDuration: budget.requestLimit(BudgetUsage.fromPayload(task.payload)),
       )) {
         switch (event) {
           case TextDelta():
@@ -674,7 +740,7 @@ class PersonalAgent {
   /// Compatibility mode over a stream: the same JSON protocol, only the
   /// transport changes. The text is accumulated and judged after [Done] by
   /// the same strict parse as a non-streaming reply.
-  Future<String> _streamCompat(
+  Future<_Reply> _streamCompat(
     PersonalTask task,
     ModelCancellation token,
     ModelProfile profile,
@@ -683,8 +749,72 @@ class PersonalAgent {
     _throwIfFailed(reply, profile);
     // No tools are offered here, so a tool call is not protocol: the reply is
     // discarded and corrected like any other non-JSON reply.
-    if (reply.calls.isNotEmpty) return '';
-    return reply.text.toString();
+    if (reply.calls.isNotEmpty) {
+      reply.text.clear();
+    }
+    return reply;
+  }
+
+  /// What is left of the token budget after the prompt, when that is less than
+  /// the reply could take; null otherwise. Only requests that go through the
+  /// provider carry it (`gateway.chat` has no such parameter).
+  int? _outputCap(PersonalTask task) {
+    final profile = _profile(task);
+    if (!profile.capabilities.streaming && !profile.capabilities.nativeTools) {
+      return null;
+    }
+    final prompt =
+        estimateMessageTokens(_view(task)) +
+        (_native(task)
+            ? estimateTokens(jsonEncode(task.payload['nativeTools']))
+            : 0);
+    final room =
+        budget.remainingTokens(BudgetUsage.fromPayload(task.payload)) - prompt;
+    return room > 0 && room < (profile.capabilities.maxOutputTokens ?? 8192)
+        ? room
+        : null;
+  }
+
+  /// The messages a request is built from: the stored conversation, or the
+  /// compacted view of it (ADR-0005 §6.6). Preview, digest and what is sent
+  /// all come from this one function.
+  List<Object?> _view(PersonalTask task) => buildRequestView(
+    task.payload['messages'] as List,
+    compactionState: task.payload['compaction'],
+  );
+
+  /// Charges one model response to the task's budgets: the time it ran
+  /// (never time spent waiting for the person) and its tokens, as the endpoint
+  /// reported them or, where it did not, a conservative estimate.
+  PersonalTask _bill(
+    PersonalTask task,
+    DateTime started, {
+    required String replyText,
+    Usage? usage,
+  }) {
+    final promptEstimate =
+        estimateMessageTokens(_view(task)) +
+        (_native(task)
+            ? estimateTokens(jsonEncode(task.payload['nativeTools']))
+            : 0);
+    final prompt = usage?.promptTokens;
+    final completion = usage?.completionTokens;
+    final next = BudgetUsage.fromPayload(task.payload).plus(
+      active: _clock().difference(started),
+      tokens:
+          (prompt ?? promptEstimate) +
+          (completion ?? estimateTokens(replyText)),
+      estimated: prompt == null || completion == null,
+    );
+    return task.copy({
+      ...next.toPayload(),
+      'round': task.payload['round'],
+      // Known size of the prompt just sent, to correct the next estimate.
+      if (prompt != null) ...{
+        'reportedPromptTokens': prompt,
+        'reportedViewCount': _view(task).length,
+      },
+    });
   }
 
   static Never _failure(_FixedFailure f) => throw f;
@@ -750,6 +880,7 @@ class PersonalAgent {
     ModelCancellation token,
     ModelProfile profile,
   ) async {
+    final started = _clock();
     final reply = await _collect(task, token, profile);
     token.check();
     if (_closing ||
@@ -758,11 +889,20 @@ class PersonalAgent {
     }
     _throwIfFailed(reply, profile);
     final text = reply.text.toString();
+    final billed = _bill(
+      task,
+      started,
+      replyText:
+          text +
+          [for (final c in reply.calls) '${c.name}${jsonEncode(c.arguments)}']
+              .join(),
+      usage: reply.usage,
+    );
     Future<void> discard() =>
-        _correctOrFail(task, notJson: false, correction: _nativeCorrection);
+        _correctOrFail(billed, notJson: false, correction: _nativeCorrection);
     if (reply.calls.isEmpty) {
       if (text.trim().isEmpty) return discard();
-      await _answerNative(task, token, text);
+      await _answerNative(billed, token, text);
       return;
     }
     final call = reply.calls.first;
@@ -773,7 +913,7 @@ class PersonalAgent {
     if (reply.calls.length != 1 || !call.valid || toolIds[call.name] == null) {
       return discard();
     }
-    final advanced = task.copy({'round': (task.payload['round'] as int) + 1});
+    final advanced = billed.copy({'round': (task.payload['round'] as int) + 1});
     await _proposeTool(
       advanced,
       toolIds[call.name]!,
@@ -879,8 +1019,8 @@ class PersonalAgent {
       );
     }
     // The discarded reply is not kept; only the correction is added. The new
-    // round counts against maxRounds and waits for confirmation as usual.
-    await _waitForModel(
+    // round counts against the step budget and waits for confirmation as usual.
+    await _advance(
       task.copy({
         'round': (task.payload['round'] as int) + 1,
         'protocolCorrections': used + 1,
@@ -906,6 +1046,7 @@ class PersonalAgent {
       }
       _toolActive.add(task.id);
       final ToolCallResult result;
+      final started = _clock();
       try {
         result = await tools.invoke(request, cancellation: token);
       } on ToolCancelled {
@@ -973,6 +1114,14 @@ class PersonalAgent {
           ? (task.payload['toolCall'] as Map)['assistantMessage']
           : null;
       final updated = task.copy({
+        // A tool call is running time; the wait before it was not.
+        ...BudgetUsage.fromPayload(task.payload)
+            .plus(active: _clock().difference(started))
+            .toPayload(),
+        'toolLog': [
+          ...task.payload['toolLog'] as List? ?? const [],
+          _logEntry(request.toolId, result),
+        ],
         'references': refs.map((r) => r.toJson()).toList(),
         'summary': '${result.summary}$lateCancel',
         'messages': [
@@ -999,7 +1148,7 @@ class PersonalAgent {
           refs,
         );
       } else {
-        await _waitForModel(updated);
+        await _advance(updated);
       }
     } finally {
       // Held until the outcome is written: a cancel in between must only
@@ -1009,6 +1158,16 @@ class PersonalAgent {
       _toolTokens.remove(task.id);
     }
   }
+
+  /// What the budget summary says about one finished call.
+  static Map<String, Object?> _logEntry(String toolId, ToolCallResult result) =>
+      {
+        'toolId': toolId,
+        'status': result.status.name,
+        'summary': result.summary.length > 120
+            ? '${result.summary.substring(0, 120)}…'
+            : result.summary,
+      };
 
   Future<void> _finish(
     PersonalTask task,
@@ -1038,12 +1197,35 @@ class PersonalAgent {
     }
   }
 
-  Future<void> _fail(PersonalTask task, String message) async {
+  Future<void> _fail(PersonalTask task, String message, {String? code}) async {
     if (await repository.updateTask(
       task.copy({'state': 'failed', 'stage': 'failed', 'error': message}),
     )) {
+      await _event(task, AgentEventType.error, {
+        'code': ?code,
+        'reason': message,
+      });
       await repository.notify(title: '助手任务未完成', body: message, taskId: task.id);
     }
+  }
+
+  /// Writes to the event sink. A sink that cannot write must not change what
+  /// the task does.
+  Future<void> _event(
+    PersonalTask task,
+    String type, [
+    Map<String, Object?> data = const {},
+  ]) async {
+    try {
+      await events.append(
+        task.id,
+        AgentEvent(
+          type,
+          step: BudgetUsage.fromPayload(task.payload).steps,
+          data: data,
+        ),
+      );
+    } catch (_) {}
   }
 
   /// Before a tool call is under way (waiting for confirmation, queued, model

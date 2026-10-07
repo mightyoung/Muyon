@@ -872,9 +872,14 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
               jsonEncode(next.scope.toJson())) {
         throw StateError('Task scope changed');
       }
+      // The event list is append-only and kept by [appendTaskEvent]: a
+      // snapshot taken before an event was added must not drop it.
+      final events = current.payload['events'];
       db.execute('UPDATE execution_records SET state=?,payload=? WHERE id=?', [
         next.state.name,
-        jsonEncode(next.payload),
+        jsonEncode(
+          events == null ? next.payload : {...next.payload, 'events': events},
+        ),
         next.id,
       ]);
       if (assistantAnswer != null) {
@@ -898,6 +903,27 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
     });
     if (result) notifyListeners();
     return result;
+  }
+
+  /// Adds one event to the task's `events` (ADR-0005 §6.5) in its own write;
+  /// `seq` increases by one per task. Allowed on a finished task too (the
+  /// closing `done` / `error` event), and it changes nothing else.
+  Future<void> appendTaskEvent(
+    String taskId,
+    Map<String, Object?> event,
+  ) async {
+    final added = await database.write((db) {
+      final current = task(taskId);
+      if (current == null) return false;
+      final events = [...(current.payload['events'] as List? ?? const [])];
+      events.add({'seq': events.length + 1, 'at': _now(), ...event});
+      db.execute('UPDATE execution_records SET payload=? WHERE id=?', [
+        jsonEncode({...current.payload, 'events': events}),
+        taskId,
+      ]);
+      return true;
+    });
+    if (added) notifyListeners();
   }
 
   Future<void> recoverInterrupted() async {
