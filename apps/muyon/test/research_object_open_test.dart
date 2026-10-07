@@ -40,6 +40,12 @@ void main() {
     await tester.runAsync(() async {
       await host.activateInquiry();
       await host.activateResearch();
+      // Activate the prototype here, in real async time (P0-F2). The fallback
+      // test taps its way into resolveScope, which activates the prototype
+      // inside the FakeAsync zone; that would create the database write queue
+      // there, and the tearDown's real-time write (runAsync never pumps the
+      // fake microtask queue) would then wait on it forever.
+      await host.activatePrototype();
       final store = host.research!.store;
       store.db.execute(
         "INSERT INTO projects(id,title,question,next_step,layout,skill_root) "
