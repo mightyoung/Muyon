@@ -215,7 +215,9 @@ class _AiSettingsState extends State<AiSettings> {
             value: widget.state.assistantPermission,
             items: [
               for (final p in AssistantPermission.values)
-                DropdownMenuItem(value: p, child: Text(p.label)),
+                // Hosted mode hides bypass: it is read as confirmWrites there.
+                if (!widget.state.isHosted || p != AssistantPermission.bypass)
+                  DropdownMenuItem(value: p, child: Text(p.label)),
             ],
             onChanged: (value) {
               if (value != null) {

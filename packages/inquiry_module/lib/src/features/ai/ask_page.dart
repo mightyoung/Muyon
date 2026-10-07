@@ -437,12 +437,15 @@ class _AskPageState extends State<AskPage> {
                 }),
                 itemBuilder: (_) => [
                   for (final p in AssistantPermission.values)
-                    PopupMenuItem(
-                      value: p.name,
-                      child: Text(
-                        '${widget.state.assistantPermission == p ? '✓ ' : ''}${p.label}',
+                    // Hosted mode hides bypass: it is read as confirmWrites there.
+                    if (!widget.state.isHosted ||
+                        p != AssistantPermission.bypass)
+                      PopupMenuItem(
+                        value: p.name,
+                        child: Text(
+                          '${widget.state.assistantPermission == p ? '✓ ' : ''}${p.label}',
+                        ),
                       ),
-                    ),
                   const PopupMenuDivider(),
                   for (final criterion in assistantDomesticCriteria.entries)
                     PopupMenuItem(
