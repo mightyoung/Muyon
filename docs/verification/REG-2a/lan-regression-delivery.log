@@ -1,0 +1,28 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/lan_security_test.dart
+00:00 +0: test/lan_trust_test.dart: identity survives secure storage and the short code matches
+00:02 +1: test/lan_security_test.dart: malformed discovery roots do not escape the socket callback
+00:02 +2: test/share_test.dart: a pushed project brings exactly what it needs
+00:03 +3: test/share_test.dart: a pushed project brings exactly what it needs
+00:04 +4: test/share_test.dart: a pushed project brings exactly what it needs
+00:05 +5: test/share_test.dart: a pushed project brings exactly what it needs
+00:06 +6: test/share_test.dart: a pushed project brings exactly what it needs
+00:07 +7: test/share_test.dart: a pushed project brings exactly what it needs
+00:08 +8: test/share_test.dart: a pushed project brings exactly what it needs
+00:10 +9: test/lan_trust_test.dart: mitm certificate is rejected and no payload is stored
+00:10 +10: test/lan_security_test.dart: active upload budgets reject excess and recover after idle timeout Instance of 'LanLimits'
+00:11 +11: test/share_test.dart: encrypted push needs the passphrase
+00:12 +12: test/share_test.dart: encrypted push needs the passphrase
+00:13 +13: test/share_test.dart: encrypted push needs the passphrase
+00:13 +14: test/share_test.dart: encrypted push needs the passphrase
+00:14 +15: test/share_test.dart: encrypted push needs the passphrase
+00:14 +16: test/share_test.dart: encrypted push needs the passphrase
+00:14 +17: test/share_test.dart: encrypted push needs the passphrase
+00:14 +18: test/share_test.dart: encrypted push needs the passphrase
+00:15 +19: test/share_test.dart: encrypted push needs the passphrase
+00:16 +20: test/share_test.dart: encrypted push needs the passphrase
+00:16 +21: test/share_test.dart: encrypted push needs the passphrase
+00:20 +22: test/share_test.dart: encrypted push needs the passphrase
+00:20 +23: test/share_test.dart: encrypted push needs the passphrase
+00:22 +24: test/share_test.dart: encrypted push needs the passphrase
+00:22 +25: test/share_test.dart: devices find each other and push over the network
+00:28 +26: All tests passed!

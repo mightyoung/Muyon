@@ -1,0 +1,690 @@
+00:00 +0: loading /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_stream_ledger_test.dart
+00:00 +0: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_stream_ledger_test.dart: the row is written before the endpoint sees the request and one row covers the whole stream
+00:01 +1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_stream_ledger_test.dart: a ledger that cannot record sends nothing
+00:01 +2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_stream_ledger_test.dart: beforeSend and a missing credential stop the request before the ledger and the network
+00:01 +3: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_stream_ledger_test.dart: a stream cut before its finish reason is failed with the bytes received and a fixed reason
+00:01 +4: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_stream_ledger_test.dart: cancelling mid-stream ends the row as cancelled
+00:01 +5: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:01 +6: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:02 +7: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:02 +8: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:03 +9: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:03 +10: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:03 +11: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:03 +12: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:04 +13: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:04 +14: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:11 +15: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:12 +16: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +17: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +17: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: mcp blocked ledger sends zero requests
+REG2A_BLOCKED mcp requests=0
+00:13 +18: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +19: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +20: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +21: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +21: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: inquiry_web blocked ledger sends zero requests
+REG2A_BLOCKED inquiry_web requests=0
+00:13 +22: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +23: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +24: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 320.0 and 200% text
+00:13 +25: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:13 +26: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:14 +26: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: inquiry_hub blocked ledger sends zero requests
+REG2A_BLOCKED inquiry_hub requests=0
+00:14 +27: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:14 +28: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:14 +29: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:14 +30: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:14 +31: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:14 +32: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:14 +33: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:15 +34: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:15 +35: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: validation errors are shown inline and nothing is saved
+00:16 +36: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 390.0 and 200% text
+00:16 +37: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 390.0 and 200% text
+00:17 +38: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 390.0 and 200% text
+00:17 +39: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 390.0 and 200% text
+00:17 +40: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 390.0 and 200% text
+00:18 +41: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 390.0 and 200% text
+00:18 +42: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 390.0 and 200% text
+00:18 +43: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: transfer transfer blocked ledger sends zero requests
+REG2A_BLOCKED transfer requests=0
+00:18 +44: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: editing keeps the token when the field stays empty
+00:18 +45: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: editing keeps the token when the field stays empty
+00:18 +46: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_servers_page_test.dart: editing keeps the token when the field stays empty
+00:18 +47: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 430.0 and 200% text
+00:19 +48: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 430.0 and 200% text
+00:19 +49: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 430.0 and 200% text
+00:19 +50: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 430.0 and 200% text
+00:19 +51: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 430.0 and 200% text
+00:20 +52: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 430.0 and 200% text
+00:20 +53: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 430.0 and 200% text
+00:20 +54: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: transfer discovery blocks UDP and records exact datagram bytes
+00:20 +55: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/responsive_shell_test.dart: platform four sections at 1280.0 and 200% text
+00:23 +56: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_gateway_test.dart: a provider base URL is completed to the chat or embeddings path
+00:23 +57: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_gateway_test.dart: real HTTP sends frozen model, bearer and parses chat subset
+00:23 +58: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_gateway_test.dart: missing credential never sends; HTTP auth failure never retries
+00:23 +59: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_gateway_test.dart: timeout covers entire response and redirects are rejected
+00:23 +60: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/model_gateway_test.dart: redirect cannot forward evidence or credentials
+00:24 +61: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_adapter_test.dart: registers supported tools as external, skips unsupported with reason
+00:24 +62: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_adapter_test.dart: calls need host approval and reach the server once
+00:24 +63: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_adapter_test.dart: destination must be the configured server
+00:24 +64: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_adapter_test.dart: tool-reported errors are failures, not successes
+00:24 +65: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: lists every state, endpoint and size, but never payload text
+00:24 +66: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: lists every state, endpoint and size, but never payload text
+00:24 +67: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: lists every state, endpoint and size, but never payload text
+00:27 +68: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: filters by caller and status
+00:29 +69: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: tool calls and approvals show status and destination
+00:30 +70: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: tool calls and approvals show status and destination
+00:30 +71: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: tool calls and approvals show status and destination
+00:30 +72: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: tool calls and approvals show status and destination
+00:30 +73: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +74: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +75: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +76: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +77: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +78: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +79: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +80: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +81: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +82: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +83: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +84: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +85: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +86: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:30 +87: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +88: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +89: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +90: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +91: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +92: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +93: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +94: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +95: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +96: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +97: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +98: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:31 +99: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:34 +100: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list empty state explains pairing
+00:35 +101: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: renders at 320.0 and 100.0% text
+00:35 +102: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list shows status, unread badge and last message
+00:36 +103: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: list shows status, unread badge and last message
+00:36 +104: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_flow_page_test.dart: renders at 1280.0 and 100.0% text
+00:36 +105: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 320.0 and 200% text
+00:37 +106: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 320.0 and 200% text
+00:38 +107: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 390.0 and 200% text
+00:38 +108: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 430.0 and 200% text
+00:39 +109: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/projection_service_test.dart: applies upserts and deletes in order and advances the cursor
+00:39 +110: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 1280.0 and 200% text
+00:39 +111: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 1280.0 and 200% text
+00:40 +112: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 1280.0 and 200% text
+00:40 +113: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 1280.0 and 200% text
+00:40 +114: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread all message states fit at 1280.0 and 200% text
+00:40 +115: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread states are words plus icons, sent means unknown
+00:41 +116: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: several calls in one reply reads run in parallel and each call id gets exactly one tool message, in order
+00:41 +117: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: several calls in one reply reads run in parallel and each call id gets exactly one tool message, in order
+00:42 +118: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: several calls in one reply reads run in parallel and each call id gets exactly one tool message, in order
+00:42 +119: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread send clears the input and appends an unconfirmed message
+00:42 +120: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread send clears the input and appends an unconfirmed message
+00:43 +121: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread send clears the input and appends an unconfirmed message
+00:43 +122: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread send clears the input and appends an unconfirmed message
+00:44 +123: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: several calls in one reply calls past the per-step limit and the card limit come back as not run, and every call id is still answered
+00:44 +124: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread send button is disabled for empty or over-long text
+00:44 +125: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: batch confirmation card every call has its own fields; several calls digest as a list, one call as its identityDigest
+00:45 +126: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread offline blocks sending but keeps history readable
+00:45 +127: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: batch confirmation card every selected call has its own one-use approval and receipt, run one after the other in the model's order
+00:45 +128: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: batch confirmation card every selected call has its own one-use approval and receipt, run one after the other in the model's order
+00:46 +129: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread a send error from the backend is shown, input kept
+00:46 +130: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread a send error from the backend is shown, input kept
+00:46 +131: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread a send error from the backend is shown, input kept
+00:46 +132: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/tool_descriptions_test.dart: startup tools carry safe, effect-accurate descriptions
+00:47 +133: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/tool_descriptions_test.dart: startup tools carry safe, effect-accurate descriptions
+00:47 +134: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/tool_descriptions_test.dart: startup tools carry safe, effect-accurate descriptions
+00:47 +135: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread cancelling the send confirmation sends nothing
+00:47 +136: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread cancelling the send confirmation sends nothing
+00:47 +137: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: batch confirmation card an interrupted call ends the task interrupted and starts nothing after it
+00:47 +138: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: batch confirmation card an interrupted call ends the task interrupted and starts nothing after it
+00:47 +139: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread retry of an old unconfirmed message asks first
+00:48 +140: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread retry of an old unconfirmed message asks first
+00:48 +141: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread retry of an old unconfirmed message asks first
+00:48 +142: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: batch confirmation card a write that changes the scope of the next one makes it fail with stale_scope and stops the batch
+00:48 +143: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread retry of a failed message needs no extra warning
+00:49 +144: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread retry of a failed message needs no extra warning
+00:49 +145: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_batch_card_test.dart: batch confirmation card cancelling the task cancels the whole card
+00:49 +146: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread accept/reject are separate from read and say nothing runs
+00:49 +147: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread accept/reject are separate from read and say nothing runs
+00:50 +148: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/backup_service_test.dart: snapshot holds writes, includes data and files, excludes transient
+00:50 +149: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/backup_service_test.dart: snapshot holds writes, includes data and files, excludes transient
+00:50 +150: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/backup_service_test.dart: snapshot holds writes, includes data and files, excludes transient
+00:50 +151: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread delete message is local-only and asks first
+00:50 +152: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread delete message is local-only and asks first
+00:51 +153: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/backup_service_test.dart: restore refuses while open, then swaps in and keeps old data
+00:51 +154: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread delete thread confirms, removes locally, leaves the page
+00:51 +155: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_pages_test.dart: thread delete thread confirms, removes locally, leaves the page
+00:55 +156: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/business_tools_test.dart: scope includes inquiry projects and research documents
+00:58 +157: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/business_tools_test.dart: inquiry and research tools return scoped records and refs
+01:00 +158: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_host_test.dart: two hosts accept one offer and a closed peer is unreachable
+01:09 +159: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:09 +160: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:09 +161: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:10 +162: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:10 +163: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:10 +164: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:10 +165: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:10 +166: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:10 +167: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:11 +168: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:11 +169: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:11 +170: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:11 +171: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:12 +172: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:12 +173: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+01:12 +174: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_inquiry_test.dart: host → inquiry data → assistant reads → approved write → reopen
+MUYON_NORTH_STAR_EVIDENCE[1/5] {"kind":"muyon-north-star-inquiry","schema":1,"startedAt":"2026-10-07T13:09:43.519006Z","evidenceClass":"fixture","realModelEvidence":false,"note":"Loopback fixture model scripted by the test. NOT real-model (M) evidence and, unless run on a device, NOT real-device (R) evidence. It proves the host wiring: confirmations, tool registry, approval-gated write, ledger and reopen persistence.","commit":null,"device":{"platform":"macos","osVersion":"Version 27.0.1 (Build 26A434)","dart":"3.13.4","processors":8,"label":null,"binding":"flutter_test (headless)"},"steps":[{"name":"host.open","ok":true,"ms":1687},{"name":"inquiry.activate","ok":true,"ms":453},{"name":"inquiry.seed","ok":true,"ms":2509},
+MUYON_NORTH_STAR_EVIDENCE[2/5] {"name":"model.profile","ok":true,"ms":25},{"name":"assistant.read.compare_quotes","ok":true,"ms":1493},{"name":"assistant.read.project_budget","ok":true,"ms":483},{"name":"read.results","ok":true,"ms":9},{"name":"scope.select","ok":true,"ms":6},{"name":"assistant.write.create_inquiry","ok":true,"ms":1141},{"name":"invariants","ok":true,"ms":71},{"name":"host.close","ok":true,"ms":345},{"name":"host.reopen","ok":true,"ms":156},{"name":"reopen.verify","ok":true,"ms":244}],"tasks":[{"phase":"read","id":"559a0a6f-c8bb-419a-9628-d358e5a83023","modelConfirmations":2,"toolConfirmations":0,"state":"succeeded","stage":"completed","rounds":2,"error":null,"tools":["inquiry.compare_quotes"],"answerPrev
+MUYON_NORTH_STAR_EVIDENCE[3/5] iew":"[夹具回答，不是真实模型] 电缆最低可用报价来自北极星乙线缆。","protocolCorrections":0,"answerReferences":2,"readReceipts":["inquiry.compare_quotes"]},{"phase":"read","id":"393a8d47-2d4c-4c2e-96b2-f66eb382fd62","modelConfirmations":2,"toolConfirmations":0,"state":"succeeded","stage":"completed","rounds":2,"error":null,"tools":["inquiry.project_budget"],"answerPreview":"[夹具回答，不是真实模型] 项目成本合计见预算明细。","protocolCorrections":0,"answerReferences":1,"readReceipts":["inquiry.project_budget"]},{"phase":"write","id":"526922e8-3aab-4c0a-8ade-7513927d0999","modelConfirmations":2,"toolConfirmations":1,"state":"succeeded","stage":"completed","rounds":2,"error":null,"tools":["inquiry.create_inquiry"],"answerPreview":"[夹具回答，不是真实模型] 
+MUYON_NORTH_STAR_EVIDENCE[4/5] 已创建询价单「北极星复核询价」。","protocolCorrections":0,"answerReferences":1}],"seed":{"suppliers":2,"budgetLines":2,"quotations":4,"inquiries":1},"model":{"endpoint":"http://127.0.0.1:63287/v1/chat/completions","modelId":"north-star-fixture","location":"local","credential":"none","fixture":true},"registeredTools":36,"readResultsChecked":["compare_quotes","project_budget"],"write":{"toolId":"inquiry.create_inquiry","inquiriesBeforeApproval":1,"inquiriesAfterApproval":2,"wrongDigestRefused":true,"repeatConfirmRefused":true,"approvalToResultMs":355,"inquiryId":"85dddc61-50be-4e89-9c30-1dca188914d7","answerCitesInquiry":true},"ledger":{"rows":6,"statuses":{"succeeded":6},"bytesSent":138201},"receipts":{"rows
+MUYON_NORTH_STAR_EVIDENCE[5/5] ":3,"byTool":{"inquiry.compare_quotes":1,"inquiry.project_budget":1,"inquiry.create_inquiry":1}},"beforeReopen":{"conversations":2,"messages":6,"tasks":3,"receipts":3,"approvals":1,"outboundRequests":6},"afterReopen":{"conversations":2,"messages":6,"tasks":3,"receipts":3,"approvals":1,"outboundRequests":6},"reopenIdentical":true,"passed":true,"finishedAt":"2026-10-07T13:09:52.435144Z","totalMs":8917}
+01:14 +175: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_storage_page_test.dart: create backup writes a new directory under the picked one
+01:14 +176: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_storage_page_test.dart: create backup failure is shown, never as success
+01:15 +177: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_storage_page_test.dart: verify failure lists every problem and shows no success
+01:15 +178: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_storage_page_test.dart: verify success says what was checked
+01:16 +179: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_storage_page_test.dart: cancelled picker does nothing
+01:16 +180: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_storage_page_test.dart: restore of a failing backup never reaches the host
+01:16 +181: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/data_storage_page_test.dart: restore explains the restart and keeps old data wording
+01:17 +182: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: migration 8 v7 -> v8 keeps tasks and their old payload events readable and numbered on; reopening changes nothing
+01:18 +182 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: rejects a non-chat profile and missing conversation or prompt
+01:18 +182 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: migration 8 v7 -> v8 keeps tasks and their old payload events readable and numbered on; reopening changes nothing [E]
+  Expected: <8>
+    Actual: <9>
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/task_events_test.dart 99:7                     main.<fn>.<fn>
+  
+01:18 +183 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: rejects a non-chat profile and missing conversation or prompt
+01:18 +184 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: rejects a non-chat profile and missing conversation or prompt
+01:18 +185 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: migration 8 legacy events that are an object are skipped: the migration succeeds and appends go on
+01:18 +186 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: a selection outside the registered candidates is rejected
+01:18 +187 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: migration 8 legacy events that are non-object elements and seqs that are not integers are skipped: the migration succeeds and appends go on
+01:18 +188 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: pause and resume only work at the confirmation boundary
+01:18 +189 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: migration 8 a corrupt payload row does not stop the migration
+01:18 +190 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: concurrent confirmation of the same task is refused
+01:18 +191 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: migration 8 a payload events list that the table does not hold (a task written by older code) is still read and numbered on
+01:19 +192 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: migration 8 a payload events list that the table does not hold (a task written by older code) is still read and numbered on
+01:19 +193 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: migration 8 a payload events list that the table does not hold (a task written by older code) is still read and numbered on
+01:19 +194 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: a tool registry change is refused before any call
+01:19 +195 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction a failed event write undoes the state change
+01:19 +196 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: a confirmation that cannot be consumed is refused
+01:19 +197 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction a failed state write leaves no event
+01:19 +198 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction a failed state write leaves no event
+01:19 +199 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: a failed tool result fails the task without an answer
+01:19 +200 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction the loop commits its finishing event with the task: when the event cannot be written the task does not end succeeded
+01:19 +201 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction the loop commits its finishing event with the task: when the event cannot be written the task does not end succeeded
+01:19 +202 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction the loop commits its finishing event with the task: when the event cannot be written the task does not end succeeded
+01:19 +203 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction the loop commits its finishing event with the task: when the event cannot be written the task does not end succeeded
+01:19 +204 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_rejections_test.dart: an oversized model context is refused before any send
+01:19 +205 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction state and event of a normal run agree: every wait has its card, done has the success
+01:20 +206 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events and state share one transaction state and event of a normal run agree: every wait has its card, done has the success
+01:20 +207 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a manual tool run with a successful receipt is taken over, not run again, and asks for no approval
+01:20 +208 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a manual tool run with a successful receipt is taken over, not run again, and asks for no approval
+01:20 +209 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a manual tool run with a successful receipt is taken over, not run again, and asks for no approval
+01:20 +210 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a manual tool run with a successful receipt is taken over, not run again, and asks for no approval
+01:21 +211 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: events carry no text or key a whole run through the table has digests and codes only
+01:21 +212 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a manual tool run whose receipt says it may have run stops at a confirmation with the reason; only a person moves it on, and then by a new card
+01:21 +213 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a manual tool run whose receipt says it may have run stops at a confirmation with the reason; only a person moves it on, and then by a new card
+01:21 +214 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: sinks a sink that is not the table gets the same events one by one after the state
+01:21 +215 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: sinks a sink that is not the table gets the same events one by one after the state
+01:21 +216 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a manual tool run with no receipt, or one that failed without effect, starts again as before
+01:21 +217 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: task_objects tool results and the answer link their objects; an object finds its tasks, newest first
+01:22 +218 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a model task after a finished step goes on from its messages: the write is in them, not asked for again
+01:23 +219 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: task_objects a task of another workspace is invisible to the lookup
+01:23 +220 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a model task with a step that has receipts but was never recorded: successful ones are used, the rest are not run, and it goes back to the model for a new card
+01:23 +221 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_events_test.dart: task_objects a write receipt links its result objects too
+01:23 +222 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a model task with a call whose receipt shows it may have run stops, says so, and does not run it; a person moves it on to the model
+01:23 +223 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_resume_test.dart: a model task a read whose receipt has no outcome is just a read: not an unknown, and with nothing taken over it starts afresh
+01:23 +224 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:24 +225 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:24 +226 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:24 +227 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:25 +228 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:25 +229 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:25 +230 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:28 +231 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:29 +232 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:29 +233 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage host Stop task cancels owner and blocks later tools/model; redirect=false
+01:31 +234 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/foundation_scope_test.dart: empty workspace cannot inherit global knowledge or unbound supplier refs
+01:31 +235 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_backend_test.dart: text is delivered once, and sent is not failed or retried by itself
+01:31 +236 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_backend_test.dart: text is delivered once, and sent is not failed or retried by itself
+01:32 +237 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_backend_test.dart: text is delivered once, and sent is not failed or retried by itself
+01:34 +238 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/chat_backend_test.dart: text is delivered once, and sent is not failed or retried by itself
+01:36 +239 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage child success_cleanup stays isolated from owning task
+01:37 +240 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage child success_cleanup stays isolated from owning task
+01:38 +241 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_web_task_stop_test.dart: AskPage child success_cleanup stays isolated from owning task
+01:38 +242 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/restore_flow_test.dart: settings → 数据与存储 → restore swaps data and reopens
+01:41 +243 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/restore_flow_test.dart: settings → 数据与存储 → restore swaps data and reopens
+01:41 +244 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/restore_flow_test.dart: settings → 数据与存储 → restore swaps data and reopens
+01:46 +245 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/restore_flow_test.dart: settings → 数据与存储 → restore swaps data and reopens
+01:47 +246 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/restore_flow_test.dart: settings → 数据与存储 → restore swaps data and reopens
+01:48 +247 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/restore_flow_test.dart: settings → 数据与存储 → restore swaps data and reopens
+02:00 +248 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/dream_test.dart: offline dream is incremental, idempotent and does not call a model
+02:00 +249 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/dream_test.dart: an interrupted run is not marked done
+02:00 +250 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/dream_test.dart: duplicate accept can be reverted and conflicts are not resolved
+02:01 +251 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/dream_test.dart: delete and disable leave assistant context and block reintroduction
+02:01 +252 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/dream_test.dart: narrowed scope propagates and verified experience is the only one used
+02:01 +253 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/dream_test.dart: dream holds no tool approval and records a model call only with a profile
+02:08 +254 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_ledger_test.dart: every sent request records caller, destination, size and outcome
+02:08 +255 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_ledger_test.dart: every sent request records caller, destination, size and outcome
+02:08 +256 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_ledger_test.dart: every sent request records caller, destination, size and outcome
+02:08 +257 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_ledger_test.dart: every sent request records caller, destination, size and outcome
+02:08 +258 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_ledger_test.dart: refused confirmation sends and records nothing
+02:09 +259 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_ledger_test.dart: HTTP failure and cancellation are recorded as such
+02:09 +260 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_ledger_test.dart: a request left sending by a crash becomes interrupted on recovery
+02:09 +261 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_ledger_test.dart: if the ledger cannot record, nothing is sent
+02:12 +262 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:13 +263 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:13 +264 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:13 +265 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:13 +266 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:13 +267 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +268 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +269 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +270 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +271 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +272 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +273 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +274 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +275 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +276 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +277 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +278 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:14 +279 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:16 +280 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:16 +281 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:16 +282 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:16 +283 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:17 +284 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:17 +285 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:17 +286 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: registration all four are write tools whose descriptions say what they change
+02:17 +287 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: create_inquiry refuses to run without host approval
+02:17 +288 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: create_inquiry runs once after approval and returns refs inside the project
+02:18 +289 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: create_inquiry records and invited parties must all be selected
+02:18 +290 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: create_inquiry module validation failure leaves data unchanged
+02:19 +291 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: create_inquiry empty item or supplier lists never reach the module
+02:19 +292 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: create_inquiry the change appears in the module change log
+02:19 +293 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: record_quote creates a quotation, then revises it only from the stated old price
+02:20 +294 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: record_quote a first quote must say there is no current price
+02:20 +295 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: record_quote a bad price is rejected by the module and changes nothing
+02:21 +296 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: record_quote unselected records are refused
+02:21 +297 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: set_item_qty changes the quantity and shows old → new in the request
+02:21 +298 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: set_item_qty changes the quantity and shows old → new in the request
+02:21 +299 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: set_item_qty changes the quantity and shows old → new in the request
+02:22 +300 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_review_test.dart: service refreshes after repository changes and dispose stops it
+02:22 +301 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_review_test.dart: service refreshes after repository changes and dispose stops it
+02:22 +302 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_review_test.dart: service refreshes after repository changes and dispose stops it
+02:22 +303 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: set_item_qty an item outside the selection is refused
+02:23 +304 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: set_item_qty cancelling before the effect leaves the data unchanged
+02:24 +305 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: set_item_qty a record that changed after the preview invalidates the approval
+02:24 +306 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_write_tools_test.dart: set_inquiry_status closes and reopens only from the stated status
+02:25 +307 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: actual AppState address during host review prevents any request
+02:25 +308 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: actual AppState address during host review prevents any request
+02:26 +309 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:26 +310 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:27 +311 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:27 +312 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:30 +313 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:30 +314 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:30 +315 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:31 +316 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:33 +317 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:35 +318 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:37 +319 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:37 +320 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:41 +321 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:41 +322 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/widget_test.dart: default host opens platform and all four navigation sections
+02:44 +323 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:48 +324 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:48 +325 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:48 +326 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:49 +327 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:49 +328 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:49 +329 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:49 +330 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:49 +331 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:50 +332 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:50 +333 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:50 +334 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:50 +335 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:50 +336 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:51 +337 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:51 +338 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:51 +339 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:51 +340 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:51 +341 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:51 +342 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:53 +343 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_hub_ui_test.dart: host review retains exact records/contact opt-in and recheck reconciles without POST retry
+02:56 +344 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/storage_manager_test.dart: one owner, foreign keys and queue rollback isolation
+02:56 +345 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/storage_manager_test.dart: close drains writes and rejects new writes
+02:56 +346 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/storage_manager_test.dart: concurrent close callers await the same database drain
+02:56 +347 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/storage_manager_test.dart: schema downgrade, same-version drift and failed migration preserve data
+02:56 +348 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/storage_manager_test.dart: ahead version never opens or clears
+03:01 +349 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_coordinator_test.dart: duplicate offer, single owner, restart, offline status and late result
+03:01 +350 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_coordinator_test.dart: duplicate offer, single owner, restart, offline status and late result
+03:02 +351 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_coordinator_test.dart: restart while running does not execute again
+03:02 +352 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/task_coordinator_test.dart: a task envelope received over paired TLS is not executed
+03:09 +353 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: Folio uses host dataset, queued same handle, persistence and shutdown
+03:13 +354 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: Folio uses host dataset, queued same handle, persistence and shutdown
+03:13 +355 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: Folio uses host dataset, queued same handle, persistence and shutdown
+03:13 +356 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/storage_recovery_test.dart: domain commit interrupted before host activation repairs once on restart
+03:14 +357 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/storage_recovery_test.dart: domain commit interrupted before host activation repairs once on restart
+03:14 +358 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/storage_recovery_test.dart: domain commit interrupted before host activation repairs once on restart
+03:14 +359 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:14 +360 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:14 +361 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:14 +362 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:15 +363 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:15 +364 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:15 +365 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:16 +366 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:16 +367 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:16 +368 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:16 +369 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:16 +370 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:16 +371 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:17 +372 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:17 +373 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:17 +374 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:17 +375 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:18 +376 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:18 +377 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:19 +378 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:19 +379 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:20 +380 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:21 +381 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:22 +382 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:27 +383 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/inquiry_plugin_test.dart: platform opens the complete Folio module with one MaterialApp
+03:28 +384 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: only human acceptance commits canonical ZIP once through host binding
+03:28 +385 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: only human acceptance commits canonical ZIP once through host binding
+03:33 +386 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_cross_tool_test.dart: crossed tools across the two read questions fail the run
+03:35 +387 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_cross_tool_test.dart: crossed tools across the two read questions fail the run
+03:37 +388 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/north_star_cross_tool_test.dart: crossed tools across the two read questions fail the run
+03:38 +389 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: DraftView no text yet: progress only
+03:39 +390 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: DraftView no text yet: progress only
+03:41 +391 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: DraftView no text yet: progress only
+03:41 +392 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: trigger a profile that does not declare contextTokens is never compacted
+03:43 +393 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: trigger a profile that does not declare contextTokens is never compacted
+03:44 +394 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: trigger a profile that does not declare contextTokens is never compacted
+03:44 +395 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: trigger a profile that does not declare contextTokens is never compacted
+03:44 +396 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: trigger a profile that does not declare contextTokens is never compacted
+03:45 +397 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: trigger a profile that does not declare contextTokens is never compacted
+03:45 +398 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: recovery activates canonical receipt and only then restores imported flag
+03:45 +399 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream shows the answer text as it streams, never the protocol, and drops the draft once the message is saved
+03:45 +400 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream shows the answer text as it streams, never the protocol, and drops the draft once the message is saved
+03:46 +401 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream shows the answer text as it streams, never the protocol, and drops the draft once the message is saved
+03:49 +402 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream shows the answer text as it streams, never the protocol, and drops the draft once the message is saved
+03:49 +403 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream shows the answer text as it streams, never the protocol, and drops the draft once the message is saved
+03:51 +404 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream shows the answer text as it streams, never the protocol, and drops the draft once the message is saved
+03:54 +405 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream shows the answer text as it streams, never the protocol, and drops the draft once the message is saved
+03:57 +406 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream shows the answer text as it streams, never the protocol, and drops the draft once the message is saved
+04:00 +407 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: wrapped canonical ZIP remains unimported rather than counting extraction
+04:00 +408 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: phase A: old tool results are cleared locally it records a compaction event with before and after
+04:00 +409 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_cancel_test.dart: cancel while waiting for confirmation is cancelled and never runs
+04:01 +410 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:02 +411 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:02 +412 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:02 +413 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:02 +414 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:03 +415 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:03 +416 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:04 +417 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:06 +418 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:06 +419 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:07 +420 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:11 +421 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:13 +422 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_draft_ui_test.dart: AssistantPage over a real stream a cancelled stream leaves the draft, marked, on the page
+04:16 +423 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_cancel_test.dart: cancel racing a finishing tool leaves exactly one consistent outcome
+04:16 +424 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_cancel_test.dart: cancel racing a finishing tool leaves exactly one consistent outcome
+04:16 +425 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_cancel_test.dart: cancel racing a finishing tool leaves exactly one consistent outcome
+04:18 +426 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_cancel_test.dart: cancel racing a finishing tool leaves exactly one consistent outcome
+04:19 +427 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_cancel_test.dart: cancel racing a finishing tool leaves exactly one consistent outcome
+04:19 +428 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_cancel_test.dart: cancel racing a finishing tool leaves exactly one consistent outcome
+04:19 +429 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/assistant_cancel_test.dart: cancel racing a finishing tool leaves exactly one consistent outcome
+04:19 +430 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: revoked durable acceptance during async import prevents commit
+04:19 +431 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: revoked durable acceptance during async import prevents commit
+04:20 +432 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: revoked durable acceptance during async import prevents commit
+04:20 +433 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: revoked durable acceptance during async import prevents commit
+04:20 +434 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: revoked durable acceptance during async import prevents commit
+04:20 +435 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: limits summary failed and the request is still above the hard limit: the task fails with context_too_large and nothing is sent
+04:21 +436 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +437 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +438 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +439 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +440 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +441 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +442 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +443 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +444 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: high level transfer send supports canonical ZIP before accepted import
+04:21 +445 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/context_compaction_test.dart: manual compaction compactNow forces the pipeline once the next request waits; the old digest no longer confirms
+04:21 +446 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: cancellation during receipt reconciliation does not fail research activation
+04:22 +447 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: binding failure after domain commit reports committed data truthfully
+04:23 +448 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: marker failure after domain and binding commit does not claim no import
+04:24 +449 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: cancellation after domain commit preserves data and reports committed
+04:25 +450 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: notification persistence failure reports original committed outcome through Flutter errors
+04:25 +451 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: unreadable receipt reports unknown rather than absence or automatic replay
+04:26 +452 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: restart isolates completed marker failure and continues later committed items
+04:26 +453 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/accepted_research_import_test.dart: cancellation queued before reconciliation marker remains isolated
+04:27 +454 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/prototype_tools_test.dart: list_pages and page_detail return data and ObjectRefs
+04:28 +455 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/prototype_tools_test.dart: prototype tools are read-only and nothing writes or sends
+04:32 +456 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the fixed payload is a constant with no user data, and its digest is pinned
+04:32 +457 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the fixed payload goes out as sent: stream, usage, one tool, ledger caller
+04:32 +458 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the gate and the confirmation a probe asks the gate with no task, scope or data
+04:32 +459 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the gate and the confirmation declining sends nothing and writes no ledger row
+04:33 +460 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the gate and the confirmation a gate that denies stops before any request
+04:33 +461 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the gate and the confirmation a ledger that cannot record means nothing is sent
+04:33 +462 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the gate and the confirmation an embedding profile cannot be tested
+04:33 +463 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the verdicts yes: tool call, stream and usage
+04:33 +464 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the verdicts no usage chunk: usage is "no", the rest unchanged
+04:33 +465 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the verdicts 400 / 422 name no parameter: nothing is concluded
+04:33 +466 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the verdicts accepted but no tool call: unconfirmed, treated as no
+04:33 +467 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the verdicts a call to another tool is not a native-tools "yes"
+04:33 +468 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the verdicts 401, 403, 500, a cut stream: cannot be determined
+04:33 +469 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: the verdicts a silent endpoint times out: cannot be determined
+04:34 +470 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +471 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +472 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +473 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +474 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +475 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +476 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +477 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +478 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a JSON answer is read after Done; the request streams and asks for JSON output, with the digest in the ledger
+04:34 +479 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/capability_probe_test.dart: presets fill the sizes of the result, not the capabilities
+04:34 +480 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream the strict parse and the one correction are unchanged: prose is discarded, not saved, not sent back
+04:34 +481 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream the strict parse and the one correction are unchanged: prose is discarded, not saved, not sent back
+04:34 +482 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream the strict parse and the one correction are unchanged: prose is discarded, not saved, not sent back
+04:34 +483 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a streamed tool proposal still goes through prepare and the frozen candidates
+04:35 +484 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream an endpoint that rejects stream:true fails with a fixed reason and is not retried as a non-streaming request
+04:35 +485 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a truncated stream fails the task and saves nothing of the partial answer
+04:35 +486 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: compatibility mode over a stream a reply cut off by the token limit is not acted on
+04:35 +487 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools a streamed call runs the read tool, and the next request carries the call and its result paired by id
+04:35 +488 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools a proposed write still waits for the person and runs only after the digest-bound confirmation
+04:36 +489 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools a call outside the frozen candidates is a violation: discarded whole, only the fixed correction is added, nothing runs
+04:36 +490 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools a registered tool that was not a candidate is a violation even when the model names it correctly encoded
+04:36 +491 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools bad arguments, a repeated call id and an empty reply are violations; a second violation fails with a fixed reason
+04:37 +492 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools the legacy function_call is a violation, never a call
+04:37 +493 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools an endpoint that rejects tools fails with a fixed reason and sends nothing else: no JSON protocol, no other model
+04:37 +494 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools a non-streaming native reply with no choices is the same fixed failure; a valid one runs the tool
+04:37 +495 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools a call cut off by the token limit does not run
+04:37 +496 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools a citation that names no tool result is removed and said so
+04:37 +497 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools a ledger that cannot record sends nothing
+04:37 +498 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: native tools an endpoint that echoes the key puts it nowhere: not in the task, the notification or the ledger
+04:37 +499 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: capabilities a code-constructed profile is compatibility, non-streaming
+04:37 +500 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: capabilities a non-streaming compatibility task goes through gateway.chat, not the stream
+04:38 +501 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: capabilities the task keeps the capabilities it started with
+04:38 +502 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: capabilities a compatibility task previews and digests exactly what it did before capabilities existed
+04:38 +503 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: capabilities a gate that does not ask the person stops the request: nothing is sent
+04:38 +504 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_streaming_test.dart: capabilities a native task previews its mode and tools, so the digest covers what is sent
+04:45 +505 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/module_registry_test.dart: broken modules are unavailable; healthy ones stay usable
+04:46 +506 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/module_registry_test.dart: duplicate module ids are a build error
+04:47 +507 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/qa_service_rejections_test.dart: prepare rejects invalid and unavailable evidence
+04:47 +508 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/qa_service_rejections_test.dart: the same execution cannot run twice
+04:48 +509 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/qa_service_rejections_test.dart: a refused running transition cancels without an answer
+04:48 +510 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/qa_service_rejections_test.dart: evidence is revalidated immediately before sending
+04:48 +511 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/qa_service_rejections_test.dart: a refused commit stores no answer
+04:48 +512 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/qa_service_rejections_test.dart: a failed model request stores no answer
+04:51 +513 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:56 +514 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:56 +515 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:57 +516 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:57 +517 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:58 +518 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:59 +519 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:59 +520 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:59 +521 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:59 +522 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+04:59 +523 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:00 +524 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:01 +525 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:01 +526 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:01 +527 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:01 +528 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:02 +529 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:02 +530 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:03 +531 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:03 +532 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:04 +533 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:04 +534 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:04 +535 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:04 +536 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:04 +537 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:05 +538 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: empty and populated states fit at 320.0 and 200% text
+05:05 +539 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:05 +540 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:05 +541 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:05 +542 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:05 +543 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:08 +544 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:10 +545 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:13 +546 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:18 +547 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:22 +548 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:25 +549 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:27 +550 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:31 +551 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:32 +552 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:34 +553 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:34 +554 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:37 +555 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:38 +556 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:44 +557 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:45 +558 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_test.dart: settings refuse a pasted key with a line break and never show it
+05:46 +559 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/prototype_wiring_test.dart: shell home opens the prototype module
+05:47 +560 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/prototype_wiring_test.dart: shell home opens the prototype module
+05:48 +561 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/prototype_wiring_test.dart: shell home opens the prototype module
+05:50 +562 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: experiences a candidate is hidden from the assistant until confirmed
+05:50 +563 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_token_redaction_test.dart: page saving a URL with a credential parameter hints but saves
+05:54 +564 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_token_redaction_test.dart: page saving a URL with a credential parameter hints but saves
+05:55 +565 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/mcp_token_redaction_test.dart: page saving a URL with a credential parameter hints but saves
+05:56 +566 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: experiences retire asks first, then removes it from the assistant
+05:56 +567 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: experiences deleting a memory retires experiences built on it
+05:59 +568 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: Dream runs only on click, offline, and shows proposals
+06:02 +569 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: Dream accept disables the extra copy, revert restores it
+06:04 +570 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: Dream a second run with no changes says so
+06:09 +571 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: Dream a model needs explicit consent; cancel sends nothing
+06:34 +572 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: real model tool loop requires each send consent and keeps real citations
+06:36 +572 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/ocr_real_model_test.dart: real fixed ONNX models with Dart BGR/DB/homography/CTC pipeline
+  Skip: Set MUYON_OCR_MODEL_DIR and MUYON_OCR_PYTHON for real CPU validation
+06:36 +572 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: real model tool loop requires each send consent and keeps real citations
+06:36 +573 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/memory_page_test.dart: Dream a failed model run is shown, not reported as done
+06:38 +574 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: cancel during or after a model-chosen tool ends the task with no further model turn
+06:40 +575 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_stream_capture_test.dart: a streamed response is recorded with its first-event time and usage
+06:40 +576 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: write requires one host confirmation; pause resume gets new attempt
+06:41 +577 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: write requires one host confirmation; pause resume gets new attempt
+06:41 +578 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_stream_capture_test.dart: the evaluation run reads its first-response time and tokens from a native profile through the agent
+06:41 +579 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_stream_capture_test.dart: the evaluation run reads its first-response time and tokens from a native profile through the agent
+06:42 +580 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_stream_capture_test.dart: the evaluation run reads its first-response time and tokens from a native profile through the agent
+06:42 +581 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_stream_capture_test.dart: the evaluation run reads its first-response time and tokens from a native profile through the agent
+06:42 +582 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: recovery interrupts active tasks; contextual memory never leaks globally
+06:43 +583 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: host close drains a running offline tool and blocks late results
+06:43 +584 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: injected selection replaces offline routing and persists evaluation identity
+06:43 +585 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: internal channels are never offered to the selection strategy
+06:43 +586 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: model cannot propose outside frozen candidates even if strategy later changes
+06:43 +587 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: default missing-model fallback preserves explicit local rule
+06:44 +588 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/personal_agent_test.dart: page disposal leaves host task active
+07:43 +589 ~1 -1: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/transfer_chat_backend_test.dart: adapter maps send, delivery, read, acceptance and delete
+08:18 +589 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/transfer_chat_backend_test.dart: adapter maps send, delivery, read, acceptance and delete [E]
+  TimeoutException after 0:00:30.000000: Test timed out after 30 seconds. See https://pub.dev/packages/test#timeouts
+  dart:isolate  _RawReceivePort._handleMessage
+  
+  连接 127.0.0.1 超时
+  package:supplier_core/src/lan.dart 898:7  LanNode.probe
+  
+08:20 +589 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/transfer_chat_backend_test.dart: sending to a device that is not reachable fails without a row
+08:24 +590 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/confirm_title_test.dart: the confirmation is titled by what it confirms
+08:25 +591 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/confirm_title_test.dart: the evaluation confirms a summary request like a model request
+09:21 +592 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: (setUpAll)
+09:23 +592 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: task set has at least 20 tasks across the required categories
+09:23 +593 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: task set every task states prompt, scope, tools, facts and writes
+09:23 +594 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: task set a bad placeholder or key is refused
+09:23 +595 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring a correct run succeeds
+09:23 +596 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring request failure
+09:23 +597 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring missing tool and wrong order
+09:24 +598 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring fact mismatch
+09:24 +599 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring extra write
+09:24 +600 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring expected write missing or wrong
+09:24 +601 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring abstain tasks fail on any tool
+09:24 +602 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring numbers are compared as decimals
+09:24 +603 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring an anchored number counts only next to its anchor
+09:24 +604 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring a failure on the pinned scope is labelled apart
+09:24 +605 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: scoring percentile, median and mean
+09:24 +606 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: fixture model (not a real model) every task of the set passes with the correct scripted model
+09:41 +607 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: fixture model (not a real model) every task of the set passes with the correct scripted model
+09:42 +608 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: fixture model (not a real model) every task of the set passes with the correct scripted model
+09:46 +609 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: fixture model (not a real model) every task of the set passes with the correct scripted model
+09:48 +610 ~1 -2: /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart: fixture model (not a real model) every task of the set passes with the correct scripted model
+09:56 +610 ~1 -3: loading /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/agent_eval_test.dart [E]
+  Bad state: Cannot close sink while adding stream.
+  package:stream_channel/src/guarantee_channel.dart 180:7      _GuaranteeSink.close
+  package:flutter_tools/src/test/flutter_platform.dart 765:43  FlutterPlatform._startTest
+  
+09:56 +610 ~1 -4: loading /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/credential_redaction_callers_test.dart [E]
+  Bad state: Cannot close sink while adding stream.
+  package:stream_channel/src/guarantee_channel.dart 180:7      _GuaranteeSink.close
+  package:flutter_tools/src/test/flutter_platform.dart 765:43  FlutterPlatform._startTest
+  
+unhandled error during finalization of test:
+/Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/research_object_open_test.dart
+PathNotFoundException: Deletion failed, path = '/var/folders/q0/177qc3b540l1_dg0ng0r3xn40000gn/T/flutter_tools.QGGUr8/flutter_test_listener.OkkoQJ' (OS Error: No such file or directory, errno = 2)
+#0      _Directory._deleteSync (dart:io/directory_impl.dart:216:7)
+#1      FileSystemEntity.deleteSync (dart:io/file_system_entity.dart:425:7)
+#2      ForwardingFileSystemEntity.deleteSync (package:file/src/forwarding/forwarding_file_system_entity.dart:70:16)
+#3      ErrorHandlingDirectory.deleteSync.<anonymous closure> (package:flutter_tools/src/base/error_handling_io.dart:717:22)
+#4      _runSync (package:flutter_tools/src/base/error_handling_io.dart:1118:16)
+#5      ErrorHandlingDirectory.deleteSync (package:flutter_tools/src/base/error_handling_io.dart:716:12)
+#6      FlutterPlatform._createListenerDart.<anonymous closure> (package:flutter_tools/src/test/flutter_platform.dart:786:15)
+#7      FlutterPlatform._startTest.finalize (package:flutter_tools/src/test/flutter_platform.dart:591:26)
+<asynchronous suspension>
+#8      asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+
+unhandled error during finalization of test:
+/Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/llm_selection_eval_test.dart
+PathNotFoundException: Deletion failed, path = '/var/folders/q0/177qc3b540l1_dg0ng0r3xn40000gn/T/flutter_tools.QGGUr8/flutter_test_listener.iCO5oe' (OS Error: No such file or directory, errno = 2)
+#0      _Directory._deleteSync (dart:io/directory_impl.dart:216:7)
+#1      FileSystemEntity.deleteSync (dart:io/file_system_entity.dart:425:7)
+#2      ForwardingFileSystemEntity.deleteSync (package:file/src/forwarding/forwarding_file_system_entity.dart:70:16)
+#3      ErrorHandlingDirectory.deleteSync.<anonymous closure> (package:flutter_tools/src/base/error_handling_io.dart:717:22)
+#4      _runSync (package:flutter_tools/src/base/error_handling_io.dart:1118:16)
+#5      ErrorHandlingDirectory.deleteSync (package:flutter_tools/src/base/error_handling_io.dart:716:12)
+#6      FlutterPlatform._createListenerDart.<anonymous closure> (package:flutter_tools/src/test/flutter_platform.dart:786:15)
+#7      FlutterPlatform._startTest.finalize (package:flutter_tools/src/test/flutter_platform.dart:591:26)
+<asynchronous suspension>
+#8      asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+
+One or more uncaught errors occurred shutting down:
+  Bad state: Cannot add event while adding stream.
+  Bad state: Cannot add event while adding stream.
+Waiting for current test(s) to finish.
+Press Control-C again to terminate immediately.

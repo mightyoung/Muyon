@@ -1,0 +1,28 @@
+Running build hooks...Running build hooks...00:00 +0: loading test/lan_security_test.dart
+00:00 +0: test/lan_security_test.dart: malformed discovery roots do not escape the socket callback
+00:00 +1: test/lan_security_test.dart: malformed discovery roots do not escape the socket callback
+00:00 +2: test/lan_trust_test.dart: discovery and a copied name do not authorize a payload
+00:01 +3: test/lan_security_test.dart: peer flood is capped, invalid fields rejected and expired peers replaced
+00:01 +4: test/lan_trust_test.dart: a repeated announcement keeps a fingerprint verified by probe
+00:01 +5: test/lan_security_test.dart: active upload budgets reject excess and recover after idle timeout Instance of 'LanLimits'
+00:01 +6: test/lan_security_test.dart: active upload budgets reject excess and recover after idle timeout Instance of 'LanLimits'
+00:02 +7: test/lan_security_test.dart: active upload budgets reject excess and recover after idle timeout Instance of 'LanLimits'
+00:02 +8: test/lan_trust_test.dart: replay of a delivered message is refused before a second copy
+00:02 +9: test/lan_security_test.dart: active upload budgets reject excess and recover after idle timeout Instance of 'LanLimits'
+00:02 +10: test/lan_security_test.dart: active upload budgets reject excess and recover after idle timeout Instance of 'LanLimits'
+00:02 +11: test/lan_trust_test.dart: a push signed outside the accept window is refused
+00:02 +12: test/lan_security_test.dart: active upload budgets reject excess and recover after idle timeout Instance of 'LanLimits'
+00:03 +13: test/lan_trust_test.dart: replay after restart is refused from the persisted window
+00:03 +14: test/lan_security_test.dart: absolute deadline ends a trickling upload and removes partial data
+00:03 +15: test/lan_security_test.dart: absolute deadline ends a trickling upload and removes partial data
+00:04 +16: test/lan_trust_test.dart: revoked peer is refused and a later push is not stored
+00:04 +17: test/lan_security_test.dart: stop cancels pending uploads and completes cleanup before returning
+00:04 +18: test/lan_security_test.dart: callback failure removes the received file and releases admission
+00:04 +19: test/lan_security_test.dart: probe bounds malformed, oversized and stalled responses
+00:05 +20: test/lan_security_test.dart: push bounds a receiver that never responds
+00:06 +21: test/lan_security_test.dart: stop aborts and drains an outgoing push instead of waiting for transfer timeout
+00:06 +22: test/lan_security_test.dart: push progress is monotonic and full byte count still awaits receiver response
+00:08 +23: test/share_test.dart: a pushed project brings exactly what it needs
+00:12 +24: test/share_test.dart: encrypted push needs the passphrase
+00:16 +25: test/share_test.dart: devices find each other and push over the network
+00:18 +26: All tests passed!

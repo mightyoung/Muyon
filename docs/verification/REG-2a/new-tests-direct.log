@@ -1,0 +1,355 @@
+00:00 +0: loading /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart
+00:00 +0: mcp blocked ledger sends zero requests
+00:03 +0 -1: mcp blocked ledger sends zero requests [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -1: mcp succeeds with exact body bytes and safe destination
+00:03 +0 -2: mcp succeeds with exact body bytes and safe destination [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -2: mcp failed request leaves safe failed row
+00:03 +0 -3: mcp failed request leaves safe failed row [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -3: inquiry_web blocked ledger sends zero requests
+00:03 +0 -4: inquiry_web blocked ledger sends zero requests [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -4: inquiry_web succeeds with exact body bytes and safe destination
+00:03 +0 -5: inquiry_web succeeds with exact body bytes and safe destination [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -5: inquiry_web failed request leaves safe failed row
+00:03 +0 -6: inquiry_web failed request leaves safe failed row [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -6: inquiry_hub blocked ledger sends zero requests
+00:03 +0 -7: inquiry_hub blocked ledger sends zero requests [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -7: inquiry_hub succeeds with exact body bytes and safe destination
+00:03 +0 -8: inquiry_hub succeeds with exact body bytes and safe destination [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -8: inquiry_hub failed request leaves safe failed row
+00:03 +0 -9: inquiry_hub failed request leaves safe failed row [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -9: closed ledger sends nothing
+00:03 +0 -10: closed ledger sends nothing [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -10: transfer transfer blocked ledger sends zero requests
+00:03 +0 -11: transfer transfer blocked ledger sends zero requests [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'service' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -11: transfer transfer push blocked ledger sends zero requests
+00:03 +0 -12: transfer transfer push blocked ledger sends zero requests [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'service' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -12: transfer transfer succeeds with exact body bytes in host ledger
+00:03 +0 -13: transfer transfer succeeds with exact body bytes in host ledger [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'service' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -13: transfer transfer failed push leaves failed row
+00:03 +0 -14: transfer transfer failed push leaves failed row [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'service' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -14: transfer discovery blocks UDP and records exact datagram bytes
+00:03 +0 -15: transfer discovery blocks UDP and records exact datagram bytes [E]
+  SqliteException(1): while executing, table tool_invocation_receipts already exists, SQL logic error (code 1)
+    Causing statement (at position 13): CREATE TABLE tool_invocation_receipts(
+   replay_key TEXT PRIMARY KEY, invocation_id TEXT NOT NULL UNIQUE,
+   identity_digest TEXT NOT NULL, tool_id TEXT NOT NULL,
+   state TEXT NOT NULL, result_json TEXT);
+  CREATE TABLE tool_approvals(
+   id TEXT PRIMARY KEY, session_id TEXT NOT NULL, tool_id TEXT NOT NULL,
+   identity_digest TEXT NOT NULL, scope_digest TEXT NOT NULL, input_digest TEXT NOT NULL,
+   destination TEXT, issued_at TEXT NOT NULL, expires_at TEXT NOT NULL,
+   state TEXT NOT NULL, consumed_at TEXT);
+  , parameters: 
+  package:sqlite3/src/implementation/exception.dart 101:3  throwException
+  package:sqlite3/src/implementation/database.dart 295:9   DatabaseImplementation.execute
+  package:muyon/platform/tool_registry.dart 11:51          installToolRegistrySchema
+  test/outbound_tool_ledger_test.dart 52:5                 main.<fn>
+  
+  LateInitializationError: Local 'server' has not been initialized.
+  dart:_internal                       LateError._throwLocalNotInitialized
+  test/outbound_tool_ledger_test.dart  main.<fn>
+  
+00:03 +0 -15: Some tests failed.
+
+Failing tests:
+  /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: closed ledger sends nothing
+  /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: inquiry_hub blocked ledger sends zero requests
+  /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: inquiry_hub failed request leaves safe failed row
+  /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: inquiry_hub succeeds with exact body bytes and safe destination
+  ... and 11 more

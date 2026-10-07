@@ -1,0 +1,99 @@
+00:00 +0: loading /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart
+00:00 +0: mcp blocked ledger sends zero requests
+REG2A_BLOCKED mcp requests=3
+00:01 +0 -1: mcp blocked ledger sends zero requests [E]
+  Expected: empty
+    Actual: [
+              [
+                123,
+                34,
+                106,
+                115,
+                111,
+                110,
+                114,
+                112,
+                99,
+                34,
+                58,
+                34,
+                50,
+                46,
+                48,
+                34,
+                44,
+                34,
+                105,
+                100,
+                34,
+                58,
+                49,
+                44,
+                ...
+              ],
+              [
+                123,
+                34,
+                106,
+                115,
+                111,
+                110,
+                114,
+                112,
+                99,
+                34,
+                58,
+                34,
+                50,
+                46,
+                48,
+                34,
+                44,
+                34,
+                109,
+                101,
+                116,
+                104,
+                111,
+                100,
+                ...
+              ],
+              [
+                123,
+                34,
+                106,
+                115,
+                111,
+                110,
+                114,
+                112,
+                99,
+                34,
+                58,
+                34,
+                50,
+                46,
+                48,
+                34,
+                44,
+                34,
+                105,
+                100,
+                34,
+                58,
+                50,
+                44,
+                ...
+              ]
+            ]
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test/outbound_tool_ledger_test.dart 208:7           main.<fn>
+  
+00:01 +0 -1: Some tests failed.
+
+Failing tests:
+  /Users/muyi/Downloads/dev/muspace/.claude/worktrees/reg-2a-outbound-tool-ledger/apps/muyon/test/outbound_tool_ledger_test.dart: mcp blocked ledger sends zero requests
+
+EXIT_CODE=1

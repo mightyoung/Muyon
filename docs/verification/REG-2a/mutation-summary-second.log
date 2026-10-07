@@ -1,0 +1,4 @@
+mcp: EXIT_CODE=1 KILLED=true
+inquiry_web: EXIT_CODE=1 KILLED=true
+inquiry_hub: EXIT_CODE=1 KILLED=true
+transfer: EXIT_CODE=1 KILLED=true
