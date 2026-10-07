@@ -12,7 +12,7 @@
 
 - ADR-0004 已采纳（用户 2026-10-07，Q1～Q13 全部按建议）。
 - 已派发：**FOLIO-BYPASS**（junior，安全修复，优先）、**REG-2a**（Codex，外传工具入账，迁移 9）、**REG-2b**（`implementer-sonnet`，模块激活与范围单点，迁移 10）。三项都审查后再合入；REG-2a 和 REG-2b 后合入的一方负责重新编号迁移。
-- REG-2 两半都合入后，按路线图 §3.1 派 REG-3、REG-4、T-3。REG-3 派发前，先请用户确认科研导出 / 导入类写操作的清单（Q10）。
+- REG-2 两半都合入后，按路线图 §3.1 派 REG-3、REG-4、T-3。Q10 清单已确认（ADR-0004 §12.1 注记），REG-3 可以直接派。
 
 ## 1. 工作方式
 
@@ -50,7 +50,7 @@
 
 | 任务 | 前提 | 执行 | 审查 |
 |---|---|---|---|
-| **REG-3、REG-4、T-3** | REG-2a、REG-2b 都合入；REG-3 先确认 Q10 清单 | 子代理 / Codex | `-high` |
+| **REG-3、REG-4、T-3** | REG-2a、REG-2b 都合入（Q10 已确认） | 子代理 / Codex | `-high` |
 | **E-1 真实基线** | 有密钥的本机执行者 | engineer | `-low` |
 | **R-1** Android 重跑 North Star（vivo V2324A） | 手机连接 | engineer | `-low`（按第 5 节） |
 | **UI-0** 现状截图 → **UI-1** 设计系统 → **UI-2** 新外壳 | UI-1 按 v4 `tokens.md` 加 `warn` | engineer / 子代理 | `-medium` |
