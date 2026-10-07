@@ -4,7 +4,7 @@
 
 - **地位**：取代 [v5](../v5/README.md)，成为 UI 重做的目标稿。UI-1（设计系统）以本目录的 [tokens.md](tokens.md)、[components.md](components.md) 为准。与 [UI 重设计方案](../ui-redesign-brief-2026-10-06.md) §8 冲突时，以方案为准。
 - **当前状态**：见 [round7-notes.md](round7-notes.md)。第七轮 A～E 都已处理；F2（320 宽、200% 字号、逐页检查浅色和深色）没有做。
-- **审阅**：[2026-10-07-design-v6-review.md](../../reviews/2026-10-07-design-v6-review.md)。
+- **审阅**：[2026-10-07-design-v6-review.md](../../reviews/2026-10-07-design-v6-review.md)。返工：[第八轮提示词](prompts/claude-design-prompt-round8.md)。UI-1a 不需要等第八轮。
 - **对比度**：`warn` 的实测值经 leader 用 WCAG 公式复算一致：浅色 `warn/sf` 5.93、`warn/warnbg` 5.31；深色分别为 10.97、8.60。
 - 附件 `uploads/` 里的 `DESIGN.md` 和第二至第七轮提示词，都与仓库中已有的文件逐字相同，没有重复入库。
 
