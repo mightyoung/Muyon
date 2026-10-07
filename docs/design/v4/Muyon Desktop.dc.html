@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap;-webkit-font-smoothing:antialiased}button{font-family:inherit;cursor:pointer}input{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:32px;align-items:flex-start;padding:32px 24px;min-height:100vh;box-sizing:border-box">
+
+<div style="width:280px;flex:none;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:8px">
+<div style="font-size:24px;font-weight:600">桌面端 · 1440×900</div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565"><b style="color:#111827">布局</b><br>图标轨 72 + 二级栏 240（可收起）+ 内容区 + 右侧助手栏 360（可收起）。AI 助手页助手占内容区，此时不显示右栏。</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">屏幕</div><sc-for list="{{ navs }}" as="n" hint-placeholder-count="7"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">列表状态（项目 / 供应商 / 物料 / 任务 / 结果 / 写作）</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ gst }}" as="c" hint-placeholder-count="6"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">设备与面板</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ ctrl }}" as="c" hint-placeholder-count="6"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态与规则</b><br>· 收件箱：右侧抽屉（不遮住当前内容的左半，可边看边批）<br>· 平板竖屏：二级栏默认收起，点汉堡展开为浮层；助手栏收起为浮动按钮；详情并排改为点行后从右滑入<br>· ⌘K / Ctrl+K 打开命令面板<br>· “显示 Tab 顺序”会在画面上标出焦点序号；所有控件有 2px 焦点环</div>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据。</div>
+</div>
+
+<div style="overflow:auto;flex:1;min-width:0;padding-bottom:20px">
+<div style="{{ frameStyle }}">
+
+<div style="width:72px;flex:none;border-right:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:8px;box-sizing:border-box">
+<div style="width:40px;height:40px;border-radius:12px;background:var(--acc);color:var(--onacc);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;margin-bottom:8px">沐</div>
+<sc-for list="{{ rail }}" as="r" hint-placeholder-count="5"><button onClick="{{ r.go }}" aria-label="{{ r.label }}" title="{{ r.label }}" style="{{ r.style }}" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span class="ms" style="font-size:26px;font-variation-settings:'FILL' {{ r.fill }}">{{ r.icon }}</span></button></sc-for>
+</div>
+
+<sc-if value="{{ secShow }}" hint-placeholder-val="{{ true }}">
+<div style="{{ secStyle }}">
+<div style="font-size:12px;color:var(--ink3);padding:4px 12px 8px">{{ secTitle }}</div>
+<sc-for list="{{ secItems }}" as="s" hint-placeholder-count="6"><button onClick="{{ s.go }}" style="{{ s.style }}" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><sc-if value="{{ s.icon }}" hint-placeholder-val="{{ true }}"><span class="ms" style="font-size:20px;color:var(--ink2)">{{ s.icon }}</span></sc-if><span style="flex:1;text-align:left;font-size:14px">{{ s.label }}</span><span style="font-size:12px;color:var(--ink3)">{{ s.sub }}</span></button></sc-for>
+</div></sc-if>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;position:relative">
+<div style="height:56px;flex:none;border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:12px;padding:0 16px">
+<button onClick="{{ toggleSec }}" aria-label="二级栏" title="收起 / 展开二级栏" style="width:40px;height:40px;border-radius:999px;border:0;background:transparent;color:var(--ink2)" style-focus="outline:2px solid var(--acc)"><span class="ms" style="font-size:22px">menu</span></button>
+<div style="flex:1;min-width:0;font-size:14px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><sc-for list="{{ crumbs }}" as="c" hint-placeholder-count="3"><span style="color:{{ c.color }};font-weight:{{ c.w }}">{{ c.t }}</span><span style="color:var(--ink3);padding:0 6px">{{ c.sep }}</span></sc-for></div>
+<button onClick="{{ openPalette }}" style="width:{{ searchW }}px;height:40px;border-radius:999px;border:1px solid var(--rs);background:var(--sk);color:var(--ink3);display:flex;align-items:center;gap:8px;padding:0 14px;font-size:13px" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span class="ms" style="font-size:18px">search</span><span style="flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">搜索或输入命令</span><span style="font-size:12px;padding:1px 6px;border-radius:6px;border:1px solid var(--rs)">⌘K</span></button>
+<button onClick="{{ toggleInbox }}" aria-label="收件箱" title="收件箱" style="position:relative;width:44px;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink)" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span class="ms" style="font-size:22px">notifications</span><span style="position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;border-radius:999px;background:var(--acc);color:var(--onacc);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center">3</span></button>
+<button style="height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500" style-focus="outline:2px solid var(--acc);outline-offset:2px">个人工作区<span class="ms" style="font-size:18px">expand_more</span></button>
+</div>
+
+<div style="flex:1;min-height:0;display:flex">
+<div class="fx" style="flex:1;min-width:0;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+
+<sc-if value="{{ vHome }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:2px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:16px;font-weight:600">待我处理</span><span style="font-size:12px;padding:3px 10px;border-radius:999px;background:var(--tint);color:var(--deep);font-weight:500">3 项待确认</span></div>
+<sc-for list="{{ todos }}" as="t" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--rule)"><span class="ms" style="font-size:26px;color:var(--acc)">{{ t.icon }}</span><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">{{ t.t }}</div><div style="font-size:12px;color:var(--ink3)">{{ t.sub }}</div></div><button onClick="{{ toggleInbox }}" style="height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">查看</button></div></sc-for></div>
+<div style="display:flex;flex-direction:column;gap:16px"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:12px"><span style="font-size:16px;font-weight:600">运行中</span><div style="display:flex;align-items:center;gap:12px"><span class="ms" style="font-size:26px;color:var(--acc)">autorenew</span><div style="flex:1"><div style="font-size:14px;font-weight:500">科研任务：文献综述整理</div><div style="font-size:12px;color:var(--ink3);margin:2px 0 8px">阶段 2/4 · 工作站</div><div style="height:6px;border-radius:99px;background:var(--rule)"><div style="width:48%;height:6px;border-radius:99px;background:var(--acc)"></div></div></div></div></div>
+<div style="background:var(--sk);border-radius:24px;padding:16px 20px;display:flex;align-items:center;gap:14px"><span class="ms" style="font-size:28px">folder_open</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:600">资料</span><span style="display:block;font-size:12px;color:var(--ink3)">文件 · 全文检索 · 对象目录</span></span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></div></div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:20px"><div style="font-size:16px;font-weight:600;margin-bottom:6px">最近</div><sc-for list="{{ recents }}" as="r" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--rule)"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ r.icon }}</span><div style="flex:1"><div style="font-size:14px;font-weight:500">{{ r.t }}</div><div style="font-size:12px;color:var(--ink3)">{{ r.sub }}</div></div></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ vAi }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:760px;width:100%;align-self:center;display:flex;flex-direction:column;gap:16px;flex:1">
+<div style="display:flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;background:var(--tint);color:var(--deep);font-size:13px;font-weight:500;align-self:flex-start"><span class="ms" style="font-size:18px">target</span>范围：项目 · 华东泵站改造<span class="ms" style="font-size:18px">expand_more</span></div>
+<div style="align-self:flex-end;max-width:70%;background:var(--sk);border-radius:24px 24px 6px 24px;padding:12px 18px;font-size:15px;line-height:1.6">这个项目三家泵的有效报价，哪家总价最低？</div>
+<div style="font-size:15px;line-height:1.7">我会调用报价比较工具，只读取当前项目的报价，不会修改数据。</div>
+<div style="border-radius:24px;background:var(--sk);padding:16px;display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:20px;color:var(--ink2)">build</span><span style="font-size:14px;font-weight:600;flex:1;font-family:Consolas,Menlo,monospace">inquiry.compare_quotes</span><span style="font-size:12px;padding:3px 10px;border-radius:999px;background:var(--sf);color:var(--ink2);font-weight:500">只读</span></div><div style="font-size:13px;color:var(--ink2)">参数：项目=华东泵站改造 · 物料=离心泵 · 仅有效报价</div>
+<sc-if value="{{ !toolOk }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:8px"><button onClick="{{ confirmTool }}" style="height:44px;padding:0 28px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--ink);outline-offset:2px">确认</button><button style="height:44px;padding:0 28px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">拒绝</button></div></sc-if>
+<sc-if value="{{ toolOk }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--green);display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:18px">check_circle</span>已执行并核验 · 3 条记录</div></sc-if></div>
+<sc-if value="{{ toolOk }}" hint-placeholder-val="{{ false }}"><div style="font-size:15px;line-height:1.7">按含税总价，<b>华泵 HB-200</b> 最低，为 ¥128,400.00；比第二名低 ¥6,150.00。</div></sc-if>
+<div style="flex:1"></div>
+<div style="display:flex;align-items:center;gap:6px;background:var(--sk);border-radius:28px;padding:6px;height:56px;box-sizing:border-box"><button aria-label="添加" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--sf);color:var(--ink2)" style-focus="outline:2px solid var(--acc)"><span class="ms" style="font-size:22px">add</span></button><span style="flex:1;font-size:15px;color:var(--ink3);padding-left:6px">向助手提问</span><button aria-label="发送" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc)" style-focus="outline:2px solid var(--ink);outline-offset:2px"><span class="ms" style="font-size:22px">arrow_upward</span></button></div>
+</div></sc-if>
+
+<sc-if value="{{ vQuotes }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><sc-for list="{{ filters }}" as="f" hint-placeholder-count="3"><button onClick="{{ f.go }}" style="{{ f.style }}" style-focus="outline:2px solid var(--acc);outline-offset:2px">{{ f.label }}</button></sc-for><span style="flex:1"></span><span style="font-size:12px;color:var(--ink3)">共 {{ qCount }} 条</span></div>
+<sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}"><div style="background:var(--tint);color:var(--deep);border-radius:8px;height:44px;padding:0 14px;display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600"><span style="flex:1">已选 {{ selCount }} 项</span><button style="height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--deep);background:transparent;color:var(--deep);font-size:12px;font-weight:600">比较所选</button><button onClick="{{ clearSel }}" style="height:32px;padding:0 14px;border-radius:999px;border:0;background:transparent;color:var(--deep);font-size:12px;font-weight:600">取消选择</button></div></sc-if>
+<div style="display:flex;gap:16px;align-items:flex-start;min-height:0">
+<div style="flex:1;min-width:0;background:var(--sf);border:1px solid var(--rule);border-radius:8px;overflow:hidden">
+<div style="display:grid;grid-template-columns:40px minmax(0,1.2fr) minmax(0,1.1fr) 120px 56px 140px 110px;height:42px;align-items:center;padding:0 8px;background:var(--sk);font-size:12px;color:var(--ink3);font-weight:600"><span></span><sc-for list="{{ heads }}" as="h" hint-placeholder-count="6"><button onClick="{{ h.go }}" style="{{ h.style }}" style-focus="outline:2px solid var(--acc);outline-offset:-2px">{{ h.label }}<span class="ms" style="font-size:14px">{{ h.arrow }}</span></button></sc-for></div>
+<sc-for list="{{ qrows }}" as="r" hint-placeholder-count="6"><div style="{{ r.style }}"><button onClick="{{ r.check }}" aria-label="选择" style="border:0;background:transparent;color:{{ r.ckColor }};padding:0" style-focus="outline:2px solid var(--acc)"><span class="ms" style="font-size:22px">{{ r.ck }}</span></button><button onClick="{{ r.open }}" style="display:contents;color:var(--ink)"><span style="font-size:13px;font-weight:500;text-align:left">{{ r.sup }}<span style="display:block;font-size:11px;color:var(--green);font-weight:600;height:14px;margin-bottom:-14px">{{ r.low }}</span></span><span style="font-size:13px;text-align:left">{{ r.item }}</span><span style="font-size:13px;text-align:right;font-variant-numeric:tabular-nums">{{ r.unit }}</span><span style="font-size:13px;text-align:right;font-variant-numeric:tabular-nums">{{ r.qty }}</span><span style="font-size:13px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.total }}</span><span style="font-size:12px;text-align:right;color:{{ r.dateColor }}">{{ r.date }}</span></button></div></sc-for></div>
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ true }}"><div style="width:320px;flex:none;background:var(--sf);border:1px solid var(--rule);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600">{{ dt.sup }} · {{ dt.id }}</span><button onClick="{{ closeDetail }}" aria-label="关闭详情" style="width:40px;height:40px;border-radius:999px;border:0;background:transparent;color:var(--ink2)" style-focus="outline:2px solid var(--acc)"><span class="ms" style="font-size:20px">close</span></button></div>
+<div style="font-size:24px;font-weight:600;font-variant-numeric:tabular-nums">¥{{ dt.total }}</div><div style="font-size:12px;color:var(--ink3)">含税 13% · CNY · {{ dt.state }}</div>
+<div style="border-top:1px solid var(--rule)"><sc-for list="{{ dt.fields }}" as="f" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:{{ f.bt }};font-size:13px"><span style="color:var(--ink3)">{{ f.k }}</span><span style="text-align:right">{{ f.v }}</span></div></sc-for></div>
+<button onClick="{{ askAbout }}" style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">针对此报价提问</button></div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ vLib }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:16px;align-items:flex-start">
+<div style="width:320px;flex:none;background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ papers }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.go }}" style="{{ p.style }}" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ p.icon }}</span><span style="flex:1;min-width:0;text-align:left"><span style="display:block;font-size:14px;font-weight:500">{{ p.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ p.meta }}</span></span><span style="display:flex;align-items:center;gap:3px;font-size:11px;padding:2px 8px;border-radius:999px;background:{{ p.bg }};color:{{ p.fg }};font-weight:600"><span class="ms" style="font-size:13px">{{ p.sicon }}</span>{{ p.state }}</span></button></sc-for></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:12px"><div style="font-size:16px;font-weight:600">离心泵选型综述</div>
+<div style="background:var(--sk);border:1px solid var(--rule);border-radius:8px;height:300px;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px"><div style="font-size:11px;color:var(--ink3)">PDF 第 12 页 · 占位</div><sc-for list="{{ lines }}" as="l" hint-placeholder-count="8"><div style="{{ l.style }}"></div></sc-for></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:20px;color:var(--acc)">format_quote</span><span style="font-size:14px;font-weight:600;flex:1">引用块 · 研究卡 RC-07</span></div><div style="font-size:14px;line-height:1.7;border-left:2px solid var(--rs);padding-left:12px">“离心泵额定流量 200 m³/h，扬程 32 m，效率不低于 78%。”</div><div style="font-size:12px;color:var(--red);display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:16px">warning</span>无法唯一定位：第 12 页、第 31 页各有一处相同引句</div></div></div>
+</div></sc-if>
+
+<sc-if value="{{ vEx }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px">
+<div style="border:1px solid var(--acc);background:var(--tint);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:22px;color:var(--deep)">move_to_inbox</span><span style="font-size:15px;font-weight:600;flex:1">来件待核验</span><span style="font-size:12px;font-weight:600;color:var(--deep)">未接纳</span></div><div style="font-size:13px;line-height:1.7">结果包 · 文献综述_v2.zip · 2.4 MB<br>来自 小李的笔记本（指纹 …a3f9c1）</div><div style="font-size:12px;color:var(--ink2)">已送达 ≠ 已导入。接纳前不会写入任何业务数据。</div><div style="display:flex;gap:8px"><button style="height:44px;padding:0 24px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--ink);outline-offset:2px">核验并接纳</button><button style="height:44px;padding:0 24px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">拒绝</button></div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:10px"><div style="font-size:15px;font-weight:600">任务包_泵选型.zip</div><div style="display:flex;align-items:center;gap:8px;font-size:13px"><span class="ms" style="font-size:18px;color:var(--green)">check_circle</span>已发出</div><div style="display:flex;align-items:center;gap:8px;font-size:13px"><span class="ms" style="font-size:18px;color:var(--green)">check_circle</span>对方已收到</div><div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)"><span class="ms" style="font-size:18px">schedule</span>对方未接纳（尚未导入）</div></div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 20px"><sc-for list="{{ devices }}" as="d" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:14px;min-height:68px;border-top:{{ d.bt }}"><span class="ms" style="font-size:28px;color:var(--ink2)">{{ d.icon }}</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:500">{{ d.name }}</span><span style="display:block;font-size:12px;color:var(--ink3)">指纹 …{{ d.fp }} · {{ d.sub }}</span></span><span style="font-size:12px;padding:3px 10px;border-radius:999px;background:{{ d.bg }};color:{{ d.fg }};font-weight:600">{{ d.state }}</span></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ vSet }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:640px;display:flex;flex-direction:column;gap:16px"><sc-for list="{{ groups }}" as="g" hint-placeholder-count="3"><div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">{{ g.label }}</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3"><button onClick="{{ it.go }}" style="width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:0;display:flex;align-items:center;gap:14px;height:56px;border-top:{{ it.bt }}" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ it.icon }}</span><span style="flex:1;font-size:15px">{{ it.name }}</span><span style="font-size:13px;color:var(--ink3)">{{ it.val }}</span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></button></sc-for></div></div></sc-for></div></sc-if>
+
+<sc-if value="{{ vWrite }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;font-weight:600;flex:1">写作 · 报告提纲</span><button style="height:40px;padding:0 20px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">导出报告</button></div>
+<div style="display:flex;gap:16px;align-items:flex-start">
+<div style="flex:1;min-width:0;background:var(--sf);border:1px solid var(--rule);border-radius:8px;overflow:hidden"><sc-for list="{{ olRows }}" as="o" hint-placeholder-count="3"><div style="{{ o.style }}"><button onClick="{{ o.go }}" style="width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:0;display:flex;flex-direction:column;gap:6px" style-focus="outline:2px solid var(--acc);outline-offset:4px"><span style="font-size:14px;font-weight:500">{{ o.t }}</span><span style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ o.chips }}" as="c" hint-placeholder-count="2"><span style="display:flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--rs);font-size:12px"><span class="ms" style="font-size:15px;color:var(--acc)">link</span>{{ c }}</span></sc-for></span></button></div></sc-for>
+<div style="padding:12px 16px;border-top:1px solid var(--rule);display:flex;gap:8px;align-items:center"><input value="{{ olEdit }}" onInput="{{ setOl }}" aria-label="章节标题" style="flex:1;min-width:0;height:44px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:14px;box-sizing:border-box"><span style="font-size:12px;color:var(--ink3)">编辑所选章节</span></div></div>
+<div style="width:420px;flex:none;background:var(--sf);border:1px solid var(--rule);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px"><div style="font-size:14px;font-weight:600">研究关系图</div>
+<div style="position:relative;width:394px;height:240px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);overflow:hidden"><svg width="394" height="240" style="position:absolute;left:0;top:0"><sc-for list="{{ gEdges }}" as="e" hint-placeholder-count="0"><line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" stroke="{{ e.stroke }}" stroke-width="{{ e.sw }}"></line></sc-for></svg><sc-for list="{{ gNodes }}" as="n" hint-placeholder-count="6"><button onClick="{{ n.go }}" style="{{ n.style }}" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span class="ms" style="font-size:16px;color:var(--ink2)">{{ n.icon }}</span><span style="font-size:12px;font-weight:500">{{ n.name }}</span></button></sc-for></div>
+<div style="font-size:12px;color:var(--ink3);line-height:1.7">图中是对象类型的示例实例；选中“{{ gnSel }}”后，相连的边高亮。</div><button onClick="{{ askAbout }}" style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">针对“{{ gnSel }}”提问</button></div>
+</div></sc-if>
+
+<sc-if value="{{ vOther }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;font-weight:600;flex:1">{{ gTitle }}</span><button style="height:40px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600" style-focus="outline:2px solid var(--ink);outline-offset:2px">新建</button></div>
+<div style="height:44px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--ink3);font-size:14px;max-width:420px"><span class="ms" style="font-size:20px">search</span>{{ gSearch }}</div>
+<sc-if value="{{ gLoad }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="5"><div style="height:52px;border-radius:8px;background:var(--sk)"></div></sc-for><div style="font-size:12px;color:var(--ink3)">正在读取…</div></div></sc-if>
+<sc-if value="{{ gEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:60px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">inbox</span><br>还没有{{ gKind }}<br>新建一条，或从文件导入。</div></sc-if>
+<sc-if value="{{ gNoMatch }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:60px 20px;color:var(--ink3);font-size:14px;line-height:1.8">没有符合“{{ gSearch }}”的{{ gKind }}<br><a href="#" onClick="{{ gClear }}">清除筛选</a></div></sc-if>
+<sc-if value="{{ gFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;max-width:560px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;font-size:14px;font-weight:600;color:var(--red);align-items:center"><span class="ms" style="font-size:20px">error</span>{{ gKind }}读取失败</div><div style="font-size:13px;line-height:1.7">本地数据库暂不可用，数据未被改动。可重试，或到“数据与存储”校验备份。</div><div><button onClick="{{ gRetry }}" style="height:40px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600" style-focus="outline:2px solid var(--ink);outline-offset:2px">重试</button></div></div></sc-if>
+<sc-if value="{{ gOffline }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sk);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2);display:flex;gap:8px;max-width:640px"><span class="ms" style="font-size:20px">cloud_off</span>离线：需要联网的操作（同步、远程模型）暂停；本地数据仍可查看与编辑。</div></sc-if>
+<sc-if value="{{ gOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:16px;align-items:flex-start">
+<div style="flex:1;min-width:0;background:var(--sf);border:1px solid var(--rule);border-radius:8px;overflow:hidden">
+<div style="{{ gHeadStyle }}"><sc-for list="{{ gHeads }}" as="h" hint-placeholder-count="5"><span style="{{ h.style }}">{{ h.t }}</span></sc-for></div>
+<sc-for list="{{ gRows }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.go }}" style="{{ r.style }}" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5"><span style="{{ c.style }}">{{ c.t }}</span></sc-for></button></sc-for></div>
+<sc-if value="{{ gDetailShow }}" hint-placeholder-val="{{ false }}"><div style="width:320px;flex:none;background:var(--sf);border:1px solid var(--rule);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:center"><span style="flex:1;font-size:16px;font-weight:600">{{ gdTitle }}</span><button onClick="{{ gCloseDetail }}" aria-label="关闭详情" style="width:40px;height:40px;border-radius:999px;border:0;background:transparent;color:var(--ink2)" style-focus="outline:2px solid var(--acc)"><span class="ms" style="font-size:20px">close</span></button></div>
+<div style="border-top:1px solid var(--rule)"><sc-for list="{{ gdFields }}" as="f" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:{{ f.bt }};font-size:13px"><span style="color:var(--ink3)">{{ f.k }}</span><span style="text-align:right">{{ f.v }}</span></div></sc-for></div>
+<sc-if value="{{ gNotTrash }}" hint-placeholder-val="{{ true }}"><button onClick="{{ askAbout }}" style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">针对此对象提问</button><button style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">编辑</button></sc-if>
+<sc-if value="{{ gTrash }}" hint-placeholder-val="{{ false }}"><button onClick="{{ gRestore }}" style="height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--ink);outline-offset:2px">恢复（连同关联数据）</button>
+</sc-if></div></sc-if>
+</div></sc-if>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ asstShow }}" hint-placeholder-val="{{ true }}">
+<div style="width:360px;flex:none;border-left:1px solid var(--rule);display:flex;flex-direction:column;padding:16px;gap:12px;box-sizing:border-box">
+<div style="display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:22px;font-variation-settings:'FILL' 1">chat_bubble</span><span style="flex:1;font-size:15px;font-weight:600">助手</span><button onClick="{{ toggleAsst }}" aria-label="收起助手栏" title="收起助手栏" style="width:40px;height:40px;border-radius:999px;border:0;background:transparent;color:var(--ink2)" style-focus="outline:2px solid var(--acc)"><span class="ms" style="font-size:20px">right_panel_close</span></button></div>
+<div style="display:flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border-radius:999px;background:var(--tint);color:var(--deep);font-size:13px;font-weight:500;align-self:flex-start"><span class="ms" style="font-size:18px">target</span>{{ scopeText }}</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.7"><div style="background:var(--sk);border-radius:20px;padding:12px 16px">{{ asstHint }}</div></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ suggests }}" as="g" hint-placeholder-count="2"><span style="height:34px;padding:0 14px;border-radius:999px;background:var(--sk);color:var(--ink2);font-size:13px;display:flex;align-items:center">{{ g }}</span></sc-for></div>
+<div style="display:flex;align-items:center;gap:6px;background:var(--sk);border-radius:28px;padding:6px;height:56px;box-sizing:border-box"><span style="flex:1;font-size:14px;color:var(--ink3);padding-left:14px">向助手提问</span><button aria-label="发送" style="width:44px;height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc)" style-focus="outline:2px solid var(--ink);outline-offset:2px"><span class="ms" style="font-size:22px">arrow_upward</span></button></div></div></sc-if>
+<sc-if value="{{ asstFab }}" hint-placeholder-val="{{ false }}"><button onClick="{{ toggleAsst }}" aria-label="展开助手栏" title="展开助手栏" style="position:absolute;right:20px;bottom:20px;width:56px;height:56px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);box-shadow:0 4px 16px rgba(0,0,0,.25)" style-focus="outline:2px solid var(--ink);outline-offset:3px"><span class="ms" style="font-size:26px;font-variation-settings:'FILL' 1">chat_bubble</span></button></sc-if>
+</div>
+
+<sc-if value="{{ inbox }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;right:0;top:56px;bottom:0;width:420px;background:var(--bg);border-left:1px solid var(--rs);box-shadow:-8px 0 24px rgba(0,0,0,.14);z-index:8;display:flex;flex-direction:column"><div style="display:flex;align-items:center;gap:8px;padding:16px"><span style="flex:1;font-size:16px;font-weight:600">收件箱</span><button onClick="{{ toggleInbox }}" aria-label="关闭" style="width:40px;height:40px;border-radius:999px;border:0;background:transparent;color:var(--ink2)" style-focus="outline:2px solid var(--acc)"><span class="ms" style="font-size:20px">close</span></button></div>
+<div style="display:flex;gap:8px;padding:0 16px 12px"><sc-for list="{{ itabs }}" as="t" hint-placeholder-count="3"><span style="{{ t.style }}">{{ t.label }}</span></sc-for></div>
+<div class="fx" style="flex:1;overflow-y:auto;padding:0 16px 20px;display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ !toolOk }}" hint-placeholder-val="{{ true }}"><div style="background:var(--sf);border:1px solid var(--rs);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px"><span style="font-size:15px;font-weight:600;flex:1">比较项目报价</span><span style="font-size:12px;padding:3px 10px;border-radius:999px;background:var(--sk);color:var(--ink2);font-weight:500">只读</span></div><div style="font-size:13px;line-height:1.7;color:var(--ink2)"><b style="color:var(--ink)">做什么</b>　读取并比较 3 条有效报价<br><b style="color:var(--ink)">对　谁</b>　本机 · 华东泵站改造<br><b style="color:var(--ink)">后　果</b>　不修改数据，不发送到设备外</div><div style="display:flex;gap:8px"><button onClick="{{ confirmTool }}" style="flex:1;height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--ink);outline-offset:2px">确认</button><button style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">拒绝</button></div></div></sc-if>
+<div style="background:var(--sf);border:1px solid var(--acc);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px"><span style="font-size:15px;font-weight:600;flex:1">向远程模型发送摘要</span><span style="font-size:12px;padding:3px 10px;border-radius:999px;background:var(--tint);color:var(--deep);font-weight:600">外传</span></div><div style="font-size:13px;line-height:1.7;color:var(--ink2)"><b style="color:var(--ink)">做什么</b>　生成报价比较的文字说明<br><b style="color:var(--ink)">对　谁</b>　远程 · api.example-llm.com<br><b style="color:var(--ink)">后　果</b>　内容离开本机，无法撤回</div><div style="background:var(--sk);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink2)">发送内容：“离心泵 3 家报价，含税总价 128,400 / 134,550 / 141,200 …” <span style="color:var(--acc)">展开全文</span><br>摘要散列 7be1…c20d</div><div style="display:flex;gap:8px"><button style="flex:1;height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--ink);outline-offset:2px">仅发送这一次</button><button style="width:96px;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">拒绝</button></div></div></div></div></sc-if>
+
+<sc-if value="{{ palette }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closePalette }}" style="position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:9"></div>
+<div style="position:absolute;z-index:10;top:110px;left:50%;margin-left:-280px;width:560px;background:var(--sf);border:1px solid var(--rs);border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.28)">
+<div style="display:flex;align-items:center;gap:10px;padding:0 18px;height:60px;border-bottom:1px solid var(--rule)"><span class="ms" style="font-size:22px;color:var(--ink3)">search</span><input value="{{ pq }}" onInput="{{ setPq }}" placeholder="搜索页面、对象或输入命令" aria-label="命令面板" style="flex:1;border:0;background:transparent;color:var(--ink);font-size:16px;height:56px;outline:none"><span style="font-size:12px;color:var(--ink3);border:1px solid var(--rs);border-radius:6px;padding:1px 6px">Esc</span></div>
+<div style="max-height:320px;overflow-y:auto;padding:8px"><sc-if value="{{ pNone }}" hint-placeholder-val="{{ false }}"><div style="padding:28px;text-align:center;color:var(--ink3);font-size:14px">没有符合“{{ pq }}”的命令</div></sc-if><sc-for list="{{ pcmds }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.go }}" style="width:100%;text-align:left;border:0;border-radius:12px;background:{{ c.bg }};color:var(--ink);height:48px;padding:0 12px;display:flex;align-items:center;gap:12px;font-size:14px" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><span class="ms" style="font-size:22px;color:var(--ink2)">{{ c.icon }}</span><span style="flex:1">{{ c.t }}</span><span style="font-size:12px;color:var(--ink3)">{{ c.kind }}</span></button></sc-for></div></div></sc-if>
+
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ tabBadges }}" as="b" hint-placeholder-count="12"><span style="{{ b.style }}">{{ b.n }}</span></sc-for></sc-if>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { tab:'plug', plug:'inquiry', sec:'quotes', device:'desktop', secOpen:true, asstOpen:true, inbox:false, palette:false, pq:'', toolOk:false, sort:{ k:'total', d:1 }, sel:[], focus:0, filt:'all', showTabs:false, paper:0, dark:null, g:'ok', gsel:-1, gask:false, trashN:[], ol:[{ t:'1 背景与目标', chips:['论文 · 选型综述'] },{ t:'2 方法与证据', chips:['研究卡 RC-07','结果包 v2'] },{ t:'3 结论与建议', chips:['结果包 v2'] }], olSel:0, gn:'提纲' };
+  componentDidMount() { this._kd = (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); this.setState({ palette:true, pq:'' }); } else if (e.key === 'Escape') this.setState({ palette:false }); }; window.addEventListener('keydown', this._kd); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._kd); }
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F' };
+    const T = dark ? D : L;
+    const tablet = s.device === 'tablet';
+    const w1280 = s.device === 'd1280';
+    const W = tablet ? 820 : w1280 ? 1280 : 1440, H = tablet ? 1180 : w1280 ? 800 : 900;
+    const frameStyle = { width:W, height:H, background:T.bg, borderRadius:12, border:'1px solid ' + T.rs, boxSizing:'border-box', position:'relative', overflow:'hidden', display:'flex', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => frameStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const tab = s.tab, sec = s.sec;
+    const secOpen = tablet ? s.secOpen && s.secFloat : s.secOpen;
+    const asstOpen = !tablet && s.asstOpen;
+    /* screens */
+    const screen = tab === 'home' ? 'home' : tab === 'ai' ? 'ai' : tab === 'ex' ? 'ex' : tab === 'set' ? 'set' : (s.plug === 'inquiry' && sec === 'quotes') ? 'quotes' : (s.plug === 'research' && sec === 'lib') ? 'lib' : (s.plug === 'research' && sec === 'write') ? 'write' : 'other';
+    const NAV = [['home','工作台','home',{ tab:'home' }],['ai','AI 助手','ai',{ tab:'ai' }],['quotes','业务插件 · 询价 · 报价表格','quotes',{ tab:'plug', plug:'inquiry', sec:'quotes' }],['lib','业务插件 · 科研 · 文库 + 阅读器','lib',{ tab:'plug', plug:'research', sec:'lib' }],['projects','询价 · 项目','other',{ tab:'plug', plug:'inquiry', sec:'projects' }],['suppliers','询价 · 供应商','other',{ tab:'plug', plug:'inquiry', sec:'suppliers' }],['materials','询价 · 物料','other',{ tab:'plug', plug:'inquiry', sec:'materials' }],['compare','询价 · 比价','other',{ tab:'plug', plug:'inquiry', sec:'compare' }],['trash','询价 · 回收站','other',{ tab:'plug', plug:'inquiry', sec:'trash' }],['tasks','科研 · 任务','other',{ tab:'plug', plug:'research', sec:'tasks' }],['results','科研 · 结果','other',{ tab:'plug', plug:'research', sec:'results' }],['write','科研 · 写作','write',{ tab:'plug', plug:'research', sec:'write' }],['ex','数据交换','ex',{ tab:'ex' }],['set','设置','set',{ tab:'set' }]];
+    const navs = NAV.map(([k, l, sc, o]) => ({ label:l, go: go(o), style:`height:36px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${(sc === 'other' ? (tab === 'plug' && sec === k) : screen === sc) ? '#2458D3' : '#C3CAD6'};background:${(sc === 'other' ? (tab === 'plug' && sec === k) : screen === sc) ? '#E8EFFF' : '#fff'};color:${(sc === 'other' ? (tab === 'plug' && sec === k) : screen === sc) ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` }));
+    const chip = (on) => `height:32px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+    const ctrl = [
+      { label:'桌面 1440', style:chip(!tablet && !w1280), go: go({ device:'desktop' }) }, { label:'桌面 1280', style:chip(w1280), go: go({ device:'d1280' }) }, { label:'平板竖屏 820', style:chip(tablet), go: go({ device:'tablet', secFloat:false }) },
+      { label:'二级栏 ' + (secOpen ? '收起' : '展开'), style:chip(false), go: tablet ? go({ secOpen:true, secFloat: !s.secFloat }) : go({ secOpen: !s.secOpen }) },
+      { label:'助手栏 ' + (s.asstOpen ? '收起' : '展开'), style:chip(false), go: go({ asstOpen: !s.asstOpen }) },
+      { label:'收件箱抽屉', style:chip(s.inbox), go: go({ inbox: !s.inbox }) }, { label:'命令面板 ⌘K', style:chip(s.palette), go: go({ palette:true, pq:'' }) },
+      { label:'显示 Tab 顺序', style:chip(s.showTabs), go: go({ showTabs: !s.showTabs }) }, { label: dark ? '切到浅色' : '切到深色', style:chip(false), go: go({ dark: !dark }) }
+    ];
+    /* rail */
+    const RL = [['ai','chat_bubble','AI 助手'],['plug','apps','业务插件'],['home','dashboard','工作台'],['ex','swap_horiz','数据交换']];
+    const railBtn = (k, icon, label) => ({ label, icon, fill: tab === k ? 1 : 0, go: go({ tab:k }), style:`width:48px;height:48px;border-radius:16px;border:0;background:${tab === k ? T.tint : 'transparent'};color:${tab === k ? T.deep : T.ink3};display:flex;align-items:center;justify-content:center;${k === 'set' ? 'margin-top:auto;' : ''}` });
+    const rail = [...RL.map(x => railBtn(...x)), railBtn('set','settings','设置')];
+    /* secondary */
+    const sbtn = (on) => `width:100%;height:44px;border-radius:12px;border:0;background:${on ? T.sk : 'transparent'};color:${T.ink};display:flex;align-items:center;gap:10px;padding:0 12px;font-weight:${on ? 600 : 400}`;
+    const secDef = {
+      ai:['对话',[['泵选型对话','','',1],['预算复核','','',0],['华东泵站改造','','account_tree',0],['离心泵选型综述.pdf','','description',0]],{}],
+      plug:['插件与分区',[['询价','','request_quote',s.plug === 'inquiry' && false,{ plug:'inquiry', sec:'quotes' }],['项目','12','',false,{ plug:'inquiry', sec:'projects' }],['报价','86','',s.plug === 'inquiry' && sec === 'quotes',{ plug:'inquiry', sec:'quotes' }],['供应商','34','',false,{ plug:'inquiry', sec:'suppliers' }],['物料','212','',false,{ plug:'inquiry', sec:'materials' }],['比价','','',false,{ plug:'inquiry', sec:'compare' }],['回收站','2','',false,{ plug:'inquiry', sec:'trash' }],['科研','','science',false,{ plug:'research', sec:'lib' }],['文库','48','',s.plug === 'research' && sec === 'lib',{ plug:'research', sec:'lib' }],['任务','3','',false,{ plug:'research', sec:'tasks' }],['结果','7','',false,{ plug:'research', sec:'results' }],['写作','','',false,{ plug:'research', sec:'write' }]],{}],
+      ex:['设备与会话',[['小李的笔记本','在线','laptop_mac',1],['工作站','在线','desktop_windows',0],['会议室平板','未配对','tablet_android',0]],{}],
+      set:['设置',[['偏好','','palette',1],['数据与安全','','shield',0],['数据中心','','hub',0],['插件','','extension',0]],{}]
+    };
+    const sd = tab === 'home' ? null : secDef[tab];
+    const secItems = sd ? sd[1].map(x => ({ label:x[0], sub:x[1], icon:x[2], style:sbtn(x[3]), go: x[4] ? go({ ...x[4] }) : () => {} })) : [];
+    const secShow = secOpen && tab !== 'home';
+    const secStyle = { width:240, flex:'none', borderRight:'1px solid ' + T.rule, padding:'12px 8px', boxSizing:'border-box', display:'flex', flexDirection:'column', gap:2, overflowY:'auto', background:T.bg, ...(tablet ? { position:'absolute', left:72, top:0, bottom:0, zIndex:7, boxShadow:'8px 0 24px rgba(0,0,0,.16)' } : {}) };
+    /* crumbs */
+    const crumbParts = tab === 'home' ? ['工作区','工作台'] : tab === 'ai' ? ['工作区','AI 助手','泵选型对话'] : tab === 'ex' ? ['工作区','数据交换'] : tab === 'set' ? ['工作区','设置'] : ['工作区', s.plug === 'inquiry' ? '询价' : '科研', { quotes:'报价', lib:'文库', projects:'项目', suppliers:'供应商', materials:'物料', tasks:'任务', results:'结果', write:'写作', compare:'比价', trash:'回收站' }[sec]];
+    const crumbs = crumbParts.map((t, i) => ({ t, sep: i < crumbParts.length - 1 ? '›' : '', color: i === crumbParts.length - 1 ? T.ink : T.ink2, w: i === crumbParts.length - 1 ? 600 : 400 }));
+    /* quotes */
+    const QS = [['Q-0412','华泵','离心泵 HB-200',32100,4,'2026-11-30','有效'],['Q-0409','云川','离心泵 YC-210',33637.5,4,'2026-11-15','有效'],['Q-0405','联泰','离心泵 LT-200',35300,4,'2026-09-30','已过期'],['Q-0398','华泵','闸阀 DN200',7166.67,12,'2026-12-10','有效'],['Q-0391','鼎阀','闸阀 DN200',7480,12,'2026-12-01','有效'],['Q-0388','联泰','压力变送器',6750,8,'2026-11-20','有效']].map(r => ({ id:r[0], sup:r[1], item:r[2], unit:r[3], qty:r[4], date:r[5], state:r[6], total:r[3] * r[4] }));
+    const fmt = (n) => n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    const filt = s.filt;
+    let qs = QS.filter(r => filt === 'all' || (filt === 'valid' && r.state === '有效') || (filt === 'pump' && r.item.startsWith('离心泵')));
+    const sk = s.sort.k, sdn = s.sort.d;
+    qs = [...qs].sort((a, b) => (typeof a[sk] === 'number' ? a[sk] - b[sk] : String(a[sk]).localeCompare(String(b[sk]), 'zh')) * sdn);
+    const minId = QS.filter(r => r.state === '有效' && r.item.startsWith('离心泵')).sort((a, b) => a.total - b.total)[0].id;
+    const sel = s.sel;
+    const qrows = qs.map(r => { const on = sel.includes(r.id), fo = s.focus === r.id;
+      return { sup:r.sup, item:r.item, unit:fmt(r.unit), qty:r.qty, total:fmt(r.total), date:r.date, dateColor: r.state === '已过期' ? T.red : T.ink, low: r.id === minId ? '最低有效' : '',
+        ck: on ? 'check_box' : 'check_box_outline_blank', ckColor: on ? T.acc : T.ink3, check: () => this.setState({ sel: on ? sel.filter(x => x !== r.id) : [...sel, r.id] }), open: go({ focus:r.id }),
+        style:`display:grid;grid-template-columns:40px minmax(0,1.2fr) minmax(0,1.1fr) 120px 56px 140px 110px;align-items:center;height:52px;padding:0 8px;border-top:1px solid ${T.rule};background:${fo ? T.tint : on ? T.sk : 'transparent'}` }; });
+    const HD = [['sup','供应商'],['item','物料'],['unit','含税单价 (¥)'],['qty','数量'],['total','含税总价 (¥)'],['date','有效期至']];
+    const heads = HD.map(([k, l], i) => ({ label:l, arrow: sk === k ? (sdn === 1 ? 'arrow_upward' : 'arrow_downward') : '', go: go({ sort:{ k, d: sk === k ? -sdn : 1 } }),
+      style:`border:0;background:transparent;color:${sk === k ? T.ink : T.ink3};font-size:12px;font-weight:600;display:flex;align-items:center;gap:2px;height:42px;padding:0;justify-content:${i >= 2 ? 'flex-end' : 'flex-start'}` }));
+    const FL = [['all','全部'],['valid','仅有效'],['pump','离心泵']];
+    const fr = QS.find(r => r.id === s.focus) || null;
+    const detailOk = !!fr && (!tablet || s.focus);
+    const dt = fr ? { id:fr.id, sup:fr.sup, total:fmt(fr.total), state:fr.state, fields:[['物料',fr.item],['数量 × 单价', fr.qty + ' × ¥' + fmt(fr.unit)],['有效期至',fr.date],['来源','手工录入 · 10月2日']].map(([k, v], i) => ({ k, v, bt: bt(i) })) } : { id:'', sup:'', total:'', state:'', fields:[] };
+    /* library */
+    const B = { ok:[T.greenbg,T.green,'check_circle','已索引'], run:[T.tint,T.deep,'autorenew','OCR 处理中'], fail:[T.redbg,T.red,'error','索引失败'] };
+    const papers = [['离心泵选型综述','PDF · 48 页','ok'],['泵站改造方案_扫描','PDF · 20 页','run'],['水力模型验证','PDF · 31 页','ok'],['旧版规格书','DOC','fail']].map(([t, meta, st], i) => ({ t, meta, icon:'description', bg:B[st][0], fg:B[st][1], sicon:B[st][2], state:B[st][3], go: go({ paper:i }), style:`width:100%;border:0;border-top:${bt(i)};background:${s.paper === i ? T.sk : 'transparent'};color:${T.ink};display:flex;align-items:center;gap:10px;min-height:68px;padding:0 4px` }));
+    const lines = [100,92,96,70,100,88,60,94,90].map((w, i) => ({ style:`height:7px;width:${w}%;border-radius:3px;background:${i === 3 ? T.acc : T.rs};opacity:${i === 3 ? 0.7 : 0.6}` }));
+    /* assistant bar */
+    const asstShow = asstOpen && screen !== 'ai';
+    const scopeText = screen === 'quotes' ? (fr ? '范围：报价 ' + fr.id + ' · ' + fr.sup : '范围：项目 · 华东泵站改造') : screen === 'lib' ? '范围：针对此论文 · 离心泵选型综述' : screen === 'home' ? '范围：个人资料' : '范围：当前页面';
+    const asstHint = screen === 'quotes' ? '选中一行后可以问“这条报价比同类低多少”。我只读取，不会修改。' : screen === 'lib' ? '可以问这篇论文里的结论，或让我核对引用位置。' : '需要时在这里提问，我会带着当前页面的范围。';
+    /* settings / ex */
+    const groups = [{ label:'偏好', items:[{ icon:'palette', name:'外观', val: dark ? '深色' : '浅色', bt:'none', go: go({ dark: !dark }) }, { icon:'model_training', name:'模型', val:'本机', bt:bt(1), go: () => {} }] }, { label:'数据与安全', items:[{ icon:'hub', name:'数据中心', val:'2 个插件不可发布', bt:'none', go: () => {} }, { icon:'outbound', name:'数据去向', val:'本周远程 3 次', bt:bt(1), go: () => {} }, { icon:'database', name:'数据与存储', val:'', bt:bt(2), go: () => {} }] }];
+    const devices = [['laptop_mac','小李的笔记本','a3f9c1','已配对','在线'],['desktop_windows','工作站','51d0be','已配对','在线'],['tablet_android','会议室平板','9c22e7','未配对','离线']].map(([icon, name, fp, sub, state], i) => ({ icon, name, fp, sub, state, bt: bt(i), bg: state === '在线' ? T.greenbg : T.sk, fg: state === '在线' ? T.green : T.ink2 }));
+    /* palette */
+    const CMDS = [['dashboard','前往 工作台','页面',{ tab:'home' }],['chat_bubble','前往 AI 助手','页面',{ tab:'ai' }],['request_quote','询价 · 报价','页面',{ tab:'plug', plug:'inquiry', sec:'quotes' }],['menu_book','科研 · 文库','页面',{ tab:'plug', plug:'research', sec:'lib' }],['swap_horiz','前往 数据交换','页面',{ tab:'ex' }],['settings','前往 设置','页面',{ tab:'set' }],['palette','切换深浅色','命令',{ dark: !dark }],['notifications','打开收件箱','命令',{ inbox:true }]];
+    const pq = s.pq.trim();
+    const pc = CMDS.filter(c => !pq || c[1].includes(pq));
+    const pcmds = pc.map((c, i) => ({ icon:c[0], t:c[1], kind:c[2], bg: i === 0 ? T.sk : 'transparent', go: go({ ...c[3], palette:false }) }));
+    const GEN = {
+      projects:{ title:'项目', kind:'项目', cols:[['名称',2,'l'],['客户',1.4,'l'],['预算 (¥)',1.2,'r'],['预算行',0.8,'r'],['状态',1,'l']], rows:[['华东泵站改造','华东水务','500,000.00','4','进行中'],['西北管网扩容','西北水务','320,000.00','2','草稿'],['厂区消防升级','华联化工','180,000.00','3','进行中']] },
+      suppliers:{ title:'供应商', kind:'供应商', cols:[['名称',2,'l'],['地区',1,'l'],['联系人',1.2,'l'],['报价数',0.8,'r'],['资质',1,'l']], rows:[['华泵','上海','王工 等 2 人','12','已核验'],['云川','成都','赵经理','9','已核验'],['联泰','苏州','周工','4','待核验']] },
+      materials:{ title:'物料', kind:'物料', cols:[['型号',2,'l'],['分类',1,'l'],['单位',0.6,'l'],['报价数',0.8,'r'],['参数数',0.8,'r']], rows:[['离心泵 HB-200','泵','台','3','5'],['闸阀 DN200','阀门','个','5','4'],['压力变送器','仪表','台','2','3']] },
+      compare:{ title:'比价 · 离心泵 HB-200 · 华东泵站改造', kind:'报价', cols:[['供应商',1.4,'l'],['含税单价 (¥)',1.2,'r'],['数量',0.6,'r'],['含税总价 (¥)',1.3,'r'],['有效期至',1.4,'l']], rows:[['华泵（最低有效）','32,100.00','4','128,400.00','2026-11-30'],['云川','33,637.50','4','134,550.00','2026-11-15'],['联泰','35,300.00','4','141,200.00','2026-09-30（已过期）']] },
+      trash:{ title:'已删除的记录', kind:'已删除项', cols:[['名称',2,'l'],['类型',1,'l'],['删除时间',1.2,'l'],['关联',1.4,'l']], rows:[['旧泵站项目','项目','10月2日','预算行 3 条'],['联泰泵业','供应商','10月1日','报价 1 条']] },
+      tasks:{ title:'科研任务', kind:'任务', cols:[['任务',2,'l'],['论文',0.8,'r'],['设备',1.2,'l'],['状态',1,'l'],['更新',1,'l']], rows:[['文献综述整理','3','工作站','执行中','今天 09:05'],['泵选型对比','2','—','草稿','昨天'],['水击分析','5','工作站','已接纳','10月1日']] },
+      results:{ title:'结果', kind:'结果包', cols:[['结果包',2,'l'],['证据支持',1,'l'],['接纳状态',1,'l'],['来源',1.2,'l'],['导回',1,'l']], rows:[['文献综述_v2','中','待评估','工作站','今天 09:20'],['水击分析 结果包','强','已接纳','工作站','10月1日']] },
+      write:{ title:'写作 · 报告提纲', kind:'提纲章节', cols:[['章节',2,'l'],['关联结果',1.2,'l'],['研究卡',0.8,'r'],['状态',1,'l']], rows:[['1 背景与目标','—','2','草稿'],['2 方法与证据','结果包 v2','3','草稿'],['3 结论与建议','结果包 v2','1','未开始']] }
+    };
+    const gc = GEN[sec] || GEN.projects, gstt = s.g;
+    const gtpl = gc.cols.map(c => c[1] + 'fr').join(' ');
+    const gq = gstt === 'nomatch' ? '联泰' : '';
+    const gcell = (v, al, bold, color) => ({ t:v, style:`font-size:13px;text-align:${al === 'r' ? 'right' : 'left'};font-variant-numeric:tabular-nums;font-weight:${bold ? 600 : 400};color:${color || T.ink};overflow:hidden;text-overflow:ellipsis;white-space:nowrap` });
+    const stColor = (v) => /失败|已过期|待核验|已过期）/.test(v) ? T.red : T.ink;
+    const gRows = gc.rows.map((row, i) => ({ row, i })).filter(x => !(sec === 'trash' && s.trashN.includes(x.i))).map(({ row, i }) => ({ go: go({ gsel: s.gsel === i ? -1 : i }), style:`display:grid;grid-template-columns:${gtpl};gap:12px;align-items:center;width:100%;text-align:left;height:52px;padding:0 16px;border:0;border-top:1px solid ${T.rule};background:${s.gsel === i ? T.tint : 'transparent'};color:${T.ink}`, cells: row.map((v, j) => gcell(v, gc.cols[j][2], j === 0, stColor(v))) }));
+    const gdRow = s.gsel >= 0 ? gc.rows[s.gsel] : null;
+    const NODES2 = [['论文','description',60,50],['研究卡','style',197,50],['提纲','list_alt',334,50],['任务','task_alt',60,170],['结果包','inventory_2',197,170],['报告','article',334,170]];
+    const EDG2 = [[1,0],[2,1],[5,2],[4,3],[2,4],[5,4]];
+    const olSel = Math.min(s.olSel, s.ol.length - 1);
+    /* tab order badges */
+    const rx = 72, sx = secShow && !tablet ? 240 : 0, cx = rx + sx;
+    const bd = (n, x, y) => ({ n, style:`position:absolute;left:${x - cx}px;top:${y}px;width:22px;height:22px;border-radius:999px;background:${T.red};color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:12;box-shadow:0 0 0 2px ${T.bg}` });
+    const sw2 = tablet ? 160 : 260, wsL = W - 136, bellL = wsL - 12 - 44, srchL = bellL - 12 - sw2;
+    const tabBadges = [bd(1,46,62),bd(2,46,118),bd(3,46,174),bd(4,46,230),bd(5,46,H - 64),bd(6,cx + 44,2),bd(7,srchL + 4,2),bd(8,bellL + 30,0),bd(9,wsL + 4,2),...(secShow ? [bd(10, rx + 8, 40)] : []),bd(11, cx + 22, 70),...(asstShow ? [bd(12, W - 350, H - 76)] : [])];
+    return {
+      frameStyle, navs, ctrl, rail, secShow, secStyle, secTitle: sd ? sd[0] : '', secItems, crumbs, searchW: tablet ? 160 : 260,
+      toggleSec: tablet ? go({ secOpen:true, secFloat: !s.secFloat }) : go({ secOpen: !s.secOpen }), toggleInbox: go({ inbox: !s.inbox }), openPalette: go({ palette:true, pq:'' }),
+      vHome: screen === 'home', vAi: screen === 'ai', vQuotes: screen === 'quotes', vLib: screen === 'lib', vEx: screen === 'ex', vSet: screen === 'set', vWrite: screen === 'write', gnSel: s.gn,
+      olRows: s.ol.map((o, i) => ({ t:o.t, chips:o.chips, go: go({ olSel:i }), style:`padding:14px 16px;border-top:${i === 0 ? 'none' : '1px solid ' + T.rule};background:${olSel === i ? T.tint : 'transparent'}` })),
+      olEdit: s.ol[olSel].t, setOl: (e) => this.setState({ ol: s.ol.map((o, j) => j === olSel ? { ...o, t:e.target.value } : o) }),
+      gEdges: EDG2.map(([a, b]) => { const A = NODES2[a], B = NODES2[b], on = A[0] === s.gn || B[0] === s.gn; return { x1:A[2], y1:A[3], x2:B[2], y2:B[3], stroke: on ? T.acc : T.rs, sw: on ? 1.8 : 1 }; }),
+      gNodes: NODES2.map(n => { const on = n[0] === s.gn; return { name:n[0], icon:n[1], go: go({ gn:n[0] }), style:`position:absolute;left:${n[2] - 48}px;top:${n[3] - 20}px;width:96px;height:40px;box-sizing:border-box;border-radius:8px;border:1px solid ${on ? T.acc : T.rs};background:${T.sf};color:${T.ink};display:flex;align-items:center;gap:6px;padding:0 10px;box-shadow:${on ? '0 0 0 2px ' + T.acc : 'none'}` }; }),
+      vOther: screen === 'other', gTitle: gc.title, gKind: gc.kind, gSearch: gq || '搜索' + gc.kind, skel:[1,2,3,4,5],
+      gLoad: gstt === 'load', gEmpty: gstt === 'empty', gNoMatch: gstt === 'nomatch', gFail: gstt === 'fail', gOffline: gstt === 'offline', gOk: gstt === 'ok' || gstt === 'offline',
+      gClear: (e) => { e.preventDefault(); this.setState({ g:'ok' }); }, gRetry: go({ g:'load' }),
+      gHeadStyle: `display:grid;grid-template-columns:${gtpl};gap:12px;height:42px;align-items:center;padding:0 16px;background:${T.sk}`,
+      gHeads: gc.cols.map(c => ({ t:c[0], style:`font-size:12px;font-weight:600;color:${T.ink3};text-align:${c[2] === 'r' ? 'right' : 'left'}` })), gRows,
+      gNotTrash: sec !== 'trash', gTrash: sec === 'trash', gAsk: s.gask, gRestore: go({ gsel:-1, gask:false, trashN:[...s.trashN, s.gsel] }), gAskDel: go({ gask:true }), gCancelDel: go({ gask:false }), gDoDel: go({ gsel:-1, gask:false, trashN:[...s.trashN, s.gsel] }), gDetailShow: !!gdRow && gstt === 'ok', gdTitle: gdRow ? gdRow[0] : '', gCloseDetail: go({ gsel:-1 }),
+      gdFields: gdRow ? gc.cols.slice(1).map((c, j) => ({ k:c[0], v:gdRow[j + 1], bt: bt(j) })) : [],
+      gst: [['ok','正常'],['load','载入中'],['empty','空'],['nomatch','筛选无结果'],['fail','失败'],['offline','离线']].map(([k, l]) => ({ label:l, style:chip(s.g === k), go: go({ g:k, gsel:-1 }) })),
+      todos: [{ icon:'fact_check', t:'比较项目报价', sub:'助手 · 只读 · 华东泵站改造' }, { icon:'cloud_upload', t:'向远程模型发送 1 段摘要', sub:'外传 · api.example-llm.com' }, { icon:'move_to_inbox', t:'来件待核验：结果包', sub:'来自 小李的笔记本 · 未接纳' }],
+      recents: [{ icon:'forum', t:'泵选型对话', sub:'AI 助手 · 今天 09:12' }, { icon:'account_tree', t:'华东泵站改造', sub:'询价 · 项目 · 昨天' }, { icon:'description', t:'离心泵选型综述.pdf', sub:'资料 · 已索引 · 10月3日' }],
+      toolOk: s.toolOk, confirmTool: go({ toolOk:true }),
+      filters: FL.map(([k, l]) => ({ label:l, go: go({ filt:k }), style:`height:36px;padding:0 16px;border-radius:999px;border:1px solid ${filt === k ? T.acc : T.rs};background:${filt === k ? T.tint : T.sf};color:${filt === k ? T.deep : T.ink};font-size:13px;font-weight:600` })),
+      qCount: qs.length, hasSel: sel.length > 0, selCount: sel.length, clearSel: go({ sel:[] }), heads, qrows, showDetail: detailOk, dt, closeDetail: go({ focus:0 }), askAbout: go({ asstOpen:true }),
+      papers, lines, groups, devices,
+      asstShow, asstFab: tablet && screen !== 'ai', toggleAsst: go({ asstOpen: !s.asstOpen }), scopeText, asstHint, suggests: screen === 'quotes' ? ['比较所选','哪家最低'] : ['总结本页','核对引用'],
+      inbox: s.inbox, itabs: [['批准 2',1],['运行记录',0],['消息',0]].map(([l, on]) => ({ label:l, style:`height:36px;padding:0 16px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600;display:flex;align-items:center` })),
+      palette: s.palette, closePalette: go({ palette:false }), pq: s.pq, setPq: (e) => this.setState({ pq:e.target.value }), pcmds, pNone: pc.length === 0,
+      showTabs: s.showTabs, tabBadges
+    };
+  }
+}
+</script>
+</body>
+</html>

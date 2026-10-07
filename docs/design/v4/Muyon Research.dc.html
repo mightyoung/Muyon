@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap;-webkit-font-smoothing:antialiased}button{font-family:inherit;cursor:pointer}input,textarea{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:56px;justify-content:center;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;min-height:100vh;box-sizing:border-box">
+
+<div style="width:300px;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:24px">
+<div style="font-size:24px;font-weight:600">科研插件 · 手机</div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565"><b style="color:#111827">可进入的二级页</b><br>概览 · 文库 › 阅读器 · 任务 › 任务详情 · 结果 › 评估与接纳 · 写作 › 研究关系图（点对象回到实际对象）</div>
+<div style="display:flex;flex-direction:column;gap:6px"><sc-for list="{{ navs }}" as="n" hint-placeholder-count="7"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for></div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态切换说明</b><br>文库状态可切换；任务按钮会推进状态；引用定位可切换“唯一 / 无法唯一定位”。</div>
+<sc-for list="{{ demoGroups }}" as="g" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">{{ g.label }}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div></sc-for>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据。PDF 页为占位。</div>
+</div>
+
+<div style="{{ phoneStyle }}">
+<div style="height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>9:41</span><span style="font-size:11px;font-weight:500;color:var(--ink3)">示意数据</span></div>
+<div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+<button onClick="{{ headClick }}" aria-label="{{ headLabel }}" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)"><span class="ms" style="font-size:22px">{{ headIcon }}</span></button>
+<div style="padding:0 18px;height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:4px;font-size:15px;font-weight:600">{{ title }}<sc-if value="{{ isTop }}" hint-placeholder-val="{{ true }}"><span class="ms" style="font-size:18px;color:var(--ink3)">expand_more</span></sc-if></div>
+<div style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)"><span class="ms" style="font-size:22px">notifications</span></div></div>
+
+<sc-if value="{{ isTop }}" hint-placeholder-val="{{ true }}"><div style="flex:none;display:flex;gap:8px;overflow-x:auto;padding:0 16px 10px"><sc-for list="{{ secChips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></sc-if>
+
+<div class="fx" style="flex:1;min-height:0;overflow-y:auto;padding:4px 16px 16px;display:flex;flex-direction:column;gap:14px">
+
+<sc-if value="{{ vOverview }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:4px"><div style="font-size:16px;font-weight:600;margin-bottom:4px">待我处理</div>
+<sc-for list="{{ todos }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" style="width:100%;text-align:left;border:0;border-top:1px solid var(--rule);background:transparent;color:var(--ink);display:flex;align-items:center;gap:12px;min-height:60px;padding:0"><span class="ms" style="font-size:24px;color:{{ t.color }}">{{ t.icon }}</span><span style="flex:1"><span style="display:block;font-size:14px;font-weight:500">{{ t.name }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:1px">{{ t.sub }}</span></span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></button></sc-for></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><sc-for list="{{ stats }}" as="x" hint-placeholder-count="4"><div style="background:var(--sk);border-radius:24px;padding:16px"><div style="font-size:22px;font-weight:600">{{ x.n }}</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">{{ x.l }}</div></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ vLib }}" hint-placeholder-val="{{ false }}">
+<div style="height:44px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--ink3);font-size:14px"><span class="ms" style="font-size:20px">search</span>{{ libSearch }}</div>
+<sc-if value="{{ libLoad }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="3"><div style="height:68px;border-radius:20px;background:var(--sk)"></div></sc-for><div style="font-size:12px;color:var(--ink3);text-align:center">正在读取文库…</div></div></sc-if>
+<sc-if value="{{ libEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">menu_book</span><br>文库为空<br>导入 PDF 或从“资料”选择文件，建立索引后可全文检索与提问。<br><button style="margin-top:12px;height:48px;padding:0 24px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">导入论文</button></div></sc-if>
+<sc-if value="{{ libNoMatch }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8">没有符合“水击”的论文<br><a href="#" onClick="{{ clearLib }}">清除筛选</a></div></sc-if>
+<sc-if value="{{ libFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;font-size:14px;font-weight:600;color:var(--red);align-items:center"><span class="ms" style="font-size:20px">error</span>文库读取失败</div><div style="font-size:13px;line-height:1.7">本地文库数据库不可用。原文件未受影响；在“数据与存储”中校验或从备份恢复。</div><div><button onClick="{{ retryLib }}" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">重试</button></div></div></sc-if>
+<sc-if value="{{ libOffline }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sk);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2);display:flex;gap:8px"><span class="ms" style="font-size:20px">cloud_off</span>离线：OCR 与向量化暂停，已索引的论文仍可阅读与检索。</div></sc-if>
+<sc-if value="{{ libList }}" hint-placeholder-val="{{ true }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ papers }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.go }}" style="width:100%;text-align:left;border:0;border-top:{{ p.bt }};background:transparent;color:var(--ink);display:flex;align-items:center;gap:12px;min-height:68px;padding:0"><span class="ms" style="font-size:26px;color:var(--ink2)">{{ p.icon }}</span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:500">{{ p.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ p.meta }}</span></span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:{{ p.bg }};color:{{ p.fg }};font-weight:600"><span class="ms" style="font-size:14px">{{ p.sicon }}</span>{{ p.state }}</span></button></sc-for></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ vReader }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;background:var(--tint);color:var(--deep);font-size:13px;font-weight:500;align-self:flex-start"><span class="ms" style="font-size:18px">target</span>范围：本论文 · 第 {{ page }} 页</div>
+<div style="background:var(--sk);border:1px solid var(--rule);border-radius:8px;height:250px;position:relative;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px">
+<div style="font-size:11px;color:var(--ink3)">PDF 第 {{ page }} 页 · 占位</div>
+<sc-for list="{{ lines }}" as="l" hint-placeholder-count="8"><div style="{{ l.style }}"></div></sc-for></div>
+<div style="display:flex;align-items:center;justify-content:space-between"><button onClick="{{ prevPage }}" aria-label="上一页" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink)"><span class="ms" style="font-size:22px">chevron_left</span></button><span style="font-size:13px;color:var(--ink2)">{{ page }} / 48</span><button onClick="{{ nextPage }}" aria-label="下一页" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink)"><span class="ms" style="font-size:22px">chevron_right</span></button></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:20px;color:var(--acc)">format_quote</span><span style="font-size:14px;font-weight:600;flex:1">引用块</span><span style="font-size:12px;color:var(--ink3)">研究卡 RC-07</span></div>
+<div style="font-size:14px;line-height:1.7;border-left:2px solid var(--rs);padding-left:12px">“离心泵额定流量 200 m³/h，扬程 32 m，效率不低于 78%。”</div>
+<div style="font-size:12px;color:var(--ink3)">{{ citeLoc }}</div>
+<sc-if value="{{ ambiguous }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--red)"><span class="ms" style="font-size:18px">warning</span>无法唯一定位</div><div style="font-size:12px;line-height:1.7;color:var(--ink)">原文中有 2 处相同引句，请选择要回跳的位置；未选择前不会标记为“已核对”。</div><div style="display:flex;gap:8px"><button onClick="{{ pick12 }}" style="height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">第 12 页</button><button onClick="{{ pick31 }}" style="height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">第 31 页</button></div></div></sc-if>
+<sc-if value="{{ !ambiguous }}" hint-placeholder-val="{{ true }}"><button onClick="{{ jumpCite }}" style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px"><span class="ms" style="font-size:18px">my_location</span>回跳到原文第 {{ citePage }} 页</button></sc-if>
+</div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">批注</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ notes }}" as="n" hint-placeholder-count="2"><div style="display:flex;gap:10px;padding:12px 0;border-top:{{ n.bt }}"><span style="flex:none;font-size:12px;color:var(--ink3);width:40px">第 {{ n.p }} 页</span><span style="flex:1;font-size:13px;line-height:1.6">{{ n.t }}</span></div></sc-for></div></div>
+<div style="background:var(--sk);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span class="ms" style="font-size:20px">edit_note</span>精读笔记</div><div style="font-size:13px;line-height:1.8;color:var(--ink2)">1. 额定点效率要求高于同类 3 个百分点。<br>2. 需核对第 31 页的重复表述是否为修订前版本。</div><div style="font-size:12px;color:var(--ink3)">笔记保存在本机；用远程模型总结时需逐次确认。</div></div>
+</sc-if>
+
+<sc-if value="{{ vXState }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ libLoad }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="3"><div style="height:68px;border-radius:20px;background:var(--sk)"></div></sc-for><div style="font-size:12px;color:var(--ink3);text-align:center">正在读取…</div></div></sc-if>
+<sc-if value="{{ libEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">inbox</span><br>还没有{{ xKind }}<br>{{ xHint }}</div></sc-if>
+<sc-if value="{{ libNoMatch }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8">没有符合条件的{{ xKind }}<br><a href="#" onClick="{{ clearLib }}">清除筛选</a></div></sc-if>
+<sc-if value="{{ libFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;font-size:14px;font-weight:600;color:var(--red);align-items:center"><span class="ms" style="font-size:20px">error</span>{{ xKind }}读取失败</div><div style="font-size:13px;line-height:1.7">科研库暂不可用，数据未被改动。可重试，或到“数据与存储”校验备份。</div><div><button onClick="{{ retryLib }}" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">重试</button></div></div></sc-if>
+</sc-if>
+<sc-if value="{{ vTasks }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ taskRows }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" style="width:100%;text-align:left;border:0;border-top:{{ t.bt }};background:transparent;color:var(--ink);display:flex;align-items:center;gap:12px;min-height:68px;padding:0"><span class="ms" style="font-size:26px;color:var(--ink2)">task_alt</span><span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:500">{{ t.name }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ t.sub }}</span></span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:{{ t.bg }};color:{{ t.fg }};font-weight:600"><span class="ms" style="font-size:14px">{{ t.icon }}</span>{{ t.state }}</span></button></sc-for></div>
+<button style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">创建任务包</button>
+</sc-if>
+
+<sc-if value="{{ vTask }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:4px"><div style="font-size:16px;font-weight:600">文献综述整理</div><div style="font-size:12px;color:var(--ink3)">任务包_泵选型.zip · 论文 3 篇</div>
+<div style="padding-top:10px"><sc-for list="{{ steps }}" as="s" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;min-height:44px"><span style="flex:none;width:26px;height:26px;border-radius:999px;background:{{ s.bg }};color:{{ s.fg }};display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:16px">{{ s.icon }}</span></span><span style="flex:1;font-size:14px;font-weight:{{ s.w }};color:{{ s.color }}">{{ s.t }}</span></div></sc-for></div></div>
+<div style="background:var(--sk);border-radius:20px;padding:14px 16px;font-size:13px;line-height:1.8;color:var(--ink2)">{{ taskNote }}</div>
+<button onClick="{{ taskAct }}" style="{{ taskBtnStyle }}">{{ taskBtn }}</button>
+<sc-if value="{{ canCancel }}" hint-placeholder-val="{{ false }}"><button onClick="{{ cancelTask }}" style="height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">仅在本机取消</button><div style="font-size:12px;line-height:1.7;color:var(--ink3);padding:0 6px">本地取消不会撤销对方设备上已开始的执行；对方回传后仍需你核验。</div></sc-if>
+</sc-if>
+
+<sc-if value="{{ vResults }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ resRows }}" as="r" hint-placeholder-count="2"><button onClick="{{ r.go }}" style="width:100%;text-align:left;border:0;border-top:{{ r.bt }};background:transparent;color:var(--ink);padding:12px 0;display:flex;flex-direction:column;gap:8px"><span style="display:flex;align-items:center;gap:8px"><span style="flex:1;font-size:14px;font-weight:500">{{ r.name }}</span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></span><span style="display:flex;gap:8px;flex-wrap:wrap"><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:var(--sk);color:var(--ink2);font-weight:600"><span class="ms" style="font-size:14px">{{ r.eIcon }}</span>证据支持：{{ r.ev }}</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:{{ r.bg }};color:{{ r.fg }};font-weight:600"><span class="ms" style="font-size:14px">{{ r.aIcon }}</span>{{ r.acc }}</span></span></button></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ vResult }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px"><div style="font-size:16px;font-weight:600">文献综述_v2 结果包</div><div style="font-size:12px;color:var(--ink3)">来自 工作站 · 校验通过 · 2.4 MB · 已导回</div>
+<div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--rule);padding-top:10px"><div style="font-size:12px;color:var(--ink3)">证据支持程度（模型/任务给出）</div><div style="display:flex;gap:8px"><sc-for list="{{ evOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--rule);padding-top:10px"><div style="font-size:12px;color:var(--ink3)">接纳状态（由你决定，与证据强弱无关）</div><span style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:{{ accFg }}"><span class="ms" style="font-size:18px">{{ accIcon }}</span>{{ accText }}</span></div></div>
+<sc-if value="{{ undecided }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px"><div style="font-size:14px;font-weight:600">评估</div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">理由（接纳或否定都需填写）<textarea value="{{ reason }}" onInput="{{ setReason }}" style="min-height:80px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:10px 12px;font-size:14px;resize:none;box-sizing:border-box"></textarea></label>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:var(--ink3)">不确定性</div><div style="display:flex;gap:8px"><sc-for list="{{ uncOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<div style="display:flex;gap:8px"><button onClick="{{ acceptRes }}" style="{{ decideStyle }}">接纳</button><button onClick="{{ rejectRes }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">否定</button></div>
+<sc-if value="{{ needReason }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--red)">请先填写理由。</div></sc-if></div></sc-if>
+<sc-if value="{{ decided }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sk);border-radius:20px;padding:14px 16px;font-size:13px;line-height:1.8;color:var(--ink2)">理由：{{ reason }}<br>不确定性：{{ unc }}<br>接纳 ≠ 已导入科研模块，导入是单独一步。<br><a href="#" onClick="{{ resetRes }}">撤回决定</a></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ vWrite }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><div style="font-size:12px;color:var(--ink3);padding:12px 0 4px">报告提纲</div><sc-for list="{{ outline }}" as="o" hint-placeholder-count="3"><div style="padding:12px 0;border-top:1px solid var(--rule)"><div style="font-size:14px;font-weight:500">{{ o.t }}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><sc-for list="{{ o.chips }}" as="c" hint-placeholder-count="1"><span style="display:flex;align-items:center;gap:4px;height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--rs);font-size:12px"><span class="ms" style="font-size:15px;color:var(--acc)">link</span>{{ c }}</span></sc-for></div></div></sc-for></div>
+<button onClick="{{ goGraph }}" style="height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px"><span class="ms" style="font-size:20px">hub</span>研究关系图</button>
+<button onClick="{{ exportRep }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">{{ exportLabel }}</button>
+<sc-if value="{{ expDone }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--green);display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:18px">check_circle</span>已导出到本机 · 报告_v1.docx</div></sc-if>
+<sc-if value="{{ expFail }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--red);display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:18px">error</span>导出失败：磁盘空间不足。释放空间后可重试，提纲未丢失。</div></sc-if>
+</sc-if>
+
+<sc-if value="{{ vGraph }}" hint-placeholder-val="{{ false }}">
+<div style="position:relative;width:358px;height:230px;border:1px solid var(--rule);border-radius:8px;background:var(--sf);overflow:hidden">
+<svg width="358" height="230" style="position:absolute;left:0;top:0"><sc-for list="{{ gEdges }}" as="e" hint-placeholder-count="0"><line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" stroke="{{ e.stroke }}" stroke-width="{{ e.sw }}"></line></sc-for></svg>
+<sc-for list="{{ gNodes }}" as="n" hint-placeholder-count="6"><button onClick="{{ n.go }}" style="{{ n.style }}"><span class="ms" style="font-size:16px;color:var(--ink2)">{{ n.icon }}</span><span style="font-size:12px;font-weight:500">{{ n.name }}</span></button></sc-for></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px"><div style="font-size:15px;font-weight:600">{{ gSel }}</div><div style="font-size:12px;color:var(--ink3)">图中是对象类型的示例实例；点击回到实际对象。</div><button onClick="{{ gOpen }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">打开{{ gSel }}</button></div>
+</sc-if>
+
+</div>
+
+<div style="height:76px;flex:none;border-top:1px solid var(--rule);background:var(--bg);display:flex;padding:0 8px 10px;box-sizing:border-box"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><button aria-label="{{ t.label }}" title="{{ t.label }}" style="flex:1;border:0;background:transparent;display:flex;align-items:center;justify-content:center;color:{{ t.color }}"><span class="ms" style="font-size:28px;font-variation-settings:'FILL' {{ t.fill }}">{{ t.icon }}</span></button></sc-for></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { v:'overview', lib:'ok', page:12, cite:'ambiguous', citePage:12, task:2, ev:1, decision:null, reason:'', unc:'中', needReason:false, exp:'idle', gsel:'提纲', dark:null };
+  timers = [];
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F' };
+    const T = dark ? D : L;
+    const phoneStyle = { width:390, height:844, background:T.bg, borderRadius:44, border:'10px solid ' + (dark ? '#2A2A2A' : '#111827'), boxSizing:'content-box', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => phoneStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const seg = (on) => `flex:1;height:44px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600`;
+    const v = s.v;
+    const top = ['overview','lib','tasks','results','write'];
+    const isTop = top.includes(v);
+    const SEC = [['overview','概览'],['lib','文库'],['tasks','任务'],['results','结果'],['write','写作']];
+    const ownSec = { reader:'lib', task:'tasks', result:'results', graph:'write' };
+    const curSec = isTop ? v : ownSec[v];
+    const B = { ok:[T.greenbg,T.green,'check_circle','已索引'], run:[T.tint,T.deep,'autorenew','OCR 处理中'], fail:[T.redbg,T.red,'error','索引失败'] };
+    const papers = [['离心泵选型综述','PDF · 48 页 · 10月3日','ok'],['泵站改造方案_扫描','PDF · 20 页 · 10月2日','run'],['水力模型验证','PDF · 31 页 · 10月1日','ok'],['旧版规格书','DOC · 9月28日','fail']].map(([t, meta, st], i) => ({ t, meta, icon: st === 'ok' ? 'description' : 'picture_as_pdf', bg:B[st][0], fg:B[st][1], sicon:B[st][2], state:B[st][3], bt: bt(i), go: st === 'ok' ? go({ v:'reader' }) : () => {} }));
+    const TS = [['草稿','edit',T.sk,T.ink2],['已导出','upload_file',T.tint,T.deep],['执行中','autorenew',T.tint,T.deep],['已导回','move_to_inbox',T.tint,T.deep],['已接纳','check_circle',T.greenbg,T.green]];
+    const taskRows = [['文献综述整理','工作站 · 论文 3 篇',s.task],['泵选型对比','草稿 · 论文 2 篇',0],['历史任务 · 水击分析','10月1日 · 已完成',4]].map(([name, sub, st], i) => ({ name, sub: i === 0 ? sub : sub, state:TS[st][0], icon:TS[st][1], bg:TS[st][2], fg:TS[st][3], bt: bt(i), go: go({ v:'task' }) }));
+    const steps = TS.map((x, i) => { const done = i < s.task, now = i === s.task; return { t:x[0], icon: done ? 'check' : now ? x[1] : 'radio_button_unchecked', bg: done ? T.greenbg : now ? T.tint : T.sk, fg: done ? T.green : now ? T.deep : T.ink3, color: i > s.task ? T.ink3 : T.ink, w: now ? 600 : 400 }; });
+    const NOTE = ['尚未导出。导出会生成任务包文件，不会自动发送到任何设备。','已导出到本机。请通过数据交换发给执行设备；“已发出”不等于“对方已收到”。','等待执行设备回传。进度未知，不显示百分比。','结果包已导回，尚未评估。导回 ≠ 已接纳。','结果已接纳。接纳 ≠ 已导入科研模块。'];
+    const BTN = ['导出任务包','前往数据交换发送','等待回传（演示：点此模拟回传）','去评估结果','查看已接纳结果'];
+    const adv = () => { if (s.task === 3) this.setState({ v:'result' }); else if (s.task === 4) this.setState({ v:'results' }); else this.setState({ task: s.task + 1 }); };
+    const decided = !!s.decision, evT = ['弱','中','强'], evI = ['trending_down','trending_flat','trending_up'];
+    const A = s.decision === 'acc' ? [T.greenbg,T.green,'check_circle','已接纳'] : s.decision === 'rej' ? [T.redbg,T.red,'cancel','已否定'] : [T.sk,T.ink2,'schedule','待评估'];
+    const resRows = [['文献综述_v2 结果包', s.ev, A],['水击分析 结果包', 2, [T.greenbg,T.green,'check_circle','已接纳']]].map(([name, ev, a], i) => ({ name, ev:evT[ev], eIcon:evI[ev], acc:a[3], aIcon:a[2], bg:a[0], fg:a[1], bt: bt(i), go: go({ v:'result' }) }));
+    const lines = [100,92,96,70,100,88,60,94].map((w, i) => ({ style:`height:7px;width:${w}%;border-radius:3px;background:${(i === 3 && s.page === s.citePage) ? T.acc : T.rs};opacity:${i === 3 && s.page === s.citePage ? 0.7 : 0.6}` }));
+    const amb = s.cite === 'ambiguous';
+    const NODES = [['论文','description',62,50],['研究卡','style',179,50],['提纲','list_alt',296,50],['任务','task_alt',62,170],['结果包','inventory_2',179,170],['报告','article',296,170]];
+    const EDG = [[1,0],[2,1],[5,2],[4,3],[2,4],[5,4]];
+    const np = {}; NODES.forEach(n => np[n[0]] = n);
+    const gEdges = EDG.map(([a, b]) => { const A2 = NODES[a], B2 = NODES[b], on = A2[0] === s.gsel || B2[0] === s.gsel; return { x1:A2[2], y1:A2[3], x2:B2[2], y2:B2[3], stroke: on ? T.acc : T.rs, sw: on ? 1.8 : 1 }; });
+    const gNodes = NODES.map(n => { const on = n[0] === s.gsel; return { name:n[0], icon:n[1], go: go({ gsel:n[0] }), style:`position:absolute;left:${n[2] - 48}px;top:${n[3] - 20}px;width:96px;height:40px;box-sizing:border-box;border-radius:8px;border:1px solid ${on ? T.acc : T.rs};background:${T.sf};color:${T.ink};display:flex;align-items:center;gap:6px;padding:0 10px;box-shadow:${on ? '0 0 0 2px ' + T.acc : 'none'}` }; });
+    const gTarget = { '论文':{ v:'reader' }, '研究卡':{ v:'reader' }, '提纲':{ v:'write' }, '任务':{ v:'task' }, '结果包':{ v:'result' }, '报告':{ v:'write' } };
+    const titles = { reader:'阅读器', task:'任务详情', result:'评估与接纳', graph:'研究关系图' };
+    const chipSt = (on) => `height:30px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+    const navs = [['overview','概览'],['lib','文库'],['reader','阅读器'],['tasks','任务'],['task','任务详情'],['results','结果'],['result','评估与接纳'],['write','写作'],['graph','研究关系图']];
+    const doExport = () => { if (s.exp === 'run') return; this.setState({ exp:'run' }); this.timers.push(setTimeout(() => this.setState({ exp:'done' }), 1500)); };
+    return {
+      phoneStyle, isTop, title: isTop ? '科研' : titles[v], headIcon: isTop ? 'workspaces' : 'arrow_back', headLabel: isTop ? '插件' : '返回',
+      headClick: isTop ? () => {} : go({ v: ownSec[v] }),
+      navs: navs.map(([k, l]) => ({ label:l, go: go({ v:k }), style:`height:36px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${v === k ? '#2458D3' : '#C3CAD6'};background:${v === k ? '#E8EFFF' : '#fff'};color:${v === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      demoGroups: [{ label:'列表状态（文库 / 任务 / 结果）', chips:[['ok','正常'],['load','载入中'],['empty','空'],['nomatch','筛选无结果'],['fail','失败'],['offline','离线']].map(([k, l]) => ({ label:l, style:chipSt(s.lib === k), go: go({ lib:k, v:'lib' }) })) }, { label:'引用定位', chips:[['ambiguous','无法唯一定位'],['unique','唯一']].map(([k, l]) => ({ label:l, style:chipSt(s.cite === k), go: go({ cite:k, v:'reader' }) })) }, { label:'主题', chips:[{ label: dark ? '切到浅色' : '切到深色', style:chipSt(false), go: go({ dark: !dark }) }] }],
+      secChips: SEC.map(([k, l]) => ({ label:l, go: go({ v:k }), style:`flex:none;height:44px;padding:0 18px;border-radius:999px;border:1px solid ${curSec === k ? T.acc : T.rs};background:${curSec === k ? T.tint : T.sf};color:${curSec === k ? T.deep : T.ink};font-size:14px;font-weight:600` })),
+      vOverview: v === 'overview', vLib: v === 'lib', vReader: v === 'reader', vXState: (v === 'tasks' || v === 'results') && ['load','empty','nomatch','fail'].includes(s.lib), xKind: v === 'tasks' ? '任务' : '结果包', xHint: v === 'tasks' ? '创建任务包，交给工作站执行。' : '任务执行完回传后，结果包会出现在这里。', vTasks: v === 'tasks' && !['load','empty','nomatch','fail'].includes(s.lib), vTask: v === 'task', vResults: v === 'results' && !['load','empty','nomatch','fail'].includes(s.lib), vResult: v === 'result', vWrite: v === 'write', vGraph: v === 'graph',
+      todos: [{ icon:'autorenew', color:T.deep, name:'文献综述整理', sub:'阶段 2/4 · 工作站 · 进度未知', go: go({ v:'task' }) }, { icon:'inventory_2', color:T.deep, name:'结果包待评估', sub:'来自 工作站 · 已导回', go: go({ v:'result' }) }, { icon:'error', color:T.red, name:'1 篇论文索引失败', sub:'旧版规格书 · 可重试', go: go({ v:'lib', lib:'ok' }) }].map(x => x),
+      stats: [{ n:'48', l:'已索引论文' }, { n:'3', l:'研究任务' }, { n:'7', l:'结果包' }, { n:'12', l:'研究卡' }],
+      skel: [1,2,3], libSearch: s.lib === 'nomatch' ? '水击' : '搜索论文、研究卡',
+      libLoad: s.lib === 'load', libEmpty: s.lib === 'empty', libNoMatch: s.lib === 'nomatch', libFail: s.lib === 'fail', libOffline: s.lib === 'offline', libList: s.lib === 'ok' || s.lib === 'offline',
+      clearLib: (e) => { e.preventDefault(); this.setState({ lib:'ok' }); }, retryLib: go({ lib:'load' }), papers,
+      page: s.page, prevPage: go({ page: Math.max(1, s.page - 1) }), nextPage: go({ page: Math.min(48, s.page + 1) }), lines,
+      ambiguous: amb, citePage: s.citePage, citeLoc: amb ? '原文位置：未确定' : '原文位置：第 ' + s.citePage + ' 页 · 已唯一定位',
+      pick12: go({ cite:'unique', citePage:12, page:12 }), pick31: go({ cite:'unique', citePage:31, page:31 }), jumpCite: go({ page: s.citePage }),
+      notes: [{ p:12, t:'额定点效率不低于 78%，对比第 5 章的结论。' }, { p:31, t:'与第 12 页表述重复，疑似修订前版本。' }].map((n, i) => ({ ...n, bt: bt(i) })),
+      taskRows, steps, taskNote: NOTE[s.task], taskBtn: BTN[s.task], taskAct: adv,
+      taskBtnStyle: `height:48px;border-radius:999px;border:${s.task === 2 ? '1px solid ' + T.rs : '0'};background:${s.task === 2 ? T.sf : T.acc};color:${s.task === 2 ? T.ink : T.onacc};font-size:14px;font-weight:600`,
+      canCancel: s.task === 1 || s.task === 2, cancelTask: go({ task:0 }),
+      resRows,
+      evOpts: evT.map((l, i) => ({ label:l, go: go({ ev:i }), style: seg(s.ev === i) })), accFg: A[1], accIcon: A[2], accText: A[3],
+      undecided: !decided, decided, reason: s.reason, setReason: (e) => this.setState({ reason:e.target.value, needReason:false }),
+      uncOpts: ['低','中','高'].map(l => ({ label:l, go: go({ unc:l }), style: seg(s.unc === l) })), unc: s.unc, needReason: s.needReason,
+      decideStyle: `flex:1;height:48px;border-radius:999px;border:0;background:${T.acc};color:${T.onacc};font-size:14px;font-weight:600`,
+      acceptRes: () => s.reason.trim() ? this.setState({ decision:'acc', task:4 }) : this.setState({ needReason:true }),
+      rejectRes: () => s.reason.trim() ? this.setState({ decision:'rej' }) : this.setState({ needReason:true }),
+      resetRes: (e) => { e.preventDefault(); this.setState({ decision:null, task:3 }); },
+      outline: [['1 背景与目标',['论文 · 选型综述']],['2 方法与证据',['研究卡 RC-07','结果包 v2']],['3 结论与建议',['结果包 v2']]].map(([t, chips]) => ({ t, chips })),
+      goGraph: go({ v:'graph' }), exportRep: doExport, exportLabel: s.exp === 'run' ? '导出中…' : '导出报告', expDone: s.exp === 'done', expFail: s.exp === 'fail',
+      gEdges, gNodes, gSel: s.gsel, gOpen: go(gTarget[s.gsel]),
+      tabs: [['chat_bubble','AI 助手',0],['apps','业务插件',1],['dashboard','工作台',0],['swap_horiz','数据交换',0],['settings','设置',0]].map(([icon, label, fill]) => ({ icon, label, fill, color: fill ? T.ink : T.ink3 }))
+    };
+  }
+}
+</script>
+</body>
+</html>

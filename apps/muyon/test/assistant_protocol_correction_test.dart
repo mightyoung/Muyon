@@ -206,23 +206,47 @@ void main() {
     expect(h.toolCalls, 0);
   });
 
+  // T1: the protocol JSON must be the whole reply. Wrapped or surrounded by
+  // text it is corrected and then fails; nothing is extracted or run.
+  for (final (name, wrapped) in [
+    ('fenced in a code block', '```json\n$_readTool\n```'),
+    ('preceded by text', '好的，我来查询：$_readTool'),
+    ('followed by text', '$_readTool 以上是工具调用。'),
+  ]) {
+    test('protocol JSON $name is not extracted or run', () async {
+      final h = await _Harness.open();
+      final gateway = _Scripted([wrapped, wrapped]);
+      final task = await h.runModelRounds(h.agent(gateway));
+      expect(task.state, PersonalTaskState.failed);
+      expect(task.payload['protocolCorrections'], 1);
+      expect(task.payload['toolCall'], isNull);
+      expect(h.toolCalls, 0);
+      expect(gateway.requests, hasLength(2));
+    });
+  }
+
   group('real gateway', () {
     late HttpServer server;
     final bodies = <Map<String, Object?>>[];
     var rejectFormat = false;
+    int? alwaysStatus;
     final replies = <String>[];
 
     setUp(() async {
       bodies.clear();
       replies.clear();
       rejectFormat = false;
+      alwaysStatus = null;
       server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
       server.listen((request) async {
         final body = jsonDecode(
           await utf8.decoder.bind(request).join(),
         ) as Map<String, Object?>;
         bodies.add(body);
-        if (rejectFormat && body.containsKey('response_format')) {
+        if (alwaysStatus != null) {
+          request.response.statusCode = alwaysStatus!;
+          request.response.write('{"error":"refused"}');
+        } else if (rejectFormat && body.containsKey('response_format')) {
           request.response.statusCode = 400;
           request.response.write('{"error":"response_format unsupported"}');
         } else {
@@ -320,6 +344,52 @@ void main() {
       );
       expect(bodies, hasLength(3));
       expect(bodies[2].containsKey('response_format'), isFalse);
+    });
+
+    // T2: only 400/422 are resent, once; everything else fails as sent.
+    for (final status in [401, 429]) {
+      test('HTTP $status is not resent', () async {
+        alwaysStatus = status;
+        await expectLater(
+          OpenAiModelGateway(UnavailableSecretStore()).chat(
+            profile: local(),
+            messages: const [
+              {'role': 'user', 'content': 'json please'},
+            ],
+            caller: 'assistant',
+          ),
+          throwsA(
+            isA<HttpException>().having(
+              (e) => e.message,
+              'message',
+              'model_http_$status',
+            ),
+          ),
+        );
+        expect(bodies, hasLength(1));
+      });
+    }
+
+    test('a persistent 400 is resent exactly once, and the endpoint is not '
+        'marked as lacking JSON mode', () async {
+      alwaysStatus = 400;
+      final gateway = OpenAiModelGateway(UnavailableSecretStore());
+      const messages = [
+        {'role': 'user', 'content': 'json please'},
+      ];
+      Future<void> send() => expectLater(
+        gateway.chat(profile: local(), messages: messages, caller: 'assistant'),
+        throwsA(isA<HttpException>()),
+      );
+      await send();
+      expect(bodies, hasLength(2), reason: 'with the parameter, then without');
+      expect(bodies[0].containsKey('response_format'), isTrue);
+      expect(bodies[1].containsKey('response_format'), isFalse);
+      // O1: the resend failed too, so the 400 was not about response_format;
+      // the next assistant request still asks for JSON output.
+      await send();
+      expect(bodies, hasLength(4));
+      expect(bodies[2].containsKey('response_format'), isTrue);
     });
 
     test('other callers keep plain requests', () async {

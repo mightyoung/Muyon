@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap}button{font-family:inherit;cursor:pointer}input{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:56px;justify-content:center;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;min-height:100vh;box-sizing:border-box">
+<div style="width:300px;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:24px">
+<div style="font-size:24px;font-weight:600">项目与技术要求 · 第三轮 B</div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565"><b style="color:#111827">可进入的二级页</b><br>项目详情（五个页签）› 项目表单 / 导出菜单<br>技术要求页签 › 导入 / 单份技术要求 › 按要求找物料<br>供应商与物料（C 组）见下一批。业务口径按 Folio。</div>
+<sc-for list="{{ navs }}" as="n" hint-placeholder-count="6"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for>
+<div style="font-size:13px;line-height:1.8;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态切换说明</b><br>芯片强制显示对应状态。</div>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">{{ g.label }}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div></sc-for>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据。</div>
+</div>
+
+<div style="{{ phoneStyle }}">
+<div style="height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>9:41</span><span style="font-size:11px;font-weight:500;color:var(--ink3)">示意数据</span></div>
+<div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+<button onClick="{{ back }}" aria-label="返回" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span class="ms" style="font-size:22px">arrow_back</span></button>
+<div style="padding:0 18px;height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;font-size:15px;font-weight:600">{{ title }}</div>
+<button onClick="{{ topAct }}" aria-label="更多" style="width:48px;height:48px;border-radius:999px;border:0;background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center;opacity:{{ topOp }}" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span class="ms" style="font-size:24px">more_vert</span></button></div>
+
+<div class="fx" style="flex:1;min-height:0;overflow-y:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:14px">
+
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="font-size:12px;color:var(--ink3)">P-2026-014 · 进行中</div><div style="font-size:17px;font-weight:600">华东泵站改造</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4"><div><div style="font-size:11px;color:var(--ink3)">{{ k.l }}</div><div style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ k.c }}">{{ k.v }}</div></div></sc-for></div></div>
+<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.l }}</button></sc-for></div>
+
+<sc-if value="{{ tBudget }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ bEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:36px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">inventory_2</span><br>这个项目还没有物料<br>从物料库添加，并自动带出最低有效报价；库里没有的可以先作为待询价添加。<br><button style="margin-top:12px;height:44px;padding:0 24px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">添加物料</button></div></sc-if>
+<sc-if value="{{ bRows }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ budget }}" as="b" hint-placeholder-count="4"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:14px;font-weight:500">{{ b.name }}</span><span style="font-size:12px;color:var(--ink3);flex:none">{{ b.qty }}</span></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:12px"><span><span style="display:block;color:var(--ink3);font-size:11px">成本单价</span><span style="font-variant-numeric:tabular-nums">{{ b.up }}</span></span><span style="text-align:right"><span style="display:block;color:var(--ink3);font-size:11px">成本金额</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ b.cost }}</span></span><span style="text-align:right"><span style="display:block;color:var(--ink3);font-size:11px">对外金额</span><span style="font-variant-numeric:tabular-nums">{{ b.ext }}</span></span></div>
+<sc-if value="{{ b.hint }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:{{ b.hbg }};color:{{ b.hfg }};align-self:flex-start"><span class="ms" style="font-size:14px">{{ b.hic }}</span>{{ b.hint }}</span></sc-if></div></sc-for>
+<div style="background:var(--tint);border-radius:8px;padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;color:var(--deep)"><span><span style="display:block;font-size:11px">成本合计</span><b style="font-size:16px;font-variant-numeric:tabular-nums">{{ sumCost }}</b></span><span style="text-align:right"><span style="display:block;font-size:11px">毛利</span><b style="font-size:16px;font-variant-numeric:tabular-nums">{{ sumGp }}</b></span></div>
+<div style="display:flex;gap:8px"><button style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">添加物料</button><button onClick="{{ openRefresh }}" style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">刷新价格</button></div>
+</sc-if></sc-if>
+
+<sc-if value="{{ tRfq }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ rfqs }}" as="r" hint-placeholder-count="2"><div style="padding:12px 0;border-top:{{ r.bt }};display:flex;justify-content:space-between;gap:8px"><span><span style="display:block;font-size:14px;font-weight:500">{{ r.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ r.s }}</span></span><span style="font-size:12px;font-weight:600;color:{{ r.c }}">{{ r.st }}</span></div></sc-for></div></sc-if>
+<sc-if value="{{ tTech }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:flex-end"><button onClick="{{ toImport }}" style="height:44px;padding:0 20px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">导入技术要求</button></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ techs }}" as="t" hint-placeholder-count="2"><button onClick="{{ toTech }}" style="width:100%;text-align:left;border:0;border-top:{{ t.bt }};background:transparent;color:var(--ink);padding:12px 0;display:flex;flex-direction:column;gap:6px" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span style="display:flex;justify-content:space-between"><span style="font-size:14px;font-weight:500">{{ t.name }}</span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></span><span style="font-size:12px;color:var(--ink3)">{{ t.src }} · {{ t.n }} 项需求</span><span style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="flex:1;height:6px;border-radius:99px;background:var(--sk);overflow:hidden;display:block"><span style="display:block;height:6px;width:{{ t.pct }}%;background:var(--acc)"></span></span>已核对 {{ t.done }}/{{ t.tot }}</span></button></sc-for></div></sc-if>
+<sc-if value="{{ tQuote }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ qrecs }}" as="r" hint-placeholder-count="3"><div style="padding:12px 0;border-top:{{ r.bt }};display:flex;justify-content:space-between"><span><span style="display:block;font-size:14px">{{ r.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ r.s }}</span></span><span style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">{{ r.p }}</span></div></sc-for></div></sc-if>
+<sc-if value="{{ tChange }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ changes }}" as="r" hint-placeholder-count="3"><div style="padding:12px 0;border-top:{{ r.bt }};font-size:13px;line-height:1.6"><div>{{ r.t }}</div><div style="font-size:12px;color:var(--ink3)">{{ r.s }}</div></div></sc-for></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isForm }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:14px"><sc-for list="{{ pf }}" as="f" hint-placeholder-count="8"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">{{ f.l }}<input value="{{ f.v }}" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box;text-align:{{ f.al }}"></label></sc-for>
+<sc-for list="{{ pseg }}" as="g" hint-placeholder-count="3"><div><div style="font-size:12px;color:var(--ink3);margin-bottom:6px">{{ g.l }}</div><div style="display:flex;gap:6px"><sc-for list="{{ g.o }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.t }}</button></sc-for></div></div></sc-for>
+<div><div style="font-size:12px;color:var(--ink3);margin-bottom:6px">新建时</div><div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ copyOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.go }}" style="{{ o.style }}"><span class="ms" style="font-size:22px">{{ o.ic }}</span>{{ o.t }}</button></sc-for></div></div></div>
+<div style="display:flex;gap:10px"><button onClick="{{ back }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ back }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">保存项目</button></div>
+<button onClick="{{ askDel }}" style="height:48px;border-radius:999px;border:1px solid var(--red);background:var(--sf);color:var(--red);font-size:14px;font-weight:600">删除项目</button>
+<sc-if value="{{ delAsk }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:16px;padding:14px;font-size:13px;line-height:1.8;display:flex;flex-direction:column;gap:10px">项目和它的成本预算行会从列表中移除，报价记录保留。删除后可以立即撤销，也可以在 设置 › 已删除的记录 中恢复；交换文件导入到其他设备后，那里也会删除。<div style="display:flex;gap:8px"><button onClick="{{ cancelDel }}" style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">取消</button><button onClick="{{ cancelDel }}" style="flex:1;height:44px;border-radius:999px;border:0;background:var(--red);color:#fff;font-size:13px;font-weight:600">确认删除</button></div></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isExport }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><sc-for list="{{ menu }}" as="m" hint-placeholder-count="8"><button onClick="{{ m.go }}" style="width:100%;text-align:left;border:0;border-top:{{ m.bt }};background:transparent;color:{{ m.c }};padding:0;min-height:56px;display:flex;align-items:center;gap:12px;font-size:14px"><span class="ms" style="font-size:22px">{{ m.ic }}</span><span style="flex:1"><span style="display:block">{{ m.t }}</span><sc-if value="{{ m.s }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12px;color:var(--ink3)">{{ m.s }}</span></sc-if></span></button></sc-for></div>
+<sc-if value="{{ pdfWarn }}" hint-placeholder-val="{{ false }}"><div style="background:var(--ambbg);color:var(--ink);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;display:flex;gap:8px"><span class="ms" style="font-size:20px;color:var(--amb)">warning</span>缺少中文字体，PDF 无法正确显示汉字。请改用 Excel 导出。</div></sc-if>
+<button onClick="{{ togPdf }}" style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">{{ pdfBtn }}</button>
+</sc-if>
+
+<sc-if value="{{ isTimp }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ tiLoad }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;display:flex;flex-direction:column;gap:12px;align-items:center"><span class="ms" style="font-size:40px;color:var(--acc)">hourglass_top</span><div style="font-size:15px;font-weight:600">正在识别设备与条款…</div><div style="font-size:12px;color:var(--ink3)">进度未知，可随时停止。</div></div></sc-if>
+<sc-if value="{{ tiEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">search_off</span><br>没有识别出设备<br>检查内容或改用文件后重试。</div></sc-if>
+<sc-if value="{{ tiFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;font-size:13px;line-height:1.7"><b style="color:var(--red)">识别失败</b><br>未写入任何数据，粘贴的内容保留。</div></sc-if>
+<sc-if value="{{ tiOk }}" hint-placeholder-val="{{ true }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;color:var(--ink3)">导入预览 · 确认前不写入</div><sc-for list="{{ preview }}" as="p" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;border-top:{{ p.bt }};padding:8px 0;font-size:14px"><span>{{ p.t }}</span><span style="color:var(--ink3);font-size:12px">{{ p.s }}</span></div></sc-for></div><div style="display:flex;gap:10px"><button onClick="{{ backTech }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ backTech }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">导入 3 项需求</button></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isTech }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:12px 14px"><div style="font-size:15px;font-weight:600">泵站设备采购技术要求 v2</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">来源：招标文件 · 3 项需求</div></div>
+<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ reqs }}" as="r" hint-placeholder-count="3"><button onClick="{{ r.go }}" style="{{ r.style }}">{{ r.t }}</button></sc-for></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="font-size:12px;color:var(--ink3)">设备类别</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ cats }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.t }}</button></sc-for></div><div style="font-size:12px;color:var(--ink3);line-height:1.6">改类别后，未核对的条款会按新类别重新识别。</div></div>
+<div style="display:flex;gap:6px"><sc-for list="{{ subs }}" as="u" hint-placeholder-count="3"><button onClick="{{ u.go }}" style="{{ u.style }}">{{ u.t }}</button></sc-for></div>
+
+<sc-if value="{{ sClause }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--sk);border-radius:12px;padding:10px 14px;font-size:12px;line-height:1.7;color:var(--ink2)">★ 实质性条款：不满足即排除；都不标时，所有条件都按必须满足处理。</div>
+<sc-if value="{{ conflict }}" hint-placeholder-val="{{ false }}"><div style="background:var(--ambbg);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.7;display:flex;gap:8px"><span class="ms" style="font-size:20px;color:var(--amb)">warning</span>条款已修改，本次 AI 结果未覆盖你的修改，请重新解析。</div></sc-if>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ clauses }}" as="c" hint-placeholder-count="4"><div style="padding:12px 0;border-top:{{ c.bt }};display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:10px;align-items:flex-start"><button onClick="{{ c.chk }}" aria-label="已核对" style="width:44px;height:44px;margin:-10px -8px -10px -10px;border:0;background:transparent;color:{{ c.ckc }}"><span class="ms" style="font-size:24px">{{ c.ck }}</span></button><span style="flex:1;font-size:14px;line-height:1.5">{{ c.t }}</span><button onClick="{{ c.star }}" aria-label="实质性条款" style="width:44px;height:44px;margin:-10px -10px -10px 0;border:0;background:transparent;color:{{ c.sc }}"><span class="ms" style="font-size:24px">{{ c.si }}</span></button></div><sc-if value="{{ c.text }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--ink3);margin-left:34px">文字条款，需人工判断</span></sc-if></div></sc-for></div>
+<div style="display:flex;gap:8px"><button style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">添加条件</button><button onClick="{{ allConfirm }}" style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">全部确认</button></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;font-weight:600;display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:20px">auto_awesome</span>用 AI 读未识别的条款</div>
+<sc-if value="{{ aiRun }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--ink3)">正在读取…进度未知。</div><button onClick="{{ aiStop }}" style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">停止</button></sc-if>
+<sc-if value="{{ aiNone }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--ink2)">AI 没有读出新的条件。</div></sc-if>
+<sc-if value="{{ aiIdle }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--ink3);line-height:1.6">发给模型前会出现确认卡，只发送这几条未识别的条款原文。</div><button onClick="{{ aiAsk }}" style="height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">读取 2 条未识别条款</button></sc-if></div>
+</sc-if>
+
+<sc-if value="{{ sMatch }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ noCat }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:32px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:40px;color:var(--rs)">category</span><br>先选设备类别，才能匹配候选物料。</div></sc-if>
+<sc-if value="{{ hasCat }}" hint-placeholder-val="{{ true }}"><sc-for list="{{ cands }}" as="c" hint-placeholder-count="2"><div style="background:var(--sf);border:1px solid {{ c.bd }};border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between"><span style="font-size:14px;font-weight:600">{{ c.name }}</span><sc-if value="{{ c.chosen }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--tint);color:var(--deep)"><span class="ms" style="font-size:14px">verified</span>已定选</span></sc-if></div>
+<sc-for list="{{ c.rs }}" as="r" hint-placeholder-count="3"><div style="display:flex;gap:8px;align-items:center;font-size:13px"><span class="ms" style="font-size:20px;color:{{ r.c }}">{{ r.ic }}</span><span style="flex:1">{{ r.t }}</span><span style="font-size:12px;color:{{ r.c }};font-weight:600">{{ r.s }}</span></div></sc-for>
+<button onClick="{{ c.pick }}" style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">{{ c.btn }}</button></div></sc-for></sc-if>
+<button onClick="{{ toFind }}" style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">按要求找物料</button>
+</sc-if>
+
+<sc-if value="{{ sResp }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:12px;padding:10px 14px;font-size:12px;line-height:1.7;color:var(--ink2)">每条填写具体内容，不要只写“满足”。有偏离的请标记。</div>
+<sc-for list="{{ resp }}" as="r" hint-placeholder-count="3"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px"><div style="font-size:13px">{{ r.t }}</div><input value="{{ r.v }}" placeholder="供应商响应：具体参数或做法" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:14px;box-sizing:border-box"><button onClick="{{ r.dev }}" style="display:flex;align-items:center;gap:8px;border:0;background:transparent;color:{{ r.dc }};padding:0;min-height:44px;font-size:13px;font-weight:600"><span class="ms" style="font-size:22px">{{ r.di }}</span>偏离</button></div></sc-for>
+<button style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">保存响应</button>
+</sc-if>
+
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><sc-for list="{{ tOps }}" as="o" hint-placeholder-count="5"><button style="width:100%;text-align:left;border:0;border-top:{{ o.bt }};background:transparent;color:{{ o.c }};padding:0;min-height:52px;display:flex;align-items:center;gap:12px;font-size:14px"><span class="ms" style="font-size:22px">{{ o.ic }}</span><span style="flex:1">{{ o.t }}</span><sc-if value="{{ o.note }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--green)">{{ o.note }}</span></sc-if></button></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isLists }}" hint-placeholder-val="{{ false }}">
+<div style="height:44px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--ink3);font-size:14px"><span class="ms" style="font-size:20px">search</span>{{ lSearch }}</div>
+<sc-if value="{{ isMatList }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ matCats }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.t }}</button></sc-for></div></sc-if>
+<sc-if value="{{ lEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">inbox</span><br>{{ emptyText }}</div></sc-if>
+<sc-if value="{{ lNo }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px">没有符合条件的记录</div></sc-if>
+<div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ lRows }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.go }}" style="text-align:left;border:1px solid {{ r.bd }};background:var(--sf);color:var(--ink);border-radius:12px;padding:12px;display:flex;gap:10px;opacity:{{ r.op }}" style-focus="outline:2px solid var(--acc);outline-offset:2px"><sc-if value="{{ batchL }}" hint-placeholder-val="{{ false }}"><span class="ms" style="font-size:24px;color:{{ r.ckc }}">{{ r.ck }}</span></sc-if><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:15px;font-weight:500">{{ r.t }}</span><sc-if value="{{ r.tag }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--sk);color:var(--ink2)"><span class="ms" style="font-size:14px">block</span>{{ r.tag }}</span></sc-if></span><span style="font-size:12px;color:var(--ink2)">{{ r.s1 }}</span><span style="font-size:12px;color:var(--ink3)">{{ r.s2 }}</span></span></button></sc-for></div>
+<div style="display:flex;gap:8px"><button onClick="{{ togBatchL }}" style="{{ batchBtn }}">{{ batchText }}</button><button onClick="{{ newItem }}" style="flex:1;height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">新建</button></div>
+<sc-if value="{{ batchL }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px"><button style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">导出选中</button><button style="flex:1;height:44px;border-radius:999px;border:1px solid var(--red);background:var(--sf);color:var(--red);font-size:13px;font-weight:600">删除（可撤销）</button></div></sc-if>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><sc-for list="{{ lActs }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.go }}" style="width:100%;text-align:left;border:0;border-top:{{ a.bt }};background:transparent;color:var(--ink);padding:0;min-height:52px;display:flex;align-items:center;gap:12px;font-size:14px"><span class="ms" style="font-size:22px;color:var(--ink2)">{{ a.ic }}</span>{{ a.t }}</button></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isCForm }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:14px"><sc-for list="{{ cf }}" as="f" hint-placeholder-count="6"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">{{ f.l }}<input value="{{ f.v }}" placeholder="{{ f.ph }}" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"><sc-if value="{{ f.h }}" hint-placeholder-val="{{ false }}"><span>{{ f.h }}</span></sc-if></label></sc-for>
+<sc-if value="{{ isSupForm }}" hint-placeholder-val="{{ false }}"><button onClick="{{ togDis }}" style="display:flex;align-items:center;gap:12px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 12px;text-align:left;min-height:64px"><span style="flex:1"><span style="display:block;font-size:14px;font-weight:600">停用这家供应商</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.5">停用后，这家的报价不再算有效报价，不参与最低价，也不会被自动带入预算。</span></span><span style="{{ disSw }}"><span style="{{ disKnob }}"></span></span></button>
+<div style="font-size:12px;color:var(--ink3);line-height:1.6;display:flex;gap:6px"><span class="ms" style="font-size:16px">info</span>保存后才能添加联系人。</div></sc-if></div>
+<sc-if value="{{ isMatForm }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="font-size:14px;font-weight:600">报价单位换算</div><div style="display:flex;gap:8px;align-items:center;font-size:14px"><span>1</span><input value="千米" style="flex:1;min-width:0;height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 10px;font-size:14px;box-sizing:border-box"><span>=</span><input value="1000" style="width:80px;height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 10px;font-size:14px;box-sizing:border-box;text-align:right"><span>米</span></div><div style="font-size:12px;color:var(--ink3);line-height:1.6">修改基准单位前请先清空旧换算。单位换算的来源单位和数量都要填写。</div><button style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">添加单位</button></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="font-size:14px;font-weight:600">关键属性（自由填写）</div><input value="铸铁 · 单级 · 卧式" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:14px;box-sizing:border-box"></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="font-size:14px;font-weight:600">物料参数</div><div style="display:flex;gap:6px"><sc-for list="{{ tpls }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.t }}</button></sc-for></div>
+<sc-if value="{{ noParams }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--ink3);line-height:1.7">还没有参数：编辑物料，选择参数模板后填写。</div></sc-if>
+<sc-for list="{{ params }}" as="p" hint-placeholder-count="3"><div style="display:flex;gap:8px;align-items:center"><span style="flex:1;font-size:13px">{{ p.l }}</span><input value="{{ p.v }}" style="width:96px;height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 10px;font-size:14px;box-sizing:border-box;text-align:right"><sc-if value="{{ p.un }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--ambbg);color:var(--amb);white-space:nowrap">未确认</span></sc-if></div></sc-for></div></sc-if>
+<div style="display:flex;gap:10px"><button onClick="{{ backList }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ trySave }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">保存</button></div>
+</sc-if>
+
+<sc-if value="{{ isCDetail }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px"><div style="font-size:17px;font-weight:600">{{ dTitle }}</div><div style="font-size:12px;color:var(--ink3)">{{ dSub }}</div><sc-if value="{{ dNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--ink2);line-height:1.6">{{ dNote }}</div></sc-if></div>
+<sc-for list="{{ dBlocks }}" as="b" hint-placeholder-count="3"><div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">{{ b.t }}</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="2"><div style="padding:10px 0;border-top:{{ r.bt }};display:flex;justify-content:space-between;gap:8px;font-size:13px;line-height:1.6"><span>{{ r.a }}</span><span style="font-weight:600;color:{{ r.c }};text-align:right">{{ r.b }}</span></div></sc-for></div></div></sc-for>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><sc-for list="{{ dActs }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.go }}" style="width:100%;text-align:left;border:0;border-top:{{ a.bt }};background:transparent;color:{{ a.c }};padding:0;min-height:52px;display:flex;align-items:center;gap:12px;font-size:14px"><span class="ms" style="font-size:22px">{{ a.ic }}</span>{{ a.t }}</button></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isMParams }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:12px;padding:10px 14px;font-size:12px;line-height:1.7;color:var(--ink2)">批量工具都先预览，确认后才写入。</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><sc-for list="{{ tools }}" as="a" hint-placeholder-count="2"><button onClick="{{ a.go }}" style="width:100%;text-align:left;border:0;border-top:{{ a.bt }};background:transparent;color:var(--ink);padding:0;min-height:56px;display:flex;align-items:center;gap:12px;font-size:14px"><span class="ms" style="font-size:22px;color:var(--ink2)">{{ a.ic }}</span>{{ a.t }}</button></sc-for></div>
+<sc-if value="{{ toolPrev }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;font-weight:600">预览 · {{ toolName }}</div><sc-for list="{{ toolRows }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;font-size:13px;border-top:{{ r.bt }};padding:8px 0"><span>{{ r.a }}</span><span>{{ r.b }}</span></div></sc-for><div style="display:flex;gap:8px"><button onClick="{{ closeTool }}" style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">取消</button><button onClick="{{ closeTool }}" style="flex:1;height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">确认写入</button></div></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isTrash }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2)">删除的供应商、物料、项目、报价等会出现在这里，可以随时恢复。恢复后记录回到原处，并随同步与交换传到其他设备。</div>
+<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ trashTypes }}" as="t" hint-placeholder-count="6"><button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.t }}</button></sc-for></div>
+<sc-if value="{{ trEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">delete_outline</span><br>没有已删除的记录</div></sc-if>
+<sc-for list="{{ trRows }}" as="r" hint-placeholder-count="3"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px"><span style="flex:1"><span style="display:block;font-size:14px;font-weight:500">{{ r.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ r.s }}</span></span><button onClick="{{ r.restore }}" style="height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">恢复</button></div></sc-for>
+<sc-if value="{{ restored }}" hint-placeholder-val="{{ false }}"><div style="background:var(--greenbg);color:var(--green);border-radius:16px;padding:12px 14px;font-size:13px;font-weight:600">已恢复，记录回到原处。</div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isFind }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="font-size:12px;color:var(--ink3)">设备类别</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ cats }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.t }}</button></sc-for></div>
+<sc-for list="{{ conds }}" as="c" hint-placeholder-count="2"><label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink3)">{{ c.l }}<input value="{{ c.v }}" onInput="{{ c.set }}" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box;text-align:right"></label></sc-for>
+<button style="height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">添加条件</button></div>
+<div style="background:var(--sk);border-radius:12px;padding:10px 14px;font-size:12px;line-height:1.7;color:var(--ink2)">至少填写一个条件的值，就会列出候选物料。★ 实质性条款：不满足即排除；都不标时，所有条件都按必须满足处理。</div>
+<sc-if value="{{ findNone }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:24px;color:var(--ink3);font-size:14px">填写条件的值后，这里会列出候选物料。</div></sc-if>
+<sc-for list="{{ found }}" as="f" hint-placeholder-count="2"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;justify-content:space-between"><span><span style="display:block;font-size:14px;font-weight:600">{{ f.n }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ f.s }}</span></span><span style="font-size:12px;font-weight:600;color:{{ f.c }}">{{ f.r }}</span></div></sc-for>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ refreshSheet }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;z-index:5"><div style="width:100%;background:var(--sf);border-radius:24px 24px 0 0;padding:20px 16px 24px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box"><div style="font-size:16px;font-weight:600">按最优价刷新 · 预览</div><sc-for list="{{ diffs }}" as="d" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;font-size:13px;border-top:{{ d.bt }};padding:8px 0"><span>{{ d.n }}</span><span style="font-variant-numeric:tabular-nums">{{ d.a }} → <b>{{ d.b }}</b></span></div></sc-for><div style="font-size:12px;color:var(--ink3);line-height:1.6">已定标的行不会被改动。确认后才会写入。</div><div style="display:flex;gap:8px"><button onClick="{{ closeRefresh }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ closeRefresh }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">确认刷新</button></div></div></div></sc-if>
+<sc-if value="{{ dupSheet }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;z-index:5"><div style="width:100%;background:var(--sf);border-radius:24px 24px 0 0;padding:20px 16px 24px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box"><div style="font-size:16px;font-weight:600">{{ dupTitle }}</div><div style="background:var(--sk);border-radius:12px;padding:12px;font-size:13px;line-height:1.7">已有：{{ dupExisting }}<br>你填的：{{ dupNew }}</div>
+<button onClick="{{ closeDup }}" style="height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">打开已有的</button><button onClick="{{ closeDup }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">合并到这条</button><button onClick="{{ closeDup }}" style="height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">仍然新建</button>
+<div style="font-size:12px;color:var(--ink3);line-height:1.7">合并后不能在软件内撤销；其他设备交换数据后也会同样合并。</div></div></div></sc-if>
+<sc-if value="{{ aiCard }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;z-index:5"><div style="width:100%;background:var(--sf);border-radius:24px 24px 0 0;padding:20px 16px 24px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box"><div style="font-size:16px;font-weight:600">发送给模型前请确认</div><div style="font-size:13px;line-height:1.9;color:var(--ink2)"><b style="color:var(--ink)">做什么</b>　读取 2 条未识别条款中的条件<br><b style="color:var(--ink)">对谁</b>　已配置的远程模型（公司网关）<br><b style="color:var(--ink)">发送内容</b>　这 2 条条款原文（共 96 字）<br><b style="color:var(--ink)">摘要散列</b>　<span style="font-family:Consolas,Menlo,monospace">4be1·90a7·d3c2</span><br><b style="color:var(--ink)">范围</b>　仅发送这一次</div><div style="display:flex;gap:8px"><button onClick="{{ aiNo }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">拒绝</button><button onClick="{{ aiYes }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">允许本次请求</button></div></div></div></sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'detail', dark:null, tab:0, bst:'ok', noContract:false, pdf:false, delAsk:false, ptype:0, pbasis:0, cur:0, copy:1, refresh:false, tiSt:'ok', req:0, cat:{ 0:'离心泵', 1:null, 2:'阀门' }, sub:0, checked:{ 0:true, 1:true }, star:{ 0:true }, aiSt:'idle', aiCard:false, chosen:false, dev:{ 1:true }, conflict:false, fcat:'离心泵', fv:'', fv2:'', lst:'ok', mcat:'全部', batchL:false, dis:false, dup:false, tpl:0, tool:null, ttype:'供应商', restored:false, sel:null };
+  timer = null;
+  componentWillUnmount() { clearTimeout(this.timer); }
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC', amb:'#8A5A00', ambbg:'#FFF1D6' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F', amb:'#F5C27A', ambbg:'#3A2A12' };
+    const T = dark ? D : L;
+    const phoneStyle = { width:390, height:844, background:T.bg, borderRadius:44, border:'10px solid ' + (dark ? '#2A2A2A' : '#111827'), boxSizing:'content-box', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => phoneStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const seg = (on, h = 44) => `flex:1;height:${h}px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600;padding:0 8px;white-space:nowrap`;
+    const pill = (on) => seg(on, 40).replace('flex:1;', 'flex:none;padding:0 16px;').replace('padding:0 8px;', '');
+    const scr = s.screen, f2 = (n) => n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+    /* budget */
+    const BR = [['离心泵 HB-200','4 台',32100,0],['变频器 VF-30','2 台',4880,'low'],['阀门 DN100','10 个',612,'exp'],['管件 DN100 法兰','20 个',35,'moq'],['压力表 0-1.6','8 块',null,'tbd']];
+    const HI = { low:['trending_down','有更低报价',T.greenbg,T.green], exp:['event_busy','报价已失效',T.redbg,T.red], moq:['inventory','未达起订量',T.ambbg,T.amb], tbd:['help','待询价',T.sk,T.ink2] };
+    const qn = (x) => parseFloat(x), qtys = [4,2,10,20,8], MK = 1.2;
+    const cost = BR.reduce((a, r, i) => a + (r[2] ? r[2] * qtys[i] : 0), 0), ext = cost * MK;
+    const budget = BR.map((r, i) => { const h = r[3] ? HI[r[3]] : null; return { name:r[0], qty:r[1], up: r[2] ? f2(r[2]) : '—', cost: r[2] ? f2(r[2] * qtys[i]) : '—', ext: r[2] ? f2(r[2] * qtys[i] * MK) : '—', hint: h ? h[1] : '', hic: h ? h[0] : '', hbg: h ? h[2] : '', hfg: h ? h[3] : '' }; });
+    const bEmpty = s.bst === 'empty';
+    const tabsL = ['成本预算','询价单','技术要求','报价记录','变更记录'];
+    const CATS = ['离心泵','变频器','阀门','待定'];
+    const REQ = [['离心泵 · 4 台'],['变频器 · 2 台'],['阀门 · 10 个']];
+    const CL = [['额定流量 ≥ 200 m³/h',0],['扬程 ≥ 32 m',0],['电机防护等级 IP55 及以上',0],['提供三年质保',1],['供应商需有同类业绩',1]];
+    const cats = CATS.map(c => ({ t:c, go: () => this.setState({ cat:{ ...s.cat, [s.req]: c === '待定' ? null : c } }), style: pill((s.cat[s.req] || '待定') === c) }));
+    const curCat = s.cat[s.req];
+    const rst = (ic, c) => ({ ic, c });
+    const cands = [
+      { name:'华泵 HB-200', rs:[['流量 220 m³/h','满足','check_circle',T.green],['扬程 30 m（要求 ≥ 32）','不满足','cancel',T.red],['防护等级 IP55','满足','check_circle',T.green]], on:false },
+      { name:'云川 YC-210', rs:[['流量 210 m³/h','满足','check_circle',T.green],['扬程 35 m','满足','check_circle',T.green],['防护等级 未提供','未知','help',T.amb]], on:true }
+    ].map((c, i) => ({ name:c.name, bd: c.on && s.chosen ? T.acc : T.rule, chosen: c.on && s.chosen, rs:c.rs.map(r => ({ t:r[0], s:r[1], ic:r[2], c:r[3] })), btn: c.on && s.chosen ? '取消定选' : '定选这个', pick: c.on ? go({ chosen:!s.chosen }) : () => {} }));
+    const clauses = CL.map((c, i) => { const ck = !!s.checked[i], st = !!s.star[i]; return { t:c[0], text:!!c[1], bt:bt(i), ck: ck ? 'check_box' : 'check_box_outline_blank', ckc: ck ? T.acc : T.ink3, chk: () => this.setState({ checked:{ ...s.checked, [i]: !ck } }), si: st ? 'star' : 'star_outline', sc: st ? T.amb : T.ink3, star: () => this.setState({ star:{ ...s.star, [i]: !st } }) }; });
+    const aiMsg = s.aiSt;
+    const FC = { '离心泵':['额定流量 (m³/h)','扬程 (m)'], '变频器':['额定功率 (kW)','防护等级'], '阀门':['公称通径 DN','工作压力 (MPa)'] };
+    const fcond = FC[s.fcat] || FC['离心泵'];
+    const hasV = !!(s.fv || s.fv2);
+    const titles = { detail:'项目详情', form:'编辑项目', export:'更多', timp:'导入技术要求', tech:'技术要求', find:'按要求找物料', slist:'供应商', sform:'编辑供应商', sdet:'供应商详情', mlist:'物料', mform:'编辑物料', mdet:'物料详情', mparams:'物料参数表', trash:'已删除的记录' };
+    const backMap = { detail:'detail', form:'detail', export:'detail', timp:'detail', tech:'detail', find:'tech', slist:'slist', sform:'slist', sdet:'slist', mlist:'mlist', mform:'mlist', mdet:'mlist', mparams:'mlist', trash:'slist' };
+    const navDefs = [['detail','项目详情'],['form','项目表单'],['export','更多菜单 / 导出'],['timp','技术要求 · 导入'],['tech','单份技术要求'],['find','按要求找物料'],['slist','供应商列表'],['sform','供应商表单'],['sdet','供应商详情'],['mlist','物料列表'],['mform','物料表单'],['mdet','物料详情'],['mparams','物料参数表与批量工具'],['trash','设置 › 已删除的记录']];
+    const isSup = ['slist','sform','sdet'].includes(scr);
+    const SUP = [['华泵','别名 华泵泵业 · 主营 离心泵、管道泵','3 条报价 · 2 个项目',0],['云川','别名 云川机电 · 主营 变频器、泵','2 条报价 · 1 个项目',0],['老宋阀门','别名 宋氏 · 主营 阀门','1 条报价 · 0 个项目',1],['联泰泵业','别名 联泰 · 主营 离心泵','1 条报价 · 1 个项目',0]];
+    const MAT = [['HB-200','离心泵','品牌 华泵 · 类别 泵 · 台','4 家报价 · 最低有效 32,100.00'],['VF-30','变频器','品牌 电驰 · 类别 电气 · 台','1 家报价 · 含税口径未知'],['DN100','阀门','品牌 — · 类别 阀门 · 个','1 家报价 · 已过期']];
+    const lst = s.lst, listScr = scr === 'slist' || scr === 'mlist';
+    const lRows0 = scr === 'slist' ? SUP.map((r, i) => ({ t:r[0], s1:r[1], s2:r[2], tag: r[3] ? '已停用' : '', op: r[3] ? 0.7 : 1, i })) : MAT.map((r, i) => ({ t:r[0] + ' ' + r[1], s1:r[2], s2:r[3], tag:'', op:1, i }));
+    const lRows = lst === 'ok' ? lRows0.map(r => { const on = s.sel === r.i; return { ...r, bd: s.batchL && on ? T.acc : T.rule, ck: on ? 'check_box' : 'check_box_outline_blank', ckc: on ? T.acc : T.ink3, go: () => s.batchL ? this.setState({ sel: on ? null : r.i }) : this.setState({ screen: scr === 'slist' ? 'sdet' : 'mdet' }) }; }) : [];
+    const sw = (on) => [`flex:none;position:relative;width:46px;height:28px;border-radius:99px;background:${on ? T.acc : T.rs};display:block`, `position:absolute;top:3px;left:${on ? 21 : 3}px;width:22px;height:22px;border-radius:99px;background:${on ? T.onacc : T.sf};display:block`];
+    const swd = sw(s.dis);
+    const fld = (l, v, ph = '', h = '') => ({ l, v, ph, h });
+    const cf = scr === 'sform' ? [fld('名称','华泵'),fld('别名','华泵泵业，HB','','多个用逗号分隔'),fld('主营类别','离心泵，管道泵','','多个用逗号分隔'),fld('地址','苏州市吴中区'),fld('备注',''),fld('评价说明','交货准时、售后响应慢','例：交货准时、售后响应慢')] : scr === 'mform' ? [fld('名称','离心泵'),fld('单位','台','台 / 个 / 米 / 项'),fld('品牌','华泵'),fld('型号','HB-200'),fld('规格说明','流量 220 m³/h，扬程 30 m'),fld('类别','泵')] : [];
+    const PARAMS = [['额定流量 (m³/h)','220',0],['扬程 (m)','30',0],['防护等级','IP55',1],['效率 %','',1]];
+    const dBlocks = scr === 'sdet' ? [
+      { t:'联系人', rows:[['张经理','138****0021',T.ink],['李销售','139****7742',T.ink]] },
+      { t:'各家报价', rows:[['离心泵 HB-200','¥32,100.00',T.ink],['离心泵 HB-150','¥28,900.00',T.ink]] },
+      { t:'参与的项目', rows:[['华东泵站改造','已定标',T.deep],['北区改造','报价中',T.ink2]] },
+      { t:'采购来源', rows:[['网页资料尚待核实；可另存原始来源及字段证据查看','',T.ink2]] }
+    ] : scr === 'mdet' ? [
+      { t:'各家报价', rows:[['华泵 · 09-12','¥32,100.00 最低有效价',T.green],['云川 · 09-20','¥33,637.50 已定标',T.deep],['联泰 · 05-02','¥35,300.00 不可用（已过期）',T.red]] },
+      { t:'用到它的项目', rows:[['华东泵站改造','4 台',T.ink]] },
+      { t:'联系人', rows:[['华泵 · 张经理','138****0021',T.ink]] }
+    ] : [];
+    const dActs = scr === 'sdet' ? [['edit','编辑','',T.ink],['person_add','添加联系人','',T.ink],['publish','发布到公司资料','',T.ink],['delete','删除（可撤销）','',T.red]] : [['edit','编辑','',T.ink],['tune','物料参数表','',T.ink],['delete','删除（可撤销）','',T.red]];
+    const tools = [['auto_fix_high','从型号和规格说明补全',['HB-200','离心泵'], [['HB-200 · 额定流量','220 m³/h'],['HB-200 · 扬程','30 m'],['VF-30 · 额定功率','30 kW']]],['sync_alt','关键属性转物料参数',['k'], [['HB-200 · “铸铁”','材质 = 铸铁'],['HB-200 · “卧式”','安装方式 = 卧式']]]];
+    const TT = ['供应商','物料','项目','报价','预算行','询价单'];
+    const TR = { '供应商':[['联泰泵业','10月1日删除 · 含 1 条报价']], '物料':[], '项目':[['旧泵站项目','10月2日删除 · 含 3 行预算']], '报价':[['电驰 · 变频器 VF-30','10月3日删除']], '预算行':[], '询价单':[['电气件询价单 #2','今天删除']] };
+    const trRows = (TR[s.ttype] || []).map(r => ({ t:r[0], s:r[1], restore: go({ restored:true }) }));
+    const dupInfo = scr === 'sform' ? ['发现重复的供应商','华泵 · 苏州市吴中区','华泵泵业 · 苏州吴中'] : ['发现重复的物料','HB-200 离心泵 · 华泵','HB200 离心泵 · 华泵'];
+    const chipSt = (on) => `height:30px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+    const grp = (label, key, opts) => ({ label, chips: opts.map(([v, l]) => ({ label:l, style:chipSt(s[key] === v), go: go({ [key]:v }) })) });
+    const menuDefs = [['upload_file','导入报价或粘贴 Excel','',T.ink],['sync','按最优价刷新','先预览差异再确认',T.ink],['playlist_add','从清单生成新项目','',T.ink],['wifi_tethering','推送到局域网设备','',T.ink],['request_quote','导出项目报价单（给客户）','Excel / PDF',T.ink],['table_chart','导出成本预算表（内部）','Excel / PDF',T.ink],['checklist','导出待询价清单（给供应商）','Excel',T.ink],['delete','删除项目','',T.red]];
+    const gp = ext - cost;
+    return {
+      phoneStyle, title:titles[scr], back: go({ screen:backMap[scr] }), topAct: scr === 'detail' ? go({ screen:'export' }) : () => {}, topOp: scr === 'detail' ? 1 : 0,
+      navs: navDefs.map(([k, l]) => ({ label:l, go:go({ screen:k }), style:`height:40px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${scr === k ? '#2458D3' : '#C3CAD6'};background:${scr === k ? '#E8EFFF' : '#fff'};color:${scr === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      groups: [grp('成本预算状态','bst',[['ok','正常'],['empty','空']]), grp('导入识别状态','tiSt',[['ok','预览'],['load','识别中'],['empty','无设备'],['fail','失败']]), grp('供应商 / 物料列表状态','lst',[['ok','正常'],['empty','空'],['nomatch','筛选无结果']]), grp('AI 读取条款','aiSt',[['idle','未读'],['run','读取中'],['none','无新条件']]), { label:'其他', chips:[{ label:'合同金额未填', style:chipSt(s.noContract), go:go({ noContract:!s.noContract }) },{ label:'条款冲突提示', style:chipSt(s.conflict), go:go({ conflict:!s.conflict }) },{ label: dark ? '切到浅色' : '切到深色', style:chipSt(false), go:go({ dark:!dark }) }] }],
+      isLists: listScr, isMatList: scr === 'mlist', lSearch: scr === 'slist' ? '名称、别名或拼音首字母' : '型号、名称、品牌、规格或拼音首字母',
+      matCats: ['全部','泵','电气','阀门'].map(c => ({ t:c, go:go({ mcat:c }), style:pill(s.mcat === c) })),
+      lEmpty: lst === 'empty', lNo: lst === 'nomatch', emptyText: scr === 'slist' ? '还没有供应商，点“新建”添加。' : '还没有物料，点“新建”添加。',
+      lRows, batchL: s.batchL, togBatchL: go({ batchL:!s.batchL, sel:null }), batchText: s.batchL ? '退出批选' : '批选', batchBtn: seg(s.batchL, 44),
+      newItem: go({ screen: scr === 'slist' ? 'sform' : 'mform' }),
+      lActs: [['upload_file','导入'],['download','导出'],['delete_outline','已删除的记录']].map(([ic, t], i) => ({ ic, t, bt:bt(i), go: i === 2 ? go({ screen:'trash' }) : () => {} })),
+      isCForm: scr === 'sform' || scr === 'mform', isSupForm: scr === 'sform', isMatForm: scr === 'mform', cf,
+      togDis: go({ dis:!s.dis }), disSw: swd[0], disKnob: swd[1],
+      tpls: ['离心泵参数','阀门参数'].map((t, i) => ({ t, go:go({ tpl:i }), style:seg(s.tpl === i, 40) })), noParams: false,
+      params: PARAMS.map(p => ({ l:p[0], v:p[1], un:!!p[2] })),
+      backList: go({ screen: scr === 'sform' ? 'slist' : 'mlist' }), trySave: go({ dup:true }),
+      dupSheet: s.dup, closeDup: go({ dup:false }), dupTitle: dupInfo[0], dupExisting: dupInfo[1], dupNew: dupInfo[2],
+      isCDetail: scr === 'sdet' || scr === 'mdet', dTitle: scr === 'sdet' ? '华泵' : 'HB-200 离心泵', dSub: scr === 'sdet' ? '别名 华泵泵业 · 评价：交货准时、售后响应慢' : '品牌 华泵 · 单位 台',
+      dNote: scr === 'sdet' ? '主营 离心泵、管道泵 · 苏州市吴中区' : '',
+      dBlocks: dBlocks.map(b => ({ t:b.t, rows:b.rows.map((r, i) => ({ a:r[0], b:r[1], c:r[2], bt:bt(i) })) })),
+      dActs: dActs.map(([ic, t, , c], i) => ({ ic, t, c, bt:bt(i), go: t === '物料参数表' ? go({ screen:'mparams' }) : t === '编辑' ? go({ screen: scr === 'sdet' ? 'sform' : 'mform' }) : () => {} })),
+      isMParams: scr === 'mparams', tools: tools.map(([ic, t], i) => ({ ic, t, bt:bt(i), go:go({ tool:i }) })), toolPrev: s.tool !== null, toolName: s.tool !== null ? tools[s.tool][1] : '', toolRows: s.tool !== null ? tools[s.tool][3].map((r, i) => ({ a:r[0], b:r[1], bt:bt(i) })) : [], closeTool: go({ tool:null }),
+      isTrash: scr === 'trash', trashTypes: TT.map(t => ({ t, go:go({ ttype:t, restored:false }), style:pill(s.ttype === t) })), trEmpty: trRows.length === 0, trRows, restored: s.restored,
+      isDetail: scr === 'detail', isForm: scr === 'form', isExport: scr === 'export', isTimp: scr === 'timp', isTech: scr === 'tech', isFind: scr === 'find',
+      kpis: [['合同金额', s.noContract ? '未填' : '¥180,000.00', s.noContract ? T.ink3 : T.ink],['成本合计','¥' + f2(cost),T.ink],['对外报价','¥' + f2(ext),T.ink],['毛利','¥' + f2(gp),T.green]].map(([l, v, c]) => ({ l, v, c })),
+      tabs: tabsL.map((l, i) => ({ l, go:go({ tab:i }), style:pill(s.tab === i) })),
+      tBudget: s.tab === 0, tRfq: s.tab === 1, tTech: s.tab === 2, tQuote: s.tab === 3, tChange: s.tab === 4,
+      bEmpty, bRows: !bEmpty, budget: bEmpty ? [] : budget, sumCost:'¥' + f2(cost), sumGp:'¥' + f2(gp),
+      openRefresh: go({ refresh:true }), closeRefresh: go({ refresh:false }), refreshSheet: s.refresh,
+      diffs: [['变频器 VF-30','4,880.00','4,500.00'],['压力表 0-1.6','待询价','86.00'],['阀门 DN100','612.00','报价已失效，保持']].map((d, i) => ({ n:d[0], a:d[1], b:d[2], bt:bt(i) })),
+      rfqs: [{ t:'泵站设备询价单 #1', s:'截止 09-30 · 3 家供应商', st:'已逾期', c:T.red },{ t:'电气件询价单 #2', s:'截止 10-20 · 2 家供应商', st:'进行中', c:T.deep }].map((r, i) => ({ ...r, bt:bt(i) })),
+      techs: [{ name:'泵站设备采购技术要求 v2', src:'招标文件', n:3, done:7, tot:11, pct:64 },{ name:'电气设备技术要求', src:'粘贴文本', n:2, done:0, tot:6, pct:0 }].map((t, i) => ({ ...t, bt:bt(i) })), toTech: go({ screen:'tech' }), toImport: go({ screen:'timp' }),
+      qrecs: [['华泵 · 离心泵 HB-200','09-12 · 含税','¥32,100.00'],['云川 · 离心泵 HB-200','09-20 · 不含税','¥29,767.26'],['联泰 · 离心泵 HB-200','05-02 · 含税','¥35,300.00']].map((r, i) => ({ t:r[0], s:r[1], p:r[2], bt:bt(i) })),
+      changes: [['预算：变频器 VF-30 数量 1 → 2','王工 · 今天 09:14'],['定标：华泵 · 离心泵 HB-200，成交价 31,800.00','李经理 · 昨天 16:40'],['项目：加价率 15% → 20%','王工 · 10月2日']].map((r, i) => ({ t:r[0], s:r[1], bt:bt(i) })),
+      pf: [['项目编号','P-2026-014'],['项目名称','华东泵站改造'],['客户','华东水务'],['合同金额 (¥)','180,000.00','right'],['加价率 %','20','right'],['合同号','HT-0912'],['负责人','王工'],['部门','工程部'],['状态','进行中'],['级别','A']].map(([l, v, al]) => ({ l, v, al: al || 'left' })),
+      pseg: [{ l:'类型', o:['未指定','市场订单','内部研发'].map((t, i) => ({ t, go:go({ ptype:i }), style:seg(s.ptype === i) })) },{ l:'价格口径', o:['含税','不含税'].map((t, i) => ({ t, go:go({ pbasis:i }), style:seg(s.pbasis === i) })) },{ l:'币种', o:['CNY 人民币','USD 美元','EUR 欧元'].map((t, i) => ({ t, go:go({ cur:i }), style:seg(s.cur === i) })) }],
+      copyOpts: [['content_copy','复制已有项目的成本清单（可选）'],['note_add','不复制，从空白开始']].map(([ic, t], i) => ({ ic, t, go:go({ copy:i }), style:`display:flex;align-items:center;gap:12px;min-height:52px;padding:0 14px;border-radius:12px;border:1px solid ${s.copy === i ? T.acc : T.rule};background:${s.copy === i ? T.tint : T.sf};color:${T.ink};font-size:14px;text-align:left` })),
+      delAsk: s.delAsk, askDel: go({ delAsk:true }), cancelDel: go({ delAsk:false }),
+      menu: menuDefs.map(([ic, t, sub, c], i) => ({ ic, t, s:sub, c, bt:bt(i), go: i === 1 ? go({ screen:'detail', tab:0, refresh:true }) : i === 7 ? go({ screen:'form', delAsk:true }) : () => {} })),
+      pdfWarn: s.pdf, togPdf: go({ pdf:!s.pdf }), pdfBtn: s.pdf ? '收起缺字体提示' : '（演示）PDF 缺中文字体',
+      tiLoad: s.tiSt === 'load', tiEmpty: s.tiSt === 'empty', tiFail: s.tiSt === 'fail', tiOk: s.tiSt === 'ok',
+      preview: [['离心泵 · 4 台','5 条条款'],['变频器 · 2 台','3 条条款'],['阀门 · 10 个','3 条条款']].map((p, i) => ({ t:p[0], s:p[1], bt:bt(i) })), backTech: go({ screen:'detail', tab:2 }),
+      reqs: REQ.map((r, i) => ({ t:r[0] + (s.cat[i] ? '' : ' · 类别待定'), go:go({ req:i }), style:pill(s.req === i) })), cats,
+      subs: ['条款','匹配与定选','供应商响应'].map((t, i) => ({ t, go:go({ sub:i }), style:seg(s.sub === i, 40) })),
+      sClause: s.sub === 0, sMatch: s.sub === 1, sResp: s.sub === 2,
+      conflict: s.conflict, clauses, allConfirm: go({ checked:{ 0:true,1:true,2:true,3:true,4:true } }),
+      aiRun: aiMsg === 'run', aiNone: aiMsg === 'none', aiIdle: aiMsg === 'idle', aiCard: s.aiCard,
+      aiAsk: go({ aiCard:true }), aiNo: go({ aiCard:false }), aiYes: () => { this.setState({ aiCard:false, aiSt:'run' }); clearTimeout(this.timer); this.timer = setTimeout(() => this.setState({ aiSt:'none' }), 1500); }, aiStop: go({ aiSt:'idle' }),
+      noCat: !curCat, hasCat: !!curCat, cands, toFind: go({ screen:'find' }),
+      resp: CL.slice(0, 3).map((c, i) => ({ t:c[0], v: i === 0 ? '额定流量 220 m³/h（设计点）' : i === 1 ? '扬程 30 m' : '', dev: () => this.setState({ dev:{ ...s.dev, [i]: !s.dev[i] } }), di: s.dev[i] ? 'flag' : 'outlined_flag', dc: s.dev[i] ? T.red : T.ink3 })),
+      tOps: [['table_view','导出技术偏离表（Excel / PDF）',T.ink,''],['table_chart','导出供应商偏离表（Excel）',T.ink,''],['playlist_add','加入项目预算（待询价）',T.ink,''],['task_alt','需求项都已在项目预算里',T.ink3,'已完成'],['delete','删除技术要求（可撤销）',T.red,'']].map(([ic, t, c, n], i) => ({ ic, t, c, note:n, bt:bt(i) })),
+      conds: fcond.map((l, i) => ({ l, v: i ? s.fv2 : s.fv, set: (e) => this.setState(i ? { fv2:e.target.value } : { fv:e.target.value }) })),
+      findNone: !hasV, found: hasV ? [{ n:'云川 YC-210', s:'流量 210 · 扬程 35', r:'全部满足', c:T.green },{ n:'华泵 HB-200', s:'流量 220 · 扬程 30', r:'1 项不满足', c:T.red }] : []
+    };
+  }
+}
+</script>
+</body>
+</html>
