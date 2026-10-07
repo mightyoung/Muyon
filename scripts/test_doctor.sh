@@ -105,6 +105,30 @@ line_is() {
   printf '%s\n' "$OUT" | grep -qF "$1"
 }
 
+# P0-J3 可选项：检查一次 curl 调用的公共约定。
+# 参数：参数文件 期望 URL 是否远程请求（1/0）
+# - 每个调用必须含 --proto 且下一项为 =http,https；
+# - --url 后紧跟目标 URL；
+# - 不带 -X/-I/-H/-d/--data；
+# - 远程请求不带 --noproxy。
+curl_args_ok() {
+  caf_file="$1"
+  caf_url="$2"
+  caf_remote="$3"
+  [ -f "$caf_file" ] || return 1
+  awk 'p == "--proto" && $0 == "=http,https" { ok = 1 } { p = $0 } END { exit !ok }' \
+    "$caf_file" 2>/dev/null || return 1
+  awk -v u="$caf_url" 'p == "--url" && $0 == u { ok = 1 } { p = $0 } END { exit !ok }' \
+    "$caf_file" 2>/dev/null || return 1
+  if grep -qE -- '^(-X|-I|-H|-d|--data)' "$caf_file" 2>/dev/null; then
+    return 1
+  fi
+  if [ "$caf_remote" -eq 1 ] && grep -qxF -- "--noproxy" "$caf_file" 2>/dev/null; then
+    return 1
+  fi
+  return 0
+}
+
 # ------------------------------------------------------------------ 场景 1
 # 版本一致时 flutter 为 OK
 run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER"
@@ -254,7 +278,7 @@ ARGS_OK=1
 if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" != "https://api.example.com/v1/models" ]; then
   ARGS_OK=0
 fi
-if grep -qE -- '^(-X|-d|--data)' "$ARGS_FILE" 2>/dev/null; then
+if ! curl_args_ok "$ARGS_FILE" "https://api.example.com/v1/models" 1; then
   ARGS_OK=0
 fi
 if grep -qF "dummy-key-for-test" "$ARGS_FILE" 2>/dev/null; then
@@ -324,32 +348,47 @@ else
 fi
 
 # ------------------------------------------------------------------ 场景 14
-# 密钥含换行时为 FAIL、不调用 curl 且输出不含密钥
+# 密钥含 CR / CRLF / LF：每种都配远程和本机端点各测一次，
+# 均为 model-key FAIL、退出码 1、不调用 curl、输出不含密钥
 ARGS_FILE="$TMP_DIR/curl-args-14.txt"
-rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
-run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
-  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
-  MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1" \
-  MUYON_EVAL_MODEL_ID="test-model" \
-  MUYON_EVAL_MODEL_KEY=$'sk-line1\nsk-line2'
 S14_OK=1
-if ! line_is "$(printf 'FAIL\tmodel-key')"; then
-  S14_OK=0
-fi
-if [ "$RC" -ne 1 ]; then
-  S14_OK=0
-fi
-if [ -f "$ARGS_FILE" ]; then
-  S14_OK=0
-fi
-if printf '%s' "$OUT" | grep -qF "sk-line1"; then
-  S14_OK=0
-fi
+for s14_case in cr crlf lf; do
+  case "$s14_case" in
+    cr) s14_key=$'sk-line1\rsk-line2' ;;
+    crlf) s14_key=$'sk-line1\r\nsk-line2' ;;
+    lf) s14_key=$'sk-line1\nsk-line2' ;;
+  esac
+  for s14_endpoint in "https://api.example.com/v1" "http://localhost:11434/v1"; do
+    rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+    run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+      FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+      MUYON_EVAL_MODEL_ENDPOINT="$s14_endpoint" \
+      MUYON_EVAL_MODEL_ID="test-model" \
+      MUYON_EVAL_MODEL_KEY="$s14_key"
+    s14_sub=1
+    if ! line_is "$(printf 'FAIL\tmodel-key')"; then
+      s14_sub=0
+    fi
+    if [ "$RC" -ne 1 ]; then
+      s14_sub=0
+    fi
+    if [ -f "$ARGS_FILE" ]; then
+      s14_sub=0
+    fi
+    if printf '%s' "$OUT" | grep -qE 'sk-line[12]'; then
+      s14_sub=0
+    fi
+    if [ "$s14_sub" -eq 0 ]; then
+      S14_OK=0
+      printf '    [%s · %s]\n' "$s14_case" "$s14_endpoint"
+      printf '%s\n' "$OUT" | sed 's/^/    /'
+    fi
+  done
+done
 if [ "$S14_OK" -eq 1 ]; then
-  pass "密钥含换行时为 FAIL、不调用 curl 且输出不含密钥"
+  pass "密钥含 CR / CRLF / LF（远程与本机端点）均为 FAIL、不调用 curl 且输出不含密钥"
 else
-  fail "密钥含换行时为 FAIL、不调用 curl 且输出不含密钥"
-  printf '%s\n' "$OUT" | sed 's/^/    /'
+  fail "密钥含 CR / CRLF / LF（远程与本机端点）均为 FAIL、不调用 curl 且输出不含密钥"
 fi
 
 # ------------------------------------------------------------------ 场景 15
@@ -369,6 +408,12 @@ if ! grep -qxF -- "*" "$ARGS_FILE" 2>/dev/null; then
   S15_OK=0
 fi
 if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" != "http://localhost:11434/v1/models" ]; then
+  S15_OK=0
+fi
+if ! curl_args_ok "$ARGS_FILE" "http://localhost:11434/v1/models" 0; then
+  S15_OK=0
+fi
+if grep -qF "dummy-key-for-test" "$ARGS_FILE" 2>/dev/null; then
   S15_OK=0
 fi
 if [ "$S15_OK" -eq 1 ]; then
@@ -398,6 +443,9 @@ if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" != "http://localhost:11434/v1/model
   S16_OK=0
 fi
 if grep -qxF -- "-K" "$ARGS_FILE" 2>/dev/null; then
+  S16_OK=0
+fi
+if ! curl_args_ok "$ARGS_FILE" "http://localhost:11434/v1/models" 0; then
   S16_OK=0
 fi
 if [ "$S16_OK" -eq 1 ]; then
@@ -433,7 +481,7 @@ else
 fi
 
 # ------------------------------------------------------------------ 场景 19
-# 密钥转义：sk-a"b\c 经 stdin 传递（转义形式或等价原文）
+# 密钥转义：sk-a"b\c 经 stdin 传递，整行必须精确匹配转义后的写法
 ARGS_FILE="$TMP_DIR/curl-args-19.txt"
 rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
 run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
@@ -441,17 +489,17 @@ run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
   MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1" \
   MUYON_EVAL_MODEL_ID="test-model" \
   MUYON_EVAL_MODEL_KEY='sk-a"b\c'
-S19_OK=0
-if grep -qF 'Bearer sk-a\"b\\c' "${ARGS_FILE}.stdin" 2>/dev/null; then
-  S19_OK=1
+S19_OK=1
+if ! grep -qxF 'header = "Authorization: Bearer sk-a\"b\\c"' "${ARGS_FILE}.stdin" 2>/dev/null; then
+  S19_OK=0
 fi
-if grep -qF 'Bearer sk-a"b\c' "${ARGS_FILE}.stdin" 2>/dev/null; then
-  S19_OK=1
+if ! curl_args_ok "$ARGS_FILE" "https://api.example.com/v1/models" 1; then
+  S19_OK=0
 fi
 if [ "$S19_OK" -eq 1 ]; then
-  pass "密钥转义后经 stdin 传递"
+  pass "密钥转义后经 stdin 精确传递整行"
 else
-  fail "密钥转义后经 stdin 传递"
+  fail "密钥转义后经 stdin 精确传递整行"
   printf '    curl stdin:\n'
   sed 's/^/    /' "${ARGS_FILE}.stdin" 2>/dev/null
 fi
@@ -465,10 +513,82 @@ run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
   MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1/" \
   MUYON_EVAL_MODEL_ID="test-model" \
   MUYON_EVAL_MODEL_KEY="dummy-key-for-test"
-if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" = "https://api.example.com/v1/models" ]; then
+S20_OK=1
+if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" != "https://api.example.com/v1/models" ]; then
+  S20_OK=0
+fi
+if ! curl_args_ok "$ARGS_FILE" "https://api.example.com/v1/models" 1; then
+  S20_OK=0
+fi
+if [ "$S20_OK" -eq 1 ]; then
   pass "端点末尾斜杠被正确剥离"
 else
   fail "端点末尾斜杠被正确剥离"
+  printf '    curl 参数:\n'
+  sed 's/^/    /' "$ARGS_FILE" 2>/dev/null
+fi
+
+# ------------------------------------------------------------------ 场景 21
+# 密钥末尾带 LF：必须保留末尾换行并判为 FAIL（$(printenv) 会吞掉末尾换行）
+ARGS_FILE="$TMP_DIR/curl-args-21.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1" \
+  MUYON_EVAL_MODEL_ID="test-model" \
+  MUYON_EVAL_MODEL_KEY=$'sk-tail\n'
+S21_OK=1
+if ! line_is "$(printf 'FAIL\tmodel-key')"; then
+  S21_OK=0
+fi
+if [ "$RC" -ne 1 ]; then
+  S21_OK=0
+fi
+if [ -f "$ARGS_FILE" ]; then
+  S21_OK=0
+fi
+if printf '%s' "$OUT" | grep -qF "sk-tail"; then
+  S21_OK=0
+fi
+if [ "$S21_OK" -eq 1 ]; then
+  pass "密钥末尾带 LF 时为 FAIL、不调用 curl 且输出不含密钥"
+else
+  fail "密钥末尾带 LF 时为 FAIL、不调用 curl 且输出不含密钥"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 22
+# HTTPS 端点带用户信息（https://u:p@host/v1）：model-env 为 FAIL 且退出码 1
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" \
+  MUYON_EVAL_MODEL_ENDPOINT="https://u:p@host/v1" \
+  MUYON_EVAL_MODEL_ID="test-model"
+if line_is "$(printf 'FAIL\tmodel-env')" && [ "$RC" -eq 1 ]; then
+  pass "HTTPS 端点带用户信息时 model-env 为 FAIL"
+else
+  fail "HTTPS 端点带用户信息时 model-env 为 FAIL"
+  printf '%s\n' "$OUT" | sed 's/^/    /'
+fi
+
+# ------------------------------------------------------------------ 场景 23
+# 端点以 /chat/completions/ 结尾：仍请求 <base>/models
+ARGS_FILE="$TMP_DIR/curl-args-23.txt"
+rm -f "$ARGS_FILE" "$ARGS_FILE.stdin"
+run_doctor "" FAKE_FLUTTER_VERSION="$EXPECTED_FLUTTER" FAKE_CURL_CODE=200 \
+  FAKE_CURL_ARGS_FILE="$ARGS_FILE" \
+  MUYON_EVAL_MODEL_ENDPOINT="https://api.example.com/v1/chat/completions/" \
+  MUYON_EVAL_MODEL_ID="test-model" \
+  MUYON_EVAL_MODEL_KEY="dummy-key-for-test"
+S23_OK=1
+if [ "$(tail -n 1 "$ARGS_FILE" 2>/dev/null)" != "https://api.example.com/v1/models" ]; then
+  S23_OK=0
+fi
+if ! curl_args_ok "$ARGS_FILE" "https://api.example.com/v1/models" 1; then
+  S23_OK=0
+fi
+if [ "$S23_OK" -eq 1 ]; then
+  pass "端点以 /chat/completions/ 结尾时请求 <base>/models"
+else
+  fail "端点以 /chat/completions/ 结尾时请求 <base>/models"
   printf '    curl 参数:\n'
   sed 's/^/    /' "$ARGS_FILE" 2>/dev/null
 fi

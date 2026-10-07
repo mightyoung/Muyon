@@ -175,7 +175,9 @@ fi
 # ----------------------------------------------------------------- model-env
 MODEL_ENDPOINT=$(env_value MUYON_EVAL_MODEL_ENDPOINT)
 MODEL_ID=$(env_value MUYON_EVAL_MODEL_ID)
-MODEL_KEY=$(env_value MUYON_EVAL_MODEL_KEY)
+# P0-J3：直接展开而不是经 $(printenv)，否则末尾换行会被命令替换吞掉，
+# 带末尾 LF 的密钥会被误判为合法。
+MODEL_KEY=${MUYON_EVAL_MODEL_KEY-}
 MODEL_ENV_STATUS=SKIP
 MODEL_IS_REMOTE=0
 IS_LOOPBACK=0
