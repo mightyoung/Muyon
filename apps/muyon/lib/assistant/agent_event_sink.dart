@@ -1,6 +1,7 @@
 /// Where the agent loop writes what happened (ADR-0005 §6.5). The loop only
-/// calls [AgentEventSink.append]; today's implementation keeps the events in
-/// the task payload, K-4 replaces it with the `task_events` table. An event
+/// calls [AgentEventSink.append] (or, for an event that goes with a state
+/// change, hands it to the same transaction as the change); K-4 keeps them in
+/// the `task_events` table. An event
 /// never carries a request or response body, a key or the model's own words:
 /// digests, sizes, ids and fixed codes only.
 library;
@@ -21,6 +22,10 @@ abstract final class AgentEventType {
   static const error = 'error';
   static const cancel = 'cancel';
   static const done = 'done';
+
+  /// A new attempt took over what an earlier one left (K-4): counts and a
+  /// fixed outcome code only.
+  static const resume = 'resume';
 }
 
 final class AgentEvent {
@@ -37,10 +42,16 @@ abstract interface class AgentEventSink {
   Future<void> append(String taskId, AgentEvent event);
 }
 
-/// Events in the task payload (`events`). The repository owns the list, so a
-/// task update made from an older snapshot cannot drop or rewrite one.
-class PayloadEventSink implements AgentEventSink {
-  const PayloadEventSink(this.repository);
+/// A sink whose events live in the same database as the task state, so an
+/// event that goes with a state change can be written in the very transaction
+/// that changes the state (`FoundationRepository.updateTask(events: ...)`).
+/// Any other sink receives such events one by one, after the change.
+abstract interface class TransactionalEventSink implements AgentEventSink {}
+
+/// Events in the `task_events` table (ADR-0005 §6.5, K-4). The repository
+/// owns the numbering, so `seq` goes up by one per task whoever appends.
+class TaskEventTableSink implements TransactionalEventSink {
+  const TaskEventTableSink(this.repository);
   final FoundationRepository repository;
 
   @override

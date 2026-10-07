@@ -132,12 +132,18 @@ void main() {
       expect(ExecutionStore(db).all().single.executionId, 'legacy-qa');
       expect(foundation.tasks().single.id, 'personal-task');
       expect(db.raw.select('SELECT id FROM execution_records').length, 2);
+      expect(
+        db.raw.select('SELECT id FROM tasks').map((r) => r['id']),
+        containsAll(['personal-task']),
+        reason: 'the copy follows the authority',
+      );
       final tables = db.raw
           .select("SELECT name FROM sqlite_master WHERE type='table'")
           .map((r) => r['name'] as String)
           .toSet();
+      // `tasks` (K-4, migration 8) is a flat copy of execution_records kept in
+      // the same transaction, not a second authority.
       for (final duplicate in [
-        'tasks',
         'personal_tasks',
         'assistant_tasks',
         'devices',

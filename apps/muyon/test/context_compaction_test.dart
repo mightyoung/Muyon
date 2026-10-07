@@ -67,6 +67,11 @@ class _RecordingGate implements ModelRequestGate {
   }
 }
 
+/// The task's timeline from the event table, in the shape events always had.
+List<Map> _events(LoopFixture f, String id) => [
+  for (final e in f.repo.taskEvents(id)) e.toJson(),
+];
+
 void main() {
   group('trigger', () {
     test(
@@ -226,8 +231,8 @@ void main() {
     });
 
     test('it records a compaction event with before and after', () async {
-      final (_, _, task) = await run4();
-      final events = (task.payload['events'] as List).cast<Map>();
+      final (f, _, task) = await run4();
+      final events = _events(f, task.id);
       final e = events.singleWhere((e) => e['type'] == 'compaction');
       expect((e['data'] as Map)['strategy'], 'A');
       expect((e['data'] as Map)['tokensBefore'], greaterThan(8000));
@@ -448,7 +453,7 @@ void main() {
         [for (final m in shown) '${m['role']}|${m['content']}'],
       );
       expect(f.repo.conversation(id), isNotNull);
-      final events = (after.payload['events'] as List).cast<Map>();
+      final events = _events(f, after.id);
       final e = events.singleWhere((e) => e['type'] == 'compaction');
       expect((e['data'] as Map)['strategy'], 'B');
       expect((e['data'] as Map)['summaryDigest'], hasLength(64));
@@ -554,7 +559,7 @@ void main() {
           final after = f.repo.task(task.id)!;
           expect(f.callsOf('read'), 0, reason: 'a summary cannot call tools');
           expect((after.payload['compaction'] as Map)['summaryFailed'], true);
-          final events = (after.payload['events'] as List).cast<Map>();
+          final events = _events(f, after.id);
           expect(
             events.where((e) => e['type'] == 'compaction_failed'),
             isNotEmpty,
@@ -730,7 +735,7 @@ void main() {
         expect(other.bodies, isEmpty);
         expect(f.bodies, isEmpty);
         expect(f.ledger.recent(), isEmpty);
-        final events = (task.payload['events'] as List).cast<Map>();
+        final events = _events(f, task.id);
         final failed = events.singleWhere(
           (e) => e['type'] == 'compaction_failed',
         );

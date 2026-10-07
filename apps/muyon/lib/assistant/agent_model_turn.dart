@@ -61,7 +61,7 @@ class AgentModelTurn {
     await ctx.fail(
       task,
       '$reason。${log.isEmpty ? '没有已完成的工具调用。' : '已完成：${log.join('；')}。'}'
-      '尚未得到最终答案；可点“继续”新建尝试，预算重新计算。',
+      '尚未得到最终答案；可点“继续”新建尝试，已用预算会计入。',
       code: 'budget_${kind.name}',
     );
   }
@@ -119,11 +119,15 @@ class AgentModelTurn {
           .toIso8601String(),
       'approvalNonce': const Uuid().v4(),
     });
-    if (!await ctx.repository.updateTask(card)) return;
-    await ctx.event(card, AgentEventType.wait, {
-      'stage': 'model',
-      'requestDigest': card.payload['requestDigest'],
-    });
+    await ctx.commit(
+      card,
+      events: [
+        (
+          AgentEventType.wait,
+          {'stage': 'model', 'requestDigest': card.payload['requestDigest']},
+        ),
+      ],
+    );
   }
 
   /// Same checks before every send, whichever path sends.

@@ -36,6 +36,8 @@ class AgentDispatch {
     'not_run_cancelled': '未执行：已请求取消',
     'over_limit': '未执行：超出单步调用上限',
     'over_card_limit': '未执行：超出一张确认卡的调用上限',
+    'not_run_resume': '未执行：任务在此之前中断，如仍需要请重新提出',
+    'unknown_before_resume': '未执行：上一次尝试中该操作的结果未知，需先核实',
   };
 
   Map<String, Object?> _planned(
@@ -133,6 +135,9 @@ class AgentDispatch {
       var next = task.copy({
         'stage': 'tool',
         'step': {'assistant': assistantMessage, 'calls': calls},
+        // Set by [_complete] once the step's calls and results are in
+        // `messages`: until then a resume has to settle the step itself.
+        'stepFolded': false,
       });
       for (final c in calls) {
         if (c['disposition'] == 'none') continue;
@@ -227,12 +232,19 @@ class AgentDispatch {
       return;
     }
     final next = task.copy(_stage(card, state: 'waitingConfirmation'));
-    if (!await ctx.repository.updateTask(next)) return;
-    await ctx.event(next, AgentEventType.wait, {
-      'stage': 'tool',
-      'requestDigest': next.payload['requestDigest'],
-      'calls': card.length,
-    });
+    await ctx.commit(
+      next,
+      events: [
+        (
+          AgentEventType.wait,
+          {
+            'stage': 'tool',
+            'requestDigest': next.payload['requestDigest'],
+            'calls': card.length,
+          },
+        ),
+      ],
+    );
   }
 
   /// What a card selection looks like after the person toggles [id]: turning
@@ -280,6 +292,27 @@ class AgentDispatch {
           c,
     ];
     return task.copy({'step': step});
+  }
+
+  /// The outcomes just recorded on [task] and their `tool_result` events in
+  /// one transaction, so a receipt the task has taken is never missing from
+  /// its timeline or the other way round. If the task is no longer running
+  /// the events are still kept: the receipts exist.
+  Future<void> _recordResults(
+    PersonalTask task,
+    List<(String, Map<String, Object?>)> events,
+  ) async {
+    if (await ctx.commit(
+      task,
+      events: events,
+      expected: {PersonalTaskState.running},
+      keepStage: true,
+    )) {
+      return;
+    }
+    for (final e in events) {
+      await ctx.event(task, e.$1, e.$2);
+    }
   }
 
   PersonalTask _chargeActive(PersonalTask task, Duration spent) => task.copy(
@@ -347,6 +380,7 @@ class AgentDispatch {
         return;
       }
       var current = _chargeActive(task, spent);
+      final recorded = <(String, Map<String, Object?>)>[];
       for (var i = 0; i < reads.length; i++) {
         final result = runs[i].result!;
         current = _record(
@@ -355,12 +389,16 @@ class AgentDispatch {
           result.status.name,
           result: result,
         );
-        await ctx.event(current, AgentEventType.toolResult, {
-          'toolId': reads[i]['toolId'],
-          'invocationId': reads[i]['invocationId'],
-          'status': result.status.name,
-        });
+        recorded.add((
+          AgentEventType.toolResult,
+          {
+            'toolId': reads[i]['toolId'],
+            'invocationId': reads[i]['invocationId'],
+            'status': result.status.name,
+          },
+        ));
       }
+      await _recordResults(current, recorded);
       for (final run in runs) {
         final result = run.result!;
         if (result.status == ToolCallStatus.cancelled) {
@@ -479,12 +517,17 @@ class AgentDispatch {
         if (stale != null) {
           stopped = true;
           current = _record(current, index, 'failed', result: stale);
-          await ctx.event(current, AgentEventType.toolResult, {
-            'toolId': c['toolId'],
-            'invocationId': id,
-            'status': 'failed',
-            'executed': false,
-          });
+          await _recordResults(current, [
+            (
+              AgentEventType.toolResult,
+              {
+                'toolId': c['toolId'],
+                'invocationId': id,
+                'status': 'failed',
+                'executed': false,
+              },
+            ),
+          ]);
           continue;
         }
         final started = ctx.clock();
@@ -512,11 +555,16 @@ class AgentDispatch {
           return;
         }
         current = _record(current, index, result.status.name, result: result);
-        await ctx.event(current, AgentEventType.toolResult, {
-          'toolId': c['toolId'],
-          'invocationId': id,
-          'status': result.status.name,
-        });
+        await _recordResults(current, [
+          (
+            AgentEventType.toolResult,
+            {
+              'toolId': c['toolId'],
+              'invocationId': id,
+              'status': result.status.name,
+            },
+          ),
+        ]);
         if (result.status == ToolCallStatus.cancelled) {
           await ctx.settle(
             current,
@@ -557,6 +605,9 @@ class AgentDispatch {
   /// and exactly one result for each `callId` (a real result, or a fixed text
   /// for a call that did not run) go into the conversation together, and the
   /// next step starts.
+  /// A resumed attempt settling the step it took over from receipts.
+  Future<void> completeStep(PersonalTask task) => _complete(task);
+
   Future<void> _complete(PersonalTask task, {bool lateCancel = false}) async {
     final calls = AgentContext.calls(task);
     final log = [...task.payload['toolLog'] as List? ?? const []];
@@ -622,6 +673,7 @@ class AgentDispatch {
     final assistant = (task.payload['step'] as Map)['assistant'];
     final late = lateCancel ? '（取消请求晚于完成）' : '';
     final updated = logged.copy({
+      'stepFolded': true,
       'references': refs.map((r) => r.toJson()).toList(),
       'summary': '${results.map((r) => r.summary).join('；')}$late',
       'messages': [
