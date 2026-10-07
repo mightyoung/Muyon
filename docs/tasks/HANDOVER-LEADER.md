@@ -52,7 +52,7 @@
 | **REG-3、REG-4、T-3** | REG-2a、REG-2b 都合入；REG-3 先确认 Q10 清单 | 子代理 / Codex | `-high` |
 | **E-1 真实基线** | 有密钥的本机执行者 | engineer | `-low` |
 | **R-1** Android 重跑 North Star（vivo V2324A） | 手机连接 | engineer | `-low`（按第 5 节） |
-| **UI-0** 现状截图 → **UI-1** 设计系统 → **UI-2** 新外壳 | UI-1 动工前，先请用户定警告色（[UI 方案](../design/ui-redesign-brief-2026-10-06.md) §8「待决」） | engineer / 子代理 | `-medium` |
+| **UI-0** 现状截图 → **UI-1** 设计系统 → **UI-2** 新外壳 | UI-1 按 v4 `tokens.md` 加 `warn` | engineer / 子代理 | `-medium` |
 | 小清理（路线图 §7 末行：注释、无用 tag、`_cardTitle` 按 rune 截断） | 任意空档 | junior | `-low` |
 
 ## 4. 第二阶段退出标准（ADR-0003）
@@ -77,13 +77,12 @@
 ## 6. 已记录、排在后面的事项
 
 见[路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md) §4（第三阶段）、§5（第四阶段）、§7（第一阶段搁置项的去向）。另有：
-- **设计决定**：设计会话的决定已汇总进 [UI 方案](../design/ui-redesign-brief-2026-10-06.md) §8 第 15～18 条：图标、询价以 Folio 为准（[对照清单](../design/folio-parity-checklist.md)）、数据中心统一、血缘与实例浏览器。两条待决：原型在数据中心显示为「不适用」的解读；警告色是红色还是独立的 `warn`。
+- **设计决定**：设计会话的决定已汇总进 [UI 方案](../design/ui-redesign-brief-2026-10-06.md) §8 第 15～18 条：图标、询价以 Folio 为准（[对照清单](../design/folio-parity-checklist.md)）、数据中心统一、血缘与实例浏览器。两条看似待决的问题已核对出已有决定（原型显示「不适用」；警告色用独立的 `warn`）。下一轮设计返工见[第六轮提示词](../design/v4/prompts/claude-design-prompt-round6.md)。
 - `ci.sh` 不跑 `test_doctor.sh`（P0-J3 可选项）。
 
 ## 7. 需要用户处理或决定的事
 
 - ADR-0004 Q1～Q13（第 0 节）。
-- UI 方案 §8 的两条待决。
 - `main` 何时更新；PR #1、#2 仍开着。
 - 可删除的停用分支：`feat/p0-ci-llm-baseline`、`claude/ui-framework-review-2863c3`（有用内容已移入 `develop`），以及已合入的 `task/*`、`review/*`。删除前先征得用户同意。
 - 旧会话曾把 `~/.claude/settings.json` 里的 MiniMax `ANTHROPIC_AUTH_TOKEN` 打印进会话记录（只在本机）。是否轮换由用户决定。
