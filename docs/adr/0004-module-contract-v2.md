@@ -192,7 +192,13 @@ class ToolSpec {
   final List<ToolExample> examples;  // 合规套件执行用的夹具参数（读纯度、范围泄漏，§8.1）
   final Map<String, Sensitivity> resultSensitivity; // 结果字段路径 → 类别（内容审查用，§9.1）
 }
-final class WriteToolSpec extends ToolSpec { final Set<String> targetTypes; final Set<String> createsTypes; }
+final class WriteToolSpec extends ToolSpec {
+  final Set<String> targetTypes;    // 被改写的类型
+  final Set<String> createsTypes;   // 会新建的类型
+  final Set<String> deletesTypes;   // 会删除的类型（A4）
+  final Set<String> affectsTypes;   // 副作用会改到的其他类型，如 award 回写预算行、mergeInto 改指向的引用方（A5）
+}
+// ToolCallResult 增加可选字段 `changes: List<ObjectChange>`，ObjectChange{ref, op: upsert | delete}；`objectRefs` 语义不变，`changes` 供范围推进使用（§5.3）
 final class ExternalToolSpec extends ToolSpec { final ToolEffect effect; final DestinationRule destination; }
 typedef ModuleToolHandler = Future<ToolCallResult> Function(ModuleToolContext ctx);
 abstract interface class ModuleToolContext {       // 包装 ToolCallContext（tools.dart:125），再加模块运行时
@@ -201,7 +207,8 @@ abstract interface class ModuleToolContext {       // 包装 ToolCallContext（t
 }
 abstract interface class HostChannel {             // 把 InquiryWebAuthority / InquiryHubAuthority 的共同骨架收归宿主
   Future<T> run<T>(ChannelRequest request, Future<T> Function(EffectGuard guard) effect,
-      {required ToolCancellationToken cancellation});
+      {required ToolCancellationToken cancellation,
+       ChannelReview? review});                      // 第二阶段：由模块界面传入，同今天；宿主界面接管在 UI-9 之后（§9.1）
 }
 ```
 
@@ -210,7 +217,7 @@ abstract interface class HostChannel {             // 把 InquiryWebAuthority / 
 | 规则 | 做法 |
 |---|---|
 | 身份 | `toolId = '<moduleId>.<name>'`，`providerId = moduleId`，`descriptor.moduleId = moduleId`；toolId 须满足 ADR-0005 §4.2 的函数名编码（`.`→`__` 后 ≤ 64 字符且全局无冲突，`llm_selection_eval.dart:100-121`），宿主启动时检查冲突 |
-| 效应不由规格自报 | 效应由调用的方法决定（`read` / `write` / `external`）；`ToolRegistry._dispatch` 对非读工具必须有未消费的一次性审批（`tool_registry.dart:344-367`），这是模块拿不到绕行入口的根本原因 |
+| 效应不由规格自报 | 效应由调用的方法决定（`read` / `write` / `external`）；`ToolRegistry._dispatch` 对非读工具必须有未消费的一次性审批（`tool_registry.dart:344-367`），模型发起的调用因此没有绕行入口（对模块代码的约束见下文第 3 条） |
 | 封存 | `registerTools` 返回后，registrar 再收到调用即抛错；v2 模块运行期不能追加工具（声明式插件走宿主自己的适配器，§7.3） |
 | 范围 | `dataModuleIds` 固定为 `{moduleId}` ∪ 清单 `requiredDependencies`；`supportedScopes` 取 `spec.scopes`；写工具缺省只支持选中范围 |
 | 结果校验 | 默认 `validateResult`：结果引用须属于已解析范围，写入工具再加“被写对象所属项目 ⊆ 选中对象的项目”——即把 `validateInquiryWriteResult`（`inquiry_write_tools.dart:38-57`）泛化为宿主默认；模块只能在其上加严 |
@@ -218,13 +225,13 @@ abstract interface class HostChannel {             // 把 InquiryWebAuthority / 
 | 可用性 | 模块激活失败 / 关闭时，宿主对其全部工具 `setAvailability(false, reason)`（`tool_registry.dart:126-139`，与两个授权类 `disable()` 同法，`inquiry_hub_authority.dart:49-53`）；今天失败时工具仍“可用”，handler 里才 `StateError(host.inquiryError…)`（`business_tools.dart:203-205`），模型会白白提议 |
 | 懒激活 | 宿主在分发前 `await ModuleHost.activate(moduleId)`，取代每个 handler 开头的 `await host.activateInquiry()`（`business_tools.dart:201`、`inquiry_write_tools.dart:90`、`prototype_tools.dart:47-54`） |
 
-**“模块不能调用自己的写工具”如何成立**（用户要求的核心不变量）：
+**“模块不能绕过宿主审批调用写工具”——准确表述**（用户要求的核心不变量；不夸大为结构性隔离）：
 
-1. handler 闭包只存放在宿主 `ToolRegistry` 的私有字段里（`_Tool.handler`，`tool_registry.dart:59`），模块得不到引用；
-2. v2 模块拿不到 `ToolRegistry`、也没有任何 `invoke` 形式的门面——助手是工具的唯一调用方；`tools` 能力对 v2 模块一律 `capability_denied`（§6.2）；
-3. 能到达 handler 的唯一路径是 `ToolRegistry.invoke → _dispatch`，其中写入 / 外传工具必须消耗一次性审批，并先落 `tool_invocation_receipts` 的 `running` 回执（`tool_registry.dart:319-379`）；
-4. 模块**自己界面里**的用户操作（点击“定标”）不是工具调用，仍直接走领域函数——这是用户本人的动作，不经助手；模块**不得**把“模型输出”直接变成写入而不经上述两种之一（评审规则 R-L1-3，§7.2）；
-5. 需要外部效应的模块代码（网页读取、资料中心发布）只能经 `HostChannel.run`：宿主依次 `prepare` → **宿主复核界面** → `approve` → `invoke`，模块只提供 `effect` 闭包与预览数据。
+1. **模型发起的调用**：到达 handler 的唯一路径是 `ToolRegistry.invoke → _dispatch`，其中写入 / 外传工具必须消耗一次性审批，并先落 `tool_invocation_receipts` 的 `running` 回执（`tool_registry.dart:319-379`，审批检查 `:344-367`）。宿主不暴露任何跳过它的入口；
+2. v2 模块拿不到 `ToolRegistry`，也没有 `invoke` 形式的门面——助手是工具的唯一调用方；`tools` 能力对 v2 模块一律 `capability_denied`（§6.2）；
+3. **但 handler 是模块自己的函数，模块代码持有它的引用**（`registerTools` 里传入的闭包；`_Tool.handler` 只是宿主私有字段，`tool_registry.dart:59`，并不使模块“得不到”）。所以第 1 条保护的是“模型与助手的路径”，**不是对模块代码的结构性隔离**：L1 与宿主同等信任（§7.2），这条靠评审规则 R-L1-3 与 lint 保证。新增一条**评审项**（不是自动门槛，REG-5 写入 REVIEW.md）：模块不得在 `registerTools` 之外直接调用写 / 外传工具的 handler；handler 宜写成 `registerTools` 内的局部闭包或不导出的私有函数，使这类调用在代码审查里显眼；
+4. 模块**自己界面里**的用户操作（点击“定标”）不是工具调用，仍直接走领域函数——这是用户本人的动作，不经助手；模块**不得**把“模型输出”直接变成写入而不经上述两种之一（R-L1-3）；
+5. 需要外部效应的模块代码（网页读取、资料中心发布）只能经 `HostChannel.run`：宿主依次 `prepare` → **复核** → `approve` → `invoke`。**第二阶段的复核回调仍由模块传入**，与今天一致（`inquiry_hub_authority.dart:93-106`、`inquiry_web_authority.dart:94-106`，回调来自 `inquiry_module`）；宿主在第二阶段保证的只有**审批签发、回执与账本**，不保证复核界面是宿主自有的；宿主自有的复核界面在 UI-9 之后接管（§9.1、§12.1 Q3）。助手发起的路径不使用通道（`modelSelectable: false`）。
 
 回执、账本不由模块写：`HostToolRegistrar` 不暴露任何写 `tool_invocation_receipts` / `tool_approvals` / `outbound_*` 的接口。
 
@@ -238,6 +245,32 @@ abstract interface class HostChannel {             // 把 InquiryWebAuthority / 
 | `SearchSource` | `id`、`objectTypes`、`list(IndexScope)`（当前可索引的引用 + 本机文件或文本 + 摘要）、`confirm(ObjectRef)`（取材前核对，等价于 `resolve` 且摘要一致） | `KnowledgeService`（统一索引）、`index_invalidation` | 取代宿主里的 `ResearchSearchAdapter` 与 `confirmIndexedSource` 的按名 `switch`；`SearchService` 的科研专用部分随 REG-3 移入科研包 |
 | `ResultRenderers`（`resultRenderers`） | `Map<String, ToolResultRenderer>`：toolId → 对话内卡片 | UI-4 助手栏（第三阶段） | 第二阶段只定义接口，宿主不消费 |
 | `PublishChecks`（`publishChecks`） | `Future<List<PublishCheckResult>> run(PublishContext)`：模块自加的检查与“去哪里改”提示 | 数据中心（DC-1，第三阶段） | 6 项基础检查由宿主从 `ModuleOntology` 与注册表**自动**产出，不需要模块实现（§9.3） |
+
+签名骨架（示意；`ImportCapable` 的方法即 v1 导入三件套，不重复）：
+
+```dart
+abstract interface class ExchangeCapable {
+  Set<ExchangeKind> get exchangeKinds;                                   // 如 'research-task'、'research-result'
+  Future<ExchangeVerdict> inspect(ExchangeEnvelope envelope);            // 核验：接受 / 拒绝(原因)；不落盘
+  Future<void> accept(ExchangeEnvelope envelope, ModuleSession session); // 宿主核验并落盘后调用，幂等
+}
+abstract interface class ObjectPages {
+  Future<ObjectPageLease?> open(BuildContext context, ObjectRef ref);    // 不要求工作区绑定；null = 无页面
+}
+class ObjectPageLease { final String title; final Widget page; final Future<void> Function() dispose; }
+abstract interface class SearchSource {
+  String get id;
+  Set<String> get objectTypes;
+  Future<List<IndexableItem>> list(IndexScope scope);                    // IndexableItem{ref, filePath | text, contentDigest}
+  Future<ObjectView?> confirm(ObjectRef ref);                            // 取材前核对；null = 已不存在或摘要不符
+}
+abstract interface class ResultRenderers {
+  Map<String, ToolResultRenderer> get renderers;                         // toolId → (BuildContext, ToolCallResult) → Widget
+}
+abstract interface class PublishChecks {
+  Future<List<PublishCheckResult>> run(PublishContext context);          // PublishCheckResult{id, passed, fixHint}
+}
+```
 
 ### 4.6 与 v1 的兼容与过渡
 
@@ -269,7 +302,7 @@ abstract interface class HostChannel {             // 把 InquiryWebAuthority / 
 
 | 步 | 做什么 |
 |---|---|
-| 1 候选 | `selectedObjects`：请求里的引用；`workspace` / `global`：从 `object_catalog` 取候选（先 `ProjectionService.idle(moduleId)` 等同步，`projection_service.dart:112`），只取 `inGlobalScope` 类型，按工作区绑定过滤，并带知识库文档 |
+| 1 候选 | `selectedObjects`：请求里的引用；`workspace` / `global`：从 `object_catalog` 取候选（先 `ProjectionService.idle(moduleId)` 等同步，`projection_service.dart:112`），只取 `inGlobalScope` 类型，按工作区绑定过滤，并带知识库文档。目录滞后可能把**已删除**的对象仍列为候选，因此第 2 步 `resolve` 返回 `null` 即剔除，目录永远不是真相 |
 | 2 核实 | 按模块分组调 `openScopeSession().resolve(ref)`，批量并发；结果缓存键 = 引用身份 + 该模块 `projection_cursors.last_applied_seq`（`projection_service.dart:73-79`），模块无新提交则不重算。这去掉了今天每次 `prepare` 的全表扫描与文件哈希（§2.3-3） |
 | 3 组装 | `ResolvedAssistantScope(requested, objects: 规范引用)`；钉住的修订号 / 摘要不符 → `scope_mismatch`（语义同 `tool_registry.dart:170-177` 与 `assistant_scope.dart:57-70`） |
 | 4 过滤 | `dataModuleIds` 过滤同 `tool_registry.dart:178-192` |
@@ -281,7 +314,7 @@ abstract interface class HostChannel {             // 把 InquiryWebAuthority / 
 | 项 | 契约机制 |
 |---|---|
 | **读工具支持选中范围** | `ToolSpec.scopes` 对读工具缺省三种范围齐全；注册时宿主要求读工具若不含 `selectedObjects` 须在覆盖清单写明理由。**数据边界**：`ToolRegistry` 只能校验**结果引用** ⊆ 范围（`tool_registry.dart:414-424`），校验不到 `data` 里的自由 JSON，所以由合规套件的**范围泄漏检查**兜底（§8.1 C-SCOPE：夹具里放一个选中、一个未选中的对象，在选中范围调用读工具，结果的序列化 JSON 里不得出现未选中对象的 id）。询价 13 个读工具逐个归类：通过的开放选中范围，不通过的保持仅全局并写明理由（REG-4） |
-| **按回执推进修订号** | 每个任务在载荷里记 `scopeAdvances`（**只新增键**，不改 ADR-0005 §8.2 的既有键）。一次写入工具成功（`succeeded`，且该次一次性审批已消耗并有回执）后，宿主对 `result.objectRefs` **逐个再经 `resolve` 复核**，仅当 `resolve(ref)` 仍等于 handler 返回的引用（修订号、摘要都对）才推进：① 身份在当前钉住集合内 → 换成新的规范引用；② 不在集合内 → 仅当该写入工具声明 `createsTypes` 包含该类型、且引用的项目 ⊆ 选中对象的项目（同 `validateInquiryWriteResult` 的规则）才**并入**，并标注来源回执；③ 被删除 → 移出。推进写 `scope_advance` 事件（K-4 的 `task_events` 增一个类型，ADR-0005 §6.5 同样允许补充） |
+| **按回执推进修订号** | 每个任务在载荷里记 `scopeAdvances`（**只新增键**，不改 ADR-0005 §8.2 的既有键）。一次写入工具成功（`succeeded`，且该次一次性审批已消耗并有回执）后，宿主取结果的 `changes`（缺省由 `objectRefs` 视作 upsert），**逐个再经 `resolve` 复核**，仅当 `resolve(ref)` 仍等于 handler 返回的引用（修订号、摘要都对）才推进：① 身份在当前钉住集合内 → 换成新的规范引用；② 不在集合内 → 仅当类型 ∈ 该工具声明的 `createsTypes`、且引用的项目 ⊆ 选中对象的项目（同 `validateInquiryWriteResult` 的规则）才**并入**，并标注来源回执；③ **副作用对象**（`award` 回写预算行、`mergeInto` 改指向的引用方等）：handler 须把它们列入 `changes`，类型须 ∈ `affectsTypes`；宿主同样 `resolve` 复核后推进（在集合内）或并入（同②的项目规则）；④ **删除**：仅当 `op = delete`、类型 ∈ `deletesTypes`、且 `resolve(ref) == null` 才移出；否则仍保持钉住，下一次 `prepare` 报 `stale_scope`。**未声明的保守失败**：结果里出现类型不在 `targetTypes` / `createsTypes` / `deletesTypes` / `affectsTypes` 之内的对象，或副作用对象未被列出，宿主不推进，范围保持旧钉住，下一次 `prepare` 以 `stale_scope` 失败，需用户重新确认；这使“漏声明”变成可见的失败而不是静默放行。推进写 `scope_advance` 事件（K-4 的 `task_events` 增一个类型，ADR-0005 §6.5 同样允许补充） |
 | **绝不推进的情形** | 失败 / 取消 / `blocked`；`interrupted`（效应可能已发生）——此时标记范围“不确定”，下一次 `prepare` 以 `stale_scope` 失败，需用户重新确认；只读工具的结果；模型文本；handler 声称的引用在 `resolve` 里对不上（说明写完后对象又被别处改了——保留 `stale_scope` 保护，不替别人的改动背书） |
 | **先读后写同一任务** | 任务从选中范围开始：读工具在选中范围内可用（上两项），写入经审批后范围随回执推进，下一步的读与写看到新版本。**一步内**多个写入沿用 ADR-0005 §6.3：批内前项使后项范围变化 → 后项 `stale_scope` 失败并“失败即停”，不自动重试；推进作用于**之后的步骤**，二者不冲突 |
 | **仍不支持** | 从全局 / 工作区范围起步的任务直接写入（需要把目标并入范围）。让确认卡把调用的目标列为“加入范围并批准”是授权语义变化，留给 UI-3 / UI-4（§12.1 Q5） |
@@ -334,7 +367,7 @@ class ModuleHost {
 ### 6.3 单一登记处与边界
 
 - **登记处**：新增 `apps/muyon/lib/app/module_catalog.dart`，唯一允许列出模块构造器的地方（`bootstrap.dart:142` 的名单迁入）。新增模块 = 该文件加一行 + `apps/muyon/pubspec.yaml` 加一行依赖 + 根 `pubspec.yaml` 的 `workspace:` 加一行 + CI 脚本的包清单（REG-5 让 `scripts/ci.sh` 按目录发现包，见 §8.4）。“宿主零改动”按此精确定义（§12.1 Q1）。
-- **边界**：`apps/muyon/lib/{platform,services,screens,assistant}` 不得 import `research_module`、`inquiry_module`、`prototype_module`；`app/` 下仅 `module_catalog.dart` 与 `app/adapters/**`（宿主侧适配，如询价，§10.4）可以。以 `test/import_boundary_test.dart` + **只减不增的基线清单**（今天 14 个文件，REG-3 / REG-4 逐个清零）实现；`supplier_core` 另列一份基线（传输与评测代码在用，§2.2）。
+- **边界**：`apps/muyon/lib/{platform,services,screens,assistant}` 不得 import `research_module`、`inquiry_module`、`prototype_module`；`app/` 下仅 `module_catalog.dart` 与 `app/adapters/**`（宿主侧适配，如询价，§10.4）可以。以 `test/import_boundary_test.dart` + **只减不增的基线清单**实现。**实测基线：`platform/`、`services/`、`screens/`、`assistant/` 内 8 个文件 import 三个模块包**（`platform/prototype_tools.dart`、`screens/platform_shell.dart`、`screens/devices_page.dart`、`services/documents/document_parser.dart`、`services/knowledge/{index_invalidation,knowledge_service,research_search_adapter}.dart`、`services/search/search_service.dart`），REG-3 / REG-4 逐个清零；**其余 6 个在 `app/`**（`bootstrap`、`app_shell`、`accepted_research_imports`、`research_task_bridge`、`research_tools_page`、`inquiry_plugin`，合计 14）：`bootstrap` 的名单迁入 `module_catalog.dart`，`inquiry_plugin` 迁入 `app/adapters/`，其余四个（科研交换与壳层页面）随 REG-3 的 `ExchangeCapable` / `ModuleSection` 搬进科研包或改为按声明驱动，REG-5 时 `app/` 里只许 `module_catalog.dart` 与 `app/adapters/**` import 模块包。`supplier_core` 另列一份基线（`business_tools`、`inquiry_write_tools`、`agent_eval`、`transfer_chat_backend`、`transfer_service` 在用，§2.2）。
 
 ### 6.4 导航、首页、对象页、检索按声明驱动
 
@@ -375,7 +408,8 @@ L1 与宿主**同等信任**：编进同一个二进制，能 import 任何东�
 - R-L1-1：模块包的 `pubspec` 依赖 ⊆ 清单依赖 + 白名单（`muyon_module_api`、`muyon_ui`、`flutter`、`sqlite3` 与模块自己的核心包）；不得 import `package:muyon/`；
 - R-L1-2：不得自行联网或调模型，须经 `HostChannel` / `ModuleModels`；
 - R-L1-3：不得把模型输出直接变成业务写入——只能经已注册的写工具，或经用户在界面里的明确操作；
-- R-L1-4：新增 `notExposed` 覆盖条目须写理由并经 leader 复核（§8.2）。
+- R-L1-4：新增 `notExposed` 覆盖条目须写理由并经 leader 复核（§8.2）；
+- R-L1-5（评审项，非自动门槛）：不得在 `registerTools` 之外直接调用写 / 外传工具的 handler（§4.4 第 3 条）。
 
 ### 7.3 L2 声明式插件：清单与信任边界（REG-6 实现）
 
@@ -390,7 +424,7 @@ L1 与宿主**同等信任**：编进同一个二进制，能 import 任何东�
   "endpoint": "https://erp.acme.example/mcp",  // https，或回环 http（沿用 mcp_adapter.dart:18-29）；不得含 userinfo、fragment、凭据查询参数
   "auth": { "type": "bearer", "credentialRef": "<密钥库引用>" },   // 令牌绝不进清单
   "tools": { "include": ["search_orders", "get_order"] },         // 白名单；缺省 = 列出全部但默认全部停用，由用户逐个启用
-  "dataCategories": ["customer_contact"],   // 声明会发出的数据类别，供内容审查；对应 Sensitivity 词表
+  "dataCategories": ["customer_contact"],   // 仅用于展示与审计，**从不用来放行任何东西**；对应 Sensitivity 词表
   "ontology": { "entities": [], "relations": [], "actions": [], "flows": [], "examples": [] },  // 可选；同 ModuleOntology 的 JSON 形式，只读
   "manifestDigest": "sha256:…"              // 宿主在接入时计算并钉住
 }
@@ -403,11 +437,11 @@ OpenAPI 的转换规则：`operationId` → 工具名；请求体 / 参数 → `
 | 能做 | 不能做（宿主强制） |
 |---|---|
 | 提供工具；描述与结果仅作**不可信文本**展示（`ToolDescriptor.description` 注释，`module_api/context.dart:90`；描述截断 500 字并脱敏，`mcp_adapter.dart:160-177`）；附只读本体供数据中心展示结构与示例问法 | 注册 `read` / `write` 效应的工具（效应一律 `network`，`ToolAccessLevel.external`，`tools.dart:163-168`）；声称自己“只读”不被采信，包括 MCP 的 `readOnlyHint` |
-| 收到模型填的参数 | 收到本机业务对象或任何范围内的数据（`dataModuleIds = {}`）；读取本机文件、库、其他插件的工具 |
+| 收到模型填的参数。**注意**：模型会把它读到的业务数据抄进参数——`dataModuleIds = {}` 只阻止宿主把范围对象交给 L2，**挡不住这条路径**；兜底是 ADR-0002 的外传内容审查接口（§9.1）加每次调用的询问；清单的 `dataCategories` 只是展示，不能当作“这个插件不会收到敏感数据”的证据 | 收到本机业务对象或任何范围内的数据由宿主直接交付（`dataModuleIds = {}`）；读取本机文件、库、其他插件的工具 |
 | 经 ADR-0002 授权后外传 | 提供本机界面、`registerTools` 之外的运行时追加工具（`tools/list` 变化 → 新工具默认停用，须用户重新确认；清单摘要变化同理） |
 | 被用户随时停用 | 修改自己的授权；使用 `HostChannel`；提供检索源 / 导入 / 变更日志；让数据中心同步其**实例**数据（只可同步结构与描述） |
 
-附加加严（只收紧，不涉及放宽任何底线）：**外部结果污染**——L2 工具的结果在任务里标记为 `provenance = external`（`ToolCallResult` 加可选字段，宿主按来源强制设置，不信 handler 自报）；此后该任务里的写入 / 外传一律走逐次确认，不适用“始终允许”类放行。这与 Folio 现有做法同源（`AssistantAppTools.requireApproval`：网页内容进入任务后，`bypass` 退回逐次确认，`assistant_actions.dart:81-84`）。具体接入 `ModelRequestGate` / `GateDecision` 与 AUTH-1 的授权解析，由 AUTH-1 落实（待核实其接口）。
+附加加严（只收紧，不涉及放宽任何底线）：**外部内容污染**——L2 工具的结果、联网读取的网页等外部内容进入任务后，任务标记为被污染（`ToolCallResult` 加可选字段 `provenance = external`，宿主按来源强制设置，不信 handler 自报）；**污染后，该任务里的写入 / 外传一律逐次确认，“始终允许”类授权不再适用**。这是对 ADR-0002 §5 Q1 / Q2 已确认放行范围的收紧（不触及 §3 底线），须经用户确认（§12.1 Q11）。这与 Folio 现有做法同源（`AssistantAppTools.requireApproval`：网页内容进入任务后，`bypass` 退回逐次确认，`assistant_actions.dart:81-84`）。具体接入 `ModelRequestGate` / `GateDecision` 与 AUTH-1 的授权解析，由 AUTH-1 落实（待核实其接口）。
 
 ### 7.4 L3 内容插件
 
@@ -428,7 +462,7 @@ OpenAPI 的转换规则：`operationId` → 工具名；请求体 / 参数 → `
 | C-SENSITIVE | 所有字段 `sensitivity != unreviewed` | 遍历 `ontology` | 阻断 |
 | C-RESOLVE | 对每个 `inGlobalScope` / 有页面的类型：样本引用 `resolve` 得到的 `view.ref` 与请求同身份、`versioned` 类型带修订号、有摘要的类型带摘要；改动后旧摘要 `resolve` 返回 `null`；不存在的 id 返回 `null`；无需工作区绑定（`openScopeSession`） | 夹具 | 阻断 |
 | C-PAGE | `page != none` 的类型 `ObjectPages.open` 对样本返回非空；`none` 必须有理由 | 夹具 | 阻断 |
-| C-TOOL | 用 `FakeRegistrar` 捕获 `registerTools`：名称合规、无重复、编码后无冲突；描述非空；参数模式通过注入的检查器；读工具有 `resultSchema`（缺则警告）；写工具缺省仅 `selectedObjects`；每个工具 `operations` 非空或为 `synthetic`；registrar 封存后再调用抛错 | 纯断言 | 阻断 |
+| C-TOOL | 用 `FakeRegistrar` 捕获 `registerTools`：名称合规、无重复、编码后无冲突；描述非空；参数模式通过注入的检查器；读工具有 `resultSchema`（缺则警告）；写工具缺省仅 `selectedObjects`；每个工具 `operations` 非空或为 `synthetic`；registrar 封存后再调用抛错；**并包含 `tool_descriptions_test` 的规则**：描述长度 20–200 字、不含禁用词（`无需确认`、`直接执行`、`已授权`）、非读工具须含效应词（`写入`、`修改`、`删除`、`导出`、`发送`、`下载`、`联网` 之一，`apps/muyon/test/tool_descriptions_test.dart:16-40`） | 纯断言 | 阻断 |
 | C-READPURE | 读工具不改库、不写文件：对每个 `ToolExample` 运行 handler，前后比较 `SELECT total_changes()`、变更日志序号与模块文件目录的文件清单 | 夹具 | 阻断 |
 | C-SCOPE | **范围泄漏**：对声明了 `selectedObjects` 的读工具，夹具里放选中 A 与未选中 B，在选中范围调用，结果 JSON 序列化后不得含 B 的 id | 夹具；弥补 `ToolRegistry` 只验引用不验 `data`（§5.3） | 阻断 |
 | C-COVERAGE | §8.2 | analyzer + 注册捕获 | 阻断 |
@@ -469,13 +503,14 @@ const coverage = CapabilityCoverage(
 1. 模块只声明 `surfaces`（库 + 类 / 扩展名，粗粒度，几十行）；
 2. CI 测试用 `package:analyzer`（仅 dev 依赖，只在 `dart test` 里运行，不进应用）解析这些库，列出每个 surface 的**公开成员**（方法、getter、setter，排除下划线与 `@visibleForTesting`）→ 集合 S。这是 AST 级读取，不是 `dart:mirrors`（Flutter AOT 不可用）也不是正则；
 3. 所有 `Operation.members` 的并集为 M。**要求 S = M，且每个成员恰属一个操作**：新增公开方法而未归类 → 红灯；清单里写了不存在的名字 → 红灯；
+3a. **操作面自动发现**（防止漏登记整个 surface）：测试同时扫描模块包 `lib/` 与其核心包中**每个以宿主 / 业务宿主类型为目标的公开扩展或类**（如 `extension … on Store`、`WorkbenchStore`），要求它们出现在 `surfaces`，或出现在 `notBusiness` 清单（附理由）；**`Store` 自身的公开方法**（`save`、`delete`、`restore`、`markResolved` 等，`store.dart`）同样必须归类，不因“不在扩展里”而漏掉；
 4. 对每个操作：`tools` 里的 id 都必须出现在 C-TOOL 的注册捕获里；效应与 `kind` 匹配（`write` 操作只能由 `write` 工具承载，`query` 只能由读工具，反之不可）；`notExposed` 的操作不得同时有工具；
 5. 反向：模块注册的每个工具必须被至少一个操作引用，或在规格里标 `synthetic`（如 `describe` 一类通用工具）——孤儿工具红灯；
 6. `deferred(taskId)` 受**棘轮**约束：基线文件 `coverage.deferred.baseline` 记录条数，只允许减少，增加则 CI 失败（防止用“稍后”掏空硬门槛；§12.1 Q8）。
 
 规模估计（`grep` 实测，待逐项核实）：`supplier_core` 中 `extension … on Store` 共 **35 个**，公开成员约 **102 个**，其中会写库或写文件的约 35 个（含通用的 `save` / `delete` / `restore`，评估 §1 记 27 类写操作）；询价现已开放 4 个写工具（`inquiry_write_tools.dart:100,158,216,248`）。科研的操作面分散在 `WorkbenchStore`（`research_module/lib/src/core/store.dart`：`saveProject` `:387`、`saveNote` `:396`、`saveTask` `:437`、`acceptRun` `:472`、`assessRun` `:479`、`startManualRun` `:505` 等）、`OutlineStore`、`CardStore`、`ResearchExchange` 等，完整 `surfaces` 列表由 REG-3 实测（待核实）。
 
-若 `analyzer` 进入 workspace 受阻（依赖钉版本、离线构建、`supplier_core` 体量下的耗时，待核实），降级为**受约束的源码扫描**（`extension … on Store {` 块内的非下划线成员声明，按缩进与分号规则），并保留“S = M 双向比对”这一判据——比对本身会暴露扫描漏项。REG-5 开头先做半天的 spike 决定用哪个。
+若 `analyzer` 进入 workspace 受阻（依赖钉版本、离线构建、`supplier_core` 体量下的耗时，待核实），降级为**受约束的源码扫描**（`extension … on Store {` 块内的非下划线成员声明，按缩进与分号规则），并保留“S = M 双向比对”这一判据——比对本身会暴露扫描漏项。REG-5 开头先做半天的 spike 决定用哪个。**spike 的第一项风险是 `analyzer` 与 Flutter SDK（当前 CI 钉 3.47.5，`ci.yml`）捆绑的 Dart / `analyzer` 版本冲突**；spike 失败时**向用户报告并由用户决定**，不静默降级（降级方案也只是备选，用户确认后才采用，§12.1 Q13）。
 
 ### 8.3 CI 硬门槛如何成立
 
@@ -498,10 +533,10 @@ const coverage = CapabilityCoverage(
 
 | §3 硬性底线 | v2 如何保持 |
 |---|---|
-| 1 授权只由用户在宿主界面给出 | registrar 不暴露授权写入口；模块注册的工具、描述、本体、覆盖清单都不能授予或扩大权限；`HostChannel` 的复核界面在第二阶段仍由询价界面提供（现状，§2.3-7），**助手发起的路径不使用它**（通道 `modelSelectable: false`）；§12.1 Q3 建议第三阶段（UI-9）把复核界面也收归宿主 |
+| 1 授权只由用户在宿主界面给出 | registrar 不暴露授权写入口；模块注册的工具、描述、本体、覆盖清单都不能授予或扩大权限；`HostChannel` 的复核回调在第二阶段仍由模块（询价界面）传入（现状，§2.3-7；宿主只保证审批签发、回执与账本），**助手发起的路径不使用它**（通道 `modelSelectable: false`）；宿主自有的复核界面在 UI-9 之后接管（§12.1 Q3） |
 | 2 授权绑定工具 + 范围 + 目的地 | toolId = `<moduleId>.<name>` 是授权键，**改名等于新工具、旧授权失效**（安全方向）；宿主在 `prepare` 前比对 `destination` 与清单 `network`（只收紧）；范围键见 §5.4 |
 | 3 新远程端点逐次询问；内容审查 | L2 一律外传类；L1 外传工具须声明 `DestinationRule` |
-| 4 一次性审批、防重放回执、出站账本 | 写入 / 外传仍只经 `ToolRegistry`；**外传类工具入出站账本是现状缺口**（§2.3-6）：v2 要求“记不进账就不发送”同样适用于 `external` 与 `HostChannel`——在 `_dispatch` 的外传路径上、调 handler 之前先写账本。因 `outbound_requests` 列绑定模型（`outbound_ledger.dart:16-34`），建议新建 `outbound_tool_requests`（id、tool_id、invocation_id、destination、payload 摘要与大小、状态 CHECK 同现有六值、起止时间）并在界面与 `recent()` 合并展示；REG-2 建表与接口，AUTH-1 追加 `grant_id`（§12.1 Q4） |
+| 4 一次性审批、防重放回执、出站账本 | 写入 / 外传仍只经 `ToolRegistry`；**外传类工具入出站账本是现状缺口**（§2.3-6）：v2 要求“记不进账就不发送”同样适用于 `external` 与 `HostChannel`——在 `_dispatch` 的外传路径上、调 handler 之前先写账本。因 `outbound_requests` 列绑定模型（`outbound_ledger.dart:16-34`），新建 `outbound_tool_requests`（形状与时机见 §12.1 Q4）（id、tool_id、invocation_id、destination、payload 摘要与大小、状态 CHECK 同现有六值、起止时间）并在界面与 `recent()` 合并展示；REG-2 建表与接口，AUTH-1 追加 `grant_id`（§12.1 Q4） |
 | 5 授权可撤销、立即生效 | 模块 / 工具 `setAvailability(false)` 使 `generation++`，在途的 `PreparedToolCall` 作废（`tool_registry.dart:126-139`、`:226-228`） |
 | 6 四类开关只能收紧 | 类别由 `ToolAccessLevel`（由方法决定的效应）映射，模块无法自报“读” |
 
@@ -537,7 +572,7 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 
 | 任务 | 前置 | 做什么 | 不做 |
 |---|---|---|---|
-| **REG-2** 通用激活、能力清单授予、范围单点 | REG-1 | `module_api` 新类型（§4）；`app/module_host.dart`、`app/module_catalog.dart`；`ModuleRegistry` 接受 {1,2}；`HostToolRegistrar`；`platform/scope_resolver.dart`（差分测试后替换旧函数体）；`module_grants` 迁移；外传工具账本（Q4）；首页 / 菜单 / 对象页按声明驱动（对 v1 模块经 `LegacyModuleBridge`） | 不迁移任何业务模块；不改界面外观 |
+| **REG-2** 通用激活、能力清单授予、范围单点 | REG-1 | `module_api` 新类型（§4）；`app/module_host.dart`、`app/module_catalog.dart`；`ModuleRegistry` 接受 {1,2}；`HostToolRegistrar`；`platform/scope_resolver.dart`（差分测试后替换旧函数体）；`module_grants` 迁移；**外传账本**：新建 `outbound_tool_requests`，把现有四条外传通道全部接入——MCP（`mcp_adapter.dart:318` 的 `HttpClient`）、`inquiry_web_authority.dart`、`inquiry_hub_authority.dart`、`public_tools.dart` 的 `transfer.*`（`transfer.export/import/listen/stop/send`）；每条通道各一条测试：“账本写不进去则什么都不发送”（Q4）；首页 / 菜单 / 对象页按声明驱动（对 v1 模块经 `LegacyModuleBridge`） | 不迁移任何业务模块；不改界面外观 |
 | **REG-3** 科研、原型迁 v2，补科研工具 | REG-2 | 见 §10.2 | 询价 |
 | **REG-4** 询价改造成 `BusinessModuleV2`，补写工具，并入自带 AI | REG-2；4c 需 K-3 | 见 §10.4 | 导航换壳（UI-9） |
 | **T-3** 平台自省工具 | REG-2 | 宿主自有，用同一 registrar（`moduleId: 'platform'`）：执行记录、记忆、通知、设备只读；记忆写入只提议——写入 `MemoryReviewService` 的候选（`bootstrap.dart:149`），仍须用户在收件箱确认。覆盖清单门槛不适用，C-TOOL 适用；`ObjectRef` 命名空间与是否进入范围解析由 T-3 定 | 不进 `BusinessModuleV2` |
@@ -568,6 +603,7 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 | `apps/muyon/test/inquiry_*`（`inquiry_hub_authority`、`inquiry_hub_ui`、`inquiry_plugin`、`inquiry_shared_models`、`inquiry_web_authority`、`inquiry_web_task_stop`、`inquiry_write_tools`） | 下方“询价兼容面” |
 | `research`：`research_object_open_test`、`research_task_flow_test`、`accepted_research_import_test`、`index_invalidation_test`、`search_test`、`projection_service_test`、`import_recovery_test`、`packages/research_module/test/*`、`packages/prototype_module/test/*` | 对象页入口、任务收发、导入回执、索引失效、检索、投影、导入恢复 |
 | `packages/inquiry_module/test/*`、`packages/supplier_core/test/*`（含 `ontology_test`、`assistant_*`、`ai_*`） | 询价 UI 与领域；Folio 自带助手在非宿主模式下行为不变 |
+| `tool_descriptions_test`、`chat_backend_test`、`agent_eval_test`、`selection_eval_test`、`llm_selection_eval_test`、`north_star_cross_tool_test`、`storage_recovery_test`、`credential_redaction_callers_test`、`acceptance_failure_matrix_test`、`widget_test` | 工具描述规则与注册顺序；聊天后端；评测夹具里的工具 id 与选择；`host.research` / `researchError` 等访问器与激活失败语义（`acceptance_failure_matrix_test.dart:49-62`）；凭据脱敏调用方；宿主启动 |
 | 同属 ADR-0005 §8.4 的守护集合 | `personal_agent*_test`、`assistant_cancel_test`、`outbound_ledger_test`、`model_gateway_test` 等 |
 
 **询价兼容面**（现有测试直接引用，路径与符号保留；实现可以搬走，旧路径留 `export` 薄壳）：
@@ -577,8 +613,11 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 | `MuyonHost.open`、`activateInquiry()`、`inquiry`（含 `.runtime.state`、`.close()`）、`inquiryError` | `inquiry_plugin_test.dart:15-48`、`inquiry_hub_ui_test.dart:29-188`、`inquiry_*_authority_test.dart`、`north_star_chain.dart:152-157` |
 | `InquiryPlugin.schema`（静态）、`InquiryHostModels`、`InquiryModelApprovalPreview` | `inquiry_write_tools_test.dart:241`（`host.storage.open('inquiry', InquiryPlugin.schema)`）；`inquiry_shared_models_test.dart:140` 等处（构造 `InquiryHostModels`、持有 `InquiryModelApprovalPreview`） |
 | `InquiryHubAuthority(registry)`、`InquiryWebAuthority(registry)`、`toolId` 常量与 `run` 行为 | `inquiry_hub_authority_test.dart:128`、`inquiry_web_authority_test.dart:157`、`inquiry_web_task_stop_test.dart:142,238` |
-| `validateInquiryWriteResult`、`AppStateWriter` | `inquiry_write_tools_test.dart:507,522` |
-| `resolveAssistantScope(host, scope)`、`objectIdentity` | `inquiry_write_tools_test.dart:82`、`business_tools_test.dart:102`、`north_star_chain.dart:281` |
+| `validateInquiryWriteResult` | `inquiry_write_tools_test.dart:507,522` |
+| `resolveAssistantScope(host, scope)` | `inquiry_write_tools_test.dart:82`、`business_tools_test.dart:102`、`north_star_chain.dart:281` |
+| `ResearchSearchAdapter` | `search_test.dart:36` |
+| `openModuleObjectPage` | `research_object_open_test.dart:336,350` |
+| `MuyonHost.activateResearch()` / `activatePrototype()`、`research` / `prototype` 访问器、`researchError` / `prototypeError` | `acceptance_failure_matrix_test.dart:49-62`、`accepted_research_import_test.dart:22,277`、`business_tools_test.dart:74` |
 
 保持这些符号的办法：旧文件 `app/inquiry_plugin.dart`、`app/inquiry_hub_authority.dart`、`app/inquiry_web_authority.dart`、`platform/business_tools.dart`、`platform/inquiry_write_tools.dart` 在 REG-4 之后仍存在，内容为薄壳或委托（authority 类的构造器保持“传入 `ToolRegistry`”，内部改用 `HostChannel`）。REG-5 之前不删。
 
@@ -588,7 +627,7 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 
 | 步 | 内容 | 前置 | 要点 |
 |---|---|---|---|
-| **REG-4a 宿主侧适配** | 新增 `app/adapters/inquiry_module.dart`：`InquiryModule implements BusinessModuleV2`（`ModuleSchema` 取自 `InquiryPlugin.schema`；`auxiliarySchemas` = `jobsSchema`、`hubSchema`；`ExclusiveDatabase`）；`InquiryPlugin` 保留为运行时句柄；`ModuleHost.activate('inquiry')` 取代 `_activateInquiry`；`ScopeResolvable` 会话：`resolve` = `store.get` + `version` + `sha256(data)`（与 `business_tools.dart:55-76` 逐字节一致，差分测试守护）；本体适配器（映射 `ontology.dart`）；`registerTools` **原样搬入**询价现有 13 个读工具与 4 个写工具（id、描述、模式、处理函数不变；`research.objects` 随 REG-3 归科研）；两个授权类改为 `HostChannel` 之上的薄类；`resolveAssistantScope` 变薄包装 | REG-2 | **纯搬运、零行为变化**：`north_star_inquiry_test` 与全部 `inquiry_*` 此时必须无需改动即全绿；`module_registry` 表仍写 `inquiry` / `ready`（`bootstrap.dart:254-260`）；`projections.watch('inquiry', …)` 保持（`:250-253`） |
+| **REG-4a 宿主侧适配** | 新增 `app/adapters/inquiry_module.dart`：`InquiryModule implements BusinessModuleV2`（`ModuleSchema` 取自 `InquiryPlugin.schema`；`auxiliarySchemas` = `jobsSchema`、`hubSchema`；`ExclusiveDatabase`）；`InquiryPlugin` 保留为运行时句柄；`ModuleHost.activate('inquiry')` 取代 `_activateInquiry`；`ScopeResolvable` 会话：`resolve` = `store.get` + `version` + `sha256(data)`（与 `business_tools.dart:55-76` 逐字节一致，差分测试守护）；本体适配器（映射 `ontology.dart`）；`registerTools` **原样搬入**询价现有 13 个读工具与 4 个写工具（**id、描述、模式、处理函数与注册顺序都不变**——`tool_descriptions_test` 与评测夹具依赖它们；`research.objects` 随 REG-3 归科研）；两个授权类改为 `HostChannel` 之上的薄类（`review` 回调仍由模块传入，与今天一致）；`resolveAssistantScope` 变薄包装 | REG-2 | **纯搬运、零行为变化**：`north_star_inquiry_test` 与全部 `inquiry_*` 此时必须无需改动即全绿；`module_registry` 表仍写 `inquiry` / `ready`（`bootstrap.dart:254-260`）；`projections.watch('inquiry', …)` 保持（`:250-253`） |
 | **REG-4b 补写工具** | 按覆盖清单把其余写操作逐批开放（§8.2 的归类初稿，每批各带测试）。**“计划 / 应用”两步**：`planQuotationImport` / `applyQuotationImport`、`planOffer` / `applyOffers`、`planParamFill` / `applyParamFill`、`planAttributeMigration` / `applyAttributeMigration`、`refreshPlan` / `applyRefresh`、`planSpecResponses` / `applySpecResponses`、`proposeFromList` / `createProjectFromProposal`——领域层本来就分了两步，计划是读（结果带摘要，存为模块工件，`ArtifactRef`），应用是写（参数含该摘要，审批绑定摘要，应用前复核计划未过期）。**直接写**：`award` / `withdrawAward`、`setParam` / `clearParam` / `confirmParams`、`createSpecRequest` / `saveClauses` / `chooseProduct` / `clearChoice` / `setClauseResponse` / `addItemsToBudget`、`mergeInto` / `redirectMerged`、`resolveConflict`、`delete` / `restore` / `markResolved`、`copyProject`。**不开放（理由入清单）**：`replaceFrom`、`exportEncryptedTo`、`syncWithFolder`（覆盖整库 / 凭据 / 外部文件夹，`humanOnly` 或 `dangerousIrreversible`）；文件导出类（`exportTo`、`exportSelection`、各 `export*` Excel / PDF）逐个判为 `export` 工具或 `humanOnly`。每个新写工具沿用现有模式：写明期望旧值（`from_*`），不符则拒绝，使“批准的预览就是实际发生的事”（`inquiry_write_tools.dart:14-17`）；`describe` 工具与 `ontology.actions` 文案同步更新（§4.3） | 4a | 现有 4 个写工具的 id 与行为不变（`create_inquiry` 等，`inquiry_write_tools.dart:100,158,216,248`），`north_star_chain.dart:297-319` 在用 |
 | **REG-4c Folio 自带 AI 工具化** | 见下表 | K-3、4b | 先“加”后“减”：新增宿主工具并行存在，旧页面在非宿主模式与宿主模式下的用户流程不变；最后一步才在宿主模式隐藏对话助手 |
 
@@ -640,14 +679,17 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 |---|---|---|
 | Q1 | “宿主零改动”的定义：允许 `module_catalog.dart` 一行、两个 `pubspec.yaml` 各一行（Dart 工作区与依赖的必需项）、CI 脚本自动发现包（REG-5 一次性改）。是否接受？ | **接受**。纯“一行登记”做不到：Dart 工作区要求依赖声明；该定义可由脚本判定（§8.4） |
 | Q2 | 询价的 v2 模块第二阶段位于 `apps/muyon/lib/app/adapters/`（因依赖宿主模型类型），第三阶段再抽成独立包。是否接受？ | **接受**。强行第二阶段抽包要先设计 `ModuleModels` / 设置桥的完整抽象，会拖慢 REG-4 且增加 `inquiry_*` 回归面 |
-| Q3 | 产品行为变化：宿主模式下**隐藏 Folio 自带的对话助手**并**禁用其 `bypass` 档**；用户转用宿主助手（已拥有同样的询价工具）。第三阶段把两处模块界面里的“复核对话框”收归宿主 | **同意**。现状是第二套更弱的授权路径（无回执、无审计、`bypass` 不绑范围，§2.3-8）；保留会让 ADR-0002 的底线在询价里形同虚设 |
-| Q4 | 外传类工具（MCP、网页、资料中心、`transfer.*`）进出站账本：新建 `outbound_tool_requests` 表，“记不进账就不发送”同样适用；REG-2 建表与接口，AUTH-1 加 `grant_id` | **同意**。这是 ADR-0002 §3.4 的字面要求，现状只覆盖模型请求；晚补则 L2（REG-6）上线时缺口扩大 |
+| Q3 | 产品行为变化：宿主模式下**隐藏 Folio 自带的对话助手**并**禁用其 `bypass` 档**；用户转用宿主助手（已拥有同样的询价工具）。UI-9 之后把两处模块界面里的“复核对话框”收归宿主 | **同意**。现状是第二套更弱的授权路径（无回执、无审计、`bypass` 不绑范围，§2.3-8）；保留会让 ADR-0002 的底线在询价里形同虚设 |
+| Q4 | 外传账本：底线（出站必入账）已由 ADR-0002 §3.4 定下，不是新问题；**待定的只有表结构与时机**——新建 `outbound_tool_requests`（不改绑定模型的 `outbound_requests`），REG-2 建表并接入 MCP、询价网页、询价资料中心、`transfer.*` 四条通道，AUTH-1 再加 `grant_id` | **同意**。晚补则 L2（REG-6）上线时缺口扩大；每条通道的“写不进账则不发送”测试是合入条件 |
 | Q5 | 是否允许写工具从全局 / 工作区范围起步（确认卡把目标列出并“加入范围并批准”）？S-1 第二阶段不做 | **第二阶段不做**，在 UI-3 / UI-4 设计确认卡时一并定；S-1 的“选中范围先读后写”已覆盖主路径 |
 | Q6 | 选中范围下读工具的数据边界：严格（只返回选中对象）还是允许沿声明关系取一跳邻居？ | **严格** + 泄漏测试（C-SCOPE）。邻居读取扩大了授权含义，需要 UI 展示“将读取的关联对象”，留后 |
 | Q7 | 敏感属性：类别词表 `personal` / `commercial` / `credential` 是否合适？询价字段初稿（联系人电话 / 邮箱 / 地址 → `personal`；单价、成本、毛利、合同额、成交价 → `commercial`；其余 `none`）由 REG-4 提出，**最终划分由用户确认**（先于 DC-3） | 采用该词表与初稿；确认时间点放在 REG-4b 合并前 |
 | Q8 | 覆盖清单的 `deferred(taskId)` 理由与只减不增的棘轮是否接受？ | **接受**。没有它，网页取证、导出类等大批操作要么被迫仓促开放、要么被迫写不诚实的“不开放”理由 |
 | Q9 | v1 契约（`routes`、v1 路径）的移除时点：REG-5 之后一个阶段（第三阶段末）。`supportedApiVersions = {1,2}` 期间不接受新的 v1 模块 | **接受** |
 | Q10 | 原型 `add_feedback` 是否开放为写工具（本机、低风险）；科研 16 类写操作里导出 / 导入类（涉及文件与设备）逐项开放还是先 `notExposed` | 原型：**开放**；科研：本机写入开放，导出 / 导入类由 REG-3 逐项提出清单，经用户在派发前确认 |
+| Q11 | **外部内容污染规则**：外部内容（L2 结果、联网网页、导入的供应商文本）进入任务后，该任务里“始终允许”类授权不再适用，写入 / 外传一律逐次确认。这收紧 ADR-0002 §5 Q1 / Q2 已确认的放行 | **接受**——只收紧，不碰 §3 底线；Folio 现已如此（`requireApproval: () => externalContent`，`ask_page.dart:286`） |
+| Q12 | **`bypass` 过渡处理**：REG-4c 之前，宿主模式下是否由宿主桥接把 Folio 的 `assistantPermission == bypass` 一律按 `confirmWrites` 读取？（`assistant_actions.dart:13`、`app_state.dart:451-458`、`ask_page.dart:220` 的 `autoApprove: permission == bypass`、`:286`） | **是**，作为立即可做的小任务。风险说明：在此之前，导入的供应商文本经提示注入可以驱动**未确认的写入**；这些写入可由回收站恢复（可恢复，但不是无害） |
+| Q13 | 把 `analyzer` 作为 dev 依赖加入 workspace（版本钉死、离线构建、与 Flutter SDK 的版本绑定）；spike 失败时是否改用降级扫描器？ | 允许 REG-5 做半天 spike；**失败不自动降级**，回报用户决定 |
 
 ### 12.2 留给后续任务核实（不需要用户拍板）
 
