@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif;color:#111827}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap;-webkit-font-smoothing:antialiased}button{font-family:inherit;cursor:pointer}a{color:#2458D3}</style>
+</helmet>
+<div style="padding:32px 32px 64px;display:flex;flex-direction:column;gap:28px;max-width:1500px;margin:0 auto">
+
+<div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap">
+<div style="flex:1;min-width:320px"><div style="font-size:26px;font-weight:600">无障碍与适配</div><div style="font-size:14px;line-height:1.8;color:#4B5565;margin-top:6px">同一组页面内容在不同宽度与 200% 文字下的重排；底栏 tooltip；减少动态效果；对比度（由色值实时计算）。<br>桌面 1280 宽请在 <b>Muyon Desktop</b> 的“桌面 1280”按钮查看。</div></div>
+<div style="display:flex;gap:8px"><button onClick="{{ toggleDark }}" style="height:40px;padding:0 18px;border-radius:999px;border:1px solid #C3CAD6;background:#fff;font-size:13px;font-weight:600;color:#111827">{{ darkLabel }}</button></div></div>
+
+<div><div style="font-size:16px;font-weight:600;margin-bottom:10px">一、宽度与文字放大（设置行 · 确认卡 · 报价行 · 底栏）</div>
+<div style="display:flex;gap:28px;align-items:flex-start;overflow-x:auto;padding-bottom:12px">
+<sc-for list="{{ frames }}" as="f" hint-placeholder-count="5"><div style="flex:none;display:flex;flex-direction:column;gap:8px"><div style="font-size:13px;font-weight:600">{{ f.label }}</div>
+<div style="{{ f.style }}">
+<div style="height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px"><div style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:22px">arrow_back</span></div><div style="padding:0 16px;min-height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;font-size:calc(15px * var(--k));font-weight:600">助手设置</div></div>
+<div style="flex:1;min-height:0;overflow-y:auto;padding:8px 12px 12px;display:flex;flex-direction:column;gap:12px">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 14px"><div style="display:flex;align-items:center;gap:12px;min-height:56px"><span class="ms" style="font-size:24px;color:var(--ink2)">psychology</span><span style="flex:1;min-width:0"><span style="display:block;font-size:calc(15px * var(--k))">记忆</span><span style="display:block;font-size:calc(12px * var(--k));color:var(--ink3)">含敏感来源，请谨慎访问</span></span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></div><div style="display:flex;align-items:center;gap:12px;min-height:56px;border-top:1px solid var(--rule)"><span class="ms" style="font-size:24px;color:var(--ink2)">shield</span><span style="flex:1;min-width:0"><span style="display:block;font-size:calc(15px * var(--k))">助手权限</span><span style="display:block;font-size:calc(12px * var(--k));color:var(--ink3)">写入与外传需逐次确认</span></span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></div></div>
+<div style="background:var(--sf);border:1px solid var(--acc);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="font-size:calc(15px * var(--k));font-weight:600;flex:1;min-width:0">向远程模型发送摘要</span><span style="font-size:calc(12px * var(--k));padding:3px 10px;border-radius:999px;background:var(--tint);color:var(--deep);font-weight:600">外传</span></div><div style="font-size:calc(13px * var(--k));line-height:1.7;color:var(--ink2)"><b style="color:var(--ink)">做什么</b>　生成报价比较说明<br><b style="color:var(--ink)">对　谁</b>　远程 · api.example-llm.com<br><b style="color:var(--ink)">后　果</b>　内容离开本机，无法撤回</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button style="flex:1 1 120px;min-height:48px;padding:6px 12px;border-radius:24px;border:0;background:var(--acc);color:var(--onacc);font-size:calc(14px * var(--k));font-weight:600">仅发送这一次</button><button style="flex:1 1 80px;min-height:48px;padding:6px 12px;border-radius:24px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:calc(14px * var(--k));font-weight:600">拒绝</button></div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:8px"><div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:10px 12px"><span style="flex:1 1 90px;min-width:0"><span style="display:block;font-size:calc(13px * var(--k));font-weight:500">华泵</span><span style="display:block;font-size:calc(12px * var(--k));color:var(--ink3)">离心泵 HB-200</span></span><span style="flex:0 0 auto;margin-left:auto;text-align:right;font-size:calc(13px * var(--k));font-variant-numeric:tabular-nums;font-weight:600">128,400.00</span></div></div>
+</div>
+<div style="height:64px;flex:none;border-top:1px solid var(--rule);display:flex;padding:0 4px 6px;box-sizing:border-box"><sc-for list="{{ icons }}" as="i" hint-placeholder-count="5"><div style="flex:1;display:flex;align-items:center;justify-content:center;color:{{ i.color }}"><span class="ms" style="font-size:26px;font-variation-settings:'FILL' {{ i.fill }}">{{ i.icon }}</span></div></sc-for></div>
+</div></div></sc-for></div>
+<div style="font-size:12px;line-height:1.8;color:#4B5565;margin-top:4px">检查点：320 宽按钮换行、文字不截断；200% 下行高随内容增长；金额始终右对齐；触达区不小于 48；底栏图标不随文字放大（保持 48 点击区）。</div></div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:24px">
+<div style="{{ cardStyle }}"><div style="font-size:15px;font-weight:600">二、底栏 tooltip（长按 / 悬停）</div>
+<div style="position:relative;height:150px;border:1px solid var(--rule);border-radius:16px;background:var(--bg);overflow:hidden"><div style="position:absolute;left:0;right:0;bottom:0;height:64px;border-top:1px solid var(--rule);display:flex;padding:0 8px"><sc-for list="{{ icons }}" as="i" hint-placeholder-count="5"><div style="flex:1;display:flex;align-items:center;justify-content:center;color:{{ i.color }}"><span class="ms" style="font-size:26px;font-variation-settings:'FILL' {{ i.fill }}">{{ i.icon }}</span></div></sc-for></div>
+<div style="position:absolute;left:26%;bottom:76px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:8px 14px;border-radius:12px;white-space:nowrap">业务插件</div>
+<div style="position:absolute;left:26%;bottom:70px;width:10px;height:10px;background:var(--ink);transform:translateX(-50%) rotate(45deg)"></div></div>
+<div style="font-size:12px;line-height:1.8;color:var(--ink2)">气泡 = 长按 500 ms（触屏）或悬停 600 ms（桌面）后出现，位于图标正上方；移开即消失。图标同时带 <span style="font-family:Consolas,Menlo,monospace">aria-label</span>，读屏直接读出名称。tooltip 文字对比度 ink / bg ≈ 17:1。</div></div>
+
+<div style="{{ cardStyle }}"><div style="font-size:15px;font-weight:600">三、减少动态效果</div>
+<div style="font-size:12px;color:var(--ink2);line-height:1.7">系统开启“减少动态效果”时：</div>
+<div style="border:1px solid var(--rule);border-radius:16px;overflow:hidden"><sc-for list="{{ motion }}" as="m" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px 14px;border-top:{{ m.bt }};font-size:13px;line-height:1.6"><span>{{ m.a }}</span><span style="color:var(--ink2)">{{ m.b }}</span></div></sc-for></div>
+<div style="font-size:12px;color:var(--ink3);line-height:1.7">未知进度本来就不显示百分比；“进行中”始终有文字，不依赖旋转图标。</div></div>
+</div>
+
+<div style="{{ cardStyle }}"><div style="font-size:15px;font-weight:600">四、对比度（由色值实时计算）</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px"><sc-for list="{{ tables }}" as="tb" hint-placeholder-count="2"><div><div style="font-size:13px;font-weight:600;margin-bottom:6px">{{ tb.name }}</div><div style="border:1px solid var(--rule);border-radius:16px;overflow:hidden"><sc-for list="{{ tb.rows }}" as="r" hint-placeholder-count="8"><div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:{{ r.bt }};font-size:13px"><span style="width:56px;height:26px;border-radius:6px;background:{{ r.bg }};color:{{ r.fg }};display:flex;align-items:center;justify-content:center;font-weight:600;border:1px solid var(--rule)">Aa</span><span style="flex:1">{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ r.ratio }} : 1</span><span style="width:44px;text-align:right;font-weight:600;color:{{ r.color }}">{{ r.pass }}</span></div></sc-for></div></div></sc-for></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { dark:null };
+  renderVals() {
+    const s = this.state, P = this.props;
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F' };
+    const T = dark ? D : L;
+    const vars = {}; Object.keys(T).forEach(k => vars['--' + k] = T[k]);
+    const lum = (h) => { const c = [1,3,5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(v => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const cr = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+    const pairs = (C) => [['正文 ink / bg','ink','bg',4.5],['次要 ink2 / bg','ink2','bg',4.5],['辅助 ink3 / bg','ink3','bg',4.5],['辅助 ink3 / sk','ink3','sk',4.5],['主按钮 onacc / acc','onacc','acc',4.5],['链接与图标 acc / bg','acc','bg',4.5],['选中 deep / tint','deep','tint',4.5],['失败 red / sf','red','sf',4.5],['失败 red / redbg','red','redbg',4.5],['成功 green / sf','green','sf',4.5],['成功 green / greenbg','green','greenbg',4.5],['描边 rs / bg（非文字）','rs','bg',3]].map(([name, f, b, min], i) => { const r = cr(C[f], C[b]); return { name, bg:C[b], fg:C[f], ratio:r.toFixed(2), pass: r >= min ? '通过' : '不足', color: r >= min ? T.green : T.red, bt: i === 0 ? 'none' : '1px solid ' + T.rule }; });
+    const fr = (w, k, label) => ({ label, style: { ...vars, '--k':k, width:w, height:640, boxSizing:'content-box', border:'8px solid ' + (dark ? '#2A2A2A' : '#111827'), borderRadius:32, background:T.bg, color:T.ink, display:'flex', flexDirection:'column', overflow:'hidden' } });
+    return {
+      darkLabel: dark ? '切到浅色' : '切到深色', toggleDark: () => this.setState({ dark: !dark }),
+      cardStyle: { ...vars, background:T.bg, color:T.ink, border:'1px solid ' + T.rs, borderRadius:24, padding:20, display:'flex', flexDirection:'column', gap:12 },
+      frames: [fr(320, 1, '320 宽 · 正常字号'), fr(390, 1, '390 宽 · 正常字号'), fr(430, 1, '430 宽 · 正常字号'), fr(390, 2, '390 宽 · 文字 200%'), fr(320, 2, '320 宽 · 文字 200%（最窄最大）')],
+      icons: [['chat_bubble',0],['apps',1],['dashboard',0],['swap_horiz',0],['settings',0]].map(([icon, fill]) => ({ icon, fill, color: fill ? T.ink : T.ink3 })),
+      motion: [['抽屉 / 浮层滑入 200 ms','直接出现，无位移'],['页面切换淡入 200 ms','直接切换'],['命令面板淡入 120 ms','直接出现'],['“进行中”旋转图标','静态图标 + 文字“进行中”'],['按钮悬停/按下颜色 120 ms','保留（无位移，非动画位移）']].map(([a, b], i) => ({ a, b, bt: i === 0 ? 'none' : '1px solid ' + T.rule })),
+      tables: [{ name:'浅色', rows:pairs(L) }, { name:'深色（琥珀）', rows:pairs(D) }]
+    };
+  }
+}
+</script>
+</body>
+</html>
