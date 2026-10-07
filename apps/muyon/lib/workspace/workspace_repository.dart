@@ -17,8 +17,8 @@ class WorkspaceRepository {
   final ManagedDatabase database;
 
   static final schema = ModuleSchema(
-    version: 6,
-    definitionDigest: 'foundation-v6',
+    version: 7,
+    definitionDigest: 'foundation-v7',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -126,6 +126,12 @@ CREATE TABLE transfer_tasks(
 );
 ''');
         },
+      ),
+      ModuleMigration(
+        version: 7,
+        id: 'outbound-streaming-columns',
+        definitionDigest: 'foundation-v7',
+        migrate: OutboundLedger.addStreamingColumns,
       ),
     ],
   );

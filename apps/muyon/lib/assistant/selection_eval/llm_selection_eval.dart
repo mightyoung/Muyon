@@ -60,9 +60,11 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 
 import '../../services/models/credential_redaction.dart';
 import '../../services/models/model_gateway.dart';
+import '../../services/models/tool_names.dart';
 import 'selection_eval.dart';
 
 export '../../services/models/credential_redaction.dart' show redactCredentials;
+export '../../services/models/tool_names.dart' show encodeToolName;
 
 /// Fixed before measurement. States product behavior, not labels: call one
 /// tool only when it directly serves the request, ask when the request is
@@ -96,30 +98,9 @@ String llmReportSlug(String modelId) {
 String llmReportPath(String modelId) =>
     'docs/implementation/tool-selection-llm-baseline-${llmReportSlug(modelId)}.md';
 
-/// Function names allowed by OpenAI-compatible providers.
-final _functionName = RegExp(r'^[a-zA-Z0-9_-]{1,64}$');
-
-/// Registered ids use dots, which function names do not allow.
-String encodeToolName(String toolId) => toolId.replaceAll('.', '__');
-
-/// Function name → registered id. Decoding is a lookup, not a string rewrite,
-/// so a returned name is registered only if it is exactly one we sent.
-Map<String, String> toolIdsByFunctionName(List<RegisteredToolInfo> tools) {
-  final byName = <String, String>{};
-  for (final tool in tools) {
-    final id = tool.descriptor.toolId;
-    final name = encodeToolName(id);
-    if (!_functionName.hasMatch(name)) {
-      throw ArgumentError('Tool id $id is not a valid function name: $name');
-    }
-    final previous = byName[name];
-    if (previous != null && previous != id) {
-      throw ArgumentError('Tool ids $previous and $id encode to $name');
-    }
-    byName[name] = id;
-  }
-  return byName;
-}
+/// Function name → registered id; see [toolIdsByFunctionNameOf].
+Map<String, String> toolIdsByFunctionName(List<RegisteredToolInfo> tools) =>
+    toolIdsByFunctionNameOf(tools.map((t) => t.descriptor.toolId));
 
 List<Map<String, Object?>> functionTools(List<RegisteredToolInfo> tools) {
   toolIdsByFunctionName(tools);
