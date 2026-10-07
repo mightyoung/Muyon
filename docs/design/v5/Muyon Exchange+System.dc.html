@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap;-webkit-font-smoothing:antialiased}button{font-family:inherit;cursor:pointer}input{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:56px;justify-content:center;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;min-height:100vh;box-sizing:border-box">
+
+<div style="width:300px;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:24px">
+<div style="font-size:24px;font-weight:600">数据交换 + 系统 · 手机</div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565"><b style="color:#111827">可进入的二级页</b><br>数据交换 › 配对向导 / 设备详情（撤销配对）/ 来件核验 / 数据包向导 · 设置 › 数据与存储（备份恢复）/ 接口与工具 / MCP</div>
+<div style="display:flex;flex-direction:column;gap:6px"><sc-for list="{{ navs }}" as="n" hint-placeholder-count="8"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for></div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态切换说明</b><br>设备列表可切换状态；配对、来件、向导、备份按钮会推进状态；撤销、恢复、移除均需二次确认。</div>
+<sc-for list="{{ demoGroups }}" as="g" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">{{ g.label }}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div></sc-for>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据。</div>
+</div>
+
+<div style="{{ phoneStyle }}">
+<div style="height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>9:41</span><span style="font-size:11px;font-weight:500;color:var(--ink3)">示意数据</span></div>
+<div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+<button onClick="{{ headClick }}" aria-label="{{ headLabel }}" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)"><span class="ms" style="font-size:22px">{{ headIcon }}</span></button>
+<div style="padding:0 18px;height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;font-size:15px;font-weight:600">{{ title }}</div>
+<div style="width:48px"></div></div>
+
+<div class="fx" style="flex:1;min-height:0;overflow-y:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:14px">
+
+<sc-if value="{{ vEx }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;background:var(--sk);border-radius:999px;padding:4px;height:48px;box-sizing:border-box"><button onClick="{{ setDev }}" style="{{ devSeg }}">设备</button><button onClick="{{ setPk }}" style="{{ pkSeg }}">数据包</button></div>
+<sc-if value="{{ incomingShow }}" hint-placeholder-val="{{ true }}"><button onClick="{{ openIncoming }}" style="text-align:left;border:1px solid var(--acc);background:var(--tint);color:var(--ink);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px"><span class="ms" style="font-size:24px;color:var(--deep)">move_to_inbox</span><span style="flex:1"><span style="display:block;font-size:14px;font-weight:600">来件待核验</span><span style="display:block;font-size:12px;color:var(--ink2);margin-top:2px">结果包 · 来自 小李的笔记本 · 未接纳</span></span><span class="ms" style="font-size:20px;color:var(--deep)">chevron_right</span></button></sc-if>
+<sc-if value="{{ devTab }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ dLoad }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="3"><div style="height:64px;border-radius:20px;background:var(--sk)"></div></sc-for><div style="font-size:12px;color:var(--ink3);text-align:center">正在查找局域网设备…</div></div></sc-if>
+<sc-if value="{{ dEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">devices</span><br>还没有配对设备<br>配对后可收发消息与数据包。<br><button onClick="{{ startPair }}" style="margin-top:12px;height:48px;padding:0 24px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">配对新设备</button></div></sc-if>
+<sc-if value="{{ dFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;font-size:14px;font-weight:600;color:var(--red);align-items:center"><span class="ms" style="font-size:20px">error</span>无法读取设备列表</div><div style="font-size:13px;line-height:1.7">本地配对记录不可用，已有数据未被改动。可重试，或到“数据与存储”检查。</div><div><button onClick="{{ retryDev }}" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">重试</button></div></div></sc-if>
+<sc-if value="{{ dOffline }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sk);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2);display:flex;gap:8px"><span class="ms" style="font-size:20px">wifi_off</span>未连接局域网：无法发现或发送。已收到的内容与数据包仍可查看；发送会排队，不会假装已送达。</div></sc-if>
+<sc-if value="{{ dList }}" hint-placeholder-val="{{ true }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ devices }}" as="d" hint-placeholder-count="4"><button onClick="{{ d.go }}" style="width:100%;text-align:left;border:0;border-top:{{ d.bt }};background:transparent;color:var(--ink);display:flex;align-items:center;gap:14px;min-height:68px;padding:0"><span class="ms" style="font-size:28px;color:var(--ink2)">{{ d.icon }}</span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:500">{{ d.name }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">指纹 …{{ d.fp }} · {{ d.sub }}</span></span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:{{ d.bg }};color:{{ d.fg }};font-weight:600"><span class="ms" style="font-size:14px">{{ d.icon2 }}</span>{{ d.state }}</span></button></sc-for></div>
+<button onClick="{{ startPair }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">配对新设备</button></sc-if>
+</sc-if>
+<sc-if value="{{ pkTab }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px"><div style="font-size:15px;font-weight:600">任务包_泵选型.zip</div><sc-for list="{{ pkStatus }}" as="p" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:8px;font-size:13px;color:{{ p.color }}"><span class="ms" style="font-size:18px">{{ p.icon }}</span>{{ p.t }}</div></sc-for></div>
+<div style="display:flex;gap:10px"><button onClick="{{ startExport }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">导出数据包</button><button onClick="{{ startImport }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">导入数据包</button></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ vPair }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:6px;justify-content:center"><sc-for list="{{ pairDots }}" as="d" hint-placeholder-count="3"><span style="{{ d.style }}"></span></sc-for></div>
+<sc-if value="{{ pair0 }}" hint-placeholder-val="{{ true }}"><div style="font-size:15px;font-weight:600">发现附近设备</div><div style="font-size:13px;color:var(--ink3);line-height:1.7">请让对方打开“配对新设备”。正在搜索，时间未知。</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ nearby }}" as="n" hint-placeholder-count="2"><button onClick="{{ n.go }}" style="width:100%;text-align:left;border:0;border-top:{{ n.bt }};background:transparent;color:var(--ink);display:flex;align-items:center;gap:14px;min-height:64px;padding:0"><span class="ms" style="font-size:26px;color:var(--ink2)">{{ n.icon }}</span><span style="flex:1;font-size:15px">{{ n.name }}<span style="display:block;font-size:12px;color:var(--ink3)">指纹 …{{ n.fp }}</span></span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></button></sc-for></div>
+<button style="height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px"><span class="ms" style="font-size:20px">qr_code_scanner</span>改为扫描二维码</button></sc-if>
+<sc-if value="{{ pair1 }}" hint-placeholder-val="{{ false }}"><div style="font-size:15px;font-weight:600">核对配对码</div><div style="font-size:13px;color:var(--ink3);line-height:1.7">两台设备上显示的数字必须完全一致，再继续。不一致说明可能连到了别的设备。</div>
+<div style="background:var(--sk);border-radius:24px;padding:28px;text-align:center;font-size:40px;font-weight:600;letter-spacing:6px;font-variant-numeric:tabular-nums">482 913</div>
+<div style="display:flex;gap:8px"><button onClick="{{ pairBack }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--red);background:var(--sf);color:var(--red);font-size:14px;font-weight:600">不一致</button><button onClick="{{ pairNext }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">一致，继续</button></div></sc-if>
+<sc-if value="{{ pair2 }}" hint-placeholder-val="{{ false }}"><div style="font-size:15px;font-weight:600">确认配对</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.8"><b style="font-size:15px">会议室平板</b>指纹 …9c22e7<br>配对后双方可：收发消息、发送数据包。<br>配对不会给助手任何新权限；来件仍需你逐个核验后接纳。</div>
+<div style="display:flex;gap:8px"><button onClick="{{ pairCancel }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ pairDone }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">确认配对</button></div></sc-if>
+<sc-if value="{{ pair4 }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center;font-size:15px;font-weight:600;color:var(--red)"><span class="ms" style="font-size:22px">error</span>配对未完成</div><div style="font-size:13px;line-height:1.8;color:var(--ink)">两台设备上的数字不一致，可能连到了别的设备。没有保存任何配对信息，也没有向对方发送内容。</div></div><div style="display:flex;gap:8px"><button onClick="{{ backEx }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">返回</button><button onClick="{{ pairRetry }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">重新搜索</button></div></sc-if>
+<sc-if value="{{ pair3 }}" hint-placeholder-val="{{ false }}"><div style="background:var(--greenbg);border-radius:20px;padding:16px;display:flex;gap:10px;color:var(--green);font-size:14px;line-height:1.7"><span class="ms" style="font-size:24px">check_circle</span>已配对：会议室平板</div><button onClick="{{ backEx }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">完成</button></sc-if>
+</sc-if>
+
+<sc-if value="{{ vDevice }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:12px"><span style="width:56px;height:56px;border-radius:999px;background:var(--sk);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:30px">laptop_mac</span></span><div style="flex:1"><div style="font-size:18px;font-weight:600">小李的笔记本</div><div style="font-size:12px;color:var(--ink3)">指纹 …a3f9c1 · {{ revokedText }}</div></div></div>
+<sc-if value="{{ revoked }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sk);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2);display:flex;gap:8px"><span class="ms" style="font-size:20px">block</span>已撤销配对。历史消息与数据包保留；不能再向该设备发送，也不会再接收它的来件。</div></sc-if>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ devInfo }}" as="f" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-top:{{ f.bt }};font-size:13px"><span style="color:var(--ink3)">{{ f.k }}</span><span style="text-align:right">{{ f.v }}</span></div></sc-for></div>
+<button onClick="{{ openChatNote }}" style="{{ sendStyle }}">{{ sendLabel }}</button>
+<sc-if value="{{ !revoked }}" hint-placeholder-val="{{ true }}"><sc-if value="{{ !askRevoke }}" hint-placeholder-val="{{ true }}"><button onClick="{{ askRev }}" style="height:48px;border-radius:999px;border:1px solid var(--red);background:var(--sf);color:var(--red);font-size:14px;font-weight:600">撤销配对</button></sc-if>
+<sc-if value="{{ askRevoke }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:16px;padding:12px 14px;font-size:12px;line-height:1.8;color:var(--ink)">撤销后将禁止向该设备发送。历史记录保留。若要再次交换，需要重新配对。</div><div style="display:flex;gap:8px"><button onClick="{{ cancelRev }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ doRevoke }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--red);color:#fff;font-size:14px;font-weight:600">确认撤销</button></div></sc-if></sc-if>
+</sc-if>
+
+<sc-if value="{{ vIncoming }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:6px"><div style="font-size:16px;font-weight:600">文献综述_v2.zip</div><div style="font-size:12px;color:var(--ink3);line-height:1.7">结果包 · 2.4 MB · 4 个文件<br>来源 小李的笔记本 · 指纹 …a3f9c1（与已配对记录一致）</div></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">四个状态相互独立</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ states4 }}" as="x" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:10px;min-height:52px;border-top:{{ x.bt }}"><span class="ms" style="font-size:22px;color:{{ x.color }}">{{ x.icon }}</span><span style="flex:1;font-size:14px">{{ x.k }}</span><span style="font-size:13px;color:{{ x.color }};font-weight:600">{{ x.v }}</span></div></sc-for></div></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">内容清单</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ files }}" as="x" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:10px;min-height:48px;border-top:{{ x.bt }};font-size:13px"><span class="ms" style="font-size:20px;color:var(--ink2)">{{ x.icon }}</span><span style="flex:1">{{ x.t }}</span><span style="color:var(--ink3);font-size:12px;font-variant-numeric:tabular-nums">{{ x.size }}</span></div></sc-for></div></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">校验结果</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ checks }}" as="x" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;min-height:48px;border-top:{{ x.bt }};font-size:13px"><span class="ms" style="font-size:20px;color:var(--green)">check_circle</span>{{ x.t }}</div></sc-for></div></div>
+<sc-if value="{{ inPending }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:8px"><button onClick="{{ rejectIn }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">拒绝</button><button onClick="{{ acceptIn }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">接纳</button></div><div style="font-size:12px;color:var(--ink3);line-height:1.7;padding:0 6px">接纳只表示你信任这份内容，不会写入任何业务数据。</div></sc-if>
+<sc-if value="{{ inAccepted }}" hint-placeholder-val="{{ false }}"><div style="background:var(--tint);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink)">已接纳，<b>尚未导入科研模块</b>。导入是单独一步，会先显示将写入的内容。</div><button onClick="{{ importIn }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">去导入到科研</button></sc-if>
+<sc-if value="{{ inImported }}" hint-placeholder-val="{{ false }}"><div style="background:var(--greenbg);border-radius:16px;padding:12px 14px;font-size:13px;color:var(--green);display:flex;gap:8px"><span class="ms" style="font-size:20px">check_circle</span>已导入科研模块。</div></sc-if>
+<sc-if value="{{ inRejected }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:16px;padding:12px 14px;font-size:13px;color:var(--red);display:flex;gap:8px"><span class="ms" style="font-size:20px">cancel</span>已拒绝。对方不会收到“已拒绝”以外的信息；文件已从暂存区移除。</div></sc-if>
+</sc-if>
+
+<sc-if value="{{ vWizard }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:6px"><sc-for list="{{ wizDots }}" as="d" hint-placeholder-count="4"><span style="{{ d.style }}">{{ d.label }}</span></sc-for></div>
+<sc-if value="{{ w0 }}" hint-placeholder-val="{{ true }}"><div style="font-size:15px;font-weight:600">{{ wizKind }}：选择内容</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ wizItems }}" as="x" hint-placeholder-count="3"><button onClick="{{ x.go }}" style="width:100%;text-align:left;border:0;border-top:{{ x.bt }};background:transparent;color:var(--ink);display:flex;align-items:center;gap:12px;min-height:56px;padding:0"><span class="ms" style="font-size:24px;color:{{ x.color }}">{{ x.icon }}</span><span style="flex:1;font-size:14px">{{ x.t }}</span><span style="font-size:12px;color:var(--ink3)">{{ x.size }}</span></button></sc-for></div></sc-if>
+<sc-if value="{{ w1 }}" hint-placeholder-val="{{ false }}"><div style="font-size:15px;font-weight:600">目标</div><div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ wizTargets }}" as="x" hint-placeholder-count="3"><button onClick="{{ x.go }}" style="{{ x.style }}"><span class="ms" style="font-size:22px;color:var(--ink2)">{{ x.icon }}</span><span style="flex:1;text-align:left;font-size:14px">{{ x.t }}</span><span class="ms" style="font-size:22px;color:var(--acc)">{{ x.check }}</span></button></sc-for></div></sc-if>
+<sc-if value="{{ w2 }}" hint-placeholder-val="{{ false }}"><div style="font-size:15px;font-weight:600">校验</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ wizChecks }}" as="x" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;min-height:52px;border-top:{{ x.bt }};font-size:13px"><span class="ms" style="font-size:20px;color:{{ x.color }}">{{ x.icon }}</span><span style="flex:1">{{ x.t }}</span></div></sc-for></div></sc-if>
+<sc-if value="{{ w3 }}" hint-placeholder-val="{{ false }}"><div style="background:{{ resBg }};border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center;font-size:15px;font-weight:600;color:{{ resFg }}"><span class="ms" style="font-size:22px">{{ resIcon }}</span>{{ resTitle }}</div><div style="font-size:13px;line-height:1.8;color:var(--ink)">{{ resText }}</div></div></sc-if>
+<div style="display:flex;gap:8px"><button onClick="{{ wizBack }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">{{ wizBackLabel }}</button><button onClick="{{ wizNext }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">{{ wizNextLabel }}</button></div>
+</sc-if>
+
+<sc-if value="{{ vStorage }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ dbs }}" as="d" hint-placeholder-count="4"><div style="padding:12px 0;border-top:{{ d.bt }}"><div style="display:flex;align-items:center;gap:10px"><span class="ms" style="font-size:22px;color:{{ d.color }}">{{ d.icon }}</span><span style="flex:1;font-size:14px;font-weight:500">{{ d.name }}</span><span style="font-size:12px;color:{{ d.color }};font-weight:600">{{ d.state }}</span></div><div style="margin:4px 0 0 32px;font-size:12px;line-height:1.6;color:var(--ink3)">{{ d.note }}</div></div></sc-for></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px"><div style="font-size:15px;font-weight:600">备份</div><div style="font-size:12px;color:var(--ink3);line-height:1.7">最近备份：{{ lastBackup }}</div>
+<sc-if value="{{ bkMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:{{ bkColor }};display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:18px">{{ bkIcon }}</span>{{ bkText }}</div></sc-if>
+<div style="display:flex;gap:8px"><button onClick="{{ makeBackup }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">{{ bkLabel }}</button><button onClick="{{ verifyBackup }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">校验备份</button></div></div>
+<sc-if value="{{ !askRestore }}" hint-placeholder-val="{{ true }}"><button onClick="{{ askRest }}" style="height:48px;border-radius:999px;border:1px solid var(--red);background:var(--sf);color:var(--red);font-size:14px;font-weight:600">从备份恢复…</button></sc-if>
+<sc-if value="{{ askRestore }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;font-weight:600;color:var(--red)">确认恢复？</div><div style="font-size:12px;line-height:1.8;color:var(--ink)">恢复会先<b>关闭应用</b>，再用备份替换当前数据。现有数据会保留在“数据_恢复前_10月7日”文件夹中，不会被删除。</div><div style="display:flex;gap:8px"><button onClick="{{ cancelRest }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button style="flex:1;height:48px;border-radius:999px;border:0;background:var(--red);color:#fff;font-size:14px;font-weight:600">关闭并恢复</button></div></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ vTools }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:8px;height:48px;border-radius:999px;background:var(--sk);padding:0 16px"><span class="ms" style="font-size:20px;color:var(--ink3)">search</span><input value="{{ toolQ }}" onInput="{{ setToolQ }}" placeholder="搜索工具" aria-label="搜索工具" style="flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:14px;height:44px"></div>
+<sc-if value="{{ toolNone }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;line-height:1.8">没有符合“{{ toolQ }}”的工具<br><a href="#" onClick="{{ clearTool }}">清除搜索</a></div></sc-if>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ toolRows }}" as="t" hint-placeholder-count="4"><div style="display:flex;align-items:center;gap:10px;min-height:60px;border-top:{{ t.bt }}"><span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:600;font-family:Consolas,Menlo,monospace;word-break:break-all">{{ t.name }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:1px">{{ t.sub }}</span></span><span style="display:flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:999px;background:{{ t.bg }};color:{{ t.fg }};font-weight:600"><span class="ms" style="font-size:14px">{{ t.icon }}</span>{{ t.kind }}</span></div></sc-for></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">调用记录</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ calls }}" as="c" hint-placeholder-count="3"><div style="display:flex;gap:10px;padding:12px 0;border-top:{{ c.bt }};font-size:12px;line-height:1.6"><span class="ms" style="font-size:18px;color:{{ c.color }}">{{ c.icon }}</span><span style="flex:1"><span style="display:block;font-family:Consolas,Menlo,monospace;font-size:12px">{{ c.name }}</span><span style="color:var(--ink3)">{{ c.sub }}</span></span><span style="color:var(--ink3)">{{ c.time }}</span></div></sc-for></div></div>
+</sc-if>
+
+<sc-if value="{{ vMcp }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:20px;padding:14px 16px;font-size:13px;line-height:1.7;color:var(--ink2)">调用 MCP 工具会把参数发给该服务器，<b>每次都需确认</b>，并记入数据去向。</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ servers }}" as="m" hint-placeholder-count="2"><div style="padding:14px 0;border-top:{{ m.bt }};display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:10px"><span class="ms" style="font-size:24px;color:var(--ink2)">cable</span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:500">{{ m.name }}</span><span style="display:block;font-size:12px;color:var(--ink3);font-family:Consolas,Menlo,monospace">{{ m.addr }}</span></span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:{{ m.bg }};color:{{ m.fg }};font-weight:600;white-space:nowrap;flex:none"><span class="ms" style="font-size:14px">{{ m.icon }}</span>{{ m.state }}</span></div>
+<sc-if value="{{ m.errShow }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--red);line-height:1.6;margin-left:34px">{{ m.err }}</div></sc-if>
+<div style="display:flex;gap:8px;margin-left:34px"><button onClick="{{ m.connect }}" style="height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">{{ m.connectLabel }}</button><button onClick="{{ m.edit }}" style="height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">编辑</button><button onClick="{{ m.remove }}" style="{{ m.rmStyle }}">{{ m.rmLabel }}</button></div></div></sc-for></div>
+<button onClick="{{ addServer }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">添加服务器</button>
+</sc-if>
+
+<sc-if value="{{ vMcpEdit }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px"><sc-for list="{{ mcpFields }}" as="f" hint-placeholder-count="3"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">{{ f.label }}<input value="{{ f.value }}" onInput="{{ f.set }}" style="height:48px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label></sc-for></div>
+<div style="display:flex;gap:10px;font-size:12px;line-height:1.7;color:var(--ink3);padding:0 6px"><span class="ms" style="font-size:18px">outbound</span>调用会把参数发给该服务器，每次需确认。密钥不会在界面回显。</div>
+<div style="display:flex;gap:8px"><button onClick="{{ cancelMcp }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ saveMcp }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">保存并连接</button></div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ showBar }}" hint-placeholder-val="{{ true }}"><div style="height:76px;flex:none;border-top:1px solid var(--rule);background:var(--bg);display:flex;padding:0 8px 10px;box-sizing:border-box"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><button aria-label="{{ t.label }}" title="{{ t.label }}" style="flex:1;border:0;background:transparent;display:flex;align-items:center;justify-content:center;color:{{ t.color }}"><span class="ms" style="font-size:28px;font-variation-settings:'FILL' {{ t.fill }}">{{ t.icon }}</span></button></sc-for></div></sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { v:'ex', exTab:'dev', dst:'ok', pstep:0, revoked:false, askRevoke:false, inSt:'pending', wk:'export', wstep:0, wsel:[1,1,0], wtarget:0, wres:'ok', bk:'idle', askRestore:false, toolQ:'', servers:[{ name:'文档检索', addr:'http://127.0.0.1:8931', st:'ok' },{ name:'报价同步', addr:'https://sync.example.com/mcp', st:'fail' }], rmAsk:-1, mcpEditIdx:-1, mcpF:{ name:'', addr:'', key:'' }, dark:null };
+  timers = [];
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const later = (fn, ms) => this.timers.push(setTimeout(fn, ms));
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F' };
+    const T = dark ? D : L;
+    const phoneStyle = { width:390, height:844, background:T.bg, borderRadius:44, border:'10px solid ' + (dark ? '#2A2A2A' : '#111827'), boxSizing:'content-box', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => phoneStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const seg = (on) => `flex:1;border:0;border-radius:999px;font-size:14px;font-weight:600;color:${on ? T.ink : T.ink3};background:${on ? T.sf : 'transparent'};box-shadow:${on ? '0 0 0 1px ' + T.rule : 'none'}`;
+    const v = s.v;
+    const titles = { ex:'数据交换', pair:'配对新设备', device:'设备详情', incoming:'来件核验', wizard: s.wk === 'export' ? '导出数据包' : '导入数据包', storage:'数据与存储', tools:'接口与工具', mcp:'MCP 服务器', mcpEdit: s.mcpEditIdx >= 0 ? '编辑服务器' : '添加服务器' };
+    const parent = { pair:'ex', device:'ex', incoming:'ex', wizard:'ex', storage:'ex', tools:'ex', mcp:'ex', mcpEdit:'mcp' };
+    const top = v === 'ex';
+    /* devices */
+    const DV = { online:[T.greenbg,T.green,'check_circle','在线'], off:[T.sk,T.ink2,'wifi_off','离线'], unpaired:[T.sk,T.ink2,'link_off','未配对'], revoked:[T.redbg,T.red,'block','已撤销'] };
+    const dvs = [['laptop_mac','小李的笔记本','a3f9c1','已配对', s.revoked ? 'revoked' : 'online','device'],['desktop_windows','工作站','51d0be','已配对 · 执行科研任务','online','device'],['tablet_android','会议室平板','9c22e7','未配对','unpaired','pair'],['smartphone','旧手机','07be44','配对已撤销 · 历史保留','revoked','device']];
+    const off = s.dst === 'offline';
+    const devices = dvs.map(([icon, name, fp, sub, st, to], i) => { const k = off && st === 'online' ? 'off' : st; return { icon, name, fp, sub, state:DV[k][3], icon2:DV[k][2], bg:DV[k][0], fg:DV[k][1], bt: bt(i), go: go({ v:to, pstep:0, askRevoke:false }) }; });
+    /* incoming */
+    const acc = s.inSt === 'accepted' || s.inSt === 'imported';
+    const states4 = [['已送达','check_circle','是 · 今天 09:20',T.green],['已接纳', acc ? 'check_circle' : s.inSt === 'rejected' ? 'cancel' : 'radio_button_unchecked', acc ? '是' : s.inSt === 'rejected' ? '已拒绝' : '否，待你决定', acc ? T.green : s.inSt === 'rejected' ? T.red : T.ink3],['已导入业务', s.inSt === 'imported' ? 'check_circle' : 'radio_button_unchecked', s.inSt === 'imported' ? '是' : '否，尚未导入', s.inSt === 'imported' ? T.green : T.ink3],['对方已读','radio_button_unchecked','不适用（来件由你读）',T.ink3]].map(([k, icon, val, color], i) => ({ k, icon, v:val, color, bt: bt(i) }));
+    /* wizard */
+    const WI = [['文献综述_v2 结果包','2.4 MB','inventory_2'],['任务包_泵选型','1.1 MB','folder_zip'],['研究卡 RC-07','12 KB','style']];
+    const wsel = s.wsel, anySel = wsel.some(Boolean);
+    const TG = s.wk === 'export' ? [['小李的笔记本','laptop_mac'],['工作站','desktop_windows'],['保存为文件','save']] : [['选择文件…','folder_open'],['来自 小李的笔记本','laptop_mac']];
+    const stepL = ['内容','目标','校验','完成'];
+    const wdots = stepL.map((l, i) => ({ label:l, style:`flex:1;text-align:center;font-size:12px;font-weight:600;padding:6px 0;border-radius:999px;background:${i === s.wstep ? T.tint : T.sk};color:${i === s.wstep ? T.deep : T.ink3}` }));
+    const RES = s.wres === 'ok' ? [T.greenbg,T.green,'check_circle', s.wk === 'export' ? '导出完成' : '导入完成', s.wk === 'export' ? '已写入 2 项到目标。目标设备收到后仍需对方核验并接纳。' : '2 项已导入暂存区；它们不是已导入业务，需逐项接纳。'] : [T.redbg,T.red,'warning', '部分失败', '成功 1 项，失败 1 项：任务包_泵选型 校验和不一致。成功的 1 项已保留，失败项未写入；可单独重试。'];
+    /* storage */
+    const dbs = [['inquiry.db','询价库','ok','可用 · 36 MB'],['research.db','科研库','ok','可用 · 118 MB'],['library_index','文库索引','bad','不可用：索引文件损坏。原文件不受影响，可重建索引。'],['memory.db','记忆库','ok','可用 · 2 MB']].map(([id, name, st, note], i) => ({ name, state: st === 'ok' ? '可用' : '不可用', icon: st === 'ok' ? 'check_circle' : 'error', color: st === 'ok' ? T.green : T.red, note, bt: bt(i) }));
+    const BK = { idle:['','',T.ink3,'',false], run:['autorenew','正在创建备份，进度未知…',T.deep,'创建中…',true], done:['check_circle','备份已创建 · 156 MB · 今天 09:31',T.green,'创建备份',true], verified:['check_circle','校验通过：4 个库完整，可用于恢复',T.green,'创建备份',true], vfail:['error','校验失败：科研库页损坏。此备份不可用于恢复。',T.red,'创建备份',true] }[s.bk];
+    /* tools */
+    const TL = [['inquiry.compare_quotes','比较项目报价','只读'],['inquiry.project_budget','项目预算余额','只读'],['inquiry.create_inquiry','创建询价单','写入'],['transfer.send','发布到公司资料','外传'],['research.create_task_pack','创建任务包','写入'],['inquiry.search','待办汇总','只读']];
+    const tc = (k) => k === '只读' ? [T.sk,T.ink2,'visibility'] : k === '写入' ? [T.tint,T.deep,'edit_note'] : [T.redbg,T.red,'outbound'];
+    const q = s.toolQ.trim();
+    const toolRows = TL.filter(t => !q || t[0].includes(q) || t[1].includes(q)).map(([name, sub, kind], i) => ({ name, sub, kind, bg:tc(kind)[0], fg:tc(kind)[1], icon:tc(kind)[2], bt: bt(i) }));
+    const calls = [['inquiry.compare_quotes','你确认 · 成功','09:14','check_circle',T.green],['transfer.send','你拒绝 · 未发送','昨天','cancel',T.ink3],['mcp:报价同步/pull','你确认 · 失败：超时','10月4日','error',T.red]].map(([name, sub, time, icon, color], i) => ({ name, sub, time, icon, color, bt: bt(i) }));
+    /* mcp */
+    const MS = { ok:[T.greenbg,T.green,'check_circle','已连接'], fail:[T.redbg,T.red,'error','连接失败'], run:[T.tint,T.deep,'autorenew','连接中'] };
+    const setServers = (arr) => this.setState({ servers: arr });
+    const servers = s.servers.map((m, i) => ({ name:m.name, addr:m.addr, bg:MS[m.st][0], fg:MS[m.st][1], icon:MS[m.st][2], state:MS[m.st][3], errShow: m.st === 'fail', err:'连接超时（10 秒）。检查地址与网络；不会影响其他工具。', bt: bt(i),
+      connectLabel: m.st === 'ok' ? '断开' : '连接', connect: () => { if (m.st === 'ok') return setServers(s.servers.map((x, j) => j === i ? { ...x, st:'fail' } : x)); setServers(s.servers.map((x, j) => j === i ? { ...x, st:'run' } : x)); later(() => this.setState(st => ({ servers: st.servers.map((x, j) => j === i ? { ...x, st:'ok' } : x) })), 1200); },
+      edit: () => this.setState({ v:'mcpEdit', mcpEditIdx:i, mcpF:{ name:m.name, addr:m.addr, key:'' } }),
+      rmLabel: s.rmAsk === i ? '确认移除' : '移除', rmStyle:`height:44px;padding:0 16px;border-radius:999px;border:${s.rmAsk === i ? '0' : '1px solid ' + T.red};background:${s.rmAsk === i ? T.red : T.sf};color:${s.rmAsk === i ? '#fff' : T.red};font-size:13px;font-weight:600`,
+      remove: () => s.rmAsk === i ? this.setState({ servers: s.servers.filter((_, j) => j !== i), rmAsk:-1 }) : this.setState({ rmAsk:i }) }));
+    const chipSt = (on) => `height:30px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+    const navDefs = [['ex','数据交换 · 设备与数据包'],['pair','配对向导'],['device','设备详情 / 撤销配对'],['incoming','来件核验'],['wizard','数据包向导'],['storage','数据与存储 · 备份恢复'],['tools','接口与工具'],['mcp','MCP 服务器'],['mcpEdit','添加 MCP 服务器']];
+    const pst = s.pstep, ds = s.dst;
+    return {
+      phoneStyle, title:titles[v], headIcon: top ? 'workspaces' : 'arrow_back', headLabel: top ? '菜单' : '返回', headClick: top ? () => {} : go({ v: parent[v] || 'ex' }),
+      showBar: v === 'ex', tabs: [['chat_bubble','AI 助手',0],['apps','业务插件',0],['dashboard','工作台',0],['swap_horiz','数据交换',1],['settings','设置',0]].map(([icon, label, fill]) => ({ icon, label, fill, color: fill ? T.ink : T.ink3 })),
+      navs: navDefs.map(([k, l]) => ({ label:l, go: go({ v:k, pstep:0, wstep:0, mcpEditIdx:-1 }), style:`height:36px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${v === k ? '#2458D3' : '#C3CAD6'};background:${v === k ? '#E8EFFF' : '#fff'};color:${v === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      demoGroups: [{ label:'设备列表状态', chips:[['ok','正常'],['load','载入中'],['empty','空'],['offline','离线'],['fail','失败']].map(([k, l]) => ({ label:l, style:chipSt(ds === k), go: go({ dst:k, v:'ex', exTab:'dev' }) })) }, { label:'数据包结果', chips:[['ok','成功'],['partial','部分失败']].map(([k, l]) => ({ label:l, style:chipSt(s.wres === k), go: go({ wres:k }) })) }, { label:'主题', chips:[{ label: dark ? '切到浅色' : '切到深色', style:chipSt(false), go: go({ dark: !dark }) }] }],
+      vEx: v === 'ex', vPair: v === 'pair', vDevice: v === 'device', vIncoming: v === 'incoming', vWizard: v === 'wizard', vStorage: v === 'storage', vTools: v === 'tools', vMcp: v === 'mcp', vMcpEdit: v === 'mcpEdit',
+      devSeg: seg(s.exTab === 'dev'), pkSeg: seg(s.exTab === 'pk'), setDev: go({ exTab:'dev' }), setPk: go({ exTab:'pk' }), devTab: s.exTab === 'dev', pkTab: s.exTab === 'pk',
+      incomingShow: s.exTab === 'dev' && s.inSt === 'pending', openIncoming: go({ v:'incoming' }),
+      skel:[1,2,3], dLoad: ds === 'load', dEmpty: ds === 'empty', dFail: ds === 'fail', dOffline: off, dList: ds === 'ok' || off, retryDev: go({ dst:'load' }), devices,
+      startPair: go({ v:'pair', pstep:0 }),
+      pkStatus: [{ icon:'check_circle', t:'已发出', color:T.green },{ icon:'check_circle', t:'对方已收到', color:T.green },{ icon:'schedule', t:'对方未接纳（尚未导入）', color:T.ink2 }],
+      startExport: go({ v:'wizard', wk:'export', wstep:0 }), startImport: go({ v:'wizard', wk:'import', wstep:0 }),
+      pairDots: [0,1,2].map(i => ({ style:`width:${i === pst ? 24 : 8}px;height:8px;border-radius:99px;background:${i <= pst && pst < 3 ? T.acc : T.rs}` })),
+      pair0: pst === 0, pair1: pst === 1, pair2: pst === 2, pair3: pst === 3, pair4: pst === 4, pairRetry: go({ pstep:0 }),
+      nearby: [['tablet_android','会议室平板','9c22e7'],['laptop_mac','访客笔记本','e41b90']].map(([icon, name, fp], i) => ({ icon, name, fp, bt: bt(i), go: go({ pstep:1 }) })),
+      pairBack: go({ pstep:4 }), pairNext: go({ pstep:2 }), pairCancel: go({ pstep:0 }), pairDone: go({ pstep:3 }), backEx: go({ v:'ex' }),
+      revoked: s.revoked, revokedText: s.revoked ? '配对已撤销' : '已配对 · 在线',
+      devInfo: [['配对时间','10月3日'],['历史记录','消息 24 · 数据包 3'],['最近一次通信','今天 09:20'],['可执行任务','科研任务（需你确认）']].map(([k, val], i) => ({ k, v:val, bt: bt(i) })),
+      sendLabel: s.revoked ? '无法发送（配对已撤销）' : '发送消息或数据包', sendStyle:`height:48px;border-radius:999px;border:0;background:${s.revoked ? T.rule : T.acc};color:${s.revoked ? T.ink3 : T.onacc};font-size:14px;font-weight:600`, openChatNote: s.revoked ? () => {} : go({ v:'wizard', wk:'export', wstep:0 }),
+      askRevoke: s.askRevoke, askRev: go({ askRevoke:true }), cancelRev: go({ askRevoke:false }), doRevoke: go({ revoked:true, askRevoke:false }),
+      states4, files: [['inventory_2','结果.json','1.9 MB'],['description','综述草稿.md','412 KB'],['table_chart','证据表.csv','96 KB'],['info','manifest.json','4 KB']].map(([icon, t, size], i) => ({ icon, t, size, bt: bt(i) })),
+      checks: ['内容哈希与清单一致','来源指纹与已配对设备一致','不含可执行内容'].map((t, i) => ({ t, bt: bt(i) })),
+      inPending: s.inSt === 'pending', inAccepted: s.inSt === 'accepted', inImported: s.inSt === 'imported', inRejected: s.inSt === 'rejected',
+      acceptIn: go({ inSt:'accepted' }), rejectIn: go({ inSt:'rejected' }), importIn: go({ inSt:'imported' }),
+      wizKind: s.wk === 'export' ? '导出' : '导入', wizDots: wdots, w0: s.wstep === 0, w1: s.wstep === 1, w2: s.wstep === 2, w3: s.wstep === 3,
+      wizItems: WI.map(([t, size, icon], i) => ({ t, size, bt: bt(i), icon: wsel[i] ? 'check_box' : 'check_box_outline_blank', color: wsel[i] ? T.acc : T.ink3, go: go({ wsel: wsel.map((x, j) => j === i ? (x ? 0 : 1) : x) }) })),
+      wizTargets: TG.map(([t, icon], i) => ({ t, icon, check: s.wtarget === i ? 'radio_button_checked' : 'radio_button_unchecked', go: go({ wtarget:i }), style:`display:flex;align-items:center;gap:14px;padding:0 16px;min-height:56px;border-radius:20px;border:1px solid ${s.wtarget === i ? T.acc : T.rule};background:${s.wtarget === i ? T.tint : T.sf};color:${T.ink}` })),
+      wizChecks: [['包结构与清单完整','check_circle',T.green],['内容哈希一致', s.wres === 'ok' ? 'check_circle' : 'cancel', s.wres === 'ok' ? T.green : T.red],['目标设备已配对且未撤销','check_circle',T.green]].map(([t, icon, color], i) => ({ t, icon, color, bt: bt(i) })),
+      resBg:RES[0], resFg:RES[1], resIcon:RES[2], resTitle:RES[3], resText:RES[4],
+      wizBackLabel: s.wstep === 0 ? '取消' : s.wstep === 3 ? '重试失败项' : '上一步', wizNextLabel: s.wstep === 3 ? '完成' : s.wstep === 2 ? '确认并执行' : '下一步',
+      wizBack: () => s.wstep === 0 ? this.setState({ v:'ex' }) : s.wstep === 3 ? this.setState({ wstep:2 }) : this.setState({ wstep: s.wstep - 1 }),
+      wizNext: () => s.wstep === 3 ? this.setState({ v:'ex', exTab:'pk' }) : (s.wstep === 0 && !anySel) ? null : this.setState({ wstep: s.wstep + 1 }),
+      dbs, lastBackup: s.bk === 'idle' ? '10月3日 22:00 · 148 MB' : '今天 09:31 · 156 MB', bkMsg: BK[4], bkIcon:BK[0], bkText:BK[1], bkColor:BK[2], bkLabel: s.bk === 'run' ? '创建中…' : '创建备份',
+      makeBackup: () => { if (s.bk === 'run') return; this.setState({ bk:'run' }); later(() => this.setState({ bk:'done' }), 1500); },
+      verifyBackup: () => this.setState({ bk: s.bk === 'verified' ? 'vfail' : 'verified' }), askRestore: s.askRestore, askRest: go({ askRestore:true }), cancelRest: go({ askRestore:false }),
+      toolQ: s.toolQ, setToolQ: (e) => this.setState({ toolQ:e.target.value }), toolNone: toolRows.length === 0, clearTool: (e) => { e.preventDefault(); this.setState({ toolQ:'' }); }, toolRows, calls,
+      servers, addServer: go({ v:'mcpEdit', mcpEditIdx:-1, mcpF:{ name:'', addr:'', key:'' } }), cancelMcp: go({ v:'mcp' }),
+      mcpFields: [['名称','name'],['地址（URL 或命令）','addr'],['密钥（只写入系统凭据）','key']].map(([label, k]) => ({ label, value: s.mcpF[k], set: (e) => this.setState({ mcpF:{ ...s.mcpF, [k]: e.target.value } }) })),
+      saveMcp: () => { const f = s.mcpF; if (!f.name.trim() || !f.addr.trim()) return; const item = { name:f.name, addr:f.addr, st:'run' }; const arr = s.mcpEditIdx >= 0 ? s.servers.map((x, j) => j === s.mcpEditIdx ? item : x) : [...s.servers, item]; const idx = s.mcpEditIdx >= 0 ? s.mcpEditIdx : arr.length - 1; this.setState({ servers:arr, v:'mcp' }); later(() => this.setState(st => ({ servers: st.servers.map((x, j) => j === idx ? { ...x, st:'ok' } : x) })), 1200); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap}button{font-family:inherit;cursor:pointer}input,textarea{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:56px;justify-content:center;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;min-height:100vh;box-sizing:border-box">
+<div style="width:300px;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:24px">
+<div style="font-size:24px;font-weight:600">平台层缺口 · 第三轮 E</div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565"><b style="color:#111827">可进入的二级页</b><br>工作区面板 › 新建工作区 / 导入向导 › 恢复未完成导入<br>研究包导入（选择 → 校验 → 预览 → 确认 → 结果）<br>离线工具模式 › 确认卡 › 结果<br>助手执行记录详情</div>
+<sc-for list="{{ navs }}" as="n" hint-placeholder-count="6"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for>
+<div style="font-size:13px;line-height:1.8;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态切换说明</b><br>芯片强制显示对应状态。</div>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">{{ g.label }}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div></sc-for>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据。</div>
+</div>
+
+<div style="{{ phoneStyle }}">
+<div style="height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>9:41</span><span style="font-size:11px;font-weight:500;color:var(--ink3)">示意数据</span></div>
+<sc-if value="{{ offline }}" hint-placeholder-val="{{ false }}"><div style="flex:none;background:var(--sk);padding:8px 16px;font-size:12px;display:flex;gap:8px;align-items:center"><span class="ms" style="font-size:16px">cloud_off</span>离线：查询与计算照常；写入或外传需联网。</div></sc-if>
+<div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+<button onClick="{{ back }}" aria-label="返回" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span class="ms" style="font-size:22px">arrow_back</span></button>
+<button onClick="{{ openWs }}" style="height:40px;padding:0 14px;border-radius:999px;border:0;background:var(--sk);color:var(--ink);display:flex;align-items:center;gap:4px;font-size:14px;font-weight:600" style-focus="outline:2px solid var(--acc);outline-offset:2px">{{ wsName }}<span class="ms" style="font-size:20px">expand_more</span></button><div style="width:48px"></div></div>
+
+<div class="fx" style="flex:1;min-height:0;overflow-y:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:14px">
+<div style="font-size:18px;font-weight:600;padding:0 4px">{{ title }}</div>
+
+<sc-if value="{{ isWs }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><sc-for list="{{ wsActs }}" as="a" hint-placeholder-count="4"><button onClick="{{ a.go }}" style="width:100%;text-align:left;border:0;border-top:{{ a.bt }};background:transparent;color:var(--ink);padding:0;min-height:60px;display:flex;align-items:center;gap:14px" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ a.ic }}</span><span style="flex:1"><span style="display:block;font-size:15px">{{ a.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ a.s }}</span></span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></button></sc-for></div>
+<sc-if value="{{ resumeOn }}" hint-placeholder-val="{{ false }}"><div style="background:var(--warnbg);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600"><span class="ms" style="font-size:20px;color:var(--warn)">pause_circle</span>有一次导入没有完成</div><div style="font-size:13px;line-height:1.7">“研究包 · 离心泵选型”在校验阶段中断。已写入的部分不会重复写入；进度未知，不显示百分比。</div><div style="display:flex;gap:8px"><button style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">放弃</button><button onClick="{{ toPack }}" style="flex:1;height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">恢复导入</button></div></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isNewWs }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:14px"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">工作区名称<input value="泵站研究" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label><div><div style="font-size:12px;color:var(--ink3);margin-bottom:6px">绑定的模块项目（可多选）</div><div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ bindOpts }}" as="b" hint-placeholder-count="3"><button onClick="{{ b.go }}" style="display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid {{ b.bd }};background:{{ b.bg }};color:var(--ink);font-size:14px;text-align:left"><span class="ms" style="font-size:22px;color:{{ b.c }}">{{ b.ic }}</span>{{ b.t }}</button></sc-for></div></div></div>
+<div style="display:flex;gap:10px"><button onClick="{{ back }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ back }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">新建工作区</button></div>
+</sc-if>
+
+<sc-if value="{{ isPack }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:4px;align-items:center"><sc-for list="{{ steps }}" as="p" hint-placeholder-count="5"><span style="flex:1;display:flex;flex-direction:column;gap:4px;align-items:center;font-size:11px;color:{{ p.c }}"><span style="width:100%;height:4px;border-radius:99px;background:{{ p.bar }};display:block"></span>{{ p.t }}</span></sc-for></div>
+<sc-if value="{{ pStep0 }}" hint-placeholder-val="{{ true }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><sc-for list="{{ srcs }}" as="a" hint-placeholder-count="3"><button onClick="{{ toCheck }}" style="width:100%;text-align:left;border:0;border-top:{{ a.bt }};background:transparent;color:var(--ink);padding:0;min-height:60px;display:flex;align-items:center;gap:14px"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ a.ic }}</span><span style="flex:1;font-size:15px">{{ a.t }}</span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></button></sc-for></div></sc-if>
+<sc-if value="{{ pStep1 }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ checks }}" as="c" hint-placeholder-count="4"><div style="padding:12px 0;border-top:{{ c.bt }};display:flex;gap:10px"><span class="ms" style="font-size:22px;color:{{ c.c }}">{{ c.ic }}</span><span style="flex:1"><span style="display:block;font-size:14px;font-weight:500">{{ c.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.6">{{ c.s }}</span></span></div></sc-for></div>
+<button onClick="{{ toPrev }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">查看将写入的内容</button></sc-if>
+<sc-if value="{{ pStep2 }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sk);border-radius:12px;padding:10px 14px;font-size:12px;line-height:1.7;color:var(--ink2)">同名或相同本地 ID 的对象不会被自动合并。来源不同的，请选择处理方式。</div>
+<sc-for list="{{ items }}" as="i" hint-placeholder-count="3"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between"><span style="font-size:14px;font-weight:500">{{ i.t }}</span><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:{{ i.bg }};color:{{ i.fg }}">{{ i.tag }}</span></div><div style="font-size:12px;color:var(--ink3);line-height:1.6">{{ i.s }}</div>
+<sc-if value="{{ i.clash }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:6px"><sc-for list="{{ i.opts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.t }}</button></sc-for></div></sc-if></div></sc-for>
+<button onClick="{{ toConfirm }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">下一步：确认</button></sc-if>
+<sc-if value="{{ pStep3 }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;font-size:13px;line-height:1.9;color:var(--ink2)"><b style="color:var(--ink)">做什么</b>　向本机研究库写入 12 个对象<br><b style="color:var(--ink)">来源</b>　research-pack-0912.zip（来源身份已校验）<br><b style="color:var(--ink)">不会做</b>　不会覆盖本机已有的同名对象</div><div style="display:flex;gap:10px"><button onClick="{{ toCheck }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ toResult }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">确认导入</button></div></sc-if>
+<sc-if value="{{ pStep4 }}" hint-placeholder-val="{{ false }}"><div style="background:{{ resBg }};border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center;font-size:15px;font-weight:600;color:{{ resFg }}"><span class="ms" style="font-size:22px">{{ resIc }}</span>{{ resT }}</div><div style="font-size:13px;line-height:1.8">{{ resS }}</div></div><div style="display:flex;gap:10px"><button onClick="{{ toPack }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">完成</button><sc-if value="{{ partial }}" hint-placeholder-val="{{ false }}"><button style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">重试失败的 2 项</button></sc-if></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isTool }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2)">查询与计算可离线运行；写入或外传会再次请求确认。</div>
+<div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ otools }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" style="{{ t.style }}"><span style="flex:1;text-align:left"><span style="display:block;font-size:14px;font-family:Consolas,Menlo,monospace">{{ t.n }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ t.d }}</span></span><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:{{ t.bg }};color:{{ t.fg }}">{{ t.k }}</span></button></sc-for></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px;font-weight:600">参数</span><span style="display:flex;gap:6px"><sc-for list="{{ views }}" as="v" hint-placeholder-count="2"><button onClick="{{ v.go }}" style="{{ v.style }}">{{ v.t }}</button></sc-for></span></div><div style="font-size:12px;color:var(--ink3)">表单与 JSON 二选一编辑；切换时以当前视图的内容为准。</div>
+<sc-if value="{{ viewForm }}" hint-placeholder-val="{{ true }}"><sc-for list="{{ tf }}" as="f" hint-placeholder-count="2"><label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink3)">{{ f.l }}<input value="{{ f.v }}" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label></sc-for></sc-if>
+<sc-if value="{{ viewJson }}" hint-placeholder-val="{{ false }}"><div style="min-height:96px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);padding:10px 12px;font-family:Consolas,Menlo,monospace;font-size:12px;line-height:1.7;white-space:pre-wrap">{{ jsonText }}</div></sc-if>
+<button onClick="{{ prep }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">准备操作</button></div>
+<sc-if value="{{ toolResult }}" hint-placeholder-val="{{ false }}"><div style="background:var(--greenbg);border-radius:12px;padding:14px;font-size:13px;line-height:1.8"><b style="color:var(--green)">结果</b>　{{ resultText }}</div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isRun }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:16px;font-weight:600">整理华东泵站报价并比价</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:{{ runBg }};color:{{ runFg }}"><span class="ms" style="font-size:14px">{{ runIc }}</span>{{ runText }}</span></div><div style="font-size:12px;color:var(--ink3)">执行设备：工作站 · 第 {{ attempt }} 次尝试</div>
+<sc-if value="{{ waiting }}" hint-placeholder-val="{{ false }}"><div style="background:var(--warnbg);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.7"><b>等待原因</b>　{{ waitWhy }}</div></sc-if></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">阶段</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ stages }}" as="g" hint-placeholder-count="4"><div style="padding:10px 0;border-top:{{ g.bt }};display:flex;gap:10px;align-items:center;font-size:13px"><span class="ms" style="font-size:20px;color:{{ g.c }}">{{ g.ic }}</span><span style="flex:1">{{ g.t }}</span><span style="font-size:11px;color:var(--ink3)">{{ g.s }}</span></div></sc-for></div></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">上下文快照摘要</div><div style="background:var(--sk);border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.8;color:var(--ink2)">项目：华东泵站改造 · 3 条报价 · 1 份技术要求（敏感属性已剔除，快照仅含摘要）</div></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">权限决定</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ perms }}" as="p" hint-placeholder-count="3"><div style="padding:10px 0;border-top:{{ p.bt }};display:flex;gap:10px;font-size:13px;align-items:center"><span class="ms" style="font-size:20px;color:{{ p.c }}">{{ p.ic }}</span><span style="flex:1">{{ p.t }}</span><span style="font-size:12px;color:{{ p.c }};font-weight:600">{{ p.s }}</span></div></sc-for></div></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">产物</div><div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ arts }}" as="a" hint-placeholder-count="2"><span style="display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--rs);font-size:13px"><span class="ms" style="font-size:18px;color:var(--acc)">link</span>{{ a }}</span></sc-for></div></div>
+<div style="display:flex;gap:8px"><sc-for list="{{ runActs }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.go }}" style="flex:1;height:48px;border-radius:999px;border:1px solid {{ a.bd }};background:{{ a.bg }};color:{{ a.fg }};font-size:13px;font-weight:600;padding:0 8px">{{ a.t }}</button></sc-for></div>
+<div style="font-size:12px;color:var(--ink3);line-height:1.7">暂停在安全边界停止；恢复创建新尝试并重新确认，不会自动重放写入或网络操作。</div>
+</sc-if>
+</div>
+
+<sc-if value="{{ wsOpen }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.45);z-index:5" onClick="{{ closeWs }}"><div style="margin:96px 16px 0;background:var(--sf);border:1px solid var(--rs);border-radius:20px;padding:8px 0;display:flex;flex-direction:column" onClick="{{ stop }}">
+<sc-for list="{{ wsList }}" as="w" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:4px;padding:0 8px 0 16px;min-height:60px"><button onClick="{{ w.pick }}" style="flex:1;text-align:left;border:0;background:transparent;color:var(--ink);padding:8px 0"><span style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:{{ w.fw }}"><span class="ms" style="font-size:20px;color:var(--acc)">{{ w.ck }}</span>{{ w.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin:2px 0 0 28px">{{ w.s }}</span></button><button aria-label="重命名" style="width:44px;height:44px;border:0;background:transparent;color:var(--ink2)"><span class="ms" style="font-size:20px">edit</span></button></div></sc-for>
+<button onClick="{{ toNew }}" style="border:0;border-top:1px solid var(--rule);background:transparent;color:var(--acc);min-height:52px;display:flex;align-items:center;gap:8px;padding:0 16px;font-size:14px;font-weight:600"><span class="ms" style="font-size:22px">add</span>新建工作区</button></div></div></sc-if>
+<sc-if value="{{ confirmCard }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;z-index:5"><div style="width:100%;background:var(--sf);border-radius:24px 24px 0 0;padding:20px 16px 24px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box"><div style="font-size:16px;font-weight:600">{{ cardTitle }}</div><div style="font-size:13px;line-height:1.9;color:var(--ink2)">{{ cardBody }}</div><div style="display:flex;gap:8px"><button onClick="{{ cardNo }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">拒绝</button><button onClick="{{ cardYes }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">允许本次请求</button></div></div></div></sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'ws', dark:null, wsOpen:false, ws:0, bind:[0], step:0, clash:{ 0:null }, resSt:'ok', tool:1, view:0, card:null, toolDone:false, runSt:'wait', attempt:1, off:false, resume:true };
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC', warn:'#8A5A00', warnbg:'#FFF1D6' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F', warn:'#E8C547', warnbg:'#2E2A10' };
+    const T = dark ? D : L;
+    const phoneStyle = { width:390, height:844, background:T.bg, borderRadius:44, border:'10px solid ' + (dark ? '#2A2A2A' : '#111827'), boxSizing:'content-box', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => phoneStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const pill = (on, h = 40) => `flex:1;height:${h}px;padding:0 10px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600;white-space:nowrap`;
+    const scr = s.screen;
+    const WS = [['个人工作区','绑定：询价、科研'],['泵站研究','绑定：科研'],['客户 A 询价','绑定：询价']];
+    const titles = { ws:'工作区', newws:'新建工作区', pack:'研究包导入', tool:'离线工具', run:'执行记录' };
+    const backMap = { ws:'ws', newws:'ws', pack:'ws', tool:'ws', run:'ws' };
+    const navDefs = [['ws','工作区面板 / 导入向导'],['newws','新建工作区'],['pack','研究包导入'],['tool','离线工具模式'],['run','助手执行记录详情']];
+    const STEPS = ['选择','校验','预览','确认','结果'], st = s.step;
+    const CK = [['来源身份','check_circle',T.green,'签名与来源一致：研究所 · 王工'],['重复导入识别','check_circle',T.green,'此前未导入过该研究包'],['并发分叉冲突','warning',T.warn,'本机“离心泵选型”在导出后又改过，将按所选方式处理'],['引用闭合','check_circle',T.green,'所有引用的论文、结果包都在包内']];
+    const clashOpt = (i) => ['保留两者','作为新对象','跳过'].map((t, k) => ({ t, go: () => this.setState({ clash:{ ...s.clash, [i]: k } }), style: pill(s.clash[i] === k, 40) }));
+    const ITEMS = [{ t:'论文 · 离心泵选型综述', tag:'新增', s:'本机没有同名对象', clash:false },{ t:'研究卡 · RC-07', tag:'同名不同来源', s:'本机已有同名“RC-07”，来源不同；不会自动合并。', clash:true },{ t:'结果包 · v2', tag:'更新', s:'相同来源，本地 ID 一致，内容有 3 处差异。', clash:false }];
+    const OT = [['research.card.paper','按论文查研究卡','只读'],['inquiry.compare_quotes','按物料比价','只读'],['inquiry.create_inquiry','新建询价单','写入'],['hub.publish_quote','发布到公司资料','外传']];
+    const kc = (k) => k === '只读' ? [T.sk, T.ink2] : k === '写入' ? [T.tint, T.deep] : [T.redbg, T.red];
+    const tl = OT[s.tool];
+    const RS = { wait:['等待确认','pause_circle',T.warnbg,T.warn], run:['执行中','autorenew',T.tint,T.deep], pause:['已暂停','pause',T.sk,T.ink2], fail:['失败','error',T.redbg,T.red] };
+    const rs = RS[s.runSt];
+    const stagesDef = [['理解目标','done'],['读取项目资料','done'],['比价并生成草稿','cur'],['写入预算（需确认）','todo']];
+    const stages = stagesDef.map((g, i) => ({ t:g[0], bt:bt(i), ic: g[1] === 'done' ? 'check_circle' : g[1] === 'cur' ? (s.runSt === 'fail' ? 'cancel' : s.runSt === 'pause' ? 'pause_circle' : 'autorenew') : 'radio_button_unchecked', c: g[1] === 'done' ? T.green : g[1] === 'cur' ? (s.runSt === 'fail' ? T.red : T.deep) : T.ink3, s: g[1] === 'done' ? '已完成' : g[1] === 'cur' ? rs[0] : '未开始' }));
+    const cardMap = { prep:['确认写入', '工具：inquiry.create_inquiry（写入）\n将创建：询价单 1 张（项目 华东泵站改造）\n不会外传任何数据。'] };
+    const chipSt = (on) => `height:30px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+    const grp = (label, key, opts) => ({ label, chips: opts.map(([v, l]) => ({ label:l, style:chipSt(s[key] === v), go: go({ [key]:v }) })) });
+    return {
+      phoneStyle, title:titles[scr], back: go({ screen:backMap[scr], wsOpen:false }), offline: s.off, wsName: WS[s.ws][0],
+      navs: navDefs.map(([k, l]) => ({ label:l, go:go({ screen:k, wsOpen:false, step:0, card:null }), style:`height:40px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${scr === k ? '#2458D3' : '#C3CAD6'};background:${scr === k ? '#E8EFFF' : '#fff'};color:${scr === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      groups: [grp('研究包结果','resSt',[['ok','成功'],['part','部分失败']]), grp('执行记录状态','runSt',[['wait','等待确认'],['run','执行中'],['pause','已暂停'],['fail','失败']]), { label:'其他', chips:[{ label:'未完成导入提示', style:chipSt(s.resume), go:go({ resume:!s.resume }) },{ label: s.off ? '在线' : '离线', style:chipSt(s.off), go:go({ off:!s.off }) },{ label: dark ? '切到浅色' : '切到深色', style:chipSt(false), go:go({ dark:!dark }) }] }],
+      isWs: scr === 'ws', isNewWs: scr === 'newws', isPack: scr === 'pack', isTool: scr === 'tool', isRun: scr === 'run',
+      openWs: go({ wsOpen:true }), closeWs: go({ wsOpen:false }), stop: (e) => e.stopPropagation(), wsOpen: s.wsOpen, toNew: go({ screen:'newws', wsOpen:false }),
+      wsList: WS.map((w, i) => ({ t:w[0], s:w[1], fw: s.ws === i ? 600 : 400, ck: s.ws === i ? 'check' : '', pick: go({ ws:i, wsOpen:false }) })),
+      wsActs: [['upload_file','导入研究目录','选择本机文件夹',go({ screen:'pack' })],['folder_zip','导入研究 ZIP','校验后再写入',go({ screen:'pack' })],['inbox','接收任务包','来自其他设备的任务',go({ screen:'pack' })],['edit','重命名当前工作区','当前：' + WS[s.ws][0],() => {}]].map(([ic, t, sub, g], i) => ({ ic, t, s:sub, go:g, bt:bt(i) })),
+      resumeOn: s.resume, toPack: go({ screen:'pack', step:1 }),
+      bindOpts: [['询价',0],['科研',1],['原型',2]].map(([t, i]) => { const on = s.bind.includes(i); return { t, ic: on ? 'check_box' : 'check_box_outline_blank', c: on ? T.acc : T.ink3, bd: on ? T.acc : T.rule, bg: on ? T.tint : T.sf, go: go({ bind: on ? s.bind.filter(k => k !== i) : [...s.bind, i] }) }; }),
+      steps: STEPS.map((t, i) => ({ t, c: i <= st ? T.deep : T.ink3, bar: i <= st ? T.acc : T.rule })),
+      pStep0: st === 0, pStep1: st === 1, pStep2: st === 2, pStep3: st === 3, pStep4: st === 4,
+      srcs: [['folder_open','选择研究目录'],['folder_zip','选择研究 ZIP'],['inbox','接收任务包']].map(([ic, t], i) => ({ ic, t, bt:bt(i) })),
+      checks: CK.map((c, i) => ({ t:c[0], ic:c[1], c:c[2], s:c[3], bt:bt(i) })),
+      items: ITEMS.map((it, i) => ({ t:it.t, tag:it.tag, s:it.s, clash:it.clash, bg: it.clash ? T.warnbg : T.sk, fg: it.clash ? T.warn : T.ink2, opts: clashOpt(i) })).map((it, i) => i === 1 ? { ...it, opts: ['保留两者','作为新对象','跳过'].map((t, k) => ({ t, go: () => this.setState({ clash:{ ...s.clash, 1:k } }), style: pill(s.clash[1] === k, 40) })) } : it),
+      toCheck: go({ step:1 }), toPrev: go({ step:2 }), toConfirm: go({ step:3 }), toResult: go({ step:4 }),
+      partial: s.resSt === 'part', resBg: s.resSt === 'ok' ? T.greenbg : T.warnbg, resFg: s.resSt === 'ok' ? T.green : T.warn, resIc: s.resSt === 'ok' ? 'check_circle' : 'warning',
+      resT: s.resSt === 'ok' ? '导入完成' : '部分导入失败', resS: s.resSt === 'ok' ? '写入 12 个对象；“RC-07”按“保留两者”处理，新对象名为“RC-07（来自研究所）”。' : '已写入 10 个对象；2 个结果包写入失败，未留下半成品。可只重试失败的 2 项。',
+      otools: OT.map((t, i) => { const c = kc(t[2]); return { n:t[0], d:t[1], k:t[2], bg:c[0], fg:c[1], go:go({ tool:i, toolDone:false }), style:`display:flex;align-items:center;gap:8px;min-height:60px;padding:0 14px;border-radius:12px;border:1px solid ${s.tool === i ? T.acc : T.rule};background:${s.tool === i ? T.tint : T.sf};color:${T.ink}` }; }),
+      views: ['表单','JSON'].map((t, i) => ({ t, go:go({ view:i }), style:pill(s.view === i, 36).replace('flex:1;', 'flex:none;') })), viewForm: s.view === 0, viewJson: s.view === 1,
+      tf: [{ l:'项目', v:'华东泵站改造' },{ l:'物料', v:'离心泵 HB-200' }], jsonText: '{\n  "project": "华东泵站改造",\n  "material": "离心泵 HB-200"\n}',
+      prep: () => tl[2] === '只读' ? this.setState({ toolDone:true }) : this.setState({ card:'prep' }),
+      toolResult: s.toolDone, resultText: tl[2] === '只读' ? '已离线完成，返回 3 条结果（来自本机数据）。' : '已写入，结果可在“询价单”中查看。',
+      confirmCard: !!s.card, cardTitle: s.card ? (tl[2] === '外传' ? '确认外传' : '确认写入') : '', cardBody: s.card ? '工具：' + tl[0] + '（' + tl[2] + '）\n将处理：项目 华东泵站改造 · 离心泵 HB-200\n' + (tl[2] === '外传' ? '将发送到公司资料中心，无法撤回。' : '不会外传任何数据。') : '',
+      cardNo: go({ card:null }), cardYes: go({ card:null, toolDone:true }),
+      runBg: rs[2], runFg: rs[3], runIc: rs[1], runText: rs[0], attempt: s.attempt, waiting: s.runSt === 'wait' || s.runSt === 'fail',
+      waitWhy: s.runSt === 'fail' ? '写入预算失败：工作站已离线。本次未写入任何数据。' : '要把比价结果写入预算，需要你确认。',
+      stages, perms: [['读取项目与资料','已允许','check_circle',T.green],['写入业务数据','每次确认','lock',T.deep],['联网与外发','已关闭','block',T.ink3]].map((p, i) => ({ t:p[0], s:p[1], ic:p[2], c:p[3], bt:bt(i) })),
+      arts: ['比价草稿 · HB-200','报价 Q-0412'],
+      runActs: (s.runSt === 'run' ? [['暂停',go({ runSt:'pause' }),false],['取消',go({ runSt:'fail' }),false]] : s.runSt === 'pause' ? [['取消',go({ runSt:'fail' }),false],['恢复（新尝试，需重新确认）',go({ runSt:'wait', attempt:s.attempt + 1 }),true]] : s.runSt === 'wait' ? [['取消',go({ runSt:'fail' }),false],['确认并继续',go({ runSt:'run' }),true]] : [['重新尝试（再次确认）',go({ runSt:'wait', attempt:s.attempt + 1 }),true]]).map(([t, g, p]) => ({ t, go:g, bd: p ? T.acc : T.rs, bg: p ? T.acc : T.sf, fg: p ? T.onacc : T.ink }))
+    };
+  }
+}
+</script>
+</body>
+</html>

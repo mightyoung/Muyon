@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap}button{font-family:inherit;cursor:pointer}input{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:56px;justify-content:center;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;min-height:100vh;box-sizing:border-box">
+<div style="width:300px;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:24px">
+<div style="font-size:24px;font-weight:600">助手运行 · 第六轮 H I</div>
+<div style="font-size:13px;line-height:1.7;color:#4B5565"><b style="color:#111827">可进入的二级页</b><br>执行记录（任务卡 + 事件时间线）<br>助手设置 › 模型设置<br>助手设置 › 数据去向<br>业务插件详情 › 助手能力<br>对象详情 › 敏感属性遮盖</div>
+<sc-for list="{{ navs }}" as="n" hint-placeholder-count="5"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for>
+<div style="font-size:13px;line-height:1.7;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态切换说明</b></div>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">{{ g.label }}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div></sc-for>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据；密钥输入永不回显。</div></div>
+
+<div style="{{ phoneStyle }}">
+<div style="height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>9:41</span><span style="font-size:11px;font-weight:500;color:var(--ink3)">示意数据</span></div>
+<div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px"><button aria-label="返回" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)"><span class="ms" style="font-size:22px">arrow_back</span></button><div style="padding:0 18px;height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;font-size:15px;font-weight:600">{{ title }}</div><div style="width:48px"></div></div>
+<div class="fx" style="flex:1;min-height:0;overflow-y:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:12px">
+
+<sc-if value="{{ isLog }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:14px;font-weight:600">比较华东泵站报价并发给云川</span><span style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:{{ tk.bg }};color:{{ tk.fg }};align-self:flex-start;white-space:nowrap"><span class="ms" style="font-size:14px">{{ tk.ic }}</span>{{ tk.t }}</span></div>
+<sc-for list="{{ budgets }}" as="b" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:8px;font-size:12px"><span style="width:56px;color:var(--ink3)">{{ b.l }}</span><span style="flex:1;height:6px;border-radius:99px;background:var(--sk);overflow:hidden;display:block"><span style="display:block;height:6px;width:{{ b.w }};background:{{ b.c }}"></span></span><span style="width:70px;text-align:right">{{ b.v }}</span></div></sc-for>
+<sc-if value="{{ capped }}" hint-placeholder-val="{{ false }}"><div style="background:var(--warnbg);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.7;display:flex;gap:8px"><span class="ms" style="font-size:18px;color:var(--warn)">warning</span>已达上限，任务已停下。</div><div style="display:flex;gap:8px"><button style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">再继续一轮</button><button style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">结束</button></div></sc-if>
+<sc-if value="{{ broken }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">从断点继续</button><span style="font-size:12px;color:var(--ink3)">已完成的写入不会重复执行。</span></div></sc-if></div>
+<sc-if value="{{ compressAsk }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--acc);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;font-weight:600">压缩较早的对话以继续</div><div style="font-size:12px;line-height:1.7;color:var(--ink2)">对话已接近长度上限。压缩后可继续，较早内容保留要点。</div><div style="display:flex;gap:8px"><button style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">压缩并继续</button><button style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">不压缩</button></div></div></sc-if>
+<div style="font-size:12px;color:var(--ink3);margin:0 8px">事件时间线</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:4px 16px"><sc-for list="{{ events }}" as="e" hint-placeholder-count="6"><div style="display:flex;gap:12px;padding:8px 0"><span style="display:flex;flex-direction:column;align-items:center"><span class="ms" style="font-size:20px;color:{{ e.c }}">{{ e.ic }}</span><span style="flex:1;width:2px;background:var(--rule);margin-top:2px;display:{{ e.line }}"></span></span><span style="flex:1;font-size:13px;line-height:1.6">{{ e.t }}<span style="display:block;font-size:12px;color:var(--ink3)">{{ e.s }}</span><sc-if value="{{ e.auto }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12px;color:var(--ink3)">由授权放行 · <a href="#" onClick="{{ noop }}">查看授权</a></span></sc-if></span></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isModel }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:14px 16px;display:flex;flex-direction:column;gap:14px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">预设<button style="height:48px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;text-align:left;display:flex;align-items:center">示意服务商 · 示意模型<span class="ms" style="margin-left:auto;font-size:20px">expand_more</span></button></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">端点<input value="https://api.example-model.com/v1" style="height:48px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:14px;box-sizing:border-box"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">密钥<input type="password" value="" placeholder="已保存，不回显" style="height:48px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:14px;box-sizing:border-box"></label>
+<button onClick="{{ togStream }}" style="display:flex;align-items:center;gap:12px;min-height:48px;border:0;background:transparent;color:var(--ink);padding:0;font-size:14px;text-align:left"><span style="flex:1">流式输出</span><span style="{{ sw.a }}"><span style="{{ sw.b }}"></span></span></button></div>
+<button onClick="{{ test }}" style="height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">{{ testBtn }}</button>
+<sc-if value="{{ testOk }}" hint-placeholder-val="{{ false }}"><div style="background:var(--greenbg);border-radius:20px;padding:14px;font-size:13px;line-height:1.9"><div style="display:flex;gap:6px;align-items:center;font-weight:600;color:var(--green)"><span class="ms" style="font-size:20px">check_circle</span>已连通 · 首字 820 毫秒</div>流式：支持　原生工具调用：支持　JSON 模式：不支持</div></sc-if>
+<sc-if value="{{ testFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:14px;font-size:13px;line-height:1.7"><div style="display:flex;gap:6px;align-items:center;font-weight:600;color:var(--red)"><span class="ms" style="font-size:20px">error</span>连接失败</div>密钥无效或已过期。请检查密钥后重试。</div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isEgress }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2)">所有外传都先记账再发送，记不进账就不发送。</div>
+<div style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none"><sc-for list="{{ chans }}" as="c" hint-placeholder-count="6"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.t }}</button></sc-for></div>
+<sc-if value="{{ egNone }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:32px;color:var(--ink3);font-size:14px">该通道没有外传记录</div></sc-if>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ eg }}" as="r" hint-placeholder-count="4"><div style="padding:12px 0;border-top:{{ r.bt }};font-size:13px;line-height:1.7"><div style="display:flex;justify-content:space-between"><b style="font-weight:600">{{ r.ch }}</b><span style="color:{{ r.c }};font-weight:600">{{ r.st }}</span></div>{{ r.dst }}<div style="font-size:12px;color:var(--ink3)">{{ r.time }} · {{ r.b }} · 任务：{{ r.task }}</div></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isCap }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:14px 16px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px;font-weight:600;flex:1">{{ plug.n }}</span><span style="font-size:11px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--sk);color:var(--ink2)">{{ plug.layer }}</span></div><sc-if value="{{ plug.ext }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--warn);display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:16px">warning</span>外部数据：进入任务后暂停自动放行</div></sc-if></div>
+<div style="display:flex;gap:8px"><sc-for list="{{ plugs }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.go }}" style="{{ p.style }}">{{ p.t }}</button></sc-for></div>
+<div style="font-size:12px;color:var(--ink3);margin:0 8px">可用操作</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ ok }}" as="o" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:8px;min-height:52px;border-top:{{ o.bt }}"><span style="flex:1;font-size:13px;font-family:Consolas,Menlo,monospace">{{ o.t }}</span><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:{{ o.bg }};color:{{ o.fg }}">{{ o.tag }}</span></div></sc-for></div>
+<div style="font-size:12px;color:var(--ink3);margin:0 8px">暂不开放</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ no }}" as="o" hint-placeholder-count="2"><div style="padding:12px 0;border-top:{{ o.bt }};font-size:13px;line-height:1.6">{{ o.t }}<span style="display:block;font-size:12px;color:var(--ink3)">{{ o.why }}</span></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isSens }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ props }}" as="p" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:8px;min-height:56px;border-top:{{ p.bt }}"><span style="width:84px;font-size:12px;color:var(--ink3)">{{ p.k }}</span><span style="flex:1;font-size:14px">{{ p.v }}</span><sc-if value="{{ p.canShow }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p.go }}" style="height:48px;padding:0 14px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:12px;font-weight:600">显示</button></sc-if></div></sc-for></div>
+<sc-if value="{{ askShow }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--acc);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;font-weight:600">显示「{{ askK }}」？</div><div style="font-size:12px;line-height:1.7;color:var(--ink2)">将记录一次查看。30 秒后自动重新遮盖，不可复制。</div><div style="display:flex;gap:8px"><button onClick="{{ doShow }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">确认显示</button><button onClick="{{ cancelShow }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">取消</button></div></div></sc-if>
+</sc-if>
+
+</div></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'log', dark:null, tk:'run', ev:'ok', ch:0, plug:0, stream:true, tst:'idle', shown:{}, ask:null, cmpAsk:false };
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC', warn:'#8A5A00', warnbg:'#FFF1D6' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F', warn:'#E8C547', warnbg:'#2E2A10' };
+    const T = dark ? D : L;
+    const phoneStyle = { width:390, height:844, background:T.bg, borderRadius:44, border:'10px solid ' + (dark ? '#2A2A2A' : '#111827'), boxSizing:'content-box', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => phoneStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule, scr = s.screen;
+    const pill = (on) => `flex:none;height:48px;padding:0 16px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600;white-space:nowrap`;
+    const TK = { run:['执行中','autorenew',T.tint,T.deep], cap:['已达上限','warning',T.warnbg,T.warn], brk:['执行中断','error',T.redbg,T.red], done:['已完成','check_circle',T.greenbg,T.green] }[s.tk];
+    const full = s.tk === 'cap';
+    const bud = [['步数', full ? '100%' : '60%', full ? '20 / 20' : '12 / 20'], ['活动时长', full ? '62%' : '40%', full ? '3:05 / 5:00' : '2:00 / 5:00'], ['token', full ? '100%' : '35%', full ? '8,000 / 8,000' : '2,800 / 8,000']];
+    const budgets = bud.map(b => ({ l:b[0], w:b[1], v:b[2], c: b[1] === '100%' ? T.warn : T.acc }));
+    const EV = [['model','模型请求','请求远程模型 · 已确认发往此端点','cloud_upload',T.ink2,0],['p','提出操作','提出 2 项：inquiry.record_quote、transfer.send','pending_actions',T.acc,0],['c','确认','你确认 inquiry.record_quote（仅这一次）','check_circle',T.green,0],['x','执行','执行 inquiry.record_quote','play_circle',T.ink2,1],['r','结果','写入 1 条报价；transfer.send 等待确认','fact_check',T.green,0],['z','压缩','已压缩较早的对话','compress',T.ink3,0],['f','失败','发送询价单失败：网络中断','error',T.red,0]];
+    const events = s.ev === 'empty' ? [] : EV.map((e, i, a) => ({ t:e[2], s:e[1] + ' · 今天 10:' + (12 + i), ic:e[3], c:e[4], auto:!!e[5], line: i === a.length - 1 ? 'none' : 'block' }));
+    const CH = ['全部','模型请求','MCP','询价网页取证','公司资料中心','设备传输'];
+    const EG = [['模型请求','api.example-model.com/v1','2.1 KB','已发送',T.green,'比较华东泵站报价','10:12'],['MCP','mcp.example.com/tools','0.6 KB','已发送',T.green,'查询供应商资料','10:20'],['询价网页取证','example.com/product','1.4 KB','已发送',T.green,'—','昨天 16:40'],['公司资料中心','hub.example.com/docs','38 KB','未发送：记账失败',T.red,'发布报价','昨天 11:00'],['设备传输','工作站 · 本人设备','4.2 MB','已发送',T.green,'导入技术条款','10月5日']];
+    const eg = EG.filter(r => s.ch === 0 || r[0] === CH[s.ch]).map((r, i) => ({ ch:r[0], dst:r[1], b:r[2], st:r[3], c:r[4], task:r[5], time:r[6], bt:bt(i) }));
+    const PL = [{ n:'询价', layer:'原生插件', ext:false, ok:[['inquiry.compare_quotes','只读'],['inquiry.project_budget','只读'],['inquiry.search','只读'],['inquiry.data_quality','只读'],['inquiry.record_quote','写入'],['inquiry.create_inquiry','写入'],['transfer.send','外传']], no:[['导出报价表','导出类，后续开放'],['批量删除报价','破坏性操作，暂不开放']] },{ n:'某 OpenAPI 服务', layer:'声明式插件 · 只读', ext:true, ok:[['catalog.search','只读'],['catalog.item','只读']], no:[['下单','声明式插件仅只读']] },{ n:'行业规范库', layer:'内容插件', ext:false, ok:[], no:[['无可调用操作','内容插件只提供资料，不提供操作']] }];
+    const pg = PL[s.plug], tagC = { '只读':[T.sk,T.ink2], '写入':[T.tint,T.deep], '外传':[T.redbg,T.red] };
+    const PR = [['联系人电话','13800000000','个人'],['单价','32,100.00','商业'],['成交价','31,800.00','商业'],['访问令牌','sk-••••','凭据'],['供应商名称','华泵','']];
+    const props = PR.map((p, i) => { const sens = !!p[2], shown = !!s.shown[p[0]]; return { k:p[0], v: !sens || shown ? p[1] : '已遮盖 · ' + (p[2] === '个人' ? '个人信息' : p[2] === '商业' ? '商业信息' : '凭据'), canShow: sens && p[2] !== '凭据' && !shown, bt:bt(i), go:go({ ask:p[0] }) }; });
+    const sw = s.stream ? { a:`flex:none;position:relative;width:46px;height:28px;border-radius:99px;background:${T.acc};display:block`, b:`position:absolute;top:3px;left:21px;width:22px;height:22px;border-radius:99px;background:${T.onacc};display:block` } : { a:`flex:none;position:relative;width:46px;height:28px;border-radius:99px;background:${T.rs};display:block`, b:`position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:99px;background:${T.sf};display:block` };
+    const titles = { log:'执行记录', model:'模型设置', eg:'数据去向', cap:'助手能力', sens:'对象详情' };
+    const chipSt = (on) => `height:30px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+    const grp = (label, key, opts) => ({ label, chips:opts.map(([v, l]) => ({ label:l, style:chipSt(s[key] === v), go:go({ [key]:v }) })) });
+    return {
+      phoneStyle, title:titles[scr], isLog: scr === 'log', isModel: scr === 'model', isEgress: scr === 'eg', isCap: scr === 'cap', isSens: scr === 'sens',
+      navs: [['log','执行记录'],['model','模型设置'],['eg','数据去向'],['cap','插件详情 · 助手能力'],['sens','对象详情 · 敏感属性']].map(([k, l]) => ({ label:l, go:go({ screen:k }), style:`height:48px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${scr === k ? '#2458D3' : '#C3CAD6'};background:${scr === k ? '#E8EFFF' : '#fff'};color:${scr === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      groups: [grp('任务状态','tk',[['run','执行中'],['cap','已达上限'],['brk','中断'],['done','已完成']]), grp('时间线','ev',[['ok','有事件'],['empty','空']]), grp('模型连接测试','tst',[['idle','未测试'],['ok','成功'],['fail','失败']]), { label:'其他', chips:[{ label:'压缩确认框', style:chipSt(s.cmpAsk), go:go({ cmpAsk:!s.cmpAsk }) },{ label: dark ? '切到浅色' : '切到深色', style:chipSt(false), go:go({ dark:!dark }) }] }],
+      tk:{ t:TK[0], ic:TK[1], bg:TK[2], fg:TK[3] }, budgets, capped: s.tk === 'cap', broken: s.tk === 'brk', compressAsk: s.cmpAsk, events, noop:(e) => e.preventDefault(),
+      sw, togStream: go({ stream:!s.stream }), test: go({ tst: s.tst === 'ok' ? 'fail' : 'ok' }), testBtn: s.tst === 'idle' ? '测试连接' : '重新测试', testOk: s.tst === 'ok', testFail: s.tst === 'fail',
+      chans: CH.map((t, i) => ({ t, go:go({ ch:i }), style:pill(s.ch === i) })), eg, egNone: eg.length === 0,
+      plug: pg, plugs: PL.map((p, i) => ({ t:p.n, go:go({ plug:i }), style:pill(s.plug === i) })),
+      ok: pg.ok.map((o, i) => ({ t:o[0], tag:o[1], bg:tagC[o[1]][0], fg:tagC[o[1]][1], bt:bt(i) })), no: pg.no.map((o, i) => ({ t:o[0], why:o[1], bt:bt(i) })),
+      props, askShow: !!s.ask, askK: s.ask, doShow: () => { const k = s.ask; this.setState({ shown:{ ...s.shown, [k]:true }, ask:null }); clearTimeout(this.tm); this.tm = setTimeout(() => this.setState({ shown:{} }), 30000); }, cancelShow: go({ ask:null })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap}button{font-family:inherit;cursor:pointer}input{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:56px;justify-content:center;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;min-height:100vh;box-sizing:border-box">
+<div style="width:300px;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:24px">
+<div style="font-size:24px;font-weight:600">数据 · 交换 · 公司资料 · 设置</div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565"><b style="color:#111827">可进入的二级页</b><br>同步与交换 › 修改冲突<br>公司资料中心 › 详情 › 发布确认<br>询价设置</div>
+<sc-for list="{{ navs }}" as="n" hint-placeholder-count="6"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for>
+<div style="font-size:13px;line-height:1.8;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态切换说明</b><br>芯片强制显示对应状态。</div>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">{{ g.label }}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div></sc-for>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据。</div>
+</div>
+
+<div style="{{ phoneStyle }}">
+<div style="height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>9:41</span><span style="font-size:11px;font-weight:500;color:var(--ink3)">示意数据</span></div>
+<div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+<button onClick="{{ back }}" aria-label="返回" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span class="ms" style="font-size:22px">arrow_back</span></button>
+<div style="padding:0 18px;height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;font-size:15px;font-weight:600">{{ title }}</div><div style="width:48px"></div></div>
+<div class="fx" style="flex:1;min-height:0;overflow-y:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:14px">
+
+<sc-if value="{{ isXchg }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><sc-for list="{{ xitems }}" as="x" hint-placeholder-count="6"><button onClick="{{ x.go }}" style="width:100%;text-align:left;border:0;border-top:{{ x.bt }};background:transparent;color:var(--ink);padding:0;min-height:64px;display:flex;align-items:center;gap:14px" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ x.ic }}</span><span style="flex:1;padding:10px 0"><span style="display:block;font-size:15px">{{ x.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.5">{{ x.s }}</span></span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></button></sc-for></div>
+<sc-if value="{{ xOpen }}" hint-placeholder-val="{{ false }}"><div style="background:var(--sf);border:1px solid var(--rs);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px"><div style="font-size:15px;font-weight:600">{{ xTitle }}</div><div style="font-size:13px;line-height:1.8;color:var(--ink2)">{{ xText }}</div>
+<sc-if value="{{ xPass }}" hint-placeholder-val="{{ false }}"><label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink3)">交换口令<input type="password" value="exchange" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label><label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink3)">确认口令<input type="password" value="exchange" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label></sc-if>
+<sc-if value="{{ xStrong }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.7"><b style="color:var(--red)">会覆盖本机询价资料</b>，替换前自动保留一份备份。请输入“替换”以继续。<input value="" placeholder="替换" style="margin-top:8px;width:100%;height:44px;border-radius:8px;border:1px solid var(--red);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></div></sc-if>
+<div style="display:flex;gap:8px"><button onClick="{{ xClose }}" style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">取消</button><button onClick="{{ xClose }}" style="flex:1;height:44px;border-radius:999px;border:0;background:{{ xBtnBg }};color:{{ xBtnFg }};font-size:13px;font-weight:600">{{ xBtn }}</button></div></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isConf }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2)">两台设备改了同一处时会列在这里。确认前这些字段按最后导入的值显示；确认结果随同步传到其他设备。</div>
+<sc-if value="{{ confNone }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:36px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--green)">check_circle</span><br>没有待确认的冲突</div></sc-if>
+<sc-for list="{{ conflicts }}" as="c" hint-placeholder-count="2"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;font-weight:600">{{ c.t }}</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="background:var(--sk);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--ink3)">本机值</div><div style="font-size:14px;font-variant-numeric:tabular-nums">{{ c.a }}</div></div><div style="background:var(--sk);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--ink3)">对方值（{{ c.dev }}）</div><div style="font-size:14px;font-variant-numeric:tabular-nums">{{ c.b }}</div></div></div>
+<div style="display:flex;gap:8px"><button onClick="{{ c.keepA }}" style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">保留本机</button><button onClick="{{ c.keepB }}" style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">保留对方</button></div></div></sc-for>
+</sc-if>
+
+<sc-if value="{{ isCenter }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ cNo }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">cloud_off</span><br>还没有连接公司资料中心<br><button onClick="{{ toCset }}" style="margin-top:12px;height:44px;padding:0 24px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">去设置</button></div></sc-if>
+<sc-if value="{{ cFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;font-weight:600;color:var(--red)">暂时无法读取公司资料</div><div><button onClick="{{ setC('ok') }}" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">重试</button></div></div></sc-if>
+<sc-if value="{{ cEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">folder_shared</span><br>中心还没有共享资料<br>在供应商或报价的详情里选择“发布到公司资料”，同事就能看到。</div></sc-if>
+<sc-if value="{{ cOk }}" hint-placeholder-val="{{ false }}">
+<div style="height:44px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--ink3);font-size:14px"><span class="ms" style="font-size:20px">search</span>名称、型号或供应商</div>
+<div style="display:flex;gap:8px"><sc-for list="{{ ctabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.l }}</button></sc-for></div>
+<sc-for list="{{ crows }}" as="r" hint-placeholder-count="3"><button onClick="{{ toCdet }}" style="text-align:left;border:1px solid var(--rule);background:var(--sf);color:var(--ink);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px;opacity:{{ r.op }}"><span style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:15px;font-weight:500">{{ r.t }}</span><span style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums">{{ r.p }}</span></span><span style="font-size:12px;color:var(--ink2)">{{ r.s }}</span><span style="display:flex;gap:6px;align-items:center;font-size:11px;font-weight:600"><span style="padding:2px 8px;border-radius:999px;background:{{ r.bg }};color:{{ r.fg }}">{{ r.st }}</span></span></button></sc-for></sc-if>
+</sc-if>
+
+<sc-if value="{{ isCdet }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px"><div style="font-size:17px;font-weight:600">离心泵 HB-200 · 华泵</div><div style="font-size:13px;color:var(--ink2)">¥32,100.00 · 含税 · 报价日期 09-12</div><div style="font-size:12px;color:var(--ink3)">来源项目：华东泵站改造</div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:var(--ink3)">评价</div><div style="font-size:14px">交货准时、售后响应慢</div><div style="font-size:12px;color:var(--ink3);margin-top:6px">发布历史（3 条记录）</div><div style="font-size:13px;line-height:1.8">09-14 发布 · 10-02 更新 · 10-05 已撤回后重新发布</div></div>
+<button onClick="{{ askPub }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">发布到公司资料</button>
+</sc-if>
+
+<sc-if value="{{ isCset }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:14px"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">中心地址<input value="http://192.168.1.20:8080" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label>
+<div style="background:var(--warnbg);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.7;display:flex;gap:8px"><span class="ms" style="font-size:18px;color:var(--warn)">warning</span>http 地址发往其他电脑时是明文传输，内容可能被同网段的人看到。</div>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">访问令牌<input type="password" value="••••••••" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"><span>存入系统安全存储，界面不会回显。</span></label></div>
+<button style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">保存并测试连接</button>
+</sc-if>
+
+<sc-if value="{{ isIset }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:14px"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">本机名称<input value="王工的工作站" style="height:44px;border-radius:8px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"><span>1–40 字，用于交换文件名和变更记录。</span></label>
+<div><div style="font-size:12px;color:var(--ink3);margin-bottom:6px">外观</div><div style="display:flex;gap:6px"><sc-for list="{{ looks }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.t }}</button></sc-for></div></div>
+<button onClick="{{ togRm }}" style="display:flex;align-items:center;gap:12px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 12px;text-align:left;min-height:64px"><span style="flex:1"><span style="display:block;font-size:14px;font-weight:600">减少动态效果</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.5">关闭页面位移和加载动画；系统设置始终优先。</span></span><span style="{{ rmSw }}"><span style="{{ rmKnob }}"></span></span></button></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:20px;padding:0 16px"><button style="width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:0;min-height:56px;display:flex;align-items:center;gap:12px;font-size:14px"><span class="ms" style="font-size:22px;color:var(--ink2)">delete_outline</span><span style="flex:1">已删除的记录</span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></button></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">诊断信息</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:12px;padding:0 14px"><sc-for list="{{ diag }}" as="d" hint-placeholder-count="6"><div style="display:flex;justify-content:space-between;padding:10px 0;border-top:{{ d.bt }};font-size:13px"><span style="color:var(--ink2)">{{ d.k }}</span><span style="font-variant-numeric:tabular-nums">{{ d.v }}</span></div></sc-for></div></div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ pubCard }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:flex-end;z-index:5"><div style="width:100%;max-height:92%;overflow-y:auto;background:var(--sf);border-radius:24px 24px 0 0;padding:20px 16px 24px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box"><div style="font-size:16px;font-weight:600">发布到公司资料前请确认</div>
+<div style="font-size:13px;line-height:1.9;color:var(--ink2)"><b style="color:var(--ink)">做什么</b>　把下列记录写入公司资料中心<br><b style="color:var(--ink)">对谁</b>　公司资料中心（192.168.1.20）<br><b style="color:var(--ink)">摘要散列</b>　<span style="font-family:Consolas,Menlo,monospace">c07d·1a92·5be4</span></div>
+<div style="font-size:12px;color:var(--ink3)">随同发布的每一条记录</div><div style="background:var(--sk);border-radius:12px;padding:0 12px"><sc-for list="{{ pubRows }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.go }}" style="width:100%;text-align:left;border:0;border-top:{{ r.bt }};background:transparent;color:var(--ink);padding:0;min-height:48px;display:flex;align-items:center;gap:10px;font-size:13px"><span class="ms" style="font-size:22px;color:{{ r.c }}">{{ r.ic }}</span><span style="flex:1">{{ r.t }}</span><span style="font-size:11px;color:var(--ink3)">{{ r.n }}</span></button></sc-for></div>
+<sc-if value="{{ pubProj }}" hint-placeholder-val="{{ false }}"><div style="background:var(--warnbg);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.7">包含项目，会带上客户和合同金额。</div></sc-if>
+<div style="font-size:12px;color:var(--ink3);line-height:1.7">联系人默认不带，需明确勾选。停止本地操作不会撤回远端写入；结果不明时必须先核验。</div>
+<div style="display:flex;gap:8px"><button onClick="{{ pubNo }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">拒绝</button><button onClick="{{ pubNo }}" style="flex:2;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">允许本次请求</button></div></div></div></sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'xchg', dark:null, dt:0, obj:0, qmode:0, qst:'ok', mcp:false, tnone:false, xo:null, conf:[{ t:'供应商 · 华泵 · 评价说明', a:'交货准时', b:'交货准时、售后响应慢', dev:'李经理的笔记本' },{ t:'报价 Q-0412 · 单价', a:'32,100.00', b:'31,800.00', dev:'李经理的笔记本' }], cst:'ok', ctab:0, pub:false, pubSel:[0], look:0, rm:false };
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC', warn:'#8A5A00', warnbg:'#FFF1D6' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F', warn:'#E8C547', warnbg:'#2E2A10' };
+    const T = dark ? D : L;
+    const phoneStyle = { width:390, height:844, background:T.bg, borderRadius:44, border:'10px solid ' + (dark ? '#2A2A2A' : '#111827'), boxSizing:'content-box', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => phoneStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const pill = (on, h = 40) => `flex:none;height:${h}px;padding:0 16px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600;white-space:nowrap`;
+    const sw = (on) => [`flex:none;position:relative;width:46px;height:28px;border-radius:99px;background:${on ? T.acc : T.rs};display:block`, `position:absolute;top:3px;left:${on ? 21 : 3}px;width:22px;height:22px;border-radius:99px;background:${on ? T.onacc : T.sf};display:block`];
+    const scr = s.screen;
+    const OBJ = [['项目','folder',[['引用了','客户、技术要求'],['被引用于','预算行、询价单、报价']],[['project_no','文本','必填','项目编号'],['contract_amount','金额','选填','合同金额'],['markup_pct','数字','选填','加价率 %'],['price_basis','枚举','必填','含税 / 不含税']],'一个投标或实施项目，是预算与询价的容器。'],['报价','request_quote',[['引用了','供应商、物料、项目'],['被引用于','预算行、询价单、比价'],['同类引用','同供应商同物料的历史报价']],[['unit_price','金额','必填','单价'],['price_basis','枚举','必填','含税 / 不含税 / 未知'],['valid_until','日期','选填','有效期至'],['tiers','列表','选填','阶梯价']],'供应商对物料在某一时点的价格。'],['供应商','storefront',[['被引用于','报价、联系人'],['同类引用','别名合并的重复供应商']],[['name','文本','必填','名称'],['disabled','布尔','选填','停用后不参与有效报价'],['rating_note','文本','选填','评价说明']],'提供物料的公司。'],['物料','inventory_2',[['被引用于','报价、预算行、技术要求匹配']],[['model','文本','必填','型号'],['unit','文本','必填','基准单位'],['params','列表','选填','物料参数']],'可采购的物品，含型号与参数。'],['预算行','table_rows',[['引用了','项目、物料、报价']],[['qty','数字','必填','数量'],['cost_unit','金额','必填','成本单价']],'项目成本预算里的一行。']];
+    const od = OBJ[s.obj];
+    const DT = ['数据模型','数据质量','AI 接入','动作','流程','AI 知识'];
+    const QG = [['项目与技术要求',[['技术要求缺设备类别',2,'项需求','预览补全'],['条款未核对',5,'条条款','打开完整列表']]],['物料参数',[['物料缺参数',7,'项物料','预览补全']]],['报价',[['报价已过期仍在预算中',3,'组','打开完整列表'],['含税口径未知',2,'条报价','打开完整列表']]],['供应商与数据一致性',[['疑似重复供应商',1,'家供应商','打开完整列表'],['待确认的修改冲突',2,'项冲突','打开完整列表']]]];
+    const qAll = s.qmode === 1;
+    const qgroups = s.qst === 'none' ? [] : QG.map(g => ({ t:g[0], tool: g[0] === '物料参数', items: g[1].map((i, k) => ({ t:i[0], n:i[1], u:i[2], act:i[3], c:T.red, bt:bt(k) })) })).concat(qAll ? [{ t:'已通过的检查', tool:false, items:[{ t:'报价都有供应商', n:0, u:'条报价', act:'查看', c:T.green, bt:'none' }] }] : []);
+    const TOOLS = [['inquiry.compare_quotes','按物料比价，返回比较价与状态','只读'],['inquiry.project_budget','项目预算与成本合计','只读'],['inquiry.search_material','按型号、名称或拼音查物料','只读'],['inquiry.create_inquiry','新建询价单（确认后写入）','写入']];
+    const tl = s.tnone ? [] : TOOLS;
+    const XI = [['file_upload','导出交换文件','加密；对方需要设置同一个交换口令','exp'],['file_download','导入交换文件','先预览差异，再确认写入','imp'],['published_with_changes','从交换快照替换询价资料','覆盖本机，需强确认','rep'],['restore','从备份恢复整个资料库','在“数据与存储”中由宿主统一管理','bak'],['folder_shared','文件夹同步','同步面板：状态与最近一次同步','dir'],['wifi_tethering','局域网推送','把项目推送到同网络的设备','lan'],['merge_type','修改冲突','两台设备改了同一处','conf']];
+    const XT = { exp:['导出交换文件','文件会加密。对方需要设置同一个交换口令才能导入。',1,0,'导出'], imp:['导入交换文件','先预览：新增 4 条、更新 2 条、冲突 1 条。确认前不会写入。',0,0,'确认导入'], rep:['从交换快照替换询价资料','用快照整体替换本机询价资料。',0,1,'替换'], dir:['文件夹同步','文件夹：D:\\共享\\询价 · 最近一次同步 今天 09:05 · 状态：正常',0,0,'立即同步'], lan:['局域网推送','发现 2 台设备：李经理的笔记本、仓库平板。推送前需对方确认接收。',0,0,'推送'] };
+    const xo = s.xo ? XT[s.xo] : null;
+    const CR = [['离心泵 HB-200 · 华泵','¥32,100.00','含税 · 09-12 · 华东泵站改造','可用',T.greenbg,T.green,1],['变频器 VF-30 · 电驰','¥4,880.00','口径未知 · 09-25 · 北区改造','含税口径未知',T.warnbg,T.warn,1],['阀门 DN100 · 老宋阀门','¥612.00','含税 · 08-01 · —','已撤回',T.sk,T.ink2,0.6]];
+    const cs = s.cst;
+    const PUB = [['storefront','供应商 · 华泵','1',T.ink,1],['request_quote','报价 · HB-200 ×2','2',T.ink,1],['folder','项目 · 华东泵站改造','1',T.warn,0],['contacts','联系人 · 张经理（默认不带）','1',T.ink3,0]];
+    const pubSel = s.pubSel;
+    const titles = { dhub:'数据中心', xchg:'同步与交换', conf:'修改冲突', center:'公司资料中心', cdet:'公司资料详情', cset:'公司资料设置', iset:'询价设置' };
+    const backMap = { dhub:'dhub', xchg:'xchg', conf:'xchg', center:'center', cdet:'center', cset:'center', iset:'iset' };
+    const navDefs = [['xchg','同步与交换'],['conf','修改冲突'],['center','公司资料中心'],['cdet','资料详情 › 发布确认'],['cset','公司资料设置'],['iset','询价设置']];
+    const chipSt = (on) => `height:30px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+    const grp = (label, key, opts) => ({ label, chips: opts.map(([v, l]) => ({ label:l, style:chipSt(s[key] === v), go: go({ [key]:v }) })) });
+    const rmS = sw(s.rm);
+    return {
+      phoneStyle, title:titles[scr], back: go({ screen:backMap[scr] }),
+      navs: navDefs.map(([k, l]) => ({ label:l, go: k === 'cdet' ? go({ screen:'cdet', pub:true }) : go({ screen:k, pub:false }), style:`height:40px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${scr === k ? '#2458D3' : '#C3CAD6'};background:${scr === k ? '#E8EFFF' : '#fff'};color:${scr === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      groups: [grp('数据质量状态','qst',[['ok','有问题'],['none','无问题']]), grp('公司资料状态','cst',[['ok','正常'],['no','未连接'],['empty','空'],['fail','失败']]), { label:'其他', chips:[{ label:'AI 工具搜索无结果', style:chipSt(s.tnone), go:go({ tnone:!s.tnone }) },{ label:'清空冲突', style:chipSt(s.conf.length === 0), go:go({ conf: s.conf.length ? [] : [{ t:'供应商 · 华泵 · 评价说明', a:'交货准时', b:'交货准时、售后响应慢', dev:'李经理的笔记本' }] }) },{ label: dark ? '切到浅色' : '切到深色', style:chipSt(false), go:go({ dark:!dark }) }] }],
+      isDhub: scr === 'dhub', isXchg: scr === 'xchg', isConf: scr === 'conf', isCenter: scr === 'center', isCdet: scr === 'cdet', isCset: scr === 'cset', isIset: scr === 'iset',
+      dtabs: DT.map((l, i) => ({ l, go:go({ dt:i }), style:pill(s.dt === i) })), dModel: s.dt === 0, dQual: s.dt === 1, dAi: s.dt === 2, dList: s.dt === 3 || s.dt === 4, dGate: s.dt === 5,
+      objs: OBJ.map((o, i) => ({ t:o[0], ic:o[1], go:go({ obj:i }), style:pill(s.obj === i, 44).replace('flex:none;', 'flex:none;display:flex;align-items:center;gap:6px;') })),
+      od: { name:od[0], desc:od[4], rels: od[2].map(r => ({ k:r[0], v:r[1] })), fields: od[3].map(f => ({ n:f[0], t:f[1], req:f[2], bg: f[2] === '必填' ? T.tint : T.sk, fg: f[2] === '必填' ? T.deep : T.ink2 })) },
+      qmodes: [['待处理',0],['全部',1]].map(([t, v]) => ({ t, go:go({ qmode:v }), style:pill(s.qmode === v, 44).replace('flex:none;', 'flex:1;') })), qNone: s.qst === 'none', qgroups,
+      toolNone: s.tnone, tools: tl.map((t, i) => ({ n:t[0], d:t[1], k:t[2], bt:bt(i) })), togMcp: go({ mcp:!s.mcp }), mcpOpen: s.mcp, mcpIc: s.mcp ? 'expand_less' : 'expand_more',
+      dlist: (s.dt === 3 ? [['新建询价单','写入','参数：项目、物料、供应商；确认卡列出将创建的内容。'],['定标','写入','参数：报价、成交单价、理由；确认后改预算成本单价。'],['发布到公司资料','外传','需统一确认卡，列出每条记录。']] : [['询价到定标','5 步','建询价单 → 发出 → 回收报价 → 比价 → 定标'],['技术要求到定选','4 步','导入 → 核对条款 → 匹配 → 定选'],['报价时效维护','3 步','提醒 → 更新或失效 → 重新比价']]).map((a, i) => ({ t:a[0], k:a[1], d:a[2], bt:bt(i) })),
+      xitems: XI.map((x, i) => ({ ic:x[0], t:x[1], s:x[2], bt:bt(i), go: x[3] === 'conf' ? go({ screen:'conf' }) : x[3] === 'bak' ? go({ xo:null }) : go({ xo:x[3] }) })),
+      xOpen: !!xo, xTitle: xo ? xo[0] : '', xText: xo ? xo[1] : '', xPass: xo ? !!xo[2] : false, xStrong: xo ? !!xo[3] : false, xBtn: xo ? xo[4] : '', xBtnBg: xo && xo[3] ? T.red : T.acc, xBtnFg: xo && xo[3] ? '#fff' : T.onacc, xClose: go({ xo:null }),
+      confNone: s.conf.length === 0, conflicts: s.conf.map((c, i) => ({ ...c, keepA: go({ conf: s.conf.filter((_, j) => j !== i) }), keepB: go({ conf: s.conf.filter((_, j) => j !== i) }) })),
+      cNo: cs === 'no', cFail: cs === 'fail', cEmpty: cs === 'empty', cOk: cs === 'ok', toCset: go({ screen:'cset' }), setC: (v) => go({ cst:v }),
+      ctabs: ['历史报价','供应商'].map((l, i) => ({ l, go:go({ ctab:i }), style:pill(s.ctab === i, 40).replace('flex:none;', 'flex:1;') })),
+      crows: CR.map(r => ({ t:r[0], p:r[1], s:r[2], st:r[3], bg:r[4], fg:r[5], op:r[6] })), toCdet: go({ screen:'cdet' }),
+      askPub: go({ pub:true }), pubCard: s.pub && scr === 'cdet', pubNo: go({ pub:false }), pubProj: pubSel.includes(2),
+      pubRows: PUB.map(([ic, t, n, c, def], i) => { const on = pubSel.includes(i); return { ic: on ? 'check_box' : 'check_box_outline_blank', c: on ? T.acc : T.ink3, t, n:n + ' 条', bt:bt(i), go: () => this.setState({ pubSel: on ? pubSel.filter(k => k !== i) : [...pubSel, i] }) }; }),
+      looks: ['跟随系统','浅色','深色'].map((t, i) => ({ t, go:go({ look:i }), style:pill(s.look === i, 44).replace('flex:none;padding:0 16px;', 'flex:1;padding:0 8px;') })), togRm: go({ rm:!s.rm }), rmSw: rmS[0], rmKnob: rmS[1],
+      diag: [['版本','1.4.2'],['数据位置','~/Muyon/inquiry'],['自动备份','今天 03:00'],['项目 / 报价','6 / 41'],['供应商 / 物料','12 / 212'],['预算行 / 技术要求','58 / 2']].map((d, i) => ({ k:d[0], v:d[1], bt:bt(i) }))
+    };
+  }
+}
+</script>
+</body>
+</html>
