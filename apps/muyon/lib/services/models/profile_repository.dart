@@ -1,5 +1,6 @@
 import '../../workspace/workspace_repository.dart';
 import 'model_gateway.dart';
+import 'model_provider.dart';
 
 class ProfileRepository {
   ProfileRepository(this.workspaces);
@@ -20,6 +21,9 @@ class ProfileRepository {
           purpose: ModelPurpose.values.byName(
             item['purpose'] as String? ?? 'chat',
           ),
+          // No key = compatibility mode; the one-time migration (bootstrap)
+          // is what writes it for saved chat profiles, never this read.
+          capabilities: ModelCapabilities.fromJson(item['capabilities']),
         ),
     ];
   }

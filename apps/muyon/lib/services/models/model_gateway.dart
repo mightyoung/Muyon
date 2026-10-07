@@ -4,6 +4,7 @@ import 'dart:io';
 
 import '../../platform/outbound_ledger.dart';
 import 'credential_redaction.dart';
+import 'model_provider.dart';
 
 enum ModelLocation { local, ownDevice, remote }
 
@@ -40,6 +41,7 @@ class ModelProfile {
     this.credentialRef,
     this.cloudProxy = false,
     this.purpose = ModelPurpose.chat,
+    this.capabilities = ModelCapabilities.compat,
   }) : endpoint = completeModelEndpoint(endpoint, purpose) {
     if (!this.endpoint.hasAuthority ||
         this.endpoint.userInfo.isNotEmpty ||
@@ -70,6 +72,16 @@ class ModelProfile {
   final String? credentialRef;
   final bool cloudProxy;
   final ModelPurpose purpose;
+
+  /// Declared by the person (or a preset); code-constructed profiles are
+  /// compatibility mode, non-streaming.
+  final ModelCapabilities capabilities;
+
+  /// [toJson] without the capability block: the shape digests had before
+  /// capabilities existed, so they do not change with the upgrade.
+  Map<String, Object?> toJsonWithoutCapabilities() =>
+      toJson()..remove('capabilities');
+
   Map<String, Object?> toJson() => {
     'id': id,
     'endpoint': endpoint.toString(),
@@ -79,6 +91,7 @@ class ModelProfile {
     'credentialRef': credentialRef,
     'cloudProxy': cloudProxy,
     'purpose': purpose.name,
+    'capabilities': capabilities.toJson(),
   };
 }
 
@@ -114,6 +127,9 @@ class OpenAiModelGateway {
     this.secrets, {
     this.timeout = const Duration(seconds: 45),
     this.maxResponseBytes = 2 * 1024 * 1024,
+    this.connectTimeout = const Duration(seconds: 15),
+    this.idleTimeout = const Duration(seconds: 60),
+    this.streamLimit = const Duration(minutes: 5),
     HttpClient Function()? clientFactory,
     this.ledger,
   }) : _clientFactory = clientFactory ?? HttpClient.new;
@@ -123,6 +139,11 @@ class OpenAiModelGateway {
   /// means the request is not sent.
   final OutboundLedger? ledger;
   final Duration timeout;
+
+  /// Streaming requests (ADR-0005 §6.1): connecting, silence between two
+  /// chunks, and the absolute length of one request. They replace [timeout],
+  /// which still covers the non-streaming [chat] / [request] / [embed].
+  final Duration connectTimeout, idleTimeout, streamLimit;
   final int maxResponseBytes;
   final HttpClient Function() _clientFactory;
 
@@ -249,66 +270,22 @@ class OpenAiModelGateway {
   }) async {
     final frozenPayload = jsonEncode(payload);
     final items = payload['messages'] ?? payload['input'];
-    String? recordId;
-    String? usedCredential;
-    var sent = false;
-    int? httpStatus;
     if (utf8.encode(frozenPayload).length > 2 * 1024 * 1024) {
       throw ArgumentError('Model payload too large');
     }
     final token = cancellation ?? ModelCancellation();
     token.check();
-    final client = _clientFactory();
-    void abort() => client.close(force: true);
-    token.add(abort);
+    final channel = _GatewayChannel(this, profile, token, streamed: false);
     try {
       return await (() async {
-        final credential = profile.credentialRef == null
-            ? null
-            : await secrets.read(profile.credentialRef!);
-        token.check();
-        if (profile.credentialRef != null &&
-            (credential == null || credential.isEmpty)) {
-          throw StateError('credential_unavailable');
-        }
-        // Checked before approval and before the ledger row: a key dart:io
-        // cannot put in a header would otherwise fail with the whole header,
-        // key included, in the exception text.
-        if (credential != null && !isSendableCredential(credential)) {
-          throw StateError('credential_invalid');
-        }
-        usedCredential = credential;
-        if (beforeSend != null) await beforeSend();
-        token.check();
-        recordId = await ledger?.begin(
-          caller: caller,
-          profile: profile,
+        await channel.open(
           payload: frozenPayload,
           itemCount: items is List ? items.length : 1,
+          caller: caller,
+          beforeSend: beforeSend,
         );
-        token.check();
-        final request = await client.postUrl(profile.endpoint);
-        request.followRedirects = false;
-        request.headers.contentType = ContentType.json;
-        if (credential != null) {
-          request.headers.set(
-            HttpHeaders.authorizationHeader,
-            'Bearer $credential',
-          );
-        }
-        request.write(frozenPayload);
-        sent = true;
-        final response = await request.close();
-        httpStatus = response.statusCode;
-        if (response.statusCode != 200) {
-          throw HttpException('model_http_${response.statusCode}');
-        }
         final bytes = <int>[];
-        await for (final chunk in response) {
-          token.check();
-          if (bytes.length + chunk.length > maxResponseBytes) {
-            throw StateError('model_response_too_large');
-          }
+        await for (final chunk in channel.body) {
           bytes.addAll(chunk);
         }
         token.check();
@@ -325,53 +302,376 @@ class OpenAiModelGateway {
           throw const FormatException('model_response_not_object');
         }
         final decoded = parsed;
-        await _finish(recordId, 'succeeded', httpStatus, null);
+        await channel.finish(const OutboundOutcome(OutboundStatus.succeeded));
         return decoded;
       })().timeout(timeout);
     } on TimeoutException {
       token.cancel();
-      await _finish(recordId, 'timeout', httpStatus, _when(sent));
+      await channel.finish(
+        OutboundOutcome(OutboundStatus.timeout, error: channel.stoppedNote),
+      );
       rethrow;
     } catch (error, stack) {
-      final status = token.isCancelled ? 'cancelled' : 'failed';
-      await _finish(
-        recordId,
-        status,
-        httpStatus,
-        token.isCancelled
-            ? _when(sent)
-            : redactCredentials(error, secret: usedCredential),
-      );
-      // Callers store and show error text (tasks, notifications, receipts);
-      // an error that quotes the key, or a header carrying it, leaves the
-      // gateway already redacted.
-      final safe = redactCredentials(error, secret: usedCredential);
-      if (safe != '$error') {
-        Error.throwWithStackTrace(StateError(safe), stack);
-      }
-      rethrow;
+      await channel.fail(error, stack);
     } finally {
-      token.remove(abort);
-      abort();
+      channel.dispose();
     }
   }
 
-  static String _when(bool sent) => sent
-      ? 'Stopped after the request was sent; the endpoint may have processed it'
-      : 'Stopped before the request was sent';
+  /// One model request as events (ADR-0005 §4.4, §5). Same order as
+  /// [request]: credential, `beforeSend`, `ledger.begin`, send. A failed
+  /// `begin` sends nothing. One ledger row spans the whole stream and is
+  /// finished once: `succeeded` after [Done], `failed` for an HTTP error,
+  /// a provider error event or a body that ends without a finish reason
+  /// (`stream_truncated`, with `bytes_received`), `timeout` for a silent
+  /// connection or a stream past its limit, `cancelled` when the caller
+  /// cancels or stops listening. Pre-send failures and non-200 answers are
+  /// thrown (an [HttpException] `model_http_<code>`, redacted like
+  /// [request]), as is a connection that drops mid-stream; a provider error
+  /// event or a body that ends without a finish reason is a [ModelError].
+  /// There is no fallback to another protocol, model or endpoint.
+  ///
+  /// [maxDuration] caps one request below [streamLimit] (the host passes what
+  /// is left of its active-time budget).
+  Stream<ModelEvent> chatStream({
+    required ModelProvider provider,
+    required ModelRequest request,
+    ModelCancellation? cancellation,
+    Future<void> Function()? beforeSend,
+    Duration? maxDuration,
+  }) async* {
+    if (request.profile.purpose != ModelPurpose.chat) {
+      throw StateError('Model profile is not configured for chat');
+    }
+    final key = '${request.profile.endpoint}|${request.profile.modelId}';
+    var attempt = request.jsonObject && _noJsonObject.contains(key)
+        ? request.withoutJsonObject()
+        : request;
+    final first = attempt;
+    while (true) {
+      try {
+        // Not `yield*`: that forwards an error to the listener instead of
+        // throwing it here, where the resend rule below must see it.
+        await for (final event in _streamOnce(
+          provider,
+          attempt,
+          cancellation,
+          beforeSend,
+          maxDuration,
+        )) {
+          yield event;
+        }
+        if (!identical(attempt, first)) _noJsonObject.add(key);
+        return;
+      } on HttpException catch (error) {
+        // Same rule as [chat], for non-streaming requests only: an endpoint
+        // that rejects response_format (400/422) gets the confirmed content
+        // once more without it; both requests are in the ledger. A streamed
+        // request is never resent: a 400/422 could just as well be about
+        // `stream`, so the caller fails with a fixed reason instead.
+        final rejected =
+            error.message == 'model_http_400' ||
+            error.message == 'model_http_422';
+        if (attempt.profile.capabilities.streaming ||
+            !attempt.jsonObject ||
+            !rejected) {
+          rethrow;
+        }
+        attempt = attempt.withoutJsonObject();
+      }
+    }
+  }
+
+  Stream<ModelEvent> _streamOnce(
+    ModelProvider provider,
+    ModelRequest request,
+    ModelCancellation? cancellation,
+    Future<void> Function()? beforeSend,
+    Duration? maxDuration,
+  ) async* {
+    final frozenPayload = jsonEncode(provider.encode(request));
+    if (utf8.encode(frozenPayload).length > 2 * 1024 * 1024) {
+      throw ArgumentError('Model payload too large');
+    }
+    final token = cancellation ?? ModelCancellation();
+    token.check();
+    final channel = _GatewayChannel(
+      this,
+      request.profile,
+      token,
+      streamed: request.profile.capabilities.streaming,
+    );
+    var limitHit = false;
+    var finished = false;
+    Timer? limit;
+    int? promptTokens, completionTokens;
+    final cap = maxDuration != null && maxDuration < streamLimit
+        ? maxDuration
+        : streamLimit;
+    try {
+      // The cap runs from the start, so a server that accepts the connection
+      // and never answers cannot hold the request past it either.
+      limit = Timer(cap, () {
+        limitHit = true;
+        channel.abort();
+      });
+      final streamed = request.profile.capabilities.streaming;
+      final base = streamed ? idleTimeout : timeout;
+      await channel.open(
+        payload: frozenPayload,
+        itemCount: request.messages.length,
+        caller: request.caller,
+        beforeSend: beforeSend,
+        requestDigest: request.requestDigest,
+        headerTimeout: base < cap ? base : cap,
+      );
+      ModelError? failure;
+      var done = false;
+      await for (final event in provider.decode(request, channel.body)) {
+        if (event is Usage) {
+          promptTokens = event.promptTokens;
+          completionTokens = event.completionTokens;
+        }
+        yield event;
+        if (event is Done) done = true;
+        if (event is ModelError) failure = event;
+        if (done || failure != null) break;
+      }
+      token.check();
+      if (limitHit) throw TimeoutException('model_stream_limit');
+      if (!done && failure == null) {
+        failure = ModelError(
+          'stream_truncated',
+          partialOutput: channel.bytesReceived > 0,
+        );
+        yield failure;
+      }
+      finished = true;
+      await channel.finish(
+        failure == null
+            ? OutboundOutcome(
+                OutboundStatus.succeeded,
+                promptTokens: promptTokens,
+                completionTokens: completionTokens,
+              )
+            : OutboundOutcome(
+                OutboundStatus.failed,
+                error: failure.code,
+                promptTokens: promptTokens,
+                completionTokens: completionTokens,
+              ),
+      );
+    } on TimeoutException {
+      finished = true;
+      token.cancel();
+      await channel.finish(
+        OutboundOutcome(OutboundStatus.timeout, error: channel.stoppedNote),
+      );
+      rethrow;
+    } catch (error, stack) {
+      if (limitHit) {
+        finished = true;
+        await channel.finish(
+          OutboundOutcome(OutboundStatus.timeout, error: channel.stoppedNote),
+        );
+        throw TimeoutException('model_stream_limit');
+      }
+      finished = true;
+      // Stopping the client makes the body fail with a connection error:
+      // that is the caller's cancellation, not a new failure.
+      await channel.fail(
+        token.isCancelled && error is! StateError
+            ? StateError('cancelled')
+            : error,
+        stack,
+      );
+    } finally {
+      limit?.cancel();
+      if (!finished) {
+        // The listener went away (or the generator was closed) mid-stream.
+        await channel.finish(
+          OutboundOutcome(OutboundStatus.cancelled, error: channel.stoppedNote),
+        );
+      }
+      channel.dispose();
+    }
+  }
 
   Future<void> _finish(
     String? id,
-    String status,
-    int? httpStatus,
-    String? error,
-  ) async {
+    OutboundOutcome outcome,
+    int? httpStatus, {
+    int? firstByteMs,
+    int? bytesReceived,
+  }) async {
     if (id == null) return;
     try {
-      await ledger!.finish(id, status, httpStatus: httpStatus, error: error);
+      await ledger!.finish(
+        id,
+        outcome.status.name,
+        httpStatus: httpStatus,
+        error: outcome.error,
+        promptTokens: outcome.promptTokens,
+        completionTokens: outcome.completionTokens,
+        firstByteMs: firstByteMs,
+        bytesReceived: bytesReceived,
+      );
     } catch (_) {
       // Left as 'sending'; recoverInterrupted() marks it on next start. The
       // request's own result/error is what the caller must see.
     }
+  }
+}
+
+/// The gateway's one outbound path (ADR-0005 §4.4): credential, `beforeSend`,
+/// ledger row, send, status check, then the body with its limits.
+class _GatewayChannel implements OutboundChannel {
+  _GatewayChannel(
+    this._gateway,
+    this.profile,
+    this.token, {
+    required this.streamed,
+  }) : _client = _gateway._clientFactory() {
+    if (streamed) _client.connectionTimeout = _gateway.connectTimeout;
+    token.add(abort);
+  }
+  final OpenAiModelGateway _gateway;
+  final ModelProfile profile;
+  final ModelCancellation token;
+
+  /// Streaming requests also record first byte, size and an idle limit.
+  final bool streamed;
+  final HttpClient _client;
+  HttpClientResponse? _response;
+  String? _recordId;
+  String? _usedCredential;
+  bool _sent = false;
+  int? _httpStatus;
+  int _bytes = 0;
+  int? _firstByteMs;
+  final _sinceBegin = Stopwatch();
+
+  void abort() => _client.close(force: true);
+
+  void dispose() {
+    token.remove(abort);
+    abort();
+  }
+
+  @override
+  int get bytesReceived => _bytes;
+
+  String get stoppedNote => _sent
+      ? 'Stopped after the request was sent; the endpoint may have processed it'
+      : 'Stopped before the request was sent';
+
+  Future<void> open({
+    required String payload,
+    required int itemCount,
+    required String caller,
+    Future<void> Function()? beforeSend,
+    String? requestDigest,
+    Duration? headerTimeout,
+  }) async {
+    final credential = profile.credentialRef == null
+        ? null
+        : await _gateway.secrets.read(profile.credentialRef!);
+    token.check();
+    if (profile.credentialRef != null &&
+        (credential == null || credential.isEmpty)) {
+      throw StateError('credential_unavailable');
+    }
+    // Checked before approval and before the ledger row: a key dart:io
+    // cannot put in a header would otherwise fail with the whole header,
+    // key included, in the exception text.
+    if (credential != null && !isSendableCredential(credential)) {
+      throw StateError('credential_invalid');
+    }
+    _usedCredential = credential;
+    if (beforeSend != null) await beforeSend();
+    token.check();
+    _recordId = await _gateway.ledger?.begin(
+      caller: caller,
+      profile: profile,
+      payload: payload,
+      itemCount: itemCount,
+      requestDigest: requestDigest,
+      streamed: streamed ? true : null,
+    );
+    _sinceBegin.start();
+    token.check();
+    final request = await _client.postUrl(profile.endpoint);
+    request.followRedirects = false;
+    request.headers.contentType = ContentType.json;
+    if (credential != null) {
+      request.headers.set(
+        HttpHeaders.authorizationHeader,
+        'Bearer $credential',
+      );
+    }
+    request.write(payload);
+    _sent = true;
+    final response = headerTimeout == null
+        ? await request.close()
+        : await request.close().timeout(
+            headerTimeout,
+            onTimeout: () => throw TimeoutException('model_header_timeout'),
+          );
+    _httpStatus = response.statusCode;
+    if (response.statusCode != 200) {
+      throw HttpException('model_http_${response.statusCode}');
+    }
+    _response = response;
+  }
+
+  @override
+  Stream<List<int>> get body async* {
+    Stream<List<int>> source = _response!;
+    if (streamed) {
+      source = source.timeout(
+        _gateway.idleTimeout,
+        onTimeout: (sink) {
+          sink.addError(TimeoutException('model_stream_idle'));
+          sink.close();
+        },
+      );
+    }
+    var total = 0;
+    await for (final chunk in source) {
+      token.check();
+      if (total + chunk.length > _gateway.maxResponseBytes) {
+        throw StateError('model_response_too_large');
+      }
+      total += chunk.length;
+      if (streamed) {
+        _bytes = total;
+        _firstByteMs ??= _sinceBegin.elapsedMilliseconds;
+      }
+      yield chunk;
+    }
+  }
+
+  @override
+  Future<void> finish(OutboundOutcome outcome) => _gateway._finish(
+    _recordId,
+    outcome,
+    _httpStatus,
+    firstByteMs: streamed ? _firstByteMs : null,
+    bytesReceived: streamed ? _bytes : null,
+  );
+
+  /// Ends the row for an error and throws it. Callers store and show error
+  /// text (tasks, notifications, receipts); an error that quotes the key, or
+  /// a header carrying it, leaves the gateway already redacted.
+  Future<Never> fail(Object error, StackTrace stack) async {
+    final safe = redactCredentials(error, secret: _usedCredential);
+    await finish(
+      OutboundOutcome(
+        token.isCancelled ? OutboundStatus.cancelled : OutboundStatus.failed,
+        error: token.isCancelled ? stoppedNote : safe,
+      ),
+    );
+    if (safe != '$error') Error.throwWithStackTrace(StateError(safe), stack);
+    Error.throwWithStackTrace(error, stack);
   }
 }

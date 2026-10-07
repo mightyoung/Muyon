@@ -33,6 +33,18 @@ CREATE TABLE outbound_requests(
   error TEXT
 )''');
 
+  /// Streaming and audit columns (ADR-0005 §5.2, §5.4). Nullable, so rows
+  /// from before stay valid; the status CHECK is untouched. A truncated
+  /// stream is `failed` with `bytes_received > 0`, not a new status.
+  static void addStreamingColumns(Database db) => db.execute('''
+ALTER TABLE outbound_requests ADD COLUMN request_digest TEXT;
+ALTER TABLE outbound_requests ADD COLUMN prompt_tokens INTEGER;
+ALTER TABLE outbound_requests ADD COLUMN completion_tokens INTEGER;
+ALTER TABLE outbound_requests ADD COLUMN first_byte_ms INTEGER;
+ALTER TABLE outbound_requests ADD COLUMN bytes_received INTEGER;
+ALTER TABLE outbound_requests ADD COLUMN streamed INTEGER;
+''');
+
   static String _now() => DateTime.now().toUtc().toIso8601String();
 
   /// Throws if the record cannot be written; callers must then not send.
@@ -41,14 +53,21 @@ CREATE TABLE outbound_requests(
     required ModelProfile profile,
     required String payload,
     required int itemCount,
+    String? requestDigest,
+    bool? streamed,
   }) {
     final id = const Uuid().v4();
     final bytes = utf8.encode(payload);
+    // The audit columns are written only when given, so a caller that does
+    // not use them also works on a table from before they existed.
+    final audit = requestDigest != null || streamed != null;
     return database.write((db) {
       db.execute(
         'INSERT INTO outbound_requests(id,caller,profile_id,endpoint,'
         'endpoint_identity,location,cloud_proxy,model_id,payload_sha256,'
-        "payload_bytes,item_count,started_at,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'sending')",
+        'payload_bytes,item_count,started_at,status'
+        "${audit ? ',request_digest,streamed' : ''}) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'sending'"
+        "${audit ? ',?,?' : ''})",
         [
           id,
           caller,
@@ -62,6 +81,10 @@ CREATE TABLE outbound_requests(
           bytes.length,
           itemCount,
           _now(),
+          if (audit) ...[
+            requestDigest,
+            streamed == null ? null : (streamed ? 1 : 0),
+          ],
         ],
       );
       return id;
@@ -73,12 +96,37 @@ CREATE TABLE outbound_requests(
     String status, {
     int? httpStatus,
     String? error,
-  }) => database.write(
-    (db) => db.execute(
-      "UPDATE outbound_requests SET status=?,http_status=?,error=?,finished_at=? WHERE id=? AND status='sending'",
-      [status, httpStatus, error, _now(), id],
-    ),
-  );
+    int? promptTokens,
+    int? completionTokens,
+    int? firstByteMs,
+    int? bytesReceived,
+  }) {
+    final stream =
+        promptTokens != null ||
+        completionTokens != null ||
+        firstByteMs != null ||
+        bytesReceived != null;
+    return database.write(
+      (db) => db.execute(
+        'UPDATE outbound_requests SET status=?,http_status=?,error=?,finished_at=?'
+        "${stream ? ',prompt_tokens=?,completion_tokens=?,first_byte_ms=?,bytes_received=?' : ''}"
+        " WHERE id=? AND status='sending'",
+        [
+          status,
+          httpStatus,
+          error,
+          _now(),
+          if (stream) ...[
+            promptTokens,
+            completionTokens,
+            firstByteMs,
+            bytesReceived,
+          ],
+          id,
+        ],
+      ),
+    );
+  }
 
   /// Requests still `sending` from a previous run: the process stopped while
   /// waiting, so whether the endpoint processed them is unknown.

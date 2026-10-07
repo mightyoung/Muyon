@@ -52,7 +52,7 @@ class QaRequest {
         utf8.encode(
           jsonEncode({
             'context': context.toJson(),
-            'profile': profile.toJson(),
+            'profile': profile.toJsonWithoutCapabilities(),
             'question': question,
             'evidence': evidence.map((e) => e.toJson()).toList(),
           }),
@@ -241,7 +241,7 @@ class QaService {
           'citationIds': ids,
           'insufficientEvidence': insufficient,
           'question': request.question,
-          'profile': request.profile.toJson(),
+          'profile': request.profile.toJsonWithoutCapabilities(),
           'inputDigest': request.inputDigest,
           'evidence': [
             for (final e in request.evidence)
