@@ -46,6 +46,7 @@ List<AgentDraft> _record(PersonalAgent agent) {
 
 String _everything(LoopFixture f, PersonalTask task) => jsonEncode({
   'payload': f.repo.task(task.id)!.payload,
+  'events': [for (final e in f.repo.taskEvents(task.id)) e.toJson()],
   'messages': [for (final m in f.repo.messages(task.conversationId)) m.content],
   'ledger': f.ledger.recent(),
 });
@@ -158,13 +159,15 @@ void main() {
         reason: 'superseded by the message',
       );
       // The answer is the saved message; the events carry size and digest.
-      final events = (f.repo.task(task.id)!.payload['events'] as List)
-          .cast<Map>();
-      final response = events.firstWhere((e) => e['type'] == 'model_response');
-      final data = response['data'] as Map;
+      final events = f.repo.taskEvents(task.id);
+      final response = events.firstWhere((e) => e.type == 'model_response');
+      final data = response.data;
       expect(data['draftLength'], '$_mark 2080 元'.length);
       expect(data['draftDigest'], AgentContext.digest('$_mark 2080 元'));
-      expect(jsonEncode(events), isNot(contains(_mark)));
+      expect(
+        jsonEncode([for (final e in events) e.toJson()]),
+        isNot(contains(_mark)),
+      );
     },
   );
 
