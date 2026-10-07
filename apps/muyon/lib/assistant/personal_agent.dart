@@ -195,11 +195,9 @@ class PersonalAgent {
       if (selection.ruleToolId == null) {
         await _finish(task, '当前使用离线模式。请选择下方已注册工具进行真实查询或计算，或选择模型开始对话。', []);
       } else {
-        await _proposeTool(
-          task,
-          selection.ruleToolId!,
-          selection.ruleParameters,
-        );
+        await _dispatch(task, [
+          _Planned(selection.ruleToolId!, selection.ruleParameters),
+        ]);
       }
     } else {
       await _advance(task);
@@ -288,7 +286,9 @@ class PersonalAgent {
       'user',
       '运行工具 $toolId：${jsonEncode(parameters)}',
     );
-    await _proposeTool(task, toolId, parameters, destination: destination);
+    await _dispatch(task, [
+      _Planned(toolId, parameters, destination: destination),
+    ]);
     return repository.task(task.id)!;
   });
 
@@ -420,83 +420,644 @@ class PersonalAgent {
     );
   }
 
-  ToolCallRequest _request(PersonalTask task) => ToolCallRequest(
-    invocationId: (task.payload['toolCall'] as Map)['invocationId'] as String,
-    toolId: (task.payload['toolCall'] as Map)['toolId'] as String,
-    scope: task.scope,
-    parameters: Map<String, Object?>.from(
-      (task.payload['toolCall'] as Map)['parameters'] as Map,
-    ),
-    destination: (task.payload['toolCall'] as Map)['destination'] as String?,
-  );
+  static ToolCallRequest _requestOf(PersonalTask task, Map call) =>
+      ToolCallRequest(
+        invocationId: call['invocationId'] as String,
+        toolId: call['toolId'] as String,
+        scope: task.scope,
+        parameters: Map<String, Object?>.from(call['parameters'] as Map),
+        destination: call['destination'] as String?,
+      );
 
-  Future<void> _proposeTool(
+  /// Fixed texts for a call that did not run; the model's own words are never
+  /// used.
+  static const _notRunText = {
+    'not_approved': '用户未批准此调用',
+    'not_run_prior_failed': '未执行：前一个操作失败',
+    'not_run_cancelled': '未执行：已请求取消',
+    'over_limit': '未执行：超出单步调用上限',
+    'over_card_limit': '未执行：超出一张确认卡的调用上限',
+  };
+
+  Map<String, Object?> _planned(
+    int index,
+    _Planned p, {
+    required String disposition,
+    PreparedToolCall? prepared,
+    String? note,
+  }) => {
+    'index': index,
+    'callId': p.callId,
+    'toolId': p.toolId,
+    'parameters': p.parameters,
+    'destination': p.destination,
+    'disposition': disposition,
+    if (prepared != null) ...{
+      'invocationId': prepared.request.invocationId,
+      'access': prepared.info.accessLevel.name,
+      'effect': prepared.info.descriptor.effect.name,
+      'identityDigest': prepared.identityDigest,
+      'scope': prepared.resolvedScope.toJson(),
+    },
+    if (note != null) 'outcome': {'status': note},
+  };
+
+  /// What the person sees of one call on the card.
+  static Map<String, Object?> _cardView(Map<String, Object?> call) => {
+    'invocationId': call['invocationId'],
+    'toolId': call['toolId'],
+    'parameters': call['parameters'],
+    'destination': call['destination'],
+    'scope': call['scope'],
+    'effect': call['effect'],
+    'identityDigest': call['identityDigest'],
+  };
+
+  /// The calls of the step in the model's order, as typed JSON maps (a
+  /// payload only accepts those).
+  static List<Map<String, Object?>> _calls(PersonalTask task) => [
+    for (final c
+        in (task.payload['step'] as Map?)?['calls'] as List? ?? const [])
+      Map<String, Object?>.from(c as Map),
+  ];
+
+  static List<Map<String, Object?>> _cardCalls(PersonalTask task) => [
+    for (final c in _calls(task))
+      if (c['disposition'] == 'card') c,
+  ];
+
+  /// S4 (ADR-0005 §6.2, §6.3). Every call of the reply is prepared first: one
+  /// that cannot be prepared ends the task before anything has run. Reads then
+  /// run in parallel; writes and exports wait on one card (at most
+  /// `maxCardCalls`), and each of them is prepared again, approved, invoked and
+  /// receipted by itself.
+  Future<void> _dispatch(
     PersonalTask task,
-    String toolId,
-    Map<String, Object?> parameters, {
-    String? destination,
-    String? callId,
+    List<_Planned> planned, {
     Map<String, Object?>? assistantMessage,
   }) async {
     try {
       final candidates = task.payload['candidateIds'] as List?;
-      if (candidates == null || !candidates.contains(toolId)) {
+      if (candidates == null ||
+          planned.any((p) => !candidates.contains(p.toolId))) {
         throw StateError('Tool is outside frozen candidates');
       }
-      final call = ToolCallRequest(
-        invocationId: const Uuid().v4(),
-        toolId: toolId,
-        scope: task.scope,
-        parameters: parameters,
-        destination: destination,
-      );
-      if (_closing) throw StateError("Assistant is closing");
-      final prepared = await tools.prepare(call);
-      if (_closing) throw StateError("Assistant is closing");
-      final next = task.copy({
+      final calls = <Map<String, Object?>>[];
+      var cards = 0;
+      for (var i = 0; i < planned.length; i++) {
+        final p = planned[i];
+        if (i >= budget.maxCallsPerStep) {
+          calls.add(_planned(i, p, disposition: 'none', note: 'over_limit'));
+          continue;
+        }
+        final request = ToolCallRequest(
+          invocationId: const Uuid().v4(),
+          toolId: p.toolId,
+          scope: task.scope,
+          parameters: p.parameters,
+          destination: p.destination,
+        );
+        if (_closing) throw StateError('Assistant is closing');
+        final prepared = await tools.prepare(request);
+        if (_closing) throw StateError('Assistant is closing');
+        final read = prepared.info.accessLevel == ToolAccessLevel.read;
+        if (!read && cards >= budget.maxCardCalls) {
+          calls.add(
+            _planned(i, p, disposition: 'none', note: 'over_card_limit'),
+          );
+          continue;
+        }
+        if (!read) cards++;
+        calls.add(
+          _planned(
+            i,
+            p,
+            disposition: read ? 'run' : 'card',
+            prepared: prepared,
+          ),
+        );
+      }
+      var next = task.copy({
         'stage': 'tool',
-        'toolCall': {
-          'invocationId': call.invocationId,
-          'toolId': toolId,
-          'parameters': parameters,
-          'destination': destination,
-          // Native mode: the model's own call, kept out of the conversation
-          // until the tool has a result so every saved call has its answer.
-          'callId': ?callId,
-          'assistantMessage': ?assistantMessage,
-        },
-        'toolIdentityDigest': prepared.identityDigest,
-        'requestDigest': prepared.identityDigest,
-        'preview': {
-          'toolId': toolId,
-          'parameters': parameters,
-          'destination': destination,
-          'scope': prepared.resolvedScope.toJson(),
-          'effect': prepared.info.descriptor.effect.name,
-        },
-        'state': prepared.info.accessLevel == ToolAccessLevel.read
-            ? 'running'
-            : 'waitingConfirmation',
-        'waitingFor': prepared.info.accessLevel == ToolAccessLevel.read
-            ? null
-            : '确认工具操作',
-        'expiresAt': _clock()
-            .toUtc()
-            .add(const Duration(minutes: 5))
-            .toIso8601String(),
-        'approvalNonce': const Uuid().v4(),
+        'step': {'assistant': assistantMessage, 'calls': calls},
       });
-      if (!await repository.updateTask(next)) return;
-      if (prepared.info.accessLevel == ToolAccessLevel.read) {
-        await _runTool(next, call);
+      for (final c in calls) {
+        if (c['disposition'] == 'none') continue;
+        await _event(next, AgentEventType.toolProposed, {
+          'toolId': c['toolId'],
+          'invocationId': c['invocationId'],
+          'effect': c['effect'],
+          'identityDigest': c['identityDigest'],
+        });
+      }
+      final reads = [
+        for (final c in calls)
+          if (c['disposition'] == 'run') c,
+      ];
+      if (reads.isNotEmpty) {
+        next = next.copy(_stage(reads, state: 'running'));
+        if (!await repository.updateTask(next)) return;
+        await _runReads(next);
+      } else {
+        await _openCard(next);
       }
     } catch (_) {
       await _fail(task, '工具参数、可用性或范围校验未通过');
     }
   }
 
+  /// The payload keys that describe the calls the task is on: `toolCall` (the
+  /// one waiting or running now, the first on a card), its `toolIdentityDigest`,
+  /// `toolCalls` (all [shown]) and, for a task that waits, `toolSelection`.
+  /// The digest of one call is its `identityDigest`; of several, the digest of
+  /// the list of them in order. A single call has the keys it always had.
+  Map<String, Object?> _stage(
+    List<Map<String, Object?>> shown, {
+    required String state,
+  }) {
+    final single = shown.length == 1;
+    final identity = single
+        ? shown.single['identityDigest'] as String
+        : digest({
+            'calls': [for (final c in shown) c['identityDigest']],
+          });
+    final first = shown.first;
+    return {
+      'state': state,
+      'toolCall': {
+        'invocationId': first['invocationId'],
+        'toolId': first['toolId'],
+        'parameters': first['parameters'],
+        'destination': first['destination'],
+        'callId': ?first['callId'],
+      },
+      'toolIdentityDigest': first['identityDigest'],
+      'toolCalls': [for (final c in shown) _cardView(c)],
+      if (state == 'waitingConfirmation')
+        'toolSelection': [for (final c in shown) c['invocationId']],
+      'requestDigest': identity,
+      'preview': single
+          ? {
+              'toolId': first['toolId'],
+              'parameters': first['parameters'],
+              'destination': first['destination'],
+              'scope': first['scope'],
+              'effect': first['effect'],
+            }
+          : {
+              'order': '按顺序执行；某项失败则其后各项不再执行',
+              'calls': [for (final c in shown) _cardView(c)],
+            },
+      'waitingFor': state == 'waitingConfirmation' ? '确认工具操作' : null,
+      'expiresAt': _clock()
+          .toUtc()
+          .add(const Duration(minutes: 5))
+          .toIso8601String(),
+      'approvalNonce': const Uuid().v4(),
+    };
+  }
+
+  /// The confirmation card for the writes / exports of the step. Which of
+  /// them the person selects is not part of its digest.
+  Future<void> _openCard(PersonalTask task) async {
+    final card = _cardCalls(task);
+    if (card.isEmpty) {
+      await _complete(task);
+      return;
+    }
+    final next = task.copy(_stage(card, state: 'waitingConfirmation'));
+    if (!await repository.updateTask(next)) return;
+    await _event(next, AgentEventType.wait, {
+      'stage': 'tool',
+      'requestDigest': next.payload['requestDigest'],
+      'calls': card.length,
+    });
+  }
+
+  /// What a card selection looks like after the person toggles [id]: turning
+  /// a call off turns off every later one too (a later write may depend on
+  /// it); turning one on adds just that call back. Order is the card's.
+  static List<String> toggleSelection(
+    List<String> cardOrder,
+    List<String> selected,
+    String id,
+  ) {
+    final at = cardOrder.indexOf(id);
+    if (at < 0) throw ArgumentError('unknown_invocation');
+    final on = selected.toSet();
+    if (on.contains(id)) {
+      on.removeAll(cardOrder.skip(at));
+    } else {
+      on.add(id);
+    }
+    return [
+      for (final c in cardOrder)
+        if (on.contains(c)) c,
+    ];
+  }
+
+  /// Calls of the step in the order the model gave them, with [outcome] set
+  /// for the one at [index].
+  PersonalTask _record(
+    PersonalTask task,
+    int index,
+    String status, {
+    ToolCallResult? result,
+  }) {
+    final step = Map<String, Object?>.from(task.payload['step'] as Map);
+    step['calls'] = [
+      for (final c in _calls(task))
+        if (c['index'] == index)
+          {
+            ...c,
+            'outcome': {
+              'status': status,
+              if (result != null) 'result': result.toJson(),
+            },
+          }
+        else
+          c,
+    ];
+    return task.copy({'step': step});
+  }
+
+  PersonalTask _chargeActive(PersonalTask task, Duration spent) => task.copy(
+    BudgetUsage.fromPayload(task.payload).plus(active: spent).toPayload(),
+  );
+
+  /// Invokes one prepared call and reads off what the registry says; nothing
+  /// is settled here. [abandoned]: the task ended or the host is closing.
+  /// [cancelled]: stopped before dispatch, so nothing ran.
+  Future<_Run> _invokeOne(
+    PersonalTask task,
+    ToolCallRequest request,
+    ToolCancellationToken token,
+  ) async {
+    if (_closing ||
+        repository.task(task.id)?.state != PersonalTaskState.running) {
+      return const _Run.abandoned();
+    }
+    try {
+      final result = await tools.invoke(request, cancellation: token);
+      return _Run.ran(result);
+    } on ToolCancelled {
+      return const _Run.cancelled();
+    } catch (_) {
+      // The registry refused or failed before any effect.
+      if (_cancelRequested.contains(task.id)) return const _Run.cancelled();
+      rethrow;
+    }
+  }
+
+  /// Reads of a step, in parallel. A cancel request discards their results
+  /// (a read has no external effect); otherwise the first call that did not
+  /// succeed decides how the task ends, as a single call always did.
+  Future<void> _runReads(PersonalTask task) async {
+    final token = ToolCancellationToken();
+    _toolTokens[task.id] = token;
+    try {
+      if (_closing ||
+          repository.task(task.id)?.state != PersonalTaskState.running) {
+        return;
+      }
+      _toolActive.add(task.id);
+      final reads = [
+        for (final c in _calls(task))
+          if (c['disposition'] == 'run') c,
+      ];
+      final started = _clock();
+      final runs = await Future.wait([
+        for (final c in reads) _invokeOne(task, _requestOf(task, c), token),
+      ]);
+      final spent = _clock().difference(started);
+      final cancelRequested =
+          _cancelRequested.remove(task.id) || token.isCancelled;
+      if (runs.any((r) => r.kind == _RunKind.cancelled)) {
+        await _settle(task, PersonalTaskState.cancelled, null);
+        return;
+      }
+      if (_closing ||
+          runs.any((r) => r.kind == _RunKind.abandoned) ||
+          repository.task(task.id)?.state != PersonalTaskState.running) {
+        return;
+      }
+      if (cancelRequested) {
+        await _settle(task, PersonalTaskState.cancelled, null);
+        return;
+      }
+      var current = _chargeActive(task, spent);
+      for (var i = 0; i < reads.length; i++) {
+        final result = runs[i].result!;
+        current = _record(
+          current,
+          reads[i]['index'] as int,
+          result.status.name,
+          result: result,
+        );
+        await _event(current, AgentEventType.toolResult, {
+          'toolId': reads[i]['toolId'],
+          'invocationId': reads[i]['invocationId'],
+          'status': result.status.name,
+        });
+      }
+      for (final run in runs) {
+        final result = run.result!;
+        if (result.status == ToolCallStatus.cancelled) {
+          await _settle(current, PersonalTaskState.cancelled, null);
+          return;
+        }
+        if (result.status == ToolCallStatus.interrupted) {
+          await _settle(
+            current,
+            PersonalTaskState.interrupted,
+            '操作结果未知，重试前请先核实。${result.summary}',
+          );
+          return;
+        }
+      }
+      // A read that failed ends the task before any card is shown.
+      final failed = runs.any(
+        (r) => r.result!.status != ToolCallStatus.succeeded,
+      );
+      if (failed) {
+        await _complete(current);
+      } else {
+        await _openCard(current);
+      }
+    } finally {
+      // Held until the outcome is written: a cancel in between must only
+      // signal, never take the "not started" path and write `cancelled`.
+      _toolActive.remove(task.id);
+      _cancelRequested.remove(task.id);
+      _toolTokens.remove(task.id);
+    }
+  }
+
+  /// After the person confirmed the card: the selected writes / exports, one
+  /// at a time in the model's order. Each is prepared again, its
+  /// `identityDigest` compared with the card's, approved (one use) and
+  /// invoked, and has its own receipt. A call that does not succeed stops the
+  /// rest; so does a change of scope (`stale_scope`).
+  Future<void> _executeCard(PersonalTask task, Set<String> selected) async {
+    final token = ToolCancellationToken();
+    _toolTokens[task.id] = token;
+    _toolActive.add(task.id);
+    try {
+      var current = task.copy({
+        'toolSelection': [
+          for (final c in _cardCalls(task))
+            if (selected.contains(c['invocationId'])) c['invocationId'],
+        ],
+      });
+      var stopped = false, cancelled = false;
+      var ran = 0;
+      for (final c in _cardCalls(task)) {
+        final id = c['invocationId'] as String;
+        final index = c['index'] as int;
+        if (_closing ||
+            repository.task(task.id)?.state != PersonalTaskState.running) {
+          return;
+        }
+        if (stopped) {
+          current = _record(current, index, 'not_run_prior_failed');
+          continue;
+        }
+        if (!selected.contains(id)) {
+          current = _record(current, index, 'not_approved');
+          continue;
+        }
+        if (token.isCancelled || _cancelRequested.contains(task.id)) {
+          cancelled = stopped = true;
+          current = _record(current, index, 'not_run_cancelled');
+          continue;
+        }
+        // The task is on this call now.
+        current = current.copy({
+          'stage': repository.task(task.id)!.stage,
+          'toolCall': (_stage([c], state: 'running'))['toolCall'],
+          'toolIdentityDigest': c['identityDigest'],
+        });
+        if (!await repository.updateTask(
+          current,
+          expected: {PersonalTaskState.running},
+        )) {
+          return;
+        }
+        final request = _requestOf(task, c);
+        ToolCallResult failed(String reason) =>
+            ToolCallResult(status: ToolCallStatus.failed, summary: reason);
+        ToolCallResult? stale;
+        PreparedToolCall? prepared;
+        try {
+          prepared = await tools.prepare(request);
+          // The scope may have moved under an earlier write of this card.
+          if (prepared.identityDigest != c['identityDigest']) {
+            stale = failed('stale_scope: 资料范围已变化，该操作未执行');
+          }
+        } catch (error) {
+          stale = failed(
+            '${error is ToolPlatformException ? error.code : 'prepare_failed'}: 该操作未执行',
+          );
+        }
+        String? approval;
+        if (stale == null) {
+          try {
+            // One approval for this one call, used up by its invoke.
+            approval = await tools.approve(prepared!);
+            await _event(current, AgentEventType.approval, {
+              'toolId': c['toolId'],
+              'invocationId': id,
+              'identityDigest': c['identityDigest'],
+            });
+          } catch (error) {
+            stale = failed(
+              '${error is ToolPlatformException ? error.code : 'approve_failed'}: 该操作未执行',
+            );
+          }
+        }
+        if (stale != null) {
+          stopped = true;
+          current = _record(current, index, 'failed', result: stale);
+          await _event(current, AgentEventType.toolResult, {
+            'toolId': c['toolId'],
+            'invocationId': id,
+            'status': 'failed',
+            'executed': false,
+          });
+          continue;
+        }
+        final started = _clock();
+        final run = await _invokeOne(
+          task,
+          request.withApproval(approval!),
+          token,
+        );
+        if (run.kind == _RunKind.abandoned) return;
+        if (run.kind == _RunKind.cancelled) {
+          await _settle(
+            current,
+            PersonalTaskState.cancelled,
+            ran == 0 ? null : '已取消；此前已执行 $ran 个操作，见回执',
+          );
+          return;
+        }
+        ran++;
+        final result = run.result!;
+        final cancelRequested =
+            _cancelRequested.contains(task.id) || token.isCancelled;
+        current = _chargeActive(current, _clock().difference(started));
+        if (_closing ||
+            repository.task(task.id)?.state != PersonalTaskState.running) {
+          return;
+        }
+        current = _record(current, index, result.status.name, result: result);
+        await _event(current, AgentEventType.toolResult, {
+          'toolId': c['toolId'],
+          'invocationId': id,
+          'status': result.status.name,
+        });
+        if (result.status == ToolCallStatus.cancelled) {
+          await _settle(
+            current,
+            PersonalTaskState.cancelled,
+            ran == 1 ? null : '已取消；此前已执行 ${ran - 1} 个操作，见回执',
+          );
+          return;
+        }
+        if (result.status == ToolCallStatus.interrupted) {
+          // The effect may have happened; the receipt is the truth, not
+          // "cancelled". The calls after it do not start.
+          await _settle(
+            current,
+            PersonalTaskState.interrupted,
+            cancelRequested
+                ? '已请求取消，但操作可能已生效，重试前请先核实。${result.summary}'
+                : '操作结果未知，重试前请先核实。${result.summary}',
+          );
+          return;
+        }
+        if (result.status != ToolCallStatus.succeeded) stopped = true;
+        if (cancelRequested) cancelled = stopped = true;
+      }
+      if (cancelled && ran == 0) {
+        await _settle(current, PersonalTaskState.cancelled, null);
+        return;
+      }
+      await _complete(current, lateCancel: cancelled);
+    } finally {
+      _toolActive.remove(task.id);
+      _cancelRequested.remove(task.id);
+      _toolTokens.remove(task.id);
+    }
+  }
+
+  /// S5 (ADR-0005 §6.2): every call of the step has an outcome. A failure
+  /// ends the task as a failed call always did. Otherwise the model's calls
+  /// and exactly one result for each `callId` (a real result, or a fixed text
+  /// for a call that did not run) go into the conversation together, and the
+  /// next step starts.
+  Future<void> _complete(PersonalTask task, {bool lateCancel = false}) async {
+    final calls = _calls(task);
+    final log = [...task.payload['toolLog'] as List? ?? const []];
+    var refs = _references(task);
+    final results = <ToolCallResult>[];
+    final added = <Map<String, Object?>>[];
+    for (final c in calls) {
+      final outcome = c['outcome'] as Map?;
+      final result = outcome?['result'] == null
+          ? null
+          : ToolCallResult.fromJson(
+              Map<String, Object?>.from(outcome!['result'] as Map),
+            );
+      if (result != null) {
+        log.add(_logEntry(c['toolId'] as String, result));
+        if (result.status == ToolCallStatus.succeeded) {
+          results.add(result);
+          refs = <ObjectRef>{...refs, ...result.objectRefs}.toList();
+        }
+      }
+      final String content;
+      if (result != null && result.status == ToolCallStatus.succeeded) {
+        content = jsonEncode({
+          'trustedToolResult': result.toJson(),
+          'citations': [
+            for (var i = 0; i < refs.length; i++)
+              {'citationId': 'r${i + 1}', 'reference': refs[i].toJson()},
+          ],
+        });
+      } else {
+        content = jsonEncode({
+          'notExecuted': _notRunText[outcome?['status']] ?? '未执行',
+        });
+      }
+      if ((task.payload['step'] as Map)['assistant'] == null) {
+        added.add({'role': 'user', 'content': content});
+      } else {
+        added.add({
+          'role': 'tool',
+          'tool_call_id': c['callId'],
+          'content': content,
+        });
+      }
+    }
+    final failure = [
+      for (final c in calls)
+        if ((c['outcome'] as Map?)?['result'] != null &&
+            ToolCallResult.fromJson(
+                  Map<String, Object?>.from(
+                    (c['outcome'] as Map)['result'] as Map,
+                  ),
+                ).status !=
+                ToolCallStatus.succeeded)
+          ToolCallResult.fromJson(
+            Map<String, Object?>.from((c['outcome'] as Map)['result'] as Map),
+          ),
+    ];
+    final logged = task.copy({'toolLog': log});
+    if (failure.isNotEmpty) {
+      await _fail(logged, failure.first.summary);
+      return;
+    }
+    final assistant = (task.payload['step'] as Map)['assistant'];
+    final late = lateCancel ? '（取消请求晚于完成）' : '';
+    final updated = logged.copy({
+      'references': refs.map((r) => r.toJson()).toList(),
+      'summary': '${results.map((r) => r.summary).join('；')}$late',
+      'messages': [
+        ...task.payload['messages'] as List,
+        if (assistant is Map) assistant,
+        ...added,
+      ],
+    });
+    if (task.profileId == null || lateCancel) {
+      // A cancel request that arrived after the tool finished must not
+      // discard its real result, and it ends the task here: no further
+      // model request after the person cancelled. The state guard still
+      // lets only one of cancel and completion land.
+      await _finish(
+        updated,
+        results
+            .map((r) => '${r.summary}$late\n${jsonEncode(r.data)}')
+            .join('\n\n'),
+        refs,
+      );
+    } else {
+      await _advance(updated);
+    }
+  }
+
   /// Trusted host UI only: display preview before supplying its exact digest.
-  Future<void> confirm(String taskId, {required String requestDigest}) {
+  ///
+  /// On a tool card [selectedInvocationIds] names the calls the person left
+  /// ticked (null: all of them; none: the card is refused and the task
+  /// cancelled). It must name only calls listed on the card. One confirmation
+  /// is one click on the card, never one approval for several executions:
+  /// each selected call is approved and invoked by itself.
+  Future<void> confirm(
+    String taskId, {
+    required String requestDigest,
+    List<String>? selectedInvocationIds,
+  }) {
     if (_closing || _operations.containsKey(taskId)) {
       return Future.error(StateError('Task unavailable'));
     }
@@ -515,6 +1076,22 @@ class PersonalAgent {
           digest(c.scope.toJson()) != digest(task.scope.toJson())) {
         throw StateError('scope_mismatch');
       }
+      final cardIds = [
+        for (final call in _cardCalls(task)) call['invocationId'] as String,
+      ];
+      final chosen = selectedInvocationIds;
+      if (chosen != null &&
+          (task.stage != 'tool' ||
+              chosen.toSet().length != chosen.length ||
+              chosen.any((id) => !cardIds.contains(id)))) {
+        // Only calls on the card, each once.
+        throw ArgumentError('unknown_invocation');
+      }
+      if (chosen != null && chosen.isEmpty) {
+        // Nothing ticked is a refusal of the whole card.
+        await cancel(taskId);
+        return;
+      }
       if (!await repository.updateTask(
         task.copy({'state': 'running', 'waitingFor': null}),
         expected: {PersonalTaskState.waitingConfirmation},
@@ -529,12 +1106,7 @@ class PersonalAgent {
           }
           await _runModel(task);
         } else {
-          final prepared = await tools.prepare(_request(task));
-          if (prepared.identityDigest != requestDigest) {
-            throw StateError('tool_scope_changed');
-          }
-          final approval = await tools.approve(prepared);
-          await _runTool(task, prepared.request.withApproval(approval));
+          await _executeCard(task, {...(chosen ?? cardIds)});
         }
       } on _FixedFailure catch (error) {
         await _fail(task, error.message);
@@ -625,12 +1197,13 @@ class PersonalAgent {
         ],
       });
       if (response['type'] == 'tool') {
-        await _proposeTool(
-          advanced,
-          response['toolId'] as String,
-          Map<String, Object?>.from(response['parameters'] as Map),
-          destination: response['destination'] as String?,
-        );
+        await _dispatch(advanced, [
+          _Planned(
+            response['toolId'] as String,
+            Map<String, Object?>.from(response['parameters'] as Map),
+            destination: response['destination'] as String?,
+          ),
+        ]);
       } else if (response['type'] == 'answer' && response['answer'] is String) {
         final all = _references(task);
         final ids = response['citationIds'] as List? ?? const [];
@@ -870,11 +1443,11 @@ class PersonalAgent {
   }
 
   /// Native tool calling. A reply that breaks the protocol (an unknown or
-  /// repeated call, arguments that are not a JSON object, more than one call,
-  /// the legacy `function_call`, an empty reply) is discarded whole: it is not
-  /// saved and not sent back; only the fixed correction is added, at most once.
-  /// A proposed call still goes through the frozen candidates,
-  /// `ToolRegistry.prepare` and the person's confirmation.
+  /// repeated call, arguments that are not a JSON object, the legacy
+  /// `function_call`, an empty reply) is discarded whole: it is not saved and
+  /// not sent back; only the fixed correction is added, at most once. Several
+  /// calls in one reply are fine: each goes through the frozen candidates and
+  /// `ToolRegistry.prepare`, and writes through the person's confirmation.
   Future<void> _runNative(
     PersonalTask task,
     ModelCancellation token,
@@ -905,29 +1478,32 @@ class PersonalAgent {
       await _answerNative(billed, token, text);
       return;
     }
-    final call = reply.calls.first;
     final toolIds = {
       for (final t in task.payload['nativeTools'] as List)
         (t as Map)['name'] as String: t['toolId'] as String,
     };
-    if (reply.calls.length != 1 || !call.valid || toolIds[call.name] == null) {
+    // One bad call spoils the reply: it is discarded whole, so no saved call
+    // is ever left without its result.
+    if (reply.calls.any((c) => !c.valid || toolIds[c.name] == null)) {
       return discard();
     }
     final advanced = billed.copy({'round': (task.payload['round'] as int) + 1});
-    await _proposeTool(
+    await _dispatch(
       advanced,
-      toolIds[call.name]!,
-      call.arguments!,
-      callId: call.callId,
+      [
+        for (final c in reply.calls)
+          _Planned(toolIds[c.name]!, c.arguments!, callId: c.callId),
+      ],
       assistantMessage: {
         'role': 'assistant',
         'content': text,
         'tool_calls': [
-          ModelToolCall(
-            id: call.callId,
-            name: call.name,
-            arguments: jsonEncode(call.arguments),
-          ).toJson(),
+          for (final c in reply.calls)
+            ModelToolCall(
+              id: c.callId,
+              name: c.name,
+              arguments: jsonEncode(c.arguments),
+            ).toJson(),
         ],
       },
     );
@@ -1036,128 +1612,6 @@ class PersonalAgent {
     for (final r in task.payload['references'] as List)
       objectRefFromJson(Map<String, Object?>.from(r as Map)),
   ];
-  Future<void> _runTool(PersonalTask task, ToolCallRequest request) async {
-    final token = ToolCancellationToken();
-    _toolTokens[task.id] = token;
-    try {
-      if (_closing ||
-          repository.task(task.id)?.state != PersonalTaskState.running) {
-        return;
-      }
-      _toolActive.add(task.id);
-      final ToolCallResult result;
-      final started = _clock();
-      try {
-        result = await tools.invoke(request, cancellation: token);
-      } on ToolCancelled {
-        // Stopped before dispatch: nothing ran.
-        _cancelRequested.remove(task.id);
-        await _settle(task, PersonalTaskState.cancelled, null);
-        return;
-      } catch (_) {
-        // The registry refused or failed before any effect.
-        if (_cancelRequested.remove(task.id)) {
-          await _settle(task, PersonalTaskState.cancelled, null);
-          return;
-        }
-        rethrow;
-      }
-      final cancelRequested =
-          _cancelRequested.remove(task.id) || token.isCancelled;
-      if (_closing ||
-          repository.task(task.id)?.state != PersonalTaskState.running) {
-        return;
-      }
-      final readOnly =
-          tools.inspect(request.toolId)?.accessLevel == ToolAccessLevel.read;
-      if (cancelRequested && readOnly) {
-        // A read tool has no external side effect, so the person's cancel wins
-        // whatever it returned; its result is discarded.
-        await _settle(task, PersonalTaskState.cancelled, null);
-        return;
-      }
-      if (result.status == ToolCallStatus.cancelled) {
-        await _settle(task, PersonalTaskState.cancelled, null);
-        return;
-      }
-      if (result.status == ToolCallStatus.interrupted) {
-        // The effect may have happened; the receipt is the truth, not "cancelled".
-        await _settle(
-          task,
-          PersonalTaskState.interrupted,
-          cancelRequested
-              ? '已请求取消，但操作可能已生效，重试前请先核实。${result.summary}'
-              : '操作结果未知，重试前请先核实。${result.summary}',
-        );
-        return;
-      }
-      final lateCancel = cancelRequested ? '（取消请求晚于完成）' : '';
-      if (result.status != ToolCallStatus.succeeded) {
-        await _fail(task, result.summary);
-        return;
-      }
-      final refs = <ObjectRef>{
-        ..._references(task),
-        ...result.objectRefs,
-      }.toList();
-      final resultContent = jsonEncode({
-        'trustedToolResult': result.toJson(),
-        'citations': [
-          for (var i = 0; i < refs.length; i++)
-            {'citationId': 'r${i + 1}', 'reference': refs[i].toJson()},
-        ],
-      });
-      // Native mode: the model's call and its result enter the conversation
-      // together, as an assistant `tool_calls` message and the `tool` message
-      // that answers it.
-      final nativeCall = task.payload['toolCall'] is Map
-          ? (task.payload['toolCall'] as Map)['assistantMessage']
-          : null;
-      final updated = task.copy({
-        // A tool call is running time; the wait before it was not.
-        ...BudgetUsage.fromPayload(task.payload)
-            .plus(active: _clock().difference(started))
-            .toPayload(),
-        'toolLog': [
-          ...task.payload['toolLog'] as List? ?? const [],
-          _logEntry(request.toolId, result),
-        ],
-        'references': refs.map((r) => r.toJson()).toList(),
-        'summary': '${result.summary}$lateCancel',
-        'messages': [
-          ...task.payload['messages'] as List,
-          if (nativeCall is Map) ...[
-            nativeCall,
-            {
-              'role': 'tool',
-              'tool_call_id': (task.payload['toolCall'] as Map)['callId'],
-              'content': resultContent,
-            },
-          ] else
-            {'role': 'user', 'content': resultContent},
-        ],
-      });
-      if (task.profileId == null || cancelRequested) {
-        // A cancel request that arrived after the tool finished must not
-        // discard its real result, and it ends the task here: no further
-        // model request after the person cancelled. The state guard still
-        // lets only one of cancel and completion land.
-        await _finish(
-          updated,
-          '${result.summary}$lateCancel\n${jsonEncode(result.data)}',
-          refs,
-        );
-      } else {
-        await _advance(updated);
-      }
-    } finally {
-      // Held until the outcome is written: a cancel in between must only
-      // signal, never take the "not started" path and write `cancelled`.
-      _toolActive.remove(task.id);
-      _cancelRequested.remove(task.id);
-      _toolTokens.remove(task.id);
-    }
-  }
 
   /// What the budget summary says about one finished call.
   static Map<String, Object?> _logEntry(String toolId, ToolCallResult result) =>
@@ -1374,4 +1828,30 @@ class _FixedFailure implements Exception {
   final String code, message;
   @override
   String toString() => code;
+}
+
+/// A call the model asked for, before the host has prepared it.
+class _Planned {
+  const _Planned(this.toolId, this.parameters, {this.destination, this.callId});
+  final String toolId;
+  final Map<String, Object?> parameters;
+  final String? destination;
+
+  /// The model's id for it (native mode), used only to pair the result.
+  final String? callId;
+}
+
+enum _RunKind { ran, cancelled, abandoned }
+
+/// What one `ToolRegistry.invoke` came to, before the task is settled.
+class _Run {
+  const _Run.ran(ToolCallResult this.result) : kind = _RunKind.ran;
+
+  /// Stopped before dispatch: nothing ran.
+  const _Run.cancelled() : kind = _RunKind.cancelled, result = null;
+
+  /// The task ended meanwhile or the host is closing; someone else settled it.
+  const _Run.abandoned() : kind = _RunKind.abandoned, result = null;
+  final _RunKind kind;
+  final ToolCallResult? result;
 }

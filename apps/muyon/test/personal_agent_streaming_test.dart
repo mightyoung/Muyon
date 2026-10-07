@@ -482,7 +482,7 @@ void main() {
       expect(task.payload['protocolCorrections'], 1);
     });
 
-    test('bad arguments, several calls and an empty reply are violations; '
+    test('bad arguments, a repeated call id and an empty reply are violations; '
         'a second violation fails with a fixed reason', () async {
       for (final bad in [
         _toolCall('read', '{"note":'),
@@ -497,7 +497,7 @@ void main() {
               },
               {
                 'index': 1,
-                'id': 'c2',
+                'id': 'c1',
                 'function': {'name': 'write', 'arguments': '{}'},
               },
             ],
