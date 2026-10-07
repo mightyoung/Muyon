@@ -29,7 +29,7 @@
 | P0-F2 修复研究对象页测试的两个 10 分钟超时（门禁变绿） | `task/p0-f2-object-open-timeout` | [P0-F2.md](P0-F2.md) | junior | E11b 合入之后 | 已合入（[审查](P0-F2-review.md)；门禁恢复为绿） |
 | E11b 研究对象页收尾（小） | `task/e11b-object-page-tests` | [E11b.md](E11b.md) | junior | P0-1 修复之后、P0-J3 之前 | 已合入（[审查](E11b-review.md)） |
 | P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | — | 第一～三批已合入（[审查](P0-4-review.md)）；**P0-3d 之后 macOS 设备链路通过（R+M）**，用户 2026-10-07 决定以此满足退出标准第 1 项；Android 重跑转第二阶段 R-1 |
-| K-1 模型适配层与 Agent 循环设计（ADR-0005） | `task/k-1-model-adapter-adr` | [K-1.md](K-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](K-1-review.md)，两轮）；ADR-0005 状态“提议”，§10.1 七问待用户决定 |
+| K-1 模型适配层与 Agent 循环设计（ADR-0005） | `task/k-1-model-adapter-adr` | [K-1.md](K-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](K-1-review.md)）；**ADR-0005 已采纳**（用户 2026-10-07 决定，K-1b 合入） |
 | E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 进行中（2026-10-07 派发） |
 | UI-0 现状截图与走查 | （未建） | [UI-0.md](UI-0.md) | engineer | 第一阶段之后 | **第一阶段之后**（用户 2026-10-06 决定） |
 | UI-1 设计系统 | （未建） | [UI-1.md](UI-1.md) | senior | UI-0 | **第一阶段之后** |
