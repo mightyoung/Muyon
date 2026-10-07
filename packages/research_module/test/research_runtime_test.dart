@@ -267,6 +267,56 @@ void main() {
   );
 
   test(
+    'card app bar titles strip heading marks and keep emoji whole',
+    () async {
+      final prepared = await prepare();
+      await runtime.commitImport(prepared, intent(prepared));
+      final cards = CardStore(database);
+      final heading = await cards.save(
+        projectId: 'native-a',
+        cardId: 'heading-card',
+        expectedHead: null,
+        bodyMarkdown: '# 卡片标题\n\n正文',
+      );
+      final emoji = await cards.save(
+        projectId: 'native-a',
+        cardId: 'emoji-card',
+        expectedHead: null,
+        bodyMarkdown: 'x${'🙂' * 70}',
+      );
+      final session = await runtime.openSession(binding);
+      ObjectRef ref(String id, String revision, String digest) => ObjectRef(
+        moduleId: 'research',
+        objectType: 'card',
+        objectId: id,
+        nativeProjectId: 'native-a',
+        revisionRef: revision,
+        contentDigest: digest,
+      );
+      expect(
+        (await session.resolve(
+          ref(
+            'heading-card',
+            heading.revision.revisionId,
+            heading.revision.contentDigest,
+          ),
+        ))!.title,
+        '卡片标题',
+      );
+      final emojiTitle = (await session.resolve(
+        ref(
+          'emoji-card',
+          emoji.revision.revisionId,
+          emoji.revision.contentDigest,
+        ),
+      ))!.title;
+      expect(emojiTitle, 'x${'🙂' * 59}…');
+      expect(emojiTitle.runes.length, 61);
+      await session.dispose();
+    },
+  );
+
+  test(
     'canonical document versions and soft deletion publish current identity',
     () async {
       final prepared = await prepare();

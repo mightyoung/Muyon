@@ -40,6 +40,12 @@ void main() {
     await tester.runAsync(() async {
       await host.activateInquiry();
       await host.activateResearch();
+      // Activate the prototype here, in real async time (P0-F2). The fallback
+      // test taps its way into resolveScope, which activates the prototype
+      // inside the FakeAsync zone; that would create the database write queue
+      // there, and the tearDown's real-time write (runAsync never pumps the
+      // fake microtask queue) would then wait on it forever.
+      await host.activatePrototype();
       final store = host.research!.store;
       store.db.execute(
         "INSERT INTO projects(id,title,question,next_step,layout,skill_root) "
@@ -358,6 +364,59 @@ void main() {
       () => openModuleObjectPage(context, host, entryRef()),
     );
     expect(deleted, isNull);
+  });
+
+  testWidgets('the helper disposes the session when it returns null', (
+    tester,
+  ) async {
+    await open(tester);
+    await seed(tester);
+    late BuildContext context;
+    await tester.pumpWidget(
+      Builder(
+        builder: (c) {
+          context = c;
+          return const SizedBox();
+        },
+      ),
+    );
+    // A null kind column resolves (title fallback) but throws in objectPage.
+    await tester.runAsync(() async {
+      host.research!.store.db.execute(
+        "INSERT INTO entries(id,project_id,kind,title,data) "
+        "VALUES('e-bad','p1',NULL,'坏对象','{}')",
+      );
+      host.research!.store.db.execute("DELETE FROM entries WHERE id='e1'");
+    });
+    final spy = _RecordingRuntime(host.research!.resources);
+    host.research = spy;
+
+    Future<void> expectDisposed(ResearchSession session) => expectLater(
+      session.resolve(entryRef()),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          'Session disposed',
+        ),
+      ),
+    );
+
+    // A deleted object resolves to nothing; the helper must still dispose.
+    final deleted = await tester.runAsync(
+      () => openModuleObjectPage(context, host, entryRef()),
+    );
+    expect(deleted, isNull);
+    expect(spy.sessions, hasLength(1));
+    await expectDisposed(spy.sessions.single);
+
+    // objectPage throws after a successful resolve; same guarantee.
+    final throwing = await tester.runAsync(
+      () => openModuleObjectPage(context, host, entryRef('e-bad')),
+    );
+    expect(throwing, isNull);
+    expect(spy.sessions, hasLength(2));
+    await expectDisposed(spy.sessions.last);
   });
 }
 
