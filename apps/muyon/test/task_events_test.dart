@@ -99,6 +99,46 @@ void main() {
       expect(WorkspaceRepository.schema.version, 8);
     });
 
+    test('a corrupt payload row does not stop the migration', () async {
+      final dir = Directory.systemTemp.createTempSync('muyon-k4-bad-');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final v7 = ModuleSchema(
+        version: 7,
+        definitionDigest: 'foundation-v7',
+        migrations: WorkspaceRepository.schema.migrations.take(7).toList(),
+      );
+      final first = StorageManager(dir.path);
+      final old = await first.open('muyon', v7);
+      await old.write((db) {
+        db.execute('INSERT INTO execution_records VALUES(?,?,?)', [
+          'bad',
+          'running',
+          '{not json',
+        ]);
+        db.execute('INSERT INTO execution_records VALUES(?,?,?)', [
+          'good',
+          'succeeded',
+          jsonEncode({
+            'kind': 'personal',
+            'executionId': 'good',
+            'conversationId': 'c',
+            'prompt': 'p',
+            'events': [
+              {'seq': 1, 'at': 'a', 'type': 'wait'},
+            ],
+          }),
+        ]);
+      });
+      await first.close();
+      final second = StorageManager(dir.path);
+      addTearDown(second.close);
+      final db = await second.open('muyon', WorkspaceRepository.schema);
+      expect(db.raw.select('SELECT id FROM tasks').map((r) => r['id']), [
+        'good',
+      ]);
+      expect(db.raw.select('SELECT task_id FROM task_events'), hasLength(1));
+    });
+
     test('a payload events list that the table does not hold (a task written '
         'by older code) is still read and numbered on', () async {
       final f = await LoopFixture.open();
@@ -363,10 +403,17 @@ void main() {
         isTrue,
       );
       final second = await f.run(agent, await f.start(agent, f.profile()));
-      expect(f.repo.tasksForObject(f.ref).map((t) => t.id), [
-        second.id,
-        first.id,
-      ]);
+      expect(
+        f.repo
+            .tasksForObject(f.ref, workspaceId: 'w', includeGlobal: true)
+            .map((t) => t.id),
+        [second.id, first.id],
+      );
+      expect(
+        f.repo.tasksForObject(f.ref, workspaceId: 'w'),
+        isEmpty,
+        reason: 'global tasks only when asked for',
+      );
       expect(
         f.repo.tasksForObject(
           const ObjectRef(
@@ -374,6 +421,8 @@ void main() {
             objectType: 'budget',
             objectId: 'zz',
           ),
+          workspaceId: 'w',
+          includeGlobal: true,
         ),
         isEmpty,
       );
@@ -387,6 +436,43 @@ void main() {
             .select('SELECT COUNT(*) AS n FROM task_objects')
             .first['n'],
         n,
+      );
+    });
+
+    test('a task of another workspace is invisible to the lookup', () async {
+      final f = await LoopFixture.open();
+      f.replies
+        ..add(LoopReply.sse(sseCalls([('c1', 'read', '{}')])))
+        ..add(LoopReply.sse(sseText('甲 [r1]')))
+        ..add(LoopReply.sse(sseCalls([('c1', 'read', '{}')])))
+        ..add(LoopReply.sse(sseText('乙 [r1]')));
+      final agent = f.agent();
+      final one = await f.repo.createConversation(
+        scope: AssistantScope.workspace('w1'),
+      );
+      final two = await f.repo.createConversation(
+        scope: AssistantScope.workspace('w2'),
+      );
+      final a = await f.run(
+        agent,
+        await f.start(agent, f.profile(), conversationId: one.id),
+      );
+      final b = await f.run(
+        agent,
+        await f.start(agent, f.profile(), conversationId: two.id),
+      );
+      expect(a.state, PersonalTaskState.succeeded);
+      expect(b.state, PersonalTaskState.succeeded);
+      expect(f.repo.tasksForObject(f.ref, workspaceId: 'w1').map((t) => t.id), [
+        a.id,
+      ]);
+      expect(f.repo.tasksForObject(f.ref, workspaceId: 'w2').map((t) => t.id), [
+        b.id,
+      ]);
+      expect(f.repo.tasksForObject(f.ref, workspaceId: 'w3'), isEmpty);
+      expect(
+        f.repo.tasksForObject(f.ref, workspaceId: 'w1', includeGlobal: true),
+        hasLength(1),
       );
     });
 
@@ -406,7 +492,13 @@ void main() {
         f.repo.taskObjects(task.id).map((l) => l.role),
         contains('tool_result'),
       );
-      expect(f.repo.tasksForObject(f.ref).single.id, task.id);
+      expect(
+        f.repo
+            .tasksForObject(f.ref, workspaceId: 'w', includeGlobal: true)
+            .single
+            .id,
+        task.id,
+      );
     });
   });
 }

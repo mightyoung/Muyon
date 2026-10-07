@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
 import '../platform/task_records.dart';
+import 'agent_budget.dart';
 import 'agent_context.dart';
 import 'agent_dispatch.dart';
 import 'agent_event_sink.dart';
@@ -60,7 +61,9 @@ class AgentResume {
     final id = call['invocationId'] as String?;
     final receipt = id == null ? null : ctx.tools.receiptFor(id);
     final toolId = call['toolId'] as String;
-    if (receipt == null || (!receipt.succeeded && !receipt.unknown)) {
+    final mismatch = receipt != null && receipt.toolId != toolId;
+    if (!mismatch &&
+        (receipt == null || (!receipt.succeeded && !receipt.unknown))) {
       // Nothing ran, or it failed without any effect: ask again as before.
       return null;
     }
@@ -81,7 +84,7 @@ class AgentResume {
         'destination': call['destination'],
       },
     });
-    if (receipt.succeeded) {
+    if (!mismatch && receipt.succeeded) {
       final result = receipt.result!;
       final taken = withCall.copy({
         'step': {
@@ -168,6 +171,19 @@ class AgentResume {
       if (id == null) {
         // Never prepared (over a limit): its outcome is already fixed.
         settled.add(c);
+      } else if (receipt != null && receipt.toolId != c['toolId']) {
+        // The id belongs to another tool: nothing can be taken from it.
+        unknown++;
+        unknownTools.add(c['toolId'] as String);
+        settled.add({
+          ...c,
+          'outcome': {'status': 'unknown_before_resume'},
+        });
+        view.add({
+          'toolId': c['toolId'],
+          'invocationId': id,
+          'receipt': 'unknown',
+        });
       } else if (receipt != null && receipt.succeeded) {
         adopted++;
         settled.add({
@@ -270,6 +286,9 @@ class AgentResume {
         (base.payload['messages'] as List).first,
         ...messages.skip(1),
       ],
+      // What the earlier attempt used still counts: repeated resumes cannot
+      // get past the step, time and token limits.
+      ...BudgetUsage.fromPayload(prev.payload).toPayload(),
       'references': prev.payload['references'] ?? const <Object?>[],
       'toolLog': prev.payload['toolLog'] ?? const <Object?>[],
       'compaction': ?prev.payload['compaction'],

@@ -204,7 +204,11 @@ void main() {
       expect(next.previousAttemptId, task.id);
       expect(next.state, PersonalTaskState.waitingConfirmation);
       expect(next.stage, 'model');
-      expect(next.payload['round'], 0, reason: 'budget counted anew');
+      expect(
+        next.payload['round'],
+        task.payload['round'],
+        reason: 'what the earlier attempt used still counts',
+      );
       final text = jsonEncode(next.payload['messages']);
       expect(text, contains('trustedToolResult'));
       expect(text, contains('c1'));
@@ -320,6 +324,43 @@ void main() {
       final next = await agent.resume(task.id);
       expect(next.stage, 'model');
       expect(next.state, PersonalTaskState.waitingConfirmation);
+      expect(f.callsOf('w1'), 0);
+    });
+
+    test('repeated resumes cannot get past the step limit', () async {
+      final f = await LoopFixture.open();
+      f.replies.add(LoopReply.sse(sseCalls([('c1', 'write', '{}')])));
+      final agent = f.agent(maxRounds: 1);
+      var task = await f.run(agent, await f.start(agent, f.profile()));
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+      task = f.repo.task(task.id)!;
+      expect(task.state, PersonalTaskState.failed, reason: 'one step only');
+      for (var i = 0; i < 2; i++) {
+        final next = await agent.resume(task.id);
+        expect(next.state, PersonalTaskState.failed);
+        expect(next.payload['round'], 1);
+        expect(f.bodies, hasLength(1), reason: 'no further request');
+        task = next;
+      }
+      expect(f.callsOf('write'), 1);
+    });
+
+    test('a receipt of another tool is not taken over: a stop', () async {
+      final (f, agent, task) = await _twoWrites();
+      final calls = (task.payload['toolCalls'] as List).cast<Map>();
+      await agent.cancel(task.id);
+      _receipt(
+        f,
+        {...calls[0], 'toolId': 'w2'},
+        'succeeded',
+        result: ToolCallResult(status: ToolCallStatus.succeeded, summary: 's'),
+      );
+      await _crash(f, task.id, 'interrupted');
+      final held = await agent.resume(task.id);
+      expect(held.stage, 'resume');
       expect(f.callsOf('w1'), 0);
     });
 

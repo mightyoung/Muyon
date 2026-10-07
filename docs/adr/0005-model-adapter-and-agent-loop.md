@@ -346,6 +346,8 @@ abstract interface class AgentEventSink {
 > - 迁移 v8 新增 `tasks`、`task_events`、`task_objects`（`platform/task_records.dart`）；`execution_records` 仍是任务载荷的权威，`tasks` 是随同一事务更新的扁平副本。旧任务载荷里的 `events` 在迁移时复制进事件表，且读取时仍兼容（`FoundationRepository.taskEvents`）。
 > - 事件与状态同事务：`updateTask` / `createTask` 签名不变（`PersonalTask.withEvents` 携带待写事件，因守护测试的 `_NoCommitRepository` 覆写了 `updateTask`）；`AgentContext.commit` 对 `TransactionalEventSink`（事件表实现）走同事务，对其他 sink 先写状态再逐条投递。同事务覆盖：确认卡的 `wait`、模型 / 摘要请求的 `approval`、`done` / `error` / `cancel`、`tool_result`（与记录结果的任务状态一起）。`tool_proposed`、`model_request`、`model_response`、`compaction*`、逐调用 `approval` 是不伴随状态写入的事实记录，单独追加。
 > - 恢复（`assistant/agent_resume.dart`）：仍是新建尝试，但接管上一次尝试的检查点——已完成步骤的消息、`toolLog`、`references`，以及未折叠步骤里**有成功回执**的调用结果；有成功回执的写入 / 外传不再执行。回执显示“可能已生效”（无结果或 `interrupted`）的写入 / 外传，或事件里有提议且有回执但载荷不认识的调用，一律停在 `waitingConfirmation`（`stage = resume`），写明原因；确认只代表用户已核实，之后仍走正常的确认卡与一次性审批。
+> - 逐调用的 `approval` 事件在 `invoke` 之前写入：崩溃后时间线可能显示“已批准”而没有结果；这不产生效果（该一次性审批未使用即过期）。UI-3 须按此渲染。
+> - 反查 `tasksForObject` 必须给出 `workspaceId`，只返回该工作区的任务；无工作区（全局范围）的任务仅在 `includeGlobal: true` 时返回。恢复会把上一次尝试已用的预算（步数、活动时长、token）带入新尝试。
 > - `task_objects` 仅由工具回执（`tool_result`）与回答引用（`answer`）写入；`FoundationRepository.tasksForObject` / `taskObjects` 为只读 API，界面归 UI-5。
 
 ### 6.6 自动上下文压缩

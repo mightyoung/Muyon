@@ -122,7 +122,8 @@ SELECT id,
     THEN json_extract(payload,'\$.updatedAt') END,
   json_extract(payload,'\$.previousAttemptId')
 FROM execution_records
-WHERE json_extract(payload,'\$.kind')='personal';
+WHERE CASE WHEN json_valid(payload)
+  THEN json_extract(payload,'\$.kind')='personal' ELSE 0 END;
 INSERT OR IGNORE INTO task_events
 SELECT r.id,
   json_extract(e.value,'\$.seq'),
@@ -130,7 +131,8 @@ SELECT r.id,
   json_extract(e.value,'\$.type'),
   json_remove(e.value,'\$.seq','\$.at','\$.type')
 FROM execution_records r, json_each(r.payload,'\$.events') e
-WHERE json_extract(r.payload,'\$.kind')='personal'
+WHERE CASE WHEN json_valid(r.payload)
+    THEN json_extract(r.payload,'\$.kind')='personal' ELSE 0 END
   AND json_extract(e.value,'\$.seq') IS NOT NULL
   AND json_extract(e.value,'\$.type') IS NOT NULL;
 ''');
@@ -249,18 +251,22 @@ ON CONFLICT(id) DO UPDATE SET
               [taskId],
             ).first['m']
             as int;
-    final payload = db.select(
-      'SELECT payload FROM execution_records WHERE id=?',
-      [taskId],
-    );
-    if (payload.isNotEmpty) {
-      for (final e in _legacy(
-        taskId,
-        (jsonDecode(payload.first['payload'] as String) as Map)['events'],
-      )) {
-        if (e.seq > seq) seq = e.seq;
-      }
-    }
+    // Highest seq of an old payload `events` list, without parsing the whole
+    // payload in Dart.
+    final legacy =
+        db
+                .select(
+                  '''
+SELECT COALESCE(MAX(json_extract(e.value,'\$.seq')),0) AS m
+FROM (SELECT payload FROM execution_records
+      WHERE id=? AND json_valid(payload)) r,
+     json_each(r.payload,'\$.events') e
+''',
+                  [taskId],
+                )
+                .first['m']
+            as int;
+    if (legacy > seq) seq = legacy;
     for (final d in drafts) {
       seq++;
       db.execute(
@@ -314,10 +320,28 @@ ON CONFLICT(id) DO UPDATE SET
       _link(r),
   ];
 
-  static List<TaskObjectLink> linksOfObject(Database db, ObjectRef ref) => [
+  /// Links to [ref] from tasks of [workspaceId] only (and, when
+  /// [includeGlobal], from tasks without a workspace).
+  static List<TaskObjectLink> linksOfObject(
+    Database db,
+    ObjectRef ref, {
+    required String workspaceId,
+    bool includeGlobal = false,
+  }) => [
     for (final r in db.select(
-      'SELECT * FROM task_objects WHERE module_id=? AND object_type=? AND object_id=? ORDER BY rowid',
-      [ref.moduleId, ref.objectType, ref.objectId],
+      '''
+SELECT o.* FROM task_objects o JOIN tasks t ON t.id=o.task_id
+WHERE o.module_id=? AND o.object_type=? AND o.object_id=?
+  AND (t.workspace_id=? OR (? AND t.workspace_id IS NULL))
+ORDER BY o.rowid
+''',
+      [
+        ref.moduleId,
+        ref.objectType,
+        ref.objectId,
+        workspaceId,
+        includeGlobal ? 1 : 0,
+      ],
     ))
       _link(r),
   ];

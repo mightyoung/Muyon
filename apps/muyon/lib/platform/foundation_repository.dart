@@ -982,12 +982,23 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
   List<TaskObjectLink> taskObjects(String taskId) =>
       TaskRecords.linksOfTask(database.raw, taskId);
 
-  /// Tasks that touched [ref], newest first (read only; the object page that
-  /// shows them is UI-5).
-  List<PersonalTask> tasksForObject(ObjectRef ref) {
+  /// Tasks of [workspaceId] that touched [ref], newest first (read only; the
+  /// object page that shows them is UI-5). Tasks of other workspaces are never
+  /// returned; tasks without a workspace (global scope) only when
+  /// [includeGlobal] is set.
+  List<PersonalTask> tasksForObject(
+    ObjectRef ref, {
+    required String workspaceId,
+    bool includeGlobal = false,
+  }) {
     final seen = <String>{};
     final found = <PersonalTask>[];
-    for (final link in TaskRecords.linksOfObject(database.raw, ref).reversed) {
+    for (final link in TaskRecords.linksOfObject(
+      database.raw,
+      ref,
+      workspaceId: workspaceId,
+      includeGlobal: includeGlobal,
+    ).reversed) {
       if (!seen.add(link.taskId)) continue;
       final t = task(link.taskId);
       if (t != null) found.add(t);
