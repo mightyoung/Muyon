@@ -1,0 +1,203 @@
+{
+  "kind": "muyon-north-star-inquiry",
+  "schema": 1,
+  "startedAt": "2026-10-07T00:15:23.230186Z",
+  "evidenceClass": "real-model",
+  "realModelEvidence": true,
+  "note": "Real model endpoint; assertions are invariants only (registered tools, write only after approval, survives reopen, ledger rows).",
+  "commit": "d635a1e",
+  "device": {
+    "platform": "macos",
+    "osVersion": "Version 27.0.1 (Build 26A434)",
+    "dart": "3.13.4",
+    "processors": 8,
+    "label": "macOS 27 desktop app",
+    "binding": "integration_test"
+  },
+  "steps": [
+    {
+      "name": "host.open",
+      "ok": true,
+      "ms": 233
+    },
+    {
+      "name": "inquiry.activate",
+      "ok": true,
+      "ms": 50
+    },
+    {
+      "name": "inquiry.seed",
+      "ok": true,
+      "ms": 414
+    },
+    {
+      "name": "model.profile",
+      "ok": true,
+      "ms": 5
+    },
+    {
+      "name": "assistant.read.compare_quotes",
+      "ok": true,
+      "ms": 2601
+    },
+    {
+      "name": "assistant.read.project_budget",
+      "ok": true,
+      "ms": 1793
+    },
+    {
+      "name": "read.results",
+      "ok": true,
+      "ms": 2
+    },
+    {
+      "name": "scope.select",
+      "ok": true,
+      "ms": 1
+    },
+    {
+      "name": "assistant.write.create_inquiry",
+      "ok": true,
+      "ms": 1788
+    },
+    {
+      "name": "invariants",
+      "ok": true,
+      "ms": 10
+    },
+    {
+      "name": "host.close",
+      "ok": true,
+      "ms": 12
+    },
+    {
+      "name": "host.reopen",
+      "ok": true,
+      "ms": 14
+    },
+    {
+      "name": "reopen.verify",
+      "ok": true,
+      "ms": 28
+    }
+  ],
+  "tasks": [
+    {
+      "phase": "read",
+      "id": "e644ad4a-68d4-4a20-83c3-9c9e4d6a4763",
+      "modelConfirmations": 2,
+      "toolConfirmations": 0,
+      "state": "succeeded",
+      "stage": "completed",
+      "rounds": 2,
+      "error": null,
+      "tools": [
+        "inquiry.compare_quotes"
+      ],
+      "answerPreview": "在「电缆」（product_id=44a8b3ac-ba1c-49b2-9892-1fa6d2c0a735）的可比口径（CNY、含税、单位：米）下，共 2 条报价，均可用、未被截断：\n\n- 北极星乙线缆：11.8 元/米，最低价（quotation id 78061f93-194b-4043-87bf-0180da858506）\n- 北极星甲电气：12.5 元/米（quotation id e0c…",
+      "protocolCorrections": 0,
+      "answerReferences": 2,
+      "readReceipts": [
+        "inquiry.compare_quotes"
+      ]
+    },
+    {
+      "phase": "read",
+      "id": "ab94915d-3461-4dc7-bd0e-000e05a4d9f9",
+      "modelConfirmations": 2,
+      "toolConfirmations": 0,
+      "state": "succeeded",
+      "stage": "completed",
+      "rounds": 2,
+      "error": null,
+      "tools": [
+        "inquiry.project_budget"
+      ],
+      "answerPreview": "「北极星验收项目」的成本预算如下（汇总覆盖全部行，共 2 行，未截断）：\n\n- 成本合计：2080 元；销售合计：2080 元；毛利：0 元（分类仅「材料」一项，小计 2080 元）\n\n明细：\n1. 电缆：数量 100 米，成本单价 11.8 元/米，成本金额 1180 元；销售单价 11.8 元/米，销售金额 1180 元\n2. 桥架：数量 20 米，成本单价 45 元/米，成本金额 900 元…",
+      "protocolCorrections": 0,
+      "answerReferences": 3,
+      "readReceipts": [
+        "inquiry.project_budget"
+      ]
+    },
+    {
+      "phase": "write",
+      "id": "f525038a-9776-4080-b81f-f33ce7a8c8c3",
+      "modelConfirmations": 2,
+      "toolConfirmations": 1,
+      "state": "succeeded",
+      "stage": "completed",
+      "rounds": 2,
+      "error": null,
+      "tools": [
+        "inquiry.create_inquiry"
+      ],
+      "answerPreview": "已创建询价单「北极星复核询价」（id: fc5640d6-7056-4e71-9587-be175908ea48），项目 7a9a2784-9753-4e40-a188-3265d5c1bca6，包含预算行「电缆」（004138b3-44d4-4017-a8f6-a3eeb83a500f）及两家指定供应商（5da37718-f7eb-4518-9d6a-b1c431b47954、3b601dfc-…",
+      "protocolCorrections": 0,
+      "answerReferences": 1
+    }
+  ],
+  "seed": {
+    "suppliers": 2,
+    "budgetLines": 2,
+    "quotations": 4,
+    "inquiries": 1
+  },
+  "model": {
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "modelId": "deepseek-chat",
+    "location": "remote",
+    "credential": "env (not stored)",
+    "configuredBy": "dart-define"
+  },
+  "registeredTools": 36,
+  "readResultsChecked": [
+    "compare_quotes",
+    "project_budget"
+  ],
+  "write": {
+    "toolId": "inquiry.create_inquiry",
+    "inquiriesBeforeApproval": 1,
+    "inquiriesAfterApproval": 2,
+    "wrongDigestRefused": true,
+    "repeatConfirmRefused": true,
+    "approvalToResultMs": 23,
+    "inquiryId": "fc5640d6-7056-4e71-9587-be175908ea48",
+    "answerCitesInquiry": true
+  },
+  "ledger": {
+    "rows": 6,
+    "statuses": {
+      "succeeded": 6
+    },
+    "bytesSent": 139699
+  },
+  "receipts": {
+    "rows": 3,
+    "byTool": {
+      "inquiry.compare_quotes": 1,
+      "inquiry.project_budget": 1,
+      "inquiry.create_inquiry": 1
+    }
+  },
+  "beforeReopen": {
+    "conversations": 2,
+    "messages": 6,
+    "tasks": 3,
+    "receipts": 3,
+    "approvals": 1,
+    "outboundRequests": 6
+  },
+  "afterReopen": {
+    "conversations": 2,
+    "messages": 6,
+    "tasks": 3,
+    "receipts": 3,
+    "approvals": 1,
+    "outboundRequests": 6
+  },
+  "reopenIdentical": true,
+  "passed": true,
+  "finishedAt": "2026-10-07T00:15:30.209953Z",
+  "totalMs": 6980
+}

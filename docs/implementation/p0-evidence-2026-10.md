@@ -99,6 +99,47 @@ exit=0
 
 按任务说明：比价题必须包含 `inquiry.compare_quotes`（四次都满足），预算题必须包含 `inquiry.project_budget`（只有 macOS 无头第 1 次包含，其余三次都不包含）。四次运行整体都 `passed:false`，所以**都不计为 2.3 的 M 证据**；如实记录，由 leader 人工核对。
 
+## 第 3 批：P0-3d 合入之后（`review/P0-4` 合并 `origin/develop` @ `4a4fb2f`，合并提交 `d635a1e`）
+
+文件名带 `-p03d` 以区别于合入前同平台的失败证据，两批都保留，不覆盖。
+
+| 项目 | 平台 / 设备 | 模型 | 命令 | 结果 | 证据文件 | 类别 |
+|---|---|---|---|---|---|---|
+| North Star 链路（macOS 设备集成测试） | macOS 27 桌面应用 | deepseek-chat（远程） | `flutter test integration_test/north_star_inquiry_test.dart -d macos --dart-define=MUYON_EVAL_REAL=1 …`（先 `flutter pub get`） | **`passed: true`**：13 个步骤全部成功，重开后逐项一致（`reopenIdentical: true`）；账本 6 行全部 `succeeded`，发送 139699 字节；写入：审批前 1 张询价单、审批后 2 张，错误摘要被拒、重复确认被拒，回答引用了新询价单 | `docs/evidence/2026-10-p0/north-star-macos-deepseek-chat-p03d.json` | R（设备）+ M |
+| North Star 链路（Android 真机） | vivo V2324A | deepseek-chat（远程） | 同上，`-d <设备 id>` | **未执行**：手机没有出现在 `adb devices`（输出为空），见下 | — | — |
+| `bash scripts/ci.sh` | macOS 27 主机 | — | `bash scripts/ci.sh`（去掉模型变量） | **`CI SUMMARY: FAILED (test:host test:inquiry)`**，见下 | — | T |
+
+### macOS 设备运行（P0-3d 之后）两道只读题的 `tasks[].tools`
+
+| 题 | `tools` | 状态 | 轮数 | 只读回执 | 回答引用数 |
+|---|---|---|---|---|---|
+| 比价 | `["inquiry.compare_quotes"]` | `succeeded` | 2 | `["inquiry.compare_quotes"]` | 2 |
+| 预算 | `["inquiry.project_budget"]` | `succeeded` | 2 | `["inquiry.project_budget"]` | 3 |
+
+两题都满足任务说明的要求（比价含 `inquiry.compare_quotes`，预算含 `inquiry.project_budget`）。写入任务的 `tools` 为 `["inquiry.create_inquiry"]`，`succeeded`。D1 在这次运行中**没有复现**：合入 P0-3d 之前同一设备同一模型的预算题失败，合入之后通过。这是一次运行的结果，没有挑选，也没有重复运行。
+
+`commit` 字段是 `d635a1e`。运行时的 `git status`：Flutter 与 CocoaPods 的构建副产物改了 `apps/muyon/macos` 下 4 个已跟踪文件并生成 `Podfile`、`Podfile.lock`、两处 `xcshareddata/swiftpm/`（与前一次 macOS 设备运行相同，没有 Dart 代码改动）；运行后已 `git checkout` 还原、删除，没有提交。
+
+### `scripts/ci.sh`（本机 macOS 27）
+
+```
+analyze  7/7: ok
+test     module_api: ok  +17: All tests passed!
+test     muyon_ui: ok  +6: All tests passed!
+test     prototype: ok  +40: All tests passed!
+test     research: ok  +211: All tests passed!
+test     supplier_core: ok  +482 ~3: All other tests passed!
+test     host: FAILED (exit 1)  +441 ~2 -3: Some tests failed.
+test     inquiry: FAILED (exit 1)  +276 ~1 -46: Some tests failed.
+CI SUMMARY: FAILED (test:host test:inquiry)
+```
+
+- **inquiry 的 46 个失败**：全部是 `screenshot_test.dart`（82 处输出）和 `ontology_screenshot_test.dart` 的 golden 像素对比，例如 `ontology-light.png` 差 0.15%、2383 px，`ontology-dark.png` 差 0.14%、2165 px。这是 macOS 27 渲染与基准图（旧版 macOS 生成）的漂移，如预期；`develop` 上的 `ci.sh` 不再排除这些测试（Linux 上它们靠 `skip: !hasFont` 自行跳过），所以本机会失败。失败输出里只出现这两个文件。
+- **host 的 3 个失败（真实缺陷，只记录，没有修复）**：`apps/muyon/test/research_object_open_test.dart` 里的 `an object without a binding falls back to the JSON page` 这个测试**挂起**，整个 `flutter test` 报 `TimeoutException after 0:10:00.000000: Test timed out after 10 minutes`，随后的测试因为框架状态被破坏连带失败（`Failed assertion: '!inTest' is not true`、`Reentrant call to runAsync() denied`）。
+  - 单独复现：`flutter test --no-pub --reporter compact test/research_object_open_test.dart --plain-name 'an object without a binding falls back'` 运行超过 120 秒不结束（我手动终止）。同一文件的前三个 `openObject …` 用例单独运行在 120 秒内结束。
+  - 这个文件来自 E11/E11b（已合入 `develop`）。我没有在其它平台复现，所以不能判断是否与 macOS 27 有关。
+  - `--timeout 120s` 没有生效：失败信息仍是 10 分钟超时，因此这个挂起会让 `ci.sh` 的 host 套件多花约 10 分钟。
+
 ## 发现的缺陷（只记录，没有修复）
 
 **D1：deepseek-chat 在预算题上四次都没有给出助手协议要求的 JSON，任务因 `FormatException` 失败（macOS 无头两次，Android 真机一次，macOS 设备一次）。**
