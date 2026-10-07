@@ -32,8 +32,9 @@
 | K-1 模型适配层与 Agent 循环设计（ADR-0005） | `task/k-1-model-adapter-adr` | [K-1.md](K-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](K-1-review.md)）；**ADR-0005 已采纳**（用户 2026-10-07 决定，K-1b 合入） |
 | K-2a 模型适配层、流式与原生工具（核心） | `task/k-2a-provider-streaming` | [K-2.md](K-2.md) | Sonnet 子代理 | ADR-0005 已采纳 | 已合入（[审查](K-2a-review.md)，三轮） |
 | K-3 预算式循环、批量确认卡、上下文自动压缩 | `task/k-3-budget-loop` | [K-3.md](K-3.md) | Sonnet 子代理 | K-2a 合入 | 已合入（[审查](K-3-review.md)，两轮） |
-| K-3b 拆分 `personal_agent.dart`（纯重构） | `task/k-3b-agent-split` | [K-3b.md](K-3b.md) | Sonnet 子代理 | K-3 合入 | 进行中（2026-10-07 派发） |
-| K-2b 测试连接、流式显示与预设（外围） | `task/k-2b-probe-stream-ui` | [K-2.md](K-2.md) | Sonnet 子代理 | K-3b 合入（同改助手核心，串行避免冲突） | 待派发 |
+| K-3b 拆分 `personal_agent.dart`（纯重构） | `task/k-3b-agent-split` | [K-3b.md](K-3b.md) | Sonnet 子代理 | K-3 合入 | 已合入（[审查](K-3b-review.md)） |
+| K-2b 测试连接、流式显示与预设（外围） | `task/k-2b-probe-stream-ui` | [K-2.md](K-2.md) | Sonnet 子代理 | K-3b 合入 | 进行中（2026-10-07 派发） |
+| K-4 执行记录事件化（后端） | `task/k-4-task-events` | [K-4.md](K-4.md) | Sonnet 子代理 | K-3b 合入 | 进行中（2026-10-07 派发，与 K-2b 并行） |
 | REG-1 模块契约 v2 与三层插件（ADR-0004） | `task/reg-1-contract-v2-adr` | [REG-1.md](REG-1.md) | Sonnet 子代理 | 评估文档（2026-10-07） | 已合入（[审查](REG-1-review.md)，两轮）；ADR-0004 “提议”，§12.1 十三问待用户决定 |
 | E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](E-1-review.md)，三轮）；真实模型基线待有密钥者运行 |
 | UI-0 现状截图与走查 | （未建） | [UI-0.md](UI-0.md) | engineer | 第一阶段之后 | **第一阶段之后**（用户 2026-10-06 决定） |
