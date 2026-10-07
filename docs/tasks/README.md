@@ -32,7 +32,8 @@
 | K-1 模型适配层与 Agent 循环设计（ADR-0005） | `task/k-1-model-adapter-adr` | [K-1.md](K-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](K-1-review.md)）；**ADR-0005 已采纳**（用户 2026-10-07 决定，K-1b 合入） |
 | K-2a 模型适配层、流式与原生工具（核心） | `task/k-2a-provider-streaming` | [K-2.md](K-2.md) | Sonnet 子代理 | ADR-0005 已采纳 | 进行中（2026-10-07 派发） |
 | K-2b 测试连接、流式显示与预设（外围） | `task/k-2b-probe-stream-ui` | [K-2.md](K-2.md) | Sonnet 子代理 | K-2a 合入 | 待派发 |
-| E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 进行中（2026-10-07 派发） |
+| REG-1 模块契约 v2 与三层插件（ADR-0004） | `task/reg-1-contract-v2-adr` | [REG-1.md](REG-1.md) | Sonnet 子代理 | 评估文档（2026-10-07） | 进行中（2026-10-07 派发） |
+| E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](E-1-review.md)，三轮）；真实模型基线待有密钥者运行 |
 | UI-0 现状截图与走查 | （未建） | [UI-0.md](UI-0.md) | engineer | 第一阶段之后 | **第一阶段之后**（用户 2026-10-06 决定） |
 | UI-1 设计系统 | （未建） | [UI-1.md](UI-1.md) | senior | UI-0 | **第一阶段之后** |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
