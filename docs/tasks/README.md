@@ -40,8 +40,11 @@
 | REG-2a 外传工具入账（`outbound_tool_requests`，四条通道） | `task/reg-2a-outbound-tool-ledger` | [REG-2a.md](REG-2a.md) | Codex | ADR-0004 已采纳 | **已派发** |
 | REG-2b 通用模块激活、能力授予、范围单点 | `task/reg-2b-module-host` | [REG-2b.md](REG-2b.md) | implementer-sonnet | ADR-0004 已采纳 | **已派发** |
 | E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](E-1-review.md)，三轮）；真实模型基线待有密钥者运行 |
-| UI-0 现状截图与走查 | （未建） | [UI-0.md](UI-0.md) | engineer | 第一阶段之后 | **第一阶段之后**（用户 2026-10-06 决定） |
-| UI-1 设计系统 | （未建） | [UI-1.md](UI-1.md) | senior | UI-0 | **第一阶段之后** |
+| UI-1a 设计系统：v6 token、通用组件、自适应尺寸 | `task/ui-1a-design-system` | [UI-1a.md](UI-1a.md) | implementer-sonnet | — | **已派发** |
+| R-1 Android 重跑、E-1 真实基线、UI-0 精简截图 | `task/r-1-evidence` | [R-1.md](R-1.md) | engineer | 手机连接 | **已派发** |
+| JR-1 小清理（ci 跑 test_doctor、按字符截断、无用 tag、注释） | `task/jr-1-cleanups` | [JR-1.md](JR-1.md) | junior | — | **已派发** |
+| UI-0 现状截图与走查 | 并入 `task/r-1-evidence` | [UI-0.md](UI-0.md) | engineer | — | 精简版并入 R-1（第 3 件） |
+| UI-1 设计系统 | 拆为 UI-1a、UI-1b | [UI-1.md](UI-1.md) | — | — | UI-1a 已派发；UI-1b（迁入询价部件、去硬编码颜色）在 FOLIO-BYPASS、REG-4 之后 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` → `review/E11` | [审查](E11-review.md) | junior | — | 已合入（两轮；S6 第一阶段搁置） |
 
