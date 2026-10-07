@@ -8,7 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
 /// The sole connection and transaction owner of one physical database.
-class ManagedConnection implements ManagedDatabase {
+class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
   ManagedConnection(this.raw);
   @override
   final Database raw;
@@ -54,6 +54,7 @@ class ManagedConnection implements ManagedDatabase {
 
   /// Existing modules own their short SQL transactions. Serialize the whole
   /// operation without adding an outer BEGIN around asynchronous file work.
+  @override
   Future<T> exclusiveAsync<T>(FutureOr<T> Function(Database) body) {
     if (_closing) return Future.error(StateError('Database is closing'));
     final result = Completer<T>();

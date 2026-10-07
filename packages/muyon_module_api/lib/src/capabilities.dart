@@ -13,6 +13,7 @@ class CapabilityRegistry {
   ModuleCapabilities forModule(
     String moduleId, {
     required Set<String> allowed,
+    Set<String> denied = const {},
   }) {
     final providers = <String, Object>{};
     for (final id in allowed) {
@@ -20,16 +21,23 @@ class CapabilityRegistry {
       if (provider == null) throw StateError('Unknown capability: $id');
       providers[id] = provider;
     }
-    return ModuleCapabilities._(moduleId, providers);
+    return ModuleCapabilities._(moduleId, providers, denied);
   }
 }
 
 class ModuleCapabilities {
-  ModuleCapabilities._(this.moduleId, Map<String, Object> providers)
-    : _providers = Map.unmodifiable(providers);
+  ModuleCapabilities._(
+    this.moduleId,
+    Map<String, Object> providers, [
+    Set<String> denied = const {},
+  ]) : _providers = Map.unmodifiable(providers),
+       denied = Set.unmodifiable(denied);
   final String moduleId;
   final Map<String, Object> _providers;
   Set<String> get available => Set.unmodifiable(_providers.keys);
+
+  /// Requested capabilities the host declined, so a module can degrade.
+  final Set<String> denied;
 
   T require<T extends Object>(String id) {
     final provider = _providers[id];

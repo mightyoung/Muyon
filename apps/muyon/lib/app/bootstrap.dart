@@ -1,18 +1,20 @@
 import 'dart:async';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
-import 'package:path/path.dart' as p;
 import 'package:prototype_module/prototype_module.dart';
 import 'package:research_module/research_module.dart';
 
-import '../platform/file_gateway.dart';
+import '../platform/module_grants.dart';
 import '../platform/outbound_ledger.dart';
 import '../platform/projection_service.dart';
 import '../platform/schema_catalog.dart';
 import '../platform/storage_manager.dart';
-import '../workspace/import_coordinator.dart';
 import '../workspace/workspace_repository.dart';
+import '../platform/scope_resolver.dart';
+import 'module_catalog.dart';
+import 'module_host.dart';
 import 'module_registry.dart';
+import 'legacy_module_bridge.dart';
 import 'accepted_research_imports.dart';
 import '../assistant/execution_store.dart';
 import '../assistant/dream/dream_service.dart';
@@ -122,10 +124,19 @@ class MuyonHost {
   Future<bool> Function(InquiryModelApprovalPreview preview)?
   approveInquiryModelRequest;
   late final AcceptedResearchImports acceptedResearchImports;
-  ResearchRuntime? research;
-  String? researchError;
-  PrototypeRuntime? prototype;
-  String? prototypeError;
+  late final ModuleGrants grants;
+  late final ModuleHost modules;
+  late final ScopeResolver scopeResolver;
+
+  // v1 accessors, kept as thin delegates to [modules] until REG-5; a number of
+  // host files and tests still use them.
+  ResearchRuntime? get research => modules.runtime<ResearchRuntime>('research');
+  set research(ResearchRuntime? value) =>
+      modules.setRuntimeForTesting('research', value);
+  String? get researchError => modules.error('research');
+  PrototypeRuntime? get prototype =>
+      modules.runtime<PrototypeRuntime>(prototypeModuleId);
+  String? get prototypeError => modules.error(prototypeModuleId);
   InquiryPlugin? inquiry;
   String? inquiryError;
   bool _closing = false;
@@ -201,6 +212,9 @@ class MuyonHost {
   static Future<MuyonHost> open(
     String rootPath, {
     Future<String?> Function(TaskOffer offer)? taskExecutor,
+
+    /// Replaces the module catalog; for tests of the generic module path.
+    Iterable<BusinessModule>? modules,
   }) async {
     final storage = StorageManager(rootPath);
     try {
@@ -210,7 +224,10 @@ class MuyonHost {
       final host = MuyonHost._(
         storage,
         WorkspaceRepository(database),
-        ModuleRegistry([ResearchModule(), PrototypeModule()]),
+        ModuleRegistry(
+          modules ?? moduleCatalog(),
+          knownCapabilities: hostCapabilityIds,
+        ),
         CapabilityRegistry(),
       );
       await migrateModelProfileCapabilities(host.workspaces);
@@ -227,7 +244,20 @@ class MuyonHost {
       }
       host.tools = ToolRegistry(
         database: database,
-        resolveScope: (scope) => resolveAssistantScope(host, scope),
+        resolveScope: (scope) => host.scopeResolver.resolve(scope),
+      );
+      host.grants = ModuleGrants(database);
+      host.modules = ModuleHost(
+        registry: host.registry,
+        storage: storage,
+        workspaces: host.workspaces,
+        projections: host.projections,
+        capabilities: host.capabilities,
+        grants: host.grants,
+        tools: host.tools,
+        notify: (title, body) =>
+            host.foundation.notify(title: title, body: body),
+        legacy: legacyBridges(host),
       );
       host.services = await PublicServices.open(
         storage: storage,
@@ -282,7 +312,17 @@ class MuyonHost {
       );
       host.services.transfer.onTaskEnvelope = host.tasks.receive;
       await host.services.transfer.deliverPendingTaskEnvelopes();
+      host.scopeResolver = ScopeResolver(
+        sources: host.modules.scopeSources(),
+        workspaces: host.workspaces,
+        knowledgeSources: () async => [
+          for (final document in host.services.knowledge.documents())
+            if (await host.services.knowledge.isCurrent(document.id))
+              document.source,
+        ],
+      );
       registerBusinessTools(host);
+      host.modules.registerTools();
       host.capabilities.register('knowledge', host.services.knowledge);
       host.capabilities.register('models', host.services.gateway);
       host.capabilities.register('ocr', host.services.ocr);
@@ -295,8 +335,6 @@ class MuyonHost {
     }
   }
 
-  Future<void>? _activating;
-  Future<void>? _activatingPrototype;
   Future<void>? _openingInquiry;
   Future<void> activateInquiry() {
     if (_closing) return Future.error(StateError('Host is closing'));
@@ -337,104 +375,16 @@ class MuyonHost {
     }
   }
 
-  Future<void> activateResearch() {
-    if (_closing) return Future.error(StateError('Host is closing'));
-    return _activating ??= _activateResearch();
-  }
-
-  Future<void> _activateResearch() async {
-    if (research != null) return;
-    try {
-      final module = registry.require('research');
-      final connection = await storage.open('research', module.schema);
-      final files = FileGateway(
-        p.join(storage.rootPath, 'modules', 'research', 'files'),
-      );
-      projections.watch('research', connection);
-      research = await module.activate(
-        ModuleResources(
-          database: connection,
-          files: files,
-          capabilities: capabilities.forModule(
-            'research',
-            allowed: {'knowledge', 'models', 'tools'},
-          ),
-        ),
-      ) as ResearchRuntime;
-      await workspaces.database.write((db) {
-        db.execute('INSERT OR REPLACE INTO module_registry VALUES(?,?,?)', [
-          'research',
-          'ready',
-          null,
-        ]);
-      });
-      final recovery = await ImportCoordinator(workspaces)
-          .recover('research', research!);
-      if (recovery.conflicts.isNotEmpty) {
-        await foundation.notify(
-          title: '导入未能完成绑定',
-          body: recovery.conflicts.values.join('\n'),
-        );
-      }
-      await acceptedResearchImports.reconcileCommitted(research!);
-      researchError = null;
-    } catch (error) {
-      research = null;
-      researchError = error.toString();
-      await workspaces.database.write(
-        (db) => db.execute(
-          'INSERT OR REPLACE INTO module_registry VALUES(?,?,?)',
-          ['research', 'failed', researchError],
-        ),
-      );
-      _activating = null;
-    }
-  }
+  Future<void> activateResearch() => _activateModule('research');
 
   /// Opens the prototype module on first use. A failure is recorded in
   /// [prototypeError] and `module_registry`; the host and other modules keep
   /// working, and the next call retries.
-  Future<void> activatePrototype() {
-    if (_closing) return Future.error(StateError('Host is closing'));
-    return _activatingPrototype ??= _activatePrototype();
-  }
+  Future<void> activatePrototype() => _activateModule(prototypeModuleId);
 
-  Future<void> _activatePrototype() async {
-    if (prototype != null) return;
-    try {
-      final module = registry.require(prototypeModuleId);
-      final connection = await storage.open(prototypeModuleId, module.schema);
-      projections.watch(prototypeModuleId, connection);
-      prototype = await module.activate(
-        ModuleResources(
-          database: connection,
-          files: FileGateway(
-            p.join(storage.rootPath, 'modules', prototypeModuleId, 'files'),
-          ),
-          capabilities: capabilities.forModule(
-            prototypeModuleId,
-            allowed: const {},
-          ),
-        ),
-      ) as PrototypeRuntime;
-      await workspaces.database.write(
-        (db) => db.execute(
-          'INSERT OR REPLACE INTO module_registry VALUES(?,?,?)',
-          [prototypeModuleId, 'ready', null],
-        ),
-      );
-      prototypeError = null;
-    } catch (error) {
-      prototype = null;
-      prototypeError = error.toString();
-      await workspaces.database.write(
-        (db) => db.execute(
-          'INSERT OR REPLACE INTO module_registry VALUES(?,?,?)',
-          [prototypeModuleId, 'failed', prototypeError],
-        ),
-      );
-      _activatingPrototype = null;
-    }
+  Future<void> _activateModule(String id) {
+    if (_closing) return Future.error(StateError('Host is closing'));
+    return modules.activate(id).then<void>((_) {});
   }
 
   Future<void> close() => _closeFuture ??= _close();
@@ -442,8 +392,7 @@ class MuyonHost {
     _closing = true;
     await personalAgent.close();
     await _openingInquiry;
-    await _activating;
-    await _activatingPrototype;
+    await modules.close();
     await inquiry?.close();
     await services.transfer.close();
     await Future.wait(_platformOperations.toList());

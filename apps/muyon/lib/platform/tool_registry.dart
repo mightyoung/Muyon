@@ -77,6 +77,7 @@ class _Tool {
     this.supportedScopes,
     this.dataModuleIds,
     this.validateResult,
+    this.preflight,
   );
   RegisteredToolInfo info;
   final Future<ToolCallResult> Function(ToolCallContext) handler;
@@ -84,6 +85,7 @@ class _Tool {
   final Set<String>? dataModuleIds;
   final Future<void> Function(ResolvedAssistantScope, ToolCallResult)?
   validateResult;
+  final void Function(ToolCallRequest)? preflight;
   int generation = 1;
 }
 
@@ -112,6 +114,7 @@ class ToolRegistry {
     Set<String>? dataModuleIds,
     Future<void> Function(ResolvedAssistantScope, ToolCallResult)?
     validateResult,
+    void Function(ToolCallRequest)? preflight,
     bool available = true,
     String? unavailableReason,
   }) {
@@ -140,6 +143,7 @@ class ToolRegistry {
       Set.unmodifiable(supportedScopes),
       dataModuleIds == null ? null : Set.unmodifiable(dataModuleIds),
       validateResult,
+      preflight,
     );
   }
 
@@ -190,6 +194,9 @@ class ToolRegistry {
         'External calls require an explicit destination',
       );
     }
+    // Host-set request rule (a module's destination policy); throws to refuse
+    // before any scope work and long before an approval can be issued.
+    tool.preflight?.call(request);
     var scope = await resolveScope(request.scope);
     if (_canonical(scope.requested.toJson()) !=
         _canonical(request.scope.toJson())) {

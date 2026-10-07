@@ -96,7 +96,7 @@ void main() {
         before.first['n'],
       );
       expect(again.raw.select('SELECT * FROM tasks'), hasLength(1));
-      expect(WorkspaceRepository.schema.version, 9);
+      expect(WorkspaceRepository.schema.version, 10);
     });
 
     for (final (name, events, next) in <(String, Object, int)>[
