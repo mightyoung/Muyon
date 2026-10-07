@@ -10,6 +10,7 @@ import '../services/models/model_provider.dart';
 import '../services/models/token_estimate.dart';
 import 'agent_budget.dart';
 import 'agent_context.dart';
+import 'agent_drafts.dart';
 import 'agent_event_sink.dart';
 import 'agent_compaction_flow.dart';
 import 'agent_dispatch.dart';
@@ -164,10 +165,11 @@ class AgentModelTurn {
       final started = ctx.clock();
       final String text;
       Usage? usage;
+      Reply? streamed;
       if (profile.capabilities.streaming) {
-        final reply = await _streamCompat(task, token, profile);
-        text = reply.text.toString();
-        usage = reply.usage;
+        streamed = await _streamCompat(task, token, profile);
+        text = streamed.text.toString();
+        usage = streamed.usage;
       } else {
         text = await ctx.gateway.chat(
           profile: profile,
@@ -194,9 +196,11 @@ class AgentModelTurn {
       }
       // What this response used is charged whatever it turns out to be.
       final billed = _bill(task, started, replyText: text, usage: usage);
-      await _responded(billed, usage, null);
+      await _responded(billed, usage, null, streamed?.draft);
       final response = _protocolReply(text);
       if (response == null) {
+        // The draft was only ever a view of this text: dropped with it.
+        ctx.drafts.discard(task.id);
         // Prose, native tool-call markup or a wrong shape is never acted on.
         // At most one corrective round, confirmed like any other; then a
         // fixed reason that does not quote the model (it may echo a key).
@@ -211,6 +215,7 @@ class AgentModelTurn {
         ],
       });
       if (response['type'] == 'tool') {
+        ctx.drafts.commit(task.id);
         await dispatch.dispatch(advanced, [
           Planned(
             response['toolId'] as String,
@@ -227,17 +232,25 @@ class AgentModelTurn {
               !RegExp(r'^r[1-9][0-9]*$').hasMatch(id) ||
               int.parse(id.substring(1)) > all.length,
         )) {
+          ctx.drafts.discard(task.id);
           throw StateError('Invalid citations');
         }
+        ctx.drafts.commit(task.id);
         await ctx.finish(advanced, response['answer'] as String, [
           for (final id in ids.toSet())
             all[int.parse((id as String).substring(1)) - 1],
         ], canCommit: () => !token.isCancelled);
       } else {
+        ctx.drafts.discard(task.id);
         throw const FormatException('Invalid assistant protocol');
       }
     } finally {
       ctx.modelTokens.remove(task.id);
+      // Whatever ended the request without a usable reply (cancel, cut
+      // stream, timeout, truncation, a rejected request): the draft stays on
+      // screen, marked as not saved. A no-op once it was committed or
+      // discarded.
+      ctx.drafts.interrupt(task.id);
     }
   }
 
@@ -281,7 +294,12 @@ class AgentModelTurn {
     ModelProfile profile,
   ) async {
     try {
-      return await drain(task, _modelRequest(task, profile), token);
+      return await drain(
+        task,
+        _modelRequest(task, profile),
+        token,
+        showDraft: true,
+      );
     } on HttpException catch (error) {
       // The endpoint refused what was asked: a fixed failure, never another
       // protocol, model or endpoint (ADR-0005 §4.3), and no resend.
@@ -303,48 +321,67 @@ class AgentModelTurn {
 
   /// Sends [request] through the gateway and gathers its events. Nothing is
   /// acted on here.
+  ///
+  /// With [showDraft] the text (compatibility mode: only the `answer` text)
+  /// is also offered to the screen as a draft, in memory only; the task event
+  /// gets its length and digest, never its text.
   Future<Reply> drain(
     PersonalTask task,
     ModelRequest request,
-    ModelCancellation token,
-  ) async {
+    ModelCancellation token, {
+    bool showDraft = false,
+  }) async {
     final reply = Reply();
-    var announced = false;
-    await for (final event in ctx.gateway.chatStream(
-      provider: ctx.provider,
-      request: request,
-      cancellation: token,
-      beforeSend: () => _beforeSend(task),
-      // The smaller of what is left of the active budget and 5 minutes.
-      maxDuration: ctx.budget.requestLimit(
-        BudgetUsage.fromPayload(task.payload),
-      ),
-    )) {
-      if (!announced) {
-        // The first event means the ledger row exists and the request went.
-        announced = true;
-        await ctx.event(task, AgentEventType.modelRequest, {
-          'caller': request.caller,
-          'requestDigest': request.requestDigest,
-          'mode': request.tools.isNotEmpty ? 'native' : 'compat',
-          'streamed': request.profile.capabilities.streaming,
-        });
+    final feed = showDraft
+        ? DraftFeed(ctx.drafts, task.id, native: request.tools.isNotEmpty)
+        : null;
+    try {
+      var announced = false;
+      await for (final event in ctx.gateway.chatStream(
+        provider: ctx.provider,
+        request: request,
+        cancellation: token,
+        beforeSend: () => _beforeSend(task),
+        // The smaller of what is left of the active budget and 5 minutes.
+        maxDuration: ctx.budget.requestLimit(
+          BudgetUsage.fromPayload(task.payload),
+        ),
+      )) {
+        if (!announced) {
+          // The first event means the ledger row exists and the request went.
+          announced = true;
+          await ctx.event(task, AgentEventType.modelRequest, {
+            'caller': request.caller,
+            'requestDigest': request.requestDigest,
+            'mode': request.tools.isNotEmpty ? 'native' : 'compat',
+            'streamed': request.profile.capabilities.streaming,
+          });
+        }
+        switch (event) {
+          case TextDelta():
+            reply.text.write(event.text);
+            feed?.text(event.text);
+          case ToolCallComplete():
+            reply.calls.add(event);
+          case ToolCallDelta():
+            // Display only: "preparing a tool call"; never acted on.
+            feed?.toolCall();
+          case Usage():
+            reply.usage = event;
+          case Done():
+            reply.done = event;
+          case ModelError():
+            reply.error = event;
+        }
       }
-      switch (event) {
-        case TextDelta():
-          reply.text.write(event.text);
-        case ToolCallComplete():
-          reply.calls.add(event);
-        case ToolCallDelta():
-          // Display only (K-2b); never acted on.
-          break;
-        case Usage():
-          reply.usage = event;
-        case Done():
-          reply.done = event;
-        case ModelError():
-          reply.error = event;
-      }
+    } finally {
+      feed?.flush();
+    }
+    if (feed != null) {
+      reply.draft = (
+        length: feed.length,
+        digest: AgentContext.digest(feed.shown),
+      );
     }
     return reply;
   }
@@ -435,14 +472,23 @@ class AgentModelTurn {
 
   /// What one response cost, as an event: sizes and a finish reason, never
   /// the text.
-  Future<void> _responded(PersonalTask billed, Usage? usage, Done? done) =>
-      ctx.event(billed, AgentEventType.modelResponse, {
-        'promptTokens': usage?.promptTokens,
-        'completionTokens': usage?.completionTokens,
-        'tokensUsed': billed.payload['tokensUsed'],
-        'estimated': billed.payload['tokensEstimated'],
-        'finish': ?done?.reason.name,
-      });
+  Future<void> _responded(
+    PersonalTask billed,
+    Usage? usage,
+    Done? done, [
+    ({int length, String digest})? draft,
+  ]) => ctx.event(billed, AgentEventType.modelResponse, {
+    'promptTokens': usage?.promptTokens,
+    'completionTokens': usage?.completionTokens,
+    'tokensUsed': billed.payload['tokensUsed'],
+    'estimated': billed.payload['tokensEstimated'],
+    'finish': ?done?.reason.name,
+    // The draft the person was shown: its size and digest only (Q4).
+    if (draft != null) ...{
+      'draftLength': draft.length,
+      'draftDigest': draft.digest,
+    },
+  });
 
   static Never _failure(FixedFailure f) => throw f;
 
@@ -525,9 +571,16 @@ class AgentModelTurn {
               .join(),
       usage: reply.usage,
     );
-    await _responded(billed, reply.usage, reply.done);
-    Future<void> discard() =>
-        _correctOrFail(billed, notJson: false, correction: _nativeCorrection);
+    await _responded(billed, reply.usage, reply.done, reply.draft);
+    Future<void> discard() {
+      ctx.drafts.discard(task.id);
+      return _correctOrFail(
+        billed,
+        notJson: false,
+        correction: _nativeCorrection,
+      );
+    }
+
     if (reply.calls.isEmpty) {
       if (text.trim().isEmpty) return discard();
       await _answerNative(billed, token, text);
@@ -543,6 +596,8 @@ class AgentModelTurn {
       return discard();
     }
     final advanced = billed.copy({'round': (task.payload['round'] as int) + 1});
+    // The text before the calls is saved with the step's assistant message.
+    ctx.drafts.commit(task.id);
     await dispatch.dispatch(
       advanced,
       [
@@ -592,6 +647,7 @@ class AgentModelTurn {
         {'role': 'assistant', 'content': text},
       ],
     });
+    ctx.drafts.commit(task.id);
     await ctx.finish(advanced, answer, [
       for (final n in cited.toList()..sort()) all[n - 1],
     ], canCommit: () => !token.isCancelled);

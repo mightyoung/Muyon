@@ -24,6 +24,9 @@ class ProfileRepository {
           // No key = compatibility mode; the one-time migration (bootstrap)
           // is what writes it for saved chat profiles, never this read.
           capabilities: ModelCapabilities.fromJson(item['capabilities']),
+          detectedCapabilities: DetectedCapabilities.fromJson(
+            item['detectedCapabilities'],
+          ),
         ),
     ];
   }
@@ -34,7 +37,7 @@ class ProfileRepository {
     profiles.add(profile);
     await workspaces.setSetting(
       'modelProfiles',
-      profiles.map((p) => p.toJson()).toList(),
+      profiles.map((p) => p.toStoredJson()).toList(),
     );
   }
 
@@ -43,7 +46,7 @@ class ProfileRepository {
       'modelProfiles',
       all()
           .where((profile) => profile.id != id)
-          .map((p) => p.toJson())
+          .map((p) => p.toStoredJson())
           .toList(),
     );
   }

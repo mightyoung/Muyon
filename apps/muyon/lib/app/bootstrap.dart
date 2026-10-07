@@ -38,9 +38,23 @@ const modelProfilesSchemaKey = 'modelProfilesSchema';
 const modelProfilesSchemaVersion = 2;
 
 /// Set when the migration changed profiles, so the settings page can tell the
-/// person once ("streaming is now on for your models"). The page itself comes
-/// later; this only leaves the flag.
+/// person once ("streaming is now on for your models"); the page reads it with
+/// [pendingModelProfilesNotice] and clears it with
+/// [clearModelProfilesNotice].
 const modelProfilesNoticeKey = 'modelProfilesMigrationNotice';
+
+/// How many profiles the migration changed, while its notice is still to be
+/// shown; null when there is nothing to tell.
+int? pendingModelProfilesNotice(WorkspaceRepository workspaces) {
+  final notice = workspaces.setting(modelProfilesNoticeKey);
+  if (notice is! Map || notice['pending'] != true) return null;
+  final count = notice['migrated'];
+  return count is int && count > 0 ? count : null;
+}
+
+/// The notice has been shown: it does not come back.
+Future<void> clearModelProfilesNotice(WorkspaceRepository workspaces) =>
+    workspaces.setSetting(modelProfilesNoticeKey, {'pending': false});
 
 /// One-time, idempotent: a saved chat profile with no `capabilities` gets
 /// `{streaming: true, source: migrated}` written out (every other capability

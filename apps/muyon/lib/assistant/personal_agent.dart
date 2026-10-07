@@ -16,6 +16,7 @@ import 'model_request_gate.dart';
 import 'tool_selection.dart';
 import 'agent_compaction_flow.dart';
 import 'agent_context.dart';
+import 'agent_drafts.dart';
 import 'agent_dispatch.dart';
 import 'agent_model_turn.dart';
 import 'agent_resume.dart';
@@ -116,6 +117,13 @@ class PersonalAgent {
     _ctx.activeStarts.add(future);
     return future.whenComplete(() => _ctx.activeStarts.remove(future));
   }
+
+  /// Read-only drafts of the replies being streamed (memory only, never
+  /// stored; see agent_drafts.dart).
+  Stream<AgentDraft> get drafts => _ctx.drafts.stream;
+
+  /// The draft in flight for [taskId], if any.
+  AgentDraft? draftOf(String taskId) => _ctx.drafts.of(taskId);
 
   static String digest(Object? value) => AgentContext.digest(value);
 

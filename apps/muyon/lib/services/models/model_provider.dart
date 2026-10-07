@@ -69,6 +69,28 @@ final class ModelCapabilities {
     );
   }
 
+  ModelCapabilities copyWith({
+    bool? nativeTools,
+    bool? parallelToolCalls,
+    bool? streaming,
+    bool? jsonSchema,
+    bool? jsonObject,
+    bool? reportsUsage,
+    int? contextTokens,
+    int? maxOutputTokens,
+    CapabilitySource? source,
+  }) => ModelCapabilities(
+    nativeTools: nativeTools ?? this.nativeTools,
+    parallelToolCalls: parallelToolCalls ?? this.parallelToolCalls,
+    streaming: streaming ?? this.streaming,
+    jsonSchema: jsonSchema ?? this.jsonSchema,
+    jsonObject: jsonObject ?? this.jsonObject,
+    reportsUsage: reportsUsage ?? this.reportsUsage,
+    contextTokens: contextTokens ?? this.contextTokens,
+    maxOutputTokens: maxOutputTokens ?? this.maxOutputTokens,
+    source: source ?? this.source,
+  );
+
   Map<String, Object?> toJson() => {
     'nativeTools': nativeTools,
     'parallelToolCalls': parallelToolCalls,
@@ -79,6 +101,127 @@ final class ModelCapabilities {
     'contextTokens': contextTokens,
     'maxOutputTokens': maxOutputTokens,
     'source': source.name,
+  };
+}
+
+/// What one probe observed (ADR-0005 §4.5). [unconfirmed] is a reply that was
+/// accepted but did not show the behaviour (the model did not call the tool):
+/// treated like "no", and said so. [undetermined] (timeout, 401/403, 5xx,
+/// a dropped stream) and [notTested] never change a setting.
+enum ProbeVerdict { yes, no, unconfirmed, undetermined, notTested }
+
+/// The result of "测试连接", kept on the profile next to (never in place of)
+/// [ModelCapabilities]. It takes effect only through [adoptedOver], which the
+/// person triggers with "采用".
+final class DetectedCapabilities {
+  const DetectedCapabilities({
+    this.nativeTools = ProbeVerdict.notTested,
+    this.streaming = ProbeVerdict.notTested,
+    this.reportsUsage = ProbeVerdict.notTested,
+    this.jsonObject = ProbeVerdict.notTested,
+    this.parallelToolCalls = ProbeVerdict.notTested,
+    this.contextTokens,
+    this.maxOutputTokens,
+    this.presetNativeTools,
+    required this.detectedAt,
+    required this.payloadDigest,
+    this.ledgerIds = const [],
+  });
+
+  final ProbeVerdict nativeTools,
+      streaming,
+      reportsUsage,
+      jsonObject,
+      parallelToolCalls;
+
+  /// From the presets table, not from the probe (a probe cannot measure them).
+  final int? contextTokens, maxOutputTokens;
+
+  /// What the presets table suggests for native tools; shown, never adopted
+  /// on its own.
+  final bool? presetNativeTools;
+  final DateTime detectedAt;
+
+  /// Digest of the fixed probe content that was sent.
+  final String payloadDigest;
+  final List<String> ledgerIds;
+
+  static bool? _flag(ProbeVerdict v) => switch (v) {
+    ProbeVerdict.yes => true,
+    ProbeVerdict.no || ProbeVerdict.unconfirmed => false,
+    _ => null,
+  };
+
+  /// [current] with every definite finding applied; an undetermined or untested
+  /// item, and a size the presets do not know, keep the current value.
+  ModelCapabilities adoptedOver(ModelCapabilities current) => ModelCapabilities(
+    nativeTools: _flag(nativeTools) ?? current.nativeTools,
+    parallelToolCalls: _flag(parallelToolCalls) ?? current.parallelToolCalls,
+    streaming: _flag(streaming) ?? current.streaming,
+    jsonSchema: current.jsonSchema,
+    jsonObject: _flag(jsonObject) ?? current.jsonObject,
+    reportsUsage: _flag(reportsUsage) ?? current.reportsUsage,
+    contextTokens: contextTokens ?? current.contextTokens,
+    maxOutputTokens: maxOutputTokens ?? current.maxOutputTokens,
+    source: CapabilitySource.detected,
+  );
+
+  /// Whether adopting would change anything.
+  bool differsFrom(ModelCapabilities current) {
+    final next = adoptedOver(current);
+    return next.nativeTools != current.nativeTools ||
+        next.parallelToolCalls != current.parallelToolCalls ||
+        next.streaming != current.streaming ||
+        next.jsonObject != current.jsonObject ||
+        next.reportsUsage != current.reportsUsage ||
+        next.contextTokens != current.contextTokens ||
+        next.maxOutputTokens != current.maxOutputTokens;
+  }
+
+  static ProbeVerdict _verdict(Object? v) =>
+      ProbeVerdict.values.asNameMap()[v] ?? ProbeVerdict.undetermined;
+
+  /// A damaged value reads as "no result" rather than failing the profile.
+  static DetectedCapabilities? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final at = DateTime.tryParse('${json['detectedAt']}');
+    final digest = json['payloadDigest'];
+    if (at == null || digest is! String) return null;
+    int? count(String key) {
+      final v = json[key];
+      return v is int && v > 0 ? v : null;
+    }
+
+    return DetectedCapabilities(
+      nativeTools: _verdict(json['nativeTools']),
+      streaming: _verdict(json['streaming']),
+      reportsUsage: _verdict(json['reportsUsage']),
+      jsonObject: _verdict(json['jsonObject']),
+      parallelToolCalls: _verdict(json['parallelToolCalls']),
+      contextTokens: count('contextTokens'),
+      maxOutputTokens: count('maxOutputTokens'),
+      presetNativeTools: json['presetNativeTools'] as bool?,
+      detectedAt: at,
+      payloadDigest: digest,
+      ledgerIds: [
+        for (final id in (json['ledgerIds'] as List?) ?? const [])
+          if (id is String) id,
+      ],
+    );
+  }
+
+  Map<String, Object?> toJson() => {
+    'nativeTools': nativeTools.name,
+    'streaming': streaming.name,
+    'reportsUsage': reportsUsage.name,
+    'jsonObject': jsonObject.name,
+    'parallelToolCalls': parallelToolCalls.name,
+    'contextTokens': contextTokens,
+    'maxOutputTokens': maxOutputTokens,
+    'presetNativeTools': presetNativeTools,
+    'detectedAt': detectedAt.toUtc().toIso8601String(),
+    'payloadDigest': payloadDigest,
+    'ledgerIds': ledgerIds,
   };
 }
 

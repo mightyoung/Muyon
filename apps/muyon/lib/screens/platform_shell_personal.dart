@@ -178,6 +178,24 @@ extension _PersonalSections on _PlatformShellState {
     secret.dispose();
   }
 
+  /// "测试连接": the probe goes through the assistant's gate, the gateway's
+  /// one outbound channel and the ledger; its result is stored next to the
+  /// profile's capabilities and takes effect only when the person adopts it.
+  Future<void> testConnection(ModelProfile profile) async {
+    final probe = CapabilityProbe(
+      gateway: host.services.gateway,
+      gate: host.personalAgent.gate,
+    );
+    await testProfileConnection(
+      context,
+      profile: profile,
+      profiles: profiles,
+      run: (p, {required extended, required confirm}) =>
+          probe.run(p, extended: extended, confirm: confirm),
+      onChanged: repo.refresh,
+    );
+  }
+
   Widget memoryPage() => MemoryPage(
     repo: repo,
     dream: host.dream,
@@ -225,6 +243,11 @@ extension _PersonalSections on _PlatformShellState {
         onTap: () => page('数据与存储', storagePage()),
       ),
       const Text('模型与数据去向'),
+      ProfileMigrationNotice(
+        key: const ValueKey('profile-migration-notice-slot'),
+        read: () => pendingModelProfilesNotice(host.workspaces),
+        clear: () => clearModelProfilesNotice(host.workspaces),
+      ),
       DropdownButtonFormField<String>(
         initialValue:
             profiles.all().any(
@@ -256,25 +279,34 @@ extension _PersonalSections on _PlatformShellState {
         label: const Text('添加模型'),
       ),
       for (final profile in profiles.all())
-        ListTile(
-          title: Text(profile.endpointIdentity),
-          subtitle: Text(
-            '${profile.location.name} · ${profile.modelId}\n${profile.endpoint}',
-          ),
-          isThreeLine: true,
-          trailing: IconButton(
-            tooltip: '删除模型配置',
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => action(() async {
-              await profiles.remove(profile.id);
-              if (profile.credentialRef != null) {
-                await const MethodChannelSecretStore().remove(
-                  profile.credentialRef!,
-                );
-              }
-              repo.refresh();
-            }),
-          ),
+        ModelProfileTile(
+          key: ValueKey('profile-${profile.id}'),
+          profile: profile,
+          onStreaming: (on) => action(() async {
+            // Read again: a detection result may have been stored meanwhile.
+            final current = profiles.all().firstWhere(
+              (p) => p.id == profile.id,
+            );
+            await profiles.save(
+              current.copyWith(
+                capabilities: current.capabilities.copyWith(
+                  streaming: on,
+                  source: CapabilitySource.userDeclared,
+                ),
+              ),
+            );
+            repo.refresh();
+          }),
+          onTest: () => testConnection(profile),
+          onDelete: () => action(() async {
+            await profiles.remove(profile.id);
+            if (profile.credentialRef != null) {
+              await const MethodChannelSecretStore().remove(
+                profile.credentialRef!,
+              );
+            }
+            repo.refresh();
+          }),
         ),
       const Divider(),
       const Text('权限与能力'),
