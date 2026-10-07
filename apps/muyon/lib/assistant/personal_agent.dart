@@ -52,7 +52,7 @@ class PersonalAgent {
                maxCardCalls: budget.maxCardCalls,
                requestCap: budget.requestCap,
              ),
-       events = events ?? PayloadEventSink(repository),
+       events = events ?? TaskEventTableSink(repository),
        _clock = clock ?? DateTime.now {
     _dispatch.model = _model;
     _model
@@ -236,8 +236,20 @@ class PersonalAgent {
         await cancel(taskId);
         return;
       }
-      if (!await repository.updateTask(
+      // The approval of a model / summary request is
+      // written with the state change that consumes the confirmation.
+      final approves = ['model', 'compaction'].contains(task.stage);
+      final previewOk =
+          AgentContext.digest(task.payload['preview']) == requestDigest;
+      if (!await _ctx.commit(
         task.copy({'state': 'running', 'waitingFor': null}),
+        events: [
+          if (approves && previewOk)
+            (
+              AgentEventType.approval,
+              {'stage': task.stage, 'requestDigest': requestDigest},
+            ),
+        ],
         expected: {PersonalTaskState.waitingConfirmation},
       )) {
         throw StateError('confirmation_consumed');
@@ -245,22 +257,10 @@ class PersonalAgent {
       task = repository.task(taskId)!;
       try {
         if (task.stage == 'model') {
-          if (AgentContext.digest(task.payload['preview']) != requestDigest) {
-            throw StateError('preview_changed');
-          }
-          await _ctx.event(task, AgentEventType.approval, {
-            'stage': 'model',
-            'requestDigest': requestDigest,
-          });
+          if (!previewOk) throw StateError('preview_changed');
           await _model.runModel(task);
         } else if (task.stage == 'compaction') {
-          if (AgentContext.digest(task.payload['preview']) != requestDigest) {
-            throw StateError('preview_changed');
-          }
-          await _ctx.event(task, AgentEventType.approval, {
-            'stage': 'compaction',
-            'requestDigest': requestDigest,
-          });
+          if (!previewOk) throw StateError('preview_changed');
           await _compaction.runCompaction(task);
         } else {
           await _dispatch.executeCard(task, {...(chosen ?? cardIds)});
@@ -309,15 +309,14 @@ class PersonalAgent {
     }
     _ctx.modelTokens[id]?.cancel();
     _ctx.toolTokens[id]?.cancel();
-    if (await repository.updateTask(
+    await _ctx.commit(
       task.copy({
         'state': 'cancelled',
         'stage': 'cancelled',
         'waitingFor': null,
       }),
-    )) {
-      await _ctx.event(task, AgentEventType.cancel);
-    }
+      events: [(AgentEventType.cancel, <String, Object?>{})],
+    );
   }
 
   Future<void> pause(String id) async {

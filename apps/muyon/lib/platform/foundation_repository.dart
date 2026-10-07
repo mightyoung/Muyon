@@ -6,6 +6,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
+import 'task_records.dart';
 import 'tool_registry.dart';
 
 class AssistantConversation {
@@ -136,8 +137,30 @@ enum PersonalTaskState {
 }
 
 class PersonalTask {
-  PersonalTask(Map<String, Object?> payload) : payload = freezeJsonMap(payload);
+  PersonalTask(
+    Map<String, Object?> payload, {
+    this.pendingEvents = const [],
+    this.keepStage = false,
+  }) : payload = freezeJsonMap(payload);
   final Map<String, Object?> payload;
+
+  /// Events that go into the same transaction as the write of this task
+  /// (`createTask` / `updateTask`). They are not part of the payload and are
+  /// not copied by [copy]: only [withEvents] sets them.
+  final List<TaskEventDraft> pendingEvents;
+
+  /// For `updateTask`: keep the stage that is stored (a cancel may have
+  /// changed it while the writer was working) instead of this task's.
+  final bool keepStage;
+
+  PersonalTask withEvents(
+    List<TaskEventDraft> events, {
+    bool keepStage = false,
+  }) => PersonalTask(
+    payload,
+    pendingEvents: List.unmodifiable(events),
+    keepStage: keepStage,
+  );
   String get id => payload['executionId'] as String;
   String get conversationId => payload['conversationId'] as String;
   String get prompt => payload['prompt'] as String;
@@ -837,21 +860,28 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
           );
   }
 
+  /// Stores a new task; its [PersonalTask.pendingEvents] go into the same
+  /// transaction.
   Future<void> createTask(PersonalTask task) async {
     if (task.payload['kind'] != 'personal' ||
         task.state != PersonalTaskState.queued) {
       throw ArgumentError('Invalid new task');
     }
-    await database.write(
-      (db) => db.execute('INSERT INTO execution_records VALUES(?,?,?)', [
+    await database.write((db) {
+      db.execute('INSERT INTO execution_records VALUES(?,?,?)', [
         task.id,
         task.state.name,
         jsonEncode(task.payload),
-      ]),
-    );
+      ]);
+      TaskRecords.syncTask(db, task.payload, task.state.name);
+      TaskRecords.append(db, task.id, task.pendingEvents, _now());
+    });
     notifyListeners();
   }
 
+  /// Writes the task's new state. The state, the flat `tasks` row, the object
+  /// links and every one of `next.pendingEvents` are one transaction: they all
+  /// land or none does, so the timeline never disagrees with the state.
   Future<bool> updateTask(
     PersonalTask next, {
     Set<PersonalTaskState>? expected,
@@ -872,16 +902,27 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
               jsonEncode(next.scope.toJson())) {
         throw StateError('Task scope changed');
       }
-      // The event list is append-only and kept by [appendTaskEvent]: a
-      // snapshot taken before an event was added must not drop it.
-      final events = current.payload['events'];
+      // Events of the old payload list are history: a snapshot taken before
+      // this write cannot drop them. New events never go there.
+      final legacy = current.payload['events'];
+      final payload = {
+        ...next.payload,
+        if (next.keepStage) 'stage': current.stage,
+        'events': ?legacy,
+      };
       db.execute('UPDATE execution_records SET state=?,payload=? WHERE id=?', [
         next.state.name,
-        jsonEncode(
-          events == null ? next.payload : {...next.payload, 'events': events},
-        ),
+        jsonEncode(payload),
         next.id,
       ]);
+      TaskRecords.syncTask(db, payload, next.state.name);
+      TaskRecords.link(
+        db,
+        next.id,
+        TaskRecords.toolResultObjects(payload),
+        TaskObjectRole.toolResult,
+      );
+      TaskRecords.append(db, next.id, next.pendingEvents, _now());
       if (assistantAnswer != null) {
         if (next.state != PersonalTaskState.succeeded) {
           throw StateError('Answer requires success');
@@ -898,6 +939,7 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
           _now(),
           next.conversationId,
         ]);
+        TaskRecords.link(db, next.id, references, TaskObjectRole.answer);
       }
       return true;
     });
@@ -905,25 +947,52 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
     return result;
   }
 
-  /// Adds one event to the task's `events` (ADR-0005 §6.5) in its own write;
-  /// `seq` increases by one per task. Allowed on a finished task too (the
-  /// closing `done` / `error` event), and it changes nothing else.
+  /// Adds one event to the task's timeline in its own write; `seq` increases
+  /// by one per task. Allowed on a finished task too (a closing `done` /
+  /// `error` event) and it changes nothing else. [event] has `type` and
+  /// optionally `step` and `data`.
   Future<void> appendTaskEvent(
     String taskId,
     Map<String, Object?> event,
   ) async {
     final added = await database.write((db) {
-      final current = task(taskId);
-      if (current == null) return false;
-      final events = [...(current.payload['events'] as List? ?? const [])];
-      events.add({'seq': events.length + 1, 'at': _now(), ...event});
-      db.execute('UPDATE execution_records SET payload=? WHERE id=?', [
-        jsonEncode({...current.payload, 'events': events}),
+      if (db.select('SELECT 1 FROM execution_records WHERE id=?', [
         taskId,
-      ]);
+      ]).isEmpty) {
+        return false;
+      }
+      TaskRecords.append(db, taskId, [
+        TaskEventDraft(
+          event['type'] as String,
+          step: event['step'] as int?,
+          data: Map<String, Object?>.from(event['data'] as Map? ?? const {}),
+        ),
+      ], _now());
       return true;
     });
     if (added) notifyListeners();
+  }
+
+  /// The task's timeline in order; tasks from before the event table are
+  /// read from their payload's `events`.
+  List<TaskEvent> taskEvents(String taskId) =>
+      TaskRecords.events(database.raw, taskId);
+
+  /// The objects the task's receipts and answer refer to.
+  List<TaskObjectLink> taskObjects(String taskId) =>
+      TaskRecords.linksOfTask(database.raw, taskId);
+
+  /// Tasks that touched [ref], newest first (read only; the object page that
+  /// shows them is UI-5).
+  List<PersonalTask> tasksForObject(ObjectRef ref) {
+    final seen = <String>{};
+    final found = <PersonalTask>[];
+    for (final link in TaskRecords.linksOfObject(database.raw, ref).reversed) {
+      if (!seen.add(link.taskId)) continue;
+      final t = task(link.taskId);
+      if (t != null) found.add(t);
+    }
+    return found;
   }
 
   Future<void> recoverInterrupted() async {

@@ -118,11 +118,15 @@ class AgentModelTurn {
           .toIso8601String(),
       'approvalNonce': const Uuid().v4(),
     });
-    if (!await ctx.repository.updateTask(card)) return;
-    await ctx.event(card, AgentEventType.wait, {
-      'stage': 'model',
-      'requestDigest': card.payload['requestDigest'],
-    });
+    await ctx.commit(
+      card,
+      events: [
+        (
+          AgentEventType.wait,
+          {'stage': 'model', 'requestDigest': card.payload['requestDigest']},
+        ),
+      ],
+    );
   }
 
   /// Same checks before every send, whichever path sends.

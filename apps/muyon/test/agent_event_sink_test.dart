@@ -9,8 +9,8 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 
 import 'support/agent_loop_fixture.dart';
 
-/// K-3: the loop reports through [AgentEventSink] (ADR-0005 §6.5); today's
-/// implementation keeps the events in the task payload.
+/// K-3: the loop reports through [AgentEventSink] (ADR-0005 §6.5); K-4's
+/// implementation keeps the events in the `task_events` table.
 class _CollectingSink implements AgentEventSink {
   final events = <(String, AgentEvent)>[];
   @override
@@ -24,70 +24,77 @@ class _BrokenSink implements AgentEventSink {
       throw StateError('disk full');
 }
 
-List<Map> _events(PersonalTask task) => [
-  for (final e in task.payload['events'] as List? ?? const []) e as Map,
+/// The timeline from the event table (K-4), in the shape events always had.
+List<Map> _events(LoopFixture f, PersonalTask task) => [
+  for (final e in f.repo.taskEvents(task.id)) e.toJson(),
 ];
 
 void main() {
-  test('a read task leaves its timeline in the payload: in order, numbered, '
-      'with digests and counts and none of the text', () async {
-    final f = await LoopFixture.open();
-    f.replies
-      ..add(
-        LoopReply.sse(
-          sseCalls([('c1', 'read', '{}')], prompt: 400, completion: 20),
-        ),
-      )
-      ..add(
-        LoopReply.sse(
-          sseText('MODEL-ANSWER-TEXT [r1]', prompt: 600, completion: 30),
-        ),
+  test(
+    'a read task leaves its timeline in the event table: in order, numbered, '
+    'with digests and counts and none of the text',
+    () async {
+      final f = await LoopFixture.open();
+      f.replies
+        ..add(
+          LoopReply.sse(
+            sseCalls([('c1', 'read', '{}')], prompt: 400, completion: 20),
+          ),
+        )
+        ..add(
+          LoopReply.sse(
+            sseText('MODEL-ANSWER-TEXT [r1]', prompt: 600, completion: 30),
+          ),
+        );
+      final agent = f.agent();
+      final task = await f.run(agent, await f.start(agent, f.profile()));
+      expect(task.state, PersonalTaskState.succeeded);
+      final events = _events(f, task);
+      expect(events.map((e) => e['type']), [
+        'wait',
+        'approval',
+        'model_request',
+        'model_response',
+        'tool_proposed',
+        'tool_result',
+        'wait',
+        'approval',
+        'model_request',
+        'model_response',
+        'done',
+      ]);
+      expect(events.map((e) => e['seq']), [for (var i = 1; i <= 11; i++) i]);
+      expect(events.map((e) => e['step']), [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2,
+      ], reason: 'steps used when it happened');
+      final first = events.first['data'] as Map;
+      expect(first['stage'], 'model');
+      expect(first['requestDigest'], hasLength(64));
+      expect(
+        (events[1]['data'] as Map)['requestDigest'],
+        first['requestDigest'],
       );
-    final agent = f.agent();
-    final task = await f.run(agent, await f.start(agent, f.profile()));
-    expect(task.state, PersonalTaskState.succeeded);
-    final events = _events(task);
-    expect(events.map((e) => e['type']), [
-      'wait',
-      'approval',
-      'model_request',
-      'model_response',
-      'tool_proposed',
-      'tool_result',
-      'wait',
-      'approval',
-      'model_request',
-      'model_response',
-      'done',
-    ]);
-    expect(events.map((e) => e['seq']), [for (var i = 1; i <= 11; i++) i]);
-    expect(events.map((e) => e['step']), [
-      0,
-      0,
-      0,
-      0,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      2,
-    ], reason: 'steps used when it happened');
-    final first = events.first['data'] as Map;
-    expect(first['stage'], 'model');
-    expect(first['requestDigest'], hasLength(64));
-    expect((events[1]['data'] as Map)['requestDigest'], first['requestDigest']);
-    expect((events[2]['data'] as Map)['mode'], 'native');
-    expect(events[3]['data'], containsPair('promptTokens', 400));
-    expect(events[3]['data'], containsPair('finish', 'toolCalls'));
-    expect(events[4]['data'], containsPair('toolId', 'read'));
-    expect(events[5]['data'], containsPair('status', 'succeeded'));
-    final text = jsonEncode(events);
-    expect(text, isNot(contains('MODEL-ANSWER-TEXT')));
-    expect(text, isNot(contains(loopKey)));
-    expect(text, isNot(contains('actual result')));
-  });
+      expect((events[2]['data'] as Map)['mode'], 'native');
+      expect(events[3]['data'], containsPair('promptTokens', 400));
+      expect(events[3]['data'], containsPair('finish', 'toolCalls'));
+      expect(events[4]['data'], containsPair('toolId', 'read'));
+      expect(events[5]['data'], containsPair('status', 'succeeded'));
+      final text = jsonEncode(events);
+      expect(text, isNot(contains('MODEL-ANSWER-TEXT')));
+      expect(text, isNot(contains(loopKey)));
+      expect(text, isNot(contains('actual result')));
+    },
+  );
 
   test('a batch leaves one approval and one result per call', () async {
     final f = await LoopFixture.open();
@@ -103,7 +110,7 @@ void main() {
       requestDigest: task.payload['requestDigest'] as String,
     );
     task = f.repo.task(task.id)!;
-    final types = _events(task).map((e) => e['type']).toList();
+    final types = _events(f, task).map((e) => e['type']).toList();
     expect(types.where((t) => t == 'tool_proposed'), hasLength(2));
     expect(
       types.where((t) => t == 'approval'),
@@ -121,14 +128,14 @@ void main() {
     var task = await f.start(agent, f.profile());
     await agent.cancel(task.id);
     task = f.repo.task(task.id)!;
-    expect(_events(task).last['type'], 'cancel');
+    expect(_events(f, task).last['type'], 'cancel');
 
     final g = await LoopFixture.open();
     g.replies.add(LoopReply.sse(sseCalls([('c1', 'read', '{}')])));
     final agent2 = g.agent(maxRounds: 1);
     task = await g.run(agent2, await g.start(agent2, g.profile()));
     expect(task.state, PersonalTaskState.failed);
-    final last = _events(task).last;
+    final last = _events(g, task).last;
     expect(last['type'], 'error');
     expect((last['data'] as Map)['code'], 'budget_steps');
   });
@@ -143,8 +150,8 @@ void main() {
     expect(await f.repo.updateTask(stale.copy({'summary': 'later'})), isTrue);
     final after = f.repo.task(task.id)!;
     expect(after.summary, 'later');
-    expect(_events(after).last['type'], 'done');
-    final seqs = _events(after).map((e) => e['seq'] as int).toList();
+    expect(_events(f, after).last['type'], 'done');
+    final seqs = _events(f, after).map((e) => e['seq'] as int).toList();
     expect(seqs, [for (var i = 1; i <= seqs.length; i++) i]);
   });
 

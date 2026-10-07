@@ -305,11 +305,15 @@ class AgentCompactionFlow {
           .toIso8601String(),
       'approvalNonce': const Uuid().v4(),
     });
-    if (!await ctx.repository.updateTask(card)) return true;
-    await ctx.event(card, AgentEventType.wait, {
-      'stage': 'compaction',
-      'requestDigest': requestDigest,
-    });
+    await ctx.commit(
+      card,
+      events: [
+        (
+          AgentEventType.wait,
+          {'stage': 'compaction', 'requestDigest': requestDigest},
+        ),
+      ],
+    );
     return true;
   }
 
