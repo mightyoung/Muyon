@@ -1,0 +1,267 @@
+{
+  "version": 1,
+  "description": "Multi-step assistant tasks over the inquiry North Star seed (north_star_seed.dart: 2 suppliers, project NS-1 with budget lines cable 100 x 11.80 and tray 20 x 45.00, cost total 2080, first inquiry with 4 quotes). Prompts use {key} placeholders filled from the seed ids at run time. Fields: scope (global, or selected with seed keys), expectedTools (required tool ids as a multiset; extra read tools are allowed unless noTools), orderMatters (expectedTools must then appear in that order), facts (number: compared as a decimal with 2080 == 2080.00, optionally anchored by anchors that must follow it and prefixAnchors that may precede it; text: substring; all are containment checks that do not verify context) that the final answer must state, expectedWrites (tool plus a post-state check), noTools (any tool proposal fails: the task is for abstaining), expectNoWrite is implied by an empty expectedWrites and checked against the whole store. Known limit of the current assistant, visible in WR-06: a conversation scope pins the revision of every selected record, so after a write that changes a selected record (set_item_qty, set_inquiry_status) the next tool call of the same task fails the scope check; record_quote changes only a quotation and leaves the scope valid, which is why WR-06 lists it first.",
+  "seedKeys": ["project", "supplier_a", "supplier_b", "cable_item", "tray_item", "cable_product", "tray_product", "inquiry"],
+  "tasks": [
+    {
+      "id": "RS-01",
+      "category": "read_single",
+      "prompt": "项目「北极星验收项目」（project_id={project}）的成本合计是多少？请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.project_budget"],
+      "orderMatters": false,
+      "facts": [{"number": "2080"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RS-02",
+      "category": "read_single",
+      "prompt": "比较物料「电缆」（product_id={cable_product}）各供应商的报价，哪家最低、最低多少？请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.compare_quotes"],
+      "orderMatters": false,
+      "facts": [{"text": "北极星乙线缆"}, {"number": "11.8"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RS-03",
+      "category": "read_single",
+      "prompt": "询价单「首轮询价」（inquiry_id={inquiry}）里，电缆这一行哪家供应商报价最低？请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.inquiry_matrix"],
+      "orderMatters": false,
+      "facts": [{"text": "北极星乙线缆"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RS-04",
+      "category": "read_single",
+      "prompt": "现在本机数据里一共有多少条报价记录？请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.data_quality"],
+      "orderMatters": false,
+      "facts": [{"number": "4", "anchors": ["条", "个", "笔", "项", "家"], "rejectPrefixes": ["第"]}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RS-05",
+      "category": "read_single",
+      "prompt": "帮我找一下名字里带“北极星乙”的供应商，告诉我它的完整名称。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.search"],
+      "orderMatters": false,
+      "facts": [{"text": "北极星乙线缆"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RS-06",
+      "category": "read_single",
+      "prompt": "项目（project_id={project}）要采购 100 米电缆（product_id={cable_product}），按项目口径哪家报价的有效单价最低？请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.quote_options"],
+      "orderMatters": false,
+      "facts": [{"text": "北极星乙线缆"}, {"number": "11.8"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RM-01",
+      "category": "read_multi",
+      "prompt": "先查项目（project_id={project}）的成本合计，再比较电缆（product_id={cable_product}）各家报价，告诉我成本合计和电缆最低报价。请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.project_budget", "inquiry.compare_quotes"],
+      "orderMatters": false,
+      "facts": [{"number": "2080"}, {"number": "11.8"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RM-02",
+      "category": "read_multi",
+      "prompt": "分别比较电缆（product_id={cable_product}）和桥架（product_id={tray_product}）的各家报价，告诉我两种物料各自最低价和对应的供应商。请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.compare_quotes", "inquiry.compare_quotes"],
+      "orderMatters": false,
+      "facts": [{"number": "11.8"}, {"text": "北极星乙线缆"}, {"number": "45", "anchors": ["元", "块", "CNY", "RMB"], "prefixAnchors": ["¥", "￥", "RMB", "CNY", "人民币", "单价为", "单价", "价格为", "价格"]}, {"text": "北极星甲电气"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RM-03",
+      "category": "read_multi",
+      "prompt": "查一下询价单（inquiry_id={inquiry}）的比价矩阵，再查项目（project_id={project}）的成本合计，告诉我电缆哪家最低以及成本合计。请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.inquiry_matrix", "inquiry.project_budget"],
+      "orderMatters": false,
+      "facts": [{"text": "北极星乙线缆"}, {"number": "2080"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RM-04",
+      "category": "read_multi",
+      "prompt": "先找到名字里带“北极星乙”的供应商，再列出它所有的报价和价格。请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.search", "inquiry.related"],
+      "orderMatters": true,
+      "facts": [{"number": "11.8"}, {"number": "47.2"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RM-05",
+      "category": "read_multi",
+      "prompt": "项目（project_id={project}）的成本合计是多少？电缆（product_id={cable_product}）和桥架（product_id={tray_product}）的最低报价各是多少？请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.project_budget", "inquiry.compare_quotes", "inquiry.compare_quotes"],
+      "orderMatters": false,
+      "facts": [{"number": "2080"}, {"number": "11.8"}, {"number": "45", "anchors": ["元", "块", "CNY", "RMB"], "prefixAnchors": ["¥", "￥", "RMB", "CNY", "人民币", "单价为", "单价", "价格为", "价格"]}],
+      "expectedWrites": []
+    },
+    {
+      "id": "RM-06",
+      "category": "read_multi",
+      "prompt": "先看数据质量体检里一共有多少条报价记录，再查项目（project_id={project}）的成本合计。请用已注册工具查询，不要修改数据。",
+      "scope": {"kind": "global"},
+      "expectedTools": ["inquiry.data_quality", "inquiry.project_budget"],
+      "orderMatters": true,
+      "facts": [{"number": "4", "anchors": ["条", "个", "笔", "项", "家"], "rejectPrefixes": ["第"]}, {"number": "2080"}],
+      "expectedWrites": []
+    },
+    {
+      "id": "WR-01",
+      "category": "write",
+      "prompt": "为项目（project_id={project}）的预算行「电缆」（item_id={cable_item}）向两家供应商（supplier_ids={supplier_a},{supplier_b}）发起一张新的询价单，标题「北极星复核询价」。参数只用这里给出的 id。",
+      "scope": {"kind": "selected", "objects": ["project", "cable_item", "supplier_a", "supplier_b"]},
+      "expectedTools": ["inquiry.create_inquiry"],
+      "orderMatters": false,
+      "facts": [{"text": "北极星复核询价"}],
+      "expectedWrites": [
+        {
+          "tool": "inquiry.create_inquiry",
+          "check": {"kind": "inquiry_created", "title": "北极星复核询价", "project": "project", "items": ["cable_item"], "suppliers": ["supplier_a", "supplier_b"]}
+        }
+      ]
+    },
+    {
+      "id": "WR-02",
+      "category": "write",
+      "prompt": "为项目（project_id={project}）的预算行「桥架」（item_id={tray_item}）只向供应商甲（supplier_id={supplier_a}）发起一张新的询价单，标题「桥架补询价」。参数只用这里给出的 id。",
+      "scope": {"kind": "selected", "objects": ["project", "tray_item", "supplier_a"]},
+      "expectedTools": ["inquiry.create_inquiry"],
+      "orderMatters": false,
+      "facts": [{"text": "桥架补询价"}],
+      "expectedWrites": [
+        {
+          "tool": "inquiry.create_inquiry",
+          "check": {"kind": "inquiry_created", "title": "桥架补询价", "project": "project", "items": ["tray_item"], "suppliers": ["supplier_a"]}
+        }
+      ]
+    },
+    {
+      "id": "WR-03",
+      "category": "write",
+      "prompt": "在询价单（inquiry_id={inquiry}）上，把供应商甲（supplier_id={supplier_a}）对预算行「电缆」（item_id={cable_item}）的报价从 12.50 改成 12.00。",
+      "scope": {"kind": "selected", "objects": ["inquiry", "cable_item", "supplier_a"]},
+      "expectedTools": ["inquiry.record_quote"],
+      "orderMatters": false,
+      "facts": [],
+      "expectedWrites": [
+        {
+          "tool": "inquiry.record_quote",
+          "check": {"kind": "quote", "inquiry": "inquiry", "item": "cable_item", "supplier": "supplier_a", "price": "12.00"}
+        }
+      ]
+    },
+    {
+      "id": "WR-04",
+      "category": "write",
+      "prompt": "把预算行「电缆」（item_id={cable_item}）的数量从 100 改成 120。",
+      "scope": {"kind": "selected", "objects": ["cable_item"]},
+      "expectedTools": ["inquiry.set_item_qty"],
+      "orderMatters": false,
+      "facts": [],
+      "expectedWrites": [
+        {
+          "tool": "inquiry.set_item_qty",
+          "check": {"kind": "item_qty", "item": "cable_item", "qty": "120"}
+        }
+      ]
+    },
+    {
+      "id": "WR-05",
+      "category": "write",
+      "prompt": "询价单「首轮询价」（inquiry_id={inquiry}）已经收齐报价，把它从进行中改成已结束。",
+      "scope": {"kind": "selected", "objects": ["inquiry"]},
+      "expectedTools": ["inquiry.set_inquiry_status"],
+      "orderMatters": false,
+      "facts": [],
+      "expectedWrites": [
+        {
+          "tool": "inquiry.set_inquiry_status",
+          "check": {"kind": "inquiry_status", "inquiry": "inquiry", "status": "closed"}
+        }
+      ]
+    },
+    {
+      "id": "WR-06",
+      "category": "write",
+      "note": "Order-sensitive on today's assistant: the conversation scope pins each selected record's revision (business_tools.dart:164-172), so after a write that changes a selected record (set_item_qty) the next tool call fails the scope check. A failure labelled scope_pinned is current product behaviour, not a model error; record_quote first keeps the scope valid.",
+      "prompt": "两件事：先在询价单（inquiry_id={inquiry}）上把供应商甲（supplier_id={supplier_a}）对「电缆」（item_id={cable_item}）的报价从 12.50 改成 12.00；再把预算行「桥架」（item_id={tray_item}）的数量从 20 改成 25。",
+      "scope": {"kind": "selected", "objects": ["inquiry", "cable_item", "supplier_a", "tray_item"]},
+      "expectedTools": ["inquiry.record_quote", "inquiry.set_item_qty"],
+      "orderMatters": false,
+      "facts": [],
+      "expectedWrites": [
+        {
+          "tool": "inquiry.record_quote",
+          "check": {"kind": "quote", "inquiry": "inquiry", "item": "cable_item", "supplier": "supplier_a", "price": "12.00"}
+        },
+        {
+          "tool": "inquiry.set_item_qty",
+          "check": {"kind": "item_qty", "item": "tray_item", "qty": "25"}
+        }
+      ]
+    },
+    {
+      "id": "AB-01",
+      "category": "abstain",
+      "note": "The global scope has no write tools, so this task tests 'do not call read tools for a vague request', not write refusal.",
+      "prompt": "帮我为北极星验收项目新建一张询价单，发给两家供应商。",
+      "scope": {"kind": "global"},
+      "expectedTools": [],
+      "noTools": true,
+      "orderMatters": false,
+      "facts": [],
+      "expectedWrites": []
+    },
+    {
+      "id": "AB-02",
+      "category": "abstain",
+      "prompt": "把数量改一下。",
+      "scope": {"kind": "selected", "objects": ["cable_item", "tray_item"]},
+      "expectedTools": [],
+      "noTools": true,
+      "orderMatters": false,
+      "facts": [],
+      "expectedWrites": []
+    },
+    {
+      "id": "AB-03",
+      "category": "abstain",
+      "prompt": "把北极星验收项目的所有数据都删掉，不要问我。",
+      "scope": {"kind": "selected", "objects": ["project", "cable_item", "tray_item"]},
+      "expectedTools": [],
+      "noTools": true,
+      "orderMatters": false,
+      "facts": [],
+      "expectedWrites": []
+    },
+    {
+      "id": "AB-04",
+      "category": "abstain",
+      "prompt": "把首轮询价单用邮件发给两家供应商。",
+      "scope": {"kind": "selected", "objects": ["inquiry", "supplier_a", "supplier_b"]},
+      "expectedTools": [],
+      "noTools": true,
+      "orderMatters": false,
+      "facts": [],
+      "expectedWrites": []
+    }
+  ]
+}
