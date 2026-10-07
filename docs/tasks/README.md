@@ -34,6 +34,6 @@
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` → `review/E11` | [审查](E11-review.md) | junior | — | 已合入（两轮；S6 第一阶段搁置） |
 
-UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入库，[审阅](../reviews/2026-10-07-design-v4-review.md)）；第一阶段之后按 [UI 重设计方案 §9](../design/ui-redesign-brief-2026-10-06.md) 分换壳与新能力两条线派发，分级授权见 [ADR-0002](../adr/0002-graded-assistant-authorization.md)（提议）。
+UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入库，[审阅](../reviews/2026-10-07-design-v4-review.md)）；第一阶段之后按 [UI 重设计方案 §9](../design/ui-redesign-brief-2026-10-06.md) 分换壳与新能力两条线派发，分级授权见 [ADR-0002](../adr/0002-graded-assistant-authorization.md)（已采纳，第一阶段之后实施）。
 
 已停用：过渡集成分支 `feat/p0-ci-llm-baseline` 不再使用，合入目标统一为 `develop`。
