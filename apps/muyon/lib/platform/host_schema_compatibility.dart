@@ -17,6 +17,10 @@ class HostSchemaCompatibility {
   };
   // Captured from the frozen canonical DDL, independently of database metadata.
   static const repairedFingerprints = {
+    10: 'dc4f8d2258827295b85efe506c93b522ddd780d0e79716c06ea79f0a2c92e989',
+    11: '9e89d824e3856c01f0713b1d66bd711e8562cc0097ef51e088fa2122c438b158',
+  };
+  static const previousRepairedFingerprints = {
     10: 'a0be1c5a07eacb86c2a419979c8dd71905581493001bc807888899b34cff3c83',
     11: 'a04da65762c20da2be13c17d2440eae79e92a5fc3dd4c22cf01f8242f510af05',
   };
@@ -68,7 +72,15 @@ class HostSchemaCompatibility {
     reserved,
     'module-grants',
   ];
-  static const auditDdl = '''
+  // REPLACE does not fire DELETE triggers when recursive_triggers is off.
+  // Reject every subsequent insertion before conflict resolution instead.
+  static const insertGuardDdl = '''
+CREATE TRIGGER host_compatibility_no_insert BEFORE INSERT ON host_migration_compatibility
+WHEN EXISTS(SELECT 1 FROM host_migration_compatibility)
+BEGIN SELECT RAISE(ABORT,'Migration compatibility facts are immutable'); END;
+''';
+  static const auditDdl =
+      '''
 CREATE TABLE host_migration_compatibility(
  repair_id TEXT PRIMARY KEY CHECK(repair_id='reg2a-reserved9-v1'),
  source_version INTEGER NOT NULL CHECK(source_version IN (9,10)),
@@ -84,6 +96,7 @@ CREATE TRIGGER host_compatibility_no_update BEFORE UPDATE ON host_migration_comp
 BEGIN SELECT RAISE(ABORT,'Migration compatibility facts are immutable'); END;
 CREATE TRIGGER host_compatibility_no_delete BEFORE DELETE ON host_migration_compatibility
 BEGIN SELECT RAISE(ABORT,'Migration compatibility facts are immutable'); END;
+$insertGuardDdl
 ''';
 
   static List<List<Object?>> history(Database db, int version) => [
@@ -177,7 +190,8 @@ BEGIN SELECT RAISE(ABORT,'Migration compatibility facts are immutable'); END;
       final rows = db.select('SELECT * FROM host_migration_compatibility');
       if (rows.length != 1) throw StateError('Invalid compatibility facts');
       final fact = rows.single;
-      validateCompleted(db, version, digest);
+      final previous = digest(db) == previousRepairedFingerprints[version];
+      if (!previous) validateCompleted(db, version, digest);
       final source = fact['source_version'];
       if (source is! int ||
           !fingerprints.containsKey(source) ||
@@ -203,6 +217,11 @@ BEGIN SELECT RAISE(ABORT,'Migration compatibility facts are immutable'); END;
           .isEmpty) {
         throw StateError('Compatibility repair missing');
       }
+      // Only the exact previous repaired shape may receive this additive guard.
+      // This runs in the migration transaction, never rewrites the audit row,
+      // and is rolled back with later DDL or metadata failures.
+      if (previous) db.execute(insertGuardDdl);
+      validateCompleted(db, version, digest);
       return true;
     }
     if (!fingerprints.containsKey(version) ||

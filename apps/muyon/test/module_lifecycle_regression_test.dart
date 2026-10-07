@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/app/module_host.dart';
+import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/screens/platform_shell.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
@@ -38,6 +39,149 @@ class PausedModule extends FakeV2Module {
 }
 
 void main() {
+  test(
+    'failed revocation keeps admission closed until that capability retries',
+    () async {
+      final root = Directory.systemTemp.createTempSync('revocation-retry-');
+      final module = FakeV2Module(
+        'recovery',
+        features: {ModuleFeature.exchange},
+        capabilities: {
+          const CapabilityRequest(id: 'ocr', reason: 'scan'),
+          const CapabilityRequest(id: 'transfer', reason: 'exchange'),
+        },
+      );
+      final host = await MuyonHost.open(root.path, modules: [module]);
+      try {
+        await host.modules.activate('recovery');
+        await host.workspaces.database.write(
+          (db) => db.execute(
+            "CREATE TRIGGER deny_ocr_revocation BEFORE UPDATE ON module_grants WHEN NEW.module_id='recovery' AND NEW.capability='ocr' BEGIN SELECT RAISE(ABORT,'injected revoke failure'); END",
+          ),
+        );
+        await expectLater(
+          host.modules.revokeCapability('recovery', 'ocr'),
+          throwsA(isA<SqliteException>()),
+        );
+        await host.modules.revokeCapability('recovery', 'transfer');
+        expect(
+          (await host.modules.activate('recovery')).status,
+          ModuleStatus.failed,
+        );
+        expect(module.activations, 1);
+        await host.workspaces.database.write(
+          (db) => db.execute('DROP TRIGGER deny_ocr_revocation'),
+        );
+        await host.modules.revokeCapability('recovery', 'ocr');
+        expect(
+          (await host.modules.activate('recovery')).status,
+          ModuleStatus.ready,
+        );
+        expect(host.grants.revoked('recovery'), {'ocr', 'transfer'});
+        expect(module.lastResources!.capabilities.available, isEmpty);
+      } finally {
+        await host.close();
+        root.deleteSync(recursive: true);
+      }
+    },
+  );
+
+  test('overlapping revocations keep activation closed until both writes finish', () async {
+    final root = Directory.systemTemp.createTempSync('overlapping-revokes-');
+    final module = FakeV2Module(
+      'parallel',
+      features: {ModuleFeature.exchange},
+      capabilities: {
+        const CapabilityRequest(id: 'ocr', reason: 'scan'),
+        const CapabilityRequest(id: 'transfer', reason: 'exchange'),
+      },
+    );
+    final host = await MuyonHost.open(root.path, modules: [module]);
+    final database = host.workspaces.database as ManagedConnection;
+    final entered = Completer<void>(), release = Completer<void>();
+    final previous = database.onCommit;
+    Future<void>? second;
+    var injected = false;
+    try {
+      await host.modules.activate('parallel');
+      database.onCommit = () {
+        previous?.call();
+        final row = database.raw.select(
+          "SELECT status FROM module_registry WHERE module_id='parallel'",
+        );
+        if (!injected &&
+            row.isNotEmpty &&
+            row.single['status'] == 'failed' &&
+            host.grants.revoked('parallel').contains('ocr')) {
+          injected = true;
+          // Queue a barrier after the first revoke's durable failed record,
+          // then the second revoke before the first async continuation resumes.
+          database.exclusiveAsync((_) async {
+            entered.complete();
+            await release.future;
+          });
+          second = host.modules.revokeCapability('parallel', 'transfer');
+        }
+      };
+      final first = host.modules.revokeCapability('parallel', 'ocr');
+      await first;
+      await entered.future.timeout(const Duration(seconds: 5));
+      expect(host.grants.revoked('parallel'), {'ocr'});
+      final activation = host.modules.activate('parallel');
+      release.complete();
+      await second;
+      final state = await activation;
+      expect(host.grants.revoked('parallel'), {
+        'ocr',
+        'transfer',
+      }, reason: 'both durable withdrawals must survive reactivation');
+      expect(state.status, ModuleStatus.failed);
+      expect(module.activations, 1);
+      expect(
+        host.grants
+            .forModule('parallel')
+            .every((g) => !g.granted && g.policy == 'revoked'),
+        isTrue,
+      );
+    } finally {
+      database.onCommit = previous;
+      if (!release.isCompleted) release.complete();
+      await host.close();
+      root.deleteSync(recursive: true);
+    }
+  });
+
+  for (final restart in [false, true]) {
+    test(
+      'legacy research models revocation survives ${restart ? "restart" : "immediate reactivation"}',
+      () async {
+        final root = Directory.systemTemp.createTempSync('legacy-revoked-');
+        var host = await MuyonHost.open(root.path);
+        try {
+          await host.activateResearch();
+          expect(host.research, isNotNull);
+          await host.modules.revokeCapability('research', 'models');
+          if (restart) {
+            await host.close();
+            host = await MuyonHost.open(root.path);
+          }
+          await host.activateResearch();
+          expect(host.modules.state('research').status, ModuleStatus.failed);
+          expect(host.research, isNull);
+          final decision = host.grants
+              .forModule('research')
+              .singleWhere((g) => g.capability == 'models');
+          expect(decision.granted, isFalse);
+          expect(decision.policy, 'revoked');
+          expect(host.grants.revoked('research'), contains('models'));
+        } finally {
+          await host.close();
+          root.deleteSync(recursive: true);
+        }
+      },
+    );
+  }
+
   test('API v3 module stays unavailable without activating', () async {
     final root = Directory.systemTemp.createTempSync('api3-admission-');
     final module = FakeV2Module('future', apiVersion: 3);

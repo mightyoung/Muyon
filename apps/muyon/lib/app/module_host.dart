@@ -90,7 +90,9 @@ class _Slot {
   /// not activate until the host restarts.
   String? blocked;
   int epoch = 0;
-  bool revoking = false;
+  int pendingRevocations = 0;
+  final Set<String> failedRevocations = {};
+  bool get revoking => pendingRevocations > 0 || failedRevocations.isNotEmpty;
 }
 
 /// The one way a module becomes usable (ADR-0004 §6.1). Activation is
@@ -373,7 +375,7 @@ class ModuleHost implements ModuleLink {
       _checkCurrent(slot, epoch);
     }
     final decisions = bridge != null && manifest.apiVersion == 1
-        ? GrantPolicy.legacy(id, bridge.grants)
+        ? GrantPolicy.legacy(id, bridge.grants, revoked: grants.revoked(id))
         : GrantPolicy.decide(manifest, revoked: grants.revoked(id));
     await grants.record(id, decisions);
     _checkCurrent(slot, epoch);
@@ -444,7 +446,7 @@ class ModuleHost implements ModuleLink {
   Future<void> revokeCapability(String id, String capability) async {
     final slot = _slot(id);
     ++slot.epoch;
-    slot.revoking = true;
+    ++slot.pendingRevocations;
     slot.runtime = null;
     slot.inflight = null;
     final reason = 'capability_revoked: $capability';
@@ -453,9 +455,16 @@ class ModuleHost implements ModuleLink {
     tools.cancelProvider(id);
     // Remain fail closed if durable revocation fails; a successful retry is
     // required before any new activation may be admitted.
-    await grants.revoke(id, capability);
-    await _record(id, 'failed', reason);
-    slot.revoking = false;
+    try {
+      await grants.revoke(id, capability);
+      await _record(id, 'failed', reason);
+      slot.failedRevocations.remove(capability);
+    } catch (_) {
+      slot.failedRevocations.add(capability);
+      rethrow;
+    } finally {
+      --slot.pendingRevocations;
+    }
   }
 
   Future<void> close() => _closeFuture ??= _close();

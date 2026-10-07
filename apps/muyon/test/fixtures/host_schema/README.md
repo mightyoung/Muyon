@@ -21,3 +21,11 @@ continues registering only through v10.
 Do not regenerate these fixtures from the schema under test. Tests install them
 into real on-disk SQLite databases, add user records, and verify the original
 applied migration rows survive success and transaction rollback.
+
+`repaired406ca95-v10.sql` and `repaired406ca95-v11.sql` freeze the exact repaired
+schema and audit row produced by commit 406ca9567c5db7d7e02e5d2e312ea4b601c59bbc,
+before the insert guard. They verify an additive guard upgrade preserves original
+facts/history and rolls back atomically. The new BEFORE INSERT guard is needed
+because REPLACE skips DELETE triggers when recursive_triggers is off; no global
+SQLite setting is changed. Old audit timestamps cannot be retroactively
+authenticated; the upgrade preserves them and prevents subsequent replacement.

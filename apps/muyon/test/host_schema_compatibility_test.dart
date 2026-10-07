@@ -142,6 +142,50 @@ void main() {
       );
     },
   );
+  test('INSERT OR REPLACE cannot replace a completed repair fact', () async {
+    install('legacy-v10');
+    final owner = await manager.open('muyon', WorkspaceRepository.schema);
+    final original = owner.raw
+        .select('SELECT * FROM host_migration_compatibility')
+        .single
+        .values
+        .toList();
+    expect(
+      owner.raw.select('PRAGMA recursive_triggers').single.values.single,
+      0,
+    );
+    expect(
+      () => owner.raw.execute(
+        '''
+INSERT OR REPLACE INTO host_migration_compatibility
+SELECT repair_id,source_version,source_definition_digest,source_structure_digest,
+source_history_json,canonical_migration_id,canonical_definition_digest,completed,?
+FROM host_migration_compatibility
+''',
+        ['2026-10-09T00:00:00.000Z'],
+      ),
+      throwsA(isA<SqliteException>()),
+    );
+    expect(
+      owner.raw
+          .select('SELECT * FROM host_migration_compatibility')
+          .single
+          .values
+          .toList(),
+      original,
+    );
+    await manager.close();
+    restart();
+    final reopened = await manager.open('muyon', WorkspaceRepository.schema);
+    expect(
+      reopened.raw
+          .select('SELECT * FROM host_migration_compatibility')
+          .single
+          .values
+          .toList(),
+      original,
+    );
+  });
 
   for (final fixture in ['legacy-v8', 'legacy-v9', 'legacy-v10']) {
     test(
@@ -239,6 +283,99 @@ void main() {
       },
     );
   }
+
+  for (final version in [10, 11]) {
+    test('previous repaired v$version receives guard without rewriting facts', () async {
+      install('repaired406ca95-v$version');
+      final before = sqlite3.open(getPath());
+      final original = history(before);
+      final fact = before
+          .select('SELECT * FROM host_migration_compatibility')
+          .single
+          .values
+          .toList();
+      before.close();
+      final target = version == 10 ? WorkspaceRepository.schema : schema11();
+      final owner = await manager.open('muyon', target);
+      expect(history(owner.raw), original);
+      expect(
+        owner.raw
+            .select('SELECT * FROM host_migration_compatibility')
+            .single
+            .values
+            .toList(),
+        fact,
+      );
+      expect(
+        owner.raw.select(
+          "SELECT name FROM sqlite_master WHERE name='host_compatibility_no_insert'",
+        ),
+        hasLength(1),
+      );
+      for (final statement in [
+        'INSERT OR REPLACE',
+        'REPLACE',
+        'INSERT OR IGNORE',
+      ]) {
+        expect(
+          () => owner.raw.execute(
+            '$statement INTO host_migration_compatibility SELECT * FROM host_migration_compatibility',
+          ),
+          throwsA(isA<SqliteException>()),
+        );
+      }
+      await manager.close();
+      restart();
+      final reopened = await manager.open('muyon', target);
+      expect(history(reopened.raw), original);
+      expect(
+        reopened.raw
+            .select('SELECT * FROM host_migration_compatibility')
+            .single
+            .values
+            .toList(),
+        fact,
+      );
+    });
+  }
+  test('guard upgrade rolls back with a later migration fault', () async {
+    install('repaired406ca95-v10');
+    final before = sqlite3.open(getPath());
+    final original = history(before);
+    final fingerprint = StorageManager.structureDigest(before);
+    final fact = before
+        .select('SELECT * FROM host_migration_compatibility')
+        .single
+        .values
+        .toList();
+    before.close();
+    await expectLater(
+      manager.open('muyon', schema11(fail: true)),
+      throwsStateError,
+    );
+    final inspected = sqlite3.open(getPath());
+    expect(StorageManager.structureDigest(inspected), fingerprint);
+    expect(history(inspected), original);
+    expect(
+      inspected
+          .select('SELECT * FROM host_migration_compatibility')
+          .single
+          .values
+          .toList(),
+      fact,
+    );
+    expect(
+      inspected.select(
+        "SELECT name FROM sqlite_master WHERE name='host_compatibility_no_insert'",
+      ),
+      isEmpty,
+    );
+    inspected.close();
+    expect(
+      (await manager.open('muyon', WorkspaceRepository.schema)).raw.userVersion,
+      10,
+    );
+  });
   final corruptions = <String, void Function(Database)>{
     'unknown table with forged metadata': (db) =>
         db.execute('CREATE TABLE foreign_table(x)'),

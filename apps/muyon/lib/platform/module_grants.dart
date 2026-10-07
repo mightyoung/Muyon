@@ -71,16 +71,20 @@ abstract final class GrantPolicy {
   }
 
   /// v1 modules have no request step: the host's fixed set is recorded as
-  /// granted so the table is a complete account (ADR-0004 §6.2, "记录").
-  static List<GrantDecision> legacy(String moduleId, Set<String> granted) => [
+  /// granted unless persistently revoked. v1 has no revocation exemption.
+  static List<GrantDecision> legacy(
+    String moduleId,
+    Set<String> granted, {
+    Set<String> revoked = const {},
+  }) => [
     for (final capability in granted)
       GrantDecision(
         moduleId: moduleId,
         capability: capability,
         required: true,
         reason: 'v1 module: fixed host grant (LegacyModuleBridge)',
-        granted: true,
-        policy: 'legacy',
+        granted: !revoked.contains(capability),
+        policy: revoked.contains(capability) ? 'revoked' : 'legacy',
       ),
   ];
 }
