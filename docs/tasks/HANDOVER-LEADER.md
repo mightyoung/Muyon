@@ -43,6 +43,7 @@
 | **P0-3d** 助手协议容错 | [P0-3d-review.md](P0-3d-review.md)：测试缺口转 P0-3e |
 | **E11b** 研究对象页收尾 | [E11b-review.md](E11b-review.md) |
 | **P0-4 第一、二批证据**（`76c23b2`、`34ca1da`） | [P0-4-review.md](P0-4-review.md)：基线可入账；三次链路都因 D1 失败 |
+| **P0-4 第 3 批**（macOS 设备，2026-10-07） | 同上：macOS 能构建运行；代码 `369ecca` 早于 P0-3d，预算题仍因 D1 失败，不计入 M |
 
 ## 3. 进行中的任务
 
@@ -112,6 +113,6 @@
 2. P0-3d 已合入：确认用户已把 P0-4 正式重跑转给 engineer、P0-3e 转给 senior。
 3. 确认 **P0-F2** 已转给 junior → 审查（看 Actions 是否变绿）→ 合入；P0-F2 合入后 `develop` 门禁应变绿，再转发 P0-J3。
 4. senior 把 `develop` 合进 P0-S2 后，派 `reviewer-sonnet-high` 核实 → 合入。
-5. 收 engineer 的 macOS 设备批次 → 审查 → 合入。
+5. ~~收 engineer 的 macOS 设备批次 → 审查 → 合入。~~ 已完成（2026-10-07，第 3 批）。
 6. P0-3d 合入 → engineer 在 Android（必需）和 macOS 重跑链路 → 审查 → 合入，退出标准第 1 项达成。
 7. 更新验收账本（第 6 节）→ 对照第 4 节确认全部达成 → 向用户报告第一阶段结束，之后的路线（第 7 节、UI-0/UI-1）请用户排期。
