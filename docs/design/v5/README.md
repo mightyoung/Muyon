@@ -2,7 +2,7 @@
 
 来源：Claude Design 第五、六轮产出（按 [v4 第五轮](../v4/prompts/claude-design-prompt-round5.md)、[第六轮](../v4/prompts/claude-design-prompt-round6.md)提示词）。用户 2026-10-07 放在本机 `docs/design/claude-design/v5/`，原样入库，稿件内容没有改动。
 
-- **地位**：取代 [v4](../v4/README.md)，成为 UI 重做的目标稿（用户 2026-10-07 同意）。与 [UI 重设计方案](../ui-redesign-brief-2026-10-06.md) §8 冲突时，以方案为准。
+- **地位**：已被 [v6](../v6/README.md) 取代（第七轮修正后）。原为取代 v4 的目标稿。与 [UI 重设计方案](../ui-redesign-brief-2026-10-06.md) §8 冲突时，以方案为准。
 - **审阅**：[2026-10-07-design-v5-review.md](../../reviews/2026-10-07-design-v5-review.md)。
 - **返工**：[prompts/claude-design-prompt-round7.md](prompts/claude-design-prompt-round7.md)（收尾修正，不加功能）。第二至第六轮提示词在 `../v4/prompts/`。
 - **规格**：[tokens.md](tokens.md)、[components.md](components.md)。当前状态以 `round6-notes.md` 为准。

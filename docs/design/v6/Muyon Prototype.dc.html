@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap;-webkit-font-smoothing:antialiased}button{font-family:inherit;cursor:pointer}input{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:56px;justify-content:center;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;min-height:100vh;box-sizing:border-box">
+
+<div style="width:300px;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:24px">
+<div style="font-size:24px;font-weight:600">原型插件 · 外围页面</div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565"><b style="color:#111827">可进入的二级页</b><br><span style="color:#636C7E">原型列表 › 预览外框 / 版本评审 / 反馈记录 / 导入。</span></div>
+<div style="display:flex;flex-direction:column;gap:6px"><sc-for list="{{ navs }}" as="n" hint-placeholder-count="9"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for></div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态切换说明</b><br>原型列表可切换 5 种状态；导入可切换成功 / 失败。原型内容为 WebView 导入，界面内部不套壳样式。</div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">列表状态</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ stChips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">导入结果（原型）</div><div style="display:flex;gap:6px"><button onClick="{{ impOkMode }}" style="{{ impOkStyle }}">成功</button><button onClick="{{ impFailMode }}" style="{{ impFailStyle }}">失败</button></div></div>
+<div style="display:flex;gap:6px"><button onClick="{{ toggleDark }}" style="height:30px;padding:0 12px;border-radius:999px;border:1px solid #C3CAD6;background:#fff;font-size:12px;font-weight:600;color:#111827">{{ darkLabel }}</button></div>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据。</div>
+</div>
+
+<div style="{{ phoneStyle }}">
+<div style="height:48px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>9:41</span><span style="font-size:11px;font-weight:500;color:var(--ink3)">示意数据</span></div>
+<div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+<button onClick="{{ headClick }}" aria-label="{{ headLabel }}" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)"><span class="ms" style="font-size:22px">{{ headIcon }}</span></button>
+<div style="padding:0 18px;height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:4px;font-size:15px;font-weight:600">{{ title }}<sc-if value="{{ isTop }}" hint-placeholder-val="{{ true }}"><span class="ms" style="font-size:18px;color:var(--ink3)">expand_more</span></sc-if></div>
+<sc-if value="{{ canAdd }}" hint-placeholder-val="{{ true }}"><button onClick="{{ addNew }}" aria-label="新建" style="width:48px;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:24px">add</span></button></sc-if><sc-if value="{{ !canAdd }}" hint-placeholder-val="{{ false }}"><div style="width:48px"></div></sc-if></div>
+
+<sc-if value="{{ isTop }}" hint-placeholder-val="{{ true }}"><div style="flex:none;display:flex;gap:8px;overflow-x:auto;padding:0 16px 10px"><sc-for list="{{ secChips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></sc-if>
+
+<div class="fx" style="flex:1;min-height:0;overflow-y:auto;padding:4px 16px 16px;display:flex;flex-direction:column;gap:14px">
+
+<sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+<div style="height:48px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--ink3);font-size:14px"><span class="ms" style="font-size:20px">search</span>{{ searchText }}</div>
+<sc-if value="{{ stLoad }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="4"><div style="height:60px;border-radius:8px;background:var(--sk)"></div></sc-for><div style="font-size:12px;color:var(--ink3);text-align:center">正在读取…</div></div></sc-if>
+<sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">{{ emptyIcon }}</span><br>还没有{{ kindName }}<br>新建一条，或从文件导入。<br><button onClick="{{ addNew }}" style="margin-top:12px;height:48px;padding:0 24px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">新建{{ kindName }}</button></div></sc-if>
+<sc-if value="{{ stNoMatch }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8">没有符合“{{ searchText }}”的{{ kindName }}<br><a href="#" onClick="{{ clearSt }}">清除筛选</a></div></sc-if>
+<sc-if value="{{ stFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;font-size:14px;font-weight:600;color:var(--red);align-items:center"><span class="ms" style="font-size:20px">error</span>{{ kindName }}读取失败</div><div style="font-size:13px;line-height:1.7">询价数据库暂不可用，数据未被改动。可重试，或到“数据与存储”校验备份。</div><div><button onClick="{{ retrySt }}" style="height:48px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">重试</button></div></div></sc-if>
+<sc-if value="{{ stOk }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:8px;overflow:hidden"><sc-for list="{{ rows }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.go }}" style="width:100%;text-align:left;border:0;border-top:{{ r.bt }};background:transparent;color:var(--ink);display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;min-height:56px;padding:6px 12px"><span><span style="display:block;font-size:14px;font-weight:500">{{ r.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:1px">{{ r.sub }}</span></span><span style="text-align:right;font-size:13px;font-variant-numeric:tabular-nums">{{ r.end }}</span></button></sc-for></div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ vVersions }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--ink2)">每个版本是一次导入。评审只记录你的结论，不会修改导入的页面内容。</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:8px;overflow:hidden"><sc-for list="{{ versions }}" as="x" hint-placeholder-count="3"><button onClick="{{ x.go }}" style="width:100%;text-align:left;border:0;border-top:{{ x.bt }};background:{{ x.rowBg }};color:var(--ink);padding:12px;display:flex;align-items:center;gap:10px"><span style="flex:1"><span style="display:block;font-size:14px;font-weight:500">{{ x.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:1px">{{ x.sub }}</span></span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:{{ x.bg }};color:{{ x.fg }};font-weight:600"><span class="ms" style="font-size:14px">{{ x.icon }}</span>{{ x.state }}</span></button></sc-for></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px"><div style="font-size:14px;font-weight:600">评审 {{ curVer }}</div><div style="display:flex;gap:8px"><button onClick="{{ verPass }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">通过</button><button onClick="{{ verChange }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">要求修改</button></div><div style="font-size:12px;color:var(--ink3);line-height:1.6">“要求修改”会在反馈记录里新增一条待处理项。</div></div>
+</sc-if>
+
+<sc-if value="{{ vFeedback }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px"><sc-for list="{{ fbChips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div>
+<sc-if value="{{ fbEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:40px 20px;color:var(--ink3);font-size:14px;line-height:1.8">没有符合条件的反馈<br><a href="#" onClick="{{ fbAll }}">清除筛选</a></div></sc-if>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:8px;overflow:hidden"><sc-for list="{{ fbRows }}" as="x" hint-placeholder-count="3"><div style="padding:12px;border-top:{{ x.bt }};display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:center;gap:8px"><span style="flex:1;font-size:13px;font-weight:500">{{ x.t }}</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:{{ x.bg }};color:{{ x.fg }};font-weight:600"><span class="ms" style="font-size:14px">{{ x.icon }}</span>{{ x.state }}</span></div><div style="font-size:12px;color:var(--ink3)">{{ x.sub }}</div><div><button onClick="{{ x.toggle }}" style="height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:12px;font-weight:600">{{ x.btn }}</button></div></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ vImport }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px dashed var(--rs);border-radius:24px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><span class="ms" style="font-size:36px;color:var(--ink2)">upload_file</span><div style="font-size:15px;font-weight:600">选择单页原型文件</div><div style="font-size:12px;color:var(--ink3);line-height:1.7">支持 .html 或 .zip（含静态资源）· 最大 5 MB</div><div style="font-size:13px;padding:8px 14px;border-radius:999px;background:var(--sk)">泵站监控_v3.zip · 1.8 MB</div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600"><span class="ms" style="font-size:20px">lock</span>受限预览权限</div><sc-for list="{{ perms }}" as="p" hint-placeholder-count="4"><div style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.6;color:var(--ink2)"><span class="ms" style="font-size:18px;color:{{ p.color }}">{{ p.icon }}</span>{{ p.t }}</div></sc-for></div>
+<sc-if value="{{ impRun }}" hint-placeholder-val="{{ false }}"><div style="background:var(--tint);border-radius:16px;padding:12px 14px;font-size:13px;color:var(--deep);display:flex;gap:8px"><span class="ms" style="font-size:20px">autorenew</span>正在导入并扫描，进度未知…</div></sc-if>
+<sc-if value="{{ impOk }}" hint-placeholder-val="{{ false }}"><div style="background:var(--greenbg);border-radius:16px;padding:12px 14px;font-size:13px;color:var(--green);display:flex;gap:8px"><span class="ms" style="font-size:20px">check_circle</span>已导入为 v3。页面内容未被修改。<a href="#" onClick="{{ openProto }}" style="margin-left:6px">打开</a></div></sc-if>
+<sc-if value="{{ impFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--red);display:flex;gap:8px"><span class="ms" style="font-size:20px">error</span>导入失败：包内含外部网络请求脚本，受限预览不允许。未写入任何内容，可更换文件重试。</div></sc-if>
+<div style="display:flex;gap:8px"><button onClick="{{ cancelImp }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button><button onClick="{{ doImport }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">导入</button></div>
+</sc-if>
+
+<sc-if value="{{ vWebview }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--rs);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;background:var(--sf)">
+<div style="height:48px;background:var(--sk);display:flex;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid var(--rule)"><span class="ms" style="font-size:18px;color:var(--ink3)">lock</span><span style="flex:1;font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">本地预览 · 泵站监控 {{ verTag }} · 无网络</span><button aria-label="刷新" style="width:44px;height:48px;border:0;background:transparent;color:var(--ink2)"><span class="ms" style="font-size:20px">refresh</span></button><button aria-label="全屏" style="width:44px;height:48px;border:0;background:transparent;color:var(--ink2)"><span class="ms" style="font-size:20px">fullscreen</span></button></div>
+<div style="height:380px;background:#E5E7EB;color:#4B5563;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:14px;text-align:center;padding:20px"><span class="ms" style="font-size:32px">web</span>导入内容原样显示<span style="font-size:12px">此区域不套用壳样式，也不为其设计样式</span></div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--sk);color:var(--ink2)"><span class="ms" style="font-size:14px">wifi_off</span>无网络</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--sk);color:var(--ink2)"><span class="ms" style="font-size:14px">folder_off</span>无文件访问</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--sk);color:var(--ink2)"><span class="ms" style="font-size:14px">smart_toy</span>助手工具不可调用</span></div>
+<div style="display:flex;gap:8px"><button onClick="{{ goVersions }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">版本评审</button><button onClick="{{ goFeedback }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">写反馈</button></div>
+</sc-if>
+
+
+</div>
+
+<div style="height:76px;flex:none;border-top:1px solid var(--rule);background:var(--bg);display:flex;padding:0 8px 10px;box-sizing:border-box"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5"><button aria-label="{{ t.label }}" title="{{ t.label }}" style="flex:1;border:0;background:transparent;display:flex;align-items:center;justify-content:center;color:{{ t.color }}"><span class="ms" style="font-size:28px;font-variation-settings:'FILL' {{ t.fill }}">{{ t.icon }}</span></button></sc-for></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { v:'protos', st:'ok', dark:null, imp:'idle', impMode:'ok', ver:0, vstate:['pending','ok','change'], fbf:'all', fb:[{ t:'顶部报警条颜色看不清', who:'李工', time:'10月6日', ver:'v3', open:true },{ t:'缺少设备编号搜索', who:'王工', time:'10月5日', ver:'v3', open:true },{ t:'表格列宽过窄', who:'李工', time:'10月1日', ver:'v1', open:false }] };
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F' };
+    const T = dark ? D : L;
+    const phoneStyle = { width:390, height:844, background:T.bg, borderRadius:44, border:'10px solid ' + (dark ? '#2A2A2A' : '#111827'), boxSizing:'content-box', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => phoneStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const v = s.v;
+    const lists = { protos:'原型' };
+    const isList = !!lists[v];
+    const proto = ['protos','versions','feedback','import','webview'].includes(v);
+    const topSet = ['protos','versions','feedback'];
+    const isTop = topSet.includes(v);
+    const SEC = [['protos','原型列表'],['versions','版本评审'],['feedback','反馈记录']];
+    const parentOf = { import:'protos', webview:'protos' };
+    const secOf = {};
+    const curSec = (v === 'import' || v === 'webview') ? 'protos' : isTop ? v : secOf[v];
+    const DATA = {
+      projects:[['华东泵站改造','预算行 4 · 询价单 2','500,000.00','project'],['西北管网扩容','预算行 2 · 询价单 0','320,000.00','project'],['厂区消防升级','预算行 3 · 询价单 1','180,000.00','project']],
+      suppliers:[['华泵 · 上海','联系人 2 · 报价 12','','supplier'],['云川 · 成都','联系人 1 · 报价 9','','supplier'],['联泰 · 苏州','联系人 1 · 报价 4','','supplier']],
+      protos:[['泵站监控','版本 3 · 导入于 10月5日','v3','webview'],['巡检填报','版本 1 · 导入于 9月20日','v1','webview']],
+      materials:[['离心泵 HB-200','分类 泵 · 报价 3','台','material'],['闸阀 DN200','分类 阀门 · 报价 5','个','material'],['压力变送器','分类 仪表 · 报价 2','台','material']]
+    };
+    const KN = { projects:'项目', suppliers:'供应商', materials:'物料', protos:'原型' }, EI = { projects:'account_tree', suppliers:'apartment', materials:'inventory_2', protos:'web' };
+    const key = isList ? v : 'projects';
+    const rows = DATA[key].map((r, i) => ({ t:r[0], sub:r[1], end:r[2], bt: bt(i), go: go({ v:r[3] }) }));
+    const stOk = s.st === 'ok';
+    const VS = { pending:[T.sk,T.ink2,'schedule','待评审'], ok:[T.greenbg,T.green,'check_circle','已通过'], change:[T.redbg,T.red,'edit_note','需修改'] };
+    const verRows = [['v3','10月5日 导入 · 评审人 陈经理'],['v2','9月28日 导入 · 评审人 陈经理'],['v1','9月20日 导入 · 评审人 陈经理']].map(([tag, sub], i) => { const st = s.vstate[i], c = VS[st]; return { t:'泵站监控 ' + tag, sub, bg:c[0], fg:c[1], icon:c[2], state:c[3], bt: bt(i), rowBg: s.ver === i ? T.sk : 'transparent', go: go({ ver:i }) }; });
+    const setV = (st) => this.setState({ vstate: s.vstate.map((x, j) => j === s.ver ? st : x), fb: st === 'change' ? [{ t:'评审意见：请按评审要点修改', who:'陈经理', time:'刚刚', ver:['v3','v2','v1'][s.ver], open:true }, ...s.fb] : s.fb });
+    const fbList = s.fb.map((x, i) => ({ ...x, i })).filter(x => s.fbf === 'all' || (s.fbf === 'open') === x.open);
+    const imp = s.imp;
+    const chipSt = (on) => `height:30px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+                        const addKind = v === 'trash' ? null : (isList ? v.slice(0, -1) : null);
+    const navs = [['protos','原型列表'],['versions','版本评审'],['feedback','反馈记录'],['import','导入入口与权限'],['webview','受限预览外框']];
+    const titles = { import:'导入原型', webview:'原型预览' };
+    return {
+      phoneStyle, isTop, isList, title: isTop ? (proto ? '原型' : '询价') : titles[v], headIcon: isTop ? 'workspaces' : 'arrow_back', headLabel: isTop ? '插件' : '返回',
+      headClick: isTop ? () => {} : go({ v: parentOf[v] }),
+      canAdd: isList, addNew: () => v === 'protos' ? this.setState({ v:'import', imp:'idle' }) : null,
+      navs: navs.map(([k, l]) => ({ label:l, go: go({ v:k }), style:`height:36px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${v === k ? '#2458D3' : '#C3CAD6'};background:${v === k ? '#E8EFFF' : '#fff'};color:${v === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      stChips: [['ok','正常'],['load','载入中'],['empty','空'],['nomatch','筛选无结果'],['fail','失败']].map(([k, l]) => ({ label:l, style:chipSt(s.st === k), go: go({ st:k }) })),
+      toggleDark: go({ dark: !dark }), darkLabel: dark ? '切到浅色' : '切到深色',
+      secChips: SEC.map(([k, l]) => ({ label:l, go: go({ v:k, st:'ok' }), style:`flex:none;height:48px;padding:0 18px;border-radius:999px;border:1px solid ${curSec === k ? T.acc : T.rs};background:${curSec === k ? T.tint : T.sf};color:${curSec === k ? T.deep : T.ink};font-size:14px;font-weight:600` })),
+      searchText: s.st === 'nomatch' ? '联泰' : '搜索' + (KN[key] || ''), kindName: KN[key] || '', emptyIcon: EI[key] || 'inventory_2', skel:[1,2,3,4],
+      stLoad: s.st === 'load', stEmpty: s.st === 'empty', stNoMatch: s.st === 'nomatch', stFail: s.st === 'fail', stOk, clearSt: (e) => { e.preventDefault(); this.setState({ st:'ok' }); }, retrySt: go({ st:'load' }), rows,
+      vVersions: v === 'versions', vFeedback: v === 'feedback', vImport: v === 'import', vWebview: v === 'webview',
+      versions: verRows, curVer: ['v3','v2','v1'][s.ver], verPass: () => setV('ok'), verChange: () => setV('change'), verTag: ['v3','v2','v1'][s.ver],
+      fbChips: [['all','全部'],['open','待处理'],['done','已处理']].map(([k, l]) => ({ label:l, go: go({ fbf:k }), style:`height:36px;padding:0 16px;border-radius:999px;border:1px solid ${s.fbf === k ? T.acc : T.rs};background:${s.fbf === k ? T.tint : T.sf};color:${s.fbf === k ? T.deep : T.ink};font-size:13px;font-weight:600` })),
+      fbEmpty: fbList.length === 0, fbAll: (e) => { e.preventDefault(); this.setState({ fbf:'all' }); },
+      fbRows: fbList.map((x, k) => ({ t:x.t, sub:x.who + ' · ' + x.ver + ' · ' + x.time, bg: x.open ? T.tint : T.greenbg, fg: x.open ? T.deep : T.green, icon: x.open ? 'schedule' : 'check_circle', state: x.open ? '待处理' : '已处理', bt: bt(k), btn: x.open ? '标记已处理' : '重新打开', toggle: () => this.setState({ fb: s.fb.map((y, j) => j === x.i ? { ...y, open: !y.open } : y) }) })),
+      perms: [['wifi_off','不能访问网络',T.ink2],['folder_off','不能读取本机文件',T.ink2],['smart_toy','助手工具与记忆不可从页面调用',T.ink2],['visibility','页面内容原样显示，Muyon 不改写它',T.green]].map(([icon, t2, color]) => ({ icon, t:t2, color })),
+      impRun: imp === 'run', impOk: imp === 'ok', impFail: imp === 'fail', openProto: (e) => { e.preventDefault(); this.setState({ v:'webview' }); }, cancelImp: go({ v:'protos' }),
+      doImport: () => { if (imp === 'run') return; this.setState({ imp:'run' }); setTimeout(() => this.setState({ imp: s.impMode === 'ok' ? 'ok' : 'fail' }), 1200); },
+      goVersions: go({ v:'versions' }), goFeedback: go({ v:'feedback' }),
+      impOkMode: go({ impMode:'ok', imp:'idle' }), impFailMode: go({ impMode:'fail', imp:'idle' }), impOkStyle: chipSt(s.impMode === 'ok'), impFailStyle: chipSt(s.impMode === 'fail'),
+      tabs: [['chat_bubble','AI 助手',0],['apps','业务插件',1],['dashboard','工作台',0],['swap_horiz','数据交换',0],['settings','设置',0]].map(([icon, label, fill]) => ({ icon, label, fill, color: fill ? T.ink : T.ink3 }))
+    };
+  }
+}
+</script>
+</body>
+</html>
