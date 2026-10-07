@@ -36,6 +36,15 @@ String redactCredentials(Object error, {String? secret}) {
   return '$type: details withheld (may contain the credential)';
 }
 
+/// [text] with every occurrence of [secret] replaced by `<redacted>`. For
+/// content that is not an error (e.g. a remote tool result that echoes the
+/// key), where the keyword rule of [redactCredentials] would hide too much.
+/// Same [minRedactedSecretLength] floor as [redactCredentials].
+String maskSecret(String text, String? secret) =>
+    secret == null || secret.length < minRedactedSecretLength
+    ? text
+    : text.replaceAll(secret, '<redacted>');
+
 /// A credential dart:io can put in a header unchanged: visible ASCII only, no
 /// spaces, line breaks or full-width characters.
 bool isSendableCredential(String credential) =>
