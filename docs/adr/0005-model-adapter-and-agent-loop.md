@@ -158,12 +158,12 @@ final class ModelError extends ModelEvent {
 
 ### 4.3 能力声明与兼容模式
 
-- 能力保存在 `ModelProfile` 的新增可选字段 `capabilities`（`model_gateway.dart:33-83`），持久化键为设置项 `modelProfiles`（`services/models/profile_repository.dart:9-37`，旧数据无该键 = `ModelCapabilities.compat`）。创建 profile 的现有入口（`screens/platform_shell_personal.dart:148`、`app/research_tools_page.dart:350`、`app/inquiry_plugin.dart:296`）默认 `nativeTools: false`、`streaming: true`（见下方三层默认值）；K-2 只在 `platform_shell_personal.dart` 的模型表单加最小开关“使用原生工具调用”，完整设置页归 UI-7。
+- 能力保存在 `ModelProfile` 的新增可选字段 `capabilities`（`model_gateway.dart:33-83`），持久化键为设置项 `modelProfiles`（`services/models/profile_repository.dart:9-37`，旧数据无该键 = `ModelCapabilities.compat`）。现有创建 profile 的三处入口本身都是代码构造的 `ModelProfile`（`screens/platform_shell_personal.dart:148`、`app/research_tools_page.dart:350`、`app/inquiry_plugin.dart:296`），而 `ModelProfile` 构造器的默认值保持“兼容、非流式”（见下方 (a)）。因此：**只有 `platform_shell_personal.dart` 的模型 profile 表单**显式传入 `capabilities: {nativeTools: false, streaming: true, source: preset}`，并在 K-2 加最小开关“使用原生工具调用”；`research_tools_page.dart` 与 `inquiry_plugin.dart` 保持构造器默认值——它们的调用方（研究问答、Dream 等）走 `gateway.chat`，不读取 `capabilities`。完整设置页归 UI-7。
 - `PersonalAgent.start` 解析一次能力，**冻结进任务载荷**（与冻结候选工具同理，`personal_agent.dart:116`、`:281-283`），任务中途改 profile 不改变本任务的协议。能力快照与模式纳入预览，确认卡上显示“原生工具”或“兼容模式”。
 - **兼容模式** = 今天的路径：JSON 协议、`_protocolReply` 严格解析、至多一次纠正、`response_format` 与 400 / 422 重发（含其“端点 + 模型”内存记忆）。**流式默认开启**（用户 2026-10-07 决定，Q2）：兼容模式也走流式，但只改传输、不改解析——文本累积到 `Done` 后再整体做严格的 `_protocolReply`；实时显示规则见 §5.3。能力默认值分三层：
   - **(a) 代码里直接构造的 `ModelProfile`**（所有测试）：默认兼容、`streaming: false`；
-  - **(b) 经新建表单、预设或“采用测试连接结果”创建 / 更新的 profile**：默认 `streaming: true`；
-  - **(c) 已保存的存量 profile**：设置项 `modelProfiles` 里没有 `capabilities` 键。K-2 首次启动时由宿主在 `app/bootstrap.dart` 里做一次**幂等的设置迁移**（放在 `host.workspaces` 就绪之后，现有设置读写见 `app/bootstrap.dart:151-154`、`workspace/workspace_repository.dart:191-197`；**不放在 `ProfileRepository.all()` 里**，读取路径保持无副作用）：为每个缺 `capabilities` 的 profile 显式写入 `capabilities: {streaming: true, source: migrated}`，其余能力保持保守值（`nativeTools: false` 等），并写入设置项 `modelProfilesSchema = 2` 作为已迁移标记。迁移后在设置页显示一次性提示“已为已有模型启用流式显示，可在每个模型上关闭”；用户可按 profile 关闭流式。
+  - **(b) 经 `platform_shell_personal.dart` 的模型 profile 表单、预设或“采用测试连接结果”创建 / 更新的 profile**：显式 `streaming: true`；
+  - **(c) 已保存的存量 profile**：设置项 `modelProfiles` 里没有 `capabilities` 键。K-2 首次启动时由宿主在 `app/bootstrap.dart` 里做一次**幂等的设置迁移**（放在 `host.workspaces` 就绪之后，现有设置读写见 `app/bootstrap.dart:151-154`、`workspace/workspace_repository.dart:191-197`；**不放在 `ProfileRepository.all()` 里**，读取路径保持无副作用）：为每个缺 `capabilities` 且 `purpose = chat` 的 profile 显式写入（**`purpose = embedding` 的 profile 不动**） `capabilities: {streaming: true, source: migrated}`，其余能力保持保守值（`nativeTools: false` 等），并写入设置项 `modelProfilesSchema = 2` 作为已迁移标记。迁移后在设置页显示一次性提示“已为已有模型启用流式显示，可在每个模型上关闭”；用户可按 profile 关闭流式。
   - `ModelProfile.toJson` 始终写出完整 `capabilities`。
   - **路径选择**：`PersonalAgent` 依据**任务开始时冻结的** `capabilities.streaming` 选路径：为 `true` 走网关新增的流式入口，为 `false` 走**原封不动**的 `gateway.chat`（`stream: false`）。因此覆写 `chat` 的测试替身与 `test/model_gateway_test.dart:97`（断言 `stream == false`）无需改动。
   端点拒绝 `stream: true`（400 / 422）时同样不隐式回退，以固定原因 `stream_rejected` 失败并提示“关闭该模型的流式，或运行测试连接”。
@@ -514,6 +514,7 @@ K-2 / K-3 / K-4 全程**不得修改**以下测试（其断言是兼容模式与
 | R7 | 预算默认放大（4 → 12 步）在 AUTH-1 之前会让一个失控循环产生更多次确认 | 每步仍需用户确认，上限由用户注意力约束；AUTH-1 之前默认步数保持 4，授权上线后提到 12（用户已定，Q5） |
 | R11 | 压缩摘要成为新的注入与泄露面（模型写的文字被当作可信上下文；摘要请求发往错误端点） | §6.6-4：摘要是不可信数据、端点暴露面只减不增、经账本与闸门、摘要不含授权含义；原文保留可审计 |
 | R12 | 批量确认卡使“一次点击”覆盖多项，用户可能不看细节 | 每项独立列字段、默认折叠技术详情但摘要短码可见；每项各自审批与回执；上限 5 项；失败即停；ADR-0002 底线 4 不变 |
+| R14 | 迁移后少数端点可能拒绝 `stream: true`（400 / 422），已迁移的 profile 的第一个任务会以 `stream_rejected` 失败 | 一次性迁移提示、每个 profile 的流式关闭开关、测试连接；失败文案直接指向这些入口；不隐式回退 |
 | R13 | 兼容模式流式的增量扫描器被畸形输出误导（显示与最终解析不一致） | 扫描器只管显示、无副作用；权威解析在 `Done` 后；不一致则丢弃草稿并提示 |
 | R8 | 与 K-4 衔接不当导致两处真相 | `AgentEventSink` 同事务写入；K-3 不新增载荷字段之外的状态 |
 | R9 | `reasoning_content` 等私有字段的回传要求因供应商而异 | 默认丢弃；需要回传的端点作为适配器特例（待核实） |
@@ -536,7 +537,7 @@ K-2 / K-3 / K-4 全程**不得修改**以下测试（其断言是兼容模式与
 
 ### 10.2 留给后续任务核实（不需要用户拍板）
 
-- 自动压缩需要 profile 声明 `contextTokens`（Q5）：设置页为常见模型提供预设表，“测试连接”在预设表里能查到该模型时回填 `contextTokens` / `maxOutputTokens`（探测本身测不出这两项）；表里没有的由用户手填，否则不自动压缩（K-2 预设表、K-3 使用）；
+- 自动压缩需要 profile 声明 `contextTokens`（Q5）：设置页为常见模型提供预设表，“测试连接”在预设表里能查到该模型时，把 `contextTokens` / `maxOutputTokens` 填入**检测结果**（`detectedCapabilities`），用户点“采用”后才生效（同 §4.5）（探测本身测不出这两项）；表里没有的由用户手填，否则不自动压缩（K-2 预设表、K-3 使用）；
 - `compactionProfile` 的默认值与界面位置、压缩阶段 A 的 15% 门槛与“最近 2 个用户回合”等数值，摘要上限 2 000 token、触发比例 0.8 等初始值已由用户确认，K-3 用 E-1 数据调参；
 - 实现选择（建议如下，可在 K-2 / K-3 评审时调整）：账本是否新增 `partial` 状态（需重建表）——建议不新增，用 `failed` + `bytes_received > 0`；预算耗尽的终态——建议 `failed` + 小结（保持现有测试），不新增“部分完成”状态；
 - 首字时延的定义与 [E-1](../tasks/E-1.md) 对齐：从用户确认起算、从 `ledger.begin` 起算，还是从实际发送起算（本文 `first_byte_ms` 暂按 `ledger.begin` 到首个 `TextDelta`，待对齐）；
