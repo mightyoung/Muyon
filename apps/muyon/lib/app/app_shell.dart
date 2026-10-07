@@ -14,6 +14,8 @@ import '../platform/backup_service.dart';
 import '../platform/file_gateway.dart';
 import '../workspace/import_coordinator.dart';
 import 'bootstrap.dart';
+import 'legacy_module_bridge.dart';
+import 'module_host.dart';
 import 'research_tools_page.dart';
 import '../screens/data_storage_page.dart';
 import '../screens/platform_shell.dart';
@@ -245,7 +247,20 @@ class _WorkspacePageState extends State<WorkspacePage> {
     _open();
   }
 
+  /// A section a v2 module declares (the two v1 pages below are the legacy
+  /// ones the bridge still opens by name).
+  bool get _declared => activeModule != 'inquiry' && activeModule != 'research';
+
+  ModuleSection? get _section =>
+      host.modules.sections().where((s) => s.id == activeModule).firstOrNull;
+
   Future<void> _open() async {
+    if (_declared) {
+      final module = host.modules.moduleOfSection(activeModule);
+      if (module != null) await host.modules.activate(module);
+      if (mounted) setState(() {});
+      return;
+    }
     if (activeModule == 'inquiry') {
       await host.activateInquiry();
       if (mounted) setState(() {});
@@ -488,6 +503,30 @@ class _WorkspacePageState extends State<WorkspacePage> {
     }
   }
 
+  Widget _declaredBody(BuildContext context) {
+    final section = _section;
+    final module = host.modules.moduleOfSection(activeModule);
+    if (section == null || module == null) {
+      return const Center(child: Text('该模块不可用'));
+    }
+    final state = host.modules.state(module);
+    return switch (state.status) {
+      ModuleStatus.ready => section.builder(
+        context,
+        ShellSectionHost(
+          moduleId: module,
+          host: host,
+          themeMode: widget.themeMode,
+          onTheme: widget.onTheme,
+        ),
+      ),
+      ModuleStatus.failed => Center(
+        child: SelectableText('${section.label} 不可用：${state.reason}'),
+      ),
+      _ => const Center(child: CircularProgressIndicator()),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final workspaces = host.workspaces.all();
@@ -495,7 +534,9 @@ class _WorkspacePageState extends State<WorkspacePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          activeModule == 'inquiry'
+          _declared
+              ? 'Muyon · ${_section?.label ?? activeModule}'
+              : activeModule == 'inquiry'
               ? 'Muyon · Folio'
               : selected == null
               ? 'Muyon · 科研'
@@ -512,9 +553,10 @@ class _WorkspacePageState extends State<WorkspacePage> {
               });
               _open();
             },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'inquiry', child: Text('Folio · 询价与成本')),
-              PopupMenuItem(value: 'research', child: Text('科研工作台')),
+            itemBuilder: (context) => [
+              for (final section in host.modules.sections())
+                if (section.showInModuleMenu)
+                  PopupMenuItem(value: section.id, child: Text(section.label)),
             ],
           ),
           if (activeModule == 'research' && session != null)
@@ -607,11 +649,12 @@ class _WorkspacePageState extends State<WorkspacePage> {
       body: Column(
         children: [
           if (busy) const LinearProgressIndicator(),
-          if (error != null ||
-              (activeModule == 'research'
-                      ? host.researchError
-                      : host.inquiryError) !=
-                  null)
+          if (!_declared &&
+              (error != null ||
+                  (activeModule == 'research'
+                          ? host.researchError
+                          : host.inquiryError) !=
+                      null))
             Padding(
               padding: const EdgeInsets.all(12),
               child: SelectableText(
@@ -622,7 +665,9 @@ class _WorkspacePageState extends State<WorkspacePage> {
               ),
             ),
           Expanded(
-            child: activeModule == 'inquiry'
+            child: _declared
+                ? _declaredBody(context)
+                : activeModule == 'inquiry'
                 ? host.inquiry == null
                       ? Center(
                           child: host.inquiryError == null

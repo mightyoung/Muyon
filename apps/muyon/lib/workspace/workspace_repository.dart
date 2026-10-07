@@ -4,6 +4,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/module_grants.dart';
 import '../platform/outbound_ledger.dart';
 import '../platform/task_records.dart';
 
@@ -18,8 +19,8 @@ class WorkspaceRepository {
   final ManagedDatabase database;
 
   static final schema = ModuleSchema(
-    version: 8,
-    definitionDigest: 'foundation-v8',
+    version: 10,
+    definitionDigest: 'foundation-v10',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -139,6 +140,22 @@ CREATE TABLE transfer_tasks(
         id: 'task-events',
         definitionDigest: 'foundation-v8',
         migrate: TaskRecords.migrate,
+      ),
+      // Version 9 belongs to REG-2a (outbound_tool_requests), developed in
+      // parallel. This no-op only keeps the numbering contiguous on this
+      // branch; whoever merges second replaces it with the real migration 9
+      // (see the REG-2b commit message).
+      ModuleMigration(
+        version: 9,
+        id: 'reserved-reg-2a-outbound-tool-requests',
+        definitionDigest: 'foundation-v9',
+        migrate: (db) {},
+      ),
+      ModuleMigration(
+        version: 10,
+        id: 'module-grants',
+        definitionDigest: 'foundation-v10',
+        migrate: ModuleGrants.migrate,
       ),
     ],
   );

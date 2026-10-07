@@ -153,7 +153,7 @@ class ChannelSpec {
     required this.description,
     required this.effect,
     required this.destination,
-    Map<String, Object?> parameterSchema = const {},
+    required Map<String, Object?> parameterSchema,
     this.supportsCancel = true,
   }) : parameterSchema = freezeJsonMap(parameterSchema) {
     if (effect != ToolEffect.export && effect != ToolEffect.network) {
@@ -176,6 +176,12 @@ class ChannelRequest {
   final Map<String, Object?> parameters;
 }
 
+/// A channel call did not complete. [interrupted]: the effect may have started.
+class ChannelFailure implements Exception {
+  const ChannelFailure({required this.interrupted});
+  final bool interrupted;
+}
+
 /// What the person is asked to review before the effect.
 class ChannelPreview {
   const ChannelPreview({
@@ -196,6 +202,7 @@ typedef ChannelReview = Future<bool> Function(ChannelPreview preview);
 typedef EffectGuard = void Function();
 
 abstract interface class HostChannel {
+  /// Throws [ChannelFailure] when the host did not record a completed effect.
   Future<T> run<T>(
     ChannelRequest request,
     Future<T> Function(EffectGuard guard) effect, {
