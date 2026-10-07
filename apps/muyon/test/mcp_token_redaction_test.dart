@@ -39,8 +39,9 @@ class _Server {
     this.bareEcho = false,
     this.structuredEcho = false,
     this.notJson,
+    this.describeEcho = false,
   });
-  final bool errorEcho, resultEcho, bareEcho, structuredEcho;
+  final bool errorEcho, resultEcho, bareEcho, structuredEcho, describeEcho;
 
   /// Answers every request with this body instead of JSON-RPC: `json` or
   /// `sse` content type, the token as the body.
@@ -89,6 +90,7 @@ class _Server {
             'tools': [
               {
                 'name': 'echo',
+                if (describeEcho) 'description': 'use with $plain',
                 'inputSchema': {'type': 'object', 'properties': {}},
               },
             ],
@@ -112,6 +114,7 @@ class _Server {
             if (structuredEcho)
               'structuredContent': {
                 'echo': plain,
+                plain: 'as key',
                 'nested': [
                   {'k': 'sent $plain'},
                 ],
@@ -419,15 +422,69 @@ void main() {
   });
 
   group('credential query parameters', () {
+    test(
+      'a token with a quote and a backslash is masked in structuredContent',
+      () async {
+        final token = 'tok"en\\$_marker-${'0123456789abcdef' * 3}';
+        expect(isSendableCredential(token), isTrue);
+        final server = _Server(structuredEcho: true);
+        await server.start();
+        addTearDown(() => server.server.close(force: true));
+        final db = ManagedConnection(sqlite3.openInMemory());
+        final result = await _callEcho(server, token, db);
+        final escaped = jsonEncode(token).replaceAll(RegExp(r'^"|"$'), '');
+        final receipts = db.raw
+            .select('SELECT result_json FROM tool_invocation_receipts')
+            .map((row) => '${row['result_json']}')
+            .join('\n');
+        for (final text in [jsonEncode(result.toJson()), receipts]) {
+          expect(text, contains('<redacted>'));
+          expect(text, isNot(contains(_marker)));
+          expect(_leakedWindow(text, token), isNull);
+          expect(_leakedWindow(text, escaped), isNull);
+        }
+      },
+    );
+
+    test('a tool description that echoes the token is masked', () async {
+      final server = _Server(describeEcho: true);
+      await server.start();
+      addTearDown(() => server.server.close(force: true));
+      final registry = _registry();
+      await McpAdapter.connect(
+        registry,
+        McpServerConfig(
+          id: 'catalog',
+          endpoint: server.endpoint,
+          credentialRef: 'mcp-catalog',
+        ),
+        secrets: _Secrets(_good),
+      );
+      final descriptor = registry.inspect('mcp.catalog.echo')!.descriptor;
+      expect(descriptor.description, contains('<redacted>'));
+      expect(descriptor.description, isNot(contains(_marker)));
+    });
+
     test('names are recognised case-insensitively, others are untouched', () {
       for (final name in [
         'api_key', 'API-KEY', 'apikey', 'key', 'Token', 'access_token', //
         'auth', 'authorization', 'secret', 'client_secret', 'password',
         'pass', 'sig', 'signature', 'my_token', 'X-Secret-Id', 'PasswordHash',
+        'passwd', 'x-api-key', 'access_key', 'accesskey', 'private_key', 'jwt',
+        'apiKey', 'service_key', 'X-Service-Key',
       ]) {
         expect(isCredentialParam(name), isTrue, reason: name);
       }
-      for (final name in ['foo', 'page', 'q', 'keyboard', 'sign', 'user']) {
+      for (final name in [
+        'foo',
+        'page',
+        'q',
+        'keyboard',
+        'sign',
+        'user',
+        'monkey',
+        'author',
+      ]) {
         expect(isCredentialParam(name), isFalse, reason: name);
       }
       final uri = Uri.parse('https://h.example/mcp?foo=bar&API_KEY=$_urlKey&q');

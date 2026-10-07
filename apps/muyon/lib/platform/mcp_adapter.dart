@@ -39,13 +39,20 @@ class McpServerConfig {
 const _credentialParams = {
   'api_key', 'apikey', 'api-key', 'key', 'token', 'access_token', 'auth', //
   'authorization', 'secret', 'client_secret', 'password', 'pass', 'sig',
-  'signature',
+  'signature', 'passwd', 'x-api-key', 'access_key', 'accesskey', 'private_key',
+  'jwt',
 };
+
+/// A name that ends in `_key` or `-key`, or a camelCase `...Key` (`apiKey`).
+/// A plain `endsWith('key')` would also take `monkey` and `hockey`.
+final _camelKey = RegExp(r'[a-z0-9]Key$');
 
 /// Whether a query parameter called [name] is treated as a credential.
 bool isCredentialParam(String name) {
   final lower = name.toLowerCase();
   return _credentialParams.contains(lower) ||
+      RegExp(r'[_-]key$').hasMatch(lower) ||
+      _camelKey.hasMatch(name) ||
       ['token', 'secret', 'password', 'apikey'].any(lower.contains);
 }
 
@@ -150,7 +157,10 @@ abstract final class McpAdapter {
           continue;
         }
         final toolId = 'mcp.${config.id}.$name';
-        final description = '${tool['description'] ?? ''}';
+        final description = maskSecret(
+          '${tool['description'] ?? ''}',
+          client.token,
+        );
         try {
           registry.register(
             providerId: 'mcp:${config.id}',
@@ -181,6 +191,19 @@ abstract final class McpAdapter {
     }
     return McpConnection(config, registered, skipped);
   }
+
+  /// [value] with [secret] masked in every string, keys included. Walks the
+  /// decoded structure: a token with `"` or `\` is escaped once serialized, so
+  /// replacing in the JSON text would miss it.
+  static Object? _maskTree(Object? value, String? secret) => switch (value) {
+    String() => maskSecret(value, secret),
+    Map() => {
+      for (final entry in value.entries)
+        maskSecret('${entry.key}', secret): _maskTree(entry.value, secret),
+    },
+    List() => [for (final item in value) _maskTree(item, secret)],
+    _ => value,
+  };
 
   static Future<ToolCallResult> _call(
     _McpClient client,
@@ -216,9 +239,7 @@ abstract final class McpAdapter {
       data: {
         'text': summary,
         if (result['structuredContent'] is Map)
-          'structured': jsonDecode(
-            maskSecret(jsonEncode(result['structuredContent']), client.token),
-          ),
+          'structured': _maskTree(result['structuredContent'], client.token),
       },
     );
   }
