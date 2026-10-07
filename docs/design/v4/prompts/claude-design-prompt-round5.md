@@ -1,5 +1,7 @@
 # 给 Claude Design 的修正提示词（第五轮）
 
+> 2026-10-07：已有[第六轮](claude-design-prompt-round6.md)，按 ADR-0004、ADR-0005 的最新决定补改。第六轮撤回了本轮 E 中询价「AI 任务、助手历史回答」的桌面版。
+
 用法：在原项目里粘贴「提示词」整段（可分 A–E 几次发）。前置：v4 已审阅（见 `docs/reviews/2026-10-07-design-v4-review.md`），确认语义的依据是 `docs/adr/0002-graded-assistant-authorization.md`。
 
 ---
