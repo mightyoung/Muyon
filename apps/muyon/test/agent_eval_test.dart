@@ -526,30 +526,61 @@ void main() {
     });
 
     test('an anchored number counts only next to its anchor', () {
-      const four = AgentFact.number('4', anchors: ['条']);
-      expect(answerStates('一共 4 条报价记录', four), isTrue);
-      expect(answerStates('一共4条', four), isTrue);
-      expect(answerStates('见第 4 项，另有 2 条', four), isFalse);
-      expect(answerStates('4', four), isFalse);
-      expect(four.label, '4条');
-      const price = AgentFact.number(
-        '45',
-        anchors: ['元'],
-        prefixAnchors: ['¥', '￥'],
+      // The facts as the task set states them.
+      final four = taskById('RS-04').facts.single;
+      final price = taskById('RM-02').facts
+          .singleWhere((f) => f.number == '45');
+      expect(
+        taskById('RM-06').facts
+            .any((f) => f.number == '4' && f.anchors.isNotEmpty),
+        isTrue,
       );
-      expect(answerStates('桥架最低 45 元', price), isTrue);
-      expect(answerStates('桥架最低 ¥45.00', price), isTrue);
-      expect(answerStates('45 米', price), isFalse);
-      expect(answerStates('450 元', price), isFalse);
-      // The task set anchors the loose numbers.
-      for (final id in ['RS-04', 'RM-06']) {
-        final f = taskById(id).facts.singleWhere((f) => f.number == '4');
-        expect(f.anchors, isNotEmpty, reason: id);
+      expect(
+        taskById('RM-05').facts
+            .any((f) => f.number == '45' && f.anchors.isNotEmpty),
+        isTrue,
+      );
+      for (final phrase in [
+        '一共 4 条报价记录',
+        '一共4条',
+        '4 个报价',
+        '4笔',
+        '有 4 项',
+        '共 4 家供应商',
+        '合计 4 条',
+      ]) {
+        expect(answerStates(phrase, four), isTrue, reason: phrase);
       }
-      for (final id in ['RM-02', 'RM-05']) {
-        final f = taskById(id).facts.singleWhere((f) => f.number == '45');
-        expect(f.anchors, isNotEmpty, reason: id);
+      for (final phrase in [
+        '见第 4 项，另有 2 条',
+        '第 4 条',
+        '第4个',
+        '4',
+        '共有四条',
+        '14 条',
+        '4 米',
+      ]) {
+        expect(answerStates(phrase, four), isFalse, reason: phrase);
       }
+      for (final phrase in [
+        '桥架最低 45 元',
+        '桥架最低 ¥45.00',
+        '45块',
+        'RMB 45',
+        '人民币45',
+        '单价为 45',
+        '单价 45',
+        '价格为 45',
+        '45 CNY',
+        '45rmb',
+        '￥45',
+      ]) {
+        expect(answerStates(phrase, price), isTrue, reason: phrase);
+      }
+      for (final phrase in ['45 米', '450 元', '45', '共 45 个', '四十五元', '数量 45']) {
+        expect(answerStates(phrase, price), isFalse, reason: phrase);
+      }
+      expect(four.label, '4条');
     });
 
     test('a failure on the pinned scope is labelled apart', () {
@@ -835,6 +866,53 @@ void main() {
         expect(text, contains('business_tools.dart:164-172'));
         expect(text, contains('不是模型错误'));
         expect(text, contains('包含'));
+      },
+    );
+
+    test(
+      'an unregistered tool after a write is request_failed, not scope_pinned',
+      () async {
+        final r = await runOne(
+          'WR-06',
+          script: (ids) => [
+            FixtureModelServer.tool('inquiry.set_item_qty', {
+              'item_id': ids['tray_item'],
+              'from_qty': '20',
+              'to_qty': '25',
+            }),
+            (messages) => {
+              'type': 'tool',
+              'toolId': 'inquiry.no_such_tool',
+              'parameters': <String, Object?>{},
+            },
+          ],
+        );
+        expect(r.state, 'failed');
+        expect(r.toolApprovals, 1);
+        expect(r.verdict.failures, contains(AgentFailure.requestFailed));
+        expect(r.verdict.failures, isNot(contains(AgentFailure.scopePinned)));
+      },
+    );
+
+    test(
+      'a schema-invalid call after a write is request_failed, not scope_pinned',
+      () async {
+        final r = await runOne(
+          'WR-06',
+          script: (ids) => [
+            FixtureModelServer.tool('inquiry.set_item_qty', {
+              'item_id': ids['tray_item'],
+              'from_qty': '20',
+              'to_qty': '25',
+            }),
+            FixtureModelServer.tool('inquiry.record_quote', {
+              'inquiry_id': ids['inquiry'],
+            }),
+          ],
+        );
+        expect(r.state, 'failed');
+        expect(r.verdict.failures, contains(AgentFailure.requestFailed));
+        expect(r.verdict.failures, isNot(contains(AgentFailure.scopePinned)));
       },
     );
 

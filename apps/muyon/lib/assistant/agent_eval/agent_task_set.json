@@ -40,7 +40,7 @@
       "scope": {"kind": "global"},
       "expectedTools": ["inquiry.data_quality"],
       "orderMatters": false,
-      "facts": [{"number": "4", "anchors": ["条"]}],
+      "facts": [{"number": "4", "anchors": ["条", "个", "笔", "项", "家"], "rejectPrefixes": ["第"]}],
       "expectedWrites": []
     },
     {
@@ -80,7 +80,7 @@
       "scope": {"kind": "global"},
       "expectedTools": ["inquiry.compare_quotes", "inquiry.compare_quotes"],
       "orderMatters": false,
-      "facts": [{"number": "11.8"}, {"text": "北极星乙线缆"}, {"number": "45", "anchors": ["元"], "prefixAnchors": ["¥", "￥"]}, {"text": "北极星甲电气"}],
+      "facts": [{"number": "11.8"}, {"text": "北极星乙线缆"}, {"number": "45", "anchors": ["元", "块", "CNY", "RMB"], "prefixAnchors": ["¥", "￥", "RMB", "CNY", "人民币", "单价为", "单价", "价格为", "价格"]}, {"text": "北极星甲电气"}],
       "expectedWrites": []
     },
     {
@@ -110,7 +110,7 @@
       "scope": {"kind": "global"},
       "expectedTools": ["inquiry.project_budget", "inquiry.compare_quotes", "inquiry.compare_quotes"],
       "orderMatters": false,
-      "facts": [{"number": "2080"}, {"number": "11.8"}, {"number": "45", "anchors": ["元"], "prefixAnchors": ["¥", "￥"]}],
+      "facts": [{"number": "2080"}, {"number": "11.8"}, {"number": "45", "anchors": ["元", "块", "CNY", "RMB"], "prefixAnchors": ["¥", "￥", "RMB", "CNY", "人民币", "单价为", "单价", "价格为", "价格"]}],
       "expectedWrites": []
     },
     {
@@ -120,7 +120,7 @@
       "scope": {"kind": "global"},
       "expectedTools": ["inquiry.data_quality", "inquiry.project_budget"],
       "orderMatters": true,
-      "facts": [{"number": "4", "anchors": ["条"]}, {"number": "2080"}],
+      "facts": [{"number": "4", "anchors": ["条", "个", "笔", "项", "家"], "rejectPrefixes": ["第"]}, {"number": "2080"}],
       "expectedWrites": []
     },
     {

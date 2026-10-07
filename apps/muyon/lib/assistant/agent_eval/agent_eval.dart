@@ -92,19 +92,24 @@ class AgentFailure {
 /// check: it does not verify what the number is about. A small or ambiguous
 /// number can carry [anchors] (text that must follow it, e.g. `条` for "4 条")
 /// and [prefixAnchors] (text that may precede it, e.g. `¥`); then the number
-/// counts only next to one of them (spaces between are ignored).
+/// counts only next to one of them (spaces between are ignored, letters
+/// compare without case). A number directly after one of [rejectPrefixes]
+/// (e.g. the ordinal `第`) never counts. Chinese numerals (`四`) are not
+/// read.
 class AgentFact {
   const AgentFact.number(
     String this.number, {
     this.anchors = const [],
     this.prefixAnchors = const [],
+    this.rejectPrefixes = const [],
   }) : text = null;
   const AgentFact.text(String this.text)
     : number = null,
       anchors = const [],
-      prefixAnchors = const [];
+      prefixAnchors = const [],
+      rejectPrefixes = const [];
   final String? number, text;
-  final List<String> anchors, prefixAnchors;
+  final List<String> anchors, prefixAnchors, rejectPrefixes;
 
   /// How a scripted correct answer writes the fact.
   String get label => number == null
@@ -250,6 +255,10 @@ AgentTask _task(Map<String, Object?> item) {
                 prefixAnchors: [
                   for (final a in f['prefixAnchors'] as List? ?? const []) '$a',
                 ],
+                rejectPrefixes: [
+                  for (final a in f['rejectPrefixes'] as List? ?? const [])
+                    '$a',
+                ],
               )
             : AgentFact.text(f['text'] as String),
     ],
@@ -352,8 +361,10 @@ bool answerStates(String? answer, AgentFact fact) {
     if ((value - want).abs() >= 1e-9) continue;
     final before = answer.substring(0, m.start).trimRight();
     final after = answer.substring(m.end).trimLeft();
-    if (fact.anchors.any(after.startsWith) ||
-        fact.prefixAnchors.any(before.endsWith)) {
+    final lowerBefore = before.toLowerCase(), lowerAfter = after.toLowerCase();
+    if (fact.rejectPrefixes.any(before.endsWith)) continue;
+    if (fact.anchors.any((a) => lowerAfter.startsWith(a.toLowerCase())) ||
+        fact.prefixAnchors.any((a) => lowerBefore.endsWith(a.toLowerCase()))) {
       return true;
     }
   }
@@ -757,17 +768,33 @@ Future<AgentTaskResult> runAgentTask({
         before.length != after.length ||
         before.entries.any((e) => after[e.key] != e.value);
     final succeeded = current.state == PersonalTaskState.succeeded;
-    // A failure on the scope check after an applied write that changed a
-    // selected record: re-resolving the pinned scope shows it.
+    // `scope_pinned` only when the call the model proposed last is a
+    // registered tool whose parameters pass the tool's schema and the pinned
+    // scope is what rejects it. `prepare` is read-only and checks, in order,
+    // registration, availability, scope kind and parameter schema before it
+    // resolves the scope; so a StateError "Selected object is missing" from
+    // it means all of those passed. A parameter, availability or unknown-tool
+    // failure keeps `request_failed`, since the agent reports all of them
+    // with one generic message.
     var scopePinned = false;
+    final proposal = _lastProposal(current);
     if (current.state == PersonalTaskState.failed &&
         receipts.isNotEmpty &&
+        proposal != null &&
+        host.tools.inspect(proposal.$1) != null &&
         (current.error ?? '').contains('范围校验')) {
       try {
-        await resolveAssistantScope(host, scope);
+        await host.tools.prepare(
+          ToolCallRequest(
+            invocationId: 'scope-probe',
+            toolId: proposal.$1,
+            scope: scope,
+            parameters: proposal.$2,
+          ),
+        );
       } on StateError catch (error) {
         scopePinned = '$error'.contains('Selected object is missing');
-      }
+      } catch (_) {}
     }
     final observation = AgentObservation(
       state: current.state.name,
@@ -842,6 +869,22 @@ Future<List<ObjectRef>> _selected(MuyonHost host, List<String> ids) async {
     for (final ref in all.objects)
       if (ref.moduleId == 'inquiry' && ids.contains(ref.objectId)) ref,
   ];
+}
+
+/// The last tool call the model proposed: tool id and parameters.
+(String, Map<String, Object?>)? _lastProposal(PersonalTask task) {
+  (String, Map<String, Object?>)? last;
+  for (final m in task.payload['messages'] as List? ?? const []) {
+    if ((m as Map)['role'] != 'assistant') continue;
+    if (_tryJson(m['content'] as String) case {
+      'type': 'tool',
+      'toolId': final String id,
+      'parameters': final Map params,
+    }) {
+      last = (id, Map<String, Object?>.from(params));
+    }
+  }
+  return last;
 }
 
 List<String> _proposedTools(PersonalTask task) => [
@@ -1013,7 +1056,7 @@ String agentEvalReport(AgentEvalRun run, {required DateTime at}) {
         '要求的工具都被提出过（有顺序要求的按顺序）；要求的写入已生效且结果状态与期望一致；最终回答包含期望的事实（数字按数值比较，如 2080 与 2,080.00 相同）。',
     '- 失败原因：`request_failed` 请求或任务失败；`scope_pinned` 同一任务里先写入了被选中的记录，随后的工具调用因对话范围固定了记录修订号而被拒（现状的产品行为，不是模型错误，单独列出）；`tool_missing` / `tool_order` 工具缺失或顺序不对；`unexpected_tool` 应弃权的题提出了工具；'
         '`extra_write` 多余写入；`write_missing` / `write_mismatch` 要求的写入没生效或结果不符；`fact_mismatch` 回答里缺期望的事实。',
-    '- 事实判定只是“包含”检查：回答里出现期望的数字或文字即算，不核对它说的是什么；容易误撞的小数字要求紧邻锚点（如“4 条”、“45 元”）。',
+    '- 事实判定只是“包含”检查：回答里出现期望的数字或文字即算，不核对它说的是什么；容易误撞的小数字要求紧邻锚点（数量认“条/个/笔/项/家”等量词，序数“第 4 项”不算；金额认“元/块/CNY/RMB”后缀或“¥/RMB/人民币/单价/价格”前缀）。中文数字（如“四”）不识别，只认阿拉伯数字。',
     '- **人工确认次数**分两列：工具审批（写入工具，经本人确认后执行）与模型请求确认（每次向模型端点发送内容前的确认）。表中为“中位数 / 平均”。',
     '- **首个模型响应时延**：现有助手不是流式的，这里记**第一次模型请求从发出到收到完整响应**的耗时（含出站账本记录），不是首字时延；只统计得到响应的题。',
     '- **总时长**：从提交提示词到任务结束的墙钟时间，自动确认的间隔可忽略，主要是模型请求和工具执行。p50 / p95 为最近秩百分位。',
