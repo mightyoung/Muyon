@@ -1,0 +1,12 @@
+To https://github.com/mightyoung/Muyon.git
+ ! [rejected]        task/reg-2a-outbound-tool-ledger -> task/reg-2a-outbound-tool-ledger (non-fast-forward)
+error: failed to push some refs to 'https://github.com/mightyoung/Muyon.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+PUSH_EXIT_CODE=1
+LOCAL_HEAD=705de078563099b7449cdefa17ebfe59783aff0a
+REMOTE_HEAD=8283638917ea1a51b30c13c81600487194e0ed3a
+EXACT_SHA_MATCH=false

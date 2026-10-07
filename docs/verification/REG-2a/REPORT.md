@@ -56,7 +56,11 @@ The mutation logs contain REG2A_BLOCKED counts and assertion failures, and mutat
 
 Commit and ordinary push are authorized only for this task branch; no merge, force push or develop/main push. Final response records the full commit SHA and verbatim equality check against git ls-remote. GitHub Actions ci triggers automatically for task/** pushes; the final response gives the actual queried CI state. No CI success is implied by a local result. Main full-test gate remains blocked by the version-8 assertion, which cannot be repaired under the instruction not to modify existing tests.
 
-## Changed-file inventory
+## Remote branch update preserved
+
+Initial ordinary push was rejected (exit 1, non-fast-forward); full output and mismatched SHA evidence are preserved in push-initial-failed.log. The remote advanced to `8283638917ea1a51b30c13c81600487194e0ed3a` through two documentation-only commits (`7dc3478079d778172d354f13deae357ea97b93f7`, `8283638917ea1a51b30c13c81600487194e0ed3a`). Both were preserved by merging the fetched **same task branch**, not develop. `git diff --exit-code 705de078563099b7449cdefa17ebfe59783aff0a HEAD -- . ':!docs'` returned 0 after the merge, proving all tested code/assets/config remained identical. No runtime checks were needlessly repeated for these documentation changes. Final push output, exact SHA equality and actual CI status are recorded in the final response and /tmp delivery evidence.
+
+## Changed-file inventory (this task)
 
 - `apps/muyon/lib/app/inquiry_hub_authority.dart`
 - `apps/muyon/lib/app/inquiry_web_authority.dart`
@@ -107,6 +111,7 @@ Commit and ordinary push are authorized only for this task branch; no merge, for
 - `docs/verification/REG-2a/new-tests-restored.log`
 - `docs/verification/REG-2a/pub-get-authorized.log`
 - `docs/verification/REG-2a/pub-get.log`
+- `docs/verification/REG-2a/push-initial-failed.log`
 - `docs/verification/REG-2a/restored-and-required-tests.log`
 - `docs/verification/REG-2a/restored-delivery-tests.log`
 - `docs/verification/REG-2a/supplier-analyze-delivery.log`
@@ -115,3 +120,12 @@ Commit and ordinary push are authorized only for this task branch; no merge, for
 - `packages/supplier_core/lib/src/hub_channel.dart`
 - `packages/supplier_core/lib/src/lan.dart`
 - `scripts/verify_reg2a_mutations.py`
+
+## Documentation files inherited from the remote task branch
+
+- `docs/design/ui-redesign-brief-2026-10-06.md`
+- `docs/design/v4/prompts/claude-design-prompt-round5.md`
+- `docs/design/v4/prompts/claude-design-prompt-round6.md`
+- `docs/tasks/FOLIO-BYPASS.md`
+- `docs/tasks/HANDOVER-LEADER.md`
+- `docs/tasks/README.md`
