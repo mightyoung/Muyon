@@ -14,6 +14,9 @@ final _visibleAscii = RegExp(r'^[\x21-\x7E]+$');
 /// Shown instead of a key that cannot be sent in a header. Never echoes it.
 const invalidCredentialMessage = '密钥含不可见或非 ASCII 字符，请重新粘贴';
 
+/// Shortest credential value [redactCredentials] replaces by value.
+const minRedactedSecretLength = 8;
+
 /// Whether [text] may quote a credential.
 bool mayContainCredential(String text) => _credentialMention.hasMatch(text);
 
@@ -22,7 +25,12 @@ bool mayContainCredential(String text) => _credentialMention.hasMatch(text);
 /// covering an endpoint that echoes the key in its response; then text that
 /// may still quote a credential keeps only the error type and a fixed note.
 String redactCredentials(Object error, {String? secret}) {
-  final text = maskSecret(error is String ? error : '$error', secret);
+  var text = error is String ? error : '$error';
+  // Too short a secret would mask unrelated text everywhere (and is no real
+  // credential), so only values of [minRedactedSecretLength]+ are replaced.
+  if (secret != null && secret.length >= minRedactedSecretLength) {
+    text = text.replaceAll(secret, '<redacted>');
+  }
   if (!mayContainCredential(text)) return text;
   final type = error is String ? 'Error' : '${error.runtimeType}';
   return '$type: details withheld (may contain the credential)';
@@ -31,8 +39,9 @@ String redactCredentials(Object error, {String? secret}) {
 /// [text] with every occurrence of [secret] replaced by `<redacted>`. For
 /// content that is not an error (e.g. a remote tool result that echoes the
 /// key), where the keyword rule of [redactCredentials] would hide too much.
+/// Same [minRedactedSecretLength] floor as [redactCredentials].
 String maskSecret(String text, String? secret) =>
-    secret == null || secret.isEmpty
+    secret == null || secret.length < minRedactedSecretLength
     ? text
     : text.replaceAll(secret, '<redacted>');
 

@@ -110,6 +110,23 @@ void main() {
     return socket;
   }
 
+  /// Waits for the server to admit the upload: it creates the `push-`
+  /// staging directory only after parsing the request and before reading the
+  /// body, so from then on no request bytes remain unread on its side.
+  Future<void> expectUploadPending(LanNode node) async {
+    bool pending() => node.inbox.listSync().any(
+      (entry) => entry.uri.pathSegments
+          .where((segment) => segment.isNotEmpty)
+          .last
+          .startsWith('push-'),
+    );
+    for (var attempt = 0; attempt < 200; attempt++) {
+      if (pending()) return;
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    fail('the upload never became pending on the server');
+  }
+
   Future<void> expectInboxEmpty(LanNode node) async {
     for (var attempt = 0; attempt < 100; attempt++) {
       if (node.inbox.listSync().isEmpty) return;
@@ -292,7 +309,11 @@ void main() {
       final node = await start();
       final socket = await partial(node);
       final response = expectPeerClose(socket);
-      await Future<void>.delayed(const Duration(milliseconds: 40));
+      // Stop only once the upload is pending. A fixed delay let a slow machine
+      // stop before the server had read the request; closing with unread data
+      // resets the connection and the client's pending TLS write then fails
+      // with EPIPE instead of seeing the close this test is about.
+      await expectUploadPending(node);
       await node.stop().timeout(const Duration(seconds: 2));
       await response;
       expect(node.inbox.listSync(), isEmpty);

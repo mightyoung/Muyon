@@ -51,8 +51,38 @@ class _LeakyRequestGateway extends OpenAiModelGateway {
 }
 
 class _Secrets implements SecretStore {
+  _Secrets([this.value = _secret]);
+  final String value;
   @override
-  Future<String?> read(String reference) async => _secret;
+  Future<String?> read(String reference) async => value;
+}
+
+/// A key of realistic length (164 chars): long enough that a parser would
+/// quote only a truncated part of it, which value replacement cannot match.
+final _longSecret =
+    'sk-proj-${List.generate(156, (i) => 'abcdefghijklmnopqrstuvwxyz0123456789'[(i * 7) % 36]).join()}';
+
+/// No 12-character window of [secret] appears in [text].
+Matcher _noFragmentOf(String secret) => predicate<Object?>((value) {
+  final text = '$value';
+  for (var i = 0; i + 12 <= secret.length; i++) {
+    if (text.contains(secret.substring(i, i + 12))) return false;
+  }
+  return true;
+}, 'contains no 12-character fragment of the key');
+
+/// Answers every chat request with [text] instead of protocol JSON.
+class _EchoChatGateway extends OpenAiModelGateway {
+  _EchoChatGateway(this.text) : super(UnavailableSecretStore());
+  final String text;
+  @override
+  Future<String> chat({
+    required ModelProfile profile,
+    required List<Map<String, String>> messages,
+    ModelCancellation? cancellation,
+    Future<void> Function()? beforeSend,
+    String caller = 'model',
+  }) async => text;
 }
 
 ModelProfile _local(int port, {String? credentialRef}) => ModelProfile(
@@ -126,7 +156,9 @@ void main() {
   test('gateway removes the key an endpoint echoes back from the thrown '
       'error and the ledger', () async {
     // The widgets binding replaces HttpClient with one that answers 400.
+    final previous = HttpOverrides.current;
     HttpOverrides.global = null;
+    addTearDown(() => HttpOverrides.global = previous);
     final root = Directory.systemTemp.createTempSync('muyon-echo-');
     final storage = StorageManager(root.path);
     final ledger = OutboundLedger(
@@ -140,25 +172,73 @@ void main() {
     });
     server.listen((request) async {
       await utf8.decoder.bind(request).join();
-      request.response.write('invalid key $_secret');
+      request.response.write('invalid key $_longSecret');
       await request.response.close();
     });
     Object? thrown;
     try {
-      await OpenAiModelGateway(_Secrets(), ledger: ledger).request(
+      await OpenAiModelGateway(_Secrets(_longSecret), ledger: ledger).request(
         profile: _local(server.port, credentialRef: 'k'),
         payload: {'model': 'm', 'messages': <Object>[]},
       );
     } catch (error) {
       thrown = error;
     }
+    expect(_longSecret.length, greaterThanOrEqualTo(80));
     expect(thrown, isNotNull);
-    expect('$thrown', isNot(contains(_secret)));
-    expect('$thrown', contains('<redacted>'));
+    expect(thrown, _noFragmentOf(_longSecret));
+    expect('$thrown', contains('model_response_not_json'));
     final row = ledger.recent().single;
     expect(row['status'], 'failed');
-    expect(jsonEncode(row), isNot(contains(_secret)));
-    expect('${row['error']}', contains('<redacted>'));
+    expect(jsonEncode(row), _noFragmentOf(_longSecret));
+    expect('${row['error']}', contains('model_response_not_json'));
+  });
+
+  test('assistant does not quote a non-JSON model reply that echoes a long '
+      'key in the task, its notification or the conversation', () async {
+    final db = ManagedConnection(sqlite3.openInMemory());
+    for (final migration in WorkspaceRepository.schema.migrations) {
+      migration.migrate(db.raw);
+    }
+    final repo = FoundationRepository(db);
+    final agent = PersonalAgent(
+      repository: repo,
+      gateway: _EchoChatGateway('Your key $_longSecret is not valid here.'),
+      tools: ToolRegistry(
+        database: db,
+        resolveScope: (scope) async =>
+            ResolvedAssistantScope(requested: scope, objects: const []),
+      ),
+    );
+    addTearDown(agent.close);
+    final conversation = await repo.createConversation();
+    var task = await agent.start(
+      conversationId: conversation.id,
+      prompt: '你好',
+      profile: _local(9),
+    );
+    // Since P0-3d one corrective round is requested (and confirmed) before
+    // the task fails; the model keeps echoing, so both rounds are rejected.
+    for (var round = 0; round < 2; round++) {
+      task = repo.task(task.id)!;
+      expect(task.stage, 'model');
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+    }
+    task = repo.task(task.id)!;
+    expect(task.state, PersonalTaskState.failed);
+    expect(task.error, contains('model_reply_not_json'));
+    expect(repo.notifications(), isNotEmpty);
+    for (final trace in [
+      task.error,
+      jsonEncode(task.payload),
+      for (final n in repo.notifications()) '${n.title} ${n.body}',
+      for (final m in repo.messages(conversation.id)) m.content,
+    ]) {
+      expect(trace, _noFragmentOf(_longSecret));
+    }
   });
 
   testWidgets('research tools model dialog refuses a pasted key with a line '
@@ -201,15 +281,23 @@ void main() {
       );
       await tester.pumpAndSettle();
       final profilesBefore = ProfileRepository(host.workspaces).all().length;
-      await tester.tap(find.byTooltip('模型设置'));
+      // Opened with real async so the dialog's save path (which awaits the
+      // dialog) runs in real time too; see the save tap below.
+      await tester.runAsync(() async => tester.tap(find.byTooltip('模型设置')));
       await tester.pumpAndSettle();
       await tester.enterText(find.widgetWithText(TextField, '模型名'), 'm');
       await tester.enterText(
         find.widgetWithText(TextField, '密钥（仅写入系统密钥库）'),
         '$_secret\r',
       );
-      await tester.tap(find.text('保存'));
-      await tester.pumpAndSettle();
+      // Tap with real async: the refusal is synchronous, and if the check were
+      // missing the save's IO completes here instead of hanging in fake time
+      // (which made a broken check surface only at the 10-minute timeout).
+      await tester.runAsync(() async {
+        await tester.tap(find.text('保存'));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      });
+      await tester.pump();
 
       expect(find.text(invalidCredentialMessage), findsOneWidget);
       expect(find.text('配置模型端点'), findsOneWidget, reason: 'still open');

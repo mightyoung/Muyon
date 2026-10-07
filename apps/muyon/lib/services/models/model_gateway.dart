@@ -136,23 +136,49 @@ class OpenAiModelGateway {
     if (profile.purpose != ModelPurpose.chat) {
       throw StateError('Model profile is not configured for chat');
     }
-    final decoded = await request(
+    Future<Map<String, dynamic>> send(bool withFormat) => request(
       profile: profile,
       payload: {
         'model': profile.modelId,
         'messages': messages,
         'stream': false,
+        if (withFormat) 'response_format': const {'type': 'json_object'},
       },
       cancellation: cancellation,
       beforeSend: beforeSend,
       caller: caller,
     );
+    final key = '${profile.endpoint}|${profile.modelId}';
+    final withFormat =
+        _jsonObjectCallers.contains(caller) && !_noJsonObject.contains(key);
+    Map<String, dynamic> decoded;
+    try {
+      decoded = await send(withFormat);
+    } on HttpException catch (error) {
+      // An endpoint that rejects response_format (400/422) must keep working:
+      // send the same confirmed content once more without it, and remember
+      // not to ask this endpoint again. Both requests are in the ledger.
+      final rejected =
+          error.message == 'model_http_400' ||
+          error.message == 'model_http_422';
+      if (!withFormat || !rejected) rethrow;
+      _noJsonObject.add(key);
+      decoded = await send(false);
+    }
     final content = (decoded['choices'] as List).first['message']['content'];
     if (content is! String || content.trim().isEmpty) {
       throw const FormatException('Empty model response');
     }
     return content;
   }
+
+  /// Callers whose protocol is one JSON object per reply. They ask for JSON
+  /// output so a model does not answer in prose or in its native tool-call
+  /// markup (P0-3d); other callers keep their plain requests.
+  static const _jsonObjectCallers = {'assistant'};
+
+  /// Endpoint+model pairs that rejected `response_format: json_object`.
+  final _noJsonObject = <String>{};
 
   /// Endpoint is explicit in the profile; no URL rewriting or provider fallback.
   Future<List<List<double>>> embed({
@@ -284,7 +310,19 @@ class OpenAiModelGateway {
           bytes.addAll(chunk);
         }
         token.check();
-        final decoded = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+        // The parser quotes (and truncates) the body in its message, so an
+        // endpoint echoing the key could leak part of it past maskSecret.
+        // Fail with a fixed reason instead of the source text.
+        final Object? parsed;
+        try {
+          parsed = jsonDecode(utf8.decode(bytes));
+        } on FormatException {
+          throw const FormatException('model_response_not_json');
+        }
+        if (parsed is! Map<String, dynamic>) {
+          throw const FormatException('model_response_not_object');
+        }
+        final decoded = parsed;
         await _finish(recordId, 'succeeded', httpStatus, null);
         return decoded;
       })().timeout(timeout);

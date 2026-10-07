@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import 'scheme_loader.dart';
 import 'web_guard.dart';
 
 /// What a prototype page may *load*, as opposed to where it may navigate.
@@ -23,25 +24,24 @@ class PrototypeResourcePolicy {
   final RestrictedWebViewSpec spec;
   final PrototypeWebGuard _guard;
 
-  /// A sub-resource is allowed only if it is a `file:` URL inside an allowed
-  /// root. Remote `https`, `data:`, `blob:`, `about:`, `..` paths and other
-  /// local files are all refused.
+  /// A sub-resource is allowed only if it is a `muyon-proto://` URL that maps
+  /// inside the allowed root. Remote `https`, `data:`, `blob:`, `about:`,
+  /// `file:`, `..` paths and other local files are all refused.
   bool allowsResource(String rawUrl) {
-    if (!rawUrl.toLowerCase().startsWith('file:')) return false;
+    if (!rawUrl.toLowerCase().startsWith('$prototypeScheme:')) return false;
     return _guard.allowsNavigation(rawUrl);
   }
 
   /// No network at all: `connect-src 'none'` stops `fetch`, XHR, WebSocket and
   /// beacons; frames, objects and forms are off; media and fonts load only from
-  /// local files. `file:` is the narrowest scheme source CSP can express for
-  /// local files, so the root-level restriction comes from layers 2 and 3.
+  /// the prototype scheme, which the loader serves from the version root only.
   String contentSecurityPolicy() => [
     "default-src 'none'",
-    'script-src file:',
-    "style-src file: 'unsafe-inline'",
-    'img-src file:',
-    'font-src file:',
-    'media-src file:',
+    'script-src $prototypeScheme:',
+    "style-src $prototypeScheme: 'unsafe-inline'",
+    'img-src $prototypeScheme:',
+    'font-src $prototypeScheme:',
+    'media-src $prototypeScheme:',
     "connect-src 'none'",
     "frame-src 'none'",
     "object-src 'none'",
@@ -65,19 +65,12 @@ class PrototypeResourcePolicy {
 })();''';
   }
 
-  /// Apple content-blocker rules: block everything, then exempt the allowed
-  /// roots. Order matters (`ignore-previous-rules` undoes earlier blocks).
+  /// Apple content-blocker rules: block everything, then exempt the prototype
+  /// scheme. The scheme loader maps only paths inside the version root, so the
+  /// directory restriction lives there. Order matters (`ignore-previous-rules`
+  /// undoes earlier blocks).
   List<({String urlFilter, bool block})> contentBlockerRules() => [
     (urlFilter: '.*', block: true),
-    for (final root in spec.allowedRoots)
-      (urlFilter: '^${_escape(_dirPrefix(root))}', block: false),
+    (urlFilter: '^$prototypeScheme://$prototypeHost/', block: false),
   ];
-
-  static String _dirPrefix(Uri root) {
-    final text = root.normalizePath().toString();
-    return text.endsWith('/') ? text : '$text/';
-  }
-
-  static String _escape(String text) =>
-      text.replaceAllMapped(RegExp(r'[.*+?^${}()|[\]\\]'), (m) => '\\${m[0]}');
 }

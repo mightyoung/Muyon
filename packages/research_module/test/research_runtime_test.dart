@@ -204,6 +204,12 @@ void main() {
         expectedHead: null,
         bodyMarkdown: 'Card',
       );
+      final longCard = await CardStore(database).save(
+        projectId: 'native-a',
+        cardId: 'long-card',
+        expectedHead: null,
+        bodyMarkdown: '长' * 100,
+      );
       final session = await runtime.openSession(binding);
       ObjectRef ref(
         String type,
@@ -246,6 +252,67 @@ void main() {
         isNull,
       );
       expect(await session.resolve(ref('card', 'c', project: 'other')), isNull);
+      // Long card bodies are truncated for the app bar (review F10).
+      final longTitle = (await session.resolve(
+        ref(
+          'card',
+          'long-card',
+          revision: longCard.revision.revisionId,
+          digest: longCard.revision.contentDigest,
+        ),
+      ))!.title;
+      expect(longTitle.length, 61);
+      expect(longTitle.endsWith('…'), isTrue);
+    },
+  );
+
+  test(
+    'card app bar titles strip heading marks and keep emoji whole',
+    () async {
+      final prepared = await prepare();
+      await runtime.commitImport(prepared, intent(prepared));
+      final cards = CardStore(database);
+      final heading = await cards.save(
+        projectId: 'native-a',
+        cardId: 'heading-card',
+        expectedHead: null,
+        bodyMarkdown: '# 卡片标题\n\n正文',
+      );
+      final emoji = await cards.save(
+        projectId: 'native-a',
+        cardId: 'emoji-card',
+        expectedHead: null,
+        bodyMarkdown: 'x${'🙂' * 70}',
+      );
+      final session = await runtime.openSession(binding);
+      ObjectRef ref(String id, String revision, String digest) => ObjectRef(
+        moduleId: 'research',
+        objectType: 'card',
+        objectId: id,
+        nativeProjectId: 'native-a',
+        revisionRef: revision,
+        contentDigest: digest,
+      );
+      expect(
+        (await session.resolve(
+          ref(
+            'heading-card',
+            heading.revision.revisionId,
+            heading.revision.contentDigest,
+          ),
+        ))!.title,
+        '卡片标题',
+      );
+      final emojiTitle = (await session.resolve(
+        ref(
+          'emoji-card',
+          emoji.revision.revisionId,
+          emoji.revision.contentDigest,
+        ),
+      ))!.title;
+      expect(emojiTitle, 'x${'🙂' * 59}…');
+      expect(emojiTitle.runes.length, 61);
+      await session.dispose();
     },
   );
 
@@ -327,6 +394,80 @@ void main() {
       expect(changes.last.op, ChangeOp.delete);
     },
   );
+
+  testWidgets('task page shows the run status of its own revision', (
+    tester,
+  ) async {
+    late BuildContext context;
+    await tester.pumpWidget(
+      Builder(
+        builder: (c) {
+          context = c;
+          return const SizedBox();
+        },
+      ),
+    );
+    await tester.runAsync(() async {
+      database.raw.execute(
+        "INSERT INTO projects(id,title,question,next_step) VALUES('native-a','A','','')",
+      );
+      final store = runtime.store;
+      final task = await store.write(
+        () => store.saveTask(
+          projectId: 'native-a',
+          title: 'First',
+          goal: '',
+          spec: {},
+        ),
+      );
+      final taskV2 = await store.write(
+        () => store.saveTask(
+          id: task.id,
+          projectId: 'native-a',
+          title: 'Latest',
+          goal: '',
+          spec: {},
+        ),
+      );
+      final runV1 = await store.write(() => store.startManualRun(task));
+      final runV2 = await store.write(() => store.startManualRun(taskV2));
+      await store.write(() {
+        store.updateManualRun(
+          runV1.id,
+          status: 'failed',
+          metrics: const <String, dynamic>{},
+          log: '',
+          conclusion: '',
+        );
+        store.updateManualRun(
+          runV2.id,
+          status: 'completed',
+          metrics: const <String, dynamic>{},
+          log: '',
+          conclusion: '',
+        );
+      });
+      final session = await runtime.openSession(binding);
+      ObjectRef ref(String type, String id, {String? revision}) => ObjectRef(
+        moduleId: 'research',
+        objectType: type,
+        objectId: id,
+        nativeProjectId: 'native-a',
+        revisionRef: revision,
+      );
+      final first = session.objectPage(
+        context,
+        ref('task', task.id, revision: '1'),
+      ) as ResearchTaskPage;
+      final latest =
+          session.objectPage(context, ref('task', task.id)) as ResearchTaskPage;
+      expect(first.revisionRunStatus, 'failed');
+      expect(latest.revisionRunStatus, 'completed');
+      expect(first.isLatestRevision, isFalse);
+      expect(latest.isLatestRevision, isTrue);
+      await session.dispose();
+    });
+  });
 
   testWidgets(
     'scope and version checks cover reused local IDs and unavailable focused pages',
@@ -496,12 +637,27 @@ void main() {
             ),
             isNull,
           );
-          if (object.objectType != 'document' ||
-              object.objectId == 'same-doc') {
+          if (object.objectType == 'document') {
+            // 'doc-a' is this session's document (asserted below); 'same-doc'
+            // is a canonical package document with no reader adapter, so it
+            // has no page here.
             expect(
               sessionA.objectPage(context, object),
-              isNull,
-              reason: 'B-owned focused page or canonical reader adapter is unavailable',
+              object.objectId == 'same-doc' ? isNull : isA<ReaderPage>(),
+            );
+          } else {
+            expect(
+              sessionA.objectPage(context, object)?.runtimeType,
+              switch (object.objectType) {
+                'entry' => ResearchEntryPage,
+                'outline' => ResearchOutlinePage,
+                'section' => ResearchSectionPage,
+                'task' => ResearchTaskPage,
+                'run' => ResearchRunPage,
+                'card' => ResearchCardPage,
+                _ => null,
+              },
+              reason: object.objectType,
             );
           }
         }

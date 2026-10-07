@@ -645,7 +645,7 @@ void main() {
     // The gateway refuses such a key before any request (credential_invalid),
     // so neither the choice nor the report can carry it. The eval's own
     // redaction of a header error that quotes the key is covered with a
-    // gateway that skips its checks in credential_redaction_test.dart.
+    // gateway that skips its checks in credential_redaction_callers_test.dart.
     var requests = 0;
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => server.close(force: true));
