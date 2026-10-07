@@ -55,7 +55,7 @@
 
 1. **确认的是“内容”，不是“线上字节”。** `requestDigest` 覆盖预览（含 `messages`），而线上载荷还含 `response_format`、`stream` 等网关添加的字段（账本的 `payload_sha256` 才是线上字节的散列）。原生工具把 `tools` 移出 `messages` 后，若不纳入摘要，用户确认的内容就会少于实际发送的内容。
 2. **请求形态、账本、摘要三者互不关联。** 账本没有 `requestDigest`，事后无法把“用户确认的那份预览”与“实际发出的那行账本”对上。
-3. **协议状态藏在任务 JSON 里。** 轮数、纠正次数、候选集、消息都在 `execution_records` 的 `payload` 中（`platform/foundation_repository.dart:817-853`），没有事件序列；`execution_store.dart` 只管非个人助手的执行记录（`assistant/execution_store.dart:20`、`:32`）。
+3. **协议状态藏在任务 JSON 里。** 轮数、纠正次数、候选集、消息都在 `execution_records` 的 `payload` 中（`platform/foundation_repository.dart:817-836`、`createTask` `:840-853`），没有事件序列；`execution_store.dart` 只管非个人助手的执行记录（`assistant/execution_store.dart:20`、`:32`）。
 4. **消息类型只有 `role` + `content` 字符串**（`personal_agent.dart:397-398` 强转 `Map<String,String>`；`model_gateway.dart:131`），装不下 `tool_calls` / `tool_call_id`。
 5. **测试替身以“覆写 `chat` 返回字符串”为接口**（`test/personal_agent_rejections_test.dart:467-484`、`:486-508`，`test/assistant_protocol_correction_test.dart:26-44`），所以兼容模式的入口签名必须原样保留（见 §8）。
 6. **预览摘要形状被外部断言**：North Star 链路要求 `PersonalAgent.digest(preview) == requestDigest`（`integration_test/support/north_star_chain.dart:434`），并用 `3 * agent.maxRounds` 作防死循环上限（同文件 `:422`）。
@@ -201,17 +201,19 @@ abstract interface class OutboundChannel {
 | 非 200 | `failed` | `model_http_<code>`，同现状（`model_gateway.dart:303-305`） |
 | 连接已关但无 `[DONE]` / `finish_reason` | `failed` | 固定原因 `stream_truncated`，已收字节数写入 `bytes_received`；**部分输出的存在体现在 `bytes_received > 0`，不新增状态** |
 | 流中出现供应商错误事件 | `failed` | 固定错误码，不引用原文；经 `redactCredentials` |
-| 连接超时 15 s / 流空闲 60 s | `timeout` | 取代 45 s 总超时（§6.1）；兼容非流式仍用总超时 |
+| 连接超时 15 s / 流空闲 60 s / 单请求绝对上限 | `timeout` | 取代 45 s 总超时（§6.1）；兼容非流式仍用总超时 |
 | 用户取消、宿主关闭、授权被撤销（§7.2） | `cancelled` | 沿用“已发送后取消：端点可能已处理”文案（`model_gateway.dart:359-361`） |
 | 进程在流中死亡 | `sending` → 下次启动 `interrupted` | 现有 `recoverInterrupted`（`outbound_ledger.dart:85-92`），无需改动 |
 
-不新增 `partial` 状态：CHECK 约束（`outbound_ledger.dart:31`）要改只能重建表，收益不抵成本；是否仍要新增见 §10 Q6。
+补充两点：① 流已完整结束、账本已记 `succeeded`，随后才在本地被取消：沿用今天的规则，回复到达后若任务已非 `running` 则丢弃（`personal_agent.dart:420-424`）；② `finish_reason: length`：账本 `succeeded`（请求本身成功），任务 `failed`（`model_output_truncated`，不处理其中的工具调用）。
+
+不新增 `partial` 状态：CHECK 约束（`outbound_ledger.dart:31`）要改只能重建表，收益不抵成本；是否仍要新增见 §10.2。
 
 ### 5.3 部分输出与展示
 
 | 情形 | 行为 |
 |---|---|
-| 文本流中 | 逐段推给界面的“草稿”（内存中的 `Stream<AgentDraft>`，**不逐块写库**）；草稿标注“生成中，尚未确认完成” |
+| 文本流中 | 逐段推给界面的“草稿”（建议，Q4；内存中的 `Stream<AgentDraft>`，**不逐块写库**）；草稿标注“生成中，尚未确认完成” |
 | 正常完成 | 先校验（引用、协议），再通过现有 `repository.updateTask(... assistantAnswer ...)` 一次性写入会话消息（`personal_agent.dart:648-659`）；草稿被正式消息取代 |
 | 取消、断流、超时、`length` 截断 | **不写入会话消息**，任务按原因进入 `cancelled` / `failed`；草稿保留在界面中并标注“已中断，部分内容未保存”，离开页面即消失；任务事件只记长度与摘要，不存正文（§10 Q4） |
 | 工具调用片段未完成 | 不执行、不提议；`ToolCallDelta` 仅显示“正在准备调用 …” |
@@ -222,7 +224,7 @@ abstract interface class OutboundChannel {
 
 - **规范化请求**：`canonical(ModelRequest)` = 端点、profile、范围、`messages`、`tools`（含编码后函数名与 schema）、`toolChoice`、`maxOutputTokens`、能力快照与模式。`requestDigest = digest(canonical)`。
 - 兼容模式下 `canonical` 与今天的 `preview` 同形，`requestDigest` 与现状逐字节相同（`personal_agent.dart:237-254`），North Star 的断言不变（`north_star_chain.dart:434`）；原生模式在预览里多出 `tools`、`mode`。
-- 线上载荷是 `canonical` 的**确定性函数**（适配器纯映射；网关添加的 `response_format`、`stream`、`stream_options` 只取决于能力快照），所以用户确认的内容与线上字节可复核；账本新增 `request_digest` 列，与 `payload_sha256` 并存。
+- 线上载荷是 `canonical` 的**确定性函数**（适配器纯映射；网关添加的 `response_format`、`stream`、`stream_options` 只取决于能力快照），唯一例外是兼容模式的 `response_format` 重发（`model_gateway.dart:152-169`，内存记忆 `_noJsonObject` 决定是否带参数）：重发另占一行账本，`payload_sha256` 不同、`request_digest` 相同；其余情形用户确认的内容与线上字节可复核；账本新增 `request_digest` 列，与 `payload_sha256` 并存。
 - 账本新增列（`ALTER TABLE … ADD COLUMN`，走一次新的版本化迁移，现有建表迁移在 `workspace/workspace_repository.dart:61`，迁移机制细节待核实）：`request_digest`、`prompt_tokens`、`completion_tokens`、`first_byte_ms`、`bytes_received`、`streamed`；AUTH-1 再加 `grant_id`。旧行这些列为 NULL。
 
 ## 6. 预算式 Agent 循环
@@ -231,16 +233,16 @@ abstract interface class OutboundChannel {
 
 | 预算 | 默认 | 说明 |
 |---|---|---|
-| 步数 `maxSteps` | 12（[路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md) §3、深度研究报告 §6.2.3） | 一步 = 一次模型请求 + 其工具调用 + 结果回填；纠正轮也计一步。构造参数 `maxRounds` 保留为别名（§8） |
+| 步数 `maxSteps` | 默认：AUTH-1 之前 4，之后 12（§10 Q5；12 取自[深度研究报告](../reviews/2026-10-05-muyon-deep-review-and-optimization.md) §6.2.3，路线图 §3 只写“取代 4 轮 / 45 秒”） | 一步 = 一次模型请求 + 其工具调用 + 结果回填；纠正轮也计一步。构造参数 `maxRounds` 保留为别名（§8） |
 | 活动时长 `maxActive` | 10 分钟 | **只累计“运行中”时间**（模型流式、工具执行），不含 `waitingConfirmation`；等待确认仍各有 5 分钟有效期（`personal_agent.dart:255-258`） |
 | token `maxTokens` | 待用户定（建议 200 000，累计 prompt + completion，§10 Q5） | 取供应商 `usage`；未报告的请求按 `bytes ÷ 4` 估算并标记 `estimated`，同时不放宽步数上限 |
 | 单步工具调用数 | 8 | 超出的调用返回“未执行”（§6.3） |
 | 协议违规 | 1 次 / 任务 | 即今天的 `maxProtocolCorrections`（`:471`），原生与兼容共用 |
-| 单请求 | 连接 15 s、流空闲 60 s（[深度研究报告 §6.2.1](../reviews/2026-10-05-muyon-deep-review-and-optimization.md)）；响应累计 ≤ 2 MiB；请求 ≤ 2 MiB；预览 ≤ 256 KiB | 兼容非流式保留 45 s 总超时作默认，可配置 |
+| 单请求 | 绝对上限 min(剩余 `maxActive`, 固定 5 分钟)，超出记 `timeout`（防止慢速滴流的流超出活动时长预算）；连接 15 s、流空闲 60 s（[深度研究报告 §6.2.1](../reviews/2026-10-05-muyon-deep-review-and-optimization.md)）；响应累计 ≤ 2 MiB；请求 ≤ 2 MiB；预览 ≤ 256 KiB | 兼容非流式保留 45 s 总超时作默认，可配置 |
 
 - 预算只由宿主配置决定，**模型回复、资料、工具结果都不能修改预算**（ADR-0002 §3.1 的同一原则）。
 - 检查点：每次发起模型请求前；每次收到 `Usage` 后；每次工具结束后。进行中的请求最多超出 token 预算一个请求；已知剩余 token 时把 `maxOutputTokens` 限制为剩余量。
-- **耗尽时**：不再发起模型请求，不再为“总结”额外出站；由宿主按工具回执生成小结——已完成的调用（工具、状态、摘要、写入对象引用）与未完成的部分，写入任务的 `error` 与通知。终态沿用 `failed`，错误文案以现有“工具轮次达到上限”开头再附小结（保持 `test/personal_agent_rejections_test.dart:376-393` 通过，§10 Q7）；用户可点“继续”= 新建尝试（沿用 `resume`，`:744-770`），预算重新计。
+- **耗尽时**：不再发起模型请求，不再为“总结”额外出站；由宿主按工具回执生成小结——已完成的调用（工具、状态、摘要、写入对象引用）与未完成的部分，写入任务的 `error` 与通知。终态沿用 `failed`，错误文案以现有“工具轮次达到上限”开头再附小结（保持 `test/personal_agent_rejections_test.dart:369-388` 通过，§10.2）；用户可点“继续”= 新建尝试（沿用 `resume`，`:744-770`），预算重新计。
 
 ### 6.2 单步状态机
 
@@ -251,9 +253,9 @@ abstract interface class OutboundChannel {
 | S0 构建 | `running` / `model` | 查预算；组装 `ModelRequest`（历史窗口仍取最近 16 条，`:139`）；计算 `requestDigest`；大小检查（`:244-247`） | → S1；预算耗尽 → 终态 `failed` |
 | S1 闸门 | `waitingConfirmation` / `model` | `ModelRequestGate.decide(...)`（§7）；`AlwaysConfirmGate` 写出确认卡，等 `confirm`（`:334`） | 确认 / 放行 → S2；拒绝、过期 → `cancelled` / `failed` |
 | S2 流式 | `running` / `model` | `beforeSend` → `ledger.begin` → 读事件；累积文本与工具调用片段；记 `Usage` | `Done` → S3；错误、断流、取消 → 终态（§5.2、§5.3） |
-| S3 判定 | `running` | 无工具调用且 `Done(stop)` → 校验引用 → `_finish`；有工具调用且 `Done(toolCalls)` → S4；协议违规 → 计数，未超限则作为“工具结果”回填给模型进入下一步，超限则失败；`Done(length)` → 失败 `model_output_truncated` | |
+| S3 判定 | `running` | 无工具调用且 `Done(stop)` → 校验引用 → `_finish`；有工具调用且 `Done(toolCalls)` → S4；协议违规（未知函数名、`arguments` 无效、重复 `callId` 等）→ **整条 assistant 回复丢弃，不保存、不回传**，计数；未超限则只追加固定纠正消息（同今天的 `_correction`，`personal_agent.dart:426-432`、`:511-533`）进入下一步，超限则以固定原因失败；`Done(length)` → 失败 `model_output_truncated` | |
 | S4 分发 | `running` / `tool` | 逐个调用：冻结候选检查（`:281-283`）→ `ToolRegistry.prepare`；只读 → 执行（可并行）；写入 / 外传 → `waitingConfirmation` / `tool`，确认后 `approve` + `invoke`（`:367-373`） | 全部有结果 → S5 |
-| S5 回填 | `running` | 一次性追加：assistant 消息（含全部 `toolCalls`）+ 每个 `callId` 恰一条 `tool` 消息 + 引用表；更新 `references`（`:598-601`）；记 `Usage`；检查预算 | → S0 |
+| S5 回填 | `running` | **仅当本步所有调用均合法时**一次性追加：assistant 消息（含全部 `toolCalls`）+ 每个 `callId` 恰一条 `tool` 消息 + 引用表；更新 `references`（`:598-601`）；记 `Usage`；检查预算 | → S0 |
 
 取消、关闭、暂停 / 恢复沿用现有语义，不改：模型阶段取消即中止流并写 `cancelled`（`:698-706`）；工具已派发则只发信号、由回执决定（`:685-697`、`:564-597`）；`close()` 写 `interrupted`（`:772-803`）。新增：S4 并行读调用被取消时，各调用按“只读结果被丢弃”处理（`:572-577`）；批内任一调用得到 `interrupted`，任务即进入 `interrupted`，其余未开始的调用不再启动。
 
@@ -261,7 +263,7 @@ abstract interface class OutboundChannel {
 
 - **只读调用并行**（`prepare` 通过后），受单步上限约束。
 - **写入 / 外传调用逐个串行，各自走一次 `prepare` → 用户确认（或 AUTH-1 放行）→ `approve` → `invoke`**，每个调用一份一次性审批与回执；不做“一次批准整批”。一步内出现多个写入 / 外传调用时，K-3 只提议第一个，其余返回 `tool` 消息“未执行：每次只提议一个有外部效应的操作”，由模型下一步重新提议（是否放开批量见 §10 Q8）。
-- **每个 `callId` 都必须有对应的 `tool` 消息**（OpenAI 协议要求），被拒绝、未执行、校验失败的调用用固定文案的合成结果回填，不引用模型原文。
+- **每个已保存的 `callId` 都必须有对应的 `tool` 消息**（OpenAI 协议要求）；被未执行（超出上限、批内只提议一个写入）或被中止的合法调用用固定文案的合成结果回填，不引用模型原文。含非法调用（未知名字、`arguments` 无效）的回复则整条丢弃、不入库（见 S3），因此不会出现未配对的 `toolCalls`；`prepare` 阶段才失败的调用（范围、schema）属合法形态，以其失败结果回填。
 - `ToolCallRequest.invocationId` / `idempotencyKey` 由宿主生成（沿用 `personal_agent.dart:286`），**模型给出的 `callId` 只用于消息配对，不进入重放键**（`packages/muyon_module_api/lib/src/tools.dart:14-35`）。
 - 兼容模式一次只有一个工具调用，行为同现状。
 - 原生模式下，最终答案是普通文本；引用用文内标记 `[r1]`，宿主按现有规则校验（`r<n>` 且不超过实际引用数，`:450-457`）。校验未通过：兼容模式照旧失败；原生模式的处理见 §10 Q9。
@@ -352,6 +354,7 @@ K-2 → K-3 → K-4 串行（[路线图](../superpowers/plans/2026-10-07-roadmap
 
 | 范围 | 内容 |
 |---|---|
+| 载荷兼容 | 以下任务载荷键**名称与含义不变**：`requestDigest`、`preview`、`toolCall`、`toolIdentityDigest`、`round`（= 已用步数）、`protocolCorrections`、`stage`（`model` / `tool`）；`north_star_chain.dart` 在 `:430`、`:432`、`:438`、`:456`、`:464`、`:535`、`:537`、`:539` 读取它们。多调用步中，等待确认的写入调用必须就是 `toolCall`；`AlwaysConfirmGate` 下每一步仍回到 `waitingConfirmation`（该链路遇到其他状态即抛错，`:425-429`） |
 | 改写 | `assistant/personal_agent.dart`：以 `_advance` 驱动单步状态机（授权放行时可不经确认连续推进）；`Budget`；并行只读 + 串行写入；合成 `tool` 回填；耗尽小结；`maxRounds` 作为 `Budget.maxSteps` 别名且 getter 保留（`north_star_chain.dart:422` 使用）；`AgentEventSink`（载荷实现） |
 | 新增 | `assistant/agent_budget.dart`、`assistant/agent_event_sink.dart` |
 | 新增 / 改写测试 | 步数 / 时长 / token 各自耗尽的小结；等待确认不计活动时长；协议违规上限；多调用回填完整性（每个 `callId` 一条 `tool`）；多个写入只提议第一个；并行读取消；批内 `interrupted` 终止后续；宿主关闭中的流；`maxRounds: 1` 别名行为 |
@@ -389,6 +392,7 @@ K-2 / K-3 / K-4 全程**不得修改**以下测试（其断言是兼容模式与
 | R4 | 生产使用真实 `parameterSchema` 后的选择质量未知（评测器用的是空 schema） | E-1 在 140 题之上加多步任务并比较“空 schema / 真实 schema”；K-2 合入以不低于现有 JSON 协议为门槛（门槛数值：待与 E-1 对齐） |
 | R5 | 账本迁移与旧数据 | 只加可空列，不改 CHECK；新增迁移测试；旧行列为 NULL |
 | R6 | 并行读取使取消与审计复杂化 | 并行只限只读；各调用独立回执；取消按“只读结果丢弃”统一处理 |
+| R10 | K-4 之前 `resume` 只是新建尝试，不保证写入不被重复执行，只靠用户重新确认与工具自身幂等 | 不在本期解决；K-4“从检查点继续”按回执去重（§8.3）；UI 在恢复时提示先核实 |
 | R7 | 预算默认放大（4 → 12 步）在 AUTH-1 之前会让一个失控循环产生更多次确认 | 每步仍需用户确认，上限由用户注意力约束；AUTH-1 之前可把默认步数保持 4，仅在授权上线后提到 12（§10 Q5 一并确认） |
 | R8 | 与 K-4 衔接不当导致两处真相 | `AgentEventSink` 同事务写入；K-3 不新增载荷字段之外的状态 |
 | R9 | `reasoning_content` 等私有字段的回传要求因供应商而异 | 默认丢弃；需要回传的端点作为适配器特例（待核实） |
@@ -404,13 +408,13 @@ K-2 / K-3 / K-4 全程**不得修改**以下测试（其断言是兼容模式与
 | Q3 | 是否要“测试连接”按钮探测端点能力？（本期默认不做；探测是一次入账的出站请求） | 本期不做，能力靠用户 / 预设声明 |
 | Q4 | 流被取消或中断后，部分输出是否保存？ | 只在当前界面保留，任务事件只存长度与摘要；不存正文、不入会话 |
 | Q5 | token 预算数值；以及授权上线前默认步数保持 4 还是直接 12？ | `maxTokens` 200 000；授权上线前步数保持 4，之后 12 |
-| Q6 | 账本是否要新增 `partial` 状态（需重建表）？ | 不新增，用 `failed` + `bytes_received > 0` 表示 |
-| Q7 | 预算耗尽的终态：`failed` + 小结（保持现有测试），还是新增“部分完成”状态？ | `failed` + 小结，不新增状态；后续看 UI 反馈再议 |
-| Q8 | 一步内多个写入 / 外传调用是否允许批量审批？ | 本期不允许，逐个提议；批量审批与 ADR-0002 §3.4 的“每次执行一次性审批”要一起设计，归 AUTH-1 之后 |
+| Q8 | 一步内多个写入 / 外传调用，是否可以放在同一张确认卡上、用户一次点击、由宿主为每个调用分别签发一次性审批？（ADR-0002 §3.4 已定：一份审批不得覆盖多次执行，此点不再讨论） | 本期不允许，逐个提议；放开须与 AUTH-1 的确认卡一并设计 |
 | Q9 | 原生模式下答案里的引用标记无效时：整任务失败（同现状），还是保留文本、去掉无效引用并提示？ | 保留文本、去掉无效引用并提示“引用未通过校验”；兼容模式照旧失败 |
 
 ### 10.2 留给后续任务核实（不需要用户拍板）
 
+- 实现选择（建议如下，可在 K-2 / K-3 评审时调整）：账本是否新增 `partial` 状态（需重建表）——建议不新增，用 `failed` + `bytes_received > 0`；预算耗尽的终态——建议 `failed` + 小结（保持现有测试），不新增“部分完成”状态；
+- 首字时延的定义与 [E-1](../tasks/E-1.md) 对齐：从用户确认起算、从 `ledger.begin` 起算，还是从实际发送起算（本文 `first_byte_ms` 暂按 `ledger.begin` 到首个 `TextDelta`，待对齐）；
 - 各端点是否接受 `stream_options.include_usage`、`parallel_tool_calls`、`max_completion_tokens`；DeepSeek 对 `reasoning_content` 的要求（K-2 实测）；
 - 账本迁移的具体机制（`workspace_repository.dart:61` 附近）（K-2）；
 - 模型请求是否也经 ADR-0002 §4 的外传内容审查器（AUTH-1）；
