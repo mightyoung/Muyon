@@ -1,5 +1,4 @@
 // Renders the actual generated transparent sources on white for inspection.
-@Tags(['screenshot'])
 library;
 
 import 'dart:io';

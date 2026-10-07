@@ -1,6 +1,5 @@
 // Local review renders. These use explicitly named review fonts, not aliases
 // pretending to be production PingFang / Segoe / Microsoft YaHei.
-@Tags(['screenshot'])
 library;
 
 import 'dart:io';

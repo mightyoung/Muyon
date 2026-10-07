@@ -1,7 +1,6 @@
 // Local visual check: renders key screens with a real CJK font into
 // test/screens/*.png. Skipped where the macOS system font is unavailable.
 //   flutter test test/screenshot_test.dart --update-goldens
-@Tags(['screenshot'])
 library;
 
 import 'dart:io';
