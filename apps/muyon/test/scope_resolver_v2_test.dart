@@ -127,9 +127,17 @@ void main() {
       root.deleteSync(recursive: true);
       root.createSync();
       await open(lie: true);
+      // Unpinned, so only the identity check can catch the substitution.
       await expectLater(
         host.scopeResolver.resolve(
-          AssistantScope.selectedObjects([ref('item', 'a')]),
+          AssistantScope.selectedObjects([
+            const ObjectRef(
+              moduleId: 'things',
+              objectType: 'item',
+              objectId: 'a',
+              nativeProjectId: 'p1',
+            ),
+          ]),
         ),
         throwsStateError,
       );
