@@ -45,6 +45,9 @@
 | JR-1 小清理（ci 跑 test_doctor、按字符截断、无用 tag、注释） | `task/jr-1-cleanups` | [JR-1.md](JR-1.md) | junior | — | **已派发** |
 | AUTH-1a 授权库、解析器、外传内容审查接口（不接线） | `task/auth-1a-grants` | [AUTH-1a.md](AUTH-1a.md) | Codex | — | **已派发** |
 | GROK-1 ADR-0004 静态核实与科研导出/导入清单初稿 | `task/grok-1-adr0004-static` | [GROK-1.md](GROK-1.md) | grokbot | — | 已合入（[审查](GROK-1-review.md)）；Q10 清单已确认 |
+| GROK-2 能力覆盖清单初稿（科研、原型、询价） | `task/grok-2-coverage-drafts` | [GROK-2.md](GROK-2.md) | grokbot | GROK-1 | **已派发**（grokbot 第 1 件） |
+| GROK-3 询价敏感字段划分初稿（Q7，交用户确认） | `task/grok-3-sensitivity-draft` | [GROK-3.md](GROK-3.md) | grokbot | — | **已派发**（第 2 件） |
+| GROK-4 UI-1b 盘点：硬编码颜色与询价通用部件 | `task/grok-4-ui-inventory` | [GROK-4.md](GROK-4.md) | grokbot | — | **已派发**（第 3 件） |
 | UI-0 现状截图与走查 | 并入 `task/r-1-evidence` | [UI-0.md](UI-0.md) | engineer | — | 精简版并入 R-1（第 3 件） |
 | UI-1 设计系统 | 拆为 UI-1a、UI-1b | [UI-1.md](UI-1.md) | — | — | UI-1a 已派发；UI-1b（迁入询价部件、去硬编码颜色）在 FOLIO-BYPASS、REG-4 之后 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
