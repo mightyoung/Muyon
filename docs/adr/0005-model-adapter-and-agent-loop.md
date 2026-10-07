@@ -158,9 +158,15 @@ final class ModelError extends ModelEvent {
 
 ### 4.3 能力声明与兼容模式
 
-- 能力保存在 `ModelProfile` 的新增可选字段 `capabilities`（`model_gateway.dart:33-83`），持久化键为设置项 `modelProfiles`（`services/models/profile_repository.dart:9-37`，旧数据无该键 = `ModelCapabilities.compat`）。创建 profile 的现有入口（`screens/platform_shell_personal.dart:148`、`app/research_tools_page.dart:350`、`app/inquiry_plugin.dart:296`）默认不声明；K-2 只在 `platform_shell_personal.dart` 的模型表单加最小开关“使用原生工具调用”，完整设置页归 UI-7。
+- 能力保存在 `ModelProfile` 的新增可选字段 `capabilities`（`model_gateway.dart:33-83`），持久化键为设置项 `modelProfiles`（`services/models/profile_repository.dart:9-37`，旧数据无该键 = `ModelCapabilities.compat`）。创建 profile 的现有入口（`screens/platform_shell_personal.dart:148`、`app/research_tools_page.dart:350`、`app/inquiry_plugin.dart:296`）默认 `nativeTools: false`、`streaming: true`（见下方三层默认值）；K-2 只在 `platform_shell_personal.dart` 的模型表单加最小开关“使用原生工具调用”，完整设置页归 UI-7。
 - `PersonalAgent.start` 解析一次能力，**冻结进任务载荷**（与冻结候选工具同理，`personal_agent.dart:116`、`:281-283`），任务中途改 profile 不改变本任务的协议。能力快照与模式纳入预览，确认卡上显示“原生工具”或“兼容模式”。
-- **兼容模式** = 今天的路径：JSON 协议、`_protocolReply` 严格解析、至多一次纠正、`response_format` 与 400 / 422 重发（含其“端点 + 模型”内存记忆）。**流式默认开启**（用户 2026-10-07 决定，Q2）：兼容模式也走流式，但只改传输、不改解析——文本累积到 `Done` 后再整体做严格的 `_protocolReply`；实时显示规则见 §5.3。能力默认值：经新建表单 / 预设 / 测试连接得到的 profile 默认 `streaming: true`；**没有 `capabilities` 键的存量 profile 与测试用 profile 仍按“未声明 = 保守值（非流式）”处理**，不被隐式切换，由用户在设置中打开或经“测试连接”采用检测结果（这样 `test/personal_agent*_test.dart` 中覆写 `chat` 的替身不需要改动；见 §10.2）。端点拒绝 `stream: true`（400 / 422）时同样不隐式回退，以固定原因 `stream_rejected` 失败并提示关闭流式或测试连接。
+- **兼容模式** = 今天的路径：JSON 协议、`_protocolReply` 严格解析、至多一次纠正、`response_format` 与 400 / 422 重发（含其“端点 + 模型”内存记忆）。**流式默认开启**（用户 2026-10-07 决定，Q2）：兼容模式也走流式，但只改传输、不改解析——文本累积到 `Done` 后再整体做严格的 `_protocolReply`；实时显示规则见 §5.3。能力默认值分三层：
+  - **(a) 代码里直接构造的 `ModelProfile`**（所有测试）：默认兼容、`streaming: false`；
+  - **(b) 经新建表单、预设或“采用测试连接结果”创建 / 更新的 profile**：默认 `streaming: true`；
+  - **(c) 已保存的存量 profile**：设置项 `modelProfiles` 里没有 `capabilities` 键。K-2 首次启动时由宿主在 `app/bootstrap.dart` 里做一次**幂等的设置迁移**（放在 `host.workspaces` 就绪之后，现有设置读写见 `app/bootstrap.dart:151-154`、`workspace/workspace_repository.dart:191-197`；**不放在 `ProfileRepository.all()` 里**，读取路径保持无副作用）：为每个缺 `capabilities` 的 profile 显式写入 `capabilities: {streaming: true, source: migrated}`，其余能力保持保守值（`nativeTools: false` 等），并写入设置项 `modelProfilesSchema = 2` 作为已迁移标记。迁移后在设置页显示一次性提示“已为已有模型启用流式显示，可在每个模型上关闭”；用户可按 profile 关闭流式。
+  - `ModelProfile.toJson` 始终写出完整 `capabilities`。
+  - **路径选择**：`PersonalAgent` 依据**任务开始时冻结的** `capabilities.streaming` 选路径：为 `true` 走网关新增的流式入口，为 `false` 走**原封不动**的 `gateway.chat`（`stream: false`）。因此覆写 `chat` 的测试替身与 `test/model_gateway_test.dart:97`（断言 `stream == false`）无需改动。
+  端点拒绝 `stream: true`（400 / 422）时同样不隐式回退，以固定原因 `stream_rejected` 失败并提示“关闭该模型的流式，或运行测试连接”。
 - **不隐式回退**：原生模式下端点拒绝 `tools`（400 / 422）、返回空 `choices` 或其他形态错误，任务以固定原因失败（如 `native_tools_rejected`），提示用户把该 profile 改为兼容模式。**不自动改用 JSON 协议重发**——那是内容不同的另一次发送，应重新确认；也**不换到其他模型或端点**（与 `ModelProfile` 端点显式、`embed` 注释“no URL rewriting or provider fallback”一致，`model_gateway.dart:185`）。
 - **能力探测只在用户点“测试连接”时发生**（用户 2026-10-07 决定，Q3），设计见 §4.5：从不自动、不在后台、不在任务中途；结果须经用户确认才生效。
 - 兼容模式下 `parallelToolCalls`、原生 usage 不可用；Done 之后才有完整文本。
@@ -188,6 +194,7 @@ abstract interface class OutboundChannel {
 |---|---|
 | 触发 | 仅用户点击；不在保存 profile 时、不在启动时、不在后台、不在任务中途自动运行 |
 | 出站路径 | 与所有模型请求相同：经 `ModelRequestGate` → `OutboundChannel`（§4.4）→ `ledger.begin`；账本 `caller = capability_probe`；记账、取消、脱敏、超时规则与 §5 一致。**每个探测请求各占一行账本** |
+| 确认卡文案 | 探测确认卡写明“**将向该端点发送凭据与固定探测内容**”，并展示固定载荷与其摘要 |
 | 授权 | 按 ADR-0002：本机 / 本人设备端点按模式自动；**远程端点若从未授权过，每个探测请求都逐次询问**（确认卡展示固定载荷与其摘要）；已授权端点按授权处理。K-2 的 `AlwaysConfirmGate` 对探测同样返回 `confirm`。探测请求的闸门入参无任务、无范围、`dataCategories = {}`；探测是否适用“本次对话允许”这类授权，归 AUTH-1 |
 | 载荷 | **固定、不含任何用户数据**：系统句固定；用户句如“请调用工具 `probe_echo`，参数 `{"value":"ok"}`”；一个**虚拟工具** `probe_echo`（不在 `ToolRegistry` 中注册，响应里的调用只用于判断形态，**永不执行**）；`stream: true`、`stream_options: {include_usage: true}`。载荷是常量，摘要固定，便于审计 |
 | 请求数 | **P1（必做）**：`tools` + `stream` + `usage`，检测原生工具、流式、用量上报。**P2（可选，用户在对话框勾选）**：`response_format: json_object` 与要求同时调用两次 `probe_echo`，检测 JSON 模式与并行调用。至多 2 个请求 |
@@ -256,7 +263,7 @@ abstract interface class OutboundChannel {
 |---|---|---|
 | 步数 `maxSteps` | 默认：AUTH-1 之前 4，之后 12（用户已定，Q5；12 取自[深度研究报告](../reviews/2026-10-05-muyon-deep-review-and-optimization.md) §6.2.3，路线图 §3 只写“取代 4 轮 / 45 秒”） | 一步 = 一次模型请求 + 其工具调用 + 结果回填；纠正轮也计一步。构造参数 `maxRounds` 保留为别名（§8） |
 | 活动时长 `maxActive` | 10 分钟 | **只累计“运行中”时间**（模型流式、工具执行），不含 `waitingConfirmation`；等待确认仍各有 5 分钟有效期（`personal_agent.dart:255-258`） |
-| token `maxTokens` | **200 000**（用户已定，Q5；累计 prompt + completion） | 取供应商 `usage`；未报告的请求按 `bytes ÷ 4` 估算并标记 `estimated`，同时不放宽步数上限 |
+| token `maxTokens` | **200 000**（用户已定，Q5；累计 prompt + completion） | 取供应商 `usage`；未报告的请求按保守估算并标记 `estimated`：ASCII 字符按 `bytes ÷ 4`，每个非 ASCII 字符按 1 token（对中日韩文偏保守；单纯 `bytes ÷ 4` 会把中文低估约一半），同时不放宽步数上限 |
 | 单步工具调用数 | 8 | 超出的调用返回“未执行”（§6.3） |
 | 协议违规 | 1 次 / 任务 | 即今天的 `maxProtocolCorrections`（`:471`），原生与兼容共用 |
 | 单请求 | 绝对上限 min(剩余 `maxActive`, 固定 5 分钟)，超出记 `timeout`（防止慢速滴流的流超出活动时长预算）；连接 15 s、流空闲 60 s（[深度研究报告 §6.2.1](../reviews/2026-10-05-muyon-deep-review-and-optimization.md)）；响应累计 ≤ 2 MiB；请求 ≤ 2 MiB；预览 ≤ 256 KiB | 兼容非流式保留 45 s 总超时作默认，可配置 |
@@ -285,9 +292,10 @@ abstract interface class OutboundChannel {
 - **只读调用并行**（`prepare` 通过后），受单步上限约束。
 - **写入 / 外传调用：一张批量确认卡、一次点击，宿主逐个签发一次性审批**（用户 2026-10-07 决定，Q8）。ADR-0002 §3.4 的底线不变：一份审批只覆盖一次执行；点击一次只是用户对卡上所列各项表态，宿主随后对**每个被选中的调用**依次走 `prepare` → 比对 `identityDigest` → `approve`（审批用后即 `consumed`）→ `invoke`，各有自己的审批与回执。审批在该调用即将执行时才签发（不预签），每次执行前重新 `prepare` 以发现范围变化（`tool_registry.dart:221-247`、`:386-393`）。
   - **卡的内容**：每个调用一节，各列自己的字段——工具、作用对象（对象名与引用）、参数摘要、效应（`write` / `export` / `network`）、目的地（外传必填，`tool_registry.dart:163-169`）、是否可撤销、该调用的 `identityDigest` 短码；卡顶写明“按顺序执行；某项失败则其后各项不再执行”；技术详情折叠，仍可展开看完整 JSON。**一张卡至多 5 个调用**，超出的调用不入卡，回填“未执行”（§6.1 单步上限 8 仍适用）。已被授权放行的调用（AUTH-1）不入卡，由宿主直接签发并在回执记 `grant_id`。
-  - **逐项取消勾选**：每节有勾选框，默认全部勾选；按钮为“确认所选（N）/ 拒绝全部”。未勾选的调用不执行，回填固定文案“用户未批准此调用”；全部取消等同拒绝。`confirm` 增加参数 `selectedInvocationIds`，只接受卡上列出的 ID。
+  - **逐项取消勾选**：每节有勾选框，默认全部勾选；按钮为“确认所选（N）/ 拒绝全部”。**取消勾选某一项不会让宿主自动取消其后各项**；但因为“前一项不执行则后续依赖可能不成立”，界面默认在取消某项时**同时取消其后各项**并提示“其后的操作可能依赖它，已一并取消”，用户可重新勾选。未勾选的调用不执行，回填固定文案“用户未批准此调用”；全部取消等同拒绝。`confirm` 增加参数 `selectedInvocationIds`，只接受卡上列出的 ID。
   - **摘要**：多调用卡的 `requestDigest = digest({calls: [各调用 identityDigest（按卡上顺序）]})`；**单调用时仍等于该调用的 `identityDigest`**（与现状、`north_star_chain.dart:539` 的断言一致）。用户勾选结果不进摘要，但写入事件与回执。
   - **部分失败**：按模型给出的顺序串行执行，**前一项 `failed` / `cancelled` / `interrupted` / `blocked`，其后各项不再执行**，回填“未执行：前一个操作失败”；`interrupted`（效应可能已发生）使任务进入 `interrupted`，沿用现有语义（`personal_agent.dart:582-592`）。选择“失败即停”是保守默认：同一步里的写入常有先后依赖，而模型无法声明独立性；独立写入可在下一步由用户重新要求。
+  - **范围变化**：同一批里前面的写入若改变了后面某个调用的范围解析结果，后者在执行前重新 `prepare` 时会得到不同的 `identityDigest`，以 `stale_scope` 失败（`tool_registry.dart:386-393`）并触发“失败即停”。这是预期的保守行为，不做自动重试 / 重新批准；需有测试覆盖。
   - **与载荷兼容**：`toolCall` 始终是**当前等待确认或执行的那一个**调用（多调用时是第一个被选中的），新增键 `toolCalls`（卡上全部调用）、`toolSelection`；`toolIdentityDigest` 为当前调用的 `identityDigest`。取消、关闭、过期（5 分钟，`:255-258`）对整张卡生效，已执行的调用不回滚，由回执与小结如实记录。
   - **落点**：K-3 实现卡的数据结构、`confirm(selectedInvocationIds)`、逐项执行与失败即停，界面用现有确认区域的列表形态；v4 确认卡的视觉（UI-3）与按授权放行（AUTH-1）之后接入。
 - **每个已保存的 `callId` 都必须有对应的 `tool` 消息**（OpenAI 协议要求）；被未执行（超出上限、用户未勾选、前一项失败）或被中止的合法调用用固定文案的合成结果回填，不引用模型原文。含非法调用（未知名字、`arguments` 无效）的回复则整条丢弃、不入库（见 S3），因此不会出现未配对的 `toolCalls`；`prepare` 阶段才失败的调用（范围、schema）属合法形态，以其失败结果回填。
@@ -339,8 +347,10 @@ abstract interface class AgentEventSink {
 
 **1 触发**
 
+初始数值经用户确认（用户 2026-10-07）：触发比例 0.8；保留最近 2 个用户回合 / 至少 6 条消息；每张确认卡至多 5 个调用；摘要上限 2 000 token。这些是初始值，K-3 用 E-1 的多步任务数据调参。
+
 - 阈值：`compactAt = 0.8 × contextTokens − 输出预留`，`contextTokens` 取自能力声明（§4.1）。硬上限为窗口的 95%（扣输出预留）。
-- 估算与实报：每步在 S0（生成确认卡**之前**）估算本次请求的 token：已有上一次供应商报告的 `prompt_tokens` 时取“该值 + 其后新增内容的 `bytes ÷ 4`”，否则全用估算（偏保守）。收到 `Usage` 后用实报值校正下一步的判断；实报与估算偏差记入事件。
+- 估算与实报：每步在 S0（生成确认卡**之前**）估算本次请求的 token：已有上一次供应商报告的 `prompt_tokens` 时取“该值 + 仅对其后新增内容的估算”，否则全用估算；估算规则：ASCII 按 `bytes ÷ 4`、每个非 ASCII 字符按 1 token（保守）。收到 `Usage` 后用实报值校正下一步的判断；实报与估算偏差记入事件。
 - 未声明 `contextTokens` 的 profile（含存量 / 测试 profile）：**不自动压缩**，行为与现状完全相同（256 KiB 预览上限仍在，`personal_agent.dart:244-247`）；用户仍可手动压缩（§6.6-6）。
 - 压缩发生在 S0，不会发生在“已提议、待确认”的中途，所以不存在待决的审批被压缩的情形。
 
@@ -365,8 +375,9 @@ abstract interface class AgentEventSink {
 
 **4 安全与授权**
 
+- **摘要请求的确认卡使用 `stage = 'compaction'`**：`confirm` 现在只把 `stage == 'model'` 当模型请求（`personal_agent.dart:361`，其余走工具分支），K-3 在此处新增一个分支，把 `stage == 'compaction'` 路由到“摘要请求”路径（先发摘要请求，成功后再回到该步的 `model` 确认）。该阶段**只在 profile 声明了 `contextTokens` 且超过阈值时出现**；North Star 链路与现有测试用的 profile 都没有声明 `contextTokens`，所以不会遇到它——否则 `north_star_chain.dart:438`（非 `model` 阶段一律按 `toolCall` 读取）会出错。
 - **摘要请求就是模型请求**：`ModelRequest.caller = context_compaction`；经 `ModelRequestGate.decide`（§7.1）、`beforeSend`、`ledger.begin`、`OutboundChannel`，账本一行；K-2 / K-3 的 `AlwaysConfirmGate` 下它需要**自己的确认卡**（说明“为节省上下文，需先把较早内容发给模型做摘要”，展示将发送的内容与摘要散列）；AUTH-1 后与同一端点的授权同等处理，记 `grant_id`。摘要请求不带 `tools`（`toolChoice = none`），不可能产生工具调用。
-- **端点**：只能用**与本对话相同的 profile**，或用户**显式配置**的本机 / 本人设备 profile（`compactionProfile`）。**暴露面只能不变或更小**：对话在远程端点时可改用本人设备或本机；对话在本机时**不得**改用远程。**绝不发往新端点**，绝不在失败时换端点；`compactionProfile` 不可用则只做阶段 A。
+- **端点**：只能用**与本对话相同的 profile**，或用户**显式配置**的本机 / 本人设备 profile（`compactionProfile`）。**暴露面只能不变或更小**，顺序为 `local < ownDevice < remote`：对话在远程时可改用 `ownDevice` 或 `local`；对话在 `ownDevice` 时可改用 `local`；**对话在 `local` 时，压缩绝不能改用 `ownDevice` 或 `remote`**。**绝不发往新端点**，绝不在失败时换端点；`compactionProfile` 不可用则只做阶段 A。
 - **内容来源**：摘要输入只来自本任务消息，这些内容在此前的请求中已发给（或已授权发给）该端点；若改用更私密的 profile，则是其子集。系统消息（记忆）不入摘要输入。
 - **提示注入**：摘要输入里的工具结果与历史回复一律包在“引用数据”标记内，摘要指令固定、声明其中任何文字都不是指令；输出只接受固定结构的文本、长度上限（建议 ≤ 2 000 token）；摘要**不得**含授权含义——宿主从不从摘要里解析批准、预算或工具名；摘要里的 `[rN]` 不构成引用来源，引用仍只认任务载荷。
 - 预算：摘要请求**不计步**，但计入 token 预算与活动时长，并入账本；它自身的失败不计协议违规。
@@ -453,9 +464,9 @@ K-2 → K-3 → K-4 串行（[路线图](../superpowers/plans/2026-10-07-roadmap
 |---|---|
 | 新增 | `services/models/model_provider.dart`（接口与事件）、`services/models/openai_compat_provider.dart`（SSE 解析、工具名编码，复用 `llm_selection_eval.dart` 的编码 / 解析并迁到共用位置）、`assistant/model_request_gate.dart`（`AlwaysConfirmGate`） |
 | 改写 | `services/models/model_gateway.dart`：抽出 `_openChannel` 与 `OutboundChannel`；`chat` / `request` / `embed` 保持签名与行为；新增流式入口与连接 / 空闲超时；`platform/outbound_ledger.dart`：新增列与 `finish` 参数；`workspace/workspace_repository.dart` 新迁移；`services/models/profile_repository.dart` 与 `ModelProfile`：可选 `capabilities`；`assistant/personal_agent.dart`：兼容模式走原 `gateway.chat`，原生模式走 `ModelProvider`；消息类型扩展（`tool_calls`、`tool_call_id`）；草稿流；`screens/assistant_page.dart`：流式渲染；`screens/platform_shell_personal.dart`：最小开关；评测器改用共用的工具名编码 |
-| 另含 | **测试连接**（§4.5）：`services/models/capability_probe.dart`（固定探测载荷、结果判定、`detectedCapabilities`）、profile 页的“测试连接”对话框与“采用”按钮（`screens/platform_shell_personal.dart`）；流式在原生与兼容模式默认开启（新建 profile 默认 `streaming: true`）；兼容模式的 `ProtocolStreamView`（§5.3）；压缩接缝（§6.6-8） |
+| 另含 | 存量 profile 的一次性设置迁移（`app/bootstrap.dart`）与迁移提示；常见模型的能力预设表；**测试连接**（§4.5）：`services/models/capability_probe.dart`（固定探测载荷、结果判定、`detectedCapabilities`）、profile 页的“测试连接”对话框与“采用”按钮（`screens/platform_shell_personal.dart`）；流式在原生与兼容模式默认开启（新建 profile 默认 `streaming: true`）；兼容模式的 `ProtocolStreamView`（§5.3）；压缩接缝（§6.6-8） |
 | 不做 | 预算循环、并行执行、事件表、授权 |
-| 新增 / 改写测试 | 新增：`openai_compat_provider_test`（SSE 分片、`arguments` 跨块拼接、`[DONE]`、`usage` 末块、旧式 `function_call`、未知函数名、`length` 截断、DSML 当文本）；流式账本测试（先入账、`begin` 失败不发送、流断开记 `failed` + `bytes_received`、取消记 `cancelled`、空闲超时记 `timeout`、`first_byte_ms`）；原生模式端到端（假端点）：工具提议仍需 `prepare` 与确认、被拒绝 `tools` 时固定原因失败且**不**改发 JSON 协议；脱敏：SSE 错误事件与断流不泄露密钥；能力冻结与默认兼容；探测：固定载荷常量与摘要、不含用户数据、经账本（`caller = capability_probe`）与闸门、虚拟工具永不执行、各判定分支（是 / 否 / 未确认 / 未能判定）、结果不自动生效、用户“采用”后才写入；兼容模式流式：增量显示只含 `answer` 文本且从不出现协议 JSON / `toolId` / DSML、`type` 在后的缓冲、非 `{` 开头只显示进度、`Done` 后严格解析与纠正路径不变、`stream: true` 被拒的固定失败；存量 profile 不被隐式切换；`ledger` 迁移测试；`request_digest` 兼容模式逐字节不变 |
+| 新增 / 改写测试 | 新增：`openai_compat_provider_test`（SSE 分片、`arguments` 跨块拼接、`[DONE]`、`usage` 末块、旧式 `function_call`、未知函数名、`length` 截断、DSML 当文本）；流式账本测试（先入账、`begin` 失败不发送、流断开记 `failed` + `bytes_received`、取消记 `cancelled`、空闲超时记 `timeout`、`first_byte_ms`）；原生模式端到端（假端点）：工具提议仍需 `prepare` 与确认、被拒绝 `tools` 时固定原因失败且**不**改发 JSON 协议；脱敏：SSE 错误事件与断流不泄露密钥；能力冻结与默认兼容；探测：固定载荷常量与摘要、不含用户数据、经账本（`caller = capability_probe`）与闸门、虚拟工具永不执行、各判定分支（是 / 否 / 未确认 / 未能判定）、结果不自动生效、用户“采用”后才写入；兼容模式流式：增量显示只含 `answer` 文本且从不出现协议 JSON / `toolId` / DSML、`type` 在后的缓冲、非 `{` 开头只显示进度、`Done` 后严格解析与纠正路径不变、`stream: true` 被拒的固定失败；存量 profile 迁移：缺 `capabilities` 的 profile 被写入 `{streaming: true, source: migrated}` 且其余能力保守、`modelProfilesSchema = 2`；迁移幂等（再跑不变）；`ProfileRepository.all()` 无副作用；迁移后一次性提示只出现一次；用户关闭某 profile 的流式后重启不被改回；`toJson` 写出完整 `capabilities`；代码构造的 profile 仍是 `streaming: false` 并走 `gateway.chat`；`ledger` 迁移测试；`request_digest` 兼容模式逐字节不变 |
 
 ### 8.2 K-3 预算式循环
 
@@ -464,7 +475,7 @@ K-2 → K-3 → K-4 串行（[路线图](../superpowers/plans/2026-10-07-roadmap
 | 载荷兼容 | 以下任务载荷键**名称与含义不变**（多调用卡只新增 `toolCalls` / `toolSelection`，见 §6.3）：`requestDigest`、`preview`、`toolCall`、`toolIdentityDigest`、`round`（= 已用步数）、`protocolCorrections`、`stage`（`model` / `tool`）；`north_star_chain.dart` 在 `:430`、`:432`、`:438`、`:456`、`:464`、`:535`、`:537`、`:539` 读取它们。多调用步中，等待确认的写入调用必须就是 `toolCall`；`AlwaysConfirmGate` 下每一步仍回到 `waitingConfirmation`（该链路遇到其他状态即抛错，`:425-429`） |
 | 改写 | `assistant/personal_agent.dart`：以 `_advance` 驱动单步状态机（授权放行时可不经确认连续推进）；`Budget`；并行只读 + 批量确认卡内逐个串行写入（§6.3，`confirm(selectedInvocationIds)`、失败即停、`toolCalls` / `toolSelection` 载荷键）；`ContextCompactor`（§6.6）；合成 `tool` 回填；耗尽小结；`maxRounds` 作为 `Budget.maxSteps` 别名且 getter 保留（`north_star_chain.dart:422` 使用）；`AgentEventSink`（载荷实现） |
 | 新增 | `assistant/agent_budget.dart`、`assistant/agent_event_sink.dart` |
-| 新增 / 改写测试 | 步数 / 时长 / token 各自耗尽的小结；等待确认不计活动时长；协议违规上限；多调用回填完整性（每个 `callId` 一条 `tool`）；批量确认卡：每调用各自字段、取消勾选、单调用摘要等于 `identityDigest`、每个选中调用各有一次性审批与回执、前一项失败后续不执行、`interrupted` 终止、卡过期 / 取消对整张卡生效；压缩测试见 §6.6-8；并行读取消；批内 `interrupted` 终止后续；宿主关闭中的流；`maxRounds: 1` 别名行为 |
+| 新增 / 改写测试 | 步数 / 时长 / token 各自耗尽的小结；等待确认不计活动时长；协议违规上限；多调用回填完整性（每个 `callId` 一条 `tool`）；批量确认卡：每调用各自字段、取消勾选、单调用摘要等于 `identityDigest`、每个选中调用各有一次性审批与回执、前一项失败后续不执行、前一项写入使后一项范围变化 → 后一项 `stale_scope` 失败并停止、取消勾选默认连带其后各项并可重新勾选、`interrupted` 终止、卡过期 / 取消对整张卡生效；压缩测试见 §6.6-8；并行读取消；批内 `interrupted` 终止后续；宿主关闭中的流；`maxRounds: 1` 别名行为 |
 
 ### 8.3 K-4 执行记录事件化
 
@@ -514,10 +525,10 @@ K-2 / K-3 / K-4 全程**不得修改**以下测试（其断言是兼容模式与
 | # | 问题 | 决定 | 落入 |
 |---|---|---|---|
 | Q1 | K-2 的适配器范围 | 只做 OpenAI 兼容端点（含 DeepSeek、Ollama / LM Studio）；Anthropic Messages 作为 K-2 之后的独立小任务 | §3 D1 |
-| Q2 | 流式对兼容模式是否默认开启 | **原生与兼容模式都默认开启**（与原建议不同）；兼容模式累积完整 JSON 再解析，实时只显示 `answer` 文本，不显示协议 JSON | §4.3、§5.3、§8.1 |
+| Q2 | 流式对兼容模式是否默认开启 | **原生与兼容默认流式；存量 profile 经一次性迁移同样默认流式**（与原建议不同）；兼容模式累积完整 JSON 再解析，实时只显示 `answer` 文本，不显示协议 JSON；迁移与三层默认值见 §4.3 | §4.3、§5.3、§8.1 |
 | Q3 | 是否做“测试连接”能力探测 | **做**（与原建议不同）：仅用户点击触发；固定、不含用户数据的探测载荷；每个探测请求经 `OutboundChannel` 入账（`caller = capability_probe`），按 ADR-0002 对新端点逐次确认；结果存为“检测结果”，用户确认后才生效；落点 K-2 | §4.5、§8.1 |
 | Q4 | 流被取消或中断后部分输出是否保存 | 只在当前界面保留，任务事件只存长度与摘要；不存正文、不入会话 | §5.3 |
-| Q5 | token 预算与默认步数；上下文压缩 | `maxTokens` 200 000；AUTH-1 之前步数 4，之后 12。**追加：设计自动上下文压缩** | §6.1、§6.6 |
+| Q5 | token 预算与默认步数；上下文压缩 | `maxTokens` 200 000；AUTH-1 之前步数 4，之后 12。**追加：设计自动上下文压缩**（初始数值经用户确认，见 §6.6；自动压缩需 profile 声明 `contextTokens`，K-2 提供预设表与测试连接回填） | §6.1、§6.6 |
 | Q8 | 一步内多个写入 / 外传调用能否放在一张确认卡 | **可以**（与原建议不同）：一张卡、一次点击，宿主仍为每个调用分别签发一次性审批与回执（ADR-0002 §3.4）；逐项可取消勾选；前一项失败则其后不执行；落点 K-3 | §6.3、§8.2 |
 | Q9 | 原生模式引用标记无效时 | 保留文本、去掉无效引用并提示“引用未通过校验”；兼容模式照旧失败 | §6.3 |
 
@@ -525,8 +536,8 @@ K-2 / K-3 / K-4 全程**不得修改**以下测试（其断言是兼容模式与
 
 ### 10.2 留给后续任务核实（不需要用户拍板）
 
-- 存量 profile 的流式启用方式：本文设计为“新建 / 预设 / 探测采用的 profile 默认流式；无 `capabilities` 键的存量与测试 profile 保持非流式，不被隐式切换”，以免改动覆写 `chat` 的测试替身。若希望存量 profile 也自动改为流式，需要同时调整这些测试替身，须单独评审（K-2）；
-- `compactionProfile` 的默认值与界面位置、压缩阶段 A 的 15% 门槛与“最近 2 个用户回合”等数值，K-3 用 E-1 的多步任务调参；
+- 自动压缩需要 profile 声明 `contextTokens`（Q5）：设置页为常见模型提供预设表，“测试连接”在预设表里能查到该模型时回填 `contextTokens` / `maxOutputTokens`（探测本身测不出这两项）；表里没有的由用户手填，否则不自动压缩（K-2 预设表、K-3 使用）；
+- `compactionProfile` 的默认值与界面位置、压缩阶段 A 的 15% 门槛与“最近 2 个用户回合”等数值，摘要上限 2 000 token、触发比例 0.8 等初始值已由用户确认，K-3 用 E-1 数据调参；
 - 实现选择（建议如下，可在 K-2 / K-3 评审时调整）：账本是否新增 `partial` 状态（需重建表）——建议不新增，用 `failed` + `bytes_received > 0`；预算耗尽的终态——建议 `failed` + 小结（保持现有测试），不新增“部分完成”状态；
 - 首字时延的定义与 [E-1](../tasks/E-1.md) 对齐：从用户确认起算、从 `ledger.begin` 起算，还是从实际发送起算（本文 `first_byte_ms` 暂按 `ledger.begin` 到首个 `TextDelta`，待对齐）；
 - 各端点是否接受 `stream_options.include_usage`、`parallel_tool_calls`、`max_completion_tokens`；DeepSeek 对 `reasoning_content` 的要求（K-2 实测）；
