@@ -63,13 +63,14 @@ DetectedCapabilities _found({
 );
 
 void main() {
+  _wiringTests();
   late List<bool> runs;
   late List<DetectedCapabilities> stored;
   late List<ModelCapabilities> adopted;
 
   /// Runs the dialog's probe like the real one does: ask for the person's
   /// confirmation first, send (here: nothing) only after "yes".
-  ProbeRunner runner(DetectedCapabilities result) =>
+  ProbeRunner runner(DetectedCapabilities result, {bool rejected = false}) =>
       (profile, {required extended, required confirm}) async {
         runs.add(extended);
         final yes = await confirm(
@@ -85,7 +86,7 @@ void main() {
           ),
         );
         return yes
-            ? ProbeOutcome(detected: result)
+            ? ProbeOutcome(detected: result, rejected: rejected)
             : const ProbeOutcome(stoppedBy: 'declined');
       };
 
@@ -227,6 +228,27 @@ void main() {
         expect(adopted.single.reportsUsage, isFalse);
       },
     );
+
+    testWidgets('a 400/422 is reported as such, asking for a manual check', (
+      tester,
+    ) async {
+      await open(
+        tester,
+        runner(
+          _found(
+            nativeTools: ProbeVerdict.undetermined,
+            usage: ProbeVerdict.undetermined,
+          ),
+          rejected: true,
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('probe-start')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('probe-confirm')));
+      await tester.pumpAndSettle();
+      expect(find.text('端点以 400/422 拒绝（可能是工具、流式或其他参数），请手动确认'), findsOneWidget);
+      expect(find.text('否'), findsNothing);
+    });
 
     testWidgets('a failed run says so without quoting anything', (
       tester,
@@ -386,5 +408,117 @@ void main() {
     final after = ProfileRepository(w).all().single;
     expect(after.capabilities.streaming, isFalse);
     expect(after.capabilities.source, CapabilitySource.userDeclared);
+  });
+}
+
+/// The wiring the settings page uses (`testProfileConnection`) against a real
+/// profile store: a probe stores only `detectedCapabilities`; `capabilities`
+/// change only when the person clicks 采用.
+void _wiringTests() {
+  testWidgets('detection never writes capabilities; 采用 does', (tester) async {
+    final w = WorkspaceRepository(_MemoryDb());
+    final profiles = ProfileRepository(w);
+    await profiles.save(_profile);
+    var changes = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: muyonTheme(Brightness.light),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => testProfileConnection(
+                context,
+                profile: _profile,
+                profiles: profiles,
+                run: (p, {required extended, required confirm}) async {
+                  await confirm(
+                    ProbeConfirmation(
+                      index: 1,
+                      total: 1,
+                      extended: false,
+                      profile: p,
+                      payload: const {},
+                      digest: probeContentDigest(),
+                    ),
+                  );
+                  return ProbeOutcome(detected: _found());
+                },
+                onChanged: () => changes++,
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('probe-start')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('probe-confirm')));
+    await tester.pumpAndSettle();
+
+    var saved = profiles.all().single;
+    expect(changes, 1);
+    expect(saved.detectedCapabilities!.nativeTools, ProbeVerdict.yes);
+    expect(
+      saved.capabilities.toJson(),
+      _profile.capabilities.toJson(),
+      reason: 'a probe changes no setting',
+    );
+
+    await tester.tap(find.byKey(const ValueKey('probe-adopt')));
+    await tester.pumpAndSettle();
+    saved = profiles.all().single;
+    expect(changes, 2);
+    expect(saved.capabilities.nativeTools, isTrue);
+    expect(saved.capabilities.contextTokens, 32768);
+    expect(saved.capabilities.source, CapabilitySource.detected);
+    expect(saved.detectedCapabilities, isNotNull);
+  });
+
+  testWidgets('declining the card stores nothing at all', (tester) async {
+    final w = WorkspaceRepository(_MemoryDb());
+    final profiles = ProfileRepository(w);
+    await profiles.save(_profile);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: muyonTheme(Brightness.light),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => testProfileConnection(
+                context,
+                profile: _profile,
+                profiles: profiles,
+                run: (p, {required extended, required confirm}) async {
+                  await confirm(
+                    ProbeConfirmation(
+                      index: 1,
+                      total: 1,
+                      extended: false,
+                      profile: p,
+                      payload: const {},
+                      digest: probeContentDigest(),
+                    ),
+                  );
+                  return const ProbeOutcome(stoppedBy: 'declined');
+                },
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('probe-start')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('probe-decline')));
+    await tester.pumpAndSettle();
+    final saved = profiles.all().single;
+    expect(saved.detectedCapabilities, isNull);
+    expect(saved.capabilities.toJson(), _profile.capabilities.toJson());
   });
 }

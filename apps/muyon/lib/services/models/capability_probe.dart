@@ -121,7 +121,12 @@ final class ProbeConfirmation {
 }
 
 final class ProbeOutcome {
-  const ProbeOutcome({this.detected, this.stoppedBy});
+  const ProbeOutcome({this.detected, this.stoppedBy, this.rejected = false});
+
+  /// A probe request was answered 400 or 422. The endpoint refused something
+  /// in it (tools, streaming or another parameter) without saying which, so
+  /// the affected items stay undetermined and the person is asked to check.
+  final bool rejected;
 
   /// null when no request was sent.
   final DetectedCapabilities? detected;
@@ -172,10 +177,11 @@ class CapabilityProbe {
     var streaming = ProbeVerdict.undetermined;
     var usage = ProbeVerdict.undetermined;
     final one = first.observed!;
+    // A 400/422 names no parameter: it could be the tools, `stream`,
+    // `stream_options` or something else, so nothing is concluded from it.
+    var rejected = one.rejected;
     if (one.rejected) {
-      // A 400/422 to the tools request is the endpoint saying no to tools;
-      // it cannot tell whether `stream` was also a problem.
-      nativeTools = ProbeVerdict.no;
+      // Verdicts stay undetermined.
     } else if (one.done) {
       streaming = ProbeVerdict.yes;
       nativeTools = one.calls >= 1
@@ -204,7 +210,7 @@ class CapabilityProbe {
           final two = second.observed!;
           jsonObject = parallel = ProbeVerdict.undetermined;
           if (two.rejected) {
-            jsonObject = ProbeVerdict.no;
+            rejected = true;
           } else if (two.done) {
             jsonObject = ProbeVerdict.yes;
             parallel = two.calls >= 2
@@ -217,6 +223,7 @@ class CapabilityProbe {
     final preset = presetFor(profile.modelId);
     final ids = _ledgerIds(profile).difference(before);
     return ProbeOutcome(
+      rejected: rejected,
       detected: DetectedCapabilities(
         nativeTools: nativeTools,
         streaming: streaming,

@@ -100,57 +100,91 @@ class AgentDrafts {
 
 /// Feeds the draft of one response. Compatibility mode goes through
 /// [ProtocolStreamView]; native mode shows the text deltas as they come.
+///
+/// Chunks are only appended (linear work). The text is built and published at
+/// most once per [interval], and once more at [flush]; what the screen gets is
+/// capped at [maxShown] characters (the tail, behind a "…"), while [length]
+/// and [shown] describe everything the person was offered.
 class DraftFeed {
-  DraftFeed(this.drafts, this.taskId, {required this.native}) {
+  DraftFeed(
+    this.drafts,
+    this.taskId, {
+    required this.native,
+    this.interval = const Duration(milliseconds: 80),
+  }) {
     drafts.begin(taskId);
   }
   final AgentDrafts drafts;
   final String taskId;
   final bool native;
+  final Duration interval;
+  static const maxShown = 20000;
   final _view = ProtocolStreamView();
   final _native = StringBuffer();
+  final _clock = Stopwatch()..start();
+  Duration? _lastPublish;
+  Timer? _timer;
+  var _dirty = false;
   var _tool = false;
   var _shownLength = 0;
-
-  /// Length (UTF-16 units) of what the person was shown, for the task event.
-  int get length => _shownLength;
   String _shown = '';
+
+  /// Length (UTF-16 units) of what the person was shown, for the task event;
+  /// final after [flush].
+  int get length => _shownLength;
   String get shown => _shown;
 
   void text(String chunk) {
     if (native) {
       _native.write(chunk);
-      _shown = _native.toString();
-      _push();
-      return;
+    } else {
+      _view.feed(chunk);
+      if (_view.phase == ProtocolPhase.preparingTool) _tool = true;
     }
-    _view.feed(chunk);
-    switch (_view.phase) {
-      case ProtocolPhase.answering:
-        _shown = _view.text;
-        _push();
-      case ProtocolPhase.preparingTool:
-        _tool = true;
-        _shown = '';
-        _push();
-      case ProtocolPhase.thinking || ProtocolPhase.plain:
-        break;
-    }
+    _changed();
   }
 
   /// A native tool-call fragment arrived: only the fact is shown.
   void toolCall() {
     if (_tool) return;
     _tool = true;
-    _push();
+    _changed();
   }
 
-  void _push() {
+  void _changed() {
+    _dirty = true;
+    final last = _lastPublish;
+    if (last == null || _clock.elapsed - last >= interval) {
+      _publish();
+    } else {
+      _timer ??= Timer(interval - (_clock.elapsed - last), _publish);
+    }
+  }
+
+  void _publish() {
+    _timer?.cancel();
+    _timer = null;
+    if (!_dirty) return;
+    _dirty = false;
+    _lastPublish = _clock.elapsed;
+    _shown = native ? _native.toString() : _view.text;
     _shownLength = _shown.length;
+    var visible = _shown;
+    if (visible.length > maxShown) {
+      var tail = visible.substring(visible.length - maxShown);
+      // Do not start on the second half of a surrogate pair.
+      final first = tail.codeUnitAt(0);
+      if (first >= 0xDC00 && first <= 0xDFFF) tail = tail.substring(1);
+      visible = '…$tail';
+    }
     drafts.show(
       taskId,
       _tool ? DraftStage.preparingTool : DraftStage.generating,
-      _shown,
+      visible,
     );
   }
+
+  /// Publishes what is pending and stops the timer. Called when the response
+  /// ends, however it ends, so no late publish follows a commit or interrupt.
+  void flush() => _publish();
 }

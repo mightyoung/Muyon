@@ -7,6 +7,7 @@ import 'package:muyon_ui/muyon_ui.dart';
 import '../services/models/capability_probe.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/model_provider.dart';
+import '../services/models/profile_repository.dart';
 
 /// Runs a probe for the dialog; the shell supplies one bound to the host's
 /// gateway, gate and ledger.
@@ -212,6 +213,7 @@ class _ConnectionTestDialogState extends State<ConnectionTestDialog> {
   DetectedCapabilities? _detected;
   String? _stoppedBy;
   bool _adopted = false;
+  bool _rejected = false;
 
   @override
   void dispose() {
@@ -257,6 +259,7 @@ class _ConnectionTestDialogState extends State<ConnectionTestDialog> {
       setState(() {
         _detected = detected;
         _stoppedBy = outcome.stoppedBy;
+        _rejected = outcome.rejected;
         _phase = detected == null ? _Phase.stopped : _Phase.result;
       });
     } catch (_) {
@@ -448,6 +451,13 @@ class _ConnectionTestDialogState extends State<ConnectionTestDialog> {
               ),
           ],
         ),
+        if (_rejected) ...[
+          const SizedBox(height: MuyonTokens.space3),
+          const Text(
+            '端点以 400/422 拒绝（可能是工具、流式或其他参数），请手动确认',
+            key: ValueKey('probe-rejected-note'),
+          ),
+        ],
         const SizedBox(height: MuyonTokens.space3),
         Text(
           _adopted
@@ -460,4 +470,31 @@ class _ConnectionTestDialogState extends State<ConnectionTestDialog> {
       ],
     );
   }
+}
+
+/// "测试连接" for one saved profile: opens the dialog, stores the result next
+/// to the profile's capabilities (never in them), and writes the capabilities
+/// only when the person adopts it. Each write re-reads the profile, so a
+/// switch flipped meanwhile is kept.
+Future<void> testProfileConnection(
+  BuildContext context, {
+  required ModelProfile profile,
+  required ProfileRepository profiles,
+  required ProbeRunner run,
+  VoidCallback? onChanged,
+}) {
+  Future<void> store(ModelProfile Function(ModelProfile current) change) async {
+    final current = profiles.all().firstWhere((p) => p.id == profile.id);
+    await profiles.save(change(current));
+    onChanged?.call();
+  }
+
+  return showConnectionTestDialog(
+    context,
+    profile: profile,
+    run: run,
+    onDetected: (detected) =>
+        store((p) => p.copyWith(detectedCapabilities: detected)),
+    onAdopt: (adopted) => store((p) => p.copyWith(capabilities: adopted)),
+  );
 }

@@ -186,22 +186,13 @@ extension _PersonalSections on _PlatformShellState {
       gateway: host.services.gateway,
       gate: host.personalAgent.gate,
     );
-    Future<void> store(
-      ModelProfile Function(ModelProfile current) change,
-    ) async {
-      final current = profiles.all().firstWhere((p) => p.id == profile.id);
-      await profiles.save(change(current));
-      repo.refresh();
-    }
-
-    await showConnectionTestDialog(
+    await testProfileConnection(
       context,
       profile: profile,
+      profiles: profiles,
       run: (p, {required extended, required confirm}) =>
           probe.run(p, extended: extended, confirm: confirm),
-      onDetected: (detected) =>
-          store((p) => p.copyWith(detectedCapabilities: detected)),
-      onAdopt: (adopted) => store((p) => p.copyWith(capabilities: adopted)),
+      onChanged: repo.refresh,
     );
   }
 

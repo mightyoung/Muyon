@@ -51,6 +51,80 @@ String _everything(LoopFixture f, PersonalTask task) => jsonEncode({
 });
 
 void main() {
+  group('long replies', () {
+    // 2 MB in 200-character chunks, as a fast endpoint would deliver them.
+    final body = '成本' * 100; // 200 chars
+    const chunks = 10000;
+
+    test('compat: the work is linear and publishing is throttled', () async {
+      final drafts = AgentDrafts();
+      final seen = <AgentDraft>[];
+      drafts.stream.listen(seen.add);
+      final feed = DraftFeed(drafts, 't', native: false);
+      final clock = Stopwatch()..start();
+      feed.text('{"type":"answer","answer":"');
+      for (var i = 0; i < chunks; i++) {
+        feed.text(body);
+      }
+      feed.text('"}');
+      feed.flush();
+      clock.stop();
+      // ignore: avoid_print
+      print(
+        'compat 2 MB: ${clock.elapsedMilliseconds} ms, '
+        '${seen.length} publishes',
+      );
+      expect(clock.elapsed, lessThan(const Duration(seconds: 3)));
+      await _settle();
+      expect(feed.length, body.length * chunks);
+      expect(seen.length, lessThan(100), reason: 'throttled');
+      expect(seen.last.text.length, DraftFeed.maxShown + 1);
+      expect(seen.last.text, startsWith('…'));
+    });
+
+    test('native: the same', () async {
+      final drafts = AgentDrafts();
+      final seen = <AgentDraft>[];
+      drafts.stream.listen(seen.add);
+      final feed = DraftFeed(drafts, 't', native: true);
+      final clock = Stopwatch()..start();
+      for (var i = 0; i < chunks; i++) {
+        feed.text(body);
+      }
+      feed.flush();
+      clock.stop();
+      // ignore: avoid_print
+      print(
+        'native 2 MB: ${clock.elapsedMilliseconds} ms, '
+        '${seen.length} publishes',
+      );
+      expect(clock.elapsed, lessThan(const Duration(seconds: 3)));
+      await _settle();
+      expect(feed.length, body.length * chunks);
+      expect(seen.length, lessThan(100));
+    });
+
+    test('a pending publish arrives by itself, and flush ends it', () async {
+      final drafts = AgentDrafts();
+      final seen = <AgentDraft>[];
+      drafts.stream.listen(seen.add);
+      final feed = DraftFeed(drafts, 't', native: true);
+      feed.text('a');
+      feed.text('b'); // inside the interval: held back
+      await _settle();
+      expect(seen.map((d) => d.text), ['', 'a']);
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      expect(seen.last.text, 'ab');
+      feed.text('c');
+      feed.flush();
+      await _settle();
+      expect(seen.last.text, 'abc');
+      final count = seen.length;
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(seen.length, count, reason: 'no publish after flush');
+    });
+  });
+
   test(
     'compat: the draft is the answer text only, never protocol JSON',
     () async {

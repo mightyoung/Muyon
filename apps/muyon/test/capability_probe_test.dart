@@ -255,7 +255,9 @@ void main() {
 
   group('the verdicts', () {
     test('yes: tool call, stream and usage', () async {
-      final d = (await probe().run(profile(), confirm: yes)).detected!;
+      final outcome = await probe().run(profile(), confirm: yes);
+      final d = outcome.detected!;
+      expect(outcome.rejected, isFalse);
       expect(d.nativeTools, ProbeVerdict.yes);
       expect(d.streaming, ProbeVerdict.yes);
       expect(d.reportsUsage, ProbeVerdict.yes);
@@ -270,11 +272,13 @@ void main() {
       expect(d.nativeTools, ProbeVerdict.yes);
     });
 
-    test('400 / 422: tools are "no", streaming cannot be told', () async {
+    test('400 / 422 name no parameter: nothing is concluded', () async {
       for (final code in [400, 422]) {
         respond = (r, n) => status(r, code);
-        final d = (await probe().run(profile(), confirm: yes)).detected!;
-        expect(d.nativeTools, ProbeVerdict.no, reason: '$code');
+        final outcome = await probe().run(profile(), confirm: yes);
+        final d = outcome.detected!;
+        expect(outcome.rejected, isTrue, reason: '$code');
+        expect(d.nativeTools, ProbeVerdict.undetermined, reason: '$code');
         expect(d.streaming, ProbeVerdict.undetermined);
         expect(d.reportsUsage, ProbeVerdict.undetermined);
       }
@@ -368,15 +372,17 @@ void main() {
       expect(d.parallelToolCalls, ProbeVerdict.unconfirmed);
     });
 
-    test('a 400 on the second request: JSON mode is "no"', () async {
+    test('a 400 on the second request: JSON mode cannot be told', () async {
       respond = (r, n) => n == 0 ? sse(r, _calls(1)) : status(r, 400);
-      final d = (await probe().run(
+      final outcome = await probe().run(
         profile(),
         extended: true,
         confirm: yes,
-      )).detected!;
+      );
+      final d = outcome.detected!;
+      expect(outcome.rejected, isTrue);
       expect(d.nativeTools, ProbeVerdict.yes);
-      expect(d.jsonObject, ProbeVerdict.no);
+      expect(d.jsonObject, ProbeVerdict.undetermined);
       expect(d.parallelToolCalls, ProbeVerdict.undetermined);
     });
 

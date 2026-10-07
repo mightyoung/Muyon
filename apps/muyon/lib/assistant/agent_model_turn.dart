@@ -331,43 +331,47 @@ class AgentModelTurn {
     final feed = showDraft
         ? DraftFeed(ctx.drafts, task.id, native: request.tools.isNotEmpty)
         : null;
-    var announced = false;
-    await for (final event in ctx.gateway.chatStream(
-      provider: ctx.provider,
-      request: request,
-      cancellation: token,
-      beforeSend: () => _beforeSend(task),
-      // The smaller of what is left of the active budget and 5 minutes.
-      maxDuration: ctx.budget.requestLimit(
-        BudgetUsage.fromPayload(task.payload),
-      ),
-    )) {
-      if (!announced) {
-        // The first event means the ledger row exists and the request went.
-        announced = true;
-        await ctx.event(task, AgentEventType.modelRequest, {
-          'caller': request.caller,
-          'requestDigest': request.requestDigest,
-          'mode': request.tools.isNotEmpty ? 'native' : 'compat',
-          'streamed': request.profile.capabilities.streaming,
-        });
+    try {
+      var announced = false;
+      await for (final event in ctx.gateway.chatStream(
+        provider: ctx.provider,
+        request: request,
+        cancellation: token,
+        beforeSend: () => _beforeSend(task),
+        // The smaller of what is left of the active budget and 5 minutes.
+        maxDuration: ctx.budget.requestLimit(
+          BudgetUsage.fromPayload(task.payload),
+        ),
+      )) {
+        if (!announced) {
+          // The first event means the ledger row exists and the request went.
+          announced = true;
+          await ctx.event(task, AgentEventType.modelRequest, {
+            'caller': request.caller,
+            'requestDigest': request.requestDigest,
+            'mode': request.tools.isNotEmpty ? 'native' : 'compat',
+            'streamed': request.profile.capabilities.streaming,
+          });
+        }
+        switch (event) {
+          case TextDelta():
+            reply.text.write(event.text);
+            feed?.text(event.text);
+          case ToolCallComplete():
+            reply.calls.add(event);
+          case ToolCallDelta():
+            // Display only: "preparing a tool call"; never acted on.
+            feed?.toolCall();
+          case Usage():
+            reply.usage = event;
+          case Done():
+            reply.done = event;
+          case ModelError():
+            reply.error = event;
+        }
       }
-      switch (event) {
-        case TextDelta():
-          reply.text.write(event.text);
-          feed?.text(event.text);
-        case ToolCallComplete():
-          reply.calls.add(event);
-        case ToolCallDelta():
-          // Display only: "preparing a tool call"; never acted on.
-          feed?.toolCall();
-        case Usage():
-          reply.usage = event;
-        case Done():
-          reply.done = event;
-        case ModelError():
-          reply.error = event;
-      }
+    } finally {
+      feed?.flush();
     }
     if (feed != null) {
       reply.draft = (
