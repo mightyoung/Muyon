@@ -28,7 +28,7 @@
 | P0-3e 协议容错的测试补齐 | `task/p0-3e-protocol-tests` | [P0-3e.md](P0-3e.md) | senior | P0-3d 之后 | 待转交 |
 | P0-F2 修复研究对象页测试的两个 10 分钟超时（门禁变绿） | `task/p0-f2-object-open-timeout` | [P0-F2.md](P0-F2.md) | junior | E11b 合入之后 | 已合入（[审查](P0-F2-review.md)；门禁恢复为绿） |
 | E11b 研究对象页收尾（小） | `task/e11b-object-page-tests` | [E11b.md](E11b.md) | junior | P0-1 修复之后、P0-J3 之前 | 已合入（[审查](E11b-review.md)） |
-| P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | — | 第一～三批已合入（[审查](P0-4-review.md)；第 3 批为 macOS 设备，早于 P0-3d，D1 失败）；**P0-3d 已合入，可在 Android 与 macOS 正式重跑链路** |
+| P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | — | 第一～三批已合入（[审查](P0-4-review.md)）；**P0-3d 之后 macOS 设备链路通过（R+M）**；Android 重跑待手机连接 |
 | UI-0 现状截图与走查 | （未建） | [UI-0.md](UI-0.md) | engineer | 第一阶段之后 | **第一阶段之后**（用户 2026-10-06 决定） |
 | UI-1 设计系统 | （未建） | [UI-1.md](UI-1.md) | senior | UI-0 | **第一阶段之后** |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
