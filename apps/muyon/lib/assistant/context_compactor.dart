@@ -174,9 +174,17 @@ class ContextCompactor {
         candidate.id == conversation.id &&
         candidate.endpoint == conversation.endpoint &&
         candidate.endpointIdentity == conversation.endpointIdentity &&
-        candidate.location == conversation.location;
-    return same || candidate.location.index < conversation.location.index;
+        candidate.location == conversation.location &&
+        candidate.modelId == conversation.modelId &&
+        candidate.credentialRef == conversation.credentialRef &&
+        candidate.cloudProxy == conversation.cloudProxy;
+    return same || _exposure(candidate) < _exposure(conversation);
   }
+
+  /// A profile that goes through a cloud proxy is remote exposure whatever
+  /// its location says.
+  static int _exposure(ModelProfile p) =>
+      p.cloudProxy ? ModelLocation.remote.index : p.location.index;
 
   // ---------------------------------------------------------------- shape
 

@@ -447,6 +447,56 @@ void main() {
       expect(f.receipts().map((r) => r['state']), ['succeeded', 'interrupted']);
     });
 
+    test(
+      'a call that cannot be prepared any more stops the ones after it',
+      () async {
+        final f = await _open();
+        f.replies.add(LoopReply.sse(_calls(['w1', 'w2', 'w3'])));
+        final agent = f.agent();
+        final task = await f.run(agent, await f.start(agent, f.profile()));
+        f.tools.setAvailability('w2', available: false);
+        await agent.confirm(
+          task.id,
+          requestDigest: task.payload['requestDigest'] as String,
+        );
+        expect(f.order, ['w1']);
+        expect(f.callsOf('w3'), 0);
+        expect(f.approvals(), hasLength(1));
+        expect(f.repo.task(task.id)!.state, PersonalTaskState.failed);
+      },
+    );
+
+    test('a call whose approval fails stops the ones after it', () async {
+      final f = await _open();
+      f.replies.add(LoopReply.sse(_calls(['w1', 'w2', 'w3'])));
+      final agent = f.agent();
+      final task = await f.run(agent, await f.start(agent, f.profile()));
+      // The scope moves between w2's own check and its approval (which
+      // checks again): w2's prepare is resolve n0+5, its approval's n0+6.
+      final n0 = f.resolves;
+      f.onResolve = (n) {
+        if (n == n0 + 6) {
+          f.objects = [
+            f.ref,
+            const ObjectRef(
+              moduleId: 'test',
+              objectType: 'budget',
+              objectId: 'moved',
+            ),
+          ];
+        }
+      };
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+      final after = f.repo.task(task.id)!;
+      expect(after.error, contains('stale_scope'));
+      expect(f.order, ['w1']);
+      expect(f.callsOf('w3'), 0);
+      expect(f.approvals(), hasLength(1), reason: 'w2 was never approved');
+    });
+
     test('a write that changes the scope of the next one makes it fail with '
         'stale_scope and stops the batch', () async {
       final f = await _open(writes: 0);

@@ -101,6 +101,11 @@ class LoopFixture {
   /// What the tools' scope resolves to; a handler may change it to simulate
   /// data that moves under a batch.
   late List<ObjectRef> objects;
+
+  /// How often a scope was resolved, and a hook called at each one (a test
+  /// may move [objects] at an exact point).
+  var resolves = 0;
+  void Function(int n)? onResolve;
   final calls = <String, int>{};
   final order = <String>[];
   late final ObjectRef ref;
@@ -118,8 +123,11 @@ class LoopFixture {
     );
     final tools = ToolRegistry(
       database: db,
-      resolveScope: (scope) async =>
-          ResolvedAssistantScope(requested: scope, objects: f.objects),
+      resolveScope: (scope) async {
+        f.resolves++;
+        f.onResolve?.call(f.resolves);
+        return ResolvedAssistantScope(requested: scope, objects: f.objects);
+      },
     );
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     f = LoopFixture._(root, storage, repo, tools, OutboundLedger(db), server);

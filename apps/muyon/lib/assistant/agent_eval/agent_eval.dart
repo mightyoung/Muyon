@@ -519,6 +519,11 @@ List<String> checkWriteState(
 
 // ---------------------------------------------------------------- gateway
 
+/// A model request or a summary request: the person confirms it as a request
+/// to the model, there is no tool call on it.
+bool confirmsAsModelRequest(String stage) =>
+    stage == 'model' || stage == 'compaction';
+
 class GatewayCall {
   const GatewayCall({
     required this.ms,
@@ -783,7 +788,8 @@ Future<AgentTaskResult> runAgentTask({
       }
       final digest = current.payload['requestDigest'] as String;
       try {
-        if (current.stage == 'model') {
+        if (confirmsAsModelRequest(current.stage)) {
+          // A summary request is a model request the person confirms.
           await agent.confirm(current.id, requestDigest: digest);
           modelConfirmations++;
         } else {

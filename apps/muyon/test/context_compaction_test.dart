@@ -649,6 +649,47 @@ void main() {
         isFalse,
       );
       expect(c.exposureAllowed(conversation: own, candidate: remote), isFalse);
+      // Same id and endpoint is not enough: model and credential count.
+      ModelProfile variant({String? model, String? cred}) => ModelProfile(
+        id: own.id,
+        endpoint: own.endpoint,
+        location: own.location,
+        modelId: model ?? own.modelId,
+        endpointIdentity: own.endpointIdentity,
+        credentialRef: cred ?? own.credentialRef,
+      );
+      expect(
+        c.exposureAllowed(conversation: own, candidate: variant()),
+        isTrue,
+      );
+      expect(
+        c.exposureAllowed(
+          conversation: own,
+          candidate: variant(model: 'x'),
+        ),
+        isFalse,
+      );
+      expect(
+        c.exposureAllowed(
+          conversation: own,
+          candidate: variant(cred: 'x'),
+        ),
+        isFalse,
+      );
+      // A cloud proxy is remote exposure, whatever the location says.
+      final proxied = ModelProfile(
+        id: 'lp',
+        endpoint: local.endpoint,
+        location: ModelLocation.local,
+        modelId: 'm',
+        endpointIdentity: 'x',
+        cloudProxy: true,
+      );
+      expect(c.exposureAllowed(conversation: own, candidate: proxied), isFalse);
+      expect(
+        c.exposureAllowed(conversation: remote, candidate: proxied),
+        isFalse,
+      );
       // Equal level but a different endpoint is a new endpoint.
       expect(
         c.exposureAllowed(
@@ -797,6 +838,59 @@ void main() {
         expect(task.stage, 'model');
       },
     );
+
+    test('a failed summary request is still charged to the budget', () async {
+      final f = await LoopFixture.open();
+      final id = await _seed(f, messages: 8, tokens: 300);
+      final agent = f.agent();
+      final task = await f.start(
+        agent,
+        f.profile(capabilities: _caps(window: 1000)),
+        conversationId: id,
+      );
+      f.replies.add(const LoopReply.status(500));
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+      final after = f.repo.task(task.id)!;
+      expect(after.payload['tokensUsed'], greaterThan(0));
+      expect(after.payload['tokensEstimated'], true);
+    });
+
+    test('a summary that echoes the key is stored with it masked', () async {
+      final f = await LoopFixture.open();
+      final id = await _seed(f);
+      f.replies.add(
+        LoopReply.sse(
+          sseText(
+            jsonEncode({
+              'goal': 'key is $loopKey',
+              'decisions': 'd',
+              'pending': 'p',
+              'preferences': 'x',
+            }),
+          ),
+        ),
+      );
+      final agent = f.agent();
+      final task = await f.start(
+        agent,
+        f.profile(
+          location: ModelLocation.ownDevice,
+          id: 'own',
+          capabilities: _caps(window: 6000),
+        ),
+        conversationId: id,
+      );
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+      final after = f.repo.task(task.id)!;
+      expect(jsonEncode(after.payload), isNot(contains(loopKey)));
+      expect(jsonEncode(after.payload), contains('<redacted>'));
+    });
 
     test('two compactions in a row that leave it above the threshold stop '
         'the task; one that changed nothing does not count', () {
