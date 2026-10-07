@@ -29,14 +29,10 @@ ThemeData muyonTheme(Brightness brightness, {TargetPlatform? platform}) {
   final tokens = MuyonTokens.forBrightness(brightness);
   final dark = brightness == Brightness.dark;
   final target = platform ?? defaultTargetPlatform;
-  final mobile =
-      target == TargetPlatform.android || target == TargetPlatform.iOS;
   final scheme = ColorScheme(
     brightness: brightness,
     primary: tokens.accent,
-    // Light blue in the dark theme carries dark text (white would fail
-    // contrast); selected chips turn blue-tinted instead of light grey.
-    onPrimary: dark ? const Color(0xFF0B1221) : Colors.white,
+    onPrimary: tokens.onAccent,
     secondaryContainer: tokens.accentTint,
     onSecondaryContainer: tokens.accentDeep,
     primaryContainer: tokens.accentTint,
@@ -97,7 +93,8 @@ ThemeData muyonTheme(Brightness brightness, {TargetPlatform? platform}) {
       ...fontFallback,
     ],
     textTheme: text,
-    visualDensity: mobile ? VisualDensity.standard : VisualDensity.compact,
+    visualDensity: VisualDensity.standard,
+    materialTapTargetSize: MaterialTapTargetSize.padded,
     splashFactory: NoSplash.splashFactory,
     extensions: [tokens],
   );
@@ -152,12 +149,20 @@ ThemeData muyonTheme(Brightness brightness, {TargetPlatform? platform}) {
     dividerTheme: DividerThemeData(color: tokens.rule, space: 1, thickness: 1),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
+        minimumSize: const Size(
+          MuyonTokens.minimumTarget,
+          MuyonTokens.minimumTarget,
+        ),
         shape: shape,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
+        minimumSize: const Size(
+          MuyonTokens.minimumTarget,
+          MuyonTokens.minimumTarget,
+        ),
         shape: shape,
         side: side,
         foregroundColor: tokens.ink,
@@ -166,7 +171,13 @@ ThemeData muyonTheme(Brightness brightness, {TargetPlatform? platform}) {
       ),
     ),
     textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(shape: shape),
+      style: TextButton.styleFrom(
+        shape: shape,
+        minimumSize: const Size(
+          MuyonTokens.minimumTarget,
+          MuyonTokens.minimumTarget,
+        ),
+      ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       isDense: true,
