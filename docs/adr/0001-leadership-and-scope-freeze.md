@@ -83,3 +83,4 @@
 - 2026-10-07：用户决定**退出标准第 1 项接受 macOS 设备 R+M 证据**，不再等 Android（Android 重跑改为第二阶段取证项 R-1）。第二至第四阶段的划分按[路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)，第二阶段范围见 [ADR-0003](0003-phase2-scope.md)。
 - 2026-10-07：senior 未开始 P0-S2 修复；用户指示由**云端 Sonnet 代理**修复 F1、F2、F4（本条是对“云端不运行开发任务”的一次性例外，由用户明确要求）。F3 仍待用户决定。
 - 2026-10-07：**第一阶段退出**。§5 五条标准均已达成，记录见[验收账本](../implementation/muyon-acceptance-ledger.md)末尾「第一阶段退出记录」；P0-S2 作为安全修复继续收尾。第二阶段按 [ADR-0003](0003-phase2-scope.md) 开始。用户同日指示：开发任务由 leader 派生 Sonnet 5.5 子代理执行，leader 只做派发、审查与合入。
+- 2026-10-07：用户同意 [AI 原生与注册机制评估](../reviews/2026-10-07-ai-native-and-registration.md)：采用注册机制 v2（REG-1～5）并与 S-1、T-3 前移到第二阶段；支持三层插件（声明式插件 REG-6 在第三阶段）；能力覆盖作为 CI 硬门槛。ADR-0003 与路线图已修订。
