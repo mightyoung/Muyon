@@ -78,7 +78,7 @@
 ## 6. 已记录、排在后面的事项
 
 见[路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md) §4（第三阶段）、§5（第四阶段）、§7（第一阶段搁置项的去向）。另有：
-- **设计决定**：设计会话的决定已汇总进 [UI 方案](../design/ui-redesign-brief-2026-10-06.md) §8 第 15～18 条：图标、询价以 Folio 为准（[对照清单](../design/folio-parity-checklist.md)）、数据中心统一、血缘与实例浏览器。两条看似待决的问题已核对出已有决定（原型显示「不适用」；警告色用独立的 `warn`）。下一轮设计返工见[第六轮提示词](../design/v4/prompts/claude-design-prompt-round6.md)。
+- **设计决定**：设计会话的决定已汇总进 [UI 方案](../design/ui-redesign-brief-2026-10-06.md) §8 第 15～18 条：图标、询价以 Folio 为准（[对照清单](../design/folio-parity-checklist.md)）、数据中心统一、血缘与实例浏览器。两条看似待决的问题已核对出已有决定（原型显示「不适用」；警告色用独立的 `warn`）。设计稿到 v6 为止，不再返工；遗留问题见 [前端开发备忘录](../design/v6/frontend-memo.md)。
 - `ci.sh` 不跑 `test_doctor.sh`（P0-J3 可选项）。
 
 ## 7. 需要用户处理或决定的事
