@@ -314,7 +314,7 @@ abstract interface class PublishChecks {
 | 项 | 契约机制 |
 |---|---|
 | **读工具支持选中范围** | `ToolSpec.scopes` 对读工具缺省三种范围齐全；注册时宿主要求读工具若不含 `selectedObjects` 须在覆盖清单写明理由。**数据边界**：`ToolRegistry` 只能校验**结果引用** ⊆ 范围（`tool_registry.dart:414-424`），校验不到 `data` 里的自由 JSON，所以由合规套件的**范围泄漏检查**兜底（§8.1 C-SCOPE：夹具里放一个选中、一个未选中的对象，在选中范围调用读工具，结果的序列化 JSON 里不得出现未选中对象的 id）。询价 13 个读工具逐个归类：通过的开放选中范围，不通过的保持仅全局并写明理由（REG-4） |
-| **按回执推进修订号** | 每个任务在载荷里记 `scopeAdvances`（**只新增键**，不改 ADR-0005 §8.2 的既有键）。一次写入工具成功（`succeeded`，且该次一次性审批已消耗并有回执）后，宿主取结果的 `changes`（缺省由 `objectRefs` 视作 upsert），**逐个再经 `resolve` 复核**，仅当 `resolve(ref)` 仍等于 handler 返回的引用（修订号、摘要都对）才推进：① 身份在当前钉住集合内 → 换成新的规范引用；② 不在集合内 → 仅当类型 ∈ 该工具声明的 `createsTypes`、且引用的项目 ⊆ 选中对象的项目（同 `validateInquiryWriteResult` 的规则）才**并入**，并标注来源回执；③ **副作用对象**（`award` 回写预算行、`mergeInto` 改指向的引用方等）：handler 须把它们列入 `changes`，类型须 ∈ `affectsTypes`；宿主同样 `resolve` 复核后推进（在集合内）或并入（同②的项目规则）；④ **删除**：仅当 `op = delete`、类型 ∈ `deletesTypes`、且 `resolve(ref) == null` 才移出；否则仍保持钉住，下一次 `prepare` 报 `stale_scope`。**未声明的保守失败**：结果里出现类型不在 `targetTypes` / `createsTypes` / `deletesTypes` / `affectsTypes` 之内的对象，或副作用对象未被列出，宿主不推进，范围保持旧钉住，下一次 `prepare` 以 `stale_scope` 失败，需用户重新确认；这使“漏声明”变成可见的失败而不是静默放行。推进写 `scope_advance` 事件（K-4 的 `task_events` 增一个类型，ADR-0005 §6.5 同样允许补充） |
+| **按回执推进修订号** | 每个任务在载荷里记 `scopeAdvances`（**只新增键**，不改 ADR-0005 §8.2 的既有键）。一次写入工具成功（`succeeded`，且该次一次性审批已消耗并有回执）后，宿主取结果的 `changes`（缺省由 `objectRefs` 视作 upsert），**逐个再经 `resolve` 复核**，仅当 `resolve(ref)` 仍等于 handler 返回的引用（修订号、摘要都对）才推进：① 身份在当前钉住集合内 → 换成新的规范引用；② 不在集合内 → 仅当类型 ∈ 该工具声明的 `createsTypes`、且引用的项目 ⊆ 选中对象的项目（同 `validateInquiryWriteResult` 的规则）才**并入**，并标注来源回执；③ **副作用对象**（`award` 回写预算行、`mergeInto` 改指向的引用方等）：handler 须把它们列入 `changes`，类型须 ∈ `affectsTypes`；宿主同样 `resolve` 复核后推进（在集合内）或并入（同②的项目规则）；**并入范围的副作用对象须在确认卡上可见**（随 UI-3 / UI-4 落地）；④ **删除**：仅当 `op = delete`、类型 ∈ `deletesTypes`、且 `resolve(ref) == null` 才移出；否则仍保持钉住，下一次 `prepare` 报 `stale_scope`。**未声明的保守失败**：结果里出现类型不在 `targetTypes` / `createsTypes` / `deletesTypes` / `affectsTypes` 之内的对象，或副作用对象未被列出，宿主不推进，范围保持旧钉住，下一次 `prepare` 以 `stale_scope` 失败，需用户重新确认；这使“漏声明”变成可见的失败而不是静默放行。推进写 `scope_advance` 事件（K-4 的 `task_events` 增一个类型，ADR-0005 §6.5 同样允许补充） |
 | **绝不推进的情形** | 失败 / 取消 / `blocked`；`interrupted`（效应可能已发生）——此时标记范围“不确定”，下一次 `prepare` 以 `stale_scope` 失败，需用户重新确认；只读工具的结果；模型文本；handler 声称的引用在 `resolve` 里对不上（说明写完后对象又被别处改了——保留 `stale_scope` 保护，不替别人的改动背书） |
 | **先读后写同一任务** | 任务从选中范围开始：读工具在选中范围内可用（上两项），写入经审批后范围随回执推进，下一步的读与写看到新版本。**一步内**多个写入沿用 ADR-0005 §6.3：批内前项使后项范围变化 → 后项 `stale_scope` 失败并“失败即停”，不自动重试；推进作用于**之后的步骤**，二者不冲突 |
 | **仍不支持** | 从全局 / 工作区范围起步的任务直接写入（需要把目标并入范围）。让确认卡把调用的目标列为“加入范围并批准”是授权语义变化，留给 UI-3 / UI-4（§12.1 Q5） |
@@ -367,7 +367,7 @@ class ModuleHost {
 ### 6.3 单一登记处与边界
 
 - **登记处**：新增 `apps/muyon/lib/app/module_catalog.dart`，唯一允许列出模块构造器的地方（`bootstrap.dart:142` 的名单迁入）。新增模块 = 该文件加一行 + `apps/muyon/pubspec.yaml` 加一行依赖 + 根 `pubspec.yaml` 的 `workspace:` 加一行 + CI 脚本的包清单（REG-5 让 `scripts/ci.sh` 按目录发现包，见 §8.4）。“宿主零改动”按此精确定义（§12.1 Q1）。
-- **边界**：`apps/muyon/lib/{platform,services,screens,assistant}` 不得 import `research_module`、`inquiry_module`、`prototype_module`；`app/` 下仅 `module_catalog.dart` 与 `app/adapters/**`（宿主侧适配，如询价，§10.4）可以。以 `test/import_boundary_test.dart` + **只减不增的基线清单**实现。**实测基线：`platform/`、`services/`、`screens/`、`assistant/` 内 8 个文件 import 三个模块包**（`platform/prototype_tools.dart`、`screens/platform_shell.dart`、`screens/devices_page.dart`、`services/documents/document_parser.dart`、`services/knowledge/{index_invalidation,knowledge_service,research_search_adapter}.dart`、`services/search/search_service.dart`），REG-3 / REG-4 逐个清零；**其余 6 个在 `app/`**（`bootstrap`、`app_shell`、`accepted_research_imports`、`research_task_bridge`、`research_tools_page`、`inquiry_plugin`，合计 14）：`bootstrap` 的名单迁入 `module_catalog.dart`，`inquiry_plugin` 迁入 `app/adapters/`，其余四个（科研交换与壳层页面）随 REG-3 的 `ExchangeCapable` / `ModuleSection` 搬进科研包或改为按声明驱动，REG-5 时 `app/` 里只许 `module_catalog.dart` 与 `app/adapters/**` import 模块包。`supplier_core` 另列一份基线（`business_tools`、`inquiry_write_tools`、`agent_eval`、`transfer_chat_backend`、`transfer_service` 在用，§2.2）。
+- **边界**：`apps/muyon/lib/{platform,services,screens,assistant}` 不得 import `research_module`、`inquiry_module`、`prototype_module`；`app/` 下仅 `module_catalog.dart` 与 `app/adapters/**`（宿主侧适配，如询价，§10.4）可以。以 `test/import_boundary_test.dart` + **只减不增的基线清单**实现。**实测基线：`platform/`、`services/`、`screens/`、`assistant/` 内 8 个文件 import 三个模块包**（`platform/prototype_tools.dart`、`screens/platform_shell.dart`、`screens/devices_page.dart`、`services/documents/document_parser.dart`、`services/knowledge/{index_invalidation,knowledge_service,research_search_adapter}.dart`、`services/search/search_service.dart`），REG-3 / REG-4 逐个清零；**其余 6 个在 `app/`**（`bootstrap`、`app_shell`、`accepted_research_imports`、`research_task_bridge`、`research_tools_page`、`inquiry_plugin`，合计 14）：`bootstrap` 的名单迁入 `module_catalog.dart`，`inquiry_plugin` 迁入 `app/adapters/`，其余四个（科研交换与壳层页面）随 REG-3 的 `ExchangeCapable` / `ModuleSection` 搬进科研包或改为按声明驱动，REG-5 时 `app/` 里只许 `module_catalog.dart` 与 `app/adapters/**` import 模块包。`supplier_core` 另列一份基线（`app/inquiry_hub_authority.dart`、`app/inquiry_web_authority.dart`、`business_tools`、`inquiry_write_tools`、`agent_eval`、`transfer_chat_backend`、`transfer_service` 在用，§2.2）。
 
 ### 6.4 导航、首页、对象页、检索按声明驱动
 
@@ -441,7 +441,7 @@ OpenAPI 的转换规则：`operationId` → 工具名；请求体 / 参数 → `
 | 经 ADR-0002 授权后外传 | 提供本机界面、`registerTools` 之外的运行时追加工具（`tools/list` 变化 → 新工具默认停用，须用户重新确认；清单摘要变化同理） |
 | 被用户随时停用 | 修改自己的授权；使用 `HostChannel`；提供检索源 / 导入 / 变更日志；让数据中心同步其**实例**数据（只可同步结构与描述） |
 
-附加加严（只收紧，不涉及放宽任何底线）：**外部内容污染**——L2 工具的结果、联网读取的网页等外部内容进入任务后，任务标记为被污染（`ToolCallResult` 加可选字段 `provenance = external`，宿主按来源强制设置，不信 handler 自报）；**污染后，该任务里的写入 / 外传一律逐次确认，“始终允许”类授权不再适用**。这是对 ADR-0002 §5 Q1 / Q2 已确认放行范围的收紧（不触及 §3 底线），须经用户确认（§12.1 Q11）。这与 Folio 现有做法同源（`AssistantAppTools.requireApproval`：网页内容进入任务后，`bypass` 退回逐次确认，`assistant_actions.dart:81-84`）。具体接入 `ModelRequestGate` / `GateDecision` 与 AUTH-1 的授权解析，由 AUTH-1 落实（待核实其接口）。
+附加加严（只收紧，不涉及放宽任何底线）：**外部内容污染**——**外部内容**指三类：L2 工具的结果、联网读取的网页、**导入或抓取的第三方文本**（供应商文件、报价导入、采购来源）。它们进入任务后，任务标记为被污染（`ToolCallResult` 加可选字段 `provenance = external`）。**谁来设置**：宿主在结果来自 L2 工具或任何 `network` 效应工具时强制设置，不信 handler 自报；携带导入第三方文本的结果（读工具也可能带）由模块按工具声明（`ToolSpec.resultProvenance`），宿主据声明设置，且只能声明为更严；**污染后，该任务里的写入 / 外传一律逐次确认，“始终允许”类授权不再适用**。这是对 ADR-0002 §5 Q1 / Q2 已确认放行范围的收紧（不触及 §3 底线），须经用户确认（§12.1 Q11）。**这比 Folio 现状更严**：Folio 只在使用网页后才退回逐次确认（`AssistantAppTools.requireApproval`，`assistant_actions.dart:81-84`；`ask_page.dart:286` 的 `externalContent` 只在网页工具被用时置位），导入文本不触发——而导入文本同样可作提示注入的载体（Q12）。具体接入 `ModelRequestGate` / `GateDecision` 与 AUTH-1 的授权解析，由 AUTH-1 落实（待核实其接口）。
 
 ### 7.4 L3 内容插件
 
@@ -540,7 +540,7 @@ const coverage = CapabilityCoverage(
 | 5 授权可撤销、立即生效 | 模块 / 工具 `setAvailability(false)` 使 `generation++`，在途的 `PreparedToolCall` 作废（`tool_registry.dart:126-139`、`:226-228`） |
 | 6 四类开关只能收紧 | 类别由 `ToolAccessLevel`（由方法决定的效应）映射，模块无法自报“读” |
 
-**敏感属性与内容审查接口**（ADR-0002 §4 的 `OutboundContentReviewer`：输入为工具 / 端点 / 发送内容 / 范围 / 来源对象引用）：v2 提供两层数据——① 对象级：来源对象引用 → 类型 → `ObjectTypeSpec.fields` 里 `sensitivity` 非 `none` 的字段集合（“可能包含”）；② 字段级：外传工具的 `ToolSpec.resultSensitivity`（结果字段路径 → 类别）与 L2 清单的 `dataCategories`。不把 `x-sensitivity` 之类扩展写进 JSON Schema，因为 `_Schema.check` 只认固定关键字（`tool_registry.dart:489-504`）。类别词表同时是 ADR-0005 §7.1 `ModelRequestFacts.dataCategories` 的取值来源（该字段今天是常量，`personal_agent.dart:242`；由宿主按消息成分与结果引用计算）。审查器只能收紧的规则不变。审查器本身不属于本 ADR。
+**敏感属性与内容审查接口**（ADR-0002 §4 的 `OutboundContentReviewer`：输入为工具 / 端点 / 发送内容 / 范围 / 来源对象引用）：v2 提供两层数据——① 对象级：来源对象引用 → 类型 → `ObjectTypeSpec.fields` 里 `sensitivity` 非 `none` 的字段集合（“可能包含”）；② 字段级：外传工具的 `ToolSpec.resultSensitivity`（结果字段路径 → 类别）与 L2 清单的 `dataCategories`。不把 `x-sensitivity` 之类扩展写进 JSON Schema，因为 `_Schema.check` 只认固定关键字（`tool_registry.dart:489-504`）。类别词表同时是 ADR-0005 §7.1 `ModelRequestFacts.dataCategories` 的取值来源（该字段今天是常量，`personal_agent.dart:242`；由宿主按消息成分与结果引用计算）。审查器只能收紧的规则不变；`dataCategories` 只能使审查更严，不得用来跳过询问。审查器本身不属于本 ADR。
 
 ### 9.2 ADR-0005
 
@@ -575,6 +575,7 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 | **REG-2** 通用激活、能力清单授予、范围单点 | REG-1 | `module_api` 新类型（§4）；`app/module_host.dart`、`app/module_catalog.dart`；`ModuleRegistry` 接受 {1,2}；`HostToolRegistrar`；`platform/scope_resolver.dart`（差分测试后替换旧函数体）；`module_grants` 迁移；**外传账本**：新建 `outbound_tool_requests`，把现有四条外传通道全部接入——MCP（`mcp_adapter.dart:318` 的 `HttpClient`）、`inquiry_web_authority.dart`、`inquiry_hub_authority.dart`、`public_tools.dart` 的 `transfer.*`（`transfer.export/import/listen/stop/send`）；每条通道各一条测试：“账本写不进去则什么都不发送”（Q4）；首页 / 菜单 / 对象页按声明驱动（对 v1 模块经 `LegacyModuleBridge`） | 不迁移任何业务模块；不改界面外观 |
 | **REG-3** 科研、原型迁 v2，补科研工具 | REG-2 | 见 §10.2 | 询价 |
 | **REG-4** 询价改造成 `BusinessModuleV2`，补写工具，并入自带 AI | REG-2；4c 需 K-3 | 见 §10.4 | 导航换壳（UI-9） |
+| **FOLIO-BYPASS**（Q12 获批后；与 REG-2 同批） | — | 宿主模式下把 Folio 存储的 `assistant_permission = bypass` 按 `confirmWrites` 读取：改 `packages/inquiry_module/lib/src/app/app_state.dart:451-457` 的 `assistantPermission` getter（`_isHosted`，`:47,:77`）；`ask_page.dart:220` 的 `autoApprove` 因此恒为假。新增测试 `packages/inquiry_module/test/assistant_permission_hosted_test.dart`：宿主模式下存储 `bypass` 后写入仍先询问；非宿主模式行为不变（`assistant_permissions_test` 不改） | 不隐藏助手（那是 4c） |
 | **T-3** 平台自省工具 | REG-2 | 宿主自有，用同一 registrar（`moduleId: 'platform'`）：执行记录、记忆、通知、设备只读；记忆写入只提议——写入 `MemoryReviewService` 的候选（`bootstrap.dart:149`），仍须用户在收件箱确认。覆盖清单门槛不适用，C-TOOL 适用；`ObjectRef` 命名空间与是否进入范围解析由 T-3 定 | 不进 `BusinessModuleV2` |
 | **S-1** 范围模型 | K-3、REG-2；REG-4 提供询价读工具的归类 | `assistant/scope_advance.dart`；`personal_agent.dart` 在 K-3 的 `_advance` 内调用；任务载荷 `scopeAdvances`；读工具 `scopes` 放开；C-SCOPE | 全局起步直接写入（Q5） |
 | **REG-5** 示例模块、脚手架、合规入 CI | REG-3、REG-4（至少 REG-3） | `packages/example_module`、`tool/new_module.dart`、`scripts/verify_zero_host_change.sh`、`ci.sh` 按目录发现包、`import_boundary_test`、`module_conformance_test`、REVIEW.md 模块条目 | — |
@@ -650,7 +651,7 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 | I1 | 三个库，`ModuleResources.database` 只有一个；`exclusiveAsync` 不在 `ManagedDatabase` | `auxiliarySchemas` + `ExclusiveDatabase`（§4.2）；`storage.open` 对同一 id 复用连接（`storage_manager.dart:162`），`bootstrap.dart:252` 的二次打开语义不变 |
 | I2 | 进入注册表后新增失败模式（版本、依赖校验） | 询价无依赖、`apiVersion: 2`；故意失败的路径用 `inquiry_plugin_test` 同款覆盖 |
 | I3 | 全局范围摘要必须与旧实现一致 | 差分测试：同一夹具库上新旧 `ScopeResolver` 输出相等；询价摘要沿用 `sha256(row.data)`、修订号 `row.version` |
-| I4 | 双重授权：Folio 自带写入确认 + `bypass` | 4c 在宿主模式禁用 `bypass`，并隐藏对话助手；其余用户直接操作的页面（定标、导入复核）仍是用户本人动作 |
+| I4 | 双重授权：Folio 自带写入确认 + `bypass` | 4c 在宿主模式禁用 `bypass`，并隐藏对话助手；`bypass` 的临时按 `confirmWrites` 读取**提前到 REG-2 同批（若 Q12 获批，任务 `FOLIO-BYPASS`，§10.1）**；其余用户直接操作的页面（定标、导入复核）仍是用户本人动作 |
 | I5 | 复核对话框来自模块界面（§2.3-7） | 第二阶段不动；助手发起路径不经通道；Q3 建议 UI-9 收归宿主 |
 | I6 | `ontology` 的“动作只读”表述与新写工具矛盾 | 4b 同步改文案与 `describe` 输出，补测试 |
 | I7 | 变更日志触发器不写 `content_digest`（`inquiry_plugin.dart:88-91`） | 摘要靠 `resolve` 现算，不依赖日志；是否补列留给 REG-4（待核实对既有迁移摘要 `definitionDigest` 的影响——改迁移会改库摘要，须新增迁移而非改旧迁移） |
@@ -687,7 +688,7 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 | Q8 | 覆盖清单的 `deferred(taskId)` 理由与只减不增的棘轮是否接受？ | **接受**。没有它，网页取证、导出类等大批操作要么被迫仓促开放、要么被迫写不诚实的“不开放”理由 |
 | Q9 | v1 契约（`routes`、v1 路径）的移除时点：REG-5 之后一个阶段（第三阶段末）。`supportedApiVersions = {1,2}` 期间不接受新的 v1 模块 | **接受** |
 | Q10 | 原型 `add_feedback` 是否开放为写工具（本机、低风险）；科研 16 类写操作里导出 / 导入类（涉及文件与设备）逐项开放还是先 `notExposed` | 原型：**开放**；科研：本机写入开放，导出 / 导入类由 REG-3 逐项提出清单，经用户在派发前确认 |
-| Q11 | **外部内容污染规则**：外部内容（L2 结果、联网网页、导入的供应商文本）进入任务后，该任务里“始终允许”类授权不再适用，写入 / 外传一律逐次确认。这收紧 ADR-0002 §5 Q1 / Q2 已确认的放行 | **接受**——只收紧，不碰 §3 底线；Folio 现已如此（`requireApproval: () => externalContent`，`ask_page.dart:286`） |
+| Q11 | **外部内容污染规则**：外部内容（L2 结果、联网网页、导入的供应商文本）进入任务后，该任务里“始终允许”类授权不再适用，写入 / 外传一律逐次确认。这收紧 ADR-0002 §5 Q1 / Q2 已确认的放行 | **接受**——只收紧，不碰 §3 底线；注意触发范围含导入的第三方文本，比 Folio 现状（仅网页，`ask_page.dart:286`）更严 |
 | Q12 | **`bypass` 过渡处理**：REG-4c 之前，宿主模式下是否由宿主桥接把 Folio 的 `assistantPermission == bypass` 一律按 `confirmWrites` 读取？（`assistant_actions.dart:13`、`app_state.dart:451-458`、`ask_page.dart:220` 的 `autoApprove: permission == bypass`、`:286`） | **是**，作为立即可做的小任务。风险说明：在此之前，导入的供应商文本经提示注入可以驱动**未确认的写入**；这些写入可由回收站恢复（可恢复，但不是无害） |
 | Q13 | 把 `analyzer` 作为 dev 依赖加入 workspace（版本钉死、离线构建、与 Flutter SDK 的版本绑定）；spike 失败时是否改用降级扫描器？ | 允许 REG-5 做半天 spike；**失败不自动降级**，回报用户决定 |
 
