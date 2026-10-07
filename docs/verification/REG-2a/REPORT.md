@@ -35,7 +35,7 @@ No existing test files changed. No outbound_requests, model gateway, module_api,
 - Final host full flutter test: exit 1, `04:57 +777 ~3 -1: Some tests failed.` (`host-delivery-full.log`). Earlier complete run: `02:01 +776 ~3 -1: Some tests failed.` (`host-full-test.log`). The only failure is the existing task_events_test.dart:99 hardcoded expectation that schema version is 8; actual version is 9 as this task requires. The three skips are existing test settings. This is an unresolved validation gate; no existing test was edited to conceal it. host-full-final.log is an interrupted intermediate repeat and is **not** a completed full-test result (its Flutter shutdown reported EXIT_CODE=0 despite interruption). Final source-code full-test results are in host-delivery-full.log, run with concurrency=2 after all mutations and code changes ended.
 - `dart analyze` (supplier_core): exit 0, `No issues found!` (`supplier-analyze-delivery.log`).
 - LAN regressions lan_security_test/lan_trust_test/share_test: exit 0, `00:28 +26: All tests passed!` (`lan-regression-delivery.log`).
-- git diff --check: exit 0.
+- Source/report diff whitespace check (apps, packages, scripts, REPORT.md): exit 0. The full staged diff whitespace check reported trailing spaces in captured raw Flutter logs. Those bytes are intentionally preserved as original evidence, so the raw-log whitespace findings are not hidden or normalized.
 
 Initial SDK sandbox/cache errors, proxy WebSocket failure, new-test setup/compile failures, all analysis failures and all three mutation rounds are retained in this directory. Test servers use real loopback HTTP/TLS/UDP; fixtures do not prove real external-service or model integration.
 
