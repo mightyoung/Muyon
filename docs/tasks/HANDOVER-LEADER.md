@@ -54,9 +54,9 @@
 | **P0-3d** 助手协议容错（D1） | — | **已合入**（[审查](P0-3d-review.md)）。测试缺口转 **P0-3e**（senior）：「检出 `task/p0-3e-protocol-tests`，阅读 `docs/tasks/P0-3e.md` 并按要求执行，提交并推送到该分支，不要合并 develop。」审查派 `reviewer-sonnet-medium`。 |
 | **P0-S2** MCP 令牌脱敏 | `task/p0-s2-mcp-token-redaction` @ `fccc318`（基于旧的 `review/P0-S1`） | P0-S1 已合入。转发给 senior（排在 P0-3d 之后或并行）：「检出 `task/p0-s2-mcp-token-redaction`，`git merge origin/develop` 解决冲突（`credential_redaction.dart` 以 develop 上 P0-S1 的最终版为准，保留 R1 固定错误文本与 R4 的 8 字符下限），跑 analyze 与宿主全量，推送并回报。」然后派 `reviewer-sonnet-high` 核实。说明见 [P0-S2.md](P0-S2.md)；要点：确认没有削弱 P0-S1；MCP 工具结果回显令牌时是否会进入助手、模型或账本。 |
 | **E11b** | — | **已合入**。 |
-| **P0-F2** 两个 10 分钟超时 | `task/p0-f2-object-open-timeout` | 说明见 [P0-F2.md](P0-F2.md)，根因已查清，一行修复。E11b 已合入，**可转发**给 junior：「检出 `task/p0-f2-object-open-timeout`，先 `git merge origin/develop`，阅读 `docs/tasks/P0-F2.md` 并按要求执行，提交并推送到该分支，不要合并 develop，回报附 Actions 运行链接。」审查派 `reviewer-sonnet-low`，看 Actions 是否变绿。 |
+| **P0-F2** 两个 10 分钟超时 | — | **已合入**（[审查](P0-F2-review.md)），门禁恢复为绿。 |
 | **P0-4** 真机与真实模型取证 | `review/P0-4` | P0-3d 已合入。engineer 在含 P0-3d 的 `develop` 上，Android（必需）与 macOS 各重跑一次链路，加一次 `ci.sh`（本机 inquiry 截图因 macOS 27 渲染漂移会失败，如实记录）。审查按第 5 节，字段核对派 `reviewer-sonnet-low`。 |
-| **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | 排在 P0-F2 合入之后，junior。 |
+| **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | P0-F2 已合入，**可转发** junior（先 `git merge origin/develop`）。审查派 `reviewer-sonnet-low`。 |
 
 ## 4. 第一阶段退出标准（ADR-0001 §5）
 
