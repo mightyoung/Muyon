@@ -15,7 +15,7 @@
 | 工具选择基线 | macOS 主机（无头 flutter_test） | deepseek-chat（远程） | 见 `llm_selection_eval.dart` 顶部命令，`MUYON_EVAL_REAL=1`、`MUYON_WRITE_EVAL_REPORT=1`，取消代理 | top-1 66/140，误选写入/外发 0，弃权 26/26，请求失败 0 | `docs/implementation/tool-selection-llm-baseline-deepseek-chat.md` | M |
 | North Star 链路 第 1 次 | macOS 主机（无头 flutter_test） | deepseek-chat（远程） | `flutter test test/north_star_inquiry_test.dart`，`MUYON_EVAL_REAL=1` | **失败** `passed:false`：比价题成功；预算题任务 `failed` | `docs/evidence/2026-10-p0/north-star-macos-headless-deepseek-chat.json` | 不计为 M 证据（见下） |
 | North Star 链路 第 2 次 | 同上 | 同上 | 同上 | **失败** `passed:false`：比价题成功；预算题任务 `failed` | `docs/evidence/2026-10-p0/north-star-macos-headless-deepseek-chat-run2.json` | 不计为 M 证据（见下） |
-| North Star 链路（macOS 设备集成测试） | macOS 27 桌面应用 | — | `flutter test integration_test/north_star_inquiry_test.dart -d macos --dart-define=…` | **未执行成功**：Xcode 27 已安装，但 `xcodebuild` 在解析 Swift Package 时报 `IDESimulatorFoundation` 插件加载失败（缺 `CoreSimulator.framework`），提示运行 `xcodebuild -runFirstLaunch`。这条命令需要管理员权限，我没有执行，需要用户在本机运行 `sudo xcodebuild -runFirstLaunch` 后重跑 | — | — |
+| North Star 链路（macOS 设备集成测试） | macOS 27 桌面应用（`integration_test`，Xcode 27 + CocoaPods 1.17.0） | deepseek-chat（远程） | `flutter test integration_test/north_star_inquiry_test.dart -d macos --dart-define=…`（先 `flutter pub get` 生成 Podfile） | **失败** `passed:false`：应用能构建并运行；比价题成功；预算题任务 `failed`（同 D1） | `docs/evidence/2026-10-p0/north-star-macos-deepseek-chat.json` | R（设备）+ 真实模型，但未通过，不计为 M 证据 |
 | North Star 链路（Android 真机） | vivo V2324A，Android 16（`integration_test`） | deepseek-chat（远程） | `flutter test integration_test/north_star_inquiry_test.dart -d <设备 id> --dart-define=MUYON_EVAL_REAL=1 --dart-define=…` | **失败** `passed:false`：比价题成功；预算题任务 `failed`（同 D1） | `docs/evidence/2026-10-p0/north-star-android-deepseek-chat.json` | R（设备）+ 真实模型，但未通过，不计为 M 证据 |
 | North Star 链路（Windows） | — | — | — | **未验证**：没有 Windows 设备 | — | — |
 | 手动界面走查 | — | — | — | **未执行**：我不能操作应用界面，交给用户 | — | — |
@@ -95,29 +95,33 @@ exit=0
 | 第 1 次 | `["inquiry.compare_quotes"]` | `succeeded`，2 轮，有 `inquiry.compare_quotes` 的只读回执，回答引用 2 个对象 | `["inquiry.project_budget"]` | **`failed`**，1 轮 |
 | 第 2 次 | `["inquiry.compare_quotes"]` | `succeeded`，2 轮，有 `inquiry.compare_quotes` 的只读回执，回答引用 2 个对象 | `[]`（空） | **`failed`**，0 轮 |
 | Android 真机（第 1 次，`integration_test`，`flutter test`） | `["inquiry.compare_quotes"]`，成功，2 轮，有只读回执 | `[]`（空），**失败**，0 轮 |
+| macOS 设备（第 1 次，`integration_test`，`flutter test`） | `["inquiry.compare_quotes"]`，成功，2 轮，有只读回执 | `[]`（空），**失败**，0 轮 |
 
-按任务说明：比价题必须包含 `inquiry.compare_quotes`（三次都满足），预算题必须包含 `inquiry.project_budget`（只有 macOS 无头第 1 次包含，macOS 无头第 2 次和 Android 都不包含）。三次运行整体都 `passed:false`，所以**都不计为 2.3 的 M 证据**；如实记录，由 leader 人工核对。
+按任务说明：比价题必须包含 `inquiry.compare_quotes`（四次都满足），预算题必须包含 `inquiry.project_budget`（只有 macOS 无头第 1 次包含，其余三次都不包含）。四次运行整体都 `passed:false`，所以**都不计为 2.3 的 M 证据**；如实记录，由 leader 人工核对。
 
 ## 发现的缺陷（只记录，没有修复）
 
-**D1：deepseek-chat 在预算题上三次都没有给出助手协议要求的 JSON，任务因 `FormatException` 失败（macOS 无头两次，Android 真机一次）。**
+**D1：deepseek-chat 在预算题上四次都没有给出助手协议要求的 JSON，任务因 `FormatException` 失败（macOS 无头两次，Android 真机一次，macOS 设备一次）。**
 
 - 平台：macOS 主机无头；模型 `deepseek-chat`，远程；代码 `6d21831`。
 - 第 1 次：模型提议了 `inquiry.project_budget`，工具执行成功后，下一轮的最终回答是**纯文本**（“项目「北极星验收项目」的成本预算：成本合计 2080 元，销售合计 2080 元，毛利 0 元……”），不是协议 JSON。错误原文：`执行失败（FormatException: Unexpected character (at character 1) 项目「北极星验收项目」的成本预算：…）`。
 - 第 2 次：第一轮回复就是 DeepSeek 原生工具调用标记，错误原文：`执行失败（FormatException: Unexpected character (at character 1) <｜｜DSML｜｜ calls>）`，没有工具被提议。
 - Android 真机（vivo V2324A，Android 16，`integration_test`）：第一轮就是 `<｜｜DSML｜｜ calls>`，错误原文同第 2 次，预算题 0 轮、无工具。比价题同一次运行成功（`inquiry.compare_quotes`，2 轮，耗时 2665 ms）。
+- macOS 设备（`integration_test`）：第一轮同样是 `<｜｜DSML｜｜ calls>`，预算题 0 轮、无工具；比价题成功，耗时 2217 ms。
 - 复现：`MUYON_EVAL_REAL=1`，端点 `https://api.deepseek.com`，模型 `deepseek-chat`，运行 `flutter test test/north_star_inquiry_test.dart`（`apps/muyon`）。比价题同一轮成功，失败只出现在预算题。
 - 影响：真实模型对第二道只读题的表现不稳定；任务结果为 `failed`，错误文本里含模型的回答原文。P0-3c 只涉及「每道题都必须经由对应工具作答」的判定收尾，与这里的协议格式问题不是一回事；根因（模型输出格式、助手协议解析）由 leader 判断。
 
 ## 未验证的平台和原因
 
-- **macOS 设备集成测试**：Xcode 27 已装好，但 `xcodebuild -runFirstLaunch` 尚未执行（需要管理员权限），构建在解析 Swift Package 阶段失败，报 `IDESimulatorFoundation` 插件加载失败。用户执行 `sudo xcodebuild -runFirstLaunch` 后可重跑。
+- **macOS 设备集成测试**：已运行一次（见上）。过程中遇到的环境问题，都不是代码问题：`xcodebuild -runFirstLaunch` 要先执行（用户已执行）；`flutter_inappwebview_macos` 不支持 Swift Package Manager，需要 CocoaPods（用户已 `brew install cocoapods`），并且要先 `flutter pub get` 才会生成 Podfile；首次运行时沙盒容器里缺 `Library/Caches/com.mightyoung.muyon` 目录，测试创建临时目录失败，我手动创建了这个空目录后重跑成功（第一次尝试写出的证据是空的 `{}`，已丢弃，没有入库）。
 - **Android 真机**：已运行一次（见上）；测试包没有留在手机上（`flutter test` 结束后已卸载，`pm list packages` 复查无 muyon）。
 - **Windows**：没有设备。
 - **手动界面走查**：我不能操作应用界面，写「未执行」，交给用户。
 - **`ci.sh`**：P0-1 尚未合入 `develop`。
 
 ## 其他说明
+
+- **macOS 设备运行时的 `git status`**：工作区是 `review/P0-4` @ `369ecca`（`commit` 字段即它）。构建过程由 Flutter 和 CocoaPods 改动了 `apps/muyon/macos/Flutter/Flutter-Debug.xcconfig`、`Flutter-Release.xcconfig`、`Runner.xcodeproj/project.pbxproj`、`Runner.xcworkspace/contents.xcworkspacedata`（共 104 行增、3 行删），并生成了未跟踪的 `Podfile`、`Podfile.lock` 和两处 `xcshareddata/swiftpm/`；这些是 CocoaPods 集成的构建副产物，**没有任何 Dart 代码或其它目录的改动**。运行后我已用 `git checkout` 还原、删除了它们，没有提交。也就是说被测的 Dart 代码就是 `369ecca` 的内容，但 macOS 工程文件在运行时被构建流程改过。
 
 - **运行时的工作区与 `git status`**：三次链路运行的 `commit` 字段是手工传入的（`MUYON_EVAL_COMMIT`）。两次 macOS 无头运行时，工作区是 `6d21831` 上的干净检出：运行前 `git status --short` 没有任何输出，运行产生的只有本批的未跟踪证据文件，没有已跟踪文件改动。Android 真机运行时工作区是 `f535db4`（`task/p0-4-evidence`，与 `origin` 一致，`git status` 干净）；`f535db4` 比 `6d21831` 只多证据与报告文档，没有代码改动，所以被测代码与 `6d21831` 相同。Android 运行之后我又尝试过一次 macOS 构建，它会让 Flutter 改动 `apps/muyon/macos` 下的 `xcconfig` 并生成 `Podfile`，那是构建副产物，已还原删除，没有提交，也不属于这三次运行。
 
