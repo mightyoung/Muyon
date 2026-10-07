@@ -15,6 +15,8 @@ List<Object?> buildRequestView(
   Object? compactionState,
 }) => messages;
 
+/// Reserved for K-3 (compaction trigger); not used by K-2a.
+///
 /// Estimated tokens of [messages]. When the provider reported the prompt size
 /// of an earlier request, [reportedPromptTokens] stands for the first
 /// [reportedMessageCount] messages and only the rest is estimated; a report

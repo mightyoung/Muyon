@@ -310,7 +310,7 @@ void main() {
       final f = await _Fixture.open();
       f.replies
         ..add(const _Reply.status(400))
-        ..add(const _Reply.status(400));
+        ..add(_Reply.sse(_text(_answerJson)));
       final agent = f.agent();
       final task = await f.run(
         agent,
@@ -318,10 +318,10 @@ void main() {
       );
       expect(task.state, PersonalTaskState.failed);
       expect(task.error, contains('stream_rejected'));
-      // Same as chat: one resend without response_format, nothing else.
-      expect(f.bodies, hasLength(2));
-      expect(f.bodies.every((b) => b['stream'] == true), isTrue);
-      expect(f.ledger.recent(), hasLength(2));
+      // We cannot tell which parameter was rejected: exactly one request.
+      expect(f.bodies, hasLength(1));
+      expect(f.bodies.single['stream'], true);
+      expect(f.ledger.recent(), hasLength(1));
     });
 
     test('a truncated stream fails the task and saves nothing of the '
@@ -458,6 +458,28 @@ void main() {
         contains('did not follow the protocol'),
       );
       expect(jsonEncode(task.payload), isNot(contains('delete_everything')));
+    });
+
+    test('a registered tool that was not a candidate is a violation even '
+        'when the model names it correctly encoded', () async {
+      final f = await _Fixture.open();
+      f.replies
+        ..add(_Reply.sse(_toolCall('write', '{}')))
+        ..add(_Reply.sse(_text('ok')));
+      final agent = f.agent();
+      final started = await f.start(agent, f.profile(capabilities: _native));
+      // Only `read` stays a candidate for this task.
+      final narrowed = started.copy({
+        'candidateIds': ['read'],
+        'nativeTools': [
+          for (final t in started.payload['nativeTools'] as List)
+            if ((t as Map)['name'] == 'read') t,
+        ],
+      });
+      await f.repo.updateTask(narrowed);
+      final task = await f.run(agent, f.repo.task(started.id)!);
+      expect(f.writeCalls, 0);
+      expect(task.payload['protocolCorrections'], 1);
     });
 
     test('bad arguments, several calls and an empty reply are violations; '

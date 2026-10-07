@@ -14,10 +14,14 @@ int estimateTokens(String text) {
   return (ascii / 4).ceil() + other;
 }
 
+/// Reserved for K-3 (budgets and compaction); not used by K-2a.
+///
 /// Tokens of a request: the provider's own count when it reported one, else
 /// the estimate of [text].
 int tokensOf(String text, {int? reported}) => reported ?? estimateTokens(text);
 
+/// Reserved for K-3.
+///
 /// Tokens of a prompt that grew since the last report: the reported prompt
 /// size plus an estimate of only the content added after it.
 int tokensSinceReport({required int reported, required String added}) =>

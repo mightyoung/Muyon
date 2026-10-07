@@ -290,6 +290,8 @@ final class OutboundOutcome {
 }
 
 abstract interface class ModelProvider {
+  /// Reserved for K-3/AUTH-1 (capability-driven choices); not used by K-2a.
+  ///
   /// Pure: no request is sent.
   ModelCapabilities capabilities(ModelProfile profile);
 

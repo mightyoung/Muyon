@@ -76,6 +76,12 @@ class ModelProfile {
   /// Declared by the person (or a preset); code-constructed profiles are
   /// compatibility mode, non-streaming.
   final ModelCapabilities capabilities;
+
+  /// [toJson] without the capability block: the shape digests had before
+  /// capabilities existed, so they do not change with the upgrade.
+  Map<String, Object?> toJsonWithoutCapabilities() =>
+      toJson()..remove('capabilities');
+
   Map<String, Object?> toJson() => {
     'id': id,
     'endpoint': endpoint.toString(),
@@ -321,7 +327,8 @@ class OpenAiModelGateway {
   /// connection or a stream past its limit, `cancelled` when the caller
   /// cancels or stops listening. Pre-send failures and non-200 answers are
   /// thrown (an [HttpException] `model_http_<code>`, redacted like
-  /// [request]); a failure after the first byte is a [ModelError] event.
+  /// [request]), as is a connection that drops mid-stream; a provider error
+  /// event or a body that ends without a finish reason is a [ModelError].
   /// There is no fallback to another protocol, model or endpoint.
   ///
   /// [maxDuration] caps one request below [streamLimit] (the host passes what
@@ -357,14 +364,19 @@ class OpenAiModelGateway {
         if (!identical(attempt, first)) _noJsonObject.add(key);
         return;
       } on HttpException catch (error) {
-        // Same rule as [chat]: an endpoint that rejects response_format
-        // (400/422) gets the confirmed content once more without it; both
-        // requests are in the ledger. Only a resend that succeeds marks the
-        // endpoint, and only requests that ask for JSON mode can be resent.
+        // Same rule as [chat], for non-streaming requests only: an endpoint
+        // that rejects response_format (400/422) gets the confirmed content
+        // once more without it; both requests are in the ledger. A streamed
+        // request is never resent: a 400/422 could just as well be about
+        // `stream`, so the caller fails with a fixed reason instead.
         final rejected =
             error.message == 'model_http_400' ||
             error.message == 'model_http_422';
-        if (!attempt.jsonObject || !rejected) rethrow;
+        if (attempt.profile.capabilities.streaming ||
+            !attempt.jsonObject ||
+            !rejected) {
+          rethrow;
+        }
         attempt = attempt.withoutJsonObject();
       }
     }
@@ -393,21 +405,26 @@ class OpenAiModelGateway {
     var finished = false;
     Timer? limit;
     int? promptTokens, completionTokens;
+    final cap = maxDuration != null && maxDuration < streamLimit
+        ? maxDuration
+        : streamLimit;
     try {
+      // The cap runs from the start, so a server that accepts the connection
+      // and never answers cannot hold the request past it either.
+      limit = Timer(cap, () {
+        limitHit = true;
+        channel.abort();
+      });
+      final streamed = request.profile.capabilities.streaming;
+      final base = streamed ? idleTimeout : timeout;
       await channel.open(
         payload: frozenPayload,
         itemCount: request.messages.length,
         caller: request.caller,
         beforeSend: beforeSend,
         requestDigest: request.requestDigest,
+        headerTimeout: base < cap ? base : cap,
       );
-      final cap = maxDuration != null && maxDuration < streamLimit
-          ? maxDuration
-          : streamLimit;
-      limit = Timer(cap, () {
-        limitHit = true;
-        channel.abort();
-      });
       ModelError? failure;
       var done = false;
       await for (final event in provider.decode(request, channel.body)) {
@@ -554,6 +571,7 @@ class _GatewayChannel implements OutboundChannel {
     required String caller,
     Future<void> Function()? beforeSend,
     String? requestDigest,
+    Duration? headerTimeout,
   }) async {
     final credential = profile.credentialRef == null
         ? null
@@ -593,12 +611,12 @@ class _GatewayChannel implements OutboundChannel {
     }
     request.write(payload);
     _sent = true;
-    final response = streamed
-        ? await request.close().timeout(
-            _gateway.idleTimeout,
-            onTimeout: () => throw TimeoutException('model_stream_idle'),
-          )
-        : await request.close();
+    final response = headerTimeout == null
+        ? await request.close()
+        : await request.close().timeout(
+            headerTimeout,
+            onTimeout: () => throw TimeoutException('model_header_timeout'),
+          );
     _httpStatus = response.statusCode;
     if (response.statusCode != 200) {
       throw HttpException('model_http_${response.statusCode}');
@@ -638,7 +656,7 @@ class _GatewayChannel implements OutboundChannel {
     _recordId,
     outcome,
     _httpStatus,
-    firstByteMs: streamed ? _firstByteMs ?? 0 : null,
+    firstByteMs: streamed ? _firstByteMs : null,
     bytesReceived: streamed ? _bytes : null,
   );
 

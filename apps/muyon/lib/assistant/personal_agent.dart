@@ -653,19 +653,17 @@ class PersonalAgent {
       }
     } on HttpException catch (error) {
       // The endpoint refused what was asked: a fixed failure, never another
-      // protocol, model or endpoint (ADR-0005 §4.3). A second ledgered
-      // attempt without `response_format` has already happened inside the
-      // gateway, as for non-streaming requests.
+      // protocol, model or endpoint (ADR-0005 §4.3), and no resend.
       if (error.message == 'model_http_400' ||
           error.message == 'model_http_422') {
         throw profile.capabilities.nativeTools
             ? const _FixedFailure(
                 'native_tools_rejected',
-                '端点拒绝原生工具调用（native_tools_rejected）：请把该模型改为兼容模式，或关闭流式',
+                '端点以 400/422 拒绝（可能是流式、工具或其他参数）（native_tools_rejected）：请把该模型改为兼容模式，或关闭流式',
               )
             : const _FixedFailure(
                 'stream_rejected',
-                '端点拒绝流式请求（stream_rejected）：请关闭该模型的流式，或运行测试连接',
+                '端点以 400/422 拒绝（可能是流式、工具或其他参数）（stream_rejected）：请关闭该模型的流式，或运行测试连接',
               );
       }
       rethrow;
@@ -1181,6 +1179,8 @@ class PersonalAgent {
 class _Reply {
   final text = StringBuffer();
   final calls = <ToolCallComplete>[];
+
+  /// Reserved for K-3 (token budget); collected, not yet read.
   Usage? usage;
   Done? done;
   ModelError? error;

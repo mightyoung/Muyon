@@ -49,22 +49,26 @@ void main() {
   late Future<void> Function(HttpRequest request, Map<String, dynamic> body)
   respond;
 
-  ModelProfile profile({String? credentialRef}) => ModelProfile(
+  ModelProfile profile({
+    String? credentialRef,
+    bool streaming = true,
+  }) => ModelProfile(
     id: 'local',
     endpoint: Uri.parse('http://127.0.0.1:${server.port}/v1/chat/completions'),
     location: ModelLocation.local,
     modelId: 'm',
     endpointIdentity: 'fixture',
     credentialRef: credentialRef,
-    capabilities: const ModelCapabilities(streaming: true, nativeTools: true),
+    capabilities: ModelCapabilities(streaming: streaming, nativeTools: true),
   );
 
   ModelRequest request({
+    bool streaming = true,
     String? credentialRef,
     bool jsonObject = false,
     String? digest = 'digest-1',
   }) => ModelRequest(
-    profile: profile(credentialRef: credentialRef),
+    profile: profile(credentialRef: credentialRef, streaming: streaming),
     messages: const [ModelMessage(role: 'user', content: 'hello')],
     jsonObject: jsonObject,
     caller: 'assistant',
@@ -355,24 +359,95 @@ void main() {
     expect(row['http_status'], 422);
   });
 
-  test('a JSON-mode request is resent once without response_format, both '
-      'ledgered, and remembered', () async {
+  test('a streamed JSON-mode request is not resent on a 400: one request, '
+      'failed', () async {
+    respond = (r, b) async {
+      r.response.statusCode = 400;
+      await r.response.close();
+    };
+    await expectLater(
+      gateway()
+          .chatStream(
+            provider: const OpenAiCompatProvider(),
+            request: request(jsonObject: true),
+          )
+          .toList(),
+      throwsA(isA<HttpException>()),
+    );
+    expect(requests, 1);
+    expect(only()['status'], 'failed');
+  });
+
+  test('a non-streaming request that never answers times out and is '
+      'recorded as timeout', () async {
+    final hold = Completer<void>();
+    respond = (r, b) => hold.future;
+    final watch = Stopwatch()..start();
+    await expectLater(
+      OpenAiModelGateway(
+            _Secrets(),
+            ledger: ledger,
+            timeout: const Duration(milliseconds: 200),
+          )
+          .chatStream(
+            provider: const OpenAiCompatProvider(),
+            request: request(streaming: false),
+          )
+          .toList(),
+      throwsA(isA<TimeoutException>()),
+    );
+    hold.complete();
+    expect(watch.elapsed, lessThan(const Duration(seconds: 3)));
+    final row = only();
+    expect(row['status'], 'timeout');
+    expect(row['streamed'], isNull);
+  });
+
+  test('silence before the first byte is a timeout with no first_byte_ms '
+      'and zero bytes', () async {
+    final hold = Completer<void>();
+    respond = (r, b) => hold.future;
+    await expectLater(
+      gateway(idle: const Duration(milliseconds: 150))
+          .chatStream(
+            provider: const OpenAiCompatProvider(),
+            request: request(),
+          )
+          .toList(),
+      throwsA(isA<TimeoutException>()),
+    );
+    hold.complete();
+    final row = only();
+    expect(row['status'], 'timeout');
+    expect(row['first_byte_ms'], isNull);
+    expect(row['bytes_received'], 0);
+  });
+
+  test('a non-streaming JSON-mode request is resent once without '
+      'response_format, both ledgered, and remembered', () async {
     respond = (r, b) async {
       if (b.containsKey('response_format')) {
         r.response.statusCode = 400;
         await r.response.close();
         return;
       }
-      await sse(r, [
-        _chunk({'content': 'ok'}),
-        _chunk({}, finish: 'stop'),
-      ]);
+      r.response.write(
+        jsonEncode({
+          'choices': [
+            {
+              'message': {'content': 'ok'},
+              'finish_reason': 'stop',
+            },
+          ],
+        }),
+      );
+      await r.response.close();
     };
     final g = gateway();
     final events = await g
         .chatStream(
           provider: const OpenAiCompatProvider(),
-          request: request(jsonObject: true),
+          request: request(jsonObject: true, streaming: false),
         )
         .toList();
     expect((events.last as Done).reason, FinishReason.stop);
@@ -384,7 +459,7 @@ void main() {
     await g
         .chatStream(
           provider: const OpenAiCompatProvider(),
-          request: request(jsonObject: true),
+          request: request(jsonObject: true, streaming: false),
         )
         .toList();
     expect(requests, 3, reason: 'remembered: no second attempt');

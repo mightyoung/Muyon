@@ -36,6 +36,8 @@ final class GateConfirm extends GateDecision {
   const GateConfirm();
 }
 
+/// Reserved for AUTH-1; K-2a treats it as not allowed.
+///
 /// Proceed without a card; the ledger and the receipt record [grantId].
 final class GateAllowed extends GateDecision {
   const GateAllowed(this.grantId);
