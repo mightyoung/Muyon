@@ -1,6 +1,6 @@
 # UI-1a 设计系统：v6 token、通用组件与自适应尺寸
 
-分支 `task/ui-1a-design-system` · 依据：[设计稿 v6](../design/v6/README.md)（`tokens.md`、`components.md`、`round7-notes.md`）、[UI 方案](../design/ui-redesign-brief-2026-10-06.md) §3、§4、§8、[UI-1](UI-1.md) 第 1、2、5 步 · 执行：`implementer-sonnet`（leader 派发）· 审查：leader（`reviewer-sonnet-medium`）· 阶段：第二阶段（ADR-0003 允许 UI-0～UI-5）
+分支 `task/ui-1a-design-system` · 依据：[设计稿 v6](../design/v6/README.md)（`tokens.md`、`components.md`、`round7-notes.md`）、[UI 方案](../design/ui-redesign-brief-2026-10-06.md) §3、§4、§8、[UI-1](UI-1.md) 第 1、2、5 步 · 执行：Codex（排在 AUTH-1a 之后）· 审查：leader（交叉核实：junior 或 engineer 重跑测试，leader 抽查）· 阶段：第二阶段（ADR-0003 允许 UI-0～UI-5）
 
 本任务是 UI-1 的前半：建套件，**不迁移询价部件、不改任何页面**。UI-1 的第 3、4 步（迁入询价通用部件、去硬编码颜色）拆到 UI-1b，等 FOLIO-BYPASS、REG-4 动完 `inquiry_module` 后再派。UI-0 的截图基线不是本任务的前提。
 

@@ -17,6 +17,7 @@
 ## 1. 工作方式
 
 - **执行**（用户 2026-10-07）：开发任务由 leader 派生的 **Sonnet 5.5 子代理** `implementer-sonnet`（`~/.claude/agents/implementer-sonnet.md`，在 `/tmp` 的独立克隆里工作，只推任务分支）执行，Codex（本机，额度已恢复）也可派较大的实现任务；leader 只做派发、审查、合入。真机取证仍由本机 engineer 执行。senior（Opus）、junior（opencode）、grokbot（云端，无 Flutter，只做静态核对）仍可按需使用。
+- **额度约束（用户 2026-10-07）**：Claude 额度不够，**开发和审查尽量不用后台子代理**。开发派给 Codex、junior（opencode）、engineer、senior；审查优先交叉派给非作者成员（Codex、junior、engineer 重跑构建和测试，grokbot 做静态核对），leader 只读 diff、抽查关键处。只有安全敏感、又没有合适成员可派时，才用 `reviewer-sonnet-*`，且一次只开一个。
 - **派发**：一个任务一个分支 `task/<编号>`，说明 `docs/tasks/<编号>.md` 先提交到 `develop`，再从 `develop` 建任务分支。
 - **审查**：按 [REVIEW.md](REVIEW.md)。默认用 `reviewer-sonnet-high`（安全、并发、数据一致性、跨模块）、`-medium`（单模块代码与测试）、`-low`（脚本、文档、证据）；Opus 只在结论有分歧或问题特别难时用。定义在本机 `~/.claude/agents/`，写死 `model: claude-sonnet-5-5`。不要用 `model: "sonnet"`/`"opus"` 别名：`~/.claude/settings.json` 把别名映射到 MiniMax，会 404。
 - **合入**：`git merge --no-ff origin/review/<编号>`，核对任务文件与审查版本逐字一致（diff 为 0 行），然后更新索引并推送。审过两三轮、只剩低概率问题时先合入，剩下的另开小任务。
