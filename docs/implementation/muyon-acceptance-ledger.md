@@ -19,15 +19,15 @@
 | 2.2c | 执行过程、分支、接纳/否定理由、不确定性 | 🟡 | T：research run assessment | W3 链路验收 |
 | 2.2d | 任务/实验导出到另一设备并导回 | 🟡 | T：任务包/结果包（迁入） | 授权语义 C6，R 双设备 → W3 |
 | 2.2e | 完整研究包交换（不同本地 ID、分叉、重复导入） | 🟡 | T：`research_package_test` | 往返/分叉矩阵 → C4 |
-| 2.3 | 询价完整业务 + 受控只读/计算工具 | 🟡 | T：supplier 467 + 3 跳过、inquiry 历史 309（见下方 W0 记录） | 写操作工具化 C5，存储接管 C1 |
-| 2.4 | 原型业务 + 受限 WebView | ❌ | 契约 `RestrictedWebViewSpec`（T：`contract_v1_test`） | B3 |
+| 2.3 | 询价完整业务 + 受控只读/计算工具 | 🟡 | T：supplier 467 + 3 跳过、inquiry 历史 309（见下方 W0 记录）；`inquiry_write_tools_test`（4 个写入工具经宿主一次性审批）；`north_star_inquiry_test`（夹具）。**R（macOS 设备）+ M**：`docs/evidence/2026-10-p0/north-star-macos-deepseek-chat-p03d.json`（deepseek-chat，`passed: true`，P0-3d 之后，`compare_quotes` 与 `project_budget` 逐题核对，重复确认被拒；只跑 1 次）。负面证据（D1，P0-3d 之前）：同目录另 4 份 `passed: false` | Android 真机重跑 → 第二阶段 R-1；多次运行的稳定性未测；存储接管 C1 |
+| 2.4 | 原型业务 + 受限 WebView | 🟡 | B 2.4 已合入（[审查](../tasks/B-2.4-review.md)，三轮）。R（Android 16 真机）：见 [prototype-resource-policy.md](prototype-resource-policy.md)——Vite `type="module"` 脚本在 `file://` 下由 Chromium 自己拒绝执行（不是守卫拦的），因此改为 `muyon-proto://` 自定义 scheme；`IGNORE_PREVIOUS_RULES` 在 Android 构造即抛异常，已改为只在 Apple 平台构造。T：`contract_v1_test` 等 | macOS 渲染未验证；Windows 未验证（很可能打不开）；S6（原型对象从助手回答跳回）第一阶段搁置 |
 | 2.5 | 设备互传、一对一聊天、五态独立 | 🟡 | T：`lan_trust_test`、`lan_security_test`、`transfer_states_test`（配对后 TLS 证书固定 + 发送方签名；`f1c27be` 起两端 `minimumTlsProtocolVersion` 为 TLS 1.3，重启后 5 分钟窗口内的消息 id 持久拒绝；送达/落盘/导入/已读/接纳五态独立；研究包接纳后只导入一次）；D：[威胁模型](lan-threat-model.md) | 真实双设备 R；一对一文字聊天界面 → B |
 
 ## 三～六、设计与架构
 
 | # | 需求 | 状态 | 已有证据 | 缺口 |
 |---|---|---|---|---|
-| 3.1 | 双入口：页面可完整操作、助手结果回页、页面开对话 | 🟡 | 资料页→专题对话已有 | `ModuleSession.objectPage` 契约已加，模块实现 → C/B |
+| 3.1 | 双入口：页面可完整操作、助手结果回页、页面开对话 | 🟡 | 资料页→专题对话；E11 / E11b：研究对象经 `ModuleSession.objectPage` 打开业务页（[E11 审查](../tasks/E11-review.md)、[E11b 审查](../tasks/E11b-review.md)） | task、run、card、outline、section 页面上的助手调用工具时会报错（不在宿主目录内，E11 N3）→ 第三阶段随契约 v2 决定；原型对象跳回（S6）→ 第四阶段 |
 | 4.1 | 唯一入口 `apps/muyon`、契约 `muyon_module_api` | ✅ | D：W0 重命名提交 `525324e` | — |
 | 4.2 | 依赖/版本不符只禁用该模块 | ✅ | T：`module_registry_test` | 设置页显示原因 → B1 |
 | 5.1 | 模块注册 ID/版本/必要与可选依赖 | ✅ | T：`contract_v1_test` | — |
@@ -42,15 +42,15 @@
 
 | # | 需求 | 状态 | 已有证据 | 缺口 |
 |---|---|---|---|---|
-| 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`（含效应点后取消/失败记为 interrupted）、`execution_recovery_test`、`outbound_ledger_test`、`mcp_adapter_test`；D：[调用路径审计](invocation-path-audit.md)、[工具选择评测](tool-selection-eval-2026-10-05.md)（140 题。离线规则 top-1 54/140，其中精确 id 28/28，中文/中英/释义为 0；写入/外发误选 0，弃权质量 26/26，本次规则延迟 3.330 ms，费用 0，未切换生产策略。Laya `laya==0.3.27`，检查点 `convaiinnovations/laya-multilingual` 修订 `1720e3e3357cfe1e281542e223f8273b0890ca34`，4 线程，进程内 CPU、无监听端口：校准阈值 0.95，留出集 top-1 46/93，误写 0，p50 439.113 ms，p95 817.457 ms。ONNX 未导出）、[Jev 证据审查](jev-evidence-review-2026-10-05.md) | 审计缺口 G1–G5 归 C/D；MCP 服务器配置与“数据去向”界面 → B；Jev API 未调用；Laya 的概率不是授权，生产策略未切换；ONNX 未导出 |
+| 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`（含效应点后取消/失败记为 interrupted）、`execution_recovery_test`、`outbound_ledger_test`、`mcp_adapter_test`；D：[调用路径审计](invocation-path-audit.md)、[工具选择评测](tool-selection-eval-2026-10-05.md)（140 题。离线规则 top-1 54/140，其中精确 id 28/28，中文/中英/释义为 0；写入/外发误选 0，弃权质量 26/26，本次规则延迟 3.330 ms，费用 0，未切换生产策略。Laya `laya==0.3.27`，检查点 `convaiinnovations/laya-multilingual` 修订 `1720e3e3357cfe1e281542e223f8273b0890ca34`，4 线程，进程内 CPU、无监听端口：校准阈值 0.95，留出集 top-1 46/93，误写 0，p50 439.113 ms，p95 817.457 ms。ONNX 未导出）、[Jev 证据审查](jev-evidence-review-2026-10-05.md)；**M**：[LLM 原生工具调用基线](tool-selection-llm-baseline-deepseek-chat.md)（P0-2 评测器，P0-4 运行：deepseek-chat top-1 66/140，误选写入/外发 0，弃权质量 26/26，p50 1224.8 ms）；T：P0-3d / P0-3e 协议容错（`personal_agent_rejections_test` 等，至多一次协议纠正） | 审计缺口 G1–G5 归 C/D；MCP 服务器配置与“数据去向”界面 → B；Jev API 未调用；Laya 的概率不是授权，生产策略未切换；ONNX 未导出 |
 | 8 | 记忆/经验/Dream、撤回传递 | 🟡 | 见 2.1d/e | 记忆页和由用户发起的整理已在 develop `9a87ab5`。范围收窄、经验列表管理界面还没有。模型整理 M 未测 |
-| 9a | 模型端点显式、凭据安全存储、无隐式回退 | 🟡 | T：`model_gateway_test`、`profile_routing_test` | M 真实端点 → W3 |
+| 9a | 模型端点显式、凭据安全存储、无隐式回退 | 🟡 | T：`model_gateway_test`、`profile_routing_test`；P0-S1 凭据脱敏（[审查](../tasks/P0-S1-review.md)，三轮：`credential_redaction_test`，长密钥回显探针，各轮变异均被测试抓住）。M：P0-4 运行端点显式（`configuredBy: dart-define` / `environment`），证据文件中没有写出密钥（按密钥全值与首尾 12 位 grep，命中 0） | 系统钥匙串 / 凭据存储未经实机验证；MCP 令牌脱敏 P0-S2 合入后补证据；`x-api-key`、`api_key=` 关键词未覆盖（第二阶段） |
 | 9b | PDF 文字层优先 + PaddleOCR | 🟡 | M：ONNX 参考推理（`public_services_validation.md`） | Flutter 原生 R 三端 → W3 |
 | 9c | 关键词/全文/向量/组合检索、中文短词 | 🟡 | T：FTS5/向量；`retrieval_eval_test`（[300 篇评测](retrieval-eval-2026-10-05.md)：current recall@10 0.961，bigram 0.830，「泵」recall@5 为 0.714 对 0.000；结论仍保持 cjk-bigram + 单字扫描。18 篇历史结果仍在 [retrieval-eval-2026-10-04.md](retrieval-eval-2026-10-04.md)，普通测试不再改写报告） | 向量与真实论文 M 未测 → 待用户提供端点与论文后重测 |
 | 9d | 限定资料问答：定位、断言支持、应答/拒答 | 🟡 | T：引用校验 | M 评测 → W3 |
 | 10 | 发现/配对/授权/接收/导入分离，加密认证 | 🟡 | T：同 2.5；发现不授予信任、未配对/已撤销拒收、明文握手失败；`task_coordinator_test`（重复 offer、双方接受只执行一次、中途重启不二次执行、对端不可达为 unknown、较新结果保留；配对 TLS 投递任务信封不执行）；`task_host_test`（两台宿主回环：一次 offer 不执行，双方接受后只有较低设备 id 的注入执行器跑一次，关闭对端后查询为 unknown，本地状态不被改成失败或完成）；`chat_backend_test`（文字经配对 TLS：`sent` 不自动重发也不改成失败，显式 `retryText` 后对方去重并回 `delivered`；离线不落行；撤销配对后历史仍在且拒绝再发；包内 `message` 进聊天且 `imported` 仍为 false；文字不进工具注册表、记忆或经验） | 双设备 R。内存 nonce 上限仍是 4096，另有重启后的 seen 文件与 5 分钟签名时间窗。聊天界面 → B，接口见 [chat-backend.md](chat-backend.md)。科研导入的 `onAccepted` 已由 C/E 接到人工接纳之后。替换执行器之前，设备页点「授权执行」会因默认执行器拒绝而把任务记为失败 |
 | 11 | 统一设计系统（Folio DESIGN.md）、窄屏/大字体/键盘 | 🟡 | D：[DESIGN.md](../design/DESIGN.md)；T：320–1280 宽、200% 字号 | 宿主/科研主题统一 → B1 |
-| 12 | 科研完整链、失败矩阵、三端构建/实机 | ❌ | B：Android APK（开发签名，历史） | W3；需用户提供 macOS(Xcode)/Windows/Android 设备 |
+| 12 | 科研完整链、失败矩阵、三端构建/实机 | 🟡 | 门禁：P0-1 起 `ci.yml` 在 PR / push 上运行 `scripts/ci.sh`（[审查](../tasks/P0-1-review.md)），P0-F2 后为绿。B + R：macOS 27 桌面应用构建并运行询价链路（`north-star-macos-deepseek-chat-p03d.json`）；Android（vivo V2324A，Android 16）构建并运行链路（`north-star-android-deepseek-chat.json`，P0-3d 之前，因 D1 失败）；B：Android APK（开发签名，历史） | Windows 未验证；Android 在 P0-3d 之后未重跑（R-1）；科研完整链与双设备 R 未做（第四阶段 North Star A）；macOS 本机 inquiry golden 因 macOS 27 渲染漂移失败（CI 在 Linux 排除 golden） |
 
 ## W0 记录（2026-10-04）
 
@@ -116,3 +116,18 @@
 - D-R8c 训练完成：内核状态 `KernelWorkerStatus.COMPLETE`。两块 Tesla T4，`worldSize` 2，1973 行预处理 `dropped 0`，4 个 epoch，用时 390.117 秒，选择温度 1.977373。`NO_HUB_PUSH` 已落在输出里。权重 `model.safetensors` 643835524 字节，SHA-256 `ef9dbf9aee506e00eb061a0989a468578eebe5b74352696cafc5c66fe994005f`，在 `~/.cache/muyon-eval/models/laya-muyon-tool-selection/`。决定阈值还没在验证折上拟合。本机有别人的 `scripts/verify.sh`，67 题和 D-R6 重测还没跑。门禁 2 没有结论。生产策略没有切换。阶段 3 未开始。
 - E9（opencode `6a0fbca`，A 收尾 `abcc80b`）：`ontologyPaths` 在 11 类对象、22 条关系上列出双向、最多 3 步的简单路径，排序确定；`describe(type)` 增加 `paths_to`（每个目标一条最短路径）和 `paths_to_format`，`describe()`、工具 id、说明和参数结构不变。输出体积（JSON 字符数，改动前 → E 的逐步对象 limit=2 → limit=1 → A 改为一行写法）：supplier 1713 → 6664 → 4107 → 2467（1.44×）；contact 873 → 6111 → 3609 → 1716（1.97×）；product 2196 → 7133 → 4411 → 2920（1.33×）；project 2290 → 7515 → 4606 → 3038（1.33×）；quotation 4613 → 9321 → 6579 → 5249（1.14×）；project_item 1964 → 6767 → 4053 → 2627（1.34×）；inquiry 1439 → 6285 → 3593 → 2105（1.46×）；product_param 1379 → 6481 → 4638 → 2372（1.72×）；spec_request 816 → 6434 → 3612 → 1675（2.05×）；spec_item 1829 → 7289 → 4167 → 2572（1.41×）；spec_response 1141 → 6383 → 3575 → 1883（1.65×）。全部在 3 倍以内。多对多关系的反向步（如 `inquiry.supplier_ids`）由 `related` 的 `json_each` 成员匹配支持。`scripts/verify.sh` 在 `fea4ce9` 上退出码 0（supplier_core +482）。
 - Laya 门禁 2 确认（E10 题集 opencode `1635557`，评分前写定规则 `ace1f00`，结果 `12f139f`）：e8 未通过，`none` 49/60（标准 ≥ 54），只读 32/40（标准 ≥ 33），误选写入 0。2026-10-05 用户决定**暂停 Laya 专门化**：助手继续用 `RuleAndModelToolSelection`；`ReadOnlyLayaToolSelection` 只在测试和评测里使用，应用没有接入，不需要改代码。第 3 阶段（ONNX）不开始。Kaggle 私有数据集、内核和本机权重保留作记录，不再追加训练。重启专门化需要新的训练数据，以及一套没用过的确认题。
+
+## 第一阶段退出记录（2026-10-07，leader）
+
+对照 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md) §5：
+
+| # | 标准 | 结果 | 证据 |
+|---|---|---|---|
+| 1 | 询价链路至少一个真机、一个真实模型的证据 | ✅ | macOS 设备 + deepseek-chat，`north-star-macos-deepseek-chat-p03d.json`；用户 2026-10-07 决定接受 macOS，Android 重跑转第二阶段 R-1 |
+| 2 | LLM 工具选择基线至少一个真实模型的数字 | ✅ | deepseek-chat top-1 66/140，误选写入/外发 0（第 7 行） |
+| 3 | 自动门禁可用 | ✅ | P0-1；P0-F2 后为绿 |
+| 4 | B 2.4 与 E11 合入或搁置 | ✅ | 均已合入；S6 明确搁置 |
+| 5 | 验收账本按证据更新 | ✅ | 本次更新 2.3、2.4、3.1、7、9a、12 |
+
+本次更新只把证据写进对应行；所有行的状态仍按证据类别判断，T 不代替 R，一次 M 运行不等于普遍正确。P0-S2（安全修复）在第一阶段收尾中进行，合入后补 9a 行。
+
