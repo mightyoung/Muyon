@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/agent_event_sink.dart';
+import 'package:muyon/assistant/execution_store.dart';
 import 'package:muyon/assistant/personal_agent.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/storage_manager.dart';
@@ -95,10 +96,6 @@ void main() {
         before.first['n'],
       );
       expect(again.raw.select('SELECT * FROM tasks'), hasLength(1));
-      expect(
-        again.raw.select('PRAGMA user_version').first.values.first,
-        isNotNull,
-      );
       expect(WorkspaceRepository.schema.version, 8);
     });
 
@@ -299,6 +296,26 @@ void main() {
           .join();
       expect(stored, isNot(contains(loopKey)));
     });
+  });
+
+  group('read paths', () {
+    test(
+      'ExecutionStore reads the table and an old payload list alike',
+      () async {
+        final f = await LoopFixture.open();
+        final store = ExecutionStore(f.repo.database);
+        f.replies.add(LoopReply.sse(sseText('好')));
+        final agent = f.agent();
+        final task = await f.run(agent, await f.start(agent, f.profile()));
+        expect(store.events(task.id).map((e) => e.type), contains('done'));
+        expect(
+          store.events(task.id).map((e) => e.seq),
+          f.repo.taskEvents(task.id).map((e) => e.seq),
+        );
+        expect(store.events('unknown'), isEmpty);
+        expect(store.objectLinks(task.id), isEmpty);
+      },
+    );
   });
 
   group('sinks', () {

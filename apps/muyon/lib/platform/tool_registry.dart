@@ -20,6 +20,29 @@ CREATE TABLE tool_approvals(
  state TEXT NOT NULL, consumed_at TEXT);
 ''');
 
+/// What the registry recorded for one invocation id.
+class ToolReceipt {
+  const ToolReceipt({
+    required this.invocationId,
+    required this.toolId,
+    required this.state,
+    this.result,
+  });
+  final String invocationId, toolId;
+
+  /// `running` until the outcome is written, then the result status.
+  final String state;
+  final ToolCallResult? result;
+
+  /// The effect happened and its result is the receipt's.
+  bool get succeeded => result?.status == ToolCallStatus.succeeded;
+
+  /// Whether the effect may have happened without a recorded outcome: the
+  /// process stopped mid-call, or the call ended `interrupted`.
+  bool get unknown =>
+      result == null || result!.status == ToolCallStatus.interrupted;
+}
+
 class ToolPlatformException implements Exception {
   const ToolPlatformException(this.code, this.message);
   final String code;
@@ -457,6 +480,27 @@ class ToolRegistry {
         'is not undone by cancelling here; verify its actual result before '
         'starting a new attempt.',
   );
+
+  /// The receipt of one invocation, if any (read only). A resumed task asks
+  /// this before it would run anything again.
+  ToolReceipt? receiptFor(String invocationId) {
+    final rows = database.raw.select(
+      'SELECT tool_id,state,result_json FROM tool_invocation_receipts WHERE invocation_id=?',
+      [invocationId],
+    );
+    if (rows.isEmpty) return null;
+    final json = rows.first['result_json'] as String?;
+    return ToolReceipt(
+      invocationId: invocationId,
+      toolId: rows.first['tool_id'] as String,
+      state: rows.first['state'] as String,
+      result: json == null
+          ? null
+          : ToolCallResult.fromJson(
+              Map<String, Object?>.from(jsonDecode(json) as Map),
+            ),
+    );
+  }
 
   List<ToolCallResult> history({String? toolId}) => [
     for (final row in database.raw.select(
