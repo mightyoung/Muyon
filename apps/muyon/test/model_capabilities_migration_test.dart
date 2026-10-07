@@ -27,7 +27,7 @@ Map<String, Object?> _stored(
   'credentialRef': null,
   'cloudProxy': false,
   'purpose': ?purpose,
-  if (capabilities != null) 'capabilities': capabilities,
+  'capabilities': ?capabilities,
 };
 
 void main() {
