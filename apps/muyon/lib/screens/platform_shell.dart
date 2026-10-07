@@ -4,11 +4,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:inquiry_module/inquiry_module.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
-import 'package:prototype_module/prototype_module.dart';
 import 'package:uuid/uuid.dart';
 
 import '../app/app_shell.dart';
 import '../app/bootstrap.dart';
+import '../app/legacy_module_bridge.dart';
+import '../app/module_host.dart';
 import '../assistant/execution_store.dart';
 import '../platform/foundation_repository.dart';
 import '../platform/object_pages.dart';
@@ -124,82 +125,111 @@ class _PlatformShellState extends State<PlatformShell> {
     if (mounted) setState(() {});
   }
 
-  Future<void> openPrototype() async {
-    PrototypeRuntime? runtime;
-    await action(() async {
-      await host.activatePrototype();
-      runtime = host.prototype;
-      if (runtime == null) {
-        throw StateError('原型模块不可用：${host.prototypeError ?? '未知原因'}');
+  /// Opens a declared section on its own page (ADR-0004 §6.4). The page is
+  /// whatever the section's builder returns. v2 receives an active runtime;
+  /// v1 keeps its existing bridge/page activation behavior.
+  Future<void> openSection(String moduleId, ModuleSection section) async {
+    final v2 = host.registry.modules.any(
+      (module) => module.manifest.id == moduleId && module is BusinessModuleV2,
+    );
+    if (v2) {
+      ModuleState state;
+      try {
+        state = await host.modules.activate(moduleId);
+      } catch (_) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('模块暂不可用')));
+        }
+        return;
       }
-    });
-    final opened = runtime;
-    if (opened == null || !mounted) return;
+      if (!mounted) return;
+      if (state.status != ModuleStatus.ready) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('模块暂不可用：${state.reason ?? moduleId}')),
+        );
+        return;
+      }
+    }
+    if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PrototypeHome(store: opened.store),
+        builder: (context) => section.builder(
+          context,
+          ShellSectionHost(
+            moduleId: moduleId,
+            host: host,
+            themeMode: widget.themeMode,
+            onTheme: widget.onTheme,
+          ),
+        ),
       ),
     );
+    if (mounted) setState(() {});
+  }
+
+  Future<void> openDeclaration(ModuleDeclaration declaration) async {
+    if (declaration.sections.isEmpty) return;
+    await openSection(declaration.moduleId, declaration.sections.first);
   }
 
   Future<void> openObject(ObjectRef ref) async {
     await action(() async {
-      // Research objects open through their module session first: the host
-      // catalog only carries project/document/entry, so resolveScope would
-      // reject task/run/card/outline/section (review F2). A null result (no
-      // binding, deleted object, stale revision or digest) falls back to the
-      // catalog check and the JSON page below, exactly as before.
-      if (ref.moduleId == 'research') {
-        final opened = await openModuleObjectPage(context, host, ref);
-        if (opened != null) {
-          try {
-            if (!mounted) return;
-            await Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => Scaffold(
-                  appBar: AppBar(
-                    title: Text(opened.title),
-                    actions: [
-                      IconButton(
-                        tooltip: '针对当前对象使用助手',
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => Scaffold(
-                              appBar: AppBar(title: const Text('专题对话')),
-                              body: assistant(
-                                scope: AssistantScope.selectedObjects([ref]),
-                              ),
+      // Objects open through their module first: the host catalog only
+      // carries what a module puts in global scope (research: project /
+      // document / entry), so resolveScope would reject its other types
+      // (review F2). A module with no page for the ref, no binding, a deleted
+      // object or a stale revision or digest gives null, and the catalog check
+      // and the JSON page below follow, exactly as before.
+      final opened = await openModuleObjectPage(context, host, ref);
+      if (opened != null) {
+        try {
+          if (!mounted) return;
+          await Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (context) => Scaffold(
+                appBar: AppBar(
+                  title: Text(opened.title),
+                  actions: [
+                    IconButton(
+                      tooltip: '针对当前对象使用助手',
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => Scaffold(
+                            appBar: AppBar(title: const Text('专题对话')),
+                            body: assistant(
+                              scope: AssistantScope.selectedObjects([ref]),
                             ),
                           ),
                         ),
-                        icon: const Icon(Icons.chat_outlined),
                       ),
-                    ],
-                  ),
-                  body: LayoutBuilder(
-                    builder: (context, size) => size.maxWidth >= 1100
-                        ? Row(
-                            children: [
-                              Expanded(child: opened.page),
-                              SizedBox(
-                                width: 360,
-                                child: assistant(
-                                  scope: AssistantScope.selectedObjects([ref]),
-                                ),
+                      icon: const Icon(Icons.chat_outlined),
+                    ),
+                  ],
+                ),
+                body: LayoutBuilder(
+                  builder: (context, size) => size.maxWidth >= 1100
+                      ? Row(
+                          children: [
+                            Expanded(child: opened.page),
+                            SizedBox(
+                              width: 360,
+                              child: assistant(
+                                scope: AssistantScope.selectedObjects([ref]),
                               ),
-                            ],
-                          )
-                        : opened.page,
-                  ),
+                            ),
+                          ],
+                        )
+                      : opened.page,
                 ),
               ),
-            );
-          } finally {
-            // The session lives only while the object page is open.
-            await opened.dispose();
-          }
-          return;
+            ),
+          );
+        } finally {
+          // The session lives only while the object page is open.
+          await opened.dispose();
         }
+        return;
       }
       final resolved = await host.tools.resolveScope(
         AssistantScope.selectedObjects([ref]),

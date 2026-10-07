@@ -4,9 +4,17 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 /// or unavailable required dependency, or a dependency cycle is marked
 /// unavailable with a reason; healthy modules and the host keep working.
 class ModuleRegistry {
-  static const supportedApiVersion = 1;
+  /// Module API versions this host runs. v2 modules must implement
+  /// [BusinessModuleV2]; v1 modules stay on the legacy path (ADR-0004 §4.6).
+  static const supportedApiVersions = {1, 2};
 
-  ModuleRegistry(Iterable<BusinessModule> modules) {
+  /// Capability ids the host registers. A v2 manifest asking for any other id
+  /// is unavailable at once (ADR-0004 §6.2) rather than failing at activation.
+  /// Null skips the check (tests that build a registry without a host).
+  ModuleRegistry(
+    Iterable<BusinessModule> modules, {
+    Set<String>? knownCapabilities,
+  }) {
     final all = <String, BusinessModule>{};
     for (final module in modules) {
       if (all.containsKey(module.manifest.id)) {
@@ -26,8 +34,16 @@ class ModuleRegistry {
         return;
       }
       final manifest = all[id]!.manifest;
-      if (manifest.apiVersion != supportedApiVersion) {
+      if (!supportedApiVersions.contains(manifest.apiVersion)) {
         _unavailable[id] = 'Unsupported module API v${manifest.apiVersion}';
+      } else if (manifest.apiVersion == 2 && all[id]! is! BusinessModuleV2) {
+        _unavailable[id] = 'Declared API v2 without BusinessModuleV2';
+      } else if (knownCapabilities != null) {
+        for (final request in manifest.capabilities) {
+          if (!knownCapabilities.contains(request.id)) {
+            _unavailable[id] ??= 'Unknown capability ${request.id}';
+          }
+        }
       }
       for (final dependency in manifest.requiredDependencies) {
         if (!all.containsKey(dependency)) {
@@ -56,6 +72,25 @@ class ModuleRegistry {
 
   /// Module id → human-readable reason, for settings and module status UI.
   Map<String, String> get unavailable => Map.unmodifiable(_unavailable);
+
+  /// Optional dependencies are best effort. Omit an optional wait edge when
+  /// its target can reach the caller in the declared dependency graph; all
+  /// required edges are already cycle-checked by the constructor.
+  bool canAwaitOptional(String caller, String dependency) {
+    final visited = <String>{};
+    bool reachesCaller(String id) {
+      if (id == caller) return true;
+      if (!visited.add(id)) return false;
+      final manifest = _modules[id]?.manifest;
+      if (manifest == null) return false;
+      return [
+        ...manifest.requiredDependencies,
+        ...manifest.optionalDependencies,
+      ].any(reachesCaller);
+    }
+
+    return !reachesCaller(dependency);
+  }
 
   BusinessModule require(String id) =>
       _modules[id] ??

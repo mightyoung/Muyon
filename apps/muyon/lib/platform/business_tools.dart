@@ -1,20 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:supplier_core/supplier_core.dart';
 
 import '../app/bootstrap.dart';
 import 'inquiry_write_tools.dart';
+import 'scope_resolver.dart';
 import 'prototype_tools.dart';
 
-String objectIdentity(ObjectRef ref) => jsonEncode([
-  ref.moduleId,
-  ref.objectType,
-  ref.nativeProjectId,
-  ref.objectId,
-]);
+String objectIdentity(ObjectRef ref) => scopeIdentity(ref);
 
 Map<String, Object?> _businessSchema(Map input) {
   final schema = Map<String, Object?>.from(input);
@@ -42,139 +36,11 @@ Map<String, Object?> _businessSchema(Map input) {
 
 /// Domain objects remain in their module. The host only resolves identities
 /// and versions; global scope does not copy their content into model prompts.
+/// A thin wrapper: the single resolver is `ScopeResolver` (ADR-0004 §5.2).
 Future<ResolvedAssistantScope> resolveAssistantScope(
   MuyonHost host,
   AssistantScope scope,
-) async {
-  await host.activateInquiry();
-  await host.activateResearch();
-  final objects = <String, ObjectRef>{};
-  void add(ObjectRef ref) => objects[objectIdentity(ref)] = ref;
-  final inquiry = host.inquiry?.runtime.state.store;
-  if (inquiry != null) {
-    for (final type in entityTypes) {
-      for (final row in inquiry.db.select(
-        'SELECT * FROM $type WHERE deleted=0',
-      )) {
-        final data = jsonDecode(row['data'] as String) as Map;
-        add(
-          ObjectRef(
-            moduleId: 'inquiry',
-            objectType: type,
-            objectId: row['id'] as String,
-            nativeProjectId: type == 'project'
-                ? row['id'] as String
-                : data['project_id'] as String?,
-            revisionRef: row['version'].toString(),
-            contentDigest: sha256
-                .convert(utf8.encode(row['data'] as String))
-                .toString(),
-          ),
-        );
-      }
-    }
-  }
-  final research = host.research?.store;
-  if (research != null) {
-    for (final project in research.projects()) {
-      add(
-        ObjectRef(
-          moduleId: 'research',
-          objectType: 'project',
-          objectId: project.id,
-          nativeProjectId: project.id,
-          contentDigest: sha256
-              .convert(
-                utf8.encode(
-                  jsonEncode([
-                    project.title,
-                    project.question,
-                    project.nextStep,
-                  ]),
-                ),
-              )
-              .toString(),
-        ),
-      );
-      for (final document in research.documents(project.id)) {
-        final file = File(document.absolutePath);
-        final digest = file.existsSync()
-            ? (await sha256.bind(file.openRead()).first).toString()
-            : 'missing';
-        add(
-          ObjectRef(
-            moduleId: 'research',
-            objectType: 'document',
-            objectId: document.id,
-            nativeProjectId: project.id,
-            contentDigest: digest,
-          ),
-        );
-      }
-      for (final entry in research.entries(project.id)) {
-        add(
-          ObjectRef(
-            moduleId: 'research',
-            objectType: 'entry',
-            objectId: entry.id,
-            nativeProjectId: project.id,
-            contentDigest: sha256
-                .convert(utf8.encode(jsonEncode(entry.data)))
-                .toString(),
-          ),
-        );
-      }
-    }
-  }
-  await host.activatePrototype();
-  final prototype = host.prototype?.store;
-  if (prototype != null) prototypeScopeRefs(prototype).forEach(add);
-  for (final document in host.services.knowledge.documents()) {
-    if (await host.services.knowledge.isCurrent(document.id)) {
-      final ref = document.source;
-      objects.putIfAbsent(objectIdentity(ref), () => ref);
-    }
-  }
-  if (scope.kind == AssistantScopeKind.global) {
-    return ResolvedAssistantScope(
-      requested: scope,
-      objects: objects.values.toList(),
-    );
-  }
-  final workspace = scope.workspaceId;
-  if (workspace != null &&
-      !host.workspaces.all().any((w) => w.id == workspace)) {
-    throw StateError('Unknown workspace');
-  }
-  bool inWorkspace(ObjectRef ref) {
-    if (workspace == null) return true;
-    final binding = host.workspaces.binding(workspace, ref.moduleId);
-    return binding != null && binding.nativeProjectId == ref.nativeProjectId;
-  }
-
-  if (scope.kind == AssistantScopeKind.workspace) {
-    return ResolvedAssistantScope(
-      requested: scope,
-      objects: objects.values.where(inWorkspace).toList(),
-    );
-  }
-  final selected = <ObjectRef>[];
-  for (final requested in scope.objects) {
-    final current = objects[objectIdentity(requested)];
-    if (current == null ||
-        !inWorkspace(current) ||
-        (requested.revisionRef != null &&
-            requested.revisionRef != current.revisionRef) ||
-        (requested.contentDigest != null &&
-            requested.contentDigest != current.contentDigest)) {
-      throw StateError(
-        'Selected object is missing, changed or outside workspace',
-      );
-    }
-    selected.add(current);
-  }
-  return ResolvedAssistantScope(requested: scope, objects: selected);
-}
+) => host.scopeResolver.resolve(scope);
 
 void registerBusinessTools(MuyonHost host) {
   final registry = host.tools;

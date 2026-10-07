@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sqlite3/sqlite3.dart';
 
 /// The host owns migration and connection lifetime. A write callback must be
@@ -5,6 +7,12 @@ import 'package:sqlite3/sqlite3.dart';
 abstract interface class ManagedDatabase {
   Database get raw;
   Future<T> write<T>(T Function(Database database) body);
+}
+
+/// Optional sub-interface for connections that can run one exclusive
+/// background body (inquiry's `Store.attach`). [ManagedDatabase] is unchanged.
+abstract interface class ExclusiveDatabase implements ManagedDatabase {
+  Future<T> exclusiveAsync<T>(FutureOr<T> Function(Database) body);
 }
 
 class ModuleMigration {

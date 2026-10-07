@@ -73,7 +73,11 @@ class PublicServices {
       knowledge,
       EmbeddingService(knowledge, gateway),
       ocr,
-      TransferService(database, '${storage.rootPath}/transfer'),
+      TransferService(
+        database,
+        '${storage.rootPath}/transfer',
+        outboundDatabase: tools.database,
+      ),
     );
     await services.transfer.initialize();
     await registerPublicTools(services, tools, workspaces);

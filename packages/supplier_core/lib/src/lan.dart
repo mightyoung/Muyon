@@ -101,6 +101,17 @@ class LanException implements Exception {
 /// learn about us, and receives pushes over TLS. Discovery carries a
 /// fingerprint and no trust. Payloads are accepted only from a paired,
 /// unrevoked peer. Nothing is imported here: pushes wait in [inbox].
+/// Optional for standalone supplier clients; the host always supplies its
+/// durable ledger. Each operation awaits pending before touching a socket.
+abstract interface class LanOutboundLedger {
+  Future<T> send<T>({
+    required String toolId,
+    required Uri destination,
+    required String payloadDigest,
+    required Future<T> Function(void Function(int)) operation,
+  });
+}
+
 class LanNode {
   LanNode._(
     this.id,
@@ -130,6 +141,7 @@ class LanNode {
     LanLimits limits = const LanLimits(),
     LanSecretStore? secrets,
     DeviceIdentity? identity,
+    LanOutboundLedger? outboundLedger,
   }) async {
     inbox.createSync(recursive: true);
     final resolved = identity ?? await _loadIdentity(secrets);
@@ -168,6 +180,7 @@ class LanNode {
       trust.$1,
       trust.$2,
     );
+    node._ledger = outboundLedger;
     http.listen((request) {
       final pending = node._serve(request);
       node._requests.add(pending);
@@ -181,10 +194,76 @@ class LanNode {
       // down); discovery just tries again on the next tick.
       onError: (Object _) {},
     );
-    node._timer = Timer.periodic(_announceEvery, (_) => node._tick());
-    unawaited(node._tick());
+    node._timer = Timer.periodic(_announceEvery, (_) {
+      unawaited(node._tick().catchError((Object _) {}));
+    });
+    try {
+      await node._tick();
+    } catch (_) {
+      await node.stop();
+      rethrow;
+    }
     node._loadSeenPushes();
     return node;
+  }
+
+  LanOutboundLedger? _ledger;
+  final _audits = <Future<dynamic>>{};
+  Future<T> _audit<T>(
+    Uri destination,
+    String digest,
+    Future<T> Function(void Function(int)) operation, {
+    String? toolId,
+  }) async {
+    Future<T> bounded(void Function(int) count) => operation(count).timeout(
+      destination.path == '/push'
+          ? _limits.transferTimeout
+          : _limits.probeTimeout,
+    );
+    final result = _ledger == null
+        ? bounded((_) {})
+        : _ledger!.send(
+            toolId:
+                toolId ??
+                (destination.scheme == 'udp'
+                    ? 'transfer.listen'
+                    : destination.path == '/push'
+                    ? 'transfer.send'
+                    : 'transfer.probe'),
+            destination: destination,
+            payloadDigest: digest,
+            operation: bounded,
+          );
+    _audits.add(result);
+    try {
+      return await result;
+    } finally {
+      _audits.remove(result);
+    }
+  }
+
+  static String _digest(List<int> bytes) {
+    final sink = Sha256Sink()..add(bytes);
+    return sink.close();
+  }
+
+  Future<void> _sendHello(
+    InternetAddress address,
+    int port, {
+    bool reply = false,
+  }) {
+    final payload = _hello(reply: reply);
+    return _audit(
+      Uri(scheme: 'udp', host: address.address, port: port, path: '/discovery'),
+      _digest(payload),
+      (count) async {
+        if (_stopped) throw LanException('局域网已关闭');
+        final sent = _udp.send(payload, address, port);
+        count(sent);
+        if (sent != payload.length)
+          throw LanException('Discovery send incomplete');
+      },
+    );
   }
 
   final String id, name;
@@ -327,6 +406,11 @@ class LanNode {
     await _http.close(force: true);
     await Future.wait(_requests.toList());
     await Future.wait(outgoing.values.map((done) => done.future));
+    await Future.wait(
+      _audits.toList().map(
+        (work) => work.then<void>((_) {}, onError: (Object _) {}),
+      ),
+    );
   }
 
   void _expirePeers() {
@@ -357,8 +441,8 @@ class LanNode {
   );
 
   /// Announces this device to one address (tests, or a known device).
-  void helloTo(InternetAddress address, int port) =>
-      _udp.send(_hello(), address, port);
+  Future<void> helloTo(InternetAddress address, int port) =>
+      _sendHello(address, port);
 
   var _listed = 0;
 
@@ -369,7 +453,7 @@ class LanNode {
             : await _broadcastTargets()) {
       try {
         if (_stopped) return;
-        _udp.send(_hello(), target, _discoveryPort);
+        await _sendHello(target, _discoveryPort);
       } on SocketException {
         // An interface without broadcast; the others still work.
       }
@@ -448,7 +532,13 @@ class LanNode {
       );
       if (isNew && m['reply'] != true) {
         try {
-          _udp.send(_hello(reply: true), d.address, d.port);
+          unawaited(
+            _sendHello(
+              d.address,
+              d.port,
+              reply: true,
+            ).catchError((Object _) {}),
+          );
         } on SocketException {
           // Discovery retries later.
         }
@@ -469,10 +559,17 @@ class LanNode {
 
   Future<void> _serve(HttpRequest req) async {
     final res = req.response;
+    final destination = Uri(
+      scheme: 'https',
+      host: req.connectionInfo!.remoteAddress.address,
+      port: req.connectionInfo!.remotePort,
+      path: req.uri.path,
+    );
+    var replyAccounted = false;
     try {
       if (req.method == 'GET' && req.uri.path == '/hello') {
         res.headers.contentType = ContentType.json;
-        res.write(
+        final payload = utf8.encode(
           jsonEncode({
             'siq': 1,
             'id': id,
@@ -481,6 +578,12 @@ class LanNode {
             'certificate': identity.certificatePem,
           }),
         );
+        replyAccounted = true;
+        await _audit(destination, _digest(payload), (count) async {
+          res.add(payload);
+          count(payload.length);
+          await res.close();
+        }, toolId: 'transfer.listen');
       } else if (req.method == 'POST' && req.uri.path == '/push') {
         final auth = _authorizePush(req);
         if (auth == null) return;
@@ -494,6 +597,12 @@ class LanNode {
         res.statusCode = HttpStatus.notFound;
       }
     } catch (_) {
+      if (req.uri.path == '/hello') {
+        try {
+          (await res.detachSocket(writeHeaders: false)).destroy();
+        } catch (_) {}
+        return;
+      }
       try {
         res.statusCode = HttpStatus.badRequest;
         res.persistentConnection = false;
@@ -502,9 +611,22 @@ class LanNode {
       }
     } finally {
       try {
-        await res.close();
+        if (replyAccounted) {
+          await res.close();
+        } else {
+          // Empty acknowledgements/refusals still communicate a status. They
+          // require pending too, with the empty-body digest and zero bytes.
+          await _audit(
+            destination,
+            _digest(const []),
+            (_) => res.close(),
+            toolId: 'transfer.listen',
+          );
+        }
       } catch (_) {
-        // Client disconnected or the server was stopped.
+        try {
+          (await res.detachSocket(writeHeaders: false)).destroy();
+        } catch (_) {}
       }
     }
   }
@@ -747,18 +869,27 @@ class LanNode {
     );
     try {
       final m = await (() async {
-        final req = await client.getUrl(Uri.parse('https://$host:$port/hello'));
-        req.followRedirects = false;
-        final res = await req.close();
-        if (res.statusCode != HttpStatus.ok) throw const FormatException();
-        final decoded = jsonDecode(
-          utf8.decode(await _responseBytes(res, 8192)),
+        final destination = Uri(
+          scheme: 'https',
+          host: host,
+          port: port,
+          path: '/hello',
         );
-        if (decoded is! Map<String, Object?> || !_validIdentity(decoded)) {
-          throw const FormatException();
-        }
-        return decoded;
-      })().timeout(_limits.probeTimeout);
+        return _audit(destination, _digest(const []), (_) async {
+          if (_stopped) throw LanException('局域网已关闭');
+          final req = await client.getUrl(destination);
+          req.followRedirects = false;
+          final res = await req.close();
+          if (res.statusCode != HttpStatus.ok) throw const FormatException();
+          final decoded = jsonDecode(
+            utf8.decode(await _responseBytes(res, 8192)),
+          );
+          if (decoded is! Map<String, Object?> || !_validIdentity(decoded)) {
+            throw const FormatException();
+          }
+          return decoded;
+        });
+      })();
       final certificate = m['certificate'];
       if (presented.isEmpty ||
           certificate is! String ||
@@ -824,51 +955,59 @@ class LanNode {
         final chosenNonce = nonce ?? randomToken();
         final chosenMessage = messageId ?? randomToken();
         final chosenSentAt = sentAtUnix ?? _unixNow();
-        final req = await client.postUrl(
-          Uri.parse('https://${to.address}:${to.port}/push'),
+        final destination = Uri(
+          scheme: 'https',
+          host: to.address,
+          port: to.port,
+          path: '/push',
         );
-        req.followRedirects = false;
-        req.headers
-          ..contentType = ContentType.binary
-          ..contentLength = length
-          ..set('x-siq-id', id)
-          ..set('x-siq-name', Uri.encodeComponent(name))
-          ..set('x-muyon-fp', identity.fingerprint)
-          ..set('x-muyon-nonce', chosenNonce)
-          ..set('x-muyon-msg', chosenMessage)
-          ..set('x-muyon-ts', '$chosenSentAt')
-          ..set(
-            'x-muyon-sig',
-            identity.sign(
-              pushBinding(
-                fingerprint: identity.fingerprint,
-                nonce: chosenNonce,
-                messageId: chosenMessage,
-                sentAtUnix: chosenSentAt,
-                length: length,
-                bodyHash: bodyHash,
+        await _audit(destination, bodyHash, (count) async {
+          if (_stopped) throw LanException('局域网已关闭');
+          final req = await client.postUrl(destination);
+          req.followRedirects = false;
+          req.headers
+            ..contentType = ContentType.binary
+            ..contentLength = length
+            ..set('x-siq-id', id)
+            ..set('x-siq-name', Uri.encodeComponent(name))
+            ..set('x-muyon-fp', identity.fingerprint)
+            ..set('x-muyon-nonce', chosenNonce)
+            ..set('x-muyon-msg', chosenMessage)
+            ..set('x-muyon-ts', '$chosenSentAt')
+            ..set(
+              'x-muyon-sig',
+              identity.sign(
+                pushBinding(
+                  fingerprint: identity.fingerprint,
+                  nonce: chosenNonce,
+                  messageId: chosenMessage,
+                  sentAtUnix: chosenSentAt,
+                  length: length,
+                  bodyHash: bodyHash,
+                ),
               ),
-            ),
+            );
+          var sent = 0;
+          onProgress?.call(sent, length);
+          await req.addStream(
+            File(file).openRead().map((chunk) {
+              sent += chunk.length;
+              count(chunk.length);
+              onProgress?.call(sent, length);
+              return chunk;
+            }),
           );
-        var sent = 0;
-        onProgress?.call(sent, length);
-        await req.addStream(
-          File(file).openRead().map((chunk) {
-            sent += chunk.length;
-            onProgress?.call(sent, length);
-            return chunk;
-          }),
-        );
-        final res = await req.close();
-        await _responseBytes(res);
-        if (res.statusCode != HttpStatus.ok) {
-          throw LanException(
-            res.statusCode == HttpStatus.requestEntityTooLarge
-                ? '内容太大，对方拒收（上限 ${maxPushBytes ~/ 1048576} MB）'
-                : '对方没有收下（HTTP ${res.statusCode}）',
-          );
-        }
-      })().timeout(_limits.transferTimeout);
+          final res = await req.close();
+          await _responseBytes(res);
+          if (res.statusCode != HttpStatus.ok) {
+            throw LanException(
+              res.statusCode == HttpStatus.requestEntityTooLarge
+                  ? '内容太大，对方拒收（上限 ${maxPushBytes ~/ 1048576} MB）'
+                  : '对方没有收下（HTTP ${res.statusCode}）',
+            );
+          }
+        });
+      })();
     } on IOException {
       throw LanException('发送给 ${to.name} 失败：对方可能已关闭"局域网可见"或离开网络');
     } on TimeoutException {

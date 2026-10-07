@@ -3,6 +3,7 @@ import 'package:supplier_core/supplier_core.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/tool_registry.dart';
+import '../platform/outbound_tool_ledger.dart';
 
 /// Registers a recorded channel, not a model-callable grant operation. Only an
 /// invocation-bound application closure can execute this provider's handler.
@@ -116,7 +117,14 @@ class InquiryWebAuthority implements AssistantWebAuthority {
         effectStarted = true;
       }
 
-      value = await operation(checkBeforeEffect);
+      value = await OutboundToolLedger(registry.database).run(
+        toolId: toolId,
+        channel: 'inquiry_web',
+        isCancelled: () => cancellation.isCancelled,
+        destination: destination,
+        payload: const [],
+        operation: (_) => operation(checkBeforeEffect),
+      );
       validate();
       return ToolCallResult(
         status: ToolCallStatus.succeeded,

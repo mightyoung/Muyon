@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'assistant_scope.dart';
+import 'change_log.dart';
 import 'context.dart';
 import 'references.dart';
 import 'storage.dart';
@@ -52,15 +53,21 @@ class ToolCallResult {
     List<ObjectRef> objectRefs = const [],
     List<ArtifactRef> artifactRefs = const [],
     this.executionId,
+    List<ObjectChange> changes = const [],
   }) : data = freezeJsonMap(data),
        objectRefs = List.unmodifiable(objectRefs),
-       artifactRefs = List.unmodifiable(artifactRefs);
+       artifactRefs = List.unmodifiable(artifactRefs),
+       changes = List.unmodifiable(changes);
   final ToolCallStatus status;
   final String summary;
   final Map<String, Object?> data;
   final List<ObjectRef> objectRefs;
   final List<ArtifactRef> artifactRefs;
   final String? executionId;
+
+  /// Objects the call created, changed or deleted, for scope advancement
+  /// (ADR-0004 §5.3). Not part of [toJson]: the receipt format is unchanged.
+  final List<ObjectChange> changes;
   ToolCallResult forInvocation(String id) => ToolCallResult(
     status: status,
     summary: summary,
@@ -68,6 +75,7 @@ class ToolCallResult {
     objectRefs: objectRefs,
     artifactRefs: artifactRefs,
     executionId: id,
+    changes: changes,
   );
   Map<String, Object?> toJson() => {
     'status': status.name,
@@ -103,6 +111,12 @@ class ToolCallResult {
         ),
     ],
   );
+}
+
+class ObjectChange {
+  const ObjectChange(this.ref, this.op);
+  final ObjectRef ref;
+  final ChangeOp op;
 }
 
 class ToolCancelled implements Exception {
