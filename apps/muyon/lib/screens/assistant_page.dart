@@ -28,6 +28,13 @@ class AssistantPage extends StatefulWidget {
   State<AssistantPage> createState() => _AssistantPageState();
 }
 
+/// Title of the confirmation dialog for a task waiting at [stage].
+String confirmTitle(String stage) => switch (stage) {
+  'model' => '确认发送给模型',
+  'compaction' => '确认发送较早内容做摘要',
+  _ => '确认工具操作',
+};
+
 class _AssistantPageState extends State<AssistantPage> {
   final _input = TextEditingController();
   String? _conversationId;
@@ -122,7 +129,7 @@ class _AssistantPageState extends State<AssistantPage> {
     final yes = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(task.stage == 'model' ? '确认发送给模型' : '确认工具操作'),
+        title: Text(confirmTitle(task.stage)),
         content: SizedBox(
           width: 620,
           child: SingleChildScrollView(

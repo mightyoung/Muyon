@@ -135,6 +135,14 @@ class OpenAiModelGateway {
   }) : _clientFactory = clientFactory ?? HttpClient.new;
   final SecretStore secrets;
 
+  /// [text] with the credential of [profile] masked, for content an endpoint
+  /// wrote that is about to be stored (it may echo the key).
+  Future<String> mask(ModelProfile profile, String text) async {
+    final ref = profile.credentialRef;
+    if (ref == null) return text;
+    return maskSecret(text, await secrets.read(ref));
+  }
+
   /// Records every request before it is sent; when set, a failed record
   /// means the request is not sent.
   final OutboundLedger? ledger;

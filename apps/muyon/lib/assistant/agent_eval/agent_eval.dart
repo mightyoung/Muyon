@@ -49,6 +49,7 @@ import '../../platform/business_tools.dart';
 import '../../platform/foundation_repository.dart';
 import '../../services/models/credential_redaction.dart';
 import '../../services/models/model_gateway.dart';
+import '../../services/models/model_provider.dart';
 import '../personal_agent.dart';
 import '../selection_eval/llm_selection_eval.dart'
     show llmReportSlug, reportEndpoint;
@@ -518,16 +519,26 @@ List<String> checkWriteState(
 
 // ---------------------------------------------------------------- gateway
 
+/// A model request or a summary request: the person confirms it as a request
+/// to the model, there is no tool call on it.
+bool confirmsAsModelRequest(String stage) =>
+    stage == 'model' || stage == 'compaction';
+
 class GatewayCall {
   const GatewayCall({
     required this.ms,
     required this.ok,
     this.promptTokens,
     this.completionTokens,
+    this.firstEventMs,
   });
   final double ms;
   final bool ok;
   final int? promptTokens, completionTokens;
+
+  /// Streamed responses only: time to the first event (the first token, or
+  /// the first piece of a tool call). null for a non-streamed response.
+  final double? firstEventMs;
 }
 
 int? _count(Object? value) =>
@@ -535,8 +546,9 @@ int? _count(Object? value) =>
 
 /// The product gateway with a stopwatch and the usage field kept. Only
 /// timing and token counts are recorded, never request or response bodies.
-/// The first complete response is the first successful [calls] entry: the
-/// assistant is not streaming yet, so there is no first-token time.
+/// A non-streaming profile goes through [request]; a streaming or native one
+/// through [chatStream], which is recorded too, with the time to its first
+/// event. The first successful [calls] entry is the first response.
 class RecordingGateway extends OpenAiModelGateway {
   RecordingGateway(super.secrets, {super.timeout, super.ledger});
   final calls = <GatewayCall>[];
@@ -573,6 +585,62 @@ class RecordingGateway extends OpenAiModelGateway {
     } catch (_) {
       calls.add(GatewayCall(ms: watch.elapsedMicroseconds / 1000, ok: false));
       rethrow;
+    }
+  }
+
+  @override
+  Stream<ModelEvent> chatStream({
+    required ModelProvider provider,
+    required ModelRequest request,
+    ModelCancellation? cancellation,
+    Future<void> Function()? beforeSend,
+    Duration? maxDuration,
+  }) async* {
+    final watch = Stopwatch()..start();
+    double? first;
+    int? prompt, completion;
+    var done = false, failed = false, recorded = false;
+    void record() {
+      if (recorded) return;
+      recorded = true;
+      calls.add(
+        GatewayCall(
+          ms: watch.elapsedMicroseconds / 1000,
+          ok: done && !failed,
+          promptTokens: prompt,
+          completionTokens: completion,
+          firstEventMs: first,
+        ),
+      );
+    }
+
+    try {
+      await for (final event in super.chatStream(
+        provider: provider,
+        request: request,
+        cancellation: cancellation,
+        beforeSend: beforeSend,
+        maxDuration: maxDuration,
+      )) {
+        first ??= watch.elapsedMicroseconds / 1000;
+        switch (event) {
+          case Usage():
+            prompt = event.promptTokens;
+            completion = event.completionTokens;
+          case Done():
+            done = true;
+          case ModelError():
+            failed = true;
+          default:
+            break;
+        }
+        yield event;
+      }
+    } catch (_) {
+      failed = true;
+      rethrow;
+    } finally {
+      record();
     }
   }
 }
@@ -720,7 +788,8 @@ Future<AgentTaskResult> runAgentTask({
       }
       final digest = current.payload['requestDigest'] as String;
       try {
-        if (current.stage == 'model') {
+        if (confirmsAsModelRequest(current.stage)) {
+          // A summary request is a model request the person confirms.
           await agent.confirm(current.id, requestDigest: digest);
           modelConfirmations++;
         } else {
@@ -822,7 +891,9 @@ Future<AgentTaskResult> runAgentTask({
       maxRounds: agent.maxRounds,
       requests: gateway.calls.length,
       totalMs: watch.elapsedMicroseconds / 1000,
-      firstResponseMs: ok.isEmpty ? null : ok.first.ms,
+      firstResponseMs: ok.isEmpty
+          ? null
+          : (ok.first.firstEventMs ?? ok.first.ms),
       promptTokens: usage.isEmpty
           ? null
           : usage.fold<int>(0, (s, c) => s + (c.promptTokens ?? 0)),
