@@ -287,4 +287,8 @@ ADR-0001 §4 在第一阶段退出前**不允许新功能、第一阶段不需�
 12. 数据中心的"插件注册与发布门槛"、规则配置、SOUL、助手权限开关**四项全部要做**（用户 2026-10-06）；规格与排期见审阅文档 §8，冻结期内只写规格。
 13. 深色模式：所有蓝色位置用琥珀；警告一律红色。
 
+14. **采纳 Claude Design v2 为规格**（用户 2026-10-07），已提交到 `docs/design/claude-design/v2/`（7 个 html、support.js、tokens.md、components.md、round2-notes.md）。审阅见 `claude-design-v2-review-2026-10-07.md`。
+15. 图标：用 Flutter 内置 `Icons.*` 的**线性/实心成对**（选中用实心），不新增字体/依赖。
+16. **询价插件的业务功能与页面，与设计稿有出入时以 Folio 为准**；视觉与壳按 v2。对照与修正见 `folio-parity-checklist.md`；第三轮补稿提示词见 `claude-design-prompt-round3.md`。
+
 待决：这四项开工是否对 ADR-0001 开例外（leader 向用户确认）。

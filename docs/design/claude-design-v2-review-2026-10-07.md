@@ -53,3 +53,6 @@
 2. 是否把 `v2/` 提交进仓库作为规格源（约 440KB：7 个 html + support.js + 3 个 md；排除 `.DS_Store`、`uploads/` 里与仓库重复的 DESIGN.md 和提示词副本；稿里只有示意数据，无个人内容）？还是只留本机、由 leader 引用路径？
 3. 图标集：G2 的①②③。
 4. 是否开第三轮补稿（G1、G6–G11）。
+
+## 7. 用户答复（2026-10-07）
+1. 采纳 v2。2. 提交入库（已入 `docs/design/claude-design/v2/`）。3. 图标按推荐：内置 `Icons.*` 线性/实心成对。4. 开第三轮补稿，并规定**询价与 Folio 有出入时以 Folio 为准**（见 `folio-parity-checklist.md`、`claude-design-prompt-round3.md`）。

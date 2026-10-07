@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap;-webkit-font-smoothing:antialiased}button{font-family:inherit;cursor:pointer}input{font-family:inherit}.fx>*{flex:none}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="display:flex;gap:56px;justify-content:center;align-items:flex-start;padding:40px 24px;flex-wrap:wrap;min-height:100vh;box-sizing:border-box">
+
+<div style="width:300px;color:#111827;display:flex;flex-direction:column;gap:14px;padding-top:24px">
+<div style="font-size:24px;font-weight:600">助手设置 · 第二轮</div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565"><b style="color:#111827">可进入的二级页</b><br>助手设置 › SOUL / 规则配置（› 规则详情）/ 助手权限 / 数据中心·注册与发布门槛</div>
+<div style="display:flex;flex-direction:column;gap:6px"><sc-for list="{{ navs }}" as="n" hint-placeholder-count="5"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for></div>
+<div style="font-size:13px;line-height:1.8;color:#4B5565;border-top:1px solid #C3CAD6;padding-top:12px"><b style="color:#111827">状态切换说明</b><br>下面的芯片强制显示该状态；“自动”则按数据推导。</div>
+<sc-for list="{{ demoGroups }}" as="g" hint-placeholder-count="3"><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#636C7E">{{ g.label }}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ g.chips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div></sc-for>
+<div style="font-size:12px;line-height:1.7;color:#636C7E">所有数字与名称均为示意数据。</div>
+</div>
+
+<div style="{{ phoneStyle }}">
+<div style="height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>9:41</span><span style="font-size:11px;font-weight:500;color:var(--ink3)">示意数据</span></div>
+<div style="height:56px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+<button onClick="{{ back }}" aria-label="返回" style="width:48px;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);display:flex;align-items:center;justify-content:center;color:var(--ink)"><span class="ms" style="font-size:22px">arrow_back</span></button>
+<div style="padding:0 18px;height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;font-size:15px;font-weight:600">{{ title }}</div><div style="width:48px"></div></div>
+
+<div class="fx" style="flex:1;min-height:0;overflow-y:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:16px">
+
+<sc-if value="{{ isHub }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 0 4px"><div style="width:72px;height:72px;border-radius:999px;background:var(--sk);display:flex;align-items:center;justify-content:center"><span class="ms" style="font-size:36px;font-variation-settings:'FILL' 1">chat_bubble</span></div><div style="font-size:18px;font-weight:600">沐阳助手</div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ hubItems }}" as="h" hint-placeholder-count="4"><button onClick="{{ h.go }}" style="width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:0;display:flex;align-items:center;gap:14px;min-height:60px;border-top:{{ h.bt }}"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ h.icon }}</span><span style="flex:1"><span style="display:block;font-size:15px">{{ h.name }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:1px">{{ h.sub }}</span></span><span class="ms" style="font-size:20px;color:var(--ink3)">chevron_right</span></button></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isGate }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px"><sc-for list="{{ plugChips }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.go }}" style="{{ p.style }}">{{ p.label }}</button></sc-for></div>
+<div style="background:var(--sf);border:1px solid {{ syncBorder }};border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:10px"><span class="ms" style="font-size:26px;color:{{ syncFg }}">menu_book</span><div style="flex:1"><div style="font-size:15px;font-weight:600">助手知识库</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">{{ syncLine }}</div></div><span style="display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:999px;background:{{ syncBg }};color:{{ syncFg }};font-weight:600"><span class="ms" style="font-size:14px">{{ syncIcon }}</span>{{ syncState }}</span></div>
+<div style="font-size:13px;line-height:1.7;color:var(--ink2)">{{ syncText }}</div>
+<div style="display:flex;gap:8px"><button onClick="{{ doSync }}" style="{{ syncBtnStyle }}">{{ syncBtn }}</button><sc-if value="{{ syncRunning }}" hint-placeholder-val="{{ false }}"><button onClick="{{ cancelSync }}" style="height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">取消</button></sc-if></div>
+</div>
+
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">注册检查 · {{ passCount }}/6 通过</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ checks }}" as="c" hint-placeholder-count="6"><div style="padding:12px 0;border-top:{{ c.bt }}"><div style="display:flex;align-items:center;gap:10px"><span class="ms" style="font-size:22px;color:{{ c.color }}">{{ c.icon }}</span><span style="flex:1;font-size:14px;font-weight:500">{{ c.t }}</span><span style="font-size:12px;color:{{ c.color }};font-weight:600">{{ c.state }}</span></div>
+<sc-if value="{{ c.fail }}" hint-placeholder-val="{{ false }}"><div style="margin:8px 0 0 32px;background:var(--redbg);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.7;color:var(--ink)"><b style="color:var(--red)">去哪里改</b>　{{ c.fix }}</div></sc-if></div></sc-for></div></div>
+
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">敏感属性 · 点击标记 · 本次摘要剔除 {{ sensCount }} 项</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ sensRows }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.go }}" style="width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:0;display:flex;align-items:center;gap:12px;min-height:56px;border-top:{{ a.bt }}"><span class="ms" style="font-size:22px;color:var(--ink2)">{{ a.icon }}</span><span style="flex:1"><span style="display:block;font-size:14px">{{ a.name }}</span><span style="display:block;font-size:12px;color:{{ a.noteColor }};margin-top:1px">{{ a.note }}</span></span><span style="{{ a.swStyle }}"><span style="{{ a.knob }}"></span></span></button></sc-for></div>
+<div style="background:var(--sk);border-radius:16px;padding:12px 14px;margin-top:10px;font-size:12px;line-height:1.9;color:var(--ink2)"><div style="font-size:11px;color:var(--ink3);margin-bottom:2px">助手将读到的摘要</div><sc-for list="{{ preview }}" as="p" hint-placeholder-count="3"><span style="{{ p.style }}">{{ p.t }}</span></sc-for></div></div>
+
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">示例问法评测 · {{ evalSum }}</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px">
+<sc-if value="{{ noEval }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--ink3);padding:14px 0">尚未提供示例问法，无法评测助手是否学会。</div></sc-if>
+<sc-for list="{{ evals }}" as="e" hint-placeholder-count="3"><div style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-top:{{ e.bt }}"><span class="ms" style="font-size:20px;color:{{ e.color }}">{{ e.icon }}</span><div style="flex:1;min-width:0"><div style="font-size:13px">“{{ e.q }}”</div><div style="font-size:11px;color:var(--ink3);margin-top:2px;font-family:Consolas,Menlo,monospace">→ {{ e.api }}</div><sc-if value="{{ e.bad }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--red);margin-top:3px">未命中预期接口，助手会改走通用检索。</div></sc-if></div></div></sc-for></div>
+<button onClick="{{ rerunEval }}" style="width:100%;height:44px;margin-top:10px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">{{ evalBtn }}</button></div>
+</sc-if>
+
+<sc-if value="{{ isRules }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:20px;padding:14px 16px;font-size:13px;line-height:1.7;color:var(--ink2)">语句命中后调用绑定的接口或动作。顺序即优先级：多条同时命中时，排在前面的生效。写入类规则每次都需确认，且不可关闭。</div>
+<div style="height:44px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--ink3);font-size:14px"><span class="ms" style="font-size:20px">search</span>{{ searchText }}</div>
+<sc-if value="{{ showConflict }}" hint-placeholder-val="{{ false }}"><div style="border:1px solid var(--red);background:var(--redbg);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600;color:var(--red)"><span class="ms" style="font-size:20px">warning</span>语句同时命中 2 条规则</div><div style="font-size:12px;line-height:1.8;color:var(--ink)">“比较华东泵站改造报价和预算”<br>生效：<b>{{ winName }}</b>　未生效：{{ loseName }}<br>需要换结果？把另一条上移，或停用其中一条。</div></div></sc-if>
+
+<sc-if value="{{ rLoad }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="3"><div style="height:76px;border-radius:20px;background:var(--sk)"></div></sc-for><div style="font-size:12px;color:var(--ink3);text-align:center">正在读取规则…</div></div></sc-if>
+<sc-if value="{{ rEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">bolt</span><br>还没有规则<br>用一句常用问法 + 一个只读接口建立第一条。<br><button style="margin-top:12px;height:44px;padding:0 24px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">新建规则</button></div></sc-if>
+<sc-if value="{{ rNoMatch }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 20px;color:var(--ink3);font-size:14px;line-height:1.8">没有符合“{{ searchText }}”的规则<br><a href="#" onClick="{{ clearFilter }}">清除筛选</a></div></sc-if>
+<sc-if value="{{ rFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;font-size:14px;font-weight:600;color:var(--red);align-items:center"><span class="ms" style="font-size:20px">error</span>规则读取失败</div><div style="font-size:13px;line-height:1.7;color:var(--ink)">本地规则文件校验未通过，已保留原文件。助手暂不使用预设规则，仍可正常对话。</div><div><button onClick="{{ retryRules }}" style="height:40px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">重试</button></div></div></sc-if>
+
+<sc-if value="{{ rList }}" hint-placeholder-val="{{ true }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 8px 0 4px">
+<sc-for list="{{ ruleRows }}" as="x" hint-placeholder-count="4"><div draggable="true" onDragStart="{{ x.dstart }}" onDragOver="{{ x.dover }}" onDrop="{{ x.drop }}" style="display:flex;align-items:center;gap:2px;border-top:{{ x.bt }}">
+<span class="ms" title="拖动调整优先级" style="font-size:20px;color:var(--ink3);cursor:grab;flex:none;padding-left:2px">drag_indicator</span><div style="display:flex;flex-direction:column;flex:none"><button onClick="{{ x.up }}" aria-label="上移" style="width:36px;height:30px;border:0;background:transparent;color:{{ x.upColor }}"><span class="ms" style="font-size:20px">keyboard_arrow_up</span></button><button onClick="{{ x.down }}" aria-label="下移" style="width:36px;height:30px;border:0;background:transparent;color:{{ x.downColor }}"><span class="ms" style="font-size:20px">keyboard_arrow_down</span></button></div>
+<button onClick="{{ x.open }}" style="flex:1;min-width:0;text-align:left;border:0;background:transparent;color:var(--ink);padding:12px 4px;opacity:{{ x.op }}"><span style="display:flex;align-items:center;gap:8px"><span style="width:22px;height:22px;border-radius:999px;background:var(--sk);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none">{{ x.n }}</span><span style="font-size:15px;font-weight:500">{{ x.name }}</span></span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">“{{ x.trig }}”</span><span style="display:flex;align-items:center;gap:8px;margin-top:5px;font-size:11px"><span style="padding:2px 8px;border-radius:999px;background:{{ x.bg }};color:{{ x.fg }};font-weight:600">{{ x.kind }}</span><span style="color:var(--ink3)">命中 {{ x.hits }} 次{{ x.off }}</span></span></button>
+<button onClick="{{ x.toggle }}" aria-label="启用" style="border:0;background:transparent;padding:8px 4px"><span style="{{ x.swStyle }}"><span style="{{ x.knob }}"></span></span></button></div></sc-for>
+<button onClick="{{ newRule }}" style="width:100%;border:0;border-top:1px solid var(--rule);background:transparent;color:var(--acc);height:52px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:600"><span class="ms" style="font-size:22px">add</span>新建规则</button>
+</div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isRule }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:14px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">名称<input value="{{ rl.name }}" onInput="{{ setName }}" style="height:44px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label>
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">触发语句（{参数} 为可变部分）<input value="{{ rl.trig }}" onInput="{{ setTrig }}" style="height:44px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label>
+<div style="background:var(--sk);border-radius:16px;padding:12px 14px;font-size:12px;line-height:1.8;color:var(--ink2)"><div style="font-size:11px;color:var(--ink3)">参数提取预览</div>示例：“{{ sampleText }}”<br><sc-for list="{{ extracted }}" as="e" hint-placeholder-count="1"><div>{{ e }}</div></sc-for></div></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">绑定接口 / 动作</div><div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ apiOpts }}" as="a" hint-placeholder-count="5"><button onClick="{{ a.go }}" style="{{ a.style }}"><span style="flex:1;text-align:left;font-size:13px;font-family:Consolas,Menlo,monospace">{{ a.api }}</span><span style="font-size:11px;padding:2px 8px;border-radius:999px;background:{{ a.bg }};color:{{ a.fg }};font-weight:600">{{ a.kind }}</span></button></sc-for></div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px">
+<div style="display:flex;align-items:center;gap:12px;min-height:56px"><span class="ms" style="font-size:22px;color:var(--ink2)">{{ confirmIcon }}</span><span style="flex:1;font-size:14px">{{ confirmText }}</span><sc-if value="{{ isWrite }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--ink3);display:flex;gap:4px;align-items:center"><span class="ms" style="font-size:16px">lock</span>不可关闭</span></sc-if></div></div>
+<div style="background:var(--sk);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="font-size:13px;font-weight:600;display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:18px">play_arrow</span>试一试</div><div style="background:var(--sf);border-radius:16px;padding:10px 14px;font-size:14px">{{ sampleText }}</div><div style="font-size:12px;line-height:1.8;color:var(--ink2)">命中：{{ rl.name }}（优先级 {{ rl.n }}）<br>调用：<span style="font-family:Consolas,Menlo,monospace">{{ rl.api }}</span><br>{{ tryNote }}</div></div>
+<div style="display:flex;gap:10px;font-size:12px;color:var(--ink3);padding:0 6px"><span>命中 {{ rl.hits }} 次</span><span>·</span><span>最近一次 今天 09:14</span></div>
+<div style="display:flex;gap:10px"><button onClick="{{ toggleCur }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">{{ rl.toggleLabel }}</button>
+<sc-if value="{{ !delAsk }}" hint-placeholder-val="{{ true }}"><button onClick="{{ askDel }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--red);background:var(--sf);color:var(--red);font-size:14px;font-weight:600">删除</button></sc-if>
+<sc-if value="{{ delAsk }}" hint-placeholder-val="{{ false }}"><button onClick="{{ doDel }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--red);color:#fff;font-size:14px;font-weight:600">确认删除</button></sc-if></div>
+<sc-if value="{{ delAsk }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--red);line-height:1.6;margin-top:-8px;padding:0 6px">删除后历史命中记录保留，但此语句将不再触发任何接口。<a href="#" onClick="{{ cancelDel }}" style="margin-left:6px">取消</a></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isSoul }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:22px;font-variation-settings:'FILL' 1">favorite</span><span style="font-size:16px;font-weight:600">SOUL</span></div><div style="font-size:13px;line-height:1.7;color:var(--ink2)">助手的语气与做事原则。只影响表达与偏好，不扩大权限。</div></div>
+<sc-if value="{{ soulDirty }}" hint-placeholder-val="{{ false }}"><div style="background:var(--tint);color:var(--deep);border-radius:16px;padding:10px 14px;font-size:13px;display:flex;gap:8px;align-items:center"><span class="ms" style="font-size:18px">schedule</span>已保存，下一次对话生效；正在进行的对话不受影响。</div></sc-if>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">语气</div><div style="display:flex;gap:8px"><sc-for list="{{ tones }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<div><div style="display:flex;justify-content:space-between;margin:0 8px 6px;font-size:12px;color:var(--ink3)"><span>做事原则</span><span style="color:{{ countColor }}">{{ count }} / 300 字</span></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 8px 0 16px">
+<sc-for list="{{ prin }}" as="p" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:6px;min-height:56px;border-top:{{ p.bt }}"><input value="{{ p.t }}" onInput="{{ p.edit }}" aria-label="原则" style="flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:14px;height:48px"><button onClick="{{ p.del }}" aria-label="删除" style="width:48px;height:48px;border:0;background:transparent;color:var(--ink3)"><span class="ms" style="font-size:20px">delete</span></button></div></sc-for>
+<div style="display:flex;align-items:center;gap:6px;min-height:56px;border-top:1px solid var(--rule)"><input value="{{ draft }}" onInput="{{ setDraft }}" placeholder="添加一条原则" style="flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:14px;height:48px"><button onClick="{{ addPrin }}" style="height:40px;padding:0 16px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">添加</button></div></div>
+<sc-if value="{{ overLimit }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--red);margin:6px 8px 0">超出 300 字上限，无法添加；请先删减已有原则。</div></sc-if></div>
+<div style="border:1px dashed var(--rs);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><span class="ms" style="font-size:20px">lock</span>固定安全规则 · 不可覆盖</div><div style="font-size:13px;line-height:1.8;color:var(--ink2)">· 写入与外传逐次确认，不可关闭<br>· 模型回答与资料内容不授予权限<br>· 本地取消不冒称远端已撤销<br>· SOUL 中与以上冲突的内容会被忽略</div></div>
+<div style="display:flex;gap:10px;font-size:12px;line-height:1.7;color:var(--ink3);padding:0 6px"><span class="ms" style="font-size:18px">outbound</span>SOUL 与原则文本在使用远程模型时会随请求发出，并记入“数据去向”。</div>
+</sc-if>
+
+<sc-if value="{{ isMem }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ !memOpen }}" hint-placeholder-val="{{ true }}"><div style="background:var(--sk);border-radius:24px;padding:24px 20px;display:flex;flex-direction:column;gap:12px;align-items:flex-start;margin-top:16px"><span class="ms" style="font-size:36px;color:var(--ink2)">lock</span><div style="font-size:18px;font-weight:600">请谨慎访问</div><div style="font-size:14px;line-height:1.7;color:var(--ink2)">记忆来自对话、设备来件和资料，其中 1 条来源含敏感信息。记忆不会授予助手任何权限。</div><button onClick="{{ openMem }}" style="height:48px;padding:0 24px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">继续查看</button></div></sc-if>
+<sc-if value="{{ memOpen }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--acc);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:20px;color:var(--acc)">auto_awesome</span><span style="font-size:14px;font-weight:600;flex:1">Dream 整理建议</span><span style="font-size:12px;color:var(--ink3)">昨天</span></div>
+<div style="font-size:13px;line-height:1.7;color:var(--ink2)">合并 2 条重复记忆“默认币种 CNY”。仅整理，不扩大权限。</div>
+<sc-if value="{{ dreamPending }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:8px"><button onClick="{{ acceptDream }}" style="flex:1;height:44px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">接受</button><button onClick="{{ ignoreDream }}" style="flex:1;height:44px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">忽略</button></div></sc-if>
+<sc-if value="{{ !dreamPending }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:{{ dreamColor }};display:flex;gap:6px;align-items:center"><span class="ms" style="font-size:18px">{{ dreamIcon }}</span>{{ dreamText }} · <a href="#" onClick="{{ undoDream }}">撤回</a></div></sc-if></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">记忆 · {{ memCount }} 条</div>
+<sc-if value="{{ memFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px;margin-bottom:8px"><div style="display:flex;gap:8px;font-size:14px;font-weight:600;color:var(--red);align-items:center"><span class="ms" style="font-size:20px">error</span>记忆读取失败</div><div style="font-size:13px;line-height:1.7;color:var(--ink)">记忆库不可用。助手本次对话不会使用任何记忆，也不会写入新的记忆。</div><div><button onClick="{{ retryMem }}" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">重试</button></div></div></sc-if>
+<sc-if value="{{ memEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:32px 20px;color:var(--ink3);font-size:14px;line-height:1.8">没有记忆<br>助手在对话中学到的偏好会出现在这里。</div></sc-if>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 8px 0 16px"><sc-for list="{{ memRows }}" as="m" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:4px;border-top:{{ m.bt }}"><button onClick="{{ m.open }}" style="flex:1;min-width:0;text-align:left;border:0;background:transparent;color:var(--ink);padding:12px 0;opacity:{{ m.op }}"><span style="display:block;font-size:14px;font-weight:500;line-height:1.5">{{ m.t }}</span><span style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:11px"><span style="padding:2px 8px;border-radius:999px;background:{{ m.kbg }};color:{{ m.kfg }};font-weight:600">{{ m.kind }}</span><span style="padding:2px 8px;border-radius:999px;background:var(--sk);color:var(--ink2)">{{ m.scope }}</span><span style="color:var(--ink3);padding:2px 0">来源 {{ m.src }} · {{ m.exp }}</span></span></button><button onClick="{{ m.toggle }}" aria-label="启用" style="border:0;background:transparent;padding:8px 4px"><span style="{{ m.swStyle }}"><span style="{{ m.knob }}"></span></span></button></div></sc-for></div></div>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">经验候选 · 验证后才参与任务</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ expRows }}" as="e" hint-placeholder-count="1"><div style="display:flex;align-items:center;gap:10px;min-height:64px;border-top:{{ e.bt }}"><span style="flex:1;font-size:13px;line-height:1.6">{{ e.t }}<span style="display:block;font-size:11px;color:var(--ink3)">{{ e.state }}</span></span><button onClick="{{ e.go }}" style="{{ e.style }}">{{ e.label }}</button></div></sc-for></div></div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ isMemEdit }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:14px">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">内容<input value="{{ mc.t }}" onInput="{{ setMem }}" style="height:48px;border-radius:12px;border:1px solid var(--rs);background:var(--bg);color:var(--ink);padding:0 12px;font-size:15px;box-sizing:border-box"></label>
+<div style="font-size:12px;line-height:1.8;color:var(--ink3)">类型：<b style="color:var(--ink)">{{ mc.kind }}</b>（{{ mc.kindNote }}）<br>来源：{{ mc.src }}　作用域：{{ mc.scope }}</div>
+<div><div style="font-size:12px;color:var(--ink3);margin-bottom:6px">过期</div><div style="display:flex;gap:8px"><sc-for list="{{ expOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div></div>
+<div style="display:flex;gap:10px"><button onClick="{{ toggleMem }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">{{ mc.toggleLabel }}</button>
+<sc-if value="{{ !memDel }}" hint-placeholder-val="{{ true }}"><button onClick="{{ askMemDel }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--red);background:var(--sf);color:var(--red);font-size:14px;font-weight:600">删除</button></sc-if>
+<sc-if value="{{ memDel }}" hint-placeholder-val="{{ false }}"><button onClick="{{ doMemDel }}" style="flex:1;height:48px;border-radius:999px;border:0;background:var(--red);color:#fff;font-size:14px;font-weight:600">确认删除</button></sc-if></div>
+<sc-if value="{{ memDel }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:16px;padding:12px 14px;font-size:12px;line-height:1.8;color:var(--ink)">删除会传递到后续整理：Dream 不会再从同一来源重新生成这条记忆。已用过它的历史对话不受影响。<a href="#" onClick="{{ cancelMemDel }}" style="margin-left:6px">取消</a></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isModels }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:20px;padding:14px 16px;font-size:13px;line-height:1.7;color:var(--ink2)">无模型时仍可阅读、编辑与检索。助手<b>不会自动切换到其他模型</b>：所选模型不可用时，会停下并告诉你原因。</div>
+<sc-if value="{{ modelFail }}" hint-placeholder-val="{{ false }}"><div style="background:var(--redbg);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;font-size:14px;font-weight:600;color:var(--red);align-items:center"><span class="ms" style="font-size:20px">error</span>模型配置读取失败</div><div style="font-size:13px;line-height:1.7;color:var(--ink)">凭据库无法打开。已保存的 API Key 未被改动；修复前助手无法使用远程模型。</div><div><button onClick="{{ retryModel }}" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">重试</button></div></div></sc-if>
+<sc-if value="{{ modelEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:36px 20px;color:var(--ink3);font-size:14px;line-height:1.8"><span class="ms" style="font-size:44px;color:var(--rs)">model_training</span><br>还没有配置模型<br>仍可阅读、编辑与检索；添加后助手才能对话。</div></sc-if>
+<sc-if value="{{ modelOk }}" hint-placeholder-val="{{ true }}"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ modelRows }}" as="m" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;min-height:68px;border-top:{{ m.bt }}"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ m.icon }}</span><span style="flex:1;padding:10px 0"><span style="display:block;font-size:15px;font-weight:500">{{ m.name }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:1px">{{ m.sub }}</span></span><span style="font-size:12px;padding:3px 10px;border-radius:999px;background:var(--sk);color:var(--ink2);font-weight:600">{{ m.use }}</span></div></sc-for></div></sc-if>
+<button onClick="{{ addModel }}" style="height:48px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:14px;font-weight:600">添加模型</button>
+</sc-if>
+
+<sc-if value="{{ isModelAdd }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:var(--ink3);margin:0 8px">用途</div><div style="display:flex;gap:8px"><sc-for list="{{ useOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:var(--ink3);margin:0 8px">位置</div><div style="display:flex;gap:8px"><sc-for list="{{ locOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button></sc-for></div></div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px"><sc-for list="{{ mFields }}" as="f" hint-placeholder-count="4"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink3)">{{ f.label }}<input type="{{ f.type }}" value="{{ f.value }}" placeholder="{{ f.ph }}" onInput="{{ f.set }}" style="{{ f.style }}"><span style="height:14px;font-size:12px;color:{{ f.hintColor }}">{{ f.hint }}</span></label></sc-for></div>
+<div style="display:flex;gap:10px;font-size:12px;line-height:1.7;color:var(--ink3);padding:0 6px"><span class="ms" style="font-size:18px">lock</span>API Key 只写入系统凭据，保存后界面不再显示。</div>
+<div style="background:{{ vBg }};border-radius:20px;padding:14px 16px;display:flex;gap:10px;align-items:flex-start"><span class="ms" style="font-size:22px;color:{{ vFg }}">{{ vIcon }}</span><div style="flex:1;font-size:13px;line-height:1.7;color:var(--ink)"><b style="color:{{ vFg }}">{{ vTitle }}</b><br>{{ vText }}</div></div>
+<div style="display:flex;gap:8px"><button onClick="{{ verifyModel }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:14px;font-weight:600">验证连接</button><button onClick="{{ saveModel }}" style="{{ saveStyle }}">保存</button></div>
+</sc-if>
+
+<sc-if value="{{ isPerms }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--sk);border-radius:20px;padding:14px 16px;font-size:13px;line-height:1.7;color:var(--ink2)">开关只会收紧助手能“提出”的操作，不会放宽确认。写入与外传无论开关如何，每次仍需你确认，且不可关闭。</div>
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ perms }}" as="p" hint-placeholder-count="4"><button onClick="{{ p.go }}" style="width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:0;display:flex;align-items:center;gap:14px;min-height:72px;border-top:{{ p.bt }}"><span class="ms" style="font-size:24px;color:var(--ink2)">{{ p.icon }}</span><span style="flex:1;padding:10px 0"><span style="display:block;font-size:15px">{{ p.name }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.5">{{ p.sub }}</span></span><span style="{{ p.swStyle }}"><span style="{{ p.knob }}"></span></span></button></sc-for>
+<div style="display:flex;align-items:center;gap:14px;min-height:60px;border-top:1px solid var(--rule)"><span class="ms" style="font-size:24px;color:var(--ink2)">lock</span><span style="flex:1;font-size:14px">逐次确认（写入 / 外传）</span><span style="font-size:12px;color:var(--ink3)">不可关闭</span></div></div>
+<sc-if value="{{ anyOff }}" hint-placeholder-val="{{ false }}"><div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">助手遇到已关闭的类别时</div><sc-for list="{{ offHints }}" as="h" hint-placeholder-count="1"><div style="display:flex;gap:10px;align-items:center;background:var(--sk);border-radius:20px;padding:12px 16px;margin-bottom:8px"><span class="ms" style="font-size:20px;color:var(--ink2)">{{ h.icon }}</span><div style="font-size:13px;line-height:1.6">{{ h.t }}</div></div></sc-for></div></sc-if>
+<div><div style="font-size:12px;color:var(--ink3);margin:0 8px 6px">变更审计</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:24px;padding:0 16px"><sc-for list="{{ audit }}" as="a" hint-placeholder-count="3"><div style="display:flex;gap:10px;padding:12px 0;border-top:{{ a.bt }};font-size:13px;line-height:1.6"><span style="flex:1">{{ a.t }}</span><span style="font-size:12px;color:var(--ink3);flex:none">{{ a.time }}</span></div></sc-for></div></div>
+</sc-if>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'hub', plug:0, sync:'auto', evalSt:'auto', ruleSt:'ok', search:'', rules:null, rsel:0, delAsk:false, tone:1, prin:['回答先给结论，再给依据','金额一律含税并保留两位小数','不确定时明确说“未知”，不猜测'], draft:'', soulDirty:false, perm:{ read:true, write:true, net:true, dev:true }, audit:[{ t:'开启“调用本人设备”', time:'10月3日' },{ t:'初始：全部类别开启', time:'10月1日' }], sens:{}, dark:null, mem:[{ t:'默认币种为人民币，金额含税显示', src:'设置对话', scope:'全局', kind:'事实', exp:'不过期', on:true },{ t:'泵类询价优先看华泵、云川', src:'助手对话', scope:'询价', kind:'推断', exp:'12月31日', on:true },{ t:'小李负责科研任务复核', src:'设备来件（敏感）', scope:'科研', kind:'事实', exp:'不过期', on:false }], msel:0, memOpen:false, memDel:false, dream:'pending', expv:false, mform:{ use:0, loc:2, name:'', url:'', model:'', key:'' }, vst:'idle', mst:'ok', mdst:'ok' };
+  timers = [];
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F' };
+    const T = dark ? D : L;
+    const phoneStyle = { width:390, height:844, background:T.bg, borderRadius:44, border:'10px solid ' + (dark ? '#2A2A2A' : '#111827'), boxSizing:'content-box', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink, flex:'none' };
+    Object.keys(T).forEach(k => phoneStyle['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const sw = (on) => ({ swStyle:`flex:none;position:relative;width:46px;height:28px;border-radius:99px;background:${on ? T.acc : T.rs};display:block`, knob:`position:absolute;top:3px;left:${on ? 21 : 3}px;width:22px;height:22px;border-radius:99px;background:${on ? T.onacc : T.sf};display:block` });
+    const seg = (on) => `height:40px;padding:0 20px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:14px;font-weight:600`;
+    const scr = s.screen;
+    const titles = { hub:'助手设置', gate:'插件注册与发布', rules:'规则配置', rule:'规则详情', soul:'SOUL', perms:'助手权限', mem:'记忆', memEdit:'编辑记忆', models:'模型', modelAdd:'添加模型' };
+    const parent = { rule:'rules', memEdit:'mem', models:'hub', modelAdd:'models' };
+
+    /* ---- gate ---- */
+    const FIX = [['对象与属性已声明','在插件清单 ontology.entities 中声明对象与属性。'],['关系已声明查询接口','在 ontology.relations[].query 填写只读接口，例如 research.report.result。'],['动作已声明参数与确认方式','在 actions[] 声明参数、提交条件、副作用与确认方式。'],['业务流程已声明','在 flows[] 按步骤绑定接口或动作，并标明执行者。'],['敏感属性已标记','在对象属性上设置 sensitive: true；未标记视为未检查。'],['示例问法评测全部通过','在 examples[] 提供问法与期望接口，修复上面各项后点“重跑评测”。']];
+    const PL = [
+      { name:'询价', checks:[1,1,1,1,1], evals:[['比较华东泵站改造的报价','inquiry.compare_quotes',1],['华东泵站预算还剩多少','inquiry.project_budget',1],['给华东泵站发询价单','inquiry.create_rfq（需确认）',1]], attrs:[['报价 · 含税总价',1],['项目 · 预算',1],['供应商 · 名称',0]], sample:['报价 Q-0412 · 供应商 ',['供应商 · 名称','华泵'],' · 含税总价 ',['报价 · 含税总价','128,400.00'],' · 项目预算 ',['项目 · 预算','500,000.00']] },
+      { name:'科研', checks:[1,0,1,1,1], evals:[['这篇论文被哪些研究卡引用','research.card.paper',1],['报告引用了哪些结果包','research.report.result',0]], attrs:[['论文 · 作者邮箱',0],['批注 · 内容',1]], sample:['论文《离心泵选型综述》 · 作者邮箱 ',['论文 · 作者邮箱','a***@example.org'],' · 批注 ',['批注 · 内容','需核对第 12 页流量']] },
+      { name:'原型', checks:[1,0,0,0,0], evals:[], attrs:[['反馈 · 反馈人',0]], sample:['原型 v2 · 反馈人 ',['反馈 · 反馈人','李工']] }
+    ];
+    const Pc = PL[s.plug];
+    const evalAuto = Pc.evals.length === 0 ? 'none' : Pc.evals.every(e => e[2]) ? 'pass' : 'fail';
+    const evSt = s.evalSt === 'auto' ? evalAuto : s.evalSt;
+    const chk = [...Pc.checks, evSt === 'pass' ? 1 : 0];
+    const passCount = chk.filter(Boolean).length, allPass = passCount === 6;
+    const syncEff = s.sync === 'auto' ? (allPass ? 'ok' : 'blocked') : s.sync;
+    const SY = {
+      blocked:['未同步','block',T.redbg,T.red,T.rule,'检查未通过，不会加载进助手知识库','助手目前不知道该插件的对象、接口与流程。请先修复下方未通过的检查项。'],
+      run:['同步中','autorenew',T.tint,T.deep,T.acc,'正在写入对象、关系、动作与流程','进度未知，不显示百分比。同步期间助手继续使用旧版本；取消不会留下半成品。'],
+      ok:['已同步','check_circle',T.greenbg,T.green,T.rule,'v3 · 今天 09:05','助手已读到 ' + Pc.name + ' 的对象、关系、接口、动作与流程摘要。敏感属性已从摘要中剔除。'],
+      cancel:['已取消','history',T.sk,T.ink2,T.rule,'已取消，仍使用上一版本 v2','未写入任何内容，没有半成品。可随时重新同步。'],
+      fail:['同步失败','error',T.redbg,T.red,T.red,'知识库写入超时','本次未生效，助手仍使用上一版本 v2。可重试；重试不会重复写入。'],
+      rollback:['已回滚','history',T.redbg,T.red,T.red,'已回到 v2 · 新版本未通过校验','新版本写入后校验失败，系统已自动回滚。助手行为与同步前一致，没有数据丢失。']
+    }[syncEff];
+    const clearT = () => { this.timers.forEach(clearTimeout); this.timers = []; };
+    const later = (fn, ms) => this.timers.push(setTimeout(fn, ms));
+    const sensKey = (n) => Pc.name + n;
+    const isSens = (a) => s.sens[sensKey(a[0])] ?? !!a[1];
+    const evRows = Pc.evals.map((e, i) => { const ok = evSt === 'pass' ? true : evSt === 'fail' ? (Pc.evals.every(x => x[2]) ? i !== Pc.evals.length - 1 : !!e[2]) : !!e[2]; const run = evSt === 'run';
+      return { q:e[0], api:e[1], bt:bt(i), icon: run ? 'autorenew' : ok ? 'check_circle' : 'cancel', color: run ? T.deep : ok ? T.green : T.red, bad: !run && !ok }; });
+    const evPass = evRows.filter(e => !e.bad && e.icon === 'check_circle').length;
+
+    /* ---- rules ---- */
+    const R0 = [
+      { name:'报价比较', trig:'比较{项目}的报价', api:'inquiry.compare_quotes', hits:12, on:true },
+      { name:'预算查询', trig:'{项目}预算还剩多少', api:'inquiry.project_budget', hits:8, on:true },
+      { name:'待办汇总', trig:'今天有什么待办', api:'inbox.summary', hits:21, on:true },
+      { name:'发出询价单', trig:'给{项目}发询价单', api:'inquiry.create_rfq', hits:3, on:true },
+      { name:'报价与预算速览', trig:'比较{项目}报价和预算', api:'inquiry.quote_vs_budget', hits:2, on:true }
+    ];
+    const rules = s.rules || R0;
+    const KIND = { 'inquiry.compare_quotes':'只读','inquiry.project_budget':'只读','inbox.summary':'只读','inquiry.quote_vs_budget':'只读','inquiry.create_rfq':'写入','inquiry.accept_quote':'写入','inquiry.publish_hub':'外传' };
+    const kc = (k) => k === '只读' ? [T.sk, T.ink2] : k === '写入' ? [T.tint, T.deep] : [T.redbg, T.red];
+    const setRules = (arr) => this.setState({ rules: arr });
+    const move = (i, d) => () => { const a = [...rules], j = i + d; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; setRules(a); };
+    const upd = (i, p) => setRules(rules.map((r, j) => j === i ? { ...r, ...p } : r));
+    const q = s.search.trim();
+    const visible = rules.map((r, i) => ({ r, i })).filter(x => !q || x.r.name.includes(q) || x.r.trig.includes(q));
+    const iA = rules.findIndex(r => r.api === 'inquiry.compare_quotes' && r.on), iB = rules.findIndex(r => r.api === 'inquiry.quote_vs_budget' && r.on);
+    const conflict = iA >= 0 && iB >= 0;
+    const rst = s.ruleSt;
+    const ruleRows = visible.map((x, k) => { const r = x.r, i = x.i, kind = KIND[r.api] || '只读', c = kc(kind);
+      return { n:i + 1, name:r.name, trig:r.trig, kind, bg:c[0], fg:c[1], hits:r.hits, off: r.on ? '' : ' · 已停用', op: r.on ? 1 : 0.55, bt: bt(k), dstart: () => { this.dragFrom = i; }, dover: (e) => e.preventDefault(), drop: (e) => { e.preventDefault(); const a = [...rules], from = this.dragFrom; if (from === undefined || from === i) return; const [m] = a.splice(from, 1); a.splice(i, 0, m); setRules(a); this.dragFrom = undefined; }, open: go({ screen:'rule', rsel:i, delAsk:false }), toggle: () => upd(i, { on: !r.on }), up: move(i, -1), down: move(i, 1), upColor: i === 0 ? T.rule : T.ink2, downColor: i === rules.length - 1 ? T.rule : T.ink2, ...sw(r.on) }; });
+    const cur = rules[Math.min(s.rsel, rules.length - 1)] || R0[0], ci = Math.min(s.rsel, rules.length - 1);
+    const curKind = KIND[cur.api] || '只读';
+    const names = [...cur.trig.matchAll(/\{([^}]+)\}/g)].map(m => m[1]);
+    const sampleText = cur.trig.replace(/\{[^}]+\}/g, '华东泵站改造');
+    const extracted = names.length ? names.map(n => '提取：' + n + ' = 华东泵站改造') : ['无参数，直接调用'];
+
+    /* ---- soul / perms ---- */
+    const TONES = ['简洁','详细','正式'];
+    const count = s.prin.join('').length, over = count > 300 || (count + s.draft.length > 300 && s.draft.length > 0);
+    const PM = [['read','visibility','读取当前项目与资料','只读，不修改数据','“该操作类别已关闭，未提出”：助手不会读取项目与资料来回答。'],['write','edit_note','写入业务数据','新建、修改前逐次确认','“该操作类别已关闭，未提出”：助手只给建议，不提出写入。'],['net','cloud_upload','联网与外发','发往远程前逐次确认，并记入数据去向','“该操作类别已关闭，未提出”：助手只使用本机模型与本地数据。'],['dev','devices','调用本人设备','派发任务前逐次确认','“该操作类别已关闭，未提出”：助手不会向工作站等设备派发任务。']];
+    const togglePerm = (k, name, on) => () => this.setState(st => ({ perm: { ...st.perm, [k]: !on }, audit: [{ t: (on ? '关闭“' : '开启“') + name + '”', time:'刚刚' }, ...st.audit] }));
+    const anyOff = PM.some(p => !s.perm[p[0]]);
+
+    /* ---- memory ---- */
+    const kc2 = (k) => k === '事实' ? [T.greenbg, T.green] : [T.tint, T.deep];
+    const mems = s.mem, mi = Math.min(s.msel, Math.max(mems.length - 1, 0)), mcur = mems[mi] || mems[0] || { t:'', src:'', scope:'', kind:'事实', exp:'不过期', on:true };
+    const updM = (i, p) => this.setState({ mem: mems.map((m, j) => j === i ? { ...m, ...p } : m) });
+    const memRows = (s.mst !== 'ok') ? [] : mems.map((m, i) => ({ t:m.t, kind:m.kind, kbg:kc2(m.kind)[0], kfg:kc2(m.kind)[1], scope:m.scope, src:m.src, exp: m.on ? (m.exp === '不过期' ? '不过期' : m.exp + '过期') : '已停用', op: m.on ? 1 : 0.55, bt: bt(i), open: go({ screen:'memEdit', msel:i, memDel:false }), toggle: () => updM(i, { on: !m.on }), ...sw(m.on) }));
+    const DR = { pending:null, accepted:[T.green,'check_circle','已合并 2 条'], ignored:[T.ink3,'do_not_disturb_on','已忽略'] }[s.dream] || ['','',''];
+    const expOpts = ['不过期','30 天','90 天'].map(l => ({ label:l, go: () => updM(mi, { exp: l === '不过期' ? l : (l === '30 天' ? '11月6日' : '1月5日') }), style:`flex:1;height:44px;border-radius:999px;border:1px solid ${(mcur.exp === '不过期') === (l === '不过期') && (l === '不过期' || (l === '30 天') === (mcur.exp === '11月6日')) ? T.acc : T.rs};background:${(mcur.exp === '不过期') === (l === '不过期') && (l === '不过期' || (l === '30 天') === (mcur.exp === '11月6日')) ? T.tint : T.sf};color:${T.ink};font-size:13px;font-weight:600` }));
+    /* ---- models ---- */
+    const MF = s.mform, USE = ['对话与工具','向量化'], LOC = ['本机','本人设备','远程'];
+    const httpErr = MF.loc === 2 && /^http:\/\//i.test(MF.url.trim());
+    const keyErr = MF.loc !== 0 && !MF.key.trim() && !MF.keySaved;
+    const urlErr = !MF.url.trim();
+    const mset = (k) => (e) => this.setState({ mform: { ...MF, [k]: e.target.value }, vst:'idle' });
+    const mSeg = (on) => `flex:1;height:44px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600`;
+    const inSt = (bad) => `height:48px;border-radius:12px;border:1px solid ${bad ? T.red : T.rs};background:${T.bg};color:${T.ink};padding:0 12px;font-size:15px;box-sizing:border-box`;
+    const VS = { idle:[T.sk,T.ink2,'info','尚未验证','验证只发送一个测试请求，不含你的资料。'], run:[T.tint,T.deep,'autorenew','验证中…','正在连接端点，进度未知。'], ok:[T.greenbg,T.green,'check_circle','连接成功','端点可达，凭据有效，模型名存在。'], fail:[T.redbg,T.red,'error','连接失败', httpErr ? '远程端点必须使用 HTTPS，未发送任何请求。' : keyErr ? '非本机端点需要凭据，请先填写 API Key。' : urlErr ? '请填写端点 URL。' : '端点无响应。检查地址与网络；不会自动切换到其他模型。'] }[s.vst];
+    const mFields = [
+      { label:'名称', k:'name', value:MF.name, ph:'例如 公司网关', type:'text', hint:'', bad:false },
+      { label:'端点 URL', k:'url', value:MF.url, ph: MF.loc === 0 ? 'http://127.0.0.1:11434' : 'https://api.example-llm.com/v1', type:'text', hint: httpErr ? '远程要求 HTTPS' : MF.loc !== 0 ? '非本机端点需要凭据' : '本机地址不出本设备', bad:httpErr },
+      { label:'模型名', k:'model', value:MF.model, ph:'例如 qwen2.5-14b', type:'text', hint:'', bad:false },
+      { label:'API Key', k:'key', value: MF.keySaved ? '' : MF.key, ph: MF.keySaved ? '已保存到系统凭据 · 不回显' : (MF.loc === 0 ? '本机可不填' : '必填'), type:'password', hint: keyErr ? '非本机端点需要凭据' : '', bad:keyErr }
+    ].map(f => ({ ...f, set: mset(f.k), style: inSt(f.bad), hintColor: f.bad ? T.red : T.ink3 }));
+    const modelRows = [['laptop_mac','本机模型','127.0.0.1 · qwen2.5-14b','对话与工具'],['laptop_mac','本机向量','127.0.0.1 · bge-m3','向量化'],['cloud','公司网关','https://api.example-llm.com · 凭据已保存','对话与工具']].map(([icon, name, sub, use], i) => ({ icon, name, sub, use, bt: bt(i) }));
+    const navDefs = [['hub','助手设置（入口）'],['gate','数据中心 · 注册与发布门槛'],['rules','规则配置'],['rule','规则详情 / 编辑'],['soul','SOUL'],['perms','助手权限'],['mem','记忆'],['memEdit','记忆编辑'],['models','模型列表'],['modelAdd','添加模型']];
+    const chipSt = (on) => `height:30px;padding:0 12px;border-radius:999px;border:1px solid ${on ? '#2458D3' : '#C3CAD6'};background:${on ? '#E8EFFF' : '#fff'};color:${on ? '#1B47C2' : '#111827'};font-size:12px;font-weight:600`;
+    const grp = (label, key, opts) => ({ label, chips: opts.map(([v, l]) => ({ label:l, style: chipSt(s[key] === v), go: () => { clearT(); this.setState({ [key]: v }); } })) });
+    return {
+      phoneStyle, title: scr === 'gate' ? '插件注册与发布' : titles[scr], back: go({ screen: parent[scr] || 'hub' }),
+      navs: navDefs.map(([k, l]) => ({ label:l, go: go({ screen:k }), style:`height:40px;text-align:left;padding:0 14px;border-radius:12px;border:1px solid ${scr === k ? '#2458D3' : '#C3CAD6'};background:${scr === k ? '#E8EFFF' : '#fff'};color:${scr === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      demoGroups: [ grp('同步状态（门槛页）','sync',[['auto','自动'],['run','进行中'],['cancel','已取消'],['ok','成功'],['fail','失败'],['rollback','回滚']]), grp('评测状态（门槛页）','evalSt',[['auto','自动'],['run','运行中'],['fail','失败'],['pass','通过']]), grp('规则列表状态','ruleSt',[['ok','正常'],['load','载入中'],['empty','空'],['nomatch','筛选无结果'],['fail','失败']]), grp('记忆状态','mst',[['ok','正常'],['empty','空'],['fail','失败']]), grp('模型列表状态','mdst',[['ok','正常'],['empty','空'],['fail','失败']]),
+        { label:'主题', chips:[{ label: dark ? '切到浅色' : '切到深色', style: chipSt(false), go: go({ dark: !dark }) }] } ],
+      isMem: scr === 'mem', isMemEdit: scr === 'memEdit', isModels: scr === 'models', isModelAdd: scr === 'modelAdd',
+      memOpen: s.memOpen, openMem: go({ memOpen:true }), dreamPending: s.dream === 'pending', dreamColor: DR[0], dreamIcon: DR[1], dreamText: DR[2], acceptDream: go({ dream:'accepted' }), ignoreDream: go({ dream:'ignored' }), undoDream: (e) => { e.preventDefault(); this.setState({ dream:'pending' }); },
+      memRows, memCount: s.mst === 'ok' ? mems.length : 0, memEmpty: s.mst === 'empty' || (s.mst === 'ok' && mems.length === 0), memFail: s.mst === 'fail', retryMem: go({ mst:'ok' }),
+      expRows: [{ t:'比价时先看含税总价与有效期', state: s.expv ? '已验证 · 参与任务' : '候选 · 尚未验证，不参与任务', label: s.expv ? '撤销' : '验证', style:`height:40px;padding:0 16px;border-radius:999px;border:${s.expv ? '1px solid ' + T.rs : '0'};background:${s.expv ? T.sf : T.acc};color:${s.expv ? T.ink : T.onacc};font-size:13px;font-weight:600`, go: go({ expv: !s.expv }), bt:'none' }],
+      mc: { t:mcur.t, src:mcur.src, scope:mcur.scope, kind:mcur.kind, kindNote: mcur.kind === '事实' ? '来自你明确说过的内容' : '助手推断，可能不准', toggleLabel: mcur.on ? '停用' : '启用' },
+      setMem: (e) => updM(mi, { t:e.target.value }), toggleMem: () => updM(mi, { on: !mcur.on }), expOpts,
+      memDel: s.memDel, askMemDel: go({ memDel:true }), cancelMemDel: (e) => { e.preventDefault(); this.setState({ memDel:false }); }, doMemDel: () => this.setState({ mem: mems.filter((_, j) => j !== mi), screen:'mem', memDel:false }),
+      modelRows: s.mdst === 'ok' ? modelRows : [], modelOk: s.mdst === 'ok', modelEmpty: s.mdst === 'empty', modelFail: s.mdst === 'fail', retryModel: go({ mdst:'ok' }), addModel: go({ screen:'modelAdd', vst:'idle' }),
+      useOpts: USE.map((l, i) => ({ label:l, go: go({ mform:{ ...MF, use:i } }), style:mSeg(MF.use === i) })), locOpts: LOC.map((l, i) => ({ label:l, go: go({ mform:{ ...MF, loc:i }, vst:'idle' }), style:mSeg(MF.loc === i) })), mFields,
+      vBg:VS[0], vFg:VS[1], vIcon:VS[2], vTitle:VS[3], vText:VS[4],
+      verifyModel: () => { clearT(); if (httpErr || keyErr || urlErr) return this.setState({ vst:'fail' }); this.setState({ vst:'run' }); later(() => this.setState({ vst:'ok' }), 1200); },
+      saveStyle:`flex:1;height:48px;border-radius:999px;border:0;background:${(httpErr || keyErr || urlErr) ? T.rule : T.acc};color:${(httpErr || keyErr || urlErr) ? T.ink3 : T.onacc};font-size:14px;font-weight:600`,
+      saveModel: () => { if (httpErr || keyErr || urlErr) return this.setState({ vst:'fail' }); this.setState({ mform:{ ...MF, key:'', keySaved: MF.loc !== 0 || !!MF.key }, vst:'idle' }); },
+      isHub: scr === 'hub', isGate: scr === 'gate', isRules: scr === 'rules', isRule: scr === 'rule', isSoul: scr === 'soul', isPerms: scr === 'perms',
+      hubItems: [['favorite','SOUL','语气与做事原则','soul'],['bolt','规则配置','预设语句 → 接口 → 动作','rules'],['shield','助手权限','四类操作开关与审计','perms'],['hub','数据中心 · 插件注册与发布','平台级；用于核对插件是否可发布','gate'],['psychology','记忆','含敏感来源，请谨慎访问','mem'],['model_training','模型','位置、端点与凭据','models']].map(([icon, name, sub, k], i) => ({ icon, name, sub, bt: bt(i), go: go({ screen:k }) })),
+      plugChips: PL.map((p, i) => ({ label:p.name, go: () => { clearT(); this.setState({ plug:i, sync:'auto', evalSt:'auto' }); }, style: seg(s.plug === i) })),
+      syncState: SY[0], syncIcon: SY[1], syncBg: SY[2], syncFg: SY[3], syncBorder: SY[4], syncLine: SY[5], syncText: SY[6],
+      syncRunning: syncEff === 'run',
+      syncBtn: syncEff === 'ok' ? '重新同步到知识库' : syncEff === 'run' ? '同步中…' : syncEff === 'blocked' ? '同步到助手知识库' : '重试同步',
+      syncBtnStyle: `flex:1;height:44px;border-radius:999px;border:${syncEff === 'ok' ? '1px solid ' + T.rs : '0'};background:${syncEff === 'ok' ? T.sf : (syncEff === 'blocked' || syncEff === 'run') ? T.rule : T.acc};color:${syncEff === 'ok' ? T.ink : (syncEff === 'blocked' || syncEff === 'run') ? T.ink3 : T.onacc};font-size:14px;font-weight:600`,
+      doSync: () => { if (syncEff === 'blocked' || syncEff === 'run') return; clearT(); this.setState({ sync:'run' }); later(() => this.setState({ sync: allPass ? 'ok' : 'fail' }), 1800); },
+      cancelSync: () => { clearT(); this.setState({ sync:'cancel' }); },
+      passCount, checks: FIX.map((f, i) => { const ok = !!chk[i]; return { t:f[0], fix:f[1], fail: !ok, icon: ok ? 'check_circle' : 'cancel', color: ok ? T.green : T.red, state: ok ? '通过' : '未通过', bt: bt(i) }; }),
+      sensRows: Pc.attrs.map((a, i) => { const on = isSens(a); return { name:a[0], icon: on ? 'visibility_off' : 'visibility', note: on ? '摘要中已剔除' : '摘要中原样包含', noteColor: on ? T.green : T.ink3, bt: bt(i), go: go({ sens: { ...s.sens, [sensKey(a[0])]: !on } }), ...sw(on) }; }),
+      sensCount: Pc.attrs.filter(a => isSens(a)).length, preview: Pc.sample.map(p => typeof p === 'string' ? { t:p, style:'' } : (isSens(Pc.attrs.find(a => a[0] === p[0]) || [p[0], 0]) ? { t:'‹已剔除›', style:`background:${T.redbg};color:${T.red};border-radius:6px;padding:1px 6px;font-weight:600` } : { t:p[1], style:`color:${T.ink}` })),
+      noEval: Pc.evals.length === 0, evalSum: evSt === 'run' ? '运行中…' : Pc.evals.length ? (evSt === 'pass' ? Pc.evals.length : evPass) + '/' + Pc.evals.length + ' 通过' : '无',
+      evals: evRows, evalBtn: evSt === 'run' ? '评测运行中…' : evSt === 'fail' ? '修复后重跑评测' : '重跑评测',
+      rerunEval: () => { if (evSt === 'run') return; clearT(); this.setState({ evalSt:'run' }); later(() => this.setState({ evalSt:'auto' }), 1500); },
+      searchText: rst === 'nomatch' ? '待办' : (q || '搜索规则或语句'), showConflict: conflict && rst === 'ok',
+      winName: iA < iB ? rules[iA].name : rules[iB].name, loseName: iA < iB ? rules[iB].name : rules[iA].name,
+      rLoad: rst === 'load', rEmpty: rst === 'empty', rNoMatch: rst === 'nomatch', rFail: rst === 'fail', rList: rst === 'ok', skel: [1,2,3],
+      clearFilter: (e) => { e.preventDefault(); this.setState({ ruleSt:'ok', search:'' }); }, retryRules: go({ ruleSt:'load' }),
+      ruleRows, newRule: () => { setRules([...rules, { name:'新规则', trig:'查询{项目}的供应商', api:'inquiry.project_budget', hits:0, on:false }]); this.setState({ screen:'rule', rsel: rules.length, delAsk:false }); },
+      rl: { name:cur.name, trig:cur.trig, api:cur.api, hits:cur.hits, n:ci + 1, toggleLabel: cur.on ? '停用' : '启用' },
+      setName: (e) => upd(ci, { name:e.target.value }), setTrig: (e) => upd(ci, { trig:e.target.value }),
+      sampleText, extracted,
+      apiOpts: Object.keys(KIND).map(a => { const k = KIND[a], c = kc(k), on = cur.api === a; return { api:a, kind:k, bg:c[0], fg:c[1], go: () => upd(ci, { api:a }), style:`display:flex;align-items:center;gap:8px;padding:0 14px;height:48px;border-radius:16px;border:1px solid ${on ? T.acc : T.rule};background:${on ? T.tint : T.sf};color:${T.ink}` }; }),
+      isWrite: curKind !== '只读', confirmIcon: curKind === '只读' ? 'visibility' : curKind === '写入' ? 'edit_note' : 'outbound',
+      confirmText: curKind === '只读' ? '只读：命中后直接查询并展示结果' : curKind === '写入' ? '写入：命中后先弹出确认卡，列出将改动的内容' : '外传：命中后先确认发送内容与去向，无法撤回',
+      tryNote: curKind === '只读' ? '将直接查询并附依据。' : '不会直接执行，先出现确认卡。',
+      toggleCur: () => upd(ci, { on: !cur.on }), delAsk: s.delAsk, askDel: go({ delAsk:true }), cancelDel: (e) => { e.preventDefault(); this.setState({ delAsk:false }); },
+      doDel: () => { setRules(rules.filter((_, j) => j !== ci)); this.setState({ screen:'rules', delAsk:false }); },
+      tones: TONES.map((l, i) => ({ label:l, go: go({ tone:i, soulDirty:true }), style: seg(s.tone === i) })), soulDirty: s.soulDirty,
+      count, countColor: count > 300 ? T.red : T.ink3, overLimit: over, draft: s.draft, setDraft: (e) => this.setState({ draft: e.target.value }),
+      prin: s.prin.map((t, i) => ({ t, bt: bt(i), edit: (e) => this.setState({ prin: s.prin.map((x, j) => j === i ? e.target.value : x), soulDirty:true }), del: () => this.setState({ prin: s.prin.filter((_, j) => j !== i), soulDirty:true }) })),
+      addPrin: () => { const d = s.draft.trim(); if (!d || count + d.length > 300) return; this.setState({ prin: [...s.prin, d], draft:'', soulDirty:true }); },
+      perms: PM.map(([k, icon, name, sub], i) => ({ icon, name, sub: s.perm[k] ? sub : '已关闭 · 助手不会提出此类操作', bt: bt(i), go: togglePerm(k, name, s.perm[k]), ...sw(s.perm[k]) })),
+      anyOff, offHints: PM.filter(p => !s.perm[p[0]]).map(p => ({ icon:p[1], t:p[4] })),
+      audit: s.audit.map((a, i) => ({ ...a, bt: bt(i) }))
+    };
+  }
+}
+</script>
+</body>
+</html>
