@@ -130,11 +130,13 @@ SELECT r.id,
   COALESCE(json_extract(e.value,'\$.at'),''),
   json_extract(e.value,'\$.type'),
   json_remove(e.value,'\$.seq','\$.at','\$.type')
-FROM execution_records r, json_each(r.payload,'\$.events') e
+FROM execution_records r,
+  json_each(CASE WHEN json_valid(r.payload) THEN CASE WHEN json_type(r.payload,'\$.events')='array' THEN json_extract(r.payload,'\$.events') ELSE '[]' END ELSE '[]' END) e
 WHERE CASE WHEN json_valid(r.payload)
     THEN json_extract(r.payload,'\$.kind')='personal' ELSE 0 END
-  AND json_extract(e.value,'\$.seq') IS NOT NULL
-  AND json_extract(e.value,'\$.type') IS NOT NULL;
+  AND CASE WHEN e.type='object'
+    THEN json_type(e.value,'\$.seq')='integer'
+      AND json_type(e.value,'\$.type')='text' ELSE 0 END;
 ''');
   }
 
@@ -179,7 +181,7 @@ ON CONFLICT(id) DO UPDATE SET
 
   /// Events from before the table: a task payload's own `events` list.
   static List<TaskEvent> _legacy(String taskId, Object? list) => [
-    for (final e in list as List? ?? const [])
+    for (final e in list is List ? list : const [])
       if (e is Map && e['seq'] is int && e['type'] is String)
         TaskEvent(
           taskId: taskId,
@@ -257,10 +259,11 @@ ON CONFLICT(id) DO UPDATE SET
         db
                 .select(
                   '''
-SELECT COALESCE(MAX(json_extract(e.value,'\$.seq')),0) AS m
-FROM (SELECT payload FROM execution_records
-      WHERE id=? AND json_valid(payload)) r,
-     json_each(r.payload,'\$.events') e
+SELECT COALESCE(MAX(CASE WHEN e.type='object' THEN
+    CASE WHEN json_type(e.value,'\$.seq')='integer'
+      THEN json_extract(e.value,'\$.seq') END END),0) AS m
+FROM (SELECT payload FROM execution_records WHERE id=?) r,
+     json_each(CASE WHEN json_valid(r.payload) THEN CASE WHEN json_type(r.payload,'\$.events')='array' THEN json_extract(r.payload,'\$.events') ELSE '[]' END ELSE '[]' END) e
 ''',
                   [taskId],
                 )

@@ -99,6 +99,64 @@ void main() {
       expect(WorkspaceRepository.schema.version, 8);
     });
 
+    for (final (name, events, next) in <(String, Object, int)>[
+      ('a string', 'oops', 1),
+      ('a number', 7, 1),
+      ('an object', {'a': 1}, 1),
+      (
+        'non-object elements and seqs that are not integers',
+        [
+          1,
+          'x',
+          null,
+          {'seq': 2.5, 'at': 'a', 'type': 'wait'},
+          {'seq': '9', 'at': 'a', 'type': 'wait'},
+          {'seq': 1, 'at': 'a', 'type': 'wait'},
+        ],
+        2,
+      ),
+    ]) {
+      test('legacy events that are $name are skipped: the migration '
+          'succeeds and appends go on', () async {
+        final dir = Directory.systemTemp.createTempSync('muyon-k4-odd-');
+        addTearDown(() => dir.deleteSync(recursive: true));
+        final v7 = ModuleSchema(
+          version: 7,
+          definitionDigest: 'foundation-v7',
+          migrations: WorkspaceRepository.schema.migrations.take(7).toList(),
+        );
+        final first = StorageManager(dir.path);
+        final old = await first.open('muyon', v7);
+        await old.write(
+          (db) => db.execute('INSERT INTO execution_records VALUES(?,?,?)', [
+            't',
+            'succeeded',
+            jsonEncode({
+              'kind': 'personal',
+              'executionId': 't',
+              'conversationId': 'c',
+              'prompt': 'p',
+              'scope': AssistantScope.global().toJson(),
+              'events': events,
+            }),
+          ]),
+        );
+        await first.close();
+        final second = StorageManager(dir.path);
+        addTearDown(second.close);
+        final db = await second.open('muyon', WorkspaceRepository.schema);
+        final repo = FoundationRepository(db);
+        expect(db.raw.select('SELECT id FROM tasks'), hasLength(1));
+        expect(repo.taskEvents('t').length, next - 1);
+        await repo.appendTaskEvent('t', {'type': 'note'});
+        expect(repo.taskEvents('t').map((e) => e.seq).last, next);
+        // The same payload with no table rows (older code wrote it).
+        db.raw.execute('DELETE FROM task_events');
+        await repo.appendTaskEvent('t', {'type': 'note'});
+        expect(repo.taskEvents('t').map((e) => e.seq).last, next);
+      });
+    }
+
     test('a corrupt payload row does not stop the migration', () async {
       final dir = Directory.systemTemp.createTempSync('muyon-k4-bad-');
       addTearDown(() => dir.deleteSync(recursive: true));

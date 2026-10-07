@@ -152,6 +152,35 @@ void main() {
       expect(f.approvals(), hasLength(approvals + 1));
     });
 
+    test(
+      'whose receipt belongs to another tool is not taken over: a stop',
+      () async {
+        final f = await LoopFixture.open();
+        final agent = f.agent();
+        final conversation = await f.repo.createConversation();
+        final task = await agent.startTool(
+          conversationId: conversation.id,
+          toolId: 'write',
+        );
+        _receipt(
+          f,
+          {...(task.payload['toolCall'] as Map), 'toolId': 'read'},
+          'succeeded',
+          result: ToolCallResult(
+            status: ToolCallStatus.succeeded,
+            summary: 's',
+          ),
+        );
+        await agent.cancel(task.id);
+        await _crash(f, task.id, 'interrupted');
+        final held = await agent.resume(task.id);
+        expect(held.state, PersonalTaskState.waitingConfirmation);
+        expect(held.stage, 'resume');
+        expect(f.callsOf('write'), 0);
+        expect(f.callsOf('read'), 0);
+      },
+    );
+
     test('with no receipt, or one that failed without effect, starts again as '
         'before', () async {
       final f = await LoopFixture.open();
