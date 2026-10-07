@@ -6,8 +6,8 @@
 
 leader 不在主线程里运行或通读代码。凡需要重跑 analyze 与测试、逐行阅读 diff、检查边界与安全的核实，由 leader 派给核实子代理：
 
-- 复杂或高风险的派 Opus，例如安全边界、并发与取消、数据一致性、跨模块改动；
-- 常规的派 Sonnet，例如脚本、文档、单模块界面、测试补充。
+- 默认派 Sonnet 5.5，按难度选思考强度（子代理 `reviewer-sonnet-low` / `-medium` / `-high`，定义在本机 `~/.claude/agents/`）：安全边界、并发与取消、数据一致性、跨模块改动用 high；单模块代码与测试补充用 medium；脚本、文档、证据字段核对用 low。Opus 只在 Sonnet 结论有分歧或问题特别难时使用（用户 2026-10-06 要求）。
+- 也可以**交叉派给执行者**，前提是审查者不是该任务的作者：engineer（Sonnet，本机，有 Flutter）与 junior（opencode，本机）可做构建与测试类核实；engineer2（grokbot，云端，无 Flutter）只做静态核对与文档审阅。交叉审查同样按本清单回报，leader 据此下结论。
 
 核实子代理的工作方式：
 

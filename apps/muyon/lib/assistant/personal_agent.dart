@@ -6,6 +6,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart';
 import '../platform/tool_registry.dart';
 import 'tool_selection.dart';
@@ -372,8 +373,9 @@ class PersonalAgent {
         }
       } catch (error) {
         // Name the cause (e.g. model_http_404) so a wrong endpoint or model
-        // name can be fixed. Credentials never appear in these messages.
-        final cause = '$error'.replaceAll(RegExp(r'\s+'), ' ');
+        // name can be fixed. The text is stored on the task, shown and sent
+        // as a notification, so anything that may quote a key is withheld.
+        final cause = redactCredentials(error).replaceAll(RegExp(r'\s+'), ' ');
         await _fail(
           task,
           '执行失败（${cause.length > 160 ? '${cause.substring(0, 160)}…' : cause}）；'
@@ -420,7 +422,14 @@ class PersonalAgent {
           repository.task(task.id)?.state != PersonalTaskState.running) {
         return;
       }
-      final response = jsonDecode(text) as Map<String, dynamic>;
+      final response = _protocolReply(text);
+      if (response == null) {
+        // Prose, native tool-call markup or a wrong shape is never acted on.
+        // At most one corrective round, confirmed like any other; then a
+        // fixed reason that does not quote the model (it may echo a key).
+        await _correctOrFail(task, notJson: _notJson(text));
+        return;
+      }
       final advanced = task.copy({
         'round': (task.payload['round'] as int) + 1,
         'messages': [
@@ -456,6 +465,71 @@ class PersonalAgent {
     } finally {
       _modelTokens.remove(task.id);
     }
+  }
+
+  /// Corrective rounds allowed per task when a reply breaks the protocol.
+  static const maxProtocolCorrections = 1;
+
+  static const _correction =
+      'Your previous reply did not follow the protocol and was discarded. '
+      'Reply with exactly one JSON object: {"type":"tool","toolId":"registered '
+      'ID","parameters":{}} OR {"type":"answer","answer":"text",'
+      '"citationIds":["r1"]}. No other text, no markup.';
+
+  /// The reply as a protocol object, or null. Strict: the whole text must be
+  /// one JSON object of a known shape. No fence stripping, no extraction of
+  /// JSON or native tool-call markup from prose.
+  static Map<String, dynamic>? _protocolReply(String text) {
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(text);
+    } on FormatException {
+      return null;
+    }
+    if (decoded is! Map<String, dynamic>) return null;
+    return switch (decoded['type']) {
+      'tool'
+          when decoded['toolId'] is String &&
+              decoded['parameters'] is Map &&
+              (decoded['destination'] == null ||
+                  decoded['destination'] is String) =>
+        decoded,
+      'answer' when decoded['answer'] is String => decoded,
+      _ => null,
+    };
+  }
+
+  static bool _notJson(String text) {
+    try {
+      jsonDecode(text);
+      return false;
+    } on FormatException {
+      return true;
+    }
+  }
+
+  Future<void> _correctOrFail(
+    PersonalTask task, {
+    required bool notJson,
+  }) async {
+    final used = task.payload['protocolCorrections'] as int? ?? 0;
+    if (used >= maxProtocolCorrections) {
+      throw FormatException(
+        notJson ? 'model_reply_not_json' : 'Invalid assistant protocol',
+      );
+    }
+    // The discarded reply is not kept; only the correction is added. The new
+    // round counts against maxRounds and waits for confirmation as usual.
+    await _waitForModel(
+      task.copy({
+        'round': (task.payload['round'] as int) + 1,
+        'protocolCorrections': used + 1,
+        'messages': [
+          ...task.payload['messages'] as List,
+          {'role': 'user', 'content': _correction},
+        ],
+      }),
+    );
   }
 
   List<ObjectRef> _references(PersonalTask task) => [

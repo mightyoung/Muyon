@@ -7,8 +7,11 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 
 import 'app/workbench_app.dart';
+import 'app/object_pages.dart';
 import 'core/exchange.dart';
 import 'core/change_log.dart';
+import 'core/models.dart';
+import 'core/research_kinds.dart';
 import 'core/store.dart';
 import 'cards/card_store.dart';
 import 'exchange/research_package.dart';
@@ -427,10 +430,29 @@ class ResearchSession implements ModuleSession {
           digest: canonical.single['digest'] as String,
         );
       case 'entry':
+        final rows = store.db.select(
+          'SELECT title,data FROM entries WHERE id=? AND project_id=?',
+          [id, project],
+        );
+        return rows.isEmpty
+            ? null
+            : view(
+                rows.single['title'] as String? ?? id,
+                // The host object catalog digests an entry by its decoded
+                // data, so a matching digest must resolve here.
+                digest: sha256
+                    .convert(
+                      utf8.encode(
+                        jsonEncode(
+                          WorkbenchStore.decode(rows.single['data'] as String),
+                        ),
+                      ),
+                    )
+                    .toString(),
+              );
       case 'outline':
       case 'section':
         final (table, title) = switch (ref.objectType) {
-          'entry' => ('entries', 'title'),
           'outline' => ('outline', 'heading'),
           _ => ('sections', 'heading'),
         };
@@ -476,9 +498,7 @@ class ResearchSession implements ModuleSession {
                     as Map)['bodyMarkdown']
                 as String;
         return view(
-          body.isEmpty
-              ? id
-              : body.substring(0, body.length > 240 ? 240 : body.length),
+          _cardTitle(body, fallback: id),
           revision: rows.single['revision_id'] as String,
           digest: rows.single['digest'] as String,
         );
@@ -498,18 +518,208 @@ class ResearchSession implements ModuleSession {
   }
 
   /// Recheck at navigation time: a previously resolved reference can be stale.
-  /// Other object types need B-owned focused UI entry points before wiring.
+  /// Documents open the reader; the other resolved types open read-only detail
+  /// pages. Every failure path (module, project, id, revision or digest
+  /// mismatch) returns null so the caller can fall back.
   @override
   Widget? objectPage(BuildContext context, ObjectRef ref) {
-    if (_resolve(ref) == null || ref.objectType != 'document') return null;
-    final document = store
-        .documents(binding.nativeProjectId)
-        .where((doc) => doc.id == ref.objectId)
-        .firstOrNull;
-    // Canonical package documents have bytes but no existing ReaderPage file
-    // adapter yet. Do not advertise a project overview as their object page.
-    return document == null
-        ? null
-        : ReaderPage(store: store, document: document);
+    if (_resolve(ref) == null) return null;
+    final project = binding.nativeProjectId;
+    final id = ref.objectId;
+    switch (ref.objectType) {
+      case 'document':
+        final document = store
+            .documents(project)
+            .where((doc) => doc.id == id)
+            .firstOrNull;
+        // Canonical package documents have bytes but no existing ReaderPage file
+        // adapter yet. Do not advertise a project overview as their object page.
+        return document == null
+            ? null
+            : ReaderPage(store: store, document: document);
+      case 'entry':
+        final rows = store.db.select(
+          'SELECT * FROM entries WHERE id=? AND project_id=?',
+          [id, project],
+        );
+        if (rows.isEmpty) return null;
+        return ResearchEntryPage(
+          entry: ResearchEntry(
+            id: id,
+            projectId: project,
+            kind: rows.single['kind'] as String,
+            title: rows.single['title'] as String,
+            data: WorkbenchStore.decode(rows.single['data'] as String),
+          ),
+        );
+      case 'outline':
+        final rows = store.db.select(
+          'SELECT o.heading,o.evidence_id,s.heading AS section_heading '
+          'FROM outline o LEFT JOIN sections s ON s.id=o.section_id '
+          'WHERE o.id=? AND o.project_id=?',
+          [id, project],
+        );
+        if (rows.isEmpty) return null;
+        return ResearchOutlinePage(
+          heading: rows.single['heading'] as String? ?? id,
+          sectionHeading: rows.single['section_heading'] as String?,
+          content: _evidenceSummary(
+            project,
+            rows.single['evidence_id'] as String?,
+          ),
+        );
+      case 'section':
+        final rows = store.db.select(
+          'SELECT s.heading,s.argument,p.title AS project_title '
+          'FROM sections s LEFT JOIN projects p ON p.id=s.project_id '
+          'WHERE s.id=? AND s.project_id=?',
+          [id, project],
+        );
+        if (rows.isEmpty) return null;
+        return ResearchSectionPage(
+          heading: rows.single['heading'] as String,
+          projectTitle: rows.single['project_title'] as String? ?? project,
+          argument: rows.single['argument'] as String? ?? '',
+        );
+      case 'task':
+        final rows = store.db.select(
+          'SELECT * FROM tasks WHERE id=? AND project_id=? '
+          '${ref.revisionRef == null ? '' : 'AND CAST(revision AS TEXT)=? '}'
+          'ORDER BY revision DESC LIMIT 1',
+          [id, project, if (ref.revisionRef != null) ref.revisionRef],
+        );
+        if (rows.isEmpty) return null;
+        final task = store.taskFromRow(rows.single);
+        final latest =
+            store.db.select(
+                  'SELECT MAX(revision) AS latest FROM tasks WHERE id=?',
+                  [id],
+                ).first['latest']
+                as int?;
+        // The status belongs to the shown revision, not to the latest run of
+        // the task (review F1).
+        final runStatus = store.db.select(
+          'SELECT status FROM runs WHERE task_id=? AND task_revision=? '
+          'ORDER BY rowid DESC LIMIT 1',
+          [id, task.revision],
+        );
+        return ResearchTaskPage(
+          task: task,
+          revisionRunStatus: runStatus.isEmpty
+              ? null
+              : runStatus.single['status'] as String,
+          isLatestRevision: task.revision == latest,
+        );
+      case 'run':
+        final rows = store.db.select(
+          'SELECT r.*,t.title AS task_title FROM runs r '
+          'JOIN tasks t ON t.id=r.task_id AND t.revision=r.task_revision '
+          'WHERE r.id=? AND t.project_id=?',
+          [id, project],
+        );
+        if (rows.isEmpty) return null;
+        final run = store.runFromRow(rows.single);
+        final latest =
+            store.db.select(
+                  'SELECT MAX(revision) AS latest FROM tasks WHERE id=?',
+                  [run.taskId],
+                ).first['latest']
+                as int?;
+        return ResearchRunPage(
+          run: run,
+          taskTitle: rows.single['task_title'] as String? ?? run.taskId,
+          isLatestRevision: run.taskRevision == latest,
+        );
+      case 'card':
+        final revisionId = ref.revisionRef;
+        final rows = store.db.select(
+          'SELECT v.envelope,v.revision_id,c.head_revision_id FROM canonical_object_map m '
+          'JOIN rk_cards c ON c.object_key=m.object_key '
+          'JOIN rk_revisions v ON v.object_key=m.object_key AND v.revision_id=${revisionId == null ? 'c.head_revision_id' : '?'} '
+          'WHERE m.local_object_id=? AND m.local_project_id=? AND m.object_type=?',
+          [?revisionId, id, project, 'card'],
+        );
+        if (rows.isEmpty) return null;
+        final envelope = jsonDecode(
+          rows.single['envelope'] as String,
+        ) as Map<String, Object?>;
+        return ResearchCardPage(
+          bodyMarkdown: '${envelope['bodyMarkdown'] ?? ''}',
+          revisionId: rows.single['revision_id'] as String,
+          citations: [
+            for (final raw in (envelope['citationRefs'] as List? ?? const []))
+              _citationLine(Map<String, Object?>.from(raw as Map)),
+          ],
+          isLatestRevision:
+              rows.single['revision_id'] == rows.single['head_revision_id'],
+        );
+      default:
+        return null;
+    }
+  }
+
+  /// Human summary of an outline link's evidence, or the raw id when it
+  /// cannot be described. Never invents a record.
+  String? _evidenceSummary(String project, String? evidenceId) {
+    if (evidenceId == null || evidenceId.isEmpty) return null;
+    final entry = store.db.select(
+      'SELECT kind,title FROM entries WHERE id=? AND project_id=?',
+      [evidenceId, project],
+    );
+    if (entry.isNotEmpty) {
+      final kind = '${entry.single['kind']}';
+      return '${recordKinds[kind] ?? kind} · ${entry.single['title']}';
+    }
+    final note = store.db.select(
+      'SELECT n.text,d.relative_path FROM notes n JOIN documents d ON d.id=n.document_id '
+      'WHERE n.id=? AND d.project_id=?',
+      [evidenceId, project],
+    );
+    if (note.isNotEmpty) {
+      return '精读证据 · ${note.single['relative_path']} · ${note.single['text']}';
+    }
+    final run = store.db.select(
+      'SELECT r.status,t.title FROM runs r JOIN tasks t ON t.id=r.task_id AND t.revision=r.task_revision '
+      'WHERE r.id=? AND t.project_id=?',
+      [evidenceId, project],
+    );
+    if (run.isNotEmpty) {
+      return '运行结果 · ${run.single['title']} · ${run.single['status']}';
+    }
+    return evidenceId;
+  }
+
+  static String _citationLine(Map<String, Object?> citation) {
+    final source = citation['source'] is Map
+        ? Map<String, Object?>.from(citation['source'] as Map)
+        : const <String, Object?>{};
+    final documentRef = source['documentRef'] is Map
+        ? Map<String, Object?>.from(source['documentRef'] as Map)
+        : const <String, Object?>{};
+    final page = source['pageIndex'];
+    final quote = '${source['quote'] ?? ''}'.trim();
+    return [
+      '${citation['citationId'] ?? ''}',
+      if (documentRef['objectUuid'] != null)
+        '${documentRef['objectType'] ?? 'document'} ${documentRef['objectUuid']}',
+      if (page is int) '第${page + 1}页',
+      if (quote.isNotEmpty) '“$quote”',
+    ].where((part) => part.isNotEmpty).join(' · ');
+  }
+
+  /// Card app bar title (review N4): the first non-empty line without heading
+  /// marks, truncated to 60 characters with an ellipsis. Truncation is by rune
+  /// so surrogate pairs (emoji) stay whole.
+  static String _cardTitle(String bodyMarkdown, {required String fallback}) {
+    for (final line in bodyMarkdown.split('\n')) {
+      final trimmed = line.replaceFirst(RegExp(r'^#+\s*'), '').trim();
+      if (trimmed.isNotEmpty) {
+        final runes = trimmed.runes.toList();
+        return runes.length > 60
+            ? '${String.fromCharCodes(runes.take(60))}…'
+            : trimmed;
+      }
+    }
+    return fallback;
   }
 }

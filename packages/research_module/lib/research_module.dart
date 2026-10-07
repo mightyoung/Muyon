@@ -3,6 +3,7 @@ library;
 export 'src/research_module.dart';
 export 'src/research_services.dart';
 export 'src/app/workbench_app.dart' show ResearchHome;
+export 'src/app/object_pages.dart';
 export 'src/core/store.dart';
 export 'src/core/models.dart';
 export 'src/core/exchange.dart';

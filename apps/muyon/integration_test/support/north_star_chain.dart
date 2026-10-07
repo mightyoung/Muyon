@@ -42,10 +42,16 @@ class NorthStarInquiryChain {
     required this.rootPath,
     required this.evidence,
     this.binding = 'flutter_test',
+    this.fixtureTurns = const {},
   });
   final String rootPath;
   final Map<String, Object?> evidence;
   final String binding;
+
+  /// Test hook: replaces the fixture model's scripted turns for one step
+  /// (keyed by step name, e.g. `assistant.read.compare_quotes`). Lets a test
+  /// show that a run answered with the wrong tools fails; unused otherwise.
+  final Map<String, List<FixtureTurn>> fixtureTurns;
 
   final _steps = <Map<String, Object?>>[];
   final _taskEvidence = <Map<String, Object?>>[];
@@ -74,7 +80,12 @@ class NorthStarInquiryChain {
     // Decided before parsing so a bad configuration still yields evidence of
     // the run that was asked for.
     final real = NorthStarModelSettings.realRequested;
-    if (!real && NorthStarModelSettings.modelVariablesSet) {
+    final switchValue = northStarSetting('MUYON_EVAL_REAL');
+    if (switchValue != null && switchValue != '1') {
+      debugPrint(
+        'North Star: MUYON_EVAL_REAL 只接受 1; running with the fixture model.',
+      );
+    } else if (!real && NorthStarModelSettings.modelVariablesSet) {
       debugPrint(
         'North Star: model variables found but MUYON_EVAL_REAL=1 is not set; '
         'running with the fixture model.',
@@ -191,7 +202,7 @@ class NorthStarInquiryChain {
 
     // Read-only questions in the main (global) conversation.
     final main = await host.foundation.createConversation(title: '主对话');
-    _fixture?.script([
+    _script('assistant.read.compare_quotes', [
       FixtureModelServer.tool('inquiry.compare_quotes', {
         'product_id': data.cableProduct,
       }),
@@ -202,6 +213,8 @@ class NorthStarInquiryChain {
       () => _drive(
         host,
         phase: 'read',
+        question: 'compare_quotes',
+        requiredTool: 'inquiry.compare_quotes',
         conversationId: main.id,
         profile: profile,
         prompt:
@@ -209,7 +222,7 @@ class NorthStarInquiryChain {
             '哪家最低？请用已注册工具查询，不要修改数据。',
       ),
     );
-    _fixture?.script([
+    _script('assistant.read.project_budget', [
       FixtureModelServer.tool('inquiry.project_budget', {
         'project_id': data.projectId,
       }),
@@ -220,6 +233,8 @@ class NorthStarInquiryChain {
       () => _drive(
         host,
         phase: 'read',
+        question: 'project_budget',
+        requiredTool: 'inquiry.project_budget',
         conversationId: main.id,
         profile: profile,
         prompt:
@@ -278,7 +293,7 @@ class NorthStarInquiryChain {
       scope: AssistantScope.selectedObjects(selected),
     );
     const title = '北极星复核询价';
-    _fixture?.script([
+    _script('assistant.write.create_inquiry', [
       FixtureModelServer.tool('inquiry.create_inquiry', {
         'project_id': data.projectId,
         'title': title,
@@ -287,46 +302,53 @@ class NorthStarInquiryChain {
       }),
       FixtureModelServer.answer('已创建询价单「$title」。', citeType: 'inquiry'),
     ]);
-    final write = await _step(
+    // Verification runs inside the step, so a failed check marks it ok:false.
+    final (inquiryId, record) = await _step(
       'assistant.write.create_inquiry',
-      () => _drive(
-        host,
-        phase: 'write',
-        conversationId: topic.id,
-        profile: profile,
-        store: store,
-        prompt:
-            '为项目（project_id=${data.projectId}）的预算行「电缆」'
-            '（item_id=${data.cableItem}）向两家供应商（supplier_ids='
-            '${data.supplierA},${data.supplierB}）发起一张新的询价单，标题「$title」。'
-            '使用工具 inquiry.create_inquiry，参数只用这里给出的 id。',
-      ),
+      () async {
+        final write = await _drive(
+          host,
+          phase: 'write',
+          conversationId: topic.id,
+          profile: profile,
+          store: store,
+          prompt:
+              '为项目（project_id=${data.projectId}）的预算行「电缆」'
+              '（item_id=${data.cableItem}）向两家供应商（supplier_ids='
+              '${data.supplierA},${data.supplierB}）发起一张新的询价单，标题「$title」。'
+              '使用工具 inquiry.create_inquiry，参数只用这里给出的 id。',
+        );
+        expect(write.state, PersonalTaskState.succeeded, reason: write.error);
+        final created = write.objectRefs
+            .where((r) => r.moduleId == 'inquiry' && r.objectType == 'inquiry')
+            .toList();
+        expect(
+          created,
+          hasLength(1),
+          reason: 'The write result must reference the created inquiry',
+        );
+        final inquiryId = created.single.objectId;
+        final record = store.get('inquiry', inquiryId);
+        expect(record, isNotNull);
+        expect(record!.data['project_id'], data.projectId);
+        expect(record.data['status'], 'open');
+        if (settings == null) expect(record.data['title'], title);
+        expect(countRows(store, 'inquiry'), 2);
+        expect(evidence['write'], isNotNull, reason: 'The write was approved');
+        final lastAnswer = host.foundation.messages(topic.id).last;
+        expect(lastAnswer.role, 'assistant');
+        (evidence['write'] as Map)['inquiryId'] = inquiryId;
+        (evidence['write'] as Map)['answerCitesInquiry'] = lastAnswer.references
+            .any((r) => r.objectId == inquiryId);
+        if (settings == null) {
+          expect(
+            lastAnswer.references.map((r) => r.objectId),
+            contains(inquiryId),
+          );
+        }
+        return (inquiryId, record);
+      },
     );
-    expect(write.state, PersonalTaskState.succeeded, reason: write.error);
-    final created = write.objectRefs
-        .where((r) => r.moduleId == 'inquiry' && r.objectType == 'inquiry')
-        .toList();
-    expect(
-      created,
-      hasLength(1),
-      reason: 'The write result must reference the created inquiry',
-    );
-    final inquiryId = created.single.objectId;
-    final record = store.get('inquiry', inquiryId);
-    expect(record, isNotNull);
-    expect(record!.data['project_id'], data.projectId);
-    expect(record.data['status'], 'open');
-    if (settings == null) expect(record.data['title'], title);
-    expect(countRows(store, 'inquiry'), 2);
-    expect(evidence['write'], isNotNull, reason: 'The write was approved');
-    final lastAnswer = host.foundation.messages(topic.id).last;
-    expect(lastAnswer.role, 'assistant');
-    (evidence['write'] as Map)['inquiryId'] = inquiryId;
-    (evidence['write'] as Map)['answerCitesInquiry'] = lastAnswer.references
-        .any((r) => r.objectId == inquiryId);
-    if (settings == null) {
-      expect(lastAnswer.references.map((r) => r.objectId), contains(inquiryId));
-    }
 
     // Invariants over everything this run recorded.
     final before = await _step('invariants', () async {
@@ -377,6 +399,8 @@ class NorthStarInquiryChain {
     required String conversationId,
     required ModelProfile profile,
     required String prompt,
+    String? question,
+    String? requiredTool,
     Store? store,
   }) async {
     final agent = host.personalAgent;
@@ -432,7 +456,12 @@ class NorthStarInquiryChain {
       ..['rounds'] = task.payload['round']
       ..['error'] = task.error
       ..['tools'] = proposedTools(task)
-      ..['answerPreview'] = previewText(task.summary)
+      // The summary holds the last tool's description until an answer is
+      // finished, so only a succeeded task's summary is the model's answer.
+      ..['answerPreview'] = task.state == PersonalTaskState.succeeded
+          ? previewText(task.summary)
+          : null
+      ..['protocolCorrections'] = task.payload['protocolCorrections'] ?? 0
       ..['answerReferences'] = host.foundation
           .messages(conversationId)
           .last
@@ -447,7 +476,14 @@ class NorthStarInquiryChain {
           '${redactCredentials(task.error ?? 'no error recorded')}',
         );
       }
-      _requireReadTool(host, task, entry, receiptsBefore);
+      _requireReadTool(
+        host,
+        task,
+        entry,
+        receiptsBefore,
+        question: question!,
+        requiredTool: requiredTool!,
+      );
     }
     return task;
   }
@@ -459,8 +495,10 @@ class NorthStarInquiryChain {
     MuyonHost host,
     PersonalTask task,
     Map<String, Object?> entry,
-    int receiptsBefore,
-  ) {
+    int receiptsBefore, {
+    required String question,
+    required String requiredTool,
+  }) {
     final reads = [
       for (final r in receiptRows(host).skip(receiptsBefore))
         if (r['state'] == 'succeeded' &&
@@ -476,7 +514,17 @@ class NorthStarInquiryChain {
         '$reads)',
       );
     }
+    // Per question: a read tool from another question does not count.
+    if (!reads.contains(requiredTool)) {
+      throw StateError(
+        'Read question $question (${task.id}) was not answered with '
+        '$requiredTool (succeeded read receipts $reads)',
+      );
+    }
   }
+
+  void _script(String step, List<FixtureTurn> turns) =>
+      _fixture?.script(fixtureTurns[step] ?? turns);
 
   Future<void> _approveWrite(
     MuyonHost host,

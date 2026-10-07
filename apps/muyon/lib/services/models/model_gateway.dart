@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../platform/outbound_ledger.dart';
+import 'credential_redaction.dart';
 
 enum ModelLocation { local, ownDevice, remote }
 
@@ -135,23 +136,49 @@ class OpenAiModelGateway {
     if (profile.purpose != ModelPurpose.chat) {
       throw StateError('Model profile is not configured for chat');
     }
-    final decoded = await request(
+    Future<Map<String, dynamic>> send(bool withFormat) => request(
       profile: profile,
       payload: {
         'model': profile.modelId,
         'messages': messages,
         'stream': false,
+        if (withFormat) 'response_format': const {'type': 'json_object'},
       },
       cancellation: cancellation,
       beforeSend: beforeSend,
       caller: caller,
     );
+    final key = '${profile.endpoint}|${profile.modelId}';
+    final withFormat =
+        _jsonObjectCallers.contains(caller) && !_noJsonObject.contains(key);
+    Map<String, dynamic> decoded;
+    try {
+      decoded = await send(withFormat);
+    } on HttpException catch (error) {
+      // An endpoint that rejects response_format (400/422) must keep working:
+      // send the same confirmed content once more without it, and remember
+      // not to ask this endpoint again. Both requests are in the ledger.
+      final rejected =
+          error.message == 'model_http_400' ||
+          error.message == 'model_http_422';
+      if (!withFormat || !rejected) rethrow;
+      _noJsonObject.add(key);
+      decoded = await send(false);
+    }
     final content = (decoded['choices'] as List).first['message']['content'];
     if (content is! String || content.trim().isEmpty) {
       throw const FormatException('Empty model response');
     }
     return content;
   }
+
+  /// Callers whose protocol is one JSON object per reply. They ask for JSON
+  /// output so a model does not answer in prose or in its native tool-call
+  /// markup (P0-3d); other callers keep their plain requests.
+  static const _jsonObjectCallers = {'assistant'};
+
+  /// Endpoint+model pairs that rejected `response_format: json_object`.
+  final _noJsonObject = <String>{};
 
   /// Endpoint is explicit in the profile; no URL rewriting or provider fallback.
   Future<List<List<double>>> embed({
@@ -221,6 +248,7 @@ class OpenAiModelGateway {
     final frozenPayload = jsonEncode(payload);
     final items = payload['messages'] ?? payload['input'];
     String? recordId;
+    String? usedCredential;
     var sent = false;
     int? httpStatus;
     if (utf8.encode(frozenPayload).length > 2 * 1024 * 1024) {
@@ -241,6 +269,13 @@ class OpenAiModelGateway {
             (credential == null || credential.isEmpty)) {
           throw StateError('credential_unavailable');
         }
+        // Checked before approval and before the ledger row: a key dart:io
+        // cannot put in a header would otherwise fail with the whole header,
+        // key included, in the exception text.
+        if (credential != null && !isSendableCredential(credential)) {
+          throw StateError('credential_invalid');
+        }
+        usedCredential = credential;
         if (beforeSend != null) await beforeSend();
         token.check();
         recordId = await ledger?.begin(
@@ -275,7 +310,19 @@ class OpenAiModelGateway {
           bytes.addAll(chunk);
         }
         token.check();
-        final decoded = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+        // The parser quotes (and truncates) the body in its message, so an
+        // endpoint echoing the key could leak part of it past maskSecret.
+        // Fail with a fixed reason instead of the source text.
+        final Object? parsed;
+        try {
+          parsed = jsonDecode(utf8.decode(bytes));
+        } on FormatException {
+          throw const FormatException('model_response_not_json');
+        }
+        if (parsed is! Map<String, dynamic>) {
+          throw const FormatException('model_response_not_object');
+        }
+        final decoded = parsed;
         await _finish(recordId, 'succeeded', httpStatus, null);
         return decoded;
       })().timeout(timeout);
@@ -283,14 +330,23 @@ class OpenAiModelGateway {
       token.cancel();
       await _finish(recordId, 'timeout', httpStatus, _when(sent));
       rethrow;
-    } catch (error) {
+    } catch (error, stack) {
       final status = token.isCancelled ? 'cancelled' : 'failed';
       await _finish(
         recordId,
         status,
         httpStatus,
-        token.isCancelled ? _when(sent) : '$error',
+        token.isCancelled
+            ? _when(sent)
+            : redactCredentials(error, secret: usedCredential),
       );
+      // Callers store and show error text (tasks, notifications, receipts);
+      // an error that quotes the key, or a header carrying it, leaves the
+      // gateway already redacted.
+      final safe = redactCredentials(error, secret: usedCredential);
+      if (safe != '$error') {
+        Error.throwWithStackTrace(StateError(safe), stack);
+      }
       rethrow;
     } finally {
       token.remove(abort);
