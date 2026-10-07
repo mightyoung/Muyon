@@ -42,6 +42,7 @@ class ModelProfile {
     this.cloudProxy = false,
     this.purpose = ModelPurpose.chat,
     this.capabilities = ModelCapabilities.compat,
+    this.detectedCapabilities,
   }) : endpoint = completeModelEndpoint(endpoint, purpose) {
     if (!this.endpoint.hasAuthority ||
         this.endpoint.userInfo.isNotEmpty ||
@@ -76,6 +77,34 @@ class ModelProfile {
   /// Declared by the person (or a preset); code-constructed profiles are
   /// compatibility mode, non-streaming.
   final ModelCapabilities capabilities;
+
+  /// The last "测试连接" result (ADR-0005 §4.5). Never read when a task starts
+  /// and never part of [toJson]: only [toStoredJson] carries it.
+  final DetectedCapabilities? detectedCapabilities;
+
+  ModelProfile copyWith({
+    ModelCapabilities? capabilities,
+    DetectedCapabilities? detectedCapabilities,
+  }) => ModelProfile(
+    id: id,
+    endpoint: endpoint,
+    location: location,
+    modelId: modelId,
+    endpointIdentity: endpointIdentity,
+    credentialRef: credentialRef,
+    cloudProxy: cloudProxy,
+    purpose: purpose,
+    capabilities: capabilities ?? this.capabilities,
+    detectedCapabilities: detectedCapabilities ?? this.detectedCapabilities,
+  );
+
+  /// What the profile repository saves: [toJson] plus the detection result.
+  /// Kept apart so the task payload, digests and previews are unchanged.
+  Map<String, Object?> toStoredJson() => {
+    ...toJson(),
+    if (detectedCapabilities != null)
+      'detectedCapabilities': detectedCapabilities!.toJson(),
+  };
 
   /// [toJson] without the capability block: the shape digests had before
   /// capabilities existed, so they do not change with the upgrade.
