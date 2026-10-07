@@ -149,7 +149,7 @@ CI SUMMARY: FAILED (test:host test:inquiry)
 - 第 2 次：第一轮回复就是 DeepSeek 原生工具调用标记，错误原文：`执行失败（FormatException: Unexpected character (at character 1) <｜｜DSML｜｜ calls>）`，没有工具被提议。
 - Android 真机（vivo V2324A，Android 16，`integration_test`）：第一轮就是 `<｜｜DSML｜｜ calls>`，错误原文同第 2 次，预算题 0 轮、无工具。比价题同一次运行成功（`inquiry.compare_quotes`，2 轮，耗时 2665 ms）。
 - macOS 设备（`integration_test`）：第一轮同样是 `<｜｜DSML｜｜ calls>`，预算题 0 轮、无工具；比价题成功，耗时 2217 ms。代码是 `369ecca`，**不含 P0-3d**（`ebc9bf6`），所以这里的 D1 失败是预期的，不是 P0-3d 的回归。链路在预算题读取失败后就终止了，没有走到写入，所以 JSON 里没有 `readResultsChecked` 和 `write.repeatConfirmRefused`。
-- 以上四次运行的代码都早于 P0-3d。P0-3d 的效果要等在含 P0-3d 的 `develop` 上重跑后才能判断。
+- 以上四次运行的代码都早于 P0-3d。P0-3d 合入之后，macOS 设备运行了一次，预算题通过（见「第 3 批」）。这次运行中 D1 没有复现，但只跑了一次，不能据此说 D1 已经修复。
 - 复现：`MUYON_EVAL_REAL=1`，端点 `https://api.deepseek.com`，模型 `deepseek-chat`，运行 `flutter test test/north_star_inquiry_test.dart`（`apps/muyon`）。比价题同一轮成功，失败只出现在预算题。
 - 影响：真实模型对第二道只读题的表现不稳定；任务结果为 `failed`，错误文本里含模型的回答原文。P0-3c 只涉及「每道题都必须经由对应工具作答」的判定收尾，与这里的协议格式问题不是一回事；根因（模型输出格式、助手协议解析）由 leader 判断。
 
