@@ -419,20 +419,23 @@ class PersonalAgent {
       await _fail(task, '模型请求未获放行');
       return;
     }
-    await repository.updateTask(
-      task.copy({
-        'state': 'waitingConfirmation',
-        'stage': 'model',
-        'waitingFor': '确认向所选端点发送以下内容',
-        'preview': preview,
-        'requestDigest': digest(preview),
-        'expiresAt': _clock()
-            .toUtc()
-            .add(const Duration(minutes: 5))
-            .toIso8601String(),
-        'approvalNonce': const Uuid().v4(),
-      }),
-    );
+    final card = task.copy({
+      'state': 'waitingConfirmation',
+      'stage': 'model',
+      'waitingFor': '确认向所选端点发送以下内容',
+      'preview': preview,
+      'requestDigest': digest(preview),
+      'expiresAt': _clock()
+          .toUtc()
+          .add(const Duration(minutes: 5))
+          .toIso8601String(),
+      'approvalNonce': const Uuid().v4(),
+    });
+    if (!await repository.updateTask(card)) return;
+    await _event(card, AgentEventType.wait, {
+      'stage': 'model',
+      'requestDigest': card.payload['requestDigest'],
+    });
   }
 
   static ToolCallRequest _requestOf(PersonalTask task, Map call) =>
@@ -1574,11 +1577,19 @@ class PersonalAgent {
           if (digest(task.payload['preview']) != requestDigest) {
             throw StateError('preview_changed');
           }
+          await _event(task, AgentEventType.approval, {
+            'stage': 'model',
+            'requestDigest': requestDigest,
+          });
           await _runModel(task);
         } else if (task.stage == 'compaction') {
           if (digest(task.payload['preview']) != requestDigest) {
             throw StateError('preview_changed');
           }
+          await _event(task, AgentEventType.approval, {
+            'stage': 'compaction',
+            'requestDigest': requestDigest,
+          });
           await _runCompaction(task);
         } else {
           await _executeCard(task, {...(chosen ?? cardIds)});
@@ -1654,8 +1665,17 @@ class PersonalAgent {
           repository.task(task.id)?.state != PersonalTaskState.running) {
         return;
       }
+      if (!profile.capabilities.streaming) {
+        await _event(task, AgentEventType.modelRequest, {
+          'caller': 'assistant',
+          'requestDigest': task.payload['requestDigest'],
+          'mode': 'compat',
+          'streamed': false,
+        });
+      }
       // What this response used is charged whatever it turns out to be.
       final billed = _bill(task, started, replyText: text, usage: usage);
+      await _responded(billed, usage, null);
       final response = _protocolReply(text);
       if (response == null) {
         // Prose, native tool-call markup or a wrong shape is never acted on.
@@ -1768,6 +1788,7 @@ class PersonalAgent {
     ModelCancellation token,
   ) async {
     final reply = _Reply();
+    var announced = false;
     await for (final event in gateway.chatStream(
       provider: provider,
       request: request,
@@ -1776,6 +1797,16 @@ class PersonalAgent {
       // The smaller of what is left of the active budget and 5 minutes.
       maxDuration: budget.requestLimit(BudgetUsage.fromPayload(task.payload)),
     )) {
+      if (!announced) {
+        // The first event means the ledger row exists and the request went.
+        announced = true;
+        await _event(task, AgentEventType.modelRequest, {
+          'caller': request.caller,
+          'requestDigest': request.requestDigest,
+          'mode': request.tools.isNotEmpty ? 'native' : 'compat',
+          'streamed': request.profile.capabilities.streaming,
+        });
+      }
       switch (event) {
         case TextDelta():
           reply.text.write(event.text);
@@ -1887,6 +1918,17 @@ class PersonalAgent {
     });
   }
 
+  /// What one response cost, as an event: sizes and a finish reason, never
+  /// the text.
+  Future<void> _responded(PersonalTask billed, Usage? usage, Done? done) =>
+      _event(billed, AgentEventType.modelResponse, {
+        'promptTokens': usage?.promptTokens,
+        'completionTokens': usage?.completionTokens,
+        'tokensUsed': billed.payload['tokensUsed'],
+        'estimated': billed.payload['tokensEstimated'],
+        'finish': ?done?.reason.name,
+      });
+
   static Never _failure(_FixedFailure f) => throw f;
 
   /// Failures that end the task with a fixed reason (never the model's text).
@@ -1968,6 +2010,7 @@ class PersonalAgent {
               .join(),
       usage: reply.usage,
     );
+    await _responded(billed, reply.usage, reply.done);
     Future<void> discard() =>
         _correctOrFail(billed, notJson: false, correction: _nativeCorrection);
     if (reply.calls.isEmpty) {
@@ -2140,6 +2183,7 @@ class PersonalAgent {
       canCommit: canCommit,
     );
     if (saved) {
+      await _event(task, AgentEventType.done, {'chars': answer.length});
       await repository.notify(
         title: '助手任务完成',
         body: answer.length > 160 ? answer.substring(0, 160) : answer,
@@ -2202,13 +2246,15 @@ class PersonalAgent {
     }
     _modelTokens[id]?.cancel();
     _toolTokens[id]?.cancel();
-    await repository.updateTask(
+    if (await repository.updateTask(
       task.copy({
         'state': 'cancelled',
         'stage': 'cancelled',
         'waitingFor': null,
       }),
-    );
+    )) {
+      await _event(task, AgentEventType.cancel);
+    }
   }
 
   /// Final state of a running task from a tool outcome. Guarded so it cannot
@@ -2227,7 +2273,11 @@ class PersonalAgent {
       }),
       expected: {PersonalTaskState.running},
     );
+    if (saved && state == PersonalTaskState.cancelled) {
+      await _event(task, AgentEventType.cancel);
+    }
     if (saved && state == PersonalTaskState.interrupted) {
+      await _event(task, AgentEventType.error, {'code': 'interrupted'});
       await repository.notify(
         title: '助手任务结果未知',
         body: error ?? '',
