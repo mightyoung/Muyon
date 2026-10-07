@@ -21,7 +21,7 @@
 | P0-J2 自检脚本安全加固 | `task/p0-j2-doctor-hardening` | [P0-J2.md](P0-J2.md) | junior | — | 已合入（[审查](P0-J2-review.md)） |
 | P0-S1 模型网关与助手的凭据脱敏 | `task/p0-s1-credential-redaction` | [P0-S1.md](P0-S1.md) | senior | — | 已合入（[审查](P0-S1-review.md)，三轮） |
 | P0-S2 MCP 令牌凭据脱敏 | `task/p0-s2-mcp-token-redaction` | [P0-S2.md](P0-S2.md) | senior | — | 已交付（`fccc318`）；**P0-S1 已合入，待 senior 合并 develop 后核实** |
-| P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | **可转交**（P0-F2 已合入） |
+| P0-J3 自检脚本测试收尾（低优先级） | `task/p0-j3-doctor-tests` | [P0-J3.md](P0-J3.md) | junior | E11 之后 | 已合入（[审查](P0-J3-review.md)；自检脚本收口） |
 | P0-F1 修复不稳定的局域网安全测试 | `task/p0-f1-lan-flaky-test` | [P0-F1.md](P0-F1.md) | senior | — | 已合入（[审查](P0-F1-review.md)） |
 | P0-3c 询价链路判定收尾（低优先级） | `task/p0-3c-chain-per-question` | [P0-3c.md](P0-3c.md) | senior | — | 已合入（[审查](P0-3c-review.md)） |
 | P0-3d 助手协议对真实模型的容错（D1） | `task/p0-3d-protocol-robustness` | [P0-3d.md](P0-3d.md) | senior | P0-S1 合入之后 | 已合入（[审查](P0-3d-review.md)） |

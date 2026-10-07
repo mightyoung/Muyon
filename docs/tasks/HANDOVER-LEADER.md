@@ -42,6 +42,7 @@
 | **P0-S1** 凭据脱敏（三轮） | [P0-S1-review.md](P0-S1-review.md)：长密钥回显探针、三处变异均通过 |
 | **P0-3d** 助手协议容错 | [P0-3d-review.md](P0-3d-review.md)：测试缺口转 P0-3e |
 | **E11b** 研究对象页收尾 | [E11b-review.md](E11b-review.md) |
+| **P0-J3** 自检脚本测试收尾（2026-10-07） | [P0-J3-review.md](P0-J3-review.md)：6 个变异全部被抓住 |
 | **P0-F2** 对象页测试超时（2026-10-07） | [P0-F2-review.md](P0-F2-review.md)：变异确认，Actions 37551382627 绿，**门禁恢复** |
 | **P0-4 第一、二批证据**（`76c23b2`、`34ca1da`） | [P0-4-review.md](P0-4-review.md)：基线可入账；三次链路都因 D1 失败 |
 | **P0-4 第 3 批**（macOS 设备，2026-10-07） | 同上：macOS 能构建运行；代码 `369ecca` 早于 P0-3d，预算题仍因 D1 失败，不计入 M |
@@ -56,7 +57,7 @@
 | **E11b** | — | **已合入**。 |
 | **P0-F2** 两个 10 分钟超时 | — | **已合入**（[审查](P0-F2-review.md)），门禁恢复为绿。 |
 | **P0-4** 真机与真实模型取证 | `review/P0-4` | P0-3d 已合入。engineer 在含 P0-3d 的 `develop` 上，Android（必需）与 macOS 各重跑一次链路，加一次 `ci.sh`（本机 inquiry 截图因 macOS 27 渲染漂移会失败，如实记录）。审查按第 5 节，字段核对派 `reviewer-sonnet-low`。 |
-| **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | P0-F2 已合入，**可转发** junior（先 `git merge origin/develop`）。审查派 `reviewer-sonnet-low`。 |
+| **P0-J3** 自检脚本测试收尾 | — | **已合入**（[审查](P0-J3-review.md)），自检脚本收口。 |
 
 ## 4. 第一阶段退出标准（ADR-0001 §5）
 
@@ -112,7 +113,7 @@
 
 1. `git fetch`，按本文件核对各分支哈希；确认 `reviewer-sonnet-*` 子代理可用（试调一次）。
 2. P0-3d 已合入：确认用户已把 P0-4 正式重跑转给 engineer、P0-3e 转给 senior。
-3. ~~P0-F2 审查合入~~ 已完成（2026-10-07，门禁变绿）；P0-J3 已可转发。
+3. ~~P0-F2 审查合入~~ 已完成（2026-10-07，门禁变绿）；P0-J3 也已合入。
 4. senior 把 `develop` 合进 P0-S2 后，派 `reviewer-sonnet-high` 核实 → 合入。
 5. ~~收 engineer 的 macOS 设备批次 → 审查 → 合入。~~ 已完成（2026-10-07，第 3 批）。
 6. P0-3d 合入 → engineer 在 Android（必需）和 macOS 重跑链路 → 审查 → 合入，退出标准第 1 项达成。
