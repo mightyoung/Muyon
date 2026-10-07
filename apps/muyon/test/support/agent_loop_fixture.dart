@@ -218,7 +218,7 @@ class LoopFixture {
     location: location,
     modelId: 'm',
     endpointIdentity: 'fixture-$id',
-    credentialRef: null,
+    credentialRef: location == ModelLocation.local ? null : 'key',
     capabilities: capabilities,
   );
 
@@ -228,6 +228,7 @@ class LoopFixture {
     DateTime Function()? clock,
     OpenAiModelGateway? gateway,
     ModelRequestGate gate = const AlwaysConfirmGate(),
+    ModelProfile? compactionProfile,
   }) {
     final agent = PersonalAgent(
       repository: repo,
@@ -237,6 +238,7 @@ class LoopFixture {
       maxRounds: maxRounds,
       clock: clock,
       gate: gate,
+      compactionProfile: compactionProfile,
     );
     addTearDown(agent.close);
     return agent;
@@ -257,17 +259,19 @@ class LoopFixture {
   }
 
   /// Confirms every model round; stops at the first tool card unless
-  /// [confirmTools].
+  /// [confirmTools], and at a summary-request card unless [confirmSummary].
   Future<PersonalTask> run(
     PersonalAgent agent,
     PersonalTask first, {
     int max = 12,
     bool confirmTools = false,
+    bool confirmSummary = false,
   }) async {
     var task = first;
     for (var i = 0; i < max; i++) {
       if (task.state != PersonalTaskState.waitingConfirmation) break;
       if (task.stage == 'tool' && !confirmTools) break;
+      if (task.stage == 'compaction' && !confirmSummary) break;
       await agent.confirm(
         task.id,
         requestDigest: task.payload['requestDigest'] as String,
