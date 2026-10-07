@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/task_records.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/model_provider.dart';
 import '../platform/tool_registry.dart';
@@ -149,7 +150,7 @@ class AgentContext {
     bool Function()? canCommit,
   }) async {
     if (answer.trim().isEmpty) throw const FormatException('Empty answer');
-    final saved = await repository.updateTask(
+    final saved = await commit(
       task.copy({
         'state': 'succeeded',
         'stage': 'completed',
@@ -157,12 +158,14 @@ class AgentContext {
         'summary': answer,
         'references': refs.map((r) => r.toJson()).toList(),
       }),
+      events: [
+        (AgentEventType.done, {'chars': answer.length}),
+      ],
       assistantAnswer: answer,
       references: refs,
       canCommit: canCommit,
     );
     if (saved) {
-      await event(task, AgentEventType.done, {'chars': answer.length});
       await repository.notify(
         title: '助手任务完成',
         body: answer.length > 160 ? answer.substring(0, 160) : answer,
@@ -172,15 +175,49 @@ class AgentContext {
   }
 
   Future<void> fail(PersonalTask task, String message, {String? code}) async {
-    if (await repository.updateTask(
+    if (await commit(
       task.copy({'state': 'failed', 'stage': 'failed', 'error': message}),
+      events: [
+        (AgentEventType.error, {'code': ?code, 'reason': message}),
+      ],
     )) {
-      await event(task, AgentEventType.error, {
-        'code': ?code,
-        'reason': message,
-      });
       await repository.notify(title: '助手任务未完成', body: message, taskId: task.id);
     }
+  }
+
+  /// Writes the new state of a task together with the events that go with
+  /// it. With a [TransactionalEventSink] they are one transaction (a failed
+  /// event write undoes the state change); with another sink the state is
+  /// written first and the events follow, and a sink that cannot write does
+  /// not change what the task does. False: the state was not written.
+  Future<bool> commit(
+    PersonalTask next, {
+    List<(String, Map<String, Object?>)> events = const [],
+    Set<PersonalTaskState>? expected,
+    bool Function()? canCommit,
+    String? assistantAnswer,
+    List<ObjectRef> references = const [],
+    bool keepStage = false,
+  }) async {
+    final step = BudgetUsage.fromPayload(next.payload).steps;
+    final sink = this.events;
+    final together = sink is TransactionalEventSink;
+    final saved = await repository.updateTask(
+      next.withEvents([
+        if (together)
+          for (final e in events) TaskEventDraft(e.$1, step: step, data: e.$2),
+      ], keepStage: keepStage),
+      expected: expected,
+      canCommit: canCommit,
+      assistantAnswer: assistantAnswer,
+      references: references,
+    );
+    if (saved && !together) {
+      for (final e in events) {
+        await event(next, e.$1, e.$2);
+      }
+    }
+    return saved;
   }
 
   /// Writes to the event sink. A sink that cannot write must not change what
@@ -209,20 +246,22 @@ class AgentContext {
     PersonalTaskState state,
     String? error,
   ) async {
-    final saved = await repository.updateTask(
+    final saved = await commit(
       task.copy({
         'state': state.name,
         'stage': state.name,
         'waitingFor': null,
         'error': ?error,
       }),
+      events: [
+        if (state == PersonalTaskState.cancelled)
+          (AgentEventType.cancel, <String, Object?>{}),
+        if (state == PersonalTaskState.interrupted)
+          (AgentEventType.error, {'code': 'interrupted'}),
+      ],
       expected: {PersonalTaskState.running},
     );
-    if (saved && state == PersonalTaskState.cancelled) {
-      await event(task, AgentEventType.cancel);
-    }
     if (saved && state == PersonalTaskState.interrupted) {
-      await event(task, AgentEventType.error, {'code': 'interrupted'});
       await repository.notify(
         title: '助手任务结果未知',
         body: error ?? '',

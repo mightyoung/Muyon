@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
 import '../platform/outbound_ledger.dart';
+import '../platform/task_records.dart';
 
 class Workspace {
   const Workspace(this.id, this.title);
@@ -17,8 +18,8 @@ class WorkspaceRepository {
   final ManagedDatabase database;
 
   static final schema = ModuleSchema(
-    version: 7,
-    definitionDigest: 'foundation-v7',
+    version: 8,
+    definitionDigest: 'foundation-v8',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -132,6 +133,12 @@ CREATE TABLE transfer_tasks(
         id: 'outbound-streaming-columns',
         definitionDigest: 'foundation-v7',
         migrate: OutboundLedger.addStreamingColumns,
+      ),
+      ModuleMigration(
+        version: 8,
+        id: 'task-events',
+        definitionDigest: 'foundation-v8',
+        migrate: TaskRecords.migrate,
       ),
     ],
   );

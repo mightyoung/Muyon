@@ -18,6 +18,7 @@ import 'agent_compaction_flow.dart';
 import 'agent_context.dart';
 import 'agent_dispatch.dart';
 import 'agent_model_turn.dart';
+import 'agent_resume.dart';
 import 'agent_task_factory.dart';
 
 /// Host lifetime service. Views only create requests and approve displayed
@@ -52,13 +53,17 @@ class PersonalAgent {
                maxCardCalls: budget.maxCardCalls,
                requestCap: budget.requestCap,
              ),
-       events = events ?? PayloadEventSink(repository),
+       events = events ?? TaskEventTableSink(repository),
        _clock = clock ?? DateTime.now {
     _dispatch.model = _model;
     _model
       ..dispatch = _dispatch
       ..compaction = _compaction;
     _compaction.model = _model;
+    _resume
+      ..model = _model
+      ..dispatch = _dispatch
+      ..factory = _factory;
   }
   final FoundationRepository repository;
   final OpenAiModelGateway gateway;
@@ -103,6 +108,7 @@ class PersonalAgent {
   late final AgentDispatch _dispatch = AgentDispatch(_ctx);
   late final AgentModelTurn _model = AgentModelTurn(_ctx);
   late final AgentCompactionFlow _compaction = AgentCompactionFlow(_ctx);
+  late final AgentResume _resume = AgentResume(_ctx);
 
   Future<PersonalTask> _trackStart(Future<PersonalTask> Function() run) {
     if (_ctx.closing) return Future.error(StateError("Assistant is closing"));
@@ -236,8 +242,25 @@ class PersonalAgent {
         await cancel(taskId);
         return;
       }
-      if (!await repository.updateTask(
+      // The approval of a model / summary request or of a held resume is
+      // written with the state change that consumes the confirmation.
+      final approves = [
+        'model',
+        'compaction',
+        AgentResume.stage,
+      ].contains(task.stage);
+      final previewOk =
+          task.stage == AgentResume.stage ||
+          AgentContext.digest(task.payload['preview']) == requestDigest;
+      if (!await _ctx.commit(
         task.copy({'state': 'running', 'waitingFor': null}),
+        events: [
+          if (approves && previewOk)
+            (
+              AgentEventType.approval,
+              {'stage': task.stage, 'requestDigest': requestDigest},
+            ),
+        ],
         expected: {PersonalTaskState.waitingConfirmation},
       )) {
         throw StateError('confirmation_consumed');
@@ -245,23 +268,13 @@ class PersonalAgent {
       task = repository.task(taskId)!;
       try {
         if (task.stage == 'model') {
-          if (AgentContext.digest(task.payload['preview']) != requestDigest) {
-            throw StateError('preview_changed');
-          }
-          await _ctx.event(task, AgentEventType.approval, {
-            'stage': 'model',
-            'requestDigest': requestDigest,
-          });
+          if (!previewOk) throw StateError('preview_changed');
           await _model.runModel(task);
         } else if (task.stage == 'compaction') {
-          if (AgentContext.digest(task.payload['preview']) != requestDigest) {
-            throw StateError('preview_changed');
-          }
-          await _ctx.event(task, AgentEventType.approval, {
-            'stage': 'compaction',
-            'requestDigest': requestDigest,
-          });
+          if (!previewOk) throw StateError('preview_changed');
           await _compaction.runCompaction(task);
+        } else if (task.stage == AgentResume.stage) {
+          await _resume.continueHeld(task);
         } else {
           await _dispatch.executeCard(task, {...(chosen ?? cardIds)});
         }
@@ -309,15 +322,14 @@ class PersonalAgent {
     }
     _ctx.modelTokens[id]?.cancel();
     _ctx.toolTokens[id]?.cancel();
-    if (await repository.updateTask(
+    await _ctx.commit(
       task.copy({
         'state': 'cancelled',
         'stage': 'cancelled',
         'waitingFor': null,
       }),
-    )) {
-      await _ctx.event(task, AgentEventType.cancel);
-    }
+      events: [(AgentEventType.cancel, <String, Object?>{})],
+    );
   }
 
   Future<void> pause(String id) async {
@@ -340,6 +352,15 @@ class PersonalAgent {
         ].contains(task.state)) {
       throw StateError('Task is not resumable');
     }
+    // From the last checkpoint: what the earlier attempt's receipts show was
+    // done is taken over, never run again; what cannot be decided stops at a
+    // confirmation (see [AgentResume]).
+    PersonalTask? taken;
+    await _trackStart(() async {
+      taken = await _resume.attempt(task);
+      return taken ?? task;
+    });
+    if (taken != null) return taken!;
     if (task.profileId == null && task.payload["toolCall"] is Map) {
       final call = task.payload["toolCall"] as Map;
       return startTool(

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import '../platform/task_records.dart';
+
 class ExecutionStore {
   ExecutionStore(this.database);
   final ManagedDatabase database;
@@ -78,6 +80,14 @@ class ExecutionStore {
         : (jsonDecode(rows.first['payload'] as String) as Map)['answer']
               as String?;
   }
+
+  /// The timeline of an execution from the event table (K-4); one from before
+  /// the table is read from its payload's `events`. Read only.
+  List<TaskEvent> events(String id) => TaskRecords.events(database.raw, id);
+
+  /// The objects the execution's receipts and answer refer to.
+  List<TaskObjectLink> objectLinks(String id) =>
+      TaskRecords.linksOfTask(database.raw, id);
 
   Future<void> recoverInterrupted() async {
     for (final record in all()) {
