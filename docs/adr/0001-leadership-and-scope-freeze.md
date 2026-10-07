@@ -85,3 +85,4 @@
 - 2026-10-07：**第一阶段退出**。§5 五条标准均已达成，记录见[验收账本](../implementation/muyon-acceptance-ledger.md)末尾「第一阶段退出记录」；P0-S2 作为安全修复继续收尾。第二阶段按 [ADR-0003](0003-phase2-scope.md) 开始。用户同日指示：开发任务由 leader 派生 Sonnet 5.5 子代理执行，leader 只做派发、审查与合入。
 - 2026-10-07：用户同意 [AI 原生与注册机制评估](../reviews/2026-10-07-ai-native-and-registration.md)：采用注册机制 v2（REG-1～5）并与 S-1、T-3 前移到第二阶段；支持三层插件（声明式插件 REG-6 在第三阶段）；能力覆盖作为 CI 硬门槛。ADR-0003 与路线图已修订。
 - 2026-10-07：曾有两个 leader 会话同时合入 `develop`（没有冲突）。用户确认**只保留本机 leader 会话**，另一个会话不再合入。它在设计分支 `claude/ui-framework-review-2863c3` 上的决定类文档已移入 `develop`，见 UI 方案 §8 第 15～18 条。
+- 2026-10-07：用户决定 ADR-0004 §12.1 Q1～Q13 **全部按建议**，ADR-0004 改为已采纳；先派 FOLIO-BYPASS（Q12，现存风险），再派 REG-2（拆成 2a、2b 并行）。同日：**Codex 额度恢复**，作为本机执行者重新加入（codex，适合范围明确的较大实现任务）；本机新增实现子代理 `implementer-sonnet`（Sonnet 5.5，只在任务分支提交推送）。

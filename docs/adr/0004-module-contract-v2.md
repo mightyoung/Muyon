@@ -1,6 +1,6 @@
 # ADR-0004 模块契约 v2 与三层插件
 
-日期：2026-10-07 · 状态：**提议**（待用户确认 §12.1 的问题；确认前不派发 REG-2～REG-5）· 任务：[REG-1](../tasks/REG-1.md) · 阶段：第二阶段（[ADR-0003](0003-phase2-scope.md) 2026-10-07 修订）· 约束：[ADR-0002](0002-graded-assistant-authorization.md)（已采纳，其 §3 硬性底线本文一律不放宽）、[ADR-0005](0005-model-adapter-and-agent-loop.md)（已采纳）· 来源：[AI 原生与注册机制评估](../reviews/2026-10-07-ai-native-and-registration.md)（用户 2026-10-07 决定见其 §6）、[路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md) §3.1、[深度研究报告](../reviews/2026-10-05-muyon-deep-review-and-optimization.md) §6.4.1、[v4 审阅](../reviews/2026-10-07-design-v4-review.md) §4
+日期：2026-10-07 · 状态：**已采纳**（用户 2026-10-07：§12.1 Q1～Q13 全部按建议）· 任务：[REG-1](../tasks/REG-1.md) · 阶段：第二阶段（[ADR-0003](0003-phase2-scope.md) 2026-10-07 修订）· 约束：[ADR-0002](0002-graded-assistant-authorization.md)（已采纳，其 §3 硬性底线本文一律不放宽）、[ADR-0005](0005-model-adapter-and-agent-loop.md)（已采纳）· 来源：[AI 原生与注册机制评估](../reviews/2026-10-07-ai-native-and-registration.md)（用户 2026-10-07 决定见其 §6）、[路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md) §3.1、[深度研究报告](../reviews/2026-10-05-muyon-deep-review-and-optimization.md) §6.4.1、[v4 审阅](../reviews/2026-10-07-design-v4-review.md) §4
 
 本文只做设计，不改代码。行号基于本分支 `bff8d46`（自 `ecbf120` 起 `apps/`、`packages/` 无变更，已用 `git diff` 核对）。路径省略前缀者：`module_api` = `packages/muyon_module_api/lib/src/`，`host` = `apps/muyon/lib/`。不确定处标“待核实”。
 
@@ -675,6 +675,8 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 ## 12. 待决问题
 
 ### 12.1 交用户决定（附建议）
+
+> **用户决定（2026-10-07）：Q1～Q13 全部按「建议」一栏执行。** Q7 的最终字段划分仍在 REG-4b 合并前确认；Q10 的科研导出 / 导入清单仍在 REG-3 派发前确认；Q13 的 spike 失败时回报用户。
 
 | # | 问题 | 建议 |
 |---|---|---|

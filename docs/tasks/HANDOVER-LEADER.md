@@ -8,15 +8,15 @@
 - 已采纳：[ADR-0002](../adr/0002-graded-assistant-authorization.md) 分级授权、[ADR-0005](../adr/0005-model-adapter-and-agent-loop.md) 模型适配层与 Agent 循环。提议：[ADR-0004](../adr/0004-module-contract-v2.md) 模块契约 v2
 - [任务索引 README.md](README.md)、[审查清单 REVIEW.md](REVIEW.md)
 
-## 0. 当前卡点（最先处理）
+## 0. 在途任务（最先处理）
 
-- **ADR-0004 §12.1 的 Q1～Q13 待用户决定。** 决定之前不派发 REG-2～REG-5 和 FOLIO-BYPASS。这里是关键路径：路线图 §3.1 的顺序是 REG-2 → REG-3、REG-4、T-3 → S-1、AUTH-1 → UI-3、UI-4。
-- **Q12（FOLIO-BYPASS）有现存风险。** 宿主模式下 Folio 的 `bypass` 档允许对 7 类询价记录做无确认的增改删，导入的供应商文本经提示注入就能触发这些写入（回收站可恢复）。用户一批准，就先派这一项。
-- 没有在途的代码任务。`develop` CI 绿（`511eff1`）。
+- ADR-0004 已采纳（用户 2026-10-07，Q1～Q13 全部按建议）。
+- 已派发：**FOLIO-BYPASS**（`implementer-sonnet`，安全修复，优先）、**REG-2a**（Codex，外传工具入账，迁移 9）、**REG-2b**（`implementer-sonnet`，模块激活与范围单点，迁移 10）。三项都审查后再合入；REG-2a 和 REG-2b 后合入的一方负责重新编号迁移。
+- REG-2 两半都合入后，按路线图 §3.1 派 REG-3、REG-4、T-3。REG-3 派发前，先请用户确认科研导出 / 导入类写操作的清单（Q10）。
 
 ## 1. 工作方式
 
-- **执行**（用户 2026-10-07）：开发任务由 leader 派生的 **Sonnet 5.5 子代理**执行，leader 只做派发、审查、合入。真机取证仍由本机 engineer 执行。senior（Opus）、junior（opencode）、grokbot（云端，无 Flutter，只做静态核对）仍可按需使用。
+- **执行**（用户 2026-10-07）：开发任务由 leader 派生的 **Sonnet 5.5 子代理** `implementer-sonnet`（`~/.claude/agents/implementer-sonnet.md`，在 `/tmp` 的独立克隆里工作，只推任务分支）执行，Codex（本机，额度已恢复）也可派较大的实现任务；leader 只做派发、审查、合入。真机取证仍由本机 engineer 执行。senior（Opus）、junior（opencode）、grokbot（云端，无 Flutter，只做静态核对）仍可按需使用。
 - **派发**：一个任务一个分支 `task/<编号>`，说明 `docs/tasks/<编号>.md` 先提交到 `develop`，再从 `develop` 建任务分支。
 - **审查**：按 [REVIEW.md](REVIEW.md)。默认用 `reviewer-sonnet-high`（安全、并发、数据一致性、跨模块）、`-medium`（单模块代码与测试）、`-low`（脚本、文档、证据）；Opus 只在结论有分歧或问题特别难时用。定义在本机 `~/.claude/agents/`，写死 `model: claude-sonnet-5-5`。不要用 `model: "sonnet"`/`"opus"` 别名：`~/.claude/settings.json` 把别名映射到 MiniMax，会 404。
 - **合入**：`git merge --no-ff origin/review/<编号>`，核对任务文件与审查版本逐字一致（diff 为 0 行），然后更新索引并推送。审过两三轮、只剩低概率问题时先合入，剩下的另开小任务。
@@ -49,8 +49,7 @@
 
 | 任务 | 前提 | 执行 | 审查 |
 |---|---|---|---|
-| **FOLIO-BYPASS** | ADR-0004 Q12 获批 | Sonnet 子代理 | `-high` |
-| **REG-2** 通用模块激活 + `outbound_tool_requests` 四条通道入账 | ADR-0004 已采纳 | Sonnet 子代理 | `-high` |
+| **REG-3、REG-4、T-3** | REG-2a、REG-2b 都合入；REG-3 先确认 Q10 清单 | 子代理 / Codex | `-high` |
 | **E-1 真实基线** | 有密钥的本机执行者 | engineer | `-low` |
 | **R-1** Android 重跑 North Star（vivo V2324A） | 手机连接 | engineer | `-low`（按第 5 节） |
 | **UI-0** 现状截图 → **UI-1** 设计系统 → **UI-2** 新外壳 | UI-1 动工前，先请用户定警告色（[UI 方案](../design/ui-redesign-brief-2026-10-06.md) §8「待决」） | engineer / 子代理 | `-medium` |
