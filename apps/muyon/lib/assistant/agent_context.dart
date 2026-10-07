@@ -9,6 +9,7 @@ import '../services/models/model_gateway.dart';
 import '../services/models/model_provider.dart';
 import '../platform/tool_registry.dart';
 import 'agent_budget.dart';
+import 'agent_drafts.dart';
 import 'agent_event_sink.dart';
 import 'context_compactor.dart';
 import 'model_request_gate.dart';
@@ -47,6 +48,9 @@ class AgentContext {
   final ModelProvider provider;
   final ContextCompactor compactor;
   final ModelProfile? compactionProfile;
+
+  /// Drafts of replies being streamed (memory only; see agent_drafts.dart).
+  final drafts = AgentDrafts();
   final modelTokens = <String, ModelCancellation>{};
   final toolTokens = <String, ToolCancellationToken>{};
 
@@ -241,6 +245,10 @@ class Reply {
   Usage? usage;
   Done? done;
   ModelError? error;
+
+  /// Length and digest of the draft the person was shown (never its text);
+  /// null when no draft was shown (a request that is not a chat reply).
+  ({int length, String digest})? draft;
 }
 
 /// A failure with a fixed code and text; never carries model or endpoint text.
