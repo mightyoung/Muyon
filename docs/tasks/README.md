@@ -1,6 +1,6 @@
 # 任务派发索引
 
-**leader 已交接，接任者先读 [HANDOVER-LEADER.md](HANDOVER-LEADER.md)。** 决定与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)，计划见 [第一阶段执行计划](../superpowers/plans/2026-10-05-phase0-plan.md)。**当前处于范围冻结期**，只做 ADR-0001 允许的工作。
+**leader 先读 [HANDOVER-LEADER.md](HANDOVER-LEADER.md)。** 角色与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)。**当前是第二阶段**：范围见 [ADR-0003](../adr/0003-phase2-scope.md)，计划见[第二至第四阶段路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)（第一阶段已于 2026-10-07 退出）。
 
 ## 规则
 
