@@ -156,14 +156,16 @@ class OpenAiModelGateway {
       decoded = await send(withFormat);
     } on HttpException catch (error) {
       // An endpoint that rejects response_format (400/422) must keep working:
-      // send the same confirmed content once more without it, and remember
-      // not to ask this endpoint again. Both requests are in the ledger.
+      // send the same confirmed content once more without it. Both requests
+      // are in the ledger. Only a resend that succeeds proves the parameter
+      // was the problem; a 400 for another reason (e.g. context too long)
+      // must not mark the endpoint as lacking JSON mode.
       final rejected =
           error.message == 'model_http_400' ||
           error.message == 'model_http_422';
       if (!withFormat || !rejected) rethrow;
-      _noJsonObject.add(key);
       decoded = await send(false);
+      _noJsonObject.add(key);
     }
     final content = (decoded['choices'] as List).first['message']['content'];
     if (content is! String || content.trim().isEmpty) {
