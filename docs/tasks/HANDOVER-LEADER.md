@@ -9,7 +9,7 @@
 
 ## 0. 交接时仍在途的核实（最先处理）
 
-无。交接后合入了 P0-S1、P0-3d、E11b（见第 2 节）。`develop` 门禁仍是红的，原因是 `research_object_open_test.dart` 的假时间死锁（第一例 10 分钟超时，后面两例连带失败），修复是 **P0-F2**（junior，一行改动，根因见 [P0-F2.md](P0-F2.md)）。只因这几例失败，不阻塞其他任务合入。`testWidgets` 用 binding 自己的 10 分钟上限，`--timeout` 不起作用。
+无。交接后合入了 P0-S1、P0-3d、E11b（见第 2 节）。~~`develop` 门禁仍是红的~~（2026-10-07 P0-F2 合入后已变绿），原因曾是 `research_object_open_test.dart` 的假时间死锁（第一例 10 分钟超时，后面两例连带失败），修复是 **P0-F2**（junior，一行改动，根因见 [P0-F2.md](P0-F2.md)）。只因这几例失败，不阻塞其他任务合入。`testWidgets` 用 binding 自己的 10 分钟上限，`--timeout` 不起作用。
 
 ## 1. 工作方式（照此延续）
 
@@ -42,7 +42,10 @@
 | **P0-S1** 凭据脱敏（三轮） | [P0-S1-review.md](P0-S1-review.md)：长密钥回显探针、三处变异均通过 |
 | **P0-3d** 助手协议容错 | [P0-3d-review.md](P0-3d-review.md)：测试缺口转 P0-3e |
 | **E11b** 研究对象页收尾 | [E11b-review.md](E11b-review.md) |
+| **P0-J3** 自检脚本测试收尾（2026-10-07） | [P0-J3-review.md](P0-J3-review.md)：6 个变异全部被抓住 |
+| **P0-F2** 对象页测试超时（2026-10-07） | [P0-F2-review.md](P0-F2-review.md)：变异确认，Actions 37551382627 绿，**门禁恢复** |
 | **P0-4 第一、二批证据**（`76c23b2`、`34ca1da`） | [P0-4-review.md](P0-4-review.md)：基线可入账；三次链路都因 D1 失败 |
+| **P0-4 第 3 批**（macOS 设备，2026-10-07） | 同上：macOS 能构建运行；代码 `369ecca` 早于 P0-3d，预算题仍因 D1 失败，不计入 M |
 
 ## 3. 进行中的任务
 
@@ -52,9 +55,9 @@
 | **P0-3d** 助手协议容错（D1） | — | **已合入**（[审查](P0-3d-review.md)）。测试缺口转 **P0-3e**（senior）：「检出 `task/p0-3e-protocol-tests`，阅读 `docs/tasks/P0-3e.md` 并按要求执行，提交并推送到该分支，不要合并 develop。」审查派 `reviewer-sonnet-medium`。 |
 | **P0-S2** MCP 令牌脱敏 | `task/p0-s2-mcp-token-redaction` @ `fccc318`（基于旧的 `review/P0-S1`） | P0-S1 已合入。转发给 senior（排在 P0-3d 之后或并行）：「检出 `task/p0-s2-mcp-token-redaction`，`git merge origin/develop` 解决冲突（`credential_redaction.dart` 以 develop 上 P0-S1 的最终版为准，保留 R1 固定错误文本与 R4 的 8 字符下限），跑 analyze 与宿主全量，推送并回报。」然后派 `reviewer-sonnet-high` 核实。说明见 [P0-S2.md](P0-S2.md)；要点：确认没有削弱 P0-S1；MCP 工具结果回显令牌时是否会进入助手、模型或账本。 |
 | **E11b** | — | **已合入**。 |
-| **P0-F2** 两个 10 分钟超时 | `task/p0-f2-object-open-timeout` | 说明见 [P0-F2.md](P0-F2.md)，根因已查清，一行修复。E11b 已合入，**可转发**给 junior：「检出 `task/p0-f2-object-open-timeout`，先 `git merge origin/develop`，阅读 `docs/tasks/P0-F2.md` 并按要求执行，提交并推送到该分支，不要合并 develop，回报附 Actions 运行链接。」审查派 `reviewer-sonnet-low`，看 Actions 是否变绿。 |
+| **P0-F2** 两个 10 分钟超时 | — | **已合入**（[审查](P0-F2-review.md)），门禁恢复为绿。 |
 | **P0-4** 真机与真实模型取证 | `review/P0-4` | P0-3d 已合入。engineer 在含 P0-3d 的 `develop` 上，Android（必需）与 macOS 各重跑一次链路，加一次 `ci.sh`（本机 inquiry 截图因 macOS 27 渲染漂移会失败，如实记录）。审查按第 5 节，字段核对派 `reviewer-sonnet-low`。 |
-| **P0-J3** 自检脚本测试收尾 | `task/p0-j3-doctor-tests` | 排在 P0-F2 合入之后，junior。 |
+| **P0-J3** 自检脚本测试收尾 | — | **已合入**（[审查](P0-J3-review.md)），自检脚本收口。 |
 
 ## 4. 第一阶段退出标准（ADR-0001 §5）
 
@@ -62,7 +65,7 @@
 |---|---|---|
 | 1 | 询价链路至少有一个真机、一个真实模型的证据入账 | **未达成**：Android 真机已跑通流程，但预算题因 D1 失败。等 P0-3d 合入后在 Android 重跑。macOS 纳入但不阻塞。 |
 | 2 | LLM 工具选择基线至少有一个真实模型的数字 | **已达成**：deepseek-chat top-1 66/140，误选写入/外发 0，弃权 26/26 |
-| 3 | 自动门禁可用 | **已达成**（P0-1）；但门禁目前因 E11 两个超时是红的，见 P0-F2 |
+| 3 | 自动门禁可用 | **已达成**（P0-1）；P0-F2 合入后门禁为绿 |
 | 4 | B 2.4 与 E11 合入，或明确搁置 | **已达成** |
 | 5 | 验收账本按证据更新 | 第一阶段退出时由 leader 一次性完成（第 6 节） |
 
@@ -110,8 +113,8 @@
 
 1. `git fetch`，按本文件核对各分支哈希；确认 `reviewer-sonnet-*` 子代理可用（试调一次）。
 2. P0-3d 已合入：确认用户已把 P0-4 正式重跑转给 engineer、P0-3e 转给 senior。
-3. 确认 **P0-F2** 已转给 junior → 审查（看 Actions 是否变绿）→ 合入；P0-F2 合入后 `develop` 门禁应变绿，再转发 P0-J3。
+3. ~~P0-F2 审查合入~~ 已完成（2026-10-07，门禁变绿）；P0-J3 也已合入。
 4. senior 把 `develop` 合进 P0-S2 后，派 `reviewer-sonnet-high` 核实 → 合入。
-5. 收 engineer 的 macOS 设备批次 → 审查 → 合入。
+5. ~~收 engineer 的 macOS 设备批次 → 审查 → 合入。~~ 已完成（2026-10-07，第 3 批）。
 6. P0-3d 合入 → engineer 在 Android（必需）和 macOS 重跑链路 → 审查 → 合入，退出标准第 1 项达成。
 7. 更新验收账本（第 6 节）→ 对照第 4 节确认全部达成 → 向用户报告第一阶段结束，之后的路线（第 7 节、UI-0/UI-1）请用户排期。
