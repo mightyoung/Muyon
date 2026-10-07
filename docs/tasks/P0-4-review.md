@@ -62,3 +62,18 @@ D1（deepseek-chat 在预算题上不按助手协议回答 JSON：一次纯文�
 | macOS 设备 | 未执行成功：Xcode 已装，但需要用户执行 `sudo xcodebuild -runFirstLaunch` |
 
 **结论：按收口原则合入第一、二批。** 基线报告作为退出标准第 2 项的 M 证据；三次链路运行（两次无头、一次 Android）都是 `passed: false`，作为 D1 的负面证据保留，不计入 2.3。退出标准第 1 项仍等 P0-3d 合入后在 Android 真机重跑。
+
+## 第 3 批（`8b09a60`，2026-10-07，macOS 设备）
+
+新增 `north-star-macos-deepseek-chat.json`，并在报告里追加 macOS 设备一行与说明。只改证据和文档。核实由 `reviewer-sonnet-low` 执行。
+
+| 项 | 结论 |
+|---|---|
+| 范围 | `369ecca..8b09a60` 只有上述两个文件 |
+| 密钥 | 两个改动文件中，两个密钥的完整值、首尾 12 位均 0 命中；没有 `/Users/`；端点只写到路径。`p04`、`p04r` 的 `build/macos` 和应用沙盒容器里，deepseek 密钥完整值 0 命中 |
+| macOS 设备 | `evidenceClass: real-model`，`commit: 369ecca`，**`passed: false`**：应用能构建并运行，比价题成功（2 轮，2217 ms）；预算题第一轮就是 `<｜｜DSML｜｜ calls>`，0 轮、无工具，与 D1 相同 |
+| 诚实 | 字段与报告逐题一致；第一次尝试的空 `{}` 是测试没启动的环境失败，已披露，不算挑结果；构建对 macOS 工程文件的改动已披露并还原 |
+| 应改 1、2（leader 已在本分支补上） | 写明 `369ecca` 不含 P0-3d，所以 D1 失败是预期的；写明链路提前终止，所以没有 `readResultsChecked`、`write` 字段 |
+| 可选 | 第 89 节表格各行列数不一致，记录，不处理 |
+
+**结论：合入。** 本批证明 macOS 设备上可以构建和运行，但不计入 2.3 的 M 证据。退出标准第 1 项仍然要等 engineer 在含 P0-3d 的 `develop` 上正式重跑。
