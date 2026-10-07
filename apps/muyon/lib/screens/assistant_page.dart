@@ -1,12 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import '../assistant/agent_drafts.dart';
 import '../assistant/personal_agent.dart';
 import '../platform/foundation_repository.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/model_gateway.dart';
+import 'draft_view.dart';
 
 class AssistantPage extends StatefulWidget {
   const AssistantPage({
@@ -40,9 +43,29 @@ class _AssistantPageState extends State<AssistantPage> {
   String? _conversationId;
   String _profileId = '';
   bool _busy = false;
+
+  /// Drafts of replies being streamed, and those that ended without a
+  /// message. Only here, in memory: leaving the page drops them (ADR-0005
+  /// §5.3, Q4).
+  final _drafts = <String, AgentDraft>{};
+  StreamSubscription<AgentDraft>? _draftSub;
   @override
   void initState() {
     super.initState();
+    _draftSub = widget.agent.drafts.listen((draft) {
+      if (!mounted) return;
+      setState(() {
+        if (draft.stage == DraftStage.committed) {
+          _drafts.remove(draft.taskId);
+        } else {
+          _drafts[draft.taskId] = draft;
+        }
+      });
+    });
+    final running = widget.repo.tasks().map((t) => widget.agent.draftOf(t.id));
+    for (final draft in running.nonNulls) {
+      _drafts[draft.taskId] = draft;
+    }
     _conversationId =
         widget.conversationId ??
         widget.repo
@@ -65,6 +88,7 @@ class _AssistantPageState extends State<AssistantPage> {
 
   @override
   void dispose() {
+    _draftSub?.cancel();
     widget.repo.removeListener(_refresh);
     _input.dispose();
     super.dispose();
@@ -425,6 +449,10 @@ class _AssistantPageState extends State<AssistantPage> {
                             ),
                             if (task.waitReason != null) Text(task.waitReason!),
                             if (task.error != null) Text(task.error!),
+                            if (_drafts[task.id] != null) ...[
+                              const SizedBox(height: 8),
+                              DraftView(draft: _drafts[task.id]!),
+                            ],
                             Wrap(
                               spacing: 8,
                               children: [

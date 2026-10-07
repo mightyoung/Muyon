@@ -18,11 +18,6 @@ const _compat = ModelCapabilities(
   streaming: true,
   source: CapabilitySource.preset,
 );
-const _native = ModelCapabilities(
-  streaming: true,
-  nativeTools: true,
-  source: CapabilitySource.userDeclared,
-);
 const _mark = 'DRAFT-MARK-成本合计';
 
 /// [text] cut into [pieces] streamed content deltas, optionally ending with
