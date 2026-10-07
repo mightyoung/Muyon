@@ -10,3 +10,8 @@ export 'src/assistant_scope.dart';
 export 'src/tools.dart';
 export 'src/change_log.dart';
 export 'src/restricted_web.dart';
+export 'src/module_v2.dart';
+export 'src/ontology.dart';
+export 'src/tool_registrar.dart';
+export 'src/coverage.dart';
+export 'src/optional_capabilities.dart';

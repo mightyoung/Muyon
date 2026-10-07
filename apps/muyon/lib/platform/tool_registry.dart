@@ -77,6 +77,7 @@ class _Tool {
     this.supportedScopes,
     this.dataModuleIds,
     this.validateResult,
+    this.preflight,
   );
   RegisteredToolInfo info;
   final Future<ToolCallResult> Function(ToolCallContext) handler;
@@ -84,6 +85,7 @@ class _Tool {
   final Set<String>? dataModuleIds;
   final Future<void> Function(ResolvedAssistantScope, ToolCallResult)?
   validateResult;
+  final void Function(ToolCallRequest)? preflight;
   int generation = 1;
 }
 
@@ -99,8 +101,53 @@ class ToolRegistry {
   final _authority = Object();
   final String _sessionId = const Uuid().v4();
   final Map<String, _Tool> _tools = {};
-  final Map<String, ({String identity, Future<ToolCallResult> result})>
+  final Map<
+    String,
+    ({
+      String identity,
+      String providerId,
+      ToolCancellationToken cancellation,
+      Future<ToolCallResult> result,
+    })
+  >
   _active = {};
+
+  bool _closing = false;
+  Future<void>? _closeFuture;
+
+  void _ensureOpen() {
+    if (_closing) throw StateError('Tool registry is closing');
+  }
+
+  /// Cancellation is owned by the host, never exposed by ToolRegistrar.
+  void cancelProvider(String providerId) {
+    for (final call in _active.values.toList()) {
+      if (call.providerId == providerId) call.cancellation.cancel();
+    }
+  }
+
+  /// Withdraw synchronously, then drain terminal receipts before DB shutdown.
+  Future<void> close() => _closeFuture ??= _close();
+  Future<void> _close() async {
+    _closing = true;
+    for (final id in _tools.keys.toList()) {
+      setAvailability(id, available: false, reason: 'Host is closing');
+    }
+    final active = _active.values.toList();
+    for (final call in active) {
+      call.cancellation.cancel();
+    }
+    await Future.wait(
+      active.map(
+        (call) => call.result.then<void>(
+          (_) {},
+          // The invocation still delivers its error to its own caller. Draining
+          // one failed call must not abandon the remaining calls.
+          onError: (Object error, StackTrace stack) {},
+        ),
+      ),
+    );
+  }
 
   void register({
     required String providerId,
@@ -112,9 +159,11 @@ class ToolRegistry {
     Set<String>? dataModuleIds,
     Future<void> Function(ResolvedAssistantScope, ToolCallResult)?
     validateResult,
+    void Function(ToolCallRequest)? preflight,
     bool available = true,
     String? unavailableReason,
   }) {
+    _ensureOpen();
     if (providerId.isEmpty ||
         descriptor.toolId.isEmpty ||
         descriptor.apiVersion < 1 ||
@@ -140,6 +189,7 @@ class ToolRegistry {
       Set.unmodifiable(supportedScopes),
       dataModuleIds == null ? null : Set.unmodifiable(dataModuleIds),
       validateResult,
+      preflight,
     );
   }
 
@@ -155,8 +205,8 @@ class ToolRegistry {
     tool.info = RegisteredToolInfo(
       providerId: tool.info.providerId,
       descriptor: tool.info.descriptor,
-      available: available,
-      unavailableReason: reason,
+      available: available && !_closing,
+      unavailableReason: _closing ? 'Host is closing' : reason,
     );
     tool.generation++;
   }
@@ -169,6 +219,7 @@ class ToolRegistry {
       ));
 
   Future<PreparedToolCall> prepare(ToolCallRequest request) async {
+    _ensureOpen();
     final tool = _require(request.toolId);
     if (!tool.info.available) {
       throw ToolPlatformException(
@@ -190,7 +241,14 @@ class ToolRegistry {
         'External calls require an explicit destination',
       );
     }
+    // Host-set request rule (a module's destination policy); throws to refuse
+    // before any scope work and long before an approval can be issued.
+    tool.preflight?.call(request);
     var scope = await resolveScope(request.scope);
+    _ensureOpen();
+    if (!tool.info.available) {
+      throw const ToolPlatformException('unavailable', 'Tool was withdrawn');
+    }
     if (_canonical(scope.requested.toJson()) !=
         _canonical(request.scope.toJson())) {
       throw const ToolPlatformException(
@@ -295,7 +353,24 @@ class ToolRegistry {
   }) async {
     final token = cancellation ?? ToolCancellationToken();
     token.throwIfCancelled();
-    final prepared = await prepare(request);
+    final before = inspect(request.toolId);
+    late PreparedToolCall prepared;
+    try {
+      prepared = await prepare(request);
+    } on ToolPlatformException catch (error) {
+      // A read module may fail lazy activation during scope resolution. Keep
+      // every prepare/authorization refusal intact; report this transition as
+      // a failed read without dispatching a handler or issuing an approval.
+      if (before?.available == true &&
+          before?.accessLevel == ToolAccessLevel.read &&
+          error.code == 'unavailable') {
+        return ToolCallResult(
+          status: ToolCallStatus.failed,
+          summary: 'Tool is unavailable; no action was executed.',
+        ).forInvocation(request.invocationId);
+      }
+      rethrow;
+    }
     token.throwIfCancelled();
     final active = _active[request.replayKey];
     if (active != null) {
@@ -310,6 +385,8 @@ class ToolRegistry {
     final completer = Completer<ToolCallResult>();
     _active[request.replayKey] = (
       identity: prepared.identityDigest,
+      providerId: _require(request.toolId).info.providerId,
+      cancellation: token,
       result: completer.future,
     );
     try {
@@ -329,8 +406,15 @@ class ToolRegistry {
   ) async {
     final request = prepared.request;
     final tool = _require(request.toolId);
+    final generation = tool.generation;
     DateTime? approvalDeadline;
     void checkAuthorization() {
+      if (_closing || !tool.info.available || tool.generation != generation) {
+        throw const ToolPlatformException(
+          'unavailable',
+          'Tool authority was withdrawn',
+        );
+      }
       if (approvalDeadline != null && !clock().isBefore(approvalDeadline!)) {
         throw const ToolPlatformException(
           'approval_expired',
@@ -341,6 +425,7 @@ class ToolRegistry {
 
     final cached = await database.write((db) {
       token.throwIfCancelled();
+      checkAuthorization();
       final rows = db.select(
         'SELECT * FROM tool_invocation_receipts WHERE replay_key=? OR invocation_id=?',
         [request.replayKey, request.invocationId],

@@ -7,6 +7,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart' show SecretStore;
 import 'tool_registry.dart';
+import 'outbound_tool_ledger.dart';
 
 /// One external MCP server reached over Streamable HTTP.
 class McpServerConfig {
@@ -141,7 +142,12 @@ abstract final class McpAdapter {
     required SecretStore secrets,
     Duration timeout = const Duration(seconds: 30),
   }) async {
-    final client = _McpClient(config, secrets, timeout);
+    final client = _McpClient(
+      config,
+      secrets,
+      timeout,
+      OutboundToolLedger(registry.database),
+    );
     await client.initialize();
     final registered = <String>[];
     final skipped = <String, String>{};
@@ -246,7 +252,8 @@ abstract final class McpAdapter {
 }
 
 class _McpClient {
-  _McpClient(this.config, this.secrets, this.timeout);
+  _McpClient(this.config, this.secrets, this.timeout, this.ledger);
+  final OutboundToolLedger ledger;
   final McpServerConfig config;
   final SecretStore secrets;
   final Duration timeout;
@@ -334,43 +341,68 @@ class _McpClient {
           }
           token = bearer;
         }
-        final request = await client.postUrl(config.endpoint);
-        request.followRedirects = false;
-        request.headers
-          ..contentType = ContentType.json
-          ..set(HttpHeaders.acceptHeader, 'application/json, text/event-stream')
-          ..set('MCP-Protocol-Version', McpAdapter.protocolVersion);
-        if (_session != null) request.headers.set('Mcp-Session-Id', _session!);
-        if (bearer != null) {
-          request.headers.set(
-            HttpHeaders.authorizationHeader,
-            'Bearer $bearer',
-          );
-        }
-        request.write(jsonEncode(message));
-        final response = await request.close();
-        _session = response.headers.value('mcp-session-id') ?? _session;
-        if (response.statusCode == 202) {
-          await response.drain<void>();
-          return null;
-        }
-        if (response.statusCode != 200) {
-          await response.drain<void>();
-          throw HttpException('mcp_http_${response.statusCode}');
-        }
-        final bytes = <int>[];
-        await for (final chunk in response) {
-          if (bytes.length + chunk.length > _maxBytes) {
-            throw StateError('mcp_response_too_large');
-          }
-          bytes.addAll(chunk);
-        }
-        final body = utf8.decode(bytes);
-        final type = response.headers.contentType?.mimeType;
-        return type == 'text/event-stream'
-            ? _fromEvents(body, message['id'])
-            : Map<String, Object?>.from(_decode(body) as Map);
-      })().timeout(timeout);
+        final payload = utf8.encode(jsonEncode(message));
+        return ledger.run(
+          toolId: 'mcp.${config.id}.${message['method']}',
+          channel: 'mcp',
+          destination: config.endpoint,
+          payload: payload,
+          secret: token,
+          isCancelled: () => cancellation?.isCancelled ?? false,
+          failedResult: (reply) =>
+              message['id'] != null &&
+              (reply == null ||
+                  reply['id'] != message['id'] ||
+                  reply['error'] != null ||
+                  (reply['result'] is Map &&
+                      (reply['result'] as Map)['isError'] == true)),
+          operation: (countSent) => (() async {
+            cancellation?.throwIfCancelled();
+            final request = await client.postUrl(config.endpoint);
+            request.followRedirects = false;
+            request.headers
+              ..contentType = ContentType.json
+              ..set(
+                HttpHeaders.acceptHeader,
+                'application/json, text/event-stream',
+              )
+              ..set('MCP-Protocol-Version', McpAdapter.protocolVersion);
+            if (_session != null) {
+              request.headers.set('Mcp-Session-Id', _session!);
+            }
+            if (bearer != null) {
+              request.headers.set(
+                HttpHeaders.authorizationHeader,
+                'Bearer $bearer',
+              );
+            }
+            request.add(payload);
+            countSent(payload.length);
+            final response = await request.close();
+            _session = response.headers.value('mcp-session-id') ?? _session;
+            if (response.statusCode == 202) {
+              await response.drain<void>();
+              return null;
+            }
+            if (response.statusCode != 200) {
+              await response.drain<void>();
+              throw HttpException('mcp_http_${response.statusCode}');
+            }
+            final bytes = <int>[];
+            await for (final chunk in response) {
+              if (bytes.length + chunk.length > _maxBytes) {
+                throw StateError('mcp_response_too_large');
+              }
+              bytes.addAll(chunk);
+            }
+            final body = utf8.decode(bytes);
+            final type = response.headers.contentType?.mimeType;
+            return type == 'text/event-stream'
+                ? _fromEvents(body, message['id'])
+                : Map<String, Object?>.from(_decode(body) as Map);
+          })().timeout(timeout),
+        );
+      })();
     } finally {
       client.close(force: true);
     }

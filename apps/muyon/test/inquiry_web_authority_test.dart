@@ -62,7 +62,9 @@ void main() {
             review: (preview, cancel) async {
               if (revoke == 'web') state.assistantWebEnabled = false;
               if (revoke == 'permission') {
-                state.assistantPermission = AssistantPermission.bypass;
+                // Hosted mode reads a stored bypass as confirmWrites
+                // (FOLIO-BYPASS), so this revoke must narrow to readOnly.
+                state.assistantPermission = AssistantPermission.readOnly;
               }
               if (revoke == 'session') plugin.jobs.invalidateAll();
               return true;

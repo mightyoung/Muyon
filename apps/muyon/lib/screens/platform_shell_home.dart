@@ -40,24 +40,13 @@ extension _HomeSections on _PlatformShellState {
       () => showSection(1),
       Icons.auto_awesome_outlined,
     ),
-    card(
-      'Folio · 询价台账',
-      '完整供应商、询价报价和成本业务',
-      () => openModule('inquiry'),
-      Icons.receipt_long_outlined,
-    ),
-    card(
-      '科研工作台',
-      '原文阅读、批注、研究过程和成果',
-      () => openModule('research'),
-      Icons.menu_book_outlined,
-    ),
-    card(
-      '原型页面',
-      '导入单页原型，评审版本并记录反馈（不是完整业务系统）',
-      openPrototype,
-      Icons.web_outlined,
-    ),
+    for (final declaration in host.modules.declarations())
+      card(
+        declaration.displayName,
+        declaration.tagline ?? '',
+        () => openDeclaration(declaration),
+        moduleIcon(declaration.iconKey),
+      ),
     if (host.workspaces.all().isNotEmpty) ...[
       const Divider(),
       Text('项目与工作区', style: Theme.of(context).textTheme.titleMedium),
@@ -197,3 +186,11 @@ extension _HomeSections on _PlatformShellState {
     ]),
   );
 }
+
+/// The icon for a declared `iconKey`; an unknown key gets a generic one.
+IconData moduleIcon(String? key) => switch (key) {
+  'receipt_long' => Icons.receipt_long_outlined,
+  'menu_book' => Icons.menu_book_outlined,
+  'web' => Icons.web_outlined,
+  _ => Icons.extension_outlined,
+};
