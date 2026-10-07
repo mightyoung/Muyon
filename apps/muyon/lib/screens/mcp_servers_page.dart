@@ -212,7 +212,9 @@ class _McpServersPageState extends State<McpServersPage> {
       if (mounted) {
         setState(() {
           // Shown on the page: never the token, even if an error quotes it.
-          connectErrors[record.id] = redactCredentials(failure);
+          connectErrors[record.id] = redactCredentials(
+            redactEndpoint('$failure', record.endpoint),
+          );
           busy = false;
         });
       }
@@ -256,7 +258,8 @@ class _McpServersPageState extends State<McpServersPage> {
     } catch (failure) {
       if (mounted) {
         setState(() {
-          error = '移除失败：${redactCredentials(failure)}';
+          error =
+              '移除失败：${redactCredentials(redactEndpoint('$failure', record.endpoint))}';
           busy = false;
         });
       }
@@ -316,7 +319,7 @@ class _McpServersPageState extends State<McpServersPage> {
           children: [
             Text(record.id, style: theme.textTheme.titleSmall),
             SelectableText(
-              record.endpoint.toString(),
+              maskedEndpoint(record.endpoint),
               style: theme.textTheme.bodySmall,
             ),
             Text(
@@ -462,11 +465,23 @@ class _ServerDialogState extends State<_ServerDialog> {
         McpServerRecord(id: id, endpoint: validEndpoint, credentialRef: ref),
         token,
       );
-      if (mounted) Navigator.pop(context, true);
+      if (mounted) {
+        final names = credentialParamNames(validEndpoint);
+        // Not blocking: the server is saved, the person is told what that means.
+        if (names.isNotEmpty) {
+          ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+            SnackBar(
+              content: Text('地址中含有凭据参数（${names.join('、')}），会以明文保存；建议改填到令牌栏。'),
+            ),
+          );
+        }
+        Navigator.pop(context, true);
+      }
     } catch (failure) {
       setState(() {
         saving = false;
-        saveError = '保存失败：${redactCredentials(failure)}';
+        saveError =
+            '保存失败：${redactCredentials(redactEndpoint('$failure', validEndpoint))}';
       });
     }
   }

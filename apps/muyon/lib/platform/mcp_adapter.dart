@@ -35,6 +35,80 @@ class McpServerConfig {
   final String? credentialRef;
 }
 
+/// Query parameter names that carry a credential.
+const _credentialParams = {
+  'api_key', 'apikey', 'api-key', 'key', 'token', 'access_token', 'auth', //
+  'authorization', 'secret', 'client_secret', 'password', 'pass', 'sig',
+  'signature',
+};
+
+/// Whether a query parameter called [name] is treated as a credential.
+bool isCredentialParam(String name) {
+  final lower = name.toLowerCase();
+  return _credentialParams.contains(lower) ||
+      ['token', 'secret', 'password', 'apikey'].any(lower.contains);
+}
+
+List<MapEntry<String, String>> _queryPairs(Uri endpoint) => [
+  for (final part in endpoint.query.split('&'))
+    if (part.isNotEmpty)
+      MapEntry(
+        part.contains('=') ? part.substring(0, part.indexOf('=')) : part,
+        part.contains('=') ? part.substring(part.indexOf('=') + 1) : '',
+      ),
+];
+
+String _decoded(String raw) {
+  try {
+    return Uri.decodeQueryComponent(raw);
+  } catch (_) {
+    return raw;
+  }
+}
+
+/// Names of the credential parameters in [endpoint]'s query, in order.
+List<String> credentialParamNames(Uri endpoint) => [
+  for (final pair in _queryPairs(endpoint))
+    if (isCredentialParam(_decoded(pair.key)) && pair.value.isNotEmpty)
+      _decoded(pair.key),
+];
+
+/// [endpoint] as text with the values of credential parameters replaced by
+/// [mask]. Everything else is kept as written.
+String maskedEndpoint(Uri endpoint, {String mask = '••••'}) {
+  if (!endpoint.hasQuery) return endpoint.toString();
+  final query = [
+    for (final part in endpoint.query.split('&'))
+      if (part.contains('=') &&
+          isCredentialParam(_decoded(part.substring(0, part.indexOf('=')))) &&
+          part.length > part.indexOf('=') + 1)
+        '${part.substring(0, part.indexOf('='))}=$mask'
+      else
+        part,
+  ].join('&');
+  final text = endpoint.toString();
+  return '${text.substring(0, text.indexOf('?'))}?$query'
+      '${endpoint.hasFragment ? '#${endpoint.fragment}' : ''}';
+}
+
+/// [text] without the credential parameter values of [endpoint]: the URL
+/// itself (as dart:io quotes it in `uri = ...`) is rewritten in masked form,
+/// then any value of [minRedactedSecretLength]+ characters is replaced
+/// wherever it still appears.
+String redactEndpoint(String text, Uri endpoint) {
+  var out = text.replaceAll(
+    endpoint.toString(),
+    maskedEndpoint(endpoint, mask: '<redacted>'),
+  );
+  for (final pair in _queryPairs(endpoint)) {
+    if (!isCredentialParam(_decoded(pair.key))) continue;
+    for (final value in {pair.value, _decoded(pair.value)}) {
+      out = maskSecret(out, value);
+    }
+  }
+  return out;
+}
+
 class McpConnection {
   McpConnection(this.config, this.registered, this.skipped);
   final McpServerConfig config;
@@ -168,7 +242,10 @@ class _McpClient {
     try {
       return await body();
     } catch (error, stack) {
-      final safe = redactCredentials(error, secret: token);
+      final safe = redactCredentials(
+        redactEndpoint('$error', config.endpoint),
+        secret: token,
+      );
       if (safe != '$error') Error.throwWithStackTrace(StateError(safe), stack);
       rethrow;
     }

@@ -17,6 +17,9 @@ import 'package:sqlite3/sqlite3.dart';
 const _marker = 'SECRET';
 const _good = 'tok-$_marker-ok';
 
+/// A URL credential long enough that a parse or socket error would quote it.
+const _urlKey = 'k3y-$_marker-0123456789abcdef';
+
 /// A long token: a parse error quoting a prefix of the body must not leak it.
 final _long = 'tok-$_marker-${'0123456789abcdef' * 6}';
 
@@ -415,6 +418,71 @@ void main() {
     });
   });
 
+  group('credential query parameters', () {
+    test('names are recognised case-insensitively, others are untouched', () {
+      for (final name in [
+        'api_key', 'API-KEY', 'apikey', 'key', 'Token', 'access_token', //
+        'auth', 'authorization', 'secret', 'client_secret', 'password',
+        'pass', 'sig', 'signature', 'my_token', 'X-Secret-Id', 'PasswordHash',
+      ]) {
+        expect(isCredentialParam(name), isTrue, reason: name);
+      }
+      for (final name in ['foo', 'page', 'q', 'keyboard', 'sign', 'user']) {
+        expect(isCredentialParam(name), isFalse, reason: name);
+      }
+      final uri = Uri.parse('https://h.example/mcp?foo=bar&API_KEY=$_urlKey&q');
+      expect(credentialParamNames(uri), ['API_KEY']);
+      expect(
+        maskedEndpoint(uri),
+        'https://h.example/mcp?foo=bar&API_KEY=••••&q',
+      );
+      expect(
+        maskedEndpoint(Uri.parse('https://h.example/mcp?foo=bar')),
+        'https://h.example/mcp?foo=bar',
+      );
+    });
+
+    test('a short value is hidden by rewriting the URL, not by value', () {
+      final uri = Uri.parse('http://127.0.0.1:1/mcp?token=abc&foo=bar');
+      expect(
+        redactEndpoint('failed, uri = $uri', uri),
+        'failed, uri = http://127.0.0.1:1/mcp?token=<redacted>&foo=bar',
+      );
+    });
+
+    test(
+      'a connection that drops quotes the URL: the value is redacted',
+      () async {
+        final raw = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+        addTearDown(() => raw.close());
+        raw.listen((socket) async {
+          await socket.first;
+          socket.destroy();
+        });
+        Object? thrown;
+        try {
+          await McpAdapter.connect(
+            _registry(),
+            McpServerConfig(
+              id: 'catalog',
+              endpoint: Uri.parse(
+                'http://127.0.0.1:${raw.port}/mcp?api_key=$_urlKey&foo=bar',
+              ),
+            ),
+            secrets: _Secrets(_good),
+          );
+        } catch (error) {
+          thrown = error;
+        }
+        expect(thrown, isNotNull);
+        expect('$thrown', contains('<redacted>'));
+        expect('$thrown', contains('foo=bar'));
+        expect('$thrown', isNot(contains(_marker)));
+        expect(_leakedWindow('$thrown', _urlKey), isNull);
+      },
+    );
+  });
+
   group('page', () {
     final record = McpServerRecord(
       id: 'catalog',
@@ -576,6 +644,75 @@ void main() {
       await tester.pumpAndSettle();
       expect(shows('保存失败'), isTrue);
       expect(shows('details withheld'), isTrue);
+      expect(shows(_marker), isFalse);
+    });
+
+    final urlRecord = McpServerRecord(
+      id: 'catalog',
+      endpoint: Uri.parse(
+        'http://127.0.0.1:41414/mcp?api_key=$_urlKey&foo=bar',
+      ),
+    );
+
+    testWidgets('a card masks credential parameters and keeps the others', (
+      tester,
+    ) async {
+      final store = _Store(
+        (_) async => throw UnimplementedError(),
+        servers: [urlRecord],
+      );
+      await tester.pumpWidget(page(store));
+      await tester.pumpAndSettle();
+      expect(shows('api_key=••••'), isTrue);
+      expect(shows('foo=bar'), isTrue);
+      expect(shows(_marker), isFalse);
+      expect(store.servers.single.endpoint, urlRecord.endpoint);
+    });
+
+    testWidgets('a connection error quoting the URL does not show the value', (
+      tester,
+    ) async {
+      final store = _Store(
+        (_) async => throw HttpException(
+          'Connection closed before full header was received',
+          uri: urlRecord.endpoint,
+        ),
+        servers: [urlRecord],
+      );
+      await tester.pumpWidget(page(store));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('连接'));
+      await tester.pumpAndSettle();
+      expect(shows('<redacted>'), isTrue);
+      expect(shows(_marker), isFalse);
+      for (var i = 0; i + 12 <= _urlKey.length; i++) {
+        expect(shows(_urlKey.substring(i, i + 12)), isFalse);
+      }
+    });
+
+    testWidgets('saving a URL with a credential parameter hints but saves', (
+      tester,
+    ) async {
+      final store = _Store((_) async => throw UnimplementedError());
+      await tester.pumpWidget(page(store));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('添加服务器'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('mcp-id-field')),
+        'catalog',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('mcp-endpoint-field')),
+        'http://127.0.0.1:41414/mcp?api_key=$_urlKey&foo=bar&token=x',
+      );
+      await tester.tap(find.widgetWithText(FilledButton, '保存'));
+      await tester.pumpAndSettle();
+      expect(store.servers, hasLength(1));
+      expect(
+        find.text('地址中含有凭据参数（api_key、token），会以明文保存；建议改填到令牌栏。'),
+        findsOneWidget,
+      );
       expect(shows(_marker), isFalse);
     });
   });
