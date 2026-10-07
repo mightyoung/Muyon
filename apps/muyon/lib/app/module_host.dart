@@ -294,7 +294,8 @@ class ModuleHost implements ModuleLink {
       _withdraw(id, reason);
       await _record(id, 'failed', reason);
       // After an await, so the caller's `??=` has already stored this future.
-      slot.inflight = null;
+      // A module blocked at tool registration stays failed until restart.
+      if (slot.blocked == null) slot.inflight = null;
     }
     return slot.state;
   }
