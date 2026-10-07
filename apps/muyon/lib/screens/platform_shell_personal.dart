@@ -153,6 +153,14 @@ extension _PersonalSections on _PlatformShellState {
           endpointIdentity: name.text.trim(),
           credentialRef: ref,
           purpose: purpose,
+          // New chat models stream by default; tools stay in compatibility
+          // mode until the person declares or tests otherwise.
+          capabilities: purpose == ModelPurpose.chat
+              ? const ModelCapabilities(
+                  streaming: true,
+                  source: CapabilitySource.preset,
+                )
+              : ModelCapabilities.compat,
         );
         if (ref != null) {
           await const MethodChannelSecretStore().write(ref, secret.text);

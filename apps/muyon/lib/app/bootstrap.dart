@@ -25,12 +25,69 @@ import '../services/knowledge/index_invalidation.dart';
 import '../services/transfer/task_coordinator.dart';
 import '../services/public_services.dart';
 import '../services/models/model_gateway.dart';
+import '../services/models/model_provider.dart';
 import '../services/models/secret_store.dart';
 import '../services/models/profile_repository.dart';
 import 'inquiry_plugin.dart';
 import 'research_task_bridge.dart';
 
 import 'package:uuid/uuid.dart';
+
+/// Settings key and value of the one-time capability migration.
+const modelProfilesSchemaKey = 'modelProfilesSchema';
+const modelProfilesSchemaVersion = 2;
+
+/// Set when the migration changed profiles, so the settings page can tell the
+/// person once ("streaming is now on for your models"). The page itself comes
+/// later; this only leaves the flag.
+const modelProfilesNoticeKey = 'modelProfilesMigrationNotice';
+
+/// One-time, idempotent: a saved chat profile with no `capabilities` gets
+/// `{streaming: true, source: migrated}` written out (every other capability
+/// conservative); embedding profiles are untouched (ADR-0005 §4.3). Runs once
+/// per workspace database, marked by [modelProfilesSchemaKey], so a person who
+/// turns streaming off is not changed back on the next start. Deliberately not
+/// part of `ProfileRepository.all()`: reading stays free of side effects.
+/// Returns how many profiles were changed.
+Future<int> migrateModelProfileCapabilities(
+  WorkspaceRepository workspaces,
+) async {
+  final done = workspaces.setting(modelProfilesSchemaKey);
+  if (done is int && done >= modelProfilesSchemaVersion) return 0;
+  final stored = workspaces.setting('modelProfiles');
+  var changed = 0;
+  if (stored is List) {
+    final migrated = <Object?>[];
+    for (final item in stored) {
+      if (item is Map &&
+          !item.containsKey('capabilities') &&
+          (item['purpose'] as String? ?? 'chat') == ModelPurpose.chat.name) {
+        migrated.add({
+          ...item,
+          'capabilities': const ModelCapabilities(
+            streaming: true,
+            source: CapabilitySource.migrated,
+          ).toJson(),
+        });
+        changed++;
+      } else {
+        migrated.add(item);
+      }
+    }
+    if (changed > 0) {
+      await workspaces.setSetting('modelProfiles', migrated);
+      await workspaces.setSetting(modelProfilesNoticeKey, {
+        'pending': true,
+        'migrated': changed,
+      });
+    }
+  }
+  await workspaces.setSetting(
+    modelProfilesSchemaKey,
+    modelProfilesSchemaVersion,
+  );
+  return changed;
+}
 
 class MuyonHost {
   MuyonHost._(this.storage, this.workspaces, this.registry, this.capabilities);
@@ -142,6 +199,7 @@ class MuyonHost {
         ModuleRegistry([ResearchModule(), PrototypeModule()]),
         CapabilityRegistry(),
       );
+      await migrateModelProfileCapabilities(host.workspaces);
       host.foundation = FoundationRepository(database);
       host.projections = ProjectionService(database);
       host.outbound = OutboundLedger(database);
