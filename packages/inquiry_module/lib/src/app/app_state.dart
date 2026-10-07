@@ -448,12 +448,21 @@ class AppState extends ChangeNotifier {
   set assistantWebEnabled(bool value) =>
       saveSetting('assistant_web', value ? '1' : null);
 
-  AssistantPermission get assistantPermission =>
-      switch (setting('assistant_permission')) {
-        'readOnly' => AssistantPermission.readOnly,
-        'bypass' => AssistantPermission.bypass,
-        _ => AssistantPermission.confirmWrites,
-      };
+  AssistantPermission get assistantPermission {
+    final stored = setting('assistant_permission');
+    // Hosted mode never reads bypass: imported third-party text could otherwise
+    // drive unconfirmed writes (ADR-0004 Q12). The stored value is kept as-is
+    // so standalone behavior and REG-4c cleanup are unaffected.
+    if (_isHosted && stored == 'bypass') {
+      return AssistantPermission.confirmWrites;
+    }
+    return switch (stored) {
+      'readOnly' => AssistantPermission.readOnly,
+      'bypass' => AssistantPermission.bypass,
+      _ => AssistantPermission.confirmWrites,
+    };
+  }
+
   set assistantPermission(AssistantPermission value) =>
       saveSetting('assistant_permission', value.name);
 
