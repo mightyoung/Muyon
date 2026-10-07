@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap}button{font-family:inherit;cursor:pointer}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="padding:32px 24px;display:flex;flex-direction:column;gap:20px;align-items:center;min-height:100vh;box-sizing:border-box">
+<div style="width:1180px;max-width:100%;display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:#111827">
+<div style="font-size:22px;font-weight:600;margin-right:12px">数据 · 交换 · 目录 · 桌面版</div>
+<sc-for list="{{ navs }}" as="n" hint-placeholder-count="4"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.label }}</button></sc-for><button onClick="{{ togDark }}" style="{{ darkStyle }}">切换深浅</button>
+<div style="width:100%;font-size:12px;color:#636C7E">可进入的二级页：数据中心（数据模型 / 数据质量）· 同步与交换 › 修改冲突 · 供应商 / 物料列表 › 详情。所有数字与名称均为示意数据。</div></div>
+<div style="{{ frame }}">
+<div style="height:64px;flex:none;display:flex;align-items:center;gap:12px;padding:0 20px;border-bottom:1px solid var(--rule)"><div style="height:40px;padding:0 18px;border-radius:999px;background:var(--sk);display:flex;align-items:center;font-size:15px;font-weight:600">{{ title }}</div><span style="flex:1"></span><sc-for list="{{ subtabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.l }}</button></sc-for></div>
+
+<sc-if value="{{ isModel }}" hint-placeholder-val="{{ true }}"><div style="flex:1;min-height:0;display:flex">
+<div style="flex:1;min-width:0;padding:20px;display:flex;flex-direction:column;gap:12px"><div style="font-size:12px;color:var(--ink3)">本体图 · 点击对象查看详情；边上标注查询接口，未声明接口的边为红色</div>
+<div style="position:relative;flex:1;border:1px solid var(--rule);border-radius:8px;background:var(--sf);overflow:auto"><div style="position:absolute;left:50%;top:50%;width:700px;height:420px;transform:translate(-50%,-50%)"><svg width="700" height="420" style="position:absolute;left:0;top:0"><sc-for list="{{ edges }}" as="e" hint-placeholder-count="5"><g><line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" stroke="{{ e.c }}" stroke-width="{{ e.w }}" stroke-dasharray="{{ e.d }}"></line><text x="{{ e.tx }}" y="{{ e.ty }}" font-size="11" fill="{{ e.tc }}" text-anchor="middle">{{ e.t }}</text></g></sc-for></svg>
+<sc-for list="{{ nodes }}" as="n" hint-placeholder-count="5"><button onClick="{{ n.go }}" style="{{ n.style }}"><span class="ms" style="font-size:18px">{{ n.ic }}</span>{{ n.t }}</button></sc-for></div></div></div>
+<div style="width:340px;flex:none;border-left:1px solid var(--rule);padding:16px 20px;display:flex;flex-direction:column;gap:8px;overflow-y:auto"><div style="font-size:17px;font-weight:600">{{ od.name }}</div><div style="font-size:12px;color:var(--ink3);line-height:1.6">{{ od.desc }}</div>
+<sc-for list="{{ od.rels }}" as="r" hint-placeholder-count="3"><div style="display:flex;gap:8px;font-size:13px;border-top:1px solid var(--rule);padding:8px 0"><span style="width:70px;color:var(--ink3);flex:none">{{ r.k }}</span><span style="flex:1;line-height:1.6">{{ r.v }}</span></div></sc-for>
+<sc-for list="{{ od.fields }}" as="f" hint-placeholder-count="4"><div style="display:flex;gap:8px;font-size:12px;border-top:1px solid var(--rule);padding:8px 0;align-items:center"><span style="flex:1;font-family:Consolas,Menlo,monospace">{{ f.n }}</span><span style="color:var(--ink3)">{{ f.t }}</span><span style="font-weight:600;padding:2px 8px;border-radius:999px;background:{{ f.bg }};color:{{ f.fg }}">{{ f.req }}</span></div></sc-for></div></div></sc-if>
+
+<sc-if value="{{ isQual }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-height:0;overflow:auto;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start">
+<div style="grid-column:1 / 3;display:flex;gap:8px"><sc-for list="{{ qmodes }}" as="m" hint-placeholder-count="2"><button onClick="{{ m.go }}" style="{{ m.style }}">{{ m.t }}</button></sc-for></div>
+<sc-if value="{{ qNone }}" hint-placeholder-val="{{ false }}"><div style="grid-column:1 / 3;text-align:center;padding:48px;color:var(--ink3);font-size:14px"><span class="ms" style="font-size:44px;color:var(--green)">check_circle</span><br>没有发现需要处理的问题</div></sc-if>
+<sc-for list="{{ qgroups }}" as="g" hint-placeholder-count="4"><div><div style="font-size:12px;color:var(--ink3);margin:0 4px 6px">{{ g.t }}</div><div style="background:var(--sf);border:1px solid var(--rule);border-radius:8px;padding:0 14px"><sc-for list="{{ g.items }}" as="i" hint-placeholder-count="2"><div style="padding:12px 0;border-top:{{ i.bt }};display:flex;align-items:center;gap:10px"><span style="flex:1"><span style="display:block;font-size:14px">{{ i.t }}</span><span style="display:block;font-size:12px;color:var(--red);margin-top:2px">{{ i.n }} {{ i.u }}</span></span><button style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:12px;font-weight:600">{{ i.act }}</button></div></sc-for></div></div></sc-for>
+<div style="grid-column:1 / 3;font-size:12px;color:var(--ink3)">不同单位的数量不相加：组、条报价、行预算、条条款、项需求、家供应商、项物料、项冲突。</div></div></sc-if>
+
+<sc-if value="{{ isXchg }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-height:0;overflow:auto;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start">
+<div style="background:var(--sf);border:1px solid var(--rule);border-radius:8px;padding:0 16px"><sc-for list="{{ xitems }}" as="x" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:12px;min-height:60px;border-top:{{ x.bt }}"><span class="ms" style="font-size:22px;color:var(--ink2)">{{ x.ic }}</span><span style="flex:1"><span style="display:block;font-size:14px">{{ x.t }}</span><span style="display:block;font-size:12px;color:var(--ink3);margin-top:2px">{{ x.s }}</span></span></div></sc-for></div>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="font-size:12px;color:var(--ink3);margin:0 4px">修改冲突 · 两台设备改了同一处时会列在这里；确认前按最后导入的值显示</div>
+<sc-for list="{{ conflicts }}" as="c" hint-placeholder-count="2"><div style="background:var(--sf);border:1px solid var(--rule);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;font-weight:600">{{ c.t }}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="background:var(--sk);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--ink3)">本机值</div><div style="font-size:13px">{{ c.a }}</div></div><div style="background:var(--sk);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--ink3)">对方值</div><div style="font-size:13px">{{ c.b }}</div></div></div><div style="display:flex;gap:8px"><button onClick="{{ c.keep }}" style="flex:1;height:40px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">保留本机</button><button onClick="{{ c.keep }}" style="flex:1;height:40px;border-radius:999px;border:1px solid var(--rs);background:var(--sf);color:var(--ink);font-size:13px;font-weight:600">保留对方</button></div></div></sc-for>
+<sc-if value="{{ confNone }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:32px;color:var(--ink3);font-size:14px"><span class="ms" style="font-size:36px;color:var(--green)">check_circle</span><br>没有待确认的冲突</div></sc-if></div></div></sc-if>
+
+<sc-if value="{{ isCat }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-height:0;display:flex">
+<div style="flex:1;min-width:0;padding:20px;display:flex;flex-direction:column;gap:12px"><div style="display:flex;gap:8px;align-items:center"><div style="width:320px;height:40px;border-radius:999px;background:var(--sk);display:flex;align-items:center;gap:8px;padding:0 14px;color:var(--ink3);font-size:13px"><span class="ms" style="font-size:20px">search</span>{{ searchTxt }}</div><sc-for list="{{ kinds }}" as="k" hint-placeholder-count="2"><button onClick="{{ k.go }}" style="{{ k.style }}">{{ k.t }}</button></sc-for><span style="flex:1"></span><button style="height:40px;padding:0 18px;border-radius:999px;border:0;background:var(--acc);color:var(--onacc);font-size:13px;font-weight:600">新建</button></div>
+<div style="border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--sf)"><div style="display:grid;grid-template-columns:1.4fr 1.6fr 1fr;height:42px;align-items:center;gap:8px;padding:0 14px;background:var(--sk);font-size:12px;color:var(--ink3);font-weight:600"><span>{{ h1 }}</span><span>{{ h2 }}</span><span>{{ h3 }}</span></div>
+<sc-for list="{{ crows }}" as="r" hint-placeholder-count="4"><button onClick="{{ r.go }}" style="width:100%;text-align:left;display:grid;grid-template-columns:1.4fr 1.6fr 1fr;min-height:52px;align-items:center;gap:8px;padding:6px 14px;border:0;border-top:1px solid var(--rule);background:{{ r.bg }};color:var(--ink);font-size:13px;opacity:{{ r.op }}" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><span style="font-weight:500">{{ r.a }}<sc-if value="{{ r.tag }}" hint-placeholder-val="{{ false }}"><span style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--sk);color:var(--ink2)">已停用</span></sc-if></span><span style="color:var(--ink2)">{{ r.b }}</span><span style="color:var(--ink2)">{{ r.c }}</span></button></sc-for></div></div>
+<div style="width:340px;flex:none;border-left:1px solid var(--rule);padding:16px 20px;display:flex;flex-direction:column;gap:10px;overflow-y:auto"><div style="font-size:17px;font-weight:600">{{ dt.t }}</div><div style="font-size:12px;color:var(--ink3);line-height:1.6">{{ dt.s }}</div>
+<sc-for list="{{ dt.blocks }}" as="b" hint-placeholder-count="3"><div><div style="font-size:12px;color:var(--ink3);margin:6px 0 4px">{{ b.t }}</div><sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="2"><div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--rule);padding:8px 0;font-size:13px"><span>{{ r.a }}</span><span style="font-weight:600;color:{{ r.c }}">{{ r.b }}</span></div></sc-for></div></sc-for>
+<div style="background:var(--sk);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7;color:var(--ink2)">{{ dt.note }}</div></div></div></sc-if>
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'model', dark:null, obj:0, qmode:0, kind:'sup', sel:0, conf:2 };
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', green:'#17693F', greenbg:'#E6F4EC' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', green:'#4CC38A', greenbg:'#17301F' };
+    const T = dark ? D : L;
+    const frame = { width:1180, maxWidth:'100%', height:700, background:T.bg, border:'1px solid ' + (dark ? '#2A2A2A' : '#C3CAD6'), borderRadius:16, overflow:'hidden', display:'flex', flexDirection:'column', color:T.ink };
+    Object.keys(T).forEach(k => frame['--' + k] = T[k]);
+    const scr = s.screen, bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const pill = (on, h = 40) => `flex:none;height:${h}px;padding:0 16px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600;white-space:nowrap`;
+    const OBJ = [['项目','folder',140,70,[['引用了','客户、技术要求'],['被引用于','预算行、询价单、报价']],[['project_no','文本','必填'],['contract_amount','金额','选填'],['price_basis','枚举','必填']],'一个投标或实施项目，是预算与询价的容器。'],['报价','request_quote',350,70,[['引用了','供应商、物料、项目'],['被引用于','预算行、比价']],[['unit_price','金额','必填'],['price_basis','枚举','必填'],['valid_until','日期','选填']],'供应商对物料在某一时点的价格。'],['供应商','storefront',560,70,[['被引用于','报价、联系人'],['同类引用','别名合并的重复供应商']],[['name','文本','必填'],['disabled','布尔','选填']],'提供物料的公司。'],['物料','inventory_2',350,230,[['被引用于','报价、预算行、技术要求匹配']],[['model','文本','必填'],['unit','文本','必填']],'可采购的物品，含型号与参数。'],['预算行','table_rows',140,230,[['引用了','项目、物料、报价']],[['qty','数字','必填'],['cost_unit','金额','必填']],'项目成本预算里的一行。']];
+    const od = OBJ[s.obj];
+    const E = [[0,4,'budget.rows',1],[1,3,'quote.by_material',1],[1,2,'quote.supplier',1],[0,1,'project.quotes',0],[4,3,'budget.material',1]];
+    const edges = E.map(([a, b, t, ok]) => { const A = OBJ[a], B = OBJ[b]; return { x1:A[2], y1:A[3], x2:B[2], y2:B[3], c: ok ? T.rs : T.red, w: ok ? 1.5 : 1.5, d: ok ? '' : '5 4', tx:(A[2] + B[2]) / 2, ty:(A[3] + B[3]) / 2 - 6, t: ok ? t : '未声明接口', tc: ok ? T.ink3 : T.red }; });
+    const nodes = OBJ.map((o, i) => ({ t:o[0], ic:o[1], go:go({ obj:i }), style:`position:absolute;left:${o[2]}px;top:${o[3]}px;transform:translate(-50%,-50%);white-space:nowrap;display:flex;align-items:center;gap:6px;height:44px;padding:0 14px;border-radius:8px;border:1px solid ${s.obj === i ? T.acc : T.rs};background:${s.obj === i ? T.tint : T.sf};color:${T.ink};font-size:13px;font-weight:600` }));
+    const QG = [['项目与技术要求',[['技术要求缺设备类别',2,'项需求','预览补全'],['条款未核对',5,'条条款','打开完整列表']]],['物料参数',[['物料缺参数',7,'项物料','预览补全']]],['报价',[['报价已过期仍在预算中',3,'组','打开完整列表'],['含税口径未知',2,'条报价','打开完整列表']]],['供应商与数据一致性',[['疑似重复供应商',1,'家供应商','打开完整列表'],['待确认的修改冲突',s.conf,'项冲突','打开完整列表']]]];
+    const qgroups = QG.map(g => ({ t:g[0], items:g[1].map((i, k) => ({ t:i[0], n:i[1], u:i[2], act:i[3], bt:bt(k) })) }));
+    const XI = [['file_upload','导出交换文件','加密；对方需要设置同一个交换口令'],['file_download','导入交换文件','先预览差异，再确认写入'],['published_with_changes','从交换快照替换询价资料','覆盖本机，需强确认'],['restore','从备份恢复整个资料库','在“数据与存储”中由宿主统一管理'],['folder_shared','文件夹同步','状态与最近一次同步'],['wifi_tethering','局域网推送','把项目推送到同网络的设备']];
+    const confs = [['供应商 · 华泵 · 评价说明','交货准时','交货准时、售后响应慢'],['报价 Q-0412 · 单价','32,100.00','31,800.00']].slice(0, s.conf);
+    const sup = s.kind === 'sup';
+    const SUP = [['华泵','华泵泵业','主营 离心泵、管道泵',0],['云川','云川机电','主营 变频器、泵',0],['老宋阀门','宋氏','主营 阀门',1],['联泰泵业','联泰','主营 离心泵',0]];
+    const MAT = [['HB-200 离心泵','华泵 · 泵','4 家报价'],['VF-30 变频器','电驰 · 电气','1 家报价'],['DN100 阀门','— · 阀门','1 家报价']];
+    const src = sup ? SUP : MAT;
+    const crows = src.map((r, i) => ({ a:r[0], b:r[1], c:r[2], tag: sup && r[3], op: sup && r[3] ? 0.7 : 1, bg: s.sel === i ? T.tint : 'transparent', go:go({ sel:i }) }));
+    const cur = src[Math.min(s.sel, src.length - 1)];
+    const dt = sup ? { t:cur[0], s:'别名 ' + cur[1] + ' · ' + cur[2], blocks:[{ t:'联系人', rows:[['张经理','138****0021',T.ink]] },{ t:'各家报价', rows:[['离心泵 HB-200','¥32,100.00',T.ink]] },{ t:'参与的项目', rows:[['华东泵站改造','已定标',T.deep]] }], note:'采购来源：网页资料尚待核实；可另存原始来源及字段证据查看。停用后，这家的报价不再算有效报价，不参与最低价，也不会被自动带入预算。' } : { t:cur[0], s:cur[1], blocks:[{ t:'各家报价', rows:[['华泵','¥32,100.00 最低有效价',T.green],['云川','¥33,637.50 已定标',T.deep],['联泰','¥35,300.00 不可用（已过期）',T.red]] },{ t:'用到它的项目', rows:[['华东泵站改造','4 台',T.ink]] }], note:'单位换算：1 千米 = 1000 米。物料参数未确认的项会标“未确认”。' };
+    const titles = { model:'数据中心', qual:'数据中心', xchg:'同步与交换', cat:sup ? '供应商' : '物料' };
+    const tabsOf = { model:[['model','数据模型'],['qual','数据质量']], qual:[['model','数据模型'],['qual','数据质量']], xchg:[], cat:[['sup','供应商'],['mat','物料']] };
+    return {
+      frame, title:titles[scr], isModel: scr === 'model', isQual: scr === 'qual', isXchg: scr === 'xchg', isCat: scr === 'cat',
+      navs: [['model','数据中心 · 数据模型'],['qual','数据中心 · 数据质量'],['xchg','同步与交换'],['cat','供应商 / 物料']].map(([k, l]) => ({ label:l, go:go({ screen:k }), style:`height:36px;padding:0 16px;border-radius:999px;border:1px solid ${scr === k ? '#2458D3' : '#C3CAD6'};background:${scr === k ? '#E8EFFF' : '#fff'};color:${scr === k ? '#1B47C2' : '#111827'};font-size:13px;font-weight:600` })),
+      togDark: go({ dark:!dark }), darkStyle:'height:36px;padding:0 16px;border-radius:999px;border:1px solid #C3CAD6;background:#fff;color:#111827;font-size:13px;font-weight:600',
+      subtabs: tabsOf[scr].map(([k, l]) => ({ l, go: scr === 'cat' ? go({ kind:k, sel:0 }) : go({ screen:k }), style:pill(scr === 'cat' ? s.kind === k : scr === k, 36) })),
+      od: { name:od[0], desc:od[6], rels:od[4].map(r => ({ k:r[0], v:r[1] })), fields:od[5].map(f => ({ n:f[0], t:f[1], req:f[2], bg: f[2] === '必填' ? T.tint : T.sk, fg: f[2] === '必填' ? T.deep : T.ink2 })) }, edges, nodes,
+      qmodes: [['待处理',0],['全部',1]].map(([t, v]) => ({ t, go:go({ qmode:v }), style:pill(s.qmode === v, 36) })), qNone:false, qgroups,
+      xitems: XI.map((x, i) => ({ ic:x[0], t:x[1], s:x[2], bt:bt(i) })), conflicts: confs.map((c, i) => ({ t:c[0], a:c[1], b:c[2], keep: go({ conf: s.conf - 1 }) })), confNone: s.conf === 0,
+      searchTxt: sup ? '名称、别名或拼音首字母' : '型号、名称、品牌、规格或拼音首字母', kinds: [['sup','供应商'],['mat','物料']].map(([k, t]) => ({ t, go:go({ kind:k, sel:0 }), style:pill(s.kind === k, 36) })),
+      h1: sup ? '名称' : '型号 / 名称', h2: sup ? '别名' : '品牌 · 类别', h3: sup ? '主营类别' : '报价', crows, dt: { ...dt, blocks: dt.blocks.map(b => ({ t:b.t, rows:b.rows.map(r => ({ a:r[0], b:r[1], c:r[2] })) })) }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E9ECF1;font-family:'Noto Sans SC','PingFang SC',sans-serif}.ms{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;line-height:1;display:inline-block;letter-spacing:normal;white-space:nowrap}button{font-family:inherit;cursor:pointer}a{color:#2458D3}a:hover{color:#1B47C2}</style>
+</helmet>
+<div style="padding:32px 24px;display:flex;flex-direction:column;gap:16px;align-items:center;min-height:100vh;box-sizing:border-box">
+<div style="width:1180px;max-width:100%;display:flex;gap:10px;flex-wrap:wrap;align-items:center;color:#111827"><div style="font-size:22px;font-weight:600;margin-right:12px">数据中心 · 桌面版</div><button onClick="{{ togDark }}" style="height:36px;padding:0 16px;border-radius:999px;border:1px solid #C3CAD6;background:#fff;color:#111827;font-size:13px;font-weight:600">切换深浅</button><button onClick="{{ togNone }}" style="height:36px;padding:0 16px;border-radius:999px;border:1px solid #C3CAD6;background:#fff;color:#111827;font-size:13px;font-weight:600">无插件状态</button>
+<div style="width:100%;font-size:12px;color:#636C7E">可进入的二级页：左侧插件 › 视图页签 › 表格行 › 右侧详情（对象 / 关系 / 动作 / 接口 / 流程）。所有数字与名称均为示意数据。</div></div>
+<div style="{{ frame }}">
+<div style="width:260px;flex:none;border-right:1px solid var(--rule);padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto"><div style="font-size:15px;font-weight:600;padding:0 4px">数据中心</div><div style="font-size:12px;color:var(--ink3);line-height:1.6;padding:0 4px">平台级。插件通过六项检查并同步到助手知识库后才能发布。</div>
+<sc-if value="{{ none }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:32px 8px;color:var(--ink3);font-size:13px;line-height:1.8"><span class="ms" style="font-size:36px;color:var(--rs)">extension</span><br>还没有注册业务插件</div></sc-if>
+<sc-for list="{{ cards }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="text-align:left;border:1px solid {{ c.bd }};background:{{ c.bg }};color:var(--ink);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px" style-focus="outline:2px solid var(--acc);outline-offset:2px"><span style="display:flex;align-items:center;gap:8px"><span class="ms" style="font-size:22px">{{ c.icon }}</span><span style="flex:1;font-size:14px;font-weight:600">{{ c.name }}</span></span><span style="font-size:12px;color:var(--ink3)">{{ c.counts }}</span><span style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:{{ c.pc }}"><span class="ms" style="font-size:16px">{{ c.pi }}</span>{{ c.pub }}</span></button></sc-for></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<div style="height:56px;flex:none;display:flex;align-items:center;gap:6px;padding:0 16px;border-bottom:1px solid var(--rule);overflow-x:auto;scrollbar-width:none"><sc-for list="{{ views }}" as="v" hint-placeholder-count="11"><button onClick="{{ v.go }}" style="{{ v.style }}">{{ v.l }}</button></sc-for></div>
+<div style="flex:1;min-height:0;display:flex">
+<div style="flex:1;min-width:0;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px">
+<sc-if value="{{ vOverview }}" hint-placeholder-val="{{ true }}"><div style="border:1px solid {{ pubBd }};border-radius:12px;padding:16px;background:var(--sf);display:flex;flex-direction:column;gap:6px"><div style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;color:{{ pubColor }}"><span class="ms" style="font-size:24px">{{ pubIcon }}</span>{{ pubText }}</div><div style="font-size:13px;line-height:1.7;color:var(--ink2)">{{ pubDesc }}</div></div>
+<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px"><sc-for list="{{ stats }}" as="k" hint-placeholder-count="6"><div style="border:1px solid var(--rule);background:var(--sf);border-radius:8px;padding:12px"><div style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums">{{ k.n }}</div><div style="font-size:12px;color:var(--ink3)">{{ k.l }}</div></div></sc-for></div>
+<div style="border:1px solid var(--rule);border-radius:8px;background:var(--sf);padding:0 16px"><sc-for list="{{ declares }}" as="d" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:12px;min-height:48px;border-top:{{ d.bt }};font-size:14px"><span class="ms" style="font-size:22px;color:{{ d.c }}">{{ d.ic }}</span><span style="flex:1">{{ d.t }}</span><b style="font-size:12px;color:{{ d.c }}">{{ d.s }}</b></div></sc-for></div></sc-if>
+<sc-if value="{{ vGraph }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--ink3)">节点是对象类型。边上标注助手查询所用的接口；红色虚线为未声明接口，助手无法沿它查询。</div><div style="position:relative;flex:1;min-height:420px;border:1px solid var(--rule);border-radius:8px;background:var(--sf);overflow:auto"><div style="position:absolute;left:50%;top:50%;width:700px;height:420px;transform:translate(-50%,-50%)"><svg width="700" height="420" style="position:absolute;left:0;top:0"><sc-for list="{{ edges }}" as="e" hint-placeholder-count="6"><g><line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" stroke="{{ e.c }}" stroke-width="{{ e.w }}" stroke-dasharray="{{ e.d }}"></line><rect x="{{ e.rx }}" y="{{ e.ry }}" width="{{ e.rw }}" height="16" rx="4" fill="{{ e.bg }}"></rect><text x="{{ e.tx }}" y="{{ e.ty }}" font-size="11" fill="{{ e.tc }}" text-anchor="middle" font-weight="{{ e.fw }}">{{ e.t }}</text></g></sc-for></svg><sc-for list="{{ nodes }}" as="n" hint-placeholder-count="7"><button onClick="{{ n.go }}" style="{{ n.style }}">{{ n.t }}</button></sc-for></div></div></sc-if>
+<sc-if value="{{ vTable }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--ink3);line-height:1.6">{{ hint }}</div><sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px;color:var(--ink3);font-size:14px">该插件还没有声明{{ vname }}。</div></sc-if>
+<div style="border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--sf)"><div style="display:grid;grid-template-columns:1.5fr 2fr 90px;height:42px;align-items:center;gap:10px;padding:0 14px;background:var(--sk);font-size:12px;color:var(--ink3);font-weight:600"><span>名称</span><span>说明 / 接口</span><span>标签</span></div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="6"><button onClick="{{ r.go }}" style="width:100%;text-align:left;display:grid;grid-template-columns:1.5fr 2fr 90px;min-height:52px;align-items:center;gap:10px;padding:6px 14px;border:0;border-top:1px solid var(--rule);background:{{ r.bg }};color:var(--ink);font-size:13px" style-focus="outline:2px solid var(--acc);outline-offset:-2px"><span style="font-weight:500">{{ r.t }}</span><span style="color:{{ r.sc }};font-family:{{ r.sf }};font-size:12px">{{ r.s }}</span><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:{{ r.tbg }};color:{{ r.tfg }};justify-self:start">{{ r.tag }}</span></button></sc-for></div></sc-if>
+</div>
+<div style="width:320px;flex:none;border-left:1px solid var(--rule);padding:16px 20px;display:flex;flex-direction:column;gap:8px;overflow-y:auto"><div style="font-size:12px;color:var(--ink3)">{{ dLabel }}</div><div style="font-size:17px;font-weight:600">{{ dTitle }}</div>
+<sc-for list="{{ dRows }}" as="d" hint-placeholder-count="5"><div style="display:flex;gap:10px;border-top:1px solid var(--rule);padding:8px 0;font-size:13px;line-height:1.6"><span style="width:72px;flex:none;color:var(--ink3)">{{ d.k }}</span><span style="flex:1;color:{{ d.c }}">{{ d.v }}</span></div></sc-for>
+<sc-if value="{{ noDetail }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--ink3);line-height:1.7">选择一个对象、关系、动作或接口，在这里查看详情。</div></sc-if></div>
+</div></div></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dark&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { dark:null, plug:0, view:'overview', sel:0, row:0, none:false };
+  renderVals() {
+    const s = this.state, P = this.props, go = (o) => () => this.setState(o);
+    const dark = s.dark === null ? !!P.dark : s.dark;
+    const L = { bg:'#FCFCFC', sf:'#FFFFFF', sk:'#F1F3F6', rule:'#E2E6EC', rs:'#C3CAD6', ink:'#111827', ink2:'#4B5565', ink3:'#636C7E', acc:'#2458D3', tint:'#E8EFFF', deep:'#1B47C2', onacc:'#FFFFFF', red:'#B8302A', redbg:'#FDE8E6', green:'#17693F', greenbg:'#E6F4EC' };
+    const D = { bg:'#0A0A0A', sf:'#141414', sk:'#1F1F1F', rule:'#2B2B2B', rs:'#3F3F3F', ink:'#F2F2F2', ink2:'#C4C4C4', ink3:'#9A9A9A', acc:'#F0A649', tint:'#3A2A12', deep:'#F5C27A', onacc:'#0A0A0A', red:'#FF7A70', redbg:'#3A1F1D', green:'#4CC38A', greenbg:'#17301F' };
+    const T = dark ? D : L;
+    const frame = { width:1180, maxWidth:'100%', height:720, background:T.bg, border:'1px solid ' + (dark ? '#2A2A2A' : '#C3CAD6'), borderRadius:16, overflow:'hidden', display:'flex', color:T.ink };
+    Object.keys(T).forEach(k => frame['--' + k] = T[k]);
+    const bt = (i) => i === 0 ? 'none' : '1px solid ' + T.rule;
+    const pill = (on) => `flex:none;height:36px;padding:0 14px;border-radius:999px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${on ? T.deep : T.ink};font-size:13px;font-weight:600;white-space:nowrap`;
+    const P0 = { name:'询价', icon:'request_quote', st:'pub', objs:[['项目',64,48],['询价单',230,48],['技术要求',420,112],['预算行',64,200],['报价',230,200],['供应商',420,250],['物料',230,330]], links:[[0,3,'预算行','budget.rows','1:N'],[0,1,'询价单','rfq.by_project','1:N'],[0,2,'技术要求','spec.by_project','1:N'],[4,5,'供应商','quote.supplier','N:1'],[4,6,'物料','quote.by_material','N:1'],[3,6,'物料','budget.material','N:1'],[1,4,'收集报价',null,'N:N'],[2,6,'匹配物料','spec.match','N:N']], acts:4, funcs:7, flows:3 };
+    const P1 = { name:'科研', icon:'science', st:'blocked', objs:[['论文',64,60],['研究卡',250,60],['结果包',440,60],['任务',150,220],['报告',340,220]], links:[[1,0,'引用论文','research.card.paper','N:1'],[2,3,'来自任务','research.result.task','N:1'],[4,2,'引用结果包',null,'N:N']], acts:3, funcs:3, flows:2 };
+    const P2 = { name:'原型', icon:'deployed_code', st:'none', objs:[['原型',200,150],['反馈',380,150]], links:[], acts:0, funcs:0, flows:0 };
+    const PL = [P0, P1, P2], pl = PL[s.plug];
+    const ST = { pub:['check_circle','已发布 · 助手已掌握',T.green,'对象、关系、查询接口、动作与流程已同步到助手知识库 v3。'], blocked:['block','待补全 · 不能发布',T.red,'有 1 条关系没有声明查询接口，助手无法沿它查询。'], none:['radio_button_unchecked','未注册',T.ink3,'插件尚未提交本体声明。'] };
+    const sti = ST[pl.st], missing = pl.links.filter(l => !l[3]).length;
+    const dr = (a) => a.map(x => ({ k:x[0], v:x[1], c:x[2] || T.ink }));
+    const kd = (k) => k === '写入' ? [T.tint, T.deep] : k === '外传' ? [T.redbg, T.red] : [T.sk, T.ink2];
+    const ACT = [['新建询价单','写入',[['参数','项目、物料、供应商、回复截止日'],['提交条件','至少 1 家未停用供应商'],['副作用','创建询价单 1 张'],['确认','确认卡列出将创建的内容']]],['定标','写入',[['参数','报价、成交单价、理由'],['副作用','预算成本单价改为成交单价'],['确认','确认卡显示前后对比']]],['刷新预算价格','写入',[['副作用','只改未定标的行'],['确认','先预览差异再确认']]],['发布到公司资料','外传',[['副作用','远端写入，本地无法撤回'],['确认','统一确认卡，逐条列出记录']]]];
+    const FN = [['quote.by_material','物料 → 报价'],['quote.supplier','报价 → 供应商'],['budget.rows','项目 → 预算行'],['rfq.by_project','项目 → 询价单'],['spec.match','技术要求 → 候选物料'],['budget.material','预算行 → 物料'],['spec.by_project','项目 → 技术要求']];
+    const FL = [['询价到定标','5 步',['建询价单（动作）','回收报价 rfq.by_project','比价 quote.by_material','定标（动作）','预算更新 budget.rows']],['技术要求到定选','4 步',['导入','逐条核对','匹配 spec.match','定选']],['报价时效维护','3 步',['时效提醒','更新或失效','重新比价']]];
+    const v = s.view, none = s.none;
+    let trows = [], hint = '', vname = '';
+    const row = (t, sub, tag, kind, d, bad, sf) => ({ t, s:sub, sf: sf || 'inherit', sc: bad ? T.red : T.ink3, tag, tbg: kind === 'ok' ? T.greenbg : bad ? T.redbg : kd(kind)[0], tfg: kind === 'ok' ? T.green : bad ? T.red : kd(kind)[1], d, bad });
+    if (v === 'objs') { vname = '对象类型'; hint = '对象类型：本体里的“名词”。选中查看属性与关系。'; trows = pl.objs.map((o, i) => row(o[0], pl.links.filter(l => l[0] === i || l[1] === i).length + ' 条关系', '对象', '只读', dr([['对象类型', o[0]],['关系', pl.links.filter(l => l[0] === i || l[1] === i).map(l => (l[3] || '未声明接口')).join('、') || '无'],['敏感属性', '默认不进入助手摘要']]))); }
+    if (v === 'links') { vname = '关系'; hint = '关系：对象之间的链接类型，边上必须声明查询接口才能发布。'; trows = pl.links.map(l => { const ok = !!l[3]; return row(pl.objs[l[0]][0] + ' → ' + pl.objs[l[1]][0], ok ? l[3] : '未声明查询接口', l[4], ok ? '只读' : '只读', dr([['名称', l[2]],['基数', l[4]],['查询接口', ok ? l[3] : '未声明，助手无法沿此关系查询', ok ? T.ink : T.red]]), !ok, ok ? 'Consolas,Menlo,monospace' : 'inherit'); }); }
+    if (v === 'act') { vname = '动作'; hint = '动作：助手可发起的写入或外传操作，调用前逐次确认。'; trows = (pl.st === 'none' ? [] : ACT.slice(0, pl.acts || 4)).map(a => row(a[0], a[2][0][1], a[1], a[1], dr(a[2]))); }
+    if (v === 'fn') { vname = '查询接口'; hint = '查询接口：助手读取数据的只读入口。'; trows = (pl.st === 'none' ? [] : FN.slice(0, pl.funcs)).map(f => row(f[0], f[1], '只读', '只读', dr([['接口', f[0]],['沿关系', f[1]],['权限', '只读，离线可用']]), false, 'Consolas,Menlo,monospace')); }
+    if (v === 'flow') { vname = '流程'; hint = '流程：把查询接口与动作按步骤串起来。'; trows = (pl.st === 'none' ? [] : FL.slice(0, pl.flows)).map(f => row(f[0], f[1], f[1], '只读', f[2].map((x, i) => ({ k:'第 ' + (i + 1) + ' 步', v:x, c:T.ink })))); }
+    if (v === 'lineage') { vname = '血缘'; hint = '血缘：数据源 → 对象类型 → 查询接口 → 助手知识。'; trows = pl.objs.map((o, i) => row(o[0], '插件表 → ' + o[0] + ' → ' + (pl.links.filter(l => l[0] === i && l[3]).length || 0) + ' 个接口', pl.st === 'pub' ? '已同步' : '未同步', pl.st === 'pub' ? 'ok' : '只读', dr([['数据源', '插件表'],['助手知识', pl.st === 'pub' ? 'v3，敏感属性已剔除' : '未同步', pl.st === 'pub' ? T.green : T.red]]), pl.st !== 'pub' && pl.st !== 'none' && false)); }
+    if (v === 'quality') { vname = '数据质量'; hint = '数据质量：待处理问题，每条带单位，不同单位不相加。'; trows = pl.st === 'none' ? [] : [row('缺查询接口的关系', missing + ' 条关系', missing ? '待处理' : '无', missing ? '只读' : 'ok', dr([['影响','助手无法沿这些关系查询'],['处理','在插件清单中补全接口']]), !!missing),row('敏感属性未标记', '2 项属性', '待处理', '只读', dr([['处理','预览后确认标记']]), true),row('示例问法评测', pl.st === 'pub' ? '全部通过' : '1 条未命中', pl.st === 'pub' ? '通过' : '待处理', pl.st === 'pub' ? 'ok' : '只读', [], pl.st !== 'pub')]; }
+    if (v === 'kb') { vname = 'AI 知识'; hint = '发布门槛：六项检查全部通过并同步后，插件才能发布。'; const ok6 = pl.st === 'pub'; trows = pl.st === 'none' ? [] : [row('同步状态', ok6 ? '助手已读到全部声明' : '检查未通过，未同步', ok6 ? '已同步' : '未同步', ok6 ? 'ok' : '只读', dr([['版本', ok6 ? 'v3 · 今天 09:05' : '—'],['敏感属性','已从摘要中剔除']]), !ok6),row('关系已声明查询接口', missing ? missing + ' 条缺接口' : '全部已声明', missing ? '未通过' : '通过', missing ? '只读' : 'ok', dr([['去哪里改','ontology.relations[].query']]), !!missing),row('示例问法评测', ok6 ? '3/3 通过' : '1/2 通过', ok6 ? '通过' : '未通过', ok6 ? 'ok' : '只读', [], !ok6)]; }
+    if (v === 'ai') { vname = 'AI 接入'; hint = 'AI 接入：向助手与外部 MCP 暴露的只读能力。'; trows = [row('本地查询工具', pl.funcs + ' 个', '只读', '只读', dr([['说明','助手直接调用，不外传']])),row('外部 MCP', '只读能力', '已关闭', '只读', dr([['范围','仅只读，不含写入与外传']]))]; }
+    const rsel = Math.min(s.row, Math.max(trows.length - 1, 0)), cur = trows[rsel];
+    const rows = trows.map((r, i) => ({ ...r, bg: rsel === i ? T.tint : 'transparent', go:go({ row:i }) }));
+    const sel = Math.min(s.sel, pl.objs.length - 1);
+    const nodes = pl.objs.map((o, i) => { const on = i === sel; return { t:o[0], go:go({ sel:i }), style:`position:absolute;left:${o[1]}px;top:${o[2]}px;transform:translate(-50%,-50%);white-space:nowrap;height:44px;min-width:80px;padding:0 12px;border-radius:8px;border:1px solid ${on ? T.acc : T.rs};background:${on ? T.tint : T.sf};color:${T.ink};font-size:13px;font-weight:600;box-shadow:${on ? '0 0 0 2px ' + T.acc : 'none'}` }; });
+    const edges = pl.links.map(l => { const A = pl.objs[l[0]], B = pl.objs[l[1]], ok = !!l[3], hot = l[0] === sel || l[1] === sel, t = ok ? l[3] : '未声明接口', mx = (A[1] + B[1]) / 2, my = (A[2] + B[2]) / 2, rw = t.length * 6.2 + 10; return { x1:A[1], y1:A[2], x2:B[1], y2:B[2], c: !ok ? T.red : hot ? T.acc : T.rs, w: hot ? 2.5 : 1.5, d: ok ? '' : '5 4', t, tx:mx, ty:my + 4, rx:mx - rw / 2, ry:my - 8, rw, bg:T.sf, tc: !ok ? T.red : hot ? T.deep : T.ink3, fw: hot || !ok ? 600 : 400 }; });
+    const gl = pl.links.filter(l => pl.objs.findIndex(o => o === pl.objs[sel]) === l[0] || pl.objs.findIndex(o => o === pl.objs[sel]) === l[1]);
+    const VIEWS = [['overview','概览'],['graph','本体图'],['objs','对象类型'],['links','关系'],['act','动作'],['fn','查询接口'],['flow','流程'],['lineage','血缘'],['quality','数据质量'],['kb','AI 知识'],['ai','AI 接入']];
+    const dRowsOut = v === 'graph' ? dr([['对象类型', pl.objs[sel][0]], ...gl.map(l => [(l[0] === sel ? '→ ' : '← ') + pl.objs[l[0] === sel ? l[1] : l[0]][0], l[3] || '未声明接口', l[3] ? T.ink : T.red])]) : cur ? cur.d : [];
+    return {
+      frame, togDark: go({ dark:!dark }), togNone: go({ none:!none }), none,
+      cards: none ? [] : PL.map((p, i) => ({ name:p.name, icon:p.icon, counts: p.objs.length + ' 对象 · ' + p.links.length + ' 关系 · ' + p.acts + ' 动作', pi:ST[p.st][0], pub:ST[p.st][1], pc:ST[p.st][2], bd: s.plug === i ? T.acc : T.rule, bg: s.plug === i ? T.tint : T.sf, go:go({ plug:i, row:0, sel:0 }) })),
+      views: VIEWS.map(([k, l]) => ({ l, go:go({ view:k, row:0 }), style:pill(v === k) })),
+      vOverview: v === 'overview', vGraph: v === 'graph', vTable: !['overview','graph'].includes(v), hint, vname, empty: rows.length === 0, rows,
+      pubIcon:sti[0], pubText:sti[1], pubColor:sti[2], pubDesc:sti[3], pubBd: pl.st === 'blocked' ? T.red : T.rule,
+      stats: [['对象类型',pl.objs.length],['关系',pl.links.length],['动作',pl.acts],['查询接口',pl.funcs],['流程',pl.flows],['缺接口',missing]].map(([l, n]) => ({ l, n })),
+      declares: [['对象与属性已声明', pl.objs.length > 0],['关系已声明查询接口', pl.links.length > 0 && missing === 0],['动作已声明参数与确认方式', pl.acts > 0],['业务流程已声明', pl.flows > 0],['敏感属性已标记', pl.st !== 'none'],['示例问法评测全部通过', pl.st === 'pub']].map(([t, ok], i) => ({ t, ic: ok ? 'check_circle' : 'cancel', c: ok ? T.green : T.red, s: ok ? '通过' : '未通过', bt:bt(i) })),
+      nodes, edges, dLabel: v === 'graph' ? '所选对象' : '所选条目', dTitle: v === 'graph' ? pl.objs[sel][0] : cur ? cur.t : '', dRows: dRowsOut, noDetail: v !== 'graph' && !cur
+    };
+  }
+}
+</script>
+</body>
+</html>
