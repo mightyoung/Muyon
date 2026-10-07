@@ -343,13 +343,17 @@ class OpenAiModelGateway {
     final first = attempt;
     while (true) {
       try {
-        yield* _streamOnce(
+        // Not `yield*`: that forwards an error to the listener instead of
+        // throwing it here, where the resend rule below must see it.
+        await for (final event in _streamOnce(
           provider,
           attempt,
           cancellation,
           beforeSend,
           maxDuration,
-        );
+        )) {
+          yield event;
+        }
         if (!identical(attempt, first)) _noJsonObject.add(key);
         return;
       } on HttpException catch (error) {
@@ -456,7 +460,14 @@ class OpenAiModelGateway {
         throw TimeoutException('model_stream_limit');
       }
       finished = true;
-      await channel.fail(error, stack);
+      // Stopping the client makes the body fail with a connection error:
+      // that is the caller's cancellation, not a new failure.
+      await channel.fail(
+        token.isCancelled && error is! StateError
+            ? StateError('cancelled')
+            : error,
+        stack,
+      );
     } finally {
       limit?.cancel();
       if (!finished) {

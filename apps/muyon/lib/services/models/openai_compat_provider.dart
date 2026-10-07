@@ -48,7 +48,9 @@ class OpenAiCompatProvider implements ModelProvider {
 
   static FinishReason _reason(Object? value) => switch (value) {
     'stop' => FinishReason.stop,
-    'tool_calls' => FinishReason.toolCalls,
+    // `function_call` is the legacy spelling; the call itself is reported as
+    // a problem, so the reply is a protocol violation, not an "other" end.
+    'tool_calls' || 'function_call' => FinishReason.toolCalls,
     'length' => FinishReason.length,
     'content_filter' => FinishReason.contentFilter,
     _ => FinishReason.other,
