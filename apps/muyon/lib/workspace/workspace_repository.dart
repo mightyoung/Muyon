@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
 import '../platform/outbound_ledger.dart';
+import '../platform/outbound_tool_ledger.dart';
 import '../platform/task_records.dart';
 
 class Workspace {
@@ -18,8 +19,8 @@ class WorkspaceRepository {
   final ManagedDatabase database;
 
   static final schema = ModuleSchema(
-    version: 8,
-    definitionDigest: 'foundation-v8',
+    version: 9,
+    definitionDigest: 'foundation-v9',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -139,6 +140,12 @@ CREATE TABLE transfer_tasks(
         id: 'task-events',
         definitionDigest: 'foundation-v8',
         migrate: TaskRecords.migrate,
+      ),
+      ModuleMigration(
+        version: 9,
+        id: 'outbound-tool-requests',
+        definitionDigest: 'foundation-v9',
+        migrate: OutboundToolLedger.createTable,
       ),
     ],
   );

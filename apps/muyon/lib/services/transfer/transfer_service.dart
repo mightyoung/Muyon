@@ -11,6 +11,7 @@ import 'package:supplier_core/lan.dart';
 import 'package:uuid/uuid.dart';
 
 import 'chat_log.dart';
+import '../../platform/outbound_tool_ledger.dart';
 import 'task_coordinator.dart';
 
 /// Private key and paired certificates. Plain files are not a substitute.
@@ -58,7 +59,12 @@ class TransferItem {
 /// Listening is opt-in. No listener starts during host construction.
 /// Delivery, durable receipt, import, read and human acceptance stay separate.
 class TransferService {
-  TransferService(this.database, this.rootPath);
+  TransferService(
+    this.database,
+    this.rootPath, {
+    ManagedDatabase? outboundDatabase,
+  }) : outboundLedger = OutboundToolLedger(outboundDatabase ?? database);
+  final OutboundToolLedger outboundLedger;
   final ManagedDatabase database;
   final String rootPath;
   LanNode? _node;
@@ -653,6 +659,7 @@ class TransferService {
       name: deviceName,
       inbox: Directory(p.join(rootPath, 'inbox')),
       onPush: _notePush,
+      outboundLedger: outboundLedger,
       discoveryPort: discoveryPort ?? lanDiscoveryPort,
       httpPort: httpPort ?? lanHttpPort,
       secrets: secrets ?? const FlutterLanSecretStore(),
@@ -854,12 +861,7 @@ class TransferService {
 
   /// Removes the local row for this peer and message id. The peer is not told.
   Future<void> deleteChat(String peerFingerprint, String messageId) async {
-    _single(
-      peerFingerprint,
-      messageId,
-      direction: null,
-      missing: '消息不存在',
-    );
+    _single(peerFingerprint, messageId, direction: null, missing: '消息不存在');
     await database.write((db) {
       db.execute(
         'DELETE FROM chat_messages WHERE peer_fingerprint=? AND message_id=?',

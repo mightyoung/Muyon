@@ -406,8 +406,11 @@ class HubClient {
           request.headers.contentType = ContentType.json;
         check();
         beforeSend();
-        if (frozen.encodedBody != null)
-          request.add(utf8.encode(frozen.encodedBody!));
+        if (frozen.encodedBody != null) {
+          final payload = utf8.encode(frozen.encodedBody!);
+          request.add(payload);
+          frozen.onBodySent?.call(payload.length);
+        }
         check();
         final response = await cancel.wait(request.close());
         check();

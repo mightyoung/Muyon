@@ -34,6 +34,9 @@ class HubRequest {
   final Uri destination;
   final Object? body;
   final String? encodedBody;
+
+  /// Host audit observes body bytes at the native transport boundary.
+  void Function(int)? onBodySent;
   bool get publishes =>
       method == 'POST' && destination.path.endsWith('/v1/publications');
 }

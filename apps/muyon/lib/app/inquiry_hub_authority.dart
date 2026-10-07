@@ -3,6 +3,9 @@ import 'package:supplier_core/supplier_core.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/tool_registry.dart';
+import '../platform/outbound_tool_ledger.dart';
+
+import 'dart:convert';
 
 /// Registers a recorded channel, not a model-callable grant operation. Only an
 /// invocation-bound application closure can execute this provider's handler.
@@ -114,7 +117,24 @@ class InquiryHubAuthority implements HubAuthority {
         context.checkBeforeEffect();
       }
 
-      value = await operation(checkBeforeEffect);
+      value = await OutboundToolLedger(registry.database).run(
+        toolId: toolId,
+        channel: 'inquiry_hub',
+        isCancelled: () => cancellation.isCancelled,
+        errorCode: 'inquiry_hub_request_failed',
+        destination: request.destination,
+        payload: request.encodedBody == null
+            ? const []
+            : utf8.encode(request.encodedBody!),
+        operation: (countSent) async {
+          request.onBodySent = countSent;
+          try {
+            return await operation(checkBeforeEffect);
+          } finally {
+            request.onBodySent = null;
+          }
+        },
+      );
       validate();
       return ToolCallResult(
         status: ToolCallStatus.succeeded,
