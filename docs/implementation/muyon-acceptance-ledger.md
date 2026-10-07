@@ -44,7 +44,7 @@
 |---|---|---|---|---|
 | 7 | 统一调用路径、审批防重放、中断解释、外部写先查后重试 | 🟡 | T：`tool_registry_test`（含效应点后取消/失败记为 interrupted）、`execution_recovery_test`、`outbound_ledger_test`、`mcp_adapter_test`；D：[调用路径审计](invocation-path-audit.md)、[工具选择评测](tool-selection-eval-2026-10-05.md)（140 题。离线规则 top-1 54/140，其中精确 id 28/28，中文/中英/释义为 0；写入/外发误选 0，弃权质量 26/26，本次规则延迟 3.330 ms，费用 0，未切换生产策略。Laya `laya==0.3.27`，检查点 `convaiinnovations/laya-multilingual` 修订 `1720e3e3357cfe1e281542e223f8273b0890ca34`，4 线程，进程内 CPU、无监听端口：校准阈值 0.95，留出集 top-1 46/93，误写 0，p50 439.113 ms，p95 817.457 ms。ONNX 未导出）、[Jev 证据审查](jev-evidence-review-2026-10-05.md)；**M**：[LLM 原生工具调用基线](tool-selection-llm-baseline-deepseek-chat.md)（P0-2 评测器，P0-4 运行：deepseek-chat top-1 66/140，误选写入/外发 0，弃权质量 26/26，p50 1224.8 ms）；T：P0-3d / P0-3e 协议容错（`personal_agent_rejections_test` 等，至多一次协议纠正） | 审计缺口 G1–G5 归 C/D；MCP 服务器配置与“数据去向”界面 → B；Jev API 未调用；Laya 的概率不是授权，生产策略未切换；ONNX 未导出 |
 | 8 | 记忆/经验/Dream、撤回传递 | 🟡 | 见 2.1d/e | 记忆页和由用户发起的整理已在 develop `9a87ab5`。范围收窄、经验列表管理界面还没有。模型整理 M 未测 |
-| 9a | 模型端点显式、凭据安全存储、无隐式回退 | 🟡 | T：`model_gateway_test`、`profile_routing_test`；P0-S1 凭据脱敏（[审查](../tasks/P0-S1-review.md)，三轮：`credential_redaction_test`，长密钥回显探针，各轮变异均被测试抓住）。M：P0-4 运行端点显式（`configuredBy: dart-define` / `environment`），证据文件中没有写出密钥（按密钥全值与首尾 12 位 grep，命中 0） | 系统钥匙串 / 凭据存储未经实机验证；MCP 令牌脱敏 P0-S2 合入后补证据；`x-api-key`、`api_key=` 关键词未覆盖（第二阶段） |
+| 9a | 模型端点显式、凭据安全存储、无隐式回退 | 🟡 | T：`model_gateway_test`、`profile_routing_test`；P0-S1 凭据脱敏（[审查](../tasks/P0-S1-review.md)，三轮：`credential_redaction_test`，长密钥回显探针，各轮变异均被测试抓住）。M：P0-4 运行端点显式（`configuredBy: dart-define` / `environment`），证据文件中没有写出密钥（按密钥全值与首尾 12 位 grep，命中 0） | P0-S2 MCP 令牌脱敏（[审查](../tasks/P0-S2-review.md)，两轮：`mcp_token_redaction_test` +23；完整助手链路探针中 164 字符与含 `"`、`\` 的令牌在模型请求体、数据库、注册表里 0 命中；14 处变异均被抓住；URL 查询参数凭据只做显示与错误遮盖，存储仍为明文）。系统钥匙串 / 凭据存储未经实机验证；`x-api-key`、`api_key=` 关键词未覆盖（第二阶段） |
 | 9b | PDF 文字层优先 + PaddleOCR | 🟡 | M：ONNX 参考推理（`public_services_validation.md`） | Flutter 原生 R 三端 → W3 |
 | 9c | 关键词/全文/向量/组合检索、中文短词 | 🟡 | T：FTS5/向量；`retrieval_eval_test`（[300 篇评测](retrieval-eval-2026-10-05.md)：current recall@10 0.961，bigram 0.830，「泵」recall@5 为 0.714 对 0.000；结论仍保持 cjk-bigram + 单字扫描。18 篇历史结果仍在 [retrieval-eval-2026-10-04.md](retrieval-eval-2026-10-04.md)，普通测试不再改写报告） | 向量与真实论文 M 未测 → 待用户提供端点与论文后重测 |
 | 9d | 限定资料问答：定位、断言支持、应答/拒答 | 🟡 | T：引用校验 | M 评测 → W3 |
@@ -129,5 +129,5 @@
 | 4 | B 2.4 与 E11 合入或搁置 | ✅ | 均已合入；S6 明确搁置 |
 | 5 | 验收账本按证据更新 | ✅ | 本次更新 2.3、2.4、3.1、7、9a、12 |
 
-本次更新只把证据写进对应行；所有行的状态仍按证据类别判断，T 不代替 R，一次 M 运行不等于普遍正确。P0-S2（安全修复）在第一阶段收尾中进行，合入后补 9a 行。
+本次更新只把证据写进对应行；所有行的状态仍按证据类别判断，T 不代替 R，一次 M 运行不等于普遍正确。P0-S2（安全修复）已于 2026-10-07 合入，9a 行已补。
 
