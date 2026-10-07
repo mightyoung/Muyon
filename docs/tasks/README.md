@@ -5,7 +5,7 @@
 ## 规则
 
 - **派发**：每个任务一个分支，任务说明在该分支的固定位置 `docs/tasks/<编号>.md`。执行者检出分支、阅读说明、只在该分支提交并推送，不合并到 `develop`。
-- **执行**：实现与真机取证都由本地 agent 执行。senior engineer = Opus，engineer = Sonnet，engineer2 = grokbot（云端，无 Flutter；只做静态核对与文档类任务，不派构建与验证），junior = opencode。云端不运行开发任务。
+- **执行**：第二阶段起，用户 2026-10-07 指示开发任务由 leader 派生的 **Sonnet 5.5 子代理**执行，leader 只做派发、审查、合入；真机取证仍由本地 engineer 执行。此前：实现与真机取证都由本地 agent 执行。senior engineer = Opus，engineer = Sonnet，engineer2 = grokbot（云端，无 Flutter；只做静态核对与文档类任务，不派构建与验证），junior = opencode。云端不运行开发任务。
 - **审查**：由 leader 进行。任务完成后，leader 从任务分支的最终提交建立 `review/<编号>`，在该分支写入 `docs/tasks/<编号>-review.md`，清单见 [REVIEW.md](REVIEW.md)。需要修改时，执行者检出审查分支修复并推送；leader 复审通过后合入 `develop`。
 - **自查**：执行者提交前，先按 [REVIEW.md](REVIEW.md) 的「必做」逐项自查。
 
@@ -29,6 +29,8 @@
 | P0-F2 修复研究对象页测试的两个 10 分钟超时（门禁变绿） | `task/p0-f2-object-open-timeout` | [P0-F2.md](P0-F2.md) | junior | E11b 合入之后 | 已合入（[审查](P0-F2-review.md)；门禁恢复为绿） |
 | E11b 研究对象页收尾（小） | `task/e11b-object-page-tests` | [E11b.md](E11b.md) | junior | P0-1 修复之后、P0-J3 之前 | 已合入（[审查](E11b-review.md)） |
 | P0-4 真机与真实模型取证 | `task/p0-4-evidence` | [P0-4.md](P0-4.md) | engineer | — | 第一～三批已合入（[审查](P0-4-review.md)）；**P0-3d 之后 macOS 设备链路通过（R+M）**，用户 2026-10-07 决定以此满足退出标准第 1 项；Android 重跑转第二阶段 R-1 |
+| K-1 模型适配层与 Agent 循环设计（ADR-0005） | `task/k-1-model-adapter-adr` | [K-1.md](K-1.md) | Sonnet 子代理 | 第二阶段 | 进行中（2026-10-07 派发） |
+| E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 进行中（2026-10-07 派发） |
 | UI-0 现状截图与走查 | （未建） | [UI-0.md](UI-0.md) | engineer | 第一阶段之后 | **第一阶段之后**（用户 2026-10-06 决定） |
 | UI-1 设计系统 | （未建） | [UI-1.md](UI-1.md) | senior | UI-0 | **第一阶段之后** |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
