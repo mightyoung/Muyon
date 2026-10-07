@@ -44,7 +44,7 @@
 | R-1 Android 重跑、E-1 真实基线、UI-0 精简截图 | `task/r-1-evidence` | [R-1.md](R-1.md) | engineer | 手机连接 | **已派发** |
 | JR-1 小清理（ci 跑 test_doctor、按字符截断、无用 tag、注释） | `task/jr-1-cleanups` | [JR-1.md](JR-1.md) | junior | — | **已派发** |
 | AUTH-1a 授权库、解析器、外传内容审查接口（不接线） | `task/auth-1a-grants` | [AUTH-1a.md](AUTH-1a.md) | Codex | — | **已派发** |
-| GROK-1 ADR-0004 静态核实与科研导出/导入清单初稿 | `task/grok-1-adr0004-static` | [GROK-1.md](GROK-1.md) | grokbot | — | **已派发** |
+| GROK-1 ADR-0004 静态核实与科研导出/导入清单初稿 | `task/grok-1-adr0004-static` | [GROK-1.md](GROK-1.md) | grokbot | — | 已合入（[审查](GROK-1-review.md)）；Q10 清单待用户确认 |
 | UI-0 现状截图与走查 | 并入 `task/r-1-evidence` | [UI-0.md](UI-0.md) | engineer | — | 精简版并入 R-1（第 3 件） |
 | UI-1 设计系统 | 拆为 UI-1a、UI-1b | [UI-1.md](UI-1.md) | — | — | UI-1a 已派发；UI-1b（迁入询价部件、去硬编码颜色）在 FOLIO-BYPASS、REG-4 之后 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
