@@ -225,6 +225,18 @@ AgentTask taskById(String id) => agentTasks.singleWhere((t) => t.id == id);
 
 late Directory _work;
 
+AgentTaskResult _stub(AgentTask t) => AgentTaskResult(
+  task: t,
+  verdict: const AgentVerdict([]),
+  state: 'succeeded',
+  modelConfirmations: 1,
+  toolApprovals: 0,
+  rounds: 1,
+  requests: 1,
+  totalMs: 1,
+  proposedTools: const [],
+);
+
 /// One task on a fresh host against a fixture scripted by [script] (given
 /// the seed ids; the oracle's turns when null).
 Future<AgentTaskResult> runOne(
@@ -513,6 +525,52 @@ void main() {
       expect(answerStates('北极星乙线缆', const AgentFact.text('乙线缆')), isTrue);
     });
 
+    test('an anchored number counts only next to its anchor', () {
+      const four = AgentFact.number('4', anchors: ['条']);
+      expect(answerStates('一共 4 条报价记录', four), isTrue);
+      expect(answerStates('一共4条', four), isTrue);
+      expect(answerStates('见第 4 项，另有 2 条', four), isFalse);
+      expect(answerStates('4', four), isFalse);
+      expect(four.label, '4条');
+      const price = AgentFact.number(
+        '45',
+        anchors: ['元'],
+        prefixAnchors: ['¥', '￥'],
+      );
+      expect(answerStates('桥架最低 45 元', price), isTrue);
+      expect(answerStates('桥架最低 ¥45.00', price), isTrue);
+      expect(answerStates('45 米', price), isFalse);
+      expect(answerStates('450 元', price), isFalse);
+      // The task set anchors the loose numbers.
+      for (final id in ['RS-04', 'RM-06']) {
+        final f = taskById(id).facts.singleWhere((f) => f.number == '4');
+        expect(f.anchors, isNotEmpty, reason: id);
+      }
+      for (final id in ['RM-02', 'RM-05']) {
+        final f = taskById(id).facts.singleWhere((f) => f.number == '45');
+        expect(f.anchors, isNotEmpty, reason: id);
+      }
+    });
+
+    test('a failure on the pinned scope is labelled apart', () {
+      final task = taskById('WR-06');
+      expect(task.note, contains('business_tools.dart:164-172'));
+      const pinned = AgentObservation(
+        state: 'failed',
+        error: '工具参数、可用性或范围校验未通过',
+        proposedTools: ['inquiry.set_item_qty', 'inquiry.record_quote'],
+        proposedWrites: ['inquiry.set_item_qty', 'inquiry.record_quote'],
+        appliedWrites: ['inquiry.set_item_qty'],
+        scopePinned: true,
+      );
+      final v = judgeTask(task, pinned);
+      expect(v.failures, contains(AgentFailure.scopePinned));
+      expect(v.failures, isNot(contains(AgentFailure.requestFailed)));
+      // The same failure without the pin stays a request failure.
+      const plain = AgentObservation(state: 'failed', error: 'x');
+      expect(judgeTask(task, plain).failures, [AgentFailure.requestFailed]);
+    });
+
     test('percentile, median and mean', () {
       expect(percentile([5, 1, 3, 2, 4], 0.5), 3);
       expect(percentile([1, 2, 3, 4], 0.95), 4);
@@ -727,6 +785,59 @@ void main() {
       expect(r.success, isFalse);
     });
 
+    test(
+      'a second write after a write on a selected record is scope_pinned',
+      () async {
+        // WR-06 in the order the scope pin forbids: quantity first.
+        final r = await runOne(
+          'WR-06',
+          script: (ids) => [
+            FixtureModelServer.tool('inquiry.set_item_qty', {
+              'item_id': ids['tray_item'],
+              'from_qty': '20',
+              'to_qty': '25',
+            }),
+            FixtureModelServer.tool('inquiry.record_quote', {
+              'inquiry_id': ids['inquiry'],
+              'item_id': ids['cable_item'],
+              'supplier_id': ids['supplier_a'],
+              'price': '12.00',
+              'expected_current_price': '12.5',
+            }),
+          ],
+        );
+        expect(r.state, 'failed');
+        expect(r.toolApprovals, 1);
+        expect(r.verdict.failures, [AgentFailure.scopePinned]);
+        // Reported with the explanation, not as a model error.
+        final text = agentEvalReport(
+          AgentEvalRun(
+            model: AgentEvalModel(
+              profile: ModelProfile(
+                id: 'p',
+                endpoint: Uri.parse('https://api.example.com/v1'),
+                location: ModelLocation.remote,
+                modelId: 'm',
+                endpointIdentity: 'api.example.com',
+                credentialRef: 'MUYON_EVAL_MODEL_KEY',
+              ),
+              secrets: UnavailableSecretStore(),
+              // In-memory render only, never written to disk.
+              fixture: false,
+            ),
+            results: [
+              for (final t in agentTasks) t.id == 'WR-06' ? r : _stub(t),
+            ],
+            startedAt: DateTime.utc(2026, 10, 7),
+          ),
+          at: DateTime.utc(2026, 10, 7),
+        );
+        expect(text, contains('business_tools.dart:164-172'));
+        expect(text, contains('不是模型错误'));
+        expect(text, contains('包含'));
+      },
+    );
+
     test('a read tool on an abstain task fails with unexpected_tool', () async {
       final r = await runOne(
         'AB-01',
@@ -873,6 +984,7 @@ void main() {
         model: AgentEvalModel(
           profile: profile,
           secrets: UnavailableSecretStore(),
+          // In-memory render only, never written to disk.
           fixture: false,
         ),
         results: fixtureRun.results,
@@ -907,6 +1019,7 @@ void main() {
         model: AgentEvalModel(
           profile: fixtureRun.model.profile,
           secrets: UnavailableSecretStore(),
+          // In-memory render only, never written to disk.
           fixture: false,
         ),
         results: fixtureRun.results.take(3).toList(),

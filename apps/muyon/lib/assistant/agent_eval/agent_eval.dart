@@ -61,6 +61,12 @@ const agentTaskCategories = ['read_single', 'read_multi', 'write', 'abstain'];
 /// Failure codes of [judgeTask].
 class AgentFailure {
   static const requestFailed = 'request_failed';
+
+  /// The task failed because a write changed a selected record and the
+  /// conversation scope pins that record's revision: current product
+  /// behaviour (`business_tools.dart` `resolveAssistantScope`), not a model
+  /// error. Reported apart from [requestFailed].
+  static const scopePinned = 'scope_pinned';
   static const toolMissing = 'tool_missing';
   static const toolOrder = 'tool_order';
   static const unexpectedTool = 'unexpected_tool';
@@ -70,6 +76,7 @@ class AgentFailure {
   static const factMismatch = 'fact_mismatch';
   static const all = [
     requestFailed,
+    scopePinned,
     toolMissing,
     toolOrder,
     unexpectedTool,
@@ -81,12 +88,32 @@ class AgentFailure {
 }
 
 /// A fact the final answer must state. A number compares as a decimal
-/// (`2080` matches `2,080.00`); a text is a substring.
+/// (`2080` matches `2,080.00`); a text is a substring. This is a containment
+/// check: it does not verify what the number is about. A small or ambiguous
+/// number can carry [anchors] (text that must follow it, e.g. `条` for "4 条")
+/// and [prefixAnchors] (text that may precede it, e.g. `¥`); then the number
+/// counts only next to one of them (spaces between are ignored).
 class AgentFact {
-  const AgentFact.number(String this.number) : text = null;
-  const AgentFact.text(String this.text) : number = null;
+  const AgentFact.number(
+    String this.number, {
+    this.anchors = const [],
+    this.prefixAnchors = const [],
+  }) : text = null;
+  const AgentFact.text(String this.text)
+    : number = null,
+      anchors = const [],
+      prefixAnchors = const [];
   final String? number, text;
-  String get label => number ?? text!;
+  final List<String> anchors, prefixAnchors;
+
+  /// How a scripted correct answer writes the fact.
+  String get label => number == null
+      ? text!
+      : anchors.isNotEmpty
+      ? '$number${anchors.first}'
+      : prefixAnchors.isNotEmpty
+      ? '${prefixAnchors.first}$number'
+      : number!;
 }
 
 class AgentExpectedWrite {
@@ -109,8 +136,12 @@ class AgentTask {
     required this.noTools,
     required this.facts,
     required this.expectedWrites,
+    this.note,
   });
   final String id, category, prompt;
+
+  /// Reading aid shown in the report next to a failure of this task.
+  final String? note;
 
   /// `global` or `selected`; [scopeObjects] are seed keys.
   final String scopeKind;
@@ -211,9 +242,18 @@ AgentTask _task(Map<String, Object?> item) {
     facts: [
       for (final f in item['facts'] as List)
         (f as Map)['number'] is String
-            ? AgentFact.number(f['number'] as String)
+            ? AgentFact.number(
+                f['number'] as String,
+                anchors: [
+                  for (final a in f['anchors'] as List? ?? const []) '$a',
+                ],
+                prefixAnchors: [
+                  for (final a in f['prefixAnchors'] as List? ?? const []) '$a',
+                ],
+              )
             : AgentFact.text(f['text'] as String),
     ],
+    note: item['note'] as String?,
     expectedWrites: [
       for (final w in item['expectedWrites'] as List)
         AgentExpectedWrite(
@@ -238,6 +278,7 @@ class AgentObservation {
     this.answer,
     this.writeStateErrors = const [],
     this.storeChanged = false,
+    this.scopePinned = false,
   });
 
   /// Final [PersonalTaskState] name.
@@ -262,6 +303,10 @@ class AgentObservation {
 
   /// Any inquiry-module record differs from the seeded one.
   final bool storeChanged;
+
+  /// The task failed on the scope check after a write had changed a selected
+  /// record (see [AgentFailure.scopePinned]).
+  final bool scopePinned;
 }
 
 class AgentVerdict {
@@ -299,7 +344,20 @@ bool answerStates(String? answer, AgentFact fact) {
   final text = fact.text;
   if (text != null) return answer.contains(text);
   final want = double.parse(fact.number!);
-  return numbersIn(answer).any((n) => (n - want).abs() < 1e-9);
+  if (fact.anchors.isEmpty && fact.prefixAnchors.isEmpty) {
+    return numbersIn(answer).any((n) => (n - want).abs() < 1e-9);
+  }
+  for (final m in RegExp(r'\d+(?:,\d{3})*(?:\.\d+)?').allMatches(answer)) {
+    final value = double.parse(m[0]!.replaceAll(',', ''));
+    if ((value - want).abs() >= 1e-9) continue;
+    final before = answer.substring(0, m.start).trimRight();
+    final after = answer.substring(m.end).trimLeft();
+    if (fact.anchors.any(after.startsWith) ||
+        fact.prefixAnchors.any(before.endsWith)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /// Success needs every one of: the task ended, no write the task did not
@@ -316,7 +374,9 @@ AgentVerdict judgeTask(AgentTask task, AgentObservation seen) {
   }
   if (seen.rejectedWrite) return AgentVerdict(failures);
   if (seen.state != PersonalTaskState.succeeded.name) {
-    failures.add(AgentFailure.requestFailed);
+    failures.add(
+      seen.scopePinned ? AgentFailure.scopePinned : AgentFailure.requestFailed,
+    );
     return AgentVerdict(failures);
   }
   if (task.noTools && seen.proposedTools.isNotEmpty) {
@@ -656,6 +716,10 @@ Future<AgentTaskResult> runAgentTask({
           final toolId =
               (current.payload['toolCall'] as Map)['toolId'] as String;
           // The person approves only the writes the task is about, each once.
+          // Approval is by tool id and count only: it does not check the
+          // arguments. A wanted write with wrong arguments is approved and
+          // executed, and is then caught by the post-state check as
+          // `write_mismatch`, not here.
           final wanted = _minus(expectedWrites, approved).contains(toolId);
           if (!wanted) {
             await agent.cancel(current.id);
@@ -693,6 +757,18 @@ Future<AgentTaskResult> runAgentTask({
         before.length != after.length ||
         before.entries.any((e) => after[e.key] != e.value);
     final succeeded = current.state == PersonalTaskState.succeeded;
+    // A failure on the scope check after an applied write that changed a
+    // selected record: re-resolving the pinned scope shows it.
+    var scopePinned = false;
+    if (current.state == PersonalTaskState.failed &&
+        receipts.isNotEmpty &&
+        (current.error ?? '').contains('范围校验')) {
+      try {
+        await resolveAssistantScope(host, scope);
+      } on StateError catch (error) {
+        scopePinned = '$error'.contains('Selected object is missing');
+      }
+    }
     final observation = AgentObservation(
       state: current.state.name,
       error: driveError ?? current.error,
@@ -703,6 +779,7 @@ Future<AgentTaskResult> runAgentTask({
       answer: succeeded ? current.summary : null,
       writeStateErrors: stateErrors,
       storeChanged: changed,
+      scopePinned: scopePinned,
     );
     final ok = gateway.calls.where((c) => c.ok).toList();
     final usage = ok.where(
@@ -934,8 +1011,9 @@ String agentEvalReport(AgentEvalRun run, {required DateTime at}) {
     '- 每题在全新的数据目录里打开 `MuyonHost`，种入同一份询价种子数据，再用 `PersonalAgent` 跑完整个任务；题与题之间互不影响。',
     '- **成功**：同时满足 任务正常结束；没有多余写入（题目没要求的写工具一律由“本人”拒绝并记为失败；不要求写入的题，数据也不能有任何变化）；'
         '要求的工具都被提出过（有顺序要求的按顺序）；要求的写入已生效且结果状态与期望一致；最终回答包含期望的事实（数字按数值比较，如 2080 与 2,080.00 相同）。',
-    '- 失败原因：`request_failed` 请求或任务失败；`tool_missing` / `tool_order` 工具缺失或顺序不对；`unexpected_tool` 应弃权的题提出了工具；'
+    '- 失败原因：`request_failed` 请求或任务失败；`scope_pinned` 同一任务里先写入了被选中的记录，随后的工具调用因对话范围固定了记录修订号而被拒（现状的产品行为，不是模型错误，单独列出）；`tool_missing` / `tool_order` 工具缺失或顺序不对；`unexpected_tool` 应弃权的题提出了工具；'
         '`extra_write` 多余写入；`write_missing` / `write_mismatch` 要求的写入没生效或结果不符；`fact_mismatch` 回答里缺期望的事实。',
+    '- 事实判定只是“包含”检查：回答里出现期望的数字或文字即算，不核对它说的是什么；容易误撞的小数字要求紧邻锚点（如“4 条”、“45 元”）。',
     '- **人工确认次数**分两列：工具审批（写入工具，经本人确认后执行）与模型请求确认（每次向模型端点发送内容前的确认）。表中为“中位数 / 平均”。',
     '- **首个模型响应时延**：现有助手不是流式的，这里记**第一次模型请求从发出到收到完整响应**的耗时（含出站账本记录），不是首字时延；只统计得到响应的题。',
     '- **总时长**：从提交提示词到任务结束的墙钟时间，自动确认的间隔可忽略，主要是模型请求和工具执行。p50 / p95 为最近秩百分位。',
@@ -968,7 +1046,7 @@ String agentEvalReport(AgentEvalRun run, {required DateTime at}) {
           '${r.toolApprovals} | ${r.modelConfirmations} | ${r.rounds} | '
           '${r.firstResponseMs == null ? '-' : _ms(r.firstResponseMs!)} | ${_ms(r.totalMs)} | '
           '${r.verdict.failures.isEmpty ? '' : r.verdict.failures.join('、')} | '
-          '${_esc([if (r.error != null) '错误：${r.error}', ...r.writeStateErrors].join('；'))} |',
+          '${_esc([if (r.error != null) '错误：${r.error}', ...r.writeStateErrors, if (r.verdict.failures.contains(AgentFailure.scopePinned)) '范围修订号固定（business_tools.dart:164-172）：现状产品行为，不是模型错误', if (!r.success && r.task.note != null) '题注：${r.task.note}'].join('；'))} |',
     '',
   ];
   return lines.join('\n');

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Multi-step assistant tasks over the inquiry North Star seed (north_star_seed.dart: 2 suppliers, project NS-1 with budget lines cable 100 x 11.80 and tray 20 x 45.00, cost total 2080, first inquiry with 4 quotes). Prompts use {key} placeholders filled from the seed ids at run time. Fields: scope (global, or selected with seed keys), expectedTools (required tool ids as a multiset; extra read tools are allowed unless noTools), orderMatters (expectedTools must then appear in that order), facts (number: compared as a decimal with 2080 == 2080.00; text: substring) that the final answer must state, expectedWrites (tool plus a post-state check), noTools (any tool proposal fails: the task is for abstaining), expectNoWrite is implied by an empty expectedWrites and checked against the whole store. Known limit of the current assistant, visible in WR-06: a conversation scope pins the revision of every selected record, so after a write that changes a selected record (set_item_qty, set_inquiry_status) the next tool call of the same task fails the scope check; record_quote changes only a quotation and leaves the scope valid, which is why WR-06 lists it first.",
+  "description": "Multi-step assistant tasks over the inquiry North Star seed (north_star_seed.dart: 2 suppliers, project NS-1 with budget lines cable 100 x 11.80 and tray 20 x 45.00, cost total 2080, first inquiry with 4 quotes). Prompts use {key} placeholders filled from the seed ids at run time. Fields: scope (global, or selected with seed keys), expectedTools (required tool ids as a multiset; extra read tools are allowed unless noTools), orderMatters (expectedTools must then appear in that order), facts (number: compared as a decimal with 2080 == 2080.00, optionally anchored by anchors that must follow it and prefixAnchors that may precede it; text: substring; all are containment checks that do not verify context) that the final answer must state, expectedWrites (tool plus a post-state check), noTools (any tool proposal fails: the task is for abstaining), expectNoWrite is implied by an empty expectedWrites and checked against the whole store. Known limit of the current assistant, visible in WR-06: a conversation scope pins the revision of every selected record, so after a write that changes a selected record (set_item_qty, set_inquiry_status) the next tool call of the same task fails the scope check; record_quote changes only a quotation and leaves the scope valid, which is why WR-06 lists it first.",
   "seedKeys": ["project", "supplier_a", "supplier_b", "cable_item", "tray_item", "cable_product", "tray_product", "inquiry"],
   "tasks": [
     {
@@ -40,7 +40,7 @@
       "scope": {"kind": "global"},
       "expectedTools": ["inquiry.data_quality"],
       "orderMatters": false,
-      "facts": [{"number": "4"}],
+      "facts": [{"number": "4", "anchors": ["条"]}],
       "expectedWrites": []
     },
     {
@@ -80,7 +80,7 @@
       "scope": {"kind": "global"},
       "expectedTools": ["inquiry.compare_quotes", "inquiry.compare_quotes"],
       "orderMatters": false,
-      "facts": [{"number": "11.8"}, {"text": "北极星乙线缆"}, {"number": "45"}, {"text": "北极星甲电气"}],
+      "facts": [{"number": "11.8"}, {"text": "北极星乙线缆"}, {"number": "45", "anchors": ["元"], "prefixAnchors": ["¥", "￥"]}, {"text": "北极星甲电气"}],
       "expectedWrites": []
     },
     {
@@ -110,7 +110,7 @@
       "scope": {"kind": "global"},
       "expectedTools": ["inquiry.project_budget", "inquiry.compare_quotes", "inquiry.compare_quotes"],
       "orderMatters": false,
-      "facts": [{"number": "2080"}, {"number": "11.8"}, {"number": "45"}],
+      "facts": [{"number": "2080"}, {"number": "11.8"}, {"number": "45", "anchors": ["元"], "prefixAnchors": ["¥", "￥"]}],
       "expectedWrites": []
     },
     {
@@ -120,7 +120,7 @@
       "scope": {"kind": "global"},
       "expectedTools": ["inquiry.data_quality", "inquiry.project_budget"],
       "orderMatters": true,
-      "facts": [{"number": "4"}, {"number": "2080"}],
+      "facts": [{"number": "4", "anchors": ["条"]}, {"number": "2080"}],
       "expectedWrites": []
     },
     {
@@ -201,6 +201,7 @@
     {
       "id": "WR-06",
       "category": "write",
+      "note": "Order-sensitive on today's assistant: the conversation scope pins each selected record's revision (business_tools.dart:164-172), so after a write that changes a selected record (set_item_qty) the next tool call fails the scope check. A failure labelled scope_pinned is current product behaviour, not a model error; record_quote first keeps the scope valid.",
       "prompt": "两件事：先在询价单（inquiry_id={inquiry}）上把供应商甲（supplier_id={supplier_a}）对「电缆」（item_id={cable_item}）的报价从 12.50 改成 12.00；再把预算行「桥架」（item_id={tray_item}）的数量从 20 改成 25。",
       "scope": {"kind": "selected", "objects": ["inquiry", "cable_item", "supplier_a", "tray_item"]},
       "expectedTools": ["inquiry.record_quote", "inquiry.set_item_qty"],
@@ -220,6 +221,7 @@
     {
       "id": "AB-01",
       "category": "abstain",
+      "note": "The global scope has no write tools, so this task tests 'do not call read tools for a vague request', not write refusal.",
       "prompt": "帮我为北极星验收项目新建一张询价单，发给两家供应商。",
       "scope": {"kind": "global"},
       "expectedTools": [],
