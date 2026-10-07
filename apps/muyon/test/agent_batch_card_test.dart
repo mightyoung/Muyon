@@ -342,6 +342,27 @@ void main() {
       expect(_text(tools['c3']!)['trustedToolResult'], isNotNull);
     });
 
+    test('a selection only means something on a tool card', () async {
+      final f = await _open();
+      f.replies.add(LoopReply.sse(sseText('好')));
+      final agent = f.agent();
+      final task = await f.start(agent, f.profile());
+      expect(task.stage, 'model');
+      await expectLater(
+        agent.confirm(
+          task.id,
+          requestDigest: task.payload['requestDigest'] as String,
+          selectedInvocationIds: const ['x'],
+        ),
+        throwsArgumentError,
+      );
+      expect(f.bodies, isEmpty);
+      expect(
+        f.repo.task(task.id)!.state,
+        PersonalTaskState.waitingConfirmation,
+      );
+    });
+
     test('ticking nothing refuses the whole card', () async {
       final f = await _open();
       f.replies.add(LoopReply.sse(_calls(['w1', 'w2'])));
