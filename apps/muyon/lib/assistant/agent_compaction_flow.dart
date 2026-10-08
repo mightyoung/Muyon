@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/grants/outbound_content_reviewer.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/model_provider.dart';
 import '../services/models/token_estimate.dart';
@@ -307,6 +308,56 @@ class AgentCompactionFlow {
       if (decision.policyRevision != null)
         'authorizationPolicyRevision': decision.policyRevision,
     });
+    final authority = ctx.modelAuthorization;
+    if (authority != null) {
+      try {
+        final request = ModelRequest(
+          profile: profile,
+          messages: [for (final m in plan.messages) ModelMessage.fromJson(m)],
+          toolChoice: ToolChoice.none,
+          maxOutputTokens: ctx.compactor.summaryTokens,
+          caller: 'context_compaction',
+          requestDigest: requestDigest,
+        );
+        final review = await authority.prepare(
+          task: card,
+          profile: profile,
+          payload: jsonEncode(ctx.provider.encode(request)),
+          requestDigest: requestDigest,
+          modules: {
+            for (final t in ctx.tools.list())
+              ...ctx.tools.authorityModules(t.descriptor.toolId),
+          },
+          now: ctx.clock().toUtc(),
+          checkCurrent: () => model.checkPermissionTask(card),
+          summary: true,
+        );
+        if (review.decision.action == ReviewAction.block) {
+          await ctx.event(task, AgentEventType.compactionFailed, {
+            'reason': 'review_blocked',
+            'stage': 'B',
+          });
+          return false;
+        }
+        if (review.automatic) {
+          final running = card.copy({'state': 'running', 'waitingFor': null});
+          if (!await ctx.commit(
+            running,
+            expected: {PersonalTaskState.queued, PersonalTaskState.running},
+          )) {
+            return false;
+          }
+          await runCompaction(running, automatic: true);
+          return true;
+        }
+      } catch (_) {
+        await ctx.event(task, AgentEventType.compactionFailed, {
+          'reason': 'permission_changed',
+          'stage': 'B',
+        });
+        return false;
+      }
+    }
     await ctx.commit(
       card,
       events: [
@@ -322,7 +373,22 @@ class AgentCompactionFlow {
   /// After the person confirmed the summary card: the one summary request,
   /// sent exactly as previewed, with no tools. Whatever goes wrong, the task
   /// goes on with clearing only.
-  Future<void> runCompaction(PersonalTask task) async {
+  Future<void> runCompaction(
+    PersonalTask task, {
+    bool automatic = false,
+  }) async {
+    final authority = ctx.modelAuthorization;
+    if (authority == null) return _runPermittedCompaction(task);
+    final permission = authority.take(
+      task.id,
+      manual: !automatic,
+      requestDigest: task.payload['requestDigest'] as String,
+      now: ctx.clock().toUtc(),
+    );
+    await permission.run(() => _runPermittedCompaction(task));
+  }
+
+  Future<void> _runPermittedCompaction(PersonalTask task) async {
     final token = ModelCancellation();
     ctx.modelTokens[task.id] = token;
     try {

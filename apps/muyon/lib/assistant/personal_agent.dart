@@ -10,6 +10,7 @@ import '../services/models/model_provider.dart';
 import '../services/models/openai_compat_provider.dart';
 import '../platform/tool_registry.dart';
 import '../platform/grants/outbound_content_reviewer.dart';
+import '../platform/grants/host_model_authorization.dart';
 import '../platform/grants/tool_grant_context.dart';
 import '../platform/grants/host_scope_authority.dart';
 import 'agent_budget.dart';
@@ -39,6 +40,7 @@ class PersonalAgent {
     required this.tools,
     this.executionDeviceId = 'this-device',
     this.toolReviewer,
+    this.modelAuthorization,
     int? maxRounds,
     Budget budget = const Budget(),
     AgentEventSink? events,
@@ -75,6 +77,7 @@ class PersonalAgent {
   final ToolRegistry tools;
   final String executionDeviceId;
   final OutboundContentReviewer? toolReviewer;
+  final HostModelAuthorization? modelAuthorization;
   final Budget budget;
 
   /// Derives authority from this live dispatcher and actual host source owners.
@@ -138,6 +141,7 @@ class PersonalAgent {
     gateway: gateway,
     tools: tools,
     toolReviewer: toolReviewer,
+    modelAuthorization: modelAuthorization,
     executionDeviceId: executionDeviceId,
     budget: budget,
     events: events,
@@ -176,6 +180,22 @@ class PersonalAgent {
     ModelProfile? profile,
     AssistantScope? scope,
     String? previousAttemptId,
+  }) => _start(
+    conversationId: conversationId,
+    prompt: prompt,
+    profile: profile,
+    scope: scope,
+    previousAttemptId: previousAttemptId,
+    trustedProfileChoice: true,
+  );
+
+  Future<PersonalTask> _start({
+    required String conversationId,
+    required String prompt,
+    required bool trustedProfileChoice,
+    ModelProfile? profile,
+    AssistantScope? scope,
+    String? previousAttemptId,
   }) => _trackStart(() async {
     if (_ctx.closing) throw StateError('Assistant is closing');
     final (task, selection) = _factory.chatTask(
@@ -186,6 +206,9 @@ class PersonalAgent {
       previousAttemptId: previousAttemptId,
     );
     await repository.createTask(task);
+    if (profile != null && trustedProfileChoice) {
+      modelAuthorization?.bindLiveProfile(task.id, profile);
+    }
     await repository.appendMessage(conversationId, 'user', prompt.trim());
     if (profile == null) {
       if (selection.ruleToolId == null) {
@@ -422,7 +445,8 @@ class PersonalAgent {
         previousAttemptId: id,
       );
     }
-    return start(
+    return _start(
+      trustedProfileChoice: false,
       conversationId: task.conversationId,
       prompt: task.prompt,
       profile: task.profileId == null ? null : _ctx.profile(task),

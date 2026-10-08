@@ -6,6 +6,7 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
 import '../services/models/model_gateway.dart';
+import 'grants/host_model_authorization.dart';
 
 /// Where data actually went: one row per model/network request, written
 /// before any byte is sent. Holds digests and sizes, not payload content.
@@ -61,34 +62,46 @@ ALTER TABLE outbound_requests ADD COLUMN streamed INTEGER;
     // The audit columns are written only when given, so a caller that does
     // not use them also works on a table from before they existed.
     final audit = requestDigest != null || streamed != null;
-    return database.write((db) {
-      db.execute(
-        'INSERT INTO outbound_requests(id,caller,profile_id,endpoint,'
-        'endpoint_identity,location,cloud_proxy,model_id,payload_sha256,'
-        'payload_bytes,item_count,started_at,status'
-        "${audit ? ',request_digest,streamed' : ''}) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'sending'"
-        "${audit ? ',?,?' : ''})",
-        [
-          id,
-          caller,
-          profile.id,
-          profile.endpoint.toString(),
-          profile.endpointIdentity,
-          profile.location.name,
-          profile.cloudProxy ? 1 : 0,
-          profile.modelId,
-          sha256.convert(bytes).toString(),
-          bytes.length,
-          itemCount,
-          _now(),
-          if (audit) ...[
-            requestDigest,
-            streamed == null ? null : (streamed ? 1 : 0),
-          ],
-        ],
-      );
-      return id;
-    });
+    final permission = HostModelPermission.current;
+    return database
+        .write((db) {
+          permission?.commitInTransaction(database, db, profile, payload);
+          db.execute(
+            'INSERT INTO outbound_requests(id,caller,profile_id,endpoint,'
+            'endpoint_identity,location,cloud_proxy,model_id,payload_sha256,'
+            'payload_bytes,item_count,started_at,status'
+            "${audit ? ',request_digest,streamed' : ''}${permission == null ? '' : ',grant_id,authorization_source,review_decision_id'}) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,'sending'"
+            "${audit ? ',?,?' : ''}${permission == null ? '' : ',?,?,?'})",
+            [
+              id,
+              caller,
+              profile.id,
+              profile.endpoint.toString(),
+              profile.endpointIdentity,
+              profile.location.name,
+              profile.cloudProxy ? 1 : 0,
+              profile.modelId,
+              sha256.convert(bytes).toString(),
+              bytes.length,
+              itemCount,
+              _now(),
+              if (audit) ...[
+                requestDigest,
+                streamed == null ? null : (streamed ? 1 : 0),
+              ],
+              if (permission != null) ...[
+                permission.grantId,
+                permission.source,
+                permission.reviewId,
+              ],
+            ],
+          );
+          return id;
+        })
+        .then((id) {
+          permission?.committed();
+          return id;
+        });
   }
 
   Future<void> finish(

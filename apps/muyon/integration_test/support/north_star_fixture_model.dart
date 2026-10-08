@@ -42,6 +42,7 @@ class FixtureModelServer {
           'choices': [
             {
               'message': {'role': 'assistant', 'content': jsonEncode(reply)},
+              'finish_reason': 'stop',
             },
           ],
         }),

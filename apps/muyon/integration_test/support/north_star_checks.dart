@@ -75,7 +75,7 @@ String redactCredentials(String text) =>
     : text;
 
 /// Every offered, proposed and executed tool is registered; exactly one write
-/// ran; one succeeded ledger row per confirmed model send; with the fixture,
+/// ran; each model send has its actual authorization and review; with the fixture,
 /// the ledger digests exactly the bytes the endpoint received.
 void checkInvariants(
   MuyonHost host,
@@ -112,13 +112,30 @@ void checkInvariants(
     0,
     (n, t) => n + (t['modelConfirmations'] as int),
   );
-  expect(ledger, hasLength(confirmations), reason: 'One row per model send');
+  expect(
+    ledger.where((row) => row['authorization_source'] == 'manual'),
+    hasLength(confirmations),
+    reason: 'One manual send per model confirmation',
+  );
   for (final row in ledger) {
+    expect(row['authorization_source'], isIn(['manual', 'mode_auto', 'grant']));
+    final review = host.foundation.database.raw.select(
+      'SELECT * FROM assistant_review_decisions WHERE id=?',
+      [row['review_decision_id']],
+    );
+    expect(review, hasLength(1));
+    expect(review.single['payload_digest'], row['payload_sha256']);
+    expect(review.single['decision'], isIn(['allow', 'confirm']));
+    if (row['authorization_source'] == 'mode_auto') {
+      expect(row['grant_id'], isNull);
+      expect(review.single['decision'], 'allow');
+    }
     expect(row['status'], 'succeeded', reason: '${row['error']}');
     expect(row['caller'], 'assistant');
     expect(row['http_status'], 200);
   }
   if (fixture != null) {
+    expect(ledger, hasLength(fixture.bodies.length), reason: 'One row per send');
     expect(fixture.errors, isEmpty);
     expect(fixture.pending, 0, reason: 'Every scripted turn was used');
     expect(

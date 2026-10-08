@@ -12,7 +12,19 @@ import 'grant.dart';
 final class GrantStore {
   GrantStore(this.database);
   final ManagedDatabase database;
-  final _revoking = <String>{};
+  static final _revocations = Expando<_GrantRevocations>();
+  _GrantRevocations get _state =>
+      _revocations[database] ??= _GrantRevocations();
+  Set<String> get _revoking => _state.pending;
+  void Function() onRevocation(String grantId, void Function() listener) {
+    final listeners = _state.listeners.putIfAbsent(grantId, () => {});
+    listeners.add(listener);
+    if (_revoking.contains(grantId)) listener();
+    return () {
+      listeners.remove(listener);
+      if (listeners.isEmpty) _state.listeners.remove(grantId);
+    };
+  }
 
   static final migration = ModuleMigration(
     version: 11,
@@ -179,6 +191,10 @@ CREATE INDEX assistant_grant_audit_grant ON assistant_grant_audit(grant_id,id);
   /// write. On a write failure it remains blocked locally until retry succeeds.
   Future<bool> revoke(String grantId, {required DateTime now, String? taskId}) {
     _revoking.add(grantId);
+    for (final listener
+        in _state.listeners[grantId]?.toList() ?? const <void Function()>[]) {
+      listener();
+    }
     return database
         .write((db) {
           final grant = _get(db, grantId);
@@ -226,4 +242,9 @@ CREATE INDEX assistant_grant_audit_grant ON assistant_grant_audit(grant_id,id);
     'INSERT INTO assistant_grant_audit(grant_id,action,at,task_id,detail) VALUES(?,?,?,?,?)',
     [id, action, now.toUtc().toIso8601String(), taskId, jsonEncode(detail)],
   );
+}
+
+class _GrantRevocations {
+  final pending = <String>{};
+  final listeners = <String, Set<void Function()>>{};
 }

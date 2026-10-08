@@ -36,6 +36,7 @@ final class HostPolicySnapshot {
 class _PolicyChanges {
   final pending = <Object>{};
   bool failed = false;
+  final listeners = <void Function()>{};
 }
 
 /// Host-owned, absent from module registrars and model tools. Existing corrupt
@@ -46,6 +47,11 @@ final class HostAuthorizationPolicy {
   static const settingKey = 'auth1b:policy';
   static final _changes = Expando<_PolicyChanges>();
   _PolicyChanges get _state => _changes[database] ??= _PolicyChanges();
+  void Function() onChange(void Function() listener) {
+    _state.listeners.add(listener);
+    return () => _state.listeners.remove(listener);
+  }
+
   static String _digest(String value) =>
       sha256.convert(utf8.encode(value)).toString();
 
@@ -111,6 +117,9 @@ final class HostAuthorizationPolicy {
     final operation = Object();
     // Latch before queuing; a failed write cannot reopen queued permissions.
     _state.pending.add(operation);
+    for (final listener in _state.listeners.toList()) {
+      listener();
+    }
     try {
       await database.write((db) {
         token.checkActive();

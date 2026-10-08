@@ -4,6 +4,7 @@ import 'dart:io';
 
 import '../../platform/outbound_ledger.dart';
 import '../../platform/grants/host_authorization_policy.dart';
+import '../../platform/grants/host_model_authorization.dart';
 import 'credential_redaction.dart';
 import 'model_provider.dart';
 
@@ -384,7 +385,10 @@ class OpenAiModelGateway {
       throw StateError('Model profile is not configured for chat');
     }
     final key = '${request.profile.endpoint}|${request.profile.modelId}';
-    var attempt = request.jsonObject && _noJsonObject.contains(key)
+    var attempt =
+        request.jsonObject &&
+            (_noJsonObject.contains(key) ||
+                HostModelPermission.current?.prefersWithoutJsonObject == true)
         ? request.withoutJsonObject()
         : request;
     final first = attempt;
@@ -417,6 +421,7 @@ class OpenAiModelGateway {
             !rejected) {
           rethrow;
         }
+        HostModelPermission.current?.allowCompatibilityRetry();
         attempt = attempt.withoutJsonObject();
       }
     }
@@ -453,7 +458,7 @@ class OpenAiModelGateway {
       // and never answers cannot hold the request past it either.
       limit = Timer(cap, () {
         limitHit = true;
-        channel.abort();
+        token.cancel();
       });
       final streamed = request.profile.capabilities.streaming;
       final base = streamed ? idleTimeout : timeout;
@@ -574,6 +579,8 @@ class _GatewayChannel implements OutboundChannel {
   }) : _client = _gateway._clientFactory() {
     if (streamed) _client.connectionTimeout = _gateway.connectTimeout;
     token.add(abort);
+    _stopPolicyWatch = _gateway.authorizationPolicy?.onChange(token.cancel);
+    _stopGrantWatch = _permission?.watch(token);
   }
   final OpenAiModelGateway _gateway;
   final ModelProfile profile;
@@ -587,7 +594,20 @@ class _GatewayChannel implements OutboundChannel {
   String? _usedCredential;
   bool _sent = false;
   String? _policyRevision;
+  String? _permissionPayload;
+  final _permission = HostModelPermission.current;
+  void Function()? _stopPolicyWatch, _stopGrantWatch;
   void _checkPolicy() {
+    final permission = _permission;
+    if (permission != null && _permissionPayload != null) {
+      final ledger = _gateway.ledger;
+      if (ledger == null) throw StateError('model_permission_ledger_required');
+      permission.check(
+        database: ledger.database,
+        profile: profile,
+        payload: _permissionPayload!,
+      );
+    }
     final policy = _gateway.authorizationPolicy;
     if (policy == null) return;
     final current = policy.current;
@@ -606,6 +626,8 @@ class _GatewayChannel implements OutboundChannel {
   void abort() => _client.close(force: true);
 
   void dispose() {
+    _stopPolicyWatch?.call();
+    _stopGrantWatch?.call();
     token.remove(abort);
     abort();
   }
@@ -617,6 +639,24 @@ class _GatewayChannel implements OutboundChannel {
       ? 'Stopped after the request was sent; the endpoint may have processed it'
       : 'Stopped before the request was sent';
 
+  Future<String?> _readCredential(String reference) async {
+    token.check();
+    final stopped = Completer<String?>();
+    void cancelled() {
+      if (!stopped.isCompleted) stopped.completeError(StateError('cancelled'));
+    }
+
+    token.add(cancelled);
+    try {
+      return await Future.any([
+        _gateway.secrets.read(reference),
+        stopped.future,
+      ]);
+    } finally {
+      token.remove(cancelled);
+    }
+  }
+
   Future<void> open({
     required String payload,
     required int itemCount,
@@ -625,10 +665,13 @@ class _GatewayChannel implements OutboundChannel {
     String? requestDigest,
     Duration? headerTimeout,
   }) async {
+    _permissionPayload = payload;
+    await _permission?.prepareAttempt(payload);
+    token.check();
     _checkPolicy();
     final credential = profile.credentialRef == null
         ? null
-        : await _gateway.secrets.read(profile.credentialRef!);
+        : await _readCredential(profile.credentialRef!);
     token.check();
     if (profile.credentialRef != null &&
         (credential == null || credential.isEmpty)) {

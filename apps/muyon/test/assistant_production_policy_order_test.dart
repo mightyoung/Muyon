@@ -15,6 +15,7 @@ import 'package:muyon/services/models/tool_names.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
 import 'support/agent_loop_fixture.dart';
+import 'support/confirm_model_reviewer.dart';
 
 class _PolicyBoundary implements OutboundContentReviewer {
   _PolicyBoundary(this.mode);
@@ -43,7 +44,11 @@ void main() {
       final loop = await LoopFixture.open();
       final root = Directory.systemTemp.createTempSync('auth-auto-order-');
       final reviewer = _PolicyBoundary(mode);
-      final host = await MuyonHost.open(root.path, localToolReviewer: reviewer);
+      final host = await MuyonHost.open(
+        root.path,
+        localToolReviewer: reviewer,
+        localModelReviewer: const ConfirmModelReviewer(),
+      );
       addTearDown(() async {
         if (!reviewer.release.isCompleted) reviewer.release.complete();
         await host.close();

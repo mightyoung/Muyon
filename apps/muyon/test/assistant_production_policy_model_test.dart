@@ -11,6 +11,7 @@ import 'package:muyon/services/models/tool_names.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
 import 'support/agent_loop_fixture.dart';
+import 'support/confirm_model_reviewer.dart';
 
 void main() {
   for (final mode in [
@@ -22,7 +23,10 @@ void main() {
     test('actual host model policy / $mode', () async {
       final loop = await LoopFixture.open();
       final root = Directory.systemTemp.createTempSync('auth-policy-model-');
-      final host = await MuyonHost.open(root.path);
+      final host = await MuyonHost.open(
+        root.path,
+        localModelReviewer: const ConfirmModelReviewer(),
+      );
       addTearDown(() async {
         await host.close();
         root.deleteSync(recursive: true);

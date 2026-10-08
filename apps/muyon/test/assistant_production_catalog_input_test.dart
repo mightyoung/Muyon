@@ -16,6 +16,7 @@ import 'package:muyon/platform/mcp_adapter.dart';
 import 'package:muyon/services/models/tool_names.dart';
 
 import 'support/agent_loop_fixture.dart';
+import 'support/confirm_model_reviewer.dart';
 
 import 'package:muyon/services/models/model_provider.dart';
 
@@ -24,7 +25,10 @@ void main() {
     test('actual MCP catalog input / $mode', () async {
       final loop = await LoopFixture.open();
       final root = Directory.systemTemp.createTempSync('auth-auto-catalog-');
-      var host = await MuyonHost.open(root.path);
+      var host = await MuyonHost.open(
+        root.path,
+        localModelReviewer: const ConfirmModelReviewer(),
+      );
       addTearDown(() async {
         await host.close();
         root.deleteSync(recursive: true);
@@ -233,7 +237,10 @@ void main() {
         PersonalTaskState.waitingConfirmation,
       );
       await host.close();
-      host = await MuyonHost.open(root.path);
+      host = await MuyonHost.open(
+        root.path,
+        localModelReviewer: const ConfirmModelReviewer(),
+      );
       final restored = host.foundation.authorizationFacts.readTask(task.id);
       expect(restored.taintState, HostTaintState.tainted);
       expect(restored.sourceDigests, facts.sourceDigests);

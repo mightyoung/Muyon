@@ -5,7 +5,10 @@ import 'dart:io';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/grants/host_model_authorization.dart';
+import '../platform/grants/outbound_content_reviewer.dart';
 import '../services/models/model_gateway.dart';
+import '../services/models/credential_redaction.dart';
 import '../services/models/model_provider.dart';
 import '../services/models/token_estimate.dart';
 import 'agent_budget.dart';
@@ -124,6 +127,51 @@ class AgentModelTurn {
       if (decision.policyRevision != null)
         'authorizationPolicyRevision': decision.policyRevision,
     });
+    final authority = ctx.modelAuthorization;
+    if (authority != null) {
+      try {
+        final review = await preparePermission(card);
+        if (review.decision.action == ReviewAction.block) {
+          await ctx.fail(task, '模型内容审查阻止发送');
+          return;
+        }
+        if (review.automatic) {
+          final running = card.copy({'state': 'running', 'waitingFor': null});
+          if (!await ctx.commit(
+            running,
+            expected: {PersonalTaskState.queued, PersonalTaskState.running},
+          )) {
+            return;
+          }
+          await runModel(running, automatic: true);
+          return;
+        }
+      } on HostModelWireReviewRequired {
+        await ctx.commit(
+          card,
+          events: [
+            (
+              AgentEventType.wait,
+              {
+                'stage': 'model',
+                'requestDigest': card.payload['requestDigest'],
+              },
+            ),
+          ],
+        );
+        return;
+      } on FixedFailure catch (error) {
+        await ctx.fail(task, error.message);
+        return;
+      } catch (error) {
+        final cause = redactCredentials(error).replaceAll(RegExp(r'\s+'), ' ');
+        await ctx.fail(
+          task,
+          '执行失败（${cause.length > 160 ? '${cause.substring(0, 160)}…' : cause}）；请检查端点、模型名称、工具权限或资料范围后新建尝试',
+        );
+        return;
+      }
+    }
     await ctx.commit(
       card,
       events: [
@@ -159,7 +207,69 @@ class AgentModelTurn {
     }
   }
 
-  Future<void> runModel(PersonalTask task) async {
+  void checkPermissionTask(PersonalTask task) {
+    final current = ctx.repository.task(task.id);
+    if (ctx.closing ||
+        current == null ||
+        !{
+          PersonalTaskState.queued,
+          PersonalTaskState.running,
+          PersonalTaskState.waitingConfirmation,
+        }.contains(current.state) ||
+        AgentContext.digest(current.payload['profile']) !=
+            AgentContext.digest(task.payload['profile']) ||
+        AgentContext.digest(
+              ctx.repository.conversation(task.conversationId)?.scope.toJson(),
+            ) !=
+            AgentContext.digest(task.scope.toJson()) ||
+        task.payload['memoryDigest'] !=
+            AgentContext.digest(ctx.memories(task.scope))) {
+      throw StateError('model_source_changed');
+    }
+  }
+
+  Future<HostModelReview> preparePermission(PersonalTask task) {
+    final authority = ctx.modelAuthorization!;
+    final profile = ctx.profile(task);
+    final modules = <String>{
+      for (final tool in ctx.tools.list())
+        ...ctx.tools.authorityModules(tool.descriptor.toolId),
+    };
+    return authority.prepare(
+      task: task,
+      profile: profile,
+      payload: jsonEncode(ctx.provider.encode(_modelRequest(task, profile))),
+      compatiblePayload:
+          !profile.capabilities.streaming && !profile.capabilities.nativeTools
+          ? jsonEncode(
+              ctx.provider.encode(
+                _modelRequest(task, profile).withoutJsonObject(),
+              ),
+            )
+          : null,
+      requestDigest: task.payload['requestDigest'] as String,
+      modules: modules,
+      now: ctx.clock().toUtc(),
+      checkCurrent: () => checkPermissionTask(task),
+    );
+  }
+
+  Future<void> runModel(PersonalTask task, {bool automatic = false}) async {
+    final authority = ctx.modelAuthorization;
+    if (authority == null) return _runPermittedModel(task);
+    if (!automatic && !authority.hasReview(task.id)) {
+      await preparePermission(task);
+    }
+    final permission = authority.take(
+      task.id,
+      manual: !automatic,
+      requestDigest: task.payload['requestDigest'] as String,
+      now: ctx.clock().toUtc(),
+    );
+    await permission.run(() => _runPermittedModel(task));
+  }
+
+  Future<void> _runPermittedModel(PersonalTask task) async {
     final token = ModelCancellation();
     ctx.modelTokens[task.id] = token;
     try {
@@ -174,7 +284,7 @@ class AgentModelTurn {
       final String text;
       Usage? usage;
       Reply? streamed;
-      if (profile.capabilities.streaming) {
+      if (profile.capabilities.streaming || ctx.modelAuthorization != null) {
         streamed = await _streamCompat(task, token, profile);
         text = streamed.text.toString();
         usage = streamed.usage;

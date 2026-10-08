@@ -12,6 +12,7 @@ import '../platform/storage_manager.dart';
 import '../platform/grants/host_scope_authority.dart';
 import '../platform/grants/grant_store.dart';
 import '../platform/grants/host_authorization_policy.dart';
+import '../platform/grants/host_model_authorization.dart';
 import '../assistant/model_request_gate.dart';
 import '../platform/grants/outbound_content_reviewer.dart';
 import '../workspace/workspace_repository.dart';
@@ -221,6 +222,7 @@ class MuyonHost {
     String rootPath, {
     Future<String?> Function(TaskOffer offer)? taskExecutor,
     OutboundContentReviewer? localToolReviewer,
+    OutboundContentReviewer? localModelReviewer,
 
     /// Replaces the module catalog; for tests of the generic module path.
     Iterable<BusinessModule>? modules,
@@ -314,6 +316,16 @@ class MuyonHost {
         tools: host.tools,
         executionDeviceId: device,
         gate: HostPolicyModelGate(host.authorizationPolicy),
+        modelAuthorization: HostModelAuthorization(
+          repository: host.foundation,
+          policy: host.authorizationPolicy,
+          grants: host.assistantGrants,
+          configuredProfiles: () => ProfileRepository(host.workspaces).all(),
+          reviewer: ReviewerChain([
+            const NoopReviewer(),
+            ?localModelReviewer,
+          ], timeout: const Duration(seconds: 2)),
+        ),
         toolReviewer: ReviewerChain([
           const NoopReviewer(),
           ?localToolReviewer,
