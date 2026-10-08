@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '../../platform/outbound_ledger.dart';
+import '../../platform/grants/host_authorization_policy.dart';
 import 'credential_redaction.dart';
 import 'model_provider.dart';
 
@@ -161,6 +162,7 @@ class OpenAiModelGateway {
     this.streamLimit = const Duration(minutes: 5),
     HttpClient Function()? clientFactory,
     this.ledger,
+    this.authorizationPolicy,
   }) : _clientFactory = clientFactory ?? HttpClient.new;
   final SecretStore secrets;
 
@@ -175,6 +177,7 @@ class OpenAiModelGateway {
   /// Records every request before it is sent; when set, a failed record
   /// means the request is not sent.
   final OutboundLedger? ledger;
+  final HostAuthorizationPolicy? authorizationPolicy;
   final Duration timeout;
 
   /// Streaming requests (ADR-0005 §6.1): connecting, silence between two
@@ -583,6 +586,18 @@ class _GatewayChannel implements OutboundChannel {
   String? _recordId;
   String? _usedCredential;
   bool _sent = false;
+  String? _policyRevision;
+  void _checkPolicy() {
+    final policy = _gateway.authorizationPolicy;
+    if (policy == null) return;
+    final current = policy.current;
+    _policyRevision ??= current.revision;
+    if (!current.allows(AssistantAuthorizationCategory.model) ||
+        current.revision != _policyRevision) {
+      throw StateError('model_policy_changed');
+    }
+  }
+
   int? _httpStatus;
   int _bytes = 0;
   int? _firstByteMs;
@@ -610,6 +625,7 @@ class _GatewayChannel implements OutboundChannel {
     String? requestDigest,
     Duration? headerTimeout,
   }) async {
+    _checkPolicy();
     final credential = profile.credentialRef == null
         ? null
         : await _gateway.secrets.read(profile.credentialRef!);
@@ -627,6 +643,7 @@ class _GatewayChannel implements OutboundChannel {
     _usedCredential = credential;
     if (beforeSend != null) await beforeSend();
     token.check();
+    _checkPolicy();
     _recordId = await _gateway.ledger?.begin(
       caller: caller,
       profile: profile,
@@ -637,6 +654,7 @@ class _GatewayChannel implements OutboundChannel {
     );
     _sinceBegin.start();
     token.check();
+    _checkPolicy();
     final request = await _client.postUrl(profile.endpoint);
     request.followRedirects = false;
     request.headers.contentType = ContentType.json;
@@ -646,6 +664,8 @@ class _GatewayChannel implements OutboundChannel {
         'Bearer $credential',
       );
     }
+    token.check();
+    _checkPolicy();
     request.write(payload);
     _sent = true;
     final response = headerTimeout == null
@@ -676,6 +696,7 @@ class _GatewayChannel implements OutboundChannel {
     var total = 0;
     await for (final chunk in source) {
       token.check();
+      _checkPolicy();
       if (total + chunk.length > _gateway.maxResponseBytes) {
         throw StateError('model_response_too_large');
       }

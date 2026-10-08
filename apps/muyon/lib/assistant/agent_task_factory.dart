@@ -39,7 +39,10 @@ class AgentTaskFactory {
     }
     final available = List<RegisteredToolInfo>.unmodifiable(
       ctx.tools.list().where(
-        (t) => t.available && t.descriptor.modelSelectable,
+        (t) =>
+            t.available &&
+            t.descriptor.modelSelectable &&
+            ctx.tools.permitsCategory(t.descriptor.toolId),
       ),
     );
     final selection = ctx.selectionStrategy.select(

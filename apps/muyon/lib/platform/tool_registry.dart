@@ -67,6 +67,7 @@ class PreparedToolCall {
     this._authority,
     this._generation,
     this.effectIntent,
+    this._policyRevision,
   );
   final ToolCallRequest request;
   final RegisteredToolInfo info;
@@ -76,6 +77,7 @@ class PreparedToolCall {
   final HostEffectIntent? effectIntent;
   final Object _authority;
   final int _generation;
+  final String? _policyRevision;
 }
 
 class _Tool {
@@ -107,12 +109,31 @@ class ToolRegistry {
     DateTime Function()? clock,
     this.grants,
     this.grantContext,
+    this.categoryAllowed,
+    this.policyRevision,
   }) : clock = clock ?? DateTime.now;
   final ManagedDatabase database;
   final Future<ResolvedAssistantScope> Function(AssistantScope) resolveScope;
   final DateTime Function() clock;
   final GrantStore? grants;
   final ToolGrantContext? Function(ToolCallRequest)? grantContext;
+  final bool Function(ToolEffect)? categoryAllowed;
+  final String Function()? policyRevision;
+  bool permitsCategory(String toolId) =>
+      categoryAllowed?.call(_require(toolId).info.descriptor.effect) ?? true;
+
+  void _checkPolicy(String toolId, String? revision) {
+    if (!permitsCategory(toolId)) {
+      throw const ToolPlatformException('category_disabled', '该操作类别已关闭，未提出');
+    }
+    if (revision != policyRevision?.call()) {
+      throw const ToolPlatformException(
+        'stale_policy',
+        'Host authorization policy changed',
+      );
+    }
+  }
+
   final _authority = Object();
   final String _sessionId = const Uuid().v4();
   final Map<String, _Tool> _tools = {};
@@ -273,6 +294,8 @@ class ToolRegistry {
   Future<PreparedToolCall> prepare(ToolCallRequest request) async {
     _ensureOpen();
     final tool = _require(request.toolId);
+    final policy = policyRevision?.call();
+    _checkPolicy(request.toolId, policy);
     if (!tool.info.available) {
       throw ToolPlatformException(
         'unavailable',
@@ -298,6 +321,7 @@ class ToolRegistry {
     tool.preflight?.call(request);
     var scope = await resolveScope(request.scope);
     _ensureOpen();
+    _checkPolicy(request.toolId, policy);
     if (!tool.info.available) {
       throw const ToolPlatformException('unavailable', 'Tool was withdrawn');
     }
@@ -351,6 +375,7 @@ class ToolRegistry {
       'parameterDigest': parameterDigest,
       'destination': request.destination,
       'effectIntent': intent?.digest,
+      'policyRevision': ?policy,
     });
     return PreparedToolCall._(
       request,
@@ -361,6 +386,7 @@ class ToolRegistry {
       _authority,
       tool.generation,
       intent,
+      policy,
     );
   }
 
@@ -510,6 +536,7 @@ class ToolRegistry {
     HostReviewOutcome? review, {
     bool manual = false,
   }) {
+    _checkPolicy(prepared.request.toolId, prepared._policyRevision);
     if (prepared.effectIntent != null && review == null) {
       throw const ToolPlatformException(
         'review_required',
@@ -730,6 +757,7 @@ class ToolRegistry {
     String? sourceReviewId, authorizationSource;
     HostReviewOutcome? reviewProof;
     void checkAuthorization() {
+      _checkPolicy(request.toolId, prepared._policyRevision);
       if (reviewProof != null) {
         _checkReview(
           prepared,

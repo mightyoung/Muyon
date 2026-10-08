@@ -11,6 +11,8 @@ import '../platform/schema_catalog.dart';
 import '../platform/storage_manager.dart';
 import '../platform/grants/host_scope_authority.dart';
 import '../platform/grants/grant_store.dart';
+import '../platform/grants/host_authorization_policy.dart';
+import '../assistant/model_request_gate.dart';
 import '../platform/grants/outbound_content_reviewer.dart';
 import '../workspace/workspace_repository.dart';
 import '../platform/scope_resolver.dart';
@@ -132,6 +134,7 @@ class MuyonHost {
   late final ScopeResolver scopeResolver;
   late final HostScopeAuthority scopeAuthority;
   late final GrantStore assistantGrants;
+  late final HostAuthorizationPolicy authorizationPolicy;
 
   // v1 accessors, kept as thin delegates to [modules] until REG-5; a number of
   // host files and tests still use them.
@@ -249,10 +252,14 @@ class MuyonHost {
         await host.workspaces.setSetting('deviceId', device);
       }
       host.assistantGrants = GrantStore(database);
+      host.authorizationPolicy = HostAuthorizationPolicy(database);
       host.tools = ToolRegistry(
         database: database,
         resolveScope: (scope) => host.scopeResolver.resolve(scope),
         grants: host.assistantGrants,
+        categoryAllowed: (effect) =>
+            host.authorizationPolicy.current.allowsTool(effect),
+        policyRevision: () => host.authorizationPolicy.current.revision,
         grantContext: (request) =>
             host.personalAgent.hostGrantContext(request, host.scopeAuthority),
       );
@@ -275,6 +282,7 @@ class MuyonHost {
         gateway: OpenAiModelGateway(
           const MethodChannelSecretStore(),
           ledger: host.outbound,
+          authorizationPolicy: host.authorizationPolicy,
         ),
         tools: host.tools,
       );
@@ -305,6 +313,7 @@ class MuyonHost {
         gateway: host.services.gateway,
         tools: host.tools,
         executionDeviceId: device,
+        gate: HostPolicyModelGate(host.authorizationPolicy),
         toolReviewer: ReviewerChain([
           const NoopReviewer(),
           ?localToolReviewer,

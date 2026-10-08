@@ -304,6 +304,8 @@ class AgentCompactionFlow {
           .add(const Duration(minutes: 5))
           .toIso8601String(),
       'approvalNonce': const Uuid().v4(),
+      if (decision.policyRevision != null)
+        'authorizationPolicyRevision': decision.policyRevision,
     });
     await ctx.commit(
       card,

@@ -103,7 +103,10 @@ class AgentModelTurn {
     // Only the confirmation card exists until AUTH-1 (K-3's loop): any other
     // answer stops here rather than sending without the person.
     if (decision is! GateConfirm) {
-      await ctx.fail(task, '模型请求未获放行');
+      await ctx.fail(
+        task,
+        decision is GateDenied ? decision.reason : '模型请求未获放行',
+      );
       return;
     }
     final card = task.copy({
@@ -118,6 +121,8 @@ class AgentModelTurn {
           .add(const Duration(minutes: 5))
           .toIso8601String(),
       'approvalNonce': const Uuid().v4(),
+      if (decision.policyRevision != null)
+        'authorizationPolicyRevision': decision.policyRevision,
     });
     await ctx.commit(
       card,
@@ -132,6 +137,9 @@ class AgentModelTurn {
 
   /// Same checks before every send, whichever path sends.
   Future<void> _beforeSend(PersonalTask task) async {
+    if (ctx.gate case ModelPolicyGuard guard) {
+      guard.checkPolicy(task.payload['authorizationPolicyRevision'] as String?);
+    }
     if (ctx.closing ||
         ctx.repository.task(task.id)?.state != PersonalTaskState.running) {
       throw StateError('cancelled');

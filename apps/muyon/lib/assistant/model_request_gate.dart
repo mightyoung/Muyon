@@ -6,6 +6,7 @@
 library;
 
 import '../services/models/model_gateway.dart';
+import '../platform/grants/host_authorization_policy.dart';
 
 final class ModelRequestFacts {
   const ModelRequestFacts({
@@ -33,7 +34,8 @@ sealed class GateDecision {
 
 /// Show the confirmation card and wait for the person.
 final class GateConfirm extends GateDecision {
-  const GateConfirm();
+  const GateConfirm({this.policyRevision});
+  final String? policyRevision;
 }
 
 /// Reserved for AUTH-1; K-2a treats it as not allowed.
@@ -60,4 +62,32 @@ class AlwaysConfirmGate implements ModelRequestGate {
   @override
   Future<GateDecision> decide(ModelRequestFacts facts) async =>
       const GateConfirm();
+}
+
+/// Rechecks the actual host policy for an already-confirmed request.
+abstract interface class ModelPolicyGuard {
+  void checkPolicy(String? revision);
+}
+
+/// Category fencing only. Automatic mode/grant issuance remains a separate
+/// C permission service; this gate still asks the person for allowed requests.
+final class HostPolicyModelGate implements ModelRequestGate, ModelPolicyGuard {
+  HostPolicyModelGate(this.policy);
+  final HostAuthorizationPolicy policy;
+  @override
+  Future<GateDecision> decide(ModelRequestFacts facts) async {
+    final current = policy.current;
+    return current.allows(AssistantAuthorizationCategory.model)
+        ? GateConfirm(policyRevision: current.revision)
+        : const GateDenied('该操作类别已关闭，未提出');
+  }
+
+  @override
+  void checkPolicy(String? revision) {
+    final current = policy.current;
+    if (!current.allows(AssistantAuthorizationCategory.model) ||
+        current.revision != revision) {
+      throw StateError('model_policy_changed');
+    }
+  }
 }
