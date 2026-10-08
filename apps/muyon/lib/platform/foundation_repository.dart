@@ -140,19 +140,33 @@ enum PersonalTaskState {
 
 /// Host-issued proof for a fresh input view, never reconstructed from JSON.
 final class HostLoadedInputProof {
-  HostLoadedInputProof._(this._owner, PersonalTask task)
-    : _taskId = task.id,
+  HostLoadedInputProof._(
+    this._owner,
+    PersonalTask task,
+    Iterable<HostSourceFact> externalSources,
+  ) : _externalSources = List.unmodifiable(externalSources),
+      _taskId = task.id,
       _digest = _hash(task.payload);
   final FoundationRepository _owner;
+  final List<HostSourceFact> _externalSources;
   final String _taskId, _digest;
   static String _hash(Object? value) =>
       sha256.convert(utf8.encode(jsonEncode(value))).toString();
-  bool verify(Database db, PersonalTask task) =>
+  bool _bound(Database db, PersonalTask task) =>
       identical(db, _owner.database.raw) &&
       !db.autocommit &&
       task.id == _taskId &&
-      _hash(task.payload) == _digest &&
+      _hash(task.payload) == _digest;
+  bool verify(Database db, PersonalTask task) =>
+      _bound(db, task) &&
+      _externalSources.isEmpty &&
       _owner._freshInputView(task);
+
+  /// Only the owner transaction can read provenance of the frozen input.
+  Iterable<HostSourceFact> verifiedExternalSources(
+    Database db,
+    PersonalTask task,
+  ) => _bound(db, task) ? _externalSources : const [];
 }
 
 class PersonalTask {
@@ -245,25 +259,29 @@ class FoundationRepository extends ChangeNotifier {
   }
 
   /// Called by the actual task factory after loading its input view. Only a
-  /// fully empty, fresh host context is proven today; verified imported memory
-  /// is not proof of clean provenance. Recheck inside the owner create write.
+  /// fully empty, fresh host context is proven clean today; imported memory
+  /// is not proof of clean provenance. Actual external catalog inputs carry
+  /// owner-bound taint evidence, rechecked inside the task create write.
   PersonalTask bindLoadedInputs(
     PersonalTask task, {
     required List<AssistantMessage> history,
     required List<Map<String, Object?>> memories,
+    Iterable<HostSourceFact> externalSources = const [],
   }) {
+    final loadedExternal = List<HostSourceFact>.unmodifiable(externalSources);
     if (database is! ManagedConnection ||
         !(database as ManagedConnection).scopeAuthorityStable ||
-        history.isNotEmpty ||
-        memories.isNotEmpty ||
-        !_freshInputView(task)) {
+        (loadedExternal.isEmpty &&
+            (history.isNotEmpty ||
+                memories.isNotEmpty ||
+                !_freshInputView(task)))) {
       return task;
     }
     return PersonalTask(
       task.payload,
       pendingEvents: task.pendingEvents,
       keepStage: task.keepStage,
-      loadedInputProof: HostLoadedInputProof._(this, task),
+      loadedInputProof: HostLoadedInputProof._(this, task, loadedExternal),
     );
   }
 

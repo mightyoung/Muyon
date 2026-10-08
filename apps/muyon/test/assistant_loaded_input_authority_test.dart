@@ -142,6 +142,64 @@ void main() {
       },
     );
   }
+  for (final mutation in [
+    'intact',
+    'events',
+    'payload',
+    'copy',
+    'json',
+    'owner',
+  ]) {
+    test('external loaded input proof / $mutation', () async {
+      final f = await LoopFixture.open();
+      final c = await f.repo.createConversation();
+      final source = HostSourceFact.project('mcp:actual-provider', null);
+      final bound = f.repo.bindLoadedInputs(
+        queued(c.id, 'catalog-proof'),
+        history: [],
+        memories: [],
+        externalSources: [source],
+      );
+      expect(bound.loadedInputProof, isNotNull);
+      var submit = bound;
+      var owner = f.repo;
+      if (mutation == 'events') {
+        submit = bound.withEvents([]);
+      } else if (mutation == 'payload') {
+        submit = PersonalTask({
+          ...bound.payload,
+          'prompt': 'changed input',
+        }, loadedInputProof: bound.loadedInputProof);
+      } else if (mutation == 'copy') {
+        submit = bound.copy({'prompt': 'copied input'});
+      } else if (mutation == 'json') {
+        submit = PersonalTask(
+          Map<String, Object?>.from(
+            jsonDecode(jsonEncode(bound.payload)) as Map,
+          ),
+        );
+      } else if (mutation == 'owner') {
+        final other = await LoopFixture.open();
+        final otherC = await other.repo.createConversation();
+        await other.repo.database.write(
+          (db) => db.execute('UPDATE conversations SET id=? WHERE id=?', [
+            c.id,
+            otherC.id,
+          ]),
+        );
+        owner = other.repo;
+      }
+      await owner.createTask(submit);
+      final facts = owner.authorizationFacts.readTask(submit.id);
+      final valid = mutation == 'intact' || mutation == 'events';
+      expect(
+        facts.taintState,
+        valid ? HostTaintState.tainted : HostTaintState.unknown,
+      );
+      expect(facts.requiresConfirmation, isTrue);
+      expect(facts.sourceDigests.contains(source.identityDigest), valid);
+    });
+  }
   test('fresh proof cannot erase prior persisted source taint', () async {
     final f = await LoopFixture.open();
     await f.repo.authorizationFacts.markSourceExternal(
