@@ -4,6 +4,8 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/grants/authorization_links.dart';
+import '../platform/grants/grant_store.dart';
 import '../platform/module_grants.dart';
 import '../platform/outbound_ledger.dart';
 import '../platform/outbound_tool_ledger.dart';
@@ -20,8 +22,8 @@ class WorkspaceRepository {
   final ManagedDatabase database;
 
   static final schema = ModuleSchema(
-    version: 10,
-    definitionDigest: 'foundation-v10',
+    version: 12,
+    definitionDigest: 'foundation-v12',
     migrations: [
       ModuleMigration(
         version: 1,
@@ -154,6 +156,8 @@ CREATE TABLE transfer_tasks(
         definitionDigest: 'foundation-v10',
         migrate: ModuleGrants.migrate,
       ),
+      GrantStore.migration,
+      AuthorizationLinks.migration,
     ],
   );
 

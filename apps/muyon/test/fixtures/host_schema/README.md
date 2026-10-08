@@ -15,8 +15,8 @@ Fingerprints use SHA-256 of JSON rows `(type,name,tbl_name,sql)` from
 captured fingerprints are in `HostSchemaCompatibility`; database metadata alone
 is never sufficient to recognize an old placeholder schema. Repair fingerprints
 include the frozen real ledger, module-grants and immutable compatibility DDL;
-v11 additionally includes the already defined AUTH grant library DDL. Production
-continues registering only through v10.
+v11 additionally includes the already defined AUTH grant library DDL. AUTH-1b registers the unchanged v11 grant migration and adds v12 authorization
+linkage; all previous DDL and applied history remain frozen.
 
 Do not regenerate these fixtures from the schema under test. Tests install them
 into real on-disk SQLite databases, add user records, and verify the original
@@ -29,3 +29,13 @@ facts/history and rolls back atomically. The new BEFORE INSERT guard is needed
 because REPLACE skips DELETE triggers when recursive_triggers is off; no global
 SQLite setting is changed. Old audit timestamps cannot be retroactively
 authenticated; the upgrade preserves them and prevents subsequent replacement.
+
+`canonical-v12.sql` and `repaired-v12.sql` freeze AUTH-1b linkage DDL. They
+were captured independently by applying the immutable approved baseline
+`b95d6f9de1f1b50cadcd8c8092cd3edf9beeef72` v10/v11 DDL and the separately
+written v12 SQL to the existing frozen fixtures, not by invoking the schema
+under test. The repaired fixture also includes the immutable insert guard.
+Canonical v12 fingerprint: `684ec7c8d50704ede272245aec25c11ffc5b1c069e1b25ef49fd12488d6c526e`.
+Repaired v12 fingerprint: `12a312b608fe9a95a18d5113a4361acb7f552fb9702fb4b3bcca41559e737d81`.
+Review decisions are separate records; both transport state CHECK constraints
+are unchanged. A blocked review does not manufacture a sent request.

@@ -6,6 +6,10 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
+import 'grants/grant.dart';
+import 'grants/grant_store.dart';
+import 'grants/tool_grant_context.dart';
+
 /// A replay receipt index, not another task/conversation authority. The host
 /// includes this installer in its normal versioned database migration.
 void installToolRegistrySchema(Database db) => db.execute('''
@@ -94,10 +98,14 @@ class ToolRegistry {
     required this.database,
     required this.resolveScope,
     DateTime Function()? clock,
+    this.grants,
+    this.grantContext,
   }) : clock = clock ?? DateTime.now;
   final ManagedDatabase database;
   final Future<ResolvedAssistantScope> Function(AssistantScope) resolveScope;
   final DateTime Function() clock;
+  final GrantStore? grants;
+  final ToolGrantContext Function(ToolCallRequest)? grantContext;
   final _authority = Object();
   final String _sessionId = const Uuid().v4();
   final Map<String, _Tool> _tools = {};
@@ -329,7 +337,7 @@ class ToolRegistry {
         [_sessionId],
       );
       db.execute(
-        'INSERT INTO tool_approvals VALUES(?,?,?,?,?,?,?,?,?,?,NULL)',
+        'INSERT INTO tool_approvals(id,session_id,tool_id,identity_digest,scope_digest,input_digest,destination,issued_at,expires_at,state,consumed_at) VALUES(?,?,?,?,?,?,?,?,?,?,NULL)',
         [
           id,
           _sessionId,
@@ -345,6 +353,178 @@ class ToolRegistry {
       );
     });
     return id;
+  }
+
+  /// A permission request built entirely from the host's prepared call and facts.
+  /// A coarse scope key never replaces the revision-bound identityDigest.
+  GrantRequest authorizationRequest(PreparedToolCall prepared) {
+    if (!identical(prepared._authority, _authority) ||
+        grantContext == null ||
+        prepared.info.accessLevel == ToolAccessLevel.read) {
+      throw const ToolPlatformException(
+        'invalid_grant_request',
+        'Trusted host effect context required',
+      );
+    }
+    final context = grantContext!(prepared.request);
+    if (!context.allowedModuleIds.containsAll(
+      prepared.resolvedScope.moduleIds,
+    )) {
+      throw const ToolPlatformException(
+        'scope_mismatch',
+        'Host permission boundary excludes resolved objects',
+      );
+    }
+    return GrantRequest(
+      category: prepared.info.accessLevel == ToolAccessLevel.external
+          ? 'outbound'
+          : 'write',
+      toolId: prepared.request.toolId,
+      scopeDigest: toolGrantScopeDigest(
+        prepared.request.scope,
+        context.allowedModuleIds,
+      ),
+      // Full permission identity, not the redacted host/path audit display.
+      destination: prepared.request.destination == null
+          ? null
+          : _digest(prepared.request.destination),
+      now: clock(),
+      taskId: context.taskId,
+      conversationId: context.conversationId,
+      taskTainted: context.taskTainted,
+    );
+  }
+
+  static String _grantContextDigest(GrantRequest request) => _digest({
+    'taskId': request.taskId,
+    'conversationId': request.conversationId,
+    'scopeDigest': request.scopeDigest,
+  });
+
+  /// Foundational host API; A does not wire it into the agent's decision path.
+  /// Consumption, audit and signing are one transaction, never two writes.
+  Future<String?> approveWithGrant(
+    PreparedToolCall prepared, {
+    required String grantId,
+  }) async {
+    if (grants == null ||
+        grantContext == null ||
+        !identical(grants!.database, database)) {
+      throw const ToolPlatformException(
+        'invalid_grant_store',
+        'Same host owner required',
+      );
+    }
+    final tool = _require(prepared.request.toolId);
+    if (!identical(prepared._authority, _authority) ||
+        prepared._generation != tool.generation ||
+        !tool.info.available) {
+      throw const ToolPlatformException(
+        'invalid_approval',
+        'Approval preview is stale',
+      );
+    }
+    final scopeRevision = grantContext!(prepared.request).scopeRevision;
+    if (scopeRevision.isEmpty) {
+      throw const ToolPlatformException(
+        'invalid_grant_request',
+        'Host scope revision required',
+      );
+    }
+    final current = await prepare(prepared.request);
+    if (current.identityDigest != prepared.identityDigest) {
+      throw const ToolPlatformException(
+        'stale_scope',
+        'Approval preview no longer matches current data',
+      );
+    }
+    return database.write((db) {
+      _ensureOpen();
+      if (!tool.info.available || tool.generation != prepared._generation) {
+        throw const ToolPlatformException(
+          'invalid_approval',
+          'Tool was withdrawn before signing',
+        );
+      }
+      // Resolving under the write queue would deadlock lazy activation and
+      // projection work. The host revision fences intervening writes instead.
+      if (grantContext!(prepared.request).scopeRevision != scopeRevision) {
+        throw const ToolPlatformException(
+          'stale_scope',
+          'Scope changed while signing was queued',
+        );
+      }
+      final bound = authorizationRequest(prepared);
+      final previous = db.select(
+        'SELECT * FROM tool_approvals WHERE grant_id IS NOT NULL AND (invocation_id=? OR replay_key=?)',
+        [prepared.request.invocationId, prepared.request.replayKey],
+      );
+      if (previous.isNotEmpty) {
+        final row = previous.single;
+        if (row['identity_digest'] != prepared.identityDigest ||
+            row['grant_id'] != grantId ||
+            row['session_id'] != _sessionId ||
+            row['grant_context_digest'] != _grantContextDigest(bound)) {
+          throw const ToolPlatformException(
+            'idempotency_conflict',
+            'Approval identity already used',
+          );
+        }
+        final receipt = db.select(
+          'SELECT identity_digest FROM tool_invocation_receipts WHERE replay_key=?',
+          [prepared.request.replayKey],
+        );
+        if (row['state'] == 'consumed' &&
+            receipt.isNotEmpty &&
+            receipt.single['identity_digest'] == prepared.identityDigest) {
+          return row['id'] as String;
+        }
+        if (row['state'] == 'issued' &&
+            clock().isBefore(DateTime.parse(row['expires_at'] as String)) &&
+            grants!.permitsIssuedApproval(grantId, bound)) {
+          return row['id'] as String;
+        }
+        return null;
+      }
+      if (db.select(
+        'SELECT 1 FROM tool_invocation_receipts WHERE replay_key=? OR invocation_id=?',
+        [prepared.request.replayKey, prepared.request.invocationId],
+      ).isNotEmpty) {
+        throw const ToolPlatformException(
+          'idempotency_conflict',
+          'Invocation already has a receipt',
+        );
+      }
+      final used = grants!.recordUseInTransaction(db, grantId, bound);
+      if (used == null) return null;
+      final id = const Uuid().v4();
+      final deadline = bound.now.add(const Duration(minutes: 2));
+      final expires =
+          used.expiresAt != null && used.expiresAt!.isBefore(deadline)
+          ? used.expiresAt!
+          : deadline;
+      db.execute(
+        'INSERT INTO tool_approvals(id,session_id,tool_id,identity_digest,scope_digest,input_digest,destination,issued_at,expires_at,state,grant_id,authorization_source,grant_context_digest,invocation_id,replay_key) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        [
+          id,
+          _sessionId,
+          prepared.request.toolId,
+          prepared.identityDigest,
+          _digest(prepared.resolvedScope.toJson()),
+          prepared.parameterDigest,
+          bound.destination,
+          bound.now.toIso8601String(),
+          expires.toIso8601String(),
+          'issued',
+          grantId,
+          'grant',
+          _grantContextDigest(bound),
+          prepared.request.invocationId,
+          prepared.request.replayKey,
+        ],
+      );
+      return id;
+    });
   }
 
   Future<ToolCallResult> invoke(
@@ -407,13 +587,35 @@ class ToolRegistry {
     final request = prepared.request;
     final tool = _require(request.toolId);
     final generation = tool.generation;
+    final scopeRevision = grantContext?.call(request).scopeRevision;
     DateTime? approvalDeadline;
+    String? sourceGrantId;
+    String? sourceContextDigest;
     void checkAuthorization() {
       if (_closing || !tool.info.available || tool.generation != generation) {
         throw const ToolPlatformException(
           'unavailable',
           'Tool authority was withdrawn',
         );
+      }
+      if (sourceGrantId != null) {
+        if (scopeRevision == null ||
+            scopeRevision.isEmpty ||
+            grantContext?.call(request).scopeRevision != scopeRevision) {
+          throw const ToolPlatformException(
+            'stale_scope',
+            'Scope changed before the authorized effect',
+          );
+        }
+        final bound = authorizationRequest(prepared);
+        if (sourceContextDigest != _grantContextDigest(bound) ||
+            grants == null ||
+            !grants!.permitsIssuedApproval(sourceGrantId!, bound)) {
+          throw const ToolPlatformException(
+            'grant_invalidated',
+            'Source authorization no longer permits this effect',
+          );
+        }
       }
       if (approvalDeadline != null && !clock().isBefore(approvalDeadline!)) {
         throw const ToolPlatformException(
@@ -465,6 +667,13 @@ class ToolRegistry {
             'A current one-use host confirmation is required',
           );
         }
+        sourceGrantId = grants.single.containsKey('grant_id')
+            ? grants.single['grant_id'] as String?
+            : null;
+        sourceContextDigest = grants.single.containsKey('grant_context_digest')
+            ? grants.single['grant_context_digest'] as String?
+            : null;
+        checkAuthorization();
         db.execute(
           "UPDATE tool_approvals SET state='consumed',consumed_at=? WHERE id=?",
           [clock().toUtc().toIso8601String(), request.approvalId],
@@ -474,13 +683,16 @@ class ToolRegistry {
         );
       }
       db.execute(
-        'INSERT INTO tool_invocation_receipts VALUES(?,?,?,?,?,NULL)',
+        'INSERT INTO tool_invocation_receipts(replay_key,invocation_id,identity_digest,tool_id,state,result_json'
+        "${sourceGrantId == null ? '' : ',grant_id,authorization_source'}) VALUES(?,?,?,?,?,NULL"
+        "${sourceGrantId == null ? '' : ',?,?'})",
         [
           request.replayKey,
           request.invocationId,
           prepared.identityDigest,
           request.toolId,
           'running',
+          if (sourceGrantId != null) ...[sourceGrantId, 'grant'],
         ],
       );
       return null;

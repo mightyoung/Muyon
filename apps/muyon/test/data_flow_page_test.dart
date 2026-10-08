@@ -92,7 +92,7 @@ void main() {
     );
     return host.workspaces.database.write(
       (db) => db.execute(
-        'INSERT INTO tool_invocation_receipts VALUES(?,?,?,?,?,?)',
+        'INSERT INTO tool_invocation_receipts(replay_key,invocation_id,identity_digest,tool_id,state,result_json) VALUES(?,?,?,?,?,?)',
         [
           'rk-$n',
           'inv-$n',
@@ -114,7 +114,7 @@ void main() {
     final n = counter++;
     return host.workspaces.database.write(
       (db) => db.execute(
-        'INSERT INTO tool_approvals VALUES(?,?,?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO tool_approvals(id,session_id,tool_id,identity_digest,scope_digest,input_digest,destination,issued_at,expires_at,state,consumed_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)',
         [
           'ap-$n',
           'session',

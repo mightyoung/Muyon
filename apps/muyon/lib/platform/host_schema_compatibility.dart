@@ -19,6 +19,7 @@ class HostSchemaCompatibility {
   static const repairedFingerprints = {
     10: 'dc4f8d2258827295b85efe506c93b522ddd780d0e79716c06ea79f0a2c92e989',
     11: '9e89d824e3856c01f0713b1d66bd711e8562cc0097ef51e088fa2122c438b158',
+    12: '12a312b608fe9a95a18d5113a4361acb7f552fb9702fb4b3bcca41559e737d81',
   };
   static const previousRepairedFingerprints = {
     10: 'a0be1c5a07eacb86c2a419979c8dd71905581493001bc807888899b34cff3c83',
@@ -29,16 +30,23 @@ class HostSchemaCompatibility {
     9: '588c43f902108ac5609856ab9aeffa4aabde62269591a51c0bd91b820a55ee32',
     10: '7a4af5e262881d772c83b655b83a07207db39ed7ebd49ef563ce1b858f15feff',
     11: 'd9ced9e0133319bd7c8a6b1c8dc4e6e56d07551316e36ac40dd1ec822280568c',
+    12: '684ec7c8d50704ede272245aec25c11ffc5b1c069e1b25ef49fd12488d6c526e',
   };
 
   static bool isCanonicalTarget(ModuleSchema schema) =>
-      (schema.version == 10 || schema.version == 11) &&
+      (schema.version == 10 || schema.version == 11 || schema.version == 12) &&
       schema.definitionDigest == 'foundation-v${schema.version}' &&
       schema.migrations.length == schema.version &&
       schema.migrations[8].id == canonical &&
       schema.migrations[8].definitionDigest == 'foundation-v9' &&
       schema.migrations[9].id == 'module-grants' &&
-      schema.migrations[9].definitionDigest == 'foundation-v10';
+      schema.migrations[9].definitionDigest == 'foundation-v10' &&
+      (schema.version < 11 ||
+          (schema.migrations[10].id == 'assistant-grants' &&
+              schema.migrations[10].definitionDigest == 'foundation-v11')) &&
+      (schema.version < 12 ||
+          (schema.migrations[11].id == 'assistant-authorization-links' &&
+              schema.migrations[11].definitionDigest == 'foundation-v12'));
 
   static void validateCanonical(
     Database db,
@@ -145,7 +153,7 @@ $insertGuardDdl
             .any((r) => r['migration_id'] == reserved);
     if (!hasAudit && !hasReserved) {
       if (version >= 8 &&
-          version <= 11 &&
+          version <= 12 &&
           isCanonicalTarget(schema) &&
           (digest(db) != canonicalFingerprints[version] ||
               db
@@ -158,20 +166,7 @@ $insertGuardDdl
       }
       return false;
     }
-    if ((schema.version != 10 && schema.version != 11) ||
-        schema.definitionDigest != 'foundation-v${schema.version}' ||
-        (schema.version == 11 &&
-            (schema.migrations.length != 11 ||
-                schema.migrations.last.id != 'assistant-grants' ||
-                schema.migrations.last.definitionDigest != 'foundation-v11'))) {
-      throw StateError('Unsupported host compatibility target');
-    }
-    if (schema.version < 10 ||
-        schema.migrations.length < 10 ||
-        schema.migrations[8].id != canonical ||
-        schema.migrations[8].definitionDigest != 'foundation-v9' ||
-        schema.migrations[9].id != ids[9] ||
-        schema.migrations[9].definitionDigest != 'foundation-v10') {
+    if (!isCanonicalTarget(schema)) {
       throw StateError('Unsupported host compatibility target');
     }
     for (var i = 0; i < 8; i++) {

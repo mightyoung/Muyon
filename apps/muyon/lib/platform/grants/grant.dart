@@ -74,7 +74,7 @@ final class AssistantGrant {
   static DateTime? _date(Object? value) =>
       value == null ? null : DateTime.parse(value as String).toUtc();
 
-  bool matches(GrantRequest request) {
+  bool matches(GrantRequest request, {bool checkUseLimit = true}) {
     if (category != request.category ||
         toolId != request.toolId ||
         scopeDigest != request.scopeDigest ||
@@ -83,7 +83,7 @@ final class AssistantGrant {
     }
     if (revokedAt != null ||
         (expiresAt != null && !request.now.isBefore(expiresAt!)) ||
-        (maxUses != null && uses >= maxUses!)) {
+        (checkUseLimit && maxUses != null && uses >= maxUses!)) {
       return false;
     }
     if (request.taskTainted &&
