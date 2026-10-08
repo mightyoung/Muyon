@@ -1,0 +1,156 @@
+{
+  "base": "4f2f749958a14ad9d94e607dc79ada62df753f28",
+  "source_branch": "task/ui-3a-semantic-preview",
+  "excluded": [
+    "apps/muyon/macos/Podfile",
+    "apps/muyon/macos/Flutter/Flutter-Debug.xcconfig",
+    "apps/muyon/macos/Flutter/Flutter-Release.xcconfig"
+  ],
+  "files": [
+    {
+      "path": "apps/muyon_ui_preview/analysis_options.yaml",
+      "sha256": "5c4709b070c4372b35666ef06352cb096d2712b0e332e9be1ad581469deb325d",
+      "size": 93
+    },
+    {
+      "path": "apps/muyon_ui_preview/lib/fixture_ports.dart",
+      "sha256": "c4bb84d18fdcb68ffc689fa802b4a87b37080dbe586cbce3211174757d1c6d04",
+      "size": 3983
+    },
+    {
+      "path": "apps/muyon_ui_preview/lib/main.dart",
+      "sha256": "0b10be26fe3eaa7379394771c3fbfce87f747a1242a3bc5eefc1b519676b550d",
+      "size": 163
+    },
+    {
+      "path": "apps/muyon_ui_preview/lib/preview_app.dart",
+      "sha256": "78baa20bcc9921af7edc88f63b61914fcefac2d38f569fbc49a2e8bbc5d28378",
+      "size": 2535
+    },
+    {
+      "path": "apps/muyon_ui_preview/pubspec.yaml",
+      "sha256": "ae5b9e036b66426ff700e0fe70eb40f5c33fdcdddf454641468d82fc31847c51",
+      "size": 592
+    },
+    {
+      "path": "apps/muyon_ui_preview/test/preview_smoke_test.dart",
+      "sha256": "8a5060464cc3502b62dc278595f5601cf42dc1274c20a98bb44eb69af9d6a101",
+      "size": 4301
+    },
+    {
+      "path": "apps/muyon_ui_preview/web/favicon.png",
+      "sha256": "7ab2525f4b86b65d3e4c70358a17e5a1aaf6f437f99cbcc046dad73d59bb9015",
+      "size": 917
+    },
+    {
+      "path": "apps/muyon_ui_preview/web/icons/Icon-192.png",
+      "sha256": "3dce99077602f70421c1c6b2a240bc9b83d64d86681d45f2154143310c980be3",
+      "size": 5292
+    },
+    {
+      "path": "apps/muyon_ui_preview/web/icons/Icon-512.png",
+      "sha256": "baccb205ae45f0b421be1657259b4943ac40c95094ab877f3bcbe12cd544dcbe",
+      "size": 8252
+    },
+    {
+      "path": "apps/muyon_ui_preview/web/icons/Icon-maskable-192.png",
+      "sha256": "d2c842e22a9f4ec9d996b23373a905c88d9a203b220c5c151885ad621f974b5c",
+      "size": 5594
+    },
+    {
+      "path": "apps/muyon_ui_preview/web/icons/Icon-maskable-512.png",
+      "sha256": "6aee06cdcab6b2aef74b1734c4778f4421d2da100b0ff9e52b21b55240202929",
+      "size": 20998
+    },
+    {
+      "path": "apps/muyon_ui_preview/web/index.html",
+      "sha256": "3efacdbc622f6d4a999f0f9fa524b4985d0e26b57c03f48bc3618211b4ff78f1",
+      "size": 1559
+    },
+    {
+      "path": "apps/muyon_ui_preview/web/manifest.json",
+      "sha256": "37e4d7f2404630f43d6ac1f5160dfe1d7e0173b05b5c3a3bd5cd2919ee18fa1a",
+      "size": 944
+    },
+    {
+      "path": "packages/muyon_module_api/lib/src/ui/intent.dart",
+      "sha256": "2d1e05ff1df5f63d5bb3c24bfed9b013bcf51b8462db136e89309b219b1acb17",
+      "size": 665
+    },
+    {
+      "path": "packages/muyon_module_api/lib/src/ui/plan.dart",
+      "sha256": "973f8b1643886387726c0d994b35fa7e8683a5cbd76c1b13d0aab1d63ea8d543",
+      "size": 4707
+    },
+    {
+      "path": "packages/muyon_module_api/lib/src/ui/snapshot.dart",
+      "sha256": "4a70c35addb9005ce4d6b9e618c09eee5fb867c02eacb5d2b792a252c136249c",
+      "size": 3991
+    },
+    {
+      "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+      "sha256": "981e56c275eafe90fb7926e0d29e9011366421e027218f1e4d27ccbb3646ca74",
+      "size": 4465
+    },
+    {
+      "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+      "sha256": "11e18eceabaf40373bebd9981bd4d69e493be12b80e0a4cc31b9793fa2dd88a3",
+      "size": 7883
+    },
+    {
+      "path": "packages/muyon_module_api/lib/ui_contract.dart",
+      "sha256": "5025b3a99d73d9e61d8dce3e3d364d5cd88bd3b9205681fb9e8a4cbbe20540d8",
+      "size": 264
+    },
+    {
+      "path": "packages/muyon_module_api/test/ui/fixtures.dart",
+      "sha256": "9d252396926053a4b324f839ef1b408aa2652bda45ee3cac101a71d42c2a600c",
+      "size": 3824
+    },
+    {
+      "path": "packages/muyon_module_api/test/ui_contract_test.dart",
+      "sha256": "3c02804e0fb3a8e0e950b4c17360f120b1700b73a4befe5bf4553a7c0be04f46",
+      "size": 8581
+    },
+    {
+      "path": "packages/muyon_ui/lib/dynamic_ui.dart",
+      "sha256": "69d84e9c04d3b2fb97b35012693a65d65a5d2c9fb4200374d78277fe7cae77e0",
+      "size": 152
+    },
+    {
+      "path": "packages/muyon_ui/lib/src/dynamic_ui/catalog.dart",
+      "sha256": "f9e45d24b0c6e20e0f88be3ba659bb38a0c5fcac11c15de8d7c10708ddcab050",
+      "size": 2044
+    },
+    {
+      "path": "packages/muyon_ui/lib/src/dynamic_ui/surface.dart",
+      "sha256": "a0f4cddeee3276c79aad4f0a87b86216c44b7e6e7b41908d1a20aa9b2f559962",
+      "size": 7879
+    },
+    {
+      "path": "packages/muyon_ui/pubspec.yaml",
+      "sha256": "b07951b762a1c586f817badbae841d688f8d6ccc614d123ff45179226eb82106",
+      "size": 456
+    },
+    {
+      "path": "pubspec.lock",
+      "sha256": "5f4efa0bfe5062b64247b199830833286a57843d64a3e2b0d85052f6e9d0072d",
+      "size": 36685
+    },
+    {
+      "path": "pubspec.yaml",
+      "sha256": "6dd991753da384fb9e660f0d0df9c0149f3f690aa56c16b90b99bc0193b27b76",
+      "size": 295
+    },
+    {
+      "path": "scripts/ci.sh",
+      "sha256": "9cb8d76547c81eb6b6128d86ba0f7dec94b1c3725f0247557492efdabfc617a1",
+      "size": 4630
+    },
+    {
+      "path": "scripts/verify.sh",
+      "sha256": "00bd366f8992adb12a0a325e7a7fe5e91dcb8d3a0901fa416853dc9273e13f11",
+      "size": 2578
+    }
+  ]
+}

@@ -8,6 +8,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  muyon_module_api:
+    path: ../muyon_module_api
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -18,7 +18,7 @@ export NO_PROXY=localhost,127.0.0.1,::1
 status=0
 cd "$ROOT" && flutter pub get >/dev/null || { echo "pub get failed"; exit 1; }
 
-for pkg in packages/muyon_module_api packages/muyon_ui packages/prototype_module packages/research_module packages/supplier_core packages/inquiry_module apps/muyon; do
+for pkg in packages/muyon_module_api packages/muyon_ui packages/prototype_module packages/research_module packages/supplier_core packages/inquiry_module apps/muyon apps/muyon_ui_preview; do
   if out=$(cd "$ROOT/$pkg" && flutter analyze 2>&1); then
     echo "analyze  $pkg: ok"
   else
@@ -34,6 +34,7 @@ suites=(
   "research|packages/research_module|test"
   "supplier_core|packages/supplier_core|test"
   "host|apps/muyon|test"
+  "ui_preview|apps/muyon_ui_preview|test"
   "inquiry|apps/muyon|../../packages/inquiry_module/test"   # needs host asset keys
 )
 for entry in "${suites[@]}"; do

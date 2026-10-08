@@ -4,6 +4,7 @@ environment:
   sdk: '>=3.13.0 <4.0.0'
 workspace:
   - apps/muyon
+  - apps/muyon_ui_preview
   - packages/muyon_module_api
   - packages/research_module
   - packages/supplier_core
