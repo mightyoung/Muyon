@@ -7,6 +7,7 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
 import 'task_records.dart';
+import 'storage_manager.dart';
 import 'tool_registry.dart';
 import 'grants/host_authorization_facts.dart';
 
@@ -137,13 +138,32 @@ enum PersonalTaskState {
   interrupted,
 }
 
+/// Host-issued proof for a fresh input view, never reconstructed from JSON.
+final class HostLoadedInputProof {
+  HostLoadedInputProof._(this._owner, PersonalTask task)
+    : _taskId = task.id,
+      _digest = _hash(task.payload);
+  final FoundationRepository _owner;
+  final String _taskId, _digest;
+  static String _hash(Object? value) =>
+      sha256.convert(utf8.encode(jsonEncode(value))).toString();
+  bool verify(Database db, PersonalTask task) =>
+      identical(db, _owner.database.raw) &&
+      !db.autocommit &&
+      task.id == _taskId &&
+      _hash(task.payload) == _digest &&
+      _owner._freshInputView(task);
+}
+
 class PersonalTask {
   PersonalTask(
     Map<String, Object?> payload, {
     this.pendingEvents = const [],
     this.keepStage = false,
+    this.loadedInputProof,
   }) : payload = freezeJsonMap(payload);
   final Map<String, Object?> payload;
+  final HostLoadedInputProof? loadedInputProof;
 
   /// Events that go into the same transaction as the write of this task
   /// (`createTask` / `updateTask`). They are not part of the payload and are
@@ -161,6 +181,7 @@ class PersonalTask {
     payload,
     pendingEvents: List.unmodifiable(events),
     keepStage: keepStage,
+    loadedInputProof: loadedInputProof,
   );
   String get id => payload['executionId'] as String;
   String get conversationId => payload['conversationId'] as String;
@@ -205,6 +226,47 @@ class FoundationRepository extends ChangeNotifier {
   late final authorizationFacts = HostAuthorizationFacts(database);
   final ManagedDatabase database;
   void refresh() => notifyListeners();
+
+  bool _freshInputView(PersonalTask task) {
+    final c = conversation(task.conversationId);
+    return c != null &&
+        task.previousAttemptId == null &&
+        jsonEncode(c.scope.toJson()) == jsonEncode(task.scope.toJson()) &&
+        messages(c.id).isEmpty &&
+        memoriesFor(c.scope).isEmpty &&
+        experiencesFor(c.scope).isEmpty &&
+        database.raw.select('SELECT 1 FROM settings WHERE key=?', [
+          'auth1b:conversation:${c.id}',
+        ]).isEmpty &&
+        database.raw.select(
+          "SELECT 1 FROM execution_records WHERE id<>? AND json_valid(payload) AND json_extract(payload,'\$.conversationId')=? LIMIT 1",
+          [task.id, c.id],
+        ).isEmpty;
+  }
+
+  /// Called by the actual task factory after loading its input view. Only a
+  /// fully empty, fresh host context is proven today; verified imported memory
+  /// is not proof of clean provenance. Recheck inside the owner create write.
+  PersonalTask bindLoadedInputs(
+    PersonalTask task, {
+    required List<AssistantMessage> history,
+    required List<Map<String, Object?>> memories,
+  }) {
+    if (database is! ManagedConnection ||
+        !(database as ManagedConnection).scopeAuthorityStable ||
+        history.isNotEmpty ||
+        memories.isNotEmpty ||
+        !_freshInputView(task)) {
+      return task;
+    }
+    return PersonalTask(
+      task.payload,
+      pendingEvents: task.pendingEvents,
+      keepStage: task.keepStage,
+      loadedInputProof: HostLoadedInputProof._(this, task),
+    );
+  }
+
   static final migration = ModuleMigration(
     version: 2,
     id: 'foundation-v2',
@@ -882,6 +944,8 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
         previousAttemptId: task.previousAttemptId,
         references: [...task.scope.objects, ...task.objectRefs],
         scope: task.scope,
+        loadedInputProof: task.loadedInputProof,
+        loadedTask: task,
       );
       TaskRecords.syncTask(db, task.payload, task.state.name);
       TaskRecords.append(db, task.id, task.pendingEvents, _now());

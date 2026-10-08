@@ -4,6 +4,8 @@ import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import '../foundation_repository.dart' show HostLoadedInputProof, PersonalTask;
+
 enum HostTaintState { clean, unknown, tainted }
 
 /// Stable source authority identity. Revisions are evidence, never a new
@@ -98,6 +100,7 @@ class HostAuthorizationFacts {
     _owner(db);
     _deny.add('source:${source.identityDigest}');
     _pendingSources[source.identityDigest] = source;
+    _taintAffectedTasks(db, source);
     _taint(
       db,
       'auth1b:source:${source.identityDigest}',
@@ -110,6 +113,69 @@ class HostAuthorizationFacts {
         'revisionRef': source.revisionRef,
       },
     );
+  }
+
+  bool _sourceAffects(
+    Database db,
+    AssistantScope scope,
+    HostSourceFact source,
+  ) {
+    if (scope.kind == AssistantScopeKind.global) return true;
+    if (scope.kind == AssistantScopeKind.selectedObjects) {
+      return scope.objects.any(
+        (ref) =>
+            ref.moduleId == source.moduleId &&
+            (source.projectId == null ||
+                ref.nativeProjectId == null ||
+                ref.nativeProjectId == source.projectId) &&
+            (source.objectId == null ||
+                (ref.objectType == source.objectType &&
+                    ref.objectId == source.objectId)),
+      );
+    }
+    return scope.workspaceId != null &&
+        db.select(
+          'SELECT 1 FROM workspace_module_bindings WHERE workspace_id=? AND module_id=? AND (? IS NULL OR native_project_id=?)',
+          [
+            scope.workspaceId,
+            source.moduleId,
+            source.projectId,
+            source.projectId,
+          ],
+        ).isNotEmpty;
+  }
+
+  void _taintAffectedTasks(Database db, HostSourceFact source) {
+    for (final row in db.select('SELECT id,payload FROM execution_records')) {
+      final id = row['id'] as String;
+      final facts = _read(db, 'auth1b:task:$id');
+      if (facts == null || facts['conversationId'] is! String) continue;
+      var affected = true;
+      try {
+        final task = PersonalTask(
+          Map<String, Object?>.from(
+            jsonDecode(row['payload'] as String) as Map,
+          ),
+        );
+        affected = _sourceAffects(db, task.scope, source);
+      } catch (_) {
+        // Unknown historical scope never proves that a new source is excluded.
+      }
+      if (!affected) continue;
+      final conversation = facts['conversationId'] as String;
+      _deny.addAll(['task:$id', 'conversation:$conversation']);
+      (_pendingHistory['task:$id'] ??= {}).add(source.identityDigest);
+      (_pendingHistory['conversation:$conversation'] ??= {}).add(
+        source.identityDigest,
+      );
+      _taint(
+        db,
+        'auth1b:task:$id',
+        source,
+        extra: {'taskId': id, 'conversationId': conversation},
+      );
+      _taint(db, 'auth1b:conversation:$conversation', source);
+    }
   }
 
   void _owner(Database db) {
@@ -151,6 +217,30 @@ class HostAuthorizationFacts {
         value['conversationId'] is String) {
       final conversation = value['conversationId'] as String;
       final history = _read(database.raw, 'auth1b:conversation:$conversation');
+      if (_pendingSources.isNotEmpty) {
+        final rows = database.raw.select(
+          'SELECT payload FROM execution_records WHERE id=?',
+          [taskId],
+        );
+        for (final source in _pendingSources.values) {
+          var affected = true;
+          try {
+            final task = PersonalTask(
+              Map<String, Object?>.from(
+                jsonDecode(rows.single['payload'] as String) as Map,
+              ),
+            );
+            affected = _sourceAffects(database.raw, task.scope, source);
+          } catch (_) {}
+          if (affected) {
+            _deny.addAll(['task:$taskId', 'conversation:$conversation']);
+            (_pendingHistory['task:$taskId'] ??= {}).add(source.identityDigest);
+            (_pendingHistory['conversation:$conversation'] ??= {}).add(
+              source.identityDigest,
+            );
+          }
+        }
+      }
       return HostTaskFacts(
         taskId: taskId,
         conversationId: value['conversationId'] as String?,
@@ -206,6 +296,8 @@ class HostAuthorizationFacts {
     String? previousAttemptId,
     Iterable<ObjectRef> references = const [],
     AssistantScope? scope,
+    HostLoadedInputProof? loadedInputProof,
+    PersonalTask? loadedTask,
   }) {
     _owner(db);
     final sources = <String>{
@@ -218,6 +310,11 @@ class HostAuthorizationFacts {
             (previousAttemptId != null &&
                 _deny.contains('task:$previousAttemptId'))
         ? HostTaintState.tainted
+        : loadedTask != null &&
+              loadedTask.id == taskId &&
+              loadedTask.conversationId == conversationId &&
+              loadedInputProof?.verify(db, loadedTask) == true
+        ? HostTaintState.clean
         : HostTaintState.unknown;
     final history = <Map<String, Object?>?>[
       _read(db, 'auth1b:conversation:$conversationId'),
@@ -238,13 +335,34 @@ class HostAuthorizationFacts {
         state = HostTaintState.tainted;
       }
     }
+    // An unreadable/unclassifiable persisted source cannot prove exclusion
+    // from any scoped view. Do not let JSON filters erase that uncertainty.
+    for (final row in db.select(
+      "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%'",
+    )) {
+      final value = _read(db, row['key'] as String);
+      final classified =
+          value != null &&
+          value['moduleId'] is String &&
+          (value['moduleId'] as String).isNotEmpty &&
+          (value['projectId'] == null || value['projectId'] is String) &&
+          ((value['objectType'] == null && value['objectId'] == null) ||
+              (value['objectType'] is String && value['objectId'] is String));
+      if (!classified && state == HostTaintState.clean) {
+        state = HostTaintState.unknown;
+      }
+    }
     if (scope?.kind == AssistantScopeKind.global) {
       // Global may load any available source; over-taint rather than prove
       // clean from an incomplete asynchronous projection.
       for (final row in db.select(
         "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%'",
       )) {
-        history.add(_read(db, row['key'] as String));
+        final value = _read(db, row['key'] as String);
+        if (value == null && state == HostTaintState.clean) {
+          state = HostTaintState.unknown;
+        }
+        history.add(value);
       }
       if (_pendingSources.isNotEmpty) {
         state = HostTaintState.tainted;
@@ -259,19 +377,57 @@ class HostAuthorizationFacts {
           binding['module_id'] as String,
           binding['native_project_id'] as String,
         );
-        history.add(_read(db, 'auth1b:source:${source.identityDigest}'));
+        final key = 'auth1b:source:${source.identityDigest}';
+        final boundFacts = _read(db, key);
+        if (boundFacts == null &&
+            db.select('SELECT 1 FROM settings WHERE key=?', [key]).isNotEmpty &&
+            state == HostTaintState.clean) {
+          state = HostTaintState.unknown;
+        }
+        history.add(boundFacts);
         for (final row in db.select(
-          "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%' AND json_valid(value) AND json_extract(value,'\$.moduleId')=? AND json_extract(value,'\$.projectId')=?",
+          "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%' AND json_valid(value) AND json_extract(value,'\$.moduleId')=? AND (json_extract(value,'\$.projectId') IS NULL OR json_extract(value,'\$.projectId')=?)",
           [source.moduleId, source.projectId],
         )) {
-          history.add(_read(db, row['key'] as String));
+          final value = _read(db, row['key'] as String);
+          if (value == null && state == HostTaintState.clean) {
+            state = HostTaintState.unknown;
+          }
+          history.add(value);
         }
         for (final pending in _pendingSources.values) {
           if (pending.moduleId == source.moduleId &&
-              pending.projectId == source.projectId) {
+              (pending.projectId == null ||
+                  pending.projectId == source.projectId)) {
             state = HostTaintState.tainted;
             sources.add(pending.identityDigest);
           }
+        }
+      }
+    }
+    if (scope?.kind == AssistantScopeKind.selectedObjects) {
+      for (final ref in scope!.objects) {
+        for (final row in db.select(
+          "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%' AND json_valid(value) AND json_extract(value,'\$.moduleId')=? AND (? IS NULL OR json_extract(value,'\$.projectId') IS NULL OR json_extract(value,'\$.projectId')=?) AND (json_extract(value,'\$.objectId') IS NULL OR (json_extract(value,'\$.objectType')=? AND json_extract(value,'\$.objectId')=?))",
+          [
+            ref.moduleId,
+            ref.nativeProjectId,
+            ref.nativeProjectId,
+            ref.objectType,
+            ref.objectId,
+          ],
+        )) {
+          final value = _read(db, row['key'] as String);
+          if (value == null && state == HostTaintState.clean) {
+            state = HostTaintState.unknown;
+          }
+          history.add(value);
+        }
+      }
+      for (final pending in _pendingSources.values) {
+        if (_sourceAffects(db, scope, pending)) {
+          state = HostTaintState.tainted;
+          sources.add(pending.identityDigest);
         }
       }
     }
@@ -279,12 +435,21 @@ class HostAuthorizationFacts {
       if (facts == null) continue;
       sources.addAll(List<String>.from(facts['sourceDigests'] as List));
       if (facts['taintState'] == 'tainted') state = HostTaintState.tainted;
+      if (facts['taintState'] == 'unknown' && state == HostTaintState.clean) {
+        state = HostTaintState.unknown;
+      }
     }
     for (final ref in references) {
       for (final source in [
         HostSourceFact.object(ref),
         HostSourceFact.project(ref.moduleId, ref.nativeProjectId),
       ]) {
+        final key = 'auth1b:source:${source.identityDigest}';
+        if (state == HostTaintState.clean &&
+            db.select('SELECT 1 FROM settings WHERE key=?', [key]).isNotEmpty &&
+            _read(db, key) == null) {
+          state = HostTaintState.unknown;
+        }
         if (_deny.contains('source:${source.identityDigest}')) {
           state = HostTaintState.tainted;
           sources.add(source.identityDigest);
