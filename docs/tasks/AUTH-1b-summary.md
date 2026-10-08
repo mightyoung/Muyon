@@ -18,4 +18,6 @@ A/B/production/automatic此前已合develop。C1/C2源7c1dd63000b81043f0f5177417
 
 真实Host/SQLite/Inquiry Store完成数量10→12，有成功receipt和引用；Research实际导入并检索文档、形成引用，纯读流程无需逐轮人工卡。模型答复来自loopback脚本，不代表真实模型理解能力。
 
-剩余：按[验证备忘录](VERIFICATION-MEMO.md)回归并排查已有Inquiry截图失败，核对本次发布的精确postmergeCI；UI/profile设置和授权入口由UI任务接线；其他模块业务闭环、真实云模型和实机验证另行任务化。共享owner撤销不保证跨独立连接/进程；终态map清理等原WATCH保留。本轮不继续扩大安全范围，不删除远端任务分支，不碰main/release。
+剩余：按[验证备忘录](VERIFICATION-MEMO.md)回归并排查已有Inquiry截图失败，本次精确postmergeCI37792414130已成功；UI/profile设置和授权入口由UI任务接线；其他模块业务闭环、真实云模型和实机验证另行任务化。共享owner撤销不保证跨独立连接/进程；终态map清理等原WATCH保留。本轮不继续扩大安全范围，不删除远端任务分支，不碰main/release。
+
+C1/C2已发布到develop00dbd6cf722ddd4b5f7e8c65ec378ee4150fada9，发布CI精确成功；后续可用性改造任务见[下一批计划](../superpowers/plans/2026-10-08-ai-native-next-batch.md)，本摘要不声称UI/三端已完成。

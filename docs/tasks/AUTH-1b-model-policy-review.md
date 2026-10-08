@@ -31,3 +31,5 @@ Raw evidence remains /tmp/auth-c2-integration-verify.log, /tmp/auth-c2-integrati
 Subsequent full Inquiry comparison against exact develop4573adb73f32526bc3f3bab8125db923e474f890 found the same281 passed/1 skip/46 failures: canonical cases, image dimensions/different-pixel counts and all184 PNG SHA256 values identical; added/removed/changed0. Exact integrationffe6be31a8a4cb516f8bcc5331a3065cbc142dcd LinuxCI37786931707 completed/success, analyze7/7 and test7/7. No source, golden, skip or assertion changes.
 
 The user explicitly accepted this finite baseline exception and authorized develop publication. This supersedes the publication blocker above, without relabeling the failed Mac gate as green or claiming the unknown root cause resolved. [Verification memo](VERIFICATION-MEMO.md) preserves the decision, evidence summary and mandatory later regression checks. Raw logs/matrices remain outside Git.
+
+发布完成：正常快进4573adb→00dbd6cf722ddd4b5f7e8c65ec378ee4150fada9，包含获批ffe6be31及四份文档备忘录；[精确发布CI37792414130](https://github.com/mightyoung/Muyon/actions/runs/37792414130) completed/success。原Mac失败未重写为通过，基线例外不得自动延续，main/release未动。

@@ -44,7 +44,7 @@
 | R-1 Android 重跑、E-1 真实基线、UI-0 精简截图 | `task/r-1-evidence` | [R-1.md](R-1.md) | engineer | 手机连接 | **已派发** |
 | JR-1 小清理（ci 跑 test_doctor、按字符截断、无用 tag、注释） | `task/jr-1-cleanups` | [JR-1.md](JR-1.md) | junior | — | 已合入（[审查](JR-1-review.md)） |
 | AUTH-1a 授权库、解析器、外传内容审查接口（不接线） | `task/auth-1a-grants` | [AUTH-1a.md](AUTH-1a.md) | Codex | — | 已合入（[审查](AUTH-1a-review.md)） |
-| AUTH-1b 授权接线（A、B12、B3、输入来源证明、本机写入自动化） | `task/auth-1b-*` | [AUTH-1b.md](AUTH-1b.md) | Codex（Leader B 派发与审查） | AUTH-1a、REG-2 | A、B12、B3、production 输入与自动化已合入（[审查](AUTH-1b-review.md)）；**C 段与类别策略进行中**（`task/auth-1b-model-policy`） |
+| AUTH-1b 授权接线（A、B12、B3、输入来源证明、本机写入自动化） | `task/auth-1b-*` | [AUTH-1b.md](AUTH-1b.md) | Codex（Leader B 派发与审查） | AUTH-1a、REG-2 | A、B12、B3、production 输入与自动化已合入（[审查](AUTH-1b-review.md)）；**C1/C2已发布到develop `00dbd6c`**（[审查](AUTH-1b-model-policy-review.md)，[发布CI成功](https://github.com/mightyoung/Muyon/actions/runs/37792414130)）；[限定Mac例外](VERIFICATION-MEMO.md)不可自动延续；UI/实云模型/实机仍后置 |
 | GROK-1 ADR-0004 静态核实与科研导出/导入清单初稿 | `task/grok-1-adr0004-static` | [GROK-1.md](GROK-1.md) | grokbot | — | 已合入（[审查](GROK-1-review.md)）；Q10 清单已确认 |
 | GROK-2 能力覆盖清单初稿（科研、原型、询价） | `task/grok-2-coverage-drafts` | [GROK-2.md](GROK-2.md) | grokbot | GROK-1 | 已合入（[审查](GROK-2-review.md)） |
 | GROK-3 询价敏感字段划分初稿（Q7，交用户确认） | `task/grok-3-sensitivity-draft` | [GROK-3.md](GROK-3.md) | grokbot | — | 已合入（[审查](GROK-3-review.md)）；Q7 已确认（2026-10-08） |
@@ -57,3 +57,21 @@
 UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入库，[审阅](../reviews/2026-10-07-design-v4-review.md)）；第一阶段之后按 [UI 重设计方案 §9](../design/ui-redesign-brief-2026-10-06.md) 分换壳与新能力两条线派发，分级授权见 [ADR-0002](../adr/0002-graded-assistant-authorization.md)（已采纳，第一阶段之后实施）。
 
 已停用：过渡集成分支 `feat/p0-ci-llm-baseline` 不再使用，合入目标统一为 `develop`。
+
+
+## 下一批 AI-native 任务草案（待复核，不是已派发）
+
+[版本化计划](../superpowers/plans/2026-10-08-ai-native-next-batch.md)基于已发布00dbd6c；架构稿在独立docs分支66476e2，保持建议属性。本轮只形成任务书，未发布develop或开始编码。先云端UI/流程验收与修复，再推进下阶段；原生/实机集中末次，云未覆盖保持待验。模型训练、指南稿和双模型选择不是主线前置。
+
+| 任务 | 拟任务分支 | 目标/依赖 | 状态 |
+|---|---|---|---|
+| [UI-3a](UI-3a.md) | task/ui-3a-semantic-preview | 最小合同+可运行Web预览，已合UI/REG/AUTH | 首个编码片，待leader复核派发 |
+| [REG-4a](REG-4a.md) | task/reg-4a-inquiry-adapter | 询价现有能力纯适配，已合REG-2/AUTH | 可并行，待复核派发 |
+| [UI-4a](UI-4a.md) | task/ui-4a-dynamic-preview | 确定性渲染/受控云验收，UI-3a及REG-4a联调 | 待复核派发 |
+| [UI-4b](UI-4b.md) | task/ui-4b-planning-harness | 两模式/harness共用planning，UI-3a/4a | 待复核，不等小模型/指南 |
+| [UI-3b](UI-3b.md) | task/ui-3b-workspace-state | 持久编辑/返回，UI-3a/4a | 待复核，不等训练 |
+| [REG-4b](REG-4b.md) | task/reg-4b-inquiry-import | 既有导入/回执续办，REG-4a+UI-3b/4a | 待复核派发 |
+| [UI-2a](UI-2a.md) | task/ui-2a-reference-navigation | 跨插件对象/文件导航，UI-3b/REG-4b | 待复核派发 |
+| [UI-4c](UI-4c.md) | task/ui-4c-subconversations | 一层子对话/最新引用，UI-2a+UI-4b/3b | 待复核派发 |
+| [C4-GUIDE](C4-GUIDE.md) | docs/c4-interaction-guides（接口接入另派） | train/dev软指南，UI-3a目录；复用UI-4b可空接口 | 云数据线程起草，接入待复核，不阻塞主线 |
+| [R-1-AI-UI-final](R-1-AI-UI-final.md) | 并入现有R-1 | 最终原生/实机/Mac回归 | 末次清单草案，非每片门槛 |
