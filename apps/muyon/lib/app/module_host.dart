@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
@@ -136,6 +137,30 @@ class ModuleHost implements ModuleLink {
 
   Stream<ModuleStateChange> get changes => _changes.stream;
   ModuleState state(String id) => _slots[id]?.state ?? ModuleState.inactive;
+
+  /// Synchronous host permission/availability proof. Activation, revocation
+  /// and shutdown invalidate it before queued persistent work can finish.
+  String? scopeAuthorityRevision(String id) {
+    final slot = _slots[id];
+    if (!_accepting ||
+        _closing ||
+        slot == null ||
+        slot.revoking ||
+        slot.state.status != ModuleStatus.ready) {
+      return null;
+    }
+    return jsonEncode([
+      slot.epoch,
+      identityHashCode(slot.runtime),
+      for (final decision in grants.forModule(id))
+        [
+          decision.capability,
+          decision.granted,
+          decision.required,
+          decision.policy,
+        ],
+    ]);
+  }
 
   /// The failure reason while [id] is failed, else null.
   String? error(String id) {

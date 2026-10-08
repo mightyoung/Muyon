@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
+import 'package:sqlite3/sqlite3.dart';
 
 import '../platform/foundation_repository.dart';
 import '../platform/grants/authorization_links.dart';
@@ -20,6 +21,27 @@ class Workspace {
 class WorkspaceRepository {
   WorkspaceRepository(this.database);
   final ManagedDatabase database;
+  static final _scopeStates = Expando<_WorkspaceScopeState>();
+  _WorkspaceScopeState get _scopeState =>
+      _scopeStates[database] ??= _WorkspaceScopeState();
+
+  /// Binding/visibility authority only. Grant/review/audit writes do not
+  /// invalidate this version or make their own signing transaction unknown.
+  String? get scopeAuthorityRevision {
+    final state = _scopeState;
+    return state.pending == 0 ? '${state.identity}:${state.epoch}' : null;
+  }
+
+  Future<T> writeScopeAuthority<T>(T Function(Database) body) async {
+    final state = _scopeState;
+    state.pending++;
+    state.epoch++;
+    try {
+      return await database.write(body);
+    } finally {
+      state.pending--;
+    }
+  }
 
   static final schema = ModuleSchema(
     version: 12,
@@ -171,7 +193,7 @@ CREATE TABLE transfer_tasks(
   Future<Workspace> create(String title) async {
     if (title.trim().isEmpty) throw ArgumentError('Empty workspace title');
     final workspace = Workspace(const Uuid().v4(), title.trim());
-    await database.write(
+    await writeScopeAuthority(
       (db) => db.execute('INSERT INTO workspaces VALUES(?,?)', [
         workspace.id,
         workspace.title,
@@ -201,7 +223,7 @@ CREATE TABLE transfer_tasks(
     return rows.isEmpty ? null : rows.first['workspace_id'] as String;
   }
 
-  Future<void> bind(WorkspaceBinding binding) => database.write((db) {
+  Future<void> bind(WorkspaceBinding binding) => writeScopeAuthority((db) {
     final current = this.binding(binding.workspaceId, binding.moduleId);
     if (current != null && current.nativeProjectId != binding.nativeProjectId) {
       throw StateError('Workspace already bound');
@@ -231,4 +253,10 @@ CREATE TABLE transfer_tasks(
     ]);
     return rows.isEmpty ? null : jsonDecode(rows.first['value'] as String);
   }
+}
+
+class _WorkspaceScopeState {
+  final String identity = const Uuid().v4();
+  int pending = 0;
+  int epoch = 0;
 }

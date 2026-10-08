@@ -73,44 +73,45 @@ class ImportCoordinator {
         return intent;
       });
 
-  Future<void> activate(ImportReceipt receipt) => workspaces.database.write((
-    db,
-  ) {
-    final intent = receipt.intent;
-    final rows = db.select(
-      'SELECT * FROM import_intents WHERE operation_id=?',
-      [intent.operationId],
-    );
-    if (rows.isEmpty || !_read(rows.first).sameIdentity(intent)) {
-      throw StateError('Receipt does not match intent');
-    }
-    final current = workspaces.binding(intent.workspaceId, intent.moduleId);
-    if (current != null && current.nativeProjectId != intent.targetProjectId) {
-      throw StateError('Binding conflict');
-    }
-    final owner = workspaces.ownerWorkspace(
-      intent.moduleId,
-      intent.targetProjectId,
-    );
-    if (owner != null && owner != intent.workspaceId) {
-      throw StateError('Project belongs to another workspace');
-    }
-    HostAuthorizationFacts(workspaces.database).markSourceExternalInTransaction(
-      db,
-      HostSourceFact.project(intent.moduleId, intent.targetProjectId),
-    );
-    if (current == null) {
-      db.execute('INSERT INTO workspace_module_bindings VALUES(?,?,?)', [
-        intent.workspaceId,
-        intent.moduleId,
-        intent.targetProjectId,
-      ]);
-    }
-    db.execute(
-      "UPDATE import_intents SET status='complete' WHERE operation_id=?",
-      [intent.operationId],
-    );
-  });
+  Future<void> activate(ImportReceipt receipt) =>
+      workspaces.writeScopeAuthority((db) {
+        final intent = receipt.intent;
+        final rows = db.select(
+          'SELECT * FROM import_intents WHERE operation_id=?',
+          [intent.operationId],
+        );
+        if (rows.isEmpty || !_read(rows.first).sameIdentity(intent)) {
+          throw StateError('Receipt does not match intent');
+        }
+        final current = workspaces.binding(intent.workspaceId, intent.moduleId);
+        if (current != null &&
+            current.nativeProjectId != intent.targetProjectId) {
+          throw StateError('Binding conflict');
+        }
+        final owner = workspaces.ownerWorkspace(
+          intent.moduleId,
+          intent.targetProjectId,
+        );
+        if (owner != null && owner != intent.workspaceId) {
+          throw StateError('Project belongs to another workspace');
+        }
+        HostAuthorizationFacts(workspaces.database)
+            .markSourceExternalInTransaction(
+              db,
+              HostSourceFact.project(intent.moduleId, intent.targetProjectId),
+            );
+        if (current == null) {
+          db.execute('INSERT INTO workspace_module_bindings VALUES(?,?,?)', [
+            intent.workspaceId,
+            intent.moduleId,
+            intent.targetProjectId,
+          ]);
+        }
+        db.execute(
+          "UPDATE import_intents SET status='complete' WHERE operation_id=?",
+          [intent.operationId],
+        );
+      });
 
   /// Startup/activation reconciliation for [moduleId]:
   /// - module committed (receipt exists) → bind once and mark complete;

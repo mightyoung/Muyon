@@ -123,3 +123,10 @@ B 拆三个可独立审查的提交。B1/B2 的基础接口默认不自动；B3 
 - 供应商模块内部导入不经过 host coordinator。B 保守把 legacy inquiry/相关 imported knowledge 读结果视为 external，牺牲自动率但不改 UI；精准 provenance 后续再收窄。不能报告为逐个导入点已精确接线。
 - settings 命名空间为本轮最小持久实现，须在 DB archive/restore 中随 host DB 一起保留；任务删除不自动删除 taint/source 事实。若独立审查要求关系表，再新增迁移并补全兼容指纹，不能暗改12。
 - A 静态复审通过不替代父实际复审；此文档无 B 生产代码、RED 执行、实现完成、CI绿或实机声明。C 的主/摘要 ReviewerChain、模式来源与 model 撤销订阅仍独立交付。
+
+
+## B1 checkpoint 执行更新
+
+来源事实 checkpoint `7b5e041b8b82e727f17d47bbd19cc33eca47fd3a` remote HEAD 相同，CI37717681126 completed/success。26 专项、strict、host +964 ~3、6 facts mutants 恢复通过。范围证明子片另有 14 专项、+61 关键回归和 7 scope mutants；其最终提交证据另记。
+
+Ruling: clean proof 由 B3 真实 host 输入载入路径形成，再由 task owner 验证；B1 不从空 references/旧 payload 生成 clean。成本：在证明接线前所有任务仍 unknown，自动许可关闭。首个真实 file/source producer 仅 PrototypeStore 与知识上下文，其他 source 缺覆盖即 null/manual；不把局部覆盖说成全模块已自动授权。

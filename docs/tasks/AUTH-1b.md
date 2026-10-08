@@ -64,3 +64,14 @@ leader B 后续批准 A 独立复核后普通合入 develop，并持续实施 B1
 保守范围规则：workspace 按真实绑定继承源项目/对象；global 将全部已记录来源视为可能加载，不依赖滞后 catalog 判 clean。来源失败门闩也进入这些范围。普通任务仍未知，不实现 clean 证明；trusted scope stamp、grant 自动签发、本地内容 review、B2/B3 完整接线尚未交付，不因本子片的污染接纳钩子声称自动授权上线。旧 UI 供应商直接导入用 legacy inquiry 保守外部分类，不改 UI。
 
 独立静态审查先发现三个继承缺口，均以有效行为 RED 复现后修复：已有 sibling 重开后的对话事实、失败来源 workspace/global 门闩、跨对话间接 previousAttempt 继承。末次独立静态复查 CLEAR，仅覆盖本子片，不代替 leader 最终复核或后续范围证明。B1 两份专项最终 +26 All tests passed，strict analyze No issues found；其余全量/变异/提交 CI 在子片提交证据中记录。
+
+
+## B1 真实范围证明子片
+
+`HostScopeAuthority.stamp` 同步读取源库 `total_changes()/data_version`、owner/producer 身份、宿主真实 workspace/binding 权限版本、ModuleHost 权限/可用性/epoch 和受管文件实际 SHA。两輪源证明一致才返回摘要；不从 catalog/cursor、模型字段或全 host DB total_changes 推断。源 owner 的 queued write / exclusiveAsync / closing 返回 unknown，失败恢复后可重新证明。宿主范围写单独排队版本覆盖 create/bind/import activate，不让审批/review/audit 写使签发本身失效。
+
+生产首个 producer 只为已核对的 PrototypeStore 注册，另证明 public_knowledge DB 与 files 上下文；未证明完整来源/文件覆盖的其他模块仍 null，不能自动签发。受管文件 namespace 固定，链接或 namespace 改到外部（即使字节相同）拒绝；完整目录 proof 超过 1024 entries / 8MiB 时 null，不假造版本。创建/重开 DB 的 owner 身份不同，原 stamp 不复用。只提供基础生产证明，不启用自动调用。
+
+有效 RED→GREEN：真实 producer 缺失、source exclusive 在途仍有 stamp、证明后源变化混合视图、workspace 绑定排队仍有旧 stamp、受管祖先 namespace 换外部同字节目录。还验证 foreign SQLite connection、同大小/恢复 mtime 文件改动、普通 grant/audit 写不影响 scope、真实 ModuleHost pending/failed revocation 即刻失去权威且 activation 不能恢复失败撤销。
+
+最终范围专项 14 条；B1 facts + scope + owner/module/import/binding 关键回归共 +61 All tests passed。七项范围行为变异杀死并逐字节恢复：源 DB version、foreign data_version、文件字节改成 mtime、源 pending、binding pending、跨源复核、namespace pin。strict analyze No issues found；恢复后宿主全量 +978 ~3 All tests passed，exact SHA CI 见提交/执行回报。clean 输入证明继续留给 B3 实际载入历史/memory/source 的消费者；不能把空 references 当 clean，也不在 B1 提前伪造清洁事实。B2/B3、C、真机仍未完成。
