@@ -602,7 +602,16 @@ class AgentModelTurn {
       advanced,
       [
         for (final c in reply.calls)
-          Planned(toolIds[c.name]!, c.arguments!, callId: c.callId),
+          Planned(
+            toolIds[c.name]!,
+            c.arguments!,
+            callId: c.callId,
+            // A proposed destination remains untrusted; registry preflight
+            // and the actual host intent must bind its complete identity.
+            destination: c.arguments!['destination'] is String
+                ? c.arguments!['destination'] as String
+                : null,
+          ),
       ],
       assistantMessage: {
         'role': 'assistant',

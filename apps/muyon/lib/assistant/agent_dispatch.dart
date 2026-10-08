@@ -247,7 +247,25 @@ class AgentDispatch {
 
   /// The confirmation card for the writes / exports of the step. Which of
   /// them the person selects is not part of its digest.
+  bool _cardAllowed(PersonalTask task) =>
+      !ctx.closing &&
+      !ctx.cancelRequested.contains(task.id) &&
+      ctx.toolTokens[task.id]?.isCancelled != true &&
+      ctx.repository.task(task.id)?.terminal == false;
+
+  Future<bool> _stopBeforeCard(PersonalTask task) async {
+    final current = ctx.repository.task(task.id);
+    if (ctx.closing || current == null || current.terminal) return true;
+    if (ctx.cancelRequested.contains(task.id) ||
+        ctx.toolTokens[task.id]?.isCancelled == true) {
+      await ctx.settle(task, PersonalTaskState.cancelled, null);
+      return true;
+    }
+    return false;
+  }
+
   Future<void> _openCard(PersonalTask task) async {
+    if (await _stopBeforeCard(task)) return;
     final card = AgentContext.cardCalls(task);
     if (card.isEmpty) {
       await _complete(task);
@@ -259,6 +277,7 @@ class AgentDispatch {
         // Persist the entire pending external union before reviewing any call.
         for (final call in card) {
           await _markExternal(task, _requestOf(task, call));
+          if (await _stopBeforeCard(task)) return;
         }
         for (final call in card) {
           final request = _requestOf(task, call);
@@ -269,11 +288,7 @@ class AgentDispatch {
           }
           if (prepared.effectIntent == null) continue;
           final reviewed = await authorization.review(prepared);
-          if (ctx.closing ||
-              ctx.repository.task(task.id)?.state ==
-                  PersonalTaskState.cancelled) {
-            return;
-          }
+          if (await _stopBeforeCard(task)) return;
           if (reviewed.action == ReviewAction.block) {
             await ctx.fail(task, '本地内容审查阻止了该操作', code: 'review_block');
             return;
@@ -281,13 +296,16 @@ class AgentDispatch {
           ctx.toolReviews[request.invocationId] = reviewed;
         }
       } catch (_) {
+        if (await _stopBeforeCard(task)) return;
         await ctx.fail(task, '操作来源或审查记录已变化，该操作未执行', code: 'review_stale');
         return;
       }
     }
     final next = task.copy(_stage(card, state: 'waitingConfirmation'));
-    await ctx.commit(
+    if (await _stopBeforeCard(task)) return;
+    final saved = await ctx.commit(
       next,
+      canCommit: () => _cardAllowed(task),
       events: [
         (
           AgentEventType.wait,
@@ -299,6 +317,7 @@ class AgentDispatch {
         ),
       ],
     );
+    if (!saved) await _stopBeforeCard(task);
   }
 
   /// What a card selection looks like after the person toggles [id]: turning
