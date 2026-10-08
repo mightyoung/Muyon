@@ -180,6 +180,12 @@ void main() {
                 : jsonEncode({
                     'version': 1,
                     'taintState': 'unknown',
+                    if (kind == 'unknown-source') ...{
+                      'moduleId': 'inquiry',
+                      'projectId': 'p',
+                      'objectType': null,
+                      'objectId': null,
+                    },
                     'sourceDigests': [],
                   }),
           ]),

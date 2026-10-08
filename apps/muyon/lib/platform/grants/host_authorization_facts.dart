@@ -126,6 +126,7 @@ class HostAuthorizationFacts {
         (ref) =>
             ref.moduleId == source.moduleId &&
             (source.projectId == null ||
+                ref.nativeProjectId == null ||
                 ref.nativeProjectId == source.projectId) &&
             (source.objectId == null ||
                 (ref.objectType == source.objectType &&
@@ -134,8 +135,13 @@ class HostAuthorizationFacts {
     }
     return scope.workspaceId != null &&
         db.select(
-          'SELECT 1 FROM workspace_module_bindings WHERE workspace_id=? AND module_id=? AND native_project_id=?',
-          [scope.workspaceId, source.moduleId, source.projectId],
+          'SELECT 1 FROM workspace_module_bindings WHERE workspace_id=? AND module_id=? AND (? IS NULL OR native_project_id=?)',
+          [
+            scope.workspaceId,
+            source.moduleId,
+            source.projectId,
+            source.projectId,
+          ],
         ).isNotEmpty;
   }
 
@@ -329,6 +335,23 @@ class HostAuthorizationFacts {
         state = HostTaintState.tainted;
       }
     }
+    // An unreadable/unclassifiable persisted source cannot prove exclusion
+    // from any scoped view. Do not let JSON filters erase that uncertainty.
+    for (final row in db.select(
+      "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%'",
+    )) {
+      final value = _read(db, row['key'] as String);
+      final classified =
+          value != null &&
+          value['moduleId'] is String &&
+          (value['moduleId'] as String).isNotEmpty &&
+          (value['projectId'] == null || value['projectId'] is String) &&
+          ((value['objectType'] == null && value['objectId'] == null) ||
+              (value['objectType'] is String && value['objectId'] is String));
+      if (!classified && state == HostTaintState.clean) {
+        state = HostTaintState.unknown;
+      }
+    }
     if (scope?.kind == AssistantScopeKind.global) {
       // Global may load any available source; over-taint rather than prove
       // clean from an incomplete asynchronous projection.
@@ -354,9 +377,16 @@ class HostAuthorizationFacts {
           binding['module_id'] as String,
           binding['native_project_id'] as String,
         );
-        history.add(_read(db, 'auth1b:source:${source.identityDigest}'));
+        final key = 'auth1b:source:${source.identityDigest}';
+        final boundFacts = _read(db, key);
+        if (boundFacts == null &&
+            db.select('SELECT 1 FROM settings WHERE key=?', [key]).isNotEmpty &&
+            state == HostTaintState.clean) {
+          state = HostTaintState.unknown;
+        }
+        history.add(boundFacts);
         for (final row in db.select(
-          "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%' AND json_valid(value) AND json_extract(value,'\$.moduleId')=? AND json_extract(value,'\$.projectId')=?",
+          "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%' AND json_valid(value) AND json_extract(value,'\$.moduleId')=? AND (json_extract(value,'\$.projectId') IS NULL OR json_extract(value,'\$.projectId')=?)",
           [source.moduleId, source.projectId],
         )) {
           final value = _read(db, row['key'] as String);
@@ -367,10 +397,37 @@ class HostAuthorizationFacts {
         }
         for (final pending in _pendingSources.values) {
           if (pending.moduleId == source.moduleId &&
-              pending.projectId == source.projectId) {
+              (pending.projectId == null ||
+                  pending.projectId == source.projectId)) {
             state = HostTaintState.tainted;
             sources.add(pending.identityDigest);
           }
+        }
+      }
+    }
+    if (scope?.kind == AssistantScopeKind.selectedObjects) {
+      for (final ref in scope!.objects) {
+        for (final row in db.select(
+          "SELECT key FROM settings WHERE key LIKE 'auth1b:source:%' AND json_valid(value) AND json_extract(value,'\$.moduleId')=? AND (? IS NULL OR json_extract(value,'\$.projectId') IS NULL OR json_extract(value,'\$.projectId')=?) AND (json_extract(value,'\$.objectId') IS NULL OR (json_extract(value,'\$.objectType')=? AND json_extract(value,'\$.objectId')=?))",
+          [
+            ref.moduleId,
+            ref.nativeProjectId,
+            ref.nativeProjectId,
+            ref.objectType,
+            ref.objectId,
+          ],
+        )) {
+          final value = _read(db, row['key'] as String);
+          if (value == null && state == HostTaintState.clean) {
+            state = HostTaintState.unknown;
+          }
+          history.add(value);
+        }
+      }
+      for (final pending in _pendingSources.values) {
+        if (_sourceAffects(db, scope, pending)) {
+          state = HostTaintState.tainted;
+          sources.add(pending.identityDigest);
         }
       }
     }

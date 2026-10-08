@@ -19,3 +19,15 @@ AgentTaskFactory 只载入一次 memory/experience 集合，使用同一集合�
 ## 后续仍需交付
 
 生产GrantStore/grantContext、已核实实际local-write intent producer与自动sign/有序混合调度、类别policy，以及C主模型/摘要/兼容重发/撤销在途流仍待实现；这份fresh-input子片不代表automatic或C已完成。Bootstrap、UI、main/release本子片未改。输入proof未知时保守回人工卡。
+
+## 28b9231 独立 BLOCK 与边界修复
+
+固定 `28b9231ad6cf4bad70297eeb45123ab289681640` 的 exact-head CI 37744473860 success；独立 strict clean（10.2s）及77通过并未覆盖完整边界。审查追加三条真实 public Agent / SQLite 探针均行为失败，故保留“不接纳”结论：selected ObjectRef 缺少 project identity、workspace 来源 project 为 null 时外部来源被错误排除；workspace 精确绑定 source key 的损坏记录被 JSON valid 过滤错误忽略。
+
+修复将缺失项目身份视为可能相关，已知完整双方身份才允许排除；初始来源继承、排队 read、owner 持久化 scan 均保守处理。workspace 精确绑定记录存在却不能读取时为 unknown；任何无法分类的来源元数据不能通过 SQL 过滤证明与 scope 无关。粗身份和 revision 仍分离，没有补造 project ID。旧 schema/data 不改。
+
+三个独立探针先在作者树正式复现 RED，再修复 GREEN。扩展正式16条边界回归覆盖：标记先于任务、标记晚于任务、owner 队列 barrier、真实 StorageManager 磁盘重开，另含已知 outside project 保持 clean 对照。专项与既有事实/scope/Agent/cancel/manual 合跑88通过。扩展夹具的类型/重复关闭错误不计行为 RED；已修复且重跑。
+
+四个新增有效行为 mutants（selected 缺身份排除、workspace null 比较、损坏元数据忽略、磁盘继承过滤）均被杀死；六个原有 mutants 重新核实均杀死并逐字节恢复。新增分类检查使旧 unknown-source 夹具提前收紧；将其身份字段补全，让该测试单独验证有效分类的 unknown 状态不能提升为 clean，并保留独立 unclassifiable 回归。原始记录仅 /tmp。
+
+修复变异恢复后 strict `No issues found! (ran in 5.5s)`；宿主 full `+1055 ~3: All tests passed!`（2:33）。本修复提交仍须固定HEAD独立复审和新exact-head CI，不以旧28b成功替代；未合 develop。
