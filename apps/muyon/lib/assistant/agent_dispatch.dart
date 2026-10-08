@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
 import '../platform/tool_registry.dart';
+import '../platform/grants/host_authorization_facts.dart';
 import '../services/models/credential_redaction.dart';
 import 'agent_budget.dart';
 import 'agent_context.dart';
@@ -332,12 +333,51 @@ class AgentDispatch {
       return const Run.abandoned();
     }
     try {
+      final info = ctx.tools.inspect(request.toolId);
+      // Registry/config metadata is host-owned. Result data and model
+      // parameters cannot claim internal/clean provenance. Legacy inquiry
+      // imports may bypass the host coordinator, so their reads are external.
+      final external =
+          info != null &&
+          (info.accessLevel == ToolAccessLevel.external ||
+              info.providerId.startsWith('mcp:') ||
+              info.descriptor.moduleId == 'inquiry' ||
+              info.descriptor.moduleId == 'knowledge' ||
+              info.descriptor.moduleId == 'research');
+      if (external) {
+        await ctx.repository.authorizationFacts.markExternal(
+          task.id,
+          HostSourceFact.object(
+            ObjectRef(
+              moduleId: info.descriptor.moduleId,
+              objectType: 'tool_invocation',
+              objectId: request.invocationId,
+            ),
+          ),
+        );
+        token.throwIfCancelled();
+        if (ctx.closing ||
+            ctx.repository.task(task.id)?.state != PersonalTaskState.running) {
+          return const Run.abandoned();
+        }
+      }
       final result = await ctx.tools.invoke(request, cancellation: token);
+      if (external) {
+        // Persist stable returned sources before content acceptance. The
+        // premarker remains durable on failure after the real invocation.
+        for (final ref in result.objectRefs) {
+          await ctx.repository.authorizationFacts.markExternal(
+            task.id,
+            HostSourceFact.object(ref),
+          );
+        }
+      }
       return Run.ran(result);
     } on ToolCancelled {
       return const Run.cancelled();
     } catch (_) {
-      // The registry refused or failed before any effect.
+      // Refusal, receipt/persistence failure, or failed content acceptance.
+      // A real registry receipt remains authoritative after dispatch.
       if (ctx.cancelRequested.contains(task.id)) return const Run.cancelled();
       rethrow;
     }

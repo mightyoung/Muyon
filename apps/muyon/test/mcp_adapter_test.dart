@@ -1,8 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/platform/mcp_adapter.dart';
+import 'package:muyon/app/host_ui_grant_authority.dart';
+import 'package:muyon/platform/grants/grants.dart';
+import 'package:muyon/platform/grants/host_authorization_facts.dart';
+import 'package:muyon/platform/grants/host_tool_authorization.dart';
+import 'package:muyon/platform/grants/tool_grant_context.dart';
+import 'package:muyon/workspace/workspace_repository.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/platform/tool_registry.dart';
 import 'package:muyon/services/models/model_gateway.dart';
@@ -15,19 +22,48 @@ class _Secrets implements SecretStore {
       reference == 'mcp-key' ? 'secret-token' : null;
 }
 
+class _ReviewRecorder implements OutboundContentReviewer {
+  _ReviewRecorder(this.action);
+  final ReviewAction action;
+  List<int>? bytes;
+  @override
+  Future<ReviewDecision> review(OutboundReviewRequest request) async {
+    bytes = List.of(request.content);
+    return action == ReviewAction.block
+        ? const ReviewDecision.block('private')
+        : const ReviewDecision.allow();
+  }
+}
+
+class _GatedSecrets implements SecretStore {
+  final entered = Completer<void>(), release = Completer<void>();
+  var hold = false;
+  @override
+  Future<String?> read(String reference) async {
+    if (hold) {
+      entered.complete();
+      await release.future;
+    }
+    return 'secret-token';
+  }
+}
+
 /// Minimal Streamable-HTTP MCP server: JSON for most replies, SSE for calls.
 class _FakeMcp {
   late HttpServer server;
   final calls = <Map<String, Object?>>[];
+  final callBodies = <List<int>>[];
   final sessions = <String?>[];
   final auth = <String?>[];
 
   Future<void> start() async {
     server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     server.listen((request) async {
-      final body = jsonDecode(
-        await utf8.decoder.bind(request).join(),
-      ) as Map<String, Object?>;
+      final bytes = await request.fold<List<int>>(
+        <int>[],
+        (all, chunk) => all..addAll(chunk),
+      );
+      final body = jsonDecode(utf8.decode(bytes)) as Map<String, Object?>;
       sessions.add(request.headers.value('mcp-session-id'));
       auth.add(request.headers.value('authorization'));
       final id = body['id'];
@@ -76,6 +112,7 @@ class _FakeMcp {
       } else if (method == 'tools/call') {
         final params = body['params'] as Map;
         calls.add(Map<String, Object?>.from(params));
+        callBodies.add(bytes);
         final q = (params['arguments'] as Map)['q'];
         final payload = jsonEncode({
           'jsonrpc': '2.0',
@@ -87,7 +124,11 @@ class _FakeMcp {
             'isError': q == 'bad',
           },
         });
-        response.headers.contentType = ContentType('text', 'event-stream');
+        response.headers.contentType = ContentType(
+          'text',
+          'event-stream',
+          charset: 'utf-8',
+        );
         response.write('event: message\ndata: $payload\n\n');
         await response.close();
         return;
@@ -140,7 +181,7 @@ void main() {
         toolId: 'mcp.catalog.search',
         scope: const AssistantScope.global(),
         parameters: {'q': q},
-        destination: destination ?? mcp.endpoint.origin,
+        destination: destination ?? mcp.endpoint.toString(),
       );
 
   test(
@@ -184,14 +225,32 @@ void main() {
   test('destination must be the configured server', () async {
     await connect();
     final wrong = call('x', destination: 'https://elsewhere.example');
-    final approved = wrong.withApproval(
-      await registry.approve(await registry.prepare(wrong)),
+    await expectLater(
+      registry.prepare(wrong),
+      throwsA(isA<ToolPlatformException>()),
     );
-    final result = await registry.invoke(approved);
-    expect(result.status, ToolCallStatus.failed);
-    expect(result.summary, contains('destination'));
+    expect(db.raw.select('SELECT * FROM tool_approvals'), isEmpty);
     expect(mcp.calls, isEmpty);
   });
+
+  test(
+    'same origin is insufficient: full path and query bind before approval',
+    () async {
+      await connect();
+      for (final destination in [
+        mcp.endpoint.origin,
+        mcp.endpoint.replace(path: '/other').toString(),
+        mcp.endpoint.replace(query: 'other=1').toString(),
+      ]) {
+        await expectLater(
+          registry.prepare(call('x', destination: destination)),
+          throwsA(isA<ToolPlatformException>()),
+        );
+        expect(db.raw.select('SELECT * FROM tool_approvals'), isEmpty);
+        expect(mcp.calls, isEmpty);
+      }
+    },
+  );
 
   test('tool-reported errors are failures, not successes', () async {
     await connect();
@@ -212,6 +271,182 @@ void main() {
       expect(mcp.calls, isEmpty);
     },
   );
+
+  for (final action in [ReviewAction.allow, ReviewAction.block]) {
+    test(
+      'trusted MCP actual bytes and $action review use real host linkage',
+      () async {
+        final root = Directory.systemTemp.createTempSync('auth-mcp-host-');
+        final storage = StorageManager(root.path);
+        final owner = await storage.open('muyon', WorkspaceRepository.schema);
+        final hostRegistry = ToolRegistry(
+          database: owner,
+          resolveScope: (scope) async =>
+              ResolvedAssistantScope(requested: scope, objects: const []),
+        );
+        addTearDown(() async {
+          await hostRegistry.close();
+          await storage.close();
+          root.deleteSync(recursive: true);
+        });
+        final endpoint = mcp.endpoint.replace(query: 'token=url-private');
+        await McpAdapter.connect(
+          hostRegistry,
+          McpServerConfig(
+            id: 'trusted',
+            endpoint: endpoint,
+            endpointIdentity: 'host-configured',
+            credentialRef: 'mcp-key',
+          ),
+          secrets: _Secrets(),
+          trustedEffects: true,
+        );
+        final request = ToolCallRequest(
+          invocationId: 'trusted-call',
+          toolId: 'mcp.trusted.search',
+          scope: AssistantScope.global(),
+          parameters: const {'q': '中文🌍'},
+          destination: endpoint.toString(),
+        );
+        final prepared = await hostRegistry.prepare(request);
+        expect(prepared.effectIntent, isNotNull);
+        final reviewer = _ReviewRecorder(action);
+        final auth = HostToolAuthorization(
+          registry: hostRegistry,
+          reviewer: reviewer,
+          taskFacts: (_) => HostTaskFacts(
+            taskId: 'task',
+            conversationId: 'conversation',
+            taintState: HostTaintState.unknown,
+            sourceDigests: const [],
+          ),
+        );
+        final review = await auth.review(prepared);
+        final approval = await auth.confirm(review);
+        if (action == ReviewAction.block) {
+          expect(approval, isNull);
+          expect(mcp.calls, isEmpty);
+          expect(
+            owner.raw.select(
+              "SELECT * FROM outbound_tool_requests WHERE tool_id='mcp.trusted.search'",
+            ),
+            isEmpty,
+          );
+          return;
+        }
+        expect(approval, isNotNull);
+        final result = await hostRegistry.invoke(
+          request.withApproval(approval!),
+        );
+        expect(result.status, ToolCallStatus.succeeded);
+        expect(mcp.callBodies.single, reviewer.bytes);
+        expect(mcp.callBodies.single, prepared.effectIntent!.content);
+        final row = owner.raw
+            .select(
+              "SELECT * FROM outbound_tool_requests WHERE tool_id='mcp.trusted.search'",
+            )
+            .single;
+        expect(row['review_decision_id'], review.reviewDecisionId);
+        expect(row['authorization_source'], 'manual');
+        expect(row['grant_id'], isNull);
+        expect(row['bytes_sent'], reviewer.bytes!.length);
+        expect(row['payload_digest'], prepared.effectIntent!.payloadDigest);
+        expect(
+          jsonEncode(Map<String, Object?>.from(row)),
+          isNot(contains('url-private')),
+        );
+        await hostRegistry.invoke(request.withApproval(approval));
+        expect(mcp.calls, hasLength(1));
+      },
+    );
+  }
+  test('trusted MCP revocation during real credential wait sends zero call bytes', () async {
+    final root = Directory.systemTemp.createTempSync('auth-mcp-revoke-');
+    final storage = StorageManager(root.path);
+    final owner = await storage.open('muyon', WorkspaceRepository.schema);
+    final grants = GrantStore(owner);
+    final hostRegistry = ToolRegistry(
+      database: owner,
+      grants: grants,
+      grantContext: (_) => ToolGrantContext(
+        taskId: 'task',
+        conversationId: 'conversation',
+        taskTainted: false,
+        scopeRevision: 'fixture-host-version',
+        allowedModuleIds: const {'prototype'},
+      ),
+      resolveScope: (scope) async =>
+          ResolvedAssistantScope(requested: scope, objects: const []),
+    );
+    addTearDown(() async {
+      await hostRegistry.close();
+      await storage.close();
+      root.deleteSync(recursive: true);
+    });
+    final secrets = _GatedSecrets();
+    await McpAdapter.connect(
+      hostRegistry,
+      McpServerConfig(
+        id: 'trusted',
+        endpoint: mcp.endpoint,
+        endpointIdentity: 'host-configured',
+        credentialRef: 'mcp-key',
+      ),
+      secrets: secrets,
+      trustedEffects: true,
+    );
+    final request = ToolCallRequest(
+      invocationId: 'trusted-call',
+      toolId: 'mcp.trusted.search',
+      scope: AssistantScope.global(),
+      parameters: const {'q': 'x'},
+      destination: mcp.endpoint.toString(),
+    );
+    final prepared = await hostRegistry.prepare(request);
+    final bound = hostRegistry.authorizationRequest(prepared);
+    final source = await withConfirmedHostUiGrant(
+      (token) => grants.create(
+        token: token,
+        draft: GrantDraft(
+          category: 'outbound',
+          toolId: bound.toolId,
+          scopeDigest: bound.scopeDigest,
+          destination: bound.destination,
+          duration: GrantDuration.once,
+          conversationId: 'conversation',
+        ),
+        now: DateTime.now(),
+      ),
+    );
+    final auth = HostToolAuthorization(
+      registry: hostRegistry,
+      reviewer: const NoopReviewer(),
+      // A trusted fixture proof, not a claim about production B3 input loading.
+      taskFacts: (_) => HostTaskFacts(
+        taskId: 'task',
+        conversationId: 'conversation',
+        taintState: HostTaintState.clean,
+        sourceDigests: const [],
+      ),
+    );
+    final review = await auth.review(prepared);
+    final approval = await auth.sign(review);
+    expect(approval, isNotNull);
+    secrets.hold = true;
+    final running = hostRegistry.invoke(request.withApproval(approval!));
+    await secrets.entered.future;
+    await grants.revoke(source.id, now: DateTime.now());
+    secrets.release.complete();
+    expect((await running).status, ToolCallStatus.interrupted);
+    expect(mcp.calls, isEmpty);
+    expect(
+      owner.raw.select(
+        "SELECT * FROM outbound_tool_requests WHERE tool_id='mcp.trusted.search'",
+      ),
+      isEmpty,
+    );
+    expect(grants.list().single.uses, 1);
+  });
 
   test('remote endpoints must use https', () {
     expect(

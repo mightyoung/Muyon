@@ -49,3 +49,55 @@ A 变异：移除范围/目的地比对、移除签发事务消费、审批 INSE
 新增磁盘库测试验证 DDL 后失败、schema_migrations 与 host_schema_state 两类元数据失败均全事务回滚。旧审批、回执、模型/工具账本、既有授权及审计字段值保留。冻结历史 SQL 未改；不迁移或清空用户实库。Flutter 生成的 macOS 文件退出提交范围。
 
 原始日志与变异副本仅留 /tmp；提交说明保留摘要。首次新环境测试启动曾因 shell 代理干扰本机 WebSocket 失败，关闭代理后重跑通过；不将该失败作为行为 RED。父 leader 的最终提交独立运行审查与 CI 是后续合入门禁；本轮不合 develop。真机、持久污染维护、transport 完整可信端点提供、ReviewerChain 与 model 在途撤销订阅均留 B/C/后续实机验证。
+
+
+## 后续授权与 A 集成结果（2026-10-08）
+
+leader B 后续批准 A 独立复核后普通合入 develop，并持续实施 B1/B2/B3；仍不触碰 main/release。A 实施提交 `994cd6f2fde0841996adaf83c9ce3fee5a16200f`，审查文档提交 `5e94f643b7a1784545ee654633a5dcac157c79e6`。文档 HEAD CI [37713777910](https://github.com/mightyoung/Muyon/actions/runs/37713777910) completed/success；普通 merge `e473b9c205a215b440b56e465b5e357b21c8eff4` 的 tree 与文档 HEAD 完全相同，合入前 strict 与宿主全量 +938 ~3 通过；remote develop 全 SHA 核对相同。postmerge CI [37714945075](https://github.com/mightyoung/Muyon/actions/runs/37714945075) completed/success。
+
+## B1 持久来源事实子片
+
+独立工作树 `task/auth-1b-tools` 从 A merge 开始。宿主 settings 的版本化命名空间保存 task/conversation/source 三类事实，不加迁移、不改历史数据。普通任务默认 unknown；所有 clean/knownEndpoint/grantId 等 payload 声明不参与判定。宿主来源身份摘要仅含 module/project/type/object，修订是证据字段；task/conversation/source 集合只 union，不提供清除接口。任务创建与事实初始化、继承同 owner 事务；读取已有任务也合并当前对话及内存拒绝事实。previousAttemptId 继承完整事实，包括来自旧对话的间接 taint，恢复后的新对话继续继承。
+
+可识别 MCP/network/export/legacy inquiry/knowledge/research 调用先持久标记，再 invoke；返回的稳定 objectRefs 再标记，完成后才接纳内容。结果或摘要中的 false 不清除事实。导入协调器先标记项目再提交模块，恢复绑定事务也补标记；knowledge 在宿主 DB 先提交 original/document 两种来源，再接纳另一 DB 的文件记录。域提交后失败可留更严 taint。写失败维持同 owner 跨服务实例的同步拒绝；不承诺失败写跨进程持久，失败时未接纳的内容也不能说成已接纳。
+
+保守范围规则：workspace 按真实绑定继承源项目/对象；global 将全部已记录来源视为可能加载，不依赖滞后 catalog 判 clean。来源失败门闩也进入这些范围。普通任务仍未知，不实现 clean 证明；trusted scope stamp、grant 自动签发、本地内容 review、B2/B3 完整接线尚未交付，不因本子片的污染接纳钩子声称自动授权上线。旧 UI 供应商直接导入用 legacy inquiry 保守外部分类，不改 UI。
+
+独立静态审查先发现三个继承缺口，均以有效行为 RED 复现后修复：已有 sibling 重开后的对话事实、失败来源 workspace/global 门闩、跨对话间接 previousAttempt 继承。末次独立静态复查 CLEAR，仅覆盖本子片，不代替 leader 最终复核或后续范围证明。B1 两份专项最终 +26 All tests passed，strict analyze No issues found；其余全量/变异/提交 CI 在子片提交证据中记录。
+
+
+## B1 真实范围证明子片
+
+`HostScopeAuthority.stamp` 同步读取源库 `total_changes()/data_version`、owner/producer 身份、宿主真实 workspace/binding 权限版本、ModuleHost 权限/可用性/epoch 和受管文件实际 SHA。两輪源证明一致才返回摘要；不从 catalog/cursor、模型字段或全 host DB total_changes 推断。源 owner 的 queued write / exclusiveAsync / closing 返回 unknown，失败恢复后可重新证明。宿主范围写单独排队版本覆盖 create/bind/import activate，不让审批/review/audit 写使签发本身失效。
+
+生产首个 producer 只为已核对的 PrototypeStore 注册，另证明 public_knowledge DB 与 files 上下文；未证明完整来源/文件覆盖的其他模块仍 null，不能自动签发。受管文件 namespace 固定，链接或 namespace 改到外部（即使字节相同）拒绝；完整目录 proof 超过 1024 entries / 8MiB 时 null，不假造版本。创建/重开 DB 的 owner 身份不同，原 stamp 不复用。只提供基础生产证明，不启用自动调用。
+
+有效 RED→GREEN：真实 producer 缺失、source exclusive 在途仍有 stamp、证明后源变化混合视图、workspace 绑定排队仍有旧 stamp、受管祖先 namespace 换外部同字节目录。还验证 foreign SQLite connection、同大小/恢复 mtime 文件改动、普通 grant/audit 写不影响 scope、真实 ModuleHost pending/failed revocation 即刻失去权威且 activation 不能恢复失败撤销。
+
+最终范围专项 14 条；B1 facts + scope + owner/module/import/binding 关键回归共 +61 All tests passed。七项范围行为变异杀死并逐字节恢复：源 DB version、foreign data_version、文件字节改成 mtime、源 pending、binding pending、跨源复核、namespace pin。strict analyze No issues found；恢复后宿主全量 +978 ~3 All tests passed，exact SHA CI 见提交/执行回报。clean 输入证明继续留给 B3 实际载入历史/memory/source 的消费者；不能把空 references 当 clean，也不在 B1 提前伪造清洁事实。B2/B3、C、真机仍未完成。
+
+
+## B2 基础审查/签发/transport 检查点（整片仍执行中）
+
+新增 HostEffectIntent、HostToolAuthorization 与真实宿主专项。intent 由宿主注册的 producer 创建，不接受 JSON 可信反序列化；完整 URI/config 身份、冻结正文、generation、实时 facts/scope 与最终审批绑定。allow 不补授；Noop reviewed=false；block 独立记录，零审批和真实请求；异常/超时转人工，持久 reason 只保存固定码。规则审批与真实 grant 消费共事务，签发失败全回滚；人工来源 grantId=null，审批/回执/真实请求关联同一 review。一次 transport capability 在同 owner 账本事务排队后及实际边界复核，正文/端点改变和重复提交拒绝。旧 standalone 无12关联字段时不伪造迁移事实。
+
+MCP 已固定 RPC id 与实际正文，完整端点 preflight 在审批前拒绝 origin/其他路径/查询；实际 post 发送审查同 bytes，credentials wait 后与连接后重查。trustedEffects 保持默认 false，直到 B3 card/review 消费者接通。web/hub 宿主 channel 以私有 invocation->intent 表先本地审查，block 在 UI/审批/receipt/transport 前停止；无实际 task 的 UI-only channel taskId 保持 null，不以 session 捏造任务。生产全 schema 默认 Noop 本地链；不加远程审查。
+
+独立 transfer RED 证明真实配对 TLS push 等待账本后撤销宿主权限仍发送。将既有 checkBeforeEffect 传入 LAN push，在 ledger 等待、TLS连接后与流入字节前重查；修复后真实 TLS 专项+状态/聊天后台10条通过。不改变协议、不承诺撤回字节。完整 TLS fingerprint/body/link producer、Agent自动调度、真实输入 clean 证明与 C 仍待交付；不把此安全护栏当完整 transfer 自动授权。
+
+当前合法 WIP 的独立快照用于变异，避免共享源改变。快照基线34条，9项有效行为 mutants 全杀死并逐字节恢复：完整端点身份、body不可变、无授权allow、最终reviewproof、transport字节、MCPorigin、审查后改RPC、block降级、TLS撤销重查。编译无效和冗余单护栏移除的早期 mutant 不算杀死。恢复后 strict No issues found；宿主全量+1006 ~3 All tests passed。额外 web/hub、对应夹具和审查文档作为合法已有工作保留继续核实，不删除、不重置；当前快照逐文件SHA与提交前源一致。原始logs与driver仅/tmp。仍未合develop/main/release；最终整片独立review和父集成门禁不由此checkpoint替代。
+
+### B2 paired TLS producer extension (2026-10-08)
+
+TransferService.prepareSendIntent now derives an immutable actual managed outbox body and the full HTTPS /push endpoint plus the verified paired peer certificate fingerprint. It rejects HTTP display origins, unpaired/revoked peers, changed body hashes, unapproved members and message-bearing packages; over 8MiB remains unsupported/manual. HostTransferLedger carries the host capability into the actual push ledger; LanNode pushes the frozen reviewed bytes. Legacy traffic keeps its own ledger. Production public-tool/Agent wiring is still pending and automatic calls remain off.
+
+Valid RED: null producer fails the non-null trusted-intent assertion (fixture schema setup failures excluded). GREEN: real paired TLS body equals reviewed bytes, receipt/ledger has manual source/null grant ID/exact review decision/body hash/byte count, forged model identity ignored; modifying package after review rejects approval and writes zero transport rows. Existing transfer state/chat plus new regressions +11. Three isolated valid behavior mutants (remove paired fingerprint, change review body, drop ledger link) killed and byte-restored. Restored strict clean; full host +1007 ~3 passed. Raw logs/drivers remain /tmp. Foundation independent review and exact-head successful CI are documented in AUTH-1b-B2-foundation-review.md; this extension requires its own independent review.
+
+### B2 TLS independent blockers repaired
+
+The independent b3a7de4 review found actual paired-certificate substitution at the same URI and missing mandatory byte-boundary capability checks when the optional caller callback was omitted. The review is recorded as failed, not overwritten by author results. HostAuthorizationLink now binds actual endpointIdentity; TransferService.send owns an unconditional capability/pair/live-peer guard used through freeze, queue, connection and chunks. Actual paired certificate B cannot use A's review; deadline expiry after TLS connect sends zero bytes without any caller callback. Two real regression fixtures retained, +36 focused passed; two isolated behavior mutants killed/restored; strict clean and restored full +1009 ~3 passed. Independent repair re-review and exact-head CI remain gates before acceptance. B3 consumer WIP is separate and not part of this checkpoint.
+
+
+### B12 broader independent review reopened the gate
+
+Parent review of fixed `af352970d8477f29e6b0ee04ebcbd4fde7539c34` reproduced two additional windows: positive TLS progress callback expiry before chunk delivery, and first/reopened scope proof trusting an already swapped ancestor. Earlier focused green/CI did not cover them; the baseline remains blocked until repair review. `task/auth-1b-b12-fixes` isolates both fixes from B3 partial commits and WIP. Details and final validation are recorded in [AUTH-1b-B12-boundary-repair.md](AUTH-1b-B12-boundary-repair.md). Production automatic calls remain off, historical databases are retained, and develop integration is reserved for the parent after independent review.

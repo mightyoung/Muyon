@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import 'task_records.dart';
 import 'tool_registry.dart';
+import 'grants/host_authorization_facts.dart';
 
 class AssistantConversation {
   AssistantConversation(this.id, this.title, this.scope, this.createdAt);
@@ -201,6 +202,7 @@ class PersonalTask {
 /// sole execution authority. No parallel workspace/settings/device tables.
 class FoundationRepository extends ChangeNotifier {
   FoundationRepository(this.database);
+  late final authorizationFacts = HostAuthorizationFacts(database);
   final ManagedDatabase database;
   void refresh() => notifyListeners();
   static final migration = ModuleMigration(
@@ -873,6 +875,14 @@ CREATE TABLE notifications(id TEXT PRIMARY KEY,title TEXT NOT NULL,body TEXT NOT
         task.state.name,
         jsonEncode(task.payload),
       ]);
+      authorizationFacts.initializeTaskInTransaction(
+        db,
+        taskId: task.id,
+        conversationId: task.conversationId,
+        previousAttemptId: task.previousAttemptId,
+        references: [...task.scope.objects, ...task.objectRefs],
+        scope: task.scope,
+      );
       TaskRecords.syncTask(db, task.payload, task.state.name);
       TaskRecords.append(db, task.id, task.pendingEvents, _now());
     });

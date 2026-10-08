@@ -134,7 +134,7 @@ BEGIN SELECT RAISE(ABORT, 'ledger_unavailable'); END;
         invocationId: 'echo-1',
         toolId: 'mcp.test.echo',
         scope: const AssistantScope.global(),
-        destination: config.endpoint.origin,
+        destination: config.endpoint.toString(),
         parameters: {'text': '中文🌍'},
       );
       final prepared = await registry.prepare(request);
@@ -171,7 +171,7 @@ BEGIN SELECT RAISE(ABORT, 'ledger_unavailable'); END;
   }
 
   Future<void> web() => InquiryWebAuthority(registry).run<void>(
-    destination: destination,
+    destination: destination.replace(fragment: ''),
     sessionId: 'session',
     cancellation: AiCancellation(),
     review: (_, _) async => true,
@@ -179,7 +179,9 @@ BEGIN SELECT RAISE(ABORT, 'ledger_unavailable'); END;
     operation: (guard) => exchange(destination, guard),
   );
   Future<void> hub() {
-    final request = HubRequest('POST', destination, {'text': '中文🌍'});
+    final request = HubRequest('POST', destination.replace(fragment: ''), {
+      'text': '中文🌍',
+    });
     return InquiryHubAuthority(registry).run<void>(
       request: request,
       cancellation: AiCancellation(),
@@ -274,7 +276,7 @@ BEGIN SELECT RAISE(ABORT, 'ledger_unavailable'); END;
     final cancel = AiCancellation();
     await expectLater(
       InquiryWebAuthority(registry).run<void>(
-        destination: destination,
+        destination: destination.replace(fragment: ''),
         sessionId: 'session',
         cancellation: cancel,
         review: (_, _) async => true,

@@ -9,6 +9,7 @@ import '../platform/outbound_ledger.dart';
 import '../platform/projection_service.dart';
 import '../platform/schema_catalog.dart';
 import '../platform/storage_manager.dart';
+import '../platform/grants/host_scope_authority.dart';
 import '../workspace/workspace_repository.dart';
 import '../platform/scope_resolver.dart';
 import 'module_catalog.dart';
@@ -127,6 +128,7 @@ class MuyonHost {
   late final ModuleGrants grants;
   late final ModuleHost modules;
   late final ScopeResolver scopeResolver;
+  late final HostScopeAuthority scopeAuthority;
 
   // v1 accessors, kept as thin delegates to [modules] until REG-5; a number of
   // host files and tests still use them.
@@ -322,6 +324,27 @@ class MuyonHost {
         ],
       );
       registerBusinessTools(host);
+      host.scopeAuthority = HostScopeAuthority(
+        workspaces: host.workspaces,
+        sources: {
+          // First production proof covers the known managed PrototypeStore.
+          // Other adapters remain unknown until their complete file coverage
+          // is established; a projection or origin is not a substitute.
+          prototypeModuleId: HostScopeSource.deferred(
+            connection: () => storage.connectionIfOpen(prototypeModuleId),
+            authorityRevision: () =>
+                host.modules.scopeAuthorityRevision(prototypeModuleId),
+            managedFilesRoot: () => host.prototype?.store.filesRoot,
+          ),
+        },
+        contextSources: [
+          HostScopeSource.deferred(
+            connection: () => storage.connectionIfOpen('public_knowledge'),
+            authorityRevision: () => host._closing ? null : 'host-knowledge',
+            managedFilesRoot: () => host.services.knowledge.rootPath,
+          ),
+        ],
+      );
       host.modules.registerTools();
       host.capabilities.register('knowledge', host.services.knowledge);
       host.capabilities.register('models', host.services.gateway);

@@ -16,6 +16,11 @@ class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
   final Database raw;
   Future<void> _tail = Future<void>.value();
   bool _closing = false;
+  int _pendingAuthorityOperations = 0;
+
+  /// Scope authority cannot use an open transaction or a closed connection.
+  bool get scopeAuthorityStable =>
+      !_closing && _pendingAuthorityOperations == 0 && raw.autocommit;
 
   /// Called after every committed write (and every exclusive operation), so
   /// derived projections can catch up without each caller remembering to.
@@ -25,6 +30,7 @@ class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
   @override
   Future<T> write<T>(T Function(Database) body) {
     if (_closing) return Future.error(StateError('Database is closing'));
+    _pendingAuthorityOperations++;
     final result = Completer<T>();
     _tail = _tail.then((_) {
       var begun = false;
@@ -41,6 +47,8 @@ class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
       } catch (error, stack) {
         if (begun) raw.execute('ROLLBACK');
         result.completeError(error, stack);
+      } finally {
+        _pendingAuthorityOperations--;
       }
     });
     return result.future;
@@ -59,6 +67,7 @@ class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
   @override
   Future<T> exclusiveAsync<T>(FutureOr<T> Function(Database) body) {
     if (_closing) return Future.error(StateError('Database is closing'));
+    _pendingAuthorityOperations++;
     final result = Completer<T>();
     _tail = _tail.then((_) async {
       try {
@@ -66,6 +75,8 @@ class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
         onCommit?.call();
       } catch (error, stack) {
         result.completeError(error, stack);
+      } finally {
+        _pendingAuthorityOperations--;
       }
     });
     return result.future;
@@ -135,6 +146,10 @@ class StorageManager {
 
   final Map<String, Future<ManagedConnection>> _opening = {};
   final Map<String, ManagedConnection> _connections = {};
+
+  /// Host-only observation; never opens a DB to manufacture authority.
+  ManagedConnection? connectionIfOpen(String moduleId) =>
+      _connections[moduleId];
   bool _closing = false;
   Future<void>? _closeFuture;
   RandomAccessFile? _applicationLock;

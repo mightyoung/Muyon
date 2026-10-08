@@ -12,6 +12,10 @@ import 'package:uuid/uuid.dart';
 
 import 'chat_log.dart';
 import '../../platform/outbound_tool_ledger.dart';
+import '../../platform/tool_registry.dart' show ToolPlatformException;
+import '../../platform/grants/host_effect_intent.dart';
+import '../../platform/grants/host_tool_authorization.dart';
+import '../../platform/grants/host_transfer_ledger.dart';
 import 'task_coordinator.dart';
 
 /// Private key and paired certificates. Plain files are not a substitute.
@@ -709,33 +713,161 @@ class TransferService {
     return frozen.path;
   }
 
+  HostEffectIntent? prepareSendIntent(
+    ToolCallRequest request, {
+    required Map<String, String> allowedMembers,
+    Iterable<ObjectRef> sourceObjects = const [],
+  }) {
+    final node = _node;
+    final peer = node?.peers
+        .where((value) => value.id == request.parameters['peerId'])
+        .firstOrNull;
+    if (node == null ||
+        peer == null ||
+        !node.isPaired(peer.fingerprint) ||
+        peer.fingerprint.isEmpty) {
+      throw const ToolPlatformException(
+        'peer_unavailable',
+        'Verified paired TLS peer required',
+      );
+    }
+    final endpoint = Uri(
+      scheme: 'https',
+      host: peer.address,
+      port: peer.port,
+      path: '/push',
+    );
+    if (request.destination != endpoint.toString()) {
+      throw const ToolPlatformException(
+        'destination_mismatch',
+        'Exact paired TLS destination required',
+      );
+    }
+    final path = request.parameters['path'];
+    final expectedDigest = request.parameters['sourceDigest'];
+    if (path is! String ||
+        expectedDigest is! String ||
+        allowedMembers.isEmpty ||
+        FileSystemEntity.typeSync(path, followLinks: false) !=
+            FileSystemEntityType.file) {
+      throw const ToolPlatformException(
+        'source_invalid',
+        'Managed approved package required',
+      );
+    }
+    final outbox = Directory(p.join(rootPath, 'outbox'));
+    final file = File(path);
+    if (!outbox.existsSync() ||
+        !p.isWithin(
+          outbox.resolveSymbolicLinksSync(),
+          file.resolveSymbolicLinksSync(),
+        )) {
+      throw const ToolPlatformException(
+        'source_invalid',
+        'Managed outbox package required',
+      );
+    }
+    // A complete bounded producer. Larger bodies stay on explicit manual paths.
+    if (file.lengthSync() > 8 * 1024 * 1024) return null;
+    final bytes = file.readAsBytesSync();
+    if (bytes.length > 8 * 1024 * 1024 ||
+        sha256.convert(bytes).toString() != expectedDigest) {
+      throw const ToolPlatformException(
+        'source_changed',
+        'Package bytes differ from approved source',
+      );
+    }
+    final manifest = jsonDecode(utf8.decode(bytes));
+    if (manifest is! Map || manifest['message'] != null) {
+      throw const ToolPlatformException(
+        'source_invalid',
+        'Selected source package required',
+      );
+    }
+    final members = _decodePackage(bytes);
+    if (members.entries.any(
+      (entry) =>
+          allowedMembers[entry.key] != sha256.convert(entry.value).toString(),
+    )) {
+      throw const ToolPlatformException(
+        'scope_mismatch',
+        'Package includes sources outside host scope',
+      );
+    }
+    return HostEffectIntent.transport(
+      toolId: request.toolId,
+      invocationId: request.invocationId,
+      endpoint: endpoint,
+      endpointIdentity: jsonEncode(['paired-tls', peer.id, peer.fingerprint]),
+      content: bytes,
+      sourceObjects: sourceObjects,
+    );
+  }
+
   Future<void> send(
     LanPeer peer,
     String verifiedPackagePath, {
     String? expectedDigest,
     Map<String, String>? allowedMembers,
     void Function()? checkBeforeEffect,
+    HostAuthorizationLink? authorization,
     void Function(int sent, int total)? onProgress,
   }) async {
     final node = _node;
     if (node == null) throw StateError('Device communication is disabled');
-    if (!node.isPaired(peer.fingerprint)) {
-      throw StateError('未配对或已撤销');
+    // Always validate the actual TLS pin, even without a caller callback.
+    void guard() {
+      checkBeforeEffect?.call();
+      authorization?.checkEndpointIdentity(
+        jsonEncode(['paired-tls', peer.id, peer.fingerprint]),
+      );
+      if (!node.isPaired(peer.fingerprint)) throw StateError('未配对或已撤销');
+      if (!node.peers.any(
+        (candidate) =>
+            candidate.id == peer.id &&
+            candidate.address == peer.address &&
+            candidate.port == peer.port &&
+            candidate.fingerprint == peer.fingerprint,
+      )) {
+        throw StateError('对方不在线，或已验证设备目的地发生变化');
+      }
     }
-    final online = node.peers.any(
-      (candidate) =>
-          candidate.id == peer.id && candidate.address == peer.address,
-    );
-    if (!online) throw StateError('对方不在线，没有中继');
+
+    guard();
     final frozen = await freezeForSend(
       verifiedPackagePath,
       expectedDigest: expectedDigest,
       allowedMembers: allowedMembers,
-      checkBeforeEffect: checkBeforeEffect,
+      checkBeforeEffect: guard,
     );
     try {
-      checkBeforeEffect?.call();
-      await node.push(peer, frozen, onProgress: onProgress);
+      guard();
+      final payload = authorization == null
+          ? null
+          : List<int>.unmodifiable(await File(frozen).readAsBytes());
+      if (authorization != null) {
+        authorization.check(
+          outboundLedger.database,
+          authorization.toolId,
+          Uri(
+            scheme: 'https',
+            host: peer.address,
+            port: peer.port,
+            path: '/push',
+          ),
+          sha256.convert(payload!).toString(),
+        );
+      }
+      await node.push(
+        peer,
+        frozen,
+        onProgress: onProgress,
+        checkBeforeEffect: guard,
+        payload: payload,
+        outboundLedger: authorization == null
+            ? null
+            : HostTransferLedger(outboundLedger, authorization),
+      );
     } finally {
       await File(frozen).delete();
     }

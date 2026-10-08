@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inquiry_module/src/features/ai/assistant_confirmation.dart';
+import 'package:crypto/crypto.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/app/inquiry_web_authority.dart';
 import 'package:muyon/platform/storage_manager.dart';
@@ -129,7 +130,10 @@ void recordedChannelTests() {
       );
       expect(rows, hasLength(1));
       expect(rows.single['grant_state'], 'consumed');
-      expect(rows.single['destination'], uri.toString());
+      expect(
+        rows.single['destination'],
+        sha256.convert(utf8.encode(jsonEncode(uri.toString()))).toString(),
+      );
       expect(rows.single['input_digest'], reviews.last.parameterDigest);
     }
 

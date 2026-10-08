@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:muyon/app/inquiry_hub_authority.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/platform/tool_registry.dart';
@@ -81,7 +82,12 @@ void channelTests() {
       );
       expect(rows, hasLength(1));
       expect(rows.single['grant_state'], 'consumed');
-      expect(rows.single['destination'], request.destination.toString());
+      expect(
+        rows.single['destination'],
+        sha256
+            .convert(utf8.encode(jsonEncode(request.destination.toString())))
+            .toString(),
+      );
       expect(rows.single['input_digest'], reviews.last.parameterDigest);
       if (request.publishes) {
         expect(
@@ -313,18 +319,22 @@ void channelTests() {
         },
       );
     }
-    test('cancel before the effect sends nothing and leaves nothing pending', () async {
-      final cancel = AiCancellation();
-      final c = await ready(cancel: cancel);
-      cancel.cancel();
-      await expectLater(c.publish(draft()), throwsA(anything));
-      expect(posts, 0);
-      expect(
-        journal.read(base.toString(), draft()['publication_id']! as String),
-        isNull,
-        reason: 'no attempt may block a later, separately reviewed publication',
-      );
-    });
+    test(
+      'cancel before the effect sends nothing and leaves nothing pending',
+      () async {
+        final cancel = AiCancellation();
+        final c = await ready(cancel: cancel);
+        cancel.cancel();
+        await expectLater(c.publish(draft()), throwsA(anything));
+        expect(posts, 0);
+        expect(
+          journal.read(base.toString(), draft()['publication_id']! as String),
+          isNull,
+          reason:
+              'no attempt may block a later, separately reviewed publication',
+        );
+      },
+    );
     test('lost success reconciles exact business data after reopen and never reposts', () async {
       final c = await ready();
       transport = (r, t, d, c, g, s) async {
