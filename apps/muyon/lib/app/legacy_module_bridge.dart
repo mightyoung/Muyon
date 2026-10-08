@@ -80,28 +80,27 @@ class _PrototypeSectionPageState extends State<_PrototypeSectionPage> {
   );
 }
 
+/// Unchanged inquiry navigation declaration shared with the V2 adapter.
+ModuleDeclaration inquiryDeclaration() => ModuleDeclaration(
+  moduleId: 'inquiry',
+  displayName: 'Folio · 询价台账',
+  tagline: '完整供应商、询价报价和成本业务',
+  iconKey: 'receipt_long',
+  sections: [
+    ModuleSection(
+      id: 'inquiry',
+      label: 'Folio · 询价与成本',
+      builder: (context, section) => _workspacePage(section, 'inquiry'),
+    ),
+  ],
+);
+
 /// The three modules, in the order the host always listed them. Texts are the
 /// ones the home page and the module menu showed before they were declared.
 List<LegacyModuleBridge> legacyBridges(MuyonHost host) => [
   LegacyModuleBridge(
     id: 'inquiry',
-    declaration: ModuleDeclaration(
-      moduleId: 'inquiry',
-      displayName: 'Folio · 询价台账',
-      tagline: '完整供应商、询价报价和成本业务',
-      iconKey: 'receipt_long',
-      sections: [
-        ModuleSection(
-          id: 'inquiry',
-          label: 'Folio · 询价与成本',
-          builder: (context, section) => _workspacePage(section, 'inquiry'),
-        ),
-      ],
-    ),
-    externalActivate: () async {
-      await host.activateInquiry();
-      return host.inquiryError;
-    },
+    declaration: inquiryDeclaration(),
     scopeSource: _InquiryScope(host),
   ),
   LegacyModuleBridge(
@@ -180,6 +179,10 @@ class _InquiryScope extends _LegacyScope {
 
   @override
   Future<List<ObjectRef>> enumerate() async {
+    if (host.modules.state('inquiry').status != ModuleStatus.ready ||
+        host.modules.runtime<ModuleRuntime>('inquiry') == null) {
+      return const [];
+    }
     final inquiry = host.inquiry?.runtime.state.store;
     if (inquiry == null) return const [];
     final refs = <ObjectRef>[];

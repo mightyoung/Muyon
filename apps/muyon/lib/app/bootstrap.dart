@@ -37,6 +37,7 @@ import '../services/models/model_provider.dart';
 import '../services/models/secret_store.dart';
 import '../services/models/profile_repository.dart';
 import 'inquiry_plugin.dart';
+import 'adapters/inquiry_module.dart';
 import 'research_task_bridge.dart';
 
 import 'package:uuid/uuid.dart';
@@ -232,11 +233,12 @@ class MuyonHost {
       final database = await storage.open('muyon', WorkspaceRepository.schema);
       await SchemaCatalog.attach(storage, database);
       await ExecutionStore(database).recoverInterrupted();
-      final host = MuyonHost._(
+      late final MuyonHost host;
+      host = MuyonHost._(
         storage,
         WorkspaceRepository(database),
         ModuleRegistry(
-          modules ?? moduleCatalog(),
+          modules ?? [InquiryBusinessModule(() => host), ...moduleCatalog()],
           knownCapabilities: hostCapabilityIds,
         ),
         CapabilityRegistry(),
@@ -356,7 +358,7 @@ class MuyonHost {
               document.source,
         ],
       );
-      registerBusinessTools(host);
+      registerNonInquiryBusinessTools(host);
       host.scopeAuthority = HostScopeAuthority(
         workspaces: host.workspaces,
         sources: {
@@ -405,44 +407,11 @@ class MuyonHost {
     }
   }
 
-  Future<void>? _openingInquiry;
-  Future<void> activateInquiry() {
-    if (_closing) return Future.error(StateError('Host is closing'));
-    return _openingInquiry ??= _activateInquiry();
-  }
-
-  Future<void> _activateInquiry() async {
-    try {
-      var device = workspaces.setting('deviceId') as String?;
-      if (device == null) {
-        device = const Uuid().v4();
-        await workspaces.setSetting('deviceId', device);
-      }
-      inquiry = await InquiryPlugin.open(
-        storage,
-        deviceId: device,
-        modelProfiles: ProfileRepository(workspaces),
-        modelGateway: services.gateway,
-        tools: tools,
-        approveModelRequest: (preview) =>
-            approveInquiryModelRequest?.call(preview) ?? Future.value(false),
-      );
-      projections.watch(
-        'inquiry',
-        await storage.open('inquiry', InquiryPlugin.schema),
-      );
-      await workspaces.database.write((db) {
-        db.execute('INSERT OR REPLACE INTO module_registry VALUES(?,?,?)', [
-          'inquiry',
-          'ready',
-          null,
-        ]);
-      });
-      inquiryError = null;
-    } catch (e) {
-      inquiryError = e.toString();
-      _openingInquiry = null;
-    }
+  /// Compatibility entry: activation and failure state belong to ModuleHost.
+  Future<void> activateInquiry() async {
+    if (_closing) throw StateError('Host is closing');
+    final state = await modules.activate('inquiry');
+    inquiryError = state.reason;
   }
 
   Future<void> activateResearch() => _activateModule('research');
@@ -465,7 +434,6 @@ class MuyonHost {
     // already admitted by the person before invalidating their runtimes.
     final closingTools = tools.close();
     await personalAgent.close();
-    await _openingInquiry;
     await services.transfer.close();
     await Future.wait(_platformOperations.toList());
     await modules.close();

@@ -6,6 +6,7 @@ import 'package:supplier_core/supplier_core.dart';
 
 import '../app/bootstrap.dart';
 import 'tool_registry.dart';
+import 'host_tool_registration.dart';
 import 'grants/host_effect_intent.dart';
 
 /// Inquiry write tools. They call the same domain functions the pages call
@@ -60,7 +61,11 @@ Future<void> validateInquiryWriteResult(
 ToolCallResult _failed(String reason) =>
     ToolCallResult(status: ToolCallStatus.failed, summary: reason);
 
-void registerInquiryWriteTools(MuyonHost host) {
+void registerInquiryWriteTools(
+  MuyonHost host, {
+  HostToolRegistration? register,
+}) {
+  final registerTool = register ?? host.tools.register;
   void write({
     required String name,
     required String description,
@@ -73,7 +78,7 @@ void registerInquiryWriteTools(MuyonHost host) {
     )
     run,
   }) {
-    host.tools.register(
+    registerTool(
       providerId: 'inquiry',
       descriptor: ToolDescriptor(
         toolId: 'inquiry.$name',

@@ -274,14 +274,22 @@ class ModuleHost implements ModuleLink {
     }
   }
 
+  // Host-owned compatibility channels register during activation and share
+  // the module provider identity and lifecycle.
+  Set<String> _ownedTools(String id) => {
+    ...?_toolIds[id],
+    for (final tool in tools.list())
+      if (tool.providerId == id) tool.descriptor.toolId,
+  };
+
   void _withdraw(String id, String reason) {
-    for (final toolId in _toolIds[id] ?? const <String>[]) {
+    for (final toolId in _ownedTools(id)) {
       tools.setAvailability(toolId, available: false, reason: reason);
     }
   }
 
   void _restore(String id) {
-    for (final toolId in _toolIds[id] ?? const <String>[]) {
+    for (final toolId in _ownedTools(id)) {
       if (tools.inspect(toolId)?.available == false) {
         tools.setAvailability(toolId, available: true);
       }
@@ -302,6 +310,11 @@ class ModuleHost implements ModuleLink {
     if (slot.revoking) return Future.value(slot.state);
     final existing = slot.inflight;
     if (existing != null) return existing;
+    // Completed activation has no work left. Return in the caller's zone;
+    // an in-flight activation above must still finish its durable record.
+    if (slot.runtime != null && slot.state.status == ModuleStatus.ready) {
+      return Future.value(slot.state);
+    }
     final epoch = ++slot.epoch;
     final run = _activate(id, slot, epoch);
     slot.inflight = run;
@@ -309,6 +322,10 @@ class ModuleHost implements ModuleLink {
     unawaited(
       run.then<void>(
         (_) {
+          if (identical(slot.inflight, run) &&
+              slot.state.status == ModuleStatus.ready) {
+            slot.inflight = null;
+          }
           _runs.remove(run);
         },
         onError: (Object error, StackTrace stack) {
@@ -355,7 +372,12 @@ class ModuleHost implements ModuleLink {
       _checkCurrent(slot, epoch);
       _restore(id);
     } catch (error) {
-      if (!_current(slot, epoch)) return slot.state;
+      if (!_current(slot, epoch)) {
+        if (slot.state.status != ModuleStatus.ready) {
+          _withdraw(id, slot.state.reason ?? 'Activation authority ended');
+        }
+        return slot.state;
+      }
       slot.runtime = null;
       final reason = error is _Refused ? error.message : error.toString();
       _set(id, ModuleState(ModuleStatus.failed, reason));

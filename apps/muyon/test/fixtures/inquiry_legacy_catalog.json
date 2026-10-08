@@ -1,0 +1,862 @@
+[
+  {
+    "descriptor": {
+      "id": "inquiry.create_inquiry",
+      "effect": "write",
+      "description": "为一个项目发起询价单：选定若干预算行和供应商，创建一张进行中的询价单。会修改本机询价数据（新增一张询价单），不发送给任何供应商；需要你确认后才执行。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "item_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "minItems": 1,
+            "maxItems": 500
+          },
+          "supplier_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "minItems": 1,
+            "maxItems": 50
+          }
+        },
+        "required": [
+          "project_id",
+          "title",
+          "item_ids",
+          "supplier_ids"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": true,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "selectedObjects"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": true,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.record_quote",
+      "effect": "write",
+      "description": "在一张询价单上记录或修订某供应商对某预算行的报价。需写明当前已有的单价（没有则为 null），与实际不符时不会执行。会修改本机询价数据（新增或更新一条报价），不联系供应商；需要你确认后才执行。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "inquiry_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "item_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "supplier_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "price": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "expected_current_price": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "inquiry_id",
+          "item_id",
+          "supplier_id",
+          "price",
+          "expected_current_price"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": true,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "selectedObjects"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": true,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.set_item_qty",
+      "effect": "write",
+      "description": "修改项目预算行的数量。需写明当前数量，与实际不符时不会执行。会修改本机询价数据（该预算行的数量，成本合计随之变化）；需要你确认后才执行。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "from_qty": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "to_qty": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "item_id",
+          "from_qty",
+          "to_qty"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": true,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "selectedObjects"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": true,
+    "destinationGuard": false,
+    "effectIntent": true
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.set_inquiry_status",
+      "effect": "write",
+      "description": "把询价单在“进行中”和“已结束”之间切换。需写明当前状态，与实际不符时不会执行。会修改本机询价数据（询价单状态）；需要你确认后才执行。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "inquiry_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "from_status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ]
+          },
+          "to_status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ]
+          }
+        },
+        "required": [
+          "inquiry_id",
+          "from_status",
+          "to_status"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": true,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "selectedObjects"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": true,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.describe",
+      "effect": "read",
+      "description": "查看数据模型。不带 type：全部对象类型、关系、规则和人工操作；带 type：该类型每个字段的含义、取值和关系",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "supplier",
+              "contact",
+              "product",
+              "project",
+              "quotation",
+              "project_item",
+              "inquiry",
+              "product_param",
+              "spec_request",
+              "spec_item",
+              "spec_response"
+            ]
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.search",
+      "effect": "read",
+      "description": "按关键词找物料、供应商或项目：名称、别名、型号、编号，也支持拼音首字母（如 lxb）。物料按匹配度排序",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "product",
+              "supplier",
+              "project"
+            ]
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多返回条数，默认 20，上限 50"
+          }
+        },
+        "required": [
+          "type",
+          "keywords"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.get",
+      "effect": "read",
+      "description": "按 id 读取一条记录（任何对象类型，含已删除的）",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "supplier",
+              "contact",
+              "product",
+              "project",
+              "quotation",
+              "project_item",
+              "inquiry",
+              "product_param",
+              "spec_request",
+              "spec_item",
+              "spec_response"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.query",
+      "effect": "read",
+      "description": "按字段条件筛选一类记录并计数。字段名见 describe；十进制按数值比较；列表字段任一元素满足即可；已删除和已合并的记录不返回。返回 total、returned、offset、has_more、next_offset、snapshot 和 rows；后续页须带 snapshot，数据变化则从头重查",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "supplier",
+              "contact",
+              "product",
+              "project",
+              "quotation",
+              "project_item",
+              "inquiry",
+              "product_param",
+              "spec_request",
+              "spec_item",
+              "spec_response"
+            ]
+          },
+          "where": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "op": {
+                  "type": "string",
+                  "enum": [
+                    "eq",
+                    "ne",
+                    "contains",
+                    "gt",
+                    "gte",
+                    "lt",
+                    "lte",
+                    "is_null",
+                    "not_null",
+                    "in"
+                  ]
+                },
+                "value": {
+                  "description": "比较值；in 用数组；is_null/not_null 不需要",
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean",
+                    "null",
+                    "array"
+                  ],
+                  "items": {
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "maxItems": 100
+                }
+              },
+              "required": [
+                "field",
+                "op"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "order_by": {
+            "type": "string",
+            "description": "排序字段，默认按最近修改"
+          },
+          "descending": {
+            "type": "boolean"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多返回条数，默认 20，上限 50"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "跳过条数，默认 0；用 next_offset 继续读取"
+          },
+          "snapshot": {
+            "type": "string",
+            "description": "首次查询返回的 snapshot；offset > 0 时必填，并保持原筛选与排序。数据变化时报错，须从 offset 0 重查"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.related",
+      "effect": "read",
+      "description": "沿关系找引用了某条记录的记录，例如 link=quotation.supplier_id 取某供应商的报价，link=project_item.project_id 取某项目的预算行；后续页须带 snapshot，数据变化则从头重查",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "link": {
+            "type": "string",
+            "enum": [
+              "supplier.merged_into",
+              "product.merged_into",
+              "contact.supplier_id",
+              "quotation.supplier_id",
+              "quotation.product_id",
+              "quotation.contact_id",
+              "quotation.project_id",
+              "quotation.inquiry_id",
+              "inquiry.project_id",
+              "product_param.product_id",
+              "spec_request.project_id",
+              "spec_item.request_id",
+              "spec_item.project_item_id",
+              "spec_item.chosen_product_id",
+              "spec_response.item_id",
+              "spec_response.supplier_id",
+              "spec_response.inquiry_id",
+              "project_item.project_id",
+              "project_item.product_id",
+              "project_item.quotation_id",
+              "inquiry.item_ids",
+              "inquiry.supplier_ids"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "被引用记录的 id"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多返回条数，默认 20，上限 50"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "跳过条数，默认 0；用 next_offset 继续读取"
+          },
+          "snapshot": {
+            "type": "string",
+            "description": "首次查询返回的 snapshot；offset > 0 时必填，并保持原筛选与排序。数据变化时报错，须从 offset 0 重查"
+          }
+        },
+        "required": [
+          "link",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.compare_quotes",
+      "effect": "read",
+      "description": "某物料的全部报价按可比口径（币种+含税口径+单位）分组比价：每条是否可用及原因、最低可用价、是否定标，以及该口径的历史最低/平均/最高/最近成交价。limit 控制每组条数，total/returned/truncated 标明完整性；完整明细用 query/related 带 snapshot 分页",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多返回条数，默认 20，上限 50"
+          }
+        },
+        "required": [
+          "product_id"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.quote_options",
+      "effect": "read",
+      "description": "为某项目的某物料选价：该项目币种和含税口径下的可用报价，可用的在前、有效单价从低到高；给出需求数量 qty 时计入起订量和附加费用分摊。limit 控制条数，每项 total/returned/truncated 标明列表完整性；完整原始明细用 query/related 带 snapshot 分页",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "qty": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多返回条数，默认 20，上限 50"
+          }
+        },
+        "required": [
+          "project_id",
+          "product_id"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.project_budget",
+      "effect": "read",
+      "description": "项目成本预算：各行数量、成本单价、销售单价、金额和提示，分类小计、成本合计、销售合计、毛利。汇总覆盖全部行，limit 控制明细行数，见 total/returned/truncated；完整原始明细用 related 带 snapshot 分页",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "project_id": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多返回条数，默认 20，上限 50"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.data_quality",
+      "effect": "read",
+      "description": "数据质量体检：各类记录数，以及冲突、重复、口径未知、待询价等需要处理的问题数量和处理位置",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.spec_classes",
+      "effect": "read",
+      "description": "参数字典：不带 class 列出设备类别模板；带 class 列出该类别的参数（代码、名称、类型、单位、比较方式、可选值）",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "class": {
+            "type": "string"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.match_item",
+      "effect": "read",
+      "description": "按技术要求匹配物料：给 item_id（技术要求中的需求项），或给 class（类别代码）和 requirement（要求原文）。返回原文、已计算和待核验条件、候选物料的证据状态及最低有效参考报价；参考价不是项目含运费等费用的总成本，也不证明市场价格合理",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "class": {
+            "type": "string"
+          },
+          "requirement": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多返回条数，默认 20，上限 50"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.inquiry_matrix",
+      "effect": "read",
+      "description": "询价单的比价矩阵：每个预算行 × 每家供应商的报价（有效单价、是否可用、是否最低、偏离历史均价百分比），及各供应商已回复行数。limit 控制明细行数，见 total/returned/truncated；完整原始明细用 query/related 带 snapshot 分页",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "inquiry_id": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "最多返回条数，默认 20，上限 50"
+          }
+        },
+        "required": [
+          "inquiry_id"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global"
+    ],
+    "dataModules": [
+      "inquiry"
+    ],
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  },
+  {
+    "descriptor": {
+      "id": "inquiry.object",
+      "effect": "read",
+      "description": "按类型与 id 读取一条本次范围内的询价业务记录（供应商、物料、报价、项目等），返回记录字段。只读取本机询价库，不修改数据，也不发送到设备外。",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "supplier",
+              "contact",
+              "product",
+              "project",
+              "quotation",
+              "project_item",
+              "inquiry",
+              "product_param",
+              "spec_request",
+              "spec_item",
+              "spec_response"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "result": {},
+      "cancel": false,
+      "selectable": true
+    },
+    "available": true,
+    "reason": null,
+    "scopes": [
+      "global",
+      "selectedObjects",
+      "workspace"
+    ],
+    "dataModules": null,
+    "resultGuard": false,
+    "destinationGuard": false,
+    "effectIntent": false
+  }
+]
