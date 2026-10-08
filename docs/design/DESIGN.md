@@ -1,3 +1,4 @@
+> 通用组件库以 [Muyon 设计系统 v6](muyon-design-system.md) 为准；本文其余内容保留为原设计记录。
 <!-- Muyon 设计基准：用户 2026-10-04 指定全部页面沿用 Folio（software-cost-calculator）设计风格。
      本文件逐字复制自 software-cost-calculator@b35eccbe9ddf458a6538fa107baa9b456972a4f8:DESIGN.md（与 origin/main 一致），
      文中相对链接指向原仓库。Muyon 的 Flutter 实现以 packages/inquiry_module/lib/src/app/theme.dart 为准。 -->
