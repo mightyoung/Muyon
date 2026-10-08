@@ -10,7 +10,7 @@
 
 ## 0. 在途任务（最先处理）
 
-- **2026-10-08 更新**：Leader B（ChatGPT，用户指定的 B 角）合入了 REG-2a、REG-2b、UI-1a，以及 AUTH-1b 的 A、B12、B3、输入来源证明与本机写入自动化；leader A 合入 JR-1。leader A 的审查见 [2026-10-08-leader-b-batch-review.md](../reviews/2026-10-08-leader-b-batch-review.md)。进行中：AUTH-1b C 段与类别策略（`task/auth-1b-model-policy`）、R-1 剩余两件。下一步按路线图 §3.1 派 REG-3、REG-4、T-3、S-1。
+- **2026-10-08 更新**：Leader B（ChatGPT，用户指定的 B 角）合入了 REG-2a、REG-2b、UI-1a，以及 AUTH-1b 的 A、B12、B3、输入来源证明与本机写入自动化；leader A 合入 JR-1。leader A 的审查见 [2026-10-08-leader-b-batch-review.md](../reviews/2026-10-08-leader-b-batch-review.md)。AUTH-1b C1/C2 的集成检查点 `ffe6be31` 已获用户限定基线例外批准，本次发布保留 Mac 全量失败结论；[验证备忘录](VERIFICATION-MEMO.md)登记后续截图回归要求。UI/profile入口、实云模型和实机仍后置。进行中：R-1 剩余两件。下一步按路线图 §3.1 派 REG-3、REG-4、T-3、S-1。
 
 - ADR-0004 已采纳（用户 2026-10-07，Q1～Q13 全部按建议）。
 - **已合入**：FOLIO-BYPASS（2026-10-07）、AUTH-1a（授权库，未接线）。

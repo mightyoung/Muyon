@@ -25,3 +25,9 @@ Whole-repository strict analysis: no issues (201.9s). All seven package analyses
 Standalone desktop settings failed at0.57%,5830px both in this merge and independent untouched latest develop0c9ee296770182155b1b700bbf6576f2f5cc184d. Setting FLUTTER_ROOT explicitly did not change the result. Actual PNG SHA256 in both trees: bf18dc615cd18ae20cb211e40ff25f93541c2470dc2f4d48deba612900234411. Inquiry package, UI package and dependency lockfile match develop exactly. This demonstrates the selected failure already exists on the baseline; it does not claim every one of the46 failures was individually rerun.
 
 Raw evidence remains /tmp/auth-c2-integration-verify.log, /tmp/auth-c2-integration-screenshot-diagnostic.log, /tmp/auth-c2-integration-screenshot-font-env.log and /tmp/auth-c2-golden-develop-control.log. No golden update or relaxed assertion. Integration is saved for review; develop publication remains blocked until leader explicitly resolves the baseline gate. The newer0c9ee29 document-only update is preserved by normal merge, not overwritten.
+
+## User-accepted finite baseline exception (2026-10-08)
+
+Subsequent full Inquiry comparison against exact develop4573adb73f32526bc3f3bab8125db923e474f890 found the same281 passed/1 skip/46 failures: canonical cases, image dimensions/different-pixel counts and all184 PNG SHA256 values identical; added/removed/changed0. Exact integrationffe6be31a8a4cb516f8bcc5331a3065cbc142dcd LinuxCI37786931707 completed/success, analyze7/7 and test7/7. No source, golden, skip or assertion changes.
+
+The user explicitly accepted this finite baseline exception and authorized develop publication. This supersedes the publication blocker above, without relabeling the failed Mac gate as green or claiming the unknown root cause resolved. [Verification memo](VERIFICATION-MEMO.md) preserves the decision, evidence summary and mandatory later regression checks. Raw logs/matrices remain outside Git.
