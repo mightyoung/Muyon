@@ -47,7 +47,7 @@
 | AUTH-1b 授权接线（A、B12、B3、输入来源证明、本机写入自动化） | `task/auth-1b-*` | [AUTH-1b.md](AUTH-1b.md) | Codex（Leader B 派发与审查） | AUTH-1a、REG-2 | A、B12、B3、production 输入与自动化已合入（[审查](AUTH-1b-review.md)）；**C 段与类别策略进行中**（`task/auth-1b-model-policy`） |
 | GROK-1 ADR-0004 静态核实与科研导出/导入清单初稿 | `task/grok-1-adr0004-static` | [GROK-1.md](GROK-1.md) | grokbot | — | 已合入（[审查](GROK-1-review.md)）；Q10 清单已确认 |
 | GROK-2 能力覆盖清单初稿（科研、原型、询价） | `task/grok-2-coverage-drafts` | [GROK-2.md](GROK-2.md) | grokbot | GROK-1 | 已合入（[审查](GROK-2-review.md)） |
-| GROK-3 询价敏感字段划分初稿（Q7，交用户确认） | `task/grok-3-sensitivity-draft` | [GROK-3.md](GROK-3.md) | grokbot | — | 已合入（[审查](GROK-3-review.md)）；U1～U10 待用户确认 |
+| GROK-3 询价敏感字段划分初稿（Q7，交用户确认） | `task/grok-3-sensitivity-draft` | [GROK-3.md](GROK-3.md) | grokbot | — | 已合入（[审查](GROK-3-review.md)）；Q7 已确认（2026-10-08） |
 | GROK-4 UI-1b 盘点：硬编码颜色与询价通用部件 | `task/grok-4-ui-inventory` | [GROK-4.md](GROK-4.md) | grokbot | — | 已合入（[审查](GROK-4-review.md)） |
 | UI-0 现状截图与走查 | 并入 `task/r-1-evidence` | [UI-0.md](UI-0.md) | engineer | — | 精简版并入 R-1（第 3 件） |
 | UI-1 设计系统 | 拆为 UI-1a、UI-1b | [UI-1.md](UI-1.md) | — | — | UI-1a 已合入；UI-1b（迁入询价部件、去硬编码颜色）在 FOLIO-BYPASS、REG-4 之后 |
