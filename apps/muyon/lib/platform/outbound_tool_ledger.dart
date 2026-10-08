@@ -5,6 +5,7 @@ import 'package:supplier_core/lan.dart';
 import 'package:uuid/uuid.dart';
 
 import '../services/models/credential_redaction.dart';
+import 'grants/host_tool_authorization.dart';
 import 'mcp_adapter.dart' show maskedEndpoint, redactEndpoint;
 
 /// Body bytes handed to the transport, excluding protocol headers and TLS.
@@ -31,7 +32,14 @@ CREATE TABLE IF NOT EXISTS outbound_tool_requests(
     required Uri destination,
     required String payloadDigest,
     String? taskId,
+    HostAuthorizationLink? authorization,
   }) => database.write((db) {
+    authorization?.reserve(database, toolId, destination, payloadDigest);
+    if (authorization != null &&
+        taskId != null &&
+        taskId != authorization.taskId) {
+      throw StateError('Host task identity mismatch');
+    }
     createTable(db);
     final id = const Uuid().v4();
     final safe = Uri(
@@ -42,16 +50,23 @@ CREATE TABLE IF NOT EXISTS outbound_tool_requests(
     );
     db.execute(
       'INSERT INTO outbound_tool_requests(id,task_id,tool_id,channel,destination,'
-      'payload_digest,state,created_at) VALUES(?,?,?,?,?,?,?,?)',
+      'payload_digest,state,created_at'
+      "${authorization == null ? '' : ',grant_id,authorization_source,review_decision_id'}) VALUES(?,?,?,?,?,?,?,?"
+      "${authorization == null ? '' : ',?,?,?'})",
       [
         id,
-        taskId,
+        authorization?.taskId ?? taskId,
         toolId,
         channel,
         maskedEndpoint(safe),
         payloadDigest,
         'pending',
         _now(),
+        if (authorization != null) ...[
+          authorization.grantId,
+          authorization.authorizationSource,
+          authorization.reviewDecisionId,
+        ],
       ],
     );
     return id;
@@ -86,6 +101,7 @@ CREATE TABLE IF NOT EXISTS outbound_tool_requests(
     String? errorCode,
     bool Function(T)? failedResult,
     bool Function()? isCancelled,
+    HostAuthorizationLink? authorization,
   }) => runDigest(
     toolId: toolId,
     channel: channel,
@@ -97,6 +113,7 @@ CREATE TABLE IF NOT EXISTS outbound_tool_requests(
     errorCode: errorCode,
     failedResult: failedResult,
     isCancelled: isCancelled,
+    authorization: authorization,
   );
 
   Future<T> runDigest<T>({
@@ -110,16 +127,20 @@ CREATE TABLE IF NOT EXISTS outbound_tool_requests(
     String? errorCode,
     bool Function(T)? failedResult,
     bool Function()? isCancelled,
+    HostAuthorizationLink? authorization,
   }) async {
+    authorization?.check(database, toolId, destination, payloadDigest);
     final id = await begin(
       toolId: toolId,
       channel: channel,
       destination: destination,
       payloadDigest: payloadDigest,
       taskId: taskId,
+      authorization: authorization,
     );
     var sent = 0;
     try {
+      authorization?.check(database, toolId, destination, payloadDigest);
       final result = await operation((count) => sent += count);
       final failed = failedResult?.call(result) ?? false;
       await finish(

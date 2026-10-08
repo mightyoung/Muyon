@@ -735,7 +735,12 @@ class TransferService {
     );
     try {
       checkBeforeEffect?.call();
-      await node.push(peer, frozen, onProgress: onProgress);
+      await node.push(
+        peer,
+        frozen,
+        onProgress: onProgress,
+        checkBeforeEffect: checkBeforeEffect,
+      );
     } finally {
       await File(frozen).delete();
     }

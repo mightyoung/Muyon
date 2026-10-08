@@ -75,3 +75,14 @@ leader B 后续批准 A 独立复核后普通合入 develop，并持续实施 B1
 有效 RED→GREEN：真实 producer 缺失、source exclusive 在途仍有 stamp、证明后源变化混合视图、workspace 绑定排队仍有旧 stamp、受管祖先 namespace 换外部同字节目录。还验证 foreign SQLite connection、同大小/恢复 mtime 文件改动、普通 grant/audit 写不影响 scope、真实 ModuleHost pending/failed revocation 即刻失去权威且 activation 不能恢复失败撤销。
 
 最终范围专项 14 条；B1 facts + scope + owner/module/import/binding 关键回归共 +61 All tests passed。七项范围行为变异杀死并逐字节恢复：源 DB version、foreign data_version、文件字节改成 mtime、源 pending、binding pending、跨源复核、namespace pin。strict analyze No issues found；恢复后宿主全量 +978 ~3 All tests passed，exact SHA CI 见提交/执行回报。clean 输入证明继续留给 B3 实际载入历史/memory/source 的消费者；不能把空 references 当 clean，也不在 B1 提前伪造清洁事实。B2/B3、C、真机仍未完成。
+
+
+## B2 基础审查/签发/transport 检查点（整片仍执行中）
+
+新增 HostEffectIntent、HostToolAuthorization 与真实宿主专项。intent 由宿主注册的 producer 创建，不接受 JSON 可信反序列化；完整 URI/config 身份、冻结正文、generation、实时 facts/scope 与最终审批绑定。allow 不补授；Noop reviewed=false；block 独立记录，零审批和真实请求；异常/超时转人工，持久 reason 只保存固定码。规则审批与真实 grant 消费共事务，签发失败全回滚；人工来源 grantId=null，审批/回执/真实请求关联同一 review。一次 transport capability 在同 owner 账本事务排队后及实际边界复核，正文/端点改变和重复提交拒绝。旧 standalone 无12关联字段时不伪造迁移事实。
+
+MCP 已固定 RPC id 与实际正文，完整端点 preflight 在审批前拒绝 origin/其他路径/查询；实际 post 发送审查同 bytes，credentials wait 后与连接后重查。trustedEffects 保持默认 false，直到 B3 card/review 消费者接通。web/hub 宿主 channel 以私有 invocation->intent 表先本地审查，block 在 UI/审批/receipt/transport 前停止；无实际 task 的 UI-only channel taskId 保持 null，不以 session 捏造任务。生产全 schema 默认 Noop 本地链；不加远程审查。
+
+独立 transfer RED 证明真实配对 TLS push 等待账本后撤销宿主权限仍发送。将既有 checkBeforeEffect 传入 LAN push，在 ledger 等待、TLS连接后与流入字节前重查；修复后真实 TLS 专项+状态/聊天后台10条通过。不改变协议、不承诺撤回字节。完整 TLS fingerprint/body/link producer、Agent自动调度、真实输入 clean 证明与 C 仍待交付；不把此安全护栏当完整 transfer 自动授权。
+
+当前合法 WIP 的独立快照用于变异，避免共享源改变。快照基线34条，9项有效行为 mutants 全杀死并逐字节恢复：完整端点身份、body不可变、无授权allow、最终reviewproof、transport字节、MCPorigin、审查后改RPC、block降级、TLS撤销重查。编译无效和冗余单护栏移除的早期 mutant 不算杀死。恢复后 strict No issues found；宿主全量+1006 ~3 All tests passed。额外 web/hub、对应夹具和审查文档作为合法已有工作保留继续核实，不删除、不重置；当前快照逐文件SHA与提交前源一致。原始logs与driver仅/tmp。仍未合develop/main/release；最终整片独立review和父集成门禁不由此checkpoint替代。

@@ -130,3 +130,14 @@ B 拆三个可独立审查的提交。B1/B2 的基础接口默认不自动；B3 
 来源事实 checkpoint `7b5e041b8b82e727f17d47bbd19cc33eca47fd3a` remote HEAD 相同，CI37717681126 completed/success。26 专项、strict、host +964 ~3、6 facts mutants 恢复通过。范围证明子片另有 14 专项、+61 关键回归和 7 scope mutants；其最终提交证据另记。
 
 Ruling: clean proof 由 B3 真实 host 输入载入路径形成，再由 task owner 验证；B1 不从空 references/旧 payload 生成 clean。成本：在证明接线前所有任务仍 unknown，自动许可关闭。首个真实 file/source producer 仅 PrototypeStore 与知识上下文，其他 source 缺覆盖即 null/manual；不把局部覆盖说成全模块已自动授权。
+
+## B2 执行中更新
+
+已实现 host transport intent（无 JSON 可信反序列化）、本地 review 独立记录、同 owner 最终事务签发与 review 关联、人工真实空 grantId、实时 scope/facts/body/endpoint/generation 校验、一次 transport capability 与 receipt/ledger 来源。MCP prepare 分配 RPC id 并固定正文，实际 post 发送同 bytes；MCP 完整 URI preflight 拒绝 same-origin 不同路径/查询，旧调用夹具升级完整端点。web/hub 的宿主私有 invocation->intent 表在 UI review 前接本地审查，block 零 UI/approval/receipt/transport，finally 移除；生产全 schema 默认 Noop 链明确 reviewed=false。旧 standalone 没有12关联列时保持旧人工路径，不伪造迁移事实。
+
+Ruling: 没有实际 task 的 host UI-only channel 审查与账本 taskId 保持 null；不能以 session 字符串捏造任务身份。没有输入 proof 则 unknown/manual。MCP trustedEffects 默认 false，B3 review/card consumer 连接前不启用该 prepare producer；测试显式启用仅提供 real SQLite + loopback 传输证据。generic dynamic external 仍 unknown/manual。
+
+有效 RED：空端点身份/意图摘要、Noop 缺记录/allow 无权限/block 未拦、review 等待后的 revoke/taint/scope/body/endpoint、最终签发回滚/queue、manual/link 缺来源、same-origin preflight、web local block 未拦。初次旧 SSE fixture 没有 UTF-8 charset 导致中文响应写失败，修复字符集并保留中文 exact bytes 断言；不计行为 RED。99 项 helper+MCP/凭据/ledger/A 回归和102项 helper+MCP/web/hub回归通过，strict clean。全量/变异/最终commit/独立review尚待完成；transfer TLS/body/link 和 B3 尚未交付。
+
+
+B2 基础 checkpoint 验证补记：当前源与隔离快照逐文件SHA一致；baseline34，9个有效行为 mutants 全杀死并逐字节恢复，恢复 strict clean、宿主full+1006 ~3。真实TLS ledger queue撤销 RED→GREEN +10回归；完整TLS fingerprint/body/link producer和B3/C仍pending，不宣称整片完成。早期编译无效/只去冗余block护栏的mutant未计杀死。固定SHA CI与checkpoint独立审查后续回报。

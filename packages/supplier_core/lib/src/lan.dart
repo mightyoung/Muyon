@@ -932,10 +932,12 @@ class LanNode {
     LanPeer to,
     String file, {
     void Function(int sent, int total)? onProgress,
+    void Function()? checkBeforeEffect,
     String? messageId,
     String? nonce,
     int? sentAtUnix,
   }) async {
+    checkBeforeEffect?.call();
     final fingerprint = to.fingerprint;
     if (!isPaired(fingerprint)) {
       throw LanException('未配对或已撤销，拒绝发送');
@@ -963,7 +965,9 @@ class LanNode {
         );
         await _audit(destination, bodyHash, (count) async {
           if (_stopped) throw LanException('局域网已关闭');
+          checkBeforeEffect?.call();
           final req = await client.postUrl(destination);
+          checkBeforeEffect?.call();
           req.followRedirects = false;
           req.headers
             ..contentType = ContentType.binary
@@ -989,8 +993,10 @@ class LanNode {
             );
           var sent = 0;
           onProgress?.call(sent, length);
+          checkBeforeEffect?.call();
           await req.addStream(
             File(file).openRead().map((chunk) {
+              checkBeforeEffect?.call();
               sent += chunk.length;
               count(chunk.length);
               onProgress?.call(sent, length);

@@ -165,7 +165,7 @@ Future<ToolCallResult> _callEcho(
     toolId: 'mcp.catalog.echo',
     scope: const AssistantScope.global(),
     parameters: const {},
-    destination: server.endpoint.origin,
+    destination: server.endpoint.toString(),
   );
   return registry.invoke(
     request.withApproval(
@@ -300,7 +300,7 @@ void main() {
           toolId: 'mcp.catalog.echo',
           scope: const AssistantScope.global(),
           parameters: const {},
-          destination: server.endpoint.origin,
+          destination: server.endpoint.toString(),
         );
         final result = await registry.invoke(
           request.withApproval(

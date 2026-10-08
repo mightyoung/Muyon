@@ -7,6 +7,8 @@ import 'package:sqlite3/sqlite3.dart';
 import 'package:uuid/uuid.dart';
 
 import 'grants/grant.dart';
+import 'grants/host_effect_intent.dart';
+import 'grants/host_tool_authorization.dart';
 import 'grants/grant_store.dart';
 import 'grants/tool_grant_context.dart';
 
@@ -64,12 +66,14 @@ class PreparedToolCall {
     this.identityDigest,
     this._authority,
     this._generation,
+    this.effectIntent,
   );
   final ToolCallRequest request;
   final RegisteredToolInfo info;
   final ResolvedAssistantScope resolvedScope;
   final String parameterDigest;
   final String identityDigest;
+  final HostEffectIntent? effectIntent;
   final Object _authority;
   final int _generation;
 }
@@ -82,6 +86,7 @@ class _Tool {
     this.dataModuleIds,
     this.validateResult,
     this.preflight,
+    this.effectIntent,
   );
   RegisteredToolInfo info;
   final Future<ToolCallResult> Function(ToolCallContext) handler;
@@ -90,6 +95,8 @@ class _Tool {
   final Future<void> Function(ResolvedAssistantScope, ToolCallResult)?
   validateResult;
   final void Function(ToolCallRequest)? preflight;
+  final HostEffectIntent? Function(ToolCallRequest, ResolvedAssistantScope)?
+  effectIntent;
   int generation = 1;
 }
 
@@ -109,6 +116,8 @@ class ToolRegistry {
   final _authority = Object();
   final String _sessionId = const Uuid().v4();
   final Map<String, _Tool> _tools = {};
+  final Map<String, HostReviewOutcome> _reviews = {};
+  final Map<String, HostAuthorizationLink> _transportLinks = {};
   final Map<
     String,
     ({
@@ -119,6 +128,16 @@ class ToolRegistry {
     })
   >
   _active = {};
+
+  bool get supportsAuthorizationLinks =>
+      database.raw
+          .select(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='assistant_review_decisions'",
+          )
+          .isNotEmpty &&
+      database.raw
+          .select('PRAGMA table_info(tool_approvals)')
+          .any((row) => row['name'] == 'review_decision_id');
 
   bool _closing = false;
   Future<void>? _closeFuture;
@@ -168,6 +187,8 @@ class ToolRegistry {
     Future<void> Function(ResolvedAssistantScope, ToolCallResult)?
     validateResult,
     void Function(ToolCallRequest)? preflight,
+    HostEffectIntent? Function(ToolCallRequest, ResolvedAssistantScope)?
+    effectIntent,
     bool available = true,
     String? unavailableReason,
   }) {
@@ -198,6 +219,7 @@ class ToolRegistry {
       dataModuleIds == null ? null : Set.unmodifiable(dataModuleIds),
       validateResult,
       preflight,
+      effectIntent,
     );
   }
 
@@ -279,6 +301,16 @@ class ToolRegistry {
             .toList(),
       );
     }
+    final intent = tool.effectIntent?.call(request, scope);
+    if (intent != null &&
+        (intent.toolId != request.toolId ||
+            intent.invocationId != request.invocationId ||
+            intent.endpoint.toString() != request.destination)) {
+      throw const ToolPlatformException(
+        'intent_mismatch',
+        'Host transport identity mismatch',
+      );
+    }
     final parameterDigest = _digest(request.parameters);
     final identity = _digest({
       'invocationId': request.invocationId,
@@ -293,6 +325,7 @@ class ToolRegistry {
       'scope': scope.toJson(),
       'parameterDigest': parameterDigest,
       'destination': request.destination,
+      'effectIntent': intent?.digest,
     });
     return PreparedToolCall._(
       request,
@@ -302,6 +335,7 @@ class ToolRegistry {
       identity,
       _authority,
       tool.generation,
+      intent,
     );
   }
 
@@ -310,8 +344,10 @@ class ToolRegistry {
   Future<String> approve(
     PreparedToolCall prepared, {
     Duration ttl = const Duration(minutes: 2),
+    HostReviewOutcome? review,
   }) async {
     final tool = _require(prepared.request.toolId);
+    _checkReview(prepared, review, manual: true);
     if (!identical(prepared._authority, _authority) ||
         prepared._generation != tool.generation ||
         !tool.info.available ||
@@ -332,12 +368,15 @@ class ToolRegistry {
     final now = clock().toUtc();
     final id = const Uuid().v4();
     await database.write((db) {
+      _checkReview(prepared, review, manual: true);
       db.execute(
         "UPDATE tool_approvals SET state='invalidated' WHERE session_id<>? AND state='issued'",
         [_sessionId],
       );
       db.execute(
-        'INSERT INTO tool_approvals(id,session_id,tool_id,identity_digest,scope_digest,input_digest,destination,issued_at,expires_at,state,consumed_at) VALUES(?,?,?,?,?,?,?,?,?,?,NULL)',
+        'INSERT INTO tool_approvals(id,session_id,tool_id,identity_digest,scope_digest,input_digest,destination,issued_at,expires_at,state,consumed_at'
+        "${review == null ? '' : ',authorization_source,review_decision_id'}) VALUES(?,?,?,?,?,?,?,?,?,?,NULL"
+        "${review == null ? '' : ',?,?'})",
         [
           id,
           _sessionId,
@@ -345,12 +384,17 @@ class ToolRegistry {
           prepared.identityDigest,
           _digest(prepared.resolvedScope.toJson()),
           prepared.parameterDigest,
-          prepared.request.destination,
+          prepared.effectIntent?.destinationDigest ??
+              (prepared.request.destination == null
+                  ? null
+                  : _digest(prepared.request.destination)),
           now.toIso8601String(),
           now.add(ttl).toIso8601String(),
           'issued',
+          if (review != null) ...['manual', review.reviewDecisionId],
         ],
       );
+      if (review != null) _reviews[review.reviewDecisionId!] = review;
     });
     return id;
   }
@@ -387,12 +431,62 @@ class ToolRegistry {
       // Full permission identity, not the redacted host/path audit display.
       destination: prepared.request.destination == null
           ? null
-          : _digest(prepared.request.destination),
+          : prepared.effectIntent?.destinationDigest ??
+                _digest(prepared.request.destination),
       now: clock(),
       taskId: context.taskId,
       conversationId: context.conversationId,
       taskTainted: context.taskTainted,
     );
+  }
+
+  HostAuthorizationLink? authorizationLink(ToolCallRequest request) {
+    if (request.approvalId == null) return null;
+    final rows = database.raw.select(
+      'SELECT * FROM tool_approvals WHERE id=?',
+      [request.approvalId],
+    );
+    if (rows.length != 1 || !rows.single.containsKey('review_decision_id')) {
+      return null;
+    }
+    final proof = _reviews[rows.single['review_decision_id']];
+    if (proof == null) return null;
+    return _transportLinks.putIfAbsent(
+      request.approvalId!,
+      () => proof.transportLink(
+        this,
+        request,
+        isActive: () =>
+            _active[request.replayKey]?.identity ==
+                rows.single['identity_digest'] &&
+            !(_active[request.replayKey]?.cancellation.isCancelled ?? true),
+      ),
+    );
+  }
+
+  HostEffectIntent? currentEffectIntent(PreparedToolCall prepared) {
+    final tool = _require(prepared.request.toolId);
+    if (!identical(prepared._authority, _authority) ||
+        _closing ||
+        !tool.info.available ||
+        prepared._generation != tool.generation) {
+      return null;
+    }
+    return tool.effectIntent?.call(prepared.request, prepared.resolvedScope);
+  }
+
+  void _checkReview(
+    PreparedToolCall prepared,
+    HostReviewOutcome? review, {
+    bool manual = false,
+  }) {
+    if (prepared.effectIntent != null && review == null) {
+      throw const ToolPlatformException(
+        'review_required',
+        'Host transport review required',
+      );
+    }
+    review?.requireCurrent(this, prepared, manual: manual);
   }
 
   static String _grantContextDigest(GrantRequest request) => _digest({
@@ -406,7 +500,15 @@ class ToolRegistry {
   Future<String?> approveWithGrant(
     PreparedToolCall prepared, {
     required String grantId,
+    HostReviewOutcome? review,
   }) async {
+    _checkReview(prepared, review);
+    if (review != null && review.grantId != grantId) {
+      throw const ToolPlatformException(
+        'review_mismatch',
+        'Reviewed permission source required',
+      );
+    }
     if (grants == null ||
         grantContext == null ||
         !identical(grants!.database, database)) {
@@ -439,6 +541,7 @@ class ToolRegistry {
       );
     }
     return database.write((db) {
+      _checkReview(prepared, review);
       _ensureOpen();
       if (!tool.info.available || tool.generation != prepared._generation) {
         throw const ToolPlatformException(
@@ -464,7 +567,8 @@ class ToolRegistry {
         if (row['identity_digest'] != prepared.identityDigest ||
             row['grant_id'] != grantId ||
             row['session_id'] != _sessionId ||
-            row['grant_context_digest'] != _grantContextDigest(bound)) {
+            row['grant_context_digest'] != _grantContextDigest(bound) ||
+            row['review_decision_id'] != review?.reviewDecisionId) {
           throw const ToolPlatformException(
             'idempotency_conflict',
             'Approval identity already used',
@@ -504,7 +608,7 @@ class ToolRegistry {
           ? used.expiresAt!
           : deadline;
       db.execute(
-        'INSERT INTO tool_approvals(id,session_id,tool_id,identity_digest,scope_digest,input_digest,destination,issued_at,expires_at,state,grant_id,authorization_source,grant_context_digest,invocation_id,replay_key) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        'INSERT INTO tool_approvals(id,session_id,tool_id,identity_digest,scope_digest,input_digest,destination,issued_at,expires_at,state,grant_id,authorization_source,grant_context_digest,invocation_id,replay_key,review_decision_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
         [
           id,
           _sessionId,
@@ -521,8 +625,10 @@ class ToolRegistry {
           _grantContextDigest(bound),
           prepared.request.invocationId,
           prepared.request.replayKey,
+          review?.reviewDecisionId,
         ],
       );
+      if (review != null) _reviews[review.reviewDecisionId!] = review;
       return id;
     });
   }
@@ -591,7 +697,16 @@ class ToolRegistry {
     DateTime? approvalDeadline;
     String? sourceGrantId;
     String? sourceContextDigest;
+    String? sourceReviewId, authorizationSource;
+    HostReviewOutcome? reviewProof;
     void checkAuthorization() {
+      if (reviewProof != null) {
+        _checkReview(
+          prepared,
+          reviewProof,
+          manual: authorizationSource == 'manual',
+        );
+      }
       if (_closing || !tool.info.available || tool.generation != generation) {
         throw const ToolPlatformException(
           'unavailable',
@@ -667,6 +782,18 @@ class ToolRegistry {
             'A current one-use host confirmation is required',
           );
         }
+        sourceReviewId = grants.single.containsKey('review_decision_id')
+            ? grants.single['review_decision_id'] as String?
+            : null;
+        authorizationSource = grants.single.containsKey('authorization_source')
+            ? grants.single['authorization_source'] as String?
+            : null;
+        reviewProof = _reviews[sourceReviewId];
+        _checkReview(
+          prepared,
+          reviewProof,
+          manual: authorizationSource == 'manual',
+        );
         sourceGrantId = grants.single.containsKey('grant_id')
             ? grants.single['grant_id'] as String?
             : null;
@@ -684,15 +811,19 @@ class ToolRegistry {
       }
       db.execute(
         'INSERT INTO tool_invocation_receipts(replay_key,invocation_id,identity_digest,tool_id,state,result_json'
-        "${sourceGrantId == null ? '' : ',grant_id,authorization_source'}) VALUES(?,?,?,?,?,NULL"
-        "${sourceGrantId == null ? '' : ',?,?'})",
+        "${authorizationSource == null ? '' : ',grant_id,authorization_source,review_decision_id'}) VALUES(?,?,?,?,?,NULL"
+        "${authorizationSource == null ? '' : ',?,?,?'})",
         [
           request.replayKey,
           request.invocationId,
           prepared.identityDigest,
           request.toolId,
           'running',
-          if (sourceGrantId != null) ...[sourceGrantId, 'grant'],
+          if (authorizationSource != null) ...[
+            sourceGrantId,
+            authorizationSource,
+            sourceReviewId,
+          ],
         ],
       );
       return null;

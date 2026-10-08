@@ -2,11 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
 import '../services/models/credential_redaction.dart';
 import '../services/models/model_gateway.dart' show SecretStore;
 import 'tool_registry.dart';
+import 'grants/host_effect_intent.dart';
+import 'grants/host_tool_authorization.dart';
 import 'outbound_tool_ledger.dart';
 
 /// One external MCP server reached over Streamable HTTP.
@@ -15,9 +18,11 @@ class McpServerConfig {
     required this.id,
     required this.endpoint,
     this.credentialRef,
+    this.endpointIdentity,
   }) {
     final loopback = ['localhost', '127.0.0.1', '::1'].contains(endpoint.host);
     if (!RegExp(r'^[a-z][a-z0-9_-]{0,31}$').hasMatch(id) ||
+        (endpointIdentity != null && endpointIdentity!.trim().isEmpty) ||
         !endpoint.hasAuthority ||
         endpoint.userInfo.isNotEmpty ||
         endpoint.fragment.isNotEmpty ||
@@ -34,6 +39,9 @@ class McpServerConfig {
 
   /// Secret store reference for a bearer token; the token is never stored here.
   final String? credentialRef;
+  final String? endpointIdentity;
+  String get permissionIdentity =>
+      jsonEncode([id, endpointIdentity ?? id, credentialRef]);
 }
 
 /// Query parameter names that carry a credential.
@@ -141,6 +149,8 @@ abstract final class McpAdapter {
     McpServerConfig config, {
     required SecretStore secrets,
     Duration timeout = const Duration(seconds: 30),
+    // B3 enables this only with the host review/confirmation consumer wired.
+    bool trustedEffects = false,
   }) async {
     final client = _McpClient(
       config,
@@ -185,7 +195,25 @@ abstract final class McpAdapter {
             // Remote tools receive only their parameters, never local objects.
             supportedScopes: const {AssistantScopeKind.global},
             dataModuleIds: const {},
-            handler: (context) => _call(client, name, context),
+            preflight: (request) {
+              if (request.destination != config.endpoint.toString()) {
+                throw const ToolPlatformException(
+                  'destination_mismatch',
+                  'Configured MCP endpoint required',
+                );
+              }
+            },
+            effectIntent: trustedEffects
+                ? (request, _) => client.prepareCall(name, request).intent
+                : null,
+            handler: (context) => _call(
+              client,
+              name,
+              context,
+              authorization: trustedEffects
+                  ? registry.authorizationLink(context.request)
+                  : null,
+            ),
           );
           registered.add(toolId);
         } catch (error) {
@@ -214,20 +242,25 @@ abstract final class McpAdapter {
   static Future<ToolCallResult> _call(
     _McpClient client,
     String name,
-    ToolCallContext context,
-  ) async {
+    ToolCallContext context, {
+    HostAuthorizationLink? authorization,
+  }) async {
     final destination = context.request.destination;
-    if (destination != client.config.endpoint.origin) {
+    if (destination != client.config.endpoint.toString()) {
       return ToolCallResult(
         status: ToolCallStatus.failed,
-        summary: 'Approved destination $destination is not this MCP server',
+        summary: 'Configured MCP endpoint required',
       );
     }
     context.checkBeforeEffect();
-    final result = await client.rpc('tools/call', {
-      'name': name,
-      'arguments': context.request.parameters,
-    }, cancellation: context.cancellation);
+    final result = await client.rpc(
+      'tools/call',
+      {'name': name, 'arguments': context.request.parameters},
+      cancellation: context.cancellation,
+      prepared: client.prepareCall(name, context.request),
+      authorization: authorization,
+      checkBeforeEffect: context.checkBeforeEffect,
+    );
     final text = [
       for (final item in result['content'] as List? ?? const [])
         if (item is Map && item['type'] == 'text') '${item['text']}',
@@ -251,6 +284,13 @@ abstract final class McpAdapter {
   }
 }
 
+class _FrozenMcpCall {
+  const _FrozenMcpCall(this.input, this.id, this.intent);
+  final String input;
+  final int id;
+  final HostEffectIntent intent;
+}
+
 class _McpClient {
   _McpClient(this.config, this.secrets, this.timeout, this.ledger);
   final OutboundToolLedger ledger;
@@ -260,6 +300,36 @@ class _McpClient {
   static const _maxBytes = 1024 * 1024;
   String? _session;
   var _nextId = 1;
+  final _prepared = <String, _FrozenMcpCall>{};
+  _FrozenMcpCall prepareCall(String name, ToolCallRequest request) {
+    final input = jsonEncode([name, request.invocationId, request.parameters]);
+    final previous = _prepared[request.replayKey];
+    if (previous != null) {
+      if (previous.input != input) {
+        throw const ToolPlatformException(
+          'idempotency_conflict',
+          'MCP body identity already prepared',
+        );
+      }
+      return previous;
+    }
+    final id = _nextId++;
+    final intent = HostEffectIntent.transport(
+      toolId: request.toolId,
+      invocationId: request.invocationId,
+      endpoint: config.endpoint,
+      endpointIdentity: config.permissionIdentity,
+      content: utf8.encode(
+        jsonEncode({
+          'jsonrpc': '2.0',
+          'id': id,
+          'method': 'tools/call',
+          'params': {'name': name, 'arguments': request.parameters},
+        }),
+      ),
+    );
+    return _prepared[request.replayKey] = _FrozenMcpCall(input, id, intent);
+  }
 
   /// Token used for this server's requests, kept to redact echoes of it.
   String? token;
@@ -294,20 +364,36 @@ class _McpClient {
     String method,
     Map<String, Object?> params, {
     ToolCancellationToken? cancellation,
-  }) => _redacting(() => _rpc(method, params, cancellation: cancellation));
+    _FrozenMcpCall? prepared,
+    HostAuthorizationLink? authorization,
+    void Function()? checkBeforeEffect,
+  }) => _redacting(
+    () => _rpc(
+      method,
+      params,
+      cancellation: cancellation,
+      prepared: prepared,
+      authorization: authorization,
+      checkBeforeEffect: checkBeforeEffect,
+    ),
+  );
 
   Future<Map<String, Object?>> _rpc(
     String method,
     Map<String, Object?> params, {
     ToolCancellationToken? cancellation,
+    _FrozenMcpCall? prepared,
+    HostAuthorizationLink? authorization,
+    void Function()? checkBeforeEffect,
   }) async {
-    final id = _nextId++;
-    final reply = await _post({
-      'jsonrpc': '2.0',
-      'id': id,
-      'method': method,
-      'params': params,
-    }, cancellation: cancellation);
+    final id = prepared?.id ?? _nextId++;
+    final reply = await _post(
+      {'jsonrpc': '2.0', 'id': id, 'method': method, 'params': params},
+      cancellation: cancellation,
+      frozenPayload: prepared?.intent.content,
+      authorization: authorization,
+      checkBeforeEffect: checkBeforeEffect,
+    );
     if (reply == null || reply['id'] != id) {
       throw const FormatException('MCP reply missing or mismatched');
     }
@@ -321,6 +407,9 @@ class _McpClient {
   Future<Map<String, Object?>?> _post(
     Map<String, Object?> message, {
     ToolCancellationToken? cancellation,
+    List<int>? frozenPayload,
+    HostAuthorizationLink? authorization,
+    void Function()? checkBeforeEffect,
   }) async {
     final client = HttpClient()..connectionTimeout = timeout;
     unawaited(
@@ -341,13 +430,18 @@ class _McpClient {
           }
           token = bearer;
         }
-        final payload = utf8.encode(jsonEncode(message));
+        checkBeforeEffect?.call();
+        final payload =
+            frozenPayload ??
+            List<int>.unmodifiable(utf8.encode(jsonEncode(message)));
         return ledger.run(
-          toolId: 'mcp.${config.id}.${message['method']}',
+          toolId:
+              authorization?.toolId ?? 'mcp.${config.id}.${message['method']}',
           channel: 'mcp',
           destination: config.endpoint,
           payload: payload,
           secret: token,
+          authorization: authorization,
           isCancelled: () => cancellation?.isCancelled ?? false,
           failedResult: (reply) =>
               message['id'] != null &&
@@ -358,6 +452,7 @@ class _McpClient {
                       (reply['result'] as Map)['isError'] == true)),
           operation: (countSent) => (() async {
             cancellation?.throwIfCancelled();
+            checkBeforeEffect?.call();
             final request = await client.postUrl(config.endpoint);
             request.followRedirects = false;
             request.headers
@@ -376,6 +471,13 @@ class _McpClient {
                 'Bearer $bearer',
               );
             }
+            checkBeforeEffect?.call();
+            authorization?.check(
+              ledger.database,
+              authorization.toolId,
+              config.endpoint,
+              preparedDigest(payload),
+            );
             request.add(payload);
             countSent(payload.length);
             final response = await request.close();
@@ -407,6 +509,9 @@ class _McpClient {
       client.close(force: true);
     }
   }
+
+  static String preparedDigest(List<int> payload) =>
+      sha256.convert(payload).toString();
 
   /// JSON of a response body. A parse failure quotes part of the body, which a
   /// server may have filled with the token, so the error is fixed text.
