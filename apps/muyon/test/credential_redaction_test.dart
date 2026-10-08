@@ -262,11 +262,10 @@ void main() {
         prompt: '你好',
         profile: profile,
       );
-      expect(task.stage, 'model');
-      await host.personalAgent.confirm(
-        task.id,
-        requestDigest: task.payload['requestDigest'] as String,
-      );
+      expect(task.stage, 'failed');
+      // Standard local mode now attempts the request directly; the same
+      // malformed credential must fail before ledger or bytes.
+      expect(task.state, PersonalTaskState.failed);
       task = host.foundation.task(task.id)!;
       expect(task.state, PersonalTaskState.failed);
       expect(task.error, contains('credential_invalid'));

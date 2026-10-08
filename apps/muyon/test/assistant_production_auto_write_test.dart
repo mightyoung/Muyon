@@ -10,6 +10,8 @@ import 'package:muyon/platform/grants/host_authorization_facts.dart';
 import 'package:muyon/platform/grants/tool_grant_context.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import 'support/confirm_model_reviewer.dart';
+
 void main() {
   for (final mode in [
     'grant',
@@ -28,7 +30,10 @@ void main() {
     final signed = ['grant', 'invalid-after-sign', 'exhausted'].contains(mode);
     test('actual host local quantity write / $mode', () async {
       final root = Directory.systemTemp.createTempSync('auth-auto-host-');
-      final host = await MuyonHost.open(root.path);
+      final host = await MuyonHost.open(
+        root.path,
+        localModelReviewer: const ConfirmModelReviewer(),
+      );
       addTearDown(() async {
         await host.close();
         root.deleteSync(recursive: true);

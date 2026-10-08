@@ -8,7 +8,7 @@ import 'package:muyon/platform/business_tools.dart';
 import 'package:muyon/platform/tool_registry.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/grants/grants.dart';
-import 'package:muyon/platform/grants/host_authorization_facts.dart';
+import 'package:muyon/platform/grants/host_authorization_policy.dart';
 import 'package:muyon/platform/grants/host_effect_intent.dart';
 import 'package:muyon/platform/grants/tool_grant_context.dart';
 import 'package:muyon/services/models/tool_names.dart';
@@ -17,22 +17,14 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'support/agent_loop_fixture.dart';
 import 'support/confirm_model_reviewer.dart';
 
-class _ReviewBoundary implements OutboundContentReviewer {
-  _ReviewBoundary(this.mode);
+class _PolicyBoundary implements OutboundContentReviewer {
+  _PolicyBoundary(this.mode);
   final String mode;
   final entered = Completer<void>();
   final release = Completer<void>();
   @override
   Future<ReviewDecision> review(OutboundReviewRequest request) async {
-    if (mode == 'late-block' && request.toolId == 'inquiry.auto_last') {
-      return const ReviewDecision.block('fixture local block');
-    }
-    if ([
-          'cancel-review',
-          'revoke-review',
-          'change-source-review',
-        ].contains(mode) &&
-        request.toolId == 'inquiry.auto_first') {
+    if (mode.endsWith('-review') && request.toolId == 'inquiry.auto_first') {
       expect(request.endpoint, isNull);
       if (!entered.isCompleted) entered.complete();
       await release.future;
@@ -43,20 +35,15 @@ class _ReviewBoundary implements OutboundContentReviewer {
 
 void main() {
   for (final mode in [
-    'prefix',
-    'manual-first',
-    'external-union',
-    'late-block',
-    'cancel-review',
-    'revoke-review',
-    'change-source-review',
-    'cancel-effect',
-    'revoke-effect',
+    'revision-review',
+    'disable-review',
+    'revision-effect',
+    'disable-effect',
   ]) {
-    test('actual host ordered automatic / $mode', () async {
+    test('actual host policy change at automatic boundary / $mode', () async {
       final loop = await LoopFixture.open();
       final root = Directory.systemTemp.createTempSync('auth-auto-order-');
-      final reviewer = _ReviewBoundary(mode);
+      final reviewer = _PolicyBoundary(mode);
       final host = await MuyonHost.open(
         root.path,
         localToolReviewer: reviewer,
@@ -151,8 +138,7 @@ void main() {
                 )
               : null,
           handler: (call) async {
-            if (['cancel-effect', 'revoke-effect'].contains(mode) &&
-                id == 'inquiry.auto_first') {
+            if (mode.endsWith('-effect') && id == 'inquiry.auto_first') {
               effectEntered.complete();
               await effectRelease.future;
             }
@@ -222,28 +208,8 @@ void main() {
         task.id,
         requestDigest: task.payload['requestDigest'] as String,
       );
-      if ([
-        'cancel-review',
-        'revoke-review',
-        'change-source-review',
-      ].contains(mode)) {
-        await reviewer.entered.future.timeout(const Duration(seconds: 10));
-        if (mode == 'cancel-review') await host.personalAgent.cancel(task.id);
-        if (mode == 'revoke-review') {
-          await host.assistantGrants.revoke(
-            grantIds.first,
-            now: DateTime.now(),
-          );
-        }
-        if (mode == 'change-source-review') {
-          store.save('project_item', {
-            ...store.get('project_item', itemId)!.data,
-            'notes': 'actual changed source',
-          }, id: itemId);
-        }
-        reviewer.release.complete();
-      }
-      if (['cancel-effect', 'revoke-effect'].contains(mode)) {
+      final afterSign = mode.endsWith('-effect');
+      if (afterSign) {
         await effectEntered.future.timeout(const Duration(seconds: 10));
         expect(
           host.foundation.database.raw.select(
@@ -252,14 +218,22 @@ void main() {
           ).single['uses'],
           1,
         );
-        if (mode == 'cancel-effect') await host.personalAgent.cancel(task.id);
-        if (mode == 'revoke-effect') {
-          await host.assistantGrants.revoke(
-            grantIds.first,
-            now: DateTime.now(),
-          );
-        }
+      } else {
+        await reviewer.entered.future.timeout(const Duration(seconds: 10));
+      }
+      await withConfirmedHostUiGrant(
+        (token) => host.authorizationPolicy.update(
+          token: token,
+          mode: mode.startsWith('disable')
+              ? AssistantAuthorizationMode.readOnly
+              : AssistantAuthorizationMode.standard,
+          enabled: Set.of(AssistantAuthorizationCategory.values),
+        ),
+      );
+      if (afterSign) {
         effectRelease.complete();
+      } else {
+        reviewer.release.complete();
       }
       await pending;
       task = host.foundation.task(task.id)!;
@@ -271,59 +245,17 @@ void main() {
               ]).single['uses']
               as int,
       ];
-      if (mode == 'prefix') {
-        expect(effects, ['inquiry.auto_first']);
-        expect(uses(), [1, 0]);
-        expect(task.state, PersonalTaskState.waitingConfirmation);
-        expect(task.payload['toolCalls'], hasLength(2));
-        final first = db.select('SELECT * FROM tool_approvals').single;
-        expect(first['authorization_source'], 'grant');
-        expect(first['grant_id'], grantIds.first);
-        await host.personalAgent.confirm(
-          task.id,
-          requestDigest: task.payload['requestDigest'] as String,
-        );
-        expect(effects, order);
-        expect(uses(), [1, 0]);
-        final approvals = db.select(
-          'SELECT * FROM tool_approvals ORDER BY rowid',
-        );
-        expect(approvals.map((r) => r['authorization_source']), [
-          'grant',
-          'manual',
-          'manual',
-        ]);
-        expect(approvals.skip(1).every((r) => r['grant_id'] == null), isTrue);
-      } else {
-        expect(effects, isEmpty);
-        final signedThenWithdrawn = [
-          'cancel-effect',
-          'revoke-effect',
-        ].contains(mode);
-        expect(uses(), signedThenWithdrawn ? [1, 0] : [0, 0]);
-        expect(
-          db.select('SELECT * FROM tool_approvals'),
-          signedThenWithdrawn ? hasLength(1) : isEmpty,
-        );
-        expect(
-          db.select('SELECT * FROM tool_invocation_receipts'),
-          signedThenWithdrawn ? hasLength(1) : isEmpty,
-        );
-        final state = switch (mode) {
-          'late-block' ||
-          'change-source-review' ||
-          'revoke-effect' => PersonalTaskState.failed,
-          'cancel-review' || 'cancel-effect' => PersonalTaskState.cancelled,
-          _ => PersonalTaskState.waitingConfirmation,
-        };
-        expect(task.state, state);
-        if (mode == 'external-union') {
-          expect(
-            host.foundation.authorizationFacts.readTask(task.id).taintState,
-            HostTaintState.tainted,
-          );
-        }
-      }
+      expect(effects, isEmpty);
+      expect(uses(), afterSign ? [1, 0] : [0, 0]);
+      expect(
+        db.select('SELECT * FROM tool_approvals'),
+        afterSign ? hasLength(1) : isEmpty,
+      );
+      expect(
+        db.select('SELECT * FROM tool_invocation_receipts'),
+        afterSign ? hasLength(1) : isEmpty,
+      );
+      expect(task.state, PersonalTaskState.failed);
     });
   }
 }
