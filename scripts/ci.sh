@@ -50,6 +50,18 @@ for pkg in packages/muyon_module_api packages/muyon_ui packages/prototype_module
   fi
 done
 
+# scripts/test_doctor.sh: doctor scenario tests with fake tools, no network.
+doctor_log=$(bash "$ROOT/scripts/test_doctor.sh" 2>&1; echo "exit=$?")
+doctor_code=${doctor_log##*exit=}
+doctor_summary=$(printf '%s\n' "$doctor_log" | grep -E '^all [0-9]+ scenarios passed$|^[0-9]+ passed, [0-9]+ failed$' | tail -1)
+if [[ "$doctor_code" -eq 0 && -n "$doctor_summary" ]]; then
+  echo "doctor   test_doctor: ok  $doctor_summary"
+else
+  echo "doctor   test_doctor: FAILED (exit $doctor_code)  ${doctor_summary:-NO SUMMARY (crashed or hung)}"
+  printf '%s\n' "$doctor_log" | sed '$d' | sed 's/^/           /'
+  status=1; failed+=("doctor:test_doctor")
+fi
+
 # suite name | working dir | test target
 suites=(
   "module_api|packages/muyon_module_api|test"

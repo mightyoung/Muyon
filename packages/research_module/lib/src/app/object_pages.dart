@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:muyon_ui/muyon_ui.dart';
 
+import '../core/card_title.dart';
 import '../core/models.dart';
 import '../core/research_kinds.dart';
 import 'run_assessment_dialog.dart' show assessmentSummary;
@@ -147,7 +148,7 @@ class ResearchCardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _Page(
-    title: _cardTitle(bodyMarkdown),
+    title: cardTitleFromMarkdown(bodyMarkdown, fallback: '研究卡'),
     children: [
       if (bodyMarkdown.trim().isNotEmpty) _Field('正文', bodyMarkdown),
       _Field('修订号', revisionId),
@@ -222,14 +223,4 @@ String? _withoutSummaryLabel(String? summary) {
   const label = '研究结论：';
   if (summary == null || !summary.startsWith(label)) return summary;
   return summary.substring(label.length);
-}
-
-String _cardTitle(String bodyMarkdown) {
-  for (final line in bodyMarkdown.split('\n')) {
-    final trimmed = line.replaceFirst(RegExp(r'^#+\s*'), '').trim();
-    if (trimmed.isNotEmpty) {
-      return trimmed.length > 60 ? '${trimmed.substring(0, 60)}…' : trimmed;
-    }
-  }
-  return '研究卡';
 }

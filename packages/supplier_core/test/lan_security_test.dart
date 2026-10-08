@@ -306,6 +306,8 @@ void main() {
   test(
     'stop cancels pending uploads and completes cleanup before returning',
     () async {
+      // Guards the contract that stop() does not return until the pending
+      // upload has ended and its partial data has been cleaned up.
       final node = await start();
       final socket = await partial(node);
       final response = expectPeerClose(socket);
