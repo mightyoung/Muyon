@@ -1011,9 +1011,13 @@ class LanNode {
                     : Stream<List<int>>.value(frozenPayload))
                 .map((chunk) {
                   checkBeforeEffect?.call();
-                  sent += chunk.length;
+                  final nextSent = sent + chunk.length;
+                  onProgress?.call(nextSent, length);
+                  // The callback may synchronously withdraw authority. This
+                  // chunk has not been handed to HttpClient yet.
+                  checkBeforeEffect?.call();
+                  sent = nextSent;
                   count(chunk.length);
-                  onProgress?.call(sent, length);
                   return chunk;
                 }),
           );

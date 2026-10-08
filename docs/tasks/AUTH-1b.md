@@ -96,3 +96,8 @@ Valid RED: null producer fails the non-null trusted-intent assertion (fixture sc
 ### B2 TLS independent blockers repaired
 
 The independent b3a7de4 review found actual paired-certificate substitution at the same URI and missing mandatory byte-boundary capability checks when the optional caller callback was omitted. The review is recorded as failed, not overwritten by author results. HostAuthorizationLink now binds actual endpointIdentity; TransferService.send owns an unconditional capability/pair/live-peer guard used through freeze, queue, connection and chunks. Actual paired certificate B cannot use A's review; deadline expiry after TLS connect sends zero bytes without any caller callback. Two real regression fixtures retained, +36 focused passed; two isolated behavior mutants killed/restored; strict clean and restored full +1009 ~3 passed. Independent repair re-review and exact-head CI remain gates before acceptance. B3 consumer WIP is separate and not part of this checkpoint.
+
+
+### B12 broader independent review reopened the gate
+
+Parent review of fixed `af352970d8477f29e6b0ee04ebcbd4fde7539c34` reproduced two additional windows: positive TLS progress callback expiry before chunk delivery, and first/reopened scope proof trusting an already swapped ancestor. Earlier focused green/CI did not cover them; the baseline remains blocked until repair review. `task/auth-1b-b12-fixes` isolates both fixes from B3 partial commits and WIP. Details and final validation are recorded in [AUTH-1b-B12-boundary-repair.md](AUTH-1b-B12-boundary-repair.md). Production automatic calls remain off, historical databases are retained, and develop integration is reserved for the parent after independent review.

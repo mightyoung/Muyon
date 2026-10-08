@@ -328,6 +328,74 @@ void main() {
     expect(proof(), isNull);
   });
 
+  test('first proof rejects an ancestor symlink with identical bytes', () {
+    final namespace = Directory('${root.path}/namespace')..createSync();
+    final managed = Directory('${namespace.path}/files')..createSync();
+    File('${managed.path}/data.txt').writeAsStringSync('same');
+    final isolated = HostScopeAuthority(
+      workspaces: workspaces,
+      sources: {
+        'notes': HostScopeSource(
+          database: source,
+          authorityRevision: () => 'source',
+          managedFilesRoot: () => managed.path,
+        ),
+      },
+    );
+    String? proof() =>
+        isolated.stamp(AssistantScope.workspace(workspace), {'notes'});
+    namespace.renameSync('${root.path}/original-namespace');
+    final replacement = Directory('${root.path}/outside/files')
+      ..createSync(recursive: true);
+    File('${replacement.path}/data.txt').writeAsStringSync('same');
+    Link('${root.path}/namespace').createSync('${root.path}/outside');
+    expect(proof(), isNull);
+  });
+
+  test(
+    'reopened owner and producer reject an already swapped ancestor',
+    () async {
+      final namespace = Directory('${root.path}/namespace')..createSync();
+      final managed = Directory('${namespace.path}/files')..createSync();
+      File('${managed.path}/data.txt').writeAsStringSync('same');
+      final isolated = HostScopeAuthority(
+        workspaces: workspaces,
+        sources: {
+          'notes': HostScopeSource(
+            database: source,
+            authorityRevision: () => 'source',
+            managedFilesRoot: () => managed.path,
+          ),
+        },
+      );
+      String? proof() =>
+          isolated.stamp(AssistantScope.workspace(workspace), {'notes'});
+      expect(proof(), isNotNull);
+      namespace.renameSync('${root.path}/original-namespace');
+      final replacement = Directory('${root.path}/outside/files')
+        ..createSync(recursive: true);
+      File('${replacement.path}/data.txt').writeAsStringSync('same');
+      Link('${root.path}/namespace').createSync('${root.path}/outside');
+      await source.close();
+      source = ManagedConnection(sqlite3.open('${root.path}/notes.sqlite'));
+      final reopened = HostScopeAuthority(
+        workspaces: workspaces,
+        sources: {
+          'notes': HostScopeSource(
+            database: source,
+            authorityRevision: () => 'source',
+            managedFilesRoot: () => managed.path,
+          ),
+        },
+      );
+      expect(
+        reopened.stamp(AssistantScope.workspace(workspace), {'notes'}),
+        isNull,
+      );
+      expect(proof(), isNull);
+    },
+  );
+
   test('files exceeding synchronous proof budget stay unknown', () {
     File('${files.path}/large.bin')
         .writeAsBytesSync(Uint8List(8 * 1024 * 1024 + 1));
