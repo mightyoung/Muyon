@@ -10,6 +10,8 @@ import '../services/models/model_provider.dart';
 import '../services/models/openai_compat_provider.dart';
 import '../platform/tool_registry.dart';
 import '../platform/grants/outbound_content_reviewer.dart';
+import '../platform/grants/tool_grant_context.dart';
+import '../platform/grants/host_scope_authority.dart';
 import 'agent_budget.dart';
 import 'agent_event_sink.dart';
 import 'context_compactor.dart';
@@ -74,6 +76,43 @@ class PersonalAgent {
   final String executionDeviceId;
   final OutboundContentReviewer? toolReviewer;
   final Budget budget;
+
+  /// Derives authority from this live dispatcher and actual host source owners.
+  /// Recreated snapshots and callers outside the Agent have no invocation owner.
+  ToolGrantContext? hostGrantContext(
+    ToolCallRequest request,
+    HostScopeAuthority authority,
+  ) {
+    final live = _ctx.invocationRequests[request.invocationId];
+    final facts = _ctx.factsFor(request);
+    if (live == null ||
+        facts == null ||
+        facts.conversationId == null ||
+        AgentContext.digest([
+              live.toolId,
+              live.replayKey,
+              live.scope.toJson(),
+              live.parameters,
+              live.destination,
+            ]) !=
+            AgentContext.digest([
+              request.toolId,
+              request.replayKey,
+              request.scope.toJson(),
+              request.parameters,
+              request.destination,
+            ])) {
+      return null;
+    }
+    final modules = tools.authorityModules(request.toolId);
+    return ToolGrantContext(
+      taskId: facts.taskId,
+      conversationId: facts.conversationId!,
+      taskTainted: facts.requiresConfirmation,
+      scopeRevision: authority.stamp(request.scope, modules) ?? '',
+      allowedModuleIds: modules,
+    );
+  }
 
   /// Old name of `budget.maxSteps`.
   int get maxRounds => budget.maxSteps;

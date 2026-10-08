@@ -275,7 +275,10 @@ class AgentDispatch {
     return false;
   }
 
-  Future<void> _openCard(PersonalTask task) async {
+  Future<void> _openCard(
+    PersonalTask task, {
+    bool allowAutomatic = true,
+  }) async {
     if (await _stopBeforeCard(task)) return;
     final card = AgentContext.cardCalls(task);
     if (card.isEmpty) {
@@ -309,6 +312,28 @@ class AgentDispatch {
       } catch (_) {
         if (await _stopBeforeCard(task)) return;
         await ctx.fail(task, '操作来源或审查记录已变化，该操作未执行', code: 'review_stale');
+        return;
+      }
+    }
+    if (allowAutomatic && authorization != null) {
+      // Only a contiguous authorized prefix may run. A later authorized call
+      // cannot jump over an earlier manual call or its dependency.
+      final automatic = <String>{};
+      for (final call in card) {
+        final id = call['invocationId'] as String;
+        final proof = ctx.toolReviews[id];
+        if (proof?.action != ReviewAction.allow || proof?.grantId == null) {
+          break;
+        }
+        automatic.add(id);
+      }
+      if (automatic.isNotEmpty) {
+        final running = task.copy(_stage(card, state: 'running'));
+        if (!await ctx.commit(running, canCommit: () => _cardAllowed(task))) {
+          await _stopBeforeCard(task);
+          return;
+        }
+        await executeCard(running, automatic, automatic: true);
         return;
       }
     }
@@ -410,6 +435,7 @@ class AgentDispatch {
   bool _external(ToolCallRequest request) {
     final info = ctx.tools.inspect(request.toolId);
     return info != null &&
+        !ctx.tools.isPureLocalWrite(request) &&
         (info.accessLevel == ToolAccessLevel.external ||
             info.providerId.startsWith('mcp:') ||
             info.descriptor.moduleId == 'inquiry' ||
@@ -570,7 +596,11 @@ class AgentDispatch {
   /// `identityDigest` compared with the card's, approved (one use) and
   /// invoked, and has its own receipt. A call that does not succeed stops the
   /// rest; so does a change of scope (`stale_scope`).
-  Future<void> executeCard(PersonalTask task, Set<String> selected) async {
+  Future<void> executeCard(
+    PersonalTask task,
+    Set<String> selected, {
+    bool automatic = false,
+  }) async {
     final token = ToolCancellationToken();
     ctx.toolTokens[task.id] = token;
     ctx.toolActive.add(task.id);
@@ -595,6 +625,7 @@ class AgentDispatch {
           continue;
         }
         if (!selected.contains(id)) {
+          if (automatic) break;
           current = _record(current, index, 'not_approved');
           continue;
         }
@@ -640,9 +671,14 @@ class AgentDispatch {
               ctx.invocationTasks[request.invocationId] = task.id;
               final reviewed =
                   ctx.toolReviews[id] ?? await authorization.review(prepared);
-              approval = await authorization.confirm(reviewed);
+              approval = automatic
+                  ? await authorization.sign(reviewed)
+                  : await authorization.confirm(reviewed);
               if (approval == null) throw StateError('review_block');
             } else {
+              if (automatic) {
+                throw StateError('automatic_authority_unavailable');
+              }
               approval = await ctx.tools.approve(prepared!);
             }
             await ctx.event(current, AgentEventType.approval, {
@@ -732,6 +768,10 @@ class AgentDispatch {
       }
       if (cancelled && ran == 0) {
         await ctx.settle(current, PersonalTaskState.cancelled, null);
+        return;
+      }
+      if (automatic && !stopped && AgentContext.cardCalls(current).isNotEmpty) {
+        await _openCard(current, allowAutomatic: false);
         return;
       }
       await _complete(current, lateCancel: cancelled);

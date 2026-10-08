@@ -112,7 +112,7 @@ class ToolRegistry {
   final Future<ResolvedAssistantScope> Function(AssistantScope) resolveScope;
   final DateTime Function() clock;
   final GrantStore? grants;
-  final ToolGrantContext Function(ToolCallRequest)? grantContext;
+  final ToolGrantContext? Function(ToolCallRequest)? grantContext;
   final _authority = Object();
   final String _sessionId = const Uuid().v4();
   final Map<String, _Tool> _tools = {};
@@ -226,6 +226,28 @@ class ToolRegistry {
   List<RegisteredToolInfo> list() =>
       List.unmodifiable(_tools.values.map((tool) => tool.info));
   RegisteredToolInfo? inspect(String toolId) => _tools[toolId]?.info;
+
+  Set<String> authorityModules(String toolId) {
+    final tool = _require(toolId);
+    return Set.unmodifiable(
+      tool.dataModuleIds ?? {tool.info.descriptor.moduleId},
+    );
+  }
+
+  bool isPureLocalWrite(ToolCallRequest request) {
+    final tool = _require(request.toolId);
+    if (tool.info.accessLevel != ToolAccessLevel.write ||
+        request.destination != null) {
+      return false;
+    }
+    // Only the host's producer can establish this lane, never tool JSON.
+    final scope = ResolvedAssistantScope(
+      requested: request.scope,
+      objects: request.scope.objects,
+    );
+    return tool.effectIntent?.call(request, scope)?.isTransport == false;
+  }
+
   void setAvailability(
     String toolId, {
     required bool available,
@@ -305,7 +327,10 @@ class ToolRegistry {
     if (intent != null &&
         (intent.toolId != request.toolId ||
             intent.invocationId != request.invocationId ||
-            intent.endpoint.toString() != request.destination)) {
+            (intent.isTransport
+                ? intent.endpoint.toString() != request.destination
+                : tool.info.accessLevel != ToolAccessLevel.write ||
+                      request.destination != null))) {
       throw const ToolPlatformException(
         'intent_mismatch',
         'Host transport identity mismatch',
@@ -373,10 +398,13 @@ class ToolRegistry {
         "UPDATE tool_approvals SET state='invalidated' WHERE session_id<>? AND state='issued'",
         [_sessionId],
       );
+      final sourceColumn = db
+          .select('PRAGMA table_info(tool_approvals)')
+          .any((row) => row['name'] == 'authorization_source');
       db.execute(
         'INSERT INTO tool_approvals(id,session_id,tool_id,identity_digest,scope_digest,input_digest,destination,issued_at,expires_at,state,consumed_at'
-        "${review == null ? '' : ',authorization_source,review_decision_id'}) VALUES(?,?,?,?,?,?,?,?,?,?,NULL"
-        "${review == null ? '' : ',?,?'})",
+        "${sourceColumn ? ',authorization_source' : ''}${review == null ? '' : ',review_decision_id'}) VALUES(?,?,?,?,?,?,?,?,?,?,NULL"
+        "${sourceColumn ? ',?' : ''}${review == null ? '' : ',?'})",
         [
           id,
           _sessionId,
@@ -391,7 +419,8 @@ class ToolRegistry {
           now.toIso8601String(),
           now.add(ttl).toIso8601String(),
           'issued',
-          if (review != null) ...['manual', review.reviewDecisionId],
+          if (sourceColumn) 'manual',
+          if (review != null) review.reviewDecisionId,
         ],
       );
       if (review != null) _reviews[review.reviewDecisionId!] = review;
@@ -411,9 +440,10 @@ class ToolRegistry {
       );
     }
     final context = grantContext!(prepared.request);
-    if (!context.allowedModuleIds.containsAll(
-      prepared.resolvedScope.moduleIds,
-    )) {
+    if (context == null ||
+        !context.allowedModuleIds.containsAll(
+          prepared.resolvedScope.moduleIds,
+        )) {
       throw const ToolPlatformException(
         'scope_mismatch',
         'Host permission boundary excludes resolved objects',
@@ -526,8 +556,8 @@ class ToolRegistry {
         'Approval preview is stale',
       );
     }
-    final scopeRevision = grantContext!(prepared.request).scopeRevision;
-    if (scopeRevision.isEmpty) {
+    final scopeRevision = grantContext!(prepared.request)?.scopeRevision;
+    if (scopeRevision == null || scopeRevision.isEmpty) {
       throw const ToolPlatformException(
         'invalid_grant_request',
         'Host scope revision required',
@@ -551,7 +581,7 @@ class ToolRegistry {
       }
       // Resolving under the write queue would deadlock lazy activation and
       // projection work. The host revision fences intervening writes instead.
-      if (grantContext!(prepared.request).scopeRevision != scopeRevision) {
+      if (grantContext!(prepared.request)?.scopeRevision != scopeRevision) {
         throw const ToolPlatformException(
           'stale_scope',
           'Scope changed while signing was queued',
@@ -693,7 +723,7 @@ class ToolRegistry {
     final request = prepared.request;
     final tool = _require(request.toolId);
     final generation = tool.generation;
-    final scopeRevision = grantContext?.call(request).scopeRevision;
+    final scopeRevision = grantContext?.call(request)?.scopeRevision;
     DateTime? approvalDeadline;
     String? sourceGrantId;
     String? sourceContextDigest;
@@ -716,7 +746,7 @@ class ToolRegistry {
       if (sourceGrantId != null) {
         if (scopeRevision == null ||
             scopeRevision.isEmpty ||
-            grantContext?.call(request).scopeRevision != scopeRevision) {
+            grantContext?.call(request)?.scopeRevision != scopeRevision) {
           throw const ToolPlatformException(
             'stale_scope',
             'Scope changed before the authorized effect',
