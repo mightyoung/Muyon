@@ -621,7 +621,9 @@ class AgentModelTurn {
             ModelToolCall(
               id: c.callId,
               name: c.name,
-              arguments: jsonEncode(c.arguments),
+              arguments: jsonEncode(
+                AgentDispatch.displayParameters(c.arguments!),
+              ),
             ).toJson(),
         ],
       },

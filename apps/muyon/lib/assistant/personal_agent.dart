@@ -179,7 +179,7 @@ class PersonalAgent {
     await repository.appendMessage(
       conversationId,
       'user',
-      '运行工具 $toolId：${jsonEncode(parameters)}',
+      '运行工具 $toolId：${jsonEncode(AgentDispatch.displayParameters(parameters))}',
     );
     await _dispatch.dispatch(task, [
       Planned(toolId, parameters, destination: destination),

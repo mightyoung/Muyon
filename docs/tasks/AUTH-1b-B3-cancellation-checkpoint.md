@@ -17,3 +17,6 @@ native ToolCallComplete.arguments 的 destination 以前未进入 Planned，带�
 有效 RED：隔离 driver waitingConfirmation vs cancelled；公开 cancel API 的同窗口；review INSERT 失败后 failed vs cancelled；native 调用已带 destination 但实际任务提前 failed。早期缺 dart:async 的编译失败及诊断用 timeout 不计 RED。
 
 52 项取消／本地阻断／人工确认／批次失败／事件回归通过。独立 /tmp 副本三项行为变异均失败且编译有效：移除取消 fence 组合、移除 review 失败出口取消复核、丢 native destination；逐字节恢复，strict `No issues found! (ran in 7.0s)`。恢复后全量 `+1017 ~3: All tests passed!`；三份恢复源码/回归与提交前分支逐字节一致。原始 logs/driver 只在 /tmp。固定提交独立复审与 exact-head CI 仍是接纳门禁，不能将作者绿灯冒称独立通过。
+
+
+独立 d022 复审关闭旧取消 BLOCK，但复现 native destination query 经参数/assistant arguments 持久化的新 BLOCK；详见 [AUTH-1b-B3-review.md](AUTH-1b-B3-review.md)。d022 CI 成功不覆盖此发现，新修复必须重新通过独立门禁。

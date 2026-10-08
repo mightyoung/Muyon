@@ -46,6 +46,17 @@ class AgentDispatch {
           ).toString();
   }
 
+  /// Display/persistence snapshot only. Actual arguments stay in the live
+  /// invocation binding; a restart cannot reconstruct credential queries.
+  static Map<String, Object?> displayParameters(
+    Map<String, Object?> parameters,
+  ) => {
+    for (final entry in parameters.entries)
+      entry.key: entry.key == 'destination' && entry.value is String
+          ? _displayDestination(entry.value as String)
+          : entry.value,
+  };
+
   /// Fixed texts for a call that did not run; the model's own words are never
   /// used.
   static const _notRunText = {
@@ -68,7 +79,7 @@ class AgentDispatch {
     'index': index,
     'callId': p.callId,
     'toolId': p.toolId,
-    'parameters': p.parameters,
+    'parameters': displayParameters(p.parameters),
     'destination':
         prepared?.effectIntent?.displayDestination ??
         _displayDestination(p.destination),
