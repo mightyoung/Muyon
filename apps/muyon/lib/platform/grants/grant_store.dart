@@ -7,9 +7,8 @@ import 'package:uuid/uuid.dart';
 import '../../app/host_ui_grant_authority.dart' show HostUiGrantToken;
 import 'grant.dart';
 
-/// Pure library storage. Migration 11 is deliberately not appended to the v8
-/// host schema: migrations 9/10 belong to REG-2a/2b and must arrive first.
-/// Integration must install this migration through the existing main DB owner.
+/// Host authorization storage. Migration 11 is installed by the main DB owner.
+/// Transaction-level use is reserved for the host registry signing approvals.
 final class GrantStore {
   GrantStore(this.database);
   final ManagedDatabase database;
@@ -142,20 +141,39 @@ CREATE INDEX assistant_grant_audit_grant ON assistant_grant_audit(grant_id,id);
   /// Revalidation and increment share one transaction. A stale resolver result
   /// cannot bypass revocation, expiry, taint, binding or concurrent exhaustion.
   Future<AssistantGrant?> recordUse(String grantId, GrantRequest request) =>
-      database.write((db) {
-        final current = _get(db, grantId);
-        if (current == null || !_canUse(current, request)) {
-          return null;
-        }
-        db.execute('UPDATE assistant_grants SET uses=uses+1 WHERE grant_id=?', [
-          grantId,
-        ]);
-        final result = _get(db, grantId)!;
-        _audit(db, grantId, 'used', request.now, request.taskId, {
-          'uses': result.uses,
-        });
-        return result;
-      });
+      database.write((db) => recordUseInTransaction(db, grantId, request));
+
+  /// Host-only composition with approval INSERT in the owner's transaction.
+  /// Never exposed through ToolRegistrar or registered as a model-callable tool.
+  AssistantGrant? recordUseInTransaction(
+    Database db,
+    String grantId,
+    GrantRequest request,
+  ) {
+    if (!identical(db, database.raw) || db.autocommit) {
+      throw StateError('Use requires the owner write transaction');
+    }
+    final current = _get(db, grantId);
+    if (current == null || !_canUse(current, request)) return null;
+    db.execute('UPDATE assistant_grants SET uses=uses+1 WHERE grant_id=?', [
+      grantId,
+    ]);
+    final result = _get(db, grantId)!;
+    _audit(db, grantId, 'used', request.now, request.taskId, {
+      'uses': result.uses,
+    });
+    return result;
+  }
+
+  /// Only for an already-issued one-use approval. Its own consumption must not
+  /// invalidate it; revocation, expiry, taint and every binding still apply.
+  bool permitsIssuedApproval(String grantId, GrantRequest request) {
+    final grant = _get(database.raw, grantId);
+    return grant != null &&
+        grant.uses > 0 &&
+        !_revoking.contains(grantId) &&
+        grant.matches(request, checkUseLimit: false);
+  }
 
   /// Stops matching synchronously when requested, before the queued durable
   /// write. On a write failure it remains blocked locally until retry succeeds.

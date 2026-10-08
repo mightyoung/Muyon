@@ -25,7 +25,7 @@ void _receipt(
   String state, {
   ToolCallResult? result,
 }) => f.repo.database.raw.execute(
-  'INSERT INTO tool_invocation_receipts VALUES(?,?,?,?,?,?)',
+  'INSERT INTO tool_invocation_receipts(replay_key,invocation_id,identity_digest,tool_id,state,result_json) VALUES(?,?,?,?,?,?)',
   [
     call['invocationId'],
     call['invocationId'],

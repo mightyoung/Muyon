@@ -9,12 +9,13 @@ import 'package:sqlite3/sqlite3.dart';
 
 void main() {
   group('migration 10', () {
-    test('the host schema ends with module-grants at version 10', () {
+    test('the host preserves module-grants at migration 10', () {
       final schema = WorkspaceRepository.schema;
-      expect(schema.version, 10);
-      expect(schema.migrations.last.id, 'module-grants');
-      expect(schema.migrations.last.version, 10);
-      expect(schema.definitionDigest, 'foundation-v10');
+      expect(schema.version, 12);
+      expect(schema.migrations[9].id, 'module-grants');
+      expect(schema.migrations[9].version, 10);
+      expect(schema.migrations[9].definitionDigest, 'foundation-v10');
+      expect(schema.definitionDigest, 'foundation-v12');
     });
 
     test('an existing v8 database upgrades and keeps its data', () async {

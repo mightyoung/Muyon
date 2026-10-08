@@ -7,11 +7,18 @@ import 'package:muyon/workspace/workspace_repository.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+// Keep these historical v10/v11 regressions independent of the live target.
+final _historicalSchema10 = ModuleSchema(
+  version: 10,
+  definitionDigest: 'foundation-v10',
+  migrations: WorkspaceRepository.schema.migrations.take(10).toList(),
+);
+
 ModuleSchema schema11({bool fail = false}) => ModuleSchema(
   version: 11,
   definitionDigest: 'foundation-v11',
   migrations: [
-    ...WorkspaceRepository.schema.migrations,
+    ..._historicalSchema10.migrations,
     ModuleMigration(
       version: 11,
       id: GrantStore.migration.id,
@@ -72,7 +79,7 @@ void main() {
         final before = sqlite3.open(getPath());
         final original = history(before);
         before.close();
-        final owner = await manager.open('muyon', WorkspaceRepository.schema);
+        final owner = await manager.open('muyon', _historicalSchema10);
         expect(owner.raw.userVersion, 10);
         expect(history(owner.raw).take(original.length).toList(), original);
         expect(
@@ -112,10 +119,7 @@ void main() {
         }
         await manager.close();
         restart();
-        final reopened = await manager.open(
-          'muyon',
-          WorkspaceRepository.schema,
-        );
+        final reopened = await manager.open('muyon', _historicalSchema10);
         expect(history(reopened.raw).take(original.length).toList(), original);
         await manager.close();
         restart();
@@ -131,7 +135,7 @@ void main() {
   test(
     'fresh canonical v10 contains real ledger and no compatibility fiction',
     () async {
-      final owner = await manager.open('muyon', WorkspaceRepository.schema);
+      final owner = await manager.open('muyon', _historicalSchema10);
       expect(owner.raw.userVersion, 10);
       expect(history(owner.raw)[8][1], 'outbound-tool-requests');
       expect(
@@ -144,7 +148,7 @@ void main() {
   );
   test('INSERT OR REPLACE cannot replace a completed repair fact', () async {
     install('legacy-v10');
-    final owner = await manager.open('muyon', WorkspaceRepository.schema);
+    final owner = await manager.open('muyon', _historicalSchema10);
     final original = owner.raw
         .select('SELECT * FROM host_migration_compatibility')
         .single
@@ -176,7 +180,7 @@ FROM host_migration_compatibility
     );
     await manager.close();
     restart();
-    final reopened = await manager.open('muyon', WorkspaceRepository.schema);
+    final reopened = await manager.open('muyon', _historicalSchema10);
     expect(
       reopened.raw
           .select('SELECT * FROM host_migration_compatibility')
@@ -209,13 +213,13 @@ FROM host_migration_compatibility
                 version: 10,
                 definitionDigest: 'foundation-v10',
                 migrations: [
-                  ...WorkspaceRepository.schema.migrations.take(9),
+                  ..._historicalSchema10.migrations.take(9),
                   ModuleMigration(
                     version: 10,
                     id: 'module-grants',
                     definitionDigest: 'foundation-v10',
                     migrate: (db) {
-                      WorkspaceRepository.schema.migrations.last.migrate(db);
+                      _historicalSchema10.migrations.last.migrate(db);
                       throw StateError('injected after module grants DDL');
                     },
                   ),
@@ -240,10 +244,7 @@ FROM host_migration_compatibility
         );
         inspected.close();
         expect(
-          (await manager.open(
-            'muyon',
-            WorkspaceRepository.schema,
-          )).raw.userVersion,
+          (await manager.open('muyon', _historicalSchema10)).raw.userVersion,
           10,
         );
       },
@@ -263,13 +264,13 @@ FROM host_migration_compatibility
           version: 10,
           definitionDigest: 'foundation-v10',
           migrations: [
-            ...WorkspaceRepository.schema.migrations.take(9),
+            ..._historicalSchema10.migrations.take(9),
             ModuleMigration(
               version: 10,
               id: 'module-grants',
               definitionDigest: 'foundation-v10',
               migrate: (db) {
-                WorkspaceRepository.schema.migrations.last.migrate(db);
+                _historicalSchema10.migrations.last.migrate(db);
                 db.execute('CREATE TABLE unexpected(x)');
               },
             ),
@@ -295,7 +296,7 @@ FROM host_migration_compatibility
           .values
           .toList();
       before.close();
-      final target = version == 10 ? WorkspaceRepository.schema : schema11();
+      final target = version == 10 ? _historicalSchema10 : schema11();
       final owner = await manager.open('muyon', target);
       expect(history(owner.raw), original);
       expect(
@@ -372,7 +373,7 @@ FROM host_migration_compatibility
     );
     inspected.close();
     expect(
-      (await manager.open('muyon', WorkspaceRepository.schema)).raw.userVersion,
+      (await manager.open('muyon', _historicalSchema10)).raw.userVersion,
       10,
     );
   });
@@ -410,7 +411,7 @@ FROM host_migration_compatibility
       final rows = history(db);
       db.close();
       await expectLater(
-        manager.open('muyon', WorkspaceRepository.schema),
+        manager.open('muyon', _historicalSchema10),
         throwsStateError,
       );
       final inspected = sqlite3.open(getPath());
@@ -429,7 +430,7 @@ FROM host_migration_compatibility
       '$fixture validates every migration timestamp after upgrade',
       () async {
         install(fixture);
-        await manager.open('muyon', WorkspaceRepository.schema);
+        await manager.open('muyon', _historicalSchema10);
         await manager.close();
         restart();
         final db = sqlite3.open(getPath());
@@ -438,7 +439,7 @@ FROM host_migration_compatibility
         );
         db.close();
         await expectLater(
-          manager.open('muyon', WorkspaceRepository.schema),
+          manager.open('muyon', _historicalSchema10),
           throwsStateError,
         );
       },
@@ -447,7 +448,7 @@ FROM host_migration_compatibility
   for (final kind in ['history', 'schema', 'audit']) {
     test('repaired database rejects subsequent $kind tampering', () async {
       install('legacy-v10');
-      await manager.open('muyon', WorkspaceRepository.schema);
+      await manager.open('muyon', _historicalSchema10);
       await manager.close();
       restart();
       final db = sqlite3.open(getPath());
@@ -472,7 +473,7 @@ FROM host_migration_compatibility
       ]);
       db.close();
       await expectLater(
-        manager.open('muyon', WorkspaceRepository.schema),
+        manager.open('muyon', _historicalSchema10),
         throwsStateError,
       );
     });
