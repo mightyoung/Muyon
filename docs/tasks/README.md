@@ -37,19 +37,20 @@
 | K-4 执行记录事件化（后端） | `task/k-4-task-events` | [K-4.md](K-4.md) | Sonnet 子代理 | K-3b 合入 | 已合入（[审查](K-4-review.md)，三轮） |
 | REG-1 模块契约 v2 与三层插件（ADR-0004） | `task/reg-1-contract-v2-adr` | [REG-1.md](REG-1.md) | Sonnet 子代理 | 评估文档（2026-10-07） | 已合入（[审查](REG-1-review.md)，两轮）；**ADR-0004 已采纳**（用户 2026-10-07，Q1～Q13 全部按建议） |
 | FOLIO-BYPASS 宿主模式下 `bypass` 按写入要确认读取 | `task/folio-bypass` | [FOLIO-BYPASS.md](FOLIO-BYPASS.md) | junior | ADR-0004 Q12 | 已合入（[审查](FOLIO-BYPASS-review.md)） |
-| REG-2a 外传工具入账（`outbound_tool_requests`，四条通道） | `task/reg-2a-outbound-tool-ledger` | [REG-2a.md](REG-2a.md) | Codex | ADR-0004 已采纳 | **已派发** |
-| REG-2b 通用模块激活、能力授予、范围单点 | `task/reg-2b-module-host` | [REG-2b.md](REG-2b.md) | implementer-sonnet | ADR-0004 已采纳 | 已交付（`e61a1db`），交叉核实：Codex（[说明](REG-2b-xreview.md)） |
+| REG-2a 外传工具入账（`outbound_tool_requests`，四条通道） | `task/reg-2a-outbound-tool-ledger` | [REG-2a.md](REG-2a.md) | Codex | ADR-0004 已采纳 | 已合入（`b95d6f9`，[审查](REG-2a-review.md)；leader A 2026-10-08 补验） |
+| REG-2b 通用模块激活、能力授予、范围单点 | `task/reg-2b-module-host` | [REG-2b.md](REG-2b.md) | implementer-sonnet | ADR-0004 已采纳 | 已合入（`b95d6f9`，PR #5 集成修复，[审查](REG-2b-review.md)） |
 | E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](E-1-review.md)，三轮）；真实模型基线待有密钥者运行 |
-| UI-1a 设计系统：v6 token、通用组件、自适应尺寸 | `task/ui-1a-design-system` | [UI-1a.md](UI-1a.md) | Codex | AUTH-1a 之后 | 排队（Codex） |
+| UI-1a 设计系统：v6 token、通用组件、自适应尺寸 | `task/ui-1a-design-system` | [UI-1a.md](UI-1a.md) | Codex | — | 已合入（`965d913`，[审查](UI-1a-review.md)） |
 | R-1 Android 重跑、E-1 真实基线、UI-0 精简截图 | `task/r-1-evidence` | [R-1.md](R-1.md) | engineer | 手机连接 | **已派发** |
-| JR-1 小清理（ci 跑 test_doctor、按字符截断、无用 tag、注释） | `task/jr-1-cleanups` | [JR-1.md](JR-1.md) | junior | — | **已派发** |
-| AUTH-1a 授权库、解析器、外传内容审查接口（不接线） | `task/auth-1a-grants` | [AUTH-1a.md](AUTH-1a.md) | Codex | — | 已合入（[审查](AUTH-1a-review.md)）；接线与迁移 11 登记属 AUTH-1b |
+| JR-1 小清理（ci 跑 test_doctor、按字符截断、无用 tag、注释） | `task/jr-1-cleanups` | [JR-1.md](JR-1.md) | junior | — | 已合入（[审查](JR-1-review.md)） |
+| AUTH-1a 授权库、解析器、外传内容审查接口（不接线） | `task/auth-1a-grants` | [AUTH-1a.md](AUTH-1a.md) | Codex | — | 已合入（[审查](AUTH-1a-review.md)） |
+| AUTH-1b 授权接线（A、B12、B3、输入来源证明、本机写入自动化） | `task/auth-1b-*` | [AUTH-1b.md](AUTH-1b.md) | Codex（Leader B 派发与审查） | AUTH-1a、REG-2 | A、B12、B3、production 输入与自动化已合入（[审查](AUTH-1b-review.md)）；**C 段与类别策略进行中**（`task/auth-1b-model-policy`） |
 | GROK-1 ADR-0004 静态核实与科研导出/导入清单初稿 | `task/grok-1-adr0004-static` | [GROK-1.md](GROK-1.md) | grokbot | — | 已合入（[审查](GROK-1-review.md)）；Q10 清单已确认 |
 | GROK-2 能力覆盖清单初稿（科研、原型、询价） | `task/grok-2-coverage-drafts` | [GROK-2.md](GROK-2.md) | grokbot | GROK-1 | 已合入（[审查](GROK-2-review.md)） |
 | GROK-3 询价敏感字段划分初稿（Q7，交用户确认） | `task/grok-3-sensitivity-draft` | [GROK-3.md](GROK-3.md) | grokbot | — | 已合入（[审查](GROK-3-review.md)）；U1～U10 待用户确认 |
 | GROK-4 UI-1b 盘点：硬编码颜色与询价通用部件 | `task/grok-4-ui-inventory` | [GROK-4.md](GROK-4.md) | grokbot | — | 已合入（[审查](GROK-4-review.md)） |
 | UI-0 现状截图与走查 | 并入 `task/r-1-evidence` | [UI-0.md](UI-0.md) | engineer | — | 精简版并入 R-1（第 3 件） |
-| UI-1 设计系统 | 拆为 UI-1a、UI-1b | [UI-1.md](UI-1.md) | — | — | UI-1a 已派发；UI-1b（迁入询价部件、去硬编码颜色）在 FOLIO-BYPASS、REG-4 之后 |
+| UI-1 设计系统 | 拆为 UI-1a、UI-1b | [UI-1.md](UI-1.md) | — | — | UI-1a 已合入；UI-1b（迁入询价部件、去硬编码颜色）在 FOLIO-BYPASS、REG-4 之后 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` → `review/E11` | [审查](E11-review.md) | junior | — | 已合入（两轮；S6 第一阶段搁置） |
 

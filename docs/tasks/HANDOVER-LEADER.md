@@ -10,6 +10,8 @@
 
 ## 0. 在途任务（最先处理）
 
+- **2026-10-08 更新**：Leader B（ChatGPT，用户指定的 B 角）合入了 REG-2a、REG-2b、UI-1a，以及 AUTH-1b 的 A、B12、B3、输入来源证明与本机写入自动化；leader A 合入 JR-1。leader A 的审查见 [2026-10-08-leader-b-batch-review.md](../reviews/2026-10-08-leader-b-batch-review.md)。进行中：AUTH-1b C 段与类别策略（`task/auth-1b-model-policy`）、R-1 剩余两件。下一步按路线图 §3.1 派 REG-3、REG-4、T-3、S-1。
+
 - ADR-0004 已采纳（用户 2026-10-07，Q1～Q13 全部按建议）。
 - **已合入**：FOLIO-BYPASS（2026-10-07）、AUTH-1a（授权库，未接线）。
 - 已派发：**REG-2a**（Codex，外传工具入账，迁移 9）、**REG-2b**（`implementer-sonnet`，模块激活与范围单点，迁移 10）。三项都审查后再合入；REG-2a 和 REG-2b 后合入的一方负责重新编号迁移。
@@ -85,6 +87,6 @@
 ## 7. 需要用户处理或决定的事
 
 - ADR-0004 Q1～Q13（第 0 节）。
-- `main` 何时更新；PR #1、#2 仍开着。
+- `main` 何时更新。PR #1、#2 已于 2026-10-06 上午合并，`main` 停在 `cc7c8d1`，之后没有再动过。
 - 可删除的停用分支：`feat/p0-ci-llm-baseline`、`claude/ui-framework-review-2863c3`（有用内容已移入 `develop`），以及已合入的 `task/*`、`review/*`。删除前先征得用户同意。
 - 旧会话曾把 `~/.claude/settings.json` 里的 MiniMax `ANTHROPIC_AUTH_TOKEN` 打印进会话记录（只在本机）。是否轮换由用户决定。

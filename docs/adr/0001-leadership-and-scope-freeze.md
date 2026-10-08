@@ -88,3 +88,4 @@
 - 2026-10-07：用户决定 ADR-0004 §12.1 Q1～Q13 **全部按建议**，ADR-0004 改为已采纳；先派 FOLIO-BYPASS（Q12，现存风险），再派 REG-2（拆成 2a、2b 并行）。同日：**Codex 额度恢复**，作为本机执行者重新加入（codex，适合范围明确的较大实现任务）；本机新增实现子代理 `implementer-sonnet`（Sonnet 5.5，只在任务分支提交推送）。
 - 2026-10-07：用户指示 Claude 额度不够，开发和审查尽量不用后台子代理：开发派给 Codex、junior、engineer、senior；审查优先交叉派给非作者成员，leader 抽查；安全敏感且无合适成员时才用 Sonnet 审查子代理。UI-1a 改由 Codex 执行（排在 AUTH-1a 之后）。
 - 2026-10-07：用户确认 ADR-0004 Q10 清单按 GROK-1 建议执行（报告与主张草稿的本机导出开放，其余导出、导入与设备收发暂不开放）。REG-3 的前提已满足，待 REG-2a、REG-2b 合入后派发。
+- 2026-10-08：用户指定 **Leader B（ChatGPT）** 为 B 角，执行当日的开发任务（REG-2a/2b 集成、UI-1a、AUTH-1b 多个切片），并经独立复审和对应提交的 CI 后合入 `develop`。leader A 事后审查了这一批（[审查记录](../reviews/2026-10-08-leader-b-batch-review.md)），没有发现阻断问题，补齐了过程文档和 REG-2a 的补验。

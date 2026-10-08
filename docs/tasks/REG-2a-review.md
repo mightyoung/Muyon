@@ -49,3 +49,12 @@
 4. 与 REG-2b（迁移 10）/ AUTH-1a（独立 v11）编号无冲突；合入顺序按 HANDOVER：后合入方负责重编号（若有）。
 
 本段为工程师2号预审记录，**非正式合入批准**。
+
+## leader A 补验与结论（2026-10-08）
+REG-2a 是随 REG-2b 一起合入的（`b95d6f9`），合入时只有上面这份静态预审，没有独立的变异验证。leader A 在合入后的 `develop`（`c1dbe2d`）上补验：
+- 基线：`outbound_tool_ledger_test` `+20: All tests passed!`。
+- 变异：在 `OutboundToolLedger.runDigest` 里让 `begin` 写失败时吞掉错误、继续发送。结果有 9 例失败，覆盖全部四条通道：MCP、询价网页、资料中心各自的 `blocked ledger sends zero requests`、`closed ledger sends nothing`、设备传输的发送、监听、发现。四条通道都经过 `runDigest`（设备传输经 `HostTransferLedger`，LAN 节点默认也装了账本，见 `transfer_service.dart:666`）。
+- 预审里「存疑」的 `-1`，就是当时 `task_events_test` 钉死 schema 版本为 8 的那一例，已在 `7c59b57` 解决。
+
+**结论：「记不进账就不发送」成立，正式确认合入。**
+
