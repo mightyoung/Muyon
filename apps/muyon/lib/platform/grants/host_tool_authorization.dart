@@ -102,6 +102,7 @@ final class HostReviewOutcome {
       taskId: _issuer!._facts(call.request)?.taskId,
       toolId: request.toolId,
       endpoint: call.effectIntent!.endpoint,
+      endpointIdentity: call.effectIntent!.endpointIdentity,
       payloadDigest: call.effectIntent!.payloadDigest,
       guard: guard,
     );
@@ -322,6 +323,7 @@ final class HostAuthorizationLink {
     required this.taskId,
     required this.toolId,
     required this._endpoint,
+    required this._endpointIdentity,
     required this._payloadDigest,
     required this._guard,
   });
@@ -330,9 +332,21 @@ final class HostAuthorizationLink {
   final String authorizationSource, reviewDecisionId, toolId;
   final String? taskId;
   final Uri _endpoint;
+  final String _endpointIdentity;
   final String _payloadDigest;
   final void Function() _guard;
   var _reserved = false;
+
+  /// Bind the transport's actual TLS/config identity, including its pin.
+  void checkEndpointIdentity(String actualIdentity) {
+    if (actualIdentity != _endpointIdentity) {
+      throw const ToolPlatformException(
+        'transport_identity_mismatch',
+        'Actual transport identity differs from reviewed destination',
+      );
+    }
+    _guard();
+  }
 
   void check(
     ManagedDatabase owner,

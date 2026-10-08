@@ -815,22 +815,33 @@ class TransferService {
   }) async {
     final node = _node;
     if (node == null) throw StateError('Device communication is disabled');
-    if (!node.isPaired(peer.fingerprint)) {
-      throw StateError('未配对或已撤销');
+    // Always validate the actual TLS pin, even without a caller callback.
+    void guard() {
+      checkBeforeEffect?.call();
+      authorization?.checkEndpointIdentity(
+        jsonEncode(['paired-tls', peer.id, peer.fingerprint]),
+      );
+      if (!node.isPaired(peer.fingerprint)) throw StateError('未配对或已撤销');
+      if (!node.peers.any(
+        (candidate) =>
+            candidate.id == peer.id &&
+            candidate.address == peer.address &&
+            candidate.port == peer.port &&
+            candidate.fingerprint == peer.fingerprint,
+      )) {
+        throw StateError('对方不在线，或已验证设备目的地发生变化');
+      }
     }
-    final online = node.peers.any(
-      (candidate) =>
-          candidate.id == peer.id && candidate.address == peer.address,
-    );
-    if (!online) throw StateError('对方不在线，没有中继');
+
+    guard();
     final frozen = await freezeForSend(
       verifiedPackagePath,
       expectedDigest: expectedDigest,
       allowedMembers: allowedMembers,
-      checkBeforeEffect: checkBeforeEffect,
+      checkBeforeEffect: guard,
     );
     try {
-      checkBeforeEffect?.call();
+      guard();
       final payload = authorization == null
           ? null
           : List<int>.unmodifiable(await File(frozen).readAsBytes());
@@ -851,7 +862,7 @@ class TransferService {
         peer,
         frozen,
         onProgress: onProgress,
-        checkBeforeEffect: checkBeforeEffect,
+        checkBeforeEffect: guard,
         payload: payload,
         outboundLedger: authorization == null
             ? null
