@@ -9,6 +9,7 @@ import '../services/models/model_gateway.dart';
 import '../services/models/model_provider.dart';
 import '../services/models/openai_compat_provider.dart';
 import '../platform/tool_registry.dart';
+import '../platform/grants/outbound_content_reviewer.dart';
 import 'agent_budget.dart';
 import 'agent_event_sink.dart';
 import 'context_compactor.dart';
@@ -35,6 +36,7 @@ class PersonalAgent {
     required this.gateway,
     required this.tools,
     this.executionDeviceId = 'this-device',
+    this.toolReviewer,
     int? maxRounds,
     Budget budget = const Budget(),
     AgentEventSink? events,
@@ -70,6 +72,7 @@ class PersonalAgent {
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;
   final String executionDeviceId;
+  final OutboundContentReviewer? toolReviewer;
   final Budget budget;
 
   /// Old name of `budget.maxSteps`.
@@ -95,6 +98,7 @@ class PersonalAgent {
     repository: repository,
     gateway: gateway,
     tools: tools,
+    toolReviewer: toolReviewer,
     executionDeviceId: executionDeviceId,
     budget: budget,
     events: events,

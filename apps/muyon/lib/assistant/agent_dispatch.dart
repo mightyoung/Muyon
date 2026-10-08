@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../platform/foundation_repository.dart';
 import '../platform/tool_registry.dart';
 import '../platform/grants/host_authorization_facts.dart';
+import '../platform/grants/outbound_content_reviewer.dart';
 import '../services/models/credential_redaction.dart';
 import 'agent_budget.dart';
 import 'agent_context.dart';
@@ -20,7 +21,8 @@ class AgentDispatch {
   final AgentContext ctx;
   late AgentModelTurn model;
 
-  static ToolCallRequest _requestOf(PersonalTask task, Map call) =>
+  ToolCallRequest _requestOf(PersonalTask task, Map call) =>
+      ctx.invocationRequests[call['invocationId']] ??
       ToolCallRequest(
         invocationId: call['invocationId'] as String,
         toolId: call['toolId'] as String,
@@ -28,6 +30,21 @@ class AgentDispatch {
         parameters: Map<String, Object?>.from(call['parameters'] as Map),
         destination: call['destination'] as String?,
       );
+
+  // Keep full credential-bearing destination only in the live host binding.
+  // A restart cannot reconstruct a missing query from a masked card.
+  static String? _displayDestination(String? destination) {
+    if (destination == null) return null;
+    final uri = Uri.tryParse(destination);
+    return uri == null
+        ? '[invalid destination]'
+        : Uri(
+            scheme: uri.scheme,
+            host: uri.host,
+            port: uri.hasPort ? uri.port : null,
+            path: uri.path,
+          ).toString();
+  }
 
   /// Fixed texts for a call that did not run; the model's own words are never
   /// used.
@@ -52,7 +69,9 @@ class AgentDispatch {
     'callId': p.callId,
     'toolId': p.toolId,
     'parameters': p.parameters,
-    'destination': p.destination,
+    'destination':
+        prepared?.effectIntent?.displayDestination ??
+        _displayDestination(p.destination),
     'disposition': disposition,
     if (prepared != null) ...{
       'invocationId': prepared.request.invocationId,
@@ -108,6 +127,8 @@ class AgentDispatch {
           destination: p.destination,
         );
         if (ctx.closing) throw StateError('Assistant is closing');
+        ctx.invocationTasks[request.invocationId] = task.id;
+        ctx.invocationRequests[request.invocationId] = request;
         final prepared = await ctx.tools.prepare(request);
         if (ctx.closing) throw StateError('Assistant is closing');
         final read = prepared.info.accessLevel == ToolAccessLevel.read;
@@ -232,6 +253,38 @@ class AgentDispatch {
       await _complete(task);
       return;
     }
+    final authorization = ctx.toolAuthorization;
+    if (authorization != null) {
+      try {
+        // Persist the entire pending external union before reviewing any call.
+        for (final call in card) {
+          await _markExternal(task, _requestOf(task, call));
+        }
+        for (final call in card) {
+          final request = _requestOf(task, call);
+          ctx.invocationTasks[request.invocationId] = task.id;
+          final prepared = await ctx.tools.prepare(request);
+          if (prepared.identityDigest != call['identityDigest']) {
+            throw StateError('stale_scope');
+          }
+          if (prepared.effectIntent == null) continue;
+          final reviewed = await authorization.review(prepared);
+          if (ctx.closing ||
+              ctx.repository.task(task.id)?.state ==
+                  PersonalTaskState.cancelled) {
+            return;
+          }
+          if (reviewed.action == ReviewAction.block) {
+            await ctx.fail(task, '本地内容审查阻止了该操作', code: 'review_block');
+            return;
+          }
+          ctx.toolReviews[request.invocationId] = reviewed;
+        }
+      } catch (_) {
+        await ctx.fail(task, '操作来源或审查记录已变化，该操作未执行', code: 'review_stale');
+        return;
+      }
+    }
     final next = task.copy(_stage(card, state: 'waitingConfirmation'));
     await ctx.commit(
       next,
@@ -323,6 +376,35 @@ class AgentDispatch {
   /// Invokes one prepared call and reads off what the registry says; nothing
   /// is settled here. [abandoned]: the task ended or the host is closing.
   /// [cancelled]: stopped before dispatch, so nothing ran.
+  final _premarked = <String>{};
+  bool _external(ToolCallRequest request) {
+    final info = ctx.tools.inspect(request.toolId);
+    return info != null &&
+        (info.accessLevel == ToolAccessLevel.external ||
+            info.providerId.startsWith('mcp:') ||
+            info.descriptor.moduleId == 'inquiry' ||
+            info.descriptor.moduleId == 'knowledge' ||
+            info.descriptor.moduleId == 'research');
+  }
+
+  Future<void> _markExternal(PersonalTask task, ToolCallRequest request) async {
+    if (!_external(request) || _premarked.contains(request.invocationId)) {
+      return;
+    }
+    final info = ctx.tools.inspect(request.toolId)!;
+    await ctx.repository.authorizationFacts.markExternal(
+      task.id,
+      HostSourceFact.object(
+        ObjectRef(
+          moduleId: info.descriptor.moduleId,
+          objectType: 'tool_invocation',
+          objectId: request.invocationId,
+        ),
+      ),
+    );
+    _premarked.add(request.invocationId);
+  }
+
   Future<Run> _invokeOne(
     PersonalTask task,
     ToolCallRequest request,
@@ -333,28 +415,9 @@ class AgentDispatch {
       return const Run.abandoned();
     }
     try {
-      final info = ctx.tools.inspect(request.toolId);
-      // Registry/config metadata is host-owned. Result data and model
-      // parameters cannot claim internal/clean provenance. Legacy inquiry
-      // imports may bypass the host coordinator, so their reads are external.
-      final external =
-          info != null &&
-          (info.accessLevel == ToolAccessLevel.external ||
-              info.providerId.startsWith('mcp:') ||
-              info.descriptor.moduleId == 'inquiry' ||
-              info.descriptor.moduleId == 'knowledge' ||
-              info.descriptor.moduleId == 'research');
+      final external = _external(request);
       if (external) {
-        await ctx.repository.authorizationFacts.markExternal(
-          task.id,
-          HostSourceFact.object(
-            ObjectRef(
-              moduleId: info.descriptor.moduleId,
-              objectType: 'tool_invocation',
-              objectId: request.invocationId,
-            ),
-          ),
-        );
+        await _markExternal(task, request);
         token.throwIfCancelled();
         if (ctx.closing ||
             ctx.repository.task(task.id)?.state != PersonalTaskState.running) {
@@ -542,7 +605,16 @@ class AgentDispatch {
         if (stale == null) {
           try {
             // One approval for this one call, used up by its invoke.
-            approval = await ctx.tools.approve(prepared!);
+            final authorization = ctx.toolAuthorization;
+            if (authorization != null && prepared!.effectIntent != null) {
+              ctx.invocationTasks[request.invocationId] = task.id;
+              final reviewed =
+                  ctx.toolReviews[id] ?? await authorization.review(prepared);
+              approval = await authorization.confirm(reviewed);
+              if (approval == null) throw StateError('review_block');
+            } else {
+              approval = await ctx.tools.approve(prepared!);
+            }
             await ctx.event(current, AgentEventType.approval, {
               'toolId': c['toolId'],
               'invocationId': id,

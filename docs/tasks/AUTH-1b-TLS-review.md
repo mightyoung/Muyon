@@ -19,3 +19,7 @@ Repair: TransferService.send always creates its own guard incorporating capabili
 Author focused helper + transfer normal paths + both independent regressions: +36 passed. Isolated mutants dropping the actual-certificate comparison and mandatory live capability recheck each fail their respective behavior regression; snapshot files restored byte-for-byte. Raw drivers and logs remain /tmp. Restored strict/full and independent fixed-commit re-review evidence will be appended only after completion. The original b3a7de4 review is not retroactively described as passing.
 
 Restored repair snapshot: strict `No issues found! (ran in 4.8s)`; full host +1009 ~3 passed. The only changes after full execution were removal of unnecessary test imports and addition of required braces, with assertions unchanged. Both new regressions and exact production files match the restored snapshot; B3 WIP was excluded from this snapshot and checkpoint.
+
+## Independent repair re-review
+
+Separate reviewer fixed af352970d8477f29e6b0ee04ebcbd4fde7539c34, base b3a7de48bcf99ffd514e0b03cca0ca6cf663d818, in isolated /tmp/auth1b-tls-fix-review. All six files verified byte-identical to that commit, excluding B3 WIP. Original two blockers closed; no new blocker or should-fix. Independently executed strict `No issues found! (ran in 7.1s)`, transfer normal/state/chat plus both security regressions +13, shared helper +23, diff check clean. Reviewer did not run full/mutants/CI. Original failed b3a7de4 recommendation remains unchanged. Raw logs only /tmp.

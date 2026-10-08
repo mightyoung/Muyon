@@ -9,6 +9,9 @@ import '../platform/task_records.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/model_provider.dart';
 import '../platform/tool_registry.dart';
+import '../platform/grants/outbound_content_reviewer.dart';
+import '../platform/grants/host_tool_authorization.dart';
+import '../platform/grants/host_authorization_facts.dart';
 import 'agent_budget.dart';
 import 'agent_drafts.dart';
 import 'agent_event_sink.dart';
@@ -26,6 +29,7 @@ class AgentContext {
     required this.repository,
     required this.gateway,
     required this.tools,
+    this.toolReviewer,
     required this.executionDeviceId,
     required this.budget,
     required this.events,
@@ -40,6 +44,26 @@ class AgentContext {
   final FoundationRepository repository;
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;
+  final OutboundContentReviewer? toolReviewer;
+  // Invocation ownership is created by the live dispatcher, not task/model JSON.
+  final invocationTasks = <String, String>{};
+  final invocationRequests = <String, ToolCallRequest>{};
+  final toolReviews = <String, HostReviewOutcome>{};
+  HostTaskFacts? factsFor(ToolCallRequest request) {
+    final id = invocationTasks[request.invocationId];
+    return id == null || repository.task(id) == null
+        ? null
+        : repository.authorizationFacts.readTask(id);
+  }
+
+  late final HostToolAuthorization? toolAuthorization = toolReviewer == null
+      ? null
+      : HostToolAuthorization(
+          registry: tools,
+          reviewer: toolReviewer!,
+          taskFacts: factsFor,
+        );
+
   final String executionDeviceId;
   final Budget budget;
   final AgentEventSink events;
