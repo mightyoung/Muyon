@@ -375,24 +375,25 @@ final class HostModelPermission {
       throw StateError('model_review_changed');
     }
     final id = grantId;
-    if (_attempts > 0 &&
-        id != null &&
-        !_review.owner.grants.permitsIssuedApproval(
-          id,
-          GrantRequest(
-            category: 'model',
-            toolId: 'assistant.model',
-            scopeDigest: _review.request.scopeDigest,
-            destination: _review.request.destination,
-            taskId: _review.request.taskId,
-            taskTainted: _review.owner.repository.authorizationFacts
-                .readTask(_review.taskId)
-                .requiresConfirmation,
-            conversationId: _review.request.conversationId,
-            now: DateTime.now().toUtc(),
-          ),
-        )) {
-      throw StateError('model_grant_unavailable');
+    if (id != null) {
+      final request = GrantRequest(
+        category: 'model',
+        toolId: 'assistant.model',
+        scopeDigest: _review.request.scopeDigest,
+        destination: _review.request.destination,
+        taskId: _review.request.taskId,
+        taskTainted: _review.owner.repository.authorizationFacts
+            .readTask(_review.taskId)
+            .requiresConfirmation,
+        conversationId: _review.request.conversationId,
+        now: DateTime.now().toUtc(),
+      );
+      final permitted = _attempts == 0
+          ? _review.owner.grants.permitsUse(id, request)
+          : _review.owner.grants.permitsIssuedApproval(id, request);
+      if (!permitted) {
+        throw StateError('model_grant_unavailable');
+      }
     }
     final snapshot = _review.owner.policy.current;
     if (snapshot.revision != _review.policyRevision ||

@@ -19,7 +19,10 @@ final class GrantStore {
   void Function() onRevocation(String grantId, void Function() listener) {
     final listeners = _state.listeners.putIfAbsent(grantId, () => {});
     listeners.add(listener);
-    if (_revoking.contains(grantId)) listener();
+    if (_revoking.contains(grantId) ||
+        _get(database.raw, grantId)?.revokedAt != null) {
+      listener();
+    }
     return () {
       listeners.remove(listener);
       if (listeners.isEmpty) _state.listeners.remove(grantId);
@@ -149,6 +152,13 @@ CREATE INDEX assistant_grant_audit_grant ON assistant_grant_audit(grant_id,id);
 
   bool _canUse(AssistantGrant grant, GrantRequest request) =>
       !_revoking.contains(grant.id) && grant.matches(request);
+
+  /// Check an unconsumed permission before beginning credentials or transport.
+  /// Consumption remains atomic with the owner's ledger transaction.
+  bool permitsUse(String grantId, GrantRequest request) {
+    final grant = _get(database.raw, grantId);
+    return grant != null && _canUse(grant, request);
+  }
 
   /// Revalidation and increment share one transaction. A stale resolver result
   /// cannot bypass revocation, expiry, taint, binding or concurrent exhaustion.

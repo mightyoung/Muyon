@@ -35,3 +35,12 @@ Parent 已授权在 production clean / automatic 后持续实施 C；本隔离 `
 14个有效 Expected/Actual 变异全部检出且逐字节恢复：mode_auto失效、profile identity合并、伪造manual来源、Noop伪审查、独立review行不复核、wire不绑定、grant不消费、重发重复扣次、忽略变体confirm、取消grant/policy订阅、credential等待不可取消、历史恢复JSON冒充可信配置、提前提交grant消费。C1的13变异仅对应固定d231快照，不将其冒充C2证据。断线重接后重新跑同14个变异并核对源码SHA256，全部有效且逐字节恢复；恢复后strictclean14.6s，26项实际模型/领域回归全部通过（25s）。恢复基线全量1133通过、3既有跳过（5:56），对应源码保持完全相同。原始日志/驱动仅/tmp；固定SHA独立审查和exactCI待完成。
 
 UI设置入口及其他产品页接线由UI任务负责；此任务不修改UI。未扩展新的后台grant发行入口或远程审查，不接入实际云模型，不替代真机测试。仅所列实际Inquiry/Research闭环及宿主基础接口有行为证据，其他模块业务闭环本轮未覆盖。历史迁移/数据保留，main/release不在授权内；develop须parent精确版本复审批准。
+
+
+## Fixed b423 independent finding and precredential repair
+
+源检查点 b423064b4ee6c4db1fd640b5fe5e08f039d0598d 的 exactCI37773611063 success；非作者在隔离review树亲跑全仓strictclean53.0s、宿主full1133通过/3既有跳过（5:27）。独立发现1个SHOULD：实际wire审查barrier期间共享owner完成grant撤销，release审查后仍开始首次credential RPC。独立对照证明释放RPC后task failed、无新增HTTP/ledger/use；因此不称已证实外发绕权，亦不将此源记为已接纳。本轮接受修复。
+
+作者先迁入有效RED并补耗尽次数/持久撤销晚订阅：撤销和另一合法使用耗尽次数均Expected settled / Actual credential，晚订阅Expected通知1 / Actual0。一个scope导入准备错误曾导致compile failure，不计行为RED；修正fixture后上述3个真实失败保留。修复首次permission检查调用实际GrantStore.permitsUse（包含次数、期限、绑定、pending与持久撤销），已经在本许可内消费后仍用既有permitsIssuedApproval，不重复扣次。onRevocation晚订阅同时读取实际revoked_at，保持owner共享与既有pending拒绝。没有增加新的权限基础设施、迁移或远程审查。
+
+修复后14项相关真实回归全部通过（3新增barrier/订阅、7grant与4协议/摘要）；原一次许可两次实际协议wire仅消费一次、审批/ledger INSERT失败全回滚、并发最后一次与在途取消均保留。修复源的16个变异（原14及首请求复核缺失/持久撤销晚订阅缺失）全部有效检出，四个源码SHA256逐字节恢复。初轮strict1项fixture括号info不认通过，修正新增fixture后strictclean18.9s；恢复后full1136通过、3既有跳过（6:28），对应四个源码仍与变异恢复SHA256一致。后续固定SHA复审与exactCI在本次提交时仍待完成。修复累计新增9文件29项模型/领域/owner回归；新源不沿用旧b423的CI/复审接受声明。
