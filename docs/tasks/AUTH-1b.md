@@ -106,3 +106,7 @@ Valid behavior RED→GREEN: real Agent initially published a card despite local 
 This is not B3 completion: no production bootstrap/transport registration enabling, no trusted clean-input producer, no supported local-write intent, no automatic signing/ordered auto dispatch, no automatic positive consumer test yet. Those remain required before accepting complete B3 or integrating the whole task. The B2 checkpoint af352970d8477f29e6b0ee04ebcbd4fde7539c34 independently passed review and exact-head CI 37727286493; neither checkpoint is merged to develop here.
 
 B3 optional manual-consumer restored snapshot: strict `No issues found! (ran in 7.8s)`; full +1011 ~3 All tests passed. Four source/test files match the restored isolated snapshot byte-for-byte. This result does not establish the pending automatic/production behavior above.
+
+### B12 broader independent review reopened the gate
+
+Parent review of fixed `af352970d8477f29e6b0ee04ebcbd4fde7539c34` reproduced two additional windows: positive TLS progress callback expiry before chunk delivery, and first/reopened scope proof trusting an already swapped ancestor. Earlier focused green/CI did not cover them; the baseline remains blocked until repair review. `task/auth-1b-b12-fixes` isolates both fixes from B3 partial commits and WIP. Details and final validation are recorded in [AUTH-1b-B12-boundary-repair.md](AUTH-1b-B12-boundary-repair.md). Production automatic calls remain off, historical databases are retained, and develop integration is reserved for the parent after independent review.

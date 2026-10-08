@@ -173,8 +173,27 @@ class HostScopeAuthority {
   }
 
   static String? _namespace(String root) {
-    if (!p.isAbsolute(root)) return null;
-    var anchor = p.normalize(root);
+    if (!p.isAbsolute(root) || p.normalize(root) != root) return null;
+    // Validate the complete lexical lineage before the first namespace pin.
+    // Only these OS-owned macOS aliases are accepted, with exact targets;
+    // every link inside a managed/user-selected tree stays unknown.
+    var ancestor = root;
+    while (true) {
+      if (FileSystemEntity.typeSync(ancestor, followLinks: false) ==
+          FileSystemEntityType.link) {
+        final systemTarget = Platform.isMacOS
+            ? const {'/tmp': '/private/tmp', '/var': '/private/var'}[ancestor]
+            : null;
+        if (systemTarget == null ||
+            Directory(ancestor).resolveSymbolicLinksSync() != systemTarget) {
+          return null;
+        }
+      }
+      final parent = p.dirname(ancestor);
+      if (parent == ancestor) break;
+      ancestor = parent;
+    }
+    var anchor = root;
     while (FileSystemEntity.typeSync(anchor, followLinks: false) ==
         FileSystemEntityType.notFound) {
       final parent = p.dirname(anchor);
