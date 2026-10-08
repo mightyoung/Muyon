@@ -4,6 +4,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/grants/host_authorization_facts.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/tool_names.dart';
 import 'tool_selection.dart';
@@ -112,6 +113,15 @@ class AgentTaskFactory {
         task,
         history: history,
         memories: memories,
+        // Both wire protocols load metadata only for selected candidates.
+        // The registrar's actual provider identity supplies provenance; model
+        // parameters and registry presence alone cannot taint a direct tool run.
+        externalSources: [
+          for (final tool in available)
+            if (selection.candidateIds.contains(tool.descriptor.toolId) &&
+                tool.providerId.startsWith('mcp:'))
+              HostSourceFact.project(tool.providerId, null),
+        ],
       ),
       selection,
     );

@@ -174,7 +174,10 @@ class _InquiryScope extends _LegacyScope {
   @override
   String get moduleId => 'inquiry';
   @override
-  Future<void> prepare() => host.activateInquiry();
+  Future<void> prepare() async {
+    await host.modules.activate('inquiry');
+  }
+
   @override
   Future<List<ObjectRef>> enumerate() async {
     final inquiry = host.inquiry?.runtime.state.store;

@@ -36,7 +36,8 @@ final class HostReviewOutcome {
         request.replayKey != call.request.replayKey ||
         request.toolId != call.request.toolId ||
         request.approvalId == null ||
-        call.effectIntent == null) {
+        call.effectIntent == null ||
+        !call.effectIntent!.isTransport) {
       throw const ToolPlatformException(
         'review_mismatch',
         'Signed host invocation required',
@@ -249,7 +250,7 @@ final class HostToolAuthorization {
       decision = await reviewer.review(
         OutboundReviewRequest(
           toolId: intent.toolId,
-          endpoint: intent.endpoint,
+          endpoint: intent.reviewEndpoint,
           content: intent.content,
           scopeDigest: call.identityDigest,
           sourceObjects: intent.sourceObjects,

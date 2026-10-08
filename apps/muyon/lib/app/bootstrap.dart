@@ -10,6 +10,8 @@ import '../platform/projection_service.dart';
 import '../platform/schema_catalog.dart';
 import '../platform/storage_manager.dart';
 import '../platform/grants/host_scope_authority.dart';
+import '../platform/grants/grant_store.dart';
+import '../platform/grants/outbound_content_reviewer.dart';
 import '../workspace/workspace_repository.dart';
 import '../platform/scope_resolver.dart';
 import 'module_catalog.dart';
@@ -129,6 +131,7 @@ class MuyonHost {
   late final ModuleHost modules;
   late final ScopeResolver scopeResolver;
   late final HostScopeAuthority scopeAuthority;
+  late final GrantStore assistantGrants;
 
   // v1 accessors, kept as thin delegates to [modules] until REG-5; a number of
   // host files and tests still use them.
@@ -214,6 +217,7 @@ class MuyonHost {
   static Future<MuyonHost> open(
     String rootPath, {
     Future<String?> Function(TaskOffer offer)? taskExecutor,
+    OutboundContentReviewer? localToolReviewer,
 
     /// Replaces the module catalog; for tests of the generic module path.
     Iterable<BusinessModule>? modules,
@@ -244,9 +248,13 @@ class MuyonHost {
         device = const Uuid().v4();
         await host.workspaces.setSetting('deviceId', device);
       }
+      host.assistantGrants = GrantStore(database);
       host.tools = ToolRegistry(
         database: database,
         resolveScope: (scope) => host.scopeResolver.resolve(scope),
+        grants: host.assistantGrants,
+        grantContext: (request) =>
+            host.personalAgent.hostGrantContext(request, host.scopeAuthority),
       );
       host.grants = ModuleGrants(database);
       host.modules = ModuleHost(
@@ -297,6 +305,10 @@ class MuyonHost {
         gateway: host.services.gateway,
         tools: host.tools,
         executionDeviceId: device,
+        toolReviewer: ReviewerChain([
+          const NoopReviewer(),
+          ?localToolReviewer,
+        ], timeout: const Duration(seconds: 2)),
       );
       host.dream = DreamService(
         host.foundation,
@@ -327,6 +339,20 @@ class MuyonHost {
       host.scopeAuthority = HostScopeAuthority(
         workspaces: host.workspaces,
         sources: {
+          'inquiry': HostScopeSource.deferred(
+            connection: () => storage.connectionIfOpen('inquiry'),
+            authorityRevision: () {
+              final lifecycle = host.modules.scopeAuthorityRevision('inquiry');
+              final inquiry = host.inquiry;
+              return host._closing ||
+                      lifecycle == null ||
+                      inquiry == null ||
+                      host.inquiryError != null
+                  ? null
+                  : '$lifecycle:${identityHashCode(inquiry)}';
+            },
+            managedFilesRoot: () => host.inquiry?.runtime.state.dataDir.path,
+          ),
           // First production proof covers the known managed PrototypeStore.
           // Other adapters remain unknown until their complete file coverage
           // is established; a projection or origin is not a substitute.

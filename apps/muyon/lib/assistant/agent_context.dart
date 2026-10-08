@@ -154,7 +154,7 @@ class AgentContext {
 
   static List<Map<String, Object?>> cardCalls(PersonalTask task) => [
     for (final c in calls(task))
-      if (c['disposition'] == 'card') c,
+      if (c['disposition'] == 'card' && c['outcome'] == null) c,
   ];
 
   /// The messages a request is built from: the stored conversation, or the

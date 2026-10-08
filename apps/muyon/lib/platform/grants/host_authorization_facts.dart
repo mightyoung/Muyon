@@ -316,6 +316,17 @@ class HostAuthorizationFacts {
               loadedInputProof?.verify(db, loadedTask) == true
         ? HostTaintState.clean
         : HostTaintState.unknown;
+    if (loadedTask != null &&
+        loadedTask.id == taskId &&
+        loadedTask.conversationId == conversationId) {
+      for (final source
+          in loadedInputProof?.verifiedExternalSources(db, loadedTask) ??
+              const <HostSourceFact>[]) {
+        state = HostTaintState.tainted;
+        sources.add(source.identityDigest);
+        markSourceExternalInTransaction(db, source);
+      }
+    }
     final history = <Map<String, Object?>?>[
       _read(db, 'auth1b:conversation:$conversationId'),
       if (previousAttemptId != null)

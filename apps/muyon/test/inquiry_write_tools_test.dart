@@ -6,6 +6,8 @@ import 'package:muyon/app/inquiry_plugin.dart';
 import 'package:muyon/platform/business_tools.dart';
 import 'package:muyon/platform/inquiry_write_tools.dart';
 import 'package:muyon/platform/tool_registry.dart';
+import 'package:muyon/platform/grants/host_tool_authorization.dart';
+import 'package:muyon/platform/grants/outbound_content_reviewer.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:supplier_core/supplier_core.dart';
@@ -101,12 +103,22 @@ void main() {
     parameters: parameters,
   );
 
+  Future<String> manualApproval(PreparedToolCall prepared) async {
+    if (prepared.effectIntent == null) return host.tools.approve(prepared);
+    final authorization = HostToolAuthorization(
+      registry: host.tools,
+      reviewer: const NoopReviewer(),
+    );
+    final outcome = await authorization.review(prepared);
+    return (await authorization.confirm(outcome))!;
+  }
+
   Future<ToolCallResult> approved(
     ToolCallRequest r, {
     ToolCancellationToken? token,
   }) async {
     final prepared = await host.tools.prepare(r);
-    final id = await host.tools.approve(prepared);
+    final id = await manualApproval(prepared);
     return host.tools.invoke(r.withApproval(id), cancellation: token);
   }
 
@@ -183,7 +195,7 @@ void main() {
         expect(store.get('inquiry', created.objectId)!.data['status'], 'open');
         // Same invocation again is a replay, not a second inquiry.
         final prepared = await host.tools.prepare(r);
-        final id = await host.tools.approve(prepared);
+        final id = await manualApproval(prepared);
         await host.tools.invoke(r.withApproval(id));
         expect(count('inquiry'), 1);
       },
@@ -427,7 +439,7 @@ void main() {
         await refs([itemId, projectId]),
       );
       final prepared = await host.tools.prepare(r);
-      final id = await host.tools.approve(prepared);
+      final id = await manualApproval(prepared);
       final token = ToolCancellationToken()..cancel();
       try {
         final result = await host.tools.invoke(
@@ -450,7 +462,7 @@ void main() {
           await refs([itemId, projectId]),
         );
         final prepared = await host.tools.prepare(r);
-        final id = await host.tools.approve(prepared);
+        final id = await manualApproval(prepared);
         store.save('project_item', {
           ...store.get('project_item', itemId)!.data,
           'notes': '别人改了',

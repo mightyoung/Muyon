@@ -752,6 +752,9 @@ Future<AgentTaskResult> runAgentTask({
       gateway: gateway,
       tools: host.tools,
       executionDeviceId: 'agent-eval',
+      // Evaluation remains manual, but real local intents still require the
+      // host's local review proof before each actual domain write.
+      toolReviewer: host.personalAgent.toolReviewer,
     );
     await beforeTask?.call(task, ids);
 

@@ -6,6 +6,7 @@ import 'package:supplier_core/supplier_core.dart';
 
 import '../app/bootstrap.dart';
 import 'tool_registry.dart';
+import 'grants/host_effect_intent.dart';
 
 /// Inquiry write tools. They call the same domain functions the pages call
 /// (`Store.createInquiry`, `quoteForInquiry`, `save`) through `AppState.write`,
@@ -85,6 +86,16 @@ void registerInquiryWriteTools(MuyonHost host) {
       supportedScopes: {AssistantScopeKind.selectedObjects},
       dataModuleIds: {'inquiry'},
       validateResult: validateInquiryWriteResult,
+      // Narrow verified lane: this handler only applies the requested scalar
+      // change to the selected local row, never loads imported prose for AI.
+      effectIntent: name != 'set_item_qty'
+          ? null
+          : (request, scope) => HostEffectIntent.localWrite(
+              toolId: request.toolId,
+              invocationId: request.invocationId,
+              content: utf8.encode(jsonEncode(request.parameters)),
+              sourceObjects: scope.objects,
+            ),
       handler: (call) async {
         call.cancellation.throwIfCancelled();
         await host.activateInquiry();

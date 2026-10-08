@@ -12,7 +12,8 @@ final class OutboundReviewRequest {
   }) : content = List.unmodifiable(content),
        sourceObjects = List.unmodifiable(sourceObjects);
   final String toolId, scopeDigest;
-  final Uri endpoint;
+  /// Null only for an actual local write; no invented transport identity.
+  final Uri? endpoint;
   final List<int> content;
   final List<ObjectRef> sourceObjects;
 }
