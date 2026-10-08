@@ -2,6 +2,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import 'workspace_repository.dart';
+import '../platform/grants/host_authorization_facts.dart';
 
 /// Domain receipt commits before the host binding. Recovery replays the latter.
 class ImportCoordinator {
@@ -94,6 +95,10 @@ class ImportCoordinator {
     if (owner != null && owner != intent.workspaceId) {
       throw StateError('Project belongs to another workspace');
     }
+    HostAuthorizationFacts(workspaces.database).markSourceExternalInTransaction(
+      db,
+      HostSourceFact.project(intent.moduleId, intent.targetProjectId),
+    );
     if (current == null) {
       db.execute('INSERT INTO workspace_module_bindings VALUES(?,?,?)', [
         intent.workspaceId,
@@ -174,6 +179,9 @@ class ImportCoordinator {
     if (!prepared.matches(intent)) {
       throw StateError('Prepared input identity mismatch');
     }
+    await HostAuthorizationFacts(workspaces.database).markSourceExternal(
+      HostSourceFact.project(intent.moduleId, intent.targetProjectId),
+    );
     final receipt = await runtime.commitImport(prepared, intent);
     if (interruptBeforeActivation) {
       throw StateError('Simulated activation interruption');

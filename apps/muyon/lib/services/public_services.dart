@@ -1,5 +1,6 @@
 import '../platform/storage_manager.dart';
 import '../platform/tool_registry.dart';
+import '../platform/grants/host_authorization_facts.dart';
 import '../workspace/workspace_repository.dart';
 import 'models/model_gateway.dart';
 import 'knowledge/knowledge_service.dart';
@@ -41,6 +42,7 @@ class PublicServices {
     final knowledge = KnowledgeService(
       database,
       '${storage.rootPath}/public_files',
+      authorizationFacts: HostAuthorizationFacts(workspaces.database),
       parseImage: (path) async {
         final result = await ocr.recognize(path);
         if (result.text.trim().isEmpty) {

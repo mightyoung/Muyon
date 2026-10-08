@@ -9,6 +9,7 @@ import 'package:uuid/uuid.dart';
 
 import '../documents/document_parser.dart';
 import '../search/search_service.dart';
+import '../../platform/grants/host_authorization_facts.dart';
 
 class KnowledgeDocument {
   const KnowledgeDocument({
@@ -52,12 +53,14 @@ class KnowledgeService {
     DocumentParser? parser,
     this.parseImage,
     this.parsePdf,
+    this.authorizationFacts,
   }) : parser = parser ?? DocumentParser();
   final Future<ParsedDocument> Function(String path)? parseImage;
   final Future<ParsedDocument> Function(String path)? parsePdf;
   final ManagedDatabase database;
   final String rootPath;
   final DocumentParser parser;
+  final HostAuthorizationFacts? authorizationFacts;
 
   /// Live check against the owning module. The index is not a source of truth.
   Future<bool> Function(ObjectRef ref)? confirmSource;
@@ -294,6 +297,24 @@ CREATE TABLE chat_messages(
               revisionRef: source.revisionRef,
               contentDigest: before,
             );
+      // Different DB owners cannot share one SQL transaction. Commit the
+      // conservative host marker first; failure prevents document acceptance.
+      // A later domain failure may retain taint, never clear it.
+      if (authorizationFacts != null) {
+        await authorizationFacts!.markSourceExternal(
+          HostSourceFact.object(ref),
+        );
+        await authorizationFacts!.markSourceExternal(
+          HostSourceFact.object(
+            ObjectRef(
+              moduleId: 'knowledge',
+              objectType: 'document',
+              objectId: id,
+              contentDigest: before,
+            ),
+          ),
+        );
+      }
       await database.write((db) {
         checkBeforeEffect?.call();
         db.execute(

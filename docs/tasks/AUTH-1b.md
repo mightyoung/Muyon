@@ -49,3 +49,18 @@ A 变异：移除范围/目的地比对、移除签发事务消费、审批 INSE
 新增磁盘库测试验证 DDL 后失败、schema_migrations 与 host_schema_state 两类元数据失败均全事务回滚。旧审批、回执、模型/工具账本、既有授权及审计字段值保留。冻结历史 SQL 未改；不迁移或清空用户实库。Flutter 生成的 macOS 文件退出提交范围。
 
 原始日志与变异副本仅留 /tmp；提交说明保留摘要。首次新环境测试启动曾因 shell 代理干扰本机 WebSocket 失败，关闭代理后重跑通过；不将该失败作为行为 RED。父 leader 的最终提交独立运行审查与 CI 是后续合入门禁；本轮不合 develop。真机、持久污染维护、transport 完整可信端点提供、ReviewerChain 与 model 在途撤销订阅均留 B/C/后续实机验证。
+
+
+## 后续授权与 A 集成结果（2026-10-08）
+
+leader B 后续批准 A 独立复核后普通合入 develop，并持续实施 B1/B2/B3；仍不触碰 main/release。A 实施提交 `994cd6f2fde0841996adaf83c9ce3fee5a16200f`，审查文档提交 `5e94f643b7a1784545ee654633a5dcac157c79e6`。文档 HEAD CI [37713777910](https://github.com/mightyoung/Muyon/actions/runs/37713777910) completed/success；普通 merge `e473b9c205a215b440b56e465b5e357b21c8eff4` 的 tree 与文档 HEAD 完全相同，合入前 strict 与宿主全量 +938 ~3 通过；remote develop 全 SHA 核对相同。postmerge CI [37714945075](https://github.com/mightyoung/Muyon/actions/runs/37714945075) completed/success。
+
+## B1 持久来源事实子片
+
+独立工作树 `task/auth-1b-tools` 从 A merge 开始。宿主 settings 的版本化命名空间保存 task/conversation/source 三类事实，不加迁移、不改历史数据。普通任务默认 unknown；所有 clean/knownEndpoint/grantId 等 payload 声明不参与判定。宿主来源身份摘要仅含 module/project/type/object，修订是证据字段；task/conversation/source 集合只 union，不提供清除接口。任务创建与事实初始化、继承同 owner 事务；读取已有任务也合并当前对话及内存拒绝事实。previousAttemptId 继承完整事实，包括来自旧对话的间接 taint，恢复后的新对话继续继承。
+
+可识别 MCP/network/export/legacy inquiry/knowledge/research 调用先持久标记，再 invoke；返回的稳定 objectRefs 再标记，完成后才接纳内容。结果或摘要中的 false 不清除事实。导入协调器先标记项目再提交模块，恢复绑定事务也补标记；knowledge 在宿主 DB 先提交 original/document 两种来源，再接纳另一 DB 的文件记录。域提交后失败可留更严 taint。写失败维持同 owner 跨服务实例的同步拒绝；不承诺失败写跨进程持久，失败时未接纳的内容也不能说成已接纳。
+
+保守范围规则：workspace 按真实绑定继承源项目/对象；global 将全部已记录来源视为可能加载，不依赖滞后 catalog 判 clean。来源失败门闩也进入这些范围。普通任务仍未知，不实现 clean 证明；trusted scope stamp、grant 自动签发、本地内容 review、B2/B3 完整接线尚未交付，不因本子片的污染接纳钩子声称自动授权上线。旧 UI 供应商直接导入用 legacy inquiry 保守外部分类，不改 UI。
+
+独立静态审查先发现三个继承缺口，均以有效行为 RED 复现后修复：已有 sibling 重开后的对话事实、失败来源 workspace/global 门闩、跨对话间接 previousAttempt 继承。末次独立静态复查 CLEAR，仅覆盖本子片，不代替 leader 最终复核或后续范围证明。B1 两份专项最终 +26 All tests passed，strict analyze No issues found；其余全量/变异/提交 CI 在子片提交证据中记录。
