@@ -31,3 +31,5 @@ AgentTaskFactory 只载入一次 memory/experience 集合，使用同一集合�
 四个新增有效行为 mutants（selected 缺身份排除、workspace null 比较、损坏元数据忽略、磁盘继承过滤）均被杀死；六个原有 mutants 重新核实均杀死并逐字节恢复。新增分类检查使旧 unknown-source 夹具提前收紧；将其身份字段补全，让该测试单独验证有效分类的 unknown 状态不能提升为 clean，并保留独立 unclassifiable 回归。原始记录仅 /tmp。
 
 修复变异恢复后 strict `No issues found! (ran in 5.5s)`；宿主 full `+1055 ~3: All tests passed!`（2:33）。本修复提交仍须固定HEAD独立复审和新exact-head CI，不以旧28b成功替代；未合 develop。
+
+固定修复 HEAD `193eedd52c3a14755851ec676e5958ad88e0b9d4` 的独立复审：strict `No issues found! (ran in 9.9s)`；正式新16+旧18及相关回归88通过，原3失败探针/opaque proof lifecycle4/owner reopen1追加8通过，总96通过。两类原BLOCK关闭，无新阻断；建议只接纳该窄fresh-input foundation，仍待exact-head CI及parent集成批准。独立未跑full/mutants/CI，不把作者数字计作独立证据；不代表automatic/C已完成。旧28b报告保留。原始独立报告位于/tmp/AUTH-1b-loaded-inputs-repair-independent-review-193eedd.md。
