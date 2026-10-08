@@ -214,15 +214,17 @@ class LanNode {
     String digest,
     Future<T> Function(void Function(int)) operation, {
     String? toolId,
+    LanOutboundLedger? ledgerOverride,
   }) async {
     Future<T> bounded(void Function(int) count) => operation(count).timeout(
       destination.path == '/push'
           ? _limits.transferTimeout
           : _limits.probeTimeout,
     );
-    final result = _ledger == null
+    final chosenLedger = ledgerOverride ?? _ledger;
+    final result = chosenLedger == null
         ? bounded((_) {})
-        : _ledger!.send(
+        : chosenLedger.send(
             toolId:
                 toolId ??
                 (destination.scheme == 'udp'
@@ -933,11 +935,16 @@ class LanNode {
     String file, {
     void Function(int sent, int total)? onProgress,
     void Function()? checkBeforeEffect,
+    List<int>? payload,
+    LanOutboundLedger? outboundLedger,
     String? messageId,
     String? nonce,
     int? sentAtUnix,
   }) async {
     checkBeforeEffect?.call();
+    final frozenPayload = payload == null
+        ? null
+        : List<int>.unmodifiable(payload);
     final fingerprint = to.fingerprint;
     if (!isPaired(fingerprint)) {
       throw LanException('未配对或已撤销，拒绝发送');
@@ -948,10 +955,14 @@ class LanNode {
     );
     try {
       await (() async {
-        final length = File(file).lengthSync();
+        final length = frozenPayload?.length ?? File(file).lengthSync();
         final hasher = Sha256Sink();
-        await for (final chunk in File(file).openRead()) {
-          hasher.add(chunk);
+        if (frozenPayload == null) {
+          await for (final chunk in File(file).openRead()) {
+            hasher.add(chunk);
+          }
+        } else {
+          hasher.add(frozenPayload);
         }
         final bodyHash = hasher.close();
         final chosenNonce = nonce ?? randomToken();
@@ -995,13 +1006,16 @@ class LanNode {
           onProgress?.call(sent, length);
           checkBeforeEffect?.call();
           await req.addStream(
-            File(file).openRead().map((chunk) {
-              checkBeforeEffect?.call();
-              sent += chunk.length;
-              count(chunk.length);
-              onProgress?.call(sent, length);
-              return chunk;
-            }),
+            (frozenPayload == null
+                    ? File(file).openRead()
+                    : Stream<List<int>>.value(frozenPayload))
+                .map((chunk) {
+                  checkBeforeEffect?.call();
+                  sent += chunk.length;
+                  count(chunk.length);
+                  onProgress?.call(sent, length);
+                  return chunk;
+                }),
           );
           final res = await req.close();
           await _responseBytes(res);
@@ -1012,7 +1026,7 @@ class LanNode {
                   : '对方没有收下（HTTP ${res.statusCode}）',
             );
           }
-        });
+        }, ledgerOverride: outboundLedger);
       })();
     } on IOException {
       throw LanException('发送给 ${to.name} 失败：对方可能已关闭"局域网可见"或离开网络');
