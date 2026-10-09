@@ -62,6 +62,8 @@ class DynamicWorkspaceSession {
   bool ready = false;
   bool _disposed = false;
   Future<void>? _loading;
+  // Includes registered object-page lease disposal after its pushed route pops.
+  Future<void>? pendingReferenceNavigation;
   // Ephemeral app presentation only; never a business draft or runtime state.
   String? focusedFieldNode;
   TextSelection? focusedFieldSelection;
@@ -212,6 +214,21 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
     }
   }
   Future<void> openReference({
+    ObjectRef? object,
+    String? source,
+    required String nodeId,
+  }) {
+    if (widget.host == null || controller == null || navigating) return Future.value();
+    final pending = _openReference(object: object, source: source, nodeId: nodeId);
+    session.pendingReferenceNavigation = pending;
+    return pending.whenComplete(() {
+      if (identical(session.pendingReferenceNavigation, pending)) {
+        session.pendingReferenceNavigation = null;
+      }
+    });
+  }
+
+  Future<void> _openReference({
     ObjectRef? object,
     String? source,
     required String nodeId,

@@ -92,6 +92,7 @@ class _MuyonAppState extends State<MuyonApp> {
       onExitRequested: () async {
         try {
           await conversationShell.checkpoint();
+          await _releaseReferenceRoutes();
         } catch (_) {
           // Keep the tree and unsaved input visible when the CAS fails.
           return AppExitResponse.cancel;
@@ -115,6 +116,13 @@ class _MuyonAppState extends State<MuyonApp> {
     super.dispose();
   }
 
+  Future<void> _releaseReferenceRoutes() async {
+    // Completing push futures lets each registered page execute its finally
+    // lease disposal. Replacing a Navigator tree alone does not complete them.
+    navigator.currentState?.popUntil((route) => route.isFirst);
+    await conversationShell.referencesSettled();
+  }
+
   /// Close, restore, reopen. The page tree is replaced by a plain progress
   /// screen first so nothing keeps listening to the host being closed. If the
   /// restore fails, the original data is reopened and the failure is shown.
@@ -124,6 +132,8 @@ class _MuyonAppState extends State<MuyonApp> {
     // A failed checkpoint propagates to the existing action error handler;
     // the old host and tree remain open so the user can retain their input.
     await conversationShell.checkpoint();
+    if (!mounted) return;
+    await _releaseReferenceRoutes();
     if (!mounted) return;
     conversationShell.detach();
     setState(() => restoring = true);

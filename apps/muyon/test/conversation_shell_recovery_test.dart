@@ -34,6 +34,13 @@ Future<void> _unmountRecovery(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+void _registerRecoveryCleanup(WidgetTester tester, NavigationFixture fixture) {
+  addTearDown(() async {
+    await _unmountRecovery(tester);
+    await workspaceOperation(tester, fixture.host.close);
+  });
+}
+
 class _ReceiptSession extends DynamicWorkspaceSession {
   _ReceiptSession(super.widget);
   int queries = 0;
@@ -47,10 +54,14 @@ class _ReceiptSession extends DynamicWorkspaceSession {
 class _GenerationLeaseRuntime extends FakeRuntime implements ObjectPages {
   _GenerationLeaseRuntime(super.resources);
   int released = 0;
+  Completer<void>? releaseBarrier;
   @override
   Future<ObjectPageLease?> open(BuildContext context, ObjectRef ref) async => ObjectPageLease(
     title: '宿主换代插件页', page: const Text('注册插件租用页'),
-    dispose: () async { released++; },
+    dispose: () async {
+      await releaseBarrier?.future;
+      released++;
+    },
   );
 }
 
@@ -62,6 +73,7 @@ void main() {
   for (final name in ['pending_receipt_reload_queries_once_and_never_replays', 'unknown_receipt_remains_locked_and_not_success']) {
     testWidgets(name, (tester) async {
       final f = await NavigationFixture.open(tester);
+      _registerRecoveryCleanup(tester, f);
       var actions = 0;
       final workspace = DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison',
         plan: f.plan(ref), onEvent: (_) async { actions++; });
@@ -94,10 +106,7 @@ void main() {
   testWidgets('host_generation_replaces_old_listeners_and_leases', (tester) async {
     final module = _leaseModule();
     final f = await NavigationFixture.open(tester, extra: [module]);
-    addTearDown(() async {
-      await _unmountRecovery(tester);
-      await workspaceOperation(tester, f.host.close);
-    });
+    _registerRecoveryCleanup(tester, f);
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
     addTearDown(tester.view.resetPhysicalSize);
@@ -132,6 +141,9 @@ void main() {
     await tester.tap(find.text('查看对象 · lease'));
     await workspaceVisible(tester, find.text('注册插件租用页'));
     final runtime = module.runtime! as _GenerationLeaseRuntime;
+    final leaseRelease = Completer<void>();
+    runtime.releaseBarrier = leaseRelease;
+    addTearDown(() { if (!leaseRelease.isCompleted) leaseRelease.complete(); });
     expect(runtime.released, 0);
     final entered = Completer<void>();
     final release = Completer<void>();
@@ -154,6 +166,13 @@ void main() {
     expect(runtime.released, 0);
     release.complete();
     await workspaceOperation(tester, () => blocked!);
+    await workspaceGone(tester, find.text('注册插件租用页'));
+    // The object route popped, but its asynchronous lease is not released yet.
+    // Restore must still retain the current host until that disposal finishes.
+    expect(fresh, isNull);
+    expect(f.host.workspaces.setting('marker'), 'after');
+    expect(runtime.released, 0);
+    leaseRelease.complete();
     await workspaceVisible(tester, find.textContaining('已从备份恢复并重启'));
     await workspaceOperation(tester, () => restoring!);
     expect(fresh, isNotNull);
@@ -177,6 +196,7 @@ void main() {
 
   testWidgets('incompatible_catalog_workspace_keeps_manual_draft_without_rewrite', (tester) async {
     final f = await NavigationFixture.open(tester);
+    _registerRecoveryCleanup(tester, f);
     var actions = 0;
     final workspace = DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison',
       plan: f.plan(ref), originalAnswer: '完整原回答', onEvent: (_) async { actions++; });
@@ -219,6 +239,7 @@ void main() {
 
   testWidgets('corrupt_or_incompatible_workspace_is_readable_without_rewrite', (tester) async {
     final f = await NavigationFixture.open(tester);
+    _registerRecoveryCleanup(tester, f);
     final key = 'ui-workspace:${jsonEncode(['task', 'comparison'])}';
     const bytes = '{broken-workspace';
     await workspaceOperation(tester, () => f.host.foundation.database.write((db) => db.execute(
@@ -229,7 +250,7 @@ void main() {
     await workspaceOperation(tester, session.ensureLoaded);
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: DynamicWorkspace(repository: f.host.foundation,
       taskId: 'task', surfaceId: 'comparison', session: session, embedded: true, originalAnswer: '完整原回答'))));
-    await tester.pumpAndSettle();
+    await workspaceVisible(tester, find.textContaining('读取失败，保存内容未删除'));
     expect(find.textContaining('读取失败，保存内容未删除'), findsOneWidget);
     expect(find.text('完整原回答'), findsOneWidget);
     expect(find.byType(ConversationWorkspaceBody), findsNothing);

@@ -39,7 +39,8 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
     widget.controller?.attach(this, () {
       session?.capturePresentation?.call();
       return session?.checkpoint() ?? Future.value();
-    }, () => session?.dispose());
+    }, () => session?.dispose(),
+      referencesSettled: () => session?.pendingReferenceNavigation ?? Future.value());
   }
 
   @override
