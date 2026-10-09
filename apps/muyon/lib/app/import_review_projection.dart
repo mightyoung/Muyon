@@ -200,6 +200,40 @@ class ImportReviewProjection {
     );
   }
 
+  /// Query only durable references owned by this surface; activation reconciles
+  /// the host binding and never invokes the domain commit again.
+  Future<List<ImportReceipt>> queryReceipts(
+    UiWorkspaceController controller,
+  ) async {
+    if (controller.taskId != taskId ||
+        controller.surface.current.plan.surfaceId != surfaceId ||
+        !identical(
+          runtime,
+          host.modules.runtime<InquiryModuleRuntime>('inquiry'),
+        ) ||
+        !identical(draft.pipeline, runtime.imports)) {
+      throw StateError('Import review changed; reopen it');
+    }
+    final coordinator = ImportCoordinator(host.workspaces);
+    final receipts = <ImportReceipt>[];
+    for (final operationId in controller.surface.operationRefs) {
+      final receipt = await runtime.receipt(operationId);
+      if (receipt == null) continue;
+      final intent = receipt.intent;
+      final binding = draft.target.binding;
+      if (intent.operationId != operationId ||
+          intent.moduleId != binding.moduleId ||
+          intent.workspaceId != binding.workspaceId ||
+          intent.targetProjectId != binding.nativeProjectId ||
+          !intent.stagingToken.startsWith('${draft.draftId}:')) {
+        throw StateError('Receipt is outside this import');
+      }
+      await coordinator.activate(receipt);
+      receipts.add(receipt);
+    }
+    return receipts;
+  }
+
   Future<void> syncEdits(UiWorkspaceController controller) async {
     if (controller.taskId != taskId ||
         controller.surface.current.plan.surfaceId != surfaceId ||
@@ -241,6 +275,20 @@ class ImportReviewProjection {
     }
     if (records.any((id) => !visibleRecords.any((r) => r.id == id))) {
       throw StateError('Confirm only the visible group');
+    }
+    final binding = draft.target.binding;
+    final owner = host.workspaces.ownerWorkspace(
+      binding.moduleId,
+      binding.nativeProjectId,
+    );
+    final current = host.workspaces.binding(
+      binding.workspaceId,
+      binding.moduleId,
+    );
+    if ((owner != null && owner != binding.workspaceId) ||
+        (current != null &&
+            current.nativeProjectId != binding.nativeProjectId)) {
+      throw StateError('Import target changed; choose the workspace again');
     }
     controller.selectedRecords = List.of(records);
     await controller.flush();
@@ -446,6 +494,30 @@ class _ImportReviewViewState extends State<ImportReviewView> {
       }
     } catch (e) {
       if (mounted) setState(() => error = '未确认完成：$e。先核对回执再续办。');
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  Future<void> queryReceipt() async {
+    if (busy) return;
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      final results = await projection.queryReceipts(controller);
+      if (mounted) {
+        setState(() {
+          receipt = results.isEmpty ? null : results.last;
+          error = results.length < controller.surface.operationRefs.length
+              ? '回执尚未确认，请稍后再查；未重新执行导入。'
+              : null;
+        });
+      }
+      await refresh(sync: false);
+    } catch (e) {
+      if (mounted) setState(() => error = '回执未确认：$e');
     } finally {
       if (mounted) setState(() => busy = false);
     }
@@ -686,6 +758,11 @@ class _ImportReviewViewState extends State<ImportReviewView> {
                 TextButton(
                   onPressed: busy ? null : () => move(projection.page + 1),
                   child: const Text('下一组'),
+                ),
+              if (controller.surface.operationRefs.isNotEmpty)
+                TextButton(
+                  onPressed: busy ? null : queryReceipt,
+                  child: const Text('查询提交回执'),
                 ),
               TextButton(
                 onPressed: busy || controller.readOnly

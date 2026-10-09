@@ -82,6 +82,21 @@ class InquiryBusinessModule implements BusinessModuleV2 {
       owner,
       resources.files,
       isActive: () => host.modules.scopeAuthorityRevision('inquiry') != null,
+      validateTarget: (intent) {
+        final workspaces = host.workspaces;
+        final current = workspaces.binding(intent.workspaceId, intent.moduleId);
+        final owner = workspaces.ownerWorkspace(
+          intent.moduleId,
+          intent.targetProjectId,
+        );
+        if (workspaces.scopeAuthorityRevision == null ||
+            (owner != null && owner != intent.workspaceId) ||
+            (intent.kind == ImportKind.create && current != null) ||
+            (intent.kind == ImportKind.refresh &&
+                current?.nativeProjectId != intent.targetProjectId)) {
+          throw StateError('Import target changed; choose the workspace again');
+        }
+      },
     );
   }
 
@@ -128,10 +143,12 @@ class InquiryModuleRuntime
     this.owner,
     ModuleFiles files, {
     required bool Function() isActive,
+    required void Function(ImportIntent) validateTarget,
   }) : imports = InquiryImportPipeline(
          state: owner.runtime.state,
          files: files,
          isActive: isActive,
+         validateTarget: validateTarget,
          parseText: (input) async => (await DocumentParser().parseInput(
            input.path,
            input.displayName,

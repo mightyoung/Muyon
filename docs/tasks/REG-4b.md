@@ -35,14 +35,21 @@ TXT/MD/HTML/PDF/图像分别记录真实解析/部分可用/不可用。云 Web�
 - 询价运行时实现 ImportCapable，继续同一 AppState/Store/生命周期。插件把冻结来源、提取与人工覆盖、用途分组、候选选择、确认版本、逐记录回执存到已有 meta；无需新数据库、Agent内核或服务。确认绑定真实源/schema、draft revision、有效recordIds及选择实体版本；模型confirmed布尔不构成审批。
 - 复用现有 FileGateway、DocumentParser、表格解析/extractOffers、planOffer/applyOffers、commitAiTask 和 ImportCoordinator。原领域方法新增可选逐记录观察回调，回传实际产品/供应商/报价ID与原规则判定的重复，领域规则保持原逻辑。领域写、源AI apply标记与回执同一原事务。
 - `InquiryImportEntry` 要求人选询价功能后准备；`ImportReviewView` 使用UI-3b持久覆盖与共享renderer，首个目标是报价与材料主数据（复用原MaterialImportPage两种用途），支持分组、直接编辑、候选确认、有效记录选择、真实按钮提交、完成项只读和回执后续办。每组5条保持既有200节点上限。共享Field新增可选文本键盘，原默认数字键盘兼容。
-- 本交付是可调用的文件上下文入口/投影与插件适配；生产上下文导航、全局Agent映射与默认开关未接，登记为后续接线依赖。旧AgentDispatch/startTool、procurement_import `(sessionId,callId)` 与AskPage不在本片修改；未声称解决它们的幂等或生产入口上线。回退仍可使用原导入页，插件草稿/来源/回执保留。
+- 生产任务中心的既有任务菜单新增“从文件导入业务”，进入独立上下文页：明确选询价插件，选原资料副本或原生文件，再选真实工作区/项目与报价/材料用途。已有任务的UI工作区索引提供持久草稿分组，返回后直接恢复插件草稿，不重新解析或重复入库。恢复与“查询提交回执”只查真实operationId并补原协调器host绑定，未知保持pending，不自动重放领域写。原ownerWorkspace事实过滤项目并在准备/提交前重核；host目标事实校验在插件最终写闭包内同步执行，与原领域事务之间无await，已有回执先返回。回退仍可使用原导入页，草稿/来源/回执保留。
+- 范围核对：生产人类上下文导航属于本任务；UI-2a负责对象引用/文件阅读与返回锚点，并非本入口后继。全局assistant.plan_ui与Agent UI映射依赖UI-4b；C4负责软指南元数据，不要求本片开启全局planning/default flag或新增工具授权。旧AgentDispatch/startTool、procurement_import `(sessionId,callId)` 与AskPage不在本片修改，它们的幂等风险留独立修复项，不声称全路径幂等。
 - TXT及MD公共表格夹具使用真实解析与SQLite入库；HTML/图像沿原解析器明确拒绝，测试无领域写或pending提交。PDF沿现有pdfrx文本路径，尚未验证本任务真实PDF；扫描PDF/OCR、原生文件权限待最终实机。不伪报五类格式全部通过。无新增付费模型、云服务；云UI用户暂缓，未跑cloud smoke/浏览器部署验收。
 - 独审发现同批重复回执、失败Future缓存、候选选择后实体变化三Important；均补实际失败回归并以薄接线修复，最终增量只读复核无新增Critical/Important。原始日志仅 `/tmp/reg4b-evidence-20261009`，不提交。
 
-- 纯材料名称/类别表、材料优先的混合报价表都先按主选用途调用原 offersFromWorkbook 参数，不能识别时只尝试已选其它用途；不合并两轮结果、不新建解析规则。两例在无AI配置环境都取得“误入模型”的有效RED，最终验证记录GREEN。项目采购清单 `list_import` 仍走原页面，其 ProposedLine/预算写入尚未迁本协议；若纳入第三功能，需另明确范围，不借本片重写其规则。
+- 纯材料名称/类别表、材料优先的混合报价表都先按主选用途调用原 offersFromWorkbook 参数，不能识别时只尝试已选其它用途；不合并两轮结果、不新建解析规则。两例在无AI配置环境都取得“误入模型”的有效RED，最终验证记录GREEN。项目采购清单 `list_import` 被正式任务明确列为复用项，属于REG-4b，不能整体归入UI-2a/C4后继。原 `createProjectFromProposal` 只支持新建项目并返回新ID；当前报价/材料冻结已存在项目，清单的目标ID冻结及部分提交后续办需要明确保留原新建项目语义，或由用户明确拆出后续切片。已提产品选择，尚未获答；不自行改为向已有项目追加，不称清单迁移已完成。
 
 ## 本机验证摘要
 
 最终23项 `inquiry_import_pipeline_test.dart` 全通过（真实Store、字段覆盖、人工按钮、候选/版本、同批去重、故障重试、源AI标记原子性、部分提交与恢复、所选原格式解析）；最终 inquiry/host analyze 无问题。前一完整串行 `scripts/ci.sh` 为8/8 analyze、doctor23、7/8 suites通过，host1181 passed/3 skipped、supplier_core482 passed/3 skipped；inquiry仅原有46截图失败（281 passed/1 skipped）。此轮在最后两项格式参数接线前执行，不能代称最终完整版本通过；最终完整host/候选截图另外串行复跑，结果见交付证据。
 
-精确develop基线与候选独立新跑截图均46失败，失败集合、尺寸、差异像素、184PNG哈希一致；不是截图通过，也不沿用旧SHA例外。最终SHA的任务分支Linux CI单独核验。云UI、cloud smoke、PDF/OCR/真实原生文件权限及实机仍待验收；生产路由/defaultflag/list_import迁移缺口保留，REG-4b整体仍标进行中。原始日志仅本机临时证据目录。
+精确develop基线与候选独立新跑截图均46失败，失败集合、尺寸、差异像素、184PNG哈希一致；不是截图通过，也不沿用旧SHA例外。最终SHA的任务分支Linux CI单独核验。云UI、cloud smoke、PDF/OCR/真实原生文件权限及实机仍待验收；生产人类入口已接；global planning/defaultflag是UI-4b依赖，旧Agent callId幂等留独立修复项。list_import原新建项目目标语义选择尚未答复，REG-4b整体仍标进行中。原始日志仅本机临时证据目录。
+
+## 生产入口续段验证（2026-10-09）
+
+新增 `screens/inquiry_import_context.dart`、shell任务菜单；原13文件清单之外只增加新页与两个shell接线文件，避开AskPage/report/agent_dispatch并行修复。最小复用点：原Task/Workspace/KnowledgeService、原FilePicker、插件PreparedDraft、原UIWorkspace索引和ImportCoordinator；不造新Agent任务或业务项目。
+
+本机实际30项针对性测试全通过：原23项，加任务中心真实菜单、准备/人工提交/返回恢复、已提交与未知回执查询、目标归属变化、项目候选过滤与最终写队列期间归属改变。菜单被shell busy挡住与他工作区项目写后才拒绝均取得实际失败回归后修复。独审新发现的项目归属Important及异步写队列窗口按原事实薄接线修复，最终独立只读复核无新增Critical/Important；host/inquiry analyze无问题。完整host重新串行运行，前一次中止不计通过；完整结果与任务分支精确CI见最终交付证据，不用先前SHA冒充本轮完整验证。原始日志只在 `/tmp/reg4b-evidence-20261009`，不提交。

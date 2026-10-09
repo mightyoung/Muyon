@@ -47,11 +47,13 @@ class InquiryImportPipeline {
     required this.files,
     required this.parseText,
     required this.isActive,
+    required this.validateTarget,
   });
   final AppState state;
   final ModuleFiles files;
   final Future<String> Function(SelectedInput) parseText;
   final bool Function() isActive;
+  final void Function(ImportIntent) validateTarget;
   static const _prefix = 'inquiry-import:';
   String get schemaDigest => _hash(
     utf8.encode(
@@ -435,6 +437,10 @@ class InquiryImportPipeline {
         }
         return prior;
       }
+      // Host facts are read synchronously inside the admitted final write.
+      // No await separates target validation and the original domain transaction.
+      // Existing receipts return above, so reconciliation cannot reapply effects.
+      validateTarget(intent);
       final frozen = _read('confirmation:${intent.stagingToken}');
       if (_hash(utf8.encode(jsonEncode(frozen))) != intent.inputDigest ||
           frozen['workspaceId'] != intent.workspaceId ||
@@ -602,6 +608,8 @@ class PreparedInquiryDraft extends PreparedImport {
   final String draftId;
   List<String> get recordIds => pipeline.ids(draftId);
   int get revision => pipeline._read('draft:$draftId')['revision'] as int;
+  String get sourceName =>
+      pipeline._read('draft:$draftId')['sourceName'] as String;
   String get sourceText =>
       pipeline._read('draft:$draftId')['sourceText'] as String;
   String get sourceDigest =>

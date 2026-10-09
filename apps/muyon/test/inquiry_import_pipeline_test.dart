@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -8,11 +9,158 @@ import 'package:supplier_core/supplier_core.dart';
 import 'package:muyon/workspace/import_coordinator.dart';
 import 'package:flutter/material.dart';
 import 'package:muyon/app/import_review_projection.dart';
+import 'package:muyon/screens/inquiry_import_context.dart';
+import 'package:muyon/screens/platform_shell.dart';
 import 'package:muyon/app/adapters/inquiry_module.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 
 void main() {
   LiveTestWidgetsFlutterBinding();
+  testWidgets('task_center_menu_opens_production_file_context', (tester) async {
+    final f = await _Fixture.open();
+    try {
+      await f.addTask();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: PlatformShell(
+            host: f.host,
+            themeMode: ThemeMode.light,
+            onTheme: (_) {},
+            onRestore: (_) async {},
+          ),
+        ),
+      );
+      await tester.tap(find.textContaining('任务 ').first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(PopupMenuButton<String>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('从文件导入业务'));
+      await tester.pumpAndSettle();
+      expect(find.byType(InquiryImportContextPage), findsOneWidget);
+      expect(find.byKey(const ValueKey('import-plugin')), findsOneWidget);
+      expect(f.quotationCount, 0);
+      await tester.pumpWidget(const SizedBox());
+      expect(tester.takeException(), isNull);
+    } finally {
+      await f.close();
+    }
+  });
+  testWidgets(
+    'production_context_entry_reaches_real_review_and_resumes_without_parse',
+    (tester) async {
+      final f = await _Fixture.open();
+      try {
+        await f.addTask();
+        final file = File('${f.root.path}/context.txt')
+          ..writeAsStringSync('供应商\t产品名称\t型号\t单位\t单价\n公开供应商\t水泵\tM2\t台\t10');
+        var picks = 0;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: InquiryImportContextPage(
+                host: f.host,
+                taskId: 'task',
+                pickInput: () async {
+                  picks++;
+                  return SelectedInput(
+                    path: file.path,
+                    displayName: 'context.txt',
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.byKey(const ValueKey('import-plugin')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('询价').last);
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(
+            ValueKey('import-project-${f.target.binding.workspaceId}'),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('公开项目').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('选择本地文件'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('进入用途选择'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('询价报价'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('准备预览'));
+        await tester.pumpAndSettle();
+        expect(f.quotationCount, 0);
+        await tester.tap(find.byKey(const ValueKey('select-r0')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('确认导入'));
+        await tester.pumpAndSettle();
+        expect(f.quotationCount, 1);
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('继续导入草稿').first);
+        await tester.pumpAndSettle();
+        expect(find.textContaining('已入库'), findsWidgets);
+        expect(f.quotationCount, 1);
+        expect(picks, 1);
+        await tester.pumpWidget(const SizedBox());
+        expect(tester.takeException(), isNull);
+      } finally {
+        await f.close();
+      }
+    },
+  );
+  for (final committed in [false, true]) {
+    testWidgets(
+      'receipt_query_never_reexecutes_unknown_or_committed_$committed',
+      (tester) async {
+        final f = await _Fixture.open();
+        UiWorkspaceController? controller;
+        try {
+          await f.addTask();
+          final draft = await f.prepare();
+          final projection = ImportReviewProjection(
+            f.host,
+            f.runtime as InquiryModuleRuntime,
+            draft,
+            taskId: 'task',
+          );
+          controller = await projection.open();
+          final prepared = await draft.confirm(['r0']);
+          final coordinator = ImportCoordinator(f.host.workspaces);
+          final intent = await coordinator.record(prepared);
+          controller.surface.lockRecoveredOperations([intent.operationId]);
+          await controller.flush();
+          if (committed) await f.runtime.commitImport(prepared, intent);
+          final before = f.quotationCount;
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: ImportReviewView(
+                  projection: projection,
+                  controller: controller,
+                ),
+              ),
+            ),
+          );
+          await tester.tap(find.text('查询提交回执'));
+          await tester.pumpAndSettle();
+          expect(f.quotationCount, before);
+          expect(coordinator.pending('inquiry').length, committed ? 0 : 1);
+          expect(
+            find.textContaining(committed ? '已入库' : '回执尚未确认'),
+            findsWidgets,
+          );
+          await tester.pumpWidget(const SizedBox());
+          expect(tester.takeException(), isNull);
+        } finally {
+          controller?.dispose();
+          await f.close();
+        }
+      },
+    );
+  }
   testWidgets('entry_requires_function_and_exposes_candidate_choice', (
     tester,
   ) async {
@@ -51,6 +199,127 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('product-choice-r0')), findsOneWidget);
       expect(f.quotationCount, 0);
+      await tester.pumpWidget(const SizedBox());
+      expect(tester.takeException(), isNull);
+    } finally {
+      await f.close();
+    }
+  });
+  test('queued_commit_rechecks_project_owner_inside_final_write', () async {
+    final f = await _Fixture.open();
+    final entered = Completer<void>(), release = Completer<void>();
+    Future<String?>? blocker;
+    try {
+      final draft = await f.prepare();
+      final prepared = await draft.confirm(['r0']);
+      final coordinator = ImportCoordinator(f.host.workspaces);
+      final intent = await coordinator.record(prepared);
+      final other = await f.host.workspaces.create('其他工作区');
+      blocker = f.host.inquiry!.runtime.state.writeInBackground((_) async {
+        entered.complete();
+        await release.future;
+      });
+      await entered.future;
+      final commit = f.runtime.commitImport(prepared, intent);
+      await f.host.workspaces.bind(
+        WorkspaceBinding(
+          workspaceId: other.id,
+          moduleId: 'inquiry',
+          nativeProjectId: f.project,
+        ),
+      );
+      release.complete();
+      await blocker;
+      await expectLater(commit, throwsStateError);
+      expect(f.quotationCount, 0);
+      expect(await f.runtime.receipt(intent.operationId), isNull);
+      expect(
+        coordinator.pending('inquiry').single.operationId,
+        intent.operationId,
+      );
+    } finally {
+      if (!release.isCompleted) release.complete();
+      await blocker;
+      await f.close();
+    }
+  });
+  test(
+    'project_owner_change_is_refused_before_intent_or_domain_write',
+    () async {
+      final f = await _Fixture.open();
+      UiWorkspaceController? controller;
+      try {
+        await f.addTask();
+        final draft = await f.prepare();
+        final projection = ImportReviewProjection(
+          f.host,
+          f.runtime as InquiryModuleRuntime,
+          draft,
+          taskId: 'task',
+        );
+        controller = await projection.open();
+        final other = await f.host.workspaces.create('其他工作区');
+        await f.host.workspaces.bind(
+          WorkspaceBinding(
+            workspaceId: other.id,
+            moduleId: 'inquiry',
+            nativeProjectId: f.target.binding.nativeProjectId,
+          ),
+        );
+        await expectLater(
+          projection.commitSelected(controller, ['r0']),
+          throwsStateError,
+        );
+        expect(f.quotationCount, 0);
+        expect(
+          ImportCoordinator(f.host.workspaces).pending('inquiry'),
+          isEmpty,
+        );
+      } finally {
+        controller?.dispose();
+        await f.close();
+      }
+    },
+  );
+  testWidgets('context_project_selector_excludes_another_workspace_owner', (
+    tester,
+  ) async {
+    final f = await _Fixture.open();
+    try {
+      await f.addTask();
+      final other = await f.host.workspaces.create('其他工作区');
+      await f.host.workspaces.bind(
+        WorkspaceBinding(
+          workspaceId: other.id,
+          moduleId: 'inquiry',
+          nativeProjectId: f.target.binding.nativeProjectId,
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: InquiryImportContextPage(host: f.host, taskId: 'task'),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const ValueKey('import-plugin')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('询价').last);
+      await tester.pumpAndSettle();
+      final dropdown = tester.widget<DropdownButton<String>>(
+        find.descendant(
+          of: find.byKey(
+            ValueKey('import-project-${f.target.binding.workspaceId}'),
+          ),
+          matching: find.byType(DropdownButton<String>),
+        ),
+      );
+      expect(
+        dropdown.items!.where(
+          (i) => i.value == f.target.binding.nativeProjectId,
+        ),
+        isEmpty,
+      );
       await tester.pumpWidget(const SizedBox());
       expect(tester.takeException(), isNull);
     } finally {
@@ -1029,6 +1298,10 @@ class _Fixture {
       jsonEncode({
         'kind': 'personal',
         'executionId': 'task',
+        'prompt': '公开文件导入',
+        'conversationId': 'public-conversation',
+        'executionDeviceId': 'public-device',
+        'updatedAt': '2026-10-09T00:00:00Z',
         'state': 'interrupted',
         'stage': 'interrupted',
         'scope': AssistantScope.workspace(target.binding.workspaceId).toJson(),

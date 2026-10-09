@@ -100,18 +100,33 @@ extension _HomeSections on _PlatformShellState {
                     child: Icon(Icons.devices),
                   )
                 : PopupMenuButton<String>(
-                    onSelected: (value) => action(() async {
-                      if (value == 'cancel') {
-                        await host.personalAgent.cancel(task.id);
+                    onSelected: (value) {
+                      if (value == 'import') {
+                        // The task-center route keeps the outer shell action
+                        // busy until it returns. Navigation stays local here.
+                        page(
+                          '从文件导入业务',
+                          InquiryImportContextPage(host: host, taskId: task.id),
+                        );
+                        return;
                       }
-                      if (value == 'pause') {
-                        await host.personalAgent.pause(task.id);
-                      }
-                      if (value == 'resume') {
-                        await host.personalAgent.resume(task.id);
-                      }
-                    }),
+                      action(() async {
+                        if (value == 'cancel') {
+                          await host.personalAgent.cancel(task.id);
+                        }
+                        if (value == 'pause') {
+                          await host.personalAgent.pause(task.id);
+                        }
+                        if (value == 'resume') {
+                          await host.personalAgent.resume(task.id);
+                        }
+                      });
+                    },
                     itemBuilder: (_) => [
+                      const PopupMenuItem(
+                        value: 'import',
+                        child: Text('从文件导入业务'),
+                      ),
                       if (!task.terminal)
                         const PopupMenuItem(value: 'cancel', child: Text('取消')),
                       if (!task.terminal)
