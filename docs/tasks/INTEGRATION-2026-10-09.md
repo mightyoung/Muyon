@@ -14,12 +14,14 @@ ADR-0001 用户决定、产品架构总览、AI 原生方案及流式契约。�
 | GROK-7 | `18ae5127474d6841ad331ca2251076ecca431a81` | [独立审查](GROK-7-review.md)；[精确CI](https://github.com/mightyoung/Muyon/actions/runs/37948032314) success | 先合文档，四处勘误/边界澄清，不改设计 |
 | REG-3a | `48b36375c2ea8ebf3c10281e7f6372a9aa52e5b7` | [独立复审](REG-3a-review.md)；[精确CI](https://github.com/mightyoung/Muyon/actions/runs/37961770816) success；host +1267 ~3，8/8 analyze、8/8 suites | 两模块有界 v2；精确工具目录例外获准，保留行为检查 |
 | PR #6 | `107ca439547a01c4ac37e218e059de0a508a0309` | [独立审查](CI-PACKAGE-review.md)；本轮重跑 26 Python tests OK | 仅手动基础设施，不执行 workflow_dispatch |
-| AIUI-1 | `276b29146d3eb902380cceac708209cc6ef344c0` | [精确CI](https://github.com/mightyoung/Muyon/actions/runs/37952681084) success | 等独立全库组件契约审计明确结论，不合 |
-| AIUI-2 | `3f739035385b7640d1fcec497dc33a85d3553ffe` | [精确CI](https://github.com/mightyoung/Muyon/actions/runs/37963507853) success，Form 修复已验 | 等审计；Toggle typed edit、CompareTable detail binding、集合 codec/Checklist 映射未完成，不能以弱化 validator 换取合并 |
+| AIUI-1 | `276b29146d3eb902380cceac708209cc6ef344c0` | [独立复审](AIUI-1-review.md)；[精确CI](https://github.com/mightyoung/Muyon/actions/runs/37952681084) success | 父任务已转交审计无新确定协议/授权阻断结论；加入组合门禁，成功才发布 |
+| AIUI-2 | `3f739035385b7640d1fcec497dc33a85d3553ffe` | [精确CI](https://github.com/mightyoung/Muyon/actions/runs/37963507853) success，Form 修复已验 | 暂缓：Tabs 缩减列表后索引未调整（layout.dart:214/271），原执行者修复中，不合旧 SHA；typed edit/detail/集合与恢复接线归后续，不弱化 validator |
 
 临时组合 `53458c6c69b8aff9c5338d8b7d28417a547706c8` 包含 GROK-7 与 REG-3a；
 [CI 37965251000](https://github.com/mightyoung/Muyon/actions/runs/37965251000) 为本轮重跑门禁。
 PR #6 相对该组合只增四个基础设施文件及审查摘要，另由精确源码离线测试验证。
+收到全库审计明确结论后，另将 AIUI-1 加入完整组合并重跑 CI；前一次运行不代表
+含 AIUI-1 的组合已通过。AIUI-2 的 Tabs 复现/修复与新精确提交 CI 仍由原任务负责。
 最终 develop 发布完整 SHA、ls-remote 与对应 CI 终态在执行回报核对；不把临时 CI
 冒称最终发布 CI。原始验证日志不入库。
 

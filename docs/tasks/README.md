@@ -80,11 +80,11 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 
 | 任务 | 分支 | 执行 | 依赖 | 状态 |
 |---|---|---|---|---|
-| [AIUI-1](AIUI-1.md) 流式界面协议与增量编译器 | `task/aiui-1-streaming-compiler` | Codex | — | **已派发** |
-| [AIUI-2](AIUI-2.md) 组件库 v1（合并两份目录，补齐约 24 个组件） | `task/aiui-2-component-library` | engineer | — | **已派发**（用户改派） |
+| [AIUI-1](AIUI-1.md) 流式界面协议与增量编译器 | `task/aiui-1-streaming-compiler` | Codex | — | 最终 `276b29146d3eb902380cceac708209cc6ef344c0` 独立复审通过，组合门禁及发布见[集成交接](INTEGRATION-2026-10-09.md) |
+| [AIUI-2](AIUI-2.md) 组件库 v1（合并两份目录，补齐约 24 个组件） | `task/aiui-2-component-library` | engineer | — | `3f739035385b7640d1fcec497dc33a85d3553ffe` CI 通过；Tabs 变短索引问题由原执行者修复中，旧 SHA 暂缓合入；接口接线另片 |
 | [GROK-5](GROK-5.md) 本体业务卡片静态盘点（询价） | `task/grok-5-ontology-cards` | grokbot | — | 已合入（[审查](GROK-5-review.md)） |
 | [GROK-6](GROK-6.md) 科研本体盘点（REG-3 前置） | `task/grok-6-research-ontology` | grokbot | — | 已合入（[审查](GROK-6-review.md)）；科研敏感度已确认（2026-10-09） |
-| [GROK-7](GROK-7.md) 科研场景交互走查清单（AIUI-7 前置） | `task/grok-7-research-walkthrough` | grokbot | GROK-6 | **已派发** |
+| [GROK-7](GROK-7.md) 科研场景交互走查清单（AIUI-7 前置） | `task/grok-7-research-walkthrough` | grokbot | GROK-6 | 独立复审通过，20 目的/首批 7/9 公式；集成见[交接](INTEGRATION-2026-10-09.md) |
 | AIUI-3 本地重算公式 | — | junior | AIUI-1 | 待派 |
 | AIUI-4 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | 待派（engineer 先完成 R-1） |
 | AIUI-5 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | 待派 |
@@ -96,6 +96,10 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 
 
 ## 调度安全补核（2026-10-09）
+
+REG-3a 精确 `48b36375c2ea8ebf3c10281e7f6372a9aa52e5b7` 独立复审及任务 CI 通过；
+PR #6 手动基础设施 `107ca439547a01c4ac37e218e059de0a508a0309` 独立审查与 26 离线测试通过。
+本轮组合、发布、排除项与父任务可并行待办见[集成交接](INTEGRATION-2026-10-09.md)。
 
 | 任务 | 分支 | 状态 |
 |---|---|---|
