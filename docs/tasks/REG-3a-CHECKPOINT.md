@@ -25,8 +25,10 @@
   不绕过 Flutter 下载限制，原始日志只留 /tmp。
 
 后续边界修复 `cf19dbc54a7d1a246b9f17d9bea8fcdded6f0bec` 已推送核 SHA；
-CI 37947919276 将由本次 analyzer 修复提交取代。最终 exact SHA 与 CI 终态
-必须在父任务集成前重新核实。
+CI 37947919276 已被 analyzer 修复提交取代。代码候选
+`1e3de72ddac2c3c85ec56f26ccef6ff24621a322` 已推送核远端 SHA；
+CI 37948049883 随本次交接文档更新被取代。最终 exact SHA 与 CI 终态
+必须在父任务集成前重新核实；本文件记录提交时状态，最终运行证据见交付回复。
 
 ## 交付边界
 
@@ -44,15 +46,18 @@ CI 37947919276 将由本次 analyzer 修复提交取代。最终 exact SHA 与 C
 
 非作者 `/root/reg3a_static_review` 按 REVIEW.md 只读复核三轮。
 最新轮未发现确定静态阻断，`git diff --check` 成功；没有 Flutter，未运行测试。
-首实现之后待提交的增量：事务内 current-ref 守护、排队变更确定性屏障测试、
+后续已提交增量：事务内 current-ref 守护、排队变更确定性屏障测试、
 读取解析后同步复核、run-task revision 匹配、文档全文摘要复核与有界预览、
 更完整的详情/关系/no-op/回执/双向清单/合法 OCR 重授权行为测试。
 新增 widget 测试的真实异步激活与导入使用 tester.runAsync。
+最终非作者复核对象为 `1e3de72`，工作区 clean、
+`git diff --check 9af1f6d..HEAD` 成功；未发现未解决静态阻断。
 首实现 CI 无论结果如何，都不能验证这些后续增量。
 
 ## 明确未决与下一步
 
-1. 首实现 CI 到终态，读日志修复；提交推送后续增量，再核 exact SHA CI 终态。
+1. 首实现已到 cancelled 终态、日志 lint 已修复；最终分支 exact SHA CI 到终态，
+   若失败读日志修复，不以静态审查或部分套件成功代替运行证据。
 2. 独立审查最终提交；父任务协调与最新 develop / AIUI-1 的集成门禁。
 3. 本片不是完整 REG-3：其余本机写操作在清单中 deferred(REG-3a-followup)；
    Q10 本机 exportReport/exportClaimDrafts 已获业务授权，但 registrar 缺本机
