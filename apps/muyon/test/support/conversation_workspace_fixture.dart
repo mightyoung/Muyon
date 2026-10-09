@@ -45,14 +45,17 @@ Future<void> workspaceReady(WidgetTester tester) async {
   for (var turn = 0; turn < 2000; turn++) {
     await tester.runAsync(() => Future<void>(() {}));
     await tester.pump(const Duration(milliseconds: 16));
-    final finder = find.byType(DynamicWorkspace);
-    if (finder.evaluate().isEmpty) { stable = 0; continue; }
-    final session = tester.widget<DynamicWorkspace>(finder).session;
-    if (session != null && loaded.add(session)) {
-      await workspaceOperation(tester, session.ensureLoaded);
-      stable = 0;
-      continue;
+    // A registered page can cover the workspace, and callers also use this
+    // after unmount. Read retained sessions without requiring a visible body.
+    var loadedNow = false;
+    for (final element in find.byType(DynamicWorkspace, skipOffstage: false).evaluate()) {
+      final session = (element.widget as DynamicWorkspace).session;
+      if (session != null && loaded.add(session)) {
+        await workspaceOperation(tester, session.ensureLoaded);
+        loadedNow = true;
+      }
     }
+    if (loadedNow) { stable = 0; continue; }
     stable = tester.binding.hasScheduledFrame ? 0 : stable + 1;
     if (stable >= 2) return;
   }
