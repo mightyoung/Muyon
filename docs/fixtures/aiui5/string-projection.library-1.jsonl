@@ -1,0 +1,6 @@
+{"op":"text","md":"Public host fixture; total is bound."}
+{"op":"node","id":"root","component":"PageScaffold","props":{"title":"Public quote"}}
+{"op":"node","id":"qty","parent":"root","component":"Field","props":{"label":"Quantity"},"bind":{"value":{"kind":"fact","id":"price"},"draft":{"kind":"uiState","id":"qty"}}}
+{"op":"action","node":"qty","event":"change","action":"edit","inputs":["qty"]}
+{"op":"node","id":"total","parent":"root","component":"Metric","props":{"label":"Total"},"bind":{"value":{"kind":"computed","id":"total"}}}
+{"op":"end"}

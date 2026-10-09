@@ -85,9 +85,9 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 | [GROK-5](GROK-5.md) 本体业务卡片静态盘点（询价） | `task/grok-5-ontology-cards` | grokbot | — | 已合入（[审查](GROK-5-review.md)） |
 | [GROK-6](GROK-6.md) 科研本体盘点（REG-3 前置） | `task/grok-6-research-ontology` | grokbot | — | 已合入（[审查](GROK-6-review.md)）；科研敏感度已确认（2026-10-09） |
 | [GROK-7](GROK-7.md) 科研场景交互走查清单（AIUI-7 前置） | `task/grok-7-research-walkthrough` | grokbot | GROK-6 | 已合入 `18ae5127474d6841ad331ca2251076ecca431a81`；独立复审通过，20 目的/首批 7/9 公式；勘误与门禁见[交接](INTEGRATION-2026-10-09.md) |
-| [AIUI-3](AIUI-3.md) 本地重算公式 | — | junior | AIUI-1 | 任务书复审通过；F3a 可派，运行接线另片 |
+| [AIUI-3](AIUI-3.md) 本地重算公式 | — | junior | AIUI-1 | F3a `4943c6bb` 纯计算复审及源CI通过，组合门禁中；运行接线另片 |
 | [AIUI-4](AIUI-4.md) 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | 任务书复审通过；旧链路/新目录联调分片 |
-| [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | 任务书复审通过；F5a 可派，F5b/c 等正式契约决定 |
+| [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | F5a `f0203bf` 草案复审及源CI通过，组合门禁中；F5b/c 等正式契约决定 |
 | [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-inquiry-record-tools` | Codex | AIUI-1 之后、REG-4b 合入 | 说明已就绪，排队 |
 | AIUI-6 询价场景（比价、预算小工具、导入审阅工作区） | — | Codex | AIUI-3、4、5 | 待派 |
 | AIUI-7 科研场景 | — | junior / engineer | AIUI-4、5 | 待派 |

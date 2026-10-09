@@ -96,3 +96,18 @@ completed/success：analyze 8/8、test 8/8 suites，module_api +68、muyon_ui +3
 发布前 fetch/ls-remote 再核 develop 仍为 `36a516af6af92679fc47b79a1d4679c37258d030`，
 main 保持原 SHA；本次收尾仅上述测试摘要和任务索引状态，产品/基础设施树与已测组合一致。
 最终 develop SHA、远端复核和精确发布 CI 终态在执行回报给出。
+
+## 第三轮：F3a纯计算与F5a草案基础片
+
+冻结基线 develop `0466f113fd7dd41f99c38cef11eca428622a6fac`，第二轮
+[发布CI37971444082](https://github.com/mightyoung/Muyon/actions/runs/37971444082)
+completed/success。候选仅以下两项，T-3/AIUI-4明确不纳入：
+
+| 候选 | 完整SHA | 独立复审/精确源CI |
+|---|---|---|
+| F3a | `4943c6bbdac71080615c7fec811589025213db80` | [复审](AIUI-3-F3a-review.md)无确定阻断；[CI37980112557](https://github.com/mightyoung/Muyon/actions/runs/37980112557) success，host1314~3 |
+| F5a | `f0203bf5030410f23e056bf8c6eeb6956c0593f2` | [复审](AIUI-5-F5a-review.md)无确定阻断；[CI37979546165](https://github.com/mightyoung/Muyon/actions/runs/37979546165) success，UI323~152 |
+
+两项仅新增文件，无冲突。F3a为26计算行为+4源变异共30新增测试，不接runtime。
+F5a仅草案/夹具归档，正式schema未采纳，stream/2与F5b/c必须另行决定；不以合入扩大权限。
+精确组合CI成功后再重核develop并正常推送，继续追踪精确发布CI终态。
