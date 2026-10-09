@@ -41,7 +41,7 @@
 | REG-2b 通用模块激活、能力授予、范围单点 | `task/reg-2b-module-host` | [REG-2b.md](REG-2b.md) | implementer-sonnet | ADR-0004 已采纳 | 已合入（`b95d6f9`，PR #5 集成修复，[审查](REG-2b-review.md)） |
 | E-1 多步任务评测（现状基线） | `task/e-1-agent-task-eval` | [E-1.md](E-1.md) | Sonnet 子代理 | 第二阶段 | 已合入（[审查](E-1-review.md)，三轮）；真实模型基线待有密钥者运行 |
 | UI-1a 设计系统：v6 token、通用组件、自适应尺寸 | `task/ui-1a-design-system` | [UI-1a.md](UI-1a.md) | Codex | — | 已合入（`965d913`，[审查](UI-1a-review.md)） |
-| R-1 Android 重跑、E-1 真实基线、UI-0 精简截图 | `task/r-1-evidence` | [R-1.md](R-1.md) | engineer | 手机连接 | **已派发** |
+| R-1 Android 重跑、E-1 真实基线（UI-0 截图已取消） | `task/r-1-evidence` | [R-1.md](R-1.md) | engineer | 手机连接 | **已派发** |
 | JR-1 小清理（ci 跑 test_doctor、按字符截断、无用 tag、注释） | `task/jr-1-cleanups` | [JR-1.md](JR-1.md) | junior | — | 已合入（[审查](JR-1-review.md)） |
 | AUTH-1a 授权库、解析器、外传内容审查接口（不接线） | `task/auth-1a-grants` | [AUTH-1a.md](AUTH-1a.md) | Codex | — | 已合入（[审查](AUTH-1a-review.md)） |
 | AUTH-1b 授权接线（A、B12、B3、输入来源证明、本机写入自动化） | `task/auth-1b-*` | [AUTH-1b.md](AUTH-1b.md) | Codex（Leader B 派发与审查） | AUTH-1a、REG-2 | A、B12、B3、production 输入与自动化已合入（[审查](AUTH-1b-review.md)）；**C1/C2已发布到develop `00dbd6c`**（[审查](AUTH-1b-model-policy-review.md)，[发布CI成功](https://github.com/mightyoung/Muyon/actions/runs/37792414130)）；[限定Mac例外](VERIFICATION-MEMO.md)不可自动延续；UI/实云模型/实机仍后置 |
@@ -83,6 +83,7 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 | [AIUI-1](AIUI-1.md) 流式界面协议与增量编译器 | `task/aiui-1-streaming-compiler` | Codex | — | **已派发** |
 | [AIUI-2](AIUI-2.md) 组件库 v1（合并两份目录，补齐约 24 个组件） | `task/aiui-2-component-library` | engineer | — | **已派发**（用户改派） |
 | [GROK-5](GROK-5.md) 本体业务卡片静态盘点（询价） | `task/grok-5-ontology-cards` | grokbot | — | 已合入（[审查](GROK-5-review.md)） |
+| [GROK-6](GROK-6.md) 科研本体盘点（REG-3 前置） | `task/grok-6-research-ontology` | grokbot | — | **已派发** |
 | AIUI-3 本地重算公式 | — | junior | AIUI-1 | 待派 |
 | AIUI-4 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | 待派（engineer 先完成 R-1） |
 | AIUI-5 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | 待派 |
