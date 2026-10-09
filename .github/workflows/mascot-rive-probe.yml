@@ -50,14 +50,22 @@ jobs:
           sudo apt-get install --no-install-recommends -y libegl1 libgles2 libx11-6
           dpkg-query -W libegl1 libgles2 libx11-6 libglvnd0
           ldd "$TASK_RIVE"
-      - name: Read actual CLI help, schema and samples without login
+      - name: Read schema and scaffold a synthetic local project
         shell: bash
         run: |
           set -euo pipefail
           "$TASK_RIVE" --version
-          "$TASK_RIVE" --help
-          "$TASK_RIVE" schema --search mesh
-          "$TASK_RIVE" schema --search bone
-          "$TASK_RIVE" docs --list
-          "$TASK_RIVE" samples --help
-          "$TASK_RIVE" create --help
+          for task_type in Mesh MeshVertex Bone RootBone Tendon Skin Image ImageAsset StateMachineNumber StateMachineInput StateMachine; do
+            echo "SCHEMA $task_type"
+            "$TASK_RIVE" schema "$task_type" || true
+          done
+          find "$TASK_PROBE/home/versions/1.5.1" -maxdepth 2 -type d
+          RIVE_DOCS_DIR="$TASK_PROBE/home/versions/1.5.1/docs" "$TASK_RIVE" docs --list || true
+          "$TASK_RIVE" samples --path || true
+          "$TASK_RIVE" create "$TASK_PROBE/project"
+          cat "$TASK_PROBE/project/AGENTS.md"
+          cat "$TASK_PROBE/project/rive.yaml"
+          cat "$TASK_PROBE/project/scene.rml"
+          "$TASK_RIVE" "$TASK_PROBE/project" --verify --format=json
+          "$TASK_RIVE" "$TASK_PROBE/project" --once --format=json
+          "$TASK_RIVE" inspect "$TASK_PROBE/project" --json
