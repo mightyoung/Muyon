@@ -274,7 +274,7 @@ void main() {
       store.save('project_item', fixtures.item(project, 'other', name: 'wide', qty: '3', cost: '999999999999'));
       final budget = store.budget(project, withWarnings: false);
       expect([budget.cost, budget.price, budget.margin], ['2999999999997', '2999999999997', '0']);
-      final d = UiFormulaDefinition.marginAmount(computationId: 'wide-margin', sales: fact('sales', 'CNY'), cost: fact('cost', 'CNY'), currency: 'CNY', decimalPolicy: domainDecimal);
+      final d = UiFormulaDefinition.marginAmount(computationId: 'wide-margin', sales: fact('sales', 'CNY'), cost: fact('cost', 'CNY'), currency: 'CNY', decimalPolicy: UiFormulaDecimalPolicy.supplierCoreProjectedUnsigned);
       ready(evaluate(d, snapshot({'sales': value('sales', budget.price, 'CNY'), 'cost': value('cost', budget.cost, 'CNY')})), budget.margin, 'CNY');
     } finally {
       store.close();

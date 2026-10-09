@@ -9,7 +9,7 @@
 - `UiFormulaDefinition` 由宿主通过有限 named factory 建立，固定公式名/版本、实例 id、槽名/绑定/单位及事实对象/字段身份。
 - `UiFormulaInvocation.forDefinition` 从宿主定义建立请求；请求仍校验公式/版本/实例、精确槽集合与精确 BindingRef。无 JSON/模型请求 decoder；模型 formula/expr/value 拒绝沿用已有 `packages/muyon_module_api/test/ui_stream_test.dart` 的正式流负例。
 - `evaluate(invocation, snapshot, currentUiState)` 只读当前快照与完整冻结 scalar 状态投影；快照必须预声明全部状态键。事实身份包括 ObjectRef 的修订与内容摘要；readFailed/conflict/notDisclosed/notApplicable 不作可信数值。unverified 可计算，旁路 `unverifiedInputs` 保留标记。
-- 通用 sum/product/margin 的输入政策必须显式选择 `supplierCoreUnsigned`：复用既有 ExactDecimal 的 unsigned、12 位整数、6 位小数规则。没有采纳通用 signed/新精度规则。询价税率继续用既有 3 位整数/4 位小数且 ≤100；13 表示13%，0.13表示0.13%。数量0仅用于本地展示，不能作为允许业务保存零数量的证明。
+- 通用 sum/product 及字段型 margin 的输入政策必须显式选择 `supplierCoreUnsigned`：复用既有 ExactDecimal 的 unsigned、12 位整数、6 位小数规则。真实预算总额的 margin 可显式选择 `supplierCoreProjectedUnsigned`（unsigned、最多6位小数、宿主字节限制），与字段宽度分开；BudgetLine.unitPrice引用同样保留既有计算扩大的整数宽度。这不放宽任何业务保存字段，也没有采纳通用 signed/新精度规则。询价税率继续用既有 3 位整数/4 位小数且 ≤100；13 表示13%，0.13表示0.13%。数量0仅用于本地展示，不能作为允许业务保存零数量的证明。
 - `UiFormulaLimits` 必须由宿主显式传入，测试配置为32槽/256 decimal UTF-8字节/16KiB总输入。这是本片的安全配置示例，不是正式快照/流/typed schema 的新默认值。总字节覆盖诊断输入记录：定义身份/输出单位、快照版本、槽及引用、typed原值、事实对象/字段/单位/状态/来源和完整状态投影。
 - `inputFingerprint` 仅为私有、opaque 的输入诊断；不会缓存、持久化、授予权限或证明跨 runtime 结果可发布。其正式格式及缓存/恢复语义仍交契约 owner。`inputBytes` 用于诊断和边界验证。
 
@@ -38,3 +38,7 @@ F3b / AIUI-5 仍负责编辑调度、immutable新快照、重校验、状态迁�
 本地 SDK：Flutter/Dart 不存在，未下载或绕过限制；实际 `bash scripts/ci.sh` 停于pub get，输出 `flutter: command not found` / `CI SUMMARY: FAILED (pub get)`。本地 Flutter analyze/专项/领域/全仓未运行；既有 Actions 将在精确提交执行各包完整suite，覆盖指定pricing/unit/store/research revision回归。
 
 辅助脚本本地执行：`scripts/test_verification_gates.py` 9通过、`scripts/test_doctor.sh` 23场景通过、Laya四文件分别8/4/8/9通过。基线已有Actions `37971444082` 对应冻结SHA，8/8 analyze、8/8 suites成功；它不是本片通过证据。
+
+第三轮验证：`df09ce4bbbc80ee457fddc22456e8273d889a767` / Actions `37976687534`（测试合并树同分支树）终态failure。host1312通过/3skip/2失败：未声明状态引用错误码优先级、大预算总额（cost/price=2999999999997，margin期望0）被12位字段精度拒绝。四项真实源变异均已运行：sum_decimal_exact_and_unit_checked、stale_input_version_not_published、unknown_formula_rejected、unknown_ref_rejected；各未改源码基线PASS，变异退出65并命中指定断言，不是编译/启动失败。其余7套件通过；host analyze的两条implementation_imports和一条curly_braces提示均已定位。后续提交改用现有public export、修正错误码优先级、显式预算投影政策与大预算回归；本报告不把该失败轮写成GREEN。
+
+纯计算状态：所有ready都是非null String；合法0保留。缺值/不支持口径返回unavailable/null及原因；非法值/引用/单位/超限返回invalid/null；旧SnapshotRef请求返回stale/null。本片没有通用除法或科研ratio登记；税转换的分母由合法非负税率构成，不能为0。不增加暂定零分母/科研负基准规则。稳定拒绝码包括unknown_computation/unknown_formula/unknown_formula_version、slot_mismatch、wrong_kind/ref_mismatch/unknown_ref/identity_mismatch/unit_mismatch、wrong_type/nonfinite/invalid_decimal、state_projection_mismatch、invalid_definition/empty_group、too_many_inputs/input_too_large/inputs_too_large；不可用原因包括missing_value/fact_unavailable、missing_tax_rate/unsupported_currency/unsupported_tax_mode；过期为stale_input_version。槽相关错误附固定宿主槽名；不返回用户原文作为执行代码。

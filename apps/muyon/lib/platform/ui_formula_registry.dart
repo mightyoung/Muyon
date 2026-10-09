@@ -2,14 +2,18 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/ui_contract.dart';
-import 'package:supplier_core/src/pricing.dart' as pricing;
-import 'package:supplier_core/src/values.dart' show ExactDecimal;
+import 'package:supplier_core/supplier_core.dart' as pricing;
 
 /// Host-only F3a interfaces. Not a stream codec, runtime or publication API.
 enum UiFormulaStatus { ready, unavailable, invalid, stale }
 
 /// Explicit opt-in to existing supplier field rules, not general signed math.
-enum UiFormulaDecimalPolicy { supplierCoreUnsigned }
+enum UiFormulaDecimalPolicy {
+  supplierCoreUnsigned,
+  // Explicit projection policy for already computed budget totals: unsigned
+  // <=6 fractional digits, bounded by host byte limits rather than field width.
+  supplierCoreProjectedUnsigned,
+}
 
 /// Required host safety configuration; these are not formal schema defaults.
 final class UiFormulaLimits {
@@ -236,14 +240,7 @@ final class UiFormulaRegistry {
     if (definition._formula == _Formula.sum && definition.slots.isEmpty && !definition.allowEmpty) {
       return reject('empty_group');
     }
-    if (!_sameKeys(snapshot.initialUiState, currentUiState)) {
-      // Never substitute initial values for an incomplete frozen projection.
-      return reject('state_projection_mismatch');
-    }
     final stateKeys = currentUiState.keys.toList()..sort();
-    for (final key in stateKeys) {
-      if (!isUiScalar(currentUiState[key])) return reject('invalid_state_value:$key');
-    }
     final invalid = <String>[];
     final missing = <String>[];
     final values = <String, Object?>{};
@@ -315,14 +312,16 @@ final class UiFormulaRegistry {
         try {
           final rate = definition._formula == _Formula.tax && name == 'tax_rate';
           // BudgetLine.unitPrice is a computed output, not a project input field:
-          // markup can increase its integer width. Still unsigned, <=6 decimals
+          // markup and aggregation can increase integer width. Still unsigned, <=6 decimals
           // and host byte-bounded; do not reject a valid existing budget result.
-          final projectedBudget = definition._formula == _Formula.budgetUnitPrice;
-          final decimal = ExactDecimal.parse(raw,
+          final projectedBudget = definition._formula == _Formula.budgetUnitPrice ||
+              (definition._formula == _Formula.margin &&
+               definition.decimalPolicy == UiFormulaDecimalPolicy.supplierCoreProjectedUnsigned);
+          final decimal = pricing.ExactDecimal.parse(raw,
             maxIntegerDigits: rate ? 3 : (projectedBudget ? limits.maxDecimalBytes : 12),
             maxFractionDigits: rate ? 4 : 6,
           );
-          if (rate && decimal.compareTo(ExactDecimal.parse('100')) > 0) {
+          if (rate && decimal.compareTo(pricing.ExactDecimal.parse('100')) > 0) {
             invalid.add('invalid_decimal:$name');
           }
           values[name] = decimal.canonical;
@@ -330,6 +329,14 @@ final class UiFormulaRegistry {
           invalid.add('invalid_decimal:$name');
         }
       }
+    }
+    // Report undeclared bound references specifically, while rejecting every
+    // incomplete/extra/non-scalar state projection before any computation.
+    if (!_sameKeys(snapshot.initialUiState, currentUiState)) {
+      invalid.add('state_projection_mismatch');
+    }
+    for (final key in stateKeys) {
+      if (!isUiScalar(currentUiState[key])) invalid.add('invalid_state_value:$key');
     }
     if (invalid.isNotEmpty) return result(UiFormulaStatus.invalid, errors: invalid);
 
@@ -418,7 +425,8 @@ bool _validDefinition(UiFormulaDefinition d) {
           d.slots['quantity']!.unit == d.quantityUnit &&
           d.slots['unit_price']!.unit == '${d.targetCurrency}/${d.quantityUnit}';
     case _Formula.margin:
-      return d.decimalPolicy == UiFormulaDecimalPolicy.supplierCoreUnsigned &&
+      return (d.decimalPolicy == UiFormulaDecimalPolicy.supplierCoreUnsigned ||
+              d.decimalPolicy == UiFormulaDecimalPolicy.supplierCoreProjectedUnsigned) &&
           _currency(d.targetCurrency) && d.slots.values.every((s) => s.unit == d.outputUnit);
     case _Formula.budgetUnitPrice:
       return d.slots.values.every((s) => s.binding.kind == BindingKind.fact && s.unit == d.outputUnit);
@@ -427,9 +435,12 @@ bool _validDefinition(UiFormulaDefinition d) {
       final price = d.slots['price']!;
       for (final name in ['price', 'currency', 'tax_mode', 'tax_rate', 'deal_price']) {
         final slot = d.slots[name]!;
-        if (slot.binding.kind != BindingKind.fact || slot.object != price.object) return false;
+        if (slot.binding.kind != BindingKind.fact || slot.object != price.object) {
+          return false;
+        }
       }
-      return d.slots['currency']!.unit == 'currency' &&
+      return d.slots['target_tax_mode']!.binding.kind == BindingKind.uiState &&
+          d.slots['currency']!.unit == 'currency' &&
           d.slots['tax_mode']!.unit == 'tax_mode' &&
           d.slots['target_tax_mode']!.unit == 'tax_mode' &&
           d.slots['tax_rate']!.unit == '%' &&
