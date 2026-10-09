@@ -69,11 +69,20 @@ void main() {
         ('设备聊天', '只在本人已配对、同时在线的设备之间发送文字，没有中继。聊天内容不会授予任何操作权限，也不会自动进入助手上下文。'),
         ('记忆与整理', '整理'),
       ]) {
-        final tile = find
-            .widgetWithText(ListTile, entry.$1, skipOffstage: false)
-            .first;
-        await tester.ensureVisible(tile);
-        await tester.tap(tile);
+        final scroll = find.descendant(of: find.byType(ListView), matching: find.byWidgetPredicate(
+          (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
+        ));
+        expect(scroll, findsOneWidget);
+        // A previous child may have been opened lower in the lazy settings
+        // list. Return toward the top with a gesture before finding the next
+        // entry, including entries that have not been built yet.
+        await tester.drag(scroll, const Offset(0, 1600));
+        await tester.pumpAndSettle();
+        final tile = find.widgetWithText(ListTile, entry.$1);
+        await tester.scrollUntilVisible(tile, 100, scrollable: scroll, maxScrolls: 60);
+        await tester.pumpAndSettle();
+        expect(tile.hitTestable(), findsOneWidget);
+        await tester.tap(tile.hitTestable());
         await tester.pumpAndSettle();
         expect(
           find.text(entry.$2, skipOffstage: false),
