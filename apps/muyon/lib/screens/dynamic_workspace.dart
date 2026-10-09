@@ -52,7 +52,7 @@ class DynamicWorkspace extends StatefulWidget {
 
 /// Presentation ownership only: one old dynamic controller/router per open surface.
 /// The responsive host retains this session while route and pane views change.
-class DynamicWorkspaceSession {
+class DynamicWorkspaceSession extends ChangeNotifier {
   DynamicWorkspaceSession(this.widget);
   final DynamicWorkspace widget;
   UiWorkspaceController? controller;
@@ -63,7 +63,24 @@ class DynamicWorkspaceSession {
   bool _disposed = false;
   Future<void>? _loading;
   // Includes registered object-page lease disposal after its pushed route pops.
-  Future<void>? pendingReferenceNavigation;
+  Future<void>? _pendingReferenceNavigation;
+  Future<void>? get pendingReferenceNavigation => _pendingReferenceNavigation;
+  set pendingReferenceNavigation(Future<void>? value) {
+    _pendingReferenceNavigation = value;
+    if (!_disposed) notifyListeners();
+  }
+  bool _canPresentReferences = true;
+  bool get canPresentReferences => _canPresentReferences;
+  void stopReferenceAdmission() {
+    if (!_canPresentReferences) return;
+    _canPresentReferences = false;
+    if (!_disposed) notifyListeners();
+  }
+  void resumeReferenceAdmission() {
+    if (_disposed || _canPresentReferences) return;
+    _canPresentReferences = true;
+    notifyListeners();
+  }
   // Ephemeral app presentation only; never a business draft or runtime state.
   String? focusedFieldNode;
   TextSelection? focusedFieldSelection;
@@ -178,9 +195,11 @@ class DynamicWorkspaceSession {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    stopReferenceAdmission();
     capturePresentation = null;
     router?.dispose();
     controller?.dispose();
+    super.dispose();
   }
 }
 
@@ -197,7 +216,12 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    session.addListener(sessionChanged);
     load();
+  }
+
+  void sessionChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> load() async {
@@ -218,7 +242,11 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
     String? source,
     required String nodeId,
   }) {
-    if (widget.host == null || controller == null || navigating) return Future.value();
+    if (widget.host == null || controller == null || !session.canPresentReferences) return Future.value();
+    // Ownership survives view replacement: a new route/pane State cannot
+    // replace the in-flight future and orphan its eventual object-page lease.
+    final existing = session.pendingReferenceNavigation;
+    if (existing != null) return existing;
     final pending = _openReference(object: object, source: source, nodeId: nodeId);
     session.pendingReferenceNavigation = pending;
     return pending.whenComplete(() {
@@ -234,7 +262,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
     required String nodeId,
   }) async {
     final host = widget.host, c = controller;
-    if (host == null || c == null || navigating) return;
+    if (host == null || c == null || !session.canPresentReferences) return;
     setState(() => navigating = true);
     try {
       if (!identical(host.foundation, widget.repository)) {
@@ -267,6 +295,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
         context: context,
         host: host,
         controller: c,
+        canPresent: () => session.canPresentReferences,
       );
       if (artifact == null) {
         await navigation.openReference(ref, anchor);
@@ -302,14 +331,14 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
       children: [
         for (final entry in objects.entries)
           TextButton(
-            onPressed: navigating || c.readOnly
+            onPressed: navigating || session.pendingReferenceNavigation != null || !session.canPresentReferences || c.readOnly
                 ? null
                 : () => openReference(object: entry.key, nodeId: entry.value),
             child: Text('查看对象 · ${entry.key.moduleId}'),
           ),
         for (final entry in sources.entries)
           TextButton(
-            onPressed: navigating || c.readOnly
+            onPressed: navigating || session.pendingReferenceNavigation != null || !session.canPresentReferences || c.readOnly
                 ? null
                 : () => openReference(source: entry.key, nodeId: entry.value),
             child: Text('查看原文 · ${entry.key}'),
@@ -321,6 +350,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    session.removeListener(sessionChanged);
     if (widget.session == null) session.dispose();
     super.dispose();
   }

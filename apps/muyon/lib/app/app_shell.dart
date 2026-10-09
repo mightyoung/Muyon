@@ -119,8 +119,16 @@ class _MuyonAppState extends State<MuyonApp> {
   Future<void> _releaseReferenceRoutes() async {
     // Completing push futures lets each registered page execute its finally
     // lease disposal. Replacing a Navigator tree alone does not complete them.
-    navigator.currentState?.popUntil((route) => route.isFirst);
-    await conversationShell.referencesSettled();
+    // A reference may still be acquiring its page and have no route to pop.
+    // Stop late presentation before completing the routes already on the stack.
+    conversationShell.stopReferenceAdmission();
+    try {
+      navigator.currentState?.popUntil((route) => route.isFirst);
+      await conversationShell.referencesSettled();
+    } catch (_) {
+      conversationShell.resumeReferenceAdmission();
+      rethrow;
+    }
   }
 
   /// Close, restore, reopen. The page tree is replaced by a plain progress
