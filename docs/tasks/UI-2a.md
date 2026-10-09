@@ -15,7 +15,7 @@ MD/HTML/PDF用实际可用阅读器或明确只读退路，不把PDF源码或模
 - [x] `open_actual_object_and_restore_workspace`、`unavailable_plugin_keeps_return_route`、`changed_source_marks_anchor_stale`先失败：打开真实研究/询价对象，返回编辑qty12与滚动锚点不变，lease释放一次；插件停用仍可回原对话。
 - [x] 薄适配 existing opener，UI-3b锚点持久；预览浏览器用公开对象/文件样例，实际host ObjectPages云widget测试单列。
 - [x] 运行新增两个文件、research_object_open/module_declared_ui 和 REG-4b 回归；本地公开预览移动/桌面 widget smoke 通过。
-- [ ] cloud 浏览器移动/桌面导航 smoke（未部署，本次不代称通过）。
+- [x] 浏览器移动/桌面导航 smoke：按用户新增授权使用 Mac Chrome 回环预览回退；公开对象/来源返回、输入和刷新恢复通过，不称为云部署或真实文件验收。
 - [ ] 云UI/流程通过继续子对话；原生PDF平台差异、真实文件定位由末次清单验，不假称已通过。
 - [x] 独立审查/提交；旧对象页和返回路径始终可用，失效引用不清空草稿。
 
@@ -39,3 +39,7 @@ MD/HTML/PDF用实际可用阅读器或明确只读退路，不把PDF源码或模
 原始 RED/GREEN 与完整门禁日志仅保存在 `/tmp/muspace-ui2a-evidence-20261009`，不提交。
 
 最终 Mac 全量门禁：八包 analyze 无问题，doctor23通过；module_api38/UI253/prototype40/research216/supplier491（3skip）/host1227（3skip）/ui_preview13通过。Inquiry289通过、1skip、46截图失败；与集成20c3088同环境基线46案例相同、184PNG哈希全同，新增/删除/变化均为0。Mac门禁不是全绿，未修改golden、阈值或skip。
+
+## 浏览器补验（2026-10-09）
+
+在独立 `task/ui2a-ui4c-browser-acceptance-20261009` 集成工作树运行重建 Web 公开夹具，390×844/1440×900 实际 Chrome 操作通过。移动输入14→对象/来源→返回保持14，刷新仍恢复；滚动验证以实际渲染位置为准。保存截图、脚本与 pageerror 检查，未打开用户默认浏览器配置。执行位置为 Mac 本机回环，明确不是已部署云站点。实际模块导航及文件归属仍以 host 测试为证据；PDF/HTML原生定位继续末次验收。

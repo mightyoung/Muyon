@@ -9,7 +9,7 @@ if (!baseURL || !['http:', 'https:'].includes(new URL(baseURL).protocol)) {
 }
 const output = value('--output') ?? '/tmp/muyon-ui-preview-evidence';
 const { chromium } = await import('playwright');
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}) });
 const results = [];
 try {
   await mkdir(output, { recursive: true });
@@ -20,7 +20,7 @@ try {
     await page.goto(baseURL, { waitUntil: 'networkidle' });
     // Flutter Web exposes interaction semantics after the accessibility control.
     const accessibility = page.getByRole('button', { name: 'Enable accessibility' });
-    if (await accessibility.count()) await accessibility.click({ force: true });
+    if (await accessibility.count()) await accessibility.dispatchEvent('click');
     const button = (name) => page.getByRole('button', { name, exact: true });
     const requireText = async (text) => { await page.getByText(text, { exact: true }).first().waitFor(); };
     await button('UI-4a fixture').click();
@@ -34,10 +34,12 @@ try {
     await button('拒绝').click();
     await requireText('Confirmation cancelled. No request sent.');
     await button('UI-4a fixture').click();
-    const field = page.getByRole('textbox', { name: 'Draft quantity' });
+    const field = page.getByRole('textbox', { name: 'Fact quantity' });
     await field.fill('14');
     await button('Quote B').click();
     await button('Back to comparison').click();
+    await field.click();
+    await page.waitForFunction(() => document.querySelector('input[aria-label="Fact quantity"]')?.value === '14');
     if (await field.inputValue() !== '14') throw new Error('Draft lost on return');
     await button('Explain').click();
     await requireText('Simulated semantic explanation requested. No model called.');

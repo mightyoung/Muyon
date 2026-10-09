@@ -7,7 +7,7 @@ if (!base || !['http:', 'https:'].includes(new URL(base).protocol)) throw new Er
 const url = new URL(base); url.searchParams.set('workspace', '1');
 const output = arg('--output') ?? '/tmp/muyon-ui3b-browser-evidence';
 const { chromium } = await import('playwright');
-const browser = await chromium.launch({ headless: true });
+const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}) });
 const results = [];
 try {
   await mkdir(output, { recursive: true });
@@ -16,10 +16,10 @@ try {
     const errors = []; page.on('pageerror', (e) => errors.push(String(e)));
     const enable = async () => {
       const a = page.getByRole('button', { name: 'Enable accessibility' });
-      if (await a.count()) await a.click({ force: true });
+      if (await a.count()) await a.dispatchEvent('click');
     };
     await page.goto(url.href, { waitUntil: 'networkidle' }); await enable();
-    const field = page.getByRole('textbox', { name: 'Draft quantity' });
+    const field = page.getByRole('textbox', { name: 'Fact quantity' });
     await field.fill('14');
     await page.getByRole('button', { name: 'Save checkpoint', exact: true }).click();
     // Durability assertion queries the public projection rather than sleeping.
@@ -28,6 +28,8 @@ try {
     await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith('muyon-public-workspace:') && JSON.parse(localStorage[k]).planRevision === 2));
     await page.reload({ waitUntil: 'networkidle' }); await enable();
     await page.getByText('Current surface revision: 2', { exact: true }).waitFor();
+    await field.click();
+    await page.waitForFunction(() => document.querySelector('input[aria-label="Fact quantity"]')?.value === '14');
     if (await field.inputValue() !== '14') throw new Error('Manual override lost after browser reload');
     const image = await page.screenshot({ fullPage: true });
     const name = `${viewport.width}x${viewport.height}.png`; await writeFile(`${output}/${name}`, image);

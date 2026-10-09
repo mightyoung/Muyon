@@ -23,3 +23,15 @@ Later real GPT replay/export still needs a host recorder for full question/answe
 `?workspace=1` opens the persisted public workspace. Browser localStorage is serialized with Web Locks; permission/quota failures preserve the old checkpoint and block the event port. The native host separately uses its existing managed SQLite settings table. Neither store contains domain object bodies or grants.
 
 When an authorized URL becomes available, run `node scripts/ui_preview/workspace_smoke.mjs --base-url "$PREVIEW_URL"`. It edits a public value, checkpoints, patches, reloads and asserts both the restored manual value and actual presentation revision, at two viewports. This script is prepared but real deployed browser acceptance is still pending. No SDK install or deployment is performed.
+
+## UI2a/UI4c browser combination
+
+Use an already installed Python Playwright and Chromium-family browser. No install, deploy, default browser profile, or external debug endpoint is needed:
+
+```sh
+python3 scripts/ui_preview/navigation_subconversation_smoke.py --base-url http://127.0.0.1:8766 --executable-path '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --output /tmp/muyon-ui-browser-evidence
+```
+
+Serve the release `build/web` on an authorized URL. The script uses fresh temporary browser contexts and checks both 390×844 and 1440×900. It covers public object/source return, draft reload, mobile rendered scroll restoration, child draft close/reopen/reload, explicit v2 reads and immutable v1 history. Page errors fail the run. Evidence stays outside the repository.
+
+The fixture never proves host SQLite, real task cancellation, authorization inheritance, native files, process termination, or device background execution. Pair browser evidence with actual host tests. Browser plugin was unavailable in this execution; authorized local Mac Chrome fallback was used. Existing Node scripts accept `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` for an already installed browser.
