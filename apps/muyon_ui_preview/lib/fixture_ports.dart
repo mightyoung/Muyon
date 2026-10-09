@@ -8,11 +8,13 @@ class PreviewFixture {
     required this.intent,
     required this.plan,
     required this.answer,
+    this.catalog,
   });
   final DataSnapshot snapshot;
   final InteractionIntent intent;
   final UiPlanningResult plan;
   final String answer;
+  final UiCatalog? catalog;
 }
 
 PreviewFixture comparisonFixture({
@@ -161,5 +163,127 @@ PreviewFixture comparisonFixture({
       plan: plan,
     ),
     answer: 'Public comparison: 10 pieces at 12 per piece.',
+  );
+}
+
+/// UI-4a public in-memory scenario. No host/SQLite/model imports or authority.
+PreviewFixture runtimeFixture() {
+  final base = comparisonFixture(alternative: true);
+  final old = base.snapshot;
+  final snapshot = DataSnapshot(
+    ref: old.ref,
+    facts: old.facts,
+    computations: old.computations,
+    sources: old.sources,
+    sourceDigests: old.sourceDigests,
+    initialUiState: {'quantity': '12', 'sort': 'original'},
+    actionContext: UiActionContext(
+      draftRevision: 0,
+      draft: {'quantity': '12'},
+      operations: {
+        'public-qty': HostOperationRef(
+          draftRevision: 0,
+          inputRefs: {'quantity'},
+        ),
+      },
+    ),
+  );
+  final intent = InteractionIntent(
+    id: base.intent.id,
+    purpose: base.intent.purpose,
+    snapshotRef: snapshot.ref,
+    requiredBindings: base.intent.requiredBindings,
+    mandatoryStates: base.intent.mandatoryStates,
+    allowedActionRefs: {
+      ...base.intent.allowedActionRefs,
+      'sort',
+      'confirm',
+      'cancel',
+      'explain',
+    },
+  );
+  final oldPlan = base.plan.plan!;
+  final plan = oldPlan.copyWith(
+    catalogVersion: dynamicUiCatalog.version,
+    nodes: [
+      oldPlan.nodes.first.copyWith(
+        children: [
+          ...oldPlan.nodes.first.children,
+          'sort',
+          'warning',
+          'confirmation',
+          'status',
+          'scope',
+        ],
+      ),
+      for (final n in oldPlan.nodes.skip(1))
+        if (n.id == 'total')
+          n.copyWith(
+            properties: {
+              ...n.properties,
+              'alternateLabel': 'Original quantity',
+            },
+            bindings: {
+              ...n.bindings,
+              'alternate': const BindingRef.fact('qty'),
+              'sort': const BindingRef.uiState('sort'),
+            },
+          )
+        else
+          n,
+      UiNode(
+        id: 'sort',
+        component: 'SegmentedPill',
+        bindings: {'selected': const BindingRef.uiState('sort')},
+        events: {
+          'change': ActionBinding(actionRef: 'sort', inputRefs: ['sort']),
+        },
+      ),
+      UiNode(
+        id: 'warning',
+        component: 'WarnBanner',
+        bindings: {'value': const BindingRef.fact('delivery')},
+        events: {'tap': ActionBinding(actionRef: 'explain')},
+      ),
+      UiNode(
+        id: 'confirmation',
+        component: 'ConfirmCard',
+        properties: {
+          'label': 'Simulated: update public memory quantity 10 → 12',
+        },
+        bindings: {'value': const BindingRef.fact('qty')},
+        events: {
+          'confirm': ActionBinding(
+            actionRef: 'confirm',
+            inputRefs: ['quantity'],
+            expectedDraftRevision: 0,
+            operationKeyRef: 'public-qty',
+          ),
+          'cancel': ActionBinding(actionRef: 'cancel'),
+        },
+      ),
+      UiNode(
+        id: 'status',
+        component: 'StatusBadge',
+        bindings: {'value': const BindingRef.fact('delivery')},
+      ),
+      UiNode(
+        id: 'scope',
+        component: 'ScopeChip',
+        properties: {'label': 'Public fixture only'},
+        bindings: {'value': const BindingRef.fact('qty')},
+      ),
+    ],
+  );
+  return PreviewFixture(
+    snapshot: snapshot,
+    intent: intent,
+    plan: UiPlanningResult(
+      decision: UiDisplayDecision.supplement,
+      reasonCode: 'public-runtime',
+      plan: plan,
+    ),
+    answer: base.answer,
+    catalog: dynamicUiCatalog,
   );
 }

@@ -1,0 +1,39 @@
+name: ui-preview
+on:
+  workflow_dispatch:
+  push:
+    branches: ['task/ui-4a-dynamic-runtime']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Public preview widget tests
+        working-directory: apps/muyon_ui_preview
+        run: flutter test --no-pub
+      - name: Build static package (no deployment)
+        working-directory: apps/muyon_ui_preview
+        run: flutter build web --no-pub --release
+      - name: Static package manifest
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, pathlib
+          root = pathlib.Path('apps/muyon_ui_preview/build/web')
+          files = [{'path': p.relative_to(root).as_posix(), 'bytes': p.stat().st_size, 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(root.rglob('*')) if p.is_file()]
+          pathlib.Path('/tmp/ui-preview-manifest.json').write_text(json.dumps({'simulation': True, 'deployment': False, 'files': files}, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ui-preview-static-package
+          path: |
+            apps/muyon_ui_preview/build/web
+            /tmp/ui-preview-manifest.json

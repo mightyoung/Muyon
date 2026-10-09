@@ -4,7 +4,14 @@ enum UiDisplayDecision { textOnly, supplement, replacePresentation }
 
 enum UiActionRoute { local, business, semantic }
 
-enum UiLocalAction { editField, expandSource, openDetail, back }
+enum UiLocalAction {
+  editField,
+  expandSource,
+  openDetail,
+  back,
+  cancelConfirmation,
+  sortRows,
+}
 
 enum UiValueType { string, integer, boolean }
 

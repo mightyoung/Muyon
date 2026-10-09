@@ -52,6 +52,18 @@ class ConfirmItem {
   });
   final ConfirmationKind kind;
   final String what, who, payload, digest, consequence;
+  @override
+  bool operator ==(Object other) =>
+      other is ConfirmItem &&
+      kind == other.kind &&
+      what == other.what &&
+      who == other.who &&
+      payload == other.payload &&
+      digest == other.digest &&
+      consequence == other.consequence;
+  @override
+  int get hashCode =>
+      Object.hash(kind, what, who, payload, digest, consequence);
 }
 
 class ConfirmCard extends StatefulWidget {
@@ -60,11 +72,13 @@ class ConfirmCard extends StatefulWidget {
     required this.item,
     this.status = BusinessStatus.pending,
     this.externalContent = false,
+    this.allowPersistentChoices = true,
     this.onDecision,
   });
   final ConfirmItem item;
   final BusinessStatus status;
   final bool externalContent;
+  final bool allowPersistentChoices;
   final ValueChanged<ConfirmationChoice>? onDecision;
   @override
   State<ConfirmCard> createState() => _ConfirmCardState();
@@ -142,6 +156,7 @@ class _ConfirmCardState extends State<ConfirmCard> {
       ConfirmationKind.read => <ConfirmationChoice>[],
     };
     final allowMore =
+        widget.allowPersistentChoices &&
         active &&
         item.kind == ConfirmationKind.write &&
         !external &&

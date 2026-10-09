@@ -4,15 +4,42 @@ import 'plan.dart';
 
 /// Only this validator can construct the renderer's capability.
 class ValidatedUiPlan {
-  ValidatedUiPlan._(this.plan, this.snapshot, this.catalog);
+  ValidatedUiPlan._(
+    this.plan,
+    this.snapshot,
+    this.intent,
+    this.catalog, [
+    Map<String, String> patches = const {},
+  ]) : appliedPatches = Map.unmodifiable(patches);
   final UIPlan plan;
   final DataSnapshot snapshot;
   final UiCatalog catalog;
+  final InteractionIntent intent;
+  final Map<String, String> appliedPatches;
 }
 
 class UiValidationResult {
   UiValidationResult._(List<String> errors, this.validatedPlan)
     : errors = List.unmodifiable(errors);
+  factory UiValidationResult.rejected(List<String> errors) =>
+      UiValidationResult._(errors, null);
+  factory UiValidationResult.unchanged(ValidatedUiPlan current) =>
+      UiValidationResult._([], current);
+  UiValidationResult recordPatch(String id, String fingerprint) {
+    final checked = validatedPlan;
+    if (checked == null) return this;
+    return UiValidationResult._(
+      [],
+      ValidatedUiPlan._(
+        checked.plan,
+        checked.snapshot,
+        checked.intent,
+        checked.catalog,
+        {...checked.appliedPatches, id: fingerprint},
+      ),
+    );
+  }
+
   final List<String> errors;
   final ValidatedUiPlan? validatedPlan;
   bool get isValid => errors.isEmpty;
@@ -161,7 +188,8 @@ UiValidationResult validateUiPlan(
         if (binding.operationKeyRef != null ||
             binding.expectedDraftRevision != null)
           reject('local_business_reference');
-        if (action.localAction == UiLocalAction.editField &&
+        if ((action.localAction == UiLocalAction.editField ||
+                action.localAction == UiLocalAction.sortRows) &&
             (binding.inputRefs.length != 1 ||
                 !node.bindings.values.contains(
                   BindingRef.uiState(binding.inputRefs.first),
@@ -169,6 +197,11 @@ UiValidationResult validateUiPlan(
                 schema.events[entry.key] != UiValueType.string ||
                 snapshot.initialUiState[binding.inputRefs.first] is! String))
           reject('edit_input');
+        if (action.localAction == UiLocalAction.sortRows &&
+            binding.inputRefs.any(
+              (ref) => snapshot.actionContext?.draft.containsKey(ref) ?? false,
+            ))
+          reject('view_business_input');
         if (action.localAction == UiLocalAction.expandSource &&
             !node.bindings.values.any(
               (ref) => ref.kind == BindingKind.sourceSpan,
@@ -208,6 +241,6 @@ UiValidationResult validateUiPlan(
   }
   return UiValidationResult._(
     errors,
-    errors.isEmpty ? ValidatedUiPlan._(plan, snapshot, catalog) : null,
+    errors.isEmpty ? ValidatedUiPlan._(plan, snapshot, intent, catalog) : null,
   );
 }

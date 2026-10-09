@@ -14,6 +14,8 @@ class UiSessionState {
   final Map<String, Object?> _values;
   final Map<String, String> _digests;
   final Set<String> _expandedSources = {};
+  final Set<String> _cancelled = {};
+  bool isCancelled(String nodeId) => _cancelled.contains(nodeId);
   final Set<String> _staleSources = {};
   ValidatedUiPlan? _currentPlan;
   ValidatedUiPlan? get currentPlan => _currentPlan;
@@ -46,14 +48,22 @@ class UiSessionState {
     }
   }
 
-  void edit(String field, Object? value) {
+  void edit(String field, Object? value) =>
+      _setValue(field, value, affectsDraft: true);
+
+  void selectView(String field, Object? value) {
+    if (snapshot.actionContext?.draft.containsKey(field) ?? false) return;
+    _setValue(field, value, affectsDraft: false);
+  }
+
+  void _setValue(String field, Object? value, {required bool affectsDraft}) {
     if (!_values.containsKey(field) ||
         !isUiScalar(value) ||
         (_values[field] is String && value is! String))
       return;
     if (_values[field] == value) return;
     _values[field] = value;
-    draftRevision++;
+    if (affectsDraft) draftRevision++;
   }
 
   void updateSourceDigest(String artifactId, String digest) {
@@ -112,6 +122,15 @@ class UiSessionState {
       case UiLocalAction.editField:
         if (binding.inputRefs.length != 1) return UiEventOutcome.invalid;
         edit(binding.inputRefs.single, event.payload);
+      case UiLocalAction.sortRows:
+        if (binding.inputRefs.length != 1 ||
+            (snapshot.actionContext?.draft.containsKey(
+                  binding.inputRefs.single,
+                ) ??
+                false) ||
+            !['original', 'value'].contains(event.payload))
+          return UiEventOutcome.invalid;
+        selectView(binding.inputRefs.single, event.payload);
       case UiLocalAction.expandSource:
         if (!_expandedSources.add(node.id)) _expandedSources.remove(node.id);
       case UiLocalAction.openDetail:
@@ -119,6 +138,8 @@ class UiSessionState {
         detailNode = node.id;
       case UiLocalAction.back:
         detailNode = null;
+      case UiLocalAction.cancelConfirmation:
+        _cancelled.add(node.id);
       case null:
         return UiEventOutcome.invalid;
     }
