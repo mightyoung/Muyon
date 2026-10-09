@@ -3,8 +3,10 @@ import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../platform/foundation_repository.dart';
+import '../app/bootstrap.dart';
 import '../platform/tool_registry.dart';
 import '../platform/ui_workspace_store.dart';
+import '../platform/ui_navigation_anchors.dart';
 import '../assistant/personal_agent.dart';
 import '../assistant/ui_planning_events.dart';
 
@@ -18,6 +20,7 @@ class DynamicWorkspace extends StatefulWidget {
     required this.taskId,
     required this.surfaceId,
     this.plan,
+    this.host,
     this.originalAnswer = '',
     this.tools,
     this.onEvent,
@@ -25,6 +28,7 @@ class DynamicWorkspace extends StatefulWidget {
     this.businessActions = const {},
   });
   final FoundationRepository repository;
+  final MuyonHost? host;
   final String taskId, surfaceId, originalAnswer;
   final ValidatedUiPlan? plan;
   final ToolRegistry? tools;
@@ -41,6 +45,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
   StoredUiWorkspace? stored;
   String? error;
   bool ready = false;
+  bool navigating = false;
   final receipts = <String, UiOperationRecovery>{};
   @override
   void initState() {
@@ -131,6 +136,96 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
     if (mounted) setState(() => ready = true);
   }
 
+  Future<void> openReference({
+    ObjectRef? object,
+    String? source,
+    required String nodeId,
+  }) async {
+    final host = widget.host, c = controller;
+    if (host == null || c == null || navigating) return;
+    setState(() => navigating = true);
+    try {
+      if (!identical(host.foundation, widget.repository)) {
+        throw StateError('Workspace owner changed');
+      }
+      final task = widget.repository.task(widget.taskId);
+      if (task == null) throw StateError('Task unavailable');
+      final artifact = source == null
+          ? null
+          : c.surface.current.snapshot.sources[source]?.artifact;
+      final ref =
+          object ??
+          ObjectRef(
+            moduleId: artifact!.moduleId,
+            objectType: 'document',
+            objectId: artifact.artifactId,
+            contentDigest: artifact.contentDigest,
+          );
+      final anchor = NavigationAnchor(
+        conversationId: task.conversationId,
+        taskId: task.id,
+        surfaceId: widget.surfaceId,
+        nodeId: nodeId,
+        scrollOffset: c.scrollOffset,
+        objectRef: ref,
+        sourceDigest: artifact?.contentDigest ?? ref.contentDigest,
+        artifactRef: artifact,
+      );
+      final navigation = UiReferenceNavigation(
+        context: context,
+        host: host,
+        controller: c,
+      );
+      if (artifact == null) {
+        await navigation.openReference(ref, anchor);
+      } else {
+        await navigation.openArtifact(artifact, anchor);
+      }
+    } catch (e) {
+      if (mounted) setState(() => error = '无法打开引用，原草稿仍保留：$e');
+    } finally {
+      if (mounted) setState(() => navigating = false);
+    }
+  }
+
+  Widget? referenceLinks() {
+    final c = controller;
+    if (widget.host == null || c == null) return null;
+    final current = c.surface.current;
+    final objects = <ObjectRef, String>{};
+    final sources = <String, String>{};
+    for (final node in current.plan.nodes) {
+      for (final binding in node.bindings.values) {
+        if (binding.kind == BindingKind.fact) {
+          final fact = current.snapshot.facts[binding.id];
+          if (fact != null) objects.putIfAbsent(fact.object, () => node.id);
+        } else if (binding.kind == BindingKind.sourceSpan &&
+            current.snapshot.sources.containsKey(binding.id)) {
+          sources.putIfAbsent(binding.id, () => node.id);
+        }
+      }
+    }
+    return Wrap(
+      spacing: 8,
+      children: [
+        for (final entry in objects.entries)
+          TextButton(
+            onPressed: navigating || c.readOnly
+                ? null
+                : () => openReference(object: entry.key, nodeId: entry.value),
+            child: Text('查看对象 · ${entry.key.moduleId}'),
+          ),
+        for (final entry in sources.entries)
+          TextButton(
+            onPressed: navigating || c.readOnly
+                ? null
+                : () => openReference(source: entry.key, nodeId: entry.value),
+            child: Text('查看原文 · ${entry.key}'),
+          ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     router?.dispose();
@@ -144,6 +239,8 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
       return UiWorkspaceView(
         controller: controller!,
         originalAnswer: widget.originalAnswer,
+        references: referenceLinks(),
+        banner: error,
       );
     }
     return Scaffold(

@@ -38,7 +38,7 @@ class InquiryBusinessModule implements BusinessModuleV2 {
     displayName: 'Folio · 询价台账',
     tagline: '完整供应商、询价报价和成本业务',
     iconKey: 'receipt_long',
-    features: {ModuleFeature.importPipeline},
+    features: {ModuleFeature.importPipeline, ModuleFeature.objectPages},
   );
   @override
   ModuleSchema get schema => InquiryPlugin.schema;
@@ -140,7 +140,7 @@ class InquiryBusinessModule implements BusinessModuleV2 {
 
 /// The compatibility InquiryPlugin remains the one service/close owner.
 class InquiryModuleRuntime
-    implements ModuleRuntime, ScopeResolvable, ImportCapable {
+    implements ModuleRuntime, ScopeResolvable, ImportCapable, ObjectPages {
   InquiryModuleRuntime(
     this.owner,
     ModuleFiles files, {
@@ -186,6 +186,26 @@ class InquiryModuleRuntime
   Future<PreparedInquiryListDraft> resumeListImport(String id) async =>
       imports.resumeList(id);
   @override
+  Future<ObjectPageLease?> open(BuildContext context, ObjectRef ref) async {
+    final session = _InquirySession(owner, ref.nativeProjectId);
+    var transferred = false;
+    try {
+      final view = await session.resolve(ref);
+      if (view == null || !context.mounted) return null;
+      final page = session.objectPage(context, ref);
+      if (page == null) return null;
+      transferred = true;
+      return ObjectPageLease(
+        title: view.title,
+        page: page,
+        dispose: session.dispose,
+      );
+    } finally {
+      if (!transferred) await session.dispose();
+    }
+  }
+
+  @override
   Future<ModuleSession> openSession(WorkspaceBinding binding) async =>
       _InquirySession(owner, binding.nativeProjectId);
   @override
@@ -198,7 +218,9 @@ class _InquirySession implements ModuleSession {
   final InquiryPlugin owner;
   final String? project;
   @override
-  Future<ObjectView?> resolve(ObjectRef ref) async {
+  Future<ObjectView?> resolve(ObjectRef ref) async => _resolve(ref);
+
+  ObjectView? _resolve(ObjectRef ref) {
     if (ref.moduleId != 'inquiry' ||
         !domain.entityTypes.contains(ref.objectType)) {
       return null;
@@ -238,7 +260,15 @@ class _InquirySession implements ModuleSession {
   }
 
   @override
-  Widget? objectPage(BuildContext context, ObjectRef ref) => null;
+  Widget? objectPage(BuildContext context, ObjectRef ref) =>
+      _resolve(ref) == null
+      ? null
+      : inquiryObjectPage(
+          context,
+          owner.runtime.state,
+          ref.objectType,
+          ref.objectId,
+        );
   @override
   Future<void> flush() async {}
   @override
@@ -288,9 +318,18 @@ final inquiryOntology = ModuleOntology(
             : type.fields.first.name,
         inGlobalScope: true,
         versioned: true,
-        page: const ObjectPageSupport.none(
-          'Existing inquiry pages remain in the inquiry section',
-        ),
+        page:
+            const {
+              'project',
+              'project_item',
+              'supplier',
+              'product',
+              'inquiry',
+            }.contains(type.name)
+            ? const ObjectPageSupport.unbound()
+            : const ObjectPageSupport.none(
+                'This record has no standalone inquiry page',
+              ),
         fields: [
           for (final field in type.fields)
             OntologyFieldSpec(

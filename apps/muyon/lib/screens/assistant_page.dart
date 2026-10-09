@@ -1,3 +1,5 @@
+import '../app/bootstrap.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -23,6 +25,7 @@ class AssistantPage extends StatefulWidget {
     required this.agent,
     required this.profiles,
     this.scope,
+    this.host,
     this.conversationId,
     this.onOpenReference,
   });
@@ -30,6 +33,7 @@ class AssistantPage extends StatefulWidget {
   final PersonalAgent agent;
   final ProfileRepository profiles;
   final AssistantScope? scope;
+  final MuyonHost? host;
   final String? conversationId;
   final void Function(ObjectRef)? onOpenReference;
   @override
@@ -546,6 +550,7 @@ class _AssistantPageState extends State<AssistantPage> {
                                       MaterialPageRoute<void>(
                                         builder: (_) => DynamicWorkspace(
                                           repository: widget.repo,
+                                          host: widget.host,
                                           taskId: task.id,
                                           surfaceId: widget.agent
                                               .uiPresentation(task.id)!
@@ -572,6 +577,7 @@ class _AssistantPageState extends State<AssistantPage> {
                                       MaterialPageRoute<void>(
                                         builder: (_) => DynamicWorkspace(
                                           repository: widget.repo,
+                                          host: widget.host,
                                           taskId: task.id,
                                           surfaceId: surface,
                                           tools: widget.agent.tools,

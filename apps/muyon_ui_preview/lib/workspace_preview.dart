@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
@@ -14,6 +16,7 @@ class WorkspacePreview extends StatefulWidget {
 class _WorkspacePreviewState extends State<WorkspacePreview> {
   UiWorkspaceController? controller;
   String? error;
+  bool navigating = false;
   @override
   void initState() {
     super.initState();
@@ -57,6 +60,72 @@ class _WorkspacePreviewState extends State<WorkspacePreview> {
       if (mounted) setState(() => error = null);
     } catch (e) {
       if (mounted) setState(() => error = '$e');
+    }
+  }
+
+  Future<void> openPublicReference({required bool source}) async {
+    final c = controller;
+    if (c == null || navigating || c.readOnly) return;
+    setState(() => navigating = true);
+    try {
+      final current = c.surface.current;
+      final excerpt = source ? current.snapshot.sources.values.first : null;
+      final ref = source
+          ? ObjectRef(
+              moduleId: excerpt!.artifact.moduleId,
+              objectType: 'document',
+              objectId: excerpt.artifact.artifactId,
+              contentDigest: excerpt.artifact.contentDigest,
+            )
+          : current.snapshot.facts.values.first.object;
+      final node = current.plan.nodes.firstWhere(
+        (n) => n.bindings.values.any(
+          (b) => b.kind == (source ? BindingKind.sourceSpan : BindingKind.fact),
+        ),
+      );
+      final anchor = NavigationAnchor(
+        conversationId: 'public-ui2a-conversation',
+        taskId: c.taskId,
+        surfaceId: current.plan.surfaceId,
+        nodeId: node.id,
+        scrollOffset: c.scrollOffset,
+        objectRef: ref,
+        sourceDigest: excerpt?.artifact.contentDigest ?? ref.contentDigest,
+        artifactRef: excerpt?.artifact,
+      );
+      c.returnAnchor = jsonEncode(anchor.toJson());
+      await c.flush();
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => Scaffold(
+            appBar: AppBar(
+              title: Text(source ? 'Public source' : 'Public object'),
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Simulated navigation · public fixture · no product files or module calls',
+                  ),
+                  const SizedBox(height: 16),
+                  SelectableText(
+                    source
+                        ? excerpt!.originalText
+                        : '${ref.moduleId} / ${ref.objectType} / ${ref.objectId}',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) setState(() => error = '$e');
+    } finally {
+      if (mounted) setState(() => navigating = false);
     }
   }
 
@@ -118,6 +187,23 @@ class _WorkspacePreviewState extends State<WorkspacePreview> {
           child: UiWorkspaceView(
             controller: c,
             originalAnswer: runtimeFixture().answer,
+            references: Wrap(
+              spacing: 8,
+              children: [
+                TextButton(
+                  onPressed: navigating || c.readOnly
+                      ? null
+                      : () => openPublicReference(source: false),
+                  child: const Text('Open public object'),
+                ),
+                TextButton(
+                  onPressed: navigating || c.readOnly
+                      ? null
+                      : () => openPublicReference(source: true),
+                  child: const Text('Open public source'),
+                ),
+              ],
+            ),
             banner: 'Public fixture storage · browser projection only · no product SQLite/model/network calls',
           ),
         ),

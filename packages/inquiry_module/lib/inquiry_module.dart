@@ -12,7 +12,8 @@ import 'src/app/theme.dart';
 export 'src/app/app_state.dart' show AppState;
 export 'src/app/secret_store.dart' show InquirySecretStore;
 export 'src/app/shared_models.dart';
-export 'src/features/records/open_record.dart' show openRecord;
+export 'src/features/records/open_record.dart'
+    show openRecord, inquiryObjectPage;
 export 'src/features/ai/import_pipeline.dart';
 export 'src/features/projects/project_form.dart' show suggestProjectCode;
 

@@ -4,6 +4,7 @@ import '../../app/app_state.dart';
 import '../../app/theme.dart';
 import '../../platform/files.dart';
 import '../catalog/catalog_page.dart';
+import '../catalog/detail_panel.dart';
 import '../catalog/contacts.dart';
 import '../inquiries/inquiry_page.dart';
 import '../projects/project_detail.dart';
@@ -57,4 +58,37 @@ Future<void> openRecord(
         ),
       );
   }
+}
+
+/// Existing object bodies for a host-owned route. Unsupported form-only records
+/// keep the host's read-only fallback; this does not create a second editor.
+Widget? inquiryObjectPage(
+  BuildContext context,
+  AppState state,
+  String type,
+  String id,
+) {
+  final record = state.store.get(type, id);
+  if (record == null || record.deleted) return null;
+  return switch (type) {
+    'project' || 'project_item' => LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        // The existing fixed header/toolbar and empty ledger need reading
+        // room; a short host route scrolls instead of overflowing its body.
+        child: SizedBox(
+          height: constraints.maxHeight < 720 ? 720 : constraints.maxHeight,
+          child: ProjectDetail(
+            state: state,
+            projectId: type == 'project'
+                ? id
+                : record.data['project_id'] as String,
+            compact: MediaQuery.sizeOf(context).width < 1000,
+          ),
+        ),
+      ),
+    ),
+    'supplier' || 'product' => CatalogDetail(state: state, type: type, id: id),
+    'inquiry' => InquiryPage(state: state, id: id),
+    _ => null,
+  };
 }

@@ -10,3 +10,5 @@ export 'src/ui/state.dart';
 export 'src/ui/workspace.dart';
 export 'src/ui/planning.dart';
 export 'src/ui/guides.dart';
+
+export 'src/ui/navigation.dart';
