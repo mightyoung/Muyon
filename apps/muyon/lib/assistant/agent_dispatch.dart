@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import 'package:supplier_core/supplier_core.dart' show assistantReadableSummary;
 
 import '../platform/foundation_repository.dart';
+import '../platform/assistant_subconversations.dart';
 import '../platform/tool_registry.dart';
 import '../platform/grants/host_authorization_facts.dart';
 import '../platform/grants/outbound_content_reviewer.dart';
@@ -142,6 +143,10 @@ class AgentDispatch {
         if (ctx.closing) throw StateError('Assistant is closing');
         ctx.invocationTasks[request.invocationId] = task.id;
         ctx.invocationRequests[request.invocationId] = request;
+        AssistantSubconversations(ctx.repository).checkTool(
+          task.conversationId,
+          ctx.tools.inspect(request.toolId)?.descriptor.effect,
+        );
         final prepared = await ctx.tools.prepare(request);
         if (ctx.closing) throw StateError('Assistant is closing');
         final read = prepared.info.accessLevel == ToolAccessLevel.read;
@@ -298,6 +303,10 @@ class AgentDispatch {
         for (final call in card) {
           final request = _requestOf(task, call);
           ctx.invocationTasks[request.invocationId] = task.id;
+          AssistantSubconversations(ctx.repository).checkTool(
+            task.conversationId,
+            ctx.tools.inspect(request.toolId)?.descriptor.effect,
+          );
           final prepared = await ctx.tools.prepare(request);
           if (prepared.identityDigest != call['identityDigest']) {
             throw StateError('stale_scope');
@@ -482,6 +491,10 @@ class AgentDispatch {
           return const Run.abandoned();
         }
       }
+      AssistantSubconversations(ctx.repository).checkTool(
+        task.conversationId,
+        ctx.tools.inspect(request.toolId)?.descriptor.effect,
+      );
       final result = await ctx.tools.invoke(request, cancellation: token);
       if (external) {
         // Persist stable returned sources before content acceptance. The
