@@ -18,6 +18,8 @@ import '../../services/documents/document_parser.dart';
 export 'package:inquiry_module/inquiry_module.dart'
     show
         PreparedInquiryDraft,
+        PreparedInquiryListDraft,
+        InquiryListRecord,
         InquiryImportRecord,
         InquiryRecordStatus,
         SelectedInquiryInput,
@@ -168,12 +170,21 @@ class InquiryModuleRuntime
   Future<ImportReceipt> commitImport(
     PreparedImport input,
     ImportIntent intent,
-  ) async => imports.commit(input, intent);
+  ) async => intent.stagingToken.startsWith('list:')
+      ? imports.commitList(input, intent)
+      : imports.commit(input, intent);
   @override
   Future<ImportReceipt?> receipt(String operationId) async =>
       imports.receipt(operationId);
   Future<PreparedInquiryDraft> resumeImport(String draftId) async =>
       imports.resume(draftId);
+  Future<PreparedInquiryListDraft> prepareListImport(
+    SelectedInput input,
+    ImportTarget target,
+    Map<String, Object?> project,
+  ) => imports.prepareList(input, target, project);
+  Future<PreparedInquiryListDraft> resumeListImport(String id) async =>
+      imports.resumeList(id);
   @override
   Future<ModuleSession> openSession(WorkspaceBinding binding) async =>
       _InquirySession(owner, binding.nativeProjectId);

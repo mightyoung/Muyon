@@ -40,7 +40,7 @@
 | [UI-4a](../../tasks/UI-4a.md) | 确定性动态组合+受控云URL交互验收 | UI-3a；REG-4a业务联调 | 第一批云出口，待派发 |
 | [UI-4b](../../tasks/UI-4b.md) | Harness自动/显式共用planning+两Provider入口 | UI-3a/4a | 不等训练/指南，待派发 |
 | [UI-3b](../../tasks/UI-3b.md) | 草稿持久、人工覆盖、返回现场 | UI-3a/4a | 可与规划接线错开，不等模型，待派发 |
-| [REG-4b](../../tasks/REG-4b.md) | 既有导入plan/apply、部分入库/续办 | REG-4a、UI-3b/4a | 进行中，`task/reg-4b-inquiry-import-pipeline`；本机/独审推进，云UI及实机待验 |
+| [REG-4b](../../tasks/REG-4b.md) | 既有导入plan/apply、部分入库/续办 | REG-4a、UI-3b/4a | 本机接线/测试/独审修复已完成，`task/reg-4b-inquiry-import-pipeline`；精确CI见交付证据，云UI及最终原生/实机待验 |
 | [UI-2a](../../tasks/UI-2a.md) | 跨插件对象/文件导航与原位返回 | UI-3b、REG-4b | 之后，待派发 |
 | [UI-4c](../../tasks/UI-4c.md) | 一层子对话与最新成果引用 | UI-2a、UI-4b/3b | 最后按闭环，待派发 |
 | [C4-GUIDE](../../tasks/C4-GUIDE.md) | train/dev指南稿与可空检索接口 | UI-3a数据稿；UI-4b接口接入 | 云数据线程起草/接口待派，不阻塞上表 |

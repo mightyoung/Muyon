@@ -8,6 +8,8 @@ import 'package:supplier_core/supplier_core.dart';
 
 import '../../app/app_state.dart';
 
+part 'list_import_pipeline.dart';
+
 /// Existing MaterialImportPage functions, chosen before any field preview.
 enum InquiryImportPurpose { quotations, materials }
 
