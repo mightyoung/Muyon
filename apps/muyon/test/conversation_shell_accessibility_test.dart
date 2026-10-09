@@ -44,7 +44,9 @@ void main() {
       final back = find.byTooltip('关闭工作区 / 返回');
       expect(tester.getSize(back).width, greaterThanOrEqualTo(48));
       expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
-      final node = tester.getSemantics(back);
+      final semanticBack = find.bySemanticsLabel('关闭工作区 / 返回');
+      expect(semanticBack, findsOneWidget);
+      final node = tester.getSemantics(semanticBack);
       expect(node.label, contains('关闭工作区 / 返回'));
       expect(node.flagsCollection.isButton, isTrue);
       expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
@@ -97,10 +99,10 @@ void main() {
     expect(find.text('完整原回答，不截断。'), findsOneWidget);
     expect(find.byType(DynamicUiSurface), findsNothing);
     expect(find.byType(TextField), findsNothing);
-    await tester.tap(find.text('查看对象 · removed-plugin'));
+    await workspaceOperation(tester, () => tester.tap(find.text('查看对象 · removed-plugin')));
     await workspaceVisible(tester, find.textContaining('对象或插件当前不可用'));
-    await tester.pageBack();
-    await workspaceReady(tester);
+    await workspaceOperation(tester, tester.pageBack);
+    await workspaceVisible(tester, find.text('完整原回答，不截断。'));
     expect(find.text('完整原回答，不截断。'), findsOneWidget);
     expect(actions, 0);
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
