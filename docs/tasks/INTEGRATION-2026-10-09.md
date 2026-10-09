@@ -18,7 +18,8 @@ ADR-0001 用户决定、产品架构总览、AI 原生方案及流式契约。�
 | AIUI-2 | `3f739035385b7640d1fcec497dc33a85d3553ffe` | [精确CI](https://github.com/mightyoung/Muyon/actions/runs/37963507853) success，Form 修复已验 | 暂缓：Tabs 缩减列表后索引未调整（layout.dart:214/271），原执行者修复中，不合旧 SHA；typed edit/detail/集合与恢复接线归后续，不弱化 validator |
 
 临时组合 `53458c6c69b8aff9c5338d8b7d28417a547706c8` 包含 GROK-7 与 REG-3a；
-[CI 37965251000](https://github.com/mightyoung/Muyon/actions/runs/37965251000) 为本轮重跑门禁。
+[CI 37965251000](https://github.com/mightyoung/Muyon/actions/runs/37965251000) 已到
+completed/success；analyze 8/8、test 8/8、module_api +38、host +1284 ~3。
 PR #6 相对该组合只增四个基础设施文件及审查摘要，另由精确源码离线测试验证。
 收到全库审计明确结论后，另将 AIUI-1 加入完整组合并重跑 CI；前一次运行不代表
 含 AIUI-1 的组合已通过。AIUI-2 的 Tabs 复现/修复与新精确提交 CI 仍由原任务负责。
@@ -63,5 +64,6 @@ PR #6 相对该组合只增四个基础设施文件及审查摘要，另由精�
 gh REST/GraphQL Forbidden，但 git fetch/push/ls-remote 和 GitHub 连接器可用；
 CI 查询用通用 github_fetch 的 workflow-run API（专用 commit-runs 工具只查 PR 事件，
 空列表不能当作没有 push CI）。本地无 actionlint；包装原生验证明确未做。
+本地另外重跑门禁退出码 9 项与 doctor 23 场景均通过，未导出 MUYON_EVAL_REAL。
 Linux 门禁中 macOS 字体 golden 的跳过不构成 golden 验收；原有 Mac 失败结论保留。
 REG-3b、剩余科研写入/Q10 本机导出门面、REG-5、AIUI 接线、真实模型/真机端到端另行处理。
