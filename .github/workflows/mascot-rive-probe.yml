@@ -39,3 +39,13 @@ jobs:
             echo 'No install/build/inspect/screenshot has run. Next commit must pin this reviewed installer and an exact CLI release.'
             echo 'Public repository; standard Ubuntu hosted runner; no Rive login, original image, Flutter, paid runner or persistent cache.'
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Resolve release manifest without installing
+        shell: bash
+        run: |
+          set -euo pipefail
+          task_manifest="$(mktemp "$RUNNER_TEMP/muyang-manifest.XXXXXX")"
+          curl --proto '=https' --tlsv1.2 --fail --location --silent --show-error --max-time 30 \
+            https://releases.rive.app/cli/latest/manifest.json -o "$task_manifest"
+          test "$(wc -c < "$task_manifest")" -le 131072
+          sha256sum "$task_manifest"
+          cat "$task_manifest"
