@@ -15,6 +15,14 @@ class UiStreamNodeStatus {
   final List<String> reasons;
 }
 
+/// A diagnostic-only batch result: deliberately carries no renderer capability.
+class UiStreamPlanValidation {
+  UiStreamPlanValidation._(List<String> errors)
+    : errors = List.unmodifiable(errors);
+  final List<String> errors;
+  bool get isValid => errors.isEmpty;
+}
+
 class UiStreamView {
   UiStreamView({
     required this.candidatePlan,
@@ -45,7 +53,7 @@ class UiStreamView {
   final int receivedLines, badLines, diagnosticCount;
 
   /// Exact batch result on the unfiltered candidate, for differential tests.
-  final UiValidationResult? batchValidation;
+  final UiStreamPlanValidation? batchValidation;
 
   /// Only a successfully ended stream grants this capability.
   final ValidatedUiPlan? finalPlan;
@@ -339,7 +347,9 @@ class UiStreamCompiler {
       receivedLines: _receivedLines,
       badLines: _badLines,
       diagnosticCount: _diagnosticCount,
-      batchValidation: _batch,
+      batchValidation: _batch == null
+          ? null
+          : UiStreamPlanValidation._(_batch!.errors),
       finalPlan: complete ? _batch?.validatedPlan : null,
     );
   }

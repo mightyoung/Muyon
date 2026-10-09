@@ -646,6 +646,59 @@ void main() {
       expect(() => compiler(f, limits: limits), throwsArgumentError);
     }
   });
+  test('batch diagnostics never expose a capability that can dispatch rejected actions', () {
+    for (final malformed in [true, false]) {
+      c = compiler(f);
+      root(c);
+      field(c);
+      c.addLine(
+        jsonEncode({
+          'op': 'action',
+          'node': 'qty',
+          'event': 'change',
+          'action': 'edit',
+          'inputs': ['quantity'],
+        }),
+      );
+      if (malformed) c.addLine('{"op":"unknown"}');
+      end(c);
+      differential(c);
+      final v = c.current;
+      expect(v.batchValidation!.isValid, isTrue);
+      expect(
+        () => (v.batchValidation as dynamic).validatedPlan,
+        throwsNoSuchMethodError,
+      );
+      final state = UiSessionState(f.snapshot);
+      expect(
+        () => state.accept(v.batchValidation as dynamic),
+        throwsA(isA<TypeError>()),
+      );
+      if (malformed) {
+        expect(v.finalPlan, isNull);
+        expect(state.resolve(const BindingRef.uiState('quantity')), '10');
+      } else {
+        final plan = v.finalPlan!;
+        expect(state.accept(plan), isTrue);
+        expect(
+          state.dispatch(
+            UiEvent(
+              eventId: 'edit',
+              surfaceId: f.plan.surfaceId,
+              nodeId: 'qty',
+              observedRevision: f.plan.revision,
+              kind: 'change',
+              payload: '99',
+            ),
+            plan,
+            f.catalog,
+          ),
+          UiEventOutcome.applied,
+        );
+        expect(state.resolve(const BindingRef.uiState('quantity')), '99');
+      }
+    }
+  });
   test('pure text and empty end follow batch empty plan rejection', () {
     c.addLine('{"op":"text","md":"Model prose"}');
     end(c);

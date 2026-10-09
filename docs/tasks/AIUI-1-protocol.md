@@ -52,3 +52,6 @@ validateUiNode 从原 validator 原样抽取组件、属性、绑定、事件及
 正式v1复审发现合法child/action可抹去非法patch的lastGood，以及parser预筛schema属性类型导致不可恢复；已保留旧props并复核最新children/events，任意JSON属性保留原候选且只由共享schema校验判错，嵌套字符串以迭代扫描计入UTF-8文字量。对应最后两项恢复回归测试。
 
 冻结终版独立审查通过：29项新增测试独立重跑通过，未发现剩余阻断。streamErrors过滤schema/after_end诊断不改变坏行否决；八项配置只能收紧。验证和四项真实变异摘要写入提交说明，原始日志未纳入仓库。
+
+推送后额外独立能力探针发现：坏流仍可从公开 UiValidationResult 批量结果取出 validatedPlan 并被 UiSessionState 接受/派发。已将公开 batchValidation 改为仅不可变 errors/isValid 的 UiStreamPlanValidation，批量能力保留私有；所有终态中仅成功的 finalPlan 可暴露 ValidatedUiPlan。`batch diagnostics never expose a capability that can dispatch rejected actions` 回归覆盖坏流不可取能力、诊断不可直接accept、合法终态能力可真实dispatch；差分错误集合未改变。
+能力边界修复复审通过，30项新增测试独立重跑通过；原探针访问诊断validatedPlan编译失败，合法finalPlan真实dispatch仍成功。最终验证摘要与磁盘不足后的受影响命令重跑结果记录在追加修复提交说明中。
