@@ -35,7 +35,7 @@ void main() {
     expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
     final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
     await tester.enterText(find.byType(TextField).first, '37');
-    await tester.runAsync(c.flush);
+    await workspaceOperation(tester, c.flush);
     c.surface.lockRecoveredOperations(['pending-existing']);
     final node = c.surface.current.plan.nodes.firstWhere((n) => n.id == 'quantity');
     for (final width in [1280.0, 390.0]) {
@@ -47,18 +47,18 @@ void main() {
       expect(c.surface.operationRefs, contains('pending-existing'));
       expect(c.surface.current.plan.nodes.firstWhere((n) => n.id == 'quantity'), same(node));
       await tester.enterText(find.byType(TextField).first, width == 1280 ? '38' : '39');
-      await tester.runAsync(c.flush);
+      await workspaceOperation(tester, c.flush);
       expect(tester.takeException(), isNull);
     }
     expect(c.surface.session.userOverrides['quantity'], '39');
     expect(events, 0); // Local editing never invokes the model/business port.
     final detail = c.surface.current.plan.nodes.firstWhere((n) => n.id == 'detail');
     final event = c.surface.eventFor(detail, 'tap');
-    await tester.runAsync(() => c.surface.dispatch(event));
-    await tester.runAsync(() => c.surface.dispatch(event));
+    await workspaceOperation(tester, () => c.surface.dispatch(event));
+    await workspaceOperation(tester, () => c.surface.dispatch(event));
     expect(events, 1);
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
-    await workspaceReady(tester);
+    await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
     expect(find.text('父对话'), findsOneWidget);
     expect(find.byType(ConversationWorkspaceBody), findsNothing);
     expect((await HostUiWorkspaceStore(f.host.foundation, taskId: 'task').load('comparison'))!.displayValues['quantity'], '39');
@@ -86,9 +86,9 @@ void main() {
     editor().focusNode.requestFocus();
     await tester.pump();
     final scroller = find.descendant(of: find.byType(ConversationWorkspaceBody), matching: find.byType(SingleChildScrollView));
-    await tester.drag(scroller, const Offset(0, -12));
+    await tester.drag(scroller, const Offset(0, -30));
     await tester.pumpAndSettle();
-    await tester.runAsync(c.flush);
+    await workspaceOperation(tester, c.flush);
     final before = tester.widget<SingleChildScrollView>(scroller).controller!.offset;
     expect(before, greaterThan(0));
     expect(editor().focusNode.hasFocus, isTrue);
@@ -104,10 +104,10 @@ void main() {
     }
     await tester.ensureVisible(find.byType(TextField).first);
     await tester.enterText(find.byType(TextField).first, 'continued-edit');
-    await tester.runAsync(c.flush);
+    await workspaceOperation(tester, c.flush);
     expect(c.surface.session.userOverrides['quantity'], 'continued-edit');
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
-    await workspaceReady(tester);
+    await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -127,7 +127,7 @@ void main() {
     await workspaceReady(tester);
     final first = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
     await tester.enterText(find.byType(TextField).first, '41');
-    await tester.runAsync(first.flush);
+    await workspaceOperation(tester, first.flush);
     // Open B immediately after closing A, before a frame removes A's subtree.
     // The new session key must replace its late-final state owner.
     final prior = original.plan;
@@ -135,24 +135,29 @@ void main() {
       catalogVersion: prior.catalogVersion, snapshotRef: prior.snapshotRef,
       intentRef: prior.intentRef, root: prior.root, nodes: prior.nodes),
       original.snapshot, original.intent, original.catalog).validatedPlan!;
-    await tester.runAsync(() => open!(DynamicWorkspace(repository: f.host.foundation,
+    await workspaceOperation(tester, () => open!(DynamicWorkspace(repository: f.host.foundation,
       taskId: 'task', surfaceId: 'other-surface', plan: secondPlan)));
     await workspaceReady(tester);
     final second = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
     expect(second, isNot(same(first)));
     expect(second.surface.current.plan.surfaceId, 'other-surface');
     await tester.enterText(find.byType(TextField).first, '42');
-    await tester.runAsync(second.flush);
+    await workspaceOperation(tester, second.flush);
     expect((await HostUiWorkspaceStore(f.host.foundation, taskId: 'task').load('comparison'))!.displayValues['quantity'], '41');
     expect((await HostUiWorkspaceStore(f.host.foundation, taskId: 'task').load('other-surface'))!.displayValues['quantity'], '42');
     expect(tester.takeException(), isNull);
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
-    await workspaceReady(tester);
+    await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
     await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('desktop_close_checkpoints_before_dispose', (tester) async {
     final f = await NavigationFixture.open(tester);
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+      await workspaceOperation(tester, f.host.close);
+    });
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
     addTearDown(tester.view.resetPhysicalSize);
@@ -165,36 +170,35 @@ void main() {
     await open!(DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison', plan: f.plan(ref)));
     await workspaceReady(tester);
     final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
-    // Temporary mutation diagnostics; fixed fixture data only.
-    // ignore: avoid_print
-    print('MUTATION PHASE: workspace loaded, starting SQLite barrier');
     final entered = Completer<void>();
     final release = Completer<void>();
     addTearDown(() { if (!release.isCompleted) release.complete(); });
     Future<void>? blocked;
-    await tester.runAsync(() async {
+    await workspaceOperation(tester, () async {
       blocked = (f.host.foundation.database as ExclusiveDatabase).exclusiveAsync((db) async {
         entered.complete();
         await release.future;
       });
       await entered.future;
     });
-    // ignore: avoid_print
-    print('MUTATION PHASE: barrier entered');
     // A presentation checkpoint field is not auto-flushed by a surface edit.
     c.step = 'review-before-close';
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
     await tester.pump();
-    // ignore: avoid_print
-    print('MUTATION PHASE: close tapped, checking pane retention');
     expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
     expect(tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller, same(c));
+    // The awaited save must retain a live editable controller, not merely a
+    // stale widget painted after its owner was disposed.
+    await tester.enterText(find.byType(TextField).first, 'still editing');
+    expect(c.surface.session.userOverrides['quantity'], 'still editing');
+    expect(tester.widget<TextField>(find.byType(TextField).first).controller!.text, 'still editing');
     release.complete();
-    await tester.runAsync(() => blocked!);
-    await workspaceReady(tester);
+    await workspaceOperation(tester, () => blocked!);
+    await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
     expect(find.byType(ConversationWorkspaceBody), findsNothing);
     final saved = (await HostUiWorkspaceStore(f.host.foundation, taskId: 'task').load('comparison'))!;
     expect(saved.step, 'review-before-close');
+    expect(saved.userOverrides['quantity'], 'still editing');
     expect(saved.nodeIds, contains('quantity'));
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());

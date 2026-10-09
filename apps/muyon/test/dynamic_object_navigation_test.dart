@@ -164,7 +164,7 @@ void main() {
         .widget<UiWorkspaceView>(find.byType(UiWorkspaceView))
         .controller;
     c.returnAnchor = 'legacy-message-anchor';
-    await tester.runAsync(c.flush);
+    await workspaceOperation(tester, c.flush);
     final store = HostUiWorkspaceStore(f.host.foundation, taskId: 'task');
     expect(await store.loadNavigationAnchor('comparison'), isNull);
     expect(
@@ -223,7 +223,7 @@ void main() {
           .widget<UiWorkspaceView>(find.byType(UiWorkspaceView))
           .controller;
       c.scrollOffset = 18;
-      await tester.runAsync(c.flush);
+      await workspaceOperation(tester, c.flush);
       expect(find.text('查看对象 · $module'), findsOneWidget);
       await tester.ensureVisible(find.text('查看对象 · $module'));
       await tester.tap(find.text('查看对象 · $module'));
