@@ -40,30 +40,42 @@ Future<T> workspaceOperation<T>(
 /// Drain real SQLite/registered plugin futures until the expected visible state.
 /// No elapsed-time sleeps are used to manufacture navigation/save ordering.
 Future<void> workspaceReady(WidgetTester tester) async {
-  await tester.pump();
-  final finder = find.byType(DynamicWorkspace);
-  if (finder.evaluate().isNotEmpty) {
-    final session = tester.widget<DynamicWorkspace>(finder.first).session;
-    if (session != null) await workspaceOperation(tester, session.ensureLoaded);
-  }
-  await tester.runAsync(() => Future<void>(() {}));
-  await tester.pump(const Duration(milliseconds: 16));
-}
-
-Future<void> workspaceVisible(WidgetTester tester, Finder target) async {
-  for (var turn = 0; turn < 1000; turn++) {
-    await tester.runAsync(() => Future<void>(() {}));
-    await tester.pump(const Duration(milliseconds: 16));
-    if (target.evaluate().isNotEmpty) return;
-  }
-  fail('Navigation did not expose $target after draining pending event turns');
-}
-
-Future<void> workspaceGone(WidgetTester tester, Finder target) async {
+  final loaded = <DynamicWorkspaceSession>{};
+  var stable = 0;
   for (var turn = 0; turn < 2000; turn++) {
     await tester.runAsync(() => Future<void>(() {}));
     await tester.pump(const Duration(milliseconds: 16));
-    if (target.evaluate().isEmpty) return;
+    final finder = find.byType(DynamicWorkspace);
+    if (finder.evaluate().isEmpty) { stable = 0; continue; }
+    final session = tester.widget<DynamicWorkspace>(finder).session;
+    if (session != null && loaded.add(session)) {
+      await workspaceOperation(tester, session.ensureLoaded);
+      stable = 0;
+      continue;
+    }
+    stable = tester.binding.hasScheduledFrame ? 0 : stable + 1;
+    if (stable >= 2) return;
   }
-  fail('Navigation did not remove $target after draining pending event turns');
+  fail('Workspace did not finish loading and responsive route animation');
+}
+
+Future<void> workspaceVisible(WidgetTester tester, Finder target) =>
+    _workspaceSettled(tester, () => target.evaluate().isNotEmpty,
+      'Navigation did not expose $target');
+
+Future<void> workspaceGone(WidgetTester tester, Finder target) =>
+    _workspaceSettled(tester, () => target.evaluate().isEmpty,
+      'Navigation did not remove $target');
+
+Future<void> _workspaceSettled(WidgetTester tester, bool Function() ready, String failure) async {
+  var stable = 0;
+  for (var turn = 0; turn < 2000; turn++) {
+    // Yield to native SQLite between every animation frame. pumpAndSettle
+    // alone starves real futures while an async progress indicator animates.
+    await tester.runAsync(() => Future<void>(() {}));
+    await tester.pump(const Duration(milliseconds: 16));
+    stable = ready() && !tester.binding.hasScheduledFrame ? stable + 1 : 0;
+    if (stable >= 2) return;
+  }
+  fail('$failure after draining pending event turns and animation frames');
 }
