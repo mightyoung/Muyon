@@ -1,0 +1,17 @@
+# AGENT-IDEMPOTENCY-1 旧入口业务操作幂等强化（拟编号，待派发）
+
+基线0b64cfa。REG4b当前ImportCoordinator/domain事务回执已实现，不能重新称为缺失。旧路径AgentDispatch/startTool与procurement_import/AskPage另核：dispatch每次产生新invocationId；registry已按invocation/replayKey保存回执并拦重放；AssistantProcurement._import已有(sessionId,callId)参数一致校验和领域transaction内双查/回执。因此现有路径不是“完全无幂等”，剩余问题是换attempt/callId后同一个逻辑操作的稳定关联及未知结果窗口。
+
+目标：先用可重复真实故障证明跨attempt身份丢失或同intent重复写，再最小强化已确认逻辑intent的稳定host operationId。不能按“相同参数”全局去重：用户明确新建一次同内容导入属于新intent。不能将model callId直接当业务intent，也不能重新确认就让未知操作再写一次。
+
+第一片只核与测试：域提交成功→host receipt写入前崩溃；恢复有domain receipt/unknown/no receipt三种；旧session同call同args复用，同call改args拒绝；新的intent同args允许按原业务规则处理。失败实际计数/对象/回执必须可见，不fake整套handler。
+
+后续若确实缺host稳定intent：在确认前持久owner/operation kind/host intent ID/confirmed payload digest/target scope或revision；复试同intent使用同ID；domain receipt与真实写在同一个原事务。保留原from_*、snapshot/digest、current authorization/scope检查；查成功回执可以报告实际结果，但不凭旧回执授权新的写。unknown保持interrupted/待人工核实；只在证据明确未执行且用户原授权仍有效时才继续。
+
+Files按实际失败拆片：新增platform/assistant_operation_identity.dart与host测试；必要改agent_dispatch.dart/personal_agent.dart/inquiry_write_tools.dart/business_tools.dart；procurement子片supplier_core/src/assistant_procurement.dart及其原测试、AskPage/history关联。这些与REG4c、ABC复修互斥；不修改REG4b ImportCoordinator/applyOffers/导入投影，除非有效RED证明该已合范围也有独立问题且另确认。
+
+RED拟：same_intent_after_new_attempt_returns_original_receipt；unknown_commit_window_never_replays_write；same_call_changed_payload_refused；new_explicit_intent_same_payload_is_distinct；revoked_scope_still_blocks_new_effect；restore_frozen_selection_not_model_mutable。全部尚未运行，不能当已证实故障。运行registry replay/agent_resume/import_recovery/assistant采购/domain事务回归；独审、实际全量门禁、精确CI。
+
+待决定：重开AskPage/新问题/用户再次导入何时算新intent；建议“用户明确新操作=new intent，原操作恢复/查询=same intent”，不猜文本等价。稳定ID只由host控制，intent恢复不会扩大scope/授权，不自动重试未知。
+
+状态：可审草案，未编码；先只核故障，不改变写入语义。

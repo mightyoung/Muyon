@@ -1,0 +1,15 @@
+# AGENT-RECOVERY-BUDGET-1 只读参数纠错后的预算策略（拟编号，待派发）
+
+基线0b64cfa；C修复已合，不重列为未开发。仅显式只读invalidArguments可交模型修正；真实failed/权限/scope/cancel/blocked/interrupted/未知不续。混合读写旧write不执行。当前Budget默认maxSteps4、maxActive10min、maxTokens200000、maxCallsPerStep8、maxCardCalls5、requestCap5min；纠错轮计step，实际token/time不减。协议纠错最多1次是另一机制，不混合统计。
+
+立即可准备的保守片：用真实有效/无效读与重开恢复，验证计步、时间/token只计一次；解释“读参数纠正也消耗预算”，用真实toolLog告知已做/未做。修复若找到重放重复计费或少计费，只修会计一致性，不提高上限。没有失败证据前不宣称计费bug。
+
+需决定的策略片：建议保持默认4步；预算耗尽时只有用户明确点击继续才授本任务一次额外1步许可，不增加token/time/卡上限，不清usage、不改模型或外发授权。另选项是保留原限制完全不加步。自动给纠错赠步、全局maxSteps提高、无限继续均不在已授权保守片。
+
+Files：agent_budget.dart/agent_model_turn.dart/agent_task_factory.dart/agent_resume.dart；新增test/agent_read_recovery_budget_test.dart（拟）。和AGENT-COMPLETE-1的agent_model_turn串行；不改business_tools/agent_tools错误分类。
+
+RED拟：invalid_read_correction_is_charged_once；correction_at_last_step_stops_without_new_request；restart_does_not_reset_usage；mixed_old_write_stays_not_run；denied_cancelled_unknown_cannot_get_extra_step。策略获选择后补explicit_continue_one_step_is_task_bound/not_model_controlled、token_time_still_exhausted、repeated_click_no_second_allowance；未选择前不实现/不将待选预期写成通过。
+
+所有新增许可必须host生成并持久、仅绑定明确task/attempt/usage与确认动作，模型/工具/文档不能提额度；继续仍走原model/tool请求review，不能拿额外step当权限。旧任务无许可按原Budget判断。完整agent_budget/recovery/resume/rejections/authorization/planning回归与独审/CI。
+
+状态：任务草案，未编码、未运行RED、未扩大预算。需要用户选择是否增加一次明确人工继续许可；默认建议保留限额，只先核实计费一致性。
