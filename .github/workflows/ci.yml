@@ -10,6 +10,7 @@ on:
       - develop
       - main
       - 'task/**'
+      - '!task/mascot-rive-probe'
       - 'review/**'
   pull_request:
     branches:

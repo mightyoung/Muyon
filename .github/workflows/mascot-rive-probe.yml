@@ -1,0 +1,41 @@
+name: mascot-rive-probe
+
+on:
+  push:
+    branches: ['task/mascot-rive-probe']
+    paths:
+      - '.github/workflows/mascot-rive-probe.yml'
+      - 'scripts/mascot_rive_probe/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mascot-rive-probe-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    if: github.event.repository.private == false && contains(github.event.head_commit.message, '[run-mascot-probe]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Acquire official installer for review; do not execute
+        shell: bash
+        run: |
+          set -euo pipefail
+          task_probe_dir="$(mktemp -d "$RUNNER_TEMP/muyang-installer.XXXXXX")"
+          curl --proto '=https' --tlsv1.2 --fail --location --silent --show-error --max-time 30 \
+            https://releases.rive.app/cli/install.sh -o "$task_probe_dir/install.sh"
+          test "$(wc -c < "$task_probe_dir/install.sh")" -le 131072
+          installer_sha="$(sha256sum "$task_probe_dir/install.sh" | cut -d ' ' -f 1)"
+          printf 'INSTALLER_SHA256=%s\n' "$installer_sha"
+          printf '%s\n' 'OFFICIAL_INSTALLER_REVIEW_START'
+          cat "$task_probe_dir/install.sh"
+          printf '\n%s\n' 'OFFICIAL_INSTALLER_REVIEW_END'
+          {
+            echo '## Official installer acquired; execution deliberately gated'
+            echo "Installer SHA-256: \`$installer_sha\`"
+            echo 'No install/build/inspect/screenshot has run. Next commit must pin this reviewed installer and an exact CLI release.'
+            echo 'Public repository; standard Ubuntu hosted runner; no Rive login, original image, Flutter, paid runner or persistent cache.'
+          } >> "$GITHUB_STEP_SUMMARY"
