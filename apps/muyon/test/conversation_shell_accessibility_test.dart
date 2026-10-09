@@ -49,7 +49,7 @@ void main() {
       expect(node.flagsCollection.isButton, isTrue);
       expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
       await tester.tap(back);
-      await workspaceReady(tester);
+      await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
       expect(find.byType(ConversationWorkspaceBody), findsNothing);
       await tester.pumpWidget(const SizedBox());
     }
@@ -80,7 +80,7 @@ void main() {
     expect(tester.getSize(close).width, greaterThanOrEqualTo(48));
     expect(tester.getSize(close).height, greaterThanOrEqualTo(48));
     await tester.tap(close);
-    await workspaceReady(tester);
+    await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
     expect(source.hasFocus, isTrue);
     await tester.pumpWidget(const SizedBox());
   });
@@ -104,7 +104,7 @@ void main() {
     expect(find.text('完整原回答，不截断。'), findsOneWidget);
     expect(actions, 0);
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
-    await workspaceReady(tester);
+    await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
     await tester.pumpWidget(const SizedBox());
   });
 }
