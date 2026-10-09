@@ -7,6 +7,8 @@ import 'package:muyon/screens/platform_shell.dart';
 import 'package:path/path.dart' as p;
 import 'package:prototype_module/prototype_module.dart';
 
+import 'support/conversation_workspace_fixture.dart';
+
 void main() {
   late Directory root;
   setUp(() => root = Directory.systemTemp.createTempSync('proto-wiring'));
@@ -14,7 +16,7 @@ void main() {
     if (root.existsSync()) root.deleteSync(recursive: true);
   });
 
-  testWidgets('shell home opens the prototype module', (tester) async {
+  testWidgets('shell data destination opens the prototype module', (tester) async {
     tester.view.physicalSize = const Size(390, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -35,15 +37,18 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('资料')));
+      await tester.pumpAndSettle();
       final entry = find.widgetWithText(ListTile, '原型页面');
-      await tester.ensureVisible(entry);
-      await tester.tap(entry);
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 100)),
-      );
-      for (var i = 0; i < 8; i++) {
-        await tester.pump(const Duration(milliseconds: 100));
-      }
+      final dataScroll = find.descendant(of: find.byType(ListView), matching: find.byWidgetPredicate(
+        (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
+      ));
+      expect(dataScroll, findsOneWidget);
+      await tester.scrollUntilVisible(entry, 100, scrollable: dataScroll);
+      await tester.pumpAndSettle();
+      expect(entry.hitTestable(), findsOneWidget);
+      await workspaceOperation(tester, () => tester.tap(entry.hitTestable()));
+      await workspaceVisible(tester, find.byType(PrototypeHome));
       expect(find.byType(PrototypeHome), findsOneWidget);
       expect(find.textContaining('不代表完整业务系统'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());

@@ -14,8 +14,31 @@ extension _KnowledgeSections on _PlatformShellState {
     );
   }
 
+  Future<void> browseObjects() async {
+    if (busy) return;
+    List<ObjectRef>? objects;
+    await action(() async {
+      objects = (await host.tools.resolveScope(const AssistantScope.global())).objects;
+    });
+    if (!mounted || objects == null) return;
+    // Scope resolution owns the busy lock; browsing the route must release it
+    // so an actual object click can enter the same openObject path as answers.
+    await page(
+      '业务对象目录',
+      list([
+        for (final ref in objects!)
+          ListTile(
+            title: Text('${ref.moduleId} · ${ref.objectType}'),
+            subtitle: Text(ref.objectId),
+            onTap: () => openObject(ref),
+            trailing: const Icon(Icons.open_in_new),
+          ),
+      ]),
+    );
+  }
+
   Widget knowledge() => list([
-    Text('数据与知识', style: Theme.of(context).textTheme.titleLarge),
+    Text('资料检索', style: Theme.of(context).textTheme.titleLarge),
     const Text('原文件与来源对象保留；全文检索无需模型。扫描图片的 OCR 状态单独显示。'),
     const SizedBox(height: 10),
     Wrap(
@@ -28,25 +51,7 @@ extension _KnowledgeSections on _PlatformShellState {
           label: const Text('导入文件'),
         ),
         OutlinedButton.icon(
-          onPressed: () => action(() async {
-            final scope = await host.tools.resolveScope(
-              const AssistantScope.global(),
-            );
-            if (mounted) {
-              await page(
-                '业务对象目录',
-                list([
-                  for (final ref in scope.objects)
-                    ListTile(
-                      title: Text('${ref.moduleId} · ${ref.objectType}'),
-                      subtitle: Text(ref.objectId),
-                      onTap: () => openObject(ref),
-                      trailing: const Icon(Icons.open_in_new),
-                    ),
-                ]),
-              );
-            }
-          }),
+          onPressed: busy ? null : browseObjects,
           icon: const Icon(Icons.account_tree_outlined),
           label: const Text('查找业务对象'),
         ),
@@ -95,6 +100,32 @@ extension _KnowledgeSections on _PlatformShellState {
             overflow: TextOverflow.ellipsis,
           ),
           onTap: () => openObject(hit['ref'] as ObjectRef),
+        ),
+      ),
+    const Divider(),
+    Text('业务页面与工作区', style: Theme.of(context).textTheme.titleMedium),
+    for (final declaration in host.modules.declarations())
+      card(
+        declaration.displayName,
+        declaration.tagline ?? '',
+        () => openDeclaration(declaration),
+        moduleIcon(declaration.iconKey),
+      ),
+    for (final workspace in host.workspaces.all())
+      ListTile(
+        title: Text(workspace.title),
+        leading: const Icon(Icons.folder_outlined),
+        onTap: () => action(() async {
+          await host.workspaces.setSetting('selectedWorkspace', workspace.id);
+          await openModule('research');
+        }),
+        trailing: IconButton(
+          tooltip: '工作区专题对话',
+          icon: const Icon(Icons.chat_outlined),
+          onPressed: () => page(
+            '工作区助手',
+            assistant(scope: AssistantScope.workspace(workspace.id)),
+          ),
         ),
       ),
     const Divider(),

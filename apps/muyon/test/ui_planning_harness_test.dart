@@ -120,36 +120,118 @@ class _SoftGuides implements UiGuideSource {
   ];
 }
 
+/// Controls only the planning deadline; HTTP fixture timers remain real.
+class _ManualDeadline implements Timer {
+  _ManualDeadline(this.callback);
+  final void Function() callback;
+  bool _active = true;
+  int _tick = 0;
+  @override
+  bool get isActive => _active;
+  @override
+  int get tick => _tick;
+  @override
+  void cancel() => _active = false;
+  void fire() {
+    if (!_active) return;
+    _active = false;
+    _tick = 1;
+    callback();
+  }
+}
+
+class _PlanningStartupGate implements ModelRequestGate {
+  bool holdStartup = false;
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  @override
+  Future<GateDecision> decide(ModelRequestFacts facts) async {
+    if (holdStartup) {
+      entered.complete();
+      await release.future;
+    }
+    return const GateConfirm();
+  }
+}
+
 void main() {
-  test('timed out planning confirmation cannot later send', () async {
-    final f = await LoopFixture.open();
-    final sink = _PlanningSink(TaskEventTableSink(f.repo));
-    final agent = PersonalAgent(
-      repository: f.repo,
-      gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
-      tools: f.tools,
-      events: sink,
-      uiPlanningSource: (t) async => state(),
-      uiPlanningProviders: {
-        UiPlanningMode.intelligent: FixtureUiPlanningProvider(
-          (r) async => result(r),
-        ),
+  for (final holdStartup in [false, true]) {
+    test(
+      'planning deadline commits cancellation before return '
+      '${holdStartup ? 'during startup' : 'while awaiting confirmation'}',
+      () async {
+        final f = await LoopFixture.open();
+        final sink = _PlanningSink(TaskEventTableSink(f.repo));
+        final gate = _PlanningStartupGate();
+        addTearDown(() {
+          if (!gate.release.isCompleted) gate.release.complete();
+        });
+        final agent = PersonalAgent(
+          repository: f.repo,
+          gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+          tools: f.tools,
+          gate: gate,
+          events: sink,
+          uiPlanningSource: (t) async => state(),
+          uiPlanningProviders: {
+            UiPlanningMode.intelligent: FixtureUiPlanningProvider(
+              (r) async => result(r),
+            ),
+          },
+        );
+        addTearDown(agent.close);
+        f.replies.add(LoopReply.sse(sseText(_answerJson)));
+        final task = await f.run(
+          agent,
+          await f.start(agent, f.profile(capabilities: _streaming)),
+        );
+        gate.holdStartup = holdStartup;
+        agent.configureUiPlanning(mode: UiPlanningMode.motivation);
+        late _ManualDeadline deadline;
+        final planning = runZoned(
+          () => agent.planUi(task.id),
+          zoneSpecification: ZoneSpecification(
+            createTimer: (self, parent, zone, duration, callback) {
+              if (duration == const Duration(seconds: 15)) {
+                deadline = _ManualDeadline(() => zone.run(callback));
+                return deadline;
+              }
+              return parent.createTimer(zone, duration, callback);
+            },
+          ),
+        );
+        if (holdStartup) {
+          await gate.entered.future;
+        } else {
+          await sink.child.future;
+        }
+        final child = f.repo.tasks().singleWhere(
+          (t) => t.payload['uiPlanningInternal'] == true,
+        );
+        final digest = child.payload['requestDigest'] as String?;
+        expect(f.bodies, hasLength(1));
+        final sendsBefore = f.bodies.length;
+        final ledgerBefore = f.ledger.recent().length;
+        deadline.fire();
+        final planned = await planning;
+        expect(planned.result.reasonCode, 'planner_timeout');
+        // The persistence assertion is immediate: no sleep or retry window.
+        expect(f.repo.task(child.id)!.state, PersonalTaskState.cancelled);
+        await expectLater(
+          agent.confirm(child.id, requestDigest: digest ?? 'late-confirmation'),
+          throwsStateError,
+        );
+        if (holdStartup) {
+          gate.release.complete();
+          await sink.child.future;
+          // Finishing startup cannot resurrect the cancelled child.
+          expect(f.repo.task(child.id)!.state, PersonalTaskState.cancelled);
+        }
+        expect(f.bodies, hasLength(sendsBefore));
+        expect(f.ledger.recent(), hasLength(ledgerBefore));
       },
     );
-    addTearDown(agent.close);
-    f.replies.add(LoopReply.sse(sseText(_answerJson)));
-    final task = await f.run(
-      agent,
-      await f.start(agent, f.profile(capabilities: _streaming)),
-    );
-    agent.configureUiPlanning(mode: UiPlanningMode.motivation);
-    final planning = agent.planUi(task.id);
-    final childId = await sink.child.future;
-    await planning;
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    expect(f.repo.task(childId)!.state, PersonalTaskState.cancelled);
-    expect(f.bodies, hasLength(1));
-  });
+  }
   test('internal planning cannot resume as an ordinary chat', () async {
     final f = await LoopFixture.open();
     final agent = f.agent();
