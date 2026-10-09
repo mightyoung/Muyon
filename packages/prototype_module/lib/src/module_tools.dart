@@ -199,11 +199,16 @@ void registerPrototypeTools(ToolRegistrar registrar) {
         throw StateError('Version outside selected scope');
       }
       final runtime = await ctx.runtime<PrototypeRuntime>();
-      call.checkBeforeEffect();
+      call.cancellation.throwIfCancelled();
       final feedback = await runtime.store.addFeedback(
         versionId: versionId,
         text: call.request.parameters['text'] as String,
-        beforeWrite: call.checkBeforeEffect,
+        beforeWrite: () {
+          final ref = call.resolvedScope.objects.singleWhere((r) =>
+            r.objectType == 'version' && r.objectId == versionId);
+          runtime.requireCurrent(ref);
+          call.checkBeforeEffect();
+        },
       );
       final session = await runtime.openScopeSession();
       try {

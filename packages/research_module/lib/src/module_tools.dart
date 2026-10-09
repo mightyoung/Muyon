@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'core/outline_store.dart';
+import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'research_module.dart';
-import 'research_services.dart';
+import 'core/store.dart';
 import 'module_declarations.dart';
 
 void registerResearchTools(ToolRegistrar registrar) {
@@ -32,6 +32,7 @@ void registerResearchTools(ToolRegistrar registrar) {
       for (final ref in call.resolvedScope.objects.where(
         (r) => r.moduleId == 'research' && const {'project','document','entry'}.contains(r.objectType),
       )) {
+        runtime.requireCurrent(ref);
         final store = runtime.store;
         final String title;
         if (ref.objectType == 'project') {
@@ -83,6 +84,7 @@ void registerResearchTools(ToolRegistrar registrar) {
     try {
       final view = await session.resolve(ref);
       if (view == null) throw StateError('Object changed');
+      runtime.requireCurrent(view.ref);
       final project = ref.nativeProjectId!;
       final data = switch (ref.objectType) {
         'project' => () {
@@ -121,11 +123,13 @@ void registerResearchTools(ToolRegistrar registrar) {
   ), (ctx) async {
     final runtime = await ctx.runtime<ResearchRuntime>();
     final refs = ctx.call.resolvedScope.objects.where((r) => r.moduleId == 'research').toList();
+    for (final ref in refs) { runtime.requireCurrent(ref); }
     final rows = <Map<String,Object?>>[];
-    void link(ObjectRef from, String type, String? id, String relation) {
+    void link(ObjectRef from, String type, String? id, String relation, {String? revision}) {
       if (id == null) return;
       for (final target in refs.where((r) => r.objectType == type && r.objectId == id &&
-          r.nativeProjectId == from.nativeProjectId)) {
+          r.nativeProjectId == from.nativeProjectId &&
+          (revision == null || r.revisionRef == revision))) {
         rows.add({'relation':relation,'from':from.toJson(),'to':target.toJson()});
       }
     }
@@ -134,8 +138,8 @@ void registerResearchTools(ToolRegistrar registrar) {
         link(ref,'project',ref.nativeProjectId,'${ref.objectType}_project');
       }
       if (ref.objectType == 'run') {
-        for (final row in runtime.store.db.select('SELECT task_id FROM runs WHERE id=?',[ref.objectId])) {
-          link(ref,'task',row['task_id'] as String,'run_task');
+        for (final row in runtime.store.db.select('SELECT task_id,task_revision FROM runs WHERE id=?',[ref.objectId])) {
+          link(ref,'task',row['task_id'] as String,'run_task', revision: '${row['task_revision']}');
         }
       } else if (ref.objectType == 'note') {
         for (final row in runtime.store.db.select('SELECT document_id FROM notes WHERE id=?',[ref.objectId])) {
@@ -157,7 +161,7 @@ void registerResearchTools(ToolRegistrar registrar) {
 
   void write(String name, String type, String idParameter,
       Map<String,Object?> properties, List<String> required,
-      Future<void> Function(ResearchServices, Map<String,Object?>) apply) {
+      void Function(WorkbenchStore, Map<String,Object?>) apply) {
     registrar.write(WriteToolSpec(
       name: name, description: '在已选择的科研范围内执行 $name；需用户确认，只修改本机科研库。',
       operations: _operations(name), targetTypes: {type}, affectsTypes: {type},
@@ -167,10 +171,13 @@ void registerResearchTools(ToolRegistrar registrar) {
       final params = ctx.call.request.parameters;
       final ref = _selected(ctx, type, params[idParameter] as String);
       final runtime = await ctx.runtime<ResearchRuntime>();
-      final services = ResearchServices(runtime.store, ref.nativeProjectId!,
-        ensureActive: ctx.call.checkBeforeEffect);
-      ctx.call.checkBeforeEffect();
-      await apply(services, params);
+      final store = runtime.store.scoped(ref.nativeProjectId!);
+      ctx.call.cancellation.throwIfCancelled();
+      await store.write(() {
+        runtime.requireCurrent(ref);
+        ctx.call.checkBeforeEffect();
+        apply(store,params);
+      });
       final session = await runtime.openScopeSession();
       try {
         final current = await session.resolve(ObjectRef(moduleId: 'research',
@@ -195,8 +202,9 @@ void registerResearchTools(ToolRegistrar registrar) {
     final runtime = await ctx.runtime<ResearchRuntime>();
     final store = runtime.store.scoped(ref.nativeProjectId!);
     late String noteId;
-    ctx.call.checkBeforeEffect();
+    ctx.call.cancellation.throwIfCancelled();
     await store.write(() {
+      runtime.requireCurrent(ref);
       ctx.call.checkBeforeEffect();
       final before = {for (final n in store.notes(ref.objectId)) n.id};
       store.saveNote(ref.objectId, params['locator'] as String, params['text'] as String);
@@ -234,8 +242,9 @@ void registerResearchTools(ToolRegistrar registrar) {
     final runtime = await ctx.runtime<ResearchRuntime>();
     final store = runtime.store.scoped(ref.nativeProjectId!);
     late List<ObjectRef> changed;
-    ctx.call.checkBeforeEffect();
+    ctx.call.cancellation.throwIfCancelled();
     await store.write(() {
+      runtime.requireCurrent(ref);
       ctx.call.checkBeforeEffect();
       final oldSections = {for (final s in store.sections(ref.nativeProjectId!)) s.id};
       final oldLinks = {for (final r in store.db.select('SELECT id FROM outline WHERE project_id=?', [ref.nativeProjectId])) r['id']};
@@ -269,20 +278,22 @@ Map<String,Object?> _document(ResearchRuntime runtime, ObjectRef ref, ObjectView
   if (document == null) {
     final rows = runtime.store.db.select(
       'SELECT d.file_name,length(d.bytes) AS byte_count FROM rk_documents d JOIN canonical_object_map m ON m.object_key=d.object_key '
-      'WHERE m.local_object_id=? AND m.local_project_id=? AND d.deleted=0', [ref.objectId,ref.nativeProjectId]);
+      "WHERE m.local_object_id=? AND m.local_project_id=? AND m.object_type='document' AND d.deleted=0", [ref.objectId,ref.nativeProjectId]);
     return {'relativePath':rows.single['file_name'],'byteCount':rows.single['byte_count'],'contentDigest':view.ref.contentDigest};
   }
   final file = File(document.absolutePath);
   final data = <String,Object?>{'relativePath':document.relativePath,'contentDigest':view.ref.contentDigest,'missing':!file.existsSync()};
   if (!file.existsSync()) return data;
-  data['byteCount'] = file.lengthSync();
+  // Bind returned text to the same bytes as the selected digest, rather than
+  // reading a fresh unverified prefix after scope resolution.
+  final bytes = file.readAsBytesSync();
+  if (sha256.convert(bytes).toString() != view.ref.contentDigest) {
+    throw StateError('Document changed during reading');
+  }
+  data['byteCount'] = bytes.length;
   if (const ['md','txt','csv','json'].any((ext) => document.relativePath.toLowerCase().endsWith('.$ext'))) {
-    final handle = file.openSync();
-    try {
-      final bytes = handle.readSync(16001);
-      data['text'] = utf8.decode(bytes.take(16000).toList(),allowMalformed:true);
-      data['truncated'] = bytes.length > 16000;
-    } finally {handle.closeSync();}
+    data['text'] = utf8.decode(bytes.take(16000).toList(),allowMalformed:true);
+    data['truncated'] = bytes.length > 16000;
   }
   return data;
 }

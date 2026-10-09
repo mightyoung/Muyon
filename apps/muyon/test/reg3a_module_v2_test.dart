@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,10 +7,41 @@ import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/app/module_host.dart';
 import 'package:muyon/platform/object_pages.dart';
 import 'package:muyon/platform/module_grants.dart';
+import 'support/fake_v2_module.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:prototype_module/prototype_module.dart';
 import 'package:research_module/research_module.dart';
+import 'package:sqlite3/sqlite3.dart';
+
+class _Declarations implements ToolRegistrar {
+  _Declarations(this.moduleId);
+  @override
+  final String moduleId;
+  final specs = <String,ToolSpec>{};
+  void _add(ToolSpec spec) {specs['$moduleId.${spec.name}']=spec;}
+  @override
+  void read(ToolSpec spec,ModuleToolHandler handler) => _add(spec);
+  @override
+  void write(WriteToolSpec spec,ModuleToolHandler handler) => _add(spec);
+  @override
+  void external(ExternalToolSpec spec,ModuleToolHandler handler) => _add(spec);
+  @override
+  HostChannel channel(ChannelSpec spec) => throw UnimplementedError();
+}
+
+class _ObservedWrite implements ManagedDatabase {
+  _ObservedWrite(this.delegate);
+  final ManagedDatabase delegate;
+  final queued = Completer<void>();
+  @override
+  Database get raw => delegate.raw;
+  @override
+  Future<T> write<T>(T Function(Database) body) {
+    if (!queued.isCompleted) queued.complete();
+    return delegate.write(body);
+  }
+}
 
 void main() {
   late Directory root;
@@ -78,12 +110,32 @@ void main() {
       expect(module.ontology.objectTypes, isNotEmpty);
       expect(module.coverage.operations, isNotEmpty);
       expect(module.manifest.capabilities.map((c) => c.id), isNot(contains('tools')));
+      final declarations = _Declarations(module.manifest.id);
+      module.registerTools(declarations);
+      final operations = {for (final op in module.coverage.operations) op.id:op};
+      for (final entry in declarations.specs.entries) {
+        expect(entry.value.operations,isNotEmpty);
+        for (final id in entry.value.operations) {
+          expect(operations[id]?.tools,contains(entry.key));
+        }
+      }
+      for (final action in module.ontology.actions) {
+        expect(declarations.specs[action.tool],isNotNull);
+        expect(operations[action.operationId]?.tools,contains(action.tool));
+      }
+      for (final relation in module.ontology.relations) {
+        expect(module.ontology.type(relation.from),isNotNull);
+        expect(module.ontology.type(relation.to),isNotNull);
+        expect(module.ontology.type(relation.from)!.fields.map((f) => f.name),contains(relation.field));
+        expect(declarations.specs[relation.queryTool],isNotNull);
+      }
       final members = [for (final op in module.coverage.operations) ...op.members];
       expect(members.toSet().length, members.length);
       for (final op in module.coverage.operations) {
         expect(op.tools.isNotEmpty != (op.notExposed != null), isTrue);
         for (final tool in op.tools) {
           expect(host.tools.inspect(tool), isNotNull, reason: op.id);
+          expect(declarations.specs[tool]?.operations,contains(op.id),reason:op.id);
         }
       }
     }
@@ -113,6 +165,23 @@ void main() {
     expect((await current('document','D','P')).contentDigest, 'missing');
   });
 
+  test('selected research reads return details and relations without outside content', () async {
+    await research();
+    final document = await current('document','D','P');
+    final detail = await host.tools.invoke(request('research.read_object',{'type':'document','id':'D'},document));
+    expect(detail.status,ToolCallStatus.succeeded);
+    expect((detail.data['object'] as Map)['text'],'原文');
+    final outside = await host.tools.invoke(request('research.read_object',{'type':'document','id':'D'},await current('project','Q','Q')));
+    expect(outside.status,ToolCallStatus.failed);
+    expect(outside.objectRefs,isEmpty);
+    final project = await current('project','P','P');
+    final entry = await current('entry','E','P');
+    final relation = await host.tools.invoke(ToolCallRequest(invocationId:'relations-${++invocation}',
+      toolId:'research.relations',scope:AssistantScope.selectedObjects([project,entry])));
+    expect((relation.data['relations'] as List).single['relation'],'entry_project');
+    expect(relation.objectRefs.toSet(),{project,entry});
+  });
+
   for (final name in ['save_note','accept_run','assess_run','add_outline']) {
     test('$name requires selected target and confirmation, writes once with receipt', () async {
       await research();
@@ -136,14 +205,58 @@ void main() {
       final result = await approved(r);
       expect(result.changes, isNotEmpty);
       if (name == 'save_note') expect(host.research!.store.notes('D').single.text,'批注');
-      if (name == 'accept_run') expect(host.research!.store.runs('P').single.accepted,isTrue);
+      if (name == 'accept_run' || name == 'assess_run') {
+        await expectLater(host.scopeResolver.resolve(AssistantScope.selectedObjects([ref])), throwsStateError);
+      }
+      if (name == 'accept_run') {
+        expect(host.research!.store.runs('P').single.accepted,isTrue);
+        final noop = await approved(request('research.accept_run',params,await current('run','R','P')));
+        expect(noop.changes,isEmpty);
+      }
       if (name == 'assess_run') expect(host.research!.store.runs('P').single.data['workbench_assessment'],isNotNull);
       if (name == 'add_outline') {
         expect(host.research!.store.sections('P').single.heading,'论证');
         expect(result.changes.map((c) => c.ref.objectType).toSet(), {'section','outline'});
+        final noop = await approved(request('research.add_outline',params,ref));
+        expect(noop.changes,isEmpty);
+        expect(host.research!.store.db.select('SELECT id FROM outline WHERE project_id=?',['P']),hasLength(1));
       }
     });
   }
+
+  test('queued research write rechecks its selected run inside the transaction', () async {
+    await research();
+    final original = host.research!.resources;
+    final observed = _ObservedWrite(original.database);
+    final runtime = ResearchRuntime(ModuleResources(database:observed,
+      files:original.files,capabilities:original.capabilities));
+    host.modules.setRuntimeForTesting('research',runtime);
+    final ref = await current('run','R','P');
+    final r = request('research.accept_run',{'run_id':'R'},ref);
+    final approval = await host.tools.approve(await host.tools.prepare(r));
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final holding = (original.database as ExclusiveDatabase).exclusiveAsync<void>((db) async {
+      entered.complete();
+      await release.future;
+      db.execute('UPDATE runs SET data=? WHERE id=?',['{"changed":"while queued"}','R']);
+    });
+    await entered.future;
+    try {
+      final resultFuture = host.tools.invoke(r.withApproval(approval));
+      await observed.queued.future.timeout(const Duration(seconds:5));
+      release.complete();
+      await holding;
+      final result = await resultFuture;
+      expect(result.status,ToolCallStatus.failed);
+      expect(runtime.store.runs('P').single.accepted,isFalse);
+      expect(result.changes,isEmpty);
+      expect(host.tools.receiptFor(r.invocationId)!.state,'failed');
+    } finally {
+      if (!release.isCompleted) release.complete();
+      await holding;
+    }
+  });
 
   for (final restart in [false,true]) {
     test('models withdrawal blocks tools ${restart ? 'after restart' : 'immediately'}, reconsideration keeps facade denied', () async {
@@ -167,11 +280,32 @@ void main() {
     });
   }
 
+  test('host reconsideration restores only a capability allowed by static policy', () async {
+    await host.close();
+    final module = FakeV2Module('scanner', capabilities:{
+      const CapabilityRequest(id:'ocr',reason:'扫描'),
+    }, onRegisterTools:(registrar) => registrar.read(ToolSpec(name:'read',description:'读取'),
+      (_) async => ToolCallResult(status:ToolCallStatus.succeeded,summary:'读取')));
+    host = await MuyonHost.open(p.join(root.path,'scanner'),modules:[module]);
+    await host.modules.activate('scanner');
+    expect(host.grants.forModule('scanner').single.granted,isTrue);
+    await host.modules.revokeCapability('scanner','ocr');
+    await host.modules.activate('scanner');
+    expect(host.modules.state('scanner').status,ModuleStatus.failed);
+    await host.modules.reconsiderCapability('scanner','ocr');
+    expect(host.modules.state('scanner').status,ModuleStatus.ready);
+    expect(host.grants.forModule('scanner').single.granted,isTrue);
+    expect(module.lastResources!.capabilities.available,contains('ocr'));
+    expect(host.tools.inspect('scanner.read')!.available,isTrue);
+    expect((await host.tools.invoke(ToolCallRequest(invocationId:'restored-scanner',
+      toolId:'scanner.read',scope:const AssistantScope.global()))).status,ToolCallStatus.succeeded);
+  });
+
   testWidgets('prototype opens without a binding and adds feedback after confirmation', (tester) async {
-    await host.activatePrototype();
+    await tester.runAsync(() => host.activatePrototype());
     final build = Directory(p.join(root.path,'build'))..createSync();
     File(p.join(build.path,'index.html')).writeAsStringSync('<p>原型</p>');
-    final version = await host.prototype!.store.importBuild(sourceDir:build.path,title:'页面');
+    final version = (await tester.runAsync(() => host.prototype!.store.importBuild(sourceDir:build.path,title:'页面')))!;
     final session = await host.prototype!.openScopeSession();
     final ref = (await session.resolve(ObjectRef(moduleId:'prototype',objectType:'version',
       objectId:version.id,nativeProjectId:version.pageId)))!.ref;

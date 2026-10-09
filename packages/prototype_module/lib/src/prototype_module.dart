@@ -70,6 +70,12 @@ class PrototypeRuntime implements ModuleRuntime, ScopeResolvable, ScopeCandidate
   final ModuleResources resources;
   final PrototypeStore store;
 
+  void requireCurrent(ObjectRef ref) {
+    final session = PrototypeSession(this,const WorkspaceBinding(
+      workspaceId:'',moduleId:prototypeModuleId,nativeProjectId:''));
+    if (session._resolve(ref) == null) throw StateError('Selected prototype object changed');
+  }
+
   @override
   Future<ModuleSession> openScopeSession() async => PrototypeSession(this,
     const WorkspaceBinding(workspaceId: '', moduleId: prototypeModuleId,
@@ -137,7 +143,9 @@ class PrototypeSession implements ModuleSession {
   );
 
   @override
-  Future<ObjectView?> resolve(ObjectRef ref) async {
+  Future<ObjectView?> resolve(ObjectRef ref) async => _resolve(ref);
+
+  ObjectView? _resolve(ObjectRef ref) {
     _ensureActive();
     if (ref.moduleId != prototypeModuleId) return null;
     final store = runtime.store;

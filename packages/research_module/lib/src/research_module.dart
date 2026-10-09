@@ -101,6 +101,18 @@ class ResearchRuntime implements ModuleRuntime, ImportCapable, ScopeResolvable, 
   final ModuleResources resources;
   final WorkbenchStore store;
 
+  /// Synchronous transaction-boundary recheck for module-owned writes.
+  void requireCurrent(ObjectRef ref) {
+    final project = ref.nativeProjectId;
+    if (project == null || ref.moduleId != 'research' ||
+        !store.projects().any((p) => p.id == project)) {
+      throw StateError('Object outside current research scope');
+    }
+    final session = ResearchSession(store.scoped(project), WorkspaceBinding(
+      workspaceId:'',moduleId:'research',nativeProjectId:project));
+    if (session._resolve(ref) == null) throw StateError('Selected research object changed');
+  }
+
   @override
   Future<ModuleSession> openScopeSession() async => _ResearchScopeSession(this);
 
