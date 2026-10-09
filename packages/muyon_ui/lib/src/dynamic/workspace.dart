@@ -132,6 +132,13 @@ class UiWorkspaceController extends ChangeNotifier {
     if (old != null) {
       c.surface.session.restoreWorkspace(old);
       c.surface.lockRecoveredOperations(old.operationRefs);
+      // MUTATION ONLY: replay a pending port during restore (never merge).
+      if (old.operationRefs.isNotEmpty && onEvent != null) {
+        final node = c.surface.current.plan.nodes.firstWhere(
+          (n) => n.events.containsKey('confirm'),
+        );
+        await onEvent(c.surface.eventFor(node, 'confirm'));
+      }
     }
     c.surface.addListener(c._changed);
     return c;
