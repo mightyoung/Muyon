@@ -220,10 +220,13 @@ void main() {
     c.selectedRecords = ['background-selection'];
     await tester.runAsync(() async {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
     });
     // Resume painting after simulating background events; the checkpoint is
     // still the only writer of the presentation fields above.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
     final store = HostUiWorkspaceStore(repo, taskId: 'task');
