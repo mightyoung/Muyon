@@ -10,6 +10,8 @@
 
 ## 0. 在途任务（最先处理）
 
+- **2026-10-09**：用户决定全面采用 AI 原生界面（[方案](../design/ai-native-ui-redesign-2026-10-09.md)，ADR-0003 已修订），由 leader A 统一派发。已派：AIUI-1（Codex）、AIUI-2（junior）、GROK-5（grokbot）。下一批：REG-4c（Codex，REG-4b 完成后）、AIUI-3、AIUI-4（engineer 完成 R-1 后）。
+
 - **2026-10-08 更新**：Leader B（ChatGPT，用户指定的 B 角）合入了 REG-2a、REG-2b、UI-1a，以及 AUTH-1b 的 A、B12、B3、输入来源证明与本机写入自动化；leader A 合入 JR-1。leader A 的审查见 [2026-10-08-leader-b-batch-review.md](../reviews/2026-10-08-leader-b-batch-review.md)。AUTH-1b C1/C2 的集成检查点 `ffe6be31` 已发布到 develop `00dbd6c`，[精确发布CI成功](https://github.com/mightyoung/Muyon/actions/runs/37792414130)，保留 Mac 全量失败结论；[验证备忘录](VERIFICATION-MEMO.md)登记后续截图回归要求，例外不可自动延续。[下一批计划](../superpowers/plans/2026-10-08-ai-native-next-batch.md)已形成待复核任务：首片UI-3a可运行Web预览，REG-4a纯适配并行，UI-4a云验收随后；尚未派发/实施。UI/profile入口、实云模型和实机仍后置。进行中：R-1 剩余两件。下一步按路线图 §3.1 派 REG-3、REG-4、T-3、S-1。
 
 - ADR-0004 已采纳（用户 2026-10-07，Q1～Q13 全部按建议）。

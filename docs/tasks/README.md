@@ -65,13 +65,30 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 
 | 任务 | 拟任务分支 | 目标/依赖 | 状态 |
 |---|---|---|---|
-| [UI-3a](UI-3a.md) | task/ui-3a-semantic-preview | 最小合同+可运行Web预览，已合UI/REG/AUTH | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [AIUI-F1（原 UI-3a）](UI-3a.md) | task/ui-3a-semantic-preview | 最小合同+可运行Web预览，已合UI/REG/AUTH | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
 | [REG-4a](REG-4a.md) | task/reg-4a-inquiry-adapter | 询价现有能力纯适配，已合REG-2/AUTH | 已合入 `5a243c6`（CI 37883647998） |
-| [UI-4a](UI-4a.md) | task/ui-4a-dynamic-preview | 确定性渲染/受控云验收，UI-3a及REG-4a联调 | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
-| [UI-4b](UI-4b.md) | task/ui-4b-planning-harness | 两模式/harness共用planning，UI-3a/4a | 已合入 `655b260` |
-| [UI-3b](UI-3b.md) | task/ui-3b-workspace-state | 持久编辑/返回，UI-3a/4a | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [AIUI-F2（原 UI-4a）](UI-4a.md) | task/ui-4a-dynamic-preview | 确定性渲染/受控云验收，UI-3a及REG-4a联调 | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [AIUI-F3（原 UI-4b）](UI-4b.md) | task/ui-4b-planning-harness | 两模式/harness共用planning，UI-3a/4a | 已合入 `655b260` |
+| [AIUI-F4（原 UI-3b）](UI-3b.md) | task/ui-3b-workspace-state | 持久编辑/返回，UI-3a/4a | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
 | [REG-4b](REG-4b.md) | task/reg-4b-inquiry-import | 既有导入/回执续办，REG-4a+UI-3b/4a | 部分合入，进行中 |
-| [UI-2a](UI-2a.md) | task/ui-2a-reference-navigation | 跨插件对象/文件导航，UI-3b/REG-4b | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
-| [UI-4c](UI-4c.md) | task/ui-4c-subconversations | 一层子对话/最新引用，UI-2a+UI-4b/3b | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [AIUI-F5（原 UI-2a）](UI-2a.md) | task/ui-2a-reference-navigation | 跨插件对象/文件导航，UI-3b/REG-4b | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [AIUI-F6（原 UI-4c）](UI-4c.md) | task/ui-4c-subconversations | 一层子对话/最新引用，UI-2a+UI-4b/3b | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
 | [C4-GUIDE](C4-GUIDE.md) | docs/c4-interaction-guides（接口接入另派） | train/dev软指南，UI-3a目录；复用UI-4b可空接口 | 云数据线程起草，接入待复核，不阻塞主线 |
 | [R-1-AI-UI-final](R-1-AI-UI-final.md) | 并入现有R-1 | 最终原生/实机/Mac回归 | 末次清单草案，非每片门槛 |
+
+## AI 原生界面（2026-10-09 起，[方案](../design/ai-native-ui-redesign-2026-10-09.md)，取代路线图 UI-2～UI-9）
+
+| 任务 | 分支 | 执行 | 依赖 | 状态 |
+|---|---|---|---|---|
+| [AIUI-1](AIUI-1.md) 流式界面协议与增量编译器 | `task/aiui-1-streaming-compiler` | Codex | — | **已派发** |
+| [AIUI-2](AIUI-2.md) 组件库 v1（合并两份目录，补齐约 24 个组件） | `task/aiui-2-component-library` | junior | — | **已派发** |
+| [GROK-5](GROK-5.md) 本体业务卡片静态盘点（询价） | `task/grok-5-ontology-cards` | grokbot | — | **已派发** |
+| AIUI-3 本地重算公式 | — | junior | AIUI-1 | 待派 |
+| AIUI-4 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | 待派（engineer 先完成 R-1） |
+| AIUI-5 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | 待派 |
+| REG-4c 询价按本体通用的写工具、隐藏 Folio 助手 | — | Codex | REG-4b、GROK-5 | 待派 |
+| AIUI-6 询价场景（比价、预算小工具、导入审阅工作区） | — | Codex | AIUI-3、4、5 | 待派 |
+| AIUI-7 科研场景 | — | junior / engineer | AIUI-4、5 | 待派 |
+| AIUI-8 设置与控制（可视化三档、助手权限页、数据去向） | — | engineer | AIUI-4 | 待派 |
+| AIUI-9 本体驱动的业务卡片 | — | Codex | AIUI-2、5、REG-4c | 待派 |
+
