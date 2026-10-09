@@ -55,11 +55,13 @@ typedef HostToolScopeResolver = Future<HostScopeResolution?> Function(
 class HostScopeResolution {
   final String identityKey; // 本片唯一有效值 host_platform_metadata_v1
   final ResolvedAssistantScope scope;
+  final void Function() requireCurrent; // 受信宿主纯内存撤权检查，失败抛host_unavailable
 }
 // ToolRegistry(..., HostToolScopeResolver? hostToolScopeResolver)
 ```
 
-回调 null 或返回 null：按原 resolver 继续，不改变旧调用 identity 计算。
+首次prepare的回调 null 或返回 null：按原 resolver 继续，不改变旧调用 identity 计算。
+已认领调用的再次prepare不适用此fallback，必须遵守下文固定lane规则。
 回调认领时 registry 必须验证：identityKey 为上述固定值、实际 effect 为 read、request.scope
 为 global、scope.requested 与 request 等价、scope.objects 为空；违例报
 `invalid_scope_resolution`，不吞错或退回有副作用路径。已有支持范围/参数/preflight/策略检查在回调前，
@@ -83,6 +85,16 @@ binding 认领须同时满足：回调中的registry与装配registry identical�
 不让业务模块持有binding或新增registrar能力；HostToolRegistrar无需修改。
 binding与装配函数共文件，避免跨Dart library调用私有构造器；不为此新增公开按ID扫描factory。
 
+宿主isAvailable与registry.info.available分开：前者现基线只在_PlatformLink.activate读取，
+不能假设prepare能观察它。binding保存装配时传入的isAvailable回调；识别到受信登记身份后，
+若宿主不可用，明确抛 `host_unavailable`，不返回null，也不调用默认resolver。
+认领结果requireCurrent闭包只再次检查这个宿主状态；registry在回调await之后、构造prepared前
+调用它，并把该闭包存入prepared私有字段。_reprepare开始时先检查原prepared的闭包，
+dispatch原checkAuthorization入口也调用它（running收据前、排队后及handler前的现有检查点）。
+因此prepare/重核与handler发送边界不只依赖registry.info.available；原_PlatformLink检查仍保留。
+闭包只判断内存状态，不初始化/恢复/读DB，不是新权限源；未认领业务prepared没有该闭包。
+宿主不可用与认领丢失都必须在fallback前拒绝，但分别报告host_unavailable与scope_resolution_changed。
+
 选择理由：提前初始化所有模块会改变启动成本和失败时机；让ScopeResolver“只枚举ready模块”
 会漏对象并掩盖未恢复数据；在source层按dataModuleIds跳过prepare会改变所有业务范围语义。
 这几种方案均不是本片最小改造。受信回调只隔离确知不消费业务对象的四项投影，默认解析
@@ -96,10 +108,28 @@ binding与装配函数共文件，避免跨Dart library调用私有构造器；�
 同一 invocation/replayKey 仍是相同调用的回执回放，数据变化不把已完成读回执变成自动重读；
 需要新快照使用新的 invocation，不自行清空收据。
 
+**已认领PreparedToolCall固定lane，先拒绝再fallback：**新增私有字段
+`String? _scopeResolutionKey`，首次prepare认领时存 `host_platform_metadata_v1`，
+未认领时为null。公开 `prepare(request)` 委托私有
+`Future<PreparedToolCall> _prepare(ToolCallRequest request, {String? requiredScopeResolutionKey})`；
+宿主内部重新核验必须通过
+`Future<PreparedToolCall> _reprepare(PreparedToolCall prepared)`，传入该私有key。
+dispatch（基线tool_registry.dart:895–900）及approve/approveWithGrant中针对prepared的
+重核均改用_reprepare，不从request参数恢复key，也不允许模型覆盖。
+
+_prepare在既有前置授权/schema/preflight检查之后求宿主认领结果；若required key非null，
+回调不存在、返回null或认领key变化，立即报 `scope_resolution_changed`，**在调用默认
+resolveScope前**结束。相同key仍须校验实际登记身份、generation、policy与scope形状。
+固定lane只是解析约束，不是复用上次数据/权限的许可；仍运行回调及完整身份检查。
+不能只在fallback完成后比较identityDigest，也不能在dispatch临时把expected key置null重试。
+首次未认领的普通业务工具继续原fallback及恢复；不新增全局“禁止fallback”开关。
+元数据key在首次prepare至执行重核期间丢失时，即使旧业务resolver最后也返回空refs，仍先拒绝。
+
 回调调用前保存当前实际 info、generation；认领路径 await 后核对 generation、登记身份、
 availability、policyRevision，变动须拒绝，不能把等待前后的身份拼接。默认业务路径保持现有语义，
 避免把合法的模块激活可用性更新误当全局generation违规。dispatch现有再次prepare、
-identity比较、关闭/撤权、token检查保留。回调纯内存立即返回，不新增后台任务、超时或重试。
+identity比较、关闭/撤权、token检查保留；再次prepare用固定lane入口而非公开无约束prepare。
+回调纯内存立即返回，不新增后台任务、超时或重试。
 invoke 的预取消仍在 prepare 前拒绝，过程中取消由其 prepare 后/token及handler检查拒绝；
 不声称不接收token的直接 prepare API可被取消。可恢复读取错误仍为固定摘要，新invocation可重试。
 
@@ -138,7 +168,14 @@ workspaces复用host.workspaces，knowledgeSources计数后委托原公开callba
 - P1：同一个真实 registry中手动登记四工具；每个prepare和invoke均返回global空refs，
   resolver/source.prepare/enumerate/knowledgeSources/ModuleHost激活计数为0。主库全表快照
   （invoke只排除tool_invocation_receipts）、模块DB与文件字节/监听状态/外传账本不变。
-  prepare单独断言total_changes不变；invoke允许且核对准确收据，不只排除表后放任写入。
+  成功prepare和首次prepare拒绝分别断言total_changes增量0。透明ManagedDatabase代理对每次
+  write事务前后记录total_changes及表快照：成功新invocation仅允许原running收据INSERT一行
+  （增量1）和terminal收据UPDATE一行（增量1），其他写队列调用增量0，调用整体增量2；
+  各事务的唯一变更行必须属于该invocation的tool_invocation_receipts且状态/结果准确。
+  已完成回放总增量0、无handler执行；二次prepare拒绝仅允许原running INSERT+failed terminal UPDATE，
+  二次解析拒绝阶段增量0。模块数据库也单独取total_changes增量0。
+  最终快照只是补充证据：任意非审计表写入再回滚值/改回原值也须被计数断言检出，
+  不以“最终表相同”代替零写入，不放宽允许的收据路径以吞掉额外事务/行写入。
 - P2：关闭read类别、错误schema、workspace/selectedObjects、预取消、宿主不可用拒绝；
   无业务初始化/恢复。原schema、脱敏、数量和字符边界、固定错误恢复测试全部保留。
 - P3：相同ID但provider/module/effect错误、同值不同对象descriptor、跨registrybinding、
@@ -147,14 +184,34 @@ workspaces复用host.workspaces，knowledgeSources计数后委托原公开callba
 - P4：Completer控制回调停点；等待期间toggle availability两次（generation改变但末态ready）、
   policy变化、受测registry.close、宿主isAvailable=false、token.cancel，均不能dispatch；
   首次prepare和dispatch再次prepare各设停点。
-  成功prepare后撤去binding改变lane也必须identity冲突，无sleep、不增加50ms经验等待。
+  成功prepare后撤去binding/回调返回null/返回不同key，再次prepare必须在fallback前以
+  scope_resolution_changed拒绝，而非恢复完成后才identity冲突；无sleep、不增加50ms经验等待。
+  registry.info.available保持true而仅isAvailable置false的反例单独测试：首次prepare、
+  已prepare重核及回调await后均host_unavailable，无fallback/activate/handler。
+- P4-R：预置pending import intent和确定的已提交模块receipt（控制调用可恢复），首次
+  prepare已认领元数据lane；用Completer停在dispatch重核，撤去binding后继续。
+  断言拒绝路径默认resolver/source.prepare/activate/recover计数均0，intent/binding/通知/
+  模块DB/文件不变。单独的prepare/reprepare解析阶段total_changes增量必须0；
+  invoke整体仍可产生已有running/失败收据，按审计阶段分开计数，不能为了全调用total_changes=0
+  删除收据。测试使用实现ManagedDatabase接口的透明计数代理转发真实数据库，
+  在running收据事务完成后记录total_changes，在结果收据write调用进入、尚未执行事务时再取值，
+  两者差值为0，覆盖完整二次prepare拒绝阶段；同时按P1核对两次事务各仅1次收据行写入。
+  无需暴露私有_reprepare或新增产品测试hook；集成invoke不能只排除表后放任任意写入。
+  invoke按现有dispatch契约返回failed且摘要包含scope_resolution_changed，不假定它抛异常；
+  首次公开prepare、首次invoke在prepare阶段遇host_unavailable均按异常契约断言，
+  不能把dispatch的failed规则套用到尚未进入dispatch的拒绝。
+  对照未认领业务首次prepare仍调用resolver，使import_intents.status从pending变为complete，
+  已有模块receipt内容/数量不变，commitImport计数0。
 - P5：新invocation成功、重复并发及重开后完整invocation identity一致时回放一次既有收据；
   保持invocationId/replayKey/schema/generation/policy与原调用一致，参数/lane变更冲突，
   不声称任意重开或策略更新仍能回放。
   重开host的原恢复单独断言、快照从open完成后开始；prepare/invoke二次解析均不激活模块。
 - B1：配置模块fixture的未完成ImportCoordinator intent和确定的模块receipt，在同宿主先读
   平台元数据确认pending/binding/notifications完全不变，再走正常业务read/global解析，
-  验证receipt恢复为committed、绑定正确、commitImport计数0、模块首次激活1；再次正常解析不重复效果。
+  验证import_intents.status从pending变为complete、绑定正确、已有模块receipt内容/数量不变、
+  commitImport计数0、模块首次激活1；再次正常解析不重复效果。
+  依据workspace/import_coordinator.dart:110–113 activate写complete，:125–132 recover只查询
+  模块既有receipt后协调；不把宿主intent完成误写为模块receipt新提交。
 - B2：receipt冲突fixture走正常激活，验证原冲突状态/通知规则；科研已提交接收包夹具经正常
   afterActivate协调且恰一次。复用import_recovery_test/accepted_research_import_test的持久协议，
   新夹具直接预置已接收包/回执，不启动其LanNode或TransferService网络setup。
