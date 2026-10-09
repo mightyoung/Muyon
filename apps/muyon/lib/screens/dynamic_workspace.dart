@@ -192,6 +192,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
     if (pending != null) unawaited(pending.catchError((Object _) {}));
   }
 
+  @override
   void dispose() {
     if (_disposed) return;
     _disposed = true;

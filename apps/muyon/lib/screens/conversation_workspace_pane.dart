@@ -71,7 +71,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
 
   Future<void> referencesSettled() async {
     final current = session?.pendingReferenceNavigation;
-    await Future.wait({...retiredReferences, if (current != null) current});
+    await Future.wait({...retiredReferences, ?current});
   }
 
   @override
