@@ -179,9 +179,13 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(builder: (context, constraints) {
+  Widget build(BuildContext context) {
+    // The phone route covers this full-window host. Its offstage LayoutBuilder
+    // can keep old constraints while layout is skipped, so observe viewport
+    // dependencies here to move back to a pane even before that route is popped.
+    final width = MediaQuery.sizeOf(context).width;
     final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
-    final next = constraints.maxWidth >= 1250 && constraints.maxWidth >= 720 + 440 * scale;
+    final next = width >= 1250 && width >= 720 + 440 * scale;
     if (next != desktop) {
       session?.capturePresentation?.call();
       desktop = next;
@@ -200,7 +204,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
         ],
       ]),
     );
-  });
+  }
 }
 
 /// App-level embedded body; shared dynamic runtime and persistence are reused.
