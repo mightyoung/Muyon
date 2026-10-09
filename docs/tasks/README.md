@@ -82,11 +82,11 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 |---|---|---|---|---|
 | [AIUI-1](AIUI-1.md) 流式界面协议与增量编译器 | `task/aiui-1-streaming-compiler` | Codex | — | **已派发** |
 | [AIUI-2](AIUI-2.md) 组件库 v1（合并两份目录，补齐约 24 个组件） | `task/aiui-2-component-library` | engineer | — | **已派发**（用户改派） |
-| [GROK-5](GROK-5.md) 本体业务卡片静态盘点（询价） | `task/grok-5-ontology-cards` | grokbot | — | **已派发** |
+| [GROK-5](GROK-5.md) 本体业务卡片静态盘点（询价） | `task/grok-5-ontology-cards` | grokbot | — | 已合入（[审查](GROK-5-review.md)） |
 | AIUI-3 本地重算公式 | — | junior | AIUI-1 | 待派 |
 | AIUI-4 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | 待派（engineer 先完成 R-1） |
 | AIUI-5 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | 待派 |
-| REG-4c 询价按本体通用的写工具、隐藏 Folio 助手 | — | Codex | REG-4b、GROK-5 | 待派 |
+| [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-inquiry-record-tools` | Codex | AIUI-1 之后、REG-4b 合入 | 说明已就绪，排队 |
 | AIUI-6 询价场景（比价、预算小工具、导入审阅工作区） | — | Codex | AIUI-3、4、5 | 待派 |
 | AIUI-7 科研场景 | — | junior / engineer | AIUI-4、5 | 待派 |
 | AIUI-8 设置与控制（可视化三档、助手权限页、数据去向） | — | engineer | AIUI-4 | 待派 |
