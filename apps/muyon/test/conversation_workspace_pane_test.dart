@@ -165,6 +165,8 @@ void main() {
     await open!(DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison', plan: f.plan(ref)));
     await workspaceReady(tester);
     final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
+    // Temporary mutation diagnostics; fixed fixture data only.
+    print('MUTATION PHASE: workspace loaded, starting SQLite barrier');
     final entered = Completer<void>();
     final release = Completer<void>();
     addTearDown(() { if (!release.isCompleted) release.complete(); });
@@ -176,10 +178,12 @@ void main() {
       });
       await entered.future;
     });
+    print('MUTATION PHASE: barrier entered');
     // A presentation checkpoint field is not auto-flushed by a surface edit.
     c.step = 'review-before-close';
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
     await tester.pump();
+    print('MUTATION PHASE: close tapped, checking pane retention');
     expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
     expect(tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller, same(c));
     release.complete();

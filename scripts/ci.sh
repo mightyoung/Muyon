@@ -8,4 +8,4 @@ unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
 export NO_PROXY=localhost,127.0.0.1,::1
 cd apps/muyon
 flutter analyze --no-pub
-flutter test --no-pub --reporter expanded --timeout 120s test/conversation_workspace_pane_test.dart --plain-name "desktop_close_checkpoints_before_dispose"
+timeout 240s flutter test --no-pub --reporter expanded --timeout 120s test/conversation_workspace_pane_test.dart --plain-name "desktop_close_checkpoints_before_dispose"
