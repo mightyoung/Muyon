@@ -51,6 +51,7 @@ class UiPlanningHarness {
   bool enabled;
   final UiGuideSource guides;
   final Duration timeout;
+
   /// Host cleanup must finish before a timeout fallback is exposed.
   final Future<void> Function(UiPlanningRequest)? cancelTimedOutRequest;
   final List<Object?> Function(PersonalTask)? requestView;

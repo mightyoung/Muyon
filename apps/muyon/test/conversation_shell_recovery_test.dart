@@ -1,14 +1,23 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
+import 'package:muyon/app/app_shell.dart';
+import 'package:muyon/app/bootstrap.dart';
+import 'package:muyon/app/module_catalog.dart';
+import 'package:muyon/platform/backup_service.dart';
+import 'package:muyon/screens/assistant_page.dart';
+import 'package:muyon/screens/platform_shell.dart';
 import 'package:muyon/screens/conversation_workspace_pane.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import 'support/ui_navigation_fixture.dart';
+import 'support/conversation_workspace_fixture.dart';
+import 'support/fake_v2_module.dart';
 
 class _ReceiptSession extends DynamicWorkspaceSession {
   _ReceiptSession(super.widget);
@@ -19,6 +28,19 @@ class _ReceiptSession extends DynamicWorkspaceSession {
     return UiOperationRecovery.unknown; // Simulated host receipt, no write port.
   }
 }
+
+class _GenerationLeaseRuntime extends FakeRuntime implements ObjectPages {
+  _GenerationLeaseRuntime(super.resources);
+  int released = 0;
+  @override
+  Future<ObjectPageLease?> open(BuildContext context, ObjectRef ref) async => ObjectPageLease(
+    title: '宿主换代插件页', page: const Text('注册插件租用页'),
+    dispose: () async { released++; },
+  );
+}
+
+FakeV2Module _leaseModule() => FakeV2Module('lease', features: {ModuleFeature.objectPages},
+  runtimeFactory: _GenerationLeaseRuntime.new);
 
 void main() {
   const ref = ObjectRef(moduleId: 'removed-plugin', objectType: 'item', objectId: 'saved');
@@ -55,23 +77,119 @@ void main() {
   }
 
   testWidgets('host_generation_replaces_old_listeners_and_leases', (tester) async {
-    final f = await NavigationFixture.open(tester);
-    final workspace = DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison', plan: f.plan(ref));
-    final old = DynamicWorkspaceSession(workspace);
-    await tester.runAsync(old.ensureLoaded);
-    final oldSurface = old.controller!.surface;
+    final module = _leaseModule();
+    final f = await NavigationFixture.open(tester, extra: [module]);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 900);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.runAsync(() => f.host.foundation.database.write((db) => db.execute(
+      "UPDATE execution_records SET payload=json_set(payload,'\$.prompt','公开父任务','\$.stage','paused','\$.executionDeviceId','local','\$.state','paused') WHERE id='task'",
+    )));
+    final backup = '${f.root.path}/backup';
+    await tester.runAsync(() async {
+      await f.host.workspaces.setSetting('marker', 'before');
+      await BackupService.create(f.host.storage, backup);
+      await f.host.workspaces.setSetting('marker', 'after');
+    });
+    MuyonHost? fresh;
+    addTearDown(() async { if (fresh != null) await tester.runAsync(fresh!.close); });
+    await tester.pumpWidget(MuyonApp(host: f.host, openHost: (root) async =>
+      fresh = await MuyonHost.open(root, modules: [_leaseModule(), ...moduleCatalog()])));
+    await tester.pumpAndSettle();
+    final shell = tester.widget<PlatformShell>(find.byType(PlatformShell));
+    final open = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
+    const object = ObjectRef(moduleId: 'lease', objectType: 'note', objectId: 'registered-note');
+    await open(DynamicWorkspace(repository: f.host.foundation, host: f.host, taskId: 'task',
+      surfaceId: 'comparison', plan: f.plan(object)));
+    await workspaceReady(tester);
+    final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
+    final oldSurface = c.surface;
     final node = oldSurface.current.plan.nodes.firstWhere((n) => n.id == 'quantity');
     final event = oldSurface.eventFor(node, 'change', '91');
-    old.dispose();
-    old.dispose();
-    final replacement = DynamicWorkspaceSession(workspace);
-    await tester.runAsync(replacement.ensureLoaded);
-    expect(replacement.controller!.surface, isNot(same(oldSurface)));
+    await tester.tap(find.text('查看对象 · lease'));
+    await workspaceVisible(tester, find.text('注册插件租用页'));
+    final runtime = module.runtime! as _GenerationLeaseRuntime;
+    expect(runtime.released, 0);
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    addTearDown(() { if (!release.isCompleted) release.complete(); });
+    final blocked = (f.host.foundation.database as ExclusiveDatabase).exclusiveAsync((_) async {
+      entered.complete(); await release.future;
+    });
+    await tester.runAsync(() => entered.future);
+    c.step = 'restore-checkpoint';
+    Future<void>? restoring;
+    // Exercise the actual MuyonApp restore callback with an object route still
+    // leased. This bypasses only the separately tested confirmation dialog.
+    await tester.runAsync(() async { restoring = shell.onRestore(backup); });
+    await tester.pump();
+    expect(fresh, isNull);
+    expect(find.text('注册插件租用页'), findsOneWidget);
+    expect(runtime.released, 0);
+    release.complete();
+    await tester.runAsync(() => blocked);
+    await workspaceVisible(tester, find.textContaining('已从备份恢复并重启'));
+    await tester.runAsync(() => restoring!);
+    expect(fresh, isNotNull);
+    expect(fresh!.workspaces.setting('marker'), 'before');
+    expect(runtime.released, 1);
     expect(await oldSurface.dispatch(event), UiDispatchOutcome.stale);
-    expect(replacement.controller!.surface.session.userOverrides, isEmpty);
-    replacement.dispose();
-    // Real registered object-page lease disposal is independently covered by
-    // object_page_lease_released_once_and_anchor_restores_from_store.
+    final reopenedShell = tester.widget<PlatformShell>(find.byType(PlatformShell));
+    expect(reopenedShell.host, same(fresh));
+    final nextOpen = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
+    await nextOpen(DynamicWorkspace(repository: fresh!.foundation, host: fresh, taskId: 'task',
+      surfaceId: 'comparison', plan: f.plan(object)));
+    await workspaceReady(tester);
+    final replacement = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
+    expect(replacement.surface, isNot(same(oldSurface)));
+    expect(replacement.surface.session.userOverrides, isEmpty);
+    expect(runtime.released, 1);
+    await tester.tap(find.byTooltip('关闭工作区 / 返回'));
+    await workspaceReady(tester);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('incompatible_catalog_workspace_keeps_manual_draft_without_rewrite', (tester) async {
+    final f = await NavigationFixture.open(tester);
+    var actions = 0;
+    final workspace = DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison',
+      plan: f.plan(ref), originalAnswer: '完整原回答', onEvent: (_) async { actions++; });
+    final original = DynamicWorkspaceSession(workspace);
+    await tester.runAsync(original.ensureLoaded);
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: DynamicWorkspace(repository: f.host.foundation,
+      taskId: 'task', surfaceId: 'comparison', session: original, embedded: true))));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, '人工保留');
+    await tester.runAsync(original.checkpoint);
+    await tester.pumpWidget(const SizedBox());
+    original.dispose();
+    final key = 'ui-workspace:${jsonEncode(['task', 'comparison'])}';
+    final prior = f.host.foundation.database.raw.select('SELECT value FROM settings WHERE key=?', [key]).single['value'] as String;
+    final incompatible = jsonDecode(prior) as Map<String, dynamic>;
+    incompatible['catalogVersion'] = 'unknown-future-catalog';
+    final bytes = jsonEncode(incompatible);
+    await tester.runAsync(() => f.host.foundation.database.write((db) => db.execute(
+      'UPDATE settings SET value=? WHERE key=?', [bytes, key],
+    )));
+    final restored = DynamicWorkspaceSession(workspace);
+    await tester.runAsync(restored.ensureLoaded);
+    expect(restored.controller!.readOnly, isTrue);
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: DynamicWorkspace(repository: f.host.foundation,
+      taskId: 'task', surfaceId: 'comparison', session: restored, embedded: true, originalAnswer: '完整原回答'))));
+    await tester.pumpAndSettle();
+    expect(find.text('quantity: 人工保留'), findsOneWidget);
+    expect(find.text('完整原回答'), findsOneWidget);
+    expect(find.byType(TextField), findsNothing);
+    final c = restored.controller!;
+    final confirm = c.surface.current.plan.nodes.firstWhere((n) => n.id == 'confirm');
+    expect(c.surface.canConfirm(confirm), isFalse);
+    await tester.runAsync(() => c.surface.dispatch(c.surface.eventFor(confirm, 'confirm')));
+    await tester.runAsync(restored.checkpoint);
+    expect(actions, 0);
+    expect(f.host.foundation.database.raw.select('SELECT value FROM settings WHERE key=?', [key]).single['value'], bytes);
+    await tester.pumpWidget(const SizedBox());
+    restored.dispose();
   });
 
   testWidgets('corrupt_or_incompatible_workspace_is_readable_without_rewrite', (tester) async {

@@ -62,6 +62,11 @@ class DynamicWorkspaceSession {
   bool ready = false;
   bool _disposed = false;
   Future<void>? _loading;
+  // Ephemeral app presentation only; never a business draft or runtime state.
+  String? focusedFieldNode;
+  TextSelection? focusedFieldSelection;
+  void Function()? capturePresentation;
+
   final receipts = <String, UiOperationRecovery>{};
   Future<void> ensureLoaded() => _loading ??= load();
   Future<UiOperationRecovery> receipt(String ref) async {
@@ -152,16 +157,26 @@ class DynamicWorkspaceSession {
   }
 
 
-  Future<void> checkpoint() async {
-    await ensureLoaded();
-    // Readable load failures can be dismissed without modifying their bytes.
-    if (controller == null) return;
-    await controller?.flush();
+  Future<void> checkpoint() {
+    // With an open controller, capture before returning to a non-awaitable
+    // detach caller. Readable load failures can be dismissed without writes.
+    final c = controller;
+    if (c != null) return c.flush();
+    return ensureLoaded().then<void>((_) async { await controller?.flush(); });
+  }
+
+  void detachWithBestEffortCheckpoint() {
+    if (_disposed) return;
+    // flush captures synchronously before any listener/controller is detached.
+    final pending = controller?.flush();
+    dispose();
+    if (pending != null) unawaited(pending.catchError((Object _) {}));
   }
 
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    capturePresentation = null;
     router?.dispose();
     controller?.dispose();
   }
@@ -304,6 +319,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
           banner: error,
           onClose: widget.onClose,
           textOnly: widget.textOnly,
+          session: session,
         );
       }
       return UiWorkspaceView(

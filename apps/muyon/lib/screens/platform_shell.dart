@@ -21,6 +21,7 @@ import '../services/models/profile_repository.dart';
 import '../services/models/secret_store.dart';
 import 'assistant_page.dart';
 import 'conversation_workspace_pane.dart';
+import 'conversation_shell_controller.dart';
 import 'inquiry_import_context.dart';
 import 'devices_page.dart';
 import 'knowledge_preview.dart';
@@ -58,6 +59,8 @@ class PlatformShell extends StatefulWidget {
     required this.onTheme,
     required this.onRestore,
     this.pickDirectory = pickDirectoryWithDialog,
+    this.shellController,
+    this.allowInteractiveWorkspace = true,
   });
   final MuyonHost host;
   final ThemeMode themeMode;
@@ -66,6 +69,8 @@ class PlatformShell extends StatefulWidget {
   /// Closes the host, restores a verified backup and reopens (see MuyonApp).
   final Future<void> Function(String backupDir) onRestore;
   final PickDirectory pickDirectory;
+  final ConversationShellController? shellController;
+  final bool allowInteractiveWorkspace;
   @override
   State<PlatformShell> createState() => _PlatformShellState();
 }
@@ -414,6 +419,8 @@ class _PlatformShellState extends State<PlatformShell> {
       );
   @override
   Widget build(BuildContext context) => ConversationWorkspaceHost(
+    controller: widget.shellController,
+    allowInteractive: widget.allowInteractiveWorkspace,
     builder: (context, openWorkspace) => ListenableBuilder(
     listenable: repo,
     builder: (context, _) => LayoutBuilder(
@@ -473,7 +480,9 @@ class _PlatformShellState extends State<PlatformShell> {
                   destinations: [
                     for (final d in ConversationDestination.values)
                       NavigationRailDestination(
-                        icon: Icon(d.icon),
+                        icon: d == ConversationDestination.settings
+                            ? Tooltip(message: '系统设置', child: Icon(d.icon))
+                            : Icon(d.icon),
                         label: Text(d.label),
                       ),
                   ],
@@ -490,7 +499,9 @@ class _PlatformShellState extends State<PlatformShell> {
                   onDestinationSelected: showSection,
                   destinations: [
                     for (final d in ConversationDestination.values)
-                      NavigationDestination(icon: Icon(d.icon), label: d.label),
+                      NavigationDestination(icon: d == ConversationDestination.settings
+                            ? Tooltip(message: '系统设置', child: Icon(d.icon))
+                            : Icon(d.icon), label: d.label),
                   ],
                 ),
         );

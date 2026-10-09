@@ -163,7 +163,14 @@ void main() {
     final f = await NavigationFixture.open(tester);
     final ref = await f.seedObject(tester, 'research');
     final old = f.plan(ref);
-    await f.show(tester, old);
+    Future<void> showVersion(ValidatedUiPlan plan) async {
+      await tester.pumpWidget(MaterialApp(home: DynamicWorkspace(
+        repository: f.host.foundation, host: f.host, taskId: 'task',
+        surfaceId: plan.plan.surfaceId, plan: plan, originalAnswer: '原对话回答',
+      )));
+      await tester.pumpAndSettle();
+    }
+    await showVersion(old);
     await tester.enterText(find.byType(TextField).first, 'manual priority');
     final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
     await tester.runAsync(c.flush);
@@ -186,7 +193,7 @@ void main() {
         n.id == 'confirm' ? n.copyWith(events: {'cancel': ActionBinding(actionRef: 'cancel')}) : n],
     );
     final next = validateUiPlan(candidate, snapshot, intent, old.catalog).validatedPlan!;
-    await f.show(tester, next);
+    await showVersion(next);
     expect(tester.widget<TextField>(find.byType(TextField).first).controller!.text, 'manual priority');
     expect(find.textContaining('数据版本已变化'), findsWidgets);
     final restored = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
@@ -215,6 +222,9 @@ void main() {
     c.selectedRecords = ['background-selection'];
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    // Resume painting after simulating background events; the checkpoint is
+    // still the only writer of the presentation fields above.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
     final store = HostUiWorkspaceStore(repo, taskId: 'task');
     final committed = (await store.load(plan.plan.surfaceId))!;

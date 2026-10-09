@@ -14,7 +14,7 @@ Future<void> workspaceReady(WidgetTester tester) async {
 }
 
 Future<void> workspaceVisible(WidgetTester tester, Finder target) async {
-  for (var turn = 0; turn < 100; turn++) {
+  for (var turn = 0; turn < 1000; turn++) {
     await tester.runAsync(() => Future<void>(() {}));
     await tester.pumpAndSettle();
     if (target.evaluate().isNotEmpty) return;

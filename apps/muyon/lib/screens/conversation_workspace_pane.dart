@@ -4,16 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import 'dynamic_workspace.dart';
+import 'conversation_shell_controller.dart';
 
 typedef WorkspaceOpener = Future<void> Function(DynamicWorkspace workspace);
 
 /// A presentation host. Moving between a phone route and a desktop pane keeps
 /// the same session, store, event router and pending-operation locks.
 class ConversationWorkspaceHost extends StatefulWidget {
-  const ConversationWorkspaceHost({super.key, required this.builder, this.allowInteractive = true});
+  const ConversationWorkspaceHost({super.key, required this.builder, this.allowInteractive = true, this.controller});
   final Widget Function(BuildContext, WorkspaceOpener) builder;
   /// Injected host policy; this shell does not grant or persist authorization.
   final bool allowInteractive;
+  final ConversationShellController? controller;
   @override
   State<ConversationWorkspaceHost> createState() => _ConversationWorkspaceHostState();
 }
@@ -25,6 +27,28 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   bool closing = false;
   Future<void>? opening;
   FocusNode? sourceFocus;
+
+  @override
+  void initState() {
+    super.initState();
+    attachLifecycle();
+  }
+
+  void attachLifecycle() {
+    widget.controller?.attach(this, () {
+      session?.capturePresentation?.call();
+      return session?.checkpoint() ?? Future.value();
+    }, () => session?.dispose());
+  }
+
+  @override
+  void didUpdateWidget(ConversationWorkspaceHost oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.controller, widget.controller)) {
+      oldWidget.controller?.release(this);
+      attachLifecycle();
+    }
+  }
 
   Future<void> open(DynamicWorkspace workspace) {
     if (closing) return Future.value();
@@ -47,6 +71,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   DynamicWorkspace view() {
     final w = session!.widget;
     return DynamicWorkspace(
+      key: ValueKey(session),
       repository: w.repository, host: w.host, taskId: w.taskId,
       surfaceId: w.surfaceId, plan: w.plan, originalAnswer: w.originalAnswer,
       tools: w.tools, onEvent: w.onEvent, agent: w.agent,
@@ -80,6 +105,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
     if (closing) return false;
     closing = true;
     try {
+      current.capturePresentation?.call();
       await current.checkpoint();
       if (!mounted || !identical(session, current)) return false;
       final old = route;
@@ -104,10 +130,12 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
 
   @override
   void dispose() {
+    widget.controller?.release(this);
     // Native detach cannot await; explicit close/back checkpoints above can.
     final current = session;
     if (current != null) {
-      unawaited(current.checkpoint().catchError((Object _) {}).whenComplete(current.dispose));
+      current.capturePresentation?.call();
+      current.detachWithBestEffortCheckpoint();
     }
     super.dispose();
   }
@@ -117,6 +145,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
     final scale = MediaQuery.textScalerOf(context).scale(16) / 16;
     final next = constraints.maxWidth >= 1250 && constraints.maxWidth >= 720 + 440 * scale;
     if (next != desktop) {
+      session?.capturePresentation?.call();
       desktop = next;
       WidgetsBinding.instance.addPostFrameCallback((_) => present());
     }
@@ -140,10 +169,11 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
 /// There is no nested Scaffold or route-owned controller in the desktop pane.
 class ConversationWorkspaceBody extends StatefulWidget {
   const ConversationWorkspaceBody({super.key, required this.controller,
-    required this.originalAnswer, this.references, this.banner, this.onClose, this.textOnly = false});
+    required this.originalAnswer, this.references, this.banner, this.onClose, this.textOnly = false, this.session});
   final UiWorkspaceController controller;
   final String originalAnswer;
   final bool textOnly;
+  final DynamicWorkspaceSession? session;
   final Widget? references;
   final String? banner;
   final Future<void> Function()? onClose;
@@ -160,23 +190,82 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
     super.initState();
     c.addListener(changed);
     scroll.addListener(scrolled);
+    widget.session?.capturePresentation = capturePresentation;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && scroll.hasClients) {
-        scroll.jumpTo(c.scrollOffset.clamp(0.0, scroll.position.maxScrollExtent));
+        scroll.jumpTo(c.scrollOffset.clamp(0.0, scroll.position.maxScrollExtent).toDouble());
       }
+      restorePresentation();
     });
   }
+  Map<String, EditableText> inputFields() {
+    final fields = <String, EditableText>{};
+    final nodeIds = c.surface.current.plan.nodes.map((n) => n.id).toSet();
+    void visit(Element element) {
+      if (element.widget is EditableText) {
+        String? nodeId;
+        element.visitAncestorElements((ancestor) {
+          final key = ancestor.widget.key;
+          if (key is ValueKey<String>) {
+            for (final id in nodeIds) {
+              if (key.value == '$id-field') { nodeId = id; return false; }
+            }
+          }
+          return ancestor != context;
+        });
+        if (nodeId != null) fields[nodeId!] = element.widget as EditableText;
+      }
+      element.visitChildElements(visit);
+    }
+    (context as Element).visitChildElements(visit);
+    return fields;
+  }
+
+  void capturePresentation() {
+    if (!mounted) return;
+    if (scroll.hasClients && !c.readOnly) {
+      c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent).toDouble();
+    }
+    final session = widget.session;
+    if (session == null) return;
+    // Identity comes from the renderer's stable validated-node field key.
+    for (final entry in inputFields().entries) {
+      if (entry.value.focusNode.hasFocus) {
+        session.focusedFieldNode = entry.key;
+        session.focusedFieldSelection = entry.value.controller.selection;
+        return;
+      }
+    }
+    session.focusedFieldNode = null;
+    session.focusedFieldSelection = null;
+  }
+
+  void restorePresentation() {
+    final session = widget.session;
+    if (!mounted || session == null || c.readOnly || widget.textOnly) return;
+    final field = inputFields()[session.focusedFieldNode];
+    final selection = session.focusedFieldSelection;
+    if (field == null || selection == null || !selection.isValid) return;
+    final length = field.controller.text.length;
+    field.controller.selection = TextSelection(
+      baseOffset: selection.baseOffset.clamp(0, length).toInt(),
+      extentOffset: selection.extentOffset.clamp(0, length).toInt(),
+      affinity: selection.affinity, isDirectional: selection.isDirectional,
+    );
+    field.focusNode.requestFocus();
+  }
+
   void changed() { if (mounted) setState(() {}); }
   void scrolled() {
     if (!scroll.hasClients || c.readOnly) return;
-    c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent);
+    c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent).toDouble();
     unawaited(c.flush().catchError((Object _) {}));
   }
   Future<void> close() async {
     if (closing) return;
     setState(() => closing = true);
     try {
-      if (scroll.hasClients && !c.readOnly) c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent);
+      if (scroll.hasClients && !c.readOnly) c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent).toDouble();
       await c.flush();
       await widget.onClose?.call();
     } catch (_) {
@@ -186,7 +275,12 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
     }
   }
   @override
-  void dispose() { c.removeListener(changed); scroll.dispose(); super.dispose(); }
+  void dispose() {
+    if (widget.session?.capturePresentation == capturePresentation) {
+      widget.session?.capturePresentation = null;
+    }
+    c.removeListener(changed); scroll.dispose(); super.dispose();
+  }
   @override
   Widget build(BuildContext context) => Column(children: [
     Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Row(children: [
