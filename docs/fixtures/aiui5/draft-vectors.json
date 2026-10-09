@@ -1,0 +1,602 @@
+{
+  "status": "draft; future-only; no production codec",
+  "cases": [
+    {
+      "group": "typed",
+      "id": "bool-ok",
+      "decisionDraft": "accept",
+      "input": true,
+      "reason": "declared bool target",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "bool-string",
+      "decisionDraft": "reject",
+      "input": "true",
+      "reason": "wrong type; no stringification",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "slider-fraction",
+      "decisionDraft": "accept",
+      "input": 0.25,
+      "reason": "finiteNumber min0/max1/step0.25; preserve fraction",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "slider-off-grid",
+      "decisionDraft": "reject",
+      "input": 0.3,
+      "reason": "off-grid; no rounding",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "slider-out-of-range",
+      "decisionDraft": "reject",
+      "input": 1.25,
+      "reason": "outside closed range",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "number-nonfinite",
+      "decisionDraft": "reject",
+      "input": {
+        "testOnlyNumberToken": "NaN"
+      },
+      "reason": "construct native NaN in future test; token not wire data",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "integer-unsafe",
+      "decisionDraft": "reject",
+      "input": 9007199254740992,
+      "reason": "outside safe integer range",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "date-leap",
+      "decisionDraft": "accept",
+      "input": "2028-02-29",
+      "reason": "real Gregorian date",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "date-invalid",
+      "decisionDraft": "reject",
+      "input": "2026-02-30",
+      "reason": "invalid day",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "date-timezone",
+      "decisionDraft": "reject",
+      "input": "2026-10-09T00:00:00Z",
+      "reason": "timestamp not calendar date",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "date-null",
+      "decisionDraft": "accept",
+      "input": null,
+      "reason": "only when host spec nullable=true",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "date-empty",
+      "decisionDraft": "reject",
+      "input": "",
+      "reason": "empty string not null",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "ids-ok",
+      "decisionDraft": "accept",
+      "input": [
+        "item-a",
+        "item-b"
+      ],
+      "reason": "known current membership; canonical order",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "ids-duplicate",
+      "decisionDraft": "reject",
+      "input": [
+        "item-a",
+        "item-a"
+      ],
+      "reason": "reject before dedup",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "ids-unknown",
+      "decisionDraft": "reject",
+      "input": [
+        "forged"
+      ],
+      "reason": "unknown host membership",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "undeclared-state",
+      "decisionDraft": "reject",
+      "input": {
+        "key": "model-created",
+        "value": true
+      },
+      "reason": "unknown host state",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "collection-host-envelope",
+      "decisionDraft": "accept",
+      "input": {
+        "codecVersion": "draft-not-adopted",
+        "collectionId": "quotes",
+        "collectionRevision": 8,
+        "snapshotRef": {
+          "id": "quote-view",
+          "revision": 8
+        },
+        "scopeKey": "fixture-scope",
+        "sourceVersions": {
+          "fixture-source": "v1"
+        },
+        "columns": [
+          {
+            "id": "price",
+            "label": "Price",
+            "type": "finiteNumber",
+            "nullable": false
+          }
+        ],
+        "rows": [
+          {
+            "itemId": "quote-a",
+            "cells": {
+              "price": 10
+            },
+            "rowObjectRef": {
+              "moduleId": "fixture",
+              "objectType": "quote",
+              "objectId": "a"
+            }
+          }
+        ]
+      },
+      "reason": "future dedicated registry; never fact scalar",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "collection-duplicate",
+      "decisionDraft": "reject",
+      "input": {
+        "duplicateRow": "quote-a"
+      },
+      "reason": "whole collection duplicate ID",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "collection-empty-id",
+      "decisionDraft": "reject",
+      "input": {
+        "itemId": ""
+      },
+      "reason": "empty identity",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "collection-cell-type",
+      "decisionDraft": "reject",
+      "input": {
+        "price": "10"
+      },
+      "reason": "wrong finiteNumber type",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "collection-unknown-column",
+      "decisionDraft": "reject",
+      "input": {
+        "extraCell": "unknown"
+      },
+      "reason": "unknown field",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "collection-source-stale",
+      "decisionDraft": "reject",
+      "input": {
+        "sourceVersion": "v0"
+      },
+      "reason": "source revoked/stale",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "collection-version",
+      "decisionDraft": "reject",
+      "input": {
+        "codecVersion": "future-unknown"
+      },
+      "reason": "unsupported codec",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "collection-scope",
+      "decisionDraft": "reject",
+      "input": {
+        "scopeKey": "other"
+      },
+      "reason": "cross scope",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "rows-199",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "rows",
+        "limitDraft": 200,
+        "size": 199
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "rows-200",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "rows",
+        "limitDraft": 200,
+        "size": 200
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "rows-201",
+      "decisionDraft": "reject",
+      "input": {
+        "generatorDraft": "rows",
+        "limitDraft": 200,
+        "size": 201
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "columns-31",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "columns",
+        "limitDraft": 32,
+        "size": 31
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "columns-32",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "columns",
+        "limitDraft": 32,
+        "size": 32
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "columns-33",
+      "decisionDraft": "reject",
+      "input": {
+        "generatorDraft": "columns",
+        "limitDraft": 32,
+        "size": 33
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "depth-3",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "depth",
+        "limitDraft": 4,
+        "size": 3
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "depth-4",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "depth",
+        "limitDraft": 4,
+        "size": 4
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "depth-5",
+      "decisionDraft": "reject",
+      "input": {
+        "generatorDraft": "depth",
+        "limitDraft": 4,
+        "size": 5
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "stringBytes-4095",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "stringBytes",
+        "limitDraft": 4096,
+        "size": 4095
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "stringBytes-4096",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "stringBytes",
+        "limitDraft": 4096,
+        "size": 4096
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "stringBytes-4097",
+      "decisionDraft": "reject",
+      "input": {
+        "generatorDraft": "stringBytes",
+        "limitDraft": 4096,
+        "size": 4097
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "encodedBytes-65535",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "encodedBytes",
+        "limitDraft": 65536,
+        "size": 65535
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "encodedBytes-65536",
+      "decisionDraft": "accept",
+      "input": {
+        "generatorDraft": "encodedBytes",
+        "limitDraft": 65536,
+        "size": 65536
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "encodedBytes-65537",
+      "decisionDraft": "reject",
+      "input": {
+        "generatorDraft": "encodedBytes",
+        "limitDraft": 65536,
+        "size": 65537
+      },
+      "reason": "future shared constant boundary generator; full envelope must satisfy all other limits",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "detail",
+      "id": "detail-current-row",
+      "decisionDraft": "accept",
+      "input": {
+        "collectionId": "quotes",
+        "collectionRevision": 8,
+        "itemId": "quote-a"
+      },
+      "reason": "resolve current trusted host ObjectRef after revision/scope checks",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "detail",
+      "id": "detail-stale-row",
+      "decisionDraft": "reject",
+      "input": {
+        "collectionId": "quotes",
+        "collectionRevision": 7,
+        "itemId": "quote-a"
+      },
+      "reason": "stale registry revision; zero navigation",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "detail",
+      "id": "detail-forged-ref",
+      "decisionDraft": "reject",
+      "input": {
+        "itemId": "quote-a",
+        "objectRef": {
+          "objectId": "forged"
+        }
+      },
+      "reason": "payload cannot supply ObjectRef",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "detail",
+      "id": "detail-no-object",
+      "decisionDraft": "reject",
+      "input": {
+        "itemId": "unlinked"
+      },
+      "reason": "host row has no ObjectRef; no callback",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "projection",
+      "id": "S8-I8-P12",
+      "decisionDraft": "accept",
+      "input": {
+        "snapshot": 8,
+        "computedInput": 8,
+        "qty": "3",
+        "total": "30",
+        "intent": 8,
+        "plan": 8,
+        "surfaceRevision": 12
+      },
+      "reason": "host reevaluates actual S8 inputs; atomic publish",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "projection",
+      "id": "mixed-I7",
+      "decisionDraft": "reject",
+      "input": {
+        "snapshot": 8,
+        "computedInput": 8,
+        "intent": 7,
+        "plan": 8
+      },
+      "reason": "snapshot_revision",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "projection",
+      "id": "relabel-cache20",
+      "decisionDraft": "reject",
+      "input": {
+        "snapshot": 8,
+        "computedInput": 8,
+        "qty": "3",
+        "cachedQty": "2",
+        "total": "20"
+      },
+      "reason": "host dependency fingerprint mismatch; existing validator alone cannot detect",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "projection",
+      "id": "permission-race",
+      "decisionDraft": "reject",
+      "input": {
+        "frozenPermissionGeneration": 4,
+        "currentPermissionGeneration": 5
+      },
+      "reason": "whole batch stale; preserve draft, disable old confirm",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "restore",
+      "id": "old-dynamic1",
+      "decisionDraft": "accept",
+      "input": {
+        "catalogVersion": "dynamic-1",
+        "schemaVersion": 1
+      },
+      "reason": "existing readable scalar projection; revalidate current context",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "restore",
+      "id": "unknown-codec",
+      "decisionDraft": "reject",
+      "input": {
+        "codecVersion": "future-unknown"
+      },
+      "reason": "readOnly; preserve raw bytes",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "restore",
+      "id": "deleted-item",
+      "decisionDraft": "reject",
+      "input": {
+        "selectedIds": [
+          "deleted"
+        ]
+      },
+      "reason": "membership changed; preserve override",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "restore",
+      "id": "shape-change",
+      "decisionDraft": "reject",
+      "input": {
+        "oldType": "bool",
+        "newType": "finiteNumber"
+      },
+      "reason": "type changed; no coercion",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "restore",
+      "id": "save-over-limit",
+      "decisionDraft": "reject",
+      "input": {
+        "encodedWorkspaceBytes": 262145
+      },
+      "reason": "keep old checkpoint and current readable draft",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "restore",
+      "id": "restore-permission",
+      "decisionDraft": "reject",
+      "input": {
+        "scope": "revoked"
+      },
+      "reason": "no navigation or business replay",
+      "expectedAcceptance": "future-only"
+    }
+  ]
+}
