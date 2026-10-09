@@ -112,7 +112,7 @@ void main() {
     final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
     c.selectedRecords = ['record-a'];
     c.step = 'review';
-    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -12));
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -30));
     await tester.pumpAndSettle();
     expect(c.scrollOffset, greaterThan(0));
     // Keep the reference target visible while retaining a nonzero offset.

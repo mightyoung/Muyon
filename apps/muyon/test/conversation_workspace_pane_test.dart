@@ -87,7 +87,7 @@ void main() {
     editor().focusNode.requestFocus();
     await tester.pump();
     final scroller = find.descendant(of: find.byType(ConversationWorkspaceBody), matching: find.byType(SingleChildScrollView));
-    await tester.drag(scroller, const Offset(0, -12));
+    await tester.drag(scroller, const Offset(0, -30));
     await tester.pumpAndSettle();
     await tester.runAsync(c.flush);
     final before = tester.widget<SingleChildScrollView>(scroller).controller!.offset;
