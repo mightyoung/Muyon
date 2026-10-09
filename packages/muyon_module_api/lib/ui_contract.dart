@@ -12,3 +12,5 @@ export 'src/ui/planning.dart';
 export 'src/ui/guides.dart';
 
 export 'src/ui/navigation.dart';
+export 'src/ui/stream_protocol.dart';
+export 'src/ui/stream_compiler.dart';
