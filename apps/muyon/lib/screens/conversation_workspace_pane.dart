@@ -55,7 +55,9 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
     if (session != null &&
         identical(session!.widget.repository, workspace.repository) &&
         session!.widget.taskId == workspace.taskId &&
-        session!.widget.surfaceId == workspace.surfaceId) return opening ?? Future.value();
+        session!.widget.surfaceId == workspace.surfaceId) {
+      return opening ?? Future.value();
+    }
     return opening ??= _open(workspace).whenComplete(() => opening = null);
   }
 
