@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
 import 'package:muyon/screens/conversation_workspace_pane.dart';
@@ -32,6 +33,16 @@ void _registerCleanup(WidgetTester tester, NavigationFixture fixture) {
       await workspaceOperation(tester, fixture.host.close);
     }
   });
+}
+
+class _WorkspaceRoutes extends NavigatorObserver {
+  final routes = <Route<dynamic>>{};
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => routes.add(route);
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => routes.remove(route);
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => routes.remove(route);
 }
 
 void main() {
@@ -218,6 +229,125 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
     await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('active_workspace_large_text_keeps_full_confirmation_reachable_across_route_and_pane', (tester) async {
+    final f = await NavigationFixture.open(tester);
+    _registerCleanup(tester, f);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1250, 900);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final scale = ValueNotifier<double>(1);
+    final routes = _WorkspaceRoutes();
+    addTearDown(scale.dispose);
+    const tail = '公开确认正文尾部完整标记';
+    final original = f.plan(ref), snapshot = original.snapshot;
+    final context = snapshot.actionContext!;
+    final draft = {...context.draft, '公开说明': [
+      for (var i = 0; i < 18; i++) '公开段落 $i：核对数量、对象与来源，完整内容供人工阅读，不触发业务操作。',
+      tail,
+    ].join('\n')};
+    final longSnapshot = DataSnapshot(ref: snapshot.ref, facts: snapshot.facts,
+      initialUiState: snapshot.initialUiState, computations: snapshot.computations,
+      sources: snapshot.sources, sourceDigests: snapshot.sourceDigests,
+      actionContext: UiActionContext(draftRevision: context.draftRevision,
+        draft: draft, confirmedRecordRefs: context.confirmedRecordRefs,
+        operations: context.operations));
+    final validated = validateUiPlan(original.plan, longSnapshot, original.intent, original.catalog);
+    expect(validated.validatedPlan, isNotNull);
+    final payload = '$draft';
+    var businessCalls = 0;
+    WorkspaceOpener? open;
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: [routes],
+      builder: (context, child) => ValueListenableBuilder<double>(valueListenable: scale,
+        builder: (context, value, _) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(value)), child: child!)),
+      home: ConversationWorkspaceHost(builder: (_, opener) {
+        open = opener;
+        return const Scaffold(body: Text('父对话'));
+      }),
+    ));
+    await open!(DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison',
+      plan: validated.validatedPlan!, originalAnswer: '公开原回答完整保留。',
+      onEvent: (_) async { businessCalls++; }));
+    await workspaceReady(tester);
+    final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
+    final confirm = c.surface.current.plan.nodes.firstWhere((node) => node.id == 'confirm');
+    for (final config in [
+      (width: 1250.0, scale: 1.0, pane: true),
+      (width: 1280.0, scale: 1.0, pane: true),
+      (width: 1250.0, scale: 2.0, pane: false),
+      (width: 1280.0, scale: 2.0, pane: false),
+      (width: 1920.0, scale: 2.0, pane: true),
+      (width: 390.0, scale: 2.0, pane: false),
+    ]) {
+      scale.value = config.scale;
+      tester.view.physicalSize = Size(config.width, 900);
+      await workspaceReady(tester);
+      expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
+      expect(tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller, same(c));
+      expect(find.text('父对话').hitTestable(), config.pane ? findsOneWidget : findsNothing,
+        reason: '${config.width} at ${config.scale}x must use the expected presentation');
+      expect(routes.routes.length, config.pane ? 1 : 2);
+      expect(tester.getSize(find.byType(ConversationWorkspaceBody)).width,
+        config.pane ? 440 * config.scale : config.width);
+      final closeTarget = find.byTooltip('关闭工作区 / 返回');
+      expect(closeTarget.hitTestable(), findsOneWidget);
+      expect(tester.getSize(closeTarget).width, greaterThanOrEqualTo(48));
+      expect(tester.getSize(closeTarget).height, greaterThanOrEqualTo(48));
+      expect(c.surface.canConfirm(confirm), isTrue);
+      final expand = find.text('展开内容');
+      if (expand.evaluate().isNotEmpty) {
+        await tester.ensureVisible(expand);
+        await tester.tap(expand);
+        await workspaceReady(tester);
+      }
+      final full = find.text(payload);
+      expect(full, findsOneWidget);
+      expect(tester.widget<Text>(full).maxLines, isNull);
+      expect(tester.widget<Text>(full).overflow, isNot(TextOverflow.ellipsis));
+      await Scrollable.ensureVisible(tester.element(full), alignment: 1);
+      await workspaceReady(tester);
+      final paragraph = tester.renderObject<RenderParagraph>(full);
+      expect(paragraph.didExceedMaxLines, isFalse);
+      expect(paragraph.text.toPlainText(), payload);
+      expect(paragraph.textScaler.scale(16), 16 * config.scale);
+      final tailBoxes = paragraph.getBoxesForSelection(TextSelection(
+        baseOffset: payload.indexOf(tail), extentOffset: payload.indexOf(tail) + tail.length));
+      expect(tailBoxes, isNotEmpty);
+      final scroll = find.descendant(of: find.byType(ConversationWorkspaceBody),
+        matching: find.byType(SingleChildScrollView));
+      final viewport = tester.getRect(scroll);
+      for (final box in tailBoxes) {
+        expect(viewport.contains(paragraph.localToGlobal(box.toRect().center)), isTrue,
+          reason: 'The complete payload tail must be painted inside the scroll viewport');
+      }
+      for (final label in ['请求宿主确认；界面本身不授予写入权限。', '仅这一次', '拒绝']) {
+        final target = find.text(label);
+        await tester.ensureVisible(target);
+        await workspaceReady(tester);
+        expect(target.hitTestable(), findsOneWidget);
+        if (label == '仅这一次' || label == '拒绝') {
+          final button = find.widgetWithText(TextButton, label);
+          expect(button.hitTestable(), findsOneWidget);
+          expect(tester.getSize(button).width, greaterThanOrEqualTo(48));
+          expect(tester.getSize(button).height, greaterThanOrEqualTo(48));
+        }
+      }
+      for (final label in ['仅这一次', '拒绝']) {
+        expect(tester.widget<TextButton>(find.widgetWithText(TextButton, label)).onPressed, isNotNull);
+      }
+      expect(businessCalls, 0);
+      expect(c.surface.operationRefs, isEmpty);
+      expect(tester.takeException(), isNull, reason: 'No layout overflow at ${config.width}/${config.scale}x');
+    }
+    await tester.tap(find.byTooltip('关闭工作区 / 返回'));
+    await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
+    expect(businessCalls, 0);
+    expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
 
