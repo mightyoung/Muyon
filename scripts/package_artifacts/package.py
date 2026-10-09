@@ -1,5 +1,6 @@
 """Package only native build output; never repository, caches, credentials or logs."""
 import hashlib
+from itertools import chain
 import json
 import os
 from pathlib import Path
@@ -42,11 +43,24 @@ def check_paths(paths):
             )
 
 
+def check_windows_tree(root):
+    # Windows bundles must contain ordinary files/directories only. Reject all
+    # symlinks and reparse points (including junctions), even internal links.
+    resolved_root = root.resolve(strict=True)
+    for path in chain((root,), root.rglob('*')):
+        require(not path.is_symlink()
+                and not (getattr(path.lstat(), 'st_file_attributes', 0) & 0x400),
+                'Windows bundle link/reparse point is not allowed')
+        require(path.resolve(strict=True).is_relative_to(resolved_root),
+                'Windows bundle path resolves outside Release')
+
+
 def main():
     target = os.environ['TARGET_SHA']
     workflow = os.environ['WORKFLOW_SHA']
     selected = os.environ['PACKAGE_PLATFORM']
     require(re.fullmatch('[0-9a-f]{40}', target), 'Invalid source SHA')
+    require(re.fullmatch('[0-9a-f]{40}', workflow), 'Invalid workflow SHA')
     require(command('git', '-C', 'source', 'rev-parse', 'HEAD') == target, 'Source HEAD mismatch')
     require(command('git', '-C', 'workflow', 'rev-parse', 'HEAD') == workflow, 'Workflow HEAD mismatch')
     output = Path('packages')
@@ -97,6 +111,8 @@ def main():
         command('ditto', '-c', '-k', '--sequesterRsrc', '--keepParent', str(source), str(package))
     elif selected == 'windows':
         source = app / 'build/windows/x64/runner/Release'
+        require(source.is_dir(), 'Windows Release directory missing')
+        check_windows_tree(source)
         require(all((source / name).exists() for name in
                     ['muyon.exe', 'flutter_windows.dll', 'data/icu.dat', 'data/app.so', 'data/flutter_assets']),
                 'Complete Windows Release bundle missing')

@@ -40,7 +40,9 @@ GitHub 登录用户。“内部验证”只描述用途、签名和验收状态�
 任何待打包源码、资源及最终产物都不得嵌入 secret 或真实用户数据。此工作流不读取
 环境凭据、不注入密钥；路径过滤只防止常见敏感文件/目录被打包，不能证明文件内容
 无秘密或真实用户数据。首次实际构建前仍须核对指定源码/资源符合该约束；本轮只做
-静态检查，不声称已完成真实产物内容核验。3 天保留并不提供私密访问控制。
+静态检查，不声称已完成真实产物内容核验。3 天保留并不提供私密访问控制，也不是存储账单硬上限；
+多次构建的产物会重叠保留并占用存储。public 仓库标准 runner 的免费计算分钟数
+不能证明 artifacts 存储预算已核准，首次执行前须另行确认预算。
 
 ## 产物及签名
 
@@ -54,6 +56,9 @@ GitHub 登录用户。“内部验证”只描述用途、签名和验收状态�
   manifest 记录实际架构；不承诺 Intel 包。
 - Windows：完整 `build/windows/x64/runner/Release` 压缩为带 Release 根目录的 zip，
   包括 exe、DLL、data、Flutter assets 和所有递归文件；验证 exe 未签名及必需运行文件。
+  Windows Release 拒绝所有 symlink/reparse point（含 junction、内部链接），并要求各
+  路径 resolve 后仍在 Release 内，避免读取/打包目录外内容。此链接策略仅适用 Windows，
+  macOS 正常 bundle symlink 仍由 ditto 保真，不一刀切拒绝。
   无 Authenticode。运行仍可能需要宿主 Visual C++ runtime，首次构建/启动尚未实测。
 
 源码包含三端工程，flutter_onnxruntime 1.8.5 的 pubspec 声明支持三端，Windows
@@ -77,10 +82,14 @@ python3 -m unittest discover -s scripts/package_artifacts -p 'test_*.py' -v
 git diff --check
 ```
 
-actionlint 1.7.7 通过；12 个离线测试通过，涵盖三端打包/provenance、SHA 不匹配、缺
+actionlint 1.7.7 通过；26 个离线测试通过，涵盖三端打包/provenance、SHA 不匹配、缺
 Windows DLL、错误 Android 签名、APK 内凭据和日志路径拒绝（含无目录条目的 keys/token.json 与 rawlogs/session.txt）、
-ZIP 路径穿越/绝对路径拒绝及正常无敏感路径正例。原生工具输出以夹具
-模拟，Windows zip 使用真实 Python zipfile 校验内容；不是三端真实构建/安装证据。
+ZIP 路径穿越/绝对路径拒绝及正常无敏感路径正例、两类 SHA 格式及 HEAD 不一致、
+缺/多 .app、三端签名和命令失败、Windows 内外文件/目录链接拒绝、reparse point 元数据替身及 resolve 越界拒绝。Windows zip 对
+全部成员集合及每项字节做对照。原生工具输出以夹具
+模拟，Windows zip 使用真实 Python zipfile 校验内容；不是三端真实构建/安装证据；
+macOS 正常 symlink 正例仅证明脚本允许该结构，不证明真实 ditto 压缩包权限/
+symlink 保真或 codesign 已成功，这些都待首次获授权的原生构建核验。
 本轮未安装 Flutter/Android/Xcode/Windows 工具链，未执行 Actions 构建。
 所有直接使用的 actions 固定完整 commit SHA，并由上游 Git tag 核对版本。
 提交含 `[skip ci]`，避免此基础设施草稿的 push/PR 自动启动现有 ci 工作流。
