@@ -19,7 +19,12 @@ Future<void> select(WidgetTester tester, String label) async {
 }
 
 Future<void> mountShell(WidgetTester tester, NavigationFixture f, {NavigatorObserver? observer, bool allowInteractiveWorkspace = true}) async {
-  await tester.runAsync(() => f.host.foundation.database.write((db) => db.execute(
+  addTearDown(() async {
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+    await workspaceOperation(tester, f.host.close);
+  });
+  await workspaceOperation(tester, () => f.host.foundation.database.write((db) => db.execute(
     "UPDATE execution_records SET payload=json_set(payload,'\$.prompt','公开父任务','\$.stage','paused','\$.executionDeviceId','local','\$.state','paused') WHERE id='task'",
   )));
   await tester.pumpWidget(MaterialApp(navigatorObservers: [?observer], home: PlatformShell(
@@ -66,8 +71,8 @@ void main() {
       expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
       final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
       c.step = 'system-back-$width';
-      await tester.binding.handlePopRoute();
-      await workspaceReady(tester);
+      await workspaceOperation(tester, tester.binding.handlePopRoute);
+      await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
       expect(find.byType(ConversationWorkspaceBody), findsNothing);
       expect(observer.stack, [rootRoute]);
       expect(tester.state(find.byType(AssistantPage)), same(rootState));
@@ -82,12 +87,12 @@ void main() {
 
   testWidgets('switching_destinations_keeps_unsent_parent_draft_and_scroll', (tester) async {
     final f = await NavigationFixture.open(tester);
-    await tester.runAsync(() async {
+    await workspaceOperation(tester, () async {
       for (var i = 0; i < 30; i++) {
         await f.host.foundation.appendMessage(f.conversationId, 'assistant', '固定公开历史 $i\n用于验证实际滚动位置');
       }
     });
-    await tester.runAsync(() => ProfileRepository(f.host.workspaces).save(ModelProfile(
+    await workspaceOperation(tester, () => ProfileRepository(f.host.workspaces).save(ModelProfile(
       id: 'draft-model', endpoint: Uri.parse('http://127.0.0.1:1/v1'),
       location: ModelLocation.local, modelId: 'fixture', endpointIdentity: 'fixture',
     )));
@@ -138,32 +143,62 @@ void main() {
   });
 
   testWidgets('data_and_answer_open_same_registered_business_page', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 900);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
     final f = await NavigationFixture.open(tester);
     final ref = await f.seedObject(tester, 'research');
-    await tester.runAsync(() => f.host.foundation.appendMessage(
+    await workspaceOperation(tester, () => f.host.foundation.appendMessage(
       f.conversationId, 'assistant', '公开对象引用回答', references: [ref],
     ));
     await mountShell(tester, f);
     final rootState = tester.state(find.byType(AssistantPage));
-    await tester.runAsync(() => tester.tap(find.text('${ref.moduleId}/${ref.objectType}/${ref.objectId}')));
+    Future<void> backFromPage(String title) async {
+      final appBar = find.widgetWithText(AppBar, title);
+      final back = find.descendant(of: appBar, matching: find.byType(BackButton)).hitTestable();
+      // A registered object route may still be animating above its catalogue.
+      // Exercise the visible page's own button, never a global first match.
+      await workspaceVisible(tester, back);
+      expect(back, findsOneWidget);
+      await workspaceOperation(tester, () => tester.tap(back));
+      await workspaceGone(tester, appBar);
+      await tester.pumpAndSettle();
+    }
+    final answerChip = find.widgetWithText(ActionChip, '${ref.moduleId}/${ref.objectType}/${ref.objectId}');
+    // SelectableText creates its own scrollables inside history cards. The
+    // chip's enclosing scrollable is the history ListView, not those sibling
+    // text viewports or the assistant's separate controls viewport.
+    final historyScroll = find.ancestor(
+      of: answerChip,
+      matching: find.byType(Scrollable),
+    );
+    expect(historyScroll, findsOneWidget);
+    // The reference is below the answer text in a bounded history viewport.
+    // Reveal its actual hit target before tapping; the composer must not
+    // intercept a tap on a clipped Text widget.
+    await tester.scrollUntilVisible(answerChip, 100, scrollable: historyScroll);
+    await tester.pumpAndSettle();
+    expect(answerChip.hitTestable(), findsOneWidget);
+    await workspaceOperation(tester, () => tester.tap(answerChip.hitTestable()));
     await workspaceVisible(tester, find.text('真实研究对象'));
     expect(find.text('真实研究对象'), findsWidgets);
     expect(find.textContaining('研究原始内容'), findsWidgets);
-    await tester.runAsync(tester.pageBack);
-    await tester.pumpAndSettle();
+    await backFromPage('真实研究对象');
     await select(tester, '资料');
-    await tester.runAsync(() => tester.tap(find.text('查找业务对象')));
+    await workspaceOperation(tester, () => tester.tap(find.text('查找业务对象')));
     final item = find.widgetWithText(ListTile, ref.objectId);
     await workspaceVisible(tester, item);
     expect(item, findsOneWidget);
-    await tester.runAsync(() => tester.tap(item));
+    await tester.scrollUntilVisible(item, 100, scrollable: find.byType(Scrollable).last);
+    await tester.pumpAndSettle();
+    expect(item.hitTestable(), findsOneWidget);
+    await workspaceOperation(tester, () => tester.tap(item.hitTestable()));
     await workspaceVisible(tester, find.text('真实研究对象'));
     expect(find.text('真实研究对象'), findsWidgets);
     expect(find.textContaining('研究原始内容'), findsWidgets);
-    await tester.runAsync(tester.pageBack);
-    await tester.pumpAndSettle();
-    await tester.runAsync(tester.pageBack);
-    await tester.pumpAndSettle();
+    await backFromPage('真实研究对象');
+    await backFromPage('业务对象目录');
     await select(tester, '助手');
     expect(tester.state(find.byType(AssistantPage)), same(rootState));
     expect(find.text('公开对象引用回答'), findsOneWidget);
@@ -172,6 +207,10 @@ void main() {
   });
 
   testWidgets('legacy_entries_remain_reachable', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 900);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
     final f = await NavigationFixture.open(tester);
     await mountShell(tester, f);
     await select(tester, '任务');
@@ -188,13 +227,21 @@ void main() {
     expect(find.text('业务页面与工作区'), findsOneWidget);
     await select(tester, '设置');
     for (final label in ['设备聊天', '记忆与整理', '设备与通信', '个人中心']) {
-      final entry = find.text(label);
-      await tester.ensureVisible(entry);
-      await tester.tap(entry);
+      final entry = find.widgetWithText(ListTile, label);
+      final settingsScroll = find.descendant(of: find.byType(ListView), matching: find.byType(Scrollable));
+      // Settings uses a lazy ListView. Drag the actual destination scrollable
+      // to build offscreen entries, including scrolling back to the first row.
+      await tester.scrollUntilVisible(entry, label == '个人中心' ? -100 : 100,
+        scrollable: settingsScroll, maxScrolls: 60);
       await tester.pumpAndSettle();
+      expect(entry.hitTestable(), findsOneWidget);
+      await workspaceOperation(tester, () => tester.tap(entry.hitTestable()));
+      final title = label == '记忆与整理' ? '记忆' : label;
+      await workspaceVisible(tester, find.widgetWithText(AppBar, title));
       expect(find.byType(BackButton), findsOneWidget);
-      await tester.tap(find.byType(BackButton));
-      await tester.pumpAndSettle();
+      await workspaceOperation(tester, () => tester.tap(find.byType(BackButton)));
+      await workspaceGone(tester, find.widgetWithText(AppBar, title));
+      expect(find.descendant(of: find.byType(NavigationBar), matching: find.text('设置')), findsOneWidget);
     }
     await select(tester, '助手');
     expect(find.byType(AssistantPage), findsOneWidget);

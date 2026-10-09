@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show SchedulerPhase;
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import 'dynamic_workspace.dart';
@@ -25,6 +26,8 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   Route<void>? route;
   bool desktop = false;
   bool closing = false;
+  bool releasingReferences = false;
+  final retiredReferences = <Future<void>>{};
   Future<void>? opening;
   FocusNode? sourceFocus;
 
@@ -38,7 +41,37 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
     widget.controller?.attach(this, () {
       session?.capturePresentation?.call();
       return session?.checkpoint() ?? Future.value();
-    }, () => session?.dispose());
+    }, () {
+      stopReferenceAdmission();
+      retainReference(session);
+      session?.dispose();
+    }, referencesSettled: referencesSettled,
+      stopReferenceAdmission: stopReferenceAdmission,
+      resumeReferenceAdmission: resumeReferenceAdmission);
+  }
+
+  void stopReferenceAdmission() {
+    releasingReferences = true;
+    session?.stopReferenceAdmission();
+  }
+
+  void resumeReferenceAdmission() {
+    releasingReferences = false;
+    session?.resumeReferenceAdmission();
+  }
+
+  // A closed or replaced view can still be acquiring/releasing a plugin page.
+  // Keep its lease future until completion, even after session becomes null/B.
+  void retainReference(DynamicWorkspaceSession? current) {
+    final pending = current?.pendingReferenceNavigation;
+    if (pending == null || !retiredReferences.add(pending)) return;
+    unawaited(pending.then<void>((_) { retiredReferences.remove(pending); },
+      onError: (Object error, StackTrace stack) { retiredReferences.remove(pending); }));
+  }
+
+  Future<void> referencesSettled() async {
+    final current = session?.pendingReferenceNavigation;
+    await Future.wait({...retiredReferences, ?current});
   }
 
   @override
@@ -51,7 +84,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   }
 
   Future<void> open(DynamicWorkspace workspace) {
-    if (closing) return Future.value();
+    if (closing || releasingReferences) return Future.value();
     if (session != null &&
         identical(session!.widget.repository, workspace.repository) &&
         session!.widget.taskId == workspace.taskId &&
@@ -62,8 +95,9 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   }
 
   Future<void> _open(DynamicWorkspace workspace) async {
+    if (releasingReferences) return;
     if (session != null && !await close()) return;
-    if (!mounted) return;
+    if (!mounted || releasingReferences) return;
     sourceFocus = FocusManager.instance.primaryFocus;
     session = DynamicWorkspaceSession(workspace);
     setState(() {});
@@ -113,6 +147,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
       final old = route;
       route = null;
       if (old != null) old.navigator?.removeRoute(old);
+      retainReference(current);
       setState(() => session = null);
       current.dispose();
       // The source may have disappeared after a plan update. In that case the
@@ -132,6 +167,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
 
   @override
   void dispose() {
+    releasingReferences = true;
     widget.controller?.release(this);
     // Native detach cannot await; explicit close/back checkpoints above can.
     final current = session;
@@ -187,20 +223,39 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
   late final scroll = ScrollController(initialScrollOffset: widget.controller.scrollOffset);
   UiWorkspaceController get c => widget.controller;
   bool closing = false;
+  bool active = true;
+  bool fieldRefreshQueued = false;
+  final cachedFields = <String, EditableText>{};
+  final closeFocus = FocusNode();
   @override
   void initState() {
     super.initState();
+    closeFocus.addListener(changed);
     c.addListener(changed);
     scroll.addListener(scrolled);
     widget.session?.capturePresentation = capturePresentation;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && scroll.hasClients) {
+      if (!mounted || !active) return;
+      refreshInputFields();
+      if (scroll.hasClients) {
         scroll.jumpTo(c.scrollOffset.clamp(0.0, scroll.position.maxScrollExtent).toDouble());
       }
       restorePresentation();
     });
   }
-  Map<String, EditableText> inputFields() {
+  void queueFieldRefresh() {
+    if (fieldRefreshQueued) return;
+    fieldRefreshQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fieldRefreshQueued = false;
+      if (mounted && active) refreshInputFields();
+    });
+  }
+
+  // Tree traversal is legal only after the frame has finished building. Host
+  // capture calls during LayoutBuilder/dispose read this cache, not Elements.
+  void refreshInputFields() {
+    assert(WidgetsBinding.instance.schedulerPhase == SchedulerPhase.postFrameCallbacks);
     final fields = <String, EditableText>{};
     final nodeIds = c.surface.current.plan.nodes.map((n) => n.id).toSet();
     void visit(Element element) {
@@ -220,18 +275,32 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
       element.visitChildElements(visit);
     }
     (context as Element).visitChildElements(visit);
-    return fields;
+    cachedFields..clear()..addAll(fields);
+  }
+
+  @override
+  void deactivate() {
+    active = false;
+    cachedFields.clear();
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    active = true;
+    queueFieldRefresh();
   }
 
   void capturePresentation() {
-    if (!mounted) return;
+    if (!mounted || !active) return;
     if (scroll.hasClients && !c.readOnly) {
       c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent).toDouble();
     }
     final session = widget.session;
     if (session == null) return;
     // Identity comes from the renderer's stable validated-node field key.
-    for (final entry in inputFields().entries) {
+    for (final entry in cachedFields.entries) {
       if (entry.value.focusNode.hasFocus) {
         session.focusedFieldNode = entry.key;
         session.focusedFieldSelection = entry.value.controller.selection;
@@ -244,8 +313,8 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
 
   void restorePresentation() {
     final session = widget.session;
-    if (!mounted || session == null || c.readOnly || widget.textOnly) return;
-    final field = inputFields()[session.focusedFieldNode];
+    if (!mounted || !active || session == null || c.readOnly || widget.textOnly) return;
+    final field = cachedFields[session.focusedFieldNode];
     final selection = session.focusedFieldSelection;
     if (field == null || selection == null || !selection.isValid) return;
     final length = field.controller.text.length;
@@ -278,17 +347,25 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
   }
   @override
   void dispose() {
+    active = false;
+    cachedFields.clear();
     if (widget.session?.capturePresentation == capturePresentation) {
       widget.session?.capturePresentation = null;
     }
+    closeFocus.dispose();
     c.removeListener(changed); scroll.dispose(); super.dispose();
   }
   @override
-  Widget build(BuildContext context) => Column(children: [
+  Widget build(BuildContext context) {
+    queueFieldRefresh();
+    return Column(children: [
     Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Row(children: [
       const Expanded(child: Text('当前工作区')),
-      SizedBox(width: 48, height: 48, child: IconButton(
-        onPressed: closing ? null : close, tooltip: '关闭工作区 / 返回', icon: const Icon(Icons.close))),
+      Semantics(label: '关闭工作区 / 返回', button: true, enabled: !closing,
+        focusable: !closing, focused: closeFocus.hasFocus, onTap: closing ? null : close,
+        child: ExcludeSemantics(child: SizedBox(width: 48, height: 48, child: IconButton(
+          focusNode: closeFocus, onPressed: closing ? null : close,
+          tooltip: '关闭工作区 / 返回', icon: const Icon(Icons.close))))),
     ])),
     Expanded(child: SingleChildScrollView(controller: scroll, child: Padding(
       padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -315,4 +392,5 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
       ]),
     ))),
   ]);
+  }
 }
