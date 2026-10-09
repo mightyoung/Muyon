@@ -82,7 +82,9 @@ void main() {
         );
         await tester.tap(find.byTooltip('返回'));
         await tester.pumpAndSettle();
-        expect(find.text('个人中心'), findsOneWidget, reason: 'back to hub');
+        expect(tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+            3, reason: 'back to selected settings hub');
+        expect(find.byTooltip('返回'), findsNothing, reason: 'child page closed');
       }
       await tester.pumpWidget(const SizedBox());
     } finally {

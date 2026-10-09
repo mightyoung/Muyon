@@ -12,6 +12,8 @@ import 'package:sqlite3/sqlite3.dart';
 
 import 'support/fake_v2_module.dart';
 
+import 'support/conversation_workspace_fixture.dart';
+
 class NativeHttp extends HttpOverrides {
   HttpClient client() => super.createHttpClient(null);
 }
@@ -497,15 +499,19 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.runAsync(() async {
-      await tester.tap(find.text('XReview Notes'));
-      final deadline = DateTime.now().add(const Duration(seconds: 2));
-      while (host.modules.state('notes').status != ModuleStatus.ready &&
-          DateTime.now().isBefore(deadline)) {
-        await Future<void>.delayed(const Duration(milliseconds: 5));
-      }
-    });
+    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('资料')));
     await tester.pumpAndSettle();
+    final entry = find.widgetWithText(ListTile, 'XReview Notes');
+    final dataScroll = find.descendant(of: find.byType(ListView), matching: find.byWidgetPredicate(
+      (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
+    ));
+    expect(dataScroll, findsOneWidget);
+    await tester.scrollUntilVisible(entry, 100, scrollable: dataScroll);
+    await tester.pumpAndSettle();
+    expect(entry.hitTestable(), findsOneWidget);
+    await workspaceOperation(tester, () => tester.tap(entry.hitTestable()));
+    await workspaceVisible(tester, find.text('XReview body'));
+    expect(find.text('XReview body'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     await tester.runAsync(host.close);
     root.deleteSync(recursive: true);
