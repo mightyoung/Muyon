@@ -1,0 +1,56 @@
+# REG-3a 科研 / 原型契约 v2、工具与本体
+
+日期：2026-10-09。用户委派执行；只推任务分支，集成由父任务决定。
+分支 `task/reg-3a-module-v2`；独立工作树 `/workspace/Muyon-reg-3a`；
+真实最新 develop 基线 `b87a22b202cf0c3ce1c98aebb4df32af8d08d847`。
+原 `/workspace/Muyon` 的 `work@cc7c8d1` 保留不改。
+
+依据：ADR-0004 §10.2、§10.3、Q10；REG-2b 审查的工具可用性后续；
+GROK-1 已确认清单和 GROK-2 覆盖初稿。REG-2 / AUTH 已合；
+UI-2a / UI-4c 已合。索引与旧交接时间线不代替实际 Git 基线。
+
+## 有界交付
+
+- 两模块实现 BusinessModuleV2，声明本体、覆盖清单与 registrar 工具。
+- 三个原读工具 ID、描述、结果、排序保留；读工具支持选中范围。
+- 跨项目 scope session 返回当前 canonical 引用；科研 project 可解析；
+  文档摘要按当前磁盘 bytes 算，旧摘要失效。原型 page/version/feedback
+  校验所属页及钉住摘要，无绑定对象页可开。
+- 本机写入经宿主 prepare / 一次审批 / invoke / 回执；先实现 ADR 点名的
+  saveNote / addOutline / assessRun / acceptRun 及 prototype.add_feedback。
+  其余真实操作面逐项入覆盖清单，未开放要写理由与后续任务，不能假称覆盖完成。
+- 保留科研宿主导航、已接受导入对账、工作区导入恢复桥接与所有旧交换、
+  索引、询价守护。REG-3b 单列 ExchangeCapable 与 searchSources 搬迁。
+- 不建 REG-5 的通用 module_api/testing.dart / analyzer 全仓套件；测试落点
+  `apps/muyon/test/reg3a_module_v2_test.dart`，复用已有范围差分、对象页、
+  module_lifecycle、导入恢复与 inquiry / north-star suites。
+
+## 需明确的契约缺口
+
+REG-2 的 v2 knowledge/models scoped facade 尚未实现；保持 optional 请求且
+policy 拒绝，绝不授予完整 gateway/ToolRegistry。撤销任何请求都应持续阻止
+模块重新激活；宿主合法重新授予只能清除撤销并重算既有策略，不能提升权限。
+
+Q10 已批准本机 exportReport/exportClaimDrafts，但当前 ExternalToolSpec 的
+DestinationRule/NetworkPolicy 只接受有 host 的网络 URI；本机路径的目标
+选择与允许根目录契约缺失。本片不猜 destination、不伪装为 write，也不改成
+网络请求；覆盖清单保持 deferred，交父任务明确本机 export 门面后续。
+其余本机写工具按已批准方向逐步补齐，不把 GROK 草稿的建议 ID 当成已注册。
+
+## 验证与门禁
+
+运行 `bash scripts/ci.sh`（所有 analyze / package tests）；重点新增测试核对
+契约、原 descriptor、范围外参数拒绝、无确认不写、单次确认回执、撤销立即 / 
+重启拒绝、合法重授权恢复、磁盘变化与范围差分。保持 ADR §10.3 既有测试。
+若旧测试断言 v1 授予整 gateway，只更新为 v2 明确拒绝的安全断言，记录原因。
+
+环境初探：Git 可读远端；GitHub HTTPS 200；无 Flutter/Dart；官方 storage
+下载端点 HTTP 403；gh token 无效。不绕过下载限制，不把静态检查称为运行测试。
+本地失败如实记录；已授权任务分支 push 触发远端 CI，核 exact SHA / 终态。
+若远端认证失败，保留提交并报告具体动作阻塞；原始日志仅 /tmp，不提交。
+
+## 后续与交接
+
+REG-3b：交换接口及检索迁移（不擅自补设备收发）。REG-3a 后续：其余本机
+写入、Q10 本机导出门面。REG-5：源码枚举与完整通用契约覆盖门禁。
+独立审查由非作者按 REVIEW.md 执行；父任务决定是否集成，不能自授批准。
