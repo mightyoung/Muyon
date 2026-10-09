@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muyon_ui/dynamic_ui.dart';
+
+import '../../../packages/muyon_ui/test/dynamic_fixtures.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
@@ -105,4 +108,29 @@ void main() {
     );
     expect(await store.save(value(2), expectedRevision: 1), isFalse);
   });
+  test('two_real_store_instances_reject_losing_projection_and_keep_input', () async {
+    final plan = actionPlan();
+    final firstStore = HostUiWorkspaceStore(repo, taskId: 'task');
+    final secondStore = HostUiWorkspaceStore(repo, taskId: 'task');
+    final first = await UiWorkspaceController.open(
+      store: firstStore, taskId: 'task', scopeKey: firstStore.scopeKey!, plan: plan,
+    );
+    final second = await UiWorkspaceController.open(
+      store: secondStore, taskId: 'task', scopeKey: secondStore.scopeKey!, plan: plan,
+      onEvent: (_) async => fail('A conflicting projection must never dispatch'),
+    );
+    addTearDown(first.dispose);
+    addTearDown(second.dispose);
+    final field = plan.plan.nodes.firstWhere((n) => n.component == 'Field');
+    await first.surface.dispatch(first.surface.eventFor(field, 'change', 'winner'));
+    await first.flush();
+    final committed = (await firstStore.load(plan.plan.surfaceId))!.toJson();
+    await second.surface.dispatch(second.surface.eventFor(field, 'change', 'unsaved loser'));
+    await expectLater(second.flush(), throwsStateError);
+    expect(second.readOnly, isTrue);
+    expect(second.saveError, isNotNull);
+    expect(second.surface.session.userOverrides['quantity'], 'unsaved loser');
+    expect((await secondStore.load(plan.plan.surfaceId))!.toJson(), committed);
+  });
+
 }
