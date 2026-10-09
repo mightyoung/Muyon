@@ -1,5 +1,7 @@
 # 设计稿 v6（目标稿）
 
+> **2026-10-09：页面结构与导航已作废**，以 [AI 原生界面方案](../ai-native-ui-redesign-2026-10-09.md) 为准：以对话为中心，底栏 4 项（助手 · 任务 · 资料 · 设置），插件页面冻结为固定入口。本稿只保留视觉层（token、组件外观、深浅色）；[前端开发备忘录](../v6/frontend-memo.md)仍然有效。不要按本稿的导航和页面布局施工。
+
 来源：Claude Design 第七轮产出（按 [第七轮提示词](../v5/prompts/claude-design-prompt-round7.md)）。用户 2026-10-07 放在本机 `docs/design/claude-design/v6/`，原样入库，稿件内容没有改动。
 
 - **地位**：取代 [v5](../v5/README.md)，是 UI 重做的**最终设计参考**。稿内的错误以[前端开发备忘录](frontend-memo.md)为准。UI-1（设计系统）以本目录的 [tokens.md](tokens.md)、[components.md](components.md) 为准。与 [UI 重设计方案](../ui-redesign-brief-2026-10-06.md) §8 冲突时，以方案为准。

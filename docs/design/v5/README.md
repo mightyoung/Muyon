@@ -1,5 +1,7 @@
 # 设计稿 v5（目标稿）
 
+> **2026-10-09：页面结构与导航已作废**，以 [AI 原生界面方案](../ai-native-ui-redesign-2026-10-09.md) 为准：以对话为中心，底栏 4 项（助手 · 任务 · 资料 · 设置），插件页面冻结为固定入口。本稿只保留视觉层（token、组件外观、深浅色）；[前端开发备忘录](../v6/frontend-memo.md)仍然有效。不要按本稿的导航和页面布局施工。
+
 来源：Claude Design 第五、六轮产出（按 [v4 第五轮](../v4/prompts/claude-design-prompt-round5.md)、[第六轮](../v4/prompts/claude-design-prompt-round6.md)提示词）。用户 2026-10-07 放在本机 `docs/design/claude-design/v5/`，原样入库，稿件内容没有改动。
 
 - **地位**：已被 [v6](../v6/README.md) 取代（第七轮修正后）。原为取代 v4 的目标稿。与 [UI 重设计方案](../ui-redesign-brief-2026-10-06.md) §8 冲突时，以方案为准。
