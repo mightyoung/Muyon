@@ -1,4 +1,4 @@
-# AIUI-3 F3a 交接（实现与验证进行中）
+# AIUI-3 F3a 交接（纯计算交付；验证结果见精确提交 CI）
 
 冻结基线：`0466f113fd7dd41f99c38cef11eca428622a6fac`。任务书 AIUI-3 与 AIUI-NEXT-BATCH-CONTRACTS 相对 `82df0f29d9628d107d96d52795438e972ce5fefe` 无差异。开工远端无同任务分支/开放 PR；工作分支 `task/aiui-3-local-formulas`，draft PR #8。未找到 AGENTS.md；已读 REVIEW、正式 aiui-stream/1 与定价/预算/字段校验源。
 
@@ -23,7 +23,7 @@
 | ui.product_decimal | 宿主声明数量与单位价的量纲；不推断转换关系 | 件 × CNY/件 → CNY；supplier multiply，微量半值远离零，舍入一次 |
 | inquiry.tax_price | 同一quote身份的价格/币种/税口径/税率/成交价事实，加预声明目标税口径；薄调用priceInTaxMode | 目标币种/报价单位；税转换仅一次舍入，跨币种、不明税口径、转换缺税率不可用 |
 | inquiry.margin_amount | 宿主已按现有预算次序算出的销售额与成本引用 | 金额单位（CNY），精确减法，负毛利保留，不输出百分比 |
-| inquiry.markup_unit_price | **已有budget.unitPrice事实的引用登记/对照** | 原预算单位价canonical String；未实现加价参数预览 |
+| inquiry.markup_unit_price | **已有BudgetLine.unitPrice事实的引用登记/对照** | 原预算单位价canonical String，允许既有加价计算增加整数宽度（仍受字节上限、unsigned和6位小数约束）；未实现加价参数预览 |
 
 supplier_core helper 建议（外部依赖，不在此分支实现）：提取预算现有单位加价计算为公开纯函数，输入 unitCost/markupRate/explicitUnitPrice；显式单价优先，其余保持预算现有正值舍入顺序。让 Store.budget 调用同一 helper，先单位价舍入，再乘每行数量，再求和；新增纯函数与 Store.budget 对照，包括0.1→0.1125、10.333333→11.625、显式6覆盖，以及正微量半值。AIUI-3 待 owner 完成后薄调用，不复制预算公式。
 
@@ -33,7 +33,7 @@ F3b / AIUI-5 仍负责编辑调度、immutable新快照、重校验、状态迁�
 
 ## 验证证据
 
-待云端 RED/GREEN、变异与最终 SHA 审查后更新；原始日志不入库。
+有效RED：`54fc41413fc9055694b65bb04745d4a6d8969e8b`，PR Actions `37974876914` 的合并测试树与分支树相同。25个新增行为测试失败（ready/实际invalid、税113/实际null、错误码not_implemented等），没有loader错误；原有host1284通过/3skip，其余7套件通过。host analyze 只有占位_formula未使用warning。首轮83f3ef6的loader错误不是有效RED。实现后的GREEN及4项真实源变异由本提交现有Actions全仓门禁执行，最终状态附PR交接；原始日志不入库。
 
 本地 SDK：Flutter/Dart 不存在，未下载或绕过限制；实际 `bash scripts/ci.sh` 停于pub get，输出 `flutter: command not found` / `CI SUMMARY: FAILED (pub get)`。本地 Flutter analyze/专项/领域/全仓未运行；既有 Actions 将在精确提交执行各包完整suite，覆盖指定pricing/unit/store/research revision回归。
 

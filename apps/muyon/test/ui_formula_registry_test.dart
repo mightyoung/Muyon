@@ -104,6 +104,12 @@ void main() {
       for (final line in budget.lines) {
         ready(evaluate(d, snapshot({'budget_unit_price': value('budget_unit_price', line.unitPrice, 'CNY/件')})), line.unitPrice, 'CNY/件');
       }
+      store.save('project', {...store.get('project', project)!.data, 'markup_rate': '1000'}, id: project);
+      store.save('project_item', fixtures.item(project, 'other', name: 'wide', cost: '999999999999'));
+      final wide = store.budget(project, withWarnings: false).lines.last.unitPrice;
+      expect(wide, '10999999999989');
+      ready(evaluate(d, snapshot({'budget_unit_price': value('budget_unit_price', wide, 'CNY/件')})), wide, 'CNY/件');
+
     } finally {
       store.close();
       dir.deleteSync(recursive: true);
@@ -257,5 +263,22 @@ void main() {
     rejected(evaluate(d, quote()), UiFormulaStatus.invalid, 'invalid_definition');
     final mixed = UiFormulaDefinition.taxPrice(computationId: 'tax', price: fact('price', 'CNY/件'), currency: fact('currency', 'currency'), taxMode: fact('tax_mode', 'tax_mode'), taxRate: const UiFormulaSlot.fact('tax_rate', object: ObjectRef(moduleId: 'inquiry', objectType: 'quotation', objectId: 'other'), field: 'tax_rate', unit: '%'), dealPrice: fact('deal_price', 'CNY/件'), targetTaxMode: const UiFormulaSlot.uiState('target', unit: 'tax_mode'), targetCurrency: 'CNY', quoteUnit: '件');
     rejected(evaluate(mixed, quote()), UiFormulaStatus.invalid, 'invalid_definition');
+  });
+
+  test('margin_accepts_real_budget_totals_wider_than_domain_fields', () {
+    final dir = Directory.systemTemp.createTempSync('formula-wide-budget-');
+    fixtures.tmp = dir;
+    final store = fixtures.device('wide-formula');
+    try {
+      final project = store.save('project', fixtures.project('wide', markup: '0'));
+      store.save('project_item', fixtures.item(project, 'other', name: 'wide', qty: '3', cost: '999999999999'));
+      final budget = store.budget(project, withWarnings: false);
+      expect([budget.cost, budget.price, budget.margin], ['2999999999997', '2999999999997', '0']);
+      final d = UiFormulaDefinition.marginAmount(computationId: 'wide-margin', sales: fact('sales', 'CNY'), cost: fact('cost', 'CNY'), currency: 'CNY', decimalPolicy: domainDecimal);
+      ready(evaluate(d, snapshot({'sales': value('sales', budget.price, 'CNY'), 'cost': value('cost', budget.cost, 'CNY')})), budget.margin, 'CNY');
+    } finally {
+      store.close();
+      dir.deleteSync(recursive: true);
+    }
   });
 }
