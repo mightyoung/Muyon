@@ -182,6 +182,16 @@ Never _badArgument(String field, String reason) =>
     throw _InvalidToolArguments('$field: $reason');
 
 void _validateToolArguments(String name, Map<String, Object?> arguments) {
+  // The String compatibility interface historically accepts numeric quantity
+  // and truncates/clamps numeric limits. Validate their existing conversions;
+  // host calls still pass through the host's strict schema before dispatch.
+  arguments = {
+    ...arguments,
+    if (name == 'quote_options' && arguments['qty'] is num)
+      'qty': '${arguments['qty']}',
+    if (arguments['limit'] case final num limit when limit.isFinite)
+      'limit': limit.toInt(),
+  };
   final definition = agentTools
       .where((t) => (t['function'] as Map)['name'] == name)
       .firstOrNull;

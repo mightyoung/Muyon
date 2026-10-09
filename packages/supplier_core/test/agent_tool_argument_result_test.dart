@@ -73,6 +73,55 @@ void main() {
       AgentToolStatus.failed,
     );
   });
+  test('legacy quote_options accepts numeric demand quantity', () {
+    final supplierId = store.save('supplier', supplier('supplier'));
+    final productId = store.save('product', product('pump'));
+    final projectId = store.save('project', project('project'));
+    store.save('quotation', quotation(supplierId, productId, projectId, '20'));
+    final result = store.runToolResult(
+      'quote_options',
+      jsonEncode({'project_id': projectId, 'product_id': productId, 'qty': 2}),
+    );
+    expect(result.status, AgentToolStatus.succeeded);
+    expect(result.data, isA<List>());
+    expect(
+      jsonDecode(
+        store.runTool(
+          'quote_options',
+          jsonEncode({
+            'project_id': projectId,
+            'product_id': productId,
+            'qty': 2,
+          }),
+        ),
+      ),
+      result.data,
+    );
+  });
+  test('legacy fractional limit truncates and clamps as before', () {
+    store.save('product', product('first'));
+    store.save('product', product('second'));
+    for (var i = 0; i < 55; i++) {
+      store.save('product', product('product $i'));
+    }
+    for (final limit in [1.8, -1.8, 0.0, 50.8]) {
+      final result = store.runToolResult(
+        'query',
+        jsonEncode({'type': 'product', 'limit': limit}),
+      );
+      expect(result.status, AgentToolStatus.succeeded);
+      expect((result.data as Map)['returned'], limit == 50.8 ? 50 : 1);
+      expect(
+        jsonDecode(
+          store.runTool(
+            'query',
+            jsonEncode({'type': 'product', 'limit': limit}),
+          ),
+        ),
+        result.data,
+      );
+    }
+  });
   test(
     'successful raw data is unchanged through the compatibility interface',
     () {
