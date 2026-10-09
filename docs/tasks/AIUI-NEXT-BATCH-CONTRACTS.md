@@ -49,10 +49,13 @@ git ls-tree -r --name-only <SHA> docs/tasks/AIUI-3.md docs/tasks/AIUI-4.md docs/
 | F5a | AIUI-5 / Codex或被派执行者 | 33组件映射表、harness fixture/模板退路、待采纳契约建议与负例 | typed/collection/row身份正式决定前只提交建议和诊断，不改正式schema | 契约差异、兼容/拒绝矩阵、合法完整snapshot/plan金样 |
 | F5b | AIUI-5 | 采纳后在同runtime实现typed编辑、codec、renderer、stream/provider | AIUI-1/2精确已审基线；F5a正式决议 | 全33组件生产消费/事件/坏流可执行测试及最小失败记录 |
 | F3b+F5c | AIUI-3纯计算 + AIUI-5编排 | 计算缓存/依赖失效与新快照联调 | F3a输出协议＋F5a决定 | 本地编辑→重算→新plan→CAS保存/返回，不调用模型/业务工具 |
-| F4b | AIUI-4联调 | 新壳接F5输出，移动/桌面完整返回 | F5b/c、新catalog恢复就绪 | 导航、编辑、详情、刷新、pending receipt、插件失效闭环 |
+| F4b | AIUI-4 / 旧链路恢复 | 旧dynamic已验证plan的真实SQLite返回、CAS冲突、pending回执与生命周期 | 现有store/anchor/router即可，不等待F5b/c | 旧链路现场保存/返回/重开行为与负例 |
+| F4c | AIUI-4联调 | 新壳接F5输出，移动/桌面完整返回 | F5b/c、新catalog恢复就绪 | 导航、编辑、详情、刷新、pending receipt、插件失效闭环 |
 | 后续业务/设备 | AIUI-6/7/9、REG-4c、R-1 | 工具/本体与实机证据按独立任务 | 上述接口与真实模块工具 | 正式tool mapping/授权/真实回执，设备golden/读屏/模型结果单列 |
 
 文件所有权：AIUI-3独占拟新增公式registry/evaluator与业务薄适配文件及其测试；AIUI-4独占 `screens/platform_shell.dart` 等外壳与导航widget测试；AIUI-5独占共有 `plan/validation/state/workspace`、`dynamic/surface/workspace`、`assistant/ui_planning` 的契约接线与测试。`lib/ui_contract.dart` export等共有文件由唯一集成负责人顺序合入，其他分支以小补丁交接，不共享工作树并发改写。AIUI-4调用稳定store/navigation接口；需要新增恢复字段时由AIUI-5接收测试用例后实施。
+
+测试文件唯一owner：`apps/muyon/test/dynamic_workspace_return_test.dart` 与 `apps/muyon/test/ui_workspace_store_test.dart` 均由 **AIUI-4** 独占修改，AIUI-5仅只读复跑；AIUI-5新目录/typed/集合恢复新增断言放其独占新文件 `apps/muyon/test/ui_bound_workspace_recovery_test.dart`。若确需在上述两个既有文件补测试，AIUI-5交单独补丁给AIUI-4 owner顺序应用，不同时改写。
 
 ## 3. 已确认缺口逐项负责人及可执行验收
 
@@ -65,7 +68,7 @@ git ls-tree -r --name-only <SHA> docs/tasks/AIUI-3.md docs/tasks/AIUI-4.md docs/
 | Checklist index,bool与fact edit | L boundary:95–132 | F5a/b/c | fact只读；可编辑项必须host声明uiState与stable itemid，重排后编辑同项；删除项/跨scope拒绝；保存恢复语义不漂移 |
 | 新21组件未接renderer | L surface:562 | F5b | 33组件各一合法原始plan通过validator→真实renderer与semantic等价物；所有事件实测，不用直接Widget样例代替 |
 | 本地公式不自动重算 | current snapshot final/identity | F3a/b+F5c | edit只影响host声明参数；公式输出绑定新投影版本，旧computed/旧action不可再派发；未提交业务值不变 |
-| 新目录与typed/集合恢复 | scalar workspace、局部Tabs/Disclosure State | F5c，F4b消费 | 新plan往返CAS重开+导航返回保人工覆盖/稳定节点；未知codec/catalog/schema可读旧稿，不重放已成功动作 |
+| 新目录与typed/集合恢复 | scalar workspace、局部Tabs/Disclosure State | F5c，F4c消费 | 新plan往返CAS重开+导航返回保人工覆盖/稳定节点；未知codec/catalog/schema可读旧稿，不重放已成功动作 |
 | 动作真实业务mapping为空 | UiBusinessAction仅测试实例 | AIUI-6/REG-4c，F5保持路由边界 | 模型只引用已登记动作；宿主选择tool/参数，审批与实际receipt决定成功，旧operation/replay/taint拒绝；F5夹具不得称实业务 |
 | Tabs shrink | 审计L layout:214/271；后续4e45836修复 | AIUI-2收尾已在别分支，F5/F4加集成回归 | third→one→empty→again同State不越界；F5稳定nodeid更新后选择按host状态政策恢复。此分支不重复修产品 |
 | 文档JSONL非合法library金样 | stream§2缺label/fact rows/highlight/select | F5a/b | 固定完整catalog version+host session/snapshot的合法JSONL及每个坏例；上位示意不当可执行fixture |

@@ -29,13 +29,23 @@
 
 AIUI-5 独占跨任务共享接线：`muyon_module_api/lib/src/ui/plan.dart`、`validation.dart`、`state.dart`、`workspace.dart`；`muyon_ui/lib/src/dynamic/surface.dart`、`workspace.dart`；`apps/muyon/lib/assistant/ui_planning.dart`。AIUI-3 只新增纯公式 registry/evaluator、业务薄适配与测试，禁止双方同时改共享controller。AIUI-5负责唯一controller的 recompute、不可变snapshot生成、plan重新验证与状态兼容钩子，调用AIUI-3纯接口。
 
-现有 `UiSessionState.snapshot` 为 final，接受计划要求 same snapshot identity；computed resolve 只读取原快照的结果，编辑UI state并不会自动重新计算。任务必须显式扩展这一条共享链路：合法typed edit→冻结输入/来源版本→宿主公式评估→新不可变snapshot与新计算结果→当前plan/intent/catalog重新validate→原controller协调兼容状态后原子发布。计算失败、版本竞争或计划失效保留旧可读界面/人工覆盖并给出降级原因；不得原地改fact、伪造计算值或另建session替身。新snapshot保留稳定节点/集合项identity，重新核对actionContext/draft修订，旧待确认动作不能继续用过期计算版本。
+现有 `UiSessionState.snapshot` 为 final，接受计划要求 same snapshot identity；computed resolve 只读取原快照的结果，编辑UI state并不会自动重新计算。任务必须显式扩展这一条共享链路：合法typed edit→冻结输入/来源版本→宿主公式评估→新不可变snapshot与新计算结果→依据当前语义构造匹配新snapshotRef的新intent/plan并与catalog重新validate→原controller协调兼容状态后原子发布。计算失败、版本竞争或计划失效保留旧可读界面/人工覆盖并给出降级原因；不得原地改fact、伪造计算值或另建session替身。新snapshot保留稳定节点/集合项identity，重新核对actionContext/draft修订，旧待确认动作不能继续用过期计算版本。
 
 宿主 `computationId` 是当前计算实例/结果绑定的标识，registry `formulaId` 是登记公式定义的标识；请求、结果、重算和恢复必须区分两者，不能把模型给的公式名当成已有可信结果。公式结果仍由宿主计算，并由AIUI-3声明来源/inputVersion与错误；typed编辑、finite-number和collection方案依采纳关口实施，不在草案锁定新版schema字符串。
+
+测试文件边界：既有 `apps/muyon/test/dynamic_workspace_return_test.dart` 和 `apps/muyon/test/ui_workspace_store_test.dart` 的唯一修改owner为AIUI-4；本任务只读复跑，新目录/typed/集合恢复断言放独占拟新增 `apps/muyon/test/ui_bound_workspace_recovery_test.dart`，确需补旧文件则交AIUI-4顺序应用。
 
 追加拟新增 `packages/muyon_ui/test/ui_recompute_integration_test.dart`：`typed_edit_recomputes_through_registered_formula_and_revalidates_plan` 断言实际唯一controller编辑后产生新不可变snapshot、结果inputVersion正确、绑定显示更新；`stale_formula_result_and_failed_revalidation_preserve_readable_overrides` 断言晚到结果/失败不覆盖人工编辑、不能启用旧业务确认；`formula_definition_id_is_not_computation_instance_id` 断言不混用两个ID。该专项用公开host输入与纯AIUI-3 evaluator，无模型调用。
 
 拟新增纯接口 `packages/muyon_module_api/lib/src/ui/recomputation.dart`（同样须采纳，不是假定已实现）：`UiRecomputePort.rebuild(UiRecomputeInput input) -> Future<UiRecomputeResult>`。输入固定为`previousSnapshot:DataSnapshot`、`currentUiState:Map<String,Object?>`、`observedDraftRevision:int`；输出为`baseSnapshotRef:SnapshotRef`、`observedDraftRevision:int`、`nextSnapshot:DataSnapshot?`及`errors:List<String>`。接口不接受formula表达式、工具名、路由或新权限。host adapter调用AIUI-3 `UiFormulaRegistry.evaluate`、由宿主revision allocator构造nextSnapshot，纯UI包不依赖apps/supplier/research。现有`UiSurfaceController.dispatch(UiEvent) -> Future<UiDispatchOutcome>`签名保持；可选注入recompute port，在同一dispatch后处理输入变化，发布前比较输入快照/草稿修订、重验证intent/catalog/整树并撤销过期能力。旧provider和无port模式保持原行为；需要跨snapshot更换session时在同controller里显式迁移经过校验的覆盖/视图值，而不是修改final字段或复制一个竞争runtime。
+
+### 2.2 F5a同版本构造责任与最小例子
+
+F5a契约提案必须把以下宿主职责写成一个原子发布批次；正式采纳后由AIUI-5的host adapter实现，AIUI-3只提供纯evaluate，模型不能分配版本或构造intent。宿主先冻结事实来源版本、当前允许state和observedDraftRevision，分配nextSnapshot.ref，**用该新版本的真实输入快照重新计算**；`ComputedValue.inputVersion`必须等于最终nextSnapshot.ref。宿主再从当前scope/permissions和必显要求构造匹配 `snapshotRef` 的新InteractionIntent，并重建匹配snapshotRef/intentRef且surface revision递增的新UIPlan，整树validate后才迁移兼容现场、原子替换能力。actionContext/operation必须由宿主重新核对；新intent不扩大allowedActionRefs，不复用过期授权。发布前若baseSnapshotRef、draftRevision或权限已改变，该整批结果作stale丢弃。
+
+最小只读例子（fixture中的数值来自宿主）：旧S7=`SnapshotRef('quote-view',7)`，facts.price='10'、state.qty='2'，computed.total='20'/inputVersion=S7；I7.snapshotRef=S7，P11.snapshotRef=S7、intentRef=I7.id、revision=11。用户合法把qty改成'3'后，宿主建立输入S8=`SnapshotRef('quote-view',8)`（保持price真实来源版本、带当前qty='3'），调用AIUI-3重新求积得到'30'；最终S8.computations.total='30'/inputVersion=S8。随后构造I8.snapshotRef=S8、P12.snapshotRef=S8/intentRef=I8.id/revision=12，用(S8,I8,原目录) validate P12。只把旧'20'的inputVersion改成S8，或S8搭配I7/P11，均不算重算，不能发布为当前成功界面。
+
+在 `ui_recompute_integration_test.dart` 增加 `next_snapshot_computation_intent_and_plan_are_one_versioned_projection`：实际编辑2→3后断言30、新snapshot/inputVersion/intent.snapshotRef/plan.snapshotRef完全一致、plan.intentRef匹配新intent、surface revision递增且原source版本不伪造；`relabelled_old_result_or_mixed_version_intent_is_not_published`：携旧qty=2输入fingerprint的缓存20仅重标inputVersion=S8，以及混配I7，分别拒绝、无新动作能力，原人工草稿仍保留。公式失败后的当前发布策略严格按AIUI-3状态表，不保留旧成功计算值冒充当前值。
 
 collection建议初版常量（待采纳，非现行正式schema）：200行/项、32列、深度4、单字符串4KiB、单集合64KiB UTF-8；编码后的大小也受限。复用边界常量作N-1/N/N+1测试，slot与scope失效整组拒绝。总surface规模仍同时遵守stream/1及plan已有上限，较严格者优先；不能因允许host集合扩大模型行上限。
 
@@ -84,7 +94,7 @@ collection建议初版常量（待采纳，非现行正式schema）：200行/项
 | 拟新增 `apps/muyon/test/ui_planning_stream_test.dart` | `stream_preview_has_zero_action_capability_until_valid_end`：最后end前点击任何local/business/semantic均零状态变化/零sink；有效end及当前状态复核后才通过共享surface；`bad_line_incomplete_limit_and_unknown_contract_use_trusted_fallback`：逐种错误无final capability、原答案完整、required/mandatory可信绑定保留；`stale_host_state_at_end_rejects_final_capability`。 |
 | 已有 `apps/muyon/test/ui_planning_harness_test.dart` | `planning_prompt_examples_compile_against_actual_catalog`：抓取loopback prompt并实际编译随附公共样例，与请求目录完整匹配；`auto_and_explicit_stream_share_one_provider_and_budget`：同时自动/显式仅一个实际fixture/loopback发送、完整问答/目录仍在请求；`missing_local_provider_never_sends_online`；`both_modes_use_same_bound_plan_renderer_and_router`；既有planner failure/current authority变化用例继续通过。 |
 | 已有 `packages/muyon_module_api/test/ui_workspace_test.dart`、`packages/muyon_ui/test/workspace_controller_test.dart` | `typed_collection_state_roundtrips_without_losing_user_overrides`：编辑→patch→save/load→当前validate→restore后类型、IDs、manual覆盖与draft修订保持；`old_catalog_upgrade_preserves_readable_draft_and_disables_incompatible_events`：旧版本/未知新版/绑定变化不丢字节；`incomplete_preview_is_not_restored_as_actionable_final_plan`。 |
-| 已有 `apps/muyon/test/ui_workspace_store_test.dart`、`dynamic_workspace_return_test.dart` | `native_bound_plan_reopen_preserves_ids_and_rechecks_scope_receipts`：真实临时SQLite重开/CAS冲突/保存失败保旧值，scope变化不恢复权限；unknown operation恢复零invoke、零model；返回/重开保持编辑位置。 |
+| 拟新增 `apps/muyon/test/ui_bound_workspace_recovery_test.dart`（AIUI-5独占） | `native_bound_plan_reopen_preserves_ids_and_rechecks_scope_receipts`：真实临时SQLite重开/CAS冲突/保存失败保旧值，scope变化不恢复权限；unknown operation恢复零invoke、零model；返回/重开保持编辑位置。 |
 | 已有 `apps/muyon_ui_preview/test/planning_preview_test.dart`、`workspace_restore_test.dart`；已有 `scripts/ui_preview/workspace_smoke.mjs` | `public_stream_plan_and_restore_use_same_contract`：公开fixture调用与生产同一适配入口；实际浏览器刷新/返回若可用另记证据，fixture recreation/widget不替代浏览器或原生SQLite；浏览器保存失败显示可读错误且不重放事件。 |
 | 已有 `packages/muyon_ui/test/component_library_goldens_test.dart`、`ui_components_test.dart` | 新增bound-plan映射回归与旧直接Widget金样并列；200%字体、48点击区、语义标签仍成立。不能仅更新PNG使失败消失；不同平台漂移按既有规则记录。 |
 
@@ -107,7 +117,9 @@ flutter test
 
 # apps/muyon
 flutter analyze --fatal-infos
-flutter test test/ui_planning_stream_test.dart test/ui_planning_harness_test.dart test/ui_planning_events_test.dart test/ui_workspace_store_test.dart test/dynamic_workspace_return_test.dart
+flutter test test/ui_planning_stream_test.dart test/ui_planning_harness_test.dart test/ui_planning_events_test.dart test/ui_bound_workspace_recovery_test.dart
+# AIUI-4拥有下列两个既有文件，AIUI-5仅只读复跑，新增断言交owner补丁：
+flutter test test/ui_workspace_store_test.dart test/dynamic_workspace_return_test.dart
 flutter test
 
 # apps/muyon_ui_preview

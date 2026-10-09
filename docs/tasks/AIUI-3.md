@@ -36,10 +36,23 @@ GROK-7 §0 旧汇总写 8，但 §4 逐项表与 §6 均为 **9**；本任务按
 1. 首批输入仅 fact / uiState 引用；事实必须存在且对象/字段身份有效，用户状态键必须由 snapshot.initialUiState 预声明，由宿主用现有 session.resolve 冻结当前值后交纯 evaluator。禁止原始字面值、sourceSpan、任意路径查询、模型对象以及递归 computed 依赖；需要依赖 computed 的 DAG 留后续正式契约。
 2. 区分 registry 固定名称/版本（formulaId）与宿主某次实例稳定 id（computationId）；两者不能互相冒充。
 3. 金额/数量/百分数用校验过的 decimal String；数值科研指标用 finite num。单位、币种、税口径、指标单位/同修订身份由宿主 fact 和登记许可提供，不从模型文案猜测。输出金额保持 canonical decimal String（最多6位小数），科研数值为 finite num，计数为 int；scalar 规则保持。
-4. 推荐宿主侧结果带状态 `ready / unavailable / invalid / stale` 和稳定错误码，**不直接修改 ComputedValue 正式类型**。ready 才写入 ComputedValue；合法但不可计算（缺值/零分母/不可换币种）允许明确的 null ComputedValue 并在旁路诊断注明原因；invalid/stale 不发布为有效新结果。不要把错误对象当 scalar，也不要用0冒充缺值。
+4. 推荐宿主侧结果带状态 `ready / unavailable / invalid / stale` 和稳定错误码，**不直接修改 ComputedValue 正式类型**。状态与发布策略按下表统一；null不是0，计算不可用/非法/过期时不得让旧成功结果继续占据当前计算槽。不要把错误对象当scalar。
 5. `inputVersion` 绑定本次 snapshot.ref，computationId 是宿主声明的稳定实例 id。**现有 runtime 不支持自动重算/换快照**：UiSessionState.snapshot 是 final，resolve(computed) 只读 snapshot.computations；UiSurfaceController.acceptPlan 要求相同 snapshot/intent/catalog identity。AIUI-3 只提供纯 registry/evaluator 和宿主声明实例、依赖引用，fact 版本和当前 typed state fingerprint 必须作为宿主计算依据显式记录（fingerprint 格式是待 owner 采纳建议，不更改正式 ComputedValue）。fact 或用户参数变化后的 immutable snapshot 新 revision、重校验、controller 刷新/草稿焦点保留钩子交 **AIUI-5 复用扩展唯一 runtime**；不能沿用旧 inputVersion 或旧 ValidatedUiPlan/operation 授权能力。snapshot.copyWith 现有仅支持 computations/sourceDigests，不假定它能更新initialUiState。API state/validation/plan/workspace及现有controller文件由AIUI-5独占，本任务不改。
 6. 拒绝 unknown formula / unknown slot / unknown ref / wrong kind / wrong type / unit mismatch / nonfinite / oversized input；用户字段格式不合法保留用户草稿并降级，不能回写成0。事实状态 readFailed/conflict/notDisclosed 不当可信数值；unverified 可以计算但宿主保留来源与未核验标记，不能升级成 verified。
 7. collection 项只接受宿主已验证的有限投影：首批可由宿主选定固定 scalar 引用组；集合/行/项 codec 未采纳前，不接 List/Map 快照绑定、不接受 JSON 字符串伪装集合、不把列表下标当业务对象。推荐待采纳初版上限：单实例32输入槽、单decimal字符串256 UTF-8字节、单实例输入16 KiB；统一常量测试31/32/33槽、255/256/257字节及总字节边界。现有领域格式/精度/正负规则优先，不能因为低于该上限就接受原业务非法输入。
+
+### 计算状态 → 当前结果发布策略
+
+由AIUI-3返回状态与旁路诊断，由AIUI-5按同版本构造批次发布；下表不新增正式ComputedValue字段。
+
+| 状态 | 当前计算槽策略 | 文字/动作行为 |
+|---|---|---|
+| ready | 发布本次真实重算的非null合法scalar及新inputVersion；合法0/false可发布，不变成null | 显示本次值；动作仍须整树校验及既有宿主授权 |
+| unavailable | 缺值、零分母或不支持口径是合法输入但不可计算：新快照对该宿主声明计算槽发布明确 `ComputedValue(value:null, inputVersion:nextSnapshot.ref, computationId:同实例id)`，同时保留原因诊断 | 显示“暂无/不可计算”及原因，不显示0；需要该结果的动作保持disabled，不保留旧成功值 |
+| invalid | 非法类型/单位/引用/超限：不发布成功ComputedValue，目标当前计算槽移除；不得从旧computations合并回填该槽 | 保留人工输入和错误；若必显绑定不能校验，走只读/文字fallback，旧历史画面须明确过期而非当前成功 |
+| stale | 输入/状态/权限版本竞争：整批候选丢弃，不接纳任何新结果；受影响槽的旧成功值不得作为当前输入版本的结果继续展示或派发 | 保留草稿并标待重算/过期，按最新host输入重新调度；旧历史值只可明确只读归档显示 |
+
+`unavailable` 的null槽只用于已登记的可空输出；不支持可空输出或无匹配正式schema时与invalid一样降级，不静默改schema。AIUI-3纯evaluator断言状态/值/原因；AIUI-5在 `ui_recompute_integration_test.dart` 的 `formula_status_publish_policy_clears_prior_success` 用先ready='20'再依次unavailable/invalid/stale的fixture，断言null、移除或整批拒绝分别符合表，当前值绝非旧'20'或伪0，且业务sink调用0。
 
 ## 首批必须交付（scalar；加价helper作为明确外部依赖）
 

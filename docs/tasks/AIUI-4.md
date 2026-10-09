@@ -66,6 +66,8 @@
 | 扩充 `apps/muyon/test/assistant_subconversation_widget_test.dart` | 保留 `CAS conflict retains panel and pending input`；新增 `shell_child_back_restores_parent_draft_and_scroll` | 实际父输入→打开单层子→子关闭，父draft/scroll相等；子取消/CAS冲突保留输入，不自动send父消息/写工具 |
 | 新增 `apps/muyon/test/conversation_shell_accessibility_test.dart` | `navigation_workspace_and_back_have_48_targets_and_selected_semantics`；`keyboard_focus_returns_to_source_node`；`text_only_keeps_answer_and_fixed_page_fallback_without_new_actions` | 每项目标宽/高≥48；标签/选中状态/返回语义正确；键盘Tab+激活往返焦点到有效源节点或明确fallback；200%模式下完整确认正文；注入text-only后完整文字与固定页面可达，新业务动作0 |
 
+测试所有权：本任务独占修改 `apps/muyon/test/dynamic_workspace_return_test.dart` 和 `apps/muyon/test/ui_workspace_store_test.dart`；AIUI-5可只读复跑，并在其独立 `ui_bound_workspace_recovery_test.dart` 写新目录/typed/集合恢复专项。跨任务需要补现有文件时，由另一方交补丁给本owner顺序应用。F4b是上述旧dynamic恢复片；等待F5b/c的新版联调统一称F4c。
+
 为避免只是测字段相等，返回恢复测试必须通过真实用户动作→实际导航→数据库reload路径；对象页使用真实注册插件的公共fixture，不用两页相同Text冒充对象页。若现有LiveTestWidgets绑定与新增测试不兼容，拆独立文件/CI进程，不能用sleep或跳过核心断言换通过。golden只用于外观，不能替代上述行为测试；新增可共享固定fixture且须标“模拟”。
 
 ## 6. 执行命令与完成证据
