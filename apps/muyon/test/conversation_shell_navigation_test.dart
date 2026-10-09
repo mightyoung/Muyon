@@ -154,6 +154,17 @@ void main() {
     ));
     await mountShell(tester, f);
     final rootState = tester.state(find.byType(AssistantPage));
+    Future<void> backFromPage(String title) async {
+      final appBar = find.widgetWithText(AppBar, title);
+      final back = find.descendant(of: appBar, matching: find.byType(BackButton)).hitTestable();
+      // A registered object route may still be animating above its catalogue.
+      // Exercise the visible page's own button, never a global first match.
+      await workspaceVisible(tester, back);
+      expect(back, findsOneWidget);
+      await workspaceOperation(tester, () => tester.tap(back));
+      await workspaceGone(tester, appBar);
+      await tester.pumpAndSettle();
+    }
     final answerChip = find.widgetWithText(ActionChip, '${ref.moduleId}/${ref.objectType}/${ref.objectId}');
     // SelectableText creates its own scrollables inside history cards. The
     // chip's enclosing scrollable is the history ListView, not those sibling
@@ -173,8 +184,7 @@ void main() {
     await workspaceVisible(tester, find.text('真实研究对象'));
     expect(find.text('真实研究对象'), findsWidgets);
     expect(find.textContaining('研究原始内容'), findsWidgets);
-    await workspaceOperation(tester, tester.pageBack);
-    await tester.pumpAndSettle();
+    await backFromPage('真实研究对象');
     await select(tester, '资料');
     await workspaceOperation(tester, () => tester.tap(find.text('查找业务对象')));
     final item = find.widgetWithText(ListTile, ref.objectId);
@@ -187,10 +197,8 @@ void main() {
     await workspaceVisible(tester, find.text('真实研究对象'));
     expect(find.text('真实研究对象'), findsWidgets);
     expect(find.textContaining('研究原始内容'), findsWidgets);
-    await workspaceOperation(tester, tester.pageBack);
-    await tester.pumpAndSettle();
-    await workspaceOperation(tester, tester.pageBack);
-    await tester.pumpAndSettle();
+    await backFromPage('真实研究对象');
+    await backFromPage('业务对象目录');
     await select(tester, '助手');
     expect(tester.state(find.byType(AssistantPage)), same(rootState));
     expect(find.text('公开对象引用回答'), findsOneWidget);
