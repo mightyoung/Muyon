@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'action_surface.dart';
 import 'tokens.dart';
+import 'ui_components/state.dart';
 
 enum StatusTone { success, danger, warn, neutral }
 
@@ -53,10 +54,29 @@ enum BusinessStatus {
 }
 
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({super.key, required this.status});
+  const StatusBadge({
+    super.key,
+    required this.status,
+    this.uiState = UiComponentState.ready,
+    this.errorMessage,
+  });
   final BusinessStatus status;
+
+  /// Library state (AIUI-2); [UiComponentState.ready] is the UI-1a badge.
+  final UiComponentState uiState;
+  final String? errorMessage;
+
+  String get textEquivalent => '状态：${status.label}';
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => UiStateGate(
+    state: uiState,
+    textEquivalent: textEquivalent,
+    errorMessage: errorMessage,
+    builder: (context, _) => _badge(context),
+  );
+
+  Widget _badge(BuildContext context) {
     final t = MuyonTokens.of(context);
     final (fg, bg) = switch (status.tone) {
       StatusTone.success => (t.green, t.greenBg),
@@ -97,12 +117,30 @@ class ObjectChip extends StatelessWidget {
     required this.label,
     this.onPressed,
     this.missing = false,
+    this.uiState = UiComponentState.ready,
+    this.errorMessage,
   });
   final String label;
   final VoidCallback? onPressed;
   final bool missing;
+
+  /// Library state (AIUI-2); [UiComponentState.ready] is the UI-1a chip.
+  final UiComponentState uiState;
+  final String? errorMessage;
+
+  String get textEquivalent =>
+      missing ? '对象：$label，${BusinessStatus.deleted.label}' : '对象：$label';
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => UiStateGate(
+    state: uiState,
+    textEquivalent: textEquivalent,
+    errorMessage: errorMessage,
+    builder: (context, interactive) =>
+        _chip(context, interactive ? onPressed : null),
+  );
+
+  Widget _chip(BuildContext context, VoidCallback? onPressed) {
     final text = missing ? '$label，${BusinessStatus.deleted.label}' : label;
     if (missing) {
       final color = MuyonTokens.of(context).ink3;
@@ -140,9 +178,22 @@ class ObjectChip extends StatelessWidget {
 }
 
 class ScopeChip extends StatefulWidget {
-  const ScopeChip({super.key, required this.label, this.objects = const []});
+  const ScopeChip({
+    super.key,
+    required this.label,
+    this.objects = const [],
+    this.uiState = UiComponentState.ready,
+    this.errorMessage,
+  });
   final String label;
   final List<String> objects;
+
+  /// Library state (AIUI-2); [UiComponentState.ready] is the UI-1a chip.
+  final UiComponentState uiState;
+  final String? errorMessage;
+
+  String get textEquivalent =>
+      '范围：$label${objects.isEmpty ? '' : '，${objects.join('、')}'}';
   @override
   State<ScopeChip> createState() => _ScopeChipState();
 }
@@ -150,7 +201,14 @@ class ScopeChip extends StatefulWidget {
 class _ScopeChipState extends State<ScopeChip> {
   bool expanded = false;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => UiStateGate(
+    state: widget.uiState,
+    textEquivalent: widget.textEquivalent,
+    errorMessage: widget.errorMessage,
+    builder: _chip,
+  );
+
+  Widget _chip(BuildContext context, bool interactive) {
     final t = MuyonTokens.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -160,7 +218,9 @@ class _ScopeChipState extends State<ScopeChip> {
           label: '范围：${widget.label}，${expanded ? "收起" : "展开"}',
           background: t.tint,
           foreground: t.deep,
-          onPressed: () => setState(() => expanded = !expanded),
+          onPressed: interactive
+              ? () => setState(() => expanded = !expanded)
+              : null,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

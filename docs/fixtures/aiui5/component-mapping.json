@@ -1,0 +1,3007 @@
+{
+  "status": "draft inventory, not capability acceptance",
+  "baseSha": "0466f113fd7dd41f99c38cef11eca428622a6fac",
+  "count": 33,
+  "currentRendererCases": 12,
+  "componentsWithoutRenderCase": 21,
+  "librarySurfaceFallbacks": 33,
+  "sourceSha256": {
+    "apps/muyon/lib/assistant/ui_planning_events.dart": "c10df46948a39914734c1415a5356107c8710ca1d917d53562f3d01b3f0372b8",
+    "packages/muyon_module_api/lib/src/ui/state.dart": "5d8327572736389cfdaea9a40f506cfc270ed6ba4bd9e94c1462cf0623087624",
+    "packages/muyon_module_api/lib/src/ui/validation.dart": "0c9f1ac56feaee19cbe561334149745470eeac1194c92a28a658d70c79760a6e",
+    "packages/muyon_module_api/lib/src/ui/workspace.dart": "64af10ec5fdaaf62244d27f309c9c9b5e7cad95645e9156f0c2da0d60502be6e",
+    "packages/muyon_ui/lib/src/confirmation.dart": "9a9f8c7ae52bb3fca49bea958f185a4a3b85922913f443e20781fc70306f9be8",
+    "packages/muyon_ui/lib/src/dynamic/catalog.dart": "96378009caefd04e1449e569391b825768c51b79151e088b967f42bbd2f11663",
+    "packages/muyon_ui/lib/src/dynamic/surface.dart": "b7f41738f2439a039a214eb68b7c0e9bd6a1afc6d89dd7b5abe6e95b5e14db89",
+    "packages/muyon_ui/lib/src/dynamic/workspace.dart": "351113bc15426426d432a98a71fac0c8fda33c6447089e08f143c07fae893ed9",
+    "packages/muyon_ui/lib/src/navigation_layout.dart": "59e03b9255ac65b3e74902ba869d34f55768c871a3b830d445fe15fbf258ca06",
+    "packages/muyon_ui/lib/src/primitives.dart": "bf52afc66b71e885d79412eb076fda2770b1bbbe0c5042569ab3f5c55135fa7e",
+    "packages/muyon_ui/lib/src/ui_components/business.dart": "318d58e2c3b57f2f8a286244ff3dc63e2a078ec836d1338b73f1549eeddacea6",
+    "packages/muyon_ui/lib/src/ui_components/data.dart": "9dd1dfb0c3956d22cd2026a0811cff438f0f8aa48485bdb35dac6873e26f6ab4",
+    "packages/muyon_ui/lib/src/ui_components/inputs.dart": "7c3cccafd656add7917cbd01bd4953ad3ff105330aea96e3db6bd97966eeaae5",
+    "packages/muyon_ui/lib/src/ui_components/layout.dart": "8418d25c0e45ecd8c52637ff8120bb21798de1199c39bd048e5659ece8db20ac"
+  },
+  "components": {
+    "PageScaffold": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 9
+      },
+      "schema": {
+        "allowsChildren": true,
+        "properties": {
+          "title": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "title"
+        ],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 336,
+        "symbol": "case 'PageScaffold':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/navigation_layout.dart",
+        "line": 120,
+        "symbol": "class PageScaffold "
+      },
+      "proposedParameters": "title; ordered children -> Column",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "node IDs; scroll/focus",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:PageScaffold"
+    },
+    "Field": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 14
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string",
+          "inputType": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "fact"
+          ],
+          "draft": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "value",
+          "draft"
+        ],
+        "events": {
+          "change": "UiValueType.string"
+        },
+        "eventActions": {
+          "change": [
+            "edit"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 355,
+        "symbol": "case 'Field':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 375,
+        "symbol": "TextFormField("
+      },
+      "proposedParameters": "fact value/state/unit; draft String -> controller.text",
+      "currentPayload": {
+        "change": "UiValueType.string"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "change": [
+          "edit"
+        ]
+      },
+      "actionRoutes": {
+        "edit": {
+          "route": "local",
+          "localAction": "editField",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "String override; fact immutable",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "packages/muyon_ui/test/aiui5_f5a_contract_fixture_test.dart",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Field"
+    },
+    "Table": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 87
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string",
+          "alternateLabel": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "fact",
+            "computed"
+          ],
+          "alternate": [
+            "fact",
+            "computed"
+          ],
+          "sort": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": "collection -> snapshot.collections; stream/2 adoption required; reject ID collision with any scalar namespace; cellStateRefs -> host cellStates",
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 391,
+        "symbol": "case 'Table':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/data.dart",
+        "line": 237,
+        "symbol": "class MuyonTable "
+      },
+      "proposedParameters": "host columns/cells -> rows; current renderer only scalar value/alternate",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "collection IDs/version; sort view only",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "packages/muyon_ui/test/library_contract_boundary_test.dart",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Table"
+    },
+    "SourceList": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 38
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {
+          "source": [
+            "sourceSpan"
+          ]
+        },
+        "requiredBindings": [
+          "source"
+        ],
+        "events": {
+          "tap": "null"
+        },
+        "eventActions": {
+          "tap": [
+            "source"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 422,
+        "symbol": "case 'SourceList':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 437,
+        "symbol": "SelectableText("
+      },
+      "proposedParameters": "sourceSpan -> excerpt; expandedSources by node ID",
+      "currentPayload": {
+        "tap": "null"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "tap": [
+          "source"
+        ]
+      },
+      "actionRoutes": {
+        "source": {
+          "route": "local",
+          "localAction": "expandSource",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "source digest recheck",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:SourceList"
+    },
+    "ObjectChip": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 48
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "fact"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "tap": "null",
+          "back": "null"
+        },
+        "eventActions": {
+          "tap": [
+            "detail"
+          ],
+          "back": [
+            "back"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 443,
+        "symbol": "case 'ObjectChip':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/primitives.dart",
+        "line": 114,
+        "symbol": "class ObjectChip "
+      },
+      "proposedParameters": "label; host fact.object -> trusted detail",
+      "currentPayload": {
+        "tap": "null",
+        "back": "null"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "tap": [
+          "detail"
+        ],
+        "back": [
+          "back"
+        ]
+      },
+      "actionRoutes": {
+        "detail": {
+          "route": "local",
+          "localAction": "openDetail",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        },
+        "back": {
+          "route": "local",
+          "localAction": "back",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "current detailNode; ObjectRef recheck",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:ObjectChip"
+    },
+    "MasterDetail": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 86
+      },
+      "schema": {
+        "allowsChildren": true,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 344,
+        "symbol": "case 'MasterDetail':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/navigation_layout.dart",
+        "line": 204,
+        "symbol": "class MasterDetail "
+      },
+      "proposedParameters": "first child master; remaining children detail Column",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "stable child IDs",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:MasterDetail"
+    },
+    "StatusBadge": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 100
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {
+          "value": [
+            "fact"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 460,
+        "symbol": "case 'StatusBadge':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/primitives.dart",
+        "line": 56,
+        "symbol": "class StatusBadge "
+      },
+      "proposedParameters": "fact state -> tone; value -> label",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "mandatory FactState",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:StatusBadge"
+    },
+    "ScopeChip": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 106
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "fact"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 468,
+        "symbol": "case 'ScopeChip':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/primitives.dart",
+        "line": 180,
+        "symbol": "class ScopeChip "
+      },
+      "proposedParameters": "label/value; host scope -> status",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "scope invalidation readOnly",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:ScopeChip"
+    },
+    "WarnBanner": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 114
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {
+          "value": [
+            "fact"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "tap": "null"
+        },
+        "eventActions": {
+          "tap": [
+            "explain"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 473,
+        "symbol": "case 'WarnBanner':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/confirmation.dart",
+        "line": 380,
+        "symbol": "class WarnBanner "
+      },
+      "proposedParameters": "fact value/state; explain -> semantic",
+      "currentPayload": {
+        "tap": "null"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "tap": [
+          "explain"
+        ]
+      },
+      "actionRoutes": {
+        "explain": {
+          "route": "semantic",
+          "localAction": null,
+          "consumer": {
+            "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+            "line": 30,
+            "symbol": "Future<void> dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "taint/mandatory state; no grant",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:WarnBanner"
+    },
+    "SegmentedPill": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 124
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {
+          "selected": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "selected"
+        ],
+        "events": {
+          "change": "UiValueType.string"
+        },
+        "eventActions": {
+          "change": [
+            "sort"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 412,
+        "symbol": "case 'SegmentedPill':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/primitives.dart",
+        "line": 249,
+        "symbol": "class SegmentedPill "
+      },
+      "proposedParameters": "selected original/value -> position; change String -> sort",
+      "currentPayload": {
+        "change": "UiValueType.string"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "change": [
+          "sort"
+        ]
+      },
+      "actionRoutes": {
+        "sort": {
+          "route": "local",
+          "localAction": "sortRows",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "viewValues; no draft increment",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:SegmentedPill"
+    },
+    "ConfirmCard": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 135
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "fact"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "confirm": "null",
+          "cancel": "null"
+        },
+        "eventActions": {
+          "confirm": [
+            "confirm"
+          ],
+          "cancel": [
+            "cancel"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 482,
+        "symbol": "case 'ConfirmCard':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/confirmation.dart",
+        "line": 70,
+        "symbol": "class ConfirmCard "
+      },
+      "proposedParameters": "host actionContext -> ConfirmItem; real receipt -> status",
+      "currentPayload": {
+        "confirm": "null",
+        "cancel": "null"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "confirm": [
+          "confirm"
+        ],
+        "cancel": [
+          "cancel"
+        ]
+      },
+      "actionRoutes": {
+        "confirm": {
+          "route": "business",
+          "localAction": null,
+          "consumer": {
+            "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+            "line": 30,
+            "symbol": "Future<void> dispatch("
+          }
+        },
+        "cancel": {
+          "route": "local",
+          "localAction": "cancelConfirmation",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "operation refs; no persisted approval",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:ConfirmCard"
+    },
+    "BatchConfirmCard": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 135
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "fact"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "confirm": "null",
+          "cancel": "null"
+        },
+        "eventActions": {
+          "confirm": [
+            "confirm"
+          ],
+          "cancel": [
+            "cancel"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 483,
+        "symbol": "case 'BatchConfirmCard':"
+      },
+      "renderCaseInventory": "existing case (minimal/dynamic only)",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/confirmation.dart",
+        "line": 286,
+        "symbol": "class BatchConfirmCard "
+      },
+      "proposedParameters": "current single ConfirmItem list; host batch mapping future",
+      "currentPayload": {
+        "confirm": "null",
+        "cancel": "null"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "confirm": [
+          "confirm"
+        ],
+        "cancel": [
+          "cancel"
+        ]
+      },
+      "actionRoutes": {
+        "confirm": {
+          "route": "business",
+          "localAction": null,
+          "consumer": {
+            "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+            "line": 30,
+            "symbol": "Future<void> dispatch("
+          }
+        },
+        "cancel": {
+          "route": "local",
+          "localAction": "cancelConfirmation",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "operation refs; unknown locked",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:BatchConfirmCard"
+    },
+    "Heading": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 178
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "text": "UiValueType.string",
+          "level": "UiValueType.integer"
+        },
+        "requiredProperties": [
+          "text"
+        ],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/layout.dart",
+        "line": 7,
+        "symbol": "class Heading "
+      },
+      "proposedParameters": "text; level 1..3 future validator range",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "stable node; readonly text",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Heading"
+    },
+    "Prose": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 182
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "text": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "text"
+        ],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/layout.dart",
+        "line": 44,
+        "symbol": "class Prose "
+      },
+      "proposedParameters": "text -> paragraphs",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "stable node; model text identified",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Prose"
+    },
+    "Section": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 186
+      },
+      "schema": {
+        "allowsChildren": true,
+        "properties": {
+          "title": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "title"
+        ],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/layout.dart",
+        "line": 85,
+        "symbol": "class Section "
+      },
+      "proposedParameters": "title; ordered children",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "stable child IDs",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Section"
+    },
+    "Columns": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 191
+      },
+      "schema": {
+        "allowsChildren": true,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/layout.dart",
+        "line": 139,
+        "symbol": "class Columns "
+      },
+      "proposedParameters": "ordered children; responsive width from host/theme",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "stable child IDs",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Columns"
+    },
+    "Tabs": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 192
+      },
+      "schema": {
+        "allowsChildren": true,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/layout.dart",
+        "line": 192,
+        "symbol": "class MuyonTabs "
+      },
+      "proposedParameters": "host labels <-> child IDs; current schema lacks labels/controlled selection",
+      "currentPayload": {},
+      "proposedPayloadDraft": "declared selectedChildId view; labels/children same host IDs",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "selectedChildId view; current position local only",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Tabs"
+    },
+    "Disclosure": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 193
+      },
+      "schema": {
+        "allowsChildren": true,
+        "properties": {
+          "title": "UiValueType.string",
+          "initiallyExpanded": "UiValueType.boolean"
+        },
+        "requiredProperties": [
+          "title"
+        ],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/layout.dart",
+        "line": 296,
+        "symbol": "class Disclosure "
+      },
+      "proposedParameters": "title; many children -> one Column child",
+      "currentPayload": {},
+      "proposedPayloadDraft": "declared expanded bool view",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "expanded view; current bool local only",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Disclosure"
+    },
+    "KeyValue": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 202
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {
+          "value": [
+            "fact",
+            "computed"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": "collection -> snapshot.collections; stream/2 adoption required; reject ID collision with any scalar namespace; cellStateRefs -> host cellStates",
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/data.dart",
+        "line": 17,
+        "symbol": "class KeyValue "
+      },
+      "proposedParameters": "host key/value collection -> items",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "column/item IDs/version",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:KeyValue"
+    },
+    "Metric": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 208
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string",
+          "unit": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "fact",
+            "computed"
+          ],
+          "delta": [
+            "computed"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/data.dart",
+        "line": 75,
+        "symbol": "class Metric "
+      },
+      "proposedParameters": "value/unit/label; computed delta -> numeric display",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "inputVersion and source provenance",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "packages/muyon_ui/test/aiui5_f5a_contract_fixture_test.dart",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Metric"
+    },
+    "CompareTable": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 217
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "rows": [
+            "computed"
+          ],
+          "sort": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "rows"
+        ],
+        "events": {
+          "tap": "null"
+        },
+        "eventActions": {
+          "tap": [
+            "detail"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": "collection -> snapshot.collections; stream/2 adoption required; reject ID collision with any scalar namespace; cellStateRefs -> host cellStates",
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/data.dart",
+        "line": 156,
+        "symbol": "class CompareTable "
+      },
+      "proposedParameters": "host columns/rows/marks; add stable row callback after adoption",
+      "currentPayload": {
+        "tap": "null"
+      },
+      "proposedPayloadDraft": "collectionId + collectionRevision + itemId; host ObjectRef resolution",
+      "actions": {
+        "tap": [
+          "detail"
+        ]
+      },
+      "actionRoutes": {
+        "detail": {
+          "route": "local",
+          "localAction": "openDetail",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "row ID -> current ObjectRef; no index identity",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "packages/muyon_ui/test/aiui5_f5a_contract_fixture_test.dart",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:CompareTable"
+    },
+    "Chart": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 230
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "kind": "UiValueType.string",
+          "title": "UiValueType.string",
+          "unit": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "kind"
+        ],
+        "bindings": {
+          "data": [
+            "fact",
+            "computed"
+          ]
+        },
+        "requiredBindings": [
+          "data"
+        ],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": "collection -> snapshot.collections; stream/2 adoption required; reject ID collision with any scalar namespace; cellStateRefs -> host cellStates",
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/data.dart",
+        "line": 327,
+        "symbol": "class Chart "
+      },
+      "proposedParameters": "bar/line/pie; host numeric points; same points -> text data table",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "item IDs/source/inputVersion",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "packages/muyon_ui/test/library_contract_boundary_test.dart",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Chart"
+    },
+    "Choice": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 243
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string",
+          "multiple": "UiValueType.boolean",
+          "allowCustom": "UiValueType.boolean"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "options": [
+            "fact",
+            "computed"
+          ],
+          "selected": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "options",
+          "selected"
+        ],
+        "events": {
+          "change": "UiValueType.string"
+        },
+        "eventActions": {
+          "change": [
+            "edit"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": "collection -> snapshot.collections; stream/2 adoption required; reject ID collision with any scalar namespace; cellStateRefs -> host cellStates",
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/inputs.dart",
+        "line": 10,
+        "symbol": "class Choice "
+      },
+      "proposedParameters": "host options IDs/labels; selected IDs -> Set view; custom disabled",
+      "currentPayload": {
+        "change": "UiValueType.string"
+      },
+      "proposedPayloadDraft": "canonical stable item ID array; host parameterEdit increments draftRevision/recomputes dependencies, viewSelection preserves draftRevision/no recompute",
+      "actions": {
+        "change": [
+          "edit"
+        ]
+      },
+      "actionRoutes": {
+        "edit": {
+          "route": "local",
+          "localAction": "editField",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "sorted ID array; membership revision; host parameterEdit override vs viewSelection view role preserved",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Choice"
+    },
+    "Form": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 260
+      },
+      "schema": {
+        "allowsChildren": true,
+        "properties": {
+          "title": "UiValueType.string",
+          "submitLabel": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "title"
+        ],
+        "bindings": {},
+        "requiredBindings": [],
+        "events": {
+          "submit": "null"
+        },
+        "eventActions": {
+          "submit": [
+            "submit"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/inputs.dart",
+        "line": 183,
+        "symbol": "class MuyonForm "
+      },
+      "proposedParameters": "title/submitLabel; children; readonly subtree gate",
+      "currentPayload": {
+        "submit": "null"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "submit": [
+          "submit"
+        ]
+      },
+      "actionRoutes": {
+        "submit": {
+          "route": "business",
+          "localAction": null,
+          "consumer": {
+            "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+            "line": 30,
+            "symbol": "Future<void> dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "business operation/receipt; no replay",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Form"
+    },
+    "NumberStepper": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 273
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string",
+          "unit": "UiValueType.string",
+          "min": "UiValueType.integer",
+          "max": "UiValueType.integer",
+          "step": "UiValueType.integer"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "change": "UiValueType.string"
+        },
+        "eventActions": {
+          "change": [
+            "edit"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/inputs.dart",
+        "line": 268,
+        "symbol": "class NumberStepper "
+      },
+      "proposedParameters": "finite double value/min/max/step; no truncation",
+      "currentPayload": {
+        "change": "UiValueType.string"
+      },
+      "proposedPayloadDraft": "finite JSON number; exact host range/step",
+      "actions": {
+        "change": [
+          "edit"
+        ]
+      },
+      "actionRoutes": {
+        "edit": {
+          "route": "local",
+          "localAction": "editField",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "typed number override/spec version",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:NumberStepper"
+    },
+    "Slider": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 273
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string",
+          "unit": "UiValueType.string",
+          "min": "UiValueType.integer",
+          "max": "UiValueType.integer",
+          "step": "UiValueType.integer"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "change": "UiValueType.string"
+        },
+        "eventActions": {
+          "change": [
+            "edit"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/inputs.dart",
+        "line": 349,
+        "symbol": "class MuyonSlider "
+      },
+      "proposedParameters": "finite double value/min/max; host step -> divisions policy",
+      "currentPayload": {
+        "change": "UiValueType.string"
+      },
+      "proposedPayloadDraft": "finite JSON number; preserve fraction; host range/step",
+      "actions": {
+        "change": [
+          "edit"
+        ]
+      },
+      "actionRoutes": {
+        "edit": {
+          "route": "local",
+          "localAction": "editField",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "typed number override/spec version",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Slider"
+    },
+    "Toggle": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 291
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "change": "UiValueType.boolean"
+        },
+        "eventActions": {
+          "change": [
+            "edit"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/inputs.dart",
+        "line": 419,
+        "symbol": "class Toggle "
+      },
+      "proposedParameters": "bool value/change; current edit_input blocker",
+      "currentPayload": {
+        "change": "UiValueType.boolean"
+      },
+      "proposedPayloadDraft": "bool; declared bool state only",
+      "actions": {
+        "change": [
+          "edit"
+        ]
+      },
+      "actionRoutes": {
+        "edit": {
+          "route": "local",
+          "localAction": "editField",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "bool override; never stringify",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "packages/muyon_ui/test/aiui5_f5a_contract_fixture_test.dart",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Toggle"
+    },
+    "DateField": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 303
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "label": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "label"
+        ],
+        "bindings": {
+          "value": [
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "change": "UiValueType.string"
+        },
+        "eventActions": {
+          "change": [
+            "edit"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/inputs.dart",
+        "line": 476,
+        "symbol": "class DateField "
+      },
+      "proposedParameters": "ISO date -> DateTime year/month/day; host first/last",
+      "currentPayload": {
+        "change": "UiValueType.string"
+      },
+      "proposedPayloadDraft": "YYYY-MM-DD or explicitly nullable null; DateTime adapter",
+      "actions": {
+        "change": [
+          "edit"
+        ]
+      },
+      "actionRoutes": {
+        "edit": {
+          "route": "local",
+          "localAction": "editField",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "date string/spec; nullable explicit",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:DateField"
+    },
+    "SourceCard": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 316
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "title": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "title"
+        ],
+        "bindings": {
+          "source": [
+            "sourceSpan"
+          ]
+        },
+        "requiredBindings": [
+          "source"
+        ],
+        "events": {
+          "tap": "null"
+        },
+        "eventActions": {
+          "tap": [
+            "source"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/business.dart",
+        "line": 25,
+        "symbol": "class SourceCard "
+      },
+      "proposedParameters": "title; sourceSpan -> excerpt/location/onOpen",
+      "currentPayload": {
+        "tap": "null"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "tap": [
+          "source"
+        ]
+      },
+      "actionRoutes": {
+        "source": {
+          "route": "local",
+          "localAction": "expandSource",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "digest/version recheck",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:SourceCard"
+    },
+    "FileCard": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 328
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {
+          "value": [
+            "fact"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {
+          "tap": "null"
+        },
+        "eventActions": {
+          "tap": [
+            "detail"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/business.dart",
+        "line": 101,
+        "symbol": "class FileCard "
+      },
+      "proposedParameters": "host file/ObjectRef -> name,sizeText,onOpen; no model path",
+      "currentPayload": {
+        "tap": "null"
+      },
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {
+        "tap": [
+          "detail"
+        ]
+      },
+      "actionRoutes": {
+        "detail": {
+          "route": "local",
+          "localAction": "openDetail",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "reference availability recheck",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:FileCard"
+    },
+    "ProgressCard": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 338
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {
+          "title": "UiValueType.string"
+        },
+        "requiredProperties": [
+          "title"
+        ],
+        "bindings": {
+          "value": [
+            "fact",
+            "computed"
+          ]
+        },
+        "requiredBindings": [
+          "value"
+        ],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": null,
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/business.dart",
+        "line": 182,
+        "symbol": "class ProgressCard "
+      },
+      "proposedParameters": "host value -> finite progress/step/tone",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "host task version/receipt",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "future bound-plan fixture required",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:ProgressCard"
+    },
+    "Checklist": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 346
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {
+          "items": [
+            "fact",
+            "uiState"
+          ]
+        },
+        "requiredBindings": [
+          "items"
+        ],
+        "events": {
+          "change": "UiValueType.string"
+        },
+        "eventActions": {
+          "change": [
+            "edit"
+          ]
+        }
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": "collection -> snapshot.collections; stream/2 adoption required; reject ID collision with any scalar namespace; cellStateRefs -> host cellStates",
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/business.dart",
+        "line": 268,
+        "symbol": "class Checklist "
+      },
+      "proposedParameters": "host items -> ChecklistItem; index,bool -> frozen stable ID adapter",
+      "currentPayload": {
+        "change": "UiValueType.string"
+      },
+      "proposedPayloadDraft": "stable itemId + bool; declared checked state; facts readonly",
+      "actions": {
+        "change": [
+          "edit"
+        ]
+      },
+      "actionRoutes": {
+        "edit": {
+          "route": "local",
+          "localAction": "editField",
+          "consumer": {
+            "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+            "line": 127,
+            "symbol": "UiEventOutcome dispatch("
+          }
+        }
+      },
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "checked typed projection; fact readonly",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "packages/muyon_ui/test/library_contract_boundary_test.dart",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Checklist"
+    },
+    "Timeline": {
+      "catalog": {
+        "path": "packages/muyon_ui/lib/src/dynamic/catalog.dart",
+        "line": 356
+      },
+      "schema": {
+        "allowsChildren": false,
+        "properties": {},
+        "requiredProperties": [],
+        "bindings": {
+          "events": [
+            "fact",
+            "computed"
+          ]
+        },
+        "requiredBindings": [
+          "events"
+        ],
+        "events": {},
+        "eventActions": {}
+      },
+      "catalogVersion": "library-1",
+      "bindingShape": "current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces",
+      "collectionBindingDraft": "collection -> snapshot.collections; stream/2 adoption required; reject ID collision with any scalar namespace; cellStateRefs -> host cellStates",
+      "validator": {
+        "path": "packages/muyon_module_api/lib/src/ui/validation.dart",
+        "line": 126,
+        "symbol": "List<String> validateUiNode("
+      },
+      "renderer": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 555,
+        "symbol": "default:"
+      },
+      "renderCaseInventory": "no case; default unavailable text if render reached",
+      "currentRendering": "library-1 whole-surface snapshotFallback; catalog identity gate blocks render()",
+      "surfaceCatalogGate": {
+        "path": "packages/muyon_ui/lib/src/dynamic/surface.dart",
+        "line": 562,
+        "symbol": "if (!identical(controller.current.catalog, dynamicUiCatalog)"
+      },
+      "proposedWidget": {
+        "path": "packages/muyon_ui/lib/src/ui_components/business.dart",
+        "line": 348,
+        "symbol": "class Timeline "
+      },
+      "proposedParameters": "host versioned events -> TimelineEvent time/title/detail",
+      "currentPayload": {},
+      "proposedPayloadDraft": "preserve current declared payload; no new business authority",
+      "actions": {},
+      "actionRoutes": {},
+      "state": {
+        "path": "packages/muyon_module_api/lib/src/ui/state.dart",
+        "line": 127,
+        "symbol": "UiEventOutcome dispatch("
+      },
+      "router": {
+        "path": "apps/muyon/lib/assistant/ui_planning_events.dart",
+        "line": 30,
+        "symbol": "Future<void> dispatch("
+      },
+      "restore": {
+        "path": "packages/muyon_ui/lib/src/dynamic/workspace.dart",
+        "line": 38,
+        "symbol": "static Future<UiWorkspaceController> open("
+      },
+      "codec": {
+        "path": "packages/muyon_module_api/lib/src/ui/workspace.dart",
+        "line": 198,
+        "symbol": "Map<String, Object?> encodeUiPresentation("
+      },
+      "restorePolicyDraft": "event IDs/version; readonly",
+      "textAndStates": "reuse resolved host values; proposed library ready/loading/error/readOnlyDegraded gate; current adapter is not four-state certification",
+      "fixture": "packages/muyon_ui/test/library_contract_boundary_test.dart",
+      "futureAcceptance": "every_catalog_component_renders_from_validated_bound_plan:Timeline"
+    }
+  }
+}

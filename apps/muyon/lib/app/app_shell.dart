@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'dart:ui' show AppExitResponse;
@@ -19,6 +21,7 @@ import 'module_host.dart';
 import 'research_tools_page.dart';
 import '../screens/data_storage_page.dart';
 import '../screens/platform_shell.dart';
+import '../screens/conversation_shell_controller.dart';
 
 class MuyonApp extends StatefulWidget {
   const MuyonApp({
@@ -40,8 +43,9 @@ class MuyonApp extends StatefulWidget {
 
 class _MuyonAppState extends State<MuyonApp> {
   ThemeMode mode = ThemeMode.system;
-  final navigator = GlobalKey<NavigatorState>();
-  final messenger = GlobalKey<ScaffoldMessengerState>();
+  var navigator = GlobalKey<NavigatorState>();
+  var messenger = GlobalKey<ScaffoldMessengerState>();
+  final conversationShell = ConversationShellController();
   late final AppLifecycleListener lifecycle;
   late MuyonHost host = widget.host;
   int generation = 0;
@@ -86,11 +90,21 @@ class _MuyonAppState extends State<MuyonApp> {
     _attach(host);
     lifecycle = AppLifecycleListener(
       onExitRequested: () async {
+        try {
+          await conversationShell.checkpoint();
+          await _releaseReferenceRoutes();
+        } catch (_) {
+          // Keep the tree and unsaved input visible when the CAS fails.
+          return AppExitResponse.cancel;
+        }
+        conversationShell.detach();
         await host.close();
         return AppExitResponse.exit;
       },
       onDetach: () {
-        host.close();
+        final pending = conversationShell.checkpoint();
+        conversationShell.detach();
+        unawaited(pending.catchError((Object _) {}).whenComplete(host.close));
       },
     );
   }
@@ -102,13 +116,41 @@ class _MuyonAppState extends State<MuyonApp> {
     super.dispose();
   }
 
+  Future<void> _releaseReferenceRoutes() async {
+    // Completing push futures lets each registered page execute its finally
+    // lease disposal. Replacing a Navigator tree alone does not complete them.
+    // A reference may still be acquiring its page and have no route to pop.
+    // Stop late presentation before completing the routes already on the stack.
+    conversationShell.stopReferenceAdmission();
+    try {
+      navigator.currentState?.popUntil((route) => route.isFirst);
+      await conversationShell.referencesSettled();
+    } catch (_) {
+      conversationShell.resumeReferenceAdmission();
+      rethrow;
+    }
+  }
+
   /// Close, restore, reopen. The page tree is replaced by a plain progress
   /// screen first so nothing keeps listening to the host being closed. If the
   /// restore fails, the original data is reopened and the failure is shown.
   Future<void> _restore(String backupDir) async {
     final root = host.storage.rootPath;
     final closing = host;
-    setState(() => restoring = true);
+    // A failed checkpoint propagates to the existing action error handler;
+    // the old host and tree remain open so the user can retain their input.
+    await conversationShell.checkpoint();
+    if (!mounted) return;
+    await _releaseReferenceRoutes();
+    if (!mounted) return;
+    conversationShell.detach();
+    // Changing MaterialApp's key alone can reparent a shared Navigator tree.
+    // Retire its keys so old pages/listeners are unmounted before host close.
+    setState(() {
+      restoring = true;
+      navigator = GlobalKey<NavigatorState>();
+      messenger = GlobalKey<ScaffoldMessengerState>();
+    });
     await WidgetsBinding.instance.endOfFrame;
     closing.approveInquiryModelRequest = null;
     String? failure;
@@ -121,12 +163,17 @@ class _MuyonAppState extends State<MuyonApp> {
     }
     try {
       final reopened = await (widget.openHost ?? MuyonHost.open)(root);
+      if (!mounted) {
+        await reopened.close();
+        return;
+      }
       _attach(reopened);
-      if (!mounted) return;
       setState(() {
         host = reopened;
         generation++;
         restoring = false;
+        navigator = GlobalKey<NavigatorState>();
+        messenger = GlobalKey<ScaffoldMessengerState>();
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         messenger.currentState?.showSnackBar(
@@ -148,6 +195,8 @@ class _MuyonAppState extends State<MuyonApp> {
               '${failure == null ? '' : '\n恢复也失败了：$failure'}'
               '${previous == null ? '' : '\n原数据保留在 $previous'}';
           restoring = false;
+          navigator = GlobalKey<NavigatorState>();
+          messenger = GlobalKey<ScaffoldMessengerState>();
         });
       }
     }
@@ -202,7 +251,12 @@ class _MuyonAppState extends State<MuyonApp> {
         : ListenableBuilder(
             listenable: host.foundation,
             builder: (context, _) => PlatformShell(
+              // The shared navigator GlobalKey can retain/reparent its root
+              // route across MaterialApp keys. Each host generation must own
+              // a fresh shell/session even when that route survives.
+              key: ValueKey(generation),
               host: host,
+              shellController: conversationShell,
               themeMode: mode,
               onRestore: _restore,
               pickDirectory: widget.pickDirectory,

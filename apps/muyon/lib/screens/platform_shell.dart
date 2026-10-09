@@ -20,6 +20,8 @@ import '../services/models/model_provider.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/secret_store.dart';
 import 'assistant_page.dart';
+import 'conversation_workspace_pane.dart';
+import 'conversation_shell_controller.dart';
 import 'inquiry_import_context.dart';
 import 'devices_page.dart';
 import 'knowledge_preview.dart';
@@ -37,6 +39,18 @@ part 'platform_shell_home.dart';
 part 'platform_shell_knowledge.dart';
 part 'platform_shell_personal.dart';
 
+/// Shared by the mobile bar and desktop rail, in product order.
+enum ConversationDestination {
+  assistant('助手', Icons.auto_awesome_outlined),
+  tasks('任务', Icons.fact_check_outlined),
+  data('资料', Icons.folder_outlined),
+  settings('设置', Icons.settings_outlined);
+
+  const ConversationDestination(this.label, this.icon);
+  final String label;
+  final IconData icon;
+}
+
 class PlatformShell extends StatefulWidget {
   const PlatformShell({
     super.key,
@@ -45,6 +59,8 @@ class PlatformShell extends StatefulWidget {
     required this.onTheme,
     required this.onRestore,
     this.pickDirectory = pickDirectoryWithDialog,
+    this.shellController,
+    this.allowInteractiveWorkspace = true,
   });
   final MuyonHost host;
   final ThemeMode themeMode;
@@ -53,6 +69,8 @@ class PlatformShell extends StatefulWidget {
   /// Closes the host, restores a verified backup and reopens (see MuyonApp).
   final Future<void> Function(String backupDir) onRestore;
   final PickDirectory pickDirectory;
+  final ConversationShellController? shellController;
+  final bool allowInteractiveWorkspace;
   @override
   State<PlatformShell> createState() => _PlatformShellState();
 }
@@ -60,10 +78,13 @@ class PlatformShell extends StatefulWidget {
 class _PlatformShellState extends State<PlatformShell> {
   int section = 0;
   final query = TextEditingController();
+  final _destinationFocus = [
+    for (final destination in ConversationDestination.values)
+      FocusScopeNode(debugLabel: destination.label),
+  ];
+  final _lastFocused = <int, FocusNode>{};
   String? error;
   bool busy = false;
-  bool assistantOpen = true;
-  bool executionOpen = false;
   List<Map<String, Object?>> hits = [];
   MuyonHost get host => widget.host;
   FoundationRepository get repo => host.foundation;
@@ -71,10 +92,25 @@ class _PlatformShellState extends State<PlatformShell> {
   @override
   void dispose() {
     query.dispose();
+    for (final scope in _destinationFocus) {
+      scope.dispose();
+    }
     super.dispose();
   }
 
-  void showSection(int value) => setState(() => section = value);
+  void showSection(int value) {
+    if (section == value) return;
+    final focused = _destinationFocus[section].focusedChild;
+    if (focused != null) _lastFocused[section] = focused;
+    setState(() => section = value);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || section != value) return;
+      final previous = _lastFocused[value];
+      if (previous != null && previous.context != null && previous.canRequestFocus) {
+        previous.requestFocus();
+      }
+    });
+  }
 
   Future<void> action(Future<void> Function() operation) async {
     if (busy) return;
@@ -91,7 +127,11 @@ class _PlatformShellState extends State<PlatformShell> {
     }
   }
 
-  AssistantPage assistant({AssistantScope? scope, String? conversationId}) =>
+  AssistantPage assistant({
+    AssistantScope? scope,
+    String? conversationId,
+    WorkspaceOpener? onOpenWorkspace,
+  }) =>
       AssistantPage(
         repo: repo,
         host: host,
@@ -100,6 +140,7 @@ class _PlatformShellState extends State<PlatformShell> {
         scope: scope,
         conversationId: conversationId,
         onOpenReference: openObject,
+        onOpenWorkspace: onOpenWorkspace,
       );
   // Rebuild from the repository so a pushed mobile page never shows stale state.
   Widget executionPanel() => ListenableBuilder(
@@ -364,61 +405,6 @@ class _PlatformShellState extends State<PlatformShell> {
     if (mounted) setState(() {});
   }
 
-  /// Phone-first hub: every destination opens as its own page with a back
-  /// button. Wide layouts also keep these as top-bar shortcuts.
-  Widget mine() => list([
-    Text('我的', style: Theme.of(context).textTheme.titleLarge),
-    const SizedBox(height: 8),
-    card(
-      '个人中心',
-      '任务、记忆与个人助手设置',
-      () => page('个人中心', personal()),
-      Icons.person_outline,
-    ),
-    card(
-      '消息中心',
-      '通知与待处理事项',
-      () => page('消息中心', notifications()),
-      Icons.notifications_outlined,
-    ),
-    card(
-      '执行面板',
-      '助手任务的目标、进度与产物',
-      () => page('执行面板', executionPanel()),
-      Icons.fact_check_outlined,
-    ),
-    card(
-      '设备聊天',
-      '本人已配对设备之间的文字',
-      () => page('设备聊天', ChatEntryPage(host: host)),
-      Icons.forum_outlined,
-    ),
-    card(
-      '记忆与整理',
-      '查看、停用、删除记忆；整理建议与撤回',
-      () => page('记忆', memoryPage()),
-      Icons.psychology_alt_outlined,
-    ),
-    card(
-      '系统设置',
-      '外观、模型与数据去向',
-      () => page('系统设置', settings()),
-      Icons.settings_outlined,
-    ),
-    card(
-      '数据与存储',
-      '模块状态、备份与恢复',
-      () => page('数据与存储', storagePage()),
-      Icons.storage_outlined,
-    ),
-    card(
-      '接口与工具',
-      '宿主注册的工具与调用',
-      () => page('接口与工具', tools()),
-      Icons.extension_outlined,
-    ),
-  ]);
-
   Widget list(Iterable<Widget> children) =>
       ListView(padding: const EdgeInsets.all(16), children: children.toList());
   Widget card(String title, String detail, VoidCallback tap, IconData icon) =>
@@ -432,11 +418,20 @@ class _PlatformShellState extends State<PlatformShell> {
         ),
       );
   @override
-  Widget build(BuildContext context) => ListenableBuilder(
+  Widget build(BuildContext context) => ConversationWorkspaceHost(
+    controller: widget.shellController,
+    allowInteractive: widget.allowInteractiveWorkspace,
+    builder: (context, openWorkspace) => ListenableBuilder(
     listenable: repo,
     builder: (context, _) => LayoutBuilder(
       builder: (context, size) {
-        final bodies = [home, () => assistant(), knowledge, mine];
+        final desktop = MediaQuery.sizeOf(context).width >= 900;
+        final pages = [
+          assistant(onOpenWorkspace: openWorkspace),
+          taskHub(),
+          knowledge(),
+          settings(),
+        ];
         final body = Column(
           children: [
             if (busy) const LinearProgressIndicator(),
@@ -448,97 +443,70 @@ class _PlatformShellState extends State<PlatformShell> {
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
               ),
-            Expanded(child: bodies[section]()),
+            Expanded(
+              child: IndexedStack(
+                index: section,
+                children: [
+                  for (var i = 0; i < pages.length; i++)
+                    ExcludeFocus(
+                      excluding: section != i,
+                      child: TickerMode(
+                        enabled: section == i,
+                        child: FocusScope(
+                          node: _destinationFocus[i],
+                          child: KeyedSubtree(
+                            key: ValueKey(ConversationDestination.values[i]),
+                            child: pages[i],
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ],
         );
-        const destinations = [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            label: '工作台',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.auto_awesome_outlined),
-            label: '助手',
-          ),
-          NavigationDestination(icon: Icon(Icons.folder_outlined), label: '资料'),
-          NavigationDestination(icon: Icon(Icons.person_outline), label: '我的'),
-        ];
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Muyon'),
-            actions: [
-              if (section != 1 && size.maxWidth >= 1250)
-                IconButton(
-                  tooltip: assistantOpen ? '收起助手' : '展开助手',
-                  onPressed: () =>
-                      setState(() => assistantOpen = !assistantOpen),
-                  icon: Icon(
-                    assistantOpen
-                        ? Icons.chevron_right
-                        : Icons.auto_awesome_outlined,
-                  ),
+          appBar: AppBar(title: const Text('Muyon')),
+          // Keep the same Row/content ancestry at every breakpoint so resizing
+          // does not dispose the root conversation, draft or scroll controller.
+          body: Row(
+            children: [
+              if (desktop) ...[
+                NavigationRail(
+                  selectedIndex: section,
+                  onDestinationSelected: showSection,
+                  labelType: NavigationRailLabelType.all,
+                  destinations: [
+                    for (final d in ConversationDestination.values)
+                      NavigationRailDestination(
+                        icon: d == ConversationDestination.settings
+                            ? Tooltip(message: '系统设置', child: Icon(d.icon))
+                            : Icon(d.icon),
+                        label: Text(d.label),
+                      ),
+                  ],
                 ),
-              if (size.maxWidth >= 900) ...[
-                IconButton(
-                  tooltip: executionOpen ? '收起执行面板' : '执行面板',
-                  onPressed: () =>
-                      setState(() => executionOpen = !executionOpen),
-                  icon: const Icon(Icons.fact_check_outlined),
-                ),
-                IconButton(
-                  tooltip: '消息中心',
-                  onPressed: () => page('消息中心', notifications()),
-                  icon: const Icon(Icons.notifications_outlined),
-                ),
-                IconButton(
-                  tooltip: '个人中心',
-                  onPressed: () => page('个人中心', personal()),
-                  icon: const Icon(Icons.person_outline),
-                ),
-                IconButton(
-                  tooltip: '系统设置',
-                  onPressed: () => page('系统设置', settings()),
-                  icon: const Icon(Icons.settings_outlined),
-                ),
+                const VerticalDivider(width: 1),
               ],
+              Expanded(key: const ValueKey('conversation-shell-content'), child: body),
             ],
           ),
-          body: size.maxWidth >= 900
-              ? Row(
-                  children: [
-                    NavigationRail(
-                      selectedIndex: section,
-                      onDestinationSelected: (value) =>
-                          setState(() => section = value),
-                      labelType: NavigationRailLabelType.all,
-                      destinations: destinations
-                          .map(
-                            (d) => NavigationRailDestination(
-                              icon: d.icon,
-                              label: Text(d.label),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                    const VerticalDivider(width: 1),
-                    Expanded(child: body),
-                    if (section != 1 && size.maxWidth >= 1250 && assistantOpen)
-                      SizedBox(width: 360, child: assistant()),
-                    if (executionOpen)
-                      SizedBox(width: 360, child: executionPanel()),
-                  ],
-                )
-              : body,
-          bottomNavigationBar: size.maxWidth < 900
-              ? NavigationBar(
+          bottomNavigationBar: desktop
+              ? null
+              : NavigationBar(
                   selectedIndex: section,
-                  onDestinationSelected: (value) =>
-                      setState(() => section = value),
-                  destinations: destinations,
-                )
-              : null,
+                  onDestinationSelected: showSection,
+                  destinations: [
+                    for (final d in ConversationDestination.values)
+                      NavigationDestination(icon: d == ConversationDestination.settings
+                            ? Tooltip(message: '系统设置', child: Icon(d.icon))
+                            : Icon(d.icon), label: d.label),
+                  ],
+                ),
         );
       },
+    ),
     ),
   );
 }

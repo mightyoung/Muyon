@@ -1,7 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'support/conversation_workspace_fixture.dart';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:muyon/screens/conversation_workspace_pane.dart';
+import 'package:muyon/screens/dynamic_workspace.dart';
+import 'package:muyon_ui/dynamic_ui.dart';
+
+import '../../../packages/muyon_ui/test/dynamic_fixtures.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
@@ -105,4 +113,80 @@ void main() {
     );
     expect(await store.save(value(2), expectedRevision: 1), isFalse);
   });
+  test('two_real_store_instances_reject_losing_projection_and_keep_input', () async {
+    final plan = actionPlan();
+    final firstStore = HostUiWorkspaceStore(repo, taskId: 'task');
+    final secondStore = HostUiWorkspaceStore(repo, taskId: 'task');
+    final first = await UiWorkspaceController.open(
+      store: firstStore, taskId: 'task', scopeKey: firstStore.scopeKey!, plan: plan,
+    );
+    final second = await UiWorkspaceController.open(
+      store: secondStore, taskId: 'task', scopeKey: secondStore.scopeKey!, plan: plan,
+      onEvent: (_) async => fail('A conflicting projection must never dispatch'),
+    );
+    addTearDown(first.dispose);
+    addTearDown(second.dispose);
+    final field = plan.plan.nodes.firstWhere((n) => n.component == 'Field');
+    await first.surface.dispatch(first.surface.eventFor(field, 'change', 'winner'));
+    await first.flush();
+    final committed = (await firstStore.load(plan.plan.surfaceId))!.toJson();
+    await second.surface.dispatch(second.surface.eventFor(field, 'change', 'unsaved loser'));
+    await expectLater(second.flush(), throwsStateError);
+    expect(second.readOnly, isTrue);
+    expect(second.saveError, isNotNull);
+    expect(second.surface.session.userOverrides['quantity'], 'unsaved loser');
+    expect((await secondStore.load(plan.plan.surfaceId))!.toJson(), committed);
+  });
+
+  testWidgets('shell_checkpoint_cas_conflict_does_not_pop_or_overwrite', (tester) async {
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      await workspaceOperation(tester, storage.close);
+    });
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 900);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    WorkspaceOpener? openWorkspace;
+    var businessCalls = 0;
+    final plan = actionPlan();
+    await tester.pumpWidget(MaterialApp(home: ConversationWorkspaceHost(builder: (_, open) {
+      openWorkspace = open;
+      return const Scaffold(body: Text('parent conversation'));
+    })));
+    await openWorkspace!(DynamicWorkspace(
+      repository: repo, taskId: 'task', surfaceId: plan.plan.surfaceId, plan: plan,
+      onEvent: (_) async { businessCalls++; },
+    ));
+    await workspaceReady(tester);
+    final body = find.byType(ConversationWorkspaceBody);
+    final c = tester.widget<ConversationWorkspaceBody>(body).controller;
+    await workspaceOperation(tester, c.flush);
+    final competingStore = HostUiWorkspaceStore(repo, taskId: 'task');
+    final competing = await workspaceOperation(tester, () => UiWorkspaceController.open(
+      store: competingStore, taskId: 'task', scopeKey: competingStore.scopeKey!, plan: plan,
+    ));
+    competing.step = 'winner projection';
+    await workspaceOperation(tester, competing.flush);
+    final winner = (await competingStore.load(plan.plan.surfaceId))!.toJson();
+    competing.dispose();
+    await tester.enterText(find.byType(TextField).first, 'losing input retained');
+    await workspaceOperation(tester, () async {
+      try { await c.flush(); } catch (_) { /* expected CAS failure */ }
+    });
+    await tester.pumpAndSettle();
+    expect(c.readOnly, isTrue);
+    expect(find.textContaining('losing input retained'), findsWidgets);
+    expect(find.textContaining('未保存'), findsWidgets);
+    await tester.tap(find.byTooltip('关闭工作区 / 返回'));
+    await tester.pumpAndSettle();
+    expect(body, findsOneWidget);
+    expect(find.textContaining('losing input retained'), findsWidgets);
+    expect((await competingStore.load(plan.plan.surfaceId))!.toJson(), winner);
+    expect(businessCalls, 0);
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
+
 }

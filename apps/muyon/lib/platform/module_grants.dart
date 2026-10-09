@@ -107,12 +107,24 @@ CREATE TABLE module_grants(
 );
 ''');
 
-  /// Replaces the module's rows with this activation's decisions.
+  /// Replaces current decisions while retaining durable withdrawal tombstones.
+  /// A manifest dropping a capability cannot undo its host revocation.
   Future<void> record(String moduleId, List<GrantDecision> decisions) {
     final now = DateTime.now().toUtc().toIso8601String();
     return database.write((db) {
-      db.execute('DELETE FROM module_grants WHERE module_id=?', [moduleId]);
+      db.execute(
+        "DELETE FROM module_grants WHERE module_id=? AND policy<>'revoked'",
+        [moduleId],
+      );
       for (final d in decisions) {
+        // Also preserve a withdrawal queued after policy calculation. The
+        // host's activation epoch will refuse that stale activation.
+        if (db.select(
+          "SELECT 1 FROM module_grants WHERE module_id=? AND capability=? AND policy='revoked'",
+          [moduleId, d.capability],
+        ).isNotEmpty) {
+          continue;
+        }
         db.execute('INSERT INTO module_grants VALUES(?,?,?,?,?,?,?)', [
           d.moduleId,
           d.capability,
@@ -162,4 +174,12 @@ CREATE TABLE module_grants(
           throw StateError('No grant of $capability to $moduleId');
         }
       });
+  /// Host-only reconsideration. A new decision is issued by GrantPolicy,
+  /// never by the module. This does not turn a denied facade into a grant.
+  Future<void> clearRevocation(String moduleId, String capability) => database.write((db) {
+    db.execute("UPDATE module_grants SET policy='reconsider', decided_at=? WHERE module_id=? AND capability=? AND policy='revoked'",
+      [DateTime.now().toUtc().toIso8601String(), moduleId, capability]);
+    if (db.updatedRows != 1) throw StateError('No revoked capability to reconsider');
+  });
+
 }

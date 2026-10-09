@@ -101,3 +101,9 @@ class AuxiliarySchema {
   final String id;
   final ModuleSchema schema;
 }
+
+/// Optional shell navigation for a section that opens a bound workspace.
+/// The host owns workspace selection and binding; modules own declarations.
+abstract interface class WorkspaceSectionHost implements ModuleSectionHost {
+  Widget workspacePage(BuildContext context);
+}

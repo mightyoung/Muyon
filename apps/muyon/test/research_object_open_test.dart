@@ -161,7 +161,7 @@ void main() {
   Future<void> openFromPanel(WidgetTester tester, String tile) async {
     await tester.pumpWidget(shell());
     await tester.pumpAndSettle();
-    await tester.tap(find.text('我的'));
+    await tester.tap(find.text('任务'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('执行面板'));
     await tester.pumpAndSettle();

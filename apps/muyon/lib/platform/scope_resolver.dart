@@ -152,7 +152,9 @@ class ModuleScopeSource implements ScopeSource {
     final types = _types;
     if (types.isEmpty) return const [];
     await projections.idle(moduleId);
-    final candidates = [
+    final proposed = module is ScopeCandidates
+        ? await (module as ScopeCandidates).scopeCandidates()
+        : [
       for (final row in workspaces.database.raw.select(
         'SELECT project_id,object_type,object_id FROM object_catalog '
         'WHERE module_id=? ORDER BY project_id,object_type,object_id',
@@ -169,14 +171,17 @@ class ModuleScopeSource implements ScopeSource {
                 : row['project_id'] as String,
           ),
     ];
+    final candidates = proposed.where((ref) =>
+      ref.moduleId == moduleId && types.contains(ref.objectType)).toList();
     final session = await (module as ScopeResolvable).openScopeSession();
     try {
       final views = await Future.wait([
         for (final ref in candidates) session.resolve(ref),
       ]);
       return [
-        for (final view in views)
-          if (view != null) view.ref,
+        for (var i = 0; i < views.length; i++)
+          if (views[i] != null && sameObjectIdentity(candidates[i], views[i]!.ref) &&
+              types.contains(views[i]!.ref.objectType)) views[i]!.ref,
       ];
     } finally {
       await session.dispose();

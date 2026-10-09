@@ -70,7 +70,7 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 | [AIUI-F2（原 UI-4a）](UI-4a.md) | task/ui-4a-dynamic-preview | 确定性渲染/受控云验收，UI-3a及REG-4a联调 | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
 | [AIUI-F3（原 UI-4b）](UI-4b.md) | task/ui-4b-planning-harness | 两模式/harness共用planning，UI-3a/4a | 已合入 `655b260` |
 | [AIUI-F4（原 UI-3b）](UI-3b.md) | task/ui-3b-workspace-state | 持久编辑/返回，UI-3a/4a | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
-| [REG-4b](REG-4b.md) | task/reg-4b-inquiry-import | 既有导入/回执续办，REG-4a+UI-3b/4a | 部分合入，进行中 |
+| [REG-4b](REG-4b.md) | task/reg-4b-inquiry-import | 既有导入/回执续办，REG-4a+UI-3b/4a | `8025f66c80af9fc22ec7c60ff5f68ccdc1463a96` 及 ABC 集成已在 develop 祖先中，本轮不重复合入 |
 | [AIUI-F5（原 UI-2a）](UI-2a.md) | task/ui-2a-reference-navigation | 跨插件对象/文件导航，UI-3b/REG-4b | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
 | [AIUI-F6（原 UI-4c）](UI-4c.md) | task/ui-4c-subconversations | 一层子对话/最新引用，UI-2a+UI-4b/3b | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
 | [C4-GUIDE](C4-GUIDE.md) | docs/c4-interaction-guides（接口接入另派） | train/dev软指南，UI-3a目录；复用UI-4b可空接口 | 云数据线程起草，接入待复核，不阻塞主线 |
@@ -80,14 +80,14 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 
 | 任务 | 分支 | 执行 | 依赖 | 状态 |
 |---|---|---|---|---|
-| [AIUI-1](AIUI-1.md) 流式界面协议与增量编译器 | `task/aiui-1-streaming-compiler` | Codex | — | **已派发** |
-| [AIUI-2](AIUI-2.md) 组件库 v1（合并两份目录，补齐约 24 个组件） | `task/aiui-2-component-library` | engineer | — | **已派发**（用户改派） |
+| [AIUI-1](AIUI-1.md) 流式界面协议与增量编译器 | `task/aiui-1-streaming-compiler` | Codex | — | 已合入 `276b29146d3eb902380cceac708209cc6ef344c0`；独立复审和完整组合门禁成功，发布 CI 见[集成交接](INTEGRATION-2026-10-09.md)及执行回报 |
+| [AIUI-2](AIUI-2.md) 组件库 v1（合并两份目录，补齐约 24 个组件） | `task/aiui-2-component-library` | engineer | — | `4e45836efcb85c86f5c8de57e6b07795aab6166a` Tabs 修复、独立复审及组合 CI 通过，已集成；接口接线另片 |
 | [GROK-5](GROK-5.md) 本体业务卡片静态盘点（询价） | `task/grok-5-ontology-cards` | grokbot | — | 已合入（[审查](GROK-5-review.md)） |
 | [GROK-6](GROK-6.md) 科研本体盘点（REG-3 前置） | `task/grok-6-research-ontology` | grokbot | — | 已合入（[审查](GROK-6-review.md)）；科研敏感度已确认（2026-10-09） |
-| [GROK-7](GROK-7.md) 科研场景交互走查清单（AIUI-7 前置） | `task/grok-7-research-walkthrough` | grokbot | GROK-6 | **已派发** |
-| AIUI-3 本地重算公式 | — | junior | AIUI-1 | 待派 |
-| AIUI-4 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | 待派（engineer 先完成 R-1） |
-| AIUI-5 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | 待派 |
+| [GROK-7](GROK-7.md) 科研场景交互走查清单（AIUI-7 前置） | `task/grok-7-research-walkthrough` | grokbot | GROK-6 | 已合入 `18ae5127474d6841ad331ca2251076ecca431a81`；独立复审通过，20 目的/首批 7/9 公式；勘误与门禁见[交接](INTEGRATION-2026-10-09.md) |
+| [AIUI-3](AIUI-3.md) 本地重算公式 | — | junior | AIUI-1 | F3a `4943c6bb` 纯计算已复审、组合CI通过并集成；运行接线另片 |
+| [AIUI-4](AIUI-4.md) 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | F4a/F4b `14006838` 复审、200%补验及组合CI通过，已集成；F4c新目录联调后置 |
+| [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | F5a `f0203bf` 草案已复审、组合CI通过并归档；F5b/c 等正式契约决定 |
 | [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-inquiry-record-tools` | Codex | AIUI-1 之后、REG-4b 合入 | 说明已就绪，排队 |
 | AIUI-6 询价场景（比价、预算小工具、导入审阅工作区） | — | Codex | AIUI-3、4、5 | 待派 |
 | AIUI-7 科研场景 | — | junior / engineer | AIUI-4、5 | 待派 |
@@ -96,6 +96,10 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 
 
 ## 调度安全补核（2026-10-09）
+
+REG-3a 已合入精确 `48b36375c2ea8ebf3c10281e7f6372a9aa52e5b7`，独立复审、任务及组合 CI 通过；
+PR #6 手动基础设施已合入 `107ca439547a01c4ac37e218e059de0a508a0309`，独立审查与 26 离线测试通过；未执行打包。
+本轮组合、发布、排除项与父任务可并行待办见[集成交接](INTEGRATION-2026-10-09.md)。
 
 | 任务 | 分支 | 状态 |
 |---|---|---|

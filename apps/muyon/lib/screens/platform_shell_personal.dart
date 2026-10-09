@@ -218,6 +218,11 @@ extension _PersonalSections on _PlatformShellState {
   Widget settings() => ListenableBuilder(
     listenable: repo,
     builder: (context, _) => list([
+      card('个人中心', '个人资料', () => page('个人中心', personal()), Icons.person_outline),
+      card('设备聊天', '本人已配对设备之间的文字', () => page('设备聊天', ChatEntryPage(host: host)), Icons.forum_outlined),
+      card('记忆与整理', '查看、停用、删除记忆；整理建议与撤回', () => page('记忆', memoryPage()), Icons.psychology_alt_outlined),
+      card('设备与通信', '设备配对与连接', () => page('设备与通信', DevicesPage(host: host)), Icons.devices_outlined),
+      card('接口与工具', '宿主注册的工具与调用', () => page('接口与工具', tools()), Icons.extension_outlined),
       DropdownButtonFormField<ThemeMode>(
         initialValue: widget.themeMode,
         decoration: const InputDecoration(labelText: '外观'),

@@ -16,7 +16,7 @@
 | `actionRef` | 模型从目录和 `intent.allowedActionRefs` 里选 | 能，只能选已登记的 |
 | `inputRefs` | 模型引用宿主已声明的键：业务动作引用 `actionContext.draft` 或 `confirmedRecordRefs`；本地编辑引用 `initialUiState` | 只能引用，不能新建 |
 | `operationKeyRef` | 模型引用宿主 `actionContext.operations` 里已有的键 | 只能引用；操作的内容由宿主定义 |
-| `expectedDraftRevision` | **宿主**在编译时用本会话快照的 `actionContext.draftRevision` 填入 | **不能** |
+| `expectedDraftRevision` | **宿主**仅为业务动作填入本会话快照的 `actionContext.draftRevision`；本地/语义动作保持 `null` | **不能** |
 | 事实、计算值、来源片段、界面状态的值 | 宿主快照 | 只能按 id 引用 |
 
 **缺字段一律拒绝，不猜默认值。** 例如业务动作缺 `operation` 或 `inputs`，这一行按坏行处理，不会拿某个「常用操作」来补。
@@ -39,7 +39,7 @@
 |---|---|
 | `node` | `UiNode(id, component, properties: props, bindings: bind)`；按到达顺序追加到父节点的 `children` |
 | `bind` 的每一项 | `BindingRef(kind, id)`，`kind` 只能是 `fact` / `computed` / `uiState` / `sourceSpan` |
-| `action` | `UiNode.events[event] = ActionBinding(actionRef: action, inputRefs: inputs, operationKeyRef: operation, expectedDraftRevision: <宿主填>)` |
+| `action` | `UiNode.events[event] = ActionBinding(actionRef: action, inputRefs: inputs, operationKeyRef: operation, expectedDraftRevision: <仅业务由宿主填，本地/语义为 null>)` |
 | `text` | 不进 `UIPlan`；作为回答的文字段落按顺序保存，计入文字上限 |
 | `end` | 触发最终校验（§4） |
 
@@ -67,7 +67,7 @@
 - **只要出现过坏行，最终计划就一定不通过**（`malformed_stream`）。不能先删掉坏行或坏节点，再宣布「其余部分合法」。
 - 单节点规则必须从 `validation.dart` **抽取复用**（重构成可以单独调用的函数，`validateUiPlan` 改为调用它们），不能另写一套。
 
-**差分要求**：对同一份原始候选计划，「流式编译到 `end` 的最终结论（通过与否、错误集合）」必须与「把这份候选计划一次性交给 `validateUiPlan`」完全一致。测试用例里要包含带坏节点的候选计划。
+**差分要求**：对同一份原始候选计划，流式编译到 `end` 的**计划校验结果**（通过与否、错误集合）必须与一次性交给 `validateUiPlan` 完全一致，包括带坏节点的候选。协议错误独立保留在 `streamErrors` 中；整体成功还要求无协议错误、未中断且未超限。坏行不能表示为 `UIPlan`，因此 `malformed_stream` 是协议层的最终否决，不伪装成批量校验器产生的错误；也不能清除坏行后宣布流成功。
 
 ## 5. 绑定的范围（AIUI-1）
 
@@ -84,9 +84,11 @@
 | 半截的行（不能解析为 JSON） | 坏行 |
 | 已收到完整的 `action` 行，但没有 `end` | 动作不生效。动作只有在最终计划通过之后才可点，预览期间所有动作按钮都是禁用状态 |
 | 第二个 `end`，或 `end` 之后的任何行 | 忽略，记一条 `after_end` 诊断；结果以第一个 `end` 为准 |
-| 达到任一上限 | 状态 `limit_exceeded`，**停止接收**，之后的行（包括 `end`）只计数不处理；最终计划不成立 |
+| 超过任一接收上限 | 状态 `limit_exceeded`，**停止接收**，之后的行（包括 `end`）只计数不处理；最终计划不成立 |
 
-上限（首版取值，放在一个常量对象里，测试按常量取值）：
+上限采用包含边界：≤N 允许，N+1 越界终止。因此恰好200节点后的 `end` 可以完成。保存诊断条数仅限制存储，达到100后只计数，不停止流；其它接收上限超出后终止。
+
+上限（首版取值，放在一个常量对象里，测试按常量取值；字节按 UTF-8 计）：
 
 | 项 | 上限 |
 |---|---|

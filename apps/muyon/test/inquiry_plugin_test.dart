@@ -7,6 +7,8 @@ import 'package:muyon/app/app_shell.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:supplier_core/supplier_core.dart';
 
+import 'support/conversation_workspace_fixture.dart';
+
 void main() {
   test(
     'Folio uses host dataset, queued same handle, persistence and shutdown',
@@ -66,8 +68,18 @@ void main() {
       await tester.pumpWidget(MuyonApp(host: host));
       await tester.pumpAndSettle();
       expect(find.byType(MaterialApp), findsOneWidget);
-      await tester.tap(find.text('Folio · 询价台账'));
+      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('资料')));
       await tester.pumpAndSettle();
+      final entry = find.widgetWithText(ListTile, 'Folio · 询价台账');
+      final dataScroll = find.descendant(of: find.byType(ListView), matching: find.byWidgetPredicate(
+        (widget) => widget is Scrollable && widget.axisDirection == AxisDirection.down,
+      ));
+      expect(dataScroll, findsOneWidget);
+      await tester.scrollUntilVisible(entry, 100, scrollable: dataScroll);
+      await tester.pumpAndSettle();
+      expect(entry.hitTestable(), findsOneWidget);
+      await workspaceOperation(tester, () => tester.tap(entry.hitTestable()));
+      await workspaceVisible(tester, find.byType(InquiryHome));
       expect(find.byType(InquiryHome), findsOneWidget);
       expect(find.text('Muyon · Folio'), findsOneWidget);
       expect(tester.takeException(), isNull);

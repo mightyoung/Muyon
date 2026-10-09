@@ -102,135 +102,12 @@ UiValidationResult validateUiPlan(
   if (visited.length != nodes.length) reject('unreachable_nodes');
   final shown = <BindingRef>{};
   for (final node in plan.nodes) {
-    final schema = catalog.components[node.component];
-    if (schema == null) {
-      reject('unknown_component:${node.component}');
-      continue;
+    if (catalog.components.containsKey(node.component)) {
+      shown.addAll(node.bindings.values);
     }
-    if (!schema.allowsChildren && node.children.isNotEmpty)
-      reject('children:${node.id}');
-    for (final required in schema.requiredProperties) {
-      if (!node.properties.containsKey(required))
-        reject('missing_property:${node.id}:$required');
-    }
-    for (final entry in node.properties.entries) {
-      final type = schema.properties[entry.key];
-      if (type == null || !matchesUiValue(type, entry.value))
-        reject('property_type:${node.id}:${entry.key}');
-    }
-    for (final required in schema.requiredBindings) {
-      if (!node.bindings.containsKey(required))
-        reject('missing_binding:${node.id}:$required');
-    }
-    for (final entry in node.bindings.entries) {
-      final ref = entry.value;
-      if (!(schema.bindings[entry.key]?.contains(ref.kind) ?? false))
-        reject('binding_kind:${node.id}:${entry.key}');
-      shown.add(ref);
-      switch (ref.kind) {
-        case BindingKind.fact:
-          final fact = snapshot.facts[ref.id];
-          if (fact == null || !isUiScalar(fact.value))
-            reject('unknown_fact:${ref.id}');
-          if (fact != null &&
-              (fact.object.moduleId.isEmpty ||
-                  fact.object.objectType.isEmpty ||
-                  fact.object.objectId.isEmpty ||
-                  fact.field.isEmpty))
-            reject('fact_identity:${ref.id}');
-          for (final source in fact?.sourceRefs ?? <String>[]) {
-            if (!snapshot.sources.containsKey(source))
-              reject('fact_source:${ref.id}:$source');
-          }
-        case BindingKind.uiState:
-          if (!snapshot.initialUiState.containsKey(ref.id) ||
-              !isUiScalar(snapshot.initialUiState[ref.id]))
-            reject('unknown_state:${ref.id}');
-        case BindingKind.computed:
-          final value = snapshot.computations[ref.id];
-          if (value == null ||
-              value.computationId.isEmpty ||
-              value.inputVersion != snapshot.ref ||
-              !isUiScalar(value.value))
-            reject('unknown_or_stale_computation:${ref.id}');
-        case BindingKind.sourceSpan:
-          final source = snapshot.sources[ref.id];
-          if (source == null ||
-              source.artifact.moduleId.isEmpty ||
-              source.artifact.artifactId.isEmpty ||
-              source.artifact.contentDigest.isEmpty ||
-              snapshot.sourceDigests[source.artifact.artifactId] !=
-                  source.artifact.contentDigest ||
-              source.start < 0 ||
-              source.end <= source.start ||
-              source.end > source.originalText.length ||
-              (source.page != null && source.page! < 1) ||
-              (source.paragraph != null && source.paragraph! < 1))
-            reject('unknown_or_stale_source:${ref.id}');
-      }
-    }
-    for (final entry in node.events.entries) {
-      final binding = entry.value;
-      final action = catalog.actions[binding.actionRef];
-      if (!schema.events.containsKey(entry.key) ||
-          action == null ||
-          !intent.allowedActionRefs.contains(binding.actionRef)) {
-        reject('unknown_event_or_action:${node.id}:${entry.key}');
-        continue;
-      }
-      if (!(schema.eventActions[entry.key]?.contains(binding.actionRef) ??
-          false)) {
-        reject('incompatible_event_action:${node.id}:${entry.key}');
-        continue;
-      }
-      if (action.route == UiActionRoute.local) {
-        if (action.localAction == null) reject('local_action_missing');
-        if (binding.operationKeyRef != null ||
-            binding.expectedDraftRevision != null)
-          reject('local_business_reference');
-        if ((action.localAction == UiLocalAction.editField ||
-                action.localAction == UiLocalAction.sortRows) &&
-            (binding.inputRefs.length != 1 ||
-                !node.bindings.values.contains(
-                  BindingRef.uiState(binding.inputRefs.first),
-                ) ||
-                schema.events[entry.key] != UiValueType.string ||
-                snapshot.initialUiState[binding.inputRefs.first] is! String))
-          reject('edit_input');
-        if (action.localAction == UiLocalAction.sortRows &&
-            binding.inputRefs.any(
-              (ref) => snapshot.actionContext?.draft.containsKey(ref) ?? false,
-            ))
-          reject('view_business_input');
-        if (action.localAction == UiLocalAction.expandSource &&
-            !node.bindings.values.any(
-              (ref) => ref.kind == BindingKind.sourceSpan,
-            ))
-          reject('source_input');
-        if (action.localAction == UiLocalAction.openDetail &&
-            !node.bindings.containsKey('value'))
-          reject('detail_input');
-      } else if (action.route == UiActionRoute.business) {
-        final context = snapshot.actionContext;
-        final operation = context?.operations[binding.operationKeyRef];
-        final inputs = binding.inputRefs.toSet();
-        if (context == null ||
-            operation == null ||
-            binding.expectedDraftRevision != context.draftRevision ||
-            operation.draftRevision != context.draftRevision ||
-            inputs.length != binding.inputRefs.length ||
-            inputs.isEmpty ||
-            inputs.length != operation.inputRefs.length ||
-            !inputs.containsAll(operation.inputRefs) ||
-            !inputs.every(
-              (ref) =>
-                  context.draft.containsKey(ref) ||
-                  context.confirmedRecordRefs.contains(ref),
-            ))
-          reject('host_operation_reference');
-      }
-    }
+    errors.addAll(validateUiNode(node, snapshot, intent, catalog));
   }
+
   for (final required in intent.requiredBindings) {
     if (!shown.contains(required)) reject('required_binding:${required.id}');
   }
@@ -243,4 +120,143 @@ UiValidationResult validateUiPlan(
     errors,
     errors.isEmpty ? ValidatedUiPlan._(plan, snapshot, intent, catalog) : null,
   );
+}
+
+/// Shared component, binding and event rules; tree/intent coverage is plan-level.
+List<String> validateUiNode(
+  UiNode node,
+  DataSnapshot snapshot,
+  InteractionIntent intent,
+  UiCatalog catalog,
+) {
+  final errors = <String>[];
+  void reject(String reason) => errors.add(reason);
+  final schema = catalog.components[node.component];
+  if (schema == null) {
+    reject('unknown_component:${node.component}');
+    return errors;
+  }
+  if (!schema.allowsChildren && node.children.isNotEmpty)
+    reject('children:${node.id}');
+  for (final required in schema.requiredProperties) {
+    if (!node.properties.containsKey(required))
+      reject('missing_property:${node.id}:$required');
+  }
+  for (final entry in node.properties.entries) {
+    final type = schema.properties[entry.key];
+    if (type == null || !matchesUiValue(type, entry.value))
+      reject('property_type:${node.id}:${entry.key}');
+  }
+  for (final required in schema.requiredBindings) {
+    if (!node.bindings.containsKey(required))
+      reject('missing_binding:${node.id}:$required');
+  }
+  for (final entry in node.bindings.entries) {
+    final ref = entry.value;
+    if (!(schema.bindings[entry.key]?.contains(ref.kind) ?? false))
+      reject('binding_kind:${node.id}:${entry.key}');
+    switch (ref.kind) {
+      case BindingKind.fact:
+        final fact = snapshot.facts[ref.id];
+        if (fact == null || !isUiScalar(fact.value))
+          reject('unknown_fact:${ref.id}');
+        if (fact != null &&
+            (fact.object.moduleId.isEmpty ||
+                fact.object.objectType.isEmpty ||
+                fact.object.objectId.isEmpty ||
+                fact.field.isEmpty))
+          reject('fact_identity:${ref.id}');
+        for (final source in fact?.sourceRefs ?? <String>[]) {
+          if (!snapshot.sources.containsKey(source))
+            reject('fact_source:${ref.id}:$source');
+        }
+      case BindingKind.uiState:
+        if (!snapshot.initialUiState.containsKey(ref.id) ||
+            !isUiScalar(snapshot.initialUiState[ref.id]))
+          reject('unknown_state:${ref.id}');
+      case BindingKind.computed:
+        final value = snapshot.computations[ref.id];
+        if (value == null ||
+            value.computationId.isEmpty ||
+            value.inputVersion != snapshot.ref ||
+            !isUiScalar(value.value))
+          reject('unknown_or_stale_computation:${ref.id}');
+      case BindingKind.sourceSpan:
+        final source = snapshot.sources[ref.id];
+        if (source == null ||
+            source.artifact.moduleId.isEmpty ||
+            source.artifact.artifactId.isEmpty ||
+            source.artifact.contentDigest.isEmpty ||
+            snapshot.sourceDigests[source.artifact.artifactId] !=
+                source.artifact.contentDigest ||
+            source.start < 0 ||
+            source.end <= source.start ||
+            source.end > source.originalText.length ||
+            (source.page != null && source.page! < 1) ||
+            (source.paragraph != null && source.paragraph! < 1))
+          reject('unknown_or_stale_source:${ref.id}');
+    }
+  }
+  for (final entry in node.events.entries) {
+    final binding = entry.value;
+    final action = catalog.actions[binding.actionRef];
+    if (!schema.events.containsKey(entry.key) ||
+        action == null ||
+        !intent.allowedActionRefs.contains(binding.actionRef)) {
+      reject('unknown_event_or_action:${node.id}:${entry.key}');
+      continue;
+    }
+    if (!(schema.eventActions[entry.key]?.contains(binding.actionRef) ??
+        false)) {
+      reject('incompatible_event_action:${node.id}:${entry.key}');
+      continue;
+    }
+    if (action.route == UiActionRoute.local) {
+      if (action.localAction == null) reject('local_action_missing');
+      if (binding.operationKeyRef != null ||
+          binding.expectedDraftRevision != null)
+        reject('local_business_reference');
+      if ((action.localAction == UiLocalAction.editField ||
+              action.localAction == UiLocalAction.sortRows) &&
+          (binding.inputRefs.length != 1 ||
+              !node.bindings.values.contains(
+                BindingRef.uiState(binding.inputRefs.first),
+              ) ||
+              schema.events[entry.key] != UiValueType.string ||
+              snapshot.initialUiState[binding.inputRefs.first] is! String))
+        reject('edit_input');
+      if (action.localAction == UiLocalAction.sortRows &&
+          binding.inputRefs.any(
+            (ref) => snapshot.actionContext?.draft.containsKey(ref) ?? false,
+          ))
+        reject('view_business_input');
+      if (action.localAction == UiLocalAction.expandSource &&
+          !node.bindings.values.any(
+            (ref) => ref.kind == BindingKind.sourceSpan,
+          ))
+        reject('source_input');
+      if (action.localAction == UiLocalAction.openDetail &&
+          !node.bindings.containsKey('value'))
+        reject('detail_input');
+    } else if (action.route == UiActionRoute.business) {
+      final context = snapshot.actionContext;
+      final operation = context?.operations[binding.operationKeyRef];
+      final inputs = binding.inputRefs.toSet();
+      if (context == null ||
+          operation == null ||
+          binding.expectedDraftRevision != context.draftRevision ||
+          operation.draftRevision != context.draftRevision ||
+          inputs.length != binding.inputRefs.length ||
+          inputs.isEmpty ||
+          inputs.length != operation.inputRefs.length ||
+          !inputs.containsAll(operation.inputRefs) ||
+          !inputs.every(
+            (ref) =>
+                context.draft.containsKey(ref) ||
+                context.confirmedRecordRefs.contains(ref),
+          ))
+        reject('host_operation_reference');
+    }
+  }
+  return List.unmodifiable(errors);
 }

@@ -11,6 +11,7 @@ import 'package:muyon_module_api/ui_contract.dart';
 import 'package:supplier_core/supplier_core.dart';
 
 import '../../../../packages/muyon_ui/test/dynamic_fixtures.dart';
+import 'conversation_workspace_fixture.dart';
 
 class NavigationFixture {
   NavigationFixture(this.root, this.host, this.conversationId);
@@ -35,6 +36,7 @@ class NavigationFixture {
           'paused',
           jsonEncode({
             'kind': 'personal',
+            'state': 'paused',
             'executionId': 'task',
             'conversationId': conversation.id,
             'scope': const AssistantScope.global().toJson(),
@@ -44,7 +46,24 @@ class NavigationFixture {
       return NavigationFixture(root, host, conversation.id);
     }))!;
     addTearDown(() async {
-      await tester.runAsync(f.host.close);
+      // Failure paths must unmount before closing the host, and drain fake
+      // write-tail callbacks while native close runs in the real event loop.
+      try {
+        try {
+          final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
+          if (workspaces.isNotEmpty) {
+            final navigator = Navigator.of(workspaces.first);
+            await workspaceOperation(tester, () async {
+              navigator.popUntil((route) => route.isFirst);
+            });
+          }
+        } finally {
+          await tester.pumpWidget(const SizedBox());
+          await tester.pump();
+        }
+      } finally {
+        await workspaceOperation(tester, f.host.close);
+      }
       root.deleteSync(recursive: true);
     });
     return f;

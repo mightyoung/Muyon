@@ -30,7 +30,10 @@ void main() {
           ),
         ),
       );
-      await tester.tap(find.textContaining('任务 ').first);
+      await tester.pumpAndSettle();
+      final navigation = find.byType(NavigationBar).evaluate().isNotEmpty
+          ? find.byType(NavigationBar) : find.byType(NavigationRail);
+      await tester.tap(find.descendant(of: navigation, matching: find.text('任务')));
       await tester.pumpAndSettle();
       await tester.tap(find.byType(PopupMenuButton<String>).first);
       await tester.pumpAndSettle();
