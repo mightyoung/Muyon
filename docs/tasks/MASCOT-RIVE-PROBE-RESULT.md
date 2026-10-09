@@ -1,5 +1,7 @@
 # 牧羊 Rive CLI 最小合成 rig 验证结果（2026-10-09）
 
+后续收口：原始artifact已在云端保存并逐项校验，已实际view_image检查两PNG；当前视觉核验、Flutter只读接口建议及原图阻断见 [MASCOT-RIVE-PROBE-ARCHIVE.md](MASCOT-RIVE-PROBE-ARCHIVE.md)。下文中的“尚未直接目视”是本次成功构建当时的历史状态。
+
 结论：Ubuntu 云端路径可用。官方 CLI 1.5.1 在无 Rive 登录、无原图、无产品依赖的情况下，实际完成 raster image + mesh + skin + bones + number input 的 verify／.riv 编译／inspect／headless 截图。此前 libEGL 缺失已修复；不需要转移到 Mac。此结论只通过最小工具链门禁，不代表水墨牧羊素材、Flutter 运行时接入或15–20秒角色表现验收完成。
 
 ## 固定来源与范围
