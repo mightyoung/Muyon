@@ -16,6 +16,7 @@ import '../../app/theme.dart';
 import '../../platform/files.dart';
 import '../records/open_record.dart';
 import 'assistant_confirmation.dart';
+import 'ask_history.dart';
 
 const _examples = [
   '离心水泵目前最低的有效报价是多少？来自哪个供应商？',
@@ -24,20 +25,7 @@ const _examples = [
   '泵房改造工程还有哪些物料待询价？',
 ];
 
-class _Message {
-  _Message(
-    this.fromUser,
-    this.text, {
-    this.error = false,
-    this.evidence,
-    this.appliedActions = const [],
-  });
-  final bool fromUser, error;
-  final String text;
-  // Evidence belongs only to this page session, never to saved history.
-  final AssistantAnswer? evidence;
-  final List<Map<String, Object?>> appliedActions;
-}
+typedef _Message = AskHistoryMessage;
 
 /// Local queries, optional web research and individually approved app actions.
 class AskPage extends StatefulWidget {
@@ -74,26 +62,8 @@ class _AskPageState extends State<AskPage> {
   @override
   void initState() {
     super.initState();
-    try {
-      final saved = jsonDecode(widget.state.setting(_historyKey) ?? '[]');
-      if (saved is List) {
-        for (final m in saved.skip(
-          saved.length > 100 ? saved.length - 100 : 0,
-        )) {
-          if (m is List &&
-              m.length == 3 &&
-              m[0] is bool &&
-              m[1] is String &&
-              m[2] is bool) {
-            messages.add(
-              _Message(m[0] as bool, m[1] as String, error: m[2] as bool),
-            );
-          }
-        }
-      }
-    } on FormatException {
-      // A damaged history is simply dropped.
-    }
+    messages.addAll(readAskHistory(widget.state.setting(_historyKey)));
+    _trimMessages();
     if (messages.isNotEmpty) _scrollDown(animate: false);
     if (widget.resumeJobId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -117,15 +87,8 @@ class _AskPageState extends State<AskPage> {
     }
   }
 
-  void _saveHistory() => widget.state.saveSetting(
-    _historyKey,
-    jsonEncode([
-      for (final m in messages.skip(
-        messages.length > 100 ? messages.length - 100 : 0,
-      ))
-        [m.fromUser, m.text, m.error],
-    ]),
-  );
+  void _saveHistory() =>
+      widget.state.saveSetting(_historyKey, writeAskHistory(messages));
 
   void _trimMessages() {
     if (messages.length > 100) {
@@ -141,6 +104,8 @@ class _AskPageState extends State<AskPage> {
           message.fromUser,
           message.text,
           error: message.error,
+          jobId: message.jobId,
+          appliedActions: message.appliedActions,
         );
       }
     }
@@ -175,12 +140,34 @@ class _AskPageState extends State<AskPage> {
     }
     final cancellation = _cancellation = AssistantCancellation();
     input.clear();
+    var questionIndex = resumeId == null
+        ? -1
+        : messages.indexWhere((m) => m.fromUser && m.jobId == resumeId);
+    if (resumeId != null && questionIndex < 0) {
+      final latestQuestion = messages.lastIndexWhere((m) => m.fromUser);
+      if (latestQuestion >= 0 &&
+          messages[latestQuestion].jobId == null &&
+          messages[latestQuestion].text == question &&
+          (messages.last.fromUser || messages.last.error)) {
+        questionIndex = latestQuestion;
+      }
+    }
     setState(() {
-      messages.add(_Message(true, question));
+      if (questionIndex < 0) {
+        messages.add(_Message(true, question, jobId: resumeId));
+      } else if (resumeId != null) {
+        messages[questionIndex] = messages[questionIndex].withJob(resumeId);
+      }
       _trimMessages();
       busy = true;
       activity = null;
     });
+    questionIndex = messages.lastIndexWhere(
+      (m) =>
+          m.fromUser &&
+          m.text == question &&
+          (resumeId == null || m.jobId == resumeId),
+    );
     _scrollDown(force: true);
     _Message reply;
     String? jobId;
@@ -194,6 +181,7 @@ class _AskPageState extends State<AskPage> {
     final permission = widget.state.assistantPermission;
     final webEnabled = widget.state.assistantWebEnabled;
     try {
+      _saveHistory();
       final answer = await widget.state.runAiTask(
         AiTask.conversation,
         {
@@ -244,6 +232,8 @@ class _AskPageState extends State<AskPage> {
         cancellation: cancellation,
         onCreated: (id) {
           jobId = id;
+          messages[questionIndex] = messages[questionIndex].withJob(id);
+          _saveHistory();
           void validateSession() {
             widget.state.validateAssistantSession(id);
             if (widget.state.assistantPermission != permission) {
@@ -299,7 +289,6 @@ class _AskPageState extends State<AskPage> {
     } catch (e) {
       reply = _Message(false, '查询未完成：${friendlyError('$e')}', error: true);
     }
-    if (!mounted) return;
     final applied = [
       ...?appTools?.appliedActions,
       for (final receipt in procurement?.appliedActions ?? const [])
@@ -329,6 +318,7 @@ class _AskPageState extends State<AskPage> {
       '${reply.text}$summary',
       error: reply.error,
       appliedActions: applied,
+      jobId: jobId,
       evidence:
           reply.evidence ??
           (completed.isEmpty
@@ -340,18 +330,33 @@ class _AskPageState extends State<AskPage> {
                   elapsed: Duration.zero,
                 )),
     );
-    setState(() {
-      messages.add(reply);
-      _trimMessages();
-      busy = false;
-      _cancellation = null;
-    });
-    _saveHistory();
-    if (!reply.error && jobId != null) {
+    messages.add(reply);
+    _trimMessages();
+    var historySaved = false;
+    try {
+      _saveHistory();
+      historySaved = true;
+    } catch (e) {
+      reply = _Message(
+        false,
+        '${reply.text}\n\n本机记录保存失败，请检查磁盘后重试：${friendlyError('$e')}',
+        error: true,
+        jobId: jobId,
+        evidence: reply.evidence,
+        appliedActions: reply.appliedActions,
+      );
+      messages[messages.length - 1] = reply;
+    }
+    if (historySaved && !reply.error && jobId != null) {
       widget.state.finishAiTask(jobId!);
       procurement?.clearTransient();
       widget.state.clearAssistantWebSnapshots(jobId!);
     }
+    if (!mounted) return;
+    setState(() {
+      busy = false;
+      _cancellation = null;
+    });
     _scrollDown();
     if (!reply.error && navigation != null) {
       final request = navigation!;
@@ -766,7 +771,7 @@ class _AskPageState extends State<AskPage> {
             ),
           if (!m.fromUser)
             if (m.evidence case final evidence?)
-              _evidenceView(evidence)
+              _evidenceView(evidence, m.evidenceWarnings)
             else
               Padding(
                 padding: const EdgeInsets.only(top: 8),
@@ -816,7 +821,10 @@ class _AskPageState extends State<AskPage> {
     return spans;
   }
 
-  Widget _evidenceView(AssistantAnswer evidence) => Material(
+  Widget _evidenceView(
+    AssistantAnswer evidence,
+    List<String> warnings,
+  ) => Material(
     color: Colors.transparent,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -838,7 +846,7 @@ class _AskPageState extends State<AskPage> {
                   Clipboard.setData(ClipboardData(text: source.url)),
             ),
           ),
-        for (final warning in evidence.warnings)
+        for (final warning in warnings)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(warning, style: TextStyle(color: Tokens.ink2)),
@@ -927,8 +935,7 @@ class _AppNavigationTools implements AssistantToolset {
       'type': 'function',
       'function': {
         'name': 'open_page',
-        'description':
-            '本轮回答完成后打开应用页面或已存在的记录；返回 ready_to_open 仅表示已安排打开，不会代替用户执行页面中的修改。每轮只打开一个页面。',
+        'description': '本轮回答完成后打开应用页面或已存在的记录；返回 ready_to_open 仅表示已安排打开，不会代替用户执行页面中的修改。每轮只打开一个页面。',
         'parameters': {
           'type': 'object',
           'additionalProperties': false,

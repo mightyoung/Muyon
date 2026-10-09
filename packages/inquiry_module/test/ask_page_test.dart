@@ -220,8 +220,8 @@ void main() {
     expect(find.text('回答1'), findsOneWidget);
     final saved = jsonDecode(state.setting('ask_history')!) as List;
     expect(saved, hasLength(14));
-    expect(saved.every((entry) => (entry as List).length == 3), isTrue);
-    expect(jsonEncode(saved), isNot(contains('observations')));
+    expect(saved.every((entry) => (entry as List).length == 4), isTrue);
+    expect(saved.where((entry) => entry[3]['evidence'] != null), hasLength(6));
     expect(
       saved
           .where((entry) => (entry as List)[0] == false)
@@ -230,7 +230,7 @@ void main() {
     );
   });
 
-  testWidgets('query evidence is collapsed, inspectable and never persisted', (
+  testWidgets('query evidence is collapsed, inspectable and locally persisted', (
     tester,
   ) async {
     final dir = Directory.systemTemp.createTempSync('ask_evidence');
@@ -321,7 +321,8 @@ void main() {
     expect(find.text(jsonEncode({'project_id': project})), findsOneWidget);
     final saved = jsonDecode(state.setting('ask_history')!) as List;
     expect(saved, hasLength(2));
-    expect(saved.first, [true, '泵房预算？', false]);
+    expect((saved.first as List).take(3).toList(), [true, '泵房预算？', false]);
+    expect(saved.last[3]['evidence']['observations'], hasLength(1));
     expect(saved.last[0], isFalse);
     expect(saved.last[2], isFalse);
     expect(saved.last[1], '成本为 0 元。');
