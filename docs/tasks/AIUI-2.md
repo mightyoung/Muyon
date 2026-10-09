@@ -1,6 +1,6 @@
 # AIUI-2 组件库 v1
 
-分支 `task/aiui-2-component-library` · 依据：[AI 原生界面方案](../design/ai-native-ui-redesign-2026-10-09.md) §5.2、§5.5；[前端开发备忘录](../design/v6/frontend-memo.md)；UI-1a 的 `muyon_ui` 套件 · 执行：junior · 审查：leader A（交叉核实可派 engineer）
+分支 `task/aiui-2-component-library` · 依据：[AI 原生界面方案](../design/ai-native-ui-redesign-2026-10-09.md) §5.2、§5.5；[前端开发备忘录](../design/v6/frontend-memo.md)；UI-1a 的 `muyon_ui` 套件 · 执行：engineer（用户 2026-10-09 改派）· 审查：leader A（交叉核实可派 Codex 或 junior）
 
 ## 只做这些
 1. **合并两份重复的目录**：`packages/muyon_ui/lib/src/dynamic/catalog.dart` 和 `dynamic_ui/catalog.dart` 合成一份，用到它们的地方改为引用新目录。行为不变，现有测试照常通过。
