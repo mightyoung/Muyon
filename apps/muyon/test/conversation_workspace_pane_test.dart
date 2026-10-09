@@ -168,11 +168,14 @@ void main() {
     final entered = Completer<void>();
     final release = Completer<void>();
     addTearDown(() { if (!release.isCompleted) release.complete(); });
-    final blocked = (f.host.foundation.database as ExclusiveDatabase).exclusiveAsync((db) async {
-      entered.complete();
-      await release.future;
+    Future<void>? blocked;
+    await tester.runAsync(() async {
+      blocked = (f.host.foundation.database as ExclusiveDatabase).exclusiveAsync((db) async {
+        entered.complete();
+        await release.future;
+      });
+      await entered.future;
     });
-    await tester.runAsync(() => entered.future);
     // A presentation checkpoint field is not auto-flushed by a surface edit.
     c.step = 'review-before-close';
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
@@ -180,7 +183,7 @@ void main() {
     expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
     expect(tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller, same(c));
     release.complete();
-    await tester.runAsync(() => blocked);
+    await tester.runAsync(() => blocked!);
     await workspaceReady(tester);
     expect(find.byType(ConversationWorkspaceBody), findsNothing);
     final saved = (await HostUiWorkspaceStore(f.host.foundation, taskId: 'task').load('comparison'))!;
