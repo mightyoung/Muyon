@@ -7,15 +7,33 @@ import 'package:muyon/screens/conversation_workspace_pane.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_module_api/ui_contract.dart';
+import 'package:muyon_ui/dynamic_ui.dart' show UiDispatchOutcome;
 
 import 'support/ui_navigation_fixture.dart';
 import 'support/conversation_workspace_fixture.dart';
+
+void _registerCleanup(WidgetTester tester, NavigationFixture fixture) {
+  addTearDown(() async {
+    final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
+    if (workspaces.isNotEmpty) {
+      final navigator = Navigator.of(workspaces.first);
+      await workspaceOperation(tester, () async {
+        navigator.popUntil((route) => route.isFirst);
+      });
+      await tester.pumpAndSettle();
+    }
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
+    await workspaceOperation(tester, fixture.host.close);
+  });
+}
 
 void main() {
   const ref = ObjectRef(moduleId: 'removed-plugin', objectType: 'item', objectId: 'saved');
 
   testWidgets('resize_moves_one_surface_without_duplicate_controller_or_dispatch', (tester) async {
     final f = await NavigationFixture.open(tester);
+    _registerCleanup(tester, f);
     var events = 0;
     WorkspaceOpener? open;
     tester.view.devicePixelRatio = 1;
@@ -54,9 +72,9 @@ void main() {
     expect(events, 0); // Local editing never invokes the model/business port.
     final detail = c.surface.current.plan.nodes.firstWhere((n) => n.id == 'detail');
     final event = c.surface.eventFor(detail, 'tap');
-    await workspaceOperation(tester, () => c.surface.dispatch(event));
-    await workspaceOperation(tester, () => c.surface.dispatch(event));
-    expect(events, 1);
+    expect(await workspaceOperation(tester, () => c.surface.dispatch(event)), UiDispatchOutcome.applied);
+    expect(await workspaceOperation(tester, () => c.surface.dispatch(event)), UiDispatchOutcome.duplicate);
+    expect(events, 0); // detail is old dynamic local navigation, not a host port.
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
     await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
     expect(find.text('父对话'), findsOneWidget);
@@ -65,8 +83,53 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('registered_business_event_is_dispatched_once_across_resize', (tester) async {
+    final f = await NavigationFixture.open(tester);
+    _registerCleanup(tester, f);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var portCalls = 0;
+    WorkspaceOpener? open;
+    await tester.pumpWidget(MaterialApp(home: ConversationWorkspaceHost(builder: (_, opener) {
+      open = opener;
+      return const Scaffold(body: Text('父对话'));
+    })));
+    // Simulated registered host business port: validates old dynamic confirm
+    // routing/idempotency without executing a model or a real business write.
+    await open!(DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison',
+      plan: f.plan(ref), onEvent: (_) async { portCalls++; }));
+    await workspaceReady(tester);
+    final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
+    final confirm = c.surface.current.plan.nodes.firstWhere((n) => n.id == 'confirm');
+    expect(c.surface.canConfirm(confirm), isTrue);
+    final event = c.surface.eventFor(confirm, 'confirm');
+    expect(await workspaceOperation(tester, () => c.surface.dispatch(event)), UiDispatchOutcome.routed);
+    expect(portCalls, 1);
+    for (final width in [1280.0, 390.0]) {
+      tester.view.physicalSize = Size(width, 844);
+      await workspaceReady(tester);
+      expect(tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller, same(c));
+      expect(await workspaceOperation(tester, () => c.surface.dispatch(event)), UiDispatchOutcome.duplicate);
+      // A fresh event id still cannot replay the already locked operation.
+      final repeated = c.surface.eventFor(confirm, 'confirm');
+      expect(await workspaceOperation(tester, () => c.surface.dispatch(repeated)), UiDispatchOutcome.duplicate);
+      expect(c.surface.canConfirm(confirm), isFalse);
+      expect(portCalls, 1);
+    }
+    await tester.tap(find.byTooltip('关闭工作区 / 返回'));
+    await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
+    final saved = (await HostUiWorkspaceStore(f.host.foundation, taskId: 'task').load('comparison'))!;
+    expect(saved.operationRefs, contains('public-qty'));
+    expect(portCalls, 1);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('resize_restores_measured_scroll_and_focused_field_selection', (tester) async {
     final f = await NavigationFixture.open(tester);
+    _registerCleanup(tester, f);
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(390, 500);
     addTearDown(tester.view.resetPhysicalSize);
@@ -113,6 +176,7 @@ void main() {
 
   testWidgets('desktop_opening_another_surface_replaces_disposed_view_owner', (tester) async {
     final f = await NavigationFixture.open(tester);
+    _registerCleanup(tester, f);
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
     addTearDown(tester.view.resetPhysicalSize);
@@ -153,11 +217,7 @@ void main() {
 
   testWidgets('desktop_close_checkpoints_before_dispose', (tester) async {
     final f = await NavigationFixture.open(tester);
-    addTearDown(() async {
-      await tester.pumpWidget(const SizedBox());
-      await tester.pumpAndSettle();
-      await workspaceOperation(tester, f.host.close);
-    });
+    _registerCleanup(tester, f);
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
     addTearDown(tester.view.resetPhysicalSize);

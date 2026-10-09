@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart' show SchedulerPhase;
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import 'dynamic_workspace.dart';
@@ -187,6 +188,9 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
   late final scroll = ScrollController(initialScrollOffset: widget.controller.scrollOffset);
   UiWorkspaceController get c => widget.controller;
   bool closing = false;
+  bool active = true;
+  bool fieldRefreshQueued = false;
+  final cachedFields = <String, EditableText>{};
   @override
   void initState() {
     super.initState();
@@ -194,13 +198,27 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
     scroll.addListener(scrolled);
     widget.session?.capturePresentation = capturePresentation;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && scroll.hasClients) {
+      if (!mounted || !active) return;
+      refreshInputFields();
+      if (scroll.hasClients) {
         scroll.jumpTo(c.scrollOffset.clamp(0.0, scroll.position.maxScrollExtent).toDouble());
       }
       restorePresentation();
     });
   }
-  Map<String, EditableText> inputFields() {
+  void queueFieldRefresh() {
+    if (fieldRefreshQueued) return;
+    fieldRefreshQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fieldRefreshQueued = false;
+      if (mounted && active) refreshInputFields();
+    });
+  }
+
+  // Tree traversal is legal only after the frame has finished building. Host
+  // capture calls during LayoutBuilder/dispose read this cache, not Elements.
+  void refreshInputFields() {
+    assert(WidgetsBinding.instance.schedulerPhase == SchedulerPhase.postFrameCallbacks);
     final fields = <String, EditableText>{};
     final nodeIds = c.surface.current.plan.nodes.map((n) => n.id).toSet();
     void visit(Element element) {
@@ -220,18 +238,32 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
       element.visitChildElements(visit);
     }
     (context as Element).visitChildElements(visit);
-    return fields;
+    cachedFields..clear()..addAll(fields);
+  }
+
+  @override
+  void deactivate() {
+    active = false;
+    cachedFields.clear();
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    active = true;
+    queueFieldRefresh();
   }
 
   void capturePresentation() {
-    if (!mounted) return;
+    if (!mounted || !active) return;
     if (scroll.hasClients && !c.readOnly) {
       c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent).toDouble();
     }
     final session = widget.session;
     if (session == null) return;
     // Identity comes from the renderer's stable validated-node field key.
-    for (final entry in inputFields().entries) {
+    for (final entry in cachedFields.entries) {
       if (entry.value.focusNode.hasFocus) {
         session.focusedFieldNode = entry.key;
         session.focusedFieldSelection = entry.value.controller.selection;
@@ -244,8 +276,8 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
 
   void restorePresentation() {
     final session = widget.session;
-    if (!mounted || session == null || c.readOnly || widget.textOnly) return;
-    final field = inputFields()[session.focusedFieldNode];
+    if (!mounted || !active || session == null || c.readOnly || widget.textOnly) return;
+    final field = cachedFields[session.focusedFieldNode];
     final selection = session.focusedFieldSelection;
     if (field == null || selection == null || !selection.isValid) return;
     final length = field.controller.text.length;
@@ -278,13 +310,17 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
   }
   @override
   void dispose() {
+    active = false;
+    cachedFields.clear();
     if (widget.session?.capturePresentation == capturePresentation) {
       widget.session?.capturePresentation = null;
     }
     c.removeListener(changed); scroll.dispose(); super.dispose();
   }
   @override
-  Widget build(BuildContext context) => Column(children: [
+  Widget build(BuildContext context) {
+    queueFieldRefresh();
+    return Column(children: [
     Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Row(children: [
       const Expanded(child: Text('当前工作区')),
       SizedBox(width: 48, height: 48, child: IconButton(
@@ -315,4 +351,5 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
       ]),
     ))),
   ]);
+  }
 }

@@ -19,7 +19,12 @@ Future<void> select(WidgetTester tester, String label) async {
 }
 
 Future<void> mountShell(WidgetTester tester, NavigationFixture f, {NavigatorObserver? observer, bool allowInteractiveWorkspace = true}) async {
-  await tester.runAsync(() => f.host.foundation.database.write((db) => db.execute(
+  addTearDown(() async {
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+    await workspaceOperation(tester, f.host.close);
+  });
+  await workspaceOperation(tester, () => f.host.foundation.database.write((db) => db.execute(
     "UPDATE execution_records SET payload=json_set(payload,'\$.prompt','公开父任务','\$.stage','paused','\$.executionDeviceId','local','\$.state','paused') WHERE id='task'",
   )));
   await tester.pumpWidget(MaterialApp(navigatorObservers: [?observer], home: PlatformShell(
@@ -66,8 +71,8 @@ void main() {
       expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
       final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
       c.step = 'system-back-$width';
-      await tester.binding.handlePopRoute();
-      await workspaceReady(tester);
+      await workspaceOperation(tester, tester.binding.handlePopRoute);
+      await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
       expect(find.byType(ConversationWorkspaceBody), findsNothing);
       expect(observer.stack, [rootRoute]);
       expect(tester.state(find.byType(AssistantPage)), same(rootState));
@@ -82,12 +87,12 @@ void main() {
 
   testWidgets('switching_destinations_keeps_unsent_parent_draft_and_scroll', (tester) async {
     final f = await NavigationFixture.open(tester);
-    await tester.runAsync(() async {
+    await workspaceOperation(tester, () async {
       for (var i = 0; i < 30; i++) {
         await f.host.foundation.appendMessage(f.conversationId, 'assistant', '固定公开历史 $i\n用于验证实际滚动位置');
       }
     });
-    await tester.runAsync(() => ProfileRepository(f.host.workspaces).save(ModelProfile(
+    await workspaceOperation(tester, () => ProfileRepository(f.host.workspaces).save(ModelProfile(
       id: 'draft-model', endpoint: Uri.parse('http://127.0.0.1:1/v1'),
       location: ModelLocation.local, modelId: 'fixture', endpointIdentity: 'fixture',
     )));
@@ -140,29 +145,29 @@ void main() {
   testWidgets('data_and_answer_open_same_registered_business_page', (tester) async {
     final f = await NavigationFixture.open(tester);
     final ref = await f.seedObject(tester, 'research');
-    await tester.runAsync(() => f.host.foundation.appendMessage(
+    await workspaceOperation(tester, () => f.host.foundation.appendMessage(
       f.conversationId, 'assistant', '公开对象引用回答', references: [ref],
     ));
     await mountShell(tester, f);
     final rootState = tester.state(find.byType(AssistantPage));
-    await tester.runAsync(() => tester.tap(find.text('${ref.moduleId}/${ref.objectType}/${ref.objectId}')));
-    await tester.pumpAndSettle();
+    await workspaceOperation(tester, () => tester.tap(find.text('${ref.moduleId}/${ref.objectType}/${ref.objectId}')));
+    await workspaceVisible(tester, find.text('真实研究对象'));
     expect(find.text('真实研究对象'), findsWidgets);
     expect(find.textContaining('研究原始内容'), findsWidgets);
-    await tester.pageBack();
+    await workspaceOperation(tester, tester.pageBack);
     await tester.pumpAndSettle();
     await select(tester, '资料');
-    await tester.runAsync(() => tester.tap(find.text('查找业务对象')));
-    await tester.pumpAndSettle();
+    await workspaceOperation(tester, () => tester.tap(find.text('查找业务对象')));
     final item = find.widgetWithText(ListTile, ref.objectId);
+    await workspaceVisible(tester, item);
     expect(item, findsOneWidget);
-    await tester.runAsync(() => tester.tap(item));
-    await tester.pumpAndSettle();
+    await workspaceOperation(tester, () => tester.tap(item));
+    await workspaceVisible(tester, find.text('真实研究对象'));
     expect(find.text('真实研究对象'), findsWidgets);
     expect(find.textContaining('研究原始内容'), findsWidgets);
-    await tester.pageBack();
+    await workspaceOperation(tester, tester.pageBack);
     await tester.pumpAndSettle();
-    await tester.pageBack();
+    await workspaceOperation(tester, tester.pageBack);
     await tester.pumpAndSettle();
     await select(tester, '助手');
     expect(tester.state(find.byType(AssistantPage)), same(rootState));
