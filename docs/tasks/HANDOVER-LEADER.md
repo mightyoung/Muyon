@@ -1,14 +1,52 @@
-# leader 交接（第二阶段进行中，第 3 次更新）
+# leader 交接（第二阶段进行中，第 4 次交接：leader A → Leader B）
 
-更新时间：2026-10-07 · leader：本机 leader 会话（用户 2026-10-07 确认**只保留这一个 leader**，另一个会话不再合入 `develop`）· `develop` 基线：本文件所在提交
+交接时间：2026-10-09 晚 · 交出：leader A（本机 Claude 会话，额度将用完）· 接收：**Leader B（ChatGPT）**，接任统一派发、审查与合入 · `develop` 基线：本文件所在提交
 
-**先读：**
-- [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)：角色、派发、审查与合入；末尾「后续记录」是全部用户决定的时间线
-- [ADR-0003](../adr/0003-phase2-scope.md)：第二阶段范围；[路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md) §3、§3.1：任务顺序与退出标准
-- 已采纳：[ADR-0002](../adr/0002-graded-assistant-authorization.md) 分级授权、[ADR-0005](../adr/0005-model-adapter-and-agent-loop.md) 模型适配层与 Agent 循环。提议：[ADR-0004](../adr/0004-module-contract-v2.md) 模块契约 v2
-- [任务索引 README.md](README.md)、[审查清单 REVIEW.md](REVIEW.md)
+**先读（按顺序）：**
+1. [ADR-0001](../adr/0001-leadership-and-scope-freeze.md) 末尾「后续记录」：全部用户决定的时间线，最新几条是 10-08、10-09 的。
+2. [AI 原生界面方案](../design/ai-native-ui-redesign-2026-10-09.md)（**已采纳**）与 [AIUI 流式界面契约 v1](../design/aiui-stream-contract.md)（AIUI-1 的验收依据）。
+3. [ADR-0003](../adr/0003-phase2-scope.md)（含 10-09 修订：界面线改为 AIUI）、[ADR-0002](../adr/0002-graded-assistant-authorization.md)、[ADR-0004](../adr/0004-module-contract-v2.md)（§12.1 注记含 Q7、Q10、科研敏感度）、[ADR-0005](../adr/0005-model-adapter-and-agent-loop.md)。
+4. [产品与架构总览](../superpowers/specs/2026-10-04-muspace-product-and-architecture-overview.md) 开头的「现行决定」表。
+5. [任务索引 README.md](README.md) 末尾「AI 原生界面」一节、[审查清单 REVIEW.md](REVIEW.md)。
 
-## 0. 在途任务（最先处理）
+## A. 交接时待审的交付（最先处理）
+
+| 任务 | 分支 / 提交 | 执行 | 审查要点 |
+|---|---|---|---|
+| **AIUI-1** 流式编译器 | `task/aiui-1-streaming-compiler` @ `276b291`（`5cbc4cf` + 修复） | Codex | 逐条对照[契约](../design/aiui-stream-contract.md)：§1 路由和 `expectedDraftRevision` 由宿主决定；§4 单节点规则是从 `validation.dart` **抽取复用**的、最终计划对完整候选计划整树校验、差分测试含坏节点；§6 中断、重复 `end`、超限；§7 四个变异各自被指定测试检出。安全相关，按额度规则可开一个审查子代理，或交叉派给非作者成员 |
+| **AIUI-2** 组件库 v1 | `task/aiui-2-component-library` @ `0183918` | engineer | 说明要求约 24 个组件，回报写的是 21 个，要核对少了哪些；两份目录是否真的合并成一份；四种状态、文字等价物、48 点击区、200% 字号；Chart 没有引第三方库；颜色只用 token |
+| **GROK-7** 科研走查清单 | `task/grok-7-research-walkthrough` @ `18ae512` | grokbot | 抽查 `文件:行` 引用；首批 5～8 个目的是否合理；公式表交给 AIUI-3 |
+
+审查后按 REVIEW.md 写 `docs/tasks/<编号>-review.md`，合入 `develop`，更新索引。
+
+## B. 在途与排队
+
+| 成员 | 当前 | 之后 |
+|---|---|---|
+| Codex | AIUI-1 已交付待审 | **REG-4c**（[说明已就绪](REG-4c.md)，前提是 REG-4b 合入）→ **REG-3**（说明**还没写**，见 C-1） |
+| engineer | AIUI-2 已交付待审；R-1 还剩 Android 重跑（UI-0 已取消） | AIUI-4 外壳（AIUI-2 合入后） |
+| junior | 用户已把 junior 的工作改派给 engineer | 视用户安排 |
+| grokbot | GROK-7 已交付待审 | 可派静态任务 |
+| REG-4b 询价导入续办 | 部分合入；`task/reg-4b-inquiry-import-pipeline` @ `8025f66` | 收尾与审查 → 合入后才能开 REG-4c |
+
+## C. 下一步（按顺序）
+1. **写 REG-3 任务说明**（科研迁 v2）：依据 [GROK-6 本体盘点](../reviews/2026-10-09-research-ontology-draft.md) §5 与 [GROK-2 科研覆盖清单](../reviews/coverage-drafts/research.md)。要点：
+   - 科研没有统一的 save/delete/restore，也没有统一校验，多数对象没有版本号，所以**不能照搬 REG-4c 的通用写工具**，要先补版本号和校验，或者做具名工具（约 20 个，命名见 GROK-6 §5.2）；
+   - v2 模块的知识库、模型能力需要先补受限接口（REG-2b 审查第 1 条偏离）；
+   - Q10：只开放报告和主张草稿的本机导出；
+   - 敏感度：研究内容都是 `none`。
+2. AIUI-1 合入后派 **AIUI-3** 本地重算公式（公式来源：GROK-7 的公式表、询价的含税换算与毛利）。
+3. AIUI-1、2 都合入后派 **AIUI-5** 规划提示与模型适配（接 UI-4b harness，加模板退路）。
+4. AIUI-2 合入后派 **AIUI-4** 外壳（engineer）。
+5. REG-4c 合入后派 **AIUI-9** 本体业务卡片（询价先做）。
+
+## D. 待处理的遗留
+- 10-09 批次审查第 3 项：8 个提交合入时没有审查记录，其中 `cc05fa3`（读参数恢复，改了 `agent_dispatch.dart`）属于安全路径，**应补审**（[审查记录](../reviews/2026-10-09-leader-b-batch-review.md)）。
+- Mac 上 46 例询价截图失败，根因不明（[验证备忘录](VERIFICATION-MEMO.md)）；`verify.sh` 删掉豁免后本机门禁一直是红的，合并暂时只看 Linux CI。
+- 验收账本还没有 AIUI 的验收项，等 AIUI 第一批合入时补。
+- 远端有多个已合入的 `task/auth-1b-*` 等停用分支，清理前要征得用户同意。
+
+## 0. 此前的在途记录（leader A 时期，供参考）
 
 - **2026-10-09**：用户决定全面采用 AI 原生界面（[方案](../design/ai-native-ui-redesign-2026-10-09.md)，ADR-0003 已修订），由 leader A 统一派发。已派：AIUI-1（Codex，之后 REG-4c）、AIUI-2（engineer，用户改派；R-1 只剩 Android 重跑，UI-0 已取消）、GROK-5 已合入、GROK-6（grokbot）。下一批：REG-4c（Codex，REG-4b 完成后）、AIUI-3、AIUI-4（engineer 完成 R-1 后）。
 

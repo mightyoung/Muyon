@@ -92,3 +92,4 @@
 - 2026-10-08：用户确认 ADR-0004 Q7 询价字段敏感度按 leader 建议执行（U3 供应商地址为 `none`，U4 客户名与合同号为 `commercial`，其余见 ADR-0004 §12.1 注记）。REG-4b 的合并前提已满足。
 - 2026-10-09：用户决定全面采用 AI 原生界面（参考 OpenAI Intelligent UI），[方案](../design/ai-native-ui-redesign-2026-10-09.md) §10 全部按建议，由 **leader A 统一派发**；新增「本体驱动的业务卡片」要求。ADR-0003 已修订。
 - 2026-10-09：用户确认科研敏感度按建议（研究内容与文献作者为 `none`，见 ADR-0004 §12.1 注记）；取消 UI-0；派 GROK-7（科研场景交互走查清单）。
+- 2026-10-09 晚：leader A（本机 Claude 会话）额度将用完，经用户同意**移交 Leader B（ChatGPT）接任 leader**，负责统一派发、审查与合入。交接见 [HANDOVER-LEADER.md](../tasks/HANDOVER-LEADER.md) 开头。
