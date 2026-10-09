@@ -200,6 +200,7 @@ class MuyonTabs extends StatefulWidget {
   }) : assert(labels.length == children.length);
   final List<String> labels;
   final List<Widget> children;
+  /// Initial position at mount; subsequent updates preserve local selection.
   final int initial;
   final UiComponentState state;
   final String? errorMessage;
@@ -211,7 +212,23 @@ class MuyonTabs extends StatefulWidget {
 }
 
 class _MuyonTabsState extends State<MuyonTabs> {
-  late int index = widget.initial.clamp(0, widget.labels.length - 1);
+  int index = 0;
+
+  int _validIndex(int proposed) => widget.children.isEmpty
+      ? 0
+      : proposed.clamp(0, widget.children.length - 1);
+
+  @override
+  void initState() {
+    super.initState();
+    index = _validIndex(widget.initial);
+  }
+
+  @override
+  void didUpdateWidget(covariant MuyonTabs oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    index = _validIndex(index);
+  }
 
   @override
   Widget build(BuildContext context) {

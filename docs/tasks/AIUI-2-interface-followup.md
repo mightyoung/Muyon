@@ -44,3 +44,21 @@ ValidatedUiPlan，并用 scalar 对照排除树/目录错误。它记录现存�
 说明及执行回报。未在用户 Mac 安装依赖。原始日志只留云工作区/CI artifact。
 Linux CI 的 macOS golden 跳过不构成 golden 验收；macOS verify 仍需独立执行。
 本轮不合入 develop/main。
+
+## Tabs 动态子节点回归
+
+独立复现提交 `606c592ba4acfe02ab9146d3f316f103fcf15950` 的
+[CI 37966050968](https://github.com/mightyoung/Muyon/actions/runs/37966050968)
+在原生产源码上真实失败：选第三页后缩减为两项报 `RangeError 0..1: 2`；
+清空后恢复一项报 `RangeError Only valid value 0: 1`。
+8/8 analyze 和其余 7 套测试通过；muyon_ui 为 `+309 ~152 -2`。
+
+根因是索引仅初始化，更新子列表时未收敛。修复在 initState 中确定初值，
+didUpdateWidget 中按新列表收敛当前位置；空列表记为位置 0，不读取内容。
+急切初始化避免空挂载后首次求值读取后续 initial 的问题。
+
+`tabs_update_test.dart` 五项真实同 State widget 回归覆盖缩减至两项/一项、
+首次空挂载后增加、清空后恢复、重排、initial 外部变化。
+行为边界：重排保留位置（无稳定项 id），清空恢复从第一页开始；initial
+只用于首次挂载，不是受控 selected 参数。未新增参数、动作或改变事件契约。
+修复后精确 SHA 的完整 CI 结果见执行回报；macOS golden 仍需独立验收。

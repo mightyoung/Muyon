@@ -40,6 +40,9 @@ void main() {
       ).first,
     );
     expect(selected.properties.selected, isTrue);
+    await show(tester, ['甲']);
+    expect(tester.takeException(), isNull);
+    expect(find.text('甲 内容'), findsOneWidget);
   });
 
   testWidgets('empty tabs can mount and then receive panels', (tester) async {
@@ -47,7 +50,7 @@ void main() {
     await show(tester, [], initial: 9);
     expect(tester.takeException(), isNull);
     expect(find.byType(InkWell), findsNothing);
-    await show(tester, ['甲', '乙']);
+    await show(tester, ['甲', '乙'], initial: 1);
     expect(tester.takeException(), isNull);
     expect(find.text('甲 内容'), findsOneWidget);
   });
