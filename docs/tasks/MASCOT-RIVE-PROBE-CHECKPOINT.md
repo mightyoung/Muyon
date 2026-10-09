@@ -1,5 +1,7 @@
 # 牧羊 Rive CLI 云端探针检查点（2026-10-09）
 
+**历史检查点：已在后续授权下修复。当前结果见 [MASCOT-RIVE-PROBE-RESULT.md](MASCOT-RIVE-PROBE-RESULT.md)，Ubuntu无登录合成rig已编译并headless渲染成功，不需要Mac fallback。**
+
 研究基线 develop `01404ae472451f55af5baa6ce76c95af72b0cbfc`；独立分支 `task/mascot-rive-probe`，未合并 main/develop。最新实际执行提交 `79cf5f7`。本报告记录已运行结果，不代表 rig 门禁通过。
 
 ## 已执行证据

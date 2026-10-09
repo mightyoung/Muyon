@@ -1,5 +1,7 @@
 # MASCOT-RIVE-PROBE：隔离 Actions 合成素材探针
 
+当前已完成官方CLI 1.5.1＋Ubuntu最小运行库的合成mesh／bones／number-input无登录编译、inspect及headless截图，完整证据与剩余门禁见 [MASCOT-RIVE-PROBE-RESULT.md](MASCOT-RIVE-PROBE-RESULT.md)。以下为原始任务授权与阶段安排。
+
 用户授权：2026-10-09 `Sentinel_5585bfb2bcdc8191aaaeed1f4a1b502b`，允许新增并运行独立测试工作流，费用0，不登录Rive，不上传原图，与应用打包是两项任务。
 
 分支 `task/mascot-rive-probe`，基线 `01404ae472451f55af5baa6ce76c95af72b0cbfc`。设计分支及其他工作区不动，不合并develop/main。仓库官方元数据确认visibility=public、default_branch=main，按GitHub官方计费说明标准hosted Ubuntu计算免费；不使用larger runner、缓存或付费服务。
