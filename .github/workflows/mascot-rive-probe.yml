@@ -39,6 +39,17 @@ jobs:
           RIVE_VERSION=1.5.1 RIVE_HOME="$task_probe_dir/home" RIVE_INSTALL_DIR="$task_probe_dir/bin" timeout 120 bash "$task_probe_dir/install.sh"
           echo "TASK_RIVE=$task_probe_dir/bin/rive" >> "$GITHUB_ENV"
           echo "TASK_PROBE=$task_probe_dir" >> "$GITHUB_ENV"
+      - name: Install minimal Ubuntu runtime libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          ldd "$TASK_RIVE"
+          sudo apt-get update -qq
+          apt-cache policy libegl1 libgles2 libx11-6
+          apt-cache show libegl1 libgles2 | sed -n '1,100p'
+          sudo apt-get install --no-install-recommends -y libegl1 libgles2 libx11-6
+          dpkg-query -W libegl1 libgles2 libx11-6 libglvnd0
+          ldd "$TASK_RIVE"
       - name: Read actual CLI help, schema and samples without login
         shell: bash
         run: |
