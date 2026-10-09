@@ -16,7 +16,8 @@
 坏行独立 veto、差分错误集合、父先到/重复/patch/null、绑定范围、缺 action 字段；
 中断/超限不可复活、重复 end 不替换结果、八项上限只可收紧。
 公开 batchValidation 仅有不可变 errors/isValid，无 validatedPlan；只有成功 finalPlan
-授予能力。预览事件始终为空，真实 accept/dispatch 回归覆盖拒绝与完成两种流。
+授予能力。完成前预览事件为空，成功完成后才暴露合法事件；真实 accept/dispatch
+回归覆盖拒绝与完成两种流。
 
 精确交付 [CI 37952681084](https://github.com/mightyoung/Muyon/actions/runs/37952681084)
 核 head_sha、completed/success；日志 analyze 8/8、test 8/8、module_api +68、host +1247 ~3。

@@ -23,6 +23,11 @@ completed/success；analyze 8/8、test 8/8、module_api +38、host +1284 ~3。
 PR #6 相对该组合只增四个基础设施文件及审查摘要，另由精确源码离线测试验证。
 收到全库审计明确结论后，另将 AIUI-1 加入完整组合并重跑 CI；前一次运行不代表
 含 AIUI-1 的组合已通过。AIUI-2 的 Tabs 复现/修复与新精确提交 CI 仍由原任务负责。
+完整四项组合 `af7c8a47af1ca2f26796aa197ba6dd8065d8a982` 的
+[CI 37966891011](https://github.com/mightyoung/Muyon/actions/runs/37966891011) 已到
+completed/success：analyze 8/8、test 8/8、module_api +68、muyon_ui +193 ~60、host +1284 ~3。
+发布前再次 fetch/ls-remote，develop 仍为冻结基线，无并发变化；本次最终增量仅为
+本摘要、索引状态和 AIUI-1 复审措辞，不改组合已测的产品/基础设施文件。
 最终 develop 发布完整 SHA、ls-remote 与对应 CI 终态在执行回报核对；不把临时 CI
 冒称最终发布 CI。原始验证日志不入库。
 
@@ -40,7 +45,7 @@ PR #6 相对该组合只增四个基础设施文件及审查摘要，另由精�
 
 ## 留给父任务派发的无争用候选
 
-1. **T-3 首片：平台只读自省。** ADR-0004 §10.1 前置 REG-2 已齐；最新远端
+1. **T-3 首片：平台只读自省。** ADR-0004 §10.1 前置 REG-2 已齐；本轮冻结时远端
    没有 T-3 任务分支/任务书或 platform 自省工具实现，不能声称完整 T-3 已完成。
    推荐先写任务书，再让非集成执行者实现新增 `apps/muyon/lib/platform/platform_tools.dart`
    和 `apps/muyon/test/platform_tools_test.dart`，必要时仅在 `app/bootstrap.dart` 加登记。
@@ -57,6 +62,10 @@ PR #6 相对该组合只增四个基础设施文件及审查摘要，另由精�
    `docs/implementation/p0-evidence-2026-10.md` 的 R-1 摘要。验收按 R-1/HANDOVER §5：
    如实记录 passed/readResultsChecked/逐题工具/防重放/运行 commit、凭据与路径脱敏，
    跑后卸载并核 pm list packages。不与契约/模块实现争用；手机/密钥只在本机使用。
+
+父任务后续调度：T-3 首片已派 `01a121bb-56ad-73d4-8c92-25ce29bf2018`，
+独立 `task/t-3-platform-read-tools`；bootstrap 登记另提交，本轮集成避开其文件。
+R-1 暂不新增执行，待集成版与设备/真实模型条件确认。
 
 ## 工具与未验证范围
 
