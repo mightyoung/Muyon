@@ -27,3 +27,8 @@ completed/success，head72dcb61，analyze8/8、test8/8、host1366~3。
 PR实际组合b29f95e40d6418ab6ac6eb7b381dfe1d88182aae双父c98基线+72任务，
 本地正常组合无冲突且产品树一致。历史超时/名单失败保留，不弱化旧断言。
 本机无Flutter/Dart，未冒称本地重跑；最终另跑组合/发布精确CI。原始日志不入库。
+
+完整组合 `0e94827cb56165db2d03f825ff056b00340e24d8` 的
+[CI37997331880](https://github.com/mightyoung/Muyon/actions/runs/37997331880)
+completed/success：analyze8/8、test8/8、module_api68、UI323~152、host1366~3。
+允许仅基础片归档，生产bootstrap仍关闭，完整T-3未完成。精确发布SHA和CI由执行回报另核。

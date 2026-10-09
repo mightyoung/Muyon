@@ -148,3 +148,9 @@ analyze8/8、test8/8、module_api68、UI323~152、host1347~3。发布前fetch/ls
 host1366~3（+19）。只归档handler/隔离测试，bootstrap保持关闭、完整T-3未完成。
 共享prepare的生命周期/条件恢复写入仍阻断生产接线，不扩大registry架构或创造只读授权例外。
 正常组合无冲突，按精确组合CI成功→重核develop→正常发布→精确发布CI终态执行。
+
+第五轮精确组合 `0e94827cb56165db2d03f825ff056b00340e24d8` 的
+[CI37997331880](https://github.com/mightyoung/Muyon/actions/runs/37997331880) completed/success：
+analyze8/8、test8/8、module_api68、UI323~152、host1366~3。发布前fetch/ls-remote重核
+基线develop仍为c98c092完整SHA，main未变。本次收尾仅门禁摘要，产品与CI树不变。
+最终发布SHA和精确CI终态由执行回报给出，bootstrap继续关闭、完整T-3仍未完成。
