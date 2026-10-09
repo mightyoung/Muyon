@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Full local gate: analyze every package and run every suite.
 # Usage: scripts/verify.sh   (from any directory inside the repo)
-# Exit 0 only when analysis is clean and the only test failures are listed
-# in KNOWN_FAILURES. Prints one summary line per suite.
+# Exit 0 only when analysis is clean and every test command succeeds.
+# Prints one summary line per suite; there are no test-failure exclusions.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -40,6 +40,7 @@ suites=(
 for entry in "${suites[@]}"; do
   IFS='|' read -r name dir target <<<"$entry"
   log=$(cd "$ROOT/$dir" && flutter test --no-pub --timeout 120s "$target" 2>&1 | tr '\r' '\n')
+  code=$?  # pipefail preserves flutter/tr/cd failures through the assignment.
   summary=$(echo "$log" | grep -E "All tests passed|Some tests failed|All other tests passed" | tail -1 | sed -E 's/^[0-9:]+ //')
   unexpected=$(echo "$log" | grep -E "\[E\]$" | sed -E 's/^[0-9:]+ [+~0-9 -]+: //; s/ \[E\]$//' | sort -u | while read -r failure; do
     known=0
@@ -47,7 +48,11 @@ for entry in "${suites[@]}"; do
     for k in ${KNOWN_FAILURES[@]+"${KNOWN_FAILURES[@]}"}; do [[ "$failure" == *"$k"* ]] && known=1; done
     [[ $known -eq 0 ]] && echo "$failure"
   done)
-  if [[ -z "$summary" ]]; then
+  if [[ "$code" -ne 0 ]]; then
+    echo "test     $name: FAILED (exit $code)  ${summary:-NO SUMMARY (crashed or hung)}"
+    printf '%s\n' "$log" | sed 's/^/           /'
+    status=1
+  elif [[ -z "$summary" ]]; then
     echo "test     $name: NO SUMMARY (crashed or hung)"; status=1
   elif [[ -n "$unexpected" ]]; then
     echo "test     $name: FAILED  $summary"; echo "$unexpected" | sed 's/^/           /'; status=1

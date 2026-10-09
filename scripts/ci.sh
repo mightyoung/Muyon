@@ -50,6 +50,15 @@ for pkg in packages/muyon_module_api packages/muyon_ui packages/prototype_module
   fi
 done
 
+# Offline regressions for the local and CI gate exit-status contracts.
+if gate_log=$(python3 "$ROOT/scripts/test_verification_gates.py" 2>&1); then
+  echo "gate     test_verification_gates: ok"
+else
+  echo "gate     test_verification_gates: FAILED"
+  printf '%s\n' "$gate_log"
+  status=1; failed+=("gate:test_verification_gates")
+fi
+
 # scripts/test_doctor.sh: doctor scenario tests with fake tools, no network.
 doctor_log=$(bash "$ROOT/scripts/test_doctor.sh" 2>&1; echo "exit=$?")
 doctor_code=${doctor_log##*exit=}
