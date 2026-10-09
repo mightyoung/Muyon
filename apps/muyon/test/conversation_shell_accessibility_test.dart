@@ -18,42 +18,47 @@ void main() {
   testWidgets('navigation_workspace_and_back_have_48_targets_and_selected_semantics', (tester) async {
     final f = await NavigationFixture.open(tester);
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.view.resetPhysicalSize);
-    for (final width in [390.0, 1280.0]) {
-      tester.view.physicalSize = Size(width, 900);
-      await mountShell(tester, f);
-      final nav = width >= 900 ? find.byType(NavigationRail) : find.byType(NavigationBar);
-      for (final label in ['助手', '任务', '资料', '设置']) {
-        await select(tester, label);
-        final target = find.descendant(of: nav, matching: find.byWidgetPredicate((widget) =>
-          widget is Semantics && widget.properties.selected == true));
-        expect(target, findsOneWidget, reason: 'selected semantics for $label at $width');
-        expect(find.descendant(of: target, matching: find.text(label)), findsOneWidget);
-        expect(tester.getSemantics(target).flagsCollection.isSelected, Tristate.isTrue);
-        final size = tester.getSize(target);
-        expect(size.width, greaterThanOrEqualTo(48));
-        expect(size.height, greaterThanOrEqualTo(48));
+    try {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      for (final width in [390.0, 1280.0]) {
+        tester.view.physicalSize = Size(width, 900);
+        await mountShell(tester, f);
+        final nav = width >= 900 ? find.byType(NavigationRail) : find.byType(NavigationBar);
+        for (final label in ['助手', '任务', '资料', '设置']) {
+          await select(tester, label);
+          final target = find.descendant(of: nav, matching: find.byWidgetPredicate((widget) =>
+            widget is Semantics && widget.properties.selected == true));
+          expect(target, findsOneWidget, reason: 'selected semantics for $label at $width');
+          expect(find.descendant(of: target, matching: find.text(label)), findsOneWidget);
+          expect(tester.getSemantics(target).flagsCollection.isSelected, Tristate.isTrue);
+          final size = tester.getSize(target);
+          expect(size.width, greaterThanOrEqualTo(48));
+          expect(size.height, greaterThanOrEqualTo(48));
+        }
+        await select(tester, '助手');
+        final open = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
+        await open(DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison', plan: f.plan(ref)));
+        await workspaceReady(tester);
+        final back = find.byTooltip('关闭工作区 / 返回');
+        expect(tester.getSize(back).width, greaterThanOrEqualTo(48));
+        expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
+        final semanticBack = find.bySemanticsLabel('关闭工作区 / 返回');
+        expect(semanticBack, findsOneWidget);
+        final node = tester.getSemantics(semanticBack);
+        expect(node.label, contains('关闭工作区 / 返回'));
+        expect(node.flagsCollection.isButton, isTrue);
+        expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+        await tester.tap(back);
+        await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
+        expect(find.byType(ConversationWorkspaceBody), findsNothing);
+        await tester.pumpWidget(const SizedBox());
       }
-      await select(tester, '助手');
-      final open = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
-      await open(DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison', plan: f.plan(ref)));
-      await workspaceReady(tester);
-      final back = find.byTooltip('关闭工作区 / 返回');
-      expect(tester.getSize(back).width, greaterThanOrEqualTo(48));
-      expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
-      final node = tester.getSemantics(back);
-      expect(node.label, contains('关闭工作区 / 返回'));
-      expect(node.flagsCollection.isButton, isTrue);
-      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
-      await tester.tap(back);
-      await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
-      expect(find.byType(ConversationWorkspaceBody), findsNothing);
-      await tester.pumpWidget(const SizedBox());
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
     }
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets('keyboard_focus_returns_to_source_node', (tester) async {
@@ -64,6 +69,16 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     final source = FocusNode();
     addTearDown(source.dispose);
+    // Registered after source.dispose: unmount its Focus widget before
+    // disposing the node, and close SQLite while fake callbacks can advance.
+    addTearDown(() async {
+      try {
+        await tester.pumpWidget(const SizedBox());
+        await workspaceReady(tester);
+      } finally {
+        await workspaceOperation(tester, f.host.close);
+      }
+    });
     await tester.pumpWidget(MaterialApp(home: ConversationWorkspaceHost(builder: (_, open) => Scaffold(body: TextButton(
       focusNode: source,
       onPressed: () => open(DynamicWorkspace(repository: f.host.foundation,
@@ -97,10 +112,10 @@ void main() {
     expect(find.text('完整原回答，不截断。'), findsOneWidget);
     expect(find.byType(DynamicUiSurface), findsNothing);
     expect(find.byType(TextField), findsNothing);
-    await tester.tap(find.text('查看对象 · removed-plugin'));
+    await workspaceOperation(tester, () => tester.tap(find.text('查看对象 · removed-plugin')));
     await workspaceVisible(tester, find.textContaining('对象或插件当前不可用'));
-    await tester.pageBack();
-    await workspaceReady(tester);
+    await workspaceOperation(tester, tester.pageBack);
+    await workspaceVisible(tester, find.text('完整原回答，不截断。'));
     expect(find.text('完整原回答，不截断。'), findsOneWidget);
     expect(actions, 0);
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));

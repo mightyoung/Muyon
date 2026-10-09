@@ -159,17 +159,14 @@ void main() {
       repository: repo, taskId: 'task', surfaceId: plan.plan.surfaceId, plan: plan,
       onEvent: (_) async { businessCalls++; },
     ));
-    await tester.pumpAndSettle();
-    final workspace = tester.widget<DynamicWorkspace>(find.byType(DynamicWorkspace));
-    await workspaceOperation(tester, workspace.session!.ensureLoaded);
-    await tester.pumpAndSettle();
+    await workspaceReady(tester);
     final body = find.byType(ConversationWorkspaceBody);
     final c = tester.widget<ConversationWorkspaceBody>(body).controller;
     await workspaceOperation(tester, c.flush);
     final competingStore = HostUiWorkspaceStore(repo, taskId: 'task');
-    final competing = await UiWorkspaceController.open(
+    final competing = await workspaceOperation(tester, () => UiWorkspaceController.open(
       store: competingStore, taskId: 'task', scopeKey: competingStore.scopeKey!, plan: plan,
-    );
+    ));
     competing.step = 'winner projection';
     await workspaceOperation(tester, competing.flush);
     final winner = (await competingStore.load(plan.plan.surfaceId))!.toJson();

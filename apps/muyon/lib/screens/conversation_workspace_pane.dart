@@ -26,6 +26,8 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   Route<void>? route;
   bool desktop = false;
   bool closing = false;
+  bool releasingReferences = false;
+  final retiredReferences = <Future<void>>{};
   Future<void>? opening;
   FocusNode? sourceFocus;
 
@@ -39,7 +41,37 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
     widget.controller?.attach(this, () {
       session?.capturePresentation?.call();
       return session?.checkpoint() ?? Future.value();
-    }, () => session?.dispose());
+    }, () {
+      stopReferenceAdmission();
+      retainReference(session);
+      session?.dispose();
+    }, referencesSettled: referencesSettled,
+      stopReferenceAdmission: stopReferenceAdmission,
+      resumeReferenceAdmission: resumeReferenceAdmission);
+  }
+
+  void stopReferenceAdmission() {
+    releasingReferences = true;
+    session?.stopReferenceAdmission();
+  }
+
+  void resumeReferenceAdmission() {
+    releasingReferences = false;
+    session?.resumeReferenceAdmission();
+  }
+
+  // A closed or replaced view can still be acquiring/releasing a plugin page.
+  // Keep its lease future until completion, even after session becomes null/B.
+  void retainReference(DynamicWorkspaceSession? current) {
+    final pending = current?.pendingReferenceNavigation;
+    if (pending == null || !retiredReferences.add(pending)) return;
+    unawaited(pending.then<void>((_) { retiredReferences.remove(pending); },
+      onError: (Object error, StackTrace stack) { retiredReferences.remove(pending); }));
+  }
+
+  Future<void> referencesSettled() async {
+    final current = session?.pendingReferenceNavigation;
+    await Future.wait({...retiredReferences, ?current});
   }
 
   @override
@@ -52,7 +84,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   }
 
   Future<void> open(DynamicWorkspace workspace) {
-    if (closing) return Future.value();
+    if (closing || releasingReferences) return Future.value();
     if (session != null &&
         identical(session!.widget.repository, workspace.repository) &&
         session!.widget.taskId == workspace.taskId &&
@@ -63,8 +95,9 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   }
 
   Future<void> _open(DynamicWorkspace workspace) async {
+    if (releasingReferences) return;
     if (session != null && !await close()) return;
-    if (!mounted) return;
+    if (!mounted || releasingReferences) return;
     sourceFocus = FocusManager.instance.primaryFocus;
     session = DynamicWorkspaceSession(workspace);
     setState(() {});
@@ -114,6 +147,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
       final old = route;
       route = null;
       if (old != null) old.navigator?.removeRoute(old);
+      retainReference(current);
       setState(() => session = null);
       current.dispose();
       // The source may have disappeared after a plan update. In that case the
@@ -133,6 +167,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
 
   @override
   void dispose() {
+    releasingReferences = true;
     widget.controller?.release(this);
     // Native detach cannot await; explicit close/back checkpoints above can.
     final current = session;
@@ -191,9 +226,11 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
   bool active = true;
   bool fieldRefreshQueued = false;
   final cachedFields = <String, EditableText>{};
+  final closeFocus = FocusNode();
   @override
   void initState() {
     super.initState();
+    closeFocus.addListener(changed);
     c.addListener(changed);
     scroll.addListener(scrolled);
     widget.session?.capturePresentation = capturePresentation;
@@ -315,6 +352,7 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
     if (widget.session?.capturePresentation == capturePresentation) {
       widget.session?.capturePresentation = null;
     }
+    closeFocus.dispose();
     c.removeListener(changed); scroll.dispose(); super.dispose();
   }
   @override
@@ -323,8 +361,11 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
     return Column(children: [
     Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), child: Row(children: [
       const Expanded(child: Text('当前工作区')),
-      SizedBox(width: 48, height: 48, child: IconButton(
-        onPressed: closing ? null : close, tooltip: '关闭工作区 / 返回', icon: const Icon(Icons.close))),
+      Semantics(label: '关闭工作区 / 返回', button: true, enabled: !closing,
+        focusable: !closing, focused: closeFocus.hasFocus, onTap: closing ? null : close,
+        child: ExcludeSemantics(child: SizedBox(width: 48, height: 48, child: IconButton(
+          focusNode: closeFocus, onPressed: closing ? null : close,
+          tooltip: '关闭工作区 / 返回', icon: const Icon(Icons.close))))),
     ])),
     Expanded(child: SingleChildScrollView(controller: scroll, child: Padding(
       padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -43,8 +43,8 @@ class MuyonApp extends StatefulWidget {
 
 class _MuyonAppState extends State<MuyonApp> {
   ThemeMode mode = ThemeMode.system;
-  final navigator = GlobalKey<NavigatorState>();
-  final messenger = GlobalKey<ScaffoldMessengerState>();
+  var navigator = GlobalKey<NavigatorState>();
+  var messenger = GlobalKey<ScaffoldMessengerState>();
   final conversationShell = ConversationShellController();
   late final AppLifecycleListener lifecycle;
   late MuyonHost host = widget.host;
@@ -92,6 +92,7 @@ class _MuyonAppState extends State<MuyonApp> {
       onExitRequested: () async {
         try {
           await conversationShell.checkpoint();
+          await _releaseReferenceRoutes();
         } catch (_) {
           // Keep the tree and unsaved input visible when the CAS fails.
           return AppExitResponse.cancel;
@@ -115,6 +116,21 @@ class _MuyonAppState extends State<MuyonApp> {
     super.dispose();
   }
 
+  Future<void> _releaseReferenceRoutes() async {
+    // Completing push futures lets each registered page execute its finally
+    // lease disposal. Replacing a Navigator tree alone does not complete them.
+    // A reference may still be acquiring its page and have no route to pop.
+    // Stop late presentation before completing the routes already on the stack.
+    conversationShell.stopReferenceAdmission();
+    try {
+      navigator.currentState?.popUntil((route) => route.isFirst);
+      await conversationShell.referencesSettled();
+    } catch (_) {
+      conversationShell.resumeReferenceAdmission();
+      rethrow;
+    }
+  }
+
   /// Close, restore, reopen. The page tree is replaced by a plain progress
   /// screen first so nothing keeps listening to the host being closed. If the
   /// restore fails, the original data is reopened and the failure is shown.
@@ -125,8 +141,16 @@ class _MuyonAppState extends State<MuyonApp> {
     // the old host and tree remain open so the user can retain their input.
     await conversationShell.checkpoint();
     if (!mounted) return;
+    await _releaseReferenceRoutes();
+    if (!mounted) return;
     conversationShell.detach();
-    setState(() => restoring = true);
+    // Changing MaterialApp's key alone can reparent a shared Navigator tree.
+    // Retire its keys so old pages/listeners are unmounted before host close.
+    setState(() {
+      restoring = true;
+      navigator = GlobalKey<NavigatorState>();
+      messenger = GlobalKey<ScaffoldMessengerState>();
+    });
     await WidgetsBinding.instance.endOfFrame;
     closing.approveInquiryModelRequest = null;
     String? failure;
@@ -139,12 +163,17 @@ class _MuyonAppState extends State<MuyonApp> {
     }
     try {
       final reopened = await (widget.openHost ?? MuyonHost.open)(root);
+      if (!mounted) {
+        await reopened.close();
+        return;
+      }
       _attach(reopened);
-      if (!mounted) return;
       setState(() {
         host = reopened;
         generation++;
         restoring = false;
+        navigator = GlobalKey<NavigatorState>();
+        messenger = GlobalKey<ScaffoldMessengerState>();
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         messenger.currentState?.showSnackBar(
@@ -166,6 +195,8 @@ class _MuyonAppState extends State<MuyonApp> {
               '${failure == null ? '' : '\n恢复也失败了：$failure'}'
               '${previous == null ? '' : '\n原数据保留在 $previous'}';
           restoring = false;
+          navigator = GlobalKey<NavigatorState>();
+          messenger = GlobalKey<ScaffoldMessengerState>();
         });
       }
     }
@@ -220,6 +251,10 @@ class _MuyonAppState extends State<MuyonApp> {
         : ListenableBuilder(
             listenable: host.foundation,
             builder: (context, _) => PlatformShell(
+              // The shared navigator GlobalKey can retain/reparent its root
+              // route across MaterialApp keys. Each host generation must own
+              // a fresh shell/session even when that route survives.
+              key: ValueKey(generation),
               host: host,
               shellController: conversationShell,
               themeMode: mode,

@@ -27,9 +27,25 @@ class _LeaseRuntime extends FakeRuntime implements ObjectPages {
       );
 }
 
+void _registerObjectCleanup(WidgetTester tester, NavigationFixture fixture) {
+  addTearDown(() async {
+    final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
+    if (workspaces.isNotEmpty) {
+      final navigator = Navigator.of(workspaces.first);
+      await workspaceOperation(tester, () async {
+        navigator.popUntil((route) => route.isFirst);
+      });
+    }
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+    await workspaceOperation(tester, fixture.host.close);
+  });
+}
+
 void main() {
   testWidgets('desktop_unavailable_plugin_return_keeps_parent_workspace', (tester) async {
     final f = await NavigationFixture.open(tester);
+    _registerObjectCleanup(tester, f);
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
     addTearDown(tester.view.resetPhysicalSize);
@@ -61,6 +77,7 @@ void main() {
 
   testWidgets('stale_anchor_does_not_open_another_object', (tester) async {
     final f = await NavigationFixture.open(tester);
+    _registerObjectCleanup(tester, f);
     final ref = await f.seedObject(tester, 'research');
     await f.show(tester, f.plan(ref));
     final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
