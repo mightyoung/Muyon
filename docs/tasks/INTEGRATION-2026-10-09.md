@@ -89,3 +89,10 @@ completed/success；analyze 8/8、test 8/8、module_api +68、muyon_ui +193 ~60�
 [独立任务书复核](AIUI-NEXT-BATCH-review.md) 通过，只纳入四份任务文档。
 两项本地正常 merge 无冲突；按组合 CI 成功→重核 develop→正常发布→精确发布 CI 终态执行。
 任务书保留正式 schema 决议关口，不以文档合入代替实现或授权扩张；F3a/F5a 基础片可随后派发。
+
+第二轮完整组合 `73e62c62c3a113635a91594f6c61339c5b5598dd` 的
+[CI 37970211887](https://github.com/mightyoung/Muyon/actions/runs/37970211887)
+completed/success：analyze 8/8、test 8/8 suites，module_api +68、muyon_ui +311 ~152、host +1284 ~3。
+发布前 fetch/ls-remote 再核 develop 仍为 `36a516af6af92679fc47b79a1d4679c37258d030`，
+main 保持原 SHA；本次收尾仅上述测试摘要和任务索引状态，产品/基础设施树与已测组合一致。
+最终 develop SHA、远端复核和精确发布 CI 终态在执行回报给出。

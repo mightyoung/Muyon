@@ -22,3 +22,7 @@ stable item mapping、新目录 renderer/recovery 是 AIUI-5 后续正式接线�
 边界拒绝测试和 validator 保持，不为了合入弱化校验。不宣称33组件已经生产端到端消费。
 本机无 Flutter/Dart，运行证据来自精确 CI 与下一轮组合门禁；Linux macOS-only golden 跳过
 不代表 macOS 或设备最终验收。原始日志不入库。
+
+完整组合 `73e62c62c3a113635a91594f6c61339c5b5598dd` 的
+[CI 37970211887](https://github.com/mightyoung/Muyon/actions/runs/37970211887)
+completed/success：analyze 8/8、test 8/8，module_api +68、muyon_ui +311 ~152、host +1284 ~3。
