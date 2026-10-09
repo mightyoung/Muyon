@@ -46,7 +46,6 @@ class UiReferenceNavigation {
   final UiWorkspaceController controller;
   /// App presentation admission only; identity/authority validation is unchanged.
   final bool Function()? canPresent;
-  bool get _mayPresent => context.mounted && (canPresent?.call() ?? true);
 
   Future<void> _checkpoint(NavigationAnchor anchor) async {
     final current = controller.surface.current;
@@ -73,11 +72,11 @@ class UiReferenceNavigation {
       throw StateError('Reference outside current snapshot');
     }
     await _checkpoint(returnTo);
-    if (!_mayPresent) return;
+    if (!context.mounted || !(canPresent?.call() ?? true)) return;
     ModuleObjectPage? opened;
     try {
       opened = await openModuleObjectPage(context, host, ref);
-      if (!_mayPresent) return;
+      if (!context.mounted || !(canPresent?.call() ?? true)) return;
       final page = opened;
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -112,7 +111,7 @@ class UiReferenceNavigation {
       throw StateError('Source outside current snapshot');
     }
     await _checkpoint(returnTo);
-    if (!_mayPresent) return;
+    if (!context.mounted || !(canPresent?.call() ?? true)) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) =>
