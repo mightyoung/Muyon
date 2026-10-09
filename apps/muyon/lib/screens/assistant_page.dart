@@ -30,6 +30,7 @@ class AssistantPage extends StatefulWidget {
     this.host,
     this.conversationId,
     this.onOpenReference,
+    this.onOpenWorkspace,
     this.initialWorkspace,
     this.onWorkspaceChanged,
   });
@@ -42,6 +43,7 @@ class AssistantPage extends StatefulWidget {
   final MuyonHost? host;
   final String? conversationId;
   final void Function(ObjectRef)? onOpenReference;
+  final Future<void> Function(DynamicWorkspace)? onOpenWorkspace;
   @override
   State<AssistantPage> createState() => _AssistantPageState();
 }
@@ -156,6 +158,22 @@ class _AssistantPageState extends State<AssistantPage> {
 
   void _refresh() {
     if (mounted) setState(() {});
+  }
+
+  Future<void>? _workspaceOpening;
+  Future<void> _openWorkspace(DynamicWorkspace workspace) {
+    return _workspaceOpening ??= _openWorkspaceOnce(workspace).whenComplete(
+      () => _workspaceOpening = null,
+    );
+  }
+
+  Future<void> _openWorkspaceOnce(DynamicWorkspace workspace) async {
+    final opener = widget.onOpenWorkspace;
+    if (opener != null) {
+      await opener(workspace);
+    } else {
+      await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => workspace));
+    }
   }
 
   @override
@@ -721,9 +739,7 @@ class _AssistantPageState extends State<AssistantPage> {
                                             ?.validated !=
                                         null)
                                   TextButton(
-                                    onPressed: () => Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                        builder: (_) => DynamicWorkspace(
+                                    onPressed: () => _openWorkspace(DynamicWorkspace(
                                           repository: widget.repo,
                                           host: widget.host,
                                           taskId: task.id,
@@ -738,9 +754,7 @@ class _AssistantPageState extends State<AssistantPage> {
                                           originalAnswer: task.summary ?? '',
                                           tools: widget.agent.tools,
                                           agent: widget.agent,
-                                        ),
-                                      ),
-                                    ),
+                                    )),
                                     child: const Text('打开交互页面'),
                                   ),
                                 for (final surface in HostUiWorkspaceStore(
@@ -748,17 +762,13 @@ class _AssistantPageState extends State<AssistantPage> {
                                   taskId: task.id,
                                 ).surfaces())
                                   TextButton(
-                                    onPressed: () => Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                        builder: (_) => DynamicWorkspace(
+                                    onPressed: () => _openWorkspace(DynamicWorkspace(
                                           repository: widget.repo,
                                           host: widget.host,
                                           taskId: task.id,
                                           surfaceId: surface,
                                           tools: widget.agent.tools,
-                                        ),
-                                      ),
-                                    ),
+                                    )),
                                     child: Text('已保存草稿 · $surface'),
                                   ),
                                 if (task.state ==

@@ -163,6 +163,9 @@ void main() {
         final f = await LoopFixture.open();
         final sink = _PlanningSink(TaskEventTableSink(f.repo));
         final gate = _PlanningStartupGate();
+        addTearDown(() {
+          if (!gate.release.isCompleted) gate.release.complete();
+        });
         final agent = PersonalAgent(
           repository: f.repo,
           gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
@@ -206,6 +209,7 @@ void main() {
           (t) => t.payload['uiPlanningInternal'] == true,
         );
         final digest = child.payload['requestDigest'] as String?;
+        expect(f.bodies, hasLength(1));
         final sendsBefore = f.bodies.length;
         final ledgerBefore = f.ledger.recent().length;
         deadline.fire();

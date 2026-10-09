@@ -1,82 +1,36 @@
 part of 'platform_shell.dart';
 
 extension _HomeSections on _PlatformShellState {
-  Widget home() => list([
-    Text('Muyon', style: Theme.of(context).textTheme.headlineMedium),
-    const Text('打开应用自己做，也可以交给个人助手。已有资料和业务查询可离线使用。'),
-    const SizedBox(height: 12),
-    Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        ActionChip(
-          label: const Text('本人设备'),
-          onPressed: () => page('设备与通信', DevicesPage(host: host)),
-        ),
-        ActionChip(
-          label: Text('任务 ${repo.tasks().where((t) => !t.terminal).length}'),
-          onPressed: () => action(() async {
-            await host.activateInquiry();
-            if (mounted) await page('任务中心', tasks());
-          }),
-        ),
-        ActionChip(
-          label: Text('消息 ${repo.notifications(unreadOnly: true).length}'),
-          onPressed: () => page('消息中心', notifications()),
-        ),
-        ActionChip(
-          label: const Text('个人与记忆'),
-          onPressed: () => page('个人中心', personal()),
-        ),
-        ActionChip(
-          label: const Text('系统设置'),
-          onPressed: () => page('系统设置', settings()),
-        ),
-      ],
-    ),
-    card(
-      '个人助手',
-      '主对话、专题对话和已注册工具',
-      () => showSection(1),
-      Icons.auto_awesome_outlined,
-    ),
-    for (final declaration in host.modules.declarations())
-      card(
-        declaration.displayName,
-        declaration.tagline ?? '',
-        () => openDeclaration(declaration),
-        moduleIcon(declaration.iconKey),
-      ),
-    if (host.workspaces.all().isNotEmpty) ...[
-      const Divider(),
-      Text('项目与工作区', style: Theme.of(context).textTheme.titleMedium),
-      for (final workspace in host.workspaces.all())
-        ListTile(
-          title: Text(workspace.title),
-          leading: const Icon(Icons.folder_outlined),
-          onTap: () => action(() async {
-            await host.workspaces.setSetting('selectedWorkspace', workspace.id);
-            await openModule('research');
-          }),
-          trailing: IconButton(
-            tooltip: '工作区专题对话',
-            icon: const Icon(Icons.chat_outlined),
-            onPressed: () => page(
-              '工作区助手',
-              assistant(scope: AssistantScope.workspace(workspace.id)),
+  Widget taskHub() => Column(
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(16),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => page('执行面板', executionPanel()),
+              icon: const Icon(Icons.fact_check_outlined),
+              label: const Text('执行面板'),
             ),
-          ),
+            OutlinedButton.icon(
+              onPressed: () => page('消息中心', notifications()),
+              icon: const Icon(Icons.notifications_outlined),
+              label: const Text('消息中心'),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => page('数据交换', DevicesPage(host: host)),
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text('数据交换'),
+            ),
+          ],
         ),
-    ],
-    const Divider(),
-    Text('近期工作', style: Theme.of(context).textTheme.titleMedium),
-    for (final conversation in repo.conversations().take(5))
-      ListTile(
-        title: Text(conversation.title),
-        subtitle: Text(conversation.scope.kind.name),
-        onTap: () => page('继续对话', assistant(conversationId: conversation.id)),
       ),
-  ]);
+      Expanded(child: tasks()),
+    ],
+  );
+
   Widget tasks() => ListenableBuilder(
     listenable: Listenable.merge([
       repo,

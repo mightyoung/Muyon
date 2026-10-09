@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
@@ -9,6 +11,7 @@ import '../platform/ui_workspace_store.dart';
 import '../platform/ui_navigation_anchors.dart';
 import '../assistant/personal_agent.dart';
 import '../assistant/ui_planning_events.dart';
+import 'conversation_workspace_pane.dart';
 
 /// An incremental route within the existing Shell. Planning/host action
 /// attachment remains the caller's boundary; a disabled dynamic page still
@@ -26,7 +29,15 @@ class DynamicWorkspace extends StatefulWidget {
     this.onEvent,
     this.agent,
     this.businessActions = const {},
+    this.session,
+    this.embedded = false,
+    this.textOnly = false,
+    this.onClose,
   });
+  final DynamicWorkspaceSession? session;
+  final bool embedded;
+  final bool textOnly;
+  final Future<void> Function()? onClose;
   final FoundationRepository repository;
   final MuyonHost? host;
   final String taskId, surfaceId, originalAnswer;
@@ -39,20 +50,20 @@ class DynamicWorkspace extends StatefulWidget {
   State<DynamicWorkspace> createState() => _DynamicWorkspaceState();
 }
 
-class _DynamicWorkspaceState extends State<DynamicWorkspace> {
+/// Presentation ownership only: one old dynamic controller/router per open surface.
+/// The responsive host retains this session while route and pane views change.
+class DynamicWorkspaceSession {
+  DynamicWorkspaceSession(this.widget);
+  final DynamicWorkspace widget;
   UiWorkspaceController? controller;
   UiPlanningEventRouter? router;
   StoredUiWorkspace? stored;
   String? error;
   bool ready = false;
-  bool navigating = false;
+  bool _disposed = false;
+  Future<void>? _loading;
   final receipts = <String, UiOperationRecovery>{};
-  @override
-  void initState() {
-    super.initState();
-    load();
-  }
-
+  Future<void> ensureLoaded() => _loading ??= load();
   Future<UiOperationRecovery> receipt(String ref) async {
     final task = widget.repository.task(widget.taskId);
     final calls = task?.payload['toolCalls'];
@@ -99,6 +110,10 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
         if (widget.plan!.plan.surfaceId != widget.surfaceId) {
           throw StateError('Surface identity changed');
         }
+        stored = await store.load(widget.surfaceId);
+        if (stored != null && stored!.snapshotRef != widget.plan!.snapshot.ref) {
+          error = '数据版本已变化，人工覆盖仍保留；请核对提取建议。';
+        }
         final c = await UiWorkspaceController.open(
           store: store,
           taskId: widget.taskId,
@@ -116,7 +131,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
                     }),
           receiptLookup: receipt,
         );
-        if (!mounted) {
+        if (_disposed) {
           c.dispose();
           return;
         }
@@ -133,9 +148,54 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
     } catch (e) {
       error = '$e';
     }
-    if (mounted) setState(() => ready = true);
+    ready = true;
   }
 
+
+  Future<void> checkpoint() async {
+    await ensureLoaded();
+    // Readable load failures can be dismissed without modifying their bytes.
+    if (controller == null) return;
+    await controller?.flush();
+  }
+
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    router?.dispose();
+    controller?.dispose();
+  }
+}
+
+class _DynamicWorkspaceState extends State<DynamicWorkspace>
+    with WidgetsBindingObserver {
+  late final session = widget.session ?? DynamicWorkspaceSession(widget);
+  UiWorkspaceController? get controller => session.controller;
+  StoredUiWorkspace? get stored => session.stored;
+  Map<String, UiOperationRecovery> get receipts => session.receipts;
+  String? error;
+  bool ready = false;
+  bool navigating = false;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    load();
+  }
+
+  Future<void> load() async {
+    await session.ensureLoaded();
+    if (mounted) setState(() { ready = true; error = session.error; });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      unawaited(session.checkpoint().catchError((Object e) {
+        if (mounted) setState(() => error = '未保存：$e');
+      }));
+    }
+  }
   Future<void> openReference({
     ObjectRef? object,
     String? source,
@@ -228,14 +288,24 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
 
   @override
   void dispose() {
-    router?.dispose();
-    controller?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    if (widget.session == null) session.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (controller != null) {
+      if (widget.embedded) {
+        return ConversationWorkspaceBody(
+          controller: controller!,
+          originalAnswer: widget.originalAnswer,
+          references: referenceLinks(),
+          banner: error,
+          onClose: widget.onClose,
+          textOnly: widget.textOnly,
+        );
+      }
       return UiWorkspaceView(
         controller: controller!,
         originalAnswer: widget.originalAnswer,
@@ -243,9 +313,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
         banner: error,
       );
     }
-    return Scaffold(
-      appBar: AppBar(title: const Text('已保存草稿')),
-      body: !ready
+    final body = !ready
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
@@ -270,7 +338,14 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
                   ],
                 ),
               ),
-            ),
-    );
+            );
+    if (widget.embedded) {
+      return Column(children: [
+        Row(children: [const Expanded(child: Text('已保存草稿')),
+          IconButton(onPressed: widget.onClose, tooltip: '关闭工作区', icon: const Icon(Icons.close))]),
+        Expanded(child: body),
+      ]);
+    }
+    return Scaffold(appBar: AppBar(title: const Text('已保存草稿')), body: body);
   }
 }

@@ -112,12 +112,10 @@ void main() {
     final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
     c.selectedRecords = ['record-a'];
     c.step = 'review';
-    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -250));
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -12));
     await tester.pumpAndSettle();
     expect(c.scrollOffset, greaterThan(0));
-    // Bring the real reference control back into view before opening it.
-    await tester.ensureVisible(find.text('查看对象 · research'));
-    await tester.pumpAndSettle();
+    // Keep the reference target visible while retaining a nonzero offset.
     await tester.tap(find.text('查看对象 · research'));
     await tester.pumpAndSettle();
     expect(find.text('真实研究对象'), findsWidgets);
@@ -197,6 +195,46 @@ void main() {
     expect(saved.extracted['quantity'], 'new extracted suggestion');
     expect(saved.userOverrides['quantity'], 'manual priority');
     expect(saved.snapshotRef, snapshot.ref);
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('paused_checkpoint_reopen_preserves_committed_projection', (tester) async {
+    final plan = actionPlan();
+    await tester.pumpWidget(MaterialApp(home: DynamicWorkspace(
+      repository: repo, taskId: 'task', surfaceId: plan.plan.surfaceId,
+      plan: plan, originalAnswer: '已定稿原回答',
+    )));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'committed before background');
+    final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
+    await c.flush();
+    // These presentation fields do not notify the surface; only the lifecycle
+    // checkpoint can commit them. No manual flush after paused.
+    c.step = 'background checkpoint';
+    c.selectedRecords = ['background-selection'];
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pumpAndSettle();
+    final store = HostUiWorkspaceStore(repo, taskId: 'task');
+    final committed = (await store.load(plan.plan.surfaceId))!;
+    expect(committed.step, 'background checkpoint');
+    expect(committed.selectedRecords, ['background-selection']);
+    expect(committed.userOverrides['quantity'], 'committed before background');
+    await tester.pumpWidget(const SizedBox());
+    await storage.close();
+    storage = StorageManager(root.path);
+    repo = FoundationRepository(await storage.open('muyon', WorkspaceRepository.schema));
+    expect((await HostUiWorkspaceStore(repo, taskId: 'task').load(plan.plan.surfaceId))!.toJson(), committed.toJson());
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpWidget(MaterialApp(home: DynamicWorkspace(
+      repository: repo, taskId: 'task', surfaceId: plan.plan.surfaceId,
+      plan: plan, originalAnswer: '已定稿原回答',
+    )));
+    await tester.pumpAndSettle();
+    expect(find.text('继续步骤：background checkpoint'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField).first).controller!.text, 'committed before background');
+    expect(find.text('已定稿原回答'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     expect(tester.takeException(), isNull);
   });

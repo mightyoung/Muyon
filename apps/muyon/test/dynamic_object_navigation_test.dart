@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
+import 'package:muyon/screens/conversation_workspace_pane.dart';
+import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 import 'package:supplier_core/supplier_core.dart';
 
 import 'support/ui_navigation_fixture.dart';
+import 'support/conversation_workspace_fixture.dart';
 import 'support/fake_v2_module.dart';
 
 import 'package:muyon/platform/ui_navigation_anchors.dart';
@@ -25,6 +28,57 @@ class _LeaseRuntime extends FakeRuntime implements ObjectPages {
 }
 
 void main() {
+  testWidgets('desktop_unavailable_plugin_return_keeps_parent_workspace', (tester) async {
+    final f = await NavigationFixture.open(tester);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 900);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    WorkspaceOpener? open;
+    await tester.pumpWidget(MaterialApp(home: ConversationWorkspaceHost(builder: (_, opener) {
+      open = opener;
+      return const Scaffold(body: Text('父对话'));
+    })));
+    const ref = ObjectRef(moduleId: 'removed-plugin', objectType: 'item', objectId: 'saved');
+    await open!(DynamicWorkspace(repository: f.host.foundation, host: f.host,
+      taskId: 'task', surfaceId: 'comparison', plan: f.plan(ref), originalAnswer: '原对话回答'));
+    await workspaceReady(tester);
+    final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
+    await tester.enterText(find.byType(TextField).first, '24');
+    await tester.tap(find.text('查看对象 · removed-plugin'));
+    await workspaceReady(tester);
+    await workspaceVisible(tester, find.textContaining('对象或插件当前不可用'));
+    expect(find.textContaining('对象或插件当前不可用'), findsOneWidget);
+    await tester.pageBack();
+    await workspaceReady(tester);
+    expect(tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller, same(c));
+    expect(tester.widget<TextField>(find.byType(TextField).first).controller!.text, '24');
+    expect(find.text('原对话回答'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await workspaceReady(tester);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('stale_anchor_does_not_open_another_object', (tester) async {
+    final f = await NavigationFixture.open(tester);
+    final ref = await f.seedObject(tester, 'research');
+    await f.show(tester, f.plan(ref));
+    final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
+    final navigation = UiReferenceNavigation(context: tester.element(find.byType(UiWorkspaceView)), host: f.host, controller: c);
+    final anchor = NavigationAnchor(conversationId: f.conversationId, taskId: 'task', surfaceId: 'comparison', nodeId: 'detail', scrollOffset: 0, objectRef: ref);
+    for (final bad in [
+      ObjectRef(moduleId: ref.moduleId, objectType: ref.objectType, objectId: 'other', nativeProjectId: ref.nativeProjectId),
+      ObjectRef(moduleId: ref.moduleId, objectType: ref.objectType, objectId: ref.objectId, nativeProjectId: ref.nativeProjectId, revisionRef: 'changed'),
+      ObjectRef(moduleId: ref.moduleId, objectType: ref.objectType, objectId: ref.objectId, nativeProjectId: ref.nativeProjectId, contentDigest: 'changed'),
+    ]) {
+      await expectLater(navigation.openReference(bad, anchor), throwsStateError);
+    }
+    expect(find.text('原对话回答'), findsOneWidget);
+    expect(find.text('真实研究对象'), findsNothing);
+    expect(c.returnAnchor, isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets(
     'actual_global_inquiry_supplier_opens_without_fabricated_workspace_binding',
     (tester) async {
