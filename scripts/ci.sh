@@ -16,7 +16,7 @@ for file in responsive_shell_test conversation_shell_navigation_test conversatio
   echo "EVIDENCE FILE: $file"
   timeout 90s flutter test --no-pub --reporter expanded --timeout 60s "test/$file.dart" || status=1
 done
-for case in 'widget_test|default host opens platform and all four navigation sections' 'inquiry_plugin_test|platform opens the complete Folio module with one MaterialApp' 'module_lifecycle_regression_test|opening a declared v2 section must activate its module' 'inquiry_import_pipeline_test|task_center_menu_opens_production_file_context' 'prototype_wiring_test|shell home opens the prototype module'; do
+for case in 'widget_test|default host opens platform and all four navigation sections' 'inquiry_plugin_test|platform opens the complete Folio module with one MaterialApp' 'module_lifecycle_regression_test|opening a declared v2 section must activate its module' 'inquiry_import_pipeline_test|task_center_menu_opens_production_file_context' 'prototype_wiring_test|shell data destination opens the prototype module'; do
   IFS='|' read -r file name <<< "$case"
   echo "EVIDENCE LEGACY: $file / $name"
   timeout 90s flutter test --no-pub --reporter expanded --timeout 60s "test/$file.dart" --plain-name "$name" || status=1
