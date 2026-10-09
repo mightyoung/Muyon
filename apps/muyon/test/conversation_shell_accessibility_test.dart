@@ -66,6 +66,16 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     final source = FocusNode();
     addTearDown(source.dispose);
+    // Registered after source.dispose: unmount its Focus widget before
+    // disposing the node, and close SQLite while fake callbacks can advance.
+    addTearDown(() async {
+      try {
+        await tester.pumpWidget(const SizedBox());
+        await workspaceReady(tester);
+      } finally {
+        await workspaceOperation(tester, f.host.close);
+      }
+    });
     await tester.pumpWidget(MaterialApp(home: ConversationWorkspaceHost(builder: (_, open) => Scaffold(body: TextButton(
       focusNode: source,
       onPressed: () => open(DynamicWorkspace(repository: f.host.foundation,
