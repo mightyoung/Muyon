@@ -22,12 +22,24 @@ def require(condition, message):
 
 def check_paths(paths):
     for path in paths:
-        name = Path(path).name.lower()
+        # Apply the same rules to ZIP names and native paths on every runner.
+        normalized = str(path).replace('\\', '/')
         require(
-            not (name.startswith('.env') or name in {'rawlogs', 'keys', 'key.properties'}
-                 or name.endswith(('.log', '.keystore', '.jks', '.p12', '.pfx', '.pem', '.key'))),
-            'Credential or raw-log path in build output',
+            normalized and not normalized.startswith('/') and ':' not in normalized
+            and not any(ord(char) < 32 or ord(char) == 127 for char in normalized),
+            'Unsafe absolute or malformed path in build output',
         )
+        parts = normalized.split('/')
+        # Reject traversal before dropping dots/empty segments; never collapse it.
+        require('..' not in parts, 'Directory traversal in build output')
+        names = [part.lower() for part in parts if part not in {'', '.'}]
+        require(names, 'Empty normalized path in build output')
+        for name in names:
+            require(
+                not (name.startswith('.env') or name in {'rawlogs', 'keys', 'key.properties'}
+                     or name.endswith(('.log', '.keystore', '.jks', '.p12', '.pfx', '.pem', '.key'))),
+                'Credential or raw-log path in build output',
+            )
 
 
 def main():

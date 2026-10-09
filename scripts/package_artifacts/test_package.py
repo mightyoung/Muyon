@@ -132,6 +132,53 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'Credential'):
             self.run_package('android')
 
+    def assert_apk_path_rejected(self, entry):
+        self.android(entry)
+        apk = Path('source/apps/muyon/build/app/outputs/flutter-apk/app-release.apk')
+        with zipfile.ZipFile(apk) as archive:
+            self.assertEqual(archive.namelist(), [entry])
+            self.assertFalse(any(item.is_dir() for item in archive.infolist()))
+        with self.assertRaisesRegex(RuntimeError, 'Credential'):
+            self.run_package('android')
+
+    def test_apk_rawlogs_directory_without_directory_entry_fails(self):
+        self.assert_apk_path_rejected('assets/rawlogs/session.txt')
+
+    def test_apk_keys_directory_without_directory_entry_fails(self):
+        self.assert_apk_path_rejected('assets/keys/token.json')
+
+    def test_zip_unsafe_paths_without_directory_entries_fail(self):
+        entries = [
+            '../token.json', 'assets/../token.json', 'assets/./../token.json',
+            '/assets/token.json', '//server/share/token.json',
+            r'C:\assets\token.json', 'C:token.json', r'\assets\token.json',
+            r'assets\..\token.json', r'assets\KEYS\token.json',
+            'assets/./RaWlOgS//session.txt', 'assets/file.txt:stream',
+            'assets/line\nname.txt',
+        ]
+        with zipfile.ZipFile('unsafe.zip', 'w') as archive:
+            for entry in entries:
+                archive.writestr(entry, b'fixture')
+        with zipfile.ZipFile('unsafe.zip') as archive:
+            self.assertFalse(any(item.is_dir() for item in archive.infolist()))
+            for entry in archive.namelist():
+                with self.subTest(path=entry), self.assertRaises(RuntimeError):
+                    package.check_paths([entry])
+        with self.assertRaises(RuntimeError):
+            package.check_paths(['assets/null\x00name'])
+
+    def test_normal_zip_paths_pass(self):
+        entries = ['classes.dex', 'assets/models/token.json', 'lib/arm64-v8a/libapp.so',
+                   'assets/./fonts//font.ttf', r'data\flutter_assets\AssetManifest.bin']
+        with zipfile.ZipFile('normal.zip', 'w') as archive:
+            for entry in entries:
+                archive.writestr(entry, b'fixture')
+        with zipfile.ZipFile('normal.zip') as archive:
+            package.check_paths(archive.namelist())
+        package.check_paths(['assets/', 'Contents/Frameworks/FlutterMacOS.framework/'])
+        self.android('assets/models/token.json')
+        self.assertEqual(self.run_package('android')['signing']['method'], 'android-debug-key')
+
     def test_forbidden_output_paths(self):
         for path in ['.env', 'folder/debug.keystore', 'keys', 'rawlogs', 'test.log', 'key.properties']:
             with self.subTest(path=path), self.assertRaises(RuntimeError):

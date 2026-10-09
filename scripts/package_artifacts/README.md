@@ -42,7 +42,8 @@ CMake 已固定 ONNX Runtime 1.23.0；没有为打包修改原生工程或产品
 每次仅上传 package 和 manifest.json，保留 3 天，传输压缩级别 0（包已压缩）。manifest
 记录源码 SHA、工作流 SHA/ref、run ID/attempt、OS/架构、Flutter/Dart/Python 及平台
 工具版本、实际签名方式、包大小和 SHA-256。仅收集明确版本/签名字段，不上传
-rawlogs、源码、用户数据、环境文件、keys、依赖缓存；打包前拒绝常见凭据/日志路径。
+rawlogs、源码、用户数据、环境文件、keys、依赖缓存；打包前逐段拒绝常见凭据/日志路径，统一正反斜杠并忽略点/空段，
+拒绝目录穿越、绝对/UNC/盘符路径、冒号和控制字符；不依赖 ZIP 显式目录条目。
 不传 dart-define、不开真实模型取证、不读取 .env；路径检查不是任意历史源码的秘密
 扫描，操作者必须选择可信源码。预算仍待确认，3 天保留不代表已核准存储费用。
 
@@ -54,8 +55,9 @@ python3 -m unittest discover -s scripts/package_artifacts -p 'test_*.py' -v
 git diff --check
 ```
 
-actionlint 1.7.7 通过；8 个离线测试通过，涵盖三端打包/provenance、SHA 不匹配、缺
-Windows DLL、错误 Android 签名、APK 内凭据和日志路径拒绝。原生工具输出以夹具
+actionlint 1.7.7 通过；12 个离线测试通过，涵盖三端打包/provenance、SHA 不匹配、缺
+Windows DLL、错误 Android 签名、APK 内凭据和日志路径拒绝（含无目录条目的 keys/token.json 与 rawlogs/session.txt）、
+ZIP 路径穿越/绝对路径拒绝及正常无敏感路径正例。原生工具输出以夹具
 模拟，Windows zip 使用真实 Python zipfile 校验内容；不是三端真实构建/安装证据。
 本轮未安装 Flutter/Android/Xcode/Windows 工具链，未执行 Actions 构建。
 所有直接使用的 actions 固定完整 commit SHA，并由上游 Git tag 核对版本。
