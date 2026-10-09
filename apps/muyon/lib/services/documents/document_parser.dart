@@ -13,6 +13,16 @@ class ParsedDocument {
 
 class DocumentParser {
   static const version = 'pdfrx-engine-0.6.1/plain-v1';
+
+  /// Reuses the parser without requiring a research object or importing one.
+  Future<ParsedDocument> parseInput(String path, String displayName) => parse(
+    ResearchDocument(
+      id: 'selected-input',
+      projectId: '',
+      relativePath: displayName,
+      absolutePath: path,
+    ),
+  );
   Future<ParsedDocument> parse(ResearchDocument document) async {
     final file = File(document.absolutePath);
     if (!await file.exists()) throw StateError('Source file is missing');

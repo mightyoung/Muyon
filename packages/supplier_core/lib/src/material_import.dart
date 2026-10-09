@@ -194,6 +194,28 @@ extension MaterialImport on Store {
         d,
   ]);
 
+  /// Read-only preview of the exact quote duplicate rule used by applyOffers.
+  /// Ambiguous entity matches stay unresolved; callers must not guess ids.
+  String? existingOfferQuotation(OfferPlan plan, {required String projectId}) {
+    if (plan.error != null ||
+        plan.supplierId == null ||
+        plan.productId == null ||
+        plan.offer['price'] == null)
+      return null;
+    return _existingQuote(
+      _quotation(
+        plan.offer,
+        supplierId: plan.supplierId!,
+        productId: plan.productId!,
+        projectId: projectId,
+        contactId: null,
+        unit: plan.offer['unit']!,
+        inquirer: '-',
+        today: localDay(clock()),
+      ),
+    );
+  }
+
   /// Creates suppliers, contacts, products and standard quotations for every
   /// choice in one transaction; optionally adds each material to the
   /// project's budget. Offers without a price or supplier create no
@@ -204,6 +226,14 @@ extension MaterialImport on Store {
     required String? projectId,
     required String inquirer,
     bool addToBudget = false,
+    void Function(
+      int index,
+      String productId,
+      String? supplierId,
+      String? quotationId,
+      bool duplicate,
+    )?
+    onApplied,
     DateTime? asOf,
     ({String name, List<int> bytes})? source,
   }) => transaction(() {
@@ -220,7 +250,8 @@ extension MaterialImport on Store {
     final newProducts = <String, String>{};
     final newContacts = <String, String>{};
     var quotations = 0, duplicates = 0, items = 0;
-    for (final c in choices) {
+    for (var index = 0; index < choices.length; index++) {
+      final c = choices[index];
       final o = c.offer;
       // No supplier (e.g. a selection list without one): material only.
       final supplierId =
@@ -255,6 +286,7 @@ extension MaterialImport on Store {
           : matchOrCreateContact(o, supplierId, newContacts);
       final product = get('product', productId)!.data;
       String? quoteId;
+      var duplicate = false;
       if (projectId != null && o['price'] != null && supplierId != null) {
         final payload = _quotation(
           o,
@@ -269,6 +301,7 @@ extension MaterialImport on Store {
         quoteId = _existingQuote(payload);
         if (quoteId != null) {
           duplicates++;
+          duplicate = true;
         } else {
           quoteId = save('quotation', {...payload, 'attachment_ids': evidence});
           quotations++;
@@ -300,6 +333,7 @@ extension MaterialImport on Store {
         });
         items++;
       }
+      onApplied?.call(index, productId, supplierId, quoteId, duplicate);
     }
     return (
       suppliers: newSuppliers.length,

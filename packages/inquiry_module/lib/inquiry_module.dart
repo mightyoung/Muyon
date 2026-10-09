@@ -13,6 +13,7 @@ export 'src/app/app_state.dart' show AppState;
 export 'src/app/secret_store.dart' show InquirySecretStore;
 export 'src/app/shared_models.dart';
 export 'src/features/records/open_record.dart' show openRecord;
+export 'src/features/ai/import_pipeline.dart';
 
 class InquiryRuntime {
   InquiryRuntime.attach({

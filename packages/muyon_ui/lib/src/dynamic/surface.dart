@@ -376,8 +376,12 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
             TextFormField(
               key: ValueKey('${n.id}-field'),
               controller: input,
-              decoration: const InputDecoration(labelText: 'Draft quantity'),
-              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: n.properties['label'] as String,
+              ),
+              keyboardType: n.properties['inputType'] == 'text'
+                  ? TextInputType.text
+                  : TextInputType.number,
               readOnly: !n.events.containsKey('change'),
               onChanged: n.events.containsKey('change')
                   ? (v) => dispatch(n, 'change', v)
