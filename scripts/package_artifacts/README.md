@@ -8,7 +8,17 @@
 
 用户确认 Actions 存储预算后，另行授权首次构建。GitHub 手动 workflow_dispatch
 还要求该工作流已存在于默认分支（目前 main）；本 PR 只面向 develop，默认分支的
-登记/更新须另行安排，本任务不会改 main。之后选择经过审查的 workflow 分支/提交，
+登记/更新须另行安排，本任务不会改 main。
+
+建议登记方案（仅提案，待 leader/user 决定）：本 PR 在 develop 审查完成后，另开面向
+main 的独立草稿 PR，只引入最终审查版本的四个基础设施文件：
+`.github/workflows/package-artifacts.yml`、`scripts/package_artifacts/package.py`、
+`test_package.py`、`README.md`（后三者位于 scripts/package_artifacts）。不把 develop
+产品/AIUI 改动整体合入 main，不添加 push 触发器。由 leader 核对文件与最终审查版
+一致并取得用户对默认分支登记的决定后，另行处理该 PR。登记完成仍不自动构建；
+首次 dispatch 须在用户知悉下述下载范围、确认存储预算并授权之后执行。
+
+之后选择经过审查的 workflow 分支/提交，
 填写完整、小写 40 位 `target_sha` 并选一个 `platform`（android/macos/windows）。
 无 all 选项、无矩阵、无 push/PR 触发器；UI 首选项只会选 Android，不会默认三端全跑。
 
@@ -19,6 +29,18 @@
 Flutter 固定 3.47.5，与现有 CI 一致；workspace 使用 enforce-lockfile。
 标准 GitHub 托管 ubuntu-24.04 / macos-15 / windows-2022，60 分钟上限，无 SDK/pub
 缓存，无 larger/self-hosted runner，无新增 secret，仅 contents:read。
+
+## 下载范围与数据约束
+
+mightyoung/Muyon 当前是 public 仓库。GitHub Actions artifacts 不是私有分发：
+登录 GitHub 且有仓库读取权限的用户可以下载；对 public 仓库，这个范围包括其他
+GitHub 登录用户。“内部验证”只描述用途、签名和验收状态，不代表产物私密。
+首次真实构建前，leader 必须让用户知悉此下载范围，再取得首次构建授权。
+
+任何待打包源码、资源及最终产物都不得嵌入 secret 或真实用户数据。此工作流不读取
+环境凭据、不注入密钥；路径过滤只防止常见敏感文件/目录被打包，不能证明文件内容
+无秘密或真实用户数据。首次实际构建前仍须核对指定源码/资源符合该约束；本轮只做
+静态检查，不声称已完成真实产物内容核验。3 天保留并不提供私密访问控制。
 
 ## 产物及签名
 
