@@ -18,44 +18,47 @@ void main() {
   testWidgets('navigation_workspace_and_back_have_48_targets_and_selected_semantics', (tester) async {
     final f = await NavigationFixture.open(tester);
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.view.resetPhysicalSize);
-    for (final width in [390.0, 1280.0]) {
-      tester.view.physicalSize = Size(width, 900);
-      await mountShell(tester, f);
-      final nav = width >= 900 ? find.byType(NavigationRail) : find.byType(NavigationBar);
-      for (final label in ['助手', '任务', '资料', '设置']) {
-        await select(tester, label);
-        final target = find.descendant(of: nav, matching: find.byWidgetPredicate((widget) =>
-          widget is Semantics && widget.properties.selected == true));
-        expect(target, findsOneWidget, reason: 'selected semantics for $label at $width');
-        expect(find.descendant(of: target, matching: find.text(label)), findsOneWidget);
-        expect(tester.getSemantics(target).flagsCollection.isSelected, Tristate.isTrue);
-        final size = tester.getSize(target);
-        expect(size.width, greaterThanOrEqualTo(48));
-        expect(size.height, greaterThanOrEqualTo(48));
+    try {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPhysicalSize);
+      for (final width in [390.0, 1280.0]) {
+        tester.view.physicalSize = Size(width, 900);
+        await mountShell(tester, f);
+        final nav = width >= 900 ? find.byType(NavigationRail) : find.byType(NavigationBar);
+        for (final label in ['助手', '任务', '资料', '设置']) {
+          await select(tester, label);
+          final target = find.descendant(of: nav, matching: find.byWidgetPredicate((widget) =>
+            widget is Semantics && widget.properties.selected == true));
+          expect(target, findsOneWidget, reason: 'selected semantics for $label at $width');
+          expect(find.descendant(of: target, matching: find.text(label)), findsOneWidget);
+          expect(tester.getSemantics(target).flagsCollection.isSelected, Tristate.isTrue);
+          final size = tester.getSize(target);
+          expect(size.width, greaterThanOrEqualTo(48));
+          expect(size.height, greaterThanOrEqualTo(48));
+        }
+        await select(tester, '助手');
+        final open = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
+        await open(DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison', plan: f.plan(ref)));
+        await workspaceReady(tester);
+        final back = find.byTooltip('关闭工作区 / 返回');
+        expect(tester.getSize(back).width, greaterThanOrEqualTo(48));
+        expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
+        final semanticBack = find.bySemanticsLabel('关闭工作区 / 返回');
+        expect(semanticBack, findsOneWidget);
+        final node = tester.getSemantics(semanticBack);
+        expect(node.label, contains('关闭工作区 / 返回'));
+        expect(node.flagsCollection.isButton, isTrue);
+        expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+        await tester.tap(back);
+        await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
+        expect(find.byType(ConversationWorkspaceBody), findsNothing);
+        await tester.pumpWidget(const SizedBox());
       }
-      await select(tester, '助手');
-      final open = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
-      await open(DynamicWorkspace(repository: f.host.foundation, taskId: 'task', surfaceId: 'comparison', plan: f.plan(ref)));
-      await workspaceReady(tester);
-      final back = find.byTooltip('关闭工作区 / 返回');
-      expect(tester.getSize(back).width, greaterThanOrEqualTo(48));
-      expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
-      final semanticBack = find.bySemanticsLabel('关闭工作区 / 返回');
-      expect(semanticBack, findsOneWidget);
-      final node = tester.getSemantics(semanticBack);
-      expect(node.label, contains('关闭工作区 / 返回'));
-      expect(node.flagsCollection.isButton, isTrue);
-      expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
-      await tester.tap(back);
-      await workspaceGone(tester, find.byType(ConversationWorkspaceBody));
-      expect(find.byType(ConversationWorkspaceBody), findsNothing);
-      await tester.pumpWidget(const SizedBox());
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
     }
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets('keyboard_focus_returns_to_source_node', (tester) async {
