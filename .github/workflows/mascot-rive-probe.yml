@@ -67,7 +67,8 @@ jobs:
           (p/'rive.yaml').write_text('name: synthetic-rig\n')
           scene='''<Rive version="1" kind="fragment">
            <ImageAsset file="checker.png" name="SyntheticChecker" id="0:60"/>
-           <Artboard width="256" height="256" name="MuYangProbe" id="0:2" defaultStateMachineId="0:7">
+           <Artboard width="256" height="256" name="MuYangProbe" id="0:2" defaultStateMachineId="0:7" styleId="0:5">
+            <LayoutComponentStyle name="ProbeStyle" id="0:5"/>
             <Fill name="Background"><SolidColor colorValue="FFF3EEE3"/></Fill>
             <RootBone x="64" y="128" length="64" name="Anchor" id="0:40">
              <Bone length="64" name="Deform" id="0:41"/>
@@ -87,9 +88,9 @@ jobs:
             <StateMachine name="MascotProbe" id="0:7">
              <StateMachineNumber name="headYaw" value="0" id="0:50"/>
              <StateMachineLayer name="Pose">
-              <AnyState/><ExitState/>
+              <AnyState x="200" y="-120"/><ExitState x="400" y="-120"/>
               <EntryState><StateTransition stateToId="0:12"/></EntryState>
-              <BlendState1DInput inputId="0:50" id="0:12">
+              <BlendState1DInput inputId="0:50" id="0:12" x="200" y="0">
                <BlendAnimation1D animationId="0:71" value="0"/>
                <BlendAnimation1D animationId="0:72" value="100"/>
               </BlendState1DInput>
