@@ -129,6 +129,8 @@ jobs:
           print(json.dumps({'verifiedTypes':dict(counts),'rigDetails':[x.get('rig') for x in nodes if x.get('rig')]}))
           PYCHECK
           "$TASK_RIVE" "$TASK_PROBE/project" --screenshot="$TASK_PROBE/evidence/pose-left.png" --advance=1
+          cp "$TASK_PROBE/project/scene.rml" "$TASK_PROBE/evidence/scene-left.rml"
+          cp "$TASK_PROBE/project/build/synthetic-rig.riv" "$TASK_PROBE/evidence/pose-left.riv"
           python3 - "$TASK_PROBE/project/scene.rml" <<'PYPOSE'
           from pathlib import Path
           import sys
@@ -136,6 +138,37 @@ jobs:
           PYPOSE
           "$TASK_RIVE" "$TASK_PROBE/project" --verify --format=json > "$TASK_PROBE/evidence/verify-right.json"
           "$TASK_RIVE" "$TASK_PROBE/project" --screenshot="$TASK_PROBE/evidence/pose-right.png" --advance=1
+          "$TASK_RIVE" inspect "$TASK_PROBE/project" --json > "$TASK_PROBE/evidence/inspect-right.json"
+          python3 - "$TASK_PROBE/evidence" <<'PYPIXEL' > "$TASK_PROBE/evidence/pixel-check.json"
+          import struct,zlib,json,sys
+          from pathlib import Path
+          def decode(path):
+           b=path.read_bytes();assert b[:8]==b'\x89PNG\r\n\x1a\n';pos=8;parts=[]
+           while pos<len(b):
+            n=struct.unpack('>I',b[pos:pos+4])[0];kind=b[pos+4:pos+8];data=b[pos+8:pos+8+n];pos+=n+12
+            if kind==b'IHDR': w,h,depth,color,_,_,interlace=struct.unpack('>IIBBBBB',data)
+            if kind==b'IDAT':parts.append(data)
+           assert (w,h,depth,interlace)==(256,256,8,0)
+           assert color in (2,6),color
+           channels=3 if color==2 else 4;stride=w*channels;raw=zlib.decompress(b''.join(parts));rows=[];prev=bytearray(stride);off=0
+           def paeth(a,b,c):
+            p=a+b-c;d=[abs(p-a),abs(p-b),abs(p-c)];return (a,b,c)[d.index(min(d))]
+           for y in range(h):
+            mode=raw[off];row=bytearray(raw[off+1:off+1+stride]);off+=stride+1
+            for x in range(stride):
+             a=row[x-channels] if x>=channels else 0;c=prev[x-channels] if x>=channels else 0;v=prev[x]
+             pred=(0,a,v,(a+v)//2,paeth(a,v,c))[mode];row[x]=(row[x]+pred)&255
+            rows.extend(tuple(row[x:x+3]) for x in range(0,stride,channels));prev=row
+           return rows
+          p=Path(sys.argv[1]);left=decode(p/'pose-left.png');right=decode(p/'pose-right.png');diff=sum(a!=b for a,b in zip(left,right))
+          def stats(pixels):
+           points=[(i%256,i//256) for i,c in enumerate(pixels) if max(abs(c[j]-(35,105,160)[j]) for j in range(3))<12 or max(abs(c[j]-230) for j in range(3))<12]
+           assert len(points)>5000,len(points)
+           return {'checkerPixels':len(points),'bbox':[min(x for x,y in points),min(y for x,y in points),max(x for x,y in points),max(y for x,y in points)]}
+          a=stats(left);b=stats(right);assert diff>500,diff;assert a['bbox'][0]==b['bbox'][0]
+          print(json.dumps({'pngPixelsDecoded':True,'differentPixels':diff,'left':a,'right':b,'limit':'Two builds with different default inputs; no Flutter live input verification or mascot visual acceptance.'}))
+          PYPIXEL
+          cat "$TASK_PROBE/evidence/pixel-check.json"
           cp "$TASK_PROBE/project/scene.rml" "$TASK_PROBE/project/rive.yaml" "$TASK_PROBE/project/build/synthetic-rig.riv" "$TASK_PROBE/evidence/"
           (cd "$TASK_PROBE/evidence" && sha256sum * > SHA256SUMS)
           test "$(du -sb "$TASK_PROBE/evidence" | cut -f1)" -le 10485760
