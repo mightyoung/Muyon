@@ -24,6 +24,8 @@ git ls-tree -r --name-only <SHA> docs/tasks/AIUI-3.md docs/tasks/AIUI-4.md docs/
 
 独立全库审计附件：Library `libfile_2ab1313f0ee48191a4205a73087b624a` version0；文件 `Muyon-component-contract-audit-2026-10-09.zip`，SHA256 `9e2412dadb690ec9a8f2ac3e9e22920ebea7df3997c0c8c23ef02c4354eae969`。原始日志不入库。后续合入更新基线后，执行者在任务回报冻结新完整SHA，不改写上述历史证据。
 
+**推送后远端补核**：唯一集成任务已将 develop 推进到 `36a516af6af92679fc47b79a1d4679c37258d030`。`git merge-base --is-ancestor` 确认该快照已包含上述 AIUI-1 与 GROK-7 完整SHA，仍未包含 AIUI-2 `3f739035...` 或 `4e45836...`；再次检查该develop仍无AIUI-3/4/5任务书。本分支保留01404ae文档基线，不擅自合并或覆盖唯一集成结果。开工可由唯一集成负责人选择已审的新基线；上表“拟稿时/原审计”状态仅为历史快照，不能照搬为当前在途状态。
+
 ## 1. 已有实现复用，不新造运行时
 
 | 已有实现 | 文件 | 新任务允许的增量 |
