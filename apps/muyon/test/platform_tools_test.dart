@@ -206,6 +206,29 @@ void main() {
     await registry.close();
   });
 
+  test('host category policy still blocks every platform read before resolution', () async {
+    var resolutions = 0;
+    final registry = ToolRegistry(database: host.foundation.database,
+      categoryAllowed: (_) => false,
+      resolveScope: (scope) async {
+        resolutions++;
+        return ResolvedAssistantScope(requested: scope, objects: []);
+      });
+    registerPlatformReadTools(registry: registry, foundation: host.foundation,
+      executions: ExecutionStore(host.foundation.database), transfer: host.services.transfer,
+      isAvailable: () => true);
+    final db = host.foundation.database.raw;
+    final changes = db.select('SELECT total_changes() AS n').single['n'];
+    for (final id in _ids) {
+      await expectLater(registry.invoke(ToolCallRequest(invocationId: 'blocked-$id',
+        toolId: id, scope: const AssistantScope.global())), throwsA(
+          isA<ToolPlatformException>().having((e) => e.code, 'code', 'category_disabled')));
+    }
+    expect(resolutions, 0);
+    expect(db.select('SELECT total_changes() AS n').single['n'], changes);
+    await registry.close();
+  });
+
   test('direct handlers make zero DB writes or file changes and no HTTP attempts', () async {
     seedTask('task', const AssistantScope.global());
     await host.foundation.saveMemory(content: _secret, source: _secret);
@@ -320,8 +343,9 @@ void main() {
       greaterThan(beforeChanges));
     final states = db.select('SELECT module_id,status FROM module_registry').map(
       (r) => [r['module_id'], r['status']]).toList();
+    expect(host.scopeResolver.sources, isNotEmpty);
     expect(states, containsAll([
-      ['inquiry', 'failed'], ['research', 'failed'], ['prototype', 'failed'],
+      for (final source in host.scopeResolver.sources) [source.moduleId, 'failed'],
     ]));
     expect(rows('notifications'), notifications);
     expect(rows('execution_records'), executions);
