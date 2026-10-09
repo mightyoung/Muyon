@@ -4,6 +4,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/assistant_subconversations.dart';
 import '../platform/grants/host_authorization_facts.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/tool_names.dart';
@@ -38,6 +39,8 @@ class AgentTaskFactory {
             AgentContext.digest(conversation.scope.toJson())) {
       throw StateError('scope_mismatch');
     }
+    final readonly = AssistantSubconversations(ctx.repository)
+        .validateConversation(conversationId);
     final available = List<RegisteredToolInfo>.unmodifiable(
       ctx.tools.list().where(
         (t) =>
@@ -45,6 +48,7 @@ class AgentTaskFactory {
             (t.descriptor.toolId != 'assistant.plan_ui' ||
                 ctx.uiPlanning?.enabled == true) &&
             t.available &&
+            (!readonly || t.descriptor.effect == ToolEffect.read) &&
             t.descriptor.modelSelectable &&
             ctx.tools.permitsCategory(t.descriptor.toolId),
       ),
@@ -146,6 +150,9 @@ class AgentTaskFactory {
   }) {
     final c = ctx.repository.conversation(conversationId);
     if (c == null) throw StateError('Unknown conversation');
+    AssistantSubconversations(
+      ctx.repository,
+    ).checkTool(conversationId, ctx.tools.inspect(toolId)?.descriptor.effect);
     final now = ctx.clock().toUtc().toIso8601String();
     final task = PersonalTask({
       'kind': 'personal',

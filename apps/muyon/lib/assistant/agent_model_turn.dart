@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:uuid/uuid.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/assistant_subconversations.dart';
 import '../platform/grants/host_model_authorization.dart';
 import '../platform/grants/outbound_content_reviewer.dart';
 import '../services/models/model_gateway.dart';
@@ -217,6 +218,8 @@ class AgentModelTurn {
 
   /// Same checks before every send, whichever path sends.
   Future<void> _beforeSend(PersonalTask task) async {
+    AssistantSubconversations(ctx.repository)
+        .validateConversation(task.conversationId);
     if (task.payload['uiPlanningInternal'] == true &&
         ctx.uiModelChecks[task.id] == null) {
       throw StateError('planning_session_expired');
