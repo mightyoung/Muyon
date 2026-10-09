@@ -7,7 +7,6 @@ import 'package:muyon/screens/conversation_workspace_pane.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_module_api/ui_contract.dart';
-import 'package:muyon_ui/dynamic_ui.dart';
 
 import 'support/ui_navigation_fixture.dart';
 import 'support/conversation_workspace_fixture.dart';
