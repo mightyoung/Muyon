@@ -76,3 +76,16 @@ CI 查询用通用 github_fetch 的 workflow-run API（专用 commit-runs 工具
 本地另外重跑门禁退出码 9 项与 doctor 23 场景均通过，未导出 MUYON_EVAL_REAL。
 Linux 门禁中 macOS 字体 golden 的跳过不构成 golden 验收；原有 Mac 失败结论保留。
 REG-3b、剩余科研写入/Q10 本机导出门面、REG-5、AIUI 接线、真实模型/真机端到端另行处理。
+
+## 第二轮：组件库与后续任务书
+
+首批四项已发布 develop `36a516af6af92679fc47b79a1d4679c37258d030`，
+[发布 CI 37968313166](https://github.com/mightyoung/Muyon/actions/runs/37968313166)
+completed/success；analyze 8/8、test 8/8、module_api +68、muyon_ui +193 ~60、host +1284 ~3。
+
+本轮冻结 AIUI-2 `4e45836efcb85c86f5c8de57e6b07795aab6166a`，替代上表暂缓旧 SHA；
+[独立复审](AIUI-2-review.md) 和精确 source CI 均通过，Tabs 阻断关闭。
+另冻结 `docs/aiui-next-batch-contracts@82df0f29d9628d107d96d52795438e972ce5fefe`，
+[独立任务书复核](AIUI-NEXT-BATCH-review.md) 通过，只纳入四份任务文档。
+两项本地正常 merge 无冲突；按组合 CI 成功→重核 develop→正常发布→精确发布 CI 终态执行。
+任务书保留正式 schema 决议关口，不以文档合入代替实现或授权扩张；F3a/F5a 基础片可随后派发。
