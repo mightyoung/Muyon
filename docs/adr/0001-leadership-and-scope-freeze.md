@@ -91,3 +91,4 @@
 - 2026-10-08：用户指定 **Leader B（ChatGPT）** 为 B 角，执行当日的开发任务（REG-2a/2b 集成、UI-1a、AUTH-1b 多个切片），并经独立复审和对应提交的 CI 后合入 `develop`。leader A 事后审查了这一批（[审查记录](../reviews/2026-10-08-leader-b-batch-review.md)），没有发现阻断问题，补齐了过程文档和 REG-2a 的补验。
 - 2026-10-08：用户确认 ADR-0004 Q7 询价字段敏感度按 leader 建议执行（U3 供应商地址为 `none`，U4 客户名与合同号为 `commercial`，其余见 ADR-0004 §12.1 注记）。REG-4b 的合并前提已满足。
 - 2026-10-09：用户决定全面采用 AI 原生界面（参考 OpenAI Intelligent UI），[方案](../design/ai-native-ui-redesign-2026-10-09.md) §10 全部按建议，由 **leader A 统一派发**；新增「本体驱动的业务卡片」要求。ADR-0003 已修订。
+- 2026-10-09：用户确认科研敏感度按建议（研究内容与文献作者为 `none`，见 ADR-0004 §12.1 注记）；取消 UI-0；派 GROK-7（科研场景交互走查清单）。

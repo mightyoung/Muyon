@@ -678,6 +678,8 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 
 > **用户决定（2026-10-07）：Q1～Q13 全部按「建议」一栏执行。** Q7 的字段划分已于 2026-10-08 确认：按 [GROK-3 初稿](../reviews/2026-10-07-inquiry-sensitivity-draft.md)执行，并采纳 leader 对 U1～U10 的建议——各类备注、供应商名称与别名、供应商地址（单位地址）、评价/定标说明与询价地点、附件 id、参数依据原文为 `none`；项目客户名与合同号为 `commercial`；项目负责人与询价人姓名为 `personal`；税号、银行账户目前不是字段，日后加入时税号为 `commercial`、银行账户为 `credential`；公司资料中心令牌为 `credential`（在系统安全存储，不属于询价字段）；Q10 的科研导出 / 导入清单已于同日确认（按 [GROK-1 静态核实](../reviews/2026-10-07-adr-0004-static-checks.md) §7 的建议：`exportReport`、`exportClaimDrafts` 开放为本机导出，仍需逐次确认；`exportTask`、`exportResult`、`exportSkillExperiment`、`importResult`、`importTask`、`importResearch` 与设备收发暂不开放，在覆盖清单里记为 `deferred`；本机库写入按 Q10 开放）；Q13 的 spike 失败时回报用户。
 
+> **科研敏感度（用户 2026-10-09 确认，[GROK-6](../reviews/2026-10-09-research-ontology-draft.md) §6 第 9 项）**：未发表的摘录与研究判断（笔记、卡片正文、条目判断、任务目标、运行数据、项目问题）为 `none`；文献作者姓名为 `none`；卡片 `author` 字段在只存机器标记时为 `none`，以后若存真人姓名改为 `personal`。外传给远程模型时仍按 ADR-0002 逐次询问端点；以后 AUTH-2 可以对这些内容单独设审查规则。
+
 | # | 问题 | 建议 |
 |---|---|---|
 | Q1 | “宿主零改动”的定义：允许 `module_catalog.dart` 一行、两个 `pubspec.yaml` 各一行（Dart 工作区与依赖的必需项）、CI 脚本自动发现包（REG-5 一次性改）。是否接受？ | **接受**。纯“一行登记”做不到：Dart 工作区要求依赖声明；该定义可由脚本判定（§8.4） |
