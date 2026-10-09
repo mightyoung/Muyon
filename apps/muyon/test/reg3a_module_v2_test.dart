@@ -317,11 +317,15 @@ void main() {
     expect(lease,isNotNull);
     expect(host.workspaces.ownerWorkspace('prototype',version.pageId),isNull);
     await lease!.dispose();
-    final r=request('prototype.add_feedback',{'version_id':version.id,'text':'反馈'},ref);
-    await expectLater(host.tools.invoke(r),throwsA(isA<Exception>()));
-    expect(host.prototype!.store.feedback(version.pageId),isEmpty);
-    final result = await approved(r);
-    expect(host.prototype!.store.feedback(version.pageId).single.text,'反馈');
-    expect(result.changes.single.ref.contentDigest,isNotNull);
+    // ScopeResolver prepares every source, including other modules whose
+    // first activation performs real file I/O. Keep that outside fakeAsync.
+    await tester.runAsync(() async {
+      final r=request('prototype.add_feedback',{'version_id':version.id,'text':'反馈'},ref);
+      await expectLater(host.tools.invoke(r),throwsA(isA<Exception>()));
+      expect(host.prototype!.store.feedback(version.pageId),isEmpty);
+      final result = await approved(r);
+      expect(host.prototype!.store.feedback(version.pageId).single.text,'反馈');
+      expect(result.changes.single.ref.contentDigest,isNotNull);
+    });
   });
 }
