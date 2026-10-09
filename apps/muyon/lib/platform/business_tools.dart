@@ -171,9 +171,11 @@ void registerInquiryTools(MuyonHost host, {HostToolRegistration? register}) {
         }.entries) {
           requireScoped(target.value, parameters[target.key]);
         }
-        final decoded = jsonDecode(
-          store.runTool(name, jsonEncode(call.request.parameters)),
+        final result = store.runToolResult(
+          name,
+          jsonEncode(call.request.parameters),
         );
+        final decoded = result.legacyValue;
         final data = decoded is Map
             ? Map<String, Object?>.from(decoded)
             : {'result': decoded};
@@ -210,12 +212,12 @@ void registerInquiryTools(MuyonHost host, {HostToolRegistration? register}) {
           );
         }
         return ToolCallResult(
-          status: data.containsKey('error')
-              ? ToolCallStatus.failed
-              : ToolCallStatus.succeeded,
-          summary: data.containsKey('error')
-              ? '${data['error']}'
-              : '${function['description']}',
+          status: switch (result.status) {
+            AgentToolStatus.succeeded => ToolCallStatus.succeeded,
+            AgentToolStatus.invalidArguments => ToolCallStatus.invalidArguments,
+            AgentToolStatus.failed => ToolCallStatus.failed,
+          },
+          summary: result.error ?? '${function['description']}',
           data: data,
           objectRefs: refs.toSet().toList(),
         );

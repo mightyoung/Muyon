@@ -162,12 +162,167 @@ final agentTools = [
   ),
 ];
 
+enum AgentToolStatus { succeeded, invalidArguments, failed }
+
+class AgentToolResult {
+  const AgentToolResult(this.status, {this.data, this.error});
+  final AgentToolStatus status;
+  final Object? data;
+  final String? error;
+  Object? get legacyValue =>
+      status == AgentToolStatus.succeeded ? data : {'error': error};
+}
+
+class _InvalidToolArguments implements Exception {
+  const _InvalidToolArguments(this.message);
+  final String message;
+}
+
+Never _badArgument(String field, String reason) =>
+    throw _InvalidToolArguments('$field: $reason');
+
+void _validateToolArguments(String name, Map<String, Object?> arguments) {
+  // The String compatibility interface historically accepts numeric quantity
+  // and truncates/clamps numeric limits. Validate their existing conversions;
+  // host calls still pass through the host's strict schema before dispatch.
+  arguments = {
+    ...arguments,
+    if (name == 'quote_options' && arguments['qty'] is num)
+      'qty': '${arguments['qty']}',
+    if (arguments['limit'] case final num limit when limit.isFinite)
+      'limit': limit.toInt(),
+  };
+  final definition = agentTools
+      .where((t) => (t['function'] as Map)['name'] == name)
+      .firstOrNull;
+  if (definition == null) throw StateError('未知工具 $name');
+  final schema = (definition['function'] as Map)['parameters'] as Map;
+  void validate(Map schema, Object? value, String path) {
+    if (schema['enum'] case final List values) {
+      if (!values.contains(value)) _badArgument(path, 'unknown value');
+    }
+    final type = schema['type'];
+    final valid = switch (type) {
+      'string' => value is String,
+      'integer' => value is num && value.isFinite && value == value.toInt(),
+      'boolean' => value is bool,
+      'array' => value is List,
+      'object' => value is Map,
+      _ => true,
+    };
+    if (!valid) _badArgument(path, 'expected $type');
+    if (value is Map && schema['properties'] is Map) {
+      final properties = schema['properties'] as Map;
+      for (final key in schema['required'] as List? ?? const []) {
+        if (!value.containsKey(key) || value[key] == null)
+          _badArgument('$path.$key', 'required');
+      }
+      for (final entry in properties.entries) {
+        if (value[entry.key] != null)
+          validate(entry.value as Map, value[entry.key], '$path.${entry.key}');
+      }
+    }
+    if (value is List && schema['items'] is Map) {
+      final items = schema['items'] as Map;
+      for (var i = 0; i < value.length; i++) {
+        validate(items, value[i], '$path[$i]');
+      }
+    }
+  }
+
+  validate(schema, arguments, 'arguments');
+  for (final key in schema['required'] as List? ?? const []) {
+    if (arguments[key] is String && (arguments[key] as String).isEmpty)
+      _badArgument('$key', 'required');
+  }
+  if (name == 'search' && (arguments['keywords'] as List).isEmpty)
+    _badArgument('keywords', 'required');
+  if (arguments['offset'] case final int offset) {
+    if (offset < 0) _badArgument('offset', 'expected a non-negative integer');
+  }
+  if (arguments['snapshot'] == '')
+    _badArgument('snapshot', 'expected a non-empty string');
+  if ((arguments['offset'] as int? ?? 0) > 0 && arguments['snapshot'] == null)
+    _badArgument('snapshot', 'required for pagination; restart from offset 0');
+  if (name == 'quote_options' &&
+      arguments['qty'] != null &&
+      tryDecimal(arguments['qty'] as String, positive: true) == null)
+    _badArgument('qty', 'expected a positive decimal');
+  if ((name == 'spec_classes' || name == 'match_item') &&
+      arguments['class'] is String) {
+    final code = arguments['class'] as String;
+    if (specClass(code) == null) _badArgument('class', 'unknown value');
+  }
+  if (name == 'match_item' && arguments['item_id'] == null) {
+    for (final key in ['class', 'requirement']) {
+      if (arguments[key] is! String || arguments[key] == '')
+        _badArgument(key, 'required');
+    }
+  }
+  if (name == 'query') {
+    final type = ontology[arguments['type']]!;
+    FieldSpec field(String key) =>
+        const {'id', 'updated_at', 'updated_by'}.contains(key)
+        ? FieldSpec(key, key, Kind.text, '')
+        : type.field(key) ?? _badArgument('field', 'unknown field $key');
+    if (arguments['order_by'] case final String key) field(key);
+    for (final condition in arguments['where'] as List? ?? const []) {
+      final f = field(condition['field'] as String);
+      final op = condition['op'];
+      if (op == 'is_null' || op == 'not_null') continue;
+      final value = condition['value'];
+      final List values;
+      if (op == 'in') {
+        if (value is! List || value.isEmpty || value.length > 100)
+          _badArgument('value', 'expected a list of 1-100 values');
+        values = value;
+      } else {
+        values = [value];
+      }
+      for (final value in values) {
+        if (value == null) _badArgument('value', 'required for $op');
+        if (op == 'contains') continue;
+        if (f.kind == Kind.boolean && value is! bool)
+          _badArgument('value', 'expected a boolean');
+        if (f.kind == Kind.decimal && tryDecimal('$value') == null)
+          _badArgument('value', 'expected a decimal');
+        if (f.kind == Kind.integer && num.tryParse('$value') == null)
+          _badArgument('value', 'expected a number');
+      }
+    }
+  }
+}
+
 extension AgentTools on Store {
-  /// Runs one tool call. Bad arguments come back as an error the model can
-  /// read and correct, never as an exception.
-  String runTool(String name, String arguments) {
+  /// Compatibility JSON entry point; raw success data and error payloads stay unchanged.
+  String runTool(String name, String arguments) =>
+      jsonEncode(runToolResult(name, arguments).legacyValue);
+
+  /// Only explicit argument validation can return [AgentToolStatus.invalidArguments].
+  /// Errors while reading business data, including stale snapshots, remain failed.
+  AgentToolResult runToolResult(String name, String arguments) {
+    final Map<String, Object?> a;
     try {
-      final a = jsonDecode(arguments) as Map<String, Object?>;
+      Object? decoded;
+      try {
+        decoded = jsonDecode(arguments);
+      } on FormatException {
+        throw const _InvalidToolArguments('arguments: expected JSON object');
+      }
+      if (decoded is! Map<String, Object?>) {
+        throw const _InvalidToolArguments('arguments: expected JSON object');
+      }
+      a = decoded;
+      _validateToolArguments(name, a);
+    } on _InvalidToolArguments catch (error) {
+      return AgentToolResult(
+        AgentToolStatus.invalidArguments,
+        error: error.message,
+      );
+    } catch (error) {
+      return AgentToolResult(AgentToolStatus.failed, error: '$error');
+    }
+    try {
       final limit = ((a['limit'] as num?)?.toInt() ?? 20).clamp(1, maxToolRows);
       final Object? result = switch (name) {
         'describe' => _describe(a['type'] as String?),
@@ -216,9 +371,9 @@ extension AgentTools on Store {
         },
         _ => throw FormatException('未知工具 $name'),
       };
-      return jsonEncode(result);
-    } catch (e) {
-      return jsonEncode({'error': '$e'});
+      return AgentToolResult(AgentToolStatus.succeeded, data: result);
+    } catch (error) {
+      return AgentToolResult(AgentToolStatus.failed, error: '$error');
     }
   }
 

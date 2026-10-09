@@ -10,7 +10,14 @@ import 'storage.dart';
 
 enum ToolAccessLevel { read, write, external }
 
-enum ToolCallStatus { succeeded, failed, cancelled, interrupted, blocked }
+enum ToolCallStatus {
+  succeeded,
+  failed,
+  cancelled,
+  interrupted,
+  blocked,
+  invalidArguments,
+}
 
 class ToolCallRequest {
   ToolCallRequest({

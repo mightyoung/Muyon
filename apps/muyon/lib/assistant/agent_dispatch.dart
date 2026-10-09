@@ -62,6 +62,7 @@ class AgentDispatch {
   static const _notRunText = {
     'not_approved': '用户未批准此调用',
     'not_run_prior_failed': '未执行：前一个操作失败',
+    'not_run_invalid_arguments': '未执行：只读参数需修正，请重新决定此操作',
     'not_run_cancelled': '未执行：已请求取消',
     'over_limit': '未执行：超出单步调用上限',
     'over_card_limit': '未执行：超出一张确认卡的调用上限',
@@ -578,6 +579,15 @@ class AgentDispatch {
         (r) => r.result!.status != ToolCallStatus.succeeded,
       );
       if (failed) {
+        // Never execute writes planned against a read with invalid arguments.
+        // Fold their non-execution messages into this step before asking again.
+        for (final call in AgentContext.cardCalls(current)) {
+          current = _record(
+            current,
+            call['index'] as int,
+            'not_run_invalid_arguments',
+          );
+        }
         await _complete(current);
       } else {
         await _openCard(current);
@@ -790,6 +800,11 @@ class AgentDispatch {
   /// A resumed attempt settling the step it took over from receipts.
   Future<void> completeStep(PersonalTask task) => _complete(task);
 
+  bool _correctableRead(Map call, ToolCallResult result) =>
+      call['access'] == ToolAccessLevel.read.name &&
+      call['effect'] == ToolEffect.read.name &&
+      result.status == ToolCallStatus.invalidArguments;
+
   Future<void> _complete(PersonalTask task, {bool lateCancel = false}) async {
     final calls = AgentContext.calls(task);
     final log = [...task.payload['toolLog'] as List? ?? const []];
@@ -811,7 +826,9 @@ class AgentDispatch {
         }
       }
       final String content;
-      if (result != null && result.status == ToolCallStatus.succeeded) {
+      if (result != null &&
+          (result.status == ToolCallStatus.succeeded ||
+              _correctableRead(c, result))) {
         content = jsonEncode({
           'trustedToolResult': result.toJson(),
           'citations': [
@@ -842,7 +859,15 @@ class AgentDispatch {
                     (c['outcome'] as Map)['result'] as Map,
                   ),
                 ).status !=
-                ToolCallStatus.succeeded)
+                ToolCallStatus.succeeded &&
+            !_correctableRead(
+              c,
+              ToolCallResult.fromJson(
+                Map<String, Object?>.from(
+                  (c['outcome'] as Map)['result'] as Map,
+                ),
+              ),
+            ))
           ToolCallResult.fromJson(
             Map<String, Object?>.from((c['outcome'] as Map)['result'] as Map),
           ),
