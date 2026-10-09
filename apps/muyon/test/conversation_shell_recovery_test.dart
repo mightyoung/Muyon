@@ -114,10 +114,13 @@ void main() {
     final entered = Completer<void>();
     final release = Completer<void>();
     addTearDown(() { if (!release.isCompleted) release.complete(); });
-    final blocked = (f.host.foundation.database as ExclusiveDatabase).exclusiveAsync((_) async {
-      entered.complete(); await release.future;
+    Future<void>? blocked;
+    await tester.runAsync(() async {
+      blocked = (f.host.foundation.database as ExclusiveDatabase).exclusiveAsync((_) async {
+        entered.complete(); await release.future;
+      });
+      await entered.future;
     });
-    await tester.runAsync(() => entered.future);
     c.step = 'restore-checkpoint';
     Future<void>? restoring;
     // Exercise the actual MuyonApp restore callback with an object route still
@@ -128,7 +131,7 @@ void main() {
     expect(find.text('注册插件租用页'), findsOneWidget);
     expect(runtime.released, 0);
     release.complete();
-    await tester.runAsync(() => blocked);
+    await tester.runAsync(() => blocked!);
     await workspaceVisible(tester, find.textContaining('已从备份恢复并重启'));
     await tester.runAsync(() => restoring!);
     expect(fresh, isNotNull);
