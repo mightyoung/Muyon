@@ -412,7 +412,9 @@ bool _validDefinition(UiFormulaDefinition d) {
     if (slot.binding.kind == BindingKind.fact) {
       final object = slot.object;
       if (object == null || !_nonempty(slot.field) || !_nonempty(object.moduleId) ||
-          !_nonempty(object.objectType) || !_nonempty(object.objectId)) return false;
+          !_nonempty(object.objectType) || !_nonempty(object.objectId)) {
+        return false;
+      }
     }
   }
   switch (d._formula) {
