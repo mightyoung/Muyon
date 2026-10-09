@@ -50,14 +50,100 @@ jobs:
           sudo apt-get install --no-install-recommends -y libegl1 libgles2 libx11-6
           dpkg-query -W libegl1 libgles2 libx11-6 libglvnd0
           ldd "$TASK_RIVE"
-      - name: Read input-driven blend and keyframe contracts
+      - name: Build synthetic raster mesh bone and number-input rig
         shell: bash
         run: |
           set -euo pipefail
-          export RIVE_DOCS_DIR="$TASK_PROBE/home/versions/1.5.1/docs"
-          "$TASK_RIVE" docs easing
-          "$TASK_RIVE" docs state-machines
-          "$TASK_RIVE" schema KeyFrameDouble
-          "$TASK_RIVE" schema BlendState1D
-          "$TASK_RIVE" schema BlendAnimation1D
-          "$TASK_RIVE" schema Weight
+          "$TASK_RIVE" schema BlendState1DInput
+          python3 - "$TASK_PROBE/project" <<'PYGEN'
+          import sys, struct, zlib, json
+          from pathlib import Path
+          p = Path(sys.argv[1]); p.mkdir()
+          def chunk(kind, data):
+              return struct.pack('>I',len(data))+kind+data+struct.pack('>I',zlib.crc32(kind+data)&0xffffffff)
+          raw = b''.join(b'\x00'+b''.join(bytes((230,230,230,255) if (x//8+y//8)%2 else (35,105,160,255)) for x in range(64)) for y in range(64))
+          png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',64,64,8,6,0,0,0))+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b'')
+          (p/'checker.png').write_bytes(png)
+          (p/'rive.yaml').write_text('name: synthetic-rig\n')
+          scene='''<Rive version="1" kind="fragment">
+           <ImageAsset file="checker.png" name="SyntheticChecker" id="0:60"/>
+           <Artboard width="256" height="256" name="MuYangProbe" id="0:2" defaultStateMachineId="0:7">
+            <Fill name="Background"><SolidColor colorValue="FFF3EEE3"/></Fill>
+            <RootBone x="64" y="128" length="64" name="Anchor" id="0:40">
+             <Bone length="64" name="Deform" id="0:41"/>
+            </RootBone>
+            <Image assetId="0:60" name="CheckerRaster" id="0:20">
+             <Mesh triangleIndexBytes="AAECAAID" name="CheckerMesh" id="0:21">
+              <ContourMeshVertex x="64" y="64" u="0" v="0"><Weight values="255" indices="1"/></ContourMeshVertex>
+              <ContourMeshVertex x="192" y="64" u="1" v="0"><Weight values="255" indices="2"/></ContourMeshVertex>
+              <ContourMeshVertex x="192" y="192" u="1" v="1"><Weight values="255" indices="2"/></ContourMeshVertex>
+              <ContourMeshVertex x="64" y="192" u="0" v="1"><Weight values="255" indices="1"/></ContourMeshVertex>
+              <Skin name="CheckerSkin">
+               <Tendon boneId="0:40" tx="64" ty="128" name="AnchorBind"/>
+               <Tendon boneId="0:41" tx="128" ty="128" name="DeformBind"/>
+              </Skin>
+             </Mesh>
+            </Image>
+            <StateMachine name="MascotProbe" id="0:7">
+             <StateMachineNumber name="headYaw" value="0" id="0:50"/>
+             <StateMachineLayer name="Pose">
+              <AnyState/><ExitState/>
+              <EntryState><StateTransition stateToId="0:12"/></EntryState>
+              <BlendState1DInput inputId="0:50" id="0:12">
+               <BlendAnimation1D animationId="0:71" value="0"/>
+               <BlendAnimation1D animationId="0:72" value="100"/>
+              </BlendState1DInput>
+             </StateMachineLayer>
+            </StateMachine>
+            <LinearAnimation duration="60" name="LeftPose" id="0:71">
+             <KeyedObject objectId="0:41"><KeyedProperty propertyKey="15"><KeyFrameDouble value="-0.4" frame="0"/></KeyedProperty></KeyedObject>
+            </LinearAnimation>
+            <LinearAnimation duration="60" name="RightPose" id="0:72">
+             <KeyedObject objectId="0:41"><KeyedProperty propertyKey="15"><KeyFrameDouble value="0.4" frame="0"/></KeyedProperty></KeyedObject>
+            </LinearAnimation>
+           </Artboard>
+          </Rive>
+          '''
+          (p/'scene.rml').write_text(scene)
+          PYGEN
+          mkdir "$TASK_PROBE/evidence"
+          cp "$TASK_PROBE/project/checker.png" "$TASK_PROBE/evidence/"
+          "$TASK_RIVE" "$TASK_PROBE/project" --verify --format=json > "$TASK_PROBE/evidence/verify.json"
+          "$TASK_RIVE" "$TASK_PROBE/project" --once --format=json > "$TASK_PROBE/evidence/build.json"
+          "$TASK_RIVE" inspect "$TASK_PROBE/project" --json > "$TASK_PROBE/evidence/inspect.json"
+          cat "$TASK_PROBE/evidence/verify.json" "$TASK_PROBE/evidence/build.json"
+          python3 - "$TASK_PROBE/evidence/inspect.json" <<'PYCHECK'
+          import json,sys,collections
+          data=json.load(open(sys.argv[1]))
+          def walk(v):
+              if isinstance(v,dict):
+                  yield v
+                  for c in v.values(): yield from walk(c)
+              elif isinstance(v,list):
+                  for c in v: yield from walk(c)
+          nodes=list(walk(data)); counts=collections.Counter(x.get('type') for x in nodes)
+          assert not data['problems'],data['problems']
+          for t,n in {'ImageAsset':1,'Image':1,'Mesh':1,'Skin':1,'RootBone':1,'Bone':1,'Tendon':2,'Weight':4,'StateMachineNumber':1,'BlendState1DInput':1}.items():
+              assert counts[t]==n,(t,counts[t])
+          print(json.dumps({'verifiedTypes':dict(counts),'rigDetails':[x.get('rig') for x in nodes if x.get('rig')]}))
+          PYCHECK
+          "$TASK_RIVE" "$TASK_PROBE/project" --screenshot="$TASK_PROBE/evidence/pose-left.png" --advance=1
+          python3 - "$TASK_PROBE/project/scene.rml" <<'PYPOSE'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]);p.write_text(p.read_text().replace('name="headYaw" value="0"','name="headYaw" value="100"'))
+          PYPOSE
+          "$TASK_RIVE" "$TASK_PROBE/project" --verify --format=json > "$TASK_PROBE/evidence/verify-right.json"
+          "$TASK_RIVE" "$TASK_PROBE/project" --screenshot="$TASK_PROBE/evidence/pose-right.png" --advance=1
+          cp "$TASK_PROBE/project/scene.rml" "$TASK_PROBE/project/rive.yaml" "$TASK_PROBE/project/build/synthetic-rig.riv" "$TASK_PROBE/evidence/"
+          (cd "$TASK_PROBE/evidence" && sha256sum * > SHA256SUMS)
+          test "$(du -sb "$TASK_PROBE/evidence" | cut -f1)" -le 10485760
+          cat "$TASK_PROBE/evidence/SHA256SUMS"
+      - name: Retain small synthetic evidence for one day
+        if: always() && env.TASK_PROBE != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: muyang-synthetic-rig-evidence
+          path: ${{ env.TASK_PROBE }}/evidence
+          retention-days: 1
+          if-no-files-found: warn
