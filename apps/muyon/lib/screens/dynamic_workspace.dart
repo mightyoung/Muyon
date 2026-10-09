@@ -5,6 +5,8 @@ import 'package:muyon_ui/dynamic_ui.dart';
 import '../platform/foundation_repository.dart';
 import '../platform/tool_registry.dart';
 import '../platform/ui_workspace_store.dart';
+import '../assistant/personal_agent.dart';
+import '../assistant/ui_planning_events.dart';
 
 /// An incremental route within the existing Shell. Planning/host action
 /// attachment remains the caller's boundary; a disabled dynamic page still
@@ -19,18 +21,23 @@ class DynamicWorkspace extends StatefulWidget {
     this.originalAnswer = '',
     this.tools,
     this.onEvent,
+    this.agent,
+    this.businessActions = const {},
   });
   final FoundationRepository repository;
   final String taskId, surfaceId, originalAnswer;
   final ValidatedUiPlan? plan;
   final ToolRegistry? tools;
   final UiEventSink? onEvent;
+  final PersonalAgent? agent;
+  final Map<String, UiBusinessAction> businessActions;
   @override
   State<DynamicWorkspace> createState() => _DynamicWorkspaceState();
 }
 
 class _DynamicWorkspaceState extends State<DynamicWorkspace> {
   UiWorkspaceController? controller;
+  UiPlanningEventRouter? router;
   StoredUiWorkspace? stored;
   String? error;
   bool ready = false;
@@ -53,7 +60,16 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
         if (event.data['invocationId'] is String)
           event.data['invocationId'] as String,
     };
-    if (!known.contains(ref)) return UiOperationRecovery.unknown;
+    if (!known.contains(ref)) {
+      return widget.agent == null
+          ? UiOperationRecovery.unknown
+          : recoverUiPlanningOperation(
+              widget.agent!,
+              widget.taskId,
+              widget.surfaceId,
+              ref,
+            );
+    }
     final result = widget.tools?.receiptFor(ref);
     if (result == null || result.unknown) return UiOperationRecovery.unknown;
     return result.succeeded
@@ -83,7 +99,16 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
           taskId: widget.taskId,
           scopeKey: scope,
           plan: widget.plan!,
-          onEvent: widget.onEvent,
+          onEvent:
+              widget.onEvent ??
+              (widget.agent == null
+                  ? null
+                  : (event) async {
+                      if (widget.agent!.uiPlanningEnabled != true) {
+                        throw StateError('planning_disabled');
+                      }
+                      await router?.dispatch(event);
+                    }),
           receiptLookup: receipt,
         );
         if (!mounted) {
@@ -91,6 +116,14 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
           return;
         }
         controller = c;
+        if (widget.agent != null) {
+          router = UiPlanningEventRouter(
+            agent: widget.agent!,
+            taskId: widget.taskId,
+            surface: c.surface,
+            businessActions: widget.businessActions,
+          );
+        }
       }
     } catch (e) {
       error = '$e';
@@ -100,6 +133,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace> {
 
   @override
   void dispose() {
+    router?.dispose();
     controller?.dispose();
     super.dispose();
   }

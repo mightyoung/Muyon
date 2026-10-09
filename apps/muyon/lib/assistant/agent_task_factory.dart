@@ -24,6 +24,7 @@ class AgentTaskFactory {
     ModelProfile? profile,
     AssistantScope? scope,
     String? previousAttemptId,
+    bool uiPlanningInternal = false,
   }) {
     if (profile != null && profile.purpose != ModelPurpose.chat) {
       throw ArgumentError('Chat profile required');
@@ -40,6 +41,9 @@ class AgentTaskFactory {
     final available = List<RegisteredToolInfo>.unmodifiable(
       ctx.tools.list().where(
         (t) =>
+            !uiPlanningInternal &&
+            (t.descriptor.toolId != 'assistant.plan_ui' ||
+                ctx.uiPlanning?.enabled == true) &&
             t.available &&
             t.descriptor.modelSelectable &&
             ctx.tools.permitsCategory(t.descriptor.toolId),
@@ -70,6 +74,10 @@ class AgentTaskFactory {
     final now = ctx.clock().toUtc().toIso8601String();
     final task = PersonalTask({
       'kind': 'personal',
+      if (uiPlanningInternal) ...{
+        'uiPlanningDisabled': true,
+        'uiPlanningInternal': true,
+      },
       'executionId': const Uuid().v4(),
       'conversationId': conversationId,
       'prompt': prompt.trim(),

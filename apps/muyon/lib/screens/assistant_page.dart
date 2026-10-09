@@ -13,6 +13,8 @@ import 'draft_view.dart';
 import 'dynamic_workspace.dart';
 import '../platform/ui_workspace_store.dart';
 
+import 'package:muyon_module_api/ui_contract.dart';
+
 class AssistantPage extends StatefulWidget {
   const AssistantPage({
     super.key,
@@ -352,48 +354,85 @@ class _AssistantPageState extends State<AssistantPage> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  DropdownButtonFormField<String>(
-                    key: ValueKey('conversation-$_conversationId'),
-                    initialValue:
-                        conversations.any((c) => c.id == _conversationId)
-                        ? _conversationId
-                        : null,
-                    isExpanded: true,
-                    decoration: const InputDecoration(labelText: '会话'),
-                    items: [
-                      for (final c in conversations)
-                        DropdownMenuItem(
-                          value: c.id,
-                          child: Text(c.title, overflow: TextOverflow.ellipsis),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height * .4,
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      DropdownButtonFormField<String>(
+                        key: ValueKey('conversation-$_conversationId'),
+                        initialValue:
+                            conversations.any((c) => c.id == _conversationId)
+                            ? _conversationId
+                            : null,
+                        isExpanded: true,
+                        decoration: const InputDecoration(labelText: '会话'),
+                        items: [
+                          for (final c in conversations)
+                            DropdownMenuItem(
+                              value: c.id,
+                              child: Text(
+                                c.title,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
+                        onChanged: (id) => setState(() => _conversationId = id),
+                      ),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('回答后规划交互页面'),
+                        subtitle: const Text('失败保留文字；模型外发仍需既有授权'),
+                        value: widget.agent.uiPlanningEnabled,
+                        onChanged: (value) => setState(
+                          () =>
+                              widget.agent.configureUiPlanning(enabled: value),
+                        ),
+                      ),
+                      if (widget.agent.uiPlanningEnabled)
+                        DropdownButton<UiPlanningMode>(
+                          value: widget.agent.currentUiPlanningMode,
+                          items: const [
+                            DropdownMenuItem(
+                              value: UiPlanningMode.intelligent,
+                              child: Text('Intelligent UI · 本地 Provider'),
+                            ),
+                            DropdownMenuItem(
+                              value: UiPlanningMode.motivation,
+                              child: Text('Motivation UI · 当前授权模型'),
+                            ),
+                          ],
+                          onChanged: (mode) => setState(
+                            () => widget.agent.configureUiPlanning(mode: mode),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      Text(switch (_scope.kind) {
+                        AssistantScopeKind.global => '范围：个人全局（工具调用时由宿主核对可见对象）',
+                        AssistantScopeKind.workspace =>
+                          '范围：工作区 ${_scope.workspaceId}',
+                        AssistantScopeKind.selectedObjects =>
+                          '范围：${_scope.objects.length} 个选定对象',
+                      }),
+                      if (_scope.objects.isNotEmpty)
+                        Text(
+                          _scope.objects
+                              .map(
+                                (r) =>
+                                    '${r.moduleId}/${r.objectType}/${r.objectId}',
+                              )
+                              .join(' · '),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
                     ],
-                    onChanged: (id) => setState(() => _conversationId = id),
                   ),
-                  const SizedBox(height: 8),
-                  Text(switch (_scope.kind) {
-                    AssistantScopeKind.global => '范围：个人全局（工具调用时由宿主核对可见对象）',
-                    AssistantScopeKind.workspace =>
-                      '范围：工作区 ${_scope.workspaceId}',
-                    AssistantScopeKind.selectedObjects =>
-                      '范围：${_scope.objects.length} 个选定对象',
-                  }),
-                  if (_scope.objects.isNotEmpty)
-                    Text(
-                      _scope.objects
-                          .map(
-                            (r) =>
-                                '${r.moduleId}/${r.objectType}/${r.objectId}',
-                          )
-                          .join(' · '),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                ],
+                ),
               ),
             ),
             Expanded(
@@ -458,6 +497,42 @@ class _AssistantPageState extends State<AssistantPage> {
                             Wrap(
                               spacing: 8,
                               children: [
+                                if (widget.agent.uiPlanningEnabled &&
+                                    task.state == PersonalTaskState.succeeded)
+                                  TextButton(
+                                    onPressed: () async {
+                                      await widget.agent.planUi(task.id);
+                                      _refresh();
+                                    },
+                                    child: const Text('规划此回答'),
+                                  ),
+                                if (widget.agent.uiPlanningEnabled &&
+                                    widget.agent
+                                            .uiPresentation(task.id)
+                                            ?.validated !=
+                                        null)
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => DynamicWorkspace(
+                                          repository: widget.repo,
+                                          taskId: task.id,
+                                          surfaceId: widget.agent
+                                              .uiPresentation(task.id)!
+                                              .validated!
+                                              .plan
+                                              .surfaceId,
+                                          plan: widget.agent
+                                              .uiPresentation(task.id)!
+                                              .validated,
+                                          originalAnswer: task.summary ?? '',
+                                          tools: widget.agent.tools,
+                                          agent: widget.agent,
+                                        ),
+                                      ),
+                                    ),
+                                    child: const Text('打开交互页面'),
+                                  ),
                                 for (final surface in HostUiWorkspaceStore(
                                   widget.repo,
                                   taskId: task.id,

@@ -20,6 +20,7 @@ import 'context_compactor.dart';
 import 'model_request_gate.dart';
 import 'request_view.dart';
 import 'tool_selection.dart';
+import 'ui_planning.dart';
 
 /// State and helpers shared by the collaborators of [PersonalAgent]: the
 /// repository, gateway, cancellation tokens, `closing` flag and operation
@@ -41,6 +42,7 @@ class AgentContext {
     required this.compactor,
     required this.compactionProfile,
     required this.clock,
+    this.uiPlanning,
   });
 
   final FoundationRepository repository;
@@ -71,6 +73,9 @@ class AgentContext {
   final Budget budget;
   final AgentEventSink events;
   final DateTime Function() clock;
+  UiPlanningHarness? uiPlanning;
+  final uiModelReplies = <String, Completer<String>>{};
+  final uiModelChecks = <String, Future<void> Function()>{};
   final ToolSelectionStrategy selectionStrategy;
   final ModelRequestGate gate;
   final ModelProvider provider;
@@ -192,11 +197,31 @@ class AgentContext {
       events: [
         (AgentEventType.done, {'chars': answer.length}),
       ],
-      assistantAnswer: answer,
+      assistantAnswer: task.payload['uiPlanningInternal'] == true
+          ? null
+          : answer,
       references: refs,
       canCommit: canCommit,
     );
     if (saved) {
+      uiModelReplies[task.id]?.complete(answer);
+      if (uiPlanning?.enabled == true &&
+          task.payload['uiPlanningDisabled'] != true) {
+        UiPlannedPresentation presentation;
+        try {
+          presentation =
+              await uiPlanning?.plan(task.id) ??
+              UiPlanningHarness.fallback('planning_disabled');
+        } catch (_) {
+          presentation = UiPlanningHarness.fallback('planner_unavailable');
+        }
+        await event(task, 'ui_planning', {
+          'decision': presentation.result.decision.name,
+          'reasonCode': presentation.result.reasonCode,
+          'surfaceId': presentation.validated?.plan.surfaceId,
+          'revision': presentation.validated?.plan.revision,
+        });
+      }
       await repository.notify(
         title: '助手任务完成',
         body: answer.length > 160 ? answer.substring(0, 160) : answer,
@@ -206,6 +231,10 @@ class AgentContext {
   }
 
   Future<void> fail(PersonalTask task, String message, {String? code}) async {
+    final reply = uiModelReplies[task.id];
+    if (reply != null && !reply.isCompleted) {
+      reply.completeError(StateError('planning_model_failed'));
+    }
     if (await commit(
       task.copy({'state': 'failed', 'stage': 'failed', 'error': message}),
       events: [

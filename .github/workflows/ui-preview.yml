@@ -2,7 +2,7 @@ name: ui-preview
 on:
   workflow_dispatch:
   push:
-    branches: ['task/ui-4a-dynamic-runtime', 'task/ui-3b-workspace-persistence']
+    branches: ['task/ui-4a-dynamic-runtime', 'task/ui-3b-workspace-persistence', 'task/ui-4b-planning-port']
 permissions:
   contents: read
 jobs:
@@ -17,6 +17,9 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Actual host planning and Store receipts
+        working-directory: apps/muyon
+        run: flutter test --no-pub test/ui_planning_harness_test.dart test/ui_planning_events_test.dart
       - name: Public preview widget tests
         working-directory: apps/muyon_ui_preview
         run: flutter test --no-pub

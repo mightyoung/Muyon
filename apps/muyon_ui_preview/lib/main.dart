@@ -4,9 +4,12 @@ import 'fixture_ports.dart';
 import 'preview_app.dart';
 import 'workspace_preview.dart';
 import 'browser_workspace_store.dart';
+import 'planning_preview.dart';
 
 void main() => runApp(
-  Uri.base.queryParameters['workspace'] == '1'
+  Uri.base.queryParameters['planning'] == '1'
+      ? const MaterialApp(home: PlanningPreview())
+      : Uri.base.queryParameters['workspace'] == '1'
       ? MaterialApp(
           home: WorkspacePreview(store: createBrowserWorkspaceStore()),
         )
