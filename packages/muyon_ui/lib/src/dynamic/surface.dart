@@ -6,7 +6,6 @@ import '../navigation_layout.dart';
 import '../primitives.dart';
 import 'patch.dart';
 import 'catalog.dart';
-import '../dynamic_ui/catalog.dart';
 import 'fallback.dart';
 
 typedef UiEventSink = Future<void> Function(UiEvent event);

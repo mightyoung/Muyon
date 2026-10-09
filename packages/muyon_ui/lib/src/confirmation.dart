@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'primitives.dart';
 import 'tokens.dart';
 import 'theme.dart';
+import 'ui_components/state.dart';
 
 enum ConfirmationKind {
   read('只读'),
@@ -74,18 +75,30 @@ class ConfirmCard extends StatefulWidget {
     this.externalContent = false,
     this.allowPersistentChoices = true,
     this.onDecision,
+    this.uiState = UiComponentState.ready,
+    this.errorMessage,
   });
   final ConfirmItem item;
   final BusinessStatus status;
   final bool externalContent;
   final bool allowPersistentChoices;
   final ValueChanged<ConfirmationChoice>? onDecision;
+
+  /// Library state (AIUI-2); [UiComponentState.ready] is the UI-1a card.
+  /// Read-only shows the card with every decision disabled.
+  final UiComponentState uiState;
+  final String? errorMessage;
+
+  String get textEquivalent =>
+      '确认卡（${item.kind.label}，${status.label}）：${item.what}；对谁：${item.who}'
+      '${item.consequence.isEmpty ? '' : '；后果：${item.consequence}'}';
   @override
   State<ConfirmCard> createState() => _ConfirmCardState();
 }
 
 class _ConfirmCardState extends State<ConfirmCard> {
   bool expanded = false, more = false;
+  bool _interactive = true;
   @override
   void didUpdateWidget(covariant ConfirmCard oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -112,7 +125,7 @@ class _ConfirmCardState extends State<ConfirmCard> {
   }) {
     final t = MuyonTokens.of(context);
     return TextButton(
-      onPressed: widget.onDecision == null
+      onPressed: widget.onDecision == null || !_interactive
           ? null
           : () => widget.onDecision!(value),
       style: primary
@@ -126,7 +139,17 @@ class _ConfirmCardState extends State<ConfirmCard> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => UiStateGate(
+    state: widget.uiState,
+    textEquivalent: widget.textEquivalent,
+    errorMessage: widget.errorMessage,
+    builder: (context, interactive) {
+      _interactive = interactive;
+      return _card(context);
+    },
+  );
+
+  Widget _card(BuildContext context) {
     final t = MuyonTokens.of(context);
     final item = widget.item;
     final active =
@@ -269,13 +292,34 @@ class BatchConfirmCard extends StatelessWidget {
     this.onAllowAll,
     this.onIndividual,
     this.onReject,
+    this.uiState = UiComponentState.ready,
+    this.errorMessage,
   });
   final List<ConfirmItem> items;
   final bool externalContent;
   final BatchState state;
   final VoidCallback? onAllowAll, onIndividual, onReject;
+
+  /// Library state (AIUI-2); named apart from [state] (the batch's status).
+  final UiComponentState uiState;
+  final String? errorMessage;
+
+  String get textEquivalent =>
+      '批量确认（${state.label}），${items.length} 项：'
+      '${items.map((i) => '${i.kind.label} ${i.what}').join('；')}';
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => UiStateGate(
+    state: uiState,
+    textEquivalent: textEquivalent,
+    errorMessage: errorMessage,
+    builder: _card,
+  );
+
+  Widget _card(BuildContext context, bool interactive) {
+    final onAllowAll = interactive ? this.onAllowAll : null;
+    final onIndividual = interactive ? this.onIndividual : null;
+    final onReject = interactive ? this.onReject : null;
     if (items.any((item) => item.kind == ConfirmationKind.read))
       throw ArgumentError(
         'Read-only operations do not enter batch confirmation',
@@ -339,12 +383,29 @@ class WarnBanner extends StatelessWidget {
     this.message = '本任务包含外部内容，已暂停自动放行',
     this.actionLabel,
     this.onAction,
+    this.uiState = UiComponentState.ready,
+    this.errorMessage,
   });
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
+
+  /// Library state (AIUI-2); [UiComponentState.ready] is the UI-1a banner.
+  final UiComponentState uiState;
+  final String? errorMessage;
+
+  String get textEquivalent => '注意：$message';
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => UiStateGate(
+    state: uiState,
+    textEquivalent: textEquivalent,
+    errorMessage: errorMessage,
+    builder: (context, interactive) =>
+        _banner(context, interactive ? onAction : null),
+  );
+
+  Widget _banner(BuildContext context, VoidCallback? onAction) {
     final t = MuyonTokens.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
-import 'catalog.dart';
+import '../dynamic/catalog.dart';
 import '../dynamic/fallback.dart';
 import '../dynamic/surface.dart';
 

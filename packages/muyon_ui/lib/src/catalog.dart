@@ -2,10 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'confirmation.dart';
+import 'dynamic/catalog.dart' show libraryComponentNames;
 import 'navigation_layout.dart';
 import 'overlays.dart';
 import 'primitives.dart';
 import 'theme.dart';
+import 'ui_components/samples.dart';
+import 'ui_components/state.dart';
 
 const componentNames = [
   'PageScaffold',
@@ -24,6 +27,20 @@ const componentNames = [
   'RoundIconButton',
   'TitlePill',
 ];
+
+/// Library components (AIUI-2) the catalog shows after [componentNames]:
+/// the 21 new ones plus the standalone table.
+const libraryGalleryNames = [...libraryComponentNames, 'Table'];
+
+/// The UI-1a components that gained the library states in AIUI-2.
+const _gatedComponents = {
+  'StatusBadge',
+  'ObjectChip',
+  'ScopeChip',
+  'WarnBanner',
+  'ConfirmCard',
+  'BatchConfirmCard',
+};
 
 /// Production builds have no catalog route or catalog launch target.
 Map<String, WidgetBuilder> muyonDebugRoutes() =>
@@ -55,7 +72,55 @@ class _ComponentCatalogState extends State<ComponentCatalog> {
   );
   void notify(BuildContext context, String message) =>
       MuyonToast.show(context, message: message);
-  List<Widget> samples(BuildContext context) => switch (component) {
+  List<Widget> samples(BuildContext context) => [
+    if (libraryGalleryNames.contains(component))
+      for (final state in libraryStates)
+        librarySample(
+          component,
+          state,
+          onEvent: (event) => notify(context, event),
+        )
+    else ...[
+      ...uiOneSamples(context),
+      if (_gatedComponents.contains(component))
+        for (final state in libraryStates.skip(1)) gatedSample(state),
+    ],
+  ];
+
+  /// The non-ready library states of a UI-1a component.
+  Widget gatedSample(UiComponentState state) => switch (component) {
+    'StatusBadge' => StatusBadge(
+      status: BusinessStatus.pending,
+      uiState: state,
+    ),
+    'ObjectChip' => ObjectChip(
+      label: '项目 · 华东泵站',
+      onPressed: () {},
+      uiState: state,
+    ),
+    'ScopeChip' => ScopeChip(
+      label: '选中 2 个对象',
+      objects: const ['论文', '报价'],
+      uiState: state,
+    ),
+    'WarnBanner' => WarnBanner(
+      actionLabel: '查看暂停的授权',
+      onAction: () {},
+      uiState: state,
+    ),
+    'ConfirmCard' => ConfirmCard(
+      item: item(ConfirmationKind.write),
+      onDecision: (_) {},
+      uiState: state,
+    ),
+    _ => BatchConfirmCard(
+      items: [item(ConfirmationKind.write)],
+      onAllowAll: () {},
+      uiState: state,
+    ),
+  };
+
+  List<Widget> uiOneSamples(BuildContext context) => switch (component) {
     'PageScaffold' => [
       for (final state in PageState.values)
         PageScaffold(
@@ -242,7 +307,10 @@ class _ComponentCatalogState extends State<ComponentCatalog> {
                       isExpanded: true,
                       itemHeight: null,
                       items: [
-                        for (final name in componentNames)
+                        for (final name in [
+                          ...componentNames,
+                          ...libraryGalleryNames,
+                        ])
                           DropdownMenuItem(
                             value: name,
                             child: ConstrainedBox(
