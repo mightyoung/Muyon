@@ -20,32 +20,33 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - name: Acquire official installer for review; do not execute
+      - name: Install reviewed official CLI 1.5.1 in temporary directory
         shell: bash
         run: |
           set -euo pipefail
-          task_probe_dir="$(mktemp -d "$RUNNER_TEMP/muyang-installer.XXXXXX")"
+          task_probe_dir="$(mktemp -d "$RUNNER_TEMP/muyang-cli.XXXXXX")"
           curl --proto '=https' --tlsv1.2 --fail --location --silent --show-error --max-time 30 \
             https://releases.rive.app/cli/install.sh -o "$task_probe_dir/install.sh"
-          test "$(wc -c < "$task_probe_dir/install.sh")" -le 131072
-          installer_sha="$(sha256sum "$task_probe_dir/install.sh" | cut -d ' ' -f 1)"
-          printf 'INSTALLER_SHA256=%s\n' "$installer_sha"
-          printf '%s\n' 'OFFICIAL_INSTALLER_REVIEW_START'
-          cat "$task_probe_dir/install.sh"
-          printf '\n%s\n' 'OFFICIAL_INSTALLER_REVIEW_END'
-          {
-            echo '## Official installer acquired; execution deliberately gated'
-            echo "Installer SHA-256: \`$installer_sha\`"
-            echo 'No install/build/inspect/screenshot has run. Next commit must pin this reviewed installer and an exact CLI release.'
-            echo 'Public repository; standard Ubuntu hosted runner; no Rive login, original image, Flutter, paid runner or persistent cache.'
-          } >> "$GITHUB_STEP_SUMMARY"
-      - name: Resolve release manifest without installing
+          echo "09e1dc2b14200cb16745a38e4436ad09ab9a1c17a7954fe59009307d3fc66389  $task_probe_dir/install.sh" | sha256sum --check
+          curl --proto '=https' --tlsv1.2 --fail --location --silent --show-error --max-time 30 \
+            https://releases.rive.app/cli/v1.5.1/manifest.json -o "$task_probe_dir/manifest.json"
+          python3 - "$task_probe_dir/manifest.json" <<'PYVERIFY'
+          import json, sys
+          m=json.load(open(sys.argv[1]))
+          assert m['version']=='1.5.1'
+          assert m['artifacts']['linux-x64']['sha256']=='f1c99eadc35920f8a0a802bebe8607101e18c581c040ab0dbf98895cff368477'
+          PYVERIFY
+          RIVE_VERSION=1.5.1 RIVE_HOME="$task_probe_dir/home" RIVE_INSTALL_DIR="$task_probe_dir/bin" timeout 120 bash "$task_probe_dir/install.sh"
+          echo "TASK_RIVE=$task_probe_dir/bin/rive" >> "$GITHUB_ENV"
+          echo "TASK_PROBE=$task_probe_dir" >> "$GITHUB_ENV"
+      - name: Read actual CLI help, schema and samples without login
         shell: bash
         run: |
           set -euo pipefail
-          task_manifest="$(mktemp "$RUNNER_TEMP/muyang-manifest.XXXXXX")"
-          curl --proto '=https' --tlsv1.2 --fail --location --silent --show-error --max-time 30 \
-            https://releases.rive.app/cli/latest/manifest.json -o "$task_manifest"
-          test "$(wc -c < "$task_manifest")" -le 131072
-          sha256sum "$task_manifest"
-          cat "$task_manifest"
+          "$TASK_RIVE" --version
+          "$TASK_RIVE" --help
+          "$TASK_RIVE" schema --search mesh
+          "$TASK_RIVE" schema --search bone
+          "$TASK_RIVE" docs --list
+          "$TASK_RIVE" samples --help
+          "$TASK_RIVE" create --help
