@@ -12,7 +12,10 @@ final minimalUiCatalog = UiCatalog(
       allowsChildren: true,
     ),
     'Field': UiComponentSchema(
-      properties: {'label': UiValueType.string},
+      properties: {
+        'label': UiValueType.string,
+        'inputType': UiValueType.string,
+      },
       requiredProperties: {'label'},
       bindings: {
         'value': {BindingKind.fact},

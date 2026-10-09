@@ -41,3 +41,7 @@
 - 独立只读审查无 Critical；两个 Important（保留 owner 的 scope、激活时新增内部通道的生命周期）已补 RED→GREEN 回归。macOS Podfile/xcconfig 自动生成改动已排除。原始日志仅在 `/tmp/reg4a-*.log`，不提交。
 - 本机针对性回归 116 项通过。完整 `bash scripts/ci.sh`：8/8 analyze、doctor 23 场景、7/8 测试套件通过，host 1140 passed/3 skipped；inquiry 281 passed/1 skipped/46 failed（screenshot_test 41、ontology_screenshot_test 5），整体 exit 1。最终并发边界修复后复跑 `flutter analyze --no-pub` 无问题、完整 host 套件 1141 passed/3 skipped。
 - 46 个截图失败不套用其他 SHA 的 Mac 例外，不声称截图一致、整本机 CI 通过或三端验收通过。云 UI 用户暂缓，原生/实机最后；任务分支 Linux CI 按本次 SHA 单列结果，不能替代 Mac 截图验收。
+
+## 集成状态（2026-10-09）
+
+已完成并按用户确认合入 develop `5a243c6abc8542edefc118d04a6b4b5b155633c2`，任务提交 `40b6365526a11fb5b3cc1d043e68a96fc3092d91`；[精确集成 CI 37883647998](https://github.com/mightyoung/Muyon/actions/runs/37883647998) 通过（8/8 analyze、8/8 suites，host 1160 passed/3 skipped，inquiry 281 passed/47 skipped）。未合 main。该集成的本机新旧基线截图对照均为相同46个失败、184 PNG哈希及差异像素一致；仅证明未新增回归，不宣称截图通过，例外不自动外推到REG-4b。

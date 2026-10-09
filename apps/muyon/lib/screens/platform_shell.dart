@@ -20,6 +20,7 @@ import '../services/models/model_provider.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/secret_store.dart';
 import 'assistant_page.dart';
+import 'inquiry_import_context.dart';
 import 'devices_page.dart';
 import 'knowledge_preview.dart';
 import 'data_storage_page.dart';

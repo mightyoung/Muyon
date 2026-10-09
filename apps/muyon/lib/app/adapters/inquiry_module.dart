@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/widgets.dart';
+import 'package:inquiry_module/inquiry_module.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:supplier_core/supplier_core.dart' as domain;
 
@@ -12,6 +13,17 @@ import '../bootstrap.dart';
 import '../host_tool_registrar.dart';
 import '../inquiry_plugin.dart';
 import '../legacy_module_bridge.dart';
+import '../../services/documents/document_parser.dart';
+
+export 'package:inquiry_module/inquiry_module.dart'
+    show
+        PreparedInquiryDraft,
+        PreparedInquiryListDraft,
+        InquiryListRecord,
+        InquiryImportRecord,
+        InquiryRecordStatus,
+        SelectedInquiryInput,
+        InquiryImportPurpose;
 
 /// Host-side adaptation of the existing inquiry owner (ADR-0004 §10.4).
 /// No domain rules, databases or authorization authority are duplicated.
@@ -26,6 +38,7 @@ class InquiryBusinessModule implements BusinessModuleV2 {
     displayName: 'Folio · 询价台账',
     tagline: '完整供应商、询价报价和成本业务',
     iconKey: 'receipt_long',
+    features: {ModuleFeature.importPipeline},
   );
   @override
   ModuleSchema get schema => InquiryPlugin.schema;
@@ -67,7 +80,26 @@ class InquiryBusinessModule implements BusinessModuleV2 {
           host.approveInquiryModelRequest?.call(preview) ?? Future.value(false),
     );
     host.inquiryError = null;
-    return InquiryModuleRuntime(owner);
+    return InquiryModuleRuntime(
+      owner,
+      resources.files,
+      isActive: () => host.modules.scopeAuthorityRevision('inquiry') != null,
+      validateTarget: (intent) {
+        final workspaces = host.workspaces;
+        final current = workspaces.binding(intent.workspaceId, intent.moduleId);
+        final owner = workspaces.ownerWorkspace(
+          intent.moduleId,
+          intent.targetProjectId,
+        );
+        if (workspaces.scopeAuthorityRevision == null ||
+            (owner != null && owner != intent.workspaceId) ||
+            (intent.kind == ImportKind.create && current != null) ||
+            (intent.kind == ImportKind.refresh &&
+                current?.nativeProjectId != intent.targetProjectId)) {
+          throw StateError('Import target changed; choose the workspace again');
+        }
+      },
+    );
   }
 
   @override
@@ -85,6 +117,16 @@ class InquiryBusinessModule implements BusinessModuleV2 {
           tools: ['inquiry.${(definition['function'] as Map)['name']}'],
         ),
       Operation(id: 'object', kind: OpKind.query, tools: ['inquiry.object']),
+      Operation(
+        id: 'context_import',
+        kind: OpKind.write,
+        members: {'prepareImport', 'commitImport', 'receipt'},
+        notExposed: const NotExposed(
+          NotExposedKind.humanOnly,
+          '文件上下文复核由人工选择功能、校验字段并确认记录集合；没有模型提交工具。',
+        ),
+      ),
+
       for (final name in const [
         'create_inquiry',
         'record_quote',
@@ -97,9 +139,52 @@ class InquiryBusinessModule implements BusinessModuleV2 {
 }
 
 /// The compatibility InquiryPlugin remains the one service/close owner.
-class InquiryModuleRuntime with NoImportRuntime implements ScopeResolvable {
-  InquiryModuleRuntime(this.owner);
+class InquiryModuleRuntime
+    implements ModuleRuntime, ScopeResolvable, ImportCapable {
+  InquiryModuleRuntime(
+    this.owner,
+    ModuleFiles files, {
+    required bool Function() isActive,
+    required void Function(ImportIntent) validateTarget,
+  }) : imports = InquiryImportPipeline(
+         state: owner.runtime.state,
+         files: files,
+         isActive: isActive,
+         validateTarget: validateTarget,
+         parseText: (input) async => (await DocumentParser().parseInput(
+           input.path,
+           input.displayName,
+         )).pages.join('\n'),
+       );
   final InquiryPlugin owner;
+  final InquiryImportPipeline imports;
+  @override
+  Future<PreparedImport> prepareImport(
+    SelectedInput input,
+    ImportTarget target,
+  ) async {
+    return imports.prepare(input, target);
+  }
+
+  @override
+  Future<ImportReceipt> commitImport(
+    PreparedImport input,
+    ImportIntent intent,
+  ) async => intent.stagingToken.startsWith('list:')
+      ? imports.commitList(input, intent)
+      : imports.commit(input, intent);
+  @override
+  Future<ImportReceipt?> receipt(String operationId) async =>
+      imports.receipt(operationId);
+  Future<PreparedInquiryDraft> resumeImport(String draftId) async =>
+      imports.resume(draftId);
+  Future<PreparedInquiryListDraft> prepareListImport(
+    SelectedInput input,
+    ImportTarget target,
+    Map<String, Object?> project,
+  ) => imports.prepareList(input, target, project);
+  Future<PreparedInquiryListDraft> resumeListImport(String id) async =>
+      imports.resumeList(id);
   @override
   Future<ModuleSession> openSession(WorkspaceBinding binding) async =>
       _InquirySession(owner, binding.nativeProjectId);

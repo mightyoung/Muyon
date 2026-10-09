@@ -194,10 +194,36 @@ extension ListImport on Store {
   /// transaction. Unmatched lines are kept by name as items to inquire.
   String createProjectFromProposal(
     Map<String, Object?> project,
+    List<ProposedLine> lines, {
+    String? newProjectId,
+    void Function(int index, String itemId)? onCreated,
+  }) => transaction(() {
+    final projectId = save('project', project, newId: newProjectId);
+    _saveProposalLines(projectId, lines, onCreated);
+    return projectId;
+  });
+
+  /// Continues the unfinished proposal of a project already created by its
+  /// reviewed draft. Callers must retain that draft's creation receipt.
+  void continueCreatedProjectProposal(
+    String projectId,
+    List<ProposedLine> lines, {
+    void Function(int index, String itemId)? onCreated,
+  }) => transaction(() {
+    final project = get('project', projectId);
+    if (project == null || project.deleted) {
+      throw StateError('Created project unavailable');
+    }
+    _saveProposalLines(projectId, lines, onCreated);
+  });
+
+  void _saveProposalLines(
+    String projectId,
     List<ProposedLine> lines,
-  ) => transaction(() {
-    final projectId = save('project', project);
-    for (final line in lines) {
+    void Function(int index, String itemId)? onCreated,
+  ) {
+    for (var index = 0; index < lines.length; index++) {
+      final line = lines[index];
       final product = line.productId == null
           ? null
           : get('product', line.productId!);
@@ -209,7 +235,7 @@ extension ListImport on Store {
             line.item.unit != product.data['unit'])
           '清单单位：${line.item.unit}',
       ].join('；');
-      save('project_item', {
+      final itemId = save('project_item', {
         'project_id': projectId,
         'category': 'material',
         'product_id': product?.id,
@@ -222,9 +248,9 @@ extension ListImport on Store {
         'requirement': _text(line.item.requirements, 2000),
         'notes': notes.isEmpty ? null : clipText(notes, 2000),
       });
+      onCreated?.call(index, itemId);
     }
-    return projectId;
-  });
+  }
 }
 
 Iterable<String> chunkText(String text) sync* {
