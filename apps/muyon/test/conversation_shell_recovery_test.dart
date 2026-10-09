@@ -156,8 +156,14 @@ void main() {
         }
       }
     });
-    await tester.pumpWidget(MuyonApp(host: f.host, openHost: (root) async =>
-      fresh = await MuyonHost.open(root, modules: [_leaseModule(), ...moduleCatalog()])));
+    final reopenEntered = Completer<void>(), reopenRelease = Completer<void>();
+    // Runs before the fresh-owner cleanup, even if a progress assertion fails.
+    addTearDown(() { if (!reopenRelease.isCompleted) reopenRelease.complete(); });
+    await tester.pumpWidget(MuyonApp(host: f.host, openHost: (root) async {
+      reopenEntered.complete();
+      await reopenRelease.future;
+      return fresh = await MuyonHost.open(root, modules: [_leaseModule(), ...moduleCatalog()]);
+    }));
     await tester.pumpAndSettle();
     final shell = tester.widget<PlatformShell>(find.byType(PlatformShell));
     final open = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
@@ -203,6 +209,19 @@ void main() {
     expect(f.host.workspaces.setting('marker'), 'after');
     expect(runtime.released, 0);
     leaseRelease.complete();
+    await workspaceOperation(tester, () => reopenEntered.future);
+    // The real progress spinner keeps scheduling frames; wait for its visible
+    // text, rather than requiring the deliberately paused screen to settle.
+    final progress = find.text('正在关闭 Muyon 并从备份恢复…');
+    await _recoveryCondition(tester, () => progress.hitTestable().evaluate().isNotEmpty,
+      'restore progress visible before reopening');
+    expect(progress.hitTestable(), findsOneWidget);
+    expect(fresh, isNull);
+    expect(find.byType(PlatformShell, skipOffstage: false), findsNothing);
+    expect(find.byType(AssistantPage, skipOffstage: false), findsNothing);
+    expect(find.byType(ConversationWorkspaceBody, skipOffstage: false), findsNothing);
+    expect(await oldSurface.dispatch(event), UiDispatchOutcome.stale);
+    reopenRelease.complete();
     await workspaceVisible(tester, find.textContaining('已从备份恢复并重启'));
     await workspaceOperation(tester, () => restoring!);
     expect(fresh, isNotNull);
