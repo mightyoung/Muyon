@@ -50,8 +50,9 @@ List<AskHistoryMessage> readAskHistory(String? saved) {
           row.length < 3 ||
           row[0] is! bool ||
           row[1] is! String ||
-          row[2] is! bool)
+          row[2] is! bool) {
         continue;
+      }
       final metadata = row.length == 4 && row[3] is Map
           ? row[3] as Map
           : const {};

@@ -246,7 +246,9 @@ void main() {
         (_) async => throw LlmException('暂停'),
         onCreated: (id) => jobId = id,
       );
-    } on LlmException {}
+    } on LlmException {
+      // The legacy task is deliberately paused before reopening its history.
+    }
     state.saveSetting(
       'ask_history',
       jsonEncode([
@@ -287,7 +289,7 @@ void main() {
         const LlmConfig(apiKey: 'fake'),
         transport: (_) async {
           calls++;
-          if (calls == 1)
+          if (calls == 1) {
             return {
               'choices': [
                 {
@@ -311,6 +313,7 @@ void main() {
                 },
               ],
             };
+          }
           return {
             'choices': [
               {
