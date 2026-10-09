@@ -117,3 +117,13 @@ F5a仅草案/夹具归档，正式schema未采纳，stream/2与F5b/c必须另行
 completed/success：analyze8/8、test8/8 suites、module_api68、muyon_ui323~152、host1314~3。
 发布前再次fetch/ls-remote确认develop仍为0466f113完整基线、main未变。
 收尾仅摘要和索引状态，产品/脚本/夹具树与已测组合一致。最终发布SHA与CI终态由执行回报核对。
+
+## 第四轮候选：AIUI-4 暂缓于测试缺口
+
+基线 `6e40a7956f2deb3ff53ee0397ae7cb4e1065c83d`；第三轮发布
+[CI37983292909](https://github.com/mightyoung/Muyon/actions/runs/37983292909) success。
+冻结 AIUI-4 `fc02783ad078fd0cd90f577bb7cfe129e22f19d9`，两位独立核实者复审
+见[AIUI-4-review](AIUI-4-review.md)：取消竞态与恢复路径无确定阻断，source/定向CI成功，
+但200%活动工作区正文与布局退路测试缺失，属任务书明确本轮应改。
+本地正常合并无冲突，核与PR自动组合产品树一致后已撤销临时未提交merge；
+尚未推本轮组合或develop，待原作者补测试/精确新SHA与CI后继续。T3/AIUI4-F4c不在授权范围。
