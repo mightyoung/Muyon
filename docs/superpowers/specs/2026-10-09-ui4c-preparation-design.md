@@ -44,3 +44,14 @@ AGENT-COMPLETE-1草案涉及agent_model_turn/agent_context；AGENT-RECOVERY-BUDG
 在既有授权下可立即继续：准备行为RED、类型化关联/CAS/现场存储及仅人类操作的单层面板；复用现有任务与确认卡，不改预算/授权。开编码前leader复核本设计具体接线及formal任务云门禁；当前UI2a云browser尚未验，允许依赖分支准备，不能把云门禁当完成。
 
 需具体裁定：子成果是否允许直接送入父下一次模型请求（建议默认只读，显式引用且保留provenance后才可）；更严格Agent完成判定采用何种完成合同；预算恢复是否仅人工明确“继续”增加1步；旧导入同一intent重试与新intent再次导入如何划分。后面三项独立草案，未批准前不改语义。
+
+
+## 独审修正与明确用户语义（2026-10-09）
+
+独审无Critical，指出两项Important，现已补入约束：子task默认只读，不仅概要只读；每次显式读持久不可变引用版本，旧读不被v2覆盖。
+
+host真实父子关系持久readonly标记；factory只提供effect=read候选，dispatch/实际invoke与model发送前重核关系、scope及非read拒绝。startTool、resume/retry、planning business入口均依据host关系，不信模型payload标记，不复制父grant/review。新增文件边界agent_task_factory.dart/agent_dispatch.dart/agent_model_turn.dart仅做子会话收窄守护，与其他循环修复互斥；不变预算或完成终态。子UI不显示主会话切换、新子入口或共享planning开关；原主会话不受影响。
+
+每次显式查询生成不可变readRef：child/message/task/event边界、digest/readAt、ObjectRef修订及读取摘要快照。read history写现有settings投影，正文权威仍messages，事件只存ID。新读v2另存，重开可追溯v1/v2。关闭时CAS失败保持窗口/输入并提示冲突，不静默dismiss。
+
+新增行为RED：forged_child_write_has_no_side_effect；readonly_survives_restart_and_resume；same_scope_parent_remains_writable；read_v1_v2_history_survives_reopen；close_cas_conflict_preserves_panel_input。独审发现已落实到设计，尚不是产品已修复声明。

@@ -63,3 +63,6 @@ Files：新增screens/assistant_subconversation_panel.dart；改screens/assistan
 - [ ] 进程终止/锁屏/Android/macOS/Windows/PDF/OCR/原生文件权限依R-1-AI-UI-final，未测保持未测。
 
 自审：五类风险均有具体测试；所有执行项未勾选；没有新增额度、模型、授权或导入规则；scope/provenance和云门禁未确定时保持保守只读边界。
+
+
+独审门禁修正：实现前Task1补持久readonly关系，Task2补不可变read-history（v1/v2重开均可追溯），Task3补CAS冲突拒静默关闭。agent_task_factory/agent_dispatch/agent_model_turn只新增子会话真实只读关系守护；startTool/resume/retry/planning business按同host关系拒非read。对应五个新增行为RED见spec末节，预算/终态/授权策略草案不实施。已有用户明确此语义，未要求新增无关审批。
