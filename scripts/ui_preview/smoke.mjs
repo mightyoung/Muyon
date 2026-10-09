@@ -15,6 +15,7 @@ try {
   await mkdir(output, { recursive: true });
   for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
     const page = await browser.newPage({ viewport });
+    page.setDefaultTimeout(30000);
     const errors = [];
     page.on('pageerror', (error) => errors.push(String(error)));
     await page.goto(baseURL, { waitUntil: 'networkidle' });
@@ -35,7 +36,10 @@ try {
     await requireText('Confirmation cancelled. No request sent.');
     await button('UI-4a fixture').click();
     const field = page.getByRole('textbox', { name: 'Fact quantity' });
-    await field.fill('14');
+    await field.click();
+    await field.press('ControlOrMeta+A');
+    await field.pressSequentially('14', { delay: 50 });
+    await field.press('Tab');
     await button('Quote B').click();
     await button('Back to comparison').click();
     await field.click();

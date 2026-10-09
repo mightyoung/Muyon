@@ -13,6 +13,7 @@ try {
   await mkdir(output, { recursive: true });
   for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) {
     const page = await browser.newPage({ viewport });
+    page.setDefaultTimeout(30000);
     const errors = []; page.on('pageerror', (e) => errors.push(String(e)));
     const enable = async () => {
       const a = page.getByRole('button', { name: 'Enable accessibility' });
@@ -20,7 +21,10 @@ try {
     };
     await page.goto(url.href, { waitUntil: 'networkidle' }); await enable();
     const field = page.getByRole('textbox', { name: 'Fact quantity' });
-    await field.fill('14');
+    await field.click();
+    await field.press('ControlOrMeta+A');
+    await field.pressSequentially('14', { delay: 50 });
+    await field.press('Tab');
     await page.getByRole('button', { name: 'Save checkpoint', exact: true }).click();
     // Durability assertion queries the public projection rather than sleeping.
     await page.waitForFunction(() => Object.keys(localStorage).some((k) => k.startsWith('muyon-public-workspace:') && JSON.parse(localStorage[k]).userOverrides.quantity === '14'));
