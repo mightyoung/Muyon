@@ -106,7 +106,7 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
     closing = true;
     try {
       current.capturePresentation?.call();
-      await current.checkpoint();
+      // MUTATION ONLY: omit the host close checkpoint.
       if (!mounted || !identical(session, current)) return false;
       final old = route;
       route = null;
@@ -266,7 +266,7 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
     setState(() => closing = true);
     try {
       if (scroll.hasClients && !c.readOnly) c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent).toDouble();
-      await c.flush();
+      // MUTATION ONLY: omit the view close checkpoint.
       await widget.onClose?.call();
     } catch (_) {
       changed();
