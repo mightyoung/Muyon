@@ -43,8 +43,8 @@ class MuyonApp extends StatefulWidget {
 
 class _MuyonAppState extends State<MuyonApp> {
   ThemeMode mode = ThemeMode.system;
-  final navigator = GlobalKey<NavigatorState>();
-  final messenger = GlobalKey<ScaffoldMessengerState>();
+  var navigator = GlobalKey<NavigatorState>();
+  var messenger = GlobalKey<ScaffoldMessengerState>();
   final conversationShell = ConversationShellController();
   late final AppLifecycleListener lifecycle;
   late MuyonHost host = widget.host;
@@ -144,7 +144,13 @@ class _MuyonAppState extends State<MuyonApp> {
     await _releaseReferenceRoutes();
     if (!mounted) return;
     conversationShell.detach();
-    setState(() => restoring = true);
+    // Changing MaterialApp's key alone can reparent a shared Navigator tree.
+    // Retire its keys so old pages/listeners are unmounted before host close.
+    setState(() {
+      restoring = true;
+      navigator = GlobalKey<NavigatorState>();
+      messenger = GlobalKey<ScaffoldMessengerState>();
+    });
     await WidgetsBinding.instance.endOfFrame;
     closing.approveInquiryModelRequest = null;
     String? failure;
@@ -157,12 +163,17 @@ class _MuyonAppState extends State<MuyonApp> {
     }
     try {
       final reopened = await (widget.openHost ?? MuyonHost.open)(root);
+      if (!mounted) {
+        await reopened.close();
+        return;
+      }
       _attach(reopened);
-      if (!mounted) return;
       setState(() {
         host = reopened;
         generation++;
         restoring = false;
+        navigator = GlobalKey<NavigatorState>();
+        messenger = GlobalKey<ScaffoldMessengerState>();
       });
       WidgetsBinding.instance.addPostFrameCallback((_) {
         messenger.currentState?.showSnackBar(
@@ -184,6 +195,8 @@ class _MuyonAppState extends State<MuyonApp> {
               '${failure == null ? '' : '\n恢复也失败了：$failure'}'
               '${previous == null ? '' : '\n原数据保留在 $previous'}';
           restoring = false;
+          navigator = GlobalKey<NavigatorState>();
+          messenger = GlobalKey<ScaffoldMessengerState>();
         });
       }
     }
