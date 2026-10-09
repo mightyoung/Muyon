@@ -228,7 +228,19 @@ class MuyonForm extends StatelessWidget {
             for (final c in children)
               Padding(
                 padding: const EdgeInsets.only(top: MuyonTokens.space3),
-                child: c,
+                // Children may be ready library inputs or native TextFields.
+                // Lock all user input paths without removing readable labels.
+                child: Semantics(
+                  readOnly: state == UiComponentState.readOnly,
+                  blockUserActions: state != UiComponentState.ready,
+                  child: ExcludeFocus(
+                    excluding: state != UiComponentState.ready,
+                    child: AbsorbPointer(
+                      absorbing: state != UiComponentState.ready,
+                      child: c,
+                    ),
+                  ),
+                ),
               ),
             const SizedBox(height: MuyonTokens.space4),
             Align(
