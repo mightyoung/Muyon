@@ -93,3 +93,9 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 | AIUI-8 设置与控制（可视化三档、助手权限页、数据去向） | — | engineer | AIUI-4 | 待派 |
 | AIUI-9 本体驱动的业务卡片 | — | Codex | AIUI-2、5、REG-4c | 待派 |
 
+
+## 调度安全补核（2026-10-09）
+
+| 任务 | 分支 | 状态 |
+|---|---|---|
+| [AGENT-DISPATCH-VERIFY-1](AGENT-DISPATCH-VERIFY-1.md) 只读效应边界与读参数恢复独立补核 | `task/agent-dispatch-safety-verification` → `review/AGENT-DISPATCH-VERIFY-1` | 已合入；[独立审查](AGENT-DISPATCH-VERIFY-1-review.md)，任务提交 `5b61b620`，[精确任务CI成功](https://github.com/mightyoung/Muyon/actions/runs/37944860202)；仅边界收紧，无生产越权写入证据 |

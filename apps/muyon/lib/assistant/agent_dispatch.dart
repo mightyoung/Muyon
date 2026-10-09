@@ -149,6 +149,12 @@ class AgentDispatch {
         );
         final prepared = await ctx.tools.prepare(request);
         if (ctx.closing) throw StateError('Assistant is closing');
+        // Scope resolution may await module activation. Recheck the returned
+        // effect before a child can propose or approve an effectful call.
+        AssistantSubconversations(ctx.repository).checkTool(
+          task.conversationId,
+          prepared.info.descriptor.effect,
+        );
         final read = prepared.info.accessLevel == ToolAccessLevel.read;
         if (!read && cards >= ctx.budget.maxCardCalls) {
           calls.add(
