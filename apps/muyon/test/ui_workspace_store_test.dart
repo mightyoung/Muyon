@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'support/conversation_workspace_fixture.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:muyon/screens/conversation_workspace_pane.dart';
@@ -137,6 +139,11 @@ void main() {
   });
 
   testWidgets('shell_checkpoint_cas_conflict_does_not_pop_or_overwrite', (tester) async {
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      await workspaceOperation(tester, storage.close);
+    });
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
     addTearDown(tester.view.resetPhysicalSize);
@@ -154,21 +161,21 @@ void main() {
     ));
     await tester.pumpAndSettle();
     final workspace = tester.widget<DynamicWorkspace>(find.byType(DynamicWorkspace));
-    await tester.runAsync(workspace.session!.ensureLoaded);
+    await workspaceOperation(tester, workspace.session!.ensureLoaded);
     await tester.pumpAndSettle();
     final body = find.byType(ConversationWorkspaceBody);
     final c = tester.widget<ConversationWorkspaceBody>(body).controller;
-    await tester.runAsync(c.flush);
+    await workspaceOperation(tester, c.flush);
     final competingStore = HostUiWorkspaceStore(repo, taskId: 'task');
     final competing = await UiWorkspaceController.open(
       store: competingStore, taskId: 'task', scopeKey: competingStore.scopeKey!, plan: plan,
     );
     competing.step = 'winner projection';
-    await tester.runAsync(competing.flush);
+    await workspaceOperation(tester, competing.flush);
     final winner = (await competingStore.load(plan.plan.surfaceId))!.toJson();
     competing.dispose();
     await tester.enterText(find.byType(TextField).first, 'losing input retained');
-    await tester.runAsync(() async {
+    await workspaceOperation(tester, () async {
       try { await c.flush(); } catch (_) { /* expected CAS failure */ }
     });
     await tester.pumpAndSettle();

@@ -36,24 +36,8 @@ Future<void> _unmountAndDrain(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> _closeAndDrain(WidgetTester tester, Future<void> Function() close) async {
-  var completed = false;
-  Object? failure;
-  StackTrace? failureStack;
-  // Start close on the real loop, but keep pumping the widget binding while
-  // queues/stream disposers previously created in its fake zone finish.
-  await tester.runAsync(() async {
-    close().then<void>((_) { completed = true; }, onError: (Object error, StackTrace stack) {
-      failure = error; failureStack = stack; completed = true;
-    });
-  });
-  for (var turn = 0; turn < 2000 && !completed; turn++) {
-    await tester.runAsync(() => Future<void>(() {}));
-    await tester.pump();
-  }
-  expect(completed, isTrue, reason: 'Host/SQLite close did not finish after draining its pending operations');
-  if (failure != null) Error.throwWithStackTrace(failure!, failureStack!);
-}
+Future<void> _closeAndDrain(WidgetTester tester, Future<void> Function() close) =>
+    workspaceOperation(tester, close);
 
 Future<StoredUiWorkspace> _committedProjection(
   WidgetTester tester,
@@ -141,7 +125,7 @@ void main() {
     expect(c.selectedRecords, saved.selectedRecords);
     expect(c.step, saved.step);
     expect(c.scrollOffset, saved.scrollOffset);
-    await tester.runAsync(c.flush);
+    await workspaceOperation(tester, c.flush);
     final committed = (await store.load(plan.plan.surfaceId))!;
     await _unmountAndDrain(tester);
     await _closeAndDrain(tester, f.host.close);
@@ -183,7 +167,7 @@ void main() {
     await showVersion(old);
     await tester.enterText(find.byType(TextField).first, 'manual priority');
     final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
-    await tester.runAsync(c.flush);
+    await workspaceOperation(tester, c.flush);
     await tester.pumpWidget(const SizedBox());
     final snapshot = DataSnapshot(
       ref: SnapshotRef(old.snapshot.ref.id, old.snapshot.ref.revision + 1),
@@ -207,7 +191,7 @@ void main() {
     expect(tester.widget<TextField>(find.byType(TextField).first).controller!.text, 'manual priority');
     expect(find.textContaining('数据版本已变化'), findsWidgets);
     final restored = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
-    await tester.runAsync(restored.flush);
+    await workspaceOperation(tester, restored.flush);
     final saved = (await HostUiWorkspaceStore(f.host.foundation, taskId: 'task').load(next.plan.surfaceId))!;
     expect(saved.extracted['quantity'], 'new extracted suggestion');
     expect(saved.userOverrides['quantity'], 'manual priority');
@@ -229,7 +213,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'committed before background');
     final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
-    await tester.runAsync(c.flush);
+    await workspaceOperation(tester, c.flush);
     // These presentation fields do not notify the surface; only the lifecycle
     // checkpoint can commit them. No manual flush after paused.
     c.step = 'background checkpoint';
