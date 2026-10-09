@@ -191,6 +191,91 @@ void main() {
     );
   }
 
+  test('large allowed JSON round-trips without truncating its body', () async {
+    final body = 'a' * (8 * 1024 * 1024 - 64 * 1024);
+    await first.save(
+      projectId: 'mac-project',
+      cardId: 'large-card',
+      expectedHead: null,
+      bodyMarkdown: body,
+    );
+    final bytes = await sender.exportBytes('mac-project', ['large-card']);
+    final prepared = receiver.prepareBytes(bytes, target('receiver'));
+    expect(prepared.revisions.values.single.bodyMarkdown, body);
+  });
+
+  test('512-deep ancestry round-trips with every immutable revision', () async {
+    String? head;
+    for (var index = 0; index < 513; index++) {
+      final saved = await first.save(
+        projectId: 'mac-project',
+        cardId: 'deep-card',
+        expectedHead: head,
+        bodyMarkdown: 'revision $index',
+      );
+      head = saved.revision.revisionId;
+    }
+    final bytes = await sender.exportBytes('mac-project', ['deep-card']);
+    final prepared = receiver.prepareBytes(bytes, target('receiver'));
+    expect(prepared.revisions.length, 513);
+    expect(prepared.heads.values.single, head);
+  });
+
+  test('export rejects JSON that its own importer cannot accept', () async {
+    await first.save(
+      projectId: 'mac-project',
+      cardId: 'large-card',
+      expectedHead: null,
+      bodyMarkdown: 'a' * (9 * 1024 * 1024),
+    );
+    await expectLater(
+      sender
+          .exportBytes('mac-project', ['large-card'])
+          .then((bytes) => receiver.prepareBytes(bytes, target('receiver'))),
+      throwsA(
+        isA<StateError>().having(
+          (e) => e.message,
+          'export rejection',
+          contains('JSON'),
+        ),
+      ),
+    );
+    expect(
+      first.get('mac-project', 'large-card')!.revision.bodyMarkdown.length,
+      9 * 1024 * 1024,
+    );
+  });
+
+  test('export rejects ancestry that its own importer cannot accept', () async {
+    String? head;
+    for (var index = 0; index < 514; index++) {
+      final saved = await first.save(
+        projectId: 'mac-project',
+        cardId: 'deep-card',
+        expectedHead: head,
+        bodyMarkdown: 'revision $index',
+      );
+      head = saved.revision.revisionId;
+    }
+    await expectLater(
+      sender
+          .exportBytes('mac-project', ['deep-card'])
+          .then((bytes) => receiver.prepareBytes(bytes, target('receiver'))),
+      throwsA(
+        isA<StateError>().having(
+          (e) => e.message,
+          'export rejection',
+          contains('ancestry'),
+        ),
+      ),
+    );
+    expect(first.get('mac-project', 'deep-card')!.revision.revisionId, head);
+    expect(
+      firstDb.raw.select('SELECT count(*) AS n FROM rk_revisions').single['n'],
+      514,
+    );
+  });
+
   test(
     'revocation after preparation prevents all canonical commit effects',
     () async {
