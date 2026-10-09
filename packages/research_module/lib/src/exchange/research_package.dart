@@ -53,6 +53,8 @@ class ResearchPackageExchange {
   static const maxArchiveBytes = 64 * 1024 * 1024;
   static const maxExpandedBytes = 128 * 1024 * 1024;
   static const maxEntries = 4096;
+  static const maxJsonEntryBytes = 8 * 1024 * 1024;
+  static const maxRevisionAncestryDepth = 512;
 
   Future<Uint8List> exportBytes(String projectId, List<String> cardIds) async {
     // Snapshot SQL reads on the same queue as writes. ZIP encoding follows it.
@@ -137,6 +139,31 @@ class ResearchPackageExchange {
           throw StateError('Package dependency closure is too large');
         }
       }
+      // A package we produce must fit the receiver's unchanged ancestry bound.
+      final visited = <String>{};
+      final visiting = <String>{};
+      void checkAncestry(String id, [int depth = 0]) {
+        if (depth > maxRevisionAncestryDepth) {
+          throw StateError('Revision ancestry exceeds limit');
+        }
+        if (visiting.contains(id)) throw StateError('Cyclic revision ancestry');
+        if (visited.contains(id)) return;
+        final revision = revisions[id];
+        if (revision == null) throw StateError('Missing revision ancestor');
+        visiting.add(id);
+        for (final parent in revision.parents) {
+          checkAncestry(parent.revisionId, depth + 1);
+        }
+        visiting.remove(id);
+        visited.add(id);
+      }
+
+      for (final head in heads.values) {
+        checkAncestry(head);
+      }
+      for (final fork in forks) {
+        checkAncestry(fork.revisionId);
+      }
       final output = <String, List<int>>{};
       final docManifest = <Map<String, Object?>>[];
       for (final document in documents.values) {
@@ -155,8 +182,14 @@ class ResearchPackageExchange {
         output['cards/${revision.objectKey.objectUuid}/${revision.revisionId}.md'] =
             utf8.encode(revision.bodyMarkdown);
       }
-      void json(String path, Object? value) =>
-          output[path] = utf8.encode(canonicalJson(value));
+      void json(String path, Object? value) {
+        final bytes = utf8.encode(canonicalJson(value));
+        if (bytes.length > maxJsonEntryBytes) {
+          throw StateError('Package JSON exceeds limit: $path');
+        }
+        output[path] = bytes;
+      }
+
       final origin = store.origin(projectId);
       json('manifest.json', {
         'packageType': 'muyon-research',
@@ -289,7 +322,7 @@ class ResearchPackageExchange {
     }
     Object? readJson(String name) {
       final data = entries[name];
-      if (data == null || data.length > 8 * 1024 * 1024) {
+      if (data == null || data.length > maxJsonEntryBytes) {
         throw const FormatException('Missing or oversized JSON');
       }
       return strictJsonDecode(utf8.decode(data));
@@ -419,7 +452,7 @@ class ResearchPackageExchange {
     }
     final colors = <String, int>{};
     void visit(String id, [int depth = 0]) {
-      if (depth > 512) {
+      if (depth > maxRevisionAncestryDepth) {
         throw const FormatException('Revision ancestry exceeds limit');
       }
       if (colors[id] == 1) {
