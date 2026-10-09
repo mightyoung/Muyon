@@ -112,13 +112,17 @@ void registerPrototypeTools(ToolRegistrar registrar) {
     (ctx) async {
       final call = ctx.call;
       call.cancellation.throwIfCancelled();
-      final s = (await ctx.runtime<PrototypeRuntime>()).store;
+      final runtime = await ctx.runtime<PrototypeRuntime>();
+      final s = runtime.store;
       final id = call.request.parameters['page_id'] as String;
       final scope = call.resolvedScope;
       final pageRef = _scoped(
         scope,
         'page',
       ).where((r) => r.objectId == id).firstOrNull;
+      if (pageRef != null) {
+        runtime.requireCurrent(pageRef);
+      }
       final page = s.pages().where((x) => x.id == id).firstOrNull;
       if (pageRef == null || page == null) {
         return ToolCallResult(
@@ -128,11 +132,18 @@ void registerPrototypeTools(ToolRegistrar registrar) {
         );
       }
       final versionRefs = {
-        for (final r in _scoped(scope, 'version')) r.objectId: r,
+        for (final r in _scoped(scope, 'version'))
+          if (r.nativeProjectId == id) r.objectId: r,
       };
       final feedbackRefs = {
-        for (final r in _scoped(scope, 'feedback')) r.objectId: r,
+        for (final r in _scoped(scope, 'feedback'))
+          if (r.nativeProjectId == id) r.objectId: r,
       };
+      // No await between these checks and extracting response data. A selected
+      // digest or page association must still describe the returned body.
+      for (final ref in [...versionRefs.values, ...feedbackRefs.values]) {
+        runtime.requireCurrent(ref);
+      }
       final versions = [
         for (final v in s.versions(id))
           if (versionRefs.containsKey(v.id)) v,

@@ -64,8 +64,19 @@ ScopeResolver 会准备所有模块；工具调用也可能首次激活其他模
 3. 本片不是完整 REG-3：其余本机写操作在清单中 deferred(REG-3a-followup)；
    Q10 本机 exportReport/exportClaimDrafts 已获业务授权，但 registrar 缺本机
    目标选择/允许根目录门面，不能伪装成普通 write 或网络 external。
-4. GROK-6 为规格草案：paper_binding、进一步字段/关系/卡片与敏感度建议需
-   后续落地；其内容字段 commercial/personal 仍明确待用户确认，不当成已批准。
+4. GROK-6 的 paper_binding、进一步字段/关系/卡片需后续落地。科研敏感度
+   已由固定提交 002aef4e 正式批准为 none；真人 author 未来须 personal。
    现有本体有界覆盖 ADR 类型加真实 note，不宣称 GROK-6 全量约 68 字段完成。
 5. REG-3b 交换与检索迁移单列；REG-5 通用 testing.dart / analyzer 门禁未做。
 6. Linux CI 跳过的 macOS 字体 golden、真机/模型端到端未验证。
+
+## 阻断修复恢复点
+
+用户已授权从 clean task/reg-3a-module-v2@5ef48b7 恢复阻断修复。
+该基线 CI 37952144103 success（analyze 8/8、test 8/8、host1261+3skips）；
+本次新实现不能沿用基线通过证据。修复和新测试范围见任务书末节，
+不会修改 AIUI src/ui 或保护 inventory 测试，不合 develop/main。
+云端只读命令、Git fetch 与远端核 SHA 可用；本地仍无 Flutter/Dart SDK，
+新提交推送后须最终 exact SHA CI 终态及非作者复审。
+本次独立只读复审已消除屏障测试 schema 阻断，未发现其他确定静态问题；
+本地 scripts/ci.sh 在 pub get 前因 flutter: command not found 退出，未运行测试。

@@ -432,10 +432,12 @@ class ModuleHost implements ModuleLink {
         : GrantPolicy.decide(manifest, revoked: grants.revoked(id));
     await grants.record(id, decisions);
     _checkCurrent(slot, epoch);
-    final refused = [
+    final refused = {
+      // Includes withdrawn capabilities removed from the current manifest.
+      ...grants.revoked(id),
       for (final d in decisions)
-        if (!d.granted && (d.required || d.policy == 'revoked')) d.capability,
-    ];
+        if (!d.granted && d.required) d.capability,
+    };
     if (refused.isNotEmpty) {
       throw _Refused('capability_denied: ${refused.join(', ')}');
     }
@@ -522,14 +524,17 @@ class ModuleHost implements ModuleLink {
 
   /// Host-authorized reconsideration; clears only the persistent withdrawal.
   /// Activation still applies the static policy (including facade denial).
+  /// For a capability retired from the manifest this acknowledges the old
+  /// withdrawal; no new grant is issued for an absent request.
   Future<ModuleState> reconsiderCapability(String id, String capability) async {
     final slot = _slot(id);
     if (!_accepting || _closing || slot.revoking) {
       throw StateError('Module host cannot reconsider now');
     }
     final module = registry.require(id);
-    if (!module.manifest.capabilities.any((r) => r.id == capability)) {
-      throw StateError('Capability is not requested');
+    if (!module.manifest.capabilities.any((r) => r.id == capability) &&
+        !grants.revoked(id).contains(capability)) {
+      throw StateError('Capability is neither requested nor persistently revoked');
     }
     await grants.clearRevocation(id, capability);
     return activate(id);

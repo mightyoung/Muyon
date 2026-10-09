@@ -40,7 +40,7 @@ DestinationRule/NetworkPolicy 只接受有 host 的网络 URI；本机路径的�
 ## 验证与门禁
 
 运行 `bash scripts/ci.sh`（所有 analyze / package tests）；重点新增测试核对
-契约、原 descriptor、范围外参数拒绝、无确认不写、单次确认回执、撤销立即 / 
+契约、原 descriptor、范围外参数拒绝、无确认不写、单次确认回执、撤销立即 /
 重启拒绝、合法重授权恢复、磁盘变化与范围差分。保持 ADR §10.3 既有测试。
 若旧测试断言 v1 授予整 gateway，只更新为 v2 明确拒绝的安全断言，记录原因。
 
@@ -96,3 +96,24 @@ sections，这是兼容偏离，未修改 prototype tests。
 
 原始日志不提交；最终精确 SHA 与门禁结果在交付回复中统一登记，不为了
 运行状态反复推送文档取消 CI。仍不合 develop/main。
+
+## 获授权的阻断修复（5ef48b7 后）
+
+用户已批准恢复修复，与 AIUI-2 各自分支并行；不合 develop。
+独立审查发现：v1 research/tools 的持久撤销在 v2 manifest 移除 tools 后，
+原 record 整模块替换会清除旧撤销并自动恢复模块。保留 revoked 墓碑，
+激活检查全部持久撤销；当前请求和真实历史撤销均可由宿主显式 reconsider，
+已移除能力只清除旧 withdrawal，不生成新 grant。保持原静态策略/权限架构。
+
+page_detail 异步取得 runtime 后同步复核 page 及返回候选的 version/feedback
+归属与摘要，检查和读取之间不 await。此为受控 DB 变化下的防御性一致性修复，
+不声称普通 UI 路径漏洞；旧 ID、描述、正常返回结果与保护 inventory 测试不改。
+
+测试落点 reg3a_upgrade_read_guard_test.dart：真实 v1 ModuleHost 固定 grants、
+真实旧同库 v2 升级、连续重启保持拒绝、宿主显式恢复后仍无 raw tools，
+旧数据保留；陈旧授予决策不能覆盖撤销；Completer 屏障控制 runtime await
+期间的 page 删除、version digest、feedback body/owner 变化，拒绝旧快照，
+并确认合法新 feedback 摘要可重新读取。无 sleep，不提交原始日志。
+
+固定正式要求 002aef4e 已批准科研内容、文献作者与机器标记 author 为 none；
+当前声明符合。未来 author 存真人姓名须 personal，不再列作待确认阻断。
