@@ -1,4 +1,4 @@
-import 'dart:ui' show SemanticsFlag, SemanticsAction;
+import 'dart:ui' show SemanticsAction, Tristate;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +32,7 @@ void main() {
           widget is Semantics && widget.properties.selected == true));
         expect(target, findsOneWidget, reason: 'selected semantics for $label at $width');
         expect(find.descendant(of: target, matching: find.text(label)), findsOneWidget);
-        expect(tester.getSemantics(target).hasFlag(SemanticsFlag.isSelected), isTrue);
+        expect(tester.getSemantics(target).flagsCollection.isSelected, Tristate.isTrue);
         final size = tester.getSize(target);
         expect(size.width, greaterThanOrEqualTo(48));
         expect(size.height, greaterThanOrEqualTo(48));
@@ -46,7 +46,7 @@ void main() {
       expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
       final node = tester.getSemantics(back);
       expect(node.label, contains('关闭工作区 / 返回'));
-      expect(node.hasFlag(SemanticsFlag.isButton), isTrue);
+      expect(node.flagsCollection.isButton, isTrue);
       expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
       await tester.tap(back);
       await workspaceReady(tester);

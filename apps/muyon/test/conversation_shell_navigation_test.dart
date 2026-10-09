@@ -22,7 +22,7 @@ Future<void> mountShell(WidgetTester tester, NavigationFixture f, {NavigatorObse
   await tester.runAsync(() => f.host.foundation.database.write((db) => db.execute(
     "UPDATE execution_records SET payload=json_set(payload,'\$.prompt','公开父任务','\$.stage','paused','\$.executionDeviceId','local','\$.state','paused') WHERE id='task'",
   )));
-  await tester.pumpWidget(MaterialApp(navigatorObservers: [if (observer != null) observer], home: PlatformShell(
+  await tester.pumpWidget(MaterialApp(navigatorObservers: [?observer], home: PlatformShell(
     host: f.host, themeMode: ThemeMode.light, allowInteractiveWorkspace: allowInteractiveWorkspace,
     onTheme: (_) {}, onRestore: (_) async {},
   )));
