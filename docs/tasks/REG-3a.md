@@ -75,3 +75,24 @@ sections，这是兼容偏离，未修改 prototype tests。
 `reg3a_module_v2_test.dart` 使用真实宿主库、模块写入与审批回执。
 旧 scope 差分夹具仅将原 prototypeScopeRefs 逐字搬入 fixture，使其与新实现独立。
 所有原始 CI 日志留 /tmp，不进入仓库。
+
+## 首个完整实现门禁失败后的局部修复与保护测试例外
+
+`faf3766` / CI 37950154964 到 failure：analyze 8/8、test 7/8；
+宿主 +1257、3 skips、4 failures。新增 REG-3a 行为测试没有失败；
+四项为菜单顺序回归及三条旧 v1/撤销断言，均非环境失败。
+
+- 科研 section 的 order=1 保持原菜单「记事本、询价、科研」顺序；
+  不改 module_declared_ui_test 的期望。
+- module_lifecycle_regression / assistant_scope_authority 原有的持久撤销失败
+  注入与 pending/failed 拒绝断言保持；撤销重试成功后也必须拒绝，
+  直到宿主 explicit reconsider。增加多项撤销不能被单项重新授予抹掉的断言。
+- **ADR §10.3 保护测试例外：prototype_tools_test.dart**。原工具 ID、读取
+  结果与两读工具 read-only 断言保留；原「整个模块只有两读工具」inventory
+  断言与已批准的 add_feedback 新写工具不可同时成立，改为同时验证旧读集合
+  与精确新 inventory、唯一新增 write、没有 external。批准前不写、批准后
+  单次回执仍由 REG-3a 新行为测试检查。此例外须 leader 审查才能集成；
+  非作者静态复核或 CI 绿不代替 leader 对受保护测试变更的批准。
+
+原始日志不提交；最终精确 SHA 与门禁结果在交付回复中统一登记，不为了
+运行状态反复推送文档取消 CI。仍不合 develop/main。

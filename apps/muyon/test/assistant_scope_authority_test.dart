@@ -456,6 +456,8 @@ void main() {
         owner.raw.execute('DROP TRIGGER deny_capability');
         await host.modules.revokeCapability('scopefixture', 'ocr');
         await host.modules.activate('scopefixture');
+        expect(proof(), isNull, reason: 'durable withdrawal still denies authority');
+        await host.modules.reconsiderCapability('scopefixture', 'ocr');
         expect(proof(), isNotNull);
         expect(proof(), isNot(before));
       } finally {

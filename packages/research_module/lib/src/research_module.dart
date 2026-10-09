@@ -78,7 +78,7 @@ CREATE TABLE change_log(sequence INTEGER PRIMARY KEY AUTOINCREMENT, project_id T
   List<SearchSource> get searchSources => const []; // REG-3b preserves host search.
   @override
   List<ModuleSection> get sections => [ModuleSection(
-    id: 'research', label: '科研工作台', requiresWorkspace: true,
+    id: 'research', label: '科研工作台', requiresWorkspace: true, order: 1,
     // The host retains its workspace navigation bridge for this bound section.
     builder: (context, host) => host is WorkspaceSectionHost
       ? host.workspacePage(context) : const Text('请在工作区打开科研项目'),
