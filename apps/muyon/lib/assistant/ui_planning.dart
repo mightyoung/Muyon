@@ -42,6 +42,7 @@ class UiPlanningHarness {
     this.timeout = const Duration(seconds: 15),
     this.requestView,
     this.enabled = true,
+    this.cancelTimedOutRequest,
   });
   final FoundationRepository repository;
   final UiPlanningStateSource source;
@@ -50,6 +51,8 @@ class UiPlanningHarness {
   bool enabled;
   final UiGuideSource guides;
   final Duration timeout;
+  /// Host cleanup must finish before a timeout fallback is exposed.
+  final Future<void> Function(UiPlanningRequest)? cancelTimedOutRequest;
   final List<Object?> Function(PersonalTask)? requestView;
   final _requests = <String, Future<UiPlannedPresentation>>{};
   final _latest = <String, UiPlannedPresentation>{};
@@ -217,7 +220,13 @@ class UiPlanningHarness {
     final provider = providers[selectedMode];
     if (provider == null) return fallback('provider_unavailable', request);
     try {
-      final result = await provider.plan(request).timeout(timeout);
+      final result = await provider.plan(request).timeout(
+        timeout,
+        onTimeout: () async {
+          await cancelTimedOutRequest?.call(request);
+          throw TimeoutException('UI planning deadline expired', timeout);
+        },
+      );
       if (result.errors.isNotEmpty) {
         return fallback('invalid_decision', request);
       }
