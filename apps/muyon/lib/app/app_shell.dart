@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'dart:ui' show AppExitResponse;
@@ -19,6 +21,7 @@ import 'module_host.dart';
 import 'research_tools_page.dart';
 import '../screens/data_storage_page.dart';
 import '../screens/platform_shell.dart';
+import '../screens/conversation_shell_controller.dart';
 
 class MuyonApp extends StatefulWidget {
   const MuyonApp({
@@ -42,6 +45,7 @@ class _MuyonAppState extends State<MuyonApp> {
   ThemeMode mode = ThemeMode.system;
   final navigator = GlobalKey<NavigatorState>();
   final messenger = GlobalKey<ScaffoldMessengerState>();
+  final conversationShell = ConversationShellController();
   late final AppLifecycleListener lifecycle;
   late MuyonHost host = widget.host;
   int generation = 0;
@@ -86,11 +90,20 @@ class _MuyonAppState extends State<MuyonApp> {
     _attach(host);
     lifecycle = AppLifecycleListener(
       onExitRequested: () async {
+        try {
+          await conversationShell.checkpoint();
+        } catch (_) {
+          // Keep the tree and unsaved input visible when the CAS fails.
+          return AppExitResponse.cancel;
+        }
+        conversationShell.detach();
         await host.close();
         return AppExitResponse.exit;
       },
       onDetach: () {
-        host.close();
+        final pending = conversationShell.checkpoint();
+        conversationShell.detach();
+        unawaited(pending.catchError((Object _) {}).whenComplete(host.close));
       },
     );
   }
@@ -108,6 +121,11 @@ class _MuyonAppState extends State<MuyonApp> {
   Future<void> _restore(String backupDir) async {
     final root = host.storage.rootPath;
     final closing = host;
+    // A failed checkpoint propagates to the existing action error handler;
+    // the old host and tree remain open so the user can retain their input.
+    await conversationShell.checkpoint();
+    if (!mounted) return;
+    conversationShell.detach();
     setState(() => restoring = true);
     await WidgetsBinding.instance.endOfFrame;
     closing.approveInquiryModelRequest = null;
@@ -203,6 +221,7 @@ class _MuyonAppState extends State<MuyonApp> {
             listenable: host.foundation,
             builder: (context, _) => PlatformShell(
               host: host,
+              shellController: conversationShell,
               themeMode: mode,
               onRestore: _restore,
               pickDirectory: widget.pickDirectory,

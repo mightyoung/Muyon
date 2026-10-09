@@ -34,7 +34,7 @@ void main() {
     testWidgets('four_destinations_320_390_430_900_1250_1280_at_200_percent ($width)', (tester) async {
       final root = Directory.systemTemp.createTempSync('platform-responsive');
       final host = (await tester.runAsync(() => MuyonHost.open(root.path)))!;
-      tester.view.physicalSize = Size(width, 1200);
+      tester.view.physicalSize = Size(width, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);

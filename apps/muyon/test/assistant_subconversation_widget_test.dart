@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/screens/assistant_page.dart';
+import 'package:muyon/screens/platform_shell.dart';
 import 'package:muyon/screens/assistant_subconversation_panel.dart';
 import 'package:muyon/platform/assistant_subconversations.dart';
 import 'package:muyon/services/models/model_gateway.dart';
@@ -9,6 +10,52 @@ import 'package:muyon/services/models/profile_repository.dart';
 import 'support/ui_navigation_fixture.dart';
 
 void main() {
+  testWidgets('shell_child_back_restores_parent_draft_and_scroll', (tester) async {
+    final f = await NavigationFixture.open(tester);
+    await tester.runAsync(() async {
+      await f.host.foundation.database.write((db) => db.execute(
+        "UPDATE execution_records SET payload=json_set(payload,'\$.prompt','父任务','\$.stage','paused','\$.executionDeviceId','local','\$.state','paused') WHERE id='task'",
+      ));
+      for (var i = 0; i < 20; i++) {
+        await f.host.foundation.appendMessage(f.conversationId, 'assistant', '公开父对话历史 $i');
+      }
+    });
+    final service = AssistantSubconversations(f.host.foundation);
+    final ref = (await tester.runAsync(() => service.openSubconversation('task', '公开子问题')))!;
+    await tester.pumpWidget(MaterialApp(home: PlatformShell(
+      host: f.host, themeMode: ThemeMode.light,
+      onTheme: (_) {}, onRestore: (_) async {},
+    )));
+    await tester.pumpAndSettle();
+    final parent = tester.state(find.byType(AssistantPage));
+    final history = find.descendant(of: find.byType(AssistantPage), matching: find.byType(ListView));
+    await tester.enterText(find.widgetWithText(TextField, '输入消息'), '父亲的待输入');
+    final entry = find.text('打开子对话 · 公开子问题');
+    // Opening the actual saved child entry also establishes a real parent
+    // scroll position; the dialog must leave this controller untouched.
+    await tester.ensureVisible(entry);
+    await tester.pumpAndSettle();
+    final scroll = tester.widget<ListView>(history).controller!;
+    final offset = scroll.offset;
+    expect(offset, greaterThan(0));
+    final tasks = f.host.foundation.tasks().length;
+    final calls = f.host.tools.history().length;
+    await tester.tap(entry);
+    await tester.pumpAndSettle();
+    expect(find.byType(AssistantSubconversationPanel), findsOneWidget);
+    await tester.enterText(find.descendant(of: find.byType(AssistantSubconversationPanel), matching: find.byType(TextField)), '子待输入');
+    await tester.runAsync(() => tester.tap(find.byTooltip('保存并关闭子对话')));
+    await tester.pumpAndSettle();
+    expect(find.byType(AssistantSubconversationPanel), findsNothing);
+    expect(tester.state(find.byType(AssistantPage)), same(parent));
+    expect(find.text('父亲的待输入'), findsOneWidget);
+    expect(scroll.offset, offset);
+    expect(service.loadWorkspace(ref).draftText, '子待输入');
+    expect(f.host.foundation.tasks().length, tasks);
+    expect(f.host.tools.history().length, calls);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
   testWidgets('parent offers a one-level subconversation from a real task', (
     tester,
   ) async {

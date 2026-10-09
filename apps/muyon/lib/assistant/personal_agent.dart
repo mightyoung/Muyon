@@ -83,6 +83,9 @@ class PersonalAgent {
         mode: uiPlanningMode,
         requestView: _ctx.view,
         enabled: uiPlanningEnabled,
+        cancelTimedOutRequest: (request) async {
+          await _uiPlanningCancellations[request]?.call();
+        },
       );
       tools.register(
         providerId: 'host-ui-planning',
@@ -126,6 +129,10 @@ class PersonalAgent {
       trustedProfileChoice: false,
     );
   }
+
+  // Request identity isolates concurrent turns and cached planning attempts.
+  final _uiPlanningCancellations =
+      <UiPlanningRequest, Future<void> Function()>{};
 
   Future<String> _requestUiModel(
     UiPlanningRequest request,
@@ -178,12 +185,23 @@ class PersonalAgent {
       'uiPlanningBudgetStart': usage.toPayload(),
     });
     final completed = Completer<String>();
+    var expired = false;
+    final created = Completer<void>();
+    _uiPlanningCancellations[request] = () async {
+      expired = true;
+      await created.future;
+      await cancel(task.id);
+      if (!completed.isCompleted) {
+        completed.completeError(TimeoutException('UI planning deadline expired'));
+      }
+    };
     _ctx.uiModelReplies[task.id] = completed;
     _ctx.uiModelChecks[task.id] = () async {
       final planning = _ctx.uiPlanning;
       final latest = repository.task(request.taskId);
       final state = latest == null ? null : await planning?.source(latest);
-      if (planning?.enabled != true ||
+      if (expired ||
+          planning?.enabled != true ||
           planning?.mode != request.mode ||
           state == null ||
           state.snapshot.ref != request.snapshot.ref ||
@@ -200,12 +218,20 @@ class PersonalAgent {
     final observed = completed.future;
     unawaited(observed.catchError((Object _) => ''));
     try {
-      await repository.createTask(task);
+      try {
+        await repository.createTask(task);
+      } finally {
+        // Cancellation can be requested while the first database write awaits.
+        created.complete();
+      }
+      if (expired) throw TimeoutException('UI planning deadline expired');
       await _model.advance(task);
       await _ctx.event(source, 'ui_planning_model', {'taskId': task.id});
-      return await observed.timeout(const Duration(seconds: 15));
+      // The harness owns the sole deadline, including startup and cleanup.
+      return await observed;
     } finally {
       await cancel(task.id);
+      _uiPlanningCancellations.remove(request);
       _ctx.uiModelReplies.remove(task.id);
       _ctx.uiModelChecks.remove(task.id);
     }

@@ -63,10 +63,12 @@ void main() {
   );
 
   testWidgets(
-    'the home page lists the three v1 modules as before, nothing activated',
+    'the data destination lists the three v1 modules as before, nothing activated',
     (tester) async {
       final host = await open(tester);
       await tester.pumpWidget(shell(host));
+      await tester.pumpAndSettle();
+      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('资料')));
       await tester.pumpAndSettle();
       final tiles = tester.widgetList<ListTile>(
         find.byWidgetPredicate(
@@ -107,7 +109,7 @@ void main() {
   );
 
   testWidgets(
-    'a v2 module appears on the home page and opens its own section',
+    'a v2 module appears in data and opens its own section',
     (tester) async {
       final host = await open(tester, [
         FakeV2Module(
@@ -123,6 +125,8 @@ void main() {
         ),
       ]);
       await tester.pumpWidget(shell(host));
+      await tester.pumpAndSettle();
+      await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('资料')));
       await tester.pumpAndSettle();
       expect(find.text('随手记一笔'), findsOneWidget);
       await tester.runAsync(() async {

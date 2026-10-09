@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:muyon/screens/conversation_workspace_pane.dart';
+import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../../../packages/muyon_ui/test/dynamic_fixtures.dart';
@@ -131,6 +134,55 @@ void main() {
     expect(second.saveError, isNotNull);
     expect(second.surface.session.userOverrides['quantity'], 'unsaved loser');
     expect((await secondStore.load(plan.plan.surfaceId))!.toJson(), committed);
+  });
+
+  testWidgets('shell_checkpoint_cas_conflict_does_not_pop_or_overwrite', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1280, 900);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    WorkspaceOpener? openWorkspace;
+    var businessCalls = 0;
+    final plan = actionPlan();
+    await tester.pumpWidget(MaterialApp(home: ConversationWorkspaceHost(builder: (_, open) {
+      openWorkspace = open;
+      return const Scaffold(body: Text('parent conversation'));
+    })));
+    await openWorkspace!(DynamicWorkspace(
+      repository: repo, taskId: 'task', surfaceId: plan.plan.surfaceId, plan: plan,
+      onEvent: (_) async { businessCalls++; },
+    ));
+    await tester.pumpAndSettle();
+    final workspace = tester.widget<DynamicWorkspace>(find.byType(DynamicWorkspace));
+    await tester.runAsync(workspace.session!.ensureLoaded);
+    await tester.pumpAndSettle();
+    final body = find.byType(ConversationWorkspaceBody);
+    final c = tester.widget<ConversationWorkspaceBody>(body).controller;
+    await tester.runAsync(c.flush);
+    final competingStore = HostUiWorkspaceStore(repo, taskId: 'task');
+    final competing = await UiWorkspaceController.open(
+      store: competingStore, taskId: 'task', scopeKey: competingStore.scopeKey!, plan: plan,
+    );
+    competing.step = 'winner projection';
+    await tester.runAsync(competing.flush);
+    final winner = (await competingStore.load(plan.plan.surfaceId))!.toJson();
+    competing.dispose();
+    await tester.enterText(find.byType(TextField).first, 'losing input retained');
+    await tester.runAsync(() async {
+      try { await c.flush(); } catch (_) { /* expected CAS failure */ }
+    });
+    await tester.pumpAndSettle();
+    expect(c.readOnly, isTrue);
+    expect(find.textContaining('losing input retained'), findsWidgets);
+    expect(find.textContaining('未保存'), findsWidgets);
+    await tester.tap(find.byTooltip('关闭工作区 / 返回'));
+    await tester.pumpAndSettle();
+    expect(body, findsOneWidget);
+    expect(find.textContaining('losing input retained'), findsWidgets);
+    expect((await competingStore.load(plan.plan.surfaceId))!.toJson(), winner);
+    expect(businessCalls, 0);
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
   });
 
 }
