@@ -265,10 +265,10 @@ void main() {
       final report = t.renderReport(
         AssistantAnswer.fromRun('', [], modelCalls: 1, elapsed: Duration.zero),
       );
-      expect(report, isNot(contains('"status":"reference_range"')));
+      expect(report, isNot(contains('状态：参考区间（reference_range）')));
       expect(report, contains('insufficient_evidence'));
       expect(report, contains('2027-01-01'));
-      expect(report, isNot(contains('"min":"100"')));
+      expect(report, isNot(contains('最低参考价：100')));
     },
   );
   test(
@@ -289,8 +289,8 @@ void main() {
         AssistantAnswer.fromRun('', [], modelCalls: 1, elapsed: Duration.zero),
       );
       expect(report, contains('stale_comparison'));
-      expect(report, isNot(contains('"status":"reference_range"')));
-      expect(report, isNot(contains('"min":"100"')));
+      expect(report, isNot(contains('状态：参考区间（reference_range）')));
+      expect(report, isNot(contains('最低参考价：100')));
     },
   );
   test(
@@ -345,6 +345,10 @@ void main() {
         'import',
       );
       expect(utf8.decode(attachment.bytes!), contains(source.digest));
+      final display = t.renderReport(AssistantAnswer.fromRun('', [], modelCalls: 1, elapsed: Duration.zero));
+      expect(display, contains('实际回执'));
+      expect(display, contains(result['product_id'] as String));
+      expect(display, contains(result['attachment_id'] as String));
       expect(utf8.decode(attachment.bytes!), contains('selected_row_id'));
       expect(
         store
@@ -667,6 +671,9 @@ void main() {
       final report = tools([]).renderReport(answer);
       expect(report, isNot(contains('FAKE VERIFIED')));
       expect(report, contains(source.url));
+      expect(report, contains('来源签名：${source.digest}'));
+      expect(report, contains('来源：'));
+      expect(report, isNot(contains('{\"candidate_id\"')));
       expect(report, contains('source_supported'));
     },
   );

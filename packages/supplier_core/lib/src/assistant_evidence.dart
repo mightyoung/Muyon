@@ -178,11 +178,8 @@ class AssistantAnswer {
       }.contains(observation.tool)) {
         continue;
       }
-      final data = _displayFacts(jsonDecode(observation.result));
-      final detail = const JsonEncoder.withIndent('  ').convert(data);
-      facts.add(
-        '${observation.tool}\n${detail.length > 2000 ? '${detail.substring(0, 2000)}\n（展示已截断，请展开工具实际结果查看完整内容）' : detail}',
-      );
+      final detail = assistantReadableSummary(jsonDecode(observation.result));
+      facts.add('${observation.tool}\n$detail');
     }
     if (records.isNotEmpty) {
       parts.add(
@@ -288,20 +285,123 @@ class AssistantAnswer {
   };
 }
 
-Object? _displayFacts(Object? value, [int depth = 0]) {
-  if (depth > 8) return '（更深层明细请查看实际工具结果）';
-  if (value is Map) {
-    return {
-      for (final entry in value.entries)
-        if (entry.key != 'id' &&
-            !(entry.key as String).endsWith('_id') &&
-            !(entry.key as String).endsWith('_ids'))
-          entry.key: _displayFacts(entry.value, depth + 1),
-    };
+/// Presentation only: preserves values and never changes evidence or digests.
+String assistantReadableSummary(Object? value) {
+  const labels = {
+    'name': '名称',
+    'price': '价格',
+    'currency': '币种',
+    'unit': '单位',
+    'source': '来源',
+    'sources': '来源',
+    'url': '网址',
+    'title': '标题',
+    'brand': '品牌',
+    'model': '型号',
+    'configuration': '配置',
+    'supplier': '供应商',
+    'facts': '来源字段',
+    'qualification': '逐项核验',
+    'status': '状态',
+    'reason': '原因',
+    'reasons': '原因',
+    'conflicts': '冲突',
+    'checks': '检查项',
+    'evidence': '依据',
+    'actual_receipts': '实际回执',
+    'candidate_id': '候选编号',
+    'fetched_at': '采集时间',
+    'digest': '来源签名',
+    'truncated': '来源截断',
+    'local_bindings_stale': '本机关联已过期',
+    'warning': '提醒',
+    'included': '纳入比较',
+    'excluded': '排除样本',
+    'basis': '比较口径',
+    'min': '最低参考价',
+    'max': '最高参考价',
+    'as_of': '核价日期',
+    'project_difference': '与预算比较',
+    'notice': '说明',
+    'kind': '类别',
+    'toolId': '工具',
+    'parameters': '参数',
+    'destination': '发送目标',
+    'scope': '操作范围',
+    'effect': '操作影响',
+    'calls': '操作步骤',
+    'order': '执行顺序',
+    'endpoint': '模型端点',
+    'messages': '发送内容',
+    'tools': '可用工具',
+    'maxOutputTokens': '输出上限',
+    'profile': '模型配置',
+    'dataCategories': '发送数据类别',
+    'role': '消息角色',
+    'content': '内容',
+    'compacted': '较早内容已摘要',
+    'notes': '备注',
+    'tax_mode': '含税口径',
+    'tax_rate': '税率',
+    'shipping': '运费',
+    'min_qty': '最小数量',
+    'quoted_on': '报价日期',
+    'valid_until': '有效期',
+    'clause': '要求',
+    'id': '编号',
+    'data': '字段',
+    'rows': '记录',
+  };
+  const statuses = {
+    'unknown': '未知',
+    'source_supported': '来源支持',
+    'conflict': '冲突',
+    'conflicts': '冲突',
+    'reference_range': '参考区间',
+    'insufficient_evidence': '依据不足',
+    'stale_comparison': '比较已过期',
+    'not_comparable': '不可比较',
+    'saved': '已保存',
+  };
+  final lines = <String>[];
+  String scalar(Object? v) => v == null
+      ? '未知（未提供）'
+      : v == true
+      ? '是'
+      : v == false
+      ? '否'
+      : statuses.containsKey(v)
+      ? '${statuses[v]}（$v）'
+      : '$v';
+  void walk(Object? v, String indent) {
+    if (v is Map) {
+      if (v.isEmpty) lines.add('${indent}无字段');
+      for (final entry in v.entries) {
+        final label = labels[entry.key] ?? '${entry.key}'.replaceAll('_', ' ');
+        if (entry.value is Map || entry.value is List) {
+          lines.add('$indent$label：');
+          walk(entry.value, '$indent  ');
+        } else {
+          lines.add('$indent$label：${scalar(entry.value)}');
+        }
+      }
+    } else if (v is List) {
+      if (v.isEmpty) lines.add('${indent}无');
+      for (var i = 0; i < v.length; i++) {
+        if (v[i] is Map || v[i] is List) {
+          lines.add('$indent${i + 1}.');
+          walk(v[i], '$indent  ');
+        } else {
+          lines.add('$indent• ${scalar(v[i])}');
+        }
+      }
+    } else {
+      lines.add('$indent${scalar(v)}');
+    }
   }
-  if (value is List)
-    return [for (final v in value) _displayFacts(v, depth + 1)];
-  return value;
+
+  walk(value, '');
+  return lines.join('\n');
 }
 
 // Read only documented identity positions. UUIDs buried in notes, clauses,

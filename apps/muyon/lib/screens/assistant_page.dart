@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:supplier_core/supplier_core.dart' show assistantReadableSummary;
 import 'package:muyon_module_api/muyon_module_api.dart';
 
 import '../assistant/agent_drafts.dart';
@@ -41,6 +42,28 @@ String confirmTitle(String stage) => switch (stage) {
   'compaction' => '确认发送较早内容做摘要',
   _ => '确认工具操作',
 };
+
+/// A brief model-send overview; the complete unchanged preview stays below it.
+String _confirmationSummary(PersonalTask task) {
+  final preview = task.payload['preview'];
+  if ((task.stage == 'model' || task.stage == 'compaction') && preview is Map) {
+    final profile = preview['profile'];
+    final messages = preview['messages'];
+    final tools = preview['tools'];
+    return assistantReadableSummary({
+      'endpoint': preview['endpoint'],
+      if (profile is Map) '模型': profile['modelId'],
+      'scope': preview['scope'],
+      'dataCategories': preview['dataCategories'],
+      '发送消息': messages is List ? '${messages.length} 条（原文见原始请求详情）' : '见原始请求详情',
+      if (tools is List) '可用工具': '${tools.length} 项（完整定义见原始请求详情）',
+      if (preview.containsKey('compacted')) 'compacted': preview['compacted'],
+      if (preview.containsKey('maxOutputTokens'))
+        'maxOutputTokens': preview['maxOutputTokens'],
+    });
+  }
+  return assistantReadableSummary(preview);
+}
 
 class _AssistantPageState extends State<AssistantPage> {
   final _input = TextEditingController();
@@ -166,9 +189,16 @@ class _AssistantPageState extends State<AssistantPage> {
               children: [
                 Text(task.waitReason ?? '请核对操作范围。'),
                 const SizedBox(height: 12),
-                SelectableText(
-                  const JsonEncoder.withIndent('  ')
-                      .convert(task.payload['preview']),
+                SelectableText(_confirmationSummary(task)),
+                const SizedBox(height: 12),
+                ExpansionTile(
+                  title: const Text('原始请求详情'),
+                  children: [
+                    SelectableText(
+                      const JsonEncoder.withIndent('  ')
+                          .convert(task.payload['preview']),
+                    ),
+                  ],
                 ),
               ],
             ),
