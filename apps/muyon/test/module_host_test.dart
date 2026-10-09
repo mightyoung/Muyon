@@ -236,11 +236,11 @@ void main() {
       expect(host!.modules.state('revoked').reason, 'capability_revoked: ocr');
       expect(host!.tools.inspect('revoked.ping')!.available, isFalse);
       expect(grants('revoked').single.policy, 'revoked');
-      // Activating again keeps the grant denied (optional: the module runs).
+      // Withdrawal remains fail closed until the host explicitly reconsiders.
       await host!.modules.activate('revoked');
       expect(grants('revoked').single.granted, isFalse);
-      expect(module.lastResources!.capabilities.available, isEmpty);
-      expect(module.lastResources!.capabilities.denied, {'ocr'});
+      expect(host!.modules.state('revoked').status, ModuleStatus.failed);
+      expect(host!.modules.runtime<ModuleRuntime>('revoked'), isNull);
     });
   });
 
@@ -250,9 +250,9 @@ void main() {
     final decisions = host!.grants.forModule('research');
     expect(
       {for (final d in decisions) d.capability},
-      {'knowledge', 'models', 'tools'},
+      {'knowledge', 'models'},
     );
-    expect(decisions.every((d) => d.granted && d.policy == 'legacy'), isTrue);
+    expect(decisions.every((d) => !d.granted && d.policy == GrantPolicy.facadePending), isTrue);
     await host!.activatePrototype();
     expect(host!.grants.forModule('prototype'), isEmpty);
   });

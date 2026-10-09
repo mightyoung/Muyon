@@ -1,16 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
-import 'package:prototype_module/prototype_module.dart';
 import 'package:research_module/research_module.dart';
 import 'package:supplier_core/supplier_core.dart';
 
-import '../platform/prototype_tools.dart';
 import '../platform/scope_resolver.dart';
-import '../workspace/import_coordinator.dart';
 import 'app_shell.dart';
 import 'bootstrap.dart';
 import 'module_host.dart';
@@ -21,7 +17,7 @@ import 'module_host.dart';
 
 /// What the shell hands to a section builder. A v1 module's section is the
 /// page the shell used to open itself, so it needs the shell's theme plumbing.
-class ShellSectionHost implements ModuleSectionHost {
+class ShellSectionHost implements WorkspaceSectionHost {
   const ShellSectionHost({
     required this.moduleId,
     required this.host,
@@ -36,6 +32,11 @@ class ShellSectionHost implements ModuleSectionHost {
 
   @override
   T? runtime<T extends ModuleRuntime>() => host.modules.runtime<T>(moduleId);
+  @override
+  Widget workspacePage(BuildContext context) => WorkspacePage(
+    host: host, themeMode: themeMode, onTheme: onTheme, initialModule: moduleId,
+  );
+
 }
 
 Widget _workspacePage(ModuleSectionHost section, String module) {
@@ -45,38 +46,6 @@ Widget _workspacePage(ModuleSectionHost section, String module) {
     themeMode: shell.themeMode,
     onTheme: shell.onTheme,
     initialModule: module,
-  );
-}
-
-/// The prototype home, opened after the module is activated. A failure is
-/// shown on the page rather than as a message on the home screen.
-class _PrototypeSectionPage extends StatefulWidget {
-  const _PrototypeSectionPage(this.host);
-  final MuyonHost host;
-  @override
-  State<_PrototypeSectionPage> createState() => _PrototypeSectionPageState();
-}
-
-class _PrototypeSectionPageState extends State<_PrototypeSectionPage> {
-  late final Future<void> opening = widget.host.activatePrototype();
-  @override
-  Widget build(BuildContext context) => FutureBuilder<void>(
-    future: opening,
-    builder: (context, snapshot) {
-      final runtime = widget.host.prototype;
-      if (runtime != null) return PrototypeHome(store: runtime.store);
-      final done = snapshot.connectionState == ConnectionState.done;
-      return Scaffold(
-        appBar: AppBar(title: const Text('原型页面')),
-        body: Center(
-          child: done
-              ? SelectableText(
-                  '原型模块不可用：${widget.host.prototypeError ?? '未知原因'}',
-                )
-              : const CircularProgressIndicator(),
-        ),
-      );
-    },
   );
 }
 
@@ -119,41 +88,13 @@ List<LegacyModuleBridge> legacyBridges(MuyonHost host) => [
         ),
       ],
     ),
-    grants: const {'knowledge', 'models', 'tools'},
     afterActivate: (runtime) async {
-      final recovery = await ImportCoordinator(host.workspaces)
-          .recover('research', runtime);
-      if (recovery.conflicts.isNotEmpty) {
-        await host.foundation.notify(
-          title: '导入未能完成绑定',
-          body: recovery.conflicts.values.join('\n'),
-        );
-      }
       await host.acceptedResearchImports.reconcileCommitted(
         runtime as ResearchRuntime,
       );
     },
-    scopeSource: _ResearchScope(host),
   ),
-  LegacyModuleBridge(
-    id: prototypeModuleId,
-    declaration: ModuleDeclaration(
-      moduleId: prototypeModuleId,
-      displayName: '原型页面',
-      tagline: '导入单页原型，评审版本并记录反馈（不是完整业务系统）',
-      iconKey: 'web',
-      sections: [
-        ModuleSection(
-          id: prototypeModuleId,
-          label: '原型页面',
-          showInModuleMenu: false,
-          builder: (context, section) =>
-              _PrototypeSectionPage((section as ShellSectionHost).host),
-        ),
-      ],
-    ),
-    scopeSource: _PrototypeScope(host),
-  ),
+
 ];
 
 abstract class _LegacyScope implements ScopeSource {
@@ -208,83 +149,5 @@ class _InquiryScope extends _LegacyScope {
       }
     }
     return refs;
-  }
-}
-
-/// Research projects, documents (hashed from disk) and entries.
-class _ResearchScope extends _LegacyScope {
-  _ResearchScope(super.host);
-  @override
-  String get moduleId => 'research';
-  @override
-  Future<void> prepare() => host.activateResearch();
-  @override
-  Future<List<ObjectRef>> enumerate() async {
-    final research = host.research?.store;
-    if (research == null) return const [];
-    final refs = <ObjectRef>[];
-    for (final project in research.projects()) {
-      refs.add(
-        ObjectRef(
-          moduleId: 'research',
-          objectType: 'project',
-          objectId: project.id,
-          nativeProjectId: project.id,
-          contentDigest: sha256
-              .convert(
-                utf8.encode(
-                  jsonEncode([
-                    project.title,
-                    project.question,
-                    project.nextStep,
-                  ]),
-                ),
-              )
-              .toString(),
-        ),
-      );
-      for (final document in research.documents(project.id)) {
-        final file = File(document.absolutePath);
-        final digest = file.existsSync()
-            ? (await sha256.bind(file.openRead()).first).toString()
-            : 'missing';
-        refs.add(
-          ObjectRef(
-            moduleId: 'research',
-            objectType: 'document',
-            objectId: document.id,
-            nativeProjectId: project.id,
-            contentDigest: digest,
-          ),
-        );
-      }
-      for (final entry in research.entries(project.id)) {
-        refs.add(
-          ObjectRef(
-            moduleId: 'research',
-            objectType: 'entry',
-            objectId: entry.id,
-            nativeProjectId: project.id,
-            contentDigest: sha256
-                .convert(utf8.encode(jsonEncode(entry.data)))
-                .toString(),
-          ),
-        );
-      }
-    }
-    return refs;
-  }
-}
-
-class _PrototypeScope extends _LegacyScope {
-  _PrototypeScope(super.host);
-  @override
-  String get moduleId => prototypeModuleId;
-  @override
-  Future<void> prepare() => host.activatePrototype();
-  @override
-  Future<List<ObjectRef>> enumerate() async {
-    final prototype = host.prototype?.store;
-    return prototype == null ? const [] : prototypeScopeRefs(prototype);
   }
 }

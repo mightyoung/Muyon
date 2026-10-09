@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/platform/business_tools.dart' show objectIdentity;
-import 'package:muyon/platform/prototype_tools.dart' show prototypeScopeRefs;
+import 'package:prototype_module/prototype_module.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:supplier_core/supplier_core.dart';
 
@@ -148,3 +148,31 @@ Future<ResolvedAssistantScope> legacyResolveAssistantScope(
   }
   return ResolvedAssistantScope(requested: scope, objects: selected);
 }
+
+// Frozen original prototype candidate/digest algorithm, formerly host-owned.
+List<ObjectRef> prototypeScopeRefs(PrototypeStore store) => [
+  for (final page in store.pages()) ...[
+    ObjectRef(
+      moduleId: prototypeModuleId,
+      objectType: 'page',
+      objectId: page.id,
+      nativeProjectId: page.id,
+    ),
+    for (final v in store.versions(page.id))
+      ObjectRef(
+        moduleId: prototypeModuleId,
+        objectType: 'version',
+        objectId: v.id,
+        nativeProjectId: page.id,
+        contentDigest: v.digest,
+      ),
+    for (final f in store.feedback(page.id))
+      ObjectRef(
+        moduleId: prototypeModuleId,
+        objectType: 'feedback',
+        objectId: f.id,
+        nativeProjectId: page.id,
+        contentDigest: sha256.convert(utf8.encode(f.text)).toString(),
+      ),
+  ],
+];

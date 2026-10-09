@@ -190,8 +190,7 @@ class ModuleHost implements ModuleLink {
   /// registry order, then legacy ones, each group in catalog order.
   Iterable<ModuleDeclaration> declarations() => [
     for (final module in registry.modules)
-      if (module is BusinessModuleV2 &&
-          !_legacy.containsKey(module.manifest.id))
+      if (module is BusinessModuleV2)
         ModuleDeclaration(
           moduleId: module.manifest.id,
           displayName: module.manifest.displayName ?? module.manifest.id,
@@ -199,7 +198,9 @@ class ModuleHost implements ModuleLink {
           iconKey: module.manifest.iconKey,
           sections: module.sections,
         ),
-    for (final bridge in _legacy.values) bridge.declaration,
+    for (final bridge in _legacy.values)
+      if (!registry.modules.any((m) => m is BusinessModuleV2 && m.manifest.id == bridge.id))
+        bridge.declaration,
   ];
 
   /// All sections, ordered by `order` then declaration order.
@@ -235,29 +236,31 @@ class ModuleHost implements ModuleLink {
   /// Where scope objects come from, in listing order: the legacy modules as
   /// they always were, then every registered v2 module through its contract.
   List<ScopeSource> scopeSources() => [
-    for (final bridge in _legacy.values)
-      if (bridge.scopeSource != null) bridge.scopeSource!,
     for (final module in registry.modules)
-      if (module is BusinessModuleV2 &&
-          !_legacy.containsKey(module.manifest.id))
+      if (_legacy[module.manifest.id]?.scopeSource case final ScopeSource source)
+        source
+      else if (module is BusinessModuleV2)
         ModuleScopeSource(
-          moduleId: module.manifest.id,
-          ontology: module.ontology,
-          workspaces: workspaces,
-          projections: projections,
+          moduleId: module.manifest.id, ontology: module.ontology,
+          workspaces: workspaces, projections: projections,
           runtime: () => _slots[module.manifest.id]?.runtime,
-          activate: () async {
-            await activate(module.manifest.id);
-          },
+          activate: () async { await activate(module.manifest.id); },
         ),
+    for (final bridge in _legacy.values)
+      if (!registry.modules.any((m) => m.manifest.id == bridge.id) && bridge.scopeSource != null)
+        bridge.scopeSource!,
   ];
 
   /// Registers the tools every available v2 module declares. Called once at
   /// start-up, before any activation, so the assistant sees the full set.
-  void registerTools() {
-    for (final module in registry.modules) {
+  void registerTools({List<String>? moduleIds}) {
+    final selected = moduleIds == null ? registry.modules : [
+      for (final id in moduleIds) ...registry.modules.where((m) => m.manifest.id == id),
+    ];
+    for (final module in selected) {
       if (module is! BusinessModuleV2) continue;
       final id = module.manifest.id;
+      if (_toolIds.containsKey(id)) continue;
       final registrar = HostToolRegistrar(id, tools, module.manifest, this);
       try {
         module.registerTools(registrar);
@@ -271,6 +274,9 @@ class ModuleHost implements ModuleLink {
         registrar.seal();
       }
       _toolIds[id] = registrar.registeredToolIds;
+      if (grants.revoked(id).isNotEmpty) {
+        _withdraw(id, 'capability_revoked: ${grants.revoked(id).join(', ')}');
+      }
     }
   }
 
@@ -426,10 +432,12 @@ class ModuleHost implements ModuleLink {
         : GrantPolicy.decide(manifest, revoked: grants.revoked(id));
     await grants.record(id, decisions);
     _checkCurrent(slot, epoch);
-    final refused = [
+    final refused = {
+      // Includes withdrawn capabilities removed from the current manifest.
+      ...grants.revoked(id),
       for (final d in decisions)
         if (!d.granted && d.required) d.capability,
-    ];
+    };
     if (refused.isNotEmpty) {
       throw _Refused('capability_denied: ${refused.join(', ')}');
     }
@@ -512,6 +520,24 @@ class ModuleHost implements ModuleLink {
     } finally {
       --slot.pendingRevocations;
     }
+  }
+
+  /// Host-authorized reconsideration; clears only the persistent withdrawal.
+  /// Activation still applies the static policy (including facade denial).
+  /// For a capability retired from the manifest this acknowledges the old
+  /// withdrawal; no new grant is issued for an absent request.
+  Future<ModuleState> reconsiderCapability(String id, String capability) async {
+    final slot = _slot(id);
+    if (!_accepting || _closing || slot.revoking) {
+      throw StateError('Module host cannot reconsider now');
+    }
+    final module = registry.require(id);
+    if (!module.manifest.capabilities.any((r) => r.id == capability) &&
+        !grants.revoked(id).contains(capability)) {
+      throw StateError('Capability is neither requested nor persistently revoked');
+    }
+    await grants.clearRevocation(id, capability);
+    return activate(id);
   }
 
   Future<void> close() => _closeFuture ??= _close();

@@ -114,3 +114,10 @@ mixin NoImportRuntime implements ModuleRuntime {
     ImportIntent intent,
   ) => Future.error(UnsupportedError('This module has no import pipeline'));
 }
+
+/// Optional module-owned candidate ordering for an existing catalog. These
+/// refs carry identity only; the host always confirms each through resolve.
+/// Keeps legacy listing order without moving domain SQL into the host.
+abstract interface class ScopeCandidates {
+  Future<List<ObjectRef>> scopeCandidates();
+}

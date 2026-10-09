@@ -40,7 +40,7 @@ class PausedModule extends FakeV2Module {
 
 void main() {
   test(
-    'failed revocation keeps admission closed until that capability retries',
+    'failed revocation requires durable retry and explicit reconsideration',
     () async {
       final root = Directory.systemTemp.createTempSync('revocation-retry-');
       final module = FakeV2Module(
@@ -75,10 +75,25 @@ void main() {
         await host.modules.revokeCapability('recovery', 'ocr');
         expect(
           (await host.modules.activate('recovery')).status,
-          ModuleStatus.ready,
+          ModuleStatus.failed,
         );
         expect(host.grants.revoked('recovery'), {'ocr', 'transfer'});
+        expect(module.activations, 1);
+        expect(host.modules.runtime<ModuleRuntime>('recovery'), isNull);
         expect(module.lastResources!.capabilities.available, isEmpty);
+        expect(
+          (await host.modules.reconsiderCapability('recovery', 'ocr')).status,
+          ModuleStatus.failed,
+          reason: 'reconsidering one capability cannot undo another withdrawal',
+        );
+        expect(host.grants.revoked('recovery'), {'transfer'});
+        expect(module.activations, 1);
+        expect(
+          (await host.modules.reconsiderCapability('recovery', 'transfer')).status,
+          ModuleStatus.ready,
+        );
+        expect(host.grants.revoked('recovery'), isEmpty);
+        expect(module.lastResources!.capabilities.available, {'ocr', 'transfer'});
       } finally {
         await host.close();
         root.deleteSync(recursive: true);

@@ -64,16 +64,23 @@ void main() {
     expect(missing.objectRefs, isEmpty);
   });
 
-  test('prototype tools are read-only and nothing writes or sends', () {
+  test('legacy prototype reads stay read-only; feedback is a local write', () {
     final prototype = [
       for (final info in host.tools.list())
         if (info.descriptor.moduleId == 'prototype') info.descriptor,
     ];
-    expect(prototype.map((d) => d.toolId).toSet(), {
+    final reads = prototype.where((d) => d.effect == ToolEffect.read).toList();
+    expect(reads.map((d) => d.toolId).toSet(), {
       'prototype.list_pages',
       'prototype.page_detail',
     });
-    expect(prototype.every((d) => d.effect == ToolEffect.read), isTrue);
+    expect(reads.every((d) => d.effect == ToolEffect.read), isTrue);
+    expect(prototype.map((d) => d.toolId).toSet(), {
+      'prototype.list_pages', 'prototype.page_detail', 'prototype.add_feedback',
+    });
+    expect(prototype.singleWhere((d) => d.toolId == 'prototype.add_feedback').effect,
+      ToolEffect.write);
+    expect(prototype.every((d) => d.effect == ToolEffect.read || d.effect == ToolEffect.write), isTrue);
     expect(prototype.every((d) => d.description.isNotEmpty), isTrue);
   });
 }
