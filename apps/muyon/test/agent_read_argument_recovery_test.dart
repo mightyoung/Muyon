@@ -61,6 +61,82 @@ void main() {
     );
   }
   test(
+    'corrected read and manual detail share readable facts and raw receipts',
+    () async {
+      final f = await LoopFixture.open();
+      const facts = {
+        'price': '1200',
+        'currency': 'CNY',
+        'source': 'https://example.com/verified-quote',
+        'status': 'unknown',
+        'conflicts': ['税率待核对'],
+        'actual_receipts': [
+          {'id': 'saved-combined', 'status': 'saved'},
+        ],
+      };
+      f.addTool(
+        'invalid',
+        ToolEffect.read,
+        onCall: (_) async => ToolCallResult(
+          status: ToolCallStatus.invalidArguments,
+          summary: 'unknown field',
+        ),
+      );
+      f.addTool(
+        'corrected',
+        ToolEffect.read,
+        onCall: (_) async => ToolCallResult(
+          status: ToolCallStatus.succeeded,
+          summary: '实际报价查询结果',
+          data: facts,
+        ),
+      );
+      f.replies
+        ..add(
+          LoopReply.sse(
+            sseCalls([('bad', 'invalid', '{}'), ('oldwrite', 'write', '{}')]),
+          ),
+        )
+        ..add(LoopReply.sse(sseCalls([('fixed', 'corrected', '{}')])))
+        ..add(LoopReply.sse(sseText('查询完成 [r1]')));
+      final agent = f.agent();
+      final corrected = await f.run(agent, await f.start(agent, f.profile()));
+      expect(corrected.state, PersonalTaskState.succeeded);
+      expect(f.callsOf('write'), 0);
+      final toolMessage = (f.bodies[2]['messages'] as List).singleWhere(
+        (m) => m['tool_call_id'] == 'fixed',
+      );
+      expect(
+        jsonDecode(toolMessage['content'])['trustedToolResult']['data'],
+        facts,
+      );
+      final detail = await agent.startTool(
+        conversationId: corrected.conversationId,
+        toolId: 'corrected',
+      );
+      expect(detail.state, PersonalTaskState.succeeded);
+      final answer = f.repo.messages(corrected.conversationId).last.content;
+      for (final text in [
+        '价格：1200',
+        '来源：https://example.com/verified-quote',
+        '未知（unknown）',
+        '税率待核对',
+        'saved-combined',
+      ]) {
+        expect(answer, contains(text));
+      }
+      expect(answer, isNot(contains('"price":')));
+      expect(
+        f.tools
+            .history()
+            .where((r) => r.status == ToolCallStatus.succeeded)
+            .map((r) => r.data),
+        [facts, facts],
+      );
+      expect(f.receipts(), hasLength(3));
+    },
+  );
+  test(
     'manual read with invalid arguments ends failed without a model',
     () async {
       final f = await LoopFixture.open();

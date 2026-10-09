@@ -47,6 +47,7 @@ class _AskPageState extends State<AskPage> {
   final input = TextEditingController();
   final scroll = ScrollController();
   final messages = <_Message>[];
+  List<_Message> _savedMessages = [];
   var busy = false;
   AssistantCancellation? _cancellation;
   // Local history stays local unless the user opts in for this page session.
@@ -64,6 +65,8 @@ class _AskPageState extends State<AskPage> {
     super.initState();
     messages.addAll(readAskHistory(widget.state.setting(_historyKey)));
     _trimMessages();
+    _savedMessages = [...messages];
+    widget.state.addListener(_refreshHistory);
     if (messages.isNotEmpty) _scrollDown(animate: false);
     if (widget.resumeJobId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -87,8 +90,31 @@ class _AskPageState extends State<AskPage> {
     }
   }
 
-  void _saveHistory() =>
-      widget.state.saveSetting(_historyKey, writeAskHistory(messages));
+  void _refreshHistory() {
+    if (!mounted || busy) return;
+    final latest = readAskHistory(widget.state.setting(_historyKey));
+    setState(() {
+      messages
+        ..clear()
+        ..addAll(latest);
+      _trimMessages();
+      _savedMessages = [...messages];
+    });
+  }
+
+  void _saveHistory() {
+    final merged = mergeAskHistory(
+      _savedMessages,
+      messages,
+      readAskHistory(widget.state.setting(_historyKey)),
+    );
+    messages
+      ..clear()
+      ..addAll(merged);
+    _trimMessages();
+    widget.state.saveSetting(_historyKey, writeAskHistory(messages));
+    _savedMessages = [...messages];
+  }
 
   void _trimMessages() {
     if (messages.length > 100) {
@@ -105,6 +131,7 @@ class _AskPageState extends State<AskPage> {
           message.text,
           error: message.error,
           jobId: message.jobId,
+          id: message.id,
           appliedActions: message.appliedActions,
         );
       }
@@ -113,6 +140,7 @@ class _AskPageState extends State<AskPage> {
 
   @override
   void dispose() {
+    widget.state.removeListener(_refreshHistory);
     _cancellation?.cancel();
     input.dispose();
     scroll.dispose();
@@ -168,6 +196,7 @@ class _AskPageState extends State<AskPage> {
           m.text == question &&
           (resumeId == null || m.jobId == resumeId),
     );
+    final questionId = messages[questionIndex].id;
     _scrollDown(force: true);
     _Message reply;
     String? jobId;
@@ -232,7 +261,8 @@ class _AskPageState extends State<AskPage> {
         cancellation: cancellation,
         onCreated: (id) {
           jobId = id;
-          messages[questionIndex] = messages[questionIndex].withJob(id);
+          final index = messages.indexWhere((m) => m.id == questionId);
+          messages[index] = messages[index].withJob(id);
           _saveHistory();
           void validateSession() {
             widget.state.validateAssistantSession(id);
@@ -342,10 +372,12 @@ class _AskPageState extends State<AskPage> {
         '${reply.text}\n\n本机记录保存失败，请检查磁盘后重试：${friendlyError('$e')}',
         error: true,
         jobId: jobId,
+        id: reply.id,
         evidence: reply.evidence,
         appliedActions: reply.appliedActions,
       );
-      messages[messages.length - 1] = reply;
+      final index = messages.indexWhere((m) => m.id == reply.id);
+      messages[index] = reply;
     }
     if (historySaved && !reply.error && jobId != null) {
       widget.state.finishAiTask(jobId!);
@@ -567,9 +599,8 @@ class _AskPageState extends State<AskPage> {
                               maxLines:
                                   (constraints.maxHeight *
                                           0.25 /
-                                          (MediaQuery.textScalerOf(
-                                                context,
-                                              ).scale(15) *
+                                          (MediaQuery.textScalerOf(context)
+                                                  .scale(15) *
                                               1.5))
                                       .floor()
                                       .clamp(1, 5),
@@ -890,9 +921,8 @@ class _AskPageState extends State<AskPage> {
 
   Future<void> _openSource(String url) async {
     try {
-      await InAppBrowser.openWithSystemBrowser(
-        url: WebUri(url),
-      ).timeout(const Duration(seconds: 5));
+      await InAppBrowser.openWithSystemBrowser(url: WebUri(url))
+          .timeout(const Duration(seconds: 5));
     } on TimeoutException {
       // Some Windows plugin versions open the browser without completing IPC.
       if (mounted) toast(context, '已发送打开请求；也可复制来源链接');

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 import 'package:supplier_core/supplier_core.dart';
 
 /// Local conversation history, including the task and its actual tool receipts.
@@ -12,7 +14,12 @@ class AskHistoryMessage {
     this.appliedActions = const [],
     this.jobId,
     this.evidencePacket,
-  });
+    String? id,
+  }) : id =
+           id ??
+           'message-${DateTime.now().microsecondsSinceEpoch}-${_nextId++}';
+  static int _nextId = 0;
+  final String id;
   final bool fromUser, error;
   final String text;
   final AssistantAnswer? evidence;
@@ -35,6 +42,7 @@ class AskHistoryMessage {
     appliedActions: appliedActions,
     jobId: id,
     evidencePacket: evidencePacket,
+    id: this.id,
   );
 }
 
@@ -43,6 +51,7 @@ List<AskHistoryMessage> readAskHistory(String? saved) {
   try {
     final decoded = jsonDecode(saved ?? '[]');
     if (decoded is! List) return messages;
+    final legacyOccurrences = <String, int>{};
     for (final row in decoded.skip(
       decoded.length > 100 ? decoded.length - 100 : 0,
     )) {
@@ -81,6 +90,12 @@ List<AskHistoryMessage> readAskHistory(String? saved) {
       } catch (_) {
         // A damaged packet must not hide the original question or answer.
       }
+      final legacyKey = sha256.convert(utf8.encode(jsonEncode(row))).toString();
+      final occurrence = legacyOccurrences.update(
+        legacyKey,
+        (n) => n + 1,
+        ifAbsent: () => 0,
+      );
       messages.add(
         AskHistoryMessage(
           row[0] as bool,
@@ -90,6 +105,9 @@ List<AskHistoryMessage> readAskHistory(String? saved) {
           evidencePacket: evidence != null
               ? Map<String, Object?>.from(metadata['evidence'] as Map)
               : null,
+          id: metadata['message_id'] is String
+              ? metadata['message_id'] as String
+              : 'legacy-$legacyKey-$occurrence',
           jobId: metadata['job_id'] is String
               ? metadata['job_id'] as String
               : null,
@@ -118,8 +136,12 @@ String writeAskHistory(List<AskHistoryMessage> messages) => jsonEncode([
       m.fromUser,
       m.text,
       m.error,
-      if (m.jobId != null || m.evidence != null || m.appliedActions.isNotEmpty)
+      if (!m.id.startsWith('legacy-') ||
+          m.jobId != null ||
+          m.evidence != null ||
+          m.appliedActions.isNotEmpty)
         {
+          'message_id': m.id,
           if (m.jobId != null) 'job_id': m.jobId,
           if (m.evidence != null)
             'evidence': m.evidencePacket ?? m.evidence!.toJson(),
@@ -127,3 +149,39 @@ String writeAskHistory(List<AskHistoryMessage> messages) => jsonEncode([
         },
     ],
 ]);
+
+/// Merge only this writer's changed messages into the latest persisted history.
+/// A disposed page may finish after its replacement has taken a snapshot.
+List<AskHistoryMessage> mergeAskHistory(
+  List<AskHistoryMessage> base,
+  List<AskHistoryMessage> local,
+  List<AskHistoryMessage> latest,
+) {
+  final old = {
+    for (final m in base) m.id: writeAskHistory([m]),
+  };
+  final merged = [...latest];
+  for (final message in local) {
+    if (old[message.id] == writeAskHistory([message])) continue;
+    final index = merged.indexWhere((m) => m.id == message.id);
+    if (index >= 0) {
+      merged[index] = message;
+    } else {
+      final question = message.fromUser || message.jobId == null
+          ? -1
+          : merged.lastIndexWhere(
+              (m) => m.fromUser && m.jobId == message.jobId,
+            );
+      if (question < 0) {
+        merged.add(message);
+      } else {
+        var end = question + 1;
+        while (end < merged.length && !merged[end].fromUser) {
+          end++;
+        }
+        merged.insert(end, message);
+      }
+    }
+  }
+  return merged;
+}

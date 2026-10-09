@@ -123,6 +123,134 @@ void main() {
     },
   );
 
+  testWidgets(
+    'reopened page preserves prior cancellation history when sending again',
+    (tester) async {
+      final dir = Directory.systemTemp.createTempSync('ask_reopened');
+      final store = Store.open('${dir.path}/store.db', device: 'test');
+      final pending = Completer<Map<String, Object?>>();
+      final supplierId = store.save('supplier', {
+        for (final field in Supplier.fields) field: null,
+        'name': '重返证据供应商',
+        'aliases': <String>[],
+        'categories': <String>[],
+      });
+      var calls = 0;
+      final state = _State(
+        store,
+        dir,
+        LlmClient(
+          const LlmConfig(apiKey: 'fake'),
+          transport: (_) {
+            calls++;
+            if (calls == 1) {
+              return Future.value({
+                'choices': [
+                  {
+                    'message': {
+                      'role': 'assistant',
+                      'tool_calls': [
+                        {
+                          'id': 'before-leave',
+                          'type': 'function',
+                          'function': {
+                            'name': 'get',
+                            'arguments': jsonEncode({
+                              'type': 'supplier',
+                              'id': supplierId,
+                            }),
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              });
+            }
+            if (calls == 2) return pending.future;
+            return Future.value({
+              'choices': [
+                {
+                  'message': {'role': 'assistant', 'content': '第二个完整回答'},
+                },
+              ],
+            });
+          },
+        ),
+      );
+      addTearDown(() {
+        state.dispose();
+        store.close();
+        dir.deleteSync(recursive: true);
+      });
+      Future<void> open(String key) => tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AskPage(key: ValueKey(key), state: state),
+          ),
+        ),
+      );
+      await open('first');
+      await tester.enterText(find.byType(TextField), '第一个待暂停问题');
+      await tester.pump();
+      await tester.tap(find.byTooltip('发送'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(calls, 2);
+      final firstJob = state.aiTasks.single.id;
+      await open('second');
+      await tester.pumpAndSettle();
+      final cancelled = readAskHistory(_diskHistory(dir))
+          .singleWhere((m) => !m.fromUser && m.jobId == firstJob);
+      expect(cancelled.error, isTrue);
+      expect(
+        cancelled.evidence!.observations.single.result,
+        contains('重返证据供应商'),
+      );
+      expect(find.text('查询依据（1 次）'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), '第二个新问题');
+      await tester.pump();
+      await tester.tap(find.byTooltip('发送'));
+      await tester.pumpAndSettle();
+      final after = readAskHistory(_diskHistory(dir));
+      expect(after.where((m) => m.fromUser).map((m) => m.text), [
+        '第一个待暂停问题',
+        '第二个新问题',
+      ]);
+      expect(
+        after.where((m) => !m.fromUser && m.jobId == firstJob),
+        hasLength(1),
+      );
+      expect(
+        after.singleWhere((m) => !m.fromUser && m.jobId == firstJob).text,
+        cancelled.text,
+      );
+      final secondQuestion = after.singleWhere((m) => m.text == '第二个新问题');
+      expect(
+        after.singleWhere((m) => m.text == '第二个完整回答').jobId,
+        secondQuestion.jobId,
+      );
+      expect(after.singleWhere((m) => m.text == '第二个完整回答').evidence, isNotNull);
+      expect(
+        after
+            .singleWhere((m) => !m.fromUser && m.jobId == firstJob)
+            .evidence!
+            .toJson(),
+        cancelled.evidence!.toJson(),
+      );
+      expect(state.aiTask(firstJob).status, 'paused');
+      pending.complete({
+        'choices': [
+          {
+            'message': {'role': 'assistant', 'content': '迟到回答'},
+          },
+        ],
+      });
+      await tester.pumpWidget(const SizedBox());
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('failed job binding pauses before any model call', (
     tester,
   ) async {
