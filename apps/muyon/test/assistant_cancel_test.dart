@@ -248,6 +248,8 @@ void main() {
           case PersonalTaskState.succeeded:
             expect(receipt, ToolCallStatus.succeeded);
             expect(answers(c.id), 1);
+            expect(repo.messages(c.id).singleWhere((m) => m.role == 'assistant').content, contains('value：42'));
+            expect(tools.history().first.data, {'value': 42});
           case PersonalTaskState.interrupted:
             expect(receipt, ToolCallStatus.interrupted);
             expect(answers(c.id), 0);

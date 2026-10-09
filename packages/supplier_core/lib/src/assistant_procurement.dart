@@ -1002,7 +1002,7 @@ class AssistantProcurementTools implements AssistantToolset {
         stale = true;
       }
       lines.add(
-        _canonical({
+        assistantReadableSummary({
           'candidate_id': c['id'],
           'facts': row.facts,
           'source': source.url,
@@ -1022,10 +1022,10 @@ class AssistantProcurementTools implements AssistantToolset {
         if (_canonical(_bindings(itemId)) != _canonical(stored['bindings']))
           throw const FormatException('项目引用已改变');
         final ids = (stored['candidate_ids'] as List).cast<String>();
-        lines.add(_canonical(_compare(ids, itemId)));
+        lines.add(assistantReadableSummary(_compare(ids, itemId)));
       } catch (_) {
         lines.add(
-          _canonical({
+          assistantReadableSummary({
             'kind': 'comparison',
             'status': 'stale_comparison',
             'as_of': _today,
@@ -1035,7 +1035,7 @@ class AssistantProcurementTools implements AssistantToolset {
       }
     }
     for (final receipt in appliedActions)
-      lines.add('已保存：${_canonical(receipt)}');
+      lines.add('已保存（实际回执）：\n${assistantReadableSummary(receipt)}');
     if (candidates.isEmpty) lines.add('尚无可信来源候选，不能确认物料、价格或资格。');
     lines.add('支持范围：明确关联产品行、严格数字字典条件和明确国别；复杂条款、未标示单位/税运/有效期及网页真实性须人工核验。');
     return lines.join('\n\n');

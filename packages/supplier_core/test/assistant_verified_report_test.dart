@@ -26,6 +26,46 @@ AssistantAnswer answer(String prose, List<AssistantObservation> observations) =>
     );
 
 void main() {
+  test(
+    'verified facts use readable labels and preserve evidence in export',
+    () {
+      final raw = answer('invented', [
+        observation('compare_quotes', {
+          'price': '1200',
+          'currency': 'CNY',
+          'source': 'https://example.com/quote',
+          'status': 'unknown',
+          'conflicts': ['税率不一致'],
+          'actual_receipts': [
+            {'status': 'saved', 'id': 'receipt-1'},
+          ],
+        }),
+      ]);
+      final shown = raw.verifiedReport();
+      expect(shown.text, contains('价格：1200'));
+      expect(shown.text, contains('来源：https://example.com/quote'));
+      expect(shown.text, contains('未知（unknown）'));
+      expect(shown.text, contains('税率不一致'));
+      expect(shown.text, contains('receipt-1'));
+      expect(shown.text, isNot(contains('"price":')));
+      expect(shown.toJson()['observations'], raw.toJson()['observations']);
+    },
+  );
+
+  test('long ordinary facts retain trailing conflicts and actual receipts', () {
+    final raw = answer('', [
+      observation('query', {
+        'notes': 'x' * 2200,
+        'conflicts': ['末尾冲突'],
+        'actual_receipts': [
+          {'id': 'trailing-receipt'},
+        ],
+      }),
+    ]);
+    expect(raw.verifiedReport().text, contains('末尾冲突'));
+    expect(raw.verifiedReport().text, contains('trailing-receipt'));
+  });
+
   test('unqueried fabricated procurement prose is not displayed', () {
     final raw = answer('绝对国产的自造型号FAKE-123，价格999元，完全满足', []);
     final report = raw.verifiedReport();
