@@ -131,3 +131,16 @@ C-TOOL 用捕获 registrar 检查 spec、真实 registry 检查 schema/重名/�
 既有规划超时测试含50ms固定等待，基线到36a516源码未改；本片不修改它、不推断根因，
 保留该失败证据并交父任务/原执行者处理。Linux macOS字体golden跳过保持原结论。
 本地Flutter/Dart不可用；未把本地未执行的analyze/测试记为通过。未改production bootstrap。
+
+## 基线更新（保留历史）
+
+经父任务通知，正常合并已发布 develop
+`c98c09274d4f903f5760f6c415801bd4be014c56`，其中包含 `b411713` 的规划超时取消同步修复；
+不重写既有提交、不强推、不合入 develop。既有两次规划超时失败保留为历史证据，
+不以其他运行成功覆盖。更新后的精确 push 与 PR 组合 CI 结果随后记录在 Draft PR #7。
+
+再次静态核对：ToolRegistry.prepare 仍先调用 resolveScope 再过滤 dataModuleIds；
+ScopeResolver.resolve 仍准备各 source，模块激活仍记录 ready/failed，importPipeline 恢复、
+冲突通知与 research afterActivate 协调仍可产生条件性业务效果。隔离 handler 无写入
+不等于共享 prepare 全链路无写入；已有最小复现断言保持不变。生产 bootstrap 继续不登记。
+本次没有更改工具实现或测试、扩展范围/权限/模型端点，也未关闭必要恢复流程。
