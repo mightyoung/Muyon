@@ -50,16 +50,14 @@ jobs:
           sudo apt-get install --no-install-recommends -y libegl1 libgles2 libx11-6
           dpkg-query -W libegl1 libgles2 libx11-6 libglvnd0
           ldd "$TASK_RIVE"
-      - name: Read bundled authoring documentation and mesh sample
+      - name: Read input-driven blend and keyframe contracts
         shell: bash
         run: |
           set -euo pipefail
           export RIVE_DOCS_DIR="$TASK_PROBE/home/versions/1.5.1/docs"
-          "$TASK_RIVE" docs rigging
-          "$TASK_RIVE" docs assets
-          "$TASK_RIVE" docs format
-          cat "$TASK_PROBE/home/versions/1.5.1/samples/mesh_skin_as/scene.rml"
-          "$TASK_RIVE" schema Weight
-          "$TASK_RIVE" schema KeyedObject
-          "$TASK_RIVE" schema KeyedProperty
+          "$TASK_RIVE" docs easing
+          "$TASK_RIVE" docs state-machines
           "$TASK_RIVE" schema KeyFrameDouble
+          "$TASK_RIVE" schema BlendState1D
+          "$TASK_RIVE" schema BlendAnimation1D
+          "$TASK_RIVE" schema Weight
