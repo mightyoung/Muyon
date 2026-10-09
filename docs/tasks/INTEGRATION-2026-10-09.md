@@ -111,3 +111,9 @@ completed/success。候选仅以下两项，T-3/AIUI-4明确不纳入：
 两项仅新增文件，无冲突。F3a为26计算行为+4源变异共30新增测试，不接runtime。
 F5a仅草案/夹具归档，正式schema未采纳，stream/2与F5b/c必须另行决定；不以合入扩大权限。
 精确组合CI成功后再重核develop并正常推送，继续追踪精确发布CI终态。
+
+第三轮组合 `9c8ce33859ba8ba1d4f72ab249fd58dc3b8a1bfb` 的
+[CI37981869411](https://github.com/mightyoung/Muyon/actions/runs/37981869411)
+completed/success：analyze8/8、test8/8 suites、module_api68、muyon_ui323~152、host1314~3。
+发布前再次fetch/ls-remote确认develop仍为0466f113完整基线、main未变。
+收尾仅摘要和索引状态，产品/脚本/夹具树与已测组合一致。最终发布SHA与CI终态由执行回报核对。
