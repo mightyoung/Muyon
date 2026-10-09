@@ -2,6 +2,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
 import '../platform/tool_registry.dart';
+import '../platform/grants/host_effect_intent.dart';
 import '../services/models/tool_names.dart';
 import 'module_host.dart';
 
@@ -131,6 +132,45 @@ class HostToolRegistrar implements ToolRegistrar {
       handler: _wrap(handler),
     );
     _registered.add(id);
+  }
+
+  /// Pure adaptation of declarations already owned by the trusted host.
+  void registerHostTool({
+    required String providerId,
+    required ToolDescriptor descriptor,
+    required Future<ToolCallResult> Function(ToolCallContext) handler,
+    Set<AssistantScopeKind> supportedScopes = const {
+      ...AssistantScopeKind.values,
+    },
+    Set<String>? dataModuleIds,
+    Future<void> Function(ResolvedAssistantScope, ToolCallResult)?
+    validateResult,
+    void Function(ToolCallRequest)? preflight,
+    HostEffectIntent? Function(ToolCallRequest, ResolvedAssistantScope)?
+    effectIntent,
+    bool available = true,
+    String? unavailableReason,
+  }) {
+    if (providerId != moduleId || descriptor.moduleId != moduleId) {
+      throw ArgumentError('Host adapter cannot register another module');
+    }
+    final name = descriptor.toolId.substring(moduleId.length + 1);
+    if (_claim(name) != descriptor.toolId) {
+      throw ArgumentError('Invalid host adapter tool id');
+    }
+    _registry.register(
+      providerId: providerId,
+      descriptor: descriptor,
+      supportedScopes: supportedScopes,
+      dataModuleIds: dataModuleIds,
+      validateResult: validateResult,
+      preflight: preflight,
+      effectIntent: effectIntent,
+      available: available,
+      unavailableReason: unavailableReason,
+      handler: _wrap((context) => handler(context.call)),
+    );
+    _registered.add(descriptor.toolId);
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:supplier_core/supplier_core.dart';
 
 import '../app/bootstrap.dart';
 import 'inquiry_write_tools.dart';
+import 'host_tool_registration.dart';
 import 'scope_resolver.dart';
 import 'prototype_tools.dart';
 
@@ -42,16 +43,86 @@ Future<ResolvedAssistantScope> resolveAssistantScope(
   AssistantScope scope,
 ) => host.scopeResolver.resolve(scope);
 
+/// Compatibility entry for callers of the original host catalog.
 void registerBusinessTools(MuyonHost host) {
-  final registry = host.tools;
-  registerInquiryWriteTools(host);
+  registerInquiryTools(host);
+  registerNonInquiryBusinessTools(host);
+}
+
+/// Inquiry is declared by its V2 adapter in production.
+void registerNonInquiryBusinessTools(MuyonHost host) {
   registerPrototypeTools(host);
+  host.tools.register(
+    providerId: 'research',
+    descriptor: ToolDescriptor(
+      toolId: 'research.objects',
+      moduleId: 'research',
+      effect: ToolEffect.read,
+      description:
+          '在本次范围内检索科研对象：项目、文档和研究条目，按标题子串过滤，最多返回 50 条引用与标题。'
+          '只读取本机科研库，不修改数据，也不发送到设备外。',
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'query': {'type': 'string'},
+        },
+        'additionalProperties': false,
+      },
+    ),
+    handler: (call) async {
+      final query = (call.request.parameters['query'] as String? ?? '')
+          .toLowerCase();
+      final rows = <Map<String, Object?>>[];
+      final refs = <ObjectRef>[];
+      for (final ref in call.resolvedScope.objects.where(
+        (r) => r.moduleId == 'research',
+      )) {
+        final store = host.research!.store;
+        final String title;
+        if (ref.objectType == 'project') {
+          title = store
+              .projects()
+              .where((p) => p.id == ref.objectId)
+              .first
+              .title;
+        } else if (ref.objectType == 'document') {
+          title = store
+              .documents(ref.nativeProjectId!)
+              .where((d) => d.id == ref.objectId)
+              .first
+              .relativePath;
+        } else {
+          title = store
+              .entries(ref.nativeProjectId!)
+              .where((e) => e.id == ref.objectId)
+              .first
+              .title;
+        }
+        if (query.isNotEmpty && !title.toLowerCase().contains(query)) continue;
+        refs.add(ref);
+        rows.add({'ref': ref.toJson(), 'title': title});
+        if (rows.length == 50) break;
+      }
+      return ToolCallResult(
+        status: ToolCallStatus.succeeded,
+        summary: '找到 ${rows.length} 个科研对象',
+        data: {'objects': rows, 'limit': 50},
+        objectRefs: refs,
+      );
+    },
+  );
+}
+
+/// Existing inquiry declarations, shared by the compatibility and V2 paths.
+void registerInquiryTools(MuyonHost host, {HostToolRegistration? register}) {
+  final registerTool = register ?? host.tools.register;
+  registerInquiryWriteTools(host, register: registerTool);
   // Reuse the mature application's actual query, comparison, budget and
   // matching rules, rather than rebuilding simplified calculations.
   for (final definition in agentTools) {
     final function = definition['function'] as Map;
     final name = function['name'] as String;
-    registry.register(
+    registerTool(
       providerId: 'inquiry',
       descriptor: ToolDescriptor(
         toolId: 'inquiry.$name',
@@ -151,66 +222,7 @@ void registerBusinessTools(MuyonHost host) {
       },
     );
   }
-  registry.register(
-    providerId: 'research',
-    descriptor: ToolDescriptor(
-      toolId: 'research.objects',
-      moduleId: 'research',
-      effect: ToolEffect.read,
-      description:
-          '在本次范围内检索科研对象：项目、文档和研究条目，按标题子串过滤，最多返回 50 条引用与标题。'
-          '只读取本机科研库，不修改数据，也不发送到设备外。',
-      parameterSchema: {
-        'type': 'object',
-        'properties': {
-          'query': {'type': 'string'},
-        },
-        'additionalProperties': false,
-      },
-    ),
-    handler: (call) async {
-      final query = (call.request.parameters['query'] as String? ?? '')
-          .toLowerCase();
-      final rows = <Map<String, Object?>>[];
-      final refs = <ObjectRef>[];
-      for (final ref in call.resolvedScope.objects.where(
-        (r) => r.moduleId == 'research',
-      )) {
-        final store = host.research!.store;
-        final String title;
-        if (ref.objectType == 'project') {
-          title = store
-              .projects()
-              .where((p) => p.id == ref.objectId)
-              .first
-              .title;
-        } else if (ref.objectType == 'document') {
-          title = store
-              .documents(ref.nativeProjectId!)
-              .where((d) => d.id == ref.objectId)
-              .first
-              .relativePath;
-        } else {
-          title = store
-              .entries(ref.nativeProjectId!)
-              .where((e) => e.id == ref.objectId)
-              .first
-              .title;
-        }
-        if (query.isNotEmpty && !title.toLowerCase().contains(query)) continue;
-        refs.add(ref);
-        rows.add({'ref': ref.toJson(), 'title': title});
-        if (rows.length == 50) break;
-      }
-      return ToolCallResult(
-        status: ToolCallStatus.succeeded,
-        summary: '找到 ${rows.length} 个科研对象',
-        data: {'objects': rows, 'limit': 50},
-        objectRefs: refs,
-      );
-    },
-  );
-  registry.register(
+  registerTool(
     providerId: 'inquiry',
     descriptor: ToolDescriptor(
       toolId: 'inquiry.object',

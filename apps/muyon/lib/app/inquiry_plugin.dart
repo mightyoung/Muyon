@@ -169,6 +169,32 @@ class InquiryPlugin {
     final database = await storage.open('inquiry', schema);
     final jobsDatabase = await storage.open('inquiry_jobs', jobsSchema);
     final hubDatabase = await storage.open('inquiry_hub', hubSchema);
+    return attach(
+      database: database,
+      jobsDatabase: jobsDatabase,
+      hubDatabase: hubDatabase,
+      filesRoot: p.join(storage.rootPath, 'modules', 'inquiry', 'files'),
+      deviceId: deviceId,
+      modelProfiles: modelProfiles,
+      modelGateway: modelGateway,
+      tools: tools,
+      approveModelRequest: approveModelRequest,
+      modelSecrets: modelSecrets,
+    );
+  }
+
+  static Future<InquiryPlugin> attach({
+    required ManagedConnection database,
+    required ManagedConnection jobsDatabase,
+    required ManagedConnection hubDatabase,
+    required String filesRoot,
+    required String deviceId,
+    required ProfileRepository modelProfiles,
+    required OpenAiModelGateway modelGateway,
+    ToolRegistry? tools,
+    InquiryModelApproval? approveModelRequest,
+    MethodChannelSecretStore modelSecrets = const MethodChannelSecretStore(),
+  }) async {
     final hubJournal = HubPublicationJournal(
       hubDatabase.raw,
       write: hubDatabase.write,
@@ -182,9 +208,7 @@ class InquiryPlugin {
       backgroundExecutor: <T>(action) =>
           database.exclusiveAsync((_) => action()),
     );
-    final root = Directory(
-      p.join(storage.rootPath, 'modules', 'inquiry', 'files'),
-    );
+    final root = Directory(filesRoot);
     root.createSync(recursive: true);
     final settingsFile = File(p.join(root.path, 'settings.json'));
     final settings = settingsFile.existsSync()
@@ -215,7 +239,9 @@ class InquiryPlugin {
     return InquiryPlugin._(runtime, jobs, webAuthority, hubAuthority);
   }
 
-  Future<void> close() async {
+  Future<void>? _closing;
+  Future<void> close() => _closing ??= _close();
+  Future<void> _close() async {
     _webAuthority?.disable();
     _hubAuthority?.disable();
     await runtime.close();
