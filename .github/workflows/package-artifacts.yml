@@ -1,0 +1,109 @@
+# Manual internal packages only. Do not dispatch before storage budget approval.
+name: package-artifacts
+run-name: Package ${{ inputs.platform }} at ${{ inputs.target_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: 'Reviewed source commit (full lowercase 40-character SHA)'
+        required: true
+        type: string
+      platform:
+        description: 'One platform only (internal validation, not a release)'
+        required: true
+        type: choice
+        options:
+          - android
+          - macos
+          - windows
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ${{ fromJSON('{"android":"ubuntu-24.04","macos":"macos-15","windows":"windows-2022"}')[inputs.platform] }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      TARGET_SHA: ${{ inputs.target_sha }}
+      PACKAGE_PLATFORM: ${{ inputs.platform }}
+      WORKFLOW_SHA: ${{ github.workflow_sha }}
+      WORKFLOW_REF: ${{ github.workflow_ref }}
+    steps:
+      - name: Validate manual inputs
+        run: |
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Full lowercase commit SHA required'; exit 1; }
+          case "$PACKAGE_PLATFORM" in android|macos|windows) ;; *) exit 1 ;; esac
+
+      # Packaging code comes from the workflow commit, independently of source.
+      - name: Checkout packaging tools
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: workflow
+          persist-credentials: false
+
+      - name: Checkout exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.target_sha }}
+          path: source
+          persist-credentials: false
+
+      - name: Verify source and workflow HEAD
+        run: |
+          test "$(git -C source rev-parse HEAD)" = "$TARGET_SHA"
+          test "$(git -C workflow rev-parse HEAD)" = "$WORKFLOW_SHA"
+          test -d "source/apps/muyon/$PACKAGE_PLATFORM"
+
+      - name: Set up Java for Android
+        if: inputs.platform == 'android'
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up pinned Flutter (no persistent cache)
+        uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e # v2.21.0
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: false
+
+      - name: Resolve locked workspace dependencies
+        working-directory: source
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build Android internal APK (release mode, debug key)
+        if: inputs.platform == 'android'
+        working-directory: source/apps/muyon
+        run: flutter build apk --release --no-pub
+
+      - name: Build macOS app (project ad-hoc signing, no notarization)
+        if: inputs.platform == 'macos'
+        working-directory: source/apps/muyon
+        run: flutter build macos --release --no-pub
+
+      - name: Build Windows complete Release bundle (unsigned)
+        if: inputs.platform == 'windows'
+        working-directory: source/apps/muyon
+        run: flutter build windows --release --no-pub
+
+      - name: Package and record provenance (fail on missing output)
+        run: python workflow/scripts/package_artifacts/package.py
+
+      - name: Keep only package and manifest for three days
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: muyon-${{ inputs.platform }}-${{ inputs.target_sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            packages/muyon-*
+            packages/manifest.json
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+          include-hidden-files: false
