@@ -132,3 +132,9 @@ completed/success：analyze8/8、test8/8 suites、module_api68、muyon_ui323~152
 应改关闭；新增用例真实RED检出窄route回宽pane缺陷，最小viewport订阅修复后source全量
 CI37991515411 success、定向37991523315 58/58。正常组合无冲突，准备运行精确组合门禁。
 取消b411保持；F4c/stream2未授权，T3继续不纳入。本轮旧暂缓记录保留为历史。
+
+第四轮精确组合 `d54e08a65754f029285838c9c6bde4f4d33e832a` 的
+[CI37993094024](https://github.com/mightyoung/Muyon/actions/runs/37993094024) completed/success：
+analyze8/8、test8/8、module_api68、UI323~152、host1347~3。发布前fetch/ls-remote重核
+基线develop仍为6e40a795完整SHA，main未变；收尾仅复审历史措辞/索引/门禁摘要，
+产品与脚本树不变。最终发布SHA与精确CI终态由执行回报核对。

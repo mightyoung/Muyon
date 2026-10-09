@@ -1,8 +1,8 @@
 # AIUI-4 F4a/F4b 集成复核（补验已关闭）
 
-冻结 `fc02783ad078fd0cd90f577bb7cfe129e22f19d9`，基线 develop
+首轮冻结 `fc02783ad078fd0cd90f577bb7cfe129e22f19d9`，基线 develop
 `6e40a7956f2deb3ff53ee0397ae7cb4e1065c83d`。两位非作者独立只读复核32文件，
-无确定运行阻断；有一项本轮应改测试缺口，关闭前不推组合、不合develop。
+无确定运行阻断；首轮有一项应改测试缺口，当时未推组合或合develop；最终关闭见文末。
 
 ## 首轮应改：200%活动工作区验收（历史，已关闭）
 
@@ -59,3 +59,8 @@ completed/success：run head精确140068，实际PRmerge b2744ae93701cfcd135925c
 [定向37991523315](https://github.com/mightyoung/Muyon/actions/runs/37991523315)为review56d3441
 组合运行，源apps/packages与任务相同、仅临时runner不同，实际58项通过。
 支持进入唯一集成组合门禁，成功才发布；F4c、同session新版plan热替换及设备/golden限制保持。
+
+
+完整组合 `d54e08a65754f029285838c9c6bde4f4d33e832a` 的
+[CI37993094024](https://github.com/mightyoung/Muyon/actions/runs/37993094024) completed/success：
+analyze8/8、test8/8、module_api68、UI323~152、host1347~3。最终发布按精确SHA另核CI终态。
