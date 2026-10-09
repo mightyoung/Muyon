@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
+import 'package:supplier_core/supplier_core.dart' show assistantReadableSummary;
 
 import '../platform/foundation_repository.dart';
 import '../platform/tool_registry.dart';
@@ -897,7 +898,9 @@ class AgentDispatch {
       await ctx.finish(
         updated,
         results
-            .map((r) => '${r.summary}$late\n${jsonEncode(r.data)}')
+            .map(
+              (r) => '${r.summary}$late\n${assistantReadableSummary(r.data)}',
+            )
             .join('\n\n'),
         refs,
       );
