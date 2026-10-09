@@ -24,6 +24,7 @@
 
 - descriptor同值异对象或跨registry复制必须不认领：Task 2/P3。
 - availability false→true期间generation变化不能让等待中的prepare成功：Task 1/P4。
+- 已认领lane丢失须在默认resolver前拒绝，pending intent保持未恢复：Task 1/P4-R、Task 3。
 - pending导入中存在已提交receipt，元数据不恢复而正常业务恢复且不重复commit：Task 3/B1。
 - receipt回放返回旧快照，新查询需要新invocation：Task 3/P5。
 - 上层task事件/host.open写入与工具调用边界分开计数：Task 3/P1/P5。
@@ -35,16 +36,27 @@
 **Files:** Modify `apps/muyon/lib/platform/tool_registry.dart`；Test
 `apps/muyon/test/platform_metadata_scope_test.dart`、`apps/muyon/test/tool_registry_test.dart`。
 
-**Interfaces:** Produces `HostScopeResolution(identityKey:, scope:)`、
+**Interfaces:** Produces `HostScopeResolution(identityKey:, scope:, requireCurrent:)`、
 `HostToolScopeResolver = Future<HostScopeResolution?> Function(ToolRegistry, RegisteredToolInfo, ToolCallRequest)`，
 以及构造参数 `HostToolScopeResolver? hostToolScopeResolver`；消耗现有默认resolveScope。
+私有接口 `_prepare(ToolCallRequest request, {String? requiredScopeResolutionKey})`、
+`_reprepare(PreparedToolCall prepared)`，以及prepared私有 `_scopeResolutionKey` 固定认领lane；
+公开prepare不接受模型/调用者自报lane。对prepared的dispatch/审批重核均通过_reprepare。
+认领结果requireCurrent纯内存闭包在回调await后、重核开始及dispatch原checkAuthorization检查点执行，
+prepared保存该闭包；宿主不可用抛host_unavailable，不能用null退回resolver。
 
 - [ ] 写P4、P3坏回调和B3 identity兼容红灯：错误key/refs/scope/effect拒绝，null保持旧identity；
   Completer停点核generation双切换、policy改变、受测registry关闭、宿主不可用和取消的拒绝。
+- [ ] 写P4-R红灯：首次认领后撤binding，pending intent夹具的再次prepare在默认resolver前拒绝；
+  resolver/activate/recover调用0、解析阶段total_changes增量0，正常业务首次fallback控制仍恢复。
+  dispatch二次重核拒绝按invoke failed结果断言；首次prepare以及首次invoke在prepare阶段遇
+  host_unavailable按异常断言（基线invoke只特殊处理unavailable）；加registry可用但宿主isAvailable=false反例。
 - [ ] 在apps/muyon运行 `flutter test --no-pub test/platform_metadata_scope_test.dart test/tool_registry_test.dart`，
   确认失败为缺失新接口/行为，不能把环境失败作RED。
 - [ ] 在现有preflight后调用可选回调；非null验证受限shape、认领generation快照，
-  identity仅该分支追加scopeResolution。原fallback/授权/再次prepare/审计不变，不新增schema迁移。
+  identity仅该分支追加scopeResolution；prepared保存私有lane，重核先检查认领未丢失再允许解析，
+  丢失报scope_resolution_changed且不调用fallback。普通首次未认领fallback、授权、审计不变，
+  dispatch/approve/approveWithGrant重核调用_reprepare，不新增schema迁移。
 - [ ] 同命令转绿，并 `flutter analyze --no-pub`；摘要记录实际结果。
 - [ ] 提交 `feat(t-3): isolate host metadata scope resolution`，原始日志不入库。
 
@@ -61,7 +73,8 @@ Test `apps/muyon/test/platform_metadata_scope_test.dart`。
   第五ID、伪造参数均不命中；窄scope/类别禁用/schema在解析前拒绝。
 - [ ] 运行 `flutter test --no-pub test/platform_metadata_scope_test.dart test/platform_tools_test.dart` 取得有效RED。
 - [ ] 装配成功封存后捕获四个实际descriptor对象生成私有binding；只按规格多重条件认领，
-  返回固定key/global空refs，不暴露按ID扫描任意登记项的公共binding构造。
+  对已识别受信工具检查isAvailable，false抛host_unavailable；返回固定key/global空refs及
+  requireCurrent纯内存复核闭包，不暴露按ID扫描任意登记项的公共binding构造。
 - [ ] 同命令转绿，确认原19测试及旧共享prepare副作用复现保持；`flutter analyze --no-pub`。
 - [ ] 提交 `feat(t-3): bind metadata scope to trusted host registrations`；bootstrap不登记。
 
@@ -75,9 +88,14 @@ Test `apps/muyon/test/platform_metadata_scope_test.dart`。
 按规格夹具装配，不改late final host.tools/scopeResolver，不声称生产registry端到端证明。
 统一关闭顺序为isAvailable=false→受测registry.close→host.close，不以共享DB异常替代撤权断言。
 
-- [ ] 写P1/P5/B1/B2红灯：隔离前控制夹具明确可触发prepare写入；pending+模块receipt/冲突/科研包
+- [ ] 写P1/P4-R/P5/B1/B2红灯：隔离前控制夹具明确可触发prepare写入；pending+模块receipt/冲突/科研包
   是直接预置的确定持久状态，新夹具无sleep/网络（不照搬accepted_research的网络setup）。
-  元数据先查询不恢复，正常业务后查询恢复且commit计数0；保留反例。
+  元数据先查询不恢复，正常业务后查询import_intents pending→complete，已有模块receipt不变、
+  commitImport计数0；保留反例。
+  lane撤销后的拒绝路径在默认resolver前结束；阶段total_changes=0与允许的工具收据审计分开核对。
+  按P1逐事务断言：成功prepare/首次拒绝0，成功新invoke仅running INSERT1+terminal UPDATE1，
+  已完成回放0，二次prepare拒绝仅原running/failed收据两行写入且解析段0；
+  事务表差异和模块DB计数同时核对，写入后改回值必须失败，不只比最终快照。
 - [ ] 运行 `flutter test --no-pub test/platform_metadata_scope_test.dart`，确认测试区分隔离与旧共享路径。
 - [ ] 完成同宿主测试装配和快照、spy、停点；若暴露机制问题仅回Task1/2最小修复再复审，
   不删除恢复、不放宽副作用断言、不修改已有测试挑绿。
