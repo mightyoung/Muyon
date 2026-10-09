@@ -781,7 +781,9 @@ class _ResearchScopeSession implements ModuleSession {
     if (_disposed) throw StateError('Session disposed');
     final project = ref.nativeProjectId;
     if (ref.moduleId != 'research' || project == null ||
-        !runtime.store.projects().any((p) => p.id == project)) return null;
+        !runtime.store.projects().any((p) => p.id == project)) {
+      return null;
+    }
     final session = await runtime.openSession(WorkspaceBinding(
       workspaceId: '', moduleId: 'research', nativeProjectId: project,
     ));

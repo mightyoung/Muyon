@@ -13,7 +13,9 @@
   success：analyze 8/8、test 8/8；只证明该任务书提交与基线。
 - 首实现 `2121ccfc9438208e89c8c2e0fe796a7c7f97d377` 已推送且核远端 SHA；
   [CI 37945525401](https://github.com/mightyoung/Muyon/actions/runs/37945525401)
-  当前仍 in_progress，不能声称实现测试通过。
+  因后续修复推送而 cancelled；日志显示科研 analyzer 一个缺 braces 的 info，
+  已修复。module_api/UI/prototype/research/supplier_core 五套测试成功，
+  host 套件未完成；不能声称首实现 CI 通过。
 - 最新 fetch develop `7559f23087754402f530b77672aa0081510e1b16`：
   GROK-6 草案/审查与 agent_dispatch 二次 effect 检查已合。
   本任务未修改 agent_dispatch，也未将新 develop 合入任务分支。
@@ -21,6 +23,10 @@
   本地 Flutter/Dart 缺失；官方 storage / api.github.com CONNECT 403；
   gh token 无效。本地 `scripts/ci.sh` 失败于 flutter not found / pub get。
   不绕过 Flutter 下载限制，原始日志只留 /tmp。
+
+后续边界修复 `cf19dbc54a7d1a246b9f17d9bea8fcdded6f0bec` 已推送核 SHA；
+CI 37947919276 将由本次 analyzer 修复提交取代。最终 exact SHA 与 CI 终态
+必须在父任务集成前重新核实。
 
 ## 交付边界
 
