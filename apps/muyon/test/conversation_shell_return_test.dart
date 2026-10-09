@@ -10,6 +10,7 @@ import 'package:muyon/platform/ui_navigation_anchors.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
 import 'support/ui_navigation_fixture.dart';
+import 'support/conversation_workspace_fixture.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon/workspace/workspace_repository.dart';
@@ -17,6 +18,57 @@ import 'package:muyon_module_api/muyon_module_api.dart' show AssistantScope;
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../../../packages/muyon_ui/test/dynamic_fixtures.dart';
+
+// Unmount every route before closing stream/SQLite owners. A failed assertion
+// must not leave a plugin page subscribed in the widget binding's fake zone.
+Future<void> _unmountAndDrain(WidgetTester tester) async {
+  final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
+  if (workspaces.isNotEmpty) {
+    final navigator = Navigator.of(workspaces.first);
+    // Completing the pushed route also completes UiReferenceNavigation's
+    // finally/dispose path; discarding a Navigator alone need not pop its route.
+    await tester.runAsync(() async { navigator.popUntil((route) => route.isFirst); });
+    await tester.pumpAndSettle();
+  }
+  await tester.pumpWidget(const SizedBox());
+  await tester.pumpAndSettle();
+  await tester.runAsync(() => Future<void>(() {}));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _closeAndDrain(WidgetTester tester, Future<void> Function() close) async {
+  var completed = false;
+  Object? failure;
+  StackTrace? failureStack;
+  // Start close on the real loop, but keep pumping the widget binding while
+  // queues/stream disposers previously created in its fake zone finish.
+  await tester.runAsync(() async {
+    close().then<void>((_) { completed = true; }, onError: (Object error, StackTrace stack) {
+      failure = error; failureStack = stack; completed = true;
+    });
+  });
+  for (var turn = 0; turn < 2000 && !completed; turn++) {
+    await tester.runAsync(() => Future<void>(() {}));
+    await tester.pump();
+  }
+  expect(completed, isTrue, reason: 'Host/SQLite close did not finish after draining its pending operations');
+  if (failure != null) Error.throwWithStackTrace(failure!, failureStack!);
+}
+
+Future<StoredUiWorkspace> _committedProjection(
+  WidgetTester tester,
+  HostUiWorkspaceStore store,
+  String surfaceId,
+  bool Function(StoredUiWorkspace) expected,
+) async {
+  for (var turn = 0; turn < 1000; turn++) {
+    await tester.runAsync(() => Future<void>(() {}));
+    await tester.pumpAndSettle();
+    final saved = await store.load(surfaceId);
+    if (saved != null && expected(saved)) return saved;
+  }
+  fail('The lifecycle checkpoint did not commit the expected projection');
+}
 
 void main() {
   late Directory root;
@@ -46,6 +98,10 @@ void main() {
   });
   testWidgets('shell_object_return_restores_manual_value_node_scroll_and_revision', (tester) async {
     final f = await NavigationFixture.open(tester);
+    addTearDown(() async {
+      await _unmountAndDrain(tester);
+      await _closeAndDrain(tester, f.host.close);
+    });
     final ref = await f.seedObject(tester, 'research');
     final plan = f.plan(ref);
     Future<void> show(MuyonHost host) async {
@@ -53,7 +109,7 @@ void main() {
         repository: host.foundation, taskId: 'task', surfaceId: plan.plan.surfaceId,
         plan: plan, originalAnswer: List.filled(80, '原回答保留').join('\n'), host: host,
       )));
-      await tester.pumpAndSettle();
+      await workspaceVisible(tester, find.byType(UiWorkspaceView));
     }
     await show(f.host);
     await tester.enterText(find.byType(TextField).first, 'manually edited');
@@ -64,8 +120,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(c.scrollOffset, greaterThan(0));
     // Keep the reference target visible while retaining a nonzero offset.
-    await tester.tap(find.text('查看对象 · research'));
-    await tester.pumpAndSettle();
+    // Start plugin/session IO in the real zone, then wait for its actual page.
+    await tester.runAsync(() => tester.tap(find.text('查看对象 · research')));
+    await workspaceVisible(tester, find.text('真实研究对象'));
     expect(find.text('真实研究对象'), findsWidgets);
     final store = HostUiWorkspaceStore(f.host.foundation, taskId: 'task');
     final saved = (await store.load(plan.plan.surfaceId))!;
@@ -78,16 +135,16 @@ void main() {
     expect(anchor.surfaceId, plan.plan.surfaceId);
     expect(anchor.conversationId, f.conversationId);
     expect(anchor.scrollOffset, saved.scrollOffset);
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await tester.runAsync(tester.pageBack);
+    await workspaceVisible(tester, find.byType(TextField));
     expect(tester.widget<TextField>(find.byType(TextField).first).controller!.text, 'manually edited');
     expect(c.selectedRecords, saved.selectedRecords);
     expect(c.step, saved.step);
     expect(c.scrollOffset, saved.scrollOffset);
     await tester.runAsync(c.flush);
     final committed = (await store.load(plan.plan.surfaceId))!;
-    await tester.pumpWidget(const SizedBox());
-    await tester.runAsync(f.host.close);
+    await _unmountAndDrain(tester);
+    await _closeAndDrain(tester, f.host.close);
     final reopenedHost = (await tester.runAsync(() => MuyonHost.open('${f.root.path}/data')))!;
     try {
       final reopenedStore = HostUiWorkspaceStore(reopenedHost.foundation, taskId: 'task');
@@ -102,13 +159,18 @@ void main() {
       expect(restored.scrollOffset, committed.scrollOffset);
       await tester.pumpWidget(const SizedBox());
     } finally {
-      await tester.runAsync(reopenedHost.close);
+      await _unmountAndDrain(tester);
+      await _closeAndDrain(tester, reopenedHost.close);
     }
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('snapshot_refresh_keeps_user_override_and_marks_version_change', (tester) async {
     final f = await NavigationFixture.open(tester);
+    addTearDown(() async {
+      await _unmountAndDrain(tester);
+      await _closeAndDrain(tester, f.host.close);
+    });
     final ref = await f.seedObject(tester, 'research');
     final old = f.plan(ref);
     Future<void> showVersion(ValidatedUiPlan plan) async {
@@ -116,7 +178,7 @@ void main() {
         repository: f.host.foundation, host: f.host, taskId: 'task',
         surfaceId: plan.plan.surfaceId, plan: plan, originalAnswer: '原对话回答',
       )));
-      await tester.pumpAndSettle();
+      await workspaceVisible(tester, find.byType(UiWorkspaceView));
     }
     await showVersion(old);
     await tester.enterText(find.byType(TextField).first, 'manual priority');
@@ -155,6 +217,10 @@ void main() {
   });
 
   testWidgets('paused_checkpoint_reopen_preserves_committed_projection', (tester) async {
+    addTearDown(() async {
+      await _unmountAndDrain(tester);
+      await _closeAndDrain(tester, storage.close);
+    });
     final plan = actionPlan();
     await tester.pumpWidget(MaterialApp(home: DynamicWorkspace(
       repository: repo, taskId: 'task', surfaceId: plan.plan.surfaceId,
@@ -163,24 +229,28 @@ void main() {
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'committed before background');
     final c = tester.widget<UiWorkspaceView>(find.byType(UiWorkspaceView)).controller;
-    await c.flush();
+    await tester.runAsync(c.flush);
     // These presentation fields do not notify the surface; only the lifecycle
     // checkpoint can commit them. No manual flush after paused.
     c.step = 'background checkpoint';
     c.selectedRecords = ['background-selection'];
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.runAsync(() async {
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    });
     // Resume painting after simulating background events; the checkpoint is
     // still the only writer of the presentation fields above.
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
     final store = HostUiWorkspaceStore(repo, taskId: 'task');
-    final committed = (await store.load(plan.plan.surfaceId))!;
+    final committed = await _committedProjection(tester, store, plan.plan.surfaceId,
+      (saved) => saved.step == 'background checkpoint' &&
+        saved.selectedRecords.contains('background-selection'));
     expect(committed.step, 'background checkpoint');
     expect(committed.selectedRecords, ['background-selection']);
     expect(committed.userOverrides['quantity'], 'committed before background');
-    await tester.pumpWidget(const SizedBox());
-    await storage.close();
+    await _unmountAndDrain(tester);
+    await _closeAndDrain(tester, storage.close);
     storage = StorageManager(root.path);
     repo = (await tester.runAsync(() async => FoundationRepository(
       await storage.open('muyon', WorkspaceRepository.schema),
