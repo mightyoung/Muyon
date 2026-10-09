@@ -136,8 +136,12 @@ abstract final class BackupService {
       return ['Unreadable manifest: $error'];
     }
     if (manifest['format'] != format) return ['Unsupported format'];
+    final entries = manifest['entries'];
+    if (entries is! List || entries.isEmpty) {
+      return ['Missing, invalid, or empty backup entries'];
+    }
     final problems = <String>[];
-    for (final raw in manifest['entries'] as List? ?? const []) {
+    for (final raw in entries) {
       final entry = raw as Map;
       final rel = entry['path'] as String;
       final path = p.normalize(p.join(backupDir, rel));

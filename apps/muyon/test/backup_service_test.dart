@@ -161,4 +161,54 @@ void main() {
       expect(WorkspaceRepository(host).all().single.title, 'Project A');
     },
   );
+  test('verify rejects missing and empty backup entry inventories', () async {
+    final target = p.join(tmp.path, 'backup');
+    await BackupService.create(storage, target);
+    final manifestFile = File(p.join(target, BackupService.manifestName));
+    final manifest = jsonDecode(manifestFile.readAsStringSync()) as Map;
+    manifest.remove('entries');
+    manifestFile.writeAsStringSync(jsonEncode(manifest));
+    expect(await BackupService.verify(target), isNotEmpty);
+    for (final entries in [null, <Object?>[], 'not-a-list']) {
+      manifest['entries'] = entries;
+      manifestFile.writeAsStringSync(jsonEncode(manifest));
+      expect(
+        await BackupService.verify(target),
+        isNotEmpty,
+        reason: 'An invalid inventory cannot verify as a complete backup',
+      );
+    }
+  });
+
+  test('empty manifest cannot replace the existing temporary data root', () async {
+    final target = p.join(tmp.path, 'backup');
+    await BackupService.create(storage, target);
+    await storage.close();
+    final manifestFile = File(p.join(target, BackupService.manifestName));
+    final manifest = jsonDecode(manifestFile.readAsStringSync()) as Map;
+    manifest['entries'] = [];
+    manifestFile.writeAsStringSync(jsonEncode(manifest));
+    final before = File(p.join(root, 'muyon.sqlite')).readAsBytesSync();
+    String? moved;
+    try {
+      moved = await BackupService.restore(target, root);
+    } on StateError {
+      // Rejection must happen before creating staging or moving user data.
+    }
+    expect(
+      moved,
+      isNull,
+      reason:
+          'Rejected empty backup must not swap the data root; '
+          'current files: ${Directory(root).listSync().length}; previous: $moved',
+    );
+    expect(File(p.join(root, 'muyon.sqlite')).readAsBytesSync(), before);
+    expect(
+      tmp.listSync().where(
+        (e) =>
+            e.path.contains('.restore-') || e.path.contains('.before-restore-'),
+      ),
+      isEmpty,
+    );
+  });
 }
