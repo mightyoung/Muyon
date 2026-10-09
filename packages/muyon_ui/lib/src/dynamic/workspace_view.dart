@@ -13,10 +13,12 @@ class UiWorkspaceView extends StatefulWidget {
     required this.controller,
     required this.originalAnswer,
     this.banner,
+    this.references,
   });
   final UiWorkspaceController controller;
   final String originalAnswer;
   final String? banner;
+  final Widget? references;
   @override
   State<UiWorkspaceView> createState() => _UiWorkspaceViewState();
 }
@@ -92,6 +94,7 @@ class _UiWorkspaceViewState extends State<UiWorkspaceView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (widget.banner != null) Text(widget.banner!),
+              if (widget.references != null) widget.references!,
               Text(
                 'Current surface revision: ${c.surface.current.plan.revision}',
               ),

@@ -94,6 +94,7 @@ class _PlatformShellState extends State<PlatformShell> {
   AssistantPage assistant({AssistantScope? scope, String? conversationId}) =>
       AssistantPage(
         repo: repo,
+        host: host,
         agent: host.personalAgent,
         profiles: profiles,
         scope: scope,
