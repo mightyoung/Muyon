@@ -32,7 +32,7 @@ DataSnapshot projection(int revision, String qty, {Object? total}) {
         // Public deterministic host fixture, not the future F3a evaluator.
         value: total ?? '${10 * int.parse(qty)}',
         inputVersion: ref,
-        computationId: 'host-total-$revision',
+        computationId: 'host-total-instance',
       ),
     },
   );
@@ -114,6 +114,8 @@ void main() {
     expect(checked.validatedPlan, isNotNull);
     expect(s7.computations['total']!.value, '20');
     expect(s8.computations['total']!.value, '30');
+    expect(s7.computations['total']!.computationId, 'host-total-instance');
+    expect(s8.computations['total']!.computationId, s7.computations['total']!.computationId);
     expect(s8.computations['total']!.inputVersion, s8.ref);
     expect(i8.snapshotRef, s8.ref);
     expect(p12.snapshotRef, s8.ref);
@@ -277,6 +279,27 @@ void main() {
     expect(find.byType(TextFormField), findsNothing);
     expect(routed, 0);
     expect(tester.takeException(), isNull);
+  });
+
+  test('draft_collection_binding_is_rejected_by_unchanged_stream1', () {
+    final fixture = jsonDecode(File(
+      '../../docs/fixtures/aiui5/collection-binding.draft.json',
+    ).readAsStringSync()) as Map<String, dynamic>;
+    final rowLine = jsonEncode((fixture['modelLines'] as List)[1]);
+    final parsed = parseUiStreamLine(rowLine);
+    expect(parsed.operation, isNull);
+    expect(parsed.error!.code, UiStreamErrorCode.invalidFields);
+    final snapshot = projection(7, '2');
+    final compiler = UiStreamCompiler(session: UiStreamSession(
+      surfaceId: 'quote-surface', revision: 11, snapshot: snapshot,
+      intent: intent(snapshot), catalog: libraryUiCatalog,
+    ));
+    compiler.addLine(jsonEncode((fixture['modelLines'] as List).first));
+    compiler.addLine(rowLine);
+    compiler.addLine('{"op":"end"}');
+    expect(compiler.current.finalPlan, isNull);
+    expect(compiler.current.badLines, 1);
+    expect(compiler.current.streamErrors, isNotEmpty);
   });
 
   test('public_library1_stream_golden_compiles_through_existing_final_gate', () {

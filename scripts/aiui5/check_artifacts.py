@@ -42,7 +42,7 @@ DETAILS = {
  'Metric': ('data', 'Metric', 'value/unit/label; computed delta -> numeric display', 'inputVersion and source provenance'),
  'CompareTable': ('data', 'CompareTable', 'host columns/rows/marks; add stable row callback after adoption', 'row ID -> current ObjectRef; no index identity'),
  'Chart': ('data', 'Chart', 'bar/line/pie; host numeric points; same points -> text data table', 'item IDs/source/inputVersion'),
- 'Choice': ('inputs', 'Choice', 'host options IDs/labels; selected IDs -> Set view; custom disabled', 'sorted ID array; membership revision'),
+ 'Choice': ('inputs', 'Choice', 'host options IDs/labels; selected IDs -> Set view; custom disabled', 'sorted ID array; membership revision; host parameterEdit override vs viewSelection view role preserved'),
  'Form': ('inputs', 'MuyonForm', 'title/submitLabel; children; readonly subtree gate', 'business operation/receipt; no replay'),
  'NumberStepper': ('inputs', 'NumberStepper', 'finite double value/min/max/step; no truncation', 'typed number override/spec version'),
  'Slider': ('inputs', 'MuyonSlider', 'finite double value/min/max; host step -> divisions policy', 'typed number override/spec version'),
@@ -119,7 +119,8 @@ def build():
             widget_ref = cite(path, 'class ' + widget + ' ')
         entry.update({
             'catalogVersion': 'library-1',
-            'bindingShape': 'current scalar/sourceSpan only; dedicated host collections proposed where needed',
+            'bindingShape': 'current scalar/sourceSpan only; draft collection kind resolves collections exclusively; fact/computed/uiState retain original namespaces',
+            'collectionBindingDraft': 'collection -> snapshot.collections; stream/2 adoption required; reject ID collision with any scalar namespace; cellStateRefs -> host cellStates' if name in {'Table', 'KeyValue', 'CompareTable', 'Chart', 'Choice', 'Checklist', 'Timeline'} else None,
             'validator': cite(VAL, 'List<String> validateUiNode('),
             'renderer': cite(SURFACE, "case '" + name + "':") if name in rendered else cite(SURFACE, 'default:'),
             'renderCaseInventory': 'existing case (minimal/dynamic only)' if name in rendered else 'no case; default unavailable text if render reached',
@@ -132,7 +133,7 @@ def build():
                 'NumberStepper': 'finite JSON number; exact host range/step',
                 'Slider': 'finite JSON number; preserve fraction; host range/step',
                 'DateField': 'YYYY-MM-DD or explicitly nullable null; DateTime adapter',
-                'Choice': 'canonical stable item ID array; single/multiple host membership',
+                'Choice': 'canonical stable item ID array; host parameterEdit increments draftRevision/recomputes dependencies, viewSelection preserves draftRevision/no recompute',
                 'Checklist': 'stable itemId + bool; declared checked state; facts readonly',
                 'CompareTable': 'collectionId + collectionRevision + itemId; host ObjectRef resolution',
                 'Tabs': 'declared selectedChildId view; labels/children same host IDs',
@@ -173,6 +174,26 @@ def main():
     assert lines[-1] == {'op': 'end'} and len(lines) == 6
     assert lines[1]['id'] == 'root'
     assert not any({'route', 'snapshotRef', 'intentRef', 'catalogVersion', 'revision', 'surfaceId'} & line.keys() for line in lines)
+    collection_fixture = json.loads(read('docs/fixtures/aiui5/collection-binding.draft.json'))
+    assert collection_fixture['status'] == 'draft; future-only; no production codec'
+    assert collection_fixture['bindingResolutionDraft'] == {'fact': 'facts', 'computed': 'computations', 'uiState': 'initialUiState', 'collection': 'collections'}
+    assert collection_fixture['protocolDraft'] == 'aiui-stream/2-not-adopted'
+    assert collection_fixture['modelLines'][1]['bind']['rows'] == {'kind': 'collection', 'id': 'quote-comparison'}
+    assert len(collection_fixture['negativeCases']) == 10
+    assert all(c['expectedAcceptance'] == 'future-only' for c in collection_fixture['negativeCases'])
+    # Check concrete fixture pointers/value agreement only. This is not a codec
+    # implementation and does not evaluate negative mutations or accept plans.
+    host = collection_fixture['hostSnapshotDraft']
+    entry = host['collections']['quote-comparison']
+    for row in entry['rows']:
+        for column, value in row['cells'].items():
+            state = entry['cellStates'][entry['cellStateRefs'][row['itemId']][column]]
+            fact = host['facts'][state['valueRef']['id']]
+            assert state['valueRef']['kind'] == 'fact' and fact['value'] == value
+            assert fact['state'] == state['state'] and fact['sourceRefs'] == state['sourceRefs']
+    missing = entry['cellStates']['state-b-price']
+    assert missing['state'] == 'notDisclosed' and missing['missingReason'] == 'not_disclosed'
+    assert entry['rows'][1]['cells']['price'] is None
     print(f'F5a artifact checks: PASS; 33 catalog schemas, 12 renderer cases, 21 components without render case; library-1 whole-surface fallback; {len(ids)} future-only vectors. No runtime/codec validation.')
 
 if __name__ == '__main__':

@@ -1,0 +1,270 @@
+{
+  "status": "draft; future-only; no production codec",
+  "protocolDraft": "aiui-stream/2-not-adopted",
+  "catalogDraft": "library-2-not-adopted",
+  "bindingResolutionDraft": {
+    "fact": "facts",
+    "computed": "computations",
+    "uiState": "initialUiState",
+    "collection": "collections"
+  },
+  "sameIdPolicyDraft": "reject collectionId collision with any scalar namespace; never prefer one",
+  "hostSnapshotDraft": {
+    "ref": {
+      "id": "quote-view",
+      "revision": 8
+    },
+    "facts": {
+      "price-known": {
+        "object": {
+          "moduleId": "fixture",
+          "objectType": "quote",
+          "objectId": "a"
+        },
+        "field": "price",
+        "value": 10,
+        "state": "verified",
+        "sourceRefs": [
+          "fixture-span"
+        ]
+      },
+      "price-undisclosed": {
+        "object": {
+          "moduleId": "fixture",
+          "objectType": "quote",
+          "objectId": "b"
+        },
+        "field": "price",
+        "value": null,
+        "state": "notDisclosed",
+        "sourceRefs": [
+          "fixture-span"
+        ]
+      }
+    },
+    "computations": {},
+    "initialUiState": {},
+    "sourceVersions": {
+      "fixture-source": "v1"
+    },
+    "sources": {
+      "fixture-span": {
+        "artifactId": "fixture-source",
+        "contentDigest": "public-fixture-digest-v1",
+        "originalText": "Quote A: price 10. Quote B: price not disclosed.",
+        "start": 0,
+        "end": 48
+      }
+    },
+    "sourceDigests": {
+      "fixture-source": "public-fixture-digest-v1"
+    },
+    "collections": {
+      "quote-comparison": {
+        "codecVersion": "draft-not-adopted",
+        "collectionId": "quote-comparison",
+        "collectionRevision": 8,
+        "snapshotRef": {
+          "id": "quote-view",
+          "revision": 8
+        },
+        "scopeKey": "fixture-scope",
+        "producerKind": "computed",
+        "sourceVersions": {
+          "fixture-source": "v1"
+        },
+        "computation": {
+          "computationId": "quote-comparison-instance",
+          "formulaId": "host-quote-compare",
+          "formulaVersion": 1,
+          "inputVersion": {
+            "id": "quote-view",
+            "revision": 8
+          },
+          "dependencyFingerprint": "fixture-price-known10-price-undisclosed-null"
+        },
+        "columns": [
+          {
+            "id": "price",
+            "label": "Price",
+            "type": "finiteNumber",
+            "nullable": true
+          }
+        ],
+        "rows": [
+          {
+            "itemId": "quote-a",
+            "cells": {
+              "price": 10
+            },
+            "rowObjectRef": {
+              "moduleId": "fixture",
+              "objectType": "quote",
+              "objectId": "a"
+            }
+          },
+          {
+            "itemId": "quote-b",
+            "cells": {
+              "price": null
+            },
+            "rowObjectRef": {
+              "moduleId": "fixture",
+              "objectType": "quote",
+              "objectId": "b"
+            }
+          }
+        ],
+        "cellStateRefs": {
+          "quote-a": {
+            "price": "state-a-price"
+          },
+          "quote-b": {
+            "price": "state-b-price"
+          }
+        },
+        "cellStates": {
+          "state-a-price": {
+            "state": "verified",
+            "valueRef": {
+              "kind": "fact",
+              "id": "price-known"
+            },
+            "sourceRefs": [
+              "fixture-span"
+            ]
+          },
+          "state-b-price": {
+            "state": "notDisclosed",
+            "missingReason": "not_disclosed",
+            "valueRef": {
+              "kind": "fact",
+              "id": "price-undisclosed"
+            },
+            "sourceRefs": [
+              "fixture-span"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "modelLines": [
+    {
+      "op": "node",
+      "id": "root",
+      "component": "PageScaffold",
+      "props": {
+        "title": "Public collection draft"
+      }
+    },
+    {
+      "op": "node",
+      "id": "comparison",
+      "parent": "root",
+      "component": "CompareTable",
+      "props": {
+        "label": "Quotes"
+      },
+      "bind": {
+        "rows": {
+          "kind": "collection",
+          "id": "quote-comparison"
+        }
+      }
+    },
+    {
+      "op": "end"
+    }
+  ],
+  "negativeCases": [
+    {
+      "id": "same-fact-id",
+      "mutation": {
+        "snapshot.facts.quote-comparison": {
+          "value": "scalar"
+        }
+      },
+      "expectedDraftError": "collection_scalar_id_conflict",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "same-computed-id",
+      "mutation": {
+        "snapshot.computations.quote-comparison": {
+          "value": 20
+        }
+      },
+      "expectedDraftError": "collection_scalar_id_conflict",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "same-uiState-id",
+      "mutation": {
+        "snapshot.initialUiState.quote-comparison": "scalar"
+      },
+      "expectedDraftError": "collection_scalar_id_conflict",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "unknown-collection",
+      "mutation": {
+        "modelLines[1].bind.rows.id": "absent"
+      },
+      "expectedDraftError": "unknown_collection",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "fact-kind-is-not-registry",
+      "mutation": {
+        "modelLines[1].bind.rows.kind": "fact"
+      },
+      "expectedDraftError": "collection_binding_kind",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "computed-kind-is-not-registry",
+      "mutation": {
+        "modelLines[1].bind.rows.kind": "computed"
+      },
+      "expectedDraftError": "collection_binding_kind",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "missing-as-empty-string",
+      "mutation": {
+        "rows[1].cells.price": ""
+      },
+      "expectedDraftError": "cell_value_reference_mismatch",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "missing-reason-removed",
+      "mutation": {
+        "cellStates.state-b-price.missingReason": {
+          "delete": true
+        }
+      },
+      "expectedDraftError": "cell_missing_reason",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "missing-state-reference",
+      "mutation": {
+        "cellStateRefs.quote-b.price": {
+          "delete": true
+        }
+      },
+      "expectedDraftError": "cell_state_reference",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "id": "unknown-state-reference",
+      "mutation": {
+        "cellStateRefs.quote-b.price": "forged"
+      },
+      "expectedDraftError": "cell_state_reference",
+      "expectedAcceptance": "future-only"
+    }
+  ]
+}

@@ -147,40 +147,10 @@
       "id": "collection-host-envelope",
       "decisionDraft": "accept",
       "input": {
-        "codecVersion": "draft-not-adopted",
-        "collectionId": "quotes",
-        "collectionRevision": 8,
-        "snapshotRef": {
-          "id": "quote-view",
-          "revision": 8
-        },
-        "scopeKey": "fixture-scope",
-        "sourceVersions": {
-          "fixture-source": "v1"
-        },
-        "columns": [
-          {
-            "id": "price",
-            "label": "Price",
-            "type": "finiteNumber",
-            "nullable": false
-          }
-        ],
-        "rows": [
-          {
-            "itemId": "quote-a",
-            "cells": {
-              "price": 10
-            },
-            "rowObjectRef": {
-              "moduleId": "fixture",
-              "objectType": "quote",
-              "objectId": "a"
-            }
-          }
-        ]
+        "hostFixtureRef": "docs/fixtures/aiui5/collection-binding.draft.json",
+        "collectionId": "quote-comparison"
       },
-      "reason": "future dedicated registry; never fact scalar",
+      "reason": "future collection kind resolves host registry envelope with cellStateRefs; never fact scalar",
       "expectedAcceptance": "future-only"
     },
     {
@@ -596,6 +566,164 @@
         "scope": "revoked"
       },
       "reason": "no navigation or business replay",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-same-fact-id",
+      "decisionDraft": "reject",
+      "input": {
+        "snapshot.facts.quote-comparison": {
+          "value": "scalar"
+        }
+      },
+      "reason": "collection_scalar_id_conflict",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-same-computed-id",
+      "decisionDraft": "reject",
+      "input": {
+        "snapshot.computations.quote-comparison": {
+          "value": 20
+        }
+      },
+      "reason": "collection_scalar_id_conflict",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-same-uiState-id",
+      "decisionDraft": "reject",
+      "input": {
+        "snapshot.initialUiState.quote-comparison": "scalar"
+      },
+      "reason": "collection_scalar_id_conflict",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-unknown-collection",
+      "decisionDraft": "reject",
+      "input": {
+        "modelLines[1].bind.rows.id": "absent"
+      },
+      "reason": "unknown_collection",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-fact-kind-is-not-registry",
+      "decisionDraft": "reject",
+      "input": {
+        "modelLines[1].bind.rows.kind": "fact"
+      },
+      "reason": "collection_binding_kind",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-computed-kind-is-not-registry",
+      "decisionDraft": "reject",
+      "input": {
+        "modelLines[1].bind.rows.kind": "computed"
+      },
+      "reason": "collection_binding_kind",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-missing-as-empty-string",
+      "decisionDraft": "reject",
+      "input": {
+        "rows[1].cells.price": ""
+      },
+      "reason": "cell_value_reference_mismatch",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-missing-reason-removed",
+      "decisionDraft": "reject",
+      "input": {
+        "cellStates.state-b-price.missingReason": {
+          "delete": true
+        }
+      },
+      "reason": "cell_missing_reason",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-missing-state-reference",
+      "decisionDraft": "reject",
+      "input": {
+        "cellStateRefs.quote-b.price": {
+          "delete": true
+        }
+      },
+      "reason": "cell_state_reference",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "collection",
+      "id": "binding-unknown-state-reference",
+      "decisionDraft": "reject",
+      "input": {
+        "cellStateRefs.quote-b.price": "forged"
+      },
+      "reason": "cell_state_reference",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "choice-parameter-edit",
+      "decisionDraft": "accept",
+      "input": {
+        "roleDraft": "parameterEdit",
+        "before": [
+          "item-a"
+        ],
+        "after": [
+          "item-b"
+        ],
+        "draftRevisionBefore": 2,
+        "draftRevisionAfter": 3,
+        "isFormulaDependency": true,
+        "recomputeDraft": true
+      },
+      "reason": "host-declared parameter role; preserve typed IDs; versioned recompute",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "choice-view-selection",
+      "decisionDraft": "accept",
+      "input": {
+        "roleDraft": "viewSelection",
+        "before": [
+          "item-a"
+        ],
+        "after": [
+          "item-b"
+        ],
+        "draftRevisionBefore": 2,
+        "draftRevisionAfter": 2,
+        "recomputeDraft": false
+      },
+      "reason": "viewValues only; not formula/business input",
+      "expectedAcceptance": "future-only"
+    },
+    {
+      "group": "typed",
+      "id": "choice-role-conflict",
+      "decisionDraft": "reject",
+      "input": {
+        "roleDraft": "viewSelection",
+        "isFormulaDependency": true
+      },
+      "reason": "host role conflicts with parameter dependency",
       "expectedAcceptance": "future-only"
     }
   ]
