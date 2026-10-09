@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 
-import 'app/workbench_app.dart';
 import 'app/object_pages.dart';
 import 'core/card_title.dart';
 import 'core/exchange.dart';
@@ -17,11 +16,21 @@ import 'core/store.dart';
 import 'cards/card_store.dart';
 import 'exchange/research_package.dart';
 import 'research_services.dart';
+import 'module_tools.dart';
+import 'module_declarations.dart';
 import 'reader/reader_page.dart';
 
-class ResearchModule implements BusinessModule {
+class ResearchModule implements BusinessModuleV2 {
   @override
-  ModuleManifest get manifest => ModuleManifest(id: 'research');
+  ModuleManifest get manifest => ModuleManifest(
+    id: 'research', apiVersion: 2, displayName: '科研工作台',
+    tagline: '原文阅读、批注、研究过程和成果', iconKey: 'menu_book',
+    capabilities: {
+      const CapabilityRequest(id: 'knowledge', reason: '科研检索；scoped facade 未就绪时拒绝'),
+      const CapabilityRequest(id: 'models', reason: '科研模型；scoped facade 未就绪时拒绝'),
+    },
+    features: {ModuleFeature.importPipeline},
+  );
   @override
   ModuleSchema get schema => ModuleSchema(
     version: 9,
@@ -58,26 +67,31 @@ CREATE TABLE change_log(sequence INTEGER PRIMARY KEY AUTOINCREMENT, project_id T
     ],
   );
   @override
-  List<ModuleRoute> get routes => [
-    ModuleRoute(
-      path: '/',
-      builder: (context, session) {
-        final research = session as ResearchSession;
-        research.ensureActive();
-        return ResearchHome(
-          store: research.store,
-          projectId: research.binding.nativeProjectId,
-          hosted: true,
-        );
-      },
-    ),
-  ];
+  List<ModuleRoute> get routes => const [];
+  @override
+  ModuleOntology get ontology => researchOntology;
+  @override
+  CapabilityCoverage get coverage => researchCoverage;
+  @override
+  List<AuxiliarySchema> get auxiliarySchemas => const [];
+  @override
+  List<SearchSource> get searchSources => const []; // REG-3b preserves host search.
+  @override
+  List<ModuleSection> get sections => [ModuleSection(
+    id: 'research', label: '科研工作台', requiresWorkspace: true,
+    // The host retains its workspace navigation bridge for this bound section.
+    builder: (context, host) => host is WorkspaceSectionHost
+      ? host.workspacePage(context) : const Text('请在工作区打开科研项目'),
+  )];
+  @override
+  void registerTools(ToolRegistrar registrar) => registerResearchTools(registrar);
+
   @override
   Future<ResearchRuntime> activate(ModuleResources resources) async =>
       ResearchRuntime(resources);
 }
 
-class ResearchRuntime implements ModuleRuntime {
+class ResearchRuntime implements ModuleRuntime, ImportCapable, ScopeResolvable, ScopeCandidates {
   ResearchRuntime(this.resources)
     : store = WorkbenchStore.attach(
         rootPath: resources.files.rootPath,
@@ -86,6 +100,23 @@ class ResearchRuntime implements ModuleRuntime {
       );
   final ModuleResources resources;
   final WorkbenchStore store;
+
+  @override
+  Future<ModuleSession> openScopeSession() async => _ResearchScopeSession(this);
+
+  @override
+  Future<List<ObjectRef>> scopeCandidates() async => [
+    for (final project in store.projects()) ...[
+      ObjectRef(moduleId: 'research', objectType: 'project', objectId: project.id,
+        nativeProjectId: project.id),
+      for (final document in store.documents(project.id))
+        ObjectRef(moduleId: 'research', objectType: 'document', objectId: document.id,
+          nativeProjectId: project.id),
+      for (final entry in store.entries(project.id))
+        ObjectRef(moduleId: 'research', objectType: 'entry', objectId: entry.id,
+          nativeProjectId: project.id),
+    ],
+  ];
 
   Future<PreparedTaskSnapshot> prepareTask(SelectedInput input) async {
     final frozen = await resources.files.freeze(input);
@@ -406,10 +437,19 @@ class ResearchSession implements ModuleSession {
           (ref.contentDigest != null && ref.contentDigest != digest)) {
         return null;
       }
-      return ObjectView(ref: ref, title: title);
+      return ObjectView(ref: ObjectRef(
+        moduleId: 'research', objectType: ref.objectType, objectId: id,
+        nativeProjectId: project, revisionRef: revision, contentDigest: digest,
+      ), title: title);
     }
 
     switch (ref.objectType) {
+      case 'project':
+        if (id != project) return null;
+        final row = store.projects().where((p) => p.id == id).firstOrNull;
+        return row == null ? null : view(row.title, digest: sha256.convert(
+          utf8.encode(jsonEncode([row.title, row.question, row.nextStep])),
+        ).toString());
       case 'document':
         final rows = store.db.select(
           'SELECT relative_path,sha256 FROM documents WHERE id=? AND project_id=?',
@@ -418,7 +458,11 @@ class ResearchSession implements ModuleSession {
         if (rows.isNotEmpty) {
           return view(
             rows.single['relative_path'] as String,
-            digest: rows.single['sha256'] as String?,
+            digest: (() {
+              final document = store.documents(project).where((d) => d.id == id).single;
+              final file = File(document.absolutePath);
+              return file.existsSync() ? sha256.convert(file.readAsBytesSync()).toString() : 'missing';
+            })(),
           );
         }
         final canonical = store.db.select(
@@ -430,6 +474,10 @@ class ResearchSession implements ModuleSession {
           canonical.single['file_name'] as String,
           digest: canonical.single['digest'] as String,
         );
+      case 'note':
+        final notes = store.db.select('SELECT n.* FROM notes n JOIN documents d ON d.id=n.document_id WHERE n.id=? AND d.project_id=?', [id, project]);
+        return notes.isEmpty ? null : view(notes.single['text'] as String,
+          digest: sha256.convert(utf8.encode(jsonEncode(Map<String,Object?>.from(notes.single)))).toString());
       case 'entry':
         final rows = store.db.select(
           'SELECT title,data FROM entries WHERE id=? AND project_id=?',
@@ -458,10 +506,11 @@ class ResearchSession implements ModuleSession {
           _ => ('sections', 'heading'),
         };
         final rows = store.db.select(
-          'SELECT $title FROM $table WHERE id=? AND project_id=?',
+          'SELECT * FROM $table WHERE id=? AND project_id=?',
           [id, project],
         );
-        return rows.isEmpty ? null : view(rows.single[title] as String? ?? id);
+        return rows.isEmpty ? null : view(rows.single[title] as String? ?? id,
+          digest: sha256.convert(utf8.encode(jsonEncode(Map<String,Object?>.from(rows.single)))).toString());
       case 'task':
         final rows = store.db.select(
           'SELECT title,revision FROM tasks WHERE id=? AND project_id=? '
@@ -476,7 +525,7 @@ class ResearchSession implements ModuleSession {
               );
       case 'run':
         final rows = store.db.select(
-          'SELECT t.title,r.status,r.task_revision FROM runs r JOIN tasks t ON t.id=r.task_id AND t.revision=r.task_revision WHERE r.id=? AND t.project_id=?',
+          'SELECT t.title,r.status,r.task_revision,r.accepted,r.data FROM runs r JOIN tasks t ON t.id=r.task_id AND t.revision=r.task_revision WHERE r.id=? AND t.project_id=?',
           [id, project],
         );
         return rows.isEmpty
@@ -484,6 +533,7 @@ class ResearchSession implements ModuleSession {
             : view(
                 '${rows.single['title']} — ${rows.single['status']}',
                 revision: '${rows.single['task_revision']}',
+                digest: sha256.convert(utf8.encode(jsonEncode([rows.single['status'], rows.single['accepted'], WorkbenchStore.decode(rows.single['data'] as String)]))).toString(),
               );
       case 'card':
         final rows = store.db.select(
@@ -707,4 +757,31 @@ class ResearchSession implements ModuleSession {
       if (quote.isNotEmpty) '“$quote”',
     ].where((part) => part.isNotEmpty).join(' · ');
   }
+}
+
+/// Cross-project authority delegates to the same bound-session resolver.
+class _ResearchScopeSession implements ModuleSession {
+  _ResearchScopeSession(this.runtime);
+  final ResearchRuntime runtime;
+  bool _disposed = false;
+  @override
+  Future<ObjectView?> resolve(ObjectRef ref) async {
+    if (_disposed) throw StateError('Session disposed');
+    final project = ref.nativeProjectId;
+    if (ref.moduleId != 'research' || project == null ||
+        !runtime.store.projects().any((p) => p.id == project)) return null;
+    final session = await runtime.openSession(WorkspaceBinding(
+      workspaceId: '', moduleId: 'research', nativeProjectId: project,
+    ));
+    try { return await session.resolve(ref); }
+    finally { await session.dispose(); }
+  }
+  @override
+  Widget? objectPage(BuildContext context, ObjectRef ref) => null;
+  @override
+  Future<void> flush() async {
+    if (_disposed) throw StateError('Session disposed');
+  }
+  @override
+  Future<void> dispose() async { _disposed = true; }
 }

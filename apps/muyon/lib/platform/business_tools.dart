@@ -7,7 +7,6 @@ import '../app/bootstrap.dart';
 import 'inquiry_write_tools.dart';
 import 'host_tool_registration.dart';
 import 'scope_resolver.dart';
-import 'prototype_tools.dart';
 
 String objectIdentity(ObjectRef ref) => scopeIdentity(ref);
 
@@ -51,66 +50,7 @@ void registerBusinessTools(MuyonHost host) {
 
 /// Inquiry is declared by its V2 adapter in production.
 void registerNonInquiryBusinessTools(MuyonHost host) {
-  registerPrototypeTools(host);
-  host.tools.register(
-    providerId: 'research',
-    descriptor: ToolDescriptor(
-      toolId: 'research.objects',
-      moduleId: 'research',
-      effect: ToolEffect.read,
-      description:
-          '在本次范围内检索科研对象：项目、文档和研究条目，按标题子串过滤，最多返回 50 条引用与标题。'
-          '只读取本机科研库，不修改数据，也不发送到设备外。',
-      parameterSchema: {
-        'type': 'object',
-        'properties': {
-          'query': {'type': 'string'},
-        },
-        'additionalProperties': false,
-      },
-    ),
-    handler: (call) async {
-      final query = (call.request.parameters['query'] as String? ?? '')
-          .toLowerCase();
-      final rows = <Map<String, Object?>>[];
-      final refs = <ObjectRef>[];
-      for (final ref in call.resolvedScope.objects.where(
-        (r) => r.moduleId == 'research',
-      )) {
-        final store = host.research!.store;
-        final String title;
-        if (ref.objectType == 'project') {
-          title = store
-              .projects()
-              .where((p) => p.id == ref.objectId)
-              .first
-              .title;
-        } else if (ref.objectType == 'document') {
-          title = store
-              .documents(ref.nativeProjectId!)
-              .where((d) => d.id == ref.objectId)
-              .first
-              .relativePath;
-        } else {
-          title = store
-              .entries(ref.nativeProjectId!)
-              .where((e) => e.id == ref.objectId)
-              .first
-              .title;
-        }
-        if (query.isNotEmpty && !title.toLowerCase().contains(query)) continue;
-        refs.add(ref);
-        rows.add({'ref': ref.toJson(), 'title': title});
-        if (rows.length == 50) break;
-      }
-      return ToolCallResult(
-        status: ToolCallStatus.succeeded,
-        summary: '找到 ${rows.length} 个科研对象',
-        data: {'objects': rows, 'limit': 50},
-        objectRefs: refs,
-      );
-    },
-  );
+  host.modules.registerTools(moduleIds: ['prototype', 'research']);
 }
 
 /// Existing inquiry declarations, shared by the compatibility and V2 paths.

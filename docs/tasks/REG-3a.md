@@ -54,3 +54,24 @@ DestinationRule/NetworkPolicy 只接受有 host 的网络 URI；本机路径的�
 REG-3b：交换接口及检索迁移（不擅自补设备收发）。REG-3a 后续：其余本机
 写入、Q10 本机导出门面。REG-5：源码枚举与完整通用契约覆盖门禁。
 独立审查由非作者按 REVIEW.md 执行；父任务决定是否集成，不能自授批准。
+
+## 恢复后的有界偏离与验证说明
+
+父任务已确认 AIUI-1 独占 `module_api/src/ui/`，本任务允许继续
+`module.dart` / `module_v2.dart` 两项可选接口；不修改公共导出或 AIUI 测试。
+最新 fetched develop `33783cf` 相对建分支基线仅文档变化，尚未合入本任务。
+
+为准确报告 saveNote 的真实新增对象，补 `note` 类型（非 global），
+回执返回 note canonical 引用；同事务记 ModuleChangeLog，不改已发 schema-9。
+为保持 ADR §10.3 的原型既有保护测试，原型保留 v1 `/` route；v2 宿主仍只消费
+sections，这是兼容偏离，未修改 prototype tests。
+
+撤销后 optional capability 也保持模块 unavailable，直到宿主显式 reconsider；
+更新 `module_host_test.dart` 的旧 optional 自动重激活断言为更严格的失败/无 runtime
+断言。reconsider 只撤掉 withdrawal，重新应用静态策略，不授予 raw models。
+原 v1 legacy grants 断言也改为 v2 对 scoped facade 拒绝，均须独立审查。
+
+测试 `reg3a_scope_candidates_test.dart` 使用恶意身份和非 global 类型夹具；
+`reg3a_module_v2_test.dart` 使用真实宿主库、模块写入与审批回执。
+旧 scope 差分夹具仅将原 prototypeScopeRefs 逐字搬入 fixture，使其与新实现独立。
+所有原始 CI 日志留 /tmp，不进入仓库。

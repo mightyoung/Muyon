@@ -246,6 +246,7 @@ class PrototypeStore {
   Future<PrototypeFeedback> addFeedback({
     required String versionId,
     required String text,
+    void Function()? beforeWrite,
   }) async {
     final body = text.trim();
     if (body.isEmpty) throw const FormatException('反馈内容不能为空');
@@ -253,6 +254,7 @@ class PrototypeStore {
     final id = _newId();
     final now = _clock().toUtc().toIso8601String();
     return database.write((db) {
+      beforeWrite?.call();
       final rows = db.select(
         'SELECT v.page_id,v.label,p.title FROM prototype_versions v '
         'JOIN prototype_pages p ON p.id=v.page_id WHERE v.id=?',
