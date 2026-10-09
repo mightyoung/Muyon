@@ -35,6 +35,7 @@ class NavigationFixture {
           'paused',
           jsonEncode({
             'kind': 'personal',
+            'state': 'paused',
             'executionId': 'task',
             'conversationId': conversation.id,
             'scope': const AssistantScope.global().toJson(),
