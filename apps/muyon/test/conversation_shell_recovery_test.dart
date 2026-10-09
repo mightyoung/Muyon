@@ -298,8 +298,9 @@ void main() {
         taskId: 'task', surfaceId: 'not-admitted', originalAnswer: 'blocked replacement'));
       await tester.pump();
       if (resize) {
-        // Restore has already popped the phone workspace; admission must not
-        // create a new route while the old plugin acquisition is still pending.
+        // Wait for the popped phone route's reverse animation to finish;
+        // admission must not create another route while acquisition is pending.
+        await workspaceGone(tester, find.byType(DynamicWorkspace));
         expect(find.byType(DynamicWorkspace), findsNothing);
       } else {
         expect(tester.widget<DynamicWorkspace>(find.byType(DynamicWorkspace)).session, same(session));

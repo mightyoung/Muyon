@@ -238,6 +238,10 @@ class _MuyonAppState extends State<MuyonApp> {
         : ListenableBuilder(
             listenable: host.foundation,
             builder: (context, _) => PlatformShell(
+              // The shared navigator GlobalKey can retain/reparent its root
+              // route across MaterialApp keys. Each host generation must own
+              // a fresh shell/session even when that route survives.
+              key: ValueKey(generation),
               host: host,
               shellController: conversationShell,
               themeMode: mode,

@@ -8,11 +8,12 @@ import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/models/profile_repository.dart';
 
 import 'support/ui_navigation_fixture.dart';
+import 'support/conversation_workspace_fixture.dart';
 
 void main() {
   testWidgets('shell_child_back_restores_parent_draft_and_scroll', (tester) async {
     final f = await NavigationFixture.open(tester);
-    await tester.runAsync(() async {
+    await workspaceOperation(tester, () async {
       await f.host.foundation.database.write((db) => db.execute(
         "UPDATE execution_records SET payload=json_set(payload,'\$.prompt','父任务','\$.stage','paused','\$.executionDeviceId','local','\$.state','paused') WHERE id='task'",
       ));
@@ -21,31 +22,39 @@ void main() {
       }
     });
     final service = AssistantSubconversations(f.host.foundation);
-    final ref = (await tester.runAsync(() => service.openSubconversation('task', '公开子问题')))!;
+    final ref = await workspaceOperation(tester, () => service.openSubconversation('task', '公开子问题'));
     await tester.pumpWidget(MaterialApp(home: PlatformShell(
       host: f.host, themeMode: ThemeMode.light,
       onTheme: (_) {}, onRestore: (_) async {},
     )));
     await tester.pumpAndSettle();
     final parent = tester.state(find.byType(AssistantPage));
-    final history = find.descendant(of: find.byType(AssistantPage), matching: find.byType(ListView));
+    final history = find.descendant(of: find.byType(AssistantPage), matching: find.byWidgetPredicate(
+      (widget) => widget is ListView && widget.controller != null,
+    ));
+    expect(history, findsOneWidget);
+    final scroll = tester.widget<ListView>(history).controller!;
+    final historyScrollable = find.descendant(of: history, matching: find.byWidgetPredicate(
+      (widget) => widget is Scrollable && identical(widget.controller, scroll),
+    ));
+    expect(historyScrollable, findsOneWidget);
     await tester.enterText(find.widgetWithText(TextField, '输入消息'), '父亲的待输入');
-    final entry = find.text('打开子对话 · 公开子问题');
+    final entry = find.widgetWithText(TextButton, '打开子对话 · 公开子问题');
     // Opening the actual saved child entry also establishes a real parent
     // scroll position; the dialog must leave this controller untouched.
-    await tester.ensureVisible(entry);
+    await tester.scrollUntilVisible(entry, 100, scrollable: historyScrollable, maxScrolls: 60);
     await tester.pumpAndSettle();
-    final scroll = tester.widget<ListView>(history).controller!;
+    expect(entry.hitTestable(), findsOneWidget);
     final offset = scroll.offset;
     expect(offset, greaterThan(0));
     final tasks = f.host.foundation.tasks().length;
     final calls = f.host.tools.history().length;
-    await tester.tap(entry);
-    await tester.pumpAndSettle();
+    await workspaceOperation(tester, () => tester.tap(entry.hitTestable()));
+    await workspaceVisible(tester, find.byType(AssistantSubconversationPanel));
     expect(find.byType(AssistantSubconversationPanel), findsOneWidget);
     await tester.enterText(find.descendant(of: find.byType(AssistantSubconversationPanel), matching: find.byType(TextField)), '子待输入');
-    await tester.runAsync(() => tester.tap(find.byTooltip('保存并关闭子对话')));
-    await tester.pumpAndSettle();
+    await workspaceOperation(tester, () => tester.tap(find.byTooltip('保存并关闭子对话')));
+    await workspaceGone(tester, find.byType(AssistantSubconversationPanel));
     expect(find.byType(AssistantSubconversationPanel), findsNothing);
     expect(tester.state(find.byType(AssistantPage)), same(parent));
     expect(find.text('父亲的待输入'), findsOneWidget);
@@ -146,10 +155,8 @@ void main() {
         expect(find.text('回答后规划交互页面'), findsNothing);
         expect(find.byTooltip('新建对话'), findsNothing);
         await tester.enterText(find.byType(TextField), '关闭后还在的输入');
-        await NavigationFixture.frames(tester);
-        await tester.tap(find.byTooltip('保存并关闭子对话'));
-        await NavigationFixture.frames(tester);
-        await tester.pumpAndSettle();
+        await workspaceOperation(tester, () => tester.tap(find.byTooltip('保存并关闭子对话')));
+        await workspaceGone(tester, find.byType(AssistantSubconversationPanel));
         expect(find.text('主任务'), findsOneWidget);
         expect(service.loadWorkspace(ref).draftText, '关闭后还在的输入');
         expect(service.loadWorkspace(ref).openState, isFalse);
