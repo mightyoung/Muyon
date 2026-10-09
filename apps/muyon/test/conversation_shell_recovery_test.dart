@@ -20,24 +20,30 @@ import 'support/conversation_workspace_fixture.dart';
 import 'support/fake_v2_module.dart';
 
 Future<void> _unmountRecovery(WidgetTester tester) async {
-  final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
-  if (workspaces.isNotEmpty) {
-    final navigator = Navigator.of(workspaces.first);
-    // Complete pushed-route futures so their registered object leases reach
-    // UiReferenceNavigation.finally before the host is closed.
-    await workspaceOperation(tester, () async {
-      navigator.popUntil((route) => route.isFirst);
-    });
-    await tester.pumpAndSettle();
+  try {
+    final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
+    if (workspaces.isNotEmpty) {
+      final navigator = Navigator.of(workspaces.first);
+      // Complete pushed-route futures so their registered object leases reach
+      // UiReferenceNavigation.finally before the host is closed.
+      await workspaceOperation(tester, () async {
+        navigator.popUntil((route) => route.isFirst);
+      });
+      await workspaceReady(tester);
+    }
+  } finally {
+    await tester.pumpWidget(const SizedBox());
+    await workspaceReady(tester);
   }
-  await tester.pumpWidget(const SizedBox());
-  await tester.pumpAndSettle();
 }
 
 void _registerRecoveryCleanup(WidgetTester tester, NavigationFixture fixture) {
   addTearDown(() async {
-    await _unmountRecovery(tester);
-    await workspaceOperation(tester, fixture.host.close);
+    try {
+      await _unmountRecovery(tester);
+    } finally {
+      await workspaceOperation(tester, fixture.host.close);
+    }
   });
 }
 
@@ -136,9 +142,19 @@ void main() {
       await f.host.workspaces.setSetting('marker', 'after');
     });
     MuyonHost? fresh;
+    Future<void>? restoring;
     addTearDown(() async {
-      await _unmountRecovery(tester);
-      if (fresh != null) await workspaceOperation(tester, fresh!.close);
+      // Barrier-release teardowns are registered later and run first.
+      // Wait for reopening before inspecting/closing the fresh owner.
+      try {
+        if (restoring != null) await workspaceOperation(tester, () => restoring!);
+      } finally {
+        try {
+          await _unmountRecovery(tester);
+        } finally {
+          if (fresh != null) await workspaceOperation(tester, fresh!.close);
+        }
+      }
     });
     await tester.pumpWidget(MuyonApp(host: f.host, openHost: (root) async =>
       fresh = await MuyonHost.open(root, modules: [_leaseModule(), ...moduleCatalog()])));
@@ -171,7 +187,6 @@ void main() {
       await entered.future;
     });
     c.step = 'restore-checkpoint';
-    Future<void>? restoring;
     // Exercise the actual MuyonApp restore callback with an object route still
     // leased. This bypasses only the separately tested confirmation dialog.
     await workspaceOperation(tester, () async { restoring = shell.onRestore(backup); });
@@ -228,9 +243,19 @@ void main() {
         await f.host.workspaces.setSetting('marker', 'after');
       });
       MuyonHost? fresh;
+      Future<void>? restoring;
       addTearDown(() async {
-        await _unmountRecovery(tester);
-        if (fresh != null) await workspaceOperation(tester, fresh!.close);
+        // Barrier-release teardowns are registered later and run first.
+        // Wait for reopening before inspecting/closing the fresh owner.
+        try {
+          if (restoring != null) await workspaceOperation(tester, () => restoring!);
+        } finally {
+          try {
+            await _unmountRecovery(tester);
+          } finally {
+            if (fresh != null) await workspaceOperation(tester, fresh!.close);
+          }
+        }
       });
       await tester.pumpWidget(MuyonApp(host: f.host, openHost: (root) async =>
         fresh = await MuyonHost.open(root, modules: [_leaseModule(), ...moduleCatalog()])));
@@ -264,7 +289,6 @@ void main() {
       await tester.pump();
       expect(runtime.opened, 1);
       expect(session.pendingReferenceNavigation, same(pending));
-      Future<void>? restoring;
       await workspaceOperation(tester, () async { restoring = shell.onRestore(backup); });
       await _recoveryCondition(tester, () => !session.canPresentReferences, 'reference admission stopped');
       expect(fresh, isNull);

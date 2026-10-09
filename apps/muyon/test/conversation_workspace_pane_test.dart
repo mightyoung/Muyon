@@ -14,17 +14,23 @@ import 'support/conversation_workspace_fixture.dart';
 
 void _registerCleanup(WidgetTester tester, NavigationFixture fixture) {
   addTearDown(() async {
-    final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
-    if (workspaces.isNotEmpty) {
-      final navigator = Navigator.of(workspaces.first);
-      await workspaceOperation(tester, () async {
-        navigator.popUntil((route) => route.isFirst);
-      });
-      await tester.pumpAndSettle();
+    try {
+      try {
+        final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
+        if (workspaces.isNotEmpty) {
+          final navigator = Navigator.of(workspaces.first);
+          await workspaceOperation(tester, () async {
+            navigator.popUntil((route) => route.isFirst);
+          });
+          await workspaceReady(tester);
+        }
+      } finally {
+        await tester.pumpWidget(const SizedBox());
+        await workspaceReady(tester);
+      }
+    } finally {
+      await workspaceOperation(tester, fixture.host.close);
     }
-    await tester.pumpWidget(const SizedBox());
-    await tester.pumpAndSettle();
-    await workspaceOperation(tester, fixture.host.close);
   });
 }
 
