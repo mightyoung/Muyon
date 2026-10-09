@@ -4,6 +4,8 @@ import 'package:muyon_ui/dynamic_ui.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
 import 'fixture_ports.dart';
+import 'workspace_preview.dart';
+import 'browser_workspace_store.dart';
 
 class PreviewApp extends StatelessWidget {
   const PreviewApp({super.key, required this.fixture});
@@ -107,6 +109,16 @@ class _PreviewHomeState extends State<_PreviewHome> {
                   child: Wrap(
                     spacing: 12,
                     children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => WorkspacePreview(
+                              store: createBrowserWorkspaceStore(),
+                            ),
+                          ),
+                        ),
+                        child: const Text('UI-3b workspace'),
+                      ),
                       TextButton(
                         onPressed: () =>
                             setState(() => load(comparisonFixture())),

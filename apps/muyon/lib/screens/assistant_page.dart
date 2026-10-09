@@ -10,6 +10,8 @@ import '../platform/foundation_repository.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/model_gateway.dart';
 import 'draft_view.dart';
+import 'dynamic_workspace.dart';
+import '../platform/ui_workspace_store.dart';
 
 class AssistantPage extends StatefulWidget {
   const AssistantPage({
@@ -456,6 +458,23 @@ class _AssistantPageState extends State<AssistantPage> {
                             Wrap(
                               spacing: 8,
                               children: [
+                                for (final surface in HostUiWorkspaceStore(
+                                  widget.repo,
+                                  taskId: task.id,
+                                ).surfaces())
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).push(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => DynamicWorkspace(
+                                          repository: widget.repo,
+                                          taskId: task.id,
+                                          surfaceId: surface,
+                                          tools: widget.agent.tools,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Text('已保存草稿 · $surface'),
+                                  ),
                                 if (task.state ==
                                     PersonalTaskState.waitingConfirmation)
                                   FilledButton(

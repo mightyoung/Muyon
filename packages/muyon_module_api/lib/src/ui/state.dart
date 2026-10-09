@@ -1,6 +1,7 @@
 import 'snapshot.dart';
 import 'plan.dart';
 import 'validation.dart';
+import 'workspace.dart';
 
 enum UiEventOutcome { applied, stale, invalid, unsupported }
 
@@ -13,6 +14,12 @@ class UiSessionState {
   final DataSnapshot snapshot;
   final Map<String, Object?> _values;
   final Map<String, String> _digests;
+  final Map<String, Object?> _userOverrides = {};
+  final Map<String, Object?> _viewValues = {};
+  Map<String, Object?> get userOverrides => Map.unmodifiable(_userOverrides);
+  Map<String, Object?> get viewValues => Map.unmodifiable(_viewValues);
+  Set<String> get expandedSources => Set.unmodifiable(_expandedSources);
+  Set<String> get cancelledNodes => Set.unmodifiable(_cancelled);
   final Set<String> _expandedSources = {};
   final Set<String> _cancelled = {};
   bool isCancelled(String nodeId) => _cancelled.contains(nodeId);
@@ -61,9 +68,43 @@ class UiSessionState {
         !isUiScalar(value) ||
         (_values[field] is String && value is! String))
       return;
-    if (_values[field] == value) return;
+    final explicitlyEdited = affectsDraft && !_userOverrides.containsKey(field);
+    if (affectsDraft)
+      _userOverrides[field] = value;
+    else
+      _viewValues[field] = value;
+    if (_values[field] == value && !explicitlyEdited) return;
     _values[field] = value;
     if (affectsDraft) draftRevision++;
+  }
+
+  /// Restores UI scalars only; never changes snapshot facts or host inputs.
+  void restoreWorkspace(StoredUiWorkspace value) {
+    for (final entry in {...value.viewValues, ...value.userOverrides}.entries) {
+      if (_values.containsKey(entry.key) &&
+          isUiScalar(entry.value) &&
+          (_values[entry.key] is! String || entry.value is String)) {
+        _values[entry.key] = entry.value;
+      }
+    }
+    _userOverrides.addAll(value.userOverrides);
+    _viewValues.addAll(value.viewValues);
+    draftRevision = value.draftRevision > draftRevision
+        ? value.draftRevision
+        : draftRevision;
+    if (value.snapshotRef != snapshot.ref) draftRevision++;
+    _expandedSources.addAll(value.expandedSources);
+    _cancelled.addAll(value.cancelledNodes);
+    detailNode = value.detailNode;
+  }
+
+  void adoptExtracted(String field) {
+    if (!_userOverrides.containsKey(field) ||
+        !snapshot.initialUiState.containsKey(field))
+      return;
+    _userOverrides.remove(field);
+    _values[field] = snapshot.initialUiState[field];
+    draftRevision++;
   }
 
   void updateSourceDigest(String artifactId, String digest) {

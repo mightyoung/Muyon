@@ -17,3 +17,9 @@ Use the actual controlled URL and static package SHA. The script checks mobile/d
 Existing host `inquiry_write_tools_test.dart` separately tests real SQLite quantity 10→12 and authorization failure paths in CI. That is existing business evidence, not a claim that the browser runtime invokes SQLite or that REG-4a/UI-4b integration is complete.
 
 Later real GPT replay/export still needs a host recorder for full question/answer and task/turn context, serializer/parser with schema/catalog versions, event/payload and patch acceptance history, immutable snapshot/source digests, actual port receipts and user revisions, redaction/consent and reviewed training-candidate records. This slice exposes stable surface/node IDs, revisioned events, patch IDs and correlated pending/receipt references. It adds no GPT API, paid call, credentials or training pipeline. Existing exam packages remain question/regression material, not runtime gold data.
+
+## UI-3b public projection reload
+
+`?workspace=1` opens the persisted public workspace. Browser localStorage is serialized with Web Locks; permission/quota failures preserve the old checkpoint and block the event port. The native host separately uses its existing managed SQLite settings table. Neither store contains domain object bodies or grants.
+
+When an authorized URL becomes available, run `node scripts/ui_preview/workspace_smoke.mjs --base-url "$PREVIEW_URL"`. It edits a public value, checkpoints, patches, reloads and asserts both the restored manual value and actual presentation revision, at two viewports. This script is prepared but real deployed browser acceptance is still pending. No SDK install or deployment is performed.

@@ -67,6 +67,22 @@ class UiSurfaceController extends ChangeNotifier {
   final _pending = <String, UiPendingAction>{};
   UiPendingAction? pendingAction(String eventId) => _pending[eventId];
   final _lockedOperations = <(String, int)>{};
+  final _recoveredOperations = <String>{};
+  Set<String> get operationRefs => Set.unmodifiable({
+    ..._recoveredOperations,
+    for (final key in _lockedOperations) key.$1,
+  });
+
+  /// A projection is never enough authority to retry. The host decides future
+  /// attempts from real receipts and gives them fresh operation references.
+  void lockRecoveredOperations(Iterable<String> refs) =>
+      _recoveredOperations.addAll(refs);
+  void adoptExtracted(String field) {
+    if (_disposed) return;
+    session.adoptExtracted(field);
+    notifyListeners();
+  }
+
   final _seenEvents = <String>{};
   int _eventCounter = 0;
   bool _disposed = false;
@@ -142,7 +158,8 @@ class UiSurfaceController extends ChangeNotifier {
         !_lockedOperations.contains((
           binding.operationKeyRef!,
           binding.expectedDraftRevision!,
-        ));
+        )) &&
+        !_recoveredOperations.contains(binding.operationKeyRef);
   }
 
   Future<UiDispatchOutcome> dispatch(UiEvent event) async {
@@ -167,7 +184,9 @@ class UiSurfaceController extends ChangeNotifier {
     if (route == UiActionRoute.business) {
       if (session.isCancelled(node.id)) return UiDispatchOutcome.stale;
       final key = (binding.operationKeyRef!, binding.expectedDraftRevision!);
-      if (_lockedOperations.contains(key)) return UiDispatchOutcome.duplicate;
+      if (_lockedOperations.contains(key) ||
+          _recoveredOperations.contains(key.$1))
+        return UiDispatchOutcome.duplicate;
       final inputs = <String, Object?>{};
       final context = current.snapshot.actionContext!;
       for (final ref in binding.inputRefs) {

@@ -9,6 +9,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: 1.0.9
+  web: 1.1.1
   muyon_module_api:
     path: ../../packages/muyon_module_api
   muyon_ui:

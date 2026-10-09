@@ -2,7 +2,7 @@ name: ui-preview
 on:
   workflow_dispatch:
   push:
-    branches: ['task/ui-4a-dynamic-runtime']
+    branches: ['task/ui-4a-dynamic-runtime', 'task/ui-3b-workspace-persistence']
 permissions:
   contents: read
 jobs:
