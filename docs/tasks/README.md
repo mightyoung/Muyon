@@ -65,13 +65,13 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 
 | 任务 | 拟任务分支 | 目标/依赖 | 状态 |
 |---|---|---|---|
-| [UI-3a](UI-3a.md) | task/ui-3a-semantic-preview | 最小合同+可运行Web预览，已合UI/REG/AUTH | 首个编码片，待leader复核派发 |
-| [REG-4a](REG-4a.md) | task/reg-4a-inquiry-adapter | 询价现有能力纯适配，已合REG-2/AUTH | 可并行，待复核派发 |
-| [UI-4a](UI-4a.md) | task/ui-4a-dynamic-preview | 确定性渲染/受控云验收，UI-3a及REG-4a联调 | 待复核派发 |
-| [UI-4b](UI-4b.md) | task/ui-4b-planning-harness | 两模式/harness共用planning，UI-3a/4a | 待复核，不等小模型/指南 |
-| [UI-3b](UI-3b.md) | task/ui-3b-workspace-state | 持久编辑/返回，UI-3a/4a | 待复核，不等训练 |
-| [REG-4b](REG-4b.md) | task/reg-4b-inquiry-import | 既有导入/回执续办，REG-4a+UI-3b/4a | 待复核派发 |
-| [UI-2a](UI-2a.md) | task/ui-2a-reference-navigation | 跨插件对象/文件导航，UI-3b/REG-4b | 待复核派发 |
-| [UI-4c](UI-4c.md) | task/ui-4c-subconversations | 一层子对话/最新引用，UI-2a+UI-4b/3b | 待复核派发 |
+| [UI-3a](UI-3a.md) | task/ui-3a-semantic-preview | 最小合同+可运行Web预览，已合UI/REG/AUTH | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [REG-4a](REG-4a.md) | task/reg-4a-inquiry-adapter | 询价现有能力纯适配，已合REG-2/AUTH | 已合入 `5a243c6`（CI 37883647998） |
+| [UI-4a](UI-4a.md) | task/ui-4a-dynamic-preview | 确定性渲染/受控云验收，UI-3a及REG-4a联调 | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [UI-4b](UI-4b.md) | task/ui-4b-planning-harness | 两模式/harness共用planning，UI-3a/4a | 已合入 `655b260` |
+| [UI-3b](UI-3b.md) | task/ui-3b-workspace-state | 持久编辑/返回，UI-3a/4a | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [REG-4b](REG-4b.md) | task/reg-4b-inquiry-import | 既有导入/回执续办，REG-4a+UI-3b/4a | 部分合入，进行中 |
+| [UI-2a](UI-2a.md) | task/ui-2a-reference-navigation | 跨插件对象/文件导航，UI-3b/REG-4b | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
+| [UI-4c](UI-4c.md) | task/ui-4c-subconversations | 一层子对话/最新引用，UI-2a+UI-4b/3b | 已合入（见 [10-09 批次审查](../reviews/2026-10-09-leader-b-batch-review.md)） |
 | [C4-GUIDE](C4-GUIDE.md) | docs/c4-interaction-guides（接口接入另派） | train/dev软指南，UI-3a目录；复用UI-4b可空接口 | 云数据线程起草，接入待复核，不阻塞主线 |
 | [R-1-AI-UI-final](R-1-AI-UI-final.md) | 并入现有R-1 | 最终原生/实机/Mac回归 | 末次清单草案，非每片门槛 |
