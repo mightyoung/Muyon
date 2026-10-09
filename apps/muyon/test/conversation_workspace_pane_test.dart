@@ -166,6 +166,7 @@ void main() {
     await workspaceReady(tester);
     final c = tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller;
     // Temporary mutation diagnostics; fixed fixture data only.
+    // ignore: avoid_print
     print('MUTATION PHASE: workspace loaded, starting SQLite barrier');
     final entered = Completer<void>();
     final release = Completer<void>();
@@ -178,11 +179,13 @@ void main() {
       });
       await entered.future;
     });
+    // ignore: avoid_print
     print('MUTATION PHASE: barrier entered');
     // A presentation checkpoint field is not auto-flushed by a surface edit.
     c.step = 'review-before-close';
     await tester.tap(find.byTooltip('关闭工作区 / 返回'));
     await tester.pump();
+    // ignore: avoid_print
     print('MUTATION PHASE: close tapped, checking pane retention');
     expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
     expect(tester.widget<ConversationWorkspaceBody>(find.byType(ConversationWorkspaceBody)).controller, same(c));
