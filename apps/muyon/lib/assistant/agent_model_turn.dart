@@ -70,6 +70,38 @@ class AgentModelTurn {
   }
 
   Future<void> waitForModel(PersonalTask task) async {
+    final planning = ctx.uiPlanning;
+    if (planning?.enabled == true &&
+        task.payload['uiPlanningInternal'] != true) {
+      try {
+        final state = await planning!.source(task);
+        if (state != null) {
+          final metadata = jsonEncode({
+            'hostUiPlanningContext': {
+              'snapshotId': state.snapshot.ref.id,
+              'expectedSnapshotRevision': state.snapshot.ref.revision,
+              'surfaceId': state.currentView.surfaceId,
+              'expectedSurfaceRevision': state.currentView.revision,
+              'catalogVersion': state.catalog.version,
+              'purpose': state.intent.purpose,
+              'allowedActionRefs': state.allowedActionRefs.toList(),
+            },
+            'instruction': 'After giving the full answer you may call assistant.plan_ui with these host version references. It plans presentation only.',
+          });
+          final prior = task.payload['uiPlanningContext'];
+          task = task.copy({
+            'uiPlanningContext': metadata,
+            'messages': [
+              for (final message in task.payload['messages'] as List)
+                if (message is! Map || message['content'] != prior) message,
+              {'role': 'system', 'content': metadata},
+            ],
+          });
+        }
+      } catch (_) {
+        /* Optional planning metadata never prevents a text answer. */
+      }
+    }
     final preview = {
       'endpoint': ctx.profile(task).endpoint.toString(),
       'profile': ctx.previewProfile(task),
@@ -185,6 +217,11 @@ class AgentModelTurn {
 
   /// Same checks before every send, whichever path sends.
   Future<void> _beforeSend(PersonalTask task) async {
+    if (task.payload['uiPlanningInternal'] == true &&
+        ctx.uiModelChecks[task.id] == null) {
+      throw StateError('planning_session_expired');
+    }
+    await ctx.uiModelChecks[task.id]?.call();
     if (ctx.gate case ModelPolicyGuard guard) {
       guard.checkPolicy(task.payload['authorizationPolicyRevision'] as String?);
     }

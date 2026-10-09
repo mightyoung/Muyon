@@ -25,6 +25,10 @@ import 'agent_dispatch.dart';
 import 'agent_model_turn.dart';
 import 'agent_resume.dart';
 import 'agent_task_factory.dart';
+import 'ui_planning.dart';
+import '../platform/ui_planning_tool.dart';
+
+import 'package:muyon_module_api/ui_contract.dart';
 
 /// Host lifetime service. Views only create requests and approve displayed
 /// snapshots; disposing a view never disposes or cancels its executor.
@@ -49,6 +53,10 @@ class PersonalAgent {
     this.provider = const OpenAiCompatProvider(),
     this.compactor = const ContextCompactor(),
     this.compactionProfile,
+    this.uiPlanningSource,
+    this.uiPlanningProviders = const {},
+    this.uiPlanningMode = UiPlanningMode.intelligent,
+    bool uiPlanningEnabled = true,
     DateTime Function()? clock,
   }) : budget = maxRounds == null
            ? budget
@@ -62,6 +70,31 @@ class PersonalAgent {
              ),
        events = events ?? TaskEventTableSink(repository),
        _clock = clock ?? DateTime.now {
+    if (uiPlanningSource != null) {
+      _ctx.uiPlanning = UiPlanningHarness(
+        repository: repository,
+        source: uiPlanningSource!,
+        providers: {
+          UiPlanningMode.motivation: MotivationUiPlanningProvider(
+            _requestUiModel,
+          ),
+          ...uiPlanningProviders,
+        },
+        mode: uiPlanningMode,
+        requestView: _ctx.view,
+        enabled: uiPlanningEnabled,
+      );
+      tools.register(
+        providerId: 'host-ui-planning',
+        descriptor: uiPlanningToolDescriptor,
+        handler: (context) async {
+          final request = context.request;
+          final taskId = _ctx.invocationTasks[request.invocationId];
+          if (taskId == null) throw StateError('planning_invocation_unowned');
+          return runUiPlanningTool(_ctx.uiPlanning!, taskId, request);
+        },
+      );
+    }
     _dispatch.model = _model;
     _model
       ..dispatch = _dispatch
@@ -72,6 +105,122 @@ class PersonalAgent {
       ..dispatch = _dispatch
       ..factory = _factory;
   }
+  final UiPlanningStateSource? uiPlanningSource;
+  final Map<UiPlanningMode, UiPlanningPort> uiPlanningProviders;
+  final UiPlanningMode uiPlanningMode;
+  Future<UiPlannedPresentation> planUi(
+    String taskId, {
+    Map<String, Object?>? expected,
+  }) async =>
+      await _ctx.uiPlanning?.plan(taskId, expected: expected) ??
+      UiPlanningHarness.fallback('planning_disabled');
+  Future<PersonalTask> startUiSemantic(String taskId, String prompt) {
+    final task = repository.task(taskId);
+    if (task == null) return Future.error(StateError('task_unavailable'));
+    return _start(
+      conversationId: task.conversationId,
+      prompt: prompt,
+      profile: task.payload['profile'] is Map ? _ctx.profile(task) : null,
+      scope: task.scope,
+      previousAttemptId: task.id,
+      trustedProfileChoice: false,
+    );
+  }
+
+  Future<String> _requestUiModel(
+    UiPlanningRequest request,
+    String prompt,
+  ) async {
+    final source = repository.task(request.taskId);
+    if (source == null || source.payload['profile'] is! Map) {
+      throw StateError('model_unavailable');
+    }
+    final profile = _ctx.profile(source);
+    final (built, _) = _factory.chatTask(
+      conversationId: source.conversationId,
+      prompt: prompt,
+      profile: profile,
+      scope: source.scope,
+      previousAttemptId: source.id,
+      uiPlanningInternal: true,
+    );
+    // Charge all planning attempts to the original turn. Each child persists
+    // its starting usage so deltas remain auditable after a host restart.
+    var usage = BudgetUsage.fromPayload(source.payload);
+    for (final prior in repository.tasks(
+      conversationId: source.conversationId,
+    )) {
+      if (prior.payload['uiPlanningInternal'] != true ||
+          prior.previousAttemptId != source.id) {
+        continue;
+      }
+      if (!prior.terminal) throw StateError('planning_attempt_pending');
+      final before = BudgetUsage.fromPayload(
+        Map<String, Object?>.from(
+          prior.payload['uiPlanningBudgetStart'] as Map? ?? source.payload,
+        ),
+      );
+      final after = BudgetUsage.fromPayload(prior.payload);
+      usage = BudgetUsage(
+        steps: usage.steps + (after.steps - before.steps).clamp(0, 1000000),
+        active:
+            usage.active +
+            (after.active > before.active
+                ? after.active - before.active
+                : Duration.zero),
+        tokens:
+            usage.tokens + (after.tokens - before.tokens).clamp(0, 1000000000),
+        estimated: usage.estimated || after.estimated,
+      );
+    }
+    final task = built.copy({
+      ...usage.toPayload(),
+      'uiPlanningBudgetStart': usage.toPayload(),
+    });
+    final completed = Completer<String>();
+    _ctx.uiModelReplies[task.id] = completed;
+    _ctx.uiModelChecks[task.id] = () async {
+      final planning = _ctx.uiPlanning;
+      final latest = repository.task(request.taskId);
+      final state = latest == null ? null : await planning?.source(latest);
+      if (planning?.enabled != true ||
+          planning?.mode != request.mode ||
+          state == null ||
+          state.snapshot.ref != request.snapshot.ref ||
+          state.catalog.version != request.catalog.version ||
+          state.currentView.surfaceId != request.currentView.surfaceId ||
+          state.currentView.revision != request.currentView.revision ||
+          jsonEncode(state.currentView.values) !=
+              jsonEncode(request.currentView.values) ||
+          !state.allowedActionRefs.containsAll(request.allowedActionRefs)) {
+        throw StateError('planning_source_changed');
+      }
+    };
+    // Install a handler before advance: local policy may finish synchronously.
+    final observed = completed.future;
+    unawaited(observed.catchError((Object _) => ''));
+    try {
+      await repository.createTask(task);
+      await _model.advance(task);
+      await _ctx.event(source, 'ui_planning_model', {'taskId': task.id});
+      return await observed.timeout(const Duration(seconds: 15));
+    } finally {
+      await cancel(task.id);
+      _ctx.uiModelReplies.remove(task.id);
+      _ctx.uiModelChecks.remove(task.id);
+    }
+  }
+
+  bool get uiPlanningEnabled => _ctx.uiPlanning?.enabled ?? false;
+  UiPlanningMode get currentUiPlanningMode =>
+      _ctx.uiPlanning?.mode ?? uiPlanningMode;
+  void configureUiPlanning({bool? enabled, UiPlanningMode? mode}) {
+    if (enabled != null) _ctx.uiPlanning?.enabled = enabled;
+    if (mode != null) _ctx.uiPlanning?.mode = mode;
+  }
+
+  UiPlannedPresentation? uiPresentation(String taskId) =>
+      _ctx.uiPlanning?.presentation(taskId);
   final FoundationRepository repository;
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;
@@ -418,6 +567,9 @@ class PersonalAgent {
 
   Future<PersonalTask> resume(String id) async {
     final task = repository.task(id);
+    if (task?.payload['uiPlanningInternal'] == true) {
+      throw StateError('planning_session_expired');
+    }
     if (task == null ||
         ![
           PersonalTaskState.paused,

@@ -113,7 +113,9 @@ void main() {
             ];
       final expected = [
         for (final t in host.tools.list())
-          if (t.available &&
+          if ((t.descriptor.toolId != 'assistant.plan_ui' ||
+                  host.personalAgent.uiPlanningEnabled) &&
+              t.available &&
               t.descriptor.modelSelectable &&
               t.descriptor.effect == ToolEffect.read)
             native ? encodeToolName(t.descriptor.toolId) : t.descriptor.toolId,
