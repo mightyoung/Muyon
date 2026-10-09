@@ -138,3 +138,13 @@ CI37991515411 success、定向37991523315 58/58。正常组合无冲突，准备
 analyze8/8、test8/8、module_api68、UI323~152、host1347~3。发布前fetch/ls-remote重核
 基线develop仍为6e40a795完整SHA，main未变；收尾仅复审历史措辞/索引/门禁摘要，
 产品与脚本树不变。最终发布SHA与精确CI终态由执行回报核对。
+
+## 第五轮：T-3 未注册handler基础片
+
+基线 `c98c09274d4f903f5760f6c415801bd4be014c56`；第四轮发布
+[CI37994429362](https://github.com/mightyoung/Muyon/actions/runs/37994429362) success。
+冻结候选 `72dcb61a9a8e09995fd1e10f5c2c2bbde201b079`，3新增文件，两位独立复审通过，
+[复审摘要](T-3-platform-read-tools-review.md)。精确push37995814951/PR37995821460均success，
+host1366~3（+19）。只归档handler/隔离测试，bootstrap保持关闭、完整T-3未完成。
+共享prepare的生命周期/条件恢复写入仍阻断生产接线，不扩大registry架构或创造只读授权例外。
+正常组合无冲突，按精确组合CI成功→重核develop→正常发布→精确发布CI终态执行。
