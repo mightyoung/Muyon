@@ -11,7 +11,6 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     addTearDown(() => tester.binding.setSurfaceSize(null));
     var changes = 0;
     var submits = 0;
@@ -66,6 +65,7 @@ void main() {
         isFalse,
       );
     }
+    semantics.dispose();
   });
 
   testWidgets('locking a focused form revokes focus; unlocking allows editing', (
