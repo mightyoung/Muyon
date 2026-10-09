@@ -155,10 +155,14 @@ void main() {
     await mountShell(tester, f);
     final rootState = tester.state(find.byType(AssistantPage));
     final answerChip = find.widgetWithText(ActionChip, '${ref.moduleId}/${ref.objectType}/${ref.objectId}');
-    final historyScroll = find.descendant(
-      of: find.descendant(of: find.byType(AssistantPage), matching: find.byType(ListView)),
+    // SelectableText creates its own scrollables inside history cards. The
+    // chip's enclosing scrollable is the history ListView, not those sibling
+    // text viewports or the assistant's separate controls viewport.
+    final historyScroll = find.ancestor(
+      of: answerChip,
       matching: find.byType(Scrollable),
     );
+    expect(historyScroll, findsOneWidget);
     // The reference is below the answer text in a bounded history viewport.
     // Reveal its actual hit target before tapping; the composer must not
     // intercept a tap on a clipped Text widget.

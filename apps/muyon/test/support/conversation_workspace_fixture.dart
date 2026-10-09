@@ -46,13 +46,14 @@ Future<void> workspaceReady(WidgetTester tester) async {
     final session = tester.widget<DynamicWorkspace>(finder.first).session;
     if (session != null) await workspaceOperation(tester, session.ensureLoaded);
   }
-  await tester.pumpAndSettle();
+  await tester.runAsync(() => Future<void>(() {}));
+  await tester.pump(const Duration(milliseconds: 16));
 }
 
 Future<void> workspaceVisible(WidgetTester tester, Finder target) async {
   for (var turn = 0; turn < 1000; turn++) {
     await tester.runAsync(() => Future<void>(() {}));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 16));
     if (target.evaluate().isNotEmpty) return;
   }
   fail('Navigation did not expose $target after draining pending event turns');
@@ -61,7 +62,7 @@ Future<void> workspaceVisible(WidgetTester tester, Finder target) async {
 Future<void> workspaceGone(WidgetTester tester, Finder target) async {
   for (var turn = 0; turn < 2000; turn++) {
     await tester.runAsync(() => Future<void>(() {}));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 16));
     if (target.evaluate().isEmpty) return;
   }
   fail('Navigation did not remove $target after draining pending event turns');
