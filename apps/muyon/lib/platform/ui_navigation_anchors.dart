@@ -6,6 +6,7 @@ import 'package:muyon_module_api/ui_contract.dart' show NavigationAnchor;
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../app/bootstrap.dart';
+import '../app/module_host.dart';
 import '../screens/artifact_preview.dart';
 import 'object_pages.dart';
 import 'ui_workspace_store.dart';
@@ -79,18 +80,70 @@ class UiReferenceNavigation {
     }
   }
 
+  String? _sourceStamp(String moduleId) => host.scopeAuthority.stamp(
+    const AssistantScope.global(), {moduleId},
+  );
+
+  void _requireAuthority(String moduleId, String permission, String source) {
+    if (host.modules.scopeAuthorityRevision(moduleId) != permission ||
+        _sourceStamp(moduleId) != source) {
+      throw StateError('Object or source authority changed');
+    }
+  }
+
   Future<void> openReference(ObjectRef ref, NavigationAnchor returnTo) async {
     _requireReference(ref, returnTo);
+    _requireCurrentAnchor(returnTo);
+    final known = host.registry.modules.any((m) => m.manifest.id == ref.moduleId);
+    if (known &&
+        ((ref.revisionRef ?? '').isEmpty || (ref.contentDigest ?? '').isEmpty)) {
+      throw StateError('Object version proof unavailable');
+    }
+    final initialState = host.modules.state(ref.moduleId);
+    var permission = host.modules.scopeAuthorityRevision(ref.moduleId);
+    var source = permission == null ? null : _sourceStamp(ref.moduleId);
+    if (known && permission != null) {
+      if (source == null) throw StateError('Object source authority unavailable');
+      _requireAuthority(ref.moduleId, permission, source);
+    } else if (known && initialState.status != ModuleStatus.inactive) {
+      throw StateError('Object permission unavailable');
+    }
     await _checkpoint(returnTo);
     if (!context.mounted || !(canPresent?.call() ?? true)) return;
     _requireCurrentAnchor(returnTo);
     _requireReference(ref, returnTo);
+    if (known) {
+      if (permission == null) {
+        // An inactive module may be prepared only after the draft saved. A
+        // revocation changes its state before durable work, so it cannot be
+        // silently retried as part of this navigation.
+        if (!identical(initialState, host.modules.state(ref.moduleId))) {
+          throw StateError('Object permission changed during checkpoint');
+        }
+        await host.modules.runtimeFor(ref.moduleId);
+        if (!context.mounted || !(canPresent?.call() ?? true)) return;
+        _requireCurrentAnchor(returnTo);
+        _requireReference(ref, returnTo);
+        permission = host.modules.scopeAuthorityRevision(ref.moduleId);
+        source = _sourceStamp(ref.moduleId);
+        if (permission == null || source == null) {
+          throw StateError('Object source authority unavailable');
+        }
+      }
+      _requireAuthority(ref.moduleId, permission, source!);
+    }
     ModuleObjectPage? opened;
     try {
-      opened = await openModuleObjectPage(context, host, ref);
+      // Removed modules get only the host's saved-reference text. No runtime,
+      // session, object page or file is consulted for this fallback.
+      if (known) {
+        opened = await openModuleObjectPage(context, host, ref);
+        if (opened == null) throw StateError('Object no longer resolves');
+      }
       if (!context.mounted || !(canPresent?.call() ?? true)) return;
       _requireCurrentAnchor(returnTo);
       _requireReference(ref, returnTo);
+      if (known) _requireAuthority(ref.moduleId, permission!, source!);
       final page = opened;
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
