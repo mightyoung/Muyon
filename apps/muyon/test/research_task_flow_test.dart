@@ -149,6 +149,9 @@ void main() {
     const taskId = 'held-offer', revision = '1';
     final archive = Archive()..addFile(ArchiveFile('README.md', 1, [65]));
     final bytes = ZipEncoder().encode(archive);
+    // Report a drain failure independently of a primary assertion failure.
+    // This runs before the suite's tearDown closes either host.
+    addTearDown(() => b.services.transfer.itemsSettled);
     try {
       await a.tasks.offer(
         taskId: taskId,
@@ -166,8 +169,12 @@ void main() {
       expect(b.researchTasks.isResearchTask(taskId, revision), isFalse);
       var settled = false;
       final received = b.services.transfer.itemsSettled.then((_) => settled = true);
-      // Drain the already scheduled microtasks, without advancing wall time.
-      await Future<void>.value();
+      // Positive control: an already completed signal is observable at this
+      // same checkpoint. The real queue remains gated on the unfinished save.
+      var immediateSettled = false;
+      final immediate = Future<void>.value().then((_) => immediateSettled = true);
+      await immediate;
+      expect(immediateSettled, isTrue);
       expect(settled, isFalse);
       release.complete();
       await received;
@@ -179,7 +186,6 @@ void main() {
       expect(executions, 0);
     } finally {
       if (!release.isCompleted) release.complete();
-      await b.services.transfer.itemsSettled;
     }
   });
 

@@ -22,19 +22,26 @@
 所有已有收据、数据、授权和恢复断言保留，无生产代码或 bootstrap 变更。
 新增断言尚待当前精确 SHA 的 Actions；不声称新增证据曾独立运行 RED。
 
-## 附件用例疑问：待逐条详细意见核对
+## 附件用例疑问：可核实边界及最小加强
 
 已核源码：保存回调先 await 显式 release gate，再调用真实附件保存；
 观察 offered 时 handler 已进入接收队列。itemsSettled await 该 handler 及文件删除，
 handler await 创建目录/写文件/rename。最后的文件存在断言仍保留。
 
-现有 `Future<void>.value()` 是一个 microtask 检查点，不应解释成对任意 Future
-延迟的通用“未完成证明”。目前没有复现“当前 itemsSettled 提前完成而测试通过”。
-收到详细意见后再验证具体反例，不能仅凭概述改变生产状态顺序。
+原 `Future<void>.value()` 是一个 microtask 检查点，不应解释成对任意 Future
+延迟的通用“未完成证明”。现加已完成 Future 的正向对照：在观察真实 queue
+完成标志之前，同样注册完成回调并 await 对照，断言其标志为 true、真实 queue 为 false。
+这验证该观察点能识别已完成的信号，而不是所有标志都因调度尚未发生而为 false。
+最后真实 queue 完成及最终文件存在仍是独立证据，未被负向标志替代。
+目前没有复现“当前 itemsSettled 提前完成而测试通过”；不据此概述修改生产顺序。
 
-当前 finally 释放 gate 并 drain，避免清理死锁；若主体断言与 drain 同时失败，
-Dart finally 的异常可能替换主体异常。这是可核实的诊断边界，尚未收到具体失败复现。
-后续若加强清理诊断，应保留主体失败和独立清理失败，不吞掉任何一个。
+原 finally 释放 gate 并 drain；若主体断言与 drain 同时失败，Dart finally 的异常
+可能替换主体异常。这是可核实的诊断边界，尚无具体失败复现。
+现 finally 只同步释放 gate，drain 注册为 addTearDown，由测试框架单独处理清理错误，
+不在主体失败传播路径用第二个 await 替换其异常，也不 catch/吞掉清理错误。
+[test API](https://pub.dev/documentation/test/latest/test/addTearDown.html)
+明确该回调先于 tearDown，故仍在 host.close 之前 drain；未改变宿主生命周期。
+新断言和清理动态证据待当前精确 SHA CI；逐条详细 Claude 意见待父任务补回。
 
 本地没有 Flutter/Dart；使用既有全库 CI，不改代理设置、不提交原始日志，
 摘要写提交说明及 PR；不合并 develop/main，不强推，不部署。
