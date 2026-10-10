@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:muyon_module_api/ui_contract.dart';
 
 import '../../app/bootstrap.dart';
 import '../ontology_cards/inquiry_ontology_card_adapter.dart';
@@ -15,9 +18,10 @@ enum InquiryReadonlyScene {
 
 /// A single pinned saved record, never an atomic aggregate or a write payload.
 final class InquiryReadonlySnapshot {
-  const InquiryReadonlySnapshot._(this.scene, this.record);
+  const InquiryReadonlySnapshot._(this.scene, this.record, this.sourceLabel);
   final InquiryReadonlyScene scene;
   final OntologyCardSnapshot record;
+  final String sourceLabel;
 }
 
 /// Host-only entry for the initial read-only inquiry scene templates.
@@ -36,7 +40,10 @@ final class InquiryReadonlySnapshots {
         !scope.objects.contains(object) ||
         scope.objects.any((ref) => ref.moduleId != 'inquiry' ||
             ref.revisionRef == null || ref.revisionRef!.isEmpty ||
-            ref.contentDigest == null || ref.contentDigest!.isEmpty)) {
+            ref.contentDigest == null || ref.contentDigest!.isEmpty ||
+            [ref.moduleId, ref.objectType, ref.objectId, ref.nativeProjectId,
+              ref.revisionRef, ref.contentDigest].any((value) => value != null &&
+                utf8.encode(value).length > UiCollectionLimits.idBytes))) {
       throw StateError('Inquiry scene requires bounded pinned selected objects');
     }
     final scene = switch (object.objectType) {
@@ -56,6 +63,18 @@ final class InquiryReadonlySnapshots {
         host.workspaces.scopeAuthorityRevision != authority) {
       throw StateError('Inquiry scene owner or scope changed during read');
     }
-    return InquiryReadonlySnapshot._(scene, card);
+    final trusted = card.object;
+    final sourceLabel = '来源对象 ${trusted.moduleId}/${trusted.objectType}/${trusted.objectId} · 修订 ${trusted.revisionRef}';
+    final displayText = [sourceLabel, scene.label, card.typeLabel,
+      for (final field in card.fields) ...[
+        field.label, field.value, if (field.suggestion != null) field.suggestion!,
+      ],
+    ];
+    if (utf8.encode(sourceLabel).length > UiCollectionLimits.labelBytes ||
+        displayText.fold<int>(0, (size, text) => size + utf8.encode(text).length) >
+            UiStreamLimits.v1.textBytes) {
+      throw StateError('Inquiry scene source or text exceeds display budget');
+    }
+    return InquiryReadonlySnapshot._(scene, card, sourceLabel);
   }
 }

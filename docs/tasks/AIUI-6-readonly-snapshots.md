@@ -21,3 +21,7 @@
 - 不称完整预算/比价聚合、交互编辑重算、导入复核审批/回执、F4导航恢复或 North Star/live/真机完成。
 - `supplier_core.budget/compareQuotes` 当前枚举全部关联记录，没有带 resolved scope + 分页预算 + 全来源 pins 的有界聚合公共接口。推荐由领域owner交此read接口后复用既有预算/税价公式；不能选中少量对象却扫描并展示其余报价。
 - 导入 `resumeImport` 可能恢复持久化检查点，本片不把它当作纯读。后片需明确只读导入draft分页/当前revision/sourceDigest公共read接口与敏感字段投影，之后才接现有人工审批与回执。
+
+## 独审修订
+
+针对cd50来源不可定位及正向语义断言P2：owner从已验宿主card.object生成来源module/type/objectId/revision文字，不采信模型来源标签。selected refs元数据各UTF8≤UiCollectionLimits.idBytes=128，来源标签≤labelBytes=256，来源和字段投影总文字≤UiStreamLimits.v1.textBytes；超限拒绝而非截断/丢对象身份。补128/129字节和多字节边界，呈现owner补来源/修订、已保存事实/建议标签的正Text及Semantics验证，既有敏感遮盖不放宽。

@@ -3,6 +3,7 @@ import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/assistant/inquiry_snapshots/inquiry_readonly_snapshot.dart';
 import 'package:muyon/app/module_host.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:muyon_module_api/ui_contract.dart';
 
 import '../../../packages/supplier_core/test/fixtures.dart' as fixture;
 import 'support/aiui6_snapshot_fixture.dart';
@@ -23,6 +24,8 @@ void main() {
       expect(snapshot.record.snapshotRef.revision.toString(), object.revisionRef);
       expect(snapshot.scene.label, {'inquiry': '询价单', 'quotation': '报价', 'project_item': '预算行'}[type]);
       expect(snapshot.record.fields, isNotEmpty);
+      expect(snapshot.sourceLabel, contains(object.objectId));
+      expect(snapshot.sourceLabel, contains('修订 ${object.revisionRef}'));
       expect(fixture.content(store), before);
       expect(f.host.modules.state('research').status, ModuleStatus.inactive);
       expect(f.host.modules.state('prototype').status, ModuleStatus.inactive);
@@ -98,6 +101,31 @@ void main() {
     } finally {
       await host.close();
     }
+  });
+  test('128-byte saved identity is readable and 129-byte metadata rejects', () async {
+    final current = f.refs['project_item']!;
+    final store = f.host.inquiry!.runtime.state.store;
+    final id = List.filled(UiCollectionLimits.idBytes, 'x').join();
+    final row = store.get('project_item', current.objectId)!;
+    store.save('project_item', row.data, newId: id);
+    final object = (await f.host.scopeResolver.sources.singleWhere(
+      (source) => source.moduleId == 'inquiry').resolve(ObjectRef(
+        moduleId: 'inquiry', objectType: 'project_item', objectId: id,
+        nativeProjectId: current.nativeProjectId)))!;
+    final snapshot = await InquiryReadonlySnapshots.read(host: f.host,
+      scope: AssistantScope.selectedObjects([object]), object: object);
+    expect(snapshot.sourceLabel, contains(id));
+    final oversized = ObjectRef(moduleId: 'inquiry', objectType: 'project_item',
+      objectId: '${id}x', nativeProjectId: current.nativeProjectId,
+      revisionRef: current.revisionRef, contentDigest: current.contentDigest);
+    await expectLater(InquiryReadonlySnapshots.read(host: f.host,
+      scope: AssistantScope.selectedObjects([oversized]), object: oversized), throwsStateError);
+    final multibyte = ObjectRef(moduleId: 'inquiry', objectType: 'project_item',
+      objectId: List.filled(UiCollectionLimits.idBytes ~/ 4 + 1, '😀').join(),
+      nativeProjectId: current.nativeProjectId, revisionRef: current.revisionRef,
+      contentDigest: current.contentDigest);
+    await expectLater(InquiryReadonlySnapshots.read(host: f.host,
+      scope: AssistantScope.selectedObjects([multibyte]), object: multibyte), throwsStateError);
   });
   test('unsupported object type cannot enter the scene adapter', () async {
     const object = ObjectRef(moduleId: 'inquiry', objectType: 'supplier',
