@@ -68,11 +68,14 @@ class _ShellState extends State<Shell> {
     Section.home => HomePage(state: widget.state, onGo: go),
     Section.projects => ProjectsPage(state: widget.state),
     Section.quotes => QuotesPage(state: widget.state),
-    Section.ask => widget.state.isHosted ? HomePage(state: widget.state, onGo: go) : AskPage(
-      state: widget.state,
-      onOpenPage: (name) =>
-          go(Section.values.firstWhere((s) => s.name == name)),
-    ),
+    Section.ask =>
+      widget.state.isHosted
+          ? HomePage(state: widget.state, onGo: go)
+          : AskPage(
+              state: widget.state,
+              onOpenPage: (name) =>
+                  go(Section.values.firstWhere((s) => s.name == name)),
+            ),
     Section.aiTasks => AiTasksPage(state: widget.state),
     Section.suppliers => CatalogPage(state: widget.state, type: 'supplier'),
     Section.products => CatalogPage(state: widget.state, type: 'product'),
@@ -114,12 +117,12 @@ class _ShellState extends State<Shell> {
         for (final meta in [false, true]) ...{
           for (var i = 0; i < 8; i++)
             if (!widget.state.isHosted || Section.values[i] != Section.ask)
-            SingleActivator(
-              LogicalKeyboardKey(0x31 + i),
-              control: !meta,
-              meta: meta,
-            ): () =>
-                go(Section.values[i]),
+              SingleActivator(
+                LogicalKeyboardKey(0x31 + i),
+                control: !meta,
+                meta: meta,
+              ): () =>
+                  go(Section.values[i]),
           SingleActivator(
             LogicalKeyboardKey.comma,
             control: !meta,
@@ -332,7 +335,11 @@ class _Sidebar extends StatelessWidget {
 }
 
 class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.current, required this.onSelect, required this.hosted});
+  const _BottomNav({
+    required this.current,
+    required this.onSelect,
+    required this.hosted,
+  });
   final Section current;
   final ValueChanged<Section> onSelect;
 

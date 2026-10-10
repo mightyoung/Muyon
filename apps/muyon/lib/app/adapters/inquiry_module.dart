@@ -235,7 +235,11 @@ class _InquirySession implements ModuleSession {
 
   @override
   Widget? objectPage(BuildContext context, ObjectRef ref) =>
-      (_resolve(ref) == null || owner.runtime.state.store.get(ref.objectType, ref.objectId)?.deleted != false)
+      (_resolve(ref) == null ||
+          owner.runtime.state.store
+                  .get(ref.objectType, ref.objectId)
+                  ?.deleted !=
+              false)
       ? null
       : inquiryObjectPage(
           context,
@@ -341,7 +345,10 @@ final inquiryOntology = ModuleOntology(
           'save_record' => 'inquiry.update_record',
           _ => null,
         },
-        humanOnlyReason: const {'create_inquiry', 'save_record'}.contains(action.name) ? null : 'Existing human page action; specialized tool deferred to REG-4',
+        humanOnlyReason:
+            const {'create_inquiry', 'save_record'}.contains(action.name)
+            ? null
+            : 'Existing human page action; specialized tool deferred to REG-4',
       ),
   ],
   rules: [for (final rule in domain.rules) RuleSpec(rule.name, rule.text)],

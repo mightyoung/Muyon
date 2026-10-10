@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
+
 import 'package:flutter/services.dart';
 import 'package:supplier_core/supplier_core.dart';
 
@@ -95,14 +96,14 @@ class _PaletteState extends State<_Palette> {
     ),
     for (final (i, s) in Section.values.indexed)
       if (!widget.state.isHosted || s != Section.ask)
-      _Entry(
-        '打开 ${s.label}',
-        s.icon,
-        keys: s == Section.settings
-            ? 'Ctrl+,'
-            : (i < 8 ? 'Ctrl+${i + 1}' : null),
-        (_) async => widget.onGo(s),
-      ),
+        _Entry(
+          '打开 ${s.label}',
+          s.icon,
+          keys: s == Section.settings
+              ? 'Ctrl+,'
+              : (i < 8 ? 'Ctrl+${i + 1}' : null),
+          (_) async => widget.onGo(s),
+        ),
     _Entry('快捷键一览', Icons.keyboard_outlined, keys: 'Ctrl+/', showShortcutHelp),
   ];
 

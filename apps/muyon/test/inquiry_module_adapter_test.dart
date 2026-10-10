@@ -329,20 +329,36 @@ void main() {
       );
       final catalog = adapted.entries;
       const genericWrites = {
-        'inquiry.create_record', 'inquiry.update_record',
-        'inquiry.delete_record', 'inquiry.restore_record',
+        'inquiry.create_record',
+        'inquiry.update_record',
+        'inquiry.delete_record',
+        'inquiry.restore_record',
       };
       final originalCatalog = jsonDecode(
         File('test/fixtures/inquiry_legacy_catalog.json').readAsStringSync(),
       ) as List;
       // Preserve the entire original snapshot byte-for-byte, and require the
       // four new registrations in addition. No old guard is discarded.
-      expect(catalog.where((entry) => !genericWrites.contains(
-        (entry['descriptor'] as Map)['id'])).toList(), originalCatalog);
+      expect(
+        catalog
+            .where(
+              (entry) =>
+                  !genericWrites.contains((entry['descriptor'] as Map)['id']),
+            )
+            .toList(),
+        originalCatalog,
+      );
       expect(catalog, hasLength(originalCatalog.length + genericWrites.length));
-      final added = catalog.where((entry) => genericWrites.contains(
-        (entry['descriptor'] as Map)['id'])).toList();
-      expect(added.map((entry) => (entry['descriptor'] as Map)['id']).toSet(), genericWrites);
+      final added = catalog
+          .where(
+            (entry) =>
+                genericWrites.contains((entry['descriptor'] as Map)['id']),
+          )
+          .toList();
+      expect(
+        added.map((entry) => (entry['descriptor'] as Map)['id']).toSet(),
+        genericWrites,
+      );
       for (final entry in added) {
         expect((entry['descriptor'] as Map)['effect'], 'write');
         expect(entry['scopes'], ['selectedObjects']);
