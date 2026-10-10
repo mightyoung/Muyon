@@ -36,10 +36,10 @@ class _NavigationRuntime extends FakeRuntime implements ObjectPages {
   }
 }
 
-FakeV2Module _module() => FakeV2Module('navigation-fixture',
+FakeV2Module _module() => FakeV2Module('navigation_fixture',
   features: {ModuleFeature.objectPages}, runtimeFactory: _NavigationRuntime.new);
 
-const _object = ObjectRef(moduleId: 'navigation-fixture', objectType: 'note',
+const _object = ObjectRef(moduleId: 'navigation_fixture', objectType: 'note',
   objectId: 'public-note', revisionRef: 'v1', contentDigest: 'public-fixture-digest');
 
 ValidatedUiPlan _plan([String component = 'Choice']) {
@@ -56,7 +56,13 @@ ValidatedUiPlan _plan([String component = 'Choice']) {
     },
     initialUiState: {...source.snapshot.initialUiState, 'count': 2.0},
     editSpecs: {...source.snapshot.editSpecs, 'count': const UiNumberEdit(min: 0, max: 10)},
-    collections: {...source.snapshot.collections, 'unused': UiCollection(id: 'unused',
+    collections: {
+      for (final entry in source.snapshot.collections.entries)
+        entry.key: UiCollection(id: entry.value.id, columns: entry.value.columns,
+          rows: [for (final row in entry.value.rows)
+            UiRow(itemId: row.itemId, cells: row.cells,
+              object: row.object == null ? null : _object)]),
+      'unused': UiCollection(id: 'unused',
       columns: const [UiColumn('label', 'Unused')],
       rows: [UiRow(itemId: 'hidden', cells: {'label': const BindingRef.fact('unrelated')})])},
     actionContext: source.snapshot.actionContext,
@@ -120,7 +126,7 @@ void main() {
       MuyonHost? reopened;
       addTearDown(() async {
         try { await _unmount(tester); }
-        finally { if (reopened != null) { await workspaceOperation(tester, reopened!.close); } }
+        finally { if (reopened != null) { await workspaceOperation(tester, reopened.close); } }
       });
       final plan = _plan(component);
       var calls = 0;
@@ -137,10 +143,10 @@ void main() {
         expect(c.surface.session.selections['k'], ['a', 'b']);
       }
       expect(c.surface.session.userOverrides['count'], 3.0);
-      expect(find.text('查看对象 · navigation-fixture'), findsOneWidget);
+      expect(find.text('查看对象 · navigation_fixture'), findsOneWidget);
       expect(find.text('查看对象 · unrelated-fixture'), findsNothing);
       final oldCallback = tester.widget<IconButton>(find.byKey(const ValueKey('stepper-plus'))).onPressed!;
-      await tester.tap(find.text('查看对象 · navigation-fixture'));
+      await tester.tap(find.text('查看对象 · navigation_fixture'));
       await workspaceVisible(tester, find.text('注册对象 public-note'));
       final runtime = module.runtime! as _NavigationRuntime;
       expect(runtime.opened, 1);
@@ -190,7 +196,7 @@ void main() {
       addTearDown(() => _unmount(tester));
       var calls = 0;
       final session = await _show(tester, f.host, _plan(), () { calls++; });
-      await workspaceOperation(tester, () => f.host.modules.runtimeFor('navigation-fixture'));
+      await workspaceOperation(tester, () => f.host.modules.runtimeFor('navigation_fixture'));
       final runtime = module.runtime! as _NavigationRuntime;
       final entered = Completer<void>(), release = Completer<void>();
       runtime.entered = entered;
@@ -199,7 +205,7 @@ void main() {
       String? savedBytes;
       addTearDown(() { if (!release.isCompleted) { release.complete(); } });
       try {
-        await tester.tap(find.text('查看对象 · navigation-fixture'));
+        await tester.tap(find.text('查看对象 · navigation_fixture'));
         await workspaceOperation(tester, () => entered.future);
         pending = session.pendingReferenceNavigation;
         expect(pending, isNotNull);
@@ -251,7 +257,7 @@ void main() {
       competing.surface.session.edit('count', 7.0);
       await workspaceOperation(tester, competing.flush);
       final winner = (await workspaceOperation(tester, () => store.load('s')))!.toJson();
-      await tester.tap(find.text('查看对象 · navigation-fixture'));
+      await tester.tap(find.text('查看对象 · navigation_fixture'));
       await workspaceVisible(tester, find.textContaining('无法打开引用，原草稿仍保留'));
       expect(module.activations, 0);
       expect(find.text('注册对象 public-note'), findsNothing);
