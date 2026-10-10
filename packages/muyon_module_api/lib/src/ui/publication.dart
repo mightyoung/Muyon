@@ -2,6 +2,29 @@ import 'plan.dart';
 import 'recomputation.dart';
 import 'validation.dart';
 
+/// Owner mutation clock with a synchronous, monotonic advance only.
+final class UiPublicationEpoch {
+  int _value = 0;
+  int get value => _value;
+  void advance() => _value++;
+}
+
+/// Immutable preparation-time observation; no host callback runs at this fence.
+final class UiPublicationFence {
+  UiPublicationFence(this.source) : expected = source.value;
+  final UiPublicationEpoch source;
+  final int expected;
+  bool get matches => source.value == expected;
+}
+
+/// Opaque request bound to one coordinator, base capability and request epoch.
+final class UiRecomputeRequest {
+  UiRecomputeRequest._(this._owner, this._base, this._epoch);
+  final UiPublicationCoordinator _owner;
+  final ValidatedUiPlan _base;
+  final int _epoch;
+}
+
 /// Isolated host publication boundary, not a session or event executor.
 ///
 /// Only this object's validated S/I/P bundle is atomically replaced. A surface
@@ -10,11 +33,13 @@ import 'validation.dart';
 final class UiPublicationCoordinator {
   UiPublicationCoordinator(ValidatedUiPlan initial)
     : _current = initial,
-      _publishedDraftRevision = initial.snapshot.actionContext?.draftRevision ?? 0;
+      _publishedDraftRevision =
+          initial.snapshot.actionContext?.draftRevision ?? 0;
 
   ValidatedUiPlan _current;
   ValidatedUiPlan get current => _current;
   int _publishedDraftRevision;
+
   /// Monotonic publication floor; live edit revisions come from the host probe.
   int get publishedDraftRevision => _publishedDraftRevision;
   int _epoch = 0;
@@ -40,9 +65,29 @@ final class UiPublicationCoordinator {
     return null;
   }
 
+  // RED declarations: behavior is implemented only after the bridge tests fail.
+  bool adoptPlan(ValidatedUiPlan next) => false;
+
+  UiRecomputeRequest? beginRecompute() =>
+      _disposed ? null : UiRecomputeRequest._(this, _current, _epoch);
+
+  UiPublishOutcome completeRecompute(
+    UiRecomputeRequest request,
+    UiVersionBatch batch,
+    UiPublishTokenProbe probe, {
+    UiPublicationFence? fence,
+  }) => UiPublishOutcome.invalid;
+
+  UiPublishOutcome failRecompute(UiRecomputeRequest request) =>
+      UiPublishOutcome.invalid;
+
   /// Validate a raw host batch, then perform a final synchronous complete probe.
   /// No await, notification or external commit callback occurs in this method.
-  UiPublishOutcome publish(UiVersionBatch batch, UiPublishTokenProbe probe) {
+  UiPublishOutcome publish(
+    UiVersionBatch batch,
+    UiPublishTokenProbe probe, {
+    UiPublicationFence? fence,
+  }) {
     if (_disposed) return UiPublishOutcome.disposed;
     final base = _current;
     final epoch = _epoch;
@@ -77,7 +122,12 @@ final class UiPublicationCoordinator {
     }
     final UiValidationResult checked;
     try {
-      checked = validateUiPlan(plan, batch.snapshot, batch.intent, base.catalog);
+      checked = validateUiPlan(
+        plan,
+        batch.snapshot,
+        batch.intent,
+        base.catalog,
+      );
     } catch (_) {
       return _obsolete(epoch, base) ?? _invalid(['publish_validation_failed']);
     }

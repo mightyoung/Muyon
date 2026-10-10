@@ -92,12 +92,98 @@ InteractionIntent intentWith(
 );
 
 void main() {
+  test('prepared mutation fence rejects final-probe local changes', () {
+    final f = ContractFixture();
+    final initial = f.validate(f.plan).validatedPlan!;
+    final c = UiPublicationCoordinator(initial);
+    final clock = UiPublicationEpoch();
+    final fence = UiPublicationFence(clock);
+    var reads = 0;
+    expect(
+      c.publish(nextBatch(f), () {
+        if (++reads == 2) clock.advance();
+        return token();
+      }, fence: fence),
+      UiPublishOutcome.staleToken,
+    );
+    expect(c.current, same(initial));
+    expect(c.publicationErrors, isEmpty);
+  });
+
+  test('legacy plan bridge retains floor and invalidates pending request', () {
+    final f = ContractFixture();
+    final initial = f.validate(f.plan).validatedPlan!;
+    final c = UiPublicationCoordinator(initial);
+    final request = c.beginRecompute()!;
+    final patch = f.validate(f.plan.copyWith(revision: 5)).validatedPlan!;
+    expect(c.adoptPlan(patch), isTrue);
+    expect(c.current, same(patch));
+    expect(c.publishedDraftRevision, 15);
+    expect(c.outdated, isTrue);
+    expect(
+      c.completeRecompute(request, nextBatch(f), () => token()),
+      UiPublishOutcome.staleToken,
+    );
+    expect(c.current, same(patch));
+  });
+
+  test(
+    'split completion publishes synchronously with opaque latest request',
+    () {
+      final f = ContractFixture();
+      final initial = f.validate(f.plan).validatedPlan!;
+      final c = UiPublicationCoordinator(initial);
+      final old = c.beginRecompute()!;
+      final newest = c.beginRecompute()!;
+      expect(c.recomputing, isTrue);
+      expect(
+        c.completeRecompute(old, nextBatch(f), () => token()),
+        UiPublishOutcome.staleToken,
+      );
+      expect(c.recomputing, isTrue);
+      expect(
+        c.completeRecompute(newest, nextBatch(f), () => token()),
+        UiPublishOutcome.published,
+      );
+      expect(c.current.snapshot.ref, const SnapshotRef('comparison', 5));
+      expect(c.recomputing, isFalse);
+      expect(c.outdated, isFalse);
+    },
+  );
+
+  test('split failure and foreign requests do not mutate another owner', () {
+    final f = ContractFixture();
+    final initial = f.validate(f.plan).validatedPlan!;
+    final c = UiPublicationCoordinator(initial),
+        foreign = UiPublicationCoordinator(initial);
+    final foreignRequest = foreign.beginRecompute()!;
+    final own = c.beginRecompute()!;
+    expect(
+      c.completeRecompute(foreignRequest, nextBatch(f), () => token()),
+      UiPublishOutcome.staleToken,
+    );
+    expect(c.recomputing, isTrue);
+    expect(c.failRecompute(own), UiPublishOutcome.invalid);
+    expect(c.current, same(initial));
+    expect(c.recomputing, isFalse);
+    expect(c.outdated, isTrue);
+    c.dispose();
+    expect(c.beginRecompute(), isNull);
+    expect(
+      c.completeRecompute(own, nextBatch(f), () => token()),
+      UiPublishOutcome.disposed,
+    );
+  });
+
   test('publishes one validated S/I/P bundle synchronously', () {
     final f = ContractFixture();
     final initial = f.validate(f.plan).validatedPlan!;
     final coordinator = UiPublicationCoordinator(initial);
     final candidate = nextBatch(f);
-    expect(coordinator.publish(candidate, () => token()), UiPublishOutcome.published);
+    expect(
+      coordinator.publish(candidate, () => token()),
+      UiPublishOutcome.published,
+    );
     final published = coordinator.current;
     expect(published.plan, same(candidate.plan));
     expect(published.snapshot, same(candidate.snapshot));
@@ -121,7 +207,10 @@ void main() {
       token(scope: 'other'),
     ]) {
       final c = UiPublicationCoordinator(initial);
-      expect(c.publish(nextBatch(f), () => changed), UiPublishOutcome.staleToken);
+      expect(
+        c.publish(nextBatch(f), () => changed),
+        UiPublishOutcome.staleToken,
+      );
       expect(c.current, same(initial));
       expect(c.publicationErrors, isEmpty);
     }
@@ -133,8 +222,10 @@ void main() {
     );
     expect(c.current, same(initial));
     final rollback = token(draft: 14);
-    expect(c.publish(nextBatch(f, frozen: rollback), () => rollback),
-        UiPublishOutcome.staleToken);
+    expect(
+      c.publish(nextBatch(f, frozen: rollback), () => rollback),
+      UiPublishOutcome.staleToken,
+    );
     expect(c.publishedDraftRevision, 15);
   });
 
@@ -157,57 +248,75 @@ void main() {
     final initial = f.validate(f.plan).validatedPlan!;
     final c = UiPublicationCoordinator(initial);
     var reads = 0;
-    expect(c.publish(nextBatch(f), () {
-      if (++reads == 2) c.dispose();
-      return token();
-    }), UiPublishOutcome.disposed);
+    expect(
+      c.publish(nextBatch(f), () {
+        if (++reads == 2) c.dispose();
+        return token();
+      }),
+      UiPublishOutcome.disposed,
+    );
     expect(c.current, same(initial));
   });
 
-  test('strict identity, revision and validator failures preserve old bundle', () {
-    final f = ContractFixture();
-    final initial = f.validate(f.plan).validatedPlan!;
-    final good = nextBatch(f);
-    final candidates = [
-      replace(good, plan: good.plan.copyWith(revision: 4)),
-      replace(good, plan: good.plan.copyWith(revision: 3)),
-      replace(good, plan: planWith(good.plan, surface: 'other')),
-      replace(good, plan: planWith(good.plan, catalog: 'other')),
-      replace(good, plan: good.plan.copyWith(snapshotRef: f.snapshot.ref)),
-      replace(good, snapshot: f.snapshot),
-      replace(good, snapshot: f.snapshot, intent: f.intent,
-          plan: good.plan.copyWith(snapshotRef: f.snapshot.ref)),
-      replace(good, intent: intentWith(good.intent, ref: f.snapshot.ref)),
-      replace(good, intent: intentWith(good.intent, id: 'other')),
-      replace(good, plan: good.plan.copyWith(intentRef: 'other')),
-      replace(good, plan: good.plan.copyWith(nodes: [good.plan.nodes.first])),
-      replace(good, snapshot: good.snapshot.copyWith(computations: {
-        'total': const ComputedValue(
-          value: 120,
-          inputVersion: SnapshotRef('comparison', 4),
-          computationId: 'fixture-total',
+  test(
+    'strict identity, revision and validator failures preserve old bundle',
+    () {
+      final f = ContractFixture();
+      final initial = f.validate(f.plan).validatedPlan!;
+      final good = nextBatch(f);
+      final candidates = [
+        replace(good, plan: good.plan.copyWith(revision: 4)),
+        replace(good, plan: good.plan.copyWith(revision: 3)),
+        replace(good, plan: planWith(good.plan, surface: 'other')),
+        replace(good, plan: planWith(good.plan, catalog: 'other')),
+        replace(good, plan: good.plan.copyWith(snapshotRef: f.snapshot.ref)),
+        replace(good, snapshot: f.snapshot),
+        replace(
+          good,
+          snapshot: f.snapshot,
+          intent: f.intent,
+          plan: good.plan.copyWith(snapshotRef: f.snapshot.ref),
         ),
-      })),
-    ];
-    for (final candidate in candidates) {
-      final c = UiPublicationCoordinator(initial);
-      expect(c.publish(candidate, () => token()), UiPublishOutcome.invalid);
-      expect(c.current, same(initial));
-      expect(c.publicationErrors, isNotEmpty);
-      expect(c.outdated, isTrue);
-      expect(() => c.publicationErrors.clear(), throwsUnsupportedError);
-    }
-  });
+        replace(good, intent: intentWith(good.intent, ref: f.snapshot.ref)),
+        replace(good, intent: intentWith(good.intent, id: 'other')),
+        replace(good, plan: good.plan.copyWith(intentRef: 'other')),
+        replace(good, plan: good.plan.copyWith(nodes: [good.plan.nodes.first])),
+        replace(
+          good,
+          snapshot: good.snapshot.copyWith(
+            computations: {
+              'total': const ComputedValue(
+                value: 120,
+                inputVersion: SnapshotRef('comparison', 4),
+                computationId: 'fixture-total',
+              ),
+            },
+          ),
+        ),
+      ];
+      for (final candidate in candidates) {
+        final c = UiPublicationCoordinator(initial);
+        expect(c.publish(candidate, () => token()), UiPublishOutcome.invalid);
+        expect(c.current, same(initial));
+        expect(c.publicationErrors, isNotEmpty);
+        expect(c.outdated, isTrue);
+        expect(() => c.publicationErrors.clear(), throwsUnsupportedError);
+      }
+    },
+  );
 
   test('candidate intent cannot expand allowed actions', () {
     final f = ContractFixture();
     final initial = f.validate(f.plan).validatedPlan!;
     final c = UiPublicationCoordinator(initial);
     final good = nextBatch(f);
-    final expanded = replace(good, intent: intentWith(
-      good.intent,
-      allowed: {...good.intent.allowedActionRefs, 'extra'},
-    ));
+    final expanded = replace(
+      good,
+      intent: intentWith(
+        good.intent,
+        allowed: {...good.intent.allowedActionRefs, 'extra'},
+      ),
+    );
     expect(c.publish(expanded, () => token()), UiPublishOutcome.invalid);
     expect(c.publicationErrors, contains('publish_permission_expansion'));
     expect(c.current, same(initial));
@@ -229,41 +338,62 @@ void main() {
       sourceDigests: good.snapshot.sourceDigests,
       actionContext: UiActionContext(draftRevision: 1),
     );
-    expect(c.publish(replace(good, snapshot: olderContext), () => token()),
-        UiPublishOutcome.published);
+    expect(
+      c.publish(replace(good, snapshot: olderContext), () => token()),
+      UiPublishOutcome.published,
+    );
     expect(c.publishedDraftRevision, 15);
     expect(c.current.snapshot.initialUiState, f.snapshot.initialUiState);
   });
 
-  test('recomputing gate blocks business while allowing parameter edits', () async {
-    final f = ContractFixture();
-    final c = UiPublicationCoordinator(f.validate(f.plan).validatedPlan!);
-    final complete = Completer<UiVersionBatch>();
-    final work = c.recompute(() => complete.future, () => token());
-    addTearDown(() async {
-      if (!complete.isCompleted) complete.complete(nextBatch(f));
-      await work;
-    });
-    expect(c.recomputing, isTrue);
-    const business = UiActionDefinition(route: UiActionRoute.business);
-    const edit = UiActionDefinition(
-      route: UiActionRoute.local, localAction: UiLocalAction.editField);
-    const cancel = UiActionDefinition(
-      route: UiActionRoute.local, localAction: UiLocalAction.cancelConfirmation);
-    const semantic = UiActionDefinition(route: UiActionRoute.semantic);
-    expect(c.allowsDispatch(business, readOnly: false, pending: false), isFalse);
-    expect(c.allowsDispatch(edit, readOnly: false, pending: false), isTrue);
-    expect(c.allowsDispatch(cancel, readOnly: false, pending: true), isFalse);
-    expect(c.allowsDispatch(cancel, readOnly: false, pending: false), isTrue);
-    for (final action in [business, edit, cancel, semantic]) {
-      expect(c.allowsDispatch(action, readOnly: true, pending: false), isFalse);
-    }
-    complete.complete(nextBatch(f));
-    expect(await work, UiPublishOutcome.published);
-    expect(c.recomputing, isFalse);
-    expect(c.allowsDispatch(business, readOnly: false, pending: true), isFalse);
-    expect(c.allowsDispatch(business, readOnly: false, pending: false), isTrue);
-  });
+  test(
+    'recomputing gate blocks business while allowing parameter edits',
+    () async {
+      final f = ContractFixture();
+      final c = UiPublicationCoordinator(f.validate(f.plan).validatedPlan!);
+      final complete = Completer<UiVersionBatch>();
+      final work = c.recompute(() => complete.future, () => token());
+      addTearDown(() async {
+        if (!complete.isCompleted) complete.complete(nextBatch(f));
+        await work;
+      });
+      expect(c.recomputing, isTrue);
+      const business = UiActionDefinition(route: UiActionRoute.business);
+      const edit = UiActionDefinition(
+        route: UiActionRoute.local,
+        localAction: UiLocalAction.editField,
+      );
+      const cancel = UiActionDefinition(
+        route: UiActionRoute.local,
+        localAction: UiLocalAction.cancelConfirmation,
+      );
+      const semantic = UiActionDefinition(route: UiActionRoute.semantic);
+      expect(
+        c.allowsDispatch(business, readOnly: false, pending: false),
+        isFalse,
+      );
+      expect(c.allowsDispatch(edit, readOnly: false, pending: false), isTrue);
+      expect(c.allowsDispatch(cancel, readOnly: false, pending: true), isFalse);
+      expect(c.allowsDispatch(cancel, readOnly: false, pending: false), isTrue);
+      for (final action in [business, edit, cancel, semantic]) {
+        expect(
+          c.allowsDispatch(action, readOnly: true, pending: false),
+          isFalse,
+        );
+      }
+      complete.complete(nextBatch(f));
+      expect(await work, UiPublishOutcome.published);
+      expect(c.recomputing, isFalse);
+      expect(
+        c.allowsDispatch(business, readOnly: false, pending: true),
+        isFalse,
+      );
+      expect(
+        c.allowsDispatch(business, readOnly: false, pending: false),
+        isTrue,
+      );
+    },
+  );
 
   test('cancel fences late completion and leaves bundle untouched', () async {
     final f = ContractFixture();
@@ -278,94 +408,125 @@ void main() {
     expect(c.recomputing, isFalse);
     expect(c.outdated, isTrue);
     expect(c.publicationErrors, ['recompute_cancelled']);
-    expect(await c.recompute(() async => nextBatch(f), () => token()),
-        UiPublishOutcome.published);
+    expect(
+      await c.recompute(() async => nextBatch(f), () => token()),
+      UiPublishOutcome.published,
+    );
     expect(c.outdated, isFalse);
   });
 
-  test('latest request wins and old completion cannot reset its state', () async {
-    final f = ContractFixture();
-    final c = UiPublicationCoordinator(f.validate(f.plan).validatedPlan!);
-    final first = Completer<UiVersionBatch>();
-    final latest = Completer<UiVersionBatch>();
-    final oldWork = c.recompute(() => first.future, () => token());
-    final newWork = c.recompute(() => latest.future, () => token());
-    first.complete(nextBatch(f));
-    expect(await oldWork, UiPublishOutcome.staleToken);
-    expect(c.recomputing, isTrue);
-    latest.complete(nextBatch(f));
-    expect(await newWork, UiPublishOutcome.published);
-    expect(c.current.plan.revision, 5);
-    expect(c.recomputing, isFalse);
-    expect(c.outdated, isFalse);
-  });
-
-  test('cancellation inside final probe prevents reentrant publication', () async {
-    final f = ContractFixture();
-    final initial = f.validate(f.plan).validatedPlan!;
-    final c = UiPublicationCoordinator(initial);
-    var reads = 0;
-    final outcome = await c.recompute(() async => nextBatch(f), () {
-      if (++reads == 2) c.cancelRecompute();
-      return token();
-    });
-    expect(outcome, UiPublishOutcome.staleToken);
-    expect(c.current, same(initial));
-    expect(c.publicationErrors, ['recompute_cancelled']);
-    expect(c.recomputing, isFalse);
-  });
-
-  test('obsolete failure cannot degrade the latest successful publication', () async {
-    final f = ContractFixture();
-    final c = UiPublicationCoordinator(f.validate(f.plan).validatedPlan!);
-    final first = Completer<UiVersionBatch>();
-    final obsolete = c.recompute(() => first.future, () => token());
-    expect(await c.recompute(() async => nextBatch(f), () => token()),
-        UiPublishOutcome.published);
-    final published = c.current;
-    first.completeError(StateError('obsolete host failure'));
-    expect(await obsolete, UiPublishOutcome.staleToken);
-    expect(c.current, same(published));
-    expect(c.outdated, isFalse);
-    expect(c.publicationErrors, isEmpty);
-  });
-
-  test('prepare failures degrade without replacing data or exposing errors', () async {
-    final f = ContractFixture();
-    final initial = f.validate(f.plan).validatedPlan!;
-    for (final prepare in <Future<UiVersionBatch> Function()>[
-      () => throw StateError('private host details'),
-      () async => throw StateError('private host details'),
-    ]) {
-      final c = UiPublicationCoordinator(initial);
-      expect(await c.recompute(prepare, () => token()), UiPublishOutcome.invalid);
-      expect(c.current, same(initial));
+  test(
+    'latest request wins and old completion cannot reset its state',
+    () async {
+      final f = ContractFixture();
+      final c = UiPublicationCoordinator(f.validate(f.plan).validatedPlan!);
+      final first = Completer<UiVersionBatch>();
+      final latest = Completer<UiVersionBatch>();
+      final oldWork = c.recompute(() => first.future, () => token());
+      final newWork = c.recompute(() => latest.future, () => token());
+      first.complete(nextBatch(f));
+      expect(await oldWork, UiPublishOutcome.staleToken);
+      expect(c.recomputing, isTrue);
+      latest.complete(nextBatch(f));
+      expect(await newWork, UiPublishOutcome.published);
+      expect(c.current.plan.revision, 5);
       expect(c.recomputing, isFalse);
-      expect(c.outdated, isTrue);
-      expect(c.publicationErrors, ['recompute_failed']);
-      expect(c.allowsDispatch(f.catalog.actions['edit']!, readOnly: false,
-          pending: false), isFalse);
-    }
-  });
+      expect(c.outdated, isFalse);
+    },
+  );
 
-  test('disposed receiver never starts preparation or publishes late work', () async {
-    final f = ContractFixture();
-    final initial = f.validate(f.plan).validatedPlan!;
-    final c = UiPublicationCoordinator(initial);
-    final complete = Completer<UiVersionBatch>();
-    final work = c.recompute(() => complete.future, () => token());
-    c.dispose();
-    complete.complete(nextBatch(f));
-    expect(await work, UiPublishOutcome.disposed);
-    expect(c.current, same(initial));
-    var starts = 0;
-    expect(await c.recompute(() async {
-      starts++;
-      return nextBatch(f);
-    }, () => token()), UiPublishOutcome.disposed);
-    expect(starts, 0);
-    expect(c.recomputing, isFalse);
-  });
+  test(
+    'cancellation inside final probe prevents reentrant publication',
+    () async {
+      final f = ContractFixture();
+      final initial = f.validate(f.plan).validatedPlan!;
+      final c = UiPublicationCoordinator(initial);
+      var reads = 0;
+      final outcome = await c.recompute(() async => nextBatch(f), () {
+        if (++reads == 2) c.cancelRecompute();
+        return token();
+      });
+      expect(outcome, UiPublishOutcome.staleToken);
+      expect(c.current, same(initial));
+      expect(c.publicationErrors, ['recompute_cancelled']);
+      expect(c.recomputing, isFalse);
+    },
+  );
+
+  test(
+    'obsolete failure cannot degrade the latest successful publication',
+    () async {
+      final f = ContractFixture();
+      final c = UiPublicationCoordinator(f.validate(f.plan).validatedPlan!);
+      final first = Completer<UiVersionBatch>();
+      final obsolete = c.recompute(() => first.future, () => token());
+      expect(
+        await c.recompute(() async => nextBatch(f), () => token()),
+        UiPublishOutcome.published,
+      );
+      final published = c.current;
+      first.completeError(StateError('obsolete host failure'));
+      expect(await obsolete, UiPublishOutcome.staleToken);
+      expect(c.current, same(published));
+      expect(c.outdated, isFalse);
+      expect(c.publicationErrors, isEmpty);
+    },
+  );
+
+  test(
+    'prepare failures degrade without replacing data or exposing errors',
+    () async {
+      final f = ContractFixture();
+      final initial = f.validate(f.plan).validatedPlan!;
+      for (final prepare in <Future<UiVersionBatch> Function()>[
+        () => throw StateError('private host details'),
+        () async => throw StateError('private host details'),
+      ]) {
+        final c = UiPublicationCoordinator(initial);
+        expect(
+          await c.recompute(prepare, () => token()),
+          UiPublishOutcome.invalid,
+        );
+        expect(c.current, same(initial));
+        expect(c.recomputing, isFalse);
+        expect(c.outdated, isTrue);
+        expect(c.publicationErrors, ['recompute_failed']);
+        expect(
+          c.allowsDispatch(
+            f.catalog.actions['edit']!,
+            readOnly: false,
+            pending: false,
+          ),
+          isFalse,
+        );
+      }
+    },
+  );
+
+  test(
+    'disposed receiver never starts preparation or publishes late work',
+    () async {
+      final f = ContractFixture();
+      final initial = f.validate(f.plan).validatedPlan!;
+      final c = UiPublicationCoordinator(initial);
+      final complete = Completer<UiVersionBatch>();
+      final work = c.recompute(() => complete.future, () => token());
+      c.dispose();
+      complete.complete(nextBatch(f));
+      expect(await work, UiPublishOutcome.disposed);
+      expect(c.current, same(initial));
+      var starts = 0;
+      expect(
+        await c.recompute(() async {
+          starts++;
+          return nextBatch(f);
+        }, () => token()),
+        UiPublishOutcome.disposed,
+      );
+      expect(starts, 0);
+      expect(c.recomputing, isFalse);
+    },
+  );
 
   test('direct publication supersedes an older async candidate', () async {
     final f = ContractFixture();
@@ -386,10 +547,13 @@ void main() {
     for (final failingRead in [1, 2]) {
       final c = UiPublicationCoordinator(initial);
       var reads = 0;
-      expect(c.publish(nextBatch(f), () {
-        if (++reads == failingRead) throw StateError('host unavailable');
-        return token();
-      }), UiPublishOutcome.invalid);
+      expect(
+        c.publish(nextBatch(f), () {
+          if (++reads == failingRead) throw StateError('host unavailable');
+          return token();
+        }),
+        UiPublishOutcome.invalid,
+      );
       expect(c.current, same(initial));
       expect(c.publicationErrors, ['publish_probe_failed']);
     }
