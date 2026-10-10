@@ -252,3 +252,23 @@ analyze/test 8/8、host 1486/3skip、Laya 全通过。按用户授权正常 no-f
 `5e7c3036f10f928665fea5f162ff3ad8052a4057`，整树与该已测组合完全一致；仅另附本摘要。
 发布完整 HEAD、远端读回及对应 CI 终态见执行回报，不以源或组合 CI 代替发布结果。
 PR21/28/29/30 和 coverage/lint 其余候选仍各按独立门禁处理，不随 PR20 批量合入。
+
+### PR29：supplier owner lint 复审及最新 develop 组合后合入（2026-10-10）
+
+冻结源 `a77aec123dc986eb0c9f5e7a244d41c2729c84d4`，合前 develop
+`7773b7d96bc99f173b57a723d61526fba0df49ff`。五文件 17+/11- 仅 braces、wildcard、
+typed File iteration 和 named initializing formal；安全/信任断言、重放保护及清理顺序保留。
+完整 diff 和非作者独立复审无当前确定阻断；Dart 下限及调用参数名/类型保持兼容。
+[源 push CI38024379339](https://github.com/mightyoung/Muyon/actions/runs/38024379339) 与
+[PR CI38024403409](https://github.com/mightyoung/Muyon/actions/runs/38024403409) 均成功。
+[固定源 bot 复审](https://github.com/mightyoung/Muyon/pull/29#issuecomment-6094367458)
+已终结且无主要问题；合前重读全部评论、review body 和 inline threads 无新增未裁定意见。
+旧质量组合 CI38024433993 因其他 owner 的 API45/UI37 analyze infos 失败，supplier analyze
+及八套测试通过；本次未复用其接受结论，也未弱化严格 analyze 门禁。
+最新 develop 正常组合 `961a3e49acfd26808b7e8c92c4cadebba8fa1b5a` 的
+[CI38028993444](https://github.com/mightyoung/Muyon/actions/runs/38028993444) 成功：analyze/test
+8/8、host1486/3skip、supplier498/4skip、doctor23、Laya29。正常 no-ff 合入
+`ad1d3cf3b49c6686bf63554c0e9798ecea83b148`，整树与已测组合相同，仅另附本摘要。
+发布 HEAD、远端读回及对应 CI 终态见执行回报，不以源或组合 CI 代替发布结果。
+PR32 文档新依赖顺序 P2、PR28 当前四项契约/回调阻断均另交作者处理，未随本次合入；
+PR21/30 仍待依赖验收与新组合，coverage 候选仍按独立门禁推进。
