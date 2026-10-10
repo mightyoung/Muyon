@@ -27,8 +27,9 @@ import 'agent_task_factory.dart';
 ///   `waitingConfirmation` (stage [stage]) and says why. Confirming it only
 ///   acknowledges that the person looked; whatever is still to be done comes
 ///   as ordinary requests with their own confirmations and one-time approvals.
-/// - Nothing here issues an approval or invokes a tool. Anything not covered
-///   by a receipt goes back to the model, whose calls need their cards again.
+/// - Historical receipt reconciliation never approves or invokes a tool.
+///   Acknowledged manual requests use fresh dispatch with normal authorization;
+///   model calls not covered by receipts need their ordinary cards again.
 class AgentResume {
   AgentResume(this.ctx);
   final AgentContext ctx;
@@ -83,8 +84,23 @@ class AgentResume {
 
   Future<PersonalTask?> _manual(PersonalTask prev) async {
     final call = Map<String, Object?>.from(prev.payload['toolCall'] as Map);
+    final preview = prev.payload['preview'];
+    final previousHold = preview is Map ? preview['resume'] : null;
+    final previouslyHeld = previousHold is Map;
+    final heldCalls = previousHold is Map ? previousHold['calls'] : null;
     final id = _invocationId(call);
-    final receipt = id == null ? null : ctx.tools.receiptFor(id);
+    final acknowledgement = prev.payload['resumeAcknowledged'];
+    final acknowledged =
+        !previouslyHeld &&
+        acknowledgement is Map &&
+        acknowledgement.containsKey('invocationId') &&
+        acknowledgement['invocationId'] == id;
+    // Pause changes stage, but cannot acknowledge a persisted verification
+    // stop. Keep even legacy holds without an id/digest held; later receipts
+    // cannot release them either. Only explicit confirmation consumes it.
+    final receipt = previouslyHeld || acknowledged || id == null
+        ? null
+        : ctx.tools.receiptFor(id);
     final toolId = call['toolId'] as String;
     final mismatch =
         receipt != null &&
@@ -93,7 +109,9 @@ class AgentResume {
               prev.payload['toolIdentityDigest'],
               receipt.identityDigest,
             ));
-    if (!mismatch &&
+    if (!previouslyHeld &&
+        !acknowledged &&
+        !mismatch &&
         (receipt == null || (!receipt.succeeded && !receipt.unknown))) {
       // Nothing ran, or it failed without any effect: ask again as before.
       return null;
@@ -109,13 +127,29 @@ class AgentResume {
       '运行工具 $toolId：${jsonEncode(call['parameters'] ?? const {})}',
     );
     final withCall = task.copy({
-      'toolCall': {
-        'toolId': toolId,
-        'parameters': call['parameters'],
-        'destination': call['destination'],
-      },
+      ...BudgetUsage.fromPayload(prev.payload).toPayload(),
+      'toolCall': call,
+      'toolIdentityDigest': prev.payload['toolIdentityDigest'],
+      if (acknowledged) 'resumeAcknowledged': acknowledgement,
     });
-    if (!mismatch && receipt.succeeded) {
+    if (acknowledged) {
+      // The old result was explicitly verified. Retry only fresh preparation
+      // with normal authorization, carrying the checkpoint if prepare fails
+      // again. Once dispatch saves a new call id, this acknowledgement no
+      // longer matches: a new unknown receipt must stop recovery as usual.
+      await ctx.repository.createTask(
+        withCall.withEvents([_resumeEvent(prev, carried)]),
+      );
+      await dispatch.dispatch(withCall, [
+        Planned(
+          toolId,
+          Map<String, Object?>.from(call['parameters'] as Map),
+          destination: call['destination'] as String?,
+        ),
+      ]);
+      return ctx.repository.task(withCall.id)!;
+    }
+    if (!previouslyHeld && !mismatch && receipt != null && receipt.succeeded) {
       final result = receipt.result!;
       final taken = withCall.copy({
         'step': {
@@ -158,14 +192,19 @@ class AgentResume {
     await _hold(
       withCall,
       prev,
-      calls: [
-        {
-          'toolId': toolId,
-          'invocationId': id,
-          'receipt': 'unknown',
-          if (mismatch) 'reason': 'identity_unverified',
-        },
-      ],
+      calls: heldCalls is List
+          ? [
+              for (final heldCall in heldCalls.whereType<Map>())
+                Map<String, Object?>.from(heldCall),
+            ]
+          : [
+              {
+                'toolId': toolId,
+                'invocationId': id,
+                'receipt': 'unknown',
+                if (mismatch) 'reason': 'identity_unverified',
+              },
+            ],
       unknownTools: [toolId],
       adopted: 0,
       unknown: 1,
@@ -442,9 +481,9 @@ class AgentResume {
     );
   }
 
-  /// The person confirmed the stop (the task is `running` again). Nothing is
-  /// executed: a manual tool run is asked for again on a new card; a model
-  /// task settles the step from what is known and goes back to the model.
+  /// The person confirmed the stop (the task is `running` again). A manual
+  /// request uses fresh preparation and normal authorization; a model task
+  /// settles the step from what is known and goes back to the model.
   Future<void> continueHeld(PersonalTask task) async {
     if (task.profileId == null) {
       final call = task.payload['toolCall'] as Map;
