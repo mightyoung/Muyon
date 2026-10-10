@@ -139,6 +139,42 @@ ValidatedUiPlan bundle(
 }
 
 void main() {
+  test(
+    'a legal edit repairs retained unreadable draft through the event gate',
+    () {
+      final old = bundle(1);
+      final next = bundle(
+        2,
+        stringSpec: UiStringEdit(accepts: (value) => value != '3'),
+      );
+      final session = UiSessionState(old.snapshot)
+        ..accept(old)
+        ..edit('qty', '3');
+      expect(session.commitPreparedRebase(session.prepareRebase(next)), isTrue);
+      expect(session.readableDraft['qty'], '3');
+      expect(session.unreadableReasons['qty'], 'format');
+      final revision = session.draftRevision;
+      final result = session.dispatch(
+        UiEvent(
+          eventId: 'repair',
+          surfaceId: 's',
+          nodeId: 'qty',
+          observedRevision: 2,
+          kind: 'change',
+          payload: '4',
+        ),
+        next,
+        catalog,
+      );
+      expect(result, UiEventOutcome.applied);
+      expect(session.resolve(const BindingRef.uiState('qty')), '4');
+      expect(session.userOverrides['qty'], '4');
+      expect(session.readableDraft, isEmpty);
+      expect(session.unreadableReasons, isEmpty);
+      expect(session.draftRevision, revision + 1);
+    },
+  );
+
   test('prepared rebase preserves same session extracted override view and selections', () {
     final old = bundle(1), next = bundle(2);
     final session = UiSessionState(old.snapshot)
