@@ -1,4 +1,6 @@
-# leader 交接（第二阶段进行中，第 4 次交接：leader A → Leader B）
+# leader 交接（第二阶段进行中，第 5 次交接：Leader B → leader A）
+
+**2026-10-10 晚：Leader B 额度用完，经用户同意由 leader A 接手合入**（派发、审查、合入 develop）。合入流程：已审分支先在 `review/leader-a-batch-*` 组合分支上合到最新 develop，组合 CI 成功后快进 develop。此后的待办见[当前状态](CURRENT-STATUS-2026-10-10.md)与下方「当前入口」；第 4 次交接（leader A → Leader B）的正文保留为历史。
 
 交接时间：2026-10-09 晚 · 交出：leader A（本机 Claude 会话，额度将用完）· 接收：**Leader B（ChatGPT）**，接任统一派发、审查与合入 · `develop` 基线：本文件所在提交
 
