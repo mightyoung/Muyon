@@ -53,6 +53,12 @@ def main():
         print(base.stdout[-15000:])
         raise SystemExit('Baseline behavior gate failed')
     print('REG4C baseline: GREEN', flush=True)
+    catalog = run(ROOT, 'scope-catalog',
+                  target='test/inquiry_scope_catalog_test.dart')
+    if catalog.returncode != 0:
+        print(catalog.stdout[-15000:])
+        raise SystemExit('Scope catalog gate failed')
+    print('REG4C scope catalog: GREEN', flush=True)
     protocol = run(ROOT, 'host-model-protocol',
                    target='test/assistant_production_model_protocol_test.dart')
     if protocol.returncode != 0:
