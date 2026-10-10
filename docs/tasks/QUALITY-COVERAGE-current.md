@@ -67,9 +67,12 @@ The sole discrepancy is `edit_spec.dart:83`, the const UiBoolEdit constructor,
 which was hit only by the push run. The const UiDateEdit constructor at line156
 was unhit in both. This is a reproducibility blocker before freezing a new
 per-file hit baseline; it is not removed, ignored or converted into a lower floor.
-The coordinator has been asked to allocate a behavior-based runtime constructor
-regression to the typed owner or approve a unique independent test. No production
-or owner-test edit is made to address it here.
+The coordinator authorized the unique independent
+`ui_edit_spec_runtime_coverage_test.dart`. Runtime-decoded metadata constructs
+bool/date specs without const canonicalization; assertions verify strict boolean
+payloads/nullability, real leap dates, inclusive bounds, invalid types/formats and
+reversed ranges. No production or owner-test edit is made. Remote execution and
+stable constructor DA hits remain pending; no success is inferred from source review.
 
 The all-source diagnostic fixture additionally asserts a lib source outside the
 six historical target files. It fails against the historical diagnostic and
