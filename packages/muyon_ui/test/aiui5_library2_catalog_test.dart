@@ -27,6 +27,19 @@ UiValidationResult check(
         state: FactState.verified,
       ),
     },
+    sources: {
+      'source': const SourceSpanRef(
+        artifact: ArtifactRef(
+          moduleId: 'm',
+          artifactId: 'a',
+          contentDigest: 'v1',
+        ),
+        originalText: 'source',
+        start: 0,
+        end: 6,
+      ),
+    },
+    sourceDigests: {'a': 'v1'},
     initialUiState: spec is UiItemIdsEdit ? {} : {'k': initial},
     editSpecs: spec == null ? {} : {'k': spec},
     collections: {

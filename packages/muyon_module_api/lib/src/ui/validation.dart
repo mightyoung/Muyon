@@ -239,6 +239,8 @@ List<String> validateUiNode(
       }
     }
   }
+  if (usesTypedEdits(catalog))
+    errors.addAll(_componentEditErrors(node, snapshot));
   for (final entry in node.events.entries) {
     final binding = entry.value;
     final action = catalog.actions[binding.actionRef];
@@ -354,6 +356,58 @@ List<String> validateUiNode(
     }
   }
   return List.unmodifiable(errors);
+}
+
+/// Library-2's public widgets must have matching host specs even when readonly.
+List<String> _componentEditErrors(UiNode node, DataSnapshot snapshot) {
+  final slot = switch (node.component) {
+    'NumberStepper' || 'Slider' || 'Toggle' || 'DateField' => 'value',
+    'Choice' || 'Tabs' => 'selected',
+    'Checklist' => 'checked',
+    'Disclosure' => 'expanded',
+    _ => null,
+  };
+  final ref = slot == null ? null : node.bindings[slot];
+  if (ref == null || ref.kind != BindingKind.uiState) return const [];
+  final spec = snapshot.editSpecs[ref.id] ?? const UiStringEdit();
+  final correct = switch (node.component) {
+    'NumberStepper' || 'Slider' => spec is UiNumberEdit,
+    'Toggle' => spec is UiBoolEdit,
+    'DateField' => spec is UiDateEdit,
+    'Choice' || 'Checklist' => spec is UiItemIdsEdit,
+    'Tabs' => spec is UiStringEdit && spec.view,
+    'Disclosure' => spec is UiBoolEdit && spec.view,
+    _ => true,
+  };
+  if (!correct) return ['component_edit_spec:${node.id}'];
+  final errors = <String>[];
+  if (spec is UiItemIdsEdit) {
+    final collection =
+        node.bindings[node.component == 'Choice' ? 'options' : 'items'];
+    if (collection?.kind != BindingKind.collection ||
+        collection?.id != spec.collectionId) {
+      errors.add('selection_collection:${node.id}');
+    }
+    if (node.component == 'Choice' &&
+        node.properties.containsKey('multiple') &&
+        node.properties['multiple'] != spec.multiple) {
+      errors.add('selection_mode:${node.id}');
+    }
+  }
+  if (node.component == 'Tabs' &&
+      !node.children.contains(snapshot.initialUiState[ref.id])) {
+    errors.add('tab_selection:${node.id}');
+  }
+  if (node.component == 'Slider' && spec is UiNumberEdit && spec.step != null) {
+    final divisions = (spec.max - spec.min) / spec.step!;
+    if (!divisions.isFinite ||
+        divisions < 1 ||
+        divisions > 10000 ||
+        divisions != divisions.roundToDouble()) {
+      errors.add('slider_step_unrepresentable');
+    }
+  }
+  return errors;
 }
 
 bool _sourceInvalid(SourceSpanRef? source, DataSnapshot snapshot) =>
