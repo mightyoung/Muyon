@@ -1,3 +1,4 @@
+import 'collection.dart';
 import 'snapshot.dart';
 
 enum UiDisplayDecision { textOnly, supplement, replacePresentation }
@@ -11,6 +12,7 @@ enum UiLocalAction {
   back,
   cancelConfirmation,
   sortRows,
+  openRow,
 }
 
 /// `number` and `stringList` are event payload types only (never properties).
@@ -40,7 +42,16 @@ class UiComponentSchema {
     Map<String, UiValueType?> events = const {},
     Map<String, Set<String>> eventActions = const {},
     this.allowsChildren = false,
-  }) : properties = Map.unmodifiable(_propertiesOnly(properties)),
+    Map<String, UiCollectionShape> collections = const {},
+    Map<String, Set<Object>> allowedValues = const {},
+    Set<String> childComponents = const {},
+  }) : collections = Map.unmodifiable(collections),
+       allowedValues = Map.unmodifiable({
+         for (final e in allowedValues.entries)
+           e.key: Set<Object>.unmodifiable(e.value),
+       }),
+       childComponents = Set.unmodifiable(childComponents),
+       properties =Map.unmodifiable(_propertiesOnly(properties)),
        requiredProperties = Set.unmodifiable(requiredProperties),
        bindings = Map.unmodifiable({
          for (final e in bindings.entries)
@@ -60,6 +71,11 @@ class UiComponentSchema {
   /// Action references implemented for each component event; absent means none.
   final Map<String, Set<String>> eventActions;
   final bool allowsChildren;
+
+  /// NOT READY (slice 1c scaffold): metadata only, not consulted by validation.
+  final Map<String, UiCollectionShape> collections;
+  final Map<String, Set<Object>> allowedValues;
+  final Set<String> childComponents;
 }
 
 class UiActionDefinition {

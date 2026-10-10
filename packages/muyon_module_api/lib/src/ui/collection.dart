@@ -32,6 +32,18 @@ class UiCollection {
   final List<UiRow> rows;
 }
 
+/// NOT READY (slice 1c scaffold): metadata only; `accepts` is not implemented
+/// and answers false for every collection until GREEN.
+enum UiCollectionShape {
+  table,
+  series,
+  timeline,
+  options,
+  items;
+
+  bool accepts(UiCollection collection) => false;
+}
+
 class UiCollectionLimits {
   const UiCollectionLimits._();
   static const rows = 200, columns = 32;

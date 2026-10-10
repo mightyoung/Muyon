@@ -1,3 +1,4 @@
+import '../references.dart';
 import 'edit_spec.dart';
 import 'snapshot.dart';
 import 'plan.dart';
@@ -71,6 +72,9 @@ class UiSessionState {
         return source.originalText.substring(source.start, source.end);
     }
   }
+
+  /// NOT READY (slice 1c scaffold): always null until GREEN.
+  ObjectRef? rowObject(UiNode node, Object? itemId) => null;
 
   /// Typed rules are in force only while the accepted current plan uses a
   /// typed catalog; with no plan or an older catalog the legacy gate applies.
@@ -299,6 +303,9 @@ class UiSessionState {
       case UiLocalAction.openDetail:
         if (!node.bindings.containsKey('value')) return UiEventOutcome.invalid;
         detailNode = node.id;
+      case UiLocalAction.openRow:
+        // NOT READY (slice 1c scaffold): no row navigation yet.
+        return UiEventOutcome.invalid;
       case UiLocalAction.back:
         detailNode = null;
       case UiLocalAction.cancelConfirmation:
