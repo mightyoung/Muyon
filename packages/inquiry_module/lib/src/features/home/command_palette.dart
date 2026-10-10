@@ -94,6 +94,7 @@ class _PaletteState extends State<_Palette> {
       (c) => showCatalogForm(c, widget.state, 'product'),
     ),
     for (final (i, s) in Section.values.indexed)
+      if (!widget.state.isHosted || s != Section.ask)
       _Entry(
         '打开 ${s.label}',
         s.icon,

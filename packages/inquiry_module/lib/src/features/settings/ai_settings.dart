@@ -207,6 +207,7 @@ class _AiSettingsState extends State<AiSettings> {
         ),
       ),
       const SizedBox(height: 12),
+      if (!widget.state.isHosted) ...[
       Wrap(
         spacing: 8,
         children: [
@@ -240,6 +241,7 @@ class _AiSettingsState extends State<AiSettings> {
         title: const Text('助手联网查询'),
         subtitle: const Text('搜索词会发送给公开搜索网站；公开网页内容会交给配置的 AI 服务处理。'),
       ),
+      ],
       Wrap(
         spacing: 12,
         crossAxisAlignment: WrapCrossAlignment.center,

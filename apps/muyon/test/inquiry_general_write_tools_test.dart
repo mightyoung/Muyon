@@ -72,6 +72,21 @@ void main() {
     }
   });
 
+  test('coverage registers CRUD and gives specialized writes explicit deferred reasons', () {
+    final module = host.registry.require('inquiry') as BusinessModuleV2;
+    final operations = {for (final op in module.coverage.operations) op.id: op};
+    for (final name in ['create_record', 'update_record', 'delete_record', 'restore_record']) {
+      expect(operations[name]!.kind, OpKind.write);
+      expect(operations[name]!.tools, ['inquiry.$name']);
+    }
+    for (final name in ['product_param', 'spec_records', 'merge_duplicates', 'award', 'refresh_prices']) {
+      expect(operations[name]!.notExposed!.kind, NotExposedKind.deferred);
+      expect(operations[name]!.notExposed!.taskId, 'REG-4');
+      expect(operations[name]!.notExposed!.reason, isNotEmpty);
+      expect(operations[name]!.tools, isEmpty);
+    }
+  });
+
   test('unapproved generic write never changes the Store or writes a receipt', () async {
     final r = await request('update_record', edit(supplierId));
     await expectLater(host.tools.invoke(r), throwsA(isA<ToolPlatformException>()));

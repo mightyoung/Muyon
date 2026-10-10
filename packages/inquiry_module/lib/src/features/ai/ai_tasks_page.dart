@@ -24,6 +24,9 @@ class AiTasksPage extends StatelessWidget {
 
   Future<void> _resume(BuildContext context, AiJob job) async {
     try {
+      if (state.isHosted && job.task == AiTask.conversation) {
+        throw const FormatException('请使用宿主统一助手');
+      }
       if (job.task == AiTask.clauseReading) {
         final item = state.store.get(
           'spec_item',
@@ -78,7 +81,7 @@ class AiTasksPage extends StatelessWidget {
     builder: (context, _) {
       late List<AiJob> jobs;
       try {
-        jobs = state.aiTasks;
+        jobs = state.aiTasks.where((job) => !state.isHosted || job.task != AiTask.conversation).toList();
       } catch (e) {
         return Center(child: Text('任务记录读取失败：${friendlyError('$e')}'));
       }

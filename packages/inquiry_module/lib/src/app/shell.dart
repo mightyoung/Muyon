@@ -59,13 +59,16 @@ class Shell extends StatefulWidget {
 class _ShellState extends State<Shell> {
   late var section = widget.initial;
 
-  void go(Section s) => setState(() => section = s);
+  void go(Section s) {
+    if (widget.state.isHosted && s == Section.ask) return;
+    setState(() => section = s);
+  }
 
   Widget _page() => switch (section) {
     Section.home => HomePage(state: widget.state, onGo: go),
     Section.projects => ProjectsPage(state: widget.state),
     Section.quotes => QuotesPage(state: widget.state),
-    Section.ask => AskPage(
+    Section.ask => widget.state.isHosted ? HomePage(state: widget.state, onGo: go) : AskPage(
       state: widget.state,
       onOpenPage: (name) =>
           go(Section.values.firstWhere((s) => s.name == name)),
@@ -110,6 +113,7 @@ class _ShellState extends State<Shell> {
         // Ctrl on Windows and Android keyboards, ⌘ on macOS; both work.
         for (final meta in [false, true]) ...{
           for (var i = 0; i < 8; i++)
+            if (!widget.state.isHosted || Section.values[i] != Section.ask)
             SingleActivator(
               LogicalKeyboardKey(0x31 + i),
               control: !meta,
@@ -158,9 +162,10 @@ class _ShellState extends State<Shell> {
                   children: [
                     _Sidebar(
                       showWindowDecorations: !widget.embedded,
+                      hosted: widget.state.isHosted,
                       current: section,
                       device: widget.state.deviceName,
-                      onSelect: (s) => setState(() => section = s),
+                      onSelect: go,
                     ),
                     Expanded(
                       child: customTitleBar && !widget.embedded
@@ -178,8 +183,9 @@ class _ShellState extends State<Shell> {
             : Scaffold(
                 body: SafeArea(child: page),
                 bottomNavigationBar: _BottomNav(
+                  hosted: widget.state.isHosted,
                   current: section,
-                  onSelect: (s) => setState(() => section = s),
+                  onSelect: go,
                 ),
               ),
       ),
@@ -193,11 +199,13 @@ class _Sidebar extends StatelessWidget {
     required this.device,
     required this.onSelect,
     required this.showWindowDecorations,
+    required this.hosted,
   });
   final Section current;
   final String device;
   final ValueChanged<Section> onSelect;
   final bool showWindowDecorations;
+  final bool hosted;
 
   @override
   Widget build(BuildContext context) {
@@ -299,7 +307,7 @@ class _Sidebar extends StatelessWidget {
                 ])
                   item(s),
                 group('辅助工具'),
-                item(Section.ask),
+                if (!hosted) item(Section.ask),
                 item(Section.aiTasks),
                 item(Section.exchange),
                 item(Section.data),
@@ -324,9 +332,11 @@ class _Sidebar extends StatelessWidget {
 }
 
 class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.current, required this.onSelect});
+  const _BottomNav({required this.current, required this.onSelect, required this.hosted});
   final Section current;
   final ValueChanged<Section> onSelect;
+
+  final bool hosted;
 
   static const _primary = [Section.home, Section.projects, Section.quotes];
 
@@ -359,7 +369,7 @@ class _BottomNav extends StatelessWidget {
                     Section.products,
                     Section.suppliers,
                     Section.hub,
-                    Section.ask,
+                    if (!hosted) Section.ask,
                     Section.aiTasks,
                     Section.exchange,
                     Section.data,

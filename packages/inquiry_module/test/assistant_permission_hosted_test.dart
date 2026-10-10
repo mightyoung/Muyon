@@ -155,7 +155,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('both permission selectors hide bypass', (tester) async {
+    testWidgets('hosted settings are hidden and compatibility AskPage hides bypass', (tester) async {
       state.assistantPermission = AssistantPermission.bypass;
       await tester.pumpWidget(
         MaterialApp(
@@ -166,18 +166,11 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final dropdown = find.byType(DropdownButton<AssistantPermission>);
-      await tester.ensureVisible(dropdown);
-      await tester.tap(dropdown);
-      await tester.pumpAndSettle();
-      expect(
-        find.widgetWithText(DropdownMenuItem<AssistantPermission>, '自动执行（免确认）'),
-        findsNothing,
-      );
-      expect(
-        find.widgetWithText(DropdownMenuItem<AssistantPermission>, '修改前逐次确认'),
-        findsWidgets,
-      );
+      // REG-4c removes the entire hosted permission surface, a stronger
+      // boundary than merely omitting bypass from an accessible dropdown.
+      expect(find.byType(DropdownButton<AssistantPermission>), findsNothing);
+      expect(find.text('助手操作权限'), findsNothing);
+      expect(find.text('助手联网查询'), findsNothing);
       expect(find.textContaining('助手会直接保存修改和联网请求'), findsNothing);
 
       await tester.pumpWidget(

@@ -81,7 +81,7 @@ void main() {
       );
       expect(
         host.tools.list().where((tool) => tool.providerId == 'inquiry'),
-        hasLength(19),
+        hasLength(23),
       );
       expect(
         host.tools
@@ -328,12 +328,28 @@ void main() {
         reason: 'Preserve every original registration argument',
       );
       final catalog = adapted.entries;
-      expect(
-        catalog,
-        jsonDecode(
-          File('test/fixtures/inquiry_legacy_catalog.json').readAsStringSync(),
-        ),
-      );
+      const genericWrites = {
+        'inquiry.create_record', 'inquiry.update_record',
+        'inquiry.delete_record', 'inquiry.restore_record',
+      };
+      final originalCatalog = jsonDecode(
+        File('test/fixtures/inquiry_legacy_catalog.json').readAsStringSync(),
+      ) as List;
+      // Preserve the entire original snapshot byte-for-byte, and require the
+      // four new registrations in addition. No old guard is discarded.
+      expect(catalog.where((entry) => !genericWrites.contains(
+        (entry['descriptor'] as Map)['id'])).toList(), originalCatalog);
+      expect(catalog, hasLength(originalCatalog.length + genericWrites.length));
+      final added = catalog.where((entry) => genericWrites.contains(
+        (entry['descriptor'] as Map)['id'])).toList();
+      expect(added.map((entry) => (entry['descriptor'] as Map)['id']).toSet(), genericWrites);
+      for (final entry in added) {
+        expect((entry['descriptor'] as Map)['effect'], 'write');
+        expect(entry['scopes'], ['selectedObjects']);
+        expect(entry['dataModules'], ['inquiry']);
+        expect(entry['resultGuard'], true);
+        expect(entry['destinationGuard'], true);
+      }
       expect(
         catalog.map((entry) => (entry['descriptor'] as Map)['id']).toSet(),
         hasLength(catalog.length),
