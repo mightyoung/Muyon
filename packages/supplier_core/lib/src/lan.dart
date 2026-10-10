@@ -677,14 +677,16 @@ class LanNode {
 
   void _rememberPersisted(String messageId, int sentAtUnix) {
     final now = _unixNow();
-    _persistedMessages.removeWhere(
+    final pending = Map<String, int>.of(_persistedMessages);
+    pending.removeWhere(
       (_, at) => (now - at).abs() > pushAcceptWindow.inSeconds,
     );
-    _persistedMessages[messageId] = sentAtUnix;
-    _seenPushFile.writeAsStringSync(
-      jsonEncode(_persistedMessages),
-      flush: true,
-    );
+    pending[messageId] = sentAtUnix;
+    _seenPushFile.writeAsStringSync(jsonEncode(pending), flush: true);
+    // A failed write must not contaminate a later successful persistence.
+    _persistedMessages
+      ..clear()
+      ..addAll(pending);
   }
 
   _PushAuth? _authorizePush(HttpRequest req) {
@@ -815,14 +817,17 @@ class LanNode {
             auth.signature,
           );
       if (!proofOk) throw const FormatException('sender proof rejected');
-      attempt?.enter(LanReceiveStage.persist);
-      _rememberPersisted(auth.messageId, auth.sentAtUnix);
       // Move out of the unique staging directory: callers delete only the file.
       attempt?.enter(LanReceiveStage.rename);
       final finalFile = await file.rename('${staging.path}.siq');
       try {
         if (timedOut || _stopped)
           throw const FormatException('transfer stopped');
+        // Reserve durable replay protection only once the final file exists
+        // and delivery can be attempted. Keep it if the callback throws: the
+        // callback may already have performed effects before throwing.
+        attempt?.enter(LanReceiveStage.persist);
+        _rememberPersisted(auth.messageId, auth.sentAtUnix);
         attempt?.enter(LanReceiveStage.deliver);
         _onPush(
           LanPush(

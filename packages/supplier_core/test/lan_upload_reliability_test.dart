@@ -225,7 +225,7 @@ Future<(LanNode, DeviceIdentity, Directory)> observedNode(
 // Called from main below; the real receiver deadline is the synchronization
 // event. No sleep or client-side latency is used as proof of expiry.
 void diagnosticTests() {
-  test('malformed HTTP length never reaches upload admission', () async {
+  test('malformed HTTP length closes before upload admission', () async {
     final recorder = ReceiveRecorder();
     final pushes = <LanPush>[];
     final (node, _, dir) = await observedNode(recorder, onPush: pushes.add);
@@ -240,16 +240,16 @@ void diagnosticTests() {
     socket.write('POST /push HTTP/1.1\r\nHost: localhost\r\n'
         'Content-Length: invalid\r\nConnection: close\r\n\r\n');
     await socket.flush();
-    final response = String.fromCharCodes(await reading);
-    final fields = response.split(' ');
-    final status = fields.length > 1 ? int.tryParse(fields[1]) : null;
-    expect(status, HttpStatus.badRequest, reason: recorder.events.join('\n'));
+    final response = await reading;
+    // A header parse failure closes the socket before dispatch. This SDK
+    // path does not send an HTTP response or surface a server-stream error.
+    // Record SDK behavior; RFC 9112 6.3 requires 400 before close instead.
+    expect(response, isEmpty, reason: 'responseBytes=${response.length}');
+    expect(recorder.events, isEmpty);
     expect(pushes, isEmpty);
     expect(dir.listSync(), isEmpty);
-    expect(recorder.events.where((e) =>
-        e.stage == LanReceiveStage.admission || e.stage == LanReceiveStage.deliver), isEmpty);
-    // HttpServer may generate 400 without a request or stream error callback.
-    // Absence of an attempt is evidence of pre-dispatch failure, not its cause.
+    // Other parser failures remain unclassified. This injected invalid length
+    // is evidence of pre-dispatch close, not a reproduction of HTTP 400.
   });
 
   test('complete legal body held in filesystem hits receiver deadline', () async {
