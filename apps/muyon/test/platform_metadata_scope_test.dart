@@ -67,6 +67,27 @@ class _Runtime implements ModuleRuntime, ScopeCandidates, ScopeResolvable {
   }
 }
 
+class _Handlers implements ToolRegistrar {
+  @override
+  final moduleId = 'platform';
+  final handlers = <String, ModuleToolHandler>{};
+  @override
+  void read(ToolSpec spec, ModuleToolHandler handler) => handlers[spec.name] = handler;
+  @override
+  void write(WriteToolSpec spec, ModuleToolHandler handler) => throw StateError('not read');
+  @override
+  void external(ExternalToolSpec spec, ModuleToolHandler handler) => throw StateError('not read');
+  @override
+  HostChannel channel(ChannelSpec spec) => throw StateError('not read');
+}
+class _Context implements ModuleToolContext {
+  _Context(this.call);
+  @override
+  final ToolCallContext call;
+  @override
+  Future<T> runtime<T extends ModuleRuntime>() => throw StateError('no business runtime');
+}
+
 class _Counters { int prepare = 0, enumerate = 0, resolve = 0, knowledge = 0; }
 class _Source implements ScopeSource {
   _Source(this.source, this.counts);
@@ -142,7 +163,7 @@ void main() {
     configureScopes();
     audit = _AuditDatabase(host.foundation.database);
     registry = newRegistry();
-    binding =     registerPlatformReadTools(registry: registry, foundation: host.foundation,
+    binding = registerPlatformReadTools(registry: registry, foundation: host.foundation,
       executions: ExecutionStore(host.foundation.database), transfer: host.services.transfer,
       isAvailable: () => available);
   });
@@ -499,4 +520,24 @@ void main() {
       expect(researchHost.services.transfer.peers, isEmpty);
     } finally { await reads?.close(); await researchHost.close(); }
   });
+  test('handler rechecks host authorization after registrar async preparation', () async {
+    final handlers = _Handlers();
+    PlatformReadTools(foundation: host.foundation,
+      executions: ExecutionStore(host.foundation.database), transfer: host.services.transfer)
+      .registerTools(handlers);
+    var checks = 0;
+    final before = changes(audit.raw);
+    for (final entry in handlers.handlers.entries) {
+      final call = request('platform.${entry.key}', 'handler-${entry.key}');
+      await expectLater(entry.value(_Context(ToolCallContext(request: call,
+        resolvedScope: ResolvedAssistantScope(requested: call.scope, objects: []),
+        cancellation: ToolCancellationToken(), checkAuthorization: () {
+          checks++;
+          throw const ToolPlatformException('host_unavailable', 'Host metadata is unavailable');
+        }))), throwsA(isA<ToolPlatformException>().having((e) => e.code, 'code', 'host_unavailable')));
+    }
+    expect(checks, 4); expect(changes(audit.raw), before);
+    expect(module.activations, 0);
+  });
+
 }
