@@ -101,7 +101,11 @@ class UiStreamCompiler {
       _limit(UiStreamErrorCode.lineCountLimit, 'line_count_limit');
       return current;
     }
-    final parsed = parseUiStreamLine(line, limits: limits);
+    final parsed = parseUiStreamLine(
+      line,
+      limits: limits,
+      protocolVersion: session.protocolVersion,
+    );
     if (parsed.error case final error?) {
       if (error.code == UiStreamErrorCode.lineLimit) {
         _limit(error.code, error.reason);

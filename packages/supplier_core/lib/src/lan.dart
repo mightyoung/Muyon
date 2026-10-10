@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'lan_identity.dart';
+import 'lan_receive_diagnostics.dart';
 
 export 'lan_identity.dart';
 
@@ -181,11 +182,16 @@ class LanNode {
       trust.$2,
     );
     node._ledger = outboundLedger;
+    node._receiveDiagnostics = LanReceiveDiagnostics.current;
     http.listen((request) {
       final pending = node._serve(request);
       node._requests.add(pending);
       unawaited(pending.whenComplete(() => node._requests.remove(pending)));
-    }, onError: (Object _) {});
+    }, onError: (Object error) {
+      final attempt = node._receiveDiagnostics?.begin();
+      attempt?.enter(LanReceiveStage.http);
+      attempt?.failure(error);
+    });
     udp.listen(
       (e) {
         if (e == RawSocketEvent.read) node._receive();
@@ -208,6 +214,7 @@ class LanNode {
   }
 
   LanOutboundLedger? _ledger;
+  LanReceiveDiagnostics? _receiveDiagnostics;
   final _audits = <Future<dynamic>>{};
   Future<T> _audit<T>(
     Uri destination,
@@ -561,6 +568,9 @@ class LanNode {
 
   Future<void> _serve(HttpRequest req) async {
     final res = req.response;
+    final attempt = req.method == 'POST' && req.uri.path == '/push'
+        ? _receiveDiagnostics?.begin()
+        : null;
     final destination = Uri(
       scheme: 'https',
       host: req.connectionInfo!.remoteAddress.address,
@@ -587,18 +597,20 @@ class LanNode {
           await res.close();
         }, toolId: 'transfer.listen');
       } else if (req.method == 'POST' && req.uri.path == '/push') {
+        attempt?.enter(LanReceiveStage.authorization);
         final auth = _authorizePush(req);
         if (auth == null) return;
         _pushAuth[req] = auth;
         try {
-          await _acceptPush(req);
+          await _acceptPush(req, attempt);
         } finally {
           _pushAuth.remove(req);
         }
       } else {
         res.statusCode = HttpStatus.notFound;
       }
-    } catch (_) {
+    } catch (error) {
+      if (attempt != null && !attempt.hasFailure) attempt.failure(error);
       if (req.uri.path == '/hello') {
         try {
           (await res.detachSocket(writeHeaders: false)).destroy();
@@ -612,6 +624,7 @@ class LanNode {
         // The socket may already be closed during shutdown.
       }
     } finally {
+      attempt?.enter(LanReceiveStage.response);
       try {
         if (replyAccounted) {
           await res.close();
@@ -625,7 +638,12 @@ class LanNode {
             toolId: 'transfer.listen',
           );
         }
-      } catch (_) {
+        attempt?.emit(
+          LanReceiveEventKind.responded,
+          statusCode: res.statusCode,
+        );
+      } catch (error) {
+        attempt?.failure(error);
         try {
           (await res.detachSocket(writeHeaders: false)).destroy();
         } catch (_) {}
@@ -659,14 +677,16 @@ class LanNode {
 
   void _rememberPersisted(String messageId, int sentAtUnix) {
     final now = _unixNow();
-    _persistedMessages.removeWhere(
+    final pending = Map<String, int>.of(_persistedMessages);
+    pending.removeWhere(
       (_, at) => (now - at).abs() > pushAcceptWindow.inSeconds,
     );
-    _persistedMessages[messageId] = sentAtUnix;
-    _seenPushFile.writeAsStringSync(
-      jsonEncode(_persistedMessages),
-      flush: true,
-    );
+    pending[messageId] = sentAtUnix;
+    _seenPushFile.writeAsStringSync(jsonEncode(pending), flush: true);
+    // A failed write must not contaminate a later successful persistence.
+    _persistedMessages
+      ..clear()
+      ..addAll(pending);
   }
 
   _PushAuth? _authorizePush(HttpRequest req) {
@@ -705,7 +725,11 @@ class LanNode {
     seen.remove(order.removeAt(0));
   }
 
-  Future<void> _acceptPush(HttpRequest req) async {
+  Future<void> _acceptPush(
+    HttpRequest req,
+    LanReceiveAttempt? attempt,
+  ) async {
+    attempt?.enter(LanReceiveStage.admission);
     final auth = _pushAuth[req];
     final length = req.contentLength;
     if (length <= 0 || length > maxPushBytes) {
@@ -723,6 +747,7 @@ class LanNode {
       req.response.persistentConnection = false;
       return;
     }
+    attempt?.enter(LanReceiveStage.identity);
     final fromId = req.headers.value('x-siq-id') ?? '';
     final fromName = Uri.decodeComponent(req.headers.value('x-siq-name') ?? '');
     final at = DateTime.now();
@@ -738,30 +763,44 @@ class LanNode {
     final hasher = Sha256Sink();
     final deadline = Timer(_limits.transferTimeout, () {
       timedOut = true;
+      if (attempt != null) {
+        attempt.deadlineExpired = true;
+        attempt.emit(LanReceiveEventKind.deadline);
+      }
       unawaited(input.cancel());
     });
     Directory? staging;
     RandomAccessFile? sink;
     var retained = false;
+    var finalCleanupSucceeded = true;
     var received = 0;
     try {
+      attempt?.enter(LanReceiveStage.createTemp);
       staging = await inbox.createTemp('push-');
       final file = File('${staging.path}/data.siq');
+      attempt?.enter(LanReceiveStage.open);
       sink = await file.open(mode: FileMode.write);
+      attempt?.enter(LanReceiveStage.read);
       while (await input.moveNext()) {
         final chunk = input.current;
         received += chunk.length;
         if (received > length) throw const FormatException('too long');
         hasher.add(chunk);
+        attempt?.enter(LanReceiveStage.write);
         await sink.writeFrom(chunk);
+        attempt?.enter(LanReceiveStage.read);
       }
+      attempt?.enter(LanReceiveStage.flush);
       await sink.flush();
+      attempt?.enter(LanReceiveStage.close);
       await sink.close();
       sink = null;
+      attempt?.enter(LanReceiveStage.validateLength);
       if (timedOut || _stopped) throw const FormatException('transfer stopped');
       if (received != length) throw const FormatException('cut short');
       if (auth == null) throw const FormatException('missing sender proof');
       final bodyHash = hasher.close();
+      attempt?.enter(LanReceiveStage.verify);
       final certificate = _paired[auth.fingerprint];
       final proofOk =
           certificate != null &&
@@ -778,12 +817,18 @@ class LanNode {
             auth.signature,
           );
       if (!proofOk) throw const FormatException('sender proof rejected');
-      _rememberPersisted(auth.messageId, auth.sentAtUnix);
       // Move out of the unique staging directory: callers delete only the file.
+      attempt?.enter(LanReceiveStage.rename);
       final finalFile = await file.rename('${staging.path}.siq');
       try {
         if (timedOut || _stopped)
           throw const FormatException('transfer stopped');
+        // Reserve durable replay protection only once the final file exists
+        // and delivery can be attempted. Keep it if the callback throws: the
+        // callback may already have performed effects before throwing.
+        attempt?.enter(LanReceiveStage.persist);
+        _rememberPersisted(auth.messageId, auth.sentAtUnix);
+        attempt?.enter(LanReceiveStage.deliver);
         _onPush(
           LanPush(
             fromId,
@@ -795,11 +840,29 @@ class LanNode {
           ),
         );
         retained = true;
+      } catch (error) {
+        attempt?.failure(error);
+        rethrow;
       } finally {
-        if (!retained && await finalFile.exists()) await finalFile.delete();
+        if (!retained) {
+          attempt?.enter(LanReceiveStage.cleanup);
+          try {
+            if (await finalFile.exists()) await finalFile.delete();
+          } catch (error) {
+            finalCleanupSucceeded = false;
+            attempt?.failure(error);
+            rethrow;
+          }
+        }
       }
+    } catch (error) {
+      if (attempt != null && !attempt.hasFailure) attempt.failure(error);
+      rethrow;
     } finally {
       deadline.cancel();
+      // Failure was captured before cleanup can replace its stage/error.
+      attempt?.enter(LanReceiveStage.cleanup);
+      var cleanupSucceeded = false;
       try {
         try {
           await input.cancel();
@@ -810,8 +873,13 @@ class LanNode {
             if (staging != null && await staging.exists()) {
               await staging.delete(recursive: true);
             }
+            cleanupSucceeded = finalCleanupSucceeded;
           }
         }
+      } catch (error) {
+        cleanupSucceeded = false;
+        attempt?.failure(error);
+        rethrow;
       } finally {
         _uploads.remove(input);
         _reservedBytes -= length;
@@ -821,6 +889,14 @@ class LanNode {
         } else {
           _uploadsByAddress[address] = remaining;
         }
+        attempt?.emit(
+          LanReceiveEventKind.cleaned,
+          stopped: _stopped,
+          retained: retained,
+          cleanupSucceeded: cleanupSucceeded,
+          activeUploads: _uploads.length,
+          reservedBytes: _reservedBytes,
+        );
       }
     }
   }

@@ -248,7 +248,10 @@ UIPlan decodeUiPresentation(Map<String, dynamic> j) => UIPlan(
           bindings: {
             for (final e in (n['bindings'] as Map).entries)
               e.key as String: BindingRef(
-                BindingKind.values.byName(e.value['kind'] as String),
+                // Stored workspaces have no collection codec yet.
+                e.value['kind'] == 'collection'
+                    ? throw ArgumentError.value(e.value['kind'], 'kind')
+                    : BindingKind.values.byName(e.value['kind'] as String),
                 e.value['id'] as String,
               ),
           },

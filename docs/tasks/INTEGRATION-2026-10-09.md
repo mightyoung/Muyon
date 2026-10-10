@@ -211,3 +211,21 @@ invocationId/digest、可能转fresh可执行卡的P1，晚于03:34:35Z实际合
 父任务已派原作者task/harness-manual-hold-identity复现/最小修复并等待真实Claude评审，
 本线程不擅自回滚、重复合入或并行改实现。新修复需固定源门禁、独立组合及机器人精确head
 review终态/未处理意见裁定。此后不mark-ready即merge，其他入口提前合入须合后补查与报告。
+
+### PR27：修正任务索引的历史状态（2026-10-10）
+
+冻结源 `1e78c1c091a6a392629e544c93048f633fbdc888`，合前 develop
+`e192a32ebe659160cb64a1d4bd5df0b93bfdb74f`。README 单段明确旧“未发布/未编码”仅为
+2026-10-08 状态，保留后续集成和未验范围；独立复审核 133 个链接目标及 diff 检查通过。
+[源 push CI38023574770](https://github.com/mightyoung/Muyon/actions/runs/38023574770) 与
+[PR组合 CI38023593893](https://github.com/mightyoung/Muyon/actions/runs/38023593893) 均成功。
+[固定 head 机器人审查](https://github.com/mightyoung/Muyon/pull/27#issuecomment-6093816261)
+已终结且无发现；合前另核完整评论、review body、inline threads 均无未结意见。
+按用户授权正常 no-ff 合入 `55ab4db03aa5b18de6480e3e4e1e478ec2c2b83b`，整树等于已测源 tree。
+发布 HEAD、ls-remote 和发布 CI 终态见执行回报，不以 source CI 代替发布结果。
+
+PR20 源 `204f9a71a4ab7d8f6075270686e5891467867929` 的源/组合 CI 虽成功，
+但[新 P2](https://github.com/mightyoung/Muyon/pull/20#discussion_r4236403656)经独立复审确认：
+已消费核实后 fresh prepare 失败仍保留旧 hold 标记，恢复重复要求核实；现有回归未覆盖。
+继续暂停，原作者补故障回归和持久消费状态后复审；不称 PR16 P1 已整体闭环。
+PR21/28 仍按纯接口/typed 机制范围及组合依赖推进，不记 runtime、collection 或33组件完成。

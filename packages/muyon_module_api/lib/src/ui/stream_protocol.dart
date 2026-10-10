@@ -27,6 +27,9 @@ class UiStreamLimits {
       diagnostics;
 }
 
+const streamProtocolV1 = 'aiui-stream/1';
+const streamProtocolV2 = 'aiui-stream/2';
+
 /// Trusted host inputs; the stream can never replace this metadata.
 class UiStreamSession {
   UiStreamSession({
@@ -36,10 +39,18 @@ class UiStreamSession {
     required this.intent,
     required this.catalog,
     this.root = 'root',
-    this.protocolVersion = 'aiui-stream/1',
+    this.protocolVersion = streamProtocolV1,
   }) {
-    if (protocolVersion != 'aiui-stream/1') {
+    if (protocolVersion != streamProtocolV1 &&
+        protocolVersion != streamProtocolV2) {
       throw ArgumentError.value(protocolVersion, 'protocolVersion');
+    }
+    if (catalog.version == 'library-2' && protocolVersion != streamProtocolV2) {
+      throw ArgumentError.value(
+        protocolVersion,
+        'protocolVersion',
+        'catalog_requires_stream_2',
+      );
     }
   }
   final String surfaceId, root, protocolVersion;
@@ -127,6 +138,7 @@ class UiStreamParseResult {
 UiStreamParseResult parseUiStreamLine(
   String line, {
   UiStreamLimits limits = UiStreamLimits.v1,
+  String protocolVersion = streamProtocolV1,
 }) {
   if (utf8.encode(line).length > limits.lineBytes) {
     return const UiStreamParseResult(
@@ -177,6 +189,9 @@ UiStreamParseResult parseUiStreamLine(
               ref['kind'] is! String ||
               ref['id'] is! String ||
               (ref['id'] as String).isEmpty)
+            throw const FormatException();
+          // Explicit gate: the enum has collection, but /1 grammar must not.
+          if (ref['kind'] == 'collection' && protocolVersion != streamProtocolV2)
             throw const FormatException();
           final kind = BindingKind.values.byName(ref['kind'] as String);
           return MapEntry(key, BindingRef(kind, ref['id'] as String));

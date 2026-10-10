@@ -1,6 +1,6 @@
 # 任务派发索引
 
-**leader 先读 [HANDOVER-LEADER.md](HANDOVER-LEADER.md)。** 角色与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)。**当前是第二阶段**：范围见 [ADR-0003](../adr/0003-phase2-scope.md)，计划见[第二至第四阶段路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)（第一阶段已于 2026-10-07 退出）。
+**当前入口：先读 [状态快照 v1（2026-10-10）](CURRENT-STATUS-2026-10-10-v1.md)，再读 [HANDOVER-LEADER.md](HANDOVER-LEADER.md) 的现行阅读顺序。** 角色与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)。**当前是第二阶段**：范围见 [ADR-0003](../adr/0003-phase2-scope.md)，计划见[第二至第四阶段路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)（第一阶段已于 2026-10-07 退出）。
 
 ## 规则
 
@@ -49,19 +49,23 @@
 | GROK-2 能力覆盖清单初稿（科研、原型、询价） | `task/grok-2-coverage-drafts` | [GROK-2.md](GROK-2.md) | grokbot | GROK-1 | 已合入（[审查](GROK-2-review.md)） |
 | GROK-3 询价敏感字段划分初稿（Q7，交用户确认） | `task/grok-3-sensitivity-draft` | [GROK-3.md](GROK-3.md) | grokbot | — | 已合入（[审查](GROK-3-review.md)）；Q7 已确认（2026-10-08） |
 | GROK-4 UI-1b 盘点：硬编码颜色与询价通用部件 | `task/grok-4-ui-inventory` | [GROK-4.md](GROK-4.md) | grokbot | — | 已合入（[审查](GROK-4-review.md)） |
-| UI-0 现状截图与走查 | 并入 `task/r-1-evidence` | [UI-0.md](UI-0.md) | engineer | — | 精简版并入 R-1（第 3 件） |
+| UI-0 现状截图与走查 | 历史：曾并入 `task/r-1-evidence` | [UI-0.md](UI-0.md) | engineer | — | **已取消（用户 2026-10-09）**；取代 10-07「R-1 第 3 件」安排，见 [R-1 §3](R-1.md) |
 | UI-1 设计系统 | 拆为 UI-1a、UI-1b | [UI-1.md](UI-1.md) | — | — | UI-1a 已合入；UI-1b（迁入询价部件、去硬编码颜色）在 FOLIO-BYPASS、REG-4 之后 |
 | B 2.4 原型补齐（冻结前在途） | `feat/b-ui` → `review/B-2.4` | [审查](B-2.4-review.md) | engineer | — | 已合入（三轮；S6 第一阶段搁置） |
 | E11 研究对象页（冻结前在途） | `feat/e-support` → `review/E11` | [审查](E11-review.md) | junior | — | 已合入（两轮；S6 第一阶段搁置） |
 
-UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入库，[审阅](../reviews/2026-10-07-design-v4-review.md)）；第一阶段之后按 [UI 重设计方案 §9](../design/ui-redesign-brief-2026-10-06.md) 分换壳与新能力两条线派发，分级授权见 [ADR-0002](../adr/0002-graded-assistant-authorization.md)（已采纳，第一阶段之后实施）。
+**历史路线（2026-10-07，已被 2026-10-09 AI 原生方案取代）：** UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入库，[审阅](../reviews/2026-10-07-design-v4-review.md)）；第一阶段之后按 [UI 重设计方案 §9](../design/ui-redesign-brief-2026-10-06.md) 分换壳与新能力两条线派发，分级授权见 [ADR-0002](../adr/0002-graded-assistant-authorization.md)（已采纳，第一阶段之后实施）。
 
 已停用：过渡集成分支 `feat/p0-ci-llm-baseline` 不再使用，合入目标统一为 `develop`。
 
 
-## 下一批 AI-native 任务草案（待复核，不是已派发）
+## 2026-10-08 AI-native 草案及后续集成记录
 
-[版本化计划](../superpowers/plans/2026-10-08-ai-native-next-batch.md)基于已发布00dbd6c；架构稿在独立docs分支66476e2，保持建议属性。本轮只形成任务书，未发布develop或开始编码。先云端UI/流程验收与修复，再推进下阶段；原生/实机集中末次，云未覆盖保持待验。模型训练、指南稿和双模型选择不是主线前置。
+原草案标题「待复核，不是已派发」是 10-08 状态；下表已合入行以 10-09 集成记录为准，当前待办见状态快照。
+
+**历史规划状态（2026-10-08 形成该批任务书时）：** [版本化计划](../superpowers/plans/2026-10-08-ai-native-next-batch.md)基于当时已发布00dbd6c；架构稿位于独立docs分支66476e2，保持建议属性。当时该批只形成任务书，尚未发布到develop或开始编码。该历史状态不适用于下表的后续集成结果。
+
+**后续集成与待办：** 下表 AIUI-F1～F6、REG-4a 已合入，REG-4b 源及 ABC 集成也已在 develop 祖先中；这不代表全部验收完成。C4-GUIDE 接入待复核，R-1-AI-UI-final 仍为末次清单草案，原生/实机/Mac及云未覆盖能力继续待验。执行顺序仍为先云端UI/流程验收与修复、再推进下阶段，原生/实机集中末次；模型训练、指南稿和双模型选择不是主线前置。
 
 | 任务 | 拟任务分支 | 目标/依赖 | 状态 |
 |---|---|---|---|
@@ -87,7 +91,7 @@ UI 重做的目标稿为 [设计稿 v4](../design/v4/README.md)（2026-10-07 入
 | [GROK-7](GROK-7.md) 科研场景交互走查清单（AIUI-7 前置） | `task/grok-7-research-walkthrough` | grokbot | GROK-6 | 已合入 `18ae5127474d6841ad331ca2251076ecca431a81`；独立复审通过，20 目的/首批 7/9 公式；勘误与门禁见[交接](INTEGRATION-2026-10-09.md) |
 | [AIUI-3](AIUI-3.md) 本地重算公式 | — | junior | AIUI-1 | F3a `4943c6bb` 纯计算已复审、组合CI通过并集成；运行接线另片 |
 | [AIUI-4](AIUI-4.md) 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | F4a/F4b `14006838` 复审、200%补验及组合CI通过，已集成；F4c新目录联调后置 |
-| [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | F5a `f0203bf` 草案已复审、组合CI通过并归档；F5b/c 等正式契约决定 |
+| [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | F5a `f0203bf` 草案已复审、组合CI通过并归档；PR19 六项接口获父任务技术采纳，F5b/F5c 进行中、未集成，见[快照](CURRENT-STATUS-2026-10-10-v1.md) |
 | [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-inquiry-record-tools` | Codex | AIUI-1 之后、REG-4b 合入 | 说明已就绪，排队 |
 | AIUI-6 询价场景（比价、预算小工具、导入审阅工作区） | — | Codex | AIUI-3、4、5 | 待派 |
 | AIUI-7 科研场景 | — | junior / engineer | AIUI-4、5 | 待派 |
@@ -122,3 +126,9 @@ Claude/B1复审和[固定源全套CI](https://github.com/mightyoung/Muyon/action
 
 实际合入账号/时间、PR14发布CI取消与后续成功区分见[交接](INTEGRATION-2026-10-09.md)。
 LAN未决与AIUI未来夹具/契约待验另行处理，不自动采纳或合入。
+
+## 本轮质量收口（2026-10-10）
+
+[版本化状态与质量清单](CURRENT-STATUS-2026-10-10-v1.md)登记四包推荐 lint 补齐（独立分支进行中）、coverage 基线门禁（框架分支进行中，真实测量待核）、Mac golden 固定版本复验（待本机取证）、性能测量后决策（待测量）。CI 绿不代表 PR16 manual hold P1 已关闭；PR18 仍为有效 RED，禁止合入。父任务统一 review，唯一 integrator 顺序合 develop。
+
+用户本轮“制定修复任务并并行开始执行修复”的可定位执行计划：[QUALITY-REPAIR-PLAN-2026-10-10-v1.md](QUALITY-REPAIR-PLAN-2026-10-10-v1.md)。

@@ -2,6 +2,24 @@
 
 交接时间：2026-10-09 晚 · 交出：leader A（本机 Claude 会话，额度将用完）· 接收：**Leader B（ChatGPT）**，接任统一派发、审查与合入 · `develop` 基线：本文件所在提交
 
+## 现行入口（2026-10-10）
+
+先读 [状态快照 v1](CURRENT-STATUS-2026-10-10-v1.md) → [任务索引](README.md) →
+[集成交接](INTEGRATION-2026-10-09.md) 的最新轮次与 PR16 合后 P1 更新 →
+[验证备忘录](VERIFICATION-MEMO.md) → ADR-0001 后续记录、ADR-0003 的 10-09 修订及已采纳 AI 原生方案。
+当前仅父任务统一 review、唯一 integrator 合 develop；本轮执行分支只提交、推送草稿 PR。
+
+AIUI-1/2、GROK-7、REG-3a 已集成，不能再按下面 A～C 排队审合。
+PR16 已合但 manual hold 重复 resume 身份 P1 尚未关闭；独立修复进行中，CI 成功不作无阻断结论。
+UI-0 已取消；当前为助手/任务/资料/设置四导航，v6 只保留视觉层。
+REG-3a 说明已存在且有界片已合，REG-3b 等剩余能力仍待办；JR-1 已让 CI 跑 doctor。
+证据与替代提交见快照；旧决定全部保留供追溯。
+
+## 历史交接正文（2026-10-09 晚，以下时态仅指当时）
+
+> A～D、§2～3、§6～7 的待审/未写/待决条目不是当前队列；其现行状态由上方快照和最新集成交接取代。
+> §1 的工作方式仍需结合用户本轮授权；§4 退出标准与 §5 真机审查要求仍须遵守，不因历史标注取消。
+
 **先读（按顺序）：**
 1. [ADR-0001](../adr/0001-leadership-and-scope-freeze.md) 末尾「后续记录」：全部用户决定的时间线，最新几条是 10-08、10-09 的。
 2. [AI 原生界面方案](../design/ai-native-ui-redesign-2026-10-09.md)（**已采纳**）与 [AIUI 流式界面契约 v1](../design/aiui-stream-contract.md)（AIUI-1 的验收依据）。
@@ -9,7 +27,7 @@
 4. [产品与架构总览](../superpowers/specs/2026-10-04-muspace-product-and-architecture-overview.md) 开头的「现行决定」表。
 5. [任务索引 README.md](README.md) 末尾「AI 原生界面」一节、[审查清单 REVIEW.md](REVIEW.md)。
 
-## A. 交接时待审的交付（最先处理）
+## A. 历史：交接时待审的交付（2026-10-09 晚）
 
 | 任务 | 分支 / 提交 | 执行 | 审查要点 |
 |---|---|---|---|
@@ -29,7 +47,7 @@
 | grokbot | GROK-7 已交付待审 | 可派静态任务 |
 | REG-4b 询价导入续办 | 部分合入；`task/reg-4b-inquiry-import-pipeline` @ `8025f66` | 收尾与审查 → 合入后才能开 REG-4c |
 
-## C. 下一步（按顺序）
+## C. 历史：当时的下一步（2026-10-09 晚）
 1. **写 REG-3 任务说明**（科研迁 v2）：依据 [GROK-6 本体盘点](../reviews/2026-10-09-research-ontology-draft.md) §5 与 [GROK-2 科研覆盖清单](../reviews/coverage-drafts/research.md)。要点：
    - 科研没有统一的 save/delete/restore，也没有统一校验，多数对象没有版本号，所以**不能照搬 REG-4c 的通用写工具**，要先补版本号和校验，或者做具名工具（约 20 个，命名见 GROK-6 §5.2）；
    - v2 模块的知识库、模型能力需要先补受限接口（REG-2b 审查第 1 条偏离）；
@@ -122,7 +140,7 @@
 
 见[路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md) §4（第三阶段）、§5（第四阶段）、§7（第一阶段搁置项的去向）。另有：
 - **设计决定**：设计会话的决定已汇总进 [UI 方案](../design/ui-redesign-brief-2026-10-06.md) §8 第 15～18 条：图标、询价以 Folio 为准（[对照清单](../design/folio-parity-checklist.md)）、数据中心统一、血缘与实例浏览器。两条看似待决的问题已核对出已有决定（原型显示「不适用」；警告色用独立的 `warn`）。设计稿到 v6 为止，不再返工；遗留问题见 [前端开发备忘录](../design/v6/frontend-memo.md)。
-- `ci.sh` 不跑 `test_doctor.sh`（P0-J3 可选项）。
+- 历史遗留说明：`ci.sh` 不跑 `test_doctor.sh`（P0-J3 可选项）。**已由 JR-1 取代**：当前 `scripts/ci.sh` 已运行 doctor；见 [JR-1 审查](JR-1-review.md)及状态快照。
 
 ## 7. 需要用户处理或决定的事
 

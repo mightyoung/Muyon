@@ -1,0 +1,7 @@
+{"op":"text","md":"三家报价已列出，未披露的价格显示为未披露。"}
+{"op":"node","id":"root","component":"PageScaffold","props":{"title":"报价对比"}}
+{"op":"node","id":"cmp","parent":"root","component":"CompareTable","props":{"label":"报价"},"bind":{"rows":{"kind":"collection","id":"quotes"}}}
+{"op":"action","node":"cmp","event":"tap","action":"openRow","inputs":[]}
+{"op":"node","id":"pick","parent":"root","component":"Choice","props":{"label":"入围","multiple":true},"bind":{"options":{"kind":"collection","id":"quote-labels"},"selected":{"kind":"uiState","id":"picked"}}}
+{"op":"action","node":"pick","event":"change","action":"edit","inputs":["picked"]}
+{"op":"end"}
