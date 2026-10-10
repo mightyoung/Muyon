@@ -222,6 +222,19 @@ void main() {
         spec: const UiNumberEdit(min: 0, max: .3, step: .1),
       );
       expect(result.isValid, isTrue, reason: result.errors.join(','));
+      for (final spec in [
+        const UiNumberEdit(min: .2, max: .3, step: .1),
+        const UiNumberEdit(min: .7, max: .8, step: .00001),
+      ]) {
+        final boundary = check(
+          'Slider',
+          props: {'label': 'boundary'},
+          bindings: {'value': const BindingRef.uiState('k')},
+          initial: spec.min,
+          spec: spec,
+        );
+        expect(boundary.isValid, isTrue, reason: boundary.errors.join(','));
+      }
     },
   );
 

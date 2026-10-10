@@ -29,7 +29,14 @@ final catalog = UiCatalog(
   },
 );
 
-ValidatedUiPlan bundle(int revision, {bool number = false, bool rowsB = true}) {
+ValidatedUiPlan bundle(
+  int revision, {
+  bool number = false,
+  bool rowsB = true,
+  UiStringEdit? stringSpec,
+  bool draftSort = false,
+  String collectionId = 'options',
+}) {
   final ref = SnapshotRef('s', revision);
   final snapshot = DataSnapshot(
     ref: ref,
@@ -49,13 +56,13 @@ ValidatedUiPlan bundle(int revision, {bool number = false, bool rowsB = true}) {
     editSpecs: {
       'qty': number
           ? const UiNumberEdit(min: 0, max: 10)
-          : const UiStringEdit(),
+          : stringSpec ?? const UiStringEdit(),
       'sort': const UiStringEdit(view: true),
-      'selected': UiItemIdsEdit(collectionId: 'options', initial: ['a']),
+      'selected': UiItemIdsEdit(collectionId: collectionId, initial: ['a']),
     },
     collections: {
-      'options': UiCollection(
-        id: 'options',
+      collectionId: UiCollection(
+        id: collectionId,
         columns: const [UiColumn('label', 'Label')],
         rows: [
           for (final id in ['a', if (rowsB) 'b'])
@@ -63,6 +70,19 @@ ValidatedUiPlan bundle(int revision, {bool number = false, bool rowsB = true}) {
         ],
       ),
     },
+    sources: {
+      'source': const SourceSpanRef(
+        artifact: ArtifactRef(
+          moduleId: 'm',
+          artifactId: 'a',
+          contentDigest: 'v1',
+        ),
+        originalText: 'text',
+        start: 0,
+        end: 4,
+      ),
+    },
+    sourceDigests: {'a': 'v1'},
     computations: {
       'total': ComputedValue(
         value: revision == 1 ? '20' : '30',
@@ -73,7 +93,10 @@ ValidatedUiPlan bundle(int revision, {bool number = false, bool rowsB = true}) {
     computedEvidence: {
       'total': UiComputedEvidence(state: FactState.verified, unit: 'CNY'),
     },
-    actionContext: UiActionContext(draftRevision: 0),
+    actionContext: UiActionContext(
+      draftRevision: 0,
+      draft: draftSort ? {'sort': 'original'} : {},
+    ),
   );
   final intent = InteractionIntent(
     id: 'i',
@@ -142,6 +165,137 @@ void main() {
     expect(session.resolve(const BindingRef.uiState('qty')), '2');
     expect(session.userOverrides, isNot(contains('qty')));
     expect(session.draftRevision, draft + 1);
+  });
+
+  test(
+    'invalid override and removed selected ID stay readable without applying',
+    () {
+      final old = bundle(1), next = bundle(2, number: true, rowsB: false);
+      final session = UiSessionState(old.snapshot)
+        ..accept(old)
+        ..edit('qty', '3')
+        ..edit('selected', ['b']);
+      final draft = session.draftRevision;
+      expect(session.commitPreparedRebase(session.prepareRebase(next)), isTrue);
+      expect(session.userOverrides, isEmpty);
+      expect(session.resolve(const BindingRef.uiState('qty')), 2);
+      expect(session.selections['selected'], ['a']);
+      expect(session.readableDraft['qty'], '3');
+      expect(session.readableDraft['selected'], ['b']);
+      expect(session.unreadableReasons, {
+        'qty': 'type',
+        'selected': 'unknown_item',
+      });
+      expect(session.draftRevision, draft);
+      session.adoptExtracted('qty');
+      expect(session.readableDraft.containsKey('qty'), isFalse);
+      expect(session.draftRevision, draft + 1);
+      expect(session.readableDraft['selected'], ['b']);
+    },
+  );
+
+  test(
+    'view edit and source digest updates fence previously prepared state',
+    () {
+      for (final source in [false, true]) {
+        final old = bundle(1), next = bundle(2);
+        final session = UiSessionState(old.snapshot)
+          ..accept(old)
+          ..edit('qty', '3');
+        final prepared = session.prepareRebase(next);
+        if (source) {
+          session.updateSourceDigest('a', 'changed');
+        } else {
+          session.selectView('sort', 'value');
+        }
+        expect(session.commitPreparedRebase(prepared), isFalse);
+        expect(session.snapshot, same(old.snapshot));
+        expect(session.userOverrides['qty'], '3');
+        if (!source) expect(session.viewValues['sort'], 'value');
+      }
+    },
+  );
+
+  test(
+    'a host predicate failure during preparation cannot change old layers',
+    () {
+      final old = bundle(1);
+      final next = bundle(
+        2,
+        stringSpec: UiStringEdit(
+          accepts: (value) =>
+              value == '2' ? true : throw StateError('host failure'),
+        ),
+      );
+      final session = UiSessionState(old.snapshot)
+        ..accept(old)
+        ..edit('qty', '3');
+      expect(() => session.prepareRebase(next), throwsStateError);
+      expect(session.snapshot, same(old.snapshot));
+      expect(session.userOverrides['qty'], '3');
+      expect(session.readableDraft, isEmpty);
+      expect(session.draftRevision, 1);
+    },
+  );
+
+  test('install uses the actual publisher capability only for identical prepared references', () {
+    final old = bundle(1), next = bundle(2);
+    final session = UiSessionState(old.snapshot)..accept(old);
+    final prepared = session.prepareRebase(next);
+    expect(
+      session.commitPreparedRebase(prepared, accepted: bundle(2)),
+      isFalse,
+    );
+    expect(session.snapshot, same(old.snapshot));
+    final accepted = validateUiPlan(
+      next.plan,
+      next.snapshot,
+      next.intent,
+      next.catalog,
+    ).validatedPlan!;
+    expect(accepted, isNot(same(next)));
+    expect(session.commitPreparedRebase(prepared, accepted: accepted), isTrue);
+    expect(session.currentPlan, same(accepted));
+  });
+
+  test('an unbound view key colliding with new business draft is retained only as unreadable', () {
+    final old = bundle(1), next = bundle(2, draftSort: true);
+    final session = UiSessionState(old.snapshot)
+      ..accept(old)
+      ..selectView('sort', 'value');
+    expect(session.commitPreparedRebase(session.prepareRebase(next)), isTrue);
+    expect(session.viewValues, isEmpty);
+    expect(session.resolve(const BindingRef.uiState('sort')), 'original');
+    expect(session.readableDraft['sort'], 'value');
+    expect(session.unreadableReasons['sort'], 'view_business_input');
+    expect(session.draftRevision, 0);
+  });
+
+  test('changing selection collection cannot silently rebind an existing chosen ID', () {
+    final old = bundle(1), next = bundle(2, collectionId: 'other');
+    final session = UiSessionState(old.snapshot)
+      ..accept(old)
+      ..edit('selected', ['b']);
+    expect(session.commitPreparedRebase(session.prepareRebase(next)), isTrue);
+    expect(session.selections['selected'], ['a']);
+    expect(session.readableDraft['selected'], ['b']);
+    expect(
+      session.unreadableReasons['selected'],
+      'selection_collection_changed',
+    );
+    expect(session.draftRevision, 1);
+  });
+
+  test('accepted fresh source metadata clears prior stale-read cache', () {
+    final old = bundle(1), next = bundle(2);
+    final session = UiSessionState(old.snapshot)
+      ..accept(old)
+      ..updateSourceDigest('a', 'changed');
+    expect(session.resolve(const BindingRef.sourceSpan('source')), isNull);
+    expect(session.staleSources, contains('source'));
+    expect(session.commitPreparedRebase(session.prepareRebase(next)), isTrue);
+    expect(session.staleSources, isEmpty);
+    expect(session.resolve(const BindingRef.sourceSpan('source')), 'text');
   });
 
   test('prepared state cannot install in a foreign session', () {

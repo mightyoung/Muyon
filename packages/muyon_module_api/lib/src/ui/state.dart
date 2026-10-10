@@ -8,17 +8,39 @@ import 'workspace.dart';
 enum UiEventOutcome { applied, stale, invalid, unsupported }
 
 /// Owner-prepared session state; only its originating session may install it.
-class UiPreparedSessionRebase {
-  UiPreparedSessionRebase._(this._owner, this._base, this._next);
+final class UiPreparedSessionRebase {
+  UiPreparedSessionRebase._({
+    required this._owner,
+    required this.base,
+    required this.epoch,
+    required this.next,
+    required this._values,
+    required this._overrides,
+    required this._view,
+    required this._selections,
+    required this._selectionOverrides,
+    required this._viewSelections,
+    required this._digests,
+    required this._readableDraft,
+    required this._reasons,
+    required this.draftRevision,
+  });
   final UiSessionState _owner;
-  final ValidatedUiPlan? _base;
-  final ValidatedUiPlan _next;
+  final ValidatedUiPlan? base;
+  final int epoch;
+  final ValidatedUiPlan next;
+  final Map<String, Object?> _values, _overrides, _view, _readableDraft;
+  final Map<String, List<String>> _selections, _viewSelections;
+  final Set<String> _selectionOverrides;
+  final Map<String, String> _digests, _reasons;
+  final int draftRevision;
 }
 
 /// In-memory view/draft state only. Never grants authority or executes business tools.
 class UiSessionState {
-  UiSessionState(this.snapshot)
-    : _values = Map.of(snapshot.initialUiState),
+  UiSessionState(DataSnapshot snapshot)
+    : _snapshot = snapshot,
+      _values = Map.of(snapshot.initialUiState),
       _digests = Map.of(snapshot.sourceDigests),
       _selections = {
         for (final e in snapshot.editSpecs.entries)
@@ -26,19 +48,26 @@ class UiSessionState {
             e.key: UiItemIdsEdit.normalize(ids.initial),
       },
       draftRevision = snapshot.actionContext?.draftRevision ?? 0;
-  final DataSnapshot snapshot;
-  final Map<String, Object?> _values;
+  DataSnapshot _snapshot;
+  DataSnapshot get snapshot => _snapshot;
+  int _mutationEpoch = 0;
+  Map<String, Object?> _readableDraft = {};
+  Map<String, String> _unreadableReasons = {};
+  Map<String, Object?> get readableDraft => Map.unmodifiable(_readableDraft);
+  Map<String, String> get unreadableReasons =>
+      Map.unmodifiable(_unreadableReasons);
+  Map<String, Object?> _values;
   // itemIds live outside _values/userOverrides: never scalar.
-  final Map<String, List<String>> _selections;
-  final Set<String> _selectionOverrides = {};
-  final Map<String, List<String>> _viewSelections = {};
+  Map<String, List<String>> _selections;
+  Set<String> _selectionOverrides = {};
+  Map<String, List<String>> _viewSelections = {};
   Map<String, List<String>> get selections => Map.unmodifiable(_selections);
   Set<String> get selectionOverrides => Set.unmodifiable(_selectionOverrides);
   Map<String, List<String>> get viewSelections =>
       Map.unmodifiable(_viewSelections);
-  final Map<String, String> _digests;
-  final Map<String, Object?> _userOverrides = {};
-  final Map<String, Object?> _viewValues = {};
+  Map<String, String> _digests;
+  Map<String, Object?> _userOverrides = {};
+  Map<String, Object?> _viewValues = {};
   Map<String, Object?> get userOverrides => Map.unmodifiable(_userOverrides);
   Map<String, Object?> get viewValues => Map.unmodifiable(_viewValues);
   Set<String> get expandedSources => Set.unmodifiable(_expandedSources);
@@ -182,6 +211,9 @@ class UiSessionState {
     if (spec is! UiItemIdsEdit) {
       return _setValue(field, value, affectsDraft: affectsDraft, typed: true);
     }
+    _mutationEpoch++;
+    _readableDraft.remove(field);
+    _unreadableReasons.remove(field);
     final ids = UiItemIdsEdit.normalize((value as List).cast<String>());
     final explicitlyEdited =
         affectsDraft && !_selectionOverrides.contains(field);
@@ -214,6 +246,9 @@ class UiSessionState {
         (!typed && _values[field] is String && value is! String)) {
       return false;
     }
+    _mutationEpoch++;
+    _readableDraft.remove(field);
+    _unreadableReasons.remove(field);
     final explicitlyEdited = affectsDraft && !_userOverrides.containsKey(field);
     if (affectsDraft) {
       _userOverrides[field] = value;
@@ -228,6 +263,7 @@ class UiSessionState {
 
   /// Restores UI scalars only; never changes snapshot facts or host inputs.
   void restoreWorkspace(StoredUiWorkspace value) {
+    _mutationEpoch++;
     for (final entry in {...value.viewValues, ...value.userOverrides}.entries) {
       if (_values.containsKey(entry.key) &&
           isUiScalar(entry.value) &&
@@ -248,7 +284,17 @@ class UiSessionState {
 
   void adoptExtracted(String field) {
     final spec = snapshot.editSpecs[field];
+    if (_readableDraft.containsKey(field) &&
+        (snapshot.initialUiState.containsKey(field) || spec is UiItemIdsEdit)) {
+      _readableDraft.remove(field);
+      _unreadableReasons.remove(field);
+      _mutationEpoch++;
+      if (!(spec?.view ?? false)) draftRevision++;
+      return;
+    }
+
     if (spec is UiItemIdsEdit && _selectionOverrides.remove(field)) {
+      _mutationEpoch++;
       _selections[field] = UiItemIdsEdit.normalize(spec.initial);
       draftRevision++;
       return;
@@ -257,20 +303,174 @@ class UiSessionState {
         !snapshot.initialUiState.containsKey(field)) {
       return;
     }
+    _mutationEpoch++;
     _userOverrides.remove(field);
     _values[field] = snapshot.initialUiState[field];
     draftRevision++;
   }
 
   void updateSourceDigest(String artifactId, String digest) {
+    _mutationEpoch++;
     _digests[artifactId] = digest;
   }
 
-  UiPreparedSessionRebase prepareRebase(ValidatedUiPlan next) =>
-      UiPreparedSessionRebase._(this, _currentPlan, next);
+  /// Prepare every layer before the publisher's final freshness check.
+  /// A rejected/manual value remains readable but is not applied as valid state.
+  UiPreparedSessionRebase prepareRebase(ValidatedUiPlan next) {
+    final base = _currentPlan;
+    final epoch = _mutationEpoch;
+    if (base == null ||
+        !identical(base.catalog, next.catalog) ||
+        base.plan.surfaceId != next.plan.surfaceId ||
+        base.intent.id != next.intent.id ||
+        next.plan.revision <= base.plan.revision ||
+        next.snapshot.ref.id != snapshot.ref.id ||
+        next.snapshot.ref.revision <= snapshot.ref.revision) {
+      throw ArgumentError('rebase_identity_or_revision');
+    }
+    final candidate = next.snapshot;
+    final typed = usesTypedEdits(next.catalog);
+    final values = Map<String, Object?>.of(candidate.initialUiState);
+    final overrides = <String, Object?>{}, view = <String, Object?>{};
+    final selections = <String, List<String>>{
+      for (final entry in candidate.editSpecs.entries)
+        if (entry.value case final UiItemIdsEdit ids)
+          entry.key: UiItemIdsEdit.normalize(ids.initial),
+    };
+    final selectionOverrides = <String>{},
+        viewSelections = <String, List<String>>{};
+    final readable = Map<String, Object?>.of(_readableDraft);
+    final reasons = Map<String, String>.of(_unreadableReasons);
+    final context = UiEditContext(collections: candidate.collections);
+    String? reject(String key, Object? value, bool isView, bool isIds) {
+      final spec = candidate.editSpecs[key] ?? const UiStringEdit();
+      if (isIds
+          ? spec is! UiItemIdsEdit
+          : !candidate.initialUiState.containsKey(key)) {
+        return 'key_removed';
+      }
+      if (typed && spec.view != isView) return 'view_scope_changed';
+      if (typed &&
+          spec.view &&
+          (candidate.actionContext?.draft.containsKey(key) ?? false)) {
+        return 'view_business_input';
+      }
+      if (isIds &&
+          spec is UiItemIdsEdit &&
+          snapshot.editSpecs[key] is UiItemIdsEdit &&
+          (snapshot.editSpecs[key] as UiItemIdsEdit).collectionId !=
+              spec.collectionId) {
+        return 'selection_collection_changed';
+      }
 
-  // RED: no live snapshot/layer mutation until the owner transaction exists.
-  bool commitPreparedRebase(UiPreparedSessionRebase prepared) => false;
+      if (typed) return spec.validateSpec() ?? spec.reject(value, context);
+      return !isUiScalar(value) ||
+              (candidate.initialUiState[key] is String && value is! String)
+          ? 'type'
+          : null;
+    }
+
+    void preserve(
+      String key,
+      Object? value, {
+      required bool isView,
+      required bool isIds,
+    }) {
+      final reason = reject(key, value, isView, isIds);
+      if (reason != null) {
+        readable[key] = value is List<String>
+            ? List<String>.unmodifiable(value)
+            : value;
+        reasons[key] = reason;
+        return;
+      }
+      readable.remove(key);
+      reasons.remove(key);
+      if (isIds) {
+        final ids = UiItemIdsEdit.normalize((value as List).cast<String>());
+        selections[key] = ids;
+        if (isView) {
+          viewSelections[key] = ids;
+        } else {
+          selectionOverrides.add(key);
+        }
+      } else {
+        values[key] = value;
+        if (isView) {
+          view[key] = value;
+        } else {
+          overrides[key] = value;
+        }
+      }
+    }
+
+    for (final entry in _userOverrides.entries) {
+      preserve(entry.key, entry.value, isView: false, isIds: false);
+    }
+    for (final entry in _viewValues.entries) {
+      preserve(entry.key, entry.value, isView: true, isIds: false);
+    }
+    for (final key in _selectionOverrides) {
+      preserve(key, _selections[key], isView: false, isIds: true);
+    }
+    for (final entry in _viewSelections.entries) {
+      preserve(entry.key, entry.value, isView: true, isIds: true);
+    }
+    return UiPreparedSessionRebase._(
+      owner: this,
+      base: base,
+      epoch: epoch,
+      next: next,
+      values: values,
+      overrides: overrides,
+      view: view,
+      selections: selections,
+      selectionOverrides: selectionOverrides,
+      viewSelections: viewSelections,
+      digests: Map.of(candidate.sourceDigests),
+      readableDraft: readable,
+      reasons: reasons,
+      draftRevision:
+          draftRevision > (candidate.actionContext?.draftRevision ?? 0)
+          ? draftRevision
+          : (candidate.actionContext?.draftRevision ?? 0),
+    );
+  }
+
+  bool canCommitPreparedRebase(UiPreparedSessionRebase prepared) =>
+      identical(prepared._owner, this) &&
+      identical(prepared.base, _currentPlan) &&
+      prepared.epoch == _mutationEpoch;
+
+  /// Only local assignments occur after the check; no predicate/listener/await.
+  bool commitPreparedRebase(
+    UiPreparedSessionRebase prepared, {
+    ValidatedUiPlan? accepted,
+  }) {
+    final target = accepted ?? prepared.next;
+    if (!canCommitPreparedRebase(prepared) ||
+        !identical(target.plan, prepared.next.plan) ||
+        !identical(target.snapshot, prepared.next.snapshot) ||
+        !identical(target.intent, prepared.next.intent) ||
+        !identical(target.catalog, prepared.next.catalog)) {
+      return false;
+    }
+    _snapshot = target.snapshot;
+    _values = prepared._values;
+    _userOverrides = prepared._overrides;
+    _viewValues = prepared._view;
+    _selections = prepared._selections;
+    _selectionOverrides = prepared._selectionOverrides;
+    _viewSelections = prepared._viewSelections;
+    _digests = prepared._digests;
+    _readableDraft = prepared._readableDraft;
+    _unreadableReasons = prepared._reasons;
+    draftRevision = prepared.draftRevision;
+    _currentPlan = target;
+    _staleSources.clear();
+    _mutationEpoch++;
+    return true;
+  }
 
   bool accept(ValidatedUiPlan plan) {
     final current = _currentPlan;
@@ -282,6 +482,7 @@ class UiSessionState {
                     !identical(plan, current))))) {
       return false;
     }
+    if (!identical(_currentPlan, plan)) _mutationEpoch++;
     _currentPlan = plan;
     return true;
   }
@@ -311,6 +512,9 @@ class UiSessionState {
         !schema.events.containsKey(event.kind) ||
         !(schema.eventActions[event.kind]?.contains(binding.actionRef) ??
             false)) {
+      return UiEventOutcome.invalid;
+    }
+    if (binding.inputRefs.any(_unreadableReasons.containsKey)) {
       return UiEventOutcome.invalid;
     }
     final payloadType = schema.events[event.kind];

@@ -142,6 +142,9 @@ Widget _libraryComponent(UiAdapterContext c) {
         children: c.children,
       );
     case 'Disclosure':
+      if (n.bindings.containsKey('expanded') && c.value('expanded') == null) {
+        return Text('${c.label('title')}：未设置展开状态');
+      }
       return Disclosure(
         title: c.label('title'),
         initiallyExpanded: n.properties['initiallyExpanded'] as bool? ?? false,

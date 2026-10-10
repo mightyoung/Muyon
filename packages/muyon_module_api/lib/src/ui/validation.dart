@@ -406,11 +406,15 @@ List<String> _componentEditErrors(UiNode node, DataSnapshot snapshot) {
   }
   if (node.component == 'Slider' && spec is UiNumberEdit && spec.step != null) {
     final divisions = (spec.max - spec.min) / spec.step!;
-    if (!divisions.isFinite ||
-        divisions < 1 ||
-        divisions > 10000 ||
-        (divisions - divisions.roundToDouble()).abs() > 1e-9) {
+    if (!divisions.isFinite) {
       errors.add('slider_step_unrepresentable');
+    } else {
+      final rounded = divisions.roundToDouble();
+      if (rounded < 1 ||
+          rounded > 10000 ||
+          (divisions - rounded).abs() > 1e-9) {
+        errors.add('slider_step_unrepresentable');
+      }
     }
   }
   return errors;

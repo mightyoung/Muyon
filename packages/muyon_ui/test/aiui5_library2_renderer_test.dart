@@ -448,6 +448,27 @@ void main() {
     },
   );
 
+  testWidgets(
+    'nullable controlled Disclosure does not fall back to model initial expansion',
+    (tester) async {
+      final result = fixture.check(
+        'Disclosure',
+        props: {'title': 'Details', 'initiallyExpanded': true},
+        bindings: {'expanded': const BindingRef.uiState('k')},
+        spec: const UiBoolEdit(view: true, nullable: true),
+        initial: null,
+        events: {
+          'change': ActionBinding(actionRef: 'edit', inputRefs: ['k']),
+        },
+      );
+      final controller = await mount(tester, result);
+      expect(find.text('Details：未设置展开状态'), findsOneWidget);
+      expect(find.byType(ui.Disclosure), findsNothing);
+      expect(controller.session.viewValues, isEmpty);
+      expect(controller.session.draftRevision, 0);
+    },
+  );
+
   testWidgets('old library1 remains a whole-surface fallback', (tester) async {
     final current = componentCase('Heading').validatedPlan!;
     final legacy = validateUiPlan(
@@ -492,6 +513,45 @@ void main() {
   testWidgets(
     'all 33 components validate and render through the opted in library2 surface',
     (tester) async {
+      const widgetTypes = <String, Type>{
+        'PageScaffold': ui.PageScaffold,
+        'MasterDetail': ui.MasterDetail,
+        'Field': TextFormField,
+        'Table': Table,
+        'SourceList': TextButton,
+        'ObjectChip': ui.ObjectChip,
+        'StatusBadge': ui.StatusBadge,
+        'ScopeChip': ui.ScopeChip,
+        'WarnBanner': ui.WarnBanner,
+        'SegmentedPill': ui.SegmentedPill,
+        'ConfirmCard': ui.ConfirmCard,
+        'BatchConfirmCard': ui.BatchConfirmCard,
+        'Heading': ui.Heading,
+        'Prose': ui.Prose,
+        'Section': ui.Section,
+        'Columns': ui.Columns,
+        'Tabs': ui.MuyonTabs,
+        'Disclosure': ui.Disclosure,
+        'KeyValue': ui.KeyValue,
+        'Metric': ui.Metric,
+        'CompareTable': ui.CompareTable,
+        'Chart': ui.Chart,
+        'Choice': ui.Choice,
+        'Form': ui.MuyonForm,
+        'NumberStepper': ui.NumberStepper,
+        'Slider': ui.MuyonSlider,
+        'Toggle': ui.Toggle,
+        'DateField': ui.DateField,
+        'SourceCard': ui.SourceCard,
+        'FileCard': ui.FileCard,
+        'ProgressCard': ui.ProgressCard,
+        'Checklist': ui.Checklist,
+        'Timeline': ui.Timeline,
+      };
+      expect(
+        library2UiCatalog.components.keys.toSet(),
+        widgetTypes.keys.toSet(),
+      );
       expect(library2UiCatalog.components.length, 33);
       for (final name in library2UiCatalog.components.keys) {
         final result = componentCase(name);
@@ -513,6 +573,14 @@ void main() {
         expect(
           find.byKey(const ValueKey('aiui2-target')),
           findsOneWidget,
+          reason: name,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(const ValueKey('aiui2-target')),
+            matching: find.byType(widgetTypes[name]!),
+          ),
+          findsWidgets,
           reason: name,
         );
         expect(
