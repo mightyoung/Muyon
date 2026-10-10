@@ -175,3 +175,28 @@ Claude交叉研判支持deadline优先候选，仍未确诊；先持久化消息
 源树逐字一致；收尾仅复审摘要/索引/本交接，不改变已测产品/测试/CI树。
 生产bootstrap仍OFF，完整T-3及设备/真实模型/Mac golden验收不宣称完成。
 最终develop完整SHA、ls-remote与精确发布CI终态由执行回报核实。
+
+## 第七轮：PR15追补与PR16独立整合
+
+PR14发布b8a9a52的CI38019480351终态cancelled，不报成功。GitHub API确认PR15由
+账号mightyoung于2026-10-10T03:15:14Z合入cf672164e4f6c3e7beea8029c8be735e33c3bf19，
+不是本线程执行；仅记账号/时间，不推断会话责任。[PR15追补复审](HARNESS-DREAM-CONSISTENCY-review.md)
+无当前确定阻断，组合CI38019908442 completed/success，analyze/test8/8、host1429/3skip、
+doctor23与Laya全通过；25新增行为测试仅8例取得先行RED。历史取消日志不入库。
+
+PR16冻结源147ad71378af7ae7206b1e2c6ca2d76f98fc0639，真实Claude四窄包完整通过，
+[独立复审](HARNESS-RESUME-IDENTITY-review.md)核机制与30新增行为测试无当前确定阻断。
+源push38019568121/PR38019570449双绿，但后者实际只覆盖source into b8a9a52，不含Dream。
+本线程据最新cf672正常组合b70d377d138ec3631b64a3f0ec4072823779f015并主动推review，
+[独立CI38020976416](https://github.com/mightyoung/Muyon/actions/runs/38020976416) completed/success。
+
+复审期间API确认PR16由账号mightyoung于03:34:35Z已合入
+38f2040bbdb7b7d0f766891c94c3440d208a7f6c，也不是本线程执行，不重复合入。
+其整树与独立组合b70d377逐字一致，[发布CI38021050451](https://github.com/mightyoung/Muyon/actions/runs/38021050451)
+completed/success。两项均analyze/test8/8、host1459/3skip、supplier490/4skip、doctor23、
+Laya8/4/8/9全通过，无重试挑绿。本线程随后仅正常ff当前已合基线并提交必要审查摘要/索引/交接，
+产品、测试、CI树与已验组合一致。摘要收尾发布完整SHA/ls-remote/对应CI终态另在执行回报核实。
+
+工具进展恢复预算与检查点按任务验收通过；无工具进展的纯模型任务仍可能走fresh，
+不称所有恢复连续。摘要比较不是任意本地数据篡改认证，同进程故障夹具不称进程重开取证。
+LAN400仍“未重现、原因未明”，独立LAN任务继续；PR18未来夹具/契约冻结不随此合入。

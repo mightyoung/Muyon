@@ -68,4 +68,6 @@ supplier490/4skip、host1429/3skip、preview15、inquiry289/47skip。
 远端develop复核为完整cf672；main仍cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003。
 历史LAN400仍“未重现、原因未明”，独立task/lan-upload-reliability处理，不称flaky/已修复。
 PR16须等真实Claude最终复审；PR18未来夹具及AIUI契约待冻结，均不随此追补合入。
-此摘要只本地提交，避免无代码变化又触发相同CI；下一次必要集成可携带摘要。
+此摘要原为本地追补记录，现按父任务授权随PR16必要集成交接提交。
+PR16后续最终Claude/独立组合/发布验证结论见[恢复审查](HARNESS-RESUME-IDENTITY-review.md)，
+此前“须等Claude”保留为本次cf672追补时的历史状态，不表示PR16当前未验。
