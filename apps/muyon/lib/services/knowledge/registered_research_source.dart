@@ -112,7 +112,9 @@ Future<bool> confirmRegisteredResearchDocument(ObjectRef ref, {
   final authority = authorityRevision();
   final declared = sources().where((source) => source.id == 'research.documents').toList();
   if (authority == null || declared.length != 1 ||
-      declared.single is! ResearchDocumentSearchSource) return false;
+      declared.single is! ResearchDocumentSearchSource) {
+    return false;
+  }
   final source = declared.single;
   try {
     final view = await source.confirm(ref);
