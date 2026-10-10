@@ -12,3 +12,5 @@ export 'src/cards/canonical_json.dart';
 export 'src/source_ref.dart';
 export 'src/exchange/research_package.dart';
 export 'src/reader/reader_page.dart' show ReaderPage;
+
+export 'src/search/document_search_source.dart';

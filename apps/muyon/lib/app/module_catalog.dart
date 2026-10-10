@@ -5,4 +5,6 @@ import 'package:research_module/research_module.dart';
 /// The one place a module is listed (ADR-0004 §6.3): one line per module.
 /// Adding a module is a line here, a dependency in `apps/muyon/pubspec.yaml`
 /// and a `workspace:` entry in the root `pubspec.yaml`.
-List<BusinessModule> moduleCatalog() => [ResearchModule(), PrototypeModule()];
+List<BusinessModule> moduleCatalog({
+  ResearchRuntime? Function()? researchRuntime,
+}) => [ResearchModule(currentRuntime: researchRuntime), PrototypeModule()];

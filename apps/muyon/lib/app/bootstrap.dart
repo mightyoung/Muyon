@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../platform/ui_planning_source.dart';
+import '../services/knowledge/registered_research_source.dart';
 
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
@@ -241,7 +242,7 @@ class MuyonHost {
         storage,
         WorkspaceRepository(database),
         ModuleRegistry(
-          modules ?? [InquiryBusinessModule(() => host), ...moduleCatalog()],
+          modules ?? [InquiryBusinessModule(() => host), ...moduleCatalog(researchRuntime: () => host.research)],
           knownCapabilities: hostCapabilityIds,
         ),
         CapabilityRegistry(),
@@ -296,7 +297,13 @@ class MuyonHost {
       host.acceptedResearchImports = AcceptedResearchImports(host);
       host.services.transfer.onAccepted = host.acceptedResearchImports.accept;
       host.projections.onApplied = host.services.knowledge.followProjections(
-        (ref) => confirmIndexedSource(
+        (ref) => ref.moduleId == 'research' && ref.objectType == 'document'
+            ? confirmRegisteredResearchDocument(ref,
+                sources: () => host.registry.modules.whereType<BusinessModuleV2>()
+                    .where((module) => module.manifest.id == 'research')
+                    .expand((module) => module.searchSources).toList(),
+                authorityRevision: () => host.modules.scopeAuthorityRevision('research'))
+            : confirmIndexedSource(
           ref,
           research: () => host.research,
           inquiry: () => host.inquiry,
