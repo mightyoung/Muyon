@@ -83,8 +83,8 @@ class UiSurfaceController extends ChangeNotifier {
     if ((recomputePort == null) != (publishTokenProbe == null)) {
       throw ArgumentError('Provide both recomputePort and publishTokenProbe');
     }
-    session = UiSessionState(plan.snapshot, canDispatch: _allowsEvent);
-    session.accept(plan);
+    _session = UiSessionState(plan.snapshot, canDispatch: _allowsEvent);
+    _session.accept(plan);
   }
   final UiPublicationCoordinator _publication;
   final UiRecomputePort? recomputePort;
@@ -123,7 +123,7 @@ class UiSurfaceController extends ChangeNotifier {
         previousSnapshot: base.snapshot,
         currentUiState: {
           for (final key in base.snapshot.initialUiState.keys)
-            key: session.resolve(BindingRef.uiState(key)),
+            key: _session.resolve(BindingRef.uiState(key)),
         },
         token: probe(),
       );
@@ -203,8 +203,8 @@ class UiSurfaceController extends ChangeNotifier {
         if (!_disposed && failed == UiPublishOutcome.invalid) notifyListeners();
         return failed;
       }
-      final fence = session.publicationFence;
-      final prepared = session.prepareRebase(checked.validatedPlan!);
+      final fence = _session.publicationFence;
+      final prepared = _session.prepareRebase(checked.validatedPlan!);
       final outcome = _publication.completeRecompute(
         request,
         batch,
@@ -213,9 +213,9 @@ class UiSurfaceController extends ChangeNotifier {
       );
       if (outcome == UiPublishOutcome.published) {
         // Fence + identical raw references guarantee this local install cannot fail.
-        final installed = session.commitPreparedRebase(
+        final installed = _session.commitPreparedRebase(
           prepared,
-          accepted: current,
+          accepted: _publication.current,
         );
         assert(
           installed,
@@ -232,7 +232,8 @@ class UiSurfaceController extends ChangeNotifier {
   }
 
   ValidatedUiPlan get current => _publication.current;
-  late final UiSessionState session;
+  late final UiSessionState _session;
+  UiSessionState get session => _session;
   final UiEventSink? onEvent;
   final UiObjectOpen? onOpenObject;
   final _receipts = <String, UiBusinessReceipt>{};
@@ -252,9 +253,9 @@ class UiSurfaceController extends ChangeNotifier {
       _recoveredOperations.addAll(refs);
   void adoptExtracted(String field) {
     if (_disposed) return;
-    final before = session.draftRevision;
-    session.adoptExtracted(field);
-    if (session.draftRevision != before && recomputePort != null) {
+    final before = _session.draftRevision;
+    _session.adoptExtracted(field);
+    if (_session.draftRevision != before && recomputePort != null) {
       unawaited(recompute());
     }
     notifyListeners();
@@ -328,10 +329,10 @@ class UiSurfaceController extends ChangeNotifier {
       result = result.recordPatch(entry.key, entry.value);
     }
     final merged = result.validatedPlan!;
-    if (!session.canAcceptPlan(merged) || !_publication.adoptPlan(merged)) {
+    if (!_session.canAcceptPlan(merged) || !_publication.adoptPlan(merged)) {
       return false;
     }
-    session.accept(merged);
+    _session.accept(merged);
     notifyListeners();
     return true;
   }
@@ -379,9 +380,9 @@ class UiSurfaceController extends ChangeNotifier {
         binding.expectedDraftRevision != null &&
         current.catalog.actions[binding.actionRef]?.route ==
             UiActionRoute.business &&
-        !session.isCancelled(node.id) &&
+        !_session.isCancelled(node.id) &&
         !isPending(node) &&
-        binding.expectedDraftRevision == session.draftRevision &&
+        binding.expectedDraftRevision == _session.draftRevision &&
         !_lockedOperations.contains((
           binding.operationKeyRef!,
           binding.expectedDraftRevision!,
@@ -421,9 +422,9 @@ class UiSurfaceController extends ChangeNotifier {
       return UiDispatchOutcome.stale;
     }
     final rowObject = action?.localAction == UiLocalAction.openRow
-        ? session.rowObject(node, event.payload)
+        ? _session.rowObject(node, event.payload)
         : null;
-    final outcome = session.dispatch(event, current, current.catalog);
+    final outcome = _session.dispatch(event, current, current.catalog);
     if (outcome == UiEventOutcome.applied) {
       _seenEvents.add(event.eventId);
       if (action?.localAction == UiLocalAction.editField &&
@@ -460,7 +461,7 @@ class UiSurfaceController extends ChangeNotifier {
     final route = current.catalog.actions[binding.actionRef]!.route;
     if (onEvent == null) return UiDispatchOutcome.unsupported;
     if (route == UiActionRoute.business) {
-      if (session.isCancelled(node.id)) return UiDispatchOutcome.stale;
+      if (_session.isCancelled(node.id)) return UiDispatchOutcome.stale;
       final key = (binding.operationKeyRef!, binding.expectedDraftRevision!);
       if (_lockedOperations.contains(key) ||
           _recoveredOperations.contains(key.$1)) {
@@ -470,7 +471,7 @@ class UiSurfaceController extends ChangeNotifier {
       final context = current.snapshot.actionContext!;
       for (final ref in binding.inputRefs) {
         if (context.draft.containsKey(ref)) {
-          final value = session.resolve(BindingRef.uiState(ref));
+          final value = _session.resolve(BindingRef.uiState(ref));
           if (value != context.draft[ref]) return UiDispatchOutcome.stale;
           inputs[ref] = value;
         } else {

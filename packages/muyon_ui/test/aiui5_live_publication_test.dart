@@ -20,6 +20,25 @@ class DeferredPort implements UiRecomputePort {
   }
 }
 
+class ReentrantGetterController extends UiSurfaceController {
+  ReentrantGetterController(
+    super.plan, {
+    super.recomputePort,
+    super.publishTokenProbe,
+  });
+  bool armed = false;
+  int afterPublicationReads = 0;
+  @override
+  ValidatedUiPlan get current {
+    final value = super.current;
+    if (armed && value.snapshot.ref.revision == 2) {
+      afterPublicationReads++;
+      session.selectView('sort', 'value');
+    }
+    return value;
+  }
+}
+
 ValidatedUiPlan mountedPlan() {
   final base = actionPlan();
   final p = base.plan.copyWith(
@@ -93,6 +112,31 @@ UiRecomputeResult candidate(
 }
 
 void main() {
+  test(
+    'no overridable host getter runs between publication and session install',
+    () async {
+      final port = DeferredPort();
+      late ReentrantGetterController c;
+      c = ReentrantGetterController(
+        mountedPlan(),
+        recomputePort: port,
+        publishTokenProbe: () => liveToken(c),
+      );
+      addTearDown(c.dispose);
+      c.armed = true;
+      final result = c.recompute();
+      port.pending.single.complete(
+        candidate(port.inputs.single, c.current.intent, '180'),
+      );
+      expect(await result, UiPublishOutcome.published);
+      expect(c.afterPublicationReads, 0);
+      c.armed = false;
+      expect(c.session.snapshot, same(c.current.snapshot));
+      expect(c.session.currentPlan, same(c.current));
+      expect(c.session.resolve(const BindingRef.computed('total')), '180');
+    },
+  );
+
   test('incomplete recomputation injection fails closed', () {
     expect(
       () => UiSurfaceController(mountedPlan(), recomputePort: DeferredPort()),
