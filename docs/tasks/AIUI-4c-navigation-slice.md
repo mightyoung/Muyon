@@ -22,6 +22,7 @@ F3b 的 11 项重算验收不是 F4c scope/lease 导航验收。
   snapshot.facts/sources，复用原 ObjectRef/ArtifactRef 路由；没有增加行 tap 业务 mapping。
 - 保存及异步插件页取得后重新核 task/surface/conversation/node、当前 scope 和只读状态；
   scope 失效不 push 已取得页面，finally 释放 lease。取得页后复核当前 fact 身份。
+  对象/原文在 checkpoint await 后同样重复当前 snapshot 的引用身份校验。
 
 ## 独立行为验收
 
@@ -46,4 +47,7 @@ event loop 关闭宿主/SQLite；无 sleep、skip、弱化已有拒绝断言。
 及既有导航/返回/store/recovery 全量；完整 CI 与 coverage 保持原门禁。
 
 本片不是未来 14 场景整体完成，也不证明真实模型/真机/强杀/Mac golden。
+插件页是通过真实注册 ObjectPages 协议打开的 FakeRuntime 公共夹具，不是科研/询价生产插件
+的新覆盖。本片使用固定 validated snapshot；当前页面未接快照热发布/recompute ports，
+没有声称 await 中 snapshot 热替换的真实页面验收。
 F4a/b 历史变异不能作为本片新 source 已执行证据。

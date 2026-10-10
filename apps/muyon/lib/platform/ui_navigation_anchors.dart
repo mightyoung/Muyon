@@ -70,26 +70,27 @@ class UiReferenceNavigation {
     await controller.flush();
   }
 
-  Future<void> openReference(ObjectRef ref, NavigationAnchor returnTo) async {
+  void _requireReference(ObjectRef ref, NavigationAnchor returnTo) {
     if (ref != returnTo.objectRef ||
         !controller.surface.current.snapshot.facts.values.any(
           (f) => f.object == ref,
         )) {
       throw StateError('Reference outside current snapshot');
     }
+  }
+
+  Future<void> openReference(ObjectRef ref, NavigationAnchor returnTo) async {
+    _requireReference(ref, returnTo);
     await _checkpoint(returnTo);
     if (!context.mounted || !(canPresent?.call() ?? true)) return;
     _requireCurrentAnchor(returnTo);
+    _requireReference(ref, returnTo);
     ModuleObjectPage? opened;
     try {
       opened = await openModuleObjectPage(context, host, ref);
       if (!context.mounted || !(canPresent?.call() ?? true)) return;
       _requireCurrentAnchor(returnTo);
-      if (!controller.surface.current.snapshot.facts.values.any(
-        (fact) => fact.object == ref,
-      )) {
-        throw StateError('Reference outside current snapshot');
-      }
+      _requireReference(ref, returnTo);
       final page = opened;
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -109,7 +110,7 @@ class UiReferenceNavigation {
     }
   }
 
-  Future<void> openArtifact(ArtifactRef ref, NavigationAnchor returnTo) async {
+  void _requireArtifact(ArtifactRef ref, NavigationAnchor returnTo) {
     final supplied = returnTo.artifactRef;
     if (supplied == null ||
         supplied.moduleId != ref.moduleId ||
@@ -123,9 +124,14 @@ class UiReferenceNavigation {
         )) {
       throw StateError('Source outside current snapshot');
     }
+  }
+
+  Future<void> openArtifact(ArtifactRef ref, NavigationAnchor returnTo) async {
+    _requireArtifact(ref, returnTo);
     await _checkpoint(returnTo);
     if (!context.mounted || !(canPresent?.call() ?? true)) return;
     _requireCurrentAnchor(returnTo);
+    _requireArtifact(ref, returnTo);
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) =>
