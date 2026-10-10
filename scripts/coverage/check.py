@@ -71,6 +71,7 @@ def measure(root, reports):
         gates[prefix] = {
             'source_files': inventory,
             'loaded_denominator': {p: sorted(data) for p, data in sorted(selected.items())},
+            'file_hit_lines': {p: sum(data.values()) for p, data in sorted(selected.items())},
             'loaded_executable_lines': sum(len(data) for data in selected.values()),
             'hit_lines': sum(sum(data.values()) for data in selected.values()),
         }
@@ -107,6 +108,9 @@ def compare(actual, baseline):
             errors.append(f'denominator drift: {scope}; review/remeasure, never silently accept')
         if not previous['loaded_executable_lines']:
             errors.append(f'empty baseline gate: {scope}')
+        for path, hits in previous.get('file_hit_lines', {}).items():
+            if current.get('file_hit_lines', {}).get(path, 0) < hits:
+                errors.append(f'coverage decrease: {path}')
         if current['hit_lines'] < previous['hit_lines']:
             errors.append(f'coverage decrease: {scope}: {current["hit_lines"]} < {previous["hit_lines"]}')
     return errors
