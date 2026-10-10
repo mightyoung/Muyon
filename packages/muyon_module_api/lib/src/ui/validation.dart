@@ -1,3 +1,4 @@
+import 'edit_spec.dart';
 import 'snapshot.dart';
 import 'intent.dart';
 import 'plan.dart';
@@ -124,6 +125,33 @@ UiValidationResult validateUiPlan(
   );
 }
 
+/// library-2 editField rules: spec metadata, event type, initial value (payload
+/// and context) and the view/business-draft separation.
+List<String> _typedEditErrors(
+  DataSnapshot snapshot,
+  String key,
+  UiValueType? eventType,
+) {
+  final spec = snapshot.editSpecs[key] ?? const UiStringEdit();
+  final errors = <String>[];
+  if (spec.validateSpec() != null) errors.add('edit_spec:$key');
+  final isIds = spec is UiItemIdsEdit;
+  final present = snapshot.initialUiState.containsKey(key);
+  final Object? initial = spec is UiItemIdsEdit
+      ? spec.initial
+      : snapshot.initialUiState[key];
+  if (spec.payloadType != eventType ||
+      (isIds ? present : !present) ||
+      spec.reject(initial, UiEditContext(collections: snapshot.collections)) !=
+          null) {
+    errors.add('edit_input');
+  }
+  if (spec.view && (snapshot.actionContext?.draft.containsKey(key) ?? false)) {
+    errors.add('view_business_input');
+  }
+  return errors;
+}
+
 /// Shared component, binding and event rules; tree/intent coverage is plan-level.
 List<String> validateUiNode(
   UiNode node,
@@ -173,8 +201,13 @@ List<String> validateUiNode(
             reject('fact_source:${ref.id}:$source');
         }
       case BindingKind.uiState:
-        if (!snapshot.initialUiState.containsKey(ref.id) ||
-            !isUiScalar(snapshot.initialUiState[ref.id]))
+        // itemIds selections live outside initialUiState (never scalar).
+        final isIds =
+            usesTypedEdits(catalog) &&
+            snapshot.editSpecs[ref.id] is UiItemIdsEdit;
+        if (!isIds &&
+            (!snapshot.initialUiState.containsKey(ref.id) ||
+                !isUiScalar(snapshot.initialUiState[ref.id])))
           reject('unknown_state:${ref.id}');
       case BindingKind.computed:
         final value = snapshot.computations[ref.id];
@@ -221,15 +254,44 @@ List<String> validateUiNode(
       if (binding.operationKeyRef != null ||
           binding.expectedDraftRevision != null)
         reject('local_business_reference');
-      if ((action.localAction == UiLocalAction.editField ||
-              action.localAction == UiLocalAction.sortRows) &&
-          (binding.inputRefs.length != 1 ||
-              !node.bindings.values.contains(
-                BindingRef.uiState(binding.inputRefs.first),
-              ) ||
-              schema.events[entry.key] != UiValueType.string ||
-              snapshot.initialUiState[binding.inputRefs.first] is! String))
-        reject('edit_input');
+      final isEdit = action.localAction == UiLocalAction.editField;
+      if (isEdit || action.localAction == UiLocalAction.sortRows) {
+        if (binding.inputRefs.length != 1 ||
+            !node.bindings.values.contains(
+              BindingRef.uiState(binding.inputRefs.first),
+            )) {
+          reject('edit_input');
+        } else if (isEdit && usesTypedEdits(catalog)) {
+          errors.addAll(
+            _typedEditErrors(
+              snapshot,
+              binding.inputRefs.first,
+              schema.events[entry.key],
+            ),
+          );
+        } else if (schema.events[entry.key] != UiValueType.string ||
+            snapshot.initialUiState[binding.inputRefs.first] is! String) {
+          reject('edit_input');
+        } else if (!isEdit &&
+            usesTypedEdits(catalog) &&
+            snapshot.editSpecs[binding.inputRefs.first] != null) {
+          // library-2 sort writes view state: a registered spec must be a
+          // view string spec (no draft bypass); unregistered keys keep the
+          // legacy sort mapping.
+          final spec = snapshot.editSpecs[binding.inputRefs.first]!;
+          if (spec is! UiStringEdit || !spec.view) {
+            reject('edit_input');
+          } else {
+            errors.addAll(
+              _typedEditErrors(
+                snapshot,
+                binding.inputRefs.first,
+                schema.events[entry.key],
+              ),
+            );
+          }
+        }
+      }
       if (action.localAction == UiLocalAction.sortRows &&
           binding.inputRefs.any(
             (ref) => snapshot.actionContext?.draft.containsKey(ref) ?? false,

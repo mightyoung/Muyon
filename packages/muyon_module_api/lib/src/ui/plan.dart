@@ -16,6 +16,21 @@ enum UiLocalAction {
 /// `number` and `stringList` are event payload types only (never properties).
 enum UiValueType { string, integer, boolean, number, stringList }
 
+/// `number`/`stringList` may not ride in model-writable properties. A runtime
+/// throw, not an assert, so release builds cannot bypass it.
+Map<String, UiValueType> _propertiesOnly(Map<String, UiValueType> properties) {
+  for (final e in properties.entries) {
+    if (e.value == UiValueType.number || e.value == UiValueType.stringList) {
+      throw ArgumentError.value(
+        e.value,
+        'properties.${e.key}',
+        'event_only_type',
+      );
+    }
+  }
+  return properties;
+}
+
 class UiComponentSchema {
   UiComponentSchema({
     Map<String, UiValueType> properties = const {},
@@ -25,7 +40,7 @@ class UiComponentSchema {
     Map<String, UiValueType?> events = const {},
     Map<String, Set<String>> eventActions = const {},
     this.allowsChildren = false,
-  }) : properties = Map.unmodifiable(properties),
+  }) : properties = Map.unmodifiable(_propertiesOnly(properties)),
        requiredProperties = Set.unmodifiable(requiredProperties),
        bindings = Map.unmodifiable({
          for (final e in bindings.entries)

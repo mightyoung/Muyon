@@ -2,7 +2,8 @@ import '../references.dart';
 import 'snapshot.dart';
 
 /// NOT READY (F5b slice 1b scaffold): immutable declarations only. No
-/// collection validator, resolver or renderer consumes these yet.
+/// collection-binding validator, resolver or renderer consumes these yet.
+/// Typed itemIds membership may inspect these host row identities.
 class UiColumn {
   const UiColumn(this.id, this.label);
   final String id, label;

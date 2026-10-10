@@ -1,3 +1,4 @@
+import 'edit_spec.dart';
 import 'snapshot.dart';
 import 'plan.dart';
 import 'validation.dart';
@@ -10,9 +11,22 @@ class UiSessionState {
   UiSessionState(this.snapshot)
     : _values = Map.of(snapshot.initialUiState),
       _digests = Map.of(snapshot.sourceDigests),
+      _selections = {
+        for (final e in snapshot.editSpecs.entries)
+          if (e.value case final UiItemIdsEdit ids)
+            e.key: UiItemIdsEdit.normalize(ids.initial),
+      },
       draftRevision = snapshot.actionContext?.draftRevision ?? 0;
   final DataSnapshot snapshot;
   final Map<String, Object?> _values;
+  // itemIds live outside _values/userOverrides: never scalar.
+  final Map<String, List<String>> _selections;
+  final Set<String> _selectionOverrides = {};
+  final Map<String, List<String>> _viewSelections = {};
+  Map<String, List<String>> get selections => Map.unmodifiable(_selections);
+  Set<String> get selectionOverrides => Set.unmodifiable(_selectionOverrides);
+  Map<String, List<String>> get viewSelections =>
+      Map.unmodifiable(_viewSelections);
   final Map<String, String> _digests;
   final Map<String, Object?> _userOverrides = {};
   final Map<String, Object?> _viewValues = {};
@@ -58,27 +72,99 @@ class UiSessionState {
     }
   }
 
-  void edit(String field, Object? value) =>
-      _setValue(field, value, affectsDraft: true);
-
-  void selectView(String field, Object? value) {
-    if (snapshot.actionContext?.draft.containsKey(field) ?? false) return;
-    _setValue(field, value, affectsDraft: false);
+  /// Typed rules are in force only while the accepted current plan uses a
+  /// typed catalog; with no plan or an older catalog the legacy gate applies.
+  bool get _typedActive {
+    final plan = _currentPlan;
+    return plan != null && usesTypedEdits(plan.catalog);
   }
 
-  void _setValue(String field, Object? value, {required bool affectsDraft}) {
+  String? _specReject(UiEditSpec spec, Object? value) =>
+      spec.validateSpec() != null
+      ? 'spec_invalid'
+      : spec.reject(value, UiEditContext(collections: snapshot.collections));
+
+  void edit(String field, Object? value) => _editCore(field, value);
+
+  void selectView(String field, Object? value) => _selectViewCore(field, value);
+
+  /// A key without a registered spec is a default [UiStringEdit].
+  bool _editCore(String field, Object? value) {
+    if (!_typedActive) return _setValue(field, value, affectsDraft: true);
+    final spec = snapshot.editSpecs[field] ?? const UiStringEdit();
+    // View keys are never draft edits.
+    if (spec.view || _specReject(spec, value) != null) return false;
+    return _applyTyped(field, spec, value, affectsDraft: true);
+  }
+
+  /// Returns whether the view value was written (or already equal).
+  bool _selectViewCore(String field, Object? value) {
+    if (snapshot.actionContext?.draft.containsKey(field) ?? false) {
+      return false;
+    }
+    if (!_typedActive) return _setValue(field, value, affectsDraft: false);
+    final registered = snapshot.editSpecs[field];
+    if (registered == null) {
+      // Unregistered key keeps the legacy sort mapping under the default spec.
+      return _specReject(const UiStringEdit(), value) == null &&
+          _setValue(field, value, affectsDraft: false);
+    }
+    // A registered spec must itself be a view spec: no draft bypass.
+    if (!registered.view || _specReject(registered, value) != null) {
+      return false;
+    }
+    return _applyTyped(field, registered, value, affectsDraft: false);
+  }
+
+  bool _applyTyped(
+    String field,
+    UiEditSpec spec,
+    Object? value, {
+    required bool affectsDraft,
+  }) {
+    if (spec is! UiItemIdsEdit) {
+      return _setValue(field, value, affectsDraft: affectsDraft, typed: true);
+    }
+    final ids = UiItemIdsEdit.normalize((value as List).cast<String>());
+    final explicitlyEdited =
+        affectsDraft && !_selectionOverrides.contains(field);
+    if (affectsDraft) {
+      _selectionOverrides.add(field);
+    } else {
+      _viewSelections[field] = ids;
+    }
+    final changed = !_sameIds(_selections[field], ids);
+    _selections[field] = ids;
+    if (affectsDraft && (changed || explicitlyEdited)) draftRevision++;
+    return true;
+  }
+
+  static bool _sameIds(List<String>? a, List<String> b) =>
+      a != null &&
+      a.length == b.length &&
+      Iterable.generate(b.length).every((i) => a[i] == b[i]);
+
+  bool _setValue(
+    String field,
+    Object? value, {
+    required bool affectsDraft,
+    bool typed = false,
+  }) {
+    // Typed values were already checked against their spec; the legacy
+    // "String stays String" lock would wrongly block nullable string/date.
     if (!_values.containsKey(field) ||
         !isUiScalar(value) ||
-        (_values[field] is String && value is! String))
-      return;
+        (!typed && _values[field] is String && value is! String))
+      return false;
     final explicitlyEdited = affectsDraft && !_userOverrides.containsKey(field);
     if (affectsDraft)
       _userOverrides[field] = value;
     else
       _viewValues[field] = value;
-    if (_values[field] == value && !explicitlyEdited) return;
+    if (_values[field] == value && !explicitlyEdited) return true;
     _values[field] = value;
     if (affectsDraft) draftRevision++;
+    return true;
   }
 
   /// Restores UI scalars only; never changes snapshot facts or host inputs.
@@ -102,6 +188,12 @@ class UiSessionState {
   }
 
   void adoptExtracted(String field) {
+    final spec = snapshot.editSpecs[field];
+    if (spec is UiItemIdsEdit && _selectionOverrides.remove(field)) {
+      _selections[field] = UiItemIdsEdit.normalize(spec.initial);
+      draftRevision++;
+      return;
+    }
     if (!_userOverrides.containsKey(field) ||
         !snapshot.initialUiState.containsKey(field))
       return;
@@ -152,9 +244,20 @@ class UiSessionState {
             false))
       return UiEventOutcome.invalid;
     final payloadType = schema.events[event.kind];
-    if (payloadType == null
-        ? event.payload != null
-        : !matchesUiValue(payloadType, event.payload))
+    // library-2 editField: the host spec, not the coarse type, owns the payload.
+    UiEditSpec? spec;
+    if (usesTypedEdits(catalog) &&
+        definition.route == UiActionRoute.local &&
+        definition.localAction == UiLocalAction.editField) {
+      if (binding.inputRefs.length != 1) return UiEventOutcome.invalid;
+      spec =
+          snapshot.editSpecs[binding.inputRefs.single] ?? const UiStringEdit();
+      if (spec.payloadType != payloadType) return UiEventOutcome.invalid;
+    }
+    if (!(spec != null && spec.nullable && event.payload == null) &&
+        (payloadType == null
+            ? event.payload != null
+            : !matchesUiValue(payloadType, event.payload)))
       return UiEventOutcome.invalid;
     if (definition.route != UiActionRoute.local) {
       if (definition.route == UiActionRoute.business &&
@@ -165,7 +268,17 @@ class UiSessionState {
     switch (definition.localAction) {
       case UiLocalAction.editField:
         if (binding.inputRefs.length != 1) return UiEventOutcome.invalid;
-        edit(binding.inputRefs.single, event.payload);
+        final key = binding.inputRefs.single;
+        if (spec == null) {
+          edit(key, event.payload);
+        } else {
+          if (_specReject(spec, event.payload) != null ||
+              (spec.view &&
+                  (snapshot.actionContext?.draft.containsKey(key) ?? false))) {
+            return UiEventOutcome.invalid;
+          }
+          _applyTyped(key, spec, event.payload, affectsDraft: !spec.view);
+        }
       case UiLocalAction.sortRows:
         if (binding.inputRefs.length != 1 ||
             (snapshot.actionContext?.draft.containsKey(
@@ -174,7 +287,13 @@ class UiSessionState {
                 false) ||
             !['original', 'value'].contains(event.payload))
           return UiEventOutcome.invalid;
-        selectView(binding.inputRefs.single, event.payload);
+        final written = _selectViewCore(
+          binding.inputRefs.single,
+          event.payload,
+        );
+        // Legacy catalogs keep their historic always-applied sort; library-2
+        // never reports applied for a write that was refused.
+        if (!written && usesTypedEdits(catalog)) return UiEventOutcome.invalid;
       case UiLocalAction.expandSource:
         if (!_expandedSources.add(node.id)) _expandedSources.remove(node.id);
       case UiLocalAction.openDetail:
