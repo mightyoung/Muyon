@@ -1,0 +1,43 @@
+{
+  "status": "proposed; not adopted; future-only DATA. Bytes are illustrative; the real store is the existing settings-table projection (HostUiWorkspaceStore).",
+  "design": "docs/design/aiui-f5-contract-proposed.md §5",
+  "storedV2": {
+    "taskId": "t1", "surfaceId": "quote", "scopeKey": "{\"scope\":\"fixture\"}", "revision": 3, "schemaVersion": 2,
+    "catalogVersion": "library-2", "snapshotId": "quote-view", "snapshotRevision": 8, "intentRef": "intent-quote",
+    "planRevision": 12, "draftRevision": 5,
+    "extracted": {"qty": "2"}, "userOverrides": {"qty": "3"}, "viewValues": {"tab": "sec-b"},
+    "selections": {"picked": ["quote-a", "quote-b"]},
+    "nodeIds": ["root", "cmp", "pick"], "operationRefs": ["op-confirm-1"]
+  },
+  "cases": [
+    {"id": "roundtrip-keeps-overrides-and-selections", "action": "save→load→open with same S8/I8/catalog", "expect": {"readOnly": false, "userOverrides.qty": "3", "selections.picked": ["quote-a", "quote-b"], "draftRevision": 5, "viewValues.tab": "sec-b"}},
+    {"id": "override-violates-current-spec", "mutate": "当前 spec 把 qty 改成 UiNumberEdit，存储里是 '3'", "expect": {"readOnly": true, "reason": "override_rejected:qty", "readableDraft": {"qty": "3"}, "save": 0}, "note": "现行 restoreWorkspace 会悄悄不放入 _values 却仍 addAll 进 _userOverrides，必须修"},
+    {"id": "selection-membership-changed", "mutate": "quote-b 不再在 quote-labels", "expect": {"readOnly": true, "reason": "override_rejected:picked", "readableDraft.selections.picked": ["quote-a", "quote-b"]}},
+    {"id": "old-catalog-library-1", "mutate": "stored.schemaVersion=1, catalogVersion=library-1", "expect": {"readOnly": true, "readableDraft": true, "save": 0}},
+    {"id": "future-schema-version", "mutate": "stored.schemaVersion=3 且含未知字段", "expect": {"readOnly": true, "save": 0, "rawBytesUnchanged": true}},
+    {"id": "unknown-binding-kind", "mutate": "presentation 里 binding kind='collection2'", "expect": {"load": "UiWorkspaceUnreadable", "controller": "readOnly + unreadableReason", "save": 0, "rawBytesUnchanged": true}},
+    {"id": "truncated-json", "mutate": "bytes 被截断", "expect": {"load": "UiWorkspaceUnreadable", "readableDraft": "none", "save": 0, "rawBytesUnchanged": true, "listedInSurfaces": true}},
+    {"id": "changed-shape-cast-error", "mutate": "userOverrides 变成 List", "expect": {"load": "UiWorkspaceUnreadable", "save": 0, "rawBytesUnchanged": true}},
+    {"id": "node-deleted-or-binding-changed", "mutate": "当前 plan 缺 pick 节点", "expect": {"readOnly": true, "readableDraft": true}},
+    {"id": "scope-changed", "mutate": "task scope 变化", "expect": {"load": null, "note": "现有 scopeKey 比对；不恢复权限"}},
+    {"id": "cas-conflict-keeps-old", "action": "两个 controller 同 expectedRevision 保存", "expect": {"loser": "readOnly + saveError", "winnerBytesKept": true}},
+    {"id": "save-over-unreadable-old-value", "action": "对不可读旧 bytes 调 save(expectedRevision=旧)", "expect": {"result": "false or throws", "rawBytesUnchanged": true}, "note": "变异 M4 的检出点"},
+    {"id": "restore-never-replays", "action": "reopen with operationRefs=[op-confirm-1] 且回执 unknown", "expect": {"businessSinkCalls": 0, "semanticCalls": 0, "modelCalls": 0, "confirm": "locked"}},
+    {"id": "incomplete-preview-not-restored-as-actionable", "action": "流中断的预览被保存", "expect": {"restoredAsFinalPlan": false}, "note": "只有最终 ValidatedUiPlan 才可保存为可继续界面（任务书 §5）"},
+    {"id": "collections-content-not-persisted", "inspect": "storedV2 JSON", "expect": {"containsCollectionRows": false, "containsBindingRefKindCollection": true}}
+  ],
+  "round2": {
+    "storedV2Adds": {"selectionOverrides": ["picked"], "viewSelections": {"shortlistView": ["quote-a"]}},
+    "cases": [
+      {"id": "library-2-checkpoint-without-selections-still-schema-2", "stored": {"schemaVersion": 2, "catalogVersion": "library-2", "selections": {}}, "expect": {"valid": true}},
+      {"id": "library-2-with-schema-1", "stored": {"schemaVersion": 1, "catalogVersion": "library-2"}, "expect": {"readOnly": true, "save": 0}},
+      {"id": "dynamic-1-with-schema-2", "stored": {"schemaVersion": 2, "catalogVersion": "dynamic-1"}, "expect": {"readOnly": true, "save": 0}},
+      {"id": "dynamic-1-schema-1-unchanged", "stored": {"schemaVersion": 1, "catalogVersion": "dynamic-1"}, "expect": "现行行为不变"},
+      {"id": "collection-binding-in-non-library-2-presentation", "mutate": "dynamic-1 presentation 含 kind=collection", "expect": {"load": "UiWorkspaceUnreadable", "save": 0, "rawBytesUnchanged": true}, "note": "不依赖 BindingKind.byName 随枚举新增而放行"},
+      {"id": "readableDraft-includes-typed-arrays", "mutate": "存储为不可打开版本，含 selections/selectionOverrides/viewSelections", "expect": {"readableDraft": {"selections": "kept", "selectionOverrides": "kept", "viewSelections": "kept", "scalars": "kept"}}},
+      {"id": "workspace-over-256KiB", "action": "保存编码 > 262144 字节", "expect": {"save": "rejected workspace_too_large", "oldBytesUnchanged": true, "inMemoryDraftKept": true, "readOnly": true, "saveError": "readable"}},
+      {"id": "selection-incompatible-kept-as-draft", "mutate": "selections.picked 含已不在集合的 id", "expect": {"readOnly": true, "readableDraftKeepsOriginal": true, "selectionOverrideFlagKept": true}}
+    ]
+  },
+  "expectedAcceptance": "future-only"
+}

@@ -1,0 +1,31 @@
+{
+  "status": "proposed; not adopted; future-only DATA. No file here is consumed by any existing checker, validator, codec or test.",
+  "baseSha": "cf672164e4f6c3e7beea8029c8be735e33c3bf19",
+  "design": "docs/design/aiui-f5-contract-proposed.md",
+  "versions": {"catalog": "library-2", "stream": "aiui-stream/2", "workspaceSchemaVersion": 2},
+  "files": {
+    "typed-edits.json": "typed positive/negative, money, formula dependency",
+    "collection-stable-row.json": "host snapshot slice, missing-source null cells, collection negatives, N-1/N/N+1 limits, stable row detail",
+    "library-2.stream-2.model-lines.jsonl": "model lines (only kind/id; no host metadata)",
+    "stream-version.json": "protocol x catalog matrix, version mismatch, workspace gate",
+    "snapshot-race.json": "atomic S/I/P publish, race, failure, stale confirm",
+    "restore-overrides.json": "restore, overrides, unreadable/unknown version, byte preservation"
+  },
+  "catalogParity": {
+    "count": 33,
+    "components": ["PageScaffold", "Field", "Table", "SourceList", "ObjectChip", "MasterDetail", "StatusBadge", "ScopeChip", "WarnBanner", "SegmentedPill", "ConfirmCard", "BatchConfirmCard", "Heading", "Prose", "Section", "Columns", "Tabs", "Disclosure", "KeyValue", "Metric", "CompareTable", "Chart", "Choice", "Form", "NumberStepper", "Slider", "Toggle", "DateField", "SourceCard", "FileCard", "ProgressCard", "Checklist", "Timeline"],
+    "source": "packages/muyon_ui/lib/src/dynamic/catalog.dart: minimalUiCatalog(5) + dynamicUiCatalog(+7) + libraryUiCatalog(+21); Table is overridden in dynamic, not double counted",
+    "note": "A future F5b checker must assert libraryUiCatalog2.components.keys equals this list; the old scripts/aiui5/check_artifacts.py is not modified."
+  },
+  "acceptanceEntries": {
+    "F5b": ["packages/muyon_module_api/test/ui_edit_spec_test.dart (new)", "packages/muyon_module_api/test/ui_collection_test.dart (new)", "packages/muyon_module_api/test/ui_stream_v2_test.dart (new)", "packages/muyon_ui/test/component_plan_mapping_test.dart (new)"],
+    "F5c": ["packages/muyon_ui/test/ui_recompute_integration_test.dart (new)", "apps/muyon/test/ui_row_detail_navigation_test.dart (new)", "apps/muyon/test/ui_planning_stream_test.dart (new)", "apps/muyon/test/ui_bound_workspace_recovery_test.dart (new)", "packages/muyon_module_api/test/ui_workspace_unreadable_test.dart (new)"]
+  },
+  "mutations": [
+    {"id": "M1", "mutation": "UiSessionState.dispatch skips spec.reject", "caughtBy": "ui_edit_spec_test.dart typed negatives", "fixture": "typed-edits.json"},
+    {"id": "M2", "mutation": "aiui-stream/1 session accepts kind=collection", "caughtBy": "ui_stream_v2_test.dart v1 bad-line case", "fixture": "stream-version.json"},
+    {"id": "M3", "mutation": "UiSurfaceController.publish does not re-check token after await", "caughtBy": "ui_recompute_integration_test.dart race cases", "fixture": "snapshot-race.json"},
+    {"id": "M4", "mutation": "workspace save overwrites unreadable/unknown-version bytes", "caughtBy": "ui_bound_workspace_recovery_test.dart byte-preservation case", "fixture": "restore-overrides.json"}
+  ],
+  "expectedAcceptance": "future-only"
+}

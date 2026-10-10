@@ -1,0 +1,80 @@
+{
+  "status": "proposed; not adopted; future-only DATA. No production validator/codec consumed this file.",
+  "design": "docs/design/aiui-f5-contract-proposed.md §2",
+  "specs": {
+    "name": {"kind": "string", "maxLength": 4096},
+    "agreed": {"kind": "bool"},
+    "ratio": {"kind": "finiteNumber", "min": 0, "max": 1, "step": 0.25, "integer": false},
+    "count": {"kind": "finiteNumber", "min": 0, "max": 10, "integer": true},
+    "due": {"kind": "date", "first": "2026-01-01", "last": "2030-12-31", "nullable": true},
+    "picked": {"kind": "itemIds", "collectionId": "quote-labels", "multiple": true}
+  },
+  "collectionItemIds": ["quote-a", "quote-b", "quote-c"],
+  "cases": [
+    {"id": "string-ok", "spec": "name", "payload": "云川", "decision": "accept", "draftRevisionDelta": 1},
+    {"id": "string-legacy-no-spec", "spec": null, "payload": "x", "decision": "accept", "note": "无 spec 的 uiState 键等价 UiStringEdit，与现行行为逐字相同", "draftRevisionDelta": 1},
+    {"id": "string-too-long", "spec": "name", "payload": {"repeat": "a", "times": 4097}, "decision": "reject", "error": "string_too_long", "draftRevisionDelta": 0},
+    {"id": "bool-true", "spec": "agreed", "payload": true, "decision": "accept", "draftRevisionDelta": 1},
+    {"id": "bool-as-string", "spec": "agreed", "payload": "true", "decision": "reject", "error": "wrong_type", "draftRevisionDelta": 0},
+    {"id": "bool-as-int", "spec": "agreed", "payload": 1, "decision": "reject", "error": "wrong_type", "draftRevisionDelta": 0},
+    {"id": "number-fraction-preserved", "spec": "ratio", "payload": 0.25, "decision": "accept", "stored": 0.25, "draftRevisionDelta": 1},
+    {"id": "number-off-grid", "spec": "ratio", "payload": 0.3, "decision": "reject", "error": "off_grid", "note": "不 round 到 0.25，不 clamp", "draftRevisionDelta": 0},
+    {"id": "number-above-max", "spec": "ratio", "payload": 1.25, "decision": "reject", "error": "out_of_range", "draftRevisionDelta": 0},
+    {"id": "number-nan", "spec": "ratio", "payload": {"testOnlyNative": "double.nan"}, "decision": "reject", "error": "not_finite", "note": "未来测试内以原生 NaN 构造；不是 wire 数据", "draftRevisionDelta": 0},
+    {"id": "number-infinity", "spec": "ratio", "payload": {"testOnlyNative": "double.infinity"}, "decision": "reject", "error": "not_finite", "draftRevisionDelta": 0},
+    {"id": "integer-ok", "spec": "count", "payload": 7, "decision": "accept", "draftRevisionDelta": 1},
+    {"id": "integer-fraction", "spec": "count", "payload": 7.5, "decision": "reject", "error": "not_integer", "note": "不 toInt 截断", "draftRevisionDelta": 0},
+    {"id": "integer-unsafe", "spec": "count", "payload": 9007199254740992, "decision": "reject", "error": "out_of_range", "draftRevisionDelta": 0},
+    {"id": "date-leap-ok", "spec": "due", "payload": "2028-02-29", "decision": "accept", "draftRevisionDelta": 1},
+    {"id": "date-null-nullable", "spec": "due", "payload": null, "decision": "accept", "draftRevisionDelta": 1},
+    {"id": "date-invalid-day", "spec": "due", "payload": "2026-02-30", "decision": "reject", "error": "invalid_date", "draftRevisionDelta": 0},
+    {"id": "date-not-padded", "spec": "due", "payload": "2026-1-2", "decision": "reject", "error": "invalid_date", "draftRevisionDelta": 0},
+    {"id": "date-with-timezone", "spec": "due", "payload": "2026-01-02T00:00:00Z", "decision": "reject", "error": "invalid_date", "draftRevisionDelta": 0},
+    {"id": "date-empty-string-is-not-null", "spec": "due", "payload": "", "decision": "reject", "error": "invalid_date", "draftRevisionDelta": 0},
+    {"id": "date-before-first", "spec": "due", "payload": "2025-12-31", "decision": "reject", "error": "out_of_range", "draftRevisionDelta": 0},
+    {"id": "itemids-ok-canonical-order", "spec": "picked", "payload": ["quote-b", "quote-a"], "decision": "accept", "stored": ["quote-a", "quote-b"], "draftRevisionDelta": 1},
+    {"id": "itemids-duplicate", "spec": "picked", "payload": ["quote-a", "quote-a"], "decision": "reject", "error": "duplicate_item_id", "note": "整体拒绝，不去重后放行", "draftRevisionDelta": 0},
+    {"id": "itemids-unknown", "spec": "picked", "payload": ["quote-zzz"], "decision": "reject", "error": "unknown_item_id", "draftRevisionDelta": 0},
+    {"id": "itemids-label-not-id", "spec": "picked", "payload": ["云川"], "decision": "reject", "error": "unknown_item_id", "note": "显示标签不是 ID；Choice 自填首版 disabled", "draftRevisionDelta": 0},
+    {"id": "undeclared-state-key", "spec": "missing", "stateKey": "no-such-key", "payload": "x", "decision": "reject", "error": "unknown_state", "draftRevisionDelta": 0},
+    {"id": "view-edit-no-revision", "spec": "picked", "specOverride": {"view": true}, "payload": ["quote-a"], "decision": "accept", "draftRevisionDelta": 0, "note": "view=true 只写 viewValues，不递增 draftRevision"},
+    {"id": "view-key-also-business-input", "spec": "picked", "specOverride": {"view": true}, "alsoInActionContextDraft": true, "decision": "reject-plan", "error": "view_business_input"}
+  ],
+  "money": [
+    {"id": "money-string-keeps-scale", "spec": {"kind": "string", "accepts": "exactDecimal(unsigned, <=12 int, <=6 frac)"}, "payload": "10.333333", "decision": "accept", "stored": "10.333333"},
+    {"id": "money-too-many-fraction-digits", "payload": "10.3333334", "decision": "reject", "error": "decimal_rejected", "note": "不截断到 6 位"},
+    {"id": "money-bound-to-number-spec", "decision": "reject-snapshot", "error": "money_must_be_string_state", "note": "宿主构建 snapshot 时拒绝把金额 key 声明为 finiteNumber；F3a 也要求公式状态输入为 String"}
+  ],
+  "formulaDependency": [
+    {"id": "formula-depends-on-bool", "decision": "reject-snapshot", "error": "formula_state_dep_kind", "note": "首版公式状态依赖仅限 UiStringEdit"}
+  ],
+  "round2": {
+    "validatorComponentContract": [
+      {"id": "heading-level-4", "node": "Heading level=4", "decision": "reject-node", "error": "property_value:h:level"},
+      {"id": "heading-level-2", "node": "Heading level=2", "decision": "accept"},
+      {"id": "chart-kind-radar", "node": "Chart kind=radar", "decision": "reject-node", "error": "property_value:c:kind"},
+      {"id": "chart-kind-pie", "node": "Chart kind=pie", "decision": "accept"}
+    ],
+    "validateSpec": [
+      {"id": "min-greater-than-max", "spec": {"kind": "finiteNumber", "min": 2, "max": 1}, "decision": "reject-snapshot", "error": "spec_range"},
+      {"id": "step-zero", "spec": {"kind": "finiteNumber", "min": 0, "max": 1, "step": 0}, "decision": "reject-snapshot", "error": "spec_step"},
+      {"id": "step-negative", "spec": {"kind": "finiteNumber", "min": 0, "max": 1, "step": -0.25}, "decision": "reject-snapshot", "error": "spec_step"},
+      {"id": "nonfinite-bound", "spec": {"kind": "finiteNumber", "min": 0, "max": {"testOnlyNative": "double.infinity"}}, "decision": "reject-snapshot", "error": "spec_range"},
+      {"id": "slider-step-not-divisible", "spec": {"kind": "finiteNumber", "min": 0, "max": 1, "step": 0.3}, "component": "Slider", "decision": "reject-snapshot", "error": "slider_step_unrepresentable", "note": "不得退化为 continuous 绕过 step"},
+      {"id": "slider-divisions-over-10000", "spec": {"kind": "finiteNumber", "min": 0, "max": 100000, "step": 1}, "component": "Slider", "decision": "reject-snapshot", "error": "slider_step_unrepresentable"},
+      {"id": "initial-violates-spec", "spec": {"kind": "finiteNumber", "min": 0, "max": 1, "step": 0.25}, "initial": 0.3, "decision": "reject-snapshot", "error": "initial_rejected"},
+      {"id": "date-without-first-last", "spec": {"kind": "date"}, "decision": "reject-snapshot", "error": "spec_date_range_required", "note": "无 DateTime.now 默认"},
+      {"id": "date-first-after-last", "spec": {"kind": "date", "first": "2030-01-01", "last": "2026-01-01"}, "decision": "reject-snapshot", "error": "spec_date_range"}
+    ],
+    "itemIdsLayers": [
+      {"id": "payload-layer-passes-membership-layer-rejects", "payload": ["quote-zzz"], "rejectPayload": null, "rejectInContext": "unknown_item_id", "decision": "reject"},
+      {"id": "duplicate-caught-at-payload-layer", "payload": ["quote-a", "quote-a"], "rejectPayload": "duplicate_item_id", "decision": "reject"}
+    ],
+    "widgetStableIds": [
+      {"id": "choice-same-label-different-ids", "options": [{"id": "s1", "label": "云川"}, {"id": "s2", "label": "云川"}], "tap": "s2", "expectPayload": ["s2"]},
+      {"id": "tabs-controlled-no-initial-fake-restore", "selected": "sec-b", "expect": "selectedIndex 受控 + onChanged；不靠重建/initial"},
+      {"id": "disclosure-controlled", "expanded": true, "expect": "expanded 受控 + onChanged"}
+    ]
+  },
+  "expectedAcceptance": "future-only"
+}

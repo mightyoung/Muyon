@@ -1,0 +1,117 @@
+{
+  "status": "proposed; not adopted; future-only DATA. Shapes follow docs/design/aiui-f5-contract-proposed.md §3 (cells are BindingRef; no value copy, no cellStates).",
+  "protocol": "aiui-stream/2",
+  "catalog": "library-2",
+  "snapshot": {
+    "ref": {"id": "quote-view", "revision": 8},
+    "editSpecs": {"picked": {"kind": "itemIds", "collectionId": "quote-labels", "multiple": true, "initial": []}},
+    "facts": {
+      "qa-name": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "a"}, "field": "supplier", "value": "云川", "state": "verified", "sourceRefs": ["span-a"]},
+      "qb-name": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "b"}, "field": "supplier", "value": "远航", "state": "verified", "sourceRefs": ["span-b"]},
+      "qc-name": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "c"}, "field": "supplier", "value": "北辰", "state": "verified", "sourceRefs": []},
+      "qa-price": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "a"}, "field": "price", "value": "10", "state": "verified", "unit": "CNY", "sourceRefs": ["span-a"]},
+      "qa-lead": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "a"}, "field": "leadDays", "value": "7", "state": "verified", "sourceRefs": ["span-a"]},
+      "qb-price": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "b"}, "field": "price", "value": null, "state": "notDisclosed", "unit": "CNY", "sourceRefs": ["span-b"]},
+      "qb-lead": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "b"}, "field": "leadDays", "value": "9", "state": "unverified", "sourceRefs": ["span-b"]},
+      "qc-price": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "c"}, "field": "price", "value": null, "state": "readFailed", "unit": "CNY", "sourceRefs": []},
+      "qc-lead": {"object": {"moduleId": "fixture", "objectType": "quote", "objectId": "c"}, "field": "leadDays", "value": null, "state": "notApplicable", "sourceRefs": []}
+    },
+    "sources": {
+      "span-a": {"artifactId": "src-a", "contentDigest": "public-digest-a1", "originalText": "Quote A price 10 lead 7 days", "start": 0, "end": 28},
+      "span-b": {"artifactId": "src-b", "contentDigest": "public-digest-b1", "originalText": "Quote B price not disclosed lead 9 days", "start": 0, "end": 39}
+    },
+    "sourceDigests": {"src-a": "public-digest-a1", "src-b": "public-digest-b1"},
+    "collections": {
+      "quote-labels": {
+        "columns": [{"id": "label", "label": "供应商"}],
+        "rows": [
+          {"itemId": "quote-a", "cells": {"label": {"kind": "fact", "id": "qa-name"}}},
+          {"itemId": "quote-b", "cells": {"label": {"kind": "fact", "id": "qb-name"}}},
+          {"itemId": "quote-c", "cells": {"label": {"kind": "fact", "id": "qc-name"}}}
+        ]
+      },
+      "quotes": {
+        "columns": [{"id": "price", "label": "含税单价"}, {"id": "lead", "label": "交期(天)"}],
+        "rows": [
+          {"itemId": "quote-a", "cells": {"price": {"kind": "fact", "id": "qa-price"}, "lead": {"kind": "fact", "id": "qa-lead"}}, "object": {"moduleId": "fixture", "objectType": "quote", "objectId": "a"}},
+          {"itemId": "quote-b", "cells": {"price": {"kind": "fact", "id": "qb-price"}, "lead": {"kind": "fact", "id": "qb-lead"}}, "object": {"moduleId": "fixture", "objectType": "quote", "objectId": "b"}},
+          {"itemId": "quote-c", "cells": {"price": {"kind": "fact", "id": "qc-price"}, "lead": {"kind": "fact", "id": "qc-lead"}}}
+        ]
+      }
+    }
+  },
+  "missingSourceCells": [
+    {"id": "null-notDisclosed-is-visible", "cell": "quote-b/price", "expect": {"value": null, "state": "notDisclosed", "textEquivalent": "未披露", "notZero": true, "notEmptyString": true}},
+    {"id": "null-readFailed-is-visible", "cell": "quote-c/price", "expect": {"value": null, "state": "readFailed", "textEquivalent": "读取失败", "notZero": true}},
+    {"id": "null-notApplicable-is-visible", "cell": "quote-c/lead", "expect": {"value": null, "state": "notApplicable", "textEquivalent": "不适用"}},
+    {"id": "unverified-keeps-state", "cell": "quote-b/lead", "expect": {"value": "9", "state": "unverified", "mark": "未核验"}}
+  ],
+  "collectionNegativeCases": [
+    {"id": "row-missing-column-cell", "mutate": "删除 quote-a.cells.lead", "decision": "reject-collection", "error": "collection:quotes:cell_missing", "note": "整体拒绝，不丢行、不补默认值"},
+    {"id": "row-extra-unknown-column", "mutate": "quote-a.cells 增加 weight", "decision": "reject-collection", "error": "collection:quotes:unknown_column"},
+    {"id": "duplicate-item-id", "mutate": "quote-b.itemId = quote-a", "decision": "reject-collection", "error": "collection:quotes:duplicate_item_id"},
+    {"id": "empty-item-id", "mutate": "quote-c.itemId = ''", "decision": "reject-collection", "error": "collection:quotes:empty_id"},
+    {"id": "cell-refs-unknown-fact", "mutate": "quote-a.cells.price.id = nope", "decision": "reject-collection", "error": "collection:quotes:unknown_fact"},
+    {"id": "cell-kind-uiState", "mutate": "quote-a.cells.price.kind = uiState", "decision": "reject-collection", "error": "collection:quotes:cell_kind"},
+    {"id": "cell-computed-stale", "mutate": "cell 指向 inputVersion != snapshot.ref 的 computed", "decision": "reject-collection", "error": "collection:quotes:unknown_or_stale_computation"},
+    {"id": "row-object-not-a-cell-fact-object", "mutate": "quote-a.object.objectId = zzz", "decision": "reject-collection", "error": "collection:quotes:row_object_mismatch"},
+    {"id": "rows-201", "mutate": "rows 增至 201", "decision": "reject-collection", "error": "collection:quotes:too_many_rows"},
+    {"id": "columns-33", "mutate": "columns 增至 33", "decision": "reject-collection", "error": "collection:quotes:too_many_columns"},
+    {"id": "slot-shape-mismatch", "mutate": "Chart.data 绑定 3 列集合", "decision": "reject-node", "error": "collection_shape:chart:data"}
+  ],
+  "limits": [
+    {"name": "rows", "constant": 200, "cases": [199, 200, 201], "expect": ["accept", "accept", "reject"]},
+    {"name": "columns", "constant": 32, "cases": [31, 32, 33], "expect": ["accept", "accept", "reject"]},
+    {"name": "itemIds", "constant": 200, "cases": [199, 200, 201], "expect": ["accept", "accept", "reject"]},
+    {"name": "stringEditMaxLength", "constant": 4096, "unit": "utf8-bytes", "cases": [4095, 4096, 4097], "expect": ["accept", "accept", "reject"]}
+  ],
+  "stableRow": {
+    "detailEvent": {"kind": "tap", "action": "openRow", "payloadType": "string", "payload": "itemId"},
+    "cases": [
+      {"id": "reorder-keeps-target", "sort": "reverse", "tap": "quote-a", "expectObject": {"moduleId": "fixture", "objectType": "quote", "objectId": "a"}, "toolCalls": 0},
+      {"id": "unknown-item-id", "tap": "quote-zzz", "expect": "invalid", "navigations": 0, "toolCalls": 0},
+      {"id": "forged-object-in-payload", "payload": {"itemId": "quote-a", "object": {"objectId": "evil"}}, "expect": "invalid", "note": "payload 必须是 string；不接受模型/Widget 自报 ObjectRef", "navigations": 0},
+      {"id": "title-or-index-is-not-identity", "tap": "第 0 行 / 标题 云川", "expect": "invalid", "note": "只认 itemId"},
+      {"id": "row-without-object", "tap": "quote-c", "expect": "invalid", "navigations": 0, "note": "无 object 的行没有回调"},
+      {"id": "stale-observed-revision", "observedRevision": "plan.revision - 1", "expect": "stale", "navigations": 0},
+      {"id": "object-not-in-snapshot-facts", "mutate": "snapshot 删除 qa-* facts", "expect": "navigation-rejected", "note": "既有 UiReferenceNavigation.openReference 校验 ref ∈ snapshot.facts 的 object", "toolCalls": 0}
+    ]
+  },
+  "round2": {
+    "computedEvidence": {
+      "snapshotAdds": {
+        "computations": {"qa-total": {"value": "20", "inputVersion": {"id": "quote-view", "revision": 8}, "computationId": "host-total-instance"}, "qb-total": {"value": null, "inputVersion": {"id": "quote-view", "revision": 8}, "computationId": "host-total-b"}},
+        "computedEvidence": {"qa-total": {"state": "verified", "unit": "CNY", "sourceRefs": ["span-a"]}, "qb-total": {"state": "notDisclosed", "unit": "CNY", "sourceRefs": ["span-b"]}}
+      },
+      "cases": [
+        {"id": "computed-cell-with-evidence", "cell": "qa-total", "decision": "accept", "expect": {"state": "verified", "sources": ["span-a"]}},
+        {"id": "computed-null-notDisclosed-degrades-not-error", "cell": "qb-total", "decision": "accept", "expect": {"value": null, "state": "notDisclosed", "textEquivalent": "未披露", "errorState": false, "notZero": true}},
+        {"id": "computed-notApplicable-is-legal", "evidence": {"state": "notApplicable"}, "decision": "accept", "expect": {"errorState": false, "textEquivalent": "不适用"}},
+        {"id": "computed-conflict-keeps-mark", "evidence": {"state": "conflict"}, "decision": "accept", "expect": {"mark": "冲突"}},
+        {"id": "computed-unverified-keeps-mark", "evidence": {"state": "unverified"}, "decision": "accept", "expect": {"mark": "未核验"}},
+        {"id": "computed-readFailed-degrades", "evidence": {"state": "readFailed"}, "decision": "accept", "expect": {"textEquivalent": "读取失败"}},
+        {"id": "computed-evidence-missing", "mutate": "删除 computedEvidence.qa-total", "decision": "reject-collection", "error": "collection:quotes:computed_evidence_missing", "note": "不默认 verified"},
+        {"id": "computed-evidence-source-digest-mismatch", "mutate": "evidence.sourceRefs 指向 digest 不一致的 span", "decision": "reject-collection", "error": "collection:quotes:unknown_or_stale_source"},
+        {"id": "computed-inputVersion-stale", "mutate": "inputVersion.revision=7", "decision": "reject-collection", "error": "collection:quotes:unknown_or_stale_computation"}
+      ]
+    },
+    "chart": [
+      {"id": "series-legal-missing-point-kept-in-table", "decision": "accept", "expect": {"plotted": ["quote-a"], "dataTableRows": ["quote-a", "quote-b(未披露)", "quote-c(读取失败)"]}},
+      {"id": "series-nonfinite-value", "mutate": "value 单元为 NaN 的数值", "decision": "reject-collection", "error": "collection_shape:chart:data:nonfinite", "note": "不丢点后宣称整体有效"},
+      {"id": "series-non-numeric-string-with-ready-state", "mutate": "value='abc' 且 state=verified", "decision": "reject-collection", "error": "collection_shape:chart:data:not_numeric"},
+      {"id": "pie-negative", "chartKind": "pie", "mutate": "value='-1'", "decision": "reject-collection", "error": "collection_shape:chart:data:negative_pie"},
+      {"id": "bar-negative-allowed", "chartKind": "bar", "mutate": "value='-1'", "decision": "accept"}
+    ],
+    "rowNavigationRecheck": [
+      {"id": "scope-changed", "host": {"scopeKey": "other"}, "expect": "navigation-refused", "toolCalls": 0},
+      {"id": "object-revision-changed", "host": {"objectRevisionRef": "newer"}, "expect": "navigation-refused", "toolCalls": 0},
+      {"id": "source-digest-revoked", "host": {"sourceDigest": "changed"}, "expect": "navigation-refused", "toolCalls": 0, "note": "既有 openReference 的 membership 校验不足以替代"}
+    ],
+    "limits": [
+      {"name": "idBytes", "constant": 128, "cases": [127, 128, 129], "expect": ["accept", "accept", "reject"]},
+      {"name": "labelBytes", "constant": 256, "cases": [255, 256, 257], "expect": ["accept", "accept", "reject"]},
+      {"name": "collectionEncodedBytes", "constant": 65536, "cases": [65535, 65536, 65537], "expect": ["accept", "accept", "reject"]}
+    ]
+  },
+  "expectedAcceptance": "future-only"
+}
