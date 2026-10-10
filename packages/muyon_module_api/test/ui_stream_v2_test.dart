@@ -25,7 +25,16 @@ void main() {
       UiStreamSession(
         surfaceId: f.plan.surfaceId,
         revision: f.plan.revision,
-        snapshot: f.snapshot,
+        snapshot: catalog.version == 'library-2'
+            ? f.snapshot.copyWith(
+                computedEvidence: {
+                  'total': UiComputedEvidence(
+                    state: FactState.verified,
+                    sourceRefs: const ['quote'],
+                  ),
+                },
+              )
+            : f.snapshot,
         intent: f.intent,
         catalog: catalog,
         root: f.plan.root,

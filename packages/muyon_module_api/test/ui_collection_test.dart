@@ -3,11 +3,9 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
-// F5b slice 1c (RED). Real validateUiPlan / UiSessionState.dispatch / stream2
-// compiler only. The declarations (UiCollectionShape, UiComputedEvidence,
-// schema metadata, openRow, rowObject) are NOT-READY scaffolds, so every
-// positive collection assertion fails on behaviour today. Each negative test
-// first asserts its valid control, so no reject can pass vacuously.
+// F5b slice 1c. Real validateUiPlan / UiSessionState.dispatch / stream2
+// compiler only. Each negative test first asserts its valid control, so no
+// reject can pass vacuously. RED history is documented in the slice report.
 
 const _ref = SnapshotRef('s', 1);
 const _obj = ObjectRef(
@@ -23,11 +21,7 @@ const _obj2 = ObjectRef(
   revisionRef: 'r1',
 );
 const _doc = SourceSpanRef(
-  artifact: ArtifactRef(
-    moduleId: 'm',
-    artifactId: 'doc',
-    contentDigest: 'd1',
-  ),
+  artifact: ArtifactRef(moduleId: 'm', artifactId: 'doc', contentDigest: 'd1'),
   originalText: 'hello world',
   start: 0,
   end: 5,
@@ -180,9 +174,11 @@ class Rig {
       intentRef: 'i',
       root: 'root',
       nodes: [
-        UiNode(id: 'root', component: 'Page', children: [
-          for (final n in nodes) n.id,
-        ]),
+        UiNode(
+          id: 'root',
+          component: 'Page',
+          children: [for (final n in nodes) n.id],
+        ),
         ...nodes,
       ],
     );
@@ -225,8 +221,10 @@ void bad(Rig r, [String prefix = 'collection:rows:']) {
   );
 }
 
-Rig _rigC(UiCollection c, {Map<String, SnapshotFact>? facts}) =>
-    Rig(_snapshot(collections: {c.id: c}, facts: facts), cid: c.id);
+Rig _rigC(UiCollection c, {Map<String, SnapshotFact>? facts}) => Rig(
+  _snapshot(collections: {c.id: c}, facts: facts),
+  cid: c.id,
+);
 
 /// Size contract used by these tests (execution clarification, pending parent
 /// review): UTF-8 length of jsonEncode of the structural reference metadata
@@ -318,9 +316,16 @@ void main() {
         ['label', 'value', 'x'],
         ['x', 'value'],
       ]) {
-        expect(UiCollectionShape.series.accepts(cols(no)), isFalse, reason: '$no');
+        expect(
+          UiCollectionShape.series.accepts(cols(no)),
+          isFalse,
+          reason: '$no',
+        );
       }
-      expect(UiCollectionShape.timeline.accepts(cols(['time', 'title'])), isTrue);
+      expect(
+        UiCollectionShape.timeline.accepts(cols(['time', 'title'])),
+        isTrue,
+      );
       expect(
         UiCollectionShape.timeline.accepts(cols(['time', 'title', 'detail'])),
         isTrue,
@@ -340,11 +345,18 @@ void main() {
 
     test('schema metadata is immutable (scaffold control)', () {
       final s = _catalog().components['Table']!;
-      expect(() => s.collections['x'] = UiCollectionShape.table, throwsUnsupportedError);
-      expect(() => _catalog().components['Page']!.childComponents.add('x'),
-          throwsUnsupportedError);
-      expect(() => _catalog().components['Chart']!.allowedValues['kind']!.add('x'),
-          throwsUnsupportedError);
+      expect(
+        () => s.collections['x'] = UiCollectionShape.table,
+        throwsUnsupportedError,
+      );
+      expect(
+        () => _catalog().components['Page']!.childComponents.add('x'),
+        throwsUnsupportedError,
+      );
+      expect(
+        () => _catalog().components['Chart']!.allowedValues['kind']!.add('x'),
+        throwsUnsupportedError,
+      );
     });
 
     test('shape mismatch is rejected by the existing validator', () {
@@ -352,7 +364,20 @@ void main() {
       final twoCols = _wide(2, 3);
       ok(_rigC(twoCols));
       final r = Rig(
-        _snapshot(),
+        _snapshot(
+          collections: {
+            'rows': _coll(
+              columns: const [UiColumn('label', 'Name')],
+              rows: [
+                UiRow(
+                  itemId: 'r1',
+                  cells: {'label': _bind('f1')},
+                  object: _obj,
+                ),
+              ],
+            ),
+          },
+        ),
         catalog: _catalog(shape: UiCollectionShape.options),
       );
       // single-column collection fits options ...
@@ -368,8 +393,12 @@ void main() {
   });
 
   group('limits N-1/N/N+1 with real plan validation', () {
-    void edge(String name, UiCollection okC, UiCollection badC,
-        {UiCollection? below}) {
+    void edge(
+      String name,
+      UiCollection okC,
+      UiCollection badC, {
+      UiCollection? below,
+    }) {
       test(name, () {
         if (below != null) ok(_rigC(below));
         ok(_rigC(okC));
@@ -377,7 +406,12 @@ void main() {
       });
     }
 
-    edge('rows 199/200/201', _wide(200, 1), _wide(201, 1), below: _wide(199, 1));
+    edge(
+      'rows 199/200/201',
+      _wide(200, 1),
+      _wide(201, 1),
+      below: _wide(199, 1),
+    );
     edge('columns 31/32/33', _wide(2, 32), _wide(2, 33), below: _wide(2, 31));
     edge(
       'collection id 127/128/129 bytes',
@@ -392,18 +426,38 @@ void main() {
     );
     UiCollection withCol(String id, String label) => _coll(
       columns: [UiColumn(id, label)],
-      rows: [UiRow(itemId: 'r1', cells: {id: _bind('f1')})],
+      rows: [
+        UiRow(itemId: 'r1', cells: {id: _bind('f1')}),
+      ],
     );
-    edge('column id 127/128/129', withCol('a' * 128, 'L'), withCol('a' * 129, 'L'),
-        below: withCol('a' * 127, 'L'));
-    edge('column label 255/256/257', withCol('c', 'a' * 256), withCol('c', 'a' * 257),
-        below: withCol('c', 'a' * 255));
-    edge('label counts bytes', withCol('c', 'é' * 128), withCol('c', 'é' * 129));
+    edge(
+      'column id 127/128/129',
+      withCol('a' * 128, 'L'),
+      withCol('a' * 129, 'L'),
+      below: withCol('a' * 127, 'L'),
+    );
+    edge(
+      'column label 255/256/257',
+      withCol('c', 'a' * 256),
+      withCol('c', 'a' * 257),
+      below: withCol('c', 'a' * 255),
+    );
+    edge(
+      'label counts bytes',
+      withCol('c', 'é' * 128),
+      withCol('c', 'é' * 129),
+    );
     UiCollection withItem(String id) => _coll(
-      rows: [UiRow(itemId: id, cells: {'c1': _bind('f1')})],
+      rows: [
+        UiRow(itemId: id, cells: {'c1': _bind('f1')}),
+      ],
     );
-    edge('item id 127/128/129', withItem('a' * 128), withItem('a' * 129),
-        below: withItem('a' * 127));
+    edge(
+      'item id 127/128/129',
+      withItem('a' * 128),
+      withItem('a' * 129),
+      below: withItem('a' * 127),
+    );
     edge('item id counts bytes', withItem('é' * 64), withItem('é' * 65));
 
     test('metadata envelope 64 KiB: 65535/65536 ok, 65537 rejected', () {
@@ -415,36 +469,56 @@ void main() {
 
     test('fact values do not count toward the 64 KiB metadata size', () {
       final big = _wide(200, 9, padTo: 65536);
-      ok(
-        _rigC(big, facts: {'f1': _fact(value: 'x' * 100000)}),
-      );
+      ok(_rigC(big, facts: {'f1': _fact(value: 'x' * 100000)}));
     });
   });
 
   group('structure', () {
     test('duplicate column / duplicate row rejected as a whole', () {
       ok(Rig(_snapshot()));
-      bad(_rigC(_coll(
-        columns: const [UiColumn('c1', 'A'), UiColumn('c1', 'B')],
-      )));
-      bad(_rigC(_coll(rows: [
-        UiRow(itemId: 'r1', cells: {'c1': _bind('f1')}),
-        UiRow(itemId: 'r1', cells: {'c1': _bind('f1')}),
-      ])));
+      bad(
+        _rigC(_coll(columns: const [UiColumn('c1', 'A'), UiColumn('c1', 'B')])),
+      );
+      bad(
+        _rigC(
+          _coll(
+            rows: [
+              UiRow(itemId: 'r1', cells: {'c1': _bind('f1')}),
+              UiRow(itemId: 'r1', cells: {'c1': _bind('f1')}),
+            ],
+          ),
+        ),
+      );
     });
 
     test('missing or extra cell rejects the whole collection', () {
       ok(_rigC(_wide(2, 2)));
-      bad(_rigC(_coll(
-        columns: const [UiColumn('c1', 'A'), UiColumn('c2', 'B')],
-        rows: [
-          UiRow(itemId: 'r1', cells: {'c1': _bind('f1'), 'c2': _bind('f1')}),
-          UiRow(itemId: 'r2', cells: {'c1': _bind('f1')}),
-        ],
-      )));
-      bad(_rigC(_coll(rows: [
-        UiRow(itemId: 'r1', cells: {'c1': _bind('f1'), 'zz': _bind('f1')}),
-      ])));
+      bad(
+        _rigC(
+          _coll(
+            columns: const [UiColumn('c1', 'A'), UiColumn('c2', 'B')],
+            rows: [
+              UiRow(
+                itemId: 'r1',
+                cells: {'c1': _bind('f1'), 'c2': _bind('f1')},
+              ),
+              UiRow(itemId: 'r2', cells: {'c1': _bind('f1')}),
+            ],
+          ),
+        ),
+      );
+      bad(
+        _rigC(
+          _coll(
+            rows: [
+              UiRow(
+                itemId: 'r1',
+                cells: {'c1': _bind('f1'), 'zz': _bind('f1')},
+              ),
+            ],
+          ),
+        ),
+      );
     });
 
     test('cell kind must be fact or computed and must resolve', () {
@@ -455,17 +529,29 @@ void main() {
         const BindingRef.collection('rows'),
         _bind('missing'),
       ]) {
-        bad(_rigC(_coll(rows: [
-          UiRow(itemId: 'r1', cells: {'c1': ref}),
-        ])));
+        bad(
+          _rigC(
+            _coll(
+              rows: [
+                UiRow(itemId: 'r1', cells: {'c1': ref}),
+              ],
+            ),
+          ),
+        );
       }
     });
 
     test('row object must equal the cell fact object', () {
       ok(Rig(_snapshot()));
-      bad(_rigC(_coll(rows: [
-        UiRow(itemId: 'r1', cells: {'c1': _bind('f1')}, object: _obj2),
-      ])));
+      bad(
+        _rigC(
+          _coll(
+            rows: [
+              UiRow(itemId: 'r1', cells: {'c1': _bind('f1')}, object: _obj2),
+            ],
+          ),
+        ),
+      );
     });
   });
 
@@ -504,12 +590,16 @@ void main() {
     test('evidence missing / bad source / stale generation rejected', () {
       ok(rig(ev: good));
       bad(rig());
-      bad(rig(ev: {
-        'k': UiComputedEvidence(
-          state: FactState.verified,
-          sourceRefs: const ['nope'],
+      bad(
+        rig(
+          ev: {
+            'k': UiComputedEvidence(
+              state: FactState.verified,
+              sourceRefs: const ['nope'],
+            ),
+          },
         ),
-      }));
+      );
       bad(rig(ev: good, v: const SnapshotRef('s', 0)));
       bad(rig(ev: good, digests: const {'doc': 'changed'}));
     });
@@ -517,7 +607,10 @@ void main() {
     test('computedEvidence/copyWith carry state and are immutable', () {
       final s = _snapshot().copyWith(computedEvidence: good);
       expect(s.computedEvidence['k']!.state, FactState.verified);
-      expect(() => s.computedEvidence['x'] = good['k']!, throwsUnsupportedError);
+      expect(
+        () => s.computedEvidence['x'] = good['k']!,
+        throwsUnsupportedError,
+      );
       expect(() => good['k']!.sourceRefs.add('x'), throwsUnsupportedError);
     });
   });
@@ -546,24 +639,31 @@ void main() {
       ok(Rig(_snapshot(), intent: _intent(required: {_bind('f1')})));
       final facts = {'f1': _fact(), 'f2': _fact()};
       bad(
-        Rig(_snapshot(facts: facts), intent: _intent(required: {_bind('f2')})),
+        Rig(
+          _snapshot(facts: facts),
+          intent: _intent(required: {_bind('f2')}),
+        ),
         'required_binding:',
       );
     });
 
     test('collection cells count as shown for mandatoryStates', () {
-      final shown = {
-        'f1': _fact(value: null, state: FactState.notDisclosed),
-      };
-      ok(Rig(_snapshot(facts: shown),
-          intent: _intent(mandatory: {FactState.notDisclosed})));
+      final shown = {'f1': _fact(value: null, state: FactState.notDisclosed)};
+      ok(
+        Rig(
+          _snapshot(facts: shown),
+          intent: _intent(mandatory: {FactState.notDisclosed}),
+        ),
+      );
       final hidden = {
         ...shown,
         'f2': _fact(value: null, state: FactState.notDisclosed),
       };
       bad(
-        Rig(_snapshot(facts: hidden),
-            intent: _intent(mandatory: {FactState.notDisclosed})),
+        Rig(
+          _snapshot(facts: hidden),
+          intent: _intent(mandatory: {FactState.notDisclosed}),
+        ),
         'mandatory_state:',
       );
     });
@@ -574,9 +674,18 @@ void main() {
       ok(r);
       final v = r.result.validatedPlan!;
       expect(identical(v.snapshot, snap), isTrue);
-      expect(identical(v.snapshot.collections['rows'], snap.collections['rows']), isTrue);
+      expect(
+        identical(v.snapshot.collections['rows'], snap.collections['rows']),
+        isTrue,
+      );
       expect(identical(v.snapshot.facts['f1'], snap.facts['f1']), isTrue);
-      expect(identical(v.snapshot.facts['f1']!.sourceRefs, snap.facts['f1']!.sourceRefs), isTrue);
+      expect(
+        identical(
+          v.snapshot.facts['f1']!.sourceRefs,
+          snap.facts['f1']!.sourceRefs,
+        ),
+        isTrue,
+      );
       expect(snap.collections['rows']!.rows.single.cells['c1'], _bind('f1'));
     });
 
@@ -626,7 +735,16 @@ void main() {
 
     const v = FactState.verified;
     test('canonical numbers, decimal strings and legal gaps are accepted', () {
-      ok(series([(3, v), (2.5, v), ('10.25', v), ('-1', v), (null, FactState.notApplicable), (null, FactState.notDisclosed)]));
+      ok(
+        series([
+          (3, v),
+          (2.5, v),
+          ('10.25', v),
+          ('-1', v),
+          (null, FactState.notApplicable),
+          (null, FactState.notDisclosed),
+        ]),
+      );
       ok(series([(1, v), (2, v)], kind: 'pie'));
       ok(series([(-4, v)], kind: 'line'));
     });
@@ -642,6 +760,7 @@ void main() {
         '1e5',
         ' 1',
         true,
+        '9' * 400, // Canonical text whose chart geometry overflows double.
       ]) {
         bad(series([(1, v), (badValue, v), (2, v)]));
       }
@@ -679,14 +798,20 @@ void main() {
 
     test('Chart.kind only bar/line/pie', () {
       Rig chart(String k) => Rig(
-        _snapshot(facts: {'f1': _fact(value: 1), 'lbl': _fact()}, collections: {
-          'rows': _coll(
-            columns: const [UiColumn('label', 'L'), UiColumn('value', 'V')],
-            rows: [
-              UiRow(itemId: 'p', cells: {'label': _bind('lbl'), 'value': _bind('f1')}),
-            ],
-          ),
-        }),
+        _snapshot(
+          facts: {'f1': _fact(value: 1), 'lbl': _fact()},
+          collections: {
+            'rows': _coll(
+              columns: const [UiColumn('label', 'L'), UiColumn('value', 'V')],
+              rows: [
+                UiRow(
+                  itemId: 'p',
+                  cells: {'label': _bind('lbl'), 'value': _bind('f1')},
+                ),
+              ],
+            ),
+          },
+        ),
         body: [_chart(k)],
       );
       for (final k in ['bar', 'line', 'pie']) {
@@ -694,17 +819,17 @@ void main() {
       }
       final r = chart('donut');
       expect(r.result.isValid, isFalse);
-      expect(r.result.errors.any((e) => e.contains('kind')), isTrue,
-          reason: '${r.result.errors}');
+      expect(
+        r.result.errors.any((e) => e.contains('kind')),
+        isTrue,
+        reason: '${r.result.errors}',
+      );
     });
   });
 
   group('readonly typed bindings validate metadata and initial', () {
     Rig ro(UiEditSpec spec, Object? initial, {bool ids = false}) => Rig(
-      _snapshot(
-        state: ids ? const {} : {'k': initial},
-        specs: {'k': spec},
-      ),
+      _snapshot(state: ids ? const {} : {'k': initial}, specs: {'k': spec}),
       body: [
         UiNode(
           id: 't',
@@ -716,22 +841,39 @@ void main() {
 
     test('bad spec metadata is refused', () {
       ok(ro(const UiStringEdit(maxLength: 8), 'ok'));
-      expect(ro(const UiStringEdit(maxLength: 0), 'ok').result.isValid, isFalse);
+      expect(
+        ro(const UiStringEdit(maxLength: 0), 'ok').result.isValid,
+        isFalse,
+      );
       expect(ro(const UiNumberEdit(min: 5, max: 1), 3).result.isValid, isFalse);
     });
 
     test('initial violating its spec is refused', () {
       ok(ro(const UiNumberEdit(min: 0, max: 10), 5));
-      expect(ro(const UiNumberEdit(min: 0, max: 10), 99).result.isValid, isFalse);
-      expect(ro(const UiStringEdit(maxLength: 2), 'toolong').result.isValid, isFalse);
+      expect(
+        ro(const UiNumberEdit(min: 0, max: 10), 99).result.isValid,
+        isFalse,
+      );
+      expect(
+        ro(const UiStringEdit(maxLength: 2), 'toolong').result.isValid,
+        isFalse,
+      );
     });
 
     test('itemIds initial must be known row ids', () {
-      ok(ro(UiItemIdsEdit(collectionId: 'rows', initial: ['r1']), null, ids: true));
+      ok(
+        ro(
+          UiItemIdsEdit(collectionId: 'rows', initial: ['r1']),
+          null,
+          ids: true,
+        ),
+      );
       expect(
-        ro(UiItemIdsEdit(collectionId: 'rows', initial: ['nope']), null, ids: true)
-            .result
-            .isValid,
+        ro(
+          UiItemIdsEdit(collectionId: 'rows', initial: ['nope']),
+          null,
+          ids: true,
+        ).result.isValid,
         isFalse,
       );
     });
@@ -752,7 +894,10 @@ void main() {
 
     Rig rig({bool swap = false, bool noObject2 = false}) => Rig(
       _snapshot(
-        facts: {'f1': _fact(), 'f2': _fact(object: _obj2)},
+        facts: {
+          'f1': _fact(),
+          'f2': _fact(object: _obj2),
+        },
         collections: {'rows': two(swap: swap, noObject2: noObject2)},
       ),
     );
@@ -793,6 +938,44 @@ void main() {
     });
   });
 
+  group('collection admission regressions', () {
+    test('row lookup rejects forged nodes and expired source digests', () {
+      final r = Rig(_snapshot());
+      ok(r);
+      expect(r.send('r1'), UiEventOutcome.applied);
+      expect(r.state.rowObject(r.table, 'r1'), _obj);
+      expect(r.state.rowObject(r.table.copyWith(), 'r1'), isNull);
+      final revision = r.state.draftRevision;
+      r.state.updateSourceDigest('doc', 'changed');
+      expect(r.state.rowObject(r.table, 'r1'), isNull);
+      expect(r.send('r1'), UiEventOutcome.invalid);
+      expect(r.state.draftRevision, revision);
+      expect(r.state.userOverrides, isEmpty);
+    });
+    test('an invalid collection shape cannot cover required cell facts', () {
+      final c = _coll(
+        columns: const [UiColumn('label', 'Name')],
+        rows: [
+          UiRow(itemId: 'r1', cells: {'label': _bind('f1')}),
+        ],
+      );
+      ok(
+        Rig(
+          _snapshot(collections: {'rows': c}),
+          catalog: _catalog(shape: UiCollectionShape.options),
+          intent: _intent(required: {_bind('f1')}),
+        ),
+      );
+      final bad = Rig(
+        _snapshot(),
+        catalog: _catalog(shape: UiCollectionShape.options),
+        intent: _intent(required: {_bind('f1')}),
+      );
+      expect(bad.result.isValid, isFalse);
+      expect(bad.result.errors, contains('required_binding:f1'));
+    });
+  });
+
   group('stream2 end-to-end', () {
     UiStreamCompiler compile(Rig r) {
       final c = UiStreamCompiler(
@@ -806,23 +989,27 @@ void main() {
           protocolVersion: 'aiui-stream/2',
         ),
       );
-      c.addLine(jsonEncode({
-        'op': 'node',
-        'id': 'root',
-        'component': 'Page',
-        'props': <String, Object?>{},
-        'bind': <String, Object?>{},
-      }));
-      c.addLine(jsonEncode({
-        'op': 'node',
-        'id': 't',
-        'component': 'Table',
-        'parent': 'root',
-        'props': <String, Object?>{},
-        'bind': {
-          'rows': {'kind': 'collection', 'id': 'rows'},
-        },
-      }));
+      c.addLine(
+        jsonEncode({
+          'op': 'node',
+          'id': 'root',
+          'component': 'Page',
+          'props': <String, Object?>{},
+          'bind': <String, Object?>{},
+        }),
+      );
+      c.addLine(
+        jsonEncode({
+          'op': 'node',
+          'id': 't',
+          'component': 'Table',
+          'parent': 'root',
+          'props': <String, Object?>{},
+          'bind': {
+            'rows': {'kind': 'collection', 'id': 'rows'},
+          },
+        }),
+      );
       c.addLine('{"op":"end"}');
       return c;
     }
@@ -835,11 +1022,15 @@ void main() {
       expect(c.current.complete, isTrue);
       expect(c.current.finalPlan, isNotNull);
 
-      final broken = Rig(_snapshot(collections: {
-        'rows': _coll(
-          columns: const [UiColumn('c1', 'A'), UiColumn('c2', 'B')],
+      final broken = Rig(
+        _snapshot(
+          collections: {
+            'rows': _coll(
+              columns: const [UiColumn('c1', 'A'), UiColumn('c2', 'B')],
+            ),
+          },
         ),
-      }));
+      );
       bad(broken);
       final d = compile(broken);
       expect(d.current.badLines, 0);

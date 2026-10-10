@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'collection.dart';
 import 'edit_spec.dart';
 import 'snapshot.dart';
 import 'intent.dart';
@@ -105,12 +108,33 @@ UiValidationResult validateUiPlan(
 
   if (plan.nodes.length <= 200) visit(plan.root);
   if (visited.length != nodes.length) reject('unreachable_nodes');
+  for (final node in plan.nodes) {
+    final allowed = catalog.components[node.component]?.childComponents;
+    if (allowed == null || allowed.isEmpty) continue;
+    for (final child in node.children) {
+      final component = nodes[child]?.component;
+      if (component != null && !allowed.contains(component)) {
+        reject('child_component:${node.id}:$child');
+      }
+    }
+  }
   final shown = <BindingRef>{};
   for (final node in plan.nodes) {
+    final nodeErrors = validateUiNode(node, snapshot, intent, catalog);
+    errors.addAll(nodeErrors);
     if (catalog.components.containsKey(node.component)) {
       shown.addAll(node.bindings.values);
+      for (final ref in node.bindings.values) {
+        // Only a fully valid collection may vouch for its cells as shown.
+        if (nodeErrors.isEmpty &&
+            ref.kind == BindingKind.collection &&
+            _collectionErrors(snapshot, catalog, ref).isEmpty) {
+          shown.addAll(
+            snapshot.collections[ref.id]!.rows.expand((r) => r.cells.values),
+          );
+        }
+      }
     }
-    errors.addAll(validateUiNode(node, snapshot, intent, catalog));
   }
 
   for (final required in intent.requiredBindings) {
@@ -181,6 +205,9 @@ List<String> validateUiNode(
     final type = schema.properties[entry.key];
     if (type == null || !matchesUiValue(type, entry.value)) {
       reject('property_type:${node.id}:${entry.key}');
+    } else if (!(schema.allowedValues[entry.key]?.contains(entry.value) ??
+        true)) {
+      reject('property_value:${node.id}:${entry.key}');
     }
   }
   for (final required in schema.requiredBindings) {
@@ -193,60 +220,23 @@ List<String> validateUiNode(
     if (!(schema.bindings[entry.key]?.contains(ref.kind) ?? false)) {
       reject('binding_kind:${node.id}:${entry.key}');
     }
-    switch (ref.kind) {
-      case BindingKind.fact:
-        final fact = snapshot.facts[ref.id];
-        if (fact == null || !isUiScalar(fact.value)) {
-          reject('unknown_fact:${ref.id}');
-        }
-        if (fact != null &&
-            (fact.object.moduleId.isEmpty ||
-                fact.object.objectType.isEmpty ||
-                fact.object.objectId.isEmpty ||
-                fact.field.isEmpty)) {
-          reject('fact_identity:${ref.id}');
-        }
-        for (final source in fact?.sourceRefs ?? <String>[]) {
-          if (!snapshot.sources.containsKey(source)) {
-            reject('fact_source:${ref.id}:$source');
-          }
-        }
-      case BindingKind.uiState:
-        // itemIds selections live outside initialUiState (never scalar).
-        final isIds =
-            usesTypedEdits(catalog) &&
-            snapshot.editSpecs[ref.id] is UiItemIdsEdit;
-        if (!isIds &&
-            (!snapshot.initialUiState.containsKey(ref.id) ||
-                !isUiScalar(snapshot.initialUiState[ref.id]))) {
-          reject('unknown_state:${ref.id}');
-        }
-      case BindingKind.computed:
-        final value = snapshot.computations[ref.id];
-        if (value == null ||
-            value.computationId.isEmpty ||
-            value.inputVersion != snapshot.ref ||
-            !isUiScalar(value.value)) {
-          reject('unknown_or_stale_computation:${ref.id}');
-        }
-      case BindingKind.collection:
-        // No host collection registry yet (slice 1b): never valid.
-        reject('unknown_collection:${ref.id}');
-      case BindingKind.sourceSpan:
-        final source = snapshot.sources[ref.id];
-        if (source == null ||
-            source.artifact.moduleId.isEmpty ||
-            source.artifact.artifactId.isEmpty ||
-            source.artifact.contentDigest.isEmpty ||
-            snapshot.sourceDigests[source.artifact.artifactId] !=
-                source.artifact.contentDigest ||
-            source.start < 0 ||
-            source.end <= source.start ||
-            source.end > source.originalText.length ||
-            (source.page != null && source.page! < 1) ||
-            (source.paragraph != null && source.paragraph! < 1)) {
-          reject('unknown_or_stale_source:${ref.id}');
-        }
+    if (ref.kind != BindingKind.collection) {
+      errors.addAll(_bindingErrors(ref, snapshot, catalog));
+      continue;
+    }
+    final collectionErrors = _collectionErrors(snapshot, catalog, ref);
+    errors.addAll(collectionErrors);
+    final collection = snapshot.collections[ref.id];
+    final shape = schema.collections[entry.key];
+    if (shape == null) reject('collection:${ref.id}:shape_declaration');
+    if (collectionErrors.isEmpty && collection != null && shape != null) {
+      if (!shape.accepts(collection)) {
+        reject('collection:${collection.id}:shape');
+      } else if (shape == UiCollectionShape.series) {
+        errors.addAll(
+          _seriesErrors(collection, snapshot, node.properties['kind'] == 'pie'),
+        );
+      }
     }
   }
   for (final entry in node.events.entries) {
@@ -319,6 +309,15 @@ List<String> validateUiNode(
           )) {
         reject('source_input');
       }
+      if (action.localAction == UiLocalAction.openRow &&
+          (!usesTypedEdits(catalog) ||
+              binding.inputRefs.isNotEmpty ||
+              schema.events[entry.key] != UiValueType.string ||
+              !node.bindings.values.any(
+                (ref) => ref.kind == BindingKind.collection,
+              ))) {
+        reject('row_input');
+      }
       if (action.localAction == UiLocalAction.openDetail &&
           !node.bindings.containsKey('value')) {
         reject('detail_input');
@@ -345,4 +344,221 @@ List<String> validateUiNode(
     }
   }
   return List.unmodifiable(errors);
+}
+
+bool _sourceInvalid(SourceSpanRef? source, DataSnapshot snapshot) =>
+    source == null ||
+    source.artifact.moduleId.isEmpty ||
+    source.artifact.artifactId.isEmpty ||
+    source.artifact.contentDigest.isEmpty ||
+    snapshot.sourceDigests[source.artifact.artifactId] !=
+        source.artifact.contentDigest ||
+    source.start < 0 ||
+    source.end <= source.start ||
+    source.end > source.originalText.length ||
+    (source.page != null && source.page! < 1) ||
+    (source.paragraph != null && source.paragraph! < 1);
+
+/// Fact / uiState / computed / sourceSpan resolution rules, shared by node
+/// bindings and collection cells. Collection refs are handled by the caller.
+List<String> _bindingErrors(
+  BindingRef ref,
+  DataSnapshot snapshot,
+  UiCatalog catalog,
+) {
+  final errors = <String>[];
+  final typed = usesTypedEdits(catalog);
+  switch (ref.kind) {
+    case BindingKind.fact:
+      final fact = snapshot.facts[ref.id];
+      if (fact == null || !isUiScalar(fact.value)) {
+        errors.add('unknown_fact:${ref.id}');
+      }
+      if (fact != null &&
+          (fact.object.moduleId.isEmpty ||
+              fact.object.objectType.isEmpty ||
+              fact.object.objectId.isEmpty ||
+              fact.field.isEmpty)) {
+        errors.add('fact_identity:${ref.id}');
+      }
+      for (final source in fact?.sourceRefs ?? <String>[]) {
+        if (!snapshot.sources.containsKey(source)) {
+          errors.add('fact_source:${ref.id}:$source');
+        } else if (typed &&
+            _sourceInvalid(snapshot.sources[source], snapshot)) {
+          errors.add('unknown_or_stale_source:$source');
+        }
+      }
+    case BindingKind.uiState:
+      final spec = typed
+          ? (snapshot.editSpecs[ref.id] ?? const UiStringEdit())
+          : null;
+      // itemIds selections live outside initialUiState (never scalar).
+      final isIds = spec is UiItemIdsEdit;
+      if (!isIds &&
+          (!snapshot.initialUiState.containsKey(ref.id) ||
+              !isUiScalar(snapshot.initialUiState[ref.id]))) {
+        errors.add('unknown_state:${ref.id}');
+      }
+      // Readonly typed bindings are checked too, not only editField ones.
+      if (spec != null) {
+        if (isIds && snapshot.initialUiState.containsKey(ref.id)) {
+          errors.add('edit_input:${ref.id}');
+        }
+        if (spec.view &&
+            (snapshot.actionContext?.draft.containsKey(ref.id) ?? false)) {
+          errors.add('view_business_input');
+        }
+        final context = UiEditContext(collections: snapshot.collections);
+        if (spec.validateSpec() != null) {
+          errors.add('edit_spec:${ref.id}');
+        } else if (isIds
+            ? spec.reject(spec.initial, context) != null
+            : snapshot.initialUiState.containsKey(ref.id) &&
+                  spec.reject(snapshot.initialUiState[ref.id], context) !=
+                      null) {
+          errors.add('edit_input:${ref.id}');
+        }
+      }
+    case BindingKind.computed:
+      final value = snapshot.computations[ref.id];
+      if (value == null ||
+          value.computationId.isEmpty ||
+          value.inputVersion != snapshot.ref ||
+          !isUiScalar(value.value)) {
+        errors.add('unknown_or_stale_computation:${ref.id}');
+      }
+      if (typed) {
+        final evidence = snapshot.computedEvidence[ref.id];
+        if (evidence == null) {
+          errors.add('computed_evidence_missing:${ref.id}');
+        } else {
+          for (final source in evidence.sourceRefs) {
+            if (_sourceInvalid(snapshot.sources[source], snapshot)) {
+              errors.add('unknown_or_stale_source:$source');
+            }
+          }
+        }
+      }
+    case BindingKind.collection:
+      break;
+    case BindingKind.sourceSpan:
+      if (_sourceInvalid(snapshot.sources[ref.id], snapshot)) {
+        errors.add('unknown_or_stale_source:${ref.id}');
+      }
+  }
+  return errors;
+}
+
+const _idMaxBytes = UiCollectionLimits.idBytes,
+    _labelMaxBytes = UiCollectionLimits.labelBytes,
+    _collectionMetaMaxBytes = UiCollectionLimits.metadataBytes;
+int _bytes(String s) => utf8.encode(s).length;
+
+/// UTF-8 size of the structural reference metadata (ids, labels, cell refs,
+/// row objects); never fact/computed values. Execution clarification pending
+/// parent review.
+int _metaBytes(UiCollection c) => _bytes(
+  jsonEncode({
+    'id': c.id,
+    'columns': [
+      for (final col in c.columns) {'id': col.id, 'label': col.label},
+    ],
+    'rows': [
+      for (final row in c.rows)
+        {
+          'itemId': row.itemId,
+          'cells': [
+            for (final col in c.columns)
+              {
+                'kind': row.cells[col.id]!.kind.name,
+                'id': row.cells[col.id]!.id,
+              },
+          ],
+          if (row.object != null) 'object': row.object!.toJson(),
+        },
+    ],
+  }),
+);
+
+/// Whole-collection check: any failure rejects the entire collection.
+List<String> _collectionErrors(
+  DataSnapshot snapshot,
+  UiCatalog catalog,
+  BindingRef ref,
+) {
+  final c = snapshot.collections[ref.id];
+  if (c == null || c.id != ref.id) return ['unknown_collection:${ref.id}'];
+  // Older catalogs never admit collections, whatever their schemas declare.
+  if (!usesTypedEdits(catalog)) return ['collection_catalog:${ref.id}'];
+  final errors = <String>[];
+  void bad(String code) => errors.add('collection:${c.id}:$code');
+  if (c.id.isEmpty || _bytes(c.id) > _idMaxBytes) bad('id');
+  if (c.columns.length > UiCollectionLimits.columns) bad('columns');
+  if (c.rows.length > UiCollectionLimits.rows) bad('rows');
+  final columnIds = <String>{};
+  for (final col in c.columns) {
+    if (col.id.isEmpty || _bytes(col.id) > _idMaxBytes) bad('column_id');
+    if (!columnIds.add(col.id)) bad('duplicate_column');
+    if (_bytes(col.label) > _labelMaxBytes) bad('column_label');
+  }
+  final itemIds = <String>{};
+  var wellFormed = true;
+  for (final row in c.rows) {
+    if (row.itemId.isEmpty || _bytes(row.itemId) > _idMaxBytes) bad('item_id');
+    if (!itemIds.add(row.itemId)) bad('duplicate_row');
+    if (row.cells.length != columnIds.length ||
+        !row.cells.keys.every(columnIds.contains)) {
+      bad('cells');
+      wellFormed = false;
+      continue;
+    }
+    for (final cell in row.cells.values) {
+      if (cell.kind != BindingKind.fact && cell.kind != BindingKind.computed) {
+        bad('cell_kind');
+        continue;
+      }
+      for (final e in _bindingErrors(cell, snapshot, catalog)) {
+        bad('cell:$e');
+      }
+    }
+    final object = row.object;
+    if (object != null &&
+        !row.cells.values.any(
+          (cell) =>
+              cell.kind == BindingKind.fact &&
+              snapshot.facts[cell.id]?.object == object,
+        )) {
+      bad('row_object');
+    }
+  }
+  if (wellFormed && _metaBytes(c) > _collectionMetaMaxBytes) bad('size');
+  return errors;
+}
+
+final _decimal = RegExp(r'^-?(0|[1-9][0-9]*)(\.[0-9]+)?$');
+
+/// Series `value` column: finite number, canonical decimal string, or a legal
+/// gap (null keeps its FactState). Pie additionally rejects negatives.
+List<String> _seriesErrors(UiCollection c, DataSnapshot snapshot, bool pie) {
+  for (final row in c.rows) {
+    final ref = row.cells['value'];
+    if (ref == null) continue;
+    final Object? v = switch (ref.kind) {
+      BindingKind.fact => snapshot.facts[ref.id]?.value,
+      BindingKind.computed => snapshot.computations[ref.id]?.value,
+      _ => null,
+    };
+    final valid = switch (v) {
+      null => true,
+      final num n => n.isFinite && !(pie && n < 0),
+      final String s =>
+        _decimal.hasMatch(s) &&
+            (double.tryParse(s)?.isFinite ?? false) &&
+            !(pie && double.parse(s) < 0),
+      _ => false,
+    };
+    if (!valid) return ['collection:${c.id}:series_value:${row.itemId}'];
+  }
+  return const [];
 }

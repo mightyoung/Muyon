@@ -1,9 +1,8 @@
 import '../references.dart';
 import 'snapshot.dart';
 
-/// NOT READY (F5b slice 1b scaffold): immutable declarations only. No
-/// collection-binding validator, resolver or renderer consumes these yet.
-/// Typed itemIds membership may inspect these host row identities.
+/// Immutable host-owned collection metadata. Cells retain binding references,
+/// so values and provenance continue to come from the snapshot.
 class UiColumn {
   const UiColumn(this.id, this.label);
   final String id, label;
@@ -32,8 +31,7 @@ class UiCollection {
   final List<UiRow> rows;
 }
 
-/// NOT READY (slice 1c scaffold): metadata only; `accepts` is not implemented
-/// and answers false for every collection until GREEN.
+/// Required column identities. Registry order remains presentation order.
 enum UiCollectionShape {
   table,
   series,
@@ -41,10 +39,22 @@ enum UiCollectionShape {
   options,
   items;
 
-  bool accepts(UiCollection collection) => false;
+  bool accepts(UiCollection collection) {
+    final ids = collection.columns.map((column) => column.id).toSet();
+    if (ids.length != collection.columns.length) return false;
+    return switch (this) {
+      table => ids.isNotEmpty,
+      series => ids.length == 2 && ids.containsAll({'label', 'value'}),
+      timeline =>
+        ids.containsAll({'time', 'title'}) &&
+            ids.every({'time', 'title', 'detail'}.contains),
+      options || items => ids.length == 1 && ids.contains('label'),
+    };
+  }
 }
 
 class UiCollectionLimits {
   const UiCollectionLimits._();
   static const rows = 200, columns = 32;
+  static const idBytes = 128, labelBytes = 256, metadataBytes = 65536;
 }

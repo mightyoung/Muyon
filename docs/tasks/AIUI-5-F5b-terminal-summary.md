@@ -33,3 +33,6 @@ collection GREEN真实中止：10turns/114002ms，wrapper subtype success但**is
 3. F5c严格publish/恢复与F3b薄适配器/F4c导航是父任务另外调度，最终组合不能用协议/typed或纯core测试代替。F3b已获父授权但不由本任务改文件。
 
 GitHub PR可用；两次Codex app attach_artifact返回MCP错误，未确认sidebar附件，非GitHub PR创建或push失败。没有因此扩权限或配置。
+
+## 追加授权后状态更新
+父任务收到限额报告后明确授权Codex继续，不在05:00UTC前重试Claude，不换额度/付费通道；此历史交回的collection阻断已经由Codex接续解决。已完成collection40个原RED→GREEN，追加2个真实admission RED后也闭合；全API157PASS、collection42PASS、旧UI475PASS，M3移除64KiB门槛1FAIL后逐字恢复42PASS。实现与报告归属详slice1c-report；**本接续仍未获真实Claude交叉审查**。整分支仍draft，33组件/真实publication组合继续按依赖分slice，不据本阶段宣称全F5b完成。此前原始Claude额度终态与partial存档仍保留真实记录。

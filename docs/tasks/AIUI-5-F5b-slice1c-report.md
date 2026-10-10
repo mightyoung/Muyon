@@ -46,3 +46,14 @@ validator/resolve/openRow 分派/`rowObject`/`accepts` 实现属 F5b 后续 GREE
 真实Claude CLI2.1.295/init claude-sonnet-5-5，sonnet/low/24000/acceptEdits，新session f92460c9-b44f-4e5d-86a5-058e41c86046，首次30turns/400893ms/result success/end_turn/exit0。首跑多余brace导致编译错误，不能计RED；调用者还指出allowedValues必须Set<Object>及series按列ID集合不限定顺序。原Claude修复回合14turns/38853ms/result success/end_turn/exit0，不是Codex代写实现。
 
 修复后实际专项2PASS/38FAIL/exit1，无编译/NoSuchMethod/StateError。失败主要是同一collection拒绝门的正例前置，也有allowedValues与readonly typed binding未校验的实际缺口；不冒称38独立缺陷。64KiB helper构造未异常，真正接受/拒绝仍待GREEN。缓存Flutter3.47.5/Dart3.13.4/no-pub；日志/tmp/aiui-f5b-logs不入仓。仅Scaffold+RED，没有collection绑定GREEN、没有UI/33适配。
+
+## Codex接续GREEN（2026-10-10，父任务明确追加授权）
+Claude额度中止后，父任务明确要求原F5b任务以自身编码能力继续，不重试Claude/不换额度或付费通道。Codex核读交接与保存352行partial，恢复采用其共用binding/source/collection校验思路并完成实现；新增与修正改动归Codex，**尚未经额度重置后的真实Claude交叉审查**。原ClaudeRED/部分补丁与Codex接续归属分开，不将本GREEN冒称Claude终态。
+
+实现：复用现有validator抽取binding规则，library2 collection整集合结构/身份/限额/来源/evidence检查；readonly typed bindings同样检spec初值；shape按列ID集合（series无列序限制）、allowedValues原类型、childComponents默认空集保持旧容器兼容；合法collection cells进入required/mandatory展示覆盖，非法节点不冒充已显示；computed evidence必填且来源digest核验，旧目录仍拒collection且不强加evidence。registry元数据保持引用，collection本身不当scalar resolve；openRow仅从accepted capability节点按itemId解析真实ObjectRef，无draft变动，未知/无object/伪造node/已失效source拒绝。未增加第二runtime/router/validator/codec，未动生产目录。
+
+RED40项转GREEN时发现并纠正两处测试夹具：options正例必须列ID label而非c1；library2 stream正例按新增契约显式声明total computedEvidence（verified+quote），没有改旧目录夹具或放宽拒绝。另加canonical decimal大串溢出double负例，不能接受无限几何值。
+
+实际：原collection40项转绿，全API155PASS；新增两个admission回归（expired source、invalid shape不能覆盖required fact）真实40PASS/2FAIL，再修复后全API157PASS。旧UI完整475PASS/0FAIL。M3临时移除64KiB门槛：41PASS/1行为FAIL/exit1，源码逐字恢复后42PASS/exit0；不提交变异。缓存Flutter3.47.5/Dart3.13.4/no-pub；临时PR22严格配置下修改文件0诊断，只剩已有context与PR21 core test两条owner外info；临时配置已删除由PR22交付。日志/tmp/aiui-f5b-logs/codex-collection-*，不进仓。
+
+64KiB结构引用元数据JSON计量澄清仍待父任务技术审查（非用户逐条采纳）；library2 workspace编码/发布/恢复、F3b adapter、F4c导航由各owner另做。下一片开始33组件/受控输入与capture，尚未实施完工。

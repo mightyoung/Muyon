@@ -55,7 +55,7 @@ class UiSessionState {
         final result = snapshot.computations[ref.id];
         return result?.inputVersion == snapshot.ref ? result?.value : null;
       case BindingKind.collection:
-        // No host collection registry yet (slice 1b): never resolves.
+        // Collection metadata is read from the registry, never as a scalar value.
         return null;
       case BindingKind.sourceSpan:
         final source = snapshot.sources[ref.id];
@@ -74,8 +74,52 @@ class UiSessionState {
     }
   }
 
-  /// NOT READY (slice 1c scaffold): always null until GREEN.
-  ObjectRef? rowObject(UiNode node, Object? itemId) => null;
+  /// Resolve a stable row identity only from the accepted host capability.
+  ObjectRef? rowObject(UiNode node, Object? itemId) {
+    final plan = _currentPlan;
+    if (plan == null ||
+        !usesTypedEdits(plan.catalog) ||
+        itemId is! String ||
+        !plan.plan.nodes.any((current) => identical(current, node))) {
+      return null;
+    }
+    final refs = node.bindings.values.where(
+      (ref) => ref.kind == BindingKind.collection,
+    );
+    if (refs.length != 1) return null;
+    final rows = snapshot.collections[refs.single.id]?.rows.where(
+      (row) => row.itemId == itemId,
+    );
+    if (rows == null || rows.length != 1) return null;
+    final row = rows.single;
+    final object = row.object;
+    if (object == null ||
+        !row.cells.values.any(
+          (ref) =>
+              ref.kind == BindingKind.fact &&
+              snapshot.facts[ref.id]?.object == object,
+        )) {
+      return null;
+    }
+    for (final cell in row.cells.values) {
+      final sourceRefs = switch (cell.kind) {
+        BindingKind.fact =>
+          snapshot.facts[cell.id]?.sourceRefs ?? const <String>[],
+        BindingKind.computed =>
+          snapshot.computedEvidence[cell.id]?.sourceRefs ?? const <String>[],
+        _ => const <String>[],
+      };
+      for (final sourceId in sourceRefs) {
+        final source = snapshot.sources[sourceId];
+        if (source == null ||
+            _digests[source.artifact.artifactId] !=
+                source.artifact.contentDigest) {
+          return null;
+        }
+      }
+    }
+    return object;
+  }
 
   /// Typed rules are in force only while the accepted current plan uses a
   /// typed catalog; with no plan or an older catalog the legacy gate applies.
@@ -315,8 +359,9 @@ class UiSessionState {
         if (!node.bindings.containsKey('value')) return UiEventOutcome.invalid;
         detailNode = node.id;
       case UiLocalAction.openRow:
-        // NOT READY (slice 1c scaffold): no row navigation yet.
-        return UiEventOutcome.invalid;
+        if (rowObject(node, event.payload) == null) {
+          return UiEventOutcome.invalid;
+        }
       case UiLocalAction.back:
         detailNode = null;
       case UiLocalAction.cancelConfirmation:
