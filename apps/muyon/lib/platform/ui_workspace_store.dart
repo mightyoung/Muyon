@@ -17,8 +17,19 @@ class HostUiWorkspaceStore implements UiWorkspaceStore {
 
   String _key(String surfaceId) =>
       'ui-workspace:${jsonEncode([taskId, surfaceId])}';
-  StoredUiWorkspace _decode(String value) =>
-      StoredUiWorkspace.fromJson(jsonDecode(value) as Map<String, dynamic>);
+  StoredUiWorkspace _decode(String value) {
+    if (utf8.encode(value).length > UiWorkspaceLimits.bytes) {
+      throw UiWorkspaceUnreadable('workspace_byte_limit', value);
+    }
+    try {
+      return StoredUiWorkspace.fromJson(
+        jsonDecode(value) as Map<String, dynamic>,
+      );
+    } catch (_) {
+      throw UiWorkspaceUnreadable('workspace_codec', value);
+    }
+  }
+
   @override
   Future<StoredUiWorkspace?> load(String surfaceId) async {
     final rows = repository.database.raw.select(
@@ -35,28 +46,31 @@ class HostUiWorkspaceStore implements UiWorkspaceStore {
   }
 
   @override
-  Future<bool> save(StoredUiWorkspace value, {required int expectedRevision}) =>
-      repository.database.write((db) {
-        if (value.taskId != taskId ||
-            value.scopeKey != scopeKey ||
-            value.revision != expectedRevision + 1) {
-          return false;
-        }
-        final key = _key(value.surfaceId);
-        final rows = db.select('SELECT value FROM settings WHERE key=?', [key]);
-        final old = rows.isEmpty
-            ? null
-            : _decode(rows.single['value'] as String);
-        if ((old?.revision ?? 0) != expectedRevision ||
-            (old != null && old.scopeKey != value.scopeKey)) {
-          return false;
-        }
-        db.execute(
-          'INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
-          [key, jsonEncode(value.toJson())],
-        );
-        return true;
-      });
+  Future<bool> save(StoredUiWorkspace value, {required int expectedRevision}) {
+    final encoded = jsonEncode(value.toJson());
+    if (utf8.encode(encoded).length > UiWorkspaceLimits.bytes) {
+      return Future.error(ArgumentError('workspace_byte_limit'));
+    }
+    return repository.database.write((db) {
+      if (value.taskId != taskId ||
+          value.scopeKey != scopeKey ||
+          value.revision != expectedRevision + 1) {
+        return false;
+      }
+      final key = _key(value.surfaceId);
+      final rows = db.select('SELECT value FROM settings WHERE key=?', [key]);
+      final old = rows.isEmpty ? null : _decode(rows.single['value'] as String);
+      if ((old?.revision ?? 0) != expectedRevision ||
+          (old != null && old.scopeKey != value.scopeKey)) {
+        return false;
+      }
+      db.execute(
+        'INSERT INTO settings(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
+        [key, encoded],
+      );
+      return true;
+    });
+  }
 
   /// Indexed by the existing task; no new task/conversation registry.
   List<String> surfaces() {

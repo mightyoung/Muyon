@@ -10,6 +10,7 @@ import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../../../packages/muyon_ui/test/dynamic_fixtures.dart';
+import '../../../packages/muyon_ui/test/aiui5_revision2_review_test.dart' show reviewPlan;
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
@@ -66,6 +67,66 @@ void main() {
   tearDown(() async {
     await storage.close();
     root.deleteSync(recursive: true);
+  });
+  test('library2 collection and edited stable IDs survive actual SQLite close reopen', () async {
+    final plan = reviewPlan('Choice');
+    final c = await UiWorkspaceController.open(
+      store: store,
+      taskId: 'task',
+      scopeKey: store.scopeKey!,
+      plan: plan,
+      schemaVersion: 2,
+    );
+    c.surface.session.edit('k', ['b']);
+    expect(c.surface.session.selections['k'], ['b']);
+    await c.flush();
+    c.dispose();
+    await storage.close();
+    await open();
+    final restored = await UiWorkspaceController.open(
+      store: store,
+      taskId: 'task',
+      scopeKey: store.scopeKey!,
+      plan: plan,
+      schemaVersion: 2,
+    );
+    addTearDown(restored.dispose);
+    expect(restored.readOnly, isFalse);
+    expect(restored.surface.session.selections['k'], ['b']);
+    expect(restored.surface.session.selectionOverrides, contains('k'));
+    expect(restored.surface.session.draftRevision, 1);
+  });
+  for (final damage in ['future-kind', 'future-schema', 'duplicate-ids']) {
+    test('damaged schema2 $damage retains original SQLite bytes and readable IDs read only', () async {
+      final plan = reviewPlan('Choice');
+      final c = await UiWorkspaceController.open(store: store, taskId: 'task', scopeKey: store.scopeKey!, plan: plan);
+      c.surface.session.edit('k', ['b']); await c.flush(); c.dispose();
+      final key = 'ui-workspace:${jsonEncode(['task', 's'])}';
+      final raw = jsonDecode(repo.database.raw.select('SELECT value FROM settings WHERE key=?', [key]).single['value'] as String) as Map<String,dynamic>;
+      if (damage == 'future-kind') {
+        (raw['presentation']['nodes'] as List).firstWhere((n) => n['id']=='target')['bindings']['options']['kind'] = 'future_collection';
+      } else if (damage == 'future-schema') {
+        raw['schemaVersion'] = 3;
+      } else { raw['selections']['k'] = ['b','b']; }
+      final bytes = jsonEncode(raw);
+      await repo.database.write((db) => db.execute('UPDATE settings SET value=? WHERE key=?', [bytes,key]));
+      var calls = 0;
+      final restored = await UiWorkspaceController.open(store: store, taskId:'task',scopeKey:store.scopeKey!,plan:plan,onEvent:(_) async { calls++; });
+      addTearDown(restored.dispose);
+      expect(restored.readOnly,isTrue); expect(restored.saveError,'workspace_codec');
+      expect(restored.readableDraft!['k'], damage=='duplicate-ids' ? ['b','b'] : ['b']);
+      expect(restored.surface.session.selections['k'], ['a']);
+      final submit=restored.surface.current.plan.nodes.firstWhere((n)=>n.id=='approval');
+      expect(await restored.surface.dispatch(restored.surface.eventFor(submit,'submit')),UiDispatchOutcome.stale); expect(calls,0);
+      await expectLater(restored.flush(), throwsStateError);
+      expect(repo.database.raw.select('SELECT value FROM settings WHERE key=?',[key]).single['value'],bytes);
+    });
+  }
+  test('oversized new checkpoint refuses write and retains the existing SQLite revision', () async {
+    await store.save(value(1),expectedRevision:0);
+    final before=(await store.load('surface'))!.toJson();
+    await expectLater(store.save(value(2,qty:'x' * UiWorkspaceLimits.bytes),expectedRevision:1),throwsArgumentError);
+    expect((await store.load('surface'))!.toJson(),before);
   });
   test(
     'edited value survives SQLite close reopen with version and selection',

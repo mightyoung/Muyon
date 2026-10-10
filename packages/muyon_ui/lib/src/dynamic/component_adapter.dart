@@ -122,7 +122,13 @@ Widget _libraryComponent(UiAdapterContext c) {
         level: n.properties['level'] as int? ?? 1,
       );
     case 'Prose':
-      return Prose(text: c.label('text'));
+      return Prose(
+        text: c
+            .label('text')
+            .split(RegExp(r'\n\s*\n'))
+            .map((paragraph) => '模型所述：${paragraph.trim()}')
+            .join('\n\n'),
+      );
     case 'Section':
       return Section(title: c.label('title'), children: c.children);
     case 'Columns':
@@ -179,6 +185,25 @@ Widget _libraryComponent(UiAdapterContext c) {
       );
     case 'CompareTable':
       final collection = c.collection('rows');
+      final rows = collection.rows.toList();
+      // The existing value-sort contract is a single-value comparison only.
+      // Multiple columns have no adopted key/direction policy.
+      if (collection.columns.length == 1 && c.value('sort') == 'value') {
+        final column = collection.columns.single.id;
+        final positions = {
+          for (var i = 0; i < rows.length; i++) rows[i].itemId: i,
+        };
+        rows.sort((a, b) {
+          final av = c.session.resolve(a.cells[column]!);
+          final bv = c.session.resolve(b.cells[column]!);
+          final order = av is num && bv is num
+              ? av.compareTo(bv)
+              : '$av'.compareTo('$bv');
+          return order == 0
+              ? positions[a.itemId]!.compareTo(positions[b.itemId]!)
+              : order;
+        });
+      }
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -186,20 +211,18 @@ Widget _libraryComponent(UiAdapterContext c) {
             columns: [for (final col in collection.columns) col.label],
             caption: label,
             rows: [
-              for (final row in collection.rows)
+              for (final row in rows)
                 [for (final col in collection.columns) c.cell(row, col.id)],
             ],
             marks: {
-              for (var row = 0; row < collection.rows.length; row++)
+              for (var row = 0; row < rows.length; row++)
                 for (var col = 0; col < collection.columns.length; col++)
-                  if (c.state(
-                        collection.rows[row].cells[collection.columns[col].id]!,
-                      ) !=
+                  if (c.state(rows[row].cells[collection.columns[col].id]!) !=
                       FactState.verified)
                     (row, col): CompareMark.unverified,
             },
           ),
-          for (final row in collection.rows)
+          for (final row in rows)
             TextButton(
               key: ValueKey('aiui2-${n.id}-row-${row.itemId}'),
               onPressed:

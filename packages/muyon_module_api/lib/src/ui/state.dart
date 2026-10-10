@@ -268,25 +268,107 @@ class UiSessionState {
     return true;
   }
 
-  /// Restores UI scalars only; never changes snapshot facts or host inputs.
-  void restoreWorkspace(StoredUiWorkspace value) {
-    _mutationClock.advance();
-    for (final entry in {...value.viewValues, ...value.userOverrides}.entries) {
-      if (_values.containsKey(entry.key) &&
-          isUiScalar(entry.value) &&
-          (_values[entry.key] is! String || entry.value is String)) {
-        _values[entry.key] = entry.value;
+  /// Revalidates saved layers against the current host contract; rejected
+  /// values remain readable and never become active UI or business inputs.
+  void restoreWorkspace(StoredUiWorkspace saved, {bool activate = true}) {
+    final typed = _typedActive;
+    final context = UiEditContext(collections: snapshot.collections);
+    final overrides = <String, Object?>{}, view = <String, Object?>{};
+    final idsOverrides = <String>{}, viewIds = <String, List<String>>{};
+    final values = Map<String, Object?>.of(_values);
+    final selections = Map<String, List<String>>.of(_selections);
+    final readable = Map<String, Object?>.of(saved.readableDraft);
+    final reasons = {
+      for (final key in readable.keys) key: 'retained_unreadable',
+    };
+    void restore(
+      String key,
+      Object? value, {
+      required bool isView,
+      required bool isIds,
+    }) {
+      String? reason;
+      final spec = snapshot.editSpecs[key] ?? const UiStringEdit();
+      if (!activate) {
+        reason = 'workspace_incompatible';
+      } else if (isIds
+          ? spec is! UiItemIdsEdit
+          : !snapshot.initialUiState.containsKey(key)) {
+        reason = 'key_removed';
+      } else if (typed &&
+          (spec.view != isView ||
+              (spec.view &&
+                  (snapshot.actionContext?.draft.containsKey(key) ?? false)))) {
+        reason = 'view_scope_changed';
+      } else {
+        try {
+          reason = typed
+              ? spec.validateSpec() ?? spec.reject(value, context)
+              : (!isUiScalar(value) ||
+                        (_values[key] is String && value is! String)
+                    ? 'type'
+                    : null);
+        } catch (_) {
+          reason = 'spec_exception';
+        }
+      }
+      if (reason != null) {
+        readable[key] = value is List
+            ? List<String>.unmodifiable(value.cast<String>())
+            : value;
+        reasons[key] = reason;
+        return;
+      }
+      readable.remove(key);
+      reasons.remove(key);
+      if (isIds) {
+        final ids = UiItemIdsEdit.normalize((value as List).cast<String>());
+        selections[key] = ids;
+        if (isView) {
+          viewIds[key] = ids;
+        } else {
+          idsOverrides.add(key);
+        }
+      } else {
+        values[key] = value;
+        if (isView) {
+          view[key] = value;
+        } else {
+          overrides[key] = value;
+        }
       }
     }
-    _userOverrides.addAll(value.userOverrides);
-    _viewValues.addAll(value.viewValues);
-    draftRevision = value.draftRevision > draftRevision
-        ? value.draftRevision
+
+    for (final entry in saved.userOverrides.entries) {
+      restore(entry.key, entry.value, isView: false, isIds: false);
+    }
+    for (final entry in saved.viewValues.entries) {
+      restore(entry.key, entry.value, isView: true, isIds: false);
+    }
+    for (final key in saved.selectionOverrides) {
+      restore(key, saved.selections[key], isView: false, isIds: true);
+    }
+    for (final entry in saved.viewSelections.entries) {
+      restore(entry.key, entry.value, isView: true, isIds: true);
+    }
+    // A saved initial (unedited) selection is never authoritative over current
+    // host defaults. Only explicit manual/view layers are restored above.
+    _values = values;
+    _userOverrides = overrides;
+    _viewValues = view;
+    _selections = selections;
+    _selectionOverrides = idsOverrides;
+    _viewSelections = viewIds;
+    _readableDraft = readable;
+    _unreadableReasons = reasons;
+    draftRevision = saved.draftRevision > draftRevision
+        ? saved.draftRevision
         : draftRevision;
-    if (value.snapshotRef != snapshot.ref) draftRevision++;
-    _expandedSources.addAll(value.expandedSources);
-    _cancelled.addAll(value.cancelledNodes);
-    detailNode = value.detailNode;
+    if (saved.snapshotRef != snapshot.ref) draftRevision++;
+    _expandedSources.addAll(saved.expandedSources);
+    _cancelled.addAll(saved.cancelledNodes);
+    detailNode = saved.detailNode;
+    _mutationClock.advance();
   }
 
   void adoptExtracted(String field) {

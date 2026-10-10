@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:muyon_module_api/ui_contract.dart';
 
 import '../confirmation.dart';
@@ -471,9 +472,36 @@ class UiSurfaceController extends ChangeNotifier {
       final context = current.snapshot.actionContext!;
       for (final ref in binding.inputRefs) {
         if (context.draft.containsKey(ref)) {
-          final value = _session.resolve(BindingRef.uiState(ref));
-          if (value != context.draft[ref]) return UiDispatchOutcome.stale;
-          inputs[ref] = value;
+          final spec = current.snapshot.editSpecs[ref];
+          if (spec is UiItemIdsEdit && usesTypedEdits(current.catalog)) {
+            final expected = context.draft[ref];
+            final selected = _session.selections[ref];
+            if (spec.view ||
+                selected == null ||
+                spec.reject(
+                      expected,
+                      UiEditContext(collections: current.snapshot.collections),
+                    ) !=
+                    null ||
+                spec.reject(
+                      selected,
+                      UiEditContext(collections: current.snapshot.collections),
+                    ) !=
+                    null) {
+              return UiDispatchOutcome.invalid;
+            }
+            if (!listEquals(
+              selected,
+              UiItemIdsEdit.normalize((expected as List).cast<String>()),
+            )) {
+              return UiDispatchOutcome.stale;
+            }
+            inputs[ref] = List<String>.unmodifiable(selected);
+          } else {
+            final value = _session.resolve(BindingRef.uiState(ref));
+            if (value != context.draft[ref]) return UiDispatchOutcome.stale;
+            inputs[ref] = value;
+          }
         } else {
           inputs[ref] = ref; // Existing host-confirmed record reference only.
         }
