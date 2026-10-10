@@ -156,7 +156,7 @@ void main() {
       expect(audit.deltas.where((n) => n != 0), [1, 1]);
       expect(audit.gaps, everyElement(0));
       expect(changes(audit.raw) - before, 2);
-      final receipt = registry.receipt(call.invocationId)!;
+      final receipt = registry.receiptFor(call.invocationId)!;
       expect(receipt.state, 'succeeded'); expect(receipt.toolId, id);
       audit.reset();
       final replayBefore = changes(audit.raw);
