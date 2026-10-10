@@ -19,12 +19,15 @@ const _ids = ['platform.executions', 'platform.memories',
   'platform.notifications', 'platform.device_status'];
 
 int changes(Database db) => db.select('SELECT total_changes() AS n').single['n'] as int;
+List<List<Object?>> tableRows(Database db, String table) => [
+  for (final row in db.select('SELECT * FROM "${table.replaceAll('"', '""')}"'))
+    row.values.toList(),
+]..sort((a, b) => jsonEncode(a).compareTo(jsonEncode(b)));
 String snapshot(Database db, {bool receipts = true}) => jsonEncode({
   for (final row in db.select("SELECT name FROM sqlite_master WHERE type='table' "
       "AND name NOT LIKE 'sqlite_%' ORDER BY name"))
     if (receipts || row['name'] != 'tool_invocation_receipts')
-      row['name'] as String: [for (final r in db.select(
-          'SELECT * FROM ${row['name']} ORDER BY rowid')) r.values.toList()],
+      row['name'] as String: tableRows(db, row['name'] as String),
 });
 
 class _AuditDatabase implements ManagedDatabase {
@@ -73,6 +76,9 @@ class _AuditDatabase implements ManagedDatabase {
 }
 
 class _Runtime implements ModuleRuntime, ScopeCandidates, ScopeResolvable {
+  final _scope = ResolvableRuntime({});
+  @override
+  Future<ModuleSession> openScopeSession() => _scope.openScopeSession();
   @override
   Future<List<ObjectRef>> scopeCandidates() async => [];
   final receipts = <String, ImportReceipt>{};
@@ -369,9 +375,11 @@ void main() {
         if (audit.deltas.length != 1) return;
         if (loss == 'binding') binding = null;
         if (loss == 'host') available = false;
-        if (loss == 'bad-key') customResolution = (_, _, call) async => HostScopeResolution(
-          identityKey: 'wrong', scope: ResolvedAssistantScope(requested: call.scope, objects: []),
-          requireCurrent: () {});
+        if (loss == 'bad-key') {
+          customResolution = (_, _, call) async => HostScopeResolution(
+            identityKey: 'wrong', scope: ResolvedAssistantScope(requested: call.scope, objects: []),
+            requireCurrent: () {});
+        }
       };
       final before = changes(audit.raw), tables = snapshot(audit.raw, receipts: false);
       final receipt = runtime.receipts[intent.operationId];
