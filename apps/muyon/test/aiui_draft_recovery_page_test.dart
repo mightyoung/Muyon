@@ -129,6 +129,34 @@ void main() {
     expect(session.controller!.quarantinedDraft['k'], 9.0);
   });
 
+  testWidgets('incompatible node identity cannot be recovered through buttons', (tester) async {
+    await workspaceOperation(tester, seed);
+    final raw = jsonDecode(bytes()) as Map<String, dynamic>;
+    raw['nodeIds'] = ['removed'];
+    await workspaceOperation(tester, () => writeRaw(jsonEncode(raw)));
+    final before = bytes();
+    final session = await mount(tester, reviewPlan('NumberStepper'));
+    expect(session.controller!.readOnly, isTrue);
+    expect(session.controller!.canResolveDraft, isFalse);
+    expect(tester.widget<TextButton>(find.widgetWithText(TextButton, '恢复 k')).onPressed, isNull);
+    await expectLater(workspaceOperation(tester, () => session.controller!.resolveDraft('k', discard: true)), throwsStateError);
+    expect(bytes(), before);
+    expect(session.controller!.surface.session.userOverrides, isEmpty);
+  });
+
+  testWidgets('damaged foreign scope does not disclose readable fields', (tester) async {
+    await workspaceOperation(tester, seed);
+    final raw = jsonDecode(bytes()) as Map<String, dynamic>;
+    raw['schemaVersion'] = 99;
+    raw['scopeKey'] = 'foreign';
+    await workspaceOperation(tester, () => writeRaw(jsonEncode(raw)));
+    final before = bytes();
+    final session = await mount(tester, null);
+    expect(session.unreadableDraft, isNull);
+    expect(find.text('k: 9.0'), findsNothing);
+    expect(bytes(), before);
+  });
+
   for (final hasPlan in [true, false]) {
     testWidgets('actual damaged-codec page readable without activation or byte rewrite plan=$hasPlan', (tester) async {
       await workspaceOperation(tester, seed);
