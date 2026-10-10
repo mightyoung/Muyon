@@ -118,7 +118,7 @@ Claude/B1复审和[固定源全套CI](https://github.com/mightyoung/Muyon/action
 | 任务 | 固定源 | 状态 |
 | --- | --- | --- |
 | [Dream consistency](HARNESS-DREAM-CONSISTENCY.md) / PR15 | `4d86c3433c09142ab4fc5d3bdfab491d769f759a` | 已合cf672；[追补独立复审](HARNESS-DREAM-CONSISTENCY-review.md)无确定阻断，组合CI38019908442成功 |
-| [Resume identity](HARNESS-RESUME-IDENTITY.md) / PR16 | `147ad71378af7ae7206b1e2c6ca2d76f98fc0639` | 已合38f2040；[独立整合复审](HARNESS-RESUME-IDENTITY-review.md)与Claude通过，组合CI38020976416/发布38021050451成功；无工具进展fresh边界保留 |
+| [Resume identity](HARNESS-RESUME-IDENTITY.md) / PR16 | `147ad71378af7ae7206b1e2c6ca2d76f98fc0639` | 已合38f2040，组合CI38020976416/发布38021050451成功；但合后机器人manual hold身份P1未裁定，整体审查暂停；原作者独立修复任务进行中，见[复审更新](HARNESS-RESUME-IDENTITY-review.md) |
 
 实际合入账号/时间、PR14发布CI取消与后续成功区分见[交接](INTEGRATION-2026-10-09.md)。
 LAN未决与AIUI未来夹具/契约待验另行处理，不自动采纳或合入。

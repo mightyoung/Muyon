@@ -1,5 +1,9 @@
 # PR16 恢复身份与工具进展预算：独立整合复审
 
+**当前状态更新：CI绿，但PR16整体审查结论暂停。** GitHub机器人对精确最终源新增P1，
+尚待原作者复现/修复及真实Claude评审，不能把本片或develop整体标为无未结风险。
+此前窄审/CI结论保留为各自范围的历史证据，不替代新评论裁定。
+
 日期2026-10-10。冻结源 `147ad71378af7ae7206b1e2c6ca2d76f98fc0639`，
 develop基线 `cf672164e4f6c3e7beea8029c8be735e33c3bf19`，临时组合
 `b70d377d138ec3631b64a3f0ec4072823779f015`。
@@ -84,5 +88,25 @@ fetch及git diff --exit-code核实38f2040整树与独立组合b70d377逐字一�
 supplier490/4skip、host1459/3skip、preview15、inquiry289/47skip，无过滤或重试挑绿。
 原始日志仅`/tmp/muyon-ci38020976416-job114121670514.log`与
 `/tmp/muyon-ci38021050451-job114121900331.log`或Actions，不进仓库。
-结论：当前源及同树组合无确定阻断，接受已合结果，不重复合入。收尾仅复审/索引/交接文档，
+上述原结论是在窄审及当时CI证据范围内接受同树已合结果；以下新P1使整体结论暂停。
+不重复合入。收尾仅复审/索引/交接文档，
 不改已测产品/测试/CI树；最终摘要发布SHA和对应CI单独由执行回报核实。
+
+## 合后机器人P1：manual hold身份连续性未裁定
+
+已亲自读取[review5477387202](https://github.com/mightyoung/Muyon/pull/16#pullrequestreview-5477387202)，
+作者chatgpt-codex-connector[bot]，state=COMMENTED，submitted_at=2026-10-10T03:37:36Z，
+commit_id精确`147ad71378af7ae7206b1e2c6ca2d76f98fc0639`。评论在03:34:35Z合入之后发布。
+评论在review body内，inline comments为空也不能误判无意见；COMMENTED仅说明提交已完成，
+不能等同批准或P1已处理。
+
+P1定位agent_resume.dart:92–95：manual身份不匹配/异常暂停的替换toolCall省略历史
+invocationId/digest，若未确认核实卡而再次pause/resume，下一次_manual可能因缺ID返回null，
+转fresh可执行卡，确认后可能重复既有副作用。此前模型held重复恢复证据不覆盖这条manual路径。
+CI成功不证明该场景无缺陷；当前作为未裁定P1保留，不冒称已动态复现或已修复。
+父任务已派task/harness-manual-hold-identity由原作者test-first复现及最小修复，后续需
+新固定head/RED-GREEN/真实Claude评审/独立组合门禁。本线程不并行修改实现、不擅自回滚。
+
+后续合入新增必要门槛：读取机器人对精确待合head的最终review/评论，核终态及全部未处理
+意见已裁定；没有review/仍pending/新P1未处理不能mark-ready后立即抢先merge。
+若其他入口提前合入，合后补查、记录真实账号/时间及未结风险，不推断会话责任。
