@@ -65,4 +65,17 @@ handler await 创建目录/写文件/rename。最后的文件存在断言仍保�
   无 sleep、不吞保存错误；不宣称真实文件系统故障或 runner 两个未处理失败的报告方式。
 
 以上仅新增测试证据，未经当前精确 SHA CI 前不算通过。已驳回的生产契约疑问不改代码。
-B1/B2 恢复与科研夹具的 Claude 窄审仍由父任务在最终 head 安排。
+父任务确认最终真实 Claude 窄审已完整结束，仅剩下述 B1 同宿主顺序验收缺口，非生产缺陷。
+
+## 最终 Claude 窄审：B1 同宿主顺序验收
+
+核对任务书 B1：必须在同一个 host 先读平台元数据，再走普通业务 global 解析。
+原正常恢复控制与元数据隔离测试属于不同 setUp，不能共同证明该顺序。
+现只在原正常恢复控制的业务 prepare 前 invoke 四个元数据工具，核对成功、
+intent 仍 pending、workspace_module_bindings/notifications 全行快照不变，
+fallback、模块 activation、scope source prepare/enumerate/resolve/knowledge、
+receiptReads/commitImport 均为零，原 receipt 实例和数量保留。
+随后原 complete、正确 project 绑定、receipt 未变、commitImport 为零、首次 activation 为一
+以及重复正常解析不重复效果的断言全部保留。无生产或 bootstrap 修改。
+本机仍无 Flutter/Dart；该最小补充待新固定提交的 push/PR 全套 Actions 动态验证，
+不以先前 head 的成功替代，也不提交原始日志。

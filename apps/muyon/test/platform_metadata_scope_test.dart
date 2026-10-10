@@ -360,6 +360,23 @@ void main() {
       parameterSchema: const {'type': 'object', 'properties': <String, Object?>{}}),
       handler: (_) async => ToolCallResult(status: ToolCallStatus.succeeded, summary: 'probe'));
     final receipt = runtime.receipts[intent.operationId];
+    final bindings = tableRows(audit.raw, 'workspace_module_bindings');
+    final notifications = tableRows(audit.raw, 'notifications');
+    // B1 requires both phases in this same host: metadata reads leave recovery
+    // pending, then the ordinary business resolver performs it exactly once.
+    for (final id in _ids) {
+      expect((await registry.invoke(request(id, 'before-recovery-$id'))).status,
+        ToolCallStatus.succeeded);
+    }
+    expect(intentStatus(), 'pending');
+    expect(tableRows(audit.raw, 'workspace_module_bindings'), bindings);
+    expect(tableRows(audit.raw, 'notifications'), notifications);
+    expect(fallbackCalls, 0); expect(module.activations, 0);
+    expect(counts.prepare, 0); expect(counts.enumerate, 0);
+    expect(counts.resolve, 0); expect(counts.knowledge, 0);
+    expect(runtime.receiptReads, 0); expect(runtime.commits, 0);
+    expect(runtime.receipts[intent.operationId], same(receipt));
+    expect(runtime.receipts, hasLength(1));
     await registry.prepare(request('notes.probe', 'normal'));
     expect(fallbackCalls, 1); expect(module.activations, 1);
     expect(intentStatus(), 'complete'); expect(runtime.commits, 0);
