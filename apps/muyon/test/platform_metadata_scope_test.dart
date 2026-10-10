@@ -41,9 +41,31 @@ class _AuditDatabase implements ManagedDatabase {
     final before = changes(db);
     if (last != null) gaps.add(before - last!);
     final tables = snapshot(db, receipts: false);
+    Map<String, List<Object?>> receiptRows() => {
+      for (final row in db.select('SELECT * FROM tool_invocation_receipts'))
+        row['replay_key'] as String: row.values.toList(),
+    };
+    final oldReceipts = receiptRows();
     final value = body(db);
-    deltas.add(changes(db) - before);
+    final delta = changes(db) - before;
+    deltas.add(delta);
     expect(snapshot(db, receipts: false), tables);
+    final newReceipts = receiptRows();
+    final changed = {...oldReceipts.keys, ...newReceipts.keys}.where((key) =>
+      jsonEncode(oldReceipts[key]) != jsonEncode(newReceipts[key])).toList();
+    if (delta == 0) {
+      expect(changed, isEmpty);
+    } else {
+      expect(delta, 1); expect(changed, hasLength(1));
+      final old = oldReceipts[changed.single], next = newReceipts[changed.single]!;
+      if (old == null) {
+        expect(next[4], 'running'); expect(next[5], isNull);
+      } else {
+        expect(next.take(4), old.take(4));
+        expect(old[4], 'running'); expect(next[4], isNot('running'));
+        expect(next[5], isNotNull);
+      }
+    }
     last = changes(db);
     return value;
   }).then((value) { afterWrite?.call(); return value; });
@@ -252,6 +274,27 @@ void main() {
     expect(snapshot(transfer.database.raw), state);
     expect(transfer.listening, isFalse); expect(transfer.peers, isEmpty);
     expect(network.attempts, 0); expect(module.activations, 0);
+    expect(fallbackCalls, 0); expect(intentStatus(), 'pending');
+  });
+
+  test('already open business database and module file bytes remain unchanged', () async {
+    final business = await host.storage.open('notes', module.schema);
+    await business.write((db) => db.execute("INSERT INTO fake_items VALUES('sentinel')"));
+    final before = changes(business.raw), state = snapshot(business.raw);
+    Map<String, String> files() => {
+      for (final file in root.listSync(recursive: true).whereType<File>())
+        if (file.path.contains('notes.sqlite'))
+          file.path: base64Encode(file.readAsBytesSync()),
+    };
+    final bytes = files();
+    expect(bytes, isNotEmpty);
+    for (final id in _ids) {
+      await registry.prepare(request(id, 'existing-db-prepare-$id'));
+      expect((await registry.invoke(request(id, 'existing-db-invoke-$id'))).status,
+        ToolCallStatus.succeeded);
+    }
+    expect(changes(business.raw), before); expect(snapshot(business.raw), state);
+    expect(files(), bytes); expect(module.activations, 0);
     expect(fallbackCalls, 0); expect(intentStatus(), 'pending');
   });
 
