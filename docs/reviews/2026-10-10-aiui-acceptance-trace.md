@@ -108,7 +108,7 @@ AIUI-9 任务书写明：只读切片，未接对话和对象导航，全部提�
 | `expectedDraftRevision` 由宿主填 | `ui_stream_test.dart` `business revision host filled; local refs remain null` | 该测试 | 仅测试可达 | 已实现仅测试可达 |
 | 缺业务字段一律拒绝 | 同上文件 `duplicate events and missing business operation cannot finalize` | 该测试 | 仅测试可达 | 已实现仅测试可达 |
 | 占位是编译状态；最终计划整树校验 | `batch coverage only applies at end and unknown component never satisfies it` | 该测试 | 仅测试可达 | 已实现仅测试可达 |
-| AIUI-1 不接受公式，只引用宿主快照里已经算好的结果 | 流编译器不调用 `UiFormulaRegistry` | 无单独测试名把「编译器拒绝公式」写进标题。公式在另一套注册表 | 两条路都不从 P0 进入 | 已实现无测试 |
+| AIUI-1 不接受公式，只引用宿主快照里已经算好的结果 | `stream_protocol.dart:189-194`：`bind` 只能有 `kind` 和 `id`，多出的 `formula` / `expr` / `value` 解析失败。`stream_compiler.dart:104` 走这条解析，不调用 `UiFormulaRegistry` | `ui_stream_test.dart` `forbidden metadata formula binding and v2 fields are typed bad lines`（`packages/muyon_module_api/test/ui_stream_test.dart:359`） | 仅测试可达 | 已实现仅测试可达 |
 
 ### 5.2 组件库 v1
 
@@ -275,7 +275,6 @@ AIUI-5 这一行的状态按「harness 已接上」计。模板和流式编译�
 - `knowledge_preview.dart:17` 的 PDF 预览是否算 AIUI-7 的阅读器工作区。从回答卡片追不到它，本表不算作已交付。
 - 14 个未来场景旁边的只读表单测试、适配器 30/40 测试，父任务是否视为场景已覆盖。场景文件自己仍标 `not-run`，本表按整段场景记未实现。
 - 设置里的模型下拉和「接口与工具」有生产入口。本轮没有找到只覆盖这两个控件的测试名，所以状态是已实现无测试，不是「没有入口」。
-- 流编译器拒绝公式这一条，没有标题直接写「拒绝公式」的测试。代码上编译器不调用公式注册表。
 
 ## 6. 疑似缺陷（只列位置，不评价对错）
 
