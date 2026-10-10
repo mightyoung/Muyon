@@ -58,6 +58,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
   UiWorkspaceController? controller;
   UiPlanningEventRouter? router;
   StoredUiWorkspace? stored;
+  Map<String, Object?>? unreadableDraft;
   String? error;
   bool ready = false;
   bool _disposed = false;
@@ -126,17 +127,21 @@ class DynamicWorkspaceSession extends ChangeNotifier {
       final scope = store.scopeKey;
       if (scope == null) throw StateError('Task not available');
       if (widget.plan == null) {
-        stored = await store.load(widget.surfaceId);
+        try {
+          stored = await store.load(widget.surfaceId);
+        } on UiWorkspaceUnreadable catch (failure) {
+          unreadableDraft = UiWorkspaceController.readUnreadableDraft(
+            failure, taskId: widget.taskId, surfaceId: widget.surfaceId,
+            scopeKey: scope,
+          );
+          error = failure.reason;
+        }
         for (final ref in stored?.operationRefs ?? <String>[]) {
           receipts[ref] = await receipt(ref);
         }
       } else {
         if (widget.plan!.plan.surfaceId != widget.surfaceId) {
           throw StateError('Surface identity changed');
-        }
-        stored = await store.load(widget.surfaceId);
-        if (stored != null && stored!.snapshotRef != widget.plan!.snapshot.ref) {
-          error = '数据版本已变化，人工覆盖仍保留；请核对提取建议。';
         }
         final c = await UiWorkspaceController.open(
           store: store,
@@ -155,6 +160,9 @@ class DynamicWorkspaceSession extends ChangeNotifier {
                     }),
           receiptLookup: receipt,
         );
+        if (c.extractionChanged) {
+          error = '数据版本已变化，人工覆盖仍保留；请核对提取建议。';
+        }
         if (_disposed) {
           c.dispose();
           return;
@@ -180,8 +188,15 @@ class DynamicWorkspaceSession extends ChangeNotifier {
     // With an open controller, capture before returning to a non-awaitable
     // detach caller. Readable load failures can be dismissed without writes.
     final c = controller;
-    if (c != null) return c.flush();
-    return ensureLoaded().then<void>((_) async { await controller?.flush(); });
+    if (c != null) {
+      return c.canCloseWithoutCheckpoint ? Future.value() : c.flush();
+    }
+    return ensureLoaded().then<void>((_) async {
+      final loaded = controller;
+      if (loaded != null && !loaded.canCloseWithoutCheckpoint) {
+        await loaded.flush();
+      }
+    });
   }
 
   void detachWithBestEffortCheckpoint() {
@@ -398,6 +413,8 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
                       for (final e in receipts.entries)
                         Text('回执 ${e.key}: ${e.value.name}'),
                     ],
+                    for (final e in (session.unreadableDraft ?? {}).entries)
+                      SelectableText('${e.key}: ${e.value}'),
                     SelectableText(widget.originalAnswer),
                   ],
                 ),

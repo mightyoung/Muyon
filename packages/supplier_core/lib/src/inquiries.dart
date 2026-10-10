@@ -370,8 +370,9 @@ extension Inquiries on Store {
       currency: project.data['currency']! as String,
       taxMode: project.data['tax_mode']! as String,
     );
-    if (unitCost == null)
+    if (unitCost == null) {
       invalid('quotation_id', 'currency or tax mode differs from project');
+    }
     save('project_item', {
       ...item.data,
       'product_id': quote.data['product_id'],

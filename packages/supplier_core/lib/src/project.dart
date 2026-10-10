@@ -19,8 +19,9 @@ String? _decimal(Object? value, String field, {int fraction = 6}) {
 }
 
 Object? _oneOf(Object? value, String field, List<String> allowed) {
-  if (value != null && !allowed.contains(value))
+  if (value != null && !allowed.contains(value)) {
     invalid(field, 'unknown value');
+  }
   return value;
 }
 

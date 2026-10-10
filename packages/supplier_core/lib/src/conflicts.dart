@@ -71,8 +71,9 @@ extension Conflicts on Store {
   /// other device.
   void resolveConflict(FieldConflict c, Object? value) => transaction(() {
     final record = get(c.entity, c.entityId);
-    if (record == null || record.deleted)
+    if (record == null || record.deleted) {
       invalid('id', 'record does not exist');
+    }
     if (jsonEncode(record.data[c.field]) == jsonEncode(value)) {
       markResolved(c.entity, c.entityId, c.field);
     } else {

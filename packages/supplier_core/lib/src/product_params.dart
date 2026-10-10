@@ -56,8 +56,9 @@ final class ProductParam extends EntityPayload {
     }
     final source = value['source'];
     if (!paramSources.contains(source)) invalid('source', 'unknown value');
-    if (value['confirmed'] is! bool)
+    if (value['confirmed'] is! bool) {
       invalid('confirmed', 'expected true or false');
+    }
     return ProductParam._({
       'product_id': requireUuid(value['product_id'], 'product_id'),
       'property': property,
@@ -113,13 +114,12 @@ String derivedUuid(String seed) {
 extension ProductParams on Store {
   /// Live parameters of a material, by property code.
   Map<String, Record> paramsOf(String productId) => {
-    for (final r in db.select(
+    for (final rec in db.select(
       "SELECT id FROM product_param WHERE deleted = 0 "
       "AND json_extract(data,'\$.product_id') = ?",
       [productId],
-    ))
-      if (get('product_param', r['id'] as String) case final rec?)
-        rec.data['property']! as String: rec,
+    ).map((r) => get('product_param', r['id'] as String)).whereType<Record>())
+      rec.data['property']! as String: rec,
   };
 
   /// Sets one parameter (creating, restoring or editing its record).

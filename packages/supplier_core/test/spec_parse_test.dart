@@ -27,8 +27,9 @@ void main() {
         final ok = got.length == exp.length && got.containsAll(exp);
         if (ok) right++;
         if (c.hint != null) flagged++;
-        if (!ok && c.hint == null && got.isNotEmpty)
+        if (!ok && c.hint == null && got.isNotEmpty) {
           silent.add('$name ${c.text}');
+        }
         if (!ok) {
           report.writeln(
             '✗ $name「${c.text}」\n  got  $got\n  want $exp\n  hint ${c.hint}',

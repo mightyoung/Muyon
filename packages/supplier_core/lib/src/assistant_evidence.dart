@@ -242,14 +242,16 @@ class AssistantAnswer {
         if (url is! String ||
             url.length > 2048 ||
             title is! String ||
-            at is! String)
+            at is! String) {
           continue;
+        }
         final uri = Uri.tryParse(url);
         if (uri == null ||
             uri.scheme != 'https' ||
             uri.host.isEmpty ||
-            uri.userInfo.isNotEmpty)
+            uri.userInfo.isNotEmpty) {
           continue;
+        }
         found[url] = AssistantSource(
           url: url,
           title: title.length > 200 ? title.substring(0, 200) : title,
@@ -375,7 +377,7 @@ String assistantReadableSummary(Object? value) {
       : '$v';
   void walk(Object? v, String indent) {
     if (v is Map) {
-      if (v.isEmpty) lines.add('${indent}无字段');
+      if (v.isEmpty) lines.add('$indent无字段');
       for (final entry in v.entries) {
         final label = labels[entry.key] ?? '${entry.key}'.replaceAll('_', ' ');
         if (entry.value is Map || entry.value is List) {
@@ -386,7 +388,7 @@ String assistantReadableSummary(Object? value) {
         }
       }
     } else if (v is List) {
-      if (v.isEmpty) lines.add('${indent}无');
+      if (v.isEmpty) lines.add('$indent无');
       for (var i = 0; i < v.length; i++) {
         if (v[i] is Map || v[i] is List) {
           lines.add('$indent${i + 1}.');
@@ -411,8 +413,9 @@ void _collectRecords(
   Map<String, String> records,
 ) {
   final data = jsonDecode(observation.result);
-  if (!observation.providedToModel || observation.failed || data == null)
+  if (!observation.providedToModel || observation.failed || data == null) {
     return;
+  }
   final args = jsonDecode(observation.arguments) as Map;
   void add(String? type, Object? row, {String idField = 'id'}) {
     if (type == null || !ontology.containsKey(type) || row is! Map) return;
@@ -425,7 +428,7 @@ void _collectRecords(
 
   void rows(String? type, Object? values, {String idField = 'id'}) {
     if (values is List) {
-      for (final row in values) add(type, row, idField: idField);
+      for (final row in values) { add(type, row, idField: idField); }
     }
   }
 
@@ -441,16 +444,18 @@ void _collectRecords(
       if (data is Map) rows(link?.from, data['rows']);
     case 'compare_quotes':
       if (data is List) {
-        for (final group in data.whereType<Map>())
+        for (final group in data.whereType<Map>()) {
           rows('quotation', group['quotes']);
+        }
       }
     case 'quote_options':
       rows('quotation', data);
     case 'project_budget':
       if (data is Map) rows('project_item', data['lines']);
     case 'match_item':
-      if (data is Map)
+      if (data is Map) {
         rows('product', data['candidates'], idField: 'product_id');
+      }
     case 'inquiry_matrix':
       if (data is Map) {
         rows('supplier', data['suppliers']);
