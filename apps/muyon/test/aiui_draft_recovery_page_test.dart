@@ -14,6 +14,7 @@ import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../../../packages/muyon_ui/test/aiui5_revision2_review_test.dart' show reviewPlan;
 import 'support/conversation_workspace_fixture.dart';
+import '../../../packages/muyon_ui/test/dynamic_fixtures.dart' show actionPlan;
 
 void main() {
   late Directory directory;
@@ -155,6 +156,34 @@ void main() {
     expect(session.unreadableDraft, isNull);
     expect(find.text('k: 9.0'), findsNothing);
     expect(bytes(), before);
+  });
+
+  testWidgets('schema1 two isolated fields remain readable and byte-identical without migration', (tester) async {
+    final plan = actionPlan();
+    final legacy = await workspaceOperation(tester, () => UiWorkspaceController.open(store: store, taskId: 'task', scopeKey: store.scopeKey!, plan: plan));
+    await workspaceOperation(tester, legacy.flush);
+    legacy.dispose();
+    final legacyKey = 'ui-workspace:${jsonEncode(['task', 'comparison'])}';
+    String legacyBytes() => repository.database.raw.select('SELECT value FROM settings WHERE key=?', [legacyKey]).single['value'] as String;
+    final raw = jsonDecode(legacyBytes()) as Map<String, dynamic>;
+    raw['userOverrides'] = {'quantity': 9.0, 'sort': 8.0};
+    final before = jsonEncode(raw);
+    await workspaceOperation(tester, () => repository.database.write((db) => db.execute('UPDATE settings SET value=? WHERE key=?', [before, legacyKey])));
+    await workspaceOperation(tester, storage.close);
+    await workspaceOperation(tester, open);
+    final page = DynamicWorkspace(repository: repository, taskId: 'task', surfaceId: 'comparison', plan: plan);
+    final session = DynamicWorkspaceSession(page);
+    addTearDown(session.dispose);
+    await workspaceOperation(tester, session.ensureLoaded);
+    await tester.pumpWidget(MaterialApp(home: DynamicWorkspace(repository: repository, taskId: 'task', surfaceId: 'comparison', session: session)));
+    await workspaceReady(tester);
+    expect(session.controller!.schemaVersion, 1);
+    expect(session.controller!.quarantinedDraft, {'quantity': 9.0, 'sort': 8.0});
+    expect(session.controller!.canResolveDraft, isFalse);
+    await expectLater(workspaceOperation(tester, () => session.controller!.resolveDraft('quantity', discard: true)), throwsStateError);
+    expect(legacyBytes(), before);
+    expect(find.text('隔离 quantity: 9.0'), findsOneWidget);
+    expect(find.text('隔离 sort: 8.0'), findsOneWidget);
   });
 
   for (final hasPlan in [true, false]) {

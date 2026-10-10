@@ -160,6 +160,9 @@ class DynamicWorkspaceSession extends ChangeNotifier {
                     }),
           receiptLookup: receipt,
         );
+        if (c.extractionChanged) {
+          error = '数据版本已变化，人工覆盖仍保留；请核对提取建议。';
+        }
         if (_disposed) {
           c.dispose();
           return;

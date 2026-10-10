@@ -29,6 +29,8 @@ class UiWorkspaceController extends ChangeNotifier {
   bool _recovering = false;
   bool get canResolveDraft => !_disposed && !_recovering && _compatibleRecovery;
   Map<String, Object?> get quarantinedDraft => surface.session.readableDraft;
+  bool get extractionChanged => _stored != null &&
+      _stored!.snapshotRef != surface.current.snapshot.ref;
   String? saveError;
   String step = 'review';
   List<String> selectedRecords = [];
@@ -156,7 +158,9 @@ class UiWorkspaceController extends ChangeNotifier {
     );
     if (old != null) {
       final compatible = !c.readOnly;
-      c._compatibleRecovery = compatible;
+      // v1 cannot persist unreadableDraft. A partial recovery would drop the
+      // remaining isolated fields; retain its bytes until a migration decision.
+      c._compatibleRecovery = compatible && c.schemaVersion == 2;
       c.surface.session.restoreWorkspace(old, activate: compatible);
       // Existing incompatible workspaces keep their silent no-write checkpoint.
       // Only a rejected edit in a compatible workspace is a new save error.
