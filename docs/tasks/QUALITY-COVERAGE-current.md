@@ -24,8 +24,7 @@ threshold relaxation, source exclusion, or automatic baseline acceptance is adde
 
 Local checks: coverage checker 9 tests, DA diagnostics 5 tests, verification gate
 10 tests passed; bash syntax and diff whitespace passed. Flutter/Dart are absent
-in this cloud workspace, so no local Flutter success is claimed. Remote run and
-measurement results are pending.
+in this cloud workspace, so no local Flutter success is claimed. Final remote measurement evidence is recorded below.
 
 ## Initial typed-product drift evidence (not the final baseline)
 
@@ -71,11 +70,81 @@ The coordinator authorized the unique independent
 `ui_edit_spec_runtime_coverage_test.dart`. Runtime-decoded metadata constructs
 bool/date specs without const canonicalization; assertions verify strict boolean
 payloads/nullability, real leap dates, inclusive bounds, invalid types/formats and
-reversed ranges. No production or owner-test edit is made. Remote execution and
-stable constructor DA hits remain pending; no success is inferred from source review.
+reversed ranges. No production or owner-test edit is made. The final independent measurements below verify both constructor DA hits;
+static review alone was not treated as execution success.
 
 The all-source diagnostic fixture additionally asserts a lib source outside the
 six historical target files. It fails against the historical diagnostic and
 against a mutation restricting the current diagnostic back to those six targets,
 and passes against the current implementation. These temporary mutations and
 raw test output are not committed.
+
+## Automatic gate boundary
+
+The automatic checker compares measurement contract, source-file inventory,
+loaded DA line-set fingerprints and per-file/scope hit-count decreases. It does
+**not** compare source-content hashes, and does **not** detect a swap of hit and
+unhit line identities when per-file hit counts stay equal. Exact source hashes
+and uncovered DA identities are additional diagnostic evidence independently
+checked during this baseline review, not additional automatic checks. Future
+production changes need their own fixed-source measurement and review; the
+current evidence does not silently certify a changed production tree.
+
+
+## Final runtime measurement pair
+
+The reviewed runtime tree is `75cd9da4f21e014fc30360f95df0bd1ad7dd4cf3`.
+Develop `60b1efdbb2e38ea760c8f49077599fb5ea994602` adds only the integration
+review document; all eight lib trees are identical. Runtime source, PR and
+combination CI passed before baseline review.
+
+[Push 38045851196](https://github.com/mightyoung/Muyon/actions/runs/38045851196)
+measured `bf09261ed57a69f49e60475c63e6ed1d619164e8`.
+[PR 38045853186](https://github.com/mightyoung/Muyon/actions/runs/38045853186)
+measured `5e633256ff0e87a308c09475ae5089fe3406cd7a`.
+Both completed analysis 8/8 and tests 8/8: API 198; UI 373 / 152 skips;
+prototype 39 / 1 skip; research 220; supplier 498 / 4 skips;
+host 1542 / 3 skips; preview 15; inquiry 289 / 47 skips.
+Both failed only the deliberately retained old API denominator gate.
+Laya was skipped after that failure; these measurements are not complete green CI.
+
+All eight reports were present. Independently recalculated inventories,
+401 loaded-source SHA256 values, package totals and 43 gate-file DA fingerprints
+matched each measured Git tree. The two measurements have identical source
+hashes, full DA line identities and uncovered DA identities for all 401 files,
+as well as identical package/gate totals and suite outcomes. The independent
+runtime tests make edit_spec 84 / 84 in both, including bool line83 and date line156.
+No lower floor or ignored record resolves the earlier constructor discrepancy.
+
+| Package | Previous hit / loaded DA | Final pair hit / loaded DA |
+|---|---:|---:|
+| module API | 1298 / 1389 | 2091 / 2203 |
+| UI | 2471 / 2647 | 3147 / 3342 |
+| prototype | 677 / 768 | 677 / 768 |
+| research | 4586 / 5397 | 4586 / 5397 |
+| supplier | 9548 / 10280 | 9619 / 10354 |
+| inquiry | 9241 / 11977 | 9262 / 11996 |
+| host | 15932 / 18555 | 16412 / 19043 |
+| preview | 475 / 527 | 475 / 527 |
+
+API inventory is 28 to 32 without removals. Its changed DA fingerprints belong
+only to new or changed sources; unchanged gate sources lose neither denominator
+nor hit count. Models remain 751 / 778 and transfer 827 / 882 with identical
+inventory, source bytes, DA fingerprints and hits. Nineteen unloaded source
+files still have unknown executable denominators; whole-package coverage is
+unknown. Historical DA identities are not reconstructed from old fingerprints.
+
+Earlier aed5, 70bc and 6e70 runs were superseded by normal merges of reviewed
+runtime fixes. Existing workflow concurrency cancelled earlier in-flight runs;
+no workflow was manually cancelled or rerun. Failed/cancelled measurements are
+not inherited as final evidence. Raw logs and decoded diagnostic evidence stay
+outside Git. The candidate baseline is the exact push snapshot from the final
+stable pair; independent review and fresh green CI are required before integration.
+
+
+The non-author reviewer independently recomputed both snapshots, source blobs,
+all inventories/DA/hits and unknowns. All 31 unchanged historical gate sources
+retain their DA identities and hit floors; all 11 API drift files changed source
+bytes. The candidate was approved for freezing without threshold changes.
+The baseline now records that exact reviewed snapshot. Publication and merge
+still require the new commit's complete CI, including Laya.
