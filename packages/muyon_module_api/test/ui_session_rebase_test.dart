@@ -140,6 +140,53 @@ ValidatedUiPlan bundle(
 
 void main() {
   test(
+    'session view and source mutations fence the publisher final comparison',
+    () {
+      for (final source in [false, true]) {
+        final old = bundle(1), next = bundle(2);
+        final session = UiSessionState(old.snapshot)
+          ..accept(old)
+          ..edit('qty', '3');
+        final prepared = session.prepareRebase(next);
+        final c = UiPublicationCoordinator(old);
+        final token = UiPublishToken(
+          baseSnapshotRef: old.snapshot.ref,
+          draftRevision: session.draftRevision,
+          hostGeneration: 1,
+          sourceGeneration: 1,
+          permissionGeneration: 1,
+          scopeKey: 'test',
+        );
+        final fence = session.publicationFence;
+        var reads = 0;
+        final result = c.publish(
+          UiVersionBatch(
+            token: token,
+            snapshot: next.snapshot,
+            intent: next.intent,
+            plan: next.plan,
+          ),
+          () {
+            if (++reads == 2) {
+              if (source) {
+                session.updateSourceDigest('a', 'changed');
+              } else {
+                session.selectView('sort', 'value');
+              }
+            }
+            return token;
+          },
+          fence: fence,
+        );
+        expect(result, UiPublishOutcome.staleToken);
+        expect(c.current, same(old));
+        expect(session.snapshot, same(old.snapshot));
+        expect(session.canCommitPreparedRebase(prepared), isFalse);
+      }
+    },
+  );
+
+  test(
     'a legal edit repairs retained unreadable draft through the event gate',
     () {
       final old = bundle(1);
@@ -154,6 +201,25 @@ void main() {
       expect(session.readableDraft['qty'], '3');
       expect(session.unreadableReasons['qty'], 'format');
       final revision = session.draftRevision;
+      for (final invalid in ['3', 4]) {
+        expect(
+          session.dispatch(
+            UiEvent(
+              eventId: 'invalid-$invalid',
+              surfaceId: 's',
+              nodeId: 'qty',
+              observedRevision: 2,
+              kind: 'change',
+              payload: invalid,
+            ),
+            next,
+            catalog,
+          ),
+          UiEventOutcome.invalid,
+        );
+        expect(session.readableDraft['qty'], '3');
+        expect(session.draftRevision, revision);
+      }
       final result = session.dispatch(
         UiEvent(
           eventId: 'repair',

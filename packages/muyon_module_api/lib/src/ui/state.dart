@@ -4,6 +4,7 @@ import 'snapshot.dart';
 import 'plan.dart';
 import 'validation.dart';
 import 'workspace.dart';
+import 'publication.dart';
 
 enum UiEventOutcome { applied, stale, invalid, unsupported }
 
@@ -38,19 +39,25 @@ final class UiPreparedSessionRebase {
 
 /// In-memory view/draft state only. Never grants authority or executes business tools.
 class UiSessionState {
-  UiSessionState(DataSnapshot snapshot)
-    : _snapshot = snapshot,
-      _values = Map.of(snapshot.initialUiState),
-      _digests = Map.of(snapshot.sourceDigests),
-      _selections = {
-        for (final e in snapshot.editSpecs.entries)
-          if (e.value case final UiItemIdsEdit ids)
-            e.key: UiItemIdsEdit.normalize(ids.initial),
-      },
-      draftRevision = snapshot.actionContext?.draftRevision ?? 0;
+  UiSessionState(
+    DataSnapshot snapshot, {
+    bool Function(UiEvent, UiActionDefinition)? canDispatch,
+  }) : _admission = canDispatch,
+       _snapshot = snapshot,
+       _values = Map.of(snapshot.initialUiState),
+       _digests = Map.of(snapshot.sourceDigests),
+       _selections = {
+         for (final e in snapshot.editSpecs.entries)
+           if (e.value case final UiItemIdsEdit ids)
+             e.key: UiItemIdsEdit.normalize(ids.initial),
+       },
+       draftRevision = snapshot.actionContext?.draftRevision ?? 0;
   DataSnapshot _snapshot;
   DataSnapshot get snapshot => _snapshot;
-  int _mutationEpoch = 0;
+  final bool Function(UiEvent, UiActionDefinition)? _admission;
+  int get _mutationEpoch => _mutationClock.value;
+  final UiPublicationEpoch _mutationClock = UiPublicationEpoch();
+  UiPublicationFence get publicationFence => UiPublicationFence(_mutationClock);
   Map<String, Object?> _readableDraft = {};
   Map<String, String> _unreadableReasons = {};
   Map<String, Object?> get readableDraft => Map.unmodifiable(_readableDraft);
@@ -211,7 +218,7 @@ class UiSessionState {
     if (spec is! UiItemIdsEdit) {
       return _setValue(field, value, affectsDraft: affectsDraft, typed: true);
     }
-    _mutationEpoch++;
+    _mutationClock.advance();
     _readableDraft.remove(field);
     _unreadableReasons.remove(field);
     final ids = UiItemIdsEdit.normalize((value as List).cast<String>());
@@ -246,7 +253,7 @@ class UiSessionState {
         (!typed && _values[field] is String && value is! String)) {
       return false;
     }
-    _mutationEpoch++;
+    _mutationClock.advance();
     _readableDraft.remove(field);
     _unreadableReasons.remove(field);
     final explicitlyEdited = affectsDraft && !_userOverrides.containsKey(field);
@@ -263,7 +270,7 @@ class UiSessionState {
 
   /// Restores UI scalars only; never changes snapshot facts or host inputs.
   void restoreWorkspace(StoredUiWorkspace value) {
-    _mutationEpoch++;
+    _mutationClock.advance();
     for (final entry in {...value.viewValues, ...value.userOverrides}.entries) {
       if (_values.containsKey(entry.key) &&
           isUiScalar(entry.value) &&
@@ -288,13 +295,13 @@ class UiSessionState {
         (snapshot.initialUiState.containsKey(field) || spec is UiItemIdsEdit)) {
       _readableDraft.remove(field);
       _unreadableReasons.remove(field);
-      _mutationEpoch++;
+      _mutationClock.advance();
       if (!(spec?.view ?? false)) draftRevision++;
       return;
     }
 
     if (spec is UiItemIdsEdit && _selectionOverrides.remove(field)) {
-      _mutationEpoch++;
+      _mutationClock.advance();
       _selections[field] = UiItemIdsEdit.normalize(spec.initial);
       draftRevision++;
       return;
@@ -303,14 +310,14 @@ class UiSessionState {
         !snapshot.initialUiState.containsKey(field)) {
       return;
     }
-    _mutationEpoch++;
+    _mutationClock.advance();
     _userOverrides.remove(field);
     _values[field] = snapshot.initialUiState[field];
     draftRevision++;
   }
 
   void updateSourceDigest(String artifactId, String digest) {
-    _mutationEpoch++;
+    _mutationClock.advance();
     _digests[artifactId] = digest;
   }
 
@@ -468,11 +475,11 @@ class UiSessionState {
     draftRevision = prepared.draftRevision;
     _currentPlan = target;
     _staleSources.clear();
-    _mutationEpoch++;
+    _mutationClock.advance();
     return true;
   }
 
-  bool accept(ValidatedUiPlan plan) {
+  bool canAcceptPlan(ValidatedUiPlan plan) {
     final current = _currentPlan;
     if (!identical(plan.snapshot, snapshot) ||
         (current != null &&
@@ -482,7 +489,12 @@ class UiSessionState {
                     !identical(plan, current))))) {
       return false;
     }
-    if (!identical(_currentPlan, plan)) _mutationEpoch++;
+    return true;
+  }
+
+  bool accept(ValidatedUiPlan plan) {
+    if (!canAcceptPlan(plan)) return false;
+    if (!identical(_currentPlan, plan)) _mutationClock.advance();
     _currentPlan = plan;
     return true;
   }
@@ -514,7 +526,18 @@ class UiSessionState {
             false)) {
       return UiEventOutcome.invalid;
     }
-    if (binding.inputRefs.any(_unreadableReasons.containsKey)) {
+    try {
+      if (_admission != null && !_admission(event, definition)) {
+        return UiEventOutcome.invalid;
+      }
+    } catch (_) {
+      return UiEventOutcome.invalid;
+    }
+    final repairsField =
+        definition.route == UiActionRoute.local &&
+        definition.localAction == UiLocalAction.editField;
+    if (!repairsField &&
+        binding.inputRefs.any(_unreadableReasons.containsKey)) {
       return UiEventOutcome.invalid;
     }
     final payloadType = schema.events[event.kind];

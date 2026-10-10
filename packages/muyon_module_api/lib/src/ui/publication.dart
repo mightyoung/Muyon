@@ -65,21 +65,69 @@ final class UiPublicationCoordinator {
     return null;
   }
 
-  // RED declarations: behavior is implemented only after the bridge tests fail.
-  bool adoptPlan(ValidatedUiPlan next) => false;
+  /// Advances an already validated same-snapshot stream/patch capability.
+  /// Retains the draft publication floor and invalidates older preparations.
+  bool adoptPlan(ValidatedUiPlan next) {
+    if (_disposed) return false;
+    if (identical(next, _current)) return true;
+    if (!identical(next.snapshot, _current.snapshot) ||
+        !identical(next.intent, _current.intent) ||
+        !identical(next.catalog, _current.catalog) ||
+        next.plan.surfaceId != _current.plan.surfaceId ||
+        next.plan.revision <= _current.plan.revision) {
+      return false;
+    }
+    _current = next;
+    ++_epoch;
+    if (_recomputing) {
+      _recomputing = false;
+      _outdated = true;
+      _publicationErrors = const ['recompute_plan_advanced'];
+    }
+    return true;
+  }
 
-  UiRecomputeRequest? beginRecompute() =>
-      _disposed ? null : UiRecomputeRequest._(this, _current, _epoch);
+  /// Begin before host work; completion remains synchronous for surface install.
+  UiRecomputeRequest? beginRecompute() {
+    if (_disposed) return null;
+    ++_epoch;
+    _recomputing = true;
+    _publicationErrors = const [];
+    return UiRecomputeRequest._(this, _current, _epoch);
+  }
 
+  UiPublishOutcome? _requestObsolete(UiRecomputeRequest request) {
+    if (_disposed) return UiPublishOutcome.disposed;
+    if (!identical(request._owner, this)) return UiPublishOutcome.staleToken;
+    return _obsolete(request._epoch, request._base);
+  }
+
+  bool isCurrentRequest(UiRecomputeRequest request) =>
+      _requestObsolete(request) == null;
+
+  /// No await between final probe, coordinator publication and caller install.
   UiPublishOutcome completeRecompute(
     UiRecomputeRequest request,
     UiVersionBatch batch,
     UiPublishTokenProbe probe, {
     UiPublicationFence? fence,
-  }) => UiPublishOutcome.invalid;
+  }) {
+    final obsolete = _requestObsolete(request);
+    if (obsolete != null) return obsolete;
+    final outcome = publish(batch, probe, fence: fence);
+    if (request._epoch == _epoch) {
+      _recomputing = false;
+      if (outcome != UiPublishOutcome.published) _outdated = true;
+    }
+    return outcome;
+  }
 
-  UiPublishOutcome failRecompute(UiRecomputeRequest request) =>
-      UiPublishOutcome.invalid;
+  UiPublishOutcome failRecompute(UiRecomputeRequest request) {
+    final obsolete = _requestObsolete(request);
+    if (obsolete != null) return obsolete;
+    _recomputing = false;
+    return _invalid(['recompute_failed']);
+  }
 
   /// Validate a raw host batch, then perform a final synchronous complete probe.
   /// No await, notification or external commit callback occurs in this method.
@@ -89,6 +137,7 @@ final class UiPublicationCoordinator {
     UiPublicationFence? fence,
   }) {
     if (_disposed) return UiPublishOutcome.disposed;
+    if (fence != null && !fence.matches) return UiPublishOutcome.staleToken;
     final base = _current;
     final epoch = _epoch;
     try {
@@ -145,7 +194,9 @@ final class UiPublicationCoordinator {
       final live = probe();
       final obsolete = _obsolete(epoch, base);
       if (obsolete != null) return obsolete;
-      if (batch.token != live) return UiPublishOutcome.staleToken;
+      if (batch.token != live || (fence != null && !fence.matches)) {
+        return UiPublishOutcome.staleToken;
+      }
     } catch (_) {
       return _obsolete(epoch, base) ?? _invalid(['publish_probe_failed']);
     }
@@ -165,24 +216,13 @@ final class UiPublicationCoordinator {
     Future<UiVersionBatch> Function() prepare,
     UiPublishTokenProbe probe,
   ) async {
-    if (_disposed) return UiPublishOutcome.disposed;
-    final epoch = ++_epoch;
-    final base = _current;
-    _recomputing = true;
-    _publicationErrors = const [];
+    final request = beginRecompute();
+    if (request == null) return UiPublishOutcome.disposed;
     try {
       final batch = await prepare();
-      final obsolete = _obsolete(epoch, base);
-      if (obsolete != null) return obsolete;
-      final outcome = publish(batch, probe);
-      if (outcome != UiPublishOutcome.published && epoch == _epoch) {
-        _outdated = true;
-      }
-      return outcome;
+      return completeRecompute(request, batch, probe);
     } catch (_) {
-      return _obsolete(epoch, base) ?? _invalid(['recompute_failed']);
-    } finally {
-      if (epoch == _epoch) _recomputing = false;
+      return failRecompute(request);
     }
   }
 
