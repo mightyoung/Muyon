@@ -2,7 +2,7 @@ diff --git a/packages/muyon_module_api/test/ui_workspace_collection_decode_cover
 new file mode 100644
 --- /dev/null
 +++ b/packages/muyon_module_api/test/ui_workspace_collection_decode_coverage_test.dart
-@@ -0,0 +1,104 @@
+@@ -0,0 +1,107 @@
 +import 'dart:convert';
 +
 +import 'package:flutter_test/flutter_test.dart';
@@ -94,6 +94,9 @@ new file mode 100644
 +    expect(restored.extracted['quantity'], '2');
 +    expect(restored.draftRevision, 16);
 +    expect(restored.presentation, isNotNull);
++    final snapshotNames = {const SnapshotRef('snapshot', 4): 'original'};
++    expect(snapshotNames[restored.snapshotRef], 'original');
++    expect(snapshotNames[restored.presentation!.snapshotRef], 'original');
 +    final node = restored.presentation!.nodes.single;
 +    expect(node.bindings['value'], const BindingRef.fact('quantity'));
 +    expect(node.events['edit']!.actionRef, 'editQuantity');
