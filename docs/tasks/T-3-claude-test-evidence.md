@@ -41,7 +41,28 @@ handler await 创建目录/写文件/rename。最后的文件存在断言仍保�
 不在主体失败传播路径用第二个 await 替换其异常，也不 catch/吞掉清理错误。
 [test API](https://pub.dev/documentation/test/latest/test/addTearDown.html)
 明确该回调先于 tearDown，故仍在 host.close 之前 drain；未改变宿主生命周期。
-新断言和清理动态证据待当前精确 SHA CI；逐条详细 Claude 意见待父任务补回。
+新断言和清理动态证据待当前精确 SHA CI；父任务已补回逐条详细意见。
 
 本地没有 Flutter/Dart；使用既有全库 CI，不改代理设置、不提交原始日志，
 摘要写提交说明及 PR；不合并 develop/main，不强推，不部署。
+
+## 详细意见补充整改
+
+- registry 独立拒绝：强制 callback 声称 metadata lane，而不调用 binding。
+  schema/category/supportedScopes 均合法，分别仅改变 provider、module、第五 ID、
+  workspace scope；精确 invalid_scope_resolution、callback 到达一次、fallback/SQL/handler 为零。
+  非 global 的单项差分用 workspace：selectedObjects 的公开构造器要求返回原选择对象，
+  因而还会触及 objects 非空检查，不能称单项违规。已有工具 scope 拒绝包含两种非 global。
+- lane 参数伪造：精确 invalid_parameters，并直接断言 resolutionCalls/fallback 为零。
+- 通过公开 foundation.notify 改变数据，已完成通知调用回放旧结果且额外 handler 为零；
+  新 invocation 读到新通知且 handler 总计为二。原并发与重开 host 的额外零调用仍保留。
+- B3：测试运行时提供带 revision/digest 的真实非空 ObjectRef，经实际 host resolver 和
+  workspace binding，分别比较 workspace/selectedObjects 的 resolvedScope、identityDigest、
+  parameterDigest 与无 callback 的旧 registry。global 原对照保留。此为本片必需范围；
+  未扩写未变更审批协议的 expires/state/一次消耗可选对照。
+- 附件新增受控回调故障：在 release 前挂 itemsSettled 错误观察，分别核对同一主体错误
+  与保存错误，以及 body-failure→gate-released→save-failure、host 关闭前 drain。
+  无 sleep、不吞保存错误；不宣称真实文件系统故障或 runner 两个未处理失败的报告方式。
+
+以上仅新增测试证据，未经当前精确 SHA CI 前不算通过。已驳回的生产契约疑问不改代码。
+B1/B2 恢复与科研夹具的 Claude 窄审仍由父任务在最终 head 安排。

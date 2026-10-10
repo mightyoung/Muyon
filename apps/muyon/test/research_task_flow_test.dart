@@ -189,6 +189,73 @@ void main() {
     }
   });
 
+  test('attachment failure drains after gate release without replacing the body error', () async {
+    await connect();
+    final saving = Completer<void>(), release = Completer<void>();
+    final bodyError = StateError('injected body failure');
+    final saveError = StateError('injected attachment save failure');
+    final order = <String>[];
+    Future<void>? observedSaveError;
+    final archive = Archive()..addFile(ArchiveFile('README.md', 1, [65]));
+    final bytes = ZipEncoder().encode(archive);
+    final receiver = TaskCoordinator(
+      database: b.tasks.database,
+      deviceId: b.tasks.deviceId,
+      send: b.services.transfer.sendTaskEnvelope,
+      executor: (_) async => throw StateError('receiving must not execute'),
+      onOfferAttachment: (_, _, _) async {
+        saving.complete();
+        await release.future;
+        order.add('save-failure');
+        throw saveError;
+      },
+    );
+    b.services.transfer.onTaskEnvelope = receiver.receive;
+    addTearDown(() async {
+      // Attach the error matcher before release; this cleanup only awaits its
+      // observation and therefore never substitutes a drain error for the body.
+      if (observedSaveError != null) {
+        await observedSaveError;
+        expect(order, ['body-failure', 'gate-released', 'save-failure']);
+        expect(release.isCompleted, isTrue);
+        // These reads also verify that cleanup precedes the host-closing tearDown.
+        expect(receiver.stateOf('failed-offer', '1'), 'offered');
+        expect(b.researchTasks.isResearchTask('failed-offer', '1'), isFalse);
+        expect(b.workspaces.all(), isEmpty);
+        expect(b.research, isNull);
+      } else {
+        await b.services.transfer.itemsSettled;
+      }
+    });
+    // Observe the two injected errors separately. This does not test how the
+    // test runner reports two unhandled failures in one test.
+    await expectLater(() async {
+      try {
+        await a.tasks.offer(
+          taskId: 'failed-offer',
+          inputRevision: '1',
+          idempotencyKey: 'failed-offer-key',
+          attachment: {
+            'kind': 'research-task',
+            'name': 'failed-offer.zip',
+            'sha256': sha256.convert(bytes).toString(),
+            'dataBase64': base64Encode(bytes),
+          },
+        );
+        await saving.future.timeout(const Duration(seconds: 20));
+        observedSaveError = expectLater(
+          b.services.transfer.itemsSettled,
+          throwsA(same(saveError)),
+        );
+        order.add('body-failure');
+        throw bodyError;
+      } finally {
+        order.add('gate-released');
+        if (!release.isCompleted) release.complete();
+      }
+    }, throwsA(same(bodyError)));
+  });
+
   test(
     'offer → authorise → import (not run) → result → one import on the origin',
     () async {

@@ -81,7 +81,7 @@ class _Runtime implements ModuleRuntime, ScopeCandidates, ScopeResolvable {
   @override
   Future<ModuleSession> openScopeSession() => _scope.openScopeSession();
   @override
-  Future<List<ObjectRef>> scopeCandidates() async => [];
+  Future<List<ObjectRef>> scopeCandidates() async => _scope.objects.values.toList();
   final receipts = <String, ImportReceipt>{};
   int receiptReads = 0, commits = 0;
   @override
@@ -382,7 +382,8 @@ void main() {
       }
       await expectLater(registry.prepare(ToolCallRequest(invocationId: 'bad-param-$id',
         toolId: id, scope: const AssistantScope.global(), parameters: {'lane': 'metadata'})),
-        throwsA(isA<ToolPlatformException>()));
+        throwsA(isA<ToolPlatformException>().having((e) => e.code, 'code', 'invalid_parameters')));
+      expect(resolutionCalls, 0); expect(fallbackCalls, 0);
       await expectLater(registry.invoke(request(id, 'pre-cancel-$id'),
         cancellation: ToolCancellationToken()..cancel()), throwsA(isA<ToolCancelled>()));
     }
@@ -506,6 +507,33 @@ void main() {
     expect(changes(audit.raw), before); expect(fallbackCalls, 0);
   });
 
+  for (final invalid in ['provider', 'module', 'fifth', 'workspace']) {
+    test('registry independently rejects a claimed metadata lane with invalid $invalid', () async {
+      // Legal schema/category/supportedScopes allow this to reach registry's
+      // claimed-lane guard. The callback deliberately bypasses binding checks.
+      await registry.close();
+      registry = newRegistry();
+      final id = invalid == 'fifth' ? 'platform.fifth' : _ids.first;
+      registry.register(providerId: invalid == 'provider' ? 'forged' : 'platform',
+        descriptor: ToolDescriptor(toolId: id,
+          moduleId: invalid == 'module' ? 'notes' : 'platform', effect: ToolEffect.read,
+          parameterSchema: const {'type': 'object', 'additionalProperties': false}),
+        handler: (_) async => throw StateError('must not dispatch'));
+      final scope = invalid == 'workspace' ? AssistantScope.workspace(intent.workspaceId) :
+        const AssistantScope.global();
+      customResolution = (_, _, call) async => HostScopeResolution(
+        identityKey: HostScopeResolution.platformMetadataKey,
+        scope: ResolvedAssistantScope(requested: call.scope, objects: []), requireCurrent: () {});
+      final before = changes(audit.raw), state = snapshot(audit.raw);
+      await expectLater(registry.prepare(ToolCallRequest(invocationId: 'claim-$invalid',
+        toolId: id, scope: scope)), throwsA(isA<ToolPlatformException>()
+          .having((e) => e.code, 'code', 'invalid_scope_resolution')));
+      expect(resolutionCalls, 1); expect(fallbackCalls, 0);
+      expect(changes(audit.raw), before); expect(snapshot(audit.raw), state);
+      expect(handlerCalls, isEmpty); expect(module.activations, 0);
+    });
+  }
+
   test('binding refuses value-equal descriptor wrong provider fifth ID and another registry', () async {
     final trusted = registry.inspect(_ids.first)!;
     final descriptor = trusted.descriptor;
@@ -550,6 +578,59 @@ void main() {
       expect((await legacy.prepare(call)).identityDigest, withCallback.identityDigest);
     } finally { await legacy.close(); }
     expect(intentStatus(), 'complete'); expect(runtime.commits, 0);
+  });
+
+  test('unclaimed business workspace and selected scopes match the legacy resolver', () async {
+    const ref = ObjectRef(moduleId: 'notes', objectType: 'item', objectId: 'A',
+      nativeProjectId: 'project', revisionRef: 'v1', contentDigest: 'fixture');
+    runtime._scope.objects['item/A'] = ref;
+    const id = 'notes.scope-difference';
+    final descriptor = ToolDescriptor(toolId: id, moduleId: 'notes', effect: ToolEffect.read,
+      parameterSchema: const {'type': 'object', 'additionalProperties': false});
+    Future<ToolCallResult> handler(ToolCallContext call) async => ToolCallResult(
+      status: ToolCallStatus.succeeded, summary: 'business', objectRefs: call.resolvedScope.objects);
+    registry.register(providerId: 'notes', descriptor: descriptor, dataModuleIds: {'notes'},
+      handler: handler);
+    final legacy = ToolRegistry(database: host.foundation.database,
+      categoryAllowed: (effect) => host.authorizationPolicy.current.allowsTool(effect),
+      policyRevision: () => host.authorizationPolicy.current.revision,
+      resolveScope: host.scopeResolver.resolve);
+    try {
+      legacy.register(providerId: 'notes', descriptor: descriptor, dataModuleIds: {'notes'},
+        handler: handler);
+      for (final scope in [AssistantScope.workspace(intent.workspaceId),
+        AssistantScope.selectedObjects([ref], workspaceId: intent.workspaceId)]) {
+        final call = ToolCallRequest(invocationId: 'difference-${scope.kind.name}',
+          toolId: id, scope: scope);
+        final current = await registry.prepare(call), original = await legacy.prepare(call);
+        expect(current.resolvedScope.objects, [ref]);
+        expect(current.resolvedScope.toJson(), original.resolvedScope.toJson());
+        expect(current.identityDigest, original.identityDigest);
+        expect(current.parameterDigest, original.parameterDigest);
+      }
+      expect(fallbackCalls, 2); expect(intentStatus(), 'complete');
+      expect(runtime.commits, 0); expect(runtime.receipts, hasLength(1));
+      expect(handlerCalls, isEmpty);
+    } finally { await legacy.close(); }
+  });
+
+  test('completed notification replay keeps its snapshot while a new invocation reads new data', () async {
+    const id = 'platform.notifications';
+    final call = request(id, 'notification-snapshot');
+    final original = await registry.invoke(call);
+    expect(original.data['items'], isEmpty); expect(handlerCalls[id], 1);
+    // Intentional fixture mutation through the public repository, outside the
+    // audited tool boundary. It must not change the cached invocation result.
+    await host.foundation.notify(title: 'fixture', body: 'private fixture');
+    audit.reset();
+    final before = changes(audit.raw), state = snapshot(audit.raw);
+    final replay = await registry.invoke(call);
+    expect(replay.data, original.data); expect(handlerCalls[id], 1);
+    expect(changes(audit.raw), before); expect(snapshot(audit.raw), state);
+    final fresh = await registry.invoke(request(id, 'notification-new-snapshot'));
+    expect(fresh.data['items'], hasLength(1)); expect(handlerCalls[id], 2);
+    expect(fallbackCalls, 0); expect(module.activations, 0);
+    expect(audit.deltas.where((n) => n != 0), [1, 1]);
   });
 
   test('concurrent completed replay and a fresh registry preserve receipt identity', () async {
