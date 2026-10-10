@@ -40,9 +40,9 @@ Iterable<FieldSpec> _allowedFields(String type) => ontology[type]!.fields.where(
 );
 
 Map<String, Object?> _fieldSchema(FieldSpec field) {
-  // Keep validation constraints, but do not repeat the full ontology prose in
-  // both create/update schemas and the model's native/prompt tool catalogs.
-  // The ontology query remains the source of field labels and explanations.
+  // Avoid repeating ontology prose and size limits in both create/update and
+  // native/prompt catalogs. Preflight below enforces the same size limits;
+  // the ontology query supplies field labels and explanations.
   final type = switch (field.kind) {
     Kind.integer => 'integer',
     Kind.boolean => 'boolean',
@@ -52,10 +52,8 @@ Map<String, Object?> _fieldSchema(FieldSpec field) {
   };
   return {
     'type': [type, 'null'],
-    if (type == 'string') 'maxLength': 2000,
     if (type == 'array') ...{
-      'items': {'type': 'string', 'maxLength': 200},
-      'maxItems': 500,
+      'items': {'type': 'string'},
     },
     if (type == 'object') 'additionalProperties': true,
     if (field.values != null) 'enum': [...field.values!.keys, null],
@@ -88,7 +86,7 @@ Map<String, Object?> _recordSchema(String operation) {
     {
       'operation_id': {
         ..._uuidSchema,
-        'description': '同一业务操作的稳定 UUID；重试必须沿用，不能换参数或范围。',
+        'description': '业务重试沿用此 UUID，不换参数或范围。',
       },
       'type': {'type': 'string', 'enum': _recordTypes},
       if (operation != 'create_record') ...{
@@ -153,6 +151,12 @@ void _validateArguments(String operation, Map<String, Object?> p) {
       final value = entry.value;
       if (value == null) {
         continue; // Full payload validation checks required fields.
+      }
+      if ((value is String && value.length > 2000) ||
+          (value is List &&
+              (value.length > 500 ||
+                  value.any((v) => v is String && v.length > 200)))) {
+        invalid(entry.key, 'Field exceeds the approved size limit');
       }
       final valid = switch (field.kind) {
         Kind.integer => value is int,
@@ -340,7 +344,7 @@ void registerInquiryRecordTools(
               'update_record' => '修改',
               'delete_record' => '删除',
               _ => '恢复',
-            }}一条本机记录，需要宿主确认后才写入。修改、删除、恢复检查版本；报价只改日期、交期、质保、备注，录价和定标走专用流程。删除预览须列出引用对象，有活跃引用就拒绝。重试沿用业务操作 ID。',
+            }}一条本机记录，确认后会修改台账；仅选定范围，检查版本。报价只改非价格字段；有活跃引用禁止删除。',
         parameterSchema: _recordSchema(operation),
         supportsCancel: true,
       ),

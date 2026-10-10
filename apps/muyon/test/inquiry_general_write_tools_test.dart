@@ -281,6 +281,21 @@ void main() {
     },
   );
 
+  test('field size limits still fail before approval with compact schemas', () async {
+    for (final values in <Map<String, Object?>>[
+      {'name': 'a' * 2001},
+      {'aliases': List.filled(501, 'a')},
+      {'aliases': ['a' * 201]},
+    ]) {
+      await expectLater(
+        host.tools.prepare(await request('update_record', edit(supplierId, values: values))),
+        throwsA(isA<ToolPlatformException>()),
+      );
+      expect(store.get('supplier', supplierId)!.version, 1);
+      expect(store.db.select("SELECT key FROM meta WHERE key LIKE 'reg4c:%'"), isEmpty);
+    }
+  });
+
   test('unselected target is refused without domain writes', () async {
     final other = store.save('supplier', {
       ...store.get('supplier', supplierId)!.data,
