@@ -266,7 +266,12 @@ void main() {
       final barrier = _RecoveryBarrierStore(store, fail: storageFails);
       var calls = 0;
       final c = await workspaceOperation(tester, () => UiWorkspaceController.open(store: barrier, taskId: 'task', scopeKey: store.scopeKey!, plan: reviewPlan('NumberStepper'), onEvent: (_) async { calls++; }));
-      addTearDown(c.dispose);
+      var disposed = false;
+      addTearDown(() {
+        if (!disposed) {
+          c.dispose();
+        }
+      });
       Object? failure;
       var finished = false;
       await tester.runAsync(() async {
@@ -311,6 +316,7 @@ void main() {
         expect((await workspaceOperation(tester, () => store.load('s')))!.userOverrides['k'], 9.0);
         final committedBytes = bytes();
         c.dispose();
+        disposed = true;
         await workspaceOperation(tester, storage.close);
         await workspaceOperation(tester, open);
         final reopened = await workspaceOperation(tester, () => UiWorkspaceController.open(
