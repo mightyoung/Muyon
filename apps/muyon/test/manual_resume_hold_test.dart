@@ -74,6 +74,108 @@ class _Host {
 }
 
 void main() {
+  for (final legacy in [false, true]) {
+    for (final receiptState in ['succeeded', 'running']) {
+      test('acknowledged ${legacy ? 'legacy' : 'current'} $receiptState hold '
+          'survives fresh prepare failure without repeated verification',
+          () async {
+        final h = _Host();
+        await h.open();
+        addTearDown(h.close);
+        final conversation = await h.repo.createConversation();
+        final original = await h.agent.startTool(
+          conversationId: conversation.id, toolId: 'write',
+        );
+        final id = (original.payload['toolCall'] as Map)['invocationId'];
+        if (receiptState == 'succeeded') {
+          await h.agent.confirm(original.id,
+              requestDigest: original.payload['requestDigest'] as String);
+        } else {
+          await h.repo.database.write((db) => db.execute(
+            'INSERT INTO tool_invocation_receipts('
+            'replay_key,invocation_id,identity_digest,tool_id,state) '
+            'VALUES(?,?,?,?,?)',
+            [id, id, original.payload['toolIdentityDigest'], 'write', 'running'],
+          ));
+        }
+        final usage = BudgetUsage.fromPayload(h.repo.task(original.id)!.payload)
+            .plus(tokens: 11, estimated: true);
+        final crashed = h.repo.task(original.id)!.copy({
+          ...usage.toPayload(),
+          if (receiptState == 'succeeded') 'toolIdentityDigest': 'damaged',
+          'state': 'interrupted', 'stage': 'interrupted',
+        });
+        await h.repo.database.write((db) => db.execute(
+          'UPDATE execution_records SET state=?,payload=? WHERE id=?',
+          ['interrupted', jsonEncode(crashed.payload), original.id],
+        ));
+        var task = await h.agent.resume(original.id);
+        expect(task.stage, 'resume');
+        if (legacy) {
+          await h.repo.database.write((db) => db.execute(
+            "UPDATE execution_records SET payload=json_remove(payload,"
+            "'\$.toolCall.invocationId','\$.toolIdentityDigest') WHERE id=?",
+            [task.id],
+          ));
+        }
+        final effects = h.invocations;
+        final approvals = h.approvals;
+        final acknowledgedTask = task.id;
+        h.tools.setAvailability('write', available: false);
+        await h.agent.confirm(task.id,
+            requestDigest: task.payload['requestDigest'] as String);
+        task = h.repo.task(task.id)!;
+        expect(task.state, PersonalTaskState.failed,
+            reason: 'real registry prepare rejects unavailable tool');
+        expect(h.repo.taskEvents(acknowledgedTask).where((e) =>
+            e.type == 'approval' && e.data['stage'] == 'resume'), hasLength(1));
+        expect(h.invocations, effects);
+        expect(h.approvals, approvals);
+
+        for (var i = 0; i < 2; i++) {
+          await h.reopen();
+          h.tools.setAvailability('write', available: false);
+          task = await h.agent.resume(task.id);
+          expect(task.state, PersonalTaskState.failed,
+              reason: 'retry fresh prepare, do not ask to verify again');
+          expect((task.payload['preview'] as Map?)?['resume'], isNull);
+          expect(BudgetUsage.fromPayload(task.payload).toPayload(),
+              usage.toPayload());
+          expect(h.repo.taskEvents(task.id).where((e) =>
+              e.type == 'approval' && e.data['stage'] == 'resume'), isEmpty);
+          expect(h.invocations, effects);
+          expect(h.approvals, approvals);
+        }
+        await h.reopen();
+        task = await h.agent.resume(task.id);
+        expect(task.stage, 'tool');
+        expect(task.state, PersonalTaskState.waitingConfirmation);
+        expect((task.payload['toolCall'] as Map)['invocationId'], isNot(id));
+        expect(BudgetUsage.fromPayload(task.payload).toPayload(),
+            usage.toPayload());
+        expect(h.invocations, effects);
+        expect(h.approvals, approvals);
+        // A newly proposed call is not covered by acknowledgement of the old
+        // call: its own unknown receipt must still hold rather than replay.
+        final fresh = task.payload['toolCall'] as Map;
+        await h.repo.database.write((db) => db.execute(
+          'INSERT INTO tool_invocation_receipts('
+          'replay_key,invocation_id,identity_digest,tool_id,state) '
+          'VALUES(?,?,?,?,?)',
+          [fresh['invocationId'], fresh['invocationId'],
+            task.payload['toolIdentityDigest'], 'write', 'running'],
+        ));
+        await h.agent.pause(task.id);
+        await h.reopen();
+        task = await h.agent.resume(task.id);
+        expect(task.stage, 'resume',
+            reason: 'old acknowledgement cannot cover a new unknown call');
+        expect(h.invocations, effects);
+        expect(h.approvals, approvals);
+      });
+    }
+  }
+
   test('confirmation after pause cannot repeat a recorded manual effect '
       'before verification', () async {
     final h = _Host();
