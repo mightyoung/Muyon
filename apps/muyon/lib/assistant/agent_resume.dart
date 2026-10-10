@@ -274,12 +274,13 @@ class AgentResume {
       view.add({'invocationId': id, 'receipt': 'unknown'});
     }
     final tookNothing = adopted == 0 && unknown == 0;
-    if (tookNothing && !progressed) return null;
+    if (tookNothing && !progressed && calls.isEmpty) return null;
 
     final base = _carry(prev);
-    final task = tookNothing || calls.isEmpty
+    final task = calls.isEmpty
         ? base
         : base.copy({
+            'stepFolded': false,
             'step': {
               ...Map<String, Object?>.from(prev.payload['step'] as Map),
               'calls': settled,
@@ -302,7 +303,7 @@ class AgentResume {
         _resumeEvent(prev, carried, adopted: adopted, pending: pending),
       ]),
     );
-    if (!tookNothing && calls.isNotEmpty) {
+    if (calls.isNotEmpty) {
       await dispatch.completeStep(task);
     } else {
       await model.advance(task);
@@ -331,6 +332,7 @@ class AgentResume {
       ...BudgetUsage.fromPayload(prev.payload).toPayload(),
       'references': prev.payload['references'] ?? const <Object?>[],
       'toolLog': prev.payload['toolLog'] ?? const <Object?>[],
+      if (prev.payload['stepFolded'] == true) 'stepFolded': true,
       'compaction': ?prev.payload['compaction'],
     });
   }
@@ -342,14 +344,26 @@ class AgentResume {
     final lastResponse = events.lastIndexWhere(
       (e) => e.type == AgentEventType.modelResponse,
     );
-    return [
+    // A held attempt has its own timeline. Preserve the original orphan
+    // identities from its persisted verification card until it is confirmed;
+    // pausing/resuming must not make uncertain effects disappear.
+    final preview = prev.payload['preview'];
+    final resume = preview is Map ? preview['resume'] : null;
+    final heldCalls = resume is Map ? resume['calls'] : null;
+    return {
       for (final e in events.skip(lastResponse + 1))
         if (e.type == AgentEventType.toolProposed &&
             e.data['invocationId'] is String &&
             !known.contains(e.data['invocationId']) &&
             ctx.tools.receiptFor(e.data['invocationId'] as String) != null)
           e.data['invocationId'] as String,
-    ];
+      for (final call in heldCalls is List ? heldCalls : const [])
+        if (call is Map &&
+            call['invocationId'] is String &&
+            !known.contains(call['invocationId']) &&
+            ctx.tools.receiptFor(call['invocationId'] as String) != null)
+          call['invocationId'] as String,
+    }.toList();
   }
 
   // --- the stop -------------------------------------------------------------
@@ -444,7 +458,10 @@ class AgentResume {
     } else if (task.payload['step'] is Map) {
       await dispatch.completeStep(task);
     } else {
-      await model.advance(task);
+      // No step remains to fold. Acknowledging the unknown orphan is itself
+      // a checkpoint: clear the verification card and preserve budget progress
+      // even if advance immediately stops at an exhausted budget.
+      await model.advance(task.copy({'preview': null, 'stepFolded': true}));
     }
   }
 }

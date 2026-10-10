@@ -242,6 +242,29 @@ void main() {
   }
 
   group('a manual tool run', () {
+    test('a matching failed receipt requires a new card and no replay', () async {
+      final f = await LoopFixture.open();
+      final agent = f.agent();
+      final conversation = await f.repo.createConversation();
+      final task = await agent.startTool(
+        conversationId: conversation.id, toolId: 'write',
+      );
+      _receipt(f, task.payload['toolCall'] as Map, 'failed',
+        identityDigest: task.payload['toolIdentityDigest'] as String,
+        result: ToolCallResult(
+          status: ToolCallStatus.failed, summary: 'failed before effect',
+        ));
+      await agent.pause(task.id);
+      final next = await agent.resume(task.id);
+      expect(next.stage, 'tool');
+      expect(next.state, PersonalTaskState.waitingConfirmation);
+      expect((next.payload['toolCall'] as Map)['invocationId'],
+          isNot((task.payload['toolCall'] as Map)['invocationId']));
+      expect(f.callsOf('write'), 0);
+      expect(f.approvals(), isEmpty);
+    });
+
+
     test('with a successful receipt is taken over, not run again, and asks '
         'for no approval', () async {
       final f = await LoopFixture.open();
@@ -382,6 +405,86 @@ void main() {
   });
 
   group('a model task', () {
+
+    for (final receiptCase in ['identity mismatch', 'orphan running',
+        'orphan succeeded']) {
+      final orphan = receiptCase.startsWith('orphan');
+      final running = receiptCase == 'orphan running';
+      test('$receiptCase holds survive '
+          'repeated pause and resume', () async {
+        final (f, agent, task) = await _twoWrites();
+        final call = (task.payload['toolCalls'] as List).first as Map;
+        _receipt(f, {...call,
+          if (!orphan) 'identityDigest': List.filled(64, '0').join(),
+        }, running ? 'running' : 'succeeded',
+          result: running ? null : ToolCallResult(
+            status: ToolCallStatus.succeeded, summary: 'unverified result',
+          ));
+        await agent.cancel(task.id);
+        await _crash(f, task.id, 'interrupted');
+        if (orphan) {
+          await f.repo.database.write((db) => db.execute(
+            "UPDATE execution_records SET payload=json_remove(payload,"
+            "'\$.step') WHERE id=?", [task.id],
+          ));
+        }
+        final usage = BudgetUsage.fromPayload(task.payload).toPayload();
+        var held = await agent.resume(task.id);
+        for (var i = 0; i < 2; i++) {
+          expect(held.stage, 'resume');
+          expect(held.state, PersonalTaskState.waitingConfirmation);
+          expect(BudgetUsage.fromPayload(held.payload).toPayload(), usage);
+          expect(f.repo.taskEvents(held.id).first.data['adopted'], 0);
+          expect(f.repo.taskEvents(held.id).first.data['unknown'], 1);
+          if (!orphan) expect(held.payload['stepFolded'], false);
+          await agent.pause(held.id);
+          held = await agent.resume(held.id);
+        }
+        expect(held.stage, 'resume');
+        expect(held.state, PersonalTaskState.waitingConfirmation);
+        expect(BudgetUsage.fromPayload(held.payload).toPayload(), usage);
+        expect(f.repo.taskEvents(held.id).first.data['unknown'], 1);
+        expect(f.callsOf('w1'), 0);
+        expect(f.callsOf('w2'), 0);
+        expect(f.bodies, hasLength(1));
+        expect(f.approvals(), isEmpty);
+      });
+    }
+
+    test('acknowledged orphan at exhausted budget stays failed on resume',
+        () async {
+      final f = await LoopFixture.open();
+      f.replies.add(LoopReply.sse(sseCalls([('c1', 'write', '{}')],
+          prompt: 100, completion: 50)));
+      final agent = f.agent(maxRounds: 1);
+      final task = await f.run(agent, await f.start(agent, f.profile()));
+      _receipt(f, (task.payload['toolCalls'] as List).first as Map, 'running');
+      await agent.cancel(task.id);
+      await _crash(f, task.id, 'interrupted');
+      await f.repo.database.write((db) => db.execute(
+        "UPDATE execution_records SET payload=json_remove(payload,"
+        "'\$.step') WHERE id=?", [task.id],
+      ));
+      var next = await agent.resume(task.id);
+      expect(next.stage, 'resume');
+      await agent.confirm(next.id,
+          requestDigest: next.payload['requestDigest'] as String);
+      next = f.repo.task(next.id)!;
+      final usage = BudgetUsage.fromPayload(task.payload).toPayload();
+      expect(next.state, PersonalTaskState.failed);
+      expect(next.error, contains('轮次'));
+      expect(next.payload['preview'], isNull);
+      expect(next.payload['stepFolded'], true);
+      for (var i = 0; i < 2; i++) {
+        next = await agent.resume(next.id);
+        expect(next.state, PersonalTaskState.failed);
+        expect(next.error, contains('轮次'));
+        expect(BudgetUsage.fromPayload(next.payload).toPayload(), usage);
+      }
+      expect(f.callsOf('write'), 0);
+      expect(f.approvals(), isEmpty);
+      expect(f.bodies, hasLength(1));
+    });
 
     test('an unverified read receipt is held rather than adopted', () async {
       final f = await LoopFixture.open();
