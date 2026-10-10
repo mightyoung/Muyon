@@ -1,6 +1,6 @@
 # 任务派发索引
 
-**当前入口：先读 [状态快照 v1（2026-10-10）](CURRENT-STATUS-2026-10-10-v1.md)，再读 [HANDOVER-LEADER.md](HANDOVER-LEADER.md) 的现行阅读顺序。** 角色与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)。**当前是第二阶段**：范围见 [ADR-0003](../adr/0003-phase2-scope.md)，计划见[第二至第四阶段路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)（第一阶段已于 2026-10-07 退出）。
+**当前入口：先读 [下一批交付队列 v1（固定 develop 7773b7d，2026-10-10）](NEXT-DELIVERIES-2026-10-10-v1.md)，再读 [较早状态快照 v1](CURRENT-STATUS-2026-10-10-v1.md)（固定8deb，历史状态不可覆盖新队列）和 [HANDOVER-LEADER.md](HANDOVER-LEADER.md) 的现行阅读顺序。** 角色与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)。**当前是第二阶段**：范围见 [ADR-0003](../adr/0003-phase2-scope.md)，计划见[第二至第四阶段路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)（第一阶段已于 2026-10-07 退出）。
 
 ## 规则
 
@@ -91,8 +91,8 @@
 | [GROK-7](GROK-7.md) 科研场景交互走查清单（AIUI-7 前置） | `task/grok-7-research-walkthrough` | grokbot | GROK-6 | 已合入 `18ae5127474d6841ad331ca2251076ecca431a81`；独立复审通过，20 目的/首批 7/9 公式；勘误与门禁见[交接](INTEGRATION-2026-10-09.md) |
 | [AIUI-3](AIUI-3.md) 本地重算公式 | — | junior | AIUI-1 | F3a `4943c6bb` 纯计算已复审、组合CI通过并集成；运行接线另片 |
 | [AIUI-4](AIUI-4.md) 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | F4a/F4b `14006838` 复审、200%补验及组合CI通过，已集成；F4c新目录联调后置 |
-| [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | F5a `f0203bf` 草案已复审、组合CI通过并归档；PR19 六项接口获父任务技术采纳，F5b/F5c 进行中、未集成，见[快照](CURRENT-STATUS-2026-10-10-v1.md) |
-| [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-inquiry-record-tools` | Codex | AIUI-1 之后、REG-4b 合入 | 说明已就绪，排队 |
+| [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | F5a `f0203bf` 草案已复审、组合CI通过并归档；PR19 技术采纳记录和PR26协商门槛已合；F5b/F5c完整接线仍在途，见[新队列](NEXT-DELIVERIES-2026-10-10-v1.md) |
+| [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-inquiry-record-tools` | Codex | AIUI-1 之后、REG-4b 合入 | 已启动（父任务另派云端专有任务）；交付/验收待核，不重复派发 |
 | AIUI-6 询价场景（比价、预算小工具、导入审阅工作区） | — | Codex | AIUI-3、4、5 | 待派 |
 | AIUI-7 科研场景 | — | junior / engineer | AIUI-4、5 | 待派 |
 | AIUI-8 设置与控制（可视化三档、助手权限页、数据去向） | — | engineer | AIUI-4 | 待派 |
@@ -122,13 +122,17 @@ Claude/B1复审和[固定源全套CI](https://github.com/mightyoung/Muyon/action
 | 任务 | 固定源 | 状态 |
 | --- | --- | --- |
 | [Dream consistency](HARNESS-DREAM-CONSISTENCY.md) / PR15 | `4d86c3433c09142ab4fc5d3bdfab491d769f759a` | 已合cf672；[追补独立复审](HARNESS-DREAM-CONSISTENCY-review.md)无确定阻断，组合CI38019908442成功 |
-| [Resume identity](HARNESS-RESUME-IDENTITY.md) / PR16 | `147ad71378af7ae7206b1e2c6ca2d76f98fc0639` | 已合38f2040，组合CI38020976416/发布38021050451成功；但合后机器人manual hold身份P1未裁定，整体审查暂停；原作者独立修复任务进行中，见[复审更新](HARNESS-RESUME-IDENTITY-review.md) |
+| [Resume identity](HARNESS-RESUME-IDENTITY.md) / PR16 | `147ad71378af7ae7206b1e2c6ca2d76f98fc0639` | 已合38f2040，组合CI38020976416/发布38021050451成功；合后曾出现manual hold身份P1、审查暂停；PR20已修复并合入，剩余专项验证见[新队列](NEXT-DELIVERIES-2026-10-10-v1.md)，旧[复审更新](HARNESS-RESUME-IDENTITY-review.md)保留历史 |
 
 实际合入账号/时间、PR14发布CI取消与后续成功区分见[交接](INTEGRATION-2026-10-09.md)。
 LAN未决与AIUI未来夹具/契约待验另行处理，不自动采纳或合入。
 
 ## 本轮质量收口（2026-10-10）
 
-[版本化状态与质量清单](CURRENT-STATUS-2026-10-10-v1.md)登记四包推荐 lint 补齐（独立分支进行中）、coverage 基线门禁（框架分支进行中，真实测量待核）、Mac golden 固定版本复验（待本机取证）、性能测量后决策（待测量）。CI 绿不代表 PR16 manual hold P1 已关闭；PR18 仍为有效 RED，禁止合入。父任务统一 review，唯一 integrator 顺序合 develop。
+[较早版本化状态与质量清单](CURRENT-STATUS-2026-10-10-v1.md)保留8deb时点记录；当前lint/coverage组合仍待收口，PR25 Mac三例诊断和PR20 manual hold修复已合，后续专项/golden/性能仍待验，详见[新队列](NEXT-DELIVERIES-2026-10-10-v1.md)。PR18仍为有效RED，禁止整包合入。父任务统一 review，唯一 integrator 顺序合 develop。
 
 用户本轮“制定修复任务并并行开始执行修复”的可定位执行计划：[QUALITY-REPAIR-PLAN-2026-10-10-v1.md](QUALITY-REPAIR-PLAN-2026-10-10-v1.md)。
+
+## 新需求设计任务（2026-10-10）
+
+[输入预测胶囊 UX-PREDICT-1](UX-PREDICT-1.md)与[对话视频 UX-VIDEO-1](UX-VIDEO-1.md)：用户已确认需求、设计待审，尚未启动实现。完整owner/依赖/验收及REG-3b/REG-5/T-3/AIUI-6～9顺序见[版本化交付队列](NEXT-DELIVERIES-2026-10-10-v1.md)；派发不算完成。总体设计同步注明已合基础片、在途接线与未选吉祥物资产，保留旧版本。
