@@ -1,4 +1,5 @@
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:research_module/research_module.dart';
 
 import '../../workspace/workspace_repository.dart';
 
@@ -50,6 +51,16 @@ class ResearchSourceRead {
     }
   }
 
+  void requirePinned(ObjectRef ref) {
+    requireCurrent();
+    final current = source;
+    if (!_inScope(ref) || current is! ResearchDocumentSearchSource) {
+      throw StateError('Registered research source cannot verify a pin');
+    }
+    current.requirePinned(ref);
+    requireCurrent();
+  }
+
   Future<T> _await<T>(Future<T> Function() operation) async {
     requireCurrent();
     final future = operation();
@@ -88,5 +99,26 @@ class ResearchSourceRead {
       throw StateError('Registered source returned a different identity');
     }
     return view;
+  }
+}
+
+/// Public knowledge invalidation has no workspace grant to broaden. This only
+/// asks the registered owning source to revalidate its already-pinned document,
+/// and refuses publication when the module's lifecycle changes during I/O.
+Future<bool> confirmRegisteredResearchDocument(ObjectRef ref, {
+  required List<SearchSource> Function() sources,
+  required String? Function() authorityRevision,
+}) async {
+  final authority = authorityRevision();
+  final declared = sources().where((source) => source.id == 'research.documents').toList();
+  if (authority == null || declared.length != 1 ||
+      declared.single is! ResearchDocumentSearchSource) return false;
+  final source = declared.single;
+  try {
+    final view = await source.confirm(ref);
+    return view?.ref == ref && authorityRevision() == authority &&
+        sources().any((candidate) => identical(candidate, source));
+  } on StateError {
+    return false;
   }
 }

@@ -88,6 +88,44 @@ class ResearchDocumentSearchSource implements SearchSource {
     }
   }
 
+  /// Synchronous module-owned proof for a host transaction's final effect
+  /// check. It uses the same current-version/path/byte identity as confirm;
+  /// there is no await between this check and the host's ready commit.
+  void requirePinned(ObjectRef ref) {
+    final runtime = _runtime();
+    final project = ref.nativeProjectId;
+    if (ref.moduleId != 'research' || ref.objectType != 'document' ||
+        project == null || ref.revisionRef != null || ref.contentDigest == null) {
+      throw StateError('Unsupported research source pin');
+    }
+    final document = _document(runtime, project, ref.objectId);
+    if (document == null) throw StateError('Research document version changed');
+    try {
+      final path = _path(runtime, document);
+      final bytes = BytesBuilder(copy: false);
+      final handle = File(path).openSync();
+      try {
+        while (true) {
+          final chunk = handle.readSync(64 * 1024);
+          if (chunk.isEmpty) break;
+          if (bytes.length + chunk.length > maxFileBytes) {
+            throw StateError('Research source file budget exceeded');
+          }
+          bytes.add(chunk);
+        }
+      } finally { handle.closeSync(); }
+      _current(runtime);
+      final latest = _document(runtime, project, ref.objectId);
+      if (latest == null || _path(runtime, latest) != path ||
+          sha256.convert(bytes.takeBytes()).toString() != ref.contentDigest) {
+        throw StateError('Research source pin changed');
+      }
+      _current(runtime);
+    } on FileSystemException {
+      throw StateError('Research source file unavailable');
+    }
+  }
+
   @override
   Future<List<IndexableItem>> list(IndexScope scope) async {
     final runtime = _runtime();

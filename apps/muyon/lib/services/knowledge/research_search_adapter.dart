@@ -196,13 +196,21 @@ class ResearchSearchAdapter extends SearchService {
       await knowledge.delete(entry.id, checkBeforeEffect: read.requireCurrent);
       entry = null;
     }
-    entry ??= await knowledge.importFile(item.filePath!, source: item.ref,
-      expectedDigest: item.contentDigest, checkBeforeEffect: read.requireCurrent);
-    read.requireCurrent();
-    if (await read.confirm(item.ref) == null) throw StateError('Source changed during import');
-    await knowledge.index(entry.id, checkBeforeEffect: read.requireCurrent);
-    if (await read.confirm(item.ref) == null) throw StateError('Source changed during indexing');
-    read.requireCurrent();
+    try {
+      entry ??= await knowledge.importFile(item.filePath!, source: item.ref,
+        expectedDigest: item.contentDigest,
+        checkBeforeEffect: () => read.requirePinned(item.ref));
+      if (await read.confirm(item.ref) == null) throw StateError('Source changed during import');
+      await knowledge.index(entry.id,
+        checkBeforeEffect: () => read.requirePinned(item.ref));
+      if (await read.confirm(item.ref) == null) throw StateError('Source changed during indexing');
+      read.requirePinned(item.ref);
+    } catch (_) {
+      // Compensating cleanup targets only the pinned host cache entry. It must
+      // still run after withdrawal; retained source taint is never cleared.
+      if (entry != null) await knowledge.delete(entry.id);
+      rethrow;
+    }
   }
 
   Future<SearchResult> _searchRegistered(WorkspaceBinding binding, String question,

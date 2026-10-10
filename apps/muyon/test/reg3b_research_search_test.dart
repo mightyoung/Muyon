@@ -5,6 +5,8 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/services/knowledge/registered_research_source.dart';
+import 'package:muyon/services/knowledge/knowledge_service.dart';
+import 'package:muyon/services/documents/document_parser.dart';
 import 'package:muyon/services/knowledge/research_search_adapter.dart';
 import 'package:muyon/workspace/import_coordinator.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
@@ -50,15 +52,21 @@ class _Fixture {
 
 /// Retains the real in-flight source future so tests can release and join it
 /// after cancellation, without timers or leaving I/O behind at fixture close.
-class _HeldSource implements SearchSource {
-  _HeldSource(this.delegate);
-  final SearchSource delegate;
+class _HeldSource extends ResearchDocumentSearchSource {
+  _HeldSource({required super.currentRuntime, required super.readBytes});
   Future<List<IndexableItem>>? pending;
-  @override String get id => delegate.id;
-  @override Set<String> get objectTypes => delegate.objectTypes;
   @override Future<List<IndexableItem>> list(IndexScope scope) =>
-      pending = delegate.list(scope);
-  @override Future<ObjectView?> confirm(ObjectRef ref) => delegate.confirm(ref);
+      pending = super.list(scope);
+}
+
+class _PausedParser extends DocumentParser {
+  final entered = Completer<void>(), release = Completer<void>();
+  @override Future<ParsedDocument> parse(ResearchDocument document) async {
+    final parsed = await super.parse(document);
+    entered.complete();
+    await release.future;
+    return parsed;
+  }
 }
 
 void main() {
@@ -168,13 +176,13 @@ void main() {
   test('cancel returns before blocked read ends and prevents indexing effects', () async {
     final f = await _Fixture.open();
     final entered = Completer<void>(), release = Completer<void>();
-    final source = _HeldSource(ResearchDocumentSearchSource(currentRuntime: () => f.host.research,
+    final source = _HeldSource(currentRuntime: () => f.host.research,
       readBytes: (path) async {
         final bytes = File(path).readAsBytesSync();
         if (!entered.isCompleted) entered.complete();
         await release.future;
         return bytes;
-      }));
+      });
     try {
       final adapter = f.adapter(sources: () => [source]);
       final doc = adapter.documents(f.binding).first;
@@ -197,13 +205,13 @@ void main() {
   test('module revoke during source I/O rejects proof before knowledge writes', () async {
     final f = await _Fixture.open();
     final entered = Completer<void>(), release = Completer<void>();
-    final source = _HeldSource(ResearchDocumentSearchSource(currentRuntime: () => f.host.research,
+    final source = _HeldSource(currentRuntime: () => f.host.research,
       readBytes: (path) async {
         final bytes = File(path).readAsBytesSync();
         if (!entered.isCompleted) entered.complete();
         await release.future;
         return bytes;
-      }));
+      });
     try {
       final adapter = f.adapter(sources: () => [source]);
       final pending = adapter.index(f.binding, adapter.documents(f.binding).first);
@@ -222,13 +230,13 @@ void main() {
   test('workspace rebind during source I/O invalidates otherwise active module read', () async {
     final f = await _Fixture.open();
     final entered = Completer<void>(), release = Completer<void>();
-    final source = _HeldSource(ResearchDocumentSearchSource(currentRuntime: () => f.host.research,
+    final source = _HeldSource(currentRuntime: () => f.host.research,
       readBytes: (path) async {
         final bytes = File(path).readAsBytesSync();
         if (!entered.isCompleted) entered.complete();
         await release.future;
         return bytes;
-      }));
+      });
     try {
       final read = f.consumer(sources: () => [source]).begin(f.binding);
       final pending = read.list();
@@ -293,4 +301,49 @@ void main() {
         moduleId: 'research', nativeProjectId: 'B')), throwsStateError);
     } finally { await f.close(); }
   });
+  for (final legacyConfirmation in [false, true]) {
+    test('current-version change during parse cannot publish old evidence (legacy hook $legacyConfirmation)', () async {
+      final f = await _Fixture.open();
+      final parser = _PausedParser();
+      try {
+        final original = f.adapter().documents(f.binding).first;
+        await f.adapter().index(f.binding, original);
+        final oldRef = f.host.services.knowledge.documents().single.source;
+        expect(await f.host.services.knowledge.allowModelContent(oldRef), isTrue);
+        expect(await f.host.services.knowledge.search('Evidence'), hasLength(1));
+        final controlled = KnowledgeService(f.host.services.knowledge.database,
+          f.host.services.knowledge.rootPath, parser: parser,
+          authorizationFacts: f.host.services.knowledge.authorizationFacts);
+        // The legacy fixture isolates the transaction's independent synchronous
+        // source proof; production uses the real registered confirmation hook.
+        controlled.confirmSource = legacyConfirmation
+            ? (_) async => true : f.host.services.knowledge.confirmSource;
+        final adapter = ResearchSearchAdapter.registered(controlled, f.host.workspaces,
+          f.host.research!.store, sources: f.sources, authorityRevision: f.authority);
+        final pending = adapter.index(f.binding, original);
+        final rejected = expectLater(pending, throwsStateError);
+        await parser.entered.future;
+        final store = f.host.research!.store;
+        final next = File('${store.rootPath}/next.md')..writeAsStringSync('fresh replacement Evidence');
+        await store.write(() => store.db.execute(
+          'INSERT INTO documents(id,project_id,relative_path,snapshot_path) VALUES(?,?,?,?)',
+          ['next', 'A', original.relativePath, store.storedPath(next.path)]));
+        expect(File(original.absolutePath).existsSync(), isTrue);
+        parser.release.complete();
+        await rejected;
+        expect(f.host.services.knowledge.documents(), isEmpty);
+        expect(f.host.services.knowledge.database.raw.select(
+          "SELECT * FROM index_documents WHERE state='ready'"), isEmpty);
+        expect(await f.host.services.knowledge.search('Evidence'), isEmpty);
+        expect(await f.host.services.knowledge.allowModelContent(oldRef), isFalse);
+        final current = f.adapter().documents(f.binding).firstWhere((doc) => doc.id == 'next');
+        await f.adapter().index(f.binding, current);
+        expect(await f.host.services.knowledge.search('fresh'), hasLength(1));
+      } finally {
+        if (!parser.release.isCompleted) parser.release.complete();
+        await f.close();
+      }
+    });
+  }
+
 }
