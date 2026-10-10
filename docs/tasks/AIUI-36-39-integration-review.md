@@ -10,7 +10,8 @@
 | --- | --- | --- |
 | PR36 AIUI-8 | `aef127ff501e7c0d141152bec69aa4e9f3719828` | [38048233373](https://github.com/mightyoung/Muyon/actions/runs/38048233373) / [38048244033](https://github.com/mightyoung/Muyon/actions/runs/38048244033) SUCCESS |
 | PR38 原F4c片 | `5f6e291e3bf36a436c45a02afde983d77df7b92c` | [38049637152](https://github.com/mightyoung/Muyon/actions/runs/38049637152) / [38049639051](https://github.com/mightyoung/Muyon/actions/runs/38049639051) SUCCESS，仅旧head证据 |
-| PR38 对象准入修复 | `aaa175343eee08a4e53576b621bef2c17c16c06a` | [38052426475](https://github.com/mightyoung/Muyon/actions/runs/38052426475) / [38052429669](https://github.com/mightyoung/Muyon/actions/runs/38052429669) 待终态，旧fixture冲突待确认 |
+| PR38 对象准入修复 | `aaa175343eee08a4e53576b621bef2c17c16c06a` | [38052426475](https://github.com/mightyoung/Muyon/actions/runs/38052426475) / [38052429669](https://github.com/mightyoung/Muyon/actions/runs/38052429669) FAILURE：宿主1549/3skip/9fail及两项自有lint，仅旧head证据 |
+| PR38 获准夹具最终源 | `53aacb95e598d0e406f66082d8d6386fc7b8cecc` | [38054244081](https://github.com/mightyoung/Muyon/actions/runs/38054244081) / [38054246068](https://github.com/mightyoung/Muyon/actions/runs/38054246068) 新运行待终态 |
 | PR39 设置组合 | `76400fe0b640d89ec8bf72123a58b5040b63ee63` | [38049686964](https://github.com/mightyoung/Muyon/actions/runs/38049686964) / [38049689477](https://github.com/mightyoung/Muyon/actions/runs/38049689477) SUCCESS |
 | PR37 AIUI-9 | `055a8cbd1e82a63ef632abb013bfc9b2f180172d` | [38049438912](https://github.com/mightyoung/Muyon/actions/runs/38049438912) / [38049441446](https://github.com/mightyoung/Muyon/actions/runs/38049441446) SUCCESS |
 
@@ -19,7 +20,8 @@
 `bbea3112cb74b5203e3402e1a881f18492f9650f` 与固定PR37；前者父为基线与固定PR39。
 四源均为精确祖先，所有交付blob逐项相同，基线coverage审查文档保留；无冲突或cherry-pick。
 相对基线仅8个宿主生产文件、4个新增测试、3个任务说明；集成者另补设计与交接摘要。
-旧测试、组件/API/codec/validator、CI/scripts、baseline、依赖或权限没有修改。
+此原组合未修改旧测试、组件/API/codec/validator、CI/scripts、baseline、依赖或权限；
+其后的旧九项迁移只按下述用户批准例外修改，其他保护项仍不变。
 原组合文档head `cec2a66faa80f8fcd3753987d3dca5eea5e6cade` 的
 [38051505714](https://github.com/mightyoung/Muyon/actions/runs/38051505714) 实际SUCCESS，
 job 12:19:02–12:34:57 UTC；八库分析/测试通过、host1575/3skip。它含已确认的准入缺口，
@@ -28,6 +30,18 @@ host16680/19320；19未加载仍unknown，baseline不变。新修复不能沿用
 随后仅增量普通merge PR38修复到临时候选 `2efef5f85fdf46498469a95f9ca50b37795f5c1c`，
 父为摘要提交 `3be13e02258da1a50f72f1906acda9ae013ebb98` 与固定aaa175源；
 不重复整包合PR36/38/39，全部既有来源祖先保留，develop尚未推进。
+其摘要head `ca4378a7dbd9aad2c54a3ef5e6ab44bbd46e0d2f` 的
+[38052721032](https://github.com/mightyoung/Muyon/actions/runs/38052721032) 真实FAILURE，
+job 12:38:54–12:55:20 UTC；host1572/3skip/9fail，两项自有lint，其余七库分析/测试通过。
+源 `3d3813d04529ba454e87e875f81df9d718256262` 修自有lint并扩到20自有case；
+该源两运行因获准迁移新push正常取消，不作PASS。
+用户经父任务明确批准旧三文件九例范围，排除2380及门禁，不将Research-origin迁Inquiry
+用作科研验收。公开v2提案 `b20e2d1fb208d7623b79a961555cabc0c504fa67`，
+补丁SHA256 `771b641c70d0fe85f4c79fd1213ab3d1f6a84557483589d1b775c8b3ebb86540`，
+先经独立字节/范围核对再应用；最终源53aacb95增量4files121+/82-，仅旧九例+新helper，
+生产、自有20、2380、artifact与gate零diff，完整原行为断言保留。
+普通增量merge最终源至代码组合 `06b1fc6258fc9123d44737831faec50805af2d87`，
+父为ca437摘要与53aac最终源；新组合及发布CI未终态前不推进develop。
 
 ## 跨组件与安全核实
 
@@ -60,10 +74,12 @@ host16680/19320；19未加载仍unknown，baseline不变。新修复不能沿用
 真实询价lease返回至外围await恢复间，现有revokeCapability使module runtime失效，
 却不改变task scope或snapshot，旧最终检查仍可能push旧页面；DB末窗口也会按旧R8显示R9。
 原owner已交aaa175，双非作者精确静态复审认为这两对象窗口机制已关闭，未见新增确定生产阻断。
-16项本片行为测试委托真实Inquiry schema/SQLite/resolver与实际lease，含四项撤权/DB屏障、
+20项自有本片行为测试委托真实Inquiry schema/SQLite/resolver与实际lease，含四项撤权/DB屏障、
 两项unsupported拒绝，原typed/selection/anchor/重开与CAS失败零激活断言保留。
-这是静态结论，尚不准合：旧3文件9项正向fixture缺proof或pin，迁移范围待用户确认，
-未经确认未修改；已请求只迁真实Inquiry/fullpin并保留全部行为断言，不能跳过或降低门禁。
+旧3文件9项正向fixture缺proof或pin；用户已明确批准精确迁移，53aac最终源使用真实
+Inquiry/fullpin/实际lease与页面，保留返回、草稿、scroll、revision、anchor和释放次数断言。
+三旧文件输出及helper与获准v2逐字节一致，非作者精确源静态复审；完整新CI仍须通过，
+不能跳过或降低门禁，Research-origin例不可称科研页面正向验收。
 整来源stamp为保守变化证明，不独自证明精确对象/字段权限；真实pinnedresolve必须保留，
 初始化前变化依它核对。不能以固定snapshot或该修复宣称完整H3。其余33组件契约未见新增确定回归。
 范围交叉核实：本批新增集合入口只有fact对象，collection cell不准入sourceSpan；

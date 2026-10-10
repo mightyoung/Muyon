@@ -9,8 +9,8 @@
 基于 develop `c265eb13564ce8b485297fbdd3f1ddb351256e0d`，本批实现设置中的只读
 助手授权/审计控制页及既有数据去向入口、固定snapshot的typed/collection引用导航与
 scope/lease/CAS行为测试，以及读取真实询价保存快照的只读本体卡适配器。
-对象导航末窗口修复aaa175已通过双非作者静态机制复审；旧3文件9项fixture迁移待范围
-确认及新完整CI，当前候选仍未合入develop，不能据旧组合绿色宣称本批集成完成。
+对象导航末窗口修复aaa175已通过双非作者静态机制复审；旧3文件9项fixture迁移已获用户明确范围
+批准并冻结53aacb95，待新完整CI，当前候选仍未合入develop，不能据旧组合绿色宣称本批集成完成。
 详细边界见[AI原生方案当前实现切片](../../design/ai-native-ui-redesign-2026-10-09.md)
 和[固定源/组合/审查交接](../../tasks/AIUI-36-39-integration-review.md)。
 
