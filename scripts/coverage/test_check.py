@@ -14,7 +14,7 @@ class CoverageContract(unittest.TestCase):
         return dict(measurement_version=1, measurement_sha256='fixed', platform='linux',
                     flutter_version='3.47.5', suites=['a'], exclusions=[],
                     gates={'critical/': dict(source_files=['critical/a.dart'],
-                          loaded_denominator={'critical/a.dart': [1, 3]},
+                          loaded_denominator={'critical/a.dart': {'line_count': 2, 'line_set_sha256': 'before'}},
                           loaded_executable_lines=2, hit_lines=2)})
 
     def test_missing_report_fails(self):
@@ -53,7 +53,7 @@ class CoverageContract(unittest.TestCase):
     def test_line_identity_drift_even_at_equal_count_fails(self):
         baseline = self.contract()
         actual = copy.deepcopy(baseline)
-        actual['gates']['critical/']['loaded_denominator']['critical/a.dart'] = [1, 4]
+        actual['gates']['critical/']['loaded_denominator']['critical/a.dart']['line_set_sha256'] = 'after'
         self.assertTrue(any('drift' in e for e in checker.compare(actual, baseline)))
 
     def test_unloaded_source_added_fails(self):
