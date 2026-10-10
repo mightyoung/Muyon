@@ -177,7 +177,9 @@ class UiPlanningHarness {
               current = fallback('current_authority_changed', value.request);
             }
           }
-          if (mode == selectedMode) {
+          if (mode == selectedMode &&
+              identical(identity, presentationIdentity?.call(taskId)) &&
+              (allowsPresentation?.call(taskId) ?? true)) {
             _latest[task.id] = current;
             repository.refresh();
           }
@@ -300,10 +302,12 @@ class UiPlanningHarness {
       return UiPlannedPresentation(result, request, checked.validatedPlan,
         stream: provider is StreamMotivationUiPlanningProvider ? provider.progressFor(request) : null);
     } on TimeoutException {
-      _streamProgress.remove(task.id); repository.refresh();
+      if (identical(_streamProgress[task.id]?.request, request)) _streamProgress.remove(task.id);
+      repository.refresh();
       return fallback('planner_timeout', request);
     } catch (_) {
-      _streamProgress.remove(task.id); repository.refresh();
+      if (identical(_streamProgress[task.id]?.request, request)) _streamProgress.remove(task.id);
+      repository.refresh();
       return fallback('planner_unavailable', request);
     }
   }

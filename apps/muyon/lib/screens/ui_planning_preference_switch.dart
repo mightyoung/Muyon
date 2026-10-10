@@ -15,12 +15,18 @@ class UiPlanningPreferenceSwitch extends StatefulWidget {
 
 class _UiPlanningPreferenceSwitchState extends State<UiPlanningPreferenceSwitch> {
   bool saving = false, failed = false;
+  int fieldGeneration = 0;
   Future<void> save(UiPresentationMode? value) async {
     if (saving || value == null) return;
     final agent = widget.agent;
     setState(() { saving = true; failed = false; });
     try { await agent.savePresentationMode(value); }
-    catch (_) { if (mounted && identical(widget.agent, agent)) setState(() => failed = true); }
+    catch (_) { if (mounted && identical(widget.agent, agent)) setState(() {
+      failed = true;
+      // FormField changes its own value before async persistence. Recreate it
+      // from the committed host mode on failure, never the tentative choice.
+      fieldGeneration++;
+    }); }
     finally { if (mounted && identical(widget.agent, agent)) setState(() => saving = false); }
   }
   @override
@@ -33,7 +39,7 @@ class _UiPlanningPreferenceSwitchState extends State<UiPlanningPreferenceSwitch>
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       DropdownButtonFormField<UiPresentationMode>(
-        key: ValueKey(widget.agent.presentationMode),
+        key: ValueKey('${widget.agent.presentationMode.name}:$fieldGeneration'),
         initialValue: widget.agent.presentationMode,
         decoration: InputDecoration(labelText: widget.title),
         items: [for (final mode in UiPresentationMode.values)

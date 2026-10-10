@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -121,5 +122,34 @@ void main() {
       await expectLater(source.read(task), throwsStateError);
       expect(f.host.tools.history(), isEmpty);
     } finally { await f.close(); }
+  });
+  test('old explicit terminal result cannot replace a newer same-mode request', () async {
+    final f = await LoopFixture.open();
+    final preference = UiPresentationPreference(f.repo);
+    await preference.save(UiPresentationMode.few);
+    final firstEntered = Completer<void>(), releaseFirst = Completer<void>();
+    var calls = 0;
+    final provider = StreamMotivationUiPlanningProvider((_, __, receive) async {
+      if (++calls == 1) { firstEntered.complete(); await releaseFirst.future; }
+      receive(validStream);
+    });
+    final agent = PersonalAgent(repository: f.repo,
+      gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger), tools: f.tools,
+      presentationPreference: preference, uiPlanningSource: (_) async => state(f),
+      uiPlanningMode: UiPlanningMode.motivation,
+      uiPlanningProviders: {UiPlanningMode.motivation: provider});
+    addTearDown(agent.close);
+    final conversation = await f.repo.createConversation();
+    final task = await agent.start(conversationId: conversation.id, prompt: '无模型配置');
+    final old = agent.planUiFromUserControl(task.id);
+    await firstEntered.future;
+    final fresh = await agent.planUiFromUserControl(task.id);
+    expect(fresh.validated, isNotNull);
+    expect(agent.uiPresentation(task.id), same(fresh));
+    releaseFirst.complete();
+    expect((await old).validated, isNull);
+    expect(agent.uiPresentation(task.id), same(fresh));
+    expect(f.bodies, isEmpty);
+    expect(f.callsOf('write'), 0);
   });
 }

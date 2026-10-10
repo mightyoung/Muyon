@@ -537,6 +537,10 @@ class _AssistantPageState extends State<AssistantPage> {
         : widget.repo.tasks(conversationId: _conversationId);
     final taskCards = [
       ...tasks.where((task) => task.payload['uiPlanningInternal'] != true).take(8),
+      // Optional content policy never hides the separate mandatory approval
+      // for the real planning model request. Terminal internal replies remain
+      // hidden, and pending internal tasks expose only their approval/cancel.
+      ...tasks.where((task) => task.payload['uiPlanningInternal'] == true && !task.terminal),
       if (!_child)
         for (final task in tasks.skip(8))
           if (_children.children(task.id).isNotEmpty) task,
@@ -689,13 +693,14 @@ class _AssistantPageState extends State<AssistantPage> {
                     ),
                   for (final task in taskCards)
                     Card(
+                      key: ValueKey('assistant-task-${task.id}'),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${_stateLabel(task.state)} · ${task.executionDeviceId}',
+                              '${task.payload['uiPlanningInternal'] == true ? '界面规划模型请求 · ' : ''}${_stateLabel(task.state)} · ${task.executionDeviceId}',
                             ),
                             if (task.waitReason != null) Text(task.waitReason!),
                             if (task.error != null) Text(task.error!),
@@ -703,19 +708,19 @@ class _AssistantPageState extends State<AssistantPage> {
                               const SizedBox(height: 8),
                               DraftView(draft: _drafts[task.id]!),
                             ],
-                            if (!_child) UiStreamTaskView(agent: widget.agent, taskId: task.id, host: widget.host),
-                            if (!_child) _subconversationEntries(task),
+                            if (!_child && task.payload['uiPlanningInternal'] != true) UiStreamTaskView(agent: widget.agent, taskId: task.id, host: widget.host),
+                            if (!_child && task.payload['uiPlanningInternal'] != true) _subconversationEntries(task),
                             Wrap(
                               spacing: 8,
                               children: [
-                                if (!_child)
+                                if (!_child && task.payload['uiPlanningInternal'] != true)
                                   TextButton(
                                     onPressed: _openingChild
                                         ? null
                                         : () => _openChild(task),
                                     child: const Text('子对话'),
                                   ),
-                                if (!_child &&
+                                if (!_child && task.payload['uiPlanningInternal'] != true &&
                                     task.state == PersonalTaskState.succeeded)
                                   TextButton(
                                     onPressed: () async {
@@ -724,7 +729,7 @@ class _AssistantPageState extends State<AssistantPage> {
                                     },
                                     child: const Text('规划此回答'),
                                   ),
-                                if (!_child &&
+                                if (!_child && task.payload['uiPlanningInternal'] != true &&
                                     widget.agent.uiPlanningEnabled &&
                                     widget.agent
                                             .uiPresentation(task.id)
@@ -749,10 +754,10 @@ class _AssistantPageState extends State<AssistantPage> {
                                     )),
                                     child: const Text('打开交互页面'),
                                   ),
-                                for (final surface in HostUiWorkspaceStore(
+                                for (final surface in (task.payload['uiPlanningInternal'] == true ? <String>[] : HostUiWorkspaceStore(
                                   widget.repo,
                                   taskId: task.id,
-                                ).surfaces())
+                                ).surfaces()))
                                   TextButton(
                                     onPressed: () => _openWorkspace(DynamicWorkspace(
                                           repository: widget.repo,
@@ -787,7 +792,7 @@ class _AssistantPageState extends State<AssistantPage> {
                                         .catchError(_error),
                                     child: const Text('取消'),
                                   ),
-                                if ([
+                                if (task.payload['uiPlanningInternal'] != true && [
                                   PersonalTaskState.paused,
                                   PersonalTaskState.interrupted,
                                   PersonalTaskState.failed,

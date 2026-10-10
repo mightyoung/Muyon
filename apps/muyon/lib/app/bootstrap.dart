@@ -469,4 +469,3 @@ class MuyonHost {
     await storage.close();
   }
 }
-

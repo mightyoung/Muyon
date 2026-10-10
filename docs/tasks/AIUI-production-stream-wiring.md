@@ -28,7 +28,8 @@ Android integration_test 验收 1–4 与 7、每种延迟至少五样本、真�
 
 ## 验证与交接
 
-新增注册 37 个测试：stream 7、外部确认 5、真实宿主设置 2、三档 helper 23。
+新增注册 45 个测试：stream 8、外部确认 5、真实宿主设置 2、三档 helper 23、
+三档必需审批/拒绝真实入口 6、持久失败界面回滚及重试 1。
 包括真实受授权 loopback gateway deltas、Managed SQLite 重开、真实域写操作的一次审批正例、
 未知/迟到污染/拒绝无写负例，以及 helper 的保存失败、关闭、ABA 与跨 owner 身份拒绝。
 不改已有保护测试、组件契约、覆盖基线或 CI 门禁。
@@ -36,3 +37,5 @@ Android integration_test 验收 1–4 与 7、每种延迟至少五样本、真�
 云端无 Flutter/Dart，实际命令返回 127；本地无动态通过结论。
 源码正常提交后由 Actions 跑完整八套分析和测试、Laya 与覆盖门禁，
 并由非作者按完整冻结 SHA 审查。正式 CI、独审、组合结果由 leader 记录，不能沿用旧分支绿灯。
+完整外部标记验收仍需补：阻塞与失败持久、恢复后旧 capture/replay、
+可匹配持久 grant 的 used 拒消费。当前 5 个外部路径测试不替代这些后续验证。
