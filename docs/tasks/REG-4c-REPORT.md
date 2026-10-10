@@ -47,3 +47,83 @@ quotation 仅开放 quoted_on、lead_time_days、warranty_months、valid_until�
 原测试保留：注册目录在原冻结目录外精确增加 4 项并继续比较全部原工具；hosted 旧权限测试收紧为整个控件不存在；standalone 测试不放宽。Linux inquiry 现有 Mac 字体截图跳过按备忘录记录，不能据此宣称 Mac 截图、真机或真实模型验证通过。原始 RED/候选日志只在 `/tmp/reg4c-evidence` 和 Actions artifact，不入仓库。
 
 文件所有权：只涉及询价域、专属适配器/桥接/注册、hosted Folio 入口、专属测试/验证脚本/工作流及本回报；没有修改 F5b 的 shared UI state/surface/module_api 新目录。未修改 main、合 develop、强推、删分支或部署。
+
+## 共享工具目录阻塞：提交给唯一 integrator 的定位
+
+运行源码 head：`01cebb90ff0b4372f65db55f098c68ba9d4f55fc`。该 head 的 [push CI](https://github.com/mightyoung/Muyon/actions/runs/38030502715) 和 [PR CI](https://github.com/mightyoung/Muyon/actions/runs/38030505531) 均已到 failure 终态：analyze 8/8 通过，测试套件 7/8 通过；host `+1505 ~3 -1`、inquiry `+289 ~47`，北极星夹具 `passed=true`。唯一失败为下面的原宿主测试；未删除或放宽任何断言。
+
+失败测试：[assistant_production_model_protocol_test.dart](../../apps/muyon/test/assistant_production_model_protocol_test.dart#L131)，完整名称 `actual host same-endpoint summary uses model mode_auto and preserves taint`，失败断言在第 163–165 行：期望 `PersonalTaskState.succeeded`，实际 `failed`，错误 `context_too_large`。
+
+| 源码候选 | 压缩前估算 token | 压缩后估算 token | 结果 |
+| --- | ---: | ---: | --- |
+| `499e1f5` | 15,860 | 14,102 | 超过原门禁 |
+| `0586002`（去字段重复说明） | 14,021 | 12,263 | 超过原门禁 |
+| `01cebb9`（长度约束移至同效 preflight、精简工具说明） | 13,412 | 11,654 | 超过原门禁 |
+
+原夹具能力为 `contextTokens=12000`、`maxOutputTokens=512`；原 `ContextCompactor.hardRatio=0.95`，所以硬门禁是 `floor(12000 × 0.95) − 512 = 10888`。这是原有预算规则，不是本任务新设的阈值。最新超限量为 766 token。日志中的 `tokenSource=estimated`、`strategy=B`、`upTo=4`、`overCount=1`；上表为实际日志摘要，原始日志不入仓库。
+
+关键路径：
+
+1. [agent_task_factory.dart](../../apps/muyon/lib/assistant/agent_task_factory.dart#L42) 的 `chatTask` 构建 available 列表，过滤停用、只读、modelSelectable 和类别，但没有检查注册器持有的 `supportedScopes`；`selectionStrategy.select` 接收该列表，`_nativeToolSpecs` 据 candidateIds 构造冻结模型目录。
+2. [tool_registry.dart](../../apps/muyon/lib/platform/tool_registry.dart#L269) 已保存不可变 `supportedScopes`；第 348 行 prepare 会拒绝不匹配的调用，但目录冻结发生在调用前，因而无效范围的模式仍占模型窗口。`RegisteredToolInfo` 不暴露此字段，不能直接写 `t.supportedScopes`。
+3. 该夹具是默认 global 会话；4 个新通用写工具只声明 selectedObjects，global 里根本不能执行。它们的模式却进入 nativeTools，扩大了不可通过摘要压缩的固定目录。
+
+选择范围过滤的原因：它让目录与注册器现有执行权限一致，减少本会话不能执行的候选，而不扩大模型声明的窗口、不减少输出保留、不改压缩保留历史或污点规则。继续抹掉字段类型/枚举以适配某个夹具会降低工具输入说明质量，仍不能解决后续模块目录增长；更改预算或增加夹具窗口则会绕开真实门禁。过滤只是发现层约束，prepare/invoke 的范围复核、审批、revision 与回执仍须保留，不能以目录缺席代替执行鉴权。
+
+### 尚未应用的精确 diff
+
+两个共享文件均待 integrator 划权；F5b 的 shared UI state/surface/module_api 新目录不涉及。以下补丁已在上述 head 上通过 `git apply --check`，只证明适用性，**尚未实施或验证 GREEN**。
+
+```diff
+diff --git a/apps/muyon/lib/assistant/agent_task_factory.dart b/apps/muyon/lib/assistant/agent_task_factory.dart
+--- a/apps/muyon/lib/assistant/agent_task_factory.dart
++++ b/apps/muyon/lib/assistant/agent_task_factory.dart
+@@ -49,5 +49,8 @@
+                 ctx.uiPlanning?.enabled == true) &&
+             t.available &&
++            ctx.tools.supportsScope(
++              t.descriptor.toolId, conversation.scope.kind,
++            ) &&
+             (!readonly || t.descriptor.effect == ToolEffect.read) &&
+             t.descriptor.modelSelectable &&
+             ctx.tools.permitsCategory(t.descriptor.toolId),
+diff --git a/apps/muyon/lib/platform/tool_registry.dart b/apps/muyon/lib/platform/tool_registry.dart
+--- a/apps/muyon/lib/platform/tool_registry.dart
++++ b/apps/muyon/lib/platform/tool_registry.dart
+@@ -281,3 +281,6 @@
++  bool supportsScope(String toolId, AssistantScopeKind kind) =>
++      _require(toolId).supportedScopes.contains(kind);
++
+   Set<String> authorityModules(String toolId) {
+     final tool = _require(toolId);
+     return Set.unmodifiable(
+```
+
+### 当前失败最小复现
+
+在仓库使用现有 Flutter 3.47.5 / Dart 3.13.4，先 `flutter pub get`，再从 `apps/muyon` 运行以下原测试单例；不修改夹具窗口或断言，不启用真实模型：
+
+```sh
+flutter test --no-pub --reporter expanded \
+  test/assistant_production_model_protocol_test.dart \
+  --plain-name 'actual host same-endpoint summary uses model mode_auto and preserves taint'
+```
+
+夹具只创建临时宿主目录与 loopback 无凭据模型服务。种子为 8 条交替 user/assistant 历史，每条 `history-$i-` 加 `'abcd' * 600`；模型应答队列是一条摘要和一条答案，模型能力按上述 12,000/512 声明。失败无需询价业务种子、真实业务库、真实模型或 F5b UI。环境代理需按现有 ci.sh 在 pub get 后清除 HTTP(S)/ALL_PROXY 并设置 `NO_PROXY=localhost,127.0.0.1,::1`，否则会引入无关 localhost 通信失败。
+
+最新 [专属 run](https://github.com/mightyoung/Muyon/actions/runs/38030502603) 已在原源码上确认询价行为基线 GREEN，随后运行原协议测试失败；源码没有临时套入过滤补丁。由于协议门禁停止流程，此 head 的五项变异尚未再次执行；不能用 `499e1f5` 上的 5/5 检出替代它。
+
+### 获得所有权后的安全不变量测试设计
+
+拟增加专属回归，原宿主窗口测试原样保留：
+
+| 不变量 | 构造与断言 |
+| --- | --- |
+| 目录与注册范围一致 | 注册 global-only、workspace-only、selectedObjects-only、支持所有范围的工具；对三类会话分别检查 candidateIds 及 nativeTools，只包含该范围支持的候选，支持所有范围者保留。 |
+| 通用询价写入仍可发现 | global 会话的 candidateIds/nativeTools 不含新四工具；选定实际 inquiry 对象的会话须完整包含这四个工具。使用 loopback 原夹具，不引入真实模型。 |
+| 过滤不成为执行鉴权 | 从 global 直接构造新工具请求，prepare/invoke 仍因 scope_mismatch 拒绝；选定对象但未批准的写入仍不得变更 Store 或写业务回执；不能仅断言目录缺席。 |
+| 既有目录门禁仍有效 | 匹配范围也不得重新暴露停用、modelSelectable=false、类别禁止的工具；只读子会话不包含 write/export/network，保留原断言。 |
+| 没有预算或污点绕过 | 原失败单例须成功，并保留两次模型请求、mode_auto 来源、摘要存在、旧历史 requiresConfirmation=true 的全部原断言；能力仍为 12000/512，hardRatio 仍为 0.95。 |
+| 冻结任务不改权 | 新任务目录按创建时 scope 冻结；后续模块停用/对象 revision 变化仍由调用端复核拒绝，既有回执与批准绑定不得改变。 |
+
+执行顺序：先记录目录过滤断言的有效 RED，再应用获准的共享补丁；运行目录回归、原协议单例、north_star_inquiry/inquiry_* 原测试；完成新 head 基线 GREEN、五项安全变异各自行为断言失败、恢复源码 GREEN；最后完整 ci.sh、push/PR exact-head CI 跟到终态。失败在授权范围内修复，仍不放宽窗口或删除断言。
