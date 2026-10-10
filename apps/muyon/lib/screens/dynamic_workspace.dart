@@ -333,14 +333,27 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
     final current = c.surface.current;
     final objects = <ObjectRef, String>{};
     final sources = <String, String>{};
+    void addBinding(BindingRef binding, String nodeId) {
+      if (binding.kind == BindingKind.fact) {
+        final fact = current.snapshot.facts[binding.id];
+        if (fact != null) {
+          objects.putIfAbsent(fact.object, () => nodeId);
+        }
+      } else if (binding.kind == BindingKind.sourceSpan &&
+          current.snapshot.sources.containsKey(binding.id)) {
+        sources.putIfAbsent(binding.id, () => nodeId);
+      }
+    }
     for (final node in current.plan.nodes) {
       for (final binding in node.bindings.values) {
-        if (binding.kind == BindingKind.fact) {
-          final fact = current.snapshot.facts[binding.id];
-          if (fact != null) objects.putIfAbsent(fact.object, () => node.id);
-        } else if (binding.kind == BindingKind.sourceSpan &&
-            current.snapshot.sources.containsKey(binding.id)) {
-          sources.putIfAbsent(binding.id, () => node.id);
+        addBinding(binding, node.id);
+        if (binding.kind == BindingKind.collection) {
+          final collection = current.snapshot.collections[binding.id];
+          for (final row in collection?.rows ?? <UiRow>[]) {
+            for (final cell in row.cells.values) {
+              addBinding(cell, node.id);
+            }
+          }
         }
       }
     }

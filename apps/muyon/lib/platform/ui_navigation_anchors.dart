@@ -47,7 +47,7 @@ class UiReferenceNavigation {
   /// App presentation admission only; identity/authority validation is unchanged.
   final bool Function()? canPresent;
 
-  Future<void> _checkpoint(NavigationAnchor anchor) async {
+  void _requireCurrentAnchor(NavigationAnchor anchor) {
     final current = controller.surface.current;
     if (anchor.taskId != controller.taskId ||
         anchor.surfaceId != current.plan.surfaceId ||
@@ -56,9 +56,15 @@ class UiReferenceNavigation {
         !current.plan.nodes.any((n) => n.id == anchor.nodeId) ||
         !anchor.scrollOffset.isFinite ||
         anchor.scrollOffset < 0 ||
-        controller.readOnly) {
+        controller.readOnly ||
+        HostUiWorkspaceStore(host.foundation, taskId: controller.taskId).scopeKey !=
+            controller.scopeKey) {
       throw StateError('Return workspace unavailable');
     }
+  }
+
+  Future<void> _checkpoint(NavigationAnchor anchor) async {
+    _requireCurrentAnchor(anchor);
     controller.returnAnchor = jsonEncode(anchor.toJson());
     controller.scrollOffset = anchor.scrollOffset;
     await controller.flush();
@@ -73,10 +79,17 @@ class UiReferenceNavigation {
     }
     await _checkpoint(returnTo);
     if (!context.mounted || !(canPresent?.call() ?? true)) return;
+    _requireCurrentAnchor(returnTo);
     ModuleObjectPage? opened;
     try {
       opened = await openModuleObjectPage(context, host, ref);
       if (!context.mounted || !(canPresent?.call() ?? true)) return;
+      _requireCurrentAnchor(returnTo);
+      if (!controller.surface.current.snapshot.facts.values.any(
+        (fact) => fact.object == ref,
+      )) {
+        throw StateError('Reference outside current snapshot');
+      }
       final page = opened;
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -112,6 +125,7 @@ class UiReferenceNavigation {
     }
     await _checkpoint(returnTo);
     if (!context.mounted || !(canPresent?.call() ?? true)) return;
+    _requireCurrentAnchor(returnTo);
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) =>
