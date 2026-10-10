@@ -49,8 +49,8 @@
 | T-3-NEXT | 安全生产登记→有界仓储分页→正文/提议各片 | metadata机制已合；先明确宿主global身份与零业务恢复副作用，再登记；正文/提议另审 | T3 owner platform_tools/registry；仓储公共接口由各owner，不读raw SQL | metadata零写入；正文范围/敏感度/撤销；提议不自动接纳；真实扫描预算，G | 待排；T3两份任务/复审，生产仍OFF |
 | REG-5 | testing套件、示例模块、脚手架、覆盖CI | REG-3b/REST＋REG-4c合同稳定→全三模块组合 | 契约owner module_api/testing与CI；coverage owner协调脚本 | 新模块只模块包＋一行登记，宿主零改动；源码枚举完整覆盖，不混作LCOV；G | 待排；ADR-0004/R/REG-3a |
 | S-1-REMAINDER | 范围模型缺口盘点与最小收口 | 已有REG-2/AUTH范围单点→REG3/4/T3新路径复核 | AUTH/registry owner | 不重造范围层；撤权/跨对象/版本变化拒绝、G | 待核任务书；R/ADR-0004，已有实现不重复 |
-| AIUI-8 | 可视化三档、权限入口、数据去向 | F4a/b已合；实现排在F4c共享外壳交接后 | 设置owner权限页；AUTH gate归授权owner | 范围内只读工具免业务审批，普通问答不新增业务确认；首次/未授权远程模型端点及外发仍走既有gate，不得以零确认绕权限；授权仅用户宿主给出；外部内容禁放行；三档功能可达、G | 待排；D §8/ADR-0002 |
-| AIUI-9 | 询价先做本体业务卡 | F5b/c→REG-4c→AIUI-8权限入口协同 | 业务卡owner；目录/renderer归F5b | 本体唯一结构，suggested值非已写入、稳定对象/版本/真实回执，G | 待排；D §4.4/§8 |
+| AIUI-8 | 可视化三档、权限入口、数据去向 | AIUI-4基础已合，可与AIUI-9/6并行协同；仅触及F4c共享外壳文件时按owner交接顺序应用 | 设置owner权限页；AUTH gate归授权owner | 范围内只读工具免业务审批，普通问答不新增业务确认；首次/未授权远程模型端点及外发仍走既有gate，不得以零确认绕权限；授权仅用户宿主给出；外部内容禁放行；三档功能可达、G | 待排；D §8/ADR-0002 |
+| AIUI-9 | 询价先做本体业务卡 | AIUI-2已合＋AIUI-5所需F5b/c接口＋REG-4c；AIUI-8可并行协同，不是前置；先复用现有确认流程 | 业务卡owner；目录/renderer归F5b | 本体唯一结构，suggested值非已写入、稳定对象/版本/真实回执，G | 待排；D §4.4/§8 |
 | AIUI-6 | 比价、预算、导入审阅完整询价场景 | F3b/F4c/F5闭环＋REG-4c；写卡复用AIUI-9 | 询价场景owner，supplier规则归领域owner | 真业务mapping与公式、导入预览→审批→回执；完整North Star，G | 待排；D §8 |
 | AIUI-7 | 引用/阅读工作区/结果对比 | F4c/F5＋GROK-7；开放写入须REG-3-REST | 科研场景owner；不写通用core | 首批目的/来源定位、科研公式、返回恢复；未开放能力禁用，G | 待排；D/GROK-7 |
 | UX-PREDICT-1 | 输入预测胶囊设计包→获审实现 | 本文任务书审查→assistant输入owner窗口；模型接入需预算/隐私决定 | assistant输入owner；planning/core只交补丁 | 仅填入不发送，普通问答无新增业务确认、既有模型端点/外发gate保留，IME/陈旧结果/取消拒绝 | 需求已确认、设计待审；[任务书](UX-PREDICT-1.md)、U |
@@ -88,3 +88,5 @@
 针对 `70c677245b3fc0bc4976339e18409d14080d5b5c` 独立审查P2：AIUI-8及预测/视频/总体设计中的“普通问答零确认”限定为**无新增业务确认**；首次/未授权远程模型端点和外发仍执行ADR-0002及现有gate，不能为验收零确认绕权限。用户原需求不改。
 
 S6去重静态证据：[prototype_module.dart](../../packages/prototype_module/lib/src/prototype_module.dart)声明objectPages，Runtime.open经resolve取得lease，Session.objectPage覆盖page/version/feedback；[object_pages.dart](../../apps/muyon/lib/platform/object_pages.dart)优先无绑定ObjectPages；[platform_shell.dart](../../apps/muyon/lib/screens/platform_shell.dart)把AssistantPage.onOpenReference接openObject，[assistant_page.dart](../../apps/muyon/lib/screens/assistant_page.dart)引用按钮调用该callback。[reg3a_module_v2_test.dart](../../apps/muyon/test/reg3a_module_v2_test.dart)的 `prototype opens without a binding and adds feedback after confirmation` 断言lease非空且ownerWorkspace为null；已有[REG-3a复审](REG-3a-review.md)亦记录无绑定对象页。因此旧R §7“第四阶段S6”保留历史，不作为再次开发opener的依据。需要补的是实际助手回答引用/失效与返回等端到端验收是否完整的核对；如有扩展先明确范围。此次只读源码/断言，未重跑Flutter，不把存在测试写成本轮运行通过或整个S6完成。
+
+针对 `e188b30e16c5fdd2b48e594507b1be32e556769c` 的[依赖边界P2](https://github.com/mightyoung/Muyon/pull/32#discussion_r4236609434)：按已采纳D §8及README依赖表，AIUI-9前置为AIUI-2、AIUI-5、REG-4c，AIUI-8仅依赖AIUI-4。设置/权限入口与业务卡可并行协同；卡片先复用现有确认流程，AIUI-8完成后再按既定授权提供自动放行入口，不以设置页完成阻塞AIUI-9或复用它的AIUI-6/North Star。共享文件owner交接只约束该文件写入，不增加全任务硬前置。原已修的模型端点/外发gate与S6能力/验收分层保持。
