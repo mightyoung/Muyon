@@ -49,3 +49,24 @@
 旧ui_stream_test.dart单独30/30 PASS。新增ui_stream_v2_test.dart实际3 PASS/4 FAIL，exit1：/2构造returnsNormally失败；library2+/1预期抛catalog_requires_stream_2但未抛；完整v2计划与collection语法在当前/2构造处失败。全API运行包含新增RED：71 PASS/4 FAIL，失败恰为上述4项，无其他失败。没有编译错误；前三个v2正面路径同一缺口，不计独立三缺陷。
 
 日志在/tmp/aiui-f5b-logs/，不入仓。Green需将旧ui_stream_test.dart中未知协议拒绝例从/2改测/3（仅此未知版本例），旧v1/旧目录拒绝不得削弱。首片a先protocol2/显式v1kind gate及枚举穷举；首片b随后metadata/spec/collection实际validate/dispatch行为RED→GREEN；Widget/render capture/33项下一切片。本RED提交不是实现完成，也不启用production目录。
+
+## 切片 1a：protocol GREEN（已写，NOT RUN，待调用者验证）
+
+改动（仅 `packages/muyon_module_api`）：
+- `stream_protocol.dart`：常量 `streamProtocolV1/V2`；`UiStreamSession` 仅接受 /1 与 /2，`library-2` + 非 /2 抛 `ArgumentError`（消息含 `catalog_requires_stream_2`）；`parseUiStreamLine(…, protocolVersion = /1)`，非 /2 时在 `byName` 之前显式拒绝 `kind:"collection"`。
+- `stream_compiler.dart`：把 `session.protocolVersion` 传给同一 `parseUiStreamLine`。
+- `snapshot.dart`：`BindingKind.collection`、`BindingRef.collection(id)`。
+- `state.dart`：`resolve(collection)` 恒返回 null（无 registry）。
+- `validation.dart`：穷尽 switch 增 collection 分支，恒报 `unknown_collection:<id>`；非允许槽位仍先报 `binding_kind:`。无 registry，不放行任何 collection。
+- `workspace.dart`：解码 `kind=="collection"` 抛 `ArgumentError`（无 codec、无 schema2，不做 F5c 功能）。
+- `test/ui_stream_test.dart`：仅 session metadata 例的未知版本 `/2` → `/3`，其它断言未动。
+- `test/ui_stream_v2_test.dart`：追加共享 parser 版本穿透正负断言。
+
+未做：collection registry、typed spec、正面 collection 验收属切片 1b，现在不能声称 collection 可用；`library-2` 目录对象未实现（测试内以版本串模拟）。
+待调用者：`flutter analyze` 与 module_api 全部 `flutter test`；确认 `muyon_ui`/`apps/muyon` 无对 BindingKind 的穷尽 switch（grep 仅见 state/validation 两处）。以上均未运行，不声称 GREEN。
+
+## 切片1a调用者GREEN与变异证据
+
+真实Claude同会话protocol GREEN回合 result success/end_turn/exit0；调用者API全套76PASS/0FAIL、fatal-infos analyze无问题；旧UI library_contract_boundary + aiui5_f5a_contract_fixture合计21PASS/0FAIL。新增专项8PASS。M2实际跳过v1 collection字符串gate后专项5PASS/3FAIL（bad-line、shared parser、old catalogs三行为断言失败，非编译错误），源码逐字恢复后8PASS；最初路径错误未注入变异的运行不计证据。既有工作树缓存SDK与包复用/no-pub，日志/tmp/aiui-f5b-logs。
+
+实现仅协议常量、session门槛、共享parser版本穿透、独立collection枚举及穷举拒绝分支。尚无registry；validator仍拒绝所有collection，resolve null，workspace decode仍拒绝collection。应用目录仍dynamic-1，没有生产切换。旧协议未知版本测试仅/2→/3，旧library拒绝断言原样。后续1b需真实typed/collection行为RED→GREEN，再单独组件adapter/capture切片；不据本GREEN称F5b完成。

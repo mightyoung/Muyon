@@ -172,6 +172,25 @@ void main() {
       );
     });
 
+    test('shared parser gates collection on the passed protocol version', () {
+      final line = jsonEncode({
+        'op': 'node',
+        'id': 'n',
+        'component': 'Text',
+        'bind': {
+          'x': {'kind': 'collection', 'id': 'rows'},
+        },
+      });
+      expect(parseUiStreamLine(line).error, isNotNull);
+      expect(parseUiStreamLine(line, protocolVersion: v1).error, isNotNull);
+      final ok = parseUiStreamLine(line, protocolVersion: v2);
+      expect(ok.error, isNull);
+      expect(
+        (ok.operation as UiStreamNode).node.bindings['x'],
+        const BindingRef.collection('rows'),
+      );
+    });
+
     test('old catalogs still reject collection bindings', () {
       for (final version in ['minimal-1', 'dynamic-1', 'library-1']) {
         final c = stream(v1, asVersion(version));

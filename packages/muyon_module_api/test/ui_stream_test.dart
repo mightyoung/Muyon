@@ -34,7 +34,7 @@ void main() {
         snapshot: f.snapshot,
         intent: f.intent,
         catalog: f.catalog,
-        protocolVersion: 'aiui-stream/2',
+        protocolVersion: 'aiui-stream/3',
       ),
       throwsArgumentError,
     );

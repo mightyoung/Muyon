@@ -181,6 +181,9 @@ List<String> validateUiNode(
             value.inputVersion != snapshot.ref ||
             !isUiScalar(value.value))
           reject('unknown_or_stale_computation:${ref.id}');
+      case BindingKind.collection:
+        // No host collection registry yet (slice 1b): never valid.
+        reject('unknown_collection:${ref.id}');
       case BindingKind.sourceSpan:
         final source = snapshot.sources[ref.id];
         if (source == null ||
