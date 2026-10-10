@@ -57,6 +57,25 @@ class ToolPlatformException implements Exception {
   String toString() => '$code: $message';
 }
 
+/// A host-owned metadata resolution, never a module or model declaration.
+class HostScopeResolution {
+  const HostScopeResolution({
+    required this.identityKey,
+    required this.scope,
+    required this.requireCurrent,
+  });
+  static const platformMetadataKey = 'host_platform_metadata_v1';
+  final String identityKey;
+  final ResolvedAssistantScope scope;
+  final void Function() requireCurrent;
+}
+
+typedef HostToolScopeResolver = Future<HostScopeResolution?> Function(
+  ToolRegistry registry,
+  RegisteredToolInfo tool,
+  ToolCallRequest request,
+);
+
 class PreparedToolCall {
   const PreparedToolCall._(
     this.request,
@@ -68,6 +87,8 @@ class PreparedToolCall {
     this._generation,
     this.effectIntent,
     this._policyRevision,
+    this._scopeResolutionKey,
+    this._requireScopeCurrent,
   );
   final ToolCallRequest request;
   final RegisteredToolInfo info;
@@ -78,6 +99,8 @@ class PreparedToolCall {
   final Object _authority;
   final int _generation;
   final String? _policyRevision;
+  final String? _scopeResolutionKey;
+  final void Function()? _requireScopeCurrent;
 }
 
 class _Tool {
@@ -111,9 +134,11 @@ class ToolRegistry {
     this.grantContext,
     this.categoryAllowed,
     this.policyRevision,
+    this.hostToolScopeResolver,
   }) : clock = clock ?? DateTime.now;
   final ManagedDatabase database;
   final Future<ResolvedAssistantScope> Function(AssistantScope) resolveScope;
+  final HostToolScopeResolver? hostToolScopeResolver;
   final DateTime Function() clock;
   final GrantStore? grants;
   final ToolGrantContext? Function(ToolCallRequest)? grantContext;
@@ -291,7 +316,20 @@ class ToolRegistry {
         'Tool is not registered',
       ));
 
-  Future<PreparedToolCall> prepare(ToolCallRequest request) async {
+  Future<PreparedToolCall> prepare(ToolCallRequest request) => _prepare(request);
+
+  Future<PreparedToolCall> _reprepare(PreparedToolCall prepared) {
+    prepared._requireScopeCurrent?.call();
+    return _prepare(
+      prepared.request,
+      requiredScopeResolutionKey: prepared._scopeResolutionKey,
+    );
+  }
+
+  Future<PreparedToolCall> _prepare(
+    ToolCallRequest request, {
+    String? requiredScopeResolutionKey,
+  }) async {
     _ensureOpen();
     final tool = _require(request.toolId);
     final policy = policyRevision?.call();
@@ -319,11 +357,57 @@ class ToolRegistry {
     // Host-set request rule (a module's destination policy); throws to refuse
     // before any scope work and long before an approval can be issued.
     tool.preflight?.call(request);
-    var scope = await resolveScope(request.scope);
+    final beforeInfo = tool.info;
+    final beforeGeneration = tool.generation;
+    final hostResolver = hostToolScopeResolver;
+    final hostScope = hostResolver == null
+        ? null
+        : await hostResolver(this, beforeInfo, request);
+    // A previously claimed call must never enter the business resolver when
+    // its host binding disappears, even if that resolver returns empty refs.
+    if (requiredScopeResolutionKey != null &&
+        hostScope?.identityKey != requiredScopeResolutionKey) {
+      throw const ToolPlatformException(
+        'scope_resolution_changed',
+        'Host metadata scope authority changed',
+      );
+    }
+    if (hostScope != null &&
+        (hostScope.identityKey != HostScopeResolution.platformMetadataKey ||
+            beforeInfo.descriptor.effect != ToolEffect.read ||
+            beforeInfo.providerId != 'platform' ||
+            beforeInfo.descriptor.moduleId != 'platform' ||
+            !const {
+              'platform.executions',
+              'platform.memories',
+              'platform.notifications',
+              'platform.device_status',
+            }.contains(beforeInfo.descriptor.toolId) ||
+            request.scope.kind != AssistantScopeKind.global ||
+            hostScope.scope.objects.isNotEmpty ||
+            _canonical(hostScope.scope.requested.toJson()) !=
+                _canonical(request.scope.toJson()))) {
+      throw const ToolPlatformException(
+        'invalid_scope_resolution',
+        'Host metadata scope does not match the registered read',
+      );
+    }
+    var scope = hostScope?.scope ?? await resolveScope(request.scope);
     _ensureOpen();
     _checkPolicy(request.toolId, policy);
     if (!tool.info.available) {
       throw const ToolPlatformException('unavailable', 'Tool was withdrawn');
+    }
+    if (hostScope != null) {
+      if (tool.generation != beforeGeneration ||
+          tool.info.providerId != beforeInfo.providerId ||
+          !identical(tool.info.descriptor, beforeInfo.descriptor)) {
+        throw const ToolPlatformException(
+          'stale_scope',
+          'Host metadata registration changed during preparation',
+        );
+      }
+      hostScope.requireCurrent();
     }
     if (_canonical(scope.requested.toJson()) !=
         _canonical(request.scope.toJson())) {
@@ -372,6 +456,7 @@ class ToolRegistry {
       'resultSchema': tool.info.descriptor.resultSchema,
       'generation': tool.generation,
       'scope': scope.toJson(),
+      if (hostScope != null) 'scopeResolution': hostScope.identityKey,
       'parameterDigest': parameterDigest,
       'destination': request.destination,
       'effectIntent': intent?.digest,
@@ -387,6 +472,8 @@ class ToolRegistry {
       tool.generation,
       intent,
       policy,
+      hostScope?.identityKey,
+      hostScope?.requireCurrent,
     );
   }
 
@@ -409,7 +496,7 @@ class ToolRegistry {
         'Approval preview is stale or lifetime invalid',
       );
     }
-    final current = await prepare(prepared.request);
+    final current = await _reprepare(prepared);
     if (current.identityDigest != prepared.identityDigest) {
       throw const ToolPlatformException(
         'stale_scope',
@@ -590,7 +677,7 @@ class ToolRegistry {
         'Host scope revision required',
       );
     }
-    final current = await prepare(prepared.request);
+    final current = await _reprepare(prepared);
     if (current.identityDigest != prepared.identityDigest) {
       throw const ToolPlatformException(
         'stale_scope',
@@ -758,6 +845,7 @@ class ToolRegistry {
     HostReviewOutcome? reviewProof;
     void checkAuthorization() {
       _checkPolicy(request.toolId, prepared._policyRevision);
+      prepared._requireScopeCurrent?.call();
       if (reviewProof != null) {
         _checkReview(
           prepared,
@@ -893,7 +981,7 @@ class ToolRegistry {
     try {
       token.throwIfCancelled();
       // Re-resolve immediately before dispatch, including after queue waits.
-      final current = await prepare(request);
+      final current = await _reprepare(prepared);
       if (current.identityDigest != prepared.identityDigest) {
         throw const ToolPlatformException(
           'stale_scope',
