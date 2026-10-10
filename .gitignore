@@ -18,4 +18,5 @@ __pycache__/
 **/test/failures/
 
 .coverage-run/
-**/coverage/
+/packages/*/coverage/
+/apps/*/coverage/
