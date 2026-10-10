@@ -65,6 +65,12 @@ def main():
         print(protocol.stdout[-15000:])
         raise SystemExit('Existing host model protocol gate failed')
     print('REG4C existing host model protocol: GREEN', flush=True)
+    taint = run(ROOT, 'host-catalog-taint',
+                target='test/assistant_production_catalog_input_test.dart')
+    if taint.returncode != 0:
+        print(taint.stdout[-15000:])
+        raise SystemExit('Existing catalog taint gate failed')
+    print('REG4C existing catalog taint: GREEN', flush=True)
     # Only the archive copy is mutated. The source checkout and tracked tests
     # stay byte-identical; the final invocation runs the original checkout.
     with tempfile.TemporaryDirectory(prefix='reg4c-mutations-') as directory:

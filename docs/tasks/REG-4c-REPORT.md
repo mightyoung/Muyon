@@ -78,12 +78,19 @@ quotation 仅开放 quoted_on、lead_time_days、warranty_months、valid_until�
 diff --git a/apps/muyon/lib/assistant/agent_task_factory.dart b/apps/muyon/lib/assistant/agent_task_factory.dart
 --- a/apps/muyon/lib/assistant/agent_task_factory.dart
 +++ b/apps/muyon/lib/assistant/agent_task_factory.dart
-@@ -49,5 +49,8 @@
+@@ -49,5 +49,15 @@
                  ctx.uiPlanning?.enabled == true) &&
              t.available &&
-+            ctx.tools.supportsScope(
-+              t.descriptor.toolId, conversation.scope.kind,
-+            ) &&
++            (ctx.tools.supportsScope(
++                  t.descriptor.toolId, conversation.scope.kind,
++                ) ||
++                // Global host metadata with no business data authority stays
++                // input to the model and its taint ledger. Invocation scope
++                // checks remain strict in the registry.
++                (ctx.tools.authorityModules(t.descriptor.toolId).isEmpty &&
++                    ctx.tools.supportsScope(
++                      t.descriptor.toolId, AssistantScopeKind.global,
++                    ))) &&
              (!readonly || t.descriptor.effect == ToolEffect.read) &&
              t.descriptor.modelSelectable &&
              ctx.tools.permitsCategory(t.descriptor.toolId),
@@ -130,10 +137,18 @@ flutter test --no-pub --reporter expanded \
 
 ### 获权后实际执行记录
 
-唯一 integrator 已正式授权 `agent_task_factory.dart`、`tool_registry.dart`，非作者复审精确提案没有确定阻断。两文件只新增只读范围查询与 chat 候选目录过滤；原 invoke/prepare 鉴权、预算/窗口/压缩参数、旧历史污点及原协议测试断言没有修改。
+唯一 integrator 已正式授权 `agent_task_factory.dart`、`tool_registry.dart`，非作者复审精确提案没有确定阻断。两文件只新增只读范围查询与 chat 候选目录过滤；原 invoke/prepare 鉴权、预算/窗口/压缩参数、旧历史污点及原协议测试断言没有修改。发现层保留同时声明 global 且显式空业务数据授权的宿主元数据目录；实际调用仍按原注册 scope 复核。
 
 独立回归为 `apps/muyon/test/inquiry_scope_catalog_test.dart`：三种范围分别检查注册矩阵、candidateIds 与 nativeTools；保留全范围工具，排除停用和 modelSelectable=false 工具；global 无新四写工具但 selectedObjects 必须仍可发现；直接 global 请求仍 `scope_mismatch` 拒绝，未批准的选定写入仍不得修改 Store/业务回执。
 
 有效范围 RED 为 `a2e94be44d655efb210c306b2f98a5133ecb5cd8`、[run 38032601387](https://github.com/mightyoung/Muyon/actions/runs/38032601387)：询价基线 GREEN；新目录回归 1 通过/4 失败，实际 Set 包含额外不匹配范围工具，或 global 目录仍含通用写工具；没有 loader 错误。更早 cc0f067 的夹具 const 构造错误不计有效 RED。原始证据仍仅在 `/tmp/reg4c-evidence/a2e94be-effective-scope-red.log` 和 Actions artifact。
 
 专属门禁现在依次运行询价行为基线、新范围回归、原宿主协议测试；隔离副本执行原五项写入安全变异，再将范围查询强制 true，要求新 global 矩阵断言失败；恢复后再次运行询价基线及范围回归。最终新 head 的完整 CI、五项安全变异和范围变异均需实际结果确认，不能引用前一 head 代替。
+
+### 全量发现的 MCP 元数据兼容性修复
+
+`08bf916` 的 [专属 run 38032903965](https://github.com/mightyoung/Muyon/actions/runs/38032903965) 已 success：原窗口/污点协议测试 GREEN、五项写入安全变异及范围过滤变异全部检出、恢复后 GREEN。但其 [push CI](https://github.com/mightyoung/Muyon/actions/runs/38032903983) / [PR CI](https://github.com/mightyoung/Muyon/actions/runs/38032909248) 到 failure 终态：分析 8/8 通过，host `+1509 ~3 -2`，唯一两项失败是未修改的 `actual MCP catalog input / native` 和 `/ json`。失败 job 为 114157415021 /114157430413，步骤 `Analyze and test every package`；断言在原 `assistant_production_catalog_input_test.dart:218`，wire 缺少 `REMOTE_CATALOG_UNTRUSTED`。**不是窗口问题复发**。
+
+McpAdapter 现有注册同时为 global-only 和 `dataModuleIds: {}`：目录是外部元数据输入，不携带本机业务数据授权。严格按会话 kind 一概去掉它，会让原输入及污点依赖从模型目录消失。修复仅在发现层保留“声明支持 global 且 authorityModules 为空”的目录；默认 dataModuleIds=null 会映射到模块的非空业务授权，不能进入该分支。`supportsScope` 仍返回注册声明，prepare/invoke 的原 scope_mismatch、destination、批准和数据检查均不改。没有按 provider 前缀特判、没有放宽 MCP 注册权限，也没有改原污点断言。
+
+范围矩阵新增空授权 global 元数据项，同时断言停用/隐藏的元数据项不得重现；新单例验证目录可见而 selectedObjects 下直接 prepare/invoke 仍拒绝。专属门禁额外原样运行 `assistant_production_catalog_input_test.dart` 全文件，要求原 native/json 下远程目录和 schema 标记存在、未确认前 qty 不变、授权 uses 不消耗、taint/sourceDigests 保留及 reopen 后继续需要确认；direct-tool 原授权路径也须通过。最终实现仍限定在已获权的两共享文件及独立回归，最终 exact-head 结果在 PR #31 提供。

@@ -52,6 +52,7 @@ void main() {
     Set<AssistantScopeKind> kinds, {
     bool available = true,
     bool selectable = true,
+    Set<String>? dataModules,
   }) {
     host.tools.register(
       providerId: 'inquiry',
@@ -67,6 +68,7 @@ void main() {
         },
       ),
       supportedScopes: kinds,
+      dataModuleIds: dataModules,
       available: available,
       handler: (_) async => ToolCallResult(
         status: ToolCallStatus.succeeded,
@@ -108,10 +110,13 @@ void main() {
           register(declared.name, {declared});
         }
         register('all', AssistantScopeKind.values.toSet());
+      register('metadata', {AssistantScopeKind.global}, dataModules: {});
+      register('metadataOff', {AssistantScopeKind.global}, dataModules: {}, available: false);
+      register('metadataHidden', {AssistantScopeKind.global}, dataModules: {}, selectable: false);
         register('off', {kind}, available: false);
         register('hidden', {kind}, selectable: false);
         final task = await chat(scope(kind));
-        final expected = {'reg4c_scope.${kind.name}', 'reg4c_scope.all'};
+      final expected = {'reg4c_scope.${kind.name}', 'reg4c_scope.all', 'reg4c_scope.metadata'};
         for (final ids in [candidates(task), native(task)]) {
           expect(
             ids.where((id) => id.startsWith('reg4c_scope.')).toSet(),
@@ -135,6 +140,22 @@ void main() {
       }
     },
   );
+
+  test('global metadata discovery never widens its invocation scope', () async {
+    register('metadata', {AssistantScopeKind.global}, dataModules: {});
+    final value = AssistantScope.selectedObjects([selected]);
+    final task = await chat(value);
+    expect(candidates(task), contains('reg4c_scope.metadata'));
+    expect(native(task), contains('reg4c_scope.metadata'));
+    final request = ToolCallRequest(
+      invocationId: 'metadata-wrong-scope', toolId: 'reg4c_scope.metadata',
+      scope: value, parameters: const {},
+    );
+    await expectLater(host.tools.prepare(request), throwsA(
+      isA<ToolPlatformException>().having((error) => error.code, 'code', 'scope_mismatch'),
+    ));
+    await expectLater(host.tools.invoke(request), throwsA(isA<ToolPlatformException>()));
+  });
 
   test(
     'catalog filtering never replaces invocation scope and approval guards',
