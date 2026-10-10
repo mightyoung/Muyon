@@ -21,7 +21,8 @@ void main() {
       final semantics = tester.ensureSemantics();
       InquirySnapshotFixture? fixture;
       try {
-        fixture = (await tester.runAsync(InquirySnapshotFixture.open))!;
+        final activeFixture = (await tester.runAsync(InquirySnapshotFixture.open))!;
+        fixture = activeFixture;
         final scenes = <(String, InquiryReadonlyScene)>[
           ('inquiry', InquiryReadonlyScene.inquiry),
           ('quotation', InquiryReadonlyScene.quote),
@@ -29,11 +30,11 @@ void main() {
         ];
 
         for (final (key, scene) in scenes) {
-          final ref = fixture.refs[key] ??
+          final ref = activeFixture.refs[key] ??
               (throw StateError('Missing fixture reference: $key'));
           final snapshot = await tester.runAsync(
             () => InquiryReadonlySnapshots.read(
-              host: fixture.host,
+              host: activeFixture.host,
               scope: AssistantScope.selectedObjects([ref]),
               object: ref,
               suggestions: const {
