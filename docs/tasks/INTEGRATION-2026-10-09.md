@@ -229,3 +229,26 @@ PR20 源 `204f9a71a4ab7d8f6075270686e5891467867929` 的源/组合 CI 虽成功�
 已消费核实后 fresh prepare 失败仍保留旧 hold 标记，恢复重复要求核实；现有回归未覆盖。
 继续暂停，原作者补故障回归和持久消费状态后复审；不称 PR16 P1 已整体闭环。
 PR21/28 仍按纯接口/typed 机制范围及组合依赖推进，不记 runtime、collection 或33组件完成。
+
+### PR20：manual hold 身份保持与确认消费复审后合入（2026-10-10）
+
+冻结源 `609e724874e5112152b06dfa7856f877cd2e413a`，合前 develop
+`b142e6591ec66a5e9f0e68fb21e064ce17d0aa9f`。原 PR16 manual hold 重复 pause/resume
+历史身份丢失 P1 及 PR20 确认后 prepare 失败重复核实 P2，均按本次固定源重新复审，
+不沿用旧 head 的无阻断结论。核实确认在同一事务消费 hold、记录旧调用绑定的 acknowledgement；
+fresh prepare 失败和重开重试保持预算及历史身份，新 invocation 仍走独立授权与未知回执停止。
+27 项 manual hold 回归保留，新增四种 prepare 故障回归与先行 RED 文件逐字一致。
+[源 push CI38025585341](https://github.com/mightyoung/Muyon/actions/runs/38025585341) 与
+[PR CI38025588960](https://github.com/mightyoung/Muyon/actions/runs/38025588960) 均成功。
+父任务核实真实 Claude 两轮 success/end_turn；本线程另派非作者独立 exact-head 复审，
+无当前确定阻断。事务 rollback、acknowledged queued 崩溃窗口与有效 grant 专项补测仍为
+非阻断剩余验证，静态核对不记为故障注入通过。
+[新 head bot 复审](https://github.com/mightyoung/Muyon/pull/20#issuecomment-6094110047)
+已终结且无主要问题；旧 P2 r4236403656 据修复机制及保留回归明确裁定已修复，thread 已关闭。
+合前再次核完整 review body、issue/inline 评论，没有新增未裁定意见。
+当前 develop 正常组合 `07d56654123c4be275ccf3789dcead15ce685f3e` 的
+[CI38026717599](https://github.com/mightyoung/Muyon/actions/runs/38026717599) 成功，
+analyze/test 8/8、host 1486/3skip、Laya 全通过。按用户授权正常 no-ff 合入
+`5e7c3036f10f928665fea5f162ff3ad8052a4057`，整树与该已测组合完全一致；仅另附本摘要。
+发布完整 HEAD、远端读回及对应 CI 终态见执行回报，不以源或组合 CI 代替发布结果。
+PR21/28/29/30 和 coverage/lint 其余候选仍各按独立门禁处理，不随 PR20 批量合入。
