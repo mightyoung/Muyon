@@ -83,7 +83,16 @@ Future<void> _unmount(WidgetTester tester) async {
   final workspaces = find.byType(DynamicWorkspace, skipOffstage: false).evaluate();
   if (workspaces.isNotEmpty) {
     final navigator = Navigator.of(workspaces.first);
-    await workspaceOperation(tester, () async { navigator.popUntil((route) => route.isFirst); });
+    final workspaceRoute = ModalRoute.of(workspaces.first);
+    await workspaceOperation(tester, () async {
+      // Pop ordinary object routes to complete their lease futures. A failed
+      // checkpoint intentionally blocks the phone workspace's PopScope; do
+      // not repeatedly request that blocked user pop during test cleanup.
+      navigator.popUntil((route) => identical(route, workspaceRoute));
+      if (workspaceRoute != null && !workspaceRoute.isFirst) {
+        navigator.removeRoute(workspaceRoute);
+      }
+    });
   }
   await tester.pumpWidget(const SizedBox());
   await workspaceReady(tester);
