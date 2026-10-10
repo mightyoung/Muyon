@@ -101,7 +101,7 @@ class _DreamSectionState extends State<DreamSection> {
         title: const Text('撤回最近一次整理？'),
         content: const Text(
           '记忆和经验会恢复到这次整理开始前的状态，这次的建议全部标记为已撤回。'
-          '整理之后你自己做的修改也会被还原。',
+          '整理后若你修改了记忆或经验，将拒绝撤回并保留你的修改。',
         ),
         actions: [
           TextButton(

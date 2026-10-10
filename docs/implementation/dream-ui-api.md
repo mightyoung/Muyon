@@ -117,22 +117,22 @@
 
 ### 提案载荷
 
-- `duplicate`：`keepId` 是 revision 最高者，revision 相同则 id 较小者。`disableIds` 是其余 id。`accept` 对 `disableIds` 调用 `setMemoryDisabled(id, true)`。
+- `duplicate`：`keepId` 是 revision 最高者，revision 相同则 id 较小者。`disableIds` 是其余 id。`accept` 先在提交事务内重验全部证据（包括 keepId），再停用 `disableIds`。
 - `conflict`：`sources` 为 `{id, revision, source, content}`。模型来的冲突另有 `summary`。`accept` 抛 `冲突只展示来源，不能自动消解`。界面只展示来源，让人自己改记忆。
 - `summary`：`content`。`accept` 调用 `saveMemory(source: 'dream', kind: 'summary', inference: true, verified: false, lineage: evidence)`。范围必须和全部证据相同，否则 `证据范围不一致，不能合并成更宽的范围`。证据停用、过期、revision 变了或不存在则 `证据已变化、停用或删除`。没有证据则 `提案没有证据`。不会放宽成 global。正文已被删除则 `已删除的内容不会被重新写入`。
 - `experience`：`content`。`accept` 调用 `saveExperience`，状态永远是 `candidate`，界面还要人再 `verifyExperience` 才会进入助手上下文。
 - 其他 kind：`未知提案`。
-- 提案不是 `proposed`：`提案已处理`。成功后提案变为 `accepted`。
+- 提案不是 `proposed`：`提案已处理`。成功后提案变为 `accepted`。提交事务内重新读取提案与运行状态；全部修改类提案都重验来源存在、revision、停用、过期与范围。产物、accepted 状态及回滚守卫同一事务提交；并发或崩溃重试不会重复产物。
 
 ### `revert` 恢复什么
 
 只能回滚最近一次 `done`。否则 `只能回滚最近一次已完成的整理`。
 
-它调用 `restoreOrganizationSnapshot`：按运行开始时的快照，删除并重写全部记忆、经验和墓碑。然后把该次运行的提案和运行本身标为 `reverted`。
+在同一事务内重读运行状态并核对完整组织状态指纹；只有运行开始后除本次接纳之外没有其他记忆、经验或墓碑修改，才按快照恢复并将提案及运行标为 `reverted`。
 
-这会撤销快照之后对记忆、经验和墓碑的修改，包括用户在整理之后亲手做的修改。界面在回滚前要把这句话告诉用户。
+用户删除、停用、范围收窄、编辑、新增或经验状态改变都会阻止整库恢复；接纳前已发生的修改会永久标记该运行不可回滚，后续接纳不会清除守卫。旧运行缺少持久守卫也拒绝恢复。故障会回滚快照与状态的全部写入。守卫保存在现有 outputs_json 内，无数据库迁移。
 
-`organizationSnapshot()` 返回 `{memories, experiences, tombstones}`。界面用 `revert`，不要自己拼快照再 `restoreOrganizationSnapshot`，除非是在做和回滚等价的恢复。
+`organizationSnapshot()` 返回 `{memories, experiences, tombstones}`。界面只用 `revert`。仓库 `restoreOrganizationSnapshot` 需要 `expectedFingerprint` 并在事务内核对；Dream 用同步事务体把恢复和状态写入合并。
 
 ## 界面不要做的事
 
