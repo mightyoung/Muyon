@@ -65,10 +65,27 @@ final class InquiryReadonlySnapshots {
     }
     final trusted = card.object;
     final sourceLabel = '来源对象 ${trusted.moduleId}/${trusted.objectType}/${trusted.objectId} · 修订 ${trusted.revisionRef}';
-    final displayText = [sourceLabel, scene.label, card.typeLabel,
+    final rows = <(String, String)>[
       for (final field in card.fields) ...[
-        field.label, field.value, if (field.suggestion != null) field.suggestion!,
+        ('${field.label}${field.required ? '（必填）' : ''}', field.value),
+        if (field.suggestion != null)
+          ('${field.label} · 建议（尚未写入）', field.suggestion!),
       ],
+    ];
+    // Bound visible copy plus KeyValue's combined accessibility equivalent.
+    // Count every optional fixed message conservatively, even when not shown.
+    final displayText = [
+      sourceLabel, '${scene.label} · 已保存事实',
+      '来源：询价插件的已保存记录；建议尚未写入',
+      '${card.typeLabel} · 只读预览',
+      '保存快照 · 修订 ${trusted.revisionRef}',
+      '不支持的本体版本或类型，请在原页面编辑',
+      '当前为只读预览，编辑与提交尚未接入',
+      '此类型未开放通用修改，请在原页面操作',
+      '此类型没有独立原页面，请从询价业务页面操作',
+      '提交（不可用）',
+      for (final row in rows) ...[row.$1, row.$2],
+      rows.map((row) => '${row.$1}：${row.$2}').join('；'),
     ];
     if (utf8.encode(sourceLabel).length > UiCollectionLimits.labelBytes ||
         displayText.fold<int>(0, (size, text) => size + utf8.encode(text).length) >

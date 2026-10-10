@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/assistant/inquiry_snapshots/inquiry_readonly_snapshot.dart';
+import 'package:muyon/assistant/ontology_cards/inquiry_ontology_card_adapter.dart';
 import 'package:muyon/app/module_host.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_module_api/ui_contract.dart';
@@ -115,17 +116,45 @@ void main() {
     final snapshot = await InquiryReadonlySnapshots.read(host: f.host,
       scope: AssistantScope.selectedObjects([object]), object: object);
     expect(snapshot.sourceLabel, contains(id));
-    final oversized = ObjectRef(moduleId: 'inquiry', objectType: 'project_item',
-      objectId: '${id}x', nativeProjectId: current.nativeProjectId,
-      revisionRef: current.revisionRef, contentDigest: current.contentDigest);
+    for (final oversizedId in [
+      '${id}x',
+      List.filled(UiCollectionLimits.idBytes ~/ 4 + 1, '😀').join(),
+    ]) {
+      store.save('project_item', row.data, newId: oversizedId);
+      final oversized = (await f.host.scopeResolver.sources.singleWhere(
+        (source) => source.moduleId == 'inquiry').resolve(ObjectRef(
+          moduleId: 'inquiry', objectType: 'project_item', objectId: oversizedId,
+          nativeProjectId: current.nativeProjectId)))!;
+      expect(oversized.objectId, oversizedId);
+      expect(oversized.revisionRef, isNotEmpty);
+      expect(oversized.contentDigest, isNotEmpty);
+      await expectLater(InquiryReadonlySnapshots.read(host: f.host,
+        scope: AssistantScope.selectedObjects([oversized]), object: oversized), throwsStateError);
+    }
+  });
+  test('real quotation projection fitting payload rejects oversized complete display', () async {
+    final object = f.refs['quotation']!;
+    final scope = AssistantScope.selectedObjects([object]);
+    final text = List.filled(3000, 'x').join();
+    final suggestions = <String, Object?>{
+      for (final name in ['supplier_id', 'product_id', 'contact_id',
+        'project_id', 'inquiry_id', 'unit_snapshot', 'notes',
+        'inquiry_location', 'award_note']) name: text,
+      'attachment_ids': [text],
+      'includes': [text],
+      'min_qty': List.filled(3000, '0').join(),
+      'tax_rate': List.filled(3000, '0').join(),
+    };
+    final before = fixture.content(f.host.inquiry!.runtime.state.store);
+    final card = await InquiryOntologyCardAdapter.read(host: f.host,
+      scope: scope, object: object, suggestions: suggestions);
+    expect(card.fields.where((field) => (field.suggestion?.length ?? 0) >= 3000),
+      hasLength(13));
     await expectLater(InquiryReadonlySnapshots.read(host: f.host,
-      scope: AssistantScope.selectedObjects([oversized]), object: oversized), throwsStateError);
-    final multibyte = ObjectRef(moduleId: 'inquiry', objectType: 'project_item',
-      objectId: List.filled(UiCollectionLimits.idBytes ~/ 4 + 1, '😀').join(),
-      nativeProjectId: current.nativeProjectId, revisionRef: current.revisionRef,
-      contentDigest: current.contentDigest);
-    await expectLater(InquiryReadonlySnapshots.read(host: f.host,
-      scope: AssistantScope.selectedObjects([multibyte]), object: multibyte), throwsStateError);
+      scope: scope, object: object, suggestions: suggestions),
+      throwsA(isA<StateError>().having((error) => error.message, 'budget error',
+        'Inquiry scene source or text exceeds display budget')));
+    expect(fixture.content(f.host.inquiry!.runtime.state.store), before);
   });
   test('unsupported object type cannot enter the scene adapter', () async {
     const object = ObjectRef(moduleId: 'inquiry', objectType: 'supplier',
