@@ -16,9 +16,10 @@
 - **F4c固定快照片**：当前已验证计划所绑定collection中的fact引用可沿既有
   外围引用入口导航；collection cell仍只准入fact/computed，不新增sourceSpan准入。
   保存与插件页await前后仅复核任务、scope和当前snapshot身份，并释放lease；
-  独立审查确认最终宿主撤权检查缺口，当前阻断集成，不能称完整H3已经交付。
+  原独审确认最终宿主撤权/对象改版缺口；aaa175以现成双proof与真实pinned解析修复，
+  双非作者静态复审认可机制，但旧fixture精确迁移尚待范围确认及完整CI，未准合入。
   typed Choice/Checklist/CompareTable往返、SQLite重开、scope失效和CAS拒绝有行为测试；
-  使用注册公共协议夹具，不代表真实询价/科研页面或同mounted工作区热发布验收。
+  使用真实询价公开协议委托夹具与SQLite，不代表完整询价/科研生产联调或热发布验收。
   CompareTable行详情callback未接线；对象/来源最终实时证明仍需补齐。
 - **AIUI-9**：只读适配当前已激活询价模块的真实保存快照，按已注册v2本体和完整
   pinned ObjectRef核项目、scope、revision/digest及lifecycle。可信宿主KeyValue模板
