@@ -1,0 +1,44 @@
+name: format-bootstrap-df74
+
+on:
+  push:
+    branches:
+      - 'tools/format-bootstrap-df74-20261010'
+
+permissions:
+  contents: read
+
+jobs:
+  format-bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: true
+
+      - name: Format bootstrap without changing the checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          dart --version
+          dart format --output=show --summary=none apps/muyon/lib/app/bootstrap.dart > "$RUNNER_TEMP/bootstrap.formatted.dart"
+          python3 - <<'PY'
+          import base64
+          import hashlib
+          import subprocess
+          from pathlib import Path
+
+          source = Path('apps/muyon/lib/app/bootstrap.dart').read_bytes()
+          formatted = Path(__import__('os').environ['RUNNER_TEMP'], 'bootstrap.formatted.dart').read_bytes()
+          head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          print(f'SOURCE_HEAD={head}')
+          print(f'SOURCE_SHA256={hashlib.sha256(source).hexdigest()}')
+          print(f'FORMATTED_SHA256={hashlib.sha256(formatted).hexdigest()}')
+          print('FORMATTED_BASE64=' + base64.b64encode(formatted).decode('ascii'))
+          PY
+          git diff --exit-code -- apps/muyon/lib/app/bootstrap.dart
