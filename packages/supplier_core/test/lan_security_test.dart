@@ -242,7 +242,9 @@ void main() {
       send('x' * 129);
       await Future<void>.delayed(const Duration(milliseconds: 30));
       expect(node.peers, isEmpty);
-      for (var i = 0; i < 80; i++) send('peer-$i');
+      for (var i = 0; i < 80; i++) {
+        send('peer-$i');
+      }
       await Future<void>.delayed(const Duration(milliseconds: 150));
       expect(node.peers, hasLength(4));
       expect(notifications, lessThanOrEqualTo(2));

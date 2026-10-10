@@ -173,8 +173,9 @@ class HubClient {
     try {
       if (log != null) {
         final boundOrigin = origin ?? _origin;
-        if (boundOrigin == null || boundOrigin != _origin)
+        if (boundOrigin == null || boundOrigin != _origin) {
           throw HubException('请先核对中心身份和发布版本');
+        }
         final digest = await hubDigest(frozen);
         _check();
         final prior = log.read(
@@ -314,8 +315,9 @@ class HubClient {
           ),
         );
         guard();
-        if (response.bytes.length > _maxResponse)
+        if (response.bytes.length > _maxResponse) {
           throw HubException('中心返回的数据过大');
+        }
         if (missingIsNull && response.statusCode == 404) return null;
         Map<String, Object?>? json;
         try {
@@ -382,7 +384,7 @@ class HubClient {
       unawaited(
         task.socket.then<void>(
           (_) => detach(),
-          onError: (Object _, StackTrace __) {
+          onError: (Object _, StackTrace _) {
             detach();
           },
         ),
@@ -402,8 +404,9 @@ class HubClient {
         if (token != null && token.isNotEmpty) {
           request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
         }
-        if (frozen.encodedBody != null)
+        if (frozen.encodedBody != null) {
           request.headers.contentType = ContentType.json;
+        }
         check();
         beforeSend();
         if (frozen.encodedBody != null) {

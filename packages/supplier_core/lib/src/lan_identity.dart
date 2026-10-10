@@ -14,9 +14,8 @@ class DeviceIdentity {
   DeviceIdentity._({
     required this.certificatePem,
     required this.privateKeyPem,
-    required ECPrivateKey privateKey,
-  }) : _privateKey = privateKey,
-       fingerprint = fingerprintOfPem(certificatePem);
+    required this._privateKey,
+  }) : fingerprint = fingerprintOfPem(certificatePem);
 
   final String certificatePem;
   final String privateKeyPem;

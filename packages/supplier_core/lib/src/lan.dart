@@ -269,8 +269,9 @@ class LanNode {
         if (_stopped) throw LanException('局域网已关闭');
         final sent = _udp.send(payload, address, port);
         count(sent);
-        if (sent != payload.length)
+        if (sent != payload.length) {
           throw LanException('Discovery send incomplete');
+        }
       },
     );
   }
@@ -821,8 +822,9 @@ class LanNode {
       attempt?.enter(LanReceiveStage.rename);
       final finalFile = await file.rename('${staging.path}.siq');
       try {
-        if (timedOut || _stopped)
+        if (timedOut || _stopped) {
           throw const FormatException('transfer stopped');
+        }
         // Reserve durable replay protection only once the final file exists
         // and delivery can be attempted. Keep it if the callback throws: the
         // callback may already have performed effects before throwing.

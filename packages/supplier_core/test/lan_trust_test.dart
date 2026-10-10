@@ -217,7 +217,7 @@ void main() {
       ),
       throwsA(isA<LanException>()),
     );
-    expect(bob.inbox.listSync().where((e) => e is File), isEmpty);
+    expect(bob.inbox.listSync().whereType<File>(), isEmpty);
   });
 
   test('replay after restart is refused from the persisted window', () async {
