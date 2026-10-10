@@ -526,6 +526,13 @@ class UiSessionState {
             false)) {
       return UiEventOutcome.invalid;
     }
+    if (usesTypedEdits(catalog) &&
+        definition.route == UiActionRoute.business &&
+        binding.inputRefs.any(
+          (key) => snapshot.editSpecs[key]?.view ?? false,
+        )) {
+      return UiEventOutcome.invalid;
+    }
     try {
       if (_admission != null && !_admission(event, definition)) {
         return UiEventOutcome.invalid;

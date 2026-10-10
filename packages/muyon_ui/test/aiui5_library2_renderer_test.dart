@@ -369,7 +369,7 @@ void main() {
       final controller = await mount(
         tester,
         result,
-        onOpenObject: (object) async {
+        onOpenObject: (object, {required nodeId}) async {
           opened.add(object);
         },
         onEvent: (_) async {
@@ -402,6 +402,57 @@ void main() {
       expect(controller.session.detailNode, isNull);
     },
   );
+
+  testWidgets('same object from two tables retains each originating node ID', (
+    tester,
+  ) async {
+    final initial = fixture
+        .check(
+          'CompareTable',
+          props: {'label': 'Quotes'},
+          bindings: {'rows': const BindingRef.collection('table')},
+          events: {'tap': ActionBinding(actionRef: 'openRow')},
+        )
+        .validatedPlan!;
+    final target = initial.plan.nodes.firstWhere((n) => n.id == 'target');
+    final nodes = [
+      for (final node in initial.plan.nodes)
+        if (node.id == initial.plan.root)
+          node.copyWith(children: [...node.children, 'second'])
+        else
+          node,
+      UiNode(
+        id: 'second',
+        component: target.component,
+        properties: target.properties,
+        bindings: target.bindings,
+        events: target.events,
+      ),
+    ];
+    final result = validateUiPlan(
+      initial.plan.copyWith(nodes: nodes),
+      initial.snapshot,
+      initial.intent,
+      initial.catalog,
+    );
+    expect(result.isValid, isTrue, reason: result.errors.join(','));
+    final opened = <(ObjectRef, String)>[];
+    await mount(
+      tester,
+      result,
+      onOpenObject: (object, {required nodeId}) async {
+        opened.add((object, nodeId));
+      },
+    );
+    for (final id in ['target', 'second']) {
+      tester
+          .widget<TextButton>(find.byKey(ValueKey('aiui2-$id-row-a')))
+          .onPressed!();
+      await tester.pump();
+    }
+    expect(opened.map((value) => value.$2), ['target', 'second']);
+    expect(opened[0].$1, opened[1].$1);
+  });
 
   testWidgets(
     'Chart preserves null, conflict, units and same-source decimal text',

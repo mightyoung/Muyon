@@ -12,7 +12,10 @@ import 'component_adapter.dart';
 import 'fallback.dart';
 
 typedef UiEventSink = Future<void> Function(UiEvent event);
-typedef UiObjectOpen = Future<void> Function(ObjectRef object);
+typedef UiObjectOpen = Future<void> Function(
+  ObjectRef object, {
+  required String nodeId,
+});
 
 enum UiDispatchOutcome {
   applied,
@@ -440,7 +443,7 @@ class UiSurfaceController extends ChangeNotifier {
           return UiDispatchOutcome.stale;
         }
         try {
-          await onOpenObject!(rowObject);
+          await onOpenObject!(rowObject, nodeId: node.id);
         } catch (_) {
           if (!_disposed) {
             portError = 'Local object navigation failed.';

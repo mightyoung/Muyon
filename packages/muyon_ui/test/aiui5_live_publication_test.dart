@@ -93,6 +93,190 @@ UiRecomputeResult candidate(
 }
 
 void main() {
+  test('incomplete recomputation injection fails closed', () {
+    expect(
+      () => UiSurfaceController(mountedPlan(), recomputePort: DeferredPort()),
+      throwsArgumentError,
+    );
+  });
+
+  test(
+    'read-only admission reaches both controller and direct session events',
+    () async {
+      var calls = 0;
+      final c = UiSurfaceController(
+        mountedPlan(),
+        readOnlyProbe: () => true,
+        onEvent: (_) async {
+          calls++;
+        },
+      );
+      addTearDown(c.dispose);
+      final edit = event('readonly-edit', 'quantity', 'change', payload: '18');
+      expect(
+        c.session.dispatch(edit, c.current, c.current.catalog),
+        UiEventOutcome.invalid,
+      );
+      expect(await c.dispatch(edit), UiDispatchOutcome.stale);
+      expect(
+        await c.dispatch(event('readonly-business', 'confirm', 'confirm')),
+        UiDispatchOutcome.stale,
+      );
+      expect(c.session.userOverrides, isEmpty);
+      expect(c.session.draftRevision, 0);
+      expect(c.operationRefs, isEmpty);
+      expect(calls, 0);
+    },
+  );
+
+  test('reverse host completion publishes only the latest request', () async {
+    final port = DeferredPort();
+    late UiSurfaceController c;
+    c = UiSurfaceController(
+      mountedPlan(),
+      recomputePort: port,
+      publishTokenProbe: () => liveToken(c),
+    );
+    addTearDown(c.dispose);
+    final first = c.recompute(), latest = c.recompute();
+    port.pending.last.complete(
+      candidate(port.inputs.last, c.current.intent, '180'),
+    );
+    expect(await latest, UiPublishOutcome.published);
+    final published = c.current;
+    port.pending.first.complete(
+      candidate(port.inputs.first, published.intent, '999'),
+    );
+    expect(await first, UiPublishOutcome.staleToken);
+    expect(c.current, same(published));
+    expect(c.session.snapshot, same(published.snapshot));
+    expect(c.session.resolve(const BindingRef.computed('total')), '180');
+  });
+
+  test(
+    'final probe view and source mutations reject both-object installation',
+    () {
+      for (final source in [false, true]) {
+        final port = DeferredPort();
+        late UiSurfaceController c;
+        var reads = 0;
+        c = UiSurfaceController(
+          mountedPlan(),
+          recomputePort: port,
+          publishTokenProbe: () {
+            if (++reads == 2) {
+              if (source) {
+                c.session.updateSourceDigest('text', 'changed');
+              } else {
+                c.session.selectView('sort', 'value');
+              }
+            }
+            return liveToken(c);
+          },
+        );
+        addTearDown(c.dispose);
+        final base = c.current;
+        final input = UiRecomputeInput(
+          previousSnapshot: base.snapshot,
+          currentUiState: base.snapshot.initialUiState,
+          token: liveToken(c),
+        );
+        final result = candidate(input, base.intent, '180');
+        final plan = base.plan.copyWith(
+          revision: base.plan.revision + 1,
+          snapshotRef: result.nextSnapshot!.ref,
+          nodes: [
+            for (final n in base.plan.nodes)
+              n.copyWith(
+                events: {
+                  for (final entry in n.events.entries)
+                    if (result.nextIntent!.allowedActionRefs.contains(
+                      entry.value.actionRef,
+                    ))
+                      entry.key: entry.value,
+                },
+              ),
+          ],
+        );
+        expect(
+          c.publish(
+            UiVersionBatch(
+              token: input.token,
+              snapshot: result.nextSnapshot!,
+              intent: result.nextIntent!,
+              plan: plan,
+            ),
+          ),
+          UiPublishOutcome.staleToken,
+        );
+        expect(c.current, same(base));
+        expect(c.session.snapshot, same(base.snapshot));
+        expect(c.session.resolve(const BindingRef.computed('total')), 120);
+        expect(c.outdated, isTrue);
+      }
+    },
+  );
+
+  test(
+    'publication retains pending operation and correlates its original receipt',
+    () async {
+      final port = DeferredPort(), sink = Completer<void>();
+      late UiSurfaceController c;
+      var calls = 0;
+      c = UiSurfaceController(
+        mountedPlan(),
+        recomputePort: port,
+        publishTokenProbe: () => liveToken(c),
+        onEvent: (_) {
+          calls++;
+          return sink.future;
+        },
+      );
+      addTearDown(c.dispose);
+      final sent = c.dispatch(event('pending', 'confirm', 'confirm'));
+      final pending = c.pendingAction('pending');
+      expect(pending, isNotNull);
+      expect(
+        await c.dispatch(event('edit', 'quantity', 'change', payload: '18')),
+        UiDispatchOutcome.applied,
+      );
+      expect(
+        c.session.dispatch(
+          event('direct-business', 'confirm', 'confirm'),
+          c.current,
+          c.current.catalog,
+        ),
+        UiEventOutcome.invalid,
+      );
+      port.pending.single.complete(
+        candidate(port.inputs.single, c.current.intent, '180'),
+      );
+      await Future<void>.value();
+      expect(c.current.snapshot.ref.revision, 2);
+      expect(c.session.resolve(const BindingRef.computed('total')), '180');
+      expect(c.pendingAction('pending'), same(pending));
+      expect(c.operationRefs, contains('public-qty'));
+      expect(
+        c.acceptReceipt(
+          const UiBusinessReceipt(
+            eventId: 'pending',
+            operationKeyRef: 'public-qty',
+            draftRevision: 0,
+            status: UiReceiptStatus.succeeded,
+            message: 'host result',
+            isSimulated: true,
+          ),
+        ),
+        isTrue,
+      );
+      expect(c.receipts['confirm']!.draftRevision, 0);
+      expect(c.operationRefs, contains('public-qty'));
+      sink.complete();
+      expect(await sent, UiDispatchOutcome.routed);
+      expect(calls, 1);
+    },
+  );
+
   testWidgets(
     'edit publishes into the same mounted session and preserves field focus',
     (tester) async {
