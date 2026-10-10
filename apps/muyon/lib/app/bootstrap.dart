@@ -241,7 +241,7 @@ class MuyonHost {
         storage,
         WorkspaceRepository(database),
         ModuleRegistry(
-          modules ?? [InquiryBusinessModule(() => host), ...moduleCatalog()],
+          modules ?? [InquiryBusinessModule(() => host), ...moduleCatalog(researchRuntime: () => host.research)],
           knownCapabilities: hostCapabilityIds,
         ),
         CapabilityRegistry(),
