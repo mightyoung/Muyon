@@ -74,13 +74,32 @@ final class UiItemIdsEdit extends UiEditSpec { const UiItemIdsEdit({required thi
 1. **向后兼容**：typed specs 的新编辑语义只在 library-2 生效；minimal/dynamic/library-1 的编辑 gate 和 dispatch 继续逐字保持 string-only，不能因宿主登记 spec 而绕过旧拒绝。`initialUiState` 的键没有 spec 时等价于 `const UiStringEdit()`，即今天的行为（初值必须是 String）。旧 plan/旧测试不变。
 2. **payloadType 映射**：string→`string`，bool→`boolean`，number→`number`，date→`string`，itemIds→`stringList`。`UiValueType` 需新增 `number`、`stringList` 两个值（`plan.dart:16`；`matchesUiValue` 增加两分支：`number` = `value is num && value.isFinite`，`stringList` = `value is List && every String`）。**这两个值只允许用在 `events`，不允许用在 `properties`**（`UiComponentSchema` 构造断言），模型因此不能用 props 夹带数字或列表。
 3. **validator 变更**（`validateUiNode` 的 `editField` 分支，`validation.dart:219-227`）：把 `schema.events[kind] != UiValueType.string || initialUiState[key] is! String` 换成：`spec = snapshot.editSpecs[key] ?? const UiStringEdit()`；`spec.payloadType != schema.events[kind]` → `edit_input`；初值须满足 `spec.rejectPayload(initial) == null`（itemIds 的 key 不在 `initialUiState`，由 `spec.initial` 决定，`unknown_state` 判断改为「在 `initialUiState` 或 `editSpecs[id] is UiItemIdsEdit`」）。`spec.view` 为真的 key 若同时出现在 `actionContext.draft` → `view_business_input`（沿用 `sortRows` 的既有规则）。
-4. **dispatch 变更**（`UiSessionState.dispatch`，`state.dart:163`）：`editField` → `spec.rejectPayload(payload) != null` 返回 `UiEventOutcome.invalid`，**不改任何值、不递增 `draftRevision`**；通过后 `spec.view ? selectView : edit`。`_setValue` 里写死的「`_values[field] is String && value is! String` 才拒」改为以 spec 为准；`isUiScalar` **不放宽**，itemIds 另存 `Map<String, List<String>> _selections`（规范化为字典序去重数组），不进 `_values`/`userOverrides`。`restoreWorkspace` 同理走 spec。
+4. **dispatch 变更**（`UiSessionState.dispatch`，`state.dart:127`）。现行顺序是：身份/revision/目录核对 → **粗类型 `matchesUiValue(payloadType, payload)`（`:151-155`，此处 null 一律 invalid）** → route 分支 → `localAction` switch。library-2 的前置判断顺序（仅 library-2 的 `editField`，其余事件与旧目录原样保持原 gate）：
+   1. 身份/revision/目录核对（不变）。
+   2. 确认 `localAction == editField`，取 `key = binding.inputRefs.single`，`spec = snapshot.editSpecs[key]`（library-2 必有；无 spec 的键走默认 `UiStringEdit` 且 `nullable=false`），且 `spec.payloadType == schema.events[event.kind]`（与目录事件类型一致）；任一不成立 → `invalid`，不改值。
+   3. 粗类型：`payload == null && spec.nullable` 时**跳过**粗类型检查；其余情形（非 null、或 null 但 spec 不 nullable）仍执行 `matchesUiValue`，失败 → `invalid`。
+   4. `spec.rejectPayload(payload)` 与 `spec.rejectInContext(payload, context)`（null 仅在 nullable 时通过）；非 null → `invalid`。
+   5. 通过才写状态。
+   无 state key/无 spec、被拒 null：值、`userOverrides`/`viewValues`/`_selections`、`draftRevision` 均不变。旧目录（minimal/dynamic/library-1）与所有非 `editField` 事件完全沿用原粗类型 gate（null 对有载荷的事件仍 invalid）。
+
+   `editField` 被拒绝时 `UiEventOutcome.invalid`；通过后 `spec.view ? selectView : edit`。`_setValue` 里写死的「`_values[field] is String && value is! String` 才拒」改为以 spec 为准；`isUiScalar` **不放宽**，itemIds 另存 `Map<String, List<String>> _selections`（规范化为字典序去重数组），不进 `_values`/`userOverrides`。`restoreWorkspace` 同理走 spec。
 5. **number**：wire 为 JSON number；`value is num && isFinite`。`integer=true`：数学整数且 `|v| ≤ 2^53−1`。范围为闭区间，`min ≤ max`；`step` 给定则要求 `abs((v−min)/step − round(..)) ≤ 1e-9`，**off-grid 直接拒绝，不 round、不 clamp、不 `toInt`**。`min == max` 渲染只读常量。Slider 有 step 时要求 `(max−min)/step` 为整数且 ∈ [1,10000]；否则拒绝该组件绑定，不允许用 continuous 绕过 step。无 step 时才可 continuous。目录 `NumberStepper`/`Slider` 的 `min/max/step` integer 属性在 library-2 **删除**（规格只有宿主一个来源，不存在两处冲突）。
-6. **金额与定点**：金额、单价、税率一律是 `String` 小数（F3a `ExactDecimal` 规则），编辑用 `UiStringEdit(accepts: <apps 侧用 ExactDecimal 实现的谓词>)`——谓词由 `apps/muyon` 注入，`muyon_module_api` 不依赖 supplier_core。**`UiNumberEdit` 禁止绑定金额**；Chart 只在画图几何时把规范小数串解析成 double，数据表与读屏文字仍用原字符串。
+6. **金额与定点**：金额、单价、税率一律是 `String` 小数（F3a `ExactDecimal` 规则），编辑用 `UiStringEdit(accepts: <apps 侧用 ExactDecimal 实现的谓词>)`——谓词由 `apps/muyon` 注入，`muyon_module_api` 不依赖 supplier_core。**首片采用严格 payload 拒绝**：`'oops'`、未完成的 `''`、`'.'` 等不满足谓词的输入 → `invalid`，**不写 state/override、不递增 `draftRevision`、不触发重算**；首版不实现单独持久的编辑 buffer。Widget 可短暂显示用户键入，但那不是已提交状态：被拒后恢复最后已接受文本，可提示原因。领域层的 `invalid`（如 `unit_mismatch`）只针对**合法 decimal String**（如 `qty='3'`）的计算，合法人工 qty 保留；非法文本永不进入 evaluator。最大精度、零数量等业务规则沿用 F3a。**`UiNumberEdit` 禁止绑定金额**；Chart 只在画图几何时把规范小数串解析成 double，数据表与读屏文字仍用原字符串。
 7. **date**：严格 `YYYY-MM-DD`，年 0001–9999，必须 `DateTime.utc(y,m,d)` 往返字段一致（排除 `2026-02-30`），无时间/时区；`first/last` 由宿主必填且为同格式字符串，字典序比较即日期序。`DateField` 适配器只用 year/month/day 构造本地 `DateTime(y,m,d)` 与读回，不 `toUtc`/`toIso8601String`。`""` 不是 null。
 8. **itemIds**：payload 是 `List<String>`；重复 ID **整体拒绝**（不去重后放行）；每个 ID 必须是 `collections[spec.collectionId].rows` 的 `itemId`；`multiple=false` 时 ≤ 1；总数 ≤ `UiCollectionLimits.rows`。存储规范化为 `String.compareTo` 升序。`Choice` 的显示文字不是 ID，**自填首版 disabled**。
 9. **Checklist 的 fact 模式只读**：没有 `checked` 绑定即只读；有绑定时 Widget 的 `(index, bool)` 回调由适配器按**本次渲染冻结的行序**映射成 itemId，再发 `change` 载荷（新的完整 itemId 列表）。位置不是持久身份。
-10. **事件 → state 全链路（typed）**：Widget 回调 → 适配器生成 payload → `UiSurfaceController.dispatch(UiEvent(kind:'change', payload))`（签名不变，`surface.dart:164`）→ `UiSessionState.dispatch` 的 spec 校验 → `userOverrides`/`viewValues`/`_selections` 与 `draftRevision`（非 view 才 +1）→ `notifyListeners`。业务 draft 值与 fact 永不被该路径写入。
+10. **渲染捕获身份（F5b，防旧 Widget 冒充新 revision）**：现状 `eventFor`（`surface.dart:90`）在调用时读取 `current.plan.revision` 生成 `UiEvent`，`_render` 的 `dispatch` 闭包（`:311`）每次回调都调它，所以 publish 之后仍被持有的旧 `onChanged/onPressed` 会被重标成新 revision，并可能取到新 operation。最小加性方案：
+    - 新增 `class UiRenderCapture { final String surfaceId; final int revision; final UiCatalog catalog; final ValidatedUiPlan plan; }`，在**每次 build/render 开头**从 `controller.current` 冻结一次（含该次渲染所见 plan 的各节点 events/operation 引用）。
+    - 普通 `UiEvent` **不携带** capture（不改 `UiEvent` wire，不维护 `eventId→capture` 第二索引）。capture 只经 controller 的加性入口传递，两个精确签名：
+      ```dart
+      UiEvent eventForCapture(UiRenderCapture capture, UiNode node, String kind, [Object? payload]);
+      Future<UiDispatchOutcome> dispatchCaptured(UiRenderCapture capture, UiNode node, String kind, [Object? payload]);
+      ```
+      `eventForCapture` 仅为 `dispatchCaptured` 内部使用的生成器：`surfaceId`/`observedRevision` 取自 capture，`eventId` 仍由 controller 计数。
+    - `dispatchCaptured` 在**第一个 `await` 之前、同一同步片段**内依次完成：(a) `capture.plan`、`capture.catalog` 与 `current`/`current.catalog` `identical`，`capture.surfaceId == current.plan.surfaceId`、`capture.revision == current.plan.revision`；(b) `node` 属于 `capture.plan.nodes`，且 `node.events[kind]` 来自该节点（不从 current 重新查）；(c) 任一不成立 → 直接返回 `UiDispatchOutcome.stale`，**零进入底层 `dispatch`、零 event sink/router/tool**；(d) 全部成立才 `eventForCapture` 并转既有 `dispatch(UiEvent)`。此时 capture 与 current identical，因此 business 的 `operationKeyRef`/`expectedDraftRevision`/inputs 来自已核身份的同一 plan，不从新 current 补旧 operation。严格 publish（revision 单调递增，见 §4.2）保证旧 revision 不可复用。既有 `dispatch(UiEvent)` 的 `observedRevision` 检查保持不变。
+    - 渲染器（`component_adapter.dart` 与 `_render`）**只许调用 `dispatchCaptured`**，所有回调——Field/Choice/Toggle/NumberStepper/Slider/DateField/Checklist/Tabs/Disclosure 的 change，CompareTable/SourceCard/ObjectChip 的 tap，ConfirmCard/BatchConfirmCard 的 confirm/cancel，Form submit——都在闭包里使用该 build 捕获的 `capture`。旧 `eventFor(UiNode, kind, payload)` 可保留给现有调用/测试，但**渲染路径禁止使用现场读 current 的 eventFor**（以 grep/测试守住）。
+    - 结果：publish 后、下一帧重建前直接调用旧闭包 → `stale`，零状态变化、零 event sink/router/tool。
+11. **事件 → state 全链路（typed）**：Widget 回调 → 适配器生成 payload → `UiSurfaceController.dispatchCaptured(capture, node, kind, payload)` → 既有 `dispatch(UiEvent)`（签名不变，`surface.dart:164`）→ `UiSessionState.dispatch` 的 spec 校验 → `userOverrides`/`viewValues`/`_selections` 与 `draftRevision`（非 view 才 +1）→ `notifyListeners`。业务 draft 值与 fact 永不被该路径写入。
 
 **Tabs / Checklist / Choice 的稳定身份**：身份 = 节点 id（Tabs 子节点）或 `itemId`（Choice/Checklist 行），不是位置、不是标题。Tabs 的 `labels` 取自**子 `Section` 节点的 `title` 属性**，因此 library-2 给 `UiComponentSchema` 新增 `childComponents`（可选 `Set<String>`），`Tabs` 声明 `{'Section'}`，该规则在 `validateUiPlan` 的整树阶段检查（节点单独校验时看不到子节点组件，与现有 `children:` 规则同层，预览阶段不报、`end` 时报）。选中项为可选 `selected` uiState 绑定（`UiStringEdit(view:true)`，值 = 子节点 id；不在子节点内则回落第一页）。`Disclosure` 的展开态为可选 `expanded` uiState 绑定（`UiBoolEdit(view:true)`）。两者都进 `viewValues`，因此随 workspace 保存/恢复。
 
@@ -170,7 +189,18 @@ Chart：合法缺值点不画几何，但**同源数据表保留并显示状态*
 
 ### 3.5 当前宿主重核
 
-前提：`DataSnapshot.collections` 构造后不可变；事件绑定链唯一为 `UiEvent.observedRevision → current plan → plan.snapshotRef → snapshot.collections`。`onOpenObject` 回调的宿主处理（H3，异步重核后导航，事件dispatch等待回调；重核失败零导航）在既有 `openReference`（仅查 fact object 成员关系）之外**必须再核**：当前 task scope（`scopeKey`）、`ObjectRef` 的 `revisionRef`/`contentDigest` 与宿主当前值一致、行引用的 source digest 未被撤销（`sourceDigests` 与宿主当前）。任一失败 → 不导航、零 tool，界面提示「对象/来源已变化」。该重核函数由宿主注入（`Future<bool> Function(ObjectRef, DataSnapshot)`），F5b 的 `rowObject` 不替代它。
+前提：`DataSnapshot.collections` 构造后不可变；事件绑定链唯一为 `UiEvent.observedRevision → current plan → plan.snapshotRef → snapshot.collections`。`onOpenObject` 回调的宿主处理（H3，异步重核后导航，事件dispatch等待回调；重核失败零导航）在既有 `openReference`（仅查 fact object 成员关系）之外**必须再核**：当前 task scope（`scopeKey`）、`ObjectRef` 的 `revisionRef`/`contentDigest` 与宿主当前值一致、行引用的 source digest 未被撤销（`sourceDigests` 与宿主当前）。任一失败 → 不导航、零 tool，界面提示「对象/来源已变化」。该重核函数由宿主注入，F5b 的 `rowObject` 不替代它。
+
+**await 期间撤权的封堵（H3，沿用 `ui_navigation_anchors.dart:67–81` 既有流程，不新建导航栈）**：既有 `openReference` 是 membership → `await _checkpoint` → `await openModuleObjectPage` → `Navigator.push`，中途只有 `mounted/canPresent`，入口重核不足以覆盖 await 期间的撤权。最小冻结：
+```dart
+class UiNavigationToken {   // 入口冻结（宿主）
+  final String surfaceId; final int planRevision; final SnapshotRef snapshotRef; final String scopeKey;
+  final int hostGeneration, sourceGeneration, permissionGeneration;
+  final ObjectRef object;   // 含 revisionRef / contentDigest
+}
+typedef UiNavigationProbe = bool Function(UiNavigationToken frozen); // 宿主当前 probe：同步，true = 仍当前且 scope/source/object revision-digest/权限仍合法
+```
+流程：(1) 入口捕获 `frozen` 并先 probe；(2) `await _checkpoint` 返回后 probe；(3) `await openModuleObjectPage` 取得 page/lease 后 probe；(4) **final check 与 `Navigator.push` 之间不得再 `await`**。任一 probe 失败 → 零 push；若已取得 page/lease，必须 `dispose`/释放（`opened?.dispose()`，沿用既有 `finally`），未取得则不虚报 dispose；不遗留租约、零 tool。`mounted/canPresent` 只是附加条件，不能替代授权 probe。`UiNavigationProbe` 的当前值由宿主维护（与 §4.2 `UiPublishTokenProbe` 同源的 generation）。H3 由 AIUI-4 owner 应用；PR18 owner 需同步此最终 admission 契约，本任务不改 PR18。
 
 ## 4. 同 session 原子发布与 F3a 输入
 
@@ -196,7 +226,11 @@ class UiRecomputeResult {              // 宿主构造；不接受公式/表达�
 abstract interface class UiRecomputePort { Future<UiRecomputeResult> rebuild(UiRecomputeInput input); }
 ```
 
-宿主实现（拟新增 `apps/muyon/lib/platform/ui_recompute_adapter.dart`）只做：冻结输入 → 分配 S8（同 `id`，`revision` 取 max(base+1, 宿主计数)）→ 构造 `S8_in`（= 旧 facts/sources + `initialUiState` 置为当前完整值）→ 对 `definition.slots` 里含「被编辑 uiState key」的每个 `UiFormulaDefinition`，用 `UiFormulaInvocation.forDefinition(definition, S8.ref)` 调 `UiFormulaRegistry.evaluate(invocation, S8_in, currentUiState)`（真实签名，`ui_formula_registry.dart:204`）。F3a 守卫保持有效：`inputVersion != snapshot.ref` → `stale`；`currentUiState` 键集必须与 `S8_in.initialUiState` 一致；公式状态输入必须是 `String`。因此**公式依赖的 state 键必须是 `UiStringEdit`**（宿主构建 snapshot 时检查，违反即 `formula_state_dep_kind`，整份快照不可构建）。
+宿主实现（拟新增 `apps/muyon/lib/platform/ui_recompute_adapter.dart`）只做：冻结输入 → 分配 S8（同 `id`，`revision` 取 max(base+1, 宿主计数)）→ 构造 `S8_in`（仅作「ref=S8 的计算输入」：旧 facts/sources + `ref=S8`，`initialUiState` **保持宿主 extracted 值**，键集不变）；**当前人工值（如 qty='3'）只通过单独的 `currentUiState` 参数传给 F3a**（`evaluate` 只要求其键集与 `S8_in.initialUiState` 相等，值取自 `currentUiState`，不读 `initialUiState` 的值），**不得把人工值写入 `S8_in` 或最终 published `S8.initialUiState`**。published S8 的 `initialUiState` 仍是宿主 extracted（qty='2'），`userOverrides.qty='3'` 与之同时存在、不矛盾，`session.resolve(uiState qty)` 得 '3'，`computed total` 为 '30'。输入指纹随真实 `currentUiState` 变化。→ **候选 plan 中（含 collection cell 展开后）所有将被显示的 computed 实例，全部**以 S8 的真实输入重新 evaluate，不论是否依赖当前被编辑 key；任何一个未能真实重算（unavailable 按 §4.3 表、invalid/stale/抛错则整批不发布、只读降级），**不得把未受影响的旧 value 仅改 `inputVersion` 带入 S8**；不新增缓存/DAG。对每个这样的 `UiFormulaDefinition`，用 `UiFormulaInvocation.forDefinition(definition, S8.ref)` 调 `UiFormulaRegistry.evaluate(invocation, S8_in, currentUiState)`（真实签名，`ui_formula_registry.dart:204`）。F3a 守卫保持有效：`inputVersion != snapshot.ref` → `stale`；`currentUiState` 键集必须与 `S8_in.initialUiState` 一致；公式状态输入必须是 `String`。因此**公式依赖的 state 键必须是 `UiStringEdit` 且 `view == false`**（宿主构建 snapshot 时检查：非 String spec → `formula_state_dep_kind`；String 但 `view:true` → `formula_view_state_dep`；均整份快照不可构建）。`UiStringEdit(view:true)` 绝不能成为公式输入，不能只检查 String 类型。
+
+**extracted / override / view 分层与 rebase、restore、adopt**：三层永不合并——`extracted` = 当前 snapshot 的 `initialUiState`（宿主提取值），`userOverrides` = 人工覆盖，`viewValues` = 视图选择；`resolve` 取覆盖优先。发布（`rebase`）与恢复（`restoreWorkspace`）都不得用 override 值覆写 `snapshot.initialUiState`，也不得丢弃 override 标记；workspace `_capture` 的 `extracted` 恒取 published `snapshot.initialUiState`（保 '2'）。`adoptExtracted(key)` 保持现行语义——清除该键 override 并**递增 draftRevision**，值回到 extracted '2'，随后触发重算，总价回 '20'，旧 confirm 因 revision/operation 变化失效；不允许「删 override 标记回 2 而不递增」。
+
+首片冻结验收链：编辑 qty 2→3 → publish，总价 30（extracted 2、override 3、resolve 3）→ checkpoint / SQLite 重开，extracted 仍 2、override 仍 3 → `adoptExtracted('qty')` 回 2，`draftRevision` 递增，重算后总价 20，旧 confirm stale。（fixture：`snapshot-race.json` `extractedOverrideLayers`、`restore-overrides.json` `extractedOverrideLayers`。）
 
 
 ### 4.2 原子接口
@@ -213,7 +247,7 @@ enum UiPublishOutcome { published, staleToken, invalid, disposed }   // invalid 
 typedef UiPublishTokenProbe = UiPublishToken Function();
 UiPublishOutcome publish(UiVersionBatch batch, UiPublishTokenProbe current);  // 同步；内部无 await
 ```
-`UiPublishTokenProbe` 是宿主提供的同步读取器（当前 baseSnapshotRef/draftRevision/三种 generation/scopeKey）。**异步只发生在宿主 rebuild/候选准备期间，commit 本身是同步原子**，不用 Future 包。发布拒绝条件：token 任一分量与 probe 不等（含 sourceGeneration 变化而当前快照未换）、controller 已 dispose 或宿主换代（`hostGeneration`）、`validateUiPlan(plan, snapshot, intent, catalog)` 失败。
+`UiPublishTokenProbe` 是宿主提供的同步读取器（当前 baseSnapshotRef/draftRevision/三种 generation/scopeKey）。**异步只发生在宿主 rebuild/候选准备期间，commit 本身是同步原子**，不用 Future 包。发布拒绝条件：**`batch.plan.revision <= current.plan.revision`（严格单调，含相等）**、`batch.plan.surfaceId != current.plan.surfaceId`、`batch.plan.snapshotRef != batch.snapshot.ref`、`batch.intent.snapshotRef != batch.snapshot.ref`、`batch.plan.intentRef != batch.intent.id`、`batch.intent.id != current.intent.id`、`batch.plan.catalogVersion != current.catalog.version`（任一 → `invalid`）；token 任一分量与 probe 不等（含 sourceGeneration 变化而当前快照未换）、controller 已 dispose 或宿主换代（`hostGeneration`）、`validateUiPlan(plan, snapshot, intent, catalog)` 失败。
 **Identity**：`UiSurfaceController`、`DynamicUiSurface` 的 mounted 状态与 `UiSessionState` 对象**保持同一实例**；`UiSessionState.snapshot` 改为非 final，经内部 `rebase(batch)` 替换（H1，F5c）。迁移规则：`draftRevision = max(旧, 批次 actionContext.draftRevision)`，**绝不下降**；`userOverrides`、`viewValues`、`_selections` 及其标志逐项按新 spec/membership 重核后保留，不合规者留在 `readableDraft` 并标原因；`_pending`/`_lockedOperations`/回执继续按原 `eventId` 结算；旧版本 plan 上的 capability（确认/动作）一律失效，不可重放，新版确认使用宿主新分配的 operation key。F4c 测试以「同一 controller / 同一 mounted widget」为断言边界。
 
 

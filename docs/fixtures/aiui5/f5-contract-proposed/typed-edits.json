@@ -46,8 +46,36 @@
     {"id": "money-bound-to-number-spec", "decision": "reject-snapshot", "error": "money_must_be_string_state", "note": "宿主构建 snapshot 时拒绝把金额 key 声明为 finiteNumber；F3a 也要求公式状态输入为 String"}
   ],
   "formulaDependency": [
-    {"id": "formula-depends-on-bool", "decision": "reject-snapshot", "error": "formula_state_dep_kind", "note": "首版公式状态依赖仅限 UiStringEdit"}
+    {"id": "formula-depends-on-bool", "decision": "reject-snapshot", "error": "formula_state_dep_kind", "note": "首版公式状态依赖仅限 UiStringEdit 且 view==false"},
+    {"id": "formula-depends-on-number", "decision": "reject-snapshot", "error": "formula_state_dep_kind"},
+    {"id": "formula-depends-on-string-view-true", "spec": {"kind": "string", "view": true}, "decision": "reject-snapshot", "error": "formula_view_state_dep", "note": "String 类型但 view:true 绝不可成为公式输入；整份 snapshot 构建拒绝"},
+    {"id": "formula-depends-on-string-view-false", "spec": {"kind": "string", "view": false, "accepts": "exactDecimal"}, "decision": "accept"}
   ],
+  "nullableDispatch": {
+    "order": ["identity/revision/catalog", "editField + spec exists + spec.payloadType==schema.events[kind]", "null&&spec.nullable ? skip coarse matchesUiValue : coarse matchesUiValue", "rejectPayload + rejectInContext", "write"],
+    "cases": [
+      {"id": "nullable-date-null-accepted", "catalog": "library-2", "spec": "due(nullable)", "payload": null, "decision": "accept", "valueAfter": null, "draftRevisionDelta": 1},
+      {"id": "non-nullable-string-null-rejected", "catalog": "library-2", "spec": "name", "payload": null, "decision": "reject", "error": "invalid", "valueUnchanged": true, "draftRevisionDelta": 0},
+      {"id": "non-nullable-bool-null-rejected", "catalog": "library-2", "spec": "agreed", "payload": null, "decision": "reject", "valueUnchanged": true, "draftRevisionDelta": 0},
+      {"id": "nullable-but-payloadType-mismatch", "catalog": "library-2", "spec": "due(nullable)", "eventType": "boolean", "payload": null, "decision": "reject", "note": "spec.payloadType 与目录事件类型不一致时不得借 nullable 绕过", "draftRevisionDelta": 0},
+      {"id": "no-spec-state-null", "catalog": "library-2", "stateKey": "no-such-key", "payload": null, "decision": "reject", "valueUnchanged": true, "draftRevisionDelta": 0},
+      {"id": "old-catalog-null-edit", "catalog": "library-1", "payload": null, "decision": "reject", "note": "旧目录原 gate：null 对有载荷事件 invalid"},
+      {"id": "non-edit-event-null-payload", "catalog": "library-2", "event": "非 editField 且有载荷类型", "payload": null, "decision": "reject", "note": "其他事件保持粗类型 gate"},
+      {"id": "nullable-null-fails-context-layer", "catalog": "library-2", "spec": "itemIds(nullable=false)", "payload": null, "decision": "reject", "draftRevisionDelta": 0}
+    ]
+  },
+  "strictQtyString": {
+    "spec": {"kind": "string", "accepts": "exactDecimal(unsigned,<=12 int,<=6 frac)", "nullable": false},
+    "committed": "3",
+    "cases": [
+      {"id": "qty-oops", "payload": "oops", "decision": "reject", "stateValue": "3", "userOverridesQty": "3", "draftRevisionDelta": 0, "recompute": "none", "widget": "恢复最后已接受文本 '3'"},
+      {"id": "qty-empty-in-progress", "payload": "", "decision": "reject", "stateValue": "3", "draftRevisionDelta": 0, "recompute": "none"},
+      {"id": "qty-dot", "payload": ".", "decision": "reject", "stateValue": "3", "draftRevisionDelta": 0, "recompute": "none"},
+      {"id": "qty-valid-decimal", "payload": "3.5", "decision": "accept", "draftRevisionDelta": 1, "recompute": "yes"},
+      {"id": "no-persistent-edit-buffer", "note": "首版不实现持久编辑 buffer；被拒文本不入 workspace", "workspaceContainsRejectedText": false},
+      {"id": "domain-invalid-uses-legal-qty", "payload": "3", "evaluator": "invalid(unit_mismatch)", "expect": {"manualQtyKept": "3", "oldSuccessNotShown": true}, "note": "PR18 invalid_formula_preserves_draft_without_old_success 以 oops 进入 evaluator 的写法与本契约冲突，需非 owner 验收作者同步调整；本包不改 PR18 文件"}
+    ]
+  },
   "round2": {
     "validatorComponentContract": [
       {"id": "heading-level-4", "node": "Heading level=4", "decision": "reject-node", "error": "property_value:h:level"},

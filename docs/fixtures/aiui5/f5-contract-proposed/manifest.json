@@ -27,5 +27,6 @@
     {"id": "M3", "mutation": "UiSurfaceController.publish does not re-check token after await", "caughtBy": "ui_recompute_integration_test.dart race cases", "fixture": "snapshot-race.json"},
     {"id": "M4", "mutation": "workspace save overwrites unreadable/unknown-version bytes", "caughtBy": "ui_bound_workspace_recovery_test.dart byte-preservation case", "fixture": "restore-overrides.json"}
   ],
+  "closureCases": {"typed-edits.json": ["nullableDispatch", "strictQtyString", "formulaDependency(formula_view_state_dep)"], "snapshot-race.json": ["staleWidgetCapture", "recomputeAllDisplayed", "extractedOverrideLayers"], "restore-overrides.json": ["extractedOverrideLayers"], "collection-stable-row.json": ["round2.rowNavigationRecheck(revoked-during-checkpoint-await, revoked-during-page-lease-await)"]},
   "expectedAcceptance": "future-only"
 }

@@ -105,7 +105,9 @@
     "rowNavigationRecheck": [
       {"id": "scope-changed", "host": {"scopeKey": "other"}, "expect": "navigation-refused", "toolCalls": 0},
       {"id": "object-revision-changed", "host": {"objectRevisionRef": "newer"}, "expect": "navigation-refused", "toolCalls": 0},
-      {"id": "source-digest-revoked", "host": {"sourceDigest": "changed"}, "expect": "navigation-refused", "toolCalls": 0, "note": "既有 openReference 的 membership 校验不足以替代"}
+      {"id": "source-digest-revoked", "host": {"sourceDigest": "changed"}, "expect": "navigation-refused", "toolCalls": 0, "note": "既有 openReference 的 membership 校验不足以替代"},
+      {"id": "revoked-during-checkpoint-await", "path": "ui_navigation_anchors.dart:67-81 await _checkpoint", "events": ["入口 probe 通过", "await checkpoint 期间权限/scope/source 撤销", "checkpoint 返回后 probe 失败"], "expect": {"push": 0, "toolCalls": 0, "openModuleObjectPage": 0, "leaseDispose": 0}, "note": "尚未取得 page/lease，不虚报 dispose"},
+      {"id": "revoked-during-page-lease-await", "path": "ui_navigation_anchors.dart:67-81 await openModuleObjectPage", "events": ["checkpoint 后 probe 通过", "await 取得 page/lease 期间撤权", "final probe 失败"], "expect": {"push": 0, "toolCalls": 0, "leaseDispose": 1}, "note": "已取得 lease 必须释放，不新建导航栈、不遗留租约；final check 与 push 之间无 await"}
     ],
     "limits": [
       {"name": "idBytes", "constant": 128, "cases": [127, 128, 129], "expect": ["accept", "accept", "reject"]},

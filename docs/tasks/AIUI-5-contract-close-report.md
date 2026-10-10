@@ -32,6 +32,23 @@ Claude的Python/Node Bash、仓库外PR18 Read被既有权限拒绝，未扩权�
 
 没有Flutter/Dart，不下载依赖。新Dart、4变异、浏览器/真机/真实模型均NOT IMPLEMENTED/NOT RUN。
 
+## 本轮四项最小缺口闭合（PR19 head 9fc56ba6680631b34ed830b9db2aab935b2833b8；真实 Claude sonnet low 修改，调用者已核对真实终态；Claude未运行测试，不虚构运行时 PASS）
+修改文件：design（§2 规则 4/6/10/11、§4.1、§4.2 原段落直接更新）、F5b/F5c 任务书、`typed-edits.json`、`snapshot-race.json`、`manifest.json`、本报告。
+1. nullable：仅 library-2 `editField`，先确认 state key/spec/`spec.payloadType==目录事件类型`，再按 `spec.nullable` 对 null 跳过粗 `matchesUiValue`，随后 `rejectPayload/rejectInContext`；非 null 与旧目录/其他事件保持原 gate；无 spec 或被拒 null 不改值与 revision；补 `nullableDispatch` 正负 case。
+2. 旧 Widget 冒充：`UiRenderCapture` + 加性 `eventForCapture`，渲染路径禁用现场 `eventFor`，覆盖全部回调；dispatchCaptured 在转既有 dispatch 前对旧 capture stale、business operation 只取 capture；F5c publish 严格拒绝 `revision <=` 当前并核 surfaceId/snapshot/intent/catalog；fixture `staleWidgetCapture`（直接调用真实旧闭包）。归属：F5b capture，F5c 严格 publish。
+3. 重算范围：候选 plan 所有将显示 computed（含 collection cell）全部以 S8 真实 evaluate，未受影响实例也不得重标，失败则只读降级不发布；无缓存/DAG；fixture `recomputeAllDisplayed`（两实例仅一个依赖 qty）。
+4. 严格 payload 拒绝：`'oops'`、`''`、`'.'` 不写 state/override、不增 revision、不重算，不做持久 buffer，Widget 恢复最后接受文本；领域 invalid 用合法 `qty='3'`（如 `unit_mismatch`）。**PR18 场景 `invalid_formula_preserves_draft_without_old_success` 若用 oops 进入 evaluator，需非 owner 验收作者同步调整；本包未改 PR18 文件。**
+
+5. extracted/override 冲突（真实 Claude 修改，调用者已核对终态；未运行测试）：published S8.initialUiState 保宿主 extracted2，人工3仅经 `currentUiState` 传 F3a，`S8_in` 不覆盖 extracted、不写入最终 S8；rebase/restore/_capture 保三层与 override 标记；`adoptExtracted` 清 override 并递增 revision，回2后重算20、旧 confirm 失效。补 `extractedOverrideLayers`（snapshot-race、restore-overrides）。另补公式 state 依赖守卫：必须 `UiStringEdit` 且 `view==false`，`view:true` → `formula_view_state_dep`，补 typed-edits `formulaDependency` 负例。第4项维持最小首片、不新增 raw buffer；PR18 对应调整交其 owner，未改 PR18 文件。
+
+6. H3 最终 admission（真实 Claude 修改，待调用者核对，未运行测试）：design §3.5 补 `UiNavigationToken`/同步 `UiNavigationProbe`；沿用 `ui_navigation_anchors.dart:67–81`，checkpoint 返回后与取得 page/lease 后各重核，final check 与 push 间无 await，失败零 push 并释放已取得 lease，`mounted/canPresent` 仅附加；H3 由 AIUI-4 owner 应用，PR18 owner 需同步，本任务未改 PR18。fixture 补两项撤权用例（leaseDispose 0 / 1）。另统一 `snapshot-race.json` 顶层 `published.snapshot.initialUiState.qty=2`（override 3 + currentUiState 3，总价 30），manifest `closureCases` 补第五项、`formula_view_state_dep`、H3 用例。
+
 ## 剩余边界
 
 待父任务采纳六项并另授权F5b；业务mapping/receipt由AIUI-6/REG-4c提供；H3由AIUI-4 owner接当前宿主重核及既有外壳导航。旧拒绝测试继续通过是实现要求，不需另授权改掉拒绝。首版推迟自动迁移、数值状态进F3a、Choice自填、Table/KeyValue集合、最优高亮。草稿PR只交可审文件，不启用生产、不合develop/main、不强推/删分支/部署/付费。
+
+## 本次补修终态与机械验证
+
+同一真实Claude会话/模型/low/24000设置未变，四个窄回合：four-gaps 17 turns/87277ms；fifth-gap 13 turns/45414ms；capture 7 turns/28177ms；H3 8 turns/31260ms。均result success、end_turn、is_error=false、exit0。五项及view守卫/H3全部由真实Claude直接改原提案与未来夹具；Codex只补本终态摘要并执行检查/提交推送。
+
+调用者重跑6JSON/1JSONL解析、future-only标签、真实目录33项集合核对、snapshot顶层extracted2/current override3/result30一致性、旧checker、diff检查均PASS；Dart/Widget/原子发布/导航/恢复运行时测试仍NOT IMPLEMENTED/NOT RUN。PR18文件未改，需其owner同步非法payload vs领域invalid、extracted/adopt与H3最终admission。生产文件及旧契约/测试未动。

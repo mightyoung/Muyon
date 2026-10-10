@@ -26,6 +26,16 @@
     {"id": "incomplete-preview-not-restored-as-actionable", "action": "流中断的预览被保存", "expect": {"restoredAsFinalPlan": false}, "note": "只有最终 ValidatedUiPlan 才可保存为可继续界面（任务书 §5）"},
     {"id": "collections-content-not-persisted", "inspect": "storedV2 JSON", "expect": {"containsCollectionRows": false, "containsBindingRefKindCollection": true}}
   ],
+  "extractedOverrideLayers": {
+    "stored": {"extracted": {"qty": "2"}, "userOverrides": {"qty": "3"}, "draftRevision": 5},
+    "cases": [
+      {"id": "reopen-keeps-extracted-2-and-override-3", "expect": {"snapshot.initialUiState.qty": "2", "extracted": "2", "userOverrides.qty": "3", "resolve": "3", "overrideFlagKept": true}},
+      {"id": "restore-never-writes-override-into-initialUiState", "expect": {"snapshot.initialUiState.qty": "2"}},
+      {"id": "capture-extracted-from-published-snapshot", "expect": {"_capture.extracted.qty": "2"}},
+      {"id": "adopt-after-reopen", "action": "adoptExtracted('qty')", "expect": {"userOverrides": {}, "resolve": "2", "draftRevision": 6, "recomputedTotal": "20", "oldConfirm": "stale"}},
+      {"id": "adopt-must-not-skip-revision", "mutate": "清 override 不递增", "expect": "rejected"}
+    ]
+  },
   "round2": {
     "storedV2Adds": {"selectionOverrides": ["picked"], "viewSelections": {"shortlistView": ["quote-a"]}},
     "cases": [
