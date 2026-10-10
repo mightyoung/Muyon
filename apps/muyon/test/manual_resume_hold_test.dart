@@ -74,6 +74,107 @@ class _Host {
 }
 
 void main() {
+  test('confirmation after pause cannot repeat a recorded manual effect '
+      'before verification', () async {
+    final h = _Host();
+    await h.open();
+    addTearDown(h.close);
+    final conversation = await h.repo.createConversation();
+    final original = await h.agent.startTool(
+      conversationId: conversation.id, toolId: 'write',
+    );
+    await h.agent.confirm(original.id,
+        requestDigest: original.payload['requestDigest'] as String);
+    expect(h.invocations, 1);
+    await h.repo.updateTask(h.repo.task(original.id)!.copy({
+      'toolIdentityDigest': 'damaged',
+      'state': 'interrupted', 'stage': 'interrupted',
+    }));
+    final held = await h.agent.resume(original.id);
+    expect(held.stage, 'resume');
+    await h.agent.pause(held.id);
+    await h.reopen();
+    final next = await h.agent.resume(held.id);
+    await h.agent.confirm(next.id,
+        requestDigest: next.payload['requestDigest'] as String);
+    expect(h.invocations, 1,
+        reason: 'this confirmation must acknowledge verification only');
+    expect(h.repo.task(next.id)!.stage, 'tool');
+    expect(h.approvals, 1,
+        reason: 'no second one-time tool approval before a fresh tool card');
+  });
+
+  for (final legacy in [false, true]) {
+    for (final change in ['unchanged', 'succeeded', 'failed', 'deleted']) {
+      test('unacknowledged ${legacy ? 'legacy' : 'current'} manual hold '
+          'cannot be released by receipt $change after DB reopen', () async {
+        final h = _Host();
+        await h.open();
+        addTearDown(h.close);
+        final conversation = await h.repo.createConversation();
+        final original = await h.agent.startTool(
+          conversationId: conversation.id, toolId: 'write',
+        );
+        final call = original.payload['toolCall'] as Map;
+        final id = call['invocationId'];
+        await h.repo.database.write((db) => db.execute(
+          'INSERT INTO tool_invocation_receipts('
+          'replay_key,invocation_id,identity_digest,tool_id,state) '
+          'VALUES(?,?,?,?,?)',
+          [id, id, original.payload['toolIdentityDigest'], 'write', 'running'],
+        ));
+        await h.agent.pause(original.id);
+        var held = await h.agent.resume(original.id);
+        expect(held.stage, 'resume');
+        final evidence = (held.payload['preview'] as Map)['resume'];
+        if (legacy) {
+          // Cards already persisted by PR16 have neither historical field.
+          await h.repo.database.write((db) => db.execute(
+            "UPDATE execution_records SET payload=json_remove(payload,"
+            "'\$.toolCall.invocationId','\$.toolIdentityDigest') WHERE id=?",
+            [held.id],
+          ));
+        }
+        if (change == 'deleted') {
+          await h.repo.database.write((db) => db.execute(
+            'DELETE FROM tool_invocation_receipts WHERE invocation_id=?', [id],
+          ));
+        } else if (change != 'unchanged') {
+          await h.repo.database.write((db) => db.execute(
+            'UPDATE tool_invocation_receipts SET state=?,result_json=? '
+            'WHERE invocation_id=?',
+            [change, jsonEncode(ToolCallResult(
+              status: change == 'succeeded'
+                  ? ToolCallStatus.succeeded : ToolCallStatus.failed,
+              summary: 'late receipt must not acknowledge verification',
+            ).toJson()), id],
+          ));
+        }
+        for (var i = 0; i < 3; i++) {
+          await h.agent.pause(held.id);
+          await h.reopen();
+          held = await h.agent.resume(held.id);
+          expect(held.stage, 'resume');
+          expect(held.state, PersonalTaskState.waitingConfirmation);
+          final saved = (held.payload['preview'] as Map)['resume'] as Map;
+          expect(saved['calls'], (evidence as Map)['calls']);
+          expect(saved['reason'], evidence['reason']);
+          expect(h.repo.taskEvents(held.id).first.data['adopted'], 0);
+          expect(h.invocations, 0);
+          expect(h.approvals, 0);
+        }
+        await h.agent.confirm(held.id,
+            requestDigest: held.payload['requestDigest'] as String);
+        final fresh = h.repo.task(held.id)!;
+        expect(fresh.stage, 'tool');
+        expect((fresh.payload['toolCall'] as Map)['invocationId'], isNot(id));
+        expect((fresh.payload['preview'] as Map)['resume'], isNull);
+        expect(h.invocations, 0);
+        expect(h.approvals, 0);
+      });
+    }
+  }
+
   for (final reopen in [false, true]) {
     for (final receiptState in ['succeeded', 'running']) {
       for (final identity in ['mismatch', 'missing', 'malformed', 'matching']) {
