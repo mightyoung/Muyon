@@ -322,12 +322,11 @@
        final saved = (await HostUiWorkspaceStore(
 --- /dev/null
 +++ b/apps/muyon/test/support/inquiry_navigation_lease_fixture.dart
-@@ -0,0 +1,71 @@
+@@ -0,0 +1,70 @@
 +import 'dart:async';
 +
 +import 'package:flutter/material.dart';
 +import 'package:flutter_test/flutter_test.dart';
-+import 'package:muyon/app/bootstrap.dart';
 +import 'package:muyon/app/adapters/inquiry_module.dart';
 +import 'package:muyon_module_api/muyon_module_api.dart';
 +
@@ -338,8 +337,8 @@
 +/// A real Inquiry adapter. Only the fixture marker and actual-lease barriers
 +/// differ; schema, SQLite owner, object resolution and page remain production.
 +class InquiryNavigationModule extends InquiryBusinessModule {
-+  InquiryNavigationModule(MuyonHost Function() host, {required this.marker,
-+    required this.pageTitle}) : super(host);
++  InquiryNavigationModule(super.host, {required this.marker,
++    required this.pageTitle});
 +  final String marker, pageTitle;
 +  InquiryNavigationRuntime? runtime;
 +  @override
