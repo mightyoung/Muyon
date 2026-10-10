@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,6 +7,7 @@ import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
+import 'package:muyon/services/transfer/task_coordinator.dart';
 import 'package:muyon/workspace/import_coordinator.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
@@ -124,6 +126,63 @@ void main() {
     return file.path;
   }
 
+  test('offered precedes attachment persistence and itemsSettled waits for it', () async {
+    await connect();
+    final saving = Completer<void>();
+    final release = Completer<void>();
+    var executions = 0;
+    final receiver = TaskCoordinator(
+      database: b.tasks.database,
+      deviceId: b.tasks.deviceId,
+      send: b.services.transfer.sendTaskEnvelope,
+      executor: (_) async {
+        executions++;
+        return null;
+      },
+      onOfferAttachment: (taskId, revision, attachment) async {
+        saving.complete();
+        await release.future;
+        await b.researchTasks.saveOfferAttachment(taskId, revision, attachment);
+      },
+    );
+    b.services.transfer.onTaskEnvelope = receiver.receive;
+    const taskId = 'held-offer', revision = '1';
+    final archive = Archive()..addFile(ArchiveFile('README.md', 1, [65]));
+    final bytes = ZipEncoder().encode(archive);
+    try {
+      await a.tasks.offer(
+        taskId: taskId,
+        inputRevision: revision,
+        idempotencyKey: 'held-offer-key',
+        attachment: {
+          'kind': 'research-task',
+          'name': 'held-offer.zip',
+          'sha256': sha256.convert(bytes).toString(),
+          'dataBase64': base64Encode(bytes),
+        },
+      );
+      await saving.future.timeout(const Duration(seconds: 20));
+      expect(receiver.stateOf(taskId, revision), 'offered');
+      expect(b.researchTasks.isResearchTask(taskId, revision), isFalse);
+      var settled = false;
+      final received = b.services.transfer.itemsSettled.then((_) => settled = true);
+      // Drain the already scheduled microtasks, without advancing wall time.
+      await Future<void>.value();
+      expect(settled, isFalse);
+      release.complete();
+      await received;
+      expect(settled, isTrue);
+      expect(receiver.stateOf(taskId, revision), 'offered');
+      expect(b.researchTasks.isResearchTask(taskId, revision), isTrue);
+      expect(b.workspaces.all(), isEmpty);
+      expect(b.research, isNull);
+      expect(executions, 0);
+    } finally {
+      if (!release.isCompleted) release.complete();
+      await b.services.transfer.itemsSettled;
+    }
+  });
+
   test(
     'offer → authorise → import (not run) → result → one import on the origin',
     () async {
@@ -133,6 +192,8 @@ void main() {
       await a.researchTasks.offer(task);
 
       await until(() => b.tasks.stateOf(task.id, rev) == 'offered', 'offered');
+      // Ownership is visible before the queued attachment save finishes.
+      await b.services.transfer.itemsSettled;
       // Receiving, even with the package, imports nothing and runs nothing.
       expect(b.researchTasks.isResearchTask(task.id, rev), isTrue);
       expect(b.workspaces.all(), isEmpty);
@@ -198,6 +259,7 @@ void main() {
       final rev = '${task.revision}';
       await a.researchTasks.offer(task);
       await until(() => b.tasks.stateOf(task.id, rev) == 'offered', 'offered');
+      await b.services.transfer.itemsSettled;
       await b.tasks.accept(taskId: task.id, inputRevision: rev);
       await b.tasks.start(taskId: task.id, inputRevision: rev);
       await b.researchTasks.submitResult(task.id, rev, resultFile(task));
@@ -242,6 +304,7 @@ void main() {
       final rev = '${task.revision}';
       await a.researchTasks.offer(task);
       await until(() => b.tasks.stateOf(task.id, rev) == 'offered', 'offered');
+      await b.services.transfer.itemsSettled;
       await b.tasks.accept(taskId: task.id, inputRevision: rev);
       await b.tasks.start(taskId: task.id, inputRevision: rev);
       await expectLater(
