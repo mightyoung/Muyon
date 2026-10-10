@@ -3,6 +3,8 @@
 日期：2026-10-09 · 作者：leader A · 状态：**已采纳**（用户 2026-10-09：§10 全部按建议，由 leader A 统一派发；并新增 §4.4 本体驱动的业务卡片）
 依据：用户 2026-10-09 要求「全面使用 AI 原生界面重新设计 UI」；[AI Agent 与智能交互整体设计方案](../superpowers/specs/2026-10-08-ai-native-architecture/Muyon_AI_Agent与智能交互整体设计方案.md)（下称「整体方案」）；[ADR-0002](../adr/0002-graded-assistant-authorization.md)；[ADR-0004](../adr/0004-module-contract-v2.md)；[设计稿 v6](v6/README.md) 与[前端开发备忘录](v6/frontend-memo.md)。
 
+当前实现、验收与默认启用状态请见[2026-10-10 当前状态与默认开启计划](../tasks/CURRENT-STATUS-2026-10-10.md)。设计目标中的“自动（默认）”是目标态，不代表当前实现：a68 bootstrap 仍关闭规划，且AIUI-6只读快照没有接入助手shell；完成该接线和独立开关审查前不得按默认开启验收。
+
 ## 2026-10-10 当前实现切片（PR36～39）
 
 本批基线为 develop `c265eb13564ce8b485297fbdd3f1ddb351256e0d`。完整来源、

@@ -2,18 +2,16 @@
 
 交接时间：2026-10-09 晚 · 交出：leader A（本机 Claude 会话，额度将用完）· 接收：**Leader B（ChatGPT）**，接任统一派发、审查与合入 · `develop` 基线：本文件所在提交
 
-## 当前入口（2026-10-10，PR36～39集成批）
+## 当前入口（2026-10-10）
 
-先读[本批集成审查](AIUI-36-39-integration-review.md)及[总体设计当前切片](../design/ai-native-ui-redesign-2026-10-09.md)。
-基线为 `c265eb13564ce8b485297fbdd3f1ddb351256e0d`，lint PR22、恢复PR35、coverage替代PR34
-与诊断PR33已合且各发布CI成功。原PR23/30保留，不关闭、不删除，不重复合原包。
-本批唯一授权云端integrator按固定PR39组合（包含PR36/38）再PR37的依赖顺序正常合入；
-精确来源、新组合/发布CI、远端读回与未完成范围见本批审查及执行回报。
+**先读[当前状态与默认开启计划](CURRENT-STATUS-2026-10-10.md)**，再读[本批集成审查](AIUI-36-39-integration-review.md)、[Leader A 状态审查](../reviews/2026-10-10-leader-a-status-review.md)及[总体设计当前切片](../design/ai-native-ui-redesign-2026-10-09.md)。早期[状态快照 v1](CURRENT-STATUS-2026-10-10-v1.md)固定在8deb，仅供历史追溯；本文 A–D 交接任务同为历史原文，现行状态以新状态页和精确提交/CI证据为准。
+本页所在集成提交追加 AIUI-6 / REG-3b，代码检查点 f8c50517 的全8套组合CI成功；完整源SHA、独审、覆盖和有限边界见[本批新增审查](AIUI-6-REG-3b-integration-review.md)。默认仍关闭，下一接线/持久化/烟测/开关候选的条件目标见[默认开启计划](AIUI-DEFAULT-ENABLE-PLAN.md)。原PR36–39证据继续保留。
+本批原基线为 `c265eb13564ce8b485297fbdd3f1ddb351256e0d`，PR22/35/34/33已各自合入；PR36/39与PR37固定组合、PR38修复及PR39/PR37最终合入结果见[集成审查](AIUI-36-39-integration-review.md)，代码组合为 `a42e4e5516b7b7ae1a5175569d8511013738ff79`，当前 develop 已前进至 a68。PR23、PR4现已只读核对为closed/unmerged（见[PR23](https://github.com/mightyoung/Muyon/pull/23)、[PR4](https://github.com/mightyoung/Muyon/pull/4)）；PR30保留其历史记录，本交接不操作关闭/删除。
 原独审确认导航最终撤权/对象改版缺口；原owner的aaa175已获双非作者静态机制复审。
 旧3文件9项正向fixture已获用户明确范围批准并按公开v2迁移，夹具源53aacb95、仅自有分析修正最终433436；
-2380/artifact/gate排除，Research-origin迁Inquiry不作科研验收，最终433源及b41组合完整CI已成功；
-非作者all8hash/DA复算通过，旧cec2绿色不替代修复验证。唯一integrator按正常合入
-及精确发布CI/远端回读完成本轮，结果见执行回报；40/41另批不混本组合。
+2380/artifact/gate排除，Research-origin迁Inquiry不作科研验收。代码组合`a42e4e5`已集成；成功的[38055487124](https://github.com/mightyoung/Muyon/actions/runs/38055487124)
+是文档head `b41e192` 的review组合CI，不标作a68发布CI。非作者all8hash/DA复算通过，旧cec2绿色不替代修复验证；
+a68发布run `38056891075` 已精确SUCCESS，见[当前状态](CURRENT-STATUS-2026-10-10.md)。40/41另批 f8，不混原 b41 组合。
 Claude调用入口与本机CLI在当前云环境不可用，非作者云端静态审计不冒称Claude交叉审。
 完整AIUI-8/9、live F4c、真实业务插件/模型/真机及Mac golden不因本批而完成。
 保护测试的2380元数据碰撞仅有字段级提案，未获范围确认、未改文件。
@@ -43,7 +41,7 @@ REG-3a 说明已存在且有界片已合，REG-3b 等剩余能力仍待办；JR-
 4. [产品与架构总览](../superpowers/specs/2026-10-04-muspace-product-and-architecture-overview.md) 开头的「现行决定」表。
 5. [任务索引 README.md](README.md) 末尾「AI 原生界面」一节、[审查清单 REVIEW.md](REVIEW.md)。
 
-## A. 历史：交接时待审的交付（2026-10-09 晚）
+## A. 冻结历史：交接时待审的交付（2026-10-09 晚；下文状态不代表当前排队）
 
 | 任务 | 分支 / 提交 | 执行 | 审查要点 |
 |---|---|---|---|
@@ -53,7 +51,7 @@ REG-3a 说明已存在且有界片已合，REG-3b 等剩余能力仍待办；JR-
 
 审查后按 REVIEW.md 写 `docs/tasks/<编号>-review.md`，合入 `develop`，更新索引。
 
-## B. 在途与排队
+## B. 冻结历史：在途与排队（2026-10-09 晚；下文状态不代表当前排队）
 
 | 成员 | 当前 | 之后 |
 |---|---|---|
@@ -63,7 +61,7 @@ REG-3a 说明已存在且有界片已合，REG-3b 等剩余能力仍待办；JR-
 | grokbot | GROK-7 已交付待审 | 可派静态任务 |
 | REG-4b 询价导入续办 | 部分合入；`task/reg-4b-inquiry-import-pipeline` @ `8025f66` | 收尾与审查 → 合入后才能开 REG-4c |
 
-## C. 历史：当时的下一步（2026-10-09 晚）
+## C. 冻结历史：当时的下一步（2026-10-09 晚）
 1. **写 REG-3 任务说明**（科研迁 v2）：依据 [GROK-6 本体盘点](../reviews/2026-10-09-research-ontology-draft.md) §5 与 [GROK-2 科研覆盖清单](../reviews/coverage-drafts/research.md)。要点：
    - 科研没有统一的 save/delete/restore，也没有统一校验，多数对象没有版本号，所以**不能照搬 REG-4c 的通用写工具**，要先补版本号和校验，或者做具名工具（约 20 个，命名见 GROK-6 §5.2）；
    - v2 模块的知识库、模型能力需要先补受限接口（REG-2b 审查第 1 条偏离）；
@@ -74,11 +72,13 @@ REG-3a 说明已存在且有界片已合，REG-3b 等剩余能力仍待办；JR-
 4. AIUI-2 合入后派 **AIUI-4** 外壳（engineer）。
 5. REG-4c 合入后派 **AIUI-9** 本体业务卡片（询价先做）。
 
-## D. 待处理的遗留
+## D. 冻结历史：待处理的遗留（2026-10-09 晚）
 - 10-09 批次审查第 3 项：8 个提交合入时没有审查记录，其中 `cc05fa3`（读参数恢复，改了 `agent_dispatch.dart`）属于安全路径，**应补审**（[审查记录](../reviews/2026-10-09-leader-b-batch-review.md)）。
 - Mac 上 46 例询价截图失败，根因不明（[验证备忘录](VERIFICATION-MEMO.md)）；`verify.sh` 删掉豁免后本机门禁一直是红的，合并暂时只看 Linux CI。
 - 验收账本还没有 AIUI 的验收项，等 AIUI 第一批合入时补。
 - 远端有多个已合入的 `task/auth-1b-*` 等停用分支，清理前要征得用户同意。
+
+本节 D 的第 3 条“验收账本还没有 AIUI 验收项”是当时时点记录；该项已由[AIUI 第二阶段现状补记](../implementation/muyon-acceptance-ledger.md)同步更新。当前未完成项及精确依据见[当前状态与默认开启计划](CURRENT-STATUS-2026-10-10.md)。
 
 ## 0. 此前的在途记录（leader A 时期，供参考）
 
