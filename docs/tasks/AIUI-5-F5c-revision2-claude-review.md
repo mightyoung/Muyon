@@ -111,3 +111,46 @@ Caller provided an immutable git diff and complete changed source/test files; Cl
 Five requested blockers are accepted as repaired; no hard blocker was reported. The additional P2 is recorded, not silently waived: a persisted rejected/readable draft makes the reopened workspace readOnly, and the existing adoption UI has no clear/recovery path. This follows the currently adopted incompatible-restore rule, which preserves bytes and blocks activation. The suggested distinction that would make some invalid restored drafts writable is not implemented because it changes that rule. A narrowly authorized explicit recovery/discard operation, retaining identity/spec/CAS checks, is a separate technical decision for the integrator; there is no automatic migration or loosening of authorization. This limitation must remain visible in the PR/handoff.
 
 Other review boundaries remain explicit: historical branch-only library-2/schema1 checkpoints decode readOnly; old >256KiB checkpoints are readOnly; legacy removed view keys are now readable/readOnly; mixed number/String/null sorting exactly reuses the old comparator (not a newly defined total order); multi-column sort policy is deferred. These are not claimed production migrations.
+
+
+## Final compatibility correction: real Claude follow-up
+
+Fixed source HEAD9c33d8edd0156c158a59c7cad0cf4773d2b44714. Same real CLI2.1.295/modelclaude-sonnet-5-5/effortlow/24000 cap/permission-modeacceptEdits, unchanged proxies/tool permissions; session2141772a-8ee4-4ae3-aa37-36aa13f9e189. Result success/is_errorfalse/end_turn,5turns,41879ms, shell exit0, permission_denials[]. Readonly Bash/Read verified SHA, final source delta and unchanged legacy host regression test; no file edits or test executions by Claude. Raw prompt/stream/stderr/exit/result remain outsideGit in /tmp/aiui-f5b-logs/claude.revision2-checkpoint.* and revision2-checkpoint-claude-prompt.txt. Verdict APPROVE/no blocker, does not reopen any of the five closed findings. Existing P2 remains open.
+
+### Raw completed follow-up report
+
+**Verdict: APPROVE.** I found no blocker in the 4-line compatibility fix, and it does not reopen any of the five closed findings.
+
+**What I ran**
+- I ran `git rev-parse HEAD`. It returned `9c33d8edd0156c158a59c7cad0cf4773d2b44714`, which matches your stated HEAD.
+- I ran `git diff --stat afce5b96 HEAD`. The only change since my last review is in `packages/muyon_ui/lib/src/dynamic/workspace.dart`, plus two docs files. That change is 7 lines (4 net lines of logic).
+- I ran a grep for the host regression test. It is `apps/muyon/test/conversation_shell_recovery_test.dart:402`, and I read it.
+- Permissions: I only used Bash and Read, and I did not edit any file. I did not run Flutter, `dart test` or SQLite. I did not re-run any test. Your API190, UI525, SQLite10 and "18 PASS" figures are your own reports and I have not verified them.
+- The `git status --short` output was empty, but I did not check the worktree's cleanliness before the commands above.
+
+**The fix, at `workspace.dart:197-205`**
+```dart
+final compatible = !c.readOnly;
+c.surface.session.restoreWorkspace(old, activate: compatible);
+if (compatible && c.surface.session.unreadableReasons.isNotEmpty) { readOnly = true; saveError = 'workspace_edit_spec:…'; }
+```
+- **Incompatible workspace** (`readOnly` is already true from a schema, catalog, intent, snapshot, node or presentation mismatch):
+  - All saved values stay readable under `workspace_incompatible`, and none become active.
+  - `saveError` stays null. `flush()` at `workspace.dart:~262` returns `Future.value()`, so nothing is written.
+  - `onEvent` is null and `readOnlyProbe` blocks dispatch, so there are no business calls. This restores the old silent no-write checkpoint.
+  - The test at line 402 checks exactly this: `readOnly` is true, the draft shows `quantity: 人工保留`, there are no TextFields, `actions == 0`, and the SQLite bytes are unchanged after `checkpoint`.
+- **Compatible workspace:** `compatible` is true, so the condition is identical to the previous code. A typed value that fails the current spec still sets `readOnly` and `saveError = workspace_edit_spec:<reason>`. That is the `activate=true` path that closed finding 5, so the typed-restore closure is intact.
+- **Damaged-bytes path** (`UiWorkspaceUnreadable`): `old` is null there, so the `if (old != null)` block is skipped and the change cannot affect it. `saveError` stays `workspace_codec` or `workspace_byte_limit`, which the future-kind, future-schema and duplicate-ids tests assert.
+- **Ordering:** `compatible` is read after all `readOnly` computations and before the surface restore. Nothing between those points reassigns it.
+
+**The five findings, unchanged by this diff**
+Prose provenance, CompareTable sort, Choice/Checklist ID routing, schema2 codec and typed restore revalidation all live in files this commit did not touch. The only edited logic is the incompatible-restore branch above.
+
+**Technical limits (not blockers)**
+1. **P2, as you recorded it.** A saved `readableDraft` makes `restoreWorkspace` assign `retained_unreadable`, so a compatible reopen becomes `readOnly` with `saveError = workspace_edit_spec:retained_unreadable`. `adoptExtracted` returns early when `readOnly`, so there is no way out. This is a data-safe but permanent lock until a recovery UI exists.
+2. **No new test for the fix.** The fix is covered only by the existing host test, and nothing in the package tests asserts the compatible/incompatible split directly. I did not execute that test.
+3. **`readableDraft` getter.** `UiWorkspaceController.readableDraft` returns `_stored.displayValues`, which omits `viewValues` and `viewSelections`. Those layers are readable only through the session. This is cosmetic.
+4. **Incompatible workspaces show no explicit error.** `saveError` is null, so only `readOnly` signals the state.
+5. **Still not claimed by this slice:** the F3b/apps wiring, cache optimization, multi-column CompareTable sort policy, and the 256 KiB bound, which is enforced only on save and on load.
+
+**Verdict: APPROVE.** The new code only restores the historical quiet no-write behaviour for incompatible workspaces. Compatible-workspace save errors are unchanged. My approval rests on source reading, with no re-run of tests.
