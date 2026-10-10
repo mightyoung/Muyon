@@ -51,6 +51,19 @@ class UiPendingAction {
   final Map<String, Object?> inputs;
 }
 
+/// Authority frozen once for a rendered tree and its callbacks.
+class UiRenderCapture {
+  UiRenderCapture._(this._owner, this.plan)
+    : surfaceId = plan.plan.surfaceId,
+      revision = plan.plan.revision,
+      catalog = plan.catalog;
+  final UiSurfaceController _owner;
+  final String surfaceId;
+  final int revision;
+  final UiCatalog catalog;
+  final ValidatedUiPlan plan;
+}
+
 class UiSurfaceController extends ChangeNotifier {
   UiSurfaceController(ValidatedUiPlan plan, {this.onEvent})
     : _current = plan,
@@ -96,6 +109,44 @@ class UiSurfaceController extends ChangeNotifier {
     kind: kind,
     payload: payload,
   );
+
+  UiRenderCapture captureRender() => UiRenderCapture._(this, current);
+
+  UiEvent eventForCapture(
+    UiRenderCapture capture,
+    UiNode node,
+    String kind, [
+    Object? payload,
+  ]) => UiEvent(
+    eventId: '${capture.surfaceId}:${capture.revision}:${++_eventCounter}',
+    surfaceId: capture.surfaceId,
+    nodeId: node.id,
+    observedRevision: capture.revision,
+    kind: kind,
+    payload: payload,
+  );
+
+  Future<UiDispatchOutcome> dispatchCaptured(
+    UiRenderCapture capture,
+    UiNode node,
+    String kind, [
+    Object? payload,
+  ]) async {
+    // This entire identity check executes before the first await or dispatch.
+    if (_disposed ||
+        !identical(capture._owner, this) ||
+        !identical(capture.plan, current) ||
+        !identical(capture.catalog, current.catalog) ||
+        capture.surfaceId != current.plan.surfaceId ||
+        capture.revision != current.plan.revision ||
+        !capture.plan.plan.nodes.any(
+          (candidate) => identical(candidate, node),
+        ) ||
+        !node.events.containsKey(kind)) {
+      return UiDispatchOutcome.stale;
+    }
+    return dispatch(eventForCapture(capture, node, kind, payload));
+  }
 
   bool acceptPlan(ValidatedUiPlan next) {
     if (identical(next, current)) return !_disposed;
@@ -315,10 +366,6 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
     super.dispose();
   }
 
-  void dispatch(UiNode node, String kind, [Object? value]) {
-    controller.dispatch(controller.eventFor(node, kind, value));
-  }
-
   Object? resolve(UiNode n, String slot) {
     final ref = n.bindings[slot];
     return ref == null ? null : controller.session.resolve(ref);
@@ -329,27 +376,36 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
   BusinessStatus factStatus(UiNode n) => fact(n).state == FactState.conflict
       ? BusinessStatus.warning
       : BusinessStatus.neutral;
-  List<Widget> children(UiNode n, Map<String, UiNode> nodes) => [
+  List<Widget> children(
+    UiNode n,
+    Map<String, UiNode> nodes,
+    UiRenderCapture capture,
+  ) => [
     for (final id in n.children)
       Padding(
         key: ValueKey(id),
         padding: const EdgeInsets.only(bottom: 16),
-        child: render(nodes[id]!, nodes),
+        child: render(nodes[id]!, nodes, capture),
       ),
   ];
 
-  Widget render(UiNode n, Map<String, UiNode> nodes) {
+  Widget render(UiNode n, Map<String, UiNode> nodes, UiRenderCapture capture) {
+    // Each closure holds this invocation's capture, never a mutable field.
+    void dispatch(UiNode node, String kind, [Object? value]) {
+      controller.dispatchCaptured(capture, node, kind, value);
+    }
+
     switch (n.component) {
       case 'PageScaffold':
         return PageScaffold(
           title: n.properties['title']! as String,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: children(n, nodes),
+            children: children(n, nodes, capture),
           ),
         );
       case 'MasterDetail':
-        final content = children(n, nodes);
+        final content = children(n, nodes, capture);
         return MasterDetail(
           master: content.isEmpty ? const SizedBox.shrink() : content.first,
           detail: content.length > 1
@@ -576,15 +632,16 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
         controller.current.intent,
       );
     }
-    final plan = controller.current.plan,
-        nodes = {for (final n in controller.current.plan.nodes) n.id: n};
+    final capture = controller.captureRender();
+    final plan = capture.plan.plan,
+        nodes = {for (final n in plan.nodes) n.id: n};
     final detail = nodes[controller.session.detailNode];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (controller.portError != null) Text(controller.portError!),
         if (detail == null)
-          render(nodes[plan.root]!, nodes)
+          render(nodes[plan.root]!, nodes, capture)
         else
           PageScaffold(
             title: '${detail.properties['label']} detail',
@@ -592,7 +649,7 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
               TextButton(
                 key: const ValueKey('detail-back'),
                 onPressed: detail.events.containsKey('back')
-                    ? () => dispatch(detail, 'back')
+                    ? () => controller.dispatchCaptured(capture, detail, 'back')
                     : null,
                 child: const Text('Back to comparison'),
               ),

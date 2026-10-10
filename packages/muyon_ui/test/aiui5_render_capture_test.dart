@@ -17,6 +17,35 @@ class CountingController extends UiSurfaceController {
 }
 
 void main() {
+  test('capture rejects foreign controller, copied node, unknown event and disposal', () async {
+    final plan = actionPlan();
+    final first = CountingController(plan);
+    final other = CountingController(plan);
+    final capture = first.captureRender();
+    final node = plan.plan.nodes.firstWhere((n) => n.id == 'quantity');
+    expect(
+      await other.dispatchCaptured(capture, node, 'change', '99'),
+      UiDispatchOutcome.stale,
+    );
+    expect(
+      await first.dispatchCaptured(capture, node.copyWith(), 'change', '99'),
+      UiDispatchOutcome.stale,
+    );
+    expect(
+      await first.dispatchCaptured(capture, node, 'unknown'),
+      UiDispatchOutcome.stale,
+    );
+    expect(first.bottomDispatches, 0);
+    expect(other.bottomDispatches, 0);
+    first.dispose();
+    expect(
+      await first.dispatchCaptured(capture, node, 'change', '99'),
+      UiDispatchOutcome.stale,
+    );
+    expect(first.bottomDispatches, 0);
+    other.dispose();
+  });
+
   for (final business in [false, true]) {
     testWidgets(
       'old ${business ? 'business' : 'edit'} callback before rebuild dispatches nothing',
