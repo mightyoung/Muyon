@@ -21,7 +21,7 @@ class Choice extends StatefulWidget {
     this.onChanged,
     this.state = UiComponentState.ready,
     this.errorMessage,
-  });
+  }) : assert(optionIds == null || optionIds.length == options.length);
   final String label;
   final List<String> options;
   final Set<String> selected;
@@ -96,6 +96,10 @@ class _ChoiceState extends State<Choice> {
     final on = _enabled(
       widget.state,
       widget.usesIds ? widget.onChangedIds : widget.onChanged,
+    );
+    assert(
+      widget.optionIds == null ||
+          widget.optionIds!.toSet().length == widget.optionIds!.length,
     );
     final all = [...widget.options, if (!widget.usesIds) ...extra];
     return UiComponentFrame(
@@ -559,7 +563,13 @@ class DateField extends StatelessWidget {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: value ?? now,
+      initialDate:
+          value ??
+          (first != null && now.isBefore(first!)
+              ? first!
+              : last != null && now.isAfter(last!)
+              ? last!
+              : now),
       firstDate: first ?? DateTime(now.year - 20),
       lastDate: last ?? DateTime(now.year + 20),
     );

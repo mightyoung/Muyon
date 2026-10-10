@@ -306,6 +306,9 @@ class UiSessionState {
         definition.route == UiActionRoute.local &&
         definition.localAction == UiLocalAction.editField) {
       if (binding.inputRefs.length != 1) return UiEventOutcome.invalid;
+      if (node.component == 'Tabs' && !node.children.contains(event.payload)) {
+        return UiEventOutcome.invalid;
+      }
       spec =
           snapshot.editSpecs[binding.inputRefs.single] ?? const UiStringEdit();
       if (spec.payloadType != payloadType) return UiEventOutcome.invalid;

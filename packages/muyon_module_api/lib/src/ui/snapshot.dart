@@ -68,7 +68,7 @@ class ComputedValue {
   final String computationId;
 }
 
-/// NOT READY (F5b slice 1c scaffold): declaration only, no validator reads it.
+/// Host evidence required by library-2 computed bindings and collection cells.
 class UiComputedEvidence {
   UiComputedEvidence({
     required this.state,
@@ -147,7 +147,7 @@ class DataSnapshot {
   final Map<String, String> sourceDigests;
   final UiActionContext? actionContext;
 
-  /// NOT READY (slice 1b scaffold): declared, not yet consulted by anything.
+  /// Host-owned edit rules checked by library-2 validation and dispatch.
   final Map<String, UiEditSpec> editSpecs;
   final Map<String, UiCollection> collections;
   final Map<String, UiComputedEvidence> computedEvidence;

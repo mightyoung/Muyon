@@ -239,8 +239,9 @@ List<String> validateUiNode(
       }
     }
   }
-  if (usesTypedEdits(catalog))
+  if (usesTypedEdits(catalog)) {
     errors.addAll(_componentEditErrors(node, snapshot));
+  }
   for (final entry in node.events.entries) {
     final binding = entry.value;
     final action = catalog.actions[binding.actionRef];
@@ -360,6 +361,11 @@ List<String> validateUiNode(
 
 /// Library-2's public widgets must have matching host specs even when readonly.
 List<String> _componentEditErrors(UiNode node, DataSnapshot snapshot) {
+  if (node.component == 'FileCard') {
+    final ref = node.bindings['value'];
+    final value = ref == null ? null : snapshot.facts[ref.id]?.value;
+    if (value != null && value is! String) return ['file_value:${node.id}'];
+  }
   final slot = switch (node.component) {
     'NumberStepper' || 'Slider' || 'Toggle' || 'DateField' => 'value',
     'Choice' || 'Tabs' => 'selected',
@@ -403,7 +409,7 @@ List<String> _componentEditErrors(UiNode node, DataSnapshot snapshot) {
     if (!divisions.isFinite ||
         divisions < 1 ||
         divisions > 10000 ||
-        divisions != divisions.roundToDouble()) {
+        (divisions - divisions.roundToDouble()).abs() > 1e-9) {
       errors.add('slider_step_unrepresentable');
     }
   }

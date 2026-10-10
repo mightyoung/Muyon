@@ -65,10 +65,10 @@ void main() {
     MuyonTabs tabs(int selected) => MuyonTabs(
       key: const ValueKey('controlled-tabs'),
       labels: const ['甲', '乙'],
-      children: const [Text('甲内容'), Text('乙内容')],
       initial: 1,
       selectedIndex: selected,
       onChanged: changes.add,
+      children: const [Text('甲内容'), Text('乙内容')],
     );
     await show(tester, tabs(0));
     expect(find.text('甲内容'), findsOneWidget);
@@ -89,9 +89,9 @@ void main() {
       Disclosure disclosure(bool expanded) => Disclosure(
         key: const ValueKey('controlled-disclosure'),
         title: '详情',
-        child: const Text('详情内容'),
         expanded: expanded,
         onChanged: changes.add,
+        child: const Text('详情内容'),
       );
       await show(tester, disclosure(true));
       expect(find.text('详情内容'), findsOneWidget);
@@ -112,8 +112,8 @@ void main() {
       tester,
       MuyonTabs(
         labels: ['甲', '乙'],
-        children: [Text('甲内容'), Text('乙内容')],
         selectedIndex: 0,
+        children: [Text('甲内容'), Text('乙内容')],
       ),
     );
     expect(
@@ -122,7 +122,7 @@ void main() {
     );
     await show(
       tester,
-      const Disclosure(title: '详情', child: Text('详情内容'), expanded: true),
+      const Disclosure(title: '详情', expanded: true, child: Text('详情内容')),
     );
     expect(
       tester

@@ -71,7 +71,15 @@ UiValidationResult check(
         id: 'table',
         columns: const [UiColumn('value', 'Value')],
         rows: [
-          UiRow(itemId: 'a', cells: const {'value': BindingRef.fact('value')}),
+          UiRow(
+            itemId: 'a',
+            object: const ObjectRef(
+              moduleId: 'm',
+              objectType: 't',
+              objectId: 'a',
+            ),
+            cells: const {'value': BindingRef.fact('value')},
+          ),
         ],
       ),
       'timeline': UiCollection(
@@ -201,6 +209,28 @@ void main() {
     for (final result in cases) {
       expect(result.isValid, isTrue, reason: result.errors.join(','));
     }
+  });
+
+  test(
+    'decimal slider step uses the existing finite-number grid precision',
+    () {
+      final result = check(
+        'Slider',
+        props: {'label': 'decimal'},
+        bindings: {'value': const BindingRef.uiState('k')},
+        initial: .1,
+        spec: const UiNumberEdit(min: 0, max: .3, step: .1),
+      );
+      expect(result.isValid, isTrue, reason: result.errors.join(','));
+    },
+  );
+
+  test('FileCard only displays host string facts as filenames', () {
+    final result = check(
+      'FileCard',
+      bindings: {'value': const BindingRef.fact('value')},
+    );
+    expect(result.isValid, isFalse);
   });
 
   test('component spec requirements apply even without an edit event', () {

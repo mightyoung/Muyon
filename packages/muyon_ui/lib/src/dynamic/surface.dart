@@ -5,10 +5,12 @@ import '../confirmation.dart';
 import '../navigation_layout.dart';
 import '../primitives.dart';
 import 'patch.dart';
-import 'catalog.dart';
+import 'catalog_library2.dart';
+import 'component_adapter.dart';
 import 'fallback.dart';
 
 typedef UiEventSink = Future<void> Function(UiEvent event);
+typedef UiObjectOpen = Future<void> Function(ObjectRef object);
 
 enum UiDispatchOutcome {
   applied,
@@ -65,7 +67,7 @@ class UiRenderCapture {
 }
 
 class UiSurfaceController extends ChangeNotifier {
-  UiSurfaceController(ValidatedUiPlan plan, {this.onEvent})
+  UiSurfaceController(ValidatedUiPlan plan, {this.onEvent, this.onOpenObject})
     : _current = plan,
       session = UiSessionState(plan.snapshot) {
     session.accept(plan);
@@ -74,6 +76,7 @@ class UiSurfaceController extends ChangeNotifier {
   ValidatedUiPlan get current => _current;
   final UiSessionState session;
   final UiEventSink? onEvent;
+  final UiObjectOpen? onOpenObject;
   final _receipts = <String, UiBusinessReceipt>{};
   Map<String, UiBusinessReceipt> get receipts => Map.unmodifiable(_receipts);
   final _pending = <String, UiPendingAction>{};
@@ -224,10 +227,29 @@ class UiSurfaceController extends ChangeNotifier {
     if (event.kind == 'cancel' && isPending(node)) {
       return UiDispatchOutcome.stale;
     }
+    final dispatchPlan = current;
+    final action = current.catalog.actions[node.events[event.kind]?.actionRef];
+    final rowObject = action?.localAction == UiLocalAction.openRow
+        ? session.rowObject(node, event.payload)
+        : null;
     final outcome = session.dispatch(event, current, current.catalog);
     if (outcome == UiEventOutcome.applied) {
       _seenEvents.add(event.eventId);
       notifyListeners();
+      if (rowObject != null && onOpenObject != null) {
+        // A synchronous listener may have advanced the plan during notification.
+        if (_disposed || !identical(dispatchPlan, current)) {
+          return UiDispatchOutcome.stale;
+        }
+        try {
+          await onOpenObject!(rowObject);
+        } catch (_) {
+          if (!_disposed) {
+            portError = 'Local object navigation failed.';
+            notifyListeners();
+          }
+        }
+      }
       return UiDispatchOutcome.applied;
     }
     if (outcome != UiEventOutcome.unsupported) {
@@ -389,7 +411,26 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
       ),
   ];
 
-  Widget render(UiNode n, Map<String, UiNode> nodes, UiRenderCapture capture) {
+  Widget render(
+    UiNode n,
+    Map<String, UiNode> nodes,
+    UiRenderCapture capture, {
+    bool useAdapter = true,
+  }) {
+    if (useAdapter && identical(capture.catalog, library2UiCatalog)) {
+      return renderLibrary2Component(
+        UiAdapterContext(
+          capture: capture,
+          controller: controller,
+          node: n,
+          nodes: nodes,
+          renderChild: (child) => render(child, nodes, capture),
+          legacy: () => render(n, nodes, capture, useAdapter: false),
+        ),
+      );
+    }
+
+    final renderController = controller;
     // Each closure holds this invocation's capture, never a mutable field.
     void dispatch(UiNode node, String kind, [Object? value]) {
       controller.dispatchCaptured(capture, node, kind, value);
@@ -447,7 +488,30 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
                   : TextInputType.number,
               readOnly: !n.events.containsKey('change'),
               onChanged: n.events.containsKey('change')
-                  ? (v) => dispatch(n, 'change', v)
+                  ? (v) async {
+                      final outcome = await renderController.dispatchCaptured(
+                        capture,
+                        n,
+                        'change',
+                        v,
+                      );
+                      if (outcome != UiDispatchOutcome.applied &&
+                          mounted &&
+                          identical(controller, renderController) &&
+                          identical(fields[key], input)) {
+                        final accepted =
+                            controller.session
+                                .resolve(n.bindings['draft']!)
+                                ?.toString() ??
+                            '';
+                        input.value = TextEditingValue(
+                          text: accepted,
+                          selection: TextSelection.collapsed(
+                            offset: accepted.length,
+                          ),
+                        );
+                      }
+                    }
                   : null,
             ),
           ],
@@ -625,8 +689,7 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
 
   @override
   Widget build(BuildContext context) {
-    if (!identical(controller.current.catalog, dynamicUiCatalog) &&
-        !identical(controller.current.catalog, minimalUiCatalog)) {
+    if (!supportedUiCatalogs.contains(controller.current.catalog)) {
       return snapshotFallback(
         controller.current.snapshot,
         controller.current.intent,

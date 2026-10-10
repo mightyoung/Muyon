@@ -51,7 +51,7 @@ class UiComponentSchema {
            e.key: Set<Object>.unmodifiable(e.value),
        }),
        childComponents = Set.unmodifiable(childComponents),
-       properties =Map.unmodifiable(_propertiesOnly(properties)),
+       properties = Map.unmodifiable(_propertiesOnly(properties)),
        requiredProperties = Set.unmodifiable(requiredProperties),
        bindings = Map.unmodifiable({
          for (final e in bindings.entries)
@@ -72,7 +72,7 @@ class UiComponentSchema {
   final Map<String, Set<String>> eventActions;
   final bool allowsChildren;
 
-  /// NOT READY (slice 1c scaffold): metadata only, not consulted by validation.
+  /// Collection slot shapes enforced by the shared validator.
   final Map<String, UiCollectionShape> collections;
   final Map<String, Set<Object>> allowedValues;
   final Set<String> childComponents;
