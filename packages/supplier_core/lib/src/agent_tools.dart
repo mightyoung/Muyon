@@ -214,12 +214,14 @@ void _validateToolArguments(String name, Map<String, Object?> arguments) {
     if (value is Map && schema['properties'] is Map) {
       final properties = schema['properties'] as Map;
       for (final key in schema['required'] as List? ?? const []) {
-        if (!value.containsKey(key) || value[key] == null)
+        if (!value.containsKey(key) || value[key] == null) {
           _badArgument('$path.$key', 'required');
+        }
       }
       for (final entry in properties.entries) {
-        if (value[entry.key] != null)
+        if (value[entry.key] != null) {
           validate(entry.value as Map, value[entry.key], '$path.${entry.key}');
+        }
       }
     }
     if (value is List && schema['items'] is Map) {
@@ -232,22 +234,27 @@ void _validateToolArguments(String name, Map<String, Object?> arguments) {
 
   validate(schema, arguments, 'arguments');
   for (final key in schema['required'] as List? ?? const []) {
-    if (arguments[key] is String && (arguments[key] as String).isEmpty)
+    if (arguments[key] is String && (arguments[key] as String).isEmpty) {
       _badArgument('$key', 'required');
+    }
   }
-  if (name == 'search' && (arguments['keywords'] as List).isEmpty)
+  if (name == 'search' && (arguments['keywords'] as List).isEmpty) {
     _badArgument('keywords', 'required');
+  }
   if (arguments['offset'] case final int offset) {
     if (offset < 0) _badArgument('offset', 'expected a non-negative integer');
   }
-  if (arguments['snapshot'] == '')
+  if (arguments['snapshot'] == '') {
     _badArgument('snapshot', 'expected a non-empty string');
-  if ((arguments['offset'] as int? ?? 0) > 0 && arguments['snapshot'] == null)
+  }
+  if ((arguments['offset'] as int? ?? 0) > 0 && arguments['snapshot'] == null) {
     _badArgument('snapshot', 'required for pagination; restart from offset 0');
+  }
   if (name == 'quote_options' &&
       arguments['qty'] != null &&
-      tryDecimal(arguments['qty'] as String, positive: true) == null)
+      tryDecimal(arguments['qty'] as String, positive: true) == null) {
     _badArgument('qty', 'expected a positive decimal');
+  }
   if ((name == 'spec_classes' || name == 'match_item') &&
       arguments['class'] is String) {
     final code = arguments['class'] as String;
@@ -255,8 +262,9 @@ void _validateToolArguments(String name, Map<String, Object?> arguments) {
   }
   if (name == 'match_item' && arguments['item_id'] == null) {
     for (final key in ['class', 'requirement']) {
-      if (arguments[key] is! String || arguments[key] == '')
+      if (arguments[key] is! String || arguments[key] == '') {
         _badArgument(key, 'required');
+      }
     }
   }
   if (name == 'query') {
@@ -273,8 +281,9 @@ void _validateToolArguments(String name, Map<String, Object?> arguments) {
       final value = condition['value'];
       final List values;
       if (op == 'in') {
-        if (value is! List || value.isEmpty || value.length > 100)
+        if (value is! List || value.isEmpty || value.length > 100) {
           _badArgument('value', 'expected a list of 1-100 values');
+        }
         values = value;
       } else {
         values = [value];
@@ -282,12 +291,15 @@ void _validateToolArguments(String name, Map<String, Object?> arguments) {
       for (final value in values) {
         if (value == null) _badArgument('value', 'required for $op');
         if (op == 'contains') continue;
-        if (f.kind == Kind.boolean && value is! bool)
+        if (f.kind == Kind.boolean && value is! bool) {
           _badArgument('value', 'expected a boolean');
-        if (f.kind == Kind.decimal && tryDecimal('$value') == null)
+        }
+        if (f.kind == Kind.decimal && tryDecimal('$value') == null) {
           _badArgument('value', 'expected a decimal');
-        if (f.kind == Kind.integer && num.tryParse('$value') == null)
+        }
+        if (f.kind == Kind.integer && num.tryParse('$value') == null) {
           _badArgument('value', 'expected a number');
+        }
       }
     }
   }
@@ -739,8 +751,9 @@ Map<String, Object?> _bounds(int total, int limit) => {
 
 int _offsetValue(Map<String, Object?> a) {
   final offset = a['offset'] ?? 0;
-  if (offset is! int || offset < 0)
+  if (offset is! int || offset < 0) {
     invalid('offset', 'expected a non-negative integer');
+  }
   return offset;
 }
 

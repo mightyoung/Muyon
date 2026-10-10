@@ -243,7 +243,7 @@ void main() {
   test('synchronous probe exposes changes to every token component', () {
     var current = token();
     final frozen = current;
-    final UiPublishTokenProbe probe = () => current;
+    UiPublishToken probe() => current;
     expect(probe(), frozen);
     for (final changed in [
       token(baseSnapshotRef: const SnapshotRef('budget', 8)),

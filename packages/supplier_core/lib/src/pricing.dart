@@ -65,8 +65,9 @@ bool meetsMinimumQuantity(
   String unit,
   BigInt quantity,
 ) {
-  if (quote['unit_snapshot'] == unit)
+  if (quote['unit_snapshot'] == unit) {
     return quantity >= micros(quote['min_qty']! as String);
+  }
   final source = unitFactor(product, quote['unit_snapshot']! as String);
   final target = unitFactor(product, unit);
   return source != null &&
@@ -126,11 +127,13 @@ String? _convertedPrice(
   final sourceMode = quote['tax_mode'];
   if (quote['currency'] != currency ||
       !const ['included', 'excluded'].contains(taxMode) ||
-      !const ['included', 'excluded'].contains(sourceMode))
+      !const ['included', 'excluded'].contains(sourceMode)) {
     return null;
+  }
   final price = (quote['deal_price'] ?? quote['price'])! as String;
-  if (sourceMode == taxMode)
+  if (sourceMode == taxMode) {
     return fromMicros(roundedDivide(micros(price) * numerator, denominator));
+  }
   final rate = quote['tax_rate'] as String?;
   if (rate == null) return null;
   final hundred = BigInt.from(100) * _micro;

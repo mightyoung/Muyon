@@ -105,15 +105,17 @@ void _checkDirectory(Uint8List bytes, int limit) {
     if (locator < 0 ||
         u32(locator) != 0x07064b50 ||
         u32(locator + 4) != 0 ||
-        u32(locator + 16) != 1)
+        u32(locator + 16) != 1) {
       bad();
+    }
     final z = u64(locator + 8);
     if (z < 0 ||
         z > locator - 56 ||
         u32(z) != 0x06064b50 ||
         u32(z + 16) != 0 ||
-        u32(z + 20) != 0)
+        u32(z + 20) != 0) {
       bad();
+    }
     count = u64(z + 32);
     size = u64(z + 40);
     offset = u64(z + 48);
@@ -126,8 +128,9 @@ void _checkDirectory(Uint8List bytes, int limit) {
       size < 0 ||
       offset < 0 ||
       offset > end ||
-      size > end - offset)
+      size > end - offset) {
     bad();
+  }
   final stop = offset + size;
   var seen = 0;
   for (var p = offset; p < stop;) {

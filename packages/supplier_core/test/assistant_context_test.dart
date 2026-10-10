@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('large history is indexed and the exact original can be paged back', () {
-    final original = '约束：必须含税且不少于2台。' + '资料🙂' * 6000;
+    final original = "约束：必须含税且不少于2台。${'资料🙂' * 6000}";
     final context = AssistantContext(
       system: 'system rules',
       question: '继续这个要求',
@@ -72,8 +72,9 @@ void main() {
           if (message['tool_calls'] case final List values) {
             calls.addAll(values.map((v) => v['id'] as String));
           }
-          if (message['role'] == 'tool')
+          if (message['role'] == 'tool') {
             results.add(message['tool_call_id'] as String);
+          }
         }
         expect(calls, results);
         expect(calls, contains('call$i'));

@@ -32,8 +32,7 @@ typedef Transport =
     Future<Map<String, Object?>> Function(Map<String, Object?> body);
 
 class LlmClient {
-  LlmClient(this.config, {Transport? transport, this.run, this.checkpoint})
-    : _transport = transport;
+  LlmClient(this.config, {this._transport, this.run, this.checkpoint});
   final LlmConfig config;
   final Transport? _transport;
   final AiRun? run;
@@ -137,8 +136,9 @@ class LlmClient {
         try {
           final decoded = jsonDecode(content);
           if (decoded is Map<String, Object?> &&
-              (validate == null || validate(decoded)))
+              (validate == null || validate(decoded))) {
             return decoded;
+          }
         } on FormatException {
           // retry below
         }

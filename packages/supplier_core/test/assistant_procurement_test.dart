@@ -114,7 +114,7 @@ void main() {
       (await run(t, 'procurement_stage', {
             'source_id': source.id,
             'row_id': source.products.single.id,
-            if (itemId != null) 'item_id': itemId,
+            'item_id': ?itemId,
           }))['candidate_id']
           as String;
   String budget({String requirement = '物理核数>=8核；中国制造', String model = 'A100'}) {
@@ -495,26 +495,28 @@ void main() {
       }),
       throwsFormatException,
     );
-    for (final type in ['product', 'quotation'])
+    for (final type in ['product', 'quotation']) {
       expect(
         () => guardAssistantProcurementWrite('create_record', type, {
           'name': 'Fake',
         }),
         throwsFormatException,
       );
+    }
     for (final field in [
       'product_id',
       'quotation_id',
       'unit_cost',
       'unit_price',
       'requirement',
-    ])
+    ]) {
       expect(
         () => guardAssistantProcurementWrite('update_record', 'project_item', {
           field: null,
         }),
         throwsFormatException,
       );
+    }
   });
   test(
     'approval denial, cancellation, readonly and stale versions write no imports',
@@ -673,7 +675,7 @@ void main() {
       expect(report, contains(source.url));
       expect(report, contains('来源签名：${source.digest}'));
       expect(report, contains('来源：'));
-      expect(report, isNot(contains('{\"candidate_id\"')));
+      expect(report, isNot(contains('{"candidate_id"')));
       expect(report, contains('source_supported'));
     },
   );
