@@ -242,7 +242,11 @@ class MuyonHost {
         storage,
         WorkspaceRepository(database),
         ModuleRegistry(
-          modules ?? [InquiryBusinessModule(() => host), ...moduleCatalog(researchRuntime: () => host.research)],
+          modules ??
+              [
+                InquiryBusinessModule(() => host),
+                ...moduleCatalog(researchRuntime: () => host.research),
+              ],
           knownCapabilities: hostCapabilityIds,
         ),
         CapabilityRegistry(),
@@ -298,16 +302,21 @@ class MuyonHost {
       host.services.transfer.onAccepted = host.acceptedResearchImports.accept;
       host.projections.onApplied = host.services.knowledge.followProjections(
         (ref) => ref.moduleId == 'research' && ref.objectType == 'document'
-            ? confirmRegisteredResearchDocument(ref,
-                sources: () => host.registry.modules.whereType<BusinessModuleV2>()
+            ? confirmRegisteredResearchDocument(
+                ref,
+                sources: () => host.registry.modules
+                    .whereType<BusinessModuleV2>()
                     .where((module) => module.manifest.id == 'research')
-                    .expand((module) => module.searchSources).toList(),
-                authorityRevision: () => host.modules.scopeAuthorityRevision('research'))
+                    .expand((module) => module.searchSources)
+                    .toList(),
+                authorityRevision: () =>
+                    host.modules.scopeAuthorityRevision('research'),
+              )
             : confirmIndexedSource(
-          ref,
-          research: () => host.research,
-          inquiry: () => host.inquiry,
-        ),
+                ref,
+                research: () => host.research,
+                inquiry: () => host.inquiry,
+              ),
       );
       host.services.transfer.onPendingReceived = () {
         if (host._closing) return;

@@ -23,6 +23,10 @@ REG-3b 的旧 `index_invalidation.dart` 源码和 DA 集未变，但 8 个旧命
 
 Leader A 原文冻结 `4702ee5248cfdb3120225d3f71f8778de447e7c3`，只有36行新增文档，非作者范围复核通过。其 c265 时点的“AIUI-8/9未合”及Mac字体根因推断按历史保留，不采为当前完成/确诊结论。现状/账本/条件计划候选 `3bfdbbdcd8d17d32f8c7296ae97cc4ecb761e6d2` 已获非作者精确文档复审，最终集成仅更新当前证据；默认值和任何凭据、构建、设备安装或分发均未改变。
 
-执行边界：用户另行删除已合远端分支；本批未重建旧分支、不prune或删除本地工作。唯一保留的review/aiui6-reg3b-integration-20261010固定f8，用户明确授权其全部提交进入develop、发布门禁通过且无活跃续写后删除；保留此commit与CI/审查链接供恢复，不扩大到任务分支。命令行Git/gh当前访问失败，现有连接器仍能读取精确develop指针；若用连接器正常FF，须先核最终树与受测f8除docs外相同、保留f8及Leader A4702祖先，再以expected_sha=a68、force=false推进，并亲查最终publisher终态。连接器读回不得写作git ls-remote成功。
+执行边界：用户另行删除已合远端分支；本批未重建旧分支、不prune或删除本地工作。待清理两条指定分支为review/aiui6-reg3b-integration-20261010和review/leader-a-status-20261010；前者文档组合已推进至df74，后者固定4702。用户明确授权仅在各自全部提交进入develop、发布门禁通过且无活跃续写后删除；保留此commit与CI/审查链接供恢复，不扩大到任务分支。命令行Git/gh当前访问失败，现有连接器仍能读取精确develop指针；若用连接器正常FF，须先核最终树与受测f8除docs及实际formatter输出的bootstrap纯格式外相同，最终新SHA须另跑全8套CI、保留f8及Leader A4702祖先，再以expected_sha=a68、force=false推进，并亲查最终publisher终态。连接器读回不得写作git ls-remote成功。
 
 边界：AIUI-6 只提供单个已保存 Inquiry 对象的有界只读快照，不代表报价聚合、预算总额、导入预览或对话壳已接线。REG-3b 验证真实研究文件、版本与宿主权限竞态及公开 knowledge.search 拒绝旧证据，保留 raw KnowledgeService.search 的既有缓存语义；不代表旧 QA hash 校验已全部迁移或 REST/Exchange/剩余写工具已完成。默认开关、真实模型、Android 和全场景验收均另设门槛。
+
+文档组合 `df74bc553b7dbde5693b2f2f36b4134593b133e8` 的 [CI 38058736679](https://github.com/mightyoung/Muyon/actions/runs/38058736679) 于2026-10-10 14:29:23 UTC终态SUCCESS；8/8 analyze和8/8 suites均通过。独立复核实际summary/DA与f8仅source/run元数据不同，409个loaded源码记录、全部DA/unhit及43gate保持，19unknown不作零覆盖。该绿色结果只证明原只读快照/REG-3b和文档组合，不证明后续生产卡片接线、开关持久化或Android integration test已交付。
+
+本轮bootstrap格式输出来自隔离工具提交 `962cf81bd05ba05de49e73f370f1298571068529` 的 [CI 38060427739](https://github.com/mightyoung/Muyon/actions/runs/38060427739)（SUCCESS），采用既有CI的Flutter3.47.5 / Dart3.13.4并先执行同样的flutter pub get，原flutter_lints include解析警告消除。输入SHA256 `a60b924682ccd8320e7763c3cf4ea371ec20484df03913ea71ad1c3b3ac5be31`，输出 `16a909b580ad4d5f75d5faba8afe32722f7a52317f82dba23650e48f3174d55c`；与首次未解析依赖时的格式输出一致。临时workflow不进入本批产品树，无应用打包、安装或部署。
