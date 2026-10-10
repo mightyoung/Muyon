@@ -235,13 +235,15 @@ class _MuyonTabsState extends State<MuyonTabs> {
     index = _validIndex(oldWidget.selectedIndex ?? index);
   }
 
-  void select(int selected) {
-    if (widget.selectedIndex == null) setState(() => index = selected);
-    widget.onChanged?.call(selected);
+  void select(MuyonTabs rendered, int selected) {
+    if (!mounted || !identical(widget, rendered)) return;
+    if (rendered.selectedIndex == null) setState(() => index = selected);
+    rendered.onChanged?.call(selected);
   }
 
   @override
   Widget build(BuildContext context) {
+    final rendered = widget;
     final t = MuyonTokens.of(context);
     final enabled =
         widget.state == UiComponentState.ready &&
@@ -264,11 +266,11 @@ class _MuyonTabsState extends State<MuyonTabs> {
                   label:
                       '${widget.labels[i]}，第 ${i + 1} 个，共 ${widget.labels.length} 个',
                   excludeSemantics: true,
-                  onTap: enabled ? () => select(i) : null,
+                  onTap: enabled ? () => select(rendered, i) : null,
                   child: InkWell(
                     key: ValueKey('tab-$i'),
                     borderRadius: BorderRadius.circular(MuyonTokens.pillRadius),
-                    onTap: enabled ? () => select(i) : null,
+                    onTap: enabled ? () => select(rendered, i) : null,
                     child: UiMinTarget(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -336,14 +338,16 @@ class Disclosure extends StatefulWidget {
 class _DisclosureState extends State<Disclosure> {
   late bool open = widget.initiallyExpanded;
 
-  void toggle() {
-    final next = !(widget.expanded ?? open);
-    if (widget.expanded == null) setState(() => open = next);
-    widget.onChanged?.call(next);
+  void toggle(Disclosure rendered) {
+    if (!mounted || !identical(widget, rendered)) return;
+    final next = !(rendered.expanded ?? open);
+    if (rendered.expanded == null) setState(() => open = next);
+    rendered.onChanged?.call(next);
   }
 
   @override
   Widget build(BuildContext context) {
+    final rendered = widget;
     final t = MuyonTokens.of(context);
     final enabled =
         widget.state == UiComponentState.ready &&
@@ -361,11 +365,11 @@ class _DisclosureState extends State<Disclosure> {
             expanded: expanded,
             label: widget.title,
             excludeSemantics: true,
-            onTap: enabled ? toggle : null,
+            onTap: enabled ? () => toggle(rendered) : null,
             child: InkWell(
               key: const ValueKey('disclosure-toggle'),
               borderRadius: BorderRadius.circular(MuyonTokens.radius),
-              onTap: enabled ? toggle : null,
+              onTap: enabled ? () => toggle(rendered) : null,
               child: UiMinTarget(
                 child: Row(
                   children: [

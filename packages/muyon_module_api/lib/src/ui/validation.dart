@@ -401,10 +401,6 @@ List<String> _componentEditErrors(UiNode node, DataSnapshot snapshot) {
       errors.add('selection_mode:${node.id}');
     }
   }
-  if (node.component == 'Tabs' &&
-      !node.children.contains(snapshot.initialUiState[ref.id])) {
-    errors.add('tab_selection:${node.id}');
-  }
   if (node.component == 'Slider' && spec is UiNumberEdit && spec.step != null) {
     final divisions = (spec.max - spec.min) / spec.step!;
     if (!divisions.isFinite) {

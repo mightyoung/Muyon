@@ -437,21 +437,26 @@ void main() {
     );
     expect(result.isValid, isTrue, reason: result.errors.join(','));
     final opened = <(ObjectRef, String)>[];
+    var businessCalls = 0;
     await mount(
       tester,
       result,
+      onEvent: (_) async {
+        businessCalls++;
+      },
       onOpenObject: (object, {required nodeId}) async {
         opened.add((object, nodeId));
       },
     );
     for (final id in ['target', 'second']) {
-      tester
-          .widget<TextButton>(find.byKey(ValueKey('aiui2-$id-row-a')))
-          .onPressed!();
+      final button = find.byKey(ValueKey('aiui2-$id-row-a'));
+      await tester.ensureVisible(button);
+      await tester.tap(button);
       await tester.pump();
     }
     expect(opened.map((value) => value.$2), ['target', 'second']);
     expect(opened[0].$1, opened[1].$1);
+    expect(businessCalls, 0);
   });
 
   testWidgets(

@@ -192,7 +192,9 @@ void main() {
       final old = bundle(1);
       final next = bundle(
         2,
-        stringSpec: UiStringEdit(accepts: (value) => value != '3'),
+        stringSpec: UiStringEdit(
+          accepts: (value) => value == '2' || value == '4',
+        ),
       );
       final session = UiSessionState(old.snapshot)
         ..accept(old)

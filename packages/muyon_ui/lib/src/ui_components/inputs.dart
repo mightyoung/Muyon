@@ -63,36 +63,47 @@ class _ChoiceState extends State<Choice> {
     super.dispose();
   }
 
-  void toggle(String option) {
-    final next = {...widget.selection};
-    if (widget.multiple) {
+  void toggle(Choice rendered, String option) {
+    if (!mounted || !identical(widget, rendered)) return;
+    final next = {...rendered.selection};
+    if (rendered.multiple) {
       next.contains(option) ? next.remove(option) : next.add(option);
     } else {
       next
         ..clear()
         ..add(option);
     }
-    if (widget.usesIds) {
-      widget.onChangedIds?.call(Set.unmodifiable(next));
+    if (rendered.usesIds) {
+      rendered.onChangedIds?.call(Set.unmodifiable(next));
     } else {
-      widget.onChanged?.call(next);
+      rendered.onChanged?.call(next);
     }
   }
 
-  void addCustom() {
-    if (widget.usesIds) return;
+  void addCustom(Choice rendered) {
+    if (!mounted || !identical(widget, rendered)) return;
+    if (rendered.usesIds) return;
     final text = custom.text.trim();
     if (text.isEmpty) return;
-    if (!widget.options.contains(text) && !extra.contains(text)) {
+    if (!rendered.options.contains(text) && !extra.contains(text)) {
       setState(() => extra.add(text));
     }
     custom.clear();
-    toggle(text);
+    toggle(rendered, text);
   }
 
   @override
   Widget build(BuildContext context) {
+    final rendered = widget;
     final t = MuyonTokens.of(context);
+    VoidCallback? callbackAt(int index, List<String> all, bool enabled) {
+      if (!enabled) return null;
+      final identity = rendered.usesIds
+          ? rendered.identityAt(index)
+          : all[index];
+      return () => toggle(rendered, identity);
+    }
+
     final on = _enabled(
       widget.state,
       widget.usesIds ? widget.onChangedIds : widget.onChanged,
@@ -126,13 +137,7 @@ class _ChoiceState extends State<Choice> {
                   inMutuallyExclusiveGroup: !widget.multiple,
                   label: all[optionIndex],
                   excludeSemantics: true,
-                  onTap: on
-                      ? () => toggle(
-                          widget.usesIds
-                              ? widget.identityAt(optionIndex)
-                              : all[optionIndex],
-                        )
-                      : null,
+                  onTap: callbackAt(optionIndex, all, on),
                   child: InkWell(
                     key: ValueKey(
                       'choice-${widget.usesIds ? widget.identityAt(optionIndex) : all[optionIndex]}',
@@ -140,13 +145,7 @@ class _ChoiceState extends State<Choice> {
                     borderRadius: BorderRadius.circular(
                       MuyonTokens.optionRadius,
                     ),
-                    onTap: on
-                        ? () => toggle(
-                            widget.usesIds
-                                ? widget.identityAt(optionIndex)
-                                : all[optionIndex],
-                          )
-                        : null,
+                    onTap: callbackAt(optionIndex, all, on),
                     child: UiMinTarget(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -223,14 +222,14 @@ class _ChoiceState extends State<Choice> {
                     controller: custom,
                     enabled: on,
                     decoration: const InputDecoration(labelText: '其他（自己填写）'),
-                    onSubmitted: on ? (_) => addCustom() : null,
+                    onSubmitted: on ? (_) => addCustom(rendered) : null,
                   ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: UiMinTarget(
                       child: TextButton(
                         key: const ValueKey('choice-custom-add'),
-                        onPressed: on ? addCustom : null,
+                        onPressed: on ? () => addCustom(rendered) : null,
                         child: const Text('添加'),
                       ),
                     ),

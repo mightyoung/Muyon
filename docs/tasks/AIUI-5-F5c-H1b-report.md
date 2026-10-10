@@ -1,4 +1,4 @@
-# F5c H1b implementation and bounded review closure
+# F5c H1b implementation and five-blocker review closure
 
 Status: proposed, no develop/main merge. Native implementation follows the parent's explicit exclusive assignment of state.dart, surface.dart, publication.dart, ui_contract.dart and corresponding tests. F3b retains apps port/PR18 tests; F5c provides patches/review; parent is sole integrator.
 
@@ -22,7 +22,7 @@ Legal non-view edits start one real UiRecomputePort call with frozen complete sc
 2. Public inline4236613892: view key classified as confirmedRecordRef bypassed the draft-only guard. Paired non-view/view and draft/confirmed-record cases witnessed missing view_business_input before the fix. Every typed business input is now checked against view specs regardless of classification, at the shared node/plan validator and direct event defense.
 3. Public inline4236613894: row open callback lacked the originating node ID. Actual two-table/same-object rendered clicks witnessed empty origins instead of target/second. UiObjectOpen now requires named String nodeId; dispatch sends the captured node's ID. F4c can construct its return anchor and still owns final scope/lease/source checks after awaits.
 
-Old public4236410550 was previously fixed by the draft guard;4236410552 sorting was adjudicated against the adopted String.compareTo rule. These old public comments are not a substitute for the integrator's still-unreceived complete five-item private report at /workspace/muyon-pr28-480b-review-20261010.md. No claim that all four older private blockers are closed is made.
+Old public4236410550 was previously fixed by the draft guard;4236410552 sorting was adjudicated against the adopted String.compareTo rule. The parent subsequently delivered the full five-item report directly. Its source was static review; our independently executed behavior regressions and exact closure matrix are in AIUI-5-F5c-five-blocker-review.md. All five findings are now repaired and covered; earlier public findings are not substituted for the complete checklist.
 
 ## RED to GREEN evidence
 
@@ -41,10 +41,18 @@ Final full package source checks: API190 PASS, UI505 PASS. Strict flutter_lints:
 
 F3b must inject its real live port/full token probe into the two original mounted PR18 Widget tests, preserve30/40/extracted2/same-controller/database total_changes assertions and test sequential accepted bases. The deferred protocol fixture here is not a formula or database acceptance claim. Consume the exact shared-core commit, not independently guessed constructor/batch policy.
 
-The complete private integrator report is not available on this Mac; a read-only filename search and public PR evidence did not locate it. Cross-thread evidence-request messaging was rejected by automatic approval as lacking direct human authorization; no message was sent or workaround attempted. Direct report text or explicit human messaging authorization is still required to reconcile the remaining older blockers exactly.
+The complete private report was delivered directly by the parent and no longer blocks this task. The earlier cross-thread evidence-request message was rejected by automatic approval; no message was sent or workaround attempted. No cross-thread messaging permission is needed to use the report now provided.
 
 Maintain one writer for shared files. This task retains assigned core ownership until parent reassigns it; apps/workspace host injection and navigation scope ownership are not taken over. No production catalog switch, runtime activation or merge approval is inferred from these checks.
 
 ## Final synchronous-reference repair
 
 A further actual controller subclass regression showed the public overridable current getter could run after coordinator publication but before session installation, mutate view and leave the objects split (expected published, actual staleToken). The controller now retains its constructed session privately and uses the private coordinator capability during the final install; no public virtual host getter is read in that section. The public session/current API remains available. post-probe-getter-real-red.log and post-probe-getter-green.log witness failure/restoration. The controller integration matrix is now7 PASS. Final UI full regression is506 PASS; module API source is unchanged from its final190 PASS. Strict own-file/UI analysis has no diagnostics, with only the same two external-owner infos. Temporary configs removed again.
+
+## Full five-item closure supplement
+
+The real StatefulWidget bottom callbacks now capture their rendered widget and refuse a callback once that widget has been replaced, before local mutation or dispatch. Choice freezes option identity at build time; it never reinterprets a saved old index against new option IDs. Tabs/Disclosure retain the same State and current controlled behavior. Both actual InkWell and Semantics closures are tested across accepted publication and rebuild. Initial typed Tabs values missing from the current child list are accepted and render home without rewriting the scalar. Runtime unknown child events remain rejected.
+
+The same-object/two-table regression now uses actual tester.tap and asserts zero business calls. The rebase rule is exactly String '2' or '4', with controller/direct-session unresolved business input rejection even when active value, host draft and revision match. Temporary gate removal is a separately labelled negative control, restored before any full run or commit. See the shared five-blocker checklist for source, test and evidence boundaries.
+
+Final five-item closure source: module API190/UI514 PASS; strict own-file/whole-UI diagnostics0, with only the same two external-owner infos. Temporary configs removed. Exact CI for this additional source must be checked independently of the prior9a dual-green baseline.
