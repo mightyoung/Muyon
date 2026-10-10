@@ -3,10 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:supplier_core/src/lan.dart';
+import 'package:supplier_core/src/lan_receive_diagnostics.dart';
 import 'package:test/test.dart';
 
 void main() {
   final clients = <LanNode, DeviceIdentity>{};
+  final receiveEvents = <LanNode, List<LanReceiveEvent>>{};
+  final responseSummaries = <LanNode, String>{};
 
   Future<LanNode> start({
     LanLimits limits = const LanLimits(),
@@ -14,7 +17,8 @@ void main() {
     void Function()? onPeers,
   }) async {
     final dir = Directory.systemTemp.createTempSync('lan-security-');
-    final node = await LanNode.start(
+    final events = <LanReceiveEvent>[];
+    final node = await LanReceiveDiagnostics(events.add).run(() => LanNode.start(
       id: 'local',
       name: 'Local',
       inbox: dir,
@@ -23,7 +27,8 @@ void main() {
       limits: limits,
       discoveryPort: 0,
       httpPort: 0,
-    );
+    ));
+    receiveEvents[node] = events;
     addTearDown(() async {
       await node.stop();
       dir.deleteSync(recursive: true);
@@ -78,7 +83,8 @@ void main() {
         );
       req.add(bytes);
       final res = await req.close();
-      await res.drain<void>();
+      final bodyBytes = await res.fold<int>(0, (total, chunk) => total + chunk.length);
+      responseSummaries[node] = 'HTTP ${res.statusCode}, bodyBytes=$bodyBytes';
       return res.statusCode;
     } finally {
       client.close(force: true);
@@ -299,7 +305,19 @@ void main() {
         trickle.cancel();
       }
       await expectInboxEmpty(node);
-      expect(await post(node, [7]), HttpStatus.ok);
+      expect(
+        await post(node, [7]),
+        HttpStatus.ok,
+        reason: '${responseSummaries[node]}\n${receiveEvents[node]!.join('\n')}',
+      );
+      final deadlines = receiveEvents[node]!.where(
+        (event) => event.kind == LanReceiveEventKind.deadline,
+      );
+      expect(deadlines, hasLength(1), reason: receiveEvents[node]!.join('\n'));
+      expect(deadlines.single.deadlineExpired, isTrue);
+      expect(receiveEvents[node]!.where(
+        (event) => event.kind == LanReceiveEventKind.cleaned,
+      ).first.cleanupSucceeded, isTrue);
     },
   );
 
@@ -319,6 +337,13 @@ void main() {
       await node.stop().timeout(const Duration(seconds: 2));
       await response;
       expect(node.inbox.listSync(), isEmpty);
+      final cleaned = receiveEvents[node]!.where(
+        (event) => event.kind == LanReceiveEventKind.cleaned,
+      ).single;
+      expect(cleaned.stopped, isTrue);
+      expect(cleaned.cleanupSucceeded, isTrue);
+      expect(cleaned.activeUploads, 0);
+      expect(cleaned.reservedBytes, 0);
     },
   );
 
