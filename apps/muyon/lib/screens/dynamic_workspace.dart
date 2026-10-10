@@ -158,6 +158,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
                       }
                       await router?.dispatch(event);
                     }),
+          externalContentProbe: () => widget.repository.authorizationFacts.readTask(widget.taskId).requiresConfirmation,
           receiptLookup: receipt,
         );
         if (c.canCloseWithoutCheckpoint) {

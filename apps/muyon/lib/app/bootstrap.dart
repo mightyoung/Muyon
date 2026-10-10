@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import '../platform/ui_planning_source.dart';
+import '../platform/inquiry_ui_planning_source.dart';
+import '../assistant/ui_presentation_preference.dart';
 import '../services/knowledge/registered_research_source.dart';
 
 import 'package:muyon_module_api/ui_contract.dart';
@@ -336,10 +337,8 @@ class MuyonHost {
         gateway: host.services.gateway,
         tools: host.tools,
         executionDeviceId: device,
-        uiPlanningSource: TaskReceiptUiPlanningSource(
-          host.foundation,
-          host.tools,
-        ).read,
+        uiPlanningSource: InquiryUiPlanningSource(host).read,
+        presentationPreference: UiPresentationPreference(host.foundation),
         uiPlanningMode: UiPlanningMode.motivation,
         uiPlanningEnabled: false,
         gate: HostPolicyModelGate(host.authorizationPolicy),

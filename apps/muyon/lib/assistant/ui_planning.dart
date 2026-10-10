@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:muyon_module_api/ui_contract.dart';
 
 import '../platform/foundation_repository.dart';
+import 'stream_ui_planning.dart';
 
 class UiPlanningHostState {
   const UiPlanningHostState({
@@ -26,7 +27,8 @@ typedef UiPlanningStateSource = Future<UiPlanningHostState?> Function(
 );
 
 class UiPlannedPresentation {
-  const UiPlannedPresentation(this.result, this.request, this.validated);
+  const UiPlannedPresentation(this.result, this.request, this.validated, {this.stream});
+  final HostUiStreamProgress? stream;
   final UiPlanningResult result;
   final UiPlanningRequest? request;
   final ValidatedUiPlan? validated;
@@ -43,9 +45,34 @@ class UiPlanningHarness {
     this.requestView,
     this.enabled = true,
     this.cancelTimedOutRequest,
+    this.allowsPresentation,
+    this.presentationIdentity,
   });
   final FoundationRepository repository;
+  bool canPlanTask(String id) => enabled && (allowsPresentation?.call(id) ?? true);
   final UiPlanningStateSource source;
+  final bool Function(String)? allowsPresentation;
+  final Object? Function(String)? presentationIdentity;
+  final _streamProgress = <String, HostUiStreamProgress>{};
+  final _requestIdentities = Map<UiPlanningRequest, Object?>.identity();
+  bool isCurrentRequest(UiPlanningRequest request) =>
+    enabled && (allowsPresentation?.call(request.taskId) ?? true) &&
+    _requestIdentities.containsKey(request) &&
+    identical(_requestIdentities[request], presentationIdentity?.call(request.taskId));
+  HostUiStreamProgress? streamProgress(String taskId) =>
+    enabled && (allowsPresentation?.call(taskId) ?? true) &&
+      (!_latest.containsKey(taskId) || _latest[taskId]?.validated != null)
+        ? _streamProgress[taskId] : null;
+  void publishStream(HostUiStreamProgress value) {
+    if (isCurrentRequest(value.request)) {
+      _streamProgress[value.request.taskId] = value;
+      repository.refresh();
+    }
+  }
+  void invalidate() {
+    _latest.clear(); _streamProgress.clear(); _requests.clear(); _requestIdentities.clear();
+    repository.refresh();
+  }
   final Map<UiPlanningMode, UiPlanningPort> providers;
   UiPlanningMode mode;
   bool enabled;
@@ -56,6 +83,8 @@ class UiPlanningHarness {
   final Future<void> Function(UiPlanningRequest)? cancelTimedOutRequest;
   final List<Object?> Function(PersonalTask)? requestView;
   final _requests = <String, Future<UiPlannedPresentation>>{};
+  final _identityEpochs = Map<Object, int>.identity();
+  int _nextIdentityEpoch = 0;
   final _latest = <String, UiPlannedPresentation>{};
   UiPlannedPresentation? presentation(String taskId) => _latest[taskId];
   static UiPlannedPresentation fallback(
@@ -71,12 +100,18 @@ class UiPlanningHarness {
     Map<String, Object?>? expected,
   }) async {
     final task = repository.task(taskId);
+    final identity = presentationIdentity?.call(taskId);
     if (!enabled ||
+        !(allowsPresentation?.call(taskId) ?? true) ||
         task == null ||
         task.payload['uiPlanningDisabled'] == true) {
       return fallback('planning_disabled');
     }
     final state = await source(task);
+    if (!(allowsPresentation?.call(taskId) ?? true) ||
+        !identical(identity, presentationIdentity?.call(taskId))) {
+      return fallback('host_request_changed');
+    }
     if (state == null) return fallback('host_state_unavailable');
     if (expected != null &&
         (expected.length != 4 ||
@@ -97,6 +132,7 @@ class UiPlanningHarness {
         : task.summary ?? '';
     if (answer.trim().isEmpty) return fallback('answer_unavailable');
     final key = jsonEncode([
+      identity == null ? 0 : _identityEpochs.putIfAbsent(identity, () => ++_nextIdentityEpoch),
       task.id,
       answer,
       state.snapshot.ref.id,
@@ -108,11 +144,13 @@ class UiPlanningHarness {
     ]);
     final selectedMode = mode;
     return _requests
-        .putIfAbsent(key, () => _run(task, state, selectedMode))
+        .putIfAbsent(key, () => _run(task, state, selectedMode, identity))
         .then((value) async {
           final now = await source(repository.task(task.id)!);
           var current = value;
           if (!enabled ||
+              !(allowsPresentation?.call(taskId) ?? true) ||
+              presentationIdentity?.call(taskId) != identity ||
               mode != selectedMode ||
               now == null ||
               now.snapshot.ref != state.snapshot.ref ||
@@ -141,7 +179,12 @@ class UiPlanningHarness {
               current = fallback('current_authority_changed', value.request);
             }
           }
-          if (mode == selectedMode) _latest[task.id] = current;
+          if (mode == selectedMode &&
+              identical(identity, presentationIdentity?.call(taskId)) &&
+              (allowsPresentation?.call(taskId) ?? true)) {
+            _latest[task.id] = current;
+            repository.refresh();
+          }
           return current;
         });
   }
@@ -150,6 +193,7 @@ class UiPlanningHarness {
     PersonalTask task,
     UiPlanningHostState state,
     UiPlanningMode selectedMode,
+    Object? identity,
   ) async {
     final stepAnswer =
         ((task.payload['step'] as Map?)?['assistant'] as Map?)?['content'];
@@ -220,6 +264,11 @@ class UiPlanningHarness {
     );
     final provider = providers[selectedMode];
     if (provider == null) return fallback('provider_unavailable', request);
+    if (!enabled || !(allowsPresentation?.call(task.id) ?? true) ||
+        !identical(identity, presentationIdentity?.call(task.id))) {
+      return fallback('host_request_changed', request);
+    }
+    _requestIdentities[request] = identity;
     try {
       final result = await provider.plan(request).timeout(
         timeout,
@@ -254,10 +303,15 @@ class UiPlanningHarness {
           !now.allowedActionRefs.containsAll(allowed)) {
         return fallback('host_state_changed', request);
       }
-      return UiPlannedPresentation(result, request, checked.validatedPlan);
+      return UiPlannedPresentation(result, request, checked.validatedPlan,
+        stream: provider is StreamMotivationUiPlanningProvider ? provider.progressFor(request) : null);
     } on TimeoutException {
+      if (identical(_streamProgress[task.id]?.request, request)) _streamProgress.remove(task.id);
+      repository.refresh();
       return fallback('planner_timeout', request);
     } catch (_) {
+      if (identical(_streamProgress[task.id]?.request, request)) _streamProgress.remove(task.id);
+      repository.refresh();
       return fallback('planner_unavailable', request);
     }
   }

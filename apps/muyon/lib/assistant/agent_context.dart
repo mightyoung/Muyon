@@ -74,6 +74,7 @@ class AgentContext {
   final AgentEventSink events;
   final DateTime Function() clock;
   UiPlanningHarness? uiPlanning;
+  final uiModelChunks = <String, void Function(String)>{};
   final uiModelReplies = <String, Completer<String>>{};
   final uiModelChecks = <String, Future<void> Function()>{};
   final ToolSelectionStrategy selectionStrategy;
@@ -133,6 +134,7 @@ class AgentContext {
   }
 
   static bool native(PersonalTask task) =>
+      task.payload['uiPlanningStream'] != true &&
       ((task.payload['profile'] as Map?)?['capabilities']
           as Map?)?['nativeTools'] ==
       true;
@@ -222,6 +224,7 @@ class AgentContext {
           'revision': presentation.validated?.plan.revision,
         });
       }
+      if (task.payload['uiPlanningInternal'] == true) return;
       await repository.notify(
         title: '助手任务完成',
         body: answer.length > 160 ? answer.substring(0, 160) : answer,
@@ -322,6 +325,7 @@ class AgentContext {
       expected: {PersonalTaskState.running},
     );
     if (saved && state == PersonalTaskState.interrupted) {
+      if (task.payload['uiPlanningInternal'] == true) return;
       await repository.notify(
         title: '助手任务结果未知',
         body: error ?? '',
