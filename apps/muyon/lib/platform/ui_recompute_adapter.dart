@@ -1,7 +1,3 @@
-// Pinned PR21 has no public export yet; H2 belongs to F5b. Remove this narrow
-// import suppression when that owner's export is available.
-// ignore: implementation_imports
-import 'package:muyon_module_api/src/ui/recomputation.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
 import 'ui_formula_registry.dart';
@@ -108,6 +104,9 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
       initialUiState: previous.initialUiState,
       sources: previous.sources,
       sourceDigests: previous.sourceDigests,
+      editSpecs: previous.editSpecs,
+      collections: previous.collections,
+      computedEvidence: previous.computedEvidence,
     );
     final displayed = <String>{
       for (final node in basePlan.plan.nodes)
@@ -128,6 +127,10 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
         if (binding.kind != BindingKind.uiState) continue;
         if (!parameterStateKeys.contains(binding.id)) {
           return reject(['formula_view_or_undeclared_parameter:${binding.id}']);
+        }
+        final spec = previous.editSpecs[binding.id];
+        if (spec is! UiStringEdit || spec.view) {
+          return reject(['formula_state_not_parameter_string_spec:${binding.id}']);
         }
         if (input.currentUiState[binding.id] is! String) {
           return reject(['formula_state_not_string:${binding.id}']);

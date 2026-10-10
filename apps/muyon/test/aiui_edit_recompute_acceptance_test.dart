@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/platform/ui_formula_registry.dart';
 import 'package:muyon/platform/ui_recompute_adapter.dart';
-// H2 public export is owner-controlled and absent from pinned PR21.
-// ignore: implementation_imports
-import 'package:muyon_module_api/src/ui/recomputation.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 import 'package:supplier_core/supplier_core.dart';
@@ -14,8 +11,8 @@ import 'package:supplier_core/supplier_core.dart';
 import '../../../packages/supplier_core/test/fixtures.dart' as business;
 
 // Test-first acceptance on current interfaces. The widget cases intentionally
-// require the missing edit -> recompute -> publication behavior. No production
-// publication shim, replacement evaluator, skip, or business write is used.
+// exercise edit -> real recompute -> owner publication on one mounted surface.
+// No publication shim, replacement evaluator, skip, or business write is used.
 // Adapter cases exercise only candidate preparation through the fixed F5c port.
 void main() {
   late Directory root;
@@ -67,6 +64,7 @@ void main() {
         ),
       },
       initialUiState: {'qty': item.data['qty']},
+      editSpecs: {'qty': UiStringEdit(accepts: _acceptsQuantity)},
     );
     definition = UiFormulaDefinition.product(
       computationId: 'budget-line-cost:$itemId',
@@ -356,6 +354,23 @@ void main() {
     expect(number.evaluations, isEmpty);
   });
 
+  test('adapter_requires_registered_nonview_string_specs', () {
+    final original = snapshot;
+    for (final spec in [const UiStringEdit(view: true), const UiBoolEdit()]) {
+      snapshot = DataSnapshot(
+        ref: original.ref,
+        facts: original.facts,
+        initialUiState: original.initialUiState,
+        computations: original.computations,
+        editSpecs: {'qty': spec},
+      );
+      final prepared = adapter().prepare(input('3'));
+      expect(prepared.result.errors, ['formula_state_not_parameter_string_spec:qty']);
+      expect(prepared.batch, isNull);
+      expect(prepared.evaluations, isEmpty);
+    }
+  });
+
   test('adapter_real_unit_mismatch_keeps_legal_manual_qty_and_no_candidate', () {
     final price = snapshot.facts['unit_cost']!;
     snapshot = DataSnapshot(
@@ -368,6 +383,7 @@ void main() {
         ),
       },
       initialUiState: snapshot.initialUiState,
+      editSpecs: snapshot.editSpecs,
       computations: snapshot.computations,
     );
     final frozen = input('3');
@@ -393,6 +409,7 @@ void main() {
         ),
       },
       initialUiState: snapshot.initialUiState,
+      editSpecs: snapshot.editSpecs,
       computations: snapshot.computations,
     );
     final prepared = adapter().prepare(input('3'));
@@ -409,7 +426,26 @@ void main() {
     testWidgets('edit_qty_${sample.$1}_publishes_fixed_total_${sample.$2}', (
       tester,
     ) async {
-      final controller = UiSurfaceController(plan());
+      late UiSurfaceController controller;
+      final observed = _ObservedRecomputePort(UiLiveFormulaRecomputePort(
+        currentPlan: () => controller.current,
+        registry: registry,
+        computations: {'total': definition},
+        parameterStateKeys: {'qty'},
+      ));
+      controller = UiSurfaceController(
+        plan(),
+        recomputePort: observed,
+        publishTokenProbe: () => UiPublishToken(
+          baseSnapshotRef: controller.current.snapshot.ref,
+          draftRevision: controller.session.draftRevision,
+          hostGeneration: 11,
+          sourceGeneration: 12,
+          permissionGeneration: 13,
+          scopeKey: 'fixture-selected-item:$itemId',
+        ),
+      );
+      final originalSession = controller.session;
       addTearDown(() async {
         await tester.pumpWidget(const SizedBox.shrink());
         controller.dispose();
@@ -428,6 +464,9 @@ void main() {
           ),
         ),
       );
+      final originalField = tester.widget<TextFormField>(
+        find.byKey(const ValueKey('quantity-field')),
+      ).controller;
       expect(find.text('行成本: 20'), findsOneWidget);
       expect(controller.session.resolve(const BindingRef.computed('total')), '20');
       await tester.enterText(
@@ -437,7 +476,7 @@ void main() {
       await tester.pump();
 
       // Preconditions establish a real renderer event, an accepted parameter
-      // edit, and no business effect before the missing publication assertion.
+      // edit, and no business effect before the original publication assertion.
       expect(controller.session.userOverrides['qty'], sample.$1);
       expect(controller.session.resolve(const BindingRef.uiState('qty')), sample.$1);
       expect(controller.session.draftRevision, 1);
@@ -448,21 +487,26 @@ void main() {
       expect(store.get('project_item', itemId)!.data['qty'], '2');
       expect(store.budget(projectId, withWarnings: false).lines.single.cost, '20');
       expect(store.db.select('SELECT total_changes() AS n').single['n'], businessChanges);
-      final frozenState = Map<String, Object?>.unmodifiable({
-        for (final key in snapshot.initialUiState.keys)
-          key: controller.session.resolve(BindingRef.uiState(key)),
-      });
-      final candidate = registry.evaluate(
-        UiFormulaInvocation.forDefinition(definition, snapshot.ref),
-        snapshot,
-        frozenState,
-      );
-      expect(candidate.status, UiFormulaStatus.ready);
-      expect(candidate.value, sample.$2); // Fixed 30/40, not another evaluator.
+      expect(observed.inputs, hasLength(1));
+      expect(observed.results, hasLength(1));
+      expect(observed.inputs.single.previousSnapshot, same(snapshot));
+      expect(observed.inputs.single.currentUiState['qty'], sample.$1);
+      expect(observed.results.single.nextSnapshot, same(controller.current.snapshot));
+      expect(controller.session, same(originalSession));
+      expect(controller.current.snapshot.ref, const SnapshotRef('budget-line-preview', 8));
+      expect(controller.current.snapshot.initialUiState['qty'], '2');
+      expect(controller.current.snapshot.editSpecs['qty'], same(snapshot.editSpecs['qty']));
+      expect(controller.current.plan.snapshotRef, controller.current.snapshot.ref);
+      expect(controller.current.intent.snapshotRef, controller.current.snapshot.ref);
+      expect(controller.current.plan.revision, 12);
+      expect(controller.current.snapshot.computations['total']!.inputVersion, controller.current.snapshot.ref);
+      expect(controller.recomputing, isFalse);
+      expect(controller.outdated, isFalse);
+      expect(controller.publicationErrors, isEmpty);
+      expect(tester.widget<TextFormField>(find.byKey(const ValueKey('quantity-field'))).controller, same(originalField));
       expect(tester.takeException(), isNull);
 
-      // Expected RED on the baseline: actual remains '20'. This is a desired
-      // behavior assertion, never an assertion that the missing feature works.
+      // Preserve the original independent behavior oracle after real port injection.
       expect(
         controller.session.resolve(const BindingRef.computed('total')),
         sample.$2,
@@ -470,6 +514,60 @@ void main() {
             'the mounted surface; evaluating a detached candidate is insufficient.',
       );
       expect(find.text('行成本: ${sample.$2}'), findsOneWidget);
+      if (sample.$1 == '3') {
+        final firstPublished = controller.current.snapshot;
+        await tester.enterText(find.byKey(const ValueKey('quantity-field')), '4');
+        await tester.pump();
+        expect(observed.inputs, hasLength(2));
+        expect(observed.inputs.last.previousSnapshot, same(firstPublished));
+        expect(observed.inputs.last.currentUiState['qty'], '4');
+        expect(controller.current.snapshot.ref, const SnapshotRef('budget-line-preview', 9));
+        expect(controller.session, same(originalSession));
+        expect(controller.session.draftRevision, 2);
+        expect(controller.session.resolve(const BindingRef.computed('total')), '40');
+        expect(find.text('行成本: 40'), findsOneWidget);
+        expect(controller.current.snapshot.initialUiState['qty'], '2');
+        controller.adoptExtracted('qty');
+        await tester.pump();
+        expect(observed.inputs, hasLength(3));
+        expect(observed.inputs.last.currentUiState['qty'], '2');
+        expect(controller.current.snapshot.ref, const SnapshotRef('budget-line-preview', 10));
+        expect(controller.session, same(originalSession));
+        expect(controller.session.draftRevision, 3);
+        expect(controller.session.userOverrides.containsKey('qty'), isFalse);
+        expect(controller.session.resolve(const BindingRef.computed('total')), '20');
+        expect(find.text('行成本: 20'), findsOneWidget);
+        expect(tester.widget<TextFormField>(find.byKey(const ValueKey('quantity-field'))).controller, same(originalField));
+        expect(store.db.select('SELECT total_changes() AS n').single['n'], businessChanges);
+        expect(store.get('project_item', itemId)!.data['qty'], '2');
+        expect(tester.takeException(), isNull);
+      }
     });
+  }
+}
+
+
+bool _acceptsQuantity(String value) {
+  try {
+    ExactDecimal.parse(value);
+    return true;
+  } on FormatException {
+    return false;
+  }
+}
+
+// Observes the real injected port; does not implement formulas or publication.
+final class _ObservedRecomputePort implements UiRecomputePort {
+  _ObservedRecomputePort(this.delegate);
+  final UiRecomputePort delegate;
+  final inputs = <UiRecomputeInput>[];
+  final results = <UiRecomputeResult>[];
+
+  @override
+  Future<UiRecomputeResult> rebuild(UiRecomputeInput input) async {
+    inputs.add(input);
+    final result = await delegate.rebuild(input);
+    results.add(result);
+    return result;
   }
 }

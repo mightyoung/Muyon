@@ -131,3 +131,14 @@ apps 新增 `UiLiveFormulaRecomputePort`，实现既有 `UiRecomputePort`，每�
 核心 patch 到位后的接线：原两条 mounted Widget 的同一 controller 注入本 live port；host probe 同步读该 controller 当前 snapshot/draft 加 host/source/permission generation 和逐字 scope，完整六字段返回。编辑触发 owner 的唯一调度/原子事务；apps 不监听 controller 再运行平行发布。保留固定30/40和无业务写断言，追加同 controller/session 与 S/I/P/inputVersion 一致；真实 `prepareRebase` 保留 extracted/override/view/selection 各层。消费新版 snapshot 时 apps 候选需保留 editSpecs/collections 等 host metadata，公式 uiState 需 UiStringEdit 且 !view；此项待实际依赖固定后修改，当前不冒充 library-2 支持。
 
 目前 mounted 两条仍是有效 RED；当前端口测试未核 Actions 前保持 NOT RUN。完整 H1b 组合结果待核心 owner patch，不能把 detached port 测试通过算作 mounted GREEN。
+
+
+## 8. 固定 H1b 实际接线候选
+
+父任务随后提供 PR28 固定 `9a8ab727c9fe5f89a59f8aeca7dbb84e4adb003c` 并明确按其文档/代码注入。已完整读 live-injection-contract / H1b-report 及实际 surface；以普通 merge 将固定未合入依赖组合到原任务分支，没有 merge develop。唯一 add/add 冲突选 owner 的完整 ui_recomputation_contract_test.dart；全部 API/UI 文件与固定 owner HEAD 逐字一致，未自行改共享实现。
+
+契约确认后关闭第7节 batch 疑问：controller 每次只调用一次 port.rebuild，按冻结 base 生成同布局 forward plan，移除 nextIntent 不允许的事件，真实 validator 准入；apps 不另提供 batch 或二次求值。原两条 mounted Widget 现注入真实 UiLiveFormulaRecomputePort 和同步完整六字段 probe。观察 wrapper 仅记录真实输入/结果，不算公式或调度器。保留固定30/40原断言、同mounted controller/session/field controller、S/I/P/inputVersion一致、extracted2及真实DB零写入。qty3用例再编辑4，必须以真实接受的S8为base得到S9/40；显式adoptExtracted必须S10/20，override移除，session/field不重建。
+
+apps候选保留owner新增editSpecs/collections/computedEvidence；公式uiState槽要求明确UiStringEdit且!view，并继续检查宿主参数集合及String值。通过public ui_contract导入，移除旧临时私有import抑制。仍仅minimal/dynamic标量闭环，没有声称library2/collection公式或生产入口启用。新固定组合尚待Actions实际结果；旧RED日志保留历史证据，不提前宣称GREEN。完整14场景、CAS重开和F4c行导航scope/lease仍未验收。
+
+局部git diff --check（apps与本任务doc）通过。固定owner依赖中H1b-core-owner-candidate.patch两个空context行有既存尾空白；完整组合diff --check会报告该产物，未擅自改owner patch或把它记作本任务检查通过。
