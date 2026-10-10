@@ -26,6 +26,10 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
+COVERAGE_DIR="$ROOT/.coverage-run"
+mkdir -p "$COVERAGE_DIR"
+rm -f "$COVERAGE_DIR/summary.json"
+printf '[]\n' > "$COVERAGE_DIR/suite-summary.json"
 status=0
 cd "$ROOT" || exit 1
 flutter pub get >/dev/null || { echo "pub get failed"; echo "CI SUMMARY: FAILED (pub get)"; exit 1; }
@@ -87,10 +91,24 @@ test_total=0
 for entry in "${suites[@]}"; do
   test_total=$((test_total + 1))
   IFS='|' read -r name dir target <<<"$entry"
-  log=$(cd "$ROOT/$dir" && flutter test --no-pub --reporter compact --timeout 120s "$target" 2>&1; echo "exit=$?")
+  mkdir -p "$COVERAGE_DIR/$name"
+  rm -f "$COVERAGE_DIR/$name/lcov.info"
+  log=$(cd "$ROOT/$dir" && flutter test --no-pub --reporter compact --timeout 120s --coverage --coverage-package '^(muyon|muyon_module_api|muyon_ui|muyon_ui_preview|prototype_module|research_module|supplier_core|inquiry_module)$' --coverage-path "$COVERAGE_DIR/$name/lcov.info" "$target" 2>&1; echo "exit=$?")
   code=${log##*exit=}
   log=$(echo "$log" | tr '\r' '\n')
   summary=$(echo "$log" | grep -E "All tests passed|Some tests failed|All other tests passed" | tail -1 | sed -E 's/^[0-9:]+ //')
+  python3 - "$COVERAGE_DIR/suite-summary.json" "$name" "$code" "$summary" <<'PY_SUMMARY'
+import json, re, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+rows = json.loads(path.read_text())
+summary = sys.argv[4]
+skips = re.search(r'~([0-9]+)', summary)
+rows.append(dict(suite=sys.argv[2], exit_code=int(sys.argv[3]),
+                 summary=summary, skipped=int(skips.group(1)) if skips else 0,
+                 skip_reason_attribution='unknown; inspect test declarations/logs'))
+path.write_text(json.dumps(rows, indent=2) + '\n')
+PY_SUMMARY
   if [[ "$code" -eq 0 && -n "$summary" ]]; then
     echo "test     $name: ok  $summary"
     test_ok=$((test_ok + 1))
@@ -102,6 +120,21 @@ for entry in "${suites[@]}"; do
     status=1; failed+=("test:$name")
   fi
 done
+
+if ! python3 "$ROOT/scripts/coverage/test_da_details.py"; then
+  status=1; failed+=("coverage:details-fixtures")
+fi
+if ! python3 "$ROOT/scripts/coverage/da_details.py" --reports "$COVERAGE_DIR" --output "$COVERAGE_DIR/da-details.json"; then
+  status=1; failed+=("coverage:details")
+fi
+
+coverage_args=(--reports "$COVERAGE_DIR" --output "$COVERAGE_DIR/summary.json" --baseline "$ROOT/scripts/coverage/baseline.json")
+if ! python3 "$ROOT/scripts/coverage/test_check.py"; then
+  status=1; failed+=("coverage:fixtures")
+fi
+if ! python3 "$ROOT/scripts/coverage/check.py" "${coverage_args[@]}"; then
+  status=1; failed+=("coverage:report")
+fi
 
 if [[ $status -eq 0 ]]; then
   echo "CI SUMMARY: OK (analyze $analyze_ok/$analyze_total, test $test_ok/$test_total suites)"
