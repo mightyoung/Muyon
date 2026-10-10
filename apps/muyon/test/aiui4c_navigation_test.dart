@@ -473,16 +473,16 @@ void main() {
       final restored = await _show(tester, fresh!, plan, () { calls++; });
       expect(module.activations, 0);
       final snapshot = restored.controller!.surface.current.snapshot;
-      final scope = HostUiWorkspaceStore(fresh!.foundation, taskId: 'task').scopeKey;
+      final scope = HostUiWorkspaceStore(fresh.foundation, taskId: 'task').scopeKey;
       await tester.tap(find.text('查看对象 · inquiry'));
       await workspaceVisible(tester, find.textContaining('无法打开引用，原草稿仍保留'));
       expect(module.activations, 1);
       expect(module.runtime!.rejected, 1); // Actual pinned Inquiry resolver rejected.
       expect(module.runtime!.opened, 0);
       expect(module.runtime!.released, 0); // No actual lease was obtained.
-      expect(fresh!.scopeAuthority.stamp(const AssistantScope.global(), {'inquiry'}), isNotNull);
+      expect(fresh.scopeAuthority.stamp(const AssistantScope.global(), {'inquiry'}), isNotNull);
       expect(restored.controller!.surface.current.snapshot, same(snapshot));
-      expect(HostUiWorkspaceStore(fresh!.foundation, taskId: 'task').scopeKey, scope);
+      expect(HostUiWorkspaceStore(fresh.foundation, taskId: 'task').scopeKey, scope);
       expect(restored.controller!.surface.session.userOverrides['count'], 3.0);
       expect(find.text('初始化前已变化对象'), findsNothing);
       expect(find.text('真实询价对象'), findsNothing);
