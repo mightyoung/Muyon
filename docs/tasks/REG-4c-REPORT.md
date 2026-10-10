@@ -70,9 +70,9 @@ quotation 仅开放 quoted_on、lead_time_days、warranty_months、valid_until�
 
 选择范围过滤的原因：它让目录与注册器现有执行权限一致，减少本会话不能执行的候选，而不扩大模型声明的窗口、不减少输出保留、不改压缩保留历史或污点规则。继续抹掉字段类型/枚举以适配某个夹具会降低工具输入说明质量，仍不能解决后续模块目录增长；更改预算或增加夹具窗口则会绕开真实门禁。过滤只是发现层约束，prepare/invoke 的范围复核、审批、revision 与回执仍须保留，不能以目录缺席代替执行鉴权。
 
-### 尚未应用的精确 diff
+### 获权实施的精确 diff
 
-两个共享文件均待 integrator 划权；F5b 的 shared UI state/surface/module_api 新目录不涉及。以下补丁已在上述 head 上通过 `git apply --check`，只证明适用性，**尚未实施或验证 GREEN**。
+两个共享文件已由唯一 integrator 正式划权，限定范围目录过滤及独立回归；F5b 的 shared UI state/surface/module_api 新目录不涉及。以下补丁此前在上述 head 上通过 `git apply --check`；在取得下述有效行为 RED 后已实施。验证过程及最终 exact-head 结果在 PR #31 更新，不预先宣称 GREEN。
 
 ```diff
 diff --git a/apps/muyon/lib/assistant/agent_task_factory.dart b/apps/muyon/lib/assistant/agent_task_factory.dart
@@ -127,3 +127,13 @@ flutter test --no-pub --reporter expanded \
 | 冻结任务不改权 | 新任务目录按创建时 scope 冻结；后续模块停用/对象 revision 变化仍由调用端复核拒绝，既有回执与批准绑定不得改变。 |
 
 执行顺序：先记录目录过滤断言的有效 RED，再应用获准的共享补丁；运行目录回归、原协议单例、north_star_inquiry/inquiry_* 原测试；完成新 head 基线 GREEN、五项安全变异各自行为断言失败、恢复源码 GREEN；最后完整 ci.sh、push/PR exact-head CI 跟到终态。失败在授权范围内修复，仍不放宽窗口或删除断言。
+
+### 获权后实际执行记录
+
+唯一 integrator 已正式授权 `agent_task_factory.dart`、`tool_registry.dart`，非作者复审精确提案没有确定阻断。两文件只新增只读范围查询与 chat 候选目录过滤；原 invoke/prepare 鉴权、预算/窗口/压缩参数、旧历史污点及原协议测试断言没有修改。
+
+独立回归为 `apps/muyon/test/inquiry_scope_catalog_test.dart`：三种范围分别检查注册矩阵、candidateIds 与 nativeTools；保留全范围工具，排除停用和 modelSelectable=false 工具；global 无新四写工具但 selectedObjects 必须仍可发现；直接 global 请求仍 `scope_mismatch` 拒绝，未批准的选定写入仍不得修改 Store/业务回执。
+
+有效范围 RED 为 `a2e94be44d655efb210c306b2f98a5133ecb5cd8`、[run 38032601387](https://github.com/mightyoung/Muyon/actions/runs/38032601387)：询价基线 GREEN；新目录回归 1 通过/4 失败，实际 Set 包含额外不匹配范围工具，或 global 目录仍含通用写工具；没有 loader 错误。更早 cc0f067 的夹具 const 构造错误不计有效 RED。原始证据仍仅在 `/tmp/reg4c-evidence/a2e94be-effective-scope-red.log` 和 Actions artifact。
+
+专属门禁现在依次运行询价行为基线、新范围回归、原宿主协议测试；隔离副本执行原五项写入安全变异，再将范围查询强制 true，要求新 global 矩阵断言失败；恢复后再次运行询价基线及范围回归。最终新 head 的完整 CI、五项安全变异和范围变异均需实际结果确认，不能引用前一 head 代替。

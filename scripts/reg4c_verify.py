@@ -28,14 +28,14 @@ def run(root, label, name=None, target=TARGET):
     return result
 
 
-def mutation(root, label, relative, before, after, test):
+def mutation(root, label, relative, before, after, test, target=TARGET):
     path = root / relative
     original = path.read_text()
     if original.count(before) != 1:
         raise RuntimeError(f'{label}: expected exactly one mutation site')
     try:
         path.write_text(original.replace(before, after, 1))
-        result = run(root, label, test)
+        result = run(root, label, test, target=target)
         meaningful = ('Expected:' in result.stdout and 'Actual:' in result.stdout
                       and '[E]' in result.stdout and
                       'Failed to load' not in result.stdout)
@@ -90,10 +90,21 @@ def main():
         mutation(copy, 'e-confirmation', TOOLS,
                  'effect: ToolEffect.write,', 'effect: ToolEffect.read,',
                  'unapproved generic write never changes the Store or writes a receipt')
+        mutation(copy, 'f-scope-catalog', 'apps/muyon/lib/platform/tool_registry.dart',
+                 '_require(toolId).supportedScopes.contains(kind);', 'true;',
+                 'scope catalog matches declared registration for global',
+                 target='test/inquiry_scope_catalog_test.dart')
+        print('REG4C scope catalog mutation: KILLED', flush=True)
     final = run(ROOT, 'green-after')
     if final.returncode != 0:
         print(final.stdout[-6000:])
         raise SystemExit('Restored original behavior gate failed')
+    restored_catalog = run(ROOT, 'scope-catalog-restored',
+                           target='test/inquiry_scope_catalog_test.dart')
+    if restored_catalog.returncode != 0:
+        print(restored_catalog.stdout[-6000:])
+        raise SystemExit('Restored scope catalog gate failed')
+    print('REG4C scope catalog restored: GREEN', flush=True)
     print('REG4C SUMMARY: GREEN; 5/5 safety mutations killed; restored source GREEN')
 
 

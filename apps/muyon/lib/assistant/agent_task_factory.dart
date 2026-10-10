@@ -48,6 +48,9 @@ class AgentTaskFactory {
             (t.descriptor.toolId != 'assistant.plan_ui' ||
                 ctx.uiPlanning?.enabled == true) &&
             t.available &&
+            ctx.tools.supportsScope(
+              t.descriptor.toolId, conversation.scope.kind,
+            ) &&
             (!readonly || t.descriptor.effect == ToolEffect.read) &&
             t.descriptor.modelSelectable &&
             ctx.tools.permitsCategory(t.descriptor.toolId),

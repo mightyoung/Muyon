@@ -278,6 +278,9 @@ class ToolRegistry {
       List.unmodifiable(_tools.values.map((tool) => tool.info));
   RegisteredToolInfo? inspect(String toolId) => _tools[toolId]?.info;
 
+  bool supportsScope(String toolId, AssistantScopeKind kind) =>
+      _require(toolId).supportedScopes.contains(kind);
+
   Set<String> authorityModules(String toolId) {
     final tool = _require(toolId);
     return Set.unmodifiable(
