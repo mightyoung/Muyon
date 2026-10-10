@@ -9,7 +9,7 @@ enum FactState {
   conflict,
 }
 
-enum BindingKind { fact, uiState, computed, sourceSpan }
+enum BindingKind { fact, uiState, computed, sourceSpan, collection }
 
 class SnapshotRef {
   const SnapshotRef(this.id, this.revision);
@@ -28,6 +28,7 @@ class BindingRef {
   const BindingRef.uiState(this.id) : kind = BindingKind.uiState;
   const BindingRef.computed(this.id) : kind = BindingKind.computed;
   const BindingRef.sourceSpan(this.id) : kind = BindingKind.sourceSpan;
+  const BindingRef.collection(this.id) : kind = BindingKind.collection;
   final BindingKind kind;
   final String id;
   @override

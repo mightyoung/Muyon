@@ -39,6 +39,9 @@ class UiSessionState {
       case BindingKind.computed:
         final result = snapshot.computations[ref.id];
         return result?.inputVersion == snapshot.ref ? result?.value : null;
+      case BindingKind.collection:
+        // No host collection registry yet (slice 1b): never resolves.
+        return null;
       case BindingKind.sourceSpan:
         final source = snapshot.sources[ref.id];
         if (source == null) return null;
