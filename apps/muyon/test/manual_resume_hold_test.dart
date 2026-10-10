@@ -33,7 +33,7 @@ class _Host {
     );
     tools.register(
       providerId: 'test',
-      descriptor: const ToolDescriptor(
+      descriptor: ToolDescriptor(
         toolId: 'write', moduleId: 'test', effect: ToolEffect.write,
         parameterSchema: {
           'type': 'object',
