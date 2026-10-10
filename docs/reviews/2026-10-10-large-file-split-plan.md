@@ -635,3 +635,65 @@
 ## 疑似缺陷
 
 本次不评价行为。拆分时保持原样、不要顺手改的位置：`surface.dart:871` 动态确认卡不传 `externalContent`。
+
+## 执行记录：拆开 `agent_eval.dart`
+
+方案提交 `065de7a9f51f897157417948c8c5433a0cbf5b8d`。拆分提交 `554c8efce2df2970d61538614498a5d21603e3e8`，说明是「纯搬运，无逻辑改动」。这一节是事后核对，不改前面的预计行数。
+
+父文件保留库注释、`library;`、原来的 import 和 `export`，再加 6 条 `part`。六个子文件第一行是 `part of 'agent_eval.dart';`。公开导入路径仍是 `package:muyon/assistant/agent_eval/agent_eval.dart`。
+
+按拆分前文件的行号（含两端）：父文件留 L1–58；`agent_eval_tasks.dart` 为 L60–275；`agent_eval_judge.dart` 为 L277–518；`agent_eval_gateway.dart` 为 L520–646；`agent_eval_run.dart` 为 L648–1008；`agent_eval_report.dart` 为 L1010–1170；`agent_eval_environment.dart` 为 L1172–1246。上文写环境段从 L1173 起。注释在 L1172，L1173 是空行，空行留在这一段里。
+
+### 拆后行数
+
+`wc -l`，含 `part` 和 `part of`。
+
+| 文件 | 行数 |
+|---|---:|
+| `agent_eval.dart` | 65 |
+| `agent_eval_tasks.dart` | 218 |
+| `agent_eval_judge.dart` | 244 |
+| `agent_eval_gateway.dart` | 129 |
+| `agent_eval_run.dart` | 363 |
+| `agent_eval_report.dart` | 163 |
+| `agent_eval_environment.dart` | 77 |
+| 合计 | 1259 |
+
+最大文件是 `agent_eval_run.dart`，363 行。这一段的目标是约 370。
+
+### 搬运核对
+
+对照拆分前的 `agent_eval.dart`（1246 行）和 `dart format` 之后的 7 个文件。去掉空行和 `import` 行，其余去掉行首行尾空白，排序后按多重集合比对。
+
+| 项 | 结果 |
+|---|---:|
+| 拆分前保留行 | 1141 |
+| 拆分后保留行 | 1153 |
+| 只在拆分前 | 0 |
+| 只在拆分后 | 12 |
+| 不允许的差异 | 0 |
+
+多出来的 12 行是 6 条 `part '…';` 和 6 条 `part of 'agent_eval.dart';`。没有新的 `export`。`dart format` 只改了父文件的空白。
+
+### analyze
+
+在 `apps/muyon` 跑 `flutter analyze`。info 也算失败。结果是 `No issues found! (ran in 22.0s)`，0 个问题。日志 `/tmp/grok9-analyze.log`。
+
+### 测试
+
+代理保持环境里的 `HTTP_PROXY` / `HTTPS_PROXY`（`http://127.0.0.1:10808`）。另设 `NO_PROXY=localhost,127.0.0.1,::1`，`no_proxy` 相同。没有导出 `MUYON_EVAL_REAL`，没有调用真实模型。没有跑 `scripts/ci.sh`，因为它会清掉代理。host 套件按该脚本的 `host|apps/muyon|test`，在 `apps/muyon` 执行 `flutter test --no-pub --reporter compact --timeout 120s test`。原始日志在 `/tmp`，不进仓库。失败的测试没有改产品代码。
+
+`flutter pub get` 和 analyze 曾改过三个 `analysis_options.yaml`，以及 macOS 的两个 `xcconfig` 和一个未跟踪的 `Podfile`。这些都已还原，不在拆分提交里，也不在本记录的提交里。
+
+| 范围 | 结果 |
+|---|---|
+| `grep -l -r --include='*.dart' agent_eval apps/muyon/test` 的 3 个文件：`agent_eval_test.dart`、`agent_eval_stream_capture_test.dart`、`confirm_title_test.dart`。日志 `/tmp/grok9-agent-eval-test.log` | 通过 43，失败 0，跳过 1。退出码 0 |
+| 上面这条跳过 | `agent_eval_test.dart` `real model: multi-step agent tasks on the current assistant`。日志写明未设置 `MUYON_EVAL_REAL=1` |
+| host 套件，170 个 `*_test.dart`。日志 `/tmp/grok9-host-test.log` | 通过 1584，失败 1，跳过 3。退出码 1。耗时 7 分 08 秒 |
+| 失败的一条 | `ui_formula_registry_mutation_test.dart` `source mutation is killed: unknown_formula_rejected`。`TimeoutException after 0:00:45` |
+
+`apps/muyon/test` 里只有三处测试级 `skip:`，本轮都没有设置它们要求的环境变量，和跳过数 3 一致。compact 日志没有逐条打出跳过原因。单独跑评测文件时确认了第一条。另外两条是其余的 `skip:` 声明：
+
+- `agent_eval_test.dart` `real model: multi-step agent tasks on the current assistant`
+- `llm_selection_eval_test.dart` `real model: native tool-calling baseline on the selection set`
+- `ocr_real_model_test.dart` `real fixed ONNX models with Dart BGR/DB/homography/CTC pipeline`（要 `MUYON_OCR_MODEL_DIR` 和 `MUYON_OCR_PYTHON`）
