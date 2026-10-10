@@ -12,7 +12,7 @@
 | PR38 原F4c片 | `5f6e291e3bf36a436c45a02afde983d77df7b92c` | [38049637152](https://github.com/mightyoung/Muyon/actions/runs/38049637152) / [38049639051](https://github.com/mightyoung/Muyon/actions/runs/38049639051) SUCCESS，仅旧head证据 |
 | PR38 对象准入修复 | `aaa175343eee08a4e53576b621bef2c17c16c06a` | [38052426475](https://github.com/mightyoung/Muyon/actions/runs/38052426475) / [38052429669](https://github.com/mightyoung/Muyon/actions/runs/38052429669) FAILURE：宿主1549/3skip/9fail及两项自有lint，仅旧head证据 |
 | PR38 获准夹具最终源 | `53aacb95e598d0e406f66082d8d6386fc7b8cecc` | [38054244081](https://github.com/mightyoung/Muyon/actions/runs/38054244081) / [38054246068](https://github.com/mightyoung/Muyon/actions/runs/38054246068) FAILURE：八测试全过host1562/3skip，只有三项自有分析告警 |
-| PR38 自有分析修正最终源 | `433436078c6c976cbfafcf2bad2f8575852d3ec6` | [38055080321](https://github.com/mightyoung/Muyon/actions/runs/38055080321) / [38055084736](https://github.com/mightyoung/Muyon/actions/runs/38055084736) 新运行待终态 |
+| PR38 自有分析修正最终源 | `433436078c6c976cbfafcf2bad2f8575852d3ec6` | [38055080321](https://github.com/mightyoung/Muyon/actions/runs/38055080321) / [38055084736](https://github.com/mightyoung/Muyon/actions/runs/38055084736) SUCCESS：八分析/测试通过，host1562/3skip、doctor23、Laya29 |
 | PR39 设置组合 | `76400fe0b640d89ec8bf72123a58b5040b63ee63` | [38049686964](https://github.com/mightyoung/Muyon/actions/runs/38049686964) / [38049689477](https://github.com/mightyoung/Muyon/actions/runs/38049689477) SUCCESS |
 | PR37 AIUI-9 | `055a8cbd1e82a63ef632abb013bfc9b2f180172d` | [38049438912](https://github.com/mightyoung/Muyon/actions/runs/38049438912) / [38049441446](https://github.com/mightyoung/Muyon/actions/runs/38049441446) SUCCESS |
 
@@ -30,7 +30,7 @@ job 12:19:02–12:34:57 UTC；八库分析/测试通过、host1575/3skip。它�
 host16680/19320；19未加载仍unknown，baseline不变。新修复不能沿用此测量。
 随后仅增量普通merge PR38修复到临时候选 `2efef5f85fdf46498469a95f9ca50b37795f5c1c`，
 父为摘要提交 `3be13e02258da1a50f72f1906acda9ae013ebb98` 与固定aaa175源；
-不重复整包合PR36/38/39，全部既有来源祖先保留，develop尚未推进。
+不重复整包合PR36/38/39，全部既有来源祖先保留，该历史阶段develop尚未推进。
 其摘要head `ca4378a7dbd9aad2c54a3ef5e6ab44bbd46e0d2f` 的
 [38052721032](https://github.com/mightyoung/Muyon/actions/runs/38052721032) 真实FAILURE，
 job 12:38:54–12:55:20 UTC；host1572/3skip/9fail，两项自有lint，其余七库分析/测试通过。
@@ -49,7 +49,15 @@ job 13:05:11–13:21:37 UTC；八库测试全过，host1585/3skip/API198，唯�
 不替代新成功组合。最终433436源只删这三个冗余`!`，20用例、全部断言、生产、获准旧九例、
 helper、2380/artifact/gate均未改；非作者精确机械增量复审通过。
 再普通增量merge至代码组合 `a42e4e5516b7b7ae1a5175569d8511013738ff79`，
-父为4e49摘要与433436最终源，新组合及发布CI未终态前不推进develop。
+父为4e49摘要与433436最终源。两文档子head `b41e19270f94ac51eeee08d4f41612b39d927f19`
+的[38055487124](https://github.com/mightyoung/Muyon/actions/runs/38055487124)实际SUCCESS，
+job 13:22:51–13:39:22 UTC；八库分析/测试通过，host1585/3skip/API198，doctor23、
+coverage自身5+9、Laya四脚本8+4+8+9=29全部通过。非作者实际全八库405源码hash、库存、
+DA与43严格门禁复算通过，host16707/19349；另七库同基线，19未加载源码保持unknown。
+397未改源码无命中下降/DA漂移：396条测量完全同，真实Inquiryadapter finally175回收多一次
+命中；四个改动源码旧DA人工映射无旧命中下降，新四源码匹配叶源。基线及floor不变。
+本最终交接仅文档更新，程序/测试/CI/基线树与已通过b41完全相同；正常合入前重新核
+develop，合入后核远端完整SHA并跟踪其精确发布CI，结果见执行回报。新40/41不在本组合。
 
 ## 跨组件与安全核实
 
@@ -86,7 +94,7 @@ helper、2380/artifact/gate均未改；非作者精确机械增量复审通过�
 两项unsupported拒绝，原typed/selection/anchor/重开与CAS失败零激活断言保留。
 旧3文件9项正向fixture缺proof或pin；用户已明确批准精确迁移，53aac最终源使用真实
 Inquiry/fullpin/实际lease与页面，保留返回、草稿、scroll、revision、anchor和释放次数断言。
-三旧文件输出及helper与获准v2逐字节一致，非作者精确源静态复审；完整新CI仍须通过，
+三旧文件输出及helper与获准v2逐字节一致，非作者精确源静态复审与源/组合完整CI通过，
 不能跳过或降低门禁，Research-origin例不可称科研页面正向验收。
 整来源stamp为保守变化证明，不独自证明精确对象/字段权限；真实pinnedresolve必须保留，
 初始化前变化依它核对。不能以固定snapshot或该修复宣称完整H3。其余33组件契约未见新增确定回归。
@@ -108,4 +116,4 @@ Mac三项golden、真实模型与各平台真机仍后置。2380全文扫描碰�
 
 源测量保留19个unloaded为unknown；自动严格gate只有API/models/transfer三范围，整库hash/DA
 是独立人工审计补充。已知transfer_service:1203 catch的正向+1不重置floor827，不称命中全集恒定。
-固定新组合的逐库测量和终态，以及正常发布后的远端读回见补记/执行回报。只代码集成，不打包部署。
+固定新组合的逐库测量和终态见上；正常发布后的精确CI与远端读回见执行回报。只代码集成，不打包部署。

@@ -17,7 +17,7 @@
   外围引用入口导航；collection cell仍只准入fact/computed，不新增sourceSpan准入。
   保存与插件页await前后仅复核任务、scope和当前snapshot身份，并释放lease；
   原独审确认最终宿主撤权/对象改版缺口；aaa175以现成双proof与真实pinned解析修复，
-  双非作者静态复审认可机制；旧fixture九项迁移已获准并冻结53aacb95，完整CI待终态。
+  双非作者静态复审认可机制；旧fixture九项迁移已获准并冻结53aacb95，最终433源/b41组合完整CI通过。
   typed Choice/Checklist/CompareTable往返、SQLite重开、scope失效和CAS拒绝有行为测试；
   使用真实询价公开协议委托夹具与SQLite，不代表完整询价/科研生产联调或热发布验收。
   CompareTable行详情callback未接线；对象/来源最终实时证明仍需补齐。
