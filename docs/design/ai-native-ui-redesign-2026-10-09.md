@@ -3,7 +3,31 @@
 日期：2026-10-09 · 作者：leader A · 状态：**已采纳**（用户 2026-10-09：§10 全部按建议，由 leader A 统一派发；并新增 §4.4 本体驱动的业务卡片）
 依据：用户 2026-10-09 要求「全面使用 AI 原生界面重新设计 UI」；[AI Agent 与智能交互整体设计方案](../superpowers/specs/2026-10-08-ai-native-architecture/Muyon_AI_Agent与智能交互整体设计方案.md)（下称「整体方案」）；[ADR-0002](../adr/0002-graded-assistant-authorization.md)；[ADR-0004](../adr/0004-module-contract-v2.md)；[设计稿 v6](v6/README.md) 与[前端开发备忘录](v6/frontend-memo.md)。
 
-## 2026-10-10 一致性补记（固定 develop 7773b7d）
+## 2026-10-10 当前实现切片（PR36～39）
+
+本批基线为 develop `c265eb13564ce8b485297fbdd3f1ddb351256e0d`。完整来源、
+独立契约审计、组合与发布结果见[本批集成审查](../tasks/AIUI-36-39-integration-review.md)。
+下述为实际实现范围，不替代原方案或第二阶段退出标准；下面的7773快照保留历史时态。
+
+- **AIUI-8**：设置进入真实宿主助手控制页，读取已有授权规则、状态与单条审计，
+  展示加载/空/失败/重试；目的地去用户信息、query及fragment。数据去向打开既有
+  DataFlow页面，该旧页的端点/错误展示不继承控制页的新脱敏保证。没有签发、撤销、
+  policy写入或自动发送；自动/少用/只文字三档、权限编辑与真机无障碍仍未交付。
+- **F4c固定快照片**：当前已验证计划所绑定collection中的fact/sourceSpan可沿既有
+  引用入口导航；保存与插件页await前后复核任务、scope、对象/来源身份并释放lease。
+  typed Choice/Checklist/CompareTable往返、SQLite重开、scope失效和CAS拒绝有行为测试；
+  使用注册公共协议夹具，不代表真实询价/科研页面或同mounted工作区热发布验收。
+- **AIUI-9**：只读适配当前已激活询价模块的真实保存快照，按已注册v2本体和完整
+  pinned ObjectRef核项目、scope、revision/digest及lifecycle。可信宿主KeyValue模板
+  分开展示保存事实与“建议（尚未写入）”，凭据排除、敏感/未核验值遮盖，复用显示预算。
+  模型不能给组件、路由或执行回调；全部提交禁用，未接对话/对象导航或业务写卡。
+  新建/编辑/关联/批量卡、领域双重校验、授权执行与真实回执仍是后续范围。
+
+本片不新增stream操作、组件类型、runtime、工具、授权或模型网络入口；原确认、
+回执、CAS及恢复边界保留。源分支测试与静态审计不能代替本批完整组合和develop发布CI，
+更不能代替live、真实模型、设备或Mac golden验收。
+
+## 历史一致性补记（2026-10-10，固定 develop 7773b7d）
 
 本补记追加现状与需求链接，保留本文原版；不改架构、三路动作、分级授权或模型只规划表达的决定。来源：父线程 `01a0f1f6-9060-7550-a2f0-c9bdd66e6019` 本次委派及“新改动记得更新总体设计”；详细版本、owner与验收见 [交付队列](../tasks/NEXT-DELIVERIES-2026-10-10-v1.md)。
 

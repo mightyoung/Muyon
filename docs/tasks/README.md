@@ -90,13 +90,13 @@
 | [GROK-6](GROK-6.md) 科研本体盘点（REG-3 前置） | `task/grok-6-research-ontology` | grokbot | — | 已合入（[审查](GROK-6-review.md)）；科研敏感度已确认（2026-10-09） |
 | [GROK-7](GROK-7.md) 科研场景交互走查清单（AIUI-7 前置） | `task/grok-7-research-walkthrough` | grokbot | GROK-6 | 已合入 `18ae5127474d6841ad331ca2251076ecca431a81`；独立复审通过，20 目的/首批 7/9 公式；勘误与门禁见[交接](INTEGRATION-2026-10-09.md) |
 | [AIUI-3](AIUI-3.md) 本地重算公式 | — | junior | AIUI-1 | F3a `4943c6bb` 纯计算已复审、组合CI通过并集成；运行接线另片 |
-| [AIUI-4](AIUI-4.md) 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | F4a/F4b `14006838` 复审、200%补验及组合CI通过，已集成；F4c新目录联调后置 |
+| [AIUI-4](AIUI-4.md) 以对话为中心的外壳（4 项导航） | `task/aiui-4c-navigation-20261010` | engineer / 本片云端Codex | AIUI-2 | F4a/F4b已集成；本批PR38固定快照typed/collection导航及scope/lease/CAS片与PR39设置入口，见[集成审查](AIUI-36-39-integration-review.md)；live与真实插件联调仍后置 |
 | [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | F5a `f0203bf` 草案已复审归档；PR19/26已合；PR28 `c9d11a8` 与 PR18 `44bf146` 有界片已独立复审、新组合通过并正常集成，见[复审及遗留](AIUI-5-F5b-F3b-integration-review.md)；完整恢复、F4c等仍在途，见[新队列](NEXT-DELIVERIES-2026-10-10-v1.md) |
 | [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-general-writes` | Codex | AIUI-1 之后、REG-4b 合入 | PR31 固定源 cb93c740 已独立复审及新组合 CI 通过，用户批准精确 +4 清单例外；[集成复审](REG-4c-review.md)，Mac/真实模型后置 |
 | AIUI-6 询价场景（比价、预算小工具、导入审阅工作区） | — | Codex | AIUI-3、4、5 | 待派 |
 | AIUI-7 科研场景 | — | junior / engineer | AIUI-4、5 | 待派 |
-| AIUI-8 设置与控制（可视化三档、助手权限页、数据去向） | — | engineer | AIUI-4 | 待派 |
-| AIUI-9 本体驱动的业务卡片 | — | Codex | AIUI-2、5、REG-4c | 待派 |
+| [AIUI-8](AIUI-8-control-center.md) 设置与控制 | `task/aiui-8-control-center-20261010` | 云端Codex | AIUI-4 | PR36只读授权/审计控制页，PR39真实设置入口；见[本批审查](AIUI-36-39-integration-review.md)。三档、授权编辑和真机未完成 |
+| [AIUI-9](AIUI-9-host-card-slice.md) 本体驱动的业务卡片 | `task/aiui-9-ontology-card-adapter-20261010` | 云端Codex | AIUI-2、5、REG-4c | PR37真实询价快照只读适配/模板；见[本批审查](AIUI-36-39-integration-review.md)。未接对话页面或业务写卡，完整任务未完成 |
 
 
 ## 调度安全补核（2026-10-09）
@@ -129,7 +129,7 @@ LAN未决与AIUI未来夹具/契约待验另行处理，不自动采纳或合入
 
 ## 本轮质量收口（2026-10-10）
 
-[较早版本化状态与质量清单](CURRENT-STATUS-2026-10-10-v1.md)保留8deb时点记录；当前lint/coverage组合仍待收口，PR25 Mac三例诊断和PR20 manual hold修复已合，后续专项/golden/性能仍待验，详见[新队列](NEXT-DELIVERIES-2026-10-10-v1.md)。PR18仍为有效RED，禁止整包合入。父任务统一 review，唯一 integrator 顺序合 develop。
+[较早版本化状态与质量清单](CURRENT-STATUS-2026-10-10-v1.md)保留8deb时点记录；基线c265已合lint PR22、恢复PR35、coverage替代PR34、Mac诊断PR33，各发布CI成功，见[当前交接](HANDOVER-LEADER.md)及对应审查。原PR23/30保留；PR18历史整包RED不作通过，已合有界适配片不等于原包全部验收。Mac三例golden、后续专项/性能仍待验。父任务统一review，唯一integrator顺序合develop，本批新组合与发布另验。
 
 用户本轮“制定修复任务并并行开始执行修复”的可定位执行计划：[QUALITY-REPAIR-PLAN-2026-10-10-v1.md](QUALITY-REPAIR-PLAN-2026-10-10-v1.md)。
 

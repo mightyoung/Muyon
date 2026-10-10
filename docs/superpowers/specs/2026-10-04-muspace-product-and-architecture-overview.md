@@ -4,7 +4,21 @@
 
 技术依据：[具体架构设计](2026-10-03-muspace-v0.1-design.md)、[需求账本](2026-10-04-muspace-product-requirements.md)。本文集中说明产品与架构要求。
 
-## 2026-10-10 总体设计一致性补记
+## 2026-10-10 当前实施范围（PR36～39）
+
+基于 develop `c265eb13564ce8b485297fbdd3f1ddb351256e0d`，本批实现设置中的只读
+助手授权/审计控制页及既有数据去向入口、固定snapshot的typed/collection引用导航与
+scope/lease/CAS行为测试，以及读取真实询价保存快照的只读本体卡适配器。
+详细边界见[AI原生方案当前实现切片](../../design/ai-native-ui-redesign-2026-10-09.md)
+和[固定源/组合/审查交接](../../tasks/AIUI-36-39-integration-review.md)。
+
+本体卡不接业务写入或页面，保存事实与建议分开，敏感值遮盖、凭据排除；适配只使用
+已激活询价模块，不激活其他模块。授权页只有读取，既有DataFlow的显示边界未改变。
+组件目录、共享validator/renderer、三路动作、授权和单runtime不变；完整AIUI-8三档
+及权限编辑、AIUI-9写卡、live F4c、真实插件联调、真实模型/真机及Mac golden仍未完成。
+本片代码/夹具证据不能用作第二阶段退出证据。下面的早期快照保留历史时态。
+
+## 历史总体设计一致性补记（2026-10-10，固定7773b7d）
 
 保留本文原版与架构决定。本轮已确认方案/已合机制/在途与待验证的分层说明见[AI原生方案一致性补记](../../design/ai-native-ui-redesign-2026-10-09.md)，固定develop `7773b7d96bc99f173b57a723d61526fba0df49ff`，执行顺序见[版本化交付队列](../../tasks/NEXT-DELIVERIES-2026-10-10-v1.md)。PR26已合仅stream/2协商与旧版拒绝门槛；F5b/c、F3b、F4c仍在途，不称完整typed/collection/33组件或编辑重算已验收。保持现有Intelligent UI组件范围、单runtime、共用校验渲染与原有授权；[leader技术采纳](../../tasks/AIUI-5-leader-contract-decision.md)不等于生产验收。
 
