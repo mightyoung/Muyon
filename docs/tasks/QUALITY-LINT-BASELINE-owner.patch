@@ -32,7 +32,7 @@
      _values[field] = value;
      if (affectsDraft) draftRevision++;
 @@ -100,8 +104,9 @@
- 
+
    void adoptExtracted(String field) {
      if (!_userOverrides.containsKey(field) ||
 -        !snapshot.initialUiState.containsKey(field))
@@ -128,7 +128,7 @@
        );
 +    }
    }
- 
+
    void _bad(UiStreamErrorCode code, String reason) {
      _badLines++;
      _record(code, reason);
@@ -137,20 +137,20 @@
        _limit(UiStreamErrorCode.badLineLimit, 'bad_line_limit');
 +    }
    }
- 
+
    void _limit(UiStreamErrorCode code, String reason) {
 --- a/packages/muyon_module_api/lib/src/ui/stream_protocol.dart
 +++ b/packages/muyon_module_api/lib/src/ui/stream_protocol.dart
 @@ -156,8 +156,9 @@
      }
- 
+
      void fields(Set<String> allowed) {
 -      if (m.keys.any((key) => !allowed.contains(key)))
 +      if (m.keys.any((key) => !allowed.contains(key))) {
          throw const FormatException();
 +      }
      }
- 
+
      Map<String, Object?> props() {
 @@ -176,8 +177,9 @@
            if (ref.length != 2 ||
@@ -483,7 +483,7 @@
 +    }
      return result;
    }
- 
+
 @@ -167,16 +170,18 @@
      final matching = current.plan.nodes.where((n) => n.id == event.nodeId);
      if (matching.length != 1) return UiDispatchOutcome.invalid;
@@ -624,7 +624,7 @@
      );
 @@ -178,18 +181,20 @@
    }
- 
+
    Future<void> flush() {
 -    if (readOnly)
 +    if (readOnly) {
@@ -680,7 +680,7 @@
 +    this._warnBg,
 +    this._onAccent,
 +  });
- 
+
    static const light = MuyonTokens(
      brightness: Brightness.light,
 --- a/packages/muyon_ui/lib/src/ui_components/layout.dart
@@ -697,16 +697,16 @@
 @@ -308,7 +308,7 @@
    final UiComponentState state;
    final String? errorMessage;
- 
+
 -  String get textEquivalent => '可展开：${title}';
 +  String get textEquivalent => '可展开：$title';
- 
+
    @override
    State<Disclosure> createState() => _DisclosureState();
 --- a/packages/muyon_ui/test/catalog_release_guard_test.dart
 +++ b/packages/muyon_ui/test/catalog_release_guard_test.dart
 @@ -4,10 +4,12 @@
- 
+
  void main() {
    test('catalog routes disappear when the VM is not debug', () {
 -    if (const bool.fromEnvironment('dart.vm.profile'))
@@ -859,7 +859,7 @@
 -       fingerprint = fingerprintOfPem(certificatePem);
 +    required this._privateKey,
 +  }) : fingerprint = fingerprintOfPem(certificatePem);
- 
+
    final String certificatePem;
    final String privateKeyPem;
 --- a/packages/supplier_core/test/lan_security_test.dart
@@ -882,5 +882,5 @@
 -    expect(bob.inbox.listSync().where((e) => e is File), isEmpty);
 +    expect(bob.inbox.listSync().whereType<File>(), isEmpty);
    });
- 
+
    test('replay after restart is refused from the persisted window', () async {

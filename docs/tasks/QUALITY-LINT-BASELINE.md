@@ -28,3 +28,24 @@
 Laya tests 通过。Linux/macOS 原有验收边界保持，不把 Linux 跳过的 golden 当验收。
 
 父任务按 REVIEW.md 独立审查，唯一 integrator 合 develop；本片只提交、推送和草稿 PR。
+
+## 执行证据与协调
+
+首次固定配置源 `5fbc6ce83d569614cd9fd8497f68acc60c495201` 的
+[push CI 38022202677](https://github.com/mightyoung/Muyon/actions/runs/38022202677)
+失败：四个新基线包 294 条 info（45/37/2/210）；已有四包 analyze 通过；
+test 8/8、gate 9/9、doctor 23/23 通过，后续 Laya 被失败门禁跳过。
+逐项位置见 [diagnostics](QUALITY-LINT-BASELINE-diagnostics.md)，不把预期红视为通过。
+
+局部修复针对 204 条无争用 diagnostics，包括 175 个块边界，未改条件或调用顺序；
+SQLite migration 夹具改按字段名 `value` 访问 Row；crypto 3.0.7 补为 supplier_core
+直接 dev dependency，workspace lock 原已解析同版本，不升级依赖。
+null-aware collection 保持空值跳过语义、单次求值；私有 named initializing formals
+要求 Dart >=3.12，项目 SDK >=3.13，调用方公开参数名保持不变。
+基准输出用 stdout.writeln 保留输出，不关闭 avoid_print。
+
+90 条争用 diagnostics 在 [候选 patch](QUALITY-LINT-BASELINE-owner.patch)，
+API/UI/LAN owner 在其最新代码适配、验证，父任务协调；本分支未修改这些 Dart 文件。
+44 个局部修复文件均由实际诊断驱动，无全库格式化或改名。
+局部修复精确 source `9b93e2383a2cc35163dcd3b1c1bb472a05534531` 已启动完整 CI，
+其终态与 owner 修复后的组合 GREEN 仍须补核。本任务保持草稿，不合 develop/main。
