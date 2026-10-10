@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -15,6 +16,23 @@ import 'package:muyon_ui/dynamic_ui.dart';
 import '../../../packages/muyon_ui/test/aiui5_revision2_review_test.dart' show reviewPlan;
 import 'support/conversation_workspace_fixture.dart';
 import '../../../packages/muyon_ui/test/dynamic_fixtures.dart' show actionPlan;
+
+class _RecoveryBarrierStore implements UiWorkspaceStore {
+  _RecoveryBarrierStore(this.delegate, {this.fail = false});
+  final UiWorkspaceStore delegate;
+  final bool fail;
+  final entered = Completer<void>();
+  final release = Completer<void>();
+  @override
+  Future<StoredUiWorkspace?> load(String surfaceId) => delegate.load(surfaceId);
+  @override
+  Future<bool> save(StoredUiWorkspace value, {required int expectedRevision}) async {
+    entered.complete();
+    await release.future;
+    if (fail) throw StateError('injected storage failure');
+    return delegate.save(value, expectedRevision: expectedRevision);
+  }
+}
 
 void main() {
   late Directory directory;
@@ -35,12 +53,12 @@ void main() {
     await c.flush();
     c.dispose();
   }
-  Future<DynamicWorkspaceSession> mount(WidgetTester tester, ValidatedUiPlan? plan, {bool embedded = false, void Function()? business}) async {
+  Future<DynamicWorkspaceSession> mount(WidgetTester tester, ValidatedUiPlan? plan, {bool embedded = false, void Function()? business, void Function()? close}) async {
     final page = DynamicWorkspace(repository: repository, taskId: 'task', surfaceId: 's', plan: plan, originalAnswer: '原回答', onEvent: (_) async { business?.call(); });
     final session = DynamicWorkspaceSession(page);
     addTearDown(session.dispose);
     await workspaceOperation(tester, session.ensureLoaded);
-    await tester.pumpWidget(MaterialApp(home: DynamicWorkspace(repository: repository, taskId: 'task', surfaceId: 's', session: session, embedded: embedded)));
+    await tester.pumpWidget(MaterialApp(home: DynamicWorkspace(repository: repository, taskId: 'task', surfaceId: 's', session: session, embedded: embedded, onClose: close == null ? null : () async { close(); })));
     await workspaceReady(tester);
     return session;
   }
@@ -186,6 +204,76 @@ void main() {
     expect(find.text('隔离 sort: 8.0'), findsOneWidget);
   });
 
+  testWidgets('schema2 handles isolated fields individually without dropping remaining durable data', (tester) async {
+    await workspaceOperation(tester, seed);
+    final raw = jsonDecode(bytes()) as Map<String, dynamic>;
+    raw['userOverrides'] = <String, Object?>{};
+    raw['readableDraft'] = {'k': 9.0, 'removed': 'kept'};
+    await workspaceOperation(tester, () => writeRaw(jsonEncode(raw)));
+    final session = await mount(tester, reviewPlan('NumberStepper'));
+    await tester.tap(find.text('丢弃 removed（采用当前提取值）'));
+    await workspaceReady(tester);
+    expect(session.controller!.readOnly, isTrue);
+    expect((await workspaceOperation(tester, () => store.load('s')))!.readableDraft, {'k': 9.0});
+    await tester.tap(find.text('恢复 k'));
+    await workspaceReady(tester);
+    expect(session.controller!.readOnly, isFalse);
+    expect((await workspaceOperation(tester, () => store.load('s')))!.userOverrides['k'], 9.0);
+  });
+
+  for (final storageFails in [true, false]) {
+    testWidgets('recovery await boundary does not install rejected state storageFailure=$storageFails', (tester) async {
+      await workspaceOperation(tester, seed);
+      final raw = jsonDecode(bytes()) as Map<String, dynamic>;
+      raw['userOverrides'] = <String, Object?>{};
+      raw['readableDraft'] = {'k': 9.0};
+      await workspaceOperation(tester, () => writeRaw(jsonEncode(raw)));
+      final before = bytes();
+      final barrier = _RecoveryBarrierStore(store, fail: storageFails);
+      var calls = 0;
+      final c = await workspaceOperation(tester, () => UiWorkspaceController.open(store: barrier, taskId: 'task', scopeKey: store.scopeKey!, plan: reviewPlan('NumberStepper'), onEvent: (_) async { calls++; }));
+      addTearDown(c.dispose);
+      Object? failure;
+      var finished = false;
+      c.resolveDraft('k', discard: false).then<void>((_) { finished = true; }, onError: (Object error) { failure = error; finished = true; });
+      await workspaceOperation(tester, () => barrier.entered.future);
+      if (!storageFails) c.surface.session.updateSourceDigest('changed-during-save', 'new-digest');
+      barrier.release.complete();
+      for (var turn = 0; turn < 2000 && !finished; turn++) {
+        await tester.runAsync(() => Future<void>(() {}));
+        await tester.pump();
+      }
+      expect(finished, isTrue);
+      expect(failure, isA<StateError>());
+      expect(c.readOnly, isTrue);
+      expect(c.surface.session.userOverrides, isEmpty);
+      expect(c.quarantinedDraft['k'], 9.0);
+      expect(calls, 0);
+      if (storageFails) {
+        expect(bytes(), before);
+      } else {
+        expect(c.canResolveDraft, isFalse);
+        // The revision/scope CAS completed; the changed session is never
+        // installed. Reopen is required to validate the durable projection.
+        expect((await workspaceOperation(tester, () => store.load('s')))!.userOverrides['k'], 9.0);
+      }
+    });
+  }
+
+  testWidgets('oversized damaged checkpoint exposes no salvage and performs no writes', (tester) async {
+    await workspaceOperation(tester, seed);
+    final raw = jsonDecode(bytes()) as Map<String, dynamic>;
+    raw['readableDraft'] = {'k': 'x' * UiWorkspaceLimits.bytes};
+    await workspaceOperation(tester, () => writeRaw(jsonEncode(raw)));
+    final before = bytes();
+    final session = await mount(tester, reviewPlan('NumberStepper'));
+    expect(session.controller!.readOnly, isTrue);
+    expect(session.controller!.readableDraft, isNull);
+    expect(session.controller!.canResolveDraft, isFalse);
+    await workspaceOperation(tester, session.checkpoint);
+    expect(bytes(), before);
+  });
+
   for (final hasPlan in [true, false]) {
     testWidgets('actual damaged-codec page readable without activation or byte rewrite plan=$hasPlan', (tester) async {
       await workspaceOperation(tester, seed);
@@ -193,13 +281,17 @@ void main() {
       raw['schemaVersion'] = 99;
       await workspaceOperation(tester, () => writeRaw(jsonEncode(raw)));
       final damaged = bytes();
-      var calls = 0;
-      final session = await mount(tester, hasPlan ? reviewPlan('NumberStepper') : null, business: () { calls++; });
+      var calls = 0, closes = 0;
+      final session = await mount(tester, hasPlan ? reviewPlan('NumberStepper') : null, embedded: hasPlan, business: () { calls++; }, close: () { closes++; });
       expect(find.text('k: 9.0'), findsOneWidget);
       expect(bytes(), damaged);
       if (hasPlan) {
         expect(session.controller!.readOnly, isTrue);
         expect(session.controller!.canResolveDraft, isFalse);
+        await workspaceOperation(tester, session.checkpoint);
+        await tester.tap(find.byTooltip('关闭工作区 / 返回'));
+        await workspaceReady(tester);
+        expect(closes, 1);
         expect(session.controller!.surface.session.userOverrides, isEmpty);
         final node = session.controller!.surface.current.plan.nodes.firstWhere((n) => n.id == 'target');
         expect(await workspaceOperation(tester, () => session.controller!.surface.dispatch(session.controller!.surface.eventFor(node, 'change', 3.0))), UiDispatchOutcome.stale);

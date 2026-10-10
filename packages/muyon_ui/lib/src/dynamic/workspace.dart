@@ -27,6 +27,10 @@ class UiWorkspaceController extends ChangeNotifier {
   bool readOnly = false;
   bool _compatibleRecovery = false;
   bool _recovering = false;
+  bool _unreadableCheckpoint = false;
+  // No editable state was admitted from an unreadable codec. Dismissing this
+  // read-only projection requires no save and must preserve its raw bytes.
+  bool get canCloseWithoutCheckpoint => readOnly && _unreadableCheckpoint;
   bool get canResolveDraft => !_disposed && !_recovering && _compatibleRecovery;
   Map<String, Object?> get quarantinedDraft => surface.session.readableDraft;
   bool get extractionChanged => _stored != null &&
@@ -63,6 +67,7 @@ class UiWorkspaceController extends ChangeNotifier {
     try {
       old = await store.load(plan.plan.surfaceId);
     } on UiWorkspaceUnreadable catch (error) {
+      c._unreadableCheckpoint = true;
       c.readOnly = true;
       c.saveError = error.reason;
       // Readable data is retained only within the current task/surface/scope.

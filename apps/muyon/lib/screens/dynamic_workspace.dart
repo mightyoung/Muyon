@@ -188,7 +188,9 @@ class DynamicWorkspaceSession extends ChangeNotifier {
     // With an open controller, capture before returning to a non-awaitable
     // detach caller. Readable load failures can be dismissed without writes.
     final c = controller;
-    if (c != null) return c.flush();
+    if (c != null) {
+      return c.canCloseWithoutCheckpoint ? Future.value() : c.flush();
+    }
     return ensureLoaded().then<void>((_) async { await controller?.flush(); });
   }
 

@@ -341,7 +341,7 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
     setState(() => closing = true);
     try {
       if (scroll.hasClients && !c.readOnly) c.scrollOffset = scroll.offset.clamp(0.0, scroll.position.maxScrollExtent).toDouble();
-      await c.flush();
+      if (!c.canCloseWithoutCheckpoint) await c.flush();
       await widget.onClose?.call();
     } catch (_) {
       changed();
