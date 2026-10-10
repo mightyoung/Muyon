@@ -12,7 +12,10 @@ class Choice extends StatefulWidget {
     super.key,
     required this.label,
     required this.options,
-    required this.selected,
+    this.selected = const {},
+    this.optionIds,
+    this.selectedIds,
+    this.onChangedIds,
     this.multiple = false,
     this.allowCustom = false,
     this.onChanged,
@@ -22,6 +25,9 @@ class Choice extends StatefulWidget {
   final String label;
   final List<String> options;
   final Set<String> selected;
+  final List<String>? optionIds;
+  final Set<String>? selectedIds;
+  final ValueChanged<Set<String>>? onChangedIds;
   final bool multiple, allowCustom;
   final ValueChanged<Set<String>>? onChanged;
   final UiComponentState state;

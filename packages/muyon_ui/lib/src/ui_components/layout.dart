@@ -195,6 +195,8 @@ class MuyonTabs extends StatefulWidget {
     required this.labels,
     required this.children,
     this.initial = 0,
+    this.selectedIndex,
+    this.onChanged,
     this.state = UiComponentState.ready,
     this.errorMessage,
   }) : assert(labels.length == children.length);
@@ -203,6 +205,8 @@ class MuyonTabs extends StatefulWidget {
 
   /// Initial position at mount; subsequent updates preserve local selection.
   final int initial;
+  final int? selectedIndex;
+  final ValueChanged<int>? onChanged;
   final UiComponentState state;
   final String? errorMessage;
 
@@ -300,12 +304,16 @@ class Disclosure extends StatefulWidget {
     required this.title,
     required this.child,
     this.initiallyExpanded = false,
+    this.expanded,
+    this.onChanged,
     this.state = UiComponentState.ready,
     this.errorMessage,
   });
   final String title;
   final Widget child;
   final bool initiallyExpanded;
+  final bool? expanded;
+  final ValueChanged<bool>? onChanged;
   final UiComponentState state;
   final String? errorMessage;
 
