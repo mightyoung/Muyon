@@ -502,7 +502,18 @@ class PersonalAgent {
           task.stage == AgentResume.stage ||
           AgentContext.digest(task.payload['preview']) == requestDigest;
       if (!await _ctx.commit(
-        task.copy({'state': 'running', 'waitingFor': null}),
+        task.copy({
+          'state': 'running',
+          'waitingFor': null,
+          if (task.stage == AgentResume.stage && task.profileId == null) ...{
+            // Consume the verification in the same transaction as its approval.
+            // Fresh prepare can fail before replacing the historical tool call.
+            'preview': null,
+            'resumeAcknowledged': {
+              'invocationId': (task.payload['toolCall'] as Map)['invocationId'],
+            },
+          },
+        }),
         events: [
           if (approves && previewOk)
             (

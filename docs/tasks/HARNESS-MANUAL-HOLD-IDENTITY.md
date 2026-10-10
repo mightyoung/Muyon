@@ -57,3 +57,35 @@ Baseline-to-final diff, `agent_resume.dart`, `manual_resume_hold_test.dart` and
 this evidence; read-only context: PersonalAgent pause/resume/confirm,
 AgentDispatch dispatch/_stage/_openCard and ADR0005 recovery/authorization.
 No message model, permission, schema, Dream/foundation or grant-policy rewrite.
+
+## P2: consumed verification followed by prepare failure
+
+[PR20 bot finding](https://github.com/mightyoung/Muyon/pull/20#discussion_r4236403656)
+identified a second checkpoint bug: the verification confirmation persisted
+running state and approval, but left the hold preview intact. If fresh prepare
+then failed, resuming that failed task treated the consumed hold as unconfirmed.
+The earlier P1 GREEN at204f9a71a4ab7d8f6075270686e5891467867929 is not clearance
+for this P2.
+
+- Tests-only P2 RED:36dec534fc1967ee4a546f99d32ac83907a46677.
+  Four new current/legacy × succeeded/running cases use real unavailable-tool
+  prepare failures, repeated retries after database reopening, preserved usage,
+  and a new unknown invocation that must remain held. Original23 tests unchanged.
+  [Exact-head push38024866943](https://github.com/mightyoung/Muyon/actions/runs/38024866943)
+  and [PR38024870134](https://github.com/mightyoung/Muyon/actions/runs/38024870134)
+  both completed failure: analyze8/8; host `+1482 ~3 -4`, only4 new cases
+  expected failed / actual waitingConfirmation. Old23 and all other suites
+  passed. PR checkout merged tests into developb142e6591ec66a5e9f0e68fb21e064ce17d0aa9f.
+- Confirmation must clear the manual hold and store its historical invocation
+  acknowledgement in the same transaction as state/approval consumption.
+  Clearing only preview is insufficient: the old unknown/mismatched receipt
+  would otherwise cause another hold.
+- Acknowledgement is bound to the historical call ID, with an explicit null ID
+  for legacy calls. It only permits fresh preparation, never old result adoption
+  or a tool approval. A newly prepared ID is different, so its own unknown
+  receipt still stops recovery. Repeated prepare failure carries usage and the
+  acknowledgement; normal tool authorization and grant policy remain intact.
+- P2 terminal RED/GREEN and final fixed SHA are recorded in PR20 and the fix
+  commit. Independent static review and renewed real Claude/bot review remain
+  required. The minimal atomic consumption change also touches
+  `PersonalAgent.confirm`; it does not redesign confirmations or permissions.
