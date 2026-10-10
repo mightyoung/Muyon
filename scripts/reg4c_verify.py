@@ -17,8 +17,8 @@ TOOLS = 'apps/muyon/lib/platform/inquiry_record_tools.dart'
 SHELL = 'packages/inquiry_module/lib/src/app/shell.dart'
 
 
-def run(root, label, name=None):
-    cmd = ['flutter', 'test', '--no-pub', '--reporter', 'expanded', TARGET]
+def run(root, label, name=None, target=TARGET):
+    cmd = ['flutter', 'test', '--no-pub', '--reporter', 'expanded', target]
     if name:
         cmd += ['--plain-name', name]
     result = subprocess.run(cmd, cwd=root / 'apps/muyon', env=ENV,
@@ -53,6 +53,12 @@ def main():
         print(base.stdout[-15000:])
         raise SystemExit('Baseline behavior gate failed')
     print('REG4C baseline: GREEN', flush=True)
+    protocol = run(ROOT, 'host-model-protocol',
+                   target='test/assistant_production_model_protocol_test.dart')
+    if protocol.returncode != 0:
+        print(protocol.stdout[-15000:])
+        raise SystemExit('Existing host model protocol gate failed')
+    print('REG4C existing host model protocol: GREEN', flush=True)
     # Only the archive copy is mutated. The source checkout and tracked tests
     # stay byte-identical; the final invocation runs the original checkout.
     with tempfile.TemporaryDirectory(prefix='reg4c-mutations-') as directory:

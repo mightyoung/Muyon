@@ -40,6 +40,9 @@ Iterable<FieldSpec> _allowedFields(String type) => ontology[type]!.fields.where(
 );
 
 Map<String, Object?> _fieldSchema(FieldSpec field) {
+  // Keep validation constraints, but do not repeat the full ontology prose in
+  // both create/update schemas and the model's native/prompt tool catalogs.
+  // The ontology query remains the source of field labels and explanations.
   final type = switch (field.kind) {
     Kind.integer => 'integer',
     Kind.boolean => 'boolean',
@@ -56,7 +59,6 @@ Map<String, Object?> _fieldSchema(FieldSpec field) {
     },
     if (type == 'object') 'additionalProperties': true,
     if (field.values != null) 'enum': [...field.values!.keys, null],
-    'description': '${field.label} ${field.description}',
   };
 }
 
@@ -149,8 +151,9 @@ void _validateArguments(String operation, Map<String, Object?> p) {
     for (final entry in values.entries) {
       final field = fields[entry.key]!;
       final value = entry.value;
-      if (value == null)
+      if (value == null) {
         continue; // Full payload validation checks required fields.
+      }
       final valid = switch (field.kind) {
         Kind.integer => value is int,
         Kind.boolean => value is bool,
@@ -266,8 +269,9 @@ void _checkDataScope(
     invalid('scope', '新建全局记录需要选定询价全局对象');
   }
   final project = data['project_id'];
-  if (project != null && !projects.contains(project))
+  if (project != null && !projects.contains(project)) {
     invalid('scope', '目标项目不在选定范围内');
+  }
   for (final link in links.where(
     (l) => l.from == type && values.containsKey(l.field),
   )) {
@@ -279,8 +283,9 @@ void _checkDataScope(
   }
   if (type == 'inquiry') {
     for (final id in data['item_ids'] as List) {
-      if (call.resolvedScope.objects.isEmpty)
+      if (call.resolvedScope.objects.isEmpty) {
         invalid('scope', 'Empty selection');
+      }
       // Membership is checked below against the real Store, as in the old tool.
       requireUuid(id, 'item_ids');
     }
@@ -353,11 +358,12 @@ void registerInquiryRecordTools(
         call.cancellation.throwIfCancelled();
         await host.activateInquiry();
         final state = host.inquiry?.runtime.state;
-        if (state == null)
+        if (state == null) {
           return ToolCallResult(
             status: ToolCallStatus.failed,
             summary: '询价不可用',
           );
+        }
         final p = call.request.parameters;
         ToolCallResult? result;
         final error = state.write(
@@ -394,8 +400,9 @@ void registerInquiryRecordTools(
             if (receipts.isNotEmpty) {
               final receipt =
                   jsonDecode(receipts.single['value'] as String) as Map;
-              if (receipt['arguments'] != arguments)
+              if (receipt['arguments'] != arguments) {
                 invalid('operation_id', '业务操作 ID 已用于不同参数或范围');
+              }
               result = ToolCallResult.fromJson(
                 (receipt['result'] as Map).cast<String, Object?>(),
               );
@@ -405,8 +412,9 @@ void registerInquiryRecordTools(
             final previous = creating ? null : s.get(type, id);
             if (!creating) {
               if (previous == null ||
-                  previous.deleted != (operation == 'restore_record'))
+                  previous.deleted != (operation == 'restore_record')) {
                 invalid('id', 'Record unavailable for this operation');
+              }
               if (previous.version != p['expected_version']) {
                 invalid('expected_version', '记录版本已变化，请重新确认');
               }
@@ -432,11 +440,12 @@ void registerInquiryRecordTools(
             if (type == 'inquiry') {
               for (final item in data['item_ids'] as List) {
                 if (s.get('project_item', item as String)?.data['project_id'] !=
-                    data['project_id'])
+                    data['project_id']) {
                   invalid(
                     'item_ids',
                     'Inquiry items must belong to this project',
                   );
+                }
               }
             }
             if (operation == 'restore_record') {
@@ -447,8 +456,9 @@ void registerInquiryRecordTools(
                     : [?raw];
                 for (final related in ids) {
                   final target = s.get(link.to, related as String);
-                  if (target == null || target.deleted)
+                  if (target == null || target.deleted) {
                     invalid(link.field, '请先恢复被引用记录');
+                  }
                 }
               }
             }
@@ -460,16 +470,18 @@ void registerInquiryRecordTools(
                       .toList()
                     ..sort();
               final actual = incoming.map(_json).toList()..sort();
-              if (_json(supplied) != _json(actual))
+              if (_json(supplied) != _json(actual)) {
                 invalid('referencing_records', '引用预览已变化或不完整，请重新确认');
+              }
               for (final r in incoming) {
                 _requireSelected(call, r['type'] as String, r['id'] as String);
               }
-              if (incoming.isNotEmpty)
+              if (incoming.isNotEmpty) {
                 invalid(
                   'references',
                   '仍被活跃记录引用，不能删除：${describeReferences(s.referencesTo(type, id))}',
                 );
+              }
             }
             call.checkBeforeEffect();
             switch (operation) {

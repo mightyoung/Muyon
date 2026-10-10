@@ -42,6 +42,8 @@ quotation 仅开放 quoted_on、lead_time_days、warranty_months、valid_until�
 
 本地 Python 门禁回归 9/9、doctor 场景 23/23、验证脚本 py_compile 及 git diff --check 通过。Flutter 最终结果及 exact-head run 链接在 PR #31 的验证记录中提供；未完成的 run 不视为通过。五项变异在隔离仓库副本逐项移除版本检查、放开保护字段、放开报价价格、恢复宿主助手入口、降格写效应绕过批准；须对应行为断言失败且源码恢复后再次 GREEN。
 
+499e1f5 候选的全量验证发现字段模式重复携带本体说明文字，导致原 `assistant_production_model_protocol_test` 的 12,000-token 窗口在历史压缩后仍超限；另有新文件格式化后触发的花括号 lint。仅精简新工具字段模式的重复说明（字段/类型/枚举/长度约束及校验全部保留），并补花括号；没有调整共享模型预算或放宽原测试。专属门禁额外运行该原协议测试，最终结果仍以 PR exact-head 证据为准。
+
 原测试保留：注册目录在原冻结目录外精确增加 4 项并继续比较全部原工具；hosted 旧权限测试收紧为整个控件不存在；standalone 测试不放宽。Linux inquiry 现有 Mac 字体截图跳过按备忘录记录，不能据此宣称 Mac 截图、真机或真实模型验证通过。原始 RED/候选日志只在 `/tmp/reg4c-evidence` 和 Actions artifact，不入仓库。
 
 文件所有权：只涉及询价域、专属适配器/桥接/注册、hosted Folio 入口、专属测试/验证脚本/工作流及本回报；没有修改 F5b 的 shared UI state/surface/module_api 新目录。未修改 main、合 develop、强推、删分支或部署。
