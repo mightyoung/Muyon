@@ -56,7 +56,7 @@ class VerificationGates(unittest.TestCase):
                 (root / package).mkdir(parents=True)
             shutil.copyfile(ROOT / 'scripts' / gate, root / 'scripts' / gate)
             (root / 'scripts/coverage').mkdir()
-            for filename in ('check.py', 'test_check.py'):
+            for filename in ('check.py', 'test_check.py', 'da_details.py', 'test_da_details.py'):
                 (root / 'scripts/coverage' / filename).write_text(
                     'raise SystemExit(1)\n'
                     if filename == 'check.py' and scenario == 'coverage_runner_failure'

@@ -75,6 +75,7 @@ jobs:
           path: |
             .coverage-run/summary.json
             .coverage-run/suite-summary.json
+            .coverage-run/da-details.json
           if-no-files-found: error
 
       - name: Keep the log

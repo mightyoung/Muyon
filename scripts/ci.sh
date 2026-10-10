@@ -121,6 +121,13 @@ PY_SUMMARY
   fi
 done
 
+if ! python3 "$ROOT/scripts/coverage/test_da_details.py"; then
+  status=1; failed+=("coverage:details-fixtures")
+fi
+if ! python3 "$ROOT/scripts/coverage/da_details.py" --reports "$COVERAGE_DIR" --output "$COVERAGE_DIR/da-details.json"; then
+  status=1; failed+=("coverage:details")
+fi
+
 coverage_args=(--reports "$COVERAGE_DIR" --output "$COVERAGE_DIR/summary.json" --baseline "$ROOT/scripts/coverage/baseline.json")
 if ! python3 "$ROOT/scripts/coverage/test_check.py"; then
   status=1; failed+=("coverage:fixtures")
