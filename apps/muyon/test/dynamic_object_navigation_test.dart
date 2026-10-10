@@ -11,21 +11,9 @@ import 'package:supplier_core/supplier_core.dart';
 
 import 'support/ui_navigation_fixture.dart';
 import 'support/conversation_workspace_fixture.dart';
-import 'support/fake_v2_module.dart';
+import 'support/inquiry_navigation_lease_fixture.dart';
 
 import 'package:muyon/platform/ui_navigation_anchors.dart';
-
-class _LeaseRuntime extends FakeRuntime implements ObjectPages {
-  _LeaseRuntime(super.resources);
-  int released = 0;
-  @override
-  Future<ObjectPageLease?> open(BuildContext context, ObjectRef ref) async =>
-      ObjectPageLease(
-        title: '真实插件租用页',
-        page: const Text('PLUGIN LEASE CONTENT'),
-        dispose: () async => released++,
-      );
-}
 
 void _registerObjectCleanup(WidgetTester tester, NavigationFixture fixture) {
   addTearDown(() async {
@@ -109,11 +97,12 @@ void main() {
           'categories': <String>[],
         });
       }))!;
-      final ref = ObjectRef(
+      final unpinned = ObjectRef(
         moduleId: 'inquiry',
         objectType: 'supplier',
         objectId: id,
       );
+      final ref = await pinInquiryReference(tester, f, unpinned);
       await f.show(tester, f.plan(ref));
       await tester.tap(find.text('查看对象 · inquiry'));
       await NavigationFixture.frames(tester);
@@ -193,22 +182,17 @@ void main() {
   testWidgets(
     'object_page_lease_released_once_and_anchor_restores_from_store',
     (tester) async {
-      final module = FakeV2Module(
-        'lease',
-        features: {ModuleFeature.objectPages},
-        runtimeFactory: _LeaseRuntime.new,
-      );
-      final f = await NavigationFixture.open(tester, extra: [module]);
-      const ref = ObjectRef(
-        moduleId: 'lease',
-        objectType: 'note',
-        objectId: 'actual-note',
-      );
+      late NavigationFixture f;
+      final module = InquiryNavigationModule(() => f.host,
+        marker: 'PLUGIN LEASE CONTENT', pageTitle: '真实插件租用页');
+      f = await NavigationFixture.open(tester, extra: [module]);
+      final ref = await seedPinnedInquiry(tester, f);
       await f.show(tester, f.plan(ref));
-      await tester.tap(find.text('查看对象 · lease'));
+      await tester.tap(find.text('查看对象 · inquiry'));
       await NavigationFixture.frames(tester);
       expect(find.text('PLUGIN LEASE CONTENT'), findsOneWidget);
-      final runtime = module.runtime! as _LeaseRuntime;
+      expect(find.text('真实询价对象'), findsWidgets);
+      final runtime = module.runtime!;
       expect(runtime.released, 0);
       final store = HostUiWorkspaceStore(f.host.foundation, taskId: 'task');
       final anchor = (await store.loadNavigationAnchor('comparison'))!;
@@ -228,11 +212,11 @@ void main() {
   );
 
   for (final module in ['research', 'inquiry']) {
-    testWidgets('open_actual_object_and_restore_workspace $module', (
+    testWidgets('open_actual_object_and_restore_workspace (origin $module; supported Inquiry fixture)', (
       tester,
     ) async {
       final f = await NavigationFixture.open(tester);
-      final ref = await f.seedObject(tester, module);
+      final ref = await seedPinnedInquiry(tester, f);
       final plan = f.plan(ref);
       await f.show(tester, plan);
       await tester.enterText(find.byType(TextField).first, '12');
@@ -241,12 +225,12 @@ void main() {
           .controller;
       c.scrollOffset = 18;
       await workspaceOperation(tester, c.flush);
-      expect(find.text('查看对象 · $module'), findsOneWidget);
-      await tester.ensureVisible(find.text('查看对象 · $module'));
-      await tester.tap(find.text('查看对象 · $module'));
+      expect(find.text('查看对象 · inquiry'), findsOneWidget);
+      await tester.ensureVisible(find.text('查看对象 · inquiry'));
+      await tester.tap(find.text('查看对象 · inquiry'));
       await NavigationFixture.frames(tester);
       expect(
-        find.text(module == 'research' ? '真实研究对象' : '真实询价对象'),
+        find.text('真实询价对象'),
         findsWidgets,
       );
       final saved = (await HostUiWorkspaceStore(
