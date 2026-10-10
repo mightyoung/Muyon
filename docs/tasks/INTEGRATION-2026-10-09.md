@@ -154,3 +154,24 @@ host1366~3（+19）。只归档handler/隔离测试，bootstrap保持关闭、�
 analyze8/8、test8/8、module_api68、UI323~152、host1366~3。发布前fetch/ls-remote重核
 基线develop仍为c98c092完整SHA，main未变。本次收尾仅门禁摘要，产品与CI树不变。
 最终发布SHA和精确CI终态由执行回报给出，bootstrap继续关闭、完整T-3仍未完成。
+
+## 第六轮：PR14 T-3 metadata scope 机制片
+
+冻结基线 `3b0adb9e5242dc4a598bf3be71a8252204a9a053`，最终源
+`2f7cdee41a428bd02257de990e2e54242a01ddc1`，8文件限定机制/测试/文档。
+[独立复审](T-3-metadata-scope-review.md)及真实Claude最终窄审通过，B1同host顺序缺口关闭。
+最终源push38017057408/PR38017060942双绿已核实；本轮另主动推精确源到独立review分支，
+[CI38018663166](https://github.com/mightyoung/Muyon/actions/runs/38018663166) completed/success：
+analyze8/8、test8/8、supplier490/4skip、host1404/3skip、doctor23与Laya四组全通过。
+没有混入LAN诊断分支或并行Harness分支，没有重试挑绿。
+
+旧2cb独立run38016276386的LAN第二合法请求400保留为**未重现、原因未明**；
+单次隔离诊断38017703913成功、合法请求200/空正文/客户端35.245ms，不冒称LAN已修复。
+Claude交叉研判支持deadline优先候选，仍未确诊；先持久化消息ID再交付文件的基线重试窗口
+另列后续待办，不因本片修改LAN。所有原始日志只存Actions或/tmp，不进仓库。
+
+当前固定源全套门禁通过且无确定当前提交阻断，按用户“能合入的尽量先合入”授权合机制片，
+不等其他未审PR。重核develop未变，正常no-ff merge审查远端精确源，无冲突、合并后与
+源树逐字一致；收尾仅复审摘要/索引/本交接，不改变已测产品/测试/CI树。
+生产bootstrap仍OFF，完整T-3及设备/真实模型/Mac golden验收不宣称完成。
+最终develop完整SHA、ls-remote与精确发布CI终态由执行回报核实。

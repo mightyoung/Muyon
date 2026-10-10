@@ -104,3 +104,11 @@ PR #6 手动基础设施已合入 `107ca439547a01c4ac37e218e059de0a508a0309`，�
 | 任务 | 分支 | 状态 |
 |---|---|---|
 | [AGENT-DISPATCH-VERIFY-1](AGENT-DISPATCH-VERIFY-1.md) 只读效应边界与读参数恢复独立补核 | `task/agent-dispatch-safety-verification` → `review/AGENT-DISPATCH-VERIFY-1` | 已合入；[独立审查](AGENT-DISPATCH-VERIFY-1-review.md)，任务提交 `5b61b620`，[精确任务CI成功](https://github.com/mightyoung/Muyon/actions/runs/37944860202)；仅边界收紧，无生产越权写入证据 |
+
+## T-3 分片集成（2026-10-10）
+
+首片未注册handler已在develop基线；PR14 [metadata scope机制片](T-3-metadata-scope.md)
+最终源 `2f7cdee41a428bd02257de990e2e54242a01ddc1` 经[独立复审](T-3-metadata-scope-review.md)、
+Claude/B1复审和[固定源全套CI](https://github.com/mightyoung/Muyon/actions/runs/38018663166)通过后集成。
+生产登记仍OFF、完整T-3未完成。历史LAN 400保留为“未重现、原因未明”，无测试豁免；
+后续待办与发布CI见[集成交接](INTEGRATION-2026-10-09.md)和执行回报。
