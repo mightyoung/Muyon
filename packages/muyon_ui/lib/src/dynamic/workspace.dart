@@ -195,8 +195,11 @@ class UiWorkspaceController extends ChangeNotifier {
             },
     );
     if (old != null) {
-      c.surface.session.restoreWorkspace(old, activate: !c.readOnly);
-      if (c.surface.session.unreadableReasons.isNotEmpty) {
+      final compatible = !c.readOnly;
+      c.surface.session.restoreWorkspace(old, activate: compatible);
+      // Existing incompatible workspaces keep their silent no-write checkpoint.
+      // Only a rejected edit in a compatible workspace is a new save error.
+      if (compatible && c.surface.session.unreadableReasons.isNotEmpty) {
         c.readOnly = true;
         c.saveError =
             'workspace_edit_spec:${c.surface.session.unreadableReasons.values.toSet().join(',')}';
