@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,6 +7,7 @@ import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
+import 'package:muyon/services/transfer/task_coordinator.dart';
 import 'package:muyon/workspace/import_coordinator.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
@@ -124,6 +126,136 @@ void main() {
     return file.path;
   }
 
+  test('offered precedes attachment persistence and itemsSettled waits for it', () async {
+    await connect();
+    final saving = Completer<void>();
+    final release = Completer<void>();
+    var executions = 0;
+    final receiver = TaskCoordinator(
+      database: b.tasks.database,
+      deviceId: b.tasks.deviceId,
+      send: b.services.transfer.sendTaskEnvelope,
+      executor: (_) async {
+        executions++;
+        return null;
+      },
+      onOfferAttachment: (taskId, revision, attachment) async {
+        saving.complete();
+        await release.future;
+        await b.researchTasks.saveOfferAttachment(taskId, revision, attachment);
+      },
+    );
+    b.services.transfer.onTaskEnvelope = receiver.receive;
+    const taskId = 'held-offer', revision = '1';
+    final archive = Archive()..addFile(ArchiveFile('README.md', 1, [65]));
+    final bytes = ZipEncoder().encode(archive);
+    // Report a drain failure independently of a primary assertion failure.
+    // This runs before the suite's tearDown closes either host.
+    addTearDown(() => b.services.transfer.itemsSettled);
+    try {
+      await a.tasks.offer(
+        taskId: taskId,
+        inputRevision: revision,
+        idempotencyKey: 'held-offer-key',
+        attachment: {
+          'kind': 'research-task',
+          'name': 'held-offer.zip',
+          'sha256': sha256.convert(bytes).toString(),
+          'dataBase64': base64Encode(bytes),
+        },
+      );
+      await saving.future.timeout(const Duration(seconds: 20));
+      expect(receiver.stateOf(taskId, revision), 'offered');
+      expect(b.researchTasks.isResearchTask(taskId, revision), isFalse);
+      var settled = false;
+      final received = b.services.transfer.itemsSettled.then((_) => settled = true);
+      // Positive control: an already completed signal is observable at this
+      // same checkpoint. The real queue remains gated on the unfinished save.
+      var immediateSettled = false;
+      final immediate = Future<void>.value().then((_) => immediateSettled = true);
+      await immediate;
+      expect(immediateSettled, isTrue);
+      expect(settled, isFalse);
+      release.complete();
+      await received;
+      expect(settled, isTrue);
+      expect(receiver.stateOf(taskId, revision), 'offered');
+      expect(b.researchTasks.isResearchTask(taskId, revision), isTrue);
+      expect(b.workspaces.all(), isEmpty);
+      expect(b.research, isNull);
+      expect(executions, 0);
+    } finally {
+      if (!release.isCompleted) release.complete();
+    }
+  });
+
+  test('attachment failure drains after gate release without replacing the body error', () async {
+    await connect();
+    final saving = Completer<void>(), release = Completer<void>();
+    final bodyError = StateError('injected body failure');
+    final saveError = StateError('injected attachment save failure');
+    final order = <String>[];
+    Future<void>? observedSaveError;
+    final archive = Archive()..addFile(ArchiveFile('README.md', 1, [65]));
+    final bytes = ZipEncoder().encode(archive);
+    final receiver = TaskCoordinator(
+      database: b.tasks.database,
+      deviceId: b.tasks.deviceId,
+      send: b.services.transfer.sendTaskEnvelope,
+      executor: (_) async => throw StateError('receiving must not execute'),
+      onOfferAttachment: (_, _, _) async {
+        saving.complete();
+        await release.future;
+        order.add('save-failure');
+        throw saveError;
+      },
+    );
+    b.services.transfer.onTaskEnvelope = receiver.receive;
+    addTearDown(() async {
+      // Attach the error matcher before release; this cleanup only awaits its
+      // observation and therefore never substitutes a drain error for the body.
+      if (observedSaveError != null) {
+        await observedSaveError;
+        expect(order, ['body-failure', 'gate-released', 'save-failure']);
+        expect(release.isCompleted, isTrue);
+        // These reads also verify that cleanup precedes the host-closing tearDown.
+        expect(receiver.stateOf('failed-offer', '1'), 'offered');
+        expect(b.researchTasks.isResearchTask('failed-offer', '1'), isFalse);
+        expect(b.workspaces.all(), isEmpty);
+        expect(b.research, isNull);
+      } else {
+        await b.services.transfer.itemsSettled;
+      }
+    });
+    // Observe the two injected errors separately. This does not test how the
+    // test runner reports two unhandled failures in one test.
+    await expectLater(() async {
+      try {
+        await a.tasks.offer(
+          taskId: 'failed-offer',
+          inputRevision: '1',
+          idempotencyKey: 'failed-offer-key',
+          attachment: {
+            'kind': 'research-task',
+            'name': 'failed-offer.zip',
+            'sha256': sha256.convert(bytes).toString(),
+            'dataBase64': base64Encode(bytes),
+          },
+        );
+        await saving.future.timeout(const Duration(seconds: 20));
+        observedSaveError = expectLater(
+          b.services.transfer.itemsSettled,
+          throwsA(same(saveError)),
+        );
+        order.add('body-failure');
+        throw bodyError;
+      } finally {
+        order.add('gate-released');
+        if (!release.isCompleted) release.complete();
+      }
+    }, throwsA(same(bodyError)));
+  });
+
   test(
     'offer → authorise → import (not run) → result → one import on the origin',
     () async {
@@ -133,6 +265,8 @@ void main() {
       await a.researchTasks.offer(task);
 
       await until(() => b.tasks.stateOf(task.id, rev) == 'offered', 'offered');
+      // Ownership is visible before the queued attachment save finishes.
+      await b.services.transfer.itemsSettled;
       // Receiving, even with the package, imports nothing and runs nothing.
       expect(b.researchTasks.isResearchTask(task.id, rev), isTrue);
       expect(b.workspaces.all(), isEmpty);
@@ -198,6 +332,7 @@ void main() {
       final rev = '${task.revision}';
       await a.researchTasks.offer(task);
       await until(() => b.tasks.stateOf(task.id, rev) == 'offered', 'offered');
+      await b.services.transfer.itemsSettled;
       await b.tasks.accept(taskId: task.id, inputRevision: rev);
       await b.tasks.start(taskId: task.id, inputRevision: rev);
       await b.researchTasks.submitResult(task.id, rev, resultFile(task));
@@ -242,6 +377,7 @@ void main() {
       final rev = '${task.revision}';
       await a.researchTasks.offer(task);
       await until(() => b.tasks.stateOf(task.id, rev) == 'offered', 'offered');
+      await b.services.transfer.itemsSettled;
       await b.tasks.accept(taskId: task.id, inputRevision: rev);
       await b.tasks.start(taskId: task.id, inputRevision: rev);
       await expectLater(

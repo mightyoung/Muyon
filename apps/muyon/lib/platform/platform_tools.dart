@@ -11,7 +11,7 @@ import 'tool_registry.dart';
 ///
 /// Not registered by bootstrap yet: its shared global scope resolver prepares
 /// business modules before filtering data modules, which can perform recovery
-/// writes. Integration requires a pure host metadata scope path first.
+/// writes. Integration must wire the returned host metadata scope binding.
 class PlatformReadTools {
   PlatformReadTools({
     required this.foundation,
@@ -81,6 +81,9 @@ class PlatformReadTools {
               'Platform metadata supports global scope only',
             );
           }
+          // The registrar awaited its lifecycle link before entering us.
+          // Recheck the existing host authority at the actual read boundary.
+          call.checkBeforeEffect();
           try {
             final data = query(call);
             call.cancellation.throwIfCancelled();
@@ -209,9 +212,9 @@ class PlatformReadTools {
 }
 
 /// Assembles the host identity using the same registrar and registry controls.
-/// The caller must provide a pure global metadata resolver; the existing
-/// bootstrap resolver is unsuitable (see T-3 task's integration blocker).
-void registerPlatformReadTools({
+/// The caller must wire the returned binding into hostToolScopeResolver or
+/// provide a pure metadata resolver; bootstrap's shared default is unsuitable.
+PlatformMetadataScopeBinding registerPlatformReadTools({
   required ToolRegistry registry,
   required FoundationRepository foundation,
   required ExecutionStore executions,
@@ -232,6 +235,61 @@ void registerPlatformReadTools({
     ).registerTools(registrar);
   } finally {
     registrar.seal();
+  }
+  return PlatformMetadataScopeBinding._(
+    registry,
+    {for (final id in registrar.registeredToolIds)
+      id: registry.inspect(id)!.descriptor},
+    isAvailable,
+  );
+}
+
+/// Only the successful host assembly above can bind actual registrations.
+/// Owning registry and descriptor object identity both matter: same JSON is
+/// insufficient, and a copied descriptor cannot cross registry boundaries.
+class PlatformMetadataScopeBinding {
+  PlatformMetadataScopeBinding._(
+    this._registry,
+    Map<String, ToolDescriptor> descriptors,
+    this._isAvailable,
+  ) : _descriptors = Map.unmodifiable(descriptors);
+
+  final ToolRegistry _registry;
+  final Map<String, ToolDescriptor> _descriptors;
+  final bool Function() _isAvailable;
+
+  void _requireCurrent() {
+    if (!_isAvailable()) {
+      throw const ToolPlatformException(
+        'host_unavailable',
+        'Host metadata is unavailable',
+      );
+    }
+  }
+
+  Future<HostScopeResolution?> resolve(
+    ToolRegistry registry,
+    RegisteredToolInfo tool,
+    ToolCallRequest request,
+  ) async {
+    final expected = _descriptors[tool.descriptor.toolId];
+    if (!identical(registry, _registry) ||
+        expected == null ||
+        !identical(expected, tool.descriptor) ||
+        tool.providerId != 'platform' ||
+        tool.descriptor.moduleId != 'platform' ||
+        tool.descriptor.effect != ToolEffect.read ||
+        tool.descriptor.apiVersion != expected.apiVersion ||
+        request.toolId != tool.descriptor.toolId ||
+        request.scope.kind != AssistantScopeKind.global) {
+      return null;
+    }
+    _requireCurrent();
+    return HostScopeResolution(
+      identityKey: HostScopeResolution.platformMetadataKey,
+      scope: ResolvedAssistantScope(requested: request.scope, objects: []),
+      requireCurrent: _requireCurrent,
+    );
   }
 }
 
