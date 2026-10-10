@@ -38,9 +38,41 @@ The source repository's `artifacts/development/platform/flutter-doctor.log`, pre
 
 ## Exact remaining dependency and minimum question
 
-To separate SDK/CPU/OS font-rasterizer changes from test harness behavior, obtain the actual golden-generation run's **macOS build, tester architecture and SHA256, SDK engine revision, and font SHA256**, particularly Oct 1/2 source goldens and the Oct 5 settings update. Available sources are the original Mac/SDK cache, backups of that cache, the generating sessions' environment logs, or original-repository author/reviewer records for the three commits above. Current files plus the earlier doctor log cannot supply those missing values. DPR and locale on the current side have now been measured, rather than left unspecified.
+### Bounded Mac search update (2026-10-10)
 
-Minimum user question: “Can the Mac or SDK cache used for these Oct 1–5 golden-generation runs still be accessed, or are only its logs/backups available?” If available, first read its fingerprints and compare one settings render using that already-installed environment; do not install another SDK. If not available, remaining platform attribution is blocked and the current red gate must remain explicitly red.
+The user authorized checking this Mac and suspected that old files were removed. Read-only search found retained evidence; it does **not** establish permanent deletion.
+
+| Checked scope | Result |
+|---|---|
+| Two original Folio projects, Muyon task/implementation records, selected frozen Git documents | Earlier doctor/version logs retained; no exact Oct 1/2 generator tester hash found |
+| 12 standard SDK/cache prefixes, depth ≤8, 1500-directory cap | Only current `/Users/muyi/development/flutter` tester found; recorded `/private/tmp/supplier-inquiry-toolchain` absent; common FVM/Homebrew/Flutter cache prefixes absent |
+| Task-related direct `/tmp` logs, 2 MiB/file cap | Later diagnostics retained; no Oct 1–5-mtime candidate in this direct-file subset; mtime is not provenance proof |
+| Three already-registered Oct 5 release worktrees and their adjacent verification logs | Original settings actual + expected + diffs retained, as are SDK version and native-ABI metadata |
+| Time Machine/volume metadata only | No local snapshot names; `listbackups` exit 1: no machine directory found; no destinations configured; `/Volumes` contains only the system-volume link. No external contents mounted or restored |
+
+No home-wide search, private documents, chat/session history, browser history, credential stores, Trash, or restricted directories were inspected. Frozen Git Markdown was limited to relevant UI/verification documents ≤128 KiB; project text scans were depth ≤5 and ≤2 MiB/file. Historical build inspection was limited to selected native/font artifacts at depth ≤6.
+
+**Important recovered facts:** all three Oct 5 worktrees retain `desktop_settings_testImage.png` SHA `3f51c7a531a4fc403840bfb0aa007f04f8cb93b462ad409b4c673590de638090`, identical to the settings golden later committed by `c7adebf`. Their verification logs report the earlier 158-pixel dropdown difference; they do not contain today's 5830-pixel text difference. Oct 5 package configs record Flutter 3.47.5 / Dart 3.13.4 at the same absolute SDK path. Native assets are explicitly `macos_arm64`, so the older Intel doctor log must not be used to infer the architecture of these Oct 5 runs.
+
+Retained Oct 5 Noto source/unit-test assets and MaterialIcons hashes match today's fonts exactly. Historical system-font copies and an exact Oct 5 tester binary hash were not found. The retained source font and icon bytes therefore exclude a change of those specific assets, while not excluding system fallback/OS behavior.
+
+The task-relevant entries in readable `/Library/Receipts/InstallHistory.plist` record macOS 26.5.2 and an upgrade to **macOS 27.0.1 on 2026-10-06 at 06:45:16 UTC**. This puts the Oct 5 matching render before the OS upgrade and the later reproduced text drift after it. OS-dependent font rasterization now has strong temporal evidence; the exact CoreText/Skia mechanism and old system-font hashes remain unverified. A simple smoothing override already failed the controlled A/B. No low-risk harness corrective patch follows from this evidence.
+
+Within the checked scope there is no directly runnable pre-upgrade OS environment or alternate old tester. Current retained screenshots can support visual comparison, but running the prior OS would require another existing machine/backup environment or separately authorized recovery; none was restored or installed here.
+
+### Controlled baseline reconstruction proposal — not executed
+
+1. Freeze a proposed supported Mac27 environment and current reviewed source: record OS build, actual tester architecture/hash, SDK/engine revision, locale, DPR, text scale, all font hashes and renderer flags. Preserve old expected PNGs and existing Oct 5/Oct 8 evidence separately. Use the existing three-scene visual review material first; inspect text position, line widths, weight, clipping, controls, icons and scroll positions at native scale with overlays.
+2. Require a named visual reviewer to approve each concrete old/current/diff comparison and the explicit policy of moving the baseline to Mac27. Any layout or business-state difference must be explained or fixed. This is a new visual acceptance decision, not an extension of the old C2 exception, and root-cause uncertainty must remain recorded.
+3. Only after explicit approval, prepare an independent baseline-candidate branch. Estimate total added build/evidence space first and stop if it may exceed 1 GiB or current free space is insufficient. Use the existing SDK/cache, one Mac test process, no broad regeneration. Initially change only the three approved candidate PNGs, preserving exact bytes and a review manifest; do not change tests, skips, comparators or tolerances.
+4. Verify the same three cases against unchanged old baseline and proposed current baseline under the **same** pinned environment. First run the old-source control and current source for every subsequently proposed scene. Compare complete dimensions, diff-pixel counts and expected/actual/diff hashes; disclose added/removed/changed failures. Expand to the affected screenshot suite only if resource limits permit and only with explicit per-image visual acceptance. Stop at unexplained differences rather than regenerating them away.
+5. After the full affected suite is independently reviewed, run the Mac gate and existing non-golden regressions on the final exact source. Linux skips remain non-visual evidence. A draft PR must list approved images, reviewer decisions, environment/commands, old/current failure sets and limitations; independent review and the user's existing merge policy govern publication. This proposal does not authorize overwriting golden files now or modifying F5b.
+
+The standalone local review artifact `/tmp/quality-macos-golden-20261010/golden-visual-review-20261010.html` embeds the existing three expected/actual/diff images with an opacity slider. It is review material, not regenerated golden data. New raw search indexes, hashes, extracted task-relevant log lines and backup-query status remain outside Git under `evidence/search`. The search/review bundle (1,188,843 bytes) was saved to Library as `quality-macos-golden-search-review-20261010.tar.gz`, Library ID `libfile_b04f1d299f0081918871779edaa7a1a9`, file ID `file_00000000a69c81fd9e2b84f5a062f908`. No new Flutter tests or baseline-generation commands were run during this read-only search.
+
+To fully separate SDK/CPU/OS font-rasterizer changes from test harness behavior, an exact generator tester/engine fingerprint and historical system-font hashes are still useful. The search now recovered Oct 5 SDK version, arm64 ABI, bundled font hashes, matching images and an OS-upgrade timeline, so these are no longer all unspecified. The exact generator tester SHA and historical system-font hashes remain missing.
+
+The user's reply authorized the bounded search above. No further broad search, recovery, installation, or baseline approval is assumed. The current red gate remains red; the controlled reconstruction proposal is ready for visual review if the original environment cannot be accessed elsewhere.
 
 ## Evidence and resource use
 
