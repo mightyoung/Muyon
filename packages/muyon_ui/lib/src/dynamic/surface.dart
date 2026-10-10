@@ -80,6 +80,7 @@ class UiSurfaceController extends ChangeNotifier {
     this.recomputePort,
     this.publishTokenProbe,
     this.readOnlyProbe,
+    this.externalContentProbe,
   }) : _publication = UiPublicationCoordinator(plan) {
     if ((recomputePort == null) != (publishTokenProbe == null)) {
       throw ArgumentError('Provide both recomputePort and publishTokenProbe');
@@ -91,6 +92,18 @@ class UiSurfaceController extends ChangeNotifier {
   final UiRecomputePort? recomputePort;
   final UiPublishTokenProbe? publishTokenProbe;
   final bool Function()? readOnlyProbe;
+
+  /// Host-supplied taint of the owning task. Never read from plan or UI state.
+  /// Fail closed: no probe, or a probe that throws, means external content.
+  final bool Function()? externalContentProbe;
+  bool get externalContent {
+    try {
+      return externalContentProbe?.call() ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
   bool get recomputing => _publication.recomputing;
   bool get outdated => _publication.outdated;
   List<String> get publicationErrors => _publication.publicationErrors;
@@ -871,6 +884,7 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
               ConfirmCard(
                 item: item,
                 allowPersistentChoices: false,
+                externalContent: controller.externalContent,
                 status: receipt?.status == UiReceiptStatus.succeeded
                     ? BusinessStatus.success
                     : receipt?.status == UiReceiptStatus.failed
@@ -889,6 +903,7 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
             else
               BatchConfirmCard(
                 items: [item],
+                externalContent: controller.externalContent,
                 state: cancelled
                     ? BatchState.rejected
                     : receipt?.status == UiReceiptStatus.succeeded
