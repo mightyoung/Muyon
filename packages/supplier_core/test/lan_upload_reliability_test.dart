@@ -410,7 +410,7 @@ class CleanupFailureStaging implements Directory {
   @override
   Future<bool> exists() => directory.exists();
   @override
-  Future<Directory> delete({bool recursive = false}) {
+  Future<FileSystemEntity> delete({bool recursive = false}) {
     if (inbox.failCleanup) {
       throw FileSystemException('private cleanup fault', directory.path);
     }
