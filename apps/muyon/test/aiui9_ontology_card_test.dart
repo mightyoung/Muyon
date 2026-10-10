@@ -161,24 +161,27 @@ void main() {
 
   testWidgets('sensitive values and credentials never reach text or semantics', (tester) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-    final card = _fixture(fields: [
-      for (final sensitivity in Sensitivity.values)
-        OntologyFieldSpec(name: sensitivity.name, label: sensitivity.name,
-          description: '', kind: FieldKind.text, sensitivity: sensitivity),
-    ], values: {for (final s in Sensitivity.values) s.name: 'secret-${s.name}'},
-       suggestions: {for (final s in Sensitivity.values) s.name: 'suggested-${s.name}'});
-    expect(card.fields.any((f) => f.name == 'credential'), isFalse);
-    expect(card.fields.where((f) => f.masked).length, 3);
-    await tester.pumpWidget(_app(card));
-    for (final s in [Sensitivity.personal, Sensitivity.commercial,
-                     Sensitivity.credential, Sensitivity.unreviewed]) {
-      expect(find.text('secret-${s.name}'), findsNothing);
-      expect(find.text('suggested-${s.name}'), findsNothing);
-      expect(find.bySemanticsLabel(RegExp('secret-${s.name}|suggested-${s.name}')), findsNothing);
+    try {
+      final card = _fixture(fields: [
+        for (final sensitivity in Sensitivity.values)
+          OntologyFieldSpec(name: sensitivity.name, label: sensitivity.name,
+            description: '', kind: FieldKind.text, sensitivity: sensitivity),
+      ], values: {for (final s in Sensitivity.values) s.name: 'secret-${s.name}'},
+         suggestions: {for (final s in Sensitivity.values) s.name: 'suggested-${s.name}'});
+      expect(card.fields.any((f) => f.name == 'credential'), isFalse);
+      expect(card.fields.where((f) => f.masked).length, 3);
+      await tester.pumpWidget(_app(card));
+      for (final s in [Sensitivity.personal, Sensitivity.commercial,
+                       Sensitivity.credential, Sensitivity.unreviewed]) {
+        expect(find.text('secret-${s.name}'), findsNothing);
+        expect(find.text('suggested-${s.name}'), findsNothing);
+        expect(find.bySemanticsLabel(RegExp('secret-${s.name}|suggested-${s.name}')), findsNothing);
+      }
+      expect(find.text('secret-none'), findsOneWidget);
+      expect(find.text('suggested-none'), findsOneWidget);
+    } finally {
+      semantics.dispose();
     }
-    expect(find.text('secret-none'), findsOneWidget);
-    expect(find.text('suggested-none'), findsOneWidget);
   });
 
   testWidgets('unknown type and higher version safely retain read-only fallback', (tester) async {

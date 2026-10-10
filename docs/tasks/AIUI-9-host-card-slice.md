@@ -24,3 +24,6 @@
 ## 首轮独立审查修复
 
 首源 `6d6322d722500a27a1869012e282932dcd43c131` 发现统一 resolver.prepare 会激活其他模块并写登记状态，故不能合入。修复使用仅 inquiry 的 ScopeSource 包装器禁用 prepare，仍复用原 ScopeResolver 的范围/版本检查，不复制授权规则。真实 fixture 不再用 global resolver 预激活所有模块；断言其他模块保持 inactive，module_registry 前后逐行相同。建议文本单项预算复用 `uiStringEditMaxBytes`，总文本与字段/列表项限额复用 `UiStreamLimits.v1`；超限值不序列化进入组件，不改变领域保存/协议校验。旧源运行不作为修复源验证。
+
+
+`adb5e18e8a356c63d70140f5027d790458968ef2` 首轮真实 PR CI [38048625097](https://github.com/mightyoung/Muyon/actions/runs/38048625097) 失败：宿主 analyze 一处 `invalid_null_aware_operator`，宿主 +1555/3skip/1fail（敏感测试的 SemanticsHandle 清理顺序，非遮盖断言失败）。修复去掉确定非空接收者的 `?.`，将语义句柄释放移入测试主体 `finally`，全部原行为/安全断言保留，不跳过或弱化测试。修复源仍需完整 fresh CI。

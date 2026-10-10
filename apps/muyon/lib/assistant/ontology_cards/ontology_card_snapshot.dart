@@ -75,7 +75,7 @@ final class OntologyCardSnapshot {
       typeLabel: type?.label ?? '未知对象类型',
       fallback: fallback,
       hasRegisteredUpdateTool: !fallback && hasRegisteredUpdateTool,
-      hasOriginalPage: !fallback && (type?.page.hasPage ?? false),
+      hasOriginalPage: !fallback && type.page.hasPage,
       fields: [
         if (type != null)
           for (final field in type.fields)
