@@ -228,7 +228,7 @@ void main() {
     }
   });
 
-  test('workspace rebind during source I/O invalidates otherwise active module read', () async {
+  test('workspace authority change during source I/O invalidates otherwise active module read', () async {
     final f = await _Fixture.open();
     final entered = Completer<void>(), release = Completer<void>();
     final source = _HeldSource(currentRuntime: () => f.host.research,
@@ -243,8 +243,15 @@ void main() {
       final pending = read.list();
       final rejected = expectLater(pending, throwsStateError);
       await entered.future;
-      await f.host.workspaces.bind(WorkspaceBinding(workspaceId: f.binding.workspaceId,
+      final authority = f.host.workspaces.scopeAuthorityRevision;
+      final runtime = f.host.research;
+      final other = await f.host.workspaces.create('B');
+      await f.host.workspaces.bind(WorkspaceBinding(workspaceId: other.id,
         moduleId: 'research', nativeProjectId: 'B'));
+      expect(f.host.workspaces.scopeAuthorityRevision, isNot(authority));
+      expect(f.host.research, same(runtime));
+      expect(f.host.workspaces.binding(f.binding.workspaceId, 'research')!.nativeProjectId, 'A');
+      expect(f.host.workspaces.binding(other.id, 'research')!.nativeProjectId, 'B');
       release.complete();
       await rejected;
       expect(f.host.services.knowledge.documents(), isEmpty);

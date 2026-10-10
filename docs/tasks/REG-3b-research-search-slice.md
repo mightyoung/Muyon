@@ -11,7 +11,7 @@
 - 模块源通过宿主当前 runtime getter，不能持有可在撤权后继续读取的长期 runtime/resources 缓存；未绑定、已撤销、已替换或不支持来源一律失败关闭。
 - 宿主 source consumer 复用 ModuleHost.scopeAuthorityRevision 与 workspace binding 身份，在异步前后 fence，取消结果不发布；只消费已登记的 document source，不绕成旧 store 全扫描。文件来源限模块管理根目录内且真实摘要一致，拒绝失效/跨范围/超预算来源。
 - protected search_test 和旧接口兼容保持；实际宿主 ResearchToolsPage 的 registered 构造入口另接 module declaration/lifecycle。不得仅写未使用 helper 宣称生产接线完成。
-- 新测试：真实宿主范围/来源/摘要、当前版本、磁盘变化/删除、host/module revoke与runtime替换、受控取消与异步屏障、来源路径/预算、旧搜寻行为保持（13 条新测试）。文件与项目总读取预算均 128 MiB，项目最多 1000 个当前文档，超限失败关闭。取消阻止结果发布与后续索引效果，底层已开始的只读文件 I/O 仍完成；没有宣称 Source API 支持物理取消。新增测试不改保护测试；无 sleep，原始日志不进仓库。
+- 新测试：真实宿主范围/来源/摘要、当前版本、磁盘变化/删除、host/module revoke与runtime替换、受控取消与异步屏障、实际新工作区创建/合法绑定导致范围 authority 变更（原 A 绑定和 runtime 不变）、来源路径/预算、旧搜寻行为保持（13 条新测试）。文件与项目总读取预算均 128 MiB，项目最多 1000 个当前文档，超限失败关闭。取消阻止结果发布与后续索引效果，底层已开始的只读文件 I/O 仍完成；没有宣称 Source API 支持物理取消。新增测试不改保护测试；无 sleep，原始日志不进仓库。
 - shared module_api/validator/UIcore/CI 不改。新源码库存和 DA 交 coverage owner 测量独审；不自动 reset baseline、ignore、降 floor。
 
 ## 已确认后置项
@@ -21,6 +21,8 @@ ExchangeCapable 现接口使用 ExchangeEnvelope(kind/id/filePath/header)；旧�
 REG-3-REST 已开放 research.save_note/add_outline/assess_run/accept_run，原读 objects/read_object/relations 保留。其余具名写能力（项目更新、task新修订、note-entry关联、手工run、section/cite、binding、card save）已在覆盖清单 deferred；多数对象无统一version/validator，必须按领域既有API及明确expected快照逐项冻结，不能照搬inquiry CRUD。Q10只批准 report/claimdraft 本机导出；registrar仍缺本机目标选择/允许根目录与effectIntent门面，不能伪装write或网络external。未授权 import/export任务/结果/技能实验与设备交换保持后置。
 
 独立复审发现 parse 期间同路径新版本保留旧文件时旧 knowledge source hook 只查 id 存在：模块源同步 requirePinned 接入现 checkBeforeEffect，在 ready 提交前核 currentVersions/root/实际 digest；失败只清理对应宿主缓存索引，不清来源 taint。bootstrap 仅 research.document 的既有来源确认委托真实登记 source.confirm 与模块 lifecycle fence；其余旧 hook 不改。受控真实 parser 竞态回归通过链式 ManagedConnection.onCommit 观察 ready 从未提交（保留并恢复原 hook），验证独立同步提交防线，以及 public host.tools.invoke knowledge.search/allowModelContent 拒绝旧证据、重新索引新版本正例。新增 already-ready→同路径新 current 版本回归保留旧 bytes/旧 ready 缓存，同时断言 registered adapter/public tool 拒绝旧 pin，新版索引后 public tool 恢复正例；空 hook 不退回缓存。既有 KnowledgeService.search 是原始缓存/UI 接口，不承诺所属领域 current-version 结果，本片不修改 shared KnowledgeService、index_invalidation 或保护测试；该原始 API 不冒称公开语义证据工具。
+
+同一已有工作区重新绑定/restore 不在本片测试或产品能力中，WorkspaceRepository 保持拒绝二次绑定不同项目的规则；新范围竞态回归只用合法 create B + bind B，实际范围 epoch 改变后拒绝旧读取。
 
 ResearchToolsPage 旧 QA evidenceValidator 仍用绑定元数据与文件 hash，hash await 后 epoch 复核未在此片扩展；当前不是全 QA 迁移。推荐后续只把该附加确认委托 registered source/read 与既有 beforeSend 边界，需模型流程 owner 独审。
 
