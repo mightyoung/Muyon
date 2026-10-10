@@ -567,6 +567,20 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
       await tester.pumpAndSettle();
       expect(find.byType(AskPage), findsNothing);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      final paletteSearch = find.byWidgetPredicate(
+        (widget) => widget is TextField &&
+            widget.decoration?.hintText ==
+                '搜索项目、供应商、物料（支持拼音首字母），或输入命令',
+      );
+      expect(paletteSearch, findsOneWidget);
+      await tester.enterText(paletteSearch, '问数据');
+      await tester.pumpAndSettle();
+      expect(find.text('打开 问数据'), findsNothing);
+      expect(find.text('没有找到'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     },
   );

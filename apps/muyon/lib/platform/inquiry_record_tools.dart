@@ -272,7 +272,7 @@ void _checkDataScope(
     (l) => l.from == type && values.containsKey(l.field),
   )) {
     final raw = values[link.field];
-    final ids = link.many ? (raw as List? ?? []) : [if (raw != null) raw];
+    final ids = link.many ? (raw as List? ?? []) : [?raw];
     for (final id in ids) {
       _requireSelected(call, link.to, id as String);
     }
@@ -444,7 +444,7 @@ void registerInquiryRecordTools(
                 final raw = data[link.field];
                 final ids = link.many
                     ? (raw as List? ?? [])
-                    : [if (raw != null) raw];
+                    : [?raw];
                 for (final related in ids) {
                   final target = s.get(link.to, related as String);
                   if (target == null || target.deleted)
