@@ -9,3 +9,5 @@ export 'src/dynamic/surface.dart';
 export "src/dynamic/workspace.dart";
 
 export "src/dynamic/workspace_view.dart";
+
+export 'src/dynamic/catalog_library2.dart';
