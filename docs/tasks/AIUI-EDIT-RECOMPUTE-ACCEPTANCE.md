@@ -118,3 +118,16 @@ UI包可跑 `flutter test test/dynamic_events_test.dart test/workspace_controlle
 原 `edit_qty_3_publishes_fixed_total_30` / `edit_qty_4_publishes_fixed_total_40` 保留同 mounted controller 与独立常量断言。固定接口没有原子发布/rebase 实现，不能新建 controller 或手动替换 computed 来把两条 RED 变绿。候选测试通过也只证明 adapter，14个未来场景仍 not-run；并发/迟到/权限/来源/恢复/CAS/稳定行/readOnly 都待真实 owner 接口组合。
 
 后续 guard 测试必须分别冻结 snapshot、plan 和 draft revision 的旧回调，禁止用 eventFor 动态重映射伪造旧事件。数量 `oops` 应被 decimal spec 拒绝且 accepted draft 不变，不把 raw buffer 当参数；另保留合法3的公式失败。恢复验收增加 edit→publish→save→reopen→adoptExtracted 后回到2，提取值不随候选变3。H3 详情导航在 checkpoint 和 page lease 每次 await 后复核冻结 token，最后检查和 push 连续同步执行；失效 lease 必须释放。以上尚未实现，不计为通过。
+
+
+## 7. H1b apps 端注入交接（核心 owner 接线中）
+
+父任务明确共享 state/surface/publication/ui_contract 唯一 writer 为 F5b 原任务 `01a123ce-35cd-7572-9999-7eda8935801d`，从固定 `480b0e0bd34b28a6a1e124c87d042ac0677223af` 继续。已完整读该 head 的 prepared-rebase 报告与 H1b core patch；没有应用共享 patch，也没有 merge develop。报告中的 controller `recomputePort` / `publishTokenProbe` 仍是 proposed，待 owner 提供精确接线签名和实现 SHA。
+
+apps 新增 `UiLiveFormulaRecomputePort`，实现既有 `UiRecomputePort`，每次请求从调用方读取唯一 current accepted plan，薄调用真实 adapter，不注册 listener、scheduler 或第二 runtime。固定 adapter 仍可独立用，但不得作为整个 mounted session 的永久 base：第二次编辑必须从 S8 真实计算到 S9；旧 S7 输入在当前 base 为 S8 时明确拒绝。本独立 port 测试只推进 validated fixture 引用、验证真实连续30/40、extracted2及旧输入拒绝，不声称该引用推进是发布或 mounted 验收。
+
+必须与 owner 对齐的一点：固定 `UiRecomputeResult` 无 plan 字段；apps `prepare()` 已产生真实验证的 `UiVersionBatch`。请 owner 确定该 batch 的宿主回调通道，或明确 controller 由哪个唯一流程生成/验证配套 plan。UI 不得丢掉 adapter 对业务事件/allowed refs 的过滤，也不得另读可变缓存拼成混版本结果。apps 不擅自扩展正式接口。
+
+核心 patch 到位后的接线：原两条 mounted Widget 的同一 controller 注入本 live port；host probe 同步读该 controller 当前 snapshot/draft 加 host/source/permission generation 和逐字 scope，完整六字段返回。编辑触发 owner 的唯一调度/原子事务；apps 不监听 controller 再运行平行发布。保留固定30/40和无业务写断言，追加同 controller/session 与 S/I/P/inputVersion 一致；真实 `prepareRebase` 保留 extracted/override/view/selection 各层。消费新版 snapshot 时 apps 候选需保留 editSpecs/collections 等 host metadata，公式 uiState 需 UiStringEdit 且 !view；此项待实际依赖固定后修改，当前不冒充 library-2 支持。
+
+目前 mounted 两条仍是有效 RED；当前端口测试未核 Actions 前保持 NOT RUN。完整 H1b 组合结果待核心 owner patch，不能把 detached port 测试通过算作 mounted GREEN。

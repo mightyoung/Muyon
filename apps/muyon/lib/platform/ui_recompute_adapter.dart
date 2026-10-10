@@ -23,6 +23,38 @@ final class UiPreparedFormulaRecompute {
   final Map<String, UiFormulaEvaluation> evaluations;
 }
 
+/// Injectable host port that reads the sole accepted bundle for every request.
+///
+/// The UI owner supplies lifecycle, edit capture and publication. This port
+/// neither observes edits nor publishes results. It cannot retain a constructor
+/// snapshot: a second edit must evaluate against the newly accepted snapshot.
+final class UiLiveFormulaRecomputePort implements UiRecomputePort {
+  UiLiveFormulaRecomputePort({
+    required this.currentPlan,
+    required this.registry,
+    required Map<String, UiFormulaDefinition> computations,
+    required Set<String> parameterStateKeys,
+  }) : computations = Map.unmodifiable(computations),
+       parameterStateKeys = Set.unmodifiable(parameterStateKeys);
+
+  final ValidatedUiPlan Function() currentPlan;
+  final UiFormulaRegistry registry;
+  final Map<String, UiFormulaDefinition> computations;
+  final Set<String> parameterStateKeys;
+
+  UiPreparedFormulaRecompute prepare(UiRecomputeInput input) =>
+      UiFormulaRecomputeAdapter(
+        basePlan: currentPlan(),
+        registry: registry,
+        computations: computations,
+        parameterStateKeys: parameterStateKeys,
+      ).prepare(input);
+
+  @override
+  Future<UiRecomputeResult> rebuild(UiRecomputeInput input) async =>
+      prepare(input).result;
+}
+
 /// Thin scalar F3b adapter over the fixed F5c port and real F3a evaluator.
 ///
 /// Construct per accepted base plan, using trusted host formula declarations

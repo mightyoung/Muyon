@@ -211,6 +211,49 @@ void main() {
         token: captured ?? token(),
       );
 
+  test('live_port_reads_current_accepted_bundle_for_each_real_evaluation', () async {
+    // Only the host port is exercised here. Replacing this fixture reference
+    // does not constitute a session publication or mounted Widget GREEN.
+    var accepted = plan();
+    final hostPort = UiLiveFormulaRecomputePort(
+      currentPlan: () => accepted,
+      registry: registry,
+      computations: {'total': definition},
+      parameterStateKeys: {'qty'},
+    );
+    final firstInput = input('3');
+    final first = hostPort.prepare(firstInput);
+    expect(first.result.nextSnapshot!.computations['total']!.value, '30');
+    final batch = first.batch!;
+    accepted = validateUiPlan(
+      batch.plan, batch.snapshot, batch.intent, accepted.catalog,
+    ).validatedPlan!;
+    final secondInput = UiRecomputeInput(
+      previousSnapshot: accepted.snapshot,
+      currentUiState: {'qty': '4'},
+      token: UiPublishToken(
+        baseSnapshotRef: accepted.snapshot.ref,
+        draftRevision: 2,
+        hostGeneration: 11,
+        sourceGeneration: 12,
+        permissionGeneration: 13,
+        scopeKey: 'fixture-selected-item:$itemId',
+      ),
+    );
+    final second = await hostPort.rebuild(secondInput);
+    expect(second.errors, isEmpty);
+    expect(second.nextSnapshot!.ref, const SnapshotRef('budget-line-preview', 9));
+    expect(second.nextSnapshot!.initialUiState['qty'], '2');
+    expect(second.nextSnapshot!.computations['total']!.value, '40');
+    expect(second.nextSnapshot!.computations['total']!.inputVersion, second.nextSnapshot!.ref);
+    expect(second.token, same(secondInput.token));
+    final late = await hostPort.rebuild(firstInput);
+    expect(late.errors, ['recompute_snapshot_mismatch']);
+    expect(late.nextSnapshot, isNull);
+    expect(accepted.snapshot.computations['total']!.value, '30');
+    expect(store.get('project_item', itemId)!.data['qty'], '2');
+  });
+
   test('adapter_prepares_fixed_30_40_with_new_ref_and_extracted_2', () async {
     final hostAdapter = adapter();
     final initialFingerprint = evaluate('2').inputFingerprint;
