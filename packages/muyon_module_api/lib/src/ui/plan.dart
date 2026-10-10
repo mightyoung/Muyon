@@ -1,3 +1,4 @@
+import 'collection.dart';
 import 'snapshot.dart';
 
 enum UiDisplayDecision { textOnly, supplement, replacePresentation }
@@ -11,9 +12,26 @@ enum UiLocalAction {
   back,
   cancelConfirmation,
   sortRows,
+  openRow,
 }
 
-enum UiValueType { string, integer, boolean }
+/// `number` and `stringList` are event payload types only (never properties).
+enum UiValueType { string, integer, boolean, number, stringList }
+
+/// `number`/`stringList` may not ride in model-writable properties. A runtime
+/// throw, not an assert, so release builds cannot bypass it.
+Map<String, UiValueType> _propertiesOnly(Map<String, UiValueType> properties) {
+  for (final e in properties.entries) {
+    if (e.value == UiValueType.number || e.value == UiValueType.stringList) {
+      throw ArgumentError.value(
+        e.value,
+        'properties.${e.key}',
+        'event_only_type',
+      );
+    }
+  }
+  return properties;
+}
 
 class UiComponentSchema {
   UiComponentSchema({
@@ -24,7 +42,16 @@ class UiComponentSchema {
     Map<String, UiValueType?> events = const {},
     Map<String, Set<String>> eventActions = const {},
     this.allowsChildren = false,
-  }) : properties = Map.unmodifiable(properties),
+    Map<String, UiCollectionShape> collections = const {},
+    Map<String, Set<Object>> allowedValues = const {},
+    Set<String> childComponents = const {},
+  }) : collections = Map.unmodifiable(collections),
+       allowedValues = Map.unmodifiable({
+         for (final e in allowedValues.entries)
+           e.key: Set<Object>.unmodifiable(e.value),
+       }),
+       childComponents = Set.unmodifiable(childComponents),
+       properties = Map.unmodifiable(_propertiesOnly(properties)),
        requiredProperties = Set.unmodifiable(requiredProperties),
        bindings = Map.unmodifiable({
          for (final e in bindings.entries)
@@ -44,6 +71,11 @@ class UiComponentSchema {
   /// Action references implemented for each component event; absent means none.
   final Map<String, Set<String>> eventActions;
   final bool allowsChildren;
+
+  /// Collection slot shapes enforced by the shared validator.
+  final Map<String, UiCollectionShape> collections;
+  final Map<String, Set<Object>> allowedValues;
+  final Set<String> childComponents;
 }
 
 class UiActionDefinition {

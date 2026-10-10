@@ -30,12 +30,10 @@ class MuyonTokens extends ThemeExtension<MuyonTokens> {
     required this.redBg,
     required this.green,
     required this.greenBg,
-    Color? warn,
-    Color? warnBg,
-    Color? onAccent,
-  }) : _warn = warn,
-       _warnBg = warnBg,
-       _onAccent = onAccent;
+    this._warn,
+    this._warnBg,
+    this._onAccent,
+  });
 
   static const light = MuyonTokens(
     brightness: Brightness.light,

@@ -12,24 +12,41 @@ class Choice extends StatefulWidget {
     super.key,
     required this.label,
     required this.options,
-    required this.selected,
+    this.selected = const {},
+    this.optionIds,
+    this.selectedIds,
+    this.onChangedIds,
     this.multiple = false,
     this.allowCustom = false,
     this.onChanged,
     this.state = UiComponentState.ready,
     this.errorMessage,
-  });
+  }) : assert(optionIds == null || optionIds.length == options.length);
   final String label;
   final List<String> options;
   final Set<String> selected;
+  final List<String>? optionIds;
+  final Set<String>? selectedIds;
+  final ValueChanged<Set<String>>? onChangedIds;
   final bool multiple, allowCustom;
   final ValueChanged<Set<String>>? onChanged;
   final UiComponentState state;
   final String? errorMessage;
 
+  bool get usesIds => optionIds != null;
+  Set<String> get selection => usesIds ? (selectedIds ?? const {}) : selected;
+  String identityAt(int index) => usesIds ? optionIds![index] : options[index];
+  String get selectedLabels => selection
+      .map((id) {
+        if (!usesIds) return id;
+        final index = optionIds!.indexOf(id);
+        return index < 0 ? '已失效选项' : options[index];
+      })
+      .join('、');
+
   String get textEquivalent =>
       '$label（${multiple ? '可多选' : '单选'}）：'
-      '${selected.isEmpty ? '未选' : '已选 ${selected.join('、')}'}；'
+      '${selection.isEmpty ? '未选' : '已选 $selectedLabels'}；'
       '选项：${options.join('、')}';
 
   @override
@@ -46,33 +63,56 @@ class _ChoiceState extends State<Choice> {
     super.dispose();
   }
 
-  void toggle(String option) {
-    final next = {...widget.selected};
-    if (widget.multiple) {
+  void toggle(Choice rendered, String option) {
+    if (!mounted || !identical(widget, rendered)) return;
+    final next = {...rendered.selection};
+    if (rendered.multiple) {
       next.contains(option) ? next.remove(option) : next.add(option);
     } else {
       next
         ..clear()
         ..add(option);
     }
-    widget.onChanged?.call(next);
+    if (rendered.usesIds) {
+      rendered.onChangedIds?.call(Set.unmodifiable(next));
+    } else {
+      rendered.onChanged?.call(next);
+    }
   }
 
-  void addCustom() {
+  void addCustom(Choice rendered) {
+    if (!mounted || !identical(widget, rendered)) return;
+    if (rendered.usesIds) return;
     final text = custom.text.trim();
     if (text.isEmpty) return;
-    if (!widget.options.contains(text) && !extra.contains(text)) {
+    if (!rendered.options.contains(text) && !extra.contains(text)) {
       setState(() => extra.add(text));
     }
     custom.clear();
-    toggle(text);
+    toggle(rendered, text);
   }
 
   @override
   Widget build(BuildContext context) {
+    final rendered = widget;
     final t = MuyonTokens.of(context);
-    final on = _enabled(widget.state, widget.onChanged);
-    final all = [...widget.options, ...extra];
+    VoidCallback? callbackAt(int index, List<String> all, bool enabled) {
+      if (!enabled) return null;
+      final identity = rendered.usesIds
+          ? rendered.identityAt(index)
+          : all[index];
+      return () => toggle(rendered, identity);
+    }
+
+    final on = _enabled(
+      widget.state,
+      widget.usesIds ? widget.onChangedIds : widget.onChanged,
+    );
+    assert(
+      widget.optionIds == null ||
+          widget.optionIds!.toSet().length == widget.optionIds!.length,
+    );
+    final all = [...widget.options, if (!widget.usesIds) ...extra];
     return UiComponentFrame(
       state: widget.state,
       textEquivalent: widget.textEquivalent,
@@ -86,20 +126,26 @@ class _ChoiceState extends State<Choice> {
             spacing: MuyonTokens.space2,
             runSpacing: MuyonTokens.space2,
             children: [
-              for (final option in all)
+              for (var optionIndex = 0; optionIndex < all.length; optionIndex++)
                 Semantics(
                   button: true,
-                  selected: widget.selected.contains(option),
+                  selected: widget.selection.contains(
+                    widget.usesIds
+                        ? widget.identityAt(optionIndex)
+                        : all[optionIndex],
+                  ),
                   inMutuallyExclusiveGroup: !widget.multiple,
-                  label: option,
+                  label: all[optionIndex],
                   excludeSemantics: true,
-                  onTap: on ? () => toggle(option) : null,
+                  onTap: callbackAt(optionIndex, all, on),
                   child: InkWell(
-                    key: ValueKey('choice-$option'),
+                    key: ValueKey(
+                      'choice-${widget.usesIds ? widget.identityAt(optionIndex) : all[optionIndex]}',
+                    ),
                     borderRadius: BorderRadius.circular(
                       MuyonTokens.optionRadius,
                     ),
-                    onTap: on ? () => toggle(option) : null,
+                    onTap: callbackAt(optionIndex, all, on),
                     child: UiMinTarget(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -108,11 +154,21 @@ class _ChoiceState extends State<Choice> {
                         ),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: widget.selected.contains(option)
+                          color:
+                              widget.selection.contains(
+                                widget.usesIds
+                                    ? widget.identityAt(optionIndex)
+                                    : all[optionIndex],
+                              )
                               ? t.accentTint
                               : t.surface,
                           border: Border.all(
-                            color: widget.selected.contains(option)
+                            color:
+                                widget.selection.contains(
+                                  widget.usesIds
+                                      ? widget.identityAt(optionIndex)
+                                      : all[optionIndex],
+                                )
                                 ? t.accent
                                 : t.ruleStrong,
                           ),
@@ -123,15 +179,24 @@ class _ChoiceState extends State<Choice> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (widget.selected.contains(option)) ...[
+                            if (widget.selection.contains(
+                              widget.usesIds
+                                  ? widget.identityAt(optionIndex)
+                                  : all[optionIndex],
+                            )) ...[
                               Icon(Icons.check, size: 18, color: t.accent),
                               const SizedBox(width: MuyonTokens.space1),
                             ],
                             Flexible(
                               child: Text(
-                                option,
+                                all[optionIndex],
                                 style: TextStyle(
-                                  color: widget.selected.contains(option)
+                                  color:
+                                      widget.selection.contains(
+                                        widget.usesIds
+                                            ? widget.identityAt(optionIndex)
+                                            : all[optionIndex],
+                                      )
                                       ? t.accent
                                       : t.ink,
                                 ),
@@ -145,7 +210,7 @@ class _ChoiceState extends State<Choice> {
                 ),
             ],
           ),
-          if (widget.allowCustom)
+          if (widget.allowCustom && !widget.usesIds)
             Padding(
               padding: const EdgeInsets.only(top: MuyonTokens.space3),
               // Field on its own line so its label is not cut at 200% text.
@@ -157,14 +222,14 @@ class _ChoiceState extends State<Choice> {
                     controller: custom,
                     enabled: on,
                     decoration: const InputDecoration(labelText: '其他（自己填写）'),
-                    onSubmitted: on ? (_) => addCustom() : null,
+                    onSubmitted: on ? (_) => addCustom(rendered) : null,
                   ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: UiMinTarget(
                       child: TextButton(
                         key: const ValueKey('choice-custom-add'),
-                        onPressed: on ? addCustom : null,
+                        onPressed: on ? () => addCustom(rendered) : null,
                         child: const Text('添加'),
                       ),
                     ),
@@ -497,7 +562,13 @@ class DateField extends StatelessWidget {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: value ?? now,
+      initialDate:
+          value ??
+          (first != null && now.isBefore(first!)
+              ? first!
+              : last != null && now.isAfter(last!)
+              ? last!
+              : now),
       firstDate: first ?? DateTime(now.year - 20),
       lastDate: last ?? DateTime(now.year + 20),
     );

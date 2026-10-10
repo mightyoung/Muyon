@@ -11,14 +11,18 @@ void main() {
     expect(muyonDebugRoutes().keys, ['/debug/components']);
     expect(componentNames, hasLength(15));
     expect(componentNames.toSet(), hasLength(15));
-    for (final status in PageState.values)
+    for (final status in PageState.values) {
       expect(status.label, matches(RegExp(r'[\u4e00-\u9fff]')));
-    for (final status in BatchState.values)
+    }
+    for (final status in BatchState.values) {
       expect(status.label, matches(RegExp(r'[\u4e00-\u9fff]')));
-    for (final status in ConfirmationKind.values)
+    }
+    for (final status in ConfirmationKind.values) {
       expect(status.label, matches(RegExp(r'[\u4e00-\u9fff]')));
-    for (final status in ConfirmationChoice.values)
+    }
+    for (final status in ConfirmationChoice.values) {
       expect(status.label, matches(RegExp(r'[\u4e00-\u9fff]')));
+    }
   });
   for (final config in [
     for (final brightness in Brightness.values)

@@ -1,0 +1,7 @@
+# Business-only view input review
+
+Status: proposed; native Codex fix of PR28 discussion r4236410550. A host-declared view string was also present in a legitimate business draft and operation, while the button had no binding and no local edit event. Both node validation and whole-plan validation previously admitted it. The regression pairs an ordinary business input that remains valid with the same input marked view, which must reject with view_business_input and yield no capability. The shared event entrance now checks this boundary before selecting local/business/semantic routes. No validator gate was disabled.
+
+Real RED: one behavior failure and one Unicode sorting pass. GREEN: complete module API suite 159 passed at this patch, including collection tests. Existing UI controlled slice independently passed 480 tests before this API-only fix; this does not transfer a combined UI pass to the new commit.
+
+Sorting discussion r4236410552 is not applied. The frozen docs/design/aiui-f5-contract-proposed.md §2.2 item 8 specifies String.compareTo ascending. Its collection limits describe UTF-8 byte lengths, not sorting. The older aiui-binding-adapter-contract.md has a conflicting UTF-8 sorting proposal; parent explicitly adjudicated the final F5 proposal as authoritative on this issue. A BMP U+E000 versus supplementary U+10000 test locks the actual String.compareTo ordering. No user per-item adoption is claimed.

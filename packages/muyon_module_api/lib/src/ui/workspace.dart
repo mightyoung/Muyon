@@ -1,4 +1,6 @@
 import 'plan.dart';
+import 'edit_spec.dart';
+import 'collection.dart';
 import 'snapshot.dart';
 import 'validation.dart';
 
@@ -7,6 +9,18 @@ import 'validation.dart';
 abstract interface class UiWorkspaceStore {
   Future<StoredUiWorkspace?> load(String surfaceId);
   Future<bool> save(StoredUiWorkspace value, {required int expectedRevision});
+}
+
+/// Decode failure retains the original checkpoint instead of treating it as absent.
+class UiWorkspaceUnreadable implements Exception {
+  const UiWorkspaceUnreadable(this.reason, this.rawJson);
+  final String reason, rawJson;
+  @override
+  String toString() => 'UiWorkspaceUnreadable: $reason';
+}
+
+abstract final class UiWorkspaceLimits {
+  static const bytes = 256 * 1024;
 }
 
 /// No object bodies, credentials, approvals or receipt results live here.
@@ -37,7 +51,15 @@ class StoredUiWorkspace {
     this.presentation,
     Map<String, String> patchHistory = const {},
     Map<String, Object?> viewValues = const {},
-  }) : viewValues = _scalars(viewValues),
+    Map<String, List<String>> selections = const {},
+    List<String> selectionOverrides = const [],
+    Map<String, List<String>> viewSelections = const {},
+    Map<String, Object?> readableDraft = const {},
+  }) : selections = _ids(selections),
+       selectionOverrides = List.unmodifiable(selectionOverrides),
+       viewSelections = _ids(viewSelections),
+       readableDraft = _draftValues(readableDraft),
+       viewValues = _scalars(viewValues),
        extracted = _scalars(extracted),
        userOverrides = _scalars(userOverrides),
        nodeIds = List.unmodifiable(nodeIds),
@@ -46,6 +68,16 @@ class StoredUiWorkspace {
        cancelledNodes = List.unmodifiable(cancelledNodes),
        operationRefs = List.unmodifiable(operationRefs),
        patchHistory = Map.unmodifiable(patchHistory) {
+    if ((catalogVersion == 'library-2' && schemaVersion != 2) ||
+        (schemaVersion != 2 &&
+            (selections.isNotEmpty ||
+                selectionOverrides.isNotEmpty ||
+                viewSelections.isNotEmpty)) ||
+        selectionOverrides.toSet().length != selectionOverrides.length ||
+        selectionOverrides.any((key) => !selections.containsKey(key)) ||
+        viewSelections.keys.any((key) => !selections.containsKey(key))) {
+      throw ArgumentError('workspace_selection_schema');
+    }
     if ([
           taskId,
           surfaceId,
@@ -61,8 +93,9 @@ class StoredUiWorkspace {
         snapshotRef.revision < 0 ||
         !scrollOffset.isFinite ||
         scrollOffset < 0 ||
-        nodeIds.toSet().length != nodeIds.length)
+        nodeIds.toSet().length != nodeIds.length) {
       throw ArgumentError('Invalid workspace projection');
+    }
   }
   static Map<String, Object?> _scalars(Map<String, Object?> input) {
     if (input.entries.any((e) => e.key.isEmpty || !isUiScalar(e.value))) {
@@ -71,6 +104,42 @@ class StoredUiWorkspace {
     return Map.unmodifiable(input);
   }
 
+  static Map<String, List<String>> _ids(Map<String, List<String>> input) {
+    if (input.entries.any(
+      (e) =>
+          e.key.isEmpty ||
+          e.value.length > UiCollectionLimits.rows ||
+          e.value.any((id) => id.isEmpty) ||
+          e.value.toSet().length != e.value.length,
+    )) {
+      throw ArgumentError('workspace_selection_shape');
+    }
+    return Map.unmodifiable({
+      for (final e in input.entries) e.key: UiItemIdsEdit.normalize(e.value),
+    });
+  }
+
+  static Map<String, Object?> _draftValues(Map<String, Object?> input) {
+    if (input.entries.any(
+      (e) =>
+          e.key.isEmpty ||
+          !(isUiScalar(e.value) ||
+              (e.value is List &&
+                  (e.value as List).every((id) => id is String))),
+    )) {
+      throw ArgumentError('workspace_readable_shape');
+    }
+    return Map.unmodifiable({
+      for (final e in input.entries)
+        e.key: e.value is List
+            ? List<String>.unmodifiable((e.value as List).cast<String>())
+            : e.value,
+    });
+  }
+
+  final Map<String, List<String>> selections, viewSelections;
+  final List<String> selectionOverrides;
+  final Map<String, Object?> readableDraft;
   final String taskId, surfaceId, scopeKey, catalogVersion, intentRef, step;
   final int revision, schemaVersion, planRevision, draftRevision;
   final SnapshotRef snapshotRef;
@@ -84,8 +153,12 @@ class StoredUiWorkspace {
   final double scrollOffset;
   final UIPlan? presentation;
   final Map<String, String> patchHistory;
-  Map<String, Object?> get displayValues =>
-      Map.unmodifiable({...extracted, ...userOverrides});
+  Map<String, Object?> get displayValues => Map.unmodifiable({
+    ...extracted,
+    ...userOverrides,
+    for (final key in selectionOverrides) key: selections[key],
+    ...readableDraft,
+  });
 
   StoredUiWorkspace copyWith({
     int? revision,
@@ -118,6 +191,10 @@ class StoredUiWorkspace {
     presentation: presentation,
     patchHistory: patchHistory,
     viewValues: viewValues,
+    selections: selections,
+    selectionOverrides: selectionOverrides,
+    viewSelections: viewSelections,
+    readableDraft: readableDraft,
   );
   StoredUiWorkspace refreshExtraction(
     Map<String, Object?> values,
@@ -156,6 +233,12 @@ class StoredUiWorkspace {
         : encodeUiPresentation(presentation!),
     'patchHistory': patchHistory,
     'viewValues': viewValues,
+    if (schemaVersion == 2) ...{
+      'selections': selections,
+      'selectionOverrides': selectionOverrides,
+      'viewSelections': viewSelections,
+      'readableDraft': readableDraft,
+    },
   };
   factory StoredUiWorkspace.fromJson(Map<String, dynamic> j) =>
       StoredUiWorkspace(
@@ -187,9 +270,24 @@ class StoredUiWorkspace {
             ? null
             : decodeUiPresentation(
                 Map<String, dynamic>.from(j['presentation'] as Map),
+                schemaVersion: j['schemaVersion'] as int,
               ),
         patchHistory: Map<String, String>.from(j['patchHistory'] as Map? ?? {}),
         viewValues: Map<String, Object?>.from(j['viewValues'] as Map? ?? {}),
+        selections: {
+          for (final e in (j['selections'] as Map? ?? {}).entries)
+            e.key as String: List<String>.from(e.value as List),
+        },
+        selectionOverrides: List<String>.from(
+          j['selectionOverrides'] as List? ?? [],
+        ),
+        viewSelections: {
+          for (final e in (j['viewSelections'] as Map? ?? {}).entries)
+            e.key as String: List<String>.from(e.value as List),
+        },
+        readableDraft: Map<String, Object?>.from(
+          j['readableDraft'] as Map? ?? {},
+        ),
       );
 }
 
@@ -226,45 +324,49 @@ Map<String, Object?> encodeUiPresentation(UIPlan p) => {
       },
   ],
 };
-UIPlan decodeUiPresentation(Map<String, dynamic> j) => UIPlan(
-  surfaceId: j['surfaceId'] as String,
-  revision: j['revision'] as int,
-  catalogVersion: j['catalogVersion'] as String,
-  snapshotRef: SnapshotRef(
-    j['snapshotId'] as String,
-    j['snapshotRevision'] as int,
-  ),
-  intentRef: j['intentRef'] as String,
-  root: j['root'] as String,
-  nodes: [
-    for (final raw in j['nodes'] as List)
-      (() {
-        final n = Map<String, dynamic>.from(raw as Map);
-        return UiNode(
-          id: n['id'] as String,
-          component: n['component'] as String,
-          properties: Map<String, Object?>.from(n['properties'] as Map),
-          children: List<String>.from(n['children'] as List),
-          bindings: {
-            for (final e in (n['bindings'] as Map).entries)
-              e.key as String: BindingRef(
-                // Stored workspaces have no collection codec yet.
-                e.value['kind'] == 'collection'
-                    ? throw ArgumentError.value(e.value['kind'], 'kind')
-                    : BindingKind.values.byName(e.value['kind'] as String),
-                e.value['id'] as String,
-              ),
-          },
-          events: {
-            for (final e in (n['events'] as Map).entries)
-              e.key as String: ActionBinding(
-                actionRef: e.value['actionRef'] as String,
-                inputRefs: List<String>.from(e.value['inputRefs'] as List),
-                expectedDraftRevision: e.value['expectedDraftRevision'] as int?,
-                operationKeyRef: e.value['operationKeyRef'] as String?,
-              ),
-          },
-        );
-      })(),
-  ],
-);
+UIPlan decodeUiPresentation(Map<String, dynamic> j, {int schemaVersion = 1}) =>
+    UIPlan(
+      surfaceId: j['surfaceId'] as String,
+      revision: j['revision'] as int,
+      catalogVersion: j['catalogVersion'] as String,
+      snapshotRef: SnapshotRef(
+        j['snapshotId'] as String,
+        j['snapshotRevision'] as int,
+      ),
+      intentRef: j['intentRef'] as String,
+      root: j['root'] as String,
+      nodes: [
+        for (final raw in j['nodes'] as List)
+          (() {
+            final n = Map<String, dynamic>.from(raw as Map);
+            return UiNode(
+              id: n['id'] as String,
+              component: n['component'] as String,
+              properties: Map<String, Object?>.from(n['properties'] as Map),
+              children: List<String>.from(n['children'] as List),
+              bindings: {
+                for (final e in (n['bindings'] as Map).entries)
+                  e.key as String: BindingRef(
+                    // Only explicit library-2/schema2 checkpoints carry collection refs.
+                    e.value['kind'] == 'collection' &&
+                            (schemaVersion != 2 ||
+                                j['catalogVersion'] != 'library-2')
+                        ? throw ArgumentError.value(e.value['kind'], 'kind')
+                        : BindingKind.values.byName(e.value['kind'] as String),
+                    e.value['id'] as String,
+                  ),
+              },
+              events: {
+                for (final e in (n['events'] as Map).entries)
+                  e.key as String: ActionBinding(
+                    actionRef: e.value['actionRef'] as String,
+                    inputRefs: List<String>.from(e.value['inputRefs'] as List),
+                    expectedDraftRevision:
+                        e.value['expectedDraftRevision'] as int?,
+                    operationKeyRef: e.value['operationKeyRef'] as String?,
+                  ),
+              },
+            );
+          })(),
+      ],
+    );

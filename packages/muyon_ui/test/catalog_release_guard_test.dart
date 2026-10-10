@@ -4,10 +4,12 @@ import 'package:muyon_ui/muyon_ui.dart';
 
 void main() {
   test('catalog routes disappear when the VM is not debug', () {
-    if (const bool.fromEnvironment('dart.vm.profile'))
+    if (const bool.fromEnvironment('dart.vm.profile')) {
       expect(kDebugMode, isFalse);
-    if (const bool.fromEnvironment('EXPECT_NONDEBUG'))
+    }
+    if (const bool.fromEnvironment('EXPECT_NONDEBUG')) {
       expect(kDebugMode, isFalse);
+    }
     expect(muyonDebugRoutes().isEmpty, !kDebugMode);
   });
 }

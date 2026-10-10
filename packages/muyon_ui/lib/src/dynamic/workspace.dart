@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:muyon_module_api/ui_contract.dart';
@@ -29,7 +30,9 @@ class UiWorkspaceController extends ChangeNotifier {
   List<String> selectedRecords = [];
   String? returnAnchor;
   double scrollOffset = 0;
-  Map<String, Object?>? get readableDraft => _stored?.displayValues;
+  Map<String, Object?>? _unreadableDraft;
+  Map<String, Object?>? get readableDraft =>
+      _unreadableDraft ?? _stored?.displayValues;
   final _recovered = <String, UiOperationRecovery>{};
   Map<String, UiOperationRecovery> get recoveredOperations =>
       Map.unmodifiable(_recovered);
@@ -40,12 +43,72 @@ class UiWorkspaceController extends ChangeNotifier {
     required String taskId,
     required String scopeKey,
     required ValidatedUiPlan plan,
-    int schemaVersion = 1,
+    int? schemaVersion,
     UiEventSink? onEvent,
     Future<UiOperationRecovery> Function(String)? receiptLookup,
   }) async {
-    final c = UiWorkspaceController._(store, taskId, scopeKey, schemaVersion);
-    final old = await store.load(plan.plan.surfaceId);
+    final c = UiWorkspaceController._(
+      store,
+      taskId,
+      scopeKey,
+      schemaVersion ?? (usesTypedEdits(plan.catalog) ? 2 : 1),
+    );
+    StoredUiWorkspace? old;
+    try {
+      old = await store.load(plan.plan.surfaceId);
+    } on UiWorkspaceUnreadable catch (error) {
+      c.readOnly = true;
+      c.saveError = error.reason;
+      // Readable data is retained only within the current task/surface/scope.
+      // Unknown codec bytes are never upgraded or written back automatically.
+      try {
+        if (utf8.encode(error.rawJson).length <= UiWorkspaceLimits.bytes) {
+          final raw = jsonDecode(error.rawJson);
+          if (raw is Map &&
+              raw['taskId'] == taskId &&
+              raw['surfaceId'] == plan.plan.surfaceId &&
+              raw['scopeKey'] == scopeKey) {
+            final draft = <String, Object?>{};
+            for (final field in [
+              'extracted',
+              'userOverrides',
+              'readableDraft',
+            ]) {
+              final map = raw[field];
+              if (map is Map) {
+                for (final entry in map.entries) {
+                  if (entry.key is String &&
+                      (isUiScalar(entry.value) ||
+                          (entry.value is List &&
+                              (entry.value as List).every(
+                                (id) => id is String,
+                              )))) {
+                    draft[entry.key as String] = entry.value is List
+                        ? List<String>.unmodifiable(
+                            (entry.value as List).cast<String>(),
+                          )
+                        : entry.value;
+                  }
+                }
+              }
+            }
+            final selections = raw['selections'];
+            final edited = raw['selectionOverrides'];
+            if (selections is Map && edited is List) {
+              for (final key in edited.whereType<String>()) {
+                final ids = selections[key];
+                if (ids is List && ids.every((id) => id is String)) {
+                  draft[key] = List<String>.unmodifiable(ids.cast<String>());
+                }
+              }
+            }
+            c._unreadableDraft = Map.unmodifiable(draft);
+          }
+        }
+      } catch (_) {
+        /* Preserve the original bytes without guessing a codec. */
+      }
+    }
     var current = plan;
     if (old != null) {
       if (old.taskId != taskId ||
@@ -61,7 +124,7 @@ class UiWorkspaceController extends ChangeNotifier {
       c.scrollOffset = old.scrollOffset;
       final ids = plan.plan.nodes.map((n) => n.id).toSet();
       c.readOnly =
-          old.schemaVersion != schemaVersion ||
+          old.schemaVersion != c.schemaVersion ||
           old.catalogVersion != plan.catalog.version ||
           old.intentRef != plan.intent.id ||
           old.snapshotRef.id != plan.snapshot.ref.id ||
@@ -89,18 +152,18 @@ class UiWorkspaceController extends ChangeNotifier {
             restored.revision != old.planRevision ||
             restored.snapshotRef != old.snapshotRef ||
             restored.catalogVersion != old.catalogVersion ||
-            restored.intentRef != old.intentRef)
+            restored.intentRef != old.intentRef) {
           c.readOnly = true;
-        else if (restored.revision >= plan.plan.revision) {
+        } else if (restored.revision >= plan.plan.revision) {
           var result = validateUiPlan(
             restored,
             plan.snapshot,
             plan.intent,
             plan.catalog,
           );
-          if (!result.isValid)
+          if (!result.isValid) {
             c.readOnly = true;
-          else {
+          } else {
             for (final entry in old.patchHistory.entries) {
               result = result.recordPatch(entry.key, entry.value);
             }
@@ -120,17 +183,27 @@ class UiWorkspaceController extends ChangeNotifier {
     }
     c.surface = UiSurfaceController(
       current,
+      readOnlyProbe: () => c.readOnly,
       onEvent: c.readOnly || onEvent == null
           ? null
           : (event) async {
               await c.flush(); // includes the pending/locked operation before the port
-              if (c.readOnly || c._disposed)
+              if (c.readOnly || c._disposed) {
                 throw StateError('Workspace not durable');
+              }
               await onEvent(event);
             },
     );
     if (old != null) {
-      c.surface.session.restoreWorkspace(old);
+      final compatible = !c.readOnly;
+      c.surface.session.restoreWorkspace(old, activate: compatible);
+      // Existing incompatible workspaces keep their silent no-write checkpoint.
+      // Only a rejected edit in a compatible workspace is a new save error.
+      if (compatible && c.surface.session.unreadableReasons.isNotEmpty) {
+        c.readOnly = true;
+        c.saveError =
+            'workspace_edit_spec:${c.surface.session.unreadableReasons.values.toSet().join(',')}';
+      }
       c.surface.lockRecoveredOperations(old.operationRefs);
     }
     c.surface.addListener(c._changed);
@@ -163,6 +236,12 @@ class UiWorkspaceController extends ChangeNotifier {
       extracted: p.snapshot.initialUiState,
       userOverrides: session.userOverrides,
       viewValues: session.viewValues,
+      selections: schemaVersion == 2 ? session.selections : {},
+      selectionOverrides: schemaVersion == 2
+          ? session.selectionOverrides.toList()
+          : [],
+      viewSelections: schemaVersion == 2 ? session.viewSelections : {},
+      readableDraft: session.readableDraft,
       nodeIds: p.plan.nodes.map((n) => n.id).toList(),
       step: step,
       selectedRecords: selectedRecords,
@@ -178,18 +257,20 @@ class UiWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> flush() {
-    if (readOnly)
+    if (readOnly) {
       return saveError == null
           ? Future.value()
           : Future.error(StateError(saveError!));
+    }
     // Capture now, serialize later: rapid edits each get one coherent version.
     final projection = _capture(1);
     final result = _tail
         .then((_) async {
           if (readOnly) throw StateError(saveError ?? 'Workspace read-only');
           final next = projection.copyWith(revision: _revision + 1);
-          if (!await store.save(next, expectedRevision: _revision))
+          if (!await store.save(next, expectedRevision: _revision)) {
             throw StateError('Workspace revision or scope changed');
+          }
           _revision = next.revision;
           _stored = next;
           saveError = null;

@@ -39,8 +39,9 @@ void main() {
           ),
         );
         expect(find.text(status.label), findsOneWidget);
-        for (final label in ['做什么', '对谁', '发送内容', '摘要散列', '后果'])
+        for (final label in ['做什么', '对谁', '发送内容', '摘要散列', '后果']) {
           expect(find.text(label), findsOneWidget);
+        }
         final active =
             [
               BusinessStatus.pending,
@@ -60,8 +61,9 @@ void main() {
               }
             : <String>[];
         if (status == BusinessStatus.contentReview ||
-            status == BusinessStatus.externalContent)
+            status == BusinessStatus.externalContent) {
           expected.remove('更多');
+        }
         if (status == BusinessStatus.externalContent) {
           expected.remove('本次对话允许');
           expected.remove('本次对话允许发往此端点');
@@ -122,8 +124,9 @@ void main() {
           expect(find.text('本次任务'), findsOneWidget);
           expect(find.text('本次对话'), findsOneWidget);
           expect(find.text('始终允许'), findsOneWidget);
-          for (final label in ['本次任务', '本次对话', '始终允许'])
+          for (final label in ['本次任务', '本次对话', '始终允许']) {
             minimum(tester, find.bySemanticsLabel(label));
+          }
           expect(tester.takeException(), isNull);
         } finally {
           semantics.dispose();
