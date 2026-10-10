@@ -151,8 +151,9 @@ Iterable<Map> _records(AssistantObservation observation, String type) {
   final result = jsonDecode(observation.result);
   if (args['type'] == type) {
     if (observation.tool == 'get' && result is Map) return [result];
-    if (observation.tool == 'search' && result is List)
+    if (observation.tool == 'search' && result is List) {
       return result.whereType<Map>();
+    }
     if (observation.tool == 'query' &&
         result is Map &&
         result['rows'] is List) {
@@ -217,16 +218,18 @@ Map<String, bool> checkLiveAnswer(
               (data['returned'] as int) <= 1;
         }
         if (['query', 'get', 'search'].contains(o.tool) &&
-            args['type'] == 'project_item')
+            args['type'] == 'project_item') {
           return false;
+        }
         return o.tool != 'related' ||
             !'${args['link']}'.startsWith('project_item.');
       });
       checks['full_total_and_bounded_details'] = observations.any((o) {
         if (o.failed ||
             o.tool != 'project_budget' ||
-            _args(o)['project_id'] != _project)
+            _args(o)['project_id'] != _project) {
           return false;
+        }
         final data = jsonDecode(o.result);
         return data is Map &&
             data['cost'] == '6' &&
@@ -245,11 +248,13 @@ Map<String, bool> checkLiveAnswer(
         if (o.failed ||
             o.tool != 'query' ||
             _args(o)['type'] != 'product_param' ||
-            !_parameterPopulationQuery(_args(o)))
+            !_parameterPopulationQuery(_args(o))) {
           return false;
+        }
         final data = jsonDecode(o.result);
-        if (data is! Map || data['has_more'] != false || data['rows'] is! List)
+        if (data is! Map || data['has_more'] != false || data['rows'] is! List) {
           return false;
+        }
         final rows = (data['rows'] as List).whereType<Map>().toList();
         return data['total'] == rows.length &&
             rows
@@ -285,8 +290,9 @@ Map<String, bool> checkLiveAnswer(
       checks['empty_lookup_observed'] = observations.any((o) {
         if (o.failed ||
             _args(o)['type'] != 'supplier' ||
-            !o.arguments.contains(_absentName))
+            !o.arguments.contains(_absentName)) {
           return false;
+        }
         final data = jsonDecode(o.result);
         return (o.tool == 'search' && data is List && data.isEmpty) ||
             (o.tool == 'query' && data is Map && data['total'] == 0);
@@ -297,8 +303,9 @@ Map<String, bool> checkLiveAnswer(
     case LiveTask.missing:
       checks['missing_project_observed'] = observations.any((o) {
         final args = _args(o);
-        if (o.tool == 'project_budget' && args['project_id'] == _missing)
+        if (o.tool == 'project_budget' && args['project_id'] == _missing) {
           return o.failed;
+        }
         if (!o.failed &&
             o.tool == 'query' &&
             args['type'] == 'project' &&

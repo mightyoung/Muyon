@@ -160,7 +160,7 @@ extension Budgets on Store {
         "AND json_extract(q.data,'\$.currency') = ?",
         [productId, currency],
       ))
-        if (_option(
+        ?_option(
               r['id'] as String,
               r['data'] as String,
               today,
@@ -170,9 +170,7 @@ extension Budgets on Store {
               taxMode,
               product.data,
               unit ?? product.data['unit']! as String,
-            )
-            case final option?)
-          option,
+        ),
     ];
     int rank(QuoteOption o) => !o.valid
         ? 3

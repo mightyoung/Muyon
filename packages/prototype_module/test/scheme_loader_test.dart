@@ -120,8 +120,8 @@ void main() {
   });
 
   group('symbolic links cannot lead out of the root', () {
-    final v1 = () => p.join(tmp.path, 'p1', 'v1');
-    final v2 = () => p.join(tmp.path, 'p1', 'v2');
+    String v1() => p.join(tmp.path, 'p1', 'v1');
+    String v2() => p.join(tmp.path, 'p1', 'v2');
 
     test('a file link to a file outside', () async {
       Link(p.join(v1(), 'leak.txt')).createSync(p.join(v2(), 'secret.txt'));

@@ -39,8 +39,9 @@ Uint8List _readBounded(String path, int limit) {
       read += count;
     }
     // Do not let a file that grows after the length check extend allocation.
-    if (file.readByteSync() != -1)
+    if (file.readByteSync() != -1) {
       invalid('file', 'file changed while reading');
+    }
     return bytes;
   } finally {
     file.closeSync();

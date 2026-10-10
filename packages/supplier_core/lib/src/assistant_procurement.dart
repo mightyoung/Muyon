@@ -63,8 +63,9 @@ class AssistantProcurementTools implements AssistantToolset {
     this.domesticCriterion,
     this.requestText = '',
   }) {
-    if (sessionId.isEmpty || sessionId.length > 200)
+    if (sessionId.isEmpty || sessionId.length > 200) {
       throw ArgumentError('Invalid session ID');
+    }
   }
   final Store store;
   final AssistantWebTools web;
@@ -90,8 +91,9 @@ class AssistantProcurementTools implements AssistantToolset {
 
   void _save(Map<String, Object?> state) {
     final encoded = _canonical(state);
-    if (utf8.encode(encoded).length > 512 * 1024)
+    if (utf8.encode(encoded).length > 512 * 1024) {
       throw const FormatException('任务研究证据超过512KiB限制');
+    }
     store.db.execute(
       'INSERT INTO meta(key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
       [_key, encoded],
@@ -108,8 +110,9 @@ class AssistantProcurementTools implements AssistantToolset {
   void _check(AiCancellation cancellation, {bool write = false}) {
     cancellation.check();
     validateSession?.call();
-    if (write && permission == AssistantPermission.readOnly)
+    if (write && permission == AssistantPermission.readOnly) {
       throw const FormatException('只读模式禁止采购导入');
+    }
   }
 
   @override
@@ -184,20 +187,23 @@ class AssistantProcurementTools implements AssistantToolset {
     Set<String> optional = const {},
   ]) {
     if (!args.keys.toSet().containsAll(required) ||
-        args.keys.any((k) => !required.contains(k) && !optional.contains(k)))
+        args.keys.any((k) => !required.contains(k) && !optional.contains(k))) {
       throw const FormatException('未知或缺少采购参数');
+    }
     for (final key in args.keys.where((k) => k != 'candidate_ids')) {
       if (args[key] is! String ||
           (args[key] as String).isEmpty ||
-          (args[key] as String).length > 200)
+          (args[key] as String).length > 200) {
         throw const FormatException('无效采购ID或操作');
+      }
     }
   }
 
   Record _live(String type, String id) {
     final record = store.get(type, requireUuid(id, 'id'));
-    if (record == null || record.deleted)
+    if (record == null || record.deleted) {
       throw const FormatException('原业务记录不可用');
+    }
     return record;
   }
 
@@ -242,8 +248,9 @@ class AssistantProcurementTools implements AssistantToolset {
 
   void _fresh(Map<String, Object?> candidate) {
     if (_canonical(_bindings(candidate['item_id'] as String?)) !=
-        _canonical(candidate['bindings']))
+        _canonical(candidate['bindings'])) {
       throw const FormatException('原预算/项目/物料/报价已变更，请重新研究');
+    }
   }
 
   String get _today => store.clock().toIso8601String().substring(0, 10);
@@ -260,10 +267,12 @@ class AssistantProcurementTools implements AssistantToolset {
       String? reason;
       String? evidence;
       String? countryField;
-      if (RegExp(r'^(中国制造|中国生产|制造地[:：]?中国|国产制造)$').hasMatch(clause))
+      if (RegExp(r'^(中国制造|中国生产|制造地[:：]?中国|国产制造)$').hasMatch(clause)) {
         countryField = 'manufacture_country';
-      if (RegExp(r'^(中国品牌|国产品牌|品牌来源[:：]?中国)$').hasMatch(clause))
+      }
+      if (RegExp(r'^(中国品牌|国产品牌|品牌来源[:：]?中国)$').hasMatch(clause)) {
         countryField = 'brand_origin';
+      }
       if (clause == '国产') {
         countryField = switch (domesticCriterion?.call()) {
           'manufacture' => 'manufacture_country',
@@ -274,7 +283,7 @@ class AssistantProcurementTools implements AssistantToolset {
       }
       if (countryField != null) {
         evidence = row.facts[countryField];
-        if (evidence != null)
+        if (evidence != null) {
           status =
               const {
                 '中国',
@@ -286,8 +295,10 @@ class AssistantProcurementTools implements AssistantToolset {
               }.contains(evidence)
               ? 'source_supported'
               : 'contradicted';
-        else
+        }
+        else {
           reason = '来源未明确声明所需国别，品牌与制造地不可混用';
+        }
       } else if (reason == null) {
         final parsed = _numericRequirement(clause);
         if (parsed != null) {
@@ -322,24 +333,27 @@ class AssistantProcurementTools implements AssistantToolset {
         'reason': reason,
       });
     }
-    if (checks.isEmpty)
+    if (checks.isEmpty) {
       checks.add({
         'requirement': requirement,
         'status': 'unknown',
         'reason': '未绑定完整技术要求，仅供资料研究',
       });
-    if (snapshot.truncated)
+    }
+    if (snapshot.truncated) {
       checks.add({
         'requirement': '来源完整性',
         'status': 'unknown',
         'reason': '网页快照被截断',
       });
-    if (row.warnings.isNotEmpty)
+    }
+    if (row.warnings.isNotEmpty) {
       checks.add({
         'requirement': '来源字段完整性',
         'status': 'unknown',
         'reason': row.warnings.join('；'),
       });
+    }
     final status = checks.any((c) => c['status'] == 'contradicted')
         ? 'contradicted'
         : checks.every((c) => c['status'] == 'source_supported')
@@ -391,8 +405,9 @@ class AssistantProcurementTools implements AssistantToolset {
     if (m == null) return null;
     final unit = m[2]!;
     if (property.kind != null && unit.isEmpty) return null;
-    if (property.kind == null && unit.isNotEmpty && unit != property.unitLabel)
+    if (property.kind == null && unit.isNotEmpty && unit != property.unitLabel) {
       return null;
+    }
     try {
       return normalizeParamValue(property, {
         'v': m[1],
@@ -429,10 +444,12 @@ class AssistantProcurementTools implements AssistantToolset {
     } on FormatException {
       missing.add('价格或最小数量不是明确正十进制值');
     }
-    if (!const {'included', 'excluded'}.contains(facts['tax_mode']))
+    if (!const {'included', 'excluded'}.contains(facts['tax_mode'])) {
       missing.add('税口径未知');
-    if (!RegExp(r'^[A-Z]{3}$').hasMatch(facts['currency'] ?? ''))
+    }
+    if (!RegExp(r'^[A-Z]{3}$').hasMatch(facts['currency'] ?? '')) {
       missing.add('币种无效');
+    }
     try {
       final rate = ExactDecimal.parse(
         facts['tax_rate'] ?? '',
@@ -451,8 +468,9 @@ class AssistantProcurementTools implements AssistantToolset {
       '不含运费',
       '包邮',
       '免运费',
-    }.contains(facts['shipping']))
+    }.contains(facts['shipping'])) {
       missing.add('运费口径未知');
+    }
     for (final field in ['quoted_on', 'valid_until']) {
       try {
         requireDate(facts[field], field);
@@ -461,20 +479,23 @@ class AssistantProcurementTools implements AssistantToolset {
       }
     }
     final today = _today;
-    if ((facts['quoted_on'] ?? '9999').compareTo(today) > 0)
+    if ((facts['quoted_on'] ?? '9999').compareTo(today) > 0) {
       missing.add('报价日期晚于今天');
-    if ((facts['valid_until'] ?? '0000').compareTo(today) < 0)
+    }
+    if ((facts['valid_until'] ?? '0000').compareTo(today) < 0) {
       missing.add('报价过期或有效期未知');
+    }
     if (facts['quoted_on'] != null &&
         facts['valid_until'] != null &&
-        facts['valid_until']!.compareTo(facts['quoted_on']!) < 0)
+        facts['valid_until']!.compareTo(facts['quoted_on']!) < 0) {
       missing.add('日期顺序矛盾');
+    }
     return missing;
   }
 
   Map<String, Object?> _compare(List<String> ids, String? itemId) {
     final rows = [for (final id in ids) _candidate(id)];
-    for (final c in rows) _fresh(c);
+    for (final c in rows) { _fresh(c); }
     final target = _bindings(itemId);
     final product = target['product'] == null
         ? null
@@ -493,13 +514,15 @@ class AssistantProcurementTools implements AssistantToolset {
       final problems = _priceProblems(row);
       if (source.truncated) problems.add('来源截断');
       if (product != null &&
-          (f['brand'] != product['brand'] || f['model'] != product['model']))
+          (f['brand'] != product['brand'] || f['model'] != product['model'])) {
         problems.add('与项目品牌或完整型号不同');
+      }
       if (item != null) {
         if (f['unit'] != item['unit']) problems.add('与项目单位不同');
         try {
-          if (micros(f['min_qty']!) > micros(item['qty'] as String))
+          if (micros(f['min_qty']!) > micros(item['qty'] as String)) {
             problems.add('项目数量未达到最小起订量');
+          }
         } catch (_) {
           problems.add('数量条件未知');
         }
@@ -520,16 +543,18 @@ class AssistantProcurementTools implements AssistantToolset {
         ])
           key: f[key] ?? '',
       };
-      if (basis != null && _canonical(b) != _canonical(basis))
+      if (basis != null && _canonical(b) != _canonical(basis)) {
         problems.add('样本品牌/完整型号/配置/币种/单位/税运/数量/日期口径不同');
+      }
       // Conservative grouping also rejects subdomains as independent sellers.
       final labels = Uri.parse(source.url).host.toLowerCase().split('.');
       final host = labels
           .skip(labels.length > 2 ? labels.length - 2 : 0)
           .join('.');
       final seller = (f['supplier'] ?? '').trim().toLowerCase();
-      if (sellers.contains(seller) || domains.contains(host))
+      if (sellers.contains(seller) || domains.contains(host)) {
         problems.add('卖方或域名重复，不能作为独立样本');
+      }
       if (problems.isNotEmpty) {
         excluded.add({'candidate_id': c['id'], 'reasons': problems});
         continue;
@@ -568,16 +593,18 @@ class AssistantProcurementTools implements AssistantToolset {
     List<BigInt> prices,
   ) {
     final reasons = <String>[];
-    if (bindings['item'] == null)
+    if (bindings['item'] == null) {
       return {
         'status': 'not_comparable',
         'reasons': ['未指定预算行'],
       };
-    if (basis == null || prices.length < 2)
+    }
+    if (basis == null || prices.length < 2) {
       return {
         'status': 'not_comparable',
         'reasons': ['缺少两个完整同口径独立样本'],
       };
+    }
     final item = _object(_object(bindings['item'])['data']);
     final product = bindings['product'] == null
         ? null
@@ -587,27 +614,33 @@ class AssistantProcurementTools implements AssistantToolset {
         : _object(_object(bindings['quotation'])['data']);
     final project = _object(_object(bindings['project'])['data']);
     if (product == null) reasons.add('预算没有明确物料');
-    if (quote == null)
+    if (quote == null) {
       return {
         'status': 'not_comparable',
         'reasons': [...reasons, '预算未选择正式报价'],
       };
-    if (quote['price_basis'] != null || quote['capture_mode'] != 'standard')
+    }
+    if (quote['price_basis'] != null || quote['capture_mode'] != 'standard') {
       reasons.add('选中报价不是正式标准报价');
+    }
     if (quote['product_id'] != item['product_id']) reasons.add('选中报价与预算物料不同');
-    if (quote['project_id'] != _object(bindings['project'])['id'])
+    if (quote['project_id'] != _object(bindings['project'])['id']) {
       reasons.add('选中报价不属于当前项目');
+    }
     for (final field in ['brand', 'model']) {
-      if (product?[field] == null || product?[field] != basis[field])
+      if (product?[field] == null || product?[field] != basis[field]) {
         reasons.add('本机$field与来源不一致或缺失');
+      }
     }
     final configs = <String>{};
     final attrs = product?['attributes'];
-    if (attrs is Map)
+    if (attrs is Map) {
       for (final key in ['configuration', '配置']) {
-        if (attrs[key] case final String value when value.isNotEmpty)
+        if (attrs[key] case final String value when value.isNotEmpty) {
           configs.add(value);
+        }
       }
+    }
     // A source document can supply configuration only when its selected row is
     // bound to this exact product and all of this quotation's core terms.
     for (final id in quote['attachment_ids'] as List? ?? const []) {
@@ -624,44 +657,53 @@ class AssistantProcurementTools implements AssistantToolset {
             .firstOrNull;
         if (row == null || row.warnings.isNotEmpty) continue;
         final f = row.facts;
-        if (f['brand'] != product?['brand'] || f['model'] != product?['model'])
+        if (f['brand'] != product?['brand'] || f['model'] != product?['model']) {
           continue;
+        }
         if (f['unit'] != quote['unit_snapshot']) continue;
         if (['price', 'tax_rate', 'min_qty'].any(
           (key) =>
               f[key] == null ||
               quote[key] == null ||
               micros(f[key]!) != micros(quote[key] as String),
-        ))
+        )) {
           continue;
+        }
         if ([
           'currency',
           'tax_mode',
           'quoted_on',
           'valid_until',
-        ].any((key) => f[key] != quote[key]))
+        ].any((key) => f[key] != quote[key])) {
           continue;
-        if (f['configuration'] case final String configuration)
+        }
+        if (f['configuration'] case final String configuration) {
           configs.add(configuration);
+        }
       } catch (_) {
         /* Ordinary non-source attachments provide no typed facts. */
       }
     }
-    if (configs.length != 1 || configs.single != basis['configuration'])
+    if (configs.length != 1 || configs.single != basis['configuration']) {
       reasons.add('本机配置缺失、冲突或与来源不同');
-    for (final field in ['currency', 'tax_mode', 'quoted_on', 'valid_until']) {
-      if (quote[field] == null || quote[field] != basis[field])
-        reasons.add('正式报价$field与来源不同或缺失');
     }
-    for (final field in ['currency', 'tax_mode'])
+    for (final field in ['currency', 'tax_mode', 'quoted_on', 'valid_until']) {
+      if (quote[field] == null || quote[field] != basis[field]) {
+        reasons.add('正式报价$field与来源不同或缺失');
+      }
+    }
+    for (final field in ['currency', 'tax_mode']) {
       if (project[field] != basis[field]) reasons.add('项目$field与来源不同，不自动换算');
+    }
     if (item['unit'] != basis['unit'] ||
-        quote['unit_snapshot'] != basis['unit'])
+        quote['unit_snapshot'] != basis['unit']) {
       reasons.add('预算/正式报价单位与来源不同，不自动换算');
+    }
     for (final field in ['tax_rate', 'min_qty']) {
       try {
-        if (micros(quote[field] as String) != micros(basis[field]!))
+        if (micros(quote[field] as String) != micros(basis[field]!)) {
           reasons.add('正式报价$field与来源不同');
+        }
       } catch (_) {
         reasons.add('正式报价$field缺失或无效');
       }
@@ -676,25 +718,31 @@ class AssistantProcurementTools implements AssistantToolset {
       '免运费',
     }.contains(shipping);
     final excluded = const {'excluded', '不含运费'}.contains(shipping);
-    if (scope is! List)
+    if (scope is! List) {
       reasons.add('正式报价运费范围未知');
+    }
     else {
-      if ((!included && !excluded) || scope.contains('freight') != included)
+      if ((!included && !excluded) || scope.contains('freight') != included) {
         reasons.add('正式报价运费范围与来源不同');
-      if (scope.any((value) => value != 'freight'))
+      }
+      if (scope.any((value) => value != 'freight')) {
         reasons.add('正式报价包含安装/调试/培训等额外范围，不能视为同口径单价');
+      }
     }
     if (quote['extra_cost'] != null &&
-        micros(quote['extra_cost'] as String) != BigInt.zero)
+        micros(quote['extra_cost'] as String) != BigInt.zero) {
       reasons.add('正式报价存在额外费用，需另行核对');
+    }
     if (quote['price_tiers'] != null) reasons.add('正式报价有阶梯价格，当前工具不推定适用档位');
-    if (micros(item['qty'] as String) < micros(quote['min_qty'] as String))
+    if (micros(item['qty'] as String) < micros(quote['min_qty'] as String)) {
       reasons.add('预算数量低于正式报价最小数量');
+    }
     final cost = micros(item['unit_cost'] as String),
         quoted = micros(quote['price'] as String);
     if (cost != quoted) reasons.add('预算成本快照与当前正式报价单价不同');
-    if (reasons.isNotEmpty)
+    if (reasons.isNotEmpty) {
       return {'status': 'not_comparable', 'reasons': reasons};
+    }
     return {
       'status': 'comparable_unit_price',
       'scope': '仅比较同口径单价，不代表总采购成本或市场公允价',
@@ -719,16 +767,18 @@ class AssistantProcurementTools implements AssistantToolset {
     required AiCancellation cancellation,
   }) async {
     _check(cancellation);
-    if (callId.isEmpty || callId.length > 200)
+    if (callId.isEmpty || callId.length > 200) {
       throw const FormatException('Invalid call ID');
+    }
     final args = _object(_frozen(arguments));
     switch (name) {
       case 'procurement_stage':
         _args(args, {'source_id', 'row_id'}, {'item_id'});
         final source = web.snapshot(args['source_id'] as String);
         if (source == null ||
-            !source.products.any((p) => p.id == args['row_id']))
+            !source.products.any((p) => p.id == args['row_id'])) {
           throw const FormatException('没有真实来源快照或产品行');
+        }
         final bindings = _bindings(args['item_id'] as String?);
         final requirement = bindings['item'] == null
             ? requestText
@@ -739,8 +789,9 @@ class AssistantProcurementTools implements AssistantToolset {
           _canonical([source.id, args['row_id'], bindings, requirement]),
         );
         final state = _load(), candidates = _object(_load()['candidates']);
-        if (!candidates.containsKey(id) && candidates.length >= 8)
+        if (!candidates.containsKey(id) && candidates.length >= 8) {
           throw const FormatException('任务最多8个候选');
+        }
         final candidate = <String, Object?>{
           'id': id,
           'source': source.toJson(),
@@ -771,8 +822,9 @@ class AssistantProcurementTools implements AssistantToolset {
             ids.length < 2 ||
             ids.length > 8 ||
             ids.any((v) => v is! String) ||
-            ids.toSet().length != ids.length)
+            ids.toSet().length != ids.length) {
           throw const FormatException('需要2至8个不同候选ID');
+        }
         final report = _compare(ids.cast<String>(), args['item_id'] as String?);
         final state = _load();
         final inputKey = _canonical([ids.toList()..sort(), args['item_id']]);
@@ -810,8 +862,9 @@ class AssistantProcurementTools implements AssistantToolset {
   ) async {
     _check(cancellation, write: true);
     final operation = args['operation'];
-    if (operation != 'catalog')
+    if (operation != 'catalog') {
       throw const FormatException('仅可导入资料；替换预算须重新询价并使用正式报价');
+    }
     final key =
             'assistant_procurement_receipt:${jsonEncode([sessionId, callId])}',
         canonical = _canonical(args);
@@ -831,8 +884,9 @@ class AssistantProcurementTools implements AssistantToolset {
     final qualification = _qualification(candidate);
     final criterion = domesticCriterion?.call();
     final f = row.facts;
-    if (f['name'] == null || f['unit'] == null)
+    if (f['name'] == null || f['unit'] == null) {
       throw const FormatException('来源缺物料名称或单位，不能创建物料；候选和来源已保留');
+    }
     final product = validatePayload('product', {
       for (final key in payloadFields('product')) key: null,
       'name': f['name'],
@@ -884,13 +938,16 @@ class AssistantProcurementTools implements AssistantToolset {
       _fresh(candidate);
       final currentPriceProblems = _priceProblems(row);
       if (source.truncated) currentPriceProblems.add('来源截断');
-      if (bindings['project'] == null)
+      if (bindings['project'] == null) {
         currentPriceProblems.add('缺少项目，不能建立标准参考报价');
-      if (_canonical(currentPriceProblems) != _canonical(priceProblems))
+      }
+      if (_canonical(currentPriceProblems) != _canonical(priceProblems)) {
         throw const FormatException('报价时效或条件已变，请重新审核');
+      }
       if (criterion != domesticCriterion?.call() ||
-          _canonical(qualification) != _canonical(_qualification(candidate)))
+          _canonical(qualification) != _canonical(_qualification(candidate))) {
         throw const FormatException('审核期间认定条件改变');
+      }
       final attachmentId = store.addAttachment(
         '采购来源-${source.digest.substring(0, 12)}.json',
         utf8.encode(
@@ -914,7 +971,7 @@ class AssistantProcurementTools implements AssistantToolset {
         final raw =
             row.parameters[property.code] ?? row.parameters[property.label];
         final value = raw == null ? null : _number(property, raw);
-        if (value != null)
+        if (value != null) {
           store.setParam(
             productId,
             property.code,
@@ -924,9 +981,10 @@ class AssistantProcurementTools implements AssistantToolset {
             evidence: raw,
             attachmentId: attachmentId,
           );
+        }
       }
       String? supplierId, quotationId;
-      if (f['supplier'] != null)
+      if (f['supplier'] != null) {
         supplierId = store.save('supplier', {
           for (final field in payloadFields('supplier')) field: null,
           'name': f['supplier'],
@@ -934,6 +992,7 @@ class AssistantProcurementTools implements AssistantToolset {
           'categories': <String>[],
           'notes': '网页声明供应方，未核验；来源附件 $attachmentId',
         });
+      }
       if (priceProblems.isEmpty && supplierId != null) {
         final projectId = _object(bindings['project'])['id'];
         quotationId = store.save('quotation', {
@@ -1019,8 +1078,9 @@ class AssistantProcurementTools implements AssistantToolset {
       final stored = _object(raw);
       try {
         final itemId = stored['item_id'] as String?;
-        if (_canonical(_bindings(itemId)) != _canonical(stored['bindings']))
+        if (_canonical(_bindings(itemId)) != _canonical(stored['bindings'])) {
           throw const FormatException('项目引用已改变');
+        }
         final ids = (stored['candidate_ids'] as List).cast<String>();
         lines.add(assistantReadableSummary(_compare(ids, itemId)));
       } catch (_) {
@@ -1034,8 +1094,9 @@ class AssistantProcurementTools implements AssistantToolset {
         );
       }
     }
-    for (final receipt in appliedActions)
+    for (final receipt in appliedActions) {
       lines.add('已保存（实际回执）：\n${assistantReadableSummary(receipt)}');
+    }
     if (candidates.isEmpty) lines.add('尚无可信来源候选，不能确认物料、价格或资格。');
     lines.add('支持范围：明确关联产品行、严格数字字典条件和明确国别；复杂条款、未标示单位/税运/有效期及网页真实性须人工核验。');
     return lines.join('\n\n');

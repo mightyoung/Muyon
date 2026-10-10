@@ -67,8 +67,9 @@ class XCell {
   String? date({required bool date1904}) {
     if (isBlank && !formula) return null;
     _literal();
-    if (kind == CellKind.number)
+    if (kind == CellKind.number) {
       return _serialDate(lexical, coordinate, date1904);
+    }
     final m = RegExp(
       r'^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$',
     ).firstMatch(lexical.trim());

@@ -23,7 +23,7 @@ String downgradeToV1(String path) {
 String metaVersion(String path) {
   final db = sqlite3.open(path);
   final v =
-      db.select("SELECT value FROM meta WHERE key='schema_version'").first[0]
+      db.select("SELECT value FROM meta WHERE key='schema_version'").first['value']
           as String;
   db.close();
   return v;

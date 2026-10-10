@@ -30,7 +30,7 @@ class ContextRef {
     List<ObjectRef> selectedObjectRefs = const [],
   }) : selectedObjectRefs = List.unmodifiable(selectedObjectRefs) {
     for (final ref in [
-      if (currentObjectRef != null) currentObjectRef!,
+      ?currentObjectRef,
       ...selectedObjectRefs,
     ]) {
       if (ref.moduleId != moduleId || ref.nativeProjectId != nativeProjectId) {

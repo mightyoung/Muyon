@@ -40,8 +40,9 @@ class AssistantWebProduct {
         facts.keys.any((key) => !_factKeys.contains(key)) ||
         parameters.length > 24 ||
         evidence.length > 42 ||
-        warnings.length > 16)
+        warnings.length > 16) {
       throw const FormatException('Invalid product bounds');
+    }
     for (final map in [facts, parameters, evidence]) {
       for (final entry in map.entries) {
         if (entry.key.isEmpty ||
@@ -52,8 +53,9 @@ class AssistantWebProduct {
         }
       }
     }
-    if (warnings.any((w) => w.length > 200))
+    if (warnings.any((w) => w.length > 200)) {
       throw const FormatException('Invalid warning');
+    }
   }
   final String id;
   final Map<String, String> facts, parameters, evidence;
@@ -136,8 +138,9 @@ class AssistantWebSnapshot {
         title.length > 200 ||
         fetchedAt.length > 40 ||
         DateTime.tryParse(fetchedAt) == null ||
-        text.length > maxTextChars)
+        text.length > maxTextChars) {
       throw const FormatException('Invalid snapshot bounds');
+    }
     // Legacy mixed text cannot prove whether a marker came from the host or
     // the page. Marker-free legacy snapshots retain their original identities.
     if (jsonLd.length > 8 ||
@@ -189,12 +192,14 @@ class AssistantWebSnapshot {
         json.keys.any((k) => !keys.contains(k)) ||
         json['truncated'] is! bool ||
         json['products'] is! List ||
-        (json['products'] as List).length > 8)
+        (json['products'] as List).length > 8) {
       throw const FormatException('Invalid snapshot');
+    }
     String string(String key, int limit) {
       final value = json[key];
-      if (value is! String || value.length > limit)
+      if (value is! String || value.length > limit) {
         throw FormatException('Invalid snapshot $key');
+      }
       return value;
     }
 
@@ -377,8 +382,9 @@ class _Row {
     facts.remove('price');
     evidence.remove('price');
     conflicts.add('price');
-    if (warnings.length < 16 && !warnings.contains(warning))
+    if (warnings.length < 16 && !warnings.contains(warning)) {
       warnings.add(warning);
+    }
   }
 
   AssistantWebProduct? finish() {
@@ -397,10 +403,12 @@ class _Row {
         (!RegExp(
               r'^(?:0|[1-9][0-9]{0,14})(?:\.[0-9]{1,6})?$',
             ).hasMatch(price) ||
-            (num.tryParse(price) ?? 0) <= 0))
+            (num.tryParse(price) ?? 0) <= 0)) {
       noPrice('价格不是明确的单一正数，需人工核验');
-    if (!facts.containsKey('model') && warnings.length < 16)
+    }
+    if (!facts.containsKey('model') && warnings.length < 16) {
       warnings.add('来源未明确型号');
+    }
     return AssistantWebProduct(
       id: 'product_${_digest({'facts': facts, 'parameters': parameters, 'evidence': evidence})}',
       facts: facts,
@@ -445,8 +453,9 @@ List<AssistantWebProduct> _products(
         continue;
       }
       if (node is! Map) continue;
-      if (node['@graph'] is List)
+      if (node['@graph'] is List) {
         queue.addAll((node['@graph'] as List).take(64));
+      }
       if (!_type(node, 'Product')) continue;
       final row = _Row();
       for (final key in ['name', 'model']) {
@@ -503,13 +512,15 @@ List<AssistantWebProduct> _products(
         if (offered != null &&
             (offered is! Map ||
                 offered['model'] != node['model'] ||
-                offered['name'] != node['name']))
+                offered['name'] != node['name'])) {
           invalidOffer = true;
+        }
         final description =
             '${offer['description'] ?? ''} ${node['description'] ?? ''}';
         if (_uncertainPrice(description) ||
-            offer.containsKey('priceSpecification'))
+            offer.containsKey('priceSpecification')) {
           invalidOffer = true;
+        }
         for (final entry in {
           'price': 'price',
           'priceCurrency': 'currency',
@@ -528,9 +539,10 @@ List<AssistantWebProduct> _products(
           'JSON-LD Product.offers.seller = ${jsonEncode(offer['seller'])}',
         );
       }
-      if (offerCount != 1)
+      if (offerCount != 1) {
         invalidOffer =
-            true; // Never blend commercial terms across sellers/offers.
+            true;
+      } // Never blend commercial terms across sellers/offers.
       if (invalidOffer) row.noPrice('报价缺少唯一 Offer 自身的明确价格，或为区间、起价及绑定不明确，需人工核验');
       if (_uncertainPrice(text)) row.noPrice('来源说明包含总价、非单价或不确定报价，需人工核验');
       if (truncated) row.noPrice('来源内容不完整，无法排除遗漏的报价条件或冲突');
@@ -557,8 +569,9 @@ List<AssistantWebProduct> _products(
       row.add(label, value, line.trim(), parameter: true);
     }
   }
-  if (nameCount != 1)
-    return const []; // Explicitly single-product records only.
+  if (nameCount != 1) {
+    return const [];
+  } // Explicitly single-product records only.
   if (_uncertainPrice(text)) row.noPrice('来源说明包含总价、非单价或不确定报价，需人工核验');
   if (truncated) row.noPrice('来源内容不完整，无法排除遗漏的报价条件或冲突');
   final product = row.finish();

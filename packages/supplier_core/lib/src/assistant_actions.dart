@@ -199,7 +199,7 @@ class AssistantAppTools implements AssistantToolset {
         final raw = data[link.field];
         final ids = link.many
             ? (raw as List? ?? const [])
-            : [if (raw != null) raw];
+            : [?raw];
         for (final targetId in ids) {
           final record = store.get(link.to, targetId as String);
           result['${link.to}:$targetId'] = record == null
@@ -327,8 +327,9 @@ class AssistantAppTools implements AssistantToolset {
         ? true
         : await cancellation.wait(approve!(preview));
     _check(cancellation);
-    if (!accepted)
+    if (!accepted) {
       return jsonEncode({'status': 'denied', 'type': type, 'id': id});
+    }
     var didApply = false;
     final result = store.transaction(() {
       _check(cancellation);

@@ -228,8 +228,9 @@ void main() {
         resolver: publicDns,
         transport: (uri, addresses, cancel) async {
           calls++;
-          if (uri.path != '/final')
+          if (uri.path != '/final') {
             return response('', status: 302, location: '/final');
+          }
           return response(
             '<html><title>报价 &amp; 资料</title><script>secret()</script><style>hidden</style><p>钢材&#32;价格 100 元</p></html>',
           );

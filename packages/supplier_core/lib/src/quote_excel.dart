@@ -298,11 +298,12 @@ extension QuoteExcel on Store {
       set('quoted_on', cell('报价日期').date(date1904: date1904));
       set('valid_until', cell('有效期至').date(date1904: date1904));
       final lead = cell('交期(天)').decimal();
-      if (lead != null)
+      if (lead != null) {
         set(
           'lead_time_days',
           requireSafeInteger(num.parse(lead), '交期(天)', min: 0, max: 36500),
         );
+      }
       set('inquirer_name', cell('询价人').text());
       final inquiry = cell('询价日期').date(date1904: date1904);
       if (inquiry != null && inquiry != base['inquiry_date']) {

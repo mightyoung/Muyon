@@ -59,12 +59,14 @@ bool _containsAnswerToken(String text, String token) {
     if (token.isEmpty) return false;
     if (numeric.hasMatch(token[0]) &&
         match.start > 0 &&
-        numericExpression.hasMatch(text[match.start - 1]))
+        numericExpression.hasMatch(text[match.start - 1])) {
       continue;
+    }
     if (numeric.hasMatch(token[token.length - 1]) &&
         match.end < text.length &&
-        numericExpression.hasMatch(text[match.end]))
+        numericExpression.hasMatch(text[match.end])) {
       continue;
+    }
     return true;
   }
   return false;

@@ -34,7 +34,7 @@ class AiCancellation {
     if (isCancelled) return;
     _reason = reason;
     _done.complete();
-    for (final listener in _listeners.toList()) listener();
+    for (final listener in _listeners.toList()) { listener(); }
     _listeners.clear();
   }
 
@@ -122,8 +122,9 @@ class AiRun {
   }) async {
     check();
     if (calls >= limits.maxCalls) throw LlmException('AI 调用预算已用完，请分批处理');
-    if (requestChars > limits.maxRequestChars)
+    if (requestChars > limits.maxRequestChars) {
       throw LlmException('AI 请求过大，请缩小范围');
+    }
     final number = ++calls;
     final watch = Stopwatch()..start();
     final remaining = limits.timeout == null
