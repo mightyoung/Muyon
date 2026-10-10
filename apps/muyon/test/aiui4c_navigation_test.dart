@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/app/module_catalog.dart';
+import 'package:muyon/app/adapters/inquiry_module.dart';
 import 'package:muyon/platform/ui_navigation_anchors.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
 import 'package:muyon/screens/conversation_workspace_pane.dart';
@@ -36,19 +37,77 @@ class _NavigationRuntime extends FakeRuntime implements ObjectPages {
   }
 }
 
+// Uses the production Inquiry adapter/schema/database and its real object
+// resolver. The wrapper holds an actual lease only to control the await window.
+class _SupportedModule extends InquiryBusinessModule {
+  _SupportedModule(MuyonHost Function() host) : super(host);
+  int activations = 0;
+  _SupportedRuntime? runtime;
+  @override
+  final manifest = ModuleManifest(id: 'inquiry', apiVersion: 2,
+    features: {ModuleFeature.importPipeline, ModuleFeature.objectPages},
+    capabilities: {const CapabilityRequest(id: 'ocr', reason: 'lease barrier fixture')});
+  @override
+  void registerTools(ToolRegistrar registrar) {} // No fixture business dispatch.
+  @override
+  Future<ModuleRuntime> activate(ModuleResources resources) async {
+    activations++;
+    final actual = await super.activate(resources) as InquiryModuleRuntime;
+    return runtime = _SupportedRuntime(resources, actual);
+  }
+}
+
+class _SupportedRuntime extends FakeRuntime implements ObjectPages {
+  _SupportedRuntime(super.resources, this.actual);
+  final InquiryModuleRuntime actual;
+  int opened = 0, released = 0;
+  Completer<void>? entered, release;
+  @override
+  Future<ModuleSession> openSession(WorkspaceBinding binding) => actual.openSession(binding);
+  @override
+  Future<ObjectPageLease?> open(BuildContext context, ObjectRef ref) async {
+    final lease = await actual.open(context, ref);
+    if (lease == null) return null;
+    opened++;
+    entered?.complete();
+    await release?.future;
+    return ObjectPageLease(title: lease.title, page: lease.page, dispose: () async {
+      released++;
+      await lease.dispose();
+    });
+  }
+}
+
+Future<({NavigationFixture fixture, _SupportedModule module, ObjectRef ref})>
+    _supported(WidgetTester tester) async {
+  late NavigationFixture fixture;
+  final module = _SupportedModule(() => fixture.host);
+  fixture = await NavigationFixture.open(tester, extra: [module]);
+  final unpinned = await fixture.seedObject(tester, 'inquiry');
+  final runtime = (await workspaceOperation(tester,
+    () => fixture.host.modules.runtimeFor('inquiry')))! as _SupportedRuntime;
+  final session = await workspaceOperation(tester, () => runtime.actual.openScopeSession());
+  final view = await workspaceOperation(tester, () => session.resolve(unpinned));
+  await workspaceOperation(tester, session.dispose);
+  expect(view, isNotNull);
+  expect(view!.ref.revisionRef, isNotNull);
+  expect(view.ref.contentDigest, isNotNull);
+  return (fixture: fixture, module: module, ref: view.ref);
+}
+
 FakeV2Module _module() => FakeV2Module('navigation_fixture',
   features: {ModuleFeature.objectPages}, runtimeFactory: _NavigationRuntime.new);
 
 const _object = ObjectRef(moduleId: 'navigation_fixture', objectType: 'note',
   objectId: 'public-note', revisionRef: 'v1', contentDigest: 'public-fixture-digest');
 
-ValidatedUiPlan _plan([String component = 'Choice']) {
+ValidatedUiPlan _plan([String component = 'Choice', ObjectRef object = _object]) {
   final source = reviewPlan(component);
   final snapshot = DataSnapshot(
     ref: source.snapshot.ref,
     facts: {
       for (final entry in source.snapshot.facts.entries)
-        entry.key: SnapshotFact(object: _object, field: entry.value.field,
+        entry.key: SnapshotFact(object: object, field: entry.value.field,
           value: entry.value.value, state: entry.value.state),
       'unrelated': SnapshotFact(
         object: const ObjectRef(moduleId: 'unrelated-fixture', objectType: 'note', objectId: 'hidden'),
@@ -61,7 +120,7 @@ ValidatedUiPlan _plan([String component = 'Choice']) {
         entry.key: UiCollection(id: entry.value.id, columns: entry.value.columns,
           rows: [for (final row in entry.value.rows)
             UiRow(itemId: row.itemId, cells: row.cells,
-              object: row.object == null ? null : _object)]),
+              object: row.object == null ? null : object)]),
       'unused': UiCollection(id: 'unused',
       columns: const [UiColumn('label', 'Unused')],
       rows: [UiRow(itemId: 'hidden', cells: {'label': const BindingRef.fact('unrelated')})])},
@@ -121,14 +180,14 @@ void main() {
     for (final component in ['Choice', 'Checklist', 'CompareTable']) {
     testWidgets('typed $component object round trip and SQLite reopen width=$width', (tester) async {
       _viewport(tester, width);
-      final module = _module();
-      final f = await NavigationFixture.open(tester, extra: [module]);
+      final supported = await _supported(tester);
+      final module = supported.module, f = supported.fixture, ref = supported.ref;
       MuyonHost? reopened;
       addTearDown(() async {
         try { await _unmount(tester); }
         finally { if (reopened != null) { await workspaceOperation(tester, reopened.close); } }
       });
-      final plan = _plan(component);
+      final plan = _plan(component, ref);
       var calls = 0;
       final session = await _show(tester, f.host, plan, () { calls++; });
       final c = session.controller!;
@@ -143,17 +202,17 @@ void main() {
         expect(c.surface.session.selections['k'], ['a', 'b']);
       }
       expect(c.surface.session.userOverrides['count'], 3.0);
-      expect(find.text('查看对象 · navigation_fixture'), findsOneWidget);
+      expect(find.text('查看对象 · inquiry'), findsOneWidget);
       expect(find.text('查看对象 · unrelated-fixture'), findsNothing);
       final oldCallback = tester.widget<IconButton>(find.byKey(const ValueKey('stepper-plus'))).onPressed!;
-      await tester.tap(find.text('查看对象 · navigation_fixture'));
-      await workspaceVisible(tester, find.text('注册对象 public-note'));
-      final runtime = module.runtime! as _NavigationRuntime;
+      await tester.tap(find.text('查看对象 · inquiry'));
+      await workspaceVisible(tester, find.text('真实询价对象'));
+      final runtime = module.runtime!;
       expect(runtime.opened, 1);
       expect(runtime.released, 0);
       final store = HostUiWorkspaceStore(f.host.foundation, taskId: 'task');
       final anchor = (await workspaceOperation(tester, () => store.loadNavigationAnchor('s')))!;
-      expect(anchor.objectRef, _object);
+      expect(anchor.objectRef, ref);
       expect(anchor.conversationId, f.conversationId);
       expect(anchor.nodeId, 'target');
       await tester.pageBack();
@@ -175,7 +234,8 @@ void main() {
       expect((await workspaceOperation(tester, () => store.load('s')))!.toJson(), committed.toJson());
       await _unmount(tester);
       await workspaceOperation(tester, f.host.close);
-      reopened = await workspaceOperation(tester, () => MuyonHost.open('${f.root.path}/data', modules: [_module(), ...moduleCatalog()]));
+      final freshModule = _SupportedModule(() => reopened!);
+      reopened = await workspaceOperation(tester, () => MuyonHost.open('${f.root.path}/data', modules: [freshModule, ...moduleCatalog()]));
       final restored = await _show(tester, reopened!, plan, () { calls++; });
       expect(restored.controller!.readOnly, isFalse);
       if (component != 'CompareTable') {
@@ -185,19 +245,28 @@ void main() {
       expect(restored.controller!.returnAnchor, committed.returnAnchor);
       expect(restored.controller!.surface.session.draftRevision, committed.draftRevision);
       expect(calls, 0);
+      expect(freshModule.activations, 0);
+      await tester.tap(find.text('查看对象 · inquiry'));
+      await workspaceVisible(tester, find.text('真实询价对象'));
+      expect(freshModule.activations, 1);
+      await tester.pageBack();
+      await workspaceReady(tester);
+      expect(freshModule.runtime!.released, 1);
+      expect(restored.controller!.surface.session.userOverrides['count'], 3.0);
+      expect(calls, 0);
       expect(tester.takeException(), isNull);
     });
     }
 
     testWidgets('scope revoked while registered lease opens prevents late page width=$width', (tester) async {
       _viewport(tester, width);
-      final module = _module();
-      final f = await NavigationFixture.open(tester, extra: [module]);
+      final supported = await _supported(tester);
+      final module = supported.module, f = supported.fixture;
       addTearDown(() => _unmount(tester));
       var calls = 0;
-      final session = await _show(tester, f.host, _plan(), () { calls++; });
-      await workspaceOperation(tester, () => f.host.modules.runtimeFor('navigation_fixture'));
-      final runtime = module.runtime! as _NavigationRuntime;
+      final session = await _show(tester, f.host, _plan('Choice', supported.ref), () { calls++; });
+      await workspaceOperation(tester, () => f.host.modules.runtimeFor('inquiry'));
+      final runtime = module.runtime!;
       final entered = Completer<void>(), release = Completer<void>();
       runtime.entered = entered;
       runtime.release = release;
@@ -205,7 +274,7 @@ void main() {
       String? savedBytes;
       addTearDown(() { if (!release.isCompleted) { release.complete(); } });
       try {
-        await tester.tap(find.text('查看对象 · navigation_fixture'));
+        await tester.tap(find.text('查看对象 · inquiry'));
         await workspaceOperation(tester, () => entered.future);
         pending = session.pendingReferenceNavigation;
         expect(pending, isNotNull);
@@ -223,7 +292,7 @@ void main() {
       }
       await workspaceOperation(tester, () => pending!);
       await workspaceReady(tester);
-      expect(find.text('注册对象 public-note'), findsNothing);
+      expect(find.text('真实询价对象'), findsNothing);
       expect(find.textContaining('无法打开引用，原草稿仍保留'), findsWidgets);
       expect(runtime.released, 1);
       expect(f.host.foundation.database.raw.select(
@@ -236,6 +305,89 @@ void main() {
       expect(session.controller!.readOnly, isTrue);
       expect(calls, 0);
       expect(runtime.released, 1);
+      expect(tester.takeException(), isNull);
+    });
+
+    for (final change in ['revoke', 'database']) {
+      testWidgets('real Inquiry late lease $change rejects navigation width=$width', (tester) async {
+        _viewport(tester, width);
+        final supported = await _supported(tester);
+        final f = supported.fixture, runtime = supported.module.runtime!;
+        addTearDown(() => _unmount(tester));
+        var calls = 0;
+        final plan = _plan('Choice', supported.ref);
+        final session = await _show(tester, f.host, plan, () { calls++; });
+        await tester.tap(find.byKey(const ValueKey('stepper-plus')));
+        await workspaceOperation(tester, session.controller!.flush);
+        final scope = HostUiWorkspaceStore(f.host.foundation, taskId: 'task').scopeKey;
+        final snapshot = session.controller!.surface.current.snapshot;
+        final entered = Completer<void>(), release = Completer<void>();
+        runtime.entered = entered;
+        runtime.release = release;
+        addTearDown(() { if (!release.isCompleted) release.complete(); });
+        Future<void>? pending;
+        String? savedBytes;
+        try {
+          await tester.tap(find.text('查看对象 · inquiry'));
+          await workspaceOperation(tester, () => entered.future);
+          pending = session.pendingReferenceNavigation;
+          expect(pending, isNotNull);
+          expect(runtime.opened, 1);
+          expect(runtime.released, 0);
+          savedBytes = f.host.foundation.database.raw.select(
+            'SELECT value FROM settings WHERE key=?', ['ui-workspace:["task","s"]'],
+          ).single['value'] as String;
+          if (change == 'revoke') {
+            await workspaceOperation(tester, () => f.host.modules.revokeCapability('inquiry', 'ocr'));
+            expect(f.host.modules.scopeAuthorityRevision('inquiry'), isNull);
+          } else {
+            final store = f.host.inquiry!.runtime.state.store;
+            final before = store.get('project', supported.ref.objectId)!;
+            await workspaceOperation(tester, () async {
+              store.save('project', {...before.data, 'name': '已变化的询价对象'}, id: before.id);
+            });
+            final current = store.get('project', supported.ref.objectId)!;
+            expect(current.version.toString(), isNot(supported.ref.revisionRef));
+            expect(current.data['name'], '已变化的询价对象');
+          }
+          expect(HostUiWorkspaceStore(f.host.foundation, taskId: 'task').scopeKey, scope);
+          expect(session.controller!.surface.current.snapshot, same(snapshot));
+        } finally {
+          if (!release.isCompleted) release.complete();
+        }
+        await workspaceOperation(tester, () => pending!);
+        await workspaceReady(tester);
+        expect(find.text('真实询价对象'), findsNothing);
+        expect(find.text('已变化的询价对象'), findsNothing);
+        expect(find.textContaining('无法打开引用，原草稿仍保留'), findsWidgets);
+        expect(runtime.released, 1);
+        expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
+        expect(session.controller!.surface.session.userOverrides['count'], 3.0);
+        expect(f.host.foundation.database.raw.select(
+          'SELECT value FROM settings WHERE key=?', ['ui-workspace:["task","s"]'],
+        ).single['value'], savedBytes);
+        expect(calls, 0);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets('unsupported source proof keeps workspace without plugin read width=$width', (tester) async {
+      _viewport(tester, width);
+      final module = _module();
+      final f = await NavigationFixture.open(tester, extra: [module]);
+      addTearDown(() => _unmount(tester));
+      var calls = 0;
+      final session = await _show(tester, f.host, _plan(), () { calls++; });
+      await tester.tap(find.byKey(const ValueKey('stepper-plus')));
+      await workspaceOperation(tester, session.controller!.flush);
+      await tester.tap(find.text('查看对象 · navigation_fixture'));
+      await workspaceVisible(tester, find.textContaining('无法打开引用，原草稿仍保留'));
+      expect(module.activations, 1); // Prepare succeeded; source proof is unsupported.
+      expect((module.runtime! as _NavigationRuntime).opened, 0);
+      expect(find.text('注册对象 public-note'), findsNothing);
+      expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
+      expect(session.controller!.surface.session.userOverrides['count'], 3.0);
+      expect(calls, 0);
       expect(tester.takeException(), isNull);
     });
 
