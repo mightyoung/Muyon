@@ -92,7 +92,7 @@
 | [AIUI-3](AIUI-3.md) 本地重算公式 | — | junior | AIUI-1 | F3a `4943c6bb` 纯计算已复审、组合CI通过并集成；运行接线另片 |
 | [AIUI-4](AIUI-4.md) 以对话为中心的外壳（4 项导航） | — | engineer | AIUI-2 | F4a/F4b `14006838` 复审、200%补验及组合CI通过，已集成；F4c新目录联调后置 |
 | [AIUI-5](AIUI-5.md) 规划提示与模型适配、模板退路 | — | Codex | AIUI-1、2 | F5a `f0203bf` 草案已复审、组合CI通过并归档；PR19 技术采纳记录和PR26协商门槛已合；F5b/F5c完整接线仍在途，见[新队列](NEXT-DELIVERIES-2026-10-10-v1.md) |
-| [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-inquiry-record-tools` | Codex | AIUI-1 之后、REG-4b 合入 | 已启动（父任务另派云端专有任务）；交付/验收待核，不重复派发 |
+| [REG-4c](REG-4c.md) 询价按本体通用的写工具、隐藏 Folio 助手 | `task/reg-4c-general-writes` | Codex | AIUI-1 之后、REG-4b 合入 | PR31 固定源 cb93c740 已独立复审及新组合 CI 通过，用户批准精确 +4 清单例外；[集成复审](REG-4c-review.md)，Mac/真实模型后置 |
 | AIUI-6 询价场景（比价、预算小工具、导入审阅工作区） | — | Codex | AIUI-3、4、5 | 待派 |
 | AIUI-7 科研场景 | — | junior / engineer | AIUI-4、5 | 待派 |
 | AIUI-8 设置与控制（可视化三档、助手权限页、数据去向） | — | engineer | AIUI-4 | 待派 |
