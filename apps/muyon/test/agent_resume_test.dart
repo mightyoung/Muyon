@@ -71,6 +71,108 @@ List<String> _types(LoopFixture f, String id) => [
 ];
 
 void main() {
+
+  group('historical invocation identity', () {
+    for (final manual in [true, false]) {
+      for (final changed in ['parameters', 'scope']) {
+        test('${manual ? 'manual' : 'model'} rejects a same-tool receipt '
+            'for different $changed', () async {
+          final f = await LoopFixture.open();
+          final agent = f.agent();
+          final conversation = await f.repo.createConversation();
+          final PersonalTask task;
+          if (manual) {
+            task = await agent.startTool(
+              conversationId: conversation.id,
+              toolId: 'write',
+            );
+          } else {
+            f.replies.add(LoopReply.sse(sseCalls([('c1', 'write', '{}')])));
+            task = await f.run(agent, await f.start(agent, f.profile()));
+          }
+          final call = manual
+              ? task.payload['toolCall'] as Map
+              : ((task.payload['step'] as Map)['calls'] as List).first as Map;
+          final original = await f.tools.prepare(ToolCallRequest(
+            invocationId: call['invocationId'] as String,
+            toolId: 'write',
+            scope: task.scope,
+            parameters: const {},
+          ));
+          if (changed == 'scope') f.objects = [];
+          final foreign = await f.tools.prepare(ToolCallRequest(
+            invocationId: call['invocationId'] as String,
+            toolId: 'write',
+            scope: task.scope,
+            parameters: changed == 'parameters' ? {'note': 'other'} : const {},
+          ));
+          expect(foreign.identityDigest, isNot(original.identityDigest));
+          _receipt(f, {...call, 'identityDigest': foreign.identityDigest},
+            'succeeded', result: ToolCallResult(
+              status: ToolCallStatus.succeeded,
+              summary: 'foreign result must not be adopted',
+            ));
+          await agent.cancel(task.id);
+          await _crash(f, task.id, 'interrupted');
+          final approvals = f.approvals().length;
+          final held = await agent.resume(task.id);
+          expect(held.stage, 'resume');
+          expect(held.state, PersonalTaskState.waitingConfirmation);
+          expect(held.waitingFor, contains('身份'));
+          expect(f.repo.taskEvents(held.id).first.data['adopted'], 0);
+          expect(jsonEncode(held.payload['messages']),
+              isNot(contains('foreign result must not be adopted')));
+          expect(f.callsOf('write'), 0);
+          expect(f.approvals(), hasLength(approvals));
+        });
+      }
+
+      for (final digest in [null, '', 17]) {
+        test('${manual ? 'manual' : 'model'} holds missing or malformed '
+            'historical digest $digest', () async {
+          final f = await LoopFixture.open();
+          final agent = f.agent();
+          final conversation = await f.repo.createConversation();
+          final PersonalTask task;
+          if (manual) {
+            task = await agent.startTool(
+              conversationId: conversation.id,
+              toolId: 'write',
+            );
+          } else {
+            f.replies.add(LoopReply.sse(sseCalls([('c1', 'write', '{}')])));
+            task = await f.run(agent, await f.start(agent, f.profile()));
+          }
+          final call = manual
+              ? task.payload['toolCall'] as Map
+              : ((task.payload['step'] as Map)['calls'] as List).first as Map;
+          final prepared = await f.tools.prepare(ToolCallRequest(
+            invocationId: call['invocationId'] as String,
+            toolId: 'write',
+            scope: task.scope,
+          ));
+          _receipt(f, {...call, 'identityDigest': prepared.identityDigest},
+            'succeeded', result: ToolCallResult(
+              status: ToolCallStatus.succeeded, summary: 'unverified result',
+            ));
+          await agent.cancel(task.id);
+          await _crash(f, task.id, 'interrupted');
+          await f.repo.database.write((db) => db.execute(
+            "UPDATE execution_records SET payload=json_set(payload,?,?) "
+            "WHERE id=?",
+            [manual ? '\$.toolIdentityDigest' : '\$.step.calls[0].identityDigest',
+              digest, task.id],
+          ));
+          final held = await agent.resume(task.id);
+          expect(held.stage, 'resume');
+          expect(held.waitingFor, contains('身份'));
+          expect(f.repo.taskEvents(held.id).first.data['adopted'], 0);
+          expect(f.callsOf('write'), 0);
+        });
+      }
+    }
+  });
+
   group('a manual tool run', () {
     test('with a successful receipt is taken over, not run again, and asks '
         'for no approval', () async {
