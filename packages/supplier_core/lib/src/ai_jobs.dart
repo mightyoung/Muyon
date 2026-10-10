@@ -145,8 +145,9 @@ class AiJobStore {
       throw LlmException('本机已保存100个未完成AI任务，请先继续或删除不再需要的任务');
     }
     final data = jsonEncode(input);
-    if (utf8.encode(data).length > 32 * 1024 * 1024)
+    if (utf8.encode(data).length > 32 * 1024 * 1024) {
       throw LlmException('任务附件过大，请缩小输入');
+    }
     final id = newUuid();
     _db.execute('INSERT INTO jobs VALUES(?,?,?,?,?,?,?,?,?)', [
       id,
@@ -164,8 +165,9 @@ class AiJobStore {
 
   AiJobSession start(String id, {AiCancellation? cancellation}) {
     final job = get(id);
-    if (job.epoch != epoch || job.status == 'stale')
+    if (job.epoch != epoch || job.status == 'stale') {
       throw LlmException('资料库已恢复，此任务已失效，请使用原文新建任务');
+    }
     if (job.status == 'finished') throw LlmException('此任务已经完成，不能重复继续');
     if (job.status == 'running') throw LlmException('此任务正在运行，请勿重复启动');
     final protocol = _db.select('SELECT protocol FROM jobs WHERE id=?', [
@@ -191,8 +193,9 @@ class AiJobStore {
 
   void validate(String id) {
     final job = get(id);
-    if (job.epoch != epoch || job.status == 'stale')
+    if (job.epoch != epoch || job.status == 'stale') {
       throw LlmException('资料库已恢复，旧AI结果不可应用');
+    }
     if (job.status != 'ready') throw LlmException('任务尚未完成或已经确认，请重新检查任务状态');
   }
 

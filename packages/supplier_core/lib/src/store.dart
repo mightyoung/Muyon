@@ -272,8 +272,9 @@ class Store {
       );
     }
     registerFunctions(db);
-    if (_schemaOf(db) != schemaVersion)
+    if (_schemaOf(db) != schemaVersion) {
       throw StateError('Unsupported supplier schema');
+    }
   }
 
   final StoreBackgroundExecutor? backgroundExecutor;
@@ -448,8 +449,9 @@ class Store {
     final to = get('project', data['project_id']! as String);
     if (from == null || to == null || from.deleted || to.deleted) return false;
     if (from.data['currency'] != to.data['currency'] ||
-        from.data['tax_mode'] != to.data['tax_mode'])
+        from.data['tax_mode'] != to.data['tax_mode']) {
       return false;
+    }
     final sourceData = {...source.data}..remove('project_id');
     final copiedData = {...data}..remove('project_id');
     return jsonEncode(sourceData) == jsonEncode(copiedData);
@@ -515,8 +517,9 @@ class Store {
   /// conflict on it is settled on every device that receives this log.
   void markResolved(String type, String id, String field) => transaction(() {
     final record = get(type, id);
-    if (record == null || record.deleted)
+    if (record == null || record.deleted) {
       invalid('id', 'record does not exist');
+    }
     final value = jsonEncode(record.data[field]);
     _logRow(type, id, field, value, value);
   });
@@ -594,8 +597,9 @@ class Store {
         previous?.data['project_id'] == data['project_id'] &&
         previous?.data['product_id'] == data['product_id'] &&
         previous?.data['unit'] == data['unit'] &&
-        previous?.data['unit_cost'] == data['unit_cost'])
+        previous?.data['unit_cost'] == data['unit_cost']) {
       return;
+    }
     final product = get('product', data['product_id']! as String);
     if (product == null) return;
     final normalized = priceInUnit(

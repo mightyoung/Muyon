@@ -88,7 +88,7 @@ void main() {
         const LlmConfig(apiKey: 'fake'),
         transport: (_) async {
           providerCalls++;
-          if (providerCalls == 1)
+          if (providerCalls == 1) {
             return {
               'choices': [
                 {
@@ -100,7 +100,8 @@ void main() {
                 },
               ],
             };
-          if (providerCalls == 2)
+          }
+          if (providerCalls == 2) {
             return {
               'choices': [
                 {
@@ -108,6 +109,7 @@ void main() {
                 },
               ],
             };
+          }
           throw LlmException('断线');
         },
       ).withCheckpoint(first);
@@ -299,12 +301,13 @@ void main() {
         transport: (body) async {
           requests.add(body);
           final calls = requests.length;
-          if (calls < 3)
+          if (calls < 3) {
             return {
               'choices': [
                 {'message': _call('create_record', arguments)},
               ],
             };
+          }
           final result =
               jsonDecode((body['messages'] as List).last['content'] as String)
                   as Map;

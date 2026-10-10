@@ -86,8 +86,9 @@ Set<String> classFamily(String classCode) {
   while (grew) {
     grew = false;
     for (final c in specClasses) {
-      if (c.parent != null && out.contains(c.parent) && out.add(c.code))
+      if (c.parent != null && out.contains(c.parent) && out.add(c.code)) {
         grew = true;
+      }
     }
   }
   return out;

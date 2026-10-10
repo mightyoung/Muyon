@@ -783,8 +783,9 @@ class _ClauseReader {
     }
 
     final u = unit();
-    if (assumed != null)
+    if (assumed != null) {
       hints.add('「${t.substring(x.start, x.end).trim()}」没写单位，按 $assumed 理解');
+    }
     final (op, value) = switch (x.shape) {
       'tol' => (
         'le',
@@ -861,8 +862,9 @@ class _ClauseReader {
     bool covered(int s, int e) => used.any((u) => u.$1 <= s && e <= u.$2);
     final rest = <String>[];
     for (final x in numbers) {
-      if (!covered(x.start, x.end))
+      if (!covered(x.start, x.end)) {
         rest.add(t.substring(x.start, x.end).trim());
+      }
     }
     for (final m in RegExp(
       r'[A-Za-z][A-Za-z0-9]*|\d+(?:\.\d+)?',

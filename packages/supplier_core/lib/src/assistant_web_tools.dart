@@ -77,7 +77,7 @@ class AssistantWebResponse {
 class AssistantWebTools implements AssistantToolset {
   AssistantWebTools({
     AssistantWebResolver? resolver,
-    AssistantWebTransport? transport,
+    this._transport,
     Duration timeout = const Duration(seconds: 20),
     List<AssistantWebSnapshot> restoredSnapshots = const [],
     this.onSnapshot,
@@ -87,7 +87,6 @@ class AssistantWebTools implements AssistantToolset {
     this.review,
     this.validateSession,
   }) : _resolver = resolver ?? InternetAddress.lookup,
-       _transport = transport,
        _timeout = timeout > const Duration(seconds: 20)
            ? const Duration(seconds: 20)
            : timeout {
@@ -114,8 +113,9 @@ class AssistantWebTools implements AssistantToolset {
     _snapshots.remove(snapshot.id);
     if (_snapshots.length >= 8) {
       final removed = _snapshots.remove(_snapshots.keys.first)!;
-      if (_pages[removed.url]?.snapshot.id == removed.id)
+      if (_pages[removed.url]?.snapshot.id == removed.id) {
         _pages.remove(removed.url);
+      }
     }
     _snapshots[snapshot.id] = snapshot;
     _pages[snapshot.url] = _Page(snapshot);
@@ -213,8 +213,9 @@ class AssistantWebTools implements AssistantToolset {
         _keys(args, {'query', 'limit'});
         final query = _string(args, 'query', 400);
         final limit = args['limit'] ?? 5;
-        if (limit is! int || limit < 1 || limit > 8)
+        if (limit is! int || limit < 1 || limit > 8) {
           throw _WebError('limit 必须为 1 到 8 的整数。');
+        }
         final loaded = await _load(
           Uri.https('www.bing.com', '/search', {'format': 'rss', 'q': query}),
           cancel,
@@ -227,8 +228,9 @@ class AssistantWebTools implements AssistantToolset {
           throw _WebError('搜索结果包含不支持的 XML 声明。');
         }
         final xml = XmlDocument.parse(loaded.text);
-        if (xml.rootElement.name.local != 'rss')
+        if (xml.rootElement.name.local != 'rss') {
           throw _WebError('搜索服务未返回 RSS；请稍后重试。');
+        }
         final items = xml.findAllElements('item');
         final results = <Map<String, Object?>>[];
         var omitted = false;
@@ -360,8 +362,9 @@ class AssistantWebTools implements AssistantToolset {
           throw _WebError('keywords 必须包含 1 到 8 个非空关键词，每个最多 80 字符。');
         }
         final page = _pages[url];
-        if (page == null)
+        if (page == null) {
           throw _WebError('本会话没有该网页，请先调用 web_fetch，并使用其返回的 source_url。');
+        }
         final passages = <String>[];
         final lower = page.text.toLowerCase();
         var omitted = false;
@@ -424,8 +427,9 @@ class AssistantWebTools implements AssistantToolset {
             ? await cancel.wait(_resolver(_host(destination)))
             : [literal];
         cancel.check();
-        if (addresses.isEmpty || addresses.any((a) => !_public(a)))
+        if (addresses.isEmpty || addresses.any((a) => !_public(a))) {
           throw _WebError('仅允许解析到公网地址的 HTTPS 站点。');
+        }
         checkBeforeEffect();
         final response = await cancel.wait(
           _transport == null
@@ -441,13 +445,15 @@ class AssistantWebTools implements AssistantToolset {
         try {
           checkBeforeEffect();
           if ([301, 302, 303, 307, 308].contains(response.statusCode)) {
-            if (redirects == 3 || response.location == null)
+            if (redirects == 3 || response.location == null) {
               throw _WebError('网页重定向过多或缺少目标。');
+            }
             uri = _url(uri.resolve(response.location!).toString());
             return null;
           }
-          if (response.statusCode != 200)
+          if (response.statusCode != 200) {
             throw _WebError('站点返回 HTTP ${response.statusCode}；请使用其他公开来源。');
+          }
           final type = response.contentType
               .split(';')
               .first
@@ -466,8 +472,9 @@ class AssistantWebTools implements AssistantToolset {
           await cancel.wait(() async {
             await for (final chunk in response.body) {
               checkBeforeEffect();
-              if (bytes.length + chunk.length > maxBodyBytes)
+              if (bytes.length + chunk.length > maxBodyBytes) {
                 throw _WebError('网页超过 512 KiB 限制，请选择更小的页面。');
+              }
               bytes.addAll(chunk);
             }
           }());
@@ -532,7 +539,7 @@ class AssistantWebTools implements AssistantToolset {
       unawaited(
         task.socket.then<void>(
           (_) => detach(),
-          onError: (Object _, StackTrace __) {
+          onError: (Object _, StackTrace _) {
             detach();
           },
         ),
@@ -589,8 +596,9 @@ class AssistantWebTools implements AssistantToolset {
       throw _WebError('不允许访问本地或内部地址。');
     }
     final address = InternetAddress.tryParse(host);
-    if (address != null && !_public(address))
+    if (address != null && !_public(address)) {
       throw _WebError('不允许访问私网、保留或元数据地址。');
+    }
     return uri.removeFragment();
   }
 
@@ -614,19 +622,22 @@ class AssistantWebTools implements AssistantToolset {
                   b[1] == 88 && b[2] == 99) ||
           b[0] == 198 &&
               (b[1] == 18 || b[1] == 19 || b[1] == 51 && b[2] == 100) ||
-          b[0] == 203 && b[1] == 0 && b[2] == 113)
+          b[0] == 203 && b[1] == 0 && b[2] == 113) {
         return false;
+      }
       return true;
     }
     // Only global unicast; excludes mapped IPv4, NAT64, local and multicast.
     if (b.length != 16 || b[0] & 0xe0 != 0x20) return false;
     if (b[0] == 0x20 &&
         b[1] == 0x01 &&
-        (b[2] <= 1 || b[2] == 0x0d && b[3] == 0xb8))
+        (b[2] <= 1 || b[2] == 0x0d && b[3] == 0xb8)) {
       return false;
+    }
     if (b[0] == 0x20 && b[1] == 0x02) return false; // 6to4 embeds IPv4.
-    if (b[0] == 0x3f && b[1] == 0xff && b[2] < 0x10)
-      return false; // documentation /20
+    if (b[0] == 0x3f && b[1] == 0xff && b[2] < 0x10) {
+      return false;
+    } // documentation /20
     return true;
   }
 }
@@ -679,14 +690,16 @@ Map<String, Object?> _tool(
 };
 
 void _keys(Map<String, Object?> args, Set<String> allowed) {
-  if (args.keys.any((key) => !allowed.contains(key)))
+  if (args.keys.any((key) => !allowed.contains(key))) {
     throw _WebError('工具包含不支持的参数。');
+  }
 }
 
 String _string(Map<String, Object?> args, String key, int max) {
   final value = args[key];
-  if (value is! String || value.trim().isEmpty || value.length > max)
+  if (value is! String || value.trim().isEmpty || value.length > max) {
     throw _WebError('$key 必须为 1 到 $max 字符的文本。');
+  }
   return value.trim();
 }
 
@@ -791,8 +804,9 @@ _htmlText(String html) {
           code >= 97 && code <= 122 ||
           code >= 48 && code <= 57 ||
           code == 45 ||
-          code == 58))
+          code == 58)) {
         break;
+      }
       nameEnd++;
     }
     final name = nameEnd - nameStart <= 32
@@ -833,8 +847,9 @@ _htmlText(String html) {
       'h1',
       'h2',
       'section',
-    }.contains(name))
+    }.contains(name)) {
       catalog.write('\n');
+    }
     if (!closing && activeTags.contains(name)) {
       blocked = name;
       blockedDepth = 1;

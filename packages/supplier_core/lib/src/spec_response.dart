@@ -296,8 +296,9 @@ extension SpecResponses on Store {
             ? null
             : row[i].display.trim();
         final item = at(id), number = int.tryParse(at(n) ?? '');
-        if (item == null || number == null || !items.containsKey(item))
+        if (item == null || number == null || !items.containsKey(item)) {
           continue;
+        }
         final response = at(value), stated = at(dev), remark = at(note);
         if (response == null && stated == null && remark == null) continue;
         (byItem[item] ??= []).add({

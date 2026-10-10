@@ -4,7 +4,7 @@ import 'package:supplier_core/supplier_core.dart';
 void main() {
   final failures = <String>[];
   final dir = Directory.systemTemp.createTempSync('sq-bench-');
-  print('benchmark outputs: ${dir.path}');
+  stdout.writeln('benchmark outputs: ${dir.path}');
   final s = Store.open('${dir.path}/a.db', device: 'WH01');
   final sw = Stopwatch()..start();
   late List<String> sups, prods, pros;
@@ -92,15 +92,15 @@ void main() {
       });
     }
   });
-  print('generate ${sw.elapsedMilliseconds} ms');
+  stdout.writeln('generate ${sw.elapsedMilliseconds} ms');
   s.db.execute('PRAGMA wal_checkpoint(TRUNCATE)');
   final dbBytes = File('${dir.path}/a.db').lengthSync();
-  print('db $dbBytes bytes (${dbBytes ~/ 1048576} MiB; limit 150000000)');
+  stdout.writeln('db $dbBytes bytes (${dbBytes ~/ 1048576} MiB; limit 150000000)');
   if (dbBytes > 150000000) failures.add('database size');
   sw.reset();
   s.exportTo('${dir.path}/x.siq');
   final exportMs = sw.elapsedMilliseconds;
-  print(
+  stdout.writeln(
     'export $exportMs ms, file ${File('${dir.path}/x.siq').lengthSync() ~/ 1048576} MiB',
   );
   if (exportMs > 60000) failures.add('exchange export');
@@ -108,11 +108,11 @@ void main() {
   sw.reset();
   b.importFrom('${dir.path}/x.siq');
   final importMs = sw.elapsedMilliseconds;
-  print('import into empty $importMs ms');
+  stdout.writeln('import into empty $importMs ms');
   if (importMs > 60000) failures.add('exchange import');
   sw.reset();
   b.importFrom('${dir.path}/x.siq');
-  print('re-import (no changes) ${sw.elapsedMilliseconds} ms');
+  stdout.writeln('re-import (no changes) ${sw.elapsedMilliseconds} ms');
   // Interactive queries: fail when one is several times slower than today
   // (limits allow for JIT and slow CI runners), e.g. the search index
   // stopped being used.
@@ -120,7 +120,7 @@ void main() {
     sw.reset();
     run();
     final ms = sw.elapsedMilliseconds;
-    print('$label $ms ms (limit $limitMs)');
+    stdout.writeln('$label $ms ms (limit $limitMs)');
     if (ms > limitMs) failures.add(label);
   }
 
@@ -176,9 +176,9 @@ void main() {
       SpecConstraint('mem.total', 'ge', {'v': '16', 'u': 'GiB'}),
     ]),
   );
-  print('rss ${ProcessInfo.maxRss ~/ 1048576} MiB');
+  stdout.writeln('rss ${ProcessInfo.maxRss ~/ 1048576} MiB');
   if (failures.isNotEmpty) {
-    print('BENCHMARK FAILED: ${failures.join(', ')}');
+    stdout.writeln('BENCHMARK FAILED: ${failures.join(', ')}');
     exitCode = 1;
   }
 }

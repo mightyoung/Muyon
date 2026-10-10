@@ -81,7 +81,7 @@ void main() {
       final qualityTimer = Stopwatch()..start();
       final checks = {for (final c in s.dataQuality()) c.key: c.count};
       qualityTimer.stop();
-      print(
+      stdout.writeln(
         '300 products: individual completeness $individualQueries SELECTs, '
         '${individualTimer.elapsedMicroseconds} us; full dataQuality '
         '${db.selects} SELECTs, ${qualityTimer.elapsedMicroseconds} us',

@@ -181,8 +181,9 @@ String _specClass(Object? value) {
 
 Map<String, String>? _unitConversions(Object? value, Object? base) {
   if (value == null) return null;
-  if (value is! Map || value.length > 50)
+  if (value is! Map || value.length > 50) {
     invalid('unit_conversions', 'expected at most 50 conversions');
+  }
   final result = <String, String>{};
   for (final entry in value.entries) {
     final unit = normalizeText(

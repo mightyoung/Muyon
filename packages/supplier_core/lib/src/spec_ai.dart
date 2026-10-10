@@ -207,8 +207,9 @@ SpecConstraint? verifyAiConstraint(
   if (!_numbers(evidence).containsAll(_numbers(value))) return null;
   if (p.kind != null && v['u'] != null) {
     final u = quantityKinds[p.kind]!.unit('${v['u']}')!;
-    if (![u.code, u.label, ...u.aliases].any((s) => ev.contains(_flat(s))))
+    if (![u.code, u.label, ...u.aliases].any((s) => ev.contains(_flat(s)))) {
       return null;
+    }
   }
   if (p.unitLabel != null && !ev.contains(p.unitLabel!)) return null;
   final shown = switch (p.type) {

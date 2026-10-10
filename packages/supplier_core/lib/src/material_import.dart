@@ -200,8 +200,9 @@ extension MaterialImport on Store {
     if (plan.error != null ||
         plan.supplierId == null ||
         plan.productId == null ||
-        plan.offer['price'] == null)
+        plan.offer['price'] == null) {
       return null;
+    }
     return _existingQuote(
       _quotation(
         plan.offer,
@@ -443,8 +444,9 @@ extension MaterialImport on Store {
     if (o['name'] == null) return '缺少产品名称';
     if (o['unit'] == null) return '缺少单位';
     for (final k in ['price', 'tax_rate']) {
-      if (o[k] != null && tryDecimal(o[k]) == null)
+      if (o[k] != null && tryDecimal(o[k]) == null) {
         return '${offerFields[k]!.$1}有误';
+      }
     }
     try {
       Product.fromJson({for (final f in Product.fields) f: o[f]});
