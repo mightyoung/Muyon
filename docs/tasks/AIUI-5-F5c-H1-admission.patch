@@ -1,7 +1,7 @@
 --- a/packages/muyon_module_api/lib/src/ui/state.dart
 +++ b/packages/muyon_module_api/lib/src/ui/state.dart
 @@ -9,8 +9,11 @@
- 
+
  /// In-memory view/draft state only. Never grants authority or executes business tools.
  class UiSessionState {
 -  UiSessionState(this.snapshot)
@@ -88,7 +88,7 @@
        return UiDispatchOutcome.stale;
      }
 @@ -244,6 +268,7 @@
- 
+
    @override
    void dispose() {
 +    publication.dispose();
