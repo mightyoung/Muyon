@@ -31,10 +31,15 @@ class ToolReceipt {
   const ToolReceipt({
     required this.invocationId,
     required this.toolId,
+    required this.identityDigest,
     required this.state,
     this.result,
   });
   final String invocationId, toolId;
+
+  /// Identity bound when this historical invocation ran, including its
+  /// arguments and resolved scope. Never recomputed from today's registry.
+  final String identityDigest;
 
   /// `running` until the outcome is written, then the result status.
   final String state;
@@ -1059,7 +1064,7 @@ class ToolRegistry {
   /// this before it would run anything again.
   ToolReceipt? receiptFor(String invocationId) {
     final rows = database.raw.select(
-      'SELECT tool_id,state,result_json FROM tool_invocation_receipts WHERE invocation_id=?',
+      'SELECT tool_id,identity_digest,state,result_json FROM tool_invocation_receipts WHERE invocation_id=?',
       [invocationId],
     );
     if (rows.isEmpty) return null;
@@ -1067,6 +1072,7 @@ class ToolRegistry {
     return ToolReceipt(
       invocationId: invocationId,
       toolId: rows.first['tool_id'] as String,
+      identityDigest: rows.first['identity_digest'] as String,
       state: rows.first['state'] as String,
       result: json == null
           ? null

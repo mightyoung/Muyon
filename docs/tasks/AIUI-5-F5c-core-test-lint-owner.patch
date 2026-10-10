@@ -1,0 +1,11 @@
+--- a/packages/muyon_module_api/test/ui_recomputation_contract_test.dart
++++ b/packages/muyon_module_api/test/ui_recomputation_contract_test.dart
+@@ -243,7 +243,7 @@
+   test('synchronous probe exposes changes to every token component', () {
+     var current = token();
+     final frozen = current;
+-    final UiPublishTokenProbe probe = () => current;
++    UiPublishToken probe() => current;
+     expect(probe(), frozen);
+     for (final changed in [
+       token(baseSnapshotRef: const SnapshotRef('budget', 8)),

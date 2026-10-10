@@ -89,18 +89,18 @@ class UiWorkspaceController extends ChangeNotifier {
             restored.revision != old.planRevision ||
             restored.snapshotRef != old.snapshotRef ||
             restored.catalogVersion != old.catalogVersion ||
-            restored.intentRef != old.intentRef)
+            restored.intentRef != old.intentRef) {
           c.readOnly = true;
-        else if (restored.revision >= plan.plan.revision) {
+        } else if (restored.revision >= plan.plan.revision) {
           var result = validateUiPlan(
             restored,
             plan.snapshot,
             plan.intent,
             plan.catalog,
           );
-          if (!result.isValid)
+          if (!result.isValid) {
             c.readOnly = true;
-          else {
+          } else {
             for (final entry in old.patchHistory.entries) {
               result = result.recordPatch(entry.key, entry.value);
             }
@@ -124,8 +124,9 @@ class UiWorkspaceController extends ChangeNotifier {
           ? null
           : (event) async {
               await c.flush(); // includes the pending/locked operation before the port
-              if (c.readOnly || c._disposed)
+              if (c.readOnly || c._disposed) {
                 throw StateError('Workspace not durable');
+              }
               await onEvent(event);
             },
     );
@@ -178,18 +179,20 @@ class UiWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> flush() {
-    if (readOnly)
+    if (readOnly) {
       return saveError == null
           ? Future.value()
           : Future.error(StateError(saveError!));
+    }
     // Capture now, serialize later: rapid edits each get one coherent version.
     final projection = _capture(1);
     final result = _tail
         .then((_) async {
           if (readOnly) throw StateError(saveError ?? 'Workspace read-only');
           final next = projection.copyWith(revision: _revision + 1);
-          if (!await store.save(next, expectedRevision: _revision))
+          if (!await store.save(next, expectedRevision: _revision)) {
             throw StateError('Workspace revision or scope changed');
+          }
           _revision = next.revision;
           _stored = next;
           saveError = null;

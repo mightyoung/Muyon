@@ -1,4 +1,6 @@
 import '../references.dart';
+import 'collection.dart';
+import 'edit_spec.dart';
 
 enum FactState {
   verified,
@@ -9,7 +11,7 @@ enum FactState {
   conflict,
 }
 
-enum BindingKind { fact, uiState, computed, sourceSpan }
+enum BindingKind { fact, uiState, computed, sourceSpan, collection }
 
 class SnapshotRef {
   const SnapshotRef(this.id, this.revision);
@@ -28,6 +30,7 @@ class BindingRef {
   const BindingRef.uiState(this.id) : kind = BindingKind.uiState;
   const BindingRef.computed(this.id) : kind = BindingKind.computed;
   const BindingRef.sourceSpan(this.id) : kind = BindingKind.sourceSpan;
+  const BindingRef.collection(this.id) : kind = BindingKind.collection;
   final BindingKind kind;
   final String id;
   @override
@@ -63,6 +66,18 @@ class ComputedValue {
   final Object? value;
   final SnapshotRef inputVersion;
   final String computationId;
+}
+
+/// Host evidence required by library-2 computed bindings and collection cells.
+class UiComputedEvidence {
+  UiComputedEvidence({
+    required this.state,
+    this.unit,
+    List<String> sourceRefs = const [],
+  }) : sourceRefs = List.unmodifiable(sourceRefs);
+  final FactState state;
+  final String? unit;
+  final List<String> sourceRefs;
 }
 
 class SourceSpanRef {
@@ -113,7 +128,13 @@ class DataSnapshot {
     Map<String, SourceSpanRef> sources = const {},
     Map<String, String> sourceDigests = const {},
     this.actionContext,
+    Map<String, UiEditSpec> editSpecs = const {},
+    Map<String, UiCollection> collections = const {},
+    Map<String, UiComputedEvidence> computedEvidence = const {},
   }) : facts = Map.unmodifiable(facts),
+       editSpecs = Map.unmodifiable(editSpecs),
+       collections = Map.unmodifiable(collections),
+       computedEvidence = Map.unmodifiable(computedEvidence),
        initialUiState = Map.unmodifiable(initialUiState),
        computations = Map.unmodifiable(computations),
        sources = Map.unmodifiable(sources),
@@ -125,9 +146,15 @@ class DataSnapshot {
   final Map<String, SourceSpanRef> sources;
   final Map<String, String> sourceDigests;
   final UiActionContext? actionContext;
+
+  /// Host-owned edit rules checked by library-2 validation and dispatch.
+  final Map<String, UiEditSpec> editSpecs;
+  final Map<String, UiCollection> collections;
+  final Map<String, UiComputedEvidence> computedEvidence;
   DataSnapshot copyWith({
     Map<String, String>? sourceDigests,
     Map<String, ComputedValue>? computations,
+    Map<String, UiComputedEvidence>? computedEvidence,
   }) => DataSnapshot(
     ref: ref,
     facts: facts,
@@ -136,5 +163,8 @@ class DataSnapshot {
     sources: sources,
     sourceDigests: sourceDigests ?? this.sourceDigests,
     actionContext: actionContext,
+    editSpecs: editSpecs,
+    collections: collections,
+    computedEvidence: computedEvidence ?? this.computedEvidence,
   );
 }

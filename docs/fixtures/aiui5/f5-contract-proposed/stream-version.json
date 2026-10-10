@@ -1,0 +1,23 @@
+{
+  "status": "proposed; not adopted; future-only DATA. Nothing here is accepted by today's aiui-stream/1 or library-1.",
+  "versions": {"catalog": "library-2", "stream": "aiui-stream/2", "workspaceSchemaVersion": 2, "existing": {"catalogs": ["minimal-1", "dynamic-1", "library-1"], "stream": "aiui-stream/1", "workspaceSchemaVersion": 1}},
+  "modelLinesFile": "library-2.stream-2.model-lines.jsonl",
+  "collectionLine": "{\"op\":\"node\",\"id\":\"cmp\",\"parent\":\"root\",\"component\":\"CompareTable\",\"props\":{\"label\":\"报价\"},\"bind\":{\"rows\":{\"kind\":\"collection\",\"id\":\"quotes\"}}}",
+  "matrix": [
+    {"id": "v1-session-library-1-collection-line", "protocol": "aiui-stream/1", "catalog": "library-1", "line": "collectionLine", "decision": "bad-line", "streamError": "invalidFields", "finalPlan": null, "note": "v1 解析器显式拒绝 kind=collection（BindingKind 新增枚举值后 byName 不能自动拒绝）"},
+    {"id": "v1-session-dynamic-1-collection-line", "protocol": "aiui-stream/1", "catalog": "dynamic-1", "line": "collectionLine", "decision": "bad-line", "streamError": "invalidFields", "finalPlan": null},
+    {"id": "v2-session-library-1-collection-line", "protocol": "aiui-stream/2", "catalog": "library-1", "line": "collectionLine", "decision": "parse-ok-node-rejected", "planError": "binding_kind:cmp:rows", "finalPlan": null, "note": "library-1 槽位不含 collection；语法放行不等于生效"},
+    {"id": "v2-session-library-2-collection-line", "protocol": "aiui-stream/2", "catalog": "library-2", "line": "collectionLine", "decision": "accept", "note": "整份 modelLinesFile 到 end 后 finalPlan 非空（需配合 collection-stable-row.json 的 snapshot）"},
+    {"id": "v1-session-library-2-construct", "protocol": "aiui-stream/1", "catalog": "library-2", "decision": "construct-throws", "error": "catalog_requires_stream_2", "note": "UiStreamSession 构造即失败，不等到 end"},
+    {"id": "unknown-protocol", "protocol": "aiui-stream/3", "decision": "construct-throws", "error": "protocolVersion"},
+    {"id": "v1-lines-unchanged-under-v2", "protocol": "aiui-stream/2", "catalog": "library-1", "linesFile": "../string-projection.library-1.jsonl", "decision": "accept", "note": "既有 library-1 金样在 v2 会话下仍通过（v2 仅多一个 kind）"},
+    {"id": "v2-model-supplies-route-or-metadata", "protocol": "aiui-stream/2", "line": "{\"op\":\"action\",\"node\":\"cmp\",\"event\":\"tap\",\"action\":\"openRow\",\"inputs\":[],\"route\":\"business\"}", "decision": "bad-line", "note": "路由仍由目录决定，v2 不改变流契约 §1"},
+    {"id": "v2-model-supplies-object-ref", "protocol": "aiui-stream/2", "line": "{\"op\":\"action\",\"node\":\"cmp\",\"event\":\"tap\",\"action\":\"openRow\",\"inputs\":[],\"object\":{\"objectId\":\"a\"}}", "decision": "bad-line", "note": "ObjectRef 只来自宿主 registry"}
+  ],
+  "workspaceGate": [
+    {"id": "stored-v1-library-1-open-by-library-2", "stored": {"schemaVersion": 1, "catalogVersion": "library-1"}, "opener": {"schemaVersion": 2, "catalog": "library-2"}, "decision": "readOnly", "readableDraft": true, "write": "none"},
+    {"id": "stored-v2-library-2-open-by-library-2", "stored": {"schemaVersion": 2, "catalogVersion": "library-2"}, "opener": {"schemaVersion": 2, "catalog": "library-2"}, "decision": "editable-after-revalidate"},
+    {"id": "stored-v3-future-open-by-v2", "stored": {"schemaVersion": 3}, "opener": {"schemaVersion": 2}, "decision": "readOnly", "write": "none"}
+  ],
+  "expectedAcceptance": "future-only"
+}

@@ -12,24 +12,41 @@ class Choice extends StatefulWidget {
     super.key,
     required this.label,
     required this.options,
-    required this.selected,
+    this.selected = const {},
+    this.optionIds,
+    this.selectedIds,
+    this.onChangedIds,
     this.multiple = false,
     this.allowCustom = false,
     this.onChanged,
     this.state = UiComponentState.ready,
     this.errorMessage,
-  });
+  }) : assert(optionIds == null || optionIds.length == options.length);
   final String label;
   final List<String> options;
   final Set<String> selected;
+  final List<String>? optionIds;
+  final Set<String>? selectedIds;
+  final ValueChanged<Set<String>>? onChangedIds;
   final bool multiple, allowCustom;
   final ValueChanged<Set<String>>? onChanged;
   final UiComponentState state;
   final String? errorMessage;
 
+  bool get usesIds => optionIds != null;
+  Set<String> get selection => usesIds ? (selectedIds ?? const {}) : selected;
+  String identityAt(int index) => usesIds ? optionIds![index] : options[index];
+  String get selectedLabels => selection
+      .map((id) {
+        if (!usesIds) return id;
+        final index = optionIds!.indexOf(id);
+        return index < 0 ? '已失效选项' : options[index];
+      })
+      .join('、');
+
   String get textEquivalent =>
       '$label（${multiple ? '可多选' : '单选'}）：'
-      '${selected.isEmpty ? '未选' : '已选 ${selected.join('、')}'}；'
+      '${selection.isEmpty ? '未选' : '已选 $selectedLabels'}；'
       '选项：${options.join('、')}';
 
   @override
@@ -47,7 +64,7 @@ class _ChoiceState extends State<Choice> {
   }
 
   void toggle(String option) {
-    final next = {...widget.selected};
+    final next = {...widget.selection};
     if (widget.multiple) {
       next.contains(option) ? next.remove(option) : next.add(option);
     } else {
@@ -55,10 +72,15 @@ class _ChoiceState extends State<Choice> {
         ..clear()
         ..add(option);
     }
-    widget.onChanged?.call(next);
+    if (widget.usesIds) {
+      widget.onChangedIds?.call(Set.unmodifiable(next));
+    } else {
+      widget.onChanged?.call(next);
+    }
   }
 
   void addCustom() {
+    if (widget.usesIds) return;
     final text = custom.text.trim();
     if (text.isEmpty) return;
     if (!widget.options.contains(text) && !extra.contains(text)) {
@@ -71,8 +93,15 @@ class _ChoiceState extends State<Choice> {
   @override
   Widget build(BuildContext context) {
     final t = MuyonTokens.of(context);
-    final on = _enabled(widget.state, widget.onChanged);
-    final all = [...widget.options, ...extra];
+    final on = _enabled(
+      widget.state,
+      widget.usesIds ? widget.onChangedIds : widget.onChanged,
+    );
+    assert(
+      widget.optionIds == null ||
+          widget.optionIds!.toSet().length == widget.optionIds!.length,
+    );
+    final all = [...widget.options, if (!widget.usesIds) ...extra];
     return UiComponentFrame(
       state: widget.state,
       textEquivalent: widget.textEquivalent,
@@ -86,20 +115,38 @@ class _ChoiceState extends State<Choice> {
             spacing: MuyonTokens.space2,
             runSpacing: MuyonTokens.space2,
             children: [
-              for (final option in all)
+              for (var optionIndex = 0; optionIndex < all.length; optionIndex++)
                 Semantics(
                   button: true,
-                  selected: widget.selected.contains(option),
+                  selected: widget.selection.contains(
+                    widget.usesIds
+                        ? widget.identityAt(optionIndex)
+                        : all[optionIndex],
+                  ),
                   inMutuallyExclusiveGroup: !widget.multiple,
-                  label: option,
+                  label: all[optionIndex],
                   excludeSemantics: true,
-                  onTap: on ? () => toggle(option) : null,
+                  onTap: on
+                      ? () => toggle(
+                          widget.usesIds
+                              ? widget.identityAt(optionIndex)
+                              : all[optionIndex],
+                        )
+                      : null,
                   child: InkWell(
-                    key: ValueKey('choice-$option'),
+                    key: ValueKey(
+                      'choice-${widget.usesIds ? widget.identityAt(optionIndex) : all[optionIndex]}',
+                    ),
                     borderRadius: BorderRadius.circular(
                       MuyonTokens.optionRadius,
                     ),
-                    onTap: on ? () => toggle(option) : null,
+                    onTap: on
+                        ? () => toggle(
+                            widget.usesIds
+                                ? widget.identityAt(optionIndex)
+                                : all[optionIndex],
+                          )
+                        : null,
                     child: UiMinTarget(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -108,11 +155,21 @@ class _ChoiceState extends State<Choice> {
                         ),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: widget.selected.contains(option)
+                          color:
+                              widget.selection.contains(
+                                widget.usesIds
+                                    ? widget.identityAt(optionIndex)
+                                    : all[optionIndex],
+                              )
                               ? t.accentTint
                               : t.surface,
                           border: Border.all(
-                            color: widget.selected.contains(option)
+                            color:
+                                widget.selection.contains(
+                                  widget.usesIds
+                                      ? widget.identityAt(optionIndex)
+                                      : all[optionIndex],
+                                )
                                 ? t.accent
                                 : t.ruleStrong,
                           ),
@@ -123,15 +180,24 @@ class _ChoiceState extends State<Choice> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (widget.selected.contains(option)) ...[
+                            if (widget.selection.contains(
+                              widget.usesIds
+                                  ? widget.identityAt(optionIndex)
+                                  : all[optionIndex],
+                            )) ...[
                               Icon(Icons.check, size: 18, color: t.accent),
                               const SizedBox(width: MuyonTokens.space1),
                             ],
                             Flexible(
                               child: Text(
-                                option,
+                                all[optionIndex],
                                 style: TextStyle(
-                                  color: widget.selected.contains(option)
+                                  color:
+                                      widget.selection.contains(
+                                        widget.usesIds
+                                            ? widget.identityAt(optionIndex)
+                                            : all[optionIndex],
+                                      )
                                       ? t.accent
                                       : t.ink,
                                 ),
@@ -145,7 +211,7 @@ class _ChoiceState extends State<Choice> {
                 ),
             ],
           ),
-          if (widget.allowCustom)
+          if (widget.allowCustom && !widget.usesIds)
             Padding(
               padding: const EdgeInsets.only(top: MuyonTokens.space3),
               // Field on its own line so its label is not cut at 200% text.
@@ -497,7 +563,13 @@ class DateField extends StatelessWidget {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: value ?? now,
+      initialDate:
+          value ??
+          (first != null && now.isBefore(first!)
+              ? first!
+              : last != null && now.isAfter(last!)
+              ? last!
+              : now),
       firstDate: first ?? DateTime(now.year - 20),
       lastDate: last ?? DateTime(now.year + 20),
     );

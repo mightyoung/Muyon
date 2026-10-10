@@ -54,14 +54,45 @@ class AgentResume {
     return _model(prev);
   }
 
+  /// Bad call identifiers must fail clearly before receipt lookup or any
+  /// new attempt. An absent id is valid for a call that was never prepared.
+  static String? _invocationId(Map call) {
+    final toolId = call['toolId'];
+    final id = call['invocationId'];
+    if (toolId is! String ||
+        toolId.isEmpty ||
+        (id != null && (id is! String || id.isEmpty))) {
+      throw StateError(
+        'resume_invalid_call_identity: 恢复载荷中的工具或调用标识无效',
+      );
+    }
+    return id as String?;
+  }
+
+  static final _identityPattern = RegExp(r'^[0-9a-f]{64}$');
+
+  /// Only historical identities may be compared here. Re-preparing from
+  /// today's registry/scope would invalidate legitimate completed calls.
+  static bool _sameIdentity(Object? proposed, String recorded) =>
+      proposed is String &&
+      proposed.length == 64 &&
+      _identityPattern.hasMatch(proposed) &&
+      proposed == recorded;
+
   // --- manual tool task -------------------------------------------------
 
   Future<PersonalTask?> _manual(PersonalTask prev) async {
     final call = Map<String, Object?>.from(prev.payload['toolCall'] as Map);
-    final id = call['invocationId'] as String?;
+    final id = _invocationId(call);
     final receipt = id == null ? null : ctx.tools.receiptFor(id);
     final toolId = call['toolId'] as String;
-    final mismatch = receipt != null && receipt.toolId != toolId;
+    final mismatch =
+        receipt != null &&
+        (receipt.toolId != toolId ||
+            !_sameIdentity(
+              prev.payload['toolIdentityDigest'],
+              receipt.identityDigest,
+            ));
     if (!mismatch &&
         (receipt == null || (!receipt.succeeded && !receipt.unknown))) {
       // Nothing ran, or it failed without any effect: ask again as before.
@@ -128,7 +159,12 @@ class AgentResume {
       withCall,
       prev,
       calls: [
-        {'toolId': toolId, 'invocationId': id, 'receipt': 'unknown'},
+        {
+          'toolId': toolId,
+          'invocationId': id,
+          'receipt': 'unknown',
+          if (mismatch) 'reason': 'identity_unverified',
+        },
       ],
       unknownTools: [toolId],
       adopted: 0,
@@ -164,15 +200,18 @@ class AgentResume {
     final unknownTools = <String>[];
     final known = <String>{};
     for (final c in calls) {
-      final id = c['invocationId'] as String?;
+      final id = _invocationId(c);
       if (id != null) known.add(id);
       final receipt = id == null ? null : ctx.tools.receiptFor(id);
       final read = c['access'] == 'read';
       if (id == null) {
         // Never prepared (over a limit): its outcome is already fixed.
         settled.add(c);
-      } else if (receipt != null && receipt.toolId != c['toolId']) {
-        // The id belongs to another tool: nothing can be taken from it.
+      } else if (receipt != null &&
+          (receipt.toolId != c['toolId'] ||
+              !_sameIdentity(c['identityDigest'], receipt.identityDigest))) {
+        // An invocation id alone cannot bind the result to this proposal.
+        // Missing legacy identities are undecidable too: do not adopt or retry.
         unknown++;
         unknownTools.add(c['toolId'] as String);
         settled.add({
@@ -183,6 +222,7 @@ class AgentResume {
           'toolId': c['toolId'],
           'invocationId': id,
           'receipt': 'unknown',
+          'reason': 'identity_unverified',
         });
       } else if (receipt != null && receipt.succeeded) {
         adopted++;
@@ -234,12 +274,13 @@ class AgentResume {
       view.add({'invocationId': id, 'receipt': 'unknown'});
     }
     final tookNothing = adopted == 0 && unknown == 0;
-    if (tookNothing && !progressed) return null;
+    if (tookNothing && !progressed && calls.isEmpty) return null;
 
     final base = _carry(prev);
-    final task = tookNothing || calls.isEmpty
+    final task = calls.isEmpty
         ? base
         : base.copy({
+            'stepFolded': false,
             'step': {
               ...Map<String, Object?>.from(prev.payload['step'] as Map),
               'calls': settled,
@@ -262,7 +303,7 @@ class AgentResume {
         _resumeEvent(prev, carried, adopted: adopted, pending: pending),
       ]),
     );
-    if (!tookNothing && calls.isNotEmpty) {
+    if (calls.isNotEmpty) {
       await dispatch.completeStep(task);
     } else {
       await model.advance(task);
@@ -271,8 +312,8 @@ class AgentResume {
   }
 
   /// The new attempt: the earlier one's conversation so far (completed steps
-  /// with their results) under a freshly built system message, nothing of its
-  /// budget usage, confirmations or card.
+  /// with their results) under a freshly built system message, with its budget
+  /// usage but without its confirmations or card.
   PersonalTask _carry(PersonalTask prev) {
     final (base, _) = factory.chatTask(
       conversationId: prev.conversationId,
@@ -291,6 +332,7 @@ class AgentResume {
       ...BudgetUsage.fromPayload(prev.payload).toPayload(),
       'references': prev.payload['references'] ?? const <Object?>[],
       'toolLog': prev.payload['toolLog'] ?? const <Object?>[],
+      if (prev.payload['stepFolded'] == true) 'stepFolded': true,
       'compaction': ?prev.payload['compaction'],
     });
   }
@@ -302,14 +344,26 @@ class AgentResume {
     final lastResponse = events.lastIndexWhere(
       (e) => e.type == AgentEventType.modelResponse,
     );
-    return [
+    // A held attempt has its own timeline. Preserve the original orphan
+    // identities from its persisted verification card until it is confirmed;
+    // pausing/resuming must not make uncertain effects disappear.
+    final preview = prev.payload['preview'];
+    final resume = preview is Map ? preview['resume'] : null;
+    final heldCalls = resume is Map ? resume['calls'] : null;
+    return {
       for (final e in events.skip(lastResponse + 1))
         if (e.type == AgentEventType.toolProposed &&
             e.data['invocationId'] is String &&
             !known.contains(e.data['invocationId']) &&
             ctx.tools.receiptFor(e.data['invocationId'] as String) != null)
           e.data['invocationId'] as String,
-    ];
+      for (final call in heldCalls is List ? heldCalls : const [])
+        if (call is Map &&
+            call['invocationId'] is String &&
+            !known.contains(call['invocationId']) &&
+            ctx.tools.receiptFor(call['invocationId'] as String) != null)
+          call['invocationId'] as String,
+    }.toList();
   }
 
   // --- the stop -------------------------------------------------------------
@@ -341,7 +395,11 @@ class AgentResume {
     required int adopted,
     required int unknown,
   }) async {
+    final identityUnverified = calls.any(
+      (call) => call['reason'] == 'identity_unverified',
+    );
     final reason =
+        '${identityUnverified ? '上一次尝试的调用身份摘要缺失、损坏或与历史回执不一致，无法安全采纳其结果。' : ''}'
         '上一次尝试中「${unknownTools.isEmpty ? '某个操作' : unknownTools.toSet().join('、')}」'
         '可能已经执行，但结果未知。为避免重复写入，已停止在此；'
         '请先核实实际结果。确认只表示您已核实，之后的操作仍会作为新的请求逐项确认。';
@@ -400,7 +458,10 @@ class AgentResume {
     } else if (task.payload['step'] is Map) {
       await dispatch.completeStep(task);
     } else {
-      await model.advance(task);
+      // No step remains to fold. Acknowledging the unknown orphan is itself
+      // a checkpoint: clear the verification card and preserve budget progress
+      // even if advance immediately stops at an exhausted budget.
+      await model.advance(task.copy({'preview': null, 'stepFolded': true}));
     }
   }
 }

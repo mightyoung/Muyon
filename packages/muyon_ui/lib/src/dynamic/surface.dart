@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
@@ -5,10 +7,15 @@ import '../confirmation.dart';
 import '../navigation_layout.dart';
 import '../primitives.dart';
 import 'patch.dart';
-import 'catalog.dart';
+import 'catalog_library2.dart';
+import 'component_adapter.dart';
 import 'fallback.dart';
 
 typedef UiEventSink = Future<void> Function(UiEvent event);
+typedef UiObjectOpen = Future<void> Function(
+  ObjectRef object, {
+  required String nodeId,
+});
 
 enum UiDispatchOutcome {
   applied,
@@ -51,16 +58,184 @@ class UiPendingAction {
   final Map<String, Object?> inputs;
 }
 
+/// Authority frozen once for a rendered tree and its callbacks.
+class UiRenderCapture {
+  UiRenderCapture._(this._owner, this.plan)
+    : surfaceId = plan.plan.surfaceId,
+      revision = plan.plan.revision,
+      catalog = plan.catalog;
+  final UiSurfaceController _owner;
+  final String surfaceId;
+  final int revision;
+  final UiCatalog catalog;
+  final ValidatedUiPlan plan;
+}
+
 class UiSurfaceController extends ChangeNotifier {
-  UiSurfaceController(ValidatedUiPlan plan, {this.onEvent})
-    : _current = plan,
-      session = UiSessionState(plan.snapshot) {
-    session.accept(plan);
+  UiSurfaceController(
+    ValidatedUiPlan plan, {
+    this.onEvent,
+    this.onOpenObject,
+    this.recomputePort,
+    this.publishTokenProbe,
+    this.readOnlyProbe,
+  }) : _publication = UiPublicationCoordinator(plan) {
+    if ((recomputePort == null) != (publishTokenProbe == null)) {
+      throw ArgumentError('Provide both recomputePort and publishTokenProbe');
+    }
+    _session = UiSessionState(plan.snapshot, canDispatch: _allowsEvent);
+    _session.accept(plan);
   }
-  ValidatedUiPlan _current;
-  ValidatedUiPlan get current => _current;
-  final UiSessionState session;
+  final UiPublicationCoordinator _publication;
+  final UiRecomputePort? recomputePort;
+  final UiPublishTokenProbe? publishTokenProbe;
+  final bool Function()? readOnlyProbe;
+  bool get recomputing => _publication.recomputing;
+  bool get outdated => _publication.outdated;
+  List<String> get publicationErrors => _publication.publicationErrors;
+  bool get isReadOnly {
+    try {
+      return readOnlyProbe?.call() ?? false;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  bool _allowsEvent(UiEvent event, UiActionDefinition action) =>
+      _publication.allowsDispatch(
+        action,
+        readOnly: isReadOnly,
+        pending: _pending.values.any((p) => p.event.nodeId == event.nodeId),
+      );
+
+  /// Host work is awaited before the synchronous publication/install section.
+  Future<UiPublishOutcome> recompute() async {
+    final port = recomputePort, probe = publishTokenProbe;
+    if (_disposed) return UiPublishOutcome.disposed;
+    if (port == null || probe == null || isReadOnly) {
+      return UiPublishOutcome.invalid;
+    }
+    final request = _publication.beginRecompute();
+    if (request == null) return UiPublishOutcome.disposed;
+    final base = current;
+    try {
+      final input = UiRecomputeInput(
+        previousSnapshot: base.snapshot,
+        currentUiState: {
+          for (final key in base.snapshot.initialUiState.keys)
+            key: _session.resolve(BindingRef.uiState(key)),
+        },
+        token: probe(),
+      );
+      final result = await port.rebuild(input);
+      if (!_publication.isCurrentRequest(request)) {
+        return _disposed
+            ? UiPublishOutcome.disposed
+            : UiPublishOutcome.staleToken;
+      }
+      if (result.token != input.token || result.errors.isNotEmpty) {
+        final failed = _publication.failRecompute(request);
+        if (!_disposed) notifyListeners();
+        return failed;
+      }
+      final snapshot = result.nextSnapshot!, intent = result.nextIntent!;
+      // Same-layout progression only. Old disallowed event authority is removed.
+      final plan = base.plan.copyWith(
+        revision: base.plan.revision + 1,
+        snapshotRef: snapshot.ref,
+        intentRef: intent.id,
+        nodes: [
+          for (final node in base.plan.nodes)
+            node.copyWith(
+              events: {
+                for (final entry in node.events.entries)
+                  if (intent.allowedActionRefs.contains(entry.value.actionRef))
+                    entry.key: entry.value,
+              },
+            ),
+        ],
+      );
+      return _publishPrepared(
+        UiVersionBatch(
+          token: result.token,
+          snapshot: snapshot,
+          intent: intent,
+          plan: plan,
+        ),
+        request,
+      );
+    } catch (_) {
+      final failed = _publication.failRecompute(request);
+      if (!_disposed && failed == UiPublishOutcome.invalid) notifyListeners();
+      return failed;
+    }
+  }
+
+  /// Raw host candidates share the same preparation, validator and final fence.
+  UiPublishOutcome publish(UiVersionBatch batch) {
+    if (_disposed) return UiPublishOutcome.disposed;
+    if (publishTokenProbe == null || isReadOnly) {
+      return UiPublishOutcome.invalid;
+    }
+    final request = _publication.beginRecompute();
+    if (request == null) return UiPublishOutcome.disposed;
+    return _publishPrepared(batch, request);
+  }
+
+  UiPublishOutcome _publishPrepared(
+    UiVersionBatch batch,
+    UiRecomputeRequest request,
+  ) {
+    if (!_publication.isCurrentRequest(request)) {
+      return _disposed
+          ? UiPublishOutcome.disposed
+          : UiPublishOutcome.staleToken;
+    }
+    try {
+      final checked = validateUiPlan(
+        batch.plan,
+        batch.snapshot,
+        batch.intent,
+        current.catalog,
+      );
+      if (!checked.isValid) {
+        final failed = _publication.failRecompute(request);
+        if (!_disposed && failed == UiPublishOutcome.invalid) notifyListeners();
+        return failed;
+      }
+      final fence = _session.publicationFence;
+      final prepared = _session.prepareRebase(checked.validatedPlan!);
+      final outcome = _publication.completeRecompute(
+        request,
+        batch,
+        publishTokenProbe!,
+        fence: fence,
+      );
+      if (outcome == UiPublishOutcome.published) {
+        // Fence + identical raw references guarantee this local install cannot fail.
+        final installed = _session.commitPreparedRebase(
+          prepared,
+          accepted: _publication.current,
+        );
+        assert(
+          installed,
+          'Prepared session must install with the published capability',
+        );
+      }
+      if (!_disposed) notifyListeners();
+      return outcome;
+    } catch (_) {
+      final failed = _publication.failRecompute(request);
+      if (!_disposed && failed == UiPublishOutcome.invalid) notifyListeners();
+      return failed;
+    }
+  }
+
+  ValidatedUiPlan get current => _publication.current;
+  late final UiSessionState _session;
+  UiSessionState get session => _session;
   final UiEventSink? onEvent;
+  final UiObjectOpen? onOpenObject;
   final _receipts = <String, UiBusinessReceipt>{};
   Map<String, UiBusinessReceipt> get receipts => Map.unmodifiable(_receipts);
   final _pending = <String, UiPendingAction>{};
@@ -78,7 +253,11 @@ class UiSurfaceController extends ChangeNotifier {
       _recoveredOperations.addAll(refs);
   void adoptExtracted(String field) {
     if (_disposed) return;
-    session.adoptExtracted(field);
+    final before = _session.draftRevision;
+    _session.adoptExtracted(field);
+    if (_session.draftRevision != before && recomputePort != null) {
+      unawaited(recompute());
+    }
     notifyListeners();
   }
 
@@ -97,13 +276,52 @@ class UiSurfaceController extends ChangeNotifier {
     payload: payload,
   );
 
+  UiRenderCapture captureRender() => UiRenderCapture._(this, current);
+
+  UiEvent eventForCapture(
+    UiRenderCapture capture,
+    UiNode node,
+    String kind, [
+    Object? payload,
+  ]) => UiEvent(
+    eventId: '${capture.surfaceId}:${capture.revision}:${++_eventCounter}',
+    surfaceId: capture.surfaceId,
+    nodeId: node.id,
+    observedRevision: capture.revision,
+    kind: kind,
+    payload: payload,
+  );
+
+  Future<UiDispatchOutcome> dispatchCaptured(
+    UiRenderCapture capture,
+    UiNode node,
+    String kind, [
+    Object? payload,
+  ]) async {
+    // This entire identity check executes before the first await or dispatch.
+    if (_disposed ||
+        !identical(capture._owner, this) ||
+        !identical(capture.plan, current) ||
+        !identical(capture.catalog, current.catalog) ||
+        capture.surfaceId != current.plan.surfaceId ||
+        capture.revision != current.plan.revision ||
+        !capture.plan.plan.nodes.any(
+          (candidate) => identical(candidate, node),
+        ) ||
+        !node.events.containsKey(kind)) {
+      return UiDispatchOutcome.stale;
+    }
+    return dispatch(eventForCapture(capture, node, kind, payload));
+  }
+
   bool acceptPlan(ValidatedUiPlan next) {
     if (identical(next, current)) return !_disposed;
     if (_disposed ||
         !identical(next.snapshot, current.snapshot) ||
         !identical(next.intent, current.intent) ||
-        !identical(next.catalog, current.catalog))
+        !identical(next.catalog, current.catalog)) {
       return false;
+    }
     var result = UiValidationResult.unchanged(next);
     for (final entry in current.appliedPatches.entries) {
       final supplied = next.appliedPatches[entry.key];
@@ -111,8 +329,10 @@ class UiSurfaceController extends ChangeNotifier {
       result = result.recordPatch(entry.key, entry.value);
     }
     final merged = result.validatedPlan!;
-    if (!session.accept(merged)) return false;
-    _current = merged;
+    if (!_session.canAcceptPlan(merged) || !_publication.adoptPlan(merged)) {
+      return false;
+    }
+    _session.accept(merged);
     notifyListeners();
     return true;
   }
@@ -126,9 +346,11 @@ class UiSurfaceController extends ChangeNotifier {
       current.intent,
       current.catalog,
     );
-    if (result.isValid && !identical(result.validatedPlan, current))
-      if (!acceptPlan(result.validatedPlan!))
+    if (result.isValid && !identical(result.validatedPlan, current)) {
+      if (!acceptPlan(result.validatedPlan!)) {
         return UiValidationResult.rejected(['surface_accept']);
+      }
+    }
     return result;
   }
 
@@ -144,16 +366,23 @@ class UiSurfaceController extends ChangeNotifier {
       _pending.values.any((p) => p.event.nodeId == node.id);
   bool canConfirm(UiNode node) {
     final binding = node.events['confirm'];
+    final action = current.catalog.actions[binding?.actionRef];
     return !_disposed &&
+        action != null &&
+        _publication.allowsDispatch(
+          action,
+          readOnly: isReadOnly,
+          pending: isPending(node),
+        ) &&
         onEvent != null &&
         binding != null &&
         binding.operationKeyRef != null &&
         binding.expectedDraftRevision != null &&
         current.catalog.actions[binding.actionRef]?.route ==
             UiActionRoute.business &&
-        !session.isCancelled(node.id) &&
+        !_session.isCancelled(node.id) &&
         !isPending(node) &&
-        binding.expectedDraftRevision == session.draftRevision &&
+        binding.expectedDraftRevision == _session.draftRevision &&
         !_lockedOperations.contains((
           binding.operationKeyRef!,
           binding.expectedDraftRevision!,
@@ -167,30 +396,82 @@ class UiSurfaceController extends ChangeNotifier {
     final matching = current.plan.nodes.where((n) => n.id == event.nodeId);
     if (matching.length != 1) return UiDispatchOutcome.invalid;
     final node = matching.single;
-    if (event.kind == 'cancel' && isPending(node))
+    if (event.kind == 'cancel' && isPending(node)) {
       return UiDispatchOutcome.stale;
-    final outcome = session.dispatch(event, current, current.catalog);
+    }
+    final dispatchPlan = current;
+    final action = current.catalog.actions[node.events[event.kind]?.actionRef];
+    final guardedBinding = node.events[event.kind];
+    final payloadType =
+        current.catalog.components[node.component]?.events[event.kind];
+    if (action?.route == UiActionRoute.business &&
+        guardedBinding != null &&
+        event.surfaceId == current.plan.surfaceId &&
+        event.observedRevision == current.plan.revision &&
+        (payloadType == null
+            ? event.payload == null
+            : matchesUiValue(payloadType, event.payload)) &&
+        (_lockedOperations.contains((
+              guardedBinding.operationKeyRef,
+              guardedBinding.expectedDraftRevision,
+            )) ||
+            _recoveredOperations.contains(guardedBinding.operationKeyRef))) {
+      return UiDispatchOutcome.duplicate;
+    }
+    if (action != null && !_allowsEvent(event, action)) {
+      return UiDispatchOutcome.stale;
+    }
+    final rowObject = action?.localAction == UiLocalAction.openRow
+        ? _session.rowObject(node, event.payload)
+        : null;
+    final outcome = _session.dispatch(event, current, current.catalog);
     if (outcome == UiEventOutcome.applied) {
       _seenEvents.add(event.eventId);
+      if (action?.localAction == UiLocalAction.editField &&
+          node.events[event.kind]!.inputRefs.length == 1 &&
+          !(current
+                  .snapshot
+                  .editSpecs[node.events[event.kind]!.inputRefs.single]
+                  ?.view ??
+              false) &&
+          recomputePort != null) {
+        unawaited(recompute());
+      }
       notifyListeners();
+      if (rowObject != null && onOpenObject != null) {
+        // A synchronous listener may have advanced the plan during notification.
+        if (_disposed || !identical(dispatchPlan, current)) {
+          return UiDispatchOutcome.stale;
+        }
+        try {
+          await onOpenObject!(rowObject, nodeId: node.id);
+        } catch (_) {
+          if (!_disposed) {
+            portError = 'Local object navigation failed.';
+            notifyListeners();
+          }
+        }
+      }
       return UiDispatchOutcome.applied;
     }
-    if (outcome != UiEventOutcome.unsupported)
+    if (outcome != UiEventOutcome.unsupported) {
       return UiDispatchOutcome.values.byName(outcome.name);
+    }
     final binding = node.events[event.kind]!;
     final route = current.catalog.actions[binding.actionRef]!.route;
     if (onEvent == null) return UiDispatchOutcome.unsupported;
     if (route == UiActionRoute.business) {
-      if (session.isCancelled(node.id)) return UiDispatchOutcome.stale;
+      if (_session.isCancelled(node.id)) return UiDispatchOutcome.stale;
       final key = (binding.operationKeyRef!, binding.expectedDraftRevision!);
       if (_lockedOperations.contains(key) ||
-          _recoveredOperations.contains(key.$1))
+          _recoveredOperations.contains(key.$1)) {
         return UiDispatchOutcome.duplicate;
+      }
       final inputs = <String, Object?>{};
       final context = current.snapshot.actionContext!;
       for (final ref in binding.inputRefs) {
         if (context.draft.containsKey(ref)) {
-          final value = session.resolve(BindingRef.uiState(ref));
+          final value = _session.resolve(BindingRef.uiState(ref));
           if (value != context.draft[ref]) return UiDispatchOutcome.stale;
           inputs[ref] = value;
         } else {
@@ -225,8 +506,9 @@ class UiSurfaceController extends ChangeNotifier {
     final pending = _pending[receipt.eventId];
     if (pending == null ||
         pending.binding.operationKeyRef != receipt.operationKeyRef ||
-        pending.binding.expectedDraftRevision != receipt.draftRevision)
+        pending.binding.expectedDraftRevision != receipt.draftRevision) {
       return false;
+    }
     _pending.remove(receipt.eventId);
     _receipts[pending.event.nodeId] = receipt;
     // The host operation reference stays locked even on failure: only a fresh
@@ -238,6 +520,7 @@ class UiSurfaceController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _publication.dispose();
     super.dispose();
   }
 }
@@ -282,7 +565,8 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
   void didUpdateWidget(covariant DynamicUiSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(widget.controller, oldWidget.controller) ||
-        !identical(widget.plan.snapshot, oldWidget.plan.snapshot)) {
+        (widget.controller == null &&
+            !identical(widget.plan.snapshot, oldWidget.plan.snapshot))) {
       controller.removeListener(changed);
       if (oldWidget.controller == null) controller.dispose();
       for (final c in fields.values) {
@@ -308,10 +592,6 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
     super.dispose();
   }
 
-  void dispatch(UiNode node, String kind, [Object? value]) {
-    controller.dispatch(controller.eventFor(node, kind, value));
-  }
-
   Object? resolve(UiNode n, String slot) {
     final ref = n.bindings[slot];
     return ref == null ? null : controller.session.resolve(ref);
@@ -322,27 +602,55 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
   BusinessStatus factStatus(UiNode n) => fact(n).state == FactState.conflict
       ? BusinessStatus.warning
       : BusinessStatus.neutral;
-  List<Widget> children(UiNode n, Map<String, UiNode> nodes) => [
+  List<Widget> children(
+    UiNode n,
+    Map<String, UiNode> nodes,
+    UiRenderCapture capture,
+  ) => [
     for (final id in n.children)
       Padding(
         key: ValueKey(id),
         padding: const EdgeInsets.only(bottom: 16),
-        child: render(nodes[id]!, nodes),
+        child: render(nodes[id]!, nodes, capture),
       ),
   ];
 
-  Widget render(UiNode n, Map<String, UiNode> nodes) {
+  Widget render(
+    UiNode n,
+    Map<String, UiNode> nodes,
+    UiRenderCapture capture, {
+    bool useAdapter = true,
+  }) {
+    if (useAdapter && identical(capture.catalog, library2UiCatalog)) {
+      return renderLibrary2Component(
+        UiAdapterContext(
+          capture: capture,
+          controller: controller,
+          node: n,
+          nodes: nodes,
+          renderChild: (child) => render(child, nodes, capture),
+          legacy: () => render(n, nodes, capture, useAdapter: false),
+        ),
+      );
+    }
+
+    final renderController = controller;
+    // Each closure holds this invocation's capture, never a mutable field.
+    void dispatch(UiNode node, String kind, [Object? value]) {
+      controller.dispatchCaptured(capture, node, kind, value);
+    }
+
     switch (n.component) {
       case 'PageScaffold':
         return PageScaffold(
           title: n.properties['title']! as String,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: children(n, nodes),
+            children: children(n, nodes, capture),
           ),
         );
       case 'MasterDetail':
-        final content = children(n, nodes);
+        final content = children(n, nodes, capture);
         return MasterDetail(
           master: content.isEmpty ? const SizedBox.shrink() : content.first,
           detail: content.length > 1
@@ -360,11 +668,12 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
           key,
           () => TextEditingController(text: text),
         );
-        if (input.text != text)
+        if (input.text != text) {
           input.value = TextEditingValue(
             text: text,
             selection: TextSelection.collapsed(offset: text.length),
           );
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -383,7 +692,30 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
                   : TextInputType.number,
               readOnly: !n.events.containsKey('change'),
               onChanged: n.events.containsKey('change')
-                  ? (v) => dispatch(n, 'change', v)
+                  ? (v) async {
+                      final outcome = await renderController.dispatchCaptured(
+                        capture,
+                        n,
+                        'change',
+                        v,
+                      );
+                      if (outcome != UiDispatchOutcome.applied &&
+                          mounted &&
+                          identical(controller, renderController) &&
+                          identical(fields[key], input)) {
+                        final accepted =
+                            controller.session
+                                .resolve(n.bindings['draft']!)
+                                ?.toString() ??
+                            '';
+                        input.value = TextEditingValue(
+                          text: accepted,
+                          selection: TextSelection.collapsed(
+                            offset: accepted.length,
+                          ),
+                        );
+                      }
+                    }
                   : null,
             ),
           ],
@@ -397,12 +729,13 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
               resolve(n, 'alternate'),
             ),
         ];
-        if (resolve(n, 'sort') == 'value')
+        if (resolve(n, 'sort') == 'value') {
           rows.sort(
             (a, b) => a.$2 is num && b.$2 is num
                 ? (a.$2 as num).compareTo(b.$2 as num)
                 : '${a.$2}'.compareTo('${b.$2}'),
           );
+        }
         return Table(
           children: [
             for (final row in rows)
@@ -495,12 +828,13 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
           consequence: '请求宿主确认；界面本身不授予写入权限。',
         );
         void decision(ConfirmationChoice choice) {
-          if (choice == ConfirmationChoice.once && active)
+          if (choice == ConfirmationChoice.once && active) {
             dispatch(n, 'confirm');
-          else if (choice == ConfirmationChoice.reject &&
+          } else if (choice == ConfirmationChoice.reject &&
               !pending &&
-              n.events.containsKey('cancel'))
+              n.events.containsKey('cancel')) {
             dispatch(n, 'cancel');
+          }
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -559,21 +893,22 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
 
   @override
   Widget build(BuildContext context) {
-    if (!identical(controller.current.catalog, dynamicUiCatalog) &&
-        !identical(controller.current.catalog, minimalUiCatalog))
+    if (!supportedUiCatalogs.contains(controller.current.catalog)) {
       return snapshotFallback(
         controller.current.snapshot,
         controller.current.intent,
       );
-    final plan = controller.current.plan,
-        nodes = {for (final n in controller.current.plan.nodes) n.id: n};
+    }
+    final capture = controller.captureRender();
+    final plan = capture.plan.plan,
+        nodes = {for (final n in plan.nodes) n.id: n};
     final detail = nodes[controller.session.detailNode];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (controller.portError != null) Text(controller.portError!),
         if (detail == null)
-          render(nodes[plan.root]!, nodes)
+          render(nodes[plan.root]!, nodes, capture)
         else
           PageScaffold(
             title: '${detail.properties['label']} detail',
@@ -581,7 +916,7 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
               TextButton(
                 key: const ValueKey('detail-back'),
                 onPressed: detail.events.containsKey('back')
-                    ? () => dispatch(detail, 'back')
+                    ? () => controller.dispatchCaptured(capture, detail, 'back')
                     : null,
                 child: const Text('Back to comparison'),
               ),

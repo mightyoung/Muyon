@@ -320,10 +320,11 @@ class BatchConfirmCard extends StatelessWidget {
     final onAllowAll = interactive ? this.onAllowAll : null;
     final onIndividual = interactive ? this.onIndividual : null;
     final onReject = interactive ? this.onReject : null;
-    if (items.any((item) => item.kind == ConfirmationKind.read))
+    if (items.any((item) => item.kind == ConfirmationKind.read)) {
       throw ArgumentError(
         'Read-only operations do not enter batch confirmation',
       );
+    }
     final t = MuyonTokens.of(context);
     return UiPanel(
       child: Column(

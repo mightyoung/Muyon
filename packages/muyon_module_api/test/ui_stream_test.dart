@@ -34,7 +34,7 @@ void main() {
         snapshot: f.snapshot,
         intent: f.intent,
         catalog: f.catalog,
-        protocolVersion: 'aiui-stream/2',
+        protocolVersion: 'aiui-stream/3',
       ),
       throwsArgumentError,
     );
@@ -404,15 +404,18 @@ void main() {
         expect(parsed.error, isNotNull, reason: '$m');
         expect(parsed.operation, isNull);
       }
-      for (final line in ['null', '[1]', '{', ''])
+      for (final line in ['null', '[1]', '{', '']) {
         expect(parseUiStreamLine(line).error, isNotNull);
+      }
     },
   );
   test('node limit permits N minus one and N, rejects N plus one', () {
     final n = UiStreamLimits.v1.nodes;
     c = compiler(f, intent: emptyIntent(f));
     root(c);
-    for (var i = 1; i < n - 1; i++) node(c, 'n$i', 'Text', parent: 'root');
+    for (var i = 1; i < n - 1; i++) {
+      node(c, 'n$i', 'Text', parent: 'root');
+    }
     expect(c.current.candidatePlan.nodes.length, n - 1);
     node(c, 'last', 'Text', parent: 'root');
     expect(c.current.candidatePlan.nodes.length, n);
@@ -421,7 +424,9 @@ void main() {
     differential(c);
     c = compiler(f, intent: emptyIntent(f));
     root(c);
-    for (var i = 1; i < n; i++) node(c, 'n$i', 'Text', parent: 'root');
+    for (var i = 1; i < n; i++) {
+      node(c, 'n$i', 'Text', parent: 'root');
+    }
     node(c, 'overflow', 'Text', parent: 'root');
     expect(c.current.phase, UiStreamPhase.limitExceeded);
     expect(c.current.diagnostics.last.code, UiStreamErrorCode.nodeLimit);
@@ -512,8 +517,9 @@ void main() {
     expect(c.current.diagnostics.last.code, UiStreamErrorCode.badLineLimit);
     c = compiler(f);
     root(c);
-    for (var i = 0; i < UiStreamLimits.v1.patchesPerNode; i++)
+    for (var i = 0; i < UiStreamLimits.v1.patchesPerNode; i++) {
       patch(c, 'root', {'title': 'v$i'});
+    }
     expect(c.current.phase, UiStreamPhase.streaming);
     patch(c, 'root', {'title': 'overflow'});
     expect(c.current.phase, UiStreamPhase.limitExceeded);
@@ -528,7 +534,9 @@ void main() {
       end(c);
       expect(c.current.complete, isTrue);
       final candidate = c.current.candidatePlan.nodes.length;
-      for (var i = 0; i < UiStreamLimits.v1.diagnostics + 1; i++) end(c);
+      for (var i = 0; i < UiStreamLimits.v1.diagnostics + 1; i++) {
+        end(c);
+      }
       expect(c.current.complete, isTrue);
       expect(c.current.candidatePlan.nodes.length, candidate);
       expect(c.current.diagnostics.length, UiStreamLimits.v1.diagnostics);
@@ -747,7 +755,7 @@ void node(
     'op': 'node',
     'id': id,
     'component': component,
-    if (parent != null) 'parent': parent,
+    'parent': ?parent,
     'props': props,
     'bind': bind,
   }),

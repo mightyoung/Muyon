@@ -1,0 +1,97 @@
+--- a/packages/muyon_module_api/lib/src/ui/state.dart
++++ b/packages/muyon_module_api/lib/src/ui/state.dart
+@@ -9,8 +9,11 @@
+
+ /// In-memory view/draft state only. Never grants authority or executes business tools.
+ class UiSessionState {
+-  UiSessionState(this.snapshot)
+-    : _values = Map.of(snapshot.initialUiState),
++  UiSessionState(
++    this.snapshot, {
++    bool Function(UiEvent, UiActionDefinition)? admit,
++  }) : _admit = admit,
++       _values = Map.of(snapshot.initialUiState),
+       _digests = Map.of(snapshot.sourceDigests),
+       _selections = {
+         for (final e in snapshot.editSpecs.entries)
+@@ -19,6 +22,7 @@
+       },
+       draftRevision = snapshot.actionContext?.draftRevision ?? 0;
+   final DataSnapshot snapshot;
++  final bool Function(UiEvent, UiActionDefinition)? _admit;
+   final Map<String, Object?> _values;
+   // itemIds live outside _values/userOverrides: never scalar.
+   final Map<String, List<String>> _selections;
+@@ -255,6 +259,9 @@
+             false)) {
+       return UiEventOutcome.invalid;
+     }
++    if (_admit?.call(event, definition) == false) {
++      return UiEventOutcome.stale;
++    }
+     final payloadType = schema.events[event.kind];
+     // library-2 editField: the host spec, not the coarse type, owns the payload.
+     UiEditSpec? spec;
+--- a/packages/muyon_ui/lib/src/dynamic/surface.dart
++++ b/packages/muyon_ui/lib/src/dynamic/surface.dart
+@@ -54,12 +54,24 @@
+ class UiSurfaceController extends ChangeNotifier {
+   UiSurfaceController(ValidatedUiPlan plan, {this.onEvent})
+     : _current = plan,
+-      session = UiSessionState(plan.snapshot) {
++      publication = UiPublicationCoordinator(plan) {
++    session = UiSessionState(
++      plan.snapshot,
++      admit: (event, action) => publication.allowsDispatch(
++        action,
++        readOnly: readOnly,
++        pending: _pending.values.any((p) => p.event.nodeId == event.nodeId),
++      ),
++    );
+     session.accept(plan);
+   }
+   ValidatedUiPlan _current;
+   ValidatedUiPlan get current => _current;
+-  final UiSessionState session;
++  late final UiSessionState session;
++  final UiPublicationCoordinator publication;
++  bool readOnly = false;
++  bool get recomputing => publication.recomputing;
++  List<String> get publicationErrors => publication.publicationErrors;
+   final UiEventSink? onEvent;
+   final _receipts = <String, UiBusinessReceipt>{};
+   Map<String, UiBusinessReceipt> get receipts => Map.unmodifiable(_receipts);
+@@ -148,6 +160,9 @@
+   bool canConfirm(UiNode node) {
+     final binding = node.events['confirm'];
+     return !_disposed &&
++        !readOnly &&
++        !publication.outdated &&
++        !recomputing &&
+         onEvent != null &&
+         binding != null &&
+         binding.operationKeyRef != null &&
+@@ -170,6 +185,15 @@
+     final matching = current.plan.nodes.where((n) => n.id == event.nodeId);
+     if (matching.length != 1) return UiDispatchOutcome.invalid;
+     final node = matching.single;
++    final action = current.catalog.actions[node.events[event.kind]?.actionRef];
++    if (action != null &&
++        !publication.allowsDispatch(
++          action,
++          readOnly: readOnly,
++          pending: isPending(node),
++        )) {
++      return UiDispatchOutcome.stale;
++    }
+     if (event.kind == 'cancel' && isPending(node)) {
+       return UiDispatchOutcome.stale;
+     }
+@@ -244,6 +268,7 @@
+
+   @override
+   void dispose() {
++    publication.dispose();
+     _disposed = true;
+     super.dispose();
+   }

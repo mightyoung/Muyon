@@ -112,3 +112,13 @@ PR #6 手动基础设施已合入 `107ca439547a01c4ac37e218e059de0a508a0309`，�
 Claude/B1复审和[固定源全套CI](https://github.com/mightyoung/Muyon/actions/runs/38018663166)通过后集成。
 生产登记仍OFF、完整T-3未完成。历史LAN 400保留为“未重现、原因未明”，无测试豁免；
 后续待办与发布CI见[集成交接](INTEGRATION-2026-10-09.md)和执行回报。
+
+## Harness 最小补强（2026-10-10）
+
+| 任务 | 固定源 | 状态 |
+| --- | --- | --- |
+| [Dream consistency](HARNESS-DREAM-CONSISTENCY.md) / PR15 | `4d86c3433c09142ab4fc5d3bdfab491d769f759a` | 已合cf672；[追补独立复审](HARNESS-DREAM-CONSISTENCY-review.md)无确定阻断，组合CI38019908442成功 |
+| [Resume identity](HARNESS-RESUME-IDENTITY.md) / PR16 | `147ad71378af7ae7206b1e2c6ca2d76f98fc0639` | 已合38f2040，组合CI38020976416/发布38021050451成功；但合后机器人manual hold身份P1未裁定，整体审查暂停；原作者独立修复任务进行中，见[复审更新](HARNESS-RESUME-IDENTITY-review.md) |
+
+实际合入账号/时间、PR14发布CI取消与后续成功区分见[交接](INTEGRATION-2026-10-09.md)。
+LAN未决与AIUI未来夹具/契约待验另行处理，不自动采纳或合入。

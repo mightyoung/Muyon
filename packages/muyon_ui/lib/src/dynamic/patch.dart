@@ -50,14 +50,16 @@ UiValidationResult applyUiPatch(
   UiValidationResult reject(String reason) =>
       UiValidationResult.rejected([reason]);
   if (!patch.complete) return reject('incomplete_patch');
-  if (patch.patchId.isEmpty || patch.ops.isEmpty || patch.ops.length > 200)
+  if (patch.patchId.isEmpty || patch.ops.isEmpty || patch.ops.length > 200) {
     return reject('invalid_patch');
+  }
   if (!identical(snapshot, current.snapshot) ||
       !identical(catalog, current.catalog) ||
       !identical(intent, current.intent) ||
       patch.snapshotRevision != snapshot.ref ||
-      patch.surfaceId != current.plan.surfaceId)
+      patch.surfaceId != current.plan.surfaceId) {
     return reject('patch_context');
+  }
   late String fingerprint;
   try {
     fingerprint = jsonEncode([
@@ -96,13 +98,15 @@ UiValidationResult applyUiPatch(
     return reject('patch_value');
   }
   final prior = current.appliedPatches[patch.patchId];
-  if (prior != null)
+  if (prior != null) {
     return prior == fingerprint
         ? UiValidationResult.unchanged(current)
         : reject('patch_id_reused');
+  }
   if (patch.baseRevision != current.plan.revision ||
-      patch.nextRevision <= patch.baseRevision)
+      patch.nextRevision <= patch.baseRevision) {
     return reject('patch_revision');
+  }
   final nodes = {for (final node in current.plan.nodes) node.id: node};
   final touched = <String>{};
   for (final op in patch.ops) {

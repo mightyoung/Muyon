@@ -1,0 +1,96 @@
+{
+  "status": "proposed; not adopted; future-only DATA. Public host fixture numbers only; the product is NOT a model output and F3a evaluate is NOT run by this file.",
+  "design": "docs/design/aiui-f5-contract-proposed.md §4",
+  "base": {
+    "snapshot": {"ref": {"id": "quote-view", "revision": 7}, "facts": {"price": "10"}, "initialUiState": {"qty": "2"}, "computations": {"total": {"value": "20", "inputVersion": {"id": "quote-view", "revision": 7}, "computationId": "host-total-instance"}}, "actionContext": {"draftRevision": 4}},
+    "intent": {"id": "intent-quote", "snapshotRef": {"id": "quote-view", "revision": 7}},
+    "plan": {"surfaceId": "quote", "revision": 11, "snapshotRef": {"id": "quote-view", "revision": 7}, "intentRef": "intent-quote"}
+  },
+  "edit": {"key": "qty", "from": "2", "to": "3", "spec": {"kind": "string", "accepts": "exactDecimal"}, "draftRevisionAfter": 5},
+  "published": {
+    "snapshot": {"ref": {"id": "quote-view", "revision": 8}, "initialUiState": {"qty": "2"}, "userOverrides": {"qty": "3"}, "currentUiStateForEvaluate": {"qty": "3"}, "computations": {"total": {"value": "30", "inputVersion": {"id": "quote-view", "revision": 8}, "computationId": "host-total-instance"}}, "actionContext": {"draftRevision": 5}, "note": "published.initialUiState 保宿主 extracted 2；override 3 与 currentUiState 3 单独存在，总价 30"},
+    "intent": {"id": "intent-quote", "snapshotRef": {"id": "quote-view", "revision": 8}, "note": "id 与 I7 相同，否则 workspace 的 intentRef 比对判只读"},
+    "plan": {"surfaceId": "quote", "revision": 12, "snapshotRef": {"id": "quote-view", "revision": 8}, "intentRef": "intent-quote", "note": "P11.copyWith(revision,snapshotRef,intentRef,业务 expectedDraftRevision=5)；节点与绑定 id 不变；不调用模型"}
+  },
+  "identity": {"formulaId": "ui.product_decimal", "computationId": "host-total-instance", "inputVersion": "S8", "note": "formulaId=定义，computationId=实例（S7/S8 不变），inputVersion=输入版本；不得由 revision 派生实例 id"},
+  "cases": [
+    {"id": "happy-atomic-publish", "events": ["edit qty 2->3", "rebuild ready total=30", "token unchanged", "validate(P12,S8,I8,catalog) ok"], "expect": {"surface": "S8/I8/P12", "total": "30", "overridesKept": ["qty"], "inputVersionIsS8": true}},
+    {"id": "relabel-old-result", "events": ["把 total='20' 的 inputVersion 改成 S8 而不重算"], "expect": "not-published", "note": "inputVersion 相等是必要而非充分条件；必须以 S8 实际输入 evaluate（F3a inputFingerprint 为诊断）"},
+    {"id": "mixed-version-I7-with-P12", "events": ["P12 搭配 I7"], "expect": "rejected", "error": "snapshot_revision"},
+    {"id": "race-edit-during-rebuild", "events": ["edit qty 2->3 触发 rebuild", "rebuild 未完成时 edit qty 3->4", "第一次 rebuild 完成"], "expect": "first-batch-dropped", "error": "stale_batch", "then": "latest-wins 重新 rebuild(qty=4)，最终 total=40", "neverVisible": ["total=30 与 qty=4 同时出现"]},
+    {"id": "race-permission-change", "events": ["rebuild 期间 permissionGeneration 变化"], "expect": "batch-dropped", "error": "stale_batch"},
+    {"id": "race-external-snapshot-advance", "events": ["rebuild 期间宿主已发布 S9"], "expect": "batch-dropped", "error": "stale_batch"},
+    {"id": "formula-unavailable", "events": ["price 变 notDisclosed → evaluate unavailable"], "expect": {"total": null, "display": "暂无/不可计算", "notZero": true, "confirm": "disabled"}},
+    {"id": "formula-invalid", "events": ["evaluate invalid(unit_mismatch)"], "expect": "not-published", "surface": "S7 保留并标 outdated", "overridesKept": true, "confirm": "disabled", "error": "unknown_or_stale_computation"},
+    {"id": "formula-stale-result", "events": ["evaluate 返回 stale_input_version"], "expect": "batch-dropped", "stateChanged": false},
+    {"id": "rebuild-throws", "events": ["port.rebuild 抛错或超时"], "expect": "not-published", "surface": "S7 保留并标 outdated", "businessSinkCalls": 0, "modelCalls": 0},
+    {"id": "confirm-click-while-recomputing", "events": ["recomputing=true 时点确认"], "expect": "disabled", "sinkCalls": 0},
+    {"id": "old-confirm-after-publish", "events": ["发布 P12 后到达基于 revision 11 的 confirm 事件"], "expect": "stale", "sinkCalls": 0},
+    {"id": "pending-op-survives-publish", "events": ["revision 11 的 confirm 已 pending", "发布 P12", "旧回执到达"], "expect": {"receiptAccepted": true, "newVersionConfirmOnSameNode": "disabled until receipt", "replay": 0}},
+    {"id": "new-version-uses-fresh-operation-key", "events": ["发布 P12"], "expect": {"operationKeyRef": "宿主新分配，不等于 revision 11 的键", "expectedDraftRevision": 5}},
+    {"id": "carry-over-membership-lost", "events": ["picked=[quote-c]，S8 的 quote-labels 不再含 quote-c"], "expect": {"overrideDroppedFromSession": true, "keptInReadableDraft": true, "silentLoss": false}}
+  ],
+  "staleWidgetCapture": {
+    "rule": "渲染按 build 捕获 UiRenderCapture；回调用 eventForCapture；渲染路径禁止现场读 current 的 eventFor",
+    "cases": [
+      {"id": "old-onChanged-after-publish-before-rebuild", "steps": ["build 持有 Field.onChanged 闭包(revision 11)", "publish P12", "不重建，直接调用旧 onChanged('4')"], "expect": {"outcome": "stale", "stateChanged": false, "draftRevisionChanged": false, "eventSinkCalls": 0, "routerCalls": 0, "toolCalls": 0}, "note": "必须调用真实 Widget 回调闭包，而不是自行构造旧 UiEvent 重放"},
+      {"id": "old-confirm-onPressed-after-publish", "steps": ["捕获 ConfirmCard 的 onPressed(revision 11, 旧 operation)", "publish P12", "直接调用旧 onPressed"], "expect": {"outcome": "stale", "newOperationKeyUsed": false, "eventSinkCalls": 0, "routerCalls": 0, "toolCalls": 0}},
+      {"id": "old-batch-confirm-callback", "steps": ["同上，BatchConfirmCard"], "expect": {"outcome": "stale", "eventSinkCalls": 0}},
+      {"id": "old-choice-tabs-disclosure-checklist-callbacks", "steps": ["捕获各 change/tap 闭包", "publish", "直接调用"], "expect": {"outcome": "stale", "stateChanged": false}},
+      {"id": "business-operation-from-capture-not-current", "expect": "operation/expectedDraftRevision 取自 capture 的 plan，绝不从新 current 补"},
+      {"id": "new-frame-callbacks-work", "steps": ["publish", "下一帧重建", "调用新闭包"], "expect": {"outcome": "applied or routed per normal rules"}}
+    ],
+    "publishStrictness": [
+      {"id": "equal-revision", "batch.plan.revision": "current", "expect": "invalid"},
+      {"id": "lower-revision", "batch.plan.revision": "current-1", "expect": "invalid"},
+      {"id": "surface-id-differs", "expect": "invalid"},
+      {"id": "plan-snapshot-differs-from-batch-snapshot", "expect": "invalid"},
+      {"id": "intent-snapshot-differs", "expect": "invalid"},
+      {"id": "plan-intentRef-differs-from-intent-id", "expect": "invalid"},
+      {"id": "intent-id-differs-from-current", "expect": "invalid"},
+      {"id": "catalogVersion-differs", "expect": "invalid"}
+    ]
+  },
+  "recomputeAllDisplayed": {
+    "setup": {"displayedComputed": ["total-qty-dependent", "total-fixed"], "dependsOnQty": ["total-qty-dependent"], "S7": {"total-fixed": {"value": "50", "inputVersion": "S7"}}},
+    "cases": [
+      {"id": "unaffected-instance-really-reevaluated", "edit": "qty 2->3", "expect": {"total-qty-dependent": {"evaluatedOn": "S8"}, "total-fixed": {"evaluatedOn": "S8", "value": "50", "inputVersionIsS8": true, "evaluatorCalled": true}}},
+      {"id": "unaffected-relabel-forbidden", "mutate": "total-fixed 沿用旧 value 仅改 inputVersion=S8 而不 evaluate", "expect": "not-published / blocked"},
+      {"id": "unaffected-instance-fails", "events": ["total-fixed evaluate invalid"], "expect": {"batch": "not-published", "surface": "outdated/readOnly", "manualQtyKept": true}},
+      {"id": "collection-cell-computed-also-reevaluated", "events": ["collection 内 computed cell 未依赖 qty"], "expect": {"evaluatorCalled": true}},
+      {"id": "no-cache-or-dag", "note": "首版不引入依赖 DAG/缓存"}
+    ]
+  },
+  "extractedOverrideLayers": {
+    "S7": {"initialUiState": {"qty": "2"}, "computed.total": "20"},
+    "afterEditAndPublish": {"S8.initialUiState": {"qty": "2"}, "userOverrides": {"qty": "3"}, "resolve(uiState qty)": "3", "computed.total": "30", "inputVersion": "S8", "draftRevision": 5},
+    "evaluateInputs": {"S8_in.ref": "S8", "S8_in.initialUiState": {"qty": "2"}, "currentUiState": {"qty": "3"}, "note": "F3a 只要求键集相等，值取 currentUiState；人工值不写入 S8_in 或 published S8.initialUiState"},
+    "steps": [
+      {"step": "edit qty 2->3 then publish", "expect": {"total": "30", "extracted": "2", "override": "3", "resolve": "3"}},
+      {"step": "checkpoint, SQLite reopen", "expect": {"extracted": "2", "override": "3", "total": "30"}},
+      {"step": "adoptExtracted('qty')", "expect": {"override": "removed", "resolve": "2", "draftRevisionDelta": 1, "recompute": "total 20", "oldConfirm": "stale"}}
+    ],
+    "negative": [
+      {"id": "published-initial-overwritten-with-override", "mutate": "S8.initialUiState.qty = '3'", "expect": "rejected by contract/test; extracted 2 must survive"},
+      {"id": "adopt-without-revision-increment", "mutate": "清 override 回 2 但 draftRevision 不变", "expect": "rejected; must increment"},
+      {"id": "fingerprint-follows-currentUiState", "expect": "inputFingerprint 随 currentUiState 3 变化，而非 initialUiState 2"}
+    ]
+  },
+  "round2": {
+    "firstRealSlice": {"edit": "budget line qty", "stateKind": "UiStringEdit decimal String", "businessMapping": "inquiry.set_item_qty registered but AIUI business mapping missing", "confirm": "disabled; no tool id guessed; no fabricated receipt", "numberStateIntoFormula": "forbidden in first version"},
+    "token": {"fields": ["baseSnapshotRef", "draftRevision", "hostGeneration", "sourceGeneration", "permissionGeneration", "scopeKey"], "creator": "F3b host adapter", "consumer": "UiSurfaceController.publish (F5c core)"},
+    "publishInterface": "UiPublishOutcome publish(UiVersionBatch, UiPublishTokenProbe) is synchronous; no await between probe and commit",
+    "outcomes": ["published", "staleToken", "invalid", "disposed"],
+    "cases": [
+      {"id": "source-generation-changed-same-snapshot", "events": ["rebuild 期间 sourceGeneration 变化，当前 snapshot ref 未变"], "expect": "staleToken", "stateChanged": false},
+      {"id": "scope-changed", "events": ["scopeKey 变化"], "expect": "staleToken"},
+      {"id": "host-generation-changed", "events": ["宿主换代"], "expect": "disposed"},
+      {"id": "controller-disposed", "events": ["publish 时 controller 已 dispose"], "expect": "disposed"},
+      {"id": "identity-preserved", "events": ["publish 成功"], "expect": {"sameControllerInstance": true, "sameSessionInstance": true, "sameMountedWidgetState": true}},
+      {"id": "draftRevision-monotonic", "events": ["batch.actionContext.draftRevision < session.draftRevision"], "expect": {"draftRevisionAfter": "max(old,new)", "neverDecreases": true}},
+      {"id": "old-capability-not-replayable", "events": ["publish 后重放旧 revision 的 confirm"], "expect": "stale", "sinkCalls": 0},
+      {"id": "itemIds-override-layers-survive", "events": ["selectionOverrides=[picked], viewSelections=[tab]", "publish"], "expect": {"selectionOverridesKept": ["picked"], "viewSelectionsKept": ["tab"], "incompatibleKeptInReadableDraft": true}}
+    ]
+  },
+  "expectedAcceptance": "future-only"
+}

@@ -3,6 +3,8 @@ library;
 
 export 'src/references.dart';
 export 'src/ui/snapshot.dart';
+export 'src/ui/edit_spec.dart';
+export 'src/ui/collection.dart';
 export 'src/ui/intent.dart';
 export 'src/ui/plan.dart';
 export 'src/ui/validation.dart';
@@ -14,3 +16,5 @@ export 'src/ui/guides.dart';
 export 'src/ui/navigation.dart';
 export 'src/ui/stream_protocol.dart';
 export 'src/ui/stream_compiler.dart';
+export 'src/ui/recomputation.dart';
+export 'src/ui/publication.dart';
