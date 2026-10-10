@@ -16,10 +16,13 @@ class DaDetails(unittest.TestCase):
             path = root / diagnostic.FILES[0]
             path.parent.mkdir(parents=True)
             path.write_text('this file text is not an executable denominator')
+            other = root / 'packages/muyon_module_api/lib/src/coverage.dart'
+            other.write_text('identity outside the six historic diagnostic targets')
             reports = root / 'reports'
             (reports / 'module_api').mkdir(parents=True)
             (reports / 'host').mkdir()
-            (reports / 'module_api/lcov.info').write_text('SF:lib/src/ui/snapshot.dart\n' + first)
+            (reports / 'module_api/lcov.info').write_text('SF:lib/src/ui/snapshot.dart\n' + first +
+                'SF:lib/src/coverage.dart\nDA:8,0\nDA:10,1\n')
             (reports / 'host/lcov.info').write_text('SF:../../packages/muyon_module_api/lib/src/ui/snapshot.dart\n' + second)
             with patch.object(diagnostic.subprocess, 'check_output', return_value='fixed-source\n'):
                 return diagnostic.details(root, reports)
@@ -35,6 +38,13 @@ class DaDetails(unittest.TestCase):
 
     def test_all_loaded_sources_have_identity_and_da_sets(self):
         result = self.measure('DA:17,0\nDA:21,1\n')
+        self.assertIn('all_loaded_files', result)
+        self.assertEqual(sorted(result['all_loaded_files']), [
+            'packages/muyon_module_api/lib/src/coverage.dart', diagnostic.FILES[0],
+        ])
+        self.assertEqual(result['all_loaded_files'][
+            'packages/muyon_module_api/lib/src/coverage.dart'
+        ]['uncovered_da_line_ids'], [8])
         data = result['all_loaded_files'][diagnostic.FILES[0]]
         self.assertEqual(data['da_line_ids'], [17, 21])
         self.assertEqual(data['uncovered_da_line_ids'], [17])
