@@ -20,3 +20,5 @@
 - PR4、PR23只读核对均为closed/unmerged：[4](https://github.com/mightyoung/Muyon/pull/4)、[23](https://github.com/mightyoung/Muyon/pull/23)；本候选未操作。
 
 历史A–D保留原文并标冻结；账本已补AIUI现状。用户已另行完成已合远端分支清理，integrator 未执行分支删除；后续从重新核验的最新 develop 开新任务分支，不重建旧远端，不 prune 本地工作。负责人/依赖、目标北京时间窗口、验收矩阵与失败顺延见[默认开启计划](AIUI-DEFAULT-ENABLE-PLAN.md)。
+
+最新用户更正：生产仍dynamicUiCatalog，stream compiler及library2接线先于卡片；三档实际策略、持久化与启动恢复先于默认开启。动态确认卡外部内容标记有已证UI缺口，业务动作必须同修并做真实拒绝测试；现有后端仍独立拒绝污染自动授权，不冒称已证绕过。旧接线/单bool与integration草稿保留，未提交、未编译通过、无新功能CI。GROK-8抽查已过仍待推送后用户正式审查，不抢合。Haiku5.5仍由用户在完整候选独审/组合CI通过后启动，当前无可测候选。
