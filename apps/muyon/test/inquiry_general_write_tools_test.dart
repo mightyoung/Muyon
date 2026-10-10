@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:inquiry_module/src/app/shell.dart';
 import 'package:inquiry_module/src/features/ai/ask_page.dart';
+import 'package:inquiry_module/src/features/settings/ai_settings.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/platform/business_tools.dart';
 import 'package:muyon/platform/tool_registry.dart';
@@ -46,7 +47,7 @@ void main() {
   );
   Future<ToolCallResult> approved(ToolCallRequest r) async {
     final prepared = await host.tools.prepare(r);
-    return host.tools.invoke(r.withApproval(host.tools.approve(prepared)));
+    return host.tools.invoke(r.withApproval(await host.tools.approve(prepared)));
   }
   Map<String, Object?> edit(String id, {int version = 1,
       Map<String, Object?> values = const {'name': '改名'}}) => {
@@ -87,13 +88,45 @@ void main() {
     expect(store.get('supplier', supplierId)!.data['aliases'], isEmpty);
     expect(store.get('supplier', supplierId)!.version, 2);
     final again = await approved(await request('update_record', edit(supplierId), operationId: operationId));
-    expect(again.toJson(), result.toJson());
+    expect(again.data, result.data);
+    expect(again.objectRefs.map((r) => r.toJson()), result.objectRefs.map((r) => r.toJson()));
     expect(store.get('supplier', supplierId)!.version, 2);
     expect(store.db.select("SELECT key FROM meta WHERE key LIKE 'reg4c:%'"), hasLength(1));
     final conflict = await approved(await request('update_record', edit(supplierId,
         version: 2, values: {'notes': '不同请求'}), operationId: operationId));
     expect(conflict.status, ToolCallStatus.failed);
     expect(store.get('supplier', supplierId)!.data['notes'], isNull);
+  });
+
+  test('concurrent create confirmations share one committed domain receipt', () async {
+    final operationId = newUuid();
+    final parameters = {'type': 'product', 'values': {'name': '并发物料', 'unit': '件'}};
+    final requests = [await request('create_record', parameters, operationId: operationId),
+      await request('create_record', parameters, operationId: operationId)];
+    final results = await Future.wait(requests.map(approved));
+    expect(results.every((r) => r.status == ToolCallStatus.succeeded), isTrue);
+    expect(results[0].data, results[1].data);
+    expect(store.db.select('SELECT id FROM product WHERE deleted=0'), hasLength(1));
+  });
+
+  test('a new project receives its own ref while the global selection stays narrow', () async {
+    final result = await approved(await request('create_record', {
+      'type': 'project', 'values': {'code': 'NEW', 'name': '新项目', 'status': 'planning',
+        'currency': 'CNY', 'tax_mode': 'included', 'markup_rate': '0'},
+    }));
+    expect(result.status, ToolCallStatus.succeeded);
+    expect(result.objectRefs.single.nativeProjectId, result.objectRefs.single.objectId);
+    expect(store.get('project', result.objectRefs.single.objectId)!.version, 1);
+  });
+
+  test('create refuses references outside the human selection', () async {
+    final other = store.save('supplier', {...store.get('supplier', supplierId)!.data,
+      'name': '范围外供应商'});
+    final result = await approved(await request('create_record', {
+      'type': 'contact', 'values': {'name': '联系人', 'phone': '000001', 'supplier_id': other},
+    }));
+    expect(result.status, ToolCallStatus.failed);
+    expect(store.db.select('SELECT id FROM contact'), isEmpty);
   });
 
   test('explicit expected_version refuses a stale update even with fresh scope', () async {
@@ -131,7 +164,8 @@ void main() {
     final first = await approved(await request('create_record', p, operationId: op));
     final second = await approved(await request('create_record', p, operationId: op));
     expect(first.status, ToolCallStatus.succeeded);
-    expect(second.toJson(), first.toJson());
+    expect(second.data, first.data);
+    expect(second.objectRefs.map((r) => r.toJson()), first.objectRefs.map((r) => r.toJson()));
     expect(store.db.select('SELECT id FROM supplier WHERE deleted=0'), hasLength(2));
     final invalid = await approved(await request('create_record', {
       'type': 'contact', 'values': {'supplier_id': supplierId, 'name': '缺联系方式'},
@@ -172,8 +206,108 @@ void main() {
     }
   });
 
+
+  ({String project, String item, String inquiry, String quote}) quoteFixture() {
+    final project = store.save('project', {
+      for (final field in Project.fields) field: null,
+      'code': 'REG4C', 'name': '公开项目', 'status': 'active',
+      'currency': 'CNY', 'tax_mode': 'included', 'markup_rate': '0',
+    });
+    final item = store.save('project_item', {
+      for (final field in ProjectItem.fields) field: null,
+      'project_id': project, 'category': 'material', 'name': '公开物料',
+      'qty': '1', 'unit': '件', 'unit_cost': '0',
+    });
+    final inquiry = store.createInquiry(project, '公开询价',
+        itemIds: [item], supplierIds: [supplierId]);
+    final quote = store.quoteForInquiry(inquiry, item, supplierId,
+        price: '20', context: (inquirer: '公开人员', asOf: null));
+    return (project: project, item: item, inquiry: inquiry, quote: quote);
+  }
+
+  test('withdrawAward clears award fields but retains the awarded budget snapshot', () {
+    final f = quoteFixture();
+    final before = store.get('project_item', f.item)!.data;
+    expect(before['unit_cost'], '0');
+    store.award(f.quote, itemId: f.item, dealPrice: '18');
+    expect(store.get('project_item', f.item)!.data['unit_cost'], '18');
+    store.withdrawAward(f.quote);
+    expect(store.get('quotation', f.quote)!.data['deal_price'], isNull);
+    expect(store.get('quotation', f.quote)!.data['awarded_on'], isNull);
+    expect(store.get('project_item', f.item)!.data['unit_cost'], '18');
+    expect(store.get('project_item', f.item)!.data['quotation_id'], f.quote);
+  });
+
+  test('Store permits deleting a quoted contact; generic tool must refuse it', () async {
+    final f = quoteFixture();
+    final contact = store.save('contact', {
+      for (final field in Contact.fields) field: null,
+      'supplier_id': supplierId, 'name': '公开联系人', 'phone': '000000',
+    });
+    store.save('quotation', {...store.get('quotation', f.quote)!.data,
+      'contact_id': contact,
+      'contact_snapshot': {'name': '公开联系人', 'phone': '000000',
+        'wechat': null, 'email': null},
+    }, id: f.quote);
+    expect(store.referencesTo('contact', contact), {'quotation.contact_id': 1});
+    store.transaction(() {
+      store.delete('contact', contact);
+      expect(store.get('contact', contact)!.deleted, isTrue);
+      store.restore('contact', contact);
+    });
+    final version = store.get('contact', contact)!.version;
+    final result = await approved(await request('delete_record', {
+      'type': 'contact', 'id': contact, 'expected_version': version,
+      'referencing_records': [
+        {'type': 'quotation', 'id': f.quote,
+         'version': store.get('quotation', f.quote)!.version},
+      ],
+    }, selected: await selection([contact, f.quote])));
+    expect(result.status, ToolCallStatus.failed);
+    expect(store.get('contact', contact)!.deleted, isFalse);
+    expect(store.get('quotation', f.quote)!.data['contact_id'], contact);
+  });
+
+  test('quotation metadata patch retains all price and award fields', () async {
+    final f = quoteFixture();
+    store.award(f.quote, dealPrice: '18');
+    final before = store.get('quotation', f.quote)!;
+    final result = await approved(await request('update_record', {
+      'type': 'quotation', 'id': f.quote, 'expected_version': before.version,
+      'values': {'notes': '人工核对', 'lead_time_days': 3},
+    }, selected: await selection([f.quote])));
+    expect(result.status, ToolCallStatus.succeeded);
+    final after = store.get('quotation', f.quote)!;
+    expect(after.data['notes'], '人工核对');
+    expect(after.data['lead_time_days'], 3);
+    for (final key in before.data.keys.where((k) => k != 'notes' && k != 'lead_time_days')) {
+      expect(after.data[key], before.data[key], reason: key);
+    }
+  });
+
+  test('delete preview refuses omitted or stale referring records', () async {
+    final f = quoteFixture();
+    final result = await approved(await request('delete_record', {
+      'type': 'supplier', 'id': supplierId, 'expected_version': 1,
+      'referencing_records': <Object?>[],
+    }));
+    expect(result.status, ToolCallStatus.failed);
+    expect(store.get('supplier', supplierId)!.deleted, isFalse);
+    expect(store.get('quotation', f.quote), isNotNull);
+  });
+
+  testWidgets('hosted settings offer no Folio assistant permission selector', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: Scaffold(body: SingleChildScrollView(
+      child: AiSettings(state: host.inquiry!.runtime.state),
+    ))));
+    await tester.pumpAndSettle();
+    expect(find.byType(DropdownButton<AssistantPermission>), findsNothing);
+    expect(find.text('助手操作权限'), findsNothing);
+    expect(find.text('助手联网查询'), findsNothing);
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('hosted Folio has no sidebar, palette or shortcut assistant route', (tester) async {
-    await tester.view.reset();
     tester.view.physicalSize = const Size(1400, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
