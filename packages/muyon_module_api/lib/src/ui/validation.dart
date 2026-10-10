@@ -253,6 +253,16 @@ List<String> validateUiNode(
       reject('incompatible_event_action:${node.id}:${entry.key}');
       continue;
     }
+    // All event routes share the view/draft boundary, including a business
+    // button whose state key is not displayed or locally editable.
+    if (usesTypedEdits(catalog) &&
+        binding.inputRefs.any(
+          (ref) =>
+              (snapshot.editSpecs[ref]?.view ?? false) &&
+              (snapshot.actionContext?.draft.containsKey(ref) ?? false),
+        )) {
+      reject('view_business_input');
+    }
     if (action.route == UiActionRoute.local) {
       if (action.localAction == null) reject('local_action_missing');
       if (binding.operationKeyRef != null ||
