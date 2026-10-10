@@ -19,8 +19,13 @@ import 'research_services.dart';
 import 'module_tools.dart';
 import 'module_declarations.dart';
 import 'reader/reader_page.dart';
+import 'search/document_search_source.dart';
 
 class ResearchModule implements BusinessModuleV2 {
+  ResearchModule({ResearchRuntime? Function()? currentRuntime})
+    : _documentSource = ResearchDocumentSearchSource(
+        currentRuntime: currentRuntime ?? (() => null));
+  final SearchSource _documentSource;
   @override
   ModuleManifest get manifest => ModuleManifest(
     id: 'research', apiVersion: 2, displayName: '科研工作台',
@@ -75,7 +80,7 @@ CREATE TABLE change_log(sequence INTEGER PRIMARY KEY AUTOINCREMENT, project_id T
   @override
   List<AuxiliarySchema> get auxiliarySchemas => const [];
   @override
-  List<SearchSource> get searchSources => const []; // REG-3b preserves host search.
+  List<SearchSource> get searchSources => [_documentSource];
   @override
   List<ModuleSection> get sections => [ModuleSection(
     id: 'research', label: '科研工作台', requiresWorkspace: true, order: 1,

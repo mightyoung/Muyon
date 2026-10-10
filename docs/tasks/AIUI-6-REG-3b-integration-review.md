@@ -1,0 +1,34 @@
+# AIUI-6 / REG-3b 独立集成审查
+
+本批基于 develop `a68ba43d0c8c1b64c632e4b4b30cca9a2b208956`，依次正常 merge AIUI-6 与 REG-3b；唯一 develop 合入执行者负责推进。原 AIUI-36–39 逐条证据继续保留，本文件不替代它。
+
+| 候选 | 冻结完整 SHA | 独立动态证据 |
+|---|---|---|
+| AIUI-6，PR #40 | `650f51a381d6891d16199bf435fe2ef1ed97cd6c` | [source CI](https://github.com/mightyoung/Muyon/actions/runs/38055358701)、[PR CI](https://github.com/mightyoung/Muyon/actions/runs/38055362309) 均 SUCCESS；host 1571 pass / 3 skip，8 analyze / 8 suites、doctor 23、Laya 29、coverage OK |
+| REG-3b，PR #41 | `2fbdd6952727756574200cc5d9bd181b5a67097a` | [source CI](https://github.com/mightyoung/Muyon/actions/runs/38055913908)、[PR CI](https://github.com/mightyoung/Muyon/actions/runs/38055916500) 均 SUCCESS；host 1555 pass / 3 skip，8 analyze / 8 suites、doctor 23、Laya 29、coverage OK |
+
+两项最终源码均有强模型非作者静态复审，AIUI-6 的 15 个自有测试与 REG-3b 的 13 个自有测试原样保留。REG-3b 前一版 `c067a6e3f76ccde11864337ffdab919393c09416` 的 CI 曾因新增测试错误重复绑定 workspace 失败；最终 2fb 仅修正自有夹具为合法创建并首次绑定另一 workspace，验证真实 authority 变化，不修改生产校验、旧测试或门禁。
+
+代码组合 `f8c50517d370946b99645b9861bc01cdf999e918` 经独立非作者逐项复核：两项增量分别 6 / 10 文件，路径无交集，全部 blob 与各原 source 相同，无额外产品改动。既有 AIUI-4c/9、ModuleHost、UI core、保护测试、CI、coverage baseline 均未改变。AIUI-6 的独立 Inquiry resolver 不调用 REG-3b knowledge hook；REG-3b 注册 research search source 及 runtime provider，并迁移 bootstrap 的 research.document 校验分支，其他模块 hook 保留。
+
+独立 leaf coverage 审计亲读上述实际 source/PR 日志及摘要：AIUI-6 406、REG-3b 403 个 loaded source hash，8 库库存、全部 DA/unhit、43 个严格 gate 文件均复算通过。source 与各 PR synthetic 的代码及归一化覆盖数据一致。baseline SHA256 保持 `a43a0290cd45e638f0b354095bf4978de43b5aea8a9ac4ae99f3280e0174c17b`，19 个未加载文件仍为未知分母；严格自动 gate 仅 API/models/transfer，不能写成全库自动逐文件 gate。
+
+REG-3b 的旧 `index_invalidation.dart` 源码和 DA 集未变，但 8 个旧命中行（8、13、14、15、16、18、19、20）不再命中；bootstrap 的旧 301 → 新 308 `research: () => host.research` 也失去命中。独立强审逐行映射确认均为旧 research.document any(id) hook 被注册 source 校验替代后的路径迁移，未见其他未解释的旧命中丢失，不能声称所有旧命中均保留。其他模块 hook 静态保留，当前 suite 不代表其覆盖增加。修改源码的覆盖比较需映射 diff 行号，不能把行号移动记为真实覆盖丢失。
+
+组合 [CI 38057267224](https://github.com/mightyoung/Muyon/actions/runs/38057267224) 对精确 f8c 已于 2026-10-10 14:07:42 UTC 终态 SUCCESS；亲读实际日志确认 8/8 analyze、8/8 suites：API198、UI373/152skip、prototype39/1skip、research220、supplier498/4skip、host1613/3skip、preview15、inquiry289/47skip，doctor23、Laya29、coverage OK。
+
+组合独立全8库覆盖审计亲读实际409 loaded source blob hash、全部DA/unhit及库存、43gate并复算通过，19unknown原集合保留。API2093/2203、research4682/5500、host16886/19539；其他5库同b41。5个修改源码及4个新增源码的完整records与已审叶源相同；400个源码未变records中，396完全同，其余为已解释的index旧8命中减少、knowledge新增8命中、optional_capabilities新增2命中、ontology adapter新增1命中。5个修改源码逐行映射仅bootstrap旧301→新308失去命中，同旧hook迁移；未发现额外loss/swap，不重置baseline或抬降floor。完整审计仅存/tmp，不提交原始日志。
+
+前一 develop a68 的独立 [发布 CI 38056891075](https://github.com/mightyoung/Muyon/actions/runs/38056891075) 已 SUCCESS；publisher 親核全部8套与 host1585/3。独立复算405 loaded源码哈希、库存和DA对b41相同，只有 transfer_service 1203异常处理既有行新增1命中（host16708/19349、transfer828/882），未降低原floor827，无旧命中丢失，19unknown保持。此测量不等同新f8。
+
+Leader A 原文冻结 `4702ee5248cfdb3120225d3f71f8778de447e7c3`，只有36行新增文档，非作者范围复核通过。其 c265 时点的“AIUI-8/9未合”及Mac字体根因推断按历史保留，不采为当前完成/确诊结论。现状/账本/条件计划候选 `3bfdbbdcd8d17d32f8c7296ae97cc4ecb761e6d2` 已获非作者精确文档复审，最终集成仅更新当前证据；默认值和任何凭据、构建、设备安装或分发均未改变。
+
+执行边界：用户另行删除已合远端分支；本批未重建旧分支、不prune或删除本地工作。待清理两条指定分支为review/aiui6-reg3b-integration-20261010和review/leader-a-status-20261010；前者文档组合已推进至df74，后者固定4702。用户明确授权仅在各自全部提交进入develop、发布门禁通过且无活跃续写后删除；保留此commit与CI/审查链接供恢复，不扩大到任务分支。命令行Git/gh当前访问失败，现有连接器仍能读取精确develop指针；若用连接器正常FF，须先核最终树与受测f8除docs及实际formatter输出的bootstrap纯格式外相同，最终新SHA须另跑全8套CI、保留f8及Leader A4702祖先，再以expected_sha=a68、force=false推进，并亲查最终publisher终态。连接器读回不得写作git ls-remote成功。
+
+边界：AIUI-6 只提供单个已保存 Inquiry 对象的有界只读快照，不代表报价聚合、预算总额、导入预览或对话壳已接线。REG-3b 验证真实研究文件、版本与宿主权限竞态及公开 knowledge.search 拒绝旧证据，保留 raw KnowledgeService.search 的既有缓存语义；不代表旧 QA hash 校验已全部迁移或 REST/Exchange/剩余写工具已完成。默认开关、真实模型、Android 和全场景验收均另设门槛。
+
+文档组合 `df74bc553b7dbde5693b2f2f36b4134593b133e8` 的 [CI 38058736679](https://github.com/mightyoung/Muyon/actions/runs/38058736679) 于2026-10-10 14:29:23 UTC终态SUCCESS；8/8 analyze和8/8 suites均通过。独立复核实际summary/DA与f8仅source/run元数据不同，409个loaded源码记录、全部DA/unhit及43gate保持，19unknown不作零覆盖。该绿色结果只证明原只读快照/REG-3b和文档组合，不证明后续生产卡片接线、开关持久化或Android integration test已交付。
+
+本轮bootstrap格式输出来自隔离工具提交 `962cf81bd05ba05de49e73f370f1298571068529` 的 [CI 38060427739](https://github.com/mightyoung/Muyon/actions/runs/38060427739)（SUCCESS），采用既有CI的Flutter3.47.5 / Dart3.13.4并先执行同样的flutter pub get，原flutter_lints include解析警告消除。输入SHA256 `a60b924682ccd8320e7763c3cf4ea371ec20484df03913ea71ad1c3b3ac5be31`，输出 `16a909b580ad4d5f75d5faba8afe32722f7a52317f82dba23650e48f3174d55c`；与首次未解析依赖时的格式输出一致。临时workflow不进入本批产品树，无应用打包、安装或部署。
+
+收口检查点 `3a78f3d852a081f4b2c624a5da3847f80158092c` 的 [CI 38060575001](https://github.com/mightyoung/Muyon/actions/runs/38060575001) 于2026-10-10 14:56:56 UTC终态SUCCESS；8/8 analyze、8/8 suites、host1613/3、doctor23、Laya29通过。独立复算409源码hash、全部8库DA/库存、43gate及19unknown；除bootstrap外408记录完整相同。bootstrap旧221DA/214hit按相同表达式映射为新226DA/219hit，host16891/19544，增加5个覆盖行仅格式拆行，无新增行为丢失或交换。已接受的原科研hook迁移9旧命中差异仍保留。用户随后更正默认开启前置，本文档后续提交必须独审及新精确SHA完整CI，不把3a绿色当新计划通过；产品源码保持3a原样。

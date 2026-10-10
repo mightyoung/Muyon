@@ -13,6 +13,8 @@ import '../platform/foundation_repository.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/model_gateway.dart';
 import 'draft_view.dart';
+import 'ui_stream_task_view.dart';
+import 'ui_planning_preference_switch.dart';
 import '../platform/assistant_subconversations.dart';
 import 'assistant_subconversation_panel.dart';
 import 'dynamic_workspace.dart';
@@ -534,7 +536,7 @@ class _AssistantPageState extends State<AssistantPage> {
         ? <PersonalTask>[]
         : widget.repo.tasks(conversationId: _conversationId);
     final taskCards = [
-      ...tasks.take(8),
+      ...tasks.where((task) => task.payload['uiPlanningInternal'] != true).take(8),
       if (!_child)
         for (final task in tasks.skip(8))
           if (_children.children(task.id).isNotEmpty) task,
@@ -597,17 +599,7 @@ class _AssistantPageState extends State<AssistantPage> {
                               setState(() => _conversationId = id),
                         ),
                       if (!_child)
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('回答后规划交互页面'),
-                          subtitle: const Text('失败保留文字；模型外发仍需既有授权'),
-                          value: widget.agent.uiPlanningEnabled,
-                          onChanged: (value) => setState(
-                            () => widget.agent.configureUiPlanning(
-                              enabled: value,
-                            ),
-                          ),
-                        ),
+                        UiPlanningPreferenceSwitch(agent: widget.agent),
                       if (!_child && widget.agent.uiPlanningEnabled)
                         DropdownButton<UiPlanningMode>(
                           value: widget.agent.currentUiPlanningMode,
@@ -711,6 +703,7 @@ class _AssistantPageState extends State<AssistantPage> {
                               const SizedBox(height: 8),
                               DraftView(draft: _drafts[task.id]!),
                             ],
+                            if (!_child) UiStreamTaskView(agent: widget.agent, taskId: task.id, host: widget.host),
                             if (!_child) _subconversationEntries(task),
                             Wrap(
                               spacing: 8,
@@ -723,11 +716,10 @@ class _AssistantPageState extends State<AssistantPage> {
                                     child: const Text('子对话'),
                                   ),
                                 if (!_child &&
-                                    widget.agent.uiPlanningEnabled &&
                                     task.state == PersonalTaskState.succeeded)
                                   TextButton(
                                     onPressed: () async {
-                                      await widget.agent.planUi(task.id);
+                                      await widget.agent.planUiFromUserControl(task.id);
                                       _refresh();
                                     },
                                     child: const Text('规划此回答'),

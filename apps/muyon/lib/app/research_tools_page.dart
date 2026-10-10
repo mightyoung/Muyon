@@ -61,10 +61,16 @@ class _ResearchToolsPageState extends State<ResearchToolsPage> {
 
   Future<void> _load() async {
     try {
-      final service = ResearchSearchAdapter(
+      final service = ResearchSearchAdapter.registered(
         widget.host.services.knowledge,
         widget.host.workspaces,
         widget.host.research!.store,
+        sources: () => widget.host.registry.modules
+            .whereType<BusinessModuleV2>()
+            .where((module) => module.manifest.id == 'research')
+            .expand((module) => module.searchSources).toList(),
+        authorityRevision: () =>
+            widget.host.modules.scopeAuthorityRevision('research'),
       );
       final assistant = QaService(
         gateway: widget.host.services.gateway,

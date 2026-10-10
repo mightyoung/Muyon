@@ -3,6 +3,7 @@ import 'package:muyon_module_api/ui_contract.dart';
 
 import 'personal_agent.dart';
 import '../platform/foundation_repository.dart';
+import '../platform/grants/host_authorization_facts.dart';
 
 class UiBusinessAction {
   const UiBusinessAction(this.toolId, this.parameters);
@@ -17,6 +18,7 @@ class UiPlanningEventRouter {
     required this.surface,
     this.businessActions = const {},
   }) {
+    surface.attachExternalContentProbe(() => agent.repository.authorizationFacts.readTask(taskId).requiresConfirmation);
     agent.repository.addListener(reconcile);
   }
   final PersonalAgent agent;
@@ -50,6 +52,11 @@ class UiPlanningEventRouter {
           agent.tools.inspect(action.toolId)?.available != true) {
         throw StateError('business_port_unavailable');
       }
+      final authority = agent.repository.authorizationFacts.readTask(task.id);
+      if (authority.taintState == HostTaintState.unknown ||
+          authority.requiresConfirmation != pending.externalContent) {
+        throw StateError('ui_action_provenance_changed_or_unknown');
+      }
       _pending[event.eventId] = pending;
       final child = await agent.startTool(
         conversationId: task.conversationId,
@@ -82,6 +89,7 @@ class UiPlanningEventRouter {
   }
 
   void reconcile() {
+    surface.refreshExternalContent();
     if (_disposed) return;
     for (final entry in tasks.entries) {
       final task = agent.repository.task(entry.value);
