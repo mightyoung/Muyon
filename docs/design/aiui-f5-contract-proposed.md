@@ -1,6 +1,6 @@
 # AIUI F5 最小技术决策包（proposed / 未采纳）
 
-状态：**proposed / 未采纳**。本文件是对旧草稿 [aiui-binding-adapter-contract.md](aiui-binding-adapter-contract.md)（保留不改）的收敛，供父任务决定是否采纳。不修改正式 schema、runtime、目录、存储或 `aiui-stream/1`；没有实现任何生产代码。本文所有「拟新增」都是尚不存在的东西，不得当作现有接口引用。
+历史状态：**proposed / 未采纳**（保留）。父任务于2026-10-10技术采纳修订接口方向，见 [leader decision](../tasks/AIUI-5-leader-contract-decision.md)；这是实现契约采纳，运行验收/生产启用仍未批准。本文件是对旧草稿 [aiui-binding-adapter-contract.md](aiui-binding-adapter-contract.md)（保留不改）的收敛，供父任务决定是否采纳。不修改正式 schema、runtime、目录、存储或 `aiui-stream/1`；没有实现任何生产代码。本文所有「拟新增」都是尚不存在的东西，不得当作现有接口引用。
 
 基线：`git rev-parse HEAD` = `origin/develop` = `cf672164e4f6c3e7beea8029c8be735e33c3bf19`（委派时记录的 `b8a9a523` 已被 PR #15 合并推进，本次按新值核对）。分支 `task/aiui-f5-contract-close`，工作区开工时干净。基线树无 AGENTS.md / CLAUDE.md / 仓库 skills，已自行核查。
 

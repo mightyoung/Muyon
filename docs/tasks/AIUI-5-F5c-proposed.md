@@ -1,6 +1,6 @@
 # AIUI-5 F5c 任务书：共享规划 / 重算 / workspace 集成（proposed / 未采纳）
 
-状态：**proposed / 未采纳**。前置：F5b 已合入且父任务已另行授权。基线 `cf672164e4f6c3e7beea8029c8be735e33c3bf19`；开工重取 SHA。分支建议 `task/aiui-5-f5c-integration`。依据 [aiui-f5-contract-proposed.md](../design/aiui-f5-contract-proposed.md) §4、§5。
+历史状态：**proposed / 未采纳**（保留）。父任务于2026-10-10技术采纳修订接口方向，范围/新基线见 [leader decision](AIUI-5-leader-contract-decision.md)；未授予本F5c实现授权。前置：F5b 已合入且父任务已另行授权。基线 `cf672164e4f6c3e7beea8029c8be735e33c3bf19`；开工重取 SHA。分支建议 `task/aiui-5-f5c-integration`。依据 [aiui-f5-contract-proposed.md](../design/aiui-f5-contract-proposed.md) §4、§5。
 
 ## 1. 范围
 原子 S/I/P 发布与重算、workspace 不可读/只读策略、stream 规划 provider、行详情宿主接线 patch。调用 F3a `UiFormulaRegistry.evaluate`（已合入，纯计算），不改它。不含 Dream/foundation、`agent_resume`/`tool_registry`、`supplier_core` LAN；AIUI-4 旧恢复测试只读复跑不拥有。不调用付费模型/部署。
@@ -19,7 +19,9 @@
 **H3 最终 admission（design §3.5）**：patch 由 F5c 提供、AIUI-4 owner 应用，沿用 `ui_navigation_anchors.dart:67–81` 既有流程，不新建导航栈。入口冻结 `UiNavigationToken`（surface/plan revision、snapshot ref、scope、host/source/permission generation、object revision/digest）；`await _checkpoint` 返回后、`await openModuleObjectPage` 取得 page/lease 后各用同步 `UiNavigationProbe` 重核；final check 与 `Navigator.push` 之间不得再 await；失败零 push，已取得 lease 则 dispose（`finally` 的 `opened?.dispose()`），未取得不虚报；`mounted/canPresent` 仅附加。测试用 `collection-stable-row.json` 的 `revoked-during-checkpoint-await`（push 0、leaseDispose 0）与 `revoked-during-page-lease-await`（push 0、leaseDispose 1），零 tool。PR18 owner 需同步该契约，本任务不改 PR18。
 
 ## 3. 切片
-1. 先交 `UiRecomputePort` 接口切片给 F3b；宿主 adapter 由 F3b实现：依赖键 = 含该 uiState 的 `UiFormulaDefinition.slots`；公式状态依赖限 `UiStringEdit`；`S8_in` 全量 `currentUiState`。
+1. 先交 `UiRecomputePort` 接口切片给 F3b；宿主 adapter 由 F3b 实现：候选 plan 全部显示 computed 实例（含 collection cell）都以冻结 `currentUiState` 真实重算，不按被编辑 key 筛掉实例、不重标旧结果；`S8_in` 与 published snapshot 的 `initialUiState` 保宿主 extracted，人工值只经独立 `currentUiState` 传 evaluate；公式状态依赖须 `UiStringEdit` 且 `view == false`。
+dispatch 内部 admission 必须检查 `readOnly`、`recomputing`、pending，不能只禁按钮：readOnly 禁状态改变及所有外发/导航；recomputing 禁 business confirm/submit（合法参数编辑仍可令旧批次失效并触发 latest-wins）；同节点 pending 禁新的 confirm/submit 与已在途取消，保既有操作锁/回执结算。拒绝必须零状态变化/零 sink/tool。直接调用 dispatch、旧回调与键盘/语义输入均受同一规则。F5b 先建立 readOnly guard，F5c 在所有权移交后加 recomputing/pending 整合。
+
 2. `publish`：token 复核（snapshot ref、draftRevision、host/source/permission generation、scope）、`validateUiPlan(P12,S8,I8,catalog)`、同步 rebase、状态表（ready/unavailable/invalid/stale）、新 operation key、pending 不重放。
 3. workspace：`UiWorkspaceUnreadable`、`open` 捕获→只读+原因、override 不满足当前 spec→只读、`schemaVersion: 2` 与 `selections` 加性字段；不迁移。
 4. planning：stream v2 provider 复用既有 harness/gateway/预算，预览零动作，坏流走可信模板；提示由实际 `request.catalog` 序列化。
