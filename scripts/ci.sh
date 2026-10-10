@@ -28,6 +28,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 COVERAGE_DIR="$ROOT/.coverage-run"
 mkdir -p "$COVERAGE_DIR"
+rm -f "$COVERAGE_DIR/summary.json"
 printf '[]\n' > "$COVERAGE_DIR/suite-summary.json"
 status=0
 cd "$ROOT" || exit 1
@@ -120,10 +121,7 @@ PY_SUMMARY
   fi
 done
 
-coverage_args=(--reports "$COVERAGE_DIR" --output "$COVERAGE_DIR/summary.json")
-if [[ -f "$ROOT/scripts/coverage/baseline.json" ]]; then
-  coverage_args+=(--baseline "$ROOT/scripts/coverage/baseline.json")
-fi
+coverage_args=(--reports "$COVERAGE_DIR" --output "$COVERAGE_DIR/summary.json" --baseline "$ROOT/scripts/coverage/baseline.json")
 if ! python3 "$ROOT/scripts/coverage/test_check.py"; then
   status=1; failed+=("coverage:fixtures")
 fi

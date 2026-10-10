@@ -33,3 +33,33 @@ Baseline commit and final commit/run IDs, numbers and unknowns are recorded afte
 | model directory availability | host `ocr_real_model_test.dart:96` |
 
 Counts by reason are unknown from compact runner summaries; declared conditions do not prove which skips occurred. Loaded DA records count independently of these categories. A golden declaration does not imply that the package's UI behavior tests are skipped.
+
+## Actual frozen baseline
+
+- Source SHA: `633858b21ef1afcf8d5cfe6d0839f662f97b0b0a`. Measurement v1, checker SHA256 `687d1ecad4f92fd54946709df52646b5aaed31390feca6ec72a1dcb21ffc3348`.
+- Exact-source push CI: [38022790820](https://github.com/mightyoung/Muyon/actions/runs/38022790820), **success**; `CI SUMMARY: OK (analyze 8/8, test 8/8 suites)`.
+- Independent PR CI: [38022794286](https://github.com/mightyoung/Muyon/actions/runs/38022794286), **success**, measured merge SHA `2c614f29f3fd78d972d3a5080fe6e50af6f02532`; package data and gate denominator/hit data are identical to the push measurement.
+- Machine baseline: `scripts/coverage/baseline.json`, with run ID and eight runner outcomes. Reports are unioned across the eight suites by source and executable line.
+
+| Package | Hit / loaded executable | Loaded % | Unloaded source files |
+|---|---:|---:|---:|
+| packages/muyon_module_api | 1298 / 1389 | 93.4485 | 2 |
+| packages/muyon_ui | 2471 / 2647 | 93.351 | 3 |
+| packages/prototype_module | 677 / 768 | 88.151 | 1 |
+| packages/research_module | 4586 / 5397 | 84.9731 | 1 |
+| packages/supplier_core | 9548 / 10280 | 92.8794 | 3 |
+| packages/inquiry_module | 9241 / 11977 | 77.1562 | 2 |
+| apps/muyon | 15932 / 18555 | 85.8636 | 4 |
+| apps/muyon_ui_preview | 475 / 527 | 90.1328 | 3 |
+
+All eight whole-package percentages and all unloaded executable denominators are **unknown**. The 19 unloaded source files are named in baseline JSON; they are not automatically called untested executable code. API has two unloaded sources, so its gate covers the measured executable subset plus inventory drift, not all possible API executable code.
+
+| Gate scope | Hit / loaded executable | Loaded / inventory files |
+|---|---:|---:|
+| packages/muyon_module_api/lib/ | 1298 / 1389 | 26 / 28 |
+| apps/muyon/lib/services/models/ | 751 / 778 | 10 / 10 |
+| apps/muyon/lib/services/transfer/ | 827 / 882 | 3 / 3 |
+
+No fixed 80% target is used. Gates require identical per-file denominator fingerprints and source inventory, and no per-file or scope hit decrease. Other scopes are observational. Skips measured per suite: API 0, UI 152, prototype 1, research 0, supplier 4, host 3, preview 0, inquiry 47; reason-level counts remain unknown.
+
+Self-review: allowed scope only (CI, checker/fixtures, ignore scratch outputs, task/evidence document, baseline); no business Dart, AIUI core, pubspec or analysis_options edits. Failure fixtures assert behavior and do not change package tests. No model calls or secrets were added. Script tests are fixtures, and the baseline numbers above come from actual Actions. No merge, force-push, branch deletion, deployment or paid service. Parent review and integrated-SHA measurement are required before merge.
