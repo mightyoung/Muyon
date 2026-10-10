@@ -88,6 +88,15 @@ class _Context implements ModuleToolContext {
   Future<T> runtime<T extends ModuleRuntime>() => throw StateError('no business runtime');
 }
 
+class _NoHttp extends HttpOverrides {
+  int attempts = 0;
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    attempts++;
+    throw StateError('Metadata must not open HTTP clients');
+  }
+}
+
 class _Counters { int prepare = 0, enumerate = 0, resolve = 0, knowledge = 0; }
 class _Source implements ScopeSource {
   _Source(this.source, this.counts);
@@ -223,6 +232,27 @@ void main() {
       throwsA(isA<ToolPlatformException>().having((e) => e.code, 'code', 'host_unavailable')));
     expect(fallbackCalls, 0); expect(module.activations, 0);
     expect(changes(audit.raw), before); expect(intentStatus(), 'pending');
+  });
+
+  test('metadata scope and dispatch leave module storage transfer and network untouched', () async {
+    final network = _NoHttp();
+    final transfer = host.services.transfer;
+    final before = changes(transfer.database.raw);
+    final state = snapshot(transfer.database.raw);
+    expect(host.storage.connectionIfOpen('notes'), isNull);
+    await HttpOverrides.runWithHttpOverrides(() async {
+      for (final id in _ids) {
+        await registry.prepare(request(id, 'storage-prepare-$id'));
+        expect((await registry.invoke(request(id, 'storage-invoke-$id'))).status,
+          ToolCallStatus.succeeded);
+      }
+    }, network);
+    expect(host.storage.connectionIfOpen('notes'), isNull);
+    expect(changes(transfer.database.raw), before);
+    expect(snapshot(transfer.database.raw), state);
+    expect(transfer.listening, isFalse); expect(transfer.peers, isEmpty);
+    expect(network.attempts, 0); expect(module.activations, 0);
+    expect(fallbackCalls, 0); expect(intentStatus(), 'pending');
   });
 
   test('normal business fallback still completes existing receipt without committing again', () async {
