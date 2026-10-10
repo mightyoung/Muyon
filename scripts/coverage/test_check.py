@@ -59,9 +59,9 @@ class CoverageContract(unittest.TestCase):
             reports = root / 'reports'
             for i, suite in enumerate(checker.SUITES):
                 (reports / suite).mkdir(parents=True)
-                package = checker.PACKAGES[i]
+                package = checker.WORKING_DIRS[suite]
                 (reports / suite / 'lcov.info').write_text(
-                    f'SF:{root / package / "lib/a.dart"}\nDA:1,1\nDA:3,0\nend_of_record\n'
+                    f'SF:lib/a.dart\nDA:1,1\nDA:3,0\nend_of_record\n'
                     f'SF:{root / checker.PACKAGES[0] / "lib/a.dart"}\nDA:3,1\nend_of_record\n')
             # Measure provenance without requiring a git repository fixture.
             from unittest.mock import patch

@@ -13,6 +13,8 @@ PACKAGES = ['packages/muyon_module_api', 'packages/muyon_ui',
             'apps/muyon', 'apps/muyon_ui_preview']
 SUITES = ['module_api', 'muyon_ui', 'prototype', 'research',
           'supplier_core', 'host', 'ui_preview', 'inquiry']
+WORKING_DIRS = dict(zip(SUITES, [*PACKAGES[:5], 'apps/muyon',
+                               'apps/muyon_ui_preview', 'apps/muyon']))
 GATE_PREFIXES = ['packages/muyon_module_api/lib/',
                  'apps/muyon/lib/services/models/',
                  'apps/muyon/lib/services/transfer/']
@@ -30,7 +32,7 @@ def measure(root, reports):
             if text.startswith('SF:'):
                 source = Path(text[3:])
                 # Flutter resolves SF relative to the test command working directory.
-                working = 'apps/muyon' if suite == 'inquiry' else PACKAGES[SUITES.index(suite)]
+                working = WORKING_DIRS[suite]
                 source = source if source.is_absolute() else root / working / source
                 try:
                     current = source.resolve().relative_to(root.resolve()).as_posix()
@@ -38,6 +40,8 @@ def measure(root, reports):
                     current = None  # dependencies outside repository, explicitly excluded
                 if current and not any(current.startswith(p + '/lib/') for p in PACKAGES):
                     current = None
+                if current and not (root / current).is_file():
+                    raise ValueError(f'LCOV source is missing: {current}')
             elif text.startswith('DA:') and current:
                 fields = text[3:].split(',')
                 number, hits = int(fields[0]), int(fields[1])
