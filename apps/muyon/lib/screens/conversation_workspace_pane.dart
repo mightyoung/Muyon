@@ -389,6 +389,7 @@ class _ConversationWorkspaceBodyState extends State<ConversationWorkspaceBody> {
               TextButton(onPressed: () async { try { await c.adoptExtracted(entry.key); } catch (_) { changed(); } }, child: const Text('采用提取值')),
             ]),
         ],
+        if (!widget.textOnly) UiDraftRecoveryActions(controller: c),
         for (final e in c.recoveredOperations.entries) Text('回执 ${e.key}: ${e.value.name} · 未自动重放'),
         Text('继续步骤：${c.step}'),
         if (c.selectedRecords.isNotEmpty) Text('选中记录：${c.selectedRecords.join(', ')}'),

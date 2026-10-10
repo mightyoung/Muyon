@@ -58,6 +58,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
   UiWorkspaceController? controller;
   UiPlanningEventRouter? router;
   StoredUiWorkspace? stored;
+  Map<String, Object?>? unreadableDraft;
   String? error;
   bool ready = false;
   bool _disposed = false;
@@ -126,17 +127,21 @@ class DynamicWorkspaceSession extends ChangeNotifier {
       final scope = store.scopeKey;
       if (scope == null) throw StateError('Task not available');
       if (widget.plan == null) {
-        stored = await store.load(widget.surfaceId);
+        try {
+          stored = await store.load(widget.surfaceId);
+        } on UiWorkspaceUnreadable catch (failure) {
+          unreadableDraft = UiWorkspaceController.readUnreadableDraft(
+            failure, taskId: widget.taskId, surfaceId: widget.surfaceId,
+            scopeKey: scope,
+          );
+          error = failure.reason;
+        }
         for (final ref in stored?.operationRefs ?? <String>[]) {
           receipts[ref] = await receipt(ref);
         }
       } else {
         if (widget.plan!.plan.surfaceId != widget.surfaceId) {
           throw StateError('Surface identity changed');
-        }
-        stored = await store.load(widget.surfaceId);
-        if (stored != null && stored!.snapshotRef != widget.plan!.snapshot.ref) {
-          error = '数据版本已变化，人工覆盖仍保留；请核对提取建议。';
         }
         final c = await UiWorkspaceController.open(
           store: store,
@@ -398,6 +403,8 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
                       for (final e in receipts.entries)
                         Text('回执 ${e.key}: ${e.value.name}'),
                     ],
+                    for (final e in (session.unreadableDraft ?? {}).entries)
+                      SelectableText('${e.key}: ${e.value}'),
                     SelectableText(widget.originalAnswer),
                   ],
                 ),

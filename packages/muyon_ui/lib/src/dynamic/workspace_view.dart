@@ -5,6 +5,41 @@ import 'dart:async';
 import 'workspace.dart';
 import 'surface.dart';
 
+/// Explicit actions on isolated values; recovery never invokes a business port.
+class UiDraftRecoveryActions extends StatelessWidget {
+  const UiDraftRecoveryActions({super.key, required this.controller});
+  final UiWorkspaceController controller;
+
+  Future<void> resolve(String key, bool discard) async {
+    try {
+      await controller.resolveDraft(key, discard: discard);
+    } catch (_) {
+      // The controller preserves the draft and exposes the error in the view.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      for (final entry in controller.quarantinedDraft.entries)
+        Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
+          SelectableText('隔离 ${entry.key}: ${entry.value}'),
+          TextButton(
+            onPressed: controller.canResolveDraft
+                ? () => resolve(entry.key, false) : null,
+            child: Text('恢复 ${entry.key}'),
+          ),
+          TextButton(
+            onPressed: controller.canResolveDraft
+                ? () => resolve(entry.key, true) : null,
+            child: Text('丢弃 ${entry.key}（采用当前提取值）'),
+          ),
+        ]),
+    ],
+  );
+}
+
 /// Same view for native storage and public browser fixtures. The caller owns
 /// controller lifetime; back waits for the durable checkpoint.
 class UiWorkspaceView extends StatefulWidget {
@@ -138,6 +173,7 @@ class _UiWorkspaceViewState extends State<UiWorkspaceView> {
                     ],
                   ),
               ],
+              UiDraftRecoveryActions(controller: c),
               for (final e in c.recoveredOperations.entries)
                 Text('回执 ${e.key}: ${e.value.name} · 未自动重放'),
               Text('继续步骤：${c.step}'),

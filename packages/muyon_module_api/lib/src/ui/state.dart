@@ -398,6 +398,24 @@ class UiSessionState {
     draftRevision++;
   }
 
+  /// Explicit local recovery only; never dispatches an event or business port.
+  /// Rejected recovery leaves the quarantined value untouched.
+  bool resolveReadableDraft(String field, {required bool discard}) {
+    if (!_readableDraft.containsKey(field)) return false;
+    if (discard) {
+      _readableDraft.remove(field);
+      _unreadableReasons.remove(field);
+      _mutationClock.advance();
+      if (!(snapshot.editSpecs[field]?.view ?? false)) draftRevision++;
+      return true;
+    }
+    final value = _readableDraft[field];
+    final spec = snapshot.editSpecs[field] ?? const UiStringEdit();
+    return spec.view
+        ? _selectViewCore(field, value)
+        : _editCore(field, value);
+  }
+
   void updateSourceDigest(String artifactId, String digest) {
     _mutationClock.advance();
     _digests[artifactId] = digest;

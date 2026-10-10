@@ -25,6 +25,10 @@ class UiWorkspaceController extends ChangeNotifier {
   int _revision = 0;
   bool _disposed = false;
   bool readOnly = false;
+  bool _compatibleRecovery = false;
+  bool _recovering = false;
+  bool get canResolveDraft => !_disposed && !_recovering && _compatibleRecovery;
+  Map<String, Object?> get quarantinedDraft => surface.session.readableDraft;
   String? saveError;
   String step = 'review';
   List<String> selectedRecords = [];
@@ -61,53 +65,9 @@ class UiWorkspaceController extends ChangeNotifier {
       c.saveError = error.reason;
       // Readable data is retained only within the current task/surface/scope.
       // Unknown codec bytes are never upgraded or written back automatically.
-      try {
-        if (utf8.encode(error.rawJson).length <= UiWorkspaceLimits.bytes) {
-          final raw = jsonDecode(error.rawJson);
-          if (raw is Map &&
-              raw['taskId'] == taskId &&
-              raw['surfaceId'] == plan.plan.surfaceId &&
-              raw['scopeKey'] == scopeKey) {
-            final draft = <String, Object?>{};
-            for (final field in [
-              'extracted',
-              'userOverrides',
-              'readableDraft',
-            ]) {
-              final map = raw[field];
-              if (map is Map) {
-                for (final entry in map.entries) {
-                  if (entry.key is String &&
-                      (isUiScalar(entry.value) ||
-                          (entry.value is List &&
-                              (entry.value as List).every(
-                                (id) => id is String,
-                              )))) {
-                    draft[entry.key as String] = entry.value is List
-                        ? List<String>.unmodifiable(
-                            (entry.value as List).cast<String>(),
-                          )
-                        : entry.value;
-                  }
-                }
-              }
-            }
-            final selections = raw['selections'];
-            final edited = raw['selectionOverrides'];
-            if (selections is Map && edited is List) {
-              for (final key in edited.whereType<String>()) {
-                final ids = selections[key];
-                if (ids is List && ids.every((id) => id is String)) {
-                  draft[key] = List<String>.unmodifiable(ids.cast<String>());
-                }
-              }
-            }
-            c._unreadableDraft = Map.unmodifiable(draft);
-          }
-        }
-      } catch (_) {
-        /* Preserve the original bytes without guessing a codec. */
-      }
+      c._unreadableDraft = readUnreadableDraft(
+        error, taskId: taskId, surfaceId: plan.plan.surfaceId, scopeKey: scopeKey,
+      );
     }
     var current = plan;
     if (old != null) {
@@ -184,7 +144,7 @@ class UiWorkspaceController extends ChangeNotifier {
     c.surface = UiSurfaceController(
       current,
       readOnlyProbe: () => c.readOnly,
-      onEvent: c.readOnly || onEvent == null
+      onEvent: onEvent == null
           ? null
           : (event) async {
               await c.flush(); // includes the pending/locked operation before the port
@@ -196,6 +156,7 @@ class UiWorkspaceController extends ChangeNotifier {
     );
     if (old != null) {
       final compatible = !c.readOnly;
+      c._compatibleRecovery = compatible;
       c.surface.session.restoreWorkspace(old, activate: compatible);
       // Existing incompatible workspaces keep their silent no-write checkpoint.
       // Only a rejected edit in a compatible workspace is a new save error.
@@ -208,6 +169,64 @@ class UiWorkspaceController extends ChangeNotifier {
     }
     c.surface.addListener(c._changed);
     return c;
+  }
+
+  /// Bounded, identity-scoped readable salvage; never treats damaged bytes as
+  /// an executable plan or writes an upgraded checkpoint.
+  static Map<String, Object?>? readUnreadableDraft(
+    UiWorkspaceUnreadable error, {
+    required String taskId,
+    required String surfaceId,
+    required String scopeKey,
+  }) {
+    try {
+      if (utf8.encode(error.rawJson).length <= UiWorkspaceLimits.bytes) {
+        final raw = jsonDecode(error.rawJson);
+        if (raw is Map &&
+            raw['taskId'] == taskId &&
+            raw['surfaceId'] == surfaceId &&
+            raw['scopeKey'] == scopeKey) {
+          final draft = <String, Object?>{};
+          for (final field in [
+            'extracted',
+            'userOverrides',
+            'readableDraft',
+          ]) {
+            final map = raw[field];
+            if (map is Map) {
+              for (final entry in map.entries) {
+                if (entry.key is String &&
+                    (isUiScalar(entry.value) ||
+                        (entry.value is List &&
+                            (entry.value as List).every(
+                              (id) => id is String,
+                            )))) {
+                  draft[entry.key as String] = entry.value is List
+                      ? List<String>.unmodifiable(
+                          (entry.value as List).cast<String>(),
+                        )
+                      : entry.value;
+                }
+              }
+            }
+          }
+          final selections = raw['selections'];
+          final edited = raw['selectionOverrides'];
+          if (selections is Map && edited is List) {
+            for (final key in edited.whereType<String>()) {
+              final ids = selections[key];
+              if (ids is List && ids.every((id) => id is String)) {
+                draft[key] = List<String>.unmodifiable(ids.cast<String>());
+              }
+            }
+          }
+          return Map.unmodifiable(draft);
+        }
+      }
+    } catch (_) {
+      /* Preserve the original bytes without guessing a codec. */
+    }
+    return null;
   }
 
   void _changed() {
@@ -290,6 +309,62 @@ class UiWorkspaceController extends ChangeNotifier {
     surface.adoptExtracted(key);
     await flush();
     if (!_disposed) notifyListeners();
+  }
+
+  /// Prepare in isolation, then CAS before installing any recovered state.
+  /// Incompatible identities/codecs are never eligible for this operation.
+  Future<void> resolveDraft(String field, {required bool discard}) async {
+    if (!canResolveDraft || !quarantinedDraft.containsKey(field)) {
+      throw StateError('Workspace recovery unavailable');
+    }
+    _recovering = true;
+    readOnly = true;
+    notifyListeners();
+    try {
+      await _tail;
+      if (_disposed) throw StateError('Workspace closed');
+      final base = surface.current;
+      final fence = surface.session.publicationFence;
+      final projection = _capture(_revision + 1);
+      final candidate = UiSurfaceController(base);
+      late StoredUiWorkspace next;
+      try {
+        candidate.session.restoreWorkspace(projection);
+        if (!candidate.session.resolveReadableDraft(field, discard: discard)) {
+          throw StateError('保留值不符合当前字段规则，请丢弃后重新输入。');
+        }
+        final json = projection.toJson();
+        json['userOverrides'] = candidate.session.userOverrides;
+        json['viewValues'] = candidate.session.viewValues;
+        json['selections'] = candidate.session.selections;
+        json['selectionOverrides'] = candidate.session.selectionOverrides.toList();
+        json['viewSelections'] = candidate.session.viewSelections;
+        json['readableDraft'] = candidate.session.readableDraft;
+        json['draftRevision'] = candidate.session.draftRevision;
+        next = StoredUiWorkspace.fromJson(json);
+      } finally {
+        candidate.dispose();
+      }
+      if (!fence.matches || !identical(surface.current, base) ||
+          !await store.save(next, expectedRevision: _revision)) {
+        throw StateError('Workspace revision or scope changed');
+      }
+      _revision = next.revision;
+      _stored = next;
+      if (_disposed || !fence.matches || !identical(surface.current, base)) {
+        _compatibleRecovery = false;
+        throw StateError('Workspace changed during recovery; reopen to review');
+      }
+      surface.session.restoreWorkspace(next);
+      readOnly = surface.session.unreadableReasons.isNotEmpty;
+      saveError = readOnly ? '仍有隔离字段，请逐项核对。' : null;
+    } catch (error) {
+      saveError = '$error';
+      rethrow;
+    } finally {
+      _recovering = false;
+      if (!_disposed) notifyListeners();
+    }
   }
 
   @override
