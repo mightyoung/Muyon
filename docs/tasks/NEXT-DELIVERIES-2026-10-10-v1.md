@@ -49,11 +49,11 @@
 | T-3-NEXT | 安全生产登记→有界仓储分页→正文/提议各片 | metadata机制已合；先明确宿主global身份与零业务恢复副作用，再登记；正文/提议另审 | T3 owner platform_tools/registry；仓储公共接口由各owner，不读raw SQL | metadata零写入；正文范围/敏感度/撤销；提议不自动接纳；真实扫描预算，G | 待排；T3两份任务/复审，生产仍OFF |
 | REG-5 | testing套件、示例模块、脚手架、覆盖CI | REG-3b/REST＋REG-4c合同稳定→全三模块组合 | 契约owner module_api/testing与CI；coverage owner协调脚本 | 新模块只模块包＋一行登记，宿主零改动；源码枚举完整覆盖，不混作LCOV；G | 待排；ADR-0004/R/REG-3a |
 | S-1-REMAINDER | 范围模型缺口盘点与最小收口 | 已有REG-2/AUTH范围单点→REG3/4/T3新路径复核 | AUTH/registry owner | 不重造范围层；撤权/跨对象/版本变化拒绝、G | 待核任务书；R/ADR-0004，已有实现不重复 |
-| AIUI-8 | 可视化三档、权限入口、数据去向 | F4a/b已合；实现排在F4c共享外壳交接后 | 设置owner权限页；AUTH gate归授权owner | 只读/普通问答0确认，授权仅用户宿主给出；外部内容禁放行；三档功能可达、G | 待排；D §8/ADR-0002 |
+| AIUI-8 | 可视化三档、权限入口、数据去向 | F4a/b已合；实现排在F4c共享外壳交接后 | 设置owner权限页；AUTH gate归授权owner | 范围内只读工具免业务审批，普通问答不新增业务确认；首次/未授权远程模型端点及外发仍走既有gate，不得以零确认绕权限；授权仅用户宿主给出；外部内容禁放行；三档功能可达、G | 待排；D §8/ADR-0002 |
 | AIUI-9 | 询价先做本体业务卡 | F5b/c→REG-4c→AIUI-8权限入口协同 | 业务卡owner；目录/renderer归F5b | 本体唯一结构，suggested值非已写入、稳定对象/版本/真实回执，G | 待排；D §4.4/§8 |
 | AIUI-6 | 比价、预算、导入审阅完整询价场景 | F3b/F4c/F5闭环＋REG-4c；写卡复用AIUI-9 | 询价场景owner，supplier规则归领域owner | 真业务mapping与公式、导入预览→审批→回执；完整North Star，G | 待排；D §8 |
 | AIUI-7 | 引用/阅读工作区/结果对比 | F4c/F5＋GROK-7；开放写入须REG-3-REST | 科研场景owner；不写通用core | 首批目的/来源定位、科研公式、返回恢复；未开放能力禁用，G | 待排；D/GROK-7 |
-| UX-PREDICT-1 | 输入预测胶囊设计包→获审实现 | 本文任务书审查→assistant输入owner窗口；模型接入需预算/隐私决定 | assistant输入owner；planning/core只交补丁 | 仅填入不发送，普通问答不确认，IME/陈旧结果/取消拒绝 | 需求已确认、设计待审；[任务书](UX-PREDICT-1.md)、U |
+| UX-PREDICT-1 | 输入预测胶囊设计包→获审实现 | 本文任务书审查→assistant输入owner窗口；模型接入需预算/隐私决定 | assistant输入owner；planning/core只交补丁 | 仅填入不发送，普通问答无新增业务确认、既有模型端点/外发gate保留，IME/陈旧结果/取消拒绝 | 需求已确认、设计待审；[任务书](UX-PREDICT-1.md)、U |
 | UX-VIDEO-1 | 对话视频设计包→获审实现 | 本文任务书审查→媒体来源/依赖ADR提案关口 | 对话owner＋文件/媒体owner；目录扩展由F5b | 会话播放/全屏/下载；权限/重复取消/跨端/模型边界矩阵 | 需求已确认、设计待审；[任务书](UX-VIDEO-1.md)、U |
 | MASCOT-ASSET | 统一几何2.5D或真3D资产选型→适配 | 用户资产选择→授权/来源/技术预算评审→跨端适配 | 资产owner；输入/对话外壳归UI owner | 二维双脸混合方案失败；需统一轮廓、表情/姿态、透明/主题/减少动效 | 资产待选择，未完成；U，不能自定路线或提前启实现 |
 | PERF/E-1 | 固定版本首字/合法率/审批/成本测量 | UI/运行组合稳定，已有E1分支交付另核 | 评测owner；业务模型仅获准本机执行者 | 本机<1.5s/远端<3s的实测；只读审批中位0/写1；失败也记 | 待测量；ADR-0003/E-1/R-1 |
@@ -74,10 +74,17 @@
 | EXCHANGE-UNIFY / iOS / LLM-DEDUPE | 第二阶段退出；统一交换依REG-3b；iOS采集阅读遥控；去supplier内LLM依场景迁入 | 传输/平台/模型owner | 双通道旧行为、iOS构建真机；不自动外发 | 第三阶段待排，R；旧UI-6为交换能力编号，不复活旧壳 |
 | RESIDENT / SCHEDULE-DREAM / REMOTE-APPROVAL / MCP-SERVER / SKILLS | 第三阶段退出→常驻节点→定时/遥控审批→外部接入 | runtime/授权/通信owners | 手机发起桌面执行手机批准；外部Agent访问留痕 | 第四阶段待排，R；已有Dream机制不等于定时服务 |
 | OCR-NATIVE / PROTOTYPE-BUILD | ADR-0003明确后置；阶段开始前重新写范围/依赖决定 | 原生解析/原型owner | 三端原生实测与实际构建闭环，未有证据不承诺可用 | 后阶段待定，不自动启动；ADR-0003排除项 |
-| RESEARCH-NS-A / S6 / E11-N3 | Research NS依科研/知识/交换；S6按R第四阶段；E11-N3按R第三阶段 | 科研/原型/UI owners | 完整链、真实无绑定objectPage、研究详情助手目录 | 后阶段待排；R §7，不能重造临时绑定 |
+| RESEARCH-NS-A / E11-N3 | Research NS依科研/知识/交换；E11-N3按R第三阶段 | 科研/UI owners | 完整科研链、研究详情助手目录 | 后阶段待排；R §7 |
+| S6-VERIFY | 先核现有助手引用→prototype opener，确认历史S6是否仍有额外验收缺口；仅真实剩余范围再排期 | 原型/UI owners | 不重复开发无绑定objectPage；按现有能力核真实回答引用、失效对象/版本及返回行为 | 基础能力已实现；完整S6验收未据本片静态核对宣称通过，扩展范围待核 |
 
 ## 调度与本片自查
 
 放行下一任务须同时具备：依赖可消费固定SHA、共享owner空档/交接、任务书逐条验收、原有拒绝回归。F5b/c/F3b/F4c与REG-4c保持原派发；新产品任务只完成可审设计书，不启动开发。每次交付更新本队列新版本和总体设计的状态链接，保留历史版本。
 
 已读实际develop的HANDOVER A–D、REVIEW、ADR1末尾/ADR2–5边界、总体设计、AI原生方案、stream契约、相关任务和开放PR。仓库及/workspace未发现AGENTS.md或.skills，空.agents/.codex无附加指令。只验证文档链接、固定源祖先、diff范围/空白；没有运行或声称本片Flutter/模型/设备验收。
+
+## PR32 review修订（2026-10-10，保留原固定基线）
+
+针对 `70c677245b3fc0bc4976339e18409d14080d5b5c` 独立审查P2：AIUI-8及预测/视频/总体设计中的“普通问答零确认”限定为**无新增业务确认**；首次/未授权远程模型端点和外发仍执行ADR-0002及现有gate，不能为验收零确认绕权限。用户原需求不改。
+
+S6去重静态证据：[prototype_module.dart](../../packages/prototype_module/lib/src/prototype_module.dart)声明objectPages，Runtime.open经resolve取得lease，Session.objectPage覆盖page/version/feedback；[object_pages.dart](../../apps/muyon/lib/platform/object_pages.dart)优先无绑定ObjectPages；[platform_shell.dart](../../apps/muyon/lib/screens/platform_shell.dart)把AssistantPage.onOpenReference接openObject，[assistant_page.dart](../../apps/muyon/lib/screens/assistant_page.dart)引用按钮调用该callback。[reg3a_module_v2_test.dart](../../apps/muyon/test/reg3a_module_v2_test.dart)的 `prototype opens without a binding and adds feedback after confirmation` 断言lease非空且ownerWorkspace为null；已有[REG-3a复审](REG-3a-review.md)亦记录无绑定对象页。因此旧R §7“第四阶段S6”保留历史，不作为再次开发opener的依据。需要补的是实际助手回答引用/失效与返回等端到端验收是否完整的核对；如有扩展先明确范围。此次只读源码/断言，未重跑Flutter，不把存在测试写成本轮运行通过或整个S6完成。
