@@ -86,10 +86,16 @@ void main() {
     await h.agent.confirm(original.id,
         requestDigest: original.payload['requestDigest'] as String);
     expect(h.invocations, 1);
-    await h.repo.updateTask(h.repo.task(original.id)!.copy({
+    final crashed = h.repo.task(original.id)!.copy({
       'toolIdentityDigest': 'damaged',
       'state': 'interrupted', 'stage': 'interrupted',
-    }));
+    });
+    // updateTask correctly refuses terminal tasks. Inject the interrupted
+    // checkpoint directly, as if the process died before recording completion.
+    await h.repo.database.write((db) => db.execute(
+      'UPDATE execution_records SET state=?,payload=? WHERE id=?',
+      ['interrupted', jsonEncode(crashed.payload), original.id],
+    ));
     final held = await h.agent.resume(original.id);
     expect(held.stage, 'resume');
     await h.agent.pause(held.id);
@@ -219,10 +225,14 @@ void main() {
           // Preserve a nonzero host checkpoint, including the spent tool time.
           final usage = BudgetUsage.fromPayload(h.repo.task(original.id)!.payload)
               .plus(tokens: 11, estimated: true);
-          await h.repo.updateTask(h.repo.task(original.id)!.copy({
+          final crashed = h.repo.task(original.id)!.copy({
             ...usage.toPayload(), 'toolIdentityDigest': digest,
             'state': 'interrupted', 'stage': 'interrupted',
-          }));
+          });
+          await h.repo.database.write((db) => db.execute(
+            'UPDATE execution_records SET state=?,payload=? WHERE id=?',
+            ['interrupted', jsonEncode(crashed.payload), original.id],
+          ));
           final effects = h.invocations;
           final approvals = h.approvals;
           var held = await h.agent.resume(original.id);
