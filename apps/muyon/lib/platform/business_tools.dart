@@ -42,12 +42,6 @@ Future<ResolvedAssistantScope> resolveAssistantScope(
   AssistantScope scope,
 ) => host.scopeResolver.resolve(scope);
 
-/// Compatibility entry for callers of the original host catalog.
-void registerBusinessTools(MuyonHost host) {
-  registerInquiryTools(host);
-  registerNonInquiryBusinessTools(host);
-}
-
 /// Inquiry is declared by its V2 adapter in production.
 void registerNonInquiryBusinessTools(MuyonHost host) {
   host.modules.registerTools(moduleIds: ['prototype', 'research']);
