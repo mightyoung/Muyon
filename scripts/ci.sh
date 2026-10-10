@@ -90,6 +90,9 @@ for entry in "${suites[@]}"; do
   log=$(cd "$ROOT/$dir" && flutter test --no-pub --reporter compact --timeout 120s "$target" 2>&1; echo "exit=$?")
   code=${log##*exit=}
   log=$(echo "$log" | tr '\r' '\n')
+  # This isolated diagnostic branch retains bounded, data-free test observations
+  # even on a passing run; keep all existing suite exit-status checks intact.
+  printf '%s\n' "$log" | grep -oE 'LAN_DIAGNOSTIC .*' || true
   summary=$(echo "$log" | grep -E "All tests passed|Some tests failed|All other tests passed" | tail -1 | sed -E 's/^[0-9:]+ //')
   if [[ "$code" -eq 0 && -n "$summary" ]]; then
     echo "test     $name: ok  $summary"

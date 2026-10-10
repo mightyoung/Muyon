@@ -44,7 +44,11 @@ void main() {
       DeviceIdentity.fingerprintOfDer(certificate.der) ==
       node.identity.fingerprint;
 
-  Future<int> post(LanNode node, List<int> bytes) async {
+  Future<int> post(
+    LanNode node,
+    List<int> bytes, {
+    void Function(String)? diagnostic,
+  }) async {
     final sender = clients[node]!;
     final client = HttpClient(context: lanTlsContext())
       ..badCertificateCallback = (certificate, host, port) =>
@@ -56,6 +60,7 @@ void main() {
       final req = await client.postUrl(
         Uri.parse('https://127.0.0.1:${node.httpPort}/push'),
       );
+      diagnostic?.call('legal-request-connected');
       req.followRedirects = false;
       req.contentLength = bytes.length;
       req.headers
@@ -77,8 +82,19 @@ void main() {
           ),
         );
       req.add(bytes);
+      diagnostic?.call('legal-request-body-added');
       final res = await req.close();
-      await res.drain<void>();
+      if (diagnostic == null) {
+        await res.drain<void>();
+      } else {
+        diagnostic('legal-response-headers status=${res.statusCode}');
+        final bodyBytes = await res.fold<int>(
+          0,
+          (length, chunk) => length + chunk.length,
+        );
+        // Report emptiness/size only: never disclose unexpected response data.
+        diagnostic('legal-response-body bytes=$bodyBytes');
+      }
       return res.statusCode;
     } finally {
       client.close(force: true);
@@ -281,13 +297,22 @@ void main() {
   test(
     'absolute deadline ends a trickling upload and removes partial data',
     () async {
+      final clock = Stopwatch()..start();
+      void diagnostic(String stage) {
+        // Fixed labels and elapsed time only; no credentials, paths or payload.
+        // ignore: avoid_print
+        print('LAN_DIAGNOSTIC elapsed_us=${clock.elapsedMicroseconds} $stage');
+      }
+
       final node = await start(
         limits: const LanLimits(
           uploadIdle: Duration(milliseconds: 300),
           transferTimeout: Duration(milliseconds: 150),
         ),
       );
+      diagnostic('node-started transfer_ms=150 idle_ms=300');
       final stalled = await partial(node);
+      diagnostic('trickle-request-connected');
       final response = expectPeerClose(stalled);
       final trickle = Timer.periodic(
         const Duration(milliseconds: 25),
@@ -295,11 +320,19 @@ void main() {
       );
       try {
         await response;
+        diagnostic('trickle-peer-closed');
       } finally {
         trickle.cancel();
+        diagnostic('trickle-timer-cancelled');
       }
       await expectInboxEmpty(node);
-      expect(await post(node, [7]), HttpStatus.ok);
+      diagnostic('inbox-cleanup-observed-empty');
+      final legalClock = Stopwatch()..start();
+      final status = await post(node, [7], diagnostic: diagnostic);
+      diagnostic(
+        'legal-request-complete elapsed_us=${legalClock.elapsedMicroseconds}',
+      );
+      expect(status, HttpStatus.ok);
     },
   );
 
