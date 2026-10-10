@@ -27,7 +27,7 @@ F3b 的 11 项重算验收不是 F4c scope/lease 导航验收。
 
 ## 独立行为验收
 
-`apps/muyon/test/aiui4c_navigation_test.dart` 注册 16 项（390 手机 route 与 1280 桌面 pane）：
+`apps/muyon/test/aiui4c_navigation_test.dart` 注册 20 项（390 手机 route 与 1280 桌面 pane）：
 
 1. 三组真实按钮打开正式 library-2 Choice/Checklist/CompareTable 加 NumberStepper，
    选择稳定 ID（前两者）与 finite number 编辑，未绑定 collection 的对象不冒入口，
@@ -81,3 +81,13 @@ Research/任意插件的对象导航不能以 null==null 当通过，安全降�
 
 原 artifact 预览保持既有独立行为（变化来源显示当前文件及警告），此次 collection 不准 sourceSpan
 cell，无新增原文读取入口；未泛化对象 fence 到旧文件预览，不把该既有流程计入完整 H3 验收。
+
+
+AAA source/PR Actions 终态真实失败：宿主 analyze 两项新 fixture lint（use_super_parameters、
+overridden_fields），host1549 pass/3skip/9fail，失败精确为待批准的九个旧正向 fixture，
+自有16回归未报失败。修复 constructor/getter lint并追加四项自有回归：真实 Research.run
+经实际 resolver 取双 fullpin，ready 模块但无 trusted source proof，保工作区/count/持久
+checkpoint bytes/工具计数且零 ResearchRunPage；Inquiry 对象在初始化前真实 SQLite 改版，
+关闭重开后 source proof 非空，但 actual pinned resolver 拒绝（reject1/lease0），保原 count。
+后者不是 runtimeFor await 受控屏障；前者不是全库全表快照相等。新 source 仍需 fresh CI，
+不得把静态提案或 AAA 的自有回归结果升格为新20回归运行通过。
