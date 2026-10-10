@@ -272,3 +272,22 @@ typed File iteration 和 named initializing formal；安全/信任断言、重�
 发布 HEAD、远端读回及对应 CI 终态见执行回报，不以源或组合 CI 代替发布结果。
 PR32 文档新依赖顺序 P2、PR28 当前四项契约/回调阻断均另交作者处理，未随本次合入；
 PR21/30 仍待依赖验收与新组合，coverage 候选仍按独立门禁推进。
+
+### PR32：总体设计与交付队列文档经依赖复审后合入（2026-10-10）
+
+冻结源 `c3526808916ee64f2f137262b635a8f9e31275ea`，合前 develop
+`5471f53fcc0cf0cf4024af49690f0af8e9ac753d`。八份文档 215+/5-，无生产或公共接口定义变更。
+总体设计、stream contract、队列和预测/视频任务书区分需求、设计、实现、集成与剩余验收。
+旧模型端点/外发授权及 S6 已有基础能力/未验 E2E 边界保留；最新依赖 P2 明确修复：
+AIUI-8 并行协同，AIUI-9 仍依赖 AIUI-2/5/REG-4c 并复用既有确认，F4c 仅约束共享文件交接。
+非作者独立精确源复审无当前确定阻断，199 个本地链接引用/143 个目标无缺失；diff 检查通过。
+[源 push CI38030514249](https://github.com/mightyoung/Muyon/actions/runs/38030514249)、
+[PR CI38030516739](https://github.com/mightyoung/Muyon/actions/runs/38030516739) 均成功。
+[固定源 bot](https://github.com/mightyoung/Muyon/pull/32#issuecomment-6094618461)
+已终结且无主要问题；依赖 P2 r4236609434 按修复依据关闭并读回，合前完整评论/review/inline
+无新增未裁定意见，不以 outdated 状态代替修复裁定。
+当前 develop 正常组合 `0f16b42f65670c7bf0892ce36cfd6f7f35eadca7` 的
+[CI38030635996](https://github.com/mightyoung/Muyon/actions/runs/38030635996) 成功：analyze/test
+8/8、host1486/3skip、doctor23、Laya29。正常 no-ff 合入
+`b79de59c5f769ff07d4c1a7ae8a165fdef480d75`，整树等于已测组合，仅另附本交接摘要。
+发布 HEAD、远端读回及对应 CI 终态见执行回报；计划文档接受不记 runtime/新任务验收完成。
