@@ -51,9 +51,13 @@ jobs:
         run: |
           if [[ -f .coverage-run/summary.json ]]; then
             python3 - <<'PY'
-          import json, os
+          import base64, gzip, json, os
           from pathlib import Path
           data = json.loads(Path('.coverage-run/summary.json').read_text())
+          data['actions_run_id'] = os.environ['GITHUB_RUN_ID']
+          data['suite_outcomes'] = json.loads(Path('.coverage-run/suite-summary.json').read_text())
+          snapshot = json.dumps(data, separators=(',', ':')).encode()
+          print('COVERAGE_SNAPSHOT_GZIP_BASE64=' + base64.b64encode(gzip.compress(snapshot, mtime=0)).decode())
           with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
               out.write('Loaded executable line coverage; whole-package denominator unknown.\n\n')
               out.write('| Package | Hit / loaded executable | % | Unloaded files |\n|---|---:|---:|---:|\n')

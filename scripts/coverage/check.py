@@ -74,7 +74,11 @@ def measure(root, reports):
                            for p in (root / prefix).rglob('*.dart'))
         gates[prefix] = {
             'source_files': inventory,
-            'loaded_denominator': {p: sorted(data) for p, data in sorted(selected.items())},
+            'loaded_denominator': {
+                p: {'line_count': len(data),
+                    'line_set_sha256': hashlib.sha256(
+                        ','.join(map(str, sorted(data))).encode()).hexdigest()}
+                for p, data in sorted(selected.items())},
             'file_hit_lines': {p: sum(data.values()) for p, data in sorted(selected.items())},
             'loaded_executable_lines': sum(len(data) for data in selected.values()),
             'hit_lines': sum(sum(data.values()) for data in selected.values()),

@@ -22,6 +22,25 @@ class CoverageContract(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'missing/empty'):
                 checker.measure(Path(directory), Path(directory))
 
+    def test_missing_report_cli_fails(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as directory:
+            result = subprocess.run(
+                ['python3', str(Path(__file__).with_name('check.py')),
+                 '--reports', directory, '--output', str(Path(directory) / 'summary.json')],
+                text=True, capture_output=True)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('missing/empty', result.stdout)
+
+    def test_per_file_decrease_cannot_hide_behind_scope_improvement(self):
+        baseline = self.contract()
+        baseline['gates']['critical/']['file_hit_lines'] = {'a.dart': 2, 'b.dart': 0}
+        actual = copy.deepcopy(baseline)
+        actual['gates']['critical/']['file_hit_lines'] = {'a.dart': 1, 'b.dart': 2}
+        actual['gates']['critical/']['hit_lines'] = 3
+        self.assertTrue(any('coverage decrease: a.dart' in e
+                            for e in checker.compare(actual, baseline)))
+
     def test_equal_passes(self):
         self.assertEqual(checker.compare(self.contract(), self.contract()), [])
 
@@ -60,8 +79,9 @@ class CoverageContract(unittest.TestCase):
             for i, suite in enumerate(checker.SUITES):
                 (reports / suite).mkdir(parents=True)
                 package = checker.WORKING_DIRS[suite]
+                source = '../../packages/inquiry_module/lib/a.dart' if suite == 'inquiry' else 'lib/a.dart'
                 (reports / suite / 'lcov.info').write_text(
-                    f'SF:lib/a.dart\nDA:1,1\nDA:3,0\nend_of_record\n'
+                    f'SF:{source}\nDA:1,1\nDA:3,0\nend_of_record\n'
                     f'SF:{root / checker.PACKAGES[0] / "lib/a.dart"}\nDA:3,1\nend_of_record\n')
             # Measure provenance without requiring a git repository fixture.
             from unittest.mock import patch
@@ -69,6 +89,8 @@ class CoverageContract(unittest.TestCase):
                 actual = checker.measure(root, reports)
             data = actual['packages'][checker.PACKAGES[0]]
             self.assertEqual((data['hit_lines'], data['loaded_executable_lines']), (2, 2))
+            self.assertEqual(actual['packages']['packages/inquiry_module']['hit_lines'], 1)
+            self.assertEqual(actual['packages']['apps/muyon']['hit_lines'], 1)
             self.assertEqual(data['unloaded_executable_denominator'], 'unknown')
             self.assertIn(checker.PACKAGES[0] + '/lib/unloaded.dart', data['unloaded_source_files'])
 

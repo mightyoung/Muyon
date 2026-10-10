@@ -95,6 +95,10 @@ class VerificationGates(unittest.TestCase):
                         self.assertIn('supplier_core: FAILED', result.stdout)
                         self.assertIn('inquiry: ok', result.stdout)
                     self.assertIn('../../packages/inquiry_module/test', test_calls[-1])
+                    if gate == 'ci.sh':
+                        self.assertTrue(all('--coverage ' in call for call in test_calls))
+                        self.assertEqual(len({call.split('--coverage-path ')[1].split(' ')[0]
+                                              for call in test_calls}), 8)
                     self.assertFalse(any('--exclude-tags' in call or '--tags' in call
                                          for call in test_calls))
 
