@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/assistant/execution_store.dart';
 import 'package:muyon/platform/platform_tools.dart';
+import 'package:muyon/platform/grants/host_effect_intent.dart';
 import 'package:muyon/platform/scope_resolver.dart';
 import 'package:muyon/platform/tool_registry.dart';
 import 'package:muyon/workspace/import_coordinator.dart';
@@ -125,6 +126,48 @@ class _NoHttp extends HttpOverrides {
   }
 }
 
+// Observe the actual registered-handler boundary, before the registrar's
+// lifecycle await; counting repository queries alone cannot prove no dispatch.
+class _ObservedRegistry extends ToolRegistry {
+  _ObservedRegistry({
+    required super.database,
+    required super.resolveScope,
+    required this.handlerCalls,
+    super.categoryAllowed,
+    super.policyRevision,
+    super.hostToolScopeResolver,
+  });
+  final Map<String, int> handlerCalls;
+
+  @override
+  void register({
+    required String providerId,
+    required ToolDescriptor descriptor,
+    required Future<ToolCallResult> Function(ToolCallContext) handler,
+    Set<AssistantScopeKind> supportedScopes = const {...AssistantScopeKind.values},
+    Set<String>? dataModuleIds,
+    Future<void> Function(ResolvedAssistantScope, ToolCallResult)? validateResult,
+    void Function(ToolCallRequest)? preflight,
+    HostEffectIntent? Function(ToolCallRequest, ResolvedAssistantScope)? effectIntent,
+    bool available = true,
+    String? unavailableReason,
+  }) => super.register(
+    providerId: providerId,
+    descriptor: descriptor,
+    handler: (call) {
+      handlerCalls.update(descriptor.toolId, (count) => count + 1, ifAbsent: () => 1);
+      return handler(call);
+    },
+    supportedScopes: supportedScopes,
+    dataModuleIds: dataModuleIds,
+    validateResult: validateResult,
+    preflight: preflight,
+    effectIntent: effectIntent,
+    available: available,
+    unavailableReason: unavailableReason,
+  );
+}
+
 class _Counters { int prepare = 0, enumerate = 0, resolve = 0, knowledge = 0; }
 class _Source implements ScopeSource {
   _Source(this.source, this.counts);
@@ -156,6 +199,7 @@ void main() {
   var resolutionCalls = 0;
   var categoryAllowed = true;
   var policySuffix = '';
+  final handlerCalls = <String, int>{};
   PlatformMetadataScopeBinding? binding;
   HostToolScopeResolver? customResolution;
   Future<void> Function(int)? resolutionPause;
@@ -169,7 +213,8 @@ void main() {
     fallback = (scope) { fallbackCalls++; return scopes.resolve(scope); };
   }
 
-  ToolRegistry newRegistry() => ToolRegistry(database: audit,
+  ToolRegistry newRegistry() => _ObservedRegistry(database: audit,
+    handlerCalls: handlerCalls,
     categoryAllowed: (effect) => categoryAllowed && host.authorizationPolicy.current.allowsTool(effect),
     policyRevision: () => host.authorizationPolicy.current.revision + policySuffix,
     resolveScope: (scope) => fallback(scope),
@@ -183,6 +228,7 @@ void main() {
 
   setUp(() async {
     available = true; fallbackCalls = 0; resolutionCalls = 0;
+    handlerCalls.clear();
     categoryAllowed = true; policySuffix = ''; binding = null;
     customResolution = null; resolutionPause = null;
     root = Directory.systemTemp.createTempSync('metadata-scope-');
@@ -229,6 +275,7 @@ void main() {
     expect(module.activations, 0); expect(runtime.receiptReads, 0);
     expect(changes(db), before); expect(snapshot(db), state);
     expect(intentStatus(), 'pending'); expect(runtime.commits, 0);
+    expect(handlerCalls, isEmpty);
   });
 
   test('new metadata invoke writes exactly two receipt rows and replay writes none', () async {
@@ -237,6 +284,7 @@ void main() {
       final before = changes(audit.raw);
       final call = request(id, 'audit-$id');
       expect((await registry.invoke(call)).status, ToolCallStatus.succeeded);
+      expect(handlerCalls[id], 1);
       expect(audit.deltas.where((n) => n != 0), [1, 1]);
       expect(audit.gaps, everyElement(0));
       expect(changes(audit.raw) - before, 2);
@@ -245,6 +293,7 @@ void main() {
       audit.reset();
       final replayBefore = changes(audit.raw);
       expect((await registry.invoke(call)).data, receipt.result!.data);
+      expect(handlerCalls[id], 1);
       expect(changes(audit.raw), replayBefore);
       expect(audit.deltas, everyElement(0));
     }
@@ -260,6 +309,7 @@ void main() {
       throwsA(isA<ToolPlatformException>().having((e) => e.code, 'code', 'host_unavailable')));
     expect(fallbackCalls, 0); expect(module.activations, 0);
     expect(changes(audit.raw), before); expect(intentStatus(), 'pending');
+    expect(handlerCalls, isEmpty);
   });
 
   test('metadata scope and dispatch leave module storage transfer and network untouched', () async {
@@ -341,6 +391,7 @@ void main() {
       throwsA(isA<ToolPlatformException>().having((e) => e.code, 'code', 'category_disabled')));
     expect(fallbackCalls, 0); expect(module.activations, 0);
     expect(changes(audit.raw), before);
+    expect(handlerCalls, isEmpty);
   });
 
   for (final change in ['generation', 'policy', 'host', 'cancel', 'close']) {
@@ -366,6 +417,7 @@ void main() {
       await rejected;
       expect(fallbackCalls, 0); expect(module.activations, 0);
       expect(changes(audit.raw), before); expect(intentStatus(), 'pending');
+      expect(handlerCalls, isEmpty);
     });
   }
 
@@ -392,6 +444,7 @@ void main() {
       expect(snapshot(audit.raw, receipts: false), tables);
       expect(audit.deltas, [1, 1]); expect(audit.gaps, [0]);
       expect(changes(audit.raw) - before, 2);
+      expect(handlerCalls, isEmpty);
     });
   }
 
@@ -420,6 +473,7 @@ void main() {
       expect(fallbackCalls, 0); expect(module.activations, 0);
       expect(audit.deltas, [1, 1]); expect(audit.gaps, [0]);
       expect(intentStatus(), 'pending');
+      expect(handlerCalls, isEmpty);
     });
   }
 
@@ -509,7 +563,7 @@ void main() {
     expect((await one).status, ToolCallStatus.succeeded);
     expect((await two).status, ToolCallStatus.succeeded);
     expect(audit.deltas.where((n) => n != 0), [1, 1]);
-    expect(audit.deltas.where((n) => n != 0), [1, 1]);
+    expect(handlerCalls, {_ids.first: 1});
     await registry.close();
     await host.close();
     host = await MuyonHost.open(root.path, modules: [module]);
@@ -523,9 +577,11 @@ void main() {
     final before = changes(audit.raw);
     expect((await registry.invoke(call)).status, ToolCallStatus.succeeded);
     expect(changes(audit.raw), before); expect(fallbackCalls, 0);
+    expect(handlerCalls, {_ids.first: 1});
     await expectLater(registry.invoke(ToolCallRequest(invocationId: call.invocationId,
       toolId: call.toolId, scope: call.scope, parameters: {'limit': 1})),
       throwsA(isA<ToolPlatformException>().having((e) => e.code, 'code', 'idempotency_conflict')));
+    expect(handlerCalls, {_ids.first: 1});
   });
 
   test('business recovery conflict retains original notification and no recommit', () async {
