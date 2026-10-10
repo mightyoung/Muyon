@@ -55,6 +55,12 @@ class VerificationGates(unittest.TestCase):
             for package in PACKAGES:
                 (root / package).mkdir(parents=True)
             shutil.copyfile(ROOT / 'scripts' / gate, root / 'scripts' / gate)
+            (root / 'scripts/coverage').mkdir()
+            for filename in ('check.py', 'test_check.py', 'da_details.py', 'test_da_details.py'):
+                (root / 'scripts/coverage' / filename).write_text(
+                    'raise SystemExit(1)\n'
+                    if filename == 'check.py' and scenario == 'coverage_runner_failure'
+                    else 'pass\n')
             # CI's doctor scenarios are independent of Flutter status propagation.
             (root / 'scripts/test_doctor.sh').write_text(
                 '#!/usr/bin/env bash\necho "all 23 scenarios passed"\n')
@@ -92,6 +98,10 @@ class VerificationGates(unittest.TestCase):
                         self.assertIn('supplier_core: FAILED', result.stdout)
                         self.assertIn('inquiry: ok', result.stdout)
                     self.assertIn('../../packages/inquiry_module/test', test_calls[-1])
+                    if gate == 'ci.sh':
+                        self.assertTrue(all('--coverage ' in call for call in test_calls))
+                        self.assertEqual(len({call.split('--coverage-path ')[1].split(' ')[0]
+                                              for call in test_calls}), 8)
                     self.assertFalse(any('--exclude-tags' in call or '--tags' in call
                                          for call in test_calls))
 
@@ -109,6 +119,9 @@ class VerificationGates(unittest.TestCase):
 
     def test_ci_fails_when_its_gate_regressions_fail(self):
         self.check_scenario('gate_runner_failure', {'verify.sh': 0, 'ci.sh': 1})
+
+    def test_ci_propagates_coverage_failure(self):
+        self.check_scenario('coverage_runner_failure', {'verify.sh': 0, 'ci.sh': 1})
 
     def test_missing_summary(self):
         self.check_scenario('missing_summary', 1)
