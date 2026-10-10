@@ -1,0 +1,269 @@
+{
+  "artifactKind": "acceptance-scenario-design",
+  "status": "future-only",
+  "executionStatus": "not-run",
+  "baselineSha": "cf672164e4f6c3e7beea8029c8be735e33c3bf19",
+  "contractAdopted": false,
+  "notAProductionCodec": true,
+  "businessSeed": {
+    "entity": "project_item",
+    "qty": "2",
+    "unit_cost": "10",
+    "unit": "件",
+    "currency": "CNY",
+    "markup_rate": "0"
+  },
+  "realEntrypoints": [
+    "UiFormulaRegistry.evaluate",
+    "validateUiPlan",
+    "DynamicUiSurface",
+    "UiWorkspaceController",
+    "HostUiWorkspaceStore",
+    "inquiry.set_item_qty"
+  ],
+  "oraclePolicy": "Real F3a evaluator and supplier Store.budget; no replacement multiplication implementation.",
+  "cases": [
+    {
+      "testName": "edit_recompute_publish_checkpoint_restore",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "edit:qty=3",
+        "freeze:S8",
+        "evaluate:real-F3a",
+        "validate:S8/I8/P12",
+        "publish",
+        "CAS",
+        "detail-return",
+        "SQLite-reopen"
+      ],
+      "assertions": [
+        "computed=30",
+        "fingerprint-changed",
+        "same-mounted-controller",
+        "draft=3",
+        "business-writes=0"
+      ]
+    },
+    {
+      "testName": "old_event_and_confirmation_rejected_after_publish",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "capture:old-edit-and-confirm",
+        "publish:new-batch",
+        "replay:captured-events"
+      ],
+      "assertions": [
+        "no-router-or-tool-dispatch",
+        "historic-receipt-preserved"
+      ]
+    },
+    {
+      "testName": "concurrent_edit_discards_captured_batch",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "freeze:qty=3",
+        "edit:qty=4",
+        "release:batch-3",
+        "evaluate-and-release:batch-4"
+      ],
+      "assertions": [
+        "discard-batch-3",
+        "computed=40",
+        "override=4"
+      ]
+    },
+    {
+      "testName": "late_result_does_not_replace_latest",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "hold:batch-A",
+        "hold:batch-B",
+        "release:B",
+        "release:A",
+        "repeat-after-dispose-and-host-generation-change"
+      ],
+      "assertions": [
+        "latest-only-published",
+        "no-checkpoint-regression"
+      ]
+    },
+    {
+      "testName": "invalid_formula_preserves_draft_without_old_success",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "edit:qty=oops",
+        "evaluate:real-F3a",
+        "checkpoint-and-reopen"
+      ],
+      "assertions": [
+        "status=invalid",
+        "value=null",
+        "override=oops",
+        "no-old-success",
+        "confirm-disabled"
+      ]
+    },
+    {
+      "testName": "unavailable_and_zero_keep_distinct_states",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "price:null-notDisclosed",
+        "price:readFailed",
+        "price:conflict",
+        "price:notApplicable",
+        "price:unverified-value",
+        "qty:0"
+      ],
+      "assertions": [
+        "unavailable-with-reason",
+        "unverified-not-promoted",
+        "zero-preview-not-null",
+        "domain-save-policy-preserved"
+      ]
+    },
+    {
+      "testName": "permission_change_blocks_publish_and_dispatch",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "freeze",
+        "revoke-tool-or-change-scope",
+        "release",
+        "replay-old-confirm"
+      ],
+      "assertions": [
+        "batch-discarded",
+        "no-authority-expansion",
+        "zero-business-write"
+      ]
+    },
+    {
+      "testName": "revoked_source_blocks_current_projection",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "freeze",
+        "revoke-source-or-change-digest-object-revision",
+        "release",
+        "detail-and-confirm"
+      ],
+      "assertions": [
+        "no-publish-or-navigation",
+        "draft-preserved",
+        "stale-visible"
+      ]
+    },
+    {
+      "testName": "competing_sqlite_cas_keeps_winner_and_loser_draft",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "open:two-real-stores-same-revision",
+        "save:winner",
+        "save:loser",
+        "attempt:back-and-confirm"
+      ],
+      "assertions": [
+        "one-CAS-winner",
+        "loser-input-preserved",
+        "readOnly",
+        "no-pop-on-save-error",
+        "business=0"
+      ]
+    },
+    {
+      "testName": "unknown_versions_preserve_raw_checkpoint",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "persist:checkpoint",
+        "inject:unknown-schema-catalog-typed-collection-separately",
+        "open"
+      ],
+      "assertions": [
+        "raw-settings-bytes-identical",
+        "draft-readable",
+        "readOnly-with-reason",
+        "no-auto-rewrite-or-write"
+      ]
+    },
+    {
+      "testName": "stable_row_detail_survives_sort_and_return",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "seed:duplicate-label-distinct-stable-ID",
+        "sort",
+        "tap:item-a",
+        "return",
+        "delete-or-change-scope-or-old-revision",
+        "tap"
+      ],
+      "assertions": [
+        "same-ObjectRef-before-deletion",
+        "draft-focus-preserved",
+        "zero-navigation-when-invalid",
+        "no-ObjectRef-row-not-clickable"
+      ]
+    },
+    {
+      "testName": "read_only_form_blocks_descendant_inputs",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "mount:real-validator-renderer-Form-descendants",
+        "activate:readOnly",
+        "type-or-tap:Field-Toggle-Stepper-Choice-Date-submit"
+      ],
+      "assertions": [
+        "values-and-revision-unchanged",
+        "semantics-disabled",
+        "business=0"
+      ]
+    },
+    {
+      "testName": "collection_null_and_fact_states_survive_roundtrip",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "project:host-cells-null-empty-zero-false-all-FactStates",
+        "encode",
+        "real-SQLite-CAS",
+        "reopen",
+        "inspect:semantic-copy-text"
+      ],
+      "assertions": [
+        "values-distinct",
+        "state-reason-sourceRefs-preserved",
+        "no-coercion-or-trust-promotion"
+      ]
+    },
+    {
+      "testName": "approved_quantity_write_once_and_recovery_reads_receipt",
+      "status": "future-only",
+      "executionStatus": "not-run",
+      "schedule": [
+        "install:owner-reviewed-business-mapping",
+        "confirm:through-real-router-agent-tool-registry",
+        "check:real-domain-row-budget-receipt",
+        "return-and-restart",
+        "repeat-confirm",
+        "competing-from_qty"
+      ],
+      "assertions": [
+        "qty=3",
+        "budget-line-cost=30",
+        "one-business-change-and-success-receipt",
+        "no-replay",
+        "unknown-stays-locked",
+        "competing-write-refused"
+      ]
+    }
+  ]
+}
