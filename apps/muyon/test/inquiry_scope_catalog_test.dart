@@ -28,8 +28,10 @@ void main() {
       'aliases': <String>[],
       'categories': <String>[],
     });
-    selected = (await resolveAssistantScope(host, const AssistantScope.global()))
-        .objects.singleWhere((ref) => ref.objectId == id);
+    selected = (await resolveAssistantScope(
+      host,
+      const AssistantScope.global(),
+    )).objects.singleWhere((ref) => ref.objectId == id);
     workspace = (await host.workspaces.create('公开范围夹具')).id;
   });
   tearDown(() async {
@@ -40,10 +42,14 @@ void main() {
   AssistantScope scope(AssistantScopeKind kind) => switch (kind) {
     AssistantScopeKind.global => const AssistantScope.global(),
     AssistantScopeKind.workspace => AssistantScope.workspace(workspace),
-    AssistantScopeKind.selectedObjects => AssistantScope.selectedObjects([selected]),
+    AssistantScopeKind.selectedObjects => AssistantScope.selectedObjects([
+      selected,
+    ]),
   };
 
-  void register(String suffix, Set<AssistantScopeKind> kinds, {
+  void register(
+    String suffix,
+    Set<AssistantScopeKind> kinds, {
     bool available = true,
     bool selectable = true,
   }) {
@@ -55,14 +61,16 @@ void main() {
         effect: ToolEffect.read,
         modelSelectable: selectable,
         parameterSchema: const {
-          'type': 'object', 'properties': <String, Object?>{},
+          'type': 'object',
+          'properties': <String, Object?>{},
           'additionalProperties': false,
         },
       ),
       supportedScopes: kinds,
       available: available,
-      handler: (_) async => const ToolCallResult(
-        status: ToolCallStatus.succeeded, summary: '公开目录夹具',
+      handler: (_) async => ToolCallResult(
+        status: ToolCallStatus.succeeded,
+        summary: '公开目录夹具',
       ),
     );
   }
@@ -86,56 +94,95 @@ void main() {
       (item as Map)['toolId'] as String,
   };
   const generic = {
-    'inquiry.create_record', 'inquiry.update_record',
-    'inquiry.delete_record', 'inquiry.restore_record',
+    'inquiry.create_record',
+    'inquiry.update_record',
+    'inquiry.delete_record',
+    'inquiry.restore_record',
   };
 
   for (final kind in AssistantScopeKind.values) {
-    test('scope catalog matches declared registration for ${kind.name}', () async {
-      for (final declared in AssistantScopeKind.values) {
-        register(declared.name, {declared});
-      }
-      register('all', AssistantScopeKind.values.toSet());
-      register('off', {kind}, available: false);
-      register('hidden', {kind}, selectable: false);
-      final task = await chat(scope(kind));
-      final expected = {'reg4c_scope.${kind.name}', 'reg4c_scope.all'};
-      for (final ids in [candidates(task), native(task)]) {
-        expect(ids.where((id) => id.startsWith('reg4c_scope.')).toSet(), expected);
-      }
-    });
+    test(
+      'scope catalog matches declared registration for ${kind.name}',
+      () async {
+        for (final declared in AssistantScopeKind.values) {
+          register(declared.name, {declared});
+        }
+        register('all', AssistantScopeKind.values.toSet());
+        register('off', {kind}, available: false);
+        register('hidden', {kind}, selectable: false);
+        final task = await chat(scope(kind));
+        final expected = {'reg4c_scope.${kind.name}', 'reg4c_scope.all'};
+        for (final ids in [candidates(task), native(task)]) {
+          expect(
+            ids.where((id) => id.startsWith('reg4c_scope.')).toSet(),
+            expected,
+          );
+        }
+      },
+    );
   }
 
-  test('generic writes stay discoverable only in selected object catalogs', () async {
-    final global = await chat(const AssistantScope.global());
-    final picked = await chat(AssistantScope.selectedObjects([selected]));
-    for (final ids in [candidates(global), native(global)]) {
-      expect(ids.intersection(generic), isEmpty);
-    }
-    for (final ids in [candidates(picked), native(picked)]) {
-      expect(ids.intersection(generic), generic);
-    }
-  });
+  test(
+    'generic writes stay discoverable only in selected object catalogs',
+    () async {
+      final global = await chat(const AssistantScope.global());
+      final picked = await chat(AssistantScope.selectedObjects([selected]));
+      for (final ids in [candidates(global), native(global)]) {
+        expect(ids.intersection(generic), isEmpty);
+      }
+      for (final ids in [candidates(picked), native(picked)]) {
+        expect(ids.intersection(generic), generic);
+      }
+    },
+  );
 
-  test('catalog filtering never replaces invocation scope and approval guards', () async {
-    final parameters = {
-      'operation_id': newUuid(), 'type': 'supplier', 'id': selected.objectId,
-      'expected_version': 1, 'values': {'name': '不得写入'},
-    };
-    final global = ToolCallRequest(
-      invocationId: 'scope-direct-global', toolId: 'inquiry.update_record',
-      scope: const AssistantScope.global(), parameters: parameters,
-    );
-    await expectLater(host.tools.prepare(global), throwsA(
-      isA<ToolPlatformException>().having((error) => error.code, 'code', 'scope_mismatch'),
-    ));
-    await expectLater(host.tools.invoke(global), throwsA(isA<ToolPlatformException>()));
-    await expectLater(host.tools.invoke(ToolCallRequest(
-      invocationId: 'scope-direct-selected', toolId: 'inquiry.update_record',
-      scope: AssistantScope.selectedObjects([selected]), parameters: parameters,
-    )), throwsA(isA<ToolPlatformException>()));
-    final store = host.inquiry!.runtime.state.store;
-    expect(store.get('supplier', selected.objectId)!.version, 1);
-    expect(store.db.select("SELECT key FROM meta WHERE key LIKE 'reg4c:%'"), isEmpty);
-  });
+  test(
+    'catalog filtering never replaces invocation scope and approval guards',
+    () async {
+      final parameters = {
+        'operation_id': newUuid(),
+        'type': 'supplier',
+        'id': selected.objectId,
+        'expected_version': 1,
+        'values': {'name': '不得写入'},
+      };
+      final global = ToolCallRequest(
+        invocationId: 'scope-direct-global',
+        toolId: 'inquiry.update_record',
+        scope: const AssistantScope.global(),
+        parameters: parameters,
+      );
+      await expectLater(
+        host.tools.prepare(global),
+        throwsA(
+          isA<ToolPlatformException>().having(
+            (error) => error.code,
+            'code',
+            'scope_mismatch',
+          ),
+        ),
+      );
+      await expectLater(
+        host.tools.invoke(global),
+        throwsA(isA<ToolPlatformException>()),
+      );
+      await expectLater(
+        host.tools.invoke(
+          ToolCallRequest(
+            invocationId: 'scope-direct-selected',
+            toolId: 'inquiry.update_record',
+            scope: AssistantScope.selectedObjects([selected]),
+            parameters: parameters,
+          ),
+        ),
+        throwsA(isA<ToolPlatformException>()),
+      );
+      final store = host.inquiry!.runtime.state.store;
+      expect(store.get('supplier', selected.objectId)!.version, 1);
+      expect(
+        store.db.select("SELECT key FROM meta WHERE key LIKE 'reg4c:%'"),
+        isEmpty,
+      );
+    },
+  );
 }
