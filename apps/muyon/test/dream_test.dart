@@ -96,6 +96,67 @@ void main() {
     },
   );
 
+  for (final change in ['delete', 'disable', 'narrow', 'add', 'experience']) {
+    test('revert preserves a later user $change', () async {
+      final source = await repo.saveMemory(content: '原始事实', source: 'user');
+      final run = await dream.run();
+      switch (change) {
+        case 'delete':
+          await repo.deleteMemory(source);
+        case 'disable':
+          await repo.setMemoryDisabled(source, true);
+        case 'narrow':
+          await repo.narrowMemoryScope(source, AssistantScope.workspace('w'));
+        case 'add':
+          await repo.saveMemory(content: '后来添加', source: 'user');
+        case 'experience':
+          await repo.saveExperience(content: '用户经验', source: 'user', evidence: []);
+      }
+      final before = jsonEncode(repo.organizationSnapshot());
+      await expectLater(dream.revert(run.id), throwsStateError);
+      expect(jsonEncode(repo.organizationSnapshot()), before);
+      expect(dream.runRecord(run.id)!.status, 'done');
+    });
+  }
+
+  test('duplicate acceptance rejects an edited source without partial writes', () async {
+    await repo.saveMemory(content: '重复内容', source: 'user');
+    await repo.saveMemory(content: '重复内容', source: 'user');
+    final run = await dream.run();
+    final proposal = dream.proposals(runId: run.id).single;
+    final target = (proposal.payload['disableIds'] as List).single as String;
+    await repo.saveMemory(id: target, content: '独立内容', source: 'user');
+    final before = jsonEncode(repo.organizationSnapshot());
+    await expectLater(dream.accept(proposal.id), throwsStateError);
+    expect(jsonEncode(repo.organizationSnapshot()), before);
+    expect(dream.proposals(runId: run.id).single.status, 'proposed');
+  });
+
+  for (final kind in ['summary', 'experience']) {
+    test('$kind acceptance rolls back artifact when status persistence fails', () async {
+      final source = await repo.saveMemory(content: '证据', source: 'user');
+      final run = await dream.run();
+      final id = 'test-$kind';
+      repo.database.raw.execute(
+        'INSERT INTO dream_proposals(id,run_id,kind,evidence_json,payload_json,status) VALUES(?,?,?,?,?,?)',
+        [id, run.id, kind, jsonEncode([{'id': source, 'revision': 1}]),
+          jsonEncode({'content': '整理产物'}), 'proposed'],
+      );
+      repo.database.raw.execute("CREATE TRIGGER fail_accept BEFORE UPDATE OF status ON dream_proposals WHEN NEW.status='accepted' BEGIN SELECT RAISE(ABORT, 'injected crash boundary'); END");
+      final before = jsonEncode(repo.organizationSnapshot());
+      await expectLater(dream.accept(id), throwsA(isA<Exception>()));
+      expect(jsonEncode(repo.organizationSnapshot()), before);
+      expect(dream.proposals(runId: run.id).single.status, 'proposed');
+      repo.database.raw.execute('DROP TRIGGER fail_accept');
+      await dream.accept(id);
+      final artifacts = kind == 'summary'
+          ? repo.memories().where((m) => m.source == 'dream').length
+          : repo.experiences(includeUnverified: true).length;
+      expect(artifacts, 1);
+      await expectLater(dream.accept(id), throwsStateError);
+    });
+  }
+
   test(
     'delete and disable leave assistant context and block reintroduction',
     () async {
