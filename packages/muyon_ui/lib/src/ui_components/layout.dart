@@ -232,13 +232,21 @@ class _MuyonTabsState extends State<MuyonTabs> {
   @override
   void didUpdateWidget(covariant MuyonTabs oldWidget) {
     super.didUpdateWidget(oldWidget);
-    index = _validIndex(index);
+    index = _validIndex(oldWidget.selectedIndex ?? index);
+  }
+
+  void select(int selected) {
+    if (widget.selectedIndex == null) setState(() => index = selected);
+    widget.onChanged?.call(selected);
   }
 
   @override
   Widget build(BuildContext context) {
     final t = MuyonTokens.of(context);
-    final enabled = widget.state == UiComponentState.ready;
+    final enabled =
+        widget.state == UiComponentState.ready &&
+        (widget.selectedIndex == null || widget.onChanged != null);
+    final selected = _validIndex(widget.selectedIndex ?? index);
     return UiComponentFrame(
       state: widget.state,
       textEquivalent: widget.textEquivalent,
@@ -252,15 +260,15 @@ class _MuyonTabsState extends State<MuyonTabs> {
               for (var i = 0; i < widget.labels.length; i++)
                 Semantics(
                   button: true,
-                  selected: i == index,
+                  selected: i == selected,
                   label:
                       '${widget.labels[i]}，第 ${i + 1} 个，共 ${widget.labels.length} 个',
                   excludeSemantics: true,
-                  onTap: enabled ? () => setState(() => index = i) : null,
+                  onTap: enabled ? () => select(i) : null,
                   child: InkWell(
                     key: ValueKey('tab-$i'),
                     borderRadius: BorderRadius.circular(MuyonTokens.pillRadius),
-                    onTap: enabled ? () => setState(() => index = i) : null,
+                    onTap: enabled ? () => select(i) : null,
                     child: UiMinTarget(
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -269,7 +277,9 @@ class _MuyonTabsState extends State<MuyonTabs> {
                         ),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: i == index ? t.accentTint : Colors.transparent,
+                          color: i == selected
+                              ? t.accentTint
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(
                             MuyonTokens.pillRadius,
                           ),
@@ -277,8 +287,8 @@ class _MuyonTabsState extends State<MuyonTabs> {
                         child: Text(
                           widget.labels[i],
                           style: TextStyle(
-                            color: i == index ? t.accent : t.ink2,
-                            fontWeight: i == index
+                            color: i == selected ? t.accent : t.ink2,
+                            fontWeight: i == selected
                                 ? FontWeight.w600
                                 : FontWeight.w400,
                           ),
@@ -290,7 +300,7 @@ class _MuyonTabsState extends State<MuyonTabs> {
             ],
           ),
           const SizedBox(height: MuyonTokens.space3),
-          if (widget.children.isNotEmpty) widget.children[index],
+          if (widget.children.isNotEmpty) widget.children[selected],
         ],
       ),
     );
@@ -326,10 +336,19 @@ class Disclosure extends StatefulWidget {
 class _DisclosureState extends State<Disclosure> {
   late bool open = widget.initiallyExpanded;
 
+  void toggle() {
+    final next = !(widget.expanded ?? open);
+    if (widget.expanded == null) setState(() => open = next);
+    widget.onChanged?.call(next);
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = MuyonTokens.of(context);
-    final enabled = widget.state == UiComponentState.ready;
+    final enabled =
+        widget.state == UiComponentState.ready &&
+        (widget.expanded == null || widget.onChanged != null);
+    final expanded = widget.expanded ?? open;
     return UiComponentFrame(
       state: widget.state,
       textEquivalent: widget.textEquivalent,
@@ -339,19 +358,19 @@ class _DisclosureState extends State<Disclosure> {
         children: [
           Semantics(
             button: true,
-            expanded: open,
+            expanded: expanded,
             label: widget.title,
             excludeSemantics: true,
-            onTap: enabled ? () => setState(() => open = !open) : null,
+            onTap: enabled ? toggle : null,
             child: InkWell(
               key: const ValueKey('disclosure-toggle'),
               borderRadius: BorderRadius.circular(MuyonTokens.radius),
-              onTap: enabled ? () => setState(() => open = !open) : null,
+              onTap: enabled ? toggle : null,
               child: UiMinTarget(
                 child: Row(
                   children: [
                     Icon(
-                      open ? Icons.expand_less : Icons.expand_more,
+                      expanded ? Icons.expand_less : Icons.expand_more,
                       color: t.ink2,
                       size: MuyonTokens.iconSize,
                     ),
@@ -368,7 +387,7 @@ class _DisclosureState extends State<Disclosure> {
               ),
             ),
           ),
-          if (open)
+          if (expanded)
             Padding(
               padding: const EdgeInsets.only(top: MuyonTokens.space2),
               child: widget.child,

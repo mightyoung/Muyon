@@ -8,13 +8,19 @@ void main() {
   Future<void> show(WidgetTester tester, Widget child) =>
       mount(tester, child, width: 800, scale: 1);
 
-  testWidgets('Choice identifies duplicate labels by stable IDs', (tester) async {
+  testWidgets('Choice identifies duplicate labels by stable IDs', (
+    tester,
+  ) async {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final changes = <Set<String>>[];
     Choice choice(List<String> ids, Set<String> selected) => Choice(
-      key: const ValueKey('ids'), label: '供应商',
-      options: const ['同名', '同名'], optionIds: ids, selectedIds: selected,
-      multiple: true, onChangedIds: changes.add,
+      key: const ValueKey('ids'),
+      label: '供应商',
+      options: const ['同名', '同名'],
+      optionIds: ids,
+      selectedIds: selected,
+      multiple: true,
+      onChangedIds: changes.add,
       selected: const {'legacy'},
       onChanged: (_) => fail('ID mode must not call the legacy label callback'),
     );
@@ -22,7 +28,9 @@ void main() {
     expect(find.byKey(const ValueKey('choice-b')), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('choice-b')));
     await tester.pump();
-    expect(changes, [{'a', 'b'}]);
+    expect(changes, [
+      {'a', 'b'},
+    ]);
     await show(tester, choice(['b', 'a'], {'a'}));
     await tester.tap(find.byKey(const ValueKey('choice-a')));
     await tester.pump();
@@ -30,24 +38,38 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Choice ID mode disables custom entry and maps reading to labels', (tester) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final choice = Choice(label: '选项', options: const ['甲'],
-      optionIds: const ['internal-a'], selectedIds: const {'internal-a'},
-      allowCustom: true, onChangedIds: (_) {});
-    await show(tester, choice);
-    expect(find.byKey(const ValueKey('choice-custom')), findsNothing);
-    expect(choice.textEquivalent, contains('已选 甲'));
-    expect(choice.textEquivalent, isNot(contains('internal-a')));
-  });
+  testWidgets(
+    'Choice ID mode disables custom entry and maps reading to labels',
+    (tester) async {
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final choice = Choice(
+        label: '选项',
+        options: const ['甲'],
+        optionIds: const ['internal-a'],
+        selectedIds: const {'internal-a'},
+        allowCustom: true,
+        onChangedIds: (_) {},
+      );
+      await show(tester, choice);
+      expect(find.byKey(const ValueKey('choice-custom')), findsNothing);
+      expect(choice.textEquivalent, contains('已选 甲'));
+      expect(choice.textEquivalent, isNot(contains('internal-a')));
+    },
+  );
 
-  testWidgets('controlled Tabs request change and wait for host selection', (tester) async {
+  testWidgets('controlled Tabs request change and wait for host selection', (
+    tester,
+  ) async {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final changes = <int>[];
     MuyonTabs tabs(int selected) => MuyonTabs(
-      key: const ValueKey('controlled-tabs'), labels: const ['甲', '乙'],
+      key: const ValueKey('controlled-tabs'),
+      labels: const ['甲', '乙'],
       children: const [Text('甲内容'), Text('乙内容')],
-      initial: 1, selectedIndex: selected, onChanged: changes.add);
+      initial: 1,
+      selectedIndex: selected,
+      onChanged: changes.add,
+    );
     await show(tester, tabs(0));
     expect(find.text('甲内容'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('tab-1')));
@@ -59,29 +81,55 @@ void main() {
     expect(find.text('乙内容'), findsOneWidget);
   });
 
-  testWidgets('controlled Disclosure requests change and waits for host state', (tester) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final changes = <bool>[];
-    Disclosure disclosure(bool expanded) => Disclosure(
-      key: const ValueKey('controlled-disclosure'), title: '详情',
-      child: const Text('详情内容'), expanded: expanded, onChanged: changes.add);
-    await show(tester, disclosure(true));
-    expect(find.text('详情内容'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('disclosure-toggle')));
-    await tester.pump();
-    expect(changes, [false]);
-    expect(find.text('详情内容'), findsOneWidget);
-    await show(tester, disclosure(false));
-    expect(find.text('详情内容'), findsNothing);
-  });
+  testWidgets(
+    'controlled Disclosure requests change and waits for host state',
+    (tester) async {
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final changes = <bool>[];
+      Disclosure disclosure(bool expanded) => Disclosure(
+        key: const ValueKey('controlled-disclosure'),
+        title: '详情',
+        child: const Text('详情内容'),
+        expanded: expanded,
+        onChanged: changes.add,
+      );
+      await show(tester, disclosure(true));
+      expect(find.text('详情内容'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('disclosure-toggle')));
+      await tester.pump();
+      expect(changes, [false]);
+      expect(find.text('详情内容'), findsOneWidget);
+      await show(tester, disclosure(false));
+      expect(find.text('详情内容'), findsNothing);
+    },
+  );
 
-  testWidgets('controlled layouts without callbacks stay read only', (tester) async {
+  testWidgets('controlled layouts without callbacks stay read only', (
+    tester,
+  ) async {
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await show(tester, MuyonTabs(labels: ['甲', '乙'],
-      children: [Text('甲内容'), Text('乙内容')], selectedIndex: 0));
-    expect(tester.widget<InkWell>(find.byKey(const ValueKey('tab-1'))).onTap, isNull);
-    await show(tester, const Disclosure(title: '详情', child: Text('详情内容'), expanded: true));
-    expect(tester.widget<InkWell>(find.byKey(const ValueKey('disclosure-toggle'))).onTap, isNull);
+    await show(
+      tester,
+      MuyonTabs(
+        labels: ['甲', '乙'],
+        children: [Text('甲内容'), Text('乙内容')],
+        selectedIndex: 0,
+      ),
+    );
+    expect(
+      tester.widget<InkWell>(find.byKey(const ValueKey('tab-1'))).onTap,
+      isNull,
+    );
+    await show(
+      tester,
+      const Disclosure(title: '详情', child: Text('详情内容'), expanded: true),
+    );
+    expect(
+      tester
+          .widget<InkWell>(find.byKey(const ValueKey('disclosure-toggle')))
+          .onTap,
+      isNull,
+    );
     expect(find.text('详情内容'), findsOneWidget);
   });
 }
