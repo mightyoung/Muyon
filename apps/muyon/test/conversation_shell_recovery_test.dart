@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
 import 'package:muyon/app/app_shell.dart';
 import 'package:muyon/app/bootstrap.dart';
-import 'package:muyon/app/module_catalog.dart';
 import 'package:muyon/platform/backup_service.dart';
 import 'package:muyon/screens/assistant_page.dart';
 import 'package:muyon/screens/platform_shell.dart';
@@ -17,7 +16,7 @@ import 'package:muyon_ui/dynamic_ui.dart';
 
 import 'support/ui_navigation_fixture.dart';
 import 'support/conversation_workspace_fixture.dart';
-import 'support/fake_v2_module.dart';
+import 'support/inquiry_navigation_lease_fixture.dart';
 
 Future<void> _unmountRecovery(WidgetTester tester) async {
   try {
@@ -66,28 +65,8 @@ class _ReceiptSession extends DynamicWorkspaceSession {
   }
 }
 
-class _GenerationLeaseRuntime extends FakeRuntime implements ObjectPages {
-  _GenerationLeaseRuntime(super.resources);
-  int released = 0;
-  int opened = 0;
-  Completer<void>? openBarrier, openEntered, releaseBarrier;
-  @override
-  Future<ObjectPageLease?> open(BuildContext context, ObjectRef ref) async {
-    opened++;
-    if (openEntered != null && !openEntered!.isCompleted) openEntered!.complete();
-    await openBarrier?.future;
-    return ObjectPageLease(
-      title: '宿主换代插件页', page: const Text('注册插件租用页'),
-      dispose: () async {
-        await releaseBarrier?.future;
-        released++;
-      },
-    );
-  }
-}
-
-FakeV2Module _leaseModule() => FakeV2Module('lease', features: {ModuleFeature.objectPages},
-  runtimeFactory: _GenerationLeaseRuntime.new);
+InquiryNavigationModule _leaseModule(MuyonHost Function() host) =>
+    InquiryNavigationModule(host, marker: '注册插件租用页', pageTitle: '宿主换代插件页');
 
 void main() {
   const ref = ObjectRef(moduleId: 'removed-plugin', objectType: 'item', objectId: 'saved');
@@ -125,8 +104,10 @@ void main() {
   }
 
   testWidgets('host_generation_replaces_old_listeners_and_leases', (tester) async {
-    final module = _leaseModule();
-    final f = await NavigationFixture.open(tester, extra: [module]);
+    late NavigationFixture f;
+    final module = _leaseModule(() => f.host);
+    f = await NavigationFixture.open(tester, extra: [module]);
+    final object = await seedPinnedInquiry(tester, f);
     _registerRecoveryCleanup(tester, f);
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
@@ -162,12 +143,11 @@ void main() {
     await tester.pumpWidget(MuyonApp(host: f.host, openHost: (root) async {
       reopenEntered.complete();
       await reopenRelease.future;
-      return fresh = await MuyonHost.open(root, modules: [_leaseModule(), ...moduleCatalog()]);
+      return fresh = await MuyonHost.open(root);
     }));
     await tester.pumpAndSettle();
     final shell = tester.widget<PlatformShell>(find.byType(PlatformShell));
     final open = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
-    const object = ObjectRef(moduleId: 'lease', objectType: 'note', objectId: 'registered-note');
     await open(DynamicWorkspace(repository: f.host.foundation, host: f.host, taskId: 'task',
       surfaceId: 'comparison', plan: f.plan(object)));
     await workspaceReady(tester);
@@ -175,9 +155,10 @@ void main() {
     final oldSurface = c.surface;
     final node = oldSurface.current.plan.nodes.firstWhere((n) => n.id == 'quantity');
     final event = oldSurface.eventFor(node, 'change', '91');
-    await tester.tap(find.text('查看对象 · lease'));
+    await tester.tap(find.text('查看对象 · inquiry'));
     await workspaceVisible(tester, find.text('注册插件租用页'));
-    final runtime = module.runtime! as _GenerationLeaseRuntime;
+    expect(find.text('真实询价对象'), findsWidgets);
+    final runtime = module.runtime!;
     final leaseRelease = Completer<void>();
     runtime.releaseBarrier = leaseRelease;
     addTearDown(() { if (!leaseRelease.isCompleted) leaseRelease.complete(); });
@@ -245,8 +226,10 @@ void main() {
 
   for (final resize in [false, true]) {
     testWidgets('restore_during_registered_page_open_stops_late_presentation (resize $resize)', (tester) async {
-      final module = _leaseModule();
-      final f = await NavigationFixture.open(tester, extra: [module]);
+      late NavigationFixture f;
+      final module = _leaseModule(() => f.host);
+      f = await NavigationFixture.open(tester, extra: [module]);
+      final object = await seedPinnedInquiry(tester, f);
       _registerRecoveryCleanup(tester, f);
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = const Size(1280, 900);
@@ -277,22 +260,21 @@ void main() {
         }
       });
       await tester.pumpWidget(MuyonApp(host: f.host, openHost: (root) async =>
-        fresh = await MuyonHost.open(root, modules: [_leaseModule(), ...moduleCatalog()])));
+        fresh = await MuyonHost.open(root)));
       await tester.pumpAndSettle();
       final shell = tester.widget<PlatformShell>(find.byType(PlatformShell));
       final open = tester.widget<AssistantPage>(find.byType(AssistantPage)).onOpenWorkspace!;
-      const object = ObjectRef(moduleId: 'lease', objectType: 'note', objectId: 'late-page');
       await open(DynamicWorkspace(repository: f.host.foundation, host: f.host, taskId: 'task',
         surfaceId: 'comparison', plan: f.plan(object)));
       await workspaceReady(tester);
       final session = tester.widget<DynamicWorkspace>(find.byType(DynamicWorkspace)).session!;
-      await workspaceOperation(tester, () => f.host.modules.runtimeFor('lease'));
-      final runtime = module.runtime! as _GenerationLeaseRuntime;
+      await workspaceOperation(tester, () => f.host.modules.runtimeFor('inquiry'));
+      final runtime = module.runtime!;
       final entered = Completer<void>(), release = Completer<void>();
       runtime.openEntered = entered;
       runtime.openBarrier = release;
       addTearDown(() { if (!release.isCompleted) release.complete(); });
-      await tester.tap(find.text('查看对象 · lease'));
+      await tester.tap(find.text('查看对象 · inquiry'));
       await workspaceOperation(tester, () => entered.future);
       final pending = session.pendingReferenceNavigation;
       expect(pending, isNotNull);
@@ -302,7 +284,7 @@ void main() {
         await workspaceReady(tester);
         expect(tester.widget<DynamicWorkspace>(find.byType(DynamicWorkspace)).session, same(session));
       }
-      final source = find.widgetWithText(TextButton, '查看对象 · lease');
+      final source = find.widgetWithText(TextButton, '查看对象 · inquiry');
       expect(tester.widget<TextButton>(source).onPressed, isNull);
       await tester.tap(source); // A disabled source cannot replace the pending owner.
       await tester.pump();
@@ -343,8 +325,10 @@ void main() {
   }
 
   testWidgets('resizing_inflight_reference_keeps_owner_and_reenables_source', (tester) async {
-    final module = _leaseModule();
-    final f = await NavigationFixture.open(tester, extra: [module]);
+    late NavigationFixture f;
+    final module = _leaseModule(() => f.host);
+    f = await NavigationFixture.open(tester, extra: [module]);
+    final object = await seedPinnedInquiry(tester, f);
     _registerRecoveryCleanup(tester, f);
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1280, 900);
@@ -355,24 +339,23 @@ void main() {
       open = opener;
       return const Scaffold(body: Text('父对话'));
     })));
-    const object = ObjectRef(moduleId: 'lease', objectType: 'note', objectId: 'inflight-page');
     await open!(DynamicWorkspace(repository: f.host.foundation, host: f.host,
       taskId: 'task', surfaceId: 'comparison', plan: f.plan(object)));
     await workspaceReady(tester);
     final session = tester.widget<DynamicWorkspace>(find.byType(DynamicWorkspace)).session!;
-    await workspaceOperation(tester, () => f.host.modules.runtimeFor('lease'));
-    final runtime = module.runtime! as _GenerationLeaseRuntime;
+    await workspaceOperation(tester, () => f.host.modules.runtimeFor('inquiry'));
+    final runtime = module.runtime!;
     final entered = Completer<void>(), release = Completer<void>();
     runtime.openEntered = entered;
     runtime.openBarrier = release;
     addTearDown(() { if (!release.isCompleted) release.complete(); });
-    await tester.tap(find.text('查看对象 · lease'));
+    await tester.tap(find.text('查看对象 · inquiry'));
     await workspaceOperation(tester, () => entered.future);
     final pending = session.pendingReferenceNavigation!;
     tester.view.physicalSize = const Size(390, 900);
     await workspaceReady(tester);
     expect(tester.widget<DynamicWorkspace>(find.byType(DynamicWorkspace)).session, same(session));
-    final source = find.widgetWithText(TextButton, '查看对象 · lease');
+    final source = find.widgetWithText(TextButton, '查看对象 · inquiry');
     expect(tester.widget<TextButton>(source).onPressed, isNull);
     await tester.tap(source);
     expect(session.pendingReferenceNavigation, same(pending));
@@ -386,6 +369,7 @@ void main() {
     expect(tester.widget<TextButton>(source).onPressed, isNotNull);
     await tester.tap(source);
     await workspaceVisible(tester, find.text('注册插件租用页'));
+    expect(find.text('真实询价对象'), findsWidgets);
     expect(runtime.opened, 2);
     await workspaceOperation(tester, tester.pageBack);
     await workspaceGone(tester, find.text('注册插件租用页'));

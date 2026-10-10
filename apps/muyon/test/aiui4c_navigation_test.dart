@@ -13,6 +13,7 @@ import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
+import 'package:research_module/research_module.dart';
 
 import '../../../packages/muyon_ui/test/aiui5_revision2_review_test.dart' show reviewPlan;
 import 'support/conversation_workspace_fixture.dart';
@@ -40,11 +41,11 @@ class _NavigationRuntime extends FakeRuntime implements ObjectPages {
 // Uses the production Inquiry adapter/schema/database and its real object
 // resolver. The wrapper holds an actual lease only to control the await window.
 class _SupportedModule extends InquiryBusinessModule {
-  _SupportedModule(MuyonHost Function() host) : super(host);
+  _SupportedModule(super.host);
   int activations = 0;
   _SupportedRuntime? runtime;
   @override
-  final manifest = ModuleManifest(id: 'inquiry', apiVersion: 2,
+  ModuleManifest get manifest => ModuleManifest(id: 'inquiry', apiVersion: 2,
     features: {ModuleFeature.importPipeline, ModuleFeature.objectPages},
     capabilities: {const CapabilityRequest(id: 'ocr', reason: 'lease barrier fixture')});
   @override
@@ -60,14 +61,14 @@ class _SupportedModule extends InquiryBusinessModule {
 class _SupportedRuntime extends FakeRuntime implements ObjectPages {
   _SupportedRuntime(super.resources, this.actual);
   final InquiryModuleRuntime actual;
-  int opened = 0, released = 0;
+  int opened = 0, released = 0, rejected = 0;
   Completer<void>? entered, release;
   @override
   Future<ModuleSession> openSession(WorkspaceBinding binding) => actual.openSession(binding);
   @override
   Future<ObjectPageLease?> open(BuildContext context, ObjectRef ref) async {
     final lease = await actual.open(context, ref);
-    if (lease == null) return null;
+    if (lease == null) { rejected++; return null; }
     opened++;
     entered?.complete();
     await release?.future;
@@ -387,6 +388,105 @@ void main() {
       expect(find.text('注册对象 public-note'), findsNothing);
       expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
       expect(session.controller!.surface.session.userOverrides['count'], 3.0);
+      expect(calls, 0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('real Research full-pin object lacks trusted source and cannot navigate width=$width', (tester) async {
+      _viewport(tester, width);
+      final f = await NavigationFixture.open(tester);
+      addTearDown(() => _unmount(tester));
+      final entry = await f.seedObject(tester, 'research');
+      final run = await workspaceOperation(tester, () async {
+        final store = f.host.research!.store;
+        final task = store.saveTask(projectId: entry.nativeProjectId!,
+          title: '研究无受信来源夹具', goal: '公开只读导航', spec: {});
+        return store.startManualRun(task); // Records data; launches no command/model.
+      });
+      final runtime = (await workspaceOperation(tester,
+        () => f.host.modules.runtimeFor('research')))! as ScopeResolvable;
+      final resolver = await workspaceOperation(tester, runtime.openScopeSession);
+      ObjectRef ref;
+      try {
+        final view = await workspaceOperation(tester, () => resolver.resolve(ObjectRef(
+          moduleId: 'research', objectType: 'run', objectId: run.id,
+          nativeProjectId: entry.nativeProjectId)));
+        expect(view, isNotNull);
+        expect(view!.ref.revisionRef, isNotNull);
+        expect(view.ref.contentDigest, isNotNull);
+        ref = view.ref; // Both pins come from the actual production resolver.
+      } finally {
+        await workspaceOperation(tester, resolver.dispose);
+      }
+      expect(f.host.modules.scopeAuthorityRevision('research'), isNotNull);
+      expect(f.host.scopeAuthority.stamp(const AssistantScope.global(), {'research'}), isNull);
+      var calls = 0;
+      final session = await _show(tester, f.host, _plan('Choice', ref), () { calls++; });
+      await tester.tap(find.byKey(const ValueKey('stepper-plus')));
+      await workspaceOperation(tester, session.controller!.flush);
+      final snapshot = session.controller!.surface.current.snapshot;
+      final scope = HostUiWorkspaceStore(f.host.foundation, taskId: 'task').scopeKey;
+      final bytes = f.host.foundation.database.raw.select(
+        'SELECT value FROM settings WHERE key=?', ['ui-workspace:["task","s"]'],
+      ).single['value'];
+      final tools = f.host.tools.history().length;
+      await tester.tap(find.text('查看对象 · research'));
+      await workspaceVisible(tester, find.textContaining('无法打开引用，原草稿仍保留'));
+      expect(find.byType(ResearchRunPage), findsNothing);
+      expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
+      expect(session.controller!.surface.current.snapshot, same(snapshot));
+      expect(HostUiWorkspaceStore(f.host.foundation, taskId: 'task').scopeKey, scope);
+      expect(session.controller!.surface.session.userOverrides['count'], 3.0);
+      expect(f.host.foundation.database.raw.select(
+        'SELECT value FROM settings WHERE key=?', ['ui-workspace:["task","s"]'],
+      ).single['value'], bytes);
+      expect(f.host.tools.history().length, tools);
+      expect(calls, 0);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('inactive Inquiry preparation rejects changed pinned SQLite object width=$width', (tester) async {
+      _viewport(tester, width);
+      final supported = await _supported(tester);
+      final f = supported.fixture;
+      MuyonHost? fresh;
+      addTearDown(() async {
+        try { await _unmount(tester); }
+        finally { if (fresh != null) await workspaceOperation(tester, fresh.close); }
+      });
+      var calls = 0;
+      final plan = _plan('Choice', supported.ref);
+      final original = await _show(tester, f.host, plan, () { calls++; });
+      await tester.tap(find.byKey(const ValueKey('stepper-plus')));
+      await workspaceOperation(tester, original.controller!.flush);
+      await _unmount(tester);
+      final store = f.host.inquiry!.runtime.state.store;
+      final before = store.get('project', supported.ref.objectId)!;
+      await workspaceOperation(tester, () async {
+        store.save('project', {...before.data, 'name': '初始化前已变化对象'}, id: before.id);
+      });
+      expect(store.get('project', before.id)!.version.toString(), isNot(supported.ref.revisionRef));
+      await workspaceOperation(tester, f.host.close);
+      final module = _SupportedModule(() => fresh!);
+      fresh = await workspaceOperation(tester, () => MuyonHost.open('${f.root.path}/data',
+        modules: [module, ...moduleCatalog()]));
+      final restored = await _show(tester, fresh!, plan, () { calls++; });
+      expect(module.activations, 0);
+      final snapshot = restored.controller!.surface.current.snapshot;
+      final scope = HostUiWorkspaceStore(fresh!.foundation, taskId: 'task').scopeKey;
+      await tester.tap(find.text('查看对象 · inquiry'));
+      await workspaceVisible(tester, find.textContaining('无法打开引用，原草稿仍保留'));
+      expect(module.activations, 1);
+      expect(module.runtime!.rejected, 1); // Actual pinned Inquiry resolver rejected.
+      expect(module.runtime!.opened, 0);
+      expect(module.runtime!.released, 0); // No actual lease was obtained.
+      expect(fresh!.scopeAuthority.stamp(const AssistantScope.global(), {'inquiry'}), isNotNull);
+      expect(restored.controller!.surface.current.snapshot, same(snapshot));
+      expect(HostUiWorkspaceStore(fresh!.foundation, taskId: 'task').scopeKey, scope);
+      expect(restored.controller!.surface.session.userOverrides['count'], 3.0);
+      expect(find.text('初始化前已变化对象'), findsNothing);
+      expect(find.text('真实询价对象'), findsNothing);
+      expect(find.byType(ConversationWorkspaceBody), findsOneWidget);
       expect(calls, 0);
       expect(tester.takeException(), isNull);
     });

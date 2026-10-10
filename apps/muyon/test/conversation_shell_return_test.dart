@@ -10,6 +10,7 @@ import 'package:muyon/platform/ui_navigation_anchors.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
 import 'support/ui_navigation_fixture.dart';
+import 'support/inquiry_navigation_lease_fixture.dart';
 import 'support/conversation_workspace_fixture.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
@@ -86,7 +87,7 @@ void main() {
       await _unmountAndDrain(tester);
       await _closeAndDrain(tester, f.host.close);
     });
-    final ref = await f.seedObject(tester, 'research');
+    final ref = await seedPinnedInquiry(tester, f);
     final plan = f.plan(ref);
     Future<void> show(MuyonHost host) async {
       await tester.pumpWidget(MaterialApp(home: DynamicWorkspace(
@@ -105,9 +106,9 @@ void main() {
     expect(c.scrollOffset, greaterThan(0));
     // Keep the reference target visible while retaining a nonzero offset.
     // Start plugin/session IO in the real zone, then wait for its actual page.
-    await tester.runAsync(() => tester.tap(find.text('查看对象 · research')));
-    await workspaceVisible(tester, find.text('真实研究对象'));
-    expect(find.text('真实研究对象'), findsWidgets);
+    await tester.runAsync(() => tester.tap(find.text('查看对象 · inquiry')));
+    await workspaceVisible(tester, find.text('真实询价对象'));
+    expect(find.text('真实询价对象'), findsWidgets);
     final store = HostUiWorkspaceStore(f.host.foundation, taskId: 'task');
     final saved = (await store.load(plan.plan.surfaceId))!;
     final anchor = (await store.loadNavigationAnchor(plan.plan.surfaceId))!;
