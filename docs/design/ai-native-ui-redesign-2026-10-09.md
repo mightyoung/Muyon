@@ -13,10 +13,13 @@
   展示加载/空/失败/重试；目的地去用户信息、query及fragment。数据去向打开既有
   DataFlow页面，该旧页的端点/错误展示不继承控制页的新脱敏保证。没有签发、撤销、
   policy写入或自动发送；自动/少用/只文字三档、权限编辑与真机无障碍仍未交付。
-- **F4c固定快照片**：当前已验证计划所绑定collection中的fact/sourceSpan可沿既有
-  引用入口导航；保存与插件页await前后复核任务、scope、对象/来源身份并释放lease。
+- **F4c固定快照片**：当前已验证计划所绑定collection中的fact引用可沿既有
+  外围引用入口导航；collection cell仍只准入fact/computed，不新增sourceSpan准入。
+  保存与插件页await前后仅复核任务、scope和当前snapshot身份，并释放lease；
+  独立审查确认最终宿主撤权检查缺口，当前阻断集成，不能称完整H3已经交付。
   typed Choice/Checklist/CompareTable往返、SQLite重开、scope失效和CAS拒绝有行为测试；
   使用注册公共协议夹具，不代表真实询价/科研页面或同mounted工作区热发布验收。
+  CompareTable行详情callback未接线；对象/来源最终实时证明仍需补齐。
 - **AIUI-9**：只读适配当前已激活询价模块的真实保存快照，按已注册v2本体和完整
   pinned ObjectRef核项目、scope、revision/digest及lifecycle。可信宿主KeyValue模板
   分开展示保存事实与“建议（尚未写入）”，凭据排除、敏感/未核验值遮盖，复用显示预算。

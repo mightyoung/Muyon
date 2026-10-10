@@ -123,8 +123,10 @@ F5六项细化的[leader技术采纳记录](../tasks/AIUI-5-leader-contract-deci
 
 上述“尚未合”仅指7773历史快照，当前来源与验收以[本批集成审查](../tasks/AIUI-36-39-integration-review.md)
 及既有各片审查记录为准。本批不修改操作集、上限、目录、共享校验、路由或模型权限。
-F4c只从当前已验证计划绑定的collection提取宿主fact/source引用，并在导航await后复核
-当前身份和scope；没有接受模型生成的值、页面授权或行tap业务mapping。
+F4c只从当前已验证计划绑定的collection提取宿主fact引用；collection cell仍只准入
+fact/computed。当前导航await后复核snapshot身份和task scope，不能代替最终宿主实时
+授权或对象版本证明；独立审查确认该缺口阻断集成。没有接受模型生成的值、页面授权
+或行tap业务mapping。
 AIUI-9为宿主固定只读KeyValue模板，不接模型UIPlan、模型组件/动作或可执行回调，
 保存事实与建议分开、凭据排除、显示预算复用；它不代表动态编辑卡或写工具流程已完成。
 控制页的只读授权查询不等于授权签发入口；新的完整组合与发布CI单独核验。

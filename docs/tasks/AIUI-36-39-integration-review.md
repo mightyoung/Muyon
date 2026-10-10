@@ -36,14 +36,19 @@
   整字段排除，其余敏感/未核验值遮盖；模型不给组件、路由或callback。数量、单项与总预算
   含建议，未知版本/类型只读，能力说明来自真实registry；全部提交禁用，未接业务写卡或页面。
 - collection引用仅来自当前已验证plan绑定的集合及宿主facts/sources；导航checkpoint及await
-  前后复核任务/作用域/当前对象或来源身份，finally释放lease。未新增行tap业务mapping或授权。
+  前后复核任务/作用域/当前snapshot身份，finally释放lease。该检查不等于最终宿主权限或
+  实时对象revision/digest证明。未新增行tap业务mapping或授权；collection cell仍仅fact/computed。
 - 持久化复用同事务scope/revision CAS，失败不覆盖赢家或pop；CAS后才安装，await中fence
   失效要求重开。成功CAS后旧验证投影可能已写盘的原有界限制保留，不伪称磁盘/内存全部回滚。
 - 三路动作、captured plan、pending/receipt锁、共享validator/renderer与stream坏行否决保留。
   既有整库测试包含33schema的stream2/final校验/实际render、typed输入payload、legacy边界、
   codec roundtrip、未知operation不replay、跨SQLite恢复、两实例CAS与壳层拒绝行为，不只构造器烟测。
 
-安全链路与谱系静态核实无新增确定阻断；全组件审查及新组合CI结论在发布前补记。
+两名非作者独立审查交叉确认当前导航撤权缺口，撤回此前中间合入建议：
+真实询价lease返回至外围await恢复间，现有revokeCapability使module runtime失效，
+却不改变task scope或snapshot，现有最终检查仍可能push旧页面。当前阻断合入；
+原owner负责复用现成module authority fence并加晚lease行为回归，修复后重新冻结审查与组合CI。
+对象/来源最终实时证明仍待核，不能以固定snapshot代替完整H3。其余33组件契约未见新增确定回归。
 核实代理亲跑9个checker、5个DA、10个gate行为测试及bash语法/diff检查通过。
 旧source CI不替代本批新增完整组合与develop发布CI；原始日志/逐行诊断不入仓库。
 
