@@ -105,3 +105,16 @@ UI包可跑 `flutter test test/dynamic_events_test.dart test/workspace_controlle
 原始日志留 `/tmp` / Actions artifact 不入仓。摘要必须记完整提交SHA、run URL、实际merge tree SHA与对应源tree、pass/fail/skip/not-run分类；新未来场景仍单独14项not-run，即使当前全仓CI绿也不改成已通过。基线连接器workflow查询仅返回PR-triggered第一页且为空，不据此认定该SHA无CI或已通过。
 
 父任务下一步仅需审查本文范围，并在Claude冻结包正式采纳后派阶段2；本分支未改stream/catalog/schema/surfacecontroller、验收账本或生产开关。
+
+
+## 6. F5c 固定接口后的独立候选切片
+
+父任务后来允许消费 PR21 固定 HEAD `97a2e8263a5f38b5659b4123b78fadea90eb35f9`。该未合入依赖的两个提交按顺序 cherry-pick；仅三个 F5c 依赖文件与固定 HEAD 完全一致，没有引入其 develop 上 Dream/resume 的无关变化。第1—5节是阶段1历史基线，不代表后来接口仍未获技术采纳；也不代表生产启用获批准。
+
+本切片仅新增宿主 `apps/muyon/lib/platform/ui_recompute_adapter.dart` 和扩展自己的独立测试。适配器消费 `UiRecomputePort/Input/Result/Token/VersionBatch`，真实调用 F3a registry；对全部展示 computed 实例重算并保存诊断 fingerprint，重新生成 snapshot/intent/plan 并调用真实 validator。它不做 publish、CAS、调度或业务 IO，不注册生产入口。共享 schema/stream/catalog/state/controller/renderer/workspace/export 均由原 owner 管理。PR21 尚无 public export，暂用带说明的单行 implementation_imports 抑制，待 H2 替换。
+
+当前只支持既有 minimal/dynamic 标量预览；非 view 参数集合来自可信宿主声明，未冒充新版 editSpecs/collection/library-2 验收。下一版 snapshot.initialUiState 保留提取值2，冻结 currentUiState 独立为3/4。金额固定断言30/40；另一个无数量依赖的展示实例以旧值999作为污染输入，要求实际重算到固定20。合法 typed 数量3配事实单位冲突触发真实 F3a unit_mismatch；参数不改写，候选不产生。不可用事实生成 null computed，保留事实状态和诊断，不能沿用20；未声明/view或非 String 槽位在 evaluator 前拒绝。候选不继承旧业务 actionContext，删除 business 事件和 allowed refs，真实业务映射仍关闭。
+
+原 `edit_qty_3_publishes_fixed_total_30` / `edit_qty_4_publishes_fixed_total_40` 保留同 mounted controller 与独立常量断言。固定接口没有原子发布/rebase 实现，不能新建 controller 或手动替换 computed 来把两条 RED 变绿。候选测试通过也只证明 adapter，14个未来场景仍 not-run；并发/迟到/权限/来源/恢复/CAS/稳定行/readOnly 都待真实 owner 接口组合。
+
+后续 guard 测试必须分别冻结 snapshot、plan 和 draft revision 的旧回调，禁止用 eventFor 动态重映射伪造旧事件。数量 `oops` 应被 decimal spec 拒绝且 accepted draft 不变，不把 raw buffer 当参数；另保留合法3的公式失败。恢复验收增加 edit→publish→save→reopen→adoptExtracted 后回到2，提取值不随候选变3。H3 详情导航在 checkpoint 和 page lease 每次 await 后复核冻结 token，最后检查和 push 连续同步执行；失效 lease 必须释放。以上尚未实现，不计为通过。
