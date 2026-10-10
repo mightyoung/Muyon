@@ -84,8 +84,10 @@ class UiSurfaceController extends ChangeNotifier {
     this.publishTokenProbe,
     this.readOnlyProbe,
     bool Function()? externalContentProbe,
-  }) : _externalContentProbe = externalContentProbe,
-       _publication = UiPublicationCoordinator(plan) {
+  }) : _publication = UiPublicationCoordinator(plan) {
+    if (externalContentProbe != null) {
+      attachExternalContentProbe(externalContentProbe);
+    }
     if ((recomputePort == null) != (publishTokenProbe == null)) {
       throw ArgumentError('Provide both recomputePort and publishTokenProbe');
     }
@@ -328,7 +330,9 @@ class UiSurfaceController extends ChangeNotifier {
     }
     final action = current.catalog.actions[node.events[kind]!.actionRef];
     if (action?.route == UiActionRoute.business &&
-        capture.externalContent != hasExternalContent) return UiDispatchOutcome.stale;
+        capture.externalContent != hasExternalContent) {
+      return UiDispatchOutcome.stale;
+    }
     return dispatch(eventForCapture(capture, node, kind, payload));
   }
 

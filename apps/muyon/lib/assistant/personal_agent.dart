@@ -291,8 +291,10 @@ class PersonalAgent {
   final _uiPreferenceSaves = <Future<void>>{};
   Future<void> saveUiPlanningPreference(bool enabled) {
     if (_ctx.closing) return Future.error(StateError('Assistant is closing'));
-    if (presentationPreference != null) return savePresentationMode(
-      enabled ? UiPresentationMode.automatic : UiPresentationMode.textOnly);
+    if (presentationPreference != null) {
+      return savePresentationMode(
+        enabled ? UiPresentationMode.automatic : UiPresentationMode.textOnly);
+    }
     final future = UiPlanningPreference(repository).save(enabled).then((_) {
       configureUiPlanning(enabled: enabled);
       repository.refresh();

@@ -24,7 +24,9 @@ class InquiryUiPlanningSource {
         {PersonalTaskState.failed, PersonalTaskState.cancelled, PersonalTaskState.interrupted}.contains(task.state) ||
         jsonEncode(task.scope.toJson()) != jsonEncode(conversation.scope.toJson()) ||
         task.scope.kind != AssistantScopeKind.selectedObjects ||
-        task.scope.objects.isEmpty || task.scope.objects.length > InquiryReadonlySnapshots.maxSelectionObjects) return null;
+        task.scope.objects.isEmpty || task.scope.objects.length > InquiryReadonlySnapshots.maxSelectionObjects) {
+      return null;
+    }
     final refs = task.scope.objects.where((ref) => ref.moduleId == 'inquiry' &&
       const {'inquiry', 'quotation', 'project_item'}.contains(ref.objectType));
     if (refs.isEmpty) return null;
@@ -35,7 +37,9 @@ class InquiryUiPlanningSource {
     if (lifecycle == null || authority == null ||
         host.modules.scopeAuthorityRevision('inquiry') != lifecycle ||
         host.workspaces.scopeAuthorityRevision != authority ||
-        jsonEncode(host.foundation.conversation(task.conversationId)?.scope.toJson()) != jsonEncode(task.scope.toJson())) return null;
+        jsonEncode(host.foundation.conversation(task.conversationId)?.scope.toJson()) != jsonEncode(task.scope.toJson())) {
+      return null;
+    }
     final object = selected.record.object;
     final facts = <String, SnapshotFact>{
       'saved-source': SnapshotFact(object: object, field: '来源对象及修订',

@@ -109,7 +109,9 @@ class UiPlanningHarness {
     }
     final state = await source(task);
     if (!(allowsPresentation?.call(taskId) ?? true) ||
-        !identical(identity, presentationIdentity?.call(taskId))) return fallback('host_request_changed');
+        !identical(identity, presentationIdentity?.call(taskId))) {
+      return fallback('host_request_changed');
+    }
     if (state == null) return fallback('host_state_unavailable');
     if (expected != null &&
         (expected.length != 4 ||
@@ -263,7 +265,9 @@ class UiPlanningHarness {
     final provider = providers[selectedMode];
     if (provider == null) return fallback('provider_unavailable', request);
     if (!enabled || !(allowsPresentation?.call(task.id) ?? true) ||
-        !identical(identity, presentationIdentity?.call(task.id))) return fallback('host_request_changed', request);
+        !identical(identity, presentationIdentity?.call(task.id))) {
+      return fallback('host_request_changed', request);
+    }
     _requestIdentities[request] = identity;
     try {
       final result = await provider.plan(request).timeout(

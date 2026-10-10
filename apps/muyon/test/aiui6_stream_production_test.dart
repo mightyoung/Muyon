@@ -18,7 +18,7 @@ import 'support/aiui6_snapshot_fixture.dart';
 
 String node(String id, String component, {String? parent, Map<String, Object?> props = const {},
     Map<String, Object?> bind = const {}}) => jsonEncode({
-  'op': 'node', 'id': id, 'component': component, if (parent != null) 'parent': parent,
+  'op': 'node', 'id': id, 'component': component, 'parent': ?parent,
   'props': props, 'bind': bind});
 String get validStream => '${node('root', 'PageScaffold', props: {'title': '保存事实'})}\n'
   '${node('fact', 'KeyValue', parent: 'root', bind: {'value': {'kind': 'fact', 'id': 'value'}})}\n'
@@ -49,7 +49,7 @@ void main() {
         'after-end' => '$validStream{"op":"end"}\n',
         _ => List.filled(UiStreamLimits.v1.lineBytes + 1, 'x').join(),
       };
-      final provider = StreamMotivationUiPlanningProvider((_, __, receive) async => receive(stream));
+      final provider = StreamMotivationUiPlanningProvider((_, _, receive) async => receive(stream));
       final input = request(f);
       await expectLater(provider.plan(input), throwsStateError);
       expect(provider.progressFor(input), isNull);
@@ -58,7 +58,7 @@ void main() {
   test('incremental preview has no events; only original completed candidate grants final capability', () async {
     final f = await LoopFixture.open();
     final observations = <HostUiStreamProgress>[];
-    final provider = StreamMotivationUiPlanningProvider((_, __, receive) async {
+    final provider = StreamMotivationUiPlanningProvider((_, _, receive) async {
       for (final rune in validStream.runes) { receive(String.fromCharCode(rune)); }
     }, onProgress: observations.add);
     final input = request(f);
@@ -129,7 +129,7 @@ void main() {
     await preference.save(UiPresentationMode.few);
     final firstEntered = Completer<void>(), releaseFirst = Completer<void>();
     var calls = 0;
-    final provider = StreamMotivationUiPlanningProvider((_, __, receive) async {
+    final provider = StreamMotivationUiPlanningProvider((_, _, receive) async {
       if (++calls == 1) { firstEntered.complete(); await releaseFirst.future; }
       receive(validStream);
     });
