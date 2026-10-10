@@ -75,6 +75,16 @@ void main() {
     await workspaceReady(tester);
     return session;
   }
+  void nativeCleanup(WidgetTester tester) {
+    addTearDown(() async {
+      try {
+        await tester.pumpWidget(const SizedBox());
+        await workspaceReady(tester);
+      } finally {
+        await workspaceOperation(tester, storage.close);
+      }
+    });
+  }
   setUp(() async {
     directory = Directory.systemTemp.createTempSync('aiui-draft-recovery-');
     await open();
@@ -83,6 +93,7 @@ void main() {
   tearDown(() async { await storage.close(); directory.deleteSync(recursive: true); });
 
   testWidgets('real page rejects out-of-range restore, discards explicitly, survives SQLite reopen', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     await workspaceOperation(tester, storage.close);
     await workspaceOperation(tester, open);
@@ -117,6 +128,7 @@ void main() {
   });
 
   testWidgets('embedded page explicitly restores now-valid retained value with no business call', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     final raw = jsonDecode(bytes()) as Map<String, dynamic>;
     raw['userOverrides'] = <String, Object?>{};
@@ -138,6 +150,7 @@ void main() {
   });
 
   testWidgets('stale page recovery CAS preserves winning checkpoint and isolated live draft', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     final session = await mount(tester, reviewPlan('NumberStepper', revision: 2, max: 5));
     final saved = (await workspaceOperation(tester, () => store.load('s')))!;
@@ -152,6 +165,7 @@ void main() {
   });
 
   testWidgets('scope revocation prevents explicit draft discard', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     final session = await mount(tester, reviewPlan('NumberStepper', revision: 2, max: 5));
     final before = bytes();
@@ -164,6 +178,7 @@ void main() {
   });
 
   testWidgets('incompatible node identity cannot be recovered through buttons', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     final raw = jsonDecode(bytes()) as Map<String, dynamic>;
     raw['nodeIds'] = ['removed'];
@@ -179,6 +194,7 @@ void main() {
   });
 
   testWidgets('damaged foreign scope does not disclose readable fields', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     final raw = jsonDecode(bytes()) as Map<String, dynamic>;
     raw['schemaVersion'] = 99;
@@ -192,6 +208,7 @@ void main() {
   });
 
   testWidgets('schema1 two isolated fields remain readable and byte-identical without migration', (tester) async {
+    nativeCleanup(tester);
     final plan = actionPlan();
     final legacy = await workspaceOperation(tester, () => UiWorkspaceController.open(store: store, taskId: 'task', scopeKey: store.scopeKey!, plan: plan));
     await workspaceOperation(tester, legacy.flush);
@@ -220,6 +237,7 @@ void main() {
   });
 
   testWidgets('schema2 handles isolated fields individually without dropping remaining durable data', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     final raw = jsonDecode(bytes()) as Map<String, dynamic>;
     raw['userOverrides'] = <String, Object?>{};
@@ -238,6 +256,7 @@ void main() {
 
   for (final storageFails in [true, false]) {
     testWidgets('recovery await boundary does not install rejected state storageFailure=$storageFails', (tester) async {
+      nativeCleanup(tester);
       await workspaceOperation(tester, seed);
       final raw = jsonDecode(bytes()) as Map<String, dynamic>;
       raw['userOverrides'] = <String, Object?>{};
@@ -250,21 +269,28 @@ void main() {
       addTearDown(c.dispose);
       Object? failure;
       var finished = false;
-      c.resolveDraft('k', discard: false).then<void>((_) { finished = true; }, onError: (Object error) { failure = error; finished = true; });
-      await workspaceOperation(tester, () => barrier.entered.future);
-      if (!storageFails) {
-        final current = c.surface.current;
-        expect(c.surface.applyPatch(UiPatch(
-          patchId: 'during-save', surfaceId: current.plan.surfaceId,
-          baseRevision: current.plan.revision,
-          nextRevision: current.plan.revision + 1,
-          snapshotRevision: current.snapshot.ref,
-          ops: [UiPatchOperation.replace(current.plan.nodes.first.copyWith(
-            properties: {'title': 'new plan while save awaits'},
-          ))],
-        )).isValid, isTrue);
+      await tester.runAsync(() async {
+        c.resolveDraft('k', discard: false).then<void>((_) { finished = true; }, onError: (Object error) { failure = error; finished = true; });
+      });
+      try {
+        await workspaceOperation(tester, () => barrier.entered.future);
+        if (!storageFails) {
+          final current = c.surface.current;
+          expect(c.surface.applyPatch(UiPatch(
+            patchId: 'during-save', surfaceId: current.plan.surfaceId,
+            baseRevision: current.plan.revision,
+            nextRevision: current.plan.revision + 1,
+            snapshotRevision: current.snapshot.ref,
+            ops: [UiPatchOperation.replace(current.plan.nodes.first.copyWith(
+              properties: {'title': 'new plan while save awaits'},
+            ))],
+          )).isValid, isTrue);
+        }
+      } finally {
+        if (!barrier.release.isCompleted) {
+          barrier.release.complete();
+        }
       }
-      barrier.release.complete();
       for (var turn = 0; turn < 2000 && !finished; turn++) {
         await tester.runAsync(() => Future<void>(() {}));
         await tester.pump();
@@ -304,6 +330,7 @@ void main() {
   }
 
   testWidgets('oversized damaged checkpoint exposes no salvage and performs no writes', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     final raw = jsonDecode(bytes()) as Map<String, dynamic>;
     raw['readableDraft'] = {'k': 'x' * UiWorkspaceLimits.bytes};
@@ -318,6 +345,7 @@ void main() {
   });
 
   testWidgets('closing while actual damaged-codec page loads awaits read-only load without saving', (tester) async {
+    nativeCleanup(tester);
     await workspaceOperation(tester, seed);
     final raw = jsonDecode(bytes()) as Map<String, dynamic>;
     raw['schemaVersion'] = 99;
@@ -332,11 +360,16 @@ void main() {
       session: session, embedded: true,
       onClose: () async { await session.checkpoint(); closes++; },
     )));
-    await workspaceOperation(tester, () => session.entered.future);
-    expect(session.controller, isNull);
-    await tester.tap(find.byTooltip('关闭工作区'));
-    expect(closes, 0);
-    session.release.complete();
+    try {
+      await workspaceOperation(tester, () => session.entered.future);
+      expect(session.controller, isNull);
+      await tester.tap(find.byTooltip('关闭工作区'));
+      expect(closes, 0);
+    } finally {
+      if (!session.release.isCompleted) {
+        session.release.complete();
+      }
+    }
     await workspaceReady(tester);
     expect(closes, 1);
     expect(session.controller!.canCloseWithoutCheckpoint, isTrue);
@@ -347,6 +380,7 @@ void main() {
 
   for (final hasPlan in [true, false]) {
     testWidgets('actual damaged-codec page readable without activation or byte rewrite plan=$hasPlan', (tester) async {
+      nativeCleanup(tester);
       await workspaceOperation(tester, seed);
       final raw = jsonDecode(bytes()) as Map<String, dynamic>;
       raw['schemaVersion'] = 99;
