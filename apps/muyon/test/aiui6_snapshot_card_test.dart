@@ -44,6 +44,9 @@ void main() {
           );
 
           expect(snapshot!.scene, scene);
+          final sourceLabel =
+              '来源对象 inquiry/${ref.objectType}/${ref.objectId} · 修订 ${ref.revisionRef}';
+          final revisionLabel = '保存快照 · 修订 ${ref.revisionRef}';
           await tester.pumpWidget(MaterialApp(
             theme: muyonTheme(Brightness.light),
             home: Scaffold(
@@ -52,12 +55,35 @@ void main() {
               ),
             ),
           ));
-          expect(find.text('${scene.label} · 已保存事实'), findsOneWidget);
-          expect(find.text('来源：询价插件的已保存记录；建议尚未写入'), findsOneWidget);
+          for (final label in [
+            '${scene.label} · 已保存事实',
+            sourceLabel,
+            revisionLabel,
+          ]) {
+            expect(find.text(label), findsOneWidget);
+            expect(
+              find.bySemanticsLabel(RegExp(RegExp.escape(label))),
+              findsOneWidget,
+            );
+          }
+          expect(
+            find.text('来源：询价插件的已保存记录；建议尚未写入'),
+            findsOneWidget,
+          );
           expect(find.byType(OntologyCard), findsOneWidget);
           expect(find.byType(KeyValue), findsOneWidget);
           if (scene == InquiryReadonlyScene.budgetLine) {
-            expect(find.text('建议预算行'), findsOneWidget);
+            for (final label in [
+              '真实预算行',
+              '建议预算行',
+              '名称 · 建议（尚未写入）',
+            ]) {
+              expect(find.text(label), findsOneWidget);
+              expect(
+                find.bySemanticsLabel(RegExp(RegExp.escape(label))),
+                findsOneWidget,
+              );
+            }
           }
           for (final secret in [
             'MODEL-PRICE',

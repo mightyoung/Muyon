@@ -22,6 +22,8 @@ final class InquirySnapshotCard extends StatelessWidget {
       const SizedBox(height: MuyonTokens.space2),
       const Text('来源：询价插件的已保存记录；建议尚未写入'),
       const SizedBox(height: MuyonTokens.space2),
+      Text(snapshot.sourceLabel),
+      const SizedBox(height: MuyonTokens.space2),
       OntologyCard(snapshot: snapshot.record),
     ],
   );
