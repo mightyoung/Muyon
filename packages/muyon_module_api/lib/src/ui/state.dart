@@ -7,6 +7,14 @@ import 'workspace.dart';
 
 enum UiEventOutcome { applied, stale, invalid, unsupported }
 
+/// Owner-prepared session state; only its originating session may install it.
+class UiPreparedSessionRebase {
+  UiPreparedSessionRebase._(this._owner, this._base, this._next);
+  final UiSessionState _owner;
+  final ValidatedUiPlan? _base;
+  final ValidatedUiPlan _next;
+}
+
 /// In-memory view/draft state only. Never grants authority or executes business tools.
 class UiSessionState {
   UiSessionState(this.snapshot)
@@ -257,6 +265,12 @@ class UiSessionState {
   void updateSourceDigest(String artifactId, String digest) {
     _digests[artifactId] = digest;
   }
+
+  UiPreparedSessionRebase prepareRebase(ValidatedUiPlan next) =>
+      UiPreparedSessionRebase._(this, _currentPlan, next);
+
+  // RED: no live snapshot/layer mutation until the owner transaction exists.
+  bool commitPreparedRebase(UiPreparedSessionRebase prepared) => false;
 
   bool accept(ValidatedUiPlan plan) {
     final current = _currentPlan;
