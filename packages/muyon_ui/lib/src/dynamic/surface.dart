@@ -67,11 +67,28 @@ class UiRenderCapture {
 }
 
 class UiSurfaceController extends ChangeNotifier {
-  UiSurfaceController(ValidatedUiPlan plan, {this.onEvent, this.onOpenObject})
-    : _current = plan,
-      session = UiSessionState(plan.snapshot) {
+  UiSurfaceController(
+    ValidatedUiPlan plan, {
+    this.onEvent,
+    this.onOpenObject,
+    this.recomputePort,
+    this.publishTokenProbe,
+    this.readOnlyProbe,
+  }) : _publication = UiPublicationCoordinator(plan),
+       _current = plan,
+       session = UiSessionState(plan.snapshot) {
     session.accept(plan);
   }
+  final UiPublicationCoordinator _publication;
+  final UiRecomputePort? recomputePort;
+  final UiPublishTokenProbe? publishTokenProbe;
+  final bool Function()? readOnlyProbe;
+  bool get recomputing => _publication.recomputing;
+  bool get outdated => _publication.outdated;
+  List<String> get publicationErrors => _publication.publicationErrors;
+  Future<UiPublishOutcome> recompute() async => UiPublishOutcome.invalid;
+  UiPublishOutcome publish(UiVersionBatch batch) => UiPublishOutcome.invalid;
+
   ValidatedUiPlan _current;
   ValidatedUiPlan get current => _current;
   final UiSessionState session;
