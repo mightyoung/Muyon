@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
@@ -56,6 +58,10 @@ final class OntologyCardSnapshot {
     }
     final type = ontology.type(object.objectType);
     final fallback = moduleApiVersion != 2 || type == null;
+    if ((type?.fields.length ?? 0) > UiStreamLimits.v1.nodes ||
+        suggestions.length > UiStreamLimits.v1.nodes) {
+      throw StateError('Ontology card exceeds host field budget');
+    }
     final facts = <String, SnapshotFact>{};
     for (final fact in snapshot.facts.values) {
       if (fact.object != object || facts.containsKey(fact.field)) {
@@ -63,7 +69,7 @@ final class OntologyCardSnapshot {
       }
       facts[fact.field] = fact;
     }
-    return OntologyCardSnapshot._(
+    final card = OntologyCardSnapshot._(
       object: object,
       snapshotRef: snapshot.ref,
       typeLabel: type?.label ?? '未知对象类型',
@@ -77,8 +83,29 @@ final class OntologyCardSnapshot {
               _projectField(field, facts[field.name], suggestions),
       ],
     );
+    final text = [card.typeLabel,
+      for (final field in card.fields) ...[
+        field.label, field.value, if (field.suggestion != null) field.suggestion!,
+      ],
+    ];
+    if (text.any((value) => !_withinFieldBudget(value)) ||
+        text.fold<int>(0, (total, value) => total + utf8.encode(value).length) >
+            UiStreamLimits.v1.textBytes) {
+      throw StateError('Ontology card exceeds host text budget');
+    }
+    return card;
   }
 }
+
+bool _withinFieldBudget(String value) =>
+    value.length <= uiStringEditMaxBytes &&
+    utf8.encode(value).length <= uiStringEditMaxBytes;
+
+bool _stringList(Object value) => value is List &&
+    value.length <= UiStreamLimits.v1.nodes &&
+    value.every((v) => v is String && _withinFieldBudget(v)) &&
+    value.fold<int>(0, (total, v) => total + utf8.encode(v as String).length + 3) <=
+        uiStringEditMaxBytes;
 
 OntologyCardField _projectField(
   OntologyFieldSpec field,
@@ -111,12 +138,13 @@ OntologyCardField _projectField(
 String _displayValue(OntologyFieldSpec field, Object? value) {
   if (value == null) return '未提供';
   const invalid = '无法读取，请在原页面查看';
+  if (value is String && !_withinFieldBudget(value)) return invalid;
   // This is display-shape validation, not the plugin's business validator.
   // No submit path exists in this slice.
   return switch (field.kind) {
     FieldKind.text => value is String ? value : invalid,
-    FieldKind.textList => value is List && value.every((v) => v is String)
-        ? value.join('、')
+    FieldKind.textList => _stringList(value)
+        ? (value as List).join('、')
         : invalid,
     FieldKind.decimal => value is String && num.tryParse(value)?.isFinite == true
         ? value
@@ -134,8 +162,8 @@ String _displayValue(OntologyFieldSpec field, Object? value) {
     FieldKind.ref => value is String
         ? '关联对象（未活化）：$value'
         : invalid,
-    FieldKind.refList => value is List && value.every((v) => v is String)
-        ? '关联对象（未活化）：${value.join('、')}'
+    FieldKind.refList => _stringList(value)
+        ? '关联对象（未活化）：${(value as List).join('、')}'
         : invalid,
     FieldKind.object => '结构化值，请在原页面查看',
   };

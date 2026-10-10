@@ -15,7 +15,12 @@
 
 ## 测试与验证
 
-新增 13 项行为测试：实际宿主 SQLite→范围解析→读取适配→投影→KeyValue，建议不写事实/无业务回执，旧 revision、跨选定 scope、无绑定 workspace、已删除拒绝；敏感文本与语义无泄漏；高版本/未知类型退路；混合对象/重复字段拒绝；引用与结构化值不活化；非法值不当事实；当前全部 FieldKind 显式处理；未核验内容不提升为事实。
+新增 14 项行为测试：实际宿主 SQLite→范围解析→读取适配→投影→KeyValue，建议不写事实/无业务回执，旧 revision、跨选定 scope、无绑定 workspace、已删除拒绝；敏感文本与语义无泄漏；高版本/未知类型退路；混合对象/重复字段拒绝；引用与结构化值不活化；非法值不当事实；当前全部 FieldKind 显式处理；未核验内容不提升为事实；不可信建议的单项/集合/总文本预算拒绝。
 云端未检测到 Flutter/Dart CLI，未声称本地 analyze/Flutter 测试通过。精确提交的 Linux CI 将执行现有八库 analyze/全测试/coverage/Laya；原始日志不进仓库。新增 source 库存与 DA 交 coverage owner 独立测量，不修改 baseline/checker/floor。
 
 本切片不等于 AIUI-9 新建/编辑/关联/批量写卡完成；没有提交 payload、插件双重校验、授权执行、真实回执或页面接线。未改 core/API/UI/registry/tool/既有测试，没有真实权限、账号、业务网络、部署或打包操作。
+
+
+## 首轮独立审查修复
+
+首源 `6d6322d722500a27a1869012e282932dcd43c131` 发现统一 resolver.prepare 会激活其他模块并写登记状态，故不能合入。修复使用仅 inquiry 的 ScopeSource 包装器禁用 prepare，仍复用原 ScopeResolver 的范围/版本检查，不复制授权规则。真实 fixture 不再用 global resolver 预激活所有模块；断言其他模块保持 inactive，module_registry 前后逐行相同。建议文本单项预算复用 `uiStringEditMaxBytes`，总文本与字段/列表项限额复用 `UiStreamLimits.v1`；超限值不序列化进入组件，不改变领域保存/协议校验。旧源运行不作为修复源验证。

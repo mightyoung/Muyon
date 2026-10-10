@@ -6,7 +6,7 @@ import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/assistant/ontology_cards/inquiry_ontology_card_adapter.dart';
 import 'package:muyon/assistant/ontology_cards/ontology_card.dart';
 import 'package:muyon/assistant/ontology_cards/ontology_card_snapshot.dart';
-import 'package:muyon/platform/business_tools.dart';
+import 'package:muyon/app/module_host.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/muyon_ui.dart';
@@ -69,8 +69,9 @@ void main() {
       host = await MuyonHost.open(p.join(root.path, 'data'));
       await host.activateInquiry();
       id = host.inquiry!.runtime.state.store.save('supplier', _supplier('已保存供应商'));
-      final scope = await resolveAssistantScope(host, const AssistantScope.global());
-      ref = scope.objects.singleWhere((r) => r.objectId == id);
+      ref = (await host.scopeResolver.sources.singleWhere(
+        (source) => source.moduleId == 'inquiry').resolve(ObjectRef(
+          moduleId: 'inquiry', objectType: 'supplier', objectId: id)))!;
     });
     tearDown(() async {
       await host.close();
@@ -78,10 +79,18 @@ void main() {
     });
     test('read records full revision/digest and keeps suggestions separate', () async {
       final before = host.inquiry!.runtime.state.store.get('supplier', id)!;
+      final registryBefore = host.workspaces.database.raw.select(
+        'SELECT * FROM module_registry ORDER BY module_id').map((row) => Map<String, Object?>.from(row)).toList();
+      expect(host.modules.state('research').status, ModuleStatus.inactive);
+      expect(host.modules.state('prototype').status, ModuleStatus.inactive);
       final card = await InquiryOntologyCardAdapter.read(host: host,
         scope: AssistantScope.selectedObjects([ref]), object: ref,
         suggestions: const {'name': '建议供应商', 'injected': 'not an ontology field'});
       expect(card.object, ref);
+      expect(host.modules.state('research').status, ModuleStatus.inactive);
+      expect(host.modules.state('prototype').status, ModuleStatus.inactive);
+      expect(host.workspaces.database.raw.select(
+        'SELECT * FROM module_registry ORDER BY module_id').map((row) => Map<String, Object?>.from(row)).toList(), registryBefore);
       expect(card.snapshotRef.revision, before.version);
       expect(card.hasRegisteredUpdateTool, isTrue);
       expect(card.fields.singleWhere((f) => f.name == 'name').value, '已保存供应商');
@@ -97,8 +106,9 @@ void main() {
     });
     test('object outside selected scope cannot be displayed', () async {
       final second = host.inquiry!.runtime.state.store.save('supplier', _supplier('其他'));
-      final refs = await resolveAssistantScope(host, const AssistantScope.global());
-      final other = refs.objects.singleWhere((r) => r.objectId == second);
+      final other = (await host.scopeResolver.sources.singleWhere(
+        (source) => source.moduleId == 'inquiry').resolve(ObjectRef(
+          moduleId: 'inquiry', objectType: 'supplier', objectId: second)))!;
       await expectLater(InquiryOntologyCardAdapter.read(host: host,
         scope: AssistantScope.selectedObjects([other]), object: ref), throwsStateError);
     });
@@ -123,8 +133,9 @@ void main() {
         await host!.activateInquiry();
         final store = host!.inquiry!.runtime.state.store;
         final id = store.save('supplier', _supplier('宿主事实'));
-        final scope = await resolveAssistantScope(host!, const AssistantScope.global());
-        final ref = scope.objects.singleWhere((r) => r.objectId == id);
+        final ref = (await host!.scopeResolver.sources.singleWhere(
+          (source) => source.moduleId == 'inquiry').resolve(ObjectRef(
+            moduleId: 'inquiry', objectType: 'supplier', objectId: id)))!;
         final card = await InquiryOntologyCardAdapter.read(host: host!,
           scope: AssistantScope.selectedObjects([ref]), object: ref,
           suggestions: const {'name': '模型建议'});
@@ -238,6 +249,20 @@ void main() {
     final card = _fixture(facts: [SnapshotFact(object: _ref, field: 'name',
         value: 'untrusted', state: FactState.conflict)]);
     expect(card.fields.single.value, '未核验，请在原页面查看');
+  });
+
+  test('untrusted suggestions obey field, list and aggregate display budgets', () {
+    final long = '字' * uiStringEditMaxBytes;
+    expect(_fixture(suggestions: {'name': long}).fields.single.suggestion,
+        '无法读取，请在原页面查看');
+    expect(_fixture(fields: const [OntologyFieldSpec(name: 'names', label: '名称',
+      description: '', kind: FieldKind.textList, sensitivity: Sensitivity.none)],
+      values: {'names': List.filled(UiStreamLimits.v1.nodes + 1, 'item')})
+        .fields.single.value, '无法读取，请在原页面查看');
+    expect(() => _fixture(fields: [
+      for (var i = 0; i < 40; i++) OntologyFieldSpec(name: '$i', label: '$i',
+        description: '', kind: FieldKind.text, sensitivity: Sensitivity.none),
+    ], values: {for (var i = 0; i < 40; i++) '$i': 'x' * 2000}), throwsStateError);
   });
 
 }

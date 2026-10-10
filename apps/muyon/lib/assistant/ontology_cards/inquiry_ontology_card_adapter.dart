@@ -6,6 +6,7 @@ import 'package:muyon_module_api/ui_contract.dart';
 import 'package:supplier_core/supplier_core.dart' as domain;
 
 import '../../app/bootstrap.dart';
+import '../../platform/scope_resolver.dart';
 import 'ontology_card_snapshot.dart';
 
 /// Read-only entry point for a future page owner. Does not activate a module,
@@ -28,7 +29,14 @@ final class InquiryOntologyCardAdapter {
         object.revisionRef == null || object.contentDigest == null) {
       throw StateError('Inquiry card requires an active pinned object');
     }
-    final resolved = await host.tools.resolveScope(scope);
+    final source = host.scopeResolver.sources.singleWhere(
+      (source) => source.moduleId == 'inquiry',
+    );
+    final resolved = await ScopeResolver(
+      sources: [_ActiveInquirySource(source)],
+      workspaces: host.workspaces,
+      knowledgeSources: () async => const [],
+    ).resolve(scope);
     if (!resolved.contains(object) ||
         host.modules.scopeAuthorityRevision('inquiry') != lifecycle ||
         host.workspaces.scopeAuthorityRevision != authority) {
@@ -83,4 +91,21 @@ final class InquiryOntologyCardAdapter {
       suggestions: suggestions,
     );
   }
+}
+
+/// Reuses the established host scope membership/version checks without
+/// ScopeSource.prepare activation. The caller fenced the active inquiry owner.
+final class _ActiveInquirySource implements ScopeSource {
+  const _ActiveInquirySource(this.source);
+  final ScopeSource source;
+  @override
+  String get moduleId => source.moduleId;
+  @override
+  bool get resolvesDirectly => source.resolvesDirectly;
+  @override
+  Future<void> prepare() async {}
+  @override
+  Future<List<ObjectRef>> enumerate() => source.enumerate();
+  @override
+  Future<ObjectRef?> resolve(ObjectRef requested) => source.resolve(requested);
 }
