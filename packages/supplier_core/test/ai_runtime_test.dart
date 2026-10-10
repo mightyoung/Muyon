@@ -28,7 +28,8 @@ void main() {
     addTearDown(s.close);
     // Newlines near the start of each window can create more than 12 chunks
     // even within the supported 60000-character input.
-    final source = 'a\n' + ('b' * 6001 + '\n') * 9;
+    final block = '${'b' * 6001}\n';
+    final source = 'a\n${block * 9}';
     final chunks = chunkText(source).length;
     expect(chunks, greaterThan(12));
     var calls = 0;

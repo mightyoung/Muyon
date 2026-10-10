@@ -79,13 +79,16 @@ class SpecClause {
     exactKeys(m, const ['n', 'text', 'mark', 'cs', 'by', 'reviewed', 'hint']);
     final mark = ClauseMark.values.asNameMap()[m['mark']];
     if (mark == null) invalid('clauses.mark', 'unknown value');
-    if (!clauseSources.contains(m['by']))
+    if (!clauseSources.contains(m['by'])) {
       invalid('clauses.by', 'unknown value');
-    if (m['reviewed'] is! bool)
+    }
+    if (m['reviewed'] is! bool) {
       invalid('clauses.reviewed', 'expected true or false');
+    }
     final cs = m['cs'];
-    if (cs is! List || cs.length > 20)
+    if (cs is! List || cs.length > 20) {
       invalid('clauses.cs', 'expected at most 20 constraints');
+    }
     return SpecClause(
       requireSafeInteger(m['n'], 'clauses.n', min: 1, max: 9999),
       normalizeText(m['text'], 'clauses.text', 2000, required: true)!,
@@ -103,14 +106,17 @@ class SpecClause {
     exactKeys(m, const ['p', 'op', 'value', 'mark', 'weight', 'text']);
     final code = requireSpecCode(m['p'], 'clauses.cs.p');
     final op = m['op'];
-    if (op is! String || !opLabels.containsKey(op))
+    if (op is! String || !opLabels.containsKey(op)) {
       invalid('clauses.cs.op', 'unknown value');
+    }
     final p = specProperty(code);
     final value = m['value'];
-    if (value is! Map || jsonEncode(value).length > 2000)
+    if (value is! Map || jsonEncode(value).length > 2000) {
       invalid('clauses.cs.value', 'expected object');
-    if (p != null && !opsFor(p).contains(op))
+    }
+    if (p != null && !opsFor(p).contains(op)) {
       invalid('clauses.cs.op', 'does not fit the parameter');
+    }
     final weight = m['weight'] == null
         ? null
         : requireSafeInteger(
@@ -272,8 +278,9 @@ void _validateSnapshot(Map raw) {
             !Outcome.values.asNameMap().containsKey(r['outcome']))) {
       invalid('chosen_snapshot.rows.outcome', 'unknown outcome');
     }
-    if (r['manual'] is! bool)
+    if (r['manual'] is! bool) {
       invalid('chosen_snapshot.rows.manual', 'expected boolean');
+    }
   }
 }
 

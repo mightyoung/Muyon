@@ -190,8 +190,9 @@ Verdict offersAll(List<String> have, List<String> want) {
     for (final w in want)
       if (!have.contains(w)) w,
   ];
-  if (missing.isNotEmpty)
+  if (missing.isNotEmpty) {
     return Verdict(Outcome.worse, '缺少：${missing.join('、')}');
+  }
   return Verdict(
     have.toSet().length > want.toSet().length ? Outcome.better : Outcome.exact,
   );
@@ -266,8 +267,9 @@ Verdict _exOne(ExMark have, ExMark want) {
     if (w == null) return const Verdict(Outcome.unknown, '要求的组别无法识别');
     if (h == null) return const Verdict(Outcome.unknown, '缺少组别');
     if (h.$1 != w.$1) return Verdict(Outcome.worse, '组别不同（${have.group}）');
-    if (h.$2 < w.$2)
+    if (h.$2 < w.$2) {
       return Verdict(Outcome.worse, '组别 ${have.group} 低于 ${want.group}');
+    }
     if (h.$2 > w.$2) {
       better = true;
       notes.add('组别 ${have.group}');
@@ -278,8 +280,9 @@ Verdict _exOne(ExMark have, ExMark want) {
         h = have.temp == null ? null : exMaxTemp(have.temp!);
     if (w == null) return const Verdict(Outcome.unknown, '要求的温度组别无法识别');
     if (h == null) return const Verdict(Outcome.unknown, '缺少温度组别');
-    if (h > w)
+    if (h > w) {
       return Verdict(Outcome.worse, '温度组别 ${have.temp} 不满足 ${want.temp}');
+    }
     if (h < w) {
       better = true;
       notes.add('温度组别 ${have.temp}');
@@ -291,8 +294,9 @@ Verdict _exOne(ExMark have, ExMark want) {
     final h = hEpl == null ? null : exEplRank(hEpl);
     if (w == null) return const Verdict(Outcome.unknown, '要求的保护级别无法识别');
     if (h == null) return const Verdict(Outcome.unknown, '缺少设备保护级别');
-    if (h.$1 != w.$1)
+    if (h.$1 != w.$1) {
       return Verdict(Outcome.worse, '保护级别 $hEpl 不适用于 ${want.epl}');
+    }
     if (h.$2 < w.$2) return Verdict(Outcome.worse, '保护级别 $hEpl 低于 ${want.epl}');
     if (h.$2 > w.$2) {
       better = true;

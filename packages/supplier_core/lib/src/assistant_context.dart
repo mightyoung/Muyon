@@ -74,8 +74,9 @@ class AssistantContext {
         if (page is! Map ||
             page['id'] is! String ||
             page['offset'] is! int ||
-            page['text'] is! String)
+            page['text'] is! String) {
           continue;
+        }
         final original = _archive[page['id']];
         if (original == null) continue;
         final start = page['offset'] as int;
@@ -83,8 +84,9 @@ class AssistantContext {
         final end = start + text.length;
         if (start < 0 ||
             end > original.source.length ||
-            original.source.substring(start, end) != text)
+            original.source.substring(start, end) != text) {
           continue;
+        }
         original.reads.add((start, end));
         var covered = 0;
         for (final range
@@ -154,8 +156,9 @@ class AssistantContext {
         // least once, even if this temporarily exceeds the soft compact target.
         if (entry.kind == 'tools' &&
             !entry.seen &&
-            jsonEncode(out).length <= maxAssistantContextChars)
+            jsonEncode(out).length <= maxAssistantContextChars) {
           break;
+        }
         entry.archived = true;
         changed = true;
         out = _compose(finalInstruction);
@@ -242,8 +245,9 @@ class AssistantContext {
         return error('原文分页范围无效');
       }
       var end = (offset + limit).clamp(0, entry.source.length);
-      if (end < entry.source.length && _high(entry.source.codeUnitAt(end - 1)))
+      if (end < entry.source.length && _high(entry.source.codeUnitAt(end - 1))) {
         end--;
+      }
       return jsonEncode({
         'id': entry.id,
         'kind': entry.kind,
@@ -271,8 +275,9 @@ class AssistantContext {
             : (match.start - 80).clamp(0, e.source.length);
         if (start > 0 && _low(e.source.codeUnitAt(start))) start--;
         var stop = (start + 320).clamp(0, e.source.length);
-        if (stop < e.source.length && _high(e.source.codeUnitAt(stop - 1)))
+        if (stop < e.source.length && _high(e.source.codeUnitAt(stop - 1))) {
           stop--;
+        }
         return {
           ...e.index,
           if (match != null) ...{

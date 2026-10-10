@@ -1,0 +1,886 @@
+--- a/packages/muyon_module_api/lib/src/ui/state.dart
++++ b/packages/muyon_module_api/lib/src/ui/state.dart
+@@ -49,8 +49,9 @@
+         }
+         if (source.start < 0 ||
+             source.end > source.originalText.length ||
+-            source.end <= source.start)
++            source.end <= source.start) {
+           return null;
++        }
+         return source.originalText.substring(source.start, source.end);
+     }
+   }
+@@ -66,13 +67,16 @@
+   void _setValue(String field, Object? value, {required bool affectsDraft}) {
+     if (!_values.containsKey(field) ||
+         !isUiScalar(value) ||
+-        (_values[field] is String && value is! String))
++        (_values[field] is String && value is! String)) {
+       return;
++    }
+     final explicitlyEdited = affectsDraft && !_userOverrides.containsKey(field);
+-    if (affectsDraft)
++    if (affectsDraft) {
+       _userOverrides[field] = value;
+-    else
++    }
++    else {
+       _viewValues[field] = value;
++    }
+     if (_values[field] == value && !explicitlyEdited) return;
+     _values[field] = value;
+     if (affectsDraft) draftRevision++;
+@@ -100,8 +104,9 @@
+
+   void adoptExtracted(String field) {
+     if (!_userOverrides.containsKey(field) ||
+-        !snapshot.initialUiState.containsKey(field))
++        !snapshot.initialUiState.containsKey(field)) {
+       return;
++    }
+     _userOverrides.remove(field);
+     _values[field] = snapshot.initialUiState[field];
+     draftRevision++;
+@@ -118,8 +123,9 @@
+             (plan.plan.surfaceId != current.plan.surfaceId ||
+                 plan.plan.revision < current.plan.revision ||
+                 (plan.plan.revision == current.plan.revision &&
+-                    !identical(plan, current)))))
++                    !identical(plan, current))))) {
+       return false;
++    }
+     _currentPlan = plan;
+     return true;
+   }
+@@ -132,11 +138,13 @@
+     if (!identical(plan, _currentPlan) ||
+         event.surfaceId != plan.plan.surfaceId ||
+         event.observedRevision != plan.plan.revision ||
+-        !identical(catalog, plan.catalog))
++        !identical(catalog, plan.catalog)) {
+       return UiEventOutcome.stale;
++    }
+     final nodes = plan.plan.nodes.where((node) => node.id == event.nodeId);
+-    if (nodes.length != 1 || event.eventId.isEmpty)
++    if (nodes.length != 1 || event.eventId.isEmpty) {
+       return UiEventOutcome.invalid;
++    }
+     final node = nodes.single;
+     final binding = node.events[event.kind];
+     final definition = catalog.actions[binding?.actionRef];
+@@ -146,17 +154,20 @@
+         schema == null ||
+         !schema.events.containsKey(event.kind) ||
+         !(schema.eventActions[event.kind]?.contains(binding.actionRef) ??
+-            false))
++            false)) {
+       return UiEventOutcome.invalid;
++    }
+     final payloadType = schema.events[event.kind];
+     if (payloadType == null
+         ? event.payload != null
+-        : !matchesUiValue(payloadType, event.payload))
++        : !matchesUiValue(payloadType, event.payload)) {
+       return UiEventOutcome.invalid;
++    }
+     if (definition.route != UiActionRoute.local) {
+       if (definition.route == UiActionRoute.business &&
+-          binding.expectedDraftRevision != draftRevision)
++          binding.expectedDraftRevision != draftRevision) {
+         return UiEventOutcome.stale;
++      }
+       return UiEventOutcome.unsupported;
+     }
+     switch (definition.localAction) {
+@@ -169,8 +180,9 @@
+                   binding.inputRefs.single,
+                 ) ??
+                 false) ||
+-            !['original', 'value'].contains(event.payload))
++            !['original', 'value'].contains(event.payload)) {
+           return UiEventOutcome.invalid;
++        }
+         selectView(binding.inputRefs.single, event.payload);
+       case UiLocalAction.expandSource:
+         if (!_expandedSources.add(node.id)) _expandedSources.remove(node.id);
+--- a/packages/muyon_module_api/lib/src/ui/stream_compiler.dart
++++ b/packages/muyon_module_api/lib/src/ui/stream_compiler.dart
+@@ -224,8 +224,9 @@
+           session.intent,
+           session.catalog,
+         );
+-        if (_badLines > 0)
++        if (_badLines > 0) {
+           _record(UiStreamErrorCode.malformedStream, 'malformed_stream');
++        }
+         _phase = _badLines == 0 && _batch!.isValid
+             ? UiStreamPhase.complete
+             : UiStreamPhase.rejected;
+@@ -284,17 +285,19 @@
+     bool protocolError = true,
+   }) {
+     _diagnosticCount++;
+-    if (_diagnostics.length < limits.diagnostics)
++    if (_diagnostics.length < limits.diagnostics) {
+       _diagnostics.add(
+         UiStreamError(code, reason, protocolError: protocolError),
+       );
++    }
+   }
+
+   void _bad(UiStreamErrorCode code, String reason) {
+     _badLines++;
+     _record(code, reason);
+-    if (_badLines > limits.badLines)
++    if (_badLines > limits.badLines) {
+       _limit(UiStreamErrorCode.badLineLimit, 'bad_line_limit');
++    }
+   }
+
+   void _limit(UiStreamErrorCode code, String reason) {
+--- a/packages/muyon_module_api/lib/src/ui/stream_protocol.dart
++++ b/packages/muyon_module_api/lib/src/ui/stream_protocol.dart
+@@ -156,8 +156,9 @@
+     }
+
+     void fields(Set<String> allowed) {
+-      if (m.keys.any((key) => !allowed.contains(key)))
++      if (m.keys.any((key) => !allowed.contains(key))) {
+         throw const FormatException();
++      }
+     }
+
+     Map<String, Object?> props() {
+@@ -176,8 +177,9 @@
+           if (ref.length != 2 ||
+               ref['kind'] is! String ||
+               ref['id'] is! String ||
+-              (ref['id'] as String).isEmpty)
++              (ref['id'] as String).isEmpty) {
+             throw const FormatException();
++          }
+           final kind = BindingKind.values.byName(ref['kind'] as String);
+           return MapEntry(key, BindingRef(kind, ref['id'] as String));
+         }),
+--- a/packages/muyon_module_api/lib/src/ui/validation.dart
++++ b/packages/muyon_module_api/lib/src/ui/validation.dart
+@@ -65,15 +65,17 @@
+   final errors = <String>[];
+   void reject(String reason) => errors.add(reason);
+   if (plan.surfaceId.isEmpty || plan.revision < 0) reject('invalid_surface');
+-  if (plan.snapshotRef != snapshot.ref || intent.snapshotRef != snapshot.ref)
++  if (plan.snapshotRef != snapshot.ref || intent.snapshotRef != snapshot.ref) {
+     reject('snapshot_revision');
++  }
+   if (plan.catalogVersion != catalog.version) reject('catalog_version');
+   if (plan.intentRef != intent.id) reject('intent_reference');
+   if (plan.nodes.isEmpty || plan.nodes.length > 200) reject('node_limit');
+   final nodes = <String, UiNode>{};
+   for (final node in plan.nodes) {
+-    if (node.id.isEmpty || nodes.containsKey(node.id))
++    if (node.id.isEmpty || nodes.containsKey(node.id)) {
+       reject('duplicate_node:${node.id}');
++    }
+     nodes[node.id] = node;
+   }
+   final visited = <String>{}, active = <String>{};
+@@ -113,8 +115,9 @@
+   }
+   for (final fact in snapshot.facts.entries) {
+     if (intent.mandatoryStates.contains(fact.value.state) &&
+-        !shown.contains(BindingRef.fact(fact.key)))
++        !shown.contains(BindingRef.fact(fact.key))) {
+       reject('mandatory_state:${fact.key}');
++    }
+   }
+   return UiValidationResult._(
+     errors,
+@@ -136,51 +139,61 @@
+     reject('unknown_component:${node.component}');
+     return errors;
+   }
+-  if (!schema.allowsChildren && node.children.isNotEmpty)
++  if (!schema.allowsChildren && node.children.isNotEmpty) {
+     reject('children:${node.id}');
++  }
+   for (final required in schema.requiredProperties) {
+-    if (!node.properties.containsKey(required))
++    if (!node.properties.containsKey(required)) {
+       reject('missing_property:${node.id}:$required');
++    }
+   }
+   for (final entry in node.properties.entries) {
+     final type = schema.properties[entry.key];
+-    if (type == null || !matchesUiValue(type, entry.value))
++    if (type == null || !matchesUiValue(type, entry.value)) {
+       reject('property_type:${node.id}:${entry.key}');
++    }
+   }
+   for (final required in schema.requiredBindings) {
+-    if (!node.bindings.containsKey(required))
++    if (!node.bindings.containsKey(required)) {
+       reject('missing_binding:${node.id}:$required');
++    }
+   }
+   for (final entry in node.bindings.entries) {
+     final ref = entry.value;
+-    if (!(schema.bindings[entry.key]?.contains(ref.kind) ?? false))
++    if (!(schema.bindings[entry.key]?.contains(ref.kind) ?? false)) {
+       reject('binding_kind:${node.id}:${entry.key}');
++    }
+     switch (ref.kind) {
+       case BindingKind.fact:
+         final fact = snapshot.facts[ref.id];
+-        if (fact == null || !isUiScalar(fact.value))
++        if (fact == null || !isUiScalar(fact.value)) {
+           reject('unknown_fact:${ref.id}');
++        }
+         if (fact != null &&
+             (fact.object.moduleId.isEmpty ||
+                 fact.object.objectType.isEmpty ||
+                 fact.object.objectId.isEmpty ||
+-                fact.field.isEmpty))
++                fact.field.isEmpty)) {
+           reject('fact_identity:${ref.id}');
++        }
+         for (final source in fact?.sourceRefs ?? <String>[]) {
+-          if (!snapshot.sources.containsKey(source))
++          if (!snapshot.sources.containsKey(source)) {
+             reject('fact_source:${ref.id}:$source');
++          }
+         }
+       case BindingKind.uiState:
+         if (!snapshot.initialUiState.containsKey(ref.id) ||
+-            !isUiScalar(snapshot.initialUiState[ref.id]))
++            !isUiScalar(snapshot.initialUiState[ref.id])) {
+           reject('unknown_state:${ref.id}');
++        }
+       case BindingKind.computed:
+         final value = snapshot.computations[ref.id];
+         if (value == null ||
+             value.computationId.isEmpty ||
+             value.inputVersion != snapshot.ref ||
+-            !isUiScalar(value.value))
++            !isUiScalar(value.value)) {
+           reject('unknown_or_stale_computation:${ref.id}');
++        }
+       case BindingKind.sourceSpan:
+         final source = snapshot.sources[ref.id];
+         if (source == null ||
+@@ -193,8 +206,9 @@
+             source.end <= source.start ||
+             source.end > source.originalText.length ||
+             (source.page != null && source.page! < 1) ||
+-            (source.paragraph != null && source.paragraph! < 1))
++            (source.paragraph != null && source.paragraph! < 1)) {
+           reject('unknown_or_stale_source:${ref.id}');
++        }
+     }
+   }
+   for (final entry in node.events.entries) {
+@@ -214,8 +228,9 @@
+     if (action.route == UiActionRoute.local) {
+       if (action.localAction == null) reject('local_action_missing');
+       if (binding.operationKeyRef != null ||
+-          binding.expectedDraftRevision != null)
++          binding.expectedDraftRevision != null) {
+         reject('local_business_reference');
++      }
+       if ((action.localAction == UiLocalAction.editField ||
+               action.localAction == UiLocalAction.sortRows) &&
+           (binding.inputRefs.length != 1 ||
+@@ -223,21 +238,25 @@
+                 BindingRef.uiState(binding.inputRefs.first),
+               ) ||
+               schema.events[entry.key] != UiValueType.string ||
+-              snapshot.initialUiState[binding.inputRefs.first] is! String))
++              snapshot.initialUiState[binding.inputRefs.first] is! String)) {
+         reject('edit_input');
++      }
+       if (action.localAction == UiLocalAction.sortRows &&
+           binding.inputRefs.any(
+             (ref) => snapshot.actionContext?.draft.containsKey(ref) ?? false,
+-          ))
++          )) {
+         reject('view_business_input');
++      }
+       if (action.localAction == UiLocalAction.expandSource &&
+           !node.bindings.values.any(
+             (ref) => ref.kind == BindingKind.sourceSpan,
+-          ))
++          )) {
+         reject('source_input');
++      }
+       if (action.localAction == UiLocalAction.openDetail &&
+-          !node.bindings.containsKey('value'))
++          !node.bindings.containsKey('value')) {
+         reject('detail_input');
++      }
+     } else if (action.route == UiActionRoute.business) {
+       final context = snapshot.actionContext;
+       final operation = context?.operations[binding.operationKeyRef];
+@@ -254,8 +273,9 @@
+             (ref) =>
+                 context.draft.containsKey(ref) ||
+                 context.confirmedRecordRefs.contains(ref),
+-          ))
++          )) {
+         reject('host_operation_reference');
++      }
+     }
+   }
+   return List.unmodifiable(errors);
+--- a/packages/muyon_module_api/lib/src/ui/workspace.dart
++++ b/packages/muyon_module_api/lib/src/ui/workspace.dart
+@@ -61,8 +61,9 @@
+         snapshotRef.revision < 0 ||
+         !scrollOffset.isFinite ||
+         scrollOffset < 0 ||
+-        nodeIds.toSet().length != nodeIds.length)
++        nodeIds.toSet().length != nodeIds.length) {
+       throw ArgumentError('Invalid workspace projection');
++    }
+   }
+   static Map<String, Object?> _scalars(Map<String, Object?> input) {
+     if (input.entries.any((e) => e.key.isEmpty || !isUiScalar(e.value))) {
+--- a/packages/muyon_module_api/test/ui_stream_test.dart
++++ b/packages/muyon_module_api/test/ui_stream_test.dart
+@@ -404,15 +404,16 @@
+         expect(parsed.error, isNotNull, reason: '$m');
+         expect(parsed.operation, isNull);
+       }
+-      for (final line in ['null', '[1]', '{', ''])
++      for (final line in ['null', '[1]', '{', '']) {
+         expect(parseUiStreamLine(line).error, isNotNull);
++      }
+     },
+   );
+   test('node limit permits N minus one and N, rejects N plus one', () {
+     final n = UiStreamLimits.v1.nodes;
+     c = compiler(f, intent: emptyIntent(f));
+     root(c);
+-    for (var i = 1; i < n - 1; i++) node(c, 'n$i', 'Text', parent: 'root');
++    for (var i = 1; i < n - 1; i++) { node(c, 'n$i', 'Text', parent: 'root'); }
+     expect(c.current.candidatePlan.nodes.length, n - 1);
+     node(c, 'last', 'Text', parent: 'root');
+     expect(c.current.candidatePlan.nodes.length, n);
+@@ -421,7 +422,7 @@
+     differential(c);
+     c = compiler(f, intent: emptyIntent(f));
+     root(c);
+-    for (var i = 1; i < n; i++) node(c, 'n$i', 'Text', parent: 'root');
++    for (var i = 1; i < n; i++) { node(c, 'n$i', 'Text', parent: 'root'); }
+     node(c, 'overflow', 'Text', parent: 'root');
+     expect(c.current.phase, UiStreamPhase.limitExceeded);
+     expect(c.current.diagnostics.last.code, UiStreamErrorCode.nodeLimit);
+@@ -512,8 +513,9 @@
+     expect(c.current.diagnostics.last.code, UiStreamErrorCode.badLineLimit);
+     c = compiler(f);
+     root(c);
+-    for (var i = 0; i < UiStreamLimits.v1.patchesPerNode; i++)
++    for (var i = 0; i < UiStreamLimits.v1.patchesPerNode; i++) {
+       patch(c, 'root', {'title': 'v$i'});
++    }
+     expect(c.current.phase, UiStreamPhase.streaming);
+     patch(c, 'root', {'title': 'overflow'});
+     expect(c.current.phase, UiStreamPhase.limitExceeded);
+@@ -528,7 +530,7 @@
+       end(c);
+       expect(c.current.complete, isTrue);
+       final candidate = c.current.candidatePlan.nodes.length;
+-      for (var i = 0; i < UiStreamLimits.v1.diagnostics + 1; i++) end(c);
++      for (var i = 0; i < UiStreamLimits.v1.diagnostics + 1; i++) { end(c); }
+       expect(c.current.complete, isTrue);
+       expect(c.current.candidatePlan.nodes.length, candidate);
+       expect(c.current.diagnostics.length, UiStreamLimits.v1.diagnostics);
+@@ -747,7 +749,7 @@
+     'op': 'node',
+     'id': id,
+     'component': component,
+-    if (parent != null) 'parent': parent,
++    'parent': ?parent,
+     'props': props,
+     'bind': bind,
+   }),
+--- a/packages/muyon_ui/lib/src/confirmation.dart
++++ b/packages/muyon_ui/lib/src/confirmation.dart
+@@ -320,10 +320,11 @@
+     final onAllowAll = interactive ? this.onAllowAll : null;
+     final onIndividual = interactive ? this.onIndividual : null;
+     final onReject = interactive ? this.onReject : null;
+-    if (items.any((item) => item.kind == ConfirmationKind.read))
++    if (items.any((item) => item.kind == ConfirmationKind.read)) {
+       throw ArgumentError(
+         'Read-only operations do not enter batch confirmation',
+       );
++    }
+     final t = MuyonTokens.of(context);
+     return UiPanel(
+       child: Column(
+--- a/packages/muyon_ui/lib/src/dynamic/patch.dart
++++ b/packages/muyon_ui/lib/src/dynamic/patch.dart
+@@ -50,14 +50,16 @@
+   UiValidationResult reject(String reason) =>
+       UiValidationResult.rejected([reason]);
+   if (!patch.complete) return reject('incomplete_patch');
+-  if (patch.patchId.isEmpty || patch.ops.isEmpty || patch.ops.length > 200)
++  if (patch.patchId.isEmpty || patch.ops.isEmpty || patch.ops.length > 200) {
+     return reject('invalid_patch');
++  }
+   if (!identical(snapshot, current.snapshot) ||
+       !identical(catalog, current.catalog) ||
+       !identical(intent, current.intent) ||
+       patch.snapshotRevision != snapshot.ref ||
+-      patch.surfaceId != current.plan.surfaceId)
++      patch.surfaceId != current.plan.surfaceId) {
+     return reject('patch_context');
++  }
+   late String fingerprint;
+   try {
+     fingerprint = jsonEncode([
+@@ -96,13 +98,15 @@
+     return reject('patch_value');
+   }
+   final prior = current.appliedPatches[patch.patchId];
+-  if (prior != null)
++  if (prior != null) {
+     return prior == fingerprint
+         ? UiValidationResult.unchanged(current)
+         : reject('patch_id_reused');
++  }
+   if (patch.baseRevision != current.plan.revision ||
+-      patch.nextRevision <= patch.baseRevision)
++      patch.nextRevision <= patch.baseRevision) {
+     return reject('patch_revision');
++  }
+   final nodes = {for (final node in current.plan.nodes) node.id: node};
+   final touched = <String>{};
+   for (final op in patch.ops) {
+--- a/packages/muyon_ui/lib/src/dynamic/surface.dart
++++ b/packages/muyon_ui/lib/src/dynamic/surface.dart
+@@ -102,8 +102,9 @@
+     if (_disposed ||
+         !identical(next.snapshot, current.snapshot) ||
+         !identical(next.intent, current.intent) ||
+-        !identical(next.catalog, current.catalog))
++        !identical(next.catalog, current.catalog)) {
+       return false;
++    }
+     var result = UiValidationResult.unchanged(next);
+     for (final entry in current.appliedPatches.entries) {
+       final supplied = next.appliedPatches[entry.key];
+@@ -126,9 +127,11 @@
+       current.intent,
+       current.catalog,
+     );
+-    if (result.isValid && !identical(result.validatedPlan, current))
+-      if (!acceptPlan(result.validatedPlan!))
++    if (result.isValid && !identical(result.validatedPlan, current)) {
++      if (!acceptPlan(result.validatedPlan!)) {
+         return UiValidationResult.rejected(['surface_accept']);
++      }
++    }
+     return result;
+   }
+
+@@ -167,16 +170,18 @@
+     final matching = current.plan.nodes.where((n) => n.id == event.nodeId);
+     if (matching.length != 1) return UiDispatchOutcome.invalid;
+     final node = matching.single;
+-    if (event.kind == 'cancel' && isPending(node))
++    if (event.kind == 'cancel' && isPending(node)) {
+       return UiDispatchOutcome.stale;
++    }
+     final outcome = session.dispatch(event, current, current.catalog);
+     if (outcome == UiEventOutcome.applied) {
+       _seenEvents.add(event.eventId);
+       notifyListeners();
+       return UiDispatchOutcome.applied;
+     }
+-    if (outcome != UiEventOutcome.unsupported)
++    if (outcome != UiEventOutcome.unsupported) {
+       return UiDispatchOutcome.values.byName(outcome.name);
++    }
+     final binding = node.events[event.kind]!;
+     final route = current.catalog.actions[binding.actionRef]!.route;
+     if (onEvent == null) return UiDispatchOutcome.unsupported;
+@@ -184,8 +189,9 @@
+       if (session.isCancelled(node.id)) return UiDispatchOutcome.stale;
+       final key = (binding.operationKeyRef!, binding.expectedDraftRevision!);
+       if (_lockedOperations.contains(key) ||
+-          _recoveredOperations.contains(key.$1))
++          _recoveredOperations.contains(key.$1)) {
+         return UiDispatchOutcome.duplicate;
++      }
+       final inputs = <String, Object?>{};
+       final context = current.snapshot.actionContext!;
+       for (final ref in binding.inputRefs) {
+@@ -225,8 +231,9 @@
+     final pending = _pending[receipt.eventId];
+     if (pending == null ||
+         pending.binding.operationKeyRef != receipt.operationKeyRef ||
+-        pending.binding.expectedDraftRevision != receipt.draftRevision)
++        pending.binding.expectedDraftRevision != receipt.draftRevision) {
+       return false;
++    }
+     _pending.remove(receipt.eventId);
+     _receipts[pending.event.nodeId] = receipt;
+     // The host operation reference stays locked even on failure: only a fresh
+@@ -360,11 +367,12 @@
+           key,
+           () => TextEditingController(text: text),
+         );
+-        if (input.text != text)
++        if (input.text != text) {
+           input.value = TextEditingValue(
+             text: text,
+             selection: TextSelection.collapsed(offset: text.length),
+           );
++        }
+         return Column(
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+@@ -397,12 +405,13 @@
+               resolve(n, 'alternate'),
+             ),
+         ];
+-        if (resolve(n, 'sort') == 'value')
++        if (resolve(n, 'sort') == 'value') {
+           rows.sort(
+             (a, b) => a.$2 is num && b.$2 is num
+                 ? (a.$2 as num).compareTo(b.$2 as num)
+                 : '${a.$2}'.compareTo('${b.$2}'),
+           );
++        }
+         return Table(
+           children: [
+             for (final row in rows)
+@@ -495,12 +504,14 @@
+           consequence: '请求宿主确认；界面本身不授予写入权限。',
+         );
+         void decision(ConfirmationChoice choice) {
+-          if (choice == ConfirmationChoice.once && active)
++          if (choice == ConfirmationChoice.once && active) {
+             dispatch(n, 'confirm');
++          }
+           else if (choice == ConfirmationChoice.reject &&
+               !pending &&
+-              n.events.containsKey('cancel'))
++              n.events.containsKey('cancel')) {
+             dispatch(n, 'cancel');
++          }
+         }
+         return Column(
+           crossAxisAlignment: CrossAxisAlignment.start,
+@@ -560,11 +571,12 @@
+   @override
+   Widget build(BuildContext context) {
+     if (!identical(controller.current.catalog, dynamicUiCatalog) &&
+-        !identical(controller.current.catalog, minimalUiCatalog))
++        !identical(controller.current.catalog, minimalUiCatalog)) {
+       return snapshotFallback(
+         controller.current.snapshot,
+         controller.current.intent,
+       );
++    }
+     final plan = controller.current.plan,
+         nodes = {for (final n in controller.current.plan.nodes) n.id: n};
+     final detail = nodes[controller.session.detailNode];
+--- a/packages/muyon_ui/lib/src/dynamic/workspace.dart
++++ b/packages/muyon_ui/lib/src/dynamic/workspace.dart
+@@ -89,8 +89,9 @@
+             restored.revision != old.planRevision ||
+             restored.snapshotRef != old.snapshotRef ||
+             restored.catalogVersion != old.catalogVersion ||
+-            restored.intentRef != old.intentRef)
++            restored.intentRef != old.intentRef) {
+           c.readOnly = true;
++        }
+         else if (restored.revision >= plan.plan.revision) {
+           var result = validateUiPlan(
+             restored,
+@@ -98,8 +99,9 @@
+             plan.intent,
+             plan.catalog,
+           );
+-          if (!result.isValid)
++          if (!result.isValid) {
+             c.readOnly = true;
++          }
+           else {
+             for (final entry in old.patchHistory.entries) {
+               result = result.recordPatch(entry.key, entry.value);
+@@ -124,8 +126,9 @@
+           ? null
+           : (event) async {
+               await c.flush(); // includes the pending/locked operation before the port
+-              if (c.readOnly || c._disposed)
++              if (c.readOnly || c._disposed) {
+                 throw StateError('Workspace not durable');
++              }
+               await onEvent(event);
+             },
+     );
+@@ -178,18 +181,20 @@
+   }
+
+   Future<void> flush() {
+-    if (readOnly)
++    if (readOnly) {
+       return saveError == null
+           ? Future.value()
+           : Future.error(StateError(saveError!));
++    }
+     // Capture now, serialize later: rapid edits each get one coherent version.
+     final projection = _capture(1);
+     final result = _tail
+         .then((_) async {
+           if (readOnly) throw StateError(saveError ?? 'Workspace read-only');
+           final next = projection.copyWith(revision: _revision + 1);
+-          if (!await store.save(next, expectedRevision: _revision))
++          if (!await store.save(next, expectedRevision: _revision)) {
+             throw StateError('Workspace revision or scope changed');
++          }
+           _revision = next.revision;
+           _stored = next;
+           saveError = null;
+--- a/packages/muyon_ui/lib/src/navigation_layout.dart
++++ b/packages/muyon_ui/lib/src/navigation_layout.dart
+@@ -252,7 +252,7 @@
+   Widget build(BuildContext context) => LayoutBuilder(
+     builder: (context, constraints) {
+       if (widget.detail == null || closed) return widget.master;
+-      if (constraints.maxWidth >= MuyonTokens.masterDetailBreakpoint)
++      if (constraints.maxWidth >= MuyonTokens.masterDetailBreakpoint) {
+         return Row(
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+@@ -261,6 +261,7 @@
+             Expanded(flex: 2, child: pane(context, close)),
+           ],
+         );
++      }
+       return Column(
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.start,
+--- a/packages/muyon_ui/lib/src/tokens.dart
++++ b/packages/muyon_ui/lib/src/tokens.dart
+@@ -30,12 +30,10 @@
+     required this.redBg,
+     required this.green,
+     required this.greenBg,
+-    Color? warn,
+-    Color? warnBg,
+-    Color? onAccent,
+-  }) : _warn = warn,
+-       _warnBg = warnBg,
+-       _onAccent = onAccent;
++    this._warn,
++    this._warnBg,
++    this._onAccent,
++  });
+
+   static const light = MuyonTokens(
+     brightness: Brightness.light,
+--- a/packages/muyon_ui/lib/src/ui_components/layout.dart
++++ b/packages/muyon_ui/lib/src/ui_components/layout.dart
+@@ -160,7 +160,7 @@
+       builder: (context, box) {
+         final fit = (box.maxWidth / minColumnWidth).floor().clamp(
+           1,
+-          children.length < 1 ? 1 : children.length,
++          children.isEmpty ? 1 : children.length,
+         );
+         if (fit <= 1) {
+           return Column(
+@@ -308,7 +308,7 @@
+   final UiComponentState state;
+   final String? errorMessage;
+
+-  String get textEquivalent => '可展开：${title}';
++  String get textEquivalent => '可展开：$title';
+
+   @override
+   State<Disclosure> createState() => _DisclosureState();
+--- a/packages/muyon_ui/test/catalog_release_guard_test.dart
++++ b/packages/muyon_ui/test/catalog_release_guard_test.dart
+@@ -4,10 +4,12 @@
+
+ void main() {
+   test('catalog routes disappear when the VM is not debug', () {
+-    if (const bool.fromEnvironment('dart.vm.profile'))
++    if (const bool.fromEnvironment('dart.vm.profile')) {
+       expect(kDebugMode, isFalse);
+-    if (const bool.fromEnvironment('EXPECT_NONDEBUG'))
++    }
++    if (const bool.fromEnvironment('EXPECT_NONDEBUG')) {
+       expect(kDebugMode, isFalse);
++    }
+     expect(muyonDebugRoutes().isEmpty, !kDebugMode);
+   });
+ }
+--- a/packages/muyon_ui/test/catalog_test.dart
++++ b/packages/muyon_ui/test/catalog_test.dart
+@@ -11,14 +11,18 @@
+     expect(muyonDebugRoutes().keys, ['/debug/components']);
+     expect(componentNames, hasLength(15));
+     expect(componentNames.toSet(), hasLength(15));
+-    for (final status in PageState.values)
++    for (final status in PageState.values) {
+       expect(status.label, matches(RegExp(r'[\u4e00-\u9fff]')));
+-    for (final status in BatchState.values)
++    }
++    for (final status in BatchState.values) {
+       expect(status.label, matches(RegExp(r'[\u4e00-\u9fff]')));
+-    for (final status in ConfirmationKind.values)
++    }
++    for (final status in ConfirmationKind.values) {
+       expect(status.label, matches(RegExp(r'[\u4e00-\u9fff]')));
+-    for (final status in ConfirmationChoice.values)
++    }
++    for (final status in ConfirmationChoice.values) {
+       expect(status.label, matches(RegExp(r'[\u4e00-\u9fff]')));
++    }
+   });
+   for (final config in [
+     for (final brightness in Brightness.values)
+--- a/packages/muyon_ui/test/confirmation_test.dart
++++ b/packages/muyon_ui/test/confirmation_test.dart
+@@ -39,8 +39,9 @@
+           ),
+         );
+         expect(find.text(status.label), findsOneWidget);
+-        for (final label in ['做什么', '对谁', '发送内容', '摘要散列', '后果'])
++        for (final label in ['做什么', '对谁', '发送内容', '摘要散列', '后果']) {
+           expect(find.text(label), findsOneWidget);
++        }
+         final active =
+             [
+               BusinessStatus.pending,
+@@ -60,8 +61,9 @@
+               }
+             : <String>[];
+         if (status == BusinessStatus.contentReview ||
+-            status == BusinessStatus.externalContent)
++            status == BusinessStatus.externalContent) {
+           expected.remove('更多');
++        }
+         if (status == BusinessStatus.externalContent) {
+           expected.remove('本次对话允许');
+           expected.remove('本次对话允许发往此端点');
+@@ -122,8 +124,9 @@
+           expect(find.text('本次任务'), findsOneWidget);
+           expect(find.text('本次对话'), findsOneWidget);
+           expect(find.text('始终允许'), findsOneWidget);
+-          for (final label in ['本次任务', '本次对话', '始终允许'])
++          for (final label in ['本次任务', '本次对话', '始终允许']) {
+             minimum(tester, find.bySemanticsLabel(label));
++          }
+           expect(tester.takeException(), isNull);
+         } finally {
+           semantics.dispose();
+--- a/packages/supplier_core/lib/src/hub.dart
++++ b/packages/supplier_core/lib/src/hub.dart
+@@ -173,8 +173,9 @@
+     try {
+       if (log != null) {
+         final boundOrigin = origin ?? _origin;
+-        if (boundOrigin == null || boundOrigin != _origin)
++        if (boundOrigin == null || boundOrigin != _origin) {
+           throw HubException('请先核对中心身份和发布版本');
++        }
+         final digest = await hubDigest(frozen);
+         _check();
+         final prior = log.read(
+@@ -314,8 +315,9 @@
+           ),
+         );
+         guard();
+-        if (response.bytes.length > _maxResponse)
++        if (response.bytes.length > _maxResponse) {
+           throw HubException('中心返回的数据过大');
++        }
+         if (missingIsNull && response.statusCode == 404) return null;
+         Map<String, Object?>? json;
+         try {
+@@ -382,7 +384,7 @@
+       unawaited(
+         task.socket.then<void>(
+           (_) => detach(),
+-          onError: (Object _, StackTrace __) {
++          onError: (Object _, StackTrace _) {
+             detach();
+           },
+         ),
+@@ -402,8 +404,9 @@
+         if (token != null && token.isNotEmpty) {
+           request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
+         }
+-        if (frozen.encodedBody != null)
++        if (frozen.encodedBody != null) {
+           request.headers.contentType = ContentType.json;
++        }
+         check();
+         beforeSend();
+         if (frozen.encodedBody != null) {
+--- a/packages/supplier_core/lib/src/lan.dart
++++ b/packages/supplier_core/lib/src/lan.dart
+@@ -262,8 +262,9 @@
+         if (_stopped) throw LanException('局域网已关闭');
+         final sent = _udp.send(payload, address, port);
+         count(sent);
+-        if (sent != payload.length)
++        if (sent != payload.length) {
+           throw LanException('Discovery send incomplete');
++        }
+       },
+     );
+   }
+@@ -782,8 +783,9 @@
+       // Move out of the unique staging directory: callers delete only the file.
+       final finalFile = await file.rename('${staging.path}.siq');
+       try {
+-        if (timedOut || _stopped)
++        if (timedOut || _stopped) {
+           throw const FormatException('transfer stopped');
++        }
+         _onPush(
+           LanPush(
+             fromId,
+--- a/packages/supplier_core/lib/src/lan_identity.dart
++++ b/packages/supplier_core/lib/src/lan_identity.dart
+@@ -14,9 +14,8 @@
+   DeviceIdentity._({
+     required this.certificatePem,
+     required this.privateKeyPem,
+-    required ECPrivateKey privateKey,
+-  }) : _privateKey = privateKey,
+-       fingerprint = fingerprintOfPem(certificatePem);
++    required this._privateKey,
++  }) : fingerprint = fingerprintOfPem(certificatePem);
+
+   final String certificatePem;
+   final String privateKeyPem;
+--- a/packages/supplier_core/test/lan_security_test.dart
++++ b/packages/supplier_core/test/lan_security_test.dart
+@@ -236,7 +236,7 @@
+       send('x' * 129);
+       await Future<void>.delayed(const Duration(milliseconds: 30));
+       expect(node.peers, isEmpty);
+-      for (var i = 0; i < 80; i++) send('peer-$i');
++      for (var i = 0; i < 80; i++) { send('peer-$i'); }
+       await Future<void>.delayed(const Duration(milliseconds: 150));
+       expect(node.peers, hasLength(4));
+       expect(notifications, lessThanOrEqualTo(2));
+--- a/packages/supplier_core/test/lan_trust_test.dart
++++ b/packages/supplier_core/test/lan_trust_test.dart
+@@ -217,7 +217,7 @@
+       ),
+       throwsA(isA<LanException>()),
+     );
+-    expect(bob.inbox.listSync().where((e) => e is File), isEmpty);
++    expect(bob.inbox.listSync().whereType<File>(), isEmpty);
+   });
+
+   test('replay after restart is refused from the persisted window', () async {

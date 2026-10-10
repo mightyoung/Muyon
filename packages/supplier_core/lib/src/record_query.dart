@@ -144,7 +144,7 @@ Map<String, Object?> recordJson(Map<String, Object?> row) => {
   'id': row['id'],
   for (final MapEntry(:key, :value)
       in (jsonDecode(row['data']! as String) as Map<String, Object?>).entries)
-    if (value != null) key: value,
+    key: ?value,
   'updated_at': row['updated_at'],
   'updated_by': row['updated_by'],
 };
