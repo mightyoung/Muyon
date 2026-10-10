@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/assistant/inquiry_snapshots/inquiry_readonly_snapshot.dart';
 import 'package:muyon/app/module_host.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
@@ -70,6 +71,33 @@ void main() {
     await expectLater(InquiryReadonlySnapshots.read(host: f.host,
       scope: AssistantScope.selectedObjects(objects), object: object), throwsStateError);
     expect(f.host.tools.history(), isEmpty);
+  });
+  test('a forged content digest cannot become a saved fact', () async {
+    final current = f.refs['quotation']!;
+    final forged = ObjectRef(moduleId: current.moduleId, objectType: current.objectType,
+      objectId: current.objectId, nativeProjectId: current.nativeProjectId,
+      revisionRef: current.revisionRef, contentDigest: 'forged-digest');
+    await expectLater(InquiryReadonlySnapshots.read(host: f.host,
+      scope: AssistantScope.selectedObjects([forged]), object: forged), throwsStateError);
+  });
+  test('deleted quotation cannot reappear through a pinned snapshot', () async {
+    final object = f.refs['quotation']!;
+    f.host.inquiry!.runtime.state.store.delete('quotation', object.objectId);
+    await expectLater(InquiryReadonlySnapshots.read(host: f.host,
+      scope: AssistantScope.selectedObjects([object]), object: object), throwsStateError);
+  });
+  test('read never activates an inactive inquiry owner', () async {
+    final host = await MuyonHost.open('${f.root.path}/inactive');
+    try {
+      final object = f.refs['inquiry']!;
+      expect(host.modules.state('inquiry').status, ModuleStatus.inactive);
+      await expectLater(InquiryReadonlySnapshots.read(host: host,
+        scope: AssistantScope.selectedObjects([object]), object: object), throwsStateError);
+      expect(host.modules.state('inquiry').status, ModuleStatus.inactive);
+      expect(host.tools.history(), isEmpty);
+    } finally {
+      await host.close();
+    }
   });
   test('unsupported object type cannot enter the scene adapter', () async {
     const object = ObjectRef(moduleId: 'inquiry', objectType: 'supplier',
