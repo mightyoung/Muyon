@@ -20,7 +20,7 @@ ExchangeCapable 现接口使用 ExchangeEnvelope(kind/id/filePath/header)；旧�
 
 REG-3-REST 已开放 research.save_note/add_outline/assess_run/accept_run，原读 objects/read_object/relations 保留。其余具名写能力（项目更新、task新修订、note-entry关联、手工run、section/cite、binding、card save）已在覆盖清单 deferred；多数对象无统一version/validator，必须按领域既有API及明确expected快照逐项冻结，不能照搬inquiry CRUD。Q10只批准 report/claimdraft 本机导出；registrar仍缺本机目标选择/允许根目录与effectIntent门面，不能伪装write或网络external。未授权 import/export任务/结果/技能实验与设备交换保持后置。
 
-独立复审发现 parse 期间同路径新版本保留旧文件时旧 knowledge source hook 只查 id 存在：模块源同步 requirePinned 接入现 checkBeforeEffect，在 ready 提交前核 currentVersions/root/实际 digest；失败只清理对应宿主缓存索引，不清来源 taint。bootstrap 仅 research.document 的既有来源确认委托真实登记 source.confirm 与模块 lifecycle fence；其余旧 hook 不改。两条受控 parser 竞态回归同时验证生产 hook 和独立同步提交防线，以及 public knowledge.search/allowModelContent 拒绝旧证据、重新索引新版本正例。
+独立复审发现 parse 期间同路径新版本保留旧文件时旧 knowledge source hook 只查 id 存在：模块源同步 requirePinned 接入现 checkBeforeEffect，在 ready 提交前核 currentVersions/root/实际 digest；失败只清理对应宿主缓存索引，不清来源 taint。bootstrap 仅 research.document 的既有来源确认委托真实登记 source.confirm 与模块 lifecycle fence；其余旧 hook 不改。受控真实 parser 竞态回归通过链式 ManagedConnection.onCommit 观察 ready 从未提交（保留并恢复原 hook），验证独立同步提交防线，以及 public host.tools.invoke knowledge.search/allowModelContent 拒绝旧证据、重新索引新版本正例。新增 already-ready→同路径新 current 版本回归保留旧 bytes/旧 ready 缓存，同时断言 registered adapter/public tool 拒绝旧 pin，新版索引后 public tool 恢复正例；空 hook 不退回缓存。既有 KnowledgeService.search 是原始缓存/UI 接口，不承诺所属领域 current-version 结果，本片不修改 shared KnowledgeService、index_invalidation 或保护测试；该原始 API 不冒称公开语义证据工具。
 
 ResearchToolsPage 旧 QA evidenceValidator 仍用绑定元数据与文件 hash，hash await 后 epoch 复核未在此片扩展；当前不是全 QA 迁移。推荐后续只把该附加确认委托 registered source/read 与既有 beforeSend 边界，需模型流程 owner 独审。
 

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
+import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/services/knowledge/registered_research_source.dart';
 import 'package:muyon/services/knowledge/knowledge_service.dart';
 import 'package:muyon/services/documents/document_parser.dart';
@@ -301,23 +302,34 @@ void main() {
         moduleId: 'research', nativeProjectId: 'B')), throwsStateError);
     } finally { await f.close(); }
   });
-  for (final legacyConfirmation in [false, true]) {
-    test('current-version change during parse cannot publish old evidence (legacy hook $legacyConfirmation)', () async {
+    test('current-version change during parse never commits ready old evidence', () async {
       final f = await _Fixture.open();
       final parser = _PausedParser();
+      final database = f.host.services.knowledge.database as ManagedConnection;
+      final previous = database.onCommit;
+      var observe = false, committedReady = false;
+      var readyCommits = 0;
+      database.onCommit = () {
+        previous?.call();
+        if (database.raw.select(
+          "SELECT d.id FROM knowledge_documents d JOIN index_documents i "
+          "ON i.document_id=d.id WHERE d.status='ready' AND i.state='ready'",
+        ).isNotEmpty) {
+          readyCommits++;
+          if (observe) committedReady = true;
+        }
+      };
       try {
         final original = f.adapter().documents(f.binding).first;
         await f.adapter().index(f.binding, original);
+        expect(readyCommits, greaterThan(0), reason: 'observer sees successful baseline ready commit');
         final oldRef = f.host.services.knowledge.documents().single.source;
         expect(await f.host.services.knowledge.allowModelContent(oldRef), isTrue);
         expect(await f.host.services.knowledge.search('Evidence'), hasLength(1));
         final controlled = KnowledgeService(f.host.services.knowledge.database,
           f.host.services.knowledge.rootPath, parser: parser,
           authorizationFacts: f.host.services.knowledge.authorizationFacts);
-        // The legacy fixture isolates the transaction's independent synchronous
-        // source proof; production uses the real registered confirmation hook.
-        controlled.confirmSource = legacyConfirmation
-            ? (_) async => true : f.host.services.knowledge.confirmSource;
+        controlled.confirmSource = f.host.services.knowledge.confirmSource;
         final adapter = ResearchSearchAdapter.registered(controlled, f.host.workspaces,
           f.host.research!.store, sources: f.sources, authorityRevision: f.authority);
         final pending = adapter.index(f.binding, original);
@@ -329,8 +341,11 @@ void main() {
           'INSERT INTO documents(id,project_id,relative_path,snapshot_path) VALUES(?,?,?,?)',
           ['next', 'A', original.relativePath, store.storedPath(next.path)]));
         expect(File(original.absolutePath).existsSync(), isTrue);
+        observe = true;
         parser.release.complete();
         await rejected;
+        expect(committedReady, isFalse, reason: 'ready must never commit before cleanup');
+        observe = false;
         expect(f.host.services.knowledge.documents(), isEmpty);
         expect(f.host.services.knowledge.database.raw.select(
           "SELECT * FROM index_documents WHERE state='ready'"), isEmpty);
@@ -340,10 +355,47 @@ void main() {
         await f.adapter().index(f.binding, current);
         expect(await f.host.services.knowledge.search('fresh'), hasLength(1));
       } finally {
+        database.onCommit = previous;
         if (!parser.release.isCompleted) parser.release.complete();
         await f.close();
       }
     });
-  }
+
+  test('public registered knowledge tool rejects old ready version and accepts newly indexed current version', () async {
+    final f = await _Fixture.open();
+    try {
+      final adapter = f.adapter();
+      final original = adapter.documents(f.binding).first;
+      await adapter.index(f.binding, original);
+      var invocation = 0;
+      Future<List<Object?>> ask() async {
+        final result = await f.host.tools.invoke(ToolCallRequest(
+          invocationId: 'reg3b-public-${invocation++}', toolId: 'knowledge.search',
+          scope: const AssistantScope.global(), parameters: {'query': 'Evidence'}));
+        expect(result.status, ToolCallStatus.succeeded);
+        return (result.data['hits'] as List).cast<Object?>();
+      }
+      expect(await ask(), hasLength(1));
+      final oldRef = f.host.services.knowledge.documents().single.source;
+      final store = f.host.research!.store;
+      final next = File('${store.rootPath}/next-ready.md')..writeAsStringSync('fresh Evidence');
+      await store.write(() => store.db.execute(
+        'INSERT INTO documents(id,project_id,relative_path,snapshot_path) VALUES(?,?,?,?)',
+        ['next-ready', 'A', original.relativePath, store.storedPath(next.path)]));
+      expect(File(original.absolutePath).existsSync(), isTrue);
+      // The existing raw cache API retains bytes. The public tool must ask
+      // their owning registered source before exposing them as evidence.
+      expect(await f.host.services.knowledge.search('Evidence'), hasLength(1));
+      expect(await ask(), isEmpty);
+      expect(await f.host.services.knowledge.allowModelContent(oldRef), isFalse);
+      await expectLater(adapter.search(f.binding, 'Evidence',
+        selectedDocumentIds: {original.id}), throwsStateError);
+      final current = adapter.documents(f.binding).firstWhere((doc) => doc.id == 'next-ready');
+      await adapter.index(f.binding, current);
+      expect(await ask(), hasLength(1));
+      f.host.services.knowledge.confirmSource = null;
+      expect(await ask(), isEmpty, reason: 'registered public publication never falls back to raw cache');
+    } finally { await f.close(); }
+  });
 
 }
