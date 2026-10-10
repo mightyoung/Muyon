@@ -83,8 +83,17 @@ class AgentResume {
 
   Future<PersonalTask?> _manual(PersonalTask prev) async {
     final call = Map<String, Object?>.from(prev.payload['toolCall'] as Map);
+    final preview = prev.payload['preview'];
+    final previousHold = preview is Map ? preview['resume'] : null;
+    final previouslyHeld = previousHold is Map;
+    final heldCalls = previousHold is Map ? previousHold['calls'] : null;
     final id = _invocationId(call);
-    final receipt = id == null ? null : ctx.tools.receiptFor(id);
+    // Pause changes stage, but cannot acknowledge a persisted verification
+    // stop. Keep even legacy holds without an id/digest held; later receipts
+    // cannot release them either. Only continueHeld consumes this checkpoint.
+    final receipt = previouslyHeld || id == null
+        ? null
+        : ctx.tools.receiptFor(id);
     final toolId = call['toolId'] as String;
     final mismatch =
         receipt != null &&
@@ -93,7 +102,8 @@ class AgentResume {
               prev.payload['toolIdentityDigest'],
               receipt.identityDigest,
             ));
-    if (!mismatch &&
+    if (!previouslyHeld &&
+        !mismatch &&
         (receipt == null || (!receipt.succeeded && !receipt.unknown))) {
       // Nothing ran, or it failed without any effect: ask again as before.
       return null;
@@ -109,13 +119,11 @@ class AgentResume {
       '运行工具 $toolId：${jsonEncode(call['parameters'] ?? const {})}',
     );
     final withCall = task.copy({
-      'toolCall': {
-        'toolId': toolId,
-        'parameters': call['parameters'],
-        'destination': call['destination'],
-      },
+      ...BudgetUsage.fromPayload(prev.payload).toPayload(),
+      'toolCall': call,
+      'toolIdentityDigest': prev.payload['toolIdentityDigest'],
     });
-    if (!mismatch && receipt.succeeded) {
+    if (!previouslyHeld && !mismatch && receipt != null && receipt.succeeded) {
       final result = receipt.result!;
       final taken = withCall.copy({
         'step': {
@@ -158,14 +166,19 @@ class AgentResume {
     await _hold(
       withCall,
       prev,
-      calls: [
-        {
-          'toolId': toolId,
-          'invocationId': id,
-          'receipt': 'unknown',
-          if (mismatch) 'reason': 'identity_unverified',
-        },
-      ],
+      calls: heldCalls is List
+          ? [
+              for (final heldCall in heldCalls.whereType<Map>())
+                Map<String, Object?>.from(heldCall),
+            ]
+          : [
+              {
+                'toolId': toolId,
+                'invocationId': id,
+                'receipt': 'unknown',
+                if (mismatch) 'reason': 'identity_unverified',
+              },
+            ],
       unknownTools: [toolId],
       adopted: 0,
       unknown: 1,
