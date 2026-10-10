@@ -157,6 +157,164 @@ void main() {
     });
   }
 
+  for (final change in ['delete', 'disable', 'narrow', 'expire']) {
+    test('duplicate rejects $change to its kept source', () async {
+      await repo.saveMemory(content: '重复事实', source: 'user');
+      await repo.saveMemory(content: '重复事实', source: 'user');
+      final run = await dream.run();
+      final proposal = dream.proposals(runId: run.id).single;
+      final keep = proposal.payload['keepId'] as String;
+      switch (change) {
+        case 'delete':
+          await repo.deleteMemory(keep);
+        case 'disable':
+          await repo.setMemoryDisabled(keep, true);
+        case 'narrow':
+          await repo.narrowMemoryScope(keep, AssistantScope.workspace('w'));
+        case 'expire':
+          await repo.saveMemory(id: keep, content: '重复事实', source: 'user',
+            expiresAt: DateTime.utc(2000));
+      }
+      final before = jsonEncode(repo.organizationSnapshot());
+      await expectLater(dream.accept(proposal.id), throwsStateError);
+      expect(jsonEncode(repo.organizationSnapshot()), before);
+    });
+  }
+
+  test('accept cannot erase an earlier user change from the revert guard', () async {
+    await repo.saveMemory(content: '重复', source: 'user');
+    await repo.saveMemory(content: '重复', source: 'user');
+    final run = await dream.run();
+    await repo.saveMemory(content: '新增用户记忆', source: 'user');
+    await dream.accept(dream.proposals(runId: run.id).single.id);
+    final before = jsonEncode(repo.organizationSnapshot());
+    await expectLater(dream.revert(run.id), throwsStateError);
+    expect(jsonEncode(repo.organizationSnapshot()), before);
+  });
+
+  test('revert and accepted status survive reopening the database', () async {
+    await repo.saveMemory(content: '重复', source: 'user');
+    await repo.saveMemory(content: '重复', source: 'user');
+    final run = await dream.run();
+    final proposal = dream.proposals(runId: run.id).single;
+    await dream.accept(proposal.id);
+    await storage.close();
+    storage = StorageManager(dir.path);
+    repo = FoundationRepository(await storage.open('muyon', WorkspaceRepository.schema));
+    dream = DreamService(repo);
+    await expectLater(dream.accept(proposal.id), throwsStateError);
+    await dream.revert(run.id);
+    expect(repo.memories(), hasLength(2));
+    expect(dream.proposals(runId: run.id).single.status, 'reverted');
+  });
+
+  test('failed revert rolls back snapshot and proposal state together', () async {
+    await repo.saveMemory(content: '重复', source: 'user');
+    await repo.saveMemory(content: '重复', source: 'user');
+    final run = await dream.run();
+    await dream.accept(dream.proposals(runId: run.id).single.id);
+    final before = jsonEncode(repo.organizationSnapshot());
+    repo.database.raw.execute("CREATE TRIGGER fail_revert BEFORE UPDATE OF status ON dream_runs WHEN NEW.status='reverted' BEGIN SELECT RAISE(ABORT, 'injected crash boundary'); END");
+    await expectLater(dream.revert(run.id), throwsA(isA<Exception>()));
+    expect(jsonEncode(repo.organizationSnapshot()), before);
+    expect(dream.proposals(runId: run.id).single.status, 'accepted');
+    expect(dream.runRecord(run.id)!.status, 'done');
+    repo.database.raw.execute('DROP TRIGGER fail_revert');
+    await dream.revert(run.id);
+    expect(repo.memories(), hasLength(2));
+  });
+
+  for (final kind in ['summary', 'experience']) {
+    test('$kind rechecks a source changed in the pending write queue', () async {
+      final source = await repo.saveMemory(content: '证据', source: 'user');
+      final run = await dream.run();
+      final id = 'queued-$kind';
+      _insertProposal(repo, run.id, id, kind, source);
+      final pending = repo.setMemoryDisabled(source, true);
+      final accepting = dream.accept(id);
+      await pending;
+      await expectLater(accepting, throwsStateError);
+      expect(repo.memories(includeDisabled: true), hasLength(1));
+      expect(repo.experiences(includeUnverified: true), isEmpty);
+    });
+
+    test('$kind concurrent accepts commit only one artifact', () async {
+      final source = await repo.saveMemory(content: '证据', source: 'user');
+      final run = await dream.run();
+      final id = 'concurrent-$kind';
+      _insertProposal(repo, run.id, id, kind, source);
+      final outcomes = await Future.wait([
+        for (var i = 0; i < 2; i++)
+          dream.accept(id).then((_) => true, onError: (Object _) => false),
+      ]);
+      expect(outcomes.where((accepted) => accepted), hasLength(1));
+      expect(kind == 'summary'
+          ? repo.memories().where((m) => m.source == 'dream').length
+          : repo.experiences(includeUnverified: true).length, 1);
+    });
+  }
+
+  test('legacy run without a persistent guard cannot restore the database', () async {
+    await repo.saveMemory(content: '原始', source: 'user');
+    final run = await dream.run();
+    repo.database.raw.execute('UPDATE dream_runs SET outputs_json=? WHERE id=?',
+      [jsonEncode({'proposals': [], 'error': null}), run.id]);
+    final before = jsonEncode(repo.organizationSnapshot());
+    await expectLater(dream.revert(run.id), throwsStateError);
+    expect(jsonEncode(repo.organizationSnapshot()), before);
+  });
+
+  test('pending user deletion wins over revert at the transaction boundary', () async {
+    final source = await repo.saveMemory(content: '用户事实', source: 'user');
+    final run = await dream.run();
+    final pending = repo.deleteMemory(source);
+    final reverting = dream.revert(run.id);
+    await pending;
+    await expectLater(reverting, throwsStateError);
+    expect(repo.memories(includeDisabled: true), isEmpty);
+    expect(repo.deletedContent('用户事实'), isTrue);
+  });
+
+  test('accept rejects a proposal from a running run', () async {
+    final source = await repo.saveMemory(content: '证据', source: 'user');
+    final run = await dream.run(leaveRunning: true);
+    _insertProposal(repo, run.id, 'unfinished', 'summary', source);
+    await expectLater(dream.accept('unfinished'), throwsStateError);
+    expect(repo.memories(), hasLength(1));
+  });
+
+  for (final change in ['verify', 'retire']) {
+    test('revert preserves later experience $change', () async {
+      final experience = await repo.saveExperience(
+        content: '用户经验', source: 'user', evidence: [],
+      );
+      final run = await dream.run();
+      if (change == 'verify') {
+        await repo.verifyExperience(experience);
+      } else {
+        await repo.retireExperience(experience);
+      }
+      final before = jsonEncode(repo.organizationSnapshot());
+      await expectLater(dream.revert(run.id), throwsStateError);
+      expect(jsonEncode(repo.organizationSnapshot()), before);
+    });
+  }
+
+  test('user deletion guard remains durable after reopening', () async {
+    final source = await repo.saveMemory(content: '删除的事实', source: 'user');
+    final run = await dream.run();
+    await repo.deleteMemory(source);
+    await storage.close();
+    storage = StorageManager(dir.path);
+    repo = FoundationRepository(
+      await storage.open('muyon', WorkspaceRepository.schema),
+    );
+    dream = DreamService(repo);
+    await expectLater(dream.revert(run.id), throwsStateError);
+    expect(repo.deletedContent('删除的事实'), isTrue);
+    expect(repo.memories(includeDisabled: true), isEmpty);
+  });
+
   test(
     'delete and disable leave assistant context and block reintroduction',
     () async {
@@ -401,3 +559,12 @@ PersonalAgent _agent(FoundationRepository repo) => PersonalAgent(
         ResolvedAssistantScope(requested: scope, objects: const []),
   ),
 );
+
+void _insertProposal(FoundationRepository repo, String runId, String id,
+    String kind, String source) {
+  repo.database.raw.execute(
+    'INSERT INTO dream_proposals(id,run_id,kind,evidence_json,payload_json,status) VALUES(?,?,?,?,?,?)',
+    [id, runId, kind, jsonEncode([{'id': source, 'revision': 1}]),
+      jsonEncode({'content': '整理产物'}), 'proposed'],
+  );
+}

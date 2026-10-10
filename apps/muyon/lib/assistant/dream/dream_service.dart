@@ -151,70 +151,104 @@ class DreamService {
     }
   }
 
-  Future<void> accept(String proposalId) async {
+  /// Re-read, validate and commit effects/status inside one queued transaction.
+  Future<void> accept(String proposalId) => repository.writeOrganization((db) {
     final proposal = proposals().singleWhere((item) => item.id == proposalId);
     if (proposal.status != 'proposed') throw StateError('提案已处理');
     if (proposal.kind == 'conflict') {
       throw StateError('冲突只展示来源，不能自动消解');
     }
+    final run = runRecord(proposal.runId);
+    if (run == null || run.status != 'done') {
+      throw StateError('只能接受已完成整理的提案');
+    }
+    final outputs = _outputs(run);
+    // A later accept must never make an intervening user edit revertible.
+    final blocked =
+        outputs['revertBlocked'] == true ||
+        outputs['organizationFingerprint'] !=
+            repository.currentOrganizationFingerprint();
+    final scope = _scopeOf(proposal.evidence);
     if (proposal.kind == 'duplicate') {
-      for (final id
-          in (proposal.payload['disableIds'] as List).cast<String>()) {
-        await repository.setMemoryDisabled(id, true);
+      final ids = (proposal.payload['disableIds'] as List).cast<String>();
+      final evidenceIds = proposal.evidence.map((item) => item['id']).toSet();
+      final keepId = proposal.payload['keepId'];
+      if (!evidenceIds.contains(keepId) ||
+          ids.any((id) => id == keepId || !evidenceIds.contains(id))) {
+        throw StateError('重复提案目标与证据不一致');
+      }
+      for (final id in ids) {
+        repository.setMemoryDisabledInTransaction(db, id, true);
       }
     } else if (proposal.kind == 'summary') {
       final content = proposal.payload['content'] as String;
       if (repository.deletedContent(content)) {
         throw StateError('已删除的内容不会被重新写入');
       }
-      await repository.saveMemory(
+      repository.saveMemoryInTransaction(
+        db,
         content: content,
         source: 'dream',
-        scope: _scopeOf(proposal.evidence),
+        scope: scope,
         verified: false,
         kind: 'summary',
         inference: true,
         lineage: proposal.evidence,
       );
     } else if (proposal.kind == 'experience') {
-      await repository.saveExperience(
+      repository.saveExperienceInTransaction(
+        db,
         content: proposal.payload['content'] as String,
         source: 'dream',
-        scope: _scopeOf(proposal.evidence),
+        scope: scope,
         evidence: proposal.evidence,
       );
     } else {
       throw StateError('未知提案');
     }
-    await repository.database.write(
-      (db) => db.execute(
-        "UPDATE dream_proposals SET status='accepted' WHERE id=? AND status='proposed'",
-        [proposalId],
-      ),
+    db.execute(
+      "UPDATE dream_proposals SET status='accepted' WHERE id=? AND status='proposed'",
+      [proposalId],
     );
-  }
+    outputs['revertBlocked'] = blocked;
+    outputs['organizationFingerprint'] =
+        repository.currentOrganizationFingerprint();
+    db.execute('UPDATE dream_runs SET outputs_json=? WHERE id=?', [
+      jsonEncode(outputs),
+      run.id,
+    ]);
+  });
 
-  /// Restores the snapshot taken when [runId] started. Only the latest done run.
-  Future<void> revert(String runId) async {
+  /// Only restore the latest done run if nothing else changed its organization.
+  Future<void> revert(String runId) => repository.writeOrganization((db) {
     final run = runRecord(runId);
     final latest = _lastDone();
     if (run == null || run.status != 'done' || latest?.id != runId) {
       throw StateError('只能回滚最近一次已完成的整理');
     }
-    await repository.restoreOrganizationSnapshot(
+    final outputs = _outputs(run);
+    final expected = outputs['organizationFingerprint'];
+    if (outputs['revertBlocked'] == true || expected is! String) {
+      throw StateError('整理后有其他修改或缺少回滚守卫，不能回滚');
+    }
+    repository.restoreOrganizationSnapshotInTransaction(
+      db,
       Map<String, Object?>.from(jsonDecode(run.snapshotJson) as Map),
+      expectedFingerprint: expected,
     );
-    await repository.database.write((db) {
-      db.execute(
-        "UPDATE dream_proposals SET status='reverted' WHERE run_id=?",
-        [runId],
-      );
-      db.execute(
-        "UPDATE dream_runs SET status='reverted', finished_at=? WHERE id=?",
-        [_now(), runId],
-      );
-    });
-  }
+    db.execute(
+      "UPDATE dream_proposals SET status='reverted' WHERE run_id=?",
+      [runId],
+    );
+    db.execute(
+      "UPDATE dream_runs SET status='reverted', finished_at=? WHERE id=?",
+      [_now(), runId],
+    );
+  });
+
+  Map<String, Object?> _outputs(DreamRun run) => run.outputs is Map
+      ? Map<String, Object?>.from(run.outputs as Map)
+      : <String, Object?>{};
 
   List<DreamProposal> _offline(List<PersonalMemory> changed) {
     final changedIds = changed.map((memory) => memory.id).toSet();
@@ -457,7 +491,16 @@ class DreamService {
       'UPDATE dream_runs SET status=?, outputs_json=?, outbound_ids_json=?, token_cost=?, elapsed_ms=?, finished_at=? WHERE id=?',
       [
         status,
-        jsonEncode({'proposals': outputs, 'error': error}),
+        jsonEncode({
+          'proposals': outputs,
+          'error': error,
+          'organizationFingerprint': FoundationRepository.organizationFingerprint(
+            Map<String, Object?>.from(
+              jsonDecode(runRecord(id)!.snapshotJson) as Map,
+            ),
+          ),
+          'revertBlocked': false,
+        }),
         jsonEncode(outbound),
         tokenCost,
         elapsedMs,
