@@ -114,6 +114,23 @@ class _InquiryScope extends _LegacyScope {
   @override
   String get moduleId => 'inquiry';
   @override
+  bool get resolvesDirectly => true;
+
+  // Keep the original live-row enumeration. Resolve explicit selections via
+  // the inquiry session so a pinned delete receipt can authorize a restore.
+  @override
+  Future<ObjectRef?> resolve(ObjectRef requested) async {
+    final runtime = host.modules.runtime<ModuleRuntime>('inquiry');
+    if (runtime is! ScopeResolvable) return null;
+    final session = await (runtime as ScopeResolvable).openScopeSession();
+    try {
+      return (await session.resolve(requested))?.ref;
+    } finally {
+      await session.dispose();
+    }
+  }
+
+  @override
   Future<void> prepare() async {
     await host.modules.activate('inquiry');
   }

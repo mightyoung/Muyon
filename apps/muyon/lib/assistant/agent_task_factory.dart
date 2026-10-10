@@ -48,6 +48,16 @@ class AgentTaskFactory {
             (t.descriptor.toolId != 'assistant.plan_ui' ||
                 ctx.uiPlanning?.enabled == true) &&
             t.available &&
+            (ctx.tools.supportsScope(
+                  t.descriptor.toolId, conversation.scope.kind,
+                ) ||
+                // Global host metadata with no business data authority stays
+                // input to the model and its taint ledger. Invocation scope
+                // checks remain strict in the registry.
+                (ctx.tools.authorityModules(t.descriptor.toolId).isEmpty &&
+                    ctx.tools.supportsScope(
+                      t.descriptor.toolId, AssistantScopeKind.global,
+                    ))) &&
             (!readonly || t.descriptor.effect == ToolEffect.read) &&
             t.descriptor.modelSelectable &&
             ctx.tools.permitsCategory(t.descriptor.toolId),

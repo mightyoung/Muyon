@@ -234,7 +234,9 @@ class _AskPageState extends State<AskPage> {
                       confirmAssistantNetwork(context, name, args, cancel),
                   () => widget.state.assistantWebEnabled,
                   web!,
-                  autoApprove: permission == AssistantPermission.bypass,
+                  autoApprove:
+                      !widget.state.isHosted &&
+                      permission == AssistantPermission.bypass,
                   onUsed: () => externalContent = true,
                 ),
               _AppNavigationTools(

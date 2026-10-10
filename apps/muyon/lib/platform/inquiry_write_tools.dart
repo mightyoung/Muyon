@@ -6,6 +6,7 @@ import 'package:supplier_core/supplier_core.dart';
 
 import '../app/bootstrap.dart';
 import 'tool_registry.dart';
+import 'inquiry_record_tools.dart';
 import 'host_tool_registration.dart';
 import 'grants/host_effect_intent.dart';
 
@@ -65,6 +66,7 @@ void registerInquiryWriteTools(
   MuyonHost host, {
   HostToolRegistration? register,
 }) {
+  registerInquiryRecordTools(host, register: register);
   final registerTool = register ?? host.tools.register;
   void write({
     required String name,

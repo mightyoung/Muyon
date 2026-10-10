@@ -101,8 +101,8 @@ class Rule {
   final String name, text;
 }
 
-/// Something that changes data. Agents only read; each action is carried
-/// out by a person in the app.
+/// A business action. Supported host tools require user authorization;
+/// specialized actions remain on their existing human pages.
 class ActionType {
   const ActionType(this.name, this.label, this.description);
   final String name, label, description;
@@ -704,7 +704,8 @@ const rules = [
   ),
 ];
 
-/// What people can do in the app; agents describe these, never perform them.
+/// Business actions. The host exposes approved tools for supported operations;
+/// deferred actions remain on their existing human pages.
 const actions = [
   ActionType('save_record', '新建或修改记录', '在对应页面填写表单，通过校验后保存，并记入变更记录'),
   ActionType('award', '定标', '在比价或询价单里选中一条报价，填成交单价和定标日期，并可写回预算行'),

@@ -24,6 +24,9 @@ class AiTasksPage extends StatelessWidget {
 
   Future<void> _resume(BuildContext context, AiJob job) async {
     try {
+      if (state.isHosted && job.task == AiTask.conversation) {
+        throw const FormatException('请使用宿主统一助手');
+      }
       if (job.task == AiTask.clauseReading) {
         final item = state.store.get(
           'spec_item',
@@ -33,9 +36,8 @@ class AiTasksPage extends StatelessWidget {
             item == null ||
             item.deleted ||
             item.data['spec_class'] == null ||
-            !clausesOf(
-              item,
-            ).any((c) => !c.reviewed && (c.isText || c.hint != null))) {
+            !clausesOf(item)
+                .any((c) => !c.reviewed && (c.isText || c.hint != null))) {
           throw const FormatException('原条款已变化或条款 AI 已关闭，请回到需求项检查后重新开始');
         }
       }
@@ -64,9 +66,8 @@ class AiTasksPage extends StatelessWidget {
           '这类任务暂不支持从此处继续',
         ),
       };
-      await Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => page));
+      await Navigator.of(context)
+          .push(MaterialPageRoute<void>(builder: (_) => page));
     } catch (e) {
       if (context.mounted) toast(context, friendlyError('$e'));
     }
@@ -78,7 +79,9 @@ class AiTasksPage extends StatelessWidget {
     builder: (context, _) {
       late List<AiJob> jobs;
       try {
-        jobs = state.aiTasks;
+        jobs = state.aiTasks
+            .where((job) => !state.isHosted || job.task != AiTask.conversation)
+            .toList();
       } catch (e) {
         return Center(child: Text('任务记录读取失败：${friendlyError('$e')}'));
       }

@@ -14,6 +14,7 @@ import '../host_tool_registrar.dart';
 import '../inquiry_plugin.dart';
 import '../legacy_module_bridge.dart';
 import '../../services/documents/document_parser.dart';
+import 'inquiry/coverage.dart';
 
 export 'package:inquiry_module/inquiry_module.dart'
     show
@@ -105,37 +106,7 @@ class InquiryBusinessModule implements BusinessModuleV2 {
   @override
   ModuleOntology get ontology => inquiryOntology;
   @override
-  CapabilityCoverage get coverage => CapabilityCoverage(
-    surfaces: const [
-      Surface('package:supplier_core/supplier_core.dart', 'Store'),
-    ],
-    operations: [
-      for (final definition in domain.agentTools)
-        Operation(
-          id: (definition['function'] as Map)['name'] as String,
-          kind: OpKind.query,
-          tools: ['inquiry.${(definition['function'] as Map)['name']}'],
-        ),
-      Operation(id: 'object', kind: OpKind.query, tools: ['inquiry.object']),
-      Operation(
-        id: 'context_import',
-        kind: OpKind.write,
-        members: {'prepareImport', 'commitImport', 'receipt'},
-        notExposed: const NotExposed(
-          NotExposedKind.humanOnly,
-          '文件上下文复核由人工选择功能、校验字段并确认记录集合；没有模型提交工具。',
-        ),
-      ),
-
-      for (final name in const [
-        'create_inquiry',
-        'record_quote',
-        'set_item_qty',
-        'set_inquiry_status',
-      ])
-        Operation(id: name, kind: OpKind.write, tools: ['inquiry.$name']),
-    ],
-  );
+  CapabilityCoverage get coverage => inquiryCoverage;
 }
 
 /// The compatibility InquiryPlugin remains the one service/close owner.
@@ -226,11 +197,14 @@ class _InquirySession implements ModuleSession {
       return null;
     }
     final rows = owner.runtime.state.store.db.select(
-      'SELECT id,data,version FROM ${ref.objectType} WHERE id=? AND deleted=0',
+      'SELECT id,data,version,deleted FROM ${ref.objectType} WHERE id=?',
       [ref.objectId],
     );
     if (rows.isEmpty) return null;
     final row = rows.single;
+    // Tombstones remain absent from catalogs/pages. An explicit pinned delete
+    // receipt can resolve its current version for a host-approved restore.
+    if (row['deleted'] == 1 && ref.revisionRef == null) return null;
     final raw = row['data'] as String;
     final data = jsonDecode(raw) as Map;
     final nativeProject = ref.objectType == 'project'
@@ -261,7 +235,11 @@ class _InquirySession implements ModuleSession {
 
   @override
   Widget? objectPage(BuildContext context, ObjectRef ref) =>
-      _resolve(ref) == null
+      (_resolve(ref) == null ||
+          owner.runtime.state.store
+                  .get(ref.objectType, ref.objectId)
+                  ?.deleted !=
+              false)
       ? null
       : inquiryObjectPage(
           context,
@@ -362,8 +340,15 @@ final inquiryOntology = ModuleOntology(
         name: action.name,
         label: action.label,
         description: action.description,
-        tool: action.name == 'create_inquiry' ? 'inquiry.create_inquiry' : null,
-        humanOnlyReason: action.name == 'create_inquiry' ? null : 'Existing page action; additional tool exposure is outside REG-4a',
+        tool: switch (action.name) {
+          'create_inquiry' => 'inquiry.create_inquiry',
+          'save_record' => 'inquiry.update_record',
+          _ => null,
+        },
+        humanOnlyReason:
+            const {'create_inquiry', 'save_record'}.contains(action.name)
+            ? null
+            : 'Existing human page action; specialized tool deferred to REG-4',
       ),
   ],
   rules: [for (final rule in domain.rules) RuleSpec(rule.name, rule.text)],

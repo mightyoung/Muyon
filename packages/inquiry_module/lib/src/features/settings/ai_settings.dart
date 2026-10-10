@@ -207,39 +207,41 @@ class _AiSettingsState extends State<AiSettings> {
         ),
       ),
       const SizedBox(height: 12),
-      Wrap(
-        spacing: 8,
-        children: [
-          const Text('助手操作权限'),
-          DropdownButton<AssistantPermission>(
-            value: widget.state.assistantPermission,
-            items: [
-              for (final p in AssistantPermission.values)
-                // Hosted mode hides bypass: it is read as confirmWrites there.
-                if (!widget.state.isHosted || p != AssistantPermission.bypass)
-                  DropdownMenuItem(value: p, child: Text(p.label)),
-            ],
-            onChanged: (value) {
-              if (value != null) {
-                setState(() => widget.state.assistantPermission = value);
-              }
-            },
-          ),
-        ],
-      ),
-      if (widget.state.assistantPermission == AssistantPermission.bypass)
-        Text(
-          '助手会直接保存修改和联网请求，不再弹窗确认；读取网页后写入仍需确认，来源资料导入始终需人工审核。',
-          style: Theme.of(context).textTheme.bodySmall,
+      if (!widget.state.isHosted) ...[
+        Wrap(
+          spacing: 8,
+          children: [
+            const Text('助手操作权限'),
+            DropdownButton<AssistantPermission>(
+              value: widget.state.assistantPermission,
+              items: [
+                for (final p in AssistantPermission.values)
+                  // Hosted mode hides bypass: it is read as confirmWrites there.
+                  if (!widget.state.isHosted || p != AssistantPermission.bypass)
+                    DropdownMenuItem(value: p, child: Text(p.label)),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => widget.state.assistantPermission = value);
+                }
+              },
+            ),
+          ],
         ),
-      SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        value: widget.state.assistantWebEnabled,
-        onChanged: (value) =>
-            setState(() => widget.state.assistantWebEnabled = value),
-        title: const Text('助手联网查询'),
-        subtitle: const Text('搜索词会发送给公开搜索网站；公开网页内容会交给配置的 AI 服务处理。'),
-      ),
+        if (widget.state.assistantPermission == AssistantPermission.bypass)
+          Text(
+            '助手会直接保存修改和联网请求，不再弹窗确认；读取网页后写入仍需确认，来源资料导入始终需人工审核。',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: widget.state.assistantWebEnabled,
+          onChanged: (value) =>
+              setState(() => widget.state.assistantWebEnabled = value),
+          title: const Text('助手联网查询'),
+          subtitle: const Text('搜索词会发送给公开搜索网站；公开网页内容会交给配置的 AI 服务处理。'),
+        ),
+      ],
       Wrap(
         spacing: 12,
         crossAxisAlignment: WrapCrossAlignment.center,
