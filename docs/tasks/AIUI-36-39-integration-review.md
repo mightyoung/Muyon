@@ -11,7 +11,8 @@
 | PR36 AIUI-8 | `aef127ff501e7c0d141152bec69aa4e9f3719828` | [38048233373](https://github.com/mightyoung/Muyon/actions/runs/38048233373) / [38048244033](https://github.com/mightyoung/Muyon/actions/runs/38048244033) SUCCESS |
 | PR38 原F4c片 | `5f6e291e3bf36a436c45a02afde983d77df7b92c` | [38049637152](https://github.com/mightyoung/Muyon/actions/runs/38049637152) / [38049639051](https://github.com/mightyoung/Muyon/actions/runs/38049639051) SUCCESS，仅旧head证据 |
 | PR38 对象准入修复 | `aaa175343eee08a4e53576b621bef2c17c16c06a` | [38052426475](https://github.com/mightyoung/Muyon/actions/runs/38052426475) / [38052429669](https://github.com/mightyoung/Muyon/actions/runs/38052429669) FAILURE：宿主1549/3skip/9fail及两项自有lint，仅旧head证据 |
-| PR38 获准夹具最终源 | `53aacb95e598d0e406f66082d8d6386fc7b8cecc` | [38054244081](https://github.com/mightyoung/Muyon/actions/runs/38054244081) / [38054246068](https://github.com/mightyoung/Muyon/actions/runs/38054246068) 新运行待终态 |
+| PR38 获准夹具最终源 | `53aacb95e598d0e406f66082d8d6386fc7b8cecc` | [38054244081](https://github.com/mightyoung/Muyon/actions/runs/38054244081) / [38054246068](https://github.com/mightyoung/Muyon/actions/runs/38054246068) FAILURE：八测试全过host1562/3skip，只有三项自有分析告警 |
+| PR38 自有分析修正最终源 | `433436078c6c976cbfafcf2bad2f8575852d3ec6` | [38055080321](https://github.com/mightyoung/Muyon/actions/runs/38055080321) / [38055084736](https://github.com/mightyoung/Muyon/actions/runs/38055084736) 新运行待终态 |
 | PR39 设置组合 | `76400fe0b640d89ec8bf72123a58b5040b63ee63` | [38049686964](https://github.com/mightyoung/Muyon/actions/runs/38049686964) / [38049689477](https://github.com/mightyoung/Muyon/actions/runs/38049689477) SUCCESS |
 | PR37 AIUI-9 | `055a8cbd1e82a63ef632abb013bfc9b2f180172d` | [38049438912](https://github.com/mightyoung/Muyon/actions/runs/38049438912) / [38049441446](https://github.com/mightyoung/Muyon/actions/runs/38049441446) SUCCESS |
 
@@ -41,7 +42,14 @@ job 12:38:54–12:55:20 UTC；host1572/3skip/9fail，两项自有lint，其余�
 先经独立字节/范围核对再应用；最终源53aacb95增量4files121+/82-，仅旧九例+新helper，
 生产、自有20、2380、artifact与gate零diff，完整原行为断言保留。
 普通增量merge最终源至代码组合 `06b1fc6258fc9123d44737831faec50805af2d87`，
-父为ca437摘要与53aac最终源；新组合及发布CI未终态前不推进develop。
+父为ca437摘要与53aac夹具源。其五文档摘要head `4e49f22fff65615f5ac13c6fee90228fc0c1f65b`
+的[38054370538](https://github.com/mightyoung/Muyon/actions/runs/38054370538)实际FAILURE，
+job 13:05:11–13:21:37 UTC；八库测试全过，host1585/3skip/API198，唯一appsanalyze
+自有aiui4c测试476/483/485三个多余非空断言告警。Coverage SUMMARY OK仅失败运行诊断，
+不替代新成功组合。最终433436源只删这三个冗余`!`，20用例、全部断言、生产、获准旧九例、
+helper、2380/artifact/gate均未改；非作者精确机械增量复审通过。
+再普通增量merge至代码组合 `a42e4e5516b7b7ae1a5175569d8511013738ff79`，
+父为4e49摘要与433436最终源，新组合及发布CI未终态前不推进develop。
 
 ## 跨组件与安全核实
 
