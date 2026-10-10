@@ -331,7 +331,9 @@ class UiWorkspaceController extends ChangeNotifier {
     notifyListeners();
     try {
       await _tail;
-      if (_disposed) throw StateError('Workspace closed');
+      if (_disposed) {
+        throw StateError('Workspace closed');
+      }
       final base = surface.current;
       final fence = surface.session.publicationFence;
       final projection = _capture(_revision + 1);
@@ -372,7 +374,9 @@ class UiWorkspaceController extends ChangeNotifier {
       rethrow;
     } finally {
       _recovering = false;
-      if (!_disposed) notifyListeners();
+      if (!_disposed) {
+        notifyListeners();
+      }
     }
   }
 

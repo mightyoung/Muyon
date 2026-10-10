@@ -94,7 +94,9 @@ class _UiWorkspaceViewState extends State<UiWorkspaceView> {
     returning = true;
     c.scrollOffset = scroll.hasClients ? scroll.offset : c.scrollOffset;
     try {
-      if (!c.canCloseWithoutCheckpoint) await c.flush();
+      if (!c.canCloseWithoutCheckpoint) {
+        await c.flush();
+      }
       if (mounted) {
         setState(() => leaving = true);
         await WidgetsBinding.instance.endOfFrame;

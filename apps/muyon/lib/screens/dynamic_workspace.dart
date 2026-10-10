@@ -191,7 +191,12 @@ class DynamicWorkspaceSession extends ChangeNotifier {
     if (c != null) {
       return c.canCloseWithoutCheckpoint ? Future.value() : c.flush();
     }
-    return ensureLoaded().then<void>((_) async { await controller?.flush(); });
+    return ensureLoaded().then<void>((_) async {
+      final loaded = controller;
+      if (loaded != null && !loaded.canCloseWithoutCheckpoint) {
+        await loaded.flush();
+      }
+    });
   }
 
   void detachWithBestEffortCheckpoint() {
