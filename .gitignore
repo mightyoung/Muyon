@@ -16,3 +16,6 @@ __pycache__/
 .env
 .env.*
 **/test/failures/
+
+.coverage-run/
+**/coverage/

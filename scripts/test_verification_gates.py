@@ -55,6 +55,9 @@ class VerificationGates(unittest.TestCase):
             for package in PACKAGES:
                 (root / package).mkdir(parents=True)
             shutil.copyfile(ROOT / 'scripts' / gate, root / 'scripts' / gate)
+            (root / 'scripts/coverage').mkdir()
+            for filename in ('check.py', 'test_check.py'):
+                (root / 'scripts/coverage' / filename).write_text('pass\n')
             # CI's doctor scenarios are independent of Flutter status propagation.
             (root / 'scripts/test_doctor.sh').write_text(
                 '#!/usr/bin/env bash\necho "all 23 scenarios passed"\n')

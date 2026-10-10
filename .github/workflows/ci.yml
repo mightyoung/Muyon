@@ -1,6 +1,6 @@
 # Automatic gate: analyze and test every package on Linux for each push to the
 # integration/task branches and for pull requests into develop/main.
-# Golden/screenshot tests are excluded in scripts/ci.sh (baselines are macOS);
+# Tests self-skip where platform/font/model requirements are unavailable;
 # the manual `verify` workflow still runs them on macOS.
 name: ci
 
@@ -45,6 +45,33 @@ jobs:
           for t in test_stage1_contract test_stage2_data test_stage2_threshold test_kaggle_submit; do
             python3 "$t.py"
           done
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          if [[ -f .coverage-run/summary.json ]]; then
+            python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads(Path('.coverage-run/summary.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:
+              out.write('Loaded executable line coverage; whole-package denominator unknown.\n\n')
+              out.write('| Package | Hit / loaded executable | % | Unloaded files |\n|---|---:|---:|---:|\n')
+              for package, p in data['packages'].items():
+                  out.write(f"| {package} | {p['hit_lines']} / {p['loaded_executable_lines']} | {p['loaded_line_percent']} | {len(p['unloaded_source_files'])} |\n")
+              out.write('\nLinux self-skips and platform/model limitations remain; UI behavior tests are included.\n')
+          PY
+          fi
+
+      - name: Keep coverage summaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: |
+            .coverage-run/summary.json
+            .coverage-run/suite-summary.json
+          if-no-files-found: error
 
       - name: Keep the log
         if: always()
