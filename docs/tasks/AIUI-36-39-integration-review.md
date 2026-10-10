@@ -49,6 +49,9 @@
 却不改变task scope或snapshot，现有最终检查仍可能push旧页面。当前阻断合入；
 原owner负责复用现成module authority fence并加晚lease行为回归，修复后重新冻结审查与组合CI。
 对象/来源最终实时证明仍待核，不能以固定snapshot代替完整H3。其余33组件契约未见新增确定回归。
+范围交叉核实：本批新增集合入口只有fact对象，collection cell不准入sourceSpan；
+ArtifactPreview及三项旧预览测试相对基线未改，不新增文件读取或路由。
+本次修复限定对象导航；既有“当前文件＋来源变化警告”语义保留，完整来源预览H3另片验收。
 核实代理亲跑9个checker、5个DA、10个gate行为测试及bash语法/diff检查通过。
 旧source CI不替代本批新增完整组合与develop发布CI；原始日志/逐行诊断不入仓库。
 
