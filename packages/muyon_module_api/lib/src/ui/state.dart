@@ -67,8 +67,9 @@ class UiSessionState {
         }
         if (source.start < 0 ||
             source.end > source.originalText.length ||
-            source.end <= source.start)
+            source.end <= source.start) {
           return null;
+        }
         return source.originalText.substring(source.start, source.end);
     }
   }
@@ -158,13 +159,15 @@ class UiSessionState {
     // "String stays String" lock would wrongly block nullable string/date.
     if (!_values.containsKey(field) ||
         !isUiScalar(value) ||
-        (!typed && _values[field] is String && value is! String))
+        (!typed && _values[field] is String && value is! String)) {
       return false;
+    }
     final explicitlyEdited = affectsDraft && !_userOverrides.containsKey(field);
-    if (affectsDraft)
+    if (affectsDraft) {
       _userOverrides[field] = value;
-    else
+    } else {
       _viewValues[field] = value;
+    }
     if (_values[field] == value && !explicitlyEdited) return true;
     _values[field] = value;
     if (affectsDraft) draftRevision++;
@@ -199,8 +202,9 @@ class UiSessionState {
       return;
     }
     if (!_userOverrides.containsKey(field) ||
-        !snapshot.initialUiState.containsKey(field))
+        !snapshot.initialUiState.containsKey(field)) {
       return;
+    }
     _userOverrides.remove(field);
     _values[field] = snapshot.initialUiState[field];
     draftRevision++;
@@ -217,8 +221,9 @@ class UiSessionState {
             (plan.plan.surfaceId != current.plan.surfaceId ||
                 plan.plan.revision < current.plan.revision ||
                 (plan.plan.revision == current.plan.revision &&
-                    !identical(plan, current)))))
+                    !identical(plan, current))))) {
       return false;
+    }
     _currentPlan = plan;
     return true;
   }
@@ -231,11 +236,13 @@ class UiSessionState {
     if (!identical(plan, _currentPlan) ||
         event.surfaceId != plan.plan.surfaceId ||
         event.observedRevision != plan.plan.revision ||
-        !identical(catalog, plan.catalog))
+        !identical(catalog, plan.catalog)) {
       return UiEventOutcome.stale;
+    }
     final nodes = plan.plan.nodes.where((node) => node.id == event.nodeId);
-    if (nodes.length != 1 || event.eventId.isEmpty)
+    if (nodes.length != 1 || event.eventId.isEmpty) {
       return UiEventOutcome.invalid;
+    }
     final node = nodes.single;
     final binding = node.events[event.kind];
     final definition = catalog.actions[binding?.actionRef];
@@ -245,8 +252,9 @@ class UiSessionState {
         schema == null ||
         !schema.events.containsKey(event.kind) ||
         !(schema.eventActions[event.kind]?.contains(binding.actionRef) ??
-            false))
+            false)) {
       return UiEventOutcome.invalid;
+    }
     final payloadType = schema.events[event.kind];
     // library-2 editField: the host spec, not the coarse type, owns the payload.
     UiEditSpec? spec;
@@ -261,12 +269,14 @@ class UiSessionState {
     if (!(spec != null && spec.nullable && event.payload == null) &&
         (payloadType == null
             ? event.payload != null
-            : !matchesUiValue(payloadType, event.payload)))
+            : !matchesUiValue(payloadType, event.payload))) {
       return UiEventOutcome.invalid;
+    }
     if (definition.route != UiActionRoute.local) {
       if (definition.route == UiActionRoute.business &&
-          binding.expectedDraftRevision != draftRevision)
+          binding.expectedDraftRevision != draftRevision) {
         return UiEventOutcome.stale;
+      }
       return UiEventOutcome.unsupported;
     }
     switch (definition.localAction) {
@@ -289,8 +299,9 @@ class UiSessionState {
                   binding.inputRefs.single,
                 ) ??
                 false) ||
-            !['original', 'value'].contains(event.payload))
+            !['original', 'value'].contains(event.payload)) {
           return UiEventOutcome.invalid;
+        }
         final written = _selectViewCore(
           binding.inputRefs.single,
           event.payload,

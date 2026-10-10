@@ -252,7 +252,7 @@ class _MasterDetailState extends State<MasterDetail> {
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       if (widget.detail == null || closed) return widget.master;
-      if (constraints.maxWidth >= MuyonTokens.masterDetailBreakpoint)
+      if (constraints.maxWidth >= MuyonTokens.masterDetailBreakpoint) {
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -261,6 +261,7 @@ class _MasterDetailState extends State<MasterDetail> {
             Expanded(flex: 2, child: pane(context, close)),
           ],
         );
+      }
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

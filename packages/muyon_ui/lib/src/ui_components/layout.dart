@@ -160,7 +160,7 @@ class Columns extends StatelessWidget {
       builder: (context, box) {
         final fit = (box.maxWidth / minColumnWidth).floor().clamp(
           1,
-          children.length < 1 ? 1 : children.length,
+          children.isEmpty ? 1 : children.length,
         );
         if (fit <= 1) {
           return Column(
@@ -200,6 +200,7 @@ class MuyonTabs extends StatefulWidget {
   }) : assert(labels.length == children.length);
   final List<String> labels;
   final List<Widget> children;
+
   /// Initial position at mount; subsequent updates preserve local selection.
   final int initial;
   final UiComponentState state;
@@ -308,7 +309,7 @@ class Disclosure extends StatefulWidget {
   final UiComponentState state;
   final String? errorMessage;
 
-  String get textEquivalent => '可展开：${title}';
+  String get textEquivalent => '可展开：$title';
 
   @override
   State<Disclosure> createState() => _DisclosureState();

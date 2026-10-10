@@ -168,8 +168,9 @@ UiStreamParseResult parseUiStreamLine(
     }
 
     void fields(Set<String> allowed) {
-      if (m.keys.any((key) => !allowed.contains(key)))
+      if (m.keys.any((key) => !allowed.contains(key))) {
         throw const FormatException();
+      }
     }
 
     Map<String, Object?> props() {
@@ -188,11 +189,14 @@ UiStreamParseResult parseUiStreamLine(
           if (ref.length != 2 ||
               ref['kind'] is! String ||
               ref['id'] is! String ||
-              (ref['id'] as String).isEmpty)
+              (ref['id'] as String).isEmpty) {
             throw const FormatException();
+          }
           // Explicit gate: the enum has collection, but /1 grammar must not.
-          if (ref['kind'] == 'collection' && protocolVersion != streamProtocolV2)
+          if (ref['kind'] == 'collection' &&
+              protocolVersion != streamProtocolV2) {
             throw const FormatException();
+          }
           final kind = BindingKind.values.byName(ref['kind'] as String);
           return MapEntry(key, BindingRef(kind, ref['id'] as String));
         }),

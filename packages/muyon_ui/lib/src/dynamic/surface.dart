@@ -102,8 +102,9 @@ class UiSurfaceController extends ChangeNotifier {
     if (_disposed ||
         !identical(next.snapshot, current.snapshot) ||
         !identical(next.intent, current.intent) ||
-        !identical(next.catalog, current.catalog))
+        !identical(next.catalog, current.catalog)) {
       return false;
+    }
     var result = UiValidationResult.unchanged(next);
     for (final entry in current.appliedPatches.entries) {
       final supplied = next.appliedPatches[entry.key];
@@ -126,9 +127,11 @@ class UiSurfaceController extends ChangeNotifier {
       current.intent,
       current.catalog,
     );
-    if (result.isValid && !identical(result.validatedPlan, current))
-      if (!acceptPlan(result.validatedPlan!))
+    if (result.isValid && !identical(result.validatedPlan, current)) {
+      if (!acceptPlan(result.validatedPlan!)) {
         return UiValidationResult.rejected(['surface_accept']);
+      }
+    }
     return result;
   }
 
@@ -167,16 +170,18 @@ class UiSurfaceController extends ChangeNotifier {
     final matching = current.plan.nodes.where((n) => n.id == event.nodeId);
     if (matching.length != 1) return UiDispatchOutcome.invalid;
     final node = matching.single;
-    if (event.kind == 'cancel' && isPending(node))
+    if (event.kind == 'cancel' && isPending(node)) {
       return UiDispatchOutcome.stale;
+    }
     final outcome = session.dispatch(event, current, current.catalog);
     if (outcome == UiEventOutcome.applied) {
       _seenEvents.add(event.eventId);
       notifyListeners();
       return UiDispatchOutcome.applied;
     }
-    if (outcome != UiEventOutcome.unsupported)
+    if (outcome != UiEventOutcome.unsupported) {
       return UiDispatchOutcome.values.byName(outcome.name);
+    }
     final binding = node.events[event.kind]!;
     final route = current.catalog.actions[binding.actionRef]!.route;
     if (onEvent == null) return UiDispatchOutcome.unsupported;
@@ -184,8 +189,9 @@ class UiSurfaceController extends ChangeNotifier {
       if (session.isCancelled(node.id)) return UiDispatchOutcome.stale;
       final key = (binding.operationKeyRef!, binding.expectedDraftRevision!);
       if (_lockedOperations.contains(key) ||
-          _recoveredOperations.contains(key.$1))
+          _recoveredOperations.contains(key.$1)) {
         return UiDispatchOutcome.duplicate;
+      }
       final inputs = <String, Object?>{};
       final context = current.snapshot.actionContext!;
       for (final ref in binding.inputRefs) {
@@ -225,8 +231,9 @@ class UiSurfaceController extends ChangeNotifier {
     final pending = _pending[receipt.eventId];
     if (pending == null ||
         pending.binding.operationKeyRef != receipt.operationKeyRef ||
-        pending.binding.expectedDraftRevision != receipt.draftRevision)
+        pending.binding.expectedDraftRevision != receipt.draftRevision) {
       return false;
+    }
     _pending.remove(receipt.eventId);
     _receipts[pending.event.nodeId] = receipt;
     // The host operation reference stays locked even on failure: only a fresh
@@ -360,11 +367,12 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
           key,
           () => TextEditingController(text: text),
         );
-        if (input.text != text)
+        if (input.text != text) {
           input.value = TextEditingValue(
             text: text,
             selection: TextSelection.collapsed(offset: text.length),
           );
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -397,12 +405,13 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
               resolve(n, 'alternate'),
             ),
         ];
-        if (resolve(n, 'sort') == 'value')
+        if (resolve(n, 'sort') == 'value') {
           rows.sort(
             (a, b) => a.$2 is num && b.$2 is num
                 ? (a.$2 as num).compareTo(b.$2 as num)
                 : '${a.$2}'.compareTo('${b.$2}'),
           );
+        }
         return Table(
           children: [
             for (final row in rows)
@@ -495,12 +504,13 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
           consequence: '请求宿主确认；界面本身不授予写入权限。',
         );
         void decision(ConfirmationChoice choice) {
-          if (choice == ConfirmationChoice.once && active)
+          if (choice == ConfirmationChoice.once && active) {
             dispatch(n, 'confirm');
-          else if (choice == ConfirmationChoice.reject &&
+          } else if (choice == ConfirmationChoice.reject &&
               !pending &&
-              n.events.containsKey('cancel'))
+              n.events.containsKey('cancel')) {
             dispatch(n, 'cancel');
+          }
         }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,11 +570,12 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
   @override
   Widget build(BuildContext context) {
     if (!identical(controller.current.catalog, dynamicUiCatalog) &&
-        !identical(controller.current.catalog, minimalUiCatalog))
+        !identical(controller.current.catalog, minimalUiCatalog)) {
       return snapshotFallback(
         controller.current.snapshot,
         controller.current.intent,
       );
+    }
     final plan = controller.current.plan,
         nodes = {for (final n in controller.current.plan.nodes) n.id: n};
     final detail = nodes[controller.session.detailNode];

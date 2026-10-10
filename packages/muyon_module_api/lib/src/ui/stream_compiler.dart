@@ -228,8 +228,9 @@ class UiStreamCompiler {
           session.intent,
           session.catalog,
         );
-        if (_badLines > 0)
+        if (_badLines > 0) {
           _record(UiStreamErrorCode.malformedStream, 'malformed_stream');
+        }
         _phase = _badLines == 0 && _batch!.isValid
             ? UiStreamPhase.complete
             : UiStreamPhase.rejected;
@@ -288,17 +289,19 @@ class UiStreamCompiler {
     bool protocolError = true,
   }) {
     _diagnosticCount++;
-    if (_diagnostics.length < limits.diagnostics)
+    if (_diagnostics.length < limits.diagnostics) {
       _diagnostics.add(
         UiStreamError(code, reason, protocolError: protocolError),
       );
+    }
   }
 
   void _bad(UiStreamErrorCode code, String reason) {
     _badLines++;
     _record(code, reason);
-    if (_badLines > limits.badLines)
+    if (_badLines > limits.badLines) {
       _limit(UiStreamErrorCode.badLineLimit, 'bad_line_limit');
+    }
   }
 
   void _limit(UiStreamErrorCode code, String reason) {

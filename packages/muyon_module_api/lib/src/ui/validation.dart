@@ -68,15 +68,17 @@ UiValidationResult validateUiPlan(
   final errors = <String>[];
   void reject(String reason) => errors.add(reason);
   if (plan.surfaceId.isEmpty || plan.revision < 0) reject('invalid_surface');
-  if (plan.snapshotRef != snapshot.ref || intent.snapshotRef != snapshot.ref)
+  if (plan.snapshotRef != snapshot.ref || intent.snapshotRef != snapshot.ref) {
     reject('snapshot_revision');
+  }
   if (plan.catalogVersion != catalog.version) reject('catalog_version');
   if (plan.intentRef != intent.id) reject('intent_reference');
   if (plan.nodes.isEmpty || plan.nodes.length > 200) reject('node_limit');
   final nodes = <String, UiNode>{};
   for (final node in plan.nodes) {
-    if (node.id.isEmpty || nodes.containsKey(node.id))
+    if (node.id.isEmpty || nodes.containsKey(node.id)) {
       reject('duplicate_node:${node.id}');
+    }
     nodes[node.id] = node;
   }
   final visited = <String>{}, active = <String>{};
@@ -116,8 +118,9 @@ UiValidationResult validateUiPlan(
   }
   for (final fact in snapshot.facts.entries) {
     if (intent.mandatoryStates.contains(fact.value.state) &&
-        !shown.contains(BindingRef.fact(fact.key)))
+        !shown.contains(BindingRef.fact(fact.key))) {
       reject('mandatory_state:${fact.key}');
+    }
   }
   return UiValidationResult._(
     errors,
@@ -166,39 +169,47 @@ List<String> validateUiNode(
     reject('unknown_component:${node.component}');
     return errors;
   }
-  if (!schema.allowsChildren && node.children.isNotEmpty)
+  if (!schema.allowsChildren && node.children.isNotEmpty) {
     reject('children:${node.id}');
+  }
   for (final required in schema.requiredProperties) {
-    if (!node.properties.containsKey(required))
+    if (!node.properties.containsKey(required)) {
       reject('missing_property:${node.id}:$required');
+    }
   }
   for (final entry in node.properties.entries) {
     final type = schema.properties[entry.key];
-    if (type == null || !matchesUiValue(type, entry.value))
+    if (type == null || !matchesUiValue(type, entry.value)) {
       reject('property_type:${node.id}:${entry.key}');
+    }
   }
   for (final required in schema.requiredBindings) {
-    if (!node.bindings.containsKey(required))
+    if (!node.bindings.containsKey(required)) {
       reject('missing_binding:${node.id}:$required');
+    }
   }
   for (final entry in node.bindings.entries) {
     final ref = entry.value;
-    if (!(schema.bindings[entry.key]?.contains(ref.kind) ?? false))
+    if (!(schema.bindings[entry.key]?.contains(ref.kind) ?? false)) {
       reject('binding_kind:${node.id}:${entry.key}');
+    }
     switch (ref.kind) {
       case BindingKind.fact:
         final fact = snapshot.facts[ref.id];
-        if (fact == null || !isUiScalar(fact.value))
+        if (fact == null || !isUiScalar(fact.value)) {
           reject('unknown_fact:${ref.id}');
+        }
         if (fact != null &&
             (fact.object.moduleId.isEmpty ||
                 fact.object.objectType.isEmpty ||
                 fact.object.objectId.isEmpty ||
-                fact.field.isEmpty))
+                fact.field.isEmpty)) {
           reject('fact_identity:${ref.id}');
+        }
         for (final source in fact?.sourceRefs ?? <String>[]) {
-          if (!snapshot.sources.containsKey(source))
+          if (!snapshot.sources.containsKey(source)) {
             reject('fact_source:${ref.id}:$source');
+          }
         }
       case BindingKind.uiState:
         // itemIds selections live outside initialUiState (never scalar).
@@ -207,15 +218,17 @@ List<String> validateUiNode(
             snapshot.editSpecs[ref.id] is UiItemIdsEdit;
         if (!isIds &&
             (!snapshot.initialUiState.containsKey(ref.id) ||
-                !isUiScalar(snapshot.initialUiState[ref.id])))
+                !isUiScalar(snapshot.initialUiState[ref.id]))) {
           reject('unknown_state:${ref.id}');
+        }
       case BindingKind.computed:
         final value = snapshot.computations[ref.id];
         if (value == null ||
             value.computationId.isEmpty ||
             value.inputVersion != snapshot.ref ||
-            !isUiScalar(value.value))
+            !isUiScalar(value.value)) {
           reject('unknown_or_stale_computation:${ref.id}');
+        }
       case BindingKind.collection:
         // No host collection registry yet (slice 1b): never valid.
         reject('unknown_collection:${ref.id}');
@@ -231,8 +244,9 @@ List<String> validateUiNode(
             source.end <= source.start ||
             source.end > source.originalText.length ||
             (source.page != null && source.page! < 1) ||
-            (source.paragraph != null && source.paragraph! < 1))
+            (source.paragraph != null && source.paragraph! < 1)) {
           reject('unknown_or_stale_source:${ref.id}');
+        }
     }
   }
   for (final entry in node.events.entries) {
@@ -252,8 +266,9 @@ List<String> validateUiNode(
     if (action.route == UiActionRoute.local) {
       if (action.localAction == null) reject('local_action_missing');
       if (binding.operationKeyRef != null ||
-          binding.expectedDraftRevision != null)
+          binding.expectedDraftRevision != null) {
         reject('local_business_reference');
+      }
       final isEdit = action.localAction == UiLocalAction.editField;
       if (isEdit || action.localAction == UiLocalAction.sortRows) {
         if (binding.inputRefs.length != 1 ||
@@ -295,16 +310,19 @@ List<String> validateUiNode(
       if (action.localAction == UiLocalAction.sortRows &&
           binding.inputRefs.any(
             (ref) => snapshot.actionContext?.draft.containsKey(ref) ?? false,
-          ))
+          )) {
         reject('view_business_input');
+      }
       if (action.localAction == UiLocalAction.expandSource &&
           !node.bindings.values.any(
             (ref) => ref.kind == BindingKind.sourceSpan,
-          ))
+          )) {
         reject('source_input');
+      }
       if (action.localAction == UiLocalAction.openDetail &&
-          !node.bindings.containsKey('value'))
+          !node.bindings.containsKey('value')) {
         reject('detail_input');
+      }
     } else if (action.route == UiActionRoute.business) {
       final context = snapshot.actionContext;
       final operation = context?.operations[binding.operationKeyRef];
@@ -321,8 +339,9 @@ List<String> validateUiNode(
             (ref) =>
                 context.draft.containsKey(ref) ||
                 context.confirmedRecordRefs.contains(ref),
-          ))
+          )) {
         reject('host_operation_reference');
+      }
     }
   }
   return List.unmodifiable(errors);

@@ -61,8 +61,9 @@ class StoredUiWorkspace {
         snapshotRef.revision < 0 ||
         !scrollOffset.isFinite ||
         scrollOffset < 0 ||
-        nodeIds.toSet().length != nodeIds.length)
+        nodeIds.toSet().length != nodeIds.length) {
       throw ArgumentError('Invalid workspace projection');
+    }
   }
   static Map<String, Object?> _scalars(Map<String, Object?> input) {
     if (input.entries.any((e) => e.key.isEmpty || !isUiScalar(e.value))) {
