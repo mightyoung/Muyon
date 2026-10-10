@@ -13,7 +13,8 @@ enum UiLocalAction {
   sortRows,
 }
 
-enum UiValueType { string, integer, boolean }
+/// `number` and `stringList` are event payload types only (never properties).
+enum UiValueType { string, integer, boolean, number, stringList }
 
 class UiComponentSchema {
   UiComponentSchema({

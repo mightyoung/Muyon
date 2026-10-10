@@ -1,4 +1,6 @@
 import '../references.dart';
+import 'collection.dart';
+import 'edit_spec.dart';
 
 enum FactState {
   verified,
@@ -114,7 +116,11 @@ class DataSnapshot {
     Map<String, SourceSpanRef> sources = const {},
     Map<String, String> sourceDigests = const {},
     this.actionContext,
+    Map<String, UiEditSpec> editSpecs = const {},
+    Map<String, UiCollection> collections = const {},
   }) : facts = Map.unmodifiable(facts),
+       editSpecs = Map.unmodifiable(editSpecs),
+       collections = Map.unmodifiable(collections),
        initialUiState = Map.unmodifiable(initialUiState),
        computations = Map.unmodifiable(computations),
        sources = Map.unmodifiable(sources),
@@ -126,6 +132,10 @@ class DataSnapshot {
   final Map<String, SourceSpanRef> sources;
   final Map<String, String> sourceDigests;
   final UiActionContext? actionContext;
+
+  /// NOT READY (slice 1b scaffold): declared, not yet consulted by anything.
+  final Map<String, UiEditSpec> editSpecs;
+  final Map<String, UiCollection> collections;
   DataSnapshot copyWith({
     Map<String, String>? sourceDigests,
     Map<String, ComputedValue>? computations,
@@ -137,5 +147,7 @@ class DataSnapshot {
     sources: sources,
     sourceDigests: sourceDigests ?? this.sourceDigests,
     actionContext: actionContext,
+    editSpecs: editSpecs,
+    collections: collections,
   );
 }

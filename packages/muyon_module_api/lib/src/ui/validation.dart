@@ -49,6 +49,8 @@ bool matchesUiValue(UiValueType type, Object? value) => switch (type) {
   UiValueType.string => value is String,
   UiValueType.integer => value is int,
   UiValueType.boolean => value is bool,
+  UiValueType.number => value is num && value.isFinite,
+  UiValueType.stringList => value is List && value.every((e) => e is String),
 };
 bool isUiScalar(Object? value) =>
     value == null ||
