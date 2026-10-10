@@ -67,7 +67,9 @@ class ResearchDocumentSearchSource implements SearchSource {
       final current = _document(runtime, document.projectId, document.id);
       if (bytes.length > maxFileBytes || current == null ||
           current.absolutePath != document.absolutePath ||
-          _path(runtime, current) != path) return null;
+          _path(runtime, current) != path) {
+        return null;
+      }
       final digest = sha256.convert(bytes).toString();
       // Recheck bytes and ownership after the asynchronous read; a changed
       // source never publishes a digest from an earlier row/file snapshot.
@@ -75,7 +77,9 @@ class ResearchDocumentSearchSource implements SearchSource {
       _current(runtime);
       final latest = _document(runtime, document.projectId, document.id);
       if (latest == null || _path(runtime, latest) != path ||
-          sha256.convert(verified).toString() != digest) return null;
+          sha256.convert(verified).toString() != digest) {
+        return null;
+      }
       return (IndexableItem(
         ref: ObjectRef(moduleId: 'research', objectType: 'document',
           objectId: document.id, nativeProjectId: document.projectId,
@@ -165,7 +169,9 @@ class ResearchDocumentSearchSource implements SearchSource {
     final project = ref.nativeProjectId;
     if (ref.moduleId != 'research' || ref.objectType != 'document' ||
         project == null || ref.revisionRef != null ||
-        ref.contentDigest == null) return null;
+        ref.contentDigest == null) {
+      return null;
+    }
     final document = _document(runtime, project, ref.objectId);
     if (document == null) return null;
     final item = await _item(runtime, document);
