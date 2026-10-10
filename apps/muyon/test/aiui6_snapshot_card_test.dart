@@ -3,9 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/inquiry_snapshots/inquiry_readonly_snapshot.dart';
 import 'package:muyon/assistant/inquiry_snapshots/inquiry_snapshot_card.dart';
 import 'package:muyon/assistant/ontology_cards/ontology_card.dart';
-import 'package:muyon/test/support/aiui6_snapshot_fixture.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_ui/muyon_ui.dart';
+
+import 'support/aiui6_snapshot_fixture.dart';
 
 void main() {
   for (final width in [390.0, 1280.0]) {
@@ -28,10 +29,11 @@ void main() {
         ];
 
         for (final (key, scene) in scenes) {
-          final ref = fixture.refs[key]!;
+          final ref = fixture.refs[key] ??
+              (throw StateError('Missing fixture reference: $key'));
           final snapshot = await tester.runAsync(
             () => InquiryReadonlySnapshots.read(
-              host: fixture!.host,
+              host: fixture.host,
               scope: AssistantScope.selectedObjects([ref]),
               object: ref,
               suggestions: const {
@@ -57,10 +59,18 @@ void main() {
           if (scene == InquiryReadonlyScene.budgetLine) {
             expect(find.text('建议预算行'), findsOneWidget);
           }
-          expect(find.text('MODEL-PRICE'), findsNothing);
-          expect(find.text('987654.123'), findsNothing);
-          expect(find.text('123456.789'), findsNothing);
-          expect(find.text('张三'), findsNothing);
+          for (final secret in [
+            'MODEL-PRICE',
+            '987654.123',
+            '123456.789',
+            '张三',
+          ]) {
+            expect(find.text(secret), findsNothing);
+            expect(
+              find.bySemanticsLabel(RegExp(RegExp.escape(secret))),
+              findsNothing,
+            );
+          }
           expect(find.byType(FilledButton), findsOneWidget);
           expect(
             tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
