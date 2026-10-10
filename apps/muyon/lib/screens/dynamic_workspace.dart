@@ -160,7 +160,9 @@ class DynamicWorkspaceSession extends ChangeNotifier {
                     }),
           receiptLookup: receipt,
         );
-        if (c.extractionChanged) {
+        if (c.canCloseWithoutCheckpoint) {
+          error = c.saveError;
+        } else if (c.extractionChanged) {
           error = '数据版本已变化，人工覆盖仍保留；请核对提取建议。';
         }
         if (_disposed) {
@@ -373,7 +375,8 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
 
   @override
   Widget build(BuildContext context) {
-    if (controller != null) {
+    if (controller != null &&
+        (!controller!.canCloseWithoutCheckpoint || controller!.readableDraft != null)) {
       if (widget.embedded) {
         return ConversationWorkspaceBody(
           controller: controller!,
