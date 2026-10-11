@@ -529,7 +529,7 @@ void main() {
     }
   });
 
-  test('delete preview refuses omitted or stale referring records', () async {
+  test('delete preview refuses omitted referring records', () async {
     final f = quoteFixture();
     final result = await approved(
       await request('delete_record', {
