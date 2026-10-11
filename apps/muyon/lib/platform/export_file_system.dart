@@ -184,6 +184,7 @@ final class _LinuxExportScope implements ExportFileSystemScope {
   Future<void> rename(String from, String to) async {
     final fd = _owned(from);
     final name = _name(to);
+    _native.requireCurrentDirectories(root, rootFd, directoryFd);
     if (_native.link(-100, '/proc/self/fd/$fd', directoryFd, name, 0x400) !=
         0) {
       throw FileSystemException('Atomic no-replace commit failed', to);
@@ -253,6 +254,11 @@ final class _LinuxCalls {
         IntPtr Function(Int32, Pointer<Uint8>, IntPtr, Int64),
         int Function(int, Pointer<Uint8>, int, int)
       >('pread');
+  late final _stat = _lib
+      .lookupFunction<
+        Int32 Function(Int32, Pointer<Uint8>),
+        int Function(int, Pointer<Uint8>)
+      >('fstat');
   late final _linkAt = _lib
       .lookupFunction<
         Int32 Function(Int32, Pointer<Uint8>, Int32, Pointer<Uint8>, Int32),
@@ -286,9 +292,39 @@ final class _LinuxCalls {
     (a) => _string(to, (b) => _linkAt(fromFd, a, toFd, b, flags)),
   );
 
-  ExportFileSystemScope openScope(String path) {
-    if (!Platform.isLinux ||
-        (Abi.current() != Abi.linuxX64 && Abi.current() != Abi.linuxArm64)) {
+  Uint8List _identity(int fd) => withBytes(Uint8List(256), (buffer) {
+    if (_stat(fd, buffer) != 0) {
+      throw const FileSystemException('Directory identity unavailable');
+    }
+    // glibc Linux x64 struct stat: st_dev and st_ino are its first 16 bytes.
+    return Uint8List.fromList(buffer.asTypedList(16));
+  });
+
+  void requireCurrentDirectories(String root, int rootFd, int exportsFd) {
+    final current = openScope(root, createExports: false) as _LinuxExportScope;
+    try {
+      bool same(int a, int b) {
+        final left = _identity(a);
+        final right = _identity(b);
+        for (var i = 0; i < left.length; i++) {
+          if (left[i] != right[i]) return false;
+        }
+        return true;
+      }
+
+      if (!same(rootFd, current.rootFd) ||
+          !same(exportsFd, current.directoryFd)) {
+        throw const FileSystemException(
+          'Selected export directory was replaced',
+        );
+      }
+    } finally {
+      current.close();
+    }
+  }
+
+  ExportFileSystemScope openScope(String path, {bool createExports = true}) {
+    if (!Platform.isLinux || Abi.current() != Abi.linuxX64) {
       throw const FileSystemException(
         'Secure export IO unsupported on this platform',
       );
@@ -306,7 +342,7 @@ final class _LinuxCalls {
         fd = next;
       }
       // Existing entries are validated by O_DIRECTORY | O_NOFOLLOW below.
-      mkdirAt(fd, 'exports');
+      if (createExports) mkdirAt(fd, 'exports');
       final exportsFd = openAt(fd, 'exports', 0x10000 | 0x20000 | 0x80000, 0);
       if (exportsFd < 0) {
         throw FileSystemException('Unsafe export directory', root);
