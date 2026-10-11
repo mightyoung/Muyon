@@ -103,14 +103,26 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
       state.currentView.revision == request.currentView.revision &&
       state.catalog.version == request.catalog.version;
 
+  // A read belongs to the initiating renderer generation and host request.
+  // Fence harness mutations as well as setState: a stale refusal must never
+  // reconcile against the task/request now occupying this State.
+  bool ownsRead(PersonalAgent agent, UiPlanningRequest? request, int attempt) =>
+      mounted &&
+      attempt == generation &&
+      identical(widget.agent, agent) &&
+      request != null &&
+      widget.taskId == request.taskId &&
+      currentRequest(request);
+
   Future<void> checkPreview(HostUiStreamProgress progress, int attempt) async {
+    final agent = widget.agent, taskId = widget.taskId;
     try {
-      final task = widget.agent.repository.task(widget.taskId);
+      final task = agent.repository.task(taskId);
       final state = task == null
           ? null
-          : await widget.agent.uiPlanningSource?.call(task);
-      widget.agent.reconcileUiRead(widget.taskId, state);
-      if (!mounted || attempt != generation) return;
+          : await agent.uiPlanningSource?.call(task);
+      if (!ownsRead(agent, progress.request, attempt)) return;
+      agent.reconcileUiRead(taskId, state);
       // A null read is refused, including when the task was only cancelled.
       // A still-authorized cancelled read keeps the frozen preview below.
       final readable = sameHostState(state, progress.request);
@@ -124,18 +136,21 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
         checkedPreview = progress;
       });
     } catch (_) {
-      widget.agent.reconcileUiRead(widget.taskId, null);
+      if (!ownsRead(agent, progress.request, attempt)) return;
+      agent.reconcileUiRead(taskId, null);
       if (mounted && attempt == generation) setState(clear);
     }
   }
 
   Future<void> check(UiPlannedPresentation value, int attempt) async {
+    final agent = widget.agent, taskId = widget.taskId;
     try {
-      final task = widget.agent.repository.task(widget.taskId);
+      final task = agent.repository.task(taskId);
       final state = task == null
           ? null
-          : await widget.agent.uiPlanningSource?.call(task);
-      widget.agent.reconcileUiRead(widget.taskId, state);
+          : await agent.uiPlanningSource?.call(task);
+      if (!ownsRead(agent, value.request, attempt)) return;
+      agent.reconcileUiRead(taskId, state);
       if (!mounted ||
           attempt != generation ||
           !currentRequest(value.request) ||
@@ -180,7 +195,8 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
         controller = surface;
       });
     } catch (_) {
-      widget.agent.reconcileUiRead(widget.taskId, null);
+      if (!ownsRead(agent, value.request, attempt)) return;
+      agent.reconcileUiRead(taskId, null);
       if (mounted && attempt == generation) setState(clear);
     }
   }
