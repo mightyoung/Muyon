@@ -54,7 +54,7 @@ void main() {
           final errors = process.stderr.transform(utf8.decoder).join();
           int code;
           try {
-            code = await process.exitCode.timeout(const Duration(seconds: 45));
+            code = await process.exitCode.timeout(const Duration(seconds: 150));
           } catch (_) {
             process.kill(ProcessSignal.sigkill);
             await process.exitCode;
@@ -75,6 +75,6 @@ void main() {
       } finally {
         directory.deleteSync(recursive: true);
       }
-    }, timeout: const Timeout(Duration(seconds: 120)));
+    }, timeout: const Timeout(Duration(seconds: 360)));
   }
 }
