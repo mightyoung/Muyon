@@ -357,6 +357,15 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
   /// [confirmBinding] without its own transaction, for callers inside one.
   /// Competing candidates are dropped only within the document's project.
   void applyBindingChoice(String documentId, String paperId) {
+    // A choice must name a candidate that is still waiting for one; otherwise
+    // the competitors would be dropped (or nothing updated) without a target.
+    final target = db.select(
+      'SELECT ambiguous FROM paper_bindings WHERE document_id=? AND paper_id=?',
+      [documentId, paperId],
+    );
+    if (target.isEmpty || target.single['ambiguous'] != 1) {
+      throw StateError('Binding is not waiting for a choice');
+    }
     db.execute(
       'DELETE FROM paper_bindings WHERE (document_id=? OR paper_id=?) AND NOT (document_id=? AND paper_id=?) AND ambiguous=1 '
       'AND document_id IN (SELECT id FROM documents WHERE project_id=(SELECT project_id FROM documents WHERE id=?))',
@@ -440,6 +449,7 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
     required String title,
     required String goal,
     required Map<String, dynamic> spec,
+    int? expectedRevision,
   }) {
     checkedProject(projectId);
     id ??= const Uuid().v4();
@@ -449,6 +459,13 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
     ).first;
     if (existing['revision'] != null && existing['project_id'] != projectId) {
       throw StateError('Task belongs to a different project');
+    }
+    // [expectedRevision] is the latest revision the caller saw (0: a new task).
+    // It is checked in the same write as the insert, so two writers cannot both
+    // append on top of the same revision.
+    if (expectedRevision != null &&
+        expectedRevision != ((existing['revision'] as int?) ?? 0)) {
+      throw StateError('Task revision changed');
     }
     final revision = ((existing['revision'] as int?) ?? 0) + 1;
     db.execute('INSERT INTO tasks VALUES(?,?,?,?,?,?)', [

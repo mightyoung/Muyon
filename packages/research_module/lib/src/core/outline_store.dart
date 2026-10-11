@@ -93,33 +93,46 @@ extension OutlineStore on WorkbenchStore {
 
   /// Cites [evidenceId] under the section titled [heading], creating the
   /// section at the end when none matches.
-  void addOutline(String projectId, String heading, String evidenceId) {
+  void addOutline(String projectId, String heading, String evidenceId, {String? evidenceType}) {
+    requireOutlineEvidence(projectId, evidenceId, evidenceType: evidenceType);
     final section =
         sections(projectId)
             .where((s) => s.heading == heading.trim())
             .firstOrNull ??
         addSection(projectId, heading);
-    cite(section.id, evidenceId);
+    cite(section.id, evidenceId, evidenceType: evidenceType);
+  }
+
+  /// Legacy callers without a type may cite only an unambiguous ID. Assistant
+  /// callers must bind the selected type; outline still stores a bare ID.
+  void requireOutlineEvidence(String projectId, String evidenceId, {String? evidenceType}) {
+    checkedProject(projectId);
+    final entries = db.select('SELECT id FROM entries WHERE id=? AND project_id=?',
+      [evidenceId, projectId]);
+    final notes = db.select(
+      'SELECT n.id FROM notes n JOIN documents d ON d.id=n.document_id WHERE n.id=? AND d.project_id=?',
+      [evidenceId, projectId]);
+    final runs = db.select(
+      'SELECT r.id,r.accepted FROM runs r JOIN tasks t ON t.id=r.task_id AND t.revision=r.task_revision WHERE r.id=? AND t.project_id=?',
+      [evidenceId, projectId]);
+    final types = {
+      if (entries.isNotEmpty) 'entry',
+      if (notes.isNotEmpty) 'note',
+      if (runs.isNotEmpty) 'run',
+    };
+    if (types.length != 1 || (evidenceType != null && !types.contains(evidenceType)) ||
+        (types.contains('run') && runs.single['accepted'] != 1)) {
+      throw StateError('Evidence outside workspace scope, ambiguous or not accepted');
+    }
   }
 
   /// Cites [evidenceId] in a section; citing it there again is a no-op.
-  void cite(String sectionId, String evidenceId) {
+  void cite(String sectionId, String evidenceId, {String? evidenceType}) {
     checkedObject('sections', sectionId);
-    if (projectScope != null) {
-      final evidence = db.select(
-        '''SELECT project_id FROM entries WHERE id=?
-UNION ALL SELECT d.project_id FROM notes n JOIN documents d ON d.id=n.document_id WHERE n.id=?
-UNION ALL SELECT t.project_id FROM runs r JOIN tasks t ON t.id=r.task_id AND t.revision=r.task_revision WHERE r.id=? AND r.accepted=1''',
-        [evidenceId, evidenceId, evidenceId],
-      );
-      if (evidence.isEmpty ||
-          evidence.any((row) => row['project_id'] != projectScope)) {
-        throw StateError('Evidence outside workspace scope or not accepted');
-      }
-    }
     final rows = db.select('SELECT * FROM sections WHERE id=?', [sectionId]);
     if (rows.isEmpty) throw StateError('Unknown section');
     final s = rows.single;
+    requireOutlineEvidence(s['project_id'] as String, evidenceId, evidenceType: evidenceType);
     db.execute(
       'INSERT INTO outline(id,project_id,heading,evidence_id,section_id) '
       'SELECT ?,?,?,?,? WHERE NOT EXISTS '
