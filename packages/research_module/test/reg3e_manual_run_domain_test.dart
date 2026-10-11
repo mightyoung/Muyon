@@ -177,6 +177,48 @@ void main() {
       expect(runChanges(), logs);
     });
 
+    test(
+      'legacy imported spoof marker is rejected by the domain without writes',
+      () async {
+        final t = task('p');
+        final file = File('${root.path}/spoof.json')
+          ..writeAsStringSync(
+            jsonEncode({
+              'runId': 'spoof',
+              'taskId': t.id,
+              'taskRevision': t.revision,
+              'status': 'running',
+              'metrics': {},
+              'logs': [],
+              'artifacts': [],
+              '_localManual': true,
+            }),
+          );
+        final imported = await ResearchExchange(store).importResult(file.path);
+        final data = {...imported.data, '_localManual': true};
+        await store.write(
+          () => db.raw.execute('UPDATE runs SET data=? WHERE id=?', [
+            jsonEncode(data),
+            imported.id,
+          ]),
+        );
+        final before = runRow(imported.id);
+        final changes = runChanges();
+        expect(
+          () => store.updateManualRun(
+            imported.id,
+            status: 'completed',
+            metrics: {'score': 7},
+            log: 'new log',
+            conclusion: 'new conclusion',
+          ),
+          throwsStateError,
+        );
+        expect(runRow(imported.id), before);
+        expect(runChanges(), changes);
+      },
+    );
+
     test('an unsupported status is rejected without writes', () {
       final run = store.startManualRun(task('p'));
       final before = runRow(run.id);

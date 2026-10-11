@@ -1455,15 +1455,7 @@ void registerResearchTools(ToolRegistrar registrar) {
           ]);
         },
         beforeEffect: (store) {
-          store.checkedObject('runs', ref.objectId);
-          final data =
-              store.db.select('SELECT data FROM runs WHERE id=?', [
-                    ref.objectId,
-                  ]).single['data']
-                  as String;
-          if (WorkbenchStore.decode(data)['_localManual'] != true) {
-            throw StateError('Only local manual runs can be edited');
-          }
+          store.requireLocalManualRun(ref.objectId);
         },
       );
     },

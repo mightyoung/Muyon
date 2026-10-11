@@ -571,6 +571,20 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
     );
   }
 
+  // Result import assigns _snapshotPath itself, after discarding external
+  // bookkeeping. It also identifies legacy imports carrying a spoofed marker.
+  ResearchRun requireLocalManualRun(String runId) {
+    checkedObject('runs', runId);
+    final rows = db.select('SELECT * FROM runs WHERE id=?', [runId]);
+    if (rows.isEmpty) throw StateError('Unknown run');
+    final run = runFromRow(rows.single);
+    if (run.data['_localManual'] != true ||
+        run.data.containsKey('_snapshotPath')) {
+      throw StateError('Only local manual runs can be edited');
+    }
+    return run;
+  }
+
   ResearchRun updateManualRun(
     String runId, {
     required String status,
@@ -581,13 +595,7 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
     if (!const {'running', 'completed', 'failed', 'blocked'}.contains(status)) {
       throw FormatException('Unsupported execution status: $status');
     }
-    checkedObject('runs', runId);
-    final rows = db.select('SELECT * FROM runs WHERE id=?', [runId]);
-    if (rows.isEmpty) throw StateError('Unknown run');
-    final old = runFromRow(rows.single);
-    if (old.data['_localManual'] != true) {
-      throw StateError('Only local manual runs can be edited');
-    }
+    final old = requireLocalManualRun(runId);
     final logs = List<String>.from(old.data['logs'] as List? ?? []);
     if (log.trim().isNotEmpty) logs.add(log.trim());
     const finished = {'completed', 'failed'};

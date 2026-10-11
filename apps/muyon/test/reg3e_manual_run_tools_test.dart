@@ -429,50 +429,67 @@ void main() {
   });
 
   for (final legacyMarker in [false, true]) {
-    test('update refuses real imported spoofed manual run${legacyMarker ? ' persisted before sanitization' : ''} without effects', () async {
-      final store = host.research!.store;
-      final file = File(p.join(root.path, 'spoofed-result.json'))
-        ..writeAsStringSync(jsonEncode({
-          'format': 'research-result-v1',
-          'runId': 'external-spoof',
-          'taskId': 'TP',
-          'taskRevision': 1,
-          'status': 'running',
-          'metrics': {'score': 1},
-          'logs': ['external log'],
-          'artifacts': <String>[],
-          '_localManual': true,
-        }));
-      final imported = await ResearchExchange(store).importResult(file.path);
-      expect(imported.id, 'external-spoof');
-      expect(imported.data['_snapshotPath'], isNotEmpty);
-      if (legacyMarker) {
-        // Model an already persisted result imported by the vulnerable version.
-        // Its snapshot provenance still comes from the actual importer.
-        await store.write(() {
-          final data = WorkbenchStore.decode(db().select(
-            'SELECT data FROM runs WHERE id=?', [imported.id],
-          ).single['data']);
-          data['_localManual'] = true;
-          db().execute('UPDATE runs SET data=? WHERE id=?', [jsonEncode(data), imported.id]);
-        });
-      }
-      final ref = await current('run', imported.id, 'P');
-      final beforeRuns = rows('runs');
-      final beforeLog = rows('muyon_change_log');
-      final call = request('update_manual_run', params('update_manual_run', ref), [ref]);
-      final result = await approved(call);
-      // Check each effect separately so a regression shows the actual mutation.
-      expect(rows('runs'), beforeRuns);
-      expect(rows('muyon_change_log'), beforeLog);
-      expect((await current('run', imported.id, 'P')).toJson(), ref.toJson());
-      expect(result.status, ToolCallStatus.failed, reason: result.summary);
-      expect(result.objectRefs, isEmpty);
-      expect(result.changes, isEmpty);
-      final receipt = host.tools.receiptFor(call.invocationId)!;
-      expect(receipt.state, 'failed');
-      expect(receipt.result!.changes, isEmpty);
-    });
+    test(
+      'update refuses real imported spoofed manual run${legacyMarker ? ' persisted before sanitization' : ''} without effects',
+      () async {
+        final store = host.research!.store;
+        final file = File(p.join(root.path, 'spoofed-result.json'))
+          ..writeAsStringSync(
+            jsonEncode({
+              'format': 'research-result-v1',
+              'runId': 'external-spoof',
+              'taskId': 'TP',
+              'taskRevision': 1,
+              'status': 'running',
+              'metrics': {'score': 1},
+              'logs': ['external log'],
+              'artifacts': <String>[],
+              '_localManual': true,
+            }),
+          );
+        final imported = await ResearchExchange(store).importResult(file.path);
+        expect(imported.id, 'external-spoof');
+        expect(imported.data['_snapshotPath'], isNotEmpty);
+        if (legacyMarker) {
+          // Model an already persisted result imported by the vulnerable version.
+          // Its snapshot provenance still comes from the actual importer.
+          await store.write(() {
+            final data = WorkbenchStore.decode(
+              db().select('SELECT data FROM runs WHERE id=?', [
+                imported.id,
+              ]).single['data'],
+            );
+            data['_localManual'] = true;
+            db().execute('UPDATE runs SET data=? WHERE id=?', [
+              jsonEncode(data),
+              imported.id,
+            ]);
+          });
+        }
+        final ref = await current('run', imported.id, 'P');
+        final beforeRuns = rows('runs');
+        final beforeLog = rows('muyon_change_log');
+        final call = request(
+          'update_manual_run',
+          params('update_manual_run', ref),
+          [ref],
+        );
+        final result = await approved(call);
+        // Check each effect separately so a regression shows the actual mutation.
+        expect(rows('runs'), beforeRuns);
+        expect(rows('muyon_change_log'), beforeLog);
+        expect((await current('run', imported.id, 'P')).toJson(), ref.toJson());
+        expect(result.status, ToolCallStatus.failed, reason: result.summary);
+        expect(result.objectRefs, isEmpty);
+        expect(result.changes, isEmpty);
+        final receipt = host.tools.receiptFor(call.invocationId)!;
+        expect(receipt.state, 'failed');
+        expect(receipt.result!.changes, isEmpty);
+        if (!legacyMarker) {
+          expect(imported.data.containsKey('_localManual'), isFalse);
+        }
+      },
+    );
   }
 
   test('update refuses imported run without _localManual', () async {

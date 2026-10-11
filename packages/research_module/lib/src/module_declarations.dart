@@ -558,6 +558,7 @@ final researchCoverage = CapabilityCoverage(
         'WorkbenchStore.scoped',
         'WorkbenchStore.checkedProject',
         'WorkbenchStore.checkedObject',
+        'WorkbenchStore.requireLocalManualRun',
       },
       notExposed: const NotExposed(
         NotExposedKind.notBusiness,

@@ -174,6 +174,7 @@ class ResearchExchange {
 
   /// Run data the workbench adds on top of an imported result payload.
   static const _localRunKeys = {
+    '_localManual',
     '_snapshotPath',
     'workbench_assessment',
     '_skill_export',
