@@ -6,6 +6,8 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 
+import 'support/reg3c_fixture.dart';
+
 // OC-20: locks the CURRENT state of deferred item CR-13 N-3: ToolCallResult.toJson
 // does not serialize `changes` and fromJson does not restore them, so a first
 // delete/update result carries its ObjectChange list, while receiptFor() re-read
@@ -25,40 +27,10 @@ void main() {
     root.deleteSync(recursive: true);
   });
 
-  Future<ObjectRef> current(String type, String id, String project) async {
-    final session = await host.research!.openScopeSession();
-    try {
-      return (await session.resolve(
-        ObjectRef(
-          moduleId: 'research',
-          objectType: type,
-          objectId: id,
-          nativeProjectId: project,
-        ),
-      ))!.ref;
-    } finally {
-      await session.dispose();
-    }
-  }
+  Future<ObjectRef> current(String type, String id, String project) =>
+      currentResearchRef(host, type, id, project);
 
-  Future<void> research() async {
-    await host.activateResearch();
-    final store = host.research!.store;
-    await store.write(() {
-      store.db.execute(
-        'INSERT INTO projects(id,title,question,next_step) VALUES(?,?,?,?)',
-        ['P', '研究', '问题', '下一步'],
-      );
-      store.db.execute(
-        'INSERT INTO projects(id,title,question,next_step) VALUES(?,?,?,?)',
-        ['Q', '另一项目', '', ''],
-      );
-      store.db.execute(
-        'INSERT INTO entries(id,project_id,kind,title,data) VALUES(?,?,?,?,?)',
-        ['E', 'P', 'claim', '证据', '{}'],
-      );
-    });
-  }
+  Future<void> research() => seedPqeResearch(host);
 
   ToolCallRequest request(
     String tool,
@@ -71,10 +43,8 @@ void main() {
     scope: AssistantScope.selectedObjects(refs),
   );
 
-  Future<ToolCallResult> invokeApproved(ToolCallRequest call) async {
-    final approval = await host.tools.approve(await host.tools.prepare(call));
-    return host.tools.invoke(call.withApproval(approval));
-  }
+  Future<ToolCallResult> invokeApproved(ToolCallRequest call) =>
+      invokeApprovedResearchCall(host, call);
 
   Future<ToolCallResult> confirmed(ToolCallRequest call) async {
     final result = await invokeApproved(call);
@@ -84,30 +54,15 @@ void main() {
     return result;
   }
 
-  Future<List<OutlineSection>> seed(List<String> titles) async {
-    final store = host.research!.store;
-    final created = <OutlineSection>[];
-    await store.write(() {
-      for (final title in titles) {
-        created.add(store.addSection('P', title));
-      }
-    });
-    return created;
-  }
+  Future<List<OutlineSection>> seed(List<String> titles) =>
+      seedPSections(host, titles);
 
   /// S1/S2/S3 with two evidence links under S1, in insertion order.
   Future<({List<OutlineSection> sections, List<String> linkIds})>
   seededChain() async {
     final created = await seed(['S1', 'S2', 'S3']);
     final store = host.research!.store;
-    await store.write(() {
-      store.db.execute(
-        'INSERT INTO entries(id,project_id,kind,title,data) VALUES(?,?,?,?,?)',
-        ['E2', 'P', 'claim', '证据2', '{}'],
-      );
-      store.scoped('P').cite(created.first.id, 'E');
-      store.scoped('P').cite(created.first.id, 'E2');
-    });
+    await seedPEvidenceLinks(store, created);
     final links = [
       for (final row in store.outline('P'))
         if (row['section_id'] == created.first.id) row['id'] as String,
