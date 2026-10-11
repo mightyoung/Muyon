@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -138,7 +139,8 @@ void main() {
   });
 
   for (final native in [false, true]) {
-    for (final change in ['text only', 'missing provider']) {
+    for (final change in ['text only', 'missing provider', 'source null',
+      'source throw', 'await text only', 'await missing provider']) {
       test('next model round removes stale planning metadata after $change in ${native ? 'native' : 'JSON'} protocol', () async {
         // Earlier widget cases initialize Flutter's fake HTTP override. These
         // rounds must reach the real loopback fixture, then restore the binding.
@@ -148,12 +150,25 @@ void main() {
         final f = await LoopFixture.open();
         final preference = UiPresentationPreference(f.repo);
         await preference.save(UiPresentationMode.automatic);
+        var sourceFaultArmed = false, faultSourceRead = false;
+        final sourceEntered = Completer<void>();
+        final releaseSource = Completer<void>();
         final agent = PersonalAgent(
           repository: f.repo,
           gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
           tools: f.tools,
           presentationPreference: preference,
-          uiPlanningSource: (_) async => state(f),
+          uiPlanningSource: (_) async {
+            if (!sourceFaultArmed) return state(f);
+            faultSourceRead = true;
+            if (change == 'source null') return null;
+            if (change == 'source throw') throw StateError('fixture_source_unavailable');
+            if (change.startsWith('await ')) {
+              sourceEntered.complete();
+              await releaseSource.future;
+            }
+            return state(f);
+          },
           uiPlanningMode: UiPlanningMode.motivation,
         );
         addTearDown(agent.close);
@@ -166,15 +181,38 @@ void main() {
         expect(prior, isA<String>(), reason: 'The first round must really load host metadata');
         final originalSystem = (first.payload['messages'] as List).first;
         final frozenCandidates = first.payload['candidateIds'];
+        sourceFaultArmed = true;
         if (change == 'text only') {
           await agent.savePresentationMode(UiPresentationMode.textOnly);
-        } else {
+        } else if (change == 'missing provider') {
           // This mode has no registered provider; registry presence alone is
           // not actual presentation support.
           agent.configureUiPlanning(mode: UiPlanningMode.intelligent);
         }
-        await agent.confirm(first.id,
+        final confirming = agent.confirm(first.id,
           requestDigest: first.payload['requestDigest'] as String);
+        if (change.startsWith('await ')) {
+          try {
+            await Future.any<void>([
+              sourceEntered.future,
+              confirming.then<void>((_) => throw StateError(
+                'Model round completed without entering the controlled source read')),
+            ]);
+            if (change == 'await text only') {
+              await agent.savePresentationMode(UiPresentationMode.textOnly);
+            } else {
+              agent.configureUiPlanning(mode: UiPlanningMode.intelligent);
+            }
+          } finally {
+            if (!releaseSource.isCompleted) releaseSource.complete();
+          }
+        }
+        await confirming;
+        if (change == 'source null' || change == 'source throw' ||
+            change.startsWith('await ')) {
+          expect(faultSourceRead, isTrue,
+            reason: 'Exercise a real second-round source read after the first metadata was stored');
+        }
         final next = f.repo.task(first.id)!;
         expect(f.bodies, hasLength(1), reason: 'Only the first model round was approved; ${next.error ?? next.state.name}');
         expect(f.callsOf('read'), 1, reason: 'A real tool result advances the model round');

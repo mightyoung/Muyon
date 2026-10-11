@@ -98,7 +98,9 @@ class AgentModelTurn {
             'uiPlanningContext': metadata,
             'messages': [
               for (final message in task.payload['messages'] as List)
-                if (message is! Map || message['content'] != prior) message,
+                if (message is! Map ||
+                    message['role'] != 'system' ||
+                    message['content'] != prior) message,
               {'role': 'system', 'content': metadata},
             ],
           });
@@ -106,6 +108,8 @@ class AgentModelTurn {
       } catch (_) {
         /* Optional planning metadata never prevents a text answer. */
       }
+    } else {
+      task = _withoutUiPlanning(task);
     }
     final preview = {
       'endpoint': ctx.profile(task).endpoint.toString(),
@@ -218,6 +222,62 @@ class AgentModelTurn {
         ),
       ],
     );
+  }
+
+  /// Host revocation only narrows the task's advertised presentation tool.
+  /// Keep every other frozen candidate and ordinary system field unchanged.
+  PersonalTask _withoutUiPlanning(PersonalTask task) {
+    final prior = task.payload['uiPlanningContext'];
+    final messages = task.payload['messages'] as List;
+    final narrowedMessages = <Object?>[];
+    for (var index = 0; index < messages.length; index++) {
+      final message = messages[index];
+      if (prior is String &&
+          message is Map &&
+          message['role'] == 'system' &&
+          message['content'] == prior) {
+        continue;
+      }
+      var narrowed = message;
+      // The factory owns the first JSON system envelope. Later system
+      // messages, user history and model replies are never rewritten.
+      if (index == 0 &&
+          !AgentContext.native(task) &&
+          message is Map &&
+          message['role'] == 'system' &&
+          message['content'] is String) {
+        try {
+          final envelope = jsonDecode(message['content'] as String);
+          if (envelope is Map && envelope['tools'] is List) {
+            final tools = envelope['tools'] as List;
+            final remaining = tools.where((tool) =>
+                tool is! Map || tool['toolId'] != 'assistant.plan_ui').toList();
+            if (remaining.length != tools.length) {
+              narrowed = {
+                ...message,
+                'content': jsonEncode({...envelope, 'tools': remaining}),
+              };
+            }
+          }
+        } on FormatException {
+          // An ordinary system message is not a host tool catalogue.
+        }
+      }
+      narrowedMessages.add(narrowed);
+    }
+    return task.copy({
+      'uiPlanningContext': null,
+      'candidateIds': [
+        for (final id in task.payload['candidateIds'] as List? ?? const [])
+          if (id != 'assistant.plan_ui') id,
+      ],
+      if (task.payload['nativeTools'] is List)
+        'nativeTools': [
+          for (final tool in task.payload['nativeTools'] as List)
+            if (tool is! Map || tool['toolId'] != 'assistant.plan_ui') tool,
+        ],
+      'messages': narrowedMessages,
+    });
   }
 
   /// Same checks before every send, whichever path sends.

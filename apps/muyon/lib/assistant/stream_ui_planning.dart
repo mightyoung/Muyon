@@ -13,8 +13,12 @@ class HostUiStreamProgress {
 
   /// Preserve compiler evidence and the last read-only preview while revoking
   /// the capability independently of the original whole-candidate validation.
-  HostUiStreamProgress revoke(String code) => HostUiStreamProgress(request, session,
-    UiStreamView(candidatePlan: view.candidatePlan, previewPlan: view.previewPlan,
+  HostUiStreamProgress revoke(String code, {UIPlan? preview}) => HostUiStreamProgress(request, session,
+    UiStreamView(candidatePlan: view.candidatePlan,
+      previewPlan: session.plan([
+        for (final node in (preview ?? view.previewPlan).nodes)
+          node.copyWith(events: const {}),
+      ]),
       statuses: view.statuses, text: view.text, diagnostics: view.diagnostics,
       phase: view.complete || view.phase == UiStreamPhase.streaming
         ? UiStreamPhase.incomplete : view.phase,
@@ -51,12 +55,23 @@ class StreamMotivationUiPlanningProvider implements UiPlanningPort {
     final compiler = UiStreamCompiler(session: session);
     final pending = StringBuffer();
     var pendingBytes = 0;
+    // A rejected end deliberately empties the shared compiler's preview. Keep
+    // its last pre-end projection separately, never its executable candidate.
+    var lastReadOnlyPreview = compiler.current.previewPlan;
     // After end only the line boundary matters. Do not buffer untrusted trailing
     // content or apply a pre-end byte limit to ignored protocol lines.
     bool getEnded() => compiler.current.phase == UiStreamPhase.complete ||
       compiler.current.phase == UiStreamPhase.rejected;
     void publish() {
-      final value = HostUiStreamProgress(request, session, compiler.current);
+      final current = compiler.current;
+      if (current.phase == UiStreamPhase.streaming) {
+        lastReadOnlyPreview = current.previewPlan;
+      }
+      final progress = HostUiStreamProgress(request, session, current);
+      final value = current.phase == UiStreamPhase.rejected
+        ? progress.revoke(current.badLines > 0 ? 'malformed_stream' : 'invalid_plan',
+            preview: lastReadOnlyPreview)
+        : progress;
       _progress[request] = value;
       onProgress?.call(value);
     }
@@ -107,7 +122,8 @@ class StreamMotivationUiPlanningProvider implements UiPlanningPort {
       final value = HostUiStreamProgress(request, session, compiler.current)
         .revoke(error is _StreamFailure ? error.code :
           error is StateError && error.message == 'model_unavailable' ? 'model_unavailable' :
-          error is StateError && error.message == 'planning_model_cancelled' ? 'cancelled' : 'transport_error');
+          error is StateError && error.message == 'planning_model_cancelled' ? 'cancelled' : 'transport_error',
+          preview: compiler.current.phase == UiStreamPhase.rejected ? lastReadOnlyPreview : null);
       _progress[request] = value;
       onProgress?.call(value);
       rethrow;

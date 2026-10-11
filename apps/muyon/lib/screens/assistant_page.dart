@@ -535,16 +535,23 @@ class _AssistantPageState extends State<AssistantPage> {
     final tasks = _conversationId == null
         ? <PersonalTask>[]
         : widget.repo.tasks(conversationId: _conversationId);
-    final taskCards = [
-      ...tasks.where((task) => task.payload['uiPlanningInternal'] != true).take(8),
+    final parents = tasks
+        .where((task) => task.payload['uiPlanningInternal'] != true)
+        .toList();
+    final taskCardCandidates = [
+      ...parents.take(8),
       // Optional content policy never hides the separate mandatory approval
       // for the real planning model request. Terminal internal replies remain
       // hidden, and pending internal tasks expose only their approval/cancel.
       ...tasks.where((task) => task.payload['uiPlanningInternal'] == true && !task.terminal),
       if (!_child)
-        for (final task in tasks.skip(8))
+        for (final task in parents.skip(8))
           if (_children.children(task.id).isNotEmpty) task,
     ];
+    // Each task owns one card/key, even when it also owns a child workspace.
+    final taskCards = {
+      for (final task in taskCardCandidates) task.id: task,
+    }.values;
     final profiles = widget.profiles
         .all()
         .where((p) => p.purpose == ModelPurpose.chat)
@@ -566,11 +573,12 @@ class _AssistantPageState extends State<AssistantPage> {
         ],
       ),
       body: SafeArea(
-        child: Column(
+        child: LayoutBuilder(
+          builder: (context, constraints) => Column(
           children: [
             ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.sizeOf(context).height * .4,
+                maxHeight: constraints.maxHeight * .4,
               ),
               child: SingleChildScrollView(
                 child: Padding(
@@ -881,6 +889,7 @@ class _AssistantPageState extends State<AssistantPage> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

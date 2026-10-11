@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/app/module_catalog.dart';
+import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_module_api/ui_contract.dart';
@@ -22,6 +23,7 @@ class NavigationFixture {
   static Future<NavigationFixture> open(
     WidgetTester tester, {
     List<BusinessModule> extra = const [],
+    bool knownClean = false,
   }) async {
     final root = Directory.systemTemp.createTempSync('ui2a-');
     final f = (await tester.runAsync(() async {
@@ -30,6 +32,21 @@ class NavigationFixture {
         modules: extra.isEmpty ? null : [...extra, ...moduleCatalog()],
       );
       final conversation = await host.foundation.createConversation();
+      if (knownClean) {
+        final now = DateTime.now().toUtc().toIso8601String();
+        final task = host.foundation.bindLoadedInputs(PersonalTask({
+          'kind': 'personal', 'state': 'queued', 'stage': 'queued',
+          'executionId': 'task', 'conversationId': conversation.id,
+          'prompt': '公开导航夹具',
+          'scope': const AssistantScope.global().toJson(),
+          'executionDeviceId': host.workspaces.setting('deviceId'),
+          'createdAt': now, 'updatedAt': now, 'references': <Object?>[],
+        }), history: const [], memories: const []);
+        await host.foundation.createTask(task);
+        await host.foundation.updateTask(task.copy({'state': 'paused', 'stage': 'paused'}));
+        expect(host.foundation.authorizationFacts.readTask('task').requiresConfirmation, isFalse,
+          reason: 'Registered-port positive fixture uses actual host-loaded clean provenance');
+      } else {
       await host.foundation.database.write(
         (db) => db.execute('INSERT INTO execution_records VALUES(?,?,?)', [
           'task',
@@ -43,6 +60,7 @@ class NavigationFixture {
           }),
         ]),
       );
+      }
       return NavigationFixture(root, host, conversation.id);
     }))!;
     addTearDown(() async {

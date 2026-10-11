@@ -5,6 +5,7 @@ import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/grants/host_authorization_facts.dart';
 import '../app/bootstrap.dart';
 import '../platform/tool_registry.dart';
 import '../platform/ui_workspace_store.dart';
@@ -168,6 +169,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
           taskId: widget.taskId,
           scopeKey: scope,
           plan: widget.plan!,
+          readOnlyProbe: () => !allowsPresentation,
           onEvent: widget.onEvent == null && widget.agent == null
               ? null
               : (event) async {
@@ -180,6 +182,10 @@ class DynamicWorkspaceSession extends ChangeNotifier {
                   if (pending != null &&
                       controller?.surface.isCurrentPending(event) != true) {
                     throw StateError('stale_host_action');
+                  }
+                  if (pending != null && widget.repository.authorizationFacts
+                      .readTask(widget.taskId).taintState == HostTaintState.unknown) {
+                    throw StateError('unknown_host_action');
                   }
                   if (widget.onEvent != null) {
                     await widget.onEvent!(event);
