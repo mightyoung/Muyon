@@ -306,6 +306,7 @@ void main() {
       expect(task.payload['conversationId'], conversationId);
       expect(jsonEncode(f.bodies[1]['messages']), isNot(contains('2380')));
       expect(jsonEncode(task.payload['messages']), isNot(contains('2380')));
+      expect(jsonEncode(task.payload), isNot(contains(_prose)));
       expect(task.summary, '成本合计 2080 元');
       expect(
         (f.bodies[1]['messages'] as List).last['content'],
