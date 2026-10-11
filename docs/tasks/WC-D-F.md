@@ -6,7 +6,7 @@
 历史 create 回执的 `result.data.id` 与 `objectRefs[0].objectId` 必须是合法小写 UUID（复用 `packages/supplier_core/lib/src/values.dart:33-40` 的规则）。
 测试：真实 create 回执，把两处同时改成 `"not-a-uuid"`（参数不变、version 1）→ `unreadable`、`succeeded == false`、`receipt == null`。
 ## I-2 历史请求结构
-在身份比较之前按旧回执协议检查：create/update 的 `parameters.values` 存在且为 Map；delete 的 `referencing_records` 存在且为 List；`arguments.scope` 解析后为 `{workspace, objects:[{moduleId, objectType, objectId, nativeProjectId}...]}`。不合格 → `unreadable`。通过后仍用**原始存储字符串**算摘要。不得借重新执行写工具或读当前对象来验证。
+在身份比较之前按旧回执协议检查：create/update 的 `parameters.values` 存在且为 Map；delete 的 `referencing_records` 存在且为 List；`arguments.scope` 解析后为 `{workspace, objects:[JSON字符串...]}`；每个字符串再次 JSON 解码后为 `[moduleId, objectType, objectId, nativeProjectId]` 四元数组（前三项为 String，第四项为 String/null），与 `GenericWriteIdentity.scopeKey` 的实际旧序列化一致。workspace 为 String/null；objects 为 List。不合格 → `unreadable`。通过后仍用**原始存储字符串**算摘要。不得借重新执行写工具或读当前对象来验证。
 测试矩阵：上述每项各删除 / 置 null / 换错类型一例，加 scope 为 `"{}"` 一例，全部 `unreadable`；原有正常 matched / identityConflict / notFound 用例保持通过。
 ## N-1 只读验收走 runtime
 经已激活 runtime 的 `BusinessReceiptLookup`（`InquiryModuleRuntime.lookupBusinessReceipt`）验收 matched / identityConflict / notFound / unreadable 四路径：前后比较领域库与宿主库 `total_changes()`，并记录 `AppState` 监听回调次数为 0；保留现有行数与版本断言。

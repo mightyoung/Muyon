@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/adapters/inquiry_module.dart';
 import 'package:muyon/app/bootstrap.dart';
@@ -673,4 +674,229 @@ void main() {
     );
     expect(store.get('supplier', supplierId)!.version, versionBefore);
   });
+  // Independent compatibility coverage: keep the legacy encoder and raw-byte
+  // identity contract visible, including branches not covered by the RED set.
+  BusinessReceiptQuery rawQuery(
+    String operationId,
+    Map<String, Object?> record,
+  ) {
+    final arguments = record['arguments'] as String;
+    final args = jsonDecode(arguments) as Map;
+    return BusinessReceiptQuery(
+      operationId: operationId,
+      requestDigest: sha256.convert(utf8.encode(arguments)).toString(),
+      toolId: 'inquiry.${args['operation']}',
+      scopeDigest: sha256
+          .convert(utf8.encode(args['scope'] as String))
+          .toString(),
+      domainIdentity: inquiryDomainIdentity(store.db),
+    );
+  }
+
+  for (final operation in [
+    'create_record',
+    'update_record',
+    'delete_record',
+    'restore_record',
+  ]) {
+    test(
+      'independent legacy $operation nonnull scope matches across reopen',
+      () async {
+        var objects = await selection();
+        if (operation == 'restore_record') {
+          final deleted = await approved(
+            await request('delete_record', {
+              'type': 'supplier',
+              'id': supplierId,
+              'expected_version': 1,
+              'referencing_records': <Object?>[],
+            }, operationId: newUuid()),
+          );
+          expect(deleted.status, ToolCallStatus.succeeded);
+          objects = deleted.objectRefs;
+        }
+        final parameters = <String, Object?>{
+          'type': 'supplier',
+          if (operation == 'create_record')
+            'values': {'name': '旧回执'}
+          else ...{
+            'id': supplierId,
+            'expected_version': store.get('supplier', supplierId)!.version,
+            if (operation == 'update_record') 'values': {'notes': '旧请求'},
+            if (operation == 'delete_record')
+              'referencing_records': <Object?>[],
+          },
+        };
+        final operationId = newUuid();
+        final committed = await approved(
+          await request(
+            operation,
+            parameters,
+            selected: objects,
+            operationId: operationId,
+          ),
+        );
+        expect(committed.status, ToolCallStatus.succeeded);
+        final record = storedRecord(operationId);
+        // Reconstruct a legacy request with the actual unchanged encoder. The
+        // domain result is real; this is a stored-format compatibility fixture,
+        // not evidence that today's resolver supplies these synthetic IDs.
+        final identity = GenericWriteIdentity(
+          operation: operation,
+          parameters: {'operation_id': operationId, ...parameters},
+          workspaceId: 'legacy-workspace',
+          objects: [
+            ObjectRef(
+              moduleId: 'inquiry',
+              objectType: 'supplier',
+              objectId: supplierId,
+              nativeProjectId: 'legacy-native-project',
+            ),
+          ],
+        );
+        final scope = jsonDecode(identity.scopeKey) as Map;
+        expect(scope['workspace'], 'legacy-workspace');
+        expect((scope['objects'] as List).single, isA<String>());
+        expect(jsonDecode((scope['objects'] as List).single as String), [
+          'inquiry',
+          'supplier',
+          supplierId,
+          'legacy-native-project',
+        ]);
+        record['arguments'] = identity.arguments;
+        storeRecord(operationId, record);
+        final query = rawQuery(operationId, record);
+        expect(
+          lookupInquiryReceipt(store.db, query).status,
+          BusinessReceiptStatus.matched,
+        );
+        await host.close();
+        host = await MuyonHost.open(root.path);
+        await host.activateInquiry();
+        store = host.inquiry!.runtime.state.store;
+        final found = await host.modules
+            .runtime<InquiryModuleRuntime>('inquiry')!
+            .lookupBusinessReceipt(query);
+        expect(found.status, BusinessReceiptStatus.matched);
+        expect(found.receipt!.resultData['id'], committed.data['id']);
+        expect(found.receipt!.requestDigest, identity.requestDigest);
+        expect(found.receipt!.scopeDigest, identity.scopeDigest);
+      },
+    );
+  }
+
+  final invalidScopes = <String, Map<String, Object?>>{
+    'objects null': {'workspace': null, 'objects': null},
+    'objects map': {'workspace': null, 'objects': <String, Object?>{}},
+    'workspace number': {'workspace': 3, 'objects': <Object?>[]},
+    'object map': {
+      'workspace': null,
+      'objects': [<String, Object?>{}],
+    },
+    for (final length in [3, 5])
+      'tuple length $length': {
+        'workspace': null,
+        'objects': [jsonEncode(List.filled(length, 'x'))],
+      },
+    for (var slot = 0; slot < 3; slot++)
+      for (final value in [null, 3])
+        'tuple slot $slot ${value == null ? 'null' : 'number'}': {
+          'workspace': null,
+          'objects': [
+            jsonEncode([for (var i = 0; i < 4; i++) i == slot ? value : 'x']),
+          ],
+        },
+    'tuple nativeProjectId number': {
+      'workspace': null,
+      'objects': [
+        jsonEncode(['m', 't', 'id', 3]),
+      ],
+    },
+  };
+  for (final entry in invalidScopes.entries) {
+    test('independent malformed scope ${entry.key} is unreadable', () async {
+      final operationId = await commitUpdate();
+      final record = storedRecord(operationId);
+      tamperArguments(
+        record,
+        (args) => args['scope'] = jsonEncode(entry.value),
+      );
+      storeRecord(operationId, record);
+      // Even an exact fresh digest cannot turn invalid structure into proof.
+      final found = lookupInquiryReceipt(
+        store.db,
+        rawQuery(operationId, record),
+      );
+      expect(found.status, BusinessReceiptStatus.unreadable);
+      expect(found.succeeded, isFalse);
+      expect(found.receipt, isNull);
+    });
+  }
+
+  final invalidCreateIds = <String, String>{
+    'uppercase': 'AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA',
+    'version 1': 'aaaaaaaa-aaaa-1aaa-8aaa-aaaaaaaaaaaa',
+    'wrong variant': 'aaaaaaaa-aaaa-4aaa-7aaa-aaaaaaaaaaaa',
+    'surrounding whitespace': ' aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa ',
+  };
+  for (final entry in invalidCreateIds.entries) {
+    test(
+      'independent create UUID ${entry.key} follows writer policy',
+      () async {
+        expect(() => requireUuid(entry.value, 'id'), throwsA(isA<Object>()));
+        final operationId = newUuid();
+        final parameters = <String, Object?>{
+          'type': 'supplier',
+          'values': {'name': '真实 create'},
+        };
+        final committed = await approved(
+          await request('create_record', parameters, operationId: operationId),
+        );
+        expect(committed.status, ToolCallStatus.succeeded);
+        expect(requireUuid(committed.data['id'], 'id'), committed.data['id']);
+        final record = storedRecord(operationId);
+        final result = record['result'] as Map;
+        (result['data'] as Map)['id'] = entry.value;
+        ((result['objectRefs'] as List).single as Map)['objectId'] =
+            entry.value;
+        storeRecord(operationId, record);
+        final found = lookupInquiryReceipt(
+          store.db,
+          rawQuery(operationId, record),
+        );
+        expect(found.status, BusinessReceiptStatus.unreadable);
+        expect(found.receipt, isNull);
+      },
+    );
+  }
+
+  for (final changeScope in [false, true]) {
+    test('independent raw ${changeScope ? 'scope' : 'arguments'} byte identity survives no normalization', () async {
+      final operationId = await commitUpdate();
+      final record = storedRecord(operationId);
+      final oldQuery = rawQuery(operationId, record);
+      final args =
+          jsonDecode(record['arguments'] as String) as Map<String, Object?>;
+      if (changeScope) {
+        final scope =
+            jsonDecode(args['scope'] as String) as Map<String, Object?>;
+        args['scope'] =
+            ' \n${jsonEncode({for (final key in scope.keys.toList().reversed) key: scope[key]})}\n ';
+        record['arguments'] = jsonEncode(args);
+      } else {
+        record['arguments'] =
+            ' \n${jsonEncode({for (final key in args.keys.toList().reversed) key: args[key]})}\n ';
+      }
+      storeRecord(operationId, record);
+      expect(
+        lookupInquiryReceipt(store.db, oldQuery).status,
+        BusinessReceiptStatus.identityConflict,
+      );
+      final fresh = rawQuery(operationId, record);
+      final found = lookupInquiryReceipt(store.db, fresh);
+      expect(found.status, BusinessReceiptStatus.matched);
+      expect(found.receipt!.requestDigest, fresh.requestDigest);
+      expect(found.receipt!.scopeDigest, fresh.scopeDigest);
+    });
+  }
 }
