@@ -69,6 +69,7 @@ void main() {
       'refresh',
       'retarget',
       if (phase == 'fallback') ...['replace', 'current'],
+      if (phase == 'preview') 'cancel',
     ]) {
       for (final outcome in ['changed', 'null', 'throw']) {
         testWidgets('SN4 stale $phase $outcome after $boundary', (
@@ -148,8 +149,9 @@ void main() {
                 await Future.any([
                   enteredStream.future,
                   planning!.then((_) {
-                    if (!enteredStream.isCompleted)
+                    if (!enteredStream.isCompleted) {
                       throw StateError('stream_not_entered');
+                    }
                   }),
                 ]);
               } else {
@@ -181,6 +183,12 @@ void main() {
                 tester.state(find.byType(UiStreamTaskView)),
                 same(originalState),
               );
+            } else if (boundary == 'cancel') {
+              await tester.runAsync(() => agent.cancel(a.id));
+              presentation = agent.uiPresentation(owner);
+              progress = agent.uiStreamProgress(owner)!;
+              expect(progress.request, same(request));
+              expect(presentation?.validated, isNull);
             } else if (boundary == 'replace') {
               final oldRequest = request;
               aRevision = 3;
@@ -225,8 +233,13 @@ void main() {
               );
               expect(agent.uiStreamProgress(owner), same(progress));
               expect(agent.uiPresentation(owner), same(presentation));
-              if (boundary != 'dispose')
+              if (boundary == 'dispose') {
+                await tester.pumpWidget(view(owner));
+                await tester.pump();
+              }
+              if (boundary != 'current') {
                 expect(find.text('保存事实'), findsWidgets);
+              }
             }
             expect(find.byType(DynamicUiSurface), findsNothing);
             expect(find.byType(ElevatedButton), findsNothing);
