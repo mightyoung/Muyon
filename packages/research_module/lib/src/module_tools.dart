@@ -158,6 +158,41 @@ void registerResearchTools(ToolRegistrar registrar) {
     return ToolCallResult(status: ToolCallStatus.succeeded,
       summary: '找到 ${rows.length} 条范围内关系', data: {'relations': rows}, objectRefs: refs);
   });
+  registrar.read(ToolSpec(
+    name: 'outline_rows',
+    description: '读取选定科研项目的提纲证据行，按段落顺序排列。只读取本机科研库，不修改数据，也不发送到设备外。',
+    operations: _operations('outline_rows'),
+    parameterSchema: {'type':'object','properties':{
+      'project_id': {'type':'string'},
+    },'required':['project_id'],'additionalProperties':false},
+  ), (ctx) async {
+    final ref = _selected(ctx, 'project', ctx.call.request.parameters['project_id'] as String);
+    final runtime = await ctx.runtime<ResearchRuntime>();
+    runtime.requireCurrent(ref);
+    final rows = [
+      for (final row in runtime.store.scoped(ref.nativeProjectId!).outline(ref.objectId))
+        Map<String, Object?>.from(row),
+    ];
+    return ToolCallResult(status: ToolCallStatus.succeeded,
+      summary: '找到 ${rows.length} 条提纲证据', data: {'outline': rows}, objectRefs: [ref]);
+  });
+  registrar.read(ToolSpec(
+    name: 'outline_sections',
+    description: '读取选定科研项目的提纲段落，并返回确认写入时要带回的 orderDigest。只读取本机科研库，不修改数据，也不发送到设备外。',
+    operations: _operations('outline_sections'),
+    parameterSchema: {'type':'object','properties':{
+      'project_id': {'type':'string'},
+    },'required':['project_id'],'additionalProperties':false},
+  ), (ctx) async {
+    final ref = _selected(ctx, 'project', ctx.call.request.parameters['project_id'] as String);
+    final runtime = await ctx.runtime<ResearchRuntime>();
+    runtime.requireCurrent(ref);
+    final store = runtime.store.scoped(ref.nativeProjectId!);
+    return ToolCallResult(status: ToolCallStatus.succeeded,
+      summary: '找到 ${_sectionRows(store, ref.objectId).length} 个提纲段落',
+      data: {'sections': _sectionRows(store, ref.objectId), 'orderDigest': _orderDigest(store, ref.objectId)},
+      objectRefs: [ref]);
+  });
 
   void write(String name, String type, String idParameter,
       Map<String,Object?> properties, List<String> required,
@@ -263,6 +298,180 @@ void registerResearchTools(ToolRegistrar registrar) {
         objectRefs:views, changes:[for (final r in views) ObjectChange(r,ChangeOp.upsert)]);
     } finally { await session.dispose(); }
   });
+  registrar.write(WriteToolSpec(
+    name: 'add_section',
+    description: '在选定科研项目的提纲末尾新增段落；需确认，只修改本机库。'
+        '确认前展示将新建的标题和层级，不按标题匹配已有段落；已有同名段落则拒绝，不改已有段落。'
+        'expected_digest 必须是确认时 research.outline_sections 返回的 orderDigest，执行时在同一事务核对，不一致则拒绝。',
+    operations: _operations('add_section'), targetTypes: {'project'}, createsTypes: {'section'},
+    parameterSchema: {'type':'object','properties':{
+      'project_id': {'type':'string'},
+      'heading': {'type':'string','minLength':1,'maxLength':1000},
+      'level': {'type':'integer','minimum':1,'maximum':3},
+      'expected_digest': {'type':'string','minLength':1},
+    },'required':['project_id','heading','level','expected_digest'],'additionalProperties':false},
+  ), (ctx) async {
+    final params = ctx.call.request.parameters;
+    final ref = _selected(ctx, 'project', params['project_id'] as String);
+    late String createdId;
+    final runtime = await _outlineWrite(ctx, [ref],
+      (store) => _orderDigest(store, ref.objectId), (store) {
+      createdId = store.addSection(ref.objectId, params['heading'] as String,
+        level: params['level'] as int).id;
+    }, beforeEffect: (store) => _refuseSameHeading(
+      store, ref.objectId, params['heading'] as String));
+    return _report(runtime, '已新增提纲段落', [ObjectChange(ObjectRef(
+      moduleId:'research', objectType:'section', objectId:createdId,
+      nativeProjectId:ref.nativeProjectId), ChangeOp.upsert)]);
+  });
+  registrar.write(WriteToolSpec(
+    name: 'update_section',
+    description: '按 section_id 修改选定提纲段落的标题、层级、论证和支持程度；需确认，只修改本机库。'
+        '不按标题寻找段落。把标题改成另一段落的已有标题则拒绝。'
+        'expected_digest 必须是确认时该段落的 contentDigest，执行时在同一事务核对，不一致则拒绝。',
+    operations: _operations('update_section'),
+    targetTypes: {'section'}, affectsTypes: {'section','outline'},
+    parameterSchema: {'type':'object','properties':{
+      'section_id': {'type':'string'},
+      'heading': {'type':'string','minLength':1,'maxLength':1000},
+      'level': {'type':'integer','minimum':1,'maximum':3},
+      'argument': {'type':'string','maxLength':4000},
+      'support': {'type':'string','enum':['unassessed','supported','partial','weak','contested']},
+      'expected_digest': {'type':'string','minLength':1},
+    },'required':['section_id','heading','level','argument','support','expected_digest'],'additionalProperties':false},
+  ), (ctx) async {
+    final params = ctx.call.request.parameters;
+    final ref = _selected(ctx, 'section', params['section_id'] as String);
+    late List<String> changedLinks;
+    final runtime = await _outlineWrite(ctx, [ref],
+      (store) => _rowDigestOf(store, 'sections', ref.nativeProjectId!, ref.objectId), (store) {
+      final before = {
+        for (final row in store.db.select('SELECT * FROM outline WHERE section_id=?', [ref.objectId]))
+          row['id'] as String: _rowDigest(Map<String, Object?>.from(row)),
+      };
+      store.updateSection(ref.objectId,
+        heading: params['heading'] as String, level: params['level'] as int,
+        argument: params['argument'] as String, support: params['support'] as String);
+      changedLinks = [
+        for (final row in store.db.select('SELECT * FROM outline WHERE section_id=?', [ref.objectId]))
+          if (before[row['id']] != _rowDigest(Map<String, Object?>.from(row))) row['id'] as String,
+      ];
+    }, beforeEffect: (store) => _refuseSameHeading(store, ref.nativeProjectId!,
+      params['heading'] as String, exceptId: ref.objectId));
+    return _report(runtime, '已修改提纲段落', [
+      ObjectChange(ref, ChangeOp.upsert),
+      for (final id in changedLinks) ObjectChange(ObjectRef(moduleId:'research',
+        objectType:'outline', objectId:id, nativeProjectId:ref.nativeProjectId), ChangeOp.upsert),
+    ]);
+  });
+  registrar.write(WriteToolSpec(
+    name: 'move_section',
+    description: '将选定提纲段落与相邻段落交换位置；需确认，只修改本机库。'
+        'expected_digest 必须是确认时 research.outline_sections 返回的 orderDigest，执行时在同一事务核对，不一致则拒绝。',
+    operations: _operations('move_section'), targetTypes: {'section'}, affectsTypes: {'section'},
+    parameterSchema: {'type':'object','properties':{
+      'section_id': {'type':'string'},
+      'delta': {'type':'integer','enum':[-1, 1]},
+      'expected_digest': {'type':'string','minLength':1},
+    },'required':['section_id','delta','expected_digest'],'additionalProperties':false},
+  ), (ctx) async {
+    final params = ctx.call.request.parameters;
+    final ref = _selected(ctx, 'section', params['section_id'] as String);
+    late List<String> moved;
+    final runtime = await _outlineWrite(ctx, [ref],
+      (store) => _orderDigest(store, ref.nativeProjectId!), (store) {
+      final before = {for (final section in store.sections(ref.nativeProjectId!)) section.id: section.position};
+      store.moveSection(ref.objectId, params['delta'] as int);
+      moved = [
+        for (final section in store.sections(ref.nativeProjectId!))
+          if (before[section.id] != section.position) section.id,
+      ];
+    });
+    return _report(runtime, '已移动提纲段落', [
+      for (final id in moved) ObjectChange(ObjectRef(moduleId:'research', objectType:'section',
+        objectId:id, nativeProjectId:ref.nativeProjectId), ChangeOp.upsert),
+    ]);
+  });
+  registrar.write(WriteToolSpec(
+    name: 'delete_section',
+    description: '删除选定提纲段落及其证据链接，证据本身保留；需确认，只修改本机库。'
+        'expected_digest 必须是确认时该段落的 contentDigest，执行时在同一事务核对，不一致则拒绝。',
+    operations: _operations('delete_section'),
+    targetTypes: {'section'}, deletesTypes: {'section','outline'},
+    parameterSchema: {'type':'object','properties':{
+      'section_id': {'type':'string'},
+      'expected_digest': {'type':'string','minLength':1},
+    },'required':['section_id','expected_digest'],'additionalProperties':false},
+  ), (ctx) async {
+    final ref = _selected(ctx, 'section', ctx.call.request.parameters['section_id'] as String);
+    late List<String> linkIds;
+    final runtime = await _outlineWrite(ctx, [ref],
+      (store) => _rowDigestOf(store, 'sections', ref.nativeProjectId!, ref.objectId), (store) {
+      linkIds = [
+        for (final row in store.db.select('SELECT id FROM outline WHERE section_id=?', [ref.objectId]))
+          row['id'] as String,
+      ];
+      store.deleteSection(ref.objectId);
+    });
+    return _report(runtime, '已删除提纲段落', [
+      ObjectChange(ref, ChangeOp.delete),
+      for (final id in linkIds) ObjectChange(ObjectRef(moduleId:'research', objectType:'outline',
+        objectId:id, nativeProjectId:ref.nativeProjectId), ChangeOp.delete),
+    ]);
+  });
+  registrar.write(WriteToolSpec(
+    name: 'cite',
+    description: '把选定的科研条目、已接受运行或阅读批注引用到选定段落；需确认，只修改本机库。'
+        'expected_digest 必须是确认时该段落的 contentDigest，执行时在同一事务核对，不一致则拒绝。',
+    operations: _operations('cite'),
+    targetTypes: {'section','entry','run','note'}, createsTypes: {'outline'},
+    parameterSchema: {'type':'object','properties':{
+      'section_id': {'type':'string'},
+      'evidence_type': {'type':'string','enum':['entry','run','note']},
+      'evidence_id': {'type':'string'},
+      'expected_digest': {'type':'string','minLength':1},
+    },'required':['section_id','evidence_type','evidence_id','expected_digest'],'additionalProperties':false},
+  ), (ctx) async {
+    final params = ctx.call.request.parameters;
+    final section = _selected(ctx, 'section', params['section_id'] as String);
+    final evidence = _selected(ctx, params['evidence_type'] as String, params['evidence_id'] as String);
+    late List<String> created;
+    final runtime = await _outlineWrite(ctx, [section, evidence],
+      (store) => _rowDigestOf(store, 'sections', section.nativeProjectId!, section.objectId), (store) {
+      final before = {
+        for (final row in store.db.select('SELECT id FROM outline WHERE project_id=?', [section.nativeProjectId]))
+          row['id'] as String,
+      };
+      store.cite(section.objectId, evidence.objectId);
+      created = [
+        for (final row in store.db.select(
+          'SELECT id FROM outline WHERE section_id=? AND evidence_id=?',
+          [section.objectId, evidence.objectId]))
+          if (!before.contains(row['id'])) row['id'] as String,
+      ];
+    });
+    return _report(runtime, created.isEmpty ? '提纲引用未变化' : '已引用到提纲', [
+      for (final id in created) ObjectChange(ObjectRef(moduleId:'research', objectType:'outline',
+        objectId:id, nativeProjectId:section.nativeProjectId), ChangeOp.upsert),
+    ]);
+  });
+  registrar.write(WriteToolSpec(
+    name: 'remove_outline',
+    description: '删除选定的提纲证据链接，证据本身保留；需确认，只修改本机库。'
+        'expected_digest 必须是确认时该链接的 contentDigest，执行时在同一事务核对，不一致则拒绝。',
+    operations: _operations('remove_outline'),
+    targetTypes: {'outline'}, deletesTypes: {'outline'},
+    parameterSchema: {'type':'object','properties':{
+      'outline_id': {'type':'string'},
+      'expected_digest': {'type':'string','minLength':1},
+    },'required':['outline_id','expected_digest'],'additionalProperties':false},
+  ), (ctx) async {
+    final ref = _selected(ctx, 'outline', ctx.call.request.parameters['outline_id'] as String);
+    final runtime = await _outlineWrite(ctx, [ref],
+      (store) => _rowDigestOf(store, 'outline', ref.nativeProjectId!, ref.objectId),
+      (store) => store.removeOutline(ref.objectId));
+    return _report(runtime, '已移除提纲引用', [ObjectChange(ref, ChangeOp.delete)]);
+  });
 
 }
 
@@ -271,6 +480,108 @@ ObjectRef _selected(ModuleToolContext ctx, String type, String id) {
     r.moduleId == 'research' && r.objectType == type && r.objectId == id).firstOrNull;
   if (ref == null) throw StateError('Object outside scope');
   return ref;
+}
+
+/// Outline rows have no version column. [expected] is the state shown at
+/// confirmation: section and outline tools pass the content digest already
+/// exposed by [ResearchSession]; add and move pass the ordered section digest
+/// because the neighbour is not stored on the selected row.
+void _requireExpected(Object? expected, String actual) {
+  if (expected is! String || expected != actual) {
+    throw StateError('Outline changed; confirm again');
+  }
+}
+
+/// Section tools address a paragraph by id. A heading that already belongs to
+/// another paragraph is refused here, instead of attaching to the first match.
+/// [OutlineStore.addOutline] still matches by heading; this does not change it.
+void _refuseSameHeading(WorkbenchStore store, String projectId, String heading, {String? exceptId}) {
+  final trimmed = heading.trim();
+  if (trimmed.isEmpty) throw StateError('Outline changed; confirm again');
+  final sections = store.sections(projectId);
+  if (exceptId != null && sections.any((section) => section.id == exceptId && section.heading == trimmed)) {
+    return;
+  }
+  if (sections.any((section) => section.heading == trimmed && section.id != exceptId)) {
+    throw StateError('Same section heading; choose a section id');
+  }
+}
+
+String _rowDigest(Map<String, Object?> row) =>
+    sha256.convert(utf8.encode(jsonEncode(row))).toString();
+
+String _rowDigestOf(WorkbenchStore store, String table, String projectId, String id) {
+  if (table != 'sections' && table != 'outline') {
+    throw StateError('Outline changed; confirm again');
+  }
+  final rows = table == 'sections'
+      ? store.db.select('SELECT * FROM sections WHERE id=? AND project_id=?', [id, projectId])
+      : store.db.select('SELECT * FROM outline WHERE id=? AND project_id=?', [id, projectId]);
+  if (rows.length != 1) throw StateError('Outline changed; confirm again');
+  return _rowDigest(Map<String, Object?>.from(rows.single));
+}
+
+List<Map<String, Object?>> _sectionRows(WorkbenchStore store, String projectId) => [
+  for (final section in store.sections(projectId)) {
+    'id': section.id, 'projectId': section.projectId, 'heading': section.heading,
+    'level': section.level, 'position': section.position,
+    'argument': section.argument, 'support': section.support,
+  },
+];
+
+String _orderDigest(WorkbenchStore store, String projectId) =>
+    sha256.convert(utf8.encode(jsonEncode(_sectionRows(store, projectId)))).toString();
+
+Future<ResearchRuntime> _outlineWrite(
+  ModuleToolContext ctx, List<ObjectRef> refs,
+  String Function(WorkbenchStore store) digest, void Function(WorkbenchStore store) apply, {
+  void Function(WorkbenchStore store)? beforeEffect,
+}) async {
+  final runtime = await ctx.runtime<ResearchRuntime>();
+  final projectId = refs.first.nativeProjectId!;
+  if (refs.any((ref) => ref.nativeProjectId != projectId)) {
+    throw StateError('Object outside scope');
+  }
+  final store = runtime.store.scoped(projectId);
+  final expected = ctx.call.request.parameters['expected_digest'];
+  ctx.call.cancellation.throwIfCancelled();
+  await store.write(() {
+    for (final ref in refs) {
+      runtime.requireCurrent(ref);
+    }
+    beforeEffect?.call(store);
+    _requireExpected(expected, digest(store));
+    ctx.call.checkBeforeEffect();
+    apply(store);
+  });
+  return runtime;
+}
+
+Future<ToolCallResult> _report(
+  ResearchRuntime runtime, String summary, List<ObjectChange> changes,
+) async {
+  if (changes.isEmpty) {
+    return ToolCallResult(status: ToolCallStatus.succeeded, summary: summary);
+  }
+  final session = await runtime.openScopeSession();
+  try {
+    final reported = <ObjectChange>[];
+    for (final change in changes) {
+      if (change.op == ChangeOp.delete) {
+        reported.add(change);
+        continue;
+      }
+      final resolved = (await session.resolve(ObjectRef(
+        moduleId: change.ref.moduleId, objectType: change.ref.objectType,
+        objectId: change.ref.objectId, nativeProjectId: change.ref.nativeProjectId,
+      )))!;
+      reported.add(ObjectChange(resolved.ref, change.op));
+    }
+    return ToolCallResult(status: ToolCallStatus.succeeded, summary: summary,
+      objectRefs: [for (final change in reported) change.ref], changes: reported);
+  } finally {
+    await session.dispose();
+  }
 }
 
 Map<String,Object?> _document(ResearchRuntime runtime, ObjectRef ref, ObjectView view) {
