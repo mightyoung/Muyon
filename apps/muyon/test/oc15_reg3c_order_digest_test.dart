@@ -103,7 +103,7 @@ void main() {
       .toList();
 
   List<Map<String, Object?>> log() => host.research!.store.db
-      .select('SELECT * FROM change_log ORDER BY rowid')
+      .select('SELECT * FROM muyon_change_log ORDER BY rowid')
       .map((row) => Map<String, Object?>.from(row))
       .toList();
 
