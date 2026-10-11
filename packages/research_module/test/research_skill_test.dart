@@ -96,6 +96,22 @@ void main() {
       expect(parseSkillRef('wbref:assertions/a1@1'), ('assertions', 'a1', 1));
       expect(parseSkillRef('wbref:assertions/a1@bad'), isNull);
       expect(latestRevisions(entries)['assertions/a1'], 1);
+      store.db.execute('UPDATE entries SET kind=? WHERE id=?', [
+        'other',
+        entries.single.id,
+      ]);
+      await exchange.importResearch(
+        p.join(temp.path, 'proj'),
+        intoProjectId: project.id,
+      );
+      expect(
+        store.entries(project.id, kind: 'assertions').single.id,
+        entries.single.id,
+      );
+      expect(
+        store.entries(project.id, kind: 'assertions').single.data,
+        assertion,
+      );
     },
   );
 

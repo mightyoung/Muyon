@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-// Handwritten fixture shaped after research-skill v6.5 (no upstream files copied).
+// Handwritten fixture shaped after research-skill v6.8 (no upstream files copied).
 const skillPdf = '%PDF-1.4 synthetic\n%%EOF';
 const skillMd = '# 获取材料\n\n召回与排序分开评估。\n';
 String skillSha(String s) => sha256.convert(utf8.encode(s)).toString();
