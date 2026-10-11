@@ -152,6 +152,9 @@ void main() {
     late LocalExportOverwrite overwrite;
     late LocalExportTargetCapability? target;
     late int invocation;
+    HostEffectIntent? cachedIntent;
+    void Function()? beforeEffect;
+    late int handlerEntries;
     final now = DateTime.utc(2026, 10, 11);
 
     HostToolAuthorization service([OutboundContentReviewer? reviewer]) =>
@@ -211,6 +214,9 @@ void main() {
       exportAllowed = true;
       policyRevision = 'rev-1';
       runs = 0;
+      handlerEntries = 0;
+      cachedIntent = null;
+      beforeEffect = null;
       invocation = 0;
       phase = LocalExportPhase.generate;
       bytes = [1, 2, 3];
@@ -246,7 +252,7 @@ void main() {
           effect: ToolEffect.export,
           parameterSchema: const {'type': 'object'},
         ),
-        effectIntent: (request, _) => HostEffectIntent.localExport(
+        effectIntent: (request, _) => cachedIntent ?? HostEffectIntent.localExport(
           toolId: request.toolId,
           invocationId: request.invocationId,
           phase: phase,
@@ -262,6 +268,8 @@ void main() {
           policyVersion: policyVersion,
         ),
         handler: (context) async {
+          handlerEntries++;
+          beforeEffect?.call();
           context.checkBeforeEffect();
           runs++;
           return ToolCallResult(
@@ -343,6 +351,81 @@ void main() {
         expect(await ran(signed), isFalse);
       },
     );
+
+    Future<PreparedToolCall> cacheSave() async {
+      phase = LocalExportPhase.save;
+      target = issuer.issue('cached target');
+      final call = await prepare();
+      cachedIntent = call.effectIntent!;
+      return call;
+    }
+
+    test('cached save revoked before review cannot issue approval', () async {
+      final call = await cacheSave();
+      issuer.revoke(target!);
+      final host = service();
+      Object? refusal;
+      try {
+        final outcome = await host.review(call);
+        await host.confirm(outcome);
+      } on Object catch (error) {
+        refusal = error;
+      }
+      expect(db.raw.select('SELECT * FROM tool_approvals'), isEmpty);
+      expect(refusal, isA<ToolPlatformException>());
+      expect(runs, 0);
+      expect(handlerEntries, 0);
+      expect(registry.receiptFor(call.request.invocationId), isNull);
+    });
+
+    test('cached save revoked after review cannot be confirmed', () async {
+      final call = await cacheSave();
+      final host = service();
+      final outcome = await host.review(call);
+      expect(outcome.action, ReviewAction.confirm);
+      issuer.revoke(target!);
+      Object? refusal;
+      try {
+        await host.confirm(outcome);
+      } on Object catch (error) {
+        refusal = error;
+      }
+      expect(db.raw.select('SELECT * FROM tool_approvals'), isEmpty);
+      expect(refusal, isA<ToolPlatformException>());
+      expect(runs, 0);
+      expect(handlerEntries, 0);
+    });
+
+    test('cached approved save revoked before invoke has zero effects', () async {
+      final call = await cacheSave();
+      final signed = call.request.withApproval(await approve(call));
+      issuer.revoke(target!);
+      final executed = await ran(signed);
+      expect(runs, 0, reason: 'the same cached intent must lose live authority');
+      expect(executed, isFalse);
+      expect(handlerEntries, 0);
+      expect(registry.receiptFor(signed.invocationId), isNull);
+      final row = db.raw.select('SELECT * FROM tool_approvals').single;
+      expect(row['state'], 'issued');
+      expect(row['consumed_at'], isNull);
+      expect(grants.list(), isEmpty);
+    });
+
+    test('cached save revoked at effect boundary cannot write', () async {
+      final call = await cacheSave();
+      final signed = call.request.withApproval(await approve(call));
+      beforeEffect = () => issuer.revoke(target!);
+      final executed = await ran(signed);
+      expect(runs, 0, reason: 'checkBeforeEffect must recheck live authority');
+      expect(executed, isFalse);
+      expect(handlerEntries, 1);
+      final receipt = registry.receiptFor(signed.invocationId)!;
+      expect(receipt.state, 'failed');
+      expect(receipt.result!.status, ToolCallStatus.failed);
+      expect(db.raw.select('SELECT * FROM tool_approvals').single['state'],
+          'consumed', reason: 'dispatch claimed once, but no effect was reached');
+      expect(grants.list(), isEmpty);
+    });
 
     test('a generate approval cannot execute the save stage', () async {
       final generate = await prepare(LocalExportPhase.generate, 'one');
