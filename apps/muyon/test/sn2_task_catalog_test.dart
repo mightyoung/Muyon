@@ -176,10 +176,27 @@ void main() {
         expect(next.payload['uiPlanningContext'], isNull);
         expect((next.payload['messages'] as List).where((message) =>
           message is Map && message['role'] == 'system' && message['content'] == prior), isEmpty);
-        expect((next.payload['messages'] as List).first, originalSystem,
-          reason: 'Keep the ordinary system instructions, remove only host planning metadata');
-        expect(next.payload['candidateIds'], frozenCandidates,
-          reason: 'A later mode change never expands the frozen model catalogue');
+        final nextSystemMessage = (next.payload['messages'] as List).first as Map;
+        expect(nextSystemMessage['role'], 'system');
+        if (native) {
+          expect(nextSystemMessage, originalSystem,
+            reason: 'Keep ordinary native system instructions intact');
+          expect(next.payload['nativeTools'],
+            (first.payload['nativeTools'] as List).where((tool) =>
+              (tool as Map)['toolId'] != 'assistant.plan_ui').toList());
+        } else {
+          final previousSystem = jsonDecode((originalSystem as Map)['content'] as String) as Map;
+          final nextSystem = jsonDecode(nextSystemMessage['content'] as String) as Map;
+          final priorTools = previousSystem.remove('tools') as List;
+          final nextTools = nextSystem.remove('tools');
+          expect(nextTools, priorTools.where((tool) =>
+            (tool as Map)['toolId'] != 'assistant.plan_ui').toList());
+          expect(nextSystem, previousSystem,
+            reason: 'Keep every ordinary system field while narrowing only its planning tool');
+        }
+        expect(next.payload['candidateIds'], (frozenCandidates as List)
+          .where((id) => id != 'assistant.plan_ui').toList(),
+          reason: 'Revocation may shrink the host catalogue; it never adds candidates');
         expect(f.callsOf('write'), 0);
       });
     }
