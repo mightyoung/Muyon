@@ -119,6 +119,18 @@ void main() {
     return listed.data['orderDigest'] as String;
   }
 
+  Future<String> deleteDigest(ObjectRef section) async {
+    final read = await host.tools.invoke(
+      request(
+        'research.read_object',
+        {'type': 'section', 'id': section.objectId},
+        [section],
+      ),
+    );
+    expect(read.status, ToolCallStatus.succeeded);
+    return (read.data['object'] as Map)['deleteDigest'] as String;
+  }
+
   Future<List<OutlineSection>> seed(List<String> titles) async {
     final store = host.research!.store;
     final created = <OutlineSection>[];
@@ -179,6 +191,11 @@ void main() {
     expect(
       (sections.data['sections'] as List).map((row) => (row as Map)['heading']),
       ['甲', '乙'],
+    );
+    final firstSection = await current('section', created.first.id, 'P');
+    expect(
+      (sections.data['sections'] as List).first['deleteDigest'],
+      await deleteDigest(firstSection),
     );
     expect(sections.data['orderDigest'], isA<String>());
     expect((sections.data['orderDigest'] as String).length, 64);
@@ -481,6 +498,7 @@ void main() {
       () => host.research!.store.scoped('P').cite(created.first.id, 'E'),
     );
     final section = await current('section', created.first.id, 'P');
+    final digest = await deleteDigest(section);
     final neighbour = await current('section', created.last.id, 'P');
     Map<String, Object?> params(String id, String digest) => {
       'section_id': id,
@@ -492,19 +510,15 @@ void main() {
     }
 
     await refuses(
-      request(
-        'research.delete_section',
-        params(section.objectId, section.contentDigest!),
-        [neighbour],
-      ),
+      request('research.delete_section', params(section.objectId, digest), [
+        neighbour,
+      ]),
       original,
     );
     await unapproved(
-      request(
-        'research.delete_section',
-        params(section.objectId, section.contentDigest!),
-        [section],
-      ),
+      request('research.delete_section', params(section.objectId, digest), [
+        section,
+      ]),
       original,
     );
     await refuses(
@@ -513,9 +527,18 @@ void main() {
       ]),
       original,
     );
+    // A row-only digest cannot approve a cascade, even if the section is current.
+    await refuses(
+      request(
+        'research.delete_section',
+        params(section.objectId, section.contentDigest!),
+        [section],
+      ),
+      original,
+    );
     final call = request(
       'research.delete_section',
-      params(section.objectId, section.contentDigest!),
+      params(section.objectId, digest),
       [section],
     );
     final result = await confirmed(call);
@@ -627,6 +650,201 @@ void main() {
     await expectLater(invokeApproved(call), throwsStateError);
     expect(host.research!.store.outline('P'), isEmpty);
     expect(host.research!.store.entries('P').single.id, 'E');
+  });
+
+  for (final mutation in ['add', 'remove']) {
+    test(
+      'delete_section refuses $mutation of links after approval before dispatch',
+      () async {
+        await research();
+        final created = await seed(['甲']);
+        final store = host.research!.store;
+        if (mutation == 'remove') {
+          await store.write(
+            () => store.scoped('P').cite(created.single.id, 'E'),
+          );
+        }
+        final section = await current('section', created.single.id, 'P');
+        final digest = await deleteDigest(section);
+        final call = request(
+          'research.delete_section',
+          {'section_id': section.objectId, 'expected_digest': digest},
+          [section],
+        );
+        final approval = await host.tools.approve(
+          await host.tools.prepare(call),
+        );
+        await store.write(() {
+          if (mutation == 'add') {
+            store.scoped('P').cite(section.objectId, 'E');
+          } else {
+            store
+                .scoped('P')
+                .removeOutline(store.outline('P').single['id'] as String);
+          }
+        });
+        final links = store.outline('P');
+        expect(
+          (await current('section', section.objectId, 'P')).contentDigest,
+          section.contentDigest,
+        );
+        expect(await deleteDigest(section), isNot(digest));
+        final result = await host.tools.invoke(call.withApproval(approval));
+        expect(result.status, ToolCallStatus.failed);
+        expect(result.changes, isEmpty);
+        expect(host.tools.receiptFor(call.invocationId)!.state, 'failed');
+        expect(headings(), ['甲']);
+        expect(store.outline('P'), links);
+        expect(store.entries('P').single.id, 'E');
+      },
+    );
+  }
+
+  for (final mutation in ['add', 'remove', 'replace', 'edit']) {
+    test('queued delete_section refuses $mutation of approved cascade', () async {
+      await research();
+      final created = await seed(['甲', '乙']);
+      final store = host.research!.store;
+      await store.write(() => store.scoped('P').cite(created.first.id, 'E'));
+      final section = await current('section', created.first.id, 'P');
+      final digest = await deleteDigest(section);
+      final sectionRow = Map<String, Object?>.from(
+        store.db.select('SELECT * FROM sections WHERE id=?', [
+          section.objectId,
+        ]).single,
+      );
+      final link = store.outline('P').single;
+      final original = host.research!.resources;
+      final observed = _ObservedWrite(original.database);
+      final runtime = ResearchRuntime(
+        ModuleResources(
+          database: observed,
+          files: original.files,
+          capabilities: original.capabilities,
+        ),
+      );
+      host.modules.setRuntimeForTesting('research', runtime);
+      final call = request(
+        'research.delete_section',
+        {'section_id': section.objectId, 'expected_digest': digest},
+        [section],
+      );
+      final approval = await host.tools.approve(await host.tools.prepare(call));
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      late List<Map<String, Object?>> linksAfterConcurrentWrite;
+      final holding = (original.database as ExclusiveDatabase)
+          .exclusiveAsync<void>((db) async {
+            entered.complete();
+            await release.future;
+            if (mutation == 'add') {
+              db.execute(
+                'INSERT INTO entries(id,project_id,kind,title,data) VALUES(?,?,?,?,?)',
+                ['E2', 'P', 'claim', '新增证据', '{}'],
+              );
+              store.scoped('P').cite(section.objectId, 'E2');
+            } else if (mutation == 'remove') {
+              store.scoped('P').removeOutline(link['id'] as String);
+            } else if (mutation == 'replace') {
+              store.scoped('P').removeOutline(link['id'] as String);
+              store.scoped('P').cite(section.objectId, 'E');
+            } else {
+              db.execute('UPDATE outline SET heading=? WHERE id=?', [
+                '并发修改引用',
+                link['id'],
+              ]);
+            }
+            linksAfterConcurrentWrite = store.outline('P');
+            expect(
+              Map<String, Object?>.from(
+                store.db.select('SELECT * FROM sections WHERE id=?', [
+                  section.objectId,
+                ]).single,
+              ),
+              sectionRow,
+            );
+          });
+      await entered.future;
+      try {
+        final resultFuture = host.tools.invoke(call.withApproval(approval));
+        await observed.queued.future.timeout(const Duration(seconds: 5));
+        release.complete();
+        await holding;
+        final result = await resultFuture;
+        expect(result.status, ToolCallStatus.failed);
+        expect(result.changes, isEmpty);
+        expect(host.tools.receiptFor(call.invocationId)!.state, 'failed');
+        expect(headings(), ['甲', '乙']);
+        expect(store.outline('P'), linksAfterConcurrentWrite);
+        expect(store.entries('P').map((entry) => entry.id), contains('E'));
+        final replay = await host.tools.invoke(call.withApproval(approval));
+        expect(replay.status, ToolCallStatus.failed);
+        expect(replay.changes, isEmpty);
+        expect(store.outline('P'), linksAfterConcurrentWrite);
+        // A new snapshot and a fresh one-time approval can delete the cascade.
+        final fresh = await current('section', section.objectId, 'P');
+        expect(fresh.contentDigest, section.contentDigest);
+        final freshDigest = await deleteDigest(fresh);
+        expect(freshDigest, isNot(digest));
+        final retried = await confirmed(
+          request(
+            'research.delete_section',
+            {'section_id': fresh.objectId, 'expected_digest': freshDigest},
+            [fresh],
+          ),
+        );
+        expect(retried.changes.map((change) => change.ref.objectId).toSet(), {
+          fresh.objectId,
+          for (final row in linksAfterConcurrentWrite) row['id'],
+        });
+        expect(headings(), ['乙']);
+        expect(store.outline('P'), isEmpty);
+        expect(store.entries('P').map((entry) => entry.id), contains('E'));
+      } finally {
+        if (!release.isCompleted) release.complete();
+        await holding;
+      }
+    });
+  }
+
+  test('delete_section permits unrelated and duplicate citations after approval', () async {
+    await research();
+    final created = await seed(['甲', '乙']);
+    final store = host.research!.store;
+    await store.write(() => store.scoped('P').cite(created.first.id, 'E'));
+    final section = await current('section', created.first.id, 'P');
+    final digest = await deleteDigest(section);
+    final approvedLink = store.outline('P').single['id'];
+    final call = request(
+      'research.delete_section',
+      {'section_id': section.objectId, 'expected_digest': digest},
+      [section],
+    );
+    final approval = await host.tools.approve(await host.tools.prepare(call));
+    await store.write(() {
+      store.scoped('P').cite(section.objectId, 'E'); // no-op
+      store.scoped('P').cite(created.last.id, 'E');
+      final other = store.addSection('Q', '另一项目');
+      store.db.execute(
+        'INSERT INTO entries(id,project_id,kind,title,data) VALUES(?,?,?,?,?)',
+        ['EQ', 'Q', 'claim', '另一项目证据', '{}'],
+      );
+      store.scoped('Q').cite(other.id, 'EQ');
+    });
+    expect(
+      (await current('section', section.objectId, 'P')).contentDigest,
+      section.contentDigest,
+    );
+    final result = await host.tools.invoke(call.withApproval(approval));
+    expect(result.status, ToolCallStatus.succeeded);
+    expect(result.changes.map((change) => change.ref.objectId).toSet(), {
+      section.objectId,
+      approvedLink,
+    });
+    expect(headings(), ['乙']);
+    expect(store.outline('P').single['section_id'], created.last.id);
+    expect(store.outline('Q').single['evidence_id'], 'EQ');
+    expect(store.entries('P').single.id, 'E');
   });
 
   test(

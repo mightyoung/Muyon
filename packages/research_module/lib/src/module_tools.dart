@@ -113,6 +113,9 @@ void registerResearchTools(ToolRegistrar registrar) {
         }(),
         _ => throw StateError('Unsupported object type'),
       };
+      if (ref.objectType == 'section') {
+        data['deleteDigest'] = sectionDeleteDigest(runtime.store, project, ref.objectId)!;
+      }
       return ToolCallResult(status: ToolCallStatus.succeeded,
         summary: '读取 ${view.title}', data: {'object': data}, objectRefs: [view.ref]);
     } finally { await session.dispose(); }
@@ -178,7 +181,7 @@ void registerResearchTools(ToolRegistrar registrar) {
   });
   registrar.read(ToolSpec(
     name: 'outline_sections',
-    description: '读取选定科研项目的提纲段落，并返回确认写入时要带回的 orderDigest。只读取本机科研库，不修改数据，也不发送到设备外。',
+    description: '读取选定科研项目的提纲段落，并返回新增/移动用的 orderDigest 和各段落删除用的 deleteDigest。只读取本机科研库，不修改数据，也不发送到设备外。',
     operations: _operations('outline_sections'),
     parameterSchema: {'type':'object','properties':{
       'project_id': {'type':'string'},
@@ -190,7 +193,12 @@ void registerResearchTools(ToolRegistrar registrar) {
     final store = runtime.store.scoped(ref.nativeProjectId!);
     return ToolCallResult(status: ToolCallStatus.succeeded,
       summary: '找到 ${_sectionRows(store, ref.objectId).length} 个提纲段落',
-      data: {'sections': _sectionRows(store, ref.objectId), 'orderDigest': _orderDigest(store, ref.objectId)},
+      data: {'sections': [
+        for (final section in _sectionRows(store, ref.objectId)) {
+          ...section,
+          'deleteDigest': sectionDeleteDigest(store, ref.objectId, section['id'] as String)!,
+        },
+      ], 'orderDigest': _orderDigest(store, ref.objectId)},
       objectRefs: [ref]);
   });
 
@@ -395,7 +403,8 @@ void registerResearchTools(ToolRegistrar registrar) {
   registrar.write(WriteToolSpec(
     name: 'delete_section',
     description: '删除选定提纲段落及其证据链接，证据本身保留；需确认，只修改本机库。'
-        'expected_digest 必须是确认时该段落的 contentDigest，执行时在同一事务核对，不一致则拒绝。',
+        'expected_digest 必须是确认时 research.read_object 或 research.outline_sections 返回的该段落 deleteDigest'
+        '（含段落及全部级联引用快照），执行时在同一事务核对，引用新增、移除或修改均拒绝旧确认。',
     operations: _operations('delete_section'),
     targetTypes: {'section'}, deletesTypes: {'section','outline'},
     parameterSchema: {'type':'object','properties':{
@@ -406,7 +415,7 @@ void registerResearchTools(ToolRegistrar registrar) {
     final ref = _selected(ctx, 'section', ctx.call.request.parameters['section_id'] as String);
     late List<String> linkIds;
     final runtime = await _outlineWrite(ctx, [ref],
-      (store) => _rowDigestOf(store, 'sections', ref.nativeProjectId!, ref.objectId), (store) {
+      (store) => sectionDeleteDigest(store, ref.nativeProjectId!, ref.objectId)!, (store) {
       linkIds = [
         for (final row in store.db.select('SELECT id FROM outline WHERE section_id=?', [ref.objectId]))
           row['id'] as String,
@@ -483,8 +492,9 @@ ObjectRef _selected(ModuleToolContext ctx, String type, String id) {
 }
 
 /// Outline rows have no version column. [expected] is the state shown at
-/// confirmation: section and outline tools pass the content digest already
-/// exposed by [ResearchSession]; add and move pass the ordered section digest
+/// confirmation: delete passes the cascade snapshot; update, cite and remove
+/// pass the row content digest exposed by [ResearchSession]; add and move pass
+/// the ordered section digest
 /// because the neighbour is not stored on the selected row.
 void _requireExpected(Object? expected, String actual) {
   if (expected is! String || expected != actual) {
