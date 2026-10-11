@@ -535,6 +535,44 @@ void main() {
       );
     });
 
+    test('atomic batch without the writeForms feature is never allowed', () {
+      final module = _BatchModule(
+        [_form('contact')],
+        [AtomicBatchForm(objectType: 'contact', op: WriteFormOp.create)],
+      );
+      expect(
+        atomicBatchAllowed(
+          features: {ModuleFeature.atomicBatchWrite},
+          module: module,
+          objectType: 'contact',
+          op: WriteFormOp.create,
+        ),
+        isFalse,
+      );
+    });
+
+    test('a batch op the single-row form does not allow is refused', () {
+      final module = _BatchModule(
+        [
+          ObjectWriteForm(
+            objectType: 'contact',
+            fields: const [],
+            deletes: false,
+          ),
+        ],
+        [AtomicBatchForm(objectType: 'contact', op: WriteFormOp.delete)],
+      );
+      expect(
+        atomicBatchAllowed(
+          features: {ModuleFeature.writeForms, ModuleFeature.atomicBatchWrite},
+          module: module,
+          objectType: 'contact',
+          op: WriteFormOp.delete,
+        ),
+        isFalse,
+      );
+    });
+
     test('batch declarations compare by value', () {
       expect(
         AtomicBatchForm(objectType: 'contact', op: WriteFormOp.create),
