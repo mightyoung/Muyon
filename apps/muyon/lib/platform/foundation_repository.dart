@@ -236,7 +236,16 @@ class PersonalTask {
 /// One host database: conversations add context, execution_records remain the
 /// sole execution authority. No parallel workspace/settings/device tables.
 class FoundationRepository extends ChangeNotifier {
-  FoundationRepository(this.database);
+  FoundationRepository(this.database) {
+    authorizationFacts.addListener(refresh);
+  }
+
+  @override
+  void dispose() {
+    authorizationFacts.removeListener(refresh);
+    super.dispose();
+  }
+
   late final authorizationFacts = HostAuthorizationFacts(database);
   final ManagedDatabase database;
   void refresh() => notifyListeners();

@@ -33,8 +33,18 @@ class AppState extends ChangeNotifier {
     this.webAuthority,
     this.hubAuthority,
     this.hubJournal,
+    InquiryHostTaintProbe? hostTaintProbe,
+    String? hostTaskId,
+    String? hostConversationId,
     Map<String, Object?> initialSettings = const {},
-  }) : _settings = {
+  }) : // Public host parameters keep the captured authority and identities private.
+       // ignore: prefer_initializing_formals
+       _hostTaintProbe = hostTaintProbe,
+       // ignore: prefer_initializing_formals
+       _hostTaskId = hostTaskId,
+       // ignore: prefer_initializing_formals
+       _hostConversationId = hostConversationId,
+       _settings = {
          ...initialSettings,
          'device_name': initialSettings['device_name'] ?? store.device,
          'lan_visible': null,
@@ -80,6 +90,26 @@ class AppState extends ChangeNotifier {
   final AssistantWebAuthority? webAuthority;
   final HubAuthority? hubAuthority;
   final HubPublicationJournal? hubJournal;
+  // Only attach initializes host identities; the standalone constructor stays
+  // unchanged and the hosted guard below prevents reads on that path.
+  late final InquiryHostTaintProbe? _hostTaintProbe;
+  late final String? _hostTaskId, _hostConversationId;
+
+  /// Re-read at each review boundary; a failed host read cannot grant approval.
+  bool get requiresHostConfirmation {
+    if (!_isHosted) return false;
+    final task = _hostTaskId;
+    final conversation = _hostConversationId;
+    if (task == null || conversation == null || _hostTaintProbe == null) {
+      return true;
+    }
+    try {
+      return _hostTaintProbe(task, conversation) != false;
+    } catch (_) {
+      return true;
+    }
+  }
+
   int _hubGeneration = 0;
   final _pendingAiTasks = <Future<void>>{};
   AiJobStore? _aiJobs;
