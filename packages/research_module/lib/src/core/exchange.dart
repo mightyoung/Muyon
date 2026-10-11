@@ -1276,19 +1276,16 @@ class ResearchExchange {
 /// such as the project header, document paths and a note's associated title.
 class ResearchReportPreparation extends LocalExportPreparation {
   ResearchReportPreparation({
-    required DateTime generatedAt,
-    required List<int> bytes,
-    required List<ObjectRef> sources,
+    required super.generatedAt,
+    required super.bytes,
+    required super.sources,
     required Map<String, int> objectCounts,
   }) : objectCounts = Map.unmodifiable(objectCounts),
        super(
          kind: LocalExportKind.report,
          formatVersion: 'research-report-v1',
          mimeType: 'text/markdown',
-         generatedAt: generatedAt,
-         bytes: bytes,
          sha256: _reportDigest(bytes),
-         sources: sources,
          dedupedObjectCount: objectCounts.values.fold(0, (sum, n) => sum + n),
          exclusions: const [],
          warnings: const [],
