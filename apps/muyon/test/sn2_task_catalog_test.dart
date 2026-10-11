@@ -41,6 +41,12 @@ Future<void> seedTask(LoopFixture f, String conversation, String id, {
 void main() {
   for (final mode in UiPresentationMode.values) {
     testWidgets('internal interleaving keeps unique parent cards in ${mode.name}', (tester) async {
+      // ListView builds only its viewport; include every seeded card so the
+      // key counts test selection rather than lazy child construction.
+      tester.view.physicalSize = const Size(1200, 12000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       final f = (await tester.runAsync(LoopFixture.open))!;
       final preference = UiPresentationPreference(f.repo);
       await tester.runAsync(() => preference.save(mode));
