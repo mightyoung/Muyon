@@ -20,6 +20,49 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 /// model.
 const loopKey = 'sk-agent-secret-0123456789';
 
+/// Finish real I/O while draining callbacks already queued on the fake clock.
+/// Awaiting the operation inside runAsync would stop those fake callbacks.
+Future<void> drainLoopCleanup(
+  Future<void> Function() operation, {
+  required String label,
+}) async {
+  if (BindingBase.debugBindingType() == null ||
+      !TestWidgetsFlutterBinding.instance.inTest) {
+    await operation();
+    return;
+  }
+  final binding = TestWidgetsFlutterBinding.instance;
+  var completed = false;
+  Object? failure;
+  StackTrace? failureStack;
+  await binding.runAsync(() async {
+    try {
+      operation().then<void>(
+        (_) => completed = true,
+        onError: (Object error, StackTrace stack) {
+          failure = error;
+          failureStack = stack;
+          completed = true;
+        },
+      );
+    } catch (error, stack) {
+      failure = error;
+      failureStack = stack;
+      completed = true;
+    }
+  });
+  for (var turn = 0; turn < 2000 && !completed; turn++) {
+    await binding.runAsync(() => Future<void>.delayed(Duration.zero));
+    await binding.delayed(Duration.zero);
+  }
+  if (!completed) {
+    fail('$label did not complete after draining 2000 real/fake event turns');
+  }
+  if (failure != null) {
+    Error.throwWithStackTrace(failure!, failureStack!);
+  }
+}
+
 class LoopSecrets implements SecretStore {
   @override
   Future<String?> read(String reference) async =>
@@ -165,21 +208,7 @@ class LoopFixture {
     });
     addTearDown(() async {
       await server.close(force: true);
-      // Open finished on the real clock and the sqlite tail on the fake
-      // clock. close() awaits those futures one after another, and each
-      // resume is queued on the other clock. Flush both, or tearDown waits
-      // out the framework timeout.
-      final closing = storage.close();
-      if (BindingBase.debugBindingType() != null) {
-        final binding = TestWidgetsFlutterBinding.instance;
-        if (binding.inTest) {
-          for (var i = 0; i < 8; i++) {
-            await binding.runAsync(() => Future<void>.delayed(Duration.zero));
-            binding.delayed(Duration.zero);
-          }
-        }
-      }
-      await closing;
+      await drainLoopCleanup(storage.close, label: 'LoopFixture storage.close');
       root.deleteSync(recursive: true);
     });
     return f;
