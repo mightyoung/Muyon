@@ -315,6 +315,17 @@ void main() {
           // Re-read the persisted JSON after B has committed; the returned
           // result alone cannot prove durable recovery retains A's snapshot.
           final persisted = host.tools.receiptFor(call.invocationId)!.result!;
+          expect(persisted.objectRefs.map((ref) => ref.toJson()).toList(), [
+            committedA.toJson(),
+          ]);
+          expect(
+            persisted.objectRefs.single.contentDigest,
+            committedA.contentDigest,
+          );
+          expect(
+            persisted.objectRefs.single.revisionRef,
+            committedA.revisionRef,
+          );
           expect(persisted.objectRefs.single.toJson(), committedA.toJson());
           // ChangeOp persistence is deferred by CR13 N-3.
           expect(persisted.changes, isEmpty);
@@ -323,13 +334,18 @@ void main() {
           expect(result.changes.single.ref.toJson(), committedA.toJson());
           expect(result.changes.single.op, ChangeOp.upsert);
           if (!deleteAfterCommit) {
-            expect(
-              (await current(
-                committedA.objectType,
-                committedA.objectId,
-              )).toJson(),
-              isNot(committedA.toJson()),
+            final latest = await current(
+              committedA.objectType,
+              committedA.objectId,
             );
+            expect(latest.toJson(), isNot(committedA.toJson()));
+            // Task refs carry revisionRef instead of contentDigest.
+            final persistedRef = persisted.objectRefs.single;
+            if (persistedRef.contentDigest != null) {
+              expect(persistedRef.contentDigest, isNot(latest.contentDigest));
+            } else {
+              expect(persistedRef.revisionRef, isNot(latest.revisionRef));
+            }
           }
         },
       );

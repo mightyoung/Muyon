@@ -152,6 +152,16 @@ void main() {
         expect(observed.interceptions, 1);
         expect(result.status, ToolCallStatus.succeeded, reason: result.summary);
         expect(host.tools.receiptFor(call.invocationId)!.state, 'succeeded');
+        // The persisted receipt must retain A's exact ref snapshot.
+        final persisted = host.tools.receiptFor(call.invocationId)!.result!;
+        expect(persisted.objectRefs.map((ref) => ref.toJson()).toList(), [
+          committedA.toJson(),
+        ]);
+        expect(
+          persisted.objectRefs.single.contentDigest,
+          committedA.contentDigest,
+        );
+        expect(persisted.objectRefs.single.revisionRef, committedA.revisionRef);
         expect(result.summary, '已修改提纲段落');
         expect(changes(result), {'upsert:section:${section.id}'});
         expect(result.objectRefs.single.toJson(), committedA.toJson());
@@ -163,6 +173,10 @@ void main() {
           expect(runtime.store.sections('P').single.heading, 'B 写入');
           expect(
             result.objectRefs.single.contentDigest,
+            isNot((await current('section', section.id)).contentDigest),
+          );
+          expect(
+            persisted.objectRefs.single.contentDigest,
             isNot((await current('section', section.id)).contentDigest),
           );
         }

@@ -211,17 +211,40 @@ void _currentSelection(MuyonHost host, Store store, ToolCallContext call) {
   final workspace = call.request.scope.workspaceId;
   for (final selected in call.resolvedScope.objects) {
     final row = store.get(selected.objectType, selected.objectId);
+    final current = row == null ? null : _ref(store, row.type, row.id);
+    final workspaceChanged =
+        workspace != null &&
+        host.workspaces.binding(workspace, 'inquiry')?.nativeProjectId !=
+            selected.nativeProjectId;
     if (row == null ||
-        !sameObjectIdentity(_ref(store, row.type, row.id), selected) ||
+        !sameObjectIdentity(current!, selected) ||
         '${row.version}' != selected.revisionRef ||
-        _ref(store, row.type, row.id).contentDigest != selected.contentDigest ||
-        (workspace != null &&
-            host.workspaces.binding(workspace, 'inquiry')?.nativeProjectId !=
-                selected.nativeProjectId)) {
-      invalid('scope', '选定记录或工作区已变化，请重新确认');
+        current.contentDigest != selected.contentDigest ||
+        workspaceChanged) {
+      throw WriteConflict(
+        code: 'scope_changed',
+        currentVersion:
+            !workspaceChanged &&
+                current != null &&
+                sameObjectIdentity(current, selected)
+            ? row!.version
+            : 'unavailable',
+        fieldPaths: ['scope'],
+      );
     }
   }
 }
+
+ToolCallResult _conflictResult(WriteConflict conflict) => ToolCallResult(
+  status: ToolCallStatus.failed,
+  summary: switch (conflict.code) {
+    'scope_changed' => '选定记录或工作区已变化，请重新确认',
+    'operation_id_reuse' => '业务操作 ID 已用于不同参数或范围',
+    'referencing_changed' => '引用预览已变化或不完整，请重新确认',
+    _ => '记录状态或版本已变化，请重新确认',
+  },
+  data: conflict.toTrustedData(),
+);
 
 List<Map<String, Object?>> _incoming(Store store, String type, String id) {
   final records = <String, Map<String, Object?>>{};
@@ -362,147 +385,181 @@ void registerInquiryRecordTools(
         }
         final p = call.request.parameters;
         ToolCallResult? result;
-        final error = state.write(
-          (s) => s.transaction(() {
-            _validateArguments(operation, p);
-            _currentSelection(host, s, call);
-            final type = p['type'] as String;
-            final creating = operation == 'create_record';
-            if (!creating) _requireSelected(call, type, p['id'] as String);
-            final identity = GenericWriteIdentity(
-              operation: operation,
-              parameters: p,
-              workspaceId: call.request.scope.workspaceId,
-              objects: call.resolvedScope.objects,
-            );
-            final arguments = identity.arguments;
-            final receiptKey = identity.receiptKey;
-            final receipts = s.db.select('SELECT value FROM meta WHERE key=?', [
-              receiptKey,
-            ]);
-            if (receipts.isNotEmpty) {
-              final receipt =
-                  jsonDecode(receipts.single['value'] as String) as Map;
-              if (receipt['arguments'] != arguments) {
-                invalid('operation_id', '业务操作 ID 已用于不同参数或范围');
-              }
-              result = ToolCallResult.fromJson(
-                (receipt['result'] as Map).cast<String, Object?>(),
+        String? error;
+        try {
+          error = state.write(
+            (s) => s.transaction(() {
+              _validateArguments(operation, p);
+              _currentSelection(host, s, call);
+              final type = p['type'] as String;
+              final creating = operation == 'create_record';
+              if (!creating) _requireSelected(call, type, p['id'] as String);
+              final identity = GenericWriteIdentity(
+                operation: operation,
+                parameters: p,
+                workspaceId: call.request.scope.workspaceId,
+                objects: call.resolvedScope.objects,
               );
-              return;
-            }
-            final id = creating ? newUuid() : p['id'] as String;
-            final previous = creating ? null : s.get(type, id);
-            if (!creating) {
-              if (previous == null ||
-                  previous.deleted != (operation == 'restore_record')) {
-                invalid('id', 'Record unavailable for this operation');
+              final arguments = identity.arguments;
+              final receiptKey = identity.receiptKey;
+              final receipts = s.db.select(
+                'SELECT value FROM meta WHERE key=?',
+                [receiptKey],
+              );
+              if (receipts.isNotEmpty) {
+                final receipt =
+                    jsonDecode(receipts.single['value'] as String) as Map;
+                if (receipt['arguments'] != arguments) {
+                  throw WriteConflict(
+                    code: 'operation_id_reuse',
+                    currentVersion: 'unavailable',
+                    fieldPaths: ['operation_id'],
+                  );
+                }
+                result = ToolCallResult.fromJson(
+                  (receipt['result'] as Map).cast<String, Object?>(),
+                );
+                return;
               }
-              if (previous.version != p['expected_version']) {
-                invalid('expected_version', '记录版本已变化，请重新确认');
-              }
-            }
-            final values =
-                (p['values'] as Map?)?.cast<String, Object?>() ??
-                <String, Object?>{};
-            final data = validatePayload(type, {
-              for (final field in payloadFields(type)) field: null,
-              if (type == 'supplier') ...{
-                'aliases': <String>[],
-                'categories': <String>[],
-              },
-              if (type == 'inquiry') ...{
-                'item_ids': <String>[],
-                'supplier_ids': <String>[],
-              },
-              if (type == 'quotation') 'capture_mode': 'standard',
-              ...?previous?.data,
-              ...values,
-            });
-            _checkDataScope(call, type, data, values, creating: creating);
-            if (type == 'inquiry') {
-              for (final item in data['item_ids'] as List) {
-                if (s.get('project_item', item as String)?.data['project_id'] !=
-                    data['project_id']) {
-                  invalid(
-                    'item_ids',
-                    'Inquiry items must belong to this project',
+              final id = creating ? newUuid() : p['id'] as String;
+              final previous = creating ? null : s.get(type, id);
+              if (!creating) {
+                if (previous == null ||
+                    previous.deleted != (operation == 'restore_record')) {
+                  throw WriteConflict(
+                    code: 'version_conflict',
+                    currentVersion: previous?.version ?? 'unavailable',
+                    fieldPaths: ['id'],
+                  );
+                }
+                if (previous.version != p['expected_version']) {
+                  throw WriteConflict(
+                    code: 'version_conflict',
+                    currentVersion: previous.version,
+                    fieldPaths: ['expected_version'],
                   );
                 }
               }
-            }
-            if (operation == 'restore_record') {
-              for (final link in links.where((l) => l.from == type)) {
-                final raw = data[link.field];
-                final ids = link.many
-                    ? (raw as List? ?? [])
-                    : [?raw];
-                for (final related in ids) {
-                  final target = s.get(link.to, related as String);
-                  if (target == null || target.deleted) {
-                    invalid(link.field, '请先恢复被引用记录');
+              final values =
+                  (p['values'] as Map?)?.cast<String, Object?>() ??
+                  <String, Object?>{};
+              final data = validatePayload(type, {
+                for (final field in payloadFields(type)) field: null,
+                if (type == 'supplier') ...{
+                  'aliases': <String>[],
+                  'categories': <String>[],
+                },
+                if (type == 'inquiry') ...{
+                  'item_ids': <String>[],
+                  'supplier_ids': <String>[],
+                },
+                if (type == 'quotation') 'capture_mode': 'standard',
+                ...?previous?.data,
+                ...values,
+              });
+              _checkDataScope(call, type, data, values, creating: creating);
+              if (type == 'inquiry') {
+                for (final item in data['item_ids'] as List) {
+                  if (s
+                          .get('project_item', item as String)
+                          ?.data['project_id'] !=
+                      data['project_id']) {
+                    invalid(
+                      'item_ids',
+                      'Inquiry items must belong to this project',
+                    );
                   }
                 }
               }
-            }
-            if (operation == 'delete_record') {
-              final incoming = _incoming(s, type, id);
-              final supplied =
-                  (p['referencing_records'] as List)
-                      .map((r) => canonicalJson(r))
-                      .toList()
-                    ..sort();
-              final actual = incoming.map(canonicalJson).toList()..sort();
-              if (canonicalJson(supplied) != canonicalJson(actual)) {
-                invalid('referencing_records', '引用预览已变化或不完整，请重新确认');
+              if (operation == 'restore_record') {
+                for (final link in links.where((l) => l.from == type)) {
+                  final raw = data[link.field];
+                  final ids = link.many ? (raw as List? ?? []) : [?raw];
+                  for (final related in ids) {
+                    final target = s.get(link.to, related as String);
+                    if (target == null || target.deleted) {
+                      invalid(link.field, '请先恢复被引用记录');
+                    }
+                  }
+                }
               }
-              for (final r in incoming) {
-                _requireSelected(call, r['type'] as String, r['id'] as String);
+              if (operation == 'delete_record') {
+                final incoming = _incoming(s, type, id);
+                final supplied =
+                    (p['referencing_records'] as List)
+                        .map((r) => canonicalJson(r))
+                        .toList()
+                      ..sort();
+                final actual = incoming.map(canonicalJson).toList()..sort();
+                if (canonicalJson(supplied) != canonicalJson(actual)) {
+                  throw WriteConflict(
+                    code: 'referencing_changed',
+                    // Opaque revision: never disclose unselected referring rows.
+                    currentVersion: sha256
+                        .convert(utf8.encode(canonicalJson(actual)))
+                        .toString(),
+                    fieldPaths: ['referencing_records'],
+                  );
+                }
+                for (final r in incoming) {
+                  _requireSelected(
+                    call,
+                    r['type'] as String,
+                    r['id'] as String,
+                  );
+                }
+                if (incoming.isNotEmpty) {
+                  invalid(
+                    'references',
+                    '仍被活跃记录引用，不能删除：${describeReferences(s.referencesTo(type, id))}',
+                  );
+                }
               }
-              if (incoming.isNotEmpty) {
-                invalid(
-                  'references',
-                  '仍被活跃记录引用，不能删除：${describeReferences(s.referencesTo(type, id))}',
-                );
+              call.checkBeforeEffect();
+              switch (operation) {
+                case 'create_record':
+                  s.save(type, data, newId: id);
+                case 'update_record':
+                  s.save(type, data, id: id, allowClear: true);
+                case 'delete_record':
+                  s.delete(type, id);
+                case 'restore_record':
+                  s.restore(type, id);
               }
-            }
-            call.checkBeforeEffect();
-            switch (operation) {
-              case 'create_record':
-                s.save(type, data, newId: id);
-              case 'update_record':
-                s.save(type, data, id: id, allowClear: true);
-              case 'delete_record':
-                s.delete(type, id);
-              case 'restore_record':
-                s.restore(type, id);
-            }
-            final saved = s.get(type, id)!;
-            final ref = _ref(s, type, id);
-            result = ToolCallResult(
-              status: ToolCallStatus.succeeded,
-              summary: '已完成${ontology[type]!.label}记录操作',
-              data: {
-                'operation_id': p['operation_id'],
-                'type': type,
-                'id': id,
-                'version': saved.version,
-                'deleted': saved.deleted,
-              },
-              objectRefs: [ref],
-              changes: [
-                ObjectChange(
-                  ref,
-                  saved.deleted ? ChangeOp.delete : ChangeOp.upsert,
-                ),
-              ],
-            );
-            s.db.execute('INSERT INTO meta(key,value) VALUES (?,?)', [
-              receiptKey,
-              jsonEncode({'arguments': arguments, 'result': result!.toJson()}),
-            ]);
-          }),
-        );
+              final saved = s.get(type, id)!;
+              final ref = _ref(s, type, id);
+              result = ToolCallResult(
+                status: ToolCallStatus.succeeded,
+                summary: '已完成${ontology[type]!.label}记录操作',
+                data: {
+                  'operation_id': p['operation_id'],
+                  'type': type,
+                  'id': id,
+                  'version': saved.version,
+                  'deleted': saved.deleted,
+                },
+                objectRefs: [ref],
+                changes: [
+                  ObjectChange(
+                    ref,
+                    saved.deleted ? ChangeOp.delete : ChangeOp.upsert,
+                  ),
+                ],
+              );
+              s.db.execute('INSERT INTO meta(key,value) VALUES (?,?)', [
+                receiptKey,
+                jsonEncode({
+                  'arguments': arguments,
+                  'result': result!.toJson(),
+                }),
+              ]);
+            }),
+          );
+        } on WriteConflict catch (conflict) {
+          // Store.transaction commits any normal return. Convert only after
+          // the exception has crossed the outermost transaction and rolled back.
+          return _conflictResult(conflict);
+        }
         // A committed receipt remains authoritative if a listener throws.
         if (result != null) return result!;
         return ToolCallResult(
