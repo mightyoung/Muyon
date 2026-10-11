@@ -62,7 +62,8 @@ class LocalExportExclusion {
 final _hex64 = RegExp(r'^[0-9a-f]{64}$');
 
 /// The frozen content of one export, produced once before any approval. All
-/// collections are copied and unmodifiable; later changes by the caller do not
+/// collections and source/exclusion values are copied and unmodifiable;
+/// later changes by the caller do not
 /// reach it, so what is approved is what is written.
 class LocalExportPreparation {
   LocalExportPreparation({
@@ -79,8 +80,23 @@ class LocalExportPreparation {
     required this.preparationVersion,
     required this.manifestDigest,
   }) : bytes = Uint8List.fromList(bytes).asUnmodifiableView(),
-       sources = List.unmodifiable(sources),
-       exclusions = List.unmodifiable(exclusions),
+       sources = List.unmodifiable(
+         sources.map(
+           (source) => ObjectRef(
+             moduleId: source.moduleId,
+             objectType: source.objectType,
+             objectId: source.objectId,
+             nativeProjectId: source.nativeProjectId,
+             revisionRef: source.revisionRef,
+             contentDigest: source.contentDigest,
+           ),
+         ),
+       ),
+       exclusions = List.unmodifiable(
+         exclusions.map(
+           (exclusion) => LocalExportExclusion(exclusion.id, exclusion.reason),
+         ),
+       ),
        warnings = List.unmodifiable(warnings) {
     if (bytes.isEmpty) throw ArgumentError('An export has content');
     if (!_hex64.hasMatch(sha256) || !_hex64.hasMatch(manifestDigest)) {

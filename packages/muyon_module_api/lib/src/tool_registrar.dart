@@ -29,6 +29,18 @@ class DestinationRule {
   final bool localExport;
 }
 
+// Preserve the public const rule constructors and existing network rule
+// identity. Local export specs own the values they validate, including rules
+// supplied through a mutable implementation of DestinationRule.
+DestinationRule _freezeLocalExportDestination(DestinationRule rule) =>
+    rule.localExport
+    ? DestinationRule(
+        fixedHosts: Set.unmodifiable(rule.fixedHosts),
+        publicWeb: rule.publicWeb,
+        localExport: true,
+      )
+    : rule;
+
 class ToolExample {
   ToolExample({
     required this.name,
@@ -118,12 +130,12 @@ final class ExternalToolSpec extends ToolSpec {
     super.examples,
     super.resultSensitivity,
     required this.effect,
-    required this.destination,
-  }) {
+    required DestinationRule destination,
+  }) : destination = _freezeLocalExportDestination(destination) {
     if (effect != ToolEffect.export && effect != ToolEffect.network) {
       throw ArgumentError('An external tool is export or network');
     }
-    final problems = localExportRuleProblems(effect, destination);
+    final problems = localExportRuleProblems(effect, this.destination);
     if (problems.isNotEmpty) throw ArgumentError(problems.first);
   }
   final ToolEffect effect;
@@ -168,14 +180,15 @@ class ChannelSpec {
     required this.name,
     required this.description,
     required this.effect,
-    required this.destination,
+    required DestinationRule destination,
     required Map<String, Object?> parameterSchema,
     this.supportsCancel = true,
-  }) : parameterSchema = freezeJsonMap(parameterSchema) {
+  }) : destination = _freezeLocalExportDestination(destination),
+       parameterSchema = freezeJsonMap(parameterSchema) {
     if (effect != ToolEffect.export && effect != ToolEffect.network) {
       throw ArgumentError('A channel is export or network');
     }
-    final problems = localExportRuleProblems(effect, destination);
+    final problems = localExportRuleProblems(effect, this.destination);
     if (problems.isNotEmpty) throw ArgumentError(problems.first);
   }
   final String name, description;
