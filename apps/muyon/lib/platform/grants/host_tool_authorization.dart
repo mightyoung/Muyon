@@ -242,7 +242,7 @@ final class HostToolAuthorization {
     }
     final snapshot = _snapshot(call);
     final authority = _authority(call);
-    final candidate = authority == null
+    final candidate = authority == null || intent.isLocalExport
         ? null
         : registry.grants?.findMatching(registry.authorizationRequest(call));
     ReviewDecision decision;

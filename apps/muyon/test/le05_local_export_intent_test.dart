@@ -11,15 +11,12 @@ import 'package:muyon/platform/grants/host_authorization_facts.dart';
 import 'package:muyon/platform/grants/host_effect_intent.dart';
 import 'package:muyon/platform/grants/host_tool_authorization.dart';
 import 'package:muyon/platform/grants/local_export_target.dart';
-import 'package:muyon/platform/grants/outbound_content_reviewer.dart';
 import 'package:muyon/platform/grants/tool_grant_context.dart';
 import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/platform/tool_registry.dart';
 import 'package:muyon/workspace/workspace_repository.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
-
-import 'support/fake_v2_module.dart';
 
 /// LE-05: the trusted local-export intent and its two-stage approval binding.
 /// Nothing here writes a file or opens a UI; a "run" is a counter in a handler.
@@ -181,9 +178,10 @@ void main() {
         registry.prepare(request(stage, id));
 
     Future<String> approve(PreparedToolCall call) async {
-      final outcome = await service().review(call);
+      final host = service();
+      final outcome = await host.review(call);
       expect(outcome.action, ReviewAction.confirm);
-      final id = await service().confirm(outcome);
+      final id = await host.confirm(outcome);
       expect(id, isNotNull);
       return id!;
     }
@@ -414,12 +412,12 @@ void main() {
           taint = state;
           final call = await prepare();
           // even a reviewer that says "allow" cannot skip the confirmation
-          final outcome = await service(_Reviewer(const ReviewDecision.allow()))
-              .review(call);
+          final host = service(_Reviewer(const ReviewDecision.allow()));
+          final outcome = await host.review(call);
           expect(outcome.action, ReviewAction.confirm);
           expect(outcome.grantId, isNull);
-          expect(await service().sign(outcome), isNull);
-          final id = await service().confirm(outcome);
+          expect(await host.sign(outcome), isNull);
+          final id = await host.confirm(outcome);
           expect(id, isNotNull);
           expect(await ran(call.request.withApproval(id!)), isTrue);
           expect(taint, state, reason: 'a manual confirmation does not clean');
@@ -458,11 +456,11 @@ void main() {
             now: now,
           ),
         );
-        final outcome = await service(_Reviewer(const ReviewDecision.allow()))
-            .review(call);
+        final host = service(_Reviewer(const ReviewDecision.allow()));
+        final outcome = await host.review(call);
         expect(outcome.action, ReviewAction.confirm);
         expect(outcome.grantId, isNull);
-        expect(await service().sign(outcome), isNull);
+        expect(await host.sign(outcome), isNull);
         await expectLater(
           registry.approveWithGrant(call, grantId: once.id),
           throwsA(isA<ToolPlatformException>()),
