@@ -177,8 +177,11 @@ void main() {
 
   testWidgets('SN3 cancelling the original task retains disabled facts without cancelling another task', (tester) async {
     final f = (await tester.runAsync(LoopFixture.open))!;
-    final preference = UiPresentationPreference(f.repo);
-    await tester.runAsync(() => preference.save(UiPresentationMode.few));
+    final preference = (await tester.runAsync(() async {
+      final preference = UiPresentationPreference(f.repo);
+      await preference.save(UiPresentationMode.few);
+      return preference;
+    }))!;
     final entered = Completer<void>(), release = Completer<void>();
     String? cancelledTaskId;
     final provider = StreamMotivationUiPlanningProvider((request, _, receive) async {
@@ -219,8 +222,16 @@ void main() {
       expect(f.repo.messages(conversation.id).where((m) => m.role == 'assistant')
         .map((m) => m.content), ['Saved public answer', 'Saved public answer']);
       cancelledTaskId = task.id;
-      final planning = agent.planUiFromUserControl(task.id);
-      await tester.runAsync(() => entered.future);
+      late Future<UiPlannedPresentation> planning;
+      await tester.runAsync(() async {
+        planning = agent.planUiFromUserControl(task.id);
+        await Future.any<void>([
+          entered.future,
+          planning.then<void>((_) {
+            if (!entered.isCompleted) throw StateError('cancel_stream_not_reached');
+          }),
+        ]);
+      });
       final independent = (await tester.runAsync(() => agent.planUiFromUserControl(unrelated.id)))!;
       expect(independent.validated, isNotNull);
       await tester.runAsync(() => agent.cancel(task.id));
