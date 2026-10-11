@@ -9,7 +9,7 @@ leader A 在 `/tmp` 副本对 `packages/research_module/lib/src/module_tools.dar
 | M1 `_requireExpected` 恒通过（跳过「用户看到的状态」核对） | 被抓 |
 | M2 删掉 `refs.any((ref) => ref.nativeProjectId != projectId)` 跨项目拒绝 | **两处都存活** |
 | M3 删掉 `apply` 前的 `ctx.call.checkBeforeEffect()` | **两处都存活** |
-| M4 删掉事务内 `runtime.requireCurrent(ref)` | REG-3c 测试存活；全包结果未出 |
+| M4 删掉事务内 `runtime.requireCurrent(ref)` | **两处都存活** |
 
 ## 要做（只加测试，不改源码）
 1. M2：一次调用带两个不同 `nativeProjectId` 的对象（如 move/cite 涉及两段）→ 断言 `Object outside scope`、零写入。
