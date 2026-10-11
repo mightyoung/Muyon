@@ -185,6 +185,7 @@ void main() {
           spec: {},
         ),
       );
+      final run = await store.write(() => store.startManualRun(task));
       await store.write(
         () => store.saveTask(
           id: task.id,
@@ -194,7 +195,6 @@ void main() {
           spec: {},
         ),
       );
-      final run = await store.write(() => store.startManualRun(task));
       final section = await store.write(
         () => store.addSection('native-a', 'Section'),
       );
@@ -420,6 +420,7 @@ void main() {
           spec: {},
         ),
       );
+      final runV1 = await store.write(() => store.startManualRun(task));
       final taskV2 = await store.write(
         () => store.saveTask(
           id: task.id,
@@ -429,7 +430,6 @@ void main() {
           spec: {},
         ),
       );
-      final runV1 = await store.write(() => store.startManualRun(task));
       final runV2 = await store.write(() => store.startManualRun(taskV2));
       await store.write(() {
         store.updateManualRun(
@@ -684,28 +684,25 @@ void main() {
     },
   );
 
-  test(
-    'v10 appends the project and note change-log migration without changing prior versions',
-    () {
-      final schema = ResearchModule().schema;
-      expect(schema.version, 10);
-      expect(schema.definitionDigest, 'research-schema-10');
-      expect(
-        schema.migrations.map((m) => m.version),
-        orderedEquals(List.generate(10, (i) => i + 1)),
-      );
-      expect(
-        schema.migrations.take(9).map((m) => m.definitionDigest),
-        orderedEquals(List.generate(9, (i) => 'research-schema-${i + 1}')),
-      );
-      expect(
-        database.raw.select(
-          "SELECT name FROM sqlite_master WHERE name='muyon_change_log'",
-        ),
-        hasLength(1),
-      );
-    },
-  );
+  test('v10 appends the project and note change-log migration without changing prior versions', () {
+    final schema = ResearchModule().schema;
+    expect(schema.version, 10);
+    expect(schema.definitionDigest, 'research-schema-10');
+    expect(
+      schema.migrations.map((m) => m.version),
+      orderedEquals(List.generate(10, (i) => i + 1)),
+    );
+    expect(
+      schema.migrations.take(9).map((m) => m.definitionDigest),
+      orderedEquals(List.generate(9, (i) => 'research-schema-${i + 1}')),
+    );
+    expect(
+      database.raw.select(
+        "SELECT name FROM sqlite_master WHERE name='muyon_change_log'",
+      ),
+      hasLength(1),
+    );
+  });
 
   test('host import emits same-transaction document changes once', () async {
     final prepared = await prepare();

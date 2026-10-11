@@ -164,8 +164,21 @@ void main() {
         );
         final afterRuns = rows('runs');
         final afterLog = rows('muyon_change_log');
-        final replay = await host.tools.invoke(call.withApproval(approval));
-        expect(replay.toJson(), result.toJson());
+        if (tool == 'start_manual_run') {
+          final replay = await host.tools.invoke(call.withApproval(approval));
+          expect(replay.toJson(), result.toJson());
+        } else {
+          // The original run scope is stale after an update. The host refuses
+          // it before replay; the operation still cannot execute twice.
+          await expectLater(
+            host.tools.invoke(call.withApproval(approval)),
+            throwsStateError,
+          );
+          expect(
+            host.tools.receiptFor(call.invocationId)!.result!.toJson(),
+            result.toJson(),
+          );
+        }
         expect(rows('runs'), afterRuns);
         expect(rows('muyon_change_log'), afterLog);
       },
@@ -234,7 +247,7 @@ void main() {
         values[tool == 'start_manual_run'
             ? 'task_revision'
             : 'expected_digest'] = tool == 'start_manual_run'
-            ? 0
+            ? 2
             : '0' * 64;
         final beforeRuns = rows('runs');
         final beforeLog = rows('muyon_change_log');
@@ -442,14 +455,13 @@ void main() {
       final ref = await selected('update_manual_run');
       final beforeRuns = rows('runs');
       final beforeLog = rows('muyon_change_log');
-      final result = await approved(
-        request(
-          'update_manual_run',
-          {...params('update_manual_run', ref), 'status': 'accepted'},
-          [ref],
-        ),
+      final call = request(
+        'update_manual_run',
+        {...params('update_manual_run', ref), 'status': 'accepted'},
+        [ref],
       );
-      expect(result.status, ToolCallStatus.failed);
+      await expectLater(host.tools.prepare(call), throwsA(isA<Exception>()));
+      expect(host.tools.receiptFor(call.invocationId), isNull);
       expect(rows('runs'), beforeRuns);
       expect(rows('muyon_change_log'), beforeLog);
     },
