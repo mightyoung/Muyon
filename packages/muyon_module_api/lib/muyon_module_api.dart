@@ -15,3 +15,8 @@ export 'src/ontology.dart';
 export 'src/tool_registrar.dart';
 export 'src/coverage.dart';
 export 'src/optional_capabilities.dart';
+export 'src/write_forms.dart';
+export 'src/business_receipts.dart';
+export 'src/write_conflict.dart';
+export 'src/write_contract_compliance.dart';
+export 'src/atomic_batch_write.dart';
