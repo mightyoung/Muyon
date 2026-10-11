@@ -48,6 +48,9 @@ enum ModuleFeature {
   objectPages,
   publishChecks,
   resultRenderers,
+  writeForms,
+  businessReceipts,
+  atomicBatchWrite,
 }
 
 /// Where a module's external tools may go. Only ever narrows.
