@@ -230,13 +230,20 @@ class _AskPageState extends State<AskPage> {
               procurement!,
               if (webEnabled)
                 _ReviewedWebTools(
-                  (name, args, cancel) =>
-                      confirmAssistantNetwork(context, name, args, cancel),
+                  (name, args, cancel) => confirmAssistantNetwork(
+                    context,
+                    name,
+                    args,
+                    cancel,
+                    hostRequiresConfirmation:
+                        widget.state.requiresHostConfirmation,
+                  ),
                   () => widget.state.assistantWebEnabled,
                   web!,
                   autoApprove:
                       !widget.state.isHosted &&
                       permission == AssistantPermission.bypass,
+                  reuseApproval: !widget.state.isHosted,
                   onUsed: () => externalContent = true,
                 ),
               _AppNavigationTools(
@@ -280,6 +287,7 @@ class _AskPageState extends State<AskPage> {
               preview,
               cancel,
               onStopTask: cancellation.cancel,
+              hostRequiresConfirmation: widget.state.requiresHostConfirmation,
             ),
           );
           procurement = AssistantProcurementTools(
@@ -292,8 +300,12 @@ class _AskPageState extends State<AskPage> {
                 : permission,
             requestText: question,
             domesticCriterion: () => widget.state.assistantDomesticCriterion,
-            approve: (preview) =>
-                confirmAssistantAction(context, preview, cancellation),
+            approve: (preview) => confirmAssistantAction(
+              context,
+              preview,
+              cancellation,
+              hostRequiresConfirmation: widget.state.requiresHostConfirmation,
+            ),
             validateSession: validateSession,
             onChanged: widget.state.changed,
           );
@@ -301,11 +313,16 @@ class _AskPageState extends State<AskPage> {
             widget.state.store,
             permission: permission,
             sessionId: id,
-            approve: (preview) =>
-                confirmAssistantAction(context, preview, cancellation),
+            approve: (preview) => confirmAssistantAction(
+              context,
+              preview,
+              cancellation,
+              hostRequiresConfirmation: widget.state.requiresHostConfirmation,
+            ),
             validateSession: validateSession,
             validateWrite: guardAssistantProcurementWrite,
-            requireApproval: () => externalContent,
+            requireApproval: () =>
+                externalContent || widget.state.requiresHostConfirmation,
             onChanged: widget.state.changed,
           );
         },
@@ -1043,9 +1060,11 @@ class _ReviewedWebTools implements AssistantToolset {
     this.enabled,
     this._web, {
     this.autoApprove = false,
+    this.reuseApproval = true,
     this.onUsed,
   });
   final bool autoApprove;
+  final bool reuseApproval;
   final void Function()? onUsed;
   final Future<bool> Function(String, Map<String, Object?>, AiCancellation)
   review;
@@ -1067,13 +1086,13 @@ class _ReviewedWebTools implements AssistantToolset {
     if (!enabled()) return jsonEncode({'error': '联网权限已关闭'});
     if (name == 'web_search' || name == 'web_fetch') {
       final key = jsonEncode({'name': name, 'arguments': arguments});
-      if (!autoApprove && !_approved.contains(key)) {
+      if (!autoApprove && (!reuseApproval || !_approved.contains(key))) {
         final allowed = await cancellation.wait(
           review(name, arguments, cancellation),
         );
         cancellation.check();
         if (!allowed) return jsonEncode({'error': '用户拒绝此联网请求，尚未发送'});
-        _approved.add(key);
+        if (reuseApproval) _approved.add(key);
       }
     }
     cancellation.check();
