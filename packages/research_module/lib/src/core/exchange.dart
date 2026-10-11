@@ -190,6 +190,7 @@ class ResearchExchange {
 
   /// Kinds that versions before research-skill support imported as `other`.
   static const _newlyRecognised = {
+    'assertions',
     'sources',
     'searches',
     'tensions',

@@ -35,7 +35,96 @@ void main() {
     return root;
   }
 
-  test('detects v6.5 layout, skips bulky paths and groups revisions', () async {
+  test(
+    'v6.8 assertions import preserves optional fields and references',
+    () async {
+      final assertion = <String, dynamic>{
+        'schema_version': 2,
+        'id': 'a1',
+        'rev': 1,
+        'statement': '手写合成主张',
+        'assertion_state': 'supported',
+        'evidence': [
+          {'kind': 'claims', 'id': 'c1', 'rev': 2, 'role': 'supports'},
+        ],
+        'opportunity_id': 'o1',
+        'future_optional': {
+          'nested': ['完整保留'],
+        },
+      };
+      final search = <String, dynamic>{
+        'schema_version': 2,
+        'id': 'search-new',
+        'rev': 1,
+        'query': '合成搜索',
+        'intent': 'exploratory',
+      };
+      final opportunity = <String, dynamic>{
+        'schema_version': 2,
+        'id': 'op-new',
+        'rev': 1,
+        'title': '合成机会',
+        'decisive_neighbors': [
+          {'id': 'p1-v1', 'rev': 2},
+        ],
+        'critical_unknown': [
+          {
+            'paper': {'id': 'p1-v1', 'rev': 2},
+            'gap': '合成缺口',
+          },
+        ],
+      };
+      final files = skillProject()
+        ..['research/assertions.jsonl'] = '${jsonEncode(assertion)}\n'
+        ..['research/searches.jsonl'] = '${jsonEncode(search)}\n'
+        ..['research/opportunities.jsonl'] = '${jsonEncode(opportunity)}\n';
+      final project = await exchange.importResearch(write(files).path);
+      expect(project.layout, 'research-skill-v2');
+      final entries = store.entries(project.id, kind: 'assertions');
+      expect(entries, hasLength(1));
+      expect(entries.single.data, assertion);
+      expect(store.entries(project.id, kind: 'searches').single.data, search);
+      expect(
+        store.entries(project.id, kind: 'opportunities').single.data,
+        opportunity,
+      );
+      expect(skillRef(entries.single), '[assertions/a1@1]');
+      expect(
+        linkSkillRefs('[assertions/a1@1]'),
+        '[assertions/a1@1](wbref:assertions/a1@1)',
+      );
+      expect(parseSkillRef('wbref:assertions/a1@1'), ('assertions', 'a1', 1));
+      expect(parseSkillRef('wbref:assertions/a1@bad'), isNull);
+      expect(latestRevisions(entries)['assertions/a1'], 1);
+      store.db.execute('UPDATE entries SET kind=? WHERE id=?', [
+        'other',
+        entries.single.id,
+      ]);
+      await exchange.importResearch(
+        p.join(temp.path, 'proj'),
+        intoProjectId: project.id,
+      );
+      expect(
+        store.entries(project.id, kind: 'assertions').single.id,
+        entries.single.id,
+      );
+      expect(
+        store.entries(project.id, kind: 'assertions').single.data,
+        assertion,
+      );
+    },
+  );
+
+  test('older project without assertions remains readable', () async {
+    final files = skillProject();
+    expect(files.containsKey('research/assertions.jsonl'), isFalse);
+    final project = await exchange.importResearch(write(files).path);
+    expect(project.layout, 'research-skill-v2');
+    expect(store.entries(project.id, kind: 'assertions'), isEmpty);
+    expect(store.entries(project.id, kind: 'claims'), isNotEmpty);
+  });
+
+  test('detects v6.8 layout, skips bulky paths and groups revisions', () async {
     final project = await exchange.importResearch(write(skillProject()).path);
     expect(project.layout, 'research-skill-v2');
     expect(exchange.lastSkipped.$1, 4);
