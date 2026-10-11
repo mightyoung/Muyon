@@ -55,6 +55,20 @@ void main() {
     expect(provider.progressFor(input)!.view.diagnostics.where((d) => d.reason == 'after_end'), hasLength(2));
   });
 
+  test('SN3 oversized trailing protocol line is ignored after the first end', () async {
+    final f = await LoopFixture.open();
+    final input = request(f);
+    final provider = StreamMotivationUiPlanningProvider((_, _, receive) async {
+      receive(validStream);
+      receive(List.filled(UiStreamLimits.v1.lineBytes + 1, 'x').join());
+      receive('\n');
+    });
+    final result = await provider.plan(input);
+    expect(result.plan!.nodes, hasLength(2));
+    expect(provider.progressFor(input)!.view.complete, isTrue);
+    expect(provider.progressFor(input)!.view.diagnostics.single.reason, 'after_end');
+  });
+
   test('SN3 transport fault after valid end revokes capability without rewriting compile result', () async {
     final f = await LoopFixture.open();
     final input = request(f);
@@ -195,8 +209,12 @@ void main() {
       for (final active in [task, unrelated]) {
         final saved = (await tester.runAsync(() => f.repo.updateTask(active.copy({
           'state': 'running', 'stage': 'model', 'summary': 'Saved public answer',
-        }), assistantAnswer: 'Saved public answer')))!;
+        }))))!;
         expect(saved, isTrue);
+        // A running checkpoint cannot use the success-only assistantAnswer
+        // transaction. Keep the public partial answer as a normal host message.
+        await tester.runAsync(() => f.repo.appendMessage(
+          conversation.id, 'assistant', 'Saved public answer'));
       }
       expect(f.repo.messages(conversation.id).where((m) => m.role == 'assistant')
         .map((m) => m.content), ['Saved public answer', 'Saved public answer']);
