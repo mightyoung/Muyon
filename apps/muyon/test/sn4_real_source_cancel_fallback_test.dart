@@ -133,6 +133,8 @@ Future<void> _cancelRealPlanning(
     });
     release.complete();
     final late = (await tester.runAsync(() => planning))!;
+    await tester.binding.setSurfaceSize(const Size(800, 4000));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       MaterialApp(
         home: UiStreamTaskView(agent: agent, taskId: task.id, host: f.host),

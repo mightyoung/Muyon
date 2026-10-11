@@ -13,7 +13,12 @@ import '../assistant/ui_planning_events.dart';
 /// Inline production renderer. Preview owns no controller, event sink or final
 /// capability; only the ended, whole-validated current host plan gets adapters.
 class UiStreamTaskView extends StatefulWidget {
-  const UiStreamTaskView({super.key, required this.agent, required this.taskId, this.host});
+  const UiStreamTaskView({
+    super.key,
+    required this.agent,
+    required this.taskId,
+    this.host,
+  });
   final PersonalAgent agent;
   final String taskId;
   final MuyonHost? host;
@@ -36,28 +41,40 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
     attachHost();
     refresh();
   }
+
   void attachHost() {
     watchInquiry();
     moduleSubscription = widget.host?.modules.changes.listen((change) {
-      if (change.moduleId == 'inquiry') { watchInquiry(); refresh(); }
+      if (change.moduleId == 'inquiry') {
+        watchInquiry();
+        refresh();
+      }
     });
   }
+
   void watchInquiry() {
     removeInquiryListener?.call();
     final state = widget.host?.inquiry?.runtime.state;
     state?.addListener(refresh);
     removeInquiryListener = () => state?.removeListener(refresh);
   }
+
   void detachHost() {
     removeInquiryListener?.call();
     removeInquiryListener = null;
     unawaited(moduleSubscription?.cancel());
     moduleSubscription = null;
   }
+
   void clear() {
-    router?.dispose(); router = null;
-    controller?.dispose(); controller = null; checked = null; checkedPreview = null;
+    router?.dispose();
+    router = null;
+    controller?.dispose();
+    controller = null;
+    checked = null;
+    checkedPreview = null;
   }
+
   void refresh() {
     final attempt = ++generation;
     final value = widget.agent.uiPresentation(widget.taskId);
@@ -73,36 +90,57 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
       if (progress != null) unawaited(checkPreview(progress, attempt));
     }
   }
-  bool currentRequest(UiPlanningRequest? request) => request != null &&
-    widget.agent.allowsUiContent(widget.taskId) && widget.agent.isCurrentUiRequest(request);
+
+  bool currentRequest(UiPlanningRequest? request) =>
+      request != null &&
+      widget.agent.allowsUiContent(widget.taskId) &&
+      widget.agent.isCurrentUiRequest(request);
 
   bool sameHostState(UiPlanningHostState? state, UiPlanningRequest request) =>
-    state != null && state.snapshot.ref == request.snapshot.ref &&
-    state.currentView.surfaceId == request.currentView.surfaceId &&
-    state.currentView.revision == request.currentView.revision &&
-    state.catalog.version == request.catalog.version;
+      state != null &&
+      state.snapshot.ref == request.snapshot.ref &&
+      state.currentView.surfaceId == request.currentView.surfaceId &&
+      state.currentView.revision == request.currentView.revision &&
+      state.catalog.version == request.catalog.version;
 
   Future<void> checkPreview(HostUiStreamProgress progress, int attempt) async {
     try {
       final task = widget.agent.repository.task(widget.taskId);
-      final state = task == null ? null : await widget.agent.uiPlanningSource?.call(task);
-      if (!mounted || attempt != generation || !currentRequest(progress.request) ||
-          !identical(widget.agent.uiStreamProgress(widget.taskId), progress) ||
-          !sameHostState(state, progress.request)) {
+      final state = task == null
+          ? null
+          : await widget.agent.uiPlanningSource?.call(task);
+      widget.agent.reconcileUiRead(widget.taskId, state);
+      if (!mounted || attempt != generation) return;
+      // A null read is refused, including when the task was only cancelled.
+      // A still-authorized cancelled read keeps the frozen preview below.
+      final readable = sameHostState(state, progress.request);
+      if (!readable ||
+          !currentRequest(progress.request) ||
+          !identical(widget.agent.uiStreamProgress(widget.taskId), progress)) {
+        if (!readable && mounted && attempt == generation) setState(clear);
         return;
       }
-      setState(() { checkedPreview = progress; });
+      setState(() {
+        checkedPreview = progress;
+      });
     } catch (_) {
+      widget.agent.reconcileUiRead(widget.taskId, null);
       if (mounted && attempt == generation) setState(clear);
     }
   }
+
   Future<void> check(UiPlannedPresentation value, int attempt) async {
     try {
       final task = widget.agent.repository.task(widget.taskId);
-      final state = task == null ? null : await widget.agent.uiPlanningSource?.call(task);
-      if (!mounted || attempt != generation ||
+      final state = task == null
+          ? null
+          : await widget.agent.uiPlanningSource?.call(task);
+      widget.agent.reconcileUiRead(widget.taskId, state);
+      if (!mounted ||
+          attempt != generation ||
           !currentRequest(value.request) ||
-          !identical(widget.agent.uiPresentation(widget.taskId), value) || state == null ||
+          !identical(widget.agent.uiPresentation(widget.taskId), value) ||
+          state == null ||
           state.snapshot.ref != value.request?.snapshot.ref ||
           state.currentView.surfaceId != value.request?.currentView.surfaceId ||
           state.currentView.revision != value.request?.currentView.revision ||
@@ -112,21 +150,41 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
       }
       if (identical(checked, value)) return;
       clear();
-      if (value.validated == null) {
-        setState(() { checked = value; });
+      // Cancelled work can still display the frozen read-only facts. It cannot
+      // install a controller, even if an older validation token is present.
+      if (value.validated == null || task?.state.name == 'cancelled') {
+        setState(() {
+          checked = value;
+        });
         return;
       }
-      final surface = UiSurfaceController(value.validated!,
-        readOnlyProbe: () => !currentRequest(value.request) || !identical(widget.agent.uiPresentation(widget.taskId), value),
+      final surface = UiSurfaceController(
+        value.validated!,
+        readOnlyProbe: () =>
+            !currentRequest(value.request) ||
+            !identical(widget.agent.uiPresentation(widget.taskId), value),
         externalContentProbe: () => widget.agent.repository.authorizationFacts
-          .readTask(widget.taskId).requiresConfirmation,
-        onEvent: (event) async { await router?.dispatch(event); });
-      router = UiPlanningEventRouter(agent: widget.agent, taskId: widget.taskId, surface: surface);
-      setState(() { checked = value; controller = surface; });
+            .readTask(widget.taskId)
+            .requiresConfirmation,
+        onEvent: (event) async {
+          await router?.dispatch(event);
+        },
+      );
+      router = UiPlanningEventRouter(
+        agent: widget.agent,
+        taskId: widget.taskId,
+        surface: surface,
+      );
+      setState(() {
+        checked = value;
+        controller = surface;
+      });
     } catch (_) {
+      widget.agent.reconcileUiRead(widget.taskId, null);
       if (mounted && attempt == generation) setState(clear);
     }
   }
+
   @override
   void didUpdateWidget(UiStreamTaskView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -134,19 +192,27 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
       oldWidget.agent.repository.removeListener(refresh);
       widget.agent.repository.addListener(refresh);
     }
-    if (!identical(oldWidget.host, widget.host)) { detachHost(); attachHost(); }
-    if (!identical(oldWidget.agent, widget.agent) || oldWidget.taskId != widget.taskId ||
+    if (!identical(oldWidget.host, widget.host)) {
+      detachHost();
+      attachHost();
+    }
+    if (!identical(oldWidget.agent, widget.agent) ||
+        oldWidget.taskId != widget.taskId ||
         !identical(oldWidget.host, widget.host)) {
-      clear(); refresh();
+      clear();
+      refresh();
     }
   }
+
   @override
   void dispose() {
     ++generation;
     widget.agent.repository.removeListener(refresh);
     detachHost();
-    clear(); super.dispose();
+    clear();
+    super.dispose();
   }
+
   Widget readOnlyPreview(HostUiStreamProgress progress) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -161,36 +227,53 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.agent.allowsUiContent(widget.taskId)) return const SizedBox.shrink();
+    if (!widget.agent.allowsUiContent(widget.taskId)) {
+      return const SizedBox.shrink();
+    }
     final value = checked, surface = controller;
-    if (value != null && currentRequest(value.request) &&
+    if (value != null &&
+        currentRequest(value.request) &&
         identical(widget.agent.uiPresentation(widget.taskId), value)) {
-      if (surface != null && value.validated != null) {
-        return DynamicUiSurface(key: ValueKey('ui-stream-final-${widget.taskId}'),
-          plan: value.validated!, controller: surface);
+      if (surface != null &&
+          value.validated != null &&
+          widget.agent.repository.task(widget.taskId)?.state.name !=
+              'cancelled') {
+        return DynamicUiSurface(
+          key: ValueKey('ui-stream-final-${widget.taskId}'),
+          plan: value.validated!,
+          controller: surface,
+        );
       }
       final request = value.request!;
-      return Column(key: ValueKey('ui-stream-fallback-${widget.taskId}'),
+      return Column(
+        key: ValueKey('ui-stream-fallback-${widget.taskId}'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('界面未完成 · 只读，动作不可用'),
           if (value.stream case final progress?) readOnlyPreview(progress),
           snapshotFallback(request.snapshot, request.intent),
-        ]);
+        ],
+      );
     }
     final progress = checkedPreview;
-    if (progress == null || !currentRequest(progress.request) ||
+    if (progress == null ||
+        !currentRequest(progress.request) ||
         !identical(widget.agent.uiStreamProgress(widget.taskId), progress)) {
       return const SizedBox.shrink();
     }
-    return Column(key: ValueKey('ui-stream-preview-${widget.taskId}'),
+    return Column(
+      key: ValueKey('ui-stream-preview-${widget.taskId}'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(progress.view.phase == UiStreamPhase.streaming
-          ? '界面接收中 · 动作尚不可用' : '界面未完成 · 只读，动作不可用'),
+        Text(
+          progress.view.phase == UiStreamPhase.streaming
+              ? '界面接收中 · 动作尚不可用'
+              : '界面未完成 · 只读，动作不可用',
+        ),
         readOnlyPreview(progress),
         if (progress.view.phase != UiStreamPhase.streaming)
           snapshotFallback(progress.request.snapshot, progress.request.intent),
-      ]);
+      ],
+    );
   }
 }
