@@ -56,6 +56,7 @@ class UiWorkspaceController extends ChangeNotifier {
     int? schemaVersion,
     UiEventSink? onEvent,
     Future<UiOperationRecovery> Function(String)? receiptLookup,
+    bool Function()? externalContentProbe,
   }) async {
     final c = UiWorkspaceController._(
       store,
@@ -151,6 +152,7 @@ class UiWorkspaceController extends ChangeNotifier {
     c.surface = UiSurfaceController(
       current,
       readOnlyProbe: () => c.readOnly,
+      externalContentProbe: externalContentProbe,
       onEvent: onEvent == null
           ? null
           : (event) async {
