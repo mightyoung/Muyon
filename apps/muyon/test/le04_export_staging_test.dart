@@ -435,6 +435,51 @@ void main() {
       },
     );
 
+    test(
+      'exports relocated outside research before commit are refused',
+      () async {
+        final relocated = p.join(tmp.path, 'relocated-exports');
+        final race = RaceExportFs(io);
+        race.beforeCommit = (_) async {
+          Directory(p.join(research.path, 'exports')).renameSync(relocated);
+          Directory(p.join(research.path, 'exports')).createSync();
+        };
+        final result =
+            await LocalExportStager(
+              fileSystem: race,
+              newExportId: () => _id,
+            ).generate(
+              preparation: _prep('export'),
+              researchDirectory: research.path,
+            );
+        expect(result.stage.outcome, LocalExportOutcome.failed);
+        expect(result.stage.cleanup, LocalExportCleanup.cleaned);
+        expect(Directory(relocated).listSync(), isEmpty);
+        expect(Directory(p.join(research.path, 'exports')).listSync(), isEmpty);
+      },
+    );
+
+    test('research root replaced before commit is refused', () async {
+      final relocated = p.join(tmp.path, 'relocated-root');
+      final race = RaceExportFs(io);
+      race.beforeCommit = (_) async {
+        research.renameSync(relocated);
+        Directory(p.join(research.path, 'exports')).createSync(recursive: true);
+      };
+      final result =
+          await LocalExportStager(
+            fileSystem: race,
+            newExportId: () => _id,
+          ).generate(
+            preparation: _prep('export'),
+            researchDirectory: research.path,
+          );
+      expect(result.stage.outcome, LocalExportOutcome.failed);
+      expect(result.stage.cleanup, LocalExportCleanup.cleaned);
+      expect(Directory(p.join(relocated, 'exports')).listSync(), isEmpty);
+      expect(Directory(p.join(research.path, 'exports')).listSync(), isEmpty);
+    });
+
     test('concurrent same-id IO exports have exactly one winner', () async {
       final results = await Future.wait([
         realGenerate(_prep('first')),
