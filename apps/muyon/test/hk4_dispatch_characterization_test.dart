@@ -215,6 +215,44 @@ void main() {
       2,
     ], reason: 'both calls are marked before the first review');
   });
+
+  test(
+    'write_tool_invalid_arguments_fails_task_without_next_model_turn',
+    () async {
+      final f = await LoopFixture.open();
+      register(
+        f,
+        'bad_write',
+        moduleId: 'test',
+        effect: ToolEffect.write,
+        onCall: (_) async => ToolCallResult(
+          status: ToolCallStatus.invalidArguments,
+          summary: '参数不合法',
+        ),
+      );
+      final agent = agentWith(f);
+      f.replies.add(
+        LoopReply.sse(sseCalls([('c1', 'bad_write', '{"note":"a"}')])),
+      );
+      final task = await f.start(agent, f.profile());
+      final card = await f.run(agent, task);
+      expect(card.stage, 'tool');
+      final requestsBefore = f.bodies.length;
+
+      await agent.confirm(
+        card.id,
+        requestDigest: card.payload['requestDigest'] as String,
+      );
+
+      expect(f.callsOf('bad_write'), 1);
+      expect(f.repo.task(task.id)!.state, PersonalTaskState.failed);
+      expect(
+        f.bodies.length,
+        requestsBefore,
+        reason: 'a write tool with invalid arguments must not start another model turn',
+      );
+    },
+  );
 }
 
 /// Records how many external sources were already persisted at each review.
