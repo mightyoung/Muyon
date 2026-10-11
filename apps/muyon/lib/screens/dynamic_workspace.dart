@@ -5,6 +5,7 @@ import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/grants/host_authorization_facts.dart';
 import '../app/bootstrap.dart';
 import '../platform/tool_registry.dart';
 import '../platform/ui_workspace_store.dart';
@@ -53,8 +54,57 @@ class DynamicWorkspace extends StatefulWidget {
 /// Presentation ownership only: one old dynamic controller/router per open surface.
 /// The responsive host retains this session while route and pane views change.
 class DynamicWorkspaceSession extends ChangeNotifier {
-  DynamicWorkspaceSession(this.widget);
+  DynamicWorkspaceSession(this.widget)
+      : _presentationIdentity = widget.agent?.uiContentIdentity(widget.taskId),
+        _checkpointRequest = widget.agent?.uiPresentation(widget.taskId)?.request {
+    widget.repository.addListener(_refreshHostState);
+  }
   final DynamicWorkspace widget;
+  final Object? _presentationIdentity;
+  final Object? _checkpointRequest;
+  bool _presentationRevoked = false;
+  bool get _hasPresentationAuthority => !_presentationRevoked &&
+      (widget.agent == null ||
+          (widget.agent!.allowsUiContent(widget.taskId) &&
+              identical(_presentationIdentity,
+                  widget.agent!.uiContentIdentity(widget.taskId))));
+  bool get allowsPresentation => !_disposed && _hasPresentationAuthority;
+  // View teardown ends interaction, but an already captured checkpoint still
+  // belongs to the live host identity. Cancellation/replacement revoke it even
+  // after this session has detached its repository listener.
+  bool get _allowsCheckpoint {
+    if (!_hasPresentationAuthority) return false;
+    // Planning cancellation clears this presentation synchronously, before
+    // the cancelled task row can reach the same database queue as this save.
+    if (_checkpointRequest != null) {
+      final presentation = widget.agent?.uiPresentation(widget.taskId);
+      if (!identical(_checkpointRequest, presentation?.request) ||
+          presentation?.validated == null) {
+        return false;
+      }
+    }
+    final task = widget.repository.task(widget.taskId);
+    if (task == null) return false;
+    if (task.payload['state'] is String) return uiTaskAcceptsEvents(task);
+    // Legacy stored projections can omit state in JSON; their durable task row
+    // still owns the state. Do not mistake that codec shape for host revocation.
+    final rows = widget.repository.database.raw.select(
+      'SELECT state FROM execution_records WHERE id=?', [widget.taskId]);
+    final state = rows.isEmpty ? null : rows.single['state'];
+    return state is String &&
+        PersonalTaskState.values.any((value) => value.name == state) &&
+        state != 'cancelled' && state != 'interrupted';
+  }
+  void _refreshHostState() {
+    if (_disposed) return;
+    if (!allowsPresentation) _presentationRevoked = true;
+    final c = controller;
+    if (c != null) {
+      if (!allowsPresentation) c.readOnly = true;
+      c.surface.refreshExternalContent();
+    }
+    notifyListeners();
+  }
   UiWorkspaceController? controller;
   UiPlanningEventRouter? router;
   StoredUiWorkspace? stored;
@@ -71,7 +121,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
   bool _canPresentReferences = true;
-  bool get canPresentReferences => _canPresentReferences;
+  bool get canPresentReferences => _canPresentReferences && allowsPresentation;
   void stopReferenceAdmission() {
     if (!_canPresentReferences) return;
     _canPresentReferences = false;
@@ -123,6 +173,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
       final store = HostUiWorkspaceStore(
         widget.repository,
         taskId: widget.taskId,
+        canSave: () => _allowsCheckpoint,
       );
       final scope = store.scopeKey;
       if (scope == null) throw StateError('Task not available');
@@ -148,20 +199,38 @@ class DynamicWorkspaceSession extends ChangeNotifier {
           taskId: widget.taskId,
           scopeKey: scope,
           plan: widget.plan!,
-          onEvent:
-              widget.onEvent ??
-              (widget.agent == null
-                  ? null
-                  : (event) async {
-                      if (widget.agent!.uiPlanningEnabled != true) {
-                        throw StateError('planning_disabled');
-                      }
-                      await router?.dispatch(event);
-                    }),
+          readOnlyProbe: () => !_allowsCheckpoint,
+          onEvent: widget.onEvent == null && widget.agent == null
+              ? null
+              : (event) async {
+                  // Workspace persistence is awaited by the controller before
+                  // this fence. A retained custom sink has the same policy gate.
+                  if (!uiTaskAcceptsEvents(widget.repository.task(widget.taskId))) {
+                    throw StateError('stale_host_event');
+                  }
+                  if (!allowsPresentation) {
+                    throw StateError('presentation_expired');
+                  }
+                  final pending = controller?.surface.pendingAction(event.eventId);
+                  if (pending != null &&
+                      controller?.surface.isCurrentPending(event) != true) {
+                    throw StateError('stale_host_action');
+                  }
+                  if (pending != null && widget.repository.authorizationFacts
+                      .readTask(widget.taskId).taintState == HostTaintState.unknown) {
+                    throw StateError('unknown_host_action');
+                  }
+                  if (widget.onEvent != null) {
+                    await widget.onEvent!(event);
+                  } else {
+                    await router!.dispatch(event);
+                  }
+                },
           receiptLookup: receipt,
           externalContentProbe: () => widget.repository.authorizationFacts
               .readTask(widget.taskId)
               .requiresConfirmation,
+          provenanceProbe: () => uiTaskProvenanceStamp(widget.repository, widget.taskId),
         );
         if (c.canCloseWithoutCheckpoint) {
           error = c.saveError;
@@ -173,6 +242,10 @@ class DynamicWorkspaceSession extends ChangeNotifier {
           return;
         }
         controller = c;
+        if (!allowsPresentation) {
+          _presentationRevoked = true;
+          c.readOnly = true;
+        }
         if (widget.agent != null) {
           router = UiPlanningEventRouter(
             agent: widget.agent!,
@@ -216,6 +289,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    widget.repository.removeListener(_refreshHostState);
     stopReferenceAdmission();
     capturePresentation = null;
     router?.dispose();
@@ -400,7 +474,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
           references: referenceLinks(),
           banner: error,
           onClose: widget.onClose,
-          textOnly: widget.textOnly,
+          textOnly: widget.textOnly || !session.allowsPresentation,
           session: session,
         );
       }

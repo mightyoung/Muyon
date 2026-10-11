@@ -11,3 +11,4 @@ export "src/dynamic/workspace.dart";
 export "src/dynamic/workspace_view.dart";
 
 export 'src/dynamic/catalog_library2.dart';
+export 'src/dynamic/fallback.dart' show snapshotFallback;

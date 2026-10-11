@@ -13,6 +13,8 @@ import '../platform/foundation_repository.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/model_gateway.dart';
 import 'draft_view.dart';
+import 'ui_stream_task_view.dart';
+import 'ui_planning_preference_switch.dart';
 import '../platform/assistant_subconversations.dart';
 import 'assistant_subconversation_panel.dart';
 import 'dynamic_workspace.dart';
@@ -533,12 +535,23 @@ class _AssistantPageState extends State<AssistantPage> {
     final tasks = _conversationId == null
         ? <PersonalTask>[]
         : widget.repo.tasks(conversationId: _conversationId);
-    final taskCards = [
-      ...tasks.take(8),
+    final parents = tasks
+        .where((task) => task.payload['uiPlanningInternal'] != true)
+        .toList();
+    final taskCardCandidates = [
+      ...parents.take(8),
+      // Optional content policy never hides the separate mandatory approval
+      // for the real planning model request. Terminal internal replies remain
+      // hidden, and pending internal tasks expose only their approval/cancel.
+      ...tasks.where((task) => task.payload['uiPlanningInternal'] == true && !task.terminal),
       if (!_child)
-        for (final task in tasks.skip(8))
+        for (final task in parents.skip(8))
           if (_children.children(task.id).isNotEmpty) task,
     ];
+    // Each task owns one card/key, even when it also owns a child workspace.
+    final taskCards = {
+      for (final task in taskCardCandidates) task.id: task,
+    }.values;
     final profiles = widget.profiles
         .all()
         .where((p) => p.purpose == ModelPurpose.chat)
@@ -546,6 +559,130 @@ class _AssistantPageState extends State<AssistantPage> {
     final currentProfile = profiles
         .where((p) => p.id == _profileId)
         .firstOrNull;
+    // Put required decisions before potentially long message history. The
+    // same keyed card and scroll controller preserve task ownership and state.
+    Widget taskCard(PersonalTask task) => Card(
+        key: ValueKey('assistant-task-${task.id}'),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8,
+                children: [
+                  if (!_child && task.payload['uiPlanningInternal'] != true)
+                    TextButton(
+                      onPressed: _openingChild
+                          ? null
+                          : () => _openChild(task),
+                      child: const Text('子对话'),
+                    ),
+                  if (!_child && task.payload['uiPlanningInternal'] != true &&
+                      task.state == PersonalTaskState.succeeded)
+                    TextButton(
+                      onPressed: () async {
+                        await widget.agent.planUiFromUserControl(task.id);
+                        _refresh();
+                      },
+                      child: const Text('规划此回答'),
+                    ),
+                  if (!_child && task.payload['uiPlanningInternal'] != true &&
+                      widget.agent.uiPlanningEnabled &&
+                      widget.agent
+                              .uiPresentation(task.id)
+                              ?.validated !=
+                          null)
+                    TextButton(
+                      onPressed: () => _openWorkspace(DynamicWorkspace(
+                            repository: widget.repo,
+                            host: widget.host,
+                            taskId: task.id,
+                            surfaceId: widget.agent
+                                .uiPresentation(task.id)!
+                                .validated!
+                                .plan
+                                .surfaceId,
+                            plan: widget.agent
+                                .uiPresentation(task.id)!
+                                .validated,
+                            originalAnswer: task.summary ?? '',
+                            tools: widget.agent.tools,
+                            agent: widget.agent,
+                      )),
+                      child: const Text('打开交互页面'),
+                    ),
+                  for (final surface in (task.payload['uiPlanningInternal'] == true ? <String>[] : HostUiWorkspaceStore(
+                    widget.repo,
+                    taskId: task.id,
+                  ).surfaces()))
+                    TextButton(
+                      onPressed: () => _openWorkspace(DynamicWorkspace(
+                            repository: widget.repo,
+                            host: widget.host,
+                            taskId: task.id,
+                            surfaceId: surface,
+                            tools: widget.agent.tools,
+                      )),
+                      child: Text('已保存草稿 · $surface'),
+                    ),
+                  if (task.state ==
+                      PersonalTaskState.waitingConfirmation)
+                    FilledButton(
+                      onPressed: () => _confirm(task),
+                      child: const Text('查看并确认'),
+                    ),
+                  if (task.state ==
+                      PersonalTaskState.waitingConfirmation)
+                    TextButton(
+                      onPressed: () => widget.agent
+                          .pause(task.id)
+                          .catchError(_error),
+                      child: const Text('暂停'),
+                    ),
+                  if (!task.terminal &&
+                      task.stage == 'cancelling')
+                    const Text('取消中…')
+                  else if (!task.terminal)
+                    TextButton(
+                      onPressed: () => widget.agent
+                          .cancel(task.id)
+                          .catchError(_error),
+                      child: const Text('取消'),
+                    ),
+                  if (task.payload['uiPlanningInternal'] != true && [
+                    PersonalTaskState.paused,
+                    PersonalTaskState.interrupted,
+                    PersonalTaskState.failed,
+                  ].contains(task.state))
+                    TextButton(
+                      onPressed: () async {
+                        try {
+                          await widget.agent.resume(task.id);
+                        } catch (e) {
+                          _error(e);
+                        }
+                      },
+                      child: const Text('新尝试并重新确认'),
+                    ),
+                ],
+              ),
+              Text(
+                '${task.payload['uiPlanningInternal'] == true ? '界面规划模型请求 · ' : ''}${_stateLabel(task.state)} · ${task.executionDeviceId}',
+              ),
+              if (task.waitReason != null) Text(task.waitReason!),
+              if (task.error != null) Text(task.error!),
+              if (_drafts[task.id] != null) ...[
+                const SizedBox(height: 8),
+                DraftView(draft: _drafts[task.id]!),
+              ],
+              if (!_child && task.payload['uiPlanningInternal'] != true) UiStreamTaskView(agent: widget.agent, taskId: task.id, host: widget.host),
+              if (!_child && task.payload['uiPlanningInternal'] != true) _subconversationEntries(task),
+            ],
+          ),
+        ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: !_child,
@@ -560,11 +697,12 @@ class _AssistantPageState extends State<AssistantPage> {
         ],
       ),
       body: SafeArea(
-        child: Column(
+        child: LayoutBuilder(
+          builder: (context, constraints) => Column(
           children: [
             ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.sizeOf(context).height * .4,
+                maxHeight: constraints.maxHeight * .4,
               ),
               child: SingleChildScrollView(
                 child: Padding(
@@ -597,17 +735,7 @@ class _AssistantPageState extends State<AssistantPage> {
                               setState(() => _conversationId = id),
                         ),
                       if (!_child)
-                        SwitchListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: const Text('回答后规划交互页面'),
-                          subtitle: const Text('失败保留文字；模型外发仍需既有授权'),
-                          value: widget.agent.uiPlanningEnabled,
-                          onChanged: (value) => setState(
-                            () => widget.agent.configureUiPlanning(
-                              enabled: value,
-                            ),
-                          ),
-                        ),
+                        UiPlanningPreferenceSwitch(agent: widget.agent),
                       if (!_child && widget.agent.uiPlanningEnabled)
                         DropdownButton<UiPlanningMode>(
                           value: widget.agent.currentUiPlanningMode,
@@ -656,6 +784,9 @@ class _AssistantPageState extends State<AssistantPage> {
                 controller: _scroll,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
+                  for (final task in taskCards)
+                    if (task.state == PersonalTaskState.waitingConfirmation)
+                      taskCard(task),
                   if (messages.isEmpty)
                     const Padding(
                       padding: EdgeInsets.all(16),
@@ -696,126 +827,8 @@ class _AssistantPageState extends State<AssistantPage> {
                       ),
                     ),
                   for (final task in taskCards)
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${_stateLabel(task.state)} · ${task.executionDeviceId}',
-                            ),
-                            if (task.waitReason != null) Text(task.waitReason!),
-                            if (task.error != null) Text(task.error!),
-                            if (_drafts[task.id] != null) ...[
-                              const SizedBox(height: 8),
-                              DraftView(draft: _drafts[task.id]!),
-                            ],
-                            if (!_child) _subconversationEntries(task),
-                            Wrap(
-                              spacing: 8,
-                              children: [
-                                if (!_child)
-                                  TextButton(
-                                    onPressed: _openingChild
-                                        ? null
-                                        : () => _openChild(task),
-                                    child: const Text('子对话'),
-                                  ),
-                                if (!_child &&
-                                    widget.agent.uiPlanningEnabled &&
-                                    task.state == PersonalTaskState.succeeded)
-                                  TextButton(
-                                    onPressed: () async {
-                                      await widget.agent.planUi(task.id);
-                                      _refresh();
-                                    },
-                                    child: const Text('规划此回答'),
-                                  ),
-                                if (!_child &&
-                                    widget.agent.uiPlanningEnabled &&
-                                    widget.agent
-                                            .uiPresentation(task.id)
-                                            ?.validated !=
-                                        null)
-                                  TextButton(
-                                    onPressed: () => _openWorkspace(DynamicWorkspace(
-                                          repository: widget.repo,
-                                          host: widget.host,
-                                          taskId: task.id,
-                                          surfaceId: widget.agent
-                                              .uiPresentation(task.id)!
-                                              .validated!
-                                              .plan
-                                              .surfaceId,
-                                          plan: widget.agent
-                                              .uiPresentation(task.id)!
-                                              .validated,
-                                          originalAnswer: task.summary ?? '',
-                                          tools: widget.agent.tools,
-                                          agent: widget.agent,
-                                    )),
-                                    child: const Text('打开交互页面'),
-                                  ),
-                                for (final surface in HostUiWorkspaceStore(
-                                  widget.repo,
-                                  taskId: task.id,
-                                ).surfaces())
-                                  TextButton(
-                                    onPressed: () => _openWorkspace(DynamicWorkspace(
-                                          repository: widget.repo,
-                                          host: widget.host,
-                                          taskId: task.id,
-                                          surfaceId: surface,
-                                          tools: widget.agent.tools,
-                                    )),
-                                    child: Text('已保存草稿 · $surface'),
-                                  ),
-                                if (task.state ==
-                                    PersonalTaskState.waitingConfirmation)
-                                  FilledButton(
-                                    onPressed: () => _confirm(task),
-                                    child: const Text('查看并确认'),
-                                  ),
-                                if (task.state ==
-                                    PersonalTaskState.waitingConfirmation)
-                                  TextButton(
-                                    onPressed: () => widget.agent
-                                        .pause(task.id)
-                                        .catchError(_error),
-                                    child: const Text('暂停'),
-                                  ),
-                                if (!task.terminal &&
-                                    task.stage == 'cancelling')
-                                  const Text('取消中…')
-                                else if (!task.terminal)
-                                  TextButton(
-                                    onPressed: () => widget.agent
-                                        .cancel(task.id)
-                                        .catchError(_error),
-                                    child: const Text('取消'),
-                                  ),
-                                if ([
-                                  PersonalTaskState.paused,
-                                  PersonalTaskState.interrupted,
-                                  PersonalTaskState.failed,
-                                ].contains(task.state))
-                                  TextButton(
-                                    onPressed: () async {
-                                      try {
-                                        await widget.agent.resume(task.id);
-                                      } catch (e) {
-                                        _error(e);
-                                      }
-                                    },
-                                    child: const Text('新尝试并重新确认'),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    if (task.state != PersonalTaskState.waitingConfirmation)
+                      taskCard(task),
                 ],
               ),
             ),
@@ -884,6 +897,7 @@ class _AssistantPageState extends State<AssistantPage> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

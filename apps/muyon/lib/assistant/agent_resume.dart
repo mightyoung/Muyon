@@ -46,13 +46,16 @@ class AgentResume {
 
   /// Takes over [prev], or returns null when there is nothing to take over
   /// (no tool call has happened): the caller then starts afresh as before.
-  Future<PersonalTask?> attempt(PersonalTask prev) async {
+  Future<PersonalTask?> attempt(PersonalTask prev, {
+    bool uiPlanningAvailable = false,
+    void Function(String)? onCarry,
+  }) async {
     if (ctx.closing) throw StateError('Assistant is closing');
     final manual = prev.profileId == null;
     if (manual) {
       return prev.payload['toolCall'] is Map ? _manual(prev) : null;
     }
-    return _model(prev);
+    return _model(prev, uiPlanningAvailable: uiPlanningAvailable, onCarry: onCarry);
   }
 
   /// Bad call identifiers must fail clearly before receipt lookup or any
@@ -226,7 +229,10 @@ class AgentResume {
     return AgentContext.calls(prev).any((c) => c['outcome'] == null);
   }
 
-  Future<PersonalTask?> _model(PersonalTask prev) async {
+  Future<PersonalTask?> _model(PersonalTask prev, {
+    required bool uiPlanningAvailable,
+    void Function(String)? onCarry,
+  }) async {
     final progressed =
         (prev.payload['toolLog'] as List? ?? const []).isNotEmpty ||
         prev.payload['stepFolded'] == true;
@@ -315,7 +321,9 @@ class AgentResume {
     final tookNothing = adopted == 0 && unknown == 0;
     if (tookNothing && !progressed && calls.isEmpty) return null;
 
-    final base = _carry(prev);
+    final base = _carry(prev, uiPlanningAvailable: uiPlanningAvailable);
+    // The host owns the new attempt before model.advance reads its source.
+    onCarry?.call(base.id);
     final task = calls.isEmpty
         ? base
         : base.copy({
@@ -353,18 +361,21 @@ class AgentResume {
   /// The new attempt: the earlier one's conversation so far (completed steps
   /// with their results) under a freshly built system message, with its budget
   /// usage but without its confirmations or card.
-  PersonalTask _carry(PersonalTask prev) {
+  PersonalTask _carry(PersonalTask prev, {required bool uiPlanningAvailable}) {
     final (base, _) = factory.chatTask(
       conversationId: prev.conversationId,
       prompt: prev.prompt,
       profile: ctx.profile(prev),
       previousAttemptId: prev.id,
+      uiPlanningAvailable: uiPlanningAvailable,
     );
     final messages = prev.payload['messages'] as List;
     return base.copy({
       'messages': [
         (base.payload['messages'] as List).first,
-        ...messages.skip(1),
+        for (final message in messages.skip(1))
+          if (!_isHostPlanningContext(message, prev.payload['uiPlanningContext']))
+            message,
       ],
       // What the earlier attempt used still counts: repeated resumes cannot
       // get past the step, time and token limits.
@@ -374,6 +385,19 @@ class AgentResume {
       if (prev.payload['stepFolded'] == true) 'stepFolded': true,
       'compaction': ?prev.payload['compaction'],
     });
+  }
+
+  bool _isHostPlanningContext(Object? message, Object? prior) {
+    if (message is! Map || message['role'] != 'system') return false;
+    final content = message['content'];
+    if (prior is String && content == prior) return true;
+    if (content is! String) return false;
+    try {
+      final decoded = jsonDecode(content);
+      return decoded is Map && decoded.containsKey('hostUiPlanningContext');
+    } on FormatException {
+      return false;
+    }
   }
 
   /// Invocation ids the timeline proposed for the step in progress (after the

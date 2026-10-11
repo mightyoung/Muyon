@@ -26,6 +26,9 @@ import 'agent_model_turn.dart';
 import 'agent_resume.dart';
 import 'agent_task_factory.dart';
 import 'ui_planning.dart';
+import 'ui_planning_preference.dart';
+import 'ui_presentation_preference.dart';
+import 'stream_ui_planning.dart';
 import '../platform/ui_planning_tool.dart';
 
 import 'package:muyon_module_api/ui_contract.dart';
@@ -54,6 +57,7 @@ class PersonalAgent {
     this.compactor = const ContextCompactor(),
     this.compactionProfile,
     this.uiPlanningSource,
+    this.presentationPreference,
     this.uiPlanningProviders = const {},
     this.uiPlanningMode = UiPlanningMode.intelligent,
     bool uiPlanningEnabled = true,
@@ -75,14 +79,25 @@ class PersonalAgent {
         repository: repository,
         source: uiPlanningSource!,
         providers: {
-          UiPlanningMode.motivation: MotivationUiPlanningProvider(
-            _requestUiModel,
-          ),
+          UiPlanningMode.motivation: presentationPreference == null
+              ? MotivationUiPlanningProvider(_requestUiModel)
+              : StreamMotivationUiPlanningProvider(
+                  (request, prompt, receive) async {
+                    await _requestUiModel(request, prompt, receive: receive);
+                  },
+                  onProgress: (value) => _ctx.uiPlanning?.publishStream(value),
+                ),
           ...uiPlanningProviders,
         },
         mode: uiPlanningMode,
         requestView: _ctx.view,
-        enabled: uiPlanningEnabled,
+        enabled: presentationPreference == null ? uiPlanningEnabled : true,
+        allowsPresentation: presentationPreference == null
+            ? null
+            : _allowsPresentation,
+        presentationIdentity: presentationPreference == null
+            ? null
+            : (id) => _presentationRequests[id],
         cancelTimedOutRequest: (request) async {
           await _uiPlanningCancellations[request]?.call();
         },
@@ -108,6 +123,79 @@ class PersonalAgent {
       ..dispatch = _dispatch
       ..factory = _factory;
   }
+  final UiPresentationPreference? presentationPreference;
+  final _presentationRequests = <String, UiPresentationRequest>{};
+  final _presentationPolicies = <String, UiPresentationPolicy>{};
+  UiPresentationMode get presentationMode =>
+      presentationPreference?.mode ??
+      (uiPlanningEnabled
+          ? UiPresentationMode.automatic
+          : UiPresentationMode.textOnly);
+  bool _allowsPresentation(String id) {
+    final request = _presentationRequests[id],
+        policy = _presentationPolicies[id];
+    return request != null && policy?.allowsContentFor(request) == true;
+  }
+
+  /// Optional content only. Mandatory task confirmation uses its own owner.
+  bool allowsUiContent(String taskId) =>
+      !_ctx.closing &&
+      repository.task(taskId) != null &&
+      (presentationPreference == null
+          ? uiPlanningEnabled
+          : _allowsPresentation(taskId));
+  Object? uiContentIdentity(String taskId) => _presentationRequests[taskId];
+  bool isCurrentUiRequest(UiPlanningRequest request) =>
+      _ctx.uiPlanning?.isCurrentRequest(request) ?? false;
+
+  /// Freeze the ordinary request's real planning availability into its catalogue.
+  bool canExposeUiPlanning(ModelProfile? profile) {
+    final harness = _ctx.uiPlanning;
+    if (_ctx.closing ||
+        profile == null ||
+        harness == null ||
+        !harness.enabled ||
+        harness.providers[harness.mode] == null) {
+      return false;
+    }
+    if (presentationPreference != null &&
+        presentationMode != UiPresentationMode.automatic) {
+      return false;
+    }
+    return harness.providers[harness.mode]
+            is! StreamMotivationUiPlanningProvider ||
+        profile.capabilities.streaming;
+  }
+
+  void _freezePresentation(String id, UiPresentationRequest request) {
+    _presentationRequests[id] = request;
+    final policy = presentationPreference?.freezeFor(request);
+    if (policy != null) _presentationPolicies[id] = policy;
+  }
+
+  Future<void> savePresentationMode(UiPresentationMode mode) async {
+    final preference = presentationPreference;
+    if (preference == null || _ctx.closing) {
+      throw StateError('Presentation owner unavailable');
+    }
+    await preference.save(mode);
+    _ctx.uiPlanning?.invalidate();
+  }
+
+  Future<UiPlannedPresentation> planUiFromUserControl(String taskId) {
+    _freezePresentation(taskId, UiPresentationRequest.explicitControl());
+    return planUi(taskId);
+  }
+
+  HostUiStreamProgress? uiStreamProgress(String taskId) =>
+      _ctx.uiPlanning?.streamProgress(taskId);
+
+  /// The renderer reports a fresh host read. A closed task drops its fallback
+  /// when that read is refused.
+  void reconcileUiRead(String taskId, UiPlanningHostState? state) {
+    _ctx.uiPlanning?.reconcileRead(taskId, state);
+  }
+
   final UiPlanningStateSource? uiPlanningSource;
   final Map<UiPlanningMode, UiPlanningPort> uiPlanningProviders;
   final UiPlanningMode uiPlanningMode;
@@ -136,13 +224,17 @@ class PersonalAgent {
 
   Future<String> _requestUiModel(
     UiPlanningRequest request,
-    String prompt,
-  ) async {
+    String prompt, {
+    void Function(String)? receive,
+  }) async {
     final source = repository.task(request.taskId);
     if (source == null || source.payload['profile'] is! Map) {
       throw StateError('model_unavailable');
     }
     final profile = _ctx.profile(source);
+    if (receive != null && !profile.capabilities.streaming) {
+      throw StateError('stream_model_unavailable');
+    }
     final (built, _) = _factory.chatTask(
       conversationId: source.conversationId,
       prompt: prompt,
@@ -150,6 +242,7 @@ class PersonalAgent {
       scope: source.scope,
       previousAttemptId: source.id,
       uiPlanningInternal: true,
+      uiPlanningStream: receive != null,
     );
     // Charge all planning attempts to the original turn. Each child persists
     // its starting usage so deltas remain auditable after a host restart.
@@ -192,16 +285,21 @@ class PersonalAgent {
       await created.future;
       await cancel(task.id);
       if (!completed.isCompleted) {
-        completed.completeError(TimeoutException('UI planning deadline expired'));
+        completed.completeError(
+          TimeoutException('UI planning deadline expired'),
+        );
       }
     };
     _ctx.uiModelReplies[task.id] = completed;
+    if (receive != null) _ctx.uiModelChunks[task.id] = receive;
     _ctx.uiModelChecks[task.id] = () async {
       final planning = _ctx.uiPlanning;
       final latest = repository.task(request.taskId);
       final state = latest == null ? null : await planning?.source(latest);
       if (expired ||
           planning?.enabled != true ||
+          planning?.isCurrentRequest(request) != true ||
+          (presentationPreference != null && !_allowsPresentation(source.id)) ||
           planning?.mode != request.mode ||
           state == null ||
           state.snapshot.ref != request.snapshot.ref ||
@@ -233,20 +331,44 @@ class PersonalAgent {
       await cancel(task.id);
       _uiPlanningCancellations.remove(request);
       _ctx.uiModelReplies.remove(task.id);
+      _ctx.uiModelChunks.remove(task.id);
       _ctx.uiModelChecks.remove(task.id);
     }
   }
 
-  bool get uiPlanningEnabled => _ctx.uiPlanning?.enabled ?? false;
+  bool get uiPlanningEnabled => presentationPreference == null
+      ? _ctx.uiPlanning?.enabled ?? false
+      : presentationMode != UiPresentationMode.textOnly;
   UiPlanningMode get currentUiPlanningMode =>
       _ctx.uiPlanning?.mode ?? uiPlanningMode;
   void configureUiPlanning({bool? enabled, UiPlanningMode? mode}) {
-    if (enabled != null) _ctx.uiPlanning?.enabled = enabled;
+    if (enabled != null && presentationPreference == null) {
+      _ctx.uiPlanning?.enabled = enabled;
+    }
     if (mode != null) _ctx.uiPlanning?.mode = mode;
   }
 
+  /// Commit the user's presentation choice before applying it in memory.
+  final _uiPreferenceSaves = <Future<void>>{};
+  Future<void> saveUiPlanningPreference(bool enabled) {
+    if (_ctx.closing) return Future.error(StateError('Assistant is closing'));
+    if (presentationPreference != null) {
+      return savePresentationMode(
+        enabled ? UiPresentationMode.automatic : UiPresentationMode.textOnly,
+      );
+    }
+    final future = UiPlanningPreference(repository).save(enabled).then((_) {
+      configureUiPlanning(enabled: enabled);
+      repository.refresh();
+    });
+    _uiPreferenceSaves.add(future);
+    return future.whenComplete(() => _uiPreferenceSaves.remove(future));
+  }
+
   UiPlannedPresentation? uiPresentation(String taskId) =>
-      _ctx.uiPlanning?.presentation(taskId);
+      presentationPreference != null && !_allowsPresentation(taskId)
+      ? null
+      : _ctx.uiPlanning?.presentation(taskId);
   final FoundationRepository repository;
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;
@@ -379,7 +501,9 @@ class PersonalAgent {
       profile: profile,
       scope: scope,
       previousAttemptId: previousAttemptId,
+      uiPlanningAvailable: canExposeUiPlanning(profile),
     );
+    _freezePresentation(task.id, UiPresentationRequest.ordinary());
     await repository.createTask(task);
     if (profile != null && trustedProfileChoice) {
       modelAuthorization?.bindLiveProfile(task.id, profile);
@@ -412,6 +536,7 @@ class PersonalAgent {
       toolId: toolId,
       previousAttemptId: previousAttemptId,
     );
+    _freezePresentation(task.id, UiPresentationRequest.ordinary());
     await repository.createTask(task);
     await repository.appendMessage(
       conversationId,
@@ -563,33 +688,80 @@ class PersonalAgent {
   /// phase) this ends the task as `cancelled`. Once the tool call started it
   /// only sends the signal: the registry's receipt decides whether the task
   /// ends `cancelled` (stopped before the effect), `interrupted` (the effect
-  /// may have happened) or with the real result.
+  /// may have happened) or with the real result. UI cleanup is fenced first
+  /// and observed after that decision. A diagnostics write failure still
+  /// surfaces, and it does not skip the original task's cancellation.
   Future<void> cancel(String id) async {
     var task = repository.task(id);
     if (task == null || task.terminal) return;
-    if (_ctx.toolActive.contains(id)) {
-      _ctx.cancelRequested.add(id);
-      _ctx.toolTokens[id]?.cancel();
-      final marked = await repository.updateTask(
-        task.copy({'stage': 'cancelling'}),
-        expected: {PersonalTaskState.running},
-      );
-      if (marked) return;
-      // The tool outcome was written first (for example the task now waits
-      // for the next model turn): cancel what follows like any other task.
-      task = repository.task(id);
-      if (task == null || task.terminal) return;
-    }
+    // The synchronous prefix revokes this task's capability before the first
+    // await. The listener keeps a later diagnostics failure from going
+    // unhandled while the original cancellation proceeds on its own.
+    Object? uiCleanupError;
+    StackTrace? uiCleanupStack;
+    final uiSettled = (_ctx.uiPlanning?.cancelTask(id) ?? Future<void>.value())
+        .then<void>(
+          (_) {},
+          onError: (Object error, StackTrace stack) {
+            uiCleanupError = error;
+            uiCleanupStack = stack;
+          },
+        );
     _ctx.modelTokens[id]?.cancel();
     _ctx.toolTokens[id]?.cancel();
-    await _ctx.commit(
-      task.copy({
-        'state': 'cancelled',
-        'stage': 'cancelled',
-        'waitingFor': null,
-      }),
-      events: [(AgentEventType.cancel, <String, Object?>{})],
-    );
+    Object? taskError;
+    StackTrace? taskStack;
+    try {
+      var commitCancel = true;
+      if (_ctx.toolActive.contains(id)) {
+        _ctx.cancelRequested.add(id);
+        _ctx.toolTokens[id]?.cancel();
+        final marked = await repository.updateTask(
+          task.copy({'stage': 'cancelling'}),
+          expected: {PersonalTaskState.running},
+        );
+        if (marked) {
+          commitCancel = false;
+        } else {
+          // The tool outcome was written first (for example the task now waits
+          // for the next model turn): cancel what follows like any other task.
+          final latest = repository.task(id);
+          if (latest == null || latest.terminal) {
+            commitCancel = false;
+          } else {
+            task = latest;
+          }
+        }
+      }
+      if (commitCancel) {
+        _ctx.modelTokens[id]?.cancel();
+        _ctx.toolTokens[id]?.cancel();
+        final reply = _ctx.uiModelReplies[id];
+        if (reply != null && !reply.isCompleted) {
+          reply.completeError(StateError('planning_model_cancelled'));
+        }
+        await _ctx.commit(
+          task.copy({
+            'state': 'cancelled',
+            'stage': 'cancelled',
+            'waitingFor': null,
+          }),
+          events: [(AgentEventType.cancel, <String, Object?>{})],
+        );
+      }
+    } catch (error, stack) {
+      taskError = error;
+      taskStack = stack;
+    } finally {
+      await uiSettled;
+    }
+    if (taskError != null) Error.throwWithStackTrace(taskError, taskStack!);
+    if (uiCleanupError != null) {
+      Error.throwWithStackTrace(
+        uiCleanupError!,
+        uiCleanupStack ?? StackTrace.current,
+      );
+    }
   }
 
   Future<void> pause(String id) async {
@@ -620,10 +792,19 @@ class PersonalAgent {
     // confirmation (see [AgentResume]).
     PersonalTask? taken;
     await _trackStart(() async {
-      taken = await _resume.attempt(task);
+      taken = await _resume.attempt(task,
+        uiPlanningAvailable: task.profileId != null &&
+            canExposeUiPlanning(_ctx.profile(task)),
+        onCarry: (id) => _freezePresentation(id, UiPresentationRequest.ordinary()),
+      );
       return taken ?? task;
     });
-    if (taken != null) return taken!;
+    if (taken != null) {
+      if (!_presentationRequests.containsKey(taken!.id)) {
+        _freezePresentation(taken!.id, UiPresentationRequest.ordinary());
+      }
+      return taken!;
+    }
     if (task.profileId == null && task.payload["toolCall"] is Map) {
       final call = task.payload["toolCall"] as Map;
       return startTool(
@@ -645,6 +826,10 @@ class PersonalAgent {
 
   Future<void> close() async {
     _ctx.closing = true;
+    // Withdraw UI synchronously, but enqueue the host's interrupted terminal
+    // before yielding to a blocked prepare or awaiting presentation cleanup.
+    final presentationClosing = presentationPreference?.close();
+    _ctx.uiPlanning?.invalidate();
     for (final t in _ctx.modelTokens.values) {
       t.cancel();
     }
@@ -666,6 +851,15 @@ class PersonalAgent {
         );
       }
     }
+    await presentationClosing;
+    await Future.wait(
+      _uiPlanningCancellations.values.toList().map((cancel) => cancel()),
+    );
+    await Future.wait(
+      _uiPreferenceSaves.toList().map(
+        (future) => future.then<void>((_) {}, onError: (Object _) {}),
+      ),
+    );
     await Future.wait(
       _ctx.activeStarts.toList().map(
         (f) => f.then<void>((_) {}, onError: (Object _) {}),
