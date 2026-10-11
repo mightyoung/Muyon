@@ -55,11 +55,13 @@ class DynamicWorkspace extends StatefulWidget {
 /// The responsive host retains this session while route and pane views change.
 class DynamicWorkspaceSession extends ChangeNotifier {
   DynamicWorkspaceSession(this.widget)
-      : _presentationIdentity = widget.agent?.uiContentIdentity(widget.taskId) {
+      : _presentationIdentity = widget.agent?.uiContentIdentity(widget.taskId),
+        _checkpointRequest = widget.agent?.uiPresentation(widget.taskId)?.request {
     widget.repository.addListener(_refreshHostState);
   }
   final DynamicWorkspace widget;
   final Object? _presentationIdentity;
+  final Object? _checkpointRequest;
   bool _presentationRevoked = false;
   bool get _hasPresentationAuthority => !_presentationRevoked &&
       (widget.agent == null ||
@@ -72,6 +74,15 @@ class DynamicWorkspaceSession extends ChangeNotifier {
   // after this session has detached its repository listener.
   bool get _allowsCheckpoint {
     if (!_hasPresentationAuthority) return false;
+    // Planning cancellation clears this presentation synchronously, before
+    // the cancelled task row can reach the same database queue as this save.
+    if (_checkpointRequest != null) {
+      final presentation = widget.agent?.uiPresentation(widget.taskId);
+      if (!identical(_checkpointRequest, presentation?.request) ||
+          presentation?.validated == null) {
+        return false;
+      }
+    }
     final task = widget.repository.task(widget.taskId);
     if (task == null) return false;
     if (task.payload['state'] is String) return uiTaskAcceptsEvents(task);
@@ -162,6 +173,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
       final store = HostUiWorkspaceStore(
         widget.repository,
         taskId: widget.taskId,
+        canSave: () => _allowsCheckpoint,
       );
       final scope = store.scopeKey;
       if (scope == null) throw StateError('Task not available');

@@ -5,11 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/personal_agent.dart';
 import 'package:muyon/assistant/ui_planning.dart';
 import 'package:muyon/assistant/ui_presentation_preference.dart';
-import 'package:muyon/platform/ui_workspace_store.dart';
 import 'package:muyon/platform/storage_manager.dart';
+import 'package:muyon/platform/ui_workspace_store.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon_module_api/ui_contract.dart';
+import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../../../packages/muyon_ui/test/dynamic_fixtures.dart' show actionPlan;
 import 'support/agent_loop_fixture.dart';
@@ -20,6 +21,7 @@ void main() {
     'cancel before detach',
     'identity after detach',
     'identity after save queued',
+    'cancel after save queued',
   ]) {
     test('real native detach checkpoints only live host authority: $change', () async {
       final f = await LoopFixture.open();
@@ -53,12 +55,15 @@ void main() {
       );
       addTearDown(agent.close);
       final task = await f.start(agent, f.profile());
+      await f.repo.updateTask(task.copy({'summary': 'Public answer'}));
+      final presentation = await agent.planUi(task.id);
+      expect(presentation.validated, isNotNull);
       final session = DynamicWorkspaceSession(
         DynamicWorkspace(
           repository: f.repo,
           taskId: task.id,
           surfaceId: plan.plan.surfaceId,
-          plan: plan,
+          plan: presentation.validated!,
           agent: agent,
         ),
       );
@@ -82,7 +87,7 @@ void main() {
       final entered = Completer<void>();
       final release = Completer<void>();
       Future<void>? blocked;
-      if (change == 'identity after save queued') {
+      if (change.endsWith('after save queued')) {
         blocked = (f.repo.database as ManagedConnection).exclusiveAsync((
           _,
         ) async {
@@ -100,10 +105,12 @@ void main() {
       // One event-loop turn admits the queued flush before this SQLite barrier;
       // the barrier then waits for every submitted write. No timing sleep.
       await Future<void>(() {});
-      if (change == 'identity after save queued') {
+      if (change.endsWith('after save queued')) {
         // The controller's queued guard has run, but SQLite cannot yet execute
         // its submitted save. Identity revocation is synchronous.
-        replacement = agent.planUiFromUserControl(task.id);
+        replacement = change.startsWith('identity')
+            ? agent.planUiFromUserControl(task.id)
+            : agent.cancel(task.id);
         release.complete();
         await blocked;
       }
@@ -131,5 +138,88 @@ void main() {
       expect(f.bodies, isEmpty);
       expect(f.callsOf('write'), 0);
     });
+  }
+  for (final throws in [false, true]) {
+    test(
+      'database rejection preserves controller revision: throws=$throws',
+      () async {
+        final f = await LoopFixture.open();
+        await f.repo.database.write(
+          (db) => db.execute('INSERT INTO execution_records VALUES(?,?,?)', [
+            'task',
+            'paused',
+            jsonEncode({
+              'kind': 'personal',
+              'executionId': 'task',
+              'scope': {'kind': 'global', 'workspaceId': null, 'objects': []},
+            }),
+          ]),
+        );
+        final plan = actionPlan();
+        var allowed = true;
+        final store = _RecordingWorkspaceStore(
+          HostUiWorkspaceStore(
+            f.repo,
+            taskId: 'task',
+            canSave: () {
+              if (!allowed && throws) throw StateError('revoked host probe');
+              return allowed;
+            },
+          ),
+        );
+        final controller = await UiWorkspaceController.open(
+          store: store,
+          taskId: 'task',
+          scopeKey: store.host.scopeKey!,
+          plan: plan,
+        );
+        addTearDown(controller.dispose);
+        await controller.flush();
+        final before = (await store.load(plan.plan.surfaceId))!;
+        final entered = Completer<void>();
+        final release = Completer<void>();
+        final blocked = (f.repo.database as ManagedConnection).exclusiveAsync((
+          _,
+        ) async {
+          entered.complete();
+          await release.future;
+        });
+        await entered.future;
+        controller.scrollOffset = 321;
+        final pending = controller.flush();
+        final rejected = expectLater(pending, throwsStateError);
+        await Future<void>(() {});
+        allowed = false;
+        release.complete();
+        await blocked;
+        await rejected;
+        expect(
+          jsonEncode((await store.load(plan.plan.surfaceId))!.toJson()),
+          jsonEncode(before.toJson()),
+        );
+        // Reset only the local failure flag to observe the next attempted CAS.
+        // Live host rejection remains in force and cannot authorize that retry.
+        controller.readOnly = false;
+        await expectLater(controller.flush(), throwsStateError);
+        expect(store.expectedRevisions, [0, before.revision, before.revision]);
+        expect(
+          (await store.load(plan.plan.surfaceId))!.revision,
+          before.revision,
+        );
+      },
+    );
+  }
+}
+
+class _RecordingWorkspaceStore implements UiWorkspaceStore {
+  _RecordingWorkspaceStore(this.host);
+  final HostUiWorkspaceStore host;
+  final expectedRevisions = <int>[];
+  @override
+  Future<StoredUiWorkspace?> load(String surfaceId) => host.load(surfaceId);
+  @override
+  Future<bool> save(StoredUiWorkspace value, {required int expectedRevision}) {
+    expectedRevisions.add(expectedRevision);
+    return host.save(value, expectedRevision: expectedRevision);
   }
 }
