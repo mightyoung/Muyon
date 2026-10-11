@@ -477,6 +477,20 @@ final researchOntology = ModuleOntology(
       tool: 'research.confirm_binding',
       operationId: 'research.binding.confirm',
     ),
+    const ActionSpec(
+      name: 'start_manual_run',
+      label: '建立手工运行',
+      description: '只建本机手工记录，不执行任何远端命令',
+      tool: 'research.start_manual_run',
+      operationId: 'research.run.manual_start',
+    ),
+    const ActionSpec(
+      name: 'update_manual_run',
+      label: '更新手工运行',
+      description: '仅更新本机手工运行，宿主逐次确认并返回回执',
+      tool: 'research.update_manual_run',
+      operationId: 'research.run.manual_update',
+    ),
   ],
   flows: [
     FlowSpec(
@@ -697,21 +711,13 @@ final researchCoverage = CapabilityCoverage(
       id: 'research.run.manual_start',
       kind: OpKind.write,
       members: {'WorkbenchStore.startManualRun'},
-      notExposed: const NotExposed(
-        NotExposedKind.deferred,
-        '本片保持现有业务能力，工具参数和范围需在后续有界任务补齐',
-        taskId: 'REG-3a-followup',
-      ),
+      tools: ['research.start_manual_run'],
     ),
     Operation(
       id: 'research.run.manual_update',
       kind: OpKind.write,
       members: {'WorkbenchStore.updateManualRun'},
-      notExposed: const NotExposed(
-        NotExposedKind.deferred,
-        '本片保持现有业务能力，工具参数和范围需在后续有界任务补齐',
-        taskId: 'REG-3a-followup',
-      ),
+      tools: ['research.update_manual_run'],
     ),
     Operation(
       id: 'research.outline.sections',

@@ -1348,6 +1348,147 @@ void registerResearchTools(ToolRegistrar registrar) {
       );
     },
   );
+  registrar.write(
+    WriteToolSpec(
+      name: 'start_manual_run',
+      description:
+          '只建本机手工记录，不执行任何远端命令；需确认后写入，只允许任务最新修订。'
+          'task_revision 必须匹配选中任务的修订，提交时再次核对。',
+      operations: _operations('start_manual_run'),
+      targetTypes: {'task'},
+      createsTypes: {'run'},
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'task_id': {'type': 'string'},
+          'task_revision': {'type': 'integer', 'minimum': 1},
+        },
+        'required': ['task_id', 'task_revision'],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final params = ctx.call.request.parameters;
+      final ref = _selected(ctx, 'task', params['task_id'] as String);
+      final revision = int.tryParse(ref.revisionRef ?? '');
+      if (revision == null) throw StateError('Unknown task revision');
+      late ResearchTask task;
+      return _outlineWrite(
+        ctx,
+        [ref],
+        (store) => '${store.taskRevision(ref.objectId, revision)?.revision}',
+        (runtime, store) {
+          final run = store.startManualRun(task);
+          return _report(runtime, '已建立本机手工运行记录', [
+            ObjectChange(
+              ObjectRef(
+                moduleId: 'research',
+                objectType: 'run',
+                objectId: run.id,
+                nativeProjectId: ref.nativeProjectId,
+              ),
+              ChangeOp.upsert,
+            ),
+          ]);
+        },
+        expected: '${params['task_revision']}',
+        beforeEffect: (store) {
+          task = store.requireLatestManualTask(ref.objectId, revision);
+        },
+      );
+    },
+  );
+  registrar.write(
+    WriteToolSpec(
+      name: 'update_manual_run',
+      description:
+          '修改选定的本机手工运行记录；需确认，不执行任何命令。'
+          '只允许 _localManual 记录，expected_digest 必须等于确认时 run 的 contentDigest。',
+      operations: _operations('update_manual_run'),
+      targetTypes: {'run'},
+      affectsTypes: {'run'},
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'run_id': {'type': 'string'},
+          'expected_digest': {
+            'type': 'string',
+            'minLength': 64,
+            'maxLength': 64,
+          },
+          'status': {
+            'type': 'string',
+            'enum': ['running', 'completed', 'failed', 'blocked'],
+          },
+          'metrics': {'type': 'object', 'additionalProperties': true},
+          'log': {'type': 'string'},
+          'conclusion': {'type': 'string'},
+        },
+        'required': [
+          'run_id',
+          'expected_digest',
+          'status',
+          'metrics',
+          'log',
+          'conclusion',
+        ],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final params = ctx.call.request.parameters;
+      final ref = _selected(ctx, 'run', params['run_id'] as String);
+      return _outlineWrite(
+        ctx,
+        [ref],
+        (store) => _runDigest(store, ref.nativeProjectId!, ref.objectId),
+        (runtime, store) {
+          store.updateManualRun(
+            ref.objectId,
+            status: params['status'] as String,
+            metrics: Map<String, dynamic>.from(params['metrics'] as Map),
+            log: params['log'] as String,
+            conclusion: params['conclusion'] as String,
+          );
+          return _report(runtime, '已更新本机手工运行记录', [
+            ObjectChange(ref, ChangeOp.upsert),
+          ]);
+        },
+        beforeEffect: (store) {
+          store.checkedObject('runs', ref.objectId);
+          final data =
+              store.db.select('SELECT data FROM runs WHERE id=?', [
+                    ref.objectId,
+                  ]).single['data']
+                  as String;
+          if (WorkbenchStore.decode(data)['_localManual'] != true) {
+            throw StateError('Only local manual runs can be edited');
+          }
+        },
+      );
+    },
+  );
+}
+
+String _runDigest(WorkbenchStore store, String projectId, String runId) {
+  final rows = store.db.select(
+    'SELECT r.status,r.accepted,r.data FROM runs r JOIN tasks t '
+    'ON t.id=r.task_id AND t.revision=r.task_revision WHERE r.id=? AND t.project_id=?',
+    [runId, projectId],
+  );
+  if (rows.isEmpty) throw StateError('Object outside scope');
+  final row = rows.single;
+  return sha256
+      .convert(
+        utf8.encode(
+          jsonEncode([
+            row['status'],
+            row['accepted'],
+            WorkbenchStore.decode(row['data'] as String),
+          ]),
+        ),
+      )
+      .toString();
 }
 
 ObjectRef _selected(ModuleToolContext ctx, String type, String id) {
