@@ -132,8 +132,9 @@ class ResearchRuntime
 
   /// Synchronous transaction-boundary recheck for module-owned writes.
   void requireCurrent(ObjectRef ref) {
-    if (resolveCurrent(ref) == null)
+    if (resolveCurrent(ref) == null) {
       throw StateError('Selected research object changed');
+    }
   }
 
   /// Resolve synchronously inside the caller's write transaction, so returned

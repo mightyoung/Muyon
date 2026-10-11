@@ -166,6 +166,12 @@ void registerResearchTools(ToolRegistrar registrar) {
           }(),
           _ => throw StateError('Unsupported object type'),
         };
+        if (ref.objectType == 'project' || ref.objectType == 'note') {
+          data['contentDigest'] = view.ref.contentDigest;
+        }
+        if (ref.objectType == 'task') {
+          data['revision'] = int.parse(view.ref.revisionRef!);
+        }
         if (ref.objectType == 'section') {
           data['deleteDigest'] = sectionDeleteDigest(
             runtime.store,
@@ -1106,19 +1112,21 @@ void registerResearchTools(ToolRegistrar registrar) {
     (ctx) async {
       final params = ctx.call.request.parameters;
       final ref = _selected(ctx, 'project', params['project_id'] as String);
-      final runtime = await _pendingWrite(
+      return _outlineWrite(
         ctx,
         [ref],
         (store) => _projectDigest(store, ref.objectId),
-        (store) => store.saveProject(
-          ref.objectId,
-          question: params['question'] as String,
-          nextStep: params['next_step'] as String,
-        ),
+        (runtime, store) {
+          store.saveProject(
+            ref.objectId,
+            question: params['question'] as String,
+            nextStep: params['next_step'] as String,
+          );
+          return _report(runtime, '已更新项目', [
+            ObjectChange(ref, ChangeOp.upsert),
+          ]);
+        },
       );
-      return _pendingReport(runtime, '已更新项目', [
-        ObjectChange(ref, ChangeOp.upsert),
-      ]);
     },
   );
   registrar.write(
@@ -1148,15 +1156,17 @@ void registerResearchTools(ToolRegistrar registrar) {
       final note = _selected(ctx, 'note', params['note_id'] as String);
       final entryId = params['entry_id'] as String?;
       final entry = entryId == null ? null : _selected(ctx, 'entry', entryId);
-      final runtime = await _pendingWrite(
+      return _outlineWrite(
         ctx,
         [note, ?entry],
         (store) => _noteDigest(store, note.nativeProjectId!, note.objectId),
-        (store) => store.setNoteEntry(note.objectId, entryId),
+        (runtime, store) {
+          store.setNoteEntry(note.objectId, entryId);
+          return _report(runtime, '已更新批注关联', [
+            ObjectChange(note, ChangeOp.upsert),
+          ]);
+        },
       );
-      return _pendingReport(runtime, '已更新批注关联', [
-        ObjectChange(note, ChangeOp.upsert),
-      ]);
     },
   );
   const taskSpecProperties = <String, Object?>{
@@ -1201,7 +1211,7 @@ void registerResearchTools(ToolRegistrar registrar) {
       late String taskId;
       // Validate before the write starts so a refusal is "failed", not "may have happened".
       final spec = _taskSpec(const {}, params);
-      final runtime = await _taskWrite(ctx, ref, (store) {
+      return _taskWrite(ctx, ref, (runtime, store) {
         taskId = store
             .saveTask(
               projectId: ref.objectId,
@@ -1211,18 +1221,18 @@ void registerResearchTools(ToolRegistrar registrar) {
               expectedRevision: 0,
             )
             .id;
-      });
-      return _pendingReport(runtime, '已新建任务', [
-        ObjectChange(
-          ObjectRef(
-            moduleId: 'research',
-            objectType: 'task',
-            objectId: taskId,
-            nativeProjectId: ref.nativeProjectId,
+        return _report(runtime, '已新建任务', [
+          ObjectChange(
+            ObjectRef(
+              moduleId: 'research',
+              objectType: 'task',
+              objectId: taskId,
+              nativeProjectId: ref.nativeProjectId,
+            ),
+            ChangeOp.upsert,
           ),
-          ChangeOp.upsert,
-        ),
-      ]);
+        ]);
+      });
     },
   );
   registrar.write(
@@ -1253,11 +1263,11 @@ void registerResearchTools(ToolRegistrar registrar) {
       final ref = _selected(ctx, 'task', params['task_id'] as String);
       final expected = params['expected_revision'] as int;
       late Map<String, Object?> spec;
-      final runtime = await _pendingWrite(
+      return _outlineWrite(
         ctx,
         [ref],
         (store) => '${_latestRevision(store, ref.objectId)}',
-        (store) {
+        (runtime, store) {
           store.saveTask(
             id: ref.objectId,
             projectId: ref.nativeProjectId!,
@@ -1266,6 +1276,9 @@ void registerResearchTools(ToolRegistrar registrar) {
             spec: spec,
             expectedRevision: expected,
           );
+          return _report(runtime, '已追加任务修订', [
+            ObjectChange(ref, ChangeOp.upsert),
+          ]);
         },
         beforeEffect: (store) {
           if (ref.revisionRef != '$expected') {
@@ -1277,9 +1290,6 @@ void registerResearchTools(ToolRegistrar registrar) {
         },
         expected: '$expected',
       );
-      return _pendingReport(runtime, '已追加任务修订', [
-        ObjectChange(ref, ChangeOp.upsert),
-      ]);
     },
   );
   registrar.write(
@@ -1307,7 +1317,7 @@ void registerResearchTools(ToolRegistrar registrar) {
       final params = ctx.call.request.parameters;
       final ref = _selected(ctx, 'document', params['document_id'] as String);
       final paper = params['paper_id'] as String;
-      final runtime = await _pendingWrite(
+      return _outlineWrite(
         ctx,
         [ref],
         (store) => _bindingDigest(
@@ -1319,7 +1329,12 @@ void registerResearchTools(ToolRegistrar registrar) {
                     throw StateError('Outline changed; confirm again'),
               ),
         ),
-        (store) => store.confirmBinding(ref.objectId, paper),
+        (runtime, store) {
+          store.confirmBinding(ref.objectId, paper);
+          return _report(runtime, '已确认绑定', [
+            ObjectChange(ref, ChangeOp.upsert),
+          ]);
+        },
         beforeEffect: (store) {
           // Refuse a settled or missing candidate before the effect starts, so
           // the receipt says "failed" rather than "may have happened".
@@ -1331,9 +1346,6 @@ void registerResearchTools(ToolRegistrar registrar) {
           }
         },
       );
-      return _pendingReport(runtime, '已确认绑定', [
-        ObjectChange(ref, ChangeOp.upsert),
-      ]);
     },
   );
 }
@@ -1494,20 +1506,19 @@ Map<String, Object?> _taskSpec(
   return spec;
 }
 
-Future<ResearchRuntime> _taskWrite(
+Future<ToolCallResult> _taskWrite(
   ModuleToolContext ctx,
   ObjectRef project,
-  void Function(WorkbenchStore store) apply,
+  ToolCallResult Function(ResearchRuntime runtime, WorkbenchStore store) apply,
 ) async {
   final runtime = await ctx.runtime<ResearchRuntime>();
   final store = runtime.store.scoped(project.nativeProjectId!);
   ctx.call.cancellation.throwIfCancelled();
-  await store.write(() {
+  return store.write(() {
     runtime.requireCurrent(project);
     ctx.call.checkBeforeEffect();
-    apply(store);
+    return apply(runtime, store);
   });
-  return runtime;
 }
 
 Future<ToolCallResult> _outlineWrite(
@@ -1568,71 +1579,6 @@ ToolCallResult _report(
     objectRefs: [for (final change in reported) change.ref],
     changes: reported,
   );
-}
-
-Future<ResearchRuntime> _pendingWrite(
-  ModuleToolContext ctx,
-  List<ObjectRef> refs,
-  String Function(WorkbenchStore store) digest,
-  void Function(WorkbenchStore store) apply, {
-  void Function(WorkbenchStore store)? beforeEffect,
-  Object? expected,
-}) async {
-  final runtime = await ctx.runtime<ResearchRuntime>();
-  final projectId = refs.first.nativeProjectId!;
-  if (refs.any((ref) => ref.nativeProjectId != projectId)) {
-    throw StateError('Object outside scope');
-  }
-  final store = runtime.store.scoped(projectId);
-  expected ??= ctx.call.request.parameters['expected_digest'];
-  ctx.call.cancellation.throwIfCancelled();
-  await store.write(() {
-    for (final ref in refs) {
-      runtime.requireCurrent(ref);
-    }
-    beforeEffect?.call(store);
-    _requireExpected(expected, digest(store));
-    ctx.call.checkBeforeEffect();
-    apply(store);
-  });
-  return runtime;
-}
-
-Future<ToolCallResult> _pendingReport(
-  ResearchRuntime runtime,
-  String summary,
-  List<ObjectChange> changes,
-) async {
-  if (changes.isEmpty) {
-    return ToolCallResult(status: ToolCallStatus.succeeded, summary: summary);
-  }
-  final session = await runtime.openScopeSession();
-  try {
-    final reported = <ObjectChange>[];
-    for (final change in changes) {
-      if (change.op == ChangeOp.delete) {
-        reported.add(change);
-        continue;
-      }
-      final resolved = (await session.resolve(
-        ObjectRef(
-          moduleId: change.ref.moduleId,
-          objectType: change.ref.objectType,
-          objectId: change.ref.objectId,
-          nativeProjectId: change.ref.nativeProjectId,
-        ),
-      ))!;
-      reported.add(ObjectChange(resolved.ref, change.op));
-    }
-    return ToolCallResult(
-      status: ToolCallStatus.succeeded,
-      summary: summary,
-      objectRefs: [for (final change in reported) change.ref],
-      changes: reported,
-    );
-  } finally {
-    await session.dispose();
-  }
 }
 
 Map<String, Object?> _document(

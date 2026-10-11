@@ -178,19 +178,23 @@ void main() {
                       as String
                 : id;
             committedA = await current(resultType, resultId);
-            if (tool == 'update_project')
+            if (tool == 'update_project') {
               expect(store.projects().single.question, 'A');
-            if (tool == 'set_note_entry')
+            }
+            if (tool == 'set_note_entry') {
               expect(store.notes('D').single.entryId, 'E1');
-            if (tool == 'create_task' || tool == 'revise_task')
+            }
+            if (tool == 'create_task' || tool == 'revise_task') {
               expect(
                 store
                     .taskRevision(resultId, int.parse(committedA.revisionRef!))!
                     .title,
                 'A',
               );
-            if (tool == 'confirm_binding')
+            }
+            if (tool == 'confirm_binding') {
               expect(store.bindings('P').single.ambiguous, isFalse);
+            }
             await store.write(() {
               if (deleteAfterCommit) {
                 final table = switch (resultType) {
