@@ -64,11 +64,29 @@ final class LocalExportStager {
       LocalExportKind.report => 'report-$exportId.md',
       LocalExportKind.claimDrafts => 'workbench-claims-$exportId.jsonl',
     };
+    ExportFileSystemScope? scope;
     try {
-      final exportsDir = await _safeExportsDirectory(researchDirectory);
+      final factory = _fs;
+      if (factory is ExportFileSystemScopeFactory) {
+        try {
+          scope = await (factory as ExportFileSystemScopeFactory).openScope(
+            researchDirectory,
+          );
+        } on Object {
+          throw _Refusal('unsafe_directory');
+        }
+      }
+      final fs = scope ?? _fs;
+      final exportsDir = await _safeExportsDirectory(
+        fs,
+        scope == null
+            ? researchDirectory
+            : p.normalize(p.absolute(researchDirectory)),
+      );
       final finalPath = p.join(exportsDir, name);
-      await _refuseIfOccupied(finalPath);
+      await _refuseIfOccupied(fs, finalPath);
       return await _writeAndCommit(
+        fs,
         preparation,
         tempPath: p.join(exportsDir, '.$name.tmp'),
         finalPath: finalPath,
@@ -81,31 +99,43 @@ final class LocalExportStager {
           errorCode: refusal.code,
         ),
       );
+    } on Object {
+      return ExportGeneration(
+        stage: LocalExportStage(
+          LocalExportOutcome.failed,
+          errorCode: 'directory_check_failed',
+        ),
+      );
+    } finally {
+      scope?.close();
     }
   }
 
   /// The exports folder must be a real folder (not a link) inside the research
   /// folder. Containment compares resolved real paths with [p.isWithin], never
   /// raw string prefixes.
-  Future<String> _safeExportsDirectory(String researchDirectory) async {
-    if (await _fs.typeOf(researchDirectory) != FileSystemEntityType.directory) {
+  Future<String> _safeExportsDirectory(
+    ExportFileSystem fs,
+    String researchDirectory,
+  ) async {
+    if (await fs.typeOf(researchDirectory) != FileSystemEntityType.directory) {
       throw _Refusal('unsafe_directory');
     }
     final exportsDir = p.join(researchDirectory, 'exports');
-    final type = await _fs.typeOf(exportsDir);
+    final type = await fs.typeOf(exportsDir);
     if (type == FileSystemEntityType.link ||
         type == FileSystemEntityType.file) {
       throw _Refusal('unsafe_directory');
     }
     if (type == FileSystemEntityType.notFound) {
       try {
-        await _fs.createDirectory(exportsDir);
+        await fs.createDirectory(exportsDir);
       } on Object {
         throw _Refusal('create_failed');
       }
     }
-    final realRoot = await _fs.resolveRealPath(researchDirectory);
-    final realExports = await _fs.resolveRealPath(exportsDir);
+    final realRoot = await fs.resolveRealPath(researchDirectory);
+    final realExports = await fs.resolveRealPath(exportsDir);
     if (!p.isWithin(realRoot, realExports)) {
       throw _Refusal('unsafe_directory');
     }
@@ -114,13 +144,14 @@ final class LocalExportStager {
 
   /// Never overwrite: an existing entry (including a dangling link, which
   /// would otherwise be replaced by the rename) refuses the export.
-  Future<void> _refuseIfOccupied(String finalPath) async {
-    final type = await _fs.typeOf(finalPath);
+  Future<void> _refuseIfOccupied(ExportFileSystem fs, String finalPath) async {
+    final type = await fs.typeOf(finalPath);
     if (type == FileSystemEntityType.link) throw _Refusal('unsafe_target');
     if (type != FileSystemEntityType.notFound) throw _Refusal('name_taken');
   }
 
   Future<ExportGeneration> _writeAndCommit(
+    ExportFileSystem fs,
     LocalExportPreparation prep, {
     required String tempPath,
     required String finalPath,
@@ -129,7 +160,7 @@ final class LocalExportStager {
     bool cancelRequested() => cancellation?.isCancelled ?? false;
 
     try {
-      await _fs.createExclusive(tempPath);
+      await fs.createExclusive(tempPath);
     } on Object {
       // Nothing was created by us, so there is nothing to clean up.
       return ExportGeneration(
@@ -143,19 +174,19 @@ final class LocalExportStager {
     Future<ExportGeneration> failed(String code) async => ExportGeneration(
       stage: LocalExportStage(
         LocalExportOutcome.failed,
-        cleanup: await _cleanup(tempPath),
+        cleanup: await _cleanup(fs, tempPath),
         errorCode: code,
       ),
     );
     Future<ExportGeneration> cancelled() async => ExportGeneration(
       stage: LocalExportStage(
         LocalExportOutcome.cancelled,
-        cleanup: await _cleanup(tempPath),
+        cleanup: await _cleanup(fs, tempPath),
       ),
     );
 
     try {
-      await _fs.writeAll(tempPath, prep.bytes);
+      await fs.writeAll(tempPath, prep.bytes);
     } on Object {
       return failed('write_failed');
     }
@@ -163,7 +194,7 @@ final class LocalExportStager {
 
     final Uint8List readBack;
     try {
-      readBack = await _fs.readAll(tempPath);
+      readBack = await fs.readAll(tempPath);
     } on Object {
       return failed('verify_failed');
     }
@@ -174,12 +205,15 @@ final class LocalExportStager {
     if (cancelRequested()) return cancelled();
 
     try {
-      await _refuseIfOccupied(finalPath);
+      await _refuseIfOccupied(fs, finalPath);
     } on _Refusal catch (refusal) {
       return failed(refusal.code);
+    } on Object {
+      return failed('target_check_failed');
     }
+    if (cancelRequested()) return cancelled();
     try {
-      await _fs.rename(tempPath, finalPath);
+      await fs.rename(tempPath, finalPath);
     } on Object {
       return failed('commit_failed');
     }
@@ -191,21 +225,24 @@ final class LocalExportStager {
 
   /// Removes this generation's temp file. A failed removal is reported as
   /// residue, and a failed check as unknown; never as cleaned.
-  Future<LocalExportCleanup> _cleanup(String tempPath) async {
+  Future<LocalExportCleanup> _cleanup(
+    ExportFileSystem fs,
+    String tempPath,
+  ) async {
     try {
-      if (await _fs.typeOf(tempPath) == FileSystemEntityType.notFound) {
+      if (await fs.typeOf(tempPath) == FileSystemEntityType.notFound) {
         return LocalExportCleanup.cleaned;
       }
     } on Object {
       return LocalExportCleanup.unknown;
     }
     try {
-      await _fs.delete(tempPath);
+      await fs.delete(tempPath);
     } on Object {
       return LocalExportCleanup.residue;
     }
     try {
-      return await _fs.typeOf(tempPath) == FileSystemEntityType.notFound
+      return await fs.typeOf(tempPath) == FileSystemEntityType.notFound
           ? LocalExportCleanup.cleaned
           : LocalExportCleanup.residue;
     } on Object {

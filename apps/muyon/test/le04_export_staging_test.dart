@@ -323,8 +323,10 @@ void main() {
         );
 
     test('IO commit never replaces a concurrently occupied target', () async {
-      final source = File(p.join(tmp.path, 'source'))..writeAsStringSync('export');
-      final target = File(p.join(tmp.path, 'target'))..writeAsStringSync('owner');
+      final source = File(p.join(tmp.path, 'source'))
+        ..writeAsStringSync('export');
+      final target = File(p.join(tmp.path, 'target'))
+        ..writeAsStringSync('owner');
       Object? error;
       try {
         await io.rename(source.path, target.path);
@@ -336,46 +338,119 @@ void main() {
       expect(source.readAsStringSync(), 'export');
     });
 
-    test('directory substitution cannot write outside the anchored exports', () async {
-      final exports = Directory(p.join(research.path, 'exports'))..createSync();
-      final moved = p.join(research.path, 'owned-exports');
-      final outside = Directory(p.join(tmp.path, 'outside'))..createSync();
-      final race = RaceExportFs(io);
-      race.beforeCreate = (_) async {
-        exports.renameSync(moved);
-        Link(exports.path).createSync(outside.path);
-      };
-      await LocalExportStager(fileSystem: race, newExportId: () => _id).generate(
-        preparation: _prep('export'), researchDirectory: research.path,
-      );
-      expect(outside.listSync(), isEmpty);
-    });
+    test(
+      'directory substitution cannot write outside the anchored exports',
+      () async {
+        final exports = Directory(p.join(research.path, 'exports'))
+          ..createSync();
+        final moved = p.join(research.path, 'owned-exports');
+        final outside = Directory(p.join(tmp.path, 'outside'))..createSync();
+        final race = RaceExportFs(io);
+        var outsideEntriesDuringWrite = -1;
+        race.beforeWrite = (_) async {
+          outsideEntriesDuringWrite = outside.listSync().length;
+        };
+        race.beforeCreate = (_) async {
+          exports.renameSync(moved);
+          Link(exports.path).createSync(outside.path);
+        };
+        await LocalExportStager(
+          fileSystem: race,
+          newExportId: () => _id,
+        ).generate(
+          preparation: _prep('export'),
+          researchDirectory: research.path,
+        );
+        expect(outsideEntriesDuringWrite, 0);
+        expect(outside.listSync(), isEmpty);
+      },
+    );
 
     test('temp substitution cannot truncate an unrelated file', () async {
-      final victim = File(p.join(tmp.path, 'victim'))..writeAsStringSync('owner');
+      final victim = File(p.join(tmp.path, 'victim'))
+        ..writeAsStringSync('owner');
       final race = RaceExportFs(io);
       race.beforeWrite = (path) async {
         if (File(path).existsSync()) File(path).deleteSync();
         Link(path).createSync(victim.path);
       };
-      await LocalExportStager(fileSystem: race, newExportId: () => _id).generate(
-        preparation: _prep('export'), researchDirectory: research.path,
+      await LocalExportStager(
+        fileSystem: race,
+        newExportId: () => _id,
+      ).generate(
+        preparation: _prep('export'),
+        researchDirectory: research.path,
       );
       expect(victim.readAsStringSync(), 'owner');
     });
 
-    test('temp substitution after verification never commits substituted bytes', () async {
-      final race = RaceExportFs(io);
-      race.afterRead = (path) async {
-        if (File(path).existsSync()) File(path).deleteSync();
-        File(path).writeAsStringSync('intruder');
-      };
-      final result = await LocalExportStager(fileSystem: race, newExportId: () => _id).generate(
-        preparation: _prep('export'), researchDirectory: research.path,
+    test(
+      'temp substitution after verification never commits substituted bytes',
+      () async {
+        final race = RaceExportFs(io);
+        race.afterRead = (path) async {
+          if (File(path).existsSync()) File(path).deleteSync();
+          File(path).writeAsStringSync('intruder');
+        };
+        final result =
+            await LocalExportStager(
+              fileSystem: race,
+              newExportId: () => _id,
+            ).generate(
+              preparation: _prep('export'),
+              researchDirectory: research.path,
+            );
+        if (result.stage.outcome == LocalExportOutcome.succeeded) {
+          expect(File(result.path!).readAsStringSync(), 'export');
+        }
+      },
+    );
+
+    test(
+      'a target created after the last check survives atomic IO commit',
+      () async {
+        final race = RaceExportFs(io);
+        race.beforeCommit = (path) async =>
+            File(path).writeAsStringSync('owner');
+        final result =
+            await LocalExportStager(
+              fileSystem: race,
+              newExportId: () => _id,
+            ).generate(
+              preparation: _prep('export'),
+              researchDirectory: research.path,
+            );
+        expect(result.stage.outcome, LocalExportOutcome.failed);
+        expect(result.stage.errorCode, 'commit_failed');
+        expect(result.stage.cleanup, LocalExportCleanup.cleaned);
+        expect(
+          File(p.join(research.path, 'exports', 'report-$_id.md'))
+              .readAsStringSync(),
+          'owner',
+        );
+        expect(
+          Directory(p.join(research.path, 'exports')).listSync(),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('concurrent same-id IO exports have exactly one winner', () async {
+      final results = await Future.wait([
+        realGenerate(_prep('first')),
+        realGenerate(_prep('second')),
+      ]);
+      expect(
+        results.where((r) => r.stage.outcome == LocalExportOutcome.succeeded),
+        hasLength(1),
       );
-      if (result.stage.outcome == LocalExportOutcome.succeeded) {
-        expect(File(result.path!).readAsStringSync(), 'export');
-      }
+      final bytes = File(p.join(research.path, 'exports', 'report-$_id.md'))
+          .readAsStringSync();
+      expect(bytes, anyOf('first', 'second'));
+      expect(
+        Directory(p.join(research.path, 'exports')).listSync(),
+        hasLength(1),
+      );
     });
 
     test('a real generation writes exactly the frozen bytes', () async {
@@ -436,12 +511,31 @@ void main() {
 }
 
 /// Real IO with deterministic interleavings at asynchronous adapter boundaries.
-class RaceExportFs implements ExportFileSystem {
+class RaceExportFs
+    implements
+        ExportFileSystem,
+        ExportFileSystemScopeFactory,
+        ExportFileSystemScope {
+  @override
+  Future<ExportFileSystemScope> openScope(String root) async {
+    final scoped = await (delegate as ExportFileSystemScopeFactory).openScope(
+      root,
+    );
+    return RaceExportFs(scoped)
+      ..beforeCreate = beforeCreate
+      ..beforeWrite = beforeWrite
+      ..afterRead = afterRead
+      ..beforeCommit = beforeCommit;
+  }
+
+  @override
+  void close() => (delegate as ExportFileSystemScope).close();
   RaceExportFs(this.delegate);
   final ExportFileSystem delegate;
   Future<void> Function(String)? beforeCreate;
   Future<void> Function(String)? beforeWrite;
   Future<void> Function(String)? afterRead;
+  Future<void> Function(String)? beforeCommit;
   @override
   Future<FileSystemEntityType> typeOf(String path) => delegate.typeOf(path);
   @override
@@ -453,19 +547,26 @@ class RaceExportFs implements ExportFileSystem {
     await beforeCreate?.call(path);
     await delegate.createExclusive(path);
   }
+
   @override
   Future<void> writeAll(String path, Uint8List bytes) async {
     await beforeWrite?.call(path);
     await delegate.writeAll(path, bytes);
   }
+
   @override
   Future<Uint8List> readAll(String path) async {
     final bytes = await delegate.readAll(path);
     await afterRead?.call(path);
     return bytes;
   }
+
   @override
-  Future<void> rename(String from, String to) => delegate.rename(from, to);
+  Future<void> rename(String from, String to) async {
+    await beforeCommit?.call(to);
+    await delegate.rename(from, to);
+  }
+
   @override
   Future<void> delete(String path) => delegate.delete(path);
 }
