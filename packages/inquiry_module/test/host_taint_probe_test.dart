@@ -21,8 +21,10 @@ void main() {
     'unknown',
     'mismatch',
     'clean',
+    'repeat',
   ]) {
     for (final network in [false, true]) {
+      if (scenario == 'repeat' && !network) continue;
       testWidgets(
         '$scenario host facts require review of ${network ? 'outbound' : 'write'}',
         (tester) async {
@@ -48,30 +50,30 @@ void main() {
             identities.add([taskId, conversationId]);
             if (scenario == 'throws') throw StateError('facts unavailable');
             if (scenario == 'unknown') return null;
-            if (taskId != 'host-task' || conversationId != 'host-conversation')
+            if (taskId != 'host-task' ||
+                conversationId != 'host-conversation') {
               return true;
+            }
             return scenario != 'clean';
           }
 
-          // Function.apply keeps the RED commit compilable before the new hosted
-          // constructor seam exists. The missing-probe case uses today's API.
-          final state = Function.apply(AppState.attach, [], {
-            #store: store,
-            #dataDir: directory,
-            #aiJobs: AiJobStore.attach(jobsDb),
-            #secrets: HostSecrets(),
-            #sharedModelSettings: HostModelSettings(),
-            #sharedLlmFactory: ({AiCancellation? cancellation}) async =>
+          final state = AppState.attach(
+            store: store,
+            dataDir: directory,
+            aiJobs: AiJobStore.attach(jobsDb),
+            secrets: HostSecrets(),
+            sharedModelSettings: HostModelSettings(),
+            sharedLlmFactory: ({AiCancellation? cancellation}) async =>
                 LlmClient(
                   const LlmConfig(apiKey: 'fake'),
                   transport: (_) async => {
                     'choices': [
                       {
-                        'message': ++calls == 1
+                        'message': ++calls <= (scenario == 'repeat' ? 2 : 1)
                             ? {
                                 'tool_calls': [
                                   {
-                                    'id': 'action',
+                                    'id': 'action-$calls',
                                     'type': 'function',
                                     'function': {
                                       'name': network
@@ -95,14 +97,16 @@ void main() {
                     ],
                   },
                 ),
-            if (scenario != 'missing') ...{
-              #hostTaintProbe: probe,
-              #hostTaskId: scenario == 'mismatch'
-                  ? 'folio-ai-job'
-                  : 'host-task',
-              #hostConversationId: 'host-conversation',
-            },
-          }) as AppState;
+            hostTaintProbe: scenario == 'missing' ? null : probe,
+            hostTaskId: scenario == 'missing'
+                ? null
+                : scenario == 'mismatch'
+                ? 'folio-ai-job'
+                : 'host-task',
+            hostConversationId: scenario == 'missing'
+                ? null
+                : 'host-conversation',
+          );
           addTearDown(() async {
             await state.shutdown();
             state.dispose();
@@ -145,6 +149,14 @@ void main() {
               ),
               isTrue,
             );
+          }
+          if (scenario == 'repeat') {
+            await tester.tap(find.text('允许此次请求'));
+            for (var i = 0; i < 10; i++) {
+              await tester.pump(const Duration(milliseconds: 50));
+            }
+            expect(find.text('确认联网搜索'), findsOneWidget);
+            expect(find.text(_notice), findsOneWidget);
           }
           await tester.tap(find.text('拒绝'));
           await tester.pumpAndSettle();

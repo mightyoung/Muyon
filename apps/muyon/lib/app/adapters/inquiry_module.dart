@@ -77,6 +77,7 @@ class InquiryBusinessModule implements BusinessModuleV2 {
       modelProfiles: ProfileRepository(host.workspaces),
       modelGateway: host.services.gateway,
       tools: host.tools,
+      hostTaintProbe: InquiryPlugin.hostTaintProbeFor(host.foundation),
       approveModelRequest: (preview) =>
           host.approveInquiryModelRequest?.call(preview) ?? Future.value(false),
     );

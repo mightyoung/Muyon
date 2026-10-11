@@ -28,6 +28,9 @@ class InquiryRuntime {
     AssistantWebAuthority? webAuthority,
     HubAuthority? hubAuthority,
     HubPublicationJournal? hubJournal,
+    InquiryHostTaintProbe? hostTaintProbe,
+    String? hostTaskId,
+    String? hostConversationId,
     Map<String, Object?> initialSettings = const {},
   }) : state = AppState.attach(
          store: store,
@@ -39,6 +42,9 @@ class InquiryRuntime {
          webAuthority: webAuthority,
          hubAuthority: hubAuthority,
          hubJournal: hubJournal,
+         hostTaintProbe: hostTaintProbe,
+         hostTaskId: hostTaskId,
+         hostConversationId: hostConversationId,
          initialSettings: initialSettings,
        );
   final AppState state;
