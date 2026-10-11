@@ -119,6 +119,7 @@ void main() {
             ),
           );
           await tester.enterText(find.byType(TextField), '执行请求');
+          await tester.pump();
           await tester.tap(find.byTooltip('发送'));
           for (var i = 0; i < 10; i++) {
             await tester.pump(const Duration(milliseconds: 50));
