@@ -138,10 +138,15 @@ class UiPlanningHarness {
       await cancelTimedOutRequest?.call(request);
     } finally {
       final value = _readOnlyFailure('cancelled', request, progress);
-      await _recordProgress(request, value.stream, code: 'cancelled');
-      if (isCurrentRequest(request)) _latest[taskId] = value;
-      completion.complete(value);
-      repository.refresh();
+      try {
+        await _recordProgress(request, value.stream, code: 'cancelled');
+      } finally {
+        // A persistence failure must still settle late receivers. The caller
+        // sees the failure, while the revoked capability can never revive.
+        if (isCurrentRequest(request)) _latest[taskId] = value;
+        completion.complete(value);
+        repository.refresh();
+      }
     }
   }
 

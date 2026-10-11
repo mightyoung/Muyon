@@ -56,6 +56,7 @@ class UiWorkspaceController extends ChangeNotifier {
     int? schemaVersion,
     UiEventSink? onEvent,
     bool Function()? externalContentProbe,
+    String Function()? provenanceProbe,
     Future<UiOperationRecovery> Function(String)? receiptLookup,
   }) async {
     final c = UiWorkspaceController._(
@@ -153,11 +154,16 @@ class UiWorkspaceController extends ChangeNotifier {
       current,
       readOnlyProbe: () => c.readOnly,
       externalContentProbe: externalContentProbe,
+      provenanceProbe: provenanceProbe,
       onEvent: onEvent == null
           ? null
           : (event) async {
+              final dispatchPlan = c.surface.current;
               await c.flush(); // includes the pending/locked operation before the port
-              if (c.readOnly || c._disposed) {
+              if (c.readOnly || c._disposed ||
+                  !identical(dispatchPlan, c.surface.current) ||
+                  (c.surface.pendingAction(event.eventId) != null &&
+                      !c.surface.isCurrentPending(event))) {
                 throw StateError('Workspace not durable');
               }
               await onEvent(event);

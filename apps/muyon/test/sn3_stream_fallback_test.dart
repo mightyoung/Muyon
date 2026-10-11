@@ -209,8 +209,12 @@ void main() {
       for (final active in [task, unrelated]) {
         final saved = (await tester.runAsync(() => f.repo.updateTask(active.copy({
           'state': 'running', 'stage': 'model', 'summary': 'Saved public answer',
-        }), assistantAnswer: 'Saved public answer')))!;
+        }))))!;
         expect(saved, isTrue);
+        // A running checkpoint cannot use the success-only assistantAnswer
+        // transaction. Keep the public partial answer as a normal host message.
+        await tester.runAsync(() => f.repo.appendMessage(
+          conversation.id, 'assistant', 'Saved public answer'));
       }
       expect(f.repo.messages(conversation.id).where((m) => m.role == 'assistant')
         .map((m) => m.content), ['Saved public answer', 'Saved public answer']);

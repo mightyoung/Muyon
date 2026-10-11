@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:muyon_ui/dynamic_ui.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
@@ -18,7 +20,9 @@ class UiPlanningEventRouter {
     required this.surface,
     this.businessActions = const {},
   }) {
+    _presentationIdentity = agent.uiContentIdentity(taskId);
     surface.attachExternalContentProbe(() => agent.repository.authorizationFacts.readTask(taskId).requiresConfirmation);
+    surface.attachProvenanceProbe(() => uiTaskProvenanceStamp(agent.repository, taskId));
     agent.repository.addListener(reconcile);
   }
   final PersonalAgent agent;
@@ -29,10 +33,22 @@ class UiPlanningEventRouter {
   final _pending = <String, UiPendingAction>{};
   final _seen = <String>{};
   bool _disposed = false;
+  late final Object? _presentationIdentity;
+  bool get _allowsPresentation => !_disposed &&
+      agent.allowsUiContent(taskId) &&
+      identical(_presentationIdentity, agent.uiContentIdentity(taskId));
+  bool _sameAuthority(HostTaskFacts before, HostTaskFacts after) =>
+      before.taskId == after.taskId &&
+      before.conversationId == after.conversationId &&
+      before.taintState == after.taintState &&
+      before.sourceDigests.length == after.sourceDigests.length &&
+      before.sourceDigests.containsAll(after.sourceDigests);
   Future<void> dispatch(UiEvent event) async {
     if (_disposed || !_seen.add(event.eventId)) return;
     final task = agent.repository.task(taskId);
-    if (task == null ||
+    if (task == null || !_allowsPresentation || surface.isReadOnly ||
+        task.state == PersonalTaskState.cancelled ||
+        task.state == PersonalTaskState.interrupted ||
         event.surfaceId != surface.current.plan.surfaceId ||
         event.observedRevision != surface.current.plan.revision) {
       throw StateError('stale_host_event');
@@ -48,6 +64,7 @@ class UiPlanningEventRouter {
       final pending = surface.pendingAction(event.eventId);
       final action = businessActions[binding.actionRef];
       if (pending == null ||
+          !surface.isCurrentPending(event) ||
           action == null ||
           agent.tools.inspect(action.toolId)?.available != true) {
         throw StateError('business_port_unavailable');
@@ -57,11 +74,26 @@ class UiPlanningEventRouter {
           authority.requiresConfirmation != pending.externalContent) {
         throw StateError('ui_action_provenance_changed_or_unknown');
       }
+      // Parameters are host code too: getters/mappers may synchronously change
+      // a plan, source identity or policy. Check again after mapping, then enter
+      // startTool without an asynchronous gap.
+      final parameters = action.parameters(pending);
+      final currentAuthority = agent.repository.authorizationFacts.readTask(task.id);
+      final currentTask = agent.repository.task(taskId);
+      if (!_allowsPresentation || !surface.isCurrentPending(event) ||
+          currentTask == null ||
+          currentTask.state == PersonalTaskState.cancelled ||
+          currentTask.state == PersonalTaskState.interrupted ||
+          agent.tools.inspect(action.toolId)?.available != true ||
+          currentAuthority.taintState == HostTaintState.unknown ||
+          !_sameAuthority(authority, currentAuthority)) {
+        throw StateError('stale_host_action');
+      }
       _pending[event.eventId] = pending;
       final child = await agent.startTool(
         conversationId: task.conversationId,
         toolId: action.toolId,
-        parameters: action.parameters(pending),
+        parameters: parameters,
         previousAttemptId: task.id,
       );
       tasks[event.eventId] = child.id;
@@ -89,8 +121,8 @@ class UiPlanningEventRouter {
   }
 
   void reconcile() {
-    surface.refreshExternalContent();
     if (_disposed) return;
+    surface.refreshExternalContent();
     for (final entry in tasks.entries) {
       final task = agent.repository.task(entry.value);
       if (task == null) continue;
@@ -139,6 +171,13 @@ class UiPlanningEventRouter {
     _disposed = true;
     agent.repository.removeListener(reconcile);
   }
+}
+
+/// Stable host-only source identity, including changes within tainted state.
+String uiTaskProvenanceStamp(FoundationRepository repository, String taskId) {
+  final facts = repository.authorizationFacts.readTask(taskId);
+  final sources = facts.sourceDigests.toList()..sort();
+  return jsonEncode([facts.taskId, facts.conversationId, facts.taintState.name, sources]);
 }
 
 Future<UiOperationRecovery> recoverUiPlanningOperation(

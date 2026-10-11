@@ -53,8 +53,28 @@ class DynamicWorkspace extends StatefulWidget {
 /// Presentation ownership only: one old dynamic controller/router per open surface.
 /// The responsive host retains this session while route and pane views change.
 class DynamicWorkspaceSession extends ChangeNotifier {
-  DynamicWorkspaceSession(this.widget);
+  DynamicWorkspaceSession(this.widget)
+      : _presentationIdentity = widget.agent?.uiContentIdentity(widget.taskId) {
+    widget.repository.addListener(_refreshHostState);
+  }
   final DynamicWorkspace widget;
+  final Object? _presentationIdentity;
+  bool _presentationRevoked = false;
+  bool get allowsPresentation => !_disposed && !_presentationRevoked &&
+      (widget.agent == null ||
+          (widget.agent!.allowsUiContent(widget.taskId) &&
+              identical(_presentationIdentity,
+                  widget.agent!.uiContentIdentity(widget.taskId))));
+  void _refreshHostState() {
+    if (_disposed) return;
+    if (!allowsPresentation) _presentationRevoked = true;
+    final c = controller;
+    if (c != null) {
+      if (!allowsPresentation) c.readOnly = true;
+      c.surface.refreshExternalContent();
+    }
+    notifyListeners();
+  }
   UiWorkspaceController? controller;
   UiPlanningEventRouter? router;
   StoredUiWorkspace? stored;
@@ -71,7 +91,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
   bool _canPresentReferences = true;
-  bool get canPresentReferences => _canPresentReferences;
+  bool get canPresentReferences => _canPresentReferences && allowsPresentation;
   void stopReferenceAdmission() {
     if (!_canPresentReferences) return;
     _canPresentReferences = false;
@@ -148,20 +168,30 @@ class DynamicWorkspaceSession extends ChangeNotifier {
           taskId: widget.taskId,
           scopeKey: scope,
           plan: widget.plan!,
-          onEvent:
-              widget.onEvent ??
-              (widget.agent == null
-                  ? null
-                  : (event) async {
-                      if (widget.agent!.uiPlanningEnabled != true) {
-                        throw StateError('planning_disabled');
-                      }
-                      await router?.dispatch(event);
-                    }),
+          onEvent: widget.onEvent == null && widget.agent == null
+              ? null
+              : (event) async {
+                  // Workspace persistence is awaited by the controller before
+                  // this fence. A retained custom sink has the same policy gate.
+                  if (!allowsPresentation) {
+                    throw StateError('presentation_expired');
+                  }
+                  final pending = controller?.surface.pendingAction(event.eventId);
+                  if (pending != null &&
+                      controller?.surface.isCurrentPending(event) != true) {
+                    throw StateError('stale_host_action');
+                  }
+                  if (widget.onEvent != null) {
+                    await widget.onEvent!(event);
+                  } else {
+                    await router!.dispatch(event);
+                  }
+                },
           receiptLookup: receipt,
           externalContentProbe: () => widget.repository.authorizationFacts
               .readTask(widget.taskId)
               .requiresConfirmation,
+          provenanceProbe: () => uiTaskProvenanceStamp(widget.repository, widget.taskId),
         );
         if (c.canCloseWithoutCheckpoint) {
           error = c.saveError;
@@ -173,6 +203,10 @@ class DynamicWorkspaceSession extends ChangeNotifier {
           return;
         }
         controller = c;
+        if (!allowsPresentation) {
+          _presentationRevoked = true;
+          c.readOnly = true;
+        }
         if (widget.agent != null) {
           router = UiPlanningEventRouter(
             agent: widget.agent!,
@@ -216,6 +250,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    widget.repository.removeListener(_refreshHostState);
     stopReferenceAdmission();
     capturePresentation = null;
     router?.dispose();
@@ -400,7 +435,7 @@ class _DynamicWorkspaceState extends State<DynamicWorkspace>
           references: referenceLinks(),
           banner: error,
           onClose: widget.onClose,
-          textOnly: widget.textOnly,
+          textOnly: widget.textOnly || !session.allowsPresentation,
           session: session,
         );
       }

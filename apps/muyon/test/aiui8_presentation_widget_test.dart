@@ -17,7 +17,10 @@ BEGIN SELECT RAISE(ABORT, 'fixture rejection'); END
 ''')));
       await tester.pumpWidget(MaterialApp(home: Scaffold(body: UiPlanningPreferenceSwitch(agent: agent))));
       Future<void> chooseFew() async {
-        await tester.tap(find.byType(DropdownButtonFormField<UiPresentationMode>));
+        // Opening the route registers the selection Future's continuation.
+        // It must share the real async zone of the later persistence write.
+        await tester.runAsync(() => tester.tap(
+          find.byType(DropdownButtonFormField<UiPresentationMode>)));
         await tester.pumpAndSettle();
         // The tap starts a real SQLite write. Keep its queue continuations in
         // the real async zone, like fixture setup and disposal, so cleanup

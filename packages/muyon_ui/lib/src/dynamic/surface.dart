@@ -51,13 +51,14 @@ class UiPendingAction {
     this.event,
     this.plan,
     this.binding,
-    Map<String, Object?> inputs, {this.externalContent = true,}
+    Map<String, Object?> inputs, {this.externalContent = true, this.provenanceStamp,}
   ) : inputs = Map.unmodifiable(inputs);
   final UiEvent event;
   final ValidatedUiPlan plan;
   final ActionBinding binding;
   final Map<String, Object?> inputs;
   final bool externalContent;
+  final String? provenanceStamp;
 }
 
 /// Authority frozen once for a rendered tree and its callbacks.
@@ -66,12 +67,14 @@ class UiRenderCapture {
     : surfaceId = plan.plan.surfaceId,
       revision = plan.plan.revision,
       catalog = plan.catalog,
+      provenanceStamp = _owner.provenanceStamp,
       externalContent = _owner.hasExternalContent;
   final UiSurfaceController _owner;
   final String surfaceId;
   final int revision;
   final UiCatalog catalog;
   final bool externalContent;
+  final String? provenanceStamp;
   final ValidatedUiPlan plan;
 }
 
@@ -84,10 +87,12 @@ class UiSurfaceController extends ChangeNotifier {
     this.publishTokenProbe,
     this.readOnlyProbe,
     bool Function()? externalContentProbe,
+    String Function()? provenanceProbe,
   }) : _publication = UiPublicationCoordinator(plan) {
     if (externalContentProbe != null) {
       attachExternalContentProbe(externalContentProbe);
     }
+    if (provenanceProbe != null) attachProvenanceProbe(provenanceProbe);
     if ((recomputePort == null) != (publishTokenProbe == null)) {
       throw ArgumentError('Provide both recomputePort and publishTokenProbe');
     }
@@ -105,7 +110,22 @@ class UiSurfaceController extends ChangeNotifier {
     _externalContentProbe ??= probe;
   }
   void refreshExternalContent() {
-    if (!_disposed) notifyListeners();
+    if (!_disposed) {
+      notifyListeners();
+    }
+  }
+  String Function()? _provenanceProbe;
+  int _probeFailures = 0;
+  void attachProvenanceProbe(String Function() probe) {
+    _provenanceProbe ??= probe;
+  }
+  String? get provenanceStamp {
+    try {
+      return _provenanceProbe?.call();
+    } catch (_) {
+      // A broken host reader cannot produce a matching authority stamp.
+      return 'unknown-provenance:${++_probeFailures}';
+    }
   }
   bool get externalContent {
     try {
@@ -266,6 +286,23 @@ class UiSurfaceController extends ChangeNotifier {
   Map<String, UiBusinessReceipt> get receipts => Map.unmodifiable(_receipts);
   final _pending = <String, UiPendingAction>{};
   UiPendingAction? pendingAction(String eventId) => _pending[eventId];
+  /// A durable host sink must recheck this after every awaited preparation.
+  bool isCurrentPending(UiEvent event) {
+    final pending = _pending[event.eventId];
+    if (_disposed || pending == null || !identical(pending.event, event) ||
+        !identical(pending.plan, current) ||
+        !identical(pending.plan.catalog, current.catalog) ||
+        pending.provenanceStamp != provenanceStamp ||
+        pending.externalContent != hasExternalContent ||
+        event.surfaceId != current.plan.surfaceId ||
+        event.observedRevision != current.plan.revision ||
+        pending.binding.expectedDraftRevision != _session.draftRevision) return false;
+    final nodes = current.plan.nodes.where((node) => node.id == event.nodeId);
+    if (nodes.length != 1 || !identical(nodes.single.events[event.kind], pending.binding)) return false;
+    final action = current.catalog.actions[pending.binding.actionRef];
+    return action?.route == UiActionRoute.business &&
+        _publication.allowsDispatch(action!, readOnly: isReadOnly, pending: false);
+  }
   final _lockedOperations = <(String, int)>{};
   final _recoveredOperations = <String>{};
   Set<String> get operationRefs => Set.unmodifiable({
@@ -339,7 +376,8 @@ class UiSurfaceController extends ChangeNotifier {
     }
     final action = current.catalog.actions[node.events[kind]!.actionRef];
     if (action?.route == UiActionRoute.business &&
-        capture.externalContent != hasExternalContent) {
+        (capture.externalContent != hasExternalContent ||
+            capture.provenanceStamp != provenanceStamp)) {
       return UiDispatchOutcome.stale;
     }
     return dispatch(eventForCapture(capture, node, kind, payload));
@@ -541,12 +579,24 @@ class UiSurfaceController extends ChangeNotifier {
         event,
         current,
         binding,
-        inputs, externalContent: hasExternalContent,
+        inputs, externalContent: hasExternalContent, provenanceStamp: provenanceStamp,
       );
     }
     _seenEvents.add(event.eventId);
     portError = null;
     notifyListeners();
+    // A synchronous listener can replace the plan or revoke host authority.
+    // Nothing has reached the port yet, so release only our unadmitted lock.
+    if (!identical(dispatchPlan, current) || isReadOnly || _disposed ||
+        (route == UiActionRoute.business && !isCurrentPending(event))) {
+      final pending = _pending.remove(event.eventId);
+      if (pending != null) {
+        _lockedOperations.remove((pending.binding.operationKeyRef!,
+            pending.binding.expectedDraftRevision!));
+      }
+      if (!_disposed) notifyListeners();
+      return UiDispatchOutcome.stale;
+    }
     try {
       await onEvent!(event);
     } catch (_) {
@@ -927,7 +977,9 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
                     ? BatchState.completed
                     : BatchState.pending,
                 onAllowAll: active && !controller.hasExternalContent ? () => dispatch(n, 'confirm') : null,
-                onIndividual: active ? () => dispatch(n, 'confirm') : null,
+                // A whole-batch confirmation is not an individual decision.
+                // Enable this only when the host supplies that separate route.
+                onIndividual: null,
                 onReject: active && n.events.containsKey('cancel')
                     ? () => dispatch(n, 'cancel')
                     : null,
