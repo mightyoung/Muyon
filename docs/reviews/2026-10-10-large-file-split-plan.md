@@ -697,3 +697,87 @@
 - `agent_eval_test.dart` `real model: multi-step agent tasks on the current assistant`
 - `llm_selection_eval_test.dart` `real model: native tool-calling baseline on the selection set`
 - `ocr_real_model_test.dart` `real fixed ONNX models with Dart BGR/DB/homography/CTC pipeline`（要 `MUYON_OCR_MODEL_DIR` 和 `MUYON_OCR_PYTHON`）
+
+## 执行记录：GROK-10 三个低风险文件
+
+环境与 GROK-9 相同：Flutter 3.47.5 / Dart 3.13.4。代理保持 `HTTP_PROXY` / `HTTPS_PROXY`（`http://127.0.0.1:10808`）。另设 `NO_PROXY=localhost,127.0.0.1,::1`，`no_proxy` 相同。没有导出 `MUYON_EVAL_REAL`。原始日志在 `/tmp`，不进仓库。`flutter pub get` 和 analyze 又改过三个 `analysis_options.yaml`、macOS 的两个 `xcconfig` 和一个未跟踪的 `Podfile`。这些都已还原，不在下面的提交里。
+
+顺序脚本 `/tmp/grok10_spec_order.dart` 不进仓库。它 import `package:supplier_core/src/spec_dictionary.dart`，先打印每个 `specProperties.code`，再打印每个 `specClasses.code`。
+
+### `spec_parse.dart`
+
+提交 `4a38fe11cd686534764cb2444220de08cba4569a`，说明以「纯搬运，无逻辑改动」开头。父文件留下 import、文件头注释和 `_ClauseReader`。`spec_parse_draft.dart` 是 `part of 'spec_parse.dart';`，装着 L19–253 的草稿、切分、`_Hit`、`_Number` 和 `parseClause`。
+
+| 文件 | 行数 |
+|---|---:|
+| `spec_parse.dart` | 645 |
+| `spec_parse_draft.dart` | 237 |
+
+都低于 800。`dart format` 跑过这两个文件。草稿没有被改。父文件里一处原来的三行 `RegExp` 被收成两行，那不是搬运，已改回原样。
+
+搬运核对：去掉空行和 `import` / `export` / `part` / `part of` 之后排序。拆分前 815 行，拆分后 815 行。只在拆分前 0 行，只在拆分后 0 行。没有差异原文。
+
+### `spec_dictionary.dart`
+
+提交 `3d4f3fab37d7378472586ddff89e20135580048a`，说明以「纯搬运，无逻辑改动」开头。属性表 L201–519 进 `_specPropertiesA`，L521–949 进 `_specPropertiesB`。类表 L952–1199 进 `spec_dictionary_classes.dart`。父文件把属性表拼回去。`dart format` 把展开收成一行：
+
+```dart
+const specProperties = <SpecProperty>[..._specPropertiesA, ..._specPropertiesB];
+```
+
+| 文件 | 行数 |
+|---|---:|
+| `spec_dictionary.dart` | 243 |
+| `spec_dictionary_properties_a.dart` | 323 |
+| `spec_dictionary_properties_b.dart` | 433 |
+| `spec_dictionary_classes.dart` | 250 |
+
+都低于 800。最大的是属性后半，433 行。方案目标约 440。
+
+搬运核对用同一套规则。拆分前 1192 行，拆分后 1195 行。只在拆分前的 1 行，只在拆分后的 4 行。原文如下。
+
+只在拆分前：
+
+```text
+const specProperties = <SpecProperty>[
+```
+
+只在拆分后：
+
+```text
+];
+const specProperties = <SpecProperty>[..._specPropertiesA, ..._specPropertiesB];
+const _specPropertiesA = <SpecProperty>[
+const _specPropertiesB = <SpecProperty>[
+```
+
+多出来的那条 `];` 是两个私有列表的结尾比原来多出来的一个。属性项本身没有改字。
+
+顺序核对：拆分前后各跑一次顺序脚本，两份输出逐字节相同。
+
+| 名单 | 条数 | SHA-256 |
+|---|---:|---|
+| `specProperties` 的 `code` | 84 | `d45cd562e6ea1156ab7115b1817a52450b562bbf5eecaf129b0f28be1a888777` |
+| `specClasses` 的 `code` | 12 | `5de50a84ac5984794c36fb6d56d33a23a7a5799a15f8b3e7da7366fe45c7c397` |
+| 两份名单接在一起的脚本输出 | 97 行 | `065fa22196612a0fd01ec4a4dfda932ad958ddcc6245ba8334942be9aa535c00` |
+
+### `reader_page.dart`：没有拆
+
+`_ReaderPageState` 从 `reader_page.dart:52` 一直到文件尾，是一个类。`part` 拆不开类体。方案里的做法是 mixin 再在原类上加 `with`。这样写会循环：`mixin _Links on _Reader` 并且 `class _Reader with _Links`。`dart analyze /tmp/grok10_mixin_cycle.dart` 报 `recursive_interface_inheritance`：`'_Links' can't be a superinterface of itself`。产品文件没有改。
+
+要编过，得新增一个基类来放字段，mixin 写成 `on` 那个基类，再把 `class _ReaderPageState extends State<ReaderPage>` 改成继承基类。这改了类声明，不是纯搬运。链接和笔记里调用 `setState` 的位置是 `:244`、`:463`、`:495`、`:604`、`:619`。mixin 里调用它，还可能出任务书说的 `invalid_use_of_protected_member`。这次没有为了试这个提示去改文件。
+
+以后如果允许只改类声明：加 `_ReaderPageBase extends State<ReaderPage>` 放字段，`_ReaderPageLinks` 和 `_ReaderPageNotes` 用 `on _ReaderPageBase`，`build` 留在 `_ReaderPageState`。先跑 `flutter analyze`。只要出现 protected 提示，就保持这一个文件。
+
+### analyze 与测试
+
+info 也算失败。两个包都是 `No issues found!`。`supplier_core` 3.4 秒，日志 `/tmp/grok10-analyze-supplier.log`。`research_module` 4.3 秒，日志 `/tmp/grok10-analyze-research.log`。
+
+测试是各包全量 `flutter test --no-pub --reporter compact --timeout 120s`。
+
+| 包 | 结果 |
+|---|---|
+| `packages/supplier_core`。日志 `/tmp/grok10-test-supplier.raw` | 通过 499，失败 0，跳过 3。退出码 0。耗时 1 分 17 秒 |
+| `packages/research_module`。日志 `/tmp/grok10-test-research.raw` | 通过 220，失败 0，跳过 0。退出码 0。耗时 44 秒 |
+
+`supplier_core` 的 3 条跳过和当时的环境一致：本机没有 `services/supplier_hub/target/debug/supplier-hub`，所以 `hub_client_test.dart` 里 `against the real hub` 这一组的两个测试没跑（`publish, detect up to date, republish an edit, search` 和 `a wrong token is a readable error`）；没有 `DEEPSEEK_API_KEY`，所以 `ai_jobs_test.dart` 的 `live DeepSeek response survives restart without a second request` 没跑。系统里有华文黑体，PDF 那条没有跳过。compact 日志没有逐条打出跳过原因。
