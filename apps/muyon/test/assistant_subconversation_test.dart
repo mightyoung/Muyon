@@ -241,4 +241,75 @@ void main() {
       throwsStateError,
     );
   });
+  test('child summary never enters parent model request', () async {
+    final (f, s, t) = await setup();
+    final ref = await s.openSubconversation(t.id, '读取边界子目标');
+    final agent = f.agent();
+    const childSecret = 'CHILD-SECRET-7f3a';
+    f.replies.add(LoopReply.sse(sseText('子对话结论 $childSecret')));
+    final child = await f.start(
+      agent,
+      f.profile(),
+      conversationId: ref.childConversationId,
+    );
+    final settledChild = await f.run(agent, child);
+    expect(settledChild.state, PersonalTaskState.succeeded);
+    expect(
+      f.repo.messages(ref.childConversationId).map((m) => m.content).join('\n'),
+      contains(childSecret),
+      reason: '前提：子对话回答已写入数据库',
+    );
+    final read = await s.readLatestSubconversation(ref);
+    expect(read.summary, contains(childSecret), reason: '前提：父侧读取结果里存在该字符串');
+    final requestsBefore = f.bodies.length;
+    f.replies.add(LoopReply.sse(sseText('父回答')));
+    final parent = await f.start(
+      agent,
+      f.profile(),
+      conversationId: t.conversationId,
+      prompt: '读取子对话后再问一次',
+    );
+    final settledParent = await f.run(agent, parent);
+    expect(settledParent.state, PersonalTaskState.succeeded);
+    final requests = f.bodies.sublist(requestsBefore);
+    expect(requests, isNotEmpty, reason: '前提：父模型请求确实发生');
+    for (final body in requests) {
+      expect(jsonEncode(body), isNot(contains(childSecret)));
+    }
+  });
+  test('parent answer never enters child model request', () async {
+    final (f, s, t) = await setup();
+    final agent = f.agent();
+    const parentSecret = 'PARENT-SECRET-91bc';
+    f.replies.add(LoopReply.sse(sseText('父回答 $parentSecret')));
+    final parent = await f.start(
+      agent,
+      f.profile(),
+      conversationId: t.conversationId,
+      prompt: '父问题',
+    );
+    final settledParent = await f.run(agent, parent);
+    expect(settledParent.state, PersonalTaskState.succeeded);
+    expect(
+      f.repo.messages(t.conversationId).map((m) => m.content).join('\n'),
+      contains(parentSecret),
+      reason: '前提：父回答已写入数据库',
+    );
+    final ref = await s.openSubconversation(parent.id, '子问题');
+    final requestsBefore = f.bodies.length;
+    f.replies.add(LoopReply.sse(sseText('子回答')));
+    final child = await f.start(
+      agent,
+      f.profile(),
+      conversationId: ref.childConversationId,
+      prompt: '子任务',
+    );
+    final settledChild = await f.run(agent, child);
+    expect(settledChild.state, PersonalTaskState.succeeded);
+    final requests = f.bodies.sublist(requestsBefore);
+    expect(requests, isNotEmpty, reason: '前提：子模型请求确实发生');
+    for (final body in requests) {
+      expect(jsonEncode(body), isNot(contains(parentSecret)));
+    }
+  });
 }
