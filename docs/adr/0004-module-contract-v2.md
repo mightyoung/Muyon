@@ -272,6 +272,15 @@ abstract interface class PublishChecks {
 }
 ```
 
+**2026-10-11 修订（写卡，用户采纳 [GB-5](../reviews/2026-10-11-write-card-contract.md) W1～W6）**：在上表之外新增两项**可选**能力，均为增量，不改 v1，不放宽 ADR-0002。
+
+| 接口 | 契约 | 宿主侧消费者 | 说明 |
+|---|---|---|---|
+| `WriteFormCapable`（`writeForms`） | 按「对象类型 × 操作」声明可写字段、创建是否可用、关系写入约束；`validateDraft` 返回 `WriteValidationResult`（规范化候选、稳定错误码 + 字段路径、表单级错误、已校验草稿修订） | 本体写卡（[CR-2](../design/ontology-write-cards-2026-10-11.md)） | 可写面由模块自声明（W1），本体（§4.3）**不表达**可写面；首版不要求一次收集全部错误（W2）；不实现则不出该模块的通用写卡（W6，科研不强制） |
+| `BusinessReceiptLookup`（独立 `ModuleFeature`，W4） | 按业务 `operation_id` 只读查询是否已提交及结果 | 写卡恢复、「结果待核实」核对 | 与导入回执分离；只读，不触发任何写入 |
+
+版本冲突不新增 `ToolCallStatus`，保持 `failed` 并附受信结构化数据（错误码、字段路径、当前版本）（W3）；通用写工具首版保持四个，不按类型拆分（W5）。合规套件（§8）增加交叉检查：声明了 `writeForms` 的模块必须实现 `validateDraft`。
+
 ### 4.6 与 v1 的兼容与过渡
 
 | v1 | v2 处理 |
