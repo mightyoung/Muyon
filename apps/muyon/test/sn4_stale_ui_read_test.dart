@@ -38,9 +38,16 @@ void main() {
   // Removing the renderer's pre-reconcile lifetime fence makes these fail:
   // stale reads must not mutate harness ownership even after dispose/refresh.
   for (final phase in ['fallback', 'preview']) {
-    for (final boundary in ['dispose', 'refresh', 'retarget']) {
+    for (final boundary in [
+      'dispose',
+      'refresh',
+      'retarget',
+      if (phase == 'fallback') ...['replace', 'current'],
+    ]) {
       for (final outcome in ['changed', 'null', 'throw']) {
-        testWidgets('SN4 stale $phase $outcome after $boundary', (tester) async {
+        testWidgets('SN4 stale $phase $outcome after $boundary', (
+          tester,
+        ) async {
           final f = (await tester.runAsync(LoopFixture.open))!;
           final pending = Completer<UiPlanningHostState?>();
           final enteredRead = Completer<void>();
@@ -48,7 +55,12 @@ void main() {
           final releaseStream = Completer<void>();
           String? heldTask;
           var holdNextRead = false;
-          final provider = StreamMotivationUiPlanningProvider((request, _, receive) async {
+          var aRevision = 1;
+          final provider = StreamMotivationUiPlanningProvider((
+            request,
+            _,
+            receive,
+          ) async {
             receive(validStream.replaceAll('{"op":"end"}\n', ''));
             if (phase == 'preview' && request.taskId == heldTask) {
               enteredStream.complete();
@@ -66,7 +78,9 @@ void main() {
                 enteredRead.complete();
                 return pending.future;
               }
-              return Future.value(_host(f, task.id == heldTask ? 1 : 2));
+              return Future.value(
+                _host(f, task.id == heldTask ? aRevision : 2),
+              );
             },
             uiPlanningMode: UiPlanningMode.motivation,
             uiPlanningProviders: {UiPlanningMode.motivation: provider},
@@ -78,12 +92,21 @@ void main() {
               prompt: 'saved facts',
               profile: f.profile(),
             );
-            await f.repo.updateTask(task.copy({
-              'state': 'running', 'stage': 'model', 'summary': 'Saved answer',
-            }));
-            await f.repo.appendMessage(conversation.id, 'assistant', 'Saved answer');
+            await f.repo.updateTask(
+              task.copy({
+                'state': 'running',
+                'stage': 'model',
+                'summary': 'Saved answer',
+              }),
+            );
+            await f.repo.appendMessage(
+              conversation.id,
+              'assistant',
+              'Saved answer',
+            );
             return task;
           }
+
           Future<UiPlannedPresentation>? planning;
           try {
             final a = (await tester.runAsync(start))!;
@@ -100,30 +123,54 @@ void main() {
                 ]);
               } else {
                 await planning;
-                await agent.cancel(a.id);
+                if (boundary != 'replace') await agent.cancel(a.id);
               }
             });
             final owner = boundary == 'retarget' ? b.id : a.id;
-            final presentation = agent.uiPresentation(owner);
-            final progress = agent.uiStreamProgress(owner)!;
-            final request = progress.request;
+            var presentation = agent.uiPresentation(owner);
+            var progress = agent.uiStreamProgress(owner)!;
+            var request = progress.request;
             expect(agent.isCurrentUiRequest(request), isTrue);
             holdNextRead = true;
-            Widget view(String id) => MaterialApp(home: UiStreamTaskView(agent: agent, taskId: id));
+            Widget view(String id) => MaterialApp(
+              home: UiStreamTaskView(agent: agent, taskId: id),
+            );
             await tester.pumpWidget(view(a.id));
-            expect(enteredRead.isCompleted, isTrue, reason: 'old source read is actually blocked');
+            expect(
+              enteredRead.isCompleted,
+              isTrue,
+              reason: 'old source read is actually blocked',
+            );
             final originalState = tester.state(find.byType(UiStreamTaskView));
             if (boundary == 'dispose') {
               await tester.pumpWidget(const SizedBox.shrink());
             } else if (boundary == 'retarget') {
               await tester.pumpWidget(view(b.id));
-              expect(tester.state(find.byType(UiStreamTaskView)), same(originalState));
-            } else {
+              expect(
+                tester.state(find.byType(UiStreamTaskView)),
+                same(originalState),
+              );
+            } else if (boundary == 'replace') {
+              final oldRequest = request;
+              aRevision = 3;
+              await tester.runAsync(() => agent.planUiFromUserControl(a.id));
+              await tester.runAsync(() => agent.cancel(a.id));
+              presentation = agent.uiPresentation(owner);
+              progress = agent.uiStreamProgress(owner)!;
+              request = progress.request;
+              expect(request, isNot(same(oldRequest)));
+              expect(agent.isCurrentUiRequest(oldRequest), isFalse);
+              expect(agent.isCurrentUiRequest(request), isTrue);
+            } else if (boundary != 'current') {
               f.repo.refresh();
             }
             await tester.pump();
-            if (boundary != 'dispose') {
-              expect(find.text('保存事实'), findsWidgets, reason: 'new read completed before the old one');
+            if (boundary != 'dispose' && boundary != 'current') {
+              expect(
+                find.text('保存事实'),
+                findsWidgets,
+                reason: 'new read completed before the old one',
+              );
             }
             await tester.runAsync(() async {
               if (outcome == 'throw') {
@@ -133,11 +180,23 @@ void main() {
               }
             });
             await tester.pump();
-            expect(agent.isCurrentUiRequest(request), isTrue,
-                reason: 'a stale read must not delete the current request identity');
-            expect(agent.uiStreamProgress(owner), same(progress));
-            expect(agent.uiPresentation(owner), same(presentation));
-            if (boundary != 'dispose') expect(find.text('保存事实'), findsWidgets);
+            if (boundary == 'current') {
+              expect(agent.isCurrentUiRequest(request), isFalse);
+              expect(agent.uiStreamProgress(owner), isNull);
+              expect(agent.uiPresentation(owner), isNull);
+              expect(find.text('保存事实'), findsNothing);
+            } else {
+              expect(
+                agent.isCurrentUiRequest(request),
+                isTrue,
+                reason:
+                    'a stale read must not delete the current request identity',
+              );
+              expect(agent.uiStreamProgress(owner), same(progress));
+              expect(agent.uiPresentation(owner), same(presentation));
+              if (boundary != 'dispose')
+                expect(find.text('保存事实'), findsWidgets);
+            }
             expect(find.byType(DynamicUiSurface), findsNothing);
             expect(find.byType(ElevatedButton), findsNothing);
             expect(f.bodies, isEmpty);
