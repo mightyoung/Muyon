@@ -107,9 +107,7 @@ void main() {
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
     ))
       table['name'] as String: [
-        for (final row in store.db.select(
-            'SELECT * FROM ${table['name']}',
-        ))
+        for (final row in store.db.select('SELECT * FROM ${table['name']}'))
           row.values.toList(),
       ],
   });
@@ -182,7 +180,7 @@ void main() {
         [other, workspace.id, 'inquiry'],
       ),
     );
-    await conflict(() => direct(r), 'scope_changed', version: 1);
+    await conflict(() => direct(r), 'scope_changed', version: 'unavailable');
   });
 
   for (final changeScope in [false, true]) {
@@ -243,6 +241,23 @@ void main() {
     });
     await conflict(() => approved(r), 'version_conflict', version: 1);
   });
+
+  test(
+    'unselected target does not disclose current object or version',
+    () async {
+      final other = store.save('supplier', {
+        ...store.get('supplier', supplier)!.data,
+        'name': '不可披露对象',
+      });
+      final r = await request('update_record', {...edit(), 'id': other});
+      final before = snapshot();
+      final result = await approved(r);
+      expect(result.status, ToolCallStatus.failed);
+      expect(result.data, isEmpty);
+      expect(result.objectRefs, isEmpty);
+      expect(snapshot(), before);
+    },
+  );
 
   for (final stale in [false, true]) {
     test(
