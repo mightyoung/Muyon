@@ -60,6 +60,8 @@ void main() {
         final snapshot = item.snapshot;
         final context = snapshot.actionContext!;
         expect(snapshot.ref.revision, 4);
+        expect(snapshot.facts['old.qty']!.state, FactState.verified);
+        expect(snapshot.facts['new.qty']!.state, FactState.unverified);
         expect(snapshot.facts.values.map((f) => f.object).toSet(), {
           item.target,
         });
@@ -104,7 +106,8 @@ void main() {
   );
 
   test('same target with distinct operations has distinct identities', () {
-    final operation = qty('A');
+    const id = '12345678-1234-4234-8234-123456789abc';
+    final operation = qty(id);
     final update = SingleItemOperation(
       target: operation.target,
       operation: 'update_record',
@@ -128,7 +131,7 @@ void main() {
     expect(items[1].parameters, {
       'operation_id': items[1].operationKeyRef,
       'type': 'project_item',
-      'id': 'A',
+      'id': id,
       'expected_version': 7,
       'values': {'name': 'after'},
     });
@@ -160,6 +163,36 @@ void main() {
 
   test('undeclared and incomplete independent lifecycle declarations refuse whole batch', () {
     expect(project([qty('A'), qty('B')], declarations: []), isNull);
+    expect(
+      project(
+        [qty('A')],
+        declarations: [
+          ...inquiryIndependentItemOperations,
+          ...inquiryIndependentItemOperations,
+        ],
+      ),
+      isNull,
+    );
+    final unknown = SingleItemOperation(
+      target: qty('A').target,
+      operation: 'atomic_batch_update',
+      oldValues: const {'qty': '2'},
+      newValues: const {'qty': '3'},
+    );
+    expect(
+      project(
+        [unknown],
+        declarations: const [
+          IndependentItemOperation(
+            moduleId: 'inquiry',
+            objectType: 'project_item',
+            operation: 'atomic_batch_update',
+          ),
+        ],
+      ),
+      isNull,
+    );
+
     for (final declaration in [
       const IndependentItemOperation(
         moduleId: 'inquiry',
@@ -267,7 +300,7 @@ void main() {
     expect(project([qty('A')], attempt: ''), isNull);
   });
 
-  test('host inputs are frozen before projection and nested update values stay frozen', () {
+  test('host inputs are frozen before projection', () {
     final changes = <String, Object?>{'qty': '3'};
     final operation = SingleItemOperation(
       target: qty('A').target,
@@ -278,4 +311,65 @@ void main() {
     changes['qty'] = '999';
     expect(project([operation])!.items.single.parameters['to_qty'], '3');
   });
+  test('nested host data is immutable and unsupported values are rejected', () {
+    final nested = <String, Object?>{'label': 'before'};
+    final list = <Object?>[nested];
+    final operation = SingleItemOperation(
+      target: qty('A').target,
+      operation: 'update_record',
+      oldValues: const {'notes': []},
+      newValues: {'notes': list},
+    );
+    nested['label'] = 'after';
+    list.clear();
+    final frozen = operation.newValues['notes'] as List<Object?>;
+    expect((frozen.single as Map<String, Object?>)['label'], 'before');
+    expect(() => frozen.clear(), throwsUnsupportedError);
+    expect(
+      () => (frozen.single as Map<String, Object?>)['label'] = 'B',
+      throwsUnsupportedError,
+    );
+    for (final value in [Object(), double.nan, double.infinity]) {
+      expect(
+        () => SingleItemOperation(
+          target: qty('A').target,
+          operation: 'set_item_qty',
+          oldValues: const {'qty': '2'},
+          newValues: {'qty': value},
+        ),
+        throwsArgumentError,
+      );
+    }
+  });
+  test(
+    'host map insertion order does not change reconstructed operation keys',
+    () {
+      const declaration = IndependentItemOperation(
+        moduleId: 'inquiry',
+        objectType: 'project_item',
+        operation: 'update_record',
+      );
+      SingleItemOperation operation(Map<String, Object?> values) =>
+          SingleItemOperation(
+            target: qty('A').target,
+            operation: 'update_record',
+            oldValues: const {'name': 'old', 'qty': '2'},
+            newValues: values,
+          );
+      final first = project(
+        [
+          operation({'name': 'new', 'qty': '3'}),
+        ],
+        declarations: [declaration],
+      )!.items.single;
+      final restored = project(
+        [
+          operation({'qty': '3', 'name': 'new'}),
+        ],
+        declarations: [declaration],
+      )!.items.single;
+      expect(restored.operationKeyRef, first.operationKeyRef);
+      expect(restored.snapshot.ref, first.snapshot.ref);
+    },
+  );
 }
