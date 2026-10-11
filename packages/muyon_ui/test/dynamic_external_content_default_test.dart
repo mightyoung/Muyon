@@ -44,4 +44,28 @@ void main() {
     addTearDown(controller.dispose);
     expect(controller.externalContent, isFalse);
   });
+
+  test('surface_probe_that_throws_treats_content_as_external', () {
+    final controller = UiSurfaceController(
+      mountedPlan(),
+      externalContentProbe: () => throw StateError('probe failed'),
+    );
+    addTearDown(controller.dispose);
+    expect(controller.externalContent, isTrue);
+  });
+
+  test('surface_probe_recovering_to_clean_reads_clean_again', () {
+    var throwing = true;
+    final controller = UiSurfaceController(
+      mountedPlan(),
+      externalContentProbe: () {
+        if (throwing) throw StateError('probe failed');
+        return false;
+      },
+    );
+    addTearDown(controller.dispose);
+    expect(controller.externalContent, isTrue);
+    throwing = false;
+    expect(controller.externalContent, isFalse);
+  });
 }
