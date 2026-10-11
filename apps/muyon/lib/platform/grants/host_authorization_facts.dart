@@ -216,7 +216,12 @@ class HostAuthorizationFacts {
         value['taskId'] == taskId &&
         value['conversationId'] is String) {
       final conversation = value['conversationId'] as String;
-      final history = _read(database.raw, 'auth1b:conversation:$conversation');
+      final historyKey = 'auth1b:conversation:$conversation';
+      final historyRowExists = database.raw.select(
+        'SELECT 1 FROM settings WHERE key=?',
+        [historyKey],
+      ).isNotEmpty;
+      final history = _read(database.raw, historyKey);
       if (_pendingSources.isNotEmpty) {
         final rows = database.raw.select(
           'SELECT payload FROM execution_records WHERE id=?',
@@ -247,8 +252,12 @@ class HostAuthorizationFacts {
         taintState:
             _deny.contains('task:$taskId') ||
                 _deny.contains('conversation:$conversation') ||
-                history?['taintState'] == 'tainted'
+                history?['taintState'] == 'tainted' ||
+                value['taintState'] == 'tainted'
             ? HostTaintState.tainted
+            : (historyRowExists && history == null) ||
+                  history?['taintState'] == 'unknown'
+            ? HostTaintState.unknown
             : HostTaintState.values.byName(value['taintState'] as String),
         sourceDigests: {
           ...List<String>.from(value['sourceDigests'] as List),

@@ -39,6 +39,8 @@
 | 设备交换 | 科研任务包 / 结果包的收发、核验后导入由宿主两个科研专用类处理，`TaskCoordinator` 的执行器与回调直接绑它们 | `host/app/research_task_bridge.dart:21-29`、`:67`、`:102`、`:159`；`host/app/accepted_research_imports.dart:53-64`；`bootstrap.dart:169-170`、`:201-212` |
 | 询价专用 | `InquiryPlugin`（382 行：迁移、`Store.attach`、`InquiryRuntime.attach`、`InquiryHostModels`）+ 两个授权类，各自在构造时向 `ToolRegistry` 登记 `modelSelectable: false` 的“记录通道”，再由模块的应用闭包经 `prepare → 复核 → approve → invoke` 走完一次受宿主约束的外部效应 | `inquiry_plugin.dart:37-224`、`:227-368`；`host/app/inquiry_hub_authority.dart:9-46`、`:60-143`；`host/app/inquiry_web_authority.dart:9-45`、`:59-148` |
 
+> 2026-10-11 注：`registerBusinessTools` 已删除（OC-2）。现在询价工具由询价 v2 适配器的 `registerTools` 登记（`apps/muyon/lib/app/adapters/inquiry_module.dart`），宿主在 `MuyonHost.open` 中调用 `host.modules.registerTools()`（`apps/muyon/lib/app/bootstrap.dart`）；原型与科研工具经 `registerNonInquiryBusinessTools`（`apps/muyon/lib/platform/business_tools.dart`）。上表保留为当时的历史记录。
+
 ### 2.2 宿主按模块名分支或直接依赖模块包的位置
 
 实测：`apps/muyon/lib` 下 **21 个文件** import 四个业务包之一（`research_module`、`inquiry_module`、`prototype_module`、`supplier_core`），其中 **14 个** import 三个模块包（与评估 §3 的“21 个文件”一致）。
@@ -359,7 +361,7 @@ class ModuleHost {
 | 6 | 按 `features`：`importPipeline` → `ImportCoordinator.recover` 并通知冲突；`exchange` → 注册路由；`searchSources` → 登记到 `KnowledgeService` | `bootstrap.dart:299-307` |
 | 7 | 状态写 `module_registry`（`ready` / `failed` + 原因） | `bootstrap.dart:254-260`、`:292-298`、`:312-317`、`:348-358` |
 
-**工具在启动时登记，不等激活**（`registerTools` 由 `MuyonHost.open` 对所有可用的 v2 模块调用，handler 靠“分发前确保激活”懒激活），这与今天 `registerBusinessTools(host)` 在 `open` 里一次性登记（`bootstrap.dart:213`）的时机一致，助手始终看得到完整候选集。
+**工具在启动时登记，不等激活**（`registerTools` 由 `MuyonHost.open` 对所有可用的 v2 模块调用，handler 靠“分发前确保激活”懒激活），这与当时 `registerBusinessTools(host)` 在 `open` 里一次性登记的时机一致（该函数已于 2026-10-11 删除，现由 `host.modules.registerTools()` 登记），助手始终看得到完整候选集。
 
 兼容访问器：`MuyonHost.research` / `prototype` / `inquiry`、`researchError` / `prototypeError` / `inquiryError`、`activateResearch()` / `activatePrototype()` / `activateInquiry()` 保留为 `ModuleHost` 的薄委托，直到 REG-5（14 个宿主文件与多数测试在用，§10.3）。`inquiry` 返回的对象继续暴露 `runtime.state`、`close()`。
 

@@ -1119,6 +1119,41 @@ void main() {
       );
     });
 
+    test('empty_latency_samples_render_as_not_observed', () {
+      // The abstain category ends up with no results at all, so both its
+      // first-response and total-duration samples are empty.
+      final fill = agentTasks.firstWhere((t) => t.category != 'abstain');
+      final run = AgentEvalRun(
+        model: AgentEvalModel(
+          profile: ModelProfile(
+            id: 'p',
+            endpoint: Uri.parse('https://api.example.com/v1'),
+            location: ModelLocation.remote,
+            modelId: 'm',
+            endpointIdentity: 'api.example.com',
+            credentialRef: 'MUYON_EVAL_MODEL_KEY',
+          ),
+          secrets: UnavailableSecretStore(),
+          // In-memory render only, never written to disk.
+          fixture: false,
+        ),
+        results: [
+          for (final t in agentTasks) _stub(t.category == 'abstain' ? fill : t),
+        ],
+        startedAt: DateTime.utc(2026, 10, 7),
+      );
+      final text = agentEvalReport(run, at: DateTime.utc(2026, 10, 7));
+      final row = text
+          .split('\n')
+          .singleWhere((line) => line.startsWith('| abstain |'));
+      expect(row, contains('未观察到'));
+      final cells = row.split('|').map((cell) => cell.trim()).toList();
+      // The p50 / p95 columns of the first response and the total duration:
+      // no samples must not render as 0 / 0.
+      expect(cells[8], '未观察到 / 未观察到');
+      expect(cells[9], '未观察到 / 未观察到');
+    });
+
     test('a real run needs MUYON_EVAL_REAL=1 besides the model variables', () {
       const model = {
         'MUYON_EVAL_MODEL_ENDPOINT': 'https://api.example.com/v1',
