@@ -54,24 +54,99 @@ class UiPlanningHarness {
   final bool Function(String)? allowsPresentation;
   final Object? Function(String)? presentationIdentity;
   final _streamProgress = <String, HostUiStreamProgress>{};
+  final _activeRequests = <String, UiPlanningRequest>{};
+  final _requestProviders = Map<UiPlanningRequest, UiPlanningPort>.identity();
+  final _closedRequests = Set<UiPlanningRequest>.identity();
+  final _cancelledTasks = <String>{};
+  final _terminalResults = Map<UiPlanningRequest, Future<UiPlannedPresentation>>.identity();
+  int _epoch = 0;
   final _requestIdentities = Map<UiPlanningRequest, Object?>.identity();
   bool isCurrentRequest(UiPlanningRequest request) =>
     enabled && (allowsPresentation?.call(request.taskId) ?? true) &&
     _requestIdentities.containsKey(request) &&
+    identical(_activeRequests[request.taskId], request) &&
     identical(_requestIdentities[request], presentationIdentity?.call(request.taskId));
-  HostUiStreamProgress? streamProgress(String taskId) =>
-    enabled && (allowsPresentation?.call(taskId) ?? true) &&
-      (!_latest.containsKey(taskId) || _latest[taskId]?.validated != null)
-        ? _streamProgress[taskId] : null;
+  HostUiStreamProgress? streamProgress(String taskId) {
+    final progress = _streamProgress[taskId];
+    return progress != null && isCurrentRequest(progress.request) ? progress : null;
+  }
   void publishStream(HostUiStreamProgress value) {
-    if (isCurrentRequest(value.request)) {
+    if (isCurrentRequest(value.request) && !_closedRequests.contains(value.request)) {
       _streamProgress[value.request.taskId] = value;
       repository.refresh();
     }
   }
   void invalidate() {
+    ++_epoch;
     _latest.clear(); _streamProgress.clear(); _requests.clear(); _requestIdentities.clear();
+    _activeRequests.clear(); _requestProviders.clear(); _closedRequests.clear(); _terminalResults.clear();
     repository.refresh();
+  }
+
+  HostUiStreamProgress? _progressFor(UiPlanningRequest request) {
+    final provider = _requestProviders[request];
+    return provider is StreamMotivationUiPlanningProvider ? provider.progressFor(request) :
+      identical(_streamProgress[request.taskId]?.request, request) ? _streamProgress[request.taskId] : null;
+  }
+
+  Future<void> _recordProgress(UiPlanningRequest request, HostUiStreamProgress? progress,
+      {String? code}) async {
+    final view = progress?.view;
+    final codes = <String>{
+      if (code != null) code,
+      if (progress?.failureCode case final failure?) failure,
+      if (view != null) for (final diagnostic in view.diagnostics)
+        diagnostic.code.name.replaceAllMapped(RegExp(r'[A-Z]'), (match) => '_${match[0]!.toLowerCase()}'),
+      if (view?.batchValidation?.isValid == false) 'invalid_plan',
+    };
+    if (codes.isEmpty) return;
+    await repository.appendTaskEvent(request.taskId, {
+      'type': 'ui_stream_diagnostics',
+      'data': {'codes': codes.toList(), 'phase': view?.phase.name,
+        'compilerPhase': (progress?.compilationPhase ?? view?.phase)?.name,
+        'receivedLines': view?.receivedLines, 'badLines': view?.badLines,
+        'diagnosticCount': view?.diagnosticCount,
+        'validationPassed': view?.batchValidation?.isValid,
+        'validationErrorCount': view?.batchValidation?.errors.length ?? 0},
+    });
+  }
+
+  UiPlannedPresentation _readOnlyFailure(String code, UiPlanningRequest request,
+      [HostUiStreamProgress? progress]) {
+    final frozen = progress?.revoke(code);
+    if (frozen != null && isCurrentRequest(request)) _streamProgress[request.taskId] = frozen;
+    return UiPlannedPresentation(
+      UiPlanningResult(decision: UiDisplayDecision.textOnly, reasonCode: code),
+      request, null, stream: frozen);
+  }
+
+  /// Fence only this task synchronously; its current host identity remains
+  /// available to display the disabled snapshot fallback after cleanup.
+  Future<void> cancelTask(String taskId) async {
+    _cancelledTasks.add(taskId);
+    final request = _activeRequests[taskId];
+    if (request == null) return;
+    final existing = _terminalResults[request];
+    if (existing != null) { await existing; return; }
+    _closedRequests.add(request);
+    final completion = Completer<UiPlannedPresentation>();
+    _terminalResults[request] = completion.future;
+    final progress = _progressFor(request);
+    _latest.remove(taskId); _streamProgress.remove(taskId);
+    repository.refresh();
+    try {
+      await cancelTimedOutRequest?.call(request);
+    } finally {
+      final value = _readOnlyFailure('cancelled', request, progress);
+      await _recordProgress(request, value.stream, code: 'cancelled');
+      if (isCurrentRequest(request)) _latest[taskId] = value;
+      completion.complete(value);
+      repository.refresh();
+    }
+  }
+
+  Future<UiPlanningHostState?> _sourceState(PersonalTask task) async {
+    try { return await source(task); } catch (_) { return null; }
   }
   final Map<UiPlanningMode, UiPlanningPort> providers;
   UiPlanningMode mode;
@@ -99,6 +174,7 @@ class UiPlanningHarness {
     String taskId, {
     Map<String, Object?>? expected,
   }) async {
+    final epoch = _epoch;
     final task = repository.task(taskId);
     final identity = presentationIdentity?.call(taskId);
     if (!enabled ||
@@ -107,12 +183,25 @@ class UiPlanningHarness {
         task.payload['uiPlanningDisabled'] == true) {
       return fallback('planning_disabled');
     }
-    final state = await source(task);
-    if (!(allowsPresentation?.call(taskId) ?? true) ||
+    final state = await _sourceState(task);
+    if (epoch != _epoch || !(allowsPresentation?.call(taskId) ?? true) ||
         !identical(identity, presentationIdentity?.call(taskId))) {
       return fallback('host_request_changed');
     }
-    if (state == null) return fallback('host_state_unavailable');
+    if (state == null) {
+      _latest.remove(taskId); _streamProgress.remove(taskId);
+      return fallback('host_state_unavailable');
+    }
+    if (_cancelledTasks.contains(taskId) || task.state.name == 'cancelled' || task.state.name == 'interrupted') {
+      final previous = _latest[taskId], request = _latest[taskId]?.request;
+      if (previous != null && request != null && isCurrentRequest(request) &&
+          request.snapshot.ref == state.snapshot.ref &&
+          request.currentView.surfaceId == state.currentView.surfaceId &&
+          request.currentView.revision == state.currentView.revision &&
+          request.catalog.version == state.catalog.version) return previous;
+      _latest.remove(taskId); _streamProgress.remove(taskId);
+      return fallback('cancelled');
+    }
     if (expected != null &&
         (expected.length != 4 ||
             expected['snapshotId'] != state.snapshot.ref.id ||
@@ -144,11 +233,11 @@ class UiPlanningHarness {
     ]);
     final selectedMode = mode;
     return _requests
-        .putIfAbsent(key, () => _run(task, state, selectedMode, identity))
+        .putIfAbsent(key, () => _run(task, state, selectedMode, identity, epoch))
         .then((value) async {
-          final now = await source(repository.task(task.id)!);
+          final now = await _sourceState(repository.task(task.id)!);
           var current = value;
-          if (!enabled ||
+          if (epoch != _epoch || value.request == null || !isCurrentRequest(value.request!) || !enabled ||
               !(allowsPresentation?.call(taskId) ?? true) ||
               presentationIdentity?.call(taskId) != identity ||
               mode != selectedMode ||
@@ -158,6 +247,11 @@ class UiPlanningHarness {
               now.currentView.surfaceId != state.currentView.surfaceId ||
               now.catalog.version != state.catalog.version) {
             current = fallback('host_state_changed', value.request);
+            if (epoch == _epoch && value.request != null && isCurrentRequest(value.request!)) {
+              _streamProgress.remove(taskId); _latest.remove(taskId);
+              _requestIdentities.remove(value.request);
+              _activeRequests.remove(taskId);
+            }
           } else if (value.result.plan != null) {
             final allowed = now.allowedActionRefs.intersection(
               now.intent.allowedActionRefs,
@@ -177,9 +271,11 @@ class UiPlanningHarness {
               now.catalog,
             ).isValid) {
               current = fallback('current_authority_changed', value.request);
+              _streamProgress.remove(taskId); _latest.remove(taskId);
+              _requestIdentities.remove(value.request); _activeRequests.remove(taskId);
             }
           }
-          if (mode == selectedMode &&
+          if (epoch == _epoch && value.request != null && isCurrentRequest(value.request!) && mode == selectedMode &&
               identical(identity, presentationIdentity?.call(taskId)) &&
               (allowsPresentation?.call(taskId) ?? true)) {
             _latest[task.id] = current;
@@ -194,6 +290,7 @@ class UiPlanningHarness {
     UiPlanningHostState state,
     UiPlanningMode selectedMode,
     Object? identity,
+    int epoch,
   ) async {
     final stepAnswer =
         ((task.payload['step'] as Map?)?['assistant'] as Map?)?['content'];
@@ -263,12 +360,19 @@ class UiPlanningHarness {
       guideEntries: entries,
     );
     final provider = providers[selectedMode];
-    if (provider == null) return fallback('provider_unavailable', request);
-    if (!enabled || !(allowsPresentation?.call(task.id) ?? true) ||
+    if (epoch != _epoch || !enabled || !(allowsPresentation?.call(task.id) ?? true) ||
         !identical(identity, presentationIdentity?.call(task.id))) {
       return fallback('host_request_changed', request);
     }
     _requestIdentities[request] = identity;
+    _activeRequests[task.id] = request;
+    if (_cancelledTasks.contains(task.id) ||
+        repository.task(task.id)?.state.name == 'cancelled' ||
+        repository.task(task.id)?.state.name == 'interrupted') {
+      return _readOnlyFailure('cancelled', request);
+    }
+    if (provider == null) return _readOnlyFailure('provider_unavailable', request);
+    _requestProviders[request] = provider;
     try {
       final result = await provider.plan(request).timeout(
         timeout,
@@ -277,6 +381,13 @@ class UiPlanningHarness {
           throw TimeoutException('UI planning deadline expired', timeout);
         },
       );
+      if (!isCurrentRequest(request)) return fallback('host_request_changed', request);
+      if (_closedRequests.contains(request)) return await _terminalResults[request] ?? _latest[task.id] ?? _readOnlyFailure('cancelled', request, _progressFor(request));
+      final progress = _progressFor(request);
+      if (progress != null) {
+        _streamProgress[task.id] = progress;
+        await _recordProgress(request, progress);
+      }
       if (result.errors.isNotEmpty) {
         return fallback('invalid_decision', request);
       }
@@ -294,7 +405,7 @@ class UiPlanningHarness {
         request.catalog,
       );
       if (!checked.isValid) return fallback('invalid_plan', request);
-      final now = await source(repository.task(task.id)!);
+      final now = await _sourceState(repository.task(task.id)!);
       if (now == null ||
           now.snapshot.ref != state.snapshot.ref ||
           now.currentView.surfaceId != state.currentView.surfaceId ||
@@ -303,16 +414,28 @@ class UiPlanningHarness {
           !now.allowedActionRefs.containsAll(allowed)) {
         return fallback('host_state_changed', request);
       }
+      if (!isCurrentRequest(request)) return fallback('host_request_changed', request);
+      if (_closedRequests.contains(request)) return await _terminalResults[request] ?? _latest[task.id] ?? _readOnlyFailure('cancelled', request, _progressFor(request));
       return UiPlannedPresentation(result, request, checked.validatedPlan,
         stream: provider is StreamMotivationUiPlanningProvider ? provider.progressFor(request) : null);
     } on TimeoutException {
-      if (identical(_streamProgress[task.id]?.request, request)) _streamProgress.remove(task.id);
+      _closedRequests.add(request);
+      if (!isCurrentRequest(request)) return fallback('host_request_changed', request);
+      if (_cancelledTasks.contains(task.id)) return await _terminalResults[request] ?? _latest[task.id] ?? _readOnlyFailure('cancelled', request, _progressFor(request));
+      final value = _readOnlyFailure('planner_timeout', request, _progressFor(request));
+      await _recordProgress(request, value.stream, code: 'incomplete');
       repository.refresh();
-      return fallback('planner_timeout', request);
+      return value;
     } catch (_) {
-      if (identical(_streamProgress[task.id]?.request, request)) _streamProgress.remove(task.id);
+      _closedRequests.add(request);
+      if (!isCurrentRequest(request)) return fallback('host_request_changed', request);
+      if (_cancelledTasks.contains(task.id)) return await _terminalResults[request] ?? _latest[task.id] ?? _readOnlyFailure('cancelled', request, _progressFor(request));
+      final progress = _progressFor(request);
+      final code = progress?.failureCode ?? 'planner_unavailable';
+      final value = _readOnlyFailure(code, request, progress);
+      await _recordProgress(request, value.stream, code: code);
       repository.refresh();
-      return fallback('planner_unavailable', request);
+      return value;
     }
   }
 }

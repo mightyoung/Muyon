@@ -40,21 +40,39 @@ UiPlanningRequest request(LoopFixture f) {
     catalog: host.catalog, allowedActionRefs: const {}, mode: UiPlanningMode.motivation);
 }
 void main() {
-  for (final fault in ['bad-line', 'missing-end', 'after-end', 'oversize']) {
+  for (final fault in ['bad-line', 'missing-end', 'oversize']) {
     test('original stream rejects $fault without a replacement plan', () async {
       final f = await LoopFixture.open();
       final stream = switch (fault) {
         'bad-line' => 'not-json\n$validStream',
         'missing-end' => validStream.replaceAll('{"op":"end"}\n', ''),
-        'after-end' => '$validStream{"op":"end"}\n',
         _ => List.filled(UiStreamLimits.v1.lineBytes + 1, 'x').join(),
       };
       final provider = StreamMotivationUiPlanningProvider((_, _, receive) async => receive(stream));
       final input = request(f);
       await expectLater(provider.plan(input), throwsStateError);
-      expect(provider.progressFor(input), isNull);
+      final progress = provider.progressFor(input);
+      expect(progress, isNotNull, reason: 'failed stream retains only a read-only preview');
+      expect(progress!.view.finalPlan, isNull);
+      expect(progress.view.previewPlan.nodes.every((node) => node.events.isEmpty), isTrue);
+      if (fault != 'oversize') {
+        expect(progress.view.candidatePlan.nodes, hasLength(2));
+        expect(progress.view.previewPlan.nodes.first.properties['title'], '保存事实');
+      }
     });
   }
+  test('after-end protocol lines preserve first completion and record after_end', () async {
+    final f = await LoopFixture.open();
+    final input = request(f);
+    final provider = StreamMotivationUiPlanningProvider((_, _, receive) async =>
+      receive('$validStream{"op":"end"}\n'));
+    final result = await provider.plan(input);
+    expect(result.plan!.nodes, hasLength(2));
+    final progress = provider.progressFor(input)!;
+    expect(progress.view.finalPlan, isNotNull);
+    expect(progress.view.batchValidation!.isValid, isTrue);
+    expect(progress.view.diagnostics.where((diagnostic) => diagnostic.reason == 'after_end'), hasLength(1));
+  });
   test('incremental preview has no events; only original completed candidate grants final capability', () async {
     final f = await LoopFixture.open();
     final observations = <HostUiStreamProgress>[];

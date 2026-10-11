@@ -27,6 +27,7 @@ class AgentTaskFactory {
     String? previousAttemptId,
     bool uiPlanningInternal = false,
     bool uiPlanningStream = false,
+    bool uiPlanningAvailable = false,
   }) {
     if (profile != null && profile.purpose != ModelPurpose.chat) {
       throw ArgumentError('Chat profile required');
@@ -42,12 +43,19 @@ class AgentTaskFactory {
     }
     final readonly = AssistantSubconversations(ctx.repository)
         .validateConversation(conversationId);
+    // A registered planning tool is not proof that this request can use it.
+    // The host freezes its presentation/profile decision before selection.
+    final planning = ctx.uiPlanning;
+    final planningAvailable = uiPlanningAvailable &&
+        planning != null &&
+        planning.enabled &&
+        planning.providers.containsKey(planning.mode);
     final available = List<RegisteredToolInfo>.unmodifiable(
       ctx.tools.list().where(
         (t) =>
             !uiPlanningInternal &&
             (t.descriptor.toolId != 'assistant.plan_ui' ||
-                ctx.uiPlanning?.enabled == true) &&
+                planningAvailable) &&
             t.available &&
             (ctx.tools.supportsScope(
                   t.descriptor.toolId, conversation.scope.kind,

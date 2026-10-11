@@ -126,6 +126,23 @@ class PersonalAgent {
     final request = _presentationRequests[id], policy = _presentationPolicies[id];
     return request != null && policy?.allowsContentFor(request) == true;
   }
+  /// Optional content only. Mandatory task confirmation uses its own owner.
+  bool allowsUiContent(String taskId) => !_ctx.closing &&
+    repository.task(taskId) != null &&
+    (presentationPreference == null ? uiPlanningEnabled : _allowsPresentation(taskId));
+  Object? uiContentIdentity(String taskId) => _presentationRequests[taskId];
+  bool isCurrentUiRequest(UiPlanningRequest request) =>
+    _ctx.uiPlanning?.isCurrentRequest(request) ?? false;
+  /// Freeze the ordinary request's real planning availability into its catalogue.
+  bool canExposeUiPlanning(ModelProfile? profile) {
+    final harness = _ctx.uiPlanning;
+    if (_ctx.closing || profile == null || harness == null || !harness.enabled ||
+        harness.providers[harness.mode] == null) return false;
+    if (presentationPreference != null &&
+        presentationMode != UiPresentationMode.automatic) return false;
+    return harness.providers[harness.mode] is! StreamMotivationUiPlanningProvider ||
+      profile.capabilities.streaming;
+  }
   void _freezePresentation(String id, UiPresentationRequest request) {
     _presentationRequests[id] = request;
     final policy = presentationPreference?.freezeFor(request);
@@ -438,6 +455,7 @@ class PersonalAgent {
       profile: profile,
       scope: scope,
       previousAttemptId: previousAttemptId,
+      uiPlanningAvailable: canExposeUiPlanning(profile),
     );
     _freezePresentation(task.id, UiPresentationRequest.ordinary());
     await repository.createTask(task);
@@ -628,6 +646,12 @@ class PersonalAgent {
   Future<void> cancel(String id) async {
     var task = repository.task(id);
     if (task == null || task.terminal) return;
+    // Revoke presentation capabilities before any asynchronous cancellation.
+    // This fences only this task; other open presentations retain their identity.
+    final uiCancellation = _ctx.uiPlanning?.cancelTask(id);
+    _ctx.modelTokens[id]?.cancel();
+    _ctx.toolTokens[id]?.cancel();
+    await uiCancellation;
     if (_ctx.toolActive.contains(id)) {
       _ctx.cancelRequested.add(id);
       _ctx.toolTokens[id]?.cancel();

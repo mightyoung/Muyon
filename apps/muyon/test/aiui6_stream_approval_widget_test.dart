@@ -10,6 +10,7 @@ import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/models/model_provider.dart';
 import 'package:muyon/services/models/profile_repository.dart';
 import 'package:muyon/workspace/workspace_repository.dart';
+import 'package:muyon_module_api/ui_contract.dart' show UiPlanningMode;
 
 import 'aiui6_stream_production_test.dart' show state, validStream;
 import 'support/agent_loop_fixture.dart';

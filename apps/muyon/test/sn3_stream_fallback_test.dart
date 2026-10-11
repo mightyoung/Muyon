@@ -55,6 +55,20 @@ void main() {
     expect(provider.progressFor(input)!.view.diagnostics.where((d) => d.reason == 'after_end'), hasLength(2));
   });
 
+  test('SN3 oversized trailing protocol line is ignored after the first end', () async {
+    final f = await LoopFixture.open();
+    final input = request(f);
+    final provider = StreamMotivationUiPlanningProvider((_, _, receive) async {
+      receive(validStream);
+      receive(List.filled(UiStreamLimits.v1.lineBytes + 1, 'x').join());
+      receive('\n');
+    });
+    final result = await provider.plan(input);
+    expect(result.plan!.nodes, hasLength(2));
+    expect(provider.progressFor(input)!.view.complete, isTrue);
+    expect(provider.progressFor(input)!.view.diagnostics.single.reason, 'after_end');
+  });
+
   test('SN3 transport fault after valid end revokes capability without rewriting compile result', () async {
     final f = await LoopFixture.open();
     final input = request(f);

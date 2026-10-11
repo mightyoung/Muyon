@@ -19,15 +19,26 @@ class _UiPlanningPreferenceSwitchState extends State<UiPlanningPreferenceSwitch>
   Future<void> save(UiPresentationMode? value) async {
     if (saving || value == null) return;
     final agent = widget.agent;
-    setState(() { saving = true; failed = false; });
-    try { await agent.savePresentationMode(value); }
-    catch (_) { if (mounted && identical(widget.agent, agent)) setState(() {
-      failed = true;
-      // FormField changes its own value before async persistence. Recreate it
-      // from the committed host mode on failure, never the tentative choice.
-      fieldGeneration++;
-    }); }
-    finally { if (mounted && identical(widget.agent, agent)) setState(() => saving = false); }
+    setState(() {
+      saving = true;
+      failed = false;
+    });
+    try {
+      await agent.savePresentationMode(value);
+    } catch (_) {
+      if (mounted && identical(widget.agent, agent)) {
+        setState(() {
+          failed = true;
+          // FormField changes its own value before async persistence. Recreate
+          // it from the committed mode on failure, never the tentative choice.
+          fieldGeneration++;
+        });
+      }
+    } finally {
+      if (mounted && identical(widget.agent, agent)) {
+        setState(() => saving = false);
+      }
+    }
   }
   @override
   void didUpdateWidget(UiPlanningPreferenceSwitch oldWidget) {

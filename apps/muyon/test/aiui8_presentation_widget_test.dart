@@ -19,7 +19,10 @@ BEGIN SELECT RAISE(ABORT, 'fixture rejection'); END
       Future<void> chooseFew() async {
         await tester.tap(find.byType(DropdownButtonFormField<UiPresentationMode>));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('少用').last);
+        // The tap starts a real SQLite write. Keep its queue continuations in
+        // the real async zone, like fixture setup and disposal, so cleanup
+        // never waits on a continuation owned by the paused fake clock.
+        await tester.runAsync(() => tester.tap(find.text('少用').last));
         await tester.pump();
         for (var i = 0; i < 30; i++) {
           await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 5)));

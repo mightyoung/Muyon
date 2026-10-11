@@ -72,10 +72,14 @@ class AgentModelTurn {
 
   Future<void> waitForModel(PersonalTask task) async {
     final planning = ctx.uiPlanning;
-    if (planning?.canPlanTask(task.id) == true &&
+    if (planning != null &&
+        planning.providers.containsKey(planning.mode) &&
+        planning.canPlanTask(task.id) &&
+        (task.payload['candidateIds'] as List? ?? const [])
+            .contains('assistant.plan_ui') &&
         task.payload['uiPlanningInternal'] != true) {
       try {
-        final state = await planning!.source(task);
+        final state = await planning.source(task);
         if (state != null) {
           final metadata = jsonEncode({
             'hostUiPlanningContext': {
