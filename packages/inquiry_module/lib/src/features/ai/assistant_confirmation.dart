@@ -6,12 +6,17 @@ import 'package:supplier_core/supplier_core.dart';
 Future<bool> confirmAssistantAction(
   BuildContext context,
   AssistantActionPreview preview,
-  AiCancellation cancellation,
-) async {
+  AiCancellation cancellation, {
+  bool hostRequiresConfirmation = false,
+}) async {
   cancellation.check();
   return await showDialog<bool>(
         context: context,
-        builder: (_) => _ActionDialog(preview, cancellation),
+        builder: (_) => _ActionDialog(
+          preview,
+          cancellation,
+          hostRequiresConfirmation: hostRequiresConfirmation,
+        ),
       ) ??
       false;
 }
@@ -20,14 +25,16 @@ Future<bool> confirmAssistantNetwork(
   BuildContext context,
   String name,
   Map<String, Object?> arguments,
-  AiCancellation cancellation,
-) async {
+  AiCancellation cancellation, {
+  bool hostRequiresConfirmation = false,
+}) async {
   cancellation.check();
   return await showDialog<bool>(
         context: context,
         builder: (_) => _ActionDialog(
           null,
           cancellation,
+          hostRequiresConfirmation: hostRequiresConfirmation,
           networkTitle: name == 'web_search' ? '确认联网搜索' : '确认读取网页',
           networkDetails: name == 'web_search'
               ? '${arguments['query'] ?? ''}'
@@ -43,6 +50,7 @@ Future<bool> confirmAssistantWebHostRequest(
   AssistantWebApprovalPreview preview,
   AiCancellation cancellation, {
   void Function()? onStopTask,
+  bool hostRequiresConfirmation = false,
 }) async {
   cancellation.check();
   return await showDialog<bool>(
@@ -51,6 +59,7 @@ Future<bool> confirmAssistantWebHostRequest(
           null,
           cancellation,
           onStopTask: onStopTask,
+          hostRequiresConfirmation: hostRequiresConfirmation,
           networkTitle: '宿主确认本次网页请求',
           networkDetails:
               'GET ${preview.destination}\n'
@@ -67,11 +76,13 @@ class _ActionDialog extends StatefulWidget {
     this.networkTitle,
     this.networkDetails,
     this.onStopTask,
+    this.hostRequiresConfirmation = false,
   });
   final AssistantActionPreview? preview;
   final AiCancellation cancellation;
   final void Function()? onStopTask;
   final String? networkTitle, networkDetails;
+  final bool hostRequiresConfirmation;
 
   @override
   State<_ActionDialog> createState() => _ActionDialogState();
@@ -117,6 +128,8 @@ class _ActionDialogState extends State<_ActionDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('以下搜索词或网址将发送给公开网站。请先核对是否包含不宜外发的信息。'),
+            if (widget.hostRequiresConfirmation)
+              const Text('本次任务含外部内容或宿主污染状态无法确认，写入与外发须逐次确认。'),
             const SizedBox(height: 12),
             SelectableText(widget.networkDetails!),
           ],
@@ -145,6 +158,8 @@ class _ActionDialogState extends State<_ActionDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(preview.title, style: Theme.of(context).textTheme.titleMedium),
+            if (widget.hostRequiresConfirmation)
+              const Text('本次任务含外部内容或宿主污染状态无法确认，写入与外发须逐次确认。'),
             const SizedBox(height: 12),
             if (preview.operation == 'procurement_import') ...[
               const Text('请核对产品身份、每项技术条件与来源原文。网页声明仍须人工核实。'),

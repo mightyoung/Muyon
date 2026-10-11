@@ -9,6 +9,7 @@ import 'package:supplier_core/supplier_core.dart';
 
 import '../platform/storage_manager.dart';
 import '../platform/tool_registry.dart';
+import '../platform/foundation_repository.dart';
 import 'inquiry_web_authority.dart';
 import 'inquiry_hub_authority.dart';
 import '../services/models/secret_store.dart';
@@ -35,6 +36,27 @@ typedef InquiryModelApproval = Future<bool> Function(
 /// The host adapts Folio's existing transaction owner; it does not rewrite its
 /// cross-project supplier/project relationships into research scopes.
 class InquiryPlugin {
+  /// Only the host constructs this reader. It offers no fact mutation methods.
+  static InquiryHostTaintProbe hostTaintProbeFor(
+    FoundationRepository repository,
+  ) => (taskId, conversationId) {
+    try {
+      final task = repository.task(taskId);
+      if (task == null ||
+          task.conversationId != conversationId ||
+          repository.conversation(conversationId) == null) {
+        return null;
+      }
+      final facts = repository.authorizationFacts.readTask(taskId);
+      if (facts.taskId != task.id || facts.conversationId != conversationId) {
+        return null;
+      }
+      return facts.requiresConfirmation;
+    } catch (_) {
+      return null;
+    }
+  };
+
   InquiryPlugin._(
     this.runtime,
     this.jobs,
@@ -215,6 +237,9 @@ class InquiryPlugin {
     required ProfileRepository modelProfiles,
     required OpenAiModelGateway modelGateway,
     ToolRegistry? tools,
+    InquiryHostTaintProbe? hostTaintProbe,
+    String? hostTaskId,
+    String? hostConversationId,
     InquiryModelApproval? approveModelRequest,
     MethodChannelSecretStore modelSecrets = const MethodChannelSecretStore(),
   }) async {
@@ -230,6 +255,9 @@ class InquiryPlugin {
       modelProfiles: modelProfiles,
       modelGateway: modelGateway,
       tools: tools,
+      hostTaintProbe: hostTaintProbe,
+      hostTaskId: hostTaskId,
+      hostConversationId: hostConversationId,
       approveModelRequest: approveModelRequest,
       modelSecrets: modelSecrets,
     );
@@ -244,6 +272,9 @@ class InquiryPlugin {
     required ProfileRepository modelProfiles,
     required OpenAiModelGateway modelGateway,
     ToolRegistry? tools,
+    InquiryHostTaintProbe? hostTaintProbe,
+    String? hostTaskId,
+    String? hostConversationId,
     InquiryModelApproval? approveModelRequest,
     MethodChannelSecretStore modelSecrets = const MethodChannelSecretStore(),
   }) async {
@@ -287,6 +318,9 @@ class InquiryPlugin {
       webAuthority: webAuthority,
       hubAuthority: hubAuthority,
       hubJournal: hubJournal,
+      hostTaintProbe: hostTaintProbe,
+      hostTaskId: hostTaskId,
+      hostConversationId: hostConversationId,
     );
     return InquiryPlugin._(runtime, jobs, webAuthority, hubAuthority);
   }
