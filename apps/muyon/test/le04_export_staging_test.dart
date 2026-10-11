@@ -50,12 +50,15 @@ final class FakeExportFs implements ExportFileSystem {
   bool failRename = false;
   bool corruptRead = false;
   bool truncateRead = false;
+  Future<void> Function(String path)? onType;
   Future<void> Function(String path)? onWrite;
   Future<void> Function(String path)? onRead;
 
   @override
-  Future<FileSystemEntityType> typeOf(String path) async =>
-      entries[path] ?? FileSystemEntityType.notFound;
+  Future<FileSystemEntityType> typeOf(String path) async {
+    await onType?.call(path);
+    return entries[path] ?? FileSystemEntityType.notFound;
+  }
 
   @override
   Future<String> resolveRealPath(String path) async => path;
@@ -257,6 +260,33 @@ void main() {
       },
     );
 
+    test('a final target check IO failure cleans the owned temp', () async {
+      var checks = 0;
+      fs.onType = (path) async {
+        if (path == '$_exports/report-$_id.md' && ++checks == 2) {
+          throw const FileSystemException('target check denied');
+        }
+      };
+      final result = await generate(_prep('x'));
+      expect(result.stage.outcome, LocalExportOutcome.failed);
+      expect(result.stage.cleanup, LocalExportCleanup.cleaned);
+      expect(fs.tempFiles, isEmpty);
+    });
+
+    test('cancellation during final target check never commits', () async {
+      var checks = 0;
+      final cancellation = ExportCancellation();
+      fs.onType = (path) async {
+        if (path == '$_exports/report-$_id.md' && ++checks == 2) {
+          cancellation.cancel();
+        }
+      };
+      final result = await generate(_prep('x'), cancellation: cancellation);
+      expect(result.stage.outcome, LocalExportOutcome.cancelled);
+      expect(fs.tempFiles, isEmpty);
+      expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
+    });
+
     test('the claim-drafts kind uses its own host-named file', () async {
       final result = await generate(
         _prep('{"a":1}\n', kind: LocalExportKind.claimDrafts),
@@ -291,6 +321,62 @@ void main() {
           preparation: prep,
           researchDirectory: research.path,
         );
+
+    test('IO commit never replaces a concurrently occupied target', () async {
+      final source = File(p.join(tmp.path, 'source'))..writeAsStringSync('export');
+      final target = File(p.join(tmp.path, 'target'))..writeAsStringSync('owner');
+      Object? error;
+      try {
+        await io.rename(source.path, target.path);
+      } on Object catch (caught) {
+        error = caught;
+      }
+      expect(target.readAsStringSync(), 'owner');
+      expect(error, isNotNull);
+      expect(source.readAsStringSync(), 'export');
+    });
+
+    test('directory substitution cannot write outside the anchored exports', () async {
+      final exports = Directory(p.join(research.path, 'exports'))..createSync();
+      final moved = p.join(research.path, 'owned-exports');
+      final outside = Directory(p.join(tmp.path, 'outside'))..createSync();
+      final race = RaceExportFs(io);
+      race.beforeCreate = (_) async {
+        exports.renameSync(moved);
+        Link(exports.path).createSync(outside.path);
+      };
+      await LocalExportStager(fileSystem: race, newExportId: () => _id).generate(
+        preparation: _prep('export'), researchDirectory: research.path,
+      );
+      expect(outside.listSync(), isEmpty);
+    });
+
+    test('temp substitution cannot truncate an unrelated file', () async {
+      final victim = File(p.join(tmp.path, 'victim'))..writeAsStringSync('owner');
+      final race = RaceExportFs(io);
+      race.beforeWrite = (path) async {
+        if (File(path).existsSync()) File(path).deleteSync();
+        Link(path).createSync(victim.path);
+      };
+      await LocalExportStager(fileSystem: race, newExportId: () => _id).generate(
+        preparation: _prep('export'), researchDirectory: research.path,
+      );
+      expect(victim.readAsStringSync(), 'owner');
+    });
+
+    test('temp substitution after verification never commits substituted bytes', () async {
+      final race = RaceExportFs(io);
+      race.afterRead = (path) async {
+        if (File(path).existsSync()) File(path).deleteSync();
+        File(path).writeAsStringSync('intruder');
+      };
+      final result = await LocalExportStager(fileSystem: race, newExportId: () => _id).generate(
+        preparation: _prep('export'), researchDirectory: research.path,
+      );
+      if (result.stage.outcome == LocalExportOutcome.succeeded) {
+        expect(File(result.path!).readAsStringSync(), 'export');
+      }
+    });
 
     test('a real generation writes exactly the frozen bytes', () async {
       final prep = _prep('真实文件');
@@ -347,4 +433,39 @@ void main() {
       },
     );
   });
+}
+
+/// Real IO with deterministic interleavings at asynchronous adapter boundaries.
+class RaceExportFs implements ExportFileSystem {
+  RaceExportFs(this.delegate);
+  final ExportFileSystem delegate;
+  Future<void> Function(String)? beforeCreate;
+  Future<void> Function(String)? beforeWrite;
+  Future<void> Function(String)? afterRead;
+  @override
+  Future<FileSystemEntityType> typeOf(String path) => delegate.typeOf(path);
+  @override
+  Future<String> resolveRealPath(String path) => delegate.resolveRealPath(path);
+  @override
+  Future<void> createDirectory(String path) => delegate.createDirectory(path);
+  @override
+  Future<void> createExclusive(String path) async {
+    await beforeCreate?.call(path);
+    await delegate.createExclusive(path);
+  }
+  @override
+  Future<void> writeAll(String path, Uint8List bytes) async {
+    await beforeWrite?.call(path);
+    await delegate.writeAll(path, bytes);
+  }
+  @override
+  Future<Uint8List> readAll(String path) async {
+    final bytes = await delegate.readAll(path);
+    await afterRead?.call(path);
+    return bytes;
+  }
+  @override
+  Future<void> rename(String from, String to) => delegate.rename(from, to);
+  @override
+  Future<void> delete(String path) => delegate.delete(path);
 }
