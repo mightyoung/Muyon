@@ -205,10 +205,27 @@ class _Fixture {
     return agent;
   }
 
-  Future<PersonalTask> start(PersonalAgent agent, ModelProfile profile) async {
-    final conversation = await repo.createConversation();
+  Future<PersonalTask> start(
+    PersonalAgent agent,
+    ModelProfile profile, {
+    String? conversationId,
+  }) async {
+    final id = conversationId ?? (await repo.createConversation()).id;
+    if (conversationId != null) {
+      // Pin metadata to reproduce conversation-ID collisions deterministically.
+      final now = DateTime.now().toUtc().toIso8601String();
+      await repo.database.write((db) {
+        db.execute('INSERT INTO conversations VALUES(?,?,?,?,?)', [
+          conversationId,
+          '主对话',
+          jsonEncode(const AssistantScope.global().toJson()),
+          now,
+          now,
+        ]);
+      });
+    }
     return agent.start(
-      conversationId: conversation.id,
+      conversationId: id,
       prompt: '项目的成本预算是多少？',
       profile: profile,
     );
@@ -270,6 +287,7 @@ void main() {
 
     test('the strict parse and the one correction are unchanged: prose is '
         'discarded, not saved, not sent back', () async {
+      const conversationId = 'bf94b3dc-e085-481e-a1f8-262d3aa82380';
       final f = await _Fixture.open();
       f.replies
         ..add(_Reply.sse(_text(_prose)))
@@ -277,12 +295,18 @@ void main() {
       final agent = f.agent();
       final task = await f.run(
         agent,
-        await f.start(agent, f.profile(capabilities: _streaming)),
+        await f.start(
+          agent,
+          f.profile(capabilities: _streaming),
+          conversationId: conversationId,
+        ),
       );
       expect(task.state, PersonalTaskState.succeeded);
       expect(task.payload['protocolCorrections'], 1);
+      expect(task.payload['conversationId'], conversationId);
       expect(jsonEncode(f.bodies[1]['messages']), isNot(contains('2380')));
-      expect(jsonEncode(task.payload), isNot(contains('2380')));
+      expect(jsonEncode(task.payload['messages']), isNot(contains('2380')));
+      expect(task.summary, '成本合计 2080 元');
       expect(
         (f.bodies[1]['messages'] as List).last['content'],
         contains('did not follow the protocol'),
