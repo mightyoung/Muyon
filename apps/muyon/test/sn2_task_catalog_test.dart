@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -139,6 +140,11 @@ void main() {
   for (final native in [false, true]) {
     for (final change in ['text only', 'missing provider']) {
       test('next model round removes stale planning metadata after $change in ${native ? 'native' : 'JSON'} protocol', () async {
+        // Earlier widget cases initialize Flutter's fake HTTP override. These
+        // rounds must reach the real loopback fixture, then restore the binding.
+        final previousOverrides = HttpOverrides.current;
+        HttpOverrides.global = null;
+        addTearDown(() { HttpOverrides.global = previousOverrides; });
         final f = await LoopFixture.open();
         final preference = UiPresentationPreference(f.repo);
         await preference.save(UiPresentationMode.automatic);
@@ -170,7 +176,7 @@ void main() {
         await agent.confirm(first.id,
           requestDigest: first.payload['requestDigest'] as String);
         final next = f.repo.task(first.id)!;
-        expect(f.bodies, hasLength(1), reason: 'Only the first model round was approved');
+        expect(f.bodies, hasLength(1), reason: 'Only the first model round was approved; ${next.error ?? next.state.name}');
         expect(f.callsOf('read'), 1, reason: 'A real tool result advances the model round');
         expect(next.stage, 'model');
         expect(next.payload['uiPlanningContext'], isNull);
