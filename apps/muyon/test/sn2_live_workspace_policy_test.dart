@@ -165,6 +165,28 @@ void main() {
     expect(live.f.bodies, isEmpty);
   });
 
+  testWidgets('fresh host identity immediately fences old local and port callbacks',
+      (tester) async {
+    final live = await open(tester);
+    final confirm = tester.widget<ConfirmCard>(find.byType(ConfirmCard)).onDecision!;
+    final explain = tester.widget<WarnBanner>(find.byType(WarnBanner)).onAction!;
+    final edit = tester.widget<TextFormField>(find.byType(TextFormField)).onChanged!;
+    final surface = live.session.controller!.surface;
+    final before = surface.session.resolve(const BindingRef.uiState('quantity'));
+    await tester.runAsync(() async {
+      final fresh = live.agent.planUiFromUserControl(live.taskId);
+      edit('999');
+      explain();
+      confirm(ConfirmationChoice.once);
+      await fresh;
+    });
+    await tester.pumpAndSettle();
+    expect(surface.session.resolve(const BindingRef.uiState('quantity')), before);
+    expect(live.events, isEmpty);
+    expect(live.f.callsOf('write'), 0);
+    expect(live.f.bodies, isEmpty);
+  });
+
   testWidgets('batch individual control is disabled without an individual route',
       (tester) async {
     final live = await open(tester, batch: true);
