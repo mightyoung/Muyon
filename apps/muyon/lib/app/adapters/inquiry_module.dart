@@ -7,6 +7,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:supplier_core/supplier_core.dart' as domain;
 
 import '../../platform/business_tools.dart';
+import '../../platform/inquiry_receipt_lookup.dart';
 import '../../platform/storage_manager.dart';
 import '../../services/models/profile_repository.dart';
 import '../bootstrap.dart';
@@ -39,7 +40,11 @@ class InquiryBusinessModule implements BusinessModuleV2 {
     displayName: 'Folio · 询价台账',
     tagline: '完整供应商、询价报价和成本业务',
     iconKey: 'receipt_long',
-    features: {ModuleFeature.importPipeline, ModuleFeature.objectPages},
+    features: {
+      ModuleFeature.importPipeline,
+      ModuleFeature.objectPages,
+      ModuleFeature.businessReceipts,
+    },
   );
   @override
   ModuleSchema get schema => InquiryPlugin.schema;
@@ -111,7 +116,12 @@ class InquiryBusinessModule implements BusinessModuleV2 {
 
 /// The compatibility InquiryPlugin remains the one service/close owner.
 class InquiryModuleRuntime
-    implements ModuleRuntime, ScopeResolvable, ImportCapable, ObjectPages {
+    implements
+        ModuleRuntime,
+        ScopeResolvable,
+        ImportCapable,
+        ObjectPages,
+        BusinessReceiptLookup {
   InquiryModuleRuntime(
     this.owner,
     ModuleFiles files, {
@@ -147,6 +157,12 @@ class InquiryModuleRuntime
   @override
   Future<ImportReceipt?> receipt(String operationId) async =>
       imports.receipt(operationId);
+
+  /// Read-only: never writes, approves or notifies (WC-D).
+  @override
+  Future<BusinessReceiptLookupResult> lookupBusinessReceipt(
+    BusinessReceiptQuery query,
+  ) async => lookupInquiryReceipt(owner.runtime.state.store.db, query);
   Future<PreparedInquiryDraft> resumeImport(String draftId) async =>
       imports.resume(draftId);
   Future<PreparedInquiryListDraft> prepareListImport(
