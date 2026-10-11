@@ -175,7 +175,7 @@ void main() {
     });
 
     test('v1 and v2 manifests do not need the capability by default', () {
-      const manifest = ModuleManifest(
+      final manifest = ModuleManifest(
         id: 'm',
         apiVersion: 2,
         packageRevision: '1',
@@ -301,8 +301,8 @@ void main() {
 
   group('staged results', () {
     test('each stage has its own outcome and cleanup', () {
-      const generate = LocalExportStage(LocalExportOutcome.succeeded);
-      const save = LocalExportStage(
+      final generate = LocalExportStage(LocalExportOutcome.succeeded);
+      final save = LocalExportStage(
         LocalExportOutcome.cancelled,
         cleanup: LocalExportCleanup.notNeeded,
       );
@@ -314,7 +314,7 @@ void main() {
 
     test('only generate + save succeeded counts as completed', () {
       expect(
-        const LocalExportResult(
+        LocalExportResult(
           generate: LocalExportStage(LocalExportOutcome.succeeded),
           save: LocalExportStage(LocalExportOutcome.succeeded),
         ).completed,
@@ -324,7 +324,7 @@ void main() {
         if (outcome == LocalExportOutcome.succeeded) continue;
         expect(
           LocalExportResult(
-            generate: const LocalExportStage(LocalExportOutcome.succeeded),
+            generate: LocalExportStage(LocalExportOutcome.succeeded),
             save: LocalExportStage(outcome),
           ).completed,
           isFalse,
@@ -344,7 +344,7 @@ void main() {
         expect(
           () => LocalExportResult(
             generate: LocalExportStage(outcome),
-            save: const LocalExportStage(LocalExportOutcome.succeeded),
+            save: LocalExportStage(LocalExportOutcome.succeeded),
           ),
           throwsArgumentError,
           reason: outcome.name,
@@ -354,7 +354,7 @@ void main() {
 
     test('error codes are short safe identifiers, never paths or text', () {
       expect(
-        const LocalExportStage(
+        LocalExportStage(
           LocalExportOutcome.failed,
           errorCode: 'write_failed',
         ).errorCode,
@@ -370,7 +370,7 @@ void main() {
     });
 
     test('cleanup residue and unknown are distinct, reportable states', () {
-      const stage = LocalExportStage(
+      final stage = LocalExportStage(
         LocalExportOutcome.interrupted,
         cleanup: LocalExportCleanup.residue,
       );
