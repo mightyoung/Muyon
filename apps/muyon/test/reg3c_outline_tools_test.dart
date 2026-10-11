@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
+import 'package:muyon/app/host_tool_registrar.dart';
+import 'package:muyon/app/module_host.dart';
+import 'package:muyon/platform/tool_registry.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
@@ -847,6 +850,204 @@ void main() {
     expect(store.entries('P').single.id, 'E');
   });
 
+  test('cite rejects current evidence from another project before writing', () async {
+    await research();
+    final created = await seed(['甲']);
+    final store = host.research!.store;
+    await store.write(
+      () => store.db.execute(
+        'INSERT INTO entries(id,project_id,kind,title,data) VALUES(?,?,?,?,?)',
+        ['EQ', 'Q', 'claim', '另一项目证据', '{}'],
+      ),
+    );
+    final section = await current('section', created.single.id, 'P');
+    final evidence = await current('entry', 'EQ', 'Q');
+    final registry = ToolRegistry(
+      database: host.tools.database,
+      resolveScope: host.tools.resolveScope,
+    );
+    // Observe the real handler error before the registry sanitizes StateError.
+    // Lower-level cite also refuses cross-project evidence; failed alone would
+    // pass even if the earlier Object outside scope guard were removed.
+    final registrar = _ObservedToolRegistrar(registry, host.modules);
+    ResearchModule().registerTools(registrar);
+    registrar.seal();
+    final call = request(
+      'research.cite',
+      {
+        'section_id': section.objectId,
+        'evidence_type': 'entry',
+        'evidence_id': evidence.objectId,
+        'expected_digest': section.contentDigest!,
+      },
+      [section, evidence],
+    );
+    final changes = store.db.select('SELECT * FROM change_log').toList();
+    try {
+      final prepared = await registry.prepare(call);
+      expect(prepared.resolvedScope.objects.map((ref) => ref.nativeProjectId), [
+        'P',
+        'Q',
+      ]);
+      final approval = await registry.approve(prepared);
+      final result = await registry.invoke(call.withApproval(approval));
+      expect(
+        registrar.error,
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          'Object outside scope',
+        ),
+      );
+      expect(result.status, ToolCallStatus.failed);
+      expect(result.changes, isEmpty);
+      expect(registry.receiptFor(call.invocationId)!.state, 'failed');
+      expect(store.outline('P'), isEmpty);
+      expect(store.outline('Q'), isEmpty);
+      expect(headings(), ['甲']);
+      expect(store.entries('Q').single.id, 'EQ');
+      expect(store.db.select('SELECT * FROM change_log').toList(), changes);
+    } finally {
+      await registry.close();
+    }
+  });
+
+  test(
+    'queued add_section refuses authority withdrawn before effect',
+    () async {
+      await research();
+      final selected = await project('P');
+      final digest = await orderDigest(selected);
+      final original = host.research!.resources;
+      final observed = _ObservedWrite(original.database);
+      final runtime = ResearchRuntime(
+        ModuleResources(
+          database: observed,
+          files: original.files,
+          capabilities: original.capabilities,
+        ),
+      );
+      host.modules.setRuntimeForTesting('research', runtime);
+      final call = request(
+        'research.add_section',
+        {
+          'project_id': 'P',
+          'heading': '确认新增',
+          'level': 1,
+          'expected_digest': digest,
+        },
+        [selected],
+      );
+      final approval = await host.tools.approve(await host.tools.prepare(call));
+      final changes = runtime.store.db
+          .select('SELECT * FROM change_log')
+          .toList();
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      final holding = (original.database as ExclusiveDatabase)
+          .exclusiveAsync<void>((_) async {
+            entered.complete();
+            await release.future;
+          });
+      await entered.future;
+      try {
+        final pending = host.tools.invoke(call.withApproval(approval));
+        await observed.queued.future.timeout(const Duration(seconds: 5));
+        host.tools.setAvailability('research.add_section', available: false);
+        release.complete();
+        await holding;
+        final result = await pending;
+        expect(runtime.store.sections('P'), isEmpty);
+        expect(
+          runtime.store.db.select('SELECT * FROM change_log').toList(),
+          changes,
+        );
+        expect(result.status, ToolCallStatus.failed);
+        expect(result.summary, contains('Tool authority was withdrawn'));
+        expect(result.changes, isEmpty);
+        // The registry creates a running receipt before dispatch. A refusal
+        // therefore leaves a failed audit receipt, never a success receipt.
+        expect(host.tools.receiptFor(call.invocationId)!.state, 'failed');
+      } finally {
+        if (!release.isCompleted) release.complete();
+        await holding;
+      }
+    },
+  );
+
+  test(
+    'queued cite refuses evidence no longer matching the confirmed object',
+    () async {
+      await research();
+      final created = await seed(['甲']);
+      final section = await current('section', created.single.id, 'P');
+      final evidence = await current('entry', 'E', 'P');
+      final original = host.research!.resources;
+      final observed = _ObservedWrite(original.database);
+      final runtime = ResearchRuntime(
+        ModuleResources(
+          database: observed,
+          files: original.files,
+          capabilities: original.capabilities,
+        ),
+      );
+      host.modules.setRuntimeForTesting('research', runtime);
+      final call = request(
+        'research.cite',
+        {
+          'section_id': section.objectId,
+          'evidence_type': 'entry',
+          'evidence_id': evidence.objectId,
+          'expected_digest': section.contentDigest!,
+        },
+        [section, evidence],
+      );
+      final approval = await host.tools.approve(await host.tools.prepare(call));
+      final changes = runtime.store.db
+          .select('SELECT * FROM change_log')
+          .toList();
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      final holding = (original.database as ExclusiveDatabase)
+          .exclusiveAsync<void>((db) async {
+            entered.complete();
+            await release.future;
+            db.execute('UPDATE entries SET data=? WHERE id=?', [
+              '{"claim":"changed"}',
+              'E',
+            ]);
+          });
+      await entered.future;
+      try {
+        final pending = host.tools.invoke(call.withApproval(approval));
+        await observed.queued.future.timeout(const Duration(seconds: 5));
+        release.complete();
+        await holding;
+        final result = await pending;
+        expect(runtime.store.outline('P'), isEmpty);
+        expect(result.status, ToolCallStatus.failed);
+        expect(result.changes, isEmpty);
+        expect(host.tools.receiptFor(call.invocationId)!.state, 'failed');
+        expect(
+          runtime.store.db.select('SELECT * FROM change_log').toList(),
+          changes,
+        );
+        expect(
+          (await current('section', section.objectId, 'P')).contentDigest,
+          section.contentDigest,
+        );
+        expect(
+          (await current('entry', 'E', 'P')).contentDigest,
+          isNot(evidence.contentDigest),
+        );
+        expect(headings(), ['甲']);
+      } finally {
+        if (!release.isCompleted) release.complete();
+        await holding;
+      }
+    },
+  );
+
   test(
     'queued add_section rechecks the order digest inside the transaction',
     () async {
@@ -916,5 +1117,24 @@ class _ObservedWrite implements ManagedDatabase {
   Future<T> write<T>(T Function(Database) body) {
     if (!queued.isCompleted) queued.complete();
     return delegate.write(body);
+  }
+}
+
+class _ObservedToolRegistrar extends HostToolRegistrar {
+  _ObservedToolRegistrar(ToolRegistry registry, ModuleHost modules)
+    : super('research', registry, ResearchModule().manifest, modules);
+
+  Object? error;
+
+  @override
+  void write(WriteToolSpec spec, ModuleToolHandler handler) {
+    super.write(spec, (context) async {
+      try {
+        return await handler(context);
+      } catch (caught) {
+        error = caught;
+        rethrow;
+      }
+    });
   }
 }
