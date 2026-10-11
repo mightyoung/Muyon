@@ -252,21 +252,23 @@ void main() {
           effect: ToolEffect.export,
           parameterSchema: const {'type': 'object'},
         ),
-        effectIntent: (request, _) => cachedIntent ?? HostEffectIntent.localExport(
-          toolId: request.toolId,
-          invocationId: request.invocationId,
-          phase: phase,
-          scopeDigest: scopeDigest,
-          preparationVersion: preparationVersion,
-          fileName: fileName,
-          format: format,
-          content: bytes,
-          sourceObjects: const [],
-          targetIssuer: issuer,
-          target: target,
-          overwrite: overwrite,
-          policyVersion: policyVersion,
-        ),
+        effectIntent: (request, _) =>
+            cachedIntent ??
+            HostEffectIntent.localExport(
+              toolId: request.toolId,
+              invocationId: request.invocationId,
+              phase: phase,
+              scopeDigest: scopeDigest,
+              preparationVersion: preparationVersion,
+              fileName: fileName,
+              format: format,
+              content: bytes,
+              sourceObjects: const [],
+              targetIssuer: issuer,
+              target: target,
+              overwrite: overwrite,
+              policyVersion: policyVersion,
+            ),
         handler: (context) async {
           handlerEntries++;
           beforeEffect?.call();
@@ -396,20 +398,27 @@ void main() {
       expect(handlerEntries, 0);
     });
 
-    test('cached approved save revoked before invoke has zero effects', () async {
-      final call = await cacheSave();
-      final signed = call.request.withApproval(await approve(call));
-      issuer.revoke(target!);
-      final executed = await ran(signed);
-      expect(runs, 0, reason: 'the same cached intent must lose live authority');
-      expect(executed, isFalse);
-      expect(handlerEntries, 0);
-      expect(registry.receiptFor(signed.invocationId), isNull);
-      final row = db.raw.select('SELECT * FROM tool_approvals').single;
-      expect(row['state'], 'issued');
-      expect(row['consumed_at'], isNull);
-      expect(grants.list(), isEmpty);
-    });
+    test(
+      'cached approved save revoked before invoke has zero effects',
+      () async {
+        final call = await cacheSave();
+        final signed = call.request.withApproval(await approve(call));
+        issuer.revoke(target!);
+        final executed = await ran(signed);
+        expect(
+          runs,
+          0,
+          reason: 'the same cached intent must lose live authority',
+        );
+        expect(executed, isFalse);
+        expect(handlerEntries, 0);
+        expect(registry.receiptFor(signed.invocationId), isNull);
+        final row = db.raw.select('SELECT * FROM tool_approvals').single;
+        expect(row['state'], 'issued');
+        expect(row['consumed_at'], isNull);
+        expect(grants.list(), isEmpty);
+      },
+    );
 
     test('cached save revoked at effect boundary cannot write', () async {
       final call = await cacheSave();
@@ -422,8 +431,11 @@ void main() {
       final receipt = registry.receiptFor(signed.invocationId)!;
       expect(receipt.state, 'failed');
       expect(receipt.result!.status, ToolCallStatus.failed);
-      expect(db.raw.select('SELECT * FROM tool_approvals').single['state'],
-          'consumed', reason: 'dispatch claimed once, but no effect was reached');
+      expect(
+        db.raw.select('SELECT * FROM tool_approvals').single['state'],
+        'consumed',
+        reason: 'dispatch claimed once, but no effect was reached',
+      );
       expect(grants.list(), isEmpty);
     });
 

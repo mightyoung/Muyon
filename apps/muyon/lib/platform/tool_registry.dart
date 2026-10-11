@@ -462,6 +462,7 @@ class ToolRegistry {
       );
     }
     final intent = tool.effectIntent?.call(request, scope);
+    _requireLiveEffectIntent(intent);
     final localStage = parseLocalExportDestination(request.destination);
     if (intent != null &&
         (intent.toolId != request.toolId ||
@@ -672,7 +673,21 @@ class ToolRegistry {
         prepared._generation != tool.generation) {
       return null;
     }
-    return tool.effectIntent?.call(prepared.request, prepared.resolvedScope);
+    final intent = tool.effectIntent?.call(
+      prepared.request,
+      prepared.resolvedScope,
+    );
+    _requireLiveEffectIntent(intent);
+    return intent;
+  }
+
+  static void _requireLiveEffectIntent(HostEffectIntent? intent) {
+    if (intent != null && !intent.hasLiveAuthority) {
+      throw const ToolPlatformException(
+        'authorization_invalidated',
+        'Local export target authority was withdrawn',
+      );
+    }
   }
 
   void _checkReview(

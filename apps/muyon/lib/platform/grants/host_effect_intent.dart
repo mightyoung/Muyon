@@ -82,6 +82,7 @@ final class HostEffectIntent {
          fileName,
          format,
          target,
+         targetIssuer,
          overwrite,
          policyVersion,
        ),
@@ -110,6 +111,11 @@ final class HostEffectIntent {
   final String toolId, invocationId;
   final _LocalExport? _le;
   bool get isLocalExport => _le != null;
+
+  /// Identity binding remains stable, but a cached save loses authority when
+  /// its trusted issuer revokes the target. Recheck at each host boundary.
+  bool get hasLiveAuthority =>
+      _le?.target == null || _le!.targetIssuer.owns(_le.target!);
   LocalExportPhase get phase =>
       _le?.phase ?? (throw StateError('Not a local export'));
   final Uri? _endpoint;
@@ -179,6 +185,7 @@ final class _LocalExport {
     this.fileName,
     this.format,
     this.target,
+    this.targetIssuer,
     this.overwrite,
     this.policyVersion,
   );
@@ -186,5 +193,6 @@ final class _LocalExport {
   final String scopeDigest, fileName, format, policyVersion;
   final int preparationVersion;
   final LocalExportTargetCapability? target;
+  final LocalExportTargetIssuer targetIssuer;
   final LocalExportOverwrite overwrite;
 }
