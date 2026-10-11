@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/agent_budget.dart';
 import 'package:muyon/assistant/model_request_gate.dart';
@@ -164,7 +165,21 @@ class LoopFixture {
     });
     addTearDown(() async {
       await server.close(force: true);
-      await storage.close();
+      // Open finished on the real clock and the sqlite tail on the fake
+      // clock. close() awaits those futures one after another, and each
+      // resume is queued on the other clock. Flush both, or tearDown waits
+      // out the framework timeout.
+      final closing = storage.close();
+      if (BindingBase.debugBindingType() != null) {
+        final binding = TestWidgetsFlutterBinding.instance;
+        if (binding.inTest) {
+          for (var i = 0; i < 8; i++) {
+            await binding.runAsync(() => Future<void>.delayed(Duration.zero));
+            binding.delayed(Duration.zero);
+          }
+        }
+      }
+      await closing;
       root.deleteSync(recursive: true);
     });
     return f;
