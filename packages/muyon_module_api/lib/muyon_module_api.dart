@@ -20,3 +20,4 @@ export 'src/business_receipts.dart';
 export 'src/write_conflict.dart';
 export 'src/write_contract_compliance.dart';
 export 'src/atomic_batch_write.dart';
+export 'src/local_export.dart';
