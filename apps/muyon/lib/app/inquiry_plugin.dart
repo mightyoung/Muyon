@@ -46,8 +46,10 @@ class InquiryPlugin {
   final InquiryRuntime runtime;
   final AiJobStore jobs;
   static final schema = ModuleSchema(
-    version: 2,
-    definitionDigest: _digest('inquiry-host-v2:domain12:change-log'),
+    version: 3,
+    definitionDigest: _digest(
+      'inquiry-host-v3:domain12:change-log-contact-product',
+    ),
     migrations: [
       ModuleMigration(
         version: 1,
@@ -118,6 +120,56 @@ class InquiryPlugin {
               '(object_type,object_id,native_project_id,revision_ref,'
               'op,summary,recorded_at) '
               "SELECT '$type',$type.id,${scope(type)},"
+              "CAST($type.version AS TEXT),"
+              "CASE WHEN deleted=1 THEN 'delete' ELSE 'upsert' END,"
+              "${summary(type)},strftime('%Y-%m-%dT%H:%M:%fZ','now') FROM $type",
+            );
+          }
+        },
+      ),
+      ModuleMigration(
+        version: 3,
+        id: 'inquiry-host-v3-change-log-contact-product',
+        definitionDigest: _digest(
+          'inquiry-host-v3:domain12:change-log-contact-product',
+        ),
+        migrate: (db) {
+          // contact and product carry no project_id (supplier_core entities.dart),
+          // so they are global objects: native_project_id is NULL, as GB-3 says.
+          for (final type in const ['contact', 'product']) {
+            String summary(String row) =>
+                "coalesce(json_extract($row.data, '\$.name'), "
+                "json_extract($row.data, '\$.title'), "
+                "json_extract($row.data, '\$.subject'), "
+                "json_extract($row.data, '\$.code'), $row.id)";
+            String record(String row, String op) =>
+                'INSERT INTO ${ModuleChangeLog.table}'
+                '(object_type,object_id,native_project_id,revision_ref,'
+                'op,summary,recorded_at) VALUES('
+                "'$type',$row.id,NULL,CAST($row.version AS TEXT),"
+                "$op,${summary(row)},strftime('%Y-%m-%dT%H:%M:%fZ','now'));";
+            final upsert = record(
+              'new',
+              "CASE WHEN new.deleted=1 THEN 'delete' ELSE 'upsert' END",
+            );
+            db.execute(
+              'CREATE TRIGGER muyon_${type}_ai AFTER INSERT ON $type '
+              'BEGIN $upsert END',
+            );
+            db.execute(
+              'CREATE TRIGGER muyon_${type}_au AFTER UPDATE ON $type '
+              'BEGIN $upsert END',
+            );
+            db.execute(
+              'CREATE TRIGGER muyon_${type}_ad AFTER DELETE ON $type '
+              "BEGIN ${record('old', "'delete'")} END",
+            );
+            // Existing rows must become discoverable when upgrading from v2.
+            db.execute(
+              'INSERT INTO ${ModuleChangeLog.table}'
+              '(object_type,object_id,native_project_id,revision_ref,'
+              'op,summary,recorded_at) '
+              "SELECT '$type',$type.id,NULL,"
               "CAST($type.version AS TEXT),"
               "CASE WHEN deleted=1 THEN 'delete' ELSE 'upsert' END,"
               "${summary(type)},strftime('%Y-%m-%dT%H:%M:%fZ','now') FROM $type",
