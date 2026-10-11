@@ -11,6 +11,8 @@ import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import 'support/reg3c_fixture.dart';
+
 void main() {
   late Directory root;
   late MuyonHost host;
@@ -27,40 +29,10 @@ void main() {
     root.deleteSync(recursive: true);
   });
 
-  Future<ObjectRef> current(String type, String id, String project) async {
-    final session = await host.research!.openScopeSession();
-    try {
-      return (await session.resolve(
-        ObjectRef(
-          moduleId: 'research',
-          objectType: type,
-          objectId: id,
-          nativeProjectId: project,
-        ),
-      ))!.ref;
-    } finally {
-      await session.dispose();
-    }
-  }
+  Future<ObjectRef> current(String type, String id, String project) =>
+      currentResearchRef(host, type, id, project);
 
-  Future<void> research() async {
-    await host.activateResearch();
-    final store = host.research!.store;
-    await store.write(() {
-      store.db.execute(
-        'INSERT INTO projects(id,title,question,next_step) VALUES(?,?,?,?)',
-        ['P', '研究', '问题', '下一步'],
-      );
-      store.db.execute(
-        'INSERT INTO projects(id,title,question,next_step) VALUES(?,?,?,?)',
-        ['Q', '另一项目', '', ''],
-      );
-      store.db.execute(
-        'INSERT INTO entries(id,project_id,kind,title,data) VALUES(?,?,?,?,?)',
-        ['E', 'P', 'claim', '证据', '{}'],
-      );
-    });
-  }
+  Future<void> research() => seedPqeResearch(host);
 
   ToolCallRequest request(
     String tool,
@@ -73,10 +45,8 @@ void main() {
     scope: AssistantScope.selectedObjects(refs),
   );
 
-  Future<ToolCallResult> invokeApproved(ToolCallRequest call) async {
-    final approval = await host.tools.approve(await host.tools.prepare(call));
-    return host.tools.invoke(call.withApproval(approval));
-  }
+  Future<ToolCallResult> invokeApproved(ToolCallRequest call) =>
+      invokeApprovedResearchCall(host, call);
 
   Future<void> refuses(ToolCallRequest call, void Function() unchanged) async {
     final denied = await invokeApproved(call);
@@ -134,16 +104,8 @@ void main() {
     return (read.data['object'] as Map)['deleteDigest'] as String;
   }
 
-  Future<List<OutlineSection>> seed(List<String> titles) async {
-    final store = host.research!.store;
-    final created = <OutlineSection>[];
-    await store.write(() {
-      for (final title in titles) {
-        created.add(store.addSection('P', title));
-      }
-    });
-    return created;
-  }
+  Future<List<OutlineSection>> seed(List<String> titles) =>
+      seedPSections(host, titles);
 
   test('outline operations register tools and write actions', () {
     final module = ResearchModule();

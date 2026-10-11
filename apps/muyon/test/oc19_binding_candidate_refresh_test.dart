@@ -8,6 +8,8 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 
+import 'support/reg3c_fixture.dart';
+
 // OC-19: characterizes confirm_binding when a real refresh import adds a new
 // ambiguous candidate for the same document: only the selected target's own
 // digest must stay stable; the candidate set growing does not invalidate the
@@ -30,21 +32,8 @@ void main() {
     root.deleteSync(recursive: true);
   });
 
-  Future<ObjectRef> current(String type, String id, String project) async {
-    final session = await host.research!.openScopeSession();
-    try {
-      return (await session.resolve(
-        ObjectRef(
-          moduleId: 'research',
-          objectType: type,
-          objectId: id,
-          nativeProjectId: project,
-        ),
-      ))!.ref;
-    } finally {
-      await session.dispose();
-    }
-  }
+  Future<ObjectRef> current(String type, String id, String project) =>
+      currentResearchRef(host, type, id, project);
 
   ToolCallRequest request(
     String tool,

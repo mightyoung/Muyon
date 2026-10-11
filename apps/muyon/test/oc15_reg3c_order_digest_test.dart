@@ -6,6 +6,8 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:research_module/research_module.dart';
 
+import 'support/reg3c_fixture.dart';
+
 // OC-15: pins that the outline order digest covers every section row field
 // (position included), so changing any neighbour field invalidates an old
 // expected_digest even when the enumeration order stays the same.
@@ -23,40 +25,10 @@ void main() {
     root.deleteSync(recursive: true);
   });
 
-  Future<ObjectRef> current(String type, String id, String project) async {
-    final session = await host.research!.openScopeSession();
-    try {
-      return (await session.resolve(
-        ObjectRef(
-          moduleId: 'research',
-          objectType: type,
-          objectId: id,
-          nativeProjectId: project,
-        ),
-      ))!.ref;
-    } finally {
-      await session.dispose();
-    }
-  }
+  Future<ObjectRef> current(String type, String id, String project) =>
+      currentResearchRef(host, type, id, project);
 
-  Future<void> research() async {
-    await host.activateResearch();
-    final store = host.research!.store;
-    await store.write(() {
-      store.db.execute(
-        'INSERT INTO projects(id,title,question,next_step) VALUES(?,?,?,?)',
-        ['P', '研究', '问题', '下一步'],
-      );
-      store.db.execute(
-        'INSERT INTO projects(id,title,question,next_step) VALUES(?,?,?,?)',
-        ['Q', '另一项目', '', ''],
-      );
-      store.db.execute(
-        'INSERT INTO entries(id,project_id,kind,title,data) VALUES(?,?,?,?,?)',
-        ['E', 'P', 'claim', '证据', '{}'],
-      );
-    });
-  }
+  Future<void> research() => seedPqeResearch(host);
 
   ToolCallRequest request(
     String tool,
@@ -69,10 +41,8 @@ void main() {
     scope: AssistantScope.selectedObjects(refs),
   );
 
-  Future<ToolCallResult> invokeApproved(ToolCallRequest call) async {
-    final approval = await host.tools.approve(await host.tools.prepare(call));
-    return host.tools.invoke(call.withApproval(approval));
-  }
+  Future<ToolCallResult> invokeApproved(ToolCallRequest call) =>
+      invokeApprovedResearchCall(host, call);
 
   Future<void> refuses(ToolCallRequest call, void Function() unchanged) async {
     final denied = await invokeApproved(call);
@@ -121,16 +91,8 @@ void main() {
     return listed.data['orderDigest'] as String;
   }
 
-  Future<List<OutlineSection>> seed(List<String> titles) async {
-    final store = host.research!.store;
-    final created = <OutlineSection>[];
-    await store.write(() {
-      for (final title in titles) {
-        created.add(store.addSection('P', title));
-      }
-    });
-    return created;
-  }
+  Future<List<OutlineSection>> seed(List<String> titles) =>
+      seedPSections(host, titles);
 
   test('move_section refuses when a neighbour position changed but order is the same', () async {
     await research();
