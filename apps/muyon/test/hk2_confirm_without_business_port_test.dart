@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
+import 'package:muyon/assistant/personal_agent.dart';
+import 'package:muyon/assistant/ui_planning.dart';
 import 'package:muyon/assistant/ui_presentation_preference.dart';
+import 'package:muyon/platform/tool_registry.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon_module_api/muyon_module_api.dart' show AssistantScope;
 import 'package:muyon_module_api/ui_contract.dart';
@@ -17,6 +20,7 @@ import '../../../packages/muyon_ui/test/dynamic_fixtures.dart';
 void main() {
   LiveTestWidgetsFlutterBinding();
   late Directory root;
+  final planners = <MuyonHost, (PersonalAgent, ToolRegistry)>{};
   setUp(() {
     root = Directory.systemTemp.createTempSync('hk2-confirm-');
   });
@@ -24,9 +28,21 @@ void main() {
     root.deleteSync(recursive: true);
   });
 
+  Future<void> close(WidgetTester tester, MuyonHost host) async {
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+    final planner = planners.remove(host)!;
+    await tester.runAsync(() async {
+      await planner.$1.close();
+      await planner.$2.close();
+      await host.close();
+    });
+  }
+
   Future<(MuyonHost, ValidatedUiPlan, String)> open(
     WidgetTester tester, {
     UiPresentationMode mode = UiPresentationMode.automatic,
+    bool installPlan = true,
   }) async {
     final (host, taskId) = (await tester.runAsync(() async {
       final h = await MuyonHost.open(root.path);
@@ -61,6 +77,77 @@ void main() {
       dynamicUiCatalog,
     );
     expect(checked.isValid, isTrue, reason: '${checked.errors}');
+    // Keep the actual host repository, policy, grants and SQLite receipts.
+    // A separate registry avoids duplicate registration of host-ui-planning.
+    final hostTools = host.tools;
+    final tools = ToolRegistry(
+      database: hostTools.database,
+      resolveScope: hostTools.resolveScope,
+      clock: hostTools.clock,
+      grants: hostTools.grants,
+      grantContext: hostTools.grantContext,
+      categoryAllowed: hostTools.categoryAllowed,
+      policyRevision: hostTools.policyRevision,
+      hostToolScopeResolver: hostTools.hostToolScopeResolver,
+    );
+    final agent = PersonalAgent(
+      repository: host.foundation,
+      gateway: host.services.gateway,
+      tools: tools,
+      executionDeviceId: host.personalAgent.executionDeviceId,
+      gate: host.personalAgent.gate,
+      modelAuthorization: host.personalAgent.modelAuthorization,
+      toolReviewer: host.personalAgent.toolReviewer,
+      presentationPreference: UiPresentationPreference(host.foundation),
+      uiPlanningSource: (_) async => !installPlan
+          ? null
+          : UiPlanningHostState(
+              snapshot: base.snapshot,
+              intent: base.intent,
+              catalog: dynamicUiCatalog,
+              allowedActionRefs: base.intent.allowedActionRefs,
+              currentView: UiCurrentView(
+                surfaceId: p.surfaceId,
+                revision: p.revision - 1,
+              ),
+            ),
+      uiPlanningProviders: {
+        UiPlanningMode.intelligent: FixtureUiPlanningProvider(
+          (_) async => UiPlanningResult(
+            decision: UiDisplayDecision.supplement,
+            reasonCode: 'fixture',
+            plan: p,
+          ),
+        ),
+      },
+    );
+    planners[host] = (agent, tools);
+    addTearDown(() async {
+      if (planners.containsKey(host)) {
+        await close(tester, host);
+      }
+    });
+    final presentation = (await tester.runAsync(() async {
+      final task = host.foundation.task(taskId)!;
+      await host.foundation.updateTask(
+        task.copy({'summary': 'Original answer'}),
+      );
+      return agent.planUiFromUserControl(taskId);
+    }))!;
+    expect(agent.presentationMode, mode);
+    if (mode != UiPresentationMode.textOnly && installPlan) {
+      expect(presentation.validated, isNotNull);
+      expect(presentation.request!.taskId, taskId);
+      expect(agent.isCurrentUiRequest(presentation.request!), isTrue);
+      expect(agent.uiPresentation(taskId), same(presentation));
+      expect(
+        agent.uiPresentation(taskId)!.validated,
+        same(presentation.validated),
+      );
+      return (host, presentation.validated!, taskId);
+    }
+    expect(presentation.validated, isNull);
+    expect(agent.uiPresentation(taskId), isNull);
     return (host, checked.validatedPlan!, taskId);
   }
 
@@ -78,7 +165,7 @@ void main() {
           key: UniqueKey(),
           repository: host.foundation,
           host: host,
-          agent: host.personalAgent,
+          agent: planners[host]!.$1,
           taskId: taskId,
           onEvent: onEvent,
           surfaceId: plan.plan.surfaceId,
@@ -101,13 +188,34 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> close(WidgetTester tester, MuyonHost host) async {
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump();
-    await tester.runAsync(host.close);
-  }
-
   const portError = 'Event port unavailable. Original answer retained.';
+
+  testWidgets('unbound old manual plan cannot acquire current host ownership', (
+    tester,
+  ) async {
+    final (host, plan, taskId) = await open(tester, installPlan: false);
+    final agent = planners[host]!.$1;
+    expect(agent.presentationMode, UiPresentationMode.automatic);
+    expect(agent.allowsUiContent(taskId), isTrue);
+    expect(agent.uiPresentation(taskId), isNull);
+    final history = host.tools.history().length;
+    final events = <UiEvent>[];
+    await openWorkspace(
+      tester,
+      host,
+      plan,
+      taskId,
+      onEvent: (event) async => events.add(event),
+    );
+    expect(find.byType(DynamicUiSurface), findsNothing);
+    expect(find.byType(ConfirmCard), findsNothing);
+    expect(find.text('仅这一次'), findsNothing);
+    expect(find.text('Original answer'), findsOneWidget);
+    expect(find.text('已成功'), findsNothing);
+    expect(events, isEmpty);
+    expect(host.tools.history().length, history);
+    await close(tester, host);
+  });
 
   testWidgets(
     'confirm_with_planning_enabled_reports_business_port_unavailable',
