@@ -90,8 +90,9 @@ void main() {
           final oldIdentity = agent.uiContentIdentity(first.id);
           await agent.pause(first.id);
           newSource = true;
-          if (!available)
+          if (!available) {
             await agent.savePresentationMode(UiPresentationMode.textOnly);
+          }
           final next = await agent.resume(first.id);
           expect(next.id, isNot(first.id));
           expect(next.previousAttemptId, first.id);
