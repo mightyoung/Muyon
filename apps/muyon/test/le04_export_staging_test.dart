@@ -136,41 +136,53 @@ void main() {
   );
 
   group('generation with the fake adapter', () {
-    test('a normal generation writes the frozen bytes at the host-named path', () async {
-      final prep = _prep('# 报告\n正文');
-      final result = await generate(prep);
-      expect(result.stage.outcome, LocalExportOutcome.succeeded);
-      expect(result.stage.cleanup, LocalExportCleanup.notNeeded);
-      final path = '$_exports/report-$_id.md';
-      expect(result.path, path);
-      expect(fs.bytes[path], prep.bytes);
-      expect(_hex(fs.bytes[path]!), prep.sha256);
-      expect(fs.tempFiles, isEmpty);
-    });
+    test(
+      'a normal generation writes the frozen bytes at the host-named path',
+      () async {
+        final prep = _prep('# 报告\n正文');
+        final result = await generate(prep);
+        expect(result.stage.outcome, LocalExportOutcome.succeeded);
+        expect(result.stage.cleanup, LocalExportCleanup.notNeeded);
+        final path = '$_exports/report-$_id.md';
+        expect(result.path, path);
+        expect(fs.bytes[path], prep.bytes);
+        expect(_hex(fs.bytes[path]!), prep.sha256);
+        expect(fs.tempFiles, isEmpty);
+      },
+    );
 
-    test('a disk-full write fails, leaves no temp file and no final file', () async {
-      fs.failWrite = true;
-      final result = await generate(_prep('x'));
-      expect(result.stage.outcome, LocalExportOutcome.failed);
-      expect(result.stage.errorCode, 'write_failed');
-      expect(result.stage.cleanup, LocalExportCleanup.cleaned);
-      expect(fs.tempFiles, isEmpty);
-      expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
-    });
+    test(
+      'a disk-full write fails, leaves no temp file and no final file',
+      () async {
+        fs.failWrite = true;
+        final result = await generate(_prep('x'));
+        expect(result.stage.outcome, LocalExportOutcome.failed);
+        expect(result.stage.errorCode, 'write_failed');
+        expect(result.stage.cleanup, LocalExportCleanup.cleaned);
+        expect(fs.tempFiles, isEmpty);
+        expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
+      },
+    );
 
-    test('a half-written temp file never appears under the final name', () async {
-      fs.failWrite = true;
-      await generate(_prep('partial content'));
-      expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
-    });
+    test(
+      'a half-written temp file never appears under the final name',
+      () async {
+        fs.failWrite = true;
+        await generate(_prep('partial content'));
+        expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
+      },
+    );
 
-    test('a refused exclusive create fails without touching anything', () async {
-      fs.failCreate = true;
-      final result = await generate(_prep('x'));
-      expect(result.stage.outcome, LocalExportOutcome.failed);
-      expect(result.stage.errorCode, 'create_failed');
-      expect(fs.tempFiles, isEmpty);
-    });
+    test(
+      'a refused exclusive create fails without touching anything',
+      () async {
+        fs.failCreate = true;
+        final result = await generate(_prep('x'));
+        expect(result.stage.outcome, LocalExportOutcome.failed);
+        expect(result.stage.errorCode, 'create_failed');
+        expect(fs.tempFiles, isEmpty);
+      },
+    );
 
     test('cancelling while writing gives cancelled and no residue', () async {
       final cancellation = ExportCancellation();
@@ -182,14 +194,17 @@ void main() {
       expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
     });
 
-    test('cancelling after the write but before commit leaves no final file', () async {
-      final cancellation = ExportCancellation();
-      fs.onRead = (_) async => cancellation.cancel();
-      final result = await generate(_prep('x'), cancellation: cancellation);
-      expect(result.stage.outcome, LocalExportOutcome.cancelled);
-      expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
-      expect(fs.tempFiles, isEmpty);
-    });
+    test(
+      'cancelling after the write but before commit leaves no final file',
+      () async {
+        final cancellation = ExportCancellation();
+        fs.onRead = (_) async => cancellation.cancel();
+        final result = await generate(_prep('x'), cancellation: cancellation);
+        expect(result.stage.outcome, LocalExportOutcome.cancelled);
+        expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
+        expect(fs.tempFiles, isEmpty);
+      },
+    );
 
     test('a failed cleanup is recorded as residue, never as cleaned', () async {
       fs.failWrite = true;
@@ -221,20 +236,26 @@ void main() {
       expect(fs.tempFiles, isEmpty);
     });
 
-    test('a read-back of the wrong length fails the digest check too', () async {
-      fs.truncateRead = true;
-      final result = await generate(_prep('abcdef'));
-      expect(result.stage.errorCode, 'digest_mismatch');
-      expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
-    });
+    test(
+      'a read-back of the wrong length fails the digest check too',
+      () async {
+        fs.truncateRead = true;
+        final result = await generate(_prep('abcdef'));
+        expect(result.stage.errorCode, 'digest_mismatch');
+        expect(fs.entries.containsKey('$_exports/report-$_id.md'), isFalse);
+      },
+    );
 
-    test('a refused commit cleans the temp file and reports commit_failed', () async {
-      fs.failRename = true;
-      final result = await generate(_prep('x'));
-      expect(result.stage.errorCode, 'commit_failed');
-      expect(result.stage.cleanup, LocalExportCleanup.cleaned);
-      expect(fs.tempFiles, isEmpty);
-    });
+    test(
+      'a refused commit cleans the temp file and reports commit_failed',
+      () async {
+        fs.failRename = true;
+        final result = await generate(_prep('x'));
+        expect(result.stage.errorCode, 'commit_failed');
+        expect(result.stage.cleanup, LocalExportCleanup.cleaned);
+        expect(fs.tempFiles, isEmpty);
+      },
+    );
 
     test('the claim-drafts kind uses its own host-named file', () async {
       final result = await generate(
@@ -245,10 +266,7 @@ void main() {
 
     test('a host export id must be a lowercase UUID', () async {
       nextId = 'Not/An-ID';
-      await expectLater(
-        generate(_prep('x')),
-        throwsArgumentError,
-      );
+      await expectLater(generate(_prep('x')), throwsArgumentError);
     });
   });
 
@@ -297,26 +315,36 @@ void main() {
       expect(elsewhere.listSync(), isEmpty);
     });
 
-    test('an exports link pointing inside the research folder is still refused', () async {
-      final inside = Directory(p.join(research.path, 'inside'))..createSync();
-      Link(p.join(research.path, 'exports')).createSync(inside.path);
-      final result = await realGenerate(_prep('x'));
-      expect(result.stage.errorCode, 'unsafe_directory');
-      expect(inside.listSync(), isEmpty);
-    });
+    test(
+      'an exports link pointing inside the research folder is still refused',
+      () async {
+        final inside = Directory(p.join(research.path, 'inside'))..createSync();
+        Link(p.join(research.path, 'exports')).createSync(inside.path);
+        final result = await realGenerate(_prep('x'));
+        expect(result.stage.errorCode, 'unsafe_directory');
+        expect(inside.listSync(), isEmpty);
+      },
+    );
 
-    test('a dangling symbolic link at the final name is never replaced', () async {
-      final exports = Directory(p.join(research.path, 'exports'))..createSync();
-      final target = p.join(tmp.path, 'outside.md');
-      Link(p.join(exports.path, 'report-$_id.md')).createSync(target);
-      final result = await realGenerate(_prep('x'));
-      expect(result.stage.outcome, LocalExportOutcome.failed);
-      expect(result.stage.errorCode, 'unsafe_target');
-      expect(FileSystemEntity.typeSync(
-        p.join(exports.path, 'report-$_id.md'),
-        followLinks: false,
-      ), FileSystemEntityType.link);
-      expect(File(target).existsSync(), isFalse);
-    });
+    test(
+      'a dangling symbolic link at the final name is never replaced',
+      () async {
+        final exports = Directory(p.join(research.path, 'exports'))
+          ..createSync();
+        final target = p.join(tmp.path, 'outside.md');
+        Link(p.join(exports.path, 'report-$_id.md')).createSync(target);
+        final result = await realGenerate(_prep('x'));
+        expect(result.stage.outcome, LocalExportOutcome.failed);
+        expect(result.stage.errorCode, 'unsafe_target');
+        expect(
+          FileSystemEntity.typeSync(
+            p.join(exports.path, 'report-$_id.md'),
+            followLinks: false,
+          ),
+          FileSystemEntityType.link,
+        );
+        expect(File(target).existsSync(), isFalse);
+      },
+    );
   });
 }
