@@ -260,6 +260,10 @@ void main() {
     final agent = f.agent();
     addTearDown(agent.close);
     final task = await f.start(agent, f.profile());
+    const answer = 'Saved source-check answer';
+    await f.repo.updateTask(task.copy({'summary': answer}));
+    await f.repo.appendMessage(task.conversationId, 'assistant', answer);
+    expect(f.repo.task(task.id)!.summary, answer);
     final entered = Completer<void>();
     final release = Completer<void>();
     var lookups = 0;
@@ -279,7 +283,12 @@ void main() {
       providers: {UiPlanningMode.motivation: provider});
     final planning = harness.plan(task.id);
     try {
-      await entered.future;
+      await Future.any<void>([
+        entered.future,
+        planning.then<void>((_) {
+          if (!entered.isCompleted) throw StateError('final_source_check_not_reached');
+        }),
+      ]);
       expect(harness.streamProgress(task.id)!.view.finalPlan, isNotNull);
       await harness.cancelTask(task.id);
       final cancelled = harness.presentation(task.id)!;
