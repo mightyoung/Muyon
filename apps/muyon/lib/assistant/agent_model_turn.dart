@@ -72,7 +72,7 @@ class AgentModelTurn {
 
   Future<void> waitForModel(PersonalTask task) async {
     final planning = ctx.uiPlanning;
-    if (planning?.enabled == true &&
+    if (planning?.canPlanTask(task.id) == true &&
         task.payload['uiPlanningInternal'] != true) {
       try {
         final state = await planning!.source(task);
@@ -316,7 +316,7 @@ class AgentModelTurn {
       // Frozen when the task started: editing the profile later does not
       // change this task's protocol.
       final profile = ctx.profile(task);
-      if (profile.capabilities.nativeTools) {
+      if (profile.capabilities.nativeTools && ctx.uiModelChunks[task.id] == null) {
         await _runNative(task, token, profile);
         return;
       }
@@ -355,6 +355,11 @@ class AgentModelTurn {
       // What this response used is charged whatever it turns out to be.
       final billed = _bill(task, started, replyText: text, usage: usage);
       await _responded(billed, usage, null, streamed?.draft);
+      if (ctx.uiModelChunks[task.id] != null) {
+        // This trusted internal request carries raw UI NDJSON, not chat protocol.
+        await ctx.finish(billed, text, const [], canCommit: () => !token.isCancelled);
+        return;
+      }
       final response = _protocolReply(text);
       if (response == null) {
         // The draft was only ever a view of this text: dropped with it.
@@ -419,7 +424,7 @@ class AgentModelTurn {
       'or answer in plain text. No other markup.';
 
   ModelRequest _modelRequest(PersonalTask task, ModelProfile profile) {
-    final native = profile.capabilities.nativeTools;
+    final native = profile.capabilities.nativeTools && ctx.uiModelChunks[task.id] == null;
     return ModelRequest(
       profile: profile,
       messages: [
@@ -438,7 +443,7 @@ class AgentModelTurn {
       maxOutputTokens:
           (task.payload['preview'] as Map?)?['maxOutputTokens'] as int?,
       // Compatibility mode asks for one JSON object per reply (P0-3d).
-      jsonObject: !native,
+      jsonObject: !native && ctx.uiModelChunks[task.id] == null,
       caller: 'assistant',
       requestDigest: task.payload['requestDigest'] as String?,
     );
@@ -456,7 +461,7 @@ class AgentModelTurn {
         task,
         _modelRequest(task, profile),
         token,
-        showDraft: true,
+        showDraft: ctx.uiModelChunks[task.id] == null,
       );
     } on HttpException catch (error) {
       // The endpoint refused what was asked: a fixed failure, never another
@@ -517,6 +522,8 @@ class AgentModelTurn {
         }
         switch (event) {
           case TextDelta():
+            await ctx.uiModelChecks[task.id]?.call();
+            ctx.uiModelChunks[task.id]?.call(event.text);
             reply.text.write(event.text);
             feed?.text(event.text);
           case ToolCallComplete():

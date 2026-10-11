@@ -51,12 +51,13 @@ class UiPendingAction {
     this.event,
     this.plan,
     this.binding,
-    Map<String, Object?> inputs,
+    Map<String, Object?> inputs, {this.externalContent = true,}
   ) : inputs = Map.unmodifiable(inputs);
   final UiEvent event;
   final ValidatedUiPlan plan;
   final ActionBinding binding;
   final Map<String, Object?> inputs;
+  final bool externalContent;
 }
 
 /// Authority frozen once for a rendered tree and its callbacks.
@@ -64,11 +65,13 @@ class UiRenderCapture {
   UiRenderCapture._(this._owner, this.plan)
     : surfaceId = plan.plan.surfaceId,
       revision = plan.plan.revision,
-      catalog = plan.catalog;
+      catalog = plan.catalog,
+      externalContent = _owner.hasExternalContent;
   final UiSurfaceController _owner;
   final String surfaceId;
   final int revision;
   final UiCatalog catalog;
+  final bool externalContent;
   final ValidatedUiPlan plan;
 }
 
@@ -80,8 +83,11 @@ class UiSurfaceController extends ChangeNotifier {
     this.recomputePort,
     this.publishTokenProbe,
     this.readOnlyProbe,
-    this.externalContentProbe,
+    bool Function()? externalContentProbe,
   }) : _publication = UiPublicationCoordinator(plan) {
+    if (externalContentProbe != null) {
+      attachExternalContentProbe(externalContentProbe);
+    }
     if ((recomputePort == null) != (publishTokenProbe == null)) {
       throw ArgumentError('Provide both recomputePort and publishTokenProbe');
     }
@@ -92,17 +98,23 @@ class UiSurfaceController extends ChangeNotifier {
   final UiRecomputePort? recomputePort;
   final UiPublishTokenProbe? publishTokenProbe;
   final bool Function()? readOnlyProbe;
-
-  /// Host-supplied taint of the owning task. Never read from plan or UI state.
-  /// Fail closed: no probe, or a probe that throws, means external content.
-  final bool Function()? externalContentProbe;
+  /// Host-supplied provenance. Missing or unreadable facts fail closed.
+  bool Function()? _externalContentProbe;
+  bool Function()? get externalContentProbe => _externalContentProbe;
+  void attachExternalContentProbe(bool Function() probe) {
+    _externalContentProbe ??= probe;
+  }
+  void refreshExternalContent() {
+    if (!_disposed) notifyListeners();
+  }
   bool get externalContent {
     try {
-      return externalContentProbe?.call() ?? true;
+      return _externalContentProbe?.call() ?? true;
     } catch (_) {
       return true;
     }
   }
+  bool get hasExternalContent => externalContent;
 
   bool get recomputing => _publication.recomputing;
   bool get outdated => _publication.outdated;
@@ -325,6 +337,11 @@ class UiSurfaceController extends ChangeNotifier {
         !node.events.containsKey(kind)) {
       return UiDispatchOutcome.stale;
     }
+    final action = current.catalog.actions[node.events[kind]!.actionRef];
+    if (action?.route == UiActionRoute.business &&
+        capture.externalContent != hasExternalContent) {
+      return UiDispatchOutcome.stale;
+    }
     return dispatch(eventForCapture(capture, node, kind, payload));
   }
 
@@ -524,7 +541,7 @@ class UiSurfaceController extends ChangeNotifier {
         event,
         current,
         binding,
-        inputs,
+        inputs, externalContent: hasExternalContent,
       );
     }
     _seenEvents.add(event.eventId);
@@ -909,8 +926,8 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
                     : receipt?.status == UiReceiptStatus.succeeded
                     ? BatchState.completed
                     : BatchState.pending,
-                onAllowAll: active ? () => dispatch(n, 'confirm') : null,
-                onIndividual: null,
+                onAllowAll: active && !controller.hasExternalContent ? () => dispatch(n, 'confirm') : null,
+                onIndividual: active ? () => dispatch(n, 'confirm') : null,
                 onReject: active && n.events.containsKey('cancel')
                     ? () => dispatch(n, 'cancel')
                     : null,
