@@ -7,6 +7,7 @@ import 'package:supplier_core/supplier_core.dart';
 import '../app/bootstrap.dart';
 import 'host_tool_registration.dart';
 import 'tool_registry.dart';
+import 'inquiry_write_receipts.dart';
 
 const _recordTypes = [
   'supplier',
@@ -180,15 +181,6 @@ void _validateArguments(String operation, Map<String, Object?> p) {
   }
 }
 
-Object? _canonical(Object? value) => switch (value) {
-  Map value => {
-    for (final key in (value.keys.cast<String>().toList()..sort()))
-      key: _canonical(value[key]),
-  },
-  List value => value.map(_canonical).toList(),
-  _ => value,
-};
-String _json(Object? value) => jsonEncode(_canonical(value));
 
 ObjectRef _ref(Store store, String type, String id) {
   final row = store.db.select('SELECT data,version FROM $type WHERE id=?', [
@@ -377,27 +369,14 @@ void registerInquiryRecordTools(
             final type = p['type'] as String;
             final creating = operation == 'create_record';
             if (!creating) _requireSelected(call, type, p['id'] as String);
-            final scopeKey = _json({
-              'workspace': call.request.scope.workspaceId,
-              'objects':
-                  (call.resolvedScope.objects
-                      .map(
-                        (r) => _json([
-                          r.moduleId,
-                          r.objectType,
-                          r.objectId,
-                          r.nativeProjectId,
-                        ]),
-                      )
-                      .toList()
-                    ..sort()),
-            });
-            final arguments = _json({
-              'operation': operation,
-              'parameters': p,
-              'scope': scopeKey,
-            });
-            final receiptKey = 'reg4c:${p['operation_id']}';
+            final identity = GenericWriteIdentity(
+              operation: operation,
+              parameters: p,
+              workspaceId: call.request.scope.workspaceId,
+              objects: call.resolvedScope.objects,
+            );
+            final arguments = identity.arguments;
+            final receiptKey = identity.receiptKey;
             final receipts = s.db.select('SELECT value FROM meta WHERE key=?', [
               receiptKey,
             ]);
@@ -470,11 +449,11 @@ void registerInquiryRecordTools(
               final incoming = _incoming(s, type, id);
               final supplied =
                   (p['referencing_records'] as List)
-                      .map((r) => _json(r))
+                      .map((r) => canonicalJson(r))
                       .toList()
                     ..sort();
-              final actual = incoming.map(_json).toList()..sort();
-              if (_json(supplied) != _json(actual)) {
+              final actual = incoming.map(canonicalJson).toList()..sort();
+              if (canonicalJson(supplied) != canonicalJson(actual)) {
                 invalid('referencing_records', '引用预览已变化或不完整，请重新确认');
               }
               for (final r in incoming) {
