@@ -71,6 +71,12 @@ void main() {
           await sink(event);
           expect(events, hasLength(1));
         } else {
+          await session.controller!.surface.dispatch(event);
+          expect(
+            events,
+            isEmpty,
+            reason: 'Real retained surface dispatch cannot reach the sink',
+          );
           await expectLater(sink(event), throwsStateError);
           expect(events, isEmpty);
         }

@@ -17,6 +17,28 @@ class CountingStore extends MemoryStore {
 }
 
 void main() {
+  test('queued checkpoint rechecks host before store.save', () async {
+    final store = CountingStore();
+    var revoked = false;
+    final c = await UiWorkspaceController.open(
+      store: store,
+      taskId: 'task',
+      scopeKey: 'scope',
+      plan: reviewPlan('NumberStepper'),
+      readOnlyProbe: () => revoked,
+    );
+    addTearDown(c.dispose);
+    c.surface.session.edit('k', 9.0);
+    await c.flush();
+    final before = jsonEncode(store.value!.toJson());
+    final saves = store.saves;
+    final pending = c.flush();
+    revoked = true;
+    await expectLater(pending, throwsStateError);
+    expect(store.saves, saves);
+    expect(jsonEncode(store.value!.toJson()), before);
+    expect(c.surface.session.resolve(const BindingRef.uiState('k')), 9.0);
+  });
   for (final direct in [false, true]) {
     test(
       'revoked ${direct ? 'surface' : 'workspace'} adoption preserves draft and storage',

@@ -16,6 +16,7 @@ class UiWorkspaceController extends ChangeNotifier {
     this.taskId,
     this.scopeKey,
     this.schemaVersion,
+    this._hostReadOnlyProbe,
   );
   final UiWorkspaceStore store;
   final String taskId, scopeKey;
@@ -28,10 +29,21 @@ class UiWorkspaceController extends ChangeNotifier {
   bool _compatibleRecovery = false;
   bool _recovering = false;
   bool _unreadableCheckpoint = false;
+  // Recovery temporarily sets readOnly itself. Host revocation is a separate
+  // authority fence and must still be checked during recovery and queued saves.
+  final bool Function()? _hostReadOnlyProbe;
+  bool get _hostReadOnly {
+    try {
+      return _hostReadOnlyProbe?.call() ?? false;
+    } catch (_) {
+      return true;
+    }
+  }
   // No editable state was admitted from an unreadable codec. Dismissing this
   // read-only projection requires no save and must preserve its raw bytes.
   bool get canCloseWithoutCheckpoint => readOnly && _unreadableCheckpoint;
-  bool get canResolveDraft => !_disposed && !_recovering && _compatibleRecovery;
+  bool get canResolveDraft => !_disposed && !_recovering &&
+      _compatibleRecovery && !_hostReadOnly;
   Map<String, Object?> get quarantinedDraft => surface.session.readableDraft;
   bool get extractionChanged => _stored != null &&
       _stored!.snapshotRef != surface.current.snapshot.ref;
@@ -65,6 +77,7 @@ class UiWorkspaceController extends ChangeNotifier {
       taskId,
       scopeKey,
       schemaVersion ?? (usesTypedEdits(plan.catalog) ? 2 : 1),
+      readOnlyProbe,
     );
     StoredUiWorkspace? old;
     try {
@@ -153,7 +166,7 @@ class UiWorkspaceController extends ChangeNotifier {
     }
     c.surface = UiSurfaceController(
       current,
-      readOnlyProbe: () => c.readOnly || (readOnlyProbe?.call() ?? false),
+      readOnlyProbe: () => c.readOnly || c._hostReadOnly,
       externalContentProbe: externalContentProbe,
       provenanceProbe: provenanceProbe,
       onEvent: onEvent == null
@@ -294,7 +307,7 @@ class UiWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> flush() {
-    if (readOnly) {
+    if (readOnly || _hostReadOnly) {
       return saveError == null
           ? Future.value()
           : Future.error(StateError(saveError!));
@@ -303,7 +316,9 @@ class UiWorkspaceController extends ChangeNotifier {
     final projection = _capture(1);
     final result = _tail
         .then((_) async {
-          if (readOnly) throw StateError(saveError ?? 'Workspace read-only');
+          if (readOnly || _hostReadOnly) {
+            throw StateError(saveError ?? 'Workspace read-only');
+          }
           final next = projection.copyWith(revision: _revision + 1);
           if (!await store.save(next, expectedRevision: _revision)) {
             throw StateError('Workspace revision or scope changed');
@@ -323,7 +338,7 @@ class UiWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> adoptExtracted(String key) async {
-    if (readOnly) return;
+    if (_disposed || readOnly || _hostReadOnly) return;
     surface.adoptExtracted(key);
     await flush();
     if (!_disposed) notifyListeners();
@@ -340,8 +355,8 @@ class UiWorkspaceController extends ChangeNotifier {
     notifyListeners();
     try {
       await _tail;
-      if (_disposed) {
-        throw StateError('Workspace closed');
+      if (_disposed || _hostReadOnly) {
+        throw StateError('Workspace closed or host authority revoked');
       }
       final base = surface.current;
       final fence = surface.session.publicationFence;
@@ -365,13 +380,14 @@ class UiWorkspaceController extends ChangeNotifier {
       } finally {
         candidate.dispose();
       }
-      if (!fence.matches || !identical(surface.current, base) ||
+      if (_hostReadOnly || !fence.matches || !identical(surface.current, base) ||
           !await store.save(next, expectedRevision: _revision)) {
         throw StateError('Workspace revision or scope changed');
       }
       _revision = next.revision;
       _stored = next;
-      if (_disposed || !fence.matches || !identical(surface.current, base)) {
+      if (_disposed || _hostReadOnly || !fence.matches ||
+          !identical(surface.current, base)) {
         _compatibleRecovery = false;
         throw StateError('Workspace changed during recovery; reopen to review');
       }

@@ -317,7 +317,7 @@ class UiSurfaceController extends ChangeNotifier {
   void lockRecoveredOperations(Iterable<String> refs) =>
       _recoveredOperations.addAll(refs);
   void adoptExtracted(String field) {
-    if (_disposed) return;
+    if (_disposed || isReadOnly) return;
     final before = _session.draftRevision;
     _session.adoptExtracted(field);
     if (_session.draftRevision != before && recomputePort != null) {

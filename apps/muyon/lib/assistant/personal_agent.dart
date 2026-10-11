@@ -792,10 +792,19 @@ class PersonalAgent {
     // confirmation (see [AgentResume]).
     PersonalTask? taken;
     await _trackStart(() async {
-      taken = await _resume.attempt(task);
+      taken = await _resume.attempt(task,
+        uiPlanningAvailable: task.profileId != null &&
+            canExposeUiPlanning(_ctx.profile(task)),
+        onCarry: (id) => _freezePresentation(id, UiPresentationRequest.ordinary()),
+      );
       return taken ?? task;
     });
-    if (taken != null) return taken!;
+    if (taken != null) {
+      if (!_presentationRequests.containsKey(taken!.id)) {
+        _freezePresentation(taken!.id, UiPresentationRequest.ordinary());
+      }
+      return taken!;
+    }
     if (task.profileId == null && task.payload["toolCall"] is Map) {
       final call = task.payload["toolCall"] as Map;
       return startTool(

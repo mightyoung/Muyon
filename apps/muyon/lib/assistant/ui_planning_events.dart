@@ -7,6 +7,11 @@ import 'personal_agent.dart';
 import '../platform/foundation_repository.dart';
 import '../platform/grants/host_authorization_facts.dart';
 
+/// Optional UI events cannot enter a stopped host task, including custom sinks.
+bool uiTaskAcceptsEvents(PersonalTask? task) => task != null &&
+    task.state != PersonalTaskState.cancelled &&
+    task.state != PersonalTaskState.interrupted;
+
 class UiBusinessAction {
   const UiBusinessAction(this.toolId, this.parameters);
   final String toolId;
@@ -47,8 +52,7 @@ class UiPlanningEventRouter {
     if (_disposed || !_seen.add(event.eventId)) return;
     final task = agent.repository.task(taskId);
     if (task == null || !_allowsPresentation || surface.isReadOnly ||
-        task.state == PersonalTaskState.cancelled ||
-        task.state == PersonalTaskState.interrupted ||
+        !uiTaskAcceptsEvents(task) ||
         event.surfaceId != surface.current.plan.surfaceId ||
         event.observedRevision != surface.current.plan.revision) {
       throw StateError('stale_host_event');
@@ -82,8 +86,7 @@ class UiPlanningEventRouter {
       final currentTask = agent.repository.task(taskId);
       if (!_allowsPresentation || !surface.isCurrentPending(event) ||
           currentTask == null ||
-          currentTask.state == PersonalTaskState.cancelled ||
-          currentTask.state == PersonalTaskState.interrupted ||
+          !uiTaskAcceptsEvents(currentTask) ||
           agent.tools.inspect(action.toolId)?.available != true ||
           currentAuthority.taintState == HostTaintState.unknown ||
           !_sameAuthority(authority, currentAuthority)) {

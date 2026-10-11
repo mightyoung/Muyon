@@ -38,8 +38,20 @@ void main() {
             uiPlanningSource: (_) async {
               final old = state(f);
               return UiPlanningHostState(
-                snapshot: old.snapshot,
-                intent: old.intent,
+                snapshot: newSource
+                    ? DataSnapshot(
+                        ref: const SnapshotRef('resumed-facts', 2),
+                        facts: old.snapshot.facts,
+                      )
+                    : old.snapshot,
+                intent: newSource
+                    ? InteractionIntent(
+                        id: old.intent.id,
+                        purpose: old.intent.purpose,
+                        snapshotRef: const SnapshotRef('resumed-facts', 2),
+                        requiredBindings: old.intent.requiredBindings,
+                      )
+                    : old.intent,
                 catalog: old.catalog,
                 allowedActionRefs: old.allowedActionRefs,
                 currentView: UiCurrentView(
@@ -118,6 +130,14 @@ void main() {
           expect(agent.allowsUiContent(next.id), available);
           if (available) {
             expect(next.payload['uiPlanningContext'], contains('new-surface'));
+            expect(
+              next.payload['uiPlanningContext'],
+              contains('resumed-facts'),
+            );
+            expect(
+              systems.map((m) => m['content']).join('\n'),
+              isNot(contains('"snapshotId":"saved"')),
+            );
             expect(
               systems.where(
                 (m) => m['content'] == next.payload['uiPlanningContext'],

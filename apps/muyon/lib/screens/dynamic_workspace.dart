@@ -175,6 +175,9 @@ class DynamicWorkspaceSession extends ChangeNotifier {
               : (event) async {
                   // Workspace persistence is awaited by the controller before
                   // this fence. A retained custom sink has the same policy gate.
+                  if (!uiTaskAcceptsEvents(widget.repository.task(widget.taskId))) {
+                    throw StateError('stale_host_event');
+                  }
                   if (!allowsPresentation) {
                     throw StateError('presentation_expired');
                   }
