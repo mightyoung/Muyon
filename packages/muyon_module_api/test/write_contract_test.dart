@@ -410,6 +410,7 @@ void main() {
 
     test('any mismatched identity part is an identity conflict', () {
       final cases = <String, BusinessOperationReceipt>{
+        'operation id': _receipt(operationId: 'op-2'),
         'request digest': _receipt(requestDigest: 'sha256:other'),
         'tool': _receipt(toolId: 'inquiry.set_item_qty'),
         'scope': _receipt(scopeDigest: 'sha256:scope-2'),
@@ -585,6 +586,112 @@ void main() {
     });
   });
 
+  group('nested JSON value semantics', () {
+    Map<String, Object?> payload({int qty = 2, bool reversed = false}) => {
+      'rows': [
+        reversed ? {'note': null, 'qty': qty} : {'qty': qty, 'note': null},
+        [true, 'saved', 3.5],
+      ],
+    };
+
+    test(
+      'receipts compare nested values and hash independent of map order',
+      () {
+        final a = _receipt(resultData: payload());
+        final b = _receipt(resultData: payload(reversed: true));
+        expect(a == b, isTrue);
+        expect(a.hashCode, b.hashCode);
+        expect({a, b}, hasLength(1));
+        expect(a == _receipt(resultData: payload(qty: 3)), isFalse);
+        expect(
+          a ==
+              _receipt(
+                resultData: {
+                  'rows': [
+                    [true, 'saved', 3.5],
+                    {'qty': 2, 'note': null},
+                  ],
+                },
+              ),
+          isFalse,
+        );
+      },
+    );
+
+    test('conflicts compare nested values and ordered field paths', () {
+      WriteConflict conflict(
+        Map<String, Object?> details, {
+        List<String> paths = const ['qty', 'name'],
+      }) => WriteConflict(
+        code: 'version_conflict',
+        currentVersion: 4,
+        fieldPaths: paths,
+        details: details,
+      );
+      final a = conflict(payload());
+      final b = conflict(payload(reversed: true));
+      expect(a == b, isTrue);
+      expect(a.hashCode, b.hashCode);
+      expect({a, b}, hasLength(1));
+      expect(a == conflict(payload(qty: 3)), isFalse);
+      expect(a == conflict(payload(), paths: ['name', 'qty']), isFalse);
+    });
+
+    test('all nested write JSON is detached and recursively immutable', () {
+      final source = payload();
+      final paths = ['qty'];
+      final draft = WriteDraft(
+        objectType: 'contact',
+        op: WriteFormOp.create,
+        baseline: source,
+        values: source,
+        scopeProof: Object(),
+      );
+      final valid = WriteValidationResult.ok(normalized: source);
+      final invalid = WriteValidationResult.invalid(
+        normalized: source,
+        issues: [
+          FieldIssue(code: 'type', fieldPath: 'qty', message: 'invalid'),
+        ],
+      );
+      final receipt = _receipt(resultData: source);
+      final conflict = WriteConflict(
+        code: 'version_conflict',
+        currentVersion: 4,
+        details: source,
+        fieldPaths: paths,
+      );
+      final originalReceiptHash = receipt.hashCode;
+      final originalConflictHash = conflict.hashCode;
+      ((source['rows'] as List).first as Map)['qty'] = 99;
+      (source['rows'] as List).add('later');
+      paths.add('name');
+      for (final frozen in [
+        draft.baseline,
+        draft.values,
+        valid.normalized!,
+        invalid.normalized!,
+        receipt.resultData,
+        conflict.details,
+        conflict.toTrustedData()['details'] as Map<String, Object?>,
+      ]) {
+        expect(frozen, payload());
+        final rows = frozen['rows'] as List;
+        expect(() => rows.add(null), throwsUnsupportedError);
+        expect(() => (rows.first as Map)['qty'] = 10, throwsUnsupportedError);
+        expect(() => (rows[1] as List).add(null), throwsUnsupportedError);
+      }
+      expect(conflict.fieldPaths, ['qty']);
+      expect(() => conflict.fieldPaths.add('name'), throwsUnsupportedError);
+      expect(
+        () => (conflict.toTrustedData()['field_paths'] as List).add('name'),
+        throwsUnsupportedError,
+      );
+      expect(receipt.hashCode, originalReceiptHash);
+      expect(conflict.hashCode, originalConflictHash);
+    });
+  });
+
   group('compliance', () {
     test('a module without optional write features has no violations', () {
       expect(
@@ -663,6 +770,58 @@ void main() {
         contains('AtomicBatchWriteCapable'),
       );
     });
+
+    test('duplicate batch identities are rejected regardless of row limit', () {
+      for (final limit in [50, 20]) {
+        final problems = writeContractViolations(
+          features: {ModuleFeature.writeForms, ModuleFeature.atomicBatchWrite},
+          module: _BatchModule(
+            [_form('contact')],
+            [
+              AtomicBatchForm(objectType: 'contact', op: WriteFormOp.create),
+              AtomicBatchForm(
+                objectType: 'contact',
+                op: WriteFormOp.create,
+                maxRows: limit,
+              ),
+            ],
+          ),
+        );
+        expect(problems, [
+          'duplicate atomic batch contact create',
+        ], reason: 'limit=$limit');
+      }
+    });
+
+    test(
+      'different batch types or operations remain distinct capabilities',
+      () {
+        expect(
+          writeContractViolations(
+            features: {
+              ModuleFeature.writeForms,
+              ModuleFeature.atomicBatchWrite,
+            },
+            module: _BatchModule(
+              [_form('contact'), _form('quotation')],
+              [
+                AtomicBatchForm(objectType: 'contact', op: WriteFormOp.create),
+                AtomicBatchForm(
+                  objectType: 'contact',
+                  op: WriteFormOp.update,
+                  maxRows: 20,
+                ),
+                AtomicBatchForm(
+                  objectType: 'quotation',
+                  op: WriteFormOp.create,
+                ),
+              ],
+            ),
+          ),
+          isEmpty,
+        );
+      },
+    );
 
     test('matching declarations and implementations are clean', () {
       expect(

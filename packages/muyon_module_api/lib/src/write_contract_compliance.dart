@@ -72,10 +72,10 @@ List<String> _batchProblems(Set<ModuleFeature> features, Object module) {
       'AtomicBatchWriteCapable implemented without atomicBatchWrite feature',
     );
   }
-  final seen = <AtomicBatchForm>{};
+  final seen = <(String, WriteFormOp)>{};
   for (final batch in batchModule.atomicBatchForms) {
     final label = '${batch.objectType} ${batch.op.name}';
-    if (!seen.add(batch)) {
+    if (!seen.add((batch.objectType, batch.op))) {
       problems.add('duplicate atomic batch $label');
     }
     // Batch is explicit, but it still needs the single-row face it batches.

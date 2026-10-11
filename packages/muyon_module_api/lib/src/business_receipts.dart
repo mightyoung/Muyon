@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
 
 import 'context.dart';
 
@@ -78,7 +78,7 @@ class BusinessOperationReceipt {
       other.scopeDigest == scopeDigest &&
       other.domainIdentity == domainIdentity &&
       other.applied == applied &&
-      mapEquals(other.resultData, resultData);
+      const DeepCollectionEquality().equals(other.resultData, resultData);
 
   @override
   int get hashCode => Object.hash(
@@ -89,6 +89,7 @@ class BusinessOperationReceipt {
     scopeDigest,
     domainIdentity,
     applied,
+    const DeepCollectionEquality().hash(resultData),
   );
 }
 
