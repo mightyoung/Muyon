@@ -79,9 +79,10 @@ class _MuyonAppState extends State<MuyonApp> {
           ) ??
           false;
     };
-    mode = ThemeMode.values.byName(
-      value.workspaces.setting('theme') as String? ?? 'system',
-    );
+    final stored = value.workspaces.setting('theme');
+    mode =
+        (stored is String ? ThemeMode.values.asNameMap()[stored] : null) ??
+        ThemeMode.system;
   }
 
   @override
