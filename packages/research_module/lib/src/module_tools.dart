@@ -284,27 +284,25 @@ void registerResearchTools(ToolRegistrar registrar) {
     final ref = _selected(ctx, params['evidence_type'] as String, params['evidence_id'] as String);
     final runtime = await ctx.runtime<ResearchRuntime>();
     final store = runtime.store.scoped(ref.nativeProjectId!);
-    late List<ObjectRef> changed;
     ctx.call.cancellation.throwIfCancelled();
-    await store.write(() {
+    return store.write(() {
       runtime.requireCurrent(ref);
+      store.requireOutlineEvidence(ref.nativeProjectId!, ref.objectId, evidenceType: ref.objectType);
       ctx.call.checkBeforeEffect();
       final oldSections = {for (final s in store.sections(ref.nativeProjectId!)) s.id};
       final oldLinks = {for (final r in store.db.select('SELECT id FROM outline WHERE project_id=?', [ref.nativeProjectId])) r['id']};
-      store.addOutline(ref.nativeProjectId!, params['heading'] as String, ref.objectId);
+      store.addOutline(ref.nativeProjectId!, params['heading'] as String, ref.objectId,
+        evidenceType: ref.objectType);
       final section = store.sections(ref.nativeProjectId!).firstWhere((s) => s.heading == (params['heading'] as String).trim());
       final links = store.db.select('SELECT id FROM outline WHERE section_id=? AND evidence_id=?', [section.id, ref.objectId]);
-      changed = [
+      final changed = [
         if (!oldSections.contains(section.id)) ObjectRef(moduleId:'research', objectType:'section', objectId:section.id, nativeProjectId:ref.nativeProjectId),
         for (final link in links) if (!oldLinks.contains(link['id'])) ObjectRef(moduleId:'research', objectType:'outline', objectId:link['id'] as String, nativeProjectId:ref.nativeProjectId),
       ];
+      return _report(runtime, '已添加提纲', [
+        for (final ref in changed) ObjectChange(ref, ChangeOp.upsert),
+      ]);
     });
-    final session = await runtime.openScopeSession();
-    try {
-      final views = [for (final r in changed) (await session.resolve(r))!.ref];
-      return ToolCallResult(status:ToolCallStatus.succeeded, summary:'已添加提纲',
-        objectRefs:views, changes:[for (final r in views) ObjectChange(r,ChangeOp.upsert)]);
-    } finally { await session.dispose(); }
   });
   registrar.write(WriteToolSpec(
     name: 'add_section',
@@ -321,16 +319,15 @@ void registerResearchTools(ToolRegistrar registrar) {
   ), (ctx) async {
     final params = ctx.call.request.parameters;
     final ref = _selected(ctx, 'project', params['project_id'] as String);
-    late String createdId;
-    final runtime = await _outlineWrite(ctx, [ref],
-      (store) => _orderDigest(store, ref.objectId), (store) {
-      createdId = store.addSection(ref.objectId, params['heading'] as String,
+    return _outlineWrite(ctx, [ref],
+      (store) => _orderDigest(store, ref.objectId), (runtime, store) {
+      final createdId = store.addSection(ref.objectId, params['heading'] as String,
         level: params['level'] as int).id;
+      return _report(runtime, '已新增提纲段落', [ObjectChange(ObjectRef(
+        moduleId:'research', objectType:'section', objectId:createdId,
+        nativeProjectId:ref.nativeProjectId), ChangeOp.upsert)]);
     }, beforeEffect: (store) => _refuseSameHeading(
       store, ref.objectId, params['heading'] as String));
-    return _report(runtime, '已新增提纲段落', [ObjectChange(ObjectRef(
-      moduleId:'research', objectType:'section', objectId:createdId,
-      nativeProjectId:ref.nativeProjectId), ChangeOp.upsert)]);
   });
   registrar.write(WriteToolSpec(
     name: 'update_section',
@@ -350,9 +347,8 @@ void registerResearchTools(ToolRegistrar registrar) {
   ), (ctx) async {
     final params = ctx.call.request.parameters;
     final ref = _selected(ctx, 'section', params['section_id'] as String);
-    late List<String> changedLinks;
-    final runtime = await _outlineWrite(ctx, [ref],
-      (store) => _rowDigestOf(store, 'sections', ref.nativeProjectId!, ref.objectId), (store) {
+    return _outlineWrite(ctx, [ref],
+      (store) => _rowDigestOf(store, 'sections', ref.nativeProjectId!, ref.objectId), (runtime, store) {
       final before = {
         for (final row in store.db.select('SELECT * FROM outline WHERE section_id=?', [ref.objectId]))
           row['id'] as String: _rowDigest(Map<String, Object?>.from(row)),
@@ -360,17 +356,17 @@ void registerResearchTools(ToolRegistrar registrar) {
       store.updateSection(ref.objectId,
         heading: params['heading'] as String, level: params['level'] as int,
         argument: params['argument'] as String, support: params['support'] as String);
-      changedLinks = [
+      final changedLinks = [
         for (final row in store.db.select('SELECT * FROM outline WHERE section_id=?', [ref.objectId]))
           if (before[row['id']] != _rowDigest(Map<String, Object?>.from(row))) row['id'] as String,
       ];
+      return _report(runtime, '已修改提纲段落', [
+        ObjectChange(ref, ChangeOp.upsert),
+        for (final id in changedLinks) ObjectChange(ObjectRef(moduleId:'research',
+          objectType:'outline', objectId:id, nativeProjectId:ref.nativeProjectId), ChangeOp.upsert),
+      ]);
     }, beforeEffect: (store) => _refuseSameHeading(store, ref.nativeProjectId!,
       params['heading'] as String, exceptId: ref.objectId));
-    return _report(runtime, '已修改提纲段落', [
-      ObjectChange(ref, ChangeOp.upsert),
-      for (final id in changedLinks) ObjectChange(ObjectRef(moduleId:'research',
-        objectType:'outline', objectId:id, nativeProjectId:ref.nativeProjectId), ChangeOp.upsert),
-    ]);
   });
   registrar.write(WriteToolSpec(
     name: 'move_section',
@@ -385,20 +381,21 @@ void registerResearchTools(ToolRegistrar registrar) {
   ), (ctx) async {
     final params = ctx.call.request.parameters;
     final ref = _selected(ctx, 'section', params['section_id'] as String);
-    late List<String> moved;
-    final runtime = await _outlineWrite(ctx, [ref],
-      (store) => _orderDigest(store, ref.nativeProjectId!), (store) {
+    return _outlineWrite(ctx, [ref],
+      (store) => _orderDigest(store, ref.nativeProjectId!), (runtime, store) {
       final before = {for (final section in store.sections(ref.nativeProjectId!)) section.id: section.position};
       store.moveSection(ref.objectId, params['delta'] as int);
-      moved = [
+      final moved = [
         for (final section in store.sections(ref.nativeProjectId!))
           if (before[section.id] != section.position) section.id,
       ];
+      final summary = moved.isEmpty
+        ? '已在${params['delta'] == -1 ? '首位' : '末位'}，位置未变化' : '已移动提纲段落';
+      return _report(runtime, summary, [
+        for (final id in moved) ObjectChange(ObjectRef(moduleId:'research', objectType:'section',
+          objectId:id, nativeProjectId:ref.nativeProjectId), ChangeOp.upsert),
+      ]);
     });
-    return _report(runtime, '已移动提纲段落', [
-      for (final id in moved) ObjectChange(ObjectRef(moduleId:'research', objectType:'section',
-        objectId:id, nativeProjectId:ref.nativeProjectId), ChangeOp.upsert),
-    ]);
   });
   registrar.write(WriteToolSpec(
     name: 'delete_section',
@@ -413,20 +410,19 @@ void registerResearchTools(ToolRegistrar registrar) {
     },'required':['section_id','expected_digest'],'additionalProperties':false},
   ), (ctx) async {
     final ref = _selected(ctx, 'section', ctx.call.request.parameters['section_id'] as String);
-    late List<String> linkIds;
-    final runtime = await _outlineWrite(ctx, [ref],
-      (store) => sectionDeleteDigest(store, ref.nativeProjectId!, ref.objectId)!, (store) {
-      linkIds = [
-        for (final row in store.db.select('SELECT id FROM outline WHERE section_id=?', [ref.objectId]))
-          row['id'] as String,
+    return _outlineWrite(ctx, [ref],
+      (store) => sectionDeleteDigest(store, ref.nativeProjectId!, ref.objectId)!, (runtime, store) {
+      final links = [
+        for (final row in store.db.select('SELECT * FROM outline WHERE section_id=?', [ref.objectId]))
+          ObjectRef(moduleId:'research', objectType:'outline', objectId:row['id'] as String,
+            nativeProjectId:ref.nativeProjectId, contentDigest:_rowDigest(Map<String,Object?>.from(row))),
       ];
       store.deleteSection(ref.objectId);
+      return _report(runtime, '已删除提纲段落', [
+        ObjectChange(ref, ChangeOp.delete),
+        for (final link in links) ObjectChange(link, ChangeOp.delete),
+      ]);
     });
-    return _report(runtime, '已删除提纲段落', [
-      ObjectChange(ref, ChangeOp.delete),
-      for (final id in linkIds) ObjectChange(ObjectRef(moduleId:'research', objectType:'outline',
-        objectId:id, nativeProjectId:ref.nativeProjectId), ChangeOp.delete),
-    ]);
   });
   registrar.write(WriteToolSpec(
     name: 'cite',
@@ -444,25 +440,25 @@ void registerResearchTools(ToolRegistrar registrar) {
     final params = ctx.call.request.parameters;
     final section = _selected(ctx, 'section', params['section_id'] as String);
     final evidence = _selected(ctx, params['evidence_type'] as String, params['evidence_id'] as String);
-    late List<String> created;
-    final runtime = await _outlineWrite(ctx, [section, evidence],
-      (store) => _rowDigestOf(store, 'sections', section.nativeProjectId!, section.objectId), (store) {
+    return _outlineWrite(ctx, [section, evidence],
+      (store) => _rowDigestOf(store, 'sections', section.nativeProjectId!, section.objectId), (runtime, store) {
       final before = {
         for (final row in store.db.select('SELECT id FROM outline WHERE project_id=?', [section.nativeProjectId]))
           row['id'] as String,
       };
-      store.cite(section.objectId, evidence.objectId);
-      created = [
+      store.cite(section.objectId, evidence.objectId, evidenceType: evidence.objectType);
+      final created = [
         for (final row in store.db.select(
           'SELECT id FROM outline WHERE section_id=? AND evidence_id=?',
           [section.objectId, evidence.objectId]))
           if (!before.contains(row['id'])) row['id'] as String,
       ];
-    });
-    return _report(runtime, created.isEmpty ? '提纲引用未变化' : '已引用到提纲', [
-      for (final id in created) ObjectChange(ObjectRef(moduleId:'research', objectType:'outline',
-        objectId:id, nativeProjectId:section.nativeProjectId), ChangeOp.upsert),
-    ]);
+      return _report(runtime, created.isEmpty ? '提纲引用未变化' : '已引用到提纲', [
+        for (final id in created) ObjectChange(ObjectRef(moduleId:'research', objectType:'outline',
+          objectId:id, nativeProjectId:section.nativeProjectId), ChangeOp.upsert),
+      ]);
+    }, beforeEffect: (store) => store.requireOutlineEvidence(
+      section.nativeProjectId!, evidence.objectId, evidenceType: evidence.objectType));
   });
   registrar.write(WriteToolSpec(
     name: 'remove_outline',
@@ -476,10 +472,12 @@ void registerResearchTools(ToolRegistrar registrar) {
     },'required':['outline_id','expected_digest'],'additionalProperties':false},
   ), (ctx) async {
     final ref = _selected(ctx, 'outline', ctx.call.request.parameters['outline_id'] as String);
-    final runtime = await _outlineWrite(ctx, [ref],
+    return _outlineWrite(ctx, [ref],
       (store) => _rowDigestOf(store, 'outline', ref.nativeProjectId!, ref.objectId),
-      (store) => store.removeOutline(ref.objectId));
-    return _report(runtime, '已移除提纲引用', [ObjectChange(ref, ChangeOp.delete)]);
+      (runtime, store) {
+        store.removeOutline(ref.objectId);
+        return _report(runtime, '已移除提纲引用', [ObjectChange(ref, ChangeOp.delete)]);
+      });
   });
 
 }
@@ -542,9 +540,10 @@ List<Map<String, Object?>> _sectionRows(WorkbenchStore store, String projectId) 
 String _orderDigest(WorkbenchStore store, String projectId) =>
     sha256.convert(utf8.encode(jsonEncode(_sectionRows(store, projectId)))).toString();
 
-Future<ResearchRuntime> _outlineWrite(
+Future<ToolCallResult> _outlineWrite(
   ModuleToolContext ctx, List<ObjectRef> refs,
-  String Function(WorkbenchStore store) digest, void Function(WorkbenchStore store) apply, {
+  String Function(WorkbenchStore store) digest,
+  ToolCallResult Function(ResearchRuntime runtime, WorkbenchStore store) apply, {
   void Function(WorkbenchStore store)? beforeEffect,
 }) async {
   final runtime = await ctx.runtime<ResearchRuntime>();
@@ -555,43 +554,37 @@ Future<ResearchRuntime> _outlineWrite(
   final store = runtime.store.scoped(projectId);
   final expected = ctx.call.request.parameters['expected_digest'];
   ctx.call.cancellation.throwIfCancelled();
-  await store.write(() {
+  return store.write(() {
     for (final ref in refs) {
       runtime.requireCurrent(ref);
     }
     beforeEffect?.call(store);
     _requireExpected(expected, digest(store));
     ctx.call.checkBeforeEffect();
-    apply(store);
+    return apply(runtime, store);
   });
-  return runtime;
 }
 
-Future<ToolCallResult> _report(
+ToolCallResult _report(
   ResearchRuntime runtime, String summary, List<ObjectChange> changes,
-) async {
+) {
   if (changes.isEmpty) {
     return ToolCallResult(status: ToolCallStatus.succeeded, summary: summary);
   }
-  final session = await runtime.openScopeSession();
-  try {
-    final reported = <ObjectChange>[];
-    for (final change in changes) {
-      if (change.op == ChangeOp.delete) {
-        reported.add(change);
-        continue;
-      }
-      final resolved = (await session.resolve(ObjectRef(
-        moduleId: change.ref.moduleId, objectType: change.ref.objectType,
-        objectId: change.ref.objectId, nativeProjectId: change.ref.nativeProjectId,
-      )))!;
-      reported.add(ObjectChange(resolved.ref, change.op));
+  final reported = <ObjectChange>[];
+  for (final change in changes) {
+    if (change.op == ChangeOp.delete) {
+      reported.add(change);
+      continue;
     }
-    return ToolCallResult(status: ToolCallStatus.succeeded, summary: summary,
-      objectRefs: [for (final change in reported) change.ref], changes: reported);
-  } finally {
-    await session.dispose();
+    final resolved = runtime.resolveCurrent(ObjectRef(
+      moduleId: change.ref.moduleId, objectType: change.ref.objectType,
+      objectId: change.ref.objectId, nativeProjectId: change.ref.nativeProjectId,
+    ))!;
+    reported.add(ObjectChange(resolved.ref, change.op));
   }
+  return ToolCallResult(status: ToolCallStatus.succeeded, summary: summary,
+    objectRefs: [for (final change in reported) change.ref], changes: reported);
 }
 
 Map<String,Object?> _document(ResearchRuntime runtime, ObjectRef ref, ObjectView view) {

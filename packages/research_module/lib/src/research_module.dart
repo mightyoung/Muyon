@@ -108,6 +108,12 @@ class ResearchRuntime implements ModuleRuntime, ImportCapable, ScopeResolvable, 
 
   /// Synchronous transaction-boundary recheck for module-owned writes.
   void requireCurrent(ObjectRef ref) {
+    if (resolveCurrent(ref) == null) throw StateError('Selected research object changed');
+  }
+
+  /// Resolve synchronously inside the caller's write transaction, so returned
+  /// refs describe that commit rather than a later writer's state.
+  ObjectView? resolveCurrent(ObjectRef ref) {
     final project = ref.nativeProjectId;
     if (project == null || ref.moduleId != 'research' ||
         !store.projects().any((p) => p.id == project)) {
@@ -115,7 +121,7 @@ class ResearchRuntime implements ModuleRuntime, ImportCapable, ScopeResolvable, 
     }
     final session = ResearchSession(store.scoped(project), WorkspaceBinding(
       workspaceId:'',moduleId:'research',nativeProjectId:project));
-    if (session._resolve(ref) == null) throw StateError('Selected research object changed');
+    return session._resolve(ref);
   }
 
   @override
