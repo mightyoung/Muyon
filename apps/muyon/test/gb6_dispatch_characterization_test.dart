@@ -7,6 +7,14 @@ import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/platform/business_tools.dart';
 import 'package:muyon/app/host_ui_grant_authority.dart';
 import 'package:muyon/assistant/agent_dispatch.dart';
+import 'package:muyon/assistant/agent_budget.dart';
+import 'package:muyon/assistant/agent_context.dart';
+import 'package:muyon/assistant/agent_event_sink.dart';
+import 'package:muyon/assistant/agent_task_factory.dart';
+import 'package:muyon/assistant/context_compactor.dart';
+import 'package:muyon/assistant/model_request_gate.dart';
+import 'package:muyon/assistant/tool_selection.dart';
+import 'package:muyon/services/models/openai_compat_provider.dart';
 import 'package:muyon/assistant/personal_agent.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/storage_manager.dart';
@@ -442,6 +450,99 @@ void main() {
     final task = await taskFuture;
     expect(store.get('project_item', itemId)!.data['qty'], '10');
     expect(task.state, isNot(PersonalTaskState.succeeded));
+  });
+
+
+  test('automatic_without_authorization_rejects', () async {
+    // Mutation: delete agent_dispatch.dart ≈709–711
+    // (`if (automatic) throw StateError('automatic_authority_unavailable')`)
+    // so executeCard(automatic: true) falls through to tools.approve and
+    // invokes when toolAuthorization is null.
+    //
+    // Construction: AgentContext with toolReviewer == null →
+    // toolAuthorization == null. _openCard never starts automatic itself in
+    // that case, so after a legal prepare→waitingConfirmation card we commit
+    // running and call executeCard(..., automatic: true) on the same
+    // AgentDispatch — the production automatic entry that re-checks authority.
+    // Tool has no effectIntent so approve would succeed if the throw were gone
+    // (with effectIntent, approve still fails closed via review_required).
+    final f = await LoopFixture.open();
+    var effects = 0;
+    f.tools.register(
+      providerId: 'gb6',
+      descriptor: ToolDescriptor(
+        toolId: 'gb6.local_write',
+        moduleId: 'test',
+        effect: ToolEffect.write,
+        parameterSchema: const {
+          'type': 'object',
+          'additionalProperties': false,
+        },
+      ),
+      handler: (_) async {
+        effects++;
+        return ToolCallResult(
+          status: ToolCallStatus.succeeded,
+          summary: 'wrote',
+        );
+      },
+    );
+    final ctx = AgentContext(
+      repository: f.repo,
+      gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+      tools: f.tools,
+      toolReviewer: null,
+      executionDeviceId: 'this-device',
+      budget: const Budget(),
+      events: TaskEventTableSink(f.repo),
+      selectionStrategy: const RuleAndModelToolSelection(),
+      gate: const AlwaysConfirmGate(),
+      provider: const OpenAiCompatProvider(),
+      compactor: const ContextCompactor(),
+      compactionProfile: null,
+      clock: DateTime.now,
+    );
+    expect(ctx.toolAuthorization, isNull);
+    final dispatch = AgentDispatch(ctx);
+    final factory = AgentTaskFactory(ctx);
+    final conv = await f.repo.createConversation();
+    final queued = factory.toolTask(
+      conversationId: conv.id,
+      toolId: 'gb6.local_write',
+    );
+    await f.repo.createTask(queued);
+    await dispatch.dispatch(queued, [Planned('gb6.local_write', const {})]);
+    final waiting = f.repo.task(queued.id)!;
+    expect(waiting.state, PersonalTaskState.waitingConfirmation);
+    final card = AgentContext.cardCalls(waiting);
+    expect(card, hasLength(1));
+    final invocationId = card.single['invocationId'] as String;
+    final running = waiting.copy({
+      'state': 'running',
+      'waitingFor': null,
+    });
+    expect(
+      await ctx.commit(
+        running,
+        expected: {PersonalTaskState.waitingConfirmation},
+      ),
+      isTrue,
+    );
+    await dispatch.executeCard(
+      f.repo.task(queued.id)!,
+      {invocationId},
+      automatic: true,
+    );
+    final done = f.repo.task(queued.id)!;
+    expect(effects, 0, reason: 'automatic without authority must not invoke');
+    expect(done.state, PersonalTaskState.failed);
+    expect(done.error, contains('approve_failed'));
+    final outcome =
+        ((done.payload['step'] as Map?)?['calls'] as List?)?.first as Map?;
+    final summary =
+        ((outcome?['outcome'] as Map?)?['result'] as Map?)?['summary']
+            as String?;
+    expect(summary, contains('approve_failed'));
   });
 
   test('invoke_abandoned_after_external_mark_without_receipt', () async {
