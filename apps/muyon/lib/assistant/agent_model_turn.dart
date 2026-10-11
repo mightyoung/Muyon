@@ -20,6 +20,7 @@ import 'agent_compaction_flow.dart';
 import 'agent_dispatch.dart';
 import 'model_request_gate.dart';
 import 'request_view.dart';
+import 'stream_ui_planning.dart';
 
 /// Model turn of a task (S0 budget check, the confirmation of the request,
 /// the request itself in compatibility and native mode, billing and the
@@ -71,16 +72,42 @@ class AgentModelTurn {
   }
 
   Future<void> waitForModel(PersonalTask task) async {
-    final planning = ctx.uiPlanning;
-    if (planning != null &&
-        planning.providers.containsKey(planning.mode) &&
-        planning.canPlanTask(task.id) &&
-        (task.payload['candidateIds'] as List? ?? const [])
-            .contains('assistant.plan_ui') &&
-        task.payload['uiPlanningInternal'] != true) {
-      try {
+    try {
+      final planning = ctx.uiPlanning;
+      final mode = planning?.mode;
+      final provider = planning?.providers[mode];
+      final identity = planning?.presentationIdentity?.call(task.id);
+      final profileDigest = AgentContext.digest(task.payload['profile']);
+      bool available() {
+        try {
+          final live = ctx.repository.task(task.id);
+          return !ctx.closing &&
+              planning != null &&
+              identical(ctx.uiPlanning, planning) &&
+              planning.enabled &&
+              planning.mode == mode &&
+              provider != null &&
+              identical(planning.providers[mode], provider) &&
+              planning.canPlanTask(task.id) &&
+              identical(planning.presentationIdentity?.call(task.id), identity) &&
+              task.payload['uiPlanningInternal'] != true &&
+              task.payload['profile'] is Map &&
+              (provider is! StreamMotivationUiPlanningProvider ||
+                  ctx.profile(task).capabilities.streaming) &&
+              (task.payload['candidateIds'] as List? ?? const [])
+                  .contains('assistant.plan_ui') &&
+              live != null &&
+              !live.terminal &&
+              AgentContext.digest(live.payload['profile']) == profileDigest &&
+              (live.payload['candidateIds'] as List? ?? const [])
+                  .contains('assistant.plan_ui');
+        } catch (_) {
+          return false;
+        }
+      }
+      if (planning != null && available()) {
         final state = await planning.source(task);
-        if (state != null) {
+        if (state != null && available()) {
           final metadata = jsonEncode({
             'hostUiPlanningContext': {
               'snapshotId': state.snapshot.ref.id,
@@ -104,11 +131,15 @@ class AgentModelTurn {
               {'role': 'system', 'content': metadata},
             ],
           });
+        } else {
+          task = _withoutUiPlanning(task);
         }
-      } catch (_) {
-        /* Optional planning metadata never prevents a text answer. */
+      } else {
+        task = _withoutUiPlanning(task);
       }
-    } else {
+    } catch (_) {
+      // Optional source/probe failures revoke planning advertisements while
+      // the existing text model request keeps its own confirmation flow.
       task = _withoutUiPlanning(task);
     }
     final preview = {
@@ -253,8 +284,8 @@ class AgentModelTurn {
             final remaining = tools.where((tool) =>
                 tool is! Map || tool['toolId'] != 'assistant.plan_ui').toList();
             if (remaining.length != tools.length) {
-              narrowed = {
-                ...message,
+              narrowed = <String, Object?>{
+                ...Map<String, Object?>.from(message),
                 'content': jsonEncode({...envelope, 'tools': remaining}),
               };
             }

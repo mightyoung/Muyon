@@ -137,9 +137,13 @@ class PersonalAgent {
   bool canExposeUiPlanning(ModelProfile? profile) {
     final harness = _ctx.uiPlanning;
     if (_ctx.closing || profile == null || harness == null || !harness.enabled ||
-        harness.providers[harness.mode] == null) return false;
+        harness.providers[harness.mode] == null) {
+      return false;
+    }
     if (presentationPreference != null &&
-        presentationMode != UiPresentationMode.automatic) return false;
+        presentationMode != UiPresentationMode.automatic) {
+      return false;
+    }
     return harness.providers[harness.mode] is! StreamMotivationUiPlanningProvider ||
       profile.capabilities.streaming;
   }
@@ -732,11 +736,10 @@ class PersonalAgent {
 
   Future<void> close() async {
     _ctx.closing = true;
-    await presentationPreference?.close();
+    // Withdraw UI synchronously, but enqueue the host's interrupted terminal
+    // before yielding to a blocked prepare or awaiting presentation cleanup.
+    final presentationClosing = presentationPreference?.close();
     _ctx.uiPlanning?.invalidate();
-    await Future.wait(_uiPlanningCancellations.values.toList().map((cancel) => cancel()));
-    await Future.wait(_uiPreferenceSaves.toList().map(
-      (future) => future.then<void>((_) {}, onError: (Object _) {})));
     for (final t in _ctx.modelTokens.values) {
       t.cancel();
     }
@@ -758,6 +761,10 @@ class PersonalAgent {
         );
       }
     }
+    await presentationClosing;
+    await Future.wait(_uiPlanningCancellations.values.toList().map((cancel) => cancel()));
+    await Future.wait(_uiPreferenceSaves.toList().map(
+      (future) => future.then<void>((_) {}, onError: (Object _) {})));
     await Future.wait(
       _ctx.activeStarts.toList().map(
         (f) => f.then<void>((_) {}, onError: (Object _) {}),

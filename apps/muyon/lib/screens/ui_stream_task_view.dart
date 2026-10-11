@@ -88,7 +88,9 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
       final state = task == null ? null : await widget.agent.uiPlanningSource?.call(task);
       if (!mounted || attempt != generation || !currentRequest(progress.request) ||
           !identical(widget.agent.uiStreamProgress(widget.taskId), progress) ||
-          !sameHostState(state, progress.request)) return;
+          !sameHostState(state, progress.request)) {
+        return;
+      }
       setState(() { checkedPreview = progress; });
     } catch (_) {
       if (mounted && attempt == generation) setState(clear);
@@ -178,7 +180,9 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
     }
     final progress = checkedPreview;
     if (progress == null || !currentRequest(progress.request) ||
-        !identical(widget.agent.uiStreamProgress(widget.taskId), progress)) return const SizedBox.shrink();
+        !identical(widget.agent.uiStreamProgress(widget.taskId), progress)) {
+      return const SizedBox.shrink();
+    }
     return Column(key: ValueKey('ui-stream-preview-${widget.taskId}'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

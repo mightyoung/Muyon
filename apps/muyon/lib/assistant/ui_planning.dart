@@ -93,8 +93,8 @@ class UiPlanningHarness {
       {String? code}) async {
     final view = progress?.view;
     final codes = <String>{
-      if (code != null) code,
-      if (progress?.failureCode case final failure?) failure,
+      ?code,
+      ?progress?.failureCode,
       if (view != null) for (final diagnostic in view.diagnostics)
         diagnostic.code.name.replaceAllMapped(RegExp(r'[A-Z]'), (match) => '_${match[0]!.toLowerCase()}'),
       if (view?.batchValidation?.isValid == false) 'invalid_plan',
@@ -203,7 +203,9 @@ class UiPlanningHarness {
           request.snapshot.ref == state.snapshot.ref &&
           request.currentView.surfaceId == state.currentView.surfaceId &&
           request.currentView.revision == state.currentView.revision &&
-          request.catalog.version == state.catalog.version) return previous;
+          request.catalog.version == state.catalog.version) {
+        return previous;
+      }
       _latest.remove(taskId); _streamProgress.remove(taskId);
       return fallback('cancelled');
     }

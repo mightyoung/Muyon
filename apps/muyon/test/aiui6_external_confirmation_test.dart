@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/ui_planning_events.dart';
+import 'package:muyon/assistant/ui_presentation_preference.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/grants/host_authorization_facts.dart';
 import 'package:muyon_module_api/ui_contract.dart';
@@ -20,6 +21,8 @@ void main() {
       try {
         final ref = f.refs['project_item']!;
         final conversation = await f.host.foundation.createConversation(scope: AssistantScope.selectedObjects([ref]));
+        // Persist the optional UI choice before the host freezes this request.
+        await f.host.personalAgent.savePresentationMode(UiPresentationMode.automatic);
         final parent = await f.host.personalAgent.start(conversationId: conversation.id, prompt: '没有模型');
         final fixture = runtimeFixture();
         final plan = validateUiPlan(fixture.plan.plan!, fixture.snapshot, fixture.intent, fixture.catalog!).validatedPlan!;

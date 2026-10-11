@@ -296,7 +296,9 @@ class UiSurfaceController extends ChangeNotifier {
         pending.externalContent != hasExternalContent ||
         event.surfaceId != current.plan.surfaceId ||
         event.observedRevision != current.plan.revision ||
-        pending.binding.expectedDraftRevision != _session.draftRevision) return false;
+        pending.binding.expectedDraftRevision != _session.draftRevision) {
+      return false;
+    }
     final nodes = current.plan.nodes.where((node) => node.id == event.nodeId);
     if (nodes.length != 1 || !identical(nodes.single.events[event.kind], pending.binding)) return false;
     final action = current.catalog.actions[pending.binding.actionRef];
