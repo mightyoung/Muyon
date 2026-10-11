@@ -15,37 +15,17 @@ void installResearchChangeLog(Database db) {
     String revision = 'NULL',
     String digest = 'NULL',
     String filter = '1',
-  }) {
-    String values(String row, String op) =>
-        "'$type', ${id.replaceAll('r.', '$row.')}, "
-        '${project.replaceAll('r.', '$row.')}, '
-        '${revision.replaceAll('r.', '$row.')}, '
-        '${digest.replaceAll('r.', '$row.')}, '
-        "'$op', COALESCE(${summary.replaceAll('r.', '$row.')}, ''), "
-        "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
-    const columns =
-        'object_type,object_id,native_project_id,revision_ref,'
-        'content_digest,op,summary,recorded_at';
-    for (final event in ['INSERT', 'UPDATE', 'DELETE']) {
-      final row = event == 'DELETE' ? 'OLD' : 'NEW';
-      db.execute('''
-CREATE TRIGGER research_log_${table}_${event.toLowerCase()}
-${event == 'DELETE' ? 'BEFORE' : 'AFTER'} $event ON $table
-WHEN ${filter.replaceAll('r.', '$row.')}
-BEGIN
-  INSERT INTO ${ModuleChangeLog.table}($columns)
-  SELECT ${values(row, event == 'DELETE' ? 'delete' : 'upsert')};
-END;
-''');
-    }
-    // Only migration-time seeding scans existing objects; normal writes never
-    // poll/snapshot tables. This lets a v8 database populate host projections.
-    db.execute(
-      'INSERT INTO ${ModuleChangeLog.table}($columns) '
-      "SELECT ${values('r', 'upsert')} FROM $table r WHERE $filter",
-    );
-  }
-
+  }) => _track(
+    db,
+    table,
+    type,
+    id: id,
+    project: project,
+    summary: summary,
+    revision: revision,
+    digest: digest,
+    filter: filter,
+  );
   track(
     'documents',
     'document',
@@ -123,4 +103,65 @@ INSERT INTO ${ModuleChangeLog.table}(object_type,object_id,native_project_id,rev
 SELECT 'task',t.id,t.project_id,CAST(t.revision AS TEXT),'upsert',COALESCE(t.title,''),strftime('%Y-%m-%dT%H:%M:%fZ','now')
 FROM tasks t WHERE t.revision=(SELECT MAX(v.revision) FROM tasks v WHERE v.id=t.id);
 ''');
+}
+
+/// Host schema v10: projects and reading notes were never in the host change
+/// log, so assistant-side edits (and UI edits) left the projection stale.
+void installResearchEntityChangeLog(Database db) {
+  _track(
+    db,
+    'projects',
+    'project',
+    id: 'r.id',
+    project: 'r.id',
+    summary: 'r.title',
+  );
+  _track(
+    db,
+    'notes',
+    'note',
+    project: '(SELECT d.project_id FROM documents d WHERE d.id=r.document_id)',
+    summary: 'r.text',
+  );
+}
+
+void _track(
+  Database db,
+  String table,
+  String type, {
+  String id = 'r.id',
+  String project = 'r.project_id',
+  required String summary,
+  String revision = 'NULL',
+  String digest = 'NULL',
+  String filter = '1',
+}) {
+  String values(String row, String op) =>
+      "'$type', ${id.replaceAll('r.', '$row.')}, "
+      '${project.replaceAll('r.', '$row.')}, '
+      '${revision.replaceAll('r.', '$row.')}, '
+      '${digest.replaceAll('r.', '$row.')}, '
+      "'$op', COALESCE(${summary.replaceAll('r.', '$row.')}, ''), "
+      "strftime('%Y-%m-%dT%H:%M:%fZ','now')";
+  const columns =
+      'object_type,object_id,native_project_id,revision_ref,'
+      'content_digest,op,summary,recorded_at';
+  for (final event in ['INSERT', 'UPDATE', 'DELETE']) {
+    final row = event == 'DELETE' ? 'OLD' : 'NEW';
+    db.execute('''
+CREATE TRIGGER research_log_${table}_${event.toLowerCase()}
+${event == 'DELETE' ? 'BEFORE' : 'AFTER'} $event ON $table
+WHEN ${filter.replaceAll('r.', '$row.')}
+BEGIN
+  INSERT INTO ${ModuleChangeLog.table}($columns)
+  SELECT ${values(row, event == 'DELETE' ? 'delete' : 'upsert')};
+END;
+''');
+  }
+  // Only migration-time seeding scans existing objects; normal writes never
+  // poll/snapshot tables. This lets a v8 database populate host projections.
+  db.execute(
+    'INSERT INTO ${ModuleChangeLog.table}($columns) '
+    "SELECT ${values('r', 'upsert')} FROM $table r WHERE $filter",
+  );
 }

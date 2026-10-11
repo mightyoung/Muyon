@@ -130,7 +130,7 @@ void main() {
           true,
         );
       }
-      await db.write(schema.migrations.last.migrate);
+      await db.write(schema.migrations[8].migrate);
       for (final t in tables) {
         expect(
           jsonEncode(

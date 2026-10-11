@@ -685,14 +685,18 @@ void main() {
   );
 
   test(
-    'v9 appends the projection migration without changing prior versions',
+    'v10 appends the project and note change-log migration without changing prior versions',
     () {
       final schema = ResearchModule().schema;
-      expect(schema.version, 9);
-      expect(schema.definitionDigest, 'research-schema-9');
+      expect(schema.version, 10);
+      expect(schema.definitionDigest, 'research-schema-10');
       expect(
         schema.migrations.map((m) => m.version),
-        orderedEquals(List.generate(9, (i) => i + 1)),
+        orderedEquals(List.generate(10, (i) => i + 1)),
+      );
+      expect(
+        schema.migrations.take(9).map((m) => m.definitionDigest),
+        orderedEquals(List.generate(9, (i) => 'research-schema-${i + 1}')),
       );
       expect(
         database.raw.select(
