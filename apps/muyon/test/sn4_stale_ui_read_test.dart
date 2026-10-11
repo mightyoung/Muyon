@@ -34,6 +34,32 @@ UiPlanningHostState _host(LoopFixture f, int revision) {
   );
 }
 
+// Injected providers do not have access to the agent's private publish hook.
+// Feed their real compiler progress to the renderer while planning is pending;
+// terminal results and request ownership still come from the production agent.
+class _PreviewAgent extends PersonalAgent {
+  _PreviewAgent({
+    required super.repository,
+    required super.gateway,
+    required super.tools,
+    required super.uiPlanningSource,
+    required super.uiPlanningMode,
+    required super.uiPlanningProviders,
+    required this.pendingProgress,
+  });
+  final Map<String, HostUiStreamProgress> pendingProgress;
+
+  @override
+  HostUiStreamProgress? uiStreamProgress(String taskId) {
+    final stored = super.uiStreamProgress(taskId);
+    if (stored != null) return stored;
+    final pending = pendingProgress[taskId];
+    return pending != null && isCurrentUiRequest(pending.request)
+        ? pending
+        : null;
+  }
+}
+
 void main() {
   // Removing the renderer's pre-reconcile lifetime fence makes these fail:
   // stale reads must not mutate harness ownership even after dispose/refresh.
@@ -56,19 +82,21 @@ void main() {
           String? heldTask;
           var holdNextRead = false;
           var aRevision = 1;
-          final provider = StreamMotivationUiPlanningProvider((
-            request,
-            _,
-            receive,
-          ) async {
-            receive(validStream.replaceAll('{"op":"end"}\n', ''));
-            if (phase == 'preview' && request.taskId == heldTask) {
-              enteredStream.complete();
-              await releaseStream.future;
-            }
-            // Missing end intentionally produces a zero-capability fallback.
-          });
-          final agent = PersonalAgent(
+          final pendingProgress = <String, HostUiStreamProgress>{};
+          final provider = StreamMotivationUiPlanningProvider(
+            (request, _, receive) async {
+              receive(validStream.replaceAll('{"op":"end"}\n', ''));
+              if (phase == 'preview' && request.taskId == heldTask) {
+                enteredStream.complete();
+                await releaseStream.future;
+              }
+              // Missing end intentionally produces a zero-capability fallback.
+            },
+            onProgress: (progress) =>
+                pendingProgress[progress.request.taskId] = progress,
+          );
+          final agent = _PreviewAgent(
+            pendingProgress: pendingProgress,
             repository: f.repo,
             gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
             tools: f.tools,
@@ -119,7 +147,10 @@ void main() {
               if (phase == 'preview') {
                 await Future.any([
                   enteredStream.future,
-                  planning!.then((_) => throw StateError('stream_not_entered')),
+                  planning!.then((_) {
+                    if (!enteredStream.isCompleted)
+                      throw StateError('stream_not_entered');
+                  }),
                 ]);
               } else {
                 await planning;
@@ -203,7 +234,9 @@ void main() {
             expect(f.tools.history(), isEmpty);
           } finally {
             if (!pending.isCompleted) pending.complete(null);
-            if (!releaseStream.isCompleted) releaseStream.complete();
+            await tester.runAsync(() async {
+              if (!releaseStream.isCompleted) releaseStream.complete();
+            });
             await tester.pumpWidget(const SizedBox.shrink());
             await tester.runAsync(() async {
               await planning;
