@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,7 @@ import 'package:muyon/assistant/personal_agent.dart';
 import 'package:muyon/assistant/ui_planning.dart';
 import 'package:muyon/assistant/ui_presentation_preference.dart';
 import 'package:muyon/platform/ui_workspace_store.dart';
+import 'package:muyon/platform/storage_manager.dart';
 import 'package:muyon/screens/dynamic_workspace.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon_module_api/ui_contract.dart';
@@ -17,6 +19,7 @@ void main() {
     'normal',
     'cancel before detach',
     'identity after detach',
+    'identity after save queued',
   ]) {
     test('real native detach checkpoints only live host authority: $change', () async {
       final f = await LoopFixture.open();
@@ -76,6 +79,18 @@ void main() {
       c.step = 'last native view';
       c.scrollOffset = 321;
       c.selectedRecords = ['native-selected'];
+      final entered = Completer<void>();
+      final release = Completer<void>();
+      Future<void>? blocked;
+      if (change == 'identity after save queued') {
+        blocked = (f.repo.database as ManagedConnection).exclusiveAsync((
+          _,
+        ) async {
+          entered.complete();
+          await release.future;
+        });
+        await entered.future;
+      }
       session.detachWithBestEffortCheckpoint();
       expect(session.allowsPresentation, isFalse);
       Future<Object?>? replacement;
@@ -85,6 +100,13 @@ void main() {
       // One event-loop turn admits the queued flush before this SQLite barrier;
       // the barrier then waits for every submitted write. No timing sleep.
       await Future<void>(() {});
+      if (change == 'identity after save queued') {
+        // The controller's queued guard has run, but SQLite cannot yet execute
+        // its submitted save. Identity revocation is synchronous.
+        replacement = agent.planUiFromUserControl(task.id);
+        release.complete();
+        await blocked;
+      }
       await f.repo.database.write((_) {});
       if (replacement != null) {
         await replacement;

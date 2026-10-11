@@ -76,3 +76,11 @@ RED 提交：`0b074f92f7cd531dfe441c71a753be0650b49fdb`。修复源提交：`403
 本补修继续只在独立 SN5 分支交付，新最终 SHA / CI actual checkout 必须重新核验，不能沿用 b489 的 CI。未与 develop / SN6 组合，未自行合入。保留原任务和全部先前实施/失败历史。
 
 发布补记：恢复后的云端命令行 git 缺认证，普通 push 失败，未冒称 1f863640 已推。改用已连接 GitHub git-object API 发布 RED→修复链；RED tree a5060d4019fec7441d712f7d717938c40e89c436 与原本地 RED 精确一致，更新独立分支采用 expected SHA、force=false。最终 commit 因连接器记录 author/committer 而与原本地 1f863640 不同，产品代码未改变；以 PR head / 远端 ref 核验的新 SHA 为准。原本地提交留存，不强推、不写原 owner 分支。
+
+## Additional database queue boundary: RED only
+
+On published head `eeea2c885d14fbec201bb1f6bfa702a87b4bd8ed`, the real native detach fixture now holds `ManagedConnection.exclusiveAsync` with a Completer, lets an event-loop turn submit the controller checkpoint save, synchronously replaces the agent planning identity, then releases the database queue. Result: 3 passed / 1 behavioral failure; expected the original projection bytes (revision 1), observed the detached old projection (revision 2, step `last native view`, scroll 321). The ordinary detach positive and both prior cancellation/identity negatives still passed. Raw output remains `/tmp/sn5-db-queue-red.log`; an initial fixture compile error was corrected and is not counted as behavioral RED.
+
+This is a pre-existing second queue boundary in the host store, not introduced by the detach repair, and does not establish business execution escalation. Proposed minimal scope, reported before production edits: optional synchronous live eligibility callback on `HostUiWorkspaceStore`, supplied by `DynamicWorkspaceSession`, evaluated inside the save transaction immediately before INSERT. No changes to shared `UiWorkspaceStore`, `ManagedConnection`, personal-agent cancellation, SN6 or WC files. Production implementation awaits coordination of this additional host-store boundary.
+
+Existing complete host run and remote CI remain running; no duplicate full host run or CI cancellation was requested. Previous b489 host run had two failures in the unchanged `aiui6_stream_approval_widget_test.dart` (blob `2fdd49bcd024e47227a7315a68c997c03ca141f1`, identical to PR51 d5cd): automatic true timed out after 10 minutes; automatic false raised `Reentrant call to runAsync() denied` at test line 21. These are not passing host gates.
