@@ -81,8 +81,7 @@ extension _ProcurementCompare on AssistantProcurementTools {
               }.contains(evidence)
               ? 'source_supported'
               : 'contradicted';
-        }
-        else {
+        } else {
           reason = '来源未明确声明所需国别，品牌与制造地不可混用';
         }
       } else if (reason == null) {
@@ -160,9 +159,8 @@ extension _ProcurementCompare on AssistantProcurementTools {
     )) {
       for (final label in [property.code, property.label]) {
         if (!clause.startsWith(label)) continue;
-        final match = RegExp(
-          r'^\s*(>=|<=|≥|≤|=|不低于|不少于|不高于|不超过|等于)\s*(.+)$',
-        ).firstMatch(clause.substring(label.length));
+        final match = RegExp(r'^\s*(>=|<=|≥|≤|=|不低于|不少于|不高于|不超过|等于)\s*(.+)$')
+            .firstMatch(clause.substring(label.length));
         if (match == null) continue;
         final number = _number(property, match[2]!);
         if (number == null) continue;
@@ -185,13 +183,14 @@ extension _ProcurementCompare on AssistantProcurementTools {
   }
 
   Map<String, Object?>? _number(SpecProperty property, String text) {
-    final m = RegExp(
-      r'^\s*([0-9]+(?:\.[0-9]+)?)\s*([^\s]*)\s*$',
-    ).firstMatch(text);
+    final m = RegExp(r'^\s*([0-9]+(?:\.[0-9]+)?)\s*([^\s]*)\s*$')
+        .firstMatch(text);
     if (m == null) return null;
     final unit = m[2]!;
     if (property.kind != null && unit.isEmpty) return null;
-    if (property.kind == null && unit.isNotEmpty && unit != property.unitLabel) {
+    if (property.kind == null &&
+        unit.isNotEmpty &&
+        unit != property.unitLabel) {
       return null;
     }
     try {
@@ -281,7 +280,9 @@ extension _ProcurementCompare on AssistantProcurementTools {
 
   Map<String, Object?> _compare(List<String> ids, String? itemId) {
     final rows = [for (final id in ids) _candidate(id)];
-    for (final c in rows) { _fresh(c); }
+    for (final c in rows) {
+      _fresh(c);
+    }
     final target = _bindings(itemId);
     final product = target['product'] == null
         ? null
@@ -443,7 +444,8 @@ extension _ProcurementCompare on AssistantProcurementTools {
             .firstOrNull;
         if (row == null || row.warnings.isNotEmpty) continue;
         final f = row.facts;
-        if (f['brand'] != product?['brand'] || f['model'] != product?['model']) {
+        if (f['brand'] != product?['brand'] ||
+            f['model'] != product?['model']) {
           continue;
         }
         if (f['unit'] != quote['unit_snapshot']) continue;
@@ -506,8 +508,7 @@ extension _ProcurementCompare on AssistantProcurementTools {
     final excluded = const {'excluded', '不含运费'}.contains(shipping);
     if (scope is! List) {
       reasons.add('正式报价运费范围未知');
-    }
-    else {
+    } else {
       if ((!included && !excluded) || scope.contains('freight') != included) {
         reasons.add('正式报价运费范围与来源不同');
       }
