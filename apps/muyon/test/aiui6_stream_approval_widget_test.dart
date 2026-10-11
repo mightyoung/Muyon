@@ -196,9 +196,15 @@ void main() {
             expect(f.callsOf('write'), 0);
             expect(tester.takeException(), isNull);
           } finally {
-            await tester.pumpWidget(const SizedBox.shrink());
-            await tester.runAsync(agent.close);
-            HttpOverrides.global = previousOverrides;
+            try {
+              await tester.pumpWidget(const SizedBox.shrink());
+              await drainLoopCleanup(
+                agent.close,
+                label: 'approval agent.close',
+              );
+            } finally {
+              HttpOverrides.global = previousOverrides;
+            }
           }
         },
       );
