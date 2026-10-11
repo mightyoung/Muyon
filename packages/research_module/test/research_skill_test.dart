@@ -45,7 +45,7 @@ void main() {
         'statement': '手写合成主张',
         'assertion_state': 'supported',
         'evidence': [
-          {'kind': 'claims', 'id': 'c1', 'rev': 2, 'role': 'support'},
+          {'kind': 'claims', 'id': 'c1', 'rev': 2, 'role': 'supports'},
         ],
         'opportunity_id': 'o1',
         'future_optional': {
@@ -57,7 +57,7 @@ void main() {
         'id': 'search-new',
         'rev': 1,
         'query': '合成搜索',
-        'intent': '寻找反证',
+        'intent': 'exploratory',
       };
       final opportunity = <String, dynamic>{
         'schema_version': 2,
