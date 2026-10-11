@@ -18,7 +18,7 @@ import 'conversation_workspace_pane.dart';
 /// attachment remains the caller's boundary; a disabled dynamic page still
 /// exposes its stored draft and actual registry receipts, read-only.
 class DynamicWorkspace extends StatefulWidget {
-  const DynamicWorkspace({
+  DynamicWorkspace({
     super.key,
     required this.repository,
     required this.taskId,
@@ -34,7 +34,11 @@ class DynamicWorkspace extends StatefulWidget {
     this.embedded = false,
     this.textOnly = false,
     this.onClose,
-  });
+  }) : _presentationOwner = agent?.captureUiWorkspaceOwner(taskId, plan);
+  final UiWorkspacePresentationOwner? _presentationOwner;
+  bool get hasCurrentPresentation => agent == null ||
+      (_presentationOwner != null &&
+          agent!.isCurrentUiWorkspaceOwner(_presentationOwner));
   final DynamicWorkspaceSession? session;
   final bool embedded;
   final bool textOnly;
@@ -55,19 +59,14 @@ class DynamicWorkspace extends StatefulWidget {
 /// The responsive host retains this session while route and pane views change.
 class DynamicWorkspaceSession extends ChangeNotifier {
   DynamicWorkspaceSession(this.widget)
-      : _presentationIdentity = widget.agent?.uiContentIdentity(widget.taskId),
-        _checkpointRequest = widget.agent?.uiPresentation(widget.taskId)?.request {
+      : _checkpointRequest = widget._presentationOwner?.presentation?.request {
     widget.repository.addListener(_refreshHostState);
   }
   final DynamicWorkspace widget;
-  final Object? _presentationIdentity;
   final Object? _checkpointRequest;
   bool _presentationRevoked = false;
   bool get _hasPresentationAuthority => !_presentationRevoked &&
-      (widget.agent == null ||
-          (widget.agent!.allowsUiContent(widget.taskId) &&
-              identical(_presentationIdentity,
-                  widget.agent!.uiContentIdentity(widget.taskId))));
+      widget.hasCurrentPresentation;
   bool get allowsPresentation => !_disposed && _hasPresentationAuthority;
   // View teardown ends interaction, but an already captured checkpoint still
   // belongs to the live host identity. Cancellation/replacement revoke it even
@@ -170,6 +169,12 @@ class DynamicWorkspaceSession extends ChangeNotifier {
 
   Future<void> load() async {
     try {
+      if (widget.plan != null && !allowsPresentation) {
+        _presentationRevoked = true;
+        error = '当前交互页面已失效，请重新打开。';
+        ready = true;
+        return;
+      }
       final store = HostUiWorkspaceStore(
         widget.repository,
         taskId: widget.taskId,
@@ -241,11 +246,14 @@ class DynamicWorkspaceSession extends ChangeNotifier {
           c.dispose();
           return;
         }
-        controller = c;
         if (!allowsPresentation) {
           _presentationRevoked = true;
-          c.readOnly = true;
+          c.dispose();
+          error = '当前交互页面已失效，请重新打开。';
+          ready = true;
+          return;
         }
+        controller = c;
         if (widget.agent != null) {
           router = UiPlanningEventRouter(
             agent: widget.agent!,

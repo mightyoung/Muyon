@@ -33,6 +33,22 @@ import '../platform/ui_planning_tool.dart';
 
 import 'package:muyon_module_api/ui_contract.dart';
 
+/// Host-created ownership proof; callers cannot substitute a newer identity.
+final class UiWorkspacePresentationOwner {
+  const UiWorkspacePresentationOwner._(
+    this._issuer,
+    this.taskId,
+    this.identity,
+    this.presentation,
+    this.plan,
+  );
+  final PersonalAgent _issuer;
+  final String taskId;
+  final Object? identity;
+  final UiPlannedPresentation? presentation;
+  final ValidatedUiPlan? plan;
+}
+
 /// Host lifetime service. Views only create requests and approve displayed
 /// snapshots; disposing a view never disposes or cancels its executor.
 ///
@@ -95,9 +111,7 @@ class PersonalAgent {
         allowsPresentation: presentationPreference == null
             ? null
             : _allowsPresentation,
-        presentationIdentity: presentationPreference == null
-            ? null
-            : (id) => _presentationRequests[id],
+        presentationIdentity: (id) => _presentationRequests[id],
         cancelTimedOutRequest: (request) async {
           await _uiPlanningCancellations[request]?.call();
         },
@@ -147,6 +161,38 @@ class PersonalAgent {
   Object? uiContentIdentity(String taskId) => _presentationRequests[taskId];
   bool isCurrentUiRequest(UiPlanningRequest request) =>
       _ctx.uiPlanning?.isCurrentRequest(request) ?? false;
+
+  /// Capture the plan and its host owner together, before an opener can await.
+  UiWorkspacePresentationOwner captureUiWorkspaceOwner(
+    String taskId,
+    ValidatedUiPlan? plan,
+  ) => UiWorkspacePresentationOwner._(
+    this,
+    taskId,
+    _presentationRequests[taskId],
+    _ctx.uiPlanning?.presentation(taskId),
+    plan,
+  );
+
+  bool isCurrentUiWorkspaceOwner(UiWorkspacePresentationOwner owner) {
+    if (!identical(owner._issuer, this) ||
+        !allowsUiContent(owner.taskId) ||
+        !identical(owner.identity, _presentationRequests[owner.taskId])) {
+      return false;
+    }
+    final current = _ctx.uiPlanning?.presentation(owner.taskId);
+    final captured = owner.presentation;
+    if (!identical(current, captured)) return false;
+    if (captured == null) {
+      // A stored draft has no generated plan. Legacy host-supplied plans have
+      // no planner request or presentation policy to acquire here.
+      return owner.plan == null || presentationPreference == null;
+    }
+    final request = captured.request;
+    return request != null &&
+        isCurrentUiRequest(request) &&
+        (owner.plan == null || identical(owner.plan, captured.validated));
+  }
 
   /// Freeze the ordinary request's real planning availability into its catalogue.
   bool canExposeUiPlanning(ModelProfile? profile) {
@@ -365,10 +411,15 @@ class PersonalAgent {
     return future.whenComplete(() => _uiPreferenceSaves.remove(future));
   }
 
-  UiPlannedPresentation? uiPresentation(String taskId) =>
-      presentationPreference != null && !_allowsPresentation(taskId)
-      ? null
-      : _ctx.uiPlanning?.presentation(taskId);
+  UiPlannedPresentation? uiPresentation(String taskId) {
+    if (presentationPreference != null && !_allowsPresentation(taskId)) {
+      return null;
+    }
+    final value = _ctx.uiPlanning?.presentation(taskId);
+    final request = value?.request;
+    return request != null && !isCurrentUiRequest(request) ? null : value;
+  }
+
   final FoundationRepository repository;
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;

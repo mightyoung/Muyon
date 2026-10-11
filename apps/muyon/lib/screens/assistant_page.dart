@@ -594,22 +594,20 @@ class _AssistantPageState extends State<AssistantPage> {
                               ?.validated !=
                           null)
                     TextButton(
-                      onPressed: () => _openWorkspace(DynamicWorkspace(
+                      onPressed: () {
+                        final plan = widget.agent.uiPresentation(task.id)?.validated;
+                        if (plan == null) return;
+                        _openWorkspace(DynamicWorkspace(
                             repository: widget.repo,
                             host: widget.host,
                             taskId: task.id,
-                            surfaceId: widget.agent
-                                .uiPresentation(task.id)!
-                                .validated!
-                                .plan
-                                .surfaceId,
-                            plan: widget.agent
-                                .uiPresentation(task.id)!
-                                .validated,
+                            surfaceId: plan.plan.surfaceId,
+                            plan: plan,
                             originalAnswer: task.summary ?? '',
                             tools: widget.agent.tools,
                             agent: widget.agent,
-                      )),
+                        ));
+                      },
                       child: const Text('打开交互页面'),
                     ),
                   for (final surface in (task.payload['uiPlanningInternal'] == true ? <String>[] : HostUiWorkspaceStore(

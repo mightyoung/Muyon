@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show debugPrintSynchronously;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/personal_agent.dart';
@@ -135,7 +136,7 @@ void main() {
         final a = (await workspaceOperation(
           tester,
           () => h.f.start(h.agent, h.f.profile()),
-        ))!;
+        ));
         await tester.pumpWidget(
           MaterialApp(
             home: ConversationWorkspaceHost(
@@ -207,11 +208,12 @@ void main() {
         if (next != null) await workspaceOperation(tester, next.ensureLoaded);
         await tester.pump();
         final c = next?.controller;
-        if (c != null)
+        if (c != null) {
           await workspaceOperation(tester, () async {
             c.step = 'CR18_QUEUED_B1_SAVED';
             await next!.checkpoint();
           });
+        }
         final stored = await tester.runAsync(
           () => HostUiWorkspaceStore(
             h.f.repo,
@@ -219,7 +221,7 @@ void main() {
           ).load(h.plan.plan.surfaceId),
         );
         final displayed = find.text('Public comparison').evaluate().isNotEmpty;
-        print(
+        debugPrintSynchronously(
           'CR18_CLOSE_BARRIER ${jsonEncode({'closeBarrierEntered': enteredClose.isCompleted, 'B2CompletedBeforeCloseReleased': h.release.isCompleted, 'oldRequestCurrent': h.agent.isCurrentUiRequest(h.first.request!), 'queuedPlanInstalled': identical(c?.surface.current, h.first.validated), 'sessionAllowsPresentation': next?.allowsPresentation, 'oldTitleDisplayed': displayed, 'storedOldStep': stored?.step, 'storedRevision': stored?.revision, 'modelRequests': h.f.bodies.length, 'toolHistory': h.f.tools.history().length})}',
         );
         expect(
@@ -242,7 +244,7 @@ void main() {
     addTearDown(h.close);
     await h.replace();
     final observed = h.agent.uiPresentation(h.task.id);
-    print(
+    debugPrintSynchronously(
       'CR18_SOURCE_BARRIER ${jsonEncode({'barrierEntered': h.entered.isCompleted, 'barrierReleased': h.release.isCompleted, 'oldRequestCurrent': h.agent.isCurrentUiRequest(h.first.request!), 'oldPresentationReturned': identical(observed, h.first), 'oldValidatedReturned': observed?.validated != null, 'modelRequests': h.f.bodies.length, 'toolHistory': h.f.tools.history().length})}',
     );
     expect(
@@ -271,12 +273,13 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: h.workspace(session: session)));
       await tester.pump();
       final displayed = find.text('Public comparison').evaluate().isNotEmpty;
-      if (controller != null)
+      if (controller != null) {
         await workspaceOperation(tester, () async {
           controller.step = 'CR18_STALE_B1_SAVED';
           await controller.adoptExtracted('quantity');
           await controller.flush();
         });
+      }
       final saved = await tester.runAsync(
         () => store.load(h.plan.plan.surfaceId),
       );
@@ -292,10 +295,20 @@ void main() {
         'modelRequests': h.f.bodies.length,
         'toolHistory': h.f.tools.history().length,
       };
-      print('CR18_NEW_SESSION_BARRIER ${jsonEncode(observed)}');
+      debugPrintSynchronously(
+        'CR18_NEW_SESSION_BARRIER ${jsonEncode(observed)}',
+      );
       expect(
-        {'oldTitleDisplayed': displayed, 'storedOldStep': saved?.step},
-        {'oldTitleDisplayed': false, 'storedOldStep': null},
+        {
+          'oldTitleDisplayed': displayed,
+          'storedOldStep': saved?.step,
+          'sessionAllowsPresentation': session.allowsPresentation,
+        },
+        {
+          'oldTitleDisplayed': false,
+          'storedOldStep': null,
+          'sessionAllowsPresentation': false,
+        },
         reason:
             'B2 identity must not reauthorize captured B1 content/checkpoint',
       );
