@@ -132,7 +132,8 @@ class ResearchRuntime
 
   /// Synchronous transaction-boundary recheck for module-owned writes.
   void requireCurrent(ObjectRef ref) {
-    if (resolveCurrent(ref) == null) throw StateError('Selected research object changed');
+    if (resolveCurrent(ref) == null)
+      throw StateError('Selected research object changed');
   }
 
   /// Resolve synchronously inside the caller's write transaction, so returned
@@ -144,8 +145,14 @@ class ResearchRuntime
         !store.projects().any((p) => p.id == project)) {
       throw StateError('Object outside current research scope');
     }
-    final session = ResearchSession(store.scoped(project), WorkspaceBinding(
-      workspaceId:'',moduleId:'research',nativeProjectId:project));
+    final session = ResearchSession(
+      store.scoped(project),
+      WorkspaceBinding(
+        workspaceId: '',
+        moduleId: 'research',
+        nativeProjectId: project,
+      ),
+    );
     return session._resolve(ref);
   }
 
