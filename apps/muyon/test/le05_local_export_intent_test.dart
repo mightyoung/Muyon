@@ -362,6 +362,56 @@ void main() {
       return call;
     }
 
+    test('live cached save executes once under manual approval', () async {
+      final call = await cacheSave();
+      final intent = cachedIntent!;
+      var boundaryEntries = 0;
+      beforeEffect = () => boundaryEntries++;
+      final host = service();
+      final outcome = await host.review(call);
+      expect(outcome.action, ReviewAction.confirm);
+      expect(outcome.grantId, isNull);
+      final approval = await host.confirm(outcome);
+      expect(approval, isNotNull);
+      final signed = call.request.withApproval(approval!);
+      expect(identical(registry.currentEffectIntent(call), intent), isTrue);
+      expect(intent.hasLiveAuthority, isTrue);
+      final result = await registry.invoke(signed);
+      expect(result.status, ToolCallStatus.succeeded);
+      expect(handlerEntries, 1);
+      expect(boundaryEntries, 1);
+      expect(runs, 1);
+      final row = db.raw.select('SELECT * FROM tool_approvals').single;
+      expect(row['authorization_source'], 'manual');
+      expect(row['grant_id'], isNull);
+      expect(row['state'], 'consumed');
+      expect(registry.receiptFor(signed.invocationId)!.state, 'succeeded');
+      // Identical replay returns its receipt without executing the effect again.
+      final replay = await registry.invoke(signed);
+      expect(replay.status, ToolCallStatus.succeeded);
+      expect(handlerEntries, 1);
+      expect(boundaryEntries, 1);
+      expect(runs, 1);
+      // A new replay identity cannot reuse the consumed one-use approval.
+      await expectLater(
+        registry.invoke(
+          ToolCallRequest(
+            invocationId: signed.invocationId,
+            toolId: signed.toolId,
+            scope: signed.scope,
+            destination: signed.destination,
+            idempotencyKey: 'second-attempt',
+            approvalId: approval,
+          ),
+        ),
+        throwsA(isA<ToolPlatformException>()),
+      );
+      expect(handlerEntries, 1);
+      expect(boundaryEntries, 1);
+      expect(runs, 1);
+      expect(grants.list(), isEmpty);
+    });
+
     test('cached save revoked before review cannot issue approval', () async {
       final call = await cacheSave();
       issuer.revoke(target!);
@@ -402,8 +452,15 @@ void main() {
       'cached approved save revoked before invoke has zero effects',
       () async {
         final call = await cacheSave();
+        final intent = cachedIntent!;
+        final digest = intent.digest;
+        final payloadDigest = intent.payloadDigest;
         final signed = call.request.withApproval(await approve(call));
         issuer.revoke(target!);
+        expect(identical(call.effectIntent, intent), isTrue);
+        expect(intent.digest, digest);
+        expect(intent.payloadDigest, payloadDigest);
+        expect(intent.hasLiveAuthority, isFalse);
         final executed = await ran(signed);
         expect(
           runs,
