@@ -187,6 +187,28 @@ void main() {
     expect(live.f.bodies, isEmpty);
   });
 
+  testWidgets('unknown host facts reject even a custom workspace business sink',
+      (tester) async {
+    final live = await open(tester);
+    await tester.runAsync(() => live.f.repo.database.write((db) => db.execute(
+      'DELETE FROM settings WHERE key=?', ['auth1b:task:${live.taskId}'])));
+    live.f.repo.refresh();
+    await tester.pumpAndSettle();
+    expect(live.f.repo.authorizationFacts.readTask(live.taskId).taintState,
+        HostTaintState.unknown);
+    final card = tester.widget<ConfirmCard>(find.byType(ConfirmCard));
+    expect(card.externalContent, isTrue);
+    await tester.runAsync(() async {
+      card.onDecision!(ConfirmationChoice.once);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    });
+    await tester.pumpAndSettle();
+    expect(live.events, isEmpty);
+    expect(live.f.callsOf('write'), 0);
+    expect(live.f.bodies, isEmpty);
+    expect(find.text('已成功'), findsNothing);
+  });
+
   testWidgets('batch individual control is disabled without an individual route',
       (tester) async {
     final live = await open(tester, batch: true);

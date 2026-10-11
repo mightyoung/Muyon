@@ -255,6 +255,47 @@ void main() {
     }
   });
 
+  test('SN3 cancellation during the final source check cannot restore validated output', () async {
+    final f = await LoopFixture.open();
+    final agent = f.agent();
+    addTearDown(agent.close);
+    final task = await f.start(agent, f.profile());
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    var lookups = 0;
+    late UiPlanningHarness harness;
+    final provider = StreamMotivationUiPlanningProvider(
+      (_, _, receive) async => receive(validStream),
+      onProgress: (progress) => harness.publishStream(progress),
+    );
+    harness = UiPlanningHarness(repository: f.repo,
+      source: (_) async {
+        if (++lookups == 3) {
+          entered.complete();
+          await release.future;
+        }
+        return state(f);
+      }, mode: UiPlanningMode.motivation,
+      providers: {UiPlanningMode.motivation: provider});
+    final planning = harness.plan(task.id);
+    try {
+      await entered.future;
+      expect(harness.streamProgress(task.id)!.view.finalPlan, isNotNull);
+      await harness.cancelTask(task.id);
+      final cancelled = harness.presentation(task.id)!;
+      expect(cancelled.validated, isNull);
+      expect(cancelled.result.reasonCode, 'cancelled');
+      release.complete();
+      final result = await planning;
+      expect(result.validated, isNull);
+      expect(harness.presentation(task.id), same(cancelled));
+      expect(harness.streamProgress(task.id)!.view.finalPlan, isNull);
+      expect(f.bodies, isEmpty);
+    } finally {
+      if (!release.isCompleted) release.complete();
+    }
+  });
+
   test('SN3 invalidation rejects late success and late preview publications', () async {
     final f = await LoopFixture.open();
     final agent = f.agent();
