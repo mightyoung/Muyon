@@ -7,9 +7,11 @@ import 'foundation_repository.dart';
 /// Minimal projection in the existing host settings table. The connection owner
 /// serializes CAS and commits it atomically; no schema or task history changes.
 class HostUiWorkspaceStore implements UiWorkspaceStore {
-  HostUiWorkspaceStore(this.repository, {required this.taskId});
+  HostUiWorkspaceStore(this.repository, {required this.taskId, this.canSave});
   final FoundationRepository repository;
   final String taskId;
+  /// Host authority is checked when the queued transaction actually writes.
+  final bool Function()? canSave;
   String? get scopeKey {
     final task = repository.task(taskId);
     return task == null ? null : jsonEncode(task.scope.toJson());
@@ -62,6 +64,11 @@ class HostUiWorkspaceStore implements UiWorkspaceStore {
       final old = rows.isEmpty ? null : _decode(rows.single['value'] as String);
       if ((old?.revision ?? 0) != expectedRevision ||
           (old != null && old.scopeKey != value.scopeKey)) {
+        return false;
+      }
+      try {
+        if (!(canSave?.call() ?? true)) return false;
+      } catch (_) {
         return false;
       }
       db.execute(

@@ -218,6 +218,7 @@ extension _PersonalSections on _PlatformShellState {
   Widget settings() => ListenableBuilder(
     listenable: repo,
     builder: (context, _) => list([
+      UiPlanningPreferenceSwitch(agent: host.personalAgent, title: '界面与可视化'),
       card('助手控制中心', '已授权规则、变更审计与数据去向', () => page('助手控制中心', AssistantControlPage.host(host: host)), Icons.admin_panel_settings_outlined),
       card('个人中心', '个人资料', () => page('个人中心', personal()), Icons.person_outline),
       card('设备聊天', '本人已配对设备之间的文字', () => page('设备聊天', ChatEntryPage(host: host)), Icons.forum_outlined),

@@ -95,9 +95,9 @@ class _ConversationWorkspaceHostState extends State<ConversationWorkspaceHost> {
   }
 
   Future<void> _open(DynamicWorkspace workspace) async {
-    if (releasingReferences) return;
+    if (releasingReferences || !workspace.hasCurrentPresentation) return;
     if (session != null && !await close()) return;
-    if (!mounted || releasingReferences) return;
+    if (!mounted || releasingReferences || !workspace.hasCurrentPresentation) return;
     sourceFocus = FocusManager.instance.primaryFocus;
     session = DynamicWorkspaceSession(workspace);
     setState(() {});

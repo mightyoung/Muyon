@@ -20,6 +20,7 @@ import 'agent_compaction_flow.dart';
 import 'agent_dispatch.dart';
 import 'model_request_gate.dart';
 import 'request_view.dart';
+import 'stream_ui_planning.dart';
 
 /// Model turn of a task (S0 budget check, the confirmation of the request,
 /// the request itself in compatibility and native mode, billing and the
@@ -71,12 +72,42 @@ class AgentModelTurn {
   }
 
   Future<void> waitForModel(PersonalTask task) async {
-    final planning = ctx.uiPlanning;
-    if (planning?.enabled == true &&
-        task.payload['uiPlanningInternal'] != true) {
-      try {
-        final state = await planning!.source(task);
-        if (state != null) {
+    try {
+      final planning = ctx.uiPlanning;
+      final mode = planning?.mode;
+      final provider = planning?.providers[mode];
+      final identity = planning?.presentationIdentity?.call(task.id);
+      final profileDigest = AgentContext.digest(task.payload['profile']);
+      bool available() {
+        try {
+          final live = ctx.repository.task(task.id);
+          return !ctx.closing &&
+              planning != null &&
+              identical(ctx.uiPlanning, planning) &&
+              planning.enabled &&
+              planning.mode == mode &&
+              provider != null &&
+              identical(planning.providers[mode], provider) &&
+              planning.canPlanTask(task.id) &&
+              identical(planning.presentationIdentity?.call(task.id), identity) &&
+              task.payload['uiPlanningInternal'] != true &&
+              task.payload['profile'] is Map &&
+              (provider is! StreamMotivationUiPlanningProvider ||
+                  ctx.profile(task).capabilities.streaming) &&
+              (task.payload['candidateIds'] as List? ?? const [])
+                  .contains('assistant.plan_ui') &&
+              live != null &&
+              !live.terminal &&
+              AgentContext.digest(live.payload['profile']) == profileDigest &&
+              (live.payload['candidateIds'] as List? ?? const [])
+                  .contains('assistant.plan_ui');
+        } catch (_) {
+          return false;
+        }
+      }
+      if (planning != null && available()) {
+        final state = await planning.source(task);
+        if (state != null && available()) {
           final metadata = jsonEncode({
             'hostUiPlanningContext': {
               'snapshotId': state.snapshot.ref.id,
@@ -94,14 +125,22 @@ class AgentModelTurn {
             'uiPlanningContext': metadata,
             'messages': [
               for (final message in task.payload['messages'] as List)
-                if (message is! Map || message['content'] != prior) message,
+                if (message is! Map ||
+                    message['role'] != 'system' ||
+                    message['content'] != prior) message,
               {'role': 'system', 'content': metadata},
             ],
           });
+        } else {
+          task = _withoutUiPlanning(task);
         }
-      } catch (_) {
-        /* Optional planning metadata never prevents a text answer. */
+      } else {
+        task = _withoutUiPlanning(task);
       }
+    } catch (_) {
+      // Optional source/probe failures revoke planning advertisements while
+      // the existing text model request keeps its own confirmation flow.
+      task = _withoutUiPlanning(task);
     }
     final preview = {
       'endpoint': ctx.profile(task).endpoint.toString(),
@@ -216,6 +255,62 @@ class AgentModelTurn {
     );
   }
 
+  /// Host revocation only narrows the task's advertised presentation tool.
+  /// Keep every other frozen candidate and ordinary system field unchanged.
+  PersonalTask _withoutUiPlanning(PersonalTask task) {
+    final prior = task.payload['uiPlanningContext'];
+    final messages = task.payload['messages'] as List;
+    final narrowedMessages = <Object?>[];
+    for (var index = 0; index < messages.length; index++) {
+      final message = messages[index];
+      if (prior is String &&
+          message is Map &&
+          message['role'] == 'system' &&
+          message['content'] == prior) {
+        continue;
+      }
+      var narrowed = message;
+      // The factory owns the first JSON system envelope. Later system
+      // messages, user history and model replies are never rewritten.
+      if (index == 0 &&
+          !AgentContext.native(task) &&
+          message is Map &&
+          message['role'] == 'system' &&
+          message['content'] is String) {
+        try {
+          final envelope = jsonDecode(message['content'] as String);
+          if (envelope is Map && envelope['tools'] is List) {
+            final tools = envelope['tools'] as List;
+            final remaining = tools.where((tool) =>
+                tool is! Map || tool['toolId'] != 'assistant.plan_ui').toList();
+            if (remaining.length != tools.length) {
+              narrowed = <String, Object?>{
+                ...Map<String, Object?>.from(message),
+                'content': jsonEncode({...envelope, 'tools': remaining}),
+              };
+            }
+          }
+        } on FormatException {
+          // An ordinary system message is not a host tool catalogue.
+        }
+      }
+      narrowedMessages.add(narrowed);
+    }
+    return task.copy({
+      'uiPlanningContext': null,
+      'candidateIds': [
+        for (final id in task.payload['candidateIds'] as List? ?? const [])
+          if (id != 'assistant.plan_ui') id,
+      ],
+      if (task.payload['nativeTools'] is List)
+        'nativeTools': [
+          for (final tool in task.payload['nativeTools'] as List)
+            if (tool is! Map || tool['toolId'] != 'assistant.plan_ui') tool,
+        ],
+      'messages': narrowedMessages,
+    });
+  }
+
   /// Same checks before every send, whichever path sends.
   Future<void> _beforeSend(PersonalTask task) async {
     AssistantSubconversations(ctx.repository)
@@ -316,7 +411,7 @@ class AgentModelTurn {
       // Frozen when the task started: editing the profile later does not
       // change this task's protocol.
       final profile = ctx.profile(task);
-      if (profile.capabilities.nativeTools) {
+      if (profile.capabilities.nativeTools && ctx.uiModelChunks[task.id] == null) {
         await _runNative(task, token, profile);
         return;
       }
@@ -355,6 +450,11 @@ class AgentModelTurn {
       // What this response used is charged whatever it turns out to be.
       final billed = _bill(task, started, replyText: text, usage: usage);
       await _responded(billed, usage, null, streamed?.draft);
+      if (ctx.uiModelChunks[task.id] != null) {
+        // This trusted internal request carries raw UI NDJSON, not chat protocol.
+        await ctx.finish(billed, text, const [], canCommit: () => !token.isCancelled);
+        return;
+      }
       final response = _protocolReply(text);
       if (response == null) {
         // The draft was only ever a view of this text: dropped with it.
@@ -419,7 +519,7 @@ class AgentModelTurn {
       'or answer in plain text. No other markup.';
 
   ModelRequest _modelRequest(PersonalTask task, ModelProfile profile) {
-    final native = profile.capabilities.nativeTools;
+    final native = profile.capabilities.nativeTools && ctx.uiModelChunks[task.id] == null;
     return ModelRequest(
       profile: profile,
       messages: [
@@ -438,7 +538,7 @@ class AgentModelTurn {
       maxOutputTokens:
           (task.payload['preview'] as Map?)?['maxOutputTokens'] as int?,
       // Compatibility mode asks for one JSON object per reply (P0-3d).
-      jsonObject: !native,
+      jsonObject: !native && ctx.uiModelChunks[task.id] == null,
       caller: 'assistant',
       requestDigest: task.payload['requestDigest'] as String?,
     );
@@ -456,7 +556,7 @@ class AgentModelTurn {
         task,
         _modelRequest(task, profile),
         token,
-        showDraft: true,
+        showDraft: ctx.uiModelChunks[task.id] == null,
       );
     } on HttpException catch (error) {
       // The endpoint refused what was asked: a fixed failure, never another
@@ -517,6 +617,8 @@ class AgentModelTurn {
         }
         switch (event) {
           case TextDelta():
+            await ctx.uiModelChecks[task.id]?.call();
+            ctx.uiModelChunks[task.id]?.call(event.text);
             reply.text.write(event.text);
             feed?.text(event.text);
           case ToolCallComplete():

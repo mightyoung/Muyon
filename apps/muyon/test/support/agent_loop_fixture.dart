@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/agent_budget.dart';
 import 'package:muyon/assistant/model_request_gate.dart';
@@ -18,6 +19,49 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 /// loopback endpoint that answers from a script. Nothing here reaches a real
 /// model.
 const loopKey = 'sk-agent-secret-0123456789';
+
+/// Finish real I/O while draining callbacks already queued on the fake clock.
+/// Awaiting the operation inside runAsync would stop those fake callbacks.
+Future<void> drainLoopCleanup(
+  Future<void> Function() operation, {
+  required String label,
+}) async {
+  if (BindingBase.debugBindingType() == null ||
+      !TestWidgetsFlutterBinding.instance.inTest) {
+    await operation();
+    return;
+  }
+  final binding = TestWidgetsFlutterBinding.instance;
+  var completed = false;
+  Object? failure;
+  StackTrace? failureStack;
+  await binding.runAsync(() async {
+    try {
+      operation().then<void>(
+        (_) => completed = true,
+        onError: (Object error, StackTrace stack) {
+          failure = error;
+          failureStack = stack;
+          completed = true;
+        },
+      );
+    } catch (error, stack) {
+      failure = error;
+      failureStack = stack;
+      completed = true;
+    }
+  });
+  for (var turn = 0; turn < 2000 && !completed; turn++) {
+    await binding.runAsync(() => Future<void>.delayed(Duration.zero));
+    await binding.delayed(Duration.zero);
+  }
+  if (!completed) {
+    fail('$label did not complete after draining 2000 real/fake event turns');
+  }
+  if (failure != null) {
+    Error.throwWithStackTrace(failure!, failureStack!);
+  }
+}
 
 class LoopSecrets implements SecretStore {
   @override
@@ -164,7 +208,7 @@ class LoopFixture {
     });
     addTearDown(() async {
       await server.close(force: true);
-      await storage.close();
+      await drainLoopCleanup(storage.close, label: 'LoopFixture storage.close');
       root.deleteSync(recursive: true);
     });
     return f;

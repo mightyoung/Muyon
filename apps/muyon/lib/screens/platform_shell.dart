@@ -20,6 +20,7 @@ import '../services/models/model_provider.dart';
 import '../services/models/profile_repository.dart';
 import '../services/models/secret_store.dart';
 import 'assistant_page.dart';
+import 'ui_planning_preference_switch.dart';
 import 'assistant_control/assistant_control_page.dart';
 import 'conversation_workspace_pane.dart';
 import 'conversation_shell_controller.dart';

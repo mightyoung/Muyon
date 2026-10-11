@@ -101,7 +101,7 @@ void main() {
   });
 
   testWidgets('registered_business_event_is_dispatched_once_across_resize', (tester) async {
-    final f = await NavigationFixture.open(tester);
+    final f = await NavigationFixture.open(tester, knownClean: true);
     _registerCleanup(tester, f);
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(390, 844);

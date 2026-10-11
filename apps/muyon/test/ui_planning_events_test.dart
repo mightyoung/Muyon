@@ -5,6 +5,7 @@ import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/platform/business_tools.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/assistant/ui_planning_events.dart';
+import 'package:muyon/assistant/ui_presentation_preference.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_ui/dynamic_ui.dart';
@@ -63,10 +64,14 @@ void main() {
       final conversation = await host.foundation.createConversation(
         scope: AssistantScope.selectedObjects(refs),
       );
+      // Optional UI routes require the persisted choice and a real request
+      // identity. Commit before start freezes this task's presentation policy.
+      await host.personalAgent.savePresentationMode(UiPresentationMode.automatic);
       final task = await host.personalAgent.start(
         conversationId: conversation.id,
         prompt: 'Show fixture quote',
       );
+      expect(host.personalAgent.allowsUiContent(task.id), isTrue);
       final fixture = runtimeFixture();
       final checked = validateUiPlan(
         fixture.plan.plan!,
