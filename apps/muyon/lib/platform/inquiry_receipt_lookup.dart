@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
+import 'package:supplier_core/supplier_core.dart';
 
 /// Identity of the domain library a receipt was written into: a digest of the
 /// database file the connection is open on. Moving the file makes existing
@@ -88,6 +89,18 @@ BusinessOperationReceipt _receiptFromRecord(
   if (scopeKey.trim().isEmpty || parameters['operation_id'] != operationId) {
     throw const FormatException('receipt request identity is incomplete');
   }
+  // I-2: the request must carry the fields its operation needs, and the scope
+  // must have the shape the write path stores. Checked before any identity
+  // comparison; the digests below still use the stored strings unchanged.
+  if ((operation == 'create_record' || operation == 'update_record') &&
+      parameters['values'] is! Map) {
+    throw const FormatException('receipt request has no values');
+  }
+  if (operation == 'delete_record' &&
+      parameters['referencing_records'] is! List) {
+    throw const FormatException('receipt request has no referencing records');
+  }
+  _checkStoredScope(scopeKey);
   final data = committed['data'] as Map<String, Object?>;
   if (data['operation_id'] != operationId) {
     throw const FormatException('receipt belongs to another operation');
@@ -131,6 +144,12 @@ BusinessOperationReceipt _receiptFromRecord(
       refs.single['revisionRef'] != '$version') {
     throw const FormatException('record reference does not match its data');
   }
+  // I-1: a create result names a new record, so its id must be a lowercase
+  // UUID (same rule as the schema); anything else is not a valid receipt.
+  if (operation == 'create_record') {
+    requireUuid(id, 'id');
+    requireUuid(refs.single['objectId'], 'objectId');
+  }
   return BusinessOperationReceipt(
     operationId: operationId,
     moduleId: 'inquiry',
@@ -146,4 +165,31 @@ BusinessOperationReceipt _receiptFromRecord(
       'deleted': deleted,
     },
   );
+}
+
+/// The scope as the write path stores it: `{workspace, objects}` where each
+/// object is a JSON string of `[moduleId, objectType, objectId, nativeProjectId]`.
+void _checkStoredScope(String scopeKey) {
+  final scope = jsonDecode(scopeKey);
+  if (scope is! Map ||
+      !const {'workspace', 'objects'}.containsAll(scope.keys) ||
+      scope.length != 2) {
+    throw const FormatException('receipt scope has an unknown shape');
+  }
+  final workspace = scope['workspace'];
+  final objects = scope['objects'];
+  if ((workspace != null && workspace is! String) || objects is! List) {
+    throw const FormatException('receipt scope has an unknown shape');
+  }
+  for (final item in objects) {
+    final tuple = item is String ? jsonDecode(item) : null;
+    if (tuple is! List ||
+        tuple.length != 4 ||
+        tuple[0] is! String ||
+        tuple[1] is! String ||
+        tuple[2] is! String ||
+        (tuple[3] != null && tuple[3] is! String)) {
+      throw const FormatException('receipt scope object is not a tuple');
+    }
+  }
 }
