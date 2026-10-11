@@ -172,7 +172,7 @@ void main() {
         ChangeOp.delete,
       );
       expect(changes().last.summary, 'First');
-      expect(InquiryPlugin.schema.version, 2);
+      expect(InquiryPlugin.schema.version, 3);
     },
   );
 }
