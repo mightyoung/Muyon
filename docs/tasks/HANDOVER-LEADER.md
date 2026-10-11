@@ -4,6 +4,8 @@
 
 > 集成复核补注（2026-10-11）：下文第 6 次交接保留交接当时状态。LE-01 `202e44af` 已独立确认两个阻断项，待补修，不能按「宜先合」直接放行，见[独立最小复现](https://github.com/mightyoung/Muyon/blob/abf9f9e1ff43c4d3e01dc84c9c57d05249071c4b/docs/reviews/2026-10-11-le01-independent-blocking-review.md)（在独立审查分支，尚未进入 develop）。WC-D-F 已正式交付并在独立组合复验；合入证据以本批报告为准。Mac 失败归因是作者报告，本机 Linux 复验与固定 SHA CI 分别记录，不能据此直接豁免。PR #50 的原 base 仍为作者任务分支，保持原状态，不以改 base/自动关单替代验证。
 
+> 后续集成核验：WC-D-F已正常合入develop `8b01223918e45bc0c3340ab1e3c5e13e45fe9502`，合后CI38154862759 success。LE01补修bf63985a766f39912a53661bc63e37caa430ab7b原两I已独立闭合，完整八套与旧floor/新分母复核见[最终独验](LE01-freeze-independent-combination-review-20261011.md)；本次按已授权正常合入，合后终态另核。前文旧202e44af阻断快照与完整历史保留。OC21两位前作者均停止、源dd519fc20c072188cc0de4a7a1bfdfe37e8c0b63仅任务说明；零测试探针不算验收，现由既有可用SDK的唯一集成执行会话在本批闭环后接手Linux有效基线/纯测试抽取，精确六文件并排除OC18，不重复派发。
+
 ## 工作方式（沿用）
 - 每个任务一份 `docs/tasks/<编号>.md`，推到独立 `task/<编号>-...` 分支；只含文档的分支推完立即取消其 CI（cancel-in-progress 会占 runner）。
 - 转交给成员的消息格式：一段可直接转发的文字，写明分支、基线 SHA、任务说明路径、测试先行、必须做的变异、固定行数回报（实现类 6 行，opencode 5 行）。
