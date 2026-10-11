@@ -521,6 +521,25 @@ void main() {
       },
     );
 
+    test('batch forms preserve value equality and matching hashes', () {
+      AtomicBatchForm form({
+        String type = 'contact',
+        WriteFormOp op = WriteFormOp.create,
+        int limit = 50,
+      }) => AtomicBatchForm(objectType: type, op: op, maxRows: limit);
+      final first = form();
+      final same = form();
+      final otherLimit = form(limit: 20);
+      final otherOp = form(op: WriteFormOp.update);
+      final otherType = form(type: 'quotation');
+      expect(first == same, isTrue);
+      expect(first.hashCode, same.hashCode);
+      expect(first == otherLimit, isFalse);
+      expect(first == otherOp, isFalse);
+      expect(first == otherType, isFalse);
+      expect({first, same, otherLimit, otherOp, otherType}, hasLength(4));
+    });
+
     test('batch limits must be positive', () {
       expect(
         () => AtomicBatchForm(
