@@ -307,6 +307,8 @@ class UiWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> flush() {
+    // Only a projection captured while attached may outlive view teardown.
+    if (_disposed) return Future.value();
     if (readOnly || _hostReadOnly) {
       return saveError == null
           ? Future.value()

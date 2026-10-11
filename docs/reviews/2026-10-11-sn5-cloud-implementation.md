@@ -53,3 +53,26 @@ RED 提交：`0b074f92f7cd531dfe441c71a753be0650b49fdb`。修复源提交：`403
 - 原 SN4 run 38137228379 的早期只读核验已为 cancelled，实际 checkout 日志为 `6d47da8a96f64d1c250987c13aab24b711322eb4`；不当通过。本任务新 push / PR CI 的实际 checkout 和终态必须由远端日志独立核验，不能借用原 PR51 或 SN4 绿灯。PR51 后续诊断归原任务。
 - 未运行真实模型、未导出 MUYON_EVAL_REAL、未操作 Android/adb/Mac，未安装系统组件、部署、合 main/develop、强推或删除。原始日志仅 /tmp，不入仓。
 - 本分支未与 latest develop / SN6 组合；授权通知、hostTaintProbe、单项投影和取消超时后退路延迟清理的读/执行边界，由唯一 integrator 组合 CI 后组织统一复审。独立 GREEN 不能代替组合验收。
+
+
+## 独审 Important 回归补修：正常 native detach 的最后 checkpoint
+
+独审在固定 `b4893004ddfbfb5a1e6a481b5668ec4cf96b3bf4` 指出：pane.dispose → session.detachWithBestEffortCheckpoint 同步捕获 flush 后立即 dispose；原 readOnlyProbe 绑定 !allowsPresentation，session._disposed 因此令排队保存误判撤权，抛错又被 best-effort 吞掉。await close 的正例不能覆盖此路径。
+
+先独立复现，本地 RED 提交 `272a5baf2627c3a0d92b1ecb0e6619b981975786`，连接器同树发布 RED `9178a4cf423c5f3323bb28e3fafe965b8eba59a3`：真实 LoopFixture / agent / preference / DynamicWorkspaceSession / HostUiWorkspaceStore，直接 native detach、不 await close、不先通知保存最后呈现；首项 Expected last native view / Actual review。2 pass / 1 fail，取消先于 detach 与新身份在 detach 后同步建立的负例通过。检查最后 step、scrollOffset、selectedRecords、revision；用一轮 event loop 与 SQLite 写屏障等待已提交写入，无 sleep。初始取消负例基线包括取消监听触发的旧保存，已将基线取在取消结算后，不计该夹具失败为 RED。
+
+修复只涉及 dynamic_workspace.dart 与 workspace.dart：
+
+- 将 session 宿主呈现资格与 view mounted/disposed 分开；checkpoint 探针持续核对冻结身份/呈现策略、取消/interrupted 任务状态，正常 dispose 本身不再撤销已捕获投影的保存资格。
+- 缺 JSON state 的旧投影从同一持久化 execution_records 任务行读取实际状态；必须是已知枚举状态且不是 cancelled/interrupted。完整任务仍走标准 router 的终态谓词。缺任务/未知状态仍拒绝。第一版因缺 state JSON 拒绝四个既有恢复/返回正例，已修复实现，未修改旧断言。
+- controller.flush 的入口拒绝 disposed 后新捕获；销毁前已排队投影继续在保存前核对实时宿主探针。没有删掉 SN5 排队保存 guard，取消/身份变更的保存负例保留；旧 UI 操作仍由 disposed 检查拒绝。
+
+四个 inverse mutations（每个 2 pass / 1 fail、exit1），已逐字恢复：恢复 !allowsPresentation 探针 → 正常 detach 的 step 不保存；忽略真实取消 → 撤销后字节被改；忽略冻结身份 → 新身份后字节被改；移除 flush disposed 入口拒绝 → 保留 flush 回调可在销毁后重新捕获新 scrollOffset，字节被改。原始日志仅 /tmp/sn5-detach-mutation-*.log。
+
+恢复后 focused 80/0/0，包含 detach、新/旧 I4 负例、真实 JSON/native I5、M1、既有 resume/router、SQLite 恢复与返回正例。重新严格八包 analyze 全部零 issue/exit0。module_api 再跑 198/0/0/exit0；UI 再跑 385/152/0/exit0。host 新全量仍执行中，后续以真实摘要为准。host 命令使用仓库 scripts/ci.sh 原有 --timeout 120s 参数，不修改任何测试超时/断言、不把超时退出当通过。
+
+旧 b489 宿主全量后来记录 1833 pass / 3 skip / 2 fail（仍无完整终态）：原 aiui6_stream_approval_widget_test 的 automatic true 发生其原定 10 分钟 TimeoutException，automatic false 为随后 TestFailure。全部其他测试推进后旧进程仍未结束，补修验证前停止旧进程；不当成新 SHA 的全量结果。SN6 仍由独立任务处理，本补修未修改其文件，也未合入任何外部实现。
+
+本补修继续只在独立 SN5 分支交付，新最终 SHA / CI actual checkout 必须重新核验，不能沿用 b489 的 CI。未与 develop / SN6 组合，未自行合入。保留原任务和全部先前实施/失败历史。
+
+发布补记：恢复后的云端命令行 git 缺认证，普通 push 失败，未冒称 1f863640 已推。改用已连接 GitHub git-object API 发布 RED→修复链；RED tree a5060d4019fec7441d712f7d717938c40e89c436 与原本地 RED 精确一致，更新独立分支采用 expected SHA、force=false。最终 commit 因连接器记录 author/committer 而与原本地 1f863640 不同，产品代码未改变；以 PR head / 远端 ref 核验的新 SHA 为准。原本地提交留存，不强推、不写原 owner 分支。

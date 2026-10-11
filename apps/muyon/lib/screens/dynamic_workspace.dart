@@ -61,11 +61,29 @@ class DynamicWorkspaceSession extends ChangeNotifier {
   final DynamicWorkspace widget;
   final Object? _presentationIdentity;
   bool _presentationRevoked = false;
-  bool get allowsPresentation => !_disposed && !_presentationRevoked &&
+  bool get _hasPresentationAuthority => !_presentationRevoked &&
       (widget.agent == null ||
           (widget.agent!.allowsUiContent(widget.taskId) &&
               identical(_presentationIdentity,
                   widget.agent!.uiContentIdentity(widget.taskId))));
+  bool get allowsPresentation => !_disposed && _hasPresentationAuthority;
+  // View teardown ends interaction, but an already captured checkpoint still
+  // belongs to the live host identity. Cancellation/replacement revoke it even
+  // after this session has detached its repository listener.
+  bool get _allowsCheckpoint {
+    if (!_hasPresentationAuthority) return false;
+    final task = widget.repository.task(widget.taskId);
+    if (task == null) return false;
+    if (task.payload['state'] is String) return uiTaskAcceptsEvents(task);
+    // Legacy stored projections can omit state in JSON; their durable task row
+    // still owns the state. Do not mistake that codec shape for host revocation.
+    final rows = widget.repository.database.raw.select(
+      'SELECT state FROM execution_records WHERE id=?', [widget.taskId]);
+    final state = rows.isEmpty ? null : rows.single['state'];
+    return state is String &&
+        PersonalTaskState.values.any((value) => value.name == state) &&
+        state != 'cancelled' && state != 'interrupted';
+  }
   void _refreshHostState() {
     if (_disposed) return;
     if (!allowsPresentation) _presentationRevoked = true;
@@ -169,7 +187,7 @@ class DynamicWorkspaceSession extends ChangeNotifier {
           taskId: widget.taskId,
           scopeKey: scope,
           plan: widget.plan!,
-          readOnlyProbe: () => !allowsPresentation,
+          readOnlyProbe: () => !_allowsCheckpoint,
           onEvent: widget.onEvent == null && widget.agent == null
               ? null
               : (event) async {

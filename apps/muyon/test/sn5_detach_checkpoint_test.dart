@@ -95,6 +95,14 @@ void main() {
         expect(saved.scrollOffset, 321);
         expect(saved.selectedRecords, ['native-selected']);
         expect(saved.revision, before.revision + 1);
+        // Disposal must not authorize new captures through a retained flush.
+        c.scrollOffset = 777;
+        await c.flush();
+        await f.repo.database.write((_) {});
+        expect(
+          jsonEncode((await store.load(plan.plan.surfaceId))!.toJson()),
+          jsonEncode(saved.toJson()),
+        );
       } else {
         expect(jsonEncode(saved.toJson()), jsonEncode(before.toJson()));
       }
