@@ -39,6 +39,8 @@ PR42 交接点 `b6e1856` + SN-4 `6d47da8` / PR #51 `d5cd97a` + SN-5 PR #52 `1122
 5. CR-13 延期：N-2 删除确认展示级联清单；N-3 回执版本化保存逐项 ChangeOp（OC-20 已锁现状）。
 6. 科研导出（REG-3e-b）要等 LE 全链。
 
+OIUI调研新增三项待设计队列见 [OIUI-RESEARCH-QUEUE](OIUI-RESEARCH-QUEUE.md)，全部依赖SN6/CR18整链放行，完整方案待交。
+
 ## 已知环境情况
 - Mac 本地全量常见失败：inquiry_module 16 项（develop 上同样失败，多为截图差异）、`human_new_project_preview_commit_and_resume`、列表预览不稳定用例；均以 Linux CI 为准。机器负载高时 formula、encrypted-import 等会超时，单独重跑可过。
 - flutter pub get 会改 xcconfig / Podfile / analysis_options，永不提交。
