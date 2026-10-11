@@ -1,10 +1,15 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import '../foundation_repository.dart' show HostLoadedInputProof, PersonalTask;
+
+class _HostFactNotifications extends ChangeNotifier {
+  void publish() => notifyListeners();
+}
 
 enum HostTaintState { clean, unknown, tainted }
 
@@ -50,6 +55,16 @@ class HostTaskFacts {
 class HostAuthorizationFacts {
   HostAuthorizationFacts(this.database);
   final ManagedDatabase database;
+  // The channel follows the database identity, like the irreversible latches.
+  // Facts instances do not own it; each subscriber removes its own listener.
+  static final _changes = Expando<_HostFactNotifications>();
+  _HostFactNotifications get _notifications =>
+      _changes[database] ??= _HostFactNotifications();
+  void addListener(VoidCallback listener) =>
+      _notifications.addListener(listener);
+  void removeListener(VoidCallback listener) =>
+      _notifications.removeListener(listener);
+
   static final _denials = Expando<Set<String>>();
   Set<String> get _deny => _denials[database] ??= <String>{};
   static final _sourceDenials = Expando<Map<String, HostSourceFact>>();
@@ -74,10 +89,14 @@ class HostAuthorizationFacts {
       'source:${source.identityDigest}',
     ]);
     _pendingSources[source.identityDigest] = source;
-    (_pendingHistory['task:$taskId'] ??= {}).add(source.identityDigest);
-    (_pendingHistory['conversation:$conversation'] ??= {}).add(
+    final taskChanged = (_pendingHistory['task:$taskId'] ??= {}).add(
       source.identityDigest,
     );
+    final conversationChanged =
+        (_pendingHistory['conversation:$conversation'] ??= {}).add(
+          source.identityDigest,
+        );
+    if (taskChanged || conversationChanged) _notifications.publish();
     return database.write((db) {
       _taint(
         db,
@@ -91,15 +110,17 @@ class HostAuthorizationFacts {
   }
 
   Future<void> markSourceExternal(HostSourceFact source) {
-    _deny.add('source:${source.identityDigest}');
+    final changed = _deny.add('source:${source.identityDigest}');
     _pendingSources[source.identityDigest] = source;
+    if (changed) _notifications.publish();
     return database.write((db) => markSourceExternalInTransaction(db, source));
   }
 
   void markSourceExternalInTransaction(Database db, HostSourceFact source) {
     _owner(db);
-    _deny.add('source:${source.identityDigest}');
+    final changed = _deny.add('source:${source.identityDigest}');
     _pendingSources[source.identityDigest] = source;
+    if (changed) _notifications.publish();
     _taintAffectedTasks(db, source);
     _taint(
       db,
