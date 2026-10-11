@@ -68,6 +68,9 @@ void main() {
       await preference.close();
     });
     final task = (await tester.runAsync(() => f.start(agent, f.profile())))!;
+    await tester.runAsync(() => f.repo.updateTask(
+      task.copy({'summary': comparisonFixture().answer}),
+    ));
     final presentation = (await tester.runAsync(() => explicit
         ? agent.planUiFromUserControl(task.id)
         : agent.planUi(task.id)))!;

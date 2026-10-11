@@ -120,6 +120,7 @@ void main() {
     addTearDown(agent.close);
     final task = await f.start(agent, f.profile());
     expect(task.payload['candidateIds'], isNot(contains('assistant.plan_ui')));
+    await f.repo.updateTask(task.copy({'summary': 'Public fixture answer'}));
     final presentation = await agent.planUiFromUserControl(task.id);
     expect(presentation.validated, isNotNull);
     expect(planningCalls, 1);
