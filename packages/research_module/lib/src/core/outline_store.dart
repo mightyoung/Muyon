@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:uuid/uuid.dart';
 
 import 'models.dart';
@@ -145,4 +148,35 @@ UNION ALL SELECT t.project_id FROM runs r JOIN tasks t ON t.id=r.task_id AND t.r
       throw FormatException('未知支持程度：$support');
     }
   }
+}
+
+/// The approved deletion snapshot includes every row affected by its cascade.
+/// Sort by stable link identity: insertion order is not part of the snapshot,
+/// while replacing an otherwise identical citation must invalidate approval.
+/// Shared by read tools and the synchronous write-transaction recheck.
+/// Kept separate from the section row digest so citations do not change scope.
+String? sectionDeleteDigest(
+  WorkbenchStore store,
+  String projectId,
+  String sectionId,
+) {
+  store.checkedProject(projectId);
+  final sections = store.db.select(
+    'SELECT * FROM sections WHERE id=? AND project_id=?',
+    [sectionId, projectId],
+  );
+  if (sections.length != 1) return null;
+  final snapshot = {
+    'section': Map<String, Object?>.from(sections.single),
+    // Match deleteSection/updateSection's complete cascade, including any
+    // inconsistent link project metadata, rather than hiding affected rows.
+    'outline': [
+      for (final row in store.db.select(
+        'SELECT * FROM outline WHERE section_id=? ORDER BY id',
+        [sectionId],
+      ))
+        Map<String, Object?>.from(row),
+    ],
+  };
+  return sha256.convert(utf8.encode(jsonEncode(snapshot))).toString();
 }

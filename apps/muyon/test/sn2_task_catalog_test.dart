@@ -14,7 +14,8 @@ import 'package:muyon/services/models/model_provider.dart';
 import 'package:muyon/services/models/profile_repository.dart';
 import 'package:muyon/workspace/workspace_repository.dart';
 import 'package:muyon_module_api/muyon_module_api.dart' show AssistantScope;
-import 'package:muyon_module_api/ui_contract.dart' show UiPlanningMode;
+import 'package:muyon_module_api/ui_contract.dart' show FixtureUiPlanningProvider,
+  UiDisplayDecision, UiPlanningMode, UiPlanningResult;
 
 import 'aiui6_stream_production_test.dart' show state, validStream;
 import 'support/agent_loop_fixture.dart';
@@ -140,7 +141,8 @@ void main() {
 
   for (final native in [false, true]) {
     for (final change in ['text only', 'missing provider', 'source null',
-      'source throw', 'await text only', 'await missing provider']) {
+      'source throw', 'await text only', 'await missing provider',
+      'nonstream provider switch']) {
       test('next model round removes stale planning metadata after $change in ${native ? 'native' : 'JSON'} protocol', () async {
         // Earlier widget cases initialize Flutter's fake HTTP override. These
         // rounds must reach the real loopback fixture, then restore the binding.
@@ -169,14 +171,38 @@ void main() {
             }
             return state(f);
           },
-          uiPlanningMode: UiPlanningMode.motivation,
+          uiPlanningMode: change == 'nonstream provider switch'
+            ? UiPlanningMode.intelligent : UiPlanningMode.motivation,
+          uiPlanningProviders: change == 'nonstream provider switch' ? {
+            UiPlanningMode.intelligent: FixtureUiPlanningProvider((_) async =>
+              UiPlanningResult(decision: UiDisplayDecision.textOnly,
+                reasonCode: 'fixture_template')),
+          } : const {},
         );
         addTearDown(agent.close);
-        f.replies.add(LoopReply.sse(native
-          ? sseCalls([('read-call', 'read', '{}')])
-          : sseText('{"type":"tool","toolId":"read","parameters":{}}')));
+        final streaming = change != 'nonstream provider switch';
+        if (streaming) {
+          f.replies.add(LoopReply.sse(native
+            ? sseCalls([('read-call', 'read', '{}')])
+            : sseText('{"type":"tool","toolId":"read","parameters":{}}')));
+        } else {
+          // A frozen non-streaming profile needs one complete JSON response,
+          // even when the selected protocol uses native tool calls.
+          f.replies.add(LoopReply.sse([jsonEncode({
+            'choices': [{
+              'message': native ? {
+                'content': null,
+                'tool_calls': [{
+                  'id': 'read-call', 'type': 'function',
+                  'function': {'name': 'read', 'arguments': '{}'},
+                }],
+              } : {'content': '{"type":"tool","toolId":"read","parameters":{}}'},
+              'finish_reason': native ? 'tool_calls' : 'stop',
+            }],
+          })]));
+        }
         final first = await f.start(agent, f.profile(capabilities: ModelCapabilities(
-          nativeTools: native, streaming: true)));
+          nativeTools: native, streaming: streaming)));
         final prior = first.payload['uiPlanningContext'];
         expect(prior, isA<String>(), reason: 'The first round must really load host metadata');
         final originalSystem = (first.payload['messages'] as List).first;
@@ -188,6 +214,13 @@ void main() {
           // This mode has no registered provider; registry presence alone is
           // not actual presentation support.
           agent.configureUiPlanning(mode: UiPlanningMode.intelligent);
+        } else if (change == 'nonstream provider switch') {
+          expect(frozenCandidates, contains('assistant.plan_ui'),
+            reason: 'The initial non-streaming template provider was really advertised');
+          expect(((first.payload['profile'] as Map)['capabilities'] as Map)['streaming'], isFalse);
+          // Motivation is the actual production stream provider installed by
+          // this preference owner; it cannot use the frozen non-streaming profile.
+          agent.configureUiPlanning(mode: UiPlanningMode.motivation);
         }
         final confirming = agent.confirm(first.id,
           requestDigest: first.payload['requestDigest'] as String);
@@ -215,6 +248,10 @@ void main() {
         }
         final next = f.repo.task(first.id)!;
         expect(f.bodies, hasLength(1), reason: 'Only the first model round was approved; ${next.error ?? next.state.name}');
+        if (!streaming) {
+          expect(f.bodies.single['stream'], isFalse,
+            reason: 'The real first request keeps its frozen non-streaming protocol');
+        }
         expect(f.callsOf('read'), 1, reason: 'A real tool result advances the model round');
         expect(next.stage, 'model');
         expect(next.payload['uiPlanningContext'], isNull);

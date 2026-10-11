@@ -257,6 +257,11 @@ class UiPlanningHarness {
               _requestIdentities.remove(value.request);
               _activeRequests.remove(taskId);
             }
+          } else if (_closedRequests.contains(value.request) &&
+              _terminalResults.containsKey(value.request)) {
+            // Cancellation can settle while the final host source is awaited.
+            // Retain that terminal readonly result instead of the old success.
+            current = await _terminalResults[value.request]!;
           } else if (value.result.plan != null) {
             final allowed = now.allowedActionRefs.intersection(
               now.intent.allowedActionRefs,
