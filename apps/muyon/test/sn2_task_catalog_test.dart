@@ -137,6 +137,55 @@ void main() {
   });
 
   for (final native in [false, true]) {
+    for (final change in ['text only', 'missing provider']) {
+      test('next model round removes stale planning metadata after $change in ${native ? 'native' : 'JSON'} protocol', () async {
+        final f = await LoopFixture.open();
+        final preference = UiPresentationPreference(f.repo);
+        await preference.save(UiPresentationMode.automatic);
+        final agent = PersonalAgent(
+          repository: f.repo,
+          gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+          tools: f.tools,
+          presentationPreference: preference,
+          uiPlanningSource: (_) async => state(f),
+          uiPlanningMode: UiPlanningMode.motivation,
+        );
+        addTearDown(agent.close);
+        f.replies.add(LoopReply.sse(native
+          ? sseCalls([('read-call', 'read', '{}')])
+          : sseText('{"type":"tool","toolId":"read","parameters":{}}')));
+        final first = await f.start(agent, f.profile(capabilities: ModelCapabilities(
+          nativeTools: native, streaming: true)));
+        final prior = first.payload['uiPlanningContext'];
+        expect(prior, isA<String>(), reason: 'The first round must really load host metadata');
+        final originalSystem = (first.payload['messages'] as List).first;
+        final frozenCandidates = first.payload['candidateIds'];
+        if (change == 'text only') {
+          await agent.savePresentationMode(UiPresentationMode.textOnly);
+        } else {
+          // This mode has no registered provider; registry presence alone is
+          // not actual presentation support.
+          agent.configureUiPlanning(mode: UiPlanningMode.intelligent);
+        }
+        await agent.confirm(first.id,
+          requestDigest: first.payload['requestDigest'] as String);
+        final next = f.repo.task(first.id)!;
+        expect(f.bodies, hasLength(1), reason: 'Only the first model round was approved');
+        expect(f.callsOf('read'), 1, reason: 'A real tool result advances the model round');
+        expect(next.stage, 'model');
+        expect(next.payload['uiPlanningContext'], isNull);
+        expect((next.payload['messages'] as List).where((message) =>
+          message is Map && message['role'] == 'system' && message['content'] == prior), isEmpty);
+        expect((next.payload['messages'] as List).first, originalSystem,
+          reason: 'Keep the ordinary system instructions, remove only host planning metadata');
+        expect(next.payload['candidateIds'], frozenCandidates,
+          reason: 'A later mode change never expands the frozen model catalogue');
+        expect(f.callsOf('write'), 0);
+      });
+    }
+  }
+
+  for (final native in [false, true]) {
     for (final scenario in ['few ordinary', 'text only', 'missing provider', 'nonstream profile', 'available stream']) {
       test('planning catalogue $scenario in ${native ? 'native' : 'JSON'} protocol', () async {
         final f = await LoopFixture.open();
