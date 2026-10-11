@@ -71,6 +71,8 @@ String _esc(String text) =>
     text.replaceAll('|', r'\|').replaceAll(RegExp(r'\s+'), ' ');
 
 String _ms(double v) => v.toStringAsFixed(0);
+String _latency(List<num> values, double p) =>
+    values.isEmpty ? '未观察到' : _ms(percentile(values, p));
 String _num(double v) =>
     v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
 
@@ -88,8 +90,8 @@ String _row(String label, CategorySummary s) =>
     '${_num(median(s.toolApprovals))} / ${_num(mean(s.toolApprovals))} | '
     '${_num(median(s.modelConfirmations))} / ${_num(mean(s.modelConfirmations))} | '
     '${_num(median(s.rounds))} | '
-    '${_ms(percentile(s.firstResponseMs, 0.5))} / ${_ms(percentile(s.firstResponseMs, 0.95))} | '
-    '${_ms(percentile(s.totalMs, 0.5))} / ${_ms(percentile(s.totalMs, 0.95))} | '
+    '${_latency(s.firstResponseMs, 0.5)} / ${_latency(s.firstResponseMs, 0.95)} | '
+    '${_latency(s.totalMs, 0.5)} / ${_latency(s.totalMs, 0.95)} | '
     '${_usage(s)} |';
 
 /// Report for one real model run. A fixture run is refused: it must never be
