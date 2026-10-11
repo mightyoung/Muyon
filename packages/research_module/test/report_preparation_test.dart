@@ -40,6 +40,11 @@ INSERT INTO outline(id,project_id,heading,evidence_id,section_id) VALUES('o4','p
 INSERT INTO outline(id,project_id,heading,evidence_id,section_id) VALUES('o5','p','复核','r','s2');
 INSERT INTO paper_bindings(document_id,paper_id,paper_rev,method,hash_ok,ambiguous) VALUES('d','paper',1,'manual',1,0);
 ''');
+    const document = '# 手写材料\n\n原文摘录。\n';
+    store.db.execute('UPDATE documents SET sha256=? WHERE id=?', [
+      sha256.convert(utf8.encode(document)).toString(),
+      'd',
+    ]);
     exchange = ResearchExchange(store.scoped('p'));
   });
 
@@ -160,7 +165,7 @@ INSERT INTO paper_bindings(document_id,paper_id,paper_rev,method,hash_ok,ambiguo
       for (final source in preparation.sources) {
         expect(source.moduleId, 'research');
         expect(source.contentDigest, matches(RegExp(r'^[0-9a-f]{64}$')));
-        if (source.objectType == 'entry' || source.objectType == 'run') {
+        if (source.objectType == 'run') {
           expect(source.revisionRef, isNotNull);
         }
       }
@@ -193,17 +198,41 @@ INSERT INTO paper_bindings(document_id,paper_id,paper_rev,method,hash_ok,ambiguo
     },
   );
 
-  test('preparation contract copies an external byte buffer', () {
+  test('preparation contract copies external bytes, sources and counts', () {
     final original = exchange.prepareReport('p', generatedAt: generatedAt);
     final mutable = Uint8List.fromList(original.bytes);
+    final mutableSources = List<ObjectRef>.from(original.sources);
+    final mutableCounts = Map<String, int>.from(original.objectCounts);
     final frozen = ResearchReportPreparation(
       generatedAt: generatedAt,
       bytes: mutable,
-      sources: original.sources,
-      objectCounts: original.objectCounts,
+      sources: mutableSources,
+      objectCounts: mutableCounts,
     );
+    final manifest = frozen.manifestDigest;
     mutable[0] = 0;
+    mutableSources.clear();
+    mutableCounts['entry'] = 999;
     expect(frozen.bytes, original.bytes);
+    expect(frozen.sha256, original.sha256);
+    expect(frozen.sources, original.sources);
+    expect(frozen.objectCounts, original.objectCounts);
+    expect(frozen.dedupedObjectCount, original.dedupedObjectCount);
+    expect(frozen.manifestDigest, manifest);
+    expect(frozen.manifestDigest, original.manifestDigest);
+  });
+
+  test('stable manifest changes when a rendered source changes', () {
+    final before = exchange.prepareReport('p', generatedAt: generatedAt);
+    final repeat = exchange.prepareReport('p', generatedAt: generatedAt);
+    expect(repeat.bytes, before.bytes);
+    expect(repeat.sha256, before.sha256);
+    expect(repeat.manifestDigest, before.manifestDigest);
+    store.db.execute("UPDATE entries SET title='更改正文标题' WHERE id='e'");
+    final changed = exchange.prepareReport('p', generatedAt: generatedAt);
+    expect(utf8.decode(changed.bytes), contains('更改正文标题'));
+    expect(changed.sha256, isNot(before.sha256));
+    expect(changed.manifestDigest, isNot(before.manifestDigest));
   });
 
   test(

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
+import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
@@ -1125,10 +1126,15 @@ class ResearchExchange {
     }
   }
 
-  Future<String> exportReport(
-    String projectId,
-    String destinationDirectory,
-  ) async {
+  /// Generates frozen report content without writing files or business rows.
+  ResearchReportPreparation prepareReport(
+    String projectId, {
+    required DateTime generatedAt,
+  }) {
+    if (projectScope != null && projectScope != projectId) {
+      throw StateError('Project outside workspace scope');
+    }
+    final store = this.store.scoped(projectId);
     final project = store.projects().firstWhere((e) => e.id == projectId);
     final entries = {
       for (final entry in store.entries(projectId)) entry.id: entry,
@@ -1141,22 +1147,76 @@ class ResearchExchange {
       for (final doc in store.documents(projectId))
         for (final note in store.notes(doc.id)) note.id: (doc, note),
     };
+    final sources = <(String, String), ObjectRef>{};
+    final emitted = {
+      for (final kind in ['note', 'section', 'entry', 'run']) kind: <String>{},
+    };
+    void source(String kind, String id, Object? data, {String? revision}) {
+      sources[(kind, id)] = ObjectRef(
+        moduleId: 'research',
+        nativeProjectId: projectId,
+        objectType: kind,
+        objectId: id,
+        revisionRef: revision,
+        contentDigest: sha256.convert(utf8.encode(jsonEncode(data))).toString(),
+      );
+    }
+
+    void rowSource(String kind, String table, String id) => source(
+      kind,
+      id,
+      Map<String, Object?>.from(
+        store.db.select('SELECT * FROM $table WHERE id=?', [id]).single,
+      ),
+    );
+    void entrySource(ResearchEntry entry) =>
+        source('entry', entry.id, entry.data);
+    void noteSource(ResearchDocument doc, ReadingNote note) {
+      emitted['note']!.add(note.id);
+      rowSource('note', 'notes', note.id);
+      sources[('document', doc.id)] = ObjectRef(
+        moduleId: 'research',
+        nativeProjectId: projectId,
+        objectType: 'document',
+        objectId: doc.id,
+        contentDigest: doc.sha256,
+      );
+    }
+
+    source('project', projectId, [
+      project.title,
+      project.question,
+      project.nextStep,
+    ]);
     final out = StringBuffer(
       '# ${project.title}\n\n${project.question}\n\n下一步：${project.nextStep}\n\n',
     );
-    String about(ReadingNote note) => note.entryId == null
-        ? ''
-        : '关联研究对象：${entries[note.entryId]?.title ?? note.entryId}\n\n';
+    String about(ReadingNote note) {
+      if (note.entryId == null) return '';
+      final entry = entries[note.entryId];
+      if (entry != null) entrySource(entry);
+      return '关联研究对象：${entry?.title ?? note.entryId}\n\n';
+    }
+
     String evidence(String id) {
       if (entries[id] case final entry?) {
+        emitted['entry']!.add(id);
+        entrySource(entry);
         // research-skill refs let check-research.py verify freshness.
         final ref = skillRef(entry);
         return '${entry.title}\n\n来源记录：${ref == null ? '' : '$ref '}$id\n\n```json\n${const JsonEncoder.withIndent('  ').convert(entry.data)}\n```\n';
       }
       if (accepted[id] case final run?) {
+        emitted['run']!.add(id);
+        source('run', id, [
+          run.status,
+          run.accepted ? 1 : 0,
+          run.data,
+        ], revision: '${run.taskRevision}');
         return '执行记录：${run.id}，任务 ${run.taskId} r${run.taskRevision}，状态 ${run.status}\n\n指标：${jsonEncode(run.data['metrics'] ?? {})}\n\n产物：${jsonEncode(run.data['artifacts'] ?? [])}\n\n人工关联为证据；此状态不代表科学结论已验证。\n';
       }
       if (noteEvidence[id] case (final doc, final note)) {
+        noteSource(doc, note);
         return '精读证据：${note.id}\n\n来源：${doc.relativePath}'
             '${note.pageNumber == null ? '' : ' · p. ${note.pageNumber}'}'
             '${note.locator.isEmpty ? '' : ' · ${note.locator}'}\n\n'
@@ -1168,6 +1228,8 @@ class ResearchExchange {
 
     final links = store.outline(projectId);
     for (final section in store.sections(projectId)) {
+      emitted['section']!.add(section.id);
+      rowSource('section', 'sections', section.id);
       out.writeln('${'#' * (section.level + 1)} ${section.heading}\n');
       if (section.argument.isNotEmpty) out.writeln('${section.argument}\n');
       out.writeln('证据支持程度：${sectionSupport[section.support]}\n');
@@ -1179,6 +1241,7 @@ class ResearchExchange {
     out.writeln('## 精读笔记\n');
     for (final doc in store.documents(projectId)) {
       for (final note in store.notes(doc.id)) {
+        noteSource(doc, note);
         out.writeln(
           '### ${doc.relativePath} · ${note.locator}'
           '${note.pageNumber == null ? '' : ' · p. ${note.pageNumber}'}\n\n'
@@ -1187,14 +1250,66 @@ class ResearchExchange {
         );
       }
     }
+    return ResearchReportPreparation(
+      generatedAt: generatedAt,
+      bytes: utf8.encode(out.toString()),
+      sources: sources.values.toList(),
+      objectCounts: {for (final e in emitted.entries) e.key: e.value.length},
+    );
+  }
+
+  Future<String> exportReport(
+    String projectId,
+    String destinationDirectory,
+  ) async {
+    final prepared = prepareReport(projectId, generatedAt: DateTime.now());
     await Directory(destinationDirectory).create(recursive: true);
     final file = File(
       p.join(destinationDirectory, 'report-$projectId-${const Uuid().v4()}.md'),
     );
-    await file.writeAsString(out.toString(), flush: true);
+    await file.writeAsBytes(prepared.bytes, flush: true);
     return file.path;
   }
 }
+
+/// Report counts cover only objects rendered in full, excluding dependencies
+/// such as the project header, document paths and a note's associated title.
+class ResearchReportPreparation extends LocalExportPreparation {
+  ResearchReportPreparation({
+    required DateTime generatedAt,
+    required List<int> bytes,
+    required List<ObjectRef> sources,
+    required Map<String, int> objectCounts,
+  }) : objectCounts = Map.unmodifiable(objectCounts),
+       super(
+         kind: LocalExportKind.report,
+         formatVersion: 'research-report-v1',
+         mimeType: 'text/markdown',
+         generatedAt: generatedAt,
+         bytes: bytes,
+         sha256: _reportDigest(bytes),
+         sources: sources,
+         dedupedObjectCount: objectCounts.values.fold(0, (sum, n) => sum + n),
+         exclusions: const [],
+         warnings: const [],
+         preparationVersion: 1,
+         manifestDigest: _reportDigest(
+           utf8.encode(
+             jsonEncode({
+               'formatVersion': 'research-report-v1',
+               'generatedAt': generatedAt.toUtc().toIso8601String(),
+               'sha256': _reportDigest(bytes),
+               'sources': sources.map((s) => s.toJson()).toList(),
+               'objectCounts': objectCounts,
+             }),
+           ),
+         ),
+       );
+
+  final Map<String, int> objectCounts;
+}
+
+String _reportDigest(List<int> bytes) => sha256.convert(bytes).toString();
 
 /// Result of [ResearchExchange.exportClaimDrafts].
 class ClaimDraftExport {
