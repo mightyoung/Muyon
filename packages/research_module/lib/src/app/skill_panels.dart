@@ -19,6 +19,7 @@ const skillKindLabels = {
   'sources': '来源',
   'failures': '失败记录',
   'handoffs': '交接',
+  'assertions': '研究者主张',
 };
 
 const _methodLabels = {

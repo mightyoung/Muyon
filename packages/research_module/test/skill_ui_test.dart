@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -34,6 +35,105 @@ void main() {
   tearDown(() {
     store.close();
     temp.deleteSync(recursive: true);
+  });
+
+  testWidgets('assertions have a read-only category and show their raw row', (
+    tester,
+  ) async {
+    File(
+      p.join(temp.path, 'proj', 'research', 'assertions.jsonl'),
+    ).writeAsStringSync(
+      '${jsonEncode({'schema_version': 2, 'id': 'a1', 'rev': 1, 'statement': '合成研究者主张', 'assertion_state': 'untested', 'evidence': <Object?>[]})}\n',
+    );
+    await tester.runAsync(
+      () => ResearchExchange(store).importResearch(p.join(temp.path, 'proj')),
+    );
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(WorkbenchApp(store: store));
+    await settle(tester);
+    await tester.tap(find.text('文库与证据'));
+    await settle(tester);
+    await tester.tap(find.text('研究者主张'));
+    await settle(tester);
+    expect(find.text('合成研究者主张'), findsOneWidget);
+    await tester.tap(find.text('合成研究者主张'));
+    await settle(tester);
+    expect(find.textContaining('untested'), findsWidgets);
+  });
+
+  testWidgets(
+    'assertions links preserve exact stale revisions and missing notices',
+    (tester) async {
+      File(p.join(temp.path, 'proj', 'research', 'assertions.jsonl'))
+          .writeAsStringSync(
+            [
+              for (final rev in [1, 2])
+                jsonEncode({
+                  'schema_version': 2,
+                  'id': 'a1',
+                  'rev': rev,
+                  'statement': '合成主张修订 $rev',
+                  'assertion_state': 'untested',
+                  'evidence': <Object?>[],
+                }),
+            ].join('\n'),
+          );
+      File(p.join(temp.path, 'proj', 'landscape.md'))
+          .writeAsStringSync('[assertions/a1@1]\n\n[assertions/missing@1]');
+      await tester.runAsync(
+        () => ResearchExchange(store).importResearch(p.join(temp.path, 'proj')),
+      );
+      tester.view.physicalSize = const Size(1280, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        WorkbenchApp(
+          store: store,
+          loadMarkdown: (path) => Future.value(File(path).readAsStringSync()),
+        ),
+      );
+      await settle(tester);
+      await tester.tap(find.text('文库与证据'));
+      await settle(tester);
+      await tester.tap(find.text('文件'));
+      await settle(tester);
+      await tester.tap(find.text('landscape.md').first);
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 80)),
+      );
+      await settle(tester);
+      final markdown = tester.widget<Markdown>(find.byType(Markdown));
+      expect(markdown.data, contains('wbref:assertions/a1@1'));
+      markdown.onTapLink!('a1', 'wbref:assertions/a1@1', '');
+      await settle(tester);
+      expect(find.text('合成主张修订 1'), findsOneWidget);
+      expect(find.text('[assertions/a1@1] · 有更新修订 r2'), findsOneWidget);
+      await tester.tap(find.text('关闭'));
+      await settle(tester);
+      markdown.onTapLink!('missing', 'wbref:assertions/missing@1', '');
+      await settle(tester);
+      expect(find.text('未解析的引用 [assertions/missing@1]：记录未导入'), findsOneWidget);
+    },
+  );
+
+  testWidgets('ordinary projects keep experiments and hide assertions', (
+    tester,
+  ) async {
+    store.db.execute("UPDATE projects SET layout='generic'");
+    tester.view.physicalSize = const Size(1280, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(WorkbenchApp(store: store));
+    await settle(tester);
+    await tester.tap(find.text('文库与证据'));
+    await settle(tester);
+    expect(find.text('实验计划'), findsOneWidget);
+    expect(find.text('研究者主张'), findsNothing);
   });
 
   testWidgets(

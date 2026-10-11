@@ -4,13 +4,15 @@ import 'package:path/path.dart' as p;
 
 import 'models.dart';
 
-/// research-skill v6.5 project layout support. research-skill is the format
+/// research-skill v6.8 project layout support. research-skill is the format
 /// authority: this file only reads its V2 logs and drafts rows in its format.
+/// Assertions are read-only: recognition and references never export them.
 /// See docs/research-skill-integration.md.
 const skillKinds = [
   'sources',
   'papers',
   'claims',
+  'assertions',
   'opportunities',
   'searches',
   'tensions',
