@@ -1,3 +1,47 @@
+# 第 6 次交接：leader A → Leader B（2026-10-11 深夜）
+
+用户决定：Leader B 接替 leader A 的全部工作（派发、写任务说明、组织 ChatGPT 审查、登记回报），加上原有的集成、独立验证与合入。ADR 分工条目见 `docs/adr/0001-leadership-and-scope-freeze.md` 2026-10-11 晚两条（已在 develop）。本节是交接时的快照，develop = `330020c0`。
+
+## 工作方式（沿用）
+- 每个任务一份 `docs/tasks/<编号>.md`，推到独立 `task/<编号>-...` 分支；只含文档的分支推完立即取消其 CI（cancel-in-progress 会占 runner）。
+- 转交给成员的消息格式：一段可直接转发的文字，写明分支、基线 SHA、任务说明路径、测试先行、必须做的变异、固定行数回报（实现类 6 行，opencode 5 行）。
+- 成员回报后：核对提交范围（`git diff --stat`）、RED 是否真实、变异是否抓到、失败是否分类（develop 基线也失败 / 负载相关单独重跑通过 / 本次导致），再登记、交集成。leader A 不再本机复跑；检查写成任务派 ChatGPT（在线 3 并行，只读审查 / 设计）或 Codex。
+- 用户回复「按推荐」时，把决定写进 ADR-0001 末尾并在设计文档头标注。
+- 成员能力：grok-build（Grok 4.7，可本地构建测试实现）、Sonnet = senior engineer 会话（实现）、Haiku = junior engineer 会话（实现，做事细，回报可靠）、Codex（2 并行）、opencode（deepseek flash，只做小的机械测试，必须给停止条件）、ChatGPT（3 并行，只读）、grokbot 额度用完**不要派**。
+
+## 在途任务
+| 成员 | 任务 | 分支 / 基线 | 状态 |
+|---|---|---|---|
+| grok-build | SN-6 审批 widget 测试挂在 waitingConfirmation 的根因与修复 | `task/sn-6-approval-widget-hang`，基线 PR #51 `d5cd97a1` | 未见提交 |
+| Sonnet | LE-05 本机导出意图与两阶段审批绑定 | `task/le-05-local-export-intent`，基线 LE-01 `202e44af` | 中间进展已到（26 测试、三处变异抓到、RED `9df60d0d` 未推）；已要求补两测：模型参数带 destination / `local-export:save` 被拒零执行；从派发入口走一次，`authorizationRequest`/`approveWithGrant` 抛错转为拒绝或人工确认、任务不崩 |
+| Codex ① | REG-3e-a 科研手工运行两个写工具 | `task/reg-3e-manual-runs`，基线原 PR #49 head（已在 develop） | 进行中 |
+| Codex ② | LE-02 科研报告内容准备器 | `task/le-02-report-preparer`，基线 LE-01 | 进行中 |
+| Haiku | LE-04 宿主本机导出生成与清理状态机 | `task/le-04-export-staging`，基线 LE-01 | 刚派 |
+| opencode | 空闲 | — | 下一件：见「排队」第 1 条 |
+| ChatGPT | 空闲 | — | 等 CR-18 |
+
+## 待集成（已登记、未进 develop）
+- **LE-01** `task/le-01-local-export-contract` @ `202e44af`（Sonnet；module_api 268 全过；新增 `local_export.dart` 会让 module_api 覆盖率门禁分母变化，需复核基线）。LE-02/04/05 都基于它，宜先合。
+- **WC-D-F** `task/wc-d-fixes` @ `7ad4c81e`（Haiku；#50 合入后补修，修 CR-16 I-1/I-2；scope 检查按真实存储格式——`objects` 每项是 4 元数组的 JSON 字符串，任务说明原写法有误，以实现为准）。合入后可关 PR #50。
+- **审查文档** `task/cr-15-17-chatgpt` @ `7de86d28`：CR-15（PR #49 可合入）、CR-16（WC-D/#50 需修改 → WC-D-F）、CR-17 设计 `docs/design/research-local-export-facade-2026-10-11.md`、CR-18 任务说明。
+- **CR-12 报告与 SN-4 补充** `task/sn-5-aiui-handover-fixes` @ `b6e4a421`（只含文档；SN-5 实际由 PR #52 交付，Sonnet 那边 SN-5 已停、本地改动未推）。
+
+## AIUI 放行链（主线）
+PR42 交接点 `b6e1856` + SN-4 `6d47da8` / PR #51 `d5cd97a` + SN-5 PR #52 `11225c4` + SN-6（未交）。SN-6 交回后：整链与最新 develop 组合 → 终态 CI → 派 **CR-18**（`task/cr-15-17-chatgpt` 的 `docs/tasks/CR-18.md`，填组合 SHA 与 CI）→ 统一审查通过后合入。遗留待 CR-18 判断：无视图取消且在范围写入前已超时，要等视图之后的 reconcileRead 才清退路（grok-build 报告）。PR #42、#51、#52 合入后关闭；#30 为旧 AIUI-5 F5c，需判断是否已被取代。AIUI 合入后才能做 CR-14 的 CR14-02～09（设计在 `docs/design/cr14-f1-f2-implementation-2026-10-11.md`）、Android 冒烟（Haiku，构建完等用户连手机，测完卸载）、AIUI 默认开启。
+
+## 排队（已有设计或说明，等人）
+1. **opencode：测试夹具整理**——OC-15～OC-20 已全部进 develop，可派：把 `apps/muyon/test/oc15..oc20_*` 与 `reg3c_outline_tools_test.dart` 里重复的科研建库 / 建链 / 确认辅助代码抽到 `test/support/` 共用，只动测试，全部原断言不变。
+2. **LE-03** 主张草稿准备器：排在 Codex 的 LE-02 之后（都改 `exchange.dart`）。按 ADR CR-17 第 3 条：以 research-skill v6.8 为准，资格是当前日志 `schema_version: 2` 的项目，只写挂论文的 `claims` 行，不导出 `assertions`。
+3. **LE-06～LE-14**：依赖见 CR-17 设计第 6 节（LE-06 账本依赖 01、05；LE-07 确认卡；LE-08 系统选择交接；LE-09 macOS；LE-10/11 Android；LE-12/13 接通两个工具；LE-14 平台验收）。
+4. **WC-B** 询价候选准备抽取（CR-11 片 B）：还没写任务说明；OC-14 已锁住 update 值语义（空串与 null 一样清空、false 被类型校验拒绝）。
+5. CR-13 延期：N-2 删除确认展示级联清单；N-3 回执版本化保存逐项 ChangeOp（OC-20 已锁现状）。
+6. 科研导出（REG-3e-b）要等 LE 全链。
+
+## 已知环境情况
+- Mac 本地全量常见失败：inquiry_module 16 项（develop 上同样失败，多为截图差异）、`human_new_project_preview_commit_and_resume`、列表预览不稳定用例；均以 Linux CI 为准。机器负载高时 formula、encrypted-import 等会超时，单独重跑可过。
+- flutter pub get 会改 xcconfig / Podfile / analysis_options，永不提交。
+- 不读不打印 `.env`；真实模型评测不在 verify/ci 里导出 `MUYON_EVAL_REAL`；原始验证日志不进仓库。
+
 # leader 交接（第二阶段进行中，第 5 次交接：Leader B → leader A）
 
 **2026-10-10 晚：Leader B 额度用完，经用户同意由 leader A 接手合入**（派发、审查、合入 develop）。合入流程：已审分支先在 `review/leader-a-batch-*` 组合分支上合到最新 develop，组合 CI 成功后快进 develop。此后的待办见[当前状态](CURRENT-STATUS-2026-10-10.md)与下方「当前入口」；第 4 次交接（leader A → Leader B）的正文保留为历史。
