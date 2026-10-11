@@ -607,6 +607,64 @@ void main() {
       },
     );
   }
+
+  test('clean_task_with_unknown_conversation_fact_requires_confirmation', () {
+    seed('auth1b:task:current', {
+      'taskId': 'current',
+      'conversationId': conversation,
+      'taintState': 'clean',
+      'sourceDigests': <String>[],
+    });
+    seed('auth1b:conversation:$conversation', {
+      'taintState': 'unknown',
+      'sourceDigests': <String>[],
+    });
+    final facts = HostAuthorizationFacts(db).readTask('current');
+    expect(facts.taintState, HostTaintState.unknown);
+    expect(facts.requiresConfirmation, isTrue);
+  });
+
+  test('clean_task_with_corrupt_conversation_fact_requires_confirmation', () {
+    seed('auth1b:task:current', {
+      'taskId': 'current',
+      'conversationId': conversation,
+      'taintState': 'clean',
+      'sourceDigests': <String>[],
+    });
+    db.raw.execute('INSERT OR REPLACE INTO settings(key,value) VALUES(?,?)', [
+      'auth1b:conversation:$conversation',
+      'not json',
+    ]);
+    final facts = HostAuthorizationFacts(db).readTask('current');
+    expect(facts.taintState, HostTaintState.unknown);
+    expect(facts.requiresConfirmation, isTrue);
+  });
+
+  test('clean_task_without_conversation_fact_stays_clean', () {
+    seed('auth1b:task:current', {
+      'taskId': 'current',
+      'conversationId': conversation,
+      'taintState': 'clean',
+      'sourceDigests': <String>[],
+    });
+    final facts = HostAuthorizationFacts(db).readTask('current');
+    expect(facts.taintState, HostTaintState.clean);
+  });
+
+  test('tainted_task_with_unknown_conversation_fact_stays_tainted', () {
+    seed('auth1b:task:current', {
+      'taskId': 'current',
+      'conversationId': conversation,
+      'taintState': 'tainted',
+      'sourceDigests': <String>[],
+    });
+    seed('auth1b:conversation:$conversation', {
+      'taintState': 'unknown',
+      'sourceDigests': <String>[],
+    });
+    final facts = HostAuthorizationFacts(db).readTask('current');
+    expect(facts.taintState, HostTaintState.tainted);
+  });
 }
 
 class _ImportRuntime implements ModuleRuntime {
