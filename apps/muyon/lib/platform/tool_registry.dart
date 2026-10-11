@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 
 import 'grants/grant.dart';
 import 'grants/host_effect_intent.dart';
+import 'grants/local_export_target.dart';
 import 'grants/host_tool_authorization.dart';
 import 'grants/grant_store.dart';
 import 'grants/tool_grant_context.dart';
@@ -127,6 +128,7 @@ class _Tool {
   final void Function(ToolCallRequest)? preflight;
   final HostEffectIntent? Function(ToolCallRequest, ResolvedAssistantScope)?
   effectIntent;
+  LocalExportPhase? Function(ToolCallRequest)? localExportStage;
   int generation = 1;
 }
 
@@ -274,6 +276,25 @@ class ToolRegistry {
     );
   }
 
+  /// Marks [toolId] as a local export tool whose stage the host decides.
+  void bindLocalExportStage(
+    String toolId,
+    LocalExportPhase? Function(ToolCallRequest) stage,
+  ) => _require(toolId).localExportStage = stage;
+
+  /// A local export tool takes its stage from the host, never from the
+  /// request: callers that build requests (the dispatcher) must ask here and
+  /// refuse any destination a model proposed for such a tool.
+  bool isLocalExportTool(String toolId) =>
+      _tools[toolId]?.localExportStage != null;
+
+  /// The fixed stage destination the host currently wants for [toolId], or
+  /// null when the host has no stage to offer.
+  String? hostLocalExportDestination(ToolCallRequest request) {
+    final phase = _tools[request.toolId]?.localExportStage?.call(request);
+    return phase == null ? null : localExportDestination(phase);
+  }
+
   List<RegisteredToolInfo> list() =>
       List.unmodifiable(_tools.values.map((tool) => tool.info));
   RegisteredToolInfo? inspect(String toolId) => _tools[toolId]?.info;
@@ -324,7 +345,8 @@ class ToolRegistry {
         'Tool is not registered',
       ));
 
-  Future<PreparedToolCall> prepare(ToolCallRequest request) => _prepare(request);
+  Future<PreparedToolCall> prepare(ToolCallRequest request) =>
+      _prepare(request);
 
   Future<PreparedToolCall> _reprepare(PreparedToolCall prepared) {
     prepared._requireScopeCurrent?.call();
@@ -440,16 +462,37 @@ class ToolRegistry {
       );
     }
     final intent = tool.effectIntent?.call(request, scope);
+    final localStage = parseLocalExportDestination(request.destination);
     if (intent != null &&
         (intent.toolId != request.toolId ||
             intent.invocationId != request.invocationId ||
-            (intent.isTransport
-                ? intent.endpoint.toString() != request.destination
-                : tool.info.accessLevel != ToolAccessLevel.write ||
-                      request.destination != null))) {
+            (intent.isLocalExport
+                // The stage in the request must be the stage of the intent.
+                ? tool.info.accessLevel != ToolAccessLevel.external ||
+                      tool.info.descriptor.effect != ToolEffect.export ||
+                      localStage != intent.phase
+                : localStage != null ||
+                      (intent.isTransport
+                          ? intent.endpoint.toString() != request.destination
+                          : tool.info.accessLevel != ToolAccessLevel.write ||
+                                request.destination != null)))) {
       throw const ToolPlatformException(
         'intent_mismatch',
         'Host transport identity mismatch',
+      );
+    }
+    if (tool.localExportStage != null &&
+        localStage != tool.localExportStage!(request)) {
+      throw const ToolPlatformException(
+        'intent_mismatch',
+        'Local export stage is written by the host',
+      );
+    }
+    // A local export destination is only valid with its trusted host intent.
+    if (localStage != null && (intent == null || !intent.isLocalExport)) {
+      throw const ToolPlatformException(
+        'intent_mismatch',
+        'Local export requires a trusted host intent',
       );
     }
     final parameterDigest = _digest(request.parameters);
@@ -552,6 +595,12 @@ class ToolRegistry {
   /// A permission request built entirely from the host's prepared call and facts.
   /// A coarse scope key never replaces the revision-bound identityDigest.
   GrantRequest authorizationRequest(PreparedToolCall prepared) {
+    if (prepared.effectIntent?.isLocalExport == true) {
+      throw const ToolPlatformException(
+        'invalid_grant_request',
+        'A local export needs a person, never a grant',
+      );
+    }
     if (!identical(prepared._authority, _authority) ||
         grantContext == null ||
         prepared.info.accessLevel == ToolAccessLevel.read) {
@@ -654,6 +703,12 @@ class ToolRegistry {
     required String grantId,
     HostReviewOutcome? review,
   }) async {
+    if (prepared.effectIntent?.isLocalExport == true) {
+      throw const ToolPlatformException(
+        'invalid_grant_request',
+        'A local export needs a person, never a grant',
+      );
+    }
     _checkReview(prepared, review);
     if (review != null && review.grantId != grantId) {
       throw const ToolPlatformException(
