@@ -9,6 +9,7 @@ import 'package:muyon/assistant/ui_planning.dart';
 import 'package:muyon/assistant/ui_presentation_preference.dart';
 import 'package:muyon/screens/ui_stream_task_view.dart';
 import 'package:muyon/services/models/model_gateway.dart';
+import 'package:muyon/services/models/model_provider.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 
 import 'aiui6_stream_production_test.dart' show request, state, validStream, node;
@@ -159,6 +160,82 @@ void main() {
       });
     }
   }
+
+  testWidgets('SN3 cancelling the original task retains disabled facts without cancelling another task', (tester) async {
+    final f = (await tester.runAsync(LoopFixture.open))!;
+    final preference = UiPresentationPreference(f.repo);
+    await tester.runAsync(() => preference.save(UiPresentationMode.few));
+    final entered = Completer<void>(), release = Completer<void>();
+    String? cancelledTaskId;
+    final provider = StreamMotivationUiPlanningProvider((request, _, receive) async {
+      if (request.taskId == cancelledTaskId) {
+        receive(failureStream('incomplete'));
+        entered.complete();
+        await release.future;
+        receive('{"op":"end"}\n');
+      } else {
+        receive(validStream);
+      }
+    });
+    final agent = PersonalAgent(repository: f.repo,
+      gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger), tools: f.tools,
+      presentationPreference: preference, uiPlanningSource: (_) async => state(f),
+      uiPlanningMode: UiPlanningMode.motivation,
+      uiPlanningProviders: {UiPlanningMode.motivation: provider});
+    try {
+      final conversation = (await tester.runAsync(() => f.repo.createConversation()))!;
+      // Freeze an actual profile but never approve a gateway call. The host has
+      // already saved its public answer while the original task remains active.
+      final task = (await tester.runAsync(() => f.start(agent,
+        f.profile(capabilities: const ModelCapabilities(streaming: true)),
+        conversationId: conversation.id)))!;
+      final unrelated = (await tester.runAsync(() => f.start(agent,
+        f.profile(capabilities: const ModelCapabilities(streaming: true)),
+        conversationId: conversation.id)))!;
+      for (final active in [task, unrelated]) {
+        final saved = (await tester.runAsync(() => f.repo.updateTask(active.copy({
+          'state': 'running', 'stage': 'model', 'summary': 'Saved public answer',
+        }), assistantAnswer: 'Saved public answer')))!;
+        expect(saved, isTrue);
+      }
+      expect(f.repo.messages(conversation.id).where((m) => m.role == 'assistant')
+        .map((m) => m.content), ['Saved public answer', 'Saved public answer']);
+      cancelledTaskId = task.id;
+      final planning = agent.planUiFromUserControl(task.id);
+      await tester.runAsync(() => entered.future);
+      final independent = (await tester.runAsync(() => agent.planUiFromUserControl(unrelated.id)))!;
+      expect(independent.validated, isNotNull);
+      await tester.runAsync(() => agent.cancel(task.id));
+      expect(f.repo.task(task.id)!.state.name, 'cancelled');
+      expect(agent.uiPresentation(task.id)?.validated, isNull);
+      expect(agent.uiStreamProgress(task.id), isNotNull,
+        reason: 'actual task cancellation must freeze its current preview');
+      expect(agent.uiStreamProgress(task.id)!.view.finalPlan, isNull);
+      expect(jsonEncode(f.repo.taskEvents(task.id).map((e) => e.data).toList()), contains('cancelled'));
+      expect(agent.uiPresentation(unrelated.id), same(independent),
+        reason: 'task cancellation must not invalidate another task');
+      await tester.pumpWidget(MaterialApp(home: UiStreamTaskView(agent: agent, taskId: task.id)));
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('未完成'), findsWidgets);
+      expect(find.textContaining('value: 42'), findsWidgets);
+      expect(find.text('保存事实'), findsWidgets);
+      expect(find.byType(ElevatedButton), findsNothing);
+      release.complete();
+      final late = (await tester.runAsync(() => planning))!;
+      await tester.pumpAndSettle();
+      expect(late.validated, isNull, reason: 'late end cannot restore a cancelled capability');
+      expect(agent.uiPresentation(task.id)?.validated, isNull);
+      expect(agent.uiStreamProgress(task.id)!.view.finalPlan, isNull);
+      expect(agent.uiPresentation(unrelated.id), same(independent));
+      expect(f.bodies, isEmpty);
+      expect(f.callsOf('write'), 0);
+    } finally {
+      if (!release.isCompleted) release.complete();
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.runAsync(agent.close);
+    }
+  });
 
   test('SN3 invalidation rejects late success and late preview publications', () async {
     final f = await LoopFixture.open();
