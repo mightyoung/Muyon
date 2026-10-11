@@ -4,7 +4,7 @@
 
 ## 固定输入与范围
 
-- 最新 develop：`56a7d8a898a9cf528f64b24f69c91d6cf44a5b2e`。
+- 首轮验证 develop：`56a7d8a898a9cf528f64b24f69c91d6cf44a5b2e`。
 - GB-6 源：`task/gb-6-dispatch-turn-characterization-rest` @ `fc0ab40b639d7d7b066a4f3cd6caef650d74fac7`。
 - 源 CI：[38111230154](https://github.com/mightyoung/Muyon/actions/runs/38111230154)，实际查询 completed/success，headSha 与源完全一致。
 - 隔离组合分支：`review/gb-6-develop-combination-20261011`。
@@ -81,3 +81,11 @@ SDK 为临时下载的 Flutter 3.47.5 / Dart 3.13.4，与 CI 版本一致；工�
 独立代理先静态逐项检查，后只读复核变异脚本、摘要 JSON 与恢复日志：确认 22 唯一变异、21 目标断言失败、1 存活，原实现及恢复后均 20 通过，当前 lib 差异为空。独立代理未重跑 Flutter；本报告动态执行结果来自主执行线程，不冒称两次独立全仓重跑。
 
 G14 及表内缺口继续留待后续，不把此增量当作全部拆分门禁已满足。禁止把源 CI 代替组合 CI，父会话只在复核目标 SHA 与对应 CI 后决定合入。
+
+## develop 前移后的再次组合
+
+首轮最终候选 `2d4a446f725145f8197ba2ca8f9add43cc59b71c` 的 [CI 38114037829 第二次执行](https://github.com/mightyoung/Muyon/actions/runs/38114037829/attempts/2) 已 completed/success，headSha 精确匹配；八包分析通过、测试共 3304 通过 / 207 跳过，coverage 与完整 CI 门禁通过。第一次执行因既有 supplier_core LAN trickling-upload 用例的 150ms deadline 超时失败；同一 SHA 仅重跑失败 job 一次，本地隔离重跑该例通过。保留首次失败，不修改该测试或门槛。
+
+本地完整脚本两轮均八包测试通过；首轮 analyzer 缓存目录不可写，修正目录后第二轮分析通过但覆盖门槛失败（module_api 2087 < 2091），首轮 2094、远端第一次 2093；覆盖采集波动的根因尚未确定，不把本地完整 gate 记为成功，也未降低基线。
+
+最终复查 develop 前移到 `ece1a76cbec0d1814a6bf0f72adb7abfc9067936`（REG-3c，五个文件）；与 GB-6 四个文件无重叠。再次组合以该 develop 完整 tree 为基础，仅追加原 GB-6 两个测试、任务文档及本摘要，双亲为首轮最终候选与上述 develop；不混入其他产品改动。22 个变异的被测 dispatch/model_turn 实现未被该 develop 增量修改；新增基线仍需最终新 SHA 对应的完整组合 CI，最终交付将提供精确 SHA 和 run，首轮绿灯不替代再次组合门禁。
