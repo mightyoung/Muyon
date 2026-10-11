@@ -38,8 +38,8 @@ class _HoldThenAllowReviewer implements OutboundContentReviewer {
 }
 
 List<Map> _events(LoopFixture f, String taskId) => [
-      for (final e in f.repo.taskEvents(taskId)) e.toJson(),
-    ];
+  for (final e in f.repo.taskEvents(taskId)) e.toJson(),
+];
 
 Map<String, Object?>? _toolLogEntry(PersonalTask task) {
   final log = task.payload['toolLog'] as List?;
@@ -172,7 +172,7 @@ void main() {
     // Mutation: _outputCap drops the early return for non-stream non-native,
     // so preview.maxOutputTokens appears on a compat non-stream card.
     final f = await LoopFixture.open();
-    const longPrompt = '请分析以下内容并给出结论。' * 40;
+    final longPrompt = '请分析以下内容并给出结论。' * 40;
     // Streaming+native control: with little budget left, cap is present.
     f.replies
       ..add(
@@ -182,7 +182,11 @@ void main() {
       )
       ..add(LoopReply.sse(sseText('好')));
     final streamAgent = f.agent(budget: const Budget(maxTokens: 10000));
-    var streamTask = await f.start(streamAgent, f.profile(), prompt: longPrompt);
+    var streamTask = await f.start(
+      streamAgent,
+      f.profile(),
+      prompt: longPrompt,
+    );
     expect(
       (streamTask.payload['preview'] as Map).containsKey('maxOutputTokens'),
       isFalse,
@@ -335,19 +339,12 @@ void main() {
     // not_run_resume / unknown_before_resume.
     final f = await LoopFixture.open();
     final long = '字' * 200;
-    f.addTool(
-      'longwrite',
-      ToolEffect.write,
-      summary: long,
-    );
+    f.addTool('longwrite', ToolEffect.write, summary: long);
     f.addTool('after', ToolEffect.write);
     f.replies
       ..add(
         LoopReply.sse(
-          sseCalls([
-            ('c1', 'longwrite', '{}'),
-            ('c2', 'after', '{}'),
-          ]),
+          sseCalls([('c1', 'longwrite', '{}'), ('c2', 'after', '{}')]),
         ),
       )
       ..add(LoopReply.sse(sseText('好')));
@@ -389,12 +386,7 @@ void main() {
     );
     g.addTool('later', ToolEffect.write);
     g.replies.add(
-      LoopReply.sse(
-        sseCalls([
-          ('c1', 'bad', '{}'),
-          ('c2', 'later', '{}'),
-        ]),
-      ),
+      LoopReply.sse(sseCalls([('c1', 'bad', '{}'), ('c2', 'later', '{}')])),
     );
     final agent2 = g.agent();
     final failedCard = await g.run(agent2, await g.start(agent2, g.profile()));
@@ -404,8 +396,8 @@ void main() {
     );
     final afterFail = g.repo.task(failedCard.id)!;
     expect(afterFail.state, PersonalTaskState.failed);
-    final stepCalls =
-        ((afterFail.payload['step'] as Map)['calls'] as List).cast<Map>();
+    final stepCalls = ((afterFail.payload['step'] as Map)['calls'] as List)
+        .cast<Map>();
     expect(stepCalls[1]['outcome'], {'status': 'not_run_prior_failed'});
 
     // Resume keys: unfinished step with one successful receipt and one pending
@@ -414,14 +406,7 @@ void main() {
     h.addTool('w1', ToolEffect.write);
     h.addTool('w2', ToolEffect.write);
     h.replies
-      ..add(
-        LoopReply.sse(
-          sseCalls([
-            ('c1', 'w1', '{}'),
-            ('c2', 'w2', '{}'),
-          ]),
-        ),
-      )
+      ..add(LoopReply.sse(sseCalls([('c1', 'w1', '{}'), ('c2', 'w2', '{}')])))
       ..add(LoopReply.sse(sseText('续')));
     final agent3 = h.agent();
     final card = await h.run(agent3, await h.start(agent3, h.profile()));
@@ -456,6 +441,5 @@ void main() {
       isTrue,
       reason: 'not_run_resume Chinese text must stay fixed',
     );
-
   });
 }
