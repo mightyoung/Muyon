@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
 
 import 'context.dart';
 import 'write_forms.dart';
@@ -60,9 +60,14 @@ class WriteConflict {
       other is WriteConflict &&
       other.code == code &&
       other.currentVersion == currentVersion &&
-      listEquals(other.fieldPaths, fieldPaths) &&
-      mapEquals(other.details, details);
+      const ListEquality<String>().equals(other.fieldPaths, fieldPaths) &&
+      const DeepCollectionEquality().equals(other.details, details);
 
   @override
-  int get hashCode => Object.hash(code, currentVersion);
+  int get hashCode => Object.hash(
+    code,
+    currentVersion,
+    const ListEquality<String>().hash(fieldPaths),
+    const DeepCollectionEquality().hash(details),
+  );
 }
