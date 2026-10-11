@@ -92,6 +92,55 @@ void main() {
     return host.tools.invoke(call.withApproval(approval));
   }
 
+  test('report resolution failure rolls back project and change log', () async {
+    final store = host.research!.store;
+    final selected = await current('project', 'P');
+    final beforeRows = store.db
+        .select('SELECT * FROM projects')
+        .map((r) => Map<String, Object?>.from(r))
+        .toList();
+    final beforeLog = store.db
+        .select('SELECT * FROM muyon_change_log')
+        .map((r) => Map<String, Object?>.from(r))
+        .toList();
+    // The domain UPDATE completes. Only its subsequent report resolution
+    // reads the malformed title and throws, inside that same transaction.
+    store.db.execute(
+      "CREATE TRIGGER fail_report AFTER UPDATE OF question ON projects WHEN NEW.question='report-fault' BEGIN UPDATE projects SET title=X'00' WHERE id=NEW.id; END",
+    );
+    final call = request(
+      'research.update_project',
+      {
+        'project_id': 'P',
+        'question': 'report-fault',
+        'next_step': 'must roll back',
+        'expected_digest': selected.contentDigest,
+      },
+      [selected],
+    );
+    final result = await approved(call);
+    expect(result.status, ToolCallStatus.interrupted);
+    expect(
+      store.db
+          .select('SELECT * FROM projects')
+          .map((r) => Map<String, Object?>.from(r))
+          .toList(),
+      beforeRows,
+    );
+    expect(
+      store.db
+          .select('SELECT * FROM muyon_change_log')
+          .map((r) => Map<String, Object?>.from(r))
+          .toList(),
+      beforeLog,
+    );
+    expect(store.db.autocommit, isTrue);
+    final receipt = host.tools.receiptFor(call.invocationId)!;
+    expect(receipt.state, 'interrupted');
+    expect(receipt.result!.status, ToolCallStatus.interrupted);
+    expect(receipt.result!.changes, isEmpty);
+  });
+
   for (final tool in [
     'update_project',
     'set_note_entry',
@@ -263,6 +312,13 @@ void main() {
             reason: result.summary,
           );
           expect(host.tools.receiptFor(call.invocationId)!.state, 'succeeded');
+          // Re-read the persisted JSON after B has committed; the returned
+          // result alone cannot prove durable recovery retains A's snapshot.
+          final persisted = host.tools.receiptFor(call.invocationId)!.result!;
+          expect(persisted.objectRefs.single.toJson(), committedA.toJson());
+          // ChangeOp persistence is deferred by CR13 N-3.
+          expect(persisted.changes, isEmpty);
+          expect(persisted.toJson(), result.toJson());
           expect(result.objectRefs.single.toJson(), committedA.toJson());
           expect(result.changes.single.ref.toJson(), committedA.toJson());
           expect(result.changes.single.op, ChangeOp.upsert);
