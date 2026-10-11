@@ -479,7 +479,336 @@ void registerResearchTools(ToolRegistrar registrar) {
         return _report(runtime, '已移除提纲引用', [ObjectChange(ref, ChangeOp.delete)]);
       });
   });
-
+  registrar.read(
+    ToolSpec(
+      name: 'list_notes',
+      description: '读取选定科研文档的阅读批注，每条带 digest。只读取本机科研库，不修改数据，也不发送到设备外。',
+      operations: _operations('list_notes'),
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'document_id': {'type': 'string'},
+        },
+        'required': ['document_id'],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final ref = _selected(
+        ctx,
+        'document',
+        ctx.call.request.parameters['document_id'] as String,
+      );
+      final runtime = await ctx.runtime<ResearchRuntime>();
+      runtime.requireCurrent(ref);
+      final store = runtime.store.scoped(ref.nativeProjectId!);
+      final notes = [
+        for (final note in store.notes(ref.objectId))
+          {
+            'id': note.id,
+            'documentId': note.documentId,
+            'locator': note.locator,
+            'text': note.text,
+            'pageNumber': note.pageNumber,
+            'quote': note.quote,
+            'evidenceKind': note.evidenceKind,
+            'doesNotSupport': note.doesNotSupport,
+            'entryId': note.entryId,
+            'digest': _noteDigest(store, ref.nativeProjectId!, note.id),
+          },
+      ];
+      return ToolCallResult(
+        status: ToolCallStatus.succeeded,
+        summary: '找到 ${notes.length} 条批注',
+        data: {'notes': notes},
+        objectRefs: [ref],
+      );
+    },
+  );
+  registrar.read(
+    ToolSpec(
+      name: 'list_bindings',
+      description:
+          '读取选定科研项目的文献绑定，每条带 digest，可按 document_id 过滤。只读取本机科研库，不修改数据，也不发送到设备外。',
+      operations: _operations('list_bindings'),
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'project_id': {'type': 'string'},
+          'document_id': {'type': 'string'},
+        },
+        'required': ['project_id'],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final params = ctx.call.request.parameters;
+      final ref = _selected(ctx, 'project', params['project_id'] as String);
+      final runtime = await ctx.runtime<ResearchRuntime>();
+      runtime.requireCurrent(ref);
+      final bindings = [
+        for (final b
+            in runtime.store
+                .scoped(ref.nativeProjectId!)
+                .bindings(ref.objectId))
+          if (params['document_id'] == null ||
+              params['document_id'] == b.documentId)
+            {..._bindingJson(b), 'digest': _bindingDigest(b)},
+      ];
+      return ToolCallResult(
+        status: ToolCallStatus.succeeded,
+        summary: '找到 ${bindings.length} 条绑定',
+        data: {'bindings': bindings},
+        objectRefs: [ref],
+      );
+    },
+  );
+  registrar.write(
+    WriteToolSpec(
+      name: 'update_project',
+      description:
+          '修改选定科研项目的研究问题和下一步；需确认，只修改本机库。'
+          'expected_digest 必须是确认时 research.read_object 返回的项目 contentDigest，执行时在同一事务核对，不一致则拒绝。',
+      operations: _operations('update_project'),
+      targetTypes: {'project'},
+      affectsTypes: {'project'},
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'project_id': {'type': 'string'},
+          'question': {'type': 'string', 'maxLength': 4000},
+          'next_step': {'type': 'string', 'maxLength': 4000},
+          'expected_digest': {'type': 'string', 'minLength': 1},
+        },
+        'required': ['project_id', 'question', 'next_step', 'expected_digest'],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final params = ctx.call.request.parameters;
+      final ref = _selected(ctx, 'project', params['project_id'] as String);
+      final runtime = await _pendingWrite(
+        ctx,
+        [ref],
+        (store) => _projectDigest(store, ref.objectId),
+        (store) => store.saveProject(
+          ref.objectId,
+          question: params['question'] as String,
+          nextStep: params['next_step'] as String,
+        ),
+      );
+      return _pendingReport(runtime, '已更新项目', [ObjectChange(ref, ChangeOp.upsert)]);
+    },
+  );
+  registrar.write(
+    WriteToolSpec(
+      name: 'set_note_entry',
+      description:
+          '把选定阅读批注关联到选定研究条目，entry_id 为空则清除关联；需确认，只修改本机库。'
+          '条目须在同一项目且已选定。expected_digest 必须是确认时该批注的 contentDigest，执行时在同一事务核对，不一致则拒绝。',
+      operations: _operations('set_note_entry'),
+      targetTypes: {'note', 'entry'},
+      affectsTypes: {'note'},
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'note_id': {'type': 'string'},
+          'entry_id': {
+            'type': ['string', 'null'],
+          },
+          'expected_digest': {'type': 'string', 'minLength': 1},
+        },
+        'required': ['note_id', 'entry_id', 'expected_digest'],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final params = ctx.call.request.parameters;
+      final note = _selected(ctx, 'note', params['note_id'] as String);
+      final entryId = params['entry_id'] as String?;
+      final entry = entryId == null ? null : _selected(ctx, 'entry', entryId);
+      final runtime = await _pendingWrite(
+        ctx,
+        [note, ?entry],
+        (store) => _noteDigest(store, note.nativeProjectId!, note.objectId),
+        (store) => store.setNoteEntry(note.objectId, entryId),
+      );
+      return _pendingReport(runtime, '已更新批注关联', [ObjectChange(note, ChangeOp.upsert)]);
+    },
+  );
+  const taskSpecProperties = <String, Object?>{
+    'parameters': {'type': 'object', 'additionalProperties': true},
+    'data_references': {
+      'type': 'array',
+      'items': {'type': 'string', 'maxLength': 1000},
+      'maxItems': 50,
+    },
+    'code_reference': {'type': 'string', 'maxLength': 1000},
+    'environment': {'type': 'string', 'maxLength': 2000},
+    'expected_results': {
+      'type': 'array',
+      'items': {'type': 'string', 'maxLength': 1000},
+      'maxItems': 50,
+    },
+  };
+  registrar.write(
+    WriteToolSpec(
+      name: 'create_task',
+      description:
+          '在选定科研项目新建任务（第 1 版）；需确认，只修改本机库，不运行任何命令。'
+          '任务规格只接受参数、数据引用、代码引用、环境和预期产物，不含命令与来源。',
+      operations: _operations('create_task'),
+      targetTypes: {'project'},
+      createsTypes: {'task'},
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'project_id': {'type': 'string'},
+          'title': {'type': 'string', 'minLength': 1, 'maxLength': 1000},
+          'goal': {'type': 'string', 'minLength': 1, 'maxLength': 4000},
+          ...taskSpecProperties,
+        },
+        'required': ['project_id', 'title', 'goal'],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final params = ctx.call.request.parameters;
+      final ref = _selected(ctx, 'project', params['project_id'] as String);
+      late String taskId;
+      // Validate before the write starts so a refusal is "failed", not "may have happened".
+      final spec = _taskSpec(const {}, params);
+      final runtime = await _taskWrite(ctx, ref, (store) {
+        taskId = store
+            .saveTask(
+              projectId: ref.objectId,
+              title: params['title'] as String,
+              goal: params['goal'] as String,
+              spec: spec,
+              expectedRevision: 0,
+            )
+            .id;
+      });
+      return _pendingReport(runtime, '已新建任务', [
+        ObjectChange(
+          ObjectRef(
+            moduleId: 'research',
+            objectType: 'task',
+            objectId: taskId,
+            nativeProjectId: ref.nativeProjectId,
+          ),
+          ChangeOp.upsert,
+        ),
+      ]);
+    },
+  );
+  registrar.write(
+    WriteToolSpec(
+      name: 'revise_task',
+      description:
+          '为选定科研任务追加新修订；需确认，只修改本机库，不运行任何命令。'
+          'expected_revision 必须等于选定任务的当前修订号，执行时在同一事务核对，已有更新修订则拒绝。'
+          '未给出的规格字段沿用上一修订，命令与来源字段不可修改。',
+      operations: _operations('revise_task'),
+      targetTypes: {'task'},
+      affectsTypes: {'task'},
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'task_id': {'type': 'string'},
+          'expected_revision': {'type': 'integer', 'minimum': 1},
+          'title': {'type': 'string', 'minLength': 1, 'maxLength': 1000},
+          'goal': {'type': 'string', 'minLength': 1, 'maxLength': 4000},
+          ...taskSpecProperties,
+        },
+        'required': ['task_id', 'expected_revision', 'title', 'goal'],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final params = ctx.call.request.parameters;
+      final ref = _selected(ctx, 'task', params['task_id'] as String);
+      final expected = params['expected_revision'] as int;
+      late Map<String, Object?> spec;
+      final runtime = await _pendingWrite(
+        ctx,
+        [ref],
+        (store) => '${_latestRevision(store, ref.objectId)}',
+        (store) {
+          store.saveTask(
+            id: ref.objectId,
+            projectId: ref.nativeProjectId!,
+            title: params['title'] as String,
+            goal: params['goal'] as String,
+            spec: spec,
+            expectedRevision: expected,
+          );
+        },
+        beforeEffect: (store) {
+          if (ref.revisionRef != '$expected') {
+            throw StateError('Task revision changed');
+          }
+          final previous = store.taskRevision(ref.objectId, expected);
+          if (previous == null) throw StateError('Task revision changed');
+          spec = _taskSpec(previous.spec, params);
+        },
+        expected: '$expected',
+      );
+      return _pendingReport(runtime, '已追加任务修订', [ObjectChange(ref, ChangeOp.upsert)]);
+    },
+  );
+  registrar.write(
+    WriteToolSpec(
+      name: 'confirm_binding',
+      description:
+          '为选定科研文档确认一条待消歧的文献绑定，并丢弃同项目内竞争的待消歧候选；需确认，只修改本机库。'
+          'expected_digest 必须是确认时 research.list_bindings 返回的该绑定 digest，执行时在同一事务核对；'
+          '绑定不存在或已确认则拒绝。',
+      operations: _operations('confirm_binding'),
+      targetTypes: {'document'},
+      affectsTypes: {'document'},
+      parameterSchema: {
+        'type': 'object',
+        'properties': {
+          'document_id': {'type': 'string'},
+          'paper_id': {'type': 'string'},
+          'expected_digest': {'type': 'string', 'minLength': 1},
+        },
+        'required': ['document_id', 'paper_id', 'expected_digest'],
+        'additionalProperties': false,
+      },
+    ),
+    (ctx) async {
+      final params = ctx.call.request.parameters;
+      final ref = _selected(ctx, 'document', params['document_id'] as String);
+      final paper = params['paper_id'] as String;
+      final runtime = await _pendingWrite(
+        ctx,
+        [ref],
+        (store) => _bindingDigest(
+          store
+              .bindings(ref.nativeProjectId!)
+              .firstWhere(
+                (b) => b.documentId == ref.objectId && b.paperId == paper,
+                orElse: () =>
+                    throw StateError('Outline changed; confirm again'),
+              ),
+        ),
+        (store) => store.confirmBinding(ref.objectId, paper),
+        beforeEffect: (store) {
+          // Refuse a settled or missing candidate before the effect starts, so
+          // the receipt says "failed" rather than "may have happened".
+          final row = store
+              .bindings(ref.nativeProjectId!)
+              .where((b) => b.documentId == ref.objectId && b.paperId == paper);
+          if (row.length != 1 || !row.single.ambiguous) {
+            throw StateError('Binding is not waiting for a choice');
+          }
+        },
+      );
+      return _pendingReport(runtime, '已确认绑定', [ObjectChange(ref, ChangeOp.upsert)]);
+    },
+  );
 }
 
 ObjectRef _selected(ModuleToolContext ctx, String type, String id) {
@@ -540,11 +869,78 @@ List<Map<String, Object?>> _sectionRows(WorkbenchStore store, String projectId) 
 String _orderDigest(WorkbenchStore store, String projectId) =>
     sha256.convert(utf8.encode(jsonEncode(_sectionRows(store, projectId)))).toString();
 
+String _projectDigest(WorkbenchStore store, String id) {
+  final p = store.projects().firstWhere(
+    (p) => p.id == id,
+    orElse: () => throw StateError('Outline changed; confirm again'),
+  );
+  return sha256
+      .convert(utf8.encode(jsonEncode([p.title, p.question, p.nextStep])))
+      .toString();
+}
+
+String _noteDigest(WorkbenchStore store, String projectId, String id) {
+  final rows = store.db.select(
+    'SELECT n.* FROM notes n JOIN documents d ON d.id=n.document_id WHERE n.id=? AND d.project_id=?',
+    [id, projectId],
+  );
+  if (rows.length != 1) throw StateError('Outline changed; confirm again');
+  return _rowDigest(Map<String, Object?>.from(rows.single));
+}
+
+int _latestRevision(WorkbenchStore store, String id) {
+  final rows = store.db.select(
+    'SELECT MAX(revision) AS r FROM tasks WHERE id=?',
+    [id],
+  );
+  final latest = rows.single['r'] as int?;
+  if (latest == null) throw StateError('Task revision changed');
+  return latest;
+}
+
+/// Only these keys can come from the model; `command` and `source` stay as the
+/// previous revision had them (or absent), so a task cannot be given a command.
+Map<String, Object?> _taskSpec(
+  Map<String, Object?> previous,
+  Map<String, Object?> params,
+) {
+  const keys = {
+    'parameters': 'parameters',
+    'data_references': 'dataReferences',
+    'code_reference': 'codeReference',
+    'environment': 'environment',
+    'expected_results': 'expectedResults',
+  };
+  final spec = Map<String, Object?>.from(previous);
+  for (final entry in keys.entries) {
+    if (params.containsKey(entry.key)) spec[entry.value] = params[entry.key];
+  }
+  if (jsonEncode(spec).length > 8000) throw StateError('Task spec too large');
+  return spec;
+}
+
+Future<ResearchRuntime> _taskWrite(
+  ModuleToolContext ctx,
+  ObjectRef project,
+  void Function(WorkbenchStore store) apply,
+) async {
+  final runtime = await ctx.runtime<ResearchRuntime>();
+  final store = runtime.store.scoped(project.nativeProjectId!);
+  ctx.call.cancellation.throwIfCancelled();
+  await store.write(() {
+    runtime.requireCurrent(project);
+    ctx.call.checkBeforeEffect();
+    apply(store);
+  });
+  return runtime;
+}
+
 Future<ToolCallResult> _outlineWrite(
   ModuleToolContext ctx, List<ObjectRef> refs,
   String Function(WorkbenchStore store) digest,
   ToolCallResult Function(ResearchRuntime runtime, WorkbenchStore store) apply, {
   void Function(WorkbenchStore store)? beforeEffect,
+  Object? expected,
 }) async {
   final runtime = await ctx.runtime<ResearchRuntime>();
   final projectId = refs.first.nativeProjectId!;
@@ -552,7 +948,7 @@ Future<ToolCallResult> _outlineWrite(
     throw StateError('Object outside scope');
   }
   final store = runtime.store.scoped(projectId);
-  final expected = ctx.call.request.parameters['expected_digest'];
+  expected ??= ctx.call.request.parameters['expected_digest'];
   ctx.call.cancellation.throwIfCancelled();
   return store.write(() {
     for (final ref in refs) {
@@ -585,6 +981,71 @@ ToolCallResult _report(
   }
   return ToolCallResult(status: ToolCallStatus.succeeded, summary: summary,
     objectRefs: [for (final change in reported) change.ref], changes: reported);
+}
+
+Future<ResearchRuntime> _pendingWrite(
+  ModuleToolContext ctx,
+  List<ObjectRef> refs,
+  String Function(WorkbenchStore store) digest,
+  void Function(WorkbenchStore store) apply, {
+  void Function(WorkbenchStore store)? beforeEffect,
+  Object? expected,
+}) async {
+  final runtime = await ctx.runtime<ResearchRuntime>();
+  final projectId = refs.first.nativeProjectId!;
+  if (refs.any((ref) => ref.nativeProjectId != projectId)) {
+    throw StateError('Object outside scope');
+  }
+  final store = runtime.store.scoped(projectId);
+  expected ??= ctx.call.request.parameters['expected_digest'];
+  ctx.call.cancellation.throwIfCancelled();
+  await store.write(() {
+    for (final ref in refs) {
+      runtime.requireCurrent(ref);
+    }
+    beforeEffect?.call(store);
+    _requireExpected(expected, digest(store));
+    ctx.call.checkBeforeEffect();
+    apply(store);
+  });
+  return runtime;
+}
+
+Future<ToolCallResult> _pendingReport(
+  ResearchRuntime runtime,
+  String summary,
+  List<ObjectChange> changes,
+) async {
+  if (changes.isEmpty) {
+    return ToolCallResult(status: ToolCallStatus.succeeded, summary: summary);
+  }
+  final session = await runtime.openScopeSession();
+  try {
+    final reported = <ObjectChange>[];
+    for (final change in changes) {
+      if (change.op == ChangeOp.delete) {
+        reported.add(change);
+        continue;
+      }
+      final resolved = (await session.resolve(
+        ObjectRef(
+          moduleId: change.ref.moduleId,
+          objectType: change.ref.objectType,
+          objectId: change.ref.objectId,
+          nativeProjectId: change.ref.nativeProjectId,
+        ),
+      ))!;
+      reported.add(ObjectChange(resolved.ref, change.op));
+    }
+    return ToolCallResult(
+      status: ToolCallStatus.succeeded,
+      summary: summary,
+      objectRefs: [for (final change in reported) change.ref],
+      changes: reported,
+    );
+  } finally {
+    await session.dispose();
+  }
 }
 
 Map<String,Object?> _document(ResearchRuntime runtime, ObjectRef ref, ObjectView view) {
