@@ -61,16 +61,41 @@ Matcher _error(String code) => throwsA(
 
 // A child is a separate Flutter tester OS process with a separately opened
 // SQLite connection. No inherited ledger, issuer, or in-memory running map.
-Future<Process> _child(Directory dir, String mode, String name) =>
-    Process.start(
-      Platform.environment['LE06_FLUTTER'] ?? 'flutter',
-      ['test', '--no-pub', _file, '--plain-name', 'child process fixture'],
-      environment: {
-        'LE06_CHILD_DIR': dir.path,
-        'LE06_CHILD_MODE': mode,
-        'LE06_CHILD_NAME': name,
-      },
-    );
+//
+// Each child gets an isolated Flutter build-dir (via a private HOME +
+// .flutter_settings). Child `flutter test` always runs native-asset install,
+// which deletes then rewrites every file under build/native_assets/<os>/.
+// Sharing the parent suite's build/ would let those deletes remove
+// libsqlite3.so / libpdfium.so while parallel host tests still load them
+// (CF-FIX-B CI run 38258595733: assistant_transfer_capability_boundary_test).
+Future<Process> _child(Directory dir, String mode, String name) {
+  final home = Directory('${dir.path}/flutter-home-$name')..createSync();
+  // Shared among LE06 children only; must stay relative to apps/muyon and
+  // outside the parent suite's build/native_assets tree (gitignored).
+  const buildDir = 'build/le06-children';
+  File('${home.path}/.flutter_settings').writeAsStringSync(
+    "${jsonEncode(<String, String>{'build-dir': buildDir})}\n",
+  );
+  final parentHome = Platform.environment['HOME'] ?? '';
+  final pubCache =
+      Platform.environment['PUB_CACHE'] ??
+      (parentHome.isEmpty ? null : '$parentHome/.pub-cache');
+  final environment = <String, String>{
+    'LE06_CHILD_DIR': dir.path,
+    'LE06_CHILD_MODE': mode,
+    'LE06_CHILD_NAME': name,
+    'HOME': home.path,
+    'PUB_CACHE': ?pubCache,
+    'FLUTTER_ROOT': ?Platform.environment['FLUTTER_ROOT'],
+  };
+  return Process.start(Platform.environment['LE06_FLUTTER'] ?? 'flutter', [
+    'test',
+    '--no-pub',
+    _file,
+    '--plain-name',
+    'child process fixture',
+  ], environment: environment);
+}
 
 Future<void> _finish(Process process) async {
   final output = process.stdout.transform(utf8.decoder).join();
@@ -207,7 +232,7 @@ local_export_attempts BEGIN SELECT RAISE(ABORT, '$_uriCanary'); END''');
     expect(db.raw.select('SELECT * FROM local_export_attempts'), isEmpty);
     expect(db.raw.select('SELECT * FROM local_export_exports'), isEmpty);
     _noCanaries(result('writer'));
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   test('process exit after completion failure retains pending and read-only unknown', () async {
     await db.close();
@@ -263,7 +288,7 @@ local_export_attempts BEGIN SELECT RAISE(ABORT, '$_uriCanary'); END''');
       before,
     );
     _noCanaries(observed.modelData);
-  });
+  }, timeout: const Timeout(Duration(minutes: 2)));
 
   test(
     'process reopen separates generated success from save cancellation',
@@ -292,6 +317,7 @@ local_export_attempts BEGIN SELECT RAISE(ABORT, '$_uriCanary'); END''');
       );
       _noCanaries(receipt.modelData);
     },
+    timeout: const Timeout(Duration(minutes: 2)),
   );
 
   test(
@@ -338,8 +364,8 @@ local_export_attempts BEGIN SELECT RAISE(ABORT, '$_uriCanary'); END''');
     await db.close();
     final first = await _child(dir, 'race', 'first');
     final firstDone = _finish(first);
-    // Serialize Flutter's native-asset build, then release both *database*
-    // contenders together. Concurrent builders share generated dylibs.
+    // Serialize child startup (shared isolated build/le06-children tree),
+    // then release both *database* contenders together.
     await _waitFor(File('${dir.path}/ready-first'));
     final second = await _child(dir, 'race', 'second');
     final secondDone = _finish(second);
@@ -390,7 +416,7 @@ local_export_attempts BEGIN SELECT RAISE(ABORT, '$_uriCanary'); END''');
       ledger.read('independent')!.generate!.state,
       LocalExportLedgerState.succeeded,
     );
-  });
+  }, timeout: const Timeout(Duration(minutes: 3)));
 
   test('nested audits stay frozen on disk and all model error projections redact canaries', () async {
     final nested = <String, Object?>{

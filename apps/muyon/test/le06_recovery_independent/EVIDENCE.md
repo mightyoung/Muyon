@@ -77,8 +77,10 @@ Final regression run above was performed after all five mutations were removed.
   exit after injected completion-write failure. Abrupt process kill, power loss,
   filesystem failure, and SQLite crash recovery are **not verified**.
 - Concurrency evidence covers one synchronized two-process run on macOS using
-  separate ManagedConnection instances. Startup builds are serialized because
-  Flutter native-asset builders otherwise race over the same generated dylib;
+  separate ManagedConnection instances. LE06 children share an isolated Flutter
+  `build-dir` (`build/le06-children`) so native-asset install cannot delete
+  the parent suite's `build/native_assets/<os>/*.so` (see CF-FIX-B CI
+  38258595733). Startup is still serialized before the shared database gate;
   the database operations are released together after both processes are ready.
   Every scheduler interleaving, fairness, cross-platform locking, and retries
   after lock rejection are **not verified** or promised.
