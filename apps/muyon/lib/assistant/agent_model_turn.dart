@@ -18,6 +18,7 @@ import 'agent_drafts.dart';
 import 'agent_event_sink.dart';
 import 'agent_compaction_flow.dart';
 import 'agent_dispatch.dart';
+import 'model_reference_map.dart';
 import 'model_request_gate.dart';
 import 'request_view.dart';
 import 'stream_ui_planning.dart';
@@ -89,28 +90,34 @@ class AgentModelTurn {
               provider != null &&
               identical(planning.providers[mode], provider) &&
               planning.canPlanTask(task.id) &&
-              identical(planning.presentationIdentity?.call(task.id), identity) &&
+              identical(
+                planning.presentationIdentity?.call(task.id),
+                identity,
+              ) &&
               task.payload['uiPlanningInternal'] != true &&
               task.payload['profile'] is Map &&
               (provider is! StreamMotivationUiPlanningProvider ||
                   ctx.profile(task).capabilities.streaming) &&
-              (task.payload['candidateIds'] as List? ?? const [])
-                  .contains('assistant.plan_ui') &&
+              (task.payload['candidateIds'] as List? ?? const []).contains(
+                'assistant.plan_ui',
+              ) &&
               live != null &&
               !live.terminal &&
               AgentContext.digest(live.payload['profile']) == profileDigest &&
-              (live.payload['candidateIds'] as List? ?? const [])
-                  .contains('assistant.plan_ui');
+              (live.payload['candidateIds'] as List? ?? const []).contains(
+                'assistant.plan_ui',
+              );
         } catch (_) {
           return false;
         }
       }
+
       if (planning != null && available()) {
         final state = await planning.source(task);
         if (state != null && available()) {
           final metadata = jsonEncode({
             'hostUiPlanningContext': {
-              'snapshotId': state.snapshot.ref.id,
+              'snapshotId': state.modelSnapshotId,
               'expectedSnapshotRevision': state.snapshot.ref.revision,
               'surfaceId': state.currentView.surfaceId,
               'expectedSurfaceRevision': state.currentView.revision,
@@ -127,7 +134,8 @@ class AgentModelTurn {
               for (final message in task.payload['messages'] as List)
                 if (message is! Map ||
                     message['role'] != 'system' ||
-                    message['content'] != prior) message,
+                    message['content'] != prior)
+                  message,
               {'role': 'system', 'content': metadata},
             ],
           });
@@ -145,7 +153,11 @@ class AgentModelTurn {
     final preview = {
       'endpoint': ctx.profile(task).endpoint.toString(),
       'profile': ctx.previewProfile(task),
-      'scope': task.scope.toJson(),
+      'scope': projectModelJson(
+        task.scope.toJson(),
+        ctx.modelReferences,
+        ctx.modelBinding(task),
+      ),
       'messages': ctx.view(task),
       'dataCategories': ['conversation', 'memories', 'tool_results'],
       // Native mode sends more than the messages; the person confirms that
@@ -281,8 +293,12 @@ class AgentModelTurn {
           final envelope = jsonDecode(message['content'] as String);
           if (envelope is Map && envelope['tools'] is List) {
             final tools = envelope['tools'] as List;
-            final remaining = tools.where((tool) =>
-                tool is! Map || tool['toolId'] != 'assistant.plan_ui').toList();
+            final remaining = tools
+                .where(
+                  (tool) =>
+                      tool is! Map || tool['toolId'] != 'assistant.plan_ui',
+                )
+                .toList();
             if (remaining.length != tools.length) {
               narrowed = <String, Object?>{
                 ...Map<String, Object?>.from(message),
@@ -411,7 +427,8 @@ class AgentModelTurn {
       // Frozen when the task started: editing the profile later does not
       // change this task's protocol.
       final profile = ctx.profile(task);
-      if (profile.capabilities.nativeTools && ctx.uiModelChunks[task.id] == null) {
+      if (profile.capabilities.nativeTools &&
+          ctx.uiModelChunks[task.id] == null) {
         await _runNative(task, token, profile);
         return;
       }
@@ -452,7 +469,12 @@ class AgentModelTurn {
       await _responded(billed, usage, null, streamed?.draft);
       if (ctx.uiModelChunks[task.id] != null) {
         // This trusted internal request carries raw UI NDJSON, not chat protocol.
-        await ctx.finish(billed, text, const [], canCommit: () => !token.isCancelled);
+        await ctx.finish(
+          billed,
+          text,
+          const [],
+          canCommit: () => !token.isCancelled,
+        );
         return;
       }
       final response = _protocolReply(text);
@@ -519,7 +541,8 @@ class AgentModelTurn {
       'or answer in plain text. No other markup.';
 
   ModelRequest _modelRequest(PersonalTask task, ModelProfile profile) {
-    final native = profile.capabilities.nativeTools && ctx.uiModelChunks[task.id] == null;
+    final native =
+        profile.capabilities.nativeTools && ctx.uiModelChunks[task.id] == null;
     return ModelRequest(
       profile: profile,
       messages: [

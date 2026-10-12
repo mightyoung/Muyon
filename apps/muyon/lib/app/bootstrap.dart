@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import '../platform/inquiry_ui_planning_source.dart';
 import '../assistant/ui_presentation_preference.dart';
@@ -29,6 +30,7 @@ import 'legacy_module_bridge.dart';
 import 'accepted_research_imports.dart';
 import '../assistant/execution_store.dart';
 import '../assistant/dream/dream_service.dart';
+import '../assistant/model_reference_map.dart';
 import '../assistant/personal_agent.dart';
 import '../platform/foundation_repository.dart';
 import '../platform/memory_review.dart';
@@ -128,6 +130,15 @@ class MuyonHost {
   late final ToolRegistry tools;
   late final PublicServices services;
   late final PersonalAgent personalAgent;
+
+  /// Host-private opaque model references; the key persists so a pending
+  /// confirmation card and the request it approves carry identical bytes.
+  late final ModelReferenceMap modelReferences;
+
+  /// Retires every model handle when scope or lifecycle authority moves.
+  String modelReferencePin() =>
+      '${modules.scopeAuthorityRevision('inquiry') ?? 'pending'}|'
+      '${workspaces.scopeAuthorityRevision ?? 'pending'}';
   late final TaskCoordinator tasks;
   late final ResearchTaskBridge researchTasks;
   late final DreamService dream;
@@ -332,7 +343,10 @@ class MuyonHost {
               .catchError((Object error) {}),
         );
       };
+      host.modelReferences = await _openModelReferences(host.workspaces);
       host.personalAgent = PersonalAgent(
+        modelReferences: host.modelReferences,
+        modelReferencePin: (_) => host.modelReferencePin(),
         repository: host.foundation,
         gateway: host.services.gateway,
         tools: host.tools,
@@ -468,4 +482,25 @@ class MuyonHost {
     foundation.dispose();
     await storage.close();
   }
+}
+
+const _modelReferenceKeySetting = 'assistant.modelReferenceKey.v1';
+
+Future<ModelReferenceMap> _openModelReferences(
+  WorkspaceRepository workspaces,
+) async {
+  final stored = workspaces.setting(_modelReferenceKeySetting);
+  if (stored is String && RegExp(r'^[0-9a-f]{64}$').hasMatch(stored)) {
+    return ModelReferenceMap([
+      for (var i = 0; i < 64; i += 2)
+        int.parse(stored.substring(i, i + 2), radix: 16),
+    ]);
+  }
+  final random = Random.secure();
+  final key = List.generate(32, (_) => random.nextInt(256));
+  await workspaces.setSetting(
+    _modelReferenceKeySetting,
+    key.map((b) => b.toRadixString(16).padLeft(2, '0')).join(),
+  );
+  return ModelReferenceMap(key);
 }

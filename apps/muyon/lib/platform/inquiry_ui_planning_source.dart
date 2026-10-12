@@ -7,8 +7,10 @@ import 'package:muyon_ui/dynamic_ui.dart';
 
 import '../app/bootstrap.dart';
 import '../assistant/inquiry_snapshots/inquiry_readonly_snapshot.dart';
+import '../assistant/model_reference_map.dart';
 import '../assistant/ui_planning.dart';
 import 'foundation_repository.dart';
+import 'inquiry_model_disclosure.dart';
 import 'ui_workspace_store.dart';
 
 /// Trusted selected-record projection. The model receives masked display facts,
@@ -116,6 +118,30 @@ class InquiryUiPlanningSource {
       initialUiState: const {},
     );
     const allowed = {'detail', 'back'};
+    // The model gets handles and an alias, never the row digest or an id
+    // derived from it; only registered, unmasked fields carry a value.
+    final binding = ModelReferenceBinding(
+      taskId: task.id,
+      scopeKey: sha256
+          .convert(utf8.encode(jsonEncode(task.scope.toJson())))
+          .toString(),
+      pin: host.modelReferencePin(),
+    );
+    final disclosure = UiModelDisclosure(
+      factIds: {
+        'saved-source',
+        for (final field in selected.record.fields)
+          if (inquiryFieldDisclosedToModel(
+            target.objectType,
+            field.name,
+            masked: field.masked,
+          ))
+            'saved-${field.name}',
+      },
+      objectHandle: (ref) =>
+          host.modelReferences.handleFor(ref, binding: binding),
+      snapshotAlias: host.modelReferences.snapshotAlias(binding, snapshot.ref),
+    );
     return UiPlanningHostState(
       snapshot: snapshot,
       intent: InteractionIntent(
@@ -133,6 +159,7 @@ class InquiryUiPlanningSource {
       ),
       catalog: library2UiCatalog,
       allowedActionRefs: allowed,
+      disclosure: disclosure,
     );
   }
 }

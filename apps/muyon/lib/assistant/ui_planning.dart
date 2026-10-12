@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:muyon_module_api/ui_contract.dart';
 
 import '../platform/foundation_repository.dart';
+import 'model_reference_map.dart';
 import 'stream_ui_planning.dart';
 import 'ui_planning_reason.dart';
 
@@ -14,12 +15,19 @@ class UiPlanningHostState {
     required this.currentView,
     required this.catalog,
     required this.allowedActionRefs,
+    this.disclosure,
   });
   final DataSnapshot snapshot;
   final InteractionIntent intent;
   final UiCurrentView currentView;
   final UiCatalog catalog;
   final Set<String> allowedActionRefs;
+
+  /// What the host registered for the model; null registers nothing.
+  final UiModelDisclosure? disclosure;
+
+  /// The id the model was given for this snapshot, when the source aliases it.
+  String get modelSnapshotId => disclosure?.snapshotAlias ?? snapshot.ref.id;
 }
 
 /// The facts owner reads actual current data; no model-authored facts enter here.
@@ -39,6 +47,31 @@ class UiPlannedPresentation {
   UiPlanningReason get reason => UiPlanningReason.forCode(result.reasonCode);
   final UiPlanningRequest? request;
   final ValidatedUiPlan? validated;
+}
+
+/// Without a host view the stored messages still never leave raw: row digests
+/// become handles of a throwaway map that nothing can resolve.
+final _unboundReferences = ModelReferenceMap.random();
+List<Object?> _unboundView(PersonalTask task) {
+  final binding = ModelReferenceBinding(
+    taskId: task.id,
+    scopeKey: 'unbound',
+    pin: 'unbound',
+  );
+  return [
+    for (final m in task.payload['messages'] as List? ?? const [])
+      if (m is Map && m['content'] is String)
+        {
+          ...Map<String, Object?>.from(m),
+          'content': projectModelMessageContent(
+            m['content'] as String,
+            _unboundReferences,
+            binding,
+          ),
+        }
+      else
+        m,
+  ];
 }
 
 class UiPlanningHarness {
@@ -339,7 +372,8 @@ class UiPlanningHarness {
     }
     if (expected != null &&
         (expected.length != 4 ||
-            expected['snapshotId'] != state.snapshot.ref.id ||
+            (expected['snapshotId'] != state.modelSnapshotId &&
+                expected['snapshotId'] != state.snapshot.ref.id) ||
             expected['expectedSnapshotRevision'] !=
                 state.snapshot.ref.revision ||
             expected['surfaceId'] != state.currentView.surfaceId ||
@@ -475,10 +509,7 @@ class UiPlanningHarness {
         : task.summary ?? '';
     if (answer.trim().isEmpty) return fallback('answer_unavailable');
     final messages = [
-      for (final m
-          in (requestView?.call(task) ??
-              task.payload['messages'] as List? ??
-              const []))
+      for (final m in (requestView?.call(task) ?? _unboundView(task)))
         Map<String, Object?>.from(m as Map),
     ];
     if (messages.isEmpty ||
@@ -532,6 +563,7 @@ class UiPlanningHarness {
       allowedActionRefs: allowed,
       mode: selectedMode,
       guideEntries: entries,
+      disclosure: state.disclosure,
     );
     final provider = providers[selectedMode];
     if (epoch != _epoch ||
@@ -684,8 +716,25 @@ class MotivationUiPlanningProvider implements UiPlanningPort {
         reasonCode: j['reasonCode'] as String,
         plan: j['plan'] == null
             ? null
-            : decodeUiPresentation(Map<String, dynamic>.from(j['plan'] as Map)),
+            : _hostSnapshot(
+                request,
+                decodeUiPresentation(
+                  Map<String, dynamic>.from(j['plan'] as Map),
+                ),
+              ),
       ),
     );
   }
+}
+
+/// The model only knows the snapshot alias. A plan citing exactly that alias
+/// and the current revision is rebound to the host snapshot; anything else
+/// stays as the model wrote it and fails validation against the host snapshot.
+UIPlan _hostSnapshot(UiPlanningRequest request, UIPlan plan) {
+  final ref = plan.snapshotRef;
+  if (ref.id == request.modelSnapshotId &&
+      ref.revision == request.snapshot.ref.revision) {
+    return plan.copyWith(snapshotRef: request.snapshot.ref);
+  }
+  return plan;
 }

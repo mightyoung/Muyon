@@ -732,3 +732,11 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 - 第二阶段工期已按评估调整为约 9–10 周；本文把最危险的询价迁移拆成“纯搬运 → 补工具 → AI 工具化”三步，每步都以 `north_star_inquiry_test` 与 `inquiry_*` 全绿为合入条件。
 - 代价：`module_api` 公共面显著变大；v1 / v2 并存期有双份路径；覆盖清单与敏感属性标记是持续的维护负担——换来的是可机检的契约，而不是靠约定。
 - 声明式插件（REG-6）与数据中心（DC-1～3）建立在本契约上，其清单与检查项已在此定形，第三阶段开始前再写一份范围 ADR（ADR-0003 的约定）。
+
+## 2026-10-12 补充：模型披露与不透明引用（C6-REDO，已实现）
+
+用户决定：本机显示与模型披露分别授权；自由文本（`notes`、`award_note`、`requirement`）默认不发给模型，仅宿主登记的字段才携带值，未知字段与未登记类型默认遮盖；模型侧不再收到整行 `contentDigest`。
+
+实现要点：规划请求的通用序列化（`UiPlanningRequest.toJson`）默认不发送任何 fact、computed、状态、视图或草稿值，`notDisclosed` 残值与 `sources.originalText` 永不发送，旧快照 ID 只发请求级别名；宿主通过 `UiModelDisclosure` 登记允许的 id（Inquiry 源的登记见 `inquiry_model_disclosure.dart`）。对话请求（预览、真实请求、令牌估算、规划历史、摘要请求）共用一个投影：对象引用保留定位字段，去掉 `contentDigest`，附宿主 `ModelReferenceMap` 发的 `modelRef`。`modelRef` 由宿主密钥对 task、scope、快照 pin 与整行摘要做 HMAC 得到，同一任务同一 pin 下稳定（确认卡与实际请求字节一致），换任务、换 scope、pin 变化（权限或生命周期变更）或任务撤销后一律拒绝，不回退为原摘要。持久对象身份、回执与 CAS 仍用完整摘要。工具结果 `data` 内非对象引用形态的键（例如科研写工具要求回传的 `expected_digest`）不在本次范围。
+
+已测路径：规划请求（真实 Inquiry 源，批/流，接受与拒绝）、系统提示中的范围、工具结果历史、确认卡与实际请求一致、`agent_resume` 续跑、手工 `startTool`（不产生模型请求）、pin 变化。**未测**：摘要（compaction）请求的真实运行（只有投影代码，没有端到端用例）；进程重启后的句柄存续（密钥持久，映射表不持久，重启后旧句柄不可解析，重新投影会得到同样的句柄）。

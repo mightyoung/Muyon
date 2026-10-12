@@ -17,6 +17,7 @@ import 'agent_budget.dart';
 import 'agent_drafts.dart';
 import 'agent_event_sink.dart';
 import 'context_compactor.dart';
+import 'model_reference_map.dart';
 import 'model_request_gate.dart';
 import 'request_view.dart';
 import 'tool_selection.dart';
@@ -43,9 +44,24 @@ class AgentContext {
     required this.compactionProfile,
     required this.clock,
     this.uiPlanning,
-  });
+    ModelReferenceMap? modelReferences,
+    this.modelReferencePin,
+  }) : modelReferences = modelReferences ?? ModelReferenceMap.random();
 
   final FoundationRepository repository;
+
+  /// Host-private; the model only ever sees the handles it mints.
+  final ModelReferenceMap modelReferences;
+
+  /// The host's current authority/snapshot pin for a task. A change retires
+  /// every handle minted under the previous one.
+  final String Function(PersonalTask)? modelReferencePin;
+  ModelReferenceBinding modelBinding(PersonalTask task) =>
+      ModelReferenceBinding(
+        taskId: task.id,
+        scopeKey: digest(task.scope.toJson()),
+        pin: modelReferencePin?.call(task) ?? 'static',
+      );
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;
   final OutboundContentReviewer? toolReviewer;
@@ -136,8 +152,8 @@ class AgentContext {
   static bool native(PersonalTask task) =>
       task.payload['uiPlanningStream'] != true &&
       ((task.payload['profile'] as Map?)?['capabilities']
-          as Map?)?['nativeTools'] ==
-      true;
+              as Map?)?['nativeTools'] ==
+          true;
 
   /// Compatibility mode previews exactly what it always did: the profile
   /// without the capability block, so the confirmed digest does not change.
@@ -170,10 +186,33 @@ class AgentContext {
   /// The messages a request is built from: the stored conversation, or the
   /// compacted view of it (ADR-0005 §6.6). Preview, digest and what is sent
   /// all come from this one function.
-  List<Object?> view(PersonalTask task) => buildRequestView(
-    task.payload['messages'] as List,
-    compactionState: task.payload['compaction'],
-    references: task.payload['references'] as List? ?? const [],
+  /// Every model-bound message goes through here (preview, request, token
+  /// estimate, planning history): row digests become task-bound handles.
+  List<Object?> projectMessages(PersonalTask task, List<Object?> messages) {
+    final binding = modelBinding(task);
+    return [
+      for (final m in messages)
+        if (m is Map && m['content'] is String)
+          <String, Object?>{
+            ...Map<String, Object?>.from(m),
+            'content': projectModelMessageContent(
+              m['content'] as String,
+              modelReferences,
+              binding,
+            ),
+          }
+        else
+          m,
+    ];
+  }
+
+  List<Object?> view(PersonalTask task) => projectMessages(
+    task,
+    buildRequestView(
+      task.payload['messages'] as List,
+      compactionState: task.payload['compaction'],
+      references: task.payload['references'] as List? ?? const [],
+    ),
   );
 
   List<ObjectRef> references(PersonalTask task) => [
