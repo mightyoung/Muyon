@@ -18,6 +18,7 @@ import 'agent_drafts.dart';
 import 'agent_event_sink.dart';
 import 'agent_compaction_flow.dart';
 import 'agent_dispatch.dart';
+import 'model_reference_map.dart';
 import 'model_request_gate.dart';
 import 'request_view.dart';
 import 'stream_ui_planning.dart';
@@ -152,7 +153,11 @@ class AgentModelTurn {
     final preview = {
       'endpoint': ctx.profile(task).endpoint.toString(),
       'profile': ctx.previewProfile(task),
-      'scope': task.scope.toJson(),
+      'scope': projectModelJson(
+        task.scope.toJson(),
+        ctx.modelReferences,
+        ctx.modelBinding(task),
+      ),
       'messages': ctx.view(task),
       'dataCategories': ['conversation', 'memories', 'tool_results'],
       // Native mode sends more than the messages; the person confirms that
