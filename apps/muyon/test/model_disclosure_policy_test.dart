@@ -58,6 +58,58 @@ UiPlanningRequest request(
 );
 
 void main() {
+  test('source reference preparation is awaited and refusal creates no model frame', () async {
+    final f = await LoopFixture.open();
+    final agent = f.agent();
+    f.replies.add(LoopReply.sse(sseText('普通已登记答复')));
+    final task = await f.run(agent, await f.start(agent, f.profile()));
+    var projected = 0;
+    var sent = 0;
+    final harness = UiPlanningHarness(
+      repository: f.repo,
+      source: (t) async => UiPlanningHostState(
+        snapshot: DataSnapshot(ref: ref, facts: {}),
+        intent: InteractionIntent(
+          id: 'intent',
+          purpose: 'display',
+          snapshotRef: ref,
+        ),
+        currentView: UiCurrentView(surfaceId: 'surface', revision: 1),
+        catalog: library2UiCatalog,
+        allowedActionRefs: {},
+      ),
+      prepareModelReferences: (t, state) async {
+        await Future<void>.value();
+        throw StateError('unknown_source_pin');
+      },
+      modelReferences: (t) {
+        projected++;
+        return ModelReferenceMap(
+          taskId: t.id,
+          scopeKey: PersonalAgent.digest(t.scope.toJson()),
+          snapshotKey: 'host-pin',
+          objects: {},
+        );
+      },
+      providers: {
+        UiPlanningMode.intelligent: FixtureUiPlanningProvider((r) async {
+          sent++;
+          return const UiPlanningResult(
+            decision: UiDisplayDecision.textOnly,
+            reasonCode: 'model_no_card',
+          );
+        }),
+      },
+    );
+    final planned = await harness.plan(task.id);
+    expect(planned.result.reasonCode, 'host_state_changed');
+    expect(planned.result.decision, UiDisplayDecision.textOnly);
+    expect(planned.request, isNull);
+    expect(planned.validated, isNull);
+    expect(projected, 0);
+    expect(sent, 0);
+  });
+
   test(
     'actual startTool origin text never becomes model planning question',
     () async {
