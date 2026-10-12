@@ -89,6 +89,11 @@ void main() {
     }
   }
 
+  void useCanarySectionId() {
+    db.raw.execute('UPDATE sections SET id=? WHERE id=?', [_canary, sectionId]);
+    sectionId = _canary;
+  }
+
   void failReads() => db.raw.createFunction(
     functionName: 'length',
     argumentCount: const AllowedArgumentCount(1),
@@ -126,6 +131,7 @@ void main() {
   testWidgets(
     'unexpected capture error uses a fixed distinct label and hides its canary',
     (tester) async {
+      useCanarySectionId();
       failReads();
       final diagnostics = <FlutterErrorDetails>[];
       final previous = FlutterError.onError;
@@ -157,6 +163,7 @@ void main() {
   testWidgets(
     'unexpected freshness error is announced as a read failure and stale',
     (tester) async {
+      useCanarySectionId();
       await tester.pumpWidget(host());
       failReads();
       final diagnostics = <FlutterErrorDetails>[];
@@ -252,10 +259,70 @@ void main() {
         expect(find.text('刷新预览').hitTestable(), findsOneWidget);
         expect(find.text('关闭').hitTestable(), findsOneWidget);
         expect(tester.takeException(), isNull);
+        final status = tester.getSemantics(
+          find.byType(SectionDeletePreviewDialog),
+        );
+        final statusId = status.id;
+        link('changed-while-scrolled');
+        await tester.pump(const Duration(seconds: 2));
+        final updated = tester.getSemantics(
+          find.byType(SectionDeletePreviewDialog),
+        );
+        expect(updated.id, statusId);
+        expect(updated.getSemanticsData().flagsCollection.isLiveRegion, isTrue);
+        expect(updated.getSemanticsData().label, contains(_stale));
         await tester.pumpWidget(const SizedBox());
       },
     );
   }
+
+  testWidgets(
+    'close remains keyboard reachable after unexpected read failure',
+    (tester) async {
+      useCanarySectionId();
+      failReads();
+      final diagnostics = <FlutterErrorDetails>[];
+      final previous = FlutterError.onError;
+      FlutterError.onError = diagnostics.add;
+      try {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: FilledButton(
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (_) => dialog(),
+                  ),
+                  child: const Text('打开预览'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('打开预览'));
+        await tester.pumpAndSettle();
+        expect(find.text(_failed), findsOneWidget);
+        expect(diagnostics, hasLength(1));
+        assertNoCanary(tester);
+        for (
+          var i = 0;
+          i < 10 && !Focus.of(tester.element(find.text('关闭'))).hasFocus;
+          i++
+        ) {
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.pump();
+        }
+        expect(Focus.of(tester.element(find.text('关闭'))).hasFocus, isTrue);
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pumpAndSettle();
+        expect(find.byType(SectionDeletePreviewDialog), findsNothing);
+        await tester.pumpWidget(const SizedBox());
+      } finally {
+        FlutterError.onError = previous;
+      }
+    },
+  );
 
   testWidgets(
     'keyboard reaches refresh and close and no business confirmation action',
