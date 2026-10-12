@@ -417,6 +417,16 @@ List<String> _componentEditErrors(UiNode node, DataSnapshot snapshot) {
   return errors;
 }
 
+/// States that assert a computed value exists. A null value under one of them
+/// contradicts its evidence. notDisclosed, notApplicable and readFailed may
+/// legitimately carry no value.
+bool _claimsValue(FactState state) => switch (state) {
+  FactState.verified || FactState.unverified || FactState.conflict => true,
+  FactState.notDisclosed ||
+  FactState.notApplicable ||
+  FactState.readFailed => false,
+};
+
 bool _sourceInvalid(SourceSpanRef? source, DataSnapshot snapshot) =>
     source == null ||
     source.artifact.moduleId.isEmpty ||
@@ -504,6 +514,9 @@ List<String> _bindingErrors(
         if (evidence == null) {
           errors.add('computed_evidence_missing:${ref.id}');
         } else {
+          if (value?.value == null && _claimsValue(evidence.state)) {
+            errors.add('computed_value_missing:${ref.id}');
+          }
           for (final source in evidence.sourceRefs) {
             if (_sourceInvalid(snapshot.sources[source], snapshot)) {
               errors.add('unknown_or_stale_source:$source');

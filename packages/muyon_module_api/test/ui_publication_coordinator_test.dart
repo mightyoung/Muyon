@@ -491,9 +491,20 @@ void main() {
         expect(c.recomputing, isFalse);
         expect(c.outdated, isTrue);
         expect(c.publicationErrors, ['recompute_failed']);
+        // Plan A (CF-FIX-A T4): after a failed recompute only a local editField
+        // may start the next recompute. The previous assertion refused edit,
+        // which contradicted plan A; business actions stay refused.
         expect(
           c.allowsDispatch(
             f.catalog.actions['edit']!,
+            readOnly: false,
+            pending: false,
+          ),
+          isTrue,
+        );
+        expect(
+          c.allowsDispatch(
+            f.catalog.actions['commit']!,
             readOnly: false,
             pending: false,
           ),
