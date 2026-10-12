@@ -91,6 +91,7 @@ class ModelToolHistory {
 ModelToolHistory modelToolHistory(
   List<Object?> messages, {
   Map<String, Object?>? Function(ToolCallResult, Object?)? projectedReceipt,
+  bool Function(int, Map)? explicitUserMessage,
 }) {
   var legacy = false;
   final projected = <Object?>[];
@@ -105,6 +106,7 @@ ModelToolHistory modelToolHistory(
     final hostResult =
         message['role'] == 'tool' ||
         (message['role'] == 'user' &&
+            explicitUserMessage?.call(index, message) != true &&
             _followsCompatibilityCall(messages, index));
     if (hostResult) {
       var recognized = false;
@@ -180,6 +182,14 @@ ModelToolHistory modelToolHistory(
 ModelToolHistory modelTaskToolHistory(PersonalTask task, ToolRegistry tools) =>
     modelToolHistory(
       task.payload['messages'] as List? ?? const [],
+      explicitUserMessage: (index, message) =>
+          message['role'] == 'user' &&
+          ((task.payload['uiPlanningInternal'] != true &&
+                  message['content'] == task.prompt) ||
+              (task.payload['modelUserMessageIndices'] is List &&
+                  (task.payload['modelUserMessageIndices'] as List).contains(
+                    index,
+                  ))),
       projectedReceipt: (serialized, callId) {
         final id = serialized.executionId;
         final sources = task.payload['modelResultProducers'];
@@ -219,10 +229,20 @@ List<AssistantMessage> modelConversationHistory(
               .hadLegacyResult)
         if (prior.summary != null) prior.summary!,
   };
+  final withheldCommands = <String>{
+    for (final prior in repository.tasks(conversationId: conversationId)) ...[
+      if (prior.payload['modelHostToolRequestText'] is String)
+        prior.payload['modelHostToolRequestText'] as String,
+      if (prior.profileId == null && prior.payload['toolCall'] is Map)
+        '运行工具 ${(prior.payload['toolCall'] as Map)['toolId']}：${jsonEncode((prior.payload['toolCall'] as Map)['parameters'] ?? const {})}',
+    ],
+  };
   return [
     for (final message in repository.messages(conversationId))
-      if (message.role == 'assistant' &&
-          withheldAnswers.contains(message.content))
+      if ((message.role == 'assistant' &&
+              withheldAnswers.contains(message.content)) ||
+          (message.role == 'user' &&
+              withheldCommands.contains(message.content)))
         AssistantMessage(
           message.id,
           message.conversationId,

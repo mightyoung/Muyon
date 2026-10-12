@@ -100,6 +100,15 @@ class AgentTaskFactory {
       conversationId,
       tools: ctx.tools,
     ).where((m) => m.role == 'user' || m.role == 'assistant').toList();
+    final humanInputs = <String>{
+      for (final prior in ctx.repository.tasks(conversationId: conversationId))
+        if (prior.payload['strategyId'] is String &&
+            prior.payload['uiPlanningInternal'] != true)
+          prior.prompt,
+    };
+    final retainedHistory = history
+        .skip(history.length > 16 ? history.length - 16 : 0)
+        .toList();
     final memories = ctx.memories(conversation.scope);
     final now = ctx.clock().toUtc().toIso8601String();
     final task = PersonalTask({
@@ -128,6 +137,13 @@ class AgentTaskFactory {
       'memoryDigest': AgentContext.digest(memories),
       'round': 0,
       'references': <Object?>[],
+      'modelUserMessageIndices': [
+        for (var i = 0; i < retainedHistory.length; i++)
+          if (retainedHistory[i].role == 'user' &&
+              humanInputs.contains(retainedHistory[i].content))
+            i + 1,
+        if (!uiPlanningInternal) retainedHistory.length + 1,
+      ],
       'messages': [
         {
           'role': 'system',
@@ -149,9 +165,7 @@ class AgentTaskFactory {
                   'memories': memories,
                 }),
         },
-        ...history
-            .skip(history.length > 16 ? history.length - 16 : 0)
-            .map((m) => {'role': m.role, 'content': m.content}),
+        ...retainedHistory.map((m) => {'role': m.role, 'content': m.content}),
         {'role': 'user', 'content': prompt.trim()},
       ],
     });
