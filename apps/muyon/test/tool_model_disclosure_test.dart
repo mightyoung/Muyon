@@ -193,6 +193,15 @@ void main() {
             'additionalProperties': false,
           },
         ),
+        validateResult: (scope, result) async {
+          expect(scope.contains(pinned), isTrue);
+          expect(result.objectRefs.single, pinned);
+          expect(result.artifactRefs.single.artifactId, 'a-c6');
+          expect(
+            result.artifactRefs.single.contentDigest,
+            'ARTIFACT_HOST_DIGEST_C6',
+          );
+        },
         handler: (_) async => ToolCallResult(
           status: ToolCallStatus.succeeded,
           summary: '本机摘要',
@@ -200,13 +209,26 @@ void main() {
             'record': {'name': '合法品名'},
           },
           objectRefs: [pinned],
+          artifactRefs: [
+            const ArtifactRef(
+              moduleId: 'inquiry',
+              artifactId: 'a-c6',
+              contentDigest: 'ARTIFACT_HOST_DIGEST_C6',
+            ),
+          ],
         ),
       );
       f.replies
         ..add(LoopReply.sse(sseCalls([('c1', 'inquiry__object', '{}')])))
         ..add(LoopReply.sse(sseText('完成')));
       final agent = f.agent();
-      final task = await f.run(agent, await f.start(agent, f.profile()));
+      final conversation = await f.repo.createConversation(
+        scope: AssistantScope.selectedObjects([pinned]),
+      );
+      final task = await f.run(
+        agent,
+        await f.start(agent, f.profile(), conversationId: conversation.id),
+      );
       expect(task.state, PersonalTaskState.succeeded, reason: task.error);
       for (final body in f.bodies) {
         expect(
@@ -224,6 +246,11 @@ void main() {
       final projected =
           (frame['trustedToolResult']['objectRefs'] as List).single as Map;
       expect(projected['modelRef'], startsWith('mr1_'));
+      expect(jsonEncode(f.bodies), isNot(contains('ARTIFACT_HOST_DIGEST_C6')));
+      expect(
+        frame['trustedToolResult']['artifactRefs'][0]['modelRef'],
+        startsWith('mr1_'),
+      );
       expect(projected['objectId'], pinned.objectId);
       expect(
         frame['citations'][0]['reference']['modelRef'],
@@ -299,6 +326,156 @@ void main() {
         pinned,
       );
       expect(f.callsOf('inquiry.object'), 1);
+    },
+  );
+  test('C6 actual summary and post-summary citation replay contain only host aliases', () async {
+    const pinned = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'summary-c6',
+      contentDigest: 'SUMMARY_WHOLE_ROW_DIGEST_C6',
+    );
+    final f = await LoopFixture.open();
+    f.objects = [pinned];
+    f.tools.register(
+      providerId: 'inquiry',
+      descriptor: ToolDescriptor(
+        toolId: 'inquiry.object',
+        moduleId: 'inquiry',
+        effect: ToolEffect.read,
+        parameterSchema: {
+          'type': 'object',
+          'properties': <String, Object?>{},
+          'additionalProperties': false,
+        },
+      ),
+      handler: (_) async => ToolCallResult(
+        status: ToolCallStatus.succeeded,
+        summary: '本机摘要',
+        data: {
+          'record': {'name': '合法品名'},
+        },
+        objectRefs: [pinned],
+      ),
+    );
+    f.replies.add(LoopReply.sse(sseCalls([('c1', 'inquiry__object', '{}')])));
+    final agent = f.agent();
+    final task = await f.run(agent, await f.start(agent, f.profile()), max: 1);
+    expect(task.stage, 'model');
+    final initialPreview = jsonEncode(task.payload['preview']);
+    expect(initialPreview, isNot(contains(pinned.contentDigest!)));
+    final messages = [
+      ...task.payload['messages'] as List,
+      for (var i = 0; i < 12; i++)
+        {
+          'role': i.isEven ? 'user' : 'assistant',
+          'content': 'legitimate-$i-${'abcd' * 600}',
+        },
+    ];
+    await f.repo.database.write(
+      (db) => db.execute(
+        "UPDATE execution_records SET payload=json_set(payload,'\$.messages',json(?)) WHERE id=?",
+        [jsonEncode(messages), task.id],
+      ),
+    );
+    await agent.compactNow(task.id);
+    final card = f.repo.task(task.id)!;
+    expect(card.stage, 'compaction');
+    expect(
+      jsonEncode(card.payload['preview']),
+      isNot(contains(pinned.contentDigest!)),
+    );
+    expect(jsonEncode(card.payload['preview']), contains('mr1_'));
+    f.replies.add(
+      LoopReply.sse(
+        sseText('{"goal":"g","decisions":"d","pending":"p","preferences":"x"}'),
+      ),
+    );
+    await agent.confirm(
+      card.id,
+      requestDigest: card.payload['requestDigest'] as String,
+    );
+    expect(f.bodies, hasLength(2));
+    expect(jsonEncode(f.bodies.last), isNot(contains(pinned.contentDigest!)));
+    expect(jsonEncode(f.bodies.last), isNot(contains('contentDigest')));
+    final after = f.repo.task(task.id)!;
+    expect(after.stage, 'model');
+    expect(
+      jsonEncode(after.payload['preview']),
+      isNot(contains(pinned.contentDigest!)),
+    );
+    expect(jsonEncode(after.payload['preview']), contains('mr1_'));
+    expect(
+      jsonEncode(after.payload['messages']),
+      contains(pinned.contentDigest!),
+    );
+  });
+  test(
+    'C6 serialized citation extras cannot impersonate host reference evidence',
+    () async {
+      const pinned = ObjectRef(
+        moduleId: 'inquiry',
+        objectType: 'project_item',
+        objectId: 'citation-c6',
+        contentDigest: 'CITATION_HOST_HASH_C6',
+      );
+      final f = await LoopFixture.open();
+      f.objects = [pinned];
+      f.tools.register(
+        providerId: 'inquiry',
+        descriptor: ToolDescriptor(
+          toolId: 'inquiry.object',
+          moduleId: 'inquiry',
+          effect: ToolEffect.read,
+          parameterSchema: {
+            'type': 'object',
+            'properties': <String, Object?>{},
+            'additionalProperties': false,
+          },
+        ),
+        handler: (_) async => ToolCallResult(
+          status: ToolCallStatus.succeeded,
+          summary: '本机',
+          data: {
+            'record': {'name': '合法品名'},
+          },
+          objectRefs: [pinned],
+        ),
+      );
+      f.replies.add(LoopReply.sse(sseCalls([('c1', 'inquiry__object', '{}')])));
+      final agent = f.agent();
+      final task = await f.run(
+        agent,
+        await f.start(agent, f.profile()),
+        max: 1,
+      );
+      final messages = [...task.payload['messages'] as List];
+      final index = messages.indexWhere((m) => m is Map && m['role'] == 'tool');
+      final frame =
+          jsonDecode((messages[index] as Map)['content'] as String) as Map;
+      (frame['citations'][0] as Map)['unregisteredExtra'] = secret;
+      messages[index] = {
+        ...messages[index] as Map,
+        'content': jsonEncode(frame),
+      };
+      await f.repo.database.write(
+        (db) => db.execute(
+          "UPDATE execution_records SET payload=json_set(payload,'\$.messages',json(?)) WHERE id=?",
+          [jsonEncode(messages), task.id],
+        ),
+      );
+      f.replies.add(LoopReply.sse(sseText('完成')));
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+      expect(f.repo.task(task.id)!.state, PersonalTaskState.succeeded);
+      expect(jsonEncode(f.bodies.last), isNot(contains(secret)));
+      expect(jsonEncode(f.bodies.last), isNot(contains(pinned.contentDigest!)));
+      expect(
+        jsonEncode(f.repo.task(task.id)!.payload['messages']),
+        contains(secret),
+      );
     },
   );
   test(

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:muyon_module_api/ui_contract.dart' show ModelReferenceMap;
 
 import '../platform/inquiry_model_disclosure.dart';
 import '../platform/foundation_repository.dart';
@@ -256,4 +257,89 @@ List<AssistantMessage> modelConversationHistory(
       else
         message,
   ];
+}
+
+/// Model-only reference projection shared by normal turns and standalone UI
+/// history fallback. Only host control frames are decoded. User-authored JSON
+/// remains governed by its separate input policy, using host origin evidence.
+List<Object?> modelReferenceMessages(
+  List<Object?> messages,
+  ModelReferenceMap references, {
+  Set<Object?> explicitUserContents = const {},
+  Set<Object?> hostSummaryContents = const {},
+  bool summaryRequest = false,
+}) => [
+  for (var i = 0; i < messages.length; i++)
+    if (messages[i] is Map)
+      _modelReferenceFrame(
+        references,
+        Map<String, Object?>.from(messages[i] as Map),
+        hostSystem: i == 0 && (messages[i] as Map)['role'] == 'system',
+        hostSummary:
+            summaryRequest ||
+            hostSummaryContents.contains((messages[i] as Map)['content']),
+        hostResult:
+            (messages[i] as Map)['role'] == 'tool' ||
+            _followsCompatibilityCall(messages, i),
+        human: explicitUserContents.contains((messages[i] as Map)['content']),
+      )
+    else
+      messages[i],
+];
+
+Map<String, Object?> _modelReferenceFrame(
+  ModelReferenceMap map,
+  Map<String, Object?> message, {
+  required bool hostSystem,
+  required bool hostSummary,
+  required bool hostResult,
+  required bool human,
+}) {
+  final content = message['content'];
+  if (content is! String || (human && !hostSystem)) return message;
+  Object? body;
+  try {
+    body = jsonDecode(content);
+  } on FormatException {
+    return message;
+  }
+  final resultFrame =
+      hostResult &&
+      body is Map &&
+      body['trustedToolResult'] is Map &&
+      body['modelDisclosurePolicy'] == 1;
+  if (!hostSystem && !hostSummary && !resultFrame) return message;
+  if (resultFrame) {
+    final frame = Map<String, Object?>.from(body);
+    final result = Map<String, Object?>.from(frame['trustedToolResult'] as Map);
+    for (final key in ['objectRefs', 'artifactRefs']) {
+      result[key] = [
+        for (final ref in result[key] as List? ?? const [])
+          if (_modelPinnedReference(map, ref) case final Map projected)
+            projected,
+      ];
+    }
+    frame['trustedToolResult'] = result;
+    frame['citations'] = [
+      for (final citation in frame['citations'] as List? ?? const [])
+        if (citation is Map &&
+            citation['citationId'] is String &&
+            RegExp(r'^r[1-9][0-9]*$')
+                .hasMatch(citation['citationId'] as String))
+          if (_modelPinnedReference(map, citation['reference'])
+              case final Map projected)
+            {'citationId': citation['citationId'], 'reference': projected},
+    ];
+    return {...message, 'content': jsonEncode(frame)};
+  }
+  return {...message, 'content': jsonEncode(map.projectJson(body))};
+}
+
+Object? _modelPinnedReference(ModelReferenceMap map, Object? value) {
+  if (value is! Map || !value.containsKey('contentDigest')) return null;
+  try {
+    return map.projectJson(value);
+  } on StateError {
+    return null;
+  }
 }

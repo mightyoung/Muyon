@@ -378,78 +378,13 @@ class AgentContext {
     final summary = compaction is Map && compaction['summary'] is Map
         ? (compaction['summary'] as Map)['content']
         : null;
-    return [
-      for (var i = 0; i < messages.length; i++)
-        if (messages[i] is Map)
-          _projectModelFrame(
-            map,
-            Map<String, Object?>.from(messages[i] as Map),
-            hostSystem: i == 0 && (messages[i] as Map)['role'] == 'system',
-            hostSummary:
-                summaryRequest ||
-                (summary != null && (messages[i] as Map)['content'] == summary),
-            human: human.contains((messages[i] as Map)['content']),
-          )
-        else
-          messages[i],
-    ];
-  }
-
-  Map<String, Object?> _projectModelFrame(
-    ModelReferenceMap map,
-    Map<String, Object?> message, {
-    required bool hostSystem,
-    required bool hostSummary,
-    required bool human,
-  }) {
-    final content = message['content'];
-    if (content is! String || (human && !hostSystem)) return message;
-    Object? body;
-    try {
-      body = jsonDecode(content);
-    } on FormatException {
-      return message;
-    }
-    final hostResult =
-        body is Map &&
-        body['trustedToolResult'] is Map &&
-        body['modelDisclosurePolicy'] == 1;
-    if (!hostSystem && !hostSummary && !hostResult) return message;
-    if (hostResult) {
-      final frame = Map<String, Object?>.from(body);
-      final result = Map<String, Object?>.from(
-        frame['trustedToolResult'] as Map,
-      );
-      for (final key in ['objectRefs', 'artifactRefs']) {
-        result[key] = [
-          for (final ref in result[key] as List? ?? const [])
-            if (_projectPinnedReference(map, ref) case final Map projected)
-              projected,
-        ];
-      }
-      frame['trustedToolResult'] = result;
-      frame['citations'] = [
-        for (final citation in frame['citations'] as List? ?? const [])
-          if (citation is Map &&
-              citation['citationId'] is String &&
-              RegExp(r'^r[1-9][0-9]*$')
-                  .hasMatch(citation['citationId'] as String))
-            if (_projectPinnedReference(map, citation['reference'])
-                case final Map projected)
-              {'citationId': citation['citationId'], 'reference': projected},
-      ];
-      return {...message, 'content': jsonEncode(frame)};
-    }
-    return {...message, 'content': jsonEncode(map.projectJson(body))};
-  }
-
-  Object? _projectPinnedReference(ModelReferenceMap map, Object? value) {
-    if (value is! Map || !value.containsKey('contentDigest')) return null;
-    try {
-      return map.projectJson(value);
-    } on StateError {
-      return null;
-    }
+    return modelReferenceMessages(
+      messages,
+      map,
+      explicitUserContents: human,
+      hostSummaryContents: {?summary},
+      summaryRequest: summaryRequest,
+    );
   }
 
   List<ObjectRef> references(PersonalTask task) => [
