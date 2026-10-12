@@ -530,4 +530,57 @@ void main() {
     await refuses(['n-d', 'n-pdf'], selected: scope(['n-d']));
     expect(reads, 0);
   });
+  test(
+    'prepared note source pins match the resolved current note reference',
+    () async {
+      final selected = scope(['n-d']);
+      final prepared = await prepare(['n-d'], selected: selected);
+      expect(
+        prepared.sources
+            .singleWhere((r) => r.objectType == 'note')
+            .contentDigest,
+        selected.objects
+            .singleWhere((r) => r.objectType == 'note')
+            .contentDigest,
+      );
+    },
+  );
+
+  for (final type in ['project', 'note']) {
+    test(
+      'resolved $type revision pin must match the current DB reference',
+      () async {
+        final original = scope(['n-d']);
+        final objects = [
+          for (final ref in original.objects)
+            ObjectRef(
+              moduleId: ref.moduleId,
+              objectType: ref.objectType,
+              objectId: ref.objectId,
+              nativeProjectId: ref.nativeProjectId,
+              contentDigest: ref.contentDigest,
+              revisionRef: ref.objectType == type
+                  ? 'stale-revision'
+                  : ref.revisionRef,
+            ),
+        ];
+        await refuses(
+          ['n-d'],
+          selected: ResolvedAssistantScope(
+            requested: const AssistantScope.global(),
+            objects: objects,
+          ),
+        );
+        expect(reads, 0);
+      },
+    );
+  }
+
+  test('Windows absolute document path is excluded before trusted reader invocation', () async {
+    store.db.execute(
+      "UPDATE documents SET relative_path='C:/outside.md' WHERE id='d'",
+    );
+    await refuses(['n-d']);
+    expect(reads, 0);
+  });
 }
