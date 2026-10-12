@@ -1081,7 +1081,13 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
             child: const Text('取消重算'),
           ),
         if (controller.portError != null)
-          const Text('操作未完成，请检查当前状态后重试。'),
+          Text(switch (controller.portError) {
+            'Event port unavailable. Original answer retained.' =>
+              'Event port unavailable. Original answer retained.',
+            'Local object navigation failed.' =>
+              'Local object navigation failed.',
+            _ => '操作未完成，请检查当前状态后重试。',
+          }),
         if (detail == null)
           render(nodes[plan.root]!, nodes, capture)
         else
