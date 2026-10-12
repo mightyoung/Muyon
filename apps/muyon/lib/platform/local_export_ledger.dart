@@ -17,10 +17,19 @@ enum LocalExportLedgerState {
 }
 
 final class LocalExportLedgerException implements Exception {
-  const LocalExportLedgerException(this.code);
+  const LocalExportLedgerException(this.code, [this.cause]);
   final String code;
+  final Object? cause;
   @override
   String toString() => 'LocalExportLedgerException($code)';
+}
+
+/// True when [error] is a SQLite busy/locked failure, judged by the primary
+/// result code derived from the extended result code — never by message text.
+bool _isSqliteLockContention(Object error) {
+  if (error is! SqliteException) return false;
+  final primary = error.extendedResultCode & 0xFF;
+  return primary == SqlError.SQLITE_BUSY || primary == SqlError.SQLITE_LOCKED;
 }
 
 /// Host-only input, with no model decoder. Building an intent grants no
@@ -228,6 +237,10 @@ final class LocalExportLedger {
     : clock = clock ?? DateTime.now;
   final ManagedDatabase database;
   final DateTime Function() clock;
+
+  /// Test seam for LE06-NARROW: lock classification uses extended result codes.
+  static bool isSqliteLockContention(Object error) =>
+      _isSqliteLockContention(error);
   final _running =
       <(String, LocalExportPhase), Future<LocalExportLedgerStageRecord>>{};
   final _active = <(String, LocalExportPhase)>{};
@@ -270,6 +283,10 @@ CREATE TABLE IF NOT EXISTS local_export_attempts(
         [invocation, phase.name],
       );
       return rows.isEmpty ? null : Map<String, Object?>.from(rows.single);
+    } on LocalExportLedgerException {
+      rethrow;
+    } on SqliteException catch (error) {
+      throw LocalExportLedgerException('ledger_read_failed', error);
     } catch (_) {
       throw const LocalExportLedgerException('ledger_read_failed');
     }
@@ -340,8 +357,14 @@ CREATE TABLE IF NOT EXISTS local_export_attempts(
     LocalExportLedgerRequest request,
     Map<String, Object?> row,
   ) async {
-    _match(request, row);
-    return await (_running[request._key] ?? Future.value(_record(row)));
+    try {
+      _match(request, row);
+      return await (_running[request._key] ?? Future.value(_record(row)));
+    } on LocalExportLedgerException {
+      rethrow;
+    } catch (_) {
+      throw const LocalExportLedgerException('ledger_read_failed');
+    }
   }
 
   static void _requireGenerated(Database db, String exportId) {
@@ -366,13 +389,23 @@ CREATE TABLE IF NOT EXISTS local_export_attempts(
   }) async {
     // Replays, including unknown outcomes, only read. Expired capabilities
     // cannot turn a historical receipt into a fresh execution.
-    // Reservation preflight and BEGIN IMMEDIATE share one failure class: a peer
-    // holding the write lock makes SELECT SQLITE_BUSY, which _find wraps as
-    // ledger_read_failed — that is pending contention, not a broken ledger.
+    // Prefetch SELECT may hit SQLITE_BUSY/LOCKED while a peer holds the write
+    // lock. Only those extended result codes map to ledger_pending_failed;
+    // corrupt rows and other read failures stay ledger_read_failed.
+    final Map<String, Object?>? existing;
+    try {
+      existing = _find(request.invocationId, request.phase);
+    } on LocalExportLedgerException catch (error) {
+      if (error.code == 'ledger_read_failed' &&
+          error.cause != null &&
+          _isSqliteLockContention(error.cause!)) {
+        throw const LocalExportLedgerException('ledger_pending_failed');
+      }
+      rethrow;
+    }
+    if (existing != null) return await _existing(request, existing);
     final bool inserted;
     try {
-      final existing = _find(request.invocationId, request.phase);
-      if (existing != null) return await _existing(request, existing);
       inserted = await database.write((db) {
         createTables(db);
         final duplicate = _find(request.invocationId, request.phase);
@@ -423,19 +456,16 @@ VALUES(?,?,?,?,?,?,'pending','notNeeded',?,?)''',
         );
         return true;
       });
-      if (!inserted) {
-        return await _existing(
-          request,
-          _find(request.invocationId, request.phase)!,
-        );
-      }
-    } on LocalExportLedgerException catch (error) {
-      if (error.code == 'ledger_read_failed') {
-        throw const LocalExportLedgerException('ledger_pending_failed');
-      }
+    } on LocalExportLedgerException {
       rethrow;
     } catch (_) {
       throw const LocalExportLedgerException('ledger_pending_failed');
+    }
+    if (!inserted) {
+      return await _existing(
+        request,
+        _find(request.invocationId, request.phase)!,
+      );
     }
     _active.add(request._key);
     final future = _executeOwned(request, operation);
