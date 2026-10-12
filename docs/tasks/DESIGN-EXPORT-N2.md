@@ -1,6 +1,6 @@
 # DESIGN-EXPORT-N2：导出生产接线与 N2 删除确认执行设计
 
-执行：Sonnet（Claude 路线 2）。派发：leader A，2026-10-12。设计任务，产出任务说明，不写实现。基线：develop `ab5506c3`；分支 `task/export-n2-wiring-design-20261012`。
+执行：ChatGPT（只读设计；原派 Sonnet，Sonnet 改做 C6-REDO）。派发：leader A，2026-10-12。设计任务，不写实现；任务说明草稿以文字回报，由 leader A 入库。基线：develop `ab5506c3`；分支 `task/export-n2-wiring-design-20261012`。
 
 ## 背景
 - 导出：CR-17 设计（`docs/design/research-local-export-facade-2026-10-11.md`，若不在 develop 则在 `task/cr-15-17-chatgpt`）拆为 LE-01～14。develop 已含 LE03 准备器、LE06 账本与只读恢复的有界实现，但**缺生产调用方**，旧手工 export 路径仍在。需走通：受控 reader → 准备 → 宿主审批 → 生成 → 另存为 → 账本 → 回执，含恢复与取消。
