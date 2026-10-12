@@ -380,4 +380,70 @@ void main() {
       contains(secret),
     );
   });
+  test(
+    'persisted result cannot replace the host receipt fields or producer',
+    () async {
+      final f = await LoopFixture.open();
+      f.objects = [ref];
+      f.tools.register(
+        providerId: 'inquiry',
+        descriptor: ToolDescriptor(
+          toolId: 'inquiry.object',
+          moduleId: 'inquiry',
+          effect: ToolEffect.read,
+          parameterSchema: {
+            'type': 'object',
+            'properties': <String, Object?>{},
+            'additionalProperties': false,
+          },
+        ),
+        handler: (_) async => result(),
+      );
+      f.replies.add(LoopReply.sse(sseCalls([('c1', 'inquiry__object', '{}')])));
+      final agent = f.agent();
+      var task = await f.start(agent, f.profile());
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+      task = f.repo.task(task.id)!;
+      expect(task.stage, 'model');
+      await agent.pause(task.id);
+      final messages = [...task.payload['messages'] as List];
+      final index = messages.indexWhere((m) => m is Map && m['role'] == 'tool');
+      final body = Map<String, Object?>.from(
+        jsonDecode((messages[index] as Map)['content'] as String) as Map,
+      );
+      ((body['trustedToolResult'] as Map)['data'] as Map)['record'] = {
+        'name': secret,
+        'qty': 999,
+      };
+      body['producerId'] = 'inquiry';
+      messages[index] = {
+        ...messages[index] as Map,
+        'content': jsonEncode(body),
+      };
+      await f.repo.database.write(
+        (db) => db.execute(
+          "UPDATE execution_records SET payload=json_set(payload,'\$.messages',json(?)) WHERE id=?",
+          [jsonEncode(messages), task.id],
+        ),
+      );
+      f.replies.add(LoopReply.sse(sseText('恢复完成')));
+      final resumed = await agent.resume(task.id);
+      final done = await f.run(agent, resumed);
+      expect(done.state, PersonalTaskState.succeeded);
+      expect(
+        f.tools.history(toolId: 'inquiry.object'),
+        hasLength(1),
+        reason: 'restoring a receipt must not execute again',
+      );
+      expect(jsonEncode(f.bodies.last['messages']), isNot(contains(secret)));
+      expect(jsonEncode(f.bodies.last['messages']), contains('合法品名'));
+      expect(
+        jsonEncode(f.repo.task(task.id)!.payload['messages']),
+        contains(secret),
+      );
+    },
+  );
 }

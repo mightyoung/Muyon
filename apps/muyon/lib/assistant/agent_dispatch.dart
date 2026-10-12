@@ -883,6 +883,7 @@ class AgentDispatch {
             'toolId': receipt.toolId,
             'identityDigest': receipt.identityDigest,
             'providerId': producer.providerId,
+            'callId': c['callId'],
           };
         }
         content = jsonEncode({
