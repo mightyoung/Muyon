@@ -741,7 +741,7 @@ void main() {
       );
       expect(p.result.errors, ['recompute_unavailable_evidence:sum']);
       expect(p.batch, isNull);
-    }, skip: 'GAP-1: adapter accepts; see ui_recompute_adapter.dart:184-194');
+    });
   });
 
   group('5 stale/hidden results are not reused; authority stripped', () {
