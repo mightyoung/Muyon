@@ -28,7 +28,7 @@ DataSnapshot _snapshot({required String value, SnapshotRef ref = _ref}) =>
       computations: {
         'total': ComputedValue(
           value: value,
-          inputVersion: _ref,
+          inputVersion: ref,
           computationId: 'review-total',
         ),
       },
