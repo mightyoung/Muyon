@@ -1,10 +1,13 @@
 import copy
+from contextlib import redirect_stdout
 import hashlib
 import importlib.util
 import json
+import io
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 SPEC = importlib.util.spec_from_file_location(
@@ -56,6 +59,7 @@ class EvidenceTests(unittest.TestCase):
         self.assertIn('交互：passed', summary)
 
     def test_exit_zero_and_plain_log_do_not_prove_interaction(self):
+        self.stage('linux_launch')
         log = self.stage('linux_interaction')
         log.write_text('exit 0\nAll tests passed!\n', encoding='utf-8')
         self.assertEqual(self.collect()[0]['stages']['linux_interaction']['status'], 'unknown')
@@ -123,6 +127,14 @@ class EvidenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.collect()
 
+    def test_incomplete_system_and_empty_executable_are_unknown(self):
+        self.stage('unit_widget')
+        for command in ([''], ['   '], []):
+            self.request['stages']['unit_widget']['command'] = command
+            self.assertEqual(self.collect()[0]['stages']['unit_widget']['status'], 'unknown')
+        self.request['stages']['unit_widget']['command'] = ['flutter', 'test']
+        self.request['system'].pop('release')
+        self.assertEqual(self.collect()[0]['stages']['unit_widget']['status'], 'unknown')
     def test_versions_and_non_linux_are_conservative(self):
         self.stage('unit_widget')
         self.request['system']['os'] = 'Darwin CANARY_SECRET'
@@ -142,6 +154,63 @@ class EvidenceTests(unittest.TestCase):
         self.request['stages']['unit_widget']['exit_code'] = False
         self.assertEqual(self.collect()[0]['stages']['unit_widget']['status'], 'unknown')
 
+    def test_cli_writes_only_safe_manifest_and_summary(self):
+        self.stage('unit_widget')
+        source = self.root / 'input.json'
+        source.write_text(json.dumps(self.request))
+        output = self.root / 'package'
+        with redirect_stdout(io.StringIO()) as stdout:
+            self.assertEqual(evidence.main(['--input', str(source), '--output', str(output)]), 0)
+        self.assertEqual({file.name for file in output.iterdir()}, {'manifest.json', 'summary.txt'})
+        self.assertEqual(json.loads((output / 'manifest.json').read_text())['candidate_sha'], self.sha)
+        self.assertNotIn('CANARY', stdout.getvalue() + (output / 'manifest.json').read_text())
+        self.assertEqual((output / 'summary.txt').read_text(), stdout.getvalue())
+        before = (output / 'manifest.json').read_bytes()
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(evidence.main(['--input', str(source), '--output', str(output)]), 2)
+        self.assertEqual(before, (output / 'manifest.json').read_bytes())
 
+    def test_cli_invalid_request_is_safe_and_creates_no_package(self):
+        source = self.root / 'input.json'
+        source.write_text('CANARY_SECRET https://CANARY_ENDPOINT')
+        output = self.root / 'package'
+        with redirect_stdout(io.StringIO()) as stdout:
+            self.assertEqual(evidence.main(['--input', str(source), '--output', str(output)]), 2)
+        self.assertFalse(output.exists())
+        self.assertNotIn('CANARY', stdout.getvalue())
+
+    def test_credential_and_symlink_inputs_are_never_opened(self):
+        log = self.stage('unit_widget')
+        link = self.root / 'link.log'
+        link.symlink_to(log)
+        self.request['stages']['unit_widget']['log'] = str(link)
+        with patch.object(Path, 'open', side_effect=AssertionError('must not read')):
+            self.assertEqual(self.collect()[0]['stages']['unit_widget']['error_code'], 'input_forbidden')
+        self.request['stages']['unit_widget']['log'] = str(self.root / '.env')
+        with patch.object(Path, 'open', side_effect=AssertionError('must not read')):
+            self.assertEqual(self.collect()[0]['stages']['unit_widget']['error_code'], 'input_forbidden')
+
+    def test_oversize_and_malformed_markers_are_unknown(self):
+        log = self.stage('unit_widget')
+        with patch.object(evidence, 'MAX_BYTES', 1):
+            self.assertEqual(self.collect()[0]['stages']['unit_widget']['error_code'], 'input_too_large')
+        log.write_text('{bad json}\n[]\n' + json.dumps(dict(evidence_version=True,
+            candidate_sha=self.sha, stage='unit_widget', case_id='smoke', outcome='passed')))
+        self.assertEqual(self.collect()[0]['stages']['unit_widget']['status'], 'unknown')
+
+    def test_symlink_loop_and_null_path_have_safe_error_codes(self):
+        self.stage('unit_widget')
+        loop = self.root / 'CANARY_LOOP'
+        loop.symlink_to(loop)
+        for path in (str(loop / 'log.txt'), 'CANARY\x00_SECRET'):
+            self.request['stages']['unit_widget']['log'] = path
+            manifest, summary = self.collect()
+            self.assertEqual(manifest['stages']['unit_widget']['status'], 'unknown')
+            self.assertEqual(manifest['stages']['unit_widget']['error_code'], 'input_forbidden')
+            self.assertNotIn('CANARY', json.dumps(manifest) + summary)
+        with redirect_stdout(io.StringIO()) as stdout:
+            self.assertEqual(evidence.main(['--input', str(loop / 'input.json'),
+                '--output', str(self.root / 'output')]), 2)
+        self.assertNotIn('CANARY', stdout.getvalue())
 if __name__ == '__main__':
     unittest.main()
