@@ -36,10 +36,12 @@ Future<ToolCallResult> runUiPlanningTool(
   final value = await harness.plan(taskId, expected: request.parameters);
   return ToolCallResult(
     status: ToolCallStatus.succeeded,
-    summary: 'Presentation: ${value.result.reasonCode}',
+    summary: value.reason.description,
     data: {
       'decision': value.result.decision.name,
-      'reasonCode': value.result.reasonCode,
+      'reasonCode': value.reason.code,
+      'reasonDescription': value.reason.description,
+      'reasonCategory': value.reason.category.name,
       'surfaceId': value.validated?.plan.surfaceId,
       'revision': value.validated?.plan.revision,
     },

@@ -219,7 +219,9 @@ class AgentContext {
         }
         await event(task, 'ui_planning', {
           'decision': presentation.result.decision.name,
-          'reasonCode': presentation.result.reasonCode,
+          'reasonCode': presentation.reason.code,
+          'reasonDescription': presentation.reason.description,
+          'reasonCategory': presentation.reason.category.name,
           'surfaceId': presentation.validated?.plan.surfaceId,
           'revision': presentation.validated?.plan.revision,
         });
