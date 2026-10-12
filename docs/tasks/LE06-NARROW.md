@@ -21,3 +21,6 @@ pending 先落盘、unknown 不自动重试两条约束保持不变（复审确�
 
 ## 回报（固定 6 行）
 1. RED 与失败首行　2. 修复提交（远端与本地一致）　3. 改动文件与行数　4. 变异结果；竞争测试重复次数与结果　5. analyze 与 `apps/muyon` 全量（pass/skip/fail 及分类）、精确 SHA CI　6. 未做或有疑问
+
+## 追加（2026-10-12）：子进程构建与共享 native assets
+CF-FIX-B 精确 SHA 的 CI（run 38258595733）里，`assistant_transfer_capability_boundary_test` 因 `Couldn't resolve native function 'sqlite3_initialize'` 失败，同一日志中 LE06 竞争测试正在启动子进程（测试注释已指出「并发构建会共享生成的 dylib」）。请一并核查：LE06 的子进程是否会重建或覆盖 `build/native_assets` 下的共享库，从而让同一 CI 进程里并行的其他测试偶发加载失败；若是，让子进程使用隔离的构建目录或预构建产物（不得删除或跳过该竞争测试）。在回报第 6 行写结论与证据。
