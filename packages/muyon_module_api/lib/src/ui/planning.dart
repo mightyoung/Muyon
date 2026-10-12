@@ -265,9 +265,39 @@ class UiPlanningRequest {
             .toList(),
         isCurrent: isModelReferenceCurrent,
       );
-  String get modelSnapshotId => referenceMap.projectSnapshot(snapshot.ref);
+  List<Map<String, Object?>> _modelMessages() => [
+    for (final message in conversationMessages)
+      if (message['role'] == 'user')
+        message
+      else
+        Map<String, Object?>.from(
+          referenceMap.projectJson({
+            ...message,
+            if (message['role'] == 'tool' && message['content'] is String)
+              'content': _modelToolContent(message['content'] as String),
+          }) as Map,
+        ),
+  ];
+  String _modelToolContent(String content) {
+    Object? decoded;
+    try {
+      decoded = jsonDecode(content);
+    } catch (_) {
+      throw StateError('model_reference_unavailable');
+    }
+    if (decoded is! Map && decoded is! List) {
+      throw StateError('model_reference_unavailable');
+    }
+    return jsonEncode(referenceMap.projectJson(decoded));
+  }
+
+  String get modelSnapshotId {
+    requireCurrentModelReferences();
+    return referenceMap.projectSnapshot(snapshot.ref);
+  }
+
   Map<String, dynamic> hostPlanJson(Map<String, dynamic> plan) {
-    _checkReferenceContext();
+    requireCurrentModelReferences();
     if (plan['snapshotId'] != modelSnapshotId ||
         plan['snapshotRevision'] != snapshot.ref.revision) {
       throw StateError('model_reference_unavailable');
@@ -299,12 +329,17 @@ class UiPlanningRequest {
     }
   }
 
-  Map<String, Object?> toJson() {
+  void requireCurrentModelReferences() {
     _checkReferenceContext();
+    referenceMap._requireCurrent();
+  }
+
+  Map<String, Object?> toJson() {
+    requireCurrentModelReferences();
     return {
       'question': question,
       'answer': answer,
-      'conversationMessages': conversationMessages,
+      'conversationMessages': _modelMessages(),
       'conversationVersion': conversationVersion,
       'coverage': coverage,
       'taskId': taskId,

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:muyon_module_api/ui_contract.dart';
+import 'package:muyon_module_api/muyon_module_api.dart' show AssistantScope;
 import 'package:muyon_ui/dynamic_ui.dart';
 import 'package:muyon/assistant/ui_planning.dart';
 import 'package:muyon/assistant/agent_budget.dart';
@@ -36,8 +37,8 @@ UiPlanningHostState state({int viewRevision = 4}) {
       'qty': SnapshotFact(
         object: const ObjectRef(
           moduleId: 'test',
-          objectType: 'quantity',
-          objectId: 'q',
+          objectType: 'budget',
+          objectId: 'b1',
         ),
         field: 'qty',
         value: 10,
@@ -154,6 +155,18 @@ class _PlanningStartupGate implements ModelRequestGate {
   }
 }
 
+// Source-bearing planning fixtures use the same selected pin as real task scope.
+Future<PersonalTask> _startScoped(
+  LoopFixture f,
+  PersonalAgent agent,
+  ModelProfile profile,
+) async {
+  final conversation = await f.repo.createConversation(
+    scope: AssistantScope.selectedObjects([f.ref]),
+  );
+  return f.start(agent, profile, conversationId: conversation.id);
+}
+
 void main() {
   for (final holdStartup in [false, true]) {
     test(
@@ -183,7 +196,7 @@ void main() {
         f.replies.add(LoopReply.sse(sseText(_answerJson)));
         final task = await f.run(
           agent,
-          await f.start(agent, f.profile(capabilities: _streaming)),
+          await _startScoped(f, agent, f.profile(capabilities: _streaming)),
         );
         gate.holdStartup = holdStartup;
         agent.configureUiPlanning(mode: UiPlanningMode.motivation);
@@ -235,7 +248,11 @@ void main() {
   test('internal planning cannot resume as an ordinary chat', () async {
     final f = await LoopFixture.open();
     final agent = f.agent();
-    final task = await f.start(agent, f.profile(capabilities: _streaming));
+    final task = await _startScoped(
+      f,
+      agent,
+      f.profile(capabilities: _streaming),
+    );
     await f.repo.updateTask(
       task.copy({'state': 'paused', 'uiPlanningInternal': true}),
     );
@@ -277,7 +294,7 @@ void main() {
     ]);
     final task = await f.run(
       agent,
-      await f.start(agent, f.profile(capabilities: _streaming)),
+      await _startScoped(f, agent, f.profile(capabilities: _streaming)),
     );
     expect(task.state, PersonalTaskState.succeeded);
     expect(requests.single.answer, '成本合计 2080 元');
@@ -289,7 +306,7 @@ void main() {
     f.replies.add(LoopReply.sse(sseText(_answerJson)));
     final task = await f.run(
       agent,
-      await f.start(agent, f.profile(capabilities: _streaming)),
+      await _startScoped(f, agent, f.profile(capabilities: _streaming)),
     );
     final fixture = runtimeFixture();
     final provider = FixtureUiPlanningProvider((r) async {
@@ -365,7 +382,7 @@ void main() {
     ]);
     final task = await f.run(
       agent,
-      await f.start(agent, f.profile(capabilities: _streaming)),
+      await _startScoped(f, agent, f.profile(capabilities: _streaming)),
     );
     agent.configureUiPlanning(mode: UiPlanningMode.motivation);
     final planned = agent.planUi(task.id);
@@ -420,7 +437,7 @@ void main() {
       );
       addTearDown(agent.close);
       f.replies.add(LoopReply.sse(sseText(_answerJson)));
-      final task = await f.run(agent, await f.start(agent, profile));
+      final task = await f.run(agent, await _startScoped(f, agent, profile));
       expect(f.bodies, hasLength(1));
       agent.configureUiPlanning(mode: UiPlanningMode.motivation);
       final planning = agent.planUi(task.id);
@@ -444,7 +461,7 @@ void main() {
       f.replies.add(LoopReply.sse(sseText(_answerJson)));
       final task = await f.run(
         agent,
-        await f.start(agent, f.profile(capabilities: _streaming)),
+        await _startScoped(f, agent, f.profile(capabilities: _streaming)),
       );
       for (final provider in <UiPlanningPort?>[
         null,
@@ -547,7 +564,7 @@ void main() {
     ]);
     final task = await f.run(
       agent,
-      await f.start(agent, f.profile(capabilities: _streaming)),
+      await _startScoped(f, agent, f.profile(capabilities: _streaming)),
     );
     final first = agent.uiPresentation(task.id)!.validated!;
     revision = first.plan.revision;
@@ -597,7 +614,7 @@ void main() {
     f.replies.add(LoopReply.sse(sseText(_answerJson)));
     final task = await f.run(
       agent,
-      await f.start(agent, f.profile(capabilities: _streaming)),
+      await _startScoped(f, agent, f.profile(capabilities: _streaming)),
     );
     expect(agent.uiPresentation(task.id)!.validated, isNotNull);
     allow = false;
@@ -644,7 +661,7 @@ void main() {
       ]);
       final task = await f.run(
         agent,
-        await f.start(agent, f.profile(capabilities: _native)),
+        await _startScoped(f, agent, f.profile(capabilities: _native)),
       );
       expect(task.state, PersonalTaskState.succeeded);
       expect(requests, hasLength(2));
@@ -775,7 +792,11 @@ void main() {
         uiPlanningMode: UiPlanningMode.motivation,
       );
       addTearDown(agent.close);
-      final first = await f.start(agent, f.profile(capabilities: _streaming));
+      final first = await _startScoped(
+        f,
+        agent,
+        f.profile(capabilities: _streaming),
+      );
       final finishing = f.run(agent, first);
       await Future.any([sink.child.future, finishing]);
       expect(
@@ -793,6 +814,27 @@ void main() {
         reason: 'planning bytes must wait for their own actual confirmation',
       );
       expect(f.repo.task(first.id)!.summary, '成本合计 2080 元');
+      // C6: echo the model-visible current alias, never the private host pin.
+      final planningPrompt = jsonDecode(
+        (child.payload['messages'] as List).last['content'] as String,
+      ) as Map;
+      final modelSnapshot = planningPrompt['request']['snapshot'] as Map;
+      final aliasPlan =
+          Map<String, Object?>.from(encodeUiPresentation(planned.plan!))
+            ..['snapshotId'] = modelSnapshot['id']
+            ..['snapshotRevision'] = modelSnapshot['revision'];
+      f.replies[1] = LoopReply.sse(
+        sseText(
+          jsonEncode({
+            'type': 'answer',
+            'answer': jsonEncode({
+              'decision': planned.decision.name,
+              'reasonCode': 'fixture-online',
+              'plan': aliasPlan,
+            }),
+          }),
+        ),
+      );
       await agent.confirm(
         childId,
         requestDigest: child.payload['requestDigest'] as String,
@@ -846,7 +888,11 @@ void main() {
     );
     addTearDown(agent.close);
     f.replies.add(LoopReply.sse(sseText(_answerJson)));
-    final first = await f.start(agent, f.profile(capabilities: _streaming));
+    final first = await _startScoped(
+      f,
+      agent,
+      f.profile(capabilities: _streaming),
+    );
     final finishing = f.run(agent, first);
     // Current baseline never enters the provider: race against a completed harness.
     await Future.any([entered.future, finishing]);
@@ -887,7 +933,7 @@ void main() {
     final agent = f.agent();
     final task = await f.run(
       agent,
-      await f.start(agent, f.profile(capabilities: _streaming)),
+      await _startScoped(f, agent, f.profile(capabilities: _streaming)),
     );
     expect(task.state, PersonalTaskState.succeeded);
     expect(task.summary, '成本合计 2080 元');

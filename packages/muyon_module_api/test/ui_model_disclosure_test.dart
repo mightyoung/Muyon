@@ -19,6 +19,7 @@ UiPlanningRequest request(
   ModelReferenceMap? references,
   String? scopeKey,
   String? snapshotKey,
+  List<Map<String, Object?>> messages = const [],
 }) => UiPlanningRequest(
   modelReferences: references,
   modelReferenceScopeKey: scopeKey,
@@ -28,7 +29,7 @@ UiPlanningRequest request(
   modelDisclosedUiStateRefs: uiState,
   question: 'display',
   answer: '',
-  conversationMessages: const [],
+  conversationMessages: messages,
   conversationVersion: '1',
   coverage: 'selected',
   taskId: 'task',
@@ -46,6 +47,69 @@ UiPlanningRequest request(
 );
 
 void main() {
+  test('explicit tool frames project only known pins while user JSON stays literal', () {
+    const pin = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'item',
+      contentDigest: 'HOST_HASH_DIRECT_TOOL_916',
+    );
+    final snapshot = DataSnapshot(
+      ref: ref,
+      facts: {
+        'name': SnapshotFact(
+          object: pin,
+          field: 'name',
+          value: 'legal',
+          state: FactState.verified,
+        ),
+      },
+    );
+    final content = jsonEncode({
+      'objectRefs': [pin.toJson()],
+    });
+    final r = request(
+      snapshot,
+      messages: [
+        {'role': 'tool', 'content': content},
+      ],
+    );
+    final wire = jsonEncode(r.toJson());
+    expect(wire, isNot(contains(pin.contentDigest!)));
+    expect(wire, contains('modelRef'));
+    expect(
+      jsonEncode(
+        request(
+          snapshot,
+          messages: [
+            {'role': 'user', 'content': content},
+          ],
+        ).toJson(),
+      ),
+      contains(pin.contentDigest!),
+    );
+    final unknown = const ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'unknown',
+      contentDigest: 'OTHER_PRIVATE_HASH',
+    );
+    expect(
+      () => request(
+        snapshot,
+        messages: [
+          {
+            'role': 'tool',
+            'content': jsonEncode({
+              'objectRefs': [unknown.toJson()],
+            }),
+          },
+        ],
+      ).toJson(),
+      throwsStateError,
+    );
+  });
+
   test(
     'request rejects foreign task scope and snapshot maps before egress',
     () {
