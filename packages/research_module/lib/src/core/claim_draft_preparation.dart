@@ -171,7 +171,7 @@ class ResearchClaimDraftPreparer {
       final (doc, note) = notes[id]!;
       sources[('note', id)] = selectedRef('note', id)!;
       final digest = doc.sha256;
-      sources[('document', doc.id)] = ObjectRef(
+      final documentRef = ObjectRef(
         moduleId: 'research',
         nativeProjectId: projectId,
         objectType: 'document',
@@ -249,9 +249,7 @@ class ResearchClaimDraftPreparer {
       }
       if (!material.containsKey(doc.id)) {
         try {
-          final bytes = List<int>.unmodifiable(
-            await readDocument(sources[('document', doc.id)]!),
-          );
+          final bytes = List<int>.unmodifiable(await readDocument(documentRef));
           if (bytes.length > 30 * 1024 * 1024 ||
               (!doc.isPdf && bytes.length > 16 * 1024 * 1024)) {
             materialErrors[doc.id] = 'source_too_large';
@@ -269,6 +267,7 @@ class ResearchClaimDraftPreparer {
         exclude(reason);
         continue;
       }
+      sources[('document', doc.id)] = documentRef;
       String? text;
       if (!doc.isPdf) {
         try {
