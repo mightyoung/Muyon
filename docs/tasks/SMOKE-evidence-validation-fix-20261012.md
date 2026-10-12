@@ -1,0 +1,21 @@
+# SMOKE evidence validation correction
+
+Base: `1a0131866ab33d87462ca49b3e4d75264b55e36a`. Existing smoke support source `a200bb4e32640ac827e2e10af80a6a5dc2188dd2` is an ancestor. Only smoke evidence/probe/entry and this author's dedicated test are changed. Other authors' tests remain in their original immutable branches.
+
+`filterSmokeEvidence` now separates a coherent caller document (`validation.structurally_valid`) from actual acceptance (`acceptance.status = unknown`, `summary.passed = false`). This slice has no trusted Android platform/version/run observer. A caller's SHA, platform label, capability flags, two matching strings or synthetic success report cannot establish runtime provenance. The formal entry still fails and emits 19 not-yet cases; no model, Android or desktop device execution is claimed.
+
+Structural admission checks original unsanitized fields as well as the sanitized output. Unknown schema, unobserved capabilities, preflight failure, unknown failure strings, invalid counts, duplicate/unknown cases, unobserved stages, missing card source, invalid confirmation waits and contradictory missing reasons cannot become a successful document by filtering. Arbitrary text remains excluded from published evidence. Incomplete samples receive a stable missing reason; complete observed samples do not acquire a later run failure reason. Real zero and 0.001ms observations are preserved.
+
+## Evidence grades and review calibration
+
+The accepted smoke specification sections 3, 4 and 6 expressly require actual upstream for the normal fact/suggestion group (ANDROID1), normal latency group (ANDROID7), and interruption after real content (ANDROID3_INTERRUPTION). Missing execution never counts as execution. Deterministic protocol streams expressly may use labelled scripted fixtures. MODE and other host-policy cases can also provide labelled fixture structure; this does not prove the prescribed production scenario or Android acceptance. No field in this document authenticates its producer.
+
+The original root independent test at `def83395d58ac6cf7ab3198e07cca44f8d7f91bd` was executed unchanged: baseline 4 passed / 47 failed / 0 skipped. Those 47 cover not-executed cases, preflight failures, false/null capabilities, contradictory sample reasons, missing reasons/card source, and invalid Android declarations. After the fix its sole failure is the old synthetic-positive `summary.passed` oracle; the other 50 pass. That oracle conflicts with the explicit no-self-attestation policy. A dedicated policy-calibrated derivative keeps the negative matrix and adds structural positive, 19 per-case evidence-grade checks and actual-acceptance denial. The original file/branch is not rewritten or silently weakened.
+
+External PR64 at `e500f4159378e9790e6c6f28de36077de23b2e12` is read and executed unchanged, with its original file ownership retained. Its four scripted-fault negative candidates require separate interpretation: interruption really requires actual-content upstream by section 4; cancel/timeout/version-planning upstream-only assumptions are not stated by the specification. A fixture cannot prove actual acceptance, but does not make a correctly labelled structural document invalid. Its complete synthetic `summary.passed` positives likewise require policy calibration. Raw logs remain outside Git.
+
+## Verification
+
+Independent baseline, own RED/GREEN, reverse mutations, restoration hashes and CI run evidence are recorded in `/workspace/reports/smoke-evidence-validation-fix-20261012` and `/tmp/smoke-fix-*.jsonl`, outside the repository. Tests use isolated synthetic data only. CI is a source verification gate, not evidence of a device/model acceptance run.
+
+Local verification: own 85 tests pass after all six inverse mutations; each mutant fails naturally with 1 / 20 / 2 / 1 / 1 / 1 failing tests, respectively. Exact production bytes were restored. PR64 independently reproduces 28 passed / 10 failed at the fixed base; after this correction 36 pass / 2 fail, both original synthetic actual-success oracles. Strict targeted analysis reports zero issues. The preserved RED reference is `review/smoke-evidence-red-preserved-20261012` at `748525b` (54 passed / 4 failed with the then-absent structural interface; initial root-independent 47 behavioral failures are separately preserved).

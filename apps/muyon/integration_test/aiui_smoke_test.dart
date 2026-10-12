@@ -70,7 +70,10 @@ void main() {
           failure ?? SmokeFailureCode.acceptanceCoverageIncomplete;
       evidence.preflight.putIfAbsent('passed', () => false);
       for (final sample in evidence.probe.samples) {
-        sample.missingReason = evidence.failure;
+        if (sample.firstTextVisibleAt == null ||
+            sample.firstCardVisibleAt == null) {
+          sample.missingReason = evidence.failure;
+        }
       }
       evidence.preflight.putIfAbsent(
         'failure_code',

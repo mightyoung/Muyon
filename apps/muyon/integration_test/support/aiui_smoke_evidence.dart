@@ -112,7 +112,12 @@ Map<String, Object?> filterSmokeEvidence(Map<String, Object?> raw) {
                   .whereType<num>()
                   .toList()
             : <num>[],
-        'missing_reason': _code(row['missing_reason']),
+        'missing_reason':
+            _number(row['first_text_visible_ms']) == null ||
+                _number(row['first_card_visible_ms']) == null
+            ? _code(row['missing_reason']) ??
+                  SmokeFailureCode.requestObservabilityMissing.code
+            : null,
       });
     }
   }
@@ -184,7 +189,62 @@ Map<String, Object?> filterSmokeEvidence(Map<String, Object?> raw) {
   final allCasesPresent = smokeCaseIds.every(
     (id) => cases.where((row) => row['id'] == id).length == 1,
   );
-  final passed =
+  // This validates a caller-provided document, not runtime provenance. Validate
+  // original fields before sanitization: dropping an invalid value must not turn
+  // a contradictory report into success.
+  final inputCases = raw['cases'];
+  final structurallyValid =
+      raw['schema'] == 1 &&
+      raw['platform'] == 'android' &&
+      raw['android_version'] is int &&
+      (raw['android_version'] as int) > 0 &&
+      preflight['failure_code'] == null &&
+      preflight['failure_codes'] is List &&
+      (preflight['failure_codes'] as List).isEmpty &&
+      _capabilityNames.every(
+        (key) => _map(preflight['capabilities'])[key] == true,
+      ) &&
+      summary['failure_code'] == null &&
+      inputCases is List &&
+      inputCases.length == smokeCaseIds.length &&
+      inputCases.every((value) {
+        final row = _map(value);
+        final counts = _map(row['counts']);
+        // The spec explicitly requires real upstream for the normal fact/
+        // suggestion and latency groups, and actual-content interruption.
+        // Deterministic protocol and other host-policy fixtures stay labelled
+        // fixtures. They validate structure, never Android acceptance.
+        final requiresRealUpstream = {
+          'ANDROID1',
+          'ANDROID7',
+          'ANDROID3_INTERRUPTION',
+        }.contains(row['id']);
+        final evidenceClass = row['evidence_class'];
+        return (evidenceClass == 'real_upstream' ||
+                (!requiresRealUpstream &&
+                    evidenceClass == 'scripted_fixture')) &&
+            row['failure_code'] == null &&
+            {'invariants', 'handoff'}.contains(row['stage']) &&
+            [
+              'business_write_tasks',
+              'business_write_approvals',
+              'business_write_receipts',
+              'business_grant_uses',
+              'model_grant_uses',
+            ].every((key) => counts[key] is int && (counts[key] as int) >= 0);
+      }) &&
+      inputSamples is List &&
+      inputSamples.every((value) {
+        final row = _map(value);
+        final waits = row['confirmation_wait_ms'];
+        return {
+              'host_fixed',
+              'validated_stream',
+            }.contains(row['card_source']) &&
+            row['missing_reason'] == null &&
+            waits is List &&
+            waits.every((wait) => _number(wait) != null);
+      }) &&
       summary['passed'] == true &&
       preflight['passed'] == true &&
       _sha(raw['candidate_sha']) != null &&
@@ -211,7 +271,16 @@ Map<String, Object?> filterSmokeEvidence(Map<String, Object?> raw) {
             row['evidence_class'] == 'real_upstream',
       ) &&
       _map(raw['manual_checkpoint'])['complete'] == true;
+  // No trusted Android platform/version/run observer is wired in this slice.
+  // Caller strings, capability flags and candidate hashes cannot manufacture
+  // that observation. Keep acceptance unknown even for a coherent document.
   final result = <String, Object?>{
+    'validation': {'structurally_valid': structurallyValid},
+    'acceptance': {
+      'status': 'unknown',
+      'failure_code': SmokeFailureCode.requestObservabilityMissing.code,
+    },
+    'platform': raw['platform'] == 'android' ? 'android' : 'unknown',
     'schema': 1, 'candidate_sha': _sha(raw['candidate_sha']), 'run_id': runId,
     // Labels are deliberately generic. Unreviewed device/model labels are free
     // text and may themselves contain credentials or destinations.
@@ -285,11 +354,10 @@ Map<String, Object?> filterSmokeEvidence(Map<String, Object?> raw) {
     },
     // Capability presence or a caller's success flag alone is insufficient.
     'summary': {
-      'passed': passed,
-      'failure_code': passed
-          ? null
-          : _code(summary['failure_code']) ??
-                SmokeFailureCode.acceptanceCoverageIncomplete.code,
+      'passed': false,
+      'failure_code':
+          _code(summary['failure_code']) ??
+          SmokeFailureCode.acceptanceCoverageIncomplete.code,
     },
   };
   return _freeze(result) as Map<String, Object?>;

@@ -85,11 +85,10 @@ final class SmokeLatencySample {
     'confirmation_wait_ms': confirmationWaits
         .map((wait) => wait.inMicroseconds / 1000)
         .toList(),
-    'missing_reason':
-        missingReason?.code ??
-        (firstTextVisibleAt == null || firstCardVisibleAt == null
-            ? SmokeFailureCode.requestObservabilityMissing.code
-            : null),
+    'missing_reason': firstTextVisibleAt == null || firstCardVisibleAt == null
+        ? missingReason?.code ??
+              SmokeFailureCode.requestObservabilityMissing.code
+        : null,
   };
 }
 
