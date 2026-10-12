@@ -14,12 +14,18 @@ class UiPlanningHostState {
     required this.currentView,
     required this.catalog,
     required this.allowedActionRefs,
+    this.modelDisclosedFactRefs = const {},
+    this.modelDisclosedComputedRefs = const {},
+    this.modelDisclosedUiStateRefs = const {},
   });
   final DataSnapshot snapshot;
   final InteractionIntent intent;
   final UiCurrentView currentView;
   final UiCatalog catalog;
   final Set<String> allowedActionRefs;
+  final Set<String> modelDisclosedFactRefs;
+  final Set<String> modelDisclosedComputedRefs;
+  final Set<String> modelDisclosedUiStateRefs;
 }
 
 /// The facts owner reads actual current data; no model-authored facts enter here.
@@ -532,6 +538,9 @@ class UiPlanningHarness {
       taskId: task.id,
       turnId: task.id,
       snapshot: state.snapshot,
+      modelDisclosedFactRefs: state.modelDisclosedFactRefs,
+      modelDisclosedComputedRefs: state.modelDisclosedComputedRefs,
+      modelDisclosedUiStateRefs: state.modelDisclosedUiStateRefs,
       intent: intent,
       currentView: state.currentView,
       catalog: state.catalog,

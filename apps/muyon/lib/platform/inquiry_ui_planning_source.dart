@@ -9,6 +9,7 @@ import '../app/bootstrap.dart';
 import '../assistant/inquiry_snapshots/inquiry_readonly_snapshot.dart';
 import '../assistant/ui_planning.dart';
 import 'foundation_repository.dart';
+import 'inquiry_model_disclosure.dart';
 import 'ui_workspace_store.dart';
 
 /// Trusted selected-record projection. The model receives masked display facts,
@@ -97,11 +98,27 @@ class InquiryUiPlanningSource {
         'saved-${field.name}': SnapshotFact(
           object: object,
           field: field.label,
-          value: field.value,
+          value:
+              inquiryFieldDisclosedToModel(
+                object.objectType,
+                field.name,
+                masked: field.masked,
+              )
+              ? field.value
+              : field.masked
+              ? '已遮盖'
+              : '未向模型披露',
           // The fixed-card projection supplies a typed masking flag but
           // discards original fact state/null/type-validation evidence. Its
           // formatted placeholders cannot prove verified business values.
-          state: field.masked ? FactState.notDisclosed : FactState.unverified,
+          state:
+              inquiryFieldDisclosedToModel(
+                object.objectType,
+                field.name,
+                masked: field.masked,
+              )
+              ? FactState.unverified
+              : FactState.notDisclosed,
         ),
     };
     final snapshot = DataSnapshot(
@@ -133,6 +150,16 @@ class InquiryUiPlanningSource {
       ),
       catalog: library2UiCatalog,
       allowedActionRefs: allowed,
+      modelDisclosedFactRefs: {
+        'saved-source',
+        for (final field in selected.record.fields)
+          if (inquiryFieldDisclosedToModel(
+            object.objectType,
+            field.name,
+            masked: field.masked,
+          ))
+            'saved-${field.name}',
+      },
     );
   }
 }

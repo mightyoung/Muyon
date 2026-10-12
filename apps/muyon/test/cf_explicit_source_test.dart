@@ -116,7 +116,7 @@ void main() {
       expect(result.snapshot.facts['saved-name']!.state, FactState.unverified);
       expect(
         result.snapshot.facts['saved-requirement']!.state,
-        FactState.unverified,
+        FactState.notDisclosed,
       );
       expect(
         result.snapshot.facts['saved-unit_cost']!.state,
