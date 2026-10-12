@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../core/models.dart';
 import '../core/research_kinds.dart';
 import '../core/store.dart';
+import 'section_delete_preview.dart';
 
 /// Evidence-backed outline: ordered, nested sections, each with an argument,
 /// a support level and any number of cited records, runs or reading notes.
@@ -284,6 +285,18 @@ class _WritingPageState extends State<WritingPage> {
                           tooltip: '编辑段落',
                           onPressed: () => _edit(section),
                           icon: const Icon(Icons.edit_outlined, size: 18),
+                        ),
+                        IconButton(
+                          tooltip: '预览删除影响',
+                          onPressed: () => showDialog<void>(
+                            context: context,
+                            builder: (_) => SectionDeletePreviewDialog(
+                              store: store,
+                              projectId: widget.projectId,
+                              sectionId: section.id,
+                            ),
+                          ),
+                          icon: const Icon(Icons.preview_outlined, size: 18),
                         ),
                         IconButton(
                           tooltip: '删除段落',
