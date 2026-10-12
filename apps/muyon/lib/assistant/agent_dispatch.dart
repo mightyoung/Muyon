@@ -889,6 +889,7 @@ class AgentDispatch {
         content = jsonEncode({
           'trustedToolResult': modelToolResult(result, producer: producer),
           'modelDisclosurePolicy': 1,
+          'modelReferencePolicy': 1,
           'citations': [
             for (var i = 0; i < refs.length; i++)
               {'citationId': 'r${i + 1}', 'reference': refs[i].toJson()},

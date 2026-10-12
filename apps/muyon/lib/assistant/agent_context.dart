@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:muyon_module_api/ui_contract.dart' show ModelReferenceMap;
 
 import '../platform/foundation_repository.dart';
 import '../platform/task_records.dart';
@@ -173,11 +174,282 @@ class AgentContext {
   /// all come from this one function.
   List<Object?> view(PersonalTask task) {
     final history = modelTaskToolHistory(task, tools);
-    return buildRequestView(
-      history.messages,
-      compactionState: history.compaction(task.payload['compaction']),
-      references: task.payload['references'] as List? ?? const [],
+    return projectModelMessages(
+      task,
+      buildRequestView(
+        history.messages,
+        compactionState: modelCompaction(task),
+        references: task.payload['references'] as List? ?? const [],
+      ),
     );
+  }
+
+  final _referenceMaps = <String, ModelReferenceMap>{};
+  var _referenceEpoch = 0;
+  bool _referenceListening = false;
+  void _referenceAuthorityChanged() {
+    _referenceEpoch++;
+    for (final map in _referenceMaps.values) {
+      map.expire();
+    }
+    _referenceMaps.clear();
+  }
+
+  void closeModelReferences() {
+    _referenceAuthorityChanged();
+    if (_referenceListening) {
+      repository.authorizationFacts.removeListener(_referenceAuthorityChanged);
+      _referenceListening = false;
+    }
+  }
+
+  // This is a host cache identity, never a field sent to a model. Grant use or
+  // creation must not remint preview aliases; revocation invalidates them.
+  String _referenceAuthority() {
+    final db = repository.database.raw;
+    final exists = db.select(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='assistant_grant_audit'",
+    );
+    final revoked = exists.isEmpty
+        ? 0
+        : db
+              .select(
+                "SELECT COALESCE(MAX(id),0) AS generation FROM assistant_grant_audit WHERE action='revoked'",
+              )
+              .single['generation'];
+    return digest([
+      _referenceEpoch,
+      modelAuthorization?.policy.current.revision,
+      revoked,
+    ]);
+  }
+
+  ({Set<ObjectRef> objects, List<ArtifactRef> artifacts}) _hostReferencePins(
+    PersonalTask task,
+  ) {
+    final objects = <ObjectRef>{...task.scope.objects};
+    final artifacts = <ArtifactRef>[];
+    for (final ref in task.payload['references'] as List? ?? const []) {
+      objects.add(objectRefFromJson(Map<String, Object?>.from(ref as Map)));
+    }
+    for (final memory in memories(task.scope)) {
+      final scope = AssistantScope.fromJson(
+        Map<String, Object?>.from(memory['scope'] as Map),
+      );
+      objects.addAll(scope.objects);
+    }
+    final sources = task.payload['modelResultProducers'];
+    if (sources is Map) {
+      for (final entry in sources.entries) {
+        final metadata = entry.value;
+        if (entry.key is! String || metadata is! Map) continue;
+        final receipt = tools.receiptFor(entry.key as String);
+        final producer = receipt == null ? null : tools.inspect(receipt.toolId);
+        if (receipt?.result == null ||
+            receipt!.toolId != metadata['toolId'] ||
+            receipt.identityDigest != metadata['identityDigest'] ||
+            producer?.providerId != metadata['providerId']) {
+          continue;
+        }
+        objects.addAll(receipt.result!.objectRefs);
+        artifacts.addAll(receipt.result!.artifactRefs);
+      }
+    }
+    return (objects: objects, artifacts: artifacts);
+  }
+
+  String _referenceSnapshot(PersonalTask task) {
+    final pins = _hostReferencePins(task);
+    return digest([
+      task.scope.toJson(),
+      [for (final ref in pins.objects) ref.toJson()],
+      [
+        for (final ref in pins.artifacts)
+          {
+            'moduleId': ref.moduleId,
+            'artifactId': ref.artifactId,
+            'contentDigest': ref.contentDigest,
+          },
+      ],
+      _referenceAuthority(),
+    ]);
+  }
+
+  /// The UI planner, normal turns and summarizer share this exact table.
+  ModelReferenceMap modelReferences(PersonalTask task) {
+    if (closing) throw StateError('model_reference_unavailable');
+    if (!_referenceListening) {
+      repository.authorizationFacts.addListener(_referenceAuthorityChanged);
+      _referenceListening = true;
+    }
+    final snapshot = _referenceSnapshot(task);
+    final scope = digest(task.scope.toJson());
+    final previous = _referenceMaps[task.id];
+    if (previous != null &&
+        previous.snapshotKey == snapshot &&
+        previous.scopeKey == scope) {
+      return previous;
+    }
+    previous?.expire();
+    final pins = _hostReferencePins(task);
+    final loaded = repository.task(task.id);
+    final loadedSnapshot = loaded == null
+        ? snapshot
+        : _referenceSnapshot(loaded);
+    var committed = loadedSnapshot == snapshot;
+    final map = ModelReferenceMap(
+      taskId: task.id,
+      scopeKey: scope,
+      snapshotKey: snapshot,
+      objects: pins.objects,
+      artifacts: pins.artifacts,
+      isCurrent: () {
+        if (closing) return false;
+        final current = repository.task(task.id) ?? task;
+        final currentSnapshot = _referenceSnapshot(current);
+        if (currentSnapshot == snapshot) {
+          committed = true;
+          return true;
+        }
+        // The dispatcher estimates a folded host result before committing it.
+        // Admit exactly that immutable prior snapshot until the new one lands;
+        // thereafter any changed scope/pin/authority invalidates this table.
+        return !committed && currentSnapshot == loadedSnapshot;
+      },
+    );
+    _referenceMaps[task.id] = map;
+    return map;
+  }
+
+  String modelReferenceBinding(PersonalTask task) {
+    final map = modelReferences(task);
+    final pins = _hostReferencePins(task);
+    return digest([
+      for (final ref in pins.objects) map.projectObject(ref),
+      for (final ref in pins.artifacts) map.projectArtifact(ref),
+    ]);
+  }
+
+  bool modelReferenceBindingCurrent(PersonalTask task, Object? binding) {
+    final cached = _referenceMaps[task.id];
+    if (cached == null || cached.snapshotKey != _referenceSnapshot(task)) {
+      return false;
+    }
+    try {
+      return modelReferenceBinding(task) == binding;
+    } on StateError {
+      return false;
+    }
+  }
+
+  Object? modelCompaction(PersonalTask task) {
+    final stored = task.payload['compaction'];
+    if (stored is Map &&
+        stored['summary'] != null &&
+        task.payload['compactionReferencePolicy'] != 1) {
+      return null;
+    }
+    return modelTaskToolHistory(task, tools).compaction(stored);
+  }
+
+  List<Object?> modelHistoryMessages(PersonalTask task) =>
+      projectModelMessages(task, modelTaskToolHistory(task, tools).messages);
+
+  /// Only host-created frames are decoded. Genuine user text, including JSON,
+  /// retains its existing policy. Projection follows citation replay as well.
+  List<Object?> projectModelMessages(
+    PersonalTask task,
+    List<Object?> messages, {
+    bool summaryRequest = false,
+  }) {
+    final map = modelReferences(task);
+    final original = task.payload['messages'] as List? ?? const [];
+    final human = <Object?>{
+      if (task.payload['uiPlanningInternal'] != true) task.prompt,
+      for (final index
+          in task.payload['modelUserMessageIndices'] as List? ?? const [])
+        if (index is int &&
+            index >= 0 &&
+            index < original.length &&
+            original[index] is Map)
+          (original[index] as Map)['content'],
+    };
+    final compaction = modelCompaction(task);
+    final summary = compaction is Map && compaction['summary'] is Map
+        ? (compaction['summary'] as Map)['content']
+        : null;
+    return [
+      for (var i = 0; i < messages.length; i++)
+        if (messages[i] is Map)
+          _projectModelFrame(
+            map,
+            Map<String, Object?>.from(messages[i] as Map),
+            hostSystem: i == 0 && (messages[i] as Map)['role'] == 'system',
+            hostSummary:
+                summaryRequest ||
+                (summary != null && (messages[i] as Map)['content'] == summary),
+            human: human.contains((messages[i] as Map)['content']),
+          )
+        else
+          messages[i],
+    ];
+  }
+
+  Map<String, Object?> _projectModelFrame(
+    ModelReferenceMap map,
+    Map<String, Object?> message, {
+    required bool hostSystem,
+    required bool hostSummary,
+    required bool human,
+  }) {
+    final content = message['content'];
+    if (content is! String || (human && !hostSystem)) return message;
+    Object? body;
+    try {
+      body = jsonDecode(content);
+    } on FormatException {
+      return message;
+    }
+    final hostResult =
+        body is Map &&
+        body['trustedToolResult'] is Map &&
+        body['modelDisclosurePolicy'] == 1;
+    if (!hostSystem && !hostSummary && !hostResult) return message;
+    if (hostResult) {
+      final frame = Map<String, Object?>.from(body);
+      final result = Map<String, Object?>.from(
+        frame['trustedToolResult'] as Map,
+      );
+      for (final key in ['objectRefs', 'artifactRefs']) {
+        result[key] = [
+          for (final ref in result[key] as List? ?? const [])
+            if (_projectPinnedReference(map, ref) case final Map projected)
+              projected,
+        ];
+      }
+      frame['trustedToolResult'] = result;
+      frame['citations'] = [
+        for (final citation in frame['citations'] as List? ?? const [])
+          if (citation is Map &&
+              citation['citationId'] is String &&
+              RegExp(r'^r[1-9][0-9]*$')
+                  .hasMatch(citation['citationId'] as String))
+            if (_projectPinnedReference(map, citation['reference'])
+                case final Map projected)
+              {'citationId': citation['citationId'], 'reference': projected},
+      ];
+      return {...message, 'content': jsonEncode(frame)};
+    }
+    return {...message, 'content': jsonEncode(map.projectJson(body))};
+  }
+
+  Object? _projectPinnedReference(ModelReferenceMap map, Object? value) {
+    if (value is! Map || !value.containsKey('contentDigest')) return null;
+    try {
+      return map.projectJson(value);
+    } on StateError {
+      return null;
+    }
   }
 
   List<ObjectRef> references(PersonalTask task) => [

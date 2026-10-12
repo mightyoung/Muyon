@@ -13,7 +13,6 @@ import 'agent_context.dart';
 import 'agent_event_sink.dart';
 import 'agent_model_turn.dart';
 import 'context_compactor.dart';
-import 'model_tool_result_projection.dart';
 import 'model_request_gate.dart';
 
 /// Context compaction (ADR-0005 §6.6): clearing old results, the summary
@@ -39,7 +38,7 @@ class AgentCompactionFlow {
     CompactionState state, {
     bool useReport = false,
   }) => ctx.compactor.tokensOfView(
-    modelTaskToolHistory(task, ctx.tools).messages,
+    ctx.modelHistoryMessages(task),
     state,
     references: task.payload['references'] as List? ?? const [],
     extra: _toolsTokens(task),
@@ -51,12 +50,8 @@ class AgentCompactionFlow {
         : 0,
   );
 
-  CompactionState _stateOf(PersonalTask task) => CompactionState.fromJson(
-    modelTaskToolHistory(
-      task,
-      ctx.tools,
-    ).compaction(task.payload['compaction']),
-  );
+  CompactionState _stateOf(PersonalTask task) =>
+      CompactionState.fromJson(ctx.modelCompaction(task));
 
   /// The profile that may summarize this task's conversation: the task's own,
   /// or the one the person set up for it if that exposes the data to no more
@@ -87,7 +82,7 @@ class AgentCompactionFlow {
     final threshold = ctx.compactor.compactAt(caps);
     if (threshold == null && !force) return task;
     final state = _stateOf(task);
-    final messages = modelTaskToolHistory(task, ctx.tools).messages;
+    final messages = ctx.modelHistoryMessages(task);
     final before = _tokensUnder(task, state, useReport: true);
     if (!force && before <= threshold!) return task;
     final reported = task.payload['reportedPromptTokens'] != null;
@@ -206,6 +201,7 @@ class AgentCompactionFlow {
     final updated = changed
         ? task.copy({
             'compaction': state.toJson(),
+            'compactionReferencePolicy': 1,
             // The earlier report was for a different view.
             'reportedPromptTokens': null,
             'reportedViewCount': null,
@@ -252,12 +248,17 @@ class AgentCompactionFlow {
     required String tokenSource,
     required bool strategyA,
   }) async {
+    final summaryMessages = ctx.projectModelMessages(
+      task,
+      plan.messages,
+      summaryRequest: true,
+    );
     final preview = {
       'endpoint': profile.endpoint.toString(),
       'profile': profile.toJsonWithoutCapabilities(),
       'scope': task.scope.toJson(),
       'purpose': 'context_compaction',
-      'messages': plan.messages,
+      'messages': summaryMessages,
       'dataCategories': ['conversation', 'tool_results'],
       'summarizes': {'from': plan.from, 'to': plan.upTo},
     };
@@ -293,6 +294,8 @@ class AgentCompactionFlow {
       'reportedViewCount': null,
       'compactionPlan': {
         'modelDisclosurePolicy': 1,
+        'modelReferencePolicy': 1,
+        'modelReferenceBinding': ctx.modelReferenceBinding(task),
         'upTo': plan.upTo,
         'from': plan.from,
         'tokensBefore': tokensBefore,
@@ -319,7 +322,9 @@ class AgentCompactionFlow {
       try {
         final request = ModelRequest(
           profile: profile,
-          messages: [for (final m in plan.messages) ModelMessage.fromJson(m)],
+          messages: [
+            for (final m in summaryMessages) ModelMessage.fromJson(m as Map),
+          ],
           toolChoice: ToolChoice.none,
           maxOutputTokens: ctx.compactor.summaryTokens,
           caller: 'context_compaction',
@@ -396,8 +401,17 @@ class AgentCompactionFlow {
 
   Future<void> _runPermittedCompaction(PersonalTask task) async {
     if ((task.payload['compactionPlan'] as Map?)?['modelDisclosurePolicy'] !=
-        1) {
+            1 ||
+        (task.payload['compactionPlan'] as Map?)?['modelReferencePolicy'] !=
+            1) {
       await summaryFailed(task, 'disclosure_policy_changed');
+      return;
+    }
+    if (!ctx.modelReferenceBindingCurrent(
+      task,
+      (task.payload['compactionPlan'] as Map?)?['modelReferenceBinding'],
+    )) {
+      await summaryFailed(task, 'model_reference_unavailable');
       return;
     }
     final token = ModelCancellation();

@@ -4,6 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import 'package:muyon/assistant/agent_context.dart';
+import 'package:muyon/assistant/agent_budget.dart';
+import 'package:muyon/assistant/agent_event_sink.dart';
+import 'package:muyon/assistant/context_compactor.dart';
+import 'package:muyon/assistant/model_request_gate.dart';
+import 'package:muyon/assistant/tool_selection.dart';
+import 'package:muyon/platform/grants/host_authorization_facts.dart';
+import 'package:muyon/services/models/model_gateway.dart';
+import 'package:muyon/services/models/openai_compat_provider.dart';
+
 import 'support/agent_loop_fixture.dart';
 
 import 'package:muyon/assistant/model_tool_result_projection.dart';
@@ -29,7 +39,268 @@ ToolCallResult result() => ToolCallResult(
   },
   objectRefs: [ref],
 );
+AgentContext referenceContext(LoopFixture f) => AgentContext(
+  repository: f.repo,
+  gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+  tools: f.tools,
+  executionDeviceId: 'this-device',
+  budget: const Budget(),
+  events: TaskEventTableSink(f.repo),
+  selectionStrategy: const RuleAndModelToolSelection(),
+  gate: const AlwaysConfirmGate(),
+  provider: const OpenAiCompatProvider(),
+  compactor: const ContextCompactor(),
+  compactionProfile: null,
+  clock: DateTime.now,
+);
+
 void main() {
+  test('C6 actual context keeps preview aliases stable and invalidates scope pins and authority', () async {
+    const pinned = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'ctx-c6',
+      contentDigest: 'CTX_ROW_DIGEST_C6',
+    );
+    final f = await LoopFixture.open();
+    final conversation = await f.repo.createConversation(
+      scope: AssistantScope.selectedObjects([pinned]),
+    );
+    final agent = f.agent();
+    final task = await f.start(
+      agent,
+      f.profile(),
+      conversationId: conversation.id,
+      prompt: '{"contentDigest":"HUMAN_JSON_STAYS","modelRef":"literal"}',
+    );
+    final ctx = referenceContext(f);
+    final first = ctx.view(task);
+    final map = ctx.modelReferences(task);
+    final refJson = map.projectObject(pinned);
+    expect(ctx.modelReferences(task), same(map));
+    expect(jsonEncode(ctx.view(task)), jsonEncode(first));
+    expect(jsonEncode(first), isNot(contains(pinned.contentDigest!)));
+    expect(jsonEncode(first), contains('HUMAN_JSON_STAYS'));
+    expect(
+      map.resolveObject(
+        refJson['modelRef'] as String,
+        taskId: task.id,
+        scopeKey: map.scopeKey,
+        snapshotKey: map.snapshotKey,
+      ),
+      pinned,
+    );
+    expect(
+      map.resolveObject(
+        refJson['modelRef'] as String,
+        taskId: 'other-task',
+        scopeKey: map.scopeKey,
+        snapshotKey: map.snapshotKey,
+      ),
+      isNull,
+    );
+    expect(
+      map.resolveObject(
+        refJson['modelRef'] as String,
+        taskId: task.id,
+        scopeKey: map.scopeKey,
+        snapshotKey: map.snapshotKey,
+        locators: {'objectId': 'other'},
+      ),
+      isNull,
+    );
+    await f.repo.authorizationFacts.markSourceExternal(
+      HostSourceFact.object(pinned),
+    );
+    expect(() => map.projectObject(pinned), throwsStateError);
+    final afterAuthority = ctx.modelReferences(task);
+    expect(
+      afterAuthority.projectObject(pinned)['modelRef'],
+      isNot(refJson['modelRef']),
+    );
+    const nextPin = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'ctx-c6',
+      contentDigest: 'NEXT_HOST_PIN',
+    );
+    await f.repo.database.write(
+      (db) => db.execute(
+        "UPDATE execution_records SET payload=json_set(payload,'\$.scope',json(?)) WHERE id=?",
+        [
+          jsonEncode(AssistantScope.selectedObjects([nextPin]).toJson()),
+          task.id,
+        ],
+      ),
+    );
+    expect(() => afterAuthority.projectObject(pinned), throwsStateError);
+    final next = ctx.modelReferences(f.repo.task(task.id)!);
+    expect(next.projectObject(nextPin)['modelRef'], isNot(refJson['modelRef']));
+    expect(() => next.projectObject(pinned), throwsStateError);
+    ctx.closeModelReferences();
+    expect(() => next.projectObject(nextPin), throwsStateError);
+  });
+  test('C6 legacy reference-derived assistant prose is not replayed', () {
+    const hash = 'LEGACY_WHOLE_ROW_DIGEST_C6';
+    final raw = ToolCallResult(
+      status: ToolCallStatus.succeeded,
+      summary: 's',
+      objectRefs: [
+        ObjectRef(
+          moduleId: 'inquiry',
+          objectType: 'project_item',
+          objectId: 'i',
+          contentDigest: hash,
+        ),
+      ],
+    );
+    final history = modelToolHistory([
+      {'role': 'system', 'content': 's'},
+      {
+        'role': 'tool',
+        'tool_call_id': 'old',
+        'content': jsonEncode({
+          'trustedToolResult': modelToolResult(raw),
+          'modelDisclosurePolicy': 1,
+          'citations': [],
+        }),
+      },
+      {'role': 'assistant', 'content': hash},
+    ]);
+    expect(history.hadLegacyResult, isTrue);
+    expect((history.messages.last as Map)['content'], isNot(contains(hash)));
+  });
+  test(
+    'C6 actual gateway aliases pinned host refs without sending row digest',
+    () async {
+      const pinned = ObjectRef(
+        moduleId: 'inquiry',
+        objectType: 'project_item',
+        objectId: 'item-c6',
+        contentDigest: 'WHOLE_ROW_DIGEST_CANARY_419e',
+      );
+      final f = await LoopFixture.open();
+      f.objects = [pinned];
+      f.tools.register(
+        providerId: 'inquiry',
+        descriptor: ToolDescriptor(
+          toolId: 'inquiry.object',
+          moduleId: 'inquiry',
+          effect: ToolEffect.read,
+          parameterSchema: {
+            'type': 'object',
+            'properties': <String, Object?>{},
+            'additionalProperties': false,
+          },
+        ),
+        handler: (_) async => ToolCallResult(
+          status: ToolCallStatus.succeeded,
+          summary: '本机摘要',
+          data: {
+            'record': {'name': '合法品名'},
+          },
+          objectRefs: [pinned],
+        ),
+      );
+      f.replies
+        ..add(LoopReply.sse(sseCalls([('c1', 'inquiry__object', '{}')])))
+        ..add(LoopReply.sse(sseText('完成')));
+      final agent = f.agent();
+      final task = await f.run(agent, await f.start(agent, f.profile()));
+      expect(task.state, PersonalTaskState.succeeded, reason: task.error);
+      for (final body in f.bodies) {
+        expect(
+          jsonEncode(body['messages']),
+          isNot(contains(pinned.contentDigest!)),
+        );
+        expect(jsonEncode(body['messages']), isNot(contains('contentDigest')));
+      }
+      final tool =
+          (f.bodies.last['messages'] as List)
+                  .where((m) => (m as Map)['role'] == 'tool')
+                  .single
+              as Map;
+      final frame = jsonDecode(tool['content'] as String) as Map;
+      final projected =
+          (frame['trustedToolResult']['objectRefs'] as List).single as Map;
+      expect(projected['modelRef'], startsWith('mr1_'));
+      expect(projected['objectId'], pinned.objectId);
+      expect(
+        frame['citations'][0]['reference']['modelRef'],
+        projected['modelRef'],
+      );
+      expect(jsonEncode(task.payload['step']), contains(pinned.contentDigest!));
+      final call =
+          ((task.payload['step'] as Map)['calls'] as List).single as Map;
+      expect(
+        f.tools
+            .receiptFor(call['invocationId'] as String)!
+            .result!
+            .objectRefs
+            .single,
+        pinned,
+      );
+    },
+  );
+  test(
+    'C6 persisted resume uses new task aliases and keeps original receipt pins',
+    () async {
+      const pinned = ObjectRef(
+        moduleId: 'inquiry',
+        objectType: 'project_item',
+        objectId: 'resume-c6',
+        contentDigest: 'RESUME_WHOLE_ROW_DIGEST_C6',
+      );
+      final f = await LoopFixture.open();
+      f.objects = [pinned];
+      f.addTool(
+        'inquiry.object',
+        ToolEffect.write,
+        onCall: (_) async => ToolCallResult(
+          status: ToolCallStatus.succeeded,
+          summary: '本机原件',
+          objectRefs: [pinned],
+        ),
+      );
+      f.replies.add(LoopReply.sse(sseCalls([('c1', 'inquiry__object', '{}')])));
+      final agent = f.agent();
+      var task = await f.run(agent, await f.start(agent, f.profile()));
+      await agent.confirm(
+        task.id,
+        requestDigest: task.payload['requestDigest'] as String,
+      );
+      task = f.repo.task(task.id)!;
+      await agent.pause(task.id);
+      f.replies.add(LoopReply.sse(sseText('恢复完成')));
+      final done = await f.run(agent, await agent.resume(task.id));
+      expect(done.state, PersonalTaskState.succeeded);
+      expect(done.id, isNot(task.id));
+      expect(
+        jsonEncode(f.bodies.last['messages']),
+        isNot(contains(pinned.contentDigest!)),
+      );
+      expect(
+        jsonEncode(f.bodies.last['messages']),
+        isNot(contains('contentDigest')),
+      );
+      expect(jsonEncode(f.bodies.last['messages']), contains('mr1_'));
+      expect(
+        jsonEncode(task.payload['messages']),
+        contains(pinned.contentDigest!),
+      );
+      final call =
+          ((task.payload['step'] as Map)['calls'] as List).single as Map;
+      expect(
+        f.tools
+            .receiptFor(call['invocationId'] as String)!
+            .result!
+            .objectRefs
+            .single,
+        pinned,
+      );
+      expect(f.callsOf('inquiry.object'), 1);
+    },
+  );
   test(
     'fresh real model request keeps registered scalars and not local free text',
     () async {

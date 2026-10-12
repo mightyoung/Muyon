@@ -109,6 +109,7 @@ class PersonalAgent {
         mode: uiPlanningMode,
         requestView: _ctx.view,
         modelHistory: (task) => modelTaskToolHistory(task, _ctx.tools),
+        modelReferences: _ctx.modelReferences,
         enabled: presentationPreference == null ? uiPlanningEnabled : true,
         allowsPresentation: presentationPreference == null
             ? null
@@ -889,6 +890,7 @@ class PersonalAgent {
 
   Future<void> close() async {
     _ctx.closing = true;
+    _ctx.closeModelReferences();
     // Withdraw UI synchronously, but enqueue the host's interrupted terminal
     // before yielding to a blocked prepare or awaiting presentation cleanup.
     final presentationClosing = presentationPreference?.close();
