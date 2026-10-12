@@ -84,7 +84,7 @@ class PackageAndroidTests(unittest.TestCase):
         if Path(argv[0]).name == 'apksigner' or argv[0].endswith('apksigner'):
             cert = (
                 'Signer #1 certificate DN: CN=Android Debug, O=Android, C=US\n'
-                'Signer #1 certificate SHA-256 digest: ' + ('c' * 64) + '\n'
+                'Signer #1 certificate SHA-256 digest: ' + ':'.join(['cc']*32) + '\n'
             )
             return subprocess.CompletedProcess(args, 0, stdout=cert, stderr='')
         if Path(argv[0]).name == 'java' or argv[0] == 'java':

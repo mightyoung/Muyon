@@ -82,9 +82,9 @@ def main():
         signer = max(candidates, key=lambda p: tuple(int(n) for n in re.findall(r'\d+', p.parent.name)))
         certificate = command(str(signer), 'verify', '--print-certs', str(source))
         require('CN=Android Debug' in certificate, 'Expected internal debug-signed APK')
-        digest = re.search(r'Signer #1 certificate SHA-256 digest: (\w+)', certificate)
+        digest = re.search(r'Signer #1 certificate SHA-256 digest:\s*([0-9A-Fa-f:]+)', certificate)
         require(digest, 'Certificate digest missing')
-        signing = {'method': 'android-debug-key', 'certificate_sha256': digest[1], 'distribution': False}
+        signing = {'method': 'android-debug-key', 'certificate_sha256': digest[1].replace(':', '').lower(), 'distribution': False}
         tools['java'] = command('java', '-version')
         tools['android_build_tools'] = signer.parent.name
         gradle = command(str((app / 'android/gradlew').resolve()), '--version')

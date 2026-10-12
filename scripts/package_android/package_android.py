@@ -169,11 +169,12 @@ def sha256_file(path: Path) -> str:
 def verify_debug_signing(apksigner: Path, apk: Path) -> dict:
     completed = run_checked([str(apksigner), 'verify', '--print-certs', str(apk)])
     require('CN=Android Debug' in completed.stdout, 'Expected internal debug-signed APK')
-    match = re.search(r'Signer #1 certificate SHA-256 digest: (\w+)', completed.stdout)
+    match = re.search(r'Signer #1 certificate SHA-256 digest:\s*([0-9A-Fa-f:]+)', completed.stdout)
     require(bool(match), 'Certificate digest missing')
+    digest = match.group(1).replace(':', '').lower()
     return {
         'method': 'android-debug-key',
-        'certificate_sha256': match.group(1),
+        'certificate_sha256': digest,
         'distribution': False,
     }
 
