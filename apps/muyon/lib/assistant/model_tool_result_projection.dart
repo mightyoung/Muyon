@@ -75,31 +75,46 @@ ModelToolHistory modelToolHistory(List<Object?> messages) {
     }
     var output = Map<String, Object?>.from(message);
     final content = message['content'];
-    if ((message['role'] == 'tool' ||
-            (message['role'] == 'user' &&
-                _followsCompatibilityCall(messages, index))) &&
-        content is String) {
-      try {
-        final body = jsonDecode(content);
-        if (body is Map && body['trustedToolResult'] is Map) {
-          final result = ToolCallResult.fromJson(
-            Map<String, Object?>.from(body['trustedToolResult'] as Map),
-          );
-          final safe = modelToolResult(result);
-          if (body['modelDisclosurePolicy'] != 1 ||
-              jsonEncode(safe) != jsonEncode(body['trustedToolResult'])) {
-            legacy = true;
+    final hostResult =
+        message['role'] == 'tool' ||
+        (message['role'] == 'user' &&
+            _followsCompatibilityCall(messages, index));
+    if (hostResult) {
+      var recognized = false;
+      if (content is String) {
+        try {
+          final body = jsonDecode(content);
+          if (body is Map && body['trustedToolResult'] is Map) {
+            final result = ToolCallResult.fromJson(
+              Map<String, Object?>.from(body['trustedToolResult'] as Map),
+            );
+            final safe = modelToolResult(result);
+            if (body['modelDisclosurePolicy'] != 1 ||
+                jsonEncode(safe) != jsonEncode(body['trustedToolResult'])) {
+              legacy = true;
+            }
+            output['content'] = jsonEncode({
+              'trustedToolResult': safe,
+              'modelDisclosurePolicy': 1,
+              'citations': body['citations'] is List
+                  ? body['citations']
+                  : const [],
+            });
+            recognized = true;
+          } else if (body is Map && body['notExecuted'] is String) {
+            // This is an outcome placeholder, not a result field or summary.
+            output['content'] = jsonEncode({'notExecuted': '未执行'});
+            recognized = true;
           }
-          output['content'] = jsonEncode({
-            'trustedToolResult': safe,
-            'modelDisclosurePolicy': 1,
-            'citations': body['citations'] is List
-                ? body['citations']
-                : const [],
-          });
+        } on Object {
+          // Malformed old checkpoints are retained locally, never sent raw.
         }
-      } on FormatException {
-        /* ordinary user text */
+      }
+      if (!recognized) {
+        legacy = true;
+        output['content'] = jsonEncode({
+          'modelToolResultUnavailable': 'unregistered_result',
+        });
       }
     }
     if (legacy && message['role'] == 'assistant') {
