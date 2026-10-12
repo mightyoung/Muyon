@@ -1,0 +1,3 @@
+Windows ZIP entries=33 bad_paths=[] content_hits=[] signing={'method': 'unsigned', 'authenticode': False}
+Android APK entries=429 bad_paths=[] content_hits=[] signing={'method': 'android-debug-key', 'certificate_sha256': '3cfe7622199b240450a76d77bc7728da75353f0ecd4e1eebf8a235d0a1aac1df', 'distribution': False, 'experience_only_note': '仅供体验，非发布签名'} dart_defines=[] keyless=True
+NO_KEY_OK

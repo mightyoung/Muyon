@@ -1,0 +1,54 @@
+{
+  "build_sha": "a66819630e9b8072deb3c6a8f41ea98bf3adfd58",
+  "platform": "android",
+  "os": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "architecture": "x86_64",
+  "tools": {
+    "flutter": {
+      "frameworkVersion": "3.47.5",
+      "channel": "stable",
+      "repositoryUrl": "https://github.com/flutter/flutter.git",
+      "frameworkRevision": "6a19cca56475dbfba1478ee68d7bd0c2ef891da1",
+      "frameworkCommitDate": "2026-09-17 14:13:22 -0400",
+      "engineRevision": "af7e796e161ae0bb1ff0758c71a7105418bd9ded",
+      "engineCommitDate": "2026-09-16 18:35:09.000Z",
+      "engineContentHash": "ab598368592da0064197e2bc15c7f5b0a2c6bb1f",
+      "engineBuildDate": "2026-09-16 12:35:21.428",
+      "dartSdkVersion": "3.13.4",
+      "devToolsVersion": "2.60.0",
+      "flutterVersion": "3.47.5",
+      "flutterRoot": "/opt/hostedtoolcache/flutter/stable-3.47.5-x64"
+    },
+    "python": "3.12.3",
+    "java": "openjdk version \"17.0.20.1\" 2026-08-18",
+    "android_build_tools": "37.0.0",
+    "android_ndk": [
+      "27.3.13750724",
+      "29.0.14206865",
+      "30.0.16248370"
+    ]
+  },
+  "signing": {
+    "method": "android-debug-key",
+    "certificate_sha256": "3cfe7622199b240450a76d77bc7728da75353f0ecd4e1eebf8a235d0a1aac1df",
+    "distribution": false,
+    "experience_only_note": "\u4ec5\u4f9b\u4f53\u9a8c\uff0c\u975e\u53d1\u5e03\u7b7e\u540d"
+  },
+  "dart_defines": [],
+  "build_command": [
+    "flutter",
+    "build",
+    "apk",
+    "--release"
+  ],
+  "internal_validation_only": true,
+  "keyless": true,
+  "sdk_home": "/usr/local/lib/android/sdk",
+  "files": [
+    {
+      "path": "muyon-android-a66819630e9b8072deb3c6a8f41ea98bf3adfd58-internal.apk",
+      "bytes": 191782958,
+      "sha256": "b6105555f20102a24a9ef59c81b4a03b084c729c4e3b31007301862c4cec1437"
+    }
+  ]
+}

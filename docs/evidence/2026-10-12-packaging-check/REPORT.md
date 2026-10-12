@@ -96,3 +96,45 @@ python3 scripts/package_android/package_android.py \
 
 1. Windows：选 W1 或 W2；若 W1，批准触发器补丁与首次 artifact 存储范围后再跑。
 2. Android：在已缓存 SDK+NDK+Java17 的环境跑 `scripts/package_android/package_android.py`，交 APK/SHA256/manifest。
+
+## PACKAGING-BUILD 结果（W1 / A1，2026-10-12）
+
+工作流提交 / build SHA：`a66819630e9b8072deb3c6a8f41ea98bf3adfd58`（分支 `task/packaging-android-windows-20261012`）。
+用户已批准 Windows W1、Android A1；仅本任务分支 `push` 触发；未改 main；无 secrets；标准托管 runner。
+
+### 工作流 run
+
+| 平台 | Run | 结论 |
+|---|---|---|
+| Windows | https://github.com/mightyoung/Muyon/actions/runs/38261835192 | success（9m10s） |
+| Android | https://github.com/mightyoung/Muyon/actions/runs/38261835161 | success（6m56s） |
+
+### 产物
+
+| 平台 | 文件名 | 大小 | SHA256 | build SHA |
+|---|---|---|---|---|
+| Windows | `muyon-windows-a66819630e9b8072deb3c6a8f41ea98bf3adfd58-Release.zip` | 41296801 | `7ff7eaf286117182aef86035a8d08942b66e106fb81d329d22a5f6e46582c83c` | `a66819630e9b8072deb3c6a8f41ea98bf3adfd58` |
+| Android | `muyon-android-a66819630e9b8072deb3c6a8f41ea98bf3adfd58-internal.apk` | 191782958 | `b6105555f20102a24a9ef59c81b4a03b084c729c4e3b31007301862c4cec1437` | `a66819630e9b8072deb3c6a8f41ea98bf3adfd58` |
+
+manifest 副本：`manifests-a668196/`。完整 ZIP/APK 保留在 Actions artifact（1 日）与本机 `artifacts-*/from-a668196/`（不入库）。
+
+### 四项结果
+
+| 平台 | 脚本测试 | 原生构建 | 启动 | 交互 |
+|---|---|---|---|---|
+| Windows | 通过（package_artifacts 26/26；工作流静态检查） | **通过**（windows-2022 @ a668196） | **未实跑** | **未实跑** |
+| Android | 通过（package_android 11/11） | **通过**（ubuntu-24.04 @ a668196） | **未实跑** | **未实跑** |
+
+### 无密钥核查
+
+方法：① 工作流 no-key 步骤拒绝 `--dart-define` 注入与私钥装甲；② 下载产物后扫 ZIP/APK 成员路径黑名单；③ 非二进制成员扫 `--dart-define=` / `api_key=` / 私钥装甲 / `sk-` 长串；④ 读 manifest：Windows `signing.method=unsigned`，Android `keyless=true`、`dart_defines=[]`、`signing.method=android-debug-key` 且含「仅供体验，非发布签名」。
+
+结果：见 `nokey-verification-a668196.txt` — **两端 NO_KEY_OK**。
+
+### 构建过程备注
+
+- Windows：`package.py` 曾误期待 `data/icu.dat`，已改为 Flutter 实际安装的 `data/icudtl.dat`。
+- Android：发布构建去掉 `--no-pub`（避免 `integration_test` 残留进 GeneratedPluginRegistrant）；apksigner digest 兼容带冒号格式。
+- Android 使用 runner 预装 SDK（`/usr/local/lib/android/sdk`）；本打包脚本未调用 sdkmanager。AGP/Flutter 构建过程可能按工程声明的 ndkVersion 协调 NDK（与 Windows 侧 ONNX 依赖下载同类，非本脚本拉取）。
+- 首次 push 工作流文件时 box OAuth 缺 `workflow` scope，经用户 Mac 上带 `workflow` 权限的 `gh` 用 Git Data API 推送；后续同法。
+
