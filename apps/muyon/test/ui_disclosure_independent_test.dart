@@ -334,7 +334,18 @@ void main() {
     test('C3 real: unknown stored field is not outbound', () async {
       final (prompt, _, _) = await batchPlan('project_item');
       debugPrintUnknown(f.unknownStored);
-      expect(prompt, isNot(contains(DisclosureCanary.unknownField)));
+      // Unwired (the store drops the field) is an explicit failure, not a pass.
+      final verdict = canaryVerdict(
+        stored: f.unknownStored,
+        leaked: prompt.contains(DisclosureCanary.unknownField),
+      );
+      expect(
+        verdict,
+        CanaryVerdict.pass,
+        reason: verdict == CanaryVerdict.unwired
+            ? '未接通：公共存储不保存未知字段，canary 没有前置条件'
+            : 'unknown stored field reached the model',
+      );
     });
 
     test(

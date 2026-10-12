@@ -354,9 +354,12 @@ class ContextCompactor {
   /// more to summarize. The instruction is fixed; everything else is quoted
   /// data inside `referenceData`, never anything addressed to the model.
   /// Neither the system message nor the memories are in it.
+  /// [projectModel] projects the whole previous summary, references included,
+  /// to the model's form: the stored summary keeps the full references.
   SummaryPlan? planSummary(
     List<Object?> messages,
     CompactionState state, {
+    required Object? Function(Object? json) projectModel,
     int maxItemChars = 4000,
   }) {
     final upTo = tailStart(messages);
@@ -388,7 +391,9 @@ class ContextCompactor {
     }
     final previous = state.summary == null
         ? null
-        : _json(state.summary!['content'])?['conversationSummary'];
+        : projectModel(
+            _json(state.summary!['content'])?['conversationSummary'],
+          );
     return SummaryPlan(
       from: from,
       upTo: upTo,

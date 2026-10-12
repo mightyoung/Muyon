@@ -123,6 +123,15 @@ final class _Entry {
   final ObjectRef ref;
 }
 
+/// Whether any string in [json] carries a model handle. Handles are labels the
+/// model reads; the host never accepts one back, so such a reply is refused.
+bool carriesModelHandle(Object? json) => switch (json) {
+  String text => text.contains('mr1_'),
+  List items => items.any(carriesModelHandle),
+  Map entries => entries.values.any(carriesModelHandle),
+  _ => false,
+};
+
 /// Replaces every object reference in [json] by its model form: locating fields
 /// stay, `contentDigest` goes, a handle is added. Artifact digests are dropped.
 /// Other keys, including a bare `contentDigest` in tool data, are untouched.

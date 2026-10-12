@@ -692,7 +692,12 @@ class PersonalAgent {
       ].contains(task.stage);
       final previewOk =
           task.stage == AgentResume.stage ||
-          AgentContext.digest(task.payload['preview']) == requestDigest;
+          (AgentContext.digest(task.payload['preview']) == requestDigest &&
+              (task.stage != 'model' ||
+                  _model.approvedRequestIsCurrent(task)) &&
+              (task.stage != 'compaction' ||
+                  task.payload['projectionPin'] ==
+                      _ctx.modelBinding(task).pin));
       if (!await _ctx.commit(
         task.copy({
           'state': 'running',
@@ -775,6 +780,8 @@ class PersonalAgent {
           },
         );
     _ctx.modelTokens[id]?.cancel();
+    // A cancelled task mints no further handles.
+    _ctx.modelReferences.revokeTask(id);
     _ctx.toolTokens[id]?.cancel();
     Object? taskError;
     StackTrace? taskStack;

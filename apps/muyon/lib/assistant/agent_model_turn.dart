@@ -72,6 +72,42 @@ class AgentModelTurn {
     );
   }
 
+  /// The request as it would be sent now, from the stored task and the host's
+  /// current projection. A changed pin or source changes it.
+  Map<String, Object?> previewOf(PersonalTask task) => {
+    'endpoint': ctx.profile(task).endpoint.toString(),
+    'profile': ctx.previewProfile(task),
+    'scope': projectModelJson(
+      task.scope.toJson(),
+      ctx.modelReferences,
+      ctx.modelBinding(task),
+    ),
+    'messages': ctx.view(task),
+    'dataCategories': ['conversation', 'memories', 'tool_results'],
+    // Native mode sends more than the messages; the person confirms that
+    // too, so the tools and the mode are part of the digest.
+    if (AgentContext.native(task)) ...{
+      'mode': 'native',
+      'tools': task.payload['nativeTools'],
+    },
+    // The person is told when earlier content was compacted.
+    'compacted': ?_compacted(task),
+    // Only when the token budget is nearly spent: the request is then
+    // limited to what is left, and the person sees the limit too.
+    'maxOutputTokens': ?_outputCap(task),
+  };
+
+  /// Whether the request that would be sent now is the one the person
+  /// approved. Any failure to rebuild it counts as not approved.
+  bool approvedRequestIsCurrent(PersonalTask task) {
+    try {
+      return AgentContext.digest(previewOf(task)) ==
+          task.payload['requestDigest'];
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> waitForModel(PersonalTask task) async {
     try {
       final planning = ctx.uiPlanning;
@@ -150,28 +186,7 @@ class AgentModelTurn {
       // the existing text model request keeps its own confirmation flow.
       task = _withoutUiPlanning(task);
     }
-    final preview = {
-      'endpoint': ctx.profile(task).endpoint.toString(),
-      'profile': ctx.previewProfile(task),
-      'scope': projectModelJson(
-        task.scope.toJson(),
-        ctx.modelReferences,
-        ctx.modelBinding(task),
-      ),
-      'messages': ctx.view(task),
-      'dataCategories': ['conversation', 'memories', 'tool_results'],
-      // Native mode sends more than the messages; the person confirms that
-      // too, so the tools and the mode are part of the digest.
-      if (AgentContext.native(task)) ...{
-        'mode': 'native',
-        'tools': task.payload['nativeTools'],
-      },
-      // The person is told when earlier content was compacted.
-      'compacted': ?_compacted(task),
-      // Only when the token budget is nearly spent: the request is then
-      // limited to what is left, and the person sees the limit too.
-      'maxOutputTokens': ?_outputCap(task),
-    };
+    final preview = previewOf(task);
     if (utf8.encode(jsonEncode(preview)).length > 256 * 1024) {
       await ctx.fail(task, '上下文过大，请缩小范围');
       return;
@@ -406,6 +421,8 @@ class AgentModelTurn {
   }
 
   Future<void> runModel(PersonalTask task, {bool automatic = false}) async {
+    // Checked before any review or send: the bytes must be those approved.
+    if (!approvedRequestIsCurrent(task)) throw StateError('preview_changed');
     final authority = ctx.modelAuthorization;
     if (authority == null) return _runPermittedModel(task);
     if (!automatic && !authority.hasReview(task.id)) {
@@ -478,7 +495,10 @@ class AgentModelTurn {
         return;
       }
       final response = _protocolReply(text);
-      if (response == null) {
+      // A handle is an output label only: a tool reply that carries one is
+      // refused like any other protocol break, and nothing is resolved.
+      if (response == null ||
+          (response['type'] == 'tool' && carriesModelHandle(response))) {
         // The draft was only ever a view of this text: dropped with it.
         ctx.drafts.discard(task.id);
         // Prose, native tool-call markup or a wrong shape is never acted on.
@@ -874,8 +894,13 @@ class AgentModelTurn {
         (t as Map)['name'] as String: t['toolId'] as String,
     };
     // One bad call spoils the reply: it is discarded whole, so no saved call
-    // is ever left without its result.
-    if (reply.calls.any((c) => !c.valid || toolIds[c.name] == null)) {
+    // is ever left without its result. A handle returned by the model is refused.
+    if (reply.calls.any(
+      (c) =>
+          !c.valid ||
+          toolIds[c.name] == null ||
+          carriesModelHandle(c.arguments),
+    )) {
       return discard();
     }
     final advanced = billed.copy({'round': (task.payload['round'] as int) + 1});

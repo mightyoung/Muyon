@@ -115,6 +115,8 @@ class AgentCompactionFlow {
       final binding = ctx.modelBinding(task);
       final plan = ctx.compactor.planSummary(
         ctx.projectMessages(task, messages),
+        projectModel: (json) =>
+            projectModelJson(json, ctx.modelReferences, binding),
         next.copyWith(
           cleared: {
             for (final e in next.cleared.entries)
@@ -319,6 +321,9 @@ class AgentCompactionFlow {
       'waitingFor': '为节省上下文，需先把较早内容发给模型做摘要；确认发送以下内容',
       'preview': preview,
       'requestDigest': requestDigest,
+      // The handles in the previewed messages were minted under this pin; a
+      // later pin means the bytes that would be sent differ from the approval.
+      'projectionPin': ctx.modelBinding(task).pin,
       'expiresAt': ctx
           .clock()
           .toUtc()
@@ -397,6 +402,9 @@ class AgentCompactionFlow {
     PersonalTask task, {
     bool automatic = false,
   }) async {
+    if (task.payload['projectionPin'] != ctx.modelBinding(task).pin) {
+      throw StateError('preview_changed');
+    }
     final authority = ctx.modelAuthorization;
     if (authority == null) return _runPermittedCompaction(task);
     final permission = authority.take(

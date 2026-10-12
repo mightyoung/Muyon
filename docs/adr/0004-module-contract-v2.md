@@ -740,3 +740,15 @@ REG-1（本文）→ REG-2 → REG-3 / REG-4 / T-3 并行 → S-1 → REG-5（�
 实现要点：规划请求的通用序列化（`UiPlanningRequest.toJson`）默认不发送任何 fact、computed、状态、视图或草稿值，`notDisclosed` 残值与 `sources.originalText` 永不发送，旧快照 ID 只发请求级别名；宿主通过 `UiModelDisclosure` 登记允许的 id（Inquiry 源的登记见 `inquiry_model_disclosure.dart`）。对话请求（预览、真实请求、令牌估算、规划历史、摘要请求）共用一个投影：对象引用保留定位字段，去掉 `contentDigest`，附宿主 `ModelReferenceMap` 发的 `modelRef`。`modelRef` 由宿主密钥对 task、scope、快照 pin 与整行摘要做 HMAC 得到，同一任务同一 pin 下稳定（确认卡与实际请求字节一致），换任务、换 scope、pin 变化（权限或生命周期变更）或任务撤销后一律拒绝，不回退为原摘要。持久对象身份、回执与 CAS 仍用完整摘要。工具结果 `data` 内非对象引用形态的键（例如科研写工具要求回传的 `expected_digest`）不在本次范围。
 
 已测路径：规划请求（真实 Inquiry 源，批/流，接受与拒绝）、系统提示中的范围、工具结果历史、确认卡与实际请求一致、`agent_resume` 续跑、手工 `startTool`（不产生模型请求）、pin 变化。**未测**：摘要（compaction）请求的真实运行（只有投影代码，没有端到端用例）；进程重启后的句柄存续（密钥持久，映射表不持久，重启后旧句柄不可解析，重新投影会得到同样的句柄）。
+
+## 2026-10-12 补充二：modelRef 为输出标签，不回传（C6-FIX-1）
+
+决定（leader A）：`modelRef` 只是模型用来指称已展示对象的输出标签，宿主不接受模型回传的句柄，本轮不设宿主解析入口。`ModelReferenceMap.resolve` 只是映射本身的单元能力，不属于生产路径，不得据此宣称“生产伪造、跨任务、过期、撤销路径已验收”。
+
+执行要点：
+- 模型回传的 `mr1_` 句柄一律拒绝：原生工具调用的参数、兼容模式的工具回复中，任一字符串含 `mr1_` 即整条回复作废并走纠正流程，工具不执行（与其它协议违规同一路径）。
+- `PersonalAgent.cancel` 调用 `revokeTask`，取消后同一任务不再发行句柄。
+- 发送前核对：模型请求卡在批准与执行前，用当前投影重算请求摘要，与卡上 `requestDigest` 比较；摘要请求卡保存批准时的 `projectionPin`，pin 不一致即拒绝。不一致的卡不发送，任务以 `preview_changed` 失败，需要重新发起（不自动生成新卡）。重启（新宿主实例）后 pin 变化即属此类。
+- 摘要请求的 `referenceData.previousSummary` 整体投影（含 `objectsAndReferences` 中的引用），内部持久摘要保留完整引用。
+
+范围与遗留：字段披露（I-2）另行处理；`research.read_object` 中 `data` 内的 `contentDigest` 副本（I-4）仍为遗留。上一次注记中“摘要请求未测”“进程重启后句柄存续未测”两项，已由本轮的端到端用例覆盖（摘要请求的 HTTP 正文、新实例确认旧卡）。

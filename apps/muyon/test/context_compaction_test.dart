@@ -27,6 +27,8 @@ ModelCapabilities _caps({int? window, int? out}) => ModelCapabilities(
 /// About [tokens] tokens of text, with a tag to find it again.
 String _big(int tokens, String tag) => '${tag}_${'abcd' * tokens}';
 
+Object? _identity(Object? json) => json;
+
 const _summaryJson =
     '{"goal":"弄清项目成本","decisions":"先查预算","pending":"写入报价","preferences":"简短回答"}';
 
@@ -289,7 +291,11 @@ void main() {
         for (var i = 0; i < 20; i++)
           {'role': i.isEven ? 'user' : 'assistant', 'content': 'm$i'},
       ];
-      final plan = c.planSummary(messages, const CompactionState())!;
+      final plan = c.planSummary(
+        messages,
+        const CompactionState(),
+        projectModel: _identity,
+      )!;
       // The last two user turns (m16, m18) are only 4 messages: six stay.
       expect(plan.upTo, 15);
       final state = c.withSummary(const CompactionState(), plan, {
@@ -600,7 +606,11 @@ void main() {
         for (var i = 0; i < 12; i++)
           {'role': i.isEven ? 'user' : 'assistant', 'content': 'm$i'},
       ];
-      final first = c.planSummary(messages, const CompactionState())!;
+      final first = c.planSummary(
+        messages,
+        const CompactionState(),
+        projectModel: _identity,
+      )!;
       final s1 = c.withSummary(const CompactionState(), first, {
         'goal': 'g1',
         'decisions': 'd',
@@ -611,7 +621,7 @@ void main() {
         for (var i = 12; i < 20; i++)
           {'role': i.isEven ? 'user' : 'assistant', 'content': 'm$i'},
       ]);
-      final second = c.planSummary(messages, s1)!;
+      final second = c.planSummary(messages, s1, projectModel: _identity)!;
       expect(second.from, first.upTo);
       expect(second.previousDigest, s1.summaryDigest);
       expect(jsonEncode(second.messages), contains('g1'));
@@ -1015,7 +1025,11 @@ void main() {
           ],
         },
       ];
-      final plan = c.planSummary(messages, const CompactionState())!;
+      final plan = c.planSummary(
+        messages,
+        const CompactionState(),
+        projectModel: _identity,
+      )!;
       expect(plan.upTo, lessThan(messages.length - 2));
       final state = c.withSummary(const CompactionState(), plan, {
         'goal': 'g',

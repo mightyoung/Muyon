@@ -194,6 +194,17 @@ class CapturingModel {
 }
 
 /// Every canary from [canaries] that occurs in [modelVisible].
+/// Verdict of one unknown-field canary. Without the precondition (the public
+/// store kept the field) a clean prompt proves nothing, so it is never a pass.
+enum CanaryVerdict { pass, leaked, unwired }
+
+CanaryVerdict canaryVerdict({required bool stored, required bool leaked}) =>
+    !stored
+    ? CanaryVerdict.unwired
+    : leaked
+    ? CanaryVerdict.leaked
+    : CanaryVerdict.pass;
+
 Map<String, String> leaked(String modelVisible, Map<String, String> canaries) =>
     {
       for (final e in canaries.entries)

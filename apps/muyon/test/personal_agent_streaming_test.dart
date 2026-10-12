@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muyon/assistant/agent_context.dart';
 import 'package:muyon/assistant/model_request_gate.dart';
 import 'package:muyon/assistant/personal_agent.dart';
 import 'package:muyon/platform/foundation_repository.dart';
@@ -494,12 +495,23 @@ void main() {
       final agent = f.agent();
       final started = await f.start(agent, f.profile(capabilities: _native));
       // Only `read` stays a candidate for this task.
+      // The approved card names only `read` too: its previewed tools and digest
+      // follow the narrowing, so the person confirmed exactly what is sent.
+      final nativeTools = [
+        for (final t in started.payload['nativeTools'] as List)
+          if ((t as Map)['name'] == 'read') t,
+      ];
+      final preview = jsonDecode(
+        jsonEncode({
+          ...(started.payload['preview'] as Map),
+          'tools': nativeTools,
+        }),
+      ) as Map<String, Object?>;
       final narrowed = started.copy({
         'candidateIds': ['read'],
-        'nativeTools': [
-          for (final t in started.payload['nativeTools'] as List)
-            if ((t as Map)['name'] == 'read') t,
-        ],
+        'nativeTools': nativeTools,
+        'preview': preview,
+        'requestDigest': AgentContext.digest(preview),
       });
       await f.repo.updateTask(narrowed);
       final task = await f.run(agent, f.repo.task(started.id)!);
