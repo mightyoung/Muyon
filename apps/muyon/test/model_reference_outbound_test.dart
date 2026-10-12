@@ -22,9 +22,7 @@ import 'support/agent_loop_fixture.dart';
 ///   manual startTool body .......... tested here (no model request at all)
 ///   UI planning request ............ tested in ui_disclosure_independent_test
 ///   compaction summary request ..... NOT TESTED (needs a full compaction run)
-///   agent_resume replay ............ NOT TESTED (needs an interrupted run);
-///                                    it shares view()/projectMessages with
-///                                    the paths above
+///   agent_resume replay ............ tested here (resume a failed run)
 void main() {
   const raw =
       'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90';
@@ -191,6 +189,77 @@ void main() {
         throwsA(isA<ModelReferenceRejected>()),
       );
     });
+  });
+
+  group('agent_resume', () {
+    test(
+      'a resumed attempt replays the stored result with its own handles',
+      () async {
+        f.replies
+          ..add(LoopReply.sse(sseCalls([('c1', 'rich', '{}')])))
+          ..add(const LoopReply.status(500))
+          ..add(LoopReply.sse(sseText('恢复后的回答')));
+        final first = await f.run(
+          agent,
+          await f.start(
+            agent,
+            f.profile(),
+            conversationId: await selectedConversation(),
+          ),
+        );
+        expect(first.state, PersonalTaskState.failed);
+        expect(
+          jsonEncode(f.repo.task(first.id)!.payload['messages']),
+          contains(raw),
+          reason: 'the host-side record keeps the full digest',
+        );
+        final resumed = await agent.resume(first.id);
+        expect(resumed.id, isNot(first.id));
+        final done = await f.run(agent, resumed);
+        expect(done.state, PersonalTaskState.succeeded);
+        expect(f.bodies, hasLength(3));
+        for (final body in bodies()) {
+          expect(body, isNot(contains(raw)));
+        }
+        final replay = (f.bodies[2]['messages'] as List).cast<Map>();
+        final carried = replay.singleWhere((m) => m['tool_call_id'] == 'c1');
+        final ref =
+            ((jsonDecode(carried['content'] as String)['trustedToolResult']
+                            as Map)['objectRefs']
+                        as List)
+                    .single
+                as Map;
+        // minted for the resumed attempt, not for the one that failed
+        expect(
+          map.resolve(
+            ref['modelRef'] as String,
+            current: ModelReferenceBinding(
+              taskId: resumed.id,
+              scopeKey: _scopeKey(resumed),
+              pin: pin,
+            ),
+          ),
+          row,
+        );
+        expect(
+          () => map.resolve(
+            ref['modelRef'] as String,
+            current: ModelReferenceBinding(
+              taskId: first.id,
+              scopeKey: _scopeKey(first),
+              pin: pin,
+            ),
+          ),
+          throwsA(
+            isA<ModelReferenceRejected>().having(
+              (e) => e.code,
+              'code',
+              'cross_task',
+            ),
+          ),
+        );
+      },
+    );
   });
 
   group('manual tool run', () {
