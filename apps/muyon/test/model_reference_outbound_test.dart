@@ -333,14 +333,7 @@ void main() {
         ..add(LoopReply.sse(sseText(_summaryJson)))
         ..add(LoopReply.sse(sseText('完成')));
       final conversation = await selectedConversation();
-      // Older history for the summary to fold in (as context_compaction_test).
-      for (var i = 0; i < 8; i++) {
-        await f.repo.appendMessage(
-          conversation,
-          i.isEven ? 'user' : 'assistant',
-          '历史$i' * 200,
-        );
-      }
+      await _seedHistory(f, conversation);
       var task = await f.start(
         agent,
         f.profile(),
@@ -406,6 +399,34 @@ void main() {
         expect(f.repo.task(task.id)!.state, PersonalTaskState.failed);
       },
     );
+
+    test('a summary card under a new pin is not sent either', () async {
+      final conversation = await selectedConversation();
+      await _seedHistory(f, conversation);
+      f.replies.add(LoopReply.sse(sseText('好的')));
+      final task = await f.start(
+        agent,
+        f.profile(),
+        conversationId: conversation,
+      );
+      await agent.compactNow(task.id);
+      final card = f.repo.task(task.id)!;
+      expect(card.stage, 'compaction');
+      final restarted = PersonalAgent(
+        repository: f.repo,
+        gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+        tools: f.tools,
+        modelReferences: ModelReferenceMap(List.filled(32, 5)),
+        modelReferencePin: (_) => 'pin-2',
+      );
+      addTearDown(restarted.close);
+      await restarted.confirm(
+        task.id,
+        requestDigest: card.payload['requestDigest'] as String,
+      );
+      expect(f.bodies, isEmpty, reason: 'no summary request left the host');
+      expect(f.repo.task(task.id)!.state, PersonalTaskState.failed);
+    });
 
     test('the same card under the same pin is still sent', () async {
       f.replies.add(LoopReply.sse(sseText('好的')));
@@ -533,6 +554,17 @@ void main() {
       );
     });
   });
+}
+
+/// Older history for a summary to fold in (as context_compaction_test does).
+Future<void> _seedHistory(LoopFixture f, String conversation) async {
+  for (var i = 0; i < 8; i++) {
+    await f.repo.appendMessage(
+      conversation,
+      i.isEven ? 'user' : 'assistant',
+      '历史$i' * 200,
+    );
+  }
 }
 
 const _summaryJson =
