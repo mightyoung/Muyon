@@ -16,7 +16,13 @@ UiPlanningRequest request(
   Set<String> facts = const {},
   Set<String> computed = const {},
   Set<String> uiState = const {},
+  ModelReferenceMap? references,
+  String? scopeKey,
+  String? snapshotKey,
 }) => UiPlanningRequest(
+  modelReferences: references,
+  modelReferenceScopeKey: scopeKey,
+  modelReferenceSnapshotKey: snapshotKey,
   modelDisclosedFactRefs: facts,
   modelDisclosedComputedRefs: computed,
   modelDisclosedUiStateRefs: uiState,
@@ -40,6 +46,99 @@ UiPlanningRequest request(
 );
 
 void main() {
+  test(
+    'request rejects foreign task scope and snapshot maps before egress',
+    () {
+      final snapshot = DataSnapshot(
+        ref: ref,
+        facts: {
+          'name': SnapshotFact(
+            object: object,
+            field: 'name',
+            value: 'allowed',
+            state: FactState.verified,
+          ),
+        },
+      );
+      for (final context in [
+        ('other-task', 'scope', 'pin'),
+        ('task', 'other-scope', 'pin'),
+        ('task', 'scope', 'other-pin'),
+      ]) {
+        final map = ModelReferenceMap(
+          taskId: context.$1,
+          scopeKey: context.$2,
+          snapshotKey: context.$3,
+          objects: {object},
+        );
+        expect(
+          () => request(
+            snapshot,
+            references: map,
+            scopeKey: 'scope',
+            snapshotKey: 'pin',
+          ).toJson(),
+          throwsStateError,
+        );
+      }
+      final map = ModelReferenceMap(
+        taskId: 'task',
+        scopeKey: 'scope',
+        snapshotKey: 'pin',
+        objects: {object},
+      );
+      expect(
+        request(
+          snapshot,
+          references: map,
+          scopeKey: 'scope',
+          snapshotKey: 'pin',
+        ).toJson()['snapshot'],
+        isNotNull,
+      );
+      expect(
+        () => request(snapshot, references: map).toJson(),
+        throwsStateError,
+      );
+    },
+  );
+  test('legacy snapshot hash becomes opaque and only exact alias decodes', () {
+    final snapshot = DataSnapshot(
+      ref: const SnapshotRef('ROW-HASH-LEGACY-PRIVATE', 2),
+      facts: {},
+    );
+    final r = request(snapshot);
+    final wire = jsonEncode(r.toJson());
+    expect(wire, isNot(contains(snapshot.ref.id)));
+    expect(r.modelSnapshotId, startsWith('mr1_'));
+    expect(r.modelSnapshotId, r.modelSnapshotId);
+    final plan = {
+      'snapshotId': r.modelSnapshotId,
+      'snapshotRevision': 2,
+      'unrelated': r.modelSnapshotId,
+    };
+    final restored = r.hostPlanJson(plan);
+    expect(restored['snapshotId'], snapshot.ref.id);
+    expect(restored['unrelated'], r.modelSnapshotId);
+    expect(plan['snapshotId'], r.modelSnapshotId);
+    for (final id in [
+      'forged',
+      snapshot.ref.id,
+      request(snapshot).modelSnapshotId,
+    ]) {
+      expect(
+        () => r.hostPlanJson({...plan, 'snapshotId': id}),
+        throwsStateError,
+      );
+    }
+    expect(
+      () => r.hostPlanJson({...plan, 'snapshotRevision': 3}),
+      throwsStateError,
+    );
+    r.referenceMap.expire();
+    expect(() => r.hostPlanJson(plan), throwsStateError);
+    expect(() => r.toJson(), throwsStateError);
+  });
   test('opaque references are scoped, stable, private and fail closed', () {
     const object = ObjectRef(
       moduleId: 'inquiry',
