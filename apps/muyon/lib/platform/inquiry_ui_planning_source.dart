@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_module_api/muyon_module_api.dart' show AssistantScopeKind;
 import 'package:muyon_ui/dynamic_ui.dart';
@@ -123,7 +122,22 @@ class InquiryUiPlanningSource {
     };
     final snapshot = DataSnapshot(
       ref: SnapshotRef(
-        'saved-${sha256.convert(utf8.encode(jsonEncode([object.toJson(), lifecycle, authority])))}',
+        inquiryModelSnapshotId(
+          owner: host,
+          taskId: task.id,
+          scopeKey: jsonEncode(task.scope.toJson()),
+          object: object,
+          lifecycle: lifecycle!,
+          authority: authority!,
+          policyRevision: host.authorizationPolicy.current.revision,
+          revocationRevision:
+              host.foundation.database.raw
+                      .select(
+                        'SELECT COALESCE(MAX(rowid),0) AS revision FROM assistant_grants WHERE revoked_at IS NOT NULL',
+                      )
+                      .single['revision']
+                  as int,
+        ),
         selected.record.snapshotRef.revision,
       ),
       facts: facts,

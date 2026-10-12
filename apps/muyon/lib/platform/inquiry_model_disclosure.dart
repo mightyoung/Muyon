@@ -1,3 +1,8 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:muyon_module_api/ui_contract.dart' show ObjectRef;
+
 /// Model-only field registration for the bounded saved-record planning source.
 /// This is not permission: callers must also check scope, pins, owner authority
 /// and the existing sensitive-field masking. Local pages retain their fields.
@@ -51,3 +56,39 @@ bool inquiryFieldDisclosedToModel(
 }) =>
     !masked &&
     (inquiryModelDisclosedFields[objectType]?.contains(field) ?? false);
+
+/// Host-only, ephemeral snapshot aliases. Public ObjectRef identity/CAS remains
+/// untouched. A different task, pin, scope or authority never reuses an alias.
+final _snapshotIds = Expando<Map<String, (String, String)>>();
+String inquiryModelSnapshotId({
+  required Object owner,
+  required String taskId,
+  required String scopeKey,
+  required ObjectRef object,
+  required String lifecycle,
+  required String authority,
+  required String policyRevision,
+  required int revocationRevision,
+}) {
+  final entries = _snapshotIds[owner] ??= <String, (String, String)>{};
+  final key = jsonEncode([
+    scopeKey,
+    object.toJson(),
+    lifecycle,
+    authority,
+    policyRevision,
+    revocationRevision,
+  ]);
+  final previous = entries[taskId];
+  if (previous != null && previous.$1 == key) return previous.$2;
+  // Bound memory without claiming that old process-local aliases survive
+  // restoration. An evicted alias is replaced; old request validation fails.
+  if (entries.length >= 256 && !entries.containsKey(taskId)) {
+    entries.remove(entries.keys.first);
+  }
+  final random = Random.secure();
+  final id =
+      'ms1_${base64Url.encode(List.generate(32, (_) => random.nextInt(256))).replaceAll('=', '')}';
+  entries[taskId] = (key, id);
+  return id;
+}

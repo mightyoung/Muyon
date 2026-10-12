@@ -170,6 +170,7 @@ class StreamMotivationUiPlanningProvider implements UiPlanningPort {
           }
         },
       );
+      request.requireCurrentModelReferences();
       if (pendingBytes > 0) line(pending.toString());
       // Provider-level no-card decision only; the compiler still rejects an
       // empty UIPlan and cannot grant a final capability. Transport must finish.

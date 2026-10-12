@@ -12,6 +12,8 @@ import 'package:muyon_module_api/muyon_module_api.dart'
 import 'package:muyon_ui/dynamic_ui.dart';
 import 'package:muyon/platform/inquiry_ui_planning_source.dart';
 import 'package:muyon/assistant/ui_planning.dart';
+import 'package:muyon/assistant/personal_agent.dart';
+import 'package:muyon/assistant/stream_ui_planning.dart';
 import 'package:muyon/assistant/model_tool_result_projection.dart';
 
 import 'support/agent_loop_fixture.dart';
@@ -56,6 +58,136 @@ UiPlanningRequest request(
 );
 
 void main() {
+  test(
+    'C6 providers refuse a snapshot expired during actual model callback',
+    () async {
+      final snapshot = DataSnapshot(ref: ref, facts: {});
+      final batchRequest = request(snapshot);
+      final batch = MotivationUiPlanningProvider((r, _) async {
+        r.referenceMap.expire();
+        return '{"decision":"textOnly","reasonCode":"fixture","plan":null}';
+      });
+      await expectLater(batch.plan(batchRequest), throwsStateError);
+      final streamRequest = request(snapshot);
+      final stream = StreamMotivationUiPlanningProvider((r, _, emit) async {
+        emit('{"op":"end"}\n');
+        r.referenceMap.expire();
+      });
+      await expectLater(stream.plan(streamRequest), throwsStateError);
+    },
+  );
+
+  test('C6 batch callback sees opaque snapshot and restores exact current host pin', () async {
+    final snapshot = DataSnapshot(
+      ref: const SnapshotRef('PRIVATE-SAVED-ROW-HASH', 3),
+      facts: {},
+    );
+    final r = request(snapshot);
+    final provider = MotivationUiPlanningProvider((received, prompt) async {
+      final wire = jsonDecode(prompt) as Map;
+      expect(prompt, isNot(contains(snapshot.ref.id)));
+      final alias = wire['request']['snapshot']['id'];
+      return jsonEncode({
+        'decision': 'supplement',
+        'reasonCode': 'fixture',
+        'plan': {
+          'surfaceId': 'surface',
+          'revision': 2,
+          'catalogVersion': library2UiCatalog.version,
+          'snapshotId': alias,
+          'snapshotRevision': 3,
+          'intentRef': 'intent',
+          'root': 'root',
+          'nodes': [],
+        },
+      });
+    });
+    expect((await provider.plan(r)).plan!.snapshotRef, snapshot.ref);
+    final forged = MotivationUiPlanningProvider(
+      (_, _) async => jsonEncode({
+        'decision': 'supplement',
+        'reasonCode': 'fixture',
+        'plan': {'snapshotId': snapshot.ref.id, 'snapshotRevision': 3},
+      }),
+    );
+    await expectLater(forged.plan(r), throwsStateError);
+  });
+  test('C6 stream uses opaque prompt and keeps host frozen pin and malformed guards', () async {
+    final snapshot = DataSnapshot(
+      ref: const SnapshotRef('PRIVATE-SAVED-ROW-HASH', 3),
+      facts: {},
+    );
+    final r = request(snapshot);
+    final provider = StreamMotivationUiPlanningProvider((
+      received,
+      prompt,
+      emit,
+    ) async {
+      expect(prompt, isNot(contains(snapshot.ref.id)));
+      expect(
+        jsonDecode(prompt)['request']['snapshot']['id'],
+        r.modelSnapshotId,
+      );
+      emit('{"op":"end"}\n');
+    });
+    expect((await provider.plan(r)).decision, UiDisplayDecision.textOnly);
+    final bad = StreamMotivationUiPlanningProvider((_, _, emit) async {
+      emit('{"op":"end","snapshotId":"forged"}\n');
+    });
+    await expectLater(bad.plan(r), throwsA(anything));
+    r.referenceMap.expire();
+    var sent = false;
+    final expired = StreamMotivationUiPlanningProvider((_, _, _) async {
+      sent = true;
+    });
+    await expectLater(expired.plan(r), throwsStateError);
+    expect(sent, isFalse);
+  });
+  test(
+    'C6 source snapshot aliases bind task scope pin lifecycle and authority',
+    () {
+      final owner = Object();
+      String id({
+        String task = 'task',
+        String scope = 'scope',
+        ObjectRef pin = object,
+        String authority = 'owner',
+        String policy = '1',
+        int revoked = 0,
+      }) => inquiryModelSnapshotId(
+        owner: owner,
+        taskId: task,
+        scopeKey: scope,
+        object: pin,
+        lifecycle: 'active',
+        authority: authority,
+        policyRevision: policy,
+        revocationRevision: revoked,
+      );
+      final initial = id();
+      expect(initial, startsWith('ms1_'));
+      expect(id(), initial);
+      expect(id(task: 'other'), isNot(initial));
+      expect(id(scope: 'other'), isNot(initial));
+      expect(id(), isNot(initial)); // scope ABA invalidates old alias.
+      final next = id();
+      expect(id(authority: 'other'), isNot(next));
+      expect(id(policy: '2'), isNot(next));
+      expect(id(revoked: 1), isNot(next));
+      expect(
+        id(
+          pin: const ObjectRef(
+            moduleId: 'inquiry',
+            objectType: 'project_item',
+            objectId: 'item',
+            contentDigest: 'changed-private-pin',
+          ),
+        ),
+        isNot(next),
+      );
+    },
+  );
+
   for (final path in [
     'summary',
     'step-answer',
@@ -79,6 +211,14 @@ void main() {
             status: ToolCallStatus.succeeded,
             summary: canary,
             data: {'notes': canary},
+            objectRefs: [
+              ObjectRef(
+                moduleId: 'inquiry',
+                objectType: 'project_item',
+                objectId: 'unknown-host-result',
+                contentDigest: 'FALLBACK-PRIVATE-ROW-HASH-$path-123',
+              ),
+            ],
           );
           final messages = <Object?>[
             {'role': 'user', 'content': 'USER-ORIGINAL-KEPT'},
@@ -96,6 +236,7 @@ void main() {
               'step': {
                 'assistant': {'content': canary},
               },
+            if (path == 'manual-tool') 'prompt': canary,
             if (path == 'manual-tool')
               'toolCall': {
                 'tool': 'inquiry.read_object',
@@ -130,6 +271,10 @@ void main() {
           await harness.plan(task.id);
           expect(actual, isNotNull);
           expect(jsonEncode(actual!.toJson()), isNot(contains(canary)));
+          expect(
+            jsonEncode(actual!.toJson()),
+            isNot(contains('FALLBACK-PRIVATE-ROW-HASH')),
+          );
           expect(jsonEncode(actual!.toJson()), contains('USER-ORIGINAL-KEPT'));
           final preserved = f.host.foundation.task(task.id)!;
           if (path == 'step-answer') {
@@ -196,6 +341,12 @@ void main() {
       UiPlanningRequest? actual;
       final harness = UiPlanningHarness(
         repository: f.repo,
+        modelReferences: (t) => ModelReferenceMap(
+          taskId: t.id,
+          scopeKey: PersonalAgent.digest(t.scope.toJson()),
+          snapshotKey: jsonEncode([ref.id, ref.revision]),
+          objects: {selected},
+        ),
         modelHistory: (t) => modelTaskToolHistory(t, f.tools),
         requestView: (t) => modelTaskToolHistory(t, f.tools).messages,
         source: (t) async => UiPlanningHostState(

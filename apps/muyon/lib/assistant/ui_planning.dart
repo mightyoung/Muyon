@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 import 'package:muyon_module_api/ui_contract.dart';
 
 import '../platform/foundation_repository.dart';
@@ -287,6 +289,7 @@ class UiPlanningHarness {
   /// Trusted host callback binds persisted results to current registry receipts.
   /// A model/body tag or an already-filtered view cannot grant this authority.
   final ModelToolHistory Function(PersonalTask)? modelHistory;
+
   /// The same host-owned reference table used by the task's model frames.
   final ModelReferenceMap Function(PersonalTask)? modelReferences;
   final _requests = <String, Future<UiPlannedPresentation>>{};
@@ -511,8 +514,38 @@ class UiPlanningHarness {
     // Re-applying a registry-free fallback would erase that authority and
     // incorrectly classify fresh registered results as legacy. Standalone
     // harnesses without the host callback retain conservative default denial.
+    final scopeKey = sha256
+        .convert(utf8.encode(jsonEncode(task.scope.toJson())))
+        .toString();
+    final references =
+        modelReferences?.call(task) ??
+        ModelReferenceMap(
+          taskId: task.id,
+          scopeKey: scopeKey,
+          snapshotKey: jsonEncode([
+            state.snapshot.ref.id,
+            state.snapshot.ref.revision,
+          ]),
+          objects: {
+            ...task.scope.objects,
+            ...state.snapshot.facts.values.map((fact) => fact.object),
+          },
+          artifacts: state.snapshot.sources.values
+              .map((span) => span.artifact)
+              .toList(),
+        );
+    final manualTool =
+        task.profileId == null && task.payload['toolCall'] != null;
+    final question = manualTool
+        ? task.payload['modelHostToolRequestText'] as String? ??
+              '本机工具请求内容未登记披露，已省略'
+        : task.payload['prompt'] as String? ?? '';
     final safeMessages = modelHistory == null
-        ? modelToolHistory(requestMessages).messages
+        ? modelReferenceMessages(
+            modelToolHistory(requestMessages).messages,
+            references,
+            explicitUserContents: manualTool ? const {} : {question},
+          )
         : requestMessages;
     final messages = [
       for (final m in safeMessages) Map<String, Object?>.from(m as Map),
@@ -550,8 +583,9 @@ class UiPlanningHarness {
       mandatoryStates: state.intent.mandatoryStates,
       allowedActionRefs: allowed,
     );
-    final request = UiPlanningRequest(
-      question: task.payload['prompt'] as String? ?? '',
+    late final UiPlanningRequest request;
+    request = UiPlanningRequest(
+      question: question,
       answer: answer,
       conversationMessages: messages,
       conversationVersion:
@@ -562,6 +596,15 @@ class UiPlanningHarness {
       taskId: task.id,
       turnId: task.id,
       snapshot: state.snapshot,
+      modelReferences: references,
+      modelReferenceSnapshotKey: references.snapshotKey,
+      modelReferenceScopeKey: scopeKey,
+      isModelReferenceCurrent: () =>
+          isCurrentRequest(request) &&
+          !_closedRequests.contains(request) &&
+          !_cancelledTasks.contains(task.id) &&
+          jsonEncode(repository.task(task.id)?.scope.toJson()) ==
+              jsonEncode(task.scope.toJson()),
       modelDisclosedFactRefs: state.modelDisclosedFactRefs,
       modelDisclosedComputedRefs: state.modelDisclosedComputedRefs,
       modelDisclosedUiStateRefs: state.modelDisclosedUiStateRefs,
@@ -735,6 +778,7 @@ class MotivationUiPlanningProvider implements UiPlanningPort {
         'request': request.toJson(),
       }),
     );
+    request.requireCurrentModelReferences();
     final j = jsonDecode(raw) as Map<String, dynamic>;
     return UiPlanningReason.modelResult(
       UiPlanningResult(
@@ -742,7 +786,11 @@ class MotivationUiPlanningProvider implements UiPlanningPort {
         reasonCode: j['reasonCode'] as String,
         plan: j['plan'] == null
             ? null
-            : decodeUiPresentation(Map<String, dynamic>.from(j['plan'] as Map)),
+            : decodeUiPresentation(
+                request.hostPlanJson(
+                  Map<String, dynamic>.from(j['plan'] as Map),
+                ),
+              ),
       ),
     );
   }
