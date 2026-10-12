@@ -697,4 +697,47 @@ void main() {
       expect(reads, 0);
     },
   );
+  for (final unavailable in [false, true]) {
+    test(
+      'partial proposal omits unresolvable ${unavailable ? 'missing' : 'changed'} document source refs',
+      () async {
+        final file = File(p.join(store.rootPath, 'd.md'));
+        if (unavailable) {
+          file.deleteSync();
+        } else {
+          file.writeAsStringSync('different fixture bytes');
+        }
+        final prepared = await prepare(['n-d', 'n-pdf']);
+        final session = ResearchSession(
+          store.scoped('p'),
+          const WorkspaceBinding(
+            workspaceId: 'w',
+            moduleId: 'research',
+            nativeProjectId: 'p',
+          ),
+        );
+        try {
+          for (final ref in prepared.sources) {
+            expect(
+              await session.resolve(ref),
+              isNotNull,
+              reason: 'excluded source must remain in host manifest, not current resolvable refs',
+            );
+          }
+          expect(
+            prepared.sources
+                .where((r) => r.objectType == 'document')
+                .map((r) => r.objectId),
+            ['pdf'],
+          );
+          expect(
+            (prepared.manifest['sourceState'] as Map)['documents'],
+            hasLength(3),
+          );
+        } finally {
+          await session.dispose();
+        }
+      },
+    );
+  }
 }
