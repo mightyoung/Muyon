@@ -617,11 +617,23 @@ void main() {
           );
           await tester.runAsync(() => Future<void>.delayed(Duration.zero));
           await tester.pump();
-          // Non-vacuous: the fallback branch is on screen with fixed copy.
-          expect(
-            find.byKey(ValueKey('ui-stream-fallback-$taskId')),
-            findsOneWidget,
-          );
+          // New explicit no-card contract: fixed explanation is visible, and
+          // model no-card never mounts the host failure template. Host failures
+          // still require that template. The independent original is retained
+          // at immutable 65b85d89da0a8c19a0f4838fd433cb518908e2c8.
+          if (event['reasonCode'] == 'model_no_card') {
+            expect(presentation.result.decision, UiDisplayDecision.textOnly);
+            expect(
+              find.byKey(ValueKey('ui-stream-fallback-$taskId')),
+              findsNothing,
+            );
+            expect(find.text('界面未完成 · 只读，动作不可用'), findsNothing);
+          } else {
+            expect(
+              find.byKey(ValueKey('ui-stream-fallback-$taskId')),
+              findsOneWidget,
+            );
+          }
           expect(find.text(event['reasonDescription']! as String), findsOneWidget);
           expect(find.textContaining(_marker), findsNothing);
           expect(find.textContaining('credential=secret'), findsNothing);
