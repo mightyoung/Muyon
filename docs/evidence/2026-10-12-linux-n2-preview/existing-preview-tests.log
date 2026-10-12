@@ -1,0 +1,58 @@
+Resolving dependencies in `<repo>`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (109.0.0 available)
+  analyzer 13.3.0 (14.5.0 available)
+  android_file_picker 2.0.0 (2.0.1 available)
+  archive 4.0.9 (4.5.1 available)
+  cross_file 0.3.5+5 (0.4.0 available)
+  cupertino_icons 1.0.9 (2.0.0 available)
+  cupertino_ui 1.1.1 (1.1.2 available)
+  file_picker_darwin 2.1.2 (2.1.3 available)
+  file_picker_linux 2.0.1 (2.0.2 available)
+  file_picker_web 4.0.0 (4.1.0 available)
+  flutter_onnxruntime 1.8.5 (1.9.0 available)
+  image 4.10.1 (4.12.0 available)
+  jni_flutter 1.0.3 (1.0.4+1 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  material_ui 1.5.0 (1.6.0 available)
+  package_config 2.2.0 (3.0.0 available)
+  pdf 3.12.0 (3.13.1 available)
+  qr 3.0.2 (4.0.0 available)
+  screen_retriever 0.2.2 (0.3.0 available)
+  sqlite3 3.6.0 (3.7.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+  unorm_dart 0.3.1 (0.3.3 available)
+  url_launcher 6.3.2 (6.3.3 available)
+  uuid 4.5.3 (4.6.0 available)
+  vector_math 2.4.0 (2.4.3 available)
+  webdriver 3.1.0 (3.2.0 available)
+  windows_file_picker 2.0.0 (2.0.1 available)
+  xml 6.6.1 (7.1.0 available)
+  yaml 3.1.3 (3.1.4 available)
+Got dependencies in `<repo>`!
+31 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading <repo>/packages/research_module/test/section_delete_preview_test.dart
+00:00 +0: <repo>/packages/research_module/test/section_delete_preview_test.dart: zero links is complete and reuses the existing delete digest
+00:00 +1: <repo>/packages/research_module/test/section_delete_preview_test.dart: complete cascade is stable frozen and matches the existing digest
+00:00 +2: <repo>/packages/research_module/test/section_delete_preview_test.dart: bare IDs never invent a historical type including same-ID ambiguity
+00:00 +3: <repo>/packages/research_module/test/section_delete_preview_test.dart: foreign unavailable and denied evidence reveal no identifiers
+00:00 +4: <repo>/packages/research_module/test/section_delete_preview_test.dart: section project authorization fails before any detail is returned
+00:00 +5: <repo>/packages/research_module/test/section_delete_preview_test.dart: budget counts every actual cascade row including hidden metadata
+00:00 +6: <repo>/packages/research_module/test/section_delete_preview_test.dart: byte budget refuses large section or link fields before full digest
+00:00 +7: <repo>/packages/research_module/test/section_delete_preview_test.dart: model projection excludes body quote path and commercial values
+00:00 +8: <repo>/packages/research_module/test/section_delete_preview_test.dart: read preview including failures and freshness writes no business rows logs or ledgers
+00:00 +9: <repo>/packages/research_module/test/section_delete_preview_test.dart: nested read does not commit or rollback the caller transaction
+00:00 +10: <repo>/packages/research_module/test/section_delete_preview_test.dart: section list and delete digest share a real read snapshot during another writer
+00:00 +11: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: zero links explains evidence retention and cannot confirm deletion
+00:00 +12: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: complete list scrolls at 320.0 and 200% font
+00:00 +13: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: complete list scrolls at 390.0 and 200% font
+00:01 +14: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: mutation marks frozen preview stale and refresh replaces it
+00:01 +15: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: over budget and scope failures expose only a fixed error
+00:01 +16: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: unexpected database failure reports sanitized diagnostics
+00:01 +17: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: closed database initial capture reports unexpected StateError
+00:01 +18: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: closed database freshness timer reports unexpected StateError
+00:01 +19: <repo>/packages/research_module/test/section_delete_preview_ui_test.dart: writing page preview entry leaves all business rows unchanged
+00:01 +20: All tests passed!
