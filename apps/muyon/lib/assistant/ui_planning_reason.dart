@@ -13,6 +13,11 @@ final class UiPlanningReason {
   static const _user = UiPlanningReasonCategory.user;
   static const _model = UiPlanningReasonCategory.model;
   static const _reasons = <String, UiPlanningReason>{
+    'user_presentation_changed': UiPlanningReason(
+      'user_presentation_changed',
+      _user,
+      '呈现偏好已由用户更改，本轮内容卡不再使用。',
+    ),
     'user_text_only': UiPlanningReason(
       'user_text_only',
       _user,
@@ -137,7 +142,7 @@ final class UiPlanningReason {
 
   static UiPlanningReason host(String code) {
     final reason = forCode(code);
-    return reason.category == _model
+    return reason.category == _model || code == 'validated_stream_2'
         ? _reasons['planner_unavailable']!
         : reason;
   }

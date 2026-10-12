@@ -24,16 +24,21 @@ final class UiPresentationRequest {
 
 /// Gates optional content presentation only, never confirmation or authorization.
 final class UiPresentationPolicy {
-  UiPresentationPolicy._(this.mode, this._request, this._isCurrent);
+  UiPresentationPolicy._(
+    this.mode,
+    this._request,
+    this._isCurrent,
+    this._revokedReason,
+  );
   final UiPresentationMode mode;
   final UiPresentationRequest _request;
   final bool Function() _isCurrent;
+  final String? Function() _revokedReason;
 
   /// Explain a real host policy refusal without granting presentation access.
   String? blockedReasonFor(UiPresentationRequest current) {
-    if (!_isCurrent() || !identical(current, _request)) {
-      return 'host_request_changed';
-    }
+    if (!identical(current, _request)) return 'host_request_changed';
+    if (!_isCurrent()) return _revokedReason() ?? 'host_request_changed';
     return switch (mode) {
       UiPresentationMode.textOnly => 'user_text_only',
       UiPresentationMode.few =>
@@ -57,7 +62,8 @@ final class UiPresentationPolicy {
 
 /// Serialized persist-first state. The host closes this before its database.
 final class UiPresentationPreference {
-  UiPresentationPreference(FoundationRepository repository, {
+  UiPresentationPreference(
+    FoundationRepository repository, {
     UiPresentationMode missingDefault = UiPresentationMode.textOnly,
   }) : _settings = WorkspaceRepository(repository.database) {
     _mode = _read(missingDefault);
@@ -68,6 +74,8 @@ final class UiPresentationPreference {
   final WorkspaceRepository _settings;
   late UiPresentationMode _mode;
   int _generation = 0;
+  // First successful save revokes this generation permanently, including ABA.
+  final _revocationReasons = <int, String>{};
   bool _closing = false;
   Future<void> _tail = Future<void>.value();
   Future<void>? _closeFuture;
@@ -77,7 +85,9 @@ final class UiPresentationPreference {
   UiPresentationMode _read(UiPresentationMode missingDefault) {
     try {
       final rows = _settings.database.raw.select(
-        'SELECT value FROM settings WHERE key=?', [key]);
+        'SELECT value FROM settings WHERE key=?',
+        [key],
+      );
       if (rows.isNotEmpty) {
         final value = jsonDecode(rows.single['value'] as String);
         for (final mode in UiPresentationMode.values) {
@@ -87,7 +97,9 @@ final class UiPresentationPreference {
       }
       // A legacy choice, even true, does not select a new three-tier policy.
       final legacy = _settings.database.raw.select(
-        'SELECT 1 FROM settings WHERE key=?', [legacyKey]);
+        'SELECT 1 FROM settings WHERE key=?',
+        [legacyKey],
+      );
       return legacy.isEmpty ? missingDefault : UiPresentationMode.textOnly;
     } catch (_) {
       return UiPresentationMode.textOnly;
@@ -102,16 +114,35 @@ final class UiPresentationPreference {
       request._owner = this;
       request._generation = generation;
     }
-    return UiPresentationPolicy._(_mode, request,
-      () => !_closing && generation == _generation &&
-        identical(request._owner, this) && request._generation == generation);
+    return UiPresentationPolicy._(
+      _mode,
+      request,
+      () =>
+          !_closing &&
+          generation == _generation &&
+          identical(request._owner, this) &&
+          request._generation == generation,
+      () =>
+          !_closing &&
+              identical(request._owner, this) &&
+              request._generation == generation
+          ? _revocationReasons[generation]
+          : null,
+    );
   }
 
   Future<void> save(UiPresentationMode mode) {
-    if (_closing) return Future.error(StateError('Presentation settings are closing'));
+    if (_closing) {
+      return Future.error(StateError('Presentation settings are closing'));
+    }
     final operation = _tail.then<void>((_) async {
       await _settings.setSetting(key, mode.storageValue);
       _mode = mode;
+      _revocationReasons[_generation] = switch (mode) {
+        UiPresentationMode.textOnly => 'user_text_only',
+        UiPresentationMode.few ||
+        UiPresentationMode.automatic => 'user_presentation_changed',
+      };
       _generation++;
     });
     // A failed save reaches its caller while subsequent saves remain usable.
