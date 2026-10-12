@@ -29,6 +29,19 @@ final class UiPresentationPolicy {
   final UiPresentationRequest _request;
   final bool Function() _isCurrent;
 
+  /// Explain a real host policy refusal without granting presentation access.
+  String? blockedReasonFor(UiPresentationRequest current) {
+    if (!_isCurrent() || !identical(current, _request)) {
+      return 'host_request_changed';
+    }
+    return switch (mode) {
+      UiPresentationMode.textOnly => 'user_text_only',
+      UiPresentationMode.few =>
+        _request._explicit ? null : 'user_explicit_request_required',
+      UiPresentationMode.automatic => null,
+    };
+  }
+
   bool allowsPlanningFor(UiPresentationRequest current) => _allows(current);
   bool allowsContentFor(UiPresentationRequest current) => _allows(current);
 

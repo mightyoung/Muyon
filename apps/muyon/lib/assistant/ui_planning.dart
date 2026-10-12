@@ -5,6 +5,7 @@ import 'package:muyon_module_api/ui_contract.dart';
 
 import '../platform/foundation_repository.dart';
 import 'stream_ui_planning.dart';
+import 'ui_planning_reason.dart';
 
 class UiPlanningHostState {
   const UiPlanningHostState({
@@ -35,6 +36,7 @@ class UiPlannedPresentation {
   });
   final HostUiStreamProgress? stream;
   final UiPlanningResult result;
+  UiPlanningReason get reason => UiPlanningReason.forCode(result.reasonCode);
   final UiPlanningRequest? request;
   final ValidatedUiPlan? validated;
 }
@@ -51,6 +53,7 @@ class UiPlanningHarness {
     this.enabled = true,
     this.cancelTimedOutRequest,
     this.allowsPresentation,
+    this.presentationBlockReason,
     this.presentationIdentity,
   });
   final FoundationRepository repository;
@@ -58,6 +61,7 @@ class UiPlanningHarness {
       enabled && (allowsPresentation?.call(id) ?? true);
   final UiPlanningStateSource source;
   final bool Function(String)? allowsPresentation;
+  final String? Function(String)? presentationBlockReason;
   final Object? Function(String)? presentationIdentity;
   final _streamProgress = <String, HostUiStreamProgress>{};
   final _activeRequests = <String, UiPlanningRequest>{};
@@ -121,8 +125,9 @@ class UiPlanningHarness {
   }) async {
     final view = progress?.view;
     final codes = <String>{
-      ?code,
-      ?progress?.failureCode,
+      if (code != null) UiPlanningReason.host(code).code,
+      if (progress?.failureCode case final failure?)
+        UiPlanningReason.host(failure).code,
       if (view != null)
         for (final diagnostic in view.diagnostics)
           diagnostic.code.name.replaceAllMapped(
@@ -152,6 +157,7 @@ class UiPlanningHarness {
     UiPlanningRequest request, [
     HostUiStreamProgress? progress,
   ]) {
+    code = UiPlanningReason.host(code).code;
     final frozen = progress?.revoke(code);
     if (frozen != null && isCurrentRequest(request)) {
       _streamProgress[request.taskId] = frozen;
@@ -277,7 +283,10 @@ class UiPlanningHarness {
     String code, [
     UiPlanningRequest? request,
   ]) => UiPlannedPresentation(
-    UiPlanningResult(decision: UiDisplayDecision.textOnly, reasonCode: code),
+    UiPlanningResult(
+      decision: UiDisplayDecision.textOnly,
+      reasonCode: UiPlanningReason.host(code).code,
+    ),
     request,
     null,
   );
@@ -292,7 +301,11 @@ class UiPlanningHarness {
         !(allowsPresentation?.call(taskId) ?? true) ||
         task == null ||
         task.payload['uiPlanningDisabled'] == true) {
-      return fallback('planning_disabled');
+      return fallback(
+        enabled && task != null && task.payload['uiPlanningDisabled'] != true
+            ? presentationBlockReason?.call(taskId) ?? 'planning_disabled'
+            : 'planning_disabled',
+      );
     }
     final state = await _sourceState(task);
     if (epoch != _epoch ||
@@ -539,7 +552,7 @@ class UiPlanningHarness {
     }
     _requestProviders[request] = provider;
     try {
-      final result = await provider
+      final supplied = await provider
           .plan(request)
           .timeout(
             timeout,
@@ -561,9 +574,12 @@ class UiPlanningHarness {
         _streamProgress[task.id] = progress;
         await _recordProgress(request, progress);
       }
-      if (result.errors.isNotEmpty) {
+      if (supplied.errors.isNotEmpty) {
         return fallback('invalid_decision', request);
       }
+      final result = provider is StreamMotivationUiPlanningProvider
+          ? supplied
+          : UiPlanningReason.modelResult(supplied);
       if (result.plan == null) {
         return UiPlannedPresentation(result, request, null);
       }
@@ -662,12 +678,14 @@ class MotivationUiPlanningProvider implements UiPlanningPort {
       }),
     );
     final j = jsonDecode(raw) as Map<String, dynamic>;
-    return UiPlanningResult(
-      decision: UiDisplayDecision.values.byName(j['decision'] as String),
-      reasonCode: j['reasonCode'] as String,
-      plan: j['plan'] == null
-          ? null
-          : decodeUiPresentation(Map<String, dynamic>.from(j['plan'] as Map)),
+    return UiPlanningReason.modelResult(
+      UiPlanningResult(
+        decision: UiDisplayDecision.values.byName(j['decision'] as String),
+        reasonCode: j['reasonCode'] as String,
+        plan: j['plan'] == null
+            ? null
+            : decodeUiPresentation(Map<String, dynamic>.from(j['plan'] as Map)),
+      ),
     );
   }
 }

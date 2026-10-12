@@ -36,7 +36,9 @@ void main() {
       final task = await f.host.personalAgent.start(conversationId: conversation.id, prompt: '没有模型');
       expect(f.host.personalAgent.uiPresentation(task.id), isNull);
       expect(f.host.personalAgent.uiStreamProgress(task.id), isNull);
-      expect((await f.host.personalAgent.planUi(task.id)).result.reasonCode, 'planning_disabled');
+      final blocked = await f.host.personalAgent.planUi(task.id);
+      expect(blocked.result.reasonCode, 'user_explicit_request_required');
+      expect(blocked.reason.category.name, 'user');
       expect(f.host.foundation.tasks(), hasLength(1));
       expect(f.host.tools.history(), isEmpty);
       expect(f.host.assistantGrants.list(), isEmpty);

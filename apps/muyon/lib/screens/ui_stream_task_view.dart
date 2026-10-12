@@ -7,6 +7,7 @@ import 'package:muyon_module_api/ui_contract.dart';
 import '../app/bootstrap.dart';
 import '../assistant/personal_agent.dart';
 import '../assistant/ui_planning.dart';
+import '../assistant/ui_planning_reason.dart';
 import '../assistant/stream_ui_planning.dart';
 import '../assistant/ui_planning_events.dart';
 
@@ -266,6 +267,7 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('界面未完成 · 只读，动作不可用'),
+          Text(value.reason.description),
           if (value.stream case final progress?) readOnlyPreview(progress),
           snapshotFallback(request.snapshot, request.intent),
         ],
@@ -286,6 +288,11 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
               ? '界面接收中 · 动作尚不可用'
               : '界面未完成 · 只读，动作不可用',
         ),
+        if (progress.view.phase != UiStreamPhase.streaming)
+          Text(
+            UiPlanningReason.host(progress.failureCode ?? 'incomplete')
+                .description,
+          ),
         readOnlyPreview(progress),
         if (progress.view.phase != UiStreamPhase.streaming)
           snapshotFallback(progress.request.snapshot, progress.request.intent),

@@ -227,6 +227,33 @@ void main() {
   }
 
   test(
+    'empty batch reason still fails the original decision contract',
+    () async {
+      final f = await LoopFixture.open();
+      final provider = MotivationUiPlanningProvider((_, _) async => _raw(''));
+      final agent = f.agent();
+      final taskId = await _localTask(f, agent);
+      final harness = UiPlanningHarness(
+        repository: f.repo,
+        source: (_) async => state(f),
+        mode: UiPlanningMode.motivation,
+        providers: {UiPlanningMode.motivation: provider},
+      );
+      final value = await harness.plan(taskId);
+      expect(value.result.reasonCode, 'invalid_decision');
+      expect(value.validated, isNull);
+    },
+  );
+
+  test('unknown host fallback code never becomes exported reason text', () {
+    final value = UiPlanningHarness.fallback(_canary);
+    expect(value.result.reasonCode, 'planner_unavailable');
+    expect(value.reason.code, 'planner_unavailable');
+    expect(value.reason.category.name, 'host');
+    expect(value.reason.description, '界面规划暂不可用，已使用只读事实展示。');
+  });
+
+  test(
     'native stream success keeps the host validated_stream_2 code',
     () async {
       final f = await LoopFixture.open();
