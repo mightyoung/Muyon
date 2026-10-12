@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon/assistant/personal_agent.dart';
 import 'package:muyon/assistant/stream_ui_planning.dart';
 import 'package:muyon/assistant/ui_planning.dart';
