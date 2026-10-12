@@ -282,6 +282,7 @@ class UiPlanningHarness {
   /// Host cleanup must finish before a timeout fallback is exposed.
   final Future<void> Function(UiPlanningRequest)? cancelTimedOutRequest;
   final List<Object?> Function(PersonalTask)? requestView;
+
   /// Trusted host callback binds persisted results to current registry receipts.
   /// A model/body tag or an already-filtered view cannot grant this authority.
   final ModelToolHistory Function(PersonalTask)? modelHistory;
@@ -485,9 +486,9 @@ class UiPlanningHarness {
   ) async {
     final stepAnswer =
         ((task.payload['step'] as Map?)?['assistant'] as Map?)?['content'];
-    final history = modelToolHistory(
-      task.payload['messages'] as List? ?? const [],
-    );
+    final history =
+        modelHistory?.call(task) ??
+        modelToolHistory(task.payload['messages'] as List? ?? const []);
     // Derivation provenance comes from the persisted host checkpoint, not the
     // already filtered requestView (which intentionally drops the legacy flag).
     // Keep local summaries/steps unchanged; suppress only this model projection.
@@ -502,11 +503,16 @@ class UiPlanningHarness {
         ? stepAnswer
         : task.summary ?? '';
     if (answer.trim().isEmpty) return fallback('answer_unavailable');
+    final requestMessages = requestView?.call(task) ?? history.messages;
+    // Production views were projected with a current receipt/producer binding.
+    // Re-applying a registry-free fallback would erase that authority and
+    // incorrectly classify fresh registered results as legacy. Standalone
+    // harnesses without the host callback retain conservative default denial.
+    final safeMessages = modelHistory == null
+        ? modelToolHistory(requestMessages).messages
+        : requestMessages;
     final messages = [
-      for (final m in modelToolHistory(
-        requestView?.call(task) ?? history.messages,
-      ).messages)
-        Map<String, Object?>.from(m as Map),
+      for (final m in safeMessages) Map<String, Object?>.from(m as Map),
     ];
     if (messages.isEmpty ||
         messages.last['role'] != 'assistant' ||
