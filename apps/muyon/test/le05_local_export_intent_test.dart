@@ -39,9 +39,12 @@ void main() {
       String policy = 'p1',
     }) => HostEffectIntent.localExport(
       toolId: 'research.export',
-      invocationId: 'call',
+      call: phase == LocalExportPhase.generate
+          ? LocalExportGenerateCall(exportId: 'export-1', invocationId: 'call')
+          : LocalExportSaveCall(exportId: 'export-1', invocationId: 'call'),
       phase: phase,
       scopeDigest: scope.isEmpty ? scopeA : scope,
+      preparationDigest: 'd' * 64,
       preparationVersion: version,
       fileName: name,
       format: format,
@@ -148,6 +151,7 @@ void main() {
     late LocalExportPhase phase;
     late List<int> bytes;
     late String scopeDigest, fileName, format, policyVersion;
+    late String preparationDigest;
     late int preparationVersion;
     late LocalExportOverwrite overwrite;
     late LocalExportTargetCapability? target;
@@ -224,6 +228,7 @@ void main() {
       fileName = 'report-1.md';
       format = 'text/markdown';
       policyVersion = 'p1';
+      preparationDigest = 'd' * 64;
       preparationVersion = 1;
       overwrite = LocalExportOverwrite.createNew;
       target = null;
@@ -256,9 +261,18 @@ void main() {
             cachedIntent ??
             HostEffectIntent.localExport(
               toolId: request.toolId,
-              invocationId: request.invocationId,
+              call: phase == LocalExportPhase.generate
+                  ? LocalExportGenerateCall(
+                      exportId: 'export-1',
+                      invocationId: request.invocationId,
+                    )
+                  : LocalExportSaveCall(
+                      exportId: 'export-1',
+                      invocationId: request.invocationId,
+                    ),
               phase: phase,
               scopeDigest: scopeDigest,
+              preparationDigest: preparationDigest,
               preparationVersion: preparationVersion,
               fileName: fileName,
               format: format,
@@ -303,6 +317,7 @@ void main() {
       'scope': () => scopeDigest = scopeB,
       'file name': () => fileName = 'report-2.md',
       'format': () => format = 'text/plain',
+      'preparation digest': () => preparationDigest = 'e' * 64,
       'preparation version': () => preparationVersion = 2,
       'policy version': () => policyVersion = 'p2',
     };
@@ -715,9 +730,13 @@ void main() {
     HostEffectIntent? intentFor(ToolCallRequest r, ResolvedAssistantScope _) =>
         HostEffectIntent.localExport(
           toolId: r.toolId,
-          invocationId: r.invocationId,
+          call: LocalExportGenerateCall(
+            exportId: 'export-1',
+            invocationId: r.invocationId,
+          ),
           phase: LocalExportPhase.generate,
           scopeDigest: 'c' * 64,
+          preparationDigest: 'd' * 64,
           preparationVersion: 1,
           fileName: 'report-1.md',
           format: 'text/markdown',
@@ -725,7 +744,7 @@ void main() {
           sourceObjects: const [],
           targetIssuer: issuer,
           overwrite: LocalExportOverwrite.createNew,
-          policyVersion: 'p',
+          policyVersion: 'p1',
         );
 
     test('a localExport tool needs the local_exports capability', () {

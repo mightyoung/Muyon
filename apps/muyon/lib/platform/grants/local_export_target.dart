@@ -1,14 +1,12 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:uuid/uuid.dart';
 
-/// Which half of a local export an intent or approval is for. Generation
-/// writes into the research exports area; saving copies the same bytes to the
-/// place the person picked. One approval never covers both.
-enum LocalExportPhase { generate, save }
-
-enum LocalExportOverwrite { createNew, replace }
+/// Re-export stage enums from the module contract so existing host imports keep working.
+export 'package:muyon_module_api/muyon_module_api.dart'
+    show LocalExportOverwrite, LocalExportPhase;
 
 const _destinationPrefix = 'local-export:';
 

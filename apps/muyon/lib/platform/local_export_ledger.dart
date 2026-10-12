@@ -51,11 +51,15 @@ final class LocalExportLedgerRequest {
     if (_hash(frozen.bytes) != frozen.sha256) {
       throw ArgumentError('Preparation content digest mismatch');
     }
+    final call = phase == LocalExportPhase.generate
+        ? LocalExportGenerateCall(exportId: exportId, invocationId: invocationId)
+        : LocalExportSaveCall(exportId: exportId, invocationId: invocationId);
     final intent = HostEffectIntent.localExport(
       toolId: toolId,
-      invocationId: invocationId,
+      call: call,
       phase: phase,
       scopeDigest: scopeDigest,
+      preparationDigest: frozen.preparationDigest,
       preparationVersion: frozen.preparationVersion,
       fileName: frozen.kind == LocalExportKind.report
           ? 'report-$exportId.md'

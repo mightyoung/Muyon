@@ -56,14 +56,16 @@ final class HostEffectIntent {
 
   /// A local export stage (generate A or save B). The host adapter builds it
   /// from the frozen preparation; the model never supplies any of it. Bound:
-  /// stage, resolved scope, preparation version, host file name and format,
-  /// content bytes (their SHA-256 is the payload digest), the person's target
-  /// capability (save only), create/replace mode and the policy version.
+  /// stage call identity (exportId + stage-typed invocation), preparationDigest
+  /// (not only byte digest), scope, preparation version, file name/format,
+  /// content bytes, target capability (save only), overwrite and policy.
+  /// Review outcomes belong in [LocalExportPresentation], not here.
   HostEffectIntent.localExport({
     required this.toolId,
-    required this.invocationId,
+    required LocalExportCallIdentity call,
     required LocalExportPhase phase,
     required String scopeDigest,
+    required String preparationDigest,
     required int preparationVersion,
     required String fileName,
     required String format,
@@ -73,11 +75,14 @@ final class HostEffectIntent {
     LocalExportTargetCapability? target,
     required LocalExportOverwrite overwrite,
     required String policyVersion,
-  }) : _endpoint = null,
+  }) : invocationId = call.invocationId,
+       _endpoint = null,
        _endpointIdentity = null,
        _le = _LocalExport(
          phase,
+         call.exportId,
          scopeDigest,
+         preparationDigest,
          preparationVersion,
          fileName,
          format,
@@ -91,10 +96,15 @@ final class HostEffectIntent {
     final hex = RegExp(r'^[0-9a-f]{64}$');
     final saving = phase == LocalExportPhase.save;
     if (toolId.isEmpty ||
-        invocationId.isEmpty ||
+        call.invocationId.isEmpty ||
+        call.exportId.isEmpty ||
+        call.phase != phase ||
+        (phase == LocalExportPhase.generate && call is! LocalExportGenerateCall) ||
+        (phase == LocalExportPhase.save && call is! LocalExportSaveCall) ||
         this.content.isEmpty ||
         this.content.any((byte) => byte < 0 || byte > 255) ||
         !hex.hasMatch(scopeDigest) ||
+        !hex.hasMatch(preparationDigest) ||
         preparationVersion < 1 ||
         format.isEmpty ||
         policyVersion.isEmpty ||
@@ -140,8 +150,10 @@ final class HostEffectIntent {
               'local_export',
               toolId,
               invocationId,
-              _le!.phase.name,
+              _le!.exportId,
+              _le.phase.name,
               _le.scopeDigest,
+              _le.preparationDigest,
               _le.preparationVersion,
               _le.fileName,
               _le.format,
@@ -154,6 +166,10 @@ final class HostEffectIntent {
           ),
         )
       : _plainDigest;
+  String get exportId =>
+      _le?.exportId ?? (throw StateError('Not a local export'));
+  String get preparationDigest =>
+      _le?.preparationDigest ?? (throw StateError('Not a local export'));
   String get _plainDigest => _hash(
     utf8.encode(
       jsonEncode([
@@ -180,7 +196,9 @@ final class HostEffectIntent {
 final class _LocalExport {
   const _LocalExport(
     this.phase,
+    this.exportId,
     this.scopeDigest,
+    this.preparationDigest,
     this.preparationVersion,
     this.fileName,
     this.format,
@@ -190,7 +208,7 @@ final class _LocalExport {
     this.policyVersion,
   );
   final LocalExportPhase phase;
-  final String scopeDigest, fileName, format, policyVersion;
+  final String exportId, scopeDigest, preparationDigest, fileName, format, policyVersion;
   final int preparationVersion;
   final LocalExportTargetCapability? target;
   final LocalExportTargetIssuer targetIssuer;

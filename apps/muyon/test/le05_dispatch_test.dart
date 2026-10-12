@@ -55,9 +55,13 @@ void main() {
       ),
       effectIntent: (request, _) => HostEffectIntent.localExport(
         toolId: request.toolId,
-        invocationId: request.invocationId,
+        call: LocalExportGenerateCall(
+          exportId: 'export-1',
+          invocationId: request.invocationId,
+        ),
         phase: LocalExportPhase.generate,
         scopeDigest: scopeDigest,
+        preparationDigest: 'd' * 64,
         preparationVersion: 1,
         fileName: 'report-1.md',
         format: 'text/markdown',

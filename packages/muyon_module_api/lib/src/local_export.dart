@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:typed_data';
+
+import 'package:crypto/crypto.dart' as crypto;
 
 import 'context.dart';
 import 'references.dart';
@@ -51,6 +54,12 @@ List<String> localExportDeclarationProblems({
   }
   return List.unmodifiable(problems);
 }
+
+/// Which half of a local export a call or approval is for. Generation and
+/// saving never share one approval or one call identity.
+enum LocalExportPhase { generate, save }
+
+enum LocalExportOverwrite { createNew, replace }
 
 enum LocalExportKind { report, claimDrafts }
 
@@ -124,6 +133,101 @@ class LocalExportPreparation {
   final List<String> warnings;
   final int preparationVersion;
   final String manifestDigest;
+
+  /// Frozen fact digest: content, manifest, bytes, provenance, counts,
+  /// included sources, exclusions and warnings. Any fact change must change it.
+  String get preparationDigest {
+    final payload = jsonEncode([
+      sha256,
+      manifestDigest,
+      byteCount,
+      kind.name,
+      formatVersion,
+      mimeType,
+      generatedAt.toUtc().toIso8601String(),
+      dedupedObjectCount,
+      sources.map((source) => source.toJson()).toList(),
+      exclusions.map((e) => {'id': e.id, 'reason': e.reason}).toList(),
+      warnings,
+      preparationVersion,
+    ]);
+    return crypto.sha256.convert(utf8.encode(payload)).toString();
+  }
+}
+
+/// Presentation / review facts for one export stage. Review outcome is kept
+/// here, never folded into [LocalExportPreparation] or a pre-review intent.
+final class LocalExportPresentation {
+  LocalExportPresentation({
+    required this.fixedCardId,
+    required this.preparationDigest,
+    required this.phase,
+    required this.overwrite,
+    this.reviewOutcome,
+    this.targetIdentity,
+  }) {
+    if (fixedCardId.isEmpty || !_hex64.hasMatch(preparationDigest)) {
+      throw ArgumentError('Fixed card and preparation digest required');
+    }
+    if (phase == LocalExportPhase.save &&
+        (targetIdentity == null || targetIdentity!.isEmpty)) {
+      throw ArgumentError('Save presentation needs a target identity');
+    }
+    if (phase == LocalExportPhase.generate && targetIdentity != null) {
+      throw ArgumentError('Generate presentation carries no target');
+    }
+  }
+
+  final String fixedCardId;
+  final String preparationDigest;
+  final String? reviewOutcome;
+  final LocalExportPhase phase;
+  final String? targetIdentity;
+  final LocalExportOverwrite overwrite;
+
+  String get presentationDigest {
+    final payload = jsonEncode([
+      fixedCardId,
+      preparationDigest,
+      reviewOutcome,
+      phase.name,
+      targetIdentity,
+      overwrite.name,
+    ]);
+    return crypto.sha256.convert(utf8.encode(payload)).toString();
+  }
+}
+
+/// Parent export id plus a stage-specific call. Sealed so a generate identity
+/// cannot be passed where a save identity is required.
+sealed class LocalExportCallIdentity {
+  String get exportId;
+  String get invocationId;
+  LocalExportPhase get phase;
+}
+
+final class LocalExportGenerateCall implements LocalExportCallIdentity {
+  LocalExportGenerateCall({required this.exportId, required this.invocationId}) {
+    if (exportId.isEmpty || invocationId.isEmpty) {
+      throw ArgumentError('Export and invocation ids required');
+    }
+  }
+  @override
+  final String exportId, invocationId;
+  @override
+  LocalExportPhase get phase => LocalExportPhase.generate;
+}
+
+final class LocalExportSaveCall implements LocalExportCallIdentity {
+  LocalExportSaveCall({required this.exportId, required this.invocationId}) {
+    if (exportId.isEmpty || invocationId.isEmpty) {
+      throw ArgumentError('Export and invocation ids required');
+    }
+  }
+  @override
+  final String exportId, invocationId;
+  @override
+  LocalExportPhase get phase => LocalExportPhase.save;
 }
 
 enum LocalExportOutcome { succeeded, cancelled, failed, interrupted, unknown }

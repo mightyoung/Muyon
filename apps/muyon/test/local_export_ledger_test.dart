@@ -941,4 +941,6 @@ class _MutablePreparation implements LocalExportPreparation {
   int get preparationVersion => delegate.preparationVersion;
   @override
   String get manifestDigest => delegate.manifestDigest;
+  @override
+  String get preparationDigest => delegate.preparationDigest;
 }
