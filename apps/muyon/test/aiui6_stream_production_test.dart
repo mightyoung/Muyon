@@ -88,6 +88,19 @@ void main() {
       value.view.finalPlan == null && value.view.previewPlan.nodes.every((node) => node.events.isEmpty)), isTrue);
     expect(provider.progressFor(input)!.view.finalPlan!.plan.nodes, hasLength(2));
   });
+  test('revoking a complete stream keeps it complete and records the failure', () async {
+    final f = await LoopFixture.open();
+    final provider = StreamMotivationUiPlanningProvider((_, _, receive) async {
+      receive(validStream);
+      throw StateError('model_unavailable');
+    });
+    final input = request(f);
+    await expectLater(provider.plan(input), throwsA(anything));
+    final progress = provider.progressFor(input)!;
+    expect(progress.failureCode, 'model_unavailable');
+    expect(progress.view.phase, UiStreamPhase.complete);
+    expect(progress.view.previewPlan.nodes.every((node) => node.events.isEmpty), isTrue);
+  });
   test('production PersonalAgent uses real gateway deltas and whole compiler under confirmation', () async {
     final f = await LoopFixture.open();
     final preference = UiPresentationPreference(f.repo);

@@ -20,7 +20,7 @@ class HostUiStreamProgress {
           node.copyWith(events: const {}),
       ]),
       statuses: view.statuses, text: view.text, diagnostics: view.diagnostics,
-      phase: view.complete || view.phase == UiStreamPhase.streaming
+      phase: view.phase == UiStreamPhase.streaming
         ? UiStreamPhase.incomplete : view.phase,
       receivedLines: view.receivedLines, badLines: view.badLines,
       diagnosticCount: view.diagnosticCount, batchValidation: view.batchValidation),
@@ -62,6 +62,9 @@ class StreamMotivationUiPlanningProvider implements UiPlanningPort {
     // content or apply a pre-end byte limit to ignored protocol lines.
     bool getEnded() => compiler.current.phase == UiStreamPhase.complete ||
       compiler.current.phase == UiStreamPhase.rejected;
+    // An end with no node and no bad line is the model declining to draw a card.
+    String rejectedCode(UiStreamView v) => v.badLines > 0 ? 'malformed_stream' :
+      v.candidatePlan.nodes.isEmpty ? 'model_no_card' : 'invalid_plan';
     void publish() {
       final current = compiler.current;
       if (current.phase == UiStreamPhase.streaming) {
@@ -69,7 +72,7 @@ class StreamMotivationUiPlanningProvider implements UiPlanningPort {
       }
       final progress = HostUiStreamProgress(request, session, current);
       final value = current.phase == UiStreamPhase.rejected
-        ? progress.revoke(current.badLines > 0 ? 'malformed_stream' : 'invalid_plan',
+        ? progress.revoke(rejectedCode(current),
             preview: lastReadOnlyPreview)
         : progress;
       _progress[request] = value;
@@ -113,7 +116,7 @@ class StreamMotivationUiPlanningProvider implements UiPlanningPort {
         final view = compiler.current;
         throw _StreamFailure(view.phase == UiStreamPhase.limitExceeded ? 'limit_exceeded' :
           view.phase == UiStreamPhase.incomplete ? 'incomplete' :
-          view.badLines > 0 ? 'malformed_stream' : 'invalid_plan');
+          rejectedCode(view));
       }
       return UiPlanningResult(decision: UiDisplayDecision.supplement, reasonCode: 'validated_stream_2',
         plan: compiler.current.finalPlan!.plan);

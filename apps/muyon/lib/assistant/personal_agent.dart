@@ -113,6 +113,8 @@ class PersonalAgent {
             : _allowsPresentation,
         presentationBlockReason: _presentationBlockReason,
         presentationIdentity: (id) => _presentationRequests[id],
+        userTextOnly: () =>
+            presentationPreference?.mode == UiPresentationMode.textOnly,
         cancelTimedOutRequest: (request) async {
           await _uiPlanningCancellations[request]?.call();
         },

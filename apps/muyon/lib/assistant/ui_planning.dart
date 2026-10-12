@@ -55,6 +55,7 @@ class UiPlanningHarness {
     this.allowsPresentation,
     this.presentationBlockReason,
     this.presentationIdentity,
+    this.userTextOnly,
   });
   final FoundationRepository repository;
   bool canPlanTask(String id) =>
@@ -63,6 +64,10 @@ class UiPlanningHarness {
   final bool Function(String)? allowsPresentation;
   final String? Function(String)? presentationBlockReason;
   final Object? Function(String)? presentationIdentity;
+
+  /// True while the user's own choice is "text only"; separates that cause from
+  /// real host drift when a released planning run finds its request revoked.
+  final bool Function()? userTextOnly;
   final _streamProgress = <String, HostUiStreamProgress>{};
   final _activeRequests = <String, UiPlanningRequest>{};
   final _requestProviders = Map<UiPlanningRequest, UiPlanningPort>.identity();
@@ -393,7 +398,12 @@ class UiPlanningHarness {
               presentationIdentity?.call(taskId) != identity ||
               mode != selectedMode;
           if (drifted) {
-            current = fallback('host_state_changed', request);
+            current = fallback(
+              userTextOnly?.call() == true
+                  ? 'user_text_only'
+                  : 'host_state_changed',
+              request,
+            );
             if (epoch == _epoch &&
                 request != null &&
                 isCurrentRequest(request)) {
