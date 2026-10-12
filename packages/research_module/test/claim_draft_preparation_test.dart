@@ -222,7 +222,7 @@ void main() {
       expect(prepared.dedupedObjectCount, 2);
       expect(
         prepared.sources.map((s) => s.objectType),
-        containsAll(['project', 'note', 'document', 'paper_binding', 'entry']),
+        containsAll(['project', 'note', 'document', 'entry']),
       );
       expect(rows(prepared).map((r) => r['paper_rev']), everyElement(1));
       expect(

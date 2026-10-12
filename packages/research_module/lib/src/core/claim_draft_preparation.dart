@@ -39,11 +39,12 @@ class ResearchClaimDraftPreparation extends LocalExportPreparation {
     required super.sources,
     required super.exclusions,
     required super.warnings,
-    required super.manifestDigest,
+    required Map<String, Object?> manifest,
     required List<String> selectedNoteIds,
     required List<String> includedNoteIds,
     required List<Map<String, Object?>> rows,
-  }) : selectedNoteIds = List.unmodifiable(selectedNoteIds),
+  }) : manifest = freezeJsonMap(manifest),
+       selectedNoteIds = List.unmodifiable(selectedNoteIds),
        includedNoteIds = List.unmodifiable(includedNoteIds),
        rows = List.unmodifiable(rows.map(freezeJsonMap)),
        objectCounts = Map.unmodifiable({'claimDraft': rows.length}),
@@ -54,7 +55,12 @@ class ResearchClaimDraftPreparation extends LocalExportPreparation {
          sha256: _bytesDigest(bytes),
          dedupedObjectCount: rows.length,
          preparationVersion: 1,
+         manifestDigest: _digest(manifest),
        );
+
+  /// Host-only review facts, including SQL metadata and stored document paths.
+  /// A future tool receipt must not forward this whole value to a model.
+  final Map<String, Object?> manifest;
   final List<String> selectedNoteIds, includedNoteIds;
   final List<Map<String, Object?>> rows;
   final Map<String, int> objectCounts;
@@ -136,7 +142,8 @@ class ResearchClaimDraftPreparer {
         throw ClaimDraftPreparationFailure('note_outside_current_scope');
       }
     }
-    final before = _sourceState(projectId);
+    final sourceState = freezeJsonMap(_sourceFacts(projectId));
+    final before = _digest(sourceState);
     final bindings = scoped.bindings(projectId);
     final papers = entries.where((e) => e.kind == 'papers').toList();
     final sourceEntries = entries.where((e) => e.kind == 'sources').toList();
@@ -148,7 +155,7 @@ class ResearchClaimDraftPreparer {
         objectType: type,
         objectId: id,
         revisionRef: revision,
-        contentDigest: _digest(value),
+        contentDigest: _scopeDigest(value),
       );
     }
 
@@ -175,22 +182,15 @@ class ResearchClaimDraftPreparer {
       void exclude(String reason) =>
           exclusions.add(LocalExportExclusion(id, reason));
       final candidates = bindings.where((b) => b.documentId == doc.id).toList();
-      pin('paper_binding', doc.id, [
-        for (final b in candidates)
-          [
-            b.documentId,
-            b.paperId,
-            b.paperRev,
-            b.method,
-            b.hashOk,
-            b.ambiguous,
-          ],
-      ]);
       if (candidates.length != 1 || candidates.single.ambiguous) {
         exclude(candidates.isEmpty ? 'missing_binding' : 'ambiguous_binding');
         continue;
       }
       final binding = candidates.single;
+      if (!_id.hasMatch(binding.paperId) || binding.paperRev < 1) {
+        exclude('invalid_pinned_source');
+        continue;
+      }
       final matches = papers
           .where(
             (e) =>
@@ -213,28 +213,20 @@ class ResearchClaimDraftPreparer {
                 e.data['rev'] == paperData['source_rev'],
           )
           .toList();
-      pin(
-        'entry',
-        paper.id,
-        _row('entries', paper.id),
-        revision: '${binding.paperRev}',
-      );
+      pin('entry', paper.id, paperData);
       if (!_v2(paperData) ||
           binding.paperRev < 1 ||
           paperData['source_id'] is! String ||
+          !_id.hasMatch(paperData['source_id'] as String) ||
           paperData['source_rev'] is! int ||
+          (paperData['source_rev'] as int) < 1 ||
           upstream.length != 1 ||
           !_v2(upstream.single.data)) {
         exclude('invalid_pinned_source');
         continue;
       }
       final source = upstream.single;
-      pin(
-        'entry',
-        source.id,
-        _row('entries', source.id),
-        revision: '${source.data['rev']}',
-      );
+      pin('entry', source.id, source.data);
       final relative = doc.relativePath;
       final root = project.skillRoot;
       if (RegExp(r'^[A-Za-z]:').hasMatch(relative) ||
@@ -335,7 +327,7 @@ class ResearchClaimDraftPreparer {
       selectedNoteIds: selected,
       includedNoteIds: included,
       rows: rows,
-      manifestDigest: _digest({
+      manifest: {
         'kind': 'claimDrafts',
         'formatVersion': 'research-claim-drafts-v2',
         'preparationVersion': 1,
@@ -343,6 +335,7 @@ class ResearchClaimDraftPreparer {
         'projectId': projectId,
         'scope': scope.toJson(),
         'sourceStateDigest': before,
+        'sourceState': sourceState,
         'selectedNoteIds': selected,
         'includedNoteIds': included,
         'draftIds': rows.map((r) => r['id']).toList(),
@@ -353,7 +346,7 @@ class ResearchClaimDraftPreparer {
           for (final e in exclusions) {'id': e.id, 'reason': e.reason},
         ],
         'warnings': warnings,
-      }),
+      },
     );
   }
 
@@ -362,7 +355,9 @@ class ResearchClaimDraftPreparer {
         store.db.select('SELECT * FROM $table WHERE id=?', [id]).single,
       );
 
-  String _sourceState(String project) => _digest({
+  String _sourceState(String project) => _digest(_sourceFacts(project));
+
+  Map<String, Object?> _sourceFacts(String project) => {
     'project': store.db
         .select('SELECT * FROM projects WHERE id=?', [project])
         .map((r) => Map<String, Object?>.from(r))
@@ -393,7 +388,7 @@ class ResearchClaimDraftPreparer {
         )
         .map((r) => Map<String, Object?>.from(r))
         .toList(),
-  });
+  };
 }
 
 String _bytesDigest(List<int> bytes) => sha256.convert(bytes).toString();
