@@ -1,6 +1,6 @@
 # C6-REDO：模型披露不透明引用（重做）
 
-执行：Codex（路线 2）。派发：leader A，2026-10-12。集成：leader A。基线：develop `ab5506c3`；分支 `task/c6-opaque-reference-redo-20261012`。
+执行：Sonnet（senior engineer；原派 Codex，额度用完后改派）。派发：leader A，2026-10-12。集成：leader A。基线：develop `ab5506c3`；分支 `task/c6-opaque-reference-redo-20261012`。
 背景：Leader B 交接（2026-10-12）。C6 最新两枚补修 `5436f68c`、`7df93d72` 只在已停的云端工作区，用户决定**当作丢失、重做**。远端旧候选 `task/model-disclosure-opaque-reference-20261012` @ `e6579861`（CI 38208251598 失败：apps/muyon analyze、host 70 失败、coverage 分母漂移）只作**参考**，不得整枝合入。相关 PR #65（`82c2c20d`，披露 canary：20 例 9 通过 11 RED）的 RED 测试是验收依据。
 
 ## 必须达成（交接第 7 节「模型披露与 C6 引用」）
