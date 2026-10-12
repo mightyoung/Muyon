@@ -120,3 +120,6 @@
 
 - 2026-10-11 深夜：用户进一步确定 **Leader B 接替 leader A 的全部派发、任务说明、审查组织与登记职责**，并保留既定的唯一集成执行职责。成员在途工作保留，不重复派发；固定源 SHA 的独立组合验证与合后 CI 终态仍是合入条件。第 6 次交接快照见 [HANDOVER-LEADER](../tasks/HANDOVER-LEADER.md)。
 - 2026-10-11（实施跟踪，非新增设计决定）：PR42 / SN-2 / SN-3 修复在独立任务分支推进，交付与验证见 [修复记录](../tasks/PR42-SN2-SN3-REPAIR.md)。沿用已采纳三档、宿主污点与 CR-3 决定；`after_end` 协议诊断与真实传输异常分开，失败保留只读回退，不携带执行能力。缺少逐项执行语义的批卡入口不得借用整批确认。此记录不代表源码、组合 CI、独立复审或 Android 冒烟已通过，也不授权新的模型调用、打包、部署或权限。
+- 2026-10-12：Leader B 额度用完，交接回 leader A（交接要点见当日交接稿）。用户确定：leader A 为**唯一合入人**（只合 develop，不改 main、不强推、不部署）；grokbot 额度恢复，可并行两路；C6 补修 `5436f68c`、`7df93d72` 与 Android 打包脚本 `cfd7f7b9` 只存在于已停的云端工作区，**当作丢失、重做**。Codex、grok-build 额度随后也用完。
+- 2026-10-12：用户确定导出生产接线与 N2 设计（[DESIGN-EXPORT-N2](../design/export-n2-wiring-2026-10-12.md)）五项未决问题，全部按推荐：D1 导出 payload 单份 16 MiB、总 256 MiB，可核验终态 payload 7 天后释放，元数据保留、不删用户文件，active / unknown 不清理；D2 只读 check 默认 10 秒期限，历史 unknown 允许用户显式「从同一冻结内容新建副本操作」（新 exportId、新 A/B、新建目标），旧 unknown 保留；D3 删除集合含本次写范围外项目的 outline 行时整次拒绝，REG-3c 与 N2 共用守卫，本项目内但证据不可读时可删关联；D4 无宿主门面的 standalone 明确不可用，不回退直接 IO / 直接删除；D5 按「平台 × 工具」分别验收开放，report 先行。
+- 2026-10-12：用户确定体验包构建路线：Windows 用 W1（任务分支工作流加 push 触发，公共仓库标准 windows-2022 runner，公开 artifact 保留 1 天，不改 main）；Android 用 A1（同方式在标准 ubuntu runner 使用其预装 Android SDK 与 Java 运行无密钥脚本，不自行下载工具链；release 暂用 debug 签名，仅供体验）。包内不得含任何密钥。
