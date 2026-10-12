@@ -7,6 +7,7 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
 import 'package:research_module/src/core/claim_draft_preparation.dart';
 import 'package:research_module/src/core/store.dart';
+import 'package:research_module/src/research_module.dart' show ResearchSession;
 
 String digest(Object? value) =>
     sha256.convert(utf8.encode(jsonEncode(value))).toString();
@@ -591,4 +592,109 @@ void main() {
     await refuses(['n-d']);
     expect(reads, 0);
   });
+  for (final defect in ['paper-id', 'source-id', 'source-rev']) {
+    test(
+      'invalid pinned scientific $defect is excluded before reading',
+      () async {
+        switch (defect) {
+          case 'paper-id':
+            store.db.execute(
+              "UPDATE paper_bindings SET paper_id='' WHERE document_id='d'",
+            );
+            store.db.execute(
+              "UPDATE entries SET data=json_set(data,'\$.id','') WHERE id='paper-local'",
+            );
+          case 'source-id':
+            store.db.execute(
+              "UPDATE entries SET data=json_set(data,'\$.source_id','') WHERE id='paper-local'",
+            );
+            store.db.execute(
+              "UPDATE entries SET data=json_set(data,'\$.id','') WHERE id='source-local'",
+            );
+          case 'source-rev':
+            store.db.execute(
+              "UPDATE entries SET data=json_set(data,'\$.source_rev',0) WHERE id='paper-local'",
+            );
+            store.db.execute(
+              "UPDATE entries SET data=json_set(data,'\$.rev',0) WHERE id='source-local'",
+            );
+        }
+        ClaimDraftPreparationFailure? error;
+        try {
+          await prepare(['n-d']);
+        } on ClaimDraftPreparationFailure catch (e) {
+          error = e;
+        }
+        expect(error?.code, 'no_exportable_notes');
+        expect(error!.exclusions.single.id, 'n-d');
+        expect(reads, 0);
+      },
+    );
+  }
+
+  test('all prepared source refs resolve through the official ResearchSession', () async {
+    final prepared = await prepare(['n-d', 'n-pdf']);
+    final session = ResearchSession(
+      store.scoped('p'),
+      const WorkspaceBinding(
+        workspaceId: 'w',
+        moduleId: 'research',
+        nativeProjectId: 'p',
+      ),
+    );
+    try {
+      for (final ref in prepared.sources) {
+        final view = await session.resolve(ref);
+        expect(
+          view,
+          isNotNull,
+          reason:
+              'unresolvable preparation source: ${ref.objectType}/${ref.objectId}',
+        );
+        expect(view!.ref, ref);
+      }
+    } finally {
+      await session.dispose();
+    }
+  });
+
+  test(
+    'host manifest exposes deep-frozen binding facts and all selection facts',
+    () async {
+      final prepared = await prepare(['n-d', 'n-unbound']);
+      Map? manifest;
+      try {
+        manifest = (prepared as dynamic).manifest as Map;
+      } on NoSuchMethodError {
+        manifest = null;
+      }
+      expect(manifest, isNotNull);
+      expect(manifest!['selectedNoteIds'], ['n-d', 'n-unbound']);
+      expect(manifest['includedNoteIds'], ['n-d']);
+      expect((manifest['sourceState'] as Map)['bindings'], isNotEmpty);
+      expect(() => manifest!['fake'] = true, throwsUnsupportedError);
+      expect(
+        () => ((manifest!['sourceState'] as Map)['bindings'] as List).clear(),
+        throwsUnsupportedError,
+      );
+      expect(
+        () =>
+            ((manifest!['sourceState'] as Map)['bindings'] as List)
+                    .first['paper_rev'] =
+                99,
+        throwsUnsupportedError,
+      );
+    },
+  );
+
+  test(
+    'current V1 unrelated authoritative row refuses V2 layout as a whole',
+    () async {
+      store.db.execute(
+        "INSERT INTO entries(id,project_id,kind,title,data) VALUES('legacy-claim','p','claims','old','{\"id\":\"old\",\"rev\":1}')",
+      );
+      await refuses(['n-d']);
+      expect(reads, 0);
+    },
+  );
 }
