@@ -33,11 +33,19 @@ class UiPlanningRequest {
     required Set<String> allowedActionRefs,
     required this.mode,
     List<UiGuideEntry> guideEntries = const [],
+    Set<String> modelDisclosedFactRefs = const {},
+    Set<String> modelDisclosedComputedRefs = const {},
+    Set<String> modelDisclosedUiStateRefs = const {},
   }) : conversationMessages = List.unmodifiable(
          conversationMessages.map(Map<String, Object?>.unmodifiable),
        ),
        allowedActionRefs = Set.unmodifiable(allowedActionRefs),
-       guideEntries = List.unmodifiable(guideEntries);
+       guideEntries = List.unmodifiable(guideEntries),
+       modelDisclosedFactRefs = Set.unmodifiable(modelDisclosedFactRefs),
+       modelDisclosedComputedRefs = Set.unmodifiable(
+         modelDisclosedComputedRefs,
+       ),
+       modelDisclosedUiStateRefs = Set.unmodifiable(modelDisclosedUiStateRefs);
   final String question, answer, conversationVersion, coverage, taskId, turnId;
   final List<Map<String, Object?>> conversationMessages;
   final DataSnapshot snapshot;
@@ -47,6 +55,19 @@ class UiPlanningRequest {
   final Set<String> allowedActionRefs;
   final UiPlanningMode mode;
   final List<UiGuideEntry> guideEntries;
+
+  /// Host-owned disclosure registration, intersected with current permissions
+  /// before constructing this request. Fact verification is not permission.
+  /// Never populate these sets from model output or UI display preferences.
+  final Set<String> modelDisclosedFactRefs;
+  final Set<String> modelDisclosedComputedRefs;
+  final Set<String> modelDisclosedUiStateRefs;
+  bool _readable(FactState state) =>
+      state == FactState.verified || state == FactState.unverified;
+  Map<String, Object?> _disclosedUiState(Map<String, Object?> values) => {
+    for (final entry in values.entries)
+      if (modelDisclosedUiStateRefs.contains(entry.key)) entry.key: entry.value,
+  };
   Map<String, Object?> toJson() => {
     'question': question,
     'answer': answer,
@@ -59,7 +80,7 @@ class UiPlanningRequest {
     'currentView': {
       'surfaceId': currentView.surfaceId,
       'revision': currentView.revision,
-      'values': currentView.values,
+      'values': _disclosedUiState(currentView.values),
     },
     'snapshot': {
       'id': snapshot.ref.id,
@@ -69,17 +90,27 @@ class UiPlanningRequest {
           e.key: {
             'object': e.value.object.toJson(),
             'field': e.value.field,
-            'value': e.value.value,
+            'value':
+                modelDisclosedFactRefs.contains(e.key) &&
+                    _readable(e.value.state)
+                ? e.value.value
+                : null,
             'state': e.value.state.name,
             'unit': e.value.unit,
             'sourceRefs': e.value.sourceRefs,
           },
       },
-      'initialUiState': snapshot.initialUiState,
+      'initialUiState': _disclosedUiState(snapshot.initialUiState),
       'computations': {
         for (final e in snapshot.computations.entries)
           e.key: {
-            'value': e.value.value,
+            'value':
+                modelDisclosedComputedRefs.contains(e.key) &&
+                    snapshot.computedEvidence[e.key] != null &&
+                    _readable(snapshot.computedEvidence[e.key]!.state) &&
+                    e.value.inputVersion == snapshot.ref
+                ? e.value.value
+                : null,
             'snapshotId': e.value.inputVersion.id,
             'snapshotRevision': e.value.inputVersion.revision,
             'computationId': e.value.computationId,
@@ -93,7 +124,9 @@ class UiPlanningRequest {
               'artifactId': e.value.artifact.artifactId,
               'contentDigest': e.value.artifact.contentDigest,
             },
-            'originalText': e.value.originalText,
+            // Original source text has no per-field disclosure authority.
+            // Retain reference/location metadata; rendering still uses the
+            // untouched host snapshot, never this model projection.
             'start': e.value.start,
             'end': e.value.end,
             'page': e.value.page,
@@ -105,7 +138,7 @@ class UiPlanningRequest {
           ? null
           : {
               'draftRevision': snapshot.actionContext!.draftRevision,
-              'draft': snapshot.actionContext!.draft,
+              'draft': _disclosedUiState(snapshot.actionContext!.draft),
               'confirmedRecordRefs': snapshot.actionContext!.confirmedRecordRefs
                   .toList(),
               'operations': {
