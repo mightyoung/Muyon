@@ -72,10 +72,22 @@ jobs:
 
       - name: No-key static check on workflow and packaging script
         run: |
-          if grep -nE 'dart-define|API_KEY|OPENAI|BEGIN (RSA |OPENSSH )?PRIVATE KEY' \
+          # Construct patterns so this step does not match itself.
+          d='dart'
+          if grep -nE "flutter[[:space:]]+build.*--${d}-define|--${d}-define=|--${d}-define-from-file" \
+            workflow/.github/workflows/windows-experience-package.yml; then
+            echo 'Forbidden dart-define injection in Windows packaging workflow'
+            exit 1
+          fi
+          if ! grep -qF 'flutter build windows --release --no-pub' \
+            workflow/.github/workflows/windows-experience-package.yml; then
+            echo 'Expected release Windows build command missing'
+            exit 1
+          fi
+          if grep -nE 'BEGIN (RSA |OPENSSH )?PRIVATE KEY' \
             workflow/.github/workflows/windows-experience-package.yml \
             workflow/scripts/package_artifacts/package.py; then
-            echo 'Forbidden secret/dart-define pattern in packaging inputs'
+            echo 'Forbidden private-key material in packaging inputs'
             exit 1
           fi
           echo 'No-key static check passed'

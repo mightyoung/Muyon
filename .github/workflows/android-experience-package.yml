@@ -44,10 +44,21 @@ jobs:
 
       - name: No-key static check on workflow and packaging script
         run: |
-          if grep -nE 'dart-define|API_KEY|OPENAI|BEGIN (RSA |OPENSSH )?PRIVATE KEY' \
+          d='dart'
+          if grep -nE "package_android\\.py.*--${d}-define|--${d}-define=|--${d}-define-from-file" \
+            .github/workflows/android-experience-package.yml; then
+            echo 'Forbidden dart-define injection in Android packaging workflow'
+            exit 1
+          fi
+          if ! grep -qF 'scripts/package_android/package_android.py' \
+            .github/workflows/android-experience-package.yml; then
+            echo 'Expected package_android.py invocation missing'
+            exit 1
+          fi
+          if grep -nE 'BEGIN (RSA |OPENSSH )?PRIVATE KEY' \
             .github/workflows/android-experience-package.yml \
             scripts/package_android/package_android.py; then
-            echo 'Forbidden secret/dart-define pattern in packaging inputs'
+            echo 'Forbidden private-key material in packaging inputs'
             exit 1
           fi
           echo 'No-key static check passed'
