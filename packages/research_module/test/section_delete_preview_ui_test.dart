@@ -150,7 +150,7 @@ void main() {
       await tester.pumpWidget(host());
       expect(diagnostics, isNotEmpty);
       expect(diagnostics.first.stack, isNotNull);
-      expect(find.text('无法生成完整预览：超出预算或无权读取'), findsOneWidget);
+      expect(find.text('预览读取失败，请重试'), findsOneWidget);
       expect(find.textContaining('secret-diagnostic-id'), findsNothing);
       expect(find.textContaining('private body'), findsNothing);
       expect(find.textContaining('no such table'), findsNothing);
@@ -201,7 +201,7 @@ void main() {
           await tester.pump(const Duration(seconds: 2));
           expect(find.text('预览已过期，请刷新；不能用于删除确认'), findsOneWidget);
         } else {
-          expect(find.text('无法生成完整预览：超出预算或无权读取'), findsOneWidget);
+          expect(find.text('预览读取失败，请重试'), findsOneWidget);
           expect(find.text('private heading'), findsNothing);
         }
         expect(diagnostics, isNotEmpty);
