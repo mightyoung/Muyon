@@ -20,6 +20,7 @@ import 'model_request_gate.dart';
 import 'tool_selection.dart';
 import 'agent_compaction_flow.dart';
 import 'agent_context.dart';
+import 'model_tool_result_projection.dart';
 import 'agent_drafts.dart';
 import 'agent_dispatch.dart';
 import 'agent_model_turn.dart';
@@ -107,6 +108,7 @@ class PersonalAgent {
         },
         mode: uiPlanningMode,
         requestView: _ctx.view,
+        modelHistory: (task) => modelTaskToolHistory(task, _ctx.tools),
         enabled: presentationPreference == null ? uiPlanningEnabled : true,
         allowsPresentation: presentationPreference == null
             ? null
