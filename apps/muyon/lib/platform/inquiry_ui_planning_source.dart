@@ -110,7 +110,10 @@ class InquiryUiPlanningSource {
         selected.record.snapshotRef.revision,
       ),
       facts: facts,
-      initialUiState: stored?.displayValues ?? const {},
+      // Generic checkpoints contain unclassified drafts/view values. This
+      // readonly model source cannot grant them disclosure authority. CF4/5
+      // must restore classified values through their own safe recovery owner.
+      initialUiState: const {},
     );
     const allowed = {'detail', 'back'};
     return UiPlanningHostState(
@@ -126,7 +129,7 @@ class InquiryUiPlanningSource {
       currentView: UiCurrentView(
         surfaceId: 'task-${task.id}',
         revision: stored?.planRevision ?? 0,
-        values: stored?.displayValues ?? const {},
+        values: const {},
       ),
       catalog: library2UiCatalog,
       allowedActionRefs: allowed,
