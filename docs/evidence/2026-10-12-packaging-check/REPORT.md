@@ -2,7 +2,7 @@
 
 执行：grokbot 路线 2。分支 `task/packaging-android-windows-20261012`。
 Windows 打包基线：`d83008ef`（`windows-experience-package.yml` + 说明文档）。
-交付提交：`9fe8c183e4111def55518168a937e43073c359eb`（基于工作区 `6de6e3af539d83b4dea62fb80c22e1906ab05e3c`）。
+交付提交：`32ac6f68df8e91a8b8b10d44bb06b3c608ab5af3`（基于工作区 `6de6e3af539d83b4dea62fb80c22e1906ab05e3c`）。
 时间：2026-10-12 20:13:26 CST。
 
 ## 环境
