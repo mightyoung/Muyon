@@ -848,6 +848,9 @@ class AgentDispatch {
     var refs = ctx.references(task);
     final results = <ToolCallResult>[];
     final added = <Map<String, Object?>>[];
+    final producers = Map<String, Object?>.from(
+      task.payload['modelResultProducers'] as Map? ?? const {},
+    );
     for (final c in calls) {
       final outcome = c['outcome'] as Map?;
       final result = outcome?['result'] == null
@@ -866,8 +869,24 @@ class AgentDispatch {
       if (result != null &&
           (result.status == ToolCallStatus.succeeded ||
               _correctableRead(c, result))) {
+        final declaredProducer = ctx.tools.inspect(c['toolId'] as String);
+        RegisteredToolInfo? producer;
+        final receipt = result.executionId == null
+            ? null
+            : ctx.tools.receiptFor(result.executionId!);
+        if (declaredProducer != null &&
+            receipt != null &&
+            receipt.toolId == c['toolId'] &&
+            receipt.identityDigest == c['identityDigest']) {
+          producer = declaredProducer;
+          producers[result.executionId!] = {
+            'toolId': receipt.toolId,
+            'identityDigest': receipt.identityDigest,
+            'providerId': producer.providerId,
+          };
+        }
         content = jsonEncode({
-          'trustedToolResult': modelToolResult(result),
+          'trustedToolResult': modelToolResult(result, producer: producer),
           'modelDisclosurePolicy': 1,
           'citations': [
             for (var i = 0; i < refs.length; i++)
@@ -919,6 +938,7 @@ class AgentDispatch {
     final late = lateCancel ? '（取消请求晚于完成）' : '';
     final updated = logged.copy({
       'stepFolded': true,
+      'modelResultProducers': producers,
       'references': refs.map((r) => r.toJson()).toList(),
       'summary': '${results.map((r) => r.summary).join('；')}$late',
       'messages': [

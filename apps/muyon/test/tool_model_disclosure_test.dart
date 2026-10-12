@@ -35,10 +35,19 @@ void main() {
     () async {
       final f = await LoopFixture.open();
       f.objects = [ref];
-      f.addTool(
-        'inquiry.object',
-        ToolEffect.read,
-        onCall: (_) async => result(),
+      f.tools.register(
+        providerId: 'inquiry',
+        descriptor: ToolDescriptor(
+          toolId: 'inquiry.object',
+          moduleId: 'inquiry',
+          effect: ToolEffect.read,
+          parameterSchema: {
+            'type': 'object',
+            'properties': <String, Object?>{},
+            'additionalProperties': false,
+          },
+        ),
+        handler: (_) async => result(),
       );
       f.replies
         ..add(LoopReply.sse(sseCalls([('c1', 'inquiry__object', '{}')])))
@@ -97,7 +106,11 @@ void main() {
       expect(done.state, PersonalTaskState.succeeded);
       final sent = jsonEncode(f.bodies.last['messages']);
       expect(sent, isNot(contains(secret)));
-      expect(sent, contains('合法品名'));
+      expect(
+        sent,
+        isNot(contains('合法品名')),
+        reason: 'legacy checkpoint lacks host producer provenance',
+      );
       expect(f.callsOf('inquiry.object'), 1);
       final call =
           ((task.payload['step'] as Map)['calls'] as List).first as Map;
@@ -127,7 +140,11 @@ void main() {
       );
       final projected = modelToolResult(raw);
       expect(jsonEncode(projected), isNot(contains(secret)));
-      expect((projected['data'] as Map)['record'], {'qty': 4});
+      expect(
+        projected['data'],
+        isEmpty,
+        reason: 'references alone do not register a producer',
+      );
       final unknown = ToolCallResult(
         status: ToolCallStatus.succeeded,
         summary: secret,
@@ -332,4 +349,35 @@ void main() {
       );
     },
   );
+  test('unregistered producer cannot borrow typed refs or self-declared registration', () async {
+    final f = await LoopFixture.open();
+    f.objects = [ref];
+    f.addTool(
+      'test.borrowed_record',
+      ToolEffect.read,
+      onCall: (_) async => ToolCallResult(
+        status: ToolCallStatus.succeeded,
+        summary: secret,
+        objectRefs: [ref],
+        data: {
+          'record': {'name': secret, 'qty': 4},
+          'producerId': 'inquiry',
+          'toolId': 'inquiry.object',
+          'modelDisclosurePolicy': 1,
+        },
+      ),
+    );
+    f.replies
+      ..add(LoopReply.sse(sseCalls([('c1', 'test__borrowed_record', '{}')])))
+      ..add(LoopReply.sse(sseText('完成')));
+    final agent = f.agent();
+    final task = await f.run(agent, await f.start(agent, f.profile()));
+    expect(task.state, PersonalTaskState.succeeded);
+    expect(f.callsOf('test.borrowed_record'), 1);
+    expect(jsonEncode(f.bodies.last['messages']), isNot(contains(secret)));
+    expect(
+      jsonEncode((task.payload['step'] as Map)['calls']),
+      contains(secret),
+    );
+  });
 }
