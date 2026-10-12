@@ -364,12 +364,15 @@ CREATE TABLE IF NOT EXISTS local_export_attempts(
     LocalExportLedgerRequest request, {
     required Future<LocalExportStageCompletion> Function(List<int>) operation,
   }) async {
-    final existing = _find(request.invocationId, request.phase);
     // Replays, including unknown outcomes, only read. Expired capabilities
     // cannot turn a historical receipt into a fresh execution.
-    if (existing != null) return _existing(request, existing);
-    bool inserted;
+    // Reservation preflight and BEGIN IMMEDIATE share one failure class: a peer
+    // holding the write lock makes SELECT SQLITE_BUSY, which _find wraps as
+    // ledger_read_failed — that is pending contention, not a broken ledger.
+    final bool inserted;
     try {
+      final existing = _find(request.invocationId, request.phase);
+      if (existing != null) return await _existing(request, existing);
       inserted = await database.write((db) {
         createTables(db);
         final duplicate = _find(request.invocationId, request.phase);
@@ -420,13 +423,19 @@ VALUES(?,?,?,?,?,?,'pending','notNeeded',?,?)''',
         );
         return true;
       });
-    } on LocalExportLedgerException {
+      if (!inserted) {
+        return await _existing(
+          request,
+          _find(request.invocationId, request.phase)!,
+        );
+      }
+    } on LocalExportLedgerException catch (error) {
+      if (error.code == 'ledger_read_failed') {
+        throw const LocalExportLedgerException('ledger_pending_failed');
+      }
       rethrow;
     } catch (_) {
       throw const LocalExportLedgerException('ledger_pending_failed');
-    }
-    if (!inserted) {
-      return _existing(request, _find(request.invocationId, request.phase)!);
     }
     _active.add(request._key);
     final future = _executeOwned(request, operation);
