@@ -28,6 +28,7 @@ class SectionDeletePreviewDialog extends StatefulWidget {
 class _SectionDeletePreviewDialogState
     extends State<SectionDeletePreviewDialog> {
   SectionDeletePreview? _preview;
+  String? _errorText;
   bool _stale = false;
   Timer? _timer;
 
@@ -47,10 +48,12 @@ class _SectionDeletePreviewDialogState
         maxLinks: widget.maxLinks,
         maxBytes: widget.maxBytes,
       );
+      _errorText = null;
       _stale = false;
     } catch (error, stack) {
       // Scope and budget failures must not disclose database details or IDs.
       _reportUnexpected(error, stack, 'capturing a read-only deletion preview');
+      _errorText = _errorLabel(error);
       _preview = null;
       _stale = false;
     }
@@ -64,6 +67,7 @@ class _SectionDeletePreviewDialogState
       current = sectionDeletePreviewIsCurrent(widget.store, preview);
     } catch (error, stack) {
       _reportUnexpected(error, stack, 'checking deletion preview freshness');
+      _errorText = _errorLabel(error);
       current = false;
     }
     if (!current) setState(() => _stale = true);
@@ -81,6 +85,10 @@ class _SectionDeletePreviewDialogState
     );
   }
 
+  String _errorLabel(Object error) => error is SectionDeletePreviewRefused
+      ? '无法生成完整预览：超出预算或无权读取'
+      : '预览读取失败，请重试';
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -90,54 +98,70 @@ class _SectionDeletePreviewDialogState
   @override
   Widget build(BuildContext context) {
     final preview = _preview;
-    return AlertDialog(
-      title: const Text('删除章节影响预览'),
-      content: SizedBox(
-        width: 520,
-        height: MediaQuery.sizeOf(context).height * .5,
-        child: SingleChildScrollView(
-          key: const Key('section-delete-preview-scroll'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('只读预览，不是删除确认'),
-              const SizedBox(height: 8),
-              const Text('证据实体本身会保留'),
-              const SizedBox(height: 12),
-              if (preview == null)
-                const Text('无法生成完整预览：超出预算或无权读取')
-              else ...[
-                if (_stale) const Text('预览已过期，请刷新；不能用于删除确认'),
-                Text(preview.section.heading),
-                Text('将移除 ${preview.totalLinks} 条证据关联'),
-                Text(preview.complete ? '完整关联列表' : '不完整预览'),
+    // Keep the live region outside the scroll viewport so a state transition
+    // remains accessible when the reader is at the bottom of the evidence list.
+    // Explicit children preserve the buttons and list as separate accessible
+    // nodes; this parent label contains fixed state text only.
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      liveRegion: true,
+      label: [
+        '只读预览，不是删除确认',
+        ?_errorText,
+        if (_stale) '预览已过期，请刷新；不能用于删除确认',
+      ].join('\n'),
+      child: AlertDialog(
+        scrollable: true,
+        title: const Text('删除章节影响预览'),
+        content: SizedBox(
+          width: 520,
+          height: MediaQuery.sizeOf(context).height * .5,
+          child: SingleChildScrollView(
+            key: const Key('section-delete-preview-scroll'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const ExcludeSemantics(child: Text('只读预览，不是删除确认')),
+                const SizedBox(height: 8),
+                const Text('证据实体本身会保留'),
                 const SizedBox(height: 12),
-                for (final link in preview.links)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      link.status == 'restricted'
-                          ? '受限关联：详情不可读取'
-                          : '关联 ${link.linkId ?? "未知"}\n'
-                                '证据 ${link.evidenceId ?? "未知"}\n'
-                                '${link.type == null ? "类型未知" : "类型 ${link.type}"}',
+                if (_errorText != null)
+                  ExcludeSemantics(child: Text(_errorText!)),
+                if (_stale)
+                  const ExcludeSemantics(child: Text('预览已过期，请刷新；不能用于删除确认')),
+                if (preview != null) ...[
+                  Text(preview.section.heading),
+                  Text('将移除 ${preview.totalLinks} 条证据关联'),
+                  Text(preview.complete ? '完整关联列表' : '不完整预览'),
+                  const SizedBox(height: 12),
+                  for (final link in preview.links)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Text(
+                        link.status == 'restricted'
+                            ? '受限关联：详情不可读取'
+                            : '关联 ${link.linkId ?? "未知"}\n'
+                                  '证据 ${link.evidenceId ?? "未知"}\n'
+                                  '${link.type == null ? "类型未知" : "类型 ${link.type}"}',
+                      ),
                     ),
-                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => setState(_capture),
+            child: const Text('刷新预览'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('关闭'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => setState(_capture),
-          child: const Text('刷新预览'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('关闭'),
-        ),
-      ],
     );
   }
 }
