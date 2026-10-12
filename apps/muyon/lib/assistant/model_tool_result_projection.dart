@@ -121,12 +121,14 @@ ModelToolHistory modelToolHistory(
                 projectedReceipt?.call(result, message['tool_call_id']) ??
                 modelToolResult(result);
             if (body['modelDisclosurePolicy'] != 1 ||
+                body['modelReferencePolicy'] != 1 ||
                 jsonEncode(safe) != jsonEncode(body['trustedToolResult'])) {
               legacy = true;
             }
             output['content'] = jsonEncode({
               'trustedToolResult': safe,
               'modelDisclosurePolicy': 1,
+              'modelReferencePolicy': 1,
               'citations': body['citations'] is List
                   ? body['citations']
                   : const [],
