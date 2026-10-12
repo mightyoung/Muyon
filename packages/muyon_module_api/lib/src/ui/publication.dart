@@ -233,7 +233,14 @@ final class UiPublicationCoordinator {
     required bool readOnly,
     required bool pending,
   }) {
-    if (_disposed || readOnly || (_outdated && !_recomputing)) return false;
+    if (_disposed || readOnly) return false;
+    if (_outdated && !_recomputing) {
+      // Plan A: after a failed or superseded recompute, only a local editField
+      // may start the next recompute. Business, confirmation and semantic
+      // events stay refused until a recompute publishes.
+      return action.route == UiActionRoute.local &&
+          action.localAction == UiLocalAction.editField;
+    }
     if (action.route == UiActionRoute.business && (_recomputing || pending)) {
       return false;
     }
