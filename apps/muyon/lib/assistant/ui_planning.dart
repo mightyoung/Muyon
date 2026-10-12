@@ -61,6 +61,7 @@ class UiPlanningHarness {
     this.requestView,
     this.modelHistory,
     this.modelReferences,
+    this.prepareModelReferences,
     this.enabled = true,
     this.cancelTimedOutRequest,
     this.allowsPresentation,
@@ -292,6 +293,10 @@ class UiPlanningHarness {
 
   /// The same host-owned reference table used by the task's model frames.
   final ModelReferenceMap Function(PersonalTask)? modelReferences;
+
+  /// Host resolver/read authorization verifies source pins before table use.
+  final Future<void> Function(PersonalTask, UiPlanningHostState)?
+  prepareModelReferences;
   final _requests = <String, Future<UiPlannedPresentation>>{};
   final _identityEpochs = Map<Object, int>.identity();
   int _nextIdentityEpoch = 0;
@@ -490,11 +495,20 @@ class UiPlanningHarness {
     Object? identity,
     int epoch,
   ) async {
+    try {
+      await prepareModelReferences?.call(task, state);
+    } catch (_) {
+      return fallback('model_reference_unavailable');
+    }
+    final hostManual = modelHostManualToolTask(task);
     final stepAnswer =
         ((task.payload['step'] as Map?)?['assistant'] as Map?)?['content'];
     final history =
         modelHistory?.call(task) ??
-        modelToolHistory(task.payload['messages'] as List? ?? const []);
+        modelToolHistory(
+          task.payload['messages'] as List? ?? const [],
+          hostResultMessage: (_, _) => hostManual,
+        );
     // Derivation provenance comes from the persisted host checkpoint, not the
     // already filtered requestView (which intentionally drops the legacy flag).
     // Keep local summaries/steps unchanged; suppress only this model projection.
@@ -541,11 +555,23 @@ class UiPlanningHarness {
     final question = manualTool
         ? '本机工具请求内容未登记披露，已省略'
         : task.payload['prompt'] as String? ?? '';
+    final fallbackHistory = modelHistory == null
+        ? modelToolHistory(
+            requestMessages,
+            hostResultMessage: (_, _) => hostManual,
+          ).messages
+        : const <Object?>[];
     final safeMessages = modelHistory == null
         ? modelReferenceMessages(
-            modelToolHistory(requestMessages).messages,
+            fallbackHistory,
             references,
             explicitUserContents: manualTool ? const {} : {question},
+            hostResultContents: hostManual
+                ? {
+                    for (final frame in fallbackHistory)
+                      if (frame is Map) frame['content'],
+                  }
+                : const {},
           )
         : requestMessages;
     final messages = [

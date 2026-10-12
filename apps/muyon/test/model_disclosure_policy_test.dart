@@ -63,6 +63,13 @@ void main() {
     () async {
       final f = await LoopFixture.open();
       const raw = 'ACTUAL-MANUAL-QUESTION-NOTES-329ca';
+      const privatePin = ObjectRef(
+        moduleId: 'test',
+        objectType: 'budget',
+        objectId: 'b1',
+        contentDigest: 'ACTUAL-MANUAL-PRIVATE-ROW-DIGEST-672da',
+      );
+      f.objects = [privatePin];
       f.tools.register(
         providerId: 'test',
         descriptor: ToolDescriptor(
@@ -77,8 +84,11 @@ void main() {
             'additionalProperties': false,
           },
         ),
-        handler: (_) async =>
-            ToolCallResult(status: ToolCallStatus.succeeded, summary: '本机完成'),
+        handler: (_) async => ToolCallResult(
+          status: ToolCallStatus.succeeded,
+          summary: '本机完成',
+          objectRefs: [privatePin],
+        ),
       );
       final agent = f.agent();
       final c = await f.repo.createConversation();
@@ -116,6 +126,7 @@ void main() {
       await harness.plan(manual.id);
       expect(prompt, isNotNull);
       expect(prompt, isNot(contains(raw)));
+      expect(prompt, isNot(contains(privatePin.contentDigest!)));
       expect(
         f.repo.task(manual.id)!.payload['modelHostToolRequestText'],
         contains(raw),
