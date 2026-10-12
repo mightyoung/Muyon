@@ -4,16 +4,26 @@ import 'package:muyon_module_api/muyon_module_api.dart';
 
 import '../platform/inquiry_model_disclosure.dart';
 import '../platform/foundation_repository.dart';
+import '../platform/tool_registry.dart';
 import '../app/adapters/inquiry_module.dart' show inquiryOntology;
 
 /// A model projection, never a receipt. Registered fields do not grant access:
 /// the invocation's existing scope and authorization checks still run first.
 /// No output schema is registered for arbitrary provider data or summaries.
-Map<String, Object?> modelToolResult(ToolCallResult result) {
+Map<String, Object?> modelToolResult(
+  ToolCallResult result, {
+  RegisteredToolInfo? producer,
+}) {
   final data = <String, Object?>{};
   final refs = result.objectRefs;
   final record = result.data['record'];
-  if (refs.length == 1 && refs.single.moduleId == 'inquiry' && record is Map) {
+  if (producer?.providerId == 'inquiry' &&
+      producer?.descriptor.toolId == 'inquiry.object' &&
+      producer?.descriptor.moduleId == 'inquiry' &&
+      producer?.descriptor.effect == ToolEffect.read &&
+      refs.length == 1 &&
+      refs.single.moduleId == 'inquiry' &&
+      record is Map) {
     data['record'] = <String, Object?>{
       for (final entry in record.entries)
         if (entry.key is String &&
@@ -78,7 +88,10 @@ class ModelToolHistory {
 /// Re-project persisted result messages before preview, send and summarization.
 /// After a pre-policy result, assistant-derived prose/arguments have no safe
 /// provenance. User-authored messages retain their separate disclosure policy.
-ModelToolHistory modelToolHistory(List<Object?> messages) {
+ModelToolHistory modelToolHistory(
+  List<Object?> messages, {
+  Map<String, Object?>? Function(ToolCallResult)? projectedReceipt,
+}) {
   var legacy = false;
   final projected = <Object?>[];
   for (var index = 0; index < messages.length; index++) {
@@ -102,7 +115,8 @@ ModelToolHistory modelToolHistory(List<Object?> messages) {
             final result = ToolCallResult.fromJson(
               Map<String, Object?>.from(body['trustedToolResult'] as Map),
             );
-            final safe = modelToolResult(result);
+            final safe =
+                projectedReceipt?.call(result) ?? modelToolResult(result);
             if (body['modelDisclosurePolicy'] != 1 ||
                 jsonEncode(safe) != jsonEncode(body['trustedToolResult'])) {
               legacy = true;
@@ -160,16 +174,44 @@ ModelToolHistory modelToolHistory(List<Object?> messages) {
   return ModelToolHistory(projected, hadLegacyResult: legacy);
 }
 
+/// Only host-frozen execution metadata can associate a model message with a
+/// registered producer. Result refs and result-supplied tags cannot grant it.
+ModelToolHistory modelTaskToolHistory(PersonalTask task, ToolRegistry tools) =>
+    modelToolHistory(
+      task.payload['messages'] as List? ?? const [],
+      projectedReceipt: (serialized) {
+        final id = serialized.executionId;
+        final metadata = (task.payload['modelResultProducers'] as Map?)?[id];
+        if (id == null || metadata is! Map) return null;
+        final receipt = tools.receiptFor(id);
+        if (receipt?.result == null ||
+            receipt!.toolId != metadata['toolId'] ||
+            receipt.identityDigest != metadata['identityDigest']) {
+          return null;
+        }
+        final producer = tools.inspect(receipt.toolId);
+        if (producer == null || producer.providerId != metadata['providerId']) {
+          return null;
+        }
+        return modelToolResult(receipt.result!, producer: producer);
+      },
+    );
+
 /// Host-only attribution of local tool-derived conversation answers. The
 /// original message/receipt is retained; this copy is only for model requests.
 List<AssistantMessage> modelConversationHistory(
   FoundationRepository repository,
-  String conversationId,
-) {
+  String conversationId, {
+  ToolRegistry? tools,
+}) {
   final withheldAnswers = <String>{
     for (final prior in repository.tasks(conversationId: conversationId))
       if ((prior.payload['toolCall'] != null && prior.profileId == null) ||
-          modelToolHistory(prior.payload['messages'] as List? ?? const [])
+          (tools == null
+                  ? modelToolHistory(
+                      prior.payload['messages'] as List? ?? const [],
+                    )
+                  : modelTaskToolHistory(prior, tools))
               .hadLegacyResult)
         if (prior.summary != null) prior.summary!,
   };

@@ -72,6 +72,26 @@ List<Map> _events(LoopFixture f, String id) => [
   for (final e in f.repo.taskEvents(id)) e.toJson(),
 ];
 
+void _registeredInquiryRead(
+  LoopFixture f,
+  Future<ToolCallResult> Function(ToolCallContext) handler,
+) {
+  f.tools.register(
+    providerId: 'inquiry',
+    descriptor: ToolDescriptor(
+      toolId: 'inquiry.object',
+      moduleId: 'inquiry',
+      effect: ToolEffect.read,
+      parameterSchema: {
+        'type': 'object',
+        'properties': <String, Object?>{},
+        'additionalProperties': false,
+      },
+    ),
+    handler: handler,
+  );
+}
+
 void main() {
   group('trigger', () {
     test(
@@ -145,23 +165,21 @@ void main() {
       ];
       f.objects = refs;
       var n = 0;
-      f.addTool(
-        'big',
-        ToolEffect.read,
-        onCall: (_) async {
-          final i = n++;
-          return ToolCallResult(
-            status: ToolCallStatus.succeeded,
-            summary: 'result $i',
-            data: {
-              'record': {'name': _big(2000, 'r$i')},
-            },
-            objectRefs: [refs[i]],
-          );
-        },
-      );
+      _registeredInquiryRead(f, (_) async {
+        final i = n++;
+        return ToolCallResult(
+          status: ToolCallStatus.succeeded,
+          summary: 'result $i',
+          data: {
+            'record': {'name': _big(2000, 'r$i')},
+          },
+          objectRefs: [refs[i]],
+        );
+      });
       for (var i = 0; i < 4; i++) {
-        f.replies.add(LoopReply.sse(sseCalls([('c$i', 'big', '{}')])));
+        f.replies.add(
+          LoopReply.sse(sseCalls([('c$i', 'inquiry__object', '{}')])),
+        );
       }
       f.replies.add(LoopReply.sse(sseText('看了四项 [r1] [r4]')));
       final agent = f.agent(budget: const Budget(maxSteps: 8));
@@ -183,7 +201,7 @@ void main() {
       expect(last.first['tool_call_id'], 'c0');
       final placeholder = jsonDecode(last.first['content'] as String) as Map;
       final body = placeholder['clearedToolResult'] as Map;
-      expect(body['toolId'], 'big');
+      expect(body['toolId'], 'inquiry.object');
       expect(body['status'], 'succeeded');
       expect(body['summary'], '工具结果已记录；仅展示已登记可披露的字段');
       expect(body['citationIds'], ['r1']);
@@ -328,10 +346,9 @@ void main() {
           objectId: 'b1',
         ),
       ];
-      f.addTool(
-        'big',
-        ToolEffect.read,
-        onCall: (_) async => ToolCallResult(
+      _registeredInquiryRead(
+        f,
+        (_) async => ToolCallResult(
           status: ToolCallStatus.succeeded,
           summary: 'result ${n++}',
           data: {
@@ -346,7 +363,7 @@ void main() {
           ],
         ),
       );
-      const call = '{"type":"tool","toolId":"big","parameters":{}}';
+      const call = '{"type":"tool","toolId":"inquiry.object","parameters":{}}';
       for (var i = 0; i < 4; i++) {
         f.replies.add(LoopReply.sse(sseText(call)));
       }

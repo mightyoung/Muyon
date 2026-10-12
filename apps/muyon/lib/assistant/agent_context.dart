@@ -172,7 +172,7 @@ class AgentContext {
   /// compacted view of it (ADR-0005 §6.6). Preview, digest and what is sent
   /// all come from this one function.
   List<Object?> view(PersonalTask task) {
-    final history = modelToolHistory(task.payload['messages'] as List);
+    final history = modelTaskToolHistory(task, tools);
     return buildRequestView(
       history.messages,
       compactionState: history.compaction(task.payload['compaction']),

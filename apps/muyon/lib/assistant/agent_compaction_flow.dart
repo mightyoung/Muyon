@@ -39,7 +39,7 @@ class AgentCompactionFlow {
     CompactionState state, {
     bool useReport = false,
   }) => ctx.compactor.tokensOfView(
-    modelToolHistory(task.payload['messages'] as List).messages,
+    modelTaskToolHistory(task, ctx.tools).messages,
     state,
     references: task.payload['references'] as List? ?? const [],
     extra: _toolsTokens(task),
@@ -51,11 +51,12 @@ class AgentCompactionFlow {
         : 0,
   );
 
-  static CompactionState _stateOf(PersonalTask task) =>
-      CompactionState.fromJson(
-        modelToolHistory(task.payload['messages'] as List)
-            .compaction(task.payload['compaction']),
-      );
+  CompactionState _stateOf(PersonalTask task) => CompactionState.fromJson(
+    modelTaskToolHistory(
+      task,
+      ctx.tools,
+    ).compaction(task.payload['compaction']),
+  );
 
   /// The profile that may summarize this task's conversation: the task's own,
   /// or the one the person set up for it if that exposes the data to no more
@@ -86,8 +87,7 @@ class AgentCompactionFlow {
     final threshold = ctx.compactor.compactAt(caps);
     if (threshold == null && !force) return task;
     final state = _stateOf(task);
-    final messages = modelToolHistory(task.payload['messages'] as List)
-        .messages;
+    final messages = modelTaskToolHistory(task, ctx.tools).messages;
     final before = _tokensUnder(task, state, useReport: true);
     if (!force && before <= threshold!) return task;
     final reported = task.payload['reportedPromptTokens'] != null;

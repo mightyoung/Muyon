@@ -46,7 +46,8 @@ class AgentResume {
 
   /// Takes over [prev], or returns null when there is nothing to take over
   /// (no tool call has happened): the caller then starts afresh as before.
-  Future<PersonalTask?> attempt(PersonalTask prev, {
+  Future<PersonalTask?> attempt(
+    PersonalTask prev, {
     bool uiPlanningAvailable = false,
     void Function(String)? onCarry,
   }) async {
@@ -55,7 +56,11 @@ class AgentResume {
     if (manual) {
       return prev.payload['toolCall'] is Map ? _manual(prev) : null;
     }
-    return _model(prev, uiPlanningAvailable: uiPlanningAvailable, onCarry: onCarry);
+    return _model(
+      prev,
+      uiPlanningAvailable: uiPlanningAvailable,
+      onCarry: onCarry,
+    );
   }
 
   /// Bad call identifiers must fail clearly before receipt lookup or any
@@ -66,9 +71,7 @@ class AgentResume {
     if (toolId is! String ||
         toolId.isEmpty ||
         (id != null && (id is! String || id.isEmpty))) {
-      throw StateError(
-        'resume_invalid_call_identity: 恢复载荷中的工具或调用标识无效',
-      );
+      throw StateError('resume_invalid_call_identity: 恢复载荷中的工具或调用标识无效');
     }
     return id as String?;
   }
@@ -229,7 +232,8 @@ class AgentResume {
     return AgentContext.calls(prev).any((c) => c['outcome'] == null);
   }
 
-  Future<PersonalTask?> _model(PersonalTask prev, {
+  Future<PersonalTask?> _model(
+    PersonalTask prev, {
     required bool uiPlanningAvailable,
     void Function(String)? onCarry,
   }) async {
@@ -374,7 +378,10 @@ class AgentResume {
       'messages': [
         (base.payload['messages'] as List).first,
         for (final message in messages.skip(1))
-          if (!_isHostPlanningContext(message, prev.payload['uiPlanningContext']))
+          if (!_isHostPlanningContext(
+            message,
+            prev.payload['uiPlanningContext'],
+          ))
             message,
       ],
       // What the earlier attempt used still counts: repeated resumes cannot
@@ -382,6 +389,8 @@ class AgentResume {
       ...BudgetUsage.fromPayload(prev.payload).toPayload(),
       'references': prev.payload['references'] ?? const <Object?>[],
       'toolLog': prev.payload['toolLog'] ?? const <Object?>[],
+      'modelResultProducers':
+          prev.payload['modelResultProducers'] ?? const <String, Object?>{},
       if (prev.payload['stepFolded'] == true) 'stepFolded': true,
       'compaction': ?prev.payload['compaction'],
     });

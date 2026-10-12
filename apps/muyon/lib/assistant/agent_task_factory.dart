@@ -98,6 +98,7 @@ class AgentTaskFactory {
     final history = modelConversationHistory(
       ctx.repository,
       conversationId,
+      tools: ctx.tools,
     ).where((m) => m.role == 'user' || m.role == 'assistant').toList();
     final memories = ctx.memories(conversation.scope);
     final now = ctx.clock().toUtc().toIso8601String();
