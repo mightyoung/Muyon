@@ -1,6 +1,6 @@
 # LE06-RACE：组合 CI 阻断——双进程竞争同一 pending 预约的断言失败
 
-执行：grok-build（原派 Codex，Codex 额度用完后改派）。派发：leader A，2026-10-12。基线：UI 与存储组合 `review/ui-storage-current-combo-20261012` @ `326ca1387f01d7a620297e3525150f156659be3c`；分支 `task/le06-race-diagnosis-20261012`（本分支 = 该组合 + 本说明）。
+执行：grokbot（路线 1，先做本任务再做 LINUX-COMBO-VERIFY；原派 Codex、grok-build，额度用完后改派）。派发：leader A，2026-10-12。基线：UI 与存储组合 `review/ui-storage-current-combo-20261012` @ `326ca1387f01d7a620297e3525150f156659be3c`；分支 `task/le06-race-diagnosis-20261012`（本分支 = 该组合 + 本说明）。
 
 ## 事实
 - CI 38210369162（326ca138）failure：host 2290 通过 / 3 跳过 / 1 失败，失败为 `apps/muyon/test/le06_recovery_independent_test.dart` 第 373 行附近 `two independently gated processes contend for one pending reservation`：`Expected: true / Actual: false`，即失败进程既不是 `state == 'unknown'`，也不是 `error == 'ledger_pending_failed'`。日志里没有 loser 的实际 state / error。
