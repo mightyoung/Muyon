@@ -232,8 +232,17 @@ final class UiPublicationCoordinator {
     UiActionDefinition action, {
     required bool readOnly,
     required bool pending,
+    bool allowLocalEditRecovery = false,
   }) {
-    if (_disposed || readOnly || (_outdated && !_recomputing)) return false;
+    if (_disposed || readOnly) return false;
+    // Only a host-checked, non-view local edit can recover an outdated result.
+    // This does not clear freshness or grant business/view authority.
+    if (_outdated &&
+        !(allowLocalEditRecovery &&
+            action.route == UiActionRoute.local &&
+            action.localAction == UiLocalAction.editField)) {
+      return false;
+    }
     if (action.route == UiActionRoute.business && (_recomputing || pending)) {
       return false;
     }

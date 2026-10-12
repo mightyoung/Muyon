@@ -147,12 +147,37 @@ class UiSurfaceController extends ChangeNotifier {
     }
   }
 
-  bool _allowsEvent(UiEvent event, UiActionDefinition action) =>
-      _publication.allowsDispatch(
-        action,
-        readOnly: isReadOnly,
-        pending: _pending.values.any((p) => p.event.nodeId == event.nodeId),
-      );
+  bool _allowsEvent(UiEvent event, UiActionDefinition action) {
+    final nodes = current.plan.nodes.where((node) => node.id == event.nodeId);
+    return nodes.length == 1 && _allowsNodeAction(nodes.single, event.kind, action);
+  }
+
+  bool allowsInteraction(UiNode node, String kind) {
+    if (!current.plan.nodes.any((candidate) => identical(candidate, node))) {
+      return false;
+    }
+    final action = current.catalog.actions[node.events[kind]?.actionRef];
+    return action != null && _allowsNodeAction(node, kind, action);
+  }
+
+  bool _allowsNodeAction(UiNode node, String kind, UiActionDefinition action) {
+    final binding = node.events[kind];
+    final inputs = binding?.inputRefs;
+    final key = inputs?.length == 1 ? inputs!.single : null;
+    final spec = key == null ? null : current.snapshot.editSpecs[key];
+    final recovery = action.route == UiActionRoute.local &&
+        action.localAction == UiLocalAction.editField &&
+        recomputePort != null && publishTokenProbe != null &&
+        key != null && spec != null && !spec.view &&
+        current.snapshot.initialUiState.containsKey(key) &&
+        node.bindings.values.contains(BindingRef.uiState(key));
+    return _publication.allowsDispatch(
+      action,
+      readOnly: isReadOnly,
+      pending: _pending.values.any((pending) => pending.event.nodeId == node.id),
+      allowLocalEditRecovery: recovery,
+    );
+  }
 
   /// Host work is awaited before the synchronous publication/install section.
   Future<UiPublishOutcome> recompute() async {
@@ -218,6 +243,13 @@ class UiSurfaceController extends ChangeNotifier {
     }
   }
 
+  /// Cancel only this owner's in-flight candidate; retained values stay stale.
+  void cancelRecompute() {
+    if (_disposed || !recomputing) return;
+    _publication.cancelRecompute();
+    notifyListeners();
+  }
+
   /// Raw host candidates share the same preparation, validator and final fence.
   UiPublishOutcome publish(UiVersionBatch batch) {
     if (_disposed) return UiPublishOutcome.disposed;
@@ -238,6 +270,11 @@ class UiSurfaceController extends ChangeNotifier {
           ? UiPublishOutcome.disposed
           : UiPublishOutcome.staleToken;
     }
+    if (isReadOnly) {
+      final failed = _publication.failRecompute(request);
+      if (!_disposed) notifyListeners();
+      return failed;
+    }
     try {
       final checked = validateUiPlan(
         batch.plan,
@@ -255,7 +292,11 @@ class UiSurfaceController extends ChangeNotifier {
       final outcome = _publication.completeRecompute(
         request,
         batch,
-        publishTokenProbe!,
+        () {
+          final token = publishTokenProbe!();
+          if (isReadOnly) throw StateError('Readonly publication rejected');
+          return token;
+        },
         fence: fence,
       );
       if (outcome == UiPublishOutcome.published) {
@@ -318,7 +359,7 @@ class UiSurfaceController extends ChangeNotifier {
   void lockRecoveredOperations(Iterable<String> refs) =>
       _recoveredOperations.addAll(refs);
   void adoptExtracted(String field) {
-    if (_disposed || isReadOnly) return;
+    if (_disposed || isReadOnly || outdated || recomputing) return;
     final before = _session.draftRevision;
     _session.adoptExtracted(field);
     if (_session.draftRevision != before && recomputePort != null) {
@@ -801,8 +842,8 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
               keyboardType: n.properties['inputType'] == 'text'
                   ? TextInputType.text
                   : TextInputType.number,
-              readOnly: !n.events.containsKey('change'),
-              onChanged: n.events.containsKey('change')
+              readOnly: !controller.allowsInteraction(n, 'change'),
+              onChanged: controller.allowsInteraction(n, 'change')
                   ? (v) async {
                       final outcome = await renderController.dispatchCaptured(
                         capture,
@@ -850,7 +891,7 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
         return Table(
           children: [
             for (final row in rows)
-              TableRow(children: [Text('${row.$1}: ${row.$2}')]),
+              TableRow(children: [Text('${controller.outdated || controller.recomputing ? "上次结果：" : ""}${row.$1}: ${row.$2}')]),
           ],
         );
       case 'SegmentedPill':
@@ -1029,7 +1070,8 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
                 ? '正在重算：下方结果属于上次发布版本。'
                 : '结果已过期：重算未成功，下方结果属于上次发布版本。'),
           ),
-        if (controller.portError != null) Text(controller.portError!),
+        if (controller.portError != null)
+          const Text('操作未完成，请检查当前状态后重试。'),
         if (detail == null)
           render(nodes[plan.root]!, nodes, capture)
         else
