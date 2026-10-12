@@ -290,6 +290,9 @@ class UiPlanningHarness {
     request,
     null,
   );
+  String _revocationCode(String taskId, String fallbackCode) =>
+      presentationBlockReason?.call(taskId) ?? fallbackCode;
+
   Future<UiPlannedPresentation> plan(
     String taskId, {
     Map<String, Object?>? expected,
@@ -311,7 +314,7 @@ class UiPlanningHarness {
     if (epoch != _epoch ||
         !(allowsPresentation?.call(taskId) ?? true) ||
         !identical(identity, presentationIdentity?.call(taskId))) {
-      return fallback('host_request_changed');
+      return fallback(_revocationCode(taskId, 'host_request_changed'));
     }
     // A closed task is decided before a null source is treated as a wipe.
     // Matching facts keep the revoked terminal. An unreadable re-read clears it.
@@ -393,7 +396,10 @@ class UiPlanningHarness {
               presentationIdentity?.call(taskId) != identity ||
               mode != selectedMode;
           if (drifted) {
-            current = fallback('host_state_changed', request);
+            current = fallback(
+              _revocationCode(taskId, 'host_state_changed'),
+              request,
+            );
             if (epoch == _epoch &&
                 request != null &&
                 isCurrentRequest(request)) {
@@ -538,7 +544,10 @@ class UiPlanningHarness {
         !enabled ||
         !(allowsPresentation?.call(task.id) ?? true) ||
         !identical(identity, presentationIdentity?.call(task.id))) {
-      return fallback('host_request_changed', request);
+      return fallback(
+        _revocationCode(task.id, 'host_request_changed'),
+        request,
+      );
     }
     _requestIdentities[request] = identity;
     _activeRequests[task.id] = request;
@@ -562,7 +571,10 @@ class UiPlanningHarness {
             },
           );
       if (!isCurrentRequest(request)) {
-        return fallback('host_request_changed', request);
+        return fallback(
+          _revocationCode(task.id, 'host_request_changed'),
+          request,
+        );
       }
       if (_closedRequests.contains(request)) {
         return await _terminalResults[request] ??
@@ -581,6 +593,10 @@ class UiPlanningHarness {
           ? supplied
           : UiPlanningReason.modelResult(supplied);
       if (result.plan == null) {
+        if (provider is StreamMotivationUiPlanningProvider &&
+            result.reasonCode == 'model_no_card') {
+          _streamProgress.remove(task.id);
+        }
         return UiPlannedPresentation(result, request, null);
       }
       if (result.plan!.surfaceId != request.currentView.surfaceId ||
@@ -606,7 +622,10 @@ class UiPlanningHarness {
         return _readOnlyFailure('current_authority_changed', request, progress);
       }
       if (!isCurrentRequest(request)) {
-        return fallback('host_request_changed', request);
+        return fallback(
+          _revocationCode(task.id, 'host_request_changed'),
+          request,
+        );
       }
       if (_closedRequests.contains(request)) {
         return await _terminalResults[request] ??
@@ -624,7 +643,10 @@ class UiPlanningHarness {
     } on TimeoutException {
       _closedRequests.add(request);
       if (!isCurrentRequest(request)) {
-        return fallback('host_request_changed', request);
+        return fallback(
+          _revocationCode(task.id, 'host_request_changed'),
+          request,
+        );
       }
       if (_cancelledTasks.contains(task.id)) {
         return await _terminalResults[request] ??
@@ -642,7 +664,10 @@ class UiPlanningHarness {
     } catch (_) {
       _closedRequests.add(request);
       if (!isCurrentRequest(request)) {
-        return fallback('host_request_changed', request);
+        return fallback(
+          _revocationCode(task.id, 'host_request_changed'),
+          request,
+        );
       }
       if (_cancelledTasks.contains(task.id)) {
         return await _terminalResults[request] ??

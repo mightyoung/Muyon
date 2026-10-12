@@ -284,17 +284,22 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          progress.view.phase == UiStreamPhase.streaming
+          progress.view.phase == UiStreamPhase.complete
+              ? '界面已校验 · 等待宿主确认，动作尚不可用'
+              : progress.view.phase == UiStreamPhase.streaming
               ? '界面接收中 · 动作尚不可用'
               : '界面未完成 · 只读，动作不可用',
         ),
-        if (progress.view.phase != UiStreamPhase.streaming)
+        if (progress.failureCode != null ||
+            (progress.view.phase != UiStreamPhase.streaming &&
+                progress.view.phase != UiStreamPhase.complete))
           Text(
             UiPlanningReason.host(progress.failureCode ?? 'incomplete')
                 .description,
           ),
         readOnlyPreview(progress),
-        if (progress.view.phase != UiStreamPhase.streaming)
+        if (progress.view.phase != UiStreamPhase.streaming &&
+            progress.view.phase != UiStreamPhase.complete)
           snapshotFallback(progress.request.snapshot, progress.request.intent),
       ],
     );
