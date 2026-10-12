@@ -59,6 +59,75 @@ UiPlanningRequest request(
 
 void main() {
   test(
+    'actual startTool origin text never becomes model planning question',
+    () async {
+      final f = await LoopFixture.open();
+      const raw = 'ACTUAL-MANUAL-QUESTION-NOTES-329ca';
+      f.tools.register(
+        providerId: 'test',
+        descriptor: ToolDescriptor(
+          toolId: 'localinput',
+          moduleId: 'test',
+          effect: ToolEffect.read,
+          parameterSchema: {
+            'type': 'object',
+            'properties': {
+              'notes': {'type': 'string'},
+            },
+            'additionalProperties': false,
+          },
+        ),
+        handler: (_) async =>
+            ToolCallResult(status: ToolCallStatus.succeeded, summary: '本机完成'),
+      );
+      final agent = f.agent();
+      final c = await f.repo.createConversation();
+      final manual = await agent.startTool(
+        conversationId: c.id,
+        toolId: 'localinput',
+        parameters: {'notes': raw},
+      );
+      expect(manual.state.name, 'succeeded');
+      expect(manual.payload['modelHostToolRequestText'], contains(raw));
+      String? prompt;
+      final harness = UiPlanningHarness(
+        repository: f.repo,
+        source: (t) async => UiPlanningHostState(
+          snapshot: DataSnapshot(ref: ref, facts: {}),
+          intent: InteractionIntent(
+            id: 'intent',
+            purpose: 'display',
+            snapshotRef: ref,
+          ),
+          currentView: UiCurrentView(surfaceId: 'surface', revision: 1),
+          catalog: library2UiCatalog,
+          allowedActionRefs: {},
+        ),
+        providers: {
+          UiPlanningMode.intelligent: MotivationUiPlanningProvider((
+            r,
+            modelPrompt,
+          ) async {
+            prompt = modelPrompt;
+            return '{"decision":"textOnly","reasonCode":"fixture","plan":null}';
+          }),
+        },
+      );
+      await harness.plan(manual.id);
+      expect(prompt, isNotNull);
+      expect(prompt, isNot(contains(raw)));
+      expect(
+        f.repo.task(manual.id)!.payload['modelHostToolRequestText'],
+        contains(raw),
+      );
+      expect(
+        f.repo.messages(c.id).where((m) => m.role == 'user').single.content,
+        contains(raw),
+      );
+    },
+  );
+
+  test(
     'C6 providers refuse a snapshot expired during actual model callback',
     () async {
       final snapshot = DataSnapshot(ref: ref, facts: {});

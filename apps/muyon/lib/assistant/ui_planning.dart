@@ -535,10 +535,11 @@ class UiPlanningHarness {
               .toList(),
         );
     final manualTool =
-        task.profileId == null && task.payload['toolCall'] != null;
+        task.payload['modelHostToolRequestText'] is String ||
+        (task.profileId == null && task.payload['toolCall'] != null);
+    // The attribution key stores raw local command text, not a model summary.
     final question = manualTool
-        ? task.payload['modelHostToolRequestText'] as String? ??
-              '本机工具请求内容未登记披露，已省略'
+        ? '本机工具请求内容未登记披露，已省略'
         : task.payload['prompt'] as String? ?? '';
     final safeMessages = modelHistory == null
         ? modelReferenceMessages(
