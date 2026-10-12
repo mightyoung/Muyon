@@ -243,6 +243,12 @@ class ResearchClaimDraftPreparer {
       }
       final projectPath = relative.substring(root.length);
       if (projectPath.isEmpty ||
+          projectPath == '.' ||
+          RegExp(r'^[A-Za-z]:').hasMatch(projectPath) ||
+          p.posix.isAbsolute(projectPath) ||
+          projectPath.contains('\\') ||
+          projectPath.contains('\u0000') ||
+          projectPath.split('/').contains('..') ||
           p.posix.normalize(projectPath) != projectPath) {
         exclude('invalid_document_path');
         continue;
