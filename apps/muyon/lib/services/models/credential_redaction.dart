@@ -28,9 +28,7 @@ String redactCredentials(Object error, {String? secret}) {
   var text = error is String ? error : '$error';
   // Too short a secret would mask unrelated text everywhere (and is no real
   // credential), so only values of [minRedactedSecretLength]+ are replaced.
-  if (secret != null && secret.length >= minRedactedSecretLength) {
-    text = text.replaceAll(secret, '<redacted>');
-  }
+  text = maskSecret(text, secret);
   if (!mayContainCredential(text)) return text;
   final type = error is String ? 'Error' : '${error.runtimeType}';
   return '$type: details withheld (may contain the credential)';

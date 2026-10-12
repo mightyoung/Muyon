@@ -16,10 +16,6 @@ class EnvironmentSecretStore implements SecretStore {
 
 const agentEvalKeyVariable = 'MUYON_EVAL_MODEL_KEY';
 
-/// A key that dart:io can put in a header unchanged; anything else makes
-/// header setting throw with the whole `Bearer <key>` in the message.
-final _visibleAscii = RegExp(r'^[\x21-\x7E]+$');
-
 /// Why the real run is skipped, or null when it runs. Model variables alone
 /// are not enough: `MUYON_EVAL_REAL=1` must be set as well, so an exported
 /// configuration never turns a plain `flutter test` into paid requests.
@@ -44,7 +40,7 @@ ModelProfile agentEvalProfileFromEnvironment(Map<String, String> environment) {
   final endpoint = Uri.parse(environment['MUYON_EVAL_MODEL_ENDPOINT']!.trim());
   final key = environment[agentEvalKeyVariable] ?? '';
   final hasKey = key.isNotEmpty;
-  if (hasKey && !_visibleAscii.hasMatch(key)) {
+  if (hasKey && !isSendableCredential(key)) {
     throw ArgumentError(
       '$agentEvalKeyVariable must be visible ASCII only (value not shown)',
     );
