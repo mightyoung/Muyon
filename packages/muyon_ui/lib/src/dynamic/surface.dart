@@ -164,6 +164,7 @@ class UiSurfaceController extends ChangeNotifier {
     final request = _publication.beginRecompute();
     if (request == null) return UiPublishOutcome.disposed;
     final base = current;
+    notifyListeners();
     try {
       final input = UiRecomputeInput(
         previousSnapshot: base.snapshot,
@@ -1020,6 +1021,14 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (controller.recomputing || controller.outdated)
+          Semantics(
+            container: true,
+            liveRegion: true,
+            child: Text(controller.recomputing
+                ? '正在重算：下方结果属于上次发布版本。'
+                : '结果已过期：重算未成功，下方结果属于上次发布版本。'),
+          ),
         if (controller.portError != null) Text(controller.portError!),
         if (detail == null)
           render(nodes[plan.root]!, nodes, capture)

@@ -1,5 +1,6 @@
 import 'package:muyon_module_api/ui_contract.dart';
-import 'package:muyon_ui/dynamic_ui.dart' show library2UiCatalog;
+import 'package:muyon_ui/dynamic_ui.dart'
+    show minimalUiCatalog, dynamicUiCatalog, library2UiCatalog;
 
 import 'ui_formula_registry.dart';
 
@@ -93,8 +94,8 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
     if (input.token.baseSnapshotRef != previous.ref) {
       return reject(['recompute_token_snapshot_mismatch']);
     }
-    if (basePlan.catalog.version != 'minimal-1' &&
-        basePlan.catalog.version != 'dynamic-1' &&
+    if (!identical(basePlan.catalog, minimalUiCatalog) &&
+        !identical(basePlan.catalog, dynamicUiCatalog) &&
         !identical(basePlan.catalog, library2UiCatalog)) {
       return reject(['recompute_catalog_unavailable']);
     }
@@ -187,14 +188,17 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
               fact.state != FactState.unverified,
         );
         if (evaluation.status == UiFormulaStatus.unavailable &&
-            unavailable.isEmpty) {
+            (unavailable.isEmpty ||
+                evaluation.errors.any(
+                  (error) => !error.startsWith('fact_unavailable:'),
+                ))) {
           // Missing values or unknown tax modes do not establish a domain
           // FactState. Keep real diagnostics, but never invent non-applicability.
           return reject(['recompute_unavailable_evidence:$id']);
         }
         nextEvidence[id] = UiComputedEvidence(
           state: evaluation.status == UiFormulaStatus.unavailable
-              ? unavailable.first.state
+              ? _unavailableState(unavailable)
               : evaluation.unverifiedInputs.isEmpty
               ? FactState.verified
               : FactState.unverified,
@@ -261,4 +265,19 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
       evaluations: evidence,
     );
   }
+}
+
+// A domain non-applicability claim cannot hide a failed read or a disclosure
+// restriction. Resolve mixed dependencies conservatively without slot order.
+FactState _unavailableState(Iterable<SnapshotFact> facts) {
+  final states = facts.map((fact) => fact.state).toSet();
+  for (final state in const [
+    FactState.conflict,
+    FactState.readFailed,
+    FactState.notDisclosed,
+    FactState.notApplicable,
+  ]) {
+    if (states.contains(state)) return state;
+  }
+  throw StateError('Unavailable evaluation requires domain evidence');
 }
