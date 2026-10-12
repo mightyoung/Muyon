@@ -68,7 +68,11 @@ void main() {
       final messages = task.payload['messages'] as List;
       final toolMessage =
           jsonDecode((messages.last as Map)['content'] as String) as Map;
-      expect((toolMessage['trustedToolResult'] as Map)['data'], data);
+      expect(
+        (toolMessage['trustedToolResult'] as Map)['data'],
+        isEmpty,
+        reason: 'unregistered provider fields stay in local receipts, not model messages',
+      );
       expect(
         (((call.single as Map)['outcome'] as Map)['result'] as Map)['data'],
         data,

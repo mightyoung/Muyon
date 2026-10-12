@@ -108,7 +108,8 @@ void main() {
       );
       expect(
         jsonDecode(toolMessage['content'])['trustedToolResult']['data'],
-        facts,
+        isEmpty,
+        reason: 'unregistered provider result is not a model disclosure grant',
       );
       final detail = await agent.startTool(
         conversationId: corrected.conversationId,
