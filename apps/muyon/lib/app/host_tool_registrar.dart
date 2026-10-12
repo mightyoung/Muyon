@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../platform/tool_registry.dart';
 import '../platform/grants/host_effect_intent.dart';
+import '../platform/grants/local_export_target.dart';
 import '../services/models/tool_names.dart';
 import 'module_host.dart';
 
@@ -51,8 +52,27 @@ Future<void> validateModuleWriteResult(
 /// the registry privately and offers nothing that touches approvals, receipts
 /// or the outbound ledger; the registry's own dispatch still demands a
 /// one-use approval for every write or external call.
+/// Builds the trusted intent of a local export stage from host-held state.
+/// Supplied by the host only; modules cannot reach it.
+typedef LocalExportIntentProvider = HostEffectIntent? Function(
+  ToolCallRequest,
+  ResolvedAssistantScope,
+);
+
 class HostToolRegistrar implements ToolRegistrar {
-  HostToolRegistrar(this.moduleId, this._registry, this._manifest, this._link);
+  HostToolRegistrar(
+    this.moduleId,
+    this._registry,
+    this._manifest,
+    this._link, {
+    this.localExportIntent,
+    this.localExportStage,
+  });
+  final LocalExportIntentProvider? localExportIntent;
+
+  /// The stage the host wants next for a local export tool; the request never
+  /// supplies it.
+  final LocalExportPhase? Function(ToolCallRequest)? localExportStage;
 
   @override
   final String moduleId;
@@ -110,6 +130,8 @@ class HostToolRegistrar implements ToolRegistrar {
     required Set<AssistantScopeKind> defaultScopes,
     Future<void> Function(ResolvedAssistantScope, ToolCallResult)? validate,
     void Function(ToolCallRequest)? preflight,
+    HostEffectIntent? Function(ToolCallRequest, ResolvedAssistantScope)?
+    effectIntent,
   }) {
     final id = _claim(spec.name);
     final scopes = spec.scopes ?? defaultScopes;
@@ -129,6 +151,7 @@ class HostToolRegistrar implements ToolRegistrar {
       dataModuleIds: _dataModules,
       validateResult: validate,
       preflight: preflight,
+      effectIntent: effectIntent,
       handler: _wrap(handler),
     );
     _registered.add(id);
@@ -222,6 +245,10 @@ class HostToolRegistrar implements ToolRegistrar {
 
   @override
   void external(ExternalToolSpec spec, ModuleToolHandler handler) {
+    if (spec.destination.localExport) {
+      _externalLocalExport(spec, handler);
+      return;
+    }
     _checkRule('$moduleId.${spec.name}', spec.destination);
     final guard = _destinationGuard(spec.destination);
     _register(
@@ -235,6 +262,47 @@ class HostToolRegistrar implements ToolRegistrar {
       defaultScopes: {AssistantScopeKind.selectedObjects},
       preflight: guard,
     );
+  }
+
+  /// A local export tool only says "use the host facade". The capability must
+  /// be declared, the destination is one of the two fixed host stage markers,
+  /// and without a host intent the registry refuses every call.
+  void _externalLocalExport(ExternalToolSpec spec, ModuleToolHandler handler) {
+    final problems = localExportDeclarationProblems(
+      capabilityIds: {for (final c in _manifest.capabilities) c.id},
+      declarations: [
+        LocalExportDeclaration(
+          '$moduleId.${spec.name}',
+          spec.effect,
+          spec.destination,
+        ),
+      ],
+    );
+    if (problems.isNotEmpty) throw ArgumentError(problems.join('; '));
+    void guard(ToolCallRequest request) {
+      if (parseLocalExportDestination(request.destination) == null) {
+        throw const ToolPlatformException(
+          'destination_blocked',
+          'A local export names no destination of its own',
+        );
+      }
+    }
+
+    _register(
+      spec,
+      spec.effect,
+      (ctx) {
+        guard(ctx.call.request);
+        return handler(ctx);
+      },
+      defaultScopes: {AssistantScopeKind.selectedObjects},
+      preflight: guard,
+      effectIntent: localExportIntent,
+    );
+    final stage = localExportStage;
+    if (stage != null) {
+      _registry.bindLocalExportStage('$moduleId.${spec.name}', stage);
+    }
   }
 
   @override

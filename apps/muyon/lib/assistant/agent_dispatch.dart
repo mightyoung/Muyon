@@ -8,6 +8,7 @@ import 'package:supplier_core/supplier_core.dart' show assistantReadableSummary;
 import '../platform/foundation_repository.dart';
 import '../platform/assistant_subconversations.dart';
 import '../platform/tool_registry.dart';
+import '../platform/grants/local_export_target.dart';
 import '../platform/grants/host_authorization_facts.dart';
 import '../platform/grants/outbound_content_reviewer.dart';
 import '../services/models/credential_redaction.dart';
@@ -133,13 +134,30 @@ class AgentDispatch {
           calls.add(_planned(i, p, disposition: 'none', note: 'over_limit'));
           continue;
         }
-        final request = ToolCallRequest(
-          invocationId: const Uuid().v4(),
+        final hostStaged = ctx.tools.isLocalExportTool(p.toolId);
+        // A model never names a local export stage or destination: the host
+        // writes it. Refused here, before anything is prepared.
+        if ((hostStaged && p.destination != null) ||
+            parseLocalExportDestination(p.destination) != null) {
+          throw StateError('local_export_destination_is_host_owned');
+        }
+        final invocationId = const Uuid().v4();
+        final unstaged = ToolCallRequest(
+          invocationId: invocationId,
           toolId: p.toolId,
           scope: task.scope,
           parameters: p.parameters,
           destination: p.destination,
         );
+        final request = hostStaged
+            ? ToolCallRequest(
+                invocationId: invocationId,
+                toolId: p.toolId,
+                scope: task.scope,
+                parameters: p.parameters,
+                destination: ctx.tools.hostLocalExportDestination(unstaged),
+              )
+            : unstaged;
         if (ctx.closing) throw StateError('Assistant is closing');
         ctx.invocationTasks[request.invocationId] = task.id;
         ctx.invocationRequests[request.invocationId] = request;
@@ -151,10 +169,8 @@ class AgentDispatch {
         if (ctx.closing) throw StateError('Assistant is closing');
         // Scope resolution may await module activation. Recheck the returned
         // effect before a child can propose or approve an effectful call.
-        AssistantSubconversations(ctx.repository).checkTool(
-          task.conversationId,
-          prepared.info.descriptor.effect,
-        );
+        AssistantSubconversations(ctx.repository)
+            .checkTool(task.conversationId, prepared.info.descriptor.effect);
         final read = prepared.info.accessLevel == ToolAccessLevel.read;
         if (!read && cards >= ctx.budget.maxCardCalls) {
           calls.add(

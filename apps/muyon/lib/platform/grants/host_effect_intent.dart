@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
+import 'local_export_target.dart';
+
 /// Only host effect adapters construct this value; it has no JSON decoder.
 final class HostEffectIntent {
   HostEffectIntent.transport({
@@ -14,6 +16,7 @@ final class HostEffectIntent {
     Iterable<ObjectRef> sourceObjects = const [],
   }) : _endpoint = endpoint,
        _endpointIdentity = endpointIdentity,
+       _le = null,
        content = List.unmodifiable(content),
        sourceObjects = List.unmodifiable(sourceObjects) {
     final loopback = ['localhost', '127.0.0.1', '::1'].contains(endpoint.host);
@@ -38,6 +41,7 @@ final class HostEffectIntent {
     required Iterable<ObjectRef> sourceObjects,
   }) : _endpoint = null,
        _endpointIdentity = null,
+       _le = null,
        content = List.unmodifiable(content),
        sourceObjects = List.unmodifiable(sourceObjects) {
     if (toolId.isEmpty ||
@@ -49,7 +53,71 @@ final class HostEffectIntent {
       );
     }
   }
+
+  /// A local export stage (generate A or save B). The host adapter builds it
+  /// from the frozen preparation; the model never supplies any of it. Bound:
+  /// stage, resolved scope, preparation version, host file name and format,
+  /// content bytes (their SHA-256 is the payload digest), the person's target
+  /// capability (save only), create/replace mode and the policy version.
+  HostEffectIntent.localExport({
+    required this.toolId,
+    required this.invocationId,
+    required LocalExportPhase phase,
+    required String scopeDigest,
+    required int preparationVersion,
+    required String fileName,
+    required String format,
+    required List<int> content,
+    required Iterable<ObjectRef> sourceObjects,
+    required LocalExportTargetIssuer targetIssuer,
+    LocalExportTargetCapability? target,
+    required LocalExportOverwrite overwrite,
+    required String policyVersion,
+  }) : _endpoint = null,
+       _endpointIdentity = null,
+       _le = _LocalExport(
+         phase,
+         scopeDigest,
+         preparationVersion,
+         fileName,
+         format,
+         target,
+         targetIssuer,
+         overwrite,
+         policyVersion,
+       ),
+       content = List.unmodifiable(content),
+       sourceObjects = List.unmodifiable(sourceObjects) {
+    final hex = RegExp(r'^[0-9a-f]{64}$');
+    final saving = phase == LocalExportPhase.save;
+    if (toolId.isEmpty ||
+        invocationId.isEmpty ||
+        this.content.isEmpty ||
+        this.content.any((byte) => byte < 0 || byte > 255) ||
+        !hex.hasMatch(scopeDigest) ||
+        preparationVersion < 1 ||
+        format.isEmpty ||
+        policyVersion.isEmpty ||
+        !_safeFileName.hasMatch(fileName) ||
+        fileName.startsWith('.') ||
+        fileName.contains('..') ||
+        saving != (target != null) ||
+        (target != null && !targetIssuer.owns(target)) ||
+        (!saving && overwrite != LocalExportOverwrite.createNew)) {
+      throw ArgumentError('Trusted local export identity and bytes required');
+    }
+  }
+  static final _safeFileName = RegExp(r'^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$');
   final String toolId, invocationId;
+  final _LocalExport? _le;
+  bool get isLocalExport => _le != null;
+
+  /// Identity binding remains stable, but a cached save loses authority when
+  /// its trusted issuer revokes the target. Recheck at each host boundary.
+  bool get hasLiveAuthority =>
+      _le?.target == null || _le!.targetIssuer.owns(_le.target!);
+  LocalExportPhase get phase =>
+      _le?.phase ?? (throw StateError('Not a local export'));
   final Uri? _endpoint;
   final String? _endpointIdentity;
   bool get isTransport => _endpoint != null;
@@ -65,7 +133,28 @@ final class HostEffectIntent {
       ? null
       : _hash(utf8.encode(jsonEncode([endpoint.toString(), endpointIdentity])));
   String get payloadDigest => _hash(content);
-  String get digest => _hash(
+  String get digest => isLocalExport
+      ? _hash(
+          utf8.encode(
+            jsonEncode([
+              'local_export',
+              toolId,
+              invocationId,
+              _le!.phase.name,
+              _le.scopeDigest,
+              _le.preparationVersion,
+              _le.fileName,
+              _le.format,
+              payloadDigest,
+              _le.target?.identity,
+              _le.overwrite.name,
+              _le.policyVersion,
+              sourceObjects.map((ref) => ref.toJson()).toList(),
+            ]),
+          ),
+        )
+      : _plainDigest;
+  String get _plainDigest => _hash(
     utf8.encode(
       jsonEncode([
         isTransport ? 'transport' : 'local_write',
@@ -86,4 +175,24 @@ final class HostEffectIntent {
           path: endpoint.path,
         ).toString();
   static String _hash(List<int> bytes) => sha256.convert(bytes).toString();
+}
+
+final class _LocalExport {
+  const _LocalExport(
+    this.phase,
+    this.scopeDigest,
+    this.preparationVersion,
+    this.fileName,
+    this.format,
+    this.target,
+    this.targetIssuer,
+    this.overwrite,
+    this.policyVersion,
+  );
+  final LocalExportPhase phase;
+  final String scopeDigest, fileName, format, policyVersion;
+  final int preparationVersion;
+  final LocalExportTargetCapability? target;
+  final LocalExportTargetIssuer targetIssuer;
+  final LocalExportOverwrite overwrite;
 }
