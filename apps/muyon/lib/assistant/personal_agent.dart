@@ -595,13 +595,12 @@ class PersonalAgent {
     if (_ctx.closing) throw StateError('Assistant is closing');
     final hostCommand =
         '运行工具 $toolId：${jsonEncode(AgentDispatch.displayParameters(parameters))}';
-    final task = _factory
-        .toolTask(
-          conversationId: conversationId,
-          toolId: toolId,
-          previousAttemptId: previousAttemptId,
-        )
-        .copy({'modelHostToolRequestText': hostCommand});
+    final task = _factory.toolTask(
+      conversationId: conversationId,
+      toolId: toolId,
+      previousAttemptId: previousAttemptId,
+      modelHostToolRequestText: hostCommand,
+    );
     _freezePresentation(task.id, UiPresentationRequest.ordinary());
     await repository.createTask(task);
     await repository.appendMessage(conversationId, 'user', hostCommand);
