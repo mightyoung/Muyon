@@ -207,8 +207,7 @@ class AgentTaskFactory {
       'conversationId': conversationId,
       'prompt': '运行工具 $toolId',
       'strategyId': 'manual',
-      if (modelHostToolRequestText != null)
-        'modelHostToolRequestText': modelHostToolRequestText,
+      'modelHostToolRequestText': ?modelHostToolRequestText,
       'candidateIds': [toolId],
       'previousAttemptId': previousAttemptId,
       'scope': c.scope.toJson(),

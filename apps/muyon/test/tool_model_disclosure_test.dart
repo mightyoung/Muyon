@@ -11,6 +11,7 @@ import 'package:muyon/assistant/context_compactor.dart';
 import 'package:muyon/assistant/model_request_gate.dart';
 import 'package:muyon/assistant/tool_selection.dart';
 import 'package:muyon/platform/grants/host_authorization_facts.dart';
+import 'package:muyon/platform/tool_registry.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/models/openai_compat_provider.dart';
 
@@ -43,22 +44,144 @@ ToolCallResult result() => ToolCallResult(
   },
   objectRefs: [ref],
 );
-AgentContext referenceContext(LoopFixture f) => AgentContext(
-  repository: f.repo,
-  gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
-  tools: f.tools,
-  executionDeviceId: 'this-device',
-  budget: const Budget(),
-  events: TaskEventTableSink(f.repo),
-  selectionStrategy: const RuleAndModelToolSelection(),
-  gate: const AlwaysConfirmGate(),
-  provider: const OpenAiCompatProvider(),
-  compactor: const ContextCompactor(),
-  compactionProfile: null,
-  clock: DateTime.now,
-);
+AgentContext referenceContext(LoopFixture f, {ToolRegistry? registry}) =>
+    AgentContext(
+      repository: f.repo,
+      gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+      tools: registry ?? f.tools,
+      executionDeviceId: 'this-device',
+      budget: const Budget(),
+      events: TaskEventTableSink(f.repo),
+      selectionStrategy: const RuleAndModelToolSelection(),
+      gate: const AlwaysConfirmGate(),
+      provider: const OpenAiCompatProvider(),
+      compactor: const ContextCompactor(),
+      compactionProfile: null,
+      clock: DateTime.now,
+    );
 
 void main() {
+  test('global source pin preparation proves full scope pins and refuses unknown foreign stale authority', () async {
+    const pin = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'global-source',
+      revisionRef: '1',
+      contentDigest: 'GLOBAL_SOURCE_PRIVATE_DIGEST',
+    );
+    const nextPin = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'global-source',
+      revisionRef: '2',
+      contentDigest: 'NEXT_GLOBAL_PRIVATE_DIGEST',
+    );
+    UiPlanningHostState source(ObjectRef ref) => UiPlanningHostState(
+      snapshot: DataSnapshot(
+        ref: const SnapshotRef('private-snapshot', 1),
+        facts: {
+          'notes': SnapshotFact(
+            object: ref,
+            field: 'notes',
+            value: secret,
+            state: FactState.verified,
+          ),
+        },
+      ),
+      intent: InteractionIntent(
+        id: 'intent',
+        purpose: 'display',
+        snapshotRef: const SnapshotRef('private-snapshot', 1),
+      ),
+      currentView: UiCurrentView(surfaceId: 'surface', revision: 1),
+      catalog: library2UiCatalog,
+      allowedActionRefs: {},
+    );
+    final f = await LoopFixture.open();
+    f.objects = [pin];
+    final agent = f.agent();
+    final task = await f.start(agent, f.profile());
+    expect(task.scope.kind, AssistantScopeKind.global);
+    expect(task.scope.objects, isEmpty);
+    var read = true, revision = 0;
+    final registry = ToolRegistry(
+      database: f.repo.database,
+      resolveScope: f.tools.resolveScope,
+      categoryAllowed: (_) => read,
+      policyRevision: () => '$revision',
+    );
+    final ctx = referenceContext(f, registry: registry);
+    final initial = ctx.modelReferences(task);
+    expect(() => initial.projectObject(pin), throwsStateError);
+    final state = source(pin);
+    await ctx.prepareModelReferences(task, state);
+    final map = ctx.modelReferences(task);
+    final projected = map.projectObject(pin);
+    expect(projected['modelRef'], startsWith('mr1_'));
+    expect(projected.containsKey('contentDigest'), isFalse);
+    await ctx.prepareModelReferences(task, state);
+    expect(ctx.modelReferences(task), same(map));
+    expect(ctx.modelReferences(task).projectObject(pin), projected);
+    expect(
+      state.snapshot.facts['notes']!.value,
+      secret,
+      reason: 'pin proof does not erase local source or register its field',
+    );
+    const unknown = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'unknown',
+      contentDigest: 'UNKNOWN_DIGEST',
+    );
+    await expectLater(
+      ctx.prepareModelReferences(task, source(unknown)),
+      throwsStateError,
+    );
+    expect(() => map.projectObject(pin), throwsStateError);
+    await ctx.prepareModelReferences(task, state);
+    final beforeStale = ctx.modelReferences(task);
+    f.objects = [nextPin];
+    await expectLater(
+      ctx.prepareModelReferences(task, state),
+      throwsStateError,
+    );
+    expect(() => beforeStale.projectObject(pin), throwsStateError);
+    f.objects = [pin];
+    await ctx.prepareModelReferences(task, state);
+    final beforeRace = ctx.modelReferences(task);
+    f.resolves = 0;
+    f.onResolve = (n) {
+      if (n == 2) f.objects = [nextPin];
+    };
+    await expectLater(
+      ctx.prepareModelReferences(task, state),
+      throwsStateError,
+    );
+    expect(() => beforeRace.projectObject(pin), throwsStateError);
+    f.onResolve = null;
+    f.objects = [pin];
+    await expectLater(
+      ctx.prepareModelReferences(task.copy({'executionId': 'foreign-task'}), state),
+      throwsStateError,
+    );
+    await ctx.prepareModelReferences(task, state);
+    final beforeReadRevoke = ctx.modelReferences(task);
+    read = false;
+    revision++;
+    await expectLater(
+      ctx.prepareModelReferences(task, state),
+      throwsStateError,
+    );
+    expect(() => beforeReadRevoke.projectObject(pin), throwsStateError);
+    read = true;
+    revision++;
+    await ctx.prepareModelReferences(task, state);
+    expect(
+      ctx.modelReferences(task).projectObject(pin)['modelRef'],
+      isNot(projected['modelRef']),
+    );
+    ctx.closeModelReferences();
+  });
   test('actual manual tool result uses host origin rather than user role for model refs', () async {
     const pinned = ObjectRef(
       moduleId: 'inquiry',

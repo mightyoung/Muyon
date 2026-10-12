@@ -185,6 +185,8 @@ class AgentContext {
   }
 
   final _referenceMaps = <String, ModelReferenceMap>{};
+  final _sourceReferencePins =
+      <String, ({String scope, String authority, Set<ObjectRef> objects})>{};
   var _referenceEpoch = 0;
   bool _referenceListening = false;
   void _referenceAuthorityChanged() {
@@ -193,6 +195,7 @@ class AgentContext {
       map.expire();
     }
     _referenceMaps.clear();
+    _sourceReferencePins.clear();
   }
 
   void closeModelReferences() {
@@ -220,6 +223,7 @@ class AgentContext {
     return digest([
       _referenceEpoch,
       modelAuthorization?.policy.current.revision,
+      tools.policyRevision?.call(),
       revoked,
     ]);
   }
@@ -228,6 +232,12 @@ class AgentContext {
     PersonalTask task,
   ) {
     final objects = <ObjectRef>{...task.scope.objects};
+    final source = _sourceReferencePins[task.id];
+    if (source != null &&
+        source.scope == digest(task.scope.toJson()) &&
+        source.authority == _referenceAuthority()) {
+      objects.addAll(source.objects);
+    }
     final artifacts = <ArtifactRef>[];
     for (final ref in task.payload['references'] as List? ?? const []) {
       objects.add(objectRefFromJson(Map<String, Object?>.from(ref as Map)));
@@ -256,6 +266,60 @@ class AgentContext {
       }
     }
     return (objects: objects, artifacts: artifacts);
+  }
+
+  /// Admit reference pins only from the existing host scope resolver. This
+  /// does not register fields or grant model disclosure of source values.
+  Future<void> prepareModelReferences(
+    PersonalTask task,
+    UiPlanningHostState state,
+  ) async {
+    final authority = _referenceAuthority();
+    final scope = digest(task.scope.toJson());
+    bool current() {
+      final live = repository.task(task.id);
+      return !closing &&
+          live != null &&
+          live.conversationId == task.conversationId &&
+          digest(live.scope.toJson()) == scope &&
+          digest(
+                repository.conversation(task.conversationId)?.scope.toJson(),
+              ) ==
+              scope &&
+          (tools.categoryAllowed?.call(ToolEffect.read) ?? true) &&
+          authority == _referenceAuthority();
+    }
+
+    try {
+      if (!current()) throw StateError('model_reference_unavailable');
+      final requested = state.snapshot.facts.values
+          .map((fact) => fact.object)
+          .toSet();
+      final first = await tools.resolveScope(task.scope);
+      if (!current() ||
+          digest(first.requested.toJson()) != scope ||
+          !first.objects.toSet().containsAll(requested)) {
+        throw StateError('model_reference_unavailable');
+      }
+      final second = await tools.resolveScope(task.scope);
+      if (!current() ||
+          digest(second.requested.toJson()) != scope ||
+          !second.objects.toSet().containsAll(requested)) {
+        throw StateError('model_reference_unavailable');
+      }
+      _sourceReferencePins[task.id] = (
+        scope: scope,
+        authority: authority,
+        objects: Set.unmodifiable(second.objects.where(requested.contains)),
+      );
+      // The table is replaced only if scope, exact pins or authority changed.
+      // Unknown source artifacts stay subject to the existing receipt evidence.
+      modelReferences(repository.task(task.id)!);
+    } catch (_) {
+      _sourceReferencePins.remove(task.id);
+      _referenceMaps.remove(task.id)?.expire();
+      rethrow;
+    }
   }
 
   String _referenceSnapshot(PersonalTask task) {

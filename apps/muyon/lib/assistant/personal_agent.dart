@@ -110,6 +110,7 @@ class PersonalAgent {
         requestView: _ctx.view,
         modelHistory: (task) => modelTaskToolHistory(task, _ctx.tools),
         modelReferences: _ctx.modelReferences,
+        prepareModelReferences: _ctx.prepareModelReferences,
         enabled: presentationPreference == null ? uiPlanningEnabled : true,
         allowsPresentation: presentationPreference == null
             ? null
