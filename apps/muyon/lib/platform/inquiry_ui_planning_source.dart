@@ -33,42 +33,58 @@ class InquiryUiPlanningSource {
         jsonEncode(task.scope.toJson()) !=
             jsonEncode(conversation.scope.toJson()) ||
         task.scope.kind != AssistantScopeKind.selectedObjects ||
-        task.scope.objects.isEmpty ||
-        task.scope.objects.length >
-            InquiryReadonlySnapshots.maxSelectionObjects) {
+        // The first slice has one host-selected target. Do not filter a
+        // larger selection and silently choose one of its members.
+        task.scope.objects.length != 1) {
       return null;
     }
-    final refs = task.scope.objects.where(
-      (ref) =>
-          ref.moduleId == 'inquiry' &&
-          const {
-            'inquiry',
-            'quotation',
-            'project_item',
-          }.contains(ref.objectType),
-    );
-    if (refs.isEmpty) return null;
+    final target = task.scope.objects.single;
+    if (target.moduleId != 'inquiry' ||
+        !const {
+          'inquiry',
+          'quotation',
+          'project_item',
+        }.contains(target.objectType)) {
+      return null;
+    }
+    final owner = host.inquiry;
     final lifecycle = host.modules.scopeAuthorityRevision('inquiry');
     final authority = host.workspaces.scopeAuthorityRevision;
     final selected = await InquiryReadonlySnapshots.read(
       host: host,
       scope: task.scope,
-      object: refs.first,
+      object: target,
     );
+    bool stillCurrent() {
+      final live = host.foundation.task(task.id);
+      return live != null &&
+          live.conversationId == task.conversationId &&
+          live.payload['uiPlanningInternal'] != true &&
+          !{
+            PersonalTaskState.failed,
+            PersonalTaskState.interrupted,
+          }.contains(live.state) &&
+          jsonEncode(live.scope.toJson()) == jsonEncode(task.scope.toJson()) &&
+          jsonEncode(
+                host.foundation
+                    .conversation(task.conversationId)
+                    ?.scope
+                    .toJson(),
+              ) ==
+              jsonEncode(task.scope.toJson()) &&
+          lifecycle != null &&
+          authority != null &&
+          identical(host.inquiry, owner) &&
+          host.modules.scopeAuthorityRevision('inquiry') == lifecycle &&
+          host.workspaces.scopeAuthorityRevision == authority;
+    }
+
+    if (!stillCurrent()) return null;
     final stored = await HostUiWorkspaceStore(
       host.foundation,
       taskId: task.id,
     ).load('task-${task.id}');
-    if (lifecycle == null ||
-        authority == null ||
-        host.modules.scopeAuthorityRevision('inquiry') != lifecycle ||
-        host.workspaces.scopeAuthorityRevision != authority ||
-        jsonEncode(
-              host.foundation.conversation(task.conversationId)?.scope.toJson(),
-            ) !=
-            jsonEncode(task.scope.toJson())) {
-      return null;
-    }
+    if (!stillCurrent()) return null;
     final object = selected.record.object;
     final facts = <String, SnapshotFact>{
       'saved-source': SnapshotFact(
@@ -82,7 +98,10 @@ class InquiryUiPlanningSource {
           object: object,
           field: field.label,
           value: field.value,
-          state: FactState.verified,
+          // The fixed-card projection supplies a typed masking flag but
+          // discards original fact state/null/type-validation evidence. Its
+          // formatted placeholders cannot prove verified business values.
+          state: field.masked ? FactState.notDisclosed : FactState.unverified,
         ),
     };
     final snapshot = DataSnapshot(
@@ -91,7 +110,10 @@ class InquiryUiPlanningSource {
         selected.record.snapshotRef.revision,
       ),
       facts: facts,
-      initialUiState: stored?.displayValues ?? const {},
+      // Generic checkpoints contain unclassified drafts/view values. This
+      // readonly model source cannot grant them disclosure authority. CF4/5
+      // must restore classified values through their own safe recovery owner.
+      initialUiState: const {},
     );
     const allowed = {'detail', 'back'};
     return UiPlanningHostState(
@@ -107,7 +129,7 @@ class InquiryUiPlanningSource {
       currentView: UiCurrentView(
         surfaceId: 'task-${task.id}',
         revision: stored?.planRevision ?? 0,
-        values: stored?.displayValues ?? const {},
+        values: const {},
       ),
       catalog: library2UiCatalog,
       allowedActionRefs: allowed,
