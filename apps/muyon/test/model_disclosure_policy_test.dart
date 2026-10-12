@@ -3,7 +3,12 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon_module_api/ui_contract.dart';
 import 'package:muyon_module_api/muyon_module_api.dart'
-    show AssistantScope, ToolCallResult, ToolCallStatus;
+    show
+        AssistantScope,
+        ToolCallResult,
+        ToolCallStatus,
+        ToolDescriptor,
+        ToolEffect;
 import 'package:muyon_ui/dynamic_ui.dart';
 import 'package:muyon/platform/inquiry_ui_planning_source.dart';
 import 'package:muyon/assistant/ui_planning.dart';
@@ -142,6 +147,90 @@ void main() {
       },
     );
   }
+  test(
+    'producer-bound planning keeps the current registered-tool model answer',
+    () async {
+      final f = await LoopFixture.open();
+      const selected = ObjectRef(
+        moduleId: 'inquiry',
+        objectType: 'project_item',
+        objectId: 'item-1',
+      );
+      f.objects = [selected];
+      const raw = 'CURRENT-TOOL-UNREGISTERED-NOTES-721bc';
+      f.tools.register(
+        providerId: 'inquiry',
+        descriptor: ToolDescriptor(
+          toolId: 'inquiry.object',
+          moduleId: 'inquiry',
+          effect: ToolEffect.read,
+          parameterSchema: {
+            'type': 'object',
+            'properties': <String, Object?>{},
+            'additionalProperties': false,
+          },
+        ),
+        handler: (_) async => ToolCallResult(
+          status: ToolCallStatus.succeeded,
+          summary: raw,
+          data: {
+            'record': {'name': '合法品名', 'qty': 4, 'notes': raw},
+          },
+          objectRefs: [selected],
+        ),
+      );
+      const ordinary = 'CURRENT-AFTER-REGISTERED-TOOL-ANSWER-9a26';
+      f.replies
+        ..add(LoopReply.sse(sseCalls([('c1', 'inquiry__object', '{}')])))
+        ..add(LoopReply.sse(sseText(ordinary)));
+      final agent = f.agent();
+      final done = await f.run(agent, await f.start(agent, f.profile()));
+      expect(done.summary, ordinary);
+      final provenance = modelTaskToolHistory(done, f.tools);
+      expect(
+        provenance.hadLegacyResult,
+        isFalse,
+        reason: 'actual host registry invocation, receipt, frozen identity and producer agree',
+      );
+      expect(jsonEncode(provenance.messages), contains('合法品名'));
+      UiPlanningRequest? actual;
+      final harness = UiPlanningHarness(
+        repository: f.repo,
+        modelHistory: (t) => modelTaskToolHistory(t, f.tools),
+        requestView: (t) => modelTaskToolHistory(t, f.tools).messages,
+        source: (t) async => UiPlanningHostState(
+          snapshot: DataSnapshot(ref: ref, facts: {}),
+          intent: InteractionIntent(
+            id: 'i',
+            purpose: 'display',
+            snapshotRef: ref,
+          ),
+          currentView: UiCurrentView(surfaceId: 's', revision: 1),
+          catalog: library2UiCatalog,
+          allowedActionRefs: {},
+        ),
+        providers: {
+          UiPlanningMode.intelligent: FixtureUiPlanningProvider((r) async {
+            actual = r;
+            return const UiPlanningResult(
+              decision: UiDisplayDecision.textOnly,
+              reasonCode: 'model_no_card',
+            );
+          }),
+        },
+      );
+      await harness.plan(done.id);
+      expect(actual, isNotNull);
+      expect(actual!.answer, ordinary);
+      expect(jsonEncode(actual!.toJson()), contains('合法品名'));
+      expect(jsonEncode(actual!.toJson()), isNot(contains(raw)));
+      expect(
+        jsonEncode(done.payload['step']),
+        contains(raw),
+        reason: 'model projection does not erase the local receipt',
+      );
+    },
+  );
   test('real startChat current ordinary model answer remains available to planning', () async {
     final f = await LoopFixture.open();
     final agent = f.agent();
