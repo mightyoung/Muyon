@@ -271,7 +271,7 @@ void main() {
     'two binding rows exclude the note even with a first unambiguous row',
     () async {
       store.db.execute(
-        "INSERT INTO paper_bindings VALUES('d','other-paper',1,'manual',1,0)",
+        "INSERT INTO paper_bindings VALUES('d','z-other-paper',1,'manual',1,0)",
       );
       final prepared = await prepare(['n-d', 'n-pdf']);
       expect(rows(prepared), hasLength(1));
