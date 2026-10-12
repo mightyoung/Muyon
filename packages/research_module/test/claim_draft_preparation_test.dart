@@ -531,10 +531,18 @@ void main() {
     expect(reads, 0);
   });
   test(
-    'prepared note source pins match the resolved current note reference',
+    'prepared selected source pins match the resolved current references',
     () async {
       final selected = scope(['n-d']);
       final prepared = await prepare(['n-d'], selected: selected);
+      expect(
+        prepared.sources
+            .singleWhere((r) => r.objectType == 'project')
+            .contentDigest,
+        selected.objects
+            .singleWhere((r) => r.objectType == 'project')
+            .contentDigest,
+      );
       expect(
         prepared.sources
             .singleWhere((r) => r.objectType == 'note')
