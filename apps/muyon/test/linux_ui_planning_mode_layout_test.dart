@@ -111,7 +111,18 @@ void main() {
                   expectLastGlyphFits(
                     tester,
                     find.text(labels[selection]!),
-                    tester.getRect(planner),
+                    tester
+                        .getRect(planner)
+                        .intersect(
+                          tester.getRect(
+                            find
+                                .ancestor(
+                                  of: planner,
+                                  matching: find.byType(Scrollable),
+                                )
+                                .first,
+                          ),
+                        ),
                   );
                   expect(tester.takeException(), isNull);
                 }
