@@ -6,6 +6,7 @@ import 'package:muyon/assistant/model_reference_map.dart';
 import 'package:muyon/assistant/personal_agent.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/services/models/model_gateway.dart';
+import 'package:muyon/services/models/model_provider.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
 import 'support/agent_loop_fixture.dart';
@@ -150,13 +151,13 @@ void main() {
         scopeKey: _scopeKey(task),
         pin: pin,
       );
-      expect(map.resolve(ref['modelRef'] as String, current: binding), row);
+      expect(ref['modelRef'], map.handleFor(row, binding: binding));
       // the host-side record keeps the full digest for CAS and receipts
       final stored = jsonEncode(f.repo.task(task.id)!.payload['messages']);
       expect(stored, contains(raw));
     });
 
-    test('a handle of one task does not resolve in another', () async {
+    test('map unit only: a handle of one task is refused in another', () async {
       f.replies
         ..add(LoopReply.sse(sseCalls([('c1', 'rich', '{}')])))
         ..add(LoopReply.sse(sseText('完成')));
@@ -231,30 +232,27 @@ void main() {
                 as Map;
         // minted for the resumed attempt, not for the one that failed
         expect(
-          map.resolve(
-            ref['modelRef'] as String,
-            current: ModelReferenceBinding(
+          ref['modelRef'],
+          map.handleFor(
+            row,
+            binding: ModelReferenceBinding(
               taskId: resumed.id,
               scopeKey: _scopeKey(resumed),
               pin: pin,
             ),
           ),
-          row,
+          reason: 'minted for the resumed attempt',
         );
         expect(
-          () => map.resolve(
-            ref['modelRef'] as String,
-            current: ModelReferenceBinding(
-              taskId: first.id,
-              scopeKey: _scopeKey(first),
-              pin: pin,
-            ),
-          ),
-          throwsA(
-            isA<ModelReferenceRejected>().having(
-              (e) => e.code,
-              'code',
-              'cross_task',
+          ref['modelRef'],
+          isNot(
+            map.handleFor(
+              row,
+              binding: ModelReferenceBinding(
+                taskId: first.id,
+                scopeKey: _scopeKey(first),
+                pin: pin,
+              ),
             ),
           ),
         );
@@ -291,42 +289,253 @@ void main() {
   });
 
   group('authority moves', () {
-    test('handles minted under an old pin no longer resolve', () async {
+    test(
+      'handles minted under an old pin are not the new pin\'s handles',
+      () async {
+        f.replies.add(LoopReply.sse(sseText('好的')));
+        final task = await f.start(
+          agent,
+          f.profile(),
+          conversationId: await selectedConversation(),
+        );
+        final sentHandle = RegExp(r'mr1_[A-Za-z0-9_-]+')
+            .firstMatch(jsonEncode(task.payload['preview']))!
+            .group(0)!;
+        final old = ModelReferenceBinding(
+          taskId: task.id,
+          scopeKey: _scopeKey(task),
+          pin: pin,
+        );
+        expect(map.handleFor(row, binding: old), sentHandle);
+        pin = 'pin-2';
+        expect(
+          map.handleFor(
+            row,
+            binding: ModelReferenceBinding(
+              taskId: task.id,
+              scopeKey: _scopeKey(task),
+              pin: pin,
+            ),
+          ),
+          isNot(sentHandle),
+          reason: 'a new pin mints new handles',
+        );
+      },
+    );
+  });
+
+  group('summary request projection (C6-FIX-1 I-1)', () {
+    test('a second summary quotes the first one only with handles', () async {
+      f.replies
+        ..add(LoopReply.sse(sseCalls([('c1', 'rich', '{}')])))
+        ..add(LoopReply.sse(sseText(_summaryJson)))
+        ..add(LoopReply.sse(sseCalls([('c2', 'rich', '{}')])))
+        ..add(LoopReply.sse(sseText(_summaryJson)))
+        ..add(LoopReply.sse(sseText('完成')));
+      final conversation = await selectedConversation();
+      // Older history for the summary to fold in (as context_compaction_test).
+      for (var i = 0; i < 8; i++) {
+        await f.repo.appendMessage(
+          conversation,
+          i.isEven ? 'user' : 'assistant',
+          '历史$i' * 200,
+        );
+      }
+      var task = await f.start(
+        agent,
+        f.profile(),
+        conversationId: conversation,
+      );
+      // read, then summary, read again, then summary: the second summary
+      // starts from the first one, which holds the full digest host-side.
+      Future<void> step() async {
+        task = f.repo.task(task.id)!;
+        await agent.confirm(
+          task.id,
+          requestDigest: task.payload['requestDigest'] as String,
+        );
+      }
+
+      await step();
+      await agent.compactNow(task.id);
+      await step();
+      await step();
+      await agent.compactNow(task.id);
+      await step();
+      task = await f.run(agent, f.repo.task(task.id)!);
+      expect(task.state, PersonalTaskState.succeeded);
+      final summaries = [
+        for (final body in bodies())
+          if (body.contains('You write a summary')) body,
+      ];
+      expect(summaries, hasLength(2));
+      expect(
+        summaries.last,
+        contains('previousSummary'),
+        reason: 'the previous summary is part of the request',
+      );
+      expect(summaries.last, isNot(contains(raw)));
+      expect(summaries.last, contains('mr1_'));
+    });
+  });
+
+  group('confirmation after a restart (C6-FIX-1 I-3)', () {
+    test(
+      'an old card is not sent under a new pin and the task fails',
+      () async {
+        f.replies.add(LoopReply.sse(sseText('好的')));
+        final task = await f.start(
+          agent,
+          f.profile(),
+          conversationId: await selectedConversation(),
+        );
+        expect(task.state, PersonalTaskState.waitingConfirmation);
+        final restarted = PersonalAgent(
+          repository: f.repo,
+          gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+          tools: f.tools,
+          modelReferences: ModelReferenceMap(List.filled(32, 5)),
+          modelReferencePin: (_) => 'pin-2',
+        );
+        addTearDown(restarted.close);
+        await restarted.confirm(
+          task.id,
+          requestDigest: task.payload['requestDigest'] as String,
+        );
+        expect(f.bodies, isEmpty, reason: 'nothing left the host');
+        expect(f.repo.task(task.id)!.state, PersonalTaskState.failed);
+      },
+    );
+
+    test('the same card under the same pin is still sent', () async {
       f.replies.add(LoopReply.sse(sseText('好的')));
       final task = await f.start(
         agent,
         f.profile(),
         conversationId: await selectedConversation(),
       );
-      final sentHandle = RegExp(r'mr1_[A-Za-z0-9_-]+')
-          .firstMatch(jsonEncode(task.payload['preview']))!
-          .group(0)!;
-      final old = ModelReferenceBinding(
-        taskId: task.id,
-        scopeKey: _scopeKey(task),
-        pin: pin,
+      final restarted = PersonalAgent(
+        repository: f.repo,
+        gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+        tools: f.tools,
+        modelReferences: ModelReferenceMap(List.filled(32, 5)),
+        modelReferencePin: (_) => pin,
       );
-      expect(map.resolve(sentHandle, current: old), row);
-      pin = 'pin-2';
-      expect(
-        () => map.resolve(
-          sentHandle,
-          current: ModelReferenceBinding(
+      addTearDown(restarted.close);
+      final done = await f.run(restarted, task);
+      expect(done.state, PersonalTaskState.succeeded);
+      expect(f.bodies, hasLength(1));
+    });
+  });
+
+  group('model cannot hand a handle back (C6-FIX-1 I-5)', () {
+    test(
+      'a native tool call carrying a handle is refused and never runs',
+      () async {
+        final task = await f.start(
+          agent,
+          f.profile(),
+          conversationId: await selectedConversation(),
+        );
+        final handle = map.handleFor(
+          row,
+          binding: ModelReferenceBinding(
             taskId: task.id,
             scopeKey: _scopeKey(task),
             pin: pin,
           ),
+        );
+        f.replies
+          ..add(
+            LoopReply.sse(
+              sseCalls([
+                ('c1', 'rich', jsonEncode({'note': handle})),
+              ]),
+            ),
+          )
+          ..add(LoopReply.sse(sseText('已拒绝')));
+        await f.run(agent, task);
+        expect(f.callsOf('rich'), 0, reason: 'the handle did not run the tool');
+      },
+    );
+
+    test('a compatibility tool reply carrying a handle is refused', () async {
+      final task = await f.start(
+        agent,
+        f.profile(
+          capabilities: const ModelCapabilities(
+            streaming: true,
+            nativeTools: false,
+            source: CapabilitySource.userDeclared,
+          ),
         ),
+        conversationId: await selectedConversation(),
+      );
+      final handle = map.handleFor(
+        row,
+        binding: ModelReferenceBinding(
+          taskId: task.id,
+          scopeKey: _scopeKey(task),
+          pin: pin,
+        ),
+      );
+      f.replies
+        ..add(
+          LoopReply.sse(
+            sseText(
+              jsonEncode({
+                'type': 'tool',
+                'toolId': 'rich',
+                'parameters': {'note': handle},
+              }),
+            ),
+          ),
+        )
+        ..add(
+          LoopReply.sse(
+            sseText(
+              jsonEncode({
+                'type': 'answer',
+                'answer': '已拒绝',
+                'citationIds': [],
+              }),
+            ),
+          ),
+        );
+      await f.run(agent, task);
+      expect(f.callsOf('rich'), 0, reason: 'the handle did not run the tool');
+    });
+  });
+
+  group('cancel revokes the task (C6-FIX-1 I-5)', () {
+    test('after cancel the task mints no further handles', () async {
+      f.replies.add(LoopReply.sse(sseText('好的')));
+      final task = await f.start(
+        agent,
+        f.profile(),
+        conversationId: await selectedConversation(),
+      );
+      final binding = ModelReferenceBinding(
+        taskId: task.id,
+        scopeKey: _scopeKey(task),
+        pin: pin,
+      );
+      await agent.cancel(task.id);
+      expect(
+        () => map.handleFor(row, binding: binding),
         throwsA(
           isA<ModelReferenceRejected>().having(
             (e) => e.code,
             'code',
-            'expired',
+            'revoked',
           ),
         ),
       );
     });
   });
 }
+
+const _summaryJson =
+    '{"goal":"弄清项目成本","decisions":"先查预算","pending":"写入报价","preferences":"简短回答"}';
 
 String _scopeKey(PersonalTask task) => AgentContext.digest(task.scope.toJson());

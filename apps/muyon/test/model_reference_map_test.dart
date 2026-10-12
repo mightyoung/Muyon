@@ -91,33 +91,42 @@ void main() {
     expect(resolved.contentDigest, digest);
   });
 
-  test('forged, truncated and unminted handles are rejected', () {
-    final handle = map.handleFor(object, binding: a);
-    expect(
-      () => map.resolve('mr1_${'A' * 32}', current: a),
-      rejected('unknown'),
-    );
-    expect(
-      () => map.resolve(handle.substring(0, handle.length - 2), current: a),
-      rejected('unknown'),
-    );
-    expect(
-      () => map.resolve(handle.replaceFirst('mr1_', 'mr2_'), current: a),
-      rejected('unknown'),
-    );
-    expect(() => map.resolve('', current: a), rejected('unknown'));
-    expect(() => map.resolve(object.objectId, current: a), rejected('unknown'));
-    expect(() => map.resolve(digest, current: a), rejected('unknown'));
-  });
+  test(
+    'map unit only: forged, truncated and unminted handles are rejected',
+    () {
+      final handle = map.handleFor(object, binding: a);
+      expect(
+        () => map.resolve('mr1_${'A' * 32}', current: a),
+        rejected('unknown'),
+      );
+      expect(
+        () => map.resolve(handle.substring(0, handle.length - 2), current: a),
+        rejected('unknown'),
+      );
+      expect(
+        () => map.resolve(handle.replaceFirst('mr1_', 'mr2_'), current: a),
+        rejected('unknown'),
+      );
+      expect(() => map.resolve('', current: a), rejected('unknown'));
+      expect(
+        () => map.resolve(object.objectId, current: a),
+        rejected('unknown'),
+      );
+      expect(() => map.resolve(digest, current: a), rejected('unknown'));
+    },
+  );
 
-  test('a handle from another map instance is not recognised', () {
-    final handle = ModelReferenceMap(List.filled(32, 7))
-        .handleFor(object, binding: a);
-    // same key => same handle, but this instance never minted it
-    expect(() => map.resolve(handle, current: a), rejected('unknown'));
-  });
+  test(
+    'map unit only: a handle from another map instance is not recognised',
+    () {
+      final handle = ModelReferenceMap(List.filled(32, 7))
+          .handleFor(object, binding: a);
+      // same key => same handle, but this instance never minted it
+      expect(() => map.resolve(handle, current: a), rejected('unknown'));
+    },
+  );
 
-  test('another task, another scope and an expired pin are rejected', () {
+  test('map unit only: another task, another scope and an expired pin are rejected', () {
     final handle = map.handleFor(object, binding: a);
     expect(
       () => map.resolve(
@@ -154,20 +163,23 @@ void main() {
     );
   });
 
-  test('revoking a task revokes its handles and no one else\'s', () {
-    final mine = map.handleFor(object, binding: a);
-    const b = ModelReferenceBinding(
-      taskId: 'task-b',
-      scopeKey: 'scope-1',
-      pin: 'pin-1',
-    );
-    final theirs = map.handleFor(object, binding: b);
-    map.revokeTask('task-a');
-    expect(() => map.resolve(mine, current: a), rejected('revoked'));
-    expect(map.resolve(theirs, current: b), object);
-    // a revoked task cannot mint new handles either
-    expect(() => map.handleFor(object, binding: a), rejected('revoked'));
-  });
+  test(
+    'map unit only: revoking a task revokes its handles and no one else\'s',
+    () {
+      final mine = map.handleFor(object, binding: a);
+      const b = ModelReferenceBinding(
+        taskId: 'task-b',
+        scopeKey: 'scope-1',
+        pin: 'pin-1',
+      );
+      final theirs = map.handleFor(object, binding: b);
+      map.revokeTask('task-a');
+      expect(() => map.resolve(mine, current: a), rejected('revoked'));
+      expect(map.resolve(theirs, current: b), object);
+      // a revoked task cannot mint new handles either
+      expect(() => map.handleFor(object, binding: a), rejected('revoked'));
+    },
+  );
 
   test('a handle never resolves an object without a digest', () {
     const bare = ObjectRef(
@@ -178,22 +190,25 @@ void main() {
     expect(() => map.handleFor(bare, binding: a), throwsArgumentError);
   });
 
-  test('the map is bounded and evicted handles become unknown', () {
-    final small = ModelReferenceMap(List.filled(32, 7), maxHandles: 3);
-    final first = small.handleFor(object, binding: a);
-    for (var i = 0; i < 3; i++) {
-      small.handleFor(
-        ObjectRef(
-          moduleId: 'inquiry',
-          objectType: 'quotation',
-          objectId: 'x$i',
-          contentDigest: digest,
-        ),
-        binding: a,
-      );
-    }
-    expect(() => small.resolve(first, current: a), rejected('unknown'));
-  });
+  test(
+    'map unit only: the map is bounded and evicted handles become unknown',
+    () {
+      final small = ModelReferenceMap(List.filled(32, 7), maxHandles: 3);
+      final first = small.handleFor(object, binding: a);
+      for (var i = 0; i < 3; i++) {
+        small.handleFor(
+          ObjectRef(
+            moduleId: 'inquiry',
+            objectType: 'quotation',
+            objectId: 'x$i',
+            contentDigest: digest,
+          ),
+          binding: a,
+        );
+      }
+      expect(() => small.resolve(first, current: a), rejected('unknown'));
+    },
+  );
 
   group('model projection of JSON', () {
     test(
