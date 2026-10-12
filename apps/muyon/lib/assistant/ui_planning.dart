@@ -606,6 +606,12 @@ class UiPlanningHarness {
           !_cancelledTasks.contains(task.id) &&
           jsonEncode(repository.task(task.id)?.scope.toJson()) ==
               jsonEncode(task.scope.toJson()),
+      modelDisclosedToolMessageIndices: modelHistory == null
+          ? const {}
+          : {
+              for (var i = 0; i < messages.length; i++)
+                if (messages[i]['role'] == 'tool') i,
+            },
       modelDisclosedFactRefs: state.modelDisclosedFactRefs,
       modelDisclosedComputedRefs: state.modelDisclosedComputedRefs,
       modelDisclosedUiStateRefs: state.modelDisclosedUiStateRefs,
