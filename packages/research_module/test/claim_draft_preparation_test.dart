@@ -24,7 +24,7 @@ void main() {
     reads = 0;
     duringRead = null;
     store.db.execute(
-      "INSERT INTO projects(id,title,layout,skill_root) VALUES('p','研究','research-skill-v2',''),('other','其他','research-skill-v2','')",
+      "INSERT INTO projects(id,title,question,next_step,layout,skill_root) VALUES('p','研究','','','research-skill-v2',''),('other','其他','','','research-skill-v2','')",
     );
     for (final id in ['d', 'pdf', 'unbound', 'foreign']) {
       final text = id == 'pdf' ? '%PDF-1.4 synthetic' : '原始引文，中文材料。';
