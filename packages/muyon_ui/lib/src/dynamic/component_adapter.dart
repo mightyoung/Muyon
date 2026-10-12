@@ -49,7 +49,7 @@ class UiAdapterContext {
   List<Widget> get children => [
     for (final id in node.children) renderChild(nodes[id]!),
   ];
-  bool has(String kind) => node.events.containsKey(kind);
+  bool has(String kind) => controller.allowsInteraction(node, kind);
   void dispatch(String kind, [Object? payload]) {
     controller.dispatchCaptured(capture, node, kind, payload);
   }
@@ -69,15 +69,20 @@ class UiAdapterContext {
           BindingKind.computed => snapshot.computedEvidence[ref.id]?.unit,
           _ => null,
         };
-  String cell(UiRow row, String column) =>
-      text(session.resolve(row.cells[column]!));
+  bool priorResult(BindingRef ref) => ref.kind == BindingKind.computed &&
+      (controller.recomputing || controller.outdated);
+  String display(BindingRef ref) =>
+      '${priorResult(ref) ? "上次结果：" : ""}${text(session.resolve(ref))}';
+  String displaySlot(String slot) => node.bindings[slot] == null
+      ? text(value(slot)) : display(node.bindings[slot]!);
+  String cell(UiRow row, String column) => display(row.cells[column]!);
   String evidence(BindingRef ref) {
     final fact = snapshot.facts[ref.id];
     final computed = snapshot.computedEvidence[ref.id];
     final sources = ref.kind == BindingKind.fact
         ? fact?.sourceRefs
         : computed?.sourceRefs;
-    return '${state(ref)?.name ?? "unknown"}${unit(ref) == null ? "" : " · ${unit(ref)}"}'
+    return '${priorResult(ref) ? "上次来源：" : ""}${state(ref)?.name ?? "unknown"}${unit(ref) == null ? "" : " · ${unit(ref)}"}'
         '${sources == null || sources.isEmpty ? " · 来源未提供" : " · 来源 ${sources.join('、')}"}';
   }
 }
@@ -98,11 +103,18 @@ Widget renderLibrary2Component(UiAdapterContext context) {
     key: ValueKey('aiui2-${node.id}'),
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      uiComponentAdapters[node.component]!(context),
+      if (refs.any(context.priorResult))
+        Semantics(
+          container: true,
+          label: '上次结果，已过期。',
+          child: uiComponentAdapters[node.component]!(context),
+        )
+      else
+        uiComponentAdapters[node.component]!(context),
       for (final ref in refs)
         if (ref.kind == BindingKind.fact || ref.kind == BindingKind.computed)
           Text(
-            '${ref.id}: ${context.text(context.session.resolve(ref))} · ${context.evidence(ref)}',
+            '${ref.id}: ${context.display(ref)} · ${context.evidence(ref)}',
           ),
       for (final ref in refs.where((ref) => ref.kind == BindingKind.uiState))
         if (context.session.userOverrides.containsKey(ref.id) ||
@@ -170,17 +182,17 @@ Widget _libraryComponent(UiAdapterContext c) {
             ref.kind == BindingKind.fact
                 ? c.snapshot.facts[ref.id]!.field
                 : ref.id,
-            c.text(c.value('value')),
+            c.displaySlot('value'),
           ),
         ],
       );
     case 'Metric':
       return Metric(
         label: label,
-        value: c.text(c.value('value')),
+        value: c.displaySlot('value'),
         unit: c.unit(n.bindings['value']) ?? c.label('unit'),
         delta: n.bindings.containsKey('delta')
-            ? c.text(c.value('delta'))
+            ? c.displaySlot('delta')
             : null,
       );
     case 'CompareTable':
@@ -249,7 +261,7 @@ Widget _libraryComponent(UiAdapterContext c) {
                 if (c.session.resolve(row.cells['value']!) != null)
                   ChartPoint(
                     c.cell(row, 'label'),
-                    double.parse(c.cell(row, 'value')),
+                    double.parse(c.text(c.session.resolve(row.cells['value']!))),
                   ),
             ],
           ),
@@ -355,7 +367,7 @@ Widget _libraryComponent(UiAdapterContext c) {
       );
     case 'FileCard':
       return FileCard(
-        name: c.text(c.value('value')),
+        name: c.displaySlot('value'),
         onOpen: c.has('tap') ? () => c.dispatch('tap') : null,
       );
     case 'ProgressCard':
