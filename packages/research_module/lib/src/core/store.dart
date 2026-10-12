@@ -517,12 +517,28 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
     db.execute('UPDATE runs SET data=? WHERE id=?', [jsonEncode(data), runId]);
   }
 
+  /// Validates the task revision used to create a local manual run.
+  ResearchTask requireLatestManualTask(String taskId, int revision) {
+    final task = taskRevision(taskId, revision);
+    if (task == null) throw StateError('Unknown task revision');
+    checkedProject(task.projectId);
+    final latest = db.select(
+      'SELECT MAX(revision) AS revision FROM tasks WHERE id=?',
+      [taskId],
+    ).single['revision'];
+    if (latest != revision) {
+      throw StateError('Manual runs require the latest task revision');
+    }
+    return task;
+  }
+
   /// Starts a record for work the user chooses to perform in another tool.
   /// Task commands are data and are never launched by this method.
   ResearchRun startManualRun(ResearchTask task) {
     checkedProject(task.projectId);
-    if (taskRevision(task.id, task.revision) == null) {
-      throw StateError('Unknown task revision');
+    final current = requireLatestManualTask(task.id, task.revision);
+    if (current.projectId != task.projectId) {
+      throw StateError('Task belongs to a different project');
     }
     final id = const Uuid().v4();
     final data = <String, dynamic>{
@@ -555,6 +571,20 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
     );
   }
 
+  // Result import assigns _snapshotPath itself, after discarding external
+  // bookkeeping. It also identifies legacy imports carrying a spoofed marker.
+  ResearchRun requireLocalManualRun(String runId) {
+    checkedObject('runs', runId);
+    final rows = db.select('SELECT * FROM runs WHERE id=?', [runId]);
+    if (rows.isEmpty) throw StateError('Unknown run');
+    final run = runFromRow(rows.single);
+    if (run.data['_localManual'] != true ||
+        run.data.containsKey('_snapshotPath')) {
+      throw StateError('Only local manual runs can be edited');
+    }
+    return run;
+  }
+
   ResearchRun updateManualRun(
     String runId, {
     required String status,
@@ -565,12 +595,7 @@ UPDATE outline SET section_id=(SELECT s.id FROM sections s WHERE s.project_id=ou
     if (!const {'running', 'completed', 'failed', 'blocked'}.contains(status)) {
       throw FormatException('Unsupported execution status: $status');
     }
-    final rows = db.select('SELECT * FROM runs WHERE id=?', [runId]);
-    if (rows.isEmpty) throw StateError('Unknown run');
-    final old = runFromRow(rows.single);
-    if (old.data['_localManual'] != true) {
-      throw StateError('Only local manual runs can be edited');
-    }
+    final old = requireLocalManualRun(runId);
     final logs = List<String>.from(old.data['logs'] as List? ?? []);
     if (log.trim().isNotEmpty) logs.add(log.trim());
     const finished = {'completed', 'failed'};
