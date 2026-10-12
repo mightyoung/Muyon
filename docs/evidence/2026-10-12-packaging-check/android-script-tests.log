@@ -1,0 +1,17 @@
+test_any_dart_define_rejected_in_keyless_mode (test_package_android.PackageAndroidTests.test_any_dart_define_rejected_in_keyless_mode) ... ok
+test_apk_credential_path_rejected (test_package_android.PackageAndroidTests.test_apk_credential_path_rejected) ... ok
+test_check_paths_rejects_secrets (test_package_android.PackageAndroidTests.test_check_paths_rejects_secrets) ... ok
+test_dart_define_secrets_rejected (test_package_android.PackageAndroidTests.test_dart_define_secrets_rejected) ... ok
+test_invalid_build_sha_rejected (test_package_android.PackageAndroidTests.test_invalid_build_sha_rejected) ... ok
+test_missing_ndk_fails_without_download (test_package_android.PackageAndroidTests.test_missing_ndk_fails_without_download) ... ok
+test_missing_sdk_fails_without_download (test_package_android.PackageAndroidTests.test_missing_sdk_fails_without_download) ... ok
+test_no_network_helpers_exist (test_package_android.PackageAndroidTests.test_no_network_helpers_exist) ... ok
+test_resolve_android_home_prefers_env (test_package_android.PackageAndroidTests.test_resolve_android_home_prefers_env) ... ok
+test_successful_package_names_and_manifest (test_package_android.PackageAndroidTests.test_successful_package_names_and_manifest) ... ok
+test_wrong_signature_rejected (test_package_android.PackageAndroidTests.test_wrong_signature_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.037s
+
+OK
+Packaged keyless Android APK for aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -> /tmp/tmpiussgm5m/out
