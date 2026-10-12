@@ -93,3 +93,7 @@ Interface: ResearchClaimDraftPreparer with trusted pinned-ObjectRef readonly sou
 - [ ] Exact source CI terminal and source inventory/hash/coverage-floor proof.
 - [ ] Combine eligible slices with freshly verified develop, resolve only reviewed source conflicts; run applicable independent target/whole-workspace checks and complete combination CI.
 - [ ] Normal merge only eligible reviewed tree into develop; verify full published SHA and post-merge CI terminal. Report held/incomplete pieces separately.
+
+## Incremental scheduling decision — Android deferred
+
+2026-10-12: user explicitly postpones Android real-device testing. Prioritize feature development, automated tests and CI. Smoke entry/support development continues, but no Android build/install/device calls in this batch. Device postponement does not block independent functions that do not depend on it. Default enabling and real-device acceptance remain unapproved/unverified; previous historical instructions are preserved.
