@@ -111,6 +111,7 @@ class PersonalAgent {
         allowsPresentation: presentationPreference == null
             ? null
             : _allowsPresentation,
+        presentationBlockReason: _presentationBlockReason,
         presentationIdentity: (id) => _presentationRequests[id],
         cancelTimedOutRequest: (request) async {
           await _uiPlanningCancellations[request]?.call();
@@ -149,6 +150,14 @@ class PersonalAgent {
     final request = _presentationRequests[id],
         policy = _presentationPolicies[id];
     return request != null && policy?.allowsContentFor(request) == true;
+  }
+
+  String? _presentationBlockReason(String id) {
+    final request = _presentationRequests[id],
+        policy = _presentationPolicies[id];
+    return request == null || policy == null
+        ? null
+        : policy.blockedReasonFor(request);
   }
 
   /// Optional content only. Mandatory task confirmation uses its own owner.
