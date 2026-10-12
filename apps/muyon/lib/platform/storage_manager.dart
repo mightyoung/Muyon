@@ -24,7 +24,25 @@ class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
 
   /// Called after every committed write (and every exclusive operation), so
   /// derived projections can catch up without each caller remembering to.
+  /// Notification is best effort: failure cannot undo a durable commit or
+  /// change a successfully completed exclusive operation's result.
   void Function()? onCommit;
+
+  String? _commitObserverError;
+
+  /// Fixed host diagnostic for the most recent notification. Never includes
+  /// observer exception text, database paths, or transaction contents.
+  String? get commitObserverError => _commitObserverError;
+
+  void _notifyCommit() {
+    try {
+      onCommit?.call();
+      _commitObserverError = null;
+    } catch (_) {
+      _commitObserverError = 'commit_observer_failed';
+    }
+  }
+
   Future<void>? _closeFuture;
 
   @override
@@ -42,8 +60,9 @@ class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
           throw StateError('Transaction body must be synchronous');
         }
         raw.execute('COMMIT');
+        begun = false;
         result.complete(value);
-        onCommit?.call();
+        _notifyCommit();
       } catch (error, stack) {
         if (begun) raw.execute('ROLLBACK');
         result.completeError(error, stack);
@@ -72,7 +91,7 @@ class ManagedConnection implements ManagedDatabase, ExclusiveDatabase {
     _tail = _tail.then((_) async {
       try {
         result.complete(await body(raw));
-        onCommit?.call();
+        _notifyCommit();
       } catch (error, stack) {
         result.completeError(error, stack);
       } finally {
