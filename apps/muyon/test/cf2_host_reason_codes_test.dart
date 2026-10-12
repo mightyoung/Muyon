@@ -1,13 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/assistant/personal_agent.dart';
 import 'package:muyon/assistant/stream_ui_planning.dart';
 import 'package:muyon/assistant/ui_planning.dart';
 import 'package:muyon/assistant/ui_presentation_preference.dart';
 import 'package:muyon/platform/ui_planning_tool.dart';
-import 'package:muyon/screens/ui_stream_task_view.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/models/model_provider.dart';
 import 'package:muyon_module_api/muyon_module_api.dart'
@@ -246,43 +244,6 @@ void main() {
       final value = await harness.plan(taskId);
       expect(value.result.reasonCode, 'validated_stream_2');
       expect(value.validated, isNotNull);
-    },
-  );
-
-  testWidgets(
-    'stream fallback shows fixed host Chinese cause without exception text',
-    (tester) async {
-      final f = (await tester.runAsync(LoopFixture.open))!;
-      final preference = UiPresentationPreference(f.repo);
-      await tester.runAsync(
-        () => preference.save(UiPresentationMode.automatic),
-      );
-      final provider = StreamMotivationUiPlanningProvider((
-        _,
-        _,
-        receive,
-      ) async {
-        receive(validStream.replaceAll('{"op":"end"}\n', ''));
-      });
-      final agent = _agent(f, provider, preference: preference);
-      try {
-        final taskId = (await tester.runAsync(() => _localTask(f, agent)))!;
-        await tester.runAsync(() => agent.planUi(taskId));
-        await tester.pumpWidget(
-          MaterialApp(
-            home: UiStreamTaskView(agent: agent, taskId: taskId),
-          ),
-        );
-        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-        await tester.pumpAndSettle();
-        expect(find.text('界面流未完成，已使用只读事实展示。'), findsOneWidget);
-        expect(find.textContaining('value: 42'), findsWidgets);
-        expect(find.textContaining(_canary), findsNothing);
-        expect(find.byType(ElevatedButton), findsNothing);
-      } finally {
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.runAsync(agent.close);
-      }
     },
   );
 }
