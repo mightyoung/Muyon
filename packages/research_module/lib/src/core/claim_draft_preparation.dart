@@ -114,6 +114,7 @@ class ResearchClaimDraftPreparer {
         .firstOrNull;
     final projectRef = selectedRef('project', projectId);
     if (projectRef == null ||
+        projectRef.revisionRef != null ||
         projectRef.contentDigest !=
             _digest([project.title, project.question, project.nextStep])) {
       throw ClaimDraftPreparationFailure('project_outside_current_scope');
@@ -130,6 +131,7 @@ class ResearchClaimDraftPreparer {
       final pair = notes[id];
       if (pair == null ||
           noteRef == null ||
+          noteRef.revisionRef != null ||
           noteRef.contentDigest != _scopeDigest(_row('notes', id))) {
         throw ClaimDraftPreparationFailure('note_outside_current_scope');
       }
@@ -150,7 +152,7 @@ class ResearchClaimDraftPreparer {
       );
     }
 
-    pin('project', projectId, _row('projects', projectId));
+    sources[('project', projectId)] = projectRef;
     final exclusions = <LocalExportExclusion>[];
     final warnings = <String>[];
     final rows = <Map<String, Object?>>[];
@@ -160,7 +162,7 @@ class ResearchClaimDraftPreparer {
     final materialErrors = <String, String>{};
     for (final id in selected) {
       final (doc, note) = notes[id]!;
-      pin('note', id, _row('notes', id));
+      sources[('note', id)] = selectedRef('note', id)!;
       final digest = doc.sha256;
       sources[('document', doc.id)] = ObjectRef(
         moduleId: 'research',
@@ -235,7 +237,8 @@ class ResearchClaimDraftPreparer {
       );
       final relative = doc.relativePath;
       final root = project.skillRoot;
-      if (relative.contains('\\') ||
+      if (RegExp(r'^[A-Za-z]:').hasMatch(relative) ||
+          relative.contains('\\') ||
           relative.contains('\u0000') ||
           p.posix.isAbsolute(relative) ||
           relative.split('/').contains('..') ||
