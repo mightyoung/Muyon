@@ -1,4 +1,5 @@
 import 'package:muyon_module_api/ui_contract.dart';
+import 'package:muyon_ui/dynamic_ui.dart' show library2UiCatalog;
 
 import 'ui_formula_registry.dart';
 
@@ -51,12 +52,14 @@ final class UiLiveFormulaRecomputePort implements UiRecomputePort {
       prepare(input).result;
 }
 
-/// Thin scalar F3b adapter over the fixed F5c port and real F3a evaluator.
+/// Readonly F3b adapter over the fixed F5c port and real F3a evaluator.
 ///
 /// Construct per accepted base plan, using trusted host formula declarations
 /// and non-view parameter keys. This initial slice supports the existing
-/// minimal/dynamic catalogs. Library-2 specs/collections and live publication
-/// remain owner dependencies; unsupported catalogs fail closed.
+/// minimal/dynamic catalogs and the exact host library-2 catalog. Library-2
+/// scalar specs and collection cells are preserved; formula inputs still require
+/// registered non-view String parameters. Selections and numeric formula codecs
+/// remain unsupported, and live publication belongs to the owner.
 /// No IO, listener/runtime, authority probe, business mapping or publication.
 final class UiFormulaRecomputeAdapter implements UiRecomputePort {
   UiFormulaRecomputeAdapter({
@@ -91,10 +94,22 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
       return reject(['recompute_token_snapshot_mismatch']);
     }
     if (basePlan.catalog.version != 'minimal-1' &&
-        basePlan.catalog.version != 'dynamic-1') {
+        basePlan.catalog.version != 'dynamic-1' &&
+        !identical(basePlan.catalog, library2UiCatalog)) {
       return reject(['recompute_catalog_unavailable']);
     }
 
+    final typed = identical(basePlan.catalog, library2UiCatalog);
+    if (typed) {
+      final context = UiEditContext(collections: previous.collections);
+      for (final entry in input.currentUiState.entries) {
+        final spec = previous.editSpecs[entry.key] ?? const UiStringEdit();
+        final error = spec.validateSpec() ?? spec.reject(entry.value, context);
+        if (error != null) {
+          return reject(['recompute_state_rejected:${entry.key}:$error']);
+        }
+      }
+    }
     final nextRef = SnapshotRef(previous.ref.id, previous.ref.revision + 1);
     // Extracted values remain in the snapshot; accepted manual values are
     // passed separately as the complete frozen projection to evaluate.
@@ -108,10 +123,18 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
       collections: previous.collections,
       computedEvidence: previous.computedEvidence,
     );
+    final nextEvidence = <String, UiComputedEvidence>{};
     final displayed = <String>{
       for (final node in basePlan.plan.nodes)
         for (final binding in node.bindings.values)
           if (binding.kind == BindingKind.computed) binding.id,
+      if (typed)
+        for (final node in basePlan.plan.nodes)
+          for (final binding in node.bindings.values)
+            if (binding.kind == BindingKind.collection)
+              for (final row in previous.collections[binding.id]!.rows)
+                for (final cell in row.cells.values)
+                  if (cell.kind == BindingKind.computed) cell.id,
     };
     final computed = <String, ComputedValue>{};
     for (final id in displayed.toList()..sort()) {
@@ -130,7 +153,9 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
         }
         final spec = previous.editSpecs[binding.id];
         if (spec is! UiStringEdit || spec.view) {
-          return reject(['formula_state_not_parameter_string_spec:${binding.id}']);
+          return reject([
+            'formula_state_not_parameter_string_spec:${binding.id}',
+          ]);
         }
         if (input.currentUiState[binding.id] is! String) {
           return reject(['formula_state_not_string:${binding.id}']);
@@ -146,8 +171,37 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
           evaluation.status != UiFormulaStatus.unavailable) {
         return reject([
           for (final error in evaluation.errors) '$id:$error',
-          if (evaluation.errors.isEmpty) '$id:formula_${evaluation.status.name}',
+          if (evaluation.errors.isEmpty)
+            '$id:formula_${evaluation.status.name}',
         ]);
+      }
+      if (typed) {
+        final facts = [
+          for (final slot in definition.slots.values)
+            if (slot.binding.kind == BindingKind.fact)
+              previous.facts[slot.binding.id]!,
+        ];
+        final unavailable = facts.where(
+          (fact) =>
+              fact.state != FactState.verified &&
+              fact.state != FactState.unverified,
+        );
+        if (evaluation.status == UiFormulaStatus.unavailable &&
+            unavailable.isEmpty) {
+          // Missing values or unknown tax modes do not establish a domain
+          // FactState. Keep real diagnostics, but never invent non-applicability.
+          return reject(['recompute_unavailable_evidence:$id']);
+        }
+        nextEvidence[id] = UiComputedEvidence(
+          state: evaluation.status == UiFormulaStatus.unavailable
+              ? unavailable.first.state
+              : evaluation.unverifiedInputs.isEmpty
+              ? FactState.verified
+              : FactState.unverified,
+          unit: evaluation.unit,
+          sourceRefs: {for (final fact in facts) ...fact.sourceRefs}.toList()
+            ..sort(),
+        );
       }
       computed[id] = ComputedValue(
         value: evaluation.value,
@@ -156,7 +210,10 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
       );
     }
 
-    final next = inputs.copyWith(computations: computed);
+    final next = inputs.copyWith(
+      computations: computed,
+      computedEvidence: typed ? nextEvidence : previous.computedEvidence,
+    );
     // No production quantity business mapping exists in this slice. Do not
     // carry old draft/operation capabilities into a recomputed candidate.
     final allowed = basePlan.intent.allowedActionRefs.where(
