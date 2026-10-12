@@ -1,7 +1,168 @@
+import 'dart:convert';
+import 'dart:math';
+
+import '../references.dart';
 import 'guides.dart';
 import 'intent.dart';
 import 'plan.dart';
 import 'snapshot.dart';
+
+/// Model-only aliases. Full pinned references stay inside this host-owned map.
+/// Handles are not a query permission: callers still run their normal scope,
+/// current-pin and approval checks after resolving the original reference.
+class ModelReferenceMap {
+  ModelReferenceMap({
+    required this.taskId,
+    required this.scopeKey,
+    required this.snapshotKey,
+    required Set<ObjectRef> objects,
+    List<ArtifactRef> artifacts = const [],
+    this.isCurrent,
+  }) : _allowedObjects = Set.unmodifiable(objects),
+       _allowedArtifacts = {
+         for (final ref in artifacts) _artifactKey(ref): ref,
+       };
+  final String taskId, scopeKey, snapshotKey;
+  final bool Function()? isCurrent;
+  final Set<ObjectRef> _allowedObjects;
+  final Map<String, ArtifactRef> _allowedArtifacts;
+  final _random = Random.secure();
+  final _objectTokens = <ObjectRef, String>{};
+  final _objects = <String, ObjectRef>{};
+  final _artifactTokens = <String, String>{};
+  final _artifacts = <String, ArtifactRef>{};
+  bool _active = true;
+  void expire() => _active = false;
+  bool get _current => _active && (isCurrent?.call() ?? true);
+  static String _artifactKey(ArtifactRef ref) =>
+      jsonEncode([ref.moduleId, ref.artifactId, ref.contentDigest]);
+  String _token() =>
+      'mr1_${base64Url.encode(List.generate(32, (_) => _random.nextInt(256))).replaceAll('=', '')}';
+  void _requireCurrent() {
+    if (!_current) throw StateError('model_reference_unavailable');
+  }
+
+  Map<String, Object?> projectObject(ObjectRef ref) {
+    _requireCurrent();
+    final original = _allowedObjects.lookup(ref);
+    if (original == null) {
+      throw StateError('model_reference_unavailable');
+    }
+    final token = _objectTokens.putIfAbsent(ref, () {
+      final token = _token();
+      _objects[token] = original;
+      return token;
+    });
+    return {
+      'modelRef': token,
+      'moduleId': ref.moduleId,
+      'objectType': ref.objectType,
+      'objectId': ref.objectId,
+      'nativeProjectId': ref.nativeProjectId,
+      'revisionRef': ref.revisionRef,
+    };
+  }
+
+  Map<String, Object?> projectArtifact(ArtifactRef ref) {
+    _requireCurrent();
+    final key = _artifactKey(ref);
+    if (!_allowedArtifacts.containsKey(key)) {
+      throw StateError('model_reference_unavailable');
+    }
+    final token = _artifactTokens.putIfAbsent(key, () {
+      final token = _token();
+      _artifacts[token] = _allowedArtifacts[key]!;
+      return token;
+    });
+    return {
+      'modelRef': token,
+      'moduleId': ref.moduleId,
+      'artifactId': ref.artifactId,
+    };
+  }
+
+  bool _matches(String task, String scope, String snapshot) =>
+      _current &&
+      task == taskId &&
+      scope == scopeKey &&
+      snapshot == snapshotKey;
+  ObjectRef? resolveObject(
+    String token, {
+    required String taskId,
+    required String scopeKey,
+    required String snapshotKey,
+    Map<String, Object?> locators = const {},
+  }) {
+    if (!_matches(taskId, scopeKey, snapshotKey)) return null;
+    final ref = _objects[token];
+    if (ref == null) return null;
+    final public = projectObject(ref);
+    if (locators.entries.any(
+      (e) => !public.containsKey(e.key) || public[e.key] != e.value,
+    )) {
+      return null;
+    }
+    return ref;
+  }
+
+  ArtifactRef? resolveArtifact(
+    String token, {
+    required String taskId,
+    required String scopeKey,
+    required String snapshotKey,
+    Map<String, Object?> locators = const {},
+  }) {
+    if (!_matches(taskId, scopeKey, snapshotKey)) return null;
+    final ref = _artifacts[token];
+    if (ref == null) return null;
+    final public = projectArtifact(ref);
+    if (locators.entries.any(
+      (e) => !public.containsKey(e.key) || public[e.key] != e.value,
+    )) {
+      return null;
+    }
+    return ref;
+  }
+
+  /// Structured host-owned model frames only. User prose is not reparsed.
+  Object? projectJson(Object? value) {
+    _requireCurrent();
+    if (value is List) return [for (final item in value) projectJson(item)];
+    if (value is! Map) return value;
+    final map = Map<String, Object?>.from(value);
+    if (map.containsKey('contentDigest')) {
+      if (map['moduleId'] is String &&
+          map['objectType'] is String &&
+          map['objectId'] is String) {
+        return projectObject(
+          ObjectRef(
+            moduleId: map['moduleId'] as String,
+            objectType: map['objectType'] as String,
+            objectId: map['objectId'] as String,
+            nativeProjectId: map['nativeProjectId'] as String?,
+            revisionRef: map['revisionRef'] as String?,
+            contentDigest: map['contentDigest'] as String?,
+          ),
+        );
+      }
+      if (map['moduleId'] is String &&
+          map['artifactId'] is String &&
+          map['contentDigest'] is String) {
+        return projectArtifact(
+          ArtifactRef(
+            moduleId: map['moduleId'] as String,
+            artifactId: map['artifactId'] as String,
+            contentDigest: map['contentDigest'] as String,
+          ),
+        );
+      }
+      throw StateError('model_reference_unavailable');
+    }
+    return {
+      for (final entry in map.entries) entry.key: projectJson(entry.value),
+    };
+  }
+}
 
 enum UiPlanningMode { intelligent, motivation }
 
@@ -36,6 +197,9 @@ class UiPlanningRequest {
     Set<String> modelDisclosedFactRefs = const {},
     Set<String> modelDisclosedComputedRefs = const {},
     Set<String> modelDisclosedUiStateRefs = const {},
+    this.modelReferences,
+    this.modelReferenceScopeKey,
+    this.isModelReferenceCurrent,
   }) : conversationMessages = List.unmodifiable(
          conversationMessages.map(Map<String, Object?>.unmodifiable),
        ),
@@ -62,6 +226,27 @@ class UiPlanningRequest {
   final Set<String> modelDisclosedFactRefs;
   final Set<String> modelDisclosedComputedRefs;
   final Set<String> modelDisclosedUiStateRefs;
+  final ModelReferenceMap? modelReferences;
+  final String? modelReferenceScopeKey;
+  final bool Function()? isModelReferenceCurrent;
+  late final ModelReferenceMap referenceMap =
+      modelReferences ??
+      ModelReferenceMap(
+        taskId: taskId,
+        scopeKey:
+            modelReferenceScopeKey ??
+            jsonEncode(
+              snapshot.facts.values
+                  .map((fact) => fact.object.toJson())
+                  .toList(),
+            ),
+        snapshotKey: jsonEncode([snapshot.ref.id, snapshot.ref.revision]),
+        objects: snapshot.facts.values.map((fact) => fact.object).toSet(),
+        artifacts: snapshot.sources.values
+            .map((span) => span.artifact)
+            .toList(),
+        isCurrent: isModelReferenceCurrent,
+      );
   bool _readable(FactState state) =>
       state == FactState.verified || state == FactState.unverified;
   Map<String, Object?> _disclosedUiState(Map<String, Object?> values) => {
@@ -88,7 +273,7 @@ class UiPlanningRequest {
       'facts': {
         for (final e in snapshot.facts.entries)
           e.key: {
-            'object': e.value.object.toJson(),
+            'object': referenceMap.projectObject(e.value.object),
             'field': e.value.field,
             'value':
                 modelDisclosedFactRefs.contains(e.key) &&
@@ -119,11 +304,7 @@ class UiPlanningRequest {
       'sources': {
         for (final e in snapshot.sources.entries)
           e.key: {
-            'artifact': {
-              'moduleId': e.value.artifact.moduleId,
-              'artifactId': e.value.artifact.artifactId,
-              'contentDigest': e.value.artifact.contentDigest,
-            },
+            'artifact': referenceMap.projectArtifact(e.value.artifact),
             // Original source text has no per-field disclosure authority.
             // Retain reference/location metadata; rendering still uses the
             // untouched host snapshot, never this model projection.
@@ -133,7 +314,14 @@ class UiPlanningRequest {
             'paragraph': e.value.paragraph,
           },
       },
-      'sourceDigests': snapshot.sourceDigests,
+      'sourceDigests': {
+        for (final entry in snapshot.sources.entries)
+          if (snapshot.sourceDigests[entry.value.artifact.artifactId] ==
+              entry.value.artifact.contentDigest)
+            entry.value.artifact.artifactId: referenceMap.projectArtifact(
+              entry.value.artifact,
+            )['modelRef'],
+      },
       'actionContext': snapshot.actionContext == null
           ? null
           : {

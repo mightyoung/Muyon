@@ -58,6 +58,7 @@ class UiPlanningHarness {
     this.timeout = const Duration(seconds: 15),
     this.requestView,
     this.modelHistory,
+    this.modelReferences,
     this.enabled = true,
     this.cancelTimedOutRequest,
     this.allowsPresentation,
@@ -286,6 +287,8 @@ class UiPlanningHarness {
   /// Trusted host callback binds persisted results to current registry receipts.
   /// A model/body tag or an already-filtered view cannot grant this authority.
   final ModelToolHistory Function(PersonalTask)? modelHistory;
+  /// The same host-owned reference table used by the task's model frames.
+  final ModelReferenceMap Function(PersonalTask)? modelReferences;
   final _requests = <String, Future<UiPlannedPresentation>>{};
   final _identityEpochs = Map<Object, int>.identity();
   int _nextIdentityEpoch = 0;
