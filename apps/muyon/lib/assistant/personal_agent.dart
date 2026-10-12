@@ -593,18 +593,18 @@ class PersonalAgent {
     String? previousAttemptId,
   }) => _trackStart(() async {
     if (_ctx.closing) throw StateError('Assistant is closing');
-    final task = _factory.toolTask(
-      conversationId: conversationId,
-      toolId: toolId,
-      previousAttemptId: previousAttemptId,
-    );
+    final hostCommand =
+        '运行工具 $toolId：${jsonEncode(AgentDispatch.displayParameters(parameters))}';
+    final task = _factory
+        .toolTask(
+          conversationId: conversationId,
+          toolId: toolId,
+          previousAttemptId: previousAttemptId,
+        )
+        .copy({'modelHostToolRequestText': hostCommand});
     _freezePresentation(task.id, UiPresentationRequest.ordinary());
     await repository.createTask(task);
-    await repository.appendMessage(
-      conversationId,
-      'user',
-      '运行工具 $toolId：${jsonEncode(AgentDispatch.displayParameters(parameters))}',
-    );
+    await repository.appendMessage(conversationId, 'user', hostCommand);
     await _dispatch.dispatch(task, [
       Planned(toolId, parameters, destination: destination),
     ]);
@@ -854,10 +854,12 @@ class PersonalAgent {
     // confirmation (see [AgentResume]).
     PersonalTask? taken;
     await _trackStart(() async {
-      taken = await _resume.attempt(task,
-        uiPlanningAvailable: task.profileId != null &&
-            canExposeUiPlanning(_ctx.profile(task)),
-        onCarry: (id) => _freezePresentation(id, UiPresentationRequest.ordinary()),
+      taken = await _resume.attempt(
+        task,
+        uiPlanningAvailable:
+            task.profileId != null && canExposeUiPlanning(_ctx.profile(task)),
+        onCarry: (id) =>
+            _freezePresentation(id, UiPresentationRequest.ordinary()),
       );
       return taken ?? task;
     });

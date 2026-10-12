@@ -127,14 +127,17 @@ class AgentResume {
       toolId: toolId,
       previousAttemptId: prev.id,
     );
+    final hostCommand =
+        '运行工具 $toolId：${jsonEncode(call['parameters'] ?? const {})}';
     await ctx.repository.appendMessage(
       prev.conversationId,
       'user',
-      '运行工具 $toolId：${jsonEncode(call['parameters'] ?? const {})}',
+      hostCommand,
     );
     final withCall = task.copy({
       ...BudgetUsage.fromPayload(prev.payload).toPayload(),
       'toolCall': call,
+      'modelHostToolRequestText': hostCommand,
       'toolIdentityDigest': prev.payload['toolIdentityDigest'],
       if (acknowledged) 'resumeAcknowledged': acknowledgement,
     });
@@ -389,6 +392,8 @@ class AgentResume {
       ...BudgetUsage.fromPayload(prev.payload).toPayload(),
       'references': prev.payload['references'] ?? const <Object?>[],
       'toolLog': prev.payload['toolLog'] ?? const <Object?>[],
+      'modelUserMessageIndices':
+          prev.payload['modelUserMessageIndices'] ?? const <int>[],
       'modelResultProducers':
           prev.payload['modelResultProducers'] ?? const <String, Object?>{},
       if (prev.payload['stepFolded'] == true) 'stepFolded': true,
