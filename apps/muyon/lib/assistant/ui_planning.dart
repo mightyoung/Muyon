@@ -57,6 +57,7 @@ class UiPlanningHarness {
     this.guides = const EmptyUiGuideSource(),
     this.timeout = const Duration(seconds: 15),
     this.requestView,
+    this.modelHistory,
     this.enabled = true,
     this.cancelTimedOutRequest,
     this.allowsPresentation,
@@ -281,6 +282,9 @@ class UiPlanningHarness {
   /// Host cleanup must finish before a timeout fallback is exposed.
   final Future<void> Function(UiPlanningRequest)? cancelTimedOutRequest;
   final List<Object?> Function(PersonalTask)? requestView;
+  /// Trusted host callback binds persisted results to current registry receipts.
+  /// A model/body tag or an already-filtered view cannot grant this authority.
+  final ModelToolHistory Function(PersonalTask)? modelHistory;
   final _requests = <String, Future<UiPlannedPresentation>>{};
   final _identityEpochs = Map<Object, int>.identity();
   int _nextIdentityEpoch = 0;
