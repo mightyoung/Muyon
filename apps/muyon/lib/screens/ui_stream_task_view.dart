@@ -261,6 +261,11 @@ class _UiStreamTaskViewState extends State<UiStreamTaskView> {
           controller: surface,
         );
       }
+      if (value.result.decision == UiDisplayDecision.textOnly &&
+          value.result.plan == null &&
+          value.reason.code == 'model_no_card') {
+        return Text(value.reason.description);
+      }
       final request = value.request!;
       return Column(
         key: ValueKey('ui-stream-fallback-${widget.taskId}'),

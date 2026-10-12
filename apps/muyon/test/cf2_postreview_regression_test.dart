@@ -236,6 +236,57 @@ void main() {
       });
     }
   });
+  testWidgets('model no-card renders explanation without host fallback card', (
+    tester,
+  ) async {
+    final f = (await tester.runAsync(LoopFixture.open))!;
+    final preference = UiPresentationPreference(f.repo);
+    await tester.runAsync(() => preference.save(UiPresentationMode.automatic));
+    final agent = PersonalAgent(
+      repository: f.repo,
+      gateway: OpenAiModelGateway(LoopSecrets(), ledger: f.ledger),
+      tools: f.tools,
+      presentationPreference: preference,
+      uiPlanningSource: (_) async => state(f),
+      uiPlanningMode: UiPlanningMode.motivation,
+      uiPlanningProviders: {
+        UiPlanningMode.motivation: StreamMotivationUiPlanningProvider(
+          (_, _, receive) async => receive('{"op":"end"}\n'),
+        ),
+      },
+    );
+    try {
+      final taskId = (await tester.runAsync(() async {
+        f.replies.add(
+          LoopReply.sse(sseText('{"type":"answer","answer":"Saved answer"}')),
+        );
+        final task = await f.start(
+          agent,
+          f.profile(capabilities: const ModelCapabilities(streaming: true)),
+        );
+        await f.run(agent, task);
+        expect(agent.uiPresentation(task.id)!.reason.code, 'model_no_card');
+        return task.id;
+      }))!;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: UiStreamTaskView(agent: agent, taskId: taskId),
+        ),
+      );
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+      expect(find.text('模型本轮未提供内容卡，保留文字回答。'), findsOneWidget);
+      expect(find.textContaining('界面未完成'), findsNothing);
+      expect(find.textContaining('value: 42'), findsNothing);
+      expect(find.byKey(ValueKey('ui-stream-fallback-$taskId')), findsNothing);
+      final semantics = tester.ensureSemantics();
+      expect(find.bySemanticsLabel(RegExp('value: 42|界面未完成')), findsNothing);
+      semantics.dispose();
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.runAsync(agent.close);
+    }
+  });
   test('failure fallback cannot claim validated stream success', () {
     expect(
       UiPlanningHarness.fallback('validated_stream_2').reason.code,
