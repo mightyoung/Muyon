@@ -408,6 +408,17 @@ void main() {
           .toList();
       var probes = 0, commits = 0;
       disk.onCommit = () => commits++;
+      var repeatedOperations = 0;
+      final recovered = await stored.execute(
+        save,
+        operation: (bytes) async {
+          repeatedOperations++;
+          return success(bytes);
+        },
+      );
+      expect(recovered.state, LocalExportLedgerState.unknown);
+      expect(repeatedOperations, 0);
+      expect(commits, 0, reason: 'a historical duplicate is a readonly lookup');
       final checked = await stored.check(
         'export1',
         probe: (stage) async {
@@ -423,6 +434,28 @@ void main() {
       expect(
         checked.saveAttempts.single.state,
         LocalExportLedgerState.succeeded,
+      );
+      final durableModel = recovered.modelData;
+      expect(
+        checked.saveAttempts.single.modelData['status'],
+        'unknown',
+        reason:
+            'a readonly observation cannot issue a committed success receipt',
+      );
+      expect(
+        checked.saveAttempts.single.modelData['errorCode'],
+        durableModel['errorCode'],
+      );
+      final observedModelAttempts =
+          checked.modelData['saveAttempts']! as List<Object?>;
+      final observedModelStage =
+          observedModelAttempts.single! as Map<String, Object?>;
+      expect(observedModelStage['status'], 'unknown');
+      expect(observedModelStage['errorCode'], durableModel['errorCode']);
+      expect(() => observedModelAttempts.clear(), throwsUnsupportedError);
+      expect(
+        () => observedModelStage['status'] = 'succeeded',
+        throwsUnsupportedError,
       );
       expect(
         stored.read('export1')!.saveAttempts.single.state,
@@ -440,6 +473,173 @@ void main() {
       expect(issuer.owns(target), isFalse);
     } finally {
       await disk.close();
+      dir.deleteSync(recursive: true);
+    }
+  });
+
+  test(
+    'clock failure after callback returns interrupted and never retries',
+    () async {
+      var calls = 0;
+      final unreliable = LocalExportLedger(
+        db,
+        clock: () {
+          if (calls > 0) throw StateError('/PRIVATE_CLOCK');
+          return now;
+        },
+      );
+      final req = request();
+      final result = await unreliable.execute(
+        req,
+        operation: (bytes) async {
+          calls++;
+          return success(bytes);
+        },
+      );
+      expect(result.state, LocalExportLedgerState.interrupted);
+      expect(result.errorCode, 'ledger_completion_failed');
+      expect(calls, 1);
+      expect(
+        db.raw
+            .select('SELECT state FROM local_export_attempts')
+            .single['state'],
+        'pending',
+      );
+      final reopened = LocalExportLedger(db);
+      expect(
+        reopened.read('export1')!.generate!.state,
+        LocalExportLedgerState.unknown,
+      );
+      var commits = 0;
+      db.onCommit = () => commits++;
+      final duplicate = await reopened.execute(
+        req,
+        operation: (bytes) async {
+          calls++;
+          return success(bytes);
+        },
+      );
+      expect(duplicate.state, LocalExportLedgerState.unknown);
+      expect(calls, 1);
+      expect(commits, 0);
+      expect(
+        jsonEncode(reopened.read('export1')!.modelData),
+        isNot(contains('PRIVATE_CLOCK')),
+      );
+    },
+  );
+
+  test(
+    'readonly check tolerates persistent clock and probe failures',
+    () async {
+      db.raw.execute(
+        'CREATE TRIGGER deny_completion BEFORE UPDATE ON local_export_attempts BEGIN SELECT RAISE(ABORT, \'synthetic failure\'); END',
+      );
+      expect(
+        (await ledger.execute(request(), operation: success)).state,
+        LocalExportLedgerState.interrupted,
+      );
+      db.raw.execute('DROP TRIGGER deny_completion');
+      final before = db.raw
+          .select('SELECT * FROM local_export_attempts')
+          .map((r) => Map<String, Object?>.from(r))
+          .toList();
+      final unreliable = LocalExportLedger(
+        db,
+        clock: () => throw StateError('/PRIVATE_CLOCK'),
+      );
+      var commits = 0, probes = 0;
+      db.onCommit = () => commits++;
+      for (final failProbe in [false, true]) {
+        final checked = await unreliable.check(
+          'export1',
+          probe: (stage) async {
+            probes++;
+            if (failProbe) throw StateError('/PRIVATE_PROBE');
+            return LocalExportStageCompletion(
+              LocalExportStage(LocalExportOutcome.succeeded),
+            );
+          },
+        );
+        expect(checked!.generate!.state, LocalExportLedgerState.unknown);
+        expect(checked.generate!.errorCode, 'export_check_failed');
+        expect(jsonEncode(checked.modelData), isNot(contains('PRIVATE')));
+      }
+      expect(probes, 2);
+      expect(commits, 0);
+      expect(
+        db.raw
+            .select('SELECT * FROM local_export_attempts')
+            .map((r) => Map<String, Object?>.from(r))
+            .toList(),
+        before,
+      );
+      expect(
+        unreliable.read('export1')!.generate!.state,
+        LocalExportLedgerState.unknown,
+      );
+    },
+  );
+
+  test('two SQLite connections share a durable pending winner', () async {
+    final dir = Directory.systemTemp.createTempSync('le06-concurrent-');
+    final firstDb = ManagedConnection(
+      sqlite3.open('${dir.path}/ledger.sqlite'),
+    );
+    final secondDb = ManagedConnection(
+      sqlite3.open('${dir.path}/ledger.sqlite'),
+    );
+    final release = Completer<void>(), entered = Completer<void>();
+    var calls = 0;
+    try {
+      LocalExportLedger.createTables(firstDb.raw);
+      final firstLedger = LocalExportLedger(firstDb);
+      final secondLedger = LocalExportLedger(secondDb);
+      final req = request();
+      final winner = firstLedger.execute(
+        req,
+        operation: (bytes) async {
+          calls++;
+          entered.complete();
+          await release.future;
+          return success(bytes);
+        },
+      );
+      await entered.future;
+      var otherCommits = 0;
+      secondDb.onCommit = () => otherCommits++;
+      final loser = await secondLedger.execute(
+        req,
+        operation: (bytes) async {
+          calls++;
+          return success(bytes);
+        },
+      );
+      expect(loser.state, LocalExportLedgerState.unknown);
+      expect(calls, 1);
+      expect(otherCommits, 0);
+      release.complete();
+      expect((await winner).state, LocalExportLedgerState.succeeded);
+      expect(
+        (await secondLedger.execute(
+          req,
+          operation: (bytes) async {
+            calls++;
+            return success(bytes);
+          },
+        )).state,
+        LocalExportLedgerState.succeeded,
+      );
+      expect(calls, 1);
+      expect(otherCommits, 0);
+      expect(
+        secondDb.raw.select('SELECT * FROM local_export_attempts'),
+        hasLength(1),
+      );
+    } finally {
+      if (!release.isCompleted) release.complete();
+      await firstDb.close();
+      await secondDb.close();
       dir.deleteSync(recursive: true);
     }
   });
@@ -509,6 +709,18 @@ void main() {
     );
     final receipt = ledger.read('export1')!;
     expect(() => receipt.saveAttempts.clear(), throwsUnsupportedError);
+    final recoveredAudit = receipt.generate!.hostMetadata;
+    final requestAudit = recoveredAudit['request']! as Map<String, Object?>;
+    final review = requestAudit['review']! as List<Object?>;
+    expect(() => requestAudit['review'] = 'altered', throwsUnsupportedError);
+    expect(() => review.clear(), throwsUnsupportedError);
+    expect(
+      () => (review[1]! as Map<String, Object?>)['path'] = 'altered',
+      throwsUnsupportedError,
+    );
+    final completionAudit =
+        recoveredAudit['completion']! as Map<String, Object?>;
+    expect(() => completionAudit['body'] = 'altered', throwsUnsupportedError);
     final model = receipt.modelData;
     final allowed = {
       'state',
@@ -637,6 +849,31 @@ void main() {
         attemptId: 's1',
       ),
       error('export_generation_required'),
+    );
+  });
+
+  test('shape-safe private error tokens stay host-only', () async {
+    final result = await ledger.execute(
+      request(),
+      operation: (_) async => LocalExportStageCompletion(
+        LocalExportStage(
+          LocalExportOutcome.failed,
+          errorCode: 'private_review_token',
+        ),
+        hostMetadata: {'review': 'private_review_token'},
+      ),
+    );
+    expect(result.errorCode, 'private_review_token');
+    final recovered = LocalExportLedger(db).read('export1')!;
+    expect(recovered.generate!.errorCode, 'private_review_token');
+    expect(
+      (recovered.generate!.hostMetadata['completion']! as Map)['review'],
+      'private_review_token',
+    );
+    expect(recovered.generate!.modelData['errorCode'], 'export_failed');
+    expect(
+      jsonEncode(recovered.modelData),
+      isNot(contains('private_review_token')),
     );
   });
 
