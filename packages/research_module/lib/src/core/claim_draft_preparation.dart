@@ -99,9 +99,7 @@ class ResearchClaimDraftPreparer {
         revisionGroups(
           entries.where((e) => skillKinds.contains(e.kind)).toList(),
         ).any(
-          (g) =>
-              g.current.data['active'] != false &&
-              g.current.data['schema_version'] != 2,
+          (g) => g.current.data['active'] != false && !_v2(g.current.data),
         )) {
       throw ClaimDraftPreparationFailure('requires_schema_v2');
     }
@@ -219,12 +217,12 @@ class ResearchClaimDraftPreparer {
         _row('entries', paper.id),
         revision: '${binding.paperRev}',
       );
-      if (paperData['schema_version'] != 2 ||
+      if (!_v2(paperData) ||
           binding.paperRev < 1 ||
           paperData['source_id'] is! String ||
           paperData['source_rev'] is! int ||
           upstream.length != 1 ||
-          upstream.single.data['schema_version'] != 2) {
+          !_v2(upstream.single.data)) {
         exclude('invalid_pinned_source');
         continue;
       }
@@ -401,3 +399,6 @@ String _digest(Object? value) =>
 
 String _scopeDigest(Object? value) =>
     _bytesDigest(utf8.encode(jsonEncode(value)));
+
+bool _v2(Map<String, dynamic> data) =>
+    data['schema_version'] is int && data['schema_version'] == 2;

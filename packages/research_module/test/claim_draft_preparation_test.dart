@@ -199,7 +199,14 @@ void main() {
           beforeFiles = Directory(
             temp.path,
           ).listSync(recursive: true).map((f) => f.path).toList()..sort();
+      final changes = store.db
+          .select('SELECT total_changes() AS n')
+          .single['n'];
       final prepared = await prepare(['n-d', 'n-pdf']);
+      expect(
+        store.db.select('SELECT total_changes() AS n').single['n'],
+        changes,
+      );
       expect(reads, 2);
       expect(state(), before);
       final afterFiles = Directory(
@@ -481,4 +488,46 @@ void main() {
       expect(seen.single.revisionRef, isNull);
     },
   );
+  test(
+    'oversized UTF8 source is excluded before decoding or draft creation',
+    () async {
+      final bytes = List<int>.filled(16 * 1024 * 1024 + 1, 65);
+      store.db.execute("UPDATE documents SET sha256=? WHERE id='d'", [
+        sha256.convert(bytes).toString(),
+      ]);
+      ClaimDraftPreparationFailure? error;
+      try {
+        await ResearchClaimDraftPreparer(
+          store,
+          readDocument: (_) async => bytes,
+        ).prepareClaimDrafts(
+          projectId: 'p',
+          noteIds: ['n-d'],
+          scope: scope(['n-d']),
+          generatedAt: at,
+        );
+      } on ClaimDraftPreparationFailure catch (e) {
+        error = e;
+      }
+      expect(error!.exclusions.single.reason, 'source_too_large');
+    },
+  );
+
+  test('JSONL draft line exceeding one MiB is excluded', () async {
+    store.db.execute("UPDATE notes SET text=? WHERE id='n-d'", [
+      'x' * (1024 * 1024),
+    ]);
+    ClaimDraftPreparationFailure? error;
+    try {
+      await prepare(['n-d']);
+    } on ClaimDraftPreparationFailure catch (e) {
+      error = e;
+    }
+    expect(error!.exclusions.single.reason, 'draft_line_too_large');
+  });
+
+  test('selected scope refusal performs no document reads', () async {
+    await refuses(['n-d', 'n-pdf'], selected: scope(['n-d']));
+    expect(reads, 0);
+  });
 }
