@@ -137,7 +137,11 @@ void main() {
       final f = await LoopFixture.open();
       final refs = [
         for (var i = 1; i <= 5; i++)
-          ObjectRef(moduleId: 'test', objectType: 'budget', objectId: 'b$i'),
+          ObjectRef(
+            moduleId: 'inquiry',
+            objectType: 'project_item',
+            objectId: 'b$i',
+          ),
       ];
       f.objects = refs;
       var n = 0;
@@ -149,7 +153,9 @@ void main() {
           return ToolCallResult(
             status: ToolCallStatus.succeeded,
             summary: 'result $i',
-            data: {'blob': _big(2000, 'r$i')},
+            data: {
+              'record': {'name': _big(2000, 'r$i')},
+            },
             objectRefs: [refs[i]],
           );
         },
@@ -179,7 +185,7 @@ void main() {
       final body = placeholder['clearedToolResult'] as Map;
       expect(body['toolId'], 'big');
       expect(body['status'], 'succeeded');
-      expect(body['summary'], 'result 0');
+      expect(body['summary'], '工具结果已记录；仅展示已登记可披露的字段');
       expect(body['citationIds'], ['r1']);
       expect(body['objectRefs'], hasLength(1));
       expect(body['contentDigest'], hasLength(64));
@@ -315,14 +321,29 @@ void main() {
         'with the model\'s own call messages left in place', () async {
       final f = await LoopFixture.open();
       var n = 0;
+      f.objects = [
+        const ObjectRef(
+          moduleId: 'inquiry',
+          objectType: 'project_item',
+          objectId: 'b1',
+        ),
+      ];
       f.addTool(
         'big',
         ToolEffect.read,
         onCall: (_) async => ToolCallResult(
           status: ToolCallStatus.succeeded,
           summary: 'result ${n++}',
-          data: {'blob': _big(2000, 'r$n')},
-          objectRefs: [f.ref],
+          data: {
+            'record': {'name': _big(2000, 'r$n')},
+          },
+          objectRefs: [
+            const ObjectRef(
+              moduleId: 'inquiry',
+              objectType: 'project_item',
+              objectId: 'b1',
+            ),
+          ],
         ),
       );
       const call = '{"type":"tool","toolId":"big","parameters":{}}';

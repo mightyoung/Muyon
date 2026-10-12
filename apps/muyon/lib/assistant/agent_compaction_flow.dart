@@ -13,6 +13,7 @@ import 'agent_context.dart';
 import 'agent_event_sink.dart';
 import 'agent_model_turn.dart';
 import 'context_compactor.dart';
+import 'model_tool_result_projection.dart';
 import 'model_request_gate.dart';
 
 /// Context compaction (ADR-0005 §6.6): clearing old results, the summary
@@ -38,7 +39,7 @@ class AgentCompactionFlow {
     CompactionState state, {
     bool useReport = false,
   }) => ctx.compactor.tokensOfView(
-    task.payload['messages'] as List,
+    modelToolHistory(task.payload['messages'] as List).messages,
     state,
     references: task.payload['references'] as List? ?? const [],
     extra: _toolsTokens(task),
@@ -51,7 +52,10 @@ class AgentCompactionFlow {
   );
 
   static CompactionState _stateOf(PersonalTask task) =>
-      CompactionState.fromJson(task.payload['compaction']);
+      CompactionState.fromJson(
+        modelToolHistory(task.payload['messages'] as List)
+            .compaction(task.payload['compaction']),
+      );
 
   /// The profile that may summarize this task's conversation: the task's own,
   /// or the one the person set up for it if that exposes the data to no more
@@ -82,7 +86,8 @@ class AgentCompactionFlow {
     final threshold = ctx.compactor.compactAt(caps);
     if (threshold == null && !force) return task;
     final state = _stateOf(task);
-    final messages = task.payload['messages'] as List;
+    final messages = modelToolHistory(task.payload['messages'] as List)
+        .messages;
     final before = _tokensUnder(task, state, useReport: true);
     if (!force && before <= threshold!) return task;
     final reported = task.payload['reportedPromptTokens'] != null;
@@ -287,6 +292,7 @@ class AgentCompactionFlow {
       'reportedPromptTokens': null,
       'reportedViewCount': null,
       'compactionPlan': {
+        'modelDisclosurePolicy': 1,
         'upTo': plan.upTo,
         'from': plan.from,
         'tokensBefore': tokensBefore,
@@ -389,6 +395,11 @@ class AgentCompactionFlow {
   }
 
   Future<void> _runPermittedCompaction(PersonalTask task) async {
+    if ((task.payload['compactionPlan'] as Map?)?['modelDisclosurePolicy'] !=
+        1) {
+      await summaryFailed(task, 'disclosure_policy_changed');
+      return;
+    }
     final token = ModelCancellation();
     ctx.modelTokens[task.id] = token;
     try {

@@ -79,11 +79,11 @@ void main() {
       expect(tools.keys, ['c1', 'c2']);
       expect(
         _text(tools['c1']!)['trustedToolResult'],
-        containsPair('summary', 'A done'),
+        containsPair('summary', '工具结果已记录；仅展示已登记可披露的字段'),
       );
       expect(
         _text(tools['c2']!)['trustedToolResult'],
-        containsPair('summary', 'B done'),
+        containsPair('summary', '工具结果已记录；仅展示已登记可披露的字段'),
       );
       // The same reference is one citation.
       expect(task.payload['references'], hasLength(1));

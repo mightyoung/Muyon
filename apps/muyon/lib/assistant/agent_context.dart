@@ -19,6 +19,7 @@ import 'agent_event_sink.dart';
 import 'context_compactor.dart';
 import 'model_request_gate.dart';
 import 'request_view.dart';
+import 'model_tool_result_projection.dart';
 import 'tool_selection.dart';
 import 'ui_planning.dart';
 
@@ -136,8 +137,8 @@ class AgentContext {
   static bool native(PersonalTask task) =>
       task.payload['uiPlanningStream'] != true &&
       ((task.payload['profile'] as Map?)?['capabilities']
-          as Map?)?['nativeTools'] ==
-      true;
+              as Map?)?['nativeTools'] ==
+          true;
 
   /// Compatibility mode previews exactly what it always did: the profile
   /// without the capability block, so the confirmed digest does not change.
@@ -170,11 +171,14 @@ class AgentContext {
   /// The messages a request is built from: the stored conversation, or the
   /// compacted view of it (ADR-0005 §6.6). Preview, digest and what is sent
   /// all come from this one function.
-  List<Object?> view(PersonalTask task) => buildRequestView(
-    task.payload['messages'] as List,
-    compactionState: task.payload['compaction'],
-    references: task.payload['references'] as List? ?? const [],
-  );
+  List<Object?> view(PersonalTask task) {
+    final history = modelToolHistory(task.payload['messages'] as List);
+    return buildRequestView(
+      history.messages,
+      compactionState: history.compaction(task.payload['compaction']),
+      references: task.payload['references'] as List? ?? const [],
+    );
+  }
 
   List<ObjectRef> references(PersonalTask task) => [
     for (final r in task.payload['references'] as List)
