@@ -333,58 +333,64 @@ local_export_attempts BEGIN SELECT RAISE(ABORT, '$_uriCanary'); END''');
     },
   );
 
-  test(
-    'two independently gated processes contend for one pending reservation',
-    () async {
-      LocalExportLedger.createTables(db.raw);
-      await db.close();
-      final first = await _child(dir, 'race', 'first');
-      final firstDone = _finish(first);
-      // Serialize Flutter's native-asset build, then release both *database*
-      // contenders together. Concurrent builders share generated dylibs.
-      await _waitFor(File('${dir.path}/ready-first'));
-      final second = await _child(dir, 'race', 'second');
-      final secondDone = _finish(second);
-      try {
-        await Future.wait([
-          _waitFor(File('${dir.path}/ready-first')),
-          _waitFor(File('${dir.path}/ready-second')),
-        ]);
-        File('${dir.path}/go').writeAsStringSync('start both');
-        final deadline = DateTime.now().add(const Duration(seconds: 90));
-        while (!File('${dir.path}/result-first.json').existsSync() &&
-            !File('${dir.path}/result-second.json').existsSync()) {
-          if (DateTime.now().isAfter(deadline)) {
-            fail('No losing process result');
-          }
-          await Future<void>.delayed(const Duration(milliseconds: 20));
+  test('two independently gated processes contend for one pending reservation', () async {
+    LocalExportLedger.createTables(db.raw);
+    await db.close();
+    final first = await _child(dir, 'race', 'first');
+    final firstDone = _finish(first);
+    // Serialize Flutter's native-asset build, then release both *database*
+    // contenders together. Concurrent builders share generated dylibs.
+    await _waitFor(File('${dir.path}/ready-first'));
+    final second = await _child(dir, 'race', 'second');
+    final secondDone = _finish(second);
+    try {
+      await Future.wait([
+        _waitFor(File('${dir.path}/ready-first')),
+        _waitFor(File('${dir.path}/ready-second')),
+      ]);
+      File('${dir.path}/go').writeAsStringSync('start both');
+      final deadline = DateTime.now().add(const Duration(seconds: 90));
+      while (!File('${dir.path}/result-first.json').existsSync() &&
+          !File('${dir.path}/result-second.json').existsSync()) {
+        if (DateTime.now().isAfter(deadline)) {
+          fail('No losing process result');
         }
-      } finally {
-        File('${dir.path}/release').writeAsStringSync('release winner');
-        await Future.wait([firstDone, secondDone]);
-        db = ManagedConnection(sqlite3.open('${dir.path}/ledger.sqlite'));
-        ledger = LocalExportLedger(db);
+        await Future<void>.delayed(const Duration(milliseconds: 20));
       }
-      final results = [result('first'), result('second')];
-      expect(results.map((r) => r['calls']).reduce((a, b) => a + b), 1);
-      expect(results.where((r) => r['state'] == 'succeeded'), hasLength(1));
-      final loser = results.singleWhere((r) => r['calls'] == 0);
-      // SQLite may reject a lock contender; no automatic retry is promised.
-      expect(
-        loser['state'] == 'unknown' ||
-            loser['error'] == 'ledger_pending_failed',
-        isTrue,
-      );
-      expect(
-        db.raw.select('SELECT * FROM local_export_attempts'),
-        hasLength(1),
-      );
-      expect(
-        ledger.read('independent')!.generate!.state,
-        LocalExportLedgerState.succeeded,
-      );
-    },
-  );
+    } finally {
+      File('${dir.path}/release').writeAsStringSync('release winner');
+      await Future.wait([firstDone, secondDone]);
+      db = ManagedConnection(sqlite3.open('${dir.path}/ledger.sqlite'));
+      ledger = LocalExportLedger(db);
+    }
+    final results = [result('first'), result('second')];
+    // LE06-RACE evidence: print both child outcomes before asserting.
+    // ignore: avoid_print
+    print('LE06-RACE results=${jsonEncode(results)}');
+    expect(
+      results.map((r) => r['calls']).reduce((a, b) => a + b),
+      1,
+      reason: 'LE06-RACE results=${jsonEncode(results)}',
+    );
+    expect(
+      results.where((r) => r['state'] == 'succeeded'),
+      hasLength(1),
+      reason: 'LE06-RACE results=${jsonEncode(results)}',
+    );
+    final loser = results.singleWhere((r) => r['calls'] == 0);
+    // SQLite may reject a lock contender; no automatic retry is promised.
+    expect(
+      loser['state'] == 'unknown' || loser['error'] == 'ledger_pending_failed',
+      isTrue,
+      reason:
+          'LE06-RACE loser=${jsonEncode(loser)} results=${jsonEncode(results)}',
+    );
+    expect(db.raw.select('SELECT * FROM local_export_attempts'), hasLength(1));
+    expect(
+      ledger.read('independent')!.generate!.state,
+      LocalExportLedgerState.succeeded,
+    );
+  });
 
   test('nested audits stay frozen on disk and all model error projections redact canaries', () async {
     final nested = <String, Object?>{
