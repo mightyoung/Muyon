@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
+
+import '../references.dart';
 import 'guides.dart';
 import 'intent.dart';
 import 'plan.dart';
@@ -14,6 +18,37 @@ class UiCurrentView {
   final String surfaceId;
   final int revision;
   final Map<String, Object?> values;
+}
+
+/// What the host registered for the model. Registration is necessary, not
+/// permission: scope, revision pins, owner authority and field masking still
+/// apply. Everything unregistered is withheld; the default registers nothing.
+class UiModelDisclosure {
+  UiModelDisclosure({
+    Set<String> factIds = const {},
+    Set<String> computedIds = const {},
+    Set<String> stateKeys = const {},
+    Set<String> viewKeys = const {},
+    this.objectHandle,
+    this.snapshotAlias,
+  }) : factIds = Set.unmodifiable(factIds),
+       computedIds = Set.unmodifiable(computedIds),
+       stateKeys = Set.unmodifiable(stateKeys),
+       viewKeys = Set.unmodifiable(viewKeys);
+  static final none = UiModelDisclosure();
+
+  /// Fact ids whose value may be sent (never when the fact is notDisclosed).
+  final Set<String> factIds, computedIds;
+
+  /// initialUiState / currentView keys whose values may be sent.
+  final Set<String> stateKeys, viewKeys;
+
+  /// Host-private opaque handle for an object that has a content digest. The
+  /// digest itself is never sent.
+  final String Function(ObjectRef)? objectHandle;
+
+  /// Model-side alias of the host snapshot id; null keeps the declared id.
+  final String? snapshotAlias;
 }
 
 /// Created by the host from its records/current owners, never tool arguments.
@@ -33,7 +68,9 @@ class UiPlanningRequest {
     required Set<String> allowedActionRefs,
     required this.mode,
     List<UiGuideEntry> guideEntries = const [],
-  }) : conversationMessages = List.unmodifiable(
+    UiModelDisclosure? disclosure,
+  }) : disclosure = disclosure ?? UiModelDisclosure.none,
+       conversationMessages = List.unmodifiable(
          conversationMessages.map(Map<String, Object?>.unmodifiable),
        ),
        allowedActionRefs = Set.unmodifiable(allowedActionRefs),
@@ -47,6 +84,33 @@ class UiPlanningRequest {
   final Set<String> allowedActionRefs;
   final UiPlanningMode mode;
   final List<UiGuideEntry> guideEntries;
+  final UiModelDisclosure disclosure;
+
+  /// The snapshot id the model sees: the host's alias, else a random one for
+  /// this request. The declared id can be derived from row digests, so it is
+  /// never sent; the provider maps a returned alias back to [snapshot].
+  late final String modelSnapshotId =
+      disclosure.snapshotAlias ??
+      'ms1_${base64Url.encode(List.generate(24, (_) => Random.secure().nextInt(256))).replaceAll('=', '')}';
+
+  Map<String, Object?> _object(ObjectRef ref) {
+    final handle = ref.contentDigest == null
+        ? null
+        : disclosure.objectHandle?.call(ref);
+    return {
+      'moduleId': ref.moduleId,
+      'objectType': ref.objectType,
+      'objectId': ref.objectId,
+      'nativeProjectId': ref.nativeProjectId,
+      'revisionRef': ref.revisionRef,
+      'modelRef': ?handle,
+    };
+  }
+
+  Object? _gated(Set<String> allowed, String key, Object? value) =>
+      allowed.contains(key) ? value : null;
+
+  /// The model-facing form: this is what providers serialize into prompts.
   Map<String, Object?> toJson() => {
     'question': question,
     'answer': answer,
@@ -59,28 +123,40 @@ class UiPlanningRequest {
     'currentView': {
       'surfaceId': currentView.surfaceId,
       'revision': currentView.revision,
-      'values': currentView.values,
+      'values': {
+        for (final e in currentView.values.entries)
+          e.key: _gated(disclosure.viewKeys, e.key, e.value),
+      },
     },
     'snapshot': {
-      'id': snapshot.ref.id,
+      'id': modelSnapshotId,
       'revision': snapshot.ref.revision,
       'facts': {
         for (final e in snapshot.facts.entries)
           e.key: {
-            'object': e.value.object.toJson(),
+            'object': _object(e.value.object),
             'field': e.value.field,
-            'value': e.value.value,
+            'value':
+                e.value.state == FactState.notDisclosed ||
+                    !disclosure.factIds.contains(e.key)
+                ? null
+                : e.value.value,
             'state': e.value.state.name,
             'unit': e.value.unit,
             'sourceRefs': e.value.sourceRefs,
           },
       },
-      'initialUiState': snapshot.initialUiState,
+      'initialUiState': {
+        for (final e in snapshot.initialUiState.entries)
+          e.key: _gated(disclosure.stateKeys, e.key, e.value),
+      },
       'computations': {
         for (final e in snapshot.computations.entries)
           e.key: {
-            'value': e.value.value,
-            'snapshotId': e.value.inputVersion.id,
+            'value': _gated(disclosure.computedIds, e.key, e.value.value),
+            'snapshotId': e.value.inputVersion.id == snapshot.ref.id
+                ? modelSnapshotId
+                : 'ms1_other',
             'snapshotRevision': e.value.inputVersion.revision,
             'computationId': e.value.computationId,
           },
@@ -91,21 +167,22 @@ class UiPlanningRequest {
             'artifact': {
               'moduleId': e.value.artifact.moduleId,
               'artifactId': e.value.artifact.artifactId,
-              'contentDigest': e.value.artifact.contentDigest,
             },
-            'originalText': e.value.originalText,
             'start': e.value.start,
             'end': e.value.end,
             'page': e.value.page,
             'paragraph': e.value.paragraph,
           },
       },
-      'sourceDigests': snapshot.sourceDigests,
+      'sourceDigests': snapshot.sourceDigests.keys.toList(),
       'actionContext': snapshot.actionContext == null
           ? null
           : {
               'draftRevision': snapshot.actionContext!.draftRevision,
-              'draft': snapshot.actionContext!.draft,
+              'draft': {
+                for (final e in snapshot.actionContext!.draft.entries)
+                  e.key: _gated(disclosure.stateKeys, e.key, e.value),
+              },
               'confirmedRecordRefs': snapshot.actionContext!.confirmedRecordRefs
                   .toList(),
               'operations': {
