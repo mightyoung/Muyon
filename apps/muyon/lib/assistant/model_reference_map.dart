@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
+import 'package:muyon_module_api/ui_contract.dart' show SnapshotRef;
 
 /// What a model handle is valid for: one task, its host scope and the host's
 /// current snapshot/authority pin. A change of pin retires every older handle.
@@ -70,6 +71,27 @@ final class ModelReferenceMap {
       _entries[handle] = _Entry(binding, ref);
     }
     return handle;
+  }
+
+  /// The model-side name of a host snapshot: unpredictable without the host
+  /// key, stable for one task and pin, and not derived from any row digest.
+  String snapshotAlias(ModelReferenceBinding binding, SnapshotRef snapshot) {
+    if (_revoked.contains(binding.taskId)) {
+      throw const ModelReferenceRejected('revoked');
+    }
+    final mac = Hmac(sha256, _key).convert(
+      utf8.encode(
+        jsonEncode([
+          'snapshot',
+          binding.taskId,
+          binding.scopeKey,
+          binding.pin,
+          snapshot.id,
+          snapshot.revision,
+        ]),
+      ),
+    );
+    return 'ms1_${base64Url.encode(mac.bytes.sublist(0, 24)).replaceAll('=', '')}';
   }
 
   /// Returns the full reference only for a handle this instance minted for the

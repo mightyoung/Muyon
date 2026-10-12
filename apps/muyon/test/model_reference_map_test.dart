@@ -94,7 +94,7 @@ void main() {
   test('forged, truncated and unminted handles are rejected', () {
     final handle = map.handleFor(object, binding: a);
     expect(
-      () => map.resolve('mr1_' + 'A' * 32, current: a),
+      () => map.resolve('mr1_${'A' * 32}', current: a),
       rejected('unknown'),
     );
     expect(

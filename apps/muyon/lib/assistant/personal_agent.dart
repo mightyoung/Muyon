@@ -25,6 +25,7 @@ import 'agent_dispatch.dart';
 import 'agent_model_turn.dart';
 import 'agent_resume.dart';
 import 'agent_task_factory.dart';
+import 'model_reference_map.dart';
 import 'ui_planning.dart';
 import 'ui_planning_preference.dart';
 import 'ui_presentation_preference.dart';
@@ -73,6 +74,8 @@ class PersonalAgent {
     this.compactor = const ContextCompactor(),
     this.compactionProfile,
     this.uiPlanningSource,
+    this.modelReferences,
+    this.modelReferencePin,
     this.presentationPreference,
     this.uiPlanningProviders = const {},
     this.uiPlanningMode = UiPlanningMode.intelligent,
@@ -488,6 +491,8 @@ class PersonalAgent {
   /// Context compaction (ADR-0005 §6.6); only profiles that declare
   /// `contextTokens` are compacted automatically.
   final ContextCompactor compactor;
+  final ModelReferenceMap? modelReferences;
+  final String Function(PersonalTask)? modelReferencePin;
 
   /// A profile the person set up to write the summaries, in place of the
   /// conversation's own. It is used only if it exposes the data to no more
@@ -508,6 +513,8 @@ class PersonalAgent {
     compactor: compactor,
     compactionProfile: compactionProfile,
     clock: _clock,
+    modelReferences: modelReferences,
+    modelReferencePin: modelReferencePin,
   );
   late final AgentTaskFactory _factory = AgentTaskFactory(_ctx);
   late final AgentDispatch _dispatch = AgentDispatch(_ctx);
@@ -852,10 +859,12 @@ class PersonalAgent {
     // confirmation (see [AgentResume]).
     PersonalTask? taken;
     await _trackStart(() async {
-      taken = await _resume.attempt(task,
-        uiPlanningAvailable: task.profileId != null &&
-            canExposeUiPlanning(_ctx.profile(task)),
-        onCarry: (id) => _freezePresentation(id, UiPresentationRequest.ordinary()),
+      taken = await _resume.attempt(
+        task,
+        uiPlanningAvailable:
+            task.profileId != null && canExposeUiPlanning(_ctx.profile(task)),
+        onCarry: (id) =>
+            _freezePresentation(id, UiPresentationRequest.ordinary()),
       );
       return taken ?? task;
     });

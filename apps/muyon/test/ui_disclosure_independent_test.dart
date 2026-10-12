@@ -465,8 +465,8 @@ void main() {
     );
 
     test(
-      'C6 fingerprint: outbound contentDigest is the unsalted SHA-256 of the '
-      'raw row (host pin goes outbound; not a masking)',
+      'C6 fingerprint: the host pin is the SHA-256 of the raw row and stays '
+      'host-side; outbound carries an opaque handle instead',
       () async {
         final (prompt, _, model) = await batchPlan('quotation');
         final raw = f.rawRow('quotation');
@@ -477,8 +477,8 @@ void main() {
         );
         final digest = sha256Hex(raw);
         // Host-internal: the pin is computed over the full row (incl. price,
-        // inquirer, notes, award_note). Outbound: the same digest is serialized
-        // in every fact.object and feeds snapshot.id.
+        // inquirer, notes, award_note) and stays that way. Outbound (C6-REDO):
+        // the digest never leaves; the object carries an opaque host handle.
         expect(
           model
               .requests
@@ -491,7 +491,8 @@ void main() {
               .contentDigest,
           digest,
         );
-        expect(prompt, contains(digest));
+        expect(prompt, isNot(contains(digest)));
+        expect(prompt, contains('"modelRef":"mr1_'));
         expect(prompt, isNot(contains(DisclosureCanary.quotePrice)));
       },
     );

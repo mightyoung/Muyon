@@ -13,6 +13,7 @@ import 'agent_context.dart';
 import 'agent_event_sink.dart';
 import 'agent_model_turn.dart';
 import 'context_compactor.dart';
+import 'model_reference_map.dart';
 import 'model_request_gate.dart';
 
 /// Context compaction (ADR-0005 §6.6): clearing old results, the summary
@@ -109,7 +110,26 @@ class AgentCompactionFlow {
 
     // B: one summary request, which needs the person's confirmation.
     if ((force || afterA > threshold!) && !next.summaryFailed) {
-      final plan = ctx.compactor.planSummary(messages, next);
+      // The summary request quotes the very text a normal request would send:
+      // placeholders kept in the state are projected like the messages.
+      final binding = ctx.modelBinding(task);
+      final plan = ctx.compactor.planSummary(
+        ctx.projectMessages(task, messages),
+        next.copyWith(
+          cleared: {
+            for (final e in next.cleared.entries)
+              e.key: {
+                ...e.value,
+                if (e.value['content'] is String)
+                  'content': projectModelMessageContent(
+                    e.value['content']! as String,
+                    ctx.modelReferences,
+                    binding,
+                  ),
+              },
+          },
+        ),
+      );
       if (plan != null) {
         final chosen = _summaryProfile(profile);
         if (chosen != null) {
