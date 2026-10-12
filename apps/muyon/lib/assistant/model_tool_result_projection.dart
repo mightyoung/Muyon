@@ -90,7 +90,7 @@ class ModelToolHistory {
 /// provenance. User-authored messages retain their separate disclosure policy.
 ModelToolHistory modelToolHistory(
   List<Object?> messages, {
-  Map<String, Object?>? Function(ToolCallResult)? projectedReceipt,
+  Map<String, Object?>? Function(ToolCallResult, Object?)? projectedReceipt,
 }) {
   var legacy = false;
   final projected = <Object?>[];
@@ -116,7 +116,8 @@ ModelToolHistory modelToolHistory(
               Map<String, Object?>.from(body['trustedToolResult'] as Map),
             );
             final safe =
-                projectedReceipt?.call(result) ?? modelToolResult(result);
+                projectedReceipt?.call(result, message['tool_call_id']) ??
+                modelToolResult(result);
             if (body['modelDisclosurePolicy'] != 1 ||
                 jsonEncode(safe) != jsonEncode(body['trustedToolResult'])) {
               legacy = true;
@@ -179,10 +180,13 @@ ModelToolHistory modelToolHistory(
 ModelToolHistory modelTaskToolHistory(PersonalTask task, ToolRegistry tools) =>
     modelToolHistory(
       task.payload['messages'] as List? ?? const [],
-      projectedReceipt: (serialized) {
+      projectedReceipt: (serialized, callId) {
         final id = serialized.executionId;
-        final metadata = (task.payload['modelResultProducers'] as Map?)?[id];
-        if (id == null || metadata is! Map) return null;
+        final sources = task.payload['modelResultProducers'];
+        final metadata = sources is Map ? sources[id] : null;
+        if (id == null || metadata is! Map || metadata['callId'] != callId) {
+          return null;
+        }
         final receipt = tools.receiptFor(id);
         if (receipt?.result == null ||
             receipt!.toolId != metadata['toolId'] ||
