@@ -297,4 +297,15 @@ void main() {
       expect(p.evaluations, isEmpty);
     }
   });
+  test('unavailable without explicit dependency state rejects invented evidence', () {
+    for (final state in [FactState.verified, FactState.unverified]) {
+      final p = prepare(base(collection: false, state: state, price: null));
+      expect(p.result.errors, ['recompute_unavailable_evidence:total']);
+      expect(p.result.nextSnapshot, isNull);
+      expect(p.batch, isNull);
+      expect(p.evaluations['total']!.status, UiFormulaStatus.unavailable);
+      expect(p.evaluations['total']!.errors, contains('missing_value:unit_price'));
+    }
+  });
+
 }
