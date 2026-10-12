@@ -2,10 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon_module_api/ui_contract.dart';
-import 'package:muyon_module_api/muyon_module_api.dart' show AssistantScope;
+import 'package:muyon_module_api/muyon_module_api.dart'
+    show AssistantScope, ToolCallResult, ToolCallStatus;
 import 'package:muyon_ui/dynamic_ui.dart';
 import 'package:muyon/platform/inquiry_ui_planning_source.dart';
 import 'package:muyon/assistant/ui_planning.dart';
+import 'package:muyon/assistant/model_tool_result_projection.dart';
+
+import 'support/agent_loop_fixture.dart';
+
 import 'package:muyon/platform/inquiry_model_disclosure.dart';
 import 'package:supplier_core/supplier_core.dart' show Quotation;
 
@@ -46,6 +51,134 @@ UiPlanningRequest request(
 );
 
 void main() {
+  for (final path in [
+    'summary',
+    'step-answer',
+    'filtered-view',
+    'manual-tool',
+  ]) {
+    test(
+      'planning quarantines $path legacy derived answer without changing local record',
+      () async {
+        final f = await InquirySnapshotFixture.open();
+        try {
+          final c = await f.host.foundation.createConversation(
+            scope: AssistantScope.selectedObjects([f.refs['project_item']!]),
+          );
+          final initial = await f.host.personalAgent.start(
+            conversationId: c.id,
+            prompt: 'USER-ORIGINAL-KEPT',
+          );
+          final canary = 'OLD-TOOL-DERIVED-$path-826ac';
+          final raw = ToolCallResult(
+            status: ToolCallStatus.succeeded,
+            summary: canary,
+            data: {'notes': canary},
+          );
+          final messages = <Object?>[
+            {'role': 'user', 'content': 'USER-ORIGINAL-KEPT'},
+            if (path != 'manual-tool')
+              {
+                'role': 'tool',
+                'content': jsonEncode({'trustedToolResult': raw.toJson()}),
+              },
+          ];
+          final task = initial.copy({
+            'messages': messages,
+            'summary': path == 'step-answer' ? null : canary,
+            if (path == 'step-answer') 'state': 'waitingConfirmation',
+            if (path == 'step-answer')
+              'step': {
+                'assistant': {'content': canary},
+              },
+            if (path == 'manual-tool')
+              'toolCall': {
+                'tool': 'inquiry.read_object',
+                'arguments': <String, Object?>{},
+              },
+          });
+          // Model a completed pre-policy persisted attempt. The public update
+          // API intentionally refuses terminal edits; fixtures restore bytes
+          // directly, without weakening that production transition guard.
+          f.host.foundation.database.raw.execute(
+            'UPDATE execution_records SET payload=? WHERE id=?',
+            [jsonEncode(task.payload), task.id],
+          );
+          UiPlanningRequest? actual;
+          final harness = UiPlanningHarness(
+            repository: f.host.foundation,
+            source: InquiryUiPlanningSource(f.host).read,
+            requestView: path == 'filtered-view'
+                ? (t) =>
+                      modelToolHistory(t.payload['messages'] as List).messages
+                : null,
+            providers: {
+              UiPlanningMode.intelligent: FixtureUiPlanningProvider((r) async {
+                actual = r;
+                return const UiPlanningResult(
+                  decision: UiDisplayDecision.textOnly,
+                  reasonCode: 'model_no_card',
+                );
+              }),
+            },
+          );
+          await harness.plan(task.id);
+          expect(actual, isNotNull);
+          expect(jsonEncode(actual!.toJson()), isNot(contains(canary)));
+          expect(jsonEncode(actual!.toJson()), contains('USER-ORIGINAL-KEPT'));
+          final preserved = f.host.foundation.task(task.id)!;
+          if (path == 'step-answer') {
+            expect(
+              ((preserved.payload['step'] as Map)['assistant']
+                  as Map)['content'],
+              canary,
+            );
+          } else {
+            expect(preserved.summary, canary);
+          }
+        } finally {
+          await f.close();
+        }
+      },
+    );
+  }
+  test('real startChat current ordinary model answer remains available to planning', () async {
+    final f = await LoopFixture.open();
+    final agent = f.agent();
+    const ordinary = 'CURRENT-ORDINARY-ANSWER-928c';
+    f.replies.add(LoopReply.sse(sseText(ordinary)));
+    final first = await f.start(agent, f.profile());
+    final done = await f.run(agent, first);
+    expect(done.summary, ordinary);
+    UiPlanningRequest? actual;
+    final harness = UiPlanningHarness(
+      repository: f.repo,
+      source: (t) async => UiPlanningHostState(
+        snapshot: DataSnapshot(ref: ref, facts: {}),
+        intent: InteractionIntent(
+          id: 'i',
+          purpose: 'display',
+          snapshotRef: ref,
+        ),
+        currentView: UiCurrentView(surfaceId: 's', revision: 1),
+        catalog: library2UiCatalog,
+        allowedActionRefs: {},
+      ),
+      providers: {
+        UiPlanningMode.intelligent: FixtureUiPlanningProvider((r) async {
+          actual = r;
+          return const UiPlanningResult(
+            decision: UiDisplayDecision.textOnly,
+            reasonCode: 'model_no_card',
+          );
+        }),
+      },
+    );
+    await harness.plan(done.id);
+    expect(actual, isNotNull);
+    expect(actual!.answer, ordinary);
+    expect(jsonEncode(actual!.toJson()), contains(ordinary));
+  });
   test('only explicitly registered ordinary fields are eligible and masking still wins', () {
     for (final type in ['project_item', 'quotation', 'inquiry']) {
       for (final field in [
@@ -121,9 +254,7 @@ void main() {
             prompt: 'local',
           );
           final state = (await InquiryUiPlanningSource(f.host).read(task))!;
-          await f.host.foundation.updateTask(
-            task.copy({'summary': 'Saved ordinary answer'}),
-          );
+
           UiPlanningRequest? actual;
           final harness = UiPlanningHarness(
             repository: f.host.foundation,

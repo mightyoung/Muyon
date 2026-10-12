@@ -6,6 +6,7 @@ import 'package:muyon_module_api/ui_contract.dart';
 import '../platform/foundation_repository.dart';
 import 'stream_ui_planning.dart';
 import 'ui_planning_reason.dart';
+import 'model_tool_result_projection.dart';
 
 class UiPlanningHostState {
   const UiPlanningHostState({
@@ -480,17 +481,27 @@ class UiPlanningHarness {
   ) async {
     final stepAnswer =
         ((task.payload['step'] as Map?)?['assistant'] as Map?)?['content'];
-    final answer = task.state == PersonalTaskState.succeeded
+    final history = modelToolHistory(
+      task.payload['messages'] as List? ?? const [],
+    );
+    // Derivation provenance comes from the persisted host checkpoint, not the
+    // already filtered requestView (which intentionally drops the legacy flag).
+    // Keep local summaries/steps unchanged; suppress only this model projection.
+    final hasUnclassifiedToolAnswer =
+        history.hadLegacyResult ||
+        (task.profileId == null && task.payload['toolCall'] != null);
+    final answer = hasUnclassifiedToolAnswer
+        ? '此前工具派生内容未登记披露，已省略'
+        : task.state == PersonalTaskState.succeeded
         ? task.summary ?? ''
         : stepAnswer is String
         ? stepAnswer
         : task.summary ?? '';
     if (answer.trim().isEmpty) return fallback('answer_unavailable');
     final messages = [
-      for (final m
-          in (requestView?.call(task) ??
-              task.payload['messages'] as List? ??
-              const []))
+      for (final m in modelToolHistory(
+        requestView?.call(task) ?? history.messages,
+      ).messages)
         Map<String, Object?>.from(m as Map),
     ];
     if (messages.isEmpty ||
