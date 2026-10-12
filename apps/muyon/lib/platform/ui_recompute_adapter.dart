@@ -186,11 +186,15 @@ final class UiFormulaRecomputeAdapter implements UiRecomputePort {
               fact.state != FactState.verified &&
               fact.state != FactState.unverified,
         );
+        if (evaluation.status == UiFormulaStatus.unavailable &&
+            unavailable.isEmpty) {
+          // Missing values or unknown tax modes do not establish a domain
+          // FactState. Keep real diagnostics, but never invent non-applicability.
+          return reject(['recompute_unavailable_evidence:$id']);
+        }
         nextEvidence[id] = UiComputedEvidence(
           state: evaluation.status == UiFormulaStatus.unavailable
-              ? (unavailable.isNotEmpty
-                    ? unavailable.first.state
-                    : FactState.notApplicable)
+              ? unavailable.first.state
               : evaluation.unverifiedInputs.isEmpty
               ? FactState.verified
               : FactState.unverified,
