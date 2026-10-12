@@ -39,6 +39,20 @@ Map<String, Object?> modelToolResult(ToolCallResult result) {
   return {...result.toJson(), 'summary': '工具结果已记录；仅展示已登记可披露的字段', 'data': data};
 }
 
+// Fixed host outcomes emitted by AgentDispatch. Arbitrary checkpoint strings
+// are not allowed to turn a non-executed outcome into a disclosure channel.
+const _hostNonExecutionTexts = {
+  '用户未批准此调用',
+  '未执行：前一个操作失败',
+  '未执行：只读参数需修正，请重新决定此操作',
+  '未执行：已请求取消',
+  '未执行：超出单步调用上限',
+  '未执行：超出一张确认卡的调用上限',
+  '未执行：任务在此之前中断，如仍需要请重新提出',
+  '未执行：上一次尝试中该操作的结果未知，需先核实',
+  '未执行',
+};
+
 bool _followsCompatibilityCall(List<Object?> messages, int index) {
   if (index == 0 || messages[index - 1] is! Map) return false;
   final prior = messages[index - 1] as Map;
@@ -103,7 +117,12 @@ ModelToolHistory modelToolHistory(List<Object?> messages) {
             recognized = true;
           } else if (body is Map && body['notExecuted'] is String) {
             // This is an outcome placeholder, not a result field or summary.
-            output['content'] = jsonEncode({'notExecuted': '未执行'});
+            output['content'] = jsonEncode({
+              'notExecuted':
+                  _hostNonExecutionTexts.contains(body['notExecuted'])
+                  ? body['notExecuted']
+                  : '未执行',
+            });
             recognized = true;
           }
         } on Object {
