@@ -1,0 +1,154 @@
+import 'dart:convert';
+
+import 'package:muyon_module_api/muyon_module_api.dart';
+
+import '../platform/inquiry_model_disclosure.dart';
+import '../platform/foundation_repository.dart';
+import '../app/adapters/inquiry_module.dart' show inquiryOntology;
+
+/// A model projection, never a receipt. Registered fields do not grant access:
+/// the invocation's existing scope and authorization checks still run first.
+/// No output schema is registered for arbitrary provider data or summaries.
+Map<String, Object?> modelToolResult(ToolCallResult result) {
+  final data = <String, Object?>{};
+  final refs = result.objectRefs;
+  final record = result.data['record'];
+  if (refs.length == 1 && refs.single.moduleId == 'inquiry' && record is Map) {
+    data['record'] = <String, Object?>{
+      for (final entry in record.entries)
+        if (entry.key is String &&
+            inquiryFieldDisclosedToModel(
+              refs.single.objectType,
+              entry.key as String,
+              masked:
+                  inquiryOntology
+                      .type(refs.single.objectType)
+                      ?.fields
+                      .where((field) => field.name == entry.key)
+                      .firstOrNull
+                      ?.sensitivity !=
+                  Sensitivity.none,
+            ) &&
+            (entry.value == null ||
+                entry.value is String ||
+                entry.value is num ||
+                entry.value is bool))
+          entry.key as String: entry.value,
+    };
+  }
+  return {...result.toJson(), 'summary': '工具结果已记录；仅展示已登记可披露的字段', 'data': data};
+}
+
+bool _followsCompatibilityCall(List<Object?> messages, int index) {
+  if (index == 0 || messages[index - 1] is! Map) return false;
+  final prior = messages[index - 1] as Map;
+  if (prior['role'] != 'assistant' || prior['content'] is! String) return false;
+  try {
+    final call = jsonDecode(prior['content'] as String);
+    return call is Map && (call['type'] == 'tool' || call['calls'] is List);
+  } on FormatException {
+    return false;
+  }
+}
+
+class ModelToolHistory {
+  const ModelToolHistory(this.messages, {required this.hadLegacyResult});
+  final List<Object?> messages;
+  final bool hadLegacyResult;
+
+  /// Old clearing placeholders and summaries may contain pre-policy results.
+  /// Preserve them in the checkpoint, but never reuse them in a model request.
+  Object? compaction(Object? stored) => hadLegacyResult ? null : stored;
+}
+
+/// Re-project persisted result messages before preview, send and summarization.
+/// After a pre-policy result, assistant-derived prose/arguments have no safe
+/// provenance. User-authored messages retain their separate disclosure policy.
+ModelToolHistory modelToolHistory(List<Object?> messages) {
+  var legacy = false;
+  final projected = <Object?>[];
+  for (var index = 0; index < messages.length; index++) {
+    final message = messages[index];
+    if (message is! Map) {
+      projected.add(message);
+      continue;
+    }
+    var output = Map<String, Object?>.from(message);
+    final content = message['content'];
+    if ((message['role'] == 'tool' ||
+            (message['role'] == 'user' &&
+                _followsCompatibilityCall(messages, index))) &&
+        content is String) {
+      try {
+        final body = jsonDecode(content);
+        if (body is Map && body['trustedToolResult'] is Map) {
+          final result = ToolCallResult.fromJson(
+            Map<String, Object?>.from(body['trustedToolResult'] as Map),
+          );
+          final safe = modelToolResult(result);
+          if (body['modelDisclosurePolicy'] != 1 ||
+              jsonEncode(safe) != jsonEncode(body['trustedToolResult'])) {
+            legacy = true;
+          }
+          output['content'] = jsonEncode({
+            'trustedToolResult': safe,
+            'modelDisclosurePolicy': 1,
+            'citations': body['citations'] is List
+                ? body['citations']
+                : const [],
+          });
+        }
+      } on FormatException {
+        /* ordinary user text */
+      }
+    }
+    if (legacy && message['role'] == 'assistant') {
+      output['content'] = '此前工具派生内容未登记披露，已省略';
+      if (message['tool_calls'] is List) {
+        output['tool_calls'] = [
+          for (final call in message['tool_calls'] as List)
+            if (call is Map && call['function'] is Map)
+              {
+                ...Map<String, Object?>.from(call),
+                'function': {
+                  ...Map<String, Object?>.from(call['function'] as Map),
+                  'arguments': '{}',
+                },
+              },
+        ];
+      }
+    }
+    projected.add(output);
+  }
+  return ModelToolHistory(projected, hadLegacyResult: legacy);
+}
+
+/// Host-only attribution of local tool-derived conversation answers. The
+/// original message/receipt is retained; this copy is only for model requests.
+List<AssistantMessage> modelConversationHistory(
+  FoundationRepository repository,
+  String conversationId,
+) {
+  final withheldAnswers = <String>{
+    for (final prior in repository.tasks(conversationId: conversationId))
+      if ((prior.payload['toolCall'] != null && prior.profileId == null) ||
+          modelToolHistory(prior.payload['messages'] as List? ?? const [])
+              .hadLegacyResult)
+        if (prior.summary != null) prior.summary!,
+  };
+  return [
+    for (final message in repository.messages(conversationId))
+      if (message.role == 'assistant' &&
+          withheldAnswers.contains(message.content))
+        AssistantMessage(
+          message.id,
+          message.conversationId,
+          message.role,
+          '此前本机工具派生内容未登记披露，已省略',
+          message.createdAt,
+          message.references,
+        )
+      else
+        message,
+  ];
+}
