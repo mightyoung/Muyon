@@ -737,6 +737,8 @@ class _AssistantPageState extends State<AssistantPage> {
                       if (!_child && widget.agent.uiPlanningEnabled)
                         DropdownButton<UiPlanningMode>(
                           value: widget.agent.currentUiPlanningMode,
+                          isExpanded: true,
+                          itemHeight: null,
                           items: const [
                             DropdownMenuItem(
                               value: UiPlanningMode.intelligent,
