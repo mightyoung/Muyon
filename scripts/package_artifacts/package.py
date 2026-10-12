@@ -113,9 +113,9 @@ def main():
         source = app / 'build/windows/x64/runner/Release'
         require(source.is_dir(), 'Windows Release directory missing')
         check_windows_tree(source)
-        require(all((source / name).exists() for name in
-                    ['muyon.exe', 'flutter_windows.dll', 'data/icu.dat', 'data/app.so', 'data/flutter_assets']),
-                'Complete Windows Release bundle missing')
+        required = ['muyon.exe', 'flutter_windows.dll', 'data/icudtl.dat', 'data/app.so', 'data/flutter_assets']
+        missing = [name for name in required if not (source / name).exists()]
+        require(not missing, f'Complete Windows Release bundle missing: {missing}')
         check_paths(p.relative_to(source) for p in source.rglob('*'))
         signature = command('powershell', '-NoProfile', '-Command',
                             f"(Get-AuthenticodeSignature -LiteralPath '{source}/muyon.exe').Status")

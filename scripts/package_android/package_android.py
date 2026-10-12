@@ -210,7 +210,9 @@ def package_apk(
     if not skip_pub_get:
         run_checked([flutter, 'pub', 'get', '--enforce-lockfile'], cwd=repo)
 
-    build_cmd = [flutter, 'build', 'apk', '--release', '--no-pub', *extra_args]
+    # Release must not use --no-pub: otherwise stale GeneratedPluginRegistrant can
+    # keep integration_test and break compile (see apps/muyon/README.md).
+    build_cmd = [flutter, 'build', 'apk', '--release', *extra_args]
     run_checked(build_cmd, cwd=app)
 
     source = app / 'build' / 'app' / 'outputs' / 'flutter-apk' / 'app-release.apk'

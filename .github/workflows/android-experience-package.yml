@@ -101,8 +101,11 @@ jobs:
           if [[ -d "$found/ndk" ]]; then
             echo "NDK dirs:"; ls "$found/ndk"
           else
-            echo 'WARNING: no ndk/ under SDK; package script will fail without auto-fetch'
+            echo 'Android NDK not preinstalled under SDK ndk/; refusing to run sdkmanager (A1)'
+            exit 1
           fi
+          # Flutter 3.47.5 declares ndkVersion 28.2.x; runner may only ship 27.x.
+          # AGP may reconcile during flutter build; our packaging script never calls sdkmanager.
 
       - name: Resolve locked workspace dependencies
         run: flutter pub get --enforce-lockfile
@@ -114,7 +117,6 @@ jobs:
             --output "$GITHUB_WORKSPACE/packages" \
             --flutter flutter \
             --build-sha "$BUILD_SHA" \
-            --skip-pub-get
 
       - name: Verify manifest bind and experience-only signing note
         run: |

@@ -196,6 +196,7 @@ class PackageAndroidTests(unittest.TestCase):
         build_cmds = [c for c in self.flutter_calls if 'build' in c and 'apk' in c]
         self.assertEqual(len(build_cmds), 1)
         self.assertIn('--release', build_cmds[0])
+        self.assertNotIn('--no-pub', build_cmds[0])
         self.assertTrue(all(not a.startswith('--dart-define') for a in build_cmds[0]))
 
     def test_apk_credential_path_rejected(self):
