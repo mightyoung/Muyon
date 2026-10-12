@@ -193,6 +193,7 @@ class AgentTaskFactory {
     required String conversationId,
     required String toolId,
     String? previousAttemptId,
+    String? modelHostToolRequestText,
   }) {
     final c = ctx.repository.conversation(conversationId);
     if (c == null) throw StateError('Unknown conversation');
@@ -206,6 +207,8 @@ class AgentTaskFactory {
       'conversationId': conversationId,
       'prompt': '运行工具 $toolId',
       'strategyId': 'manual',
+      if (modelHostToolRequestText != null)
+        'modelHostToolRequestText': modelHostToolRequestText,
       'candidateIds': [toolId],
       'previousAttemptId': previousAttemptId,
       'scope': c.scope.toJson(),
