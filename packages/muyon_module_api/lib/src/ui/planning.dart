@@ -31,9 +31,25 @@ class ModelReferenceMap {
   final _objects = <String, ObjectRef>{};
   final _artifactTokens = <String, String>{};
   final _artifacts = <String, ArtifactRef>{};
+  final _snapshotTokens = <String, String>{};
+  String projectSnapshot(SnapshotRef snapshot) {
+    _requireCurrent();
+    return _snapshotTokens.putIfAbsent(
+      jsonEncode([snapshot.id, snapshot.revision]),
+      _token,
+    );
+  }
+
   bool _active = true;
   void expire() => _active = false;
-  bool get _current => _active && (isCurrent?.call() ?? true);
+  bool get _current {
+    try {
+      return _active && (isCurrent?.call() ?? true);
+    } catch (_) {
+      return false;
+    }
+  }
+
   static String _artifactKey(ArtifactRef ref) =>
       jsonEncode([ref.moduleId, ref.artifactId, ref.contentDigest]);
   String _token() =>
@@ -199,6 +215,7 @@ class UiPlanningRequest {
     Set<String> modelDisclosedUiStateRefs = const {},
     this.modelReferences,
     this.modelReferenceScopeKey,
+    this.modelReferenceSnapshotKey,
     this.isModelReferenceCurrent,
   }) : conversationMessages = List.unmodifiable(
          conversationMessages.map(Map<String, Object?>.unmodifiable),
@@ -228,6 +245,7 @@ class UiPlanningRequest {
   final Set<String> modelDisclosedUiStateRefs;
   final ModelReferenceMap? modelReferences;
   final String? modelReferenceScopeKey;
+  final String? modelReferenceSnapshotKey;
   final bool Function()? isModelReferenceCurrent;
   late final ModelReferenceMap referenceMap =
       modelReferences ??
@@ -247,136 +265,173 @@ class UiPlanningRequest {
             .toList(),
         isCurrent: isModelReferenceCurrent,
       );
+  String get modelSnapshotId => referenceMap.projectSnapshot(snapshot.ref);
+  Map<String, dynamic> hostPlanJson(Map<String, dynamic> plan) {
+    _checkReferenceContext();
+    if (plan['snapshotId'] != modelSnapshotId ||
+        plan['snapshotRevision'] != snapshot.ref.revision) {
+      throw StateError('model_reference_unavailable');
+    }
+    return {...plan, 'snapshotId': snapshot.ref.id};
+  }
+
   bool _readable(FactState state) =>
       state == FactState.verified || state == FactState.unverified;
   Map<String, Object?> _disclosedUiState(Map<String, Object?> values) => {
     for (final entry in values.entries)
       if (modelDisclosedUiStateRefs.contains(entry.key)) entry.key: entry.value,
   };
-  Map<String, Object?> toJson() => {
-    'question': question,
-    'answer': answer,
-    'conversationMessages': conversationMessages,
-    'conversationVersion': conversationVersion,
-    'coverage': coverage,
-    'taskId': taskId,
-    'turnId': turnId,
-    'mode': mode.name,
-    'currentView': {
-      'surfaceId': currentView.surfaceId,
-      'revision': currentView.revision,
-      'values': _disclosedUiState(currentView.values),
-    },
-    'snapshot': {
-      'id': snapshot.ref.id,
-      'revision': snapshot.ref.revision,
-      'facts': {
-        for (final e in snapshot.facts.entries)
-          e.key: {
-            'object': referenceMap.projectObject(e.value.object),
-            'field': e.value.field,
-            'value':
-                modelDisclosedFactRefs.contains(e.key) &&
-                    _readable(e.value.state)
-                ? e.value.value
-                : null,
-            'state': e.value.state.name,
-            'unit': e.value.unit,
-            'sourceRefs': e.value.sourceRefs,
-          },
+  void _checkReferenceContext() {
+    if (isModelReferenceCurrent != null) {
+      try {
+        if (!isModelReferenceCurrent!()) {
+          throw StateError('model_reference_unavailable');
+        }
+      } catch (_) {
+        throw StateError('model_reference_unavailable');
+      }
+    }
+    if (modelReferences != null &&
+        (referenceMap.taskId != taskId ||
+            referenceMap.scopeKey != modelReferenceScopeKey ||
+            referenceMap.snapshotKey != modelReferenceSnapshotKey)) {
+      throw StateError('model_reference_unavailable');
+    }
+  }
+
+  Map<String, Object?> toJson() {
+    _checkReferenceContext();
+    return {
+      'question': question,
+      'answer': answer,
+      'conversationMessages': conversationMessages,
+      'conversationVersion': conversationVersion,
+      'coverage': coverage,
+      'taskId': taskId,
+      'turnId': turnId,
+      'mode': mode.name,
+      'currentView': {
+        'surfaceId': currentView.surfaceId,
+        'revision': currentView.revision,
+        'values': _disclosedUiState(currentView.values),
       },
-      'initialUiState': _disclosedUiState(snapshot.initialUiState),
-      'computations': {
-        for (final e in snapshot.computations.entries)
-          e.key: {
-            'value':
-                modelDisclosedComputedRefs.contains(e.key) &&
-                    snapshot.computedEvidence[e.key] != null &&
-                    _readable(snapshot.computedEvidence[e.key]!.state) &&
-                    e.value.inputVersion == snapshot.ref
-                ? e.value.value
-                : null,
-            'snapshotId': e.value.inputVersion.id,
-            'snapshotRevision': e.value.inputVersion.revision,
-            'computationId': e.value.computationId,
-          },
-      },
-      'sources': {
-        for (final e in snapshot.sources.entries)
-          e.key: {
-            'artifact': referenceMap.projectArtifact(e.value.artifact),
-            // Original source text has no per-field disclosure authority.
-            // Retain reference/location metadata; rendering still uses the
-            // untouched host snapshot, never this model projection.
-            'start': e.value.start,
-            'end': e.value.end,
-            'page': e.value.page,
-            'paragraph': e.value.paragraph,
-          },
-      },
-      'sourceDigests': {
-        for (final entry in snapshot.sources.entries)
-          if (snapshot.sourceDigests[entry.value.artifact.artifactId] ==
-              entry.value.artifact.contentDigest)
-            entry.value.artifact.artifactId: referenceMap.projectArtifact(
-              entry.value.artifact,
-            )['modelRef'],
-      },
-      'actionContext': snapshot.actionContext == null
-          ? null
-          : {
-              'draftRevision': snapshot.actionContext!.draftRevision,
-              'draft': _disclosedUiState(snapshot.actionContext!.draft),
-              'confirmedRecordRefs': snapshot.actionContext!.confirmedRecordRefs
-                  .toList(),
-              'operations': {
-                for (final e in snapshot.actionContext!.operations.entries)
-                  e.key: {
-                    'draftRevision': e.value.draftRevision,
-                    'inputRefs': e.value.inputRefs.toList(),
-                  },
-              },
-            },
-    },
-    'intent': {
-      'id': intent.id,
-      'purpose': intent.purpose,
-      'requiredBindings': [
-        for (final b in intent.requiredBindings)
-          {'kind': b.kind.name, 'id': b.id},
-      ],
-      'mandatoryStates': intent.mandatoryStates.map((s) => s.name).toList(),
-    },
-    'allowedActionRefs': allowedActionRefs.toList(),
-    'catalog': {
-      'version': catalog.version,
-      'components': {
-        for (final e in catalog.components.entries)
-          e.key: {
-            'properties': e.value.properties.map((k, v) => MapEntry(k, v.name)),
-            'requiredProperties': e.value.requiredProperties.toList(),
-            'bindings': e.value.bindings.map(
-              (k, v) => MapEntry(k, v.map((b) => b.name).toList()),
-            ),
-            'requiredBindings': e.value.requiredBindings.toList(),
-            'events': e.value.events.map((k, v) => MapEntry(k, v?.name)),
-            'eventActions': e.value.eventActions.map(
-              (k, v) => MapEntry(k, v.toList()),
-            ),
-            'allowsChildren': e.value.allowsChildren,
-          },
-      },
-      'actions': {
-        for (final e in catalog.actions.entries)
-          if (allowedActionRefs.contains(e.key))
+      'snapshot': {
+        'id': modelSnapshotId,
+        'revision': snapshot.ref.revision,
+        'facts': {
+          for (final e in snapshot.facts.entries)
             e.key: {
-              'route': e.value.route.name,
-              'localAction': e.value.localAction?.name,
+              'object': referenceMap.projectObject(e.value.object),
+              'field': e.value.field,
+              'value':
+                  modelDisclosedFactRefs.contains(e.key) &&
+                      _readable(e.value.state)
+                  ? e.value.value
+                  : null,
+              'state': e.value.state.name,
+              'unit': e.value.unit,
+              'sourceRefs': e.value.sourceRefs,
             },
+        },
+        'initialUiState': _disclosedUiState(snapshot.initialUiState),
+        'computations': {
+          for (final e in snapshot.computations.entries)
+            e.key: {
+              'value':
+                  modelDisclosedComputedRefs.contains(e.key) &&
+                      snapshot.computedEvidence[e.key] != null &&
+                      _readable(snapshot.computedEvidence[e.key]!.state) &&
+                      e.value.inputVersion == snapshot.ref
+                  ? e.value.value
+                  : null,
+              'snapshotId': e.value.inputVersion == snapshot.ref
+                  ? modelSnapshotId
+                  : null,
+              'snapshotRevision': e.value.inputVersion.revision,
+              'computationId': e.value.computationId,
+            },
+        },
+        'sources': {
+          for (final e in snapshot.sources.entries)
+            e.key: {
+              'artifact': referenceMap.projectArtifact(e.value.artifact),
+              // Original source text has no per-field disclosure authority.
+              // Retain reference/location metadata; rendering still uses the
+              // untouched host snapshot, never this model projection.
+              'start': e.value.start,
+              'end': e.value.end,
+              'page': e.value.page,
+              'paragraph': e.value.paragraph,
+            },
+        },
+        'sourceDigests': {
+          for (final entry in snapshot.sources.entries)
+            if (snapshot.sourceDigests[entry.value.artifact.artifactId] ==
+                entry.value.artifact.contentDigest)
+              entry.value.artifact.artifactId: referenceMap.projectArtifact(
+                entry.value.artifact,
+              )['modelRef'],
+        },
+        'actionContext': snapshot.actionContext == null
+            ? null
+            : {
+                'draftRevision': snapshot.actionContext!.draftRevision,
+                'draft': _disclosedUiState(snapshot.actionContext!.draft),
+                'confirmedRecordRefs': snapshot
+                    .actionContext!
+                    .confirmedRecordRefs
+                    .toList(),
+                'operations': {
+                  for (final e in snapshot.actionContext!.operations.entries)
+                    e.key: {
+                      'draftRevision': e.value.draftRevision,
+                      'inputRefs': e.value.inputRefs.toList(),
+                    },
+                },
+              },
       },
-    },
-    'guideEntries': guideEntries.map((e) => e.toJson()).toList(),
-  };
+      'intent': {
+        'id': intent.id,
+        'purpose': intent.purpose,
+        'requiredBindings': [
+          for (final b in intent.requiredBindings)
+            {'kind': b.kind.name, 'id': b.id},
+        ],
+        'mandatoryStates': intent.mandatoryStates.map((s) => s.name).toList(),
+      },
+      'allowedActionRefs': allowedActionRefs.toList(),
+      'catalog': {
+        'version': catalog.version,
+        'components': {
+          for (final e in catalog.components.entries)
+            e.key: {
+              'properties': e.value.properties.map(
+                (k, v) => MapEntry(k, v.name),
+              ),
+              'requiredProperties': e.value.requiredProperties.toList(),
+              'bindings': e.value.bindings.map(
+                (k, v) => MapEntry(k, v.map((b) => b.name).toList()),
+              ),
+              'requiredBindings': e.value.requiredBindings.toList(),
+              'events': e.value.events.map((k, v) => MapEntry(k, v?.name)),
+              'eventActions': e.value.eventActions.map(
+                (k, v) => MapEntry(k, v.toList()),
+              ),
+              'allowsChildren': e.value.allowsChildren,
+            },
+        },
+        'actions': {
+          for (final e in catalog.actions.entries)
+            if (allowedActionRefs.contains(e.key))
+              e.key: {
+                'route': e.value.route.name,
+                'localAction': e.value.localAction?.name,
+              },
+        },
+      },
+      'guideEntries': guideEntries.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 
 abstract interface class UiPlanningPort {
