@@ -26,11 +26,12 @@ class SectionDeletePreview {
   bool get evidencePreserved => true;
   int get totalLinks => links.length;
 
-  /// Deliberately excludes section text and all evidence content and paths.
+  /// Native read access does not authorize disclosure to a model. Keep the
+  /// local cascade digest and association identities out of this projection;
+  /// the digest also depends on hidden section and association metadata.
   Map<String, Object?> toModel() => {
     'sectionId': section.id,
     'projectId': section.projectId,
-    'deleteDigest': deleteDigest,
     'complete': complete,
     'totalLinks': totalLinks,
     'evidencePreserved': evidencePreserved,
@@ -50,12 +51,9 @@ class SectionDeletePreviewLink {
   String? get type => null;
   final String status;
 
-  Map<String, Object?> toModel() => {
-    if (linkId != null) 'linkId': linkId,
-    if (evidenceId != null) 'evidenceId': evidenceId,
-    if (type != null) 'type': type,
-    'status': status,
-  };
+  /// A native permission callback is not a model disclosure grant. Identical
+  /// restricted rows disclose neither identities nor their sorted positions.
+  Map<String, Object?> toModel() => {'status': 'restricted'};
 }
 
 /// Snapshot the complete cascade before any projection or redaction.
