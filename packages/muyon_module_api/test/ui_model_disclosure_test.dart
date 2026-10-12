@@ -40,6 +40,238 @@ UiPlanningRequest request(
 );
 
 void main() {
+  test('opaque references are scoped, stable, private and fail closed', () {
+    const object = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'row',
+      nativeProjectId: 'project',
+      revisionRef: '2',
+      contentDigest: 'PRIVATE-ROW-HASH-212dc',
+    );
+    const artifact = ArtifactRef(
+      moduleId: 'inquiry',
+      artifactId: 'paper',
+      contentDigest: 'PRIVATE-ARTIFACT-HASH-818a',
+    );
+    var current = true;
+    final map = ModelReferenceMap(
+      taskId: 'task',
+      scopeKey: 'PRIVATE-SCOPE',
+      snapshotKey: 'PRIVATE-SNAPSHOT',
+      objects: {object},
+      artifacts: [artifact],
+      isCurrent: () => current,
+    );
+    final wire = map.projectObject(object);
+    final token = wire['modelRef']! as String;
+    expect(wire, map.projectObject(object));
+    final text = jsonEncode(
+      map.projectJson({
+        'scope': {
+          'objects': [object.toJson()],
+        },
+        'artifact': {
+          'moduleId': artifact.moduleId,
+          'artifactId': artifact.artifactId,
+          'contentDigest': artifact.contentDigest,
+        },
+      }),
+    );
+    for (final secret in [
+      'PRIVATE-ROW-HASH-212dc',
+      'PRIVATE-ARTIFACT-HASH-818a',
+      'PRIVATE-SCOPE',
+      'PRIVATE-SNAPSHOT',
+    ]) {
+      expect(text, isNot(contains(secret)));
+    }
+    expect(
+      map.resolveObject(
+        token,
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+        locators: wire,
+      ),
+      same(object),
+    );
+    for (final context in [
+      ('foreign', 'PRIVATE-SCOPE', 'PRIVATE-SNAPSHOT'),
+      ('task', 'other', 'PRIVATE-SNAPSHOT'),
+      ('task', 'PRIVATE-SCOPE', 'old'),
+    ]) {
+      expect(
+        map.resolveObject(
+          token,
+          taskId: context.$1,
+          scopeKey: context.$2,
+          snapshotKey: context.$3,
+        ),
+        isNull,
+      );
+    }
+    expect(
+      map.resolveObject(
+        'mr1_forged',
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+      ),
+      isNull,
+    );
+    expect(
+      map.resolveObject(
+        token,
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+        locators: {...wire, 'objectId': 'foreign'},
+      ),
+      isNull,
+    );
+    expect(
+      map.resolveObject(
+        token,
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+        locators: {...wire, 'contentDigest': object.contentDigest},
+      ),
+      isNull,
+    );
+    expect(
+      () => map.projectObject(
+        const ObjectRef(
+          moduleId: 'inquiry',
+          objectType: 'project_item',
+          objectId: 'foreign',
+        ),
+      ),
+      throwsStateError,
+    );
+    expect(
+      () => map.projectJson({'contentDigest': 'UNKNOWN-HASH'}),
+      throwsStateError,
+    );
+    final artifactWire = map.projectArtifact(artifact);
+    final artifactToken = artifactWire['modelRef']! as String;
+    expect(
+      map.resolveArtifact(
+        artifactToken,
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+        locators: artifactWire,
+      ),
+      same(artifact),
+    );
+    expect(
+      map.resolveArtifact(
+        'forged',
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+      ),
+      isNull,
+    );
+    expect(
+      map.resolveArtifact(
+        artifactToken,
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+        locators: {...artifactWire, 'artifactId': 'foreign'},
+      ),
+      isNull,
+    );
+    expect(
+      map.resolveArtifact(
+        artifactToken,
+        taskId: 'foreign',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+      ),
+      isNull,
+    );
+    expect(
+      () => map.projectArtifact(
+        const ArtifactRef(
+          moduleId: 'inquiry',
+          artifactId: 'foreign',
+          contentDigest: 'unknown',
+        ),
+      ),
+      throwsStateError,
+    );
+    current = false;
+    expect(
+      map.resolveObject(
+        token,
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+      ),
+      isNull,
+    );
+    expect(() => map.projectObject(object), throwsStateError);
+    current = true;
+    map.expire();
+    expect(
+      map.resolveObject(
+        token,
+        taskId: 'task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+      ),
+      isNull,
+    );
+    expect(() => map.projectArtifact(artifact), throwsStateError);
+    final other = ModelReferenceMap(
+      taskId: 'other-task',
+      scopeKey: 'PRIVATE-SCOPE',
+      snapshotKey: 'PRIVATE-SNAPSHOT',
+      objects: {object},
+    );
+    expect(other.projectObject(object)['modelRef'], isNot(token));
+    expect(
+      other.resolveObject(
+        token,
+        taskId: 'other-task',
+        scopeKey: 'PRIVATE-SCOPE',
+        snapshotKey: 'PRIVATE-SNAPSHOT',
+      ),
+      isNull,
+    );
+  });
+
+  test('model reference metadata does not disclose the host row digest', () {
+    const pinned = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'row',
+      revisionRef: '3',
+      contentDigest: 'ROW-DIGEST-SECRET-941bd',
+    );
+    final snapshot = DataSnapshot(
+      ref: ref,
+      facts: {
+        'name': SnapshotFact(
+          object: pinned,
+          field: 'name',
+          value: 'ordinary',
+          state: FactState.verified,
+        ),
+      },
+    );
+    final text = jsonEncode(request(snapshot, facts: {'name'}).toJson());
+    expect(text, isNot(contains('ROW-DIGEST-SECRET-941bd')));
+    expect(
+      snapshot.facts['name']!.object.contentDigest,
+      'ROW-DIGEST-SECRET-941bd',
+    );
+  });
+
   for (final state in [
     FactState.notDisclosed,
     FactState.readFailed,
@@ -99,7 +331,8 @@ void main() {
       );
       final text = jsonEncode(request(snapshot).toJson());
       expect(text, isNot(contains('ORIGINAL-SECRET-93baf')));
-      expect(text, contains('digest'));
+      expect(text, contains('modelRef'));
+      expect(text, isNot(contains('"contentDigest"')));
       expect(snapshot.sources['s']!.originalText, 'ORIGINAL-SECRET-93baf');
     },
   );
