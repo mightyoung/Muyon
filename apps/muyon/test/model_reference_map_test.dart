@@ -165,9 +165,8 @@ void main() {
     map.revokeTask('task-a');
     expect(() => map.resolve(mine, current: a), rejected('revoked'));
     expect(map.resolve(theirs, current: b), object);
-    // re-minting after revocation does not resurrect the old grant silently
-    expect(map.handleFor(object, binding: a), mine);
-    expect(map.resolve(mine, current: a), object);
+    // a revoked task cannot mint new handles either
+    expect(() => map.handleFor(object, binding: a), rejected('revoked'));
   });
 
   test('a handle never resolves an object without a digest', () {
