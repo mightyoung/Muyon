@@ -117,6 +117,9 @@ ModelToolHistory modelToolHistory(List<Object?> messages) {
             recognized = true;
           } else if (body is Map && body['notExecuted'] is String) {
             // This is an outcome placeholder, not a result field or summary.
+            if (!_hostNonExecutionTexts.contains(body['notExecuted'])) {
+              legacy = true;
+            }
             output['content'] = jsonEncode({
               'notExecuted':
                   _hostNonExecutionTexts.contains(body['notExecuted'])

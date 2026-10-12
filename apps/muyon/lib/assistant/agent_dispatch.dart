@@ -16,6 +16,7 @@ import 'agent_budget.dart';
 import 'agent_context.dart';
 import 'agent_event_sink.dart';
 import 'agent_model_turn.dart';
+import 'model_tool_result_projection.dart';
 
 /// Tool-call stage of a task (S4-S5): preparing the calls of a step, running
 /// reads, the confirmation card, executing its writes and completing the step.
@@ -866,7 +867,8 @@ class AgentDispatch {
           (result.status == ToolCallStatus.succeeded ||
               _correctableRead(c, result))) {
         content = jsonEncode({
-          'trustedToolResult': result.toJson(),
+          'trustedToolResult': modelToolResult(result),
+          'modelDisclosurePolicy': 1,
           'citations': [
             for (var i = 0; i < refs.length; i++)
               {'citationId': 'r${i + 1}', 'reference': refs[i].toJson()},
