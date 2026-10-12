@@ -141,6 +141,149 @@ void main() {
     expect(db.raw.select('SELECT * FROM local_export_attempts'), isEmpty);
   });
 
+  test('reservation prefetch SQLITE_BUSY maps to ledger_pending_failed with zero execution', () async {
+    final dir = Directory.systemTemp.createTempSync('le06-narrow-busy');
+    addTearDown(() {
+      try {
+        dir.deleteSync(recursive: true);
+      } catch (_) {}
+    });
+    final path = '${dir.path}/ledger.sqlite';
+    final holder = sqlite3.open(path);
+    addTearDown(holder.close);
+    LocalExportLedger.createTables(holder);
+    holder.execute('BEGIN EXCLUSIVE');
+    final conn = ManagedConnection(sqlite3.open(path));
+    conn.raw.execute('PRAGMA busy_timeout = 0');
+    final guarded = LocalExportLedger(conn, clock: () => now);
+    var calls = 0;
+    await expectLater(
+      guarded.execute(
+        request(),
+        operation: (bytes) async {
+          calls++;
+          return success(bytes);
+        },
+      ),
+      error('ledger_pending_failed'),
+    );
+    expect(calls, 0);
+    holder.execute('ROLLBACK');
+    await conn.close();
+  });
+
+  test('reservation prefetch SQLITE_LOCKED maps to ledger_pending_failed by result code', () async {
+    expect(
+      LocalExportLedger.isSqliteLockContention(
+        SqliteException(
+          extendedResultCode: SqlError.SQLITE_LOCKED,
+          message: 'not used for classification',
+        ),
+      ),
+      isTrue,
+    );
+    expect(
+      LocalExportLedger.isSqliteLockContention(
+        SqliteException(
+          extendedResultCode: 517 /* SQLITE_BUSY_SNAPSHOT extended busy */,
+          message: 'timeout text must not decide',
+        ),
+      ),
+      isTrue,
+    );
+    expect(
+      LocalExportLedger.isSqliteLockContention(
+        SqliteException(
+          extendedResultCode: SqlError.SQLITE_CORRUPT,
+          message: 'database is locked',
+        ),
+      ),
+      isFalse,
+    );
+    expect(
+      LocalExportLedger.isSqliteLockContention(
+        SqliteException(
+          extendedResultCode: SqlError.SQLITE_NOTADB,
+          message: 'busy',
+        ),
+      ),
+      isFalse,
+    );
+  });
+
+  test('partial ledger schema on reservation stays ledger_read_failed with zero execution', () async {
+    final empty = ManagedConnection(sqlite3.openInMemory());
+    addTearDown(empty.close);
+    empty.raw.execute('''
+CREATE TABLE local_export_exports(
+ export_id TEXT PRIMARY KEY, base_digest TEXT NOT NULL,
+ base_json TEXT NOT NULL, content BLOB NOT NULL
+);
+''');
+    final guarded = LocalExportLedger(empty, clock: () => now);
+    var calls = 0;
+    await expectLater(
+      guarded.execute(
+        request(),
+        operation: (bytes) async {
+          calls++;
+          return success(bytes);
+        },
+      ),
+      error('ledger_read_failed'),
+    );
+    expect(calls, 0);
+  });
+
+  test('non-lock sqlite read failure on reservation stays ledger_read_failed with zero execution', () async {
+    final dir = Directory.systemTemp.createTempSync('le06-narrow-notadb');
+    addTearDown(() {
+      try {
+        dir.deleteSync(recursive: true);
+      } catch (_) {}
+    });
+    final path = '${dir.path}/ledger.sqlite';
+    File(path).writeAsBytesSync(List.filled(100, 0x58));
+    final conn = ManagedConnection(sqlite3.open(path));
+    final guarded = LocalExportLedger(conn, clock: () => now);
+    var calls = 0;
+    await expectLater(
+      guarded.execute(
+        request(),
+        operation: (bytes) async {
+          calls++;
+          return success(bytes);
+        },
+      ),
+      error('ledger_read_failed'),
+    );
+    expect(calls, 0);
+    await conn.close();
+  });
+
+  test(
+    'corrupt existing attempt row stays ledger_read_failed with zero execution',
+    () async {
+      await generate();
+      db.raw.execute(
+        "UPDATE local_export_attempts SET host_json = 'not-json' WHERE invocation_id = ?",
+        ['generate1'],
+      );
+      var calls = 0;
+      await expectLater(
+        ledger.execute(
+          request(),
+          operation: (bytes) async {
+            calls++;
+            return success(bytes);
+          },
+        ),
+        error('ledger_read_failed'),
+      );
+      expect(calls, 0);
+    },
+  );
+
   test('pending is committed before callback; duplicate and concurrent calls run once', () async {
     var calls = 0;
     final entered = Completer<void>(), release = Completer<void>();
