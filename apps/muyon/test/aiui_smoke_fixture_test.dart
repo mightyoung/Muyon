@@ -74,7 +74,11 @@ void main() {
         final state = await tester.runAsync(fixture.sourceForCurrentTask);
         expect(state?.catalog.version, 'library-2');
         final result = inspectSmokeProduction(fixture.host, state);
-        expect(result.capabilities['production_stream'], isTrue);
+        expect(
+          result.capabilities['production_stream'],
+          isNull,
+          reason: 'Source/preference/mode structure does not observe a production stream call',
+        );
         expect(result.capabilities['presentation_policy'], isTrue);
         expect(result.capabilities['library_2'], isTrue);
         expect(

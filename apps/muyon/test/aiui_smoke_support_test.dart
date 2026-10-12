@@ -193,6 +193,11 @@ void main() {
       expect(probe.latencyEvidence()['complete'], isFalse);
       expect(probe.latencyEvidence()['first_text_median_ms'], isNull);
       expect((probe.latencyEvidence()['samples'] as List).length, 5);
+      expect(
+        () => probe.samples.add(SmokeLatencySample(6)),
+        throwsUnsupportedError,
+      );
+      expect(probe.samples.length, 5);
     },
   );
   test('white list blocks secrets even in allowed text keys and nested values', () {
@@ -261,6 +266,38 @@ void main() {
     expect(latency['complete'], isFalse);
     expect(latency['valid_text_samples'], 1);
     expect(latency['first_text_median_ms'], isNull);
+    final six =
+        filterSmokeEvidence({
+              'latency': {
+                'samples': [
+                  for (var index = 0; index < 5; index++)
+                    {
+                      'first_text_visible_ms': 10 + index,
+                      'first_card_visible_ms': 20 + index,
+                    },
+                  {
+                    'first_text_visible_ms': null,
+                    'first_card_visible_ms': null,
+                    'missing_reason': 'request_observability_missing',
+                  },
+                ],
+              },
+            })['latency']
+            as Map;
+    expect((six['samples'] as List).length, lessThanOrEqualTo(5));
+    expect(
+      six['sample_count'],
+      6,
+      reason: 'Bounded output must not conceal the original denominator',
+    );
+    expect(
+      six['complete'],
+      isFalse,
+      reason: 'The failed sixth attempt cannot be silently dropped',
+    );
+    expect(six['first_text_median_ms'], isNull);
+    expect(six['first_card_median_ms'], isNull);
+    expect(six['failure_code'], 'latency_samples_insufficient');
   });
   test(
     'file, reportData and chunks publish the same filtered object',
