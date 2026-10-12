@@ -745,4 +745,48 @@ void main() {
       },
     );
   }
+  test(
+    'stripped nested project path cannot become Windows drive relative',
+    () async {
+      store.db.execute("UPDATE projects SET skill_root='nested/' WHERE id='p'");
+      store.db.execute(
+        "UPDATE documents SET relative_path='nested/C:outside.md' WHERE id='d'",
+      );
+      await refuses(['n-d']);
+      expect(reads, 0);
+    },
+  );
+
+  test(
+    'stripped nested project path cannot become absolute POSIX path',
+    () async {
+      store.db.execute("UPDATE projects SET skill_root='nested/' WHERE id='p'");
+      store.db.execute(
+        "UPDATE documents SET relative_path='nested//outside.md' WHERE id='d'",
+      );
+      await refuses(['n-d']);
+      expect(reads, 0);
+    },
+  );
+
+  test(
+    'valid nested project source exports its relative Unicode path',
+    () async {
+      store.db.execute("UPDATE projects SET skill_root='nested/' WHERE id='p'");
+      store.db.execute(
+        "UPDATE documents SET relative_path='nested/文献 甲.md' WHERE id='d'",
+      );
+      final prepared = await prepare(['n-d']);
+      expect(reads, 1);
+      expect(prepared.rows.single['text_binding'], {
+        'path': '文献 甲.md',
+        'sha256': sha256.convert(utf8.encode('原始引文，中文材料。')).toString(),
+        'excerpt': '原始引文',
+      });
+      expect(
+        (prepared.rows.single['workbench'] as Map)['document_path'],
+        '文献 甲.md',
+      );
+    },
+  );
 }
