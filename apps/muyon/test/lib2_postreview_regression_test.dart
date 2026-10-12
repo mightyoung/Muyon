@@ -360,6 +360,62 @@ ValidatedUiPlan _recoveryBase() {
 
 void main() {
   testWidgets(
+    'host-owned pending cancel is reachable in actual UI and labels retained results cancelled',
+    (tester) async {
+      var business = 0;
+      var readonly = false;
+      final release = Completer<void>();
+      final defs = {'total': _product('cost:a', 'price')};
+      final base = _recoveryBase();
+      final controller = await _mount(
+        tester,
+        base,
+        defs,
+        release: release,
+        readOnlyProbe: () => readonly,
+        onEvent: (_) async {
+          business++;
+        },
+      );
+      final pending = controller.recompute();
+      await tester.pump();
+      final cancel = find.byKey(const ValueKey('ui-host-cancel-recompute'));
+      expect(cancel, findsOneWidget);
+      readonly = true;
+      controller.notifyListeners();
+      await tester.pump();
+      expect(tester.widget<OutlinedButton>(cancel).onPressed, isNull);
+      controller.cancelRecompute();
+      expect(controller.recomputing,isTrue);
+      readonly = false;
+      controller.notifyListeners();
+      await tester.pump();
+      await tester.tap(cancel);
+      await tester.pump();
+      expect(find.textContaining('已取消重算'), findsOneWidget);
+      expect(cancel, findsNothing);
+      expect(controller.outdated, isTrue);
+      final submit = controller.current.plan.nodes.singleWhere(
+        (n) => n.id == 'submit',
+      );
+      expect(
+        await controller.dispatchCaptured(
+          controller.captureRender(),
+          submit,
+          'submit',
+        ),
+        UiDispatchOutcome.stale,
+      );
+      release.complete();
+      expect(await pending, UiPublishOutcome.staleToken);
+      await tester.pump();
+      expect(controller.current, same(base));
+      expect(find.textContaining('已取消重算'), findsOneWidget);
+      expect(business, 0);
+    },
+  );
+
+  testWidgets(
     'cancelled candidate cannot publish or clear visible stale results',
     (tester) async {
       final release = Completer<void>();
@@ -377,7 +433,7 @@ void main() {
       await tester.pump();
       controller.cancelRecompute();
       await tester.pump();
-      expect(find.textContaining('结果已过期'), findsOneWidget);
+      expect(find.textContaining('已取消重算'), findsOneWidget);
       release.complete();
       expect(await pending, UiPublishOutcome.staleToken);
       await tester.pump();

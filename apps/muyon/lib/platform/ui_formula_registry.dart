@@ -265,7 +265,13 @@ final class UiFormulaRegistry {
         continue;
       }
       final fact = binding.kind == BindingKind.fact ? snapshot.facts[binding.id] : null;
-      final raw = fact == null ? currentUiState[binding.id] : fact.value;
+      final unavailableFact = fact != null &&
+          fact.state != FactState.verified && fact.state != FactState.unverified;
+      // Domain state is authoritative: residual values are neither readable
+      // formula inputs nor permitted fingerprint material. Keep only metadata.
+      final raw = unavailableFact
+          ? null
+          : fact == null ? currentUiState[binding.id] : fact.value;
       if (fact != null) {
         if (fact.object != slot.object || fact.field != slot.field) invalid.add('identity_mismatch:$name');
         if (fact.unit != slot.unit) invalid.add('unit_mismatch:$name');
@@ -282,7 +288,7 @@ final class UiFormulaRegistry {
         fact?.object.toJson(), fact?.field, fact?.unit, fact?.state.name, sources,
         _typed(raw),
       ]);
-      if (fact != null && fact.state != FactState.verified && fact.state != FactState.unverified) {
+      if (unavailableFact) {
         missing.add('fact_unavailable:$name');
         continue;
       }

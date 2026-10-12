@@ -138,6 +138,8 @@ class UiSurfaceController extends ChangeNotifier {
 
   bool get recomputing => _publication.recomputing;
   bool get outdated => _publication.outdated;
+  bool get _wasRecomputeCancelled =>
+      _publication.publicationErrors.contains('recompute_cancelled');
   List<String> get publicationErrors => _publication.publicationErrors;
   bool get isReadOnly {
     try {
@@ -245,7 +247,7 @@ class UiSurfaceController extends ChangeNotifier {
 
   /// Cancel only this owner's in-flight candidate; retained values stay stale.
   void cancelRecompute() {
-    if (_disposed || !recomputing) return;
+    if (_disposed || isReadOnly || !recomputing) return;
     _publication.cancelRecompute();
     notifyListeners();
   }
@@ -1068,7 +1070,15 @@ class _DynamicUiSurfaceState extends State<DynamicUiSurface> {
             liveRegion: true,
             child: Text(controller.recomputing
                 ? '正在重算：下方结果属于上次发布版本。'
+                : controller._wasRecomputeCancelled
+                ? '已取消重算结果更新：下方结果属于上次发布版本。'
                 : '结果已过期：重算未成功，下方结果属于上次发布版本。'),
+          ),
+        if (controller.recomputing)
+          OutlinedButton(
+            key: const ValueKey('ui-host-cancel-recompute'),
+            onPressed: controller.isReadOnly ? null : controller.cancelRecompute,
+            child: const Text('取消重算'),
           ),
         if (controller.portError != null)
           const Text('操作未完成，请检查当前状态后重试。'),
