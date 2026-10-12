@@ -20,7 +20,9 @@ UiPlanningRequest request(
   String? scopeKey,
   String? snapshotKey,
   List<Map<String, Object?>> messages = const [],
+  Set<int> toolIndices = const {},
 }) => UiPlanningRequest(
+  modelDisclosedToolMessageIndices: toolIndices,
   modelReferences: references,
   modelReferenceScopeKey: scopeKey,
   modelReferenceSnapshotKey: snapshotKey,
@@ -47,6 +49,60 @@ UiPlanningRequest request(
 );
 
 void main() {
+  test('generic roletool data summary and unknown fields require host classification', () {
+    const raw = 'DIRECT-UNCLASSIFIED-TOOL-NOTES-852cf';
+    final snapshot = DataSnapshot(ref: ref, facts: {});
+    final r = request(
+      snapshot,
+      messages: [
+        {
+          'role': 'tool',
+          'content': jsonEncode({
+            'trustedToolResult': {
+              'status': 'succeeded',
+              'summary': raw,
+              'data': {'notes': raw, 'unknown': raw},
+            },
+            'unknown': raw,
+          }),
+        },
+      ],
+    );
+    expect(jsonEncode(r.toJson()), isNot(contains(raw)));
+    final structured = request(
+      snapshot,
+      messages: [
+        {
+          'role': 'tool',
+          'content': {
+            'data': {'notes': raw},
+            'summary': raw,
+          },
+        },
+      ],
+    );
+    expect(jsonEncode(structured.toJson()), isNot(contains(raw)));
+    final legitimate = request(
+      snapshot,
+      toolIndices: {0},
+      messages: [
+        {
+          'role': 'tool',
+          'content': jsonEncode({
+            'trustedToolResult': {
+              'status': 'succeeded',
+              'summary': '工具结果已登记',
+              'data': {
+                'record': {'name': '合法品名'},
+              },
+            },
+          }),
+        },
+      ],
+    );
+    expect(jsonEncode(legitimate.toJson()), contains('合法品名'));
+  });
+
   test('explicit tool frames project only known pins while user JSON stays literal', () {
     const pin = ObjectRef(
       moduleId: 'inquiry',

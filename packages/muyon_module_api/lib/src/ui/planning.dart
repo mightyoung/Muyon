@@ -213,6 +213,7 @@ class UiPlanningRequest {
     Set<String> modelDisclosedFactRefs = const {},
     Set<String> modelDisclosedComputedRefs = const {},
     Set<String> modelDisclosedUiStateRefs = const {},
+    Set<int> modelDisclosedToolMessageIndices = const {},
     this.modelReferences,
     this.modelReferenceScopeKey,
     this.modelReferenceSnapshotKey,
@@ -226,7 +227,10 @@ class UiPlanningRequest {
        modelDisclosedComputedRefs = Set.unmodifiable(
          modelDisclosedComputedRefs,
        ),
-       modelDisclosedUiStateRefs = Set.unmodifiable(modelDisclosedUiStateRefs);
+       modelDisclosedUiStateRefs = Set.unmodifiable(modelDisclosedUiStateRefs),
+       modelDisclosedToolMessageIndices = Set.unmodifiable(
+         modelDisclosedToolMessageIndices,
+       );
   final String question, answer, conversationVersion, coverage, taskId, turnId;
   final List<Map<String, Object?>> conversationMessages;
   final DataSnapshot snapshot;
@@ -243,6 +247,10 @@ class UiPlanningRequest {
   final Set<String> modelDisclosedFactRefs;
   final Set<String> modelDisclosedComputedRefs;
   final Set<String> modelDisclosedUiStateRefs;
+
+  /// Host classification of already producer/schema/capability-projected frames.
+  /// Body markers and role labels do not register disclosure.
+  final Set<int> modelDisclosedToolMessageIndices;
   final ModelReferenceMap? modelReferences;
   final String? modelReferenceScopeKey;
   final String? modelReferenceSnapshotKey;
@@ -266,29 +274,48 @@ class UiPlanningRequest {
         isCurrent: isModelReferenceCurrent,
       );
   List<Map<String, Object?>> _modelMessages() => [
-    for (final message in conversationMessages)
-      if (message['role'] == 'user')
-        message
+    for (var i = 0; i < conversationMessages.length; i++)
+      if (conversationMessages[i]['role'] == 'user')
+        conversationMessages[i]
       else
         Map<String, Object?>.from(
           referenceMap.projectJson({
-            ...message,
-            if (message['role'] == 'tool' && message['content'] is String)
-              'content': _modelToolContent(message['content'] as String),
+            ...conversationMessages[i],
+            if (conversationMessages[i]['role'] == 'tool')
+              'content': _modelToolContent(
+                conversationMessages[i]['content'],
+                disclosed: modelDisclosedToolMessageIndices.contains(i),
+              ),
           }) as Map,
         ),
   ];
-  String _modelToolContent(String content) {
+  Object? _modelToolContent(Object? content, {required bool disclosed}) {
     Object? decoded;
     try {
-      decoded = jsonDecode(content);
+      decoded = content is String ? jsonDecode(content) : content;
     } catch (_) {
       throw StateError('model_reference_unavailable');
     }
     if (decoded is! Map && decoded is! List) {
       throw StateError('model_reference_unavailable');
     }
-    return jsonEncode(referenceMap.projectJson(decoded));
+    if (!disclosed) {
+      final body = decoded is Map ? decoded : const {};
+      final result = body['trustedToolResult'] is Map
+          ? body['trustedToolResult'] as Map
+          : body;
+      decoded = {
+        'trustedToolResult': {
+          'status': 'notDisclosed',
+          'summary': '未登记模型披露的工具内容已省略',
+          'data': <String, Object?>{},
+          for (final key in ['objectRefs', 'artifactRefs'])
+            key: result[key] is List ? result[key] : const [],
+        },
+      };
+    }
+    final projected = referenceMap.projectJson(decoded);
+    return content is String ? jsonEncode(projected) : projected;
   }
 
   String get modelSnapshotId {
