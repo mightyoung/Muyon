@@ -139,6 +139,12 @@ class UiSurfaceController extends ChangeNotifier {
   bool get recomputing => _publication.recomputing;
   bool get outdated => _publication.outdated;
   List<String> get publicationErrors => _publication.publicationErrors;
+
+  /// Only computed values carry freshness; facts are always the current bundle.
+  UiValueFreshness freshnessOf(BindingRef ref) =>
+      ref.kind == BindingKind.computed
+      ? _publication.freshnessOf(ref.id)
+      : UiValueFreshness.current;
   bool get isReadOnly {
     try {
       return readOnlyProbe?.call() ?? false;
@@ -163,6 +169,8 @@ class UiSurfaceController extends ChangeNotifier {
     }
     final request = _publication.beginRecompute();
     if (request == null) return UiPublishOutcome.disposed;
+    // Pending recompute makes the shown values previous before host work starts.
+    notifyListeners();
     final base = current;
     try {
       final input = UiRecomputeInput(
