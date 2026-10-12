@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import '../references.dart';
+import '../tool_status.dart';
 import 'guides.dart';
 import 'intent.dart';
 import 'plan.dart';
@@ -306,7 +307,16 @@ class UiPlanningRequest {
           : body;
       decoded = {
         'trustedToolResult': {
-          'status': 'notDisclosed',
+          if (ToolCallStatus.values.any(
+            (status) => status.name == result['status'],
+          ))
+            'status': result['status'],
+          if (result['executionId'] is String &&
+              RegExp(
+                r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+              ).hasMatch(result['executionId'] as String))
+            'executionId': result['executionId'],
+          'disclosure': 'notDisclosed',
           'summary': '未登记模型披露的工具内容已省略',
           'data': <String, Object?>{},
           for (final key in ['objectRefs', 'artifactRefs'])

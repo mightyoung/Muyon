@@ -7,17 +7,11 @@ import 'change_log.dart';
 import 'context.dart';
 import 'references.dart';
 import 'storage.dart';
+import 'tool_status.dart';
+
+export 'tool_status.dart';
 
 enum ToolAccessLevel { read, write, external }
-
-enum ToolCallStatus {
-  succeeded,
-  failed,
-  cancelled,
-  interrupted,
-  blocked,
-  invalidArguments,
-}
 
 class ToolCallRequest {
   ToolCallRequest({

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon_module_api/ui_contract.dart';
+import 'package:muyon_module_api/muyon_module_api.dart' show ToolCallStatus;
+import 'package:muyon_module_api/src/tool_status.dart' as lightweight;
 
 import 'ui/fixtures.dart';
 
@@ -49,6 +51,67 @@ UiPlanningRequest request(
 );
 
 void main() {
+  test(
+    'canonical lightweight tool status preserves public identity and metadata',
+    () {
+      expect(ToolCallStatus.values, lightweight.ToolCallStatus.values);
+      expect(ToolCallStatus.values.map((status) => status.name), [
+        'succeeded',
+        'failed',
+        'cancelled',
+        'interrupted',
+        'blocked',
+        'invalidArguments',
+      ]);
+      for (final status in ToolCallStatus.values) {
+        expect(ToolCallStatus.values.byName(status.name), same(status));
+        expect(status.index, lightweight.ToolCallStatus.values.indexOf(status));
+        const execution = '7c99ed46-7f80-4e9b-a2ed-206f3b87ed9d';
+        final r = request(
+          DataSnapshot(ref: ref, facts: {}),
+          messages: [
+            {
+              'role': 'tool',
+              'content': jsonEncode({
+                'trustedToolResult': {
+                  'status': status.name,
+                  'executionId': execution,
+                  'summary': 'RAW_SUMMARY',
+                  'data': {'notes': 'RAW_NOTES'},
+                },
+              }),
+            },
+          ],
+        );
+        final frame =
+            ((r.toJson()['conversationMessages'] as List).single as Map);
+        final body = jsonDecode(
+          frame['content'] as String,
+        )['trustedToolResult'];
+        expect(body['status'], status.name);
+        expect(body['executionId'], execution);
+        expect(body['disclosure'], 'notDisclosed');
+        expect(body['data'], isEmpty);
+        expect(jsonEncode(body), isNot(contains('RAW_')));
+      }
+      final unknown = request(
+        DataSnapshot(ref: ref, facts: {}),
+        messages: [
+          {
+            'role': 'tool',
+            'content': jsonEncode({
+              'status': 'UNKNOWN_PRIVATE_STATUS',
+              'executionId': 'PRIVATE_BAD_CONTROL_ID',
+            }),
+          },
+        ],
+      );
+      final text = jsonEncode(unknown.toJson());
+      expect(text, isNot(contains('UNKNOWN_PRIVATE_STATUS')));
+      expect(text, isNot(contains('PRIVATE_BAD_CONTROL_ID')));
+    },
+  );
+
   test('generic roletool data summary and unknown fields require host classification', () {
     const raw = 'DIRECT-UNCLASSIFIED-TOOL-NOTES-852cf';
     final snapshot = DataSnapshot(ref: ref, facts: {});

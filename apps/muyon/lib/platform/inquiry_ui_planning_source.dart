@@ -133,7 +133,7 @@ class InquiryUiPlanningSource {
           revocationRevision:
               host.foundation.database.raw
                       .select(
-                        'SELECT COALESCE(MAX(rowid),0) AS revision FROM assistant_grants WHERE revoked_at IS NOT NULL',
+                        "SELECT COALESCE(MAX(id),0) AS revision FROM assistant_grant_audit WHERE action='revoked'",
                       )
                       .single['revision']
                   as int,
