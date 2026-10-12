@@ -382,6 +382,11 @@ class AgentContext {
       messages,
       map,
       explicitUserContents: human,
+      hostResultContents: {
+        if (modelHostManualToolTask(task))
+          for (final message in modelTaskToolHistory(task, tools).messages)
+            if (message is Map) message['content'],
+      },
       hostSummaryContents: {?summary},
       summaryRequest: summaryRequest,
     );

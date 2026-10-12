@@ -14,6 +14,10 @@ import 'package:muyon/platform/grants/host_authorization_facts.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/models/openai_compat_provider.dart';
 
+import 'package:muyon/assistant/ui_planning.dart';
+import 'package:muyon_module_api/ui_contract.dart';
+import 'package:muyon_ui/dynamic_ui.dart';
+
 import 'support/agent_loop_fixture.dart';
 
 import 'package:muyon/assistant/model_tool_result_projection.dart';
@@ -55,6 +59,131 @@ AgentContext referenceContext(LoopFixture f) => AgentContext(
 );
 
 void main() {
+  test('actual manual tool result uses host origin rather than user role for model refs', () async {
+    const pinned = ObjectRef(
+      moduleId: 'inquiry',
+      objectType: 'project_item',
+      objectId: 'manual-c6',
+      contentDigest: 'MANUAL_RESULT_HOST_ROW_DIGEST_C6',
+    );
+    final f = await LoopFixture.open();
+    f.objects = [pinned];
+    f.addTool(
+      'manualrefs',
+      ToolEffect.read,
+      onCall: (_) async => ToolCallResult(
+        status: ToolCallStatus.succeeded,
+        summary: '本机完成',
+        objectRefs: [pinned],
+      ),
+    );
+    final agent = f.agent();
+    final c = await f.repo.createConversation();
+    final manual = await agent.startTool(
+      conversationId: c.id,
+      toolId: 'manualrefs',
+    );
+    expect(manual.state, PersonalTaskState.succeeded);
+    expect((manual.payload['messages'] as List).first['role'], 'user');
+    final ctx = referenceContext(f);
+    String? actualModelPrompt;
+    final harness = UiPlanningHarness(
+      repository: f.repo,
+      mode: UiPlanningMode.motivation,
+      modelHistory: (t) => modelTaskToolHistory(t, f.tools),
+      requestView: ctx.view,
+      modelReferences: ctx.modelReferences,
+      source: (_) async => UiPlanningHostState(
+        snapshot: DataSnapshot(
+          ref: const SnapshotRef('host-only', 1),
+          facts: {},
+        ),
+        intent: InteractionIntent(
+          id: 'intent',
+          purpose: 'display',
+          snapshotRef: const SnapshotRef('host-only', 1),
+        ),
+        currentView: UiCurrentView(surfaceId: 'surface', revision: 1),
+        catalog: library2UiCatalog,
+        allowedActionRefs: {},
+      ),
+      providers: {
+        UiPlanningMode.motivation: MotivationUiPlanningProvider((
+          _,
+          prompt,
+        ) async {
+          actualModelPrompt = prompt;
+          return '{"decision":"textOnly","reasonCode":"fixture","plan":null}';
+        }),
+      },
+    );
+    await harness.plan(manual.id);
+    expect(actualModelPrompt, isNotNull);
+    expect(actualModelPrompt, isNot(contains(pinned.contentDigest!)));
+    expect(actualModelPrompt, contains('mr1_'));
+    expect(
+      jsonEncode(f.repo.task(manual.id)!.payload['messages']),
+      contains(pinned.contentDigest!),
+    );
+    ctx.closeModelReferences();
+  });
+  test('actual manual tool attribution command cannot become planning model question', () async {
+    final f = await LoopFixture.open();
+    f.addTool(
+      'localquestion',
+      ToolEffect.read,
+      onCall: (_) async =>
+          ToolCallResult(status: ToolCallStatus.succeeded, summary: '本机完成'),
+    );
+    final agent = f.agent();
+    final c = await f.repo.createConversation();
+    final manual = await agent.startTool(
+      conversationId: c.id,
+      toolId: 'localquestion',
+      parameters: {'note': secret},
+    );
+    expect(manual.state, PersonalTaskState.succeeded);
+    expect(manual.payload['modelHostToolRequestText'], contains(secret));
+    String? actualModelPrompt;
+    final harness = UiPlanningHarness(
+      repository: f.repo,
+      mode: UiPlanningMode.motivation,
+      source: (_) async => UiPlanningHostState(
+        snapshot: DataSnapshot(
+          ref: const SnapshotRef('host-only', 1),
+          facts: {},
+        ),
+        intent: InteractionIntent(
+          id: 'intent',
+          purpose: 'display',
+          snapshotRef: const SnapshotRef('host-only', 1),
+        ),
+        currentView: UiCurrentView(surfaceId: 'surface', revision: 1),
+        catalog: library2UiCatalog,
+        allowedActionRefs: {},
+      ),
+      providers: {
+        UiPlanningMode.motivation: MotivationUiPlanningProvider((
+          _,
+          prompt,
+        ) async {
+          actualModelPrompt = prompt;
+          return '{"decision":"textOnly","reasonCode":"fixture","plan":null}';
+        }),
+      },
+    );
+    await harness.plan(manual.id);
+    expect(actualModelPrompt, isNotNull);
+    expect(actualModelPrompt, isNot(contains(secret)));
+    expect(
+      f.repo.task(manual.id)!.payload['modelHostToolRequestText'],
+      contains(secret),
+    );
+    expect(
+      f.repo.messages(c.id).where((m) => m.role == 'user').single.content,
+      contains(secret),
+    );
+  });
   test('C6 actual context keeps preview aliases stable and invalidates scope pins and authority', () async {
     const pinned = ObjectRef(
       moduleId: 'inquiry',

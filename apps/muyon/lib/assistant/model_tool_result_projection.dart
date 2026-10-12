@@ -93,6 +93,7 @@ ModelToolHistory modelToolHistory(
   List<Object?> messages, {
   Map<String, Object?>? Function(ToolCallResult, Object?)? projectedReceipt,
   bool Function(int, Map)? explicitUserMessage,
+  bool Function(int, Map)? hostResultMessage,
 }) {
   var legacy = false;
   final projected = <Object?>[];
@@ -108,7 +109,8 @@ ModelToolHistory modelToolHistory(
         message['role'] == 'tool' ||
         (message['role'] == 'user' &&
             explicitUserMessage?.call(index, message) != true &&
-            _followsCompatibilityCall(messages, index));
+            (_followsCompatibilityCall(messages, index) ||
+                hostResultMessage?.call(index, message) == true));
     if (hostResult) {
       var recognized = false;
       if (content is String) {
@@ -182,9 +184,15 @@ ModelToolHistory modelToolHistory(
 
 /// Only host-frozen execution metadata can associate a model message with a
 /// registered producer. Result refs and result-supplied tags cannot grant it.
+bool modelHostManualToolTask(PersonalTask task) =>
+    task.payload['strategyId'] == 'manual' &&
+    task.profileId == null &&
+    task.payload['toolCall'] is Map;
+
 ModelToolHistory modelTaskToolHistory(PersonalTask task, ToolRegistry tools) =>
     modelToolHistory(
       task.payload['messages'] as List? ?? const [],
+      hostResultMessage: (_, _) => modelHostManualToolTask(task),
       explicitUserMessage: (index, message) =>
           message['role'] == 'user' &&
           ((task.payload['uiPlanningInternal'] != true &&
@@ -267,6 +275,7 @@ List<Object?> modelReferenceMessages(
   ModelReferenceMap references, {
   Set<Object?> explicitUserContents = const {},
   Set<Object?> hostSummaryContents = const {},
+  Set<Object?> hostResultContents = const {},
   bool summaryRequest = false,
 }) => [
   for (var i = 0; i < messages.length; i++)
@@ -279,8 +288,10 @@ List<Object?> modelReferenceMessages(
             summaryRequest ||
             hostSummaryContents.contains((messages[i] as Map)['content']),
         hostResult:
+            hostResultContents.contains((messages[i] as Map)['content']) ||
             (messages[i] as Map)['role'] == 'tool' ||
-            _followsCompatibilityCall(messages, i),
+            ((messages[i] as Map)['role'] == 'user' &&
+                _followsCompatibilityCall(messages, i)),
         human: explicitUserContents.contains((messages[i] as Map)['content']),
       )
     else
