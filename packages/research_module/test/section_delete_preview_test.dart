@@ -209,8 +209,8 @@ void main() {
     ]) {
       expect(model, isNot(contains(secret)));
     }
-    expect(model, contains(preview.deleteDigest));
-    expect(model, contains('"evidenceId":"e"'));
+    expect(model, isNot(contains(preview.deleteDigest)));
+    expect(model, isNot(contains('"evidenceId":"e"')));
   });
 
   test('read preview including failures and freshness writes no business rows logs or ledgers', () {
