@@ -340,6 +340,11 @@ void main() {
       );
       final prepared = await prepare(['n-d']);
       expect(rows(prepared).single['paper_rev'], 1);
+      final entryIds = prepared.sources
+          .where((r) => r.objectType == 'entry')
+          .map((r) => r.objectId);
+      expect(entryIds, contains('paper-local'));
+      expect(entryIds, isNot(contains('paper-new')));
       expect(rows(prepared).single['text_binding']['path'], 'd.md');
     },
   );
