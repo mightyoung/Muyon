@@ -14,3 +14,5 @@ export 'src/exchange/research_package.dart';
 export 'src/reader/reader_page.dart' show ReaderPage;
 
 export 'src/search/document_search_source.dart';
+
+export 'src/core/claim_draft_preparation.dart';

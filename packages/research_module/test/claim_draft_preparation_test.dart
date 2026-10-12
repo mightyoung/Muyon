@@ -5,7 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 import 'package:path/path.dart' as p;
-import 'package:research_module/src/core/exchange.dart';
+import 'package:research_module/src/core/claim_draft_preparation.dart';
 import 'package:research_module/src/core/store.dart';
 
 String digest(Object? value) =>
@@ -134,32 +134,28 @@ void main() {
     );
   }
 
-  // RED driver invokes the real existing exporter; no production stub.
-  // Implementation replaces this driver, retaining the behavioral assertions.
-  Future<LocalExportPreparation> prepare(
+  Future<ResearchClaimDraftPreparation> prepare(
     List<String> ids, {
     ResolvedAssistantScope? selected,
-  }) async {
-    final result = await ResearchExchange(store)
-        .exportClaimDrafts('p', ids, p.join(temp.path, 'legacy-out'), now: at);
-    final bytes = File(result.path).readAsBytesSync();
-    return LocalExportPreparation(
-      kind: LocalExportKind.claimDrafts,
-      formatVersion: 'research-claim-drafts-v2',
-      mimeType: 'application/x-ndjson',
-      generatedAt: at,
-      bytes: bytes,
-      sha256: sha256.convert(bytes).toString(),
-      sources: const [],
-      dedupedObjectCount: result.rows.length,
-      exclusions: [
-        for (final e in result.skipped) LocalExportExclusion(e.$1, e.$2),
-      ],
-      warnings: const [],
-      preparationVersion: 1,
-      manifestDigest: digest(result.rows),
-    );
-  }
+  }) =>
+      ResearchClaimDraftPreparer(
+        store,
+        readDocument: (ref) async {
+          reads++;
+          await duringRead?.call();
+          final doc = store
+              .documents('p')
+              .singleWhere((d) => d.id == ref.objectId);
+          return File(doc.absolutePath).readAsBytesSync();
+        },
+      ).prepareClaimDrafts(
+        projectId: 'p',
+        noteIds: ids,
+        scope:
+            selected ??
+            scope(ids.where((id) => id.isNotEmpty).toSet().toList()),
+        generatedAt: at,
+      );
 
   List<Map<String, dynamic>> rows(LocalExportPreparation prepared) =>
       const LineSplitter()
@@ -183,12 +179,6 @@ void main() {
           .map((r) => Map<String, Object?>.from(r))
           .toList(),
   };
-  List<String> files() =>
-      Directory(store.rootPath)
-          .listSync(recursive: true)
-          .map((f) => p.relative(f.path, from: store.rootPath))
-          .toList()
-        ..sort();
   Future<void> refuses(
     List<String> ids, {
     ResolvedAssistantScope? selected,
@@ -210,6 +200,7 @@ void main() {
             temp.path,
           ).listSync(recursive: true).map((f) => f.path).toList()..sort();
       final prepared = await prepare(['n-d', 'n-pdf']);
+      expect(reads, 2);
       expect(state(), before);
       final afterFiles = Directory(
         temp.path,
