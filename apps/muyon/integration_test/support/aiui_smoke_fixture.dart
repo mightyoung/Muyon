@@ -10,7 +10,6 @@ import 'package:muyon/screens/assistant_page.dart';
 import 'package:muyon/screens/platform_shell.dart';
 import 'package:muyon/services/models/profile_repository.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
-import 'package:muyon_module_api/ui_contract.dart';
 import 'package:path/path.dart' as p;
 
 import 'aiui_smoke_config.dart';
@@ -42,10 +41,9 @@ SmokePreflight inspectSmokeProduction(
   UiPlanningHostState? state,
 ) {
   final caps = <String, bool?>{
-    'production_stream':
-        host.personalAgent.uiPlanningSource != null &&
-        host.personalAgent.presentationPreference != null &&
-        host.personalAgent.currentUiPlanningMode == UiPlanningMode.motivation,
+    // Source/preference/mode presence is structural wiring, not observation
+    // of the actual selected provider or a production stream request.
+    'production_stream': null,
     'library_2': state?.catalog.version == 'library-2',
     'presentation_policy': host.personalAgent.presentationPreference != null,
     // These observations need a production owner and data interface, neither
@@ -60,7 +58,7 @@ SmokePreflight inspectSmokeProduction(
     'manual_checkpoint': null,
   };
   final failures = <SmokeFailureCode>[
-    if (!caps['production_stream']! || !caps['library_2']!)
+    if (caps['production_stream'] == false || !caps['library_2']!)
       SmokeFailureCode.productionStreamWiringMissing,
     if (!caps['presentation_policy']!)
       SmokeFailureCode.presentationPolicyMissing,

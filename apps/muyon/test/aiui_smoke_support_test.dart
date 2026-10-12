@@ -298,6 +298,24 @@ void main() {
     expect(six['first_text_median_ms'], isNull);
     expect(six['first_card_median_ms'], isNull);
     expect(six['failure_code'], 'latency_samples_insufficient');
+    final five =
+        filterSmokeEvidence({
+              'latency': {
+                'samples': [
+                  for (var index = 0; index < 5; index++)
+                    {
+                      'first_text_visible_ms': 10 + index,
+                      'first_card_visible_ms': 20 + index,
+                    },
+                ],
+              },
+            })['latency']
+            as Map;
+    expect(five['sample_count'], 5);
+    expect(five['complete'], isTrue);
+    expect(five['first_text_median_ms'], 12);
+    expect(five['first_card_median_ms'], 22);
+    expect(five['failure_code'], isNull);
   });
   test(
     'file, reportData and chunks publish the same filtered object',

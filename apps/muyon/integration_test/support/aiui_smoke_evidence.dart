@@ -85,6 +85,8 @@ Map<String, Object?> filterSmokeEvidence(Map<String, Object?> raw) {
   final preflight = _map(raw['preflight']);
   final latency = _map(raw['latency']);
   final inputSamples = latency['samples'];
+  final originalSampleCount = inputSamples is List ? inputSamples.length : 0;
+  final exactlyFiveSamples = originalSampleCount == 5;
   final samples = <Map<String, Object?>>[];
   if (inputSamples is List) {
     for (var index = 0; index < 5 && index < inputSamples.length; index++) {
@@ -176,7 +178,7 @@ Map<String, Object?> filterSmokeEvidence(Map<String, Object?> raw) {
       : null;
   final summary = _map(raw['summary']);
   final complete =
-      samples.length == 5 &&
+      exactlyFiveSamples &&
       texts.every((value) => value != null) &&
       cards.every((value) => value != null);
   final allCasesPresent = smokeCaseIds.every(
@@ -247,12 +249,34 @@ Map<String, Object?> filterSmokeEvidence(Map<String, Object?> raw) {
     'cases': cases,
     'latency': {
       'samples': samples,
-      'sample_count': samples.length,
-      'valid_text_samples': texts.whereType<num>().length,
-      'valid_card_samples': cards.whereType<num>().length,
+      // Output remains bounded, but completeness and denominators refer to
+      // the original attempts. A failed sixth attempt cannot disappear.
+      'sample_count': originalSampleCount,
+      'retained_sample_count': samples.length,
+      'valid_text_samples': inputSamples is List
+          ? inputSamples
+                .where(
+                  (row) => _number(_map(row)['first_text_visible_ms']) != null,
+                )
+                .length
+          : 0,
+      'valid_card_samples': inputSamples is List
+          ? inputSamples
+                .where(
+                  (row) => _number(_map(row)['first_card_visible_ms']) != null,
+                )
+                .length
+          : 0,
       'complete': complete,
-      'first_text_median_ms': exactFiveMedian(texts),
-      'first_card_median_ms': exactFiveMedian(cards),
+      'first_text_median_ms': exactlyFiveSamples
+          ? exactFiveMedian(texts)
+          : null,
+      'first_card_median_ms': exactlyFiveSamples
+          ? exactFiveMedian(cards)
+          : null,
+      'failure_code': complete
+          ? null
+          : SmokeFailureCode.latencySamplesInsufficient.code,
       'threshold_conclusion': 'not_assessed',
     },
     'manual_checkpoint': {

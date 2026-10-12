@@ -97,7 +97,9 @@ final class AiuiSmokeProbe {
   AiuiSmokeProbe() : _clock = (Stopwatch()..start());
   final Stopwatch _clock;
   Duration get now => _clock.elapsed;
-  final samples = List.generate(5, (index) => SmokeLatencySample(index + 1));
+  final List<SmokeLatencySample> samples = List.unmodifiable(
+    List.generate(5, (index) => SmokeLatencySample(index + 1)),
+  );
 
   bool accept(int index, String task, Duration at) =>
       !samples.any((sample) => sample.taskIdentity == task) &&
