@@ -343,4 +343,142 @@ void main() {
       expect(row['material_access'], 'unchecked');
     }
   });
+  test('schema version must be integer two, not a numeric lookalike', () async {
+    store.db.execute(
+      "UPDATE entries SET data=json_set(data,'\$.schema_version',2.0) WHERE id='source-local'",
+    );
+    await refuses(['n-d']);
+  });
+
+  test('typed all-ineligible failure freezes each exclusion', () async {
+    ClaimDraftPreparationFailure? error;
+    try {
+      await prepare(['n-unbound']);
+    } on ClaimDraftPreparationFailure catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error!.code, 'no_exportable_notes');
+    expect(error.exclusions.single.id, 'n-unbound');
+    expect(() => error!.exclusions.clear(), throwsUnsupportedError);
+  });
+
+  for (final mutation in ['note', 'binding', 'delete', 'paper', 'project']) {
+    test(
+      'after awaited read rechecks $mutation source state and refuses',
+      () async {
+        duringRead = () async {
+          switch (mutation) {
+            case 'note':
+              store.db.execute(
+                "UPDATE notes SET text='changed in callback' WHERE id='n-d'",
+              );
+            case 'binding':
+              store.db.execute(
+                "INSERT INTO paper_bindings VALUES('d','z-second',1,'manual',1,0)",
+              );
+            case 'delete':
+              store.db.execute("DELETE FROM notes WHERE id='n-d'");
+            case 'paper':
+              store.db.execute(
+                "UPDATE entries SET title='changed in callback' WHERE id='paper-local'",
+              );
+            case 'project':
+              store.db.execute(
+                "UPDATE projects SET layout='research-skill-v1' WHERE id='p'",
+              );
+          }
+        };
+        ClaimDraftPreparationFailure? error;
+        try {
+          await prepare(['n-d']);
+        } on ClaimDraftPreparationFailure catch (e) {
+          error = e;
+        }
+        expect(error?.code, 'source_changed_during_preparation');
+        expect(reads, 1);
+      },
+    );
+  }
+
+  test('partial proposal freezes explicit selection inclusion and nested draft rows', () async {
+    final prepared = await prepare(['n-d', 'n-unbound']);
+    expect(prepared.selectedNoteIds, ['n-d', 'n-unbound']);
+    expect(prepared.includedNoteIds, ['n-d']);
+    expect(prepared.objectCounts, {'claimDraft': 1});
+    expect(() => prepared.selectedNoteIds.clear(), throwsUnsupportedError);
+    expect(
+      () => prepared.rows.single['workbench'] = ['fake'],
+      throwsUnsupportedError,
+    );
+    expect(
+      () => (prepared.rows.single['workbench'] as Map)['quote'] = 'fake',
+      throwsUnsupportedError,
+    );
+  });
+
+  test(
+    'two notes on one document read the same pinned bytes only once',
+    () async {
+      store.db.execute(
+        "INSERT INTO notes(id,document_id,locator,text,quoted_text) VALUES('n-second','d','二','另一条','原始引文')",
+      );
+      final prepared = await prepare(['n-d', 'n-second']);
+      expect(reads, 1);
+      expect(
+        prepared.sources.where((s) => s.objectType == 'document'),
+        hasLength(1),
+      );
+      expect(prepared.rows.map((r) => r['id']).toSet(), hasLength(2));
+    },
+  );
+
+  test(
+    'duplicate exact source revision is an exclusion, not first match',
+    () async {
+      store.db.execute(
+        "INSERT INTO entries SELECT 'duplicate-source',project_id,kind,title,data FROM entries WHERE id='source-local'",
+      );
+      await refuses(['n-d']);
+      expect(reads, 0);
+    },
+  );
+
+  test(
+    'missing source bytes produce an exclusion without file writes',
+    () async {
+      File(p.join(store.rootPath, 'd.md')).deleteSync();
+      final before = state();
+      final prepared = await prepare(['n-d', 'n-pdf']);
+      expect(prepared.exclusions.single.reason, 'source_unavailable');
+      expect(state(), before);
+    },
+  );
+
+  test(
+    'untrusted snapshot paths never enter the document reader contract',
+    () async {
+      final seen = <ObjectRef>[];
+      final prepared =
+          await ResearchClaimDraftPreparer(
+            store,
+            readDocument: (ref) async {
+              seen.add(ref);
+              return utf8.encode('原始引文，中文材料。');
+            },
+          ).prepareClaimDrafts(
+            projectId: 'p',
+            noteIds: ['n-d'],
+            scope: scope(['n-d']),
+            generatedAt: at,
+          );
+      expect(prepared.rows, hasLength(1));
+      expect(seen.single.objectId, 'd');
+      expect(
+        seen.single.contentDigest,
+        sha256.convert(utf8.encode('原始引文，中文材料。')).toString(),
+      );
+      expect(seen.single.revisionRef, isNull);
+    },
+  );
 }
