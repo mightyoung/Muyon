@@ -1,0 +1,1205 @@
+# 快照写链：q4w.x → eka.e/f → t4w.d → t4w.e → eka.x(消息) → t4w.b → eka.w(头)
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### 表结构 (vl7)
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/vl7.java 行 50-53
+    50|                 x220.j(rwsVar, "CREATE TABLE IF NOT EXISTS `executed_client_tools` (`account_id` TEXT NOT NULL, `conversation_id` TEXT NOT NULL, `tool_use_id` TEXT NOT NULL, `executed_at` INTEGER NOT NULL, PRIMARY KEY(`a
+    51|                 x220.j(rwsVar, "CREATE TABLE IF NOT EXISTS `snapshot_headers` (`account_id` TEXT NOT NULL, `conversation_id` TEXT NOT NULL, `leaf_message_id` TEXT NOT NULL, `updated_at` INTEGER NOT NULL, `newest_message_
+    52|                 x220.j(rwsVar, "CREATE TABLE IF NOT EXISTS `snapshot_messages` (`account_id` TEXT NOT NULL, `conversation_id` TEXT NOT NULL, `message_id` TEXT NOT NULL, `parent_message_id` TEXT, `fingerprint` INTEGER NOT
+    53|                 x220.j(rwsVar, "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
+
+### INSERT 语句 (zm4)
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/zm4.java 行 76-90
+    76|     @Override // defpackage.pab
+    77|     public final String i() {
+    78|         switch (this.h) {
+    79|             case 0:
+    80|                 return "INSERT INTO `cachedArtifacts` (`artifact_id`,`row_json`) VALUES (?,?)";
+    81|             case 1:
+    82|                 return "INSERT INTO `cachedCoworkSessions` (`session_id`,`row_json`) VALUES (?,?)";
+    83|             case 2:
+    84|                 return "INSERT OR IGNORE INTO `executed_client_tools` (`account_id`,`conversation_id`,`tool_use_id`,`executed_at`) VALUES (?,?,?,?)";
+    85|             case 3:
+    86|                 return "INSERT INTO `snapshot_headers` (`account_id`,`conversation_id`,`leaf_message_id`,`updated_at`,`newest_message_at`,`project_id`,`facts`,`oldest_known_message_id`) VALUES (?,?,?,?,?,?,?,?)";
+    87|             default:
+    88|                 return "INSERT INTO `snapshot_messages` (`account_id`,`conversation_id`,`message_id`,`parent_message_id`,`fingerprint`,`complete_blocks`,`body`) VALUES (?,?,?,?,?,?,?)";
+    89|         }
+    90|     }
+
+### jka DAO 绑定
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/jka.java 行 13-23
+    13|     public jka(zds zdsVar) {
+    14|         this.a = zdsVar;
+    15|         byte b = 2;
+    16|         this.b = new zm4(b);
+    17|         byte b2 = 3;
+    18|         zm4 zm4Var = new zm4(b2);
+    19|         an4 an4Var = new an4(b);
+    20|         byte b3 = 0;
+    21|         this.c = new ond(zm4Var, an4Var, b3);
+    22|         this.d = new ond(new zm4((byte) 4), new an4(b2), b3);
+    23|     }
+
+### jka.d
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/jka.java 行 200-213
+   200|     }
+   202|     public /* bridge */ /* synthetic */ Object a(String str, String str2, w7a w7aVar) {
+   203|         return b(this, str, str2, w7aVar);
+   204|     }
+   206|     public final Object d(y7a y7aVar, String str, String str2, List list) {
+   207|         StringBuilder sb = new StringBuilder();
+   208|         sb.append("SELECT message_id, fingerprint, complete_blocks FROM snapshot_messages WHERE account_id = ? AND conversation_id = ? AND message_id IN (");
+   209|         x220.e(list.size(), sb);
+   210|         sb.append(")");
+   211|         return po1.S(y7aVar, new xo1(sb.toString(), str, str2, list, (w7a) null, (byte) 7), this.a, true, false);
+   212|     }
+
+### q4w.x smali: 入口门控
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/q4w.smali 行 600-690
+   600|     goto/16 :goto_2f
+   602|     :pswitch_6
+   603|     invoke-static/range {p1 .. p1}, Li0c;->T(Ljava/lang/Object;)V
+   605|     invoke-virtual {v4, v3, v2}, Leka;->s(Ljava/lang/String;Ljava/lang/String;)Z
+   607|     move-result v5
+   609|     sget-object v7, Lg5p;->y:Lg5p;
+   611|     if-eqz v5, :cond_0
+   613|     goto :goto_5
+   615|     :cond_0
+   616|     iget-object v5, v1, Lt4w;->d:Lomf;
+   618|     invoke-interface {v5}, Lomf;->a()Ljava/lang/Object;
+   620|     move-result-object v5
+   622|     move-object v13, v5
+   624|     check-cast v13, Lsga;
+   626|     if-nez v13, :cond_1
+   628|     goto :goto_5
+   630|     :cond_1
+   631|     iget-boolean v5, v13, Lsga;->a:Z
+   633|     if-eqz v5, :cond_2
+   635|     :goto_5
+   636|     return-object v7
+   638|     :cond_2
+   639|     new-instance v5, Lhar;
+   641|     invoke-direct {v5}, Ljava/lang/Object;-><init>()V
+   643|     iput-object v7, v5, Lhar;->v:Ljava/lang/Object;
+   645|     const-string v7, "persist conversation snapshot failed"
+   647|     iget-object v8, v0, Lq4w;->O:Lp4w;
+   649|     iget-object v9, v0, Lq4w;->P:Ljava/lang/String;
+   651|     iget-object v10, v0, Lq4w;->Q:Ljava/util/List;
+   653|     iget-object v14, v0, Lq4w;->R:Ljava/lang/String;
+   655|     iget-object v15, v0, Lq4w;->S:Lsga;
+   657|     iget-object v6, v0, Lq4w;->T:Ljava/lang/Long;
+   659|     if-nez v8, :cond_4
+   661|     if-eqz v9, :cond_3
+   663|     goto :goto_6
+   665|     :cond_3
+   666|     move-object v4, v6
+   668|     const/4 v2, 0x0
+   670|     const/4 v3, 0x1
+   672|     const/4 v6, 0x0
+   674|     goto :goto_9
+   676|     :cond_4
+   677|     :goto_6
+   678|     :try_start_6
+   679|     iput-object v13, v0, Lq4w;->z:Lsga;
+   680|     :try_end_6
+   681|     .catch Ljava/util/concurrent/CancellationException; {:try_start_6 .. :try_end_6} :catch_20
+   682|     .catch Ljava/lang/Exception; {:try_start_6 .. :try_end_6} :catch_1f
+   683|     .catch Ljava/lang/OutOfMemoryError; {:try_start_6 .. :try_end_6} :catch_1d
+   685|     :try_start_7
+   686|     iput-object v5, v0, Lq4w;->A:Lhar;
+   688|     iput-object v7, v0, Lq4w;->B:Ljava/lang/String;
+   690|     iput-object v8, v0, Lq4w;->C:Ljava/lang/Object;
+
+### q4w.x smali: 读头/叶/过滤 pending
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/q4w.smali 行 690-1000
+   690|     iput-object v8, v0, Lq4w;->C:Ljava/lang/Object;
+   692|     iput-object v9, v0, Lq4w;->D:Ljava/lang/Object;
+   694|     iput-object v1, v0, Lq4w;->E:Ljava/lang/Object;
+   696|     iput-object v10, v0, Lq4w;->F:Ljava/lang/Object;
+   698|     iput-object v14, v0, Lq4w;->G:Ljava/lang/Object;
+   700|     iput-object v15, v0, Lq4w;->H:Ljava/lang/Object;
+   702|     iput-object v6, v0, Lq4w;->I:Ljava/lang/Object;
+   704|     move-object/from16 v19, v1
+   706|     const/4 v1, 0x1
+   708|     iput-byte v1, v0, Lq4w;->M:B
+   709|     :try_end_7
+   710|     .catch Ljava/util/concurrent/CancellationException; {:try_start_7 .. :try_end_7} :catch_20
+   711|     .catch Ljava/lang/Exception; {:try_start_7 .. :try_end_7} :catch_1e
+   712|     .catch Ljava/lang/OutOfMemoryError; {:try_start_7 .. :try_end_7} :catch_1d
+   714|     :try_start_8
+   715|     invoke-virtual {v4}, Leka;->h()Ljka;
+   717|     move-result-object v4
+   719|     iget-object v4, v4, Ljka;->a:Lzds;
+   721|     new-instance v1, Lika;
+   722|     :try_end_8
+   723|     .catch Ljava/util/concurrent/CancellationException; {:try_start_8 .. :try_end_8} :catch_20
+   724|     .catch Ljava/lang/Exception; {:try_start_8 .. :try_end_8} :catch_1c
+   725|     .catch Ljava/lang/OutOfMemoryError; {:try_start_8 .. :try_end_8} :catch_1b
+   727|     move-object/from16 p1, v5
+   729|     move-object/from16 v20, v6
+   731|     const/4 v5, 0x3
+   733|     const/4 v6, 0x0
+   735|     :try_start_9
+   736|     invoke-direct {v1, v3, v2, v6, v5}, Lika;-><init>(Ljava/lang/String;Ljava/lang/String;Lw7a;B)V
+   738|     const/4 v2, 0x0
+   740|     const/4 v3, 0x1
+   742|     invoke-static {v0, v1, v4, v3, v2}, Lpo1;->S(Lw7a;Lenf;Lzds;ZZ)Ljava/lang/Object;
+   744|     move-result-object v1
+   745|     :try_end_9
+   746|     .catch Ljava/util/concurrent/CancellationException; {:try_start_9 .. :try_end_9} :catch_20
+   747|     .catch Ljava/lang/Exception; {:try_start_9 .. :try_end_9} :catch_1a
+   748|     .catch Ljava/lang/OutOfMemoryError; {:try_start_9 .. :try_end_9} :catch_19
+   750|     if-ne v1, v12, :cond_5
+   752|     :goto_7
+   753|     move-object v8, v12
+   755|     goto/16 :goto_27
+   757|     :cond_5
+   758|     move-object v4, v10
+   760|     move-object/from16 v5, v19
+   762|     move-object/from16 v10, p1
+   764|     :goto_8
+   765|     :try_start_a
+   766|     check-cast v1, Lw4w;
+   767|     :try_end_a
+   768|     .catch Ljava/util/concurrent/CancellationException; {:try_start_a .. :try_end_a} :catch_20
+   769|     .catch Ljava/lang/Exception; {:try_start_a .. :try_end_a} :catch_18
+   770|     .catch Ljava/lang/OutOfMemoryError; {:try_start_a .. :try_end_a} :catch_17
+   772|     move-object v6, v1
+   774|     move-object v1, v5
+   776|     move-object v5, v10
+   778|     move-object v10, v4
+   780|     move-object/from16 v4, v20
+   782|     :goto_9
+   783|     if-eqz v8, :cond_7
+   785|     if-eqz v6, :cond_6
+   787|     :try_start_b
+   788|     invoke-virtual {v1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+   790|     invoke-static {v6}, Lt4w;->g(Lw4w;)Ldxw;
+   792|     move-result-object v17
+   794|     move-object/from16 v2, v17
+   796|     goto :goto_c
+   798|     :goto_a
+   799|     move-object v9, v0
+   801|     move-object v2, v5
+   803|     move-object v10, v7
+   805|     goto/16 :goto_0
+   807|     :goto_b
+   808|     move-object v2, v5
+   810|     goto/16 :goto_4
+   812|     :cond_6
+   813|     const/4 v2, 0x0
+   815|     :goto_c
+   816|     iget-object v3, v8, Lp4w;->a:Ldxw;
+   818|     invoke-static {v2, v3}, Ln7i;->l(Ljava/lang/Object;Ljava/lang/Object;)Z
+   820|     move-result v2
+   822|     if-nez v2, :cond_7
+   824|     sget-object v0, Lg5p;->w:Lg5p;
+   826|     iput-object v0, v5, Lhar;->v:Ljava/lang/Object;
+   828|     goto/16 :goto_30
+   830|     :catch_a
+   831|     move-exception v0
+   833|     goto :goto_a
+   835|     :catch_b
+   836|     move-exception v0
+   838|     goto :goto_b
+   840|     :cond_7
+   841|     if-eqz v8, :cond_8
+   843|     iget-object v2, v8, Lp4w;->b:Ljava/lang/String;
+   845|     goto :goto_d
+   847|     :cond_8
+   848|     const/4 v2, 0x0
+   850|     :goto_d
+   851|     if-eqz v2, :cond_9
+   853|     iget-object v2, v8, Lp4w;->b:Ljava/lang/String;
+   855|     invoke-virtual {v1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+   857|     invoke-static {v10, v2, v6}, Lt4w;->c(Ljava/util/List;Ljava/lang/String;Lw4w;)Z
+   859|     move-result v2
+   861|     if-nez v2, :cond_9
+   863|     sget-object v0, Lg5p;->x:Lg5p;
+   865|     iput-object v0, v5, Lhar;->v:Ljava/lang/Object;
+   866|     :try_end_b
+   867|     .catch Ljava/util/concurrent/CancellationException; {:try_start_b .. :try_end_b} :catch_20
+   868|     .catch Ljava/lang/Exception; {:try_start_b .. :try_end_b} :catch_b
+   869|     .catch Ljava/lang/OutOfMemoryError; {:try_start_b .. :try_end_b} :catch_a
+   871|     goto/16 :goto_30
+   873|     :cond_9
+   874|     :try_start_c
+   875|     invoke-virtual {v1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+   877|     invoke-static {v14, v10}, Lt4w;->a(Ljava/lang/String;Ljava/util/List;)Ljava/lang/String;
+   879|     move-result-object v2
+   880|     :try_end_c
+   881|     .catch Ljava/util/concurrent/CancellationException; {:try_start_c .. :try_end_c} :catch_20
+   882|     .catch Ljava/lang/Exception; {:try_start_c .. :try_end_c} :catch_16
+   883|     .catch Ljava/lang/OutOfMemoryError; {:try_start_c .. :try_end_c} :catch_e
+   885|     iget-object v3, v1, Lt4w;->b:Ljava/lang/String;
+   887|     iget-object v8, v1, Lt4w;->a:Ljava/lang/String;
+   889|     if-nez v2, :cond_a
+   891|     goto/16 :goto_30
+   893|     :cond_a
+   894|     :try_start_d
+   895|     new-instance v14, Ljava/util/ArrayList;
+   897|     invoke-direct {v14}, Ljava/util/ArrayList;-><init>()V
+   899|     invoke-interface {v10}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+   901|     move-result-object v10
+   903|     :goto_e
+   904|     invoke-interface {v10}, Ljava/util/Iterator;->hasNext()Z
+   906|     move-result v19
+   908|     if-eqz v19, :cond_c
+   910|     move-object/from16 p1, v10
+   912|     invoke-interface/range {p1 .. p1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+   914|     move-result-object v10
+   915|     :try_end_d
+   916|     .catch Ljava/util/concurrent/CancellationException; {:try_start_d .. :try_end_d} :catch_20
+   917|     .catch Ljava/lang/Exception; {:try_start_d .. :try_end_d} :catch_f
+   918|     .catch Ljava/lang/OutOfMemoryError; {:try_start_d .. :try_end_d} :catch_e
+   920|     move-object/from16 v19, v11
+   922|     :try_start_e
+   923|     move-object v11, v10
+   925|     check-cast v11, Liml;
+   927|     iget-object v11, v11, Liml;->a:Lsjl;
+   929|     iget-boolean v11, v11, Lsjl;->i:Z
+   931|     if-nez v11, :cond_b
+   933|     invoke-virtual {v14, v10}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+   934|     :try_end_e
+   935|     .catch Ljava/util/concurrent/CancellationException; {:try_start_e .. :try_end_e} :catch_20
+   936|     .catch Ljava/lang/Exception; {:try_start_e .. :try_end_e} :catch_d
+   937|     .catch Ljava/lang/OutOfMemoryError; {:try_start_e .. :try_end_e} :catch_c
+   939|     :cond_b
+   940|     move-object/from16 v10, p1
+   942|     move-object/from16 v11, v19
+   944|     goto :goto_e
+   946|     :catch_c
+   947|     move-exception v0
+   949|     :goto_f
+   950|     move-object v9, v0
+   952|     move-object v2, v5
+   954|     goto/16 :goto_2
+   956|     :catch_d
+   957|     move-exception v0
+   959|     :goto_10
+   960|     move-object v2, v5
+   962|     :goto_11
+   963|     move-object v10, v7
+   965|     :goto_12
+   966|     move-object/from16 v11, v19
+   968|     goto/16 :goto_2f
+   970|     :catch_e
+   971|     move-exception v0
+   973|     move-object/from16 v19, v11
+   975|     goto :goto_f
+   977|     :catch_f
+   978|     move-exception v0
+   980|     move-object/from16 v19, v11
+   982|     goto :goto_b
+   984|     :cond_c
+   985|     move-object/from16 v19, v11
+   987|     iget-object v10, v1, Lt4w;->c:Leka;
+   989|     if-nez v9, :cond_e
+   991|     :try_start_f
+   992|     iput-object v13, v0, Lq4w;->z:Lsga;
+   994|     iput-object v5, v0, Lq4w;->A:Lhar;
+   996|     iput-object v7, v0, Lq4w;->B:Ljava/lang/String;
+   998|     iput-object v9, v0, Lq4w;->C:Ljava/lang/Object;
+  1000|     iput-object v1, v0, Lq4w;->D:Ljava/lang/Object;
+
+### q4w.x smali: 读指纹/根校验/cut 校验
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/q4w.smali 行 1000-1350
+  1000|     iput-object v1, v0, Lq4w;->D:Ljava/lang/Object;
+  1002|     iput-object v15, v0, Lq4w;->E:Ljava/lang/Object;
+  1004|     iput-object v4, v0, Lq4w;->F:Ljava/lang/Object;
+  1006|     iput-object v6, v0, Lq4w;->G:Ljava/lang/Object;
+  1008|     iput-object v14, v0, Lq4w;->H:Ljava/lang/Object;
+  1010|     iput-object v2, v0, Lq4w;->I:Ljava/lang/Object;
+  1012|     const/4 v11, 0x2
+  1014|     iput-byte v11, v0, Lq4w;->M:B
+  1016|     invoke-virtual {v10, v8, v3, v0}, Leka;->e(Ljava/lang/String;Ljava/lang/String;Ly7a;)Ljava/io/Serializable;
+  1018|     move-result-object v3
+  1020|     if-ne v3, v12, :cond_d
+  1022|     goto/16 :goto_7
+  1024|     :cond_d
+  1025|     move-object v8, v1
+  1027|     move-object v1, v2
+  1029|     move-object v10, v13
+  1031|     move-object v2, v14
+  1033|     :goto_13
+  1034|     check-cast v3, Ljava/util/Map;
+  1036|     move-object v11, v9
+  1038|     move-object v9, v8
+  1040|     move-object v8, v12
+  1042|     goto/16 :goto_17
+  1044|     :cond_e
+  1045|     new-instance v11, Ljava/util/ArrayList;
+  1047|     move-object/from16 p1, v3
+  1049|     move-object/from16 v20, v12
+  1051|     const/16 v12, 0xa
+  1053|     invoke-static {v14, v12}, Lt49;->g0(Ljava/lang/Iterable;I)I
+  1055|     move-result v3
+  1057|     invoke-direct {v11, v3}, Ljava/util/ArrayList;-><init>(I)V
+  1059|     invoke-virtual {v14}, Ljava/util/ArrayList;->size()I
+  1061|     move-result v3
+  1063|     const/4 v12, 0x0
+  1065|     :goto_14
+  1066|     if-ge v12, v3, :cond_f
+  1068|     invoke-virtual {v14, v12}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
+  1070|     move-result-object v21
+  1072|     add-int/lit8 v12, v12, 0x1
+  1074|     move/from16 v22, v3
+  1076|     move-object/from16 v3, v21
+  1078|     check-cast v3, Liml;
+  1080|     iget-object v3, v3, Liml;->a:Lsjl;
+  1082|     iget-object v3, v3, Lsjl;->a:Ljava/lang/String;
+  1084|     invoke-virtual {v11, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+  1086|     move/from16 v3, v22
+  1088|     goto :goto_14
+  1090|     :cond_f
+  1091|     new-instance v3, Ljava/util/ArrayList;
+  1093|     invoke-direct {v3}, Ljava/util/ArrayList;-><init>()V
+  1095|     invoke-virtual {v14}, Ljava/util/ArrayList;->size()I
+  1097|     move-result v12
+  1099|     move-object/from16 v21, v8
+  1101|     const/4 v8, 0x0
+  1103|     :goto_15
+  1104|     if-ge v8, v12, :cond_12
+  1106|     invoke-virtual {v14, v8}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
+  1108|     move-result-object v22
+  1110|     add-int/lit8 v8, v8, 0x1
+  1112|     move/from16 v23, v8
+  1114|     move-object/from16 v8, v22
+  1116|     check-cast v8, Liml;
+  1118|     iget-object v8, v8, Liml;->a:Lsjl;
+  1120|     iget-object v8, v8, Lsjl;->b:Ljava/lang/String;
+  1122|     if-nez v8, :cond_10
+  1124|     const/4 v8, 0x0
+  1126|     :cond_10
+  1127|     if-eqz v8, :cond_11
+  1129|     invoke-virtual {v3, v8}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+  1131|     :cond_11
+  1132|     move/from16 v8, v23
+  1134|     goto :goto_15
+  1136|     :cond_12
+  1137|     invoke-static {v11, v3}, Ls49;->T0(Ljava/util/Collection;Ljava/lang/Iterable;)Ljava/util/ArrayList;
+  1139|     move-result-object v3
+  1141|     invoke-static {v3, v9}, Ls49;->U0(Ljava/util/Collection;Ljava/lang/Object;)Ljava/util/ArrayList;
+  1143|     move-result-object v3
+  1145|     invoke-static {v3}, Ls49;->t0(Ljava/lang/Iterable;)Ljava/util/List;
+  1147|     move-result-object v3
+  1149|     iput-object v13, v0, Lq4w;->z:Lsga;
+  1151|     iput-object v5, v0, Lq4w;->A:Lhar;
+  1153|     iput-object v7, v0, Lq4w;->B:Ljava/lang/String;
+  1155|     iput-object v9, v0, Lq4w;->C:Ljava/lang/Object;
+  1157|     iput-object v1, v0, Lq4w;->D:Ljava/lang/Object;
+  1159|     iput-object v15, v0, Lq4w;->E:Ljava/lang/Object;
+  1161|     iput-object v4, v0, Lq4w;->F:Ljava/lang/Object;
+  1163|     iput-object v6, v0, Lq4w;->G:Ljava/lang/Object;
+  1165|     iput-object v14, v0, Lq4w;->H:Ljava/lang/Object;
+  1167|     iput-object v2, v0, Lq4w;->I:Ljava/lang/Object;
+  1169|     const/4 v8, 0x3
+  1171|     iput-byte v8, v0, Lq4w;->M:B
+  1173|     move-object/from16 v8, p1
+  1175|     move-object/from16 v11, v21
+  1177|     invoke-virtual {v10, v0, v11, v8, v3}, Leka;->f(Ly7a;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/io/Serializable;
+  1179|     move-result-object v3
+  1181|     move-object/from16 v8, v20
+  1183|     if-ne v3, v8, :cond_13
+  1185|     goto/16 :goto_27
+  1187|     :cond_13
+  1188|     move-object v10, v9
+  1190|     move-object v9, v1
+  1192|     move-object v1, v2
+  1194|     move-object v2, v14
+  1196|     :goto_16
+  1197|     check-cast v3, Ljava/util/Map;
+  1199|     move-object v11, v10
+  1201|     move-object v10, v13
+  1203|     :goto_17
+  1204|     invoke-interface {v3}, Ljava/util/Map;->keySet()Ljava/util/Set;
+  1206|     move-result-object v12
+  1208|     invoke-virtual {v9}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+  1210|     invoke-static {v1, v2, v11, v12}, Lt4w;->d(Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;)V
+  1212|     if-nez v11, :cond_14
+  1214|     const/4 v11, 0x0
+  1216|     goto :goto_1a
+  1218|     :cond_14
+  1219|     invoke-interface {v3, v11}, Ljava/util/Map;->containsKey(Ljava/lang/Object;)Z
+  1221|     move-result v12
+  1223|     if-nez v12, :cond_1a
+  1225|     invoke-interface {v2}, Ljava/util/Collection;->isEmpty()Z
+  1227|     move-result v12
+  1229|     if-eqz v12, :cond_15
+  1231|     goto :goto_18
+  1233|     :cond_15
+  1234|     invoke-interface {v2}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+  1236|     move-result-object v12
+  1238|     :cond_16
+  1239|     invoke-interface {v12}, Ljava/util/Iterator;->hasNext()Z
+  1241|     move-result v13
+  1243|     if-eqz v13, :cond_17
+  1245|     invoke-interface {v12}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  1247|     move-result-object v13
+  1249|     check-cast v13, Liml;
+  1251|     iget-object v13, v13, Liml;->a:Lsjl;
+  1253|     iget-object v13, v13, Lsjl;->a:Ljava/lang/String;
+  1255|     invoke-static {v13, v11}, Ln7i;->l(Ljava/lang/Object;Ljava/lang/Object;)Z
+  1257|     move-result v13
+  1259|     if-eqz v13, :cond_16
+  1261|     goto :goto_1a
+  1263|     :cond_17
+  1264|     :goto_18
+  1265|     if-eqz v6, :cond_18
+  1267|     iget-object v11, v6, Lw4w;->h:Ljava/lang/String;
+  1269|     goto :goto_19
+  1271|     :cond_18
+  1272|     const/4 v11, 0x0
+  1274|     :goto_19
+  1275|     if-eqz v11, :cond_19
+  1277|     iget-object v11, v6, Lw4w;->h:Ljava/lang/String;
+  1279|     goto :goto_1a
+  1281|     :cond_19
+  1282|     sget-object v0, Lmtx;->a:Lmtx;
+  1284|     new-instance v9, Ljava/lang/IllegalStateException;
+  1286|     const-string v0, "conversation snapshot cut names a message that is not stored"
+  1288|     invoke-direct {v9, v0}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
+  1290|     const-string v10, "persist conversation snapshot cut unstored"
+  1291|     :try_end_f
+  1292|     .catch Ljava/util/concurrent/CancellationException; {:try_start_f .. :try_end_f} :catch_20
+  1293|     .catch Ljava/lang/Exception; {:try_start_f .. :try_end_f} :catch_d
+  1294|     .catch Ljava/lang/OutOfMemoryError; {:try_start_f .. :try_end_f} :catch_c
+  1296|     const/4 v13, 0x0
+  1298|     const/16 v14, 0x28
+  1300|     const/4 v12, 0x0
+  1302|     move-object/from16 v11, v19
+  1304|     :try_start_10
+  1305|     invoke-static/range {v9 .. v14}, Lmtx;->f(Ljava/lang/Throwable;Ljava/lang/String;Loav;Ljava/util/Map;Ljava/util/List;I)V
+  1306|     :try_end_10
+  1307|     .catch Ljava/util/concurrent/CancellationException; {:try_start_10 .. :try_end_10} :catch_20
+  1308|     .catch Ljava/lang/Exception; {:try_start_10 .. :try_end_10} :catch_f
+  1309|     .catch Ljava/lang/OutOfMemoryError; {:try_start_10 .. :try_end_10} :catch_e
+  1311|     goto/16 :goto_30
+  1313|     :cond_1a
+  1314|     :goto_1a
+  1315|     :try_start_11
+  1316|     new-instance v12, Lo4w;
+  1318|     invoke-direct {v12}, Lo4w;-><init>()V
+  1320|     invoke-interface {v2}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+  1322|     move-result-object v13
+  1323|     :try_end_11
+  1324|     .catch Ljava/util/concurrent/CancellationException; {:try_start_11 .. :try_end_11} :catch_20
+  1325|     .catch Ljava/lang/Exception; {:try_start_11 .. :try_end_11} :catch_d
+  1326|     .catch Ljava/lang/OutOfMemoryError; {:try_start_11 .. :try_end_11} :catch_c
+  1328|     move-object v14, v10
+  1330|     move-object v10, v4
+  1332|     move-object v4, v2
+  1334|     move-object v2, v12
+  1336|     move-object v12, v9
+  1338|     move-object v9, v6
+  1340|     move-object v6, v3
+  1342|     move-object v3, v1
+  1344|     move-object v1, v13
+  1346|     :goto_1b
+  1347|     :try_start_12
+  1348|     invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+  1350|     move-result v13
+
+### q4w.x smali: 逐条 t4w.e → eka.x
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/q4w.smali 行 1350-1700
+  1350|     move-result v13
+  1351|     :try_end_12
+  1352|     .catch Ljava/util/concurrent/CancellationException; {:try_start_12 .. :try_end_12} :catch_20
+  1353|     .catch Ljava/lang/Exception; {:try_start_12 .. :try_end_12} :catch_13
+  1354|     .catch Ljava/lang/OutOfMemoryError; {:try_start_12 .. :try_end_12} :catch_12
+  1356|     if-eqz v13, :cond_1f
+  1358|     :try_start_13
+  1359|     invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  1361|     move-result-object v13
+  1363|     check-cast v13, Liml;
+  1365|     move-object/from16 v20, v8
+  1367|     iget-object v8, v13, Liml;->a:Lsjl;
+  1369|     iget-object v8, v8, Lsjl;->a:Ljava/lang/String;
+  1371|     invoke-interface {v6, v8}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;
+  1373|     move-result-object v8
+  1375|     check-cast v8, Lu4w;
+  1377|     invoke-virtual {v12, v13, v8}, Lt4w;->e(Liml;Lu4w;)Lb5w;
+  1379|     move-result-object v8
+  1381|     if-nez v8, :cond_1b
+  1383|     move-object/from16 v18, v4
+  1385|     move-object/from16 v21, v9
+  1387|     move-object v9, v3
+  1389|     :goto_1c
+  1390|     move-object/from16 p1, v1
+  1392|     move-object/from16 v8, v20
+  1394|     goto :goto_1e
+  1396|     :cond_1b
+  1397|     iget-object v13, v2, Lo4w;->a:Ljava/util/ArrayList;
+  1399|     invoke-virtual {v13, v8}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+  1401|     move-object v13, v3
+  1403|     move-object/from16 v18, v4
+  1405|     iget-wide v3, v2, Lo4w;->b:J
+  1407|     iget-object v8, v8, Lb5w;->g:[B
+  1409|     array-length v8, v8
+  1411|     move-wide/from16 v21, v3
+  1413|     int-to-long v3, v8
+  1415|     add-long v3, v21, v3
+  1417|     iput-wide v3, v2, Lo4w;->b:J
+  1419|     const-wide/32 v21, 0x100000
+  1421|     cmp-long v3, v3, v21
+  1423|     if-ltz v3, :cond_1c
+  1425|     const/4 v3, 0x1
+  1427|     goto :goto_1d
+  1429|     :cond_1c
+  1430|     const/4 v3, 0x0
+  1432|     :goto_1d
+  1433|     if-eqz v3, :cond_1d
+  1435|     iget-object v3, v12, Lt4w;->c:Leka;
+  1437|     iget-object v4, v12, Lt4w;->a:Ljava/lang/String;
+  1439|     iget-object v8, v12, Lt4w;->b:Ljava/lang/String;
+  1441|     move-object/from16 p1, v13
+  1443|     invoke-virtual {v2}, Lo4w;->a()Ljava/util/ArrayList;
+  1445|     move-result-object v13
+  1447|     iput-object v14, v0, Lq4w;->z:Lsga;
+  1449|     iput-object v5, v0, Lq4w;->A:Lhar;
+  1451|     iput-object v7, v0, Lq4w;->B:Ljava/lang/String;
+  1453|     iput-object v12, v0, Lq4w;->C:Ljava/lang/Object;
+  1455|     iput-object v15, v0, Lq4w;->D:Ljava/lang/Object;
+  1457|     iput-object v10, v0, Lq4w;->E:Ljava/lang/Object;
+  1459|     iput-object v9, v0, Lq4w;->F:Ljava/lang/Object;
+  1461|     move-object/from16 v21, v9
+  1463|     move-object/from16 v9, v18
+  1465|     iput-object v9, v0, Lq4w;->G:Ljava/lang/Object;
+  1467|     move-object/from16 v18, v9
+  1469|     move-object/from16 v9, p1
+  1471|     iput-object v9, v0, Lq4w;->H:Ljava/lang/Object;
+  1473|     iput-object v6, v0, Lq4w;->I:Ljava/lang/Object;
+  1475|     iput-object v11, v0, Lq4w;->J:Ljava/lang/String;
+  1477|     iput-object v2, v0, Lq4w;->K:Lo4w;
+  1479|     iput-object v1, v0, Lq4w;->L:Ljava/util/Iterator;
+  1481|     move-object/from16 p1, v1
+  1483|     const/4 v1, 0x4
+  1485|     iput-byte v1, v0, Lq4w;->M:B
+  1487|     invoke-virtual {v3, v4, v8, v13, v0}, Leka;->x(Ljava/lang/String;Ljava/lang/String;Ljava/util/ArrayList;Ljjx;)Ljava/lang/Object;
+  1489|     move-result-object v1
+  1490|     :try_end_13
+  1491|     .catch Ljava/util/concurrent/CancellationException; {:try_start_13 .. :try_end_13} :catch_20
+  1492|     .catch Ljava/lang/Exception; {:try_start_13 .. :try_end_13} :catch_d
+  1493|     .catch Ljava/lang/OutOfMemoryError; {:try_start_13 .. :try_end_13} :catch_c
+  1495|     move-object/from16 v8, v20
+  1497|     if-ne v1, v8, :cond_1e
+  1499|     goto/16 :goto_27
+  1501|     :cond_1d
+  1502|     move-object/from16 v21, v9
+  1504|     move-object v9, v13
+  1506|     goto :goto_1c
+  1508|     :cond_1e
+  1509|     :goto_1e
+  1510|     move-object/from16 v1, p1
+  1512|     move-object v3, v9
+  1514|     move-object/from16 v4, v18
+  1516|     move-object/from16 v9, v21
+  1518|     goto/16 :goto_1b
+  1520|     :cond_1f
+  1521|     move-object/from16 v18, v4
+  1523|     move-object/from16 v21, v9
+  1525|     move-object v9, v3
+  1527|     :try_start_14
+  1528|     invoke-virtual {v2}, Lo4w;->b()Z
+  1530|     move-result v1
+  1532|     if-eqz v1, :cond_21
+  1534|     iget-object v1, v12, Lt4w;->c:Leka;
+  1536|     iget-object v3, v12, Lt4w;->a:Ljava/lang/String;
+  1538|     iget-object v4, v12, Lt4w;->b:Ljava/lang/String;
+  1540|     invoke-virtual {v2}, Lo4w;->a()Ljava/util/ArrayList;
+  1542|     move-result-object v2
+  1544|     iput-object v14, v0, Lq4w;->z:Lsga;
+  1546|     iput-object v5, v0, Lq4w;->A:Lhar;
+  1548|     iput-object v7, v0, Lq4w;->B:Ljava/lang/String;
+  1550|     iput-object v12, v0, Lq4w;->C:Ljava/lang/Object;
+  1552|     iput-object v15, v0, Lq4w;->D:Ljava/lang/Object;
+  1554|     iput-object v10, v0, Lq4w;->E:Ljava/lang/Object;
+  1556|     move-object/from16 v6, v21
+  1558|     iput-object v6, v0, Lq4w;->F:Ljava/lang/Object;
+  1560|     move-object/from16 v13, v18
+  1562|     iput-object v13, v0, Lq4w;->G:Ljava/lang/Object;
+  1564|     iput-object v9, v0, Lq4w;->H:Ljava/lang/Object;
+  1565|     :try_end_14
+  1566|     .catch Ljava/util/concurrent/CancellationException; {:try_start_14 .. :try_end_14} :catch_20
+  1567|     .catch Ljava/lang/Exception; {:try_start_14 .. :try_end_14} :catch_13
+  1568|     .catch Ljava/lang/OutOfMemoryError; {:try_start_14 .. :try_end_14} :catch_12
+  1570|     move-object/from16 v17, v5
+  1572|     const/4 v5, 0x0
+  1574|     :try_start_15
+  1575|     iput-object v5, v0, Lq4w;->I:Ljava/lang/Object;
+  1577|     iput-object v11, v0, Lq4w;->J:Ljava/lang/String;
+  1579|     iput-object v5, v0, Lq4w;->K:Lo4w;
+  1581|     iput-object v5, v0, Lq4w;->L:Ljava/util/Iterator;
+  1583|     const/4 v5, 0x5
+  1585|     iput-byte v5, v0, Lq4w;->M:B
+  1587|     invoke-virtual {v1, v3, v4, v2, v0}, Leka;->x(Ljava/lang/String;Ljava/lang/String;Ljava/util/ArrayList;Ljjx;)Ljava/lang/Object;
+  1589|     move-result-object v1
+  1590|     :try_end_15
+  1591|     .catch Ljava/util/concurrent/CancellationException; {:try_start_15 .. :try_end_15} :catch_20
+  1592|     .catch Ljava/lang/Exception; {:try_start_15 .. :try_end_15} :catch_11
+  1593|     .catch Ljava/lang/OutOfMemoryError; {:try_start_15 .. :try_end_15} :catch_10
+  1595|     if-ne v1, v8, :cond_20
+  1597|     goto/16 :goto_27
+  1599|     :cond_20
+  1600|     move-object v4, v6
+  1602|     move-object v2, v9
+  1604|     move-object v5, v10
+  1606|     move-object v1, v11
+  1608|     move-object v3, v13
+  1610|     move-object v6, v15
+  1612|     move-object/from16 v13, v17
+  1614|     move-object v9, v7
+  1616|     move-object v7, v12
+  1618|     :goto_1f
+  1619|     move-object v10, v14
+  1621|     move-object v14, v1
+  1623|     move-object v1, v9
+  1625|     move-object v9, v4
+  1627|     move-object v4, v3
+  1629|     move-object v3, v10
+  1631|     move-object v10, v2
+  1633|     move-object v12, v7
+  1635|     move-object v2, v13
+  1637|     goto :goto_22
+  1639|     :catch_10
+  1640|     move-exception v0
+  1642|     :goto_20
+  1643|     move-object v9, v0
+  1645|     move-object v10, v7
+  1647|     move-object/from16 v2, v17
+  1649|     goto/16 :goto_2d
+  1651|     :catch_11
+  1652|     move-exception v0
+  1654|     :goto_21
+  1655|     move-object v10, v7
+  1657|     move-object/from16 v2, v17
+  1659|     goto/16 :goto_12
+  1661|     :catch_12
+  1662|     move-exception v0
+  1664|     move-object/from16 v17, v5
+  1666|     goto :goto_20
+  1668|     :catch_13
+  1669|     move-exception v0
+  1671|     move-object/from16 v17, v5
+  1673|     goto :goto_21
+  1675|     :cond_21
+  1676|     move-object/from16 v17, v5
+  1678|     move-object/from16 v13, v18
+  1680|     move-object/from16 v6, v21
+  1682|     move-object v1, v7
+  1684|     move-object v5, v10
+  1686|     move-object v4, v13
+  1688|     move-object v3, v14
+  1690|     move-object/from16 v2, v17
+  1692|     move-object v10, v9
+  1694|     move-object v14, v11
+  1696|     move-object v9, v6
+  1698|     move-object v6, v15
+  1700|     :goto_22
+
+### q4w.x smali: t4w.b → eka.w；异常
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/q4w.smali 行 1700-2058
+  1700|     :goto_22
+  1701|     :try_start_16
+  1702|     iget-object v7, v12, Lt4w;->c:Leka;
+  1704|     iget-object v15, v12, Lt4w;->a:Ljava/lang/String;
+  1706|     iget-object v11, v12, Lt4w;->b:Ljava/lang/String;
+  1708|     if-nez v6, :cond_23
+  1710|     if-eqz v9, :cond_22
+  1712|     invoke-virtual {v12, v9, v3}, Lt4w;->f(Lw4w;Lsga;)Lsga;
+  1714|     move-result-object v6
+  1716|     goto :goto_23
+  1718|     :catch_14
+  1719|     move-exception v0
+  1721|     move-object v9, v0
+  1723|     move-object v10, v1
+  1725|     goto/16 :goto_2d
+  1727|     :catch_15
+  1728|     move-exception v0
+  1730|     move-object v10, v1
+  1732|     goto/16 :goto_12
+  1734|     :cond_22
+  1735|     const/4 v6, 0x0
+  1737|     :cond_23
+  1738|     :goto_23
+  1739|     invoke-static {v3, v6}, Lt4w;->h(Lsga;Lsga;)Lsga;
+  1741|     move-result-object v3
+  1743|     new-instance v6, Ljava/util/ArrayList;
+  1745|     const/16 v13, 0xa
+  1747|     invoke-static {v4, v13}, Lt49;->g0(Ljava/lang/Iterable;I)I
+  1749|     move-result v13
+  1751|     invoke-direct {v6, v13}, Ljava/util/ArrayList;-><init>(I)V
+  1753|     invoke-interface {v4}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+  1755|     move-result-object v4
+  1757|     :goto_24
+  1758|     invoke-interface {v4}, Ljava/util/Iterator;->hasNext()Z
+  1760|     move-result v13
+  1762|     if-eqz v13, :cond_25
+  1764|     invoke-interface {v4}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  1766|     move-result-object v13
+  1768|     check-cast v13, Liml;
+  1770|     invoke-virtual {v13}, Liml;->b()Lsjl;
+  1772|     move-result-object v13
+  1774|     iget-object v13, v13, Lsjl;->h:Ljava/lang/Long;
+  1776|     if-eqz v13, :cond_24
+  1778|     invoke-virtual {v13}, Ljava/lang/Long;->longValue()J
+  1780|     move-result-wide v16
+  1782|     goto :goto_25
+  1784|     :cond_24
+  1785|     iget-object v13, v12, Lt4w;->e:Lomf;
+  1787|     invoke-interface {v13}, Lomf;->a()Ljava/lang/Object;
+  1789|     move-result-object v13
+  1791|     check-cast v13, Ljava/lang/Number;
+  1793|     invoke-virtual {v13}, Ljava/lang/Number;->longValue()J
+  1795|     move-result-wide v16
+  1797|     :goto_25
+  1798|     invoke-static/range {v16 .. v17}, Lvqv;->p(J)Ljava/lang/Long;
+  1800|     move-result-object v13
+  1802|     invoke-virtual {v6, v13}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+  1804|     goto :goto_24
+  1806|     :cond_25
+  1807|     if-eqz v9, :cond_26
+  1809|     move-object/from16 p1, v3
+  1811|     iget-wide v3, v9, Lw4w;->e:J
+  1813|     invoke-static {v3, v4}, Lvqv;->p(J)Ljava/lang/Long;
+  1815|     move-result-object v3
+  1817|     goto :goto_26
+  1819|     :cond_26
+  1820|     move-object/from16 p1, v3
+  1822|     const/4 v3, 0x0
+  1824|     :goto_26
+  1825|     filled-new-array {v5, v3}, [Ljava/lang/Long;
+  1827|     move-result-object v3
+  1829|     invoke-static {v3}, Lkc1;->f0([Ljava/lang/Object;)Ljava/util/List;
+  1831|     move-result-object v3
+  1833|     invoke-static {v6, v3}, Ls49;->T0(Ljava/util/Collection;Ljava/lang/Iterable;)Ljava/util/ArrayList;
+  1835|     move-result-object v3
+  1837|     invoke-static {v3}, Ls49;->O0(Ljava/util/List;)Ljava/lang/Comparable;
+  1839|     move-result-object v3
+  1841|     check-cast v3, Ljava/lang/Number;
+  1843|     invoke-virtual {v3}, Ljava/lang/Number;->longValue()J
+  1845|     move-result-wide v3
+  1847|     move-object v9, v12
+  1849|     move-wide v12, v3
+  1851|     move-object v3, v11
+  1853|     move-object/from16 v11, p1
+  1855|     invoke-virtual/range {v9 .. v14}, Lt4w;->b(Ljava/lang/String;Lsga;JLjava/lang/String;)Lw4w;
+  1857|     move-result-object v4
+  1859|     const/4 v5, 0x0
+  1861|     iput-object v5, v0, Lq4w;->z:Lsga;
+  1863|     iput-object v2, v0, Lq4w;->A:Lhar;
+  1865|     iput-object v1, v0, Lq4w;->B:Ljava/lang/String;
+  1867|     iput-object v5, v0, Lq4w;->C:Ljava/lang/Object;
+  1869|     iput-object v5, v0, Lq4w;->D:Ljava/lang/Object;
+  1871|     iput-object v5, v0, Lq4w;->E:Ljava/lang/Object;
+  1873|     iput-object v5, v0, Lq4w;->F:Ljava/lang/Object;
+  1875|     iput-object v5, v0, Lq4w;->G:Ljava/lang/Object;
+  1877|     iput-object v5, v0, Lq4w;->H:Ljava/lang/Object;
+  1879|     iput-object v5, v0, Lq4w;->I:Ljava/lang/Object;
+  1881|     iput-object v5, v0, Lq4w;->J:Ljava/lang/String;
+  1883|     iput-object v5, v0, Lq4w;->K:Lo4w;
+  1885|     iput-object v5, v0, Lq4w;->L:Ljava/util/Iterator;
+  1887|     const/4 v5, 0x6
+  1889|     iput-byte v5, v0, Lq4w;->M:B
+  1891|     invoke-virtual {v7, v15, v3, v4, v0}, Leka;->w(Ljava/lang/String;Ljava/lang/String;Lw4w;Lq4w;)Ljava/lang/Object;
+  1893|     move-result-object v0
+  1895|     if-ne v0, v8, :cond_27
+  1897|     :goto_27
+  1898|     return-object v8
+  1900|     :cond_27
+  1901|     :goto_28
+  1902|     sget-object v0, Lg5p;->v:Lg5p;
+  1904|     iput-object v0, v2, Lhar;->v:Ljava/lang/Object;
+  1905|     :try_end_16
+  1906|     .catch Ljava/util/concurrent/CancellationException; {:try_start_16 .. :try_end_16} :catch_20
+  1907|     .catch Ljava/lang/Exception; {:try_start_16 .. :try_end_16} :catch_15
+  1908|     .catch Ljava/lang/OutOfMemoryError; {:try_start_16 .. :try_end_16} :catch_14
+  1910|     goto :goto_2e
+  1912|     :catch_16
+  1913|     move-exception v0
+  1915|     move-object/from16 v19, v11
+  1917|     goto/16 :goto_10
+  1919|     :catch_17
+  1920|     move-exception v0
+  1922|     move-object/from16 v19, v11
+  1924|     move-object v9, v0
+  1926|     move-object v2, v10
+  1928|     goto/16 :goto_2
+  1930|     :catch_18
+  1931|     move-exception v0
+  1933|     move-object/from16 v19, v11
+  1935|     goto/16 :goto_3
+  1937|     :catch_19
+  1938|     move-exception v0
+  1940|     goto :goto_2b
+  1942|     :catch_1a
+  1943|     move-exception v0
+  1945|     goto :goto_2a
+  1947|     :catch_1b
+  1948|     move-exception v0
+  1950|     move-object/from16 p1, v5
+  1952|     goto :goto_2b
+  1954|     :goto_29
+  1955|     move-object/from16 v2, p1
+  1957|     move-object v9, v0
+  1959|     goto/16 :goto_2
+  1961|     :catch_1c
+  1962|     move-exception v0
+  1964|     move-object/from16 p1, v5
+  1966|     :goto_2a
+  1967|     move-object/from16 v19, v11
+  1969|     move-object/from16 v2, p1
+  1971|     goto/16 :goto_11
+  1973|     :catch_1d
+  1974|     move-exception v0
+  1976|     move-object/from16 p1, v5
+  1978|     :goto_2b
+  1979|     move-object/from16 v19, v11
+  1981|     goto :goto_29
+  1983|     :catch_1e
+  1984|     move-exception v0
+  1986|     move-object/from16 p1, v5
+  1988|     move-object/from16 v19, v11
+  1990|     :goto_2c
+  1991|     move-object/from16 v2, p1
+  1993|     goto/16 :goto_4
+  1995|     :goto_2d
+  1996|     sget-object v0, Lmtx;->a:Lmtx;
+  1998|     const/4 v13, 0x0
+  2000|     const/16 v14, 0x28
+  2002|     const/4 v12, 0x0
+  2004|     move-object/from16 v11, v19
+  2006|     invoke-static/range {v9 .. v14}, Lmtx;->f(Ljava/lang/Throwable;Ljava/lang/String;Loav;Ljava/util/Map;Ljava/util/List;I)V
+  2008|     :goto_2e
+  2009|     move-object v5, v2
+  2011|     goto :goto_30
+  2013|     :catch_1f
+  2014|     move-exception v0
+  2016|     move-object/from16 p1, v5
+  2018|     goto :goto_2c
+  2020|     :goto_2f
+  2021|     sget-object v1, Lmtx;->a:Lmtx;
+  2023|     invoke-static {v0, v10}, Ltrr;->a(Ljava/lang/Exception;Ljava/lang/String;)Ljava/lang/IllegalStateException;
+  2025|     move-result-object v9
+  2027|     const/4 v13, 0x0
+  2029|     const/16 v14, 0x28
+  2031|     const/4 v12, 0x0
+  2033|     invoke-static/range {v9 .. v14}, Lmtx;->f(Ljava/lang/Throwable;Ljava/lang/String;Loav;Ljava/util/Map;Ljava/util/List;I)V
+  2035|     goto :goto_2e
+  2037|     :goto_30
+  2038|     iget-object v0, v5, Lhar;->v:Ljava/lang/Object;
+  2040|     return-object v0
+  2042|     :catch_20
+  2043|     move-exception v0
+  2045|     throw v0
+  2047|     nop
+  2049|     :pswitch_data_0
+  2050|     .packed-switch 0x0
+  2051|         :pswitch_6
+  2052|         :pswitch_5
+  2053|         :pswitch_4
+  2054|         :pswitch_3
+  2055|         :pswitch_2
+  2056|         :pswitch_1
+  2057|         :pswitch_0
+  2058|     .end packed-switch
+
+### eka.f: 500 一批读指纹
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/eka.java 行 283-380
+   283|     public final java.io.Serializable f(defpackage.y7a r7, java.lang.String r8, java.lang.String r9, java.util.List r10) {
+   284|         /*
+   285|             r6 = this;
+   286|             boolean r0 = r7 instanceof defpackage.qja
+   287|             if (r0 == 0) goto L13
+   288|             r0 = r7
+   289|             qja r0 = (defpackage.qja) r0
+   290|             int r1 = r0.E
+   291|             r2 = -2147483648(0xffffffff80000000, float:-0.0)
+   292|             r3 = r1 & r2
+   293|             if (r3 == 0) goto L13
+   294|             int r1 = r1 - r2
+   295|             r0.E = r1
+   296|             goto L18
+   297|         L13:
+   298|             qja r0 = new qja
+   299|             r0.<init>(r6, r7)
+   300|         L18:
+   301|             java.lang.Object r7 = r0.C
+   302|             int r1 = r0.E
+   303|             r2 = 1
+   304|             if (r1 == 0) goto L36
+   305|             if (r1 != r2) goto L2f
+   306|             java.util.Iterator r8 = r0.B
+   307|             java.util.Collection r9 = r0.A
+   308|             java.util.Collection r9 = (java.util.Collection) r9
+   309|             java.lang.String r10 = r0.z
+   310|             java.lang.String r1 = r0.y
+   311|             defpackage.i0c.T(r7)
+   312|             goto L77
+   313|         L2f:
+   314|             java.lang.String r6 = "call to 'resume' before 'invoke' with coroutine"
+   315|             defpackage.lp.q(r6)
+   316|             r6 = 0
+   317|             return r6
+   318|         L36:
+   319|             defpackage.i0c.T(r7)
+   320|             r7 = 500(0x1f4, float:7.0E-43)
+   321|             java.util.ArrayList r7 = defpackage.s49.r0(r10, r7)
+   322|             java.util.ArrayList r10 = new java.util.ArrayList
+   323|             r10.<init>()
+   324|             java.util.Iterator r7 = r7.iterator()
+   325|             r5 = r8
+   326|             r8 = r7
+   327|             r7 = r5
+   328|             r5 = r10
+   329|             r10 = r9
+   330|             r9 = r5
+   331|         L4e:
+   332|             boolean r1 = r8.hasNext()
+   333|             if (r1 == 0) goto L7e
+   334|             java.lang.Object r1 = r8.next()
+   335|             java.util.List r1 = (java.util.List) r1
+   336|             jka r3 = r6.h()
+   337|             r0.y = r7
+   338|             r0.z = r10
+   339|             r4 = r9
+   340|             java.util.Collection r4 = (java.util.Collection) r4
+   341|             r0.A = r4
+   342|             r0.B = r8
+   343|             r0.E = r2
+   344|             java.lang.Object r1 = r3.d(r0, r7, r10, r1)
+   345|             rsa r3 = defpackage.rsa.v
+   346|             if (r1 != r3) goto L74
+   347|             return r3
+   348|         L74:
+   349|             r5 = r1
+   350|             r1 = r7
+   351|             r7 = r5
+   352|         L77:
+   353|             java.lang.Iterable r7 = (java.lang.Iterable) r7
+   354|             defpackage.x49.k0(r9, r7)
+   355|             r7 = r1
+   356|             goto L4e
+   357|         L7e:
+   358|             java.util.List r9 = (java.util.List) r9
+   359|             r6 = 10
+   360|             int r6 = defpackage.t49.g0(r9, r6)
+   361|             int r6 = defpackage.cak.Q(r6)
+   362|             r7 = 16
+   363|             if (r6 >= r7) goto L8f
+   364|             r6 = r7
+   365|         L8f:
+   366|             java.util.LinkedHashMap r7 = new java.util.LinkedHashMap
+   367|             r7.<init>(r6)
+   368|             java.util.Iterator r6 = r9.iterator()
+   369|         L98:
+   370|             boolean r8 = r6.hasNext()
+   371|             if (r8 == 0) goto Lad
+   372|             java.lang.Object r8 = r6.next()
+   373|             r9 = r8
+   374|             u4w r9 = (defpackage.u4w) r9
+   375|             java.lang.String r9 = r9.c()
+   376|             r7.put(r9, r8)
+   377|             goto L98
+   378|         Lad:
+   379|             return r7
+   380|         */
+
+### t4w.a/c/d
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/t4w.java 行 29-127
+    29|     public static String a(String str, List list) {
+    30|         HashMap map = new HashMap();
+    31|         Iterator it = list.iterator();
+    32|         while (it.hasNext()) {
+    33|             iml imlVar = (iml) it.next();
+    34|             if (imlVar.b().i) {
+    35|                 map.put(new zhl(imlVar.b().a), imlVar.b());
+    36|             }
+    37|         }
+    38|         int i = 0;
+    39|         while (str != null) {
+    40|             zhl.Companion.getClass();
+    41|             if (str.equals("00000000-0000-4000-8000-000000000000")) {
+    42|                 return null;
+    43|             }
+    44|             int i2 = i + 1;
+    45|             if (i > map.size()) {
+    46|                 return null;
+    47|             }
+    48|             sjl sjlVar = (sjl) map.get(new zhl(str));
+    49|             if (sjlVar == null) {
+    50|                 return str;
+    51|             }
+    52|             str = sjlVar.b;
+    53|             i = i2;
+    54|         }
+    55|         return null;
+    56|     }
+    58|     public static boolean c(List list, String str, w4w w4wVar) {
+    59|         String strB;
+    60|         if (list != null && list.isEmpty()) {
+    61|             return false;
+    62|         }
+    63|         Iterator it = list.iterator();
+    64|         while (it.hasNext()) {
+    65|             if (n7i.l(((iml) it.next()).b().a, str)) {
+    66|                 if (w4wVar == null || (strB = w4wVar.b()) == null) {
+    67|                     return true;
+    68|                 }
+    69|                 if (list.isEmpty()) {
+    70|                     return false;
+    71|                 }
+    72|                 Iterator it2 = list.iterator();
+    73|                 while (it2.hasNext()) {
+    74|                     if (n7i.l(((iml) it2.next()).b().a, strB)) {
+    75|                         return true;
+    76|                     }
+    77|                 }
+    78|                 return false;
+    79|             }
+    80|         }
+    81|         return false;
+    82|     }
+    84|     public static void d(String str, List list, String str2, Set set) {
+    85|         HashMap map = new HashMap(list.size());
+    86|         Iterator it = list.iterator();
+    87|         while (true) {
+    88|             zhl zhlVar = null;
+    89|             if (!it.hasNext()) {
+    90|                 break;
+    91|             }
+    92|             iml imlVar = (iml) it.next();
+    93|             zhl zhlVar2 = new zhl(imlVar.b().a);
+    94|             String str3 = imlVar.b().b;
+    95|             if (str3 != null) {
+    96|                 zhlVar = new zhl(str3);
+    97|             }
+    98|             map.put(zhlVar2, zhlVar);
+    99|         }
+   100|         if (str2 == null || map.containsKey(new zhl(str))) {
+   101|             int i = 0;
+   102|             while (str != null) {
+   103|                 zhl.Companion.getClass();
+   104|                 if (str.equals("00000000-0000-4000-8000-000000000000")) {
+   105|                     return;
+   106|                 }
+   107|                 int i2 = i + 1;
+   108|                 if (i > map.size()) {
+   109|                     return;
+   110|                 }
+   111|                 if (str2 == null ? false : str.equals(str2)) {
+   112|                     return;
+   113|                 }
+   114|                 if (!map.containsKey(new zhl(str))) {
+   115|                     if (str2 == null || !set.contains(str)) {
+   116|                         mtx mtxVar = mtx.a;
+   117|                         mtx.f(new IllegalStateException("conversation snapshot branch does not reach a root"), "persist conversation snapshot unrooted", oav.w, null, null, 40);
+   118|                         return;
+   119|                     }
+   120|                     return;
+   121|                 }
+   122|                 zhl zhlVar3 = (zhl) map.get(new zhl(str));
+   123|                 str = zhlVar3 != null ? zhlVar3.a : null;
+   124|                 i = i2;
+   125|             }
+   126|         }
+   127|     }
+
+### t4w.e: fingerprint + complete_blocks 单调归约
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/t4w.java 行 217-293
+   217|     public final b5w e(iml imlVar, u4w u4wVar) {
+   218|         uwh uwhVarL;
+   219|         int size;
+   220|         do4 do4Var = this.c.f;
+   221|         do4Var.getClass();
+   222|         try {
+   223|             sjl sjlVarB = imlVar.b();
+   224|             if (sjlVarB.i) {
+   225|                 throw new IllegalArgumentException("only a message the server has confirmed is cached");
+   226|             }
+   227|             String str = sjlVarB.a;
+   228|             String str2 = sjlVarB.b;
+   229|             bll bllVar = sjlVarB.c;
+   230|             int i = sjlVarB.d;
+   231|             boolean z = sjlVarB.e;
+   232|             boolean z2 = sjlVarB.f;
+   233|             String str3 = sjlVarB.g;
+   234|             Long l = sjlVarB.h;
+   235|             ush ushVar = sjlVarB.k;
+   236|             ckh ckhVar = sjlVarB.l;
+   237|             ckh ckhVar2 = sjlVarB.m;
+   238|             ckh ckhVar3 = (ckhVar2 == null || ckhVar2.isEmpty()) ? null : ckhVar2;
+   239|             k46 k46Var = sjlVarB.o;
+   240|             String str4 = sjlVarB.p;
+   241|             List listA = imlVar.a();
+   242|             String str5 = sjlVarB.a;
+   243|             Long l2 = sjlVarB.h;
+   244|             if (l2 != null) {
+   245|                 uwh uwhVar = uwh.x;
+   246|                 uwhVarL = p3.l(l2.longValue());
+   247|             } else {
+   248|                 uwhVarL = null;
+   249|             }
+   250|             ho4 ho4Var = new ho4(str, str2, bllVar, i, z, z2, str3, l, ushVar, ckhVar, ckhVar3, k46Var, str4, do4Var.a(listA, str5, uwhVarL), sjlVarB.t, sjlVarB.n, sjlVarB.u, sjlVarB.x, sjlVarB.r, sjlVarB.A, sjlVarB.B, s
+   251|             do4Var.getClass();
+   252|             KSerializer kSerializerSerializer = ho4.Companion.serializer();
+   253|             try {
+   254|                 co4 co4Var = new co4(do4Var.a.b);
+   255|                 co4Var.m(kSerializerSerializer, ho4Var);
+   256|                 long jM0 = co4Var.M0();
+   257|                 if (u4wVar == null || jM0 != u4wVar.b()) {
+   258|                     if (ho4Var.v()) {
+   259|                         size = imlVar.a().size();
+   260|                     } else {
+   261|                         List listA2 = imlVar.a();
+   262|                         ArrayList arrayList = new ArrayList();
+   263|                         for (Object obj : listA2) {
+   264|                             if (!((zw3) obj).e().k()) {
+   265|                                 break;
+   266|                             }
+   267|                             arrayList.add(obj);
+   268|                         }
+   269|                         size = arrayList.size();
+   270|                     }
+   271|                     int i2 = size;
+   272|                     if (u4wVar == null || ho4Var.v() || i2 >= u4wVar.a()) {
+   273|                         String str6 = imlVar.b().a;
+   274|                         String str7 = imlVar.b().b;
+   275|                         String str8 = str7 == null ? null : str7;
+   276|                         do4Var.getClass();
+   277|                         try {
+   278|                             sb4 sb4Var = new sb4();
+   279|                             xap.u(do4Var.a, new dtb((Object) sb4Var, (byte) 26), ho4.Companion.serializer(), ho4Var);
+   280|                             return new b5w(this.a, this.b, str6, str8, jM0, i2, sb4Var.b0(sb4Var.w));
+   281|                         } catch (StackOverflowError unused) {
+   282|                             throw new CachedMessageCodec$TooDeeplyNested();
+   283|                         }
+   284|                     }
+   285|                 }
+   286|                 return null;
+   287|             } catch (StackOverflowError unused2) {
+   288|                 throw new CachedMessageCodec$TooDeeplyNested();
+   289|             }
+   290|         } catch (StackOverflowError unused3) {
+   291|             throw new CachedMessageCodec$TooDeeplyNested();
+   292|         }
+   293|     }
+
+### t4w.f: facts StaleRow→null
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/t4w.java 行 295-308
+   295|     public final sga f(w4w w4wVar, sga sgaVar) {
+   296|         try {
+   297|             return this.c.f.e(sgaVar, w4wVar.a());
+   298|         } catch (CancellationException e) {
+   299|             throw e;
+   300|         } catch (Exception e2) {
+   301|             if (e2 instanceof CachedMessageCodec$StaleRow) {
+   302|                 return null;
+   303|             }
+   304|             mtx mtxVar = mtx.a;
+   305|             mtx.f(trr.a(e2, "undecodable facts"), "conversation snapshot facts unreadable", oav.w, null, null, 40);
+   306|             return null;
+   307|         }
+   308|     }

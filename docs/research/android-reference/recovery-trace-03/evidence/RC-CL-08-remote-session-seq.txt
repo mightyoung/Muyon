@@ -1,0 +1,627 @@
+# 远程 Code 会话：sequence_num 去重、catch_up_truncated 修复、resume_token/cursor/after_id
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### lvu.B: SSE type 分发与 durable-seq 回退
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/lvu.java 行 36-145
+    36|     }
+    38|     /* JADX WARN: Failed to restore switch over string. Please report as a decompilation issue */
+    39|     public kvu B(String str, String str2, String str3) {
+    40|         j9i j9iVar = (j9i) this.d;
+    41|         if (str2 != null) {
+    42|             switch (str2.hashCode()) {
+    43|                 case -1894416524:
+    44|                     if (str2.equals("delivery_update")) {
+    45|                         return new gvu((myw) j9iVar.b(str3, myw.Companion.serializer()));
+    46|                     }
+    47|                     break;
+    48|                 case -1102805722:
+    49|                     if (str2.equals("client_event")) {
+    50|                         jyw jywVar = (jyw) j9iVar.b(str3, jyw.Companion.serializer());
+    51|                         long j = jywVar.b;
+    52|                         Long lValueOf = Long.valueOf(j);
+    53|                         long jLongValue = 0;
+    54|                         if (j == 0) {
+    55|                             lValueOf = null;
+    56|                         }
+    57|                         if (lValueOf != null) {
+    58|                             jLongValue = lValueOf.longValue();
+    59|                         } else {
+    60|                             Long lW = str != null ? b2x.W(str) : null;
+    61|                             if (lW != null) {
+    62|                                 jLongValue = lW.longValue();
+    63|                             }
+    64|                         }
+    65|                         long j2 = jLongValue;
+    66|                         String strO = jywVar.a;
+    67|                         if (u1x.q0(strO)) {
+    68|                             strO = w0k.o(j2, "durable-seq-");
+    69|                         }
+    70|                         String str4 = strO;
+    71|                         KSerializer kSerializerSerializer = ekt.Companion.serializer();
+    72|                         String str5 = jywVar.c;
+    73|                         uwh uwhVar = jywVar.f;
+    74|                         c cVar = jywVar.e;
+    75|                         String str6 = jywVar.j;
+    76|                         uwh uwhVar2 = jywVar.h;
+    77|                         uwh uwhVar3 = jywVar.i;
+    78|                         Set set = wxu.a;
+    79|                         return new fvu((ekt) j9iVar.a(kSerializerSerializer, wxu.a(str5, str4, uwhVar, cVar, str6, uwhVar2 != null && uwhVar3 == null, n7i.l(jywVar.d, "worker"))), jywVar.a, j2, jywVar.d);
+    80|                     }
+    81|                     break;
+    82|                 case 1427309944:
+    83|                     if (str2.equals("ephemeral_event")) {
+    84|                         vyw vywVar = (vyw) j9iVar.b(str3, vyw.Companion.serializer());
+    85|                         return new hvu((ekt) j9iVar.a(ekt.Companion.serializer(), wxu.a(vywVar.a, "ephemeral-" + ((k6c) this.f).a(), vywVar.c, vywVar.b, null, false, false)));
+    86|                     }
+    87|                     break;
+    88|                 case 1977204370:
+    89|                     if (str2.equals("session_update")) {
+    90|                         return new jvu((uzw) j9iVar.b(str3, uzw.Companion.serializer()));
+    91|                     }
+    92|                     break;
+    93|                 case 2127210014:
+    94|                     if (str2.equals("catch_up_truncated")) {
+    95|                         return new evu((gyw) j9iVar.b(str3, gyw.Companion.serializer()));
+    96|                     }
+    97|                     break;
+    98|             }
+    99|         }
+   100|         if (str2 != null) {
+   101|             ouj oujVar = puj.m;
+   102|         }
+   103|         return null;
+   104|     }
+   106|     @Override // defpackage.cjk
+   107|     public final void w() {
+   108|         byte b = this.c;
+   109|         Object obj = this.h;
+   110|         switch (b) {
+   111|             case 0:
+   112|                 ouj oujVar = puj.m;
+   113|                 ((cjw) obj).a();
+   114|                 ((lc4) this.e).b(null);
+   115|                 break;
+   116|             default:
+   117|                 ((tdp) obj).b(null);
+   118|                 break;
+   119|         }
+   120|     }
+   122|     @Override // defpackage.cjk
+   123|     public final void x(xwq xwqVar, String str, String str2, String str3) {
+   124|         kvu kvuVarB;
+   125|         Object illVar;
+   126|         byte b = this.c;
+   127|         Object obj = this.e;
+   128|         switch (b) {
+   129|             case 0:
+   130|                 try {
+   131|                     kvuVarB = B(str, str2, str3);
+   132|                 } catch (Exception e) {
+   133|                     ouj oujVar = puj.m;
+   134|                     String strB = y330.b(str3, "event_type");
+   135|                     if (strB == null) {
+   136|                         strB = str2;
+   137|                     }
+   138|                     y330.h(e, "sse", strB, str3.length());
+   139|                     if (n7i.l(str2, "catch_up_truncated")) {
+   140|                         mtx mtxVar = mtx.a;
+   141|                         mtx.f(new RuntimeException("CatchUpTruncated frame undecodable — heal never ran"), "sessions/sse ramp precondition", oav.w, null, null, 56);
+   142|                     }
+   143|                     kvuVarB = null;
+   144|                 }
+   145|                 if (kvuVarB == null) {
+
+### ujw.h: seq<=last 丢弃；客户端回声只推进 l
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/ujw.java 行 276-374
+   276|     public final java.lang.Object h(defpackage.fvu r18, defpackage.y7a r19) {
+   277|         /*
+   278|             r17 = this;
+   279|             r0 = r17
+   280|             r1 = r18
+   281|             r2 = r19
+   282|             boolean r3 = r2 instanceof defpackage.jjw
+   283|             if (r3 == 0) goto L19
+   284|             r3 = r2
+   285|             jjw r3 = (defpackage.jjw) r3
+   286|             int r4 = r3.B
+   287|             r5 = -2147483648(0xffffffff80000000, float:-0.0)
+   288|             r6 = r4 & r5
+   289|             if (r6 == 0) goto L19
+   290|             int r4 = r4 - r5
+   291|             r3.B = r4
+   292|             goto L1e
+   293|         L19:
+   294|             jjw r3 = new jjw
+   295|             r3.<init>(r0, r2)
+   296|         L1e:
+   297|             java.lang.Object r2 = r3.z
+   298|             int r4 = r3.B
+   299|             r5 = 0
+   300|             hbg r6 = r0.u
+   301|             svz r7 = defpackage.svz.a
+   302|             r8 = 2
+   303|             r9 = 1
+   304|             rsa r10 = defpackage.rsa.v
+   305|             if (r4 == 0) goto L41
+   306|             if (r4 == r9) goto L3b
+   307|             if (r4 != r8) goto L35
+   308|             defpackage.i0c.T(r2)
+   309|             return r7
+   310|         L35:
+   311|             java.lang.String r0 = "call to 'resume' before 'invoke' with coroutine"
+   312|             defpackage.lp.q(r0)
+   313|             return r5
+   314|         L3b:
+   315|             fvu r1 = r3.y
+   316|             defpackage.i0c.T(r2)
+   317|             goto L81
+   318|         L41:
+   319|             defpackage.i0c.T(r2)
+   320|             long r11 = r0.l
+   321|             long r13 = r1.c
+   322|             ekt r2 = r1.a
+   323|             r15 = 1
+   324|             int r4 = (r15 > r13 ? 1 : (r15 == r13 ? 0 : -1))
+   325|             if (r4 > 0) goto L57
+   326|             int r4 = (r13 > r11 ? 1 : (r13 == r11 ? 0 : -1))
+   327|             if (r4 > 0) goto L57
+   328|             ouj r0 = defpackage.puj.m
+   329|             return r7
+   330|         L57:
+   331|             java.lang.String r4 = r1.d
+   332|             java.lang.String r11 = "client"
+   333|             boolean r4 = defpackage.n7i.l(r4, r11)
+   334|             if (r4 == 0) goto L76
+   335|             boolean r4 = r2 instanceof defpackage.njt
+   336|             if (r4 != 0) goto L69
+   337|             boolean r4 = r2 instanceof defpackage.tjt
+   338|             if (r4 == 0) goto L76
+   339|         L69:
+   340|             long r2 = r0.l
+   341|             long r4 = r1.c
+   342|             long r1 = java.lang.Math.max(r2, r4)
+   343|             r0.l = r1
+   344|             ouj r0 = defpackage.puj.m
+   345|             return r7
+   346|         L76:
+   347|             r3.y = r1
+   348|             r3.B = r9
+   349|             java.lang.Object r2 = r6.a(r2, r3)
+   350|             if (r2 != r10) goto L81
+   351|             goto La1
+   352|         L81:
+   353|             long r11 = r0.l
+   354|             long r13 = r1.c
+   355|             long r11 = java.lang.Math.max(r11, r13)
+   356|             r0.l = r11
+   357|             ekt r0 = r1.a
+   358|             java.lang.String r1 = r1.b
+   359|             int r2 = r1.length()
+   360|             if (r2 <= 0) goto L96
+   361|             goto L97
+   362|         L96:
+   363|             r1 = r5
+   364|         L97:
+   365|             r3.y = r5
+   366|             r3.B = r8
+   367|             java.lang.Object r0 = r6.f(r0, r1, r3)
+   368|             if (r0 != r10) goto La2
+   369|         La1:
+   370|             return r10
+   371|         La2:
+   372|             return r7
+   373|         */
+   374|         throw new UnsupportedOperationException("Method not decompiled: defpackage.ujw.h(fvu, y7a):java.lang.Object");
+
+### ujw.c smali: CatchUpTruncated 修复（全分支）
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/ujw.smali 行 1477-1896
+  1477| .method public final c(Lgyw;Ly7a;)Ljava/lang/Object;
+  1478|     .locals 13
+  1480|     instance-of v0, p2, Lgjw;
+  1482|     if-eqz v0, :cond_0
+  1484|     move-object v0, p2
+  1486|     check-cast v0, Lgjw;
+  1488|     iget v1, v0, Lgjw;->C:I
+  1490|     const/high16 v2, -0x80000000
+  1492|     and-int v3, v1, v2
+  1494|     if-eqz v3, :cond_0
+  1496|     sub-int/2addr v1, v2
+  1498|     iput v1, v0, Lgjw;->C:I
+  1500|     goto :goto_0
+  1502|     :cond_0
+  1503|     new-instance v0, Lgjw;
+  1505|     invoke-direct {v0, p0, p2}, Lgjw;-><init>(Lujw;Ly7a;)V
+  1507|     :goto_0
+  1508|     iget-object p2, v0, Lgjw;->A:Ljava/lang/Object;
+  1510|     iget v1, v0, Lgjw;->C:I
+  1512|     iget-object v2, p0, Lujw;->j:Ljava/util/ArrayList;
+  1514|     sget-object v5, Loav;->w:Loav;
+  1516|     const/4 v9, 0x1
+  1518|     const/4 v10, 0x0
+  1520|     sget-object v11, Lrsa;->v:Lrsa;
+  1522|     packed-switch v1, :pswitch_data_0
+  1524|     const-string p0, "call to \'resume\' before \'invoke\' with coroutine"
+  1526|     invoke-static {p0}, Llp;->q(Ljava/lang/String;)V
+  1528|     return-object v10
+  1530|     :pswitch_0
+  1531|     invoke-static {p2}, Li0c;->T(Ljava/lang/Object;)V
+  1533|     goto/16 :goto_5
+  1535|     :pswitch_1
+  1536|     iget-object p1, v0, Lgjw;->z:Ljava/util/Iterator;
+  1538|     invoke-static {p2}, Li0c;->T(Ljava/lang/Object;)V
+  1540|     goto/16 :goto_4
+  1542|     :pswitch_2
+  1543|     invoke-static {p2}, Li0c;->T(Ljava/lang/Object;)V
+  1545|     goto/16 :goto_3
+  1547|     :pswitch_3
+  1548|     invoke-static {p2}, Li0c;->T(Ljava/lang/Object;)V
+  1550|     goto/16 :goto_9
+  1552|     :pswitch_4
+  1553|     invoke-static {p2}, Li0c;->T(Ljava/lang/Object;)V
+  1555|     goto :goto_2
+  1557|     :pswitch_5
+  1558|     iget-object p1, v0, Lgjw;->y:Lgyw;
+  1560|     invoke-static {p2}, Li0c;->T(Ljava/lang/Object;)V
+  1562|     goto :goto_1
+  1564|     :pswitch_6
+  1565|     invoke-static {p2}, Li0c;->T(Ljava/lang/Object;)V
+  1567|     iget-wide v3, p1, Lgyw;->b:J
+  1569|     const-wide/16 v6, 0x0
+  1571|     cmp-long p2, v3, v6
+  1573|     if-gtz p2, :cond_1
+  1575|     sget-object p0, Lmtx;->a:Lmtx;
+  1577|     new-instance v3, Ljava/lang/RuntimeException;
+  1579|     const-string p0, "CatchUpTruncated frame malformed \u2014 at_sequence_num absent or zero"
+  1581|     invoke-direct {v3, p0}, Ljava/lang/RuntimeException;-><init>(Ljava/lang/String;)V
+  1583|     const/4 v7, 0x0
+  1585|     const/16 v8, 0x38
+  1587|     const-string v4, "sessions/sse ramp precondition"
+  1589|     const/4 v6, 0x0
+  1591|     invoke-static/range {v3 .. v8}, Lmtx;->f(Ljava/lang/Throwable;Ljava/lang/String;Loav;Ljava/util/Map;Ljava/util/List;I)V
+  1593|     sget-object p0, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
+  1595|     return-object p0
+  1597|     :cond_1
+  1598|     iput-object p1, v0, Lgjw;->y:Lgyw;
+  1600|     iput v9, v0, Lgjw;->C:I
+  1602|     iget-object p2, p0, Lujw;->v:Lxjw;
+  1604|     iget-object v1, p0, Lujw;->b:Ljava/lang/String;
+  1606|     invoke-virtual {p2, v1, v0}, Lxjw;->b(Ljava/lang/String;Ly7a;)Ljava/lang/Object;
+  1608|     move-result-object p2
+  1610|     if-ne p2, v11, :cond_2
+  1612|     goto/16 :goto_8
+  1614|     :cond_2
+  1615|     :goto_1
+  1616|     check-cast p2, Lziw;
+  1618|     iget-object v1, p2, Lziw;->e:Lzv0;
+  1620|     iget-object v12, p0, Lujw;->a:Ltdp;
+  1622|     if-eqz v1, :cond_4
+  1624|     invoke-static {v1}, Lx030;->j(Lzv0;)Ldbd;
+  1626|     move-result-object v1
+  1628|     if-eqz v1, :cond_4
+  1630|     new-instance p0, Lrwu;
+  1632|     invoke-direct {p0, v1}, Lrwu;-><init>(Ldbd;)V
+  1634|     iput-object v10, v0, Lgjw;->y:Lgyw;
+  1636|     const/4 p1, 0x2
+  1638|     iput p1, v0, Lgjw;->C:I
+  1640|     iget-object p1, v12, Ltdp;->z:Llc4;
+  1642|     invoke-interface {p1, v0, p0}, Le0u;->a(Lw7a;Ljava/lang/Object;)Ljava/lang/Object;
+  1644|     move-result-object p0
+  1646|     if-ne p0, v11, :cond_3
+  1648|     goto/16 :goto_8
+  1650|     :cond_3
+  1651|     :goto_2
+  1652|     sget-object p0, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;
+  1654|     return-object p0
+  1656|     :cond_4
+  1657|     iget-object v1, p2, Lziw;->b:Ljava/lang/Long;
+  1659|     if-eqz v1, :cond_a
+  1661|     iget-object v3, p2, Lziw;->a:Ljava/util/List;
+  1663|     invoke-interface {v3}, Ljava/util/List;->isEmpty()Z
+  1665|     move-result v3
+  1667|     if-nez v3, :cond_a
+  1669|     invoke-virtual {v1}, Ljava/lang/Long;->longValue()J
+  1671|     move-result-wide v3
+  1673|     iget-wide v6, p1, Lgyw;->b:J
+  1675|     cmp-long v3, v3, v6
+  1677|     if-ltz v3, :cond_a
+  1679|     invoke-virtual {v1}, Ljava/lang/Long;->longValue()J
+  1681|     move-result-wide v3
+  1683|     iget-wide v6, p0, Lujw;->l:J
+  1685|     cmp-long v1, v3, v6
+  1687|     if-gez v1, :cond_5
+  1689|     goto :goto_6
+  1691|     :cond_5
+  1692|     iput-object v10, v0, Lgjw;->y:Lgyw;
+  1694|     const/4 p1, 0x4
+  1696|     iput p1, v0, Lgjw;->C:I
+  1698|     invoke-virtual {p0, p2, v0}, Lujw;->n(Lziw;Ly7a;)Ljava/lang/Object;
+  1700|     move-result-object p1
+  1702|     if-ne p1, v11, :cond_6
+  1704|     goto/16 :goto_8
+  1706|     :cond_6
+  1707|     :goto_3
+  1708|     iget-object p1, p0, Lujw;->k:Ljava/util/LinkedHashSet;
+  1710|     invoke-static {v2, p1}, Lb94;->j(Ljava/util/List;Ljava/util/Set;)Lq9s;
+  1712|     move-result-object p1
+  1714|     invoke-virtual {p1}, Lq9s;->iterator()Ljava/util/Iterator;
+  1716|     move-result-object p1
+  1718|     :cond_7
+  1719|     :goto_4
+  1720|     invoke-interface {p1}, Ljava/util/Iterator;->hasNext()Z
+  1722|     move-result p2
+  1724|     iget-object v1, p0, Lujw;->d:Lyzw;
+  1726|     if-eqz p2, :cond_8
+  1728|     invoke-interface {p1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  1730|     move-result-object p2
+  1732|     check-cast p2, Lnjt;
+  1734|     iget-object v1, v1, Lyzw;->p:Lons;
+  1736|     iput-object v10, v0, Lgjw;->y:Lgyw;
+  1738|     iput-object p1, v0, Lgjw;->z:Ljava/util/Iterator;
+  1740|     const/4 v3, 0x5
+  1742|     iput v3, v0, Lgjw;->C:I
+  1744|     invoke-virtual {v1, p2, v0}, Lons;->c(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+  1746|     move-result-object p2
+  1748|     if-ne p2, v11, :cond_7
+  1750|     goto/16 :goto_8
+  1752|     :cond_8
+  1753|     iget-object p1, v1, Lyzw;->i:Lzf5;
+  1755|     sget-object p2, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
+  1757|     iput-object v10, v0, Lgjw;->y:Lgyw;
+  1759|     iput-object v10, v0, Lgjw;->z:Ljava/util/Iterator;
+  1761|     const/4 v1, 0x6
+  1763|     iput v1, v0, Lgjw;->C:I
+  1765|     invoke-virtual {p1, v2, p2, v0}, Lzf5;->i(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+  1767|     move-result-object p1
+  1769|     if-ne p1, v11, :cond_9
+  1771|     goto :goto_8
+  1773|     :cond_9
+  1774|     :goto_5
+  1775|     invoke-virtual {p0}, Lujw;->e()V
+  1777|     sget-object p0, Lmtx;->a:Lmtx;
+  1779|     new-instance v0, Ljava/lang/RuntimeException;
+  1781|     const-string p0, "CatchUpTruncated healed via latest-page reload"
+  1783|     invoke-direct {v0, p0}, Ljava/lang/RuntimeException;-><init>(Ljava/lang/String;)V
+  1785|     const/4 v4, 0x0
+  1787|     const/16 v5, 0x38
+  1789|     const-string v1, "sessions/sse catch-up heal"
+  1791|     sget-object v2, Loav;->v:Loav;
+  1793|     const/4 v3, 0x0
+  1795|     invoke-static/range {v0 .. v5}, Lmtx;->f(Ljava/lang/Throwable;Ljava/lang/String;Loav;Ljava/util/Map;Ljava/util/List;I)V
+  1797|     goto :goto_9
+  1799|     :cond_a
+  1800|     :goto_6
+  1801|     iget-wide v1, p0, Lujw;->l:J
+  1803|     iget-wide v3, p1, Lgyw;->b:J
+  1805|     invoke-static {v1, v2, v3, v4}, Ljava/lang/Math;->max(JJ)J
+  1807|     move-result-wide v1
+  1809|     iput-wide v1, p0, Lujw;->l:J
+  1811|     sget-object p1, Lmtx;->a:Lmtx;
+  1813|     new-instance v3, Ljava/lang/RuntimeException;
+  1815|     const-string p1, "CatchUpTruncated gap-heal reload failed \u2014 unfetchable transcript gap"
+  1817|     invoke-direct {v3, p1}, Ljava/lang/RuntimeException;-><init>(Ljava/lang/String;)V
+  1819|     iget-object p1, p2, Lziw;->e:Lzv0;
+  1821|     if-eqz p1, :cond_b
+  1823|     invoke-static {p1}, Lw6n;->D(Lzv0;)Ljava/lang/String;
+  1825|     move-result-object p1
+  1827|     goto :goto_7
+  1829|     :cond_b
+  1830|     move-object p1, v10
+  1832|     :goto_7
+  1833|     const-string p2, "reload_failure"
+  1835|     invoke-static {p2, p1}, Ljava/util/Collections;->singletonMap(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/Map;
+  1837|     move-result-object v6
+  1839|     invoke-virtual {v6}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+  1841|     const/4 v7, 0x0
+  1843|     const/16 v8, 0x30
+  1845|     const-string v4, "sessions/sse ramp precondition"
+  1847|     invoke-static/range {v3 .. v8}, Lmtx;->f(Ljava/lang/Throwable;Ljava/lang/String;Loav;Ljava/util/Map;Ljava/util/List;I)V
+  1849|     iget-object p1, p0, Lujw;->m:Ljava/lang/String;
+  1851|     if-eqz p1, :cond_c
+  1853|     iput-boolean v9, p0, Lujw;->n:Z
+  1855|     const/4 p1, 0x0
+  1857|     iput p1, p0, Lujw;->p:I
+  1859|     new-instance p0, Ltwu;
+  1861|     invoke-direct {p0, v9, p1}, Ltwu;-><init>(ZZ)V
+  1863|     iput-object v10, v0, Lgjw;->y:Lgyw;
+  1865|     const/4 p1, 0x3
+  1867|     iput p1, v0, Lgjw;->C:I
+  1869|     iget-object p1, v12, Ltdp;->z:Llc4;
+  1871|     invoke-interface {p1, v0, p0}, Le0u;->a(Lw7a;Ljava/lang/Object;)Ljava/lang/Object;
+  1873|     move-result-object p0
+  1875|     if-ne p0, v11, :cond_c
+  1877|     :goto_8
+  1878|     return-object v11
+  1880|     :cond_c
+  1881|     :goto_9
+  1882|     sget-object p0, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
+  1884|     return-object p0
+  1886|     :pswitch_data_0
+  1887|     .packed-switch 0x0
+  1888|         :pswitch_6
+  1889|         :pswitch_5
+  1890|         :pswitch_4
+  1891|         :pswitch_3
+  1892|         :pswitch_2
+  1893|         :pswitch_1
+  1894|         :pswitch_0
+  1895|     .end packed-switch
+  1896| .end method
+
+### m4v: sessions/watch resume_token; events cursor
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/m4v.java 行 25-125
+    25|             str2 = null;
+    26|         }
+    27|         if ((i & 16) != 0) {
+    28|             arrayList = null;
+    29|         }
+    30|         z0n z0nVar = m4vVar.b;
+    31|         vv0 vv0VarF = a0o.f(1, "v1/code/sessions/watch", "Accept", "text/event-stream");
+    32|         vv0VarF.i("resume_token", str);
+    33|         if (list != null) {
+    34|             Iterator it = list.iterator();
+    35|             while (it.hasNext()) {
+    36|                 vv0VarF.i("tags", (String) it.next());
+    37|             }
+    38|         }
+    39|         vv0VarF.h("include_trigger_sessions", bool);
+    40|         vv0VarF.i("trigger_id", str2 != null ? str2 : null);
+    41|         if (arrayList != null) {
+    42|             int size = arrayList.size();
+    43|             int i2 = 0;
+    44|             while (i2 < size) {
+    45|                 Object obj = arrayList.get(i2);
+    46|                 i2++;
+    47|                 vv0VarF.i("session_ids", (String) obj);
+    48|             }
+    49|         }
+    50|         return z0nVar.a(vv0VarF.b());
+    51|     }
+    53|     public final Object a(o5b o5bVar, y7a y7aVar) {
+    54|         vv0 vv0Var = new vv0(2, "v1/code/sessions");
+    55|         vv0Var.d(o5b.Companion.serializer(), o5bVar);
+    56|         return this.a.a(vv0Var.b(), r5b.Companion.serializer(), y7aVar);
+    57|     }
+    59|     public final Object b(prf prfVar, y7a y7aVar) {
+    60|         vv0 vv0Var = new vv0(2, "v1/code/github/get-batch-branch-status");
+    61|         vv0Var.d(prf.Companion.serializer(), prfVar);
+    62|         return this.a.a(vv0Var.b(), srf.Companion.serializer(), y7aVar);
+    63|     }
+    65|     public final Object c(y7a y7aVar, String str, boolean z) {
+    66|         vv0 vv0VarM = w0k.m(1, "v1/code/channels/{channel_id}", "channel_id", str);
+    67|         vv0VarM.h("include_members", Boolean.valueOf(z));
+    68|         return this.a.a(vv0VarM.b(), yh5.Companion.serializer(), y7aVar);
+    69|     }
+    71|     public final Object d(String str, y7a y7aVar) {
+    72|         return this.a.a(cee.c(1, "v1/code/sessions/{sessionId}", "sessionId", str), rsf.Companion.serializer(), y7aVar);
+    73|     }
+    75|     public final Object e(String str, Integer num, String str2, u1v u1vVar) {
+    76|         vv0 vv0VarM = w0k.m(1, "v1/code/shared-sessions/{shareId}", "shareId", str);
+    77|         vv0VarM.g(num, "limit");
+    78|         vv0VarM.i("cursor", str2);
+    79|         return this.a.a(vv0VarM.b(), fgv.Companion.serializer(), u1vVar);
+    80|     }
+    82|     public final Object f(y7a y7aVar, Integer num, String str, String str2, String str3, boolean z) {
+    83|         vv0 vv0VarM = w0k.m(1, "v1/code/channels/{channel_id}/pull_requests", "channel_id", str);
+    84|         vv0VarM.i("group", str2);
+    85|         vv0VarM.i("cursor", str3);
+    86|         vv0VarM.g(num, "limit");
+    87|         Boolean bool = Boolean.TRUE;
+    88|         if (!z) {
+    89|             bool = null;
+    90|         }
+    91|         vv0VarM.h("viewer_only", bool);
+    92|         return this.a.a(vv0VarM.b(), rhj.Companion.serializer(), y7aVar);
+    93|     }
+    95|     public final Object g(String str, String str2, Integer num, y7a y7aVar) {
+    96|         vv0 vv0VarM = w0k.m(1, "v1/code/sessions/{sessionId}/events", "sessionId", str);
+    97|         vv0VarM.i("cursor", str2);
+    98|         vv0VarM.i("sort_order", "desc");
+    99|         vv0VarM.g(num, "limit");
+   100|         return this.a.a(vv0VarM.b(), eij.Companion.serializer(), y7aVar);
+   101|     }
+   103|     public final Object h(ylp ylpVar, y7a y7aVar) {
+   104|         vv0 vv0Var = new vv0(1, "v1/code/project-conversions");
+   105|         int iP = xss.p(ylpVar);
+   106|         if (iP == 0) {
+   107|             vv0Var.i("chat_project_id", ((xlp) ylpVar).b());
+   108|         } else {
+   109|             if (iP != 1) {
+   110|                 uqa.a();
+   111|                 return null;
+   112|             }
+   113|             vv0Var.i("channel_id", ((wlp) ylpVar).b());
+   114|         }
+   115|         vv0Var.g(new Integer(1), "limit");
+   116|         return this.a.a(vv0Var.b(), flj.Companion.serializer(), y7aVar);
+   117|     }
+   119|     public final Object i(String str, Integer num, List list, Boolean bool, String str2, String str3, ArrayList arrayList, y7a y7aVar) {
+   120|         vv0 vv0Var = new vv0(1, "v1/code/sessions");
+   121|         vv0Var.i("cursor", str);
+   122|         vv0Var.g(num, "limit");
+   123|         if (list != null) {
+   124|             Iterator it = list.iterator();
+   125|             while (it.hasNext()) {
+
+### st: WS subscribe replay=false
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/st.java 行 60-66
+    60|         o0nVarH.A = s220.c(dc10.Z(30L, h7d.SECONDS));
+    61|         this.p = new p0n(o0nVarH);
+    62|         bsr bsrVar = new bsr();
+    63|         bsrVar.e(w0k.r(huVar.c, String.format(Locale.ROOT, "v1/sessions/ws/%s/subscribe", Arrays.copyOf(new Object[]{str}, 1)), "?organization_uuid=", str2, "&replay=false"));
+    64|         bsrVar.b("X-Organization-Uuid", str2);
+    65|         bsrVar.b("Anthropic-Version", "2023-06-01");
+    66|         bsrVar.b("Anthropic-Beta", "ccr-byoc-2025-07-29");
+
+### y2v.d0: before_id/after_id/anchor_to_latest
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/y2v.java 行 55-73
+    55|     public static Object d0(y2v y2vVar, String str, String str2, String str3, Integer num, du duVar, int i) {
+    56|         Boolean bool = Boolean.TRUE;
+    57|         if ((i & 2) != 0) {
+    58|             str2 = null;
+    59|         }
+    60|         if ((i & 4) != 0) {
+    61|             str3 = null;
+    62|         }
+    63|         if ((i & 16) != 0) {
+    64|             bool = null;
+    65|         }
+    66|         gv0 gv0Var = y2vVar.a.a;
+    67|         vv0 vv0VarM = w0k.m(1, "v1/sessions/{sessionId}/events", "sessionId", str);
+    68|         vv0VarM.i("before_id", str2);
+    69|         vv0VarM.i("after_id", str3);
+    70|         vv0VarM.g(num, "limit");
+    71|         vv0VarM.h("anchor_to_latest", bool);
+    72|         return gv0Var.a(vv0VarM.b(), w2e.Companion.serializer(), duVar);
+    73|     }
+
+### hu.smali: after_id 调用点 (mask 0x12)
+# 来源: claude/1.261009.20/work/smali_out/smali/hu.smali 行 3045-3080
+  3046|     iput v6, v11, Ldu;->N:I
+  3048|     iput v5, v11, Ldu;->O:I
+  3050|     iput v5, v11, Ldu;->P:I
+  3052|     const/4 v12, 0x4
+  3054|     iput v12, v11, Ldu;->S:I
+  3056|     const/16 v22, 0x0
+  3058|     const/16 v23, 0x12
+  3060|     move-object/from16 p2, v1
+  3062|     move-object/from16 p5, v2
+  3064|     move-object/from16 p6, v11
+  3066|     move-object/from16 p1, v20
+  3068|     move-object/from16 p3, v22
+  3070|     move/from16 p7, v23
+  3072|     invoke-static/range {p1 .. p7}, Ly2v;->d0(Ly2v;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ldu;I)Ljava/lang/Object;
+  3074|     move-result-object v1
+  3076|     move-object/from16 v2, p2
+  3078|     if-ne v1, v0, :cond_16
+  3080|     :goto_d
+
+### o0h: resume from scratch/from token 与结束原因
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/o0h.java 行 680-705
+   680|         String str;
+   681|         boolean z = k5hVar.k0().a;
+   682|         k5hVar.I0(vq9.a(k5hVar.k0(), false, false, null, null, null, null, false, 126));
+   683|         boolean z2 = (sywVar instanceof pyw) && ((pyw) sywVar).a;
+   684|         if (z) {
+   685|             Map mapSingletonMap = Collections.singletonMap("resume", this.b0.d().length() == 0 ? "from scratch" : "from token");
+   686|             mapSingletonMap.getClass();
+   687|             if (sywVar != null) {
+   688|                 Set set = zyg.a;
+   689|                 if (sywVar instanceof pyw) {
+   690|                     str = "ended_clean";
+   691|                 } else if (sywVar.equals(qyw.a)) {
+   692|                     str = "receive_timeout";
+   693|                 } else if (sywVar instanceof oyw) {
+   694|                     str = "dropped";
+   695|                 } else if (sywVar instanceof ryw) {
+   696|                     str = "terminal";
+   697|                 } else {
+   698|                     if (!sywVar.equals(nyw.a)) {
+   699|                         uqa.a();
+   700|                         return;
+   701|                     }
+   702|                     str = "closed";
+   703|                 }
+   704|                 mapU = bak.U(new kun("end", str), new kun("clean", Boolean.valueOf(z2)));
+   705|             } else {

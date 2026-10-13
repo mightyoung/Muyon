@@ -1,0 +1,264 @@
+# content_block_retract → RetractFrom：只删流内显示/缓冲状态
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### sse/c.n(): message_start 分支，清空本轮块状态
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/com/anthropic/claude/conversation/sse/c.smali 行 248-300
+   248|     instance-of v10, v0, Lnll;
+   250|     const/4 v11, 0x2
+   252|     if-eqz v10, :cond_f
+   254|     check-cast v0, Lnll;
+   256|     iget-object v3, v0, Lnll;->a:Lva9;
+   258|     iget-object v3, v3, Lva9;->a:Ljava/lang/String;
+   260|     iput-object v3, v2, Lniw;->p:Ljava/lang/String;
+   262|     if-eqz v3, :cond_d
+   264|     iput-boolean v8, v2, Lniw;->q:Z
+   266|     iget-object v7, v2, Lniw;->j:Ljava/util/LinkedHashMap;
+   268|     invoke-virtual {v7}, Ljava/util/LinkedHashMap;->clear()V
+   270|     iget-object v7, v2, Lniw;->k:Ljava/util/HashMap;
+   272|     invoke-virtual {v7}, Ljava/util/HashMap;->clear()V
+   274|     iget-object v7, v2, Lniw;->l:Ljava/util/LinkedHashMap;
+   276|     invoke-virtual {v7}, Ljava/util/LinkedHashMap;->clear()V
+   278|     iget-object v2, v2, Lniw;->a:Larq;
+   280|     invoke-virtual {v2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+   282|     sget-object v7, Lxdo;->y:Lxdo;
+   284|     invoke-virtual {v7}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+   286|     iput-object v7, v2, Larq;->x:Ljava/lang/Object;
+   288|     iput-object v3, v2, Larq;->w:Ljava/lang/Object;
+   290|     invoke-static {}, Lees;->r()Lfhj;
+   292|     move-result-object v2
+   294|     iget-object v7, v0, Lnll;->b:Ljava/lang/String;
+   296|     if-eqz v7, :cond_c
+   298|     new-instance v9, Leea;
+   300|     invoke-direct {v9, v7, v3}, Leea;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+
+### sse/c.n(): content_block_retract 分支
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/com/anthropic/claude/conversation/sse/c.smali 行 2003-2260
+  2003|     instance-of v7, v0, Lm1a;
+  2005|     if-eqz v7, :cond_73
+  2007|     check-cast v0, Lm1a;
+  2009|     iget-object v0, v0, Lm1a;->a:Ljava/lang/Integer;
+  2011|     if-nez v0, :cond_60
+  2013|     goto/16 :goto_5
+  2015|     :cond_60
+  2016|     iget-object v7, v2, Lniw;->j:Ljava/util/LinkedHashMap;
+  2018|     new-instance v8, Ljava/util/LinkedHashMap;
+  2020|     invoke-direct {v8}, Ljava/util/LinkedHashMap;-><init>()V
+  2022|     invoke-virtual {v7}, Ljava/util/LinkedHashMap;->entrySet()Ljava/util/Set;
+  2024|     move-result-object v7
+  2026|     invoke-interface {v7}, Ljava/util/Set;->iterator()Ljava/util/Iterator;
+  2028|     move-result-object v7
+  2030|     :cond_61
+  2031|     :goto_24
+  2032|     invoke-interface {v7}, Ljava/util/Iterator;->hasNext()Z
+  2034|     move-result v9
+  2036|     if-eqz v9, :cond_62
+  2038|     invoke-interface {v7}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  2040|     move-result-object v9
+  2042|     check-cast v9, Ljava/util/Map$Entry;
+  2044|     invoke-interface {v9}, Ljava/util/Map$Entry;->getKey()Ljava/lang/Object;
+  2046|     move-result-object v10
+  2048|     check-cast v10, Ljava/lang/Number;
+  2050|     invoke-virtual {v10}, Ljava/lang/Number;->intValue()I
+  2052|     move-result v10
+  2054|     invoke-virtual {v0}, Ljava/lang/Integer;->intValue()I
+  2056|     move-result v11
+  2058|     if-lt v10, v11, :cond_61
+  2060|     invoke-interface {v9}, Ljava/util/Map$Entry;->getKey()Ljava/lang/Object;
+  2062|     move-result-object v10
+  2064|     invoke-interface {v9}, Ljava/util/Map$Entry;->getValue()Ljava/lang/Object;
+  2066|     move-result-object v9
+  2068|     invoke-virtual {v8, v10, v9}, Ljava/util/AbstractMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+  2070|     goto :goto_24
+  2072|     :cond_62
+  2073|     invoke-virtual {v8}, Ljava/util/LinkedHashMap;->values()Ljava/util/Collection;
+  2075|     move-result-object v7
+  2077|     iget-object v8, v2, Lniw;->j:Ljava/util/LinkedHashMap;
+  2079|     invoke-virtual {v8}, Ljava/util/LinkedHashMap;->keySet()Ljava/util/Set;
+  2081|     move-result-object v8
+  2083|     invoke-virtual {v8}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+  2085|     check-cast v8, Ljava/lang/Iterable;
+  2087|     invoke-interface {v8}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+  2089|     move-result-object v8
+  2091|     :cond_63
+  2092|     :goto_25
+  2093|     invoke-interface {v8}, Ljava/util/Iterator;->hasNext()Z
+  2095|     move-result v9
+  2097|     if-eqz v9, :cond_64
+  2099|     invoke-interface {v8}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  2101|     move-result-object v9
+  2103|     check-cast v9, Ljava/lang/Integer;
+  2105|     invoke-virtual {v9}, Ljava/lang/Integer;->intValue()I
+  2107|     move-result v9
+  2109|     invoke-virtual {v0}, Ljava/lang/Integer;->intValue()I
+  2111|     move-result v10
+  2113|     if-lt v9, v10, :cond_63
+  2115|     invoke-interface {v8}, Ljava/util/Iterator;->remove()V
+  2117|     goto :goto_25
+  2119|     :cond_64
+  2120|     iget-object v8, v2, Lniw;->k:Ljava/util/HashMap;
+  2122|     invoke-virtual {v8}, Ljava/util/HashMap;->values()Ljava/util/Collection;
+  2124|     move-result-object v8
+  2126|     check-cast v7, Ljava/lang/Iterable;
+  2128|     invoke-static {v7}, Ls49;->r1(Ljava/lang/Iterable;)Ljava/util/Set;
+  2130|     move-result-object v9
+  2132|     check-cast v9, Ljava/util/Collection;
+  2134|     invoke-interface {v8, v9}, Ljava/util/Collection;->removeAll(Ljava/util/Collection;)Z
+  2136|     iget-object v8, v2, Lniw;->l:Ljava/util/LinkedHashMap;
+  2138|     invoke-virtual {v8}, Ljava/util/LinkedHashMap;->keySet()Ljava/util/Set;
+  2140|     move-result-object v8
+  2142|     invoke-virtual {v8}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+  2144|     check-cast v8, Ljava/lang/Iterable;
+  2146|     invoke-interface {v8}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+  2148|     move-result-object v8
+  2150|     :cond_65
+  2151|     :goto_26
+  2152|     invoke-interface {v8}, Ljava/util/Iterator;->hasNext()Z
+  2154|     move-result v9
+  2156|     if-eqz v9, :cond_66
+  2158|     invoke-interface {v8}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  2160|     move-result-object v9
+  2162|     check-cast v9, Ljava/lang/Integer;
+  2164|     invoke-virtual {v9}, Ljava/lang/Integer;->intValue()I
+  2166|     move-result v9
+  2168|     invoke-virtual {v0}, Ljava/lang/Integer;->intValue()I
+  2170|     move-result v10
+  2172|     if-lt v9, v10, :cond_65
+  2174|     invoke-interface {v8}, Ljava/util/Iterator;->remove()V
+  2176|     goto :goto_26
+  2178|     :cond_66
+  2179|     new-instance v8, Ljava/util/LinkedHashSet;
+  2181|     invoke-direct {v8}, Ljava/util/LinkedHashSet;-><init>()V
+  2183|     invoke-interface {v7}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+  2185|     move-result-object v0
+  2187|     :goto_27
+  2188|     invoke-interface {v0}, Ljava/util/Iterator;->hasNext()Z
+  2190|     move-result v9
+  2192|     if-eqz v9, :cond_68
+  2194|     invoke-interface {v0}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  2196|     move-result-object v9
+  2198|     check-cast v9, Lmiw;
+  2200|     iget-object v9, v9, Lmiw;->c:Lx0a;
+  2202|     invoke-interface {v9}, Lx0a;->c()Ljava/util/Set;
+  2204|     move-result-object v9
+  2206|     if-nez v9, :cond_67
+  2208|     move-object v9, v3
+  2210|     :cond_67
+  2211|     check-cast v9, Ljava/lang/Iterable;
+  2213|     invoke-static {v8, v9}, Lx49;->k0(Ljava/util/Collection;Ljava/lang/Iterable;)V
+  2215|     goto :goto_27
+  2217|     :cond_68
+  2218|     invoke-static {}, Lees;->r()Lfhj;
+  2220|     move-result-object v3
+  2222|     invoke-interface {v7}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+  2224|     move-result-object v7
+  2226|     invoke-interface {v7}, Ljava/util/Iterator;->hasNext()Z
+  2228|     move-result v0
+  2230|     if-nez v0, :cond_69
+  2232|     const/4 v0, 0x0
+  2234|     goto :goto_28
+  2236|     :cond_69
+  2237|     invoke-interface {v7}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  2239|     move-result-object v0
+  2241|     invoke-interface {v7}, Ljava/util/Iterator;->hasNext()Z
+  2243|     move-result v9
+  2245|     if-nez v9, :cond_6a
+  2247|     goto :goto_28
+  2249|     :cond_6a
+  2250|     move-object v9, v0
+  2252|     check-cast v9, Lmiw;
+  2254|     iget v9, v9, Lmiw;->b:I
+  2256|     :cond_6b
+  2257|     invoke-interface {v7}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  2259|     move-result-object v10
+
+### xz3.toString = RetractFrom(block=...)
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/xz3.java 行 20-30
+    20|         return (obj instanceof xz3) && this.a.equals(((xz3) obj).a);
+    21|     }
+    23|     public final int hashCode() {
+    24|         return this.a.hashCode();
+    25|     }
+    27|     public final String toString() {
+    28|         return w0k.p("RetractFrom(block=", j1a.d(this.a), ")");
+    29|     }
+    30| }
+
+### e5l.a(): 并行缓冲器，代际计数 c
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/e5l.java 行 26-60
+    26|     public final void a(azw azwVar) {
+    27|         Integer num;
+    28|         final byte b;
+    29|         if (azwVar == null) {
+    30|             return;
+    31|         }
+    32|         boolean z = azwVar instanceof nll;
+    33|         LinkedHashMap linkedHashMap = this.f;
+    34|         final byte b2 = 1;
+    35|         if (z) {
+    36|             this.c++;
+    37|             linkedHashMap.clear();
+    38|             return;
+    39|         }
+    40|         boolean z2 = azwVar instanceof q1a;
+    41|         LinkedHashMap linkedHashMap2 = this.d;
+    42|         if (z2) {
+    43|             q1a q1aVar = (q1a) azwVar;
+    44|             int i = q1aVar.a;
+    45|             b5l b5lVar = (b5l) linkedHashMap2.get(Integer.valueOf(i));
+    46|             if (b5lVar != null) {
+    47|                 b5l b5lVar2 = b5lVar.c != this.c ? b5lVar : null;
+    48|                 if (b5lVar2 != null) {
+    49|                     linkedHashMap2.remove(Integer.valueOf(i));
+    50|                     b(b5lVar2);
+    51|                 }
+    52|             }
+    53|             x0a x0aVar = q1aVar.b;
+    54|             if (x0aVar == null) {
+    55|                 return;
+    56|             }
+    57|             if (x0aVar instanceof ncz) {
+    58|                 ncz nczVar = (ncz) x0aVar;
+    59|                 if (this.b.containsKey(nczVar.c)) {
+    60|                     linkedHashMap2.put(Integer.valueOf(i), new b5l(this.c, q1aVar.a, nczVar.c, nczVar.d, nczVar.e.a));
+
+### e5l.a(): retract 分支
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/e5l.java 行 137-175
+   137|             arrayList.add(new c5l(this.c, i3, string));
+   138|             return;
+   139|         }
+   140|         if (!(azwVar instanceof m1a) || (num = ((m1a) azwVar).a) == null) {
+   141|             return;
+   142|         }
+   143|         final int iIntValue = num.intValue();
+   144|         Iterator it = linkedHashMap2.entrySet().iterator();
+   145|         while (true) {
+   146|             b = 0;
+   147|             if (!it.hasNext()) {
+   148|                 break;
+   149|             }
+   150|             Map.Entry entry = (Map.Entry) it.next();
+   151|             if (((b5l) entry.getValue()).c == this.c && ((Number) entry.getKey()).intValue() >= iIntValue) {
+   152|                 b = 1;
+   153|             }
+   154|             if (b == 1) {
+   155|                 it.remove();
+   156|             }
+   157|         }
+   158|         Iterator it2 = linkedHashMap.keySet().iterator();
+   159|         while (it2.hasNext()) {
+   160|             if (((Integer) it2.next()).intValue() >= iIntValue) {
+   161|                 it2.remove();
+   162|             }
+   163|         }
+   164|         x49.n0(this.e, new qmf(this) { // from class: a5l
+   165|             public final /* synthetic */ e5l w;
+   167|             {
+   168|                 this.w = this;
+   169|             }
+   171|             @Override // defpackage.qmf
+   172|             public final Object b(Object obj3) {
+   173|                 byte b3 = b;
+   174|                 boolean z4 = false;
+   175|                 int i4 = iIntValue;

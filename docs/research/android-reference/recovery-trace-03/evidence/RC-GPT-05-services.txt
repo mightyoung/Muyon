@@ -1,0 +1,35 @@
+# ConversationStreamingService(20min failsafe, NOT_STICKY) / WorkReasoning FGS(dataSync)
+# 样本: ChatGPT 1.2026.272 base APK sha256=47d8350a…040a（全量见 manifest.json）
+# 工具: apktool 2.7.0 smali（主）+ jadx 1.5.3（约66%中止，部分类缺失）；行号=本地输出
+# 标签: 包内直接证据（除非另注）
+
+### ConversationStreamingService.onStartCommand
+# 来源: chatgpt/1.2026.272/work/smali_out/smali_classes4/com/openai/feature/conversations/impl/coordinator/ConversationStreamingService.smali 行 340-400
+   340|     invoke-virtual {p1}, Lqqp0;->getValue()Ljava/lang/Object;
+   345|     move-result-object p2
+   348|     check-cast p2, Landroid/os/Handler;
+   352|     iget-object p0, p0, Lcom/openai/feature/conversations/impl/coordinator/ConversationStreamingService;->b:Ll96;
+   356|     invoke-virtual {p2, p0}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
+   361|     invoke-virtual {p1}, Lqqp0;->getValue()Ljava/lang/Object;
+   366|     move-result-object p1
+   369|     check-cast p1, Landroid/os/Handler;
+   373|     const-wide/32 p2, 0x124f80
+   378|     invoke-virtual {p1, p0, p2, p3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+   383|     const/4 p0, 0x2
+   386|     return p0
+
+### manifest_tree
+# 来源: chatgpt/1.2026.272/work/manifest_tree.txt 行 888-900
+   888|       E: meta-data (line=756)
+   889|         A: android:name(0x01010003)="com.google.android.gms.wallet.api.enabled" (Raw: "com.google.android.gms.wallet.api.enabled")
+   890|         A: android:value(0x01010024)=(type 0x12)0xffffffff
+   891|       E: service (line=760)
+   892|         A: android:name(0x01010003)="com.openai.feature.conversations.impl.coordinator.ConversationStreamingService" (Raw: "com.openai.feature.conversations.impl.coordinator.ConversationStreamingService")
+   893|         A: android:exported(0x01010010)=(type 0x12)0x0
+   894|       E: service (line=763)
+   895|         A: android:name(0x01010003)="com.openai.feature.conversations.impl.notifications.WorkReasoningNotificationForegroundService" (Raw: "com.openai.feature.conversations.impl.notifications.WorkReasoningNotificationFor
+   896|         A: android:exported(0x01010010)=(type 0x12)0x0
+   897|         A: android:foregroundServiceType(0x01010599)=(type 0x11)0x1
+   898|       E: service (line=767)
+   899|         A: android:label(0x01010001)=@0x7f1300c3
+   900|         A: android:icon(0x01010002)=@0x7f0800d4

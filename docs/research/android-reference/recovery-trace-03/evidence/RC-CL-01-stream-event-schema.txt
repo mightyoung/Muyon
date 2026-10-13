@@ -1,0 +1,78 @@
+# Claude 聊天 SSE 事件模型：块级 index，无 event_id/seq/cursor
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### StreamEvent 多态并集 (zyw)
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/zyw.java 行 36-36
+    36|         return new vot("com.anthropic.claude.api.chat.messages.StreamEvent", war.a(azw.class), new xe7[]{war.a(w89.class), war.a(si9.class), war.a(g1a.class), war.a(m1a.class), war.a(q1a.class), war.a(v1a.class), war.a(h
+
+### lll 序列化字段
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/lll.java 行 15-26
+    15|         lll lllVar = new lll();
+    16|         a = lllVar;
+    17|         PluginGeneratedSerialDescriptor pluginGeneratedSerialDescriptor = new PluginGeneratedSerialDescriptor("message_start", lllVar, 2);
+    18|         pluginGeneratedSerialDescriptor.l("message", false);
+    19|         pluginGeneratedSerialDescriptor.l("discarded_parent_message_uuid", true);
+    20|         pluginGeneratedSerialDescriptor.n(new nu1((byte) 10));
+    21|         descriptor = pluginGeneratedSerialDescriptor;
+    22|     }
+    24|     @Override // defpackage.sqf
+    25|     public final KSerializer[] childSerializers() {
+    26|         return new KSerializer[]{ta9.a, yb10.z(xhl.a)};
+
+### o1a 序列化字段
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/o1a.java 行 15-26
+    15|         o1a o1aVar = new o1a();
+    16|         a = o1aVar;
+    17|         PluginGeneratedSerialDescriptor pluginGeneratedSerialDescriptor = new PluginGeneratedSerialDescriptor("content_block_start", o1aVar, 2);
+    18|         pluginGeneratedSerialDescriptor.l("index", false);
+    19|         pluginGeneratedSerialDescriptor.l("content_block", false);
+    20|         pluginGeneratedSerialDescriptor.n(new nu1((byte) 10));
+    21|         descriptor = pluginGeneratedSerialDescriptor;
+    22|     }
+    24|     /* JADX WARN: Multi-variable type inference failed */
+    25|     @Override // defpackage.sqf
+    26|     public final KSerializer[] childSerializers() {
+
+### e1a 序列化字段
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/e1a.java 行 15-26
+    15|         e1a e1aVar = new e1a();
+    16|         a = e1aVar;
+    17|         PluginGeneratedSerialDescriptor pluginGeneratedSerialDescriptor = new PluginGeneratedSerialDescriptor("content_block_delta", e1aVar, 2);
+    18|         pluginGeneratedSerialDescriptor.l("index", false);
+    19|         pluginGeneratedSerialDescriptor.l("delta", false);
+    20|         pluginGeneratedSerialDescriptor.n(new nu1((byte) 10));
+    21|         descriptor = pluginGeneratedSerialDescriptor;
+    22|     }
+    24|     /* JADX WARN: Multi-variable type inference failed */
+    25|     @Override // defpackage.sqf
+    26|     public final KSerializer[] childSerializers() {
+
+### t1a 序列化字段
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/t1a.java 行 15-26
+    15|         t1a t1aVar = new t1a();
+    16|         a = t1aVar;
+    17|         PluginGeneratedSerialDescriptor pluginGeneratedSerialDescriptor = new PluginGeneratedSerialDescriptor("content_block_stop", t1aVar, 5);
+    18|         pluginGeneratedSerialDescriptor.l("index", false);
+    19|         pluginGeneratedSerialDescriptor.l("stop_timestamp", false);
+    20|         pluginGeneratedSerialDescriptor.l("disposition", true);
+    21|         pluginGeneratedSerialDescriptor.l("collapsible", true);
+    22|         pluginGeneratedSerialDescriptor.l("summary_pending", true);
+    23|         pluginGeneratedSerialDescriptor.n(new nu1((byte) 10));
+    24|         descriptor = pluginGeneratedSerialDescriptor;
+    25|     }
+
+### k1a 序列化字段
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/k1a.java 行 15-26
+    15|         k1a k1aVar = new k1a();
+    16|         a = k1aVar;
+    17|         PluginGeneratedSerialDescriptor pluginGeneratedSerialDescriptor = new PluginGeneratedSerialDescriptor("content_block_retract", k1aVar, 1);
+    18|         pluginGeneratedSerialDescriptor.l("from_index", true);
+    19|         pluginGeneratedSerialDescriptor.n(new nu1((byte) 10));
+    20|         descriptor = pluginGeneratedSerialDescriptor;
+    21|     }
+    23|     @Override // defpackage.sqf
+    24|     public final KSerializer[] childSerializers() {
+    25|         return new KSerializer[]{yb10.z(uyh.a)};
+    26|     }

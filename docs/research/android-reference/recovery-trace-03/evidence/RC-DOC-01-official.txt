@@ -1,0 +1,19 @@
+# 官方说明摘录（公开免费文档，2026-10-13 访问；仅短引用）
+# 注意：以下是对公开 API/开源服务端的说明，不等同于 Android App 的私有端点行为。
+
+[A] Anthropic — Streaming Messages（Claude API 文档）
+URL: https://docs.claude.com/en/docs/build-with-claude/streaming  访问: 2026-10-13
+- 事件流: message_start → content_block_start/delta/stop（每块有 index，对应最终 content 数组下标）→ message_delta → message_stop；可夹杂 ping、error。
+- "new event types may be added, and your code should handle unknown event types gracefully."
+- 错误恢复：保存已收到的部分，再发起继续请求；"Tool use and thinking blocks cannot be partially recovered."
+- 文档中的事件无 event id / 序号字段（与 App 包内 zyw 并集一致）。content_block_retract 未在该公开文档出现 → App 私有事件。
+
+[B] OpenAI Codex app-server README（开源）
+URL: https://raw.githubusercontent.com/openai/codex/main/codex-rs/app-server/README.md  访问: 2026-10-13
+- "Cancellation cannot roll back completed effects."
+- "Notifications remain snapshots: clients reread current account and requirements state rather than treating a queued notification as authorization."
+- revision 是 "equality tokens, not clocks: never compare or merge them across threads or hosts."
+- "Loading snapshots never acknowledges activity."
+- item 锚点游标失效 → JSON-RPC -32602（invalid params）。
+- "Interrupt, realtime stop, and goal pause/clear remain available."
+- 列表错误 "are not evidence that history is exhausted."

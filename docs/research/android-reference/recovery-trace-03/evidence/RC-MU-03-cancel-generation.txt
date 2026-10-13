@@ -1,0 +1,211 @@
+# cancelGeneration: 本地设备命令先取消 → chat.cancel → 结果分类 CleanupReason
+# 样本: Muse (com.facebook.aura) 11.0.0.8.164 base APK sha256=c7e788b5df855912dffbefc4c017f2e621b54aaeef954424f56339bd994fcefa
+# 工具: jadx 1.5.3 (138 errors) + baksmali 2.5.2 定向（HatchAgentPermissionsRepository）
+# 标签: 包内直接证据（除非另注）
+
+### cancelGeneration (jadx 回退形式，含全部分支)
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/conversation/repo/HatchConversationRepository.java 行 6340-6443
+  6340|     public final java.lang.Object cancelGeneration(boolean r7, kotlin.jvm.functions.Function0<X.C23049Dx> r8, X.C0M8<? super X.C23049Dx> r9) {
+  6341|         /*
+  6342|             r6 = this;
+  6343|             boolean r0 = r9 instanceof com.facebook.aura.conversation.repo.HatchConversationRepository.C99301
+  6344|             if (r0 == 0) goto Lb3
+  6345|             r4 = r9
+  6346|             com.facebook.aura.conversation.repo.HatchConversationRepository$cancelGeneration$1 r4 = (com.facebook.aura.conversation.repo.HatchConversationRepository.C99301) r4
+  6347|             int r2 = r4.label
+  6348|             r1 = -2147483648(0xffffffff80000000, float:-0.0)
+  6349|             r0 = r2 & r1
+  6350|             if (r0 == 0) goto Lb3
+  6351|             int r2 = r2 - r1
+  6352|             r4.label = r2
+  6353|         L12:
+  6354|             java.lang.Object r1 = r4.result
+  6355|             X.8i6 r5 = X.EnumC21398i6.A02
+  6356|             int r0 = r4.label
+  6357|             r3 = 1
+  6358|             java.lang.String r2 = "HatchConversationRepository"
+  6359|             if (r0 == 0) goto L80
+  6360|             if (r0 != r3) goto Lba
+  6361|             java.lang.Object r8 = r4.L$0
+  6362|             kotlin.jvm.functions.Function0 r8 = (kotlin.jvm.functions.Function0) r8
+  6363|             X.C8mv.A03(r1)
+  6364|         L26:
+  6365|             kotlinx.serialization.json.JsonElement r1 = (kotlinx.serialization.json.JsonElement) r1
+  6366|             if (r1 != 0) goto L3a
+  6367|             java.lang.String r0 = "cancelGeneration: chat.cancel returned null (timeout / transport failure)"
+  6368|             X.C18737eM.A06(r2, r0)
+  6369|             com.facebook.aura.conversation.repo.CleanupReason r0 = com.facebook.aura.conversation.repo.CleanupReason.TRANSPORT_FAILURE
+  6370|         L31:
+  6371|             r6.cleanupStreamingState(r0)
+  6372|             r8.invoke()
+  6373|         L37:
+  6374|             X.9Dx r5 = X.C23049Dx.A00
+  6375|             return r5
+  6376|         L3a:
+  6377|             com.facebook.aura.conversation.repo.CancelChatResult r0 = com.facebook.aura.conversation.repo.HatchConversationRepositoryJsonKt.parseCancelChatResponse(r1)
+  6378|             boolean r5 = r0.cancelled
+  6379|             java.lang.String r0 = r0.messageId
+  6380|             r4 = 0
+  6381|             if (r0 == 0) goto L60
+  6382|             java.lang.String r3 = X.C3UN.A0d(r0)
+  6383|         L49:
+  6384|             java.lang.String r0 = "cancelGeneration: cancelled="
+  6385|             java.lang.StringBuilder r1 = X.AnonymousClass001.A0x(r0)
+  6386|             r1.append(r5)
+  6387|             java.lang.String r0 = " messageId="
+  6388|             java.lang.String r0 = X.C3UO.A0P(r0, r3, r1)
+  6389|             X.C18737eM.A05(r2, r0)
+  6390|             if (r5 == 0) goto L62
+  6391|             com.facebook.aura.conversation.repo.CleanupReason r0 = com.facebook.aura.conversation.repo.CleanupReason.USER_STOP
+  6392|             goto L31
+  6393|         L60:
+  6394|             r3 = r4
+  6395|             goto L49
+  6396|         L62:
+  6397|             com.facebook.aura.conversation.repo.HatchConversationState r0 = X.C3UL.A04(r6)
+  6398|             com.facebook.aura.conversation.repo.StreamingState r1 = r0.streamingState
+  6399|             com.facebook.aura.conversation.repo.StreamingState r0 = com.facebook.aura.conversation.repo.StreamingState.Done
+  6400|             if (r1 != r0) goto L6f
+  6401|             com.facebook.aura.conversation.repo.CleanupReason r0 = com.facebook.aura.conversation.repo.CleanupReason.CANCEL_RACE
+  6402|             goto L31
+  6403|         L6f:
+  6404|             com.facebook.aura.conversation.repo.HatchConversationState r0 = X.C3UL.A04(r6)
+  6405|             java.lang.String r2 = r0.streamingMessageId
+  6406|             X.03r r1 = r6.scope
+  6407|             com.facebook.aura.conversation.repo.HatchConversationRepository$cancelGeneration$3 r0 = new com.facebook.aura.conversation.repo.HatchConversationRepository$cancelGeneration$3
+  6408|             r0.<init>(r2, r8, r4)
+  6409|             X.AnonymousClass002.A1M(r0, r1)
+  6410|             goto L37
+  6411|         L80:
+  6412|             X.C8mv.A03(r1)
+  6413|             com.facebook.aura.gateway.service.NodeCommandService$Companion r1 = com.facebook.aura.gateway.service.NodeCommandService.Companion
+  6414|             android.content.Context r0 = r6.appContext
+  6415|             r1.cancelAll(r0)
+  6416|             com.facebook.aura.conversation.repo.HatchConversationState r0 = X.C3UL.A04(r6)
+  6417|             com.facebook.aura.conversation.repo.StreamingState r1 = r0.streamingState
+  6418|             com.facebook.aura.conversation.repo.StreamingState r0 = com.facebook.aura.conversation.repo.StreamingState.Done
+  6419|             if (r1 != r0) goto L9e
+  6420|             if (r7 != 0) goto L9e
+  6421|             java.lang.String r0 = "cancelGeneration: no active turn (streamingState=Done, agent idle) — skipping chat.cancel"
+  6422|             X.C18737eM.A05(r2, r0)
+  6423|             com.facebook.aura.conversation.repo.CleanupReason r0 = com.facebook.aura.conversation.repo.CleanupReason.PRE_STREAM
+  6424|             goto L31
+  6425|         L9e:
+  6426|             com.facebook.aura.gateway.HatchGatewayConnection r0 = r6.gateway
+  6427|             java.lang.String r1 = r6.sessionId
+  6428|             r4.L$0 = r8
+  6429|             r4.Z$0 = r7
+  6430|             r4.label = r3
+  6431|             com.facebook.aura.gateway.HatchGatewayEventsHandler r0 = r0.getEventsHandler$fbandroid_express_aura_java_com_facebook_aura_gateway_gateway()
+  6432|             java.lang.Object r1 = r0.sendChatCancel(r1, r4)
+  6433|             if (r1 != r5) goto L26
+  6434|             return r5
+  6435|         Lb3:
+  6436|             com.facebook.aura.conversation.repo.HatchConversationRepository$cancelGeneration$1 r4 = new com.facebook.aura.conversation.repo.HatchConversationRepository$cancelGeneration$1
+  6437|             r4.<init>(r9)
+  6438|             goto L12
+  6439|         Lba:
+  6440|             java.lang.IllegalStateException r0 = X.AnonymousClass002.A0v()
+  6441|             throw r0
+  6442|         */
+  6443|         throw new UnsupportedOperationException("Method not decompiled: com.facebook.aura.conversation.repo.HatchConversationRepository.cancelGeneration(boolean, kotlin.jvm.functions.Function0, X.0M8):java.lang.Object");
+
+### cancelGeneration$3: 5s 内未收到 ChatAborted → FALLBACK_TIMEOUT
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/conversation/repo/HatchConversationRepository.java 行 2266-2312
+  2266|     @DebugMetadata(c = "com.facebook.aura.conversation.repo.HatchConversationRepository$cancelGeneration$3", f = "HatchConversationRepository.kt", l = {1424}, m = "invokeSuspend")
+  2267|     /* renamed from: com.facebook.aura.conversation.repo.HatchConversationRepository$cancelGeneration$3, reason: invalid class name and case insensitive filesystem */
+  2268|     public final class C99323 extends AbstractC22769Ak implements C9M6<C03r, C0M8<? super C23049Dx>, Object> {
+  2269|         public final /* synthetic */ String $cancelAttemptStreamId;
+  2270|         public final /* synthetic */ Function0<C23049Dx> $onLocalBusyCleanup;
+  2271|         public int label;
+  2273|         /* JADX WARN: 'super' call moved to the top of the method (can break code semantics) */
+  2274|         public C99323(String str, Function0<C23049Dx> function0, C0M8<? super C99323> c0m8) {
+  2275|             super(2, c0m8);
+  2276|             this.$cancelAttemptStreamId = str;
+  2277|             this.$onLocalBusyCleanup = function0;
+  2278|         }
+  2280|         @Override // X.C9BK
+  2281|         public final C0M8<C23049Dx> create(Object obj, C0M8<?> c0m8) {
+  2282|             return HatchConversationRepository.this.new C99323(this.$cancelAttemptStreamId, this.$onLocalBusyCleanup, c0m8);
+  2283|         }
+  2285|         @Override // X.C9M6
+  2286|         public final Object invoke(C03r c03r, C0M8<? super C23049Dx> c0m8) {
+  2287|             return ((C99323) create(c03r, c0m8)).invokeSuspend(C23049Dx.A00);
+  2288|         }
+  2290|         @Override // X.C9BK
+  2291|         public final Object invokeSuspend(Object obj) {
+  2292|             EnumC21398i6 enumC21398i6 = EnumC21398i6.A02;
+  2293|             int i = this.label;
+  2294|             if (i == 0) {
+  2295|                 C8mv.A03(obj);
+  2296|                 this.label = 1;
+  2297|                 if (C6Ll.A00(5000L, this) == enumC21398i6) {
+  2298|                     return enumC21398i6;
+  2299|                 }
+  2300|             } else {
+  2301|                 if (i != 1) {
+  2302|                     throw AnonymousClass002.A0v();
+  2303|                 }
+  2304|                 C8mv.A03(obj);
+  2305|             }
+  2306|             HatchConversationState hatchConversationStateA04 = C3UL.A04(HatchConversationRepository.this);
+  2307|             if (hatchConversationStateA04.streamingState != StreamingState.Done && C25519Tj.areEqual(hatchConversationStateA04.streamingMessageId, this.$cancelAttemptStreamId)) {
+  2308|                 C18737eM.A06(HatchConversationRepositoryKt.TAG, "cancelGeneration: ChatAborted not received within 5000ms, forcing cleanup");
+  2309|                 HatchConversationRepository.this.cleanupStreamingState(CleanupReason.FALLBACK_TIMEOUT);
+  2310|                 this.$onLocalBusyCleanup.invoke();
+  2311|             }
+  2312|             return C23049Dx.A00;
+
+### cleanupStreamingState 原因分组
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/conversation/repo/HatchConversationRepository.java 行 4012-4022
+  4012|         HatchConversationState hatchConversationState;
+  4013|         this.didSendStreamRequest = false;
+  4014|         this.activeReplyToIds.clear();
+  4015|         cancelPendingTranscriptFlush();
+  4016|         this.accumulator.reset();
+  4017|         boolean z = cleanupReason == CleanupReason.USER_STOP || cleanupReason == CleanupReason.FALLBACK_TIMEOUT || cleanupReason == CleanupReason.TRANSPORT_FAILURE || cleanupReason == CleanupReason.STREAM_IDLE_TIMEOUT;
+  4018|         C2L0<HatchConversationState> c2l0 = this._conversationState;
+  4019|         do {
+  4020|             value = c2l0.getValue();
+  4021|             hatchConversationState = value;
+  4022|         } while (!c2l0.A6F(value, HatchConversationState.copy$default(hatchConversationState, null, null, StreamingState.Done, z ? hatchConversationState.streamingMessageId : null, null, null, false, null, false, null, n
+
+### CleanupReason 枚举
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/conversation/repo/CleanupReason.java 行 1-40
+     1| package com.facebook.aura.conversation.repo;
+     3| import X.AnonymousClass001;
+     4| import X.CH3;
+     6| /* JADX WARN: Failed to restore enum class, 'enum' modifier and super class removed */
+     7| /* JADX WARN: Unknown enum class pattern. Please report as an issue! */
+     8| /* loaded from: classes2.dex */
+     9| public final class CleanupReason {
+    10|     public static final /* synthetic */ CH3 $ENTRIES;
+    11|     public static final /* synthetic */ CleanupReason[] $VALUES;
+    12|     public static final CleanupReason CANCEL_RACE;
+    13|     public static final CleanupReason CHAT_ABORTED;
+    14|     public static final CleanupReason FALLBACK_TIMEOUT;
+    15|     public static final CleanupReason PRE_STREAM;
+    16|     public static final CleanupReason STATIC_OVERRIDE_INVALID;
+    17|     public static final CleanupReason STREAM_IDLE_TIMEOUT;
+    18|     public static final CleanupReason TRANSPORT_FAILURE;
+    19|     public static final CleanupReason USER_STOP;
+    21|     static {
+    22|         CleanupReason cleanupReason = new CleanupReason("USER_STOP", 0);
+    23|         USER_STOP = cleanupReason;
+    24|         CleanupReason cleanupReason2 = new CleanupReason("PRE_STREAM", 1);
+    25|         PRE_STREAM = cleanupReason2;
+    26|         CleanupReason cleanupReason3 = new CleanupReason("CANCEL_RACE", 2);
+    27|         CANCEL_RACE = cleanupReason3;
+    28|         CleanupReason cleanupReason4 = new CleanupReason("FALLBACK_TIMEOUT", 3);
+    29|         FALLBACK_TIMEOUT = cleanupReason4;
+    30|         CleanupReason cleanupReason5 = new CleanupReason("TRANSPORT_FAILURE", 4);
+    31|         TRANSPORT_FAILURE = cleanupReason5;
+    32|         CleanupReason cleanupReason6 = new CleanupReason("CHAT_ABORTED", 5);
+    33|         CHAT_ABORTED = cleanupReason6;
+    34|         CleanupReason cleanupReason7 = new CleanupReason("STATIC_OVERRIDE_INVALID", 6);
+    35|         STATIC_OVERRIDE_INVALID = cleanupReason7;
+    36|         CleanupReason cleanupReason8 = new CleanupReason("STREAM_IDLE_TIMEOUT", 7);
+    37|         STREAM_IDLE_TIMEOUT = cleanupReason8;
+    38|         CleanupReason[] cleanupReasonArr = {cleanupReason, cleanupReason2, cleanupReason3, cleanupReason4, cleanupReason5, cleanupReason6, cleanupReason7, cleanupReason8};
+    39|         $VALUES = cleanupReasonArr;
+    40|         $ENTRIES = AnonymousClass001.A16(cleanupReasonArr);

@@ -1,0 +1,17 @@
+# Codex 远程 JSON-RPC 方法名（只读字符串）
+# 样本: ChatGPT 1.2026.272 base APK sha256=47d8350a…040a（全量见 manifest.json）
+# 工具: apktool 2.7.0 smali（主）+ jadx 1.5.3（约66%中止，部分类缺失）；行号=本地输出
+# 标签: 包内直接证据（除非另注）
+
+### xsg thread/resume
+# 来源: chatgpt/1.2026.272/work/smali_out/smali_classes4/xsg.smali 行 24345-24350
+ 24347|     :goto_1
+ 24348|     const-string v14, "thread/resume"
+
+### xsg turn/interrupt
+# 来源: chatgpt/1.2026.272/work/smali_out/smali_classes4/xsg.smali 行 65994-66000
+ 65997|     const-string v7, "turn/interrupt"
+
+### x32 thread/stop
+# 来源: chatgpt/1.2026.272/work/smali_out/smali_classes4/x32.smali 行 6903-6908
+  6906|     const-string v3, "thread/stop"

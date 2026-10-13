@@ -1,0 +1,197 @@
+# 流停滞看门狗 / 恢复发送校验 / 时间常量
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### conversation/sse/e.a()
+# 来源: claude/1.261009.20/work/jadx/sources/com/anthropic/claude/conversation/sse/e.java 行 6-126
+     6| public final class e {
+     7|     public final long a;
+     8|     public final bj7 b;
+     9|     public volatile long c;
+    10|     public volatile boolean d;
+    12|     public e(long j, bj7 bj7Var) {
+    13|         this.a = j;
+    14|         this.b = bj7Var;
+    15|         this.c = ((Number) bj7Var.a()).longValue();
+    16|     }
+    18|     /*  JADX ERROR: JadxOverflowException in pass: RegionMakerVisitor
+    19|         jadx.core.utils.exceptions.JadxOverflowException: Regions count limit reached
+    20|         	at jadx.core.utils.ErrorsCounter.addError(ErrorsCounter.java:59)
+    21|         	at jadx.core.utils.ErrorsCounter.error(ErrorsCounter.java:31)
+    22|         	at jadx.core.dex.attributes.nodes.NotificationAttrNode.addError(NotificationAttrNode.java:19)
+    23|         */
+    24|     /* JADX WARN: Removed duplicated region for block: B:17:0x0058 A[RETURN] */
+    25|     /* JADX WARN: Removed duplicated region for block: B:20:0x006e  */
+    26|     /* JADX WARN: Removed duplicated region for block: B:21:0x0070  */
+    27|     /* JADX WARN: Removed duplicated region for block: B:24:0x0079 A[ADDED_TO_REGION] */
+    28|     /* JADX WARN: Removed duplicated region for block: B:7:0x0013  */
+    29|     /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:16:0x0056 -> B:18:0x0059). Please report as a decompilation issue!!! */
+    30|     /*
+    31|         Code decompiled incorrectly, please refer to instructions dump.
+    32|         To view partially-correct add '--show-bad-code' argument
+    33|     */
+    34|     public final void a(defpackage.y7a r15) {
+    35|         /*
+    36|             r14 = this;
+    37|             boolean r0 = r15 instanceof defpackage.d0x
+    38|             if (r0 == 0) goto L13
+    39|             r0 = r15
+    40|             d0x r0 = (defpackage.d0x) r0
+    41|             int r1 = r0.C
+    42|             r2 = -2147483648(0xffffffff80000000, float:-0.0)
+    43|             r3 = r1 & r2
+    44|             if (r3 == 0) goto L13
+    45|             int r1 = r1 - r2
+    46|             r0.C = r1
+    47|             goto L18
+    48|         L13:
+    49|             d0x r0 = new d0x
+    50|             r0.<init>(r14, r15)
+    51|         L18:
+    52|             java.lang.Object r15 = r0.A
+    53|             rsa r1 = defpackage.rsa.v
+    54|             int r2 = r0.C
+    55|             r3 = 1
+    56|             if (r2 == 0) goto L31
+    57|             if (r2 != r3) goto L2b
+    58|             long r4 = r0.z
+    59|             long r6 = r0.y
+    60|             defpackage.i0c.T(r15)
+    61|             goto L59
+    62|         L2b:
+    63|             java.lang.String r14 = "call to 'resume' before 'invoke' with coroutine"
+    64|             defpackage.lp.q(r14)
+    65|             return
+    66|         L31:
+    67|             defpackage.i0c.T(r15)
+    68|             long r4 = r14.a
+    69|             long r4 = defpackage.d7d.k(r4)
+    70|             r6 = 4
+    71|             long r4 = r4 / r6
+    72|             bj7 r15 = r14.b
+    73|             java.lang.Object r15 = r15.a()
+    74|             java.lang.Number r15 = (java.lang.Number) r15
+    75|             long r6 = r15.longValue()
+    76|             r12 = r6
+    77|             r6 = r4
+    78|             r4 = r12
+    79|         L4c:
+    80|             r0.y = r6
+    81|             r0.z = r4
+    82|             r0.C = r3
+    83|             java.lang.Object r15 = defpackage.ywi.t(r6, r0)
+    84|             if (r15 != r1) goto L59
+    85|             return
+    86|         L59:
+    87|             bj7 r15 = r14.b
+    88|             java.lang.Object r15 = r15.a()
+    89|             java.lang.Number r15 = (java.lang.Number) r15
+    90|             long r8 = r15.longValue()
+    91|             long r4 = r8 - r4
+    92|             r10 = 2
+    93|             long r10 = r10 * r6
+    94|             int r15 = (r4 > r10 ? 1 : (r4 == r10 ? 0 : -1))
+    95|             if (r15 <= 0) goto L70
+    96|             r15 = r3
+    97|             goto L71
+    98|         L70:
+    99|             r15 = 0
+   100|         L71:
+   101|             long r4 = r14.c
+   102|             long r4 = r8 - r4
+   103|             boolean r2 = r14.d
+   104|             if (r2 == 0) goto L99
+   105|             if (r15 != 0) goto L99
+   106|             long r10 = r14.a
+   107|             long r10 = defpackage.d7d.k(r10)
+   108|             int r15 = (r4 > r10 ? 1 : (r4 == r10 ? 0 : -1))
+   109|             if (r15 > 0) goto L86
+   110|             goto L99
+   111|         L86:
+   112|             com.anthropic.claude.chat.parse.sse.ServerSentEventException r14 = new com.anthropic.claude.chat.parse.sse.ServerSentEventException
+   113|             com.anthropic.claude.conversation.sse.StreamStalledException r15 = new com.anthropic.claude.conversation.sse.StreamStalledException
+   114|             java.lang.String r0 = "The reply stream received nothing from the server, not even a ping, for "
+   115|             java.lang.String r1 = " ms, so it was closed and the reply is polled for."
+   116|             java.lang.String r0 = defpackage.cee.j(r4, r0, r1)
+   117|             r15.<init>(r0)
+   118|             r14.<init>(r15)
+   119|             throw r14
+   120|         L99:
+   121|             r4 = r8
+   122|             goto L4c
+   123|         */
+   124|         throw new UnsupportedOperationException("Method not decompiled: com.anthropic.claude.conversation.sse.e.a(y7a):void");
+   125|     }
+   126| }
+
+### SavedMessageNotAnsweredException
+# 来源: claude/1.261009.20/work/jadx/sources/com/anthropic/claude/conversation/sse/SavedMessageNotAnsweredException.java 行 1-9
+     1| package com.anthropic.claude.conversation.sse;
+     3| /* JADX INFO: Access modifiers changed from: package-private */
+     4| /* loaded from: classes3.dex */
+     5| public final class SavedMessageNotAnsweredException extends RuntimeException {
+     6|     public SavedMessageNotAnsweredException(String str) {
+     7|         super("the resumed send's reply did not answer its saved message ".concat(str));
+     8|     }
+     9| }
+
+### sse/c.n(): 恢复发送的回复 parent 不匹配时抛出
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/com/anthropic/claude/conversation/sse/c.smali 行 2730-2800
+  2731|     invoke-interface {v2}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  2733|     move-result-object v3
+  2735|     check-cast v3, Lfea;
+  2737|     if-nez v3, :cond_82
+  2739|     goto :goto_31
+  2741|     :cond_82
+  2742|     instance-of v7, v3, Lwda;
+  2744|     if-eqz v7, :cond_85
+  2746|     check-cast v3, Lwda;
+  2748|     iget-object v3, v3, Lwda;->b:Ljava/lang/String;
+  2750|     if-eqz v3, :cond_84
+  2752|     invoke-virtual {v3, v0}, Ljava/lang/Object;->equals(Ljava/lang/Object;)Z
+  2754|     move-result v3
+  2756|     if-eqz v3, :cond_83
+  2758|     goto :goto_32
+  2760|     :cond_83
+  2761|     new-instance v1, Lcom/anthropic/claude/conversation/sse/SavedMessageNotAnsweredException;
+  2763|     invoke-direct {v1, v0}, Lcom/anthropic/claude/conversation/sse/SavedMessageNotAnsweredException;-><init>(Ljava/lang/String;)V
+  2765|     throw v1
+  2767|     :cond_84
+  2768|     :goto_32
+  2769|     const/4 v12, 0x1
+  2771|     goto :goto_31
+  2773|     :cond_85
+  2774|     instance-of v7, v3, Leea;
+  2776|     if-eqz v7, :cond_81
+  2778|     check-cast v3, Leea;
+  2780|     iget-object v3, v3, Leea;->a:Ljava/lang/String;
+  2782|     invoke-static {v3, v0}, Ln7i;->l(Ljava/lang/Object;Ljava/lang/Object;)Z
+  2784|     move-result v3
+  2786|     if-nez v3, :cond_86
+  2788|     goto :goto_31
+  2790|     :cond_86
+  2791|     new-instance v1, Lcom/anthropic/claude/conversation/sse/SavedMessageNotAnsweredException;
+  2793|     invoke-direct {v1, v0}, Lcom/anthropic/claude/conversation/sse/SavedMessageNotAnsweredException;-><init>(Ljava/lang/String;)V
+  2795|     throw v1
+  2797|     :cond_87
+  2798|     if-eqz v12, :cond_88
+  2800|     iget-object v0, v1, Lcom/anthropic/claude/conversation/sse/c;->x:Lh8s;
+
+### jhw 常量
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/jhw.java 行 11-27
+    11|     public static final List a;
+    12|     public static final long b;
+    13|     public static final long c;
+    14|     public static final long d;
+    15|     public static final List e;
+    17|     static {
+    18|         jbg jbgVar = d7d.w;
+    19|         d7d d7dVar = new d7d(dc10.Y(VoiceClient.MAX_UDP_HEAD_START_MS, h7d.MILLISECONDS));
+    20|         h7d h7dVar = h7d.SECONDS;
+    21|         a = ees.G(d7dVar, new d7d(dc10.Y(3, h7dVar)), new d7d(dc10.Y(6, h7dVar)));
+    22|         b = dc10.Y(5, h7dVar);
+    23|         c = dc10.Y(240, h7dVar);
+    24|         d = dc10.Y(30, h7dVar);
+    25|         e = ees.G(2000L, 4000L);
+    26|     }

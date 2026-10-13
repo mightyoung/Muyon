@@ -1,0 +1,123 @@
+# /f/conversation/resume 请求：offset=客户端已解析事件计数
+# 样本: ChatGPT 1.2026.272 base APK sha256=47d8350a…040a（全量见 manifest.json）
+# 工具: apktool 2.7.0 smali（主）+ jadx 1.5.3（约66%中止，部分类缺失）；行号=本地输出
+# 标签: 包内直接证据（除非另注）
+
+### yfs: 端点
+# 来源: chatgpt/1.2026.272/work/smali_out/smali/yfs.smali 行 20-45
+    20| .field public final d:Lqqp0;
+    23| # direct methods
+    24| .method static constructor <clinit>()V
+    25|     .locals 4
+    28|     const-string v0, "/f/conversation/resume"
+    32|     const-string v1, "/f/conversation/steer"
+    36|     const-string v2, "/f/conversation"
+    40|     const-string v3, "/f/conversation/prepare"
+    44|     filled-new-array {v2, v3, v0, v1}, [Ljava/lang/String;
+
+### o3o: 请求字段
+# 来源: chatgpt/1.2026.272/work/smali_out/smali_classes4/o3o.smali 行 1-80
+     1| .class public final synthetic Lo3o;
+     2| .super Ljava/lang/Object;
+     3| .source "r8-map-id-ae688af1f3f4906fa0e6b58d79def950bb448c2483255bd30b8b899420250b57"
+     5| # interfaces
+     6| .implements Lzjx;
+     9| # static fields
+    10| .field public static final a:Lo3o;
+    12| .field private static final descriptor:Lkotlinx/serialization/descriptors/SerialDescriptor;
+    15| # direct methods
+    16| .method static constructor <clinit>()V
+    17|     .locals 4
+    20|     new-instance v0, Lo3o;
+    24|     invoke-direct {v0}, Ljava/lang/Object;-><init>()V
+    29|     sput-object v0, Lo3o;->a:Lo3o;
+    33|     new-instance v1, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;
+    37|     const-string v2, "5kN3qJBQ0HzIX-wny6ClEEuY_3rPFeTgtsdZgA8rtbk="
+    41|     const/4 v3, 0x3
+    44|     invoke-direct {v1, v2, v0, v3}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;-><init>(Ljava/lang/String;Lzjx;I)V
+    49|     const-string v0, "conversationId"
+    53|     const/4 v2, 0x0
+    56|     invoke-virtual {v1, v0, v2}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;->l(Ljava/lang/String;Z)V
+    61|     const-string v0, "model"
+    65|     invoke-virtual {v1, v0, v2}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;->l(Ljava/lang/String;Z)V
+    70|     const-string v0, "offset"
+    74|     const/4 v2, 0x1
+    77|     invoke-virtual {v1, v0, v2}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;->l(Ljava/lang/String;Z)V
+
+### vqo: 构造 q3o(conversationId, model, offset) + t3o(token)
+# 来源: chatgpt/1.2026.272/work/smali_out/smali_classes4/vqo.smali 行 1559-1733
+  1559|     iget-object v4, v10, Lvqo;->q:Llfo;
+  1563|     iget-object v5, v4, Llfo;->a:Ljava/lang/String;
+  1564|     :try_end_1
+  1565|     .catch Ljava/util/concurrent/CancellationException; {:try_start_1 .. :try_end_1} :catch_1
+  1566|     .catch Ljava/lang/Exception; {:try_start_1 .. :try_end_1} :catch_7
+  1570|     if-eqz v5, :cond_4
+  1574|     :try_start_2
+  1575|     new-instance v6, Ltan;
+  1579|     invoke-direct {v6, v5}, Ltan;-><init>(Ljava/lang/String;)V
+  1580|     :try_end_2
+  1581|     .catch Ljava/util/concurrent/CancellationException; {:try_start_2 .. :try_end_2} :catch_1
+  1582|     .catch Ljava/lang/Exception; {:try_start_2 .. :try_end_2} :catch_2
+  1587|     goto :goto_0
+  1590|     :catch_2
+  1591|     move-exception v0
+  1594|     move-object v6, v0
+  1597|     move-object v14, v2
+  1600|     move-object v1, v3
+  1603|     goto/16 :goto_6
+  1607|     :cond_4
+  1608|     move-object v6, v15
+  1611|     :goto_0
+  1612|     const-string v5, "Required value was null."
+  1616|     if-eqz v6, :cond_9
+  1620|     :try_start_3
+  1621|     iget-object v6, v6, Ltan;->a:Ljava/lang/String;
+  1625|     iget-object v7, v10, Lvqo;->r:Ljava/lang/String;
+  1629|     iget-object v8, v4, Llfo;->d:Lb220;
+  1633|     iget v8, v8, Lb220;->f:I
+  1637|     invoke-direct {v0, v6, v7, v8}, Lq3o;-><init>(Ljava/lang/String;Ljava/lang/String;I)V
+  1642|     iget-object v6, v4, Llfo;->b:Ljava/lang/String;
+  1643|     :try_end_3
+  1644|     .catch Ljava/util/concurrent/CancellationException; {:try_start_3 .. :try_end_3} :catch_1
+  1645|     .catch Ljava/lang/Exception; {:try_start_3 .. :try_end_3} :catch_7
+  1649|     if-eqz v6, :cond_5
+  1653|     :try_start_4
+  1654|     new-instance v8, Lt3o;
+  1658|     invoke-direct {v8, v6}, Lt3o;-><init>(Ljava/lang/String;)V
+  1659|     :try_end_4
+  1660|     .catch Ljava/util/concurrent/CancellationException; {:try_start_4 .. :try_end_4} :catch_1
+  1661|     .catch Ljava/lang/Exception; {:try_start_4 .. :try_end_4} :catch_2
+  1666|     goto :goto_1
+  1669|     :cond_5
+  1670|     move-object v8, v15
+  1673|     :goto_1
+  1674|     if-eqz v8, :cond_8
+  1678|     :try_start_5
+  1679|     iget-object v5, v8, Lt3o;->a:Ljava/lang/String;
+  1683|     iget-object v6, v10, Lvqo;->s:Ljro;
+  1687|     iget-object v8, v10, Lvqo;->t:Lcmg0;
+  1688|     :try_end_5
+  1689|     .catch Ljava/util/concurrent/CancellationException; {:try_start_5 .. :try_end_5} :catch_1
+  1690|     .catch Ljava/lang/Exception; {:try_start_5 .. :try_end_5} :catch_7
+  1694|     move-object v9, v2
+  1697|     :try_start_6
+  1698|     iget-object v2, v10, Lvqo;->u:Lvgo;
+  1702|     iget-object v14, v10, Lvqo;->v:Ljava/lang/String;
+  1706|     move-object/from16 v16, v5
+  1710|     iget-object v5, v10, Lvqo;->w:Ljava/lang/String;
+  1714|     iget-object v13, v10, Lvqo;->x:Ljava/lang/String;
+  1718|     iget-object v1, v10, Lvqo;->y:Lsk20;
+  1722|     move-object/from16 v17, v1
+  1726|     move-object v1, v8
+  1729|     new-instance v8, Luqo;
+  1733|     invoke-direct {v8, v3, v7, v4, v15}, Luqo;-><init>(Leci0;Ljava/lang/String;Llfo;Lgpm;)V
+
+### qqx: 每解析一个 SSE 事件 b220.f += 1
+# 来源: chatgpt/1.2026.272/work/smali_out/smali_classes6/qqx.smali 行 9025-9050
+  9025|     invoke-static/range {p1 .. p1}, Lpvh0;->u(Ljava/lang/Object;)V
+  9030|     iget-object v1, v5, Lqqx;->q:Ljava/lang/Object;
+  9034|     check-cast v1, Lb220;
+  9038|     iget v2, v1, Lb220;->f:I
+  9042|     add-int/2addr v2, v11
+  9045|     iput v2, v1, Lb220;->f:I
+  9049|     check-cast v12, Lkotlin/jvm/functions/Function2;

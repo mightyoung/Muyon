@@ -1,0 +1,226 @@
+# 待审批快照归约：WEBSOCKET 版本号 / HTTP_RECOVERY 过期丢弃 / snapshotMs 单调
+# 样本: Muse (com.facebook.aura) 11.0.0.8.164 base APK sha256=c7e788b5df855912dffbefc4c017f2e621b54aaeef954424f56339bd994fcefa
+# 工具: jadx 1.5.3 (138 errors) + baksmali 2.5.2 定向（HatchAgentPermissionsRepository）
+# 标签: 包内直接证据（除非另注）
+
+### jadx 签名（jadx 丢失提前 return，以 smali 为准）
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/HatchAgentPermissionsRepository.java 行 5411-5465
+  5411|     public final Object recoverPendingApprovals(C0M8<? super C23049Dx> c0m8) {
+  5412|         SingleFlight singleFlight = this.recoverySingleFlight;
+  5413|         C104782 c104782 = new C104782(null);
+  5414|         C23049Dx c23049Dx = C23049Dx.A00;
+  5415|         Object objInvoke = singleFlight.invoke(c23049Dx, c104782, c0m8);
+  5416|         return objInvoke != EnumC21398i6.A02 ? c23049Dx : objInvoke;
+  5417|     }
+  5419|     /* JADX INFO: Access modifiers changed from: private */
+  5420|     public final void replaceServerPendingApprovals(List<AgentPermissionApproval> list, List<ApprovalSnapshotRecordJson> list2, long j, SnapshotSource snapshotSource, Long l) {
+  5421|         synchronized (this.serverPendingApprovalsLock) {
+  5422|             SnapshotSource snapshotSource2 = SnapshotSource.HTTP_RECOVERY;
+  5423|             if (snapshotSource == snapshotSource2) {
+  5424|                 long j2 = this.websocketSnapshotVersion;
+  5425|                 if (l != null && l.longValue() == j2) {
+  5426|                 }
+  5427|             }
+  5428|             if (snapshotSource != snapshotSource2 || j > 0 || this.lastAppliedSnapshotMs <= 0) {
+  5429|                 if (j > 0) {
+  5430|                     long j3 = this.lastAppliedSnapshotMs;
+  5431|                     if (j3 <= 0 || j > j3) {
+  5432|                     }
+  5433|                 }
+  5434|                 if (snapshotSource == SnapshotSource.WEBSOCKET) {
+  5435|                     this.websocketSnapshotVersion++;
+  5436|                 }
+  5437|                 this.lastAppliedSnapshotMs = Math.max(this.lastAppliedSnapshotMs, j);
+  5438|                 if (!C25519Tj.areEqual(list2, this.lastRecentApprovals)) {
+  5439|                     this.lastRecentApprovals = list2;
+  5440|                     C2L0<Long> c2l0 = this._historyRefreshVersion;
+  5441|                     c2l0.AdK(Long.valueOf(C2L0.A00((C2L0) c2l0) + 1));
+  5442|                 }
+  5443|                 LinkedHashSet linkedHashSetA10 = AnonymousClass001.A10();
+  5444|                 Iterator<AgentPermissionApproval> it = list.iterator();
+  5445|                 while (it.hasNext()) {
+  5446|                     C3UP.A1H(linkedHashSetA10, it);
+  5447|                 }
+  5448|                 this.resolvedServerApprovalIds.retainAll(linkedHashSetA10);
+  5449|                 C2L0<List<AgentPermissionApproval>> c2l02 = this._serverPendingApprovals;
+  5450|                 ArrayList arrayListA0y = AnonymousClass001.A0y();
+  5451|                 for (AgentPermissionApproval agentPermissionApproval : list) {
+  5452|                     C3UO.A0y(agentPermissionApproval.approvalId, agentPermissionApproval, arrayListA0y, this.resolvedServerApprovalIds);
+  5453|                 }
+  5454|                 c2l02.AdK(arrayListA0y);
+  5455|                 C3UO.A1K(this._hasLoadedServerApprovals);
+  5456|             }
+  5457|         }
+  5458|     }
+  5460|     public static /* synthetic */ void replaceServerPendingApprovals$default(HatchAgentPermissionsRepository hatchAgentPermissionsRepository, List list, List list2, long j, SnapshotSource snapshotSource, Long l, int i, O
+  5461|         if ((i & 16) != 0) {
+  5462|             l = null;
+  5463|         }
+  5464|         hatchAgentPermissionsRepository.replaceServerPendingApprovals(list, list2, j, snapshotSource, l);
+  5465|     }
+
+### baksmali: replaceServerPendingApprovals 全方法
+# 来源: muse/11.0.0.8.164/work/smali_targeted/classes2.dex/com/facebook/aura/gateway/HatchAgentPermissionsRepository.smali 行 5243-5651
+  5243| .method private final replaceServerPendingApprovals(Ljava/util/List;Ljava/util/List;JLcom/facebook/aura/gateway/SnapshotSource;Ljava/lang/Long;)V
+  5244|     .registers 14
+  5245|     .annotation system Ldalvik/annotation/Signature;
+  5246|         value = {
+  5247|             "(",
+  5248|             "Ljava/util/List<",
+  5249|             "Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository$AgentPermissionApproval;",
+  5250|             ">;",
+  5251|             "Ljava/util/List<",
+  5252|             "Lcom/facebook/aura/gateway/ApprovalSnapshotRecordJson;",
+  5253|             ">;J",
+  5254|             "Lcom/facebook/aura/gateway/SnapshotSource;",
+  5255|             "Ljava/lang/Long;",
+  5256|             ")V"
+  5257|         }
+  5258|     .end annotation
+  5261|     iget-object v3, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->serverPendingApprovalsLock:Ljava/lang/Object;
+  5265|     monitor-enter v3
+  5268|     :try_start_3
+  5269|     sget-object v6, Lcom/facebook/aura/gateway/SnapshotSource;->HTTP_RECOVERY:Lcom/facebook/aura/gateway/SnapshotSource;
+  5273|     if-ne p5, v6, :cond_15
+  5277|     iget-wide v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->websocketSnapshotVersion:J
+  5281|     if-eqz p6, :cond_9d
+  5285|     invoke-virtual {p6}, Ljava/lang/Number;->longValue()J
+  5290|     move-result-wide v4
+  5293|     cmp-long v2, v4, v0
+  5297|     if-eqz v2, :cond_15
+  5301|     goto/16 :goto_9d
+  5305|     :cond_15
+  5306|     const-wide/16 v4, 0x0
+  5310|     if-ne p5, v6, :cond_24
+  5314|     cmp-long v0, p3, v4
+  5318|     if-gtz v0, :cond_24
+  5322|     iget-wide v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->lastAppliedSnapshotMs:J
+  5326|     cmp-long v2, v0, v4
+  5330|     if-lez v2, :cond_24
+  5334|     goto :goto_9d
+  5337|     :cond_24
+  5338|     cmp-long v0, p3, v4
+  5342|     if-lez v0, :cond_2f
+  5346|     iget-wide v1, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->lastAppliedSnapshotMs:J
+  5350|     cmp-long v0, v1, v4
+  5354|     if-lez v0, :cond_2f
+  5358|     goto :goto_99
+  5361|     :cond_2f
+  5362|     sget-object v0, Lcom/facebook/aura/gateway/SnapshotSource;->WEBSOCKET:Lcom/facebook/aura/gateway/SnapshotSource;
+  5366|     const-wide/16 v4, 0x1
+  5370|     if-ne p5, v0, :cond_3a
+  5374|     iget-wide v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->websocketSnapshotVersion:J
+  5378|     add-long/2addr v0, v4
+  5381|     iput-wide v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->websocketSnapshotVersion:J
+  5385|     :cond_3a
+  5386|     iget-wide v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->lastAppliedSnapshotMs:J
+  5390|     invoke-static {v0, v1, p3, p4}, Ljava/lang/Math;->max(JJ)J
+  5395|     move-result-wide v0
+  5398|     iput-wide v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->lastAppliedSnapshotMs:J
+  5402|     iget-object v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->lastRecentApprovals:Ljava/util/List;
+  5406|     invoke-static {p2, v0}, LX/9Tj;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+  5411|     move-result v0
+  5414|     if-nez v0, :cond_5a
+  5418|     iput-object p2, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->lastRecentApprovals:Ljava/util/List;
+  5422|     iget-object v2, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->_historyRefreshVersion:LX/2L0;
+  5426|     invoke-static {v2}, LX/2L0;->A00(LX/2L0;)J
+  5431|     move-result-wide v0
+  5434|     add-long/2addr v0, v4
+  5437|     invoke-static {v0, v1}, Ljava/lang/Long;->valueOf(J)Ljava/lang/Long;
+  5442|     move-result-object v0
+  5445|     invoke-interface {v2, v0}, LX/2L0;->AdK(Ljava/lang/Object;)V
+  5450|     :cond_5a
+  5451|     invoke-static {}, LX/001;->A10()Ljava/util/LinkedHashSet;
+  5456|     move-result-object v2
+  5459|     invoke-interface {p1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+  5464|     move-result-object v1
+  5467|     :goto_62
+  5468|     invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+  5473|     move-result v0
+  5476|     if-eqz v0, :cond_6c
+  5480|     invoke-static {v2, v1}, LX/3UP;->A1H(Ljava/util/AbstractCollection;Ljava/util/Iterator;)V
+  5485|     goto :goto_62
+  5488|     :cond_6c
+  5489|     iget-object v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->resolvedServerApprovalIds:Ljava/util/Set;
+  5493|     invoke-interface {v0, v2}, Ljava/util/Set;->retainAll(Ljava/util/Collection;)Z
+  5498|     iget-object v6, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->_serverPendingApprovals:LX/2L0;
+  5502|     invoke-static {}, LX/001;->A0y()Ljava/util/ArrayList;
+  5507|     move-result-object v5
+  5510|     invoke-interface {p1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+  5515|     move-result-object v4
+  5518|     :goto_7b
+  5519|     invoke-interface {v4}, Ljava/util/Iterator;->hasNext()Z
+  5524|     move-result v0
+  5527|     if-eqz v0, :cond_90
+  5531|     invoke-interface {v4}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+  5536|     move-result-object v2
+  5539|     move-object v0, v2
+  5542|     check-cast v0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository$AgentPermissionApproval;
+  5546|     iget-object v1, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->resolvedServerApprovalIds:Ljava/util/Set;
+  5550|     iget-object v0, v0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository$AgentPermissionApproval;->approvalId:Ljava/lang/String;
+  5554|     invoke-static {v0, v2, v5, v1}, LX/3UO;->A0y(Ljava/lang/Object;Ljava/lang/Object;Ljava/util/AbstractCollection;Ljava/util/Set;)V
+  5559|     goto :goto_7b
+  5562|     :cond_90
+  5563|     invoke-interface {v6, v5}, LX/2L0;->AdK(Ljava/lang/Object;)V
+  5568|     iget-object v0, p0, Lcom/facebook/aura/gateway/HatchAgentPermissionsRepository;->_hasLoadedServerApprovals:LX/2L0;
+  5572|     invoke-static {v0}, LX/3UO;->A1K(LX/2L0;)V
+  5577|     goto :goto_9d
+  5580|     :goto_99
+  5581|     cmp-long v0, p3, v1
+  5585|     if-gtz v0, :cond_2f
+  5586|     :try_end_9d
+  5587|     .catchall {:try_start_3 .. :try_end_9d} :catchall_9f
+  5591|     :cond_9d
+  5592|     :goto_9d
+  5593|     monitor-exit v3
+  5596|     return-void
+  5599|     :catchall_9f
+  5600|     move-exception v0
+  5603|     monitor-exit v3
+  5606|     throw v0
+  5651| .end method
+
+### clearUserData（登出）
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/HatchAgentPermissionsRepository.java 行 5579-5625
+  5579|     public void clearUserData() {
+  5580|         C6Ng c6Ng = this.observationJob;
+  5581|         if (c6Ng != null) {
+  5582|             c6Ng.A5Y(null);
+  5583|         }
+  5584|         this.observationJob = null;
+  5585|         synchronized (this.localPendingApprovalsLock) {
+  5586|             Iterator itA0W = C3UO.A0W(this.localPendingApprovalRecords);
+  5587|             while (itA0W.hasNext()) {
+  5588|                 ((C14836Mp) ((LocalPendingApprovalRecord) itA0W.next()).decision).A0R(AgentPermissionDecision.DENY);
+  5589|             }
+  5590|             this.localPendingApprovalRecords.clear();
+  5591|             publishLocalPendingApprovalsLocked();
+  5592|         }
+  5593|         synchronized (this.serverPendingApprovalsLock) {
+  5594|             C2L0<List<AgentPermissionApproval>> c2l0 = this._serverPendingApprovals;
+  5595|             C17367Ew c17367Ew = C17367Ew.A00;
+  5596|             c2l0.AdK(c17367Ew);
+  5597|             this.lastAppliedSnapshotMs = 0L;
+  5598|             this.websocketSnapshotVersion = 0L;
+  5599|             this.lastRecentApprovals = c17367Ew;
+  5600|             this._historyRefreshVersion.AdK(0L);
+  5601|             this.resolvedServerApprovalIds.clear();
+  5602|         }
+  5603|         synchronized (this.walletSelectionsLock) {
+  5604|             this.walletSelectionsInFlight.clear();
+  5605|         }
+  5606|         this.recoverySingleFlight.clearAndCancelAll();
+  5607|         C8h8.A03(null, this.scope);
+  5608|     }
+  5610|     public final Object decideApproval(String str, String str2, String str3, String str4, boolean z, C0M8<? super DecideResult> c0m8) {
+  5611|         return decideApprovals(Collections.singletonList(new AgentPermissionApprovalDecision(str, str2, str3, str4)), z, c0m8);
+  5612|     }
+  5614|     public final Object decideApprovals(List<AgentPermissionApprovalDecision> list, boolean z, C0M8<? super DecideResult> c0m8) {
+  5615|         return AbstractC14796Ml.A00(c0m8, AnonymousClass001.A15(), new AnonymousClass2(list, z, null));
+  5616|     }
+  5618|     public final Object fetchDeviceApprovalCopyWithin(long j, String str, String str2, String str3, String str4, String str5, C0M8<? super DeviceApprovalCopy> c0m8) {
+  5619|         return C6Mw.A01(c0m8, new C104772(C3UL.A1G(new HatchAgentPermissionsRepository$fetchDeviceApprovalCopyWithin$inFlight$1(this, str, str2, str3, str4, str5, null), this.scope), null), j);
+  5620|     }
+  5622|     public final C0Ho<Boolean> getHasLoadedServerApprovals() {
+  5623|         return this.hasLoadedServerApprovals;
+  5624|     }

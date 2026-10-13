@@ -1,0 +1,100 @@
+# resume_conversation_token 存储 + stream_handoff → StreamHandoffException
+# 样本: ChatGPT 1.2026.272 base APK sha256=47d8350a…040a（全量见 manifest.json）
+# 工具: apktool 2.7.0 smali（主）+ jadx 1.5.3（约66%中止，部分类缺失）；行号=本地输出
+# 标签: 包内直接证据（除非另注）
+
+### stream/a.smali: token/handoff 分支（含跳转与抛出）
+# 来源: chatgpt/1.2026.272/work/smali_out/smali_classes4/com/openai/feature/conversations/impl/conversation/stream/a.smali 行 380-700
+   381|     invoke-static {p0}, Lxi;->m(Ljava/lang/String;)V
+   386|     return-object v2
+   389|     :cond_1
+   390|     invoke-static {p1}, Lpvh0;->u(Ljava/lang/Object;)V
+   395|     instance-of p1, v0, Lw3o;
+   399|     iget-object v1, p0, Lcom/openai/feature/conversations/impl/conversation/stream/a;->p:Llfo;
+   403|     if-eqz p1, :cond_2
+   407|     move-object p1, v0
+   410|     check-cast p1, Lw3o;
+   414|     iget-object v4, p1, Lw3o;->b:Ljava/lang/String;
+   418|     iput-object v4, v1, Llfo;->b:Ljava/lang/String;
+   422|     iget-object p1, p1, Lw3o;->a:Ljava/lang/String;
+   426|     iput-object p1, v1, Llfo;->a:Ljava/lang/String;
+   430|     goto/16 :goto_2
+   434|     :cond_2
+   435|     instance-of p1, v0, Lpfo;
+   439|     if-eqz p1, :cond_b
+   443|     move-object p1, v0
+   446|     check-cast p1, Lpfo;
+   450|     iget-object v4, p1, Lpfo;->c:Ljava/util/List;
+   454|     check-cast v4, Ljava/lang/Iterable;
+   458|     instance-of v5, v4, Ljava/util/Collection;
+   462|     const/4 v6, 0x0
+   465|     if-eqz v5, :cond_3
+   469|     move-object v5, v4
+   472|     check-cast v5, Ljava/util/Collection;
+   476|     invoke-interface {v5}, Ljava/util/Collection;->isEmpty()Z
+   481|     move-result v5
+   484|     if-eqz v5, :cond_3
+   488|     goto :goto_0
+   491|     :cond_3
+   492|     invoke-interface {v4}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+   497|     move-result-object v5
+   500|     :cond_4
+   501|     invoke-interface {v5}, Ljava/util/Iterator;->hasNext()Z
+   506|     move-result v7
+   509|     if-eqz v7, :cond_5
+   513|     invoke-interface {v5}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+   518|     move-result-object v7
+   521|     check-cast v7, Lsfo;
+   525|     iget-object v7, v7, Lsfo;->a:Ljava/lang/String;
+   529|     const-string v8, "resume_sse_endpoint"
+   533|     invoke-static {v7, v8}, Ly4s0;->w(Ljava/lang/Object;Ljava/lang/Object;)Z
+   538|     move-result v7
+   541|     if-eqz v7, :cond_4
+   545|     move v6, v3
+   548|     :cond_5
+   549|     :goto_0
+   550|     invoke-interface {v4}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+   555|     move-result-object v4
+   558|     :cond_6
+   559|     invoke-interface {v4}, Ljava/util/Iterator;->hasNext()Z
+   564|     move-result v5
+   567|     if-eqz v5, :cond_7
+   571|     invoke-interface {v4}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+   576|     move-result-object v5
+   579|     move-object v7, v5
+   582|     check-cast v7, Lsfo;
+   586|     iget-object v8, v7, Lsfo;->a:Ljava/lang/String;
+   590|     const-string v9, "subscribe_ws_topic"
+   594|     invoke-static {v8, v9}, Ly4s0;->w(Ljava/lang/Object;Ljava/lang/Object;)Z
+   599|     move-result v8
+   602|     if-eqz v8, :cond_6
+   606|     iget-object v7, v7, Lsfo;->b:Ljava/lang/String;
+   610|     if-eqz v7, :cond_6
+   614|     goto :goto_1
+   617|     :cond_7
+   618|     move-object v5, v2
+   621|     :goto_1
+   622|     check-cast v5, Lsfo;
+   626|     if-eqz v5, :cond_8
+   630|     iget-object v4, v5, Lsfo;->b:Ljava/lang/String;
+   634|     iput-object v4, v1, Llfo;->c:Ljava/lang/String;
+   638|     :cond_8
+   639|     if-nez v6, :cond_9
+   643|     iget-object v4, v1, Llfo;->c:Ljava/lang/String;
+   647|     if-eqz v4, :cond_b
+   651|     :cond_9
+   652|     iget-object v4, v1, Llfo;->b:Ljava/lang/String;
+   656|     if-eqz v4, :cond_b
+   660|     iget-object p0, v1, Llfo;->a:Ljava/lang/String;
+   664|     if-nez p0, :cond_a
+   668|     iget-object p0, p1, Lpfo;->a:Ljava/lang/String;
+   672|     iput-object p0, v1, Llfo;->a:Ljava/lang/String;
+   676|     :cond_a
+   677|     new-instance p0, Lcom/openai/feature/conversations/impl/conversation/stream/StreamHandoffException;
+   681|     const-string p1, "SSE stream requested handoff to resume endpoint"
+   685|     invoke-direct {p0, p1}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
+   690|     throw p0
+   693|     :cond_b
+   694|     :goto_2
+   695|     iput-object v2, p0, Lcom/openai/feature/conversations/impl/conversation/stream/a;->o:Ljava/lang/Object;
+   699|     iput-boolean v3, p0, Lcom/openai/feature/conversations/impl/conversation/stream/a;->n:Z

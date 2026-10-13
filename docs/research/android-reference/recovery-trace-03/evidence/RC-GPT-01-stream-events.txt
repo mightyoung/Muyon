@@ -1,0 +1,32 @@
+# /f/conversation SSE 事件类型
+# 样本: ChatGPT 1.2026.272 base APK sha256=47d8350a…040a（全量见 manifest.json）
+# 工具: apktool 2.7.0 smali（主）+ jadx 1.5.3（约66%中止，部分类缺失）；行号=本地输出
+# 标签: 包内直接证据（除非另注）
+
+### weo: 事件名常量
+# 来源: chatgpt/1.2026.272/work/jadx/sources/defpackage/weo.java 行 1-40
+     1| package defpackage;
+     3| import kotlinx.serialization.json.d;
+     5| /* compiled from: r8-map-id-ae688af1f3f4906fa0e6b58d79def950bb448c2483255bd30b8b899420250b57 */
+     6| /* loaded from: classes4.dex */
+     7| public abstract class weo {
+     8|     public static final d a = qz10.c("resume_conversation_token");
+     9|     public static final d b = qz10.c("gizmo_inline_review");
+    10|     public static final d c = qz10.c("title_generation");
+    11|     public static final d d = qz10.c("num_variants_in_stream");
+    12|     public static final d e = qz10.c("url_moderation");
+    13|     public static final d f = qz10.c("conversation_detail_metadata");
+    14|     public static final d g = qz10.c("message_stream_complete");
+    15|     public static final d h = qz10.c("main_stream_complete");
+    16|     public static final d i = qz10.c("content_references_patch");
+    17|     public static final d j = qz10.c("writing_blocks_metadata_patch");
+    18|     public static final d k = qz10.c("user_signal_metadata");
+    19|     public static final d l = qz10.c("streaming_parent_patch");
+    20|     public static final d m = qz10.c("stream_handoff");
+    21|     public static final d n = qz10.c("server_ste_metadata");
+    22|     public static final d o = qz10.c("message_marker");
+    23|     public static final d p = qz10.c("conversation_async_status");
+    24|     public static final d q = qz10.c("safety_review_update");
+    25|     public static final d r = qz10.c("beacon_ui_response");
+    26|     public static final d s = qz10.c("ads");
+    27| }

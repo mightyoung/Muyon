@@ -1,0 +1,154 @@
+# JarvisProtocol: SessionCursors(afterStreamSeq, afterChatEventSeq) 内存游标 + chat.subscribe 重放
+# 样本: Muse (com.facebook.aura) 11.0.0.8.164 base APK sha256=c7e788b5df855912dffbefc4c017f2e621b54aaeef954424f56339bd994fcefa
+# 工具: jadx 1.5.3 (138 errors) + baksmali 2.5.2 定向（HatchAgentPermissionsRepository）
+# 标签: 包内直接证据（除非另注）
+
+### SessionCursors
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/JarvisProtocol.java 行 348-380
+   348|     public final class SessionCursors {
+   349|         public volatile Long afterChatEventSeq;
+   350|         public volatile Long afterStreamSeq;
+   352|         public final Long getAfterChatEventSeq() {
+   353|             return this.afterChatEventSeq;
+   354|         }
+   356|         public final Long getAfterStreamSeq() {
+   357|             return this.afterStreamSeq;
+   358|         }
+   360|         public final void setAfterChatEventSeq(Long l) {
+   361|             this.afterChatEventSeq = l;
+   362|         }
+   364|         public final void setAfterStreamSeq(Long l) {
+   365|             this.afterStreamSeq = l;
+   366|         }
+   367|     }
+   369|     /* renamed from: com.facebook.aura.gateway.JarvisProtocol$parseInlineDocumentWidgetData$1, reason: invalid class name */
+   370|     public final class AnonymousClass1 extends AbstractC22799An implements Function0<Boolean> {
+   371|         public static final AnonymousClass1 INSTANCE = new AnonymousClass1();
+   373|         public AnonymousClass1() {
+   374|             super(0);
+   375|         }
+   377|         /* JADX WARN: Can't rename method to resolve collision */
+   378|         @Override // kotlin.jvm.functions.Function0
+   379|         public final Boolean invoke() {
+   380|             return AnonymousClass002.A0l();
+
+### getReplayCursor
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/JarvisProtocol.java 行 497-510
+   497|     private final C7281CIt<Long, Long> getReplayCursor(SessionCursors sessionCursors) {
+   498|         if (sessionCursors == null) {
+   499|             return null;
+   500|         }
+   501|         Long l = sessionCursors.afterStreamSeq;
+   502|         Long l2 = sessionCursors.afterChatEventSeq;
+   503|         if (l == null || l2 == null) {
+   504|             return null;
+   505|         }
+   506|         return AnonymousClass001.A13(l, l2);
+   507|     }
+   509|     private final boolean hasResolvablePaths(HatchPresentationData hatchPresentationData) {
+   510|         List<HatchAttachmentFile> listAttachmentFiles = HatchAttachmentPresentationKt.attachmentFiles(hatchPresentationData);
+
+### sendSubscribe
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/JarvisProtocol.java 行 2177-2215
+  2177|     private final void sendSubscribe(C9M5<? super String, Boolean> c9m5) {
+  2178|         Long l;
+  2179|         Long l2;
+  2180|         String strA0v = AnonymousClass007.A0v();
+  2181|         String str = this.currentConnectionAttemptId;
+  2182|         if (str == null) {
+  2183|             str = "unknown";
+  2184|         }
+  2185|         PendingSubscribe pendingSubscribe = new PendingSubscribe(strA0v, str, System.currentTimeMillis(), null);
+  2186|         this.pendingSubscribes.put(strA0v, pendingSubscribe);
+  2187|         C7281CIt<Long, Long> replayCursor = getReplayCursor(this.sessionCursors.get(primaryCursorKey()));
+  2188|         if (replayCursor != null) {
+  2189|             l = replayCursor.first;
+  2190|             l2 = replayCursor.second;
+  2191|         } else {
+  2192|             l = null;
+  2193|             l2 = null;
+  2194|         }
+  2195|         if (AnonymousClass004.A1a(JarvisProtocolJsonKt.buildChatSubscribeBody(strA0v, pendingSubscribe.sessionId, l, l2, replayCursor != null ? 500 : null, this.currentConnectionAttemptId), c9m5)) {
+  2196|             C18737eM.A02(pendingSubscribe.requestId, pendingSubscribe.connectionAttemptId, JarvisProtocolKt.TAG, "chat.subscribe sent: requestId=%s connectionAttemptId=%s; awaiting server ack");
+  2197|             return;
+  2198|         }
+  2199|         C18737eM.A04(JarvisProtocolKt.TAG, "chat.subscribe send rejected by transport; connection not ready");
+  2200|         logSubscribeTerminalError(pendingSubscribe, "send_failed", "WebSocket send rejected");
+  2201|         this.pendingSubscribes.remove(strA0v);
+  2202|         this.onSubscribeReady.set(null);
+  2203|     }
+  2205|     private final HatchAttachment toWidgetAttachment(HatchWidget hatchWidget) {
+  2206|         String str = hatchWidget.widgetId;
+  2207|         String str2 = hatchWidget.replyToText;
+  2208|         if (str2 == null && (str2 = hatchWidget.displayText) == null) {
+  2209|             str2 = hatchWidget.kind;
+  2210|         }
+  2211|         return new HatchAttachment(str, null, null, "application/vnd.hatch.widget", str2, HatchWidgetPresentationKt.HATCH_PRESENTATION_KIND_WIDGET, "", null, hatchWidget, null);
+  2212|     }
+  2214|     private final HatchPresentationData unrenderablePresentationOrDrop(String str, JsonObject jsonObject, String str2, String str3) {
+  2215|         Object objLogPresentationParseFailure;
+
+### bumpChatEventSeqIfNewer
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/JarvisProtocol.java 行 2299-2320
+  2299|     public final void bumpChatEventSeqIfNewer(String str, Long l) {
+  2300|         SessionCursors sessionCursorsPutIfAbsent;
+  2301|         if (l != null) {
+  2302|             synchronized (this.seqCursorLock) {
+  2303|                 ConcurrentHashMap<String, SessionCursors> concurrentHashMap = this.sessionCursors;
+  2304|                 String strCursorKeyForSessionLocked = cursorKeyForSessionLocked(str);
+  2305|                 SessionCursors sessionCursors = concurrentHashMap.get(strCursorKeyForSessionLocked);
+  2306|                 if (sessionCursors == null && (sessionCursorsPutIfAbsent = concurrentHashMap.putIfAbsent(strCursorKeyForSessionLocked, (sessionCursors = new SessionCursors()))) != null) {
+  2307|                     sessionCursors = sessionCursorsPutIfAbsent;
+  2308|                 }
+  2309|                 SessionCursors sessionCursors2 = sessionCursors;
+  2310|                 long jLongValue = l.longValue();
+  2311|                 Long l2 = sessionCursors2.afterChatEventSeq;
+  2312|                 if (jLongValue > (l2 != null ? l2.longValue() : 0L)) {
+  2313|                     sessionCursors2.afterChatEventSeq = l;
+  2314|                 }
+  2315|             }
+  2316|         }
+  2317|     }
+  2319|     public final void bumpStreamSeqIfNewer(String str, Long l) {
+  2320|         SessionCursors sessionCursorsPutIfAbsent;
+
+### buildChatSubscribeBody 字段
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/JarvisProtocolJsonKt.java 行 89-130
+    89|     public static final String buildChatSubscribeBody(String str, String str2, Long l, Long l2, Integer num, String str3) {
+    90|         return C3UN.A12(str).A02(new ChatRequestEnvelopeJson("req", str, RpcMethod.ChatSubscribe.INSTANCE.getValue(), chatSubscribeParams(str2, l, l2, num), str3, AuraAcceptLanguage.INSTANCE.headerValue()), ChatRequestEn
+    91|     }
+    93|     public static final String buildChatSubscribeParams(String str, Long l, Long l2, Integer num) {
+    94|         C25519Tj.A0p(str, 0);
+    95|         return chatSubscribeParams(str, l, l2, num).toString();
+    96|     }
+    98|     public static final String buildGatewayRequestBody(String str, RpcMethod rpcMethod, JsonElement jsonElement) {
+    99|         C25519Tj.A0p(str, 0);
+   100|         C25519Tj.A0p(rpcMethod, 1);
+   101|         C21518l5 c21518l5 = new C21518l5();
+   102|         C6tk.A07("type", "req", c21518l5);
+   103|         C6tk.A07(AuraDeeplinkRouteMapper.ID_PARAM, str, c21518l5);
+   104|         C6tk.A07("method", rpcMethod.getValue(), c21518l5);
+   105|         C6tk.A07("accept_language", AuraAcceptLanguage.INSTANCE.headerValue(), c21518l5);
+   106|         if (jsonElement != null) {
+   107|             c21518l5.A07(AuraBloksDataProps.PARAMS, jsonElement);
+   108|         }
+   109|         return c21518l5.A06().toString();
+   110|     }
+   112|     public static final JsonObject chatSubscribeParams(String str, Long l, Long l2, Integer num) {
+   113|         C21518l5 c21518l5 = new C21518l5();
+   114|         C6tk.A08(PinnedItemsRepository.CAPABILITIES_PARAM, JarvisProtocolJsonKt$chatSubscribeParams$1$1.INSTANCE, c21518l5);
+   115|         if (str != null) {
+   116|             C6tk.A07(AuraCvmPushDecryptor.PARAM_SESSION_ID, str, c21518l5);
+   117|         }
+   118|         if (l != null) {
+   119|             C6tk.A06(l, "after_stream_seq", c21518l5);
+   120|         }
+   121|         if (l2 != null) {
+   122|             C6tk.A06(l2, "after_chat_event_seq", c21518l5);
+   123|         }
+   124|         if (num != null) {
+   125|             C6tk.A06(num, "replay_limit", c21518l5);
+   126|         }
+   127|         return c21518l5.A06();
+   128|     }
+   130|     public static final JsonElement toJsonElementSafe(Object obj) {

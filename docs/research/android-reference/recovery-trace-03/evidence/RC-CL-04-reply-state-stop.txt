@@ -1,0 +1,301 @@
+# 回复状态机 + Stop：请求/送达/服务端回合结束分开记录
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### quo.t(): 推导 UI 回复状态
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/quo.java 行 618-700
+   618|     public static final hga t(n2m n2mVar) {
+   619|         Object next;
+   620|         mqz mqzVar;
+   621|         Long l;
+   622|         mqz mqzVar2;
+   623|         Long l2;
+   624|         uca ucaVarX = n2mVar.x();
+   625|         String strF = n2mVar.f();
+   626|         wdo wdoVarP = n2mVar.p();
+   627|         l9o l9oVarR = n2mVar.R();
+   628|         m9o m9oVarZ = peq.Z(n2mVar);
+   629|         xo2 xo2Var = m9oVarZ != null ? new xo2(m9oVarZ.c, m9oVarZ.b, m9oVarZ.i) : null;
+   630|         iqj iqjVarO = n2mVar.o();
+   631|         p8r p8rVarW = n2mVar.W();
+   632|         uka ukaVarA = n2mVar.a();
+   633|         boolean zD = n2mVar.d();
+   634|         Iterator it = wdoVarP.values().iterator();
+   635|         while (true) {
+   636|             if (!it.hasNext()) {
+   637|                 next = null;
+   638|                 break;
+   639|             }
+   640|             next = it.next();
+   641|             if (!((eqz) next).f()) {
+   642|                 break;
+   643|             }
+   644|         }
+   645|         eqz eqzVar = (eqz) next;
+   646|         if (xo2Var != null && (strF != null || l9oVarR != null || ukaVarA.b() || (zD && xo2Var.b()))) {
+   647|             return new fga(eqzVar != null ? eqzVar.i : null, xo2Var);
+   648|         }
+   649|         if (ukaVarA != uka.A || ((l9oVarR != null && !l9oVarR.f) || (strF == null && l9oVarR == null))) {
+   650|             long jA = 0;
+   651|             if (strF == null) {
+   652|                 if (l9oVarR == null || !l9oVarR.f) {
+   653|                     if (l9oVarR != null) {
+   654|                         return new ega(p8rVarW instanceof o8r ? (o8r) p8rVarW : null, l9oVarR.a == null);
+   655|                     }
+   656|                     if (p8rVarW != null) {
+   657|                         return new dga(p8rVarW);
+   658|                     }
+   659|                     if (iqjVarO instanceof gqj) {
+   660|                         return bga.a;
+   661|                     }
+   662|                     if (iqjVarO instanceof eqj) {
+   663|                         return aga.a;
+   664|                     }
+   665|                     if (n7i.l(iqjVarO, hqj.a) && ucaVarX.b().isEmpty()) {
+   666|                         return cga.a;
+   667|                     }
+   668|                     if (ukaVarA.b()) {
+   669|                         if (eqzVar != null && (l2 = eqzVar.i) != null) {
+   670|                             jA = l2.longValue();
+   671|                         } else if (eqzVar != null && (mqzVar2 = eqzVar.a) != null) {
+   672|                             jA = mqzVar2.a();
+   673|                         }
+   674|                         return new gga(jA);
+   675|                     }
+   676|                 }
+   677|             }
+   678|             if (eqzVar != null && (l = eqzVar.i) != null) {
+   679|                 jA = l.longValue();
+   680|             } else if (eqzVar != null && (mqzVar = eqzVar.a) != null) {
+   681|                 jA = mqzVar.a();
+   682|             }
+   683|             return new gga(jA);
+   684|         }
+   685|         return zfa.a;
+   686|     }
+   688|     public static final ixl u(jsa jsaVar) {
+   689|         ixl ixlVar = (ixl) jsaVar.U0(pr20.G);
+   690|         if (ixlVar != null) {
+   691|             return ixlVar;
+   692|         }
+   693|         lp.q("A MonotonicFrameClock is not available in this CoroutineContext. Callers should supply an appropriate MonotonicFrameClock using withContext.");
+   694|         return null;
+   695|     }
+   697|     public static final int v(String str) {
+   698|         int iM0;
+   699|         char c2 = File.separatorChar;
+   700|         int iM02 = u1x.m0(str, c2, 0, 4);
+
+### m9o = Stop(...) toString
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/m9o.java 行 140-161
+   140|     public final int hashCode() {
+   141|         String str = this.a;
+   142|         int iK = w0k.k(w0k.k(jry.p((str == null ? 0 : str.hashCode()) * 31, 31, this.b), this.c, 31), this.d, 31);
+   143|         Long l = this.e;
+   144|         return this.j.hashCode() + jry.p(jry.p(jry.p(jry.p((iK + (l != null ? l.hashCode() : 0)) * 31, 31, this.f), 31, this.g), 31, this.h), 31, this.i);
+   145|     }
+   147|     public final String toString() {
+   148|         String str = this.a;
+   149|         StringBuilder sbT = u3s.t("Stop(target=", str == null ? "null" : zhl.b(str), ", targetsTurn=", ", requestedAt=", this.b);
+   150|         sbT.append(this.c);
+   151|         u3s.w(sbT, ", requestedAtElapsedMs=", this.d, ", version=");
+   152|         sbT.append(this.e);
+   153|         sbT.append(", targetWasOpen=");
+   154|         sbT.append(this.f);
+   155|         sbT.append(", awaited=");
+   156|         a0o.i(sbT, this.g, ", serverTurnEndedSinceRequest=", this.h, ", isDeliveryOverdue=");
+   157|         sbT.append(this.i);
+   158|         sbT.append(", state=");
+   159|         sbT.append(this.j);
+   160|         sbT.append(")");
+   161|         return sbT.toString();
+
+### l9o = Send(...) toString
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/l9o.java 行 210-240
+   210|         String str2 = this.k;
+   211|         int iHashCode2 = (iP2 + (str2 == null ? 0 : str2.hashCode())) * 31;
+   212|         Integer num = this.l;
+   213|         return this.p.hashCode() + jry.p(jry.p(jry.p((iHashCode2 + (num != null ? num.hashCode() : 0)) * 31, 31, this.m), 31, this.n), 31, this.o);
+   214|     }
+   216|     public final String toString() {
+   217|         String str = this.c;
+   218|         String strB = str == null ? "null" : zhl.b(str);
+   219|         StringBuilder sb = new StringBuilder("Send(human=");
+   220|         sb.append(this.a);
+   221|         sb.append(", reply=");
+   222|         sb.append(this.b);
+   223|         sb.append(", serverHumanId=");
+   224|         bgv.l(strB, ", serverLeafMoved=", ", version=", sb, this.d);
+   225|         sb.append(this.e);
+   226|         sb.append(", takenByServer=");
+   227|         sb.append(this.f);
+   228|         sb.append(", isEdit=");
+   229|         sb.append(this.g);
+   230|         sb.append(", ownUploadIds=");
+   231|         sb.append(this.h);
+   232|         sb.append(", serverMayHaveReceivedMessage=");
+   233|         a0o.i(sb, this.i, ", restored=", this.j, ", statusText=");
+   234|         sb.append(this.k);
+   235|         sb.append(", queueOrder=");
+   236|         sb.append(this.l);
+   237|         sb.append(", canCancel=");
+   238|         a0o.i(sb, this.m, ", listedByServer=", this.n, ", sentWhileBusy=");
+   239|         sb.append(this.o);
+   240|         sb.append(", phase=");
+
+### smali_classes4/xo2 toString
+# 来源: claude/1.261009.20/work/smali_out/smali_classes4/xo2.smali 行 143-169
+   143|     const-string v1, "AwaitedStop(requestedAt="
+   145|     invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+   147|     iget-wide v1, p0, Lxo2;->a:J
+   149|     invoke-virtual {v0, v1, v2}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
+   151|     const-string v1, ", targetsTurn="
+   153|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   155|     iget-boolean v1, p0, Lxo2;->b:Z
+   157|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;
+   159|     const-string v1, ", isDeliveryOverdue="
+   161|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   163|     iget-boolean p0, p0, Lxo2;->c:Z
+   165|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;
+   167|     const-string p0, ")"
+   169|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+### smali_classes3/o8r toString
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/o8r.smali 行 115-141
+   115|     const-string v1, "RetryingSend(attempt="
+   117|     invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+   119|     iget v1, p0, Lo8r;->a:I
+   121|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+   123|     const-string v1, ", isBusyContainer="
+   125|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   127|     iget-boolean p0, p0, Lo8r;->b:Z
+   129|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;
+   131|     const-string p0, ")"
+   133|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   135|     invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+   137|     move-result-object p0
+   139|     return-object p0
+   140| .end method
+
+### smali_classes3/l8r toString
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/l8r.smali 行 128-154
+   128|     const-string v1, "GaveUp(exit="
+   130|     invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+   132|     iget v1, p0, Ll8r;->a:I
+   134|     invoke-static {v1}, Luwp;->t(I)Ljava/lang/String;
+   136|     move-result-object v1
+   138|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   140|     const-string v1, ", kind="
+   142|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   144|     iget-object p0, p0, Ll8r;->b:Lzpe;
+   146|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+   148|     const-string p0, ")"
+   150|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   152|     invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+   154|     move-result-object p0
+
+### smali_classes3/m8r toString
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/m8r.smali 行 61-87
+    61|     const-string p0, "PollingForLostAssistantMessage"
+    63|     return-object p0
+    64| .end method
+
+### smali_classes3/n8r toString
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/n8r.smali 行 61-87
+    61|     const-string p0, "Reconnecting"
+    63|     return-object p0
+    64| .end method
+
+### smali/fga toString
+# 来源: claude/1.261009.20/work/smali_out/smali/fga.smali 行 117-143
+   117|     const-string v1, "Stopping(openedAt="
+   119|     invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+   121|     iget-object v1, p0, Lfga;->a:Ljava/lang/Long;
+   123|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+   125|     const-string v1, ", stopRequest="
+   127|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   129|     iget-object p0, p0, Lfga;->b:Lxo2;
+   131|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+   133|     const-string p0, ")"
+   135|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   137|     invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+   139|     move-result-object p0
+   141|     return-object p0
+   142| .end method
+
+### smali/dga toString
+# 来源: claude/1.261009.20/work/smali_out/smali/dga.smali 行 82-108
+    82|     const-string v1, "Recovering(status="
+    84|     invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+    86|     iget-object p0, p0, Ldga;->a:Lp8r;
+    88|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+    90|     const-string p0, ")"
+    92|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    94|     invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    96|     move-result-object p0
+    98|     return-object p0
+    99| .end method
+
+### smali/ega toString
+# 来源: claude/1.261009.20/work/smali_out/smali/ega.smali 行 111-137
+   111|     const-string v1, "Sending(retrying="
+   113|     invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+   115|     iget-object v1, p0, Lega;->a:Lo8r;
+   117|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+   119|     const-string v1, ", isRetryTurn="
+   121|     invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   123|     iget-boolean p0, p0, Lega;->b:Z
+   125|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;
+   127|     const-string p0, ")"
+   129|     invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+   131|     invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+   133|     move-result-object p0
+   135|     return-object p0
+   136| .end method
+
+### smali/gga toString
+# 来源: claude/1.261009.20/work/smali_out/smali/gga.smali 行 76-102
+    76|     const-string v0, "Streaming(openedAt="
+    78|     const-string v1, ")"
+    80|     iget-wide v2, p0, Lgga;->a:J
+    82|     invoke-static {v2, v3, v0, v1}, Lcee;->j(JLjava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+    84|     move-result-object p0
+    86|     return-object p0
+    87| .end method
+
+### rv5: stop_response 端点
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/rv5.java 行 38-46
+    38|         return this.a.a(vv0VarM.b(), tvz.b, y7aVar);
+    39|     }
+    41|     public final Object h(String str, String str2, ytw ytwVar, jjx jjxVar) {
+    42|         vv0 vv0VarM = w0k.m(2, "organizations/{organization}/chat_conversations/{chat}/stop_response", "organization", str);
+    43|         vv0VarM.f("chat", str2);
+    44|         vv0VarM.d(ytw.Companion.serializer(), ytwVar);
+    45|         return this.a.a(vv0VarM.b(), tvz.b, jjxVar);
+    46|     }
+
+### ytw = StopResponseRequest
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/ytw.java 行 70-78
+    70|         }
+    71|         return str.hashCode();
+    72|     }
+    74|     public final String toString() {
+    75|         String str = this.a;
+    76|         return w0k.p("StopResponseRequest(completion_request_id=", str == null ? "null" : ya9.a(str), ")");
+    77|     }
+    78| }
+
+### ss6: 无进行中回复时点 Stop
+# 来源: claude/1.261009.20/work/smali_out/smali/ss6.smali 行 11770-11790
+ 11771|     goto :goto_1
+ 11773|     :cond_3
+ 11774|     const/4 v4, 0x1
+ 11776|     iput-boolean v4, p0, Lss6;->Y4:Z
+ 11778|     sget-object v4, Lmtx;->a:Lmtx;
+ 11780|     new-instance v5, Lcom/anthropic/claude/core/telemetry/SilentException;
+ 11782|     const-string v4, "Stop tapped with no response in flight"
+ 11784|     invoke-direct {v5, v4}, Lcom/anthropic/claude/core/telemetry/SilentException;-><init>(Ljava/lang/String;)V
+ 11786|     invoke-virtual {p0}, Lss6;->V0()Lnm6;
+ 11788|     move-result-object v4
+ 11790|     invoke-static {v4}, Lhay;->n(Lnm6;)Ljava/lang/String;

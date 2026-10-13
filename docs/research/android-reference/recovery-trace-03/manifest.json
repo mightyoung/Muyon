@@ -1,0 +1,90 @@
+{
+  "task": "RECOVERY-TRACE-03",
+  "date": "2026-10-13",
+  "timezone": "Asia/Shanghai",
+  "static_only": true,
+  "no_dynamic": true,
+  "labels": [
+    "包内直接证据",
+    "官方说明",
+    "推断",
+    "未知"
+  ],
+  "samples": {
+    "claude": {
+      "version": "1.261009.20",
+      "apk_sha256": "9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a",
+      "cert_sha256": "305a1e8a432e5ec0c612b2465359c3b88e3c95d6253599ac6088562b818b64a0",
+      "signature_source": "apksigner verify --print-certs on base APK; DN 为 Play 签名形态，中等置信",
+      "coverage": "base-only，缺 abi/density split；jadx 162 errors，关键方法用 smali 补"
+    },
+    "chatgpt": {
+      "version": "1.2026.272",
+      "apk_sha256": "47d8350ad995eb54283bce326fed77d099467f6222318eb1c8509b7f8831e40a",
+      "cert_sha256": "b24f4bfbb3cf293f938703b9d87027c1102cc36dc4fa206910e08927db40473c",
+      "signature_source": "apksigner verify --print-certs",
+      "coverage": "base-only；jadx 约66%中止(49421 files)，以 apktool smali 为主"
+    },
+    "muse": {
+      "package": "com.facebook.aura",
+      "version": "11.0.0.8.164",
+      "apk_sha256": "c7e788b5df855912dffbefc4c017f2e621b54aaeef954424f56339bd994fcefa",
+      "cert_sha256": "a16bbe0247a738bc8f09fef50d890dc177ec875a83a121f877329b1b89667e99",
+      "signature_source": "apksigner 0.9 --print-certs (Meta)",
+      "coverage": "base-only 可独立安装；jadx 138 errors；HatchAgentPermissionsRepository 定向 baksmali"
+    }
+  },
+  "tools": {
+    "jadx": "1.5.3",
+    "apktool": "2.7.0-dirty",
+    "baksmali": "2.5.2",
+    "aapt": "dump xmltree",
+    "pandoc": "report.docx"
+  },
+  "reused": [
+    "AUTH-TRACE-02 evidence CL-01..06, GPT-01..05, MU-01（引用不复述）"
+  ],
+  "official_docs_accessed_2026-10-13": [
+    "https://docs.claude.com/en/docs/build-with-claude/streaming",
+    "https://raw.githubusercontent.com/openai/codex/main/codex-rs/app-server/README.md"
+  ],
+  "coverage_gaps": [
+    "Claude: 草稿存储/FCM/切换会话审批/服务端 stop 语义未追",
+    "ChatGPT: 普通聊天 stop 端点未见；offset 比较/去重未见；登出清 offset 调用方未追",
+    "Muse: chat delta 逐条处理器/replay>500/游标失效服务端行为未追",
+    "全部: 无动态验证"
+  ],
+  "secrets": "Claude manifest 含 Google Maps API key（meta-data com.google.android.geo.API_KEY）：仅记录位置，未收录值",
+  "evidence": {
+    "RC-CL-01-stream-event-schema.txt": "e5c9c2d7d4cb23f7aa78fe59098ee4ab55d94c66d50de8843f8280a16f6191f9",
+    "RC-CL-02-retract-reducer.txt": "fe98905213c83652baf4f6940bd3499750d3e6d90002e59af16b02156ab90ab9",
+    "RC-CL-03-stall-watchdog.txt": "8106b55038531064c3903d66556af548b6a409a97a41c70f90db022a099c55f1",
+    "RC-CL-04-reply-state-stop.txt": "a2e0e232a7a8ddc0672d4cb16fc38a7b8d69c3bb8413e6eaa211ba03187ca389",
+    "RC-CL-05-snapshot-write-chain.txt": "dc9fb8ebbd61ffc7fe6890972f879ae639c9640376eb494628e9da050e39aee4",
+    "RC-CL-06-snapshot-read-and-scope.txt": "21fc2a068fc845a2774f3a89e32a18d1a988fc319961011df770f199ee57b1e2",
+    "RC-CL-07-service-liveness.txt": "7ad03d10e452037e2a8af6c91d94cbdb89c627b073c970475921d5bf88f87eb6",
+    "RC-CL-08-remote-session-seq.txt": "8e0adcb6e5cf74b191e40e0fc8cf7a2ffdfdb159ec4bcfd11642a3497ef157f2",
+    "RC-CL-09-approval-kept-through-drop.txt": "d868d0f4632d951451493e5b60277d2949a0d4986fbaa61879259d453c6d636e",
+    "RC-DOC-01-official.txt": "6c4bcbf5ba9591357d2d086ba2a77cde96e8ea9967d955799dd54182acf19f64",
+    "RC-GPT-01-stream-events.txt": "8be50bba7ebc579eb3ea460455b41d654703d89ef45b7f21f742c4b5b03b4317",
+    "RC-GPT-02-resume-token-handoff.txt": "42a1145a30a5ad8ee6153bbb436161eed910d537064e3c91ef4f77962d2e1474",
+    "RC-GPT-03-resume-offset.txt": "234a106954439179abac89e13fb057124a5f5140e8d3a23f0cc6e4b07ae87aa4",
+    "RC-GPT-04-ws-topic-offset.txt": "82f18efe2d358180da99d7d1c31870c1e0ce46ed9b54765bbdb34746a5d5506b",
+    "RC-GPT-05-services.txt": "a0e7cf80f90b633ed4cc9c0646cd3239f748eef862d0cb97f466bd4784654bce",
+    "RC-GPT-06-codex-rpc.txt": "d2f049cbd5cf8898e4103bad663d754acb60deb32423a890a48d906235ff8a42",
+    "RC-MU-01-chat-cursors.txt": "71f29b761624eccdfd9feb9fdabf3387e9537012238af0c13b0c0f166758dcfb",
+    "RC-MU-02-approval-snapshot-reducer.txt": "ba0b387ef2500b730bae8fb885090ed046410a88368eaa8af9b0ecb7cddd841e",
+    "RC-MU-03-cancel-generation.txt": "74510be2b4b5ee73f10d46d92290812126ddf1c62f79b317a9fe05d35a86e3a2",
+    "RC-MU-04-browser-stop.txt": "6716812a5e7dde111ed35474b28cae095cda2b85f9a887f7447365976fc08ce8",
+    "RC-MU-05-node-command-service.txt": "c2bf9869d0b54c6bf30438253ae4a393b82e8278877345b7064fcce807ef211b"
+  },
+  "files": [
+    "claude.md",
+    "chatgpt.md",
+    "muse.md",
+    "muyon.md",
+    "report.docx",
+    "manifest.json",
+    "evidence/*"
+  ]
+}

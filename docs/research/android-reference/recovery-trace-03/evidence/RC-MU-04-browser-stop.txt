@@ -1,0 +1,121 @@
+# 浏览器任务 Stop：503 未确认码重试 3 次，409 视为成功
+# 样本: Muse (com.facebook.aura) 11.0.0.8.164 base APK sha256=c7e788b5df855912dffbefc4c017f2e621b54aaeef954424f56339bd994fcefa
+# 工具: jadx 1.5.3 (138 errors) + baksmali 2.5.2 定向（HatchAgentPermissionsRepository）
+# 标签: 包内直接证据（除非另注）
+
+### BrowserTaskStopKt
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/browsertask/control/BrowserTaskStopKt.java 行 1-120
+     1| package com.facebook.aura.browsertask.control;
+     3| import X.C0M8;
+     4| import X.C6GQ;
+     5| import kotlin.coroutines.jvm.internal.DebugMetadata;
+     7| /* loaded from: classes5.dex */
+     8| public abstract class BrowserTaskStopKt {
+     9|     public static final String ERROR_STOP_CLEANUP_PENDING = "browser_stop_cleanup_pending";
+    10|     public static final String ERROR_STOP_SETTLING = "browser_stop_owner_settling";
+    11|     public static final String ERROR_STOP_UNCONFIRMED = "browser_stop_outcome_unconfirmed";
+    12|     public static final int HTTP_CONFLICT = 409;
+    13|     public static final int HTTP_OK = 200;
+    14|     public static final int HTTP_SERVICE_UNAVAILABLE = 503;
+    15|     public static final int STOP_MAX_RETRIES = 3;
+    16|     public static final long STOP_RETRY_DELAY_MS = 1000;
+    18|     @DebugMetadata(c = "com.facebook.aura.browsertask.control.BrowserTaskStopKt", f = "BrowserTaskStop.kt", l = {21, 32}, m = "stopWithRetry")
+    19|     /* renamed from: com.facebook.aura.browsertask.control.BrowserTaskStopKt$stopWithRetry$1, reason: invalid class name */
+    20|     public final class AnonymousClass1 extends C6GQ {
+    21|         public int I$0;
+    22|         public int I$1;
+    23|         public Object L$0;
+    24|         public Object L$1;
+    25|         public Object L$2;
+    26|         public Object L$3;
+    27|         public int label;
+    28|         public /* synthetic */ Object result;
+    30|         public AnonymousClass1(C0M8<? super AnonymousClass1> c0m8) {
+    31|             super(c0m8);
+    32|         }
+    34|         @Override // X.C9BK
+    35|         public final Object invokeSuspend(Object obj) {
+    36|             this.result = obj;
+    37|             this.label |= Integer.MIN_VALUE;
+    38|             return BrowserTaskStopKt.stopWithRetry(null, null, this);
+    39|         }
+    40|     }
+    42|     /* JADX WARN: Removed duplicated region for block: B:18:0x0055  */
+    43|     /* JADX WARN: Removed duplicated region for block: B:40:0x00aa  */
+    44|     /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:37:0x00a2 -> B:12:0x002e). Please report as a decompilation issue!!! */
+    45|     /*
+    46|         Code decompiled incorrectly, please refer to instructions dump.
+    47|         To view partially-correct add '--show-bad-code' argument
+    48|     */
+    49|     public static final java.lang.Object stopWithRetry(com.facebook.aura.browsertask.control.BrowserTaskControlTransport r9, java.lang.String r10, X.C0M8<? super java.lang.Boolean> r11) {
+    50|         /*
+    51|             boolean r0 = r11 instanceof com.facebook.aura.browsertask.control.BrowserTaskStopKt.AnonymousClass1
+    52|             if (r0 == 0) goto Laa
+    53|             r6 = r11
+    54|             com.facebook.aura.browsertask.control.BrowserTaskStopKt$stopWithRetry$1 r6 = (com.facebook.aura.browsertask.control.BrowserTaskStopKt.AnonymousClass1) r6
+    55|             int r2 = r6.label
+    56|             r1 = -2147483648(0xffffffff80000000, float:-0.0)
+    57|             r0 = r2 & r1
+    58|             if (r0 == 0) goto Laa
+    59|             int r2 = r2 - r1
+    60|             r6.label = r2
+    61|         L12:
+    62|             java.lang.Object r1 = r6.result
+    63|             X.8i6 r7 = X.EnumC21398i6.A02
+    64|             int r0 = r6.label
+    65|             r5 = 2
+    66|             r4 = 0
+    67|             r3 = 1
+    68|             if (r0 == 0) goto La5
+    69|             if (r0 == r3) goto L41
+    70|             if (r0 != r5) goto Lb1
+    71|             int r2 = r6.I$0
+    72|             java.lang.Object r10 = r6.L$1
+    73|             java.lang.String r10 = (java.lang.String) r10
+    74|             java.lang.Object r9 = r6.L$0
+    75|             com.facebook.aura.browsertask.control.BrowserTaskControlTransport r9 = (com.facebook.aura.browsertask.control.BrowserTaskControlTransport) r9
+    76|             X.C8mv.A03(r1)
+    77|         L2e:
+    78|             r6.L$0 = r9
+    79|             r6.L$1 = r10
+    80|             r6.L$2 = r4
+    81|             r6.L$3 = r4
+    82|             r6.I$0 = r2
+    83|             r6.label = r3
+    84|             java.lang.Object r1 = r9.m270stopgIAlus(r10, r6)
+    85|             if (r1 != r7) goto L4f
+    86|             return r7
+    87|         L41:
+    88|             int r2 = r6.I$0
+    89|             java.lang.Object r10 = r6.L$1
+    90|             java.lang.String r10 = (java.lang.String) r10
+    91|             java.lang.Object r9 = r6.L$0
+    92|             com.facebook.aura.browsertask.control.BrowserTaskControlTransport r9 = (com.facebook.aura.browsertask.control.BrowserTaskControlTransport) r9
+    93|             java.lang.Object r1 = X.C3UL.A0n(r1)
+    94|         L4f:
+    95|             boolean r0 = r1 instanceof X.C8mh
+    96|             r0 = r0 ^ 1
+    97|             if (r0 != 0) goto Lb7
+    98|             java.lang.Throwable r8 = X.C34579tt.A00(r1)
+    99|             boolean r0 = r8 instanceof com.facebook.aura.json.NetworkException
+   100|             if (r0 == 0) goto Lb6
+   101|             com.facebook.aura.json.NetworkException r8 = (com.facebook.aura.json.NetworkException) r8
+   102|             if (r8 == 0) goto Lb6
+   103|             int r1 = r8.httpResponseCode
+   104|             r0 = 200(0xc8, float:2.8E-43)
+   105|             if (r1 == r0) goto Lb7
+   106|             r0 = 409(0x199, float:5.73E-43)
+   107|             if (r1 == r0) goto Lb7
+   108|             r0 = 503(0x1f7, float:7.05E-43)
+   109|             if (r1 != r0) goto Lb6
+   110|             java.lang.String r1 = r8.errorCode
+   111|             java.lang.String r0 = "browser_stop_outcome_unconfirmed"
+   112|             boolean r0 = r0.equals(r1)
+   113|             if (r0 != 0) goto L89
+   114|             java.lang.String r0 = "browser_stop_owner_settling"
+   115|             boolean r0 = r0.equals(r1)
+   116|             if (r0 != 0) goto L89
+   117|             java.lang.String r0 = "browser_stop_cleanup_pending"
+   118|             boolean r0 = r0.equals(r1)
+   119|             if (r0 == 0) goto Lb6
+   120|         L89:

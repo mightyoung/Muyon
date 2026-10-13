@@ -1,0 +1,82 @@
+# 断流时保留待审批客户端工具 240s
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### sse/a.smali: 断流分支
+# 来源: claude/1.261009.20/work/smali_out/smali_classes3/com/anthropic/claude/conversation/sse/a.smali 行 760-840
+   760|     move-result v0
+   762|     if-nez v0, :cond_27
+   764|     invoke-virtual {v1}, Lw020;->a()V
+   766|     iget-object v3, v13, Lncz;->d:Ljava/lang/String;
+   768|     if-eqz v3, :cond_27
+   770|     invoke-virtual {v3}, Ljava/lang/String;->length()I
+   772|     move-result v0
+   774|     if-lez v0, :cond_26
+   776|     goto :goto_17
+   778|     :cond_26
+   779|     const/4 v3, 0x0
+   781|     :goto_17
+   782|     if-eqz v3, :cond_27
+   784|     iget-object v0, v11, Lpiw;->c:Ltzn;
+   786|     invoke-virtual {v0}, Ltzn;->getValue()Ljava/lang/Object;
+   788|     move-result-object v0
+   790|     check-cast v0, Ljava/lang/Long;
+   792|     if-eqz v0, :cond_27
+   794|     invoke-virtual {v0}, Ljava/lang/Long;->longValue()J
+   796|     move-result-wide v4
+   798|     new-instance v0, Ljrm;
+   800|     invoke-direct {v0, v13}, Ljrm;-><init>(Lncz;)V
+   802|     invoke-static {v11, v0}, Lyb20;->g(Ln2m;Lkrm;)V
+   804|     iget-object v0, v11, Lpiw;->e:Ltzn;
+   806|     invoke-static {v3}, Lucz;->a(Ljava/lang/String;)Lucz;
+   808|     move-result-object v2
+   810|     invoke-virtual {v0, v2}, Ltzn;->setValue(Ljava/lang/Object;)V
+   812|     const-string v0, "toolUseId"
+   814|     invoke-static {v0, v3}, Ljava/util/Collections;->singletonMap(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/Map;
+   816|     move-result-object v0
+   818|     invoke-virtual {v0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+   820|     const-string v2, "tool approval kept through the drop"
+   822|     invoke-static {v2, v0}, Lmda;->a(Ljava/lang/String;Ljava/util/Map;)V
+   824|     new-instance v0, Lrhw;
+   826|     sget-wide v6, Ljhw;->c:J
+   828|     invoke-static {v6, v7}, Ld7d;->k(J)J
+   830|     move-result-wide v6
+   832|     add-long/2addr v6, v4
+   834|     invoke-direct {v0, v6, v7, v3}, Lrhw;-><init>(JLjava/lang/String;)V
+   836|     invoke-virtual {v1, v0}, Lw020;->c(Lwvw;)V
+   838|     :cond_27
+   839|     const/4 v3, 0x0
+
+### rhw toString
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/rhw.java 行 1-36
+     1| package defpackage;
+     3| /* loaded from: classes3.dex */
+     4| public final class rhw implements phw {
+     5|     public final String a;
+     6|     public final long b;
+     8|     public rhw(long j, String str) {
+     9|         this.a = str;
+    10|         this.b = j;
+    11|     }
+    13|     public final long a() {
+    14|         return this.b;
+    15|     }
+    17|     public final boolean equals(Object obj) {
+    18|         if (this == obj) {
+    19|             return true;
+    20|         }
+    21|         if (!(obj instanceof rhw)) {
+    22|             return false;
+    23|         }
+    24|         rhw rhwVar = (rhw) obj;
+    25|         return this.a.equals(rhwVar.a) && this.b == rhwVar.b;
+    26|     }
+    28|     public final int hashCode() {
+    29|         return Long.hashCode(this.b) + (this.a.hashCode() * 31);
+    30|     }
+    32|     public final String toString() {
+    33|         StringBuilder sbY = w0k.y(this.b, "EndToolApprovalKeptThroughDrop(toolUseId=", ucz.d(this.a), ", atElapsedRealtimeMs=");
+    34|         sbY.append(")");
+    35|         return sbY.toString();
+    36|     }

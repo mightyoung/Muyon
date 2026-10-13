@@ -1,0 +1,81 @@
+# MessageSseService：普通 Service、START_NOT_STICKY、引用计数启动/停止（非 FGS、无执行）
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### MessageSseService.java 全文
+# 来源: claude/1.261009.20/work/jadx/sources/com/anthropic/claude/chat/MessageSseService.java 行 1-28
+     1| package com.anthropic.claude.chat;
+     3| import android.app.Service;
+     4| import android.content.Intent;
+     5| import android.os.IBinder;
+     6| import defpackage.ouj;
+     7| import defpackage.puj;
+     9| /* loaded from: classes4.dex */
+    10| public final class MessageSseService extends Service {
+    11|     public static final /* synthetic */ int v = 0;
+    13|     @Override // android.app.Service
+    14|     public final IBinder onBind(Intent intent) {
+    15|         return null;
+    16|     }
+    18|     @Override // android.app.Service
+    19|     public final void onDestroy() {
+    20|         super.onDestroy();
+    21|         ouj oujVar = puj.m;
+    22|     }
+    24|     @Override // android.app.Service
+    25|     public final int onStartCommand(Intent intent, int i, int i2) {
+    26|         return 2;
+    27|     }
+    28| }
+
+### y330: startService
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/y330.java 行 365-383
+   365|         if (z2 || objU == dg9.a) {
+   366|             objU = new yjx((Object) ddtVar, (Object) ic00Var, (Object) qujVar, (byte) 25);
+   367|             lofVar.u0(objU);
+   368|         }
+   369|         return (wb00) etq.x0(war.a(wb00.class), n7i.G(ic00Var, mrz.H(war.a(wb00.class))), (qmf) objU, lofVar, 0);
+   370|     }
+   372|     public static boolean l(Context context) {
+   373|         oav oavVar = oav.w;
+   374|         try {
+   375|             context.startService(a(context));
+   376|             return true;
+   377|         } catch (IllegalStateException e) {
+   378|             SilentException.a(new SilentException("Failed to start MessageSseService", e), oavVar, null, 6);
+   379|             return false;
+   380|         } catch (SecurityException e2) {
+   381|             SilentException.a(new SilentException("Failed to start MessageSseService", e2), oavVar, null, 6);
+   382|             return false;
+   383|         }
+
+### u37: 引用计数归零 stopService
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/u37.java 行 126-140
+   127|     public final void b() {
+   128|         synchronized (this.d) {
+   129|             int i = this.e - 1;
+   130|             this.e = i;
+   131|             if (i == 0 && this.f) {
+   132|                 Context context = this.a;
+   133|                 int i2 = MessageSseService.v;
+   134|                 context.stopService(y330.a(context));
+   135|                 this.f = false;
+   136|             }
+   137|         }
+   138|     }
+   139| }
+
+### manifest (aapt xmltree)
+# 来源: /tmp/claude_manifest.txt 行 596-606
+   596|         A: android:name(0x01010003)="com.google.android.geo.API_KEY" (Raw: "com.google.android.geo.API_KEY")
+   597|         A: android:value(0x01010024)="[REDACTED: Google Maps API key 值不收录]" (Raw: "[REDACTED: Google Maps API key 值不收录]")
+   598|       E: service (line=555)
+   599|         A: android:name(0x01010003)="com.anthropic.claude.chat.MessageSseService" (Raw: "com.anthropic.claude.chat.MessageSseService")
+   600|       E: service (line=556)
+   601|         A: android:name(0x01010003)="com.anthropic.claude.bell.BellModeService" (Raw: "com.anthropic.claude.bell.BellModeService")
+   602|         A: android:enabled(0x0101000e)=(type 0x12)0xffffffff
+   603|         A: android:exported(0x01010010)=(type 0x12)0x0
+   604|         A: android:stopWithTask(0x0101036a)=(type 0x12)0xffffffff
+   605|         A: android:foregroundServiceType(0x01010599)=(type 0x11)0x82
+   606|       E: service (line=562)

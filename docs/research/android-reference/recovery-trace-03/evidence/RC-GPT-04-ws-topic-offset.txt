@@ -1,0 +1,118 @@
+# WebSocketManager: subscribe{topicId,offset}、recovered/catchups、先持久化 offset 后发射
+# 样本: ChatGPT 1.2026.272 base APK sha256=47d8350a…040a（全量见 manifest.json）
+# 工具: apktool 2.7.0 smali（主）+ jadx 1.5.3（约66%中止，部分类缺失）；行号=本地输出
+# 标签: 包内直接证据（除非另注）
+
+### s0w0: 订阅应答字段
+# 来源: chatgpt/1.2026.272/work/smali_out/smali/s0w0.smali 行 30-90
+    33|     new-instance v1, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;
+    37|     const-string v2, "subscribe"
+    41|     const/4 v3, 0x4
+    44|     invoke-direct {v1, v2, v0, v3}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;-><init>(Ljava/lang/String;Lzjx;I)V
+    49|     const-string v0, "topicId"
+    53|     const/4 v2, 0x0
+    56|     invoke-virtual {v1, v0, v2}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;->l(Ljava/lang/String;Z)V
+    61|     const-string v0, "recovered"
+    65|     invoke-virtual {v1, v0, v2}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;->l(Ljava/lang/String;Z)V
+    70|     const-string v0, "lastOffset"
+    74|     const/4 v2, 0x1
+    77|     invoke-virtual {v1, v0, v2}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;->l(Ljava/lang/String;Z)V
+    82|     const-string v0, "catchups"
+    86|     invoke-virtual {v1, v0, v2}, Lkotlinx/serialization/internal/PluginGeneratedSerialDescriptor;->l(Ljava/lang/String;Z)V
+
+### g0w0: recovered→Caught up / 否则 refresh topic
+# 来源: chatgpt/1.2026.272/work/smali_out/smali/g0w0.smali 行 3080-3215
+  3082|     move-result-object v2
+  3085|     if-ne v2, v13, :cond_a
+  3089|     :goto_6
+  3090|     return-object v13
+  3093|     :cond_b
+  3094|     move-object v12, v14
+  3097|     move-object v14, v11
+  3100|     move-object v11, v12
+  3103|     move-object v12, v15
+  3106|     :cond_c
+  3107|     move-object v1, v12
+  3110|     check-cast v1, Lu0w0;
+  3114|     iget-object v1, v1, Lu0w0;->d:Ljava/util/List;
+  3118|     if-eqz v1, :cond_d
+  3122|     invoke-interface {v1}, Ljava/util/List;->size()I
+  3127|     move-result v1
+  3130|     goto :goto_7
+  3133|     :cond_d
+  3134|     const/4 v1, 0x0
+  3137|     :goto_7
+  3138|     const-string v2, "Caught up "
+  3142|     const-string v3, " messages."
+  3146|     invoke-static {v1, v2, v3}, Lliy;->k(ILjava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+  3151|     move-result-object v1
+  3154|     move-object/from16 v4, v17
+  3158|     const/16 v2, 0xe
+  3162|     const/4 v3, 0x0
+  3165|     invoke-static {v4, v1, v3, v3, v2}, Lc950;->a(Lc950;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;I)V
+  3170|     goto :goto_8
+  3173|     :cond_e
+  3174|     move-object/from16 v4, v17
+  3178|     const/16 v2, 0xe
+  3182|     const/4 v3, 0x0
+  3185|     if-eqz v1, :cond_f
+  3189|     iget-object v1, v0, Lg0w0;->v:Lf6m0;
+  3193|     invoke-virtual {v1, v6}, Lf6m0;->e(Ljava/lang/Object;)Z
+  3198|     new-instance v1, Ljava/lang/StringBuilder;
+  3202|     const-string v5, "Refreshing topic after unrecovered subscription: "
+  3206|     invoke-direct {v1, v5}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+  3211|     invoke-virtual {v1, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+### g0w0: 每条消息先 h()(持久化 offset) 后 emit
+# 来源: chatgpt/1.2026.272/work/smali_out/smali/g0w0.smali 行 6800-6890
+  6800|     check-cast v1, Lr3r;
+  6804|     invoke-virtual {p2, v1, p1}, Lhy10;->a(Lr3r;Lkotlinx/serialization/json/b;)Ljava/lang/Object;
+  6809|     move-result-object p1
+  6812|     check-cast p1, Lm0w0;
+  6816|     invoke-virtual {p1}, Lm0w0;->c()Ljava/lang/String;
+  6821|     move-result-object p2
+  6824|     invoke-virtual {p1}, Lm0w0;->a()Ljava/lang/String;
+  6829|     move-result-object v1
+  6832|     iput-object v7, v0, Lf0w0;->n:Lxhk;
+  6836|     iput-object p1, v0, Lf0w0;->o:Lm0w0;
+  6840|     iput v6, v0, Lf0w0;->r:I
+  6844|     invoke-virtual {p0, p2, v1, v0}, Lg0w0;->h(Ljava/lang/String;Ljava/lang/String;Lipm;)Ljava/lang/Object;
+  6849|     move-result-object p2
+  6852|     if-ne p2, v8, :cond_8
+  6856|     goto :goto_5
+  6859|     :cond_8
+  6860|     :goto_3
+  6861|     iget-object p2, p0, Lg0w0;->o:Lf6m0;
+  6865|     iput-object v7, v0, Lf0w0;->n:Lxhk;
+  6869|     iput-object p1, v0, Lf0w0;->o:Lm0w0;
+  6873|     iput v5, v0, Lf0w0;->r:I
+  6877|     invoke-virtual {p2, p1, v0}, Lf6m0;->emit(Ljava/lang/Object;Lgpm;)Ljava/lang/Object;
+  6882|     move-result-object p2
+  6885|     if-ne p2, v8, :cond_9
+  6889|     goto :goto_5
+
+### g0w0: 加载失败删除 offsets
+# 来源: chatgpt/1.2026.272/work/smali_out/smali/g0w0.smali 行 3940-3975
+  3940|     :goto_b
+  3941|     new-instance v0, Lq0s0;
+  3945|     invoke-direct {v0, p1}, Lo0s0;-><init>(Ljava/lang/Throwable;)V
+  3950|     goto :goto_a
+  3953|     :goto_c
+  3954|     instance-of v0, p1, Lo0s0;
+  3958|     if-eqz v0, :cond_9
+  3962|     check-cast p1, Lo0s0;
+  3966|     const-string v0, "Failed to delete WebSocket topic offsets after load failure."
+  3970|     iget-object p1, p1, Lo0s0;->b:Ljava/lang/Throwable;
+  3974|     invoke-static {v5, v0, p1, v3, v2}, Lc950;->b(Lc950;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;I)V
+
+### o1w0: DBWebSocketTopicOffset SQL
+# 来源: chatgpt/1.2026.272/work/smali_out/smali/o1w0.smali 行 120-130
+   121|     invoke-direct {p1, v2}, Ljava/lang/Integer;-><init>(I)V
+   126|     const-string v1, "DELETE FROM DBWebSocketTopicOffset"
+   130|     iget-object v4, p0, Lxnp0;->a:Lo8o0;
+
+### o1w0: INSERT OR REPLACE
+# 来源: chatgpt/1.2026.272/work/smali_out/smali/o1w0.smali 行 338-350
+   340|     iget-object p1, p0, Lxnp0;->a:Lo8o0;
+   344|     const-string p2, "INSERT OR REPLACE INTO DBWebSocketTopicOffset(topicId, offset)\nVALUES (?, ?)"
+   348|     const/4 v4, 0x2

@@ -1,0 +1,364 @@
+# 快照读、加载来源与账户作用域清理
+# 样本: Claude 1.261009.20 base APK sha256=9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a
+# 工具: jadx 1.5.3 (162 errors) + apktool 2.7.0 smali；行号=本地反编译输出行号；混淆名随版本变化
+# 标签: 包内直接证据（除非另注）
+
+### eka.a: 沿 parent 链回溯
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/eka.java 行 41-66
+    41|     public static ArrayList a(String str, String str2, List list) {
+    42|         HashMap map = new HashMap(list.size());
+    43|         Iterator it = list.iterator();
+    44|         while (it.hasNext()) {
+    45|             c5w c5wVar = (c5w) it.next();
+    46|             map.put(c5wVar.d(), c5wVar);
+    47|         }
+    48|         ArrayList arrayList = new ArrayList();
+    49|         while (str != null) {
+    50|             zhl.Companion.getClass();
+    51|             if (str.equals("00000000-0000-4000-8000-000000000000")) {
+    52|                 break;
+    53|             }
+    54|             c5w c5wVar2 = (c5w) map.get(str);
+    55|             if (c5wVar2 == null || arrayList.size() >= map.size()) {
+    56|                 return null;
+    57|             }
+    58|             arrayList.add(c5wVar2);
+    59|             if (n7i.l(c5wVar2.d(), str2)) {
+    60|                 break;
+    61|             }
+    62|             str = c5wVar2.e();
+    63|         }
+    64|         Collections.reverse(arrayList);
+    65|         return arrayList;
+    66|     }
+
+### eka.b: 解码失败处理
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/eka.java 行 80-100
+    80|             return zhlVar.a;
+    81|         }
+    82|         return null;
+    83|     }
+    85|     public final Object b(byte[] bArr) {
+    86|         try {
+    87|             return this.f.c(bArr);
+    88|         } catch (CachedMessageCodec$StaleRow e) {
+    89|             return new t7s(e);
+    90|         } catch (OutOfMemoryError e2) {
+    91|             return new t7s(e2);
+    92|         } catch (CancellationException e3) {
+    93|             throw e3;
+    94|         } catch (Exception e4) {
+    95|             return new t7s(trr.a(e4, "undecodable body"));
+    96|         }
+    97|     }
+    99|     /* JADX WARN: Removed duplicated region for block: B:7:0x0013  */
+   100|     /*
+
+### eka.e: 读 (message_id,fingerprint,complete_blocks)
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/eka.java 行 207-281
+   207|     public final java.io.Serializable e(java.lang.String r5, java.lang.String r6, defpackage.y7a r7) {
+   208|         /*
+   209|             r4 = this;
+   210|             boolean r0 = r7 instanceof defpackage.pja
+   211|             if (r0 == 0) goto L13
+   212|             r0 = r7
+   213|             pja r0 = (defpackage.pja) r0
+   214|             int r1 = r0.A
+   215|             r2 = -2147483648(0xffffffff80000000, float:-0.0)
+   216|             r3 = r1 & r2
+   217|             if (r3 == 0) goto L13
+   218|             int r1 = r1 - r2
+   219|             r0.A = r1
+   220|             goto L18
+   221|         L13:
+   222|             pja r0 = new pja
+   223|             r0.<init>(r4, r7)
+   224|         L18:
+   225|             java.lang.Object r7 = r0.y
+   226|             int r1 = r0.A
+   227|             r2 = 0
+   228|             r3 = 1
+   229|             if (r1 == 0) goto L2c
+   230|             if (r1 != r3) goto L26
+   231|             defpackage.i0c.T(r7)
+   232|             goto L47
+   233|         L26:
+   234|             java.lang.String r4 = "call to 'resume' before 'invoke' with coroutine"
+   235|             defpackage.lp.q(r4)
+   236|             return r2
+   237|         L2c:
+   238|             defpackage.i0c.T(r7)
+   239|             jka r4 = r4.h()
+   240|             r0.A = r3
+   241|             zds r4 = r4.a
+   242|             ika r7 = new ika
+   243|             r1 = 2
+   244|             r7.<init>(r5, r6, r2, r1)
+   245|             r5 = 0
+   246|             java.lang.Object r7 = defpackage.po1.S(r0, r7, r4, r3, r5)
+   247|             rsa r4 = defpackage.rsa.v
+   248|             if (r7 != r4) goto L47
+   249|             return r4
+   250|         L47:
+   251|             java.util.List r7 = (java.util.List) r7
+   252|             java.util.HashMap r4 = new java.util.HashMap
+   253|             int r5 = r7.size()
+   254|             r4.<init>(r5)
+   255|             java.util.Iterator r5 = r7.iterator()
+   256|         L56:
+   257|             boolean r6 = r5.hasNext()
+   258|             if (r6 == 0) goto L7b
+   259|             java.lang.Object r6 = r5.next()
+   260|             c5w r6 = (defpackage.c5w) r6
+   261|             java.lang.String r7 = r6.d()
+   262|             u4w r0 = new u4w
+   263|             java.lang.String r1 = r6.d()
+   264|             long r2 = r6.c()
+   265|             int r6 = r6.b()
+   266|             r0.<init>(r1, r2, r6)
+   267|             r4.put(r7, r0)
+   268|             goto L56
+   269|         L7b:
+   270|             return r4
+   271|         */
+   272|         throw new UnsupportedOperationException("Method not decompiled: defpackage.eka.e(java.lang.String, java.lang.String, y7a):java.io.Serializable");
+   273|     }
+   275|     /* JADX WARN: Removed duplicated region for block: B:17:0x0054  */
+   276|     /* JADX WARN: Removed duplicated region for block: B:22:0x007e  */
+   277|     /* JADX WARN: Removed duplicated region for block: B:7:0x0013  */
+   278|     /* JADX WARN: Unsupported multi-entry loop pattern (BACK_EDGE: B:20:0x0074 -> B:21:0x0077). Please report as a decompilation issue!!! */
+   279|     /*
+   280|         Code decompiled incorrectly, please refer to instructions dump.
+   281|         To view partially-correct add '--show-bad-code' argument
+
+### kz5 加载来源枚举
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/kz5.java 行 1-79
+     1| package defpackage;
+     3| import androidx.health.platform.client.proto.g;
+     4| import java.lang.annotation.Annotation;
+     6| /* loaded from: classes2.dex */
+     7| public final /* synthetic */ class kz5 implements omf {
+     8|     public final /* synthetic */ byte v;
+    10|     public /* synthetic */ kz5(byte b) {
+    11|         this.v = b;
+    12|     }
+    14|     @Override // defpackage.omf
+    15|     public final Object a() {
+    16|         switch (this.v) {
+    17|             case 0:
+    18|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.AnalyticsAttachmentSource", mz5.values(), new String[]{"unknown", "library", "file", "camera", "paste", "drag_and_drop", "app_share", "camera
+    19|             case 1:
+    20|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.AnalyticsAttachmentUploadSource", oz5.values(), new String[]{"unspecified", "initial_upload", "tap_retry", "send_retry", "markup_replacement"
+    21|             case 2:
+    22|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.AttachmentMarkupOrigin", sz5.values(), new String[]{"unspecified", "staged", "transcript"}, new Annotation[][]{null, null, null});
+    23|             case 3:
+    24|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.BusyContainerSendRetryOutcome", vz5.values(), new String[]{"unknown", "recovered", "still_busy", "stop_failed", "other_error", "cancelled", "
+    25|             case 4:
+    26|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.ChatLoadFailureKind", b06.values(), new String[]{"unspecified", "not_found", "refused", "offline", "unknown"}, new Annotation[][]{null, null,
+    27|             case 5:
+    28|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.CompactionOutcome", f06.values(), new String[]{"unknown", "success", "failed", "interrupted"}, new Annotation[][]{null, null, null, null});
+    29|             case 6:
+    30|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.ComputerStatusSurface", i06.values(), new String[]{"unknown", "linked", "unlinked"}, new Annotation[][]{null, null, null});
+    31|             case 7:
+    32|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.ContentBlockKind", k06.values(), new String[]{"unknown", "text", "artifact", "thinking", "search_tool_invocation", "mcp_tool_invocation", "mc
+    33|             case 8:
+    34|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.ContinueChatButtonPressedSource", m06.values(), new String[]{"unknown", "toast", "disclaimer", "message_banner"}, new Annotation[][]{null, nu
+    35|             case 9:
+    36|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.ConversationLoadSource", q06.values(), new String[]{"unknown", "initial_network", "initial_cache", "resume_refresh"}, new Annotation[][]{null
+    37|             case 10:
+    38|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.DeviceNetworkType", u06.values(), new String[]{"unspecified", "wifi", "cellular", "other", "offline"}, new Annotation[][]{null, null, null, n
+    39|             case 11:
+    40|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.HubRequestKind", y06.values(), new String[]{"unspecified", "send", "open", "stream"}, new Annotation[][]{null, null, null, null});
+    41|             case 12:
+    42|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.LinkedComputerPresence", c16.values(), new String[]{"unknown", "connected", "unavailable"}, new Annotation[][]{null, null, null});
+    43|             case 13:
+    44|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.LockedModelAttemptVia", e16.values(), new String[]{"unknown", "model_row", "preset_stop"}, new Annotation[][]{null, null, null});
+    45|             case 14:
+    46|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.MarkdownNodeKind", g16.values(), new String[]{"unknown", "fenced_code", "indented_code", "inline_code", "table", "heading", "block_quote", "o
+    47|             case g.SERIES_VALUES_FIELD_NUMBER /* 15 */:
+    48|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.ModelSelectedSource", l16.values(), new String[]{"unknown", "selector_sheet", "quick_switch", "preset"}, new Annotation[][]{null, null, null,
+    49|             case 16:
+    50|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.ModelSelectorSheetSource", o16.values(), new String[]{"unknown", "chat_input", "top_bar", "error_snackbar", "voice_controls", "notice_cta", "
+    51|             case g.MAX_FIELD_NUMBER /* 17 */:
+    52|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.ModelSurface", q16.values(), new String[]{"unknown", "chat", "cowork", "code"}, new Annotation[][]{null, null, null, null});
+    53|             case g.AVG_FIELD_NUMBER /* 18 */:
+    54|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.NewChatButtonPressedSource", t16.values(), new String[]{"unknown", "chat_list", "chat", "home", "project", "new_window_hotkey", "chat_input_n
+    55|             case g.START_ZONE_OFFSET_SECONDS_FIELD_NUMBER /* 19 */:
+    56|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.PhotoGridLimitsSource", v16.values(), new String[]{"unspecified", "server", "config", "default"}, new Annotation[][]{null, null, null, null})
+    57|             case 20:
+    58|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.PhotoHighresCopyOutcome", x16.values(), new String[]{"unspecified", "success", "failed", "cancelled", "not_requested"}, new Annotation[][]{nu
+    59|             case 21:
+    60|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.PollingRecoveryCancellationCause", z16.values(), new String[]{"unknown", "route_destroyed", "app_backgrounded", "superseded", "user_stopped"}
+    61|             case g.SUB_TYPE_DATA_LISTS_FIELD_NUMBER /* 22 */:
+    62|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.PollingRecoveryOutcome", c26.values(), new String[]{"unknown", "success", "exhausted", "cancelled", "skipped", "superseded"}, new Annotation[
+    63|             case g.RECORDING_METHOD_FIELD_NUMBER /* 23 */:
+    64|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.PollingRecoveryTriggerReason", f26.values(), new String[]{"unknown", "stream_failed", "dangling_human_message", "conversation_load"}, new Ann
+    65|             case 24:
+    66|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.RetryCompletionReason", i26.values(), new String[]{"unspecified", "chat_footer", "fallback_model", "partial_response_error", "interrupted_ban
+    67|             case 25:
+    68|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.SafeguardsLearnMoreSurface", k26.values(), new String[]{"unspecified", "refusal", "model_change"}, new Annotation[][]{null, null, null});
+    69|             case 26:
+    70|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.SendMessageFailureReason", n26.values(), new String[]{"unspecified", "server_sent_error", "server_sent_connection_exception", "client_excepti
+    71|             case 27:
+    72|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.SendRetryOutcome", q26.values(), new String[]{"unknown", "success", "exhausted", "cancelled", "polling_fallback"}, new Annotation[][]{null, n
+    73|             case 28:
+    74|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.SendUploadWaitOutcome", t26.values(), new String[]{"unspecified", "sent", "not_sendable", "user_left", "stopped_or_expired", "attachment_fail
+    75|             default:
+    76|                 return p54.O("com.anthropic.claude.analytics.events.ChatEvents.SendUploadWaitTask", v26.values(), new String[]{"unspecified", "none", "submitted", "running"}, new Annotation[][]{null, null, null, null});
+    77|         }
+    78|     }
+    79| }
+
+### mi6: 快照 DB 名
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/mi6.java 行 220-240
+   220|                 return new r5u((i97) ddtVar11.d(i97.class, null), (c9g) ddtVar11.d(c9g.class, null), tf7.y(new ld(ddtVar11, b2)));
+   221|             case 25:
+   222|                 ddt ddtVar12 = (ddt) obj;
+   223|                 return ((c9g) ddtVar12.d(c9g.class, null)).m("mobile_offline_cache_enabled") ? new jrb((ClaudeDatabase) ddtVar12.d(ClaudeDatabase.class, null), (j9i) ddtVar12.d(j9i.class, null), (cvb) ddtVar12.d(cvb.clas
+   224|             case 26:
+   225|                 ddt ddtVar13 = (ddt) obj;
+   226|                 ji00 ji00Var3 = (ji00) ddtVar13.d(ji00.class, null);
+   227|                 String strH2 = nom.H(ji00Var3.c, ji00Var3.d, "conversation_snapshots");
+   228|                 Context context2 = (Context) ddtVar13.d(Context.class, null);
+   229|                 f4c f4cVar2 = oqc.a;
+   230|                 p2c p2cVar2 = p2c.w;
+   231|                 f4c f4cVar3 = oqc.a;
+   232|                 File databasePath = context2.getDatabasePath(strH2.concat(".db"));
+   233|                 mkx mkxVarY = tf7.y(new ph7(context2, databasePath, (byte) 12));
+   234|                 fka fkaVar = new fka(mkxVarY, (byte) 0);
+   235|                 d61 d61Var = new d61(mkxVarY, databasePath, null);
+   236|                 fka fkaVar2 = new fka(mkxVarY, (byte) 1);
+   237|                 ksa ksaVarQ1 = f4cVar3.q1(i0c.q(Runtime.getRuntime().availableProcessors() - 1, 1, 4), null);
+   238|                 AtomicInteger atomicInteger = km0.a;
+   239|                 eka ekaVar = new eka(fkaVar, d61Var, fkaVar2, ksaVarQ1);
+   240|                 ((li00) ddtVar13.d(li00.class, null)).x.add(new zw(0, ekaVar, eka.class, "close", "close()V", 0, (byte) 10));
+
+### nom.H
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/nom.java 行 178-186
+   178|     }
+   180|     public static final String H(String str, String str2, String str3) {
+   181|         StringBuilder sbQ = a83.q("acc_", str, "_org_", str2, "_");
+   182|         sbQ.append(str3);
+   183|         return sbQ.toString();
+   184|     }
+   186|     public static final jbc a(Context context) {
+
+### AccountStorageCleaner
+# 来源: claude/1.261009.20/work/jadx/sources/defpackage/cd.java 行 718-834
+   718|         List listD1;
+   719|         List<sq4> list;
+   720|         List<sq4> list2;
+   721|         boolean z = true;
+   722|         byte b = 3;
+   723|         ?? r7 = 0;
+   724|         ?? r72 = 0;
+   725|         switch (this.z) {
+   726|             case 0:
+   727|                 String str = (String) this.B;
+   728|                 dd ddVar = (dd) this.A;
+   729|                 Context context = ddVar.a;
+   730|                 i0c.T(obj);
+   731|                 try {
+   732|                     ArrayList arrayList = new ArrayList();
+   733|                     String[] strArrDatabaseList = context.databaseList();
+   734|                     strArrDatabaseList.getClass();
+   735|                     ArrayList arrayList2 = new ArrayList();
+   736|                     for (String str2 : strArrDatabaseList) {
+   737|                         str2.getClass();
+   738|                         if (u1x.X(str2, str, false)) {
+   739|                             arrayList2.add(str2);
+   740|                         }
+   741|                     }
+   742|                     ArrayList arrayList3 = new ArrayList();
+   743|                     int size = arrayList2.size();
+   744|                     int i = 0;
+   745|                     while (i < size) {
+   746|                         Object obj2 = arrayList2.get(i);
+   747|                         i++;
+   748|                         String str3 = (String) obj2;
+   749|                         List<String> list3 = dd.b;
+   750|                         if (list3 == null || !list3.isEmpty()) {
+   751|                             for (String str4 : list3) {
+   752|                                 str3.getClass();
+   753|                                 if (b2x.N(str3, str4, false)) {
+   754|                                     break;
+   755|                                 }
+   756|                             }
+   757|                         }
+   758|                         arrayList3.add(obj2);
+   759|                     }
+   760|                     int size2 = arrayList3.size();
+   761|                     int i2 = 0;
+   762|                     while (i2 < size2) {
+   763|                         Object obj3 = arrayList3.get(i2);
+   764|                         i2++;
+   765|                         String str5 = (String) obj3;
+   766|                         if (!context.deleteDatabase(str5)) {
+   767|                             arrayList.add("delete db/" + str5);
+   768|                         }
+   769|                     }
+   770|                     File[] fileArrListFiles = new File(context.getFilesDir(), "datastores").listFiles();
+   771|                     if (fileArrListFiles == null) {
+   772|                         fileArrListFiles = new File[0];
+   773|                     }
+   774|                     ArrayList arrayList4 = new ArrayList();
+   775|                     for (File file : fileArrListFiles) {
+   776|                         String name = file.getName();
+   777|                         name.getClass();
+   778|                         if (u1x.X(name, str, false)) {
+   779|                             arrayList4.add(file);
+   780|                         }
+   781|                     }
+   782|                     int size3 = arrayList4.size();
+   783|                     int i3 = 0;
+   784|                     while (i3 < size3) {
+   785|                         Object obj4 = arrayList4.get(i3);
+   786|                         i3++;
+   787|                         File file2 = (File) obj4;
+   788|                         if (!file2.delete()) {
+   789|                             arrayList.add("delete datastore/" + file2.getName());
+   790|                         }
+   791|                     }
+   792|                     File[] fileArrListFiles2 = new File(context.getDataDir(), "shared_prefs").listFiles();
+   793|                     if (fileArrListFiles2 == null) {
+   794|                         fileArrListFiles2 = new File[0];
+   795|                     }
+   796|                     ArrayList arrayList5 = new ArrayList();
+   797|                     for (File file3 : fileArrListFiles2) {
+   798|                         String name2 = file3.getName();
+   799|                         name2.getClass();
+   800|                         if (u1x.X(name2, str, false)) {
+   801|                             arrayList5.add(file3);
+   802|                         }
+   803|                     }
+   804|                     int i4 = 0;
+   805|                     ArrayList arrayList6 = new ArrayList(t49.g0(arrayList5, 10));
+   806|                     int size4 = arrayList5.size();
+   807|                     while (i4 < size4) {
+   808|                         Object obj5 = arrayList5.get(i4);
+   809|                         i4++;
+   810|                         String name3 = ((File) obj5).getName();
+   811|                         name3.getClass();
+   812|                         arrayList6.add(u1x.B0(".xml", u1x.B0(".bak", name3)));
+   813|                     }
+   814|                     for (String str6 : s49.t0(arrayList6)) {
+   815|                         if (!ddVar.a(str6)) {
+   816|                             arrayList.add("empty prefs/" + str6);
+   817|                         }
+   818|                         if (!context.deleteSharedPreferences(str6)) {
+   819|                             arrayList.add("delete prefs/" + str6);
+   820|                         }
+   821|                     }
+   822|                     if (arrayList.isEmpty()) {
+   823|                         mtx mtxVar = mtx.a;
+   824|                         mtx.e(6, "AccountStorageCleaner: wiped account storage", null, null);
+   825|                     } else {
+   826|                         SilentException.a(new SilentException("AccountStorageCleaner: failed to " + s49.I0(arrayList, null, null, null, null, 63)), oav.w, null, 6);
+   827|                     }
+   828|                 } catch (CancellationException e) {
+   829|                     throw e;
+   830|                 } catch (Exception e2) {
+   831|                     SilentException.a(new SilentException("AccountStorageCleaner: unexpected exception", e2), oav.x, null, 6);
+   832|                 }
+   833|                 return svz.a;
+   834|             case 1:

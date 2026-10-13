@@ -1,0 +1,217 @@
+# NodeCommandService：设备命令执行器，先落盘后执行，重投递丢弃，重启清除不重跑
+# 样本: Muse (com.facebook.aura) 11.0.0.8.164 base APK sha256=c7e788b5df855912dffbefc4c017f2e621b54aaeef954424f56339bd994fcefa
+# 工具: jadx 1.5.3 (138 errors) + baksmali 2.5.2 定向（HatchAgentPermissionsRepository）
+# 标签: 包内直接证据（除非另注）
+
+### cancelAllCommands / clearStaleCommands
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/service/NodeCommandService.java 行 185-215
+   185|         c16866xd.A06(service, getString(R.string._name_removed__res_0x7f1207a7), 0);
+   186|         return C16866xd.A00(c16866xd);
+   187|     }
+   189|     private final void cancelAllCommands() {
+   190|         C18737eM.A05(TAG, AbstractC7228CBi.A0l("Cancelling all ", " active command(s)", this.activeJobs.size()));
+   191|         Iterator itA0W = C3UO.A0W(this.activeJobs);
+   192|         while (itA0W.hasNext()) {
+   193|             ((C6Ng) itA0W.next()).A5Y(null);
+   194|         }
+   195|         this.activeJobs.clear();
+   196|         PendingCommandStore.INSTANCE.clearAll(C64v.A0B(this));
+   197|         stopSelfIfIdle();
+   198|     }
+   200|     private final void clearStaleCommands() {
+   201|         PendingCommandStore pendingCommandStore = PendingCommandStore.INSTANCE;
+   202|         List<CE3<String, String, String>> all = pendingCommandStore.getAll(C64v.A0B(this));
+   203|         if (all.isEmpty()) {
+   204|             return;
+   205|         }
+   206|         C18737eM.A05(TAG, AbstractC7228CBi.A0l("Clearing ", " stale command(s) from previous session", all.size()));
+   207|         Iterator<CE3<String, String, String>> it = all.iterator();
+   208|         while (it.hasNext()) {
+   209|             String str = it.next().first;
+   210|             this.attemptedRequestIds.add(str);
+   211|             pendingCommandStore.remove(C64v.A0B(this), str);
+   212|         }
+   213|     }
+   215|     private final void ensureNotificationChannel() {
+
+### job 结束/返回 START_REDELIVER_INTENT
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/service/NodeCommandService.java 行 325-345
+   325|         String stringExtra3 = intent.getStringExtra(EXTRA_TRIGGER_TYPE);
+   326|         if (stringExtra3 == null) {
+   327|             stringExtra3 = "unknown";
+   328|         }
+   329|         double doubleExtra = intent.getDoubleExtra(EXTRA_LATITUDE, 0.0d);
+   330|         double doubleExtra2 = intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0d);
+   331|         if (stringExtra == null || stringExtra.length() == 0) {
+   332|             C18737eM.A06(TAG, "Missing geofence_id in geofence trigger intent");
+   333|             stopSelfIfIdle();
+   334|             return 2;
+   335|         }
+   336|         C03r c03r = this.scope;
+   337|         C6MP c6mpA02 = AbstractC14796Ml.A02(AG1.A01, C24K.A00, new NodeCommandService$handleGeofenceTrigger$job$1(stringExtra, this, i, aa1, doubleExtra, doubleExtra2, stringExtra2, stringExtra3, null), c03r);
+   338|         this.activeJobs.put(Integer.valueOf(i), c6mpA02);
+   339|         c6mpA02.Ae8();
+   340|         return 3;
+   341|     }
+   343|     private final boolean promoteToForeground() {
+   344|         try {
+   345|             startForeground(NOTIFICATION_ID, buildNotification());
+
+### onCreate/onStartCommand
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/service/NodeCommandService.java 行 365-440
+   365|     }
+   367|     @Override // android.app.Service
+   368|     public void onCreate() {
+   369|         super.onCreate();
+   370|         promoteToForeground();
+   371|         clearStaleCommands();
+   372|     }
+   374|     @Override // android.app.Service
+   375|     public void onDestroy() {
+   376|         super.onDestroy();
+   377|         AnonymousClass005.A1F(false, NodeForegroundServiceState._isForeground);
+   378|         C8h8.A03(null, this.scope);
+   379|         this.activeJobs.clear();
+   380|     }
+   382|     @Override // android.app.Service
+   383|     public int onStartCommand(Intent intent, int i, int i2) {
+   384|         String str;
+   385|         this.latestStartId = i2;
+   386|         boolean zPromoteToForeground = promoteToForeground();
+   387|         if (ACTION_CANCEL_ALL.equals(intent != null ? intent.getAction() : null)) {
+   388|             cancelAllCommands();
+   389|         } else if (zPromoteToForeground) {
+   390|             AA1 currentUserSession = AuraUserSessionStore.INSTANCE.getCurrentUserSession();
+   391|             if (currentUserSession == null) {
+   392|                 str = "Missing user session so stopping; startId=";
+   393|             } else {
+   394|                 if (ACTION_GEOFENCE_TRIGGER.equals(intent != null ? intent.getAction() : null)) {
+   395|                     return handleGeofenceTrigger(currentUserSession, intent, i2);
+   396|                 }
+   397|                 if (intent != null) {
+   398|                     String stringExtra = intent.getStringExtra(EXTRA_COMMAND);
+   399|                     String stringExtra2 = intent.getStringExtra(EXTRA_REQUEST_ID);
+   400|                     if (stringExtra != null && stringExtra.length() != 0 && stringExtra2 != null && stringExtra2.length() != 0) {
+   401|                         if (!this.attemptedRequestIds.add(stringExtra2)) {
+   402|                             C3UL.A1Q("Dropping redelivered command: requestId=", C2dL.A03(stringExtra2, 8), TAG);
+   403|                             HatchNodeQplLogger.INSTANCE.logCommandRedeliveredDropped(stringExtra2, stringExtra);
+   404|                             stopSelfIfIdle();
+   405|                             return 2;
+   406|                         }
+   407|                         String stringExtra3 = intent.getStringExtra(EXTRA_PARAMS_JSON);
+   408|                         long longExtra = intent.getLongExtra(EXTRA_TIMEOUT_MS, 0L);
+   409|                         Long lValueOf = longExtra > 0 ? Long.valueOf(longExtra) : null;
+   410|                         String strA03 = C2dL.A03(stringExtra2, 8);
+   411|                         int length = 0;
+   412|                         boolean z = false;
+   413|                         if (stringExtra3 != null) {
+   414|                             z = true;
+   415|                             length = stringExtra3.length();
+   416|                         }
+   417|                         StringBuilder sbA0z = C3UL.A0z("onStartCommand: command=", stringExtra);
+   418|                         sbA0z.append(", requestId=");
+   419|                         sbA0z.append(strA03);
+   420|                         sbA0z.append(", hasParams=");
+   421|                         sbA0z.append(z);
+   422|                         C18737eM.A05(TAG, C3UO.A0Q(", paramsLength=", sbA0z, length));
+   423|                         PendingCommandStore.INSTANCE.save(C64v.A0B(this), stringExtra2, stringExtra, stringExtra3);
+   424|                         C6MP c6mpA02 = AbstractC14796Ml.A02(AG1.A01, C24K.A00, new NodeCommandService$onStartCommand$job$1(stringExtra, this, i2, stringExtra2, stringExtra3, currentUserSession, lValueOf, null), this.scop
+   425|                         this.activeJobs.put(Integer.valueOf(i2), c6mpA02);
+   426|                         c6mpA02.Ae8();
+   427|                         return 3;
+   428|                     }
+   429|                 }
+   430|                 str = "Missing command or request_id in intent, stopping startId=";
+   431|             }
+   432|             C18737eM.A06(TAG, AbstractC7228CBi.A0X(str, i2));
+   433|             stopSelfIfIdle();
+   434|             return 2;
+   435|         }
+   436|         return 2;
+   437|     }
+   438| }
+
+### PendingCommandStore
+# 来源: muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/service/PendingCommandStore.java 行 18-80
+    18| import java.util.Map;
+    20| /* loaded from: classes3.dex */
+    21| public final class PendingCommandStore {
+    22|     public static final PendingCommandStore INSTANCE = new PendingCommandStore();
+    23|     public static final String PREFS_NAME = "aura_pending_commands";
+    25|     private final SharedPreferences prefs(Context context) {
+    26|         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, 0);
+    27|         C25519Tj.A0l(sharedPreferences);
+    28|         return sharedPreferences;
+    29|     }
+    31|     public final void clearAll(Context context) {
+    32|         C25519Tj.A0p(context, 0);
+    33|         prefs(context).edit().clear().apply();
+    34|     }
+    36|     public final List<CE3<String, String, String>> getAll(Context context) {
+    37|         C25519Tj.A0p(context, 0);
+    38|         Map<String, ?> all = prefs(context).getAll();
+    39|         C25519Tj.A0o(all);
+    40|         ArrayList arrayListA0y = AnonymousClass001.A0y();
+    41|         Iterator itA0h = AnonymousClass003.A0h(all);
+    42|         while (itA0h.hasNext()) {
+    43|             Map.Entry entryA0o = C3UN.A0o(itA0h);
+    44|             String strA0h = C3UN.A0h(entryA0o);
+    45|             Object value = entryA0o.getValue();
+    46|             CE3 ce3 = null;
+    47|             try {
+    48|                 C9IG c9ig = HatchJsonKt.HatchJson;
+    49|                 C25519Tj.A0s(value, AnonymousClass000.A00(2));
+    50|                 PendingCommandJson pendingCommandJson = (PendingCommandJson) c9ig.A00((String) value, PendingCommandJson$$serializer.INSTANCE);
+    51|                 String str = pendingCommandJson.command;
+    52|                 String str2 = pendingCommandJson.params_json;
+    53|                 if (str2.length() <= 0) {
+    54|                     str2 = null;
+    55|                 }
+    56|                 ce3 = new CE3(strA0h, str, str2);
+    57|             } catch (Exception unused) {
+    58|                 PendingCommandStore pendingCommandStore = INSTANCE;
+    59|                 C25519Tj.A0o(strA0h);
+    60|                 pendingCommandStore.remove(context, strA0h);
+    61|             }
+    62|             if (ce3 != null) {
+    63|                 arrayListA0y.add(ce3);
+    64|             }
+    65|         }
+    66|         return arrayListA0y;
+    67|     }
+    69|     public final void remove(Context context, String str) {
+    70|         AnonymousClass004.A10(context, str);
+    71|         prefs(context).edit().remove(str).apply();
+    72|     }
+    74|     public final void save(Context context, String str, String str2, String str3) {
+    75|         AnonymousClass006.A0z(context, str, str2);
+    76|         if (str3 == null) {
+    77|             str3 = "";
+    78|         }
+    79|         prefs(context).edit().putString(str, HatchJsonKt.HatchJson.A02(new PendingCommandJson(str2, str3, System.currentTimeMillis()), PendingCommandJson$$serializer.INSTANCE)).apply();
+    80|     }
+
+### manifest FGS specialUse
+# 来源: /tmp/muse_manifest.txt 行 335-347
+   335|         A: android:name(0x01010003)="com.facebook.aura.gateway.service.NodeCommandService" (Raw: "com.facebook.aura.gateway.service.NodeCommandService")
+   336|         A: android:exported(0x01010010)=(type 0x12)0x0
+   337|         A: android:foregroundServiceType(0x01010599)=(type 0x11)0x40000000
+   338|         E: property (line=235)
+   339|           A: android:name(0x01010003)="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" (Raw: "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE")
+   340|           A: android:value(0x01010024)="Execute server-initiated device commands such as location queries and contact sync" (Raw: "Execute server-initiated device commands such as location queries and contact sync")
+   341|       E: service (line=239)
+   342|         A: android:name(0x01010003)="com.facebook.aura.gateway.service.HatchForegroundService" (Raw: "com.facebook.aura.gateway.service.HatchForegroundService")
+   343|         A: android:exported(0x01010010)=(type 0x12)0x0
+   344|         A: android:foregroundServiceType(0x01010599)=(type 0x11)0x40000000
+   345|         E: property (line=240)
+   346|           A: android:name(0x01010003)="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" (Raw: "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE")
+   347|           A: android:value(0x01010024)="Keep the app running in the background at the user's request to continue long-running assistant tasks" (Raw: "Keep the app running in the background at the user's request to contin
+
+### manifest NotificationReplyService
+# 来源: /tmp/muse_manifest.txt 行 418-423
+   418|         A: android:name(0x01010003)="com.facebook.aura.notifications.push.NotificationReplyService" (Raw: "com.facebook.aura.notifications.push.NotificationReplyService")
+   419|         A: android:exported(0x01010010)=(type 0x12)0x0
+   420|         A: android:foregroundServiceType(0x01010599)=(type 0x11)0x40000000
+   421|         E: property (line=310)
+   422|           A: android:name(0x01010003)="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" (Raw: "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE")
+   423|           A: android:value(0x01010024)="Reconnect WebSocket and send user reply from notification" (Raw: "Reconnect WebSocket and send user reply from notification")
