@@ -38,7 +38,10 @@ Rust 对当前事实确定性计算；客户端或模型的 approved/low/classif
 | --- | --- | --- |
 | 计划/参数/scope/当前权/身份/TLS/真实能力缺失，已撤权，明确禁用途，业务非法，CAS 冲突或服务硬限制 | 所有档停止；保留可信硬原因 | 修正材料、换有效环境或重规划，普通确认不能解除 |
 | 受影响能力存在有效 capability_hold | 对应路径不准入；已派发继续核对 | 只按工程修复与独立证据解除 |
-| 必需内容为 credential，或 unreviewed/检查未完成/覆盖不足 | 禁进入模型或业务正文 | 缺覆盖 terminal；可读新版本/真实新规则产生新尝试 |
+| 当前实际值命中 credential | 原始凭据不得进入模型上下文、业务工具/分享正文或日志；本机name业务正文亦不承载秘密 | typed拒绝并保留非秘密原因；正常认证只走绑定专用通道 |
+| 模型请求/业务外发的必需单元为 unreviewed，或该出口分类检查未完成/覆盖不足 | 不进入该模型/业务外发载荷；不是全部本机写入的统一禁令 | 该分类尝试缺覆盖terminal；新内容/规则可建新尝试 |
+| 本机单字段name用途，整体外发Sensitivity域尚未覆盖，但当前用途最小必要声明/来源/实际ValueCheck及授权、CAS、业务与模式规则均有效 | 可按模式继续本机计划/提交，0模型/0外发；不等完整D01b或14条全域分类规则 | 后续外发仍须该出口完整分类；不将本机通过写成已分类/外发许可 |
+| 本机name当前用途的actual-value credential检查、来源/字段证明或必要风险规则缺失 | 缺可信事实typed拒绝；合同/覆盖未定blocked_contract，明确当前用途缺口 | 不以普通确认绕过，不无限等分类，不用其他域未覆盖替代当前缺口原因 |
 | read 且当前投影获准 | 可读；不附带写权 | 无需为普通 read 造 grant |
 | 只读档 write/outbound | 不派发 | 草稿/预览；用户显式选新档后重验 |
 | 每次询问，当前完整新计划，合成一次性确认有效 | 确认后仍重验执行事实，才可派发 | 参数/事实变更旧确认失效；旧 grant 复用未定则 blocked_contract |
@@ -49,13 +52,13 @@ Rust 对当前事实确定性计算；客户端或模型的 approved/low/classif
 
 RiskDecision 最小语义继承 D 第6章：risk_class、reason_codes、matched_rule_ids、policy_revision、decision_digest；输入含动作、类别、影响范围、可逆性、接收者、来源可信度。具体 wire 只由 M03 定义。ModeGrant 和 RiskDecision 分轴保存，RiskDecision 本身不授能力。
 
-建议可独立冻结 `RD-SUPPLIER-NAME-LOCAL-v1`：仅可信完整单 supplier.name 本机编辑，稳定真实新 intent，精确当前对象/选定工作区/单字段读写集，M02规范值合法，CAS与业务关联不变量已证，有效当前权限；最终用途为本机业务字段，无 model 请求或外传，无已知模型/外部派生来源、未知读写依赖或不可核事实。上述全部为已证且内容覆盖满足该用途时，risk_class=low。规则结果只给 Auto 自动路径，不豁免硬门禁。taint/模型派生或其他动作不匹配本规则，不把它们永久判 high：Auto 对这些域暂为 blocked_contract，由 D01b 增加版本化规则。
+建议可独立冻结 `RD-SUPPLIER-NAME-LOCAL-v1`：仅可信完整单 supplier.name 本机编辑，稳定真实新 intent，精确当前对象/选定工作区/单字段读写集，M02规范值合法，CAS与业务关联不变量已证，有效当前权限；最终用途为本机业务字段，无 model 请求或外传，无已知模型/外部派生来源、未知读写依赖或不可核事实。上述全部为已证且本机当前用途的最小声明、来源与actual-value credential检查有确定覆盖/版本并通过时，risk_class=low；不要求外发Sensitivity全域覆盖或A00全部14规则实现。规则结果只给 Auto 自动路径，不豁免硬门禁。taint/模型派生或其他动作不匹配本规则，不把它们永久判 high：Auto 对这些域暂为 blocked_contract，由 D01b 增加版本化规则。
 
 首片 high 路由以明确版本的离线合成风险判定验证“Auto确认、FullAllow免风险问”，不是宣称已有真实 high 生产规则。禁止型风险规则与可信硬限制来源必须分别显示；仅风险性禁止/建议block不能在 FullAllow伪装成服务硬限制。
 
 ## 4 确定性供应商名称入口与合成 ModeGrant
 
-用户完整名称编辑→domain_command→Rust确定性预览/计划→按模式与能力重验→CAS提交→真实 EffectReceipt。全过程0模型轮、0外部发送。分类也不得为满足字段声明额外调用模型。
+用户完整名称编辑→domain_command→Rust确定性预览/计划→按模式与能力重验→CAS提交→真实 EffectReceipt。全过程0模型轮、0外部发送。最小实际值检查也不得为满足字段声明额外调用模型。
 
 承接 M02 已定限定语义：所有新入口送完整 raw；raw UTF-16 长度≤2000→XML合法字符检查→trim→NFC→required及规范后≤200码点。新端不预trim以绕过 raw 或 XML检查。同规范名的可信真实新 intent仍 revision+1/独立 receipt；同 intent 双击/replay复用原回执，零第二写。不能只换 key 将旧 unknown偷变新意图。具体 Unicode/trim/NFC版本及跨端等价仍由M04/M05 oracle证明并作为M03门禁；本文不提供伪等价结论。
 
@@ -65,9 +68,13 @@ RiskDecision 最小语义继承 D 第6章：risk_class、reason_codes、matched_
 
 ## 5 分类、内容复核与能力暂停
 
+固定D第一册L798–801区分unreviewed禁模型/业务外发与credential正文禁用，第二册L946–947明确unreviewed“先不外发，包括模型请求”。原def5草案§3把两者合并为统一业务正文门禁过宽，本delta拆开；此处不修改原A00输入或两册。
+
 Sensitivity 只有 unreviewed/none/personal/commercial/credential；来源、taint、verification、classification attempt、模式和效果回执独立。字段 none 不是grant。模型生成 name 必须字段声明 ∧ 实际新值宿主输出规则/credential检查 ∧ 来源限制 ∧ 当前用途。干净且完整覆盖值可继承字段类别，不永久unreviewed；采用/编辑模型建议保留真实模型谱系。只扫描旧值/用户输入不算输出检查；参数、编码、嵌套内容或最终载荷变化令旧证据失效。
 
-凭据不得进入模型/业务正文、日志、通知或诊断。认证走可信连接credentialRef与绑定身份/端点的允许header或专用认证通道，不能让模型选秘密、跨服务复用或重定向；不能退回业务正文。必要内容未覆盖、疑似/失败/截断等保持unreviewed，本次尝试 terminal（例如A00拟定no_coverage），给非秘密原因；没有无限classification spinner/定时空转。新内容或真实新规则可建新尝试，不原地改写旧失败；FullAllow/确认/时间流逝不能完成分类。
+凭据不得进入模型/业务正文、日志、通知或诊断。认证走可信连接credentialRef与绑定身份/端点的允许header或专用认证通道，不能让模型选秘密、跨服务复用或重定向；不能退回业务正文。模型/业务外发用途的必要内容未覆盖、疑似/失败/截断等保持unreviewed，本次分类尝试 terminal（例如A00拟定no_coverage），给非秘密原因；没有无限classification spinner/定时空转。新内容或真实新规则可建新尝试，不原地改写旧失败；FullAllow/确认/时间流逝不能完成分类。
+
+本机纯用户name编辑只依赖本用途最小规则：可信字段声明、完整真实用户输入事件与可核来源/限制、规范后实际提交值的本机credential检查及内容版本绑定，连同当前权限、CAS、业务条件和适用模式风险规则。ValueCheck在此仅表示当前用途的实际值检查语义，不是新增DTO/enum，也不表示已完成全域Sensitivity分类。检查完整且无凭据信号可在这些前提有效时按模式本机保存；整体Sensitivity尚无外发覆盖不能单独阻此路径，也不能把结果补标none/授grant或许可外发。实际检查疑似/失败/截断/本用途无覆盖，或未知来源/继承限制无法核验仍停止：已知不合法事实typed拒绝，必要合同未冻blocked_contract，明确缺口并结束本次检查；普通确认、FullAllow及等待均不能补事实。没有模型新输出的纯编辑不等模型输出规则；模型派生/其他Auto域仍按各自最小必要检查与未冻合同处理，不洗来源、不永久默认confirm。
 
 capability_hold对象是能力路径＋构建/合同版本，针对授权证明、撤权传播、越界投影、账本/回执/原子性异常等已证工程阻断；持久active→remediation_ready→verified→cleared，尽量隔离受影响路径。高风险/taint/建议服务不可用不能单独触发。重启/换档/用户批准/content_review=allow不能清除；需要修复或隔离、反例、非作者复审与当前事实重查。
 
@@ -85,8 +92,9 @@ content_review对象是本次model请求或工具效果的plan/payload摘要；�
 | A04 / V131-T01 | 已检查plan v1，提交name/目的地/权限版本变v2；伪approved | 旧证据/能力不能签新参数；重新校验或停止，0第二效果 |
 | A05 / V131-T01 | 同intent双击/重启、丢响应；真实新intent同规范名 | replay原receipt/零第二写；可信新intent独立receipt/revision+1；unknown先核对，不用换key补发 |
 | A06 / V131-T09 | legacy三档×四轴×五时长、缺失/损坏/撤销/外传会话超界 | 保持旧限制、损坏闭合、不延长、不升级；未定完整映射blocked_contract |
+| A07 / V131-T01,T02/F08,T09 | 完整可信纯用户name；外发分类域未覆盖，本机用途actual-value检查complete/无信号且所有必要事实有效；再分别删除本机检查/来源/低风险规则或给疑似秘密 | 前者按已冻结模式本机写0模型/0外发，不等14规则；后者当前用途typed拒绝或blocked_contract、0写，不洗来源/补none/默认confirm；FullAllow亦不补缺检查 |
 | F01 / V131-T02/F01,F10 | 假模型name干净＋声明＋actual output complete，FullAllow/Auto | 分类可none且保留来源；FullAllow假双出口可用；Auto域未冻blocked_contract，不能抄FullAllow金标 |
-| F02 / V131-T02/F02–F07 | 合成credential canary/疑似/无覆盖/未知字段/旧值扫描/检查后改payload/失权来源 | credential禁正文或unreviewed停止；最终假model/工具载荷与日志无禁单元；none不能降来源类 |
+| F02 / V131-T02/F02–F07 | 合成credential canary/疑似/无覆盖/未知字段/旧值扫描/检查后改payload/失权来源 | credential禁正文；unreviewed禁止相应模型/业务外发，当前本机用途缺必要检查另按A07停止；最终假model/工具载荷与日志无禁单元；none不能降来源类 |
 | F03 / V131-T02/F08,F09 | 用户完整确定性编辑；或采纳假模型建议后改一字 | 首者直Rust0模型；后者保留模型来源并新版本重查，不改标用户原创 |
 | F04 / V131-T02/N01–N03 | no_coverage后等待/切档/确认；然后真实新规则或可读新版本 | 原尝试terminal、不派发；新证据才能建新尝试，无永久封锁/无限等待 |
 | F05 / V131-T03 | 正确绑定合成credentialRef header；wrong endpoint/redirect/正文插槽 | 仅合法身份认证通道；禁业务/模型正文和跨服务秘密，不回显canary |
