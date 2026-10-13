@@ -1,6 +1,6 @@
 # REDESIGN-M02-SUPPLIER-NAME-20261014
 
-状态：文档草案已交付，`blocked_contract` 项保留；非 M03 冻结或首片产品实现。日期：2026-10-14 北京时间。
+状态：M02限定领域三项决定已定，本修订待非作者delta审查；其余`blocked_contract`项保留，非M03冻结或首片产品实现。日期：2026-10-14 北京时间。
 
 授权来源：用户按 Muyon v1.3.2 开工并交由 Leader B 派发/审查/唯一 develop 合入；父任务明确委派 M02 首片领域合同。真实 writer：`redesign_m02_contract` agent。Leader B responsibilityB custodian/唯一集成人；产品 writer 尚未分派。独立 worktree：`/workspace/Muyon-leader-b-redesign-m02-20261014`；branch：`leader-b/redesign-m02-supplier-name-20261014`；起点：`421e7332807d0f8a2f7a6a36819601dcad442130`。
 
@@ -15,6 +15,8 @@
 
 验证：引用产品目录相对固定产品SHA的git diff为空；静态核对真实校验/读取/写入/授权/回执代码。提交前检查仅指定两文件、`git diff --check`、固定路径和行号可定位。未写产品代码、schema、镜像实现的tests，未运行全8 CI或主验收；docs提交允许 [skip ci]，CI与入口switch由Leader B统筹。
 
-尚未闭合：D01a最小模式与风险样本/期限、D03a恢复与投影表示、SPIKE-01双传输及实际Android库加载、M03同源schema/编码/Unicode差分、同值新意图+1建议的非作者确认。完整旧模式映射/期限与真实分类出口归D01b。未定case标blocked_contract，不默认永久confirm、不将legacy_standard标Auto，不声称测试通过。没有实际Android库加载证据不得冻结M03。
+尚未闭合：D01a最小模式与风险样本/期限、D03a恢复与投影表示、SPIKE-01双传输及实际Android库加载、M03同源schema/编码/Unicode差分、Normalization数据版本/实现等价的M04/M05 oracle证明。完整旧模式映射/期限与真实分类出口归D01b。未定case标blocked_contract，不默认永久confirm、不将legacy_standard标Auto，不声称测试通过。没有实际Android库加载证据不得冻结M03。
+
+修订依据：原提交`642a939846a8f87e1fc8872142baa5ab755e1d02`获非作者[C0复审](/workspace/reports/redesign-m02-independent-20261014/REVIEW.md)，Leader B明确授权冻结三个领域决定：新端完整raw value进Rust且raw UTF-16 code units≤2000；统一XML check→trim→NFC→非空且≤200 Unicode码点；可信同规范名新intent仍revision+1及独立receipt，同intent重复不再写。独立readonly receipt恢复按当前scope/purpose最小投影保留，不弱化旧snapshot selection guard。补N07旧catalog_form VT/FF预trim与新端原raw拒绝差异，R03a/b/c同值新意图正例/重复与伪重试负例；仅目录、全部not_run。精确Normalization版本和实现等价留M04/M05 oracle验证及M03冻结前要件，未声称Unicode跨端实测一致。原642未改写，本delta另提交并交非作者复审。
 
 边界：无main/force/delete/deploy、新凭据、支付、真实数据、模型/设备成本、push/merge；未修改M01、原两册/ADR/产品/Rust/Android/Electron或他人文件。交付正常本地文档commit，最终fullSHA由writer回报，非作者review及唯一develop合入由Leader B处理。
