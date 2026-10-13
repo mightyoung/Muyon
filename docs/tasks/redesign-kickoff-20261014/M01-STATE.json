@@ -1,0 +1,278 @@
+{
+  "product_baseline": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "design_source": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "design_branch": "task/redesign-v11-claude-review-20261013",
+  "compare": {
+    "ahead": 6,
+    "behind": 0,
+    "added_files": 95,
+    "design_directories": 5
+  },
+  "ci": {
+    "design": {
+      "run": 38439338859,
+      "checkout_sha_verified": true,
+      "conclusion": "success",
+      "analyze_suites": 8,
+      "test_suites": 8,
+      "passed": 4199,
+      "skipped": 207
+    },
+    "product": {
+      "run": 38279219941,
+      "job_conclusion": "success",
+      "checkout_sha_verified": true,
+      "analyze_suites": 8,
+      "test_suites": 8
+    }
+  },
+  "leader": {
+    "current": "Leader B",
+    "responsibilities": [
+      "dispatch",
+      "task contracts",
+      "review organization",
+      "registration",
+      "independent validation",
+      "unique develop integration"
+    ],
+    "Leader A": "paused",
+    "authority": "user Sentinel_3b08b7b589a4819184fd7c9f3323bad5; formal development Sentinel_e6ce5e0c57808191920e687495a03d35"
+  },
+  "m01": {
+    "status": "in_progress",
+    "writer": "Leader B",
+    "exit_missing": [
+      "first-slice explicit writer and non-author reviewer reservations",
+      "cross-thread legacy conflict candidates active/unconfirmed records",
+      "precise ADR/handover entry-switch write list"
+    ]
+  },
+  "a00": {
+    "classification_catalog": "received and byte-verified; contract draft, not runtime implementation",
+    "rule_count": 14,
+    "rules": [
+      {
+        "id": "CLS-DECL-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-CREDENTIAL-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "USER-TEXT-v1",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-ATTACH-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-PROVIDER-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-MODEL-FIELD-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-MODEL-FREE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-DERIVE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-TEMPLATE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-METADATA-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-REUSE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-PURPOSE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-TRIM-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-AUTH-CHANNEL-001",
+        "status": "proposed_unfrozen"
+      }
+    ],
+    "subcase_count": 29,
+    "cases": [
+      {
+        "id": "V131-T02/U01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/U02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/U03",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/A01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/A02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/P01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/P02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/D01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/D02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/M01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/M02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F03",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F04",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F05",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F06",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F07",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F08",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F09",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F10",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F11",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/C01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/C02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/C03",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/C04",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/N01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/N02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/N03",
+        "status": "not_run"
+      }
+    ],
+    "main_acceptance_count": 52,
+    "main_acceptance_status": "not_run",
+    "inventory_23_units": {
+      "status": "received, internal hashes and 109 distinct fixed-source git blobs root verified; source author task ended",
+      "source_report": "a00-inventory/Muyon-A00-Readonly-Inventory-2026-10-14.json",
+      "root_proof": "a00-inventory/root-independent-proof.json",
+      "source_author": "external read-only inventory thread; no implementation writer",
+      "implementation_writer_freeze": "pending B assignment; null in source report does not mean files free",
+      "duplicate_dispatch": false
+    },
+    "inventory_zip": {
+      "library_id": "libfile_3476f5ecc4648191bbcd3deb6cd2c57b",
+      "bytes": 27354,
+      "sha256": "4d081426b26d49cb302a09b9431b177b6ef2349034b54fa91f5cbacb316f176a",
+      "zip_and_internal_sums_verified": true
+    }
+  },
+  "implementation_frontier": {
+    "M02": "await M01/A00 exit; extract supplier-name semantics from fixed Dart source",
+    "D01a_D03a_SPIKE01": "after M02 prerequisites; no completed spike claimed",
+    "M03": "not frozen; requires actual SPIKE-01 evidence",
+    "Rust_Android_Electron": "not dispatched beyond prerequisites"
+  },
+  "legacy_workspace": {
+    "registered_worktrees": 90,
+    "dirty_worktrees": 14,
+    "dirty_files_preserved": true,
+    "recovered_commit_objects": [
+      "5436f68c2ba57ae2ea99d6cbc749a5bd92a3cdb0",
+      "7df93d7228693c71767cd4ab88d46d11da7c6064",
+      "cfd7f7b9e081a7cd49b0a66adf87df4994f8db71"
+    ],
+    "recovery_does_not_prove_integration_or_review": true
+  },
+  "handoff_zip": {
+    "library_id": "libfile_064b8c79e34c8191959d7e87826e7e0f",
+    "bytes": 23001,
+    "sha256": "e5871071a10068ade3c0a4c50a27b4cc19644958484c4288c6f299c3d077ad21",
+    "zip_and_internal_sums_verified": true
+  },
+  "repository_mutations": {
+    "product_code_changed": false,
+    "original_design_documents_changed": false,
+    "original_worktrees_changed": false,
+    "main_changed": false,
+    "develop_merged": false
+  }
+}
