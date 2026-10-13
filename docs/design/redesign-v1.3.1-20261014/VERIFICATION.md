@@ -1,0 +1,47 @@
+# v1.3.1 发布校验与实际边界
+
+日期路径使用北京时间 2026-10-14。校验为文档交付检查，不是工程验收或独立完整Claude复审。
+
+## 输入、ZIP与原字节
+
+输入 Library 包 `libfile_9e8d5e94aecc8191bee876c63cc0d590` 已由本执行环境使用当前Library流程自行materialize，真实文件存在、可读、276532字节；SHA-256为 `dadbb4ab0e58359749e89dc305938f767ac74cd3cd9a2b1e6d8f4e13213d7cd1`，符合冻结许可。
+
+先检查ZIP恰有六个预期MD根文件、无重复或额外条目、目录、穿越/绝对路径或symlink；CRC完整，UTF-8可读。逐项核对冻结字节数/hash后解包，六MD原字节不改。完整身份表见 [README](README.md)，全部发布文件另列 [SHA256SUMS](SHA256SUMS)。
+
+15PNG从固定提交 `e014b097be94b48a6744c5d5df41a764918b0afa` 的 `docs/design/redesign-v1.3-20261013/figures/` Git对象读取并原字节复制；逐张解码有效，新目录图示与旧提交blob一致。它们是旧线框参考，不宣称已重绘或真机验证新版。
+
+## 已执行的静态检查
+
+- 六MD与ZIP条目、冻结hash/字节数一致；SHA256SUMS覆盖六MD、15PNG、README与本说明，不包含自身。
+- 六MD的GitHub Markdown语法经Pandoc解析；71张原件表格逐行检查表头/分隔/数据列数，没有列宽结构不一致。未生成发布用HTML。
+- 文档及图片相对路径核对实际目标，15图链接可读；**下面列出的两个冻结交接链接例外**，不宣称全包所有相对链接通过。
+- 常见私钥、GitHub token、AWS key、模型key和引号凭据赋值模式扫描，只报位置不输出值；未命中。有限模式检查不保证绝对无私有内容。
+- 定向复核B01/B02/I修订的处理表、迁移追踪与页面入口；检查旧40例＋新增V131-T01–T12完整保留。此静态核证不能代替产品/模型/真机或故障测试，52项设计验收均未执行。
+- v1.1/v1.2/v1.3旧目录与其原发布Git blob逐字节核对，无修改；本次diff仅新增 `docs/design/redesign-v1.3.1-20261014/`，无产品、生效ADR或任务根入口变更。
+
+## 未提供的两个报告及链接
+
+`Muyon-v1.3.1-Claude-Review-Handoff.md` 第29行的两目标不在冻结六MD包内：
+
+1. `Muyon-v1.3.1-Disclosure-Targeted-Recheck-2026-10-14.md`
+2. `Muyon-v1.3.1-Review-Verification-Migration.md`
+
+这两个链接当前缺失。六MD按冻结许可原字节保留，不伪造定向检查报告，不以其他文件冒充它们。README已显式提示，后续复审应标明未读取报告。其余正文/trace/Android入口可读取；缺失只限制对这两报告原文的核证。
+
+## CI与发布范围
+
+旧v1.3精确提交 `e014b097be94b48a6744c5d5df41a764918b0afa` 的 CI 38424976446 为 failure，supplier_core 的绝对deadline测试预期HTTP200、实际400；根因未重新验证或修复，本轮不重跑旧CI。产品代码基线仍为 `01e56cc2d729dab70e1b1def05c3aa93b28f421a`，不能用旧基线绿灯覆盖失败。
+
+本任务只做一次追加文档提交和普通非强制push；发布后 `git ls-remote` 读回完整SHA，再从该固定提交通过GitHub只读API读取六MD，比较字节并复算hash。实际SHA、读回结果和两个任务固定入口由发布回执提供；不在文件内循环写自身提交SHA。
+
+新提交自动CI仅只读跟踪到终态，不重跑、不改文件或合并。文档校验不等于CI成功，CI也不证明新版产品52项设计验收通过。
+
+没有运行产品、真实模型或真机实验，没有直接联系Claude/Claude Design，没有修改main/develop、部署或处理PR69清理。生效ADR编号和旧任务入口切换仅供后续审查，当前未执行。
+
+## 复核命令
+
+在本目录运行：
+
+```sh
+sha256sum -c SHA256SUMS
+```
