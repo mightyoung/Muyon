@@ -1,0 +1,18 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Signer #1 certificate DN: CN=(Tencent), OU=(Tencent), O=(Tencent), L=(Shenzhen), ST=(GD), C=(CN)
+Signer #1 certificate SHA-256 digest: 2b450095dd8ee48eb22387f3bcd349f485e2866b3f97e3d3925a152647b66f14
+Signer #1 certificate SHA-1 digest: 21dde389d9473349f7f7787c5c7d1e4360429979
+Signer #1 certificate MD5 digest: 53a212f17d3387bc86e24978f3b46c66
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 3072
+Owner: CN=(Tencent), OU=(Tencent), O=(Tencent), L=(Shenzhen), ST=(GD), C=(CN)
+Issuer: CN=(Tencent), OU=(Tencent), O=(Tencent), L=(Shenzhen), ST=(GD), C=(CN)
+Serial number: 7c2ec673
+Valid from: Wed Apr 01 17:06:36 CST 2026 until: Fri Oct 07 17:06:36 CST 2135
+Signature algorithm name: SHA256withRSA

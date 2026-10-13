@@ -1,0 +1,3 @@
+    A: android:requiredSplitTypes(0x0101064e)="" (Raw: "")
+    A: android:splitTypes(0x0101064f)="" (Raw: "")
+        A: android:name(0x01010003)="com.android.vending.splits" (Raw: "com.android.vending.splits")

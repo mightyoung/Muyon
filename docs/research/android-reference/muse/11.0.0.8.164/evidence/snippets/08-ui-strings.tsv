@@ -1,0 +1,46 @@
+# resources.arsc 默认语言字符串（资源名已移除；A：文案存在，不证明触发路径）
+string	found
+MEMORY	Y
+SOUL	Y
+VIBE	Y
+CREATURE	Y
+No identity configured yet.	Y
+Agent personality	Y
+Customize your agent	Y
+Open memory file?	Y
+Add memory	Y
+Summarize into memory	Y
+Import memory to %1$s	Y
+You can delete messages you’ve sent. Messages you delete are removed from the conversation but may stay in the agent’s memory. %1$s	Y
+CONFIG	Y
+ACTIVITY	Y
+HEARTBEAT	Y
+SYSTEM	Y
+WORKSPACE	Y
+Goals	Y
+Add a subgoal	Y
+First, we'll refine the goal together in chat. I'll ask a few questions to clarify exactly what you're after.	Y
+Sources	Y
+View sources	Y
+Approvals history	Y
+No approvals yet	Y
+Allow once	Y
+Allow always	Y
+Auto allowed	Y
+Manage approvals	Y
+This action wasn't recognized. Approve it only if you expected it.	Y
+Review the approval request in chat to continue	Y
+Revoke access	Y
+Release or stop the other browser task before taking control here.	Y
+Another task is in control	Y
+Paste may have reached the browser. Check before trying again.	Y
+Let your assistant keep working after you leave the app. It runs in the background until you turn it off from the notification or in device permissions.	Y
+Your agent can continue working on tasks after you close the app. Check in to keep it on track and intervene if needed.	Y
+Confidential VM	Y
+Subagent tasks	Y
+A task needs review	Y
+Stop this task?	Y
+You can ask your agent to delete this info at any time, or disconnect from Contacts in your device's settings to prevent future syncing.	Y
+Allowing access means your chats, memory, and files will be visible to support and your data will no longer be confidential.	Y
+Your feed is powered by the instructions below. Any edits you make to this prompt will apply to future posts on the feed.	Y
+You are pairing a community device not verified by Meta. It will be able to read and send messages, change your files, approve actions, and use your browser.	Y

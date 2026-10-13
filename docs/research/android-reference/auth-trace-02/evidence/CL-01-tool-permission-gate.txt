@@ -1,0 +1,43 @@
+--- /workspace/android-ref/claude/1.261009.20/work/jadx/sources/defpackage/v7z.java:14-19
+        v7z v7zVar = new v7z("NEVER", 0);
+        v = v7zVar;
+        v7z v7zVar2 = new v7z("ASK", 1);
+        w = v7zVar2;
+        v7z v7zVar3 = new v7z("ALWAYS", 2);
+        x = v7zVar3;
+--- /workspace/android-ref/claude/1.261009.20/work/jadx/sources/defpackage/k8z.java:549-563
+    public final v7z g(t7z t7zVar) {
+        if (!o(t7zVar)) {
+            a aVar = this.f;
+            aVar.b();
+            if (!aVar.a.getBoolean("paused__".concat(t7zVar.a), false)) {
+                return aVar.a(t7zVar);
+            }
+        }
+        return v7z.v;
+    }
+
+    public final Object h(String str, String str2, x5z x5zVar, y7a y7aVar) {
+        g6z g6zVar = (g6z) j().get(str);
+        return g6zVar == null ? new g7z(u3s.q("Tool not found: ", str), false) : g6zVar.w(str2, x5zVar, this.g, y7aVar);
+    }
+--- /workspace/android-ref/claude/1.261009.20/work/smali_out/smali/k8z.smali:1751-1800
+    invoke-virtual {p0}, Lk8z;->j()Ljava/util/Map;
+    invoke-interface {v0, p1}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;
+    if-nez p1, :cond_0
+    invoke-virtual {p1}, Lg6z;->m()Lt7z;
+    if-nez v0, :cond_1
+    invoke-virtual {p0, v0}, Lk8z;->g(Lt7z;)Lv7z;
+    sget-object v1, Lv7z;->x:Lv7z;
+    if-ne v0, v1, :cond_2
+    invoke-virtual {p1, p2, p0}, Lg6z;->c(Ljava/lang/String;Lcom/anthropic/claude/tool/permissions/a;)Z
+    if-eqz p0, :cond_2
+    return p0
+--- /workspace/android-ref/claude/1.261009.20/work/smali_out/smali_classes3/e8z.smali:75-90
+    invoke-virtual {v4}, Lg6z;->m()Lt7z;
+    if-eqz v4, :cond_1
+    invoke-virtual {p0, v4}, Lk8z;->g(Lt7z;)Lv7z;
+    invoke-virtual {v4}, Lv7z;->a()Z
+--- /workspace/android-ref/claude/1.261009.20/work/smali_out/smali_classes3/k91.smali:2098-2112
+    invoke-virtual {v6, v0, v1}, Lk8z;->r(Ljava/lang/String;Ljava/lang/String;)Z
+    if-eqz v6, :cond_15

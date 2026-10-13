@@ -1,0 +1,58 @@
+--- /workspace/android-ref/claude/1.261009.20/work/jadx/sources/defpackage/eka.java:507-533
+            jka r7 = r7.h()
+            r13 = r10
+            r5 = r11
+            r11 = r8
+            r12 = r9
+            r9 = r5
+            gce r8 = new gce
+            r8.<init>(r9, r11, r12, r13)
+            r0.A = r4
+            zds r9 = r7.a
+            kv9 r10 = new kv9
+            r11 = 2
+            r10.<init>(r7, r8, r3, r11)
+            java.lang.Object r13 = defpackage.po1.S(r0, r10, r9, r2, r4)
+            rsa r7 = defpackage.rsa.v
+            if (r13 != r7) goto L51
+            return r7
+        L51:
+            java.lang.Number r13 = (java.lang.Number) r13
+            long r7 = r13.longValue()
+            r9 = -1
+            int r7 = (r7 > r9 ? 1 : (r7 == r9 ? 0 : -1))
+            if (r7 == 0) goto L5e
+            r2 = r4
+        L5e:
+            java.lang.Boolean r7 = java.lang.Boolean.valueOf(r2)
+            return r7
+--- /workspace/android-ref/claude/1.261009.20/work/smali_out/smali_classes3/zc0.smali:2870-2915
+    invoke-virtual {v4}, Lbj7;->a()Ljava/lang/Object;
+    invoke-virtual {v4}, Ljava/lang/Number;->longValue()J
+    invoke-virtual/range {v0 .. v6}, Leka;->i(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLy7a;)Ljava/lang/Object;
+    if-ne v0, v8, :cond_62
+    invoke-virtual {v0}, Ljava/lang/Boolean;->booleanValue()Z
+    if-eqz v0, :cond_63
+    check-cast v0, Leka;
+    iget-object v0, v0, Leka;->i:Ljava/util/concurrent/ConcurrentHashMap$KeySetView;
+    invoke-virtual {v0, v9}, Ljava/util/concurrent/ConcurrentHashMap$KeySetView;->add(Ljava/lang/Object;)Z
+--- /workspace/android-ref/claude/1.261009.20/work/smali_out/smali/yla.smali:355-362
+    invoke-virtual {v9, v0, v3}, Lobj;->b0(Ljava/lang/String;Ly7a;)Ljava/lang/Object;
+--- /workspace/android-ref/claude/1.261009.20/work/smali_out/smali/yla.smali:385-432
+    sget-object v15, Lice;->a:Lice;
+    invoke-static {v0, v15}, Ln7i;->l(Ljava/lang/Object;Ljava/lang/Object;)Z
+    sget-object v4, Lhce;->a:Lhce;
+    invoke-static {v0, v4}, Ln7i;->l(Ljava/lang/Object;Ljava/lang/Object;)Z
+    const-string v4, "client tool already ran on this device; answered, not run tool="
+    const-string v0, " toolUse="
+    invoke-static {v0}, Lmda;->b(Ljava/lang/String;)V
+    const-string v1, "This tool call already ran on this device; its result is not available."
+--- /workspace/android-ref/claude/1.261009.20/work/smali_out/smali/yla.smali:478-484
+    invoke-virtual {v0, v14, v9, v10, v3}, Lk8z;->h(Ljava/lang/String;Ljava/lang/String;Lx5z;Ly7a;)Ljava/lang/Object;
+--- /workspace/android-ref/claude/1.261009.20/work/smali_out/smali/yla.smali:540-580
+    const-string v10, "client tool "
+    const-string v13, " threw while running: "
+    const-string v0, "An unexpected error occurred."
+    invoke-static {v4, v8, v9, v2, v3}, Lyla;->h(Lfaz;Ljava/lang/String;Ljava/lang/String;Li7z;Ly7a;)Ljava/lang/Object;
+--- /workspace/android-ref/claude/1.261009.20/work/jadx/sources/defpackage/vl7.java:50-50
+                x220.j(rwsVar, "CREATE TABLE IF NOT EXISTS `executed_client_tools` (`account_id` TEXT NOT NULL, `conversation_id` TEXT NOT NULL, `tool_use_id` TEXT NOT NULL, `executed_at` INTEGER NOT 

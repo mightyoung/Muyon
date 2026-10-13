@@ -1,0 +1,1 @@
+fonts: Optimistic_A_{Regular,Medium,Bold}, optimistic_vf, optimistic_ai_vf, Optimistic_VF_App_Lite, roboto_mono_vf, caveat_wght；color 资源 341；UI 框架 Jetpack Compose（*ScreenKt 命名 + androidx.compose）；服务端驱动 Bloks 模板 assets/json/bloks_*；WebView: noVNC VM 浏览器、HTML Spaces、docx/pptx/sheet viewer

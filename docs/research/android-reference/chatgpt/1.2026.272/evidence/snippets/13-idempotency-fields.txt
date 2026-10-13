@@ -1,0 +1,2 @@
+work/jadx/sources/defpackage/uc3.java:        pluginGeneratedSerialDescriptor.l("idempotencyKey", false);
+work/jadx/sources/defpackage/toa.java:        pluginGeneratedSerialDescriptor.l("idempotencyToken", true);

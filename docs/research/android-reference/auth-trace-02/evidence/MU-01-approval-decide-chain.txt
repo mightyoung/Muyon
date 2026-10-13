@@ -1,0 +1,44 @@
+--- /workspace/android-ref/muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/HatchAgentPermissionsRepository.java:535-541
+    public final class AgentPermissionApprovalDecision extends C0CP {
+        public static final int $stable = 0;
+        public final String alwaysScope;
+        public final String approvalId;
+        public final String decisionKind;
+        public final String reason;
+
+--- /workspace/android-ref/muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/HatchAgentPermissionsRepository.java:5307-5323
+    public final DecideResult decideLocalApprovals(List<AgentPermissionApprovalDecision> list) {
+        DecideResult failed;
+        Iterator<AgentPermissionApprovalDecision> it = list.iterator();
+        while (true) {
+            if (!it.hasNext()) {
+                failed = DecideResult.Success.INSTANCE;
+                break;
+            }
+            AgentPermissionApprovalDecision next = it.next();
+            AgentPermissionDecision agentPermissionDecisionFromWire = AgentPermissionDecision.Companion.fromWire(next.decisionKind);
+            if (agentPermissionDecisionFromWire == null) {
+                failed = new DecideResult.Failed("Invalid local approval decision");
+                break;
+            }
+            completeLocalApproval(next.approvalId, agentPermissionDecisionFromWire);
+        }
+        return failed;
+--- /workspace/android-ref/muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/HatchAgentPermissionsRepository.java:5394-5396
+    public final DecideResult mergeDecisionResults(DecideResult decideResult, DecideResult decideResult2) {
+        return !(decideResult instanceof DecideResult.Failed) ? ((decideResult2 instanceof DecideResult.Failed) || (decideResult2 instanceof DecideResult.PartiallyApplied)) ? decideResult2 : DecideRes
+    }
+--- /workspace/android-ref/muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/gateway/HatchAgentPermissionsRepository.java:5610-5616
+    public final Object decideApproval(String str, String str2, String str3, String str4, boolean z, C0M8<? super DecideResult> c0m8) {
+        return decideApprovals(Collections.singletonList(new AgentPermissionApprovalDecision(str, str2, str3, str4)), z, c0m8);
+    }
+
+    public final Object decideApprovals(List<AgentPermissionApprovalDecision> list, boolean z, C0M8<? super DecideResult> c0m8) {
+        return AbstractC14796Ml.A00(c0m8, AnonymousClass001.A15(), new AnonymousClass2(list, z, null));
+    }
+--- /workspace/android-ref/muse/11.0.0.8.164/work/jadx/sources/com/facebook/aura/agentpermission/AgentPermissionNotificationRepository.java:121-125
+                    A0y = AnonymousClass001.A0y();
+                    for (Object obj2 : list) {
+                        if (((HatchAgentPermissionsRepository.AgentPermissionApproval) obj2).origin == ApprovalOrigin.LOCAL_HITL) {
+                            A0y.add(obj2);
+                        }

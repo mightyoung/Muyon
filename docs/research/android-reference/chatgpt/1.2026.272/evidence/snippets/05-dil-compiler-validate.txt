@@ -1,0 +1,15 @@
+./DILParserN./DILIncrementalCompileJSONPatchVisitor*./DILPropertiesSchema
+./DILProperty*./DILPropertiesSchema&DILPropertiesSchema
+ApplyJSONPatch
+DILCompiler.incrementalCompile requires a DIL compile result from a previous compile call.JDILIncrementalCompileJSONPatchVisitor
+Hdil_compiler/src/DILPropertiesSchema
+Invalid DIL properties schema: dynamic properties must map to static properties by index."DILStaticProperty propertiesSchema
+JSONPatch
+exports&DILPropertiesSchema
+getValdiRuntime cel/src/CELValue4valdi_core/src/utils/Trace:json_patch/src/ApplyJSONPatch0json_patch/src/JSONPatch8dil_renderer/src/DILRenderer4dil_sandbox/src/DILSandbox@dil_sandbox/src/DILSandboxSource>dil_sandbox/src/DILSandboxErrorBdil_sandbox/src/DILTraceCollector
+json4DILCompiler.validateV1Json.DILCompiler.compileTree(validateDILJsonValue
+lJDILIncrementalCompileJSONPatchVisitor
+ldil_compiler/src/DILIncrementalCompileJSONPatchVisitor
+parseDILJson(validateDILJsonValue
+properties&DILPropertiesSchema"DILActionProperty
+schema

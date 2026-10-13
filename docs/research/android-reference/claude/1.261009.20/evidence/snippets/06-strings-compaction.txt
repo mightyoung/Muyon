@@ -1,0 +1,9 @@
+Compacted conversation · from %1$s token
+Compacted conversation · from %1$s tokens
+Compacted conversation · saved %1$s token
+Compacted conversation · saved %1$s tokens
+%1$d%% of context window used
+Context cleared
+Compacted conversation
+Context window
+Conversation compaction failed.

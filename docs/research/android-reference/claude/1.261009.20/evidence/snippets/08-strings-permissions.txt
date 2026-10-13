@@ -1,0 +1,80 @@
+Proposed a plan
+%1$d waiting for approval
+Custom header names need Anthropic approval. An unapproved name shows an error when you add this connector. Contact support to request approval for a new name.
+Automatically approve
+Manually approve
+Skip all approvals
+Please enable the microphone permission to use speech input.
+Please enable the microphone permission to use voice mode.
+Account Plan
+Your %1$s plan will pause on %2$s.
+Your %1$s plan is paused until %2$s.
+Your purchase is waiting for approval. Credits will be added once it completes.
+Calendar permission required
+Auto mode is now Claude Code’s default permission mode
+Claude will work and use your connectors without pausing for approval. This can put your data at risk.
+Skip all approvals?
+Allow for this session
+Failed to send approval
+Failed to approve plan
+Failed to approve tool call
+Failed to send plan feedback
+This request can’t be approved from your phone. Review it on your computer.
+%1$s needs to approve the Claude GitHub App’s new permissions on GitHub.
+Approve once and Claude can run tasks as you, with your connected apps, whenever this project needs them. It stays on for this project until you turn it off.
+Plan
+Claude handles permission decisions
+Create a plan before making changes
+Approve Plan
+Approve & auto mode
+Approved
+Approve
+Couldn’t approve the pull request. You can try again.
+Approve once
+You don’t have permission to change sharing for this session.
+Permission
+Help me work out a plan for a project
+Allow for all scheduled runs
+Allow for this website
+Always allow for this project
+Always allow for this session
+Always allow for this task
+Always allow for this website
+Approved plan from @%1$s
+Approved shutdown request from @%1$s
+Approving plan from @%1$s
+Approving shutdown request from @%1$s
+Entered plan mode
+Entering plan mode
+Proposed plan
+Proposing plan
+Rejected plan from @%1$s
+Rejecting plan from @%1$s
+Waiting for approval…
+Plan a birthday party
+Claude needs your permission
+Finalize the Q3 launch plan
+Paper plane
+You don’t have permission to change this project’s model.
+A thread of yours stops for a permission, a question or a decision.
+Everything is still here to read, archive or delete. Switch to a paid plan to continue.
+Everything is still here to read. The project’s owner can switch to a paid plan to continue.
+See plans
+Claude can’t run in this project on your current plan.
+Claude can’t run in this project on its owner’s current plan.
+You don’t have permission to change this project’s repositories.
+You don’t have permission to change this project.
+Get notified when Code sessions need your approval to use a tool
+Code permission requests
+Figma hasn’t approved this connector for Design, Slides or design system artifacts
+Guest passes aren’t available on your plan right now.
+Planned Exercise Session
+Change tool permission
+Claude asks before each use, except in chats set to Automatically approve
+Claude asks before each use, except in sessions set to Automatically approve
+Needs approval
+Change permission for all tools
+Permission request
+Let Claude see your events to help plan your day
+Claude works best with access to the following permissions
+Enable permissions

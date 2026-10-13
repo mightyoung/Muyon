@@ -1,0 +1,11 @@
+CCRPermissionActionWorker.smali:532:    const-string v0, "CCRPermissionAction: tool_use_id missing in push payload, sending empty"
+CCRPermissionActionWorker.smali:533-
+19:        pluginGeneratedSerialDescriptor.l("sessionId", false);
+20:        pluginGeneratedSerialDescriptor.l("requestId", false);
+21:        pluginGeneratedSerialDescriptor.l("toolUseId", false);
+22:        pluginGeneratedSerialDescriptor.l("accountId", false);
+23:        pluginGeneratedSerialDescriptor.l("organizationId", false);
+24:        pluginGeneratedSerialDescriptor.l("allow", false);
+25:        pluginGeneratedSerialDescriptor.l("comment", true);
+26:        pluginGeneratedSerialDescriptor.l("toolName", true);
+27:        pluginGeneratedSerialDescriptor.l("ccrNotifTraceId", true);

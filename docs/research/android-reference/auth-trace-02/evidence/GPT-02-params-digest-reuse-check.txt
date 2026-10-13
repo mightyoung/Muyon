@@ -1,0 +1,20 @@
+o3z0.smali(p) +1:.method public static p(Lg2a;)Ljava/lang/String;
+o3z0.smali(p) +5:    const-string v0, "SHA-256"
+o3z0.smali(p) +9:    invoke-static {v0}, Ljava/security/MessageDigest;->getInstance(Ljava/lang/String;)Ljava/security/MessageDigest;
+o3z0.smali(p) +25:    invoke-static {p0}, Lo3z0;->f(Lkotlinx/serialization/json/b;)Lkotlinx/serialization/json/b;
+o3z0.smali(p) +53:    invoke-virtual {v0, p0}, Ljava/security/MessageDigest;->digest([B)[B
+--- /workspace/android-ref/chatgpt/1.2026.272/work/smali_out/smali_classes5/acb0.smali:88-121
+    invoke-static {p1}, Lo3z0;->p(Lg2a;)Ljava/lang/String;
+    const-string v3, "item/tool/requestUserInput"
+    invoke-static {p1, v3}, Ly4s0;->w(Ljava/lang/Object;Ljava/lang/Object;)Z
+    invoke-direct {v1, v2, p2, p1}, Llbb0;-><init>(Ljava/lang/String;Lkrh;Z)V
+--- /workspace/android-ref/chatgpt/1.2026.272/work/smali_out/smali_classes5/hdb0.smali:2028-2042
+    iget-object v6, v5, Llbb0;->a:Ljava/lang/String;
+    invoke-static {v0}, Lo3z0;->p(Lg2a;)Ljava/lang/String;
+--- /workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/hdb0.java:14-14
+    public static final Set a = cf5.s1(new String[]{"saved", "failed", "not_requested"});
+--- /workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/acb0.java:9-9
+        super(xwVar, "orbit_elicitation_responses", new bn40(ubb0.Companion.serializer()), rhu.a, 80);
+    iget-object v6, v5, Llbb0;->a:Ljava/lang/String;
+    invoke-static {v0}, Lo3z0;->p(Lg2a;)Ljava/lang/String;
+    invoke-static {v6, v7}, Ly4s0;->w(Ljava/lang/Object;Ljava/lang/Object;)Z

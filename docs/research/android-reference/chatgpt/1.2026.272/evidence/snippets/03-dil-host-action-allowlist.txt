@@ -1,0 +1,30 @@
+payloadRDIL_READ_ONLY_ENTITY_REFERENCE_CAPABILITY>DIL_ENTITY_REFERENCE_CAPABILITY$open_entity_detail
+keys
+every
+category
+query2isDILModelEntityReference
+trim openURLInBrowserRDIL_READ_ONLY_SANDBOX_DOWNLOAD_CAPABILITY
+open_url
+isDILSandboxURL
+action
+--
+".2getDILSandboxDownloadPathDunsafe sandbox URL in payload.url.LisAllowedModelWrittenDILHostActionTypeHDIL_RESOLVED_WIDGET_VOICE_CAPABILITY
+fallbackActionRfallback action depth exceeded for type "znon-consuming actions cannot fall back to privileged actions.Ppayload.value must be a nonblank string."followup_metadataPpayload.query must be 
+event_name$statsig_event_name
+event_datarpayload.category must be a nonblank string when provided.`message references are unavailable on this host.jthe invoking message is not ready for entity actions.hpayload.extraParams must be 
+ask_sidebar:canonicalTrustedNavigationURL6canonicalHTTPSNavigationURL:untrusted URL in payload.url.
+file_id
+file_name*isTrustedFileCitationFuntrusted file identity in payload.
+images
+selected_index
+--
+success"isModelWrittenDil"model-written-dilRDIL_READ_ONLY_ENTITY_REFERENCE_CAPABILITYFsupportsPerElementAssetURLFiltering(setAllowedUrlRegexes2setSynchronizationEnabled
+widgetViewState
+viewStateSync
+apiService
+size
+flush
+all,hostMessageIsStreaming&clientActionsUpdate
+hostStateUpdate$entityActionsReady
+colorScheme0viewStateAcknowledgement(hydratedWidgetStates*hydratedViewStateSync
+--

@@ -1,0 +1,9 @@
+blutter: https://github.com/worawit/blutter commit 4a60ac648bf448c5a7596437243bcd0b9376fdf0 (2026-08-18)
+built: blutter_dartvm3.11.3_android_arm64
+[56/272] Building CXX object CMakeFiles/dartvm3.11.3_android_arm64.dir/runtime/vm/flags.cc.o
+-- Installing: /home/box/.local/opt/blutter/dartsdk/v3.11.3/../../packages/include/dartvm3.11.3/vm/flags.h
+libapp is loaded at 0x7f1d9d853000
+Dart version: 3.11.3, Snapshot: 78da37fed6bf1489361a312568249f3f, Target: android arm64
+flags: product no-code_comments dwarf_stack_traces_mode dedup_instructions no-asan no-msan no-tsan no-shared_data arm64 android compressed-pointers
+first run error: 'Cannot find libflutter file' (only libapp.so extracted) -> fixed by extracting libflutter.so; second run rc=0
+result: library/class/function names fully obfuscated (e.g. AAE.dart, class fz); const objects, enum value names and string pool readable

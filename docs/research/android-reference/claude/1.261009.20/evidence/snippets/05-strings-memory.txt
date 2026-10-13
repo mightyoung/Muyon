@@ -1,0 +1,47 @@
+%1$d memory file
+%1$d memory files
+Memory files
+Issue with memory
+You’ll switch back to the previous (legacy) memory system.
+Switch to Classic memory?
+Incognito chats stay out of your history, memory, and search, and aren’t used to train Claude.
+Incognito chats stay out of your history, memory, and search.
+Incognito chats stay out of your history, memory, and search, and aren’t used to train Claude.\n\nLearn more
+Incognito chats stay out of your history, memory, and search.\n\nYour organization can still see them. Learn more
+Memory
+Memory couldn’t be saved. You can try again.
+Claude can’t complete that memory edit
+Claude can’t save that to memory
+Added to memory
+Updated memory
+Updated memory, removed %1$s
+Updating memory…
+Claude will no longer have access to the memories in this file. This can’t be undone.
+This memory file may have been deleted or is no longer available.
+No memory files yet. Claude will create them as you chat.
+Allow Claude to generate memory from your chats. Learn more.
+Allow Claude to generate memory from your chats. Turning this on will also allow Claude to include sensitive topics in memory. Learn more.
+Generate memory from chats
+Claude keeps its existing memory but won’t use memory or make new memories.
+Claude keeps its existing memory, including sensitive topics, but won’t use memory or make new memories.
+Pause memory
+This will permanently delete all memories, including project memories. This can’t be undone.
+This will permanently delete all memories, including project memories, and turn off saving sensitive topics. This can’t be undone.
+Reset memory
+Allow Claude to remember relevant context from your chats. This setting controls memory for both chats and projects. Learn more.
+Generate memory from chat history
+Memory from past chats
+Memory summary
+Turn off memory
+View memory
+View memory, %1$s
+A memory update couldn’t be saved.
+A memory update couldn’t be saved. ^1
+Allow Claude to share memory between this project and your chats outside of projects.
+Use account memory
+Project memory will appear after a few chats.
+This will permanently delete all memories of sensitive topics. This can’t be undone.
+Deletion didn’t finish. Some memories of sensitive topics may still be saved.
+Claude keeps existing memories of sensitive topics but won’t add new ones.
+Allow Claude to save details about sensitive topics like health conditions or religious beliefs to memory. Learn more.
+Include sensitive topics in memory

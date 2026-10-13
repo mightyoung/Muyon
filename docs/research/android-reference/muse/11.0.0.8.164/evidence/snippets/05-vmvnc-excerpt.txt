@@ -1,0 +1,6 @@
+8:  <title>VM Browser</title>
+36:      // The websockify endpoint now requires `Authorization: Bearer <jwt>`, which a WebView
+38:      // (BrowserSessionController) owns the real socket — opened over Tigon with the VM bearer —
+170:        viewOnly = !!window.AndroidVncBridge.isViewOnly();
+174:        inputEnabled = !!window.AndroidVncBridge.isInputEnabled();
+772:      // BrowserSessionController, which reloads this page → fresh RFB → fresh native socket).

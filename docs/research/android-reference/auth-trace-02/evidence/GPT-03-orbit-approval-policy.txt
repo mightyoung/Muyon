@@ -1,0 +1,25 @@
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/slj.java:32:        pluginGeneratedSerialDescriptor.l("approvalPolicy", true);
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/slj.java:33:        pluginGeneratedSerialDescriptor.l("approvalsReviewer", true);
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/slj.java:34:        pluginGeneratedSerialDescriptor.l("sandbox", true);
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/xsj.java:32:        pluginGeneratedSerialDescriptor.l("approvalPolicy", true);
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/xsj.java:33:        pluginGeneratedSerialDescriptor.l("approvalsReviewer", true);
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/xsj.java:35:        pluginGeneratedSerialDescriptor.l("sandboxPolicy", true);
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/xsj.java:36:        pluginGeneratedSerialDescriptor.l("clientUserMessageId", true);
+--- /workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/ulj.java:86-92
+        if ((i & 1024) == 0) {
+            this.k = qz10.c("on-request");
+        } else {
+            this.k = bVar;
+        }
+        this.l = (i & 2048) == 0 ? "user" : str7;
+        this.m = (i & 4096) == 0 ? "workspace-write" : str8;
+--- /workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/k7c0.java:22-26
+        k7c0 k7c0Var = new k7c0("MisalignmentMonitor", 0, "misalignment_monitor");
+        b = k7c0Var;
+        k7c0 k7c0Var2 = new k7c0("GuardianCircuitBreaker", 1, "guardian_circuit_breaker");
+        c = k7c0Var2;
+        k7c0 k7c0Var3 = new k7c0("Unknown", 2, "unknown");
+4320:Reconnected. We couldn’t confirm whether Orbit continued.
+7767:Couldn’t confirm this request. Check its status and try again.
+7978:Auto-review did not approve some recent actions, so your dot was paused. The auto-review policy determines which actions are allowed and can be adjusted. Learn more
+7979:Auto-review did not approve some recent actions, so your dot was paused. The auto-review policy determines which actions are allowed and can be adjusted.

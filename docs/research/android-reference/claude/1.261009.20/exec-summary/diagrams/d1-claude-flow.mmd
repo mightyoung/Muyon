@@ -1,0 +1,14 @@
+flowchart LR
+  S[服务端 SSE<br/>completion] -->|content_block_start/delta/stop| P[客户端解析<br/>ParsedContentBlock]
+  S -->|thinking_summary_delta| P
+  S -->|tool_use_block_update_delta| P
+  S -->|compaction_status| P
+  P --> UI1[思考块<br/>Thought for N]
+  P --> UI2[工具行 ToolUse<br/>完成/错误/停止/等待用户]
+  UI2 -->|collapsible| UI3[折叠组<br/>N tool calls → CollapsedToolsSheet]
+  P --> UI4[压缩分隔<br/>saved N tokens]
+  P --> DB[(snapshot_messages<br/>complete_blocks/fingerprint)]
+  UI2 -->|客户端工具| L[(executed_client_tools<br/>INSERT OR IGNORE)]
+  L --> R[POST tool_result]
+  RS[Research task/status 轮询] --> UI5[Research卡<br/>Timeline/Sources]
+  CC[v1/code/sessions/watch] --> UI6[Code会话 post_turn_summary<br/>通知/小部件]

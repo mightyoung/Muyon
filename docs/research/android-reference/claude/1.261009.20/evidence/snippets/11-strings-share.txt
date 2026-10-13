@@ -1,0 +1,40 @@
+We reviewed your account and the additional context you shared, and decided not to restore access. This is our final decision.
+Use Claude’s published identity
+Share desktop app link
+Shared with you
+Publishing will make this artifact accessible to anyone and potentially visible in search engine results. Your chat will remain private.
+Publish Artifact
+Publish
+Share as %1$s
+Publishing…
+Running in the shared directory ^1. Other sessions may conflict — consider worktree mode to isolate changes.
+You can edit only your own environments, not ones shared with your organization. It may also have been archived or deleted.
+Couldn’t share image
+Shared session. Visible to anyone in %1$s with the link.
+Shared session. Visible to anyone in %1$s with repo access and the link.
+Shared session. Visible to anyone with the link.
+Shared session. Visible to anyone with repo access and the link.
+Verify your identity to share this session.
+No active share
+The shared content couldn’t be added to this session.
+Share session
+Shared by %1$s
+Share a link to this session
+It may have been unshared or deleted, or it may belong to a different organization than the one you’re signed in to.
+Share…
+Failed to share chart
+Chats using advanced research can’t be shared.
+Chats that used Claude Code can’t be shared.
+To keep data private, you can’t share chats that use connectors.
+This chat can’t be shared because some of its content is no longer available.
+This chat can’t be shared.
+This chat can’t be shared again.
+Chats using local files can’t be shared.
+Temporary chats can’t be shared.
+Files can’t be previewed from a shared link
+Share snapshot
+Only messages up to this point will be shared
+New messages can’t be shared, but the link still works.
+shared with you
+shared by %1$s
+Check the spelling, or share the invite link instead.

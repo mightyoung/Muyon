@@ -1,0 +1,23 @@
+--- /workspace/android-ref/claude/1.261009.20/work/jadx/sources/defpackage/qkk.java:73-94
+    public static String d(String str, String str2, String str3) throws DomainValidationException {
+        if (str == null || str.length() == 0) {
+            return u1x.T0(32, sav.a(str3));
+        }
+        if (str2 == null || str2.length() == 0) {
+            throw new DomainValidationException(w0k.p("Cannot validate ui.domain '", str, "': connector URL is missing"));
+        }
+        String strT0 = u1x.T0(32, sav.a(str2));
+        String strConcat = strT0.concat(".claudemcpcontent.com");
+        udr udrVar = rkk.a;
+        String lowerCase = str.toLowerCase(Locale.ROOT);
+        lowerCase.getClass();
+        xdk xdkVarE = udrVar.e(lowerCase);
+        if (xdkVarE == null) {
+            throw new DomainValidationException(w0k.r("Invalid ui.domain format: '", str, "' (expected '", strConcat, "')"));
+        }
+        String str4 = (String) ((vdk) xdkVarE.a()).get(1);
+        if (n7i.l(str4, strT0)) {
+            return str4;
+        }
+        throw new DomainValidationException(w0k.r("ui.domain hash mismatch: got '", str, "', expected '", strConcat, "'"));
+    }

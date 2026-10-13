@@ -1,0 +1,36 @@
+Couldn’t open browser
+Open browser
+Open cloud browser
+Always approve
+Allow Codex to run this command?
+Allow Codex to change files?
+Remote control requires hardware-backed device security on this device.
+Reading this file over remote control.
+Remote control session expired.
+Auto-review
+Remote control is disabled by your workspace admin. Reach out to get access.
+Allow low-risk actions
+ChatGPT will automatically approve low-risk actions but may deny actions involving sensitive information. Learn more
+Allow low-risk
+We couldn’t confirm the agent was acting safely and following your instructions. To continue working, start a new chat.
+Browser screenshot %1$d of %2$d
+View browser screenshot full screen
+Collapse browser screenshot previews
+Browser screenshot previews collapsed
+Expand browser screenshot previews
+Browser screenshot previews expanded
+Cloud browser
+%1$s was paused out of precaution
+Auto-review did not approve some recent actions, so your dot was paused. The auto-review policy determines which actions are allowed and can be adjusted. Learn more
+Auto-review did not approve some recent actions, so your dot was paused. The auto-review policy determines which actions are allowed and can be adjusted.
+Cloud browser
+Cookies saved by the cloud browser will be permanently deleted. Cookies in the browser on your device won’t be affected.
+Manage the cloud browser’s cookies.
+Cookies saved for this site will be permanently deleted, and active cloud browser sessions will be signed out immediately.
+Couldn’t load cloud browser settings.
+Loading cloud browser settings
+Cloud browser settings couldn’t be updated
+Remote control
+Connectors, Agent mode, Deep Research, and shopping research are turned off.
+Agent mode with deep research
+Agent mode with deep research

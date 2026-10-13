@@ -1,0 +1,32 @@
+{
+  "badging": "package: name='com.anthropic.claude' versionCode='26100920' versionName='1.261009.20' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+  "sha256": "9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a",
+  "size": 39518046,
+  "acquired": "2026-10-13 16:32:50 CST",
+  "source": "user-provided Google Drive folder",
+  "signer": [
+    "Signer #1 certificate DN: CN=Android, OU=Android, O=Google Inc., L=Mountain View, ST=California, C=US",
+    "Signer #1 certificate SHA-256 digest: 305a1e8a432e5ec0c612b2465359c3b88e3c95d6253599ac6088562b818b64a0",
+    "Signer #1 certificate SHA-1 digest: a2fc9db5a6a9fe2e3694a33cf32aaa9941fd5a1d",
+    "Signer #1 certificate MD5 digest: 2e746b8a2e01023c55ed06b2945690c6"
+  ],
+  "splits": "MISSING required base__abi,base__density",
+  "status": "analyzed",
+  "user_acceptance": "用户已接受：仅base APK静态分析；证书中等可信（Play App Signing形态）；无动态观察",
+  "missing_splits": [
+    "base__abi",
+    "base__density"
+  ],
+  "accepted_on": "2026-10-13",
+  "jadx": {
+    "version": "1.5.3",
+    "classes": 23311,
+    "errors": 162
+  },
+  "deliverables": [
+    "report.md",
+    "report.docx",
+    "findings-index.md",
+    "evidence/snippets/01-12"
+  ]
+}

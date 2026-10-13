@@ -1,0 +1,14 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): false
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: true
+Signer #1 certificate DN: L=Menlo Park, ST=California, OU=Meta Mobile, O=Meta Platforms Inc., C=US, CN=Meta Platforms Inc.
+Signer #1 certificate SHA-256 digest: a16bbe0247a738bc8f09fef50d890dc177ec875a83a121f877329b1b89667e99
+Signer #1 certificate SHA-1 digest: 014435c073d59e25d2b03219dc8ea9a9013d7723
+Signer #1 certificate MD5 digest: c057e5932bb0ad721530c5125fd0ffe1
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 4096
+reference: APKMirror Muse from Meta listing (2026-09) shows SHA-256 a16bbe0247a738bc8f09fef50d890dc177ec875a83a121f877329b1b89667e99, CN=Meta Platforms Inc., OU=Meta Mobile -> MATCH

@@ -1,0 +1,21 @@
+Creating draft
+Creating label
+Creating event
+Reading email threads
+Reading attachment
+Reading emails
+Updating email labels
+Updating draft
+Updating event label
+Sending input to agent
+Sending draft
+Sending email
+Opening chat
+Opening browser
+Opening file
+Created canvas
+Couldn’t create canvas
+Create canvas
+Created reminder
+Couldn’t create reminder
+Create reminder

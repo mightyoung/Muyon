@@ -1,0 +1,61 @@
+{
+  "app": "WorkBuddy",
+  "developer_claimed": "腾讯（应用汇: 深圳市腾讯计算机系统有限公司；魅族: 腾讯云计算(北京)有限责任公司）",
+  "package": "com.tencent.workbuddy.app",
+  "versionName": "2.6.1",
+  "versionCode": 852,
+  "minSdk": 24,
+  "targetSdk": 36,
+  "compileSdk": 36,
+  "abis": [
+    "arm64-v8a"
+  ],
+  "apk_type": "single APK (non-split)；仅 arm64-v8a，无 armeabi-v7a/x86；无缺失 split",
+  "file": {
+    "name": "workbuddy-2.6.1.apk",
+    "size_bytes": 293687392,
+    "sha256": "5ce904337ba2821fb1cdb7965075445746d198bc82d40b12d6842d24f1da34e3",
+    "md5": "769c521cc48c4e5cf1b2ac0a92c8ead8"
+  },
+  "acquisition": {
+    "time_asia_shanghai": "2026-10-13 13:04 CST",
+    "store_page": "https://www.appchina.com/app/com.tencent.workbuddy.app",
+    "store_download": "https://mobile.d.appchina.com/McDonald/e/7713979/0/0/0/1791867534430/package_852.1791867534430",
+    "cdn_redirect": "https://qn.yingyonghui.com/apk/7713979/769c521cc48c4e5cf1b2ac0a92c8ead8 (CDN 对象名=文件MD5，一致)",
+    "notes": "原链接为 http，盒子出口 80 端口不通，改用同主机 https；未登录、未付费。魅族网页下载按钮已停用（需客户端），未使用。"
+  },
+  "signature": {
+    "schemes": {
+      "v1": false,
+      "v2": true,
+      "v3": false
+    },
+    "verifies": true,
+    "subject_dn": "CN=(Tencent), OU=(Tencent), O=(Tencent), L=(Shenzhen), ST=(GD), C=(CN)",
+    "issuer": "self-signed (same as subject)",
+    "cert_sha256": "2b450095dd8ee48eb22387f3bcd349f485e2866b3f97e3d3925a152647b66f14",
+    "cert_sha1": "21dde389d9473349f7f7787c5c7d1e4360429979",
+    "key": "RSA 3072",
+    "valid_from": "2026-04-01 17:06:36 CST",
+    "serial": "7c2ec673",
+    "tencent_attribution": "中等可信：DN 为自填；未找到该证书的公开官方参照；与微信 com.tencent.mm 证书(SHA-256 0FE4FF85…3C7C)不同（腾讯不同产品通常各自独立签名，不能据此否定）；包内大量腾讯内部 SDK（qimei/turing/bugly/beacon/rmonitor/mars xlog/TIM/itlogin/tauth）与官方宣称产品形态一致。"
+  },
+  "packing": "未见商业加固壳（无 jiagu/legu 等 so）；Dart AOT 为 release 混淆构建（类名大多不可见）；资源名经混淆（res/zz.xml 风格）",
+  "framework": "Flutter（libflutter.so + libapp.so，单 MainActivity，windowSoftInputMode=adjustResize）",
+  "tools": {
+    "rea": "6.4.0",
+    "jadx-headless-mcp": "0.7.1",
+    "jadx": "1.5.3",
+    "apktool": "2.7.0-dirty",
+    "apksigner": "0.9 (build-tools 35.0.2)",
+    "aapt": "v0.2-debian",
+    "openjdk": "21.0.12.1",
+    "rsvg-convert/imagemagick": "Debian",
+    "blutter": "worawit/blutter@4a60ac648bf448c5a7596437243bcd0b9376fdf0 (built blutter_dartvm3.11.3_android_arm64)"
+  },
+  "flutter_snapshot_hash": "78da37fed6bf1489361a312568249f3f",
+  "dart_version": "3.11.3 (blutter)",
+  "user_decisions": {
+    "2026-10-13": "接受中等可信腾讯签名；不做动态观察；批准 blutter"
+  }
+}

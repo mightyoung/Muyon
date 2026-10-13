@@ -1,0 +1,23 @@
+        A: android:name(0x01010003)="com.anthropic.claude.chat.MessageSseService" (Raw: "com.anthropic.claude.chat.MessageSseService")
+        A: android:name(0x01010003)="com.anthropic.claude.bell.BellModeService" (Raw: "com.anthropic.claude.bell.BellModeService")
+        A: android:exported(0x01010010)=(type 0x12)0x0
+        A: android:foregroundServiceType(0x01010599)=(type 0x11)0x82
+work/jadx/sources/com/anthropic/claude/code/remote/notification:
+CCRPermissionActionReceiver.java
+CCRPermissionActionWorker.java
+CodeProjectGroupDismissReceiver.java
+SessionReplyActionReceiver.java
+SessionReplyActionWorker.java
+a.java
+
+work/jadx/sources/com/anthropic/claude/widget:
+ClaudeAppWidgetReceiver.java
+ClaudeWidgetConfigActivity.java
+CodeShortcutsWidgetReceiver.java
+RefreshInFlightAction.java
+RefreshWidgetAction.java
+WidgetChatListRefreshWorker.java
+WidgetPinnedReceiver.java
+usage
+CollapsedToolsSheetDestination.java
+ResearchDetailsSheetDestination.java

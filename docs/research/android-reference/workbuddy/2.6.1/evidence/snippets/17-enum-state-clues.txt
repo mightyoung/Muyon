@@ -1,0 +1,37 @@
+# blutter 恢复的 Dart enum 值名（类名已混淆）。仅客户端状态建模线索，不证明服务端行为、不证明触发路径。
+[发送/未知结果核对]
+  Xvd: provenNotSent | dispatchAmbiguous | acceptedAwaitingEcho
+  Yvd: safeRetryRequired | reconcilePending | confirmationUnavailable
+  Zvd: notRecoveryRow | safeRetrySubmitted | resubmitWithheld | historyRefreshed
+  otd: idle | inFlight | awaitingEcho | canResend
+  gQc/XTd: known | awaitingEcho/awaiting | unavailable
+  vLc: succeeded | unconfirmed ;  pkd: idle | inFlight | unresolved | resolved
+[对话执行管线与失败阶段]
+  TNc: none | precheck | conversationCreate | sessionConnect | promptDispatch | promptWait | responseStream | recovery | render | unknown
+  nTb: precheckRejected | conversationCreateFailed | connectFailed | promptSendFailed | promptRpcError | promptTimeout | recoveryFailed | traceMismatch | duplicateTerminal | lifecycleDropped | ledgerWriteFailed
+  lMc(流恢复): queued | reconnecting | replaying | finalizing
+  kQd(回合): terminal | unresolved | active | pendingUserTurn
+  PPc: sessionBind | historyRefresh | reconcile | stateChangePending
+[过期/取代守卫]
+  _BPc: accepted | staleGeneration | failed ;  WMc: synced | deferred | failed | superseded
+  LOd: success | cancelled | returnedWithoutCallback | superseded | stale | ...
+[权限/确认]
+  afc(权限模式): standard | fullAccess | unknown
+  bfc: none | apply | confirmThenApply ;  vQc: answer | cancel | permissionResolve
+  mRb: applied | awaitingAuth | targetUnavailable | navigated ;  TNb: skip | confirmWaiting | accept | clear
+  dkc: apply | approved | rejected ;  awd: confirmed | waiting | unavailable
+[流式滚动]
+  _sVd: idle | streamingFollow | returnToBottom ;  TVd: idle | seeking | pinned
+[消息块布局]
+  ePd: completedHeader | processGroup | answer | attachmentGroup | artifactGroup | auxiliaryCard | progress | actionRow | divider
+  mDe: expanded | expandedPaused | collapsed ;  _Blc/Ulc: completed | current | pending
+[输入区禁用原因]
+  YTd: notSelected | networkOffline | deviceOffline | channelDisconnected | historyLoadFailed | loadingConversation | recorderConversationLocked | voiceRecognizing | attachmentUploading | submissionBusy | waitingForReply
+[发送错误分类]
+  bYb: sendFailed | cloudUnavailable | loginRequiredForCloud | cloudReplyFailed | cancelled | sentNoReply | backendNotSupported | network | loginExpired | replyTimeout | imageTooLarge | desktopUpgradeRequired | sendTimeout | creditExhausted
+  bRc: ... | cloudSyncUnavailable | attachmentMissingRemoteUri | localChannelUnavailable | syncTimeout | serverStillWorking
+[设备/执行位置]  Vke: online | offline | cloud ;  ukd/Add: online | offline | unknown
+[产物类型]  CLd: document | spreadsheet | presentation | pdf | markdown | web | chart | image | video | audio | text | code | archive | form | folder | ...
+[列表加载态]  Cjd: loading | successEmpty | successNonEmpty | failed
+[生成式小组件]  anc: resultMissingSuccessFlag | resultMissingWidgetCode | finishedWithoutInput | finishedInputMissingWidgetFields
+[编辑]  FGc: confirm | undo | redo | other ;  _BFc: save | discard | cancel

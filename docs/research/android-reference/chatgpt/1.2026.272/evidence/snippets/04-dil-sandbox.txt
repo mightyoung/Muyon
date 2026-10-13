@@ -1,0 +1,10 @@
+    if (typeof key === "string" && allowedGlobalNames.has(key)) {
+  const allowedGlobalNames = new Set(globalThis.__dilAllowedGlobalNames);
+  delete globalThis.__dilAllowedGlobalNames;
+);.DIL sandbox component 'B' did not evaluate to a function.0isDILRestrictedComponent
+DIL sandbox render app data and constants must both be serialized.dDIL sandbox render app data must be a JSON object.fDIL sandbox render constants must be a JSON object."traceCollectionId.collectPolyfilledTraces
+DIL sandbox render app data must be serialized before transport.
+DIL sandbox render constants must be serialized before transport.
+__dilHostBridge&__dilComponentNames(getDILComponentNames.__dilAllowedGlobalNames>getDILSandboxAllowedGlobalNames __dilFixedTimeMs
+__esModule*DIL_COMPONENT_SOURCES(getDILComponentNames0isDILRestrictedComponent*getDILComponentSourcetdil_generated_components/src/DILComponentSources.generated
+__esModule>getDILSandboxAllowedGlobalNames*lockDownSandboxGlobal&hardenSandboxGlobal:dil_renderer/src/DILApiFacade*./DILComponentSources

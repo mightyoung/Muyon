@@ -1,0 +1,34 @@
+{
+  "badging": "package: name='com.openai.chatgpt' versionCode='2627220' versionName='1.2026.272' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'",
+  "sha256": "47d8350ad995eb54283bce326fed77d099467f6222318eb1c8509b7f8831e40a",
+  "size": 81662131,
+  "acquired": "2026-10-13 16:32:50 CST",
+  "source": "user-provided Google Drive folder",
+  "signer": [
+    "Signer #1 certificate DN: CN=Android, OU=Android, O=Google Inc., L=Mountain View, ST=California, C=US",
+    "Signer #1 certificate SHA-256 digest: b24f4bfbb3cf293f938703b9d87027c1102cc36dc4fa206910e08927db40473c",
+    "Signer #1 certificate SHA-1 digest: 51a2f260766c9c1a83b7dd5b4572040ac23e4aea",
+    "Signer #1 certificate MD5 digest: 80c31e5c1f6531e624379be062d7a20b"
+  ],
+  "splits": "MISSING required base__abi,base__density",
+  "status": "analyzed",
+  "user_acceptance": "用户已接受：仅base APK静态分析；证书中等可信（Play App Signing形态）；无动态观察",
+  "missing_splits": [
+    "base__abi",
+    "base__density"
+  ],
+  "accepted_on": "2026-10-13",
+  "jadx": {
+    "version": "1.5.3",
+    "classes": 46455,
+    "java_files_written": 49421,
+    "note": "process exited at ~66%"
+  },
+  "strings_default_locale": 11170,
+  "deliverables": [
+    "report.md",
+    "report.docx",
+    "findings-index.md",
+    "evidence/snippets/01-13"
+  ]
+}

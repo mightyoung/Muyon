@@ -1,0 +1,6 @@
+zg00: "bell_delta" "cause" "citation_end_delta" "citation_start_delta" "delete" "device" "error" "flag_delta" "input_json_delta" "keep" "log" "message" "started" "status" "text_delta" "thinking_delta" "thinking_summary_delta" "tool_use_block_update_delta" "type" "unknown" "voice_note_delta" 
+o1a: "content_block" "content_block_start" "index" 
+k1a: "content_block_retract" "from_index" 
+htw: "compaction" "conversation_length_limit" "end_turn" "error" "max_tokens" "model_context_window_exceeded" "pause_turn" "prompt_injection_risk" "refusal" "stop_sequence" "tool_use" "tool_use_limit" "user_canceled" 
+ijz: "bell" "flag" "text" "thinking" "tool_result" "tool_use" "unknown" "voice_note" 
+rkt: "image" "redacted_thinking" "text" "thinking" "tool_result" "tool_use" "type" 

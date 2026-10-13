@@ -1,0 +1,19 @@
+Creating canvas
+Created canvas
+Couldn’t create canvas
+Create canvas
+Reading canvas
+Read canvas
+Couldn’t read canvas
+Read canvas
+Updating canvas
+Updated canvas
+Couldn’t update canvas
+Update canvas
+Couldn’t load mini app
+Open mini app full screen
+Loading mini app…
+Mini app
+A widget was displayed
+Use custom layouts and interactive elements in responses.
+File downloads and some code and canvas features won’t be available.

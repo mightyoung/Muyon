@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS `executed_client_tools` (`account_id` TEXT NOT NULL, `conversation_id` TEXT NOT NULL, `tool_use_id` TEXT NOT NULL, `executed_at` INTEGER NOT NULL, PRIMARY KEY(`account_id`, `conversation_id`, `tool_use_id`))
+CREATE TABLE IF NOT EXISTS `snapshot_headers` (`account_id` TEXT NOT NULL, `conversation_id` TEXT NOT NULL, `leaf_message_id` TEXT NOT NULL, `updated_at` INTEGER NOT NULL, `newest_message_at` INTEGER NOT NULL, `project_id` TEXT, `facts` BLOB, `oldest_known_message_id` TEXT, PRIMARY KEY(`account_id`, `conversation_id`))
+CREATE TABLE IF NOT EXISTS `snapshot_messages` (`account_id` TEXT NOT NULL, `conversation_id` TEXT NOT NULL, `message_id` TEXT NOT NULL, `parent_message_id` TEXT, `fingerprint` INTEGER NOT NULL, `complete_blocks` INTEGER NOT NULL, `body` BLOB NOT NULL, PRIMARY KEY(`account_id`, `conversation_id`, `message_id`))
+
+"DELETE FROM snapshot_headers WHERE account_id = ? AND conversation_id = ?"
+"DELETE FROM snapshot_messages WHERE account_id = ? AND conversation_id = ?"
+"INSERT INTO `snapshot_headers` (`account_id`,`conversation_id`,`leaf_message_id`,`updated_at`,`newest_message_at`,`project_id`,`facts`,`oldest_known_message_id`) VALUES (?,?,?,?,?,?,?,?)"
+"INSERT INTO `snapshot_messages` (`account_id`,`conversation_id`,`message_id`,`parent_message_id`,`fingerprint`,`complete_blocks`,`body`) VALUES (?,?,?,?,?,?,?)"
+"INSERT OR IGNORE INTO `executed_client_tools` (`account_id`,`conversation_id`,`tool_use_id`,`executed_at`) VALUES (?,?,?,?)"
+"SELECT * FROM snapshot_headers WHERE account_id = ? AND conversation_id = ?"
+"SELECT * FROM snapshot_messages WHERE account_id = ? AND conversation_id = ? AND message_id IN ("
+"SELECT conversation_id FROM snapshot_headers WHERE account_id = ? UNION SELECT conversation_id FROM snapshot_messages WHERE account_id = ?"
+"SELECT conversation_id, leaf_message_id, updated_at FROM snapshot_headers WHERE account_id = ? AND conversation_id IN ("
+"SELECT message_id, fingerprint, complete_blocks FROM snapshot_messages WHERE account_id = ? AND conversation_id = ? AND message_id IN ("
+"SELECT message_id, parent_message_id, fingerprint, complete_blocks, length(body) AS body_size FROM snapshot_messages WHERE account_id = ? AND conversation_id = ?"

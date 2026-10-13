@@ -1,0 +1,4 @@
+        A: android:configChanges(0x0101001f)=(type 0x11)0x40003fb4
+        A: android:windowSoftInputMode(0x0101022b)=(type 0x11)0x10
+        A: android:configChanges(0x0101001f)=(type 0x11)0x4a0
+        A: android:configChanges(0x0101001f)=(type 0x11)0x4a0

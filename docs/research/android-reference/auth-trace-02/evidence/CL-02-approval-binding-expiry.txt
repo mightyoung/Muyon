@@ -1,0 +1,23 @@
+--- /workspace/android-ref/claude/1.261009.20/work/jadx/sources/defpackage/yla.java:119-135
+    public final void f(String str, boolean z) {
+        bp2 bp2VarI = i(str);
+        if (bp2VarI == null) {
+            e(str, "approved");
+            return;
+        }
+        if (z) {
+            String strE = bp2VarI.e();
+            String strA = bp2VarI.a();
+            k8z k8zVar = (k8z) this.a;
+            g6z g6zVar = (g6z) k8zVar.j().get(strE);
+            if (g6zVar != null) {
+                g6zVar.j(strA, k8zVar.f);
+            }
+        }
+        mrz.L(this.e, null, 0, new kv9(this, bp2VarI, str, null, (byte) 6), 3);
+    }
+--- /workspace/android-ref/claude/1.261009.20/work/jadx/sources/defpackage/yla.java:173-176
+        Iterator it3 = listN1.iterator();
+        while (it3.hasNext()) {
+            mda.a("client tool ask expired: assistant message " + str + " closed unanswered toolUse=" + ((ucz) it3.next()).e(), qhd.v);
+        }

@@ -1,0 +1,2 @@
+work/jadx/sources/defpackage/i7l.java:                return ((zu0) ((ddt) obj).d(zu0.class, null)) instanceof xu0 ? "https://www.claudeusercontent.com" : "https://staging.claudeusercontent.com";
+work/jadx/sources/defpackage/xu0.java:    public static final xu0 g = new xu0("https://claude.ai", s01.w, false, kc1.B0(new String[]{"https://claude.ai", "https://www.claudeusercontent.com"}), 8);

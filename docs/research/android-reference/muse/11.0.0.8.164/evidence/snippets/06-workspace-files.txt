@@ -1,0 +1,17 @@
+# 客户端对 agent 工作区文件的引用（jadx 反编译，com.facebook.aura 类名未混淆）
+com/facebook/aura/deeplink/AuraDeeplinkRouteMapper$commonSessionedRouteSpecs$25.java:32:"MEMORY.md"
+com/facebook/aura/deeplink/AuraDeeplinkRouteMapper.java:89:"MEMORY.md"
+com/facebook/aura/gateway/JarvisProtocol.java:1241:"IDENTITY.md"
+com/facebook/aura/library/repo/HatchGoalsTabDataSourceKt.java:50:"USER.md"
+com/facebook/aura/status/repo/MemoryDataSource.java:219:"MEMORY.md"
+com/facebook/aura/status/repo/MemoryDataSource.java:339:"MEMORY.md"
+com/facebook/aura/status/repo/MemoryDataSourceKt.java:5:"MEMORY.md"
+com/facebook/aura/status/view/IdentityScreenKt$IdentityContent$1$1$2$2$1.java:33:"SOUL.md"
+com/facebook/aura/status/view/IdentityScreenKt$IdentityContent$1$1$2$4$1.java:33:"MEMORY.md"
+com/facebook/aura/status/viewmodel/IdentityViewModel.java:721:"SOUL.md"
+com/facebook/aura/status/viewmodel/IdentityViewModel.java:733:"MEMORY.md"
+com/facebook/aura/status/viewmodel/IdentityViewModelKt.java:5:"IDENTITY.md"
+
+HatchFileOperations 方法: statFile / readFile / readFileFromVm / writeFile(content, relativePath, overwrite, append, createParent, expectedGatewayUrl) / deleteFile / shareArtifact / shareSpace
+MemoryDataSource: readFile(MEMORY.md) / saveContent -> writeFile；IdentityViewModel: statFile(SOUL.md, MEMORY.md) 取修改日期, discardChanges()
+writeFile 参数中未见 etag/版本/预期修改时间字段（线索：无乐观并发控制证据）

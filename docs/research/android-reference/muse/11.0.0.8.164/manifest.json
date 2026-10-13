@@ -1,0 +1,7 @@
+{"app":"Muse (Meta Muse)","developer":"Meta Platforms, Inc.","package":"com.facebook.aura","versionName":"11.0.0.8.164","versionCode":1061601403,"minSdk":29,"targetSdk":36,"compileSdk":37,"abis":["arm64-v8a"],
+"apk_type":"base only; requiredSplitTypes empty (installable alone); optional splits unknown",
+"file":{"name":"muse-11.0.0.8.164-base.apk","original_name":"base(1).apk","size_bytes":42279886,"sha256":"c7e788b5df855912dffbefc4c017f2e621b54aaeef954424f56339bd994fcefa"},
+"acquisition":{"time_asia_shanghai":"2026-10-13 16:32:50 CST","source":"user-provided Google Drive folder https://drive.google.com/drive/folders/1ifCHLvXiRAThyWUyCb6FbP8CfvKjnrVi","tool":"gdown"},
+"signature":{"cert_sha256":"a16bbe0247a738bc8f09fef50d890dc177ec875a83a121f877329b1b89667e99","dn":"CN=Meta Platforms Inc., OU=Meta Mobile, O=Meta Platforms Inc., L=Menlo Park, ST=California, C=US","reference_match":"APKMirror Muse from Meta listing (third-party reference) — match","verdict":"credible Meta"},
+"framework":"Jetpack Compose + Bloks templates + WebView(noVNC/HTML Spaces/doc viewers); no React Native/Hermes/Litho found",
+"tools":{"jadx":"1.5.3 (138 method errors)","apksigner":"0.9","aapt":"v0.2-debian","gdown":"pip latest"}}

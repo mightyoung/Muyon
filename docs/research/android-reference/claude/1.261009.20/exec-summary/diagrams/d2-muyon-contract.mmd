@@ -1,0 +1,15 @@
+stateDiagram-v2
+  [*] --> proposed: StepProposed
+  proposed --> awaiting_auth: 需授权(按四档)
+  awaiting_auth --> cancelled: 拒绝/撤权
+  awaiting_auth --> running: 已授权+已确认(绑定对象+版本)
+  proposed --> running: 低风险/已允许
+  running --> succeeded: Receipt(ok)
+  running --> failed: Receipt(err)
+  running --> cancelled: 用户停止
+  running --> unknown: 断连/超时
+  unknown --> succeeded: 核对账本/服务端
+  unknown --> failed: 核对
+  succeeded --> [*]
+  failed --> [*]
+  cancelled --> [*]

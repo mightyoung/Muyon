@@ -1,0 +1,10 @@
+work/jadx/sources/defpackage/f5.java:                settings.setJavaScriptEnabled(true);
+work/jadx/sources/defpackage/f5.java:                settings.setSupportMultipleWindows(false);
+work/jadx/sources/defpackage/f5.java:                settings.setAllowFileAccess(false);
+work/jadx/sources/defpackage/f5.java:                settings.setAllowContentAccess(false);
+work/jadx/sources/defpackage/omm.java:        settings.setAllowFileAccess(false);
+work/jadx/sources/defpackage/omm.java:        settings.setAllowContentAccess(false);
+work/jadx/sources/defpackage/iru.java:        ommVar.getSettings().setJavaScriptEnabled(false);
+work/jadx/sources/defpackage/nc20.java:                            j0fVar2.addJavascriptInterface(new hzm(j0fVar, ezmVar2, atomicReference, l4mVar4, l4mVar5), "_claude_bridge");
+work/jadx/sources/defpackage/vlk.java:        settings.setJavaScriptEnabled(true);
+work/jadx/sources/defpackage/vlk.java:            addJavascriptInterface(new ulk(this), "mcpAppBridge");

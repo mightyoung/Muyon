@@ -1,0 +1,50 @@
+Capturing memory snapshots
+Captured memory snapshots
+Couldn’t capture memory snapshots
+Capture memory snapshots
+Custom instructions must be %1$d character or fewer.
+Custom instructions must be %1$d characters or fewer.
+Your past chats and memory
+Memories
+Changes made after sharing won’t be shared. Custom instructions and memory won’t be shared.
+Sharing will update this link with your latest changes. Custom instructions and memory won’t be shared.
+%1$s updated assistant personality.
+Your personal ChatGPT memory is never used in group chats.
+ChatGPT can reference shared memory in your group chats. It will not be visible in your profile.
+Shared memory
+Your personal ChatGPT memory is never used in group chats.
+Other people will only be able to view this conversation. Your personal ChatGPT memory is always private.
+Memory
+Don’t use memory
+Memory may include sensitive info you provide. You can choose how memory is used in settings. Learn more
+Get more helpful replies with improved memory
+ChatGPT is now better at keeping memory up to date, so it can be more helpful, and you can repeat yourself less.
+Use memory
+Memory almost full
+Saved memory full
+ChatGPT can now reference your past chats, not just saved memories.
+You’re testing memory improvements
+Introducing new, improved memory
+Keep your access to advanced models, automated tasks in ChatGPT Work, and more memory for personalized help.
+This is a copy of a chat that was shared with you. It won’t be added to memory.
+This chat will now be included in your history. It will follow your memory and model training settings used for regular chats.
+This chat can reference memory, plugins, and custom instructions
+This chat can reference plugins and custom instructions
+This chat will ignore memory, plugins, and custom instructions
+This chat will ignore plugins and custom instructions
+Memory is disabled for this chat and it won’t appear in your history.
+This can’t be undone. Visit your settings to delete any memories saved during this chat.
+This can’t be undone. Visit your settings to delete any memories saved during this chat. This will also end the voice call.
+ChatGPT used its general knowledge to give a fast, in-depth answer. This doesn’t reference your past chats or memory.
+Retry with memory
+Custom instructions
+Custom Instructions
+Can use memory and custom instructions to shape responses.
+Memories are used to give you more relevant responses and may be used to train our models if you have model training enabled. Learn more
+ChatGPT can now give you better answers by leveraging memories when searching with search providers. You can turn this off at any time in settings. Learn more.
+With memory enabled, ChatGPT can use details and preferences from past conversations from your previous chats to give you more helpful answers when searching the web.
+Search, now with memory
+Memory off
+Review or clear specific memories, restart from scratch, or turn the feature on or off in settings.
+ChatGPT now has memory
+You can turn off improved memory in your settings.

@@ -1,0 +1,5 @@
+package: name='com.facebook.aura' versionCode='1061601403' versionName='11.0.0.8.164' platformBuildVersionName='17' platformBuildVersionCode='37' compileSdkVersion='37' compileSdkVersionCodename='17'
+sdkVersion:'29'
+targetSdkVersion:'36'
+application-label:'Muse'
+native-code: 'arm64-v8a'

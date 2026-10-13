@@ -1,0 +1,20 @@
+Enable a search integration to use research
+Research
+Chats using advanced research can’t be shared.
+Notifying you when Claude has finished researching
+Research complete
+Get notified when research completes
+Set up Claude for your classes, career, and research
+Research cancelled
+Research cancelling…
+Research interrupted
+Creating my research plan…
+Research plan created
+Keep researching
+Stop research
+This can’t be undone. You can ask Claude to research this topic again.
+Want to stop researching?
+Research timed out
+Research may take multiple minutes.
+Researching…
+Boom! Research report is ready

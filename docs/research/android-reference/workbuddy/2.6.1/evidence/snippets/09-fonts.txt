@@ -1,0 +1,12 @@
+        "family": "MaterialIcons",
+                "asset": "fonts/MaterialIcons-Regular.otf"
+        "family": "AlimamaShuHeiTi",
+                "asset": "assets/fonts/AlimamaShuHeiTi-Bold.ttf"
+        "family": "packages/flutter_math_fork/KaTeX_Main",
+                "asset": "packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Main-Regular.ttf"
+                "asset": "packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Main-Italic.ttf"
+                "asset": "packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Main-Bold.ttf"
+                "asset": "packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Main-BoldItalic.ttf"
+        "family": "packages/flutter_math_fork/KaTeX_Math",
+                "asset": "packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Math-Italic.ttf"
+                "asset": "packages/flutter_math_fork/lib/katex_fonts/fonts/KaTeX_Math-BoldItalic.ttf"

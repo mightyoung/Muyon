@@ -1,0 +1,3 @@
+10:    ReadOnly("read_only"),
+13:    CalendarWriteFailed("calendar_write_failed"),
+14:    OutcomeUnknown("outcome_unknown");

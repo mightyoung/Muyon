@@ -1,0 +1,2 @@
+work/jadx/sources/defpackage/zm4.java:                return "INSERT OR IGNORE INTO `executed_client_tools` (`account_id`,`conversation_id`,`tool_use_id`,`executed_at`) VALUES (?,?,?,?)";
+work/jadx/sources/defpackage/kv9.java:                    axs axsVarK1 = rwsVar.k1("INSERT OR IGNORE INTO `executed_client_tools` (`account_id`,`conversation_id`,`tool_use_id`,`executed_at`) VALUES (?,?,?,?)");

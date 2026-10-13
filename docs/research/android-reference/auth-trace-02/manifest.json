@@ -1,0 +1,34 @@
+{
+  "task": "AUTH-TRACE-02",
+  "date": "2026-10-13",
+  "static_only": true,
+  "samples": {
+    "claude": "claude/1.261009.20/manifest.json (jadx 162 errors; +apktool 2.7.0 smali full)",
+    "chatgpt": "chatgpt/1.2026.272/manifest.json (jadx stopped ~66%, 49421 files; +apktool smali full; valdi zstd strings)",
+    "muse": "muse/11.0.0.8.164/manifest.json (jadx 138 errors)"
+  },
+  "labels": [
+    "包内直接证据",
+    "官方说明",
+    "推断",
+    "未知"
+  ],
+  "official_docs_accessed_2026-10-13": [
+    "code.claude.com/docs/en/permission-modes",
+    "code.claude.com/docs/en/remote-control",
+    "help.openai.com/en/articles/20001495",
+    "help.openai.com/en/articles/20001280",
+    "help.openai.com/en/articles/20001423",
+    "help.openai.com/en/articles/11752874"
+  ],
+  "no_dynamic": true,
+  "files": [
+    "claude.md",
+    "chatgpt.md",
+    "muse.md",
+    "comparison.md",
+    "muyon.md",
+    "report.docx",
+    "evidence/*"
+  ]
+}

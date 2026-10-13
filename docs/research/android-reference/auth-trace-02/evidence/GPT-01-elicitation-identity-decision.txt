@@ -1,0 +1,23 @@
+--- /workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/obb0.java:25-32
+        } else {
+            this.d = str4;
+        }
+        this.e = o2aVar;
+        if ((i & 32) == 0) {
+            this.f = "mcpServer/elicitation/request";
+        } else {
+            this.f = str5;
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/mbb0.java:19:        pluginGeneratedSerialDescriptor.l("roomId", fals
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/mbb0.java:20:        pluginGeneratedSerialDescriptor.l("messageId", f
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/mbb0.java:21:        pluginGeneratedSerialDescriptor.l("threadId", fa
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/mbb0.java:22:        pluginGeneratedSerialDescriptor.l("turnId", true
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/mbb0.java:23:        pluginGeneratedSerialDescriptor.l("requestId", f
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/mbb0.java:24:        pluginGeneratedSerialDescriptor.l("method", true
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/jbb0.java:19:        pluginGeneratedSerialDescriptor.l("paramsDigest"
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/jbb0.java:20:        pluginGeneratedSerialDescriptor.l("decision", tr
+/workspace/android-ref/chatgpt/1.2026.272/work/jadx/sources/defpackage/jbb0.java:21:        pluginGeneratedSerialDescriptor.l("answered", tr
+16:        krh krhVar = new krh("Accept", 0);
+18:        krh krhVar2 = new krh("AcceptForSession", 1);
+20:        krh krhVar3 = new krh("AcceptAlways", 2);
+22:        krh krhVar4 = new krh("Decline", 3);
+24:        krh krhVar5 = new krh("Cancel", 4);

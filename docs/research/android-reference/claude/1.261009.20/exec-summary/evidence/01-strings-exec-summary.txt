@@ -1,0 +1,127 @@
+%1$d files changed
+%1$d findings
+%1$d lines added
+%1$d lines removed
+%1$d of %2$d step done
+%1$d of %2$d steps done
+%1$d steps
+%1$d tool call
+%1$d tool calls
+%1$d tool use
+%1$d tool uses
+%1$d unpushed commit and uncommitted edits, plus an unfinished git operation, stay on your computer.
+%1$d unpushed commit, plus an unfinished git operation, stays on your computer.
+%1$d unpushed commits and uncommitted edits, plus an unfinished git operation, stay on your computer.
+%1$d unpushed commits, plus an unfinished git operation, stay on your computer.
+%1$d waiting on you · %2$d finished
+%1$d working
+%1$d%% of context window used
+(edited)
+1. Describe the issue\n2. Steps to reproduce\n3. Expected vs. actual behavior
+A thread is waiting on you
+API access turns off and anything using the token stops working.
+An unfinished git operation stays on your computer.
+Boom! Research report is ready
+Chats using advanced research can’t be shared.
+Claude can’t use your repositories until GitHub setup is finished.
+Claude is working on it…
+Claude is working…
+Claude isn’t working on anything right now.
+Claude will stop working in your folder from this conversation. Claude can ask you again later.
+Claude’s step-by-step reasoning isn’t shown for this response
+Compacted conversation
+Compacted conversation · from %1$s token
+Compacted conversation · from %1$s tokens
+Compacted conversation · saved %1$s token
+Compacted conversation · saved %1$s tokens
+Context cleared
+Context window
+Conversation compaction failed.
+Couldn’t find this step in the session’s recent history. Open the session in Code to see it.
+Couldn’t load this step.
+Creating my research plan…
+Edited
+Edited %1$d file
+Edited %1$d files
+Edited %1$s
+Edited PR
+Edited ^1 files
+Edited ^1 notebooks
+Edited a file
+Edited a notebook
+Enable a search integration to use research
+Failed to approve tool call
+Failed to deny tool call
+Feel free to step away, Claude will notify you as soon as it responds.
+Files changed
+Finished %1$d
+Get notified when Claude finishes working on your code. You can change this later in settings.
+Get notified when research completes
+Keep researching
+Keep working from anywhere
+Keep working in the new project.
+Keep working on this session from your phone, the desktop app, or the web. Claude continues when you send your next message.
+Manage summary
+Mark step %1$d complete
+Memory summary
+Mentions, threads waiting on you and digests from your projects show up here.
+Nothing recent is waiting on you.
+Notifying you when Claude finished responding in the background
+Notifying you when Claude has finished researching
+Notifying you when Claude has finished working on your code
+One notification with what is waiting on you. Skipped when nothing is.
+Ran agent
+Ran agent: %1$s (+%2$d tool)
+Ran agent: %1$s (+%2$d tools)
+Read %1$s and propose next steps
+Research
+Research cancelled
+Research cancelling…
+Research complete
+Research interrupted
+Research may take multiple minutes.
+Research plan created
+Research timed out
+Researching…
+Set up Claude for your classes, career, and research
+Show steps
+Sorry, we didn’t catch that. Please make sure your microphone is working.
+Step %1$d
+Step %1$d completed
+Step %1$d of %2$d
+Step detail
+Step failed
+Step stopped
+Steps
+Steps Cadence
+Still working on it…
+Stop research
+Summary
+The current token stops working immediately; anything using it must switch to the new one.
+This can’t be undone. You can ask Claude to research this topic again.
+This chat’s project was upgraded. Keep working in the new project.
+This environment can’t be edited from your phone.
+This project was upgraded on %1$s. Keep working in the new project.
+This scheduled task has a custom schedule that can’t be edited here. Changing the frequency will replace it.
+This session’s project was upgraded. Keep working in the new project.
+This skill has settings that can only be edited on claude.ai.
+Thought for %1$s
+Tool calls (%1$d)
+Turn my notes into a finished document
+Turn on notifications so you don’t miss a message while Dispatch is working.
+Unarchive it to keep working in this project.
+Uncommitted edits and an unfinished git operation stay on your computer.
+Used a tool
+Verify it’s you to load this step. Open the session in Code to verify.
+Waiting on you (%1$d)
+Want to step away?
+Want to stop researching?
+What are you working on?
+When you’re finished on that page, tap Done.
+Working
+Working (%1$d)
+Working on it…
+Working…
+You asked Claude to remind you to step away around now.
+e.g. Every weekday morning, review new PRs and post a summary
+thought for %1$s

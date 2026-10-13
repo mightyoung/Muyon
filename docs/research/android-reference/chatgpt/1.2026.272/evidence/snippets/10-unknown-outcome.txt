@@ -1,0 +1,19 @@
+Couldn’t confirm delivery of your sign-in details.
+Couldn’t confirm whether your login was saved.
+Reconnected. Orbit received the update.
+Confirming the reconnect result…
+Reconnected. Orbit is continuing.
+Reconnected. The earlier task was not resumed.
+Reconnected. We couldn’t confirm whether Orbit continued.
+We couldn’t confirm the agent was acting safely and following your instructions. To continue working, start a new chat.
+Couldn’t confirm that %1$s is ready. Close this screen and check your inbox before creating another.
+Couldn’t confirm this request. Check its status and try again.
+App connected, but %1$s couldn’t confirm the update. You can send a message to continue.
+We couldn’t confirm %1$s was interpreting your instructions correctly. Review what was flagged and choose whether to proceed, or delete %1$s to start over. Learn more
+We couldn’t confirm %1$s was interpreting your instructions correctly. Review what was flagged and choose whether to proceed, or delete %1$s to start over.
+We couldn’t confirm %1$s was interpreting your instructions correctly. Review what was flagged and choose whether to proceed, or delete %1$s to start over. Learn more
+We couldn’t confirm %1$s was interpreting your instructions correctly. Review what was flagged and choose whether to proceed, or delete %1$s to start over.
+We couldn’t confirm that this password was deleted. Try again to check and finish deleting it.
+Couldn’t confirm deletion
+Couldn’t confirm your response. Try again to check the invitation before responding.
+Couldn’t confirm the change. Refresh access before trying again.

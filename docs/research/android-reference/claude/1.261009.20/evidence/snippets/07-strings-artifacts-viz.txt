@@ -1,0 +1,60 @@
+View artifact
+View artifacts
+%1$d artifact
+%1$d artifacts
+Create apps, prototypes, and interactive documents that use Claude inside the artifact
+Enable artifacts to use AI-powered artifacts
+AI-powered artifacts
+This artifact can’t be opened from the home screen right now.
+Report artifact
+Artifact Warning
+Artifact comment sent to Claude
+This artifact can add comments with your name attached and send them to Claude without asking you first.
+Show in artifact
+Failed to copy artifact
+No artifacts match
+Open artifact
+Search artifacts
+What will you build with artifacts?
+Choose artifacts to list
+Using the artifact’s usual icon
+Learn about artifacts
+My Artifact
+Anyone in your organization with the link can view this artifact and its files.
+Publishing will make this artifact accessible to anyone and potentially visible in search engine results. Your chat will remain private.
+This artifact is accessible to anyone and potentially visible in search engine results. Your chat remains private.
+Publish Artifact
+Artifacts are user-generated and may contain unverified or potentially unsafe content.
+Interactive artifact
+This artifact is already on your home screen.
+Couldn’t add this artifact to the home screen. Try again.
+Only your own artifacts can be added to the home screen.
+This artifact is no longer available, so it can’t be added to the home screen.
+Artifact Viewer
+Artifacts you’ve had with Claude will show up here.
+Enable artifacts to use this tool
+Artifacts aren’t available for your organization
+The Artifacts gallery isn’t available for your account.
+Artifact
+Artifact, %1$s
+Artifact · %1$s
+Couldn’t load this artifact.
+Couldn’t sign in to show this artifact.
+Artifacts
+Open artifacts
+Open pull requests and artifacts
+Artifacts (%1$d)
+Bar chart
+Line chart
+Scatter chart
+Failed to copy chart
+Chart debug info
+Failed to display chart
+Failed to share chart
+Chart
+Figma hasn’t approved this connector for Design, Slides or design system artifacts
+Allow Claude to generate interactive visualizations, charts, and diagrams directly in the conversation.
+Inline visualizations
+%1$s, artifact
+Artifact comment
+Display chart

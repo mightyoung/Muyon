@@ -1,0 +1,17 @@
+N: android=http://schemas.android.com/apk/res/android
+  E: accessibility-service (line=10)
+    A: android:description(0x01010020)=@0x7f13092e
+    A: android:accessibilityFeedbackType(0x01010382)=(type 0x11)0x10
+    A: android:notificationTimeout(0x01010383)=(type 0x10)0xc8
+    A: android:accessibilityFlags(0x01010384)=(type 0x11)0x50
+    A: android:canRetrieveWindowContent(0x01010385)=(type 0x12)0xffffffff
+    A: android:canTakeScreenshot(0x0101060f)=(type 0x12)0xffffffff
+    A: android:isAccessibilityTool(0x01010641)=(type 0x12)0x0
+Reading screen context
+Read screen context
+Couldn’t read screen context
+Read screen context
+Switch voice models\nto share screen?
+Let ChatGPT read screen text and controls when you use Share Screen.
+Share screenshot
+Share screen

@@ -1,0 +1,58 @@
+Failed after %1$d attempt. Send a new message to retry.
+Failed after %1$d attempts. Send a new message to retry.
+Desktop offline
+Reconnecting…
+Offline
+Version %1$s of %2$s
+Retry
+Claude picks up from your branch’s last push, so anything you haven’t pushed stays on your computer. The session on your computer ends, even if your computer reconnects later.
+Reconnecting to your computer…
+%1$s isn’t reachable right now. It may be asleep or offline. Wake it and it should reconnect on its own.
+Reconnect your computer
+Reconnect
+The Claude GitHub App for %1$s needs to be reconnected.
+The Claude GitHub App needs to be reconnected.
+Reconnect GitHub to re-authorize single sign-on
+Reconnect GitHub
+Reconnect GitHub?
+Couldn’t reconnect GitHub. Try again.
+Send a new message to retry.
+Couldn’t start the project — Claude doesn’t have GitHub access to this project’s repository. Install the Claude GitHub App, or reconnect GitHub in settings, then try again.
+Failed to send. Tap to retry.
+Edit and retry
+Remote control session is offline. Reconnect or run /remote-control to start a new session.
+Check that you have access to it on GitHub and that the Claude GitHub app is installed on it, or reconnect GitHub in settings.
+Can’t retry while reconnecting. The session is unchanged.
+Couldn’t load more sessions. Tap to retry
+Reconnect from %1$s
+Reconnect from your computer
+Couldn’t load more tasks. Tap to retry
+Couldn’t load the conversation. Retrying…
+Upload failed. Tap to retry.
+You’re offline. The rest of Claude’s reply will appear when you reconnect.
+Reconnecting… Claude is still responding in the background.
+You’re offline. Your message will send when you reconnect.
+Couldn’t load more. Tap to retry
+Retry message
+Claude’s response was interrupted.
+Tap to retry
+Reconnect Google Drive
+The download was interrupted. Try again.
+The Internet connection appears to be offline.
+You’re offline
+Research interrupted
+Regenerate
+Regenerate API token?
+Couldn’t load more runs. Tap to retry
+Couldn’t load more scheduled tasks. Tap to retry
+Paused until %1$s reconnects or you re-enable it.
+Paused until your computer reconnects or you re-enable it.
+Dictation stopped because the microphone was interrupted.
+Needs reconnect
+Reconnect %1$s
+Version %s
+You’re offline. Voice mode needs an internet connection.
+We’re having trouble verifying your sign-in. We’re retrying now.
+You’re reconnected now.
+You’re reconnected now. Sorry about the interruption.
+Reconnecting

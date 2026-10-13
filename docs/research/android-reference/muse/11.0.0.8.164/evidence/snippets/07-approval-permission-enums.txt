@@ -1,0 +1,15 @@
+# 枚举/字段（jadx，com.facebook.aura.gateway / agentpermission）——A：客户端合同；服务端执行方式不可见
+ApprovalRecordStatus: PENDING | APPROVED | DENIED | TIMED_OUT
+ApprovalRecordDecision: ALLOW_ONCE | ALLOW_SESSION | ALLOW_TODAY | ALLOW_ALWAYS | AUTO_ALLOW | DENY | DENY_ALWAYS | TIMED_OUT
+ApprovalOrigin: SERVER | LOCAL_HITL      ApprovalAttentionMode: FOREGROUND | BACKGROUND
+ApprovalSnapshotRecordJson: approval_id, status, decision, decision_options, scope, payload, display, is_exclusive, requested_at_ms, decided_at_ms, attention_mode
+ApprovalSnapshotJson: pending_approvals, recent_approvals, emitted_at_ms
+ApprovalDecisionJson: approval_id, decision, always_scope, reason      DecideApprovalsRequestJson: decisions[]
+专用审批载荷类: BrowserCheckoutApproval / FlightCheckoutApproval / ShopifyCheckoutApproval / StripeLinkCheckoutApproval / OutgoingMediaApproval / BrowserTaskConfirmationApproval / OpenDeviceApproval
+ActivePermissionLifetime: SESSION | TODAY | DURABLE
+ActivePermissionKind: CONNECTOR_OVERRIDE | NETWORK_RULE | TRANSIENT_CONNECTOR_GRANT | TRANSIENT_NETWORK_GRANT
+ActivePermissionScopeType: FEED | IDEA | SCHEDULE | SPACE
+ConnectorConsentSyncCategory: NO_SYNC | HISTORICAL_SYNC | PROACTIVE_PERSISTED | PROACTIVE_TRANSIENT
+LocalConnectorConsentType: CALENDAR | CALL_LOG | CONTACTS | HEALTH | LOCATION | MESSAGES | NOTIFICATIONS | PHONE | PHOTOS
+BrowserControlLease: taskId, takeoverId, controlOwner, controlExpiresAtMs
+SpaceShareDisclosure(json): contains_personal_information, contains_chat_history, ...
