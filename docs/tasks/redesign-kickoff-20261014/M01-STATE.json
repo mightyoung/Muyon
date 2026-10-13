@@ -43,9 +43,38 @@
     "status": "in_progress",
     "writer": "Leader B",
     "exit_missing": [
-      "first-slice explicit writer and non-author reviewer reservations",
-      "cross-thread legacy conflict candidates active/unconfirmed records",
-      "precise ADR/handover entry-switch write list"
+      "independent M01/A00 review terminal and first-slice residual ownership record",
+      "precise ADR/handover entry-switch integration list"
+    ],
+    "first_slice_reservations": [
+      {
+        "task": "M01 registration / current entry integration",
+        "writer": "Leader B",
+        "paths": [
+          "docs/tasks/REDESIGN-M01-20261014.md",
+          "docs/tasks/redesign-kickoff-20261014/"
+        ],
+        "status": "active; entry files await precise integration list"
+      },
+      {
+        "task": "M01/A00 independent review",
+        "owner": "/root/redesign_m01_review",
+        "source_sha": "421e7332807d0f8a2f7a6a36819601dcad442130",
+        "paths": [
+          "read-only repository; reports outside Git"
+        ],
+        "status": "running; no implementation writer"
+      },
+      {
+        "task": "M02 supplier-name contract draft",
+        "writer": "/root/redesign_m02_contract",
+        "source_sha": "421e7332807d0f8a2f7a6a36819601dcad442130",
+        "paths": [
+          "docs/contracts/redesign-v1.3.2/supplier-name-contract.md",
+          "docs/tasks/REDESIGN-M02-SUPPLIER-NAME-20261014.md"
+        ],
+        "status": "running draft; no M03 freeze or product implementation"
+      }
     ]
   },
   "a00": {
@@ -260,7 +289,25 @@
       "7df93d7228693c71767cd4ab88d46d11da7c6064",
       "cfd7f7b9e081a7cd49b0a66adf87df4994f8db71"
     ],
-    "recovery_does_not_prove_integration_or_review": true
+    "recovery_does_not_prove_integration_or_review": true,
+    "c6_remote_recovery": {
+      "method": "normal atomic fast-forward push; git ls-remote full SHA verified",
+      "task/tool-model-disclosure-20261012": "5436f68c2ba57ae2ea99d6cbc749a5bd92a3cdb0",
+      "task/model-disclosure-opaque-reference-20261012": "7df93d7228693c71767cd4ab88d46d11da7c6064",
+      "ci_runs": [
+        {
+          "sha": "5436f68c2ba57ae2ea99d6cbc749a5bd92a3cdb0",
+          "run": 38485490388,
+          "last_observed": "in_progress"
+        },
+        {
+          "sha": "7df93d7228693c71767cd4ab88d46d11da7c6064",
+          "run": 38485489896,
+          "last_observed": "in_progress"
+        }
+      ],
+      "included_in_redesign_integration": false
+    }
   },
   "handoff_zip": {
     "library_id": "libfile_064b8c79e34c8191959d7e87826e7e0f",
