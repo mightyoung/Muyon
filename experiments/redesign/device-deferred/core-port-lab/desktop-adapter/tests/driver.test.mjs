@@ -7,3 +7,6 @@ for(const name of ['baseline','lost-reply','stale-receipt'])test(`input-only ${n
 });
 test('driver rejects explicit plan plus reference rather than inventing expected plan',async()=>{await assert.rejects(runScenario({scenario_id:'bad',seed:'baseline',steps:[{request:{op:'hello',plan_id:'explicit'},plan_id_from:0}]}),/ambiguous/);});
 test('driver rejects future/non-plan causal reference',async()=>{await assert.rejects(runScenario({scenario_id:'bad',seed:'baseline',steps:[{request:{op:'hello'}},{request:{op:'commit'},plan_id_from:0}]}),/causal/);});
+test('input-only driver requires explicit seed and never silently selects baseline',async()=>{
+ await assert.rejects(runScenario({scenario_id:'missing-seed',steps:[{request:{op:'hello'}}]}),/seed/);
+});
