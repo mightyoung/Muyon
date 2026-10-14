@@ -1,5 +1,5 @@
 {
-  "status": "prepared for independent review; not merged",
+  "status": "exact existing-file scope statically independently reviewed C0; candidate CI pending",
   "base": "58fe9c62612d74a973614c41677e62a54332e6d6",
   "product_base": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
   "entry_writer": "Leader B",
@@ -21,5 +21,6 @@
   "other_21_legacy_migration_headers": "registered by fixed source; excluded from this two-file first entry patch until coordinated precise list",
   "new_adr_0006_0007": "not allocated",
   "old_product_branches_included": false,
-  "implementation_or_schema_freeze_claimed": false
+  "implementation_or_schema_freeze_claimed": false,
+  "entry_review": "independent-reviews/entry-review.md"
 }

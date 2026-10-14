@@ -40,11 +40,10 @@
     "authority": "user Sentinel_3b08b7b589a4819184fd7c9f3323bad5; formal development Sentinel_e6ce5e0c57808191920e687495a03d35"
   },
   "m01": {
-    "status": "in_progress",
+    "status": "first-slice documentation owners recorded and independently reviewed; integration CI pending",
     "writer": "Leader B",
     "exit_missing": [
-      "independent M01/A00 review terminal and first-slice residual ownership record",
-      "precise ADR/handover entry-switch integration list"
+      "exact candidate full CI terminal before unique develop integration"
     ],
     "first_slice_reservations": [
       {
@@ -74,6 +73,28 @@
           "docs/tasks/REDESIGN-M02-SUPPLIER-NAME-20261014.md"
         ],
         "status": "running draft; no M03 freeze or product implementation"
+      },
+      {
+        "task": "D01a authorization minimal draft",
+        "writer": "/root/redesign_d01a_contract",
+        "branch": "task/redesign-d01a-20261014",
+        "source_sha": "99c4d779bb5b94e3388637228f42869d6e81152d",
+        "paths": [
+          "docs/contracts/redesign-v1.3.2/authorization-minimal-contract.md",
+          "docs/tasks/REDESIGN-D01A-20261014.md"
+        ],
+        "status": "draft received; original and corrective delta non-author C0"
+      },
+      {
+        "task": "D03a recovery minimal draft",
+        "writer": "/root/redesign_d03a_contract",
+        "branch": "task/leader-b-redesign-d03a-20261014",
+        "source_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+        "paths": [
+          "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+          "docs/tasks/REDESIGN-D03A-20261014.md"
+        ],
+        "status": "draft received; non-author C0; all fixture not_run"
       }
     ]
   },
@@ -272,12 +293,13 @@
       "bytes": 27354,
       "sha256": "4d081426b26d49cb302a09b9431b177b6ef2349034b54fa91f5cbacb316f176a",
       "zip_and_internal_sums_verified": true
-    }
+    },
+    "applicability_clarification": "A00-APPLICABILITY-CLARIFICATION.md; normative fixed books override overbroad local-write reading of input catalog L51; original bytes preserved"
   },
   "implementation_frontier": {
-    "M02": "await M01/A00 exit; extract supplier-name semantics from fixed Dart source",
-    "D01a_D03a_SPIKE01": "after M02 prerequisites; no completed spike claimed",
-    "M03": "not frozen; requires actual SPIKE-01 evidence",
+    "M02": "2fd91b received, limited domain decisions recorded and non-author delta C0; fixture/oracle engineering not executed",
+    "D01a_D03a_SPIKE01": "D01a99c4d and D03a40f3 reviewed drafts, all fixtures not_run; SPIKE-01 real Android load not executed",
+    "M03": "not frozen; requires D01a/D03a actual fixture validation, M04/M05 Unicode oracle and SPIKE-01 evidence",
     "Rust_Android_Electron": "not dispatched beyond prerequisites"
   },
   "legacy_workspace": {
@@ -320,6 +342,62 @@
     "original_design_documents_changed": false,
     "original_worktrees_changed": false,
     "main_changed": false,
-    "develop_merged": false
+    "develop_merged": false,
+    "existing_entry_files_modified": [
+      "docs/adr/0001-leadership-and-scope-freeze.md append only",
+      "docs/tasks/HANDOVER-LEADER.md prefix only"
+    ],
+    "historical_entry_body_bytes_preserved": true
+  },
+  "independent_reviews": [
+    {
+      "label": "m01-review",
+      "path": "independent-reviews/m01-review.md",
+      "sha256": "2b83f7879d7d419d661cc5ef116cf280435a1f7542aac791aaeaa05588d7f1a1",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "m02-review",
+      "path": "independent-reviews/m02-review.md",
+      "sha256": "d5c9ecd8c16d84f4fd70c083fc744dc3c0bb87c4f104657dd2cf110e041fa185",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "m02-delta",
+      "path": "independent-reviews/m02-delta.md",
+      "sha256": "e11aadb51ee812280da7a6254f8912f6b7eb0d1eb49e8c830b53656c8f7ae71f",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "d01a-d03a-review",
+      "path": "independent-reviews/d01a-d03a-review.md",
+      "sha256": "3126ed9eb1b2109192a278be79a2bd62a96afd3e8d9f66c7c73271a5c01e0e1d",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "d01a-delta",
+      "path": "independent-reviews/d01a-delta.md",
+      "sha256": "55b899485f52bafdbfb182d97e4420db51832bb4faf36fdd486a6f7b170aa4e2",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "entry-review",
+      "path": "independent-reviews/entry-review.md",
+      "sha256": "24c2a7738d1efc502a0d32b558ca53c991ba51f29883c8f45f218791861fce3b",
+      "kind": "static non-author review; not runtime tests"
+    }
+  ],
+  "candidate_integration": {
+    "status": "prepared and statically independently reviewed; full CI pending",
+    "scope": "original design95 + M01/A00 intake + reviewed M02/D01a/D03a drafts + two entry append/prefix + narrow A00 input clarification; product code unchanged",
+    "exclude": [
+      "old C6/product branches",
+      "21 additional historical header migrations pending coordinated separate scope",
+      "ADR0006/0007 allocation",
+      "schema freeze",
+      "real data/model/device operations"
+    ],
+    "baseline_product": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+    "baseline_design": "58fe9c62612d74a973614c41677e62a54332e6d6"
   }
 }
