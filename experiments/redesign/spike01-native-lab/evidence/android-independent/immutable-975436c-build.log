@@ -42,7 +42,7 @@ test_actual_foreign_error_mapping (test_ffi.FfiProbe.test_actual_foreign_error_m
 test_actual_reentrant_callback_close_rejects (test_ffi.FfiProbe.test_actual_reentrant_callback_close_rejects) ... ok
 test_invalid_domain_inputs_same_typed_error_on_both_paths (test_ffi.FfiProbe.test_invalid_domain_inputs_same_typed_error_on_both_paths) ... ok
 test_missing_null_note_policy_is_explicit (test_ffi.FfiProbe.test_missing_null_note_policy_is_explicit) ... ok
-test_panic_is_caught_at_actual_uniffi_boundary (test_ffi.FfiProbe.test_panic_is_caught_at_actual_uniffi_boundary) ... 
+test_panic_is_caught_at_actual_uniffi_boundary (test_ffi.FfiProbe.test_panic_is_caught_at_actual_uniffi_boundary) ...
 thread '<unnamed>' (7760) panicked at src/lib.rs:173:28:
 SPIKE01_SYNTHETIC_PANIC
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
