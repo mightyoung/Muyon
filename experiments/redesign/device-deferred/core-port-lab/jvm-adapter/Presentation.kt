@@ -13,8 +13,9 @@ class Presentation(val domain:Domain,var epoch:String) {
     internal fun localStatus(value:String) {status=value}
     fun accept(reply:Reply,bound:BoundPlan?=null) {
         if(reply.domain!=domain) return
+        var effectBound=false
         reply.receipt?.let {receipt->
-            if(bound!=null && bound.domain==domain && receipt["kind"]=="synthetic"
+            if(reply.kind=="committed" && bound!=null && bound.domain==domain && receipt["kind"]=="synthetic"
                 &&receipt["intent"]==bound.business.intent && receipt["object_id"]==bound.business.objectId
                 &&receipt["expected_revision"]==bound.business.expectedRevision
                 &&receipt["parameters_digest"]==bound.plan["parameters_digest"]
@@ -23,6 +24,7 @@ class Presentation(val domain:Domain,var epoch:String) {
                 &&Domain.from(receipt["commit_cursor"].objectValue().filterKeys {it!="seq"})==domain) {
                 decimal(receipt["result_revision"])
                 ledger.putIfAbsent(bound.business.intent,receipt.toMap())
+                effectBound=true
             }
         }
         if(reply.epoch!=epoch || reply.admission!="current") return
@@ -33,6 +35,8 @@ class Presentation(val domain:Domain,var epoch:String) {
                 if(appliedSeq==null || seq>=appliedSeq!!) {snapshot=candidate.toMap();appliedSeq=seq}
             }
         }
-        if(bound==null || currentIntent==bound.business.intent) status=reply.kind
+        if(bound==null || currentIntent==bound.business.intent) {
+            status=if(reply.kind=="committed" && !effectBound) "unknown" else reply.kind
+        }
     }
 }
