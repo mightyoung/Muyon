@@ -1,0 +1,119 @@
+{
+  "status": "author_verified_non_author_pending",
+  "source_base": "5ac840bc5fbd798548260bed56fd440c9ce31bf0",
+  "closed_baseline": "2b455723346fff725ddbd5e6a7a2c84dd049af4b",
+  "rust": "1.99.0 (b940084d7 2026-09-28)",
+  "runtime": {
+    "runtime": {
+      "path": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+      "sha256": "14c4418a06c5c2e30f5fb57bc8add93762236ae17898c6708984cf15e680ca71",
+      "version": "3.46.1"
+    },
+    "status": "initialized",
+    "python_version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_sqlite_version": "3.53.1"
+  },
+  "counts": {
+    "rust_unit_methods": 2,
+    "process_methods": 24,
+    "sql_exit_stages": 6,
+    "sigkill_stages": 6,
+    "tail_trigger_subcases": 4,
+    "inverse_mutation_classes": 5
+  },
+  "source_sha256": {
+    "Cargo.toml": "ed83a58f38725385db215a26620316593b859229eb42f9dda3341fefcd09f8a5",
+    "Cargo.lock": "8785cea9c495eda952882e389a1e27b274e1ecf66ad89a053d9261b28c73e1ac",
+    "src/main.rs": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+    "src/sqlite.rs": "9054b8e4a36f6d250637eaadf9dff48367ebe522098ae7eb3b550ccfcc34d0a2",
+    "tests/process.py": "d9eda92a3dbfba3bc9a75c1bbd5b7d6496e783edb77e7f8898b39135d23b13a7",
+    "mutations.py": "687d745b7e64ead8e922f4d33f36c72a93ec89e6fc6493b0e534754304514f49",
+    "README.md": "b10ecbc0c8d1e04d1caeb539c7557b57f67d695dfc88ebe764f97f40d02e5caa",
+    ".gitignore": "02e7b40893c74a993a139de7b0f85d8cf2eaea57d544effd576920a514872af4"
+  },
+  "mutations": [
+    {
+      "name": "shared_transaction",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "Lists differ",
+      "intended_assertion_observed": true,
+      "source_before": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "source_restored": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "restoration_equal": true
+    },
+    {
+      "name": "cas_guard",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "unavailable: final consistency: invalid history effect",
+      "intended_assertion_observed": true,
+      "source_before": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "source_restored": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "restoration_equal": true
+    },
+    {
+      "name": "duplicate_guard",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "UNIQUE constraint failed: intents.intent",
+      "intended_assertion_observed": true,
+      "source_before": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "source_restored": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "restoration_equal": true
+    },
+    {
+      "name": "binding_comparison",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "'unknown' != 'conflict'",
+      "intended_assertion_observed": true,
+      "source_before": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "source_restored": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "restoration_equal": true
+    },
+    {
+      "name": "unknown_no_dispatch",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "'committed' != 'unknown'",
+      "intended_assertion_observed": true,
+      "source_before": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "source_restored": "f6abc8c0a74fa35ff1dbbbbd52ed8120734f826d165646af5ad214937aed4688",
+      "restoration_equal": true
+    }
+  ],
+  "evidence_root": "/tmp/rd-p07a-evidence-20261014",
+  "final_logs": {
+    "build": "final-build.log",
+    "unit": "final-unit-green.log",
+    "process": "final-process-green.log",
+    "physical_queries": "final-physical.jsonl",
+    "process_requests": "final-physical.jsonl.process.jsonl",
+    "mutation": "mutations-final-v2/mutation-results.json",
+    "restored_green": "mutations-final-v2/restored-green.log"
+  },
+  "red_logs": [
+    "first-red.log",
+    "fault-red.log",
+    "actual-effect-red.log",
+    "schema-red.log",
+    "tail-consistency-red.log"
+  ],
+  "setup_or_attempt_failures": [
+    "implementation-build.log",
+    "green-attempt-1.log",
+    "rustfmt-unavailable.log",
+    "mutations-final-driver.log"
+  ],
+  "limitations": [
+    "M03 blocked_contract",
+    "Android/Compose/Electron NOT_RUN",
+    "no full Unicode equivalence claim",
+    "no power-loss/production authority/retention/migration/backups/external-provider exactly-once claim",
+    "non-author C0 and exact candidate CI pending",
+    "historical old SQLite CI RED unchanged",
+    "CAS inverse fails required rejection via final verifier, not successful stale commit",
+    "duplicate inverse fails replay via PK, not second successful commit"
+  ]
+}
