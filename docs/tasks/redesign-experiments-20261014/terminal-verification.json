@@ -1,0 +1,46 @@
+{
+  "candidate_sha": "6a6664b1094c94c8db45f4ed274a170570c0cbb7",
+  "source_blob_checks": [
+    {
+      "source": "D01a",
+      "sha": "ad548c35552fba74946827bc9cb5068d9ccc128d",
+      "all_author_blobs_byte_equal": true,
+      "files": 16
+    },
+    {
+      "source": "D03a",
+      "sha": "eef7561289421c58e88896fa69c868403ca1d3c5",
+      "all_author_blobs_byte_equal": true,
+      "files": 10
+    }
+  ],
+  "CI_run": 38498073163,
+  "CI_status": "completed",
+  "CI_conclusion": "success",
+  "CI_counts": {
+    "pass": 4199,
+    "skip": 207,
+    "fail": 0
+  },
+  "CI_executes_new_experiments": false,
+  "root_verified_raw_log_digest_checkout_counts_and_snapshot": true,
+  "final_experiment_tests": {
+    "D01a": {
+      "tests": 33,
+      "exit": 0,
+      "log_sha256": "ba8be152ab2f067d9e996db019b61b79e3cf901195734ba0bad27b509e249f43"
+    },
+    "D03a": {
+      "tests": 24,
+      "exit": 0,
+      "log_sha256": "36d55853876ebb91f2f3cbd06db714c51ea9de87ebb28355dc2d868d0fa87995"
+    }
+  },
+  "develop": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "main": "cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003",
+  "no_develop_main_merge": true,
+  "M03": "blocked_contract",
+  "all_product_acceptance_cases": "not_run",
+  "new_tools_install_credentials_paid_resources": false,
+  "raw_logs_in_repository": false
+}

@@ -1,0 +1,100 @@
+{
+  "run": 38498073163,
+  "job": 115638313638,
+  "headSha": "6a6664b1094c94c8db45f4ed274a170570c0cbb7",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/mightyoung/Muyon/actions/runs/38498073163",
+  "startedAt": "2026-10-14T01:52:52Z",
+  "completedAt": "2026-10-14T02:10:19Z",
+  "checkoutFullShaPresent": true,
+  "checkout_lines": [
+    "2026-10-14T01:52:57.1141583Z 6a6664b1094c94c8db45f4ed274a170570c0cbb7"
+  ],
+  "analyze8": true,
+  "test8": true,
+  "doctor23": true,
+  "laya_step_success": true,
+  "coverage_snapshot_run_identity": true,
+  "coverage_suite_outcomes_exit0": true,
+  "coverage_summary_step_success": true,
+  "coverage_artifact_step_success": true,
+  "gate_success": true,
+  "ciSummaryOk": true,
+  "suite_results": [
+    {
+      "suite": "module_api",
+      "pass": 276,
+      "skip": 0,
+      "fail": 0,
+      "summary_line": "2026-10-14T01:55:16.6939338Z test     module_api: ok  +276: All tests passed!                                                                                                                                                                          "
+    },
+    {
+      "suite": "muyon_ui",
+      "pass": 392,
+      "skip": 152,
+      "fail": 0,
+      "summary_line": "2026-10-14T01:55:58.4201258Z test     muyon_ui: ok  +392 ~152: All other tests passed!                                                                                                                                                               "
+    },
+    {
+      "suite": "prototype",
+      "pass": 39,
+      "skip": 1,
+      "fail": 0,
+      "summary_line": "2026-10-14T01:56:10.9617079Z test     prototype: ok  +39 ~1: All other tests passed!                                                                                                                                                                  "
+    },
+    {
+      "suite": "research",
+      "pass": 365,
+      "skip": 0,
+      "fail": 0,
+      "summary_line": "2026-10-14T01:57:14.4680412Z test     research: ok  +365: All tests passed!                                                                                                                                                                          "
+    },
+    {
+      "suite": "supplier_core",
+      "pass": 498,
+      "skip": 4,
+      "fail": 0,
+      "summary_line": "2026-10-14T01:58:39.5502833Z test     supplier_core: ok  +498 ~4: All other tests passed!                                                                                                                                                                 "
+    },
+    {
+      "suite": "host",
+      "pass": 2312,
+      "skip": 3,
+      "fail": 0,
+      "summary_line": "2026-10-14T02:08:14.7526825Z test     host: ok  +2312 ~3: All other tests passed!                                                                                                                                                                "
+    },
+    {
+      "suite": "ui_preview",
+      "pass": 15,
+      "skip": 0,
+      "fail": 0,
+      "summary_line": "2026-10-14T02:08:27.5801107Z test     ui_preview: ok  +15: All tests passed!                                                                                                                                                                           "
+    },
+    {
+      "suite": "inquiry",
+      "pass": 302,
+      "skip": 47,
+      "fail": 0,
+      "summary_line": "2026-10-14T02:09:57.1779682Z test     inquiry: ok  +302 ~47: All other tests passed!                                                                                                                                                                "
+    }
+  ],
+  "pass": 4199,
+  "skip": 207,
+  "fail": 0,
+  "full_decoded_log_sha256": "b4f6668827c1b399970580d0ca7f9753d1e65788405467536a61abbae83e1720",
+  "proof_scope": "exact immutable candidate legacy regression CI only; new 57 Python experiment tests separate; M03 remains blocked_contract",
+  "coverageSummaryOk": true,
+  "laya_test_counts": [
+    8,
+    4,
+    8,
+    9
+  ],
+  "coverage_suite_outcomes_counts_match_full_log": true,
+  "decoded_log_provider": "GitHub MCP github_fetch_workflow_job_logs structuredContent.content",
+  "public_run_metadata_crosscheck": true,
+  "new_python_experiments_executed_by_this_ci": false,
+  "observer_dispatched_or_retried": false,
+  "observer_installed_or_modified_product_or_branch": false
+}
