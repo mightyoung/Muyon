@@ -47,3 +47,43 @@ Scope includes FullAllow without extra risk confirmation and trusted hard-deny;
 actual trust evaluation belongs to the future verified Rust port, not a UI boolean.
 
 No develop/main merge, force push, branch deletion or deployment by this writer.
+
+## Independent R1 correction (follow-up, original 23 tests retained)
+
+Non-author review at fixed `7ba6604313fe78fb69b4839947c726e9e8bbb407` withheld C0:
+registered Command did not retain expected revision; blank or unchanged result
+revision entered the receipt ledger and projected SAVED. The two original
+rejection assertions were added before the fix: actual JVM RED **23 passed /
+2 failed**, exit 1. Additional binding/invalid/recovery cases ran RED **26 passed /
+6 failed**, exit 1 after adding the command field but before enforcing the relation.
+
+Command now immutably stores `expectedRevision` from the draft in the existing
+in-memory submission register. Effects must match that entire registered command,
+original supplier and meaningful receipt reference before accounting. The temporary
+mock grammar is canonical `r<decimal unsigned 64-bit counter>` with no leading
+zeroes; an effect result must be the exact arithmetic successor (+1), and an
+expected max-u64 has no successor and cannot dispatch. No lexicographic version
+comparison or M03 wire/schema freeze is introduced. Opaque product revisions and
+actual adapter authority remain unresolved; this grammar belongs only to this lab.
+It is not on-disk persistence or durable restart recovery.
+
+Complete suite **32 passed / 0 failed**, exit 0. Retained all original 23 cases,
+including late authentic mock receipts and unknown navigation. New cases reject
+empty/unchanged/malformed/skipped/backwards result revisions, forged expected
+binding and invalid/overflow expected revisions; accept r9→r10; retain original
+expected revision when a snapshot changes; and allow unknown recovery only with
+correct original revision-bound receipt, with zero resubmission. False-like string
+`false` is rejected; Kotlin's typed seam does not accept a Boolean revision.
+
+Three independent temporary reverse mutants outside git compile successfully and
+fail assertions with Java exit 1: removing result relation (5 failures), removing
+exact command expected binding (1 failure), removing expected-successor guard
+(1 failure). Raw logs/source copies/binaries stay outside git under
+`/workspace/reports/device-deferred-rd-p04-20261014/fix/` and
+`/tmp/rd-p04-revision-mutants/`. The restored source suite is rerun before commit;
+non-author fixed-head follow-up and combined candidate checks belong to Leader B.
+
+Compose source requires no signature change because it consumes ScreenState and
+callbacks rather than Command. Compose compilation/rendering and Android actual
+load remain **NOT_RUN**. M03 remains **blocked_contract**. No dependencies,
+licenses, real models/data or device access added.
