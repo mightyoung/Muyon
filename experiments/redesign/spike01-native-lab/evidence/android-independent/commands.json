@@ -1,0 +1,79 @@
+[
+  {
+    "command": "git ls-remote --heads origin",
+    "exit": 0,
+    "scope": "develop and SPIKE fixed remote SHA verified"
+  },
+  {
+    "command": "CARGO_HOME=/workspace/spike01-tools/cargo RUSTUP_HOME=/workspace/spike01-tools/rustup sh downloads/rustup-init.sh -y --no-modify-path --profile minimal --default-toolchain 1.99.0",
+    "exit": 0
+  },
+  {
+    "command": "yes | sdkmanager --sdk_root=/workspace/spike01-tools/android --licenses",
+    "exit": 1,
+    "scope": "sdkmanager accepted 8 licenses; yes SIGPIPE; extra-license anomaly"
+  },
+  {
+    "command": "sdkmanager --sdk_root=/workspace/spike01-tools/android 'ndk;28.2.13676358' 'platform-tools' 'platforms;android-35' 'build-tools;35.0.0'",
+    "exit": 0
+  },
+  {
+    "command": "cargo build --locked --release --lib --manifest-path /workspace/spike01-tools/baseline-source/experiments/redesign/spike01-native-lab/Cargo.toml",
+    "exit": 0,
+    "scope": "baseline isolated target directory"
+  },
+  {
+    "command": "PYTHONPATH=/workspace/spike01-tools/baseline-generated timeout 5s python3 -B tests/probe_h1.py {close_session|unsubscribe} {success|reject|unexpected}",
+    "exit": 124,
+    "scope": "6 baseline cases"
+  },
+  {
+    "command": "SPIKE_TOOLS=/workspace/spike01-tools bash android-probe/build.sh",
+    "exit": 0,
+    "scope": "fixed source 975436c; exact individual commands in build.sh; log immutable-975436c-build.log"
+  },
+  {
+    "command": "cargo test --locked -- --test-threads=1",
+    "exit": 0,
+    "scope": "17 Rust tests, includes real Rust callback unwind"
+  },
+  {
+    "command": "PYTHONPATH=/workspace/spike01-tools/generated timeout 8s python3 -B tests/probe_h1.py {close_session|unsubscribe} {success|reject|unexpected|pause}",
+    "exit": 0,
+    "scope": "8 fixed cases; immutable build repeats all"
+  },
+  {
+    "command": "PYTHONPATH=/workspace/spike01-tools/generated python3 -B -m unittest discover -s tests -p test_ffi.py -v",
+    "exit": 0,
+    "scope": "10 actual Linux Python load tests"
+  },
+  {
+    "command": "java -Djna.library.path=/workspace/spike01-tools/target/release -cp probe.jar:jna-jvm.jar:coroutines.jar spike01.runner.Probe",
+    "exit": 0,
+    "scope": "Linux JVM actual load; full path argv in build.sh"
+  },
+  {
+    "command": "cargo build --locked --release --lib --target {aarch64-linux-android|x86_64-linux-android}",
+    "exit": 0,
+    "scope": "2 Android ELF builds, NDK API26 clang linkers in build.sh"
+  },
+  {
+    "command": "d8 --min-api 26 --lib android-35/android.jar --output dex probe.jar jna/classes.jar coroutines.jar",
+    "exit": 0,
+    "scope": "full paths in build.sh; Android execution NOT_RUN"
+  },
+  {
+    "command": "llvm-readelf -h -l -d -s {Rust|JNA Android ELF}",
+    "exit": 0,
+    "scope": "4 libraries; ELF LOAD p_align 0x4000"
+  },
+  {
+    "command": "adb devices -l",
+    "exit": 134,
+    "scope": "read-only home failure; actual device state UNKNOWN"
+  },
+  {
+    "command": "ANDROID_USER_HOME=/workspace/spike01-tools/android-user ANDROID_SDK_HOME=/workspace/spike01-tools adb devices -l",
+    "exit": 134
+  }
+]

@@ -1,0 +1,8 @@
+Initial workspace lookup: /workspace is not Git repository, exit128; repository found /workspace/Muyon.
+AGENTS.md lookup: no tracked or filesystem AGENTS.md in repository or workspace; cat exit1, rg no match.
+First H1 attempt ran before binding generation completed: ModuleNotFoundError exit1 both modes; logs h1-before-* preserved.
+SDK licenses pipeline: sdkmanager completed All SDK package licenses accepted; yes SIGPIPE made pipefail exit1. It inadvertently accepted seven extra license IDs; records quarantined, no related packages downloaded or used.
+adb devices -l: exit134 Cannot mkdir /home/agent/.android: Read-only file system. Retry with ANDROID_USER_HOME/ANDROID_SDK_HOME also exit134; version later also exit134. No new credential was created, no runner discovery succeeded, no permission escalation.
+Baseline archive first attempt: git archive from crate cwd had wrong relative pathspec; fatal pathspec, tar exit2; cargo exit101; subsequent six probes exit1 missing .so. Corrected git -C repository archive and rebuild succeeded; six genuine behavioral RED timeouts are recorded separately.
+Intermediate observer-borrow-only experiment: probes returned and historical suites passed, but counters dropped before foreign release; rejected on review and superseded by ObservedCall field-order RAII. No incomplete fix is committed.
+D8 compiled exit0 with invalid-local debug-information warnings for Kotlin coroutines; raw d8.log retained. No Android runtime result is inferred.

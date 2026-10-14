@@ -1,0 +1,31 @@
+   Compiling spike01_bridge_lab v0.0.0 (/workspace/Muyon-spike01-android/experiments/redesign/spike01-native-lab)
+    Finished `test` profile [unoptimized] target(s) in 1.33s
+     Running unittests src/lib.rs (/workspace/spike01-tools/target/debug/deps/spike01_bridge_lab-7d0a89fd303ad08b)
+
+running 17 tests
+test tests::callback_reentrant_close_rejects_instead_of_self_deadlock ... ok
+test tests::close_waits_for_actual_inflight_callback ... ok
+test tests::explicit_close_rejects_calls_and_native_drop_balances_count ... ok
+test tests::foreign_callback_error_becomes_typed_lab_error ... ok
+test tests::invalid_surrogate_is_typed_error ... ok
+test tests::json_fraction_and_overflow_revision_are_rejected ... ok
+test tests::json_missing_and_null_note_follow_explicit_lab_policy ... ok
+test tests::json_unknown_enum_is_rejected ... ok
+test tests::json_unknown_security_field_is_rejected ... ok
+test tests::nfc_codepoints_not_utf16_units_control_final_limit ... ok
+test tests::observer_release_keeps_reentry_marker_on_real_rust_unwind ... ok
+test tests::observer_runs_then_unsubscribe_releases_and_stops_callbacks ... ok
+test tests::panic_probe_really_panics_inside_rust ... ok
+test tests::protocol_and_purpose_are_not_ignored ... ok
+test tests::raw_utf16_limit_precedes_normalization ... ok
+test tests::same_source_json_and_typed_produce_same_semantics_and_digest ... ok
+test tests::xml_validation_precedes_trim ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests spike01_bridge_lab
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

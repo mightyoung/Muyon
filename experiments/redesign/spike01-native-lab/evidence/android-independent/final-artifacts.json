@@ -1,0 +1,80 @@
+[
+  {
+    "abi": "arm64-v8a",
+    "component": "rust",
+    "bytes": 996808,
+    "sha256": "16144a0f335d89cac29dc0da0da96aeea486b6d2df0adc9d9237c8f14dcbd677",
+    "readelf_exit": 0,
+    "load_segments": [
+      "LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x046104 0x046104 R   0x4000",
+      "LOAD           0x046104 0x000000000004a104 0x000000000004a104 0x05b83c 0x05b83c R E 0x4000",
+      "LOAD           0x0a1940 0x00000000000a9940 0x00000000000a9940 0x0033d8 0x0036c0 RW  0x4000",
+      "LOAD           0x0a4d18 0x00000000000b0d18 0x00000000000b0d18 0x000a38 0x001320 RW  0x4000"
+    ]
+  },
+  {
+    "abi": "arm64-v8a",
+    "component": "jna",
+    "bytes": 176520,
+    "sha256": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06",
+    "readelf_exit": 0,
+    "load_segments": [
+      "LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x025338 0x025338 R E 0x4000",
+      "LOAD           0x027b98 0x000000000002bb98 0x000000000002bb98 0x0006ac 0x000ee8 RW  0x4000"
+    ]
+  },
+  {
+    "abi": "x86_64",
+    "component": "rust",
+    "bytes": 951920,
+    "sha256": "66c91c2b78d3108afae42a974bf91a9daf1d76cbe388f5ceda220922f339c757",
+    "readelf_exit": 0,
+    "load_segments": [
+      "LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x0469b0 0x0469b0 R   0x4000",
+      "LOAD           0x0469b0 0x000000000004a9b0 0x000000000004a9b0 0x063d40 0x063d40 R E 0x4000",
+      "LOAD           0x0aa6f0 0x00000000000b26f0 0x00000000000b26f0 0x003e20 0x004910 RW  0x4000",
+      "LOAD           0x0ae510 0x00000000000ba510 0x00000000000ba510 0x000a50 0x001340 RW  0x4000"
+    ]
+  },
+  {
+    "abi": "x86_64",
+    "component": "jna",
+    "bytes": 126912,
+    "sha256": "3809247e9b804a05ed8377b87d545cf5b5e97f960f75e725bc8497b40260e417",
+    "readelf_exit": 0,
+    "load_segments": [
+      "LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x01943c 0x01943c R E 0x4000",
+      "LOAD           0x01bb00 0x000000000001fb00 0x000000000001fb00 0x000674 0x000f48 RW  0x4000"
+    ]
+  },
+  {
+    "component": "linux_fixed",
+    "bytes": 920096,
+    "sha256": "ece24c716a8f87e985dee0a7a2b996d204784e8150361577276127f1810593f3"
+  },
+  {
+    "component": "linux_baseline",
+    "bytes": 919360,
+    "sha256": "56f5056f5a2dc31b337887475eb0d39c1e0a60f0ddcb63fcef7985bdc3a88edb"
+  },
+  {
+    "component": "python_binding",
+    "bytes": 57215,
+    "sha256": "5ee60b21505a9cb44097feb39073680e300aad2e49ea121ade9459cfbd828791"
+  },
+  {
+    "component": "kotlin_binding",
+    "bytes": 90054,
+    "sha256": "1cba2f4a0e1d40fba5635925d06eb3e4853c709fd3c1bb1e5185e91ac7753539"
+  },
+  {
+    "component": "probe",
+    "bytes": 2656,
+    "sha256": "cb82c67b5d0ce336b1f4de972d3f443601aa84ffd5cf6d10f7942ff6b1e9afd4"
+  },
+  {
+    "component": "dex",
+    "bytes": 2254268,
+    "sha256": "faaa935f252944228c2496ac7ef7384f74587c6fbece294649e77f547622fc11"
+  }
+]

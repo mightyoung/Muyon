@@ -1,0 +1,11 @@
+# Independent Android bridge probe
+
+Built against fixed experimental source `975436c26fd16459167c09d06d2f4b203d39c191`. Android runtime execution is **NOT_RUN**; this is a DEX/app_process runner package, not an APK, installed product, or Android acceptance result.
+
+`SPIKE_TOOLS=/workspace/spike01-tools bash android-probe/build.sh` regenerates bindings, runs Rust/Python/JVM checks, cross-links both Android libraries and packages DEX. Existing installed official tools are required; the script does not install tools or accept licenses. Required versions and paths are in `../evidence/android-independent/status.json` and the script. All calls are synthetic and local.
+
+The built package is `/workspace/spike01-tools/android-runner-package/`; the portable archive is `/workspace/spike01-android-deliverables.tar.gz`, SHA256 `2e890c956635b787092746b28127d75c48f44baf6e108def4fbef8ef19318300`. Extract and verify `spike01-deliverables/SHA256SUMS`. It includes both Android ABIs, JNA dispatch libraries, DEX, baseline/fixed Linux libraries, generated bindings and all raw failure/test/install logs. Binaries, tools, downloads, caches and complete raw logs remain outside Git.
+
+Only once a runner is explicitly supplied and authorized: set `ADB` and `ANDROID_SERIAL`, then invoke the package's `run-on-android.sh`, saving stdout/stderr and exit code. It checks local hashes, verifies supported ABI, copies synthetic test assets into `/data/local/tmp/muyon-spike01-independent`, records fingerprint/API/page size/on-device hashes and invokes Android `app_process` with JNA library paths. Do not configure credentials, start a paid runner or alter security settings. Actual execution may reveal ART/JNA/classloader issues that cross-compilation and D8 cannot reveal. A PASS must come from Android VM output with matching native hashes; Linux PASS is insufficient.
+
+The combined library exports both candidates, so its size does not measure the standalone package-size difference between JSON-only and typed-only implementations. Timing is an exploratory Linux JVM observation without warmup, SLA or Android selection. Android 4KB/16KB runtime behavior, lifecycle and kill/restart recovery remain unverified.

@@ -1,0 +1,19 @@
+test_actual_close_waits_for_inflight_foreign_callback (test_ffi.FfiProbe.test_actual_close_waits_for_inflight_foreign_callback) ... ok
+test_actual_foreign_callback_unsubscribe_and_gc_release (test_ffi.FfiProbe.test_actual_foreign_callback_unsubscribe_and_gc_release) ... ok
+test_actual_foreign_error_mapping (test_ffi.FfiProbe.test_actual_foreign_error_mapping) ... ok
+test_actual_reentrant_callback_close_rejects (test_ffi.FfiProbe.test_actual_reentrant_callback_close_rejects) ... ok
+test_invalid_domain_inputs_same_typed_error_on_both_paths (test_ffi.FfiProbe.test_invalid_domain_inputs_same_typed_error_on_both_paths) ... ok
+test_missing_null_note_policy_is_explicit (test_ffi.FfiProbe.test_missing_null_note_policy_is_explicit) ... ok
+test_panic_is_caught_at_actual_uniffi_boundary (test_ffi.FfiProbe.test_panic_is_caught_at_actual_uniffi_boundary) ... 
+thread '<unnamed>' (5692) panicked at src/lib.rs:173:28:
+SPIKE01_SYNTHETIC_PANIC
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+ok
+test_protocol_and_purpose_typed_errors (test_ffi.FfiProbe.test_protocol_and_purpose_typed_errors) ... ok
+test_unknown_json_field_enum_and_numeric_shapes_reject (test_ffi.FfiProbe.test_unknown_json_field_enum_and_numeric_shapes_reject) ... ok
+test_valid_pair_semantics_canonical_bytes_and_digest (test_ffi.FfiProbe.test_valid_pair_semantics_canonical_bytes_and_digest) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.038s
+
+OK
