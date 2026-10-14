@@ -4,7 +4,9 @@
   "binary": {
     "path": "/tmp/rd-p05-core-target/debug/rd-p05-core",
     "sha256": "eb697e57d445f2b437bd16877177be56a6c5d6b8c9dc5ee9f2f205597e8efa40",
-    "source_owner": "device_deferred_rust_domain, fixed source commit assigned separately by integrator"
+    "source_owner": "device_deferred_rust_domain, fixed source commit assigned separately by integrator",
+    "core_source_head": "37848f123d2a51f7fb0c7af2b28837bd6ba66a5f",
+    "core_main_rs_sha256": "d56307a404aa93978505dde8e75ee66d8769973f2356d6d8b74ca37a32341081"
   },
   "tests": {
     "codec_red": {

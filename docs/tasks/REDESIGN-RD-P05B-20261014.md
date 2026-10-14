@@ -21,3 +21,5 @@ Complete raw goes through numeric UTF16 unchanged. Client binds actual plan and 
 ## Intake and remaining gates
 
 Source is for immutable non-author review and parent two-client actual comparison/combined CI; author does not merge develop/main. Electron/DOM runtime **NOT_RUN** (no browser retries required), Android actual load/Compose **NOT_RUN**, M03 **blocked_contract**. Actual Node↔Rust synthetic execution does not freeze product schema/transport/Unicode wire, authorize real writes or prove dual-device usability. Production authority, durable store/transaction/recovery, native/renderer IPC, full desktop UI and device/release acceptance remain required. No install/extra terms/account/model/real data/device/paid/deploy actions.
+
+Core provenance received and independently Git-blob hashed after own source commit: fixed/remote `37848f123d2a51f7fb0c7af2b28837bd6ba66a5f`, main.rsSHA256 `d56307a404aa93978505dde8e75ee66d8769973f2356d6d8b74ca37a32341081`, ready binary matches the tested `eb697e57...` artifact. This evidence update changes no adapter/runtime source.
