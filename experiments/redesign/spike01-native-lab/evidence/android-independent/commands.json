@@ -75,5 +75,21 @@
   {
     "command": "ANDROID_USER_HOME=/workspace/spike01-tools/android-user ANDROID_SDK_HOME=/workspace/spike01-tools adb devices -l",
     "exit": 134
+  },
+  {
+    "command": "SPIKE_TOOLS=/workspace/spike01-tools bash experiments/redesign/spike01-native-lab/android-probe/build.sh",
+    "exit": 0,
+    "source_sha": "bdbe0ed34fa48f9170436d3c3e44d870118ee381",
+    "scope": "18 Rust; 10 actual Linux Python; 8 H1; JVM21; 2 Android links; D8; log final-review-build.log"
+  },
+  {
+    "command": "SPIKE_TOOLS=/workspace/spike01-tools SPIKE_EVIDENCE=/workspace/spike01-evidence/mutation-recheck python3 -B tests/check_early_counter_mutation.py",
+    "exit": 0,
+    "scope": "expected two subprocess assertion failures exit1; native wait False, premature return True"
+  },
+  {
+    "command": "Library replace_library_file expected_current_version=0",
+    "scope": "same Library identity updated to version1; receipt library-upload-receipt.json",
+    "status": "succeeded"
   }
 ]

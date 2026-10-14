@@ -1,3 +1,5 @@
+Latest follow-up: [FOLLOWUP.md](FOLLOWUP.md). The report below records the earlier 975436c snapshot; use the follow-up and review-artifacts.json for current source and hashes.
+
 # SPIKE-01 independent Android verification, 2026-10-14
 
 Useful outcome: H1 reproduced and a RAII fix proposed; Rust 17 tests, Python 10 actual Linux-load tests, eight foreign-release probes and Linux JVM probe passed. Android arm64/x86_64 release ELF and a portable DEX/JNA test package built. **Android actual load NOT_RUN. M03 stays blocked_contract.** Independent review of the fix is pending; Leader B remains the sole develop integrator. No main/develop changes, merge, force-push, branch deletion or deployment occurred.

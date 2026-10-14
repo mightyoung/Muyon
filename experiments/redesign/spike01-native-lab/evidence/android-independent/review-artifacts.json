@@ -1,0 +1,51 @@
+[
+  {
+    "component": "linux_library",
+    "bytes": 922584,
+    "sha256": "72e86da92d8c5a400b433720a9ce0bbd55a3e06e02ffcac3999aa6ad46e4e898"
+  },
+  {
+    "component": "arm64_library",
+    "bytes": 999552,
+    "sha256": "9cfbe1970b056cecc8d44c155fb18203d3bddf84bdf7dc2851d691f5d98c85f0",
+    "readelf_exit": 0,
+    "load_segments": [
+      "LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x0463cc 0x0463cc R   0x4000",
+      "LOAD           0x0463cc 0x000000000004a3cc 0x000000000004a3cc 0x05bcb4 0x05bcb4 R E 0x4000",
+      "LOAD           0x0a2080 0x00000000000aa080 0x00000000000aa080 0x0033d8 0x003f80 RW  0x4000",
+      "LOAD           0x0a5458 0x00000000000b1458 0x00000000000b1458 0x000a38 0x001320 RW  0x4000"
+    ]
+  },
+  {
+    "component": "x86_64_library",
+    "bytes": 954440,
+    "sha256": "0a86a9f64658175ee297c189da499ea94e8ca1ad699cfcb8ea8ae0d7d261580f",
+    "readelf_exit": 0,
+    "load_segments": [
+      "LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x046c90 0x046c90 R   0x4000",
+      "LOAD           0x046c90 0x000000000004ac90 0x000000000004ac90 0x064180 0x064180 R E 0x4000",
+      "LOAD           0x0aae10 0x00000000000b2e10 0x00000000000b2e10 0x003e28 0x0041f0 RW  0x4000",
+      "LOAD           0x0aec38 0x00000000000bac38 0x00000000000bac38 0x000a50 0x001348 RW  0x4000"
+    ]
+  },
+  {
+    "component": "python_binding",
+    "bytes": 58484,
+    "sha256": "93ff7a214d7d44361a7df30423bab7abec06059aea2fba1de0b0d318f57aef67"
+  },
+  {
+    "component": "kotlin_binding",
+    "bytes": 90871,
+    "sha256": "73aaab481f838800062f9bb2625306e0baa28499d04a37313a8afc11106926a2"
+  },
+  {
+    "component": "probe",
+    "bytes": 3197,
+    "sha256": "b8a4138546d3d168469c760e13f04d6bbb0658aa646a02dbd0689aedfe6d1396"
+  },
+  {
+    "component": "mutation_checker",
+    "bytes": 2699,
+    "sha256": "944a21ae0787af6c0d0c3dda07d1475a07ea9d7f7eff4108801a47661085bcaf"
+  }
+]

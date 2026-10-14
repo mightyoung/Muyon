@@ -1,3 +1,5 @@
+Latest source and package provenance: [FOLLOWUP.md](../evidence/android-independent/FOLLOWUP.md). The original archive hash below describes Library version0 and does not include the later review tests.
+
 # Independent Android bridge probe
 
 Built against fixed experimental source `975436c26fd16459167c09d06d2f4b203d39c191`. Android runtime execution is **NOT_RUN**; this is a DEX/app_process runner package, not an APK, installed product, or Android acceptance result.

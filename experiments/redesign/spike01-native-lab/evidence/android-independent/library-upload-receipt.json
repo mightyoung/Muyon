@@ -1,0 +1,21 @@
+{
+  "operation": "replace_library_file",
+  "status": "succeeded",
+  "path": "/spike01-android-deliverables.tar.gz",
+  "file_id": "file_000000003f8081f593b289b01735eafc",
+  "library_file_id": "libfile_28bb6549873881918bf840cf18e9eef3",
+  "file_name": "spike01-android-deliverables.tar.gz",
+  "current_version_number": 1,
+  "restored_from_version_number": null,
+  "xattrs": [
+    {
+      "name": "user.library-file-version",
+      "value": "1"
+    }
+  ],
+  "directory_id": "libdir_00811fafe7748191b94e5f776febb3d7",
+  "mime_type": "application/x-tar",
+  "library_artifact_type": "other",
+  "file_size_bytes": 5411532,
+  "external_connectors_accessed": false
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "command": [
+      "cargo",
+      "build",
+      "--offline",
+      "--locked",
+      "--release",
+      "--lib",
+      "--manifest-path",
+      "/workspace/spike01-tools/mutation-source/Cargo.toml"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "timeout",
+      "8s",
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-B",
+      "/workspace/Muyon-spike01-android/experiments/redesign/spike01-native-lab/tests/probe_h1.py",
+      "close_session",
+      "pause"
+    ],
+    "exit": 1,
+    "expected": "detected missing native wait / premature return"
+  },
+  {
+    "command": [
+      "timeout",
+      "8s",
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-B",
+      "/workspace/Muyon-spike01-android/experiments/redesign/spike01-native-lab/tests/probe_h1.py",
+      "unsubscribe",
+      "pause"
+    ],
+    "exit": 1,
+    "expected": "detected missing native wait / premature return"
+  },
+  {
+    "component": "mutant_source",
+    "sha256": "1148c1d927858e09ba8a6af0bc097ba269134fd03e66a9f39513c06204eac914"
+  },
+  {
+    "component": "mutant_library",
+    "sha256": "d50ba14f90c0339abacce2febcf4eab0e3f97285a488f7e61b3b4cdb17541732"
+  },
+  {
+    "component": "binding",
+    "sha256": "93ff7a214d7d44361a7df30423bab7abec06059aea2fba1de0b0d318f57aef67"
+  },
+  {
+    "component": "probe",
+    "sha256": "b8a4138546d3d168469c760e13f04d6bbb0658aa646a02dbd0689aedfe6d1396"
+  }
+]
