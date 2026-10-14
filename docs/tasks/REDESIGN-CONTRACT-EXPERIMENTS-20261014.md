@@ -52,3 +52,18 @@ DUT读取oracle或caseID结果表、expected值变actual、原not_run改PASS、�
 M03仍blocked_contract：Android Rust真实加载/回调/释放/错误、双传输语义/摘要比较、Unicode实现等价及唯一schema未齐。
 终态报告必须包括作者/组合完整SHA、实际命令与exit、RED/GREEN/变异计数、独立审查、精确CI和剩余门槛。
 原始日志留仓库外；本批报告不再更新或复跑旧OC专项。
+
+## 固定交付与组合轻量终态
+
+D01a `ad548c35552fba74946827bc9cb5068d9ccc128d`、D03a `eef7561289421c58e88896fa69c868403ca1d3c5`
+分别取得非作者C0，仅接受实验范围。审查原文与safe proof在本任务配套目录，未导入原始日志。
+B新组合工作区独立执行D01a 33 tests、D03a 24 tests均exit0；两路各3语义逆变异子进程均exit1，
+恢复后源码/工作区干净。D01a矩阵61partial_experimental/16not_run/0局部差异；expected-only负控exit1且77actual不变。
+D03a矩阵63partial/9not_run/0完整场景PASS，274matched/0mismatch；非作者72行oracle/IDs/golden扰动不改变actual。
+两路包含真实AssertionError RED，额外SQLite故障测试不算原72场景。I03只在实验表示落实，不冻结产品DTO。
+
+精确命令、exit、计数、源码范围及日志hash见[组合轻量proof](redesign-experiments-20261014/combination-preci-proof.json)。
+相对1dc产品/CI/依赖/原合同/设计/v1输入diff为空，v2三项SHA校验exit0。原29/77、19/72、52主历史全部保留。
+独立组合候选将正常推送触发既有CI；此登记时CI仍pending，不冒称终态。既有CI不包含新Python实验，
+其Flutter/Doctor/Laya门禁只作为该候选整体回归证据，新接缝由以上实际轻量命令及非作者复验支持。
+本批不执行develop/main合入，不改作者分支。SPIKE01仍只读盘点，缺Android/Rust工具链与真实native load，M03 blocked。
