@@ -1,0 +1,85 @@
+{
+  "scope": "actual Rust synthetic process plus Node/controller, not Electron/DOM runtime",
+  "shared_contract_head": "b62980bbc91bbc78c0b765118d2221ffd536f45e",
+  "binary": {
+    "path": "/tmp/rd-p05-core-target/debug/rd-p05-core",
+    "sha256": "eb697e57d445f2b437bd16877177be56a6c5d6b8c9dc5ee9f2f205597e8efa40",
+    "source_owner": "device_deferred_rust_domain, fixed source commit assigned separately by integrator"
+  },
+  "tests": {
+    "codec_red": {
+      "passed": 1,
+      "failed": 6,
+      "exit": 1
+    },
+    "codec_green": {
+      "passed": 7,
+      "failed": 0,
+      "exit": 0
+    },
+    "controller_red": {
+      "passed": 16,
+      "failed": 1,
+      "exit": 1
+    },
+    "value_binding_red": {
+      "passed": 24,
+      "failed": 1,
+      "exit": 1
+    },
+    "final": {
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    }
+  },
+  "mutants": [
+    {
+      "mutation": "raw-preprocessed",
+      "exit": 1,
+      "assertion_killed": true,
+      "finally_bytes_restored": true
+    },
+    {
+      "mutation": "unknown-unlocked-by-read",
+      "exit": 1,
+      "assertion_killed": true,
+      "finally_bytes_restored": true
+    },
+    {
+      "mutation": "metadata-correlation-skipped",
+      "exit": 1,
+      "assertion_killed": true,
+      "finally_bytes_restored": true
+    },
+    {
+      "mutation": "receipt-ledger-dropped",
+      "exit": 1,
+      "assertion_killed": true,
+      "finally_bytes_restored": true
+    }
+  ],
+  "actual_driver": [
+    {
+      "scenario": "baseline",
+      "reply_count": 13,
+      "output_sha256": "769ad4549519fcd6458ec3a5ea38f464db154b9f9dfc91abdbe541287d307c85"
+    },
+    {
+      "scenario": "lost-reply",
+      "reply_count": 8,
+      "output_sha256": "b2d7645776be60f37ffb058d8890dd925b875d83271895c4775231a19200a64d"
+    },
+    {
+      "scenario": "stale-receipt",
+      "reply_count": 8,
+      "output_sha256": "81b19b62dc3d25f9d8f8ddfbf26136f8dcd52c2942ae7e4bb0070add2007ce1c"
+    }
+  ],
+  "raw_logs": "/workspace/reports/rd-p05b-desktop-20261014",
+  "Electron_DOM_runtime": "NOT_RUN",
+  "Android_actual_load": "NOT_RUN",
+  "M03": "blocked_contract",
+  "new_dependencies_licenses_models_devices": false
+}
