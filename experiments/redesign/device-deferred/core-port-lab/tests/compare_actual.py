@@ -30,7 +30,7 @@ def rust_observe(binary, lab, fixture):
             process.stdin.write(json.dumps(request) + '\n')
             process.stdin.flush()
             frame = process.stdout.readline(32770)
-            assert frame.endswith('\n') and len(frame.encode('utf-8')) <= 32768
+            assert frame.endswith('\n') and len(frame[:-1].encode('utf-8')) <= 32768
             reply = json.loads(frame)
             assert reply['protocol'] == 0 and reply['request_id'] == request['request_id']
             replies.append(reply)
