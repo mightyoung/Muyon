@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>供应商名称 · RD-P08 合成实验</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.mjs"></script>
+</head>
+<body data-view="list" data-busy="false">
+<a class="skip" href="#D01.1-DETAIL">跳到供应商详情</a>
+<header class="page-header">
+  <div><p class="eyebrow">MUYON / D01.1</p><h1>供应商目录</h1><p>名称读取与修改 · 私有合成数据</p></div>
+  <button id="refresh" type="button">刷新当前读取</button>
+</header>
+<aside class="experiment" aria-label="实验能力边界">
+  <strong>RD-P08 本机合成实验</strong>
+  <p id="capability">正式授权未接线 · M03 blocked_contract</p>
+  <p>Rust 预览只做校验。实验关联引用不是授权令牌；此页不提供正式授权模式。</p>
+</aside>
+<p id="transport-status" class="transport" role="status" aria-live="polite"></p>
+<main class="workspace">
+  <aside id="directory-search" class="panel search-panel" aria-labelledby="search-heading">
+    <p class="eyebrow">目录 / SYNTHETIC</p><h2 id="search-heading">查找供应商</h2>
+    <label for="supplier-search">名称或稳定 ID</label>
+    <input id="supplier-search" type="search" autocomplete="off" placeholder="搜索 S1、S2 或名称">
+    <p class="muted">同名不改变身份。选择与编辑均绑定稳定 supplier ID。</p>
+    <section aria-labelledby="recovery-heading"><h3 id="recovery-heading">恢复原草稿</h3><p class="muted">丢失标签页引用时，明确选择原会话。恢复只读取，不重做保存。</p><div id="recoverable-sessions"></div></section>
+  </aside>
+  <section id="D01.1-LIST" class="panel list-panel" aria-labelledby="list-heading">
+    <div class="section-heading"><h2 id="list-heading">合成供应商</h2><span id="list-count" class="tag"></span></div>
+    <p id="list-status" class="muted">等待本机读取</p><p class="muted small">S1 / S2 分别读取，不是原子列表快照。</p>
+    <ul id="supplier-list" class="supplier-list"></ul>
+  </section>
+  <section id="D01.1-DETAIL" class="panel detail-panel" aria-labelledby="detail-heading" tabindex="-1">
+    <button id="back-list" class="mobile-navigation" type="button">← 返回供应商列表</button>
+    <div id="selected-detail">
+      <p class="eyebrow">供应商 / DETAIL</p><h2 id="detail-heading">选择供应商</h2><p id="selected-identity" class="identity"></p>
+      <section class="current-value" aria-labelledby="current-heading"><h3 id="current-heading">当前保存值</h3><p id="current-name" class="literal value">尚未读取</p><p id="current-revision" class="muted"></p></section>
+      <button id="edit" class="primary" type="button" disabled>编辑名称</button> <button id="resume-editor" type="button" hidden>返回原编辑</button>
+    </div>
+    <section id="D01.1-NAME-EDITOR" class="editor" aria-labelledby="editor-heading" hidden>
+      <button id="back-detail" class="mobile-navigation" type="button">← 返回详情（保留草稿）</button>
+      <h2 id="editor-heading">我的修改</h2><p id="editor-identity" class="identity"></p><p id="editor-status" class="status" role="status" aria-live="polite"></p>
+      <dl class="binding-info"><dt>原意图</dt><dd id="intent"></dd><dt>原预期版本</dt><dd id="expected-revision"></dd></dl>
+      <label for="raw-name">名称原始输入</label><textarea id="raw-name" rows="5" spellcheck="false" autocomplete="off" aria-describedby="raw-help draft-status"></textarea>
+      <p id="raw-help" class="muted small">原始 UTF-16 输入完整保留，包括首尾空白；规范化与校验由 Rust 完成。</p><p id="draft-status" class="muted small"></p>
+      <div id="editor-actions" class="actions"><button id="cancel" type="button">取消本次编辑</button><button id="preview" type="button">预览修改</button><button id="save" class="primary" type="button">保存名称</button><button id="lookup" type="button">核对原结果</button></div>
+      <div id="discard-warning" class="notice" hidden><p>此编辑包含未保存的输入。放弃将丢弃本次缓冲，不会建立新意图。</p><div class="actions"><button id="keep-draft" type="button">保留草稿</button><button id="confirm-discard" type="button">确认放弃本次草稿</button></div></div>
+      <section id="D01.1-DIFF" class="diff" aria-labelledby="diff-heading"><h3 id="diff-heading">修改差异与 Rust 预览</h3><div class="comparison"><div><h4>编辑对象当前保存值</h4><p id="editor-current" class="literal"></p></div><div><h4>Rust 规范化预览</h4><p id="preview-name" class="literal"></p></div></div><p id="preview-revision" class="muted small"></p><p class="muted small">预览不是提交回执，也未签发正式授权。</p></section>
+      <section id="D01.1-RECEIPT" aria-labelledby="receipt-heading"><h3 id="receipt-heading">原始历史回执</h3><p id="receipt-status" class="muted"></p><details id="receipt-details" hidden><summary>查看 P07 原始回执</summary><pre id="receipt-json"></pre></details><p class="muted small">回执描述原操作的历史结果。当前行可能已再次修改，以“当前保存值”的独立读取为准。</p></section>
+    </section>
+  </section>
+</main>
+<footer>仅本机合成供应商 · 无模型回合 · Android / Electron / 生产迁移验收不包含在此实验</footer>
+</body>
+</html>
