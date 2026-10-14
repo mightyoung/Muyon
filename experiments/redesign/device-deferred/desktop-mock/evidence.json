@@ -40,5 +40,58 @@
     "full D01.1 keyboard/accessibility/multiwindow acceptance",
     "Electron actual runtime",
     "Android device and release acceptance"
-  ]
+  ],
+  "fix": {
+    "source_parent": "abf67478f341bfc726060f59ae894af0e8f8fa93",
+    "reviewer_red": {
+      "passed": 12,
+      "failed": 3,
+      "exit": 1
+    },
+    "binding_red": {
+      "passed": 12,
+      "failed": 10,
+      "exit": 1
+    },
+    "navigation_completion_red": {
+      "passed": 26,
+      "failed": 1,
+      "exit": 1
+    },
+    "final_suite": {
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    },
+    "mutants": [
+      {
+        "mutation": "reload-clears-command",
+        "exit": 1,
+        "killed": true
+      },
+      {
+        "mutation": "blank-id-accepted",
+        "exit": 1,
+        "killed": true
+      },
+      {
+        "mutation": "invalid-revision-accepted",
+        "exit": 1,
+        "killed": true
+      }
+    ],
+    "browser": {
+      "dom": "PASS actual buttons edit/preview/save, lost response/reload/no new intent/original lookup",
+      "layout200": {
+        "width": 1280,
+        "scroll": 1265,
+        "rawBottom": 833.859375,
+        "buttonTop": 949.859375
+      }
+    },
+    "receipt_binding": "registered immutable command: intent/object/planId/expectedRevision; result revision exactly expected+1, nonblank reference, normalized name",
+    "unresolved": "owned independently of snapshot/display epoch; explicit isolated draft cannot dispatch before original reconciliation",
+    "revision_domain": "mock-only positive safe JS integer +1; does not freeze M03 encoding"
+  }
 }
