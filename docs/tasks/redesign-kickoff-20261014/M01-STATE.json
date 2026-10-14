@@ -502,10 +502,17 @@
       "path": "independent-reviews/classification-fixture-delta.md",
       "sha256": "5751ebfb2cea16a690ed18dc6a668b0a0d8f9d11e82d56ecfa6609bc2445b1db",
       "kind": "static non-author fixed-source fixture material review; not runtime execution"
+    },
+    {
+      "label": "final-batch-review",
+      "source_sha": "f0ca8fd3e11c1a7ebd3cffdfc3875cdc4365c5ab",
+      "path": "independent-reviews/final-batch-review.md",
+      "sha256": "2dc47836299fb577aaab411b0fa80260b2d255e2e49e549241abb05cffd46316",
+      "kind": "static non-author final batch registration and source-identity review, C0; requires exact candidate CI before integration"
     }
   ],
   "candidate_integration": {
-    "status": "all fixed inputs/contract deltas statically reviewed and function reference independently rerun; final batch registration review and exact candidate CI pending",
+    "status": "fixed final batch registration non-author C0; exact candidate CI and post-integration CI required",
     "scope": "original design95 + M01/A00 intake + reviewed M02/D01a/D03a Drafts + two entry append/prefix + narrow A00 applicability clarification + M04/M05 input/function reference + classification/recovery synthetic input + preserved independent reviews",
     "exclude": [
       "old C6/product branches",
