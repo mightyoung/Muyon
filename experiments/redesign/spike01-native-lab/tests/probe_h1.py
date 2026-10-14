@@ -1,5 +1,5 @@
 """Actual foreign destructor reentry/paused release; run under an external timeout."""
-import gc, sys, threading, weakref
+import gc, sys, threading, time, weakref
 import spike01_bridge_lab as bridge
 from test_ffi import stimulus, typed
 mode = sys.argv[1]
@@ -49,9 +49,17 @@ if variant == 'pause':
         try: getattr(ref(),mode)();done.set()
         except BaseException as e: failures.append(repr(e))
     closer=threading.Thread(target=close);closer.start()
-    early=done.wait(.1)
+    # The getter acquires the same native mutex. It can observe a waiter
+    # only after Condvar::wait atomically unlocks it; elapsed time is no proof.
+    native_wait_entered=False
+    deadline=time.monotonic()+2
+    while time.monotonic()<deadline and not done.is_set():
+        native_wait_entered=session.release_waiter_count()>0
+        if native_wait_entered:break
+        time.sleep(.001)
+    early=done.is_set()
     release.set();worker.join(2);closer.join(2)
-    assert not early and done.is_set() and not worker.is_alive() and not closer.is_alive(), (early,seen)
+    assert native_wait_entered and not early and done.is_set() and not worker.is_alive() and not closer.is_alive(), (native_wait_entered,early,seen)
     assert not failures,failures
 else:
     run()
@@ -59,6 +67,7 @@ else:
     session.run(typed(stimulus('新名字')))
     assert len(replacement_seen)==1,replacement_seen
 gc.collect()
+assert seen.count('callback_rejected')==(1 if variant in ('reject','unexpected') else 0),seen
 assert seen.count('reentrant_rejected')==1,seen
 assert 'unsafe_early_return' not in seen and 'release_timeout' not in seen,seen
 session.unsubscribe();session.close_session()

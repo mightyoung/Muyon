@@ -69,7 +69,7 @@ pub trait LabObserver: Send + Sync + std::fmt::Debug {
 
 #[derive(uniffi::Object)]
 pub struct LabSession { id:u64, state:Mutex<SessionState>, idle:Condvar }
-struct SessionState { closed:bool, unsubscribing:bool, calls:usize, callbacks:usize, observer:Option<Arc<dyn LabObserver>> }
+struct SessionState { closed:bool, unsubscribing:bool, calls:usize, callbacks:usize, waiters:usize, observer:Option<Arc<dyn LabObserver>> }
 
 struct CallGuard<'a> { session:&'a LabSession, callback:bool }
 impl Drop for CallGuard<'_> {
@@ -97,7 +97,7 @@ impl LabSession {
     pub fn new()->Arc<Self> {
         LIVE_SESSIONS.fetch_add(1,Ordering::SeqCst);
         Arc::new(Self { id:NEXT_SESSION.fetch_add(1,Ordering::SeqCst),state:Mutex::new(SessionState {
-            closed:false,unsubscribing:false,calls:0,callbacks:0,observer:None }),idle:Condvar::new() })
+            closed:false,unsubscribing:false,calls:0,callbacks:0,waiters:0,observer:None }),idle:Condvar::new() })
     }
     pub fn set_observer(&self,observer:Arc<dyn LabObserver>)->Result<(),LabError> {
         let mut s=self.state.lock().map_err(|_|bad("STATE_LOCK"))?;
@@ -109,17 +109,20 @@ impl LabSession {
         if CALLBACK_STACK.with(|v|v.borrow().contains(&self.id)) { return Err(LabError::ReentrantClose); }
         let mut s=self.state.lock().map_err(|_|bad("STATE_LOCK"))?;
         s.unsubscribing=true;let previous=s.observer.take();
-        while s.callbacks>0 { s=self.idle.wait(s).map_err(|_|bad("STATE_LOCK"))?; }
+        while s.callbacks>0 { s.waiters+=1;s=self.idle.wait(s).map_err(|_|bad("STATE_LOCK"))?;s.waiters-=1; }
         s.unsubscribing=false;drop(s);drop(previous);Ok(())
     }
     pub fn close_session(&self)->Result<(),LabError> {
         if CALLBACK_STACK.with(|v|v.borrow().contains(&self.id)) { return Err(LabError::ReentrantClose); }
         let mut s=self.state.lock().map_err(|_|bad("STATE_LOCK"))?;
         s.closed=true;let previous=s.observer.take();
-        while s.calls>0 { s=self.idle.wait(s).map_err(|_|bad("STATE_LOCK"))?; }
+        while s.calls>0 { s.waiters+=1;s=self.idle.wait(s).map_err(|_|bad("STATE_LOCK"))?;s.waiters-=1; }
         drop(s);drop(previous);Ok(())
     }
     pub fn is_closed(&self)->bool { self.state.lock().map(|s|s.closed).unwrap_or(true) }
+    // Lab-only test instrumentation. The mutex read can observe a waiter only
+    // after Condvar::wait has released the lock, proving native wait entry.
+    pub fn release_waiter_count(&self)->u64 { self.state.lock().map(|s|s.waiters as u64).unwrap_or(0) }
     pub fn run(&self,request:LabRequest)->Result<LabReply,LabError> {
         let mut s=self.state.lock().map_err(|_|bad("STATE_LOCK"))?;
         if s.closed { return Err(LabError::Closed); }
@@ -128,6 +131,11 @@ impl LabSession {
         let call=CallGuard { session:self,callback:active };
         if active { CALLBACK_STACK.with(|v|v.borrow_mut().push(self.id)); }
         let observed=ObservedCall { observer,_callback:CallbackGuard { active },_call:call };
+        #[cfg(test)]
+        tests::RUN_AFTER_OBSERVER_CAPTURE.with(|hook| {
+            let action=hook.borrow_mut().take();
+            if let Some(action)=action { action(); }
+        });
         let reply=evaluate_typed(request)?;
         if let Some(ref observer)=observed.observer {
             observer.on_reply(reply.digest.clone()).map_err(|_|LabError::CallbackRejected)?;
@@ -183,6 +191,39 @@ uniffi::setup_scaffolding!();
 #[cfg(test)]
 mod tests {
     use super::*;
+    // Test-only scheduling seam: replace the captured observer deterministically
+    // before evaluate_typed. No hook or exported production API in release builds.
+    thread_local! { pub(super) static RUN_AFTER_OBSERVER_CAPTURE:RefCell<Option<Box<dyn FnOnce()>>>=RefCell::new(None); }
+    #[test]
+    fn invalid_run_releases_captured_observer_under_tls_before_counters() {
+        use std::sync::Weak;
+        #[derive(Debug)] struct Observer { session:Weak<LabSession>, rejected:Arc<AtomicUsize> }
+        impl LabObserver for Observer {
+            fn on_reply(&self,_:String)->Result<(),LabCallbackError> { panic!("invalid request must not call observer"); }
+        }
+        impl Drop for Observer {
+            fn drop(&mut self) {
+                let session=self.session.upgrade().unwrap();
+                if matches!(session.close_session(),Err(LabError::ReentrantClose)) { self.rejected.fetch_add(1,Ordering::SeqCst); }
+                if matches!(session.unsubscribe(),Err(LabError::ReentrantClose)) { self.rejected.fetch_add(1,Ordering::SeqCst); }
+            }
+        }
+        #[derive(Debug)] struct Quiet;
+        impl LabObserver for Quiet { fn on_reply(&self,_:String)->Result<(),LabCallbackError> { Ok(()) } }
+        let baseline=live_session_count();let session=LabSession::new();
+        let rejected=Arc::new(AtomicUsize::new(0));
+        session.set_observer(Arc::new(Observer { session:Arc::downgrade(&session),rejected:rejected.clone() })).unwrap();
+        let replace=Arc::downgrade(&session);
+        RUN_AFTER_OBSERVER_CAPTURE.with(|hook| { *hook.borrow_mut()=Some(Box::new(move || {
+            replace.upgrade().unwrap().set_observer(Arc::new(Quiet)).unwrap();
+        })); });
+        let mut invalid=req("名字");invalid.raw_utf16=vec![0xd800];
+        assert!(matches!(session.run(invalid),Err(LabError::InvalidArgument { reason }) if reason=="UTF16"));
+        assert_eq!(rejected.load(Ordering::SeqCst),2);
+        assert_eq!(session.release_waiter_count(),0);
+        session.run(req("新名字")).unwrap();session.unsubscribe().unwrap();session.close_session().unwrap();
+        drop(session);assert_eq!(live_session_count(),baseline);
+    }
     fn req(s: &str) -> LabRequest {
         LabRequest { protocol: 1, raw_utf16: s.encode_utf16().collect(), revision: 7,
             purpose: "spike01.name".into(), normalization: LabNormalization::Nfc, note: None }
