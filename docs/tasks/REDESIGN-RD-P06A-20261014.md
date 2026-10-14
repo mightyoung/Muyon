@@ -1,0 +1,25 @@
+# RD-P06A isolated durable recovery implementation
+
+Writer `/root/device_deferred_rust_domain`; worktree `/tmp/Muyon-rd-p06-durable-20261014`, branch `task/device-deferred-durable-recovery-20261014`. Product baseline `676331048611aa1fb0f226ec300f6bac633e98a0`; parent B documentation head `5fcb03555ed9e6b1d868443d6aac32a4bfb86532`. Owned writes only `experiments/redesign/device-deferred/durable-recovery-lab/core/` and this document. B owns shared CONTRACT and integration; preceding labs/products/CI/fixtures remain unmodified.
+
+Read recovery-minimal-contract plus fixed v1.3.2 ledger/projection/epoch design. Implemented one isolated unpublished Linux file lab, unique provisional serde representation, not M03 or a production DB. Trusted one-shot CLI documented in core/README; raw UTF16 is an opaque synthetic increment argument, not a supplier normalizer. The fixed private counter/source target is bound by persistent pair ID. No scope/user authority or new-intent acknowledgement is implemented.
+
+Actual source/private-file effect count is independent of ledger/projection, observed by subprocess tests. Complete intent/domain/operation/args persists pending before dispatch; same command after restart returns original verified receipt, altered binding conflicts. A pending lacking receipt is unknown even count0 and never automatically retried; lookup is strictly read-only, missing lookup notFound remains unknown. Receipt is generated only from actual successful effect write, not expected output or restored effect counter. Receipt can persist before projection; degraded projection lookup can return known receipt/snapshot null without altering files. Old epoch receipts do not overwrite current projection and slow/forked snapshots cannot erase receipts.
+
+Persistent random pair ID + canonical directory association checks state/effect physical source under both Linux flock locks. A single-side state rollback before pending checks original external dispatch history, returns unknown/conflict without another effect. Missing/changed/replaced sources fail closed. Clone/rollback of both sources/identities remains explicitly unsupported. Six same-pair processes serialize, abrupt exit90/SIGKILL release locks without stale-lock deletion. Atomic projection manifest binds content/full cursor via fsync temp/rename/parent fsync; no torn manifest activated. Digest envelopes detect corruption, not adversarial authentication. Actual IO errors leave closed/unavailable or pending unknown as appropriate.
+
+## Evidence actually executed
+
+- Existing Rust1.99.0 cached std/serde1.0.229/json1.0.154/sha2 0.11.1 only. Build offline/locked succeeds; no installs/licenses.
+- Genuine initial subprocess RED: **14 test methods, 21 assertion failures including subtests, exit1** against a compilable stub; no compiler/import RED counted. Initial GREEN14.
+- Pre-review source/rollback/receipt-axis RED: 21 methods /3 assertion failures. Additional exact pair-ID replacement RED1; fresh-readonly/SIGKILL barrier RED2 methods /3 assertions; explicit-null RED1. Every behavior failure log remains external.
+- Final **26 methods passed /0 failures /0 skips, exit0** in independent temporary directories. Eight unique exit90 fault boundaries and two parent-driven SIGKILL boundaries observed separately; no claim that subcases are independent method counts. Six-process concurrent same-intent submission observes one external effect and one original receipt.
+- Four inverse mutations each offline/locked compile exit0, targeted real-process assertion exit1, source restored byte-for-byte. Targets: pending order, unknown redispatch, projection erases receipt, state rollback ignores source history. Ready binary and mutable test target are separate.
+- Full crate cargo test exit0 contains0 Rust unit tests; real runtime/fault evidence is the26 Python methods invoking actual Rust subprocesses. Existing Flutter candidate CI does not run this lab and cannot substitute for local immutable/fault review.
+- Raw logs and actual independent effects-file count/digest observations `/tmp/rd-p06a-evidence-20261014/`. `verification-evidence.json` contains only sanitized hashes/counts. README has exact CLI/build/tests/fault matrix and reviewer evidence environment variables. No raw logs, binary, downloads, credentials or private fixture files in Git.
+
+## Remaining gates
+
+Non-author immutable review and latest-develop exact candidate local tests/CI required before B-only intake. Writer does not push/merge. Linux local filesystem assumptions only, process exits not power-loss/hardware durability proof, no NFS/distributed/provider exactly-once or hostile filesystem actor claims. Formal source/receipt authentication, production authority/permissions/retention, store migration/both-domain rollback, event filtering/stream rotation and all product schemas remain unimplemented.
+
+Android actual load/Compose/Electron **NOT_RUN**; M03 **blocked_contract**. Device release/acceptance remain deferred gates. Existing unexplained old SQLite CI failure is not diagnosed/retested/relabelled by this task.
