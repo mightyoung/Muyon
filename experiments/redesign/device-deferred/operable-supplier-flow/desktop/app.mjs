@@ -135,7 +135,7 @@ function render() {
   const selected=projection.selected,e=projection.editor;
   $('detail-heading').textContent=selected?'供应商详情':'选择供应商';
   $('selected-identity').textContent=selected?`稳定 ID ${selected.supplier}`:'在列表中明确选择 S1 或 S2';
-  const current=e?.supplier===selected?.supplier?e.current:selected;
+  const current=e&&selected&&e.supplier===selected.supplier?e.current:selected;
   $('current-name').textContent=current?.name??'当前保存值未读取';$('current-revision').textContent=current?`revision ${current.revision}`:'当前版本不可用';
   $('D01.1-NAME-EDITOR').hidden=!e;
   if(e){

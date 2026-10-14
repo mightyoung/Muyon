@@ -172,3 +172,8 @@ test('MOCK host regression: two durable sessions keep mobile detail/editor free 
   await evaluate("document.documentElement.style.fontSize=''");await call('Emulation.setDeviceMetricsOverride',{width:1400,height:1000,deviceScaleFactor:1,mobile:false});assert.notEqual(await evaluate("getComputedStyle(document.getElementById('directory-search')).display"),'none','desktop retains directory while editing');assert.ok(await evaluate("document.getElementById('recover-other-original-session').getClientRects().length>0"),'desktop retains recovery control');
  }finally{await evaluate("document.documentElement.style.fontSize=''");await call('Emulation.setDeviceMetricsOverride',{width:1400,height:1000,deviceScaleFactor:1,mobile:false});}
 });
+
+test('MOCK host regression: healthy fresh session with no selection/editor shows no transport uncertainty',async()=>{
+ const s=fixture();s.selected=null;s.editor=null;await open(s);
+ assert.equal(await text('transport-status'),'','valid initial host projection must not manufacture a transport error');assert.match(await text('list-status'),/读取可用/);assert.match(await text('supplier-S1'),/S1/);assert.match(await text('supplier-S2'),/S2/);assert.equal(await text('detail-heading'),'选择供应商');assert.match(await text('selected-identity'),/明确选择 S1 或 S2/);assert.equal(await evaluate("document.getElementById('edit').disabled"),true);assert.equal(await evaluate("document.getElementById('D01.1-NAME-EDITOR').hidden"),true);assert.equal(await evaluate('document.body.dataset.busy'),'false');assert.deepEqual(actions,[]);
+});
