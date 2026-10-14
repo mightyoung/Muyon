@@ -1,3 +1,7 @@
+> **当前职责与设计入口 — 2026-10-14 北京时间**
+> 用户已将全部派发、任务说明、审查组织、登记、独立验证和唯一 develop 合入职责交给 **Leader B**，Leader A 暂停；以下旧交接正文按其日期和固定SHA保留为历史。最新决定与适用边界见 [ADR0001 新接任记录](../adr/0001-leadership-and-scope-freeze.md#2026-10-14leader-b-全职责接任与-v132-改造开工)。
+> 本次改造规范入口为 [v1.3.2 两册与迁移追踪](../design/redesign-v1.3.2-20261014/README.md)，固定设计SHA `58fe9c62612d74a973614c41677e62a54332e6d6`；实际开工与writer登记见 [M01/A00](REDESIGN-M01-20261014.md)。产品基线 `01e56cc2d729dab70e1b1def05c3aa93b28f421a` 的旧功能继续保留，52项新架构验收仍未执行。M03尚未冻结；不把合同草案、文档CI或派发当成产品完成，不自动扩真实数据/模型/设备成本或发布范围。
+
 # 第 6 次交接：leader A → Leader B（2026-10-11 深夜）
 
 用户决定：Leader B 接替 leader A 的全部工作（派发、写任务说明、组织 ChatGPT 审查、登记回报），加上原有的集成、独立验证与合入。ADR 分工条目见 `docs/adr/0001-leadership-and-scope-freeze.md` 2026-10-11 晚两条（已在 develop）。本节是交接时的快照，develop = `330020c0`。

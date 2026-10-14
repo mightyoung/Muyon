@@ -123,3 +123,16 @@
 - 2026-10-12：Leader B 额度用完，交接回 leader A（交接要点见当日交接稿）。用户确定：leader A 为**唯一合入人**（只合 develop，不改 main、不强推、不部署）；grokbot 额度恢复，可并行两路；C6 补修 `5436f68c`、`7df93d72` 与 Android 打包脚本 `cfd7f7b9` 只存在于已停的云端工作区，**当作丢失、重做**。Codex、grok-build 额度随后也用完。
 - 2026-10-12：用户确定导出生产接线与 N2 设计（[DESIGN-EXPORT-N2](../design/export-n2-wiring-2026-10-12.md)）五项未决问题，全部按推荐：D1 导出 payload 单份 16 MiB、总 256 MiB，可核验终态 payload 7 天后释放，元数据保留、不删用户文件，active / unknown 不清理；D2 只读 check 默认 10 秒期限，历史 unknown 允许用户显式「从同一冻结内容新建副本操作」（新 exportId、新 A/B、新建目标），旧 unknown 保留；D3 删除集合含本次写范围外项目的 outline 行时整次拒绝，REG-3c 与 N2 共用守卫，本项目内但证据不可读时可删关联；D4 无宿主门面的 standalone 明确不可用，不回退直接 IO / 直接删除；D5 按「平台 × 工具」分别验收开放，report 先行。
 - 2026-10-12：用户确定体验包构建路线：Windows 用 W1（任务分支工作流加 push 触发，公共仓库标准 windows-2022 runner，公开 artifact 保留 1 天，不改 main）；Android 用 A1（同方式在标准 ubuntu runner 使用其预装 Android SDK 与 Java 运行无密钥脚本，不自行下载工具链；release 暂用 debug 签名，仅供体验）。包内不得含任何密钥。
+
+
+## 2026-10-14：Leader B 全职责接任与 v1.3.2 改造开工
+
+用户最新决定（Sentinel_162b4c6afe64819193c034061b93b518、Sentinel_3b08b7b589a4819184fd7c9f3323bad5、Sentinel_e6ce5e0c57808191920e687495a03d35）取代上列 Oct12 的当前分工：**Leader B 接管派发、任务说明、审查组织、登记、独立验证及唯一合入 develop；Leader A 暂停。** 在途任务和文件所有权保留，不重复派发，不以旧分支存在推定活跃或空闲。其他发布/清点线程不成为第二合入人。仍不改 main、不强推、不删分支、不部署、不配置新凭据或自行付费。
+
+采纳固定文档 `58fe9c62612d74a973614c41677e62a54332e6d6` 的 [v1.3.2 两册与迁移入口](../design/redesign-v1.3.2-20261014/README.md) 为本次改造规范来源。Claude 最终定向复审认定 DOCS-G0 无阻断，目录26项哈希与准确SHA的CI38439338859已核；原评审、历史失败和旧正文保留。当前产品基线仍是 `01e56cc2d729dab70e1b1def05c3aa93b28f421a`，旧Flutter功能与生产库继续保留。这是文档采纳及隔离开发开工，不表示新Rust/Android/Electron实现、52项新验收或正式数据迁移完成。
+
+新授权四档与新装默认Auto属于新版明确合同；旧Dart授权三档与呈现三档继续按其原实现解释，不因入口切换而升权或改变现有配置。FullAllow既定免额外风险询问不取消真实scope、能力、身份、业务与CAS硬前提。unreviewed禁外发与credential正文禁用分开；本机离线首片按其最小当前用途检查推进，不机械等待全部外发分类规则。完整规则及实际wire在D01a/D01b对应工程出口验证。
+
+[M01/A00开工登记](../tasks/REDESIGN-M01-20261014.md)与接收证据记录真实writer、固定SHA和未执行状态。先完成首片合同、D01a/D03a及SPIKE-01，再冻结M03；缺真实Android库加载或Unicode等价证据不得用文档/派发/现有CI替代。ADR-AUTH-01/02拟议0006/0007尚未占号或落正文，冻结前另核预留。
+
+上列“C6与Android脚本丢失”保留为当时交接记录；恢复后的原工作区已证实原对象存在。C6 `5436f68c2ba57ae2ea99d6cbc749a5bd92a3cdb0`、`7df93d7228693c71767cd4ab88d46d11da7c6064`已按用户精确授权正常推至各自原任务分支并读回完整SHA；恢复与推送不证明复审或合入通过，不纳入本次设计文档集成。Android脚本原对象仍保全；旧CI failure不追改。
