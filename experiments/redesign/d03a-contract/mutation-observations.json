@@ -1,0 +1,38 @@
+{
+  "baseline_source_sha256": "6c270f56c043ac85810e20902435c3a52a2e29aa353f1078407fbe1dfec5a5d0",
+  "restored_source_sha256": "6c270f56c043ac85810e20902435c3a52a2e29aa353f1078407fbe1dfec5a5d0",
+  "mutations": [
+    {
+      "mutation": "remove_full_domain_rejection",
+      "exit_code": 1,
+      "failed_tests": [
+        "test_domain_rejects_larger_seq_from_each_wrong_identity"
+      ],
+      "mutated_source_sha256": "69c213d71146dae4c8f5a656812d94537a4920c2500a46a03faa01e8aa9e57c8",
+      "required_safety_test": "test_domain_rejects_larger_seq_from_each_wrong_identity",
+      "behavioral_red": true
+    },
+    {
+      "mutation": "old_epoch_erases_real_receipt_hint",
+      "exit_code": 1,
+      "failed_tests": [
+        "test_old_epoch_display_rejected_but_ledger_lookup_preserves_effect"
+      ],
+      "mutated_source_sha256": "e6147ba8cac6390dcdc9db776396dc161d863dbeabc0e31fa9116070cd4c67ad",
+      "required_safety_test": "test_old_epoch_display_rejected_but_ledger_lookup_preserves_effect",
+      "behavioral_red": true
+    },
+    {
+      "mutation": "premature_commit_between_projection_and_cursor",
+      "exit_code": 1,
+      "failed_tests": [
+        "test_process_exit_between_state_and_cursor_rolls_back"
+      ],
+      "mutated_source_sha256": "38c3e2193c3e68f96ff4450708cde903eb2a6a105caa4e9a9584a6b41e2057d4",
+      "required_safety_test": "test_process_exit_between_state_and_cursor_rolls_back",
+      "behavioral_red": true
+    }
+  ],
+  "restored_suite_exit_code": 0,
+  "scope": "independent experiment inverse mutations, not product/core mutation gate"
+}
