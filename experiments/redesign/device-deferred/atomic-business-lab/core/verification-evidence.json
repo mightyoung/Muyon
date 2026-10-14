@@ -1,0 +1,151 @@
+{
+  "status": "author_fix_round_1_verified_non_author_rereview_pending",
+  "source_base": "5ac840bc5fbd798548260bed56fd440c9ce31bf0",
+  "closed_baseline": "2b455723346fff725ddbd5e6a7a2c84dd049af4b",
+  "rust": "1.99.0 (b940084d7 2026-09-28)",
+  "runtime": {
+    "runtime": {
+      "path": "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0.8.6",
+      "sha256": "14c4418a06c5c2e30f5fb57bc8add93762236ae17898c6708984cf15e680ca71",
+      "version": "3.46.1"
+    },
+    "status": "initialized",
+    "python_version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "python_sqlite_version": "3.53.1"
+  },
+  "counts": {
+    "rust_unit_methods": 2,
+    "process_methods": 27,
+    "sql_exit_stages": 6,
+    "sigkill_stages": 6,
+    "tail_trigger_subcases": 4,
+    "inverse_mutation_classes": 5,
+    "new_owned_regression_methods": 3,
+    "new_owned_red_subcases": 21,
+    "copied_external_probe_assertions": 4
+  },
+  "source_sha256": {
+    ".gitignore": "02e7b40893c74a993a139de7b0f85d8cf2eaea57d544effd576920a514872af4",
+    "Cargo.toml": "ed83a58f38725385db215a26620316593b859229eb42f9dda3341fefcd09f8a5",
+    "Cargo.lock": "8785cea9c495eda952882e389a1e27b274e1ecf66ad89a053d9261b28c73e1ac",
+    "src/main.rs": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+    "src/sqlite.rs": "9054b8e4a36f6d250637eaadf9dff48367ebe522098ae7eb3b550ccfcc34d0a2",
+    "src/facts.rs": "e24bdc7c4bdd58f24aa6633e7d8295d38b6bdbf1118e50887ca0bc364295e1d8",
+    "tests/process.py": "beb8171ac12aaf9e12e5c0b53a67ddc784edaca6b624cbde4bca8b49acad7384",
+    "mutations.py": "37cfe789b22e6ebf2c21039ee31f3503b8dd340d209629be9ab46858072c8ba2",
+    "README.md": "6ccc80113a28d915b7b7c337610c6e41014ca152daab9195ab6e8528e5438120"
+  },
+  "mutations": [
+    {
+      "name": "shared_transaction",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "Lists differ",
+      "intended_assertion_observed": true,
+      "source_before": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "source_restored": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "restoration_equal": true
+    },
+    {
+      "name": "cas_guard",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "unavailable: final consistency: invalid history effect",
+      "intended_assertion_observed": true,
+      "source_before": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "source_restored": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "restoration_equal": true
+    },
+    {
+      "name": "duplicate_guard",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "UNIQUE constraint failed: intents.intent",
+      "intended_assertion_observed": true,
+      "source_before": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "source_restored": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "restoration_equal": true
+    },
+    {
+      "name": "binding_comparison",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "'unknown' != 'conflict'",
+      "intended_assertion_observed": true,
+      "source_before": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "source_restored": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "restoration_equal": true
+    },
+    {
+      "name": "unknown_no_dispatch",
+      "build_exit": 0,
+      "test_exit": 1,
+      "intended_assertion": "'committed' != 'unknown'",
+      "intended_assertion_observed": true,
+      "source_before": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "source_restored": "0eaaa9918db1e849fe1ec065dc5d7d876ef3032eceba2394d50cfca35fb908b2",
+      "restoration_equal": true
+    }
+  ],
+  "evidence_root": "/tmp/rd-p07a-evidence-20261014/fix-round-1",
+  "final_logs": {
+    "build": "final-build.log",
+    "unit": "unit-green.log",
+    "process": "final-process-green.log",
+    "physical_queries": "final-physical.jsonl",
+    "process_requests": "final-physical.jsonl.process.jsonl",
+    "mutation": "mutations/mutation-results.json",
+    "restored_green": "mutations/restored-green.log",
+    "external_red": "external-reproductions-red.json",
+    "external_green": "external-green/external-reproductions-green.json"
+  },
+  "red_logs": [
+    "owned-regressions-red.log",
+    "identity-probe.py.red.log",
+    "claim-rejection-probe.py.red.log",
+    "meta-trigger-probe.py.red.log"
+  ],
+  "limitations": [
+    "M03 blocked_contract",
+    "Android/Compose/Electron NOT_RUN",
+    "no full Unicode equivalence claim",
+    "no power-loss/production authority/retention/migration/backups/external-provider exactly-once claim",
+    "non-author C0 and exact candidate CI pending",
+    "historical old SQLite CI RED unchanged",
+    "CAS inverse fails required rejection via final verifier, not successful stale commit",
+    "duplicate inverse fails replay via PK, not second successful commit"
+  ],
+  "source_parent": "fe3d82080fb8a09c1d1effcbc9a93efc9b3b1289",
+  "review_gate": {
+    "previous_sha": "fe3d82080fb8a09c1d1effcbc9a93efc9b3b1289",
+    "previous_spec": "FAIL",
+    "previous_quality": "FAIL",
+    "blocking_findings": [
+      "R1 original/current physical domain mismatch",
+      "R2 nonbusiness phase trigger effects"
+    ],
+    "current": "immutable_rereview_pending"
+  },
+  "previous_evidence_root": "/tmp/rd-p07a-evidence-20261014",
+  "prior_red_logs_preserved": "../ first/scaffold/fault/actual-effect/schema/tail and old mutation attempts remain",
+  "initial_source_setup_or_attempt_failures": [
+    "implementation-build.log",
+    "green-attempt-1.log",
+    "rustfmt-unavailable.log",
+    "mutations-final-driver.log"
+  ],
+  "fix_round_setup_or_attempt_failures": [],
+  "phase_invariants": {
+    "capture": "inside BEGIN IMMEDIATE",
+    "claim_allowed": "one exact target bound pending insert",
+    "rejection_allowed": "only exact target bound rejection status/reason",
+    "preserved": [
+      "meta identity",
+      "suppliers",
+      "history",
+      "receipts",
+      "all other intent rows"
+    ],
+    "success_allowed": "only target supplier name/revision plus target committed intent/history/receipt"
+  }
+}
