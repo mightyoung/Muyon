@@ -1,0 +1,85 @@
+{
+  "status": "merged_postmerge_ci_running",
+  "baseline": "676331048611aa1fb0f226ec300f6bac633e98a0",
+  "author_sha": "c925d4274b2bccf95ac48b4040e4d0db2548f5ca",
+  "candidate_sha": "eaea234c08993ac710dcf79496a7ed737ee9cbd4",
+  "candidate_branch": "review/rd-p06-combination-20261014",
+  "candidate_ci": {
+    "id": 38560506129,
+    "url": "https://github.com/mightyoung/Muyon/actions/runs/38560506129",
+    "status": "completed",
+    "conclusion": "success",
+    "attempt": 1,
+    "completed_at": "2026-10-14T12:22:19Z",
+    "analyze_suites": 8,
+    "test_suites": 8,
+    "passed": 4199,
+    "skipped": 207,
+    "failed": 0,
+    "doctor_scenarios": 23,
+    "all_workflow_steps_success": true,
+    "rust_lab_covered": false
+  },
+  "independent_review": {
+    "conclusion": "C0 bounded Linux synthetic lab",
+    "report": "/tmp/rd-p06-independent-20261014/REVIEW.md",
+    "author_process_methods": 26,
+    "candidate_process_methods": 26,
+    "independent_properties": 10,
+    "mutants_build_success_assertion_failure": 6,
+    "source_restored": true,
+    "restored_process_methods": 26,
+    "restored_properties": 10
+  },
+  "scope": {
+    "unchanged_existing_files": 2291,
+    "core_author_candidate_identical": true,
+    "production_schema_changes": false,
+    "real_models": false,
+    "real_devices": false,
+    "new_dependencies_installed": false
+  },
+  "remaining": {
+    "merge": "completed via ordinary existing GitHub connection, PR70",
+    "power_loss": "NOT_TESTED",
+    "both_store_rollback_identity_clone": "unsupported",
+    "Android_Compose_Electron": "NOT_RUN",
+    "M03": "blocked_contract",
+    "historical_RD_P05_SQLite_RED": "preserved, root cause unexplained, no rerun"
+  },
+  "remote_refs": [
+    {
+      "ref": "develop",
+      "sha": "2b455723346fff725ddbd5e6a7a2c84dd049af4b"
+    },
+    {
+      "ref": "main",
+      "sha": "cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003"
+    },
+    {
+      "ref": "review/rd-p06-combination-20261014",
+      "sha": "eaea234c08993ac710dcf79496a7ed737ee9cbd4"
+    }
+  ],
+  "access": {
+    "gh_git_shell": "credential expired after candidate push; no credentials created",
+    "readonly_connector_and_public_api": "successful terminal CI and refs read",
+    "existing_GitHub_connection": "ordinary create PR70 and merge succeeded; no new credentials, no bypass"
+  },
+  "evidence_root": "/workspace/reports/rd-p06-combination-20261014",
+  "merge_sha": "2b455723346fff725ddbd5e6a7a2c84dd049af4b",
+  "postmerge_ci": {
+    "id": 38564045491,
+    "status": "in_progress",
+    "url": "https://github.com/mightyoung/Muyon/actions/runs/38564045491"
+  },
+  "cross_environment_report": "https://github.com/mightyoung/Muyon/blob/f39066a5c7b392f574e8424c086b59110803ff0e/docs/tasks/rd-p06-evidence-20261014/independent-review.md",
+  "merge_proof": {
+    "parents": [
+      "676331048611aa1fb0f226ec300f6bac633e98a0",
+      "eaea234c08993ac710dcf79496a7ed737ee9cbd4"
+    ],
+    "tree": "078838b2b3dc877a67bdab8158e06079afdbf225",
+    "candidate_tree_equal": true
+  }
+}
