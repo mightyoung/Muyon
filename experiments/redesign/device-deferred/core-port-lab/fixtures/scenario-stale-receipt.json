@@ -1,0 +1,95 @@
+{
+  "scenario_id": "actual-stale-receipt",
+  "seed": "baseline",
+  "steps": [
+    {
+      "request": {
+        "op": "hello"
+      }
+    },
+    {
+      "request": {
+        "op": "preview",
+        "object_id": "supplier-a",
+        "intent": "intent-a",
+        "expected_revision": "1",
+        "raw_utf16": [
+          65279,
+          32,
+          101,
+          769,
+          32
+        ]
+      }
+    },
+    {
+      "request": {
+        "op": "commit",
+        "object_id": "supplier-a",
+        "intent": "intent-a",
+        "expected_revision": "1",
+        "raw_utf16": [
+          65279,
+          32,
+          101,
+          769,
+          32
+        ]
+      },
+      "plan_id_from": 1
+    },
+    {
+      "request": {
+        "op": "reconnect",
+        "new_display_epoch": "epoch-1"
+      }
+    },
+    {
+      "request": {
+        "op": "preview",
+        "object_id": "supplier-a",
+        "intent": "intent-b",
+        "expected_revision": "2",
+        "raw_utf16": [
+          30002
+        ],
+        "display_epoch": "epoch-1"
+      }
+    },
+    {
+      "request": {
+        "op": "commit",
+        "object_id": "supplier-a",
+        "intent": "intent-b",
+        "expected_revision": "2",
+        "raw_utf16": [
+          30002
+        ],
+        "display_epoch": "epoch-1"
+      },
+      "plan_id_from": 4
+    },
+    {
+      "request": {
+        "op": "lookup",
+        "object_id": "supplier-a",
+        "intent": "intent-a",
+        "expected_revision": "1",
+        "raw_utf16": [
+          65279,
+          32,
+          101,
+          769,
+          32
+        ]
+      },
+      "plan_id_from": 1
+    },
+    {
+      "request": {
+        "op": "snapshot",
+        "display_epoch": "epoch-1"
+      }
+    }
+  ]
+}

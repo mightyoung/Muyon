@@ -1,0 +1,100 @@
+{
+  "scenario_id": "actual-lost-reply",
+  "seed": "lost-reply",
+  "steps": [
+    {
+      "request": {
+        "op": "hello"
+      }
+    },
+    {
+      "request": {
+        "op": "preview",
+        "object_id": "supplier-a",
+        "intent": "intent-a",
+        "expected_revision": "1",
+        "raw_utf16": [
+          65279,
+          32,
+          101,
+          769,
+          32
+        ]
+      }
+    },
+    {
+      "request": {
+        "op": "lookup",
+        "object_id": "supplier-a",
+        "intent": "intent-a",
+        "expected_revision": "1",
+        "raw_utf16": [
+          65279,
+          32,
+          101,
+          769,
+          32
+        ]
+      },
+      "plan_id_from": 1
+    },
+    {
+      "request": {
+        "op": "commit",
+        "object_id": "supplier-a",
+        "intent": "intent-a",
+        "expected_revision": "1",
+        "raw_utf16": [
+          65279,
+          32,
+          101,
+          769,
+          32
+        ]
+      },
+      "plan_id_from": 1
+    },
+    {
+      "request": {
+        "op": "snapshot"
+      }
+    },
+    {
+      "request": {
+        "op": "lookup",
+        "object_id": "supplier-a",
+        "intent": "intent-a",
+        "expected_revision": "1",
+        "raw_utf16": [
+          65279,
+          32,
+          101,
+          769,
+          32
+        ]
+      },
+      "plan_id_from": 1
+    },
+    {
+      "request": {
+        "op": "lookup",
+        "object_id": "supplier-a",
+        "intent": "intent-a",
+        "expected_revision": "1",
+        "raw_utf16": [
+          65279,
+          32,
+          101,
+          769,
+          32
+        ]
+      },
+      "plan_id_from": 1
+    },
+    {
+      "request": {
+        "op": "snapshot"
+      }
+    }
+  ]
+}
