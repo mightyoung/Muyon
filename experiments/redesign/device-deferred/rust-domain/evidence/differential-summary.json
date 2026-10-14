@@ -1,0 +1,191 @@
+{
+  "fixture_sha": "8c5995515fa14ca3592a1c33c71afb4e4c1e5def",
+  "product_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "fixture_sha256": "164cb94b4d5f585d13a6c87358fdbca61d8b52d568156b27d8d720b8f58f5178",
+  "product_source_sha256": {
+    "packages/supplier_core/lib/src/values.dart": "047230bc6de12ac9bd4a3c6c5b8800146fb2cb40ff8a44bb99c569a7565f278d",
+    "packages/supplier_core/lib/src/entities.dart": "aa9980a6cb84150d773e012c7a79e13ffda28efb1e170d78b86db01c9a052a46",
+    "packages/supplier_core/lib/src/inquiry.dart": "afbf9ad3ee708159f0d1194922570423661ddcd9205a3691db78c32450877722"
+  },
+  "dart_dependency_lib_sha256": {
+    "lib/src/composite_iterator.dart": "8dd75df590e26b50cf624508ec5bebd6343f3f7576fb7ffc6ee3acb7a6ed1c4e",
+    "lib/src/decomposite_iterator.dart": "f13b6b0f408ca8891d795b841ba117e3f047d8f5646911c415a04623543e2e03",
+    "lib/src/iterator.dart": "01d12a5227cda4b810c0e749e898af1ad1628cb5fc0c4a1478f49372c133f662",
+    "lib/src/recursive_decomposite_iterator.dart": "9d4757d61a623e985f516eb1d1ceae6fb66d3421264b6302d694b6dfcd342b28",
+    "lib/src/uchar.dart": "76092cd836be925a4a13d9033e9348fab141626f3e0454dda7eb243416b73a26",
+    "lib/src/uchar_iterator.dart": "4dba958b779e352c2a1ab49c3148dcf380822bb2a4111f5ebdd7a80ac2cdfc2d",
+    "lib/src/unorm_dart_base.dart": "40f71ac5cddce25fccd08e69c099b3ede9b114fc3e7fa57e2de31ddedbad1175",
+    "lib/src/unormdata.dart": "0e0251270ad885a95bec95de5595b05ad7f2cb387d2d54df5369c773b2f2469a",
+    "lib/src/utils.dart": "35d03b962051a8b534285e559a7d6047d08cea39a4d185e1ff83ad88d2ae2458",
+    "lib/unorm_dart.dart": "95ab0ca47a8a2c602e845e84c5bc76a15fd069efe68424bfe45526f1cb30fdea"
+  },
+  "oracle_sha256": "bd3645e6a0a1dae939bb44be4cbc11d8dc9ce225fd6967753065479ced3882d2",
+  "dart_exit": 0,
+  "rust_exit": 0,
+  "dart_version": "Dart SDK version: 3.13.4 (stable) (Tue Sep 15 01:01:15 2026 -0700) on \"linux_x64\"",
+  "dart_normalization": "unorm_dart 0.3.1 / Unicode 8.0",
+  "rust_normalization": "unicode-normalization 0.1.25 / Unicode 17.0.0",
+  "global_unicode_equivalence": "NOT_PROVEN",
+  "cases": [
+    {
+      "case_id": "M04-NAME-chinese",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-chinese-edges",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-nfc-compose",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-nfc-canonical-angstrom",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-not-nfkc",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-no-casefold",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-cjk-200",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-cjk-201",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-emoji-200",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-emoji-201",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-decomposed-200",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-decomposed-201",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-empty",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-trim-empty-xml-whitespace",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-trim-valid-edges",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-internal-whitespace",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-raw2000-bmp",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-raw2001-bmp-domain-only",
+      "comparison": "expected_raw_guard_difference",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-raw2000-supplementary",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-raw2001-supplementary-domain-only",
+      "comparison": "expected_raw_guard_difference",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-nul",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-vt-edge",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-ff-edge",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-vt-ff-edges",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-vt-internal",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-ff-internal",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-fffe",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-ffff",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-replacement-character",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-isolated-high-surrogate",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-isolated-low-surrogate",
+      "comparison": "equal",
+      "pass": true
+    },
+    {
+      "case_id": "M04-NAME-valid-surrogate-pair",
+      "comparison": "equal",
+      "pass": true
+    }
+  ]
+}

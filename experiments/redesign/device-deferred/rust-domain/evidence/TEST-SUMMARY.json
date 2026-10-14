@@ -1,0 +1,38 @@
+{
+  "base_sha": "b17ac548f7a8d2d6151cbdaf6af527722c67ee50",
+  "rust_version": "1.99.0",
+  "red": {
+    "exit": 101,
+    "passed": 0,
+    "failed_assertions": 12
+  },
+  "green": {
+    "exit": 0,
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0
+  },
+  "restored_green": {
+    "exit": 0,
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0
+  },
+  "paired_probes": {
+    "total": 32,
+    "equal": 30,
+    "expected_raw_guard_differences": 2,
+    "unexpected_differences": 0
+  },
+  "android_actual_load": "NOT_RUN",
+  "M03": "blocked_contract",
+  "persistent_effects": "NOT_IMPLEMENTED",
+  "source_sha256": {
+    "src/lib.rs": "29df28d6cdc34dcefc66586f80c53131700343d768ed665ae14c835189d2b759",
+    "tests/domain.rs": "1dad9ff9a3d4fdfd28fe1820cbd3d70c4d6bad41208f52ab337f2625077048bc",
+    "examples/normalize_probe.rs": "8d80850208ed198a0ba9b512e37cce39a3bb0c469460818cb8c0707acae252a4",
+    "tests/differential.py": "b970bcbcbc0f61d89e2e686eef7695ff15606b95011be72ed578feca8c735973",
+    "Cargo.toml": "b44c5430ae567825651a9efb601a70f50dc4c652f2abc4325e06bffeff2fd1c3",
+    "Cargo.lock": "a73e1eedb318003fc8341a950bb626ff4f43fa69ee37be93e7005d3cdec53538"
+  }
+}

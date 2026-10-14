@@ -1,0 +1,15 @@
+use rd_p01_domain_experiment::*;
+fn raw(s: &str) -> Vec<u16> { s.encode_utf16().collect() }
+fn snapshot() -> ProvisionalSnapshot { ProvisionalSnapshot { scope: "synthetic-store".into(), supplier_id: "supplier-a".into(), name: "甲".into(), revision: 1, deleted: false } }
+#[test] fn nfc_and_bom_trim_without_nfkc() { assert_eq!(normalize_raw(&raw("\u{feff} e\u{301} \u{feff}")), Ok("é".into())); assert_eq!(normalize_raw(&raw("Ａ")), Ok("Ａ".into())); }
+#[test] fn empty_and_whitespace() { for s in ["", " \t\n\r\u{feff}"] { assert_eq!(normalize_raw(&raw(s)), Err(DomainError::Required)); } }
+#[test] fn codepoint_boundaries() { assert_eq!(normalize_raw(&raw(&"😀".repeat(200))).unwrap().chars().count(), 200); assert_eq!(normalize_raw(&raw(&"😀".repeat(201))), Err(DomainError::NameLimit)); }
+#[test] fn raw_limit_before_trim() { assert_eq!(normalize_raw(&raw(&(" ".repeat(1999)+"甲"))), Ok("甲".into())); assert_eq!(normalize_raw(&raw(&(" ".repeat(2000)+"甲"))), Err(DomainError::RawLimit)); }
+#[test] fn raw_limit_counts_utf16_not_scalars() { assert_eq!(normalize_raw(&raw(&"😀".repeat(1001))), Err(DomainError::RawLimit)); }
+#[test] fn xml_before_trim() { for s in ["\u{b}甲", "甲\u{c}", "\u{0}甲", "\u{fffe}", "\u{ffff}"] { assert_eq!(normalize_raw(&raw(s)), Err(DomainError::InvalidXml)); } }
+#[test] fn malformed_utf16() { for units in [vec![0xd800], vec![0xdc00], vec![0xd800, 0x7532]] { assert_eq!(normalize_raw(&units), Err(DomainError::InvalidXml)); } }
+#[test] fn legal_xml_internal_whitespace_preserved() { assert_eq!(normalize_raw(&raw("甲\t\n\r 乙\u{fffd}")), Ok("甲\t\n\r 乙\u{fffd}".into())); }
+#[test] fn read_checks_identity_scope_and_deleted() { let mut s = snapshot(); assert_eq!(read_name(&s, "synthetic-store", "supplier-a"), Ok("甲")); assert_eq!(read_name(&s, "other", "supplier-a"), Err(DomainError::Scope)); assert_eq!(read_name(&s, "synthetic-store", "supplier-b"), Err(DomainError::Scope)); s.deleted = true; assert_eq!(read_name(&s, "synthetic-store", "supplier-a"), Err(DomainError::Missing)); }
+#[test] fn candidate_is_pure_and_same_name_bumps_only_candidate() { let s = snapshot(); let before = s.clone(); let c = edit_candidate(&s, &s.scope, &s.supplier_id, 1, &raw(" 甲 ")).unwrap(); assert_eq!(c.normalized_name, "甲"); assert_eq!(c.expected_revision, 1); assert_eq!(c.candidate_revision, 2); assert_eq!(s, before); }
+#[test] fn rejected_edits_keep_snapshot() { let s = snapshot(); let before = s.clone(); assert_eq!(edit_candidate(&s, "other", &s.supplier_id, 1, &raw("乙")), Err(DomainError::Scope)); assert_eq!(edit_candidate(&s, &s.scope, &s.supplier_id, 0, &raw("乙")), Err(DomainError::Revision)); assert_eq!(edit_candidate(&s, &s.scope, &s.supplier_id, 2, &raw("乙")), Err(DomainError::Revision)); assert_eq!(edit_candidate(&s, &s.scope, &s.supplier_id, 1, &[0xd800]), Err(DomainError::InvalidXml)); assert_eq!(s, before); }
+#[test] fn overflow_is_rejected_not_wrapped() { let mut s = snapshot(); s.revision = u64::MAX; assert_eq!(edit_candidate(&s, &s.scope, &s.supplier_id, u64::MAX, &raw("乙")), Err(DomainError::RevisionOverflow)); }
