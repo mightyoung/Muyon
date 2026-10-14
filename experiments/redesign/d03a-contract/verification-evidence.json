@@ -1,0 +1,64 @@
+{
+  "scope": "experimental evidence only; raw logs outside repository",
+  "python_version": "3.12.14",
+  "sqlite_version": "3.53.1",
+  "fixture_source_sha": "55480f06490983a54e38908b043b06b4b02df451",
+  "worktree_base_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "evidence_directory": "/workspace/reports/d03a-contract-experiment-20261014",
+  "commands": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s experiments/redesign/d03a-contract/tests -v",
+      "final_exit_code": 0,
+      "final_tests": 24,
+      "physical_process_crash_tests": 2
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 experiments/redesign/d03a-contract/run_experiment.py --evidence-dir /workspace/reports/d03a-contract-experiment-20261014",
+      "final_exit_code": 0,
+      "complete_scenario_pass": 0,
+      "partial": 63,
+      "not_run": 9,
+      "matched_assertions": 274,
+      "mismatched_assertions": 0
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 experiments/redesign/d03a-contract/mutations.py --evidence-dir /workspace/reports/d03a-contract-experiment-20261014",
+      "tool_exit_code": 0,
+      "mutation_test_exit_codes": [
+        1,
+        1,
+        1
+      ],
+      "restored_exit_code": 0
+    }
+  ],
+  "source_sha256": {
+    "mutations.py": "e38903880a467b98b6a94117e6c42032d6ac5bb97a19269803ec330df4ffb881",
+    "run_experiment.py": "d32dd5aaf516891cc209ac7d96c29ce943015cac0579316750a7072dda2b1b4a",
+    "seam.py": "6c270f56c043ac85810e20902435c3a52a2e29aa353f1078407fbe1dfec5a5d0",
+    "tests/test_adapter.py": "d1c803a479aa8dfec5c2b5b2153f4105a297bb106c7c19a2e083afed07a1cb49",
+    "tests/test_seam.py": "de41c5ed2e0911cb5aa1ee05144fd40c98435932fa37358d3eaabf06892837ed"
+  },
+  "safe_report_sha256": {
+    "observations.json": "5b302effaadcb0d8e3d66db3580caaa81a1ee7a050ea3fa3021ea8a3d2d32428",
+    "mutation-observations.json": "14b801167f2133b42cc3377b89a86757d229337a4b9dd1705f4f7c6cc5118c60"
+  },
+  "raw_log_sha256": {
+    "01-red.log": "245c3882cb00c842e2b5335d08388d7723d087783672065a3cfb5efc7f80d837",
+    "03-adapter-red.log": "0a04887a19012356f11abb035f458bf039b81a691f774ab5074e3b43ada9ba8f",
+    "06-projection-red.log": "1c7a509eebcffdf9ac440173c2ddf3ec070a586af826f108a19cf948359db8d2",
+    "13-durable-red.log": "65c35df821233987d277af7d6125fd0868a9f937b7494328663af58e1332f548",
+    "14-checkpoint-red.log": "7787941332fac92a34795438120f9cb11dfd6d983f721270da2f9ebab7ab6bb1",
+    "15-durable-green.log": "378010fab0b1b290815d1d3e58bfad4109730311389e236205795f32120038b5",
+    "16-final-scenarios.log": "3870dad50cc47aed47191b931c96ab4d5dadee1e76f62c7086c64752d3efe86e",
+    "17-final-mutations.log": "9b9486b4821180b2a2a1a508e72433ba75af429756205b9b9e0eb2e1b7d1b72f",
+    "remove_full_domain_rejection.log": "7ab7ae3fe1d340ea517f570d00d618171059b90c22b3ac4faf394e9aaca6d39b",
+    "old_epoch_erases_real_receipt_hint.log": "75c1ffa79dfc5f437acf5ea31ace55aa683d5918da2d1ce114eabac41f899e5d",
+    "premature_commit_between_projection_and_cursor.log": "b7a97774f845253dcf961a64338c48682485ea64092fce648849352a88b91f3d",
+    "mutation-restored-green.log": "52de46e11bece5fe42b58cbde7562fe3e8aa8ce4a2b0dd2da21b361031cc6770"
+  },
+  "M03": "blocked_contract",
+  "runtime_52": "not_run",
+  "classification_29": "not_run",
+  "original_v1_unchanged": true
+}
