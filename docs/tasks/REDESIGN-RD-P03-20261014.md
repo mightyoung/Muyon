@@ -1,0 +1,23 @@
+# RD-P03 desktop mock first slice — 2026-10-14
+
+Owner: device_deferred_desktop_mock. Independent branch `task/device-deferred-desktop-mock-20261014`, base `b17ac548f7a8d2d6151cbdaf6af527722c67ee50`. WRITE only `experiments/redesign/device-deferred/desktop-mock/` and this task; no product apps/packages/schema/root dependency changes. Parent is sole develop integrator.
+
+User directed four parallel reversible development tasks and deferred device verification. This implementation proceeds without an Android runner; device/load and release acceptance gates remain. **Android actual load NOT_RUN; M03 blocked_contract.** This is neither a selection freeze nor dual-platform production acceptance.
+
+Read v1.3.2 page handbook D01.1 and M02 supplier-name, minimal authorization and recovery contracts. Implemented directory/list/detail with synthetic stable supplier identity/revision, raw draft, mock normalization preview, controlled mock commit, receipt display, unknown read-only lookup and CAS conflict display retaining draft. States loading/ready/draft/submitting/conflict/unknown are separate; button click or submitting never equals saved. Same intent double dispatch is suppressed. Resolved explicit new edit creates new intent/receipt even with same normalized name. Late receipts are identity-checked and accounted independently; old epochs cannot overwrite newer projection. NotFound or unreadable lookup stays unknown. No real model/network/database/shell request from the port or renderer.
+
+## Reversible seams and pending freeze
+
+SupplierEditor accepts read/preview/commit/lookup methods at provisional `RustCorePort`-shaped seam. Current MemoryRustCorePort only simulates effects and validates CAS/plan ownership in memory. UI sends complete raw without trim/NFC/XML stripping. Normalization inside mock is an approximation, not Rust/table-version equivalence evidence. Its synthetic intent IDs/plan IDs/receipt objects are not frozen DTOs or production identity. Production adapter must replace the port and provide trusted scope/authority/grant/risk/plan validation, durable recovery, store/stream domains, canonical payload/Unicode versions and receipt authenticity. Mock uses local numeric revision only, not a wire integer decision. No native IPC authority is exposed. Electron main isolates renderer and preload exposes only static lab metadata; production capability boundary remains NOT_CONNECTED.
+
+## Actual verification
+
+Node v24.19.0 built-in tests: first RED 9 behavioral assertions failed, no import/compile failures; GREEN 9. Identity strengthening RED 2 behavioral assertions failed (9 passed), final GREEN **11 passed / 0 failed / 0 skipped**. Covers raw bytes/code units unchanged (combining mark + forbidden control), double save one dispatch, new same-name independent receipt/revision, CAS draft retention, unknown/no fresh intent/no redispatch, notFound remaining unknown, old epoch preview rejection, late receipt separate ledger, wrong-intent and wrong-supplier receipt rejection. Full scoped package `npm test` is the same suite; parent handles combined/product regression and CI.
+
+Preinstalled Chromium actual DOM event smoke PASS: edit → raw input → preview → submit → rendered mock receipt and ready state. Headless CDP screenshot produced and visually inspected. At 200% font: viewport1280, scrollWidth1265, inputBottom833.86, saveTop949.86; no horizontal overflow or button/input overlap in this measured view. First dump-DOM launch hung with environment NSS/background diagnostics; original logs retained, no installs or new persistent security settings. This finite browser smoke is not full accessibility, Electron IPC or device acceptance. Electron adapter/main/preload syntax checks pass; **Electron runtime NOT_RUN**, runtime absent.
+
+Raw logs/screenshots: `/workspace/reports/device-deferred-rd-p03-20261014/` (`model-red.log`, `identity-red.log`, `model-green.log`, `dom-result.json`, `dom-smoke.html`, `desktop.png`, `desktop-200.png`, `chromium.log`). Summary only in `evidence.json`; no binaries/cache/secrets in commit.
+
+## Remaining gates
+
+Actual Electron/native bridge, trusted authorization and mode/risk policy, durable process restart/receipt identity, read-revocation projection clearing, multiobject/multiwindow integration, full keyboard/accessibility and full D01.1 cancellation flow are not completed by this slice. M03 original exits remain pending; Android load/device tests are deferred, not erased or declared passed. No extra licenses accepted or dependencies installed. No develop/main merge, force push, branch deletion, deployment or real data.

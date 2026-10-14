@@ -1,0 +1,44 @@
+{
+  "scope": "RD-P03 provisional desktop mock only",
+  "base": "b17ac548f7a8d2d6151cbdaf6af527722c67ee50",
+  "node": "24.19.0",
+  "model_tests": {
+    "red": {
+      "assertion_failures": 9,
+      "passes": 0
+    },
+    "green": 9,
+    "identity_red": {
+      "assertion_failures": 2,
+      "passes": 9
+    },
+    "final_green": 11,
+    "skipped": 0
+  },
+  "browser": {
+    "runtime": "preinstalled Chromium via local CDP",
+    "dom": "PASS actual edit/input/preview/save events, mock receipt rendered",
+    "layout_200_percent": {
+      "viewport": 1280,
+      "scroll_width": 1265,
+      "raw_bottom": 833.859375,
+      "save_top": 949.859375
+    },
+    "first_dump_dom": "hung, original environment log retained outside repository",
+    "screenshot": "outside repository: /workspace/reports/device-deferred-rd-p03-20261014/desktop.png"
+  },
+  "electron_runtime": "NOT_RUN missing installed Electron",
+  "android_actual_load": "NOT_RUN",
+  "M03": "blocked_contract",
+  "native_port": "NOT_CONNECTED",
+  "new_dependencies_installed": false,
+  "permissions": "no new license/account/paid/deploy/system permissions",
+  "remaining": [
+    "native trusted adapter and authorization",
+    "durable restart journal and store/scope/stream identity",
+    "final Unicode version and M03 wire encoding",
+    "full D01.1 keyboard/accessibility/multiwindow acceptance",
+    "Electron actual runtime",
+    "Android device and release acceptance"
+  ]
+}
