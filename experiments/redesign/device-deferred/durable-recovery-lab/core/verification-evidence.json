@@ -1,0 +1,133 @@
+{
+  "status": "provisional_linux_private_file_experiment",
+  "product_base_sha": "676331048611aa1fb0f226ec300f6bac633e98a0",
+  "documentation_parent_sha": "5fcb03555ed9e6b1d868443d6aac32a4bfb86532",
+  "rust_version": "1.99.0",
+  "android_actual_load": "NOT_RUN",
+  "M03": "blocked_contract",
+  "results": {
+    "initial_red": {
+      "build_exit": 0,
+      "test_exit": 1,
+      "methods": 14,
+      "assertion_failures_including_subtests": 21,
+      "errors": 0
+    },
+    "initial_green": {
+      "test_exit": 0,
+      "methods": 14
+    },
+    "binding_axis_red": {
+      "methods": 21,
+      "assertion_failures": 3,
+      "test_exit": 1
+    },
+    "pair_id_red": {
+      "methods": 1,
+      "assertion_failures": 1,
+      "test_exit": 1
+    },
+    "readonly_sigkill_red": {
+      "methods": 2,
+      "assertion_failures_including_subtests": 3,
+      "test_exit": 1
+    },
+    "null_red": {
+      "methods": 1,
+      "assertion_failures": 1,
+      "test_exit": 1
+    },
+    "restored_green": {
+      "test_exit": 0,
+      "methods": 26,
+      "failed": 0,
+      "skipped": 0
+    },
+    "cargo_test": {
+      "exit": 0,
+      "unit_tests": 0
+    },
+    "exit90_unique_fault_boundaries": 8,
+    "sigkill_fault_boundaries": 2,
+    "concurrent_same_intent_processes": 6,
+    "concurrent_actual_effects": 1
+  },
+  "actual_external_effect_observations": {
+    "record_count": 42,
+    "source": "actual private effects.json bytes read by tests, never reducer self-report",
+    "external_raw_sha256": "0e63bf81abcfc7c135a04bccacb19f0428f0730323e7c32335b7078241345191"
+  },
+  "mutations": {
+    "source_sha256": "42b6d70af109477f65377d4d557e587c2de5dbffd38c2b200f2a8ec0f729f336",
+    "restored": true,
+    "mutants": [
+      {
+        "mutant": "pending_after_effect",
+        "test": "test_pending_durable_before_effect_and_unknown_never_retry",
+        "build_exit": 0,
+        "test_exit": 1,
+        "assertion_detected": true
+      },
+      {
+        "mutant": "unknown_redispatch",
+        "test": "test_pending_durable_before_effect_and_unknown_never_retry",
+        "build_exit": 0,
+        "test_exit": 1,
+        "assertion_detected": true
+      },
+      {
+        "mutant": "snapshot_erases_receipt",
+        "test": "test_slow_snapshot_does_not_erase_receipt",
+        "build_exit": 0,
+        "test_exit": 1,
+        "assertion_detected": true
+      },
+      {
+        "mutant": "rollback_ignores_external_history",
+        "test": "test_state_rollback_before_pending_cannot_redispatch",
+        "build_exit": 0,
+        "test_exit": 1,
+        "assertion_detected": true
+      }
+    ]
+  },
+  "binary_sha256": "9c5d8aeb6607e8bc6275b68854c79ace37ff85accef8b23e23d65cddfc774223",
+  "source_hashes": {
+    "Cargo.toml": "97faa6422356f6c6d75806f1b73fac4e6ac7d99c8f82d9c4d788637d735bcd56",
+    "Cargo.lock": "ed8fe87a76cc0495bea0bba60ef43aa586f7a91258a828cbce580c875a7cf9a4",
+    "src/main.rs": "42b6d70af109477f65377d4d557e587c2de5dbffd38c2b200f2a8ec0f729f336",
+    "tests/process.py": "9280b994070f534962c2a71fef8327c095dfbaa5feb15b7d47fd2b3f318efb91",
+    "mutations.py": "9d7a51e0b69f691d208066ec1f1ee921d858de8c87f072f2946a789dd31967b0"
+  },
+  "logs_sha256": {
+    "restored-green.log": "1e33b0b272252992fa678015898c8d51ce3d1ec8f30bdc110aa94678b563c6f4",
+    "cargo-test-final.log": "7361d9fe0085f8dba7bb2cbe8c524681ead9236c80ac16379b1036544a0b904a",
+    "null-red.log": "5567dc99ff525d83414debc72f1d69e9f8935c32ef368dfcb895a06b9c95dc39",
+    "rollback_ignores_external_history.log": "0f8243911e6ca6e12cc00d42e6dad48bee711d3fb6d1abb5312f75043a3e854b",
+    "rollback_ignores_external_history-build.log": "1d82142cd5a39572f4b1312b70bfcbf8da9c5f53cc2500ccf2b8a6f938efe55e",
+    "snapshot_erases_receipt.log": "81182fe743e055f5eb22e37b90840cf966b3fc47f132da2efeb9fba5eef086be",
+    "snapshot_erases_receipt-build.log": "d807be444f7c1d75de0cdb1aa9d708de8f9d3e51a31d8831f1c92ef6a6f02daa",
+    "unknown_redispatch.log": "e6fdfa774df9b1538c3c3a874918ac89efebd403c9a80f0be1d376f924be24d5",
+    "unknown_redispatch-build.log": "079f3095e65d49c7f623eb11713d6014e1c1cb5796aaa1f6d2f11ff606ce4268",
+    "pending_after_effect.log": "328421a4428c79ddedc6cc55cc352e39c39cdea55e8308a645001864d6b15690",
+    "pending_after_effect-build.log": "03a366455b141005d60ea0566cd85ecbd74241263e3a8020a2c713ba6b96923c",
+    "final-green.log": "130b6b1ff75325125f6c827ba2e46d3fd21a0f47099f9cb0431eef685735ce8c",
+    "build-final.log": "43507cd6075f8cd4a06b574f4cc8e8e20bc82740629cc097c69dbe486e00c250",
+    "readonly-sigkill-red.log": "a3af423b02d21e5d55a12944667b21f19ab4aac153111f2c02887d33b84e3e94",
+    "binding-green.log": "a2b5713e31597f17b76be5a8cdb9b1bb5a835e2f2310eb6b54027e4e4d6095ae",
+    "build-binding-green.log": "43507cd6075f8cd4a06b574f4cc8e8e20bc82740629cc097c69dbe486e00c250",
+    "pair-id-red.log": "3d949e67942cdcdad98b44d580ae44d627816e02ab22826c3657a391bd7698e8",
+    "binding-axis-red.log": "711454dd249ce266839302fd1f5d29f4e9b777ab696ab4ab984636519816a4db",
+    "green.log": "a8af9e5ccdf1ecb2f0224b0603b1034c48aa5f97e8288dca1e02af15d42907c7",
+    "build-green.log": "51bd4a9fab2bda672a105b5b79878f02c9181f2615e325e0cc198066e9e78b39",
+    "red.log": "7f9b0d8561cd9c4620621a029b5cd9472b0ce902332cadb5e04993b6a1db2a3a",
+    "build-red.log": "bb95ef37384ffde32e1f72fce8f6ca8bac61fed067a6eb91fae8f9ed0ad09029"
+  },
+  "limitations": [
+    "local_cooperating_Linux_flock_rename_fsync_only",
+    "no_hardware_power_loss_test",
+    "no_real_provider_exactly_once",
+    "no_both_domains_clone_or_rollback_guarantee",
+    "no_product_authority_schema_or_backup_restore"
+  ]
+}
