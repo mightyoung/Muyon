@@ -158,3 +158,17 @@ test('MOCK host regression: native redo reuses exact original buffer history aft
  for(const type of ['keyDown','keyUp'])await call('Input.dispatchKeyEvent',{type,key:'z',code:'KeyZ',windowsVirtualKeyCode:90,modifiers:2});await requests(2);assert.equal(actions[1].raw,'A\r\nB\ud800');
  for(const type of ['keyDown','keyUp'])await call('Input.dispatchKeyEvent',{type,key:'y',code:'KeyY',windowsVirtualKeyCode:89,modifiers:2});await requests(3);assert.equal(actions[2].raw,'AB\ud800');
 });
+
+test('MOCK host regression: two durable sessions keep mobile detail/editor free of directory at 200% text',async()=>{
+ const s=fixture(edit());s.recoverable_sessions=[{session:'mock-session',supplier:'S1',status:'editing'},{session:'other-original-session',supplier:'S2',status:'unknown'}];
+ try{
+  await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await open(s);await evaluate("document.documentElement.style.fontSize='32px'");
+  assert.equal(state.recoverable_sessions.length,2);assert.equal(await evaluate("document.querySelectorAll('#recoverable-sessions button').length"),1);
+  assert.equal(await evaluate('document.body.dataset.view'),'editor');assert.equal(await evaluate("getComputedStyle(document.getElementById('directory-search')).display"),'none','mobile full editor must hide directory even with a recovery button');
+  await click('back-detail');assert.equal(await evaluate('document.body.dataset.view'),'detail');assert.equal(await evaluate("getComputedStyle(document.getElementById('directory-search')).display"),'none','mobile detail must hide directory even with a recovery button');
+  await click('back-list');assert.equal(await evaluate('document.body.dataset.view'),'list');assert.notEqual(await evaluate("getComputedStyle(document.getElementById('directory-search')).display"),'none','mobile list retains directory and original-session recovery');
+  await click('supplier-S1');await requests(1);await click('resume-editor');assert.equal(await evaluate('document.body.dataset.view'),'editor');assert.equal(await evaluate("document.getElementById('directory-search').getClientRects().length"),0);
+  const layout=await evaluate("({width:innerWidth,scroll:document.documentElement.scrollWidth,rawBottom:document.getElementById('raw-name').getBoundingClientRect().bottom,buttonsTop:document.getElementById('editor-actions').getBoundingClientRect().top})");assert.ok(layout.scroll<=layout.width,JSON.stringify(layout));assert.ok(layout.buttonsTop>=layout.rawBottom,JSON.stringify(layout));
+  await evaluate("document.documentElement.style.fontSize=''");await call('Emulation.setDeviceMetricsOverride',{width:1400,height:1000,deviceScaleFactor:1,mobile:false});assert.notEqual(await evaluate("getComputedStyle(document.getElementById('directory-search')).display"),'none','desktop retains directory while editing');assert.ok(await evaluate("document.getElementById('recover-other-original-session').getClientRects().length>0"),'desktop retains recovery control');
+ }finally{await evaluate("document.documentElement.style.fontSize=''");await call('Emulation.setDeviceMetricsOverride',{width:1400,height:1000,deviceScaleFactor:1,mobile:false});}
+});
