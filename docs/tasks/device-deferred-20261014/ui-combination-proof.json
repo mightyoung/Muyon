@@ -1,0 +1,35 @@
+{
+  "source_domain": "bb0c77cb83684e5e8e053465f463fe4d887d342c",
+  "source_recovery": "44b54efd7ebcf2f3221f8509ad331ad98a42e779",
+  "source_desktop": "e80d5077d4d41366336d59fd1b143ed5af04f55a",
+  "source_android": "97274f9ff8c4960e5b5ccede4673d2863ae20500",
+  "rust_dependency_candidate": "1f10e8a006b066b305b96abb4c33aa951fb07872",
+  "new_combination_runs": {
+    "desktop_Node": {
+      "pass": 27,
+      "fail": 0,
+      "command": "node --test tests/*.test.mjs"
+    },
+    "android_JVM": {
+      "pass": 38,
+      "fail": 0,
+      "command": "RD_P04_OUTPUT=/tmp/device-deferred-ui-combination-kotlin experiments/redesign/device-deferred/android-mock/run-tests.sh"
+    }
+  },
+  "unchanged_rust_dependency_runs_at_1f10e8a": {
+    "domain": 12,
+    "recovery": 19,
+    "D01a": 33,
+    "D03a": 24
+  },
+  "Android_actual_load": "NOT_RUN",
+  "Compose_compile_render": "NOT_RUN",
+  "Electron_runtime": "NOT_RUN",
+  "M03": "blocked_contract",
+  "new_install_license_account_paid_deploy_actions": false,
+  "raw_logs_external": "/workspace/reports/device-deferred-ui-combination-20261014",
+  "raw_log_hashes": {
+    "android-jvm.log": "b3868efa6b4628989be41e00cec8f96f302309948ecbd0b10b23555589cdec5e",
+    "desktop-node.log": "ca0729670f855dfe4805c4a6d77ed3a78764e0e26c103a90504bd8abf80a1d83"
+  }
+}
