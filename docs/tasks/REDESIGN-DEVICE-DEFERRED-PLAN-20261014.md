@@ -59,3 +59,16 @@ SPIKE 候选 `b17ac548f7a8d2d6151cbdaf6af527722c67ee50`（原交付 `206af7c4136
 
 重要行为失败、共写冲突、DUT借 oracle 造实际值、私密数据进日志、产品 schema 冒充冻结或需要新增许可/账号/资源时，
 暂停受影响路线并回报；其他不依赖该问题的路线继续。未核事实维持 not_run/partial，不把剩余缺口整体标可跳过。
+
+## SPIKE 集成实际终态
+
+候选 `b17ac548f7a8d2d6151cbdaf6af527722c67ee50` 的 CI38528169445 completed/success，
+完整解码 checkout SHA 核对；8 suites 共4199 pass/207 skip/0 fail，8 analyze、Doctor23、Laya与coverage成功。
+B 本轮新工作区实跑 Rust18、Python10、8H1子进程、Linux JVM21paired和两个提前降计数变异均达到预期；
+仅本轮缺 SDK/NDK 未重新交叉构建，Android源码/既有ELF证据范围单独保留。
+正常no-ff merge `1bbba1fa73ab95e66168bc75e8a2d07d4c6384b9` 已推 develop并回读相同SHA，
+parents为325e798d37044cbc0617f5bddbd14ccb9adec390与b17ac548f7a8d2d6151cbdaf6af527722c67ee50，
+受测与merge tree同为3c6a734c114237c44d6bf466a005fbdb91de7eca。
+[合入后CI38530399778](https://github.com/mightyoung/Muyon/actions/runs/38530399778)登记时in_progress，不冒称终态。
+main仍cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003。许可偏差原文保留，未新接受条款。
+四路任务仍独立实施/待固定审查；并非已合入或M03冻结。外仓证据 /workspace/reports/spike01-integration-20261014。
