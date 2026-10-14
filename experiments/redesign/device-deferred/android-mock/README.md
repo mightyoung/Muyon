@@ -60,3 +60,14 @@ requires a newer authoritative snapshot to refresh the list after a late effect.
 No real native Rust adapter is wired, and no product authorization rules/schema
 have been frozen. M03 remains **blocked_contract**. Devices are deferred for
 continued reversible development, but release and device acceptance gates remain.
+
+## Temporary revision binding (R1 follow-up)
+
+Registered commands retain the original `expectedRevision` for their entire
+in-memory lifetime. This lab chooses canonical `r<decimal u64>` counter labels;
+only the exact arithmetic successor is a valid effect result. Leading zeroes,
+empty/malformed values, skipped/backwards counters and overflow are rejected.
+For example r9→r10 is accepted; strings are never ordered lexicographically.
+This mock encoding is replaceable, not the M03 encoding of product/opaque revisions.
+Invalid effects never enter the receipt ledger or set SAVED; a later correctly
+bound original receipt may resolve unknown. This is not durable disk persistence.

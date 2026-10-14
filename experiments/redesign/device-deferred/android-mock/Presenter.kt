@@ -7,7 +7,16 @@ data class Draft(val intent: String, val raw: String, val expectedRevision: Stri
 data class Preview(val intent: String, val supplierId: String, val raw: String, val expectedRevision: String)
 enum class Decision { ALLOW, CONFIRM, HARD_DENY }
 data class Plan(val ref: String, val decision: Decision)
-data class Command(val intent: String, val supplierId: String, val plan: String, val domain: Domain, val generation: Long)
+data class Command(val intent: String, val supplierId: String, val plan: String, val domain: Domain, val generation: Long, val expectedRevision: String)
+/** Mock-only revision grammar. No product wire encoding or opaque-version ordering.
+ * Canonical r<decimal u64> counter, one effect increments exactly once; max has no successor.
+ */
+private fun mockRevisionSuccessor(revision: String): String? {
+    if(!Regex("r(?:0|[1-9][0-9]*)").matches(revision)) return null
+    val value=revision.substring(1).toULongOrNull() ?: return null
+    if(value==ULong.MAX_VALUE) return null
+    return "r${value+1uL}"
+}
 sealed interface Outcome {
     val command: Command
     data class Unknown(override val command: Command): Outcome
@@ -76,8 +85,12 @@ class SupplierPresenter(private val port: RustCorePort) {
     fun save() {
         val saved=state.saved ?: return; val draft=state.draft ?: return; val currentDomain=domain ?: return
         if(state.page!=Page.EDIT || submitted.containsKey(draft.intent) || pendingPlan!=null) return
+        if(mockRevisionSuccessor(draft.expectedRevision)==null) {
+            state=state.copy(status=Status.DENIED)
+            return
+        }
         val plan=port.preview(Preview(draft.intent,saved.id,draft.raw,draft.expectedRevision))
-        val command=Command(draft.intent,saved.id,plan.ref,currentDomain,state.generation)
+        val command=Command(draft.intent,saved.id,plan.ref,currentDomain,state.generation,draft.expectedRevision)
         when(plan.decision) {
             Decision.HARD_DENY->state=state.copy(status=Status.DENIED)
             Decision.CONFIRM->{pendingPlan=command; state=state.copy(status=Status.CONFIRM)}
@@ -99,6 +112,8 @@ class SupplierPresenter(private val port: RustCorePort) {
         if(submitted[command.intent]!=command) return
         if(outcome is Outcome.Effect) {
             if(outcome.supplier.id!=command.supplierId || outcome.receipt.isBlank()) return
+            val expectedResult=mockRevisionSuccessor(command.expectedRevision) ?: return
+            if(outcome.supplier.revision!=expectedResult) return
             if(retainedReceipts.containsKey(command.intent)) return
             retainedReceipts[command.intent]=outcome
         }
