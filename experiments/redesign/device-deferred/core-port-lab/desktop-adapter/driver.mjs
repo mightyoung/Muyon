@@ -2,6 +2,7 @@ import {readFile,writeFile} from 'node:fs/promises';import {pathToFileURL} from 
 import {RustCoreProcess} from './port.mjs';
 export async function runScenario(scenario){
  if(!scenario||typeof scenario.scenario_id!=='string'||!Array.isArray(scenario.steps))throw new Error('invalid scenario');
+ if(!['baseline','lost-reply'].includes(scenario.seed))throw new Error('explicit trusted seed required');
  const port=await RustCoreProcess.start(scenario.seed);const replies=[];
  try{
   for(const [index,step] of scenario.steps.entries()){

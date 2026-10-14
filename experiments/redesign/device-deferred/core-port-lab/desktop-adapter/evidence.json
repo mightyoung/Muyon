@@ -83,5 +83,19 @@
   "Electron_DOM_runtime": "NOT_RUN",
   "Android_actual_load": "NOT_RUN",
   "M03": "blocked_contract",
-  "new_dependencies_licenses_models_devices": false
+  "new_dependencies_licenses_models_devices": false,
+  "seed_required_followup": {
+    "review_source": "42268b97c1f31d4b84c9ff5e78e92934eaac0b74",
+    "red": {
+      "passed": 25,
+      "failed": 1,
+      "exit": 1
+    },
+    "green": {
+      "passed": 26,
+      "failed": 0,
+      "exit": 0
+    },
+    "scope": "required explicit baseline/lost-reply selector before process startup; no silent missing-seed default"
+  }
 }
