@@ -1,0 +1,8 @@
+PLATFORM os=Linux arch=amd64 vm=OpenJDK 64-Bit Server VM
+NATIVE_LOAD unicode=17.0.0
+
+thread '<unnamed>' (5696) panicked at src/lib.rs:173:28:
+SPIKE01_SYNTHETIC_PANIC
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+PASS pairs=21 errors callbacks unsubscribe close_wait reentry native_drop panic
+BENCH exploratory iterations=1000 typed_ns=150231 json_ns=109328 no_SLA_selection

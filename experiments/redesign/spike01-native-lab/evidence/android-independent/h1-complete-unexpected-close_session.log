@@ -1,0 +1,3 @@
+destructor_enter close_session unexpected
+destructor_return
+H1_PASS close_session unexpected ['reentrant_rejected', 'callback_rejected']

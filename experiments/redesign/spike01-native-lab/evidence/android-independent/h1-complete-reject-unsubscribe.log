@@ -1,0 +1,3 @@
+destructor_enter unsubscribe reject
+destructor_return
+H1_PASS unsubscribe reject ['reentrant_rejected', 'callback_rejected']
