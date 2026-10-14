@@ -1,0 +1,195 @@
+{
+  "fixed_sha": "ad548c35552fba74946827bc9cb5068d9ccc128d",
+  "base": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "commands": {
+    "suite": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "experiments/redesign/d01a-contract",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit": 0
+    },
+    "matrix": {
+      "command": [
+        "python3",
+        "experiments/redesign/d01a-contract/driver.py",
+        "--output",
+        "/workspace/reports/redesign-d01a-experiment-independent-20261014/observations.json"
+      ],
+      "exit": 0
+    },
+    "expected-negative": {
+      "command": [
+        "python3",
+        "experiments/redesign/d01a-contract/driver.py",
+        "--mutate-expected",
+        "--output",
+        "/workspace/reports/redesign-d01a-experiment-independent-20261014/expected-negative.json"
+      ],
+      "exit": 1
+    },
+    "mutations": {
+      "command": [
+        "python3",
+        "experiments/redesign/d01a-contract/mutation_runner.py",
+        "--evidence-dir",
+        "/workspace/reports/redesign-d01a-experiment-independent-20261014/mutant-raw",
+        "--output",
+        "/workspace/reports/redesign-d01a-experiment-independent-20261014/mutations.json"
+      ],
+      "exit": 0
+    },
+    "restored-green": {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "experiments/redesign/d01a-contract",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit": 0
+    }
+  },
+  "tests_passed": 33,
+  "restored_tests_passed": 33,
+  "matrix_counts": {
+    "partial_experimental": 61,
+    "not_run": 16,
+    "partial_comparison_mismatches": 0
+  },
+  "matrix_matches_fixed_observations": true,
+  "whole_case_pass_count": 0,
+  "all_77_expected_identity_changes_actual_unchanged": true,
+  "61_executed_counterfactuals_mismatch_detected": true,
+  "forbidden_oracle_77_rejected": true,
+  "mutants": [
+    {
+      "name": "bypass_actual_value_check",
+      "exit": 1,
+      "tests_run": 32,
+      "assertion_failures": 1,
+      "failure_names": [
+        "test_none_field_does_not_replace_actual_value_check"
+      ],
+      "required_failure_name": "test_none_field_does_not_replace_actual_value_check",
+      "killed": true,
+      "log_path": "/workspace/reports/redesign-d01a-experiment-independent-20261014/mutant-raw/bypass_actual_value_check.log",
+      "log_sha256": "bdfa21b890debd7d1831ac9334cd608b4a2e2165d7566374fe060f9a0531633d"
+    },
+    {
+      "name": "require_Auto_rule_in_FullAllow",
+      "exit": 1,
+      "tests_run": 32,
+      "assertion_failures": 4,
+      "failure_names": [
+        "test_FullAllow_missing_Auto_rule_is_not_a_contract_block",
+        "test_expected_access_occurs_after_DUT_invocation",
+        "test_expected_and_identity_never_enter_DUT",
+        "test_wrong_expected_is_detected_without_changing_DUT_result"
+      ],
+      "required_failure_name": "test_FullAllow_missing_Auto_rule_is_not_a_contract_block",
+      "killed": true,
+      "log_path": "/workspace/reports/redesign-d01a-experiment-independent-20261014/mutant-raw/require_Auto_rule_in_FullAllow.log",
+      "log_sha256": "d484813f6ae52bfee512a30261af202ecdbd0a8838e1a7336c53bc362cc94755"
+    },
+    {
+      "name": "downgrade_commercial_lineage",
+      "exit": 1,
+      "tests_run": 32,
+      "assertion_failures": 1,
+      "failure_names": [
+        "test_none_target_does_not_downgrade_commercial_source"
+      ],
+      "required_failure_name": "test_none_target_does_not_downgrade_commercial_source",
+      "killed": true,
+      "log_path": "/workspace/reports/redesign-d01a-experiment-independent-20261014/mutant-raw/downgrade_commercial_lineage.log",
+      "log_sha256": "350ff4378f3f81e40f1f8e55898ad38573c13c246825ac956e659ff378ab2a89"
+    }
+  ],
+  "v2_77_rows_exact_fact_copy_current_only": true,
+  "v1_33_files_byte_preserved": true,
+  "author_RED_log_proof": [
+    {
+      "phase": "RED_empty_seam",
+      "hash_verified": true,
+      "actual_assertion_RED": true
+    },
+    {
+      "phase": "RED_driver",
+      "hash_verified": true,
+      "actual_assertion_RED": true
+    },
+    {
+      "phase": "RED_unknown_source",
+      "hash_verified": true,
+      "actual_assertion_RED": true
+    },
+    {
+      "phase": "RED_source_rules_readonly_model",
+      "hash_verified": true,
+      "actual_assertion_RED": true
+    },
+    {
+      "phase": "RED_mutation_orchestration",
+      "hash_verified": true,
+      "actual_assertion_RED": true
+    },
+    {
+      "phase": "RED_lineage_proof_domain",
+      "hash_verified": true,
+      "actual_assertion_RED": true
+    },
+    {
+      "phase": "GREEN_experiment_suite",
+      "hash_verified": true,
+      "actual_assertion_RED": false
+    },
+    {
+      "phase": "matrix",
+      "hash_verified": true,
+      "actual_assertion_RED": false
+    },
+    {
+      "phase": "expected_only_negative",
+      "hash_verified": true,
+      "actual_assertion_RED": false
+    },
+    {
+      "phase": "mutations",
+      "hash_verified": true,
+      "actual_assertion_RED": false
+    }
+  ],
+  "authorized_paths": [
+    "A\tdocs/tasks/REDESIGN-D01A-EXPERIMENT-20261014.md",
+    "A\texperiments/redesign/d01a-contract/README.md",
+    "A\texperiments/redesign/d01a-contract/driver.py",
+    "A\texperiments/redesign/d01a-contract/fixture_adapter.py",
+    "A\texperiments/redesign/d01a-contract/mutation_runner.py",
+    "A\texperiments/redesign/d01a-contract/results/mutations.json",
+    "A\texperiments/redesign/d01a-contract/results/observations.json",
+    "A\texperiments/redesign/d01a-contract/results/run-summary.json",
+    "A\texperiments/redesign/d01a-contract/seam.py",
+    "A\texperiments/redesign/d01a-contract/test_driver.py",
+    "A\texperiments/redesign/d01a-contract/test_mutations.py",
+    "A\texperiments/redesign/d01a-contract/test_seam.py",
+    "A\tfixtures/redesign/classification-purpose-v2/README.md",
+    "A\tfixtures/redesign/classification-purpose-v2/SHA256SUMS",
+    "A\tfixtures/redesign/classification-purpose-v2/manifest.json",
+    "A\tfixtures/redesign/classification-purpose-v2/purpose-records.json"
+  ],
+  "author_status": "",
+  "partial_scope": "host-metadata-assumption admission/routing only; no scanner/issuer/capability consumption/payload/db/receipt/native",
+  "M03": "blocked_contract"
+}

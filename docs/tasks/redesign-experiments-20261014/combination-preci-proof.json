@@ -1,0 +1,119 @@
+{
+  "base_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "local_combination_sha": "2c76a1647f19f262e17444b7a08ae60cf34e7ff6",
+  "author_sources": {
+    "D01a": "ad548c35552fba74946827bc9cb5068d9ccc128d",
+    "D03a": "eef7561289421c58e88896fa69c868403ca1d3c5"
+  },
+  "changed_files": [
+    "docs/tasks/REDESIGN-CONTRACT-EXPERIMENTS-20261014.md",
+    "docs/tasks/REDESIGN-D01A-EXPERIMENT-20261014.md",
+    "docs/tasks/REDESIGN-D03A-EXPERIMENT-20261014.md",
+    "docs/tasks/redesign-experiments-20261014/intake-state.json",
+    "experiments/redesign/d01a-contract/README.md",
+    "experiments/redesign/d01a-contract/driver.py",
+    "experiments/redesign/d01a-contract/fixture_adapter.py",
+    "experiments/redesign/d01a-contract/mutation_runner.py",
+    "experiments/redesign/d01a-contract/results/mutations.json",
+    "experiments/redesign/d01a-contract/results/observations.json",
+    "experiments/redesign/d01a-contract/results/run-summary.json",
+    "experiments/redesign/d01a-contract/seam.py",
+    "experiments/redesign/d01a-contract/test_driver.py",
+    "experiments/redesign/d01a-contract/test_mutations.py",
+    "experiments/redesign/d01a-contract/test_seam.py",
+    "experiments/redesign/d03a-contract/README.md",
+    "experiments/redesign/d03a-contract/mutation-observations.json",
+    "experiments/redesign/d03a-contract/mutations.py",
+    "experiments/redesign/d03a-contract/observations.json",
+    "experiments/redesign/d03a-contract/run_experiment.py",
+    "experiments/redesign/d03a-contract/seam.py",
+    "experiments/redesign/d03a-contract/tests/test_adapter.py",
+    "experiments/redesign/d03a-contract/tests/test_seam.py",
+    "experiments/redesign/d03a-contract/verification-evidence.json",
+    "fixtures/redesign/classification-purpose-v2/README.md",
+    "fixtures/redesign/classification-purpose-v2/SHA256SUMS",
+    "fixtures/redesign/classification-purpose-v2/manifest.json",
+    "fixtures/redesign/classification-purpose-v2/purpose-records.json"
+  ],
+  "allowed_scope": true,
+  "product_and_original_sources_unchanged": true,
+  "purpose_v2_sha256sum_exit": 0,
+  "suites": {
+    "D01a": {
+      "command": "python3 -m unittest discover -s experiments/redesign/d01a-contract -p 'test_*.py' -v",
+      "exit": 0,
+      "tests": 33
+    },
+    "D03a": {
+      "command": "python3 -m unittest discover -s experiments/redesign/d03a-contract/tests -p 'test_*.py' -v",
+      "exit": 0,
+      "tests": 24
+    }
+  },
+  "matrices": {
+    "D01a": {
+      "partial_experimental": 61,
+      "not_run": 16,
+      "whole_case_pass": 0,
+      "mismatch": 0
+    },
+    "D03a": {
+      "partial": 63,
+      "not_run": 9,
+      "whole_case_pass": 0,
+      "matched_assertions": 274,
+      "mismatch": 0
+    }
+  },
+  "mutations": {
+    "D01a": {
+      "checker_exit": 0,
+      "subprocess_exits": [
+        1,
+        1,
+        1
+      ]
+    },
+    "D03a": {
+      "checker_exit": 0,
+      "subprocess_exits": [
+        1,
+        1,
+        1
+      ],
+      "restored_tests": 24,
+      "restored_exit": 0
+    }
+  },
+  "expected_only_negative": {
+    "exit": 1,
+    "mismatch": 1,
+    "actual_unchanged": true
+  },
+  "raw_logs_in_repository": false,
+  "M03": "blocked_contract",
+  "product_gate_52": "not_run",
+  "CI": "pending",
+  "external_log_hashes": {
+    "d01a-tests.log": "0b5f032dc72ce34846cf8562a88858d659c8c4f303f605b8365a59d5338755e7",
+    "d03a-tests.log": "18518671682071da124091e0993cb51e6a021bc18db1ecf9a47dd07c903481ce"
+  },
+  "independent_reviews": {
+    "D01a": {
+      "sha": "ad548c35552fba74946827bc9cb5068d9ccc128d",
+      "decision": "C0_experimental_only",
+      "review": "d01a-independent-review.md"
+    },
+    "D03a": {
+      "sha": "eef7561289421c58e88896fa69c868403ca1d3c5",
+      "decision": "C0_experimental_intake_only",
+      "review": "d03a-independent-review.md"
+    }
+  },
+  "review_hashes": {
+    "d03a-independent-review.md": "3571d8595f8ad6d14d22ab47fec23c06e1b40628f6b24aa714ce27d5190a4d02",
+    "d01a-independent-review.md": "12b2a0c0c2e72a38f1a30ee633846f9793166bbf83e56742c8564944442a9746",
+    "d01a-independent-proof.json": "8c8ff00b5735fbafd99017df332e7afbb96428274da3e29e004168e8c122784e",
+    "d03a-independent-proof.json": "c49be223f60128765382e04557c63becf7bce20d35f83cdfe54f1b7ded7966c1"
+  }
+}
