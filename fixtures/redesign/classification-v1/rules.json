@@ -1,0 +1,134 @@
+{
+  "artifact_kind": "fixture_semantic_catalog_not_product_schema",
+  "status": "draft",
+  "rules": [
+    {
+      "rule_id": "CLS-DECL-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "字段类别；P6、OQ、SN",
+      "coverage_proposal": "固定 module/schema/object/field 声明及版本；不包含未声明字段，不替代实际值检查",
+      "ownership_input": "03/04/14；A00清单→M02最小字段合同→M03编码；D01b完整规则，W3/W4接线",
+      "missing_behavior_input": "未知/缺分类单元 unreviewed；不套旧代码默认 none，不使用模型自报标签"
+    },
+    {
+      "rule_id": "CLS-CREDENTIAL-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "公共本机检查；P6、HS",
+      "coverage_proposal": "声明检测格式、解码/规范化域及版本，检查实际文本/被支持解析结果；不承诺识别所有未知秘密",
+      "ownership_input": "14/18；D01a首片假服务断言、D01b规则与误报/漏报评估；W4/W7实际出口，附件域随W1/W6",
+      "missing_behavior_input": "已知命中→credential；疑似、失败、截断、未执行或覆盖不足→unreviewed，保留非秘密原因"
+    },
+    {
+      "rule_id": "USER-TEXT-v1",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "用户文本分类；P6 L842–848、HS",
+      "coverage_proposal": "可信提交事件、任务/scope内完整受支持普通文字，依赖CLS-CREDENTIAL-001；可用时 personal，已知商业等来源不降类",
+      "ownership_input": "03/11/14；A00语义样本、D01a最小模式组合、D01b规则冻结；W4真实入口",
+      "missing_behavior_input": "无真实来源或检查/覆盖不完整→unreviewed；不逐句要求标签、不由外部模型完成可信分类"
+    },
+    {
+      "rule_id": "CLS-ATTACH-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "附件单元；P6、HS",
+      "coverage_proposal": "可信选择事件下每页/chunk/已支持图像转换结果；继承来源，文本可复用受支持文本规则。每种parser/OCR版本独立列能力域",
+      "ownership_input": "07/14/15/16；D01b公共合同；W1解析，W6 OCR/检索，W5导出复用",
+      "missing_behavior_input": "未解析、加密、损坏、未知嵌入物、OCR域未验证→对应单元unreviewed；不把选中事件当整份许可"
+    },
+    {
+      "rule_id": "CLS-PROVIDER-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "工具/MCP内容；P6、HS",
+      "coverage_proposal": "宿主审定provider/tool/schema版本、字段与自由文本内容规则；只覆盖注册路径，不信服务自报分类",
+      "ownership_input": "03/14/23；D01b合同，W4客户端及工具，W7配置；Hub在W3/W5适配",
+      "missing_behavior_input": "未注册provider/schema/自由文本规则→unreviewed并明确无覆盖；不能改标user_input"
+    },
+    {
+      "rule_id": "CLS-MODEL-FIELD-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "模型值写字段；RV V132-I01、P6、HS、HD",
+      "coverage_proposal": "已知业务字段的实际新生成参数，与CLS-DECL-001、CLS-CREDENTIAL-001和来源限制合取；包括name、嵌套值与最终参数版本",
+      "ownership_input": "03/04/08/14；A00目录→M02/D01a首片离线组合→M03表示；D01b完整出口，W3/W4真实接线",
+      "missing_behavior_input": "缺字段声明或输出覆盖→该值unreviewed；已覆盖干净值继承字段类别，不无限未审；不强迫纯UI动作调用模型"
+    },
+    {
+      "rule_id": "CLS-MODEL-FREE-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "模型自由文字；P6、HS",
+      "coverage_proposal": "每种输出用途/模板/受支持文本域的宿主规则；保持输入谱系，对新增文字独立查凭据。自由新增部分采用什么可信类别须逐域冻结",
+      "ownership_input": "08/14/21；D01b，W4；摘要/记忆由D03/D11及W6复用",
+      "missing_behavior_input": "没有该输出域的可信类别规则或输出检查→该部分unreviewed；不能自动套USER-TEXT-v1或统一none"
+    },
+    {
+      "rule_id": "CLS-DERIVE-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "派生约束；P6、HS",
+      "coverage_proposal": "复制、摘要、OCR、切chunk、检索片段、记忆候选；保留可定位来源类别、用途、撤权/遗忘与派生版本；新增内容另查",
+      "ownership_input": "07/14/15/21；D01b/D03/D05/D06，W4/W6；新记忆路径D11",
+      "missing_behavior_input": "谱系或限制无法验证→相关单元unreviewed或不可用；撤权/遗忘直接阻用；不从其他获准源推导被禁源可用"
+    },
+    {
+      "rule_id": "CLS-TEMPLATE-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "受控技术元数据；P6",
+      "coverage_proposal": "固定宿主模板的常量、受约束结构值及已覆盖插槽；不含用户文件名、任意URL、模型错误文字",
+      "ownership_input": "03/13/14/20；M03模板表示、D01b，W4/W7",
+      "missing_behavior_input": "模板未冻结或新增插槽无内容规则→该插槽unreviewed；不得将任意字符串藏入metadata"
+    },
+    {
+      "rule_id": "CLS-METADATA-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "来源型元数据；P6、HS",
+      "coverage_proposal": "标题、文件名、URL、引用标签、工具错误、通知摘要、证据说明；沿对应来源规则及用途逐项处理",
+      "ownership_input": "13/14/19/20；D01b/D03，W4/W5/W6/W7",
+      "missing_behavior_input": "无可信覆盖→不输出该单元，给受控原因；错误消息和日志不可回显被挡内容"
+    },
+    {
+      "rule_id": "CLS-REUSE-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "历史与缓存重用；P6、HS",
+      "coverage_proposal": "旧判定、tool history、摘要缓存、恢复版本的有效性检查；重验内容/来源/规则/当前用途版本",
+      "ownership_input": "13/14/16/20/21；D03a最小版本关系、D01b/D03/D06，W4/W6",
+      "missing_behavior_input": "缺证据或版本不匹配→失效并重分/不使用；“曾发送”不等于当前许可；只影响对应单元"
+    },
+    {
+      "rule_id": "CLS-PURPOSE-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "最终投影门禁；P6",
+      "coverage_proposal": "模型请求、业务工具、导出、日志、通知、记忆及证据各自的实际最终内容，含序列化/编码对应关系；规则覆盖不代表授权",
+      "ownership_input": "11/13/14/19/20/21；D01a假传输、D01b全链；W4/W5/W6/W7相应出口",
+      "missing_behavior_input": "缺用途/来源/版本证据不派发；未定Auto风险合同记动作侧合同未定；不以FullAllow替代其他模式"
+    },
+    {
+      "rule_id": "CLS-TRIM-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "本机裁剪与重分；P6、HS、RV S01",
+      "coverage_proposal": "确定性可定位非必要片段；新内容版本重新查验，证明任务完整或已允许部分结果；显示实际使用范围",
+      "ownership_input": "14/20；D01b/D03，W4；A1/A2页面与历史、D06留存/遗忘配合",
+      "missing_behavior_input": "无法证明裁剪保语义→不发不完整动作；只给非秘密缺口。无保留依据不另存秘密原文或裁剪差分"
+    },
+    {
+      "rule_id": "CLS-AUTH-CHANNEL-001",
+      "status": "proposed_unfrozen",
+      "synthetic_version": "fixture-rule-v1-not-registered",
+      "basis": "凭据通道隔离；P6、V131-T03",
+      "coverage_proposal": "可信连接credentialRef与身份绑定认证端点、允许header/专用认证参数；不授予模型选择凭据或跨服务重定向",
+      "ownership_input": "13/18/23；D01b合同，W4/W7适配，W5传输复核",
+      "missing_behavior_input": "无连接身份/绑定/真实能力→认证不可用；秘密不退回业务正文，不复用另一目的地凭据"
+    }
+  ],
+  "rule_status_is_not_execution_evidence": true,
+  "applicability_note": "Original missing_behavior_input is historical A00 wording; interpret with root A00-APPLICABILITY-CLARIFICATION: unreviewed prohibits model/business outbound, not every local body; current local purpose still requires minimum actual ValueCheck/source/field/authorization evidence. All 14 global rules are not a pure local-name prerequisite."
+}

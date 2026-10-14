@@ -1,0 +1,641 @@
+{
+  "artifact_kind": "fixture_semantic_record_not_product_DTO",
+  "case_id": "V131-T02/F10",
+  "parent_case": "V131-T02",
+  "status": "draft",
+  "execution_status": "not_run",
+  "catalog_group": "F",
+  "title": "Auto分类与风险分流分开",
+  "source_catalog_section": "5.2",
+  "rule_ids": [
+    "CLS-DECL-001",
+    "CLS-MODEL-FIELD-001",
+    "CLS-CREDENTIAL-001",
+    "CLS-PURPOSE-001"
+  ],
+  "all_rules_status": "proposed_unfrozen",
+  "variants": [
+    {
+      "variant_id": "low",
+      "input": {
+        "clean_text": "  明澜设备（合成）é  ",
+        "opaque_secret_refs": [],
+        "mutations": [],
+        "assumed_normalized_value": "明澜设备（合成）é",
+        "supplier_id": "00000000-0000-4000-8000-000000000001",
+        "expected_revision": 7,
+        "old_clean_name": "合成供应商甲",
+        "provider_schema": "synthetic-model-output-v1",
+        "model_output_ref": "fake.output.1",
+        "complete_single_field": true
+      },
+      "source_inheritance": {
+        "unit_ref": "unit.synthetic.1",
+        "source_kind": "model_generated",
+        "trusted_event_ref": "host.synthetic.event.1",
+        "source_version": "source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": "supplier.name",
+        "trusted_field_base": "none",
+        "field_declaration_version": "product-01e56cc2d729dab70e1b1def05c3aa93b28f421a"
+      },
+      "current_version": {
+        "input": "content-v1",
+        "normalized": "content-v1-normalized",
+        "checked": "content-v1-normalized",
+        "final": "content-v1-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": true
+      },
+      "purpose": {
+        "current": "local_supplier_name_write",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "unit.synthetic.1"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "unit.synthetic.1"
+        ]
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-DECL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-MODEL-FIELD-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "content-v1-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false
+      },
+      "mode_facts": {
+        "mode": "Auto",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "synthetic_frozen_assumption_for_routing_only",
+        "risk": "low",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "none",
+          "attempt_result": "classified_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "auto_eligible_under_synthetic_frozen_rule",
+        "local_body_allowed": true,
+        "model_body_allowed": true,
+        "business_outbound_allowed": true,
+        "extra_risk_confirmations": 0,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "trusted_field_and_actual_value_check_both_required": true,
+        "normalization_before_actual_value_check": true,
+        "expected_new_effects": 1,
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ]
+      }
+    },
+    {
+      "variant_id": "high",
+      "input": {
+        "clean_text": "  明澜设备（合成）é  ",
+        "opaque_secret_refs": [],
+        "mutations": [],
+        "assumed_normalized_value": "明澜设备（合成）é",
+        "supplier_id": "00000000-0000-4000-8000-000000000001",
+        "expected_revision": 7,
+        "old_clean_name": "合成供应商甲",
+        "provider_schema": "synthetic-model-output-v1",
+        "model_output_ref": "fake.output.1",
+        "complete_single_field": true
+      },
+      "source_inheritance": {
+        "unit_ref": "unit.synthetic.1",
+        "source_kind": "model_generated",
+        "trusted_event_ref": "host.synthetic.event.1",
+        "source_version": "source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": "supplier.name",
+        "trusted_field_base": "none",
+        "field_declaration_version": "product-01e56cc2d729dab70e1b1def05c3aa93b28f421a"
+      },
+      "current_version": {
+        "input": "content-v1",
+        "normalized": "content-v1-normalized",
+        "checked": "content-v1-normalized",
+        "final": "content-v1-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": true
+      },
+      "purpose": {
+        "current": "local_supplier_name_write",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "unit.synthetic.1"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "unit.synthetic.1"
+        ]
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-DECL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-MODEL-FIELD-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "content-v1-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false
+      },
+      "mode_facts": {
+        "mode": "Auto",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "synthetic_frozen_assumption_for_routing_only",
+        "risk": "high",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "none",
+          "attempt_result": "classified_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "await_current_intent_confirmation",
+        "local_body_allowed": true,
+        "model_body_allowed": true,
+        "business_outbound_allowed": true,
+        "extra_risk_confirmations": 1,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "trusted_field_and_actual_value_check_both_required": true,
+        "normalization_before_actual_value_check": true,
+        "expected_new_effects": 0,
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ]
+      }
+    },
+    {
+      "variant_id": "prohibited_risk",
+      "input": {
+        "clean_text": "  明澜设备（合成）é  ",
+        "opaque_secret_refs": [],
+        "mutations": [],
+        "assumed_normalized_value": "明澜设备（合成）é",
+        "supplier_id": "00000000-0000-4000-8000-000000000001",
+        "expected_revision": 7,
+        "old_clean_name": "合成供应商甲",
+        "provider_schema": "synthetic-model-output-v1",
+        "model_output_ref": "fake.output.1",
+        "complete_single_field": true
+      },
+      "source_inheritance": {
+        "unit_ref": "unit.synthetic.1",
+        "source_kind": "model_generated",
+        "trusted_event_ref": "host.synthetic.event.1",
+        "source_version": "source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": "supplier.name",
+        "trusted_field_base": "none",
+        "field_declaration_version": "product-01e56cc2d729dab70e1b1def05c3aa93b28f421a"
+      },
+      "current_version": {
+        "input": "content-v1",
+        "normalized": "content-v1-normalized",
+        "checked": "content-v1-normalized",
+        "final": "content-v1-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": true
+      },
+      "purpose": {
+        "current": "local_supplier_name_write",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "unit.synthetic.1"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "unit.synthetic.1"
+        ]
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-DECL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-MODEL-FIELD-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "content-v1-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false
+      },
+      "mode_facts": {
+        "mode": "Auto",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "synthetic_frozen_assumption_for_routing_only",
+        "risk": "prohibited_risk",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "none",
+          "attempt_result": "classified_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "risk_policy_reject_in_Auto",
+        "local_body_allowed": true,
+        "model_body_allowed": true,
+        "business_outbound_allowed": true,
+        "extra_risk_confirmations": 0,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "trusted_field_and_actual_value_check_both_required": true,
+        "normalization_before_actual_value_check": true,
+        "expected_new_effects": 0,
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ]
+      }
+    },
+    {
+      "variant_id": "unfrozen",
+      "input": {
+        "clean_text": "  明澜设备（合成）é  ",
+        "opaque_secret_refs": [],
+        "mutations": [],
+        "assumed_normalized_value": "明澜设备（合成）é",
+        "supplier_id": "00000000-0000-4000-8000-000000000001",
+        "expected_revision": 7,
+        "old_clean_name": "合成供应商甲",
+        "provider_schema": "synthetic-model-output-v1",
+        "model_output_ref": "fake.output.1",
+        "complete_single_field": true
+      },
+      "source_inheritance": {
+        "unit_ref": "unit.synthetic.1",
+        "source_kind": "model_generated",
+        "trusted_event_ref": "host.synthetic.event.1",
+        "source_version": "source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": "supplier.name",
+        "trusted_field_base": "none",
+        "field_declaration_version": "product-01e56cc2d729dab70e1b1def05c3aa93b28f421a"
+      },
+      "current_version": {
+        "input": "content-v1",
+        "normalized": "content-v1-normalized",
+        "checked": "content-v1-normalized",
+        "final": "content-v1-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": true
+      },
+      "purpose": {
+        "current": "local_supplier_name_write",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "unit.synthetic.1"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "unit.synthetic.1"
+        ]
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-DECL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-MODEL-FIELD-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "unit.synthetic.1"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "content-v1-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false
+      },
+      "mode_facts": {
+        "mode": "Auto",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "unfrozen_required_for_Auto",
+        "risk": "unfrozen",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "none",
+          "attempt_result": "classified_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "blocked_contract_Auto_risk_rule",
+        "local_body_allowed": true,
+        "model_body_allowed": true,
+        "business_outbound_allowed": true,
+        "extra_risk_confirmations": 0,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "trusted_field_and_actual_value_check_both_required": true,
+        "normalization_before_actual_value_check": true,
+        "expected_new_effects": 0,
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ]
+      }
+    }
+  ],
+  "notes": "四分支只是假规则路由假设，真实模型字段Auto规则未冻。禁止风险不冒称不可绕过hardlimit。分类不随模式变化；unfrozen不默认confirm。",
+  "evidence_required_not_yet_available": [
+    "real implementation SHA and command",
+    "host current-purpose ValueCheck and coverage evidence",
+    "source/permission/version evidence",
+    "final model/tool payload capture where applicable",
+    "authoritative receipt and database diff where applicable",
+    "independent review"
+  ],
+  "runtime_acceptance_claim": false
+}
