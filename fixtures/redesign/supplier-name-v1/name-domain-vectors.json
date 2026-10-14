@@ -1,0 +1,969 @@
+{
+  "fixture_format": "m04-supplier-name-harness-v1",
+  "format_scope": "offline test input recipes and semantic expectations; not a business DTO or M03 wire schema",
+  "kind": "actual_dart_normalizer_inputs",
+  "product_source_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "design_source_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "m02_decision_sha": "2fd91b03a7b5f0888c1e11ab0ba559a580e970d0",
+  "source_references": {
+    "normalize": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/values.dart",
+      "lines": "43-69"
+    },
+    "supplier": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/entities.dart",
+      "lines": "11-46"
+    },
+    "validate_payload": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/quotation.dart",
+      "lines": "10-25"
+    },
+    "tool_guard": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "138-179"
+    },
+    "tool_schema": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "80-134"
+    },
+    "tool_transaction": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "390-465,518-570"
+    },
+    "old_form": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/inquiry_module/lib/src/features/catalog/catalog_form.dart",
+      "lines": "251-268,295-303"
+    },
+    "store_version": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/store.dart",
+      "lines": "378-398,435-439,502-514"
+    },
+    "receipt_lookup": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_receipt_lookup.dart",
+      "lines": "8-59"
+    },
+    "receipt_identity": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_write_receipts.dart",
+      "lines": "7-65"
+    }
+  },
+  "execution": "not_run",
+  "golden": null,
+  "golden_status": "pending_independent_dart_reference",
+  "classification_or_authorization_proof": "not_supplied",
+  "cases": [
+    {
+      "case_id": "M04-NAME-chinese",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u5408\u6210\u4f9b\u5e94\u5546\u7532"
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\u5408\u6210\u4f9b\u5e94\u5546\u7532"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-chinese-edges",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "  \u5408\u6210\u4f9b\u5e94\u5546\u7532  "
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\u5408\u6210\u4f9b\u5e94\u5546\u7532"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-nfc-compose",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "e\u0301"
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\u00e9"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-nfc-canonical-angstrom",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u212b"
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\u00c5"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-not-nfkc",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\uff21\u5408\u6210"
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\uff21\u5408\u6210"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-no-casefold",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "Synthetic ABC"
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "Synthetic ABC"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-cjk-200",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "repeat": {
+          "literal": "\u7532",
+          "count": 200
+        }
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "repeat": {
+            "literal": "\u7532",
+            "count": 200
+          }
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-cjk-201",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "repeat": {
+          "literal": "\u7532",
+          "count": 201
+        }
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "exceeds 200 codepoints"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-emoji-200",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "repeat": {
+          "literal": "\ud83d\ude00",
+          "count": 200
+        }
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "repeat": {
+            "literal": "\ud83d\ude00",
+            "count": 200
+          }
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-emoji-201",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "repeat": {
+          "literal": "\ud83d\ude00",
+          "count": 201
+        }
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "exceeds 200 codepoints"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-decomposed-200",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "repeat": {
+          "literal": "e\u0301",
+          "count": 200
+        }
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "repeat": {
+            "literal": "\u00e9",
+            "count": 200
+          }
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-decomposed-201",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "repeat": {
+          "literal": "e\u0301",
+          "count": 201
+        }
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "exceeds 200 codepoints"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-empty",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": ""
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "required"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-trim-empty-xml-whitespace",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\t\n\r  "
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "required"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-trim-valid-edges",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\t\n\r \u7532 \r\n\t"
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\u7532"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-internal-whitespace",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u7532\t\n\r  \u4e59"
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\u7532\t\n\r  \u4e59"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-raw2000-bmp",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "concat": [
+          {
+            "repeat": {
+              "literal": " ",
+              "count": 1999
+            }
+          },
+          {
+            "literal": "\u7532"
+          }
+        ]
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\u7532"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-raw2001-bmp-domain-only",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "concat": [
+          {
+            "repeat": {
+              "literal": " ",
+              "count": 2000
+            }
+          },
+          {
+            "literal": "\u7532"
+          }
+        ]
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\u7532"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-raw2000-supplementary",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "concat": [
+          {
+            "repeat": {
+              "literal": " ",
+              "count": 1798
+            }
+          },
+          {
+            "repeat": {
+              "literal": "\ud83d\ude00",
+              "count": 101
+            }
+          }
+        ]
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "repeat": {
+            "literal": "\ud83d\ude00",
+            "count": 101
+          }
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-raw2001-supplementary-domain-only",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "concat": [
+          {
+            "repeat": {
+              "literal": " ",
+              "count": 1799
+            }
+          },
+          {
+            "repeat": {
+              "literal": "\ud83d\ude00",
+              "count": 101
+            }
+          }
+        ]
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "repeat": {
+            "literal": "\ud83d\ude00",
+            "count": 101
+          }
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-nul",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u0000\u7532"
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-vt-edge",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u000b\u7532"
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-ff-edge",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u7532\f"
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-vt-ff-edges",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u000b\u7532\f"
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-vt-internal",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u7532\u000b\u4e59"
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-ff-internal",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\u7532\f\u4e59"
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-fffe",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\ufffe"
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-ffff",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\uffff"
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-replacement-character",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "literal": "\ufffd"
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\ufffd"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-isolated-high-surrogate",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "utf16_code_units": [
+          55296
+        ]
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-isolated-low-surrogate",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "utf16_code_units": [
+          56320
+        ]
+      },
+      "proposed_semantics": {
+        "outcome": "FormatException",
+        "field": "name",
+        "reason": "invalid XML character or isolated surrogate"
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    },
+    {
+      "case_id": "M04-NAME-valid-surrogate-pair",
+      "status": "not_run",
+      "m02_semantics": [
+        "N02",
+        "N03",
+        "N05",
+        "N06",
+        "N07"
+      ],
+      "reference_entry": "normalizeText(input, name, 200, required: true)",
+      "source_refs": [
+        "normalize"
+      ],
+      "input_recipe": {
+        "utf16_code_units": [
+          55357,
+          56832
+        ]
+      },
+      "proposed_semantics": {
+        "outcome": "value",
+        "value_recipe": {
+          "literal": "\ud83d\ude00"
+        }
+      },
+      "scope_limit": "isolated actual Dart name normalizer; no claim of API, tool, permission, CAS, receipt, or credential checks",
+      "golden": null
+    }
+  ]
+}
