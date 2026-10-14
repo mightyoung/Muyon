@@ -35,7 +35,7 @@
 Owner: host writer ONLY `operable-supplier-flow/host/`, `docs/tasks/REDESIGN-RD-P08A-20261014.md`.
 Consumes unchanged P07 read/preview/commit/lookup and installed binary. Produces documented `host/PROJECTION.md` plus `host/flow.mjs`, `host/server.mjs`, own tests/run entry. See parent CONTRACT for API.
 - [ ] Write and execute actual adapter RED for name save/restart-original-receipt and CAS conflict against private P07 DB; no compile-only RED.
-- [ ] Implement minimal host orchestration and durable session binding, no business logic clone; synthetic S2 creation only in trusted startup fixture provisioning.
+- [ ] Implement minimal host orchestration and durable session binding, no business logic clone; trusted startup reuses unchanged P07 init containing S1/S2; no host SQL mutation.
 - [ ] Test raw invalid input, same IDs/names, preview-only, double submit, stale CAS, actual commit/reply loss and process restart lookup, missing/unavailable lookup fail closed, altered binding, hostile Host/Origin/body/path requests; independently inspect SQLite effect counts.
 - [ ] Record GREEN command/exits/counts, first failures, storage/runtime assumptions and limits; commit only owned files, no push/merge.
 
