@@ -15,6 +15,10 @@ let draftDrain = null;
 let queue = Promise.resolve();
 let inputSnapshot = null;
 let pastedRaw = null;
+let discardIntent = null;
+let rawHistory = [];
+let rawHistoryIndex = -1;
+let historyUnavailable = false;
 const active = new Set();
 const record = r => r && typeof r.supplier === 'string' && typeof r.name === 'string' && typeof r.revision === 'string';
 function originalReceipt(r, editor) {
@@ -43,8 +47,8 @@ async function request(action) {
   session=next.session;sessionStorage.setItem(sessionKey,session);
   projection=next;uncertain=false;message('');
   const editor=next.editor;
-  if(editor?.intent!==draftIntent){draftIntent=editor?.intent??null;raw=editor?.raw??null;rawVersion=0;persistedVersion=0;}
-  else if(rawVersion===persistedVersion){raw=editor?.raw??null;}
+  if(editor?.intent!==draftIntent){draftIntent=editor?.intent??null;raw=editor?.raw??null;rawVersion=0;persistedVersion=0;resetRawHistory();}
+  else if(rawVersion===persistedVersion){const nextRaw=editor?.raw??null;if(nextRaw!==raw){raw=nextRaw;resetRawHistory();}}
   render();return next;
 }
 async function persistDraft() {
@@ -60,10 +64,16 @@ function drainDraft() {
   if(draftDrain)return draftDrain;
   draftDrain=enqueue(persistDraft,'draft').finally(()=>{draftDrain=null;});return draftDrain;
 }
+function cancelPhaseAllowed() {
+  const e=projection?.editor;
+  return !uncertain&&!!e&&(['editing','prepared','rejected','saved'].includes(e.status)||e.status==='conflict'&&e.reason==='Revision'||e.status==='unavailable'&&e.reason==='preview_unavailable');
+}
 function action(name, fields={}) {
-  if(active.has(name))return;
+  if(active.has(name)||name==='cancel'&&(busy||!cancelPhaseAllowed()))return;
   active.add(name);
   const pending=enqueue(async()=>{
+    // Revalidate a queued cancellation against the latest host phase as well.
+    if(name==='cancel'&&!cancelPhaseAllowed())return;
     // A previous transport failure can leave a retained buffer after refresh.
     // This explicit action persists it before asking Rust to preview/save.
     if(name==='preview'||name==='save')await persistDraft();
@@ -89,12 +99,13 @@ function renderControls() {
   $('raw-name').readOnly=!writable||uncertain||(busy&&busyKind==='action');
   $('preview').disabled=(busy&&busyKind!=='draft')||uncertain||!writable;
   $('save').disabled=blocked||e?.status!=='prepared'||rawVersion!==persistedVersion;
-  $('cancel').disabled=blocked||!e||['unknown','saving'].includes(e.status);
+  $('cancel').disabled=busy||!cancelPhaseAllowed();
   $('lookup').disabled=busy||!e||!['unknown','saving','saved','conflict'].includes(e.status)&&!uncertain;
   $('refresh').disabled=busy;
   $('resume-editor').hidden=!e;$('resume-editor').disabled=busy;
   for(const button of $('recoverable-sessions').querySelectorAll('button'))button.disabled=busy||!!e;
-  $('confirm-discard').disabled=busy||uncertain;
+  $('confirm-discard').disabled=busy||!cancelPhaseAllowed()||discardIntent!==e?.intent;
+  if($('confirm-discard').disabled)$('discard-warning').hidden=true;
   $('draft-status').textContent=rawVersion>persistedVersion?'本机缓冲尚未获宿主持久化确认。':'草稿内容来自宿主投影；输入只修改草稿。';
 }
 function renderList() {
@@ -144,6 +155,10 @@ function render() {
 $('supplier-search').addEventListener('input',renderList);
 // HTML textarea displays CR and CRLF as LF. Keep a separate exact UTF16
 // buffer and map display offsets into it; never apply name normalization here.
+function resetRawHistory() {
+  rawHistory=raw===null?[]:[raw];rawHistoryIndex=rawHistory.length-1;
+  inputSnapshot=null;pastedRaw=null;
+}
 function displayRaw(value) { return (value??'').replace(/\r\n?/g,'\n'); }
 function rawOffset(value, displayOffset) {
   let i=0;
@@ -152,10 +167,21 @@ function rawOffset(value, displayOffset) {
   }
   return i;
 }
-function inputRaw(nextDisplay) {
+function inputRaw(nextDisplay, inputType) {
+  historyUnavailable=false;
   const original=raw??'',previous=displayRaw(original);
   let start=0,end=previous.length,inserted=null;
   const captured=inputSnapshot;
+  const type=inputType??captured?.type;
+  if(type==='historyUndo'||type==='historyRedo'){
+    const step=type==='historyUndo'?-1:1;
+    for(let i=rawHistoryIndex+step;i>=0&&i<rawHistory.length;i+=step){
+      if(displayRaw(rawHistory[i])===nextDisplay){rawHistoryIndex=i;inputSnapshot=null;pastedRaw=null;return rawHistory[i];}
+    }
+    // Never manufacture LF-only raw text when native history exceeds known
+    // exact snapshots. Preserve the prior buffer and show the local limitation.
+    historyUnavailable=true;inputSnapshot=null;pastedRaw=null;return original;
+  }
   if(captured?.original===original){
     start=captured.start;end=captured.end;
     if(captured.data!==null&&nextDisplay===previous.slice(0,start)+displayRaw(captured.data)+previous.slice(end))inserted=captured.data;
@@ -176,22 +202,31 @@ function inputRaw(nextDisplay) {
     end=previous.length-suffix;inserted=nextDisplay.slice(start,nextDisplay.length-suffix);
   }
   inputSnapshot=null;pastedRaw=null;
-  return original.slice(0,rawOffset(original,start))+inserted+original.slice(rawOffset(original,end));
+  const next=original.slice(0,rawOffset(original,start))+inserted+original.slice(rawOffset(original,end));
+  if(next!==original){
+    rawHistory.splice(rawHistoryIndex+1);rawHistory.push(next);rawHistoryIndex++;
+    if(rawHistory.length>256){rawHistory.shift();rawHistoryIndex--;}
+  }
+  return next;
 }
 $('raw-name').addEventListener('paste',event=>{pastedRaw=event.clipboardData?.getData('text/plain')??null;});
 $('raw-name').addEventListener('beforeinput',event=>{
   const el=$('raw-name');
   inputSnapshot={original:raw,start:el.selectionStart,end:el.selectionEnd,type:event.inputType,data:event.data??(event.inputType==='insertFromPaste'?pastedRaw:null)};
 });
-$('raw-name').addEventListener('input',()=>{raw=inputRaw($('raw-name').value);rawVersion++;$('discard-warning').hidden=true;renderControls();drainDraft();});
+$('raw-name').addEventListener('input',event=>{
+  const next=inputRaw($('raw-name').value,event.inputType);
+  if(historyUnavailable){$('raw-name').value=raw;message('此原始文本撤销历史不在本机缓冲中；保留原输入，未发送草稿。');return;}
+  raw=next;rawVersion++;$('discard-warning').hidden=true;renderControls();drainDraft();
+});
 $('edit').addEventListener('click',()=>action('edit'));
 $('preview').addEventListener('click',()=>action('preview'));
 $('save').addEventListener('click',()=>action('save'));
 $('lookup').addEventListener('click',()=>action('lookup'));
 $('refresh').addEventListener('click',()=>enqueue(()=>request()));
-$('cancel').addEventListener('click',()=>{if(projection.editor?.status==='saved'){action('cancel');return;}$('discard-warning').hidden=false;$('keep-draft').focus();});
+$('cancel').addEventListener('click',()=>{if(busy||!cancelPhaseAllowed())return;if(projection.editor.status==='saved'){action('cancel');return;}discardIntent=projection.editor.intent;$('discard-warning').hidden=false;renderControls();$('keep-draft').focus();});
 $('keep-draft').addEventListener('click',()=>{$('discard-warning').hidden=true;$('cancel').focus();});
-$('confirm-discard').addEventListener('click',()=>action('cancel'));
+$('confirm-discard').addEventListener('click',()=>{if(!busy&&cancelPhaseAllowed()&&discardIntent===projection.editor?.intent)action('cancel');});
 $('back-list').addEventListener('click',()=>{document.body.dataset.view='list';$(`supplier-${projection?.selected?.supplier}`)?.focus();});
 $('back-detail').addEventListener('click',()=>{document.body.dataset.view='detail';$('D01.1-DETAIL').focus();});
 // Returning from mobile detail never creates/replaces an existing intent.

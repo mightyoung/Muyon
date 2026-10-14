@@ -130,3 +130,31 @@ test('MOCK host: native deletion targets the selected original CRLF among identi
 test('MOCK host: unchanged editing status is not repeatedly announced during draft acknowledgements',async()=>{
  await open(fixture(edit()));await evaluate("window.statusChanges=0;new MutationObserver(records=>window.statusChanges+=records.length).observe(document.getElementById('editor-status'),{childList:true,characterData:true,subtree:true})");await input('another raw draft');await requests(1);assert.equal(await evaluate('window.statusChanges'),0);
 });
+
+test('MOCK host regression: pre-opened discard confirmation blocks cancel after unknown save result',async()=>{
+ await open(fixture(edit('prepared',{preview:{normalized_name:'A',candidate_revision:'2'}})));
+ await click('cancel');assert.equal(await evaluate("document.getElementById('discard-warning').hidden"),false);
+ reply=async(a,res)=>{state.editor.status='unknown';res.setHeader('Content-Type','application/json');res.end(JSON.stringify(state));};
+ await click('save');await requests(1);assert.equal(await evaluate("document.getElementById('cancel').disabled"),true);
+ const confirmDisabled=await evaluate("document.getElementById('confirm-discard').disabled");
+ await click('confirm-discard');await new Promise(r=>setTimeout(r,100));
+ console.log('INDEPENDENT discard state',JSON.stringify({confirmDisabled,actions}));
+ assert.equal(confirmDisabled,true,'unknown must also disable an already-open discard confirmation');
+ assert.deepEqual(actions.map(a=>a.action),['save']);
+});
+test('MOCK host regression: native undo restores deleted original CRLF units',async()=>{
+ await open(fixture(edit('editing',{raw:'A\r\nB'})));
+ await evaluate("document.getElementById('raw-name').focus();document.getElementById('raw-name').setSelectionRange(1,2)");
+ await call('Input.dispatchKeyEvent',{type:'keyDown',key:'Backspace',code:'Backspace',windowsVirtualKeyCode:8});
+ await call('Input.dispatchKeyEvent',{type:'keyUp',key:'Backspace',code:'Backspace',windowsVirtualKeyCode:8});await requests(1);
+ await call('Input.dispatchKeyEvent',{type:'keyDown',key:'z',code:'KeyZ',windowsVirtualKeyCode:90,modifiers:2});
+ await call('Input.dispatchKeyEvent',{type:'keyUp',key:'z',code:'KeyZ',windowsVirtualKeyCode:90,modifiers:2});await requests(2);
+ console.log('INDEPENDENT undo actions',JSON.stringify(actions));assert.equal(actions[1].raw,'A\r\nB');
+});
+
+test('MOCK host regression: native redo reuses exact original buffer history after CRLF undo',async()=>{
+ await open(fixture(edit('editing',{raw:'A\r\nB\ud800'})));await evaluate("document.getElementById('raw-name').focus();document.getElementById('raw-name').setSelectionRange(1,2)");
+ for(const type of ['keyDown','keyUp'])await call('Input.dispatchKeyEvent',{type,key:'Backspace',code:'Backspace',windowsVirtualKeyCode:8});await requests(1);assert.equal(actions[0].raw,'AB\ud800');
+ for(const type of ['keyDown','keyUp'])await call('Input.dispatchKeyEvent',{type,key:'z',code:'KeyZ',windowsVirtualKeyCode:90,modifiers:2});await requests(2);assert.equal(actions[1].raw,'A\r\nB\ud800');
+ for(const type of ['keyDown','keyUp'])await call('Input.dispatchKeyEvent',{type,key:'y',code:'KeyY',windowsVirtualKeyCode:89,modifiers:2});await requests(3);assert.equal(actions[2].raw,'AB\ud800');
+});
