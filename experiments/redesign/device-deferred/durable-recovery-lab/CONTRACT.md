@@ -18,6 +18,8 @@ Store the projection content and complete cursor domain/watermark as one recover
 
 The directory has one writer at a time. Contention must fail closed, and process death must release writer ownership without unsafe stale-lock deletion. Invalid/truncated persisted data and write failures cannot trigger effects. Storage mechanics must describe their Linux and filesystem assumptions; process-exit tests do not prove power-loss survival, cross-device atomicity or external-provider exactly-once.
 
+Bind the state directory to its synthetic effect source using persistent pair identity, checked while both locks are held. Existing state must not silently adopt a missing or different effect source. If state is rolled back while the original effect source remains, an already-recorded intent cannot produce a second effect; compare the complete effect binding and preserve unknown where receipt proof is insufficient. Simultaneously rolling back both stores or cloning their identities is outside this lab's recovery guarantees, not a supported backup workflow.
+
 ## Verification gate
 
 First collect real assertion RED from subprocess tests using actual temporary directories and exits at persistence boundaries. Then implement the minimal store and collect GREEN. Required fault coverage includes before/after pending, after effect but before receipt, receipt persistence before lost response, and before/after projection pair commit. Reopen with a new OS process and inspect physical state, stable bindings and effect counts.
