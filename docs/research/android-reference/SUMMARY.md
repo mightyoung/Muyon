@@ -9,7 +9,7 @@
 | WorkBuddy | Flutter（WB-F05） | 任务优先的信息架构、执行位置显式标注、等待/离线/排队文案体系、排版常量（WB-F14/15/17） |
 | Muse | Compose + Bloks + noVNC WebView（MU-F10） | VM 浏览器只看/可输入开关、接管租约、SOUL/IDENTITY/MEMORY 文件（MU-F05/06/07） |
 | Claude | Compose（CMP 资源）+ Glance（CL-F01） | **tool_use_id 幂等账本**、消息树快照、重连中禁止重试、按用途禁止分享、Artifact 三分类（CL-F02/03/04/11/12） |
-| ChatGPT | Compose/KMP + Valdi + WebView（GPT-F01） | 工具状态四元组、**生成式 UI 宿主动作白名单**、outcome_unknown、只读屏幕上下文、安全暂停后复核（GPT-F02/03/08/07/09） |
+| ChatGPT | Compose/KMP + Valdi + WebView（GPT-F01） | 工具状态四元组、**生成式 UI 宿主动作名单（完整性 B）**、outcome_unknown、无障碍屏幕上下文（节点动作未知）、安全暂停后复核（GPT-F02/03/08/07/09） |
 
 ## 2. 按 Muyon 页面和模块：采纳什么、来自哪款
 | Muyon 位置 | 采纳内容 | 来源 |

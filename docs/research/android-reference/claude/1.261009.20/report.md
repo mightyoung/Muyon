@@ -39,7 +39,7 @@
 |---|---|---|---|---|
 | E1 | 工具执行幂等 | snippets/01、02：executed_client_tools 主键+INSERT OR IGNORE | A/B | 仅证明客户端去重；服务端是否去重未知 |
 | E2 | 消息树+快照 | snippets/01：snapshot_*，parent_message_id、fingerprint、complete_blocks | A/B | 版本/分支、增量同步、断流续显 |
-| E3 | 离线/重连语义 | snippets/10：“Your message will send when you reconnect”“The rest of Claude’s reply will appear when you reconnect”“Reconnecting… Claude is still responding in the background”“Can’t retry while reconnecting. The session is unchanged.” | A | 未知结果先核对：重连中禁重试 |
+| E3 | 离线/重连语义 | snippets/10：“Your message will send when you reconnect”“The rest of Claude’s reply will appear when you reconnect”“Reconnecting… Claude is still responding in the background”“Can’t retry while reconnecting. The session is unchanged.” | A（重连中禁重试文案）/未知（是否先查状态再允许重试） | 证据只有重连/离线 UI 字符串，无 status-query 或重连后决策控制流；不得把“未知结果先核对”标为 A |
 | E4 | 记忆 | snippets/05 | A | 新旧记忆、暂停、重置、无痕排除、项目隔离 |
 | E5 | 压缩 | snippets/06 + `CompactionCleared` | A | 用户可见“节省token”回执与失败态 |
 | E6 | 工具/连接器授权 | snippets/08：Approve/Deny tool call、Change tool permission、Set all tools、“Claude will work and use your connectors without pausing for approval. This can put your data at risk.” | A | 连接器级 always/ask/never 风格；移除连接器后“Claude can no longer use it or its tools”=撤权立即约束 |
@@ -71,7 +71,7 @@
 |---|---|---|
 | executed_client_tools 幂等 | book1 执行/回执模块，链路C3（执行）C4（回执）；Rust core 本地账本 | 每个动作带 action_id，本地 `INSERT OR IGNORE` 账本；重复点击只返回已有回执 |
 | snapshot 树+fingerprint+complete_blocks | book1 会话存储/同步；R系列会话页 R01–R08 | 消息树 + 版本切换（“第x/共y版”），断流按完整块续显 |
-| 重连中禁重试 | Q01–Q06 确认/核对页；链路C5（未知结果核对） | “结果未知→先查询状态→再允许重试” |
+| 重连中禁重试（A 文案） | Q01–Q06 确认/核对页；链路C5（未知结果核对） | 采纳“重连中禁止重试”；“结果未知→先查询状态→再允许重试”需另取控制流证据，不能仅凭本条字符串 |
 | 记忆暂停/重置/无痕/项目隔离 | S06 记忆与偏好（已在Muse报告定义） | 增补“暂停”与“单次会话不入记忆”开关、项目范围隔离 |
 | 连接器级 ask/allow/never；移除即失效 | S01–S05 授权设置；T01–T03 工具；链路C2（授权） | 宿主确定性授权；撤权即刻阻断后续读取/动作 |
 | 分享裁剪（用连接器的会话禁分享） | D01 导出/分享；S 系列隐私 | 按用途裁剪：含商业敏感来源的会话导出需剔除或禁用 |
@@ -92,7 +92,7 @@
 | 撤权 | 移除连接器/关记忆后，下一次读取即被拒；排队动作作废并告知 |
 | 旧结果 | 版本切换显示“第x/共y版”；对旧版本的确认失效需重确认 |
 | 重复点击 | action_id 本地幂等账本，二次点击返回同一回执，不重复执行 |
-| 恢复 | 重启后按快照+完整块续显；结果未知的动作先核对状态再允许重试 |
+| 恢复 | 重启后按快照+完整块续显；重连中禁重试（A）；结果未知是否先核对再重试 = 未知 |
 
 ## 七、失败记录 / 未覆盖 / 下一步
 - jadx 162 处反编译错误；大量 defpackage 混淆类（JS桥消息协议、Markdown表格/标题实现细节只到D线索）。

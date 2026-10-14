@@ -6,11 +6,11 @@
 ## 一、一页结论
 1. **UI框架（A）**：三层混合——① Jetpack Compose / Kotlin Multiplatform（composeResources：`com.openai.kmp.platform.design / charts / rich.text.editor`）；② **Valdi** 运行时（assets 下 80+ 个 `*.valdimodule`，zstd 压缩的 TS/JS 模块，`__ValdiNativeBridge`，含 valdi_tsx/valdi_navigation/valdi_webview）——大量业务页（记忆设置、个性化、金融、钱包、地图、全局搜索、协作编辑器）用它下发；③ WebView（latex.html、mapbox.html、Apps 小组件桥 `SkybridgeNative`）。
 2. **工具状态四元组（A）**：每个工具有“进行中/已完成/失败/动作名”四条文案，如 Creating reminder / Created reminder / Couldn’t create reminder / Create reminder；canvas、邮件、日历、agent（Spawning/Waiting for/Resuming/Closing agent）同构。是“可见工具状态”的直接先例。
-3. **生成式UI = DIL（A，最重要）**：模型写 DIL JSON →客户端 `DILCompiler.validateV1Json` + `DILPropertiesSchema` 校验→支持 JSON Patch 流式增量→在**沙箱JS realm**（全局名白名单、冻结、app data/constants 必须是序列化JSON）渲染为原生组件。**模型写的DIL只能触发白名单宿主动作**：`log_event, copy, copy_node, issue_new_turn, open_url, open_entity_detail, open_image_lightbox, open_file_citation`；“non-consuming actions cannot fall back to privileged actions”；URL 规范化为可信 HTTPS，否则“untrusted URL in payload.url”。即：生成UI不能直接调工具，只能“发起新一轮”交回模型。
+3. **生成式UI = DIL（A 字符串/符号 + B 完整性，最重要）**：模型写 DIL JSON →客户端 `DILCompiler.validateV1Json` + `DILPropertiesSchema` 校验→支持 JSON Patch 流式增量→在**沙箱JS realm**（全局名白名单、冻结、app data/constants 必须是序列化JSON）渲染为原生组件。包内可见宿主动作名字符串：`log_event, copy, copy_node, issue_new_turn, open_url, open_entity_detail, open_image_lightbox, open_file_citation`，以及“non-consuming actions cannot fall back to privileged actions”、URL 须可信 HTTPS 等约束文案（A）。**Valdi 控制流未恢复**（见 auth-trace-02/chatgpt.md），因此不能把这些字符串升级为"守卫每一个模型写入动作"或"无旁路工具路径"的 A 级结论；完整性主张降为 B/未知。
 4. **外部工具驱动UI（A+C）**：Apps/MCP 小组件跑在 WebView，桥 `SkybridgeNative`，宿主方法含 callTool 链路（`tools/call`、`tools/list`）、sendFollowupMessage、setWidgetState、requestDisplayMode、requestModal、requestCheckout、openExternal、requestConnectSheet。C：developers.openai.com/apps-sdk（iframe + JSON-RPC postMessage，`_meta.ui.visibility` 控制工具是否可被UI调用）。
 5. **设备控制三分（A/C，严格分开）**：
    - **云端浏览器/Agent**（远程环境）：“Cloud browser”“Open cloud browser”“Browser screenshot %1$d of %2$d”“Agent mode”、站点逐一授权、Cookie清理即时登出。接管（Take over）文案**本包默认字符串里未找到**→A=未知，C=help.openai.com 11752874/20001280（接管期间不截屏，交还后尝试续跑）。
-   - **手机本机能力**：日历（CalendarContract，读写；错误码含 `outcome_unknown`）、提醒、位置、相机、麦克风；短信只发现 `SENDTO smsto:` 意图（交给系统短信App，用户发送），未见直接 SmsManager（反编译覆盖不全，D）。无障碍服务 `ConversationScreenAccessibilityService`：`canRetrieveWindowContent=true, canTakeScreenshot=true`，**未声明 canPerformGestures**，用途文案“Share Screen 时读取屏幕文字与控件”→只读屏幕上下文，**不能推出整机操控**。
+   - **手机本机能力**：日历（CalendarContract，读写；错误码含 `outcome_unknown`）、提醒、位置、相机、麦克风；短信只发现 `SENDTO smsto:` 意图（交给系统短信App，用户发送），未见直接 SmsManager（反编译覆盖不全，D）。无障碍服务 `ConversationScreenAccessibilityService`：`canRetrieveWindowContent=true, canTakeScreenshot=true`，**未声明 canPerformGestures**（不能合成手势分发），用途文案“Share Screen 时读取屏幕文字与控件”。未恢复服务实现前，**不能**据此标成 A 级只读：仍可通过 `AccessibilityNodeInfo.performAction()` 等节点动作点击/输入。整机操控未证明；节点动作能力 = **未知**。
    - **连接器调用**：Gmail/日历/Drive/Slack 等服务端工具（Reading emails、Sending draft…）；权限档位“Always approve / Approve / 自动批准低风险”。C：help.openai.com 20001495（Always ask / Allow read / Allow low-risk / Allow all）。
    - 另有**遥控桌面**（Codex Remote / 控制Mac或PC），需硬件级设备解锁保护（A）。
 6. **未知结果先核对（A）**：“Couldn’t confirm this request. Check its status and try again.”“Reconnected. We couldn’t confirm whether Orbit continued.”“Confirming the reconnect result…”“App connected, but %1$s couldn’t confirm the update”；本机日历错误码 `outcome_unknown`。
@@ -39,11 +39,11 @@
 |---|---|---|---|
 | E1 | 三层UI框架 | 01 | A |
 | E2 | 工具状态四元组 | 02 | A |
-| E3 | DIL 宿主动作白名单 | 03 | A |
+| E3 | DIL 宿主动作白名单（字符串） | 03 | A（名单存在）/B（是否全覆盖、有无旁路） |
 | E4 | DIL 沙箱（全局白名单、JSON序列化） | 04 | A |
 | E5 | DIL 编译期 schema 校验 + JSON Patch | 05 | A |
 | E6 | Apps 小组件桥 SkybridgeNative | 06 | A（方法名）/C（语义） |
-| E7 | 无障碍只读屏幕上下文 | 07 | A |
+| E7 | 无障碍屏幕上下文（无手势分发标志） | 07 | A（flags/文案）/未知（节点动作是否只读） |
 | E8 | 本机日历/提醒 + outcome_unknown；短信仅意图 | 08 | A/D |
 | E9 | 云端浏览器/Agent/Auto-review/Codex 权限 | 09 | A+C |
 | E10 | 未知结果核对 | 10 | A |
@@ -55,7 +55,7 @@
 | 类型 | 谁选择呈现 | 谁提供数据 | 谁校验交互 | 谁执行 |
 |---|---|---|---|---|
 | 静态结构化卡片（原生图表 kmp.charts、引用、地图、实体卡） | 模型/服务端选卡片类型（B）；客户端原生渲染（A） | 服务端检索/工具结果（B） | 客户端：仅复制/打开（A） | 客户端本地动作（A） |
-| 交互组件（DIL widgets：DatePicker、Flow、FollowUpActionBar…） | 模型写 DIL（A：isModelWrittenDIL） | 模型+宿主注入 app data（A） | **客户端**：schema校验+宿主动作白名单+可信URL（A） | 宿主执行白名单动作；涉及工具的经 `issue_new_turn` 回模型（A/B） |
+| 交互组件（DIL widgets：DatePicker、Flow、FollowUpActionBar…） | 模型写 DIL（A：isModelWrittenDIL） | 模型+宿主注入 app data（A） | **客户端**：schema校验+宿主动作名字符串+可信URL（A）；是否全路径强制 = B/未知 | 宿主可执行名单内动作；涉及工具的经 `issue_new_turn` 回模型（B，控制流未恢复） |
 | 生成HTML/代码（Canvas、代码执行、DIL沙箱JS） | 模型（A/C） | 模型（A） | 沙箱隔离（A：DIL realm）；Canvas 预览沙箱细节未知 | 沙箱内运行；无宿主特权（B） |
 | 外部工具驱动UI（Apps/MCP 小组件） | 第三方 MCP 服务端声明模板（C：_meta.ui.resourceUri） | 第三方服务端 structuredContent（C） | 宿主：工具可见性、批准卡、权限档（C）；客户端桥方法集（A） | 第三方服务端执行工具（C）；宿主仅转发（B） |
 
@@ -79,7 +79,7 @@
 | Skybridge 小组件 | T 系列、连接器 | 外部UI经宿主桥；工具可见性默认仅模型，UI调用需显式声明 |
 | outcome_unknown / Check its status | Q01–Q06；C5 核对链 | 结果未知独立状态，禁盲重试 |
 | Auto-review 暂停→复核→恢复 | S01–S05 授权；Q 系列 | “安全暂停”状态与恢复确认页 |
-| 无障碍只读 | S 隐私；book1 设备能力 | 若做屏幕上下文：只读、按次开启，与“操作手机”权限分开 |
+| 无障碍屏幕上下文（节点动作未知） | S 隐私；book1 设备能力 | 若做屏幕上下文：默认按未知能力设计；与“操作手机”权限分开；用户已决定不做安卓屏幕读取 |
 | 本机能力 vs 云端 vs 连接器 | book1 执行位置模块 | 执行位置显式标签（本机/云端/第三方） |
 | 记忆：临时聊天、群聊隔离、分享不带记忆、满额提示 | **S06 记忆与偏好** | 增补“临时会话”“记忆容量/满额”“分享时剔除记忆和指令” |
 | Personality / custom instructions | **S07 助手身份** | 人格与指令分开存储；“已更新助手人格”回执；人格不影响授权（与Muse规格一致） |

@@ -110,7 +110,9 @@
   - `NotificationReplyService`（"Reconnect WebSocket and send user reply from notification"）；
   - 音频服务（0x2）、通话服务（0x80）。
 
-**推断**：系统重投递的 Intent 会被 attemptedRequestIds 拦截（同一进程内），或在 onCreate 时被清除（新进程）。因此设备命令是 **at-most-once**，崩溃时结果为"未知/未执行"。
+**推断**：同一进程内，系统重投递的 Intent 会被 `attemptedRequestIds` 拦截。新进程 `onCreate` 会 `clearStaleCommands`，表现为"崩溃后不重跑已落盘命令"。
+
+**未知（崩溃窗）**：`PendingCommandStore.save` 使用 SharedPreferences `edit().apply()`（异步落盘，见 RC-MU-05）。若进程在命令 job 已启动、但 `apply()` 尚未持久化完成时被杀，重投递的 Intent 可能找不到已持久化的 requestId，从而再次执行带副作用的设备命令。在未演示"claim 先于 execute 且同步落盘"之前，**不能**把整条链路标成 at-most-once；该崩溃窗应视为未知。
 
 **未知**：服务端是否会收到"命令被放弃"的回执。
 
@@ -120,7 +122,7 @@
 2. **断线**：游标保留在内存中；重连后补发；HTTP 快照如果比 WS 旧则被丢弃。（包内直接证据）
 3. **取消竞态**：cancelled=false 且已 Done 时记为 CANCEL_RACE；ChatAborted 5 s 内未到时记为 FALLBACK_TIMEOUT。（包内直接证据）
 4. **迟到结果**：snapshotMs ≤ lastApplied 时丢弃；本地已决策的审批 id 被过滤。（包内直接证据）迟到的聊天 delta → 部分未知。
-5. **进程重启**：设备命令被清除且不重跑；游标丢失后全量订阅。（包内直接证据）
+5. **进程重启**：已落盘的待执行命令会被 clearStaleCommands 清除且不重跑；游标丢失后全量订阅。（包内直接证据；未落盘崩溃窗见上节未知）
 6. **游标失效**：服务端行为未知；客户端在游标缺失时退化为无游标订阅。（包内直接证据 + 未知）
 
 ## 覆盖缺口

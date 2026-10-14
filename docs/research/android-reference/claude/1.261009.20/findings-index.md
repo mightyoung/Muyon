@@ -4,7 +4,7 @@
 | F01 | UI=Compose(+CMP资源)+Glance小部件 | A | snippets/12 |
 | F02 | 工具执行幂等账本 executed_client_tools | A/B | snippets/01,02 |
 | F03 | 消息树快照+fingerprint+complete_blocks | A/B | snippets/01 |
-| F04 | 离线排队/后台续答/重连中禁重试 | A | snippets/10 |
+| F04 | 离线排队/后台续答/重连中禁重试（不含“先查状态再重试”） | A | snippets/10 |
 | F05 | 记忆：文件/摘要/暂停/重置/无痕/项目隔离 | A+C | snippets/05 |
 | F06 | 压缩回执与失败态、上下文占比 | A+C | snippets/06 |
 | F07 | 连接器级工具权限与撤权语义 | A | snippets/08 |
