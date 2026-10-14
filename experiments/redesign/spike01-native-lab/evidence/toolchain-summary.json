@@ -1,0 +1,77 @@
+{
+  "rustup-download-proof.json": {
+    "official_url": "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init",
+    "sha256": "dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
+    "official_checksum_matches": true,
+    "destination": "/tmp/muyon-spike01-toolchain/downloads",
+    "no_shell_profile_change": true
+  },
+  "jdk-install-proof.json": {
+    "official_metadata_url": "https://api.github.com/repos/adoptium/temurin17-binaries/releases/latest",
+    "release": "jdk-17.0.20.1+1",
+    "binary_url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz",
+    "sha256_url": "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.20.1%2B1/OpenJDK17U-jdk_x64_linux_hotspot_17.0.20.1_1.tar.gz.sha256.txt",
+    "size": 193252603,
+    "license_family": "GPL-2.0-with-classpath-exception",
+    "explicit_acceptance_prompt": false,
+    "initial_adoptium_api": "HTTP403; no credentials used or changed",
+    "sha256": "3808d1d15e3ec6bd5b84057fb5d84c33d8a1536a258146bcea2e603fc726e08e",
+    "checksum_matches": true,
+    "install_root": "/tmp/muyon-spike01-toolchain/jdk",
+    "installed": true
+  },
+  "gradle-install-proof.json": {
+    "official_url": "https://services.gradle.org/distributions/gradle-8.13-bin.zip",
+    "sha256": "20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78",
+    "checksum_matches": true,
+    "version": "8.13",
+    "isolated_install_root": "/tmp/muyon-spike01-toolchain/gradle-8.13",
+    "system_settings_changed": false
+  },
+  "kotlin-install-proof.json": {
+    "official_metadata_url": "https://api.github.com/repos/JetBrains/kotlin/releases/tags/v2.2.20",
+    "official_binary_url": "https://github.com/JetBrains/kotlin/releases/download/v2.2.20/kotlin-compiler-2.2.20.zip",
+    "sha256": "81f0264c9073b5cbbdb3ff8418cf2c5dac076879fc156fa1a6462f5a5acc4420",
+    "checksum_matches": true,
+    "version": "2.2.20",
+    "license": "Apache-2.0",
+    "destination": "/tmp/muyon-spike01-toolchain/kotlin-2.2.20"
+  },
+  "jvm-libraries-install-proof.json": [
+    {
+      "name": "jna",
+      "version": "5.19.1",
+      "official_maven_url": "https://repo.maven.apache.org/maven2/net/java/dev/jna/jna/5.19.1/jna-5.19.1.jar",
+      "local_sha256": "4fb141dd8ef6b0585ffceea4bc49602fbc6312fa977e2c488794ea3e6aafecae",
+      "available_official_checksums": {
+        "sha1": "ca303052cd617c1af2e2c8d344c98a706fb63143"
+      },
+      "all_available_checksums_match": true,
+      "sha256_endpoint_absence_recorded": true,
+      "destination": "/tmp/muyon-spike01-toolchain/jvm-libs/jna-5.19.1.jar"
+    },
+    {
+      "name": "kotlinx-coroutines-core-jvm",
+      "version": "1.10.2",
+      "official_maven_url": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.10.2/kotlinx-coroutines-core-jvm-1.10.2.jar",
+      "local_sha256": "5ca175b38df331fd64155b35cd8cae1251fa9ee369709b36d42e0a288ccce3fd",
+      "available_official_checksums": {
+        "sha256": "5ca175b38df331fd64155b35cd8cae1251fa9ee369709b36d42e0a288ccce3fd",
+        "sha512": "238fd451f80e222480c880dd8bcfd76e9203b6833a0306a55483b3f9eb0b25651242a3e7beaf7510d5e39922f1d3d987fca79468d945eb35b0f07156a7887ba0",
+        "sha1": "4a9f78ef49483748e2c129f3d124b8fa249dafbf"
+      },
+      "all_available_checksums_match": true,
+      "sha256_endpoint_absence_recorded": false,
+      "destination": "/tmp/muyon-spike01-toolchain/jvm-libs/kotlinx-coroutines-core-jvm-1.10.2.jar"
+    }
+  ],
+  "raw_logs_external_only": {
+    "rust-install.log": "c818da5c381e15d39a5f40b54c491adbe3ac90cf10b2aa430375519adcaf55fc",
+    "gradle-version.log": "e0b5dfaf226940128d7fb1204f559f8e48f4eb91a98b548f629f2c403dfaf30b",
+    "kotlin-version.log": "050e6a5bca2ec86137af7f27dc5dd7a2df9701cca720eafd773e461c06de3e0e",
+    "rust-full-green.log": "9a8f2b6d219718db38ce98137b90c5c98f0875b3f1720db913cb9ae0adbae042",
+    "python-ffi-tests.log": "3795ffb4367beb594582649ca92e208e35cfe7119e7e8423eb73785ebb4e1164",
+    "kotlin-generated-renamed-compile.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "android-aarch64-typecheck.log": "c53d0f0123411a5133b8b0cd123f0c7065d039945a3474b829046cd8a3d9174d"
+  }
+}
