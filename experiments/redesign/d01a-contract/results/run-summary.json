@@ -1,0 +1,166 @@
+{
+  "kind": "experimental_run_summary_not_product_acceptance",
+  "base_commit": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "report_input_commit": "8f8edf95983476a8963ea4cb35ee0a3b948aa862",
+  "case_count": 29,
+  "variant_count": 77,
+  "original_cases_status": "not_run",
+  "main_cases_status": "52 not_run",
+  "rules_status": "14 proposed_unfrozen",
+  "whole_case_pass_count": 0,
+  "partial_experimental": 61,
+  "not_run_variants": 16,
+  "real_credential_scans": 0,
+  "real_model_requests": 0,
+  "real_dispatches": 0,
+  "M03_frozen": false,
+  "source_files": [
+    {
+      "file": "driver.py",
+      "sha256": "1095d2a199f90722cdc5e7da29e2e4c3f43ab5f3ea636b750ded973e7a38d53a"
+    },
+    {
+      "file": "fixture_adapter.py",
+      "sha256": "d0b5b16fb1ca50912d593e420c9e6f9be2ac647f708b1516f3e83f671964a608"
+    },
+    {
+      "file": "mutation_runner.py",
+      "sha256": "1fdad9d190c3a7f4823208c98aa855f36f1e5303b41234eb9d6391de3fb0d7b5"
+    },
+    {
+      "file": "seam.py",
+      "sha256": "4dd45ab8cd11f401be164c6f4b27baed3e221131595160617ea55c5f3ef930bf"
+    },
+    {
+      "file": "test_driver.py",
+      "sha256": "5daf7325e171b08d6dfd4aeda6b0e7784f2c572101cdffb5c4c2febde2a0d010"
+    },
+    {
+      "file": "test_mutations.py",
+      "sha256": "abdd9b813cfe0510e9e7cf7e52b92e5a941e7c2379b9b1d5b08aa830445a8667"
+    },
+    {
+      "file": "test_seam.py",
+      "sha256": "5bb66db1695120e21aac2e92bc28ad28007203fdd19477b206663f562aaf5b23"
+    }
+  ],
+  "commands": [
+    {
+      "phase": "RED_empty_seam",
+      "command": "python3 -m unittest discover -s experiments/redesign/d01a-contract -p 'test_*.py' -v",
+      "exit": 1,
+      "tests": 20,
+      "assertion_failures": 24,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/red.log",
+      "log_sha256": "1a1d527955d11e4383c0e5b26993d751bcce43a1cf96581640db8645c7d8f327"
+    },
+    {
+      "phase": "RED_driver",
+      "command": "python3 -m unittest discover -s experiments/redesign/d01a-contract -p 'test_*.py' -v",
+      "exit": 1,
+      "tests": 26,
+      "assertion_failures": 5,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/red-driver.log",
+      "log_sha256": "442a530fb396691eb866523477448940789debdc22dc48dc280c402a94eff98e"
+    },
+    {
+      "phase": "RED_unknown_source",
+      "command": "python3 -m unittest discover -s experiments/redesign/d01a-contract -p 'test_seam.py' -v",
+      "exit": 1,
+      "tests": 21,
+      "assertion_failures": 3,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/red-source-domain.log",
+      "log_sha256": "48fb7e71433daa28d01c13b1ed2ac83aa5a71a30d454936b8af47e77bb250935"
+    },
+    {
+      "phase": "RED_source_rules_readonly_model",
+      "command": "python3 -m unittest discover -s experiments/redesign/d01a-contract -p 'test_seam.py' -v",
+      "exit": 1,
+      "tests": 23,
+      "assertion_failures": 3,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/red-source-rules-readonly-model.log",
+      "log_sha256": "2e658b2f68ee5d424a8a18350ad34d8feb83173e56bd2cbb52831521e26a813b"
+    },
+    {
+      "phase": "RED_mutation_orchestration",
+      "command": "python3 -m unittest discover -s experiments/redesign/d01a-contract -p 'test_mutations.py' -v",
+      "exit": 1,
+      "tests": 1,
+      "assertion_failures": 1,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/red-mutations.log",
+      "log_sha256": "03deb1ea76368ac64e42a07669e086af9ec0a6c8fc9c9a16853461b73eb51e8e"
+    },
+    {
+      "phase": "RED_lineage_proof_domain",
+      "command": "python3 -m unittest discover -s experiments/redesign/d01a-contract -p 'test_seam.py' -v",
+      "exit": 1,
+      "tests": 26,
+      "assertion_failures": 3,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/red-lineage-proof-domain.log",
+      "log_sha256": "caca75f869c88e7fa8a9e10c9fed1c7cd66ea79551ff84e7965b462b1cace0a3"
+    },
+    {
+      "phase": "GREEN_experiment_suite",
+      "command": "python3 -m unittest discover -s experiments/redesign/d01a-contract -p 'test_*.py' -v",
+      "exit": 0,
+      "tests": 33,
+      "assertion_failures": 0,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/green-final.log",
+      "log_sha256": "f2a720a438f208dbe4c13bd86d9121a2629b092e1dc16dc49cffec6c4711a9c1"
+    },
+    {
+      "phase": "matrix",
+      "command": "python3 experiments/redesign/d01a-contract/driver.py --derive-purpose-v2 --output experiments/redesign/d01a-contract/results/observations.json",
+      "exit": 0,
+      "partial_experimental": 61,
+      "not_run": 16,
+      "partial_mismatches": 0,
+      "whole_case_pass_count": 0,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/matrix-final.log",
+      "log_sha256": "5fb3d339a288048639214a0f48f9080f1ecc3136d6d5eef34704d08bc3fb14ea"
+    },
+    {
+      "phase": "expected_only_negative",
+      "command": "python3 experiments/redesign/d01a-contract/driver.py --mutate-expected --output /workspace/reports/redesign-d01a-experiment-20261014/expected-negative.json",
+      "exit": 1,
+      "partial_mismatches": 1,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/expected-negative.log",
+      "log_sha256": "d9c52c088f91c9439af2732ccfeaed5aaab65b16904bcbe524772bd73a401e2b"
+    },
+    {
+      "phase": "mutations",
+      "command": "python3 experiments/redesign/d01a-contract/mutation_runner.py --evidence-dir /workspace/reports/redesign-d01a-experiment-20261014/mutations --output experiments/redesign/d01a-contract/results/mutations.json",
+      "exit": 0,
+      "mutation_child_exits": [
+        1,
+        1,
+        1
+      ],
+      "all_killed": true,
+      "log": "/workspace/reports/redesign-d01a-experiment-20261014/mutations.log",
+      "log_sha256": "4b04e93cf9af71bc9e35b6b107a29997f6bcaa3c3c4362d608d6173fa570b295"
+    }
+  ],
+  "coverage_bounds": [
+    "host-evidence assumptions only; no classification engine/scanner",
+    "source/policy issuer authenticity unproven",
+    "no Unicode/parser/transform/template/retention/recovery proof",
+    "no wire/DB/receipt/capability-consumption execution",
+    "no actual Android load or product CI run"
+  ],
+  "artifact_validation": {
+    "authorized_new_paths": 16,
+    "original_v1_design_contract_product_unchanged": true,
+    "current_purpose_records": 77,
+    "original_cases": 29,
+    "structure_log": "/workspace/reports/redesign-d01a-experiment-20261014/artifact-check.log",
+    "structure_log_sha256": "f51489cd0fc14c595acf72303ac706de830c7977e4b78dcb8cd56f9a07c61235",
+    "sha256_correct_cwd_command": "sha256sum -c SHA256SUMS",
+    "sha256_correct_cwd": "fixtures/redesign/classification-purpose-v2",
+    "sha256_correct_cwd_exit": 0,
+    "sha256_log": "/workspace/reports/redesign-d01a-experiment-20261014/v2-sha256.log",
+    "sha256_log_sha256": "b57ef7145eae59912856da7af001bc241508a39ff99e697af59235173e0cc8bf",
+    "initial_sha256_attempt_from_repo_root_exit": 1,
+    "initial_sha256_failure_reason": "relative entries require v2 directory; no file read; corrected cwd succeeded; not a runtime test"
+  }
+}
