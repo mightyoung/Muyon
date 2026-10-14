@@ -23,6 +23,18 @@ Worktree `/tmp/Muyon-rd-p07-atomic-business-20261014`, branch `task/device-defer
 
 This maps to experimental M07/M09/M10/M20 behavior, not completion of those product tasks. Formal M03, actual authority and production store/entrypoint dependencies remain blocked. Existing installed runtime discovery is setup evidence, not a test pass. Whole-product regression CI is separate from the local Rust/SQLite process suite; current CI does not execute the new lab.
 
+## Fixed-source review checkpoint
+
+Initial author `fe3d82080fb8a09c1d1effcbc9a93efc9b3b1289` failed non-author R1/R2 despite its passing suite: current physical domain was not checked on existing intent replay; pending/rejection triggers could commit unreceipted business or meta changes. The actual assertion failures and initial FAIL report remain external and are not relabeled as passing.
+
+The same writer fixed these in `f3e16f089adb0ccac956bd06f3cfd664dfee906a`: original domain is checked after complete binding comparison; five-table snapshots are taken inside BEGIN IMMEDIATE and each phase checks its allowed delta before COMMIT. Only new lab core/P07A files changed; all 2301 baseline tracked blobs remain identical.
+
+Non-author fixed-source SPEC COMPLIANCE and CODE QUALITY are C0/PASS; R1/R2 ADDRESSED. Actual evidence: 27 process methods, 2 Rust units, four unchanged original blocker assertions, nine independent properties plus three new phase properties GREEN. Five independently applied inverse classes compiled successfully and failed intended behavior assertions; source restored and complete process/property suites GREEN. CAS and duplicate mutants can be caught by final verification/PK constraints without a second committed effect; evidence distinguishes response regression from an unsafe committed write.
+
+Source review `/tmp/rd-p07-independent-20261014/REVIEW-f3.md`; author/fix report `/tmp/rd-p07-workflow-20261014/task-1-report.md`; raw logs remain outside Git. Rust SQLite3.46.1 and independent Python SQLite3.53.1 are existing runtimes, not a claim of old native-asset CI root-cause repair. Cached rustfmt is unavailable; no component was installed.
+
+Candidate branch `review/rd-p07-combination-20261014` preserves exact fixed core blobs and changes this coordination document only. Candidate local SQLite suite and exact-head regression CI are separate remaining gates before B-only intake. Main, production schemas, existing labs/fixtures and platform NOT_RUN records remain unchanged. P06 and historical OC/CR reviews are not repeated.
+
 ## Review focus
 
 - SQL update before a later receipt failure: physical rollback of all four applied facts, pending preserved independently.
