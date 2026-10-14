@@ -19,6 +19,19 @@ main保持 `cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003`。
 | A00分类输入及窄修 | `7a8128ca86c583b0bbf1191c4baa4f3e732ca547` | D01a作者后续工作已完成；fixtures/redesign/classification-v1/及分类任务书；保留fe5896f初版 |
 | D03a恢复输入 | `55480f06490983a54e38908b043b06b4b02df451` | D03a作者后续工作已完成；fixtures/redesign/recovery-minimal-v1/及恢复fixture任务书 |
 
+远端分支按交付对应：
+
+- M01入口：`task/leader-b-redesign-m01-20261014`，当前固定bc5b；421e733保留于历史。
+- M02：`leader-b/redesign-m02-supplier-name-20261014`。
+- D01a：`task/redesign-d01a-20261014`。
+- D03a：`task/leader-b-redesign-d03a-20261014`。
+- M04：`leader-b/redesign-m04-supplier-name-20261014`。
+- M05：`task/leader-b-redesign-m05-supplier-name-20261014`。
+- A00分类：`task/leader-b-redesign-a00-classification-20261014`。
+- D03a恢复fixture：`task/leader-b-redesign-d03a-fixtures-20261014`。
+
+三个合同的完整独占文件前缀是`docs/contracts/redesign-v1.3.2/`，各自任务书为`docs/tasks/REDESIGN-M02-SUPPLIER-NAME-20261014.md`、`REDESIGN-D01A-20261014.md`和`REDESIGN-D03A-20261014.md`。B的组合登记范围为`docs/tasks/redesign-kickoff-20261014/`与根任务书；只追加`docs/adr/0001-leadership-and-scope-freeze.md`及前置`docs/tasks/HANDOVER-LEADER.md`。后续fixture独占范围如表，各作者旧合同分支均结束写入。
+
 以上作者固定分支均正常推送、完整SHA读回，并在首批合入历史中保留。全部旧工作区、脏改动与其它writer保留；未重复A00清点或OC13/OC14/CR10F3独立复验。Rust/Android/Electron产品writer未由此批次放行。
 
 ## 精确CI与合入证明
