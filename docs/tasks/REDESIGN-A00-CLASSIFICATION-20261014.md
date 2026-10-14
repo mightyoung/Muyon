@@ -13,3 +13,7 @@ Leader B用户持续授权v1.3.2首批合同与合成fixture。本writer新独�
 已执行仅结构检查：JSON解析、29唯一ID与77variant、14拟定规则引用、必需描述字段/来源hash、路径范围/Markdown链接、SHA256SUMS及git diff --check。原始结构检查日志位于仓库外 `/workspace/reports/redesign-a00-classification-20261014/structure-check.log`。这些检查不是runtime acceptance，未调用模型、网络服务、Android或MUYON_EVAL_REAL，未访问真实库/设备。
 
 未完门禁：精确最终commit非作者review；当前用途规则真实覆盖、actual value检测器/误报漏报说明、payload抓取/日志及库/回执证据、M04/M05Unicode等价、D03a恢复/能力消费与SPIKE-01真实Androidload、M03单源冻结。Auto其它风险域/legacy完整映射/真实模式期限仍未冻。本地正常文档提交；不push/merge/main/deploy，不安装/创建凭据/购买额度。
+
+## fe589独立复审窄修登记
+
+非作者指出F10high输入false与既有Auto/high确认预期矛盾，以及A01page.2和模板unit.synthetic.1未映射。writer依receiving-code-review先核固定fe589 JSON与根澄清后，由Leader B明确授权修正：仅F10high标记true；A01全链绑定page.2；A02明确逐已解析页actual-value覆盖、8–10页无覆盖和全篇拒绝，无final载荷。保留fe589历史；README/哈希与任务追加跟踪。29/77/14proposed/52not_run保持，所有其它case/rules/manifest源输入不变。结构/差异范围检查日志追加于同一仓库外目录，非运行验收；本delta仍待精确SHA非作者复审。

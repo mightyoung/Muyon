@@ -50,3 +50,7 @@ N01/F03无覆盖终止本次尝试，内容仍unreviewed；不无限spinner/空�
 在本目录运行 `sha256sum -c SHA256SUMS` 只验证文件字节。逐个JSON语法、29唯一case ID/77唯一局部variant、14规则引用、源输入哈希及必需描述字段检查只验证fixture结构，不能记为classification/value-check/mode/transport/数据库测试PASS。本次没有运行任何生产分类器或复制实现算法来刷PASS。
 
 未来执行需精确实现SHA/命令、规则与Unicode/normalization版本/覆盖、宿主来源与当前权限、actual新值检查及最终参数摘要、实际模型/工具载荷捕获（或证明纯本机0调用）、权威回执和库diff、日志投影及非作者审查。M04/M05规范化等价、D03a及SPIKE-01真实Android库加载证据与M03单源编码仍为门禁；本目录不冻结M03、D01b、ADR或52主验收。
+
+## fe589独立复审窄修
+
+F10仅high输入标记改为需要当次风险确认，与其既有Auto/high假冻结规则路由预期一致；其他三分支不变。A01的来源unit/source版本、实际检查target/current版本及credential/PURPOSE/ATTACH覆盖均显式绑定page.2，其他页不派发。A02逐页绑定1–7页已解析实际检查，8–10页明确无覆盖；全篇用途仍拒绝，不组装final payload、不把部分检查称全篇complete。无新增case/variant、规则、schema或产品决定；全部not_run。

@@ -37,14 +37,17 @@
             10
           ],
           "page2_clean_text": "合成附件第2页内容",
-          "parser_version": "synthetic-parser-v1-not-installed"
+          "parser_version": "synthetic-parser-v1-not-installed",
+          "selected_for_current_purpose": [
+            2
+          ]
         }
       },
       "source_inheritance": {
-        "unit_ref": "unit.synthetic.1",
+        "unit_ref": "page.2",
         "source_kind": "user_selected_attachment",
-        "trusted_event_ref": "host.synthetic.event.1",
-        "source_version": "source-v1",
+        "trusted_event_ref": "host.synthetic.attachment-selection.1",
+        "source_version": "page.2-source-v1",
         "claimed_source_kind": null,
         "inherited_sensitivity_units": [],
         "inherited_purpose_restrictions": [],
@@ -53,13 +56,14 @@
         "verification": "not_a_classification_or_authorization_fact",
         "field_path": null,
         "trusted_field_base": "personal",
-        "field_declaration_version": null
+        "field_declaration_version": null,
+        "attachment_source_ref": "attachment.synthetic.1"
       },
       "current_version": {
-        "input": "content-v1",
-        "normalized": "content-v1-normalized",
-        "checked": "content-v1-normalized",
-        "final": "content-v1-normalized",
+        "input": "page.2-content-v1",
+        "normalized": "page.2-content-v1-normalized",
+        "checked": "page.2-content-v1-normalized",
+        "final": "page.2-content-v1-normalized",
         "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
         "evidence_current": true
       },
@@ -82,13 +86,7 @@
           "synthetic_version": "fixture-rule-v1-not-registered",
           "assumed_current_purpose_coverage": "complete",
           "assumed_covered_units": [
-            "page.1",
-            "page.2",
-            "page.3",
-            "page.4",
-            "page.5",
-            "page.6",
-            "page.7"
+            "page.2"
           ]
         },
         {
@@ -97,7 +95,7 @@
           "synthetic_version": "fixture-rule-v1-not-registered",
           "assumed_current_purpose_coverage": "complete",
           "assumed_covered_units": [
-            "unit.synthetic.1"
+            "page.2"
           ]
         },
         {
@@ -106,19 +104,23 @@
           "synthetic_version": "fixture-rule-v1-not-registered",
           "assumed_current_purpose_coverage": "complete",
           "assumed_covered_units": [
-            "unit.synthetic.1"
+            "page.2"
           ]
         }
       ],
       "actual_value_check": {
         "role": "host_check_assumption_not_classifier_result",
-        "target_ref": "content-v1-normalized",
+        "target_ref": "page.2-content-v1-normalized",
         "target_is_actual_new_value": true,
         "state": "complete_assumption",
         "signal": "none_assumption",
         "rule_id": "CLS-CREDENTIAL-001",
         "rule_status": "proposed_unfrozen",
-        "secret_plaintext_in_artifact": false
+        "secret_plaintext_in_artifact": false,
+        "checked_unit_refs": [
+          "page.2"
+        ],
+        "source_version": "page.2-source-v1"
       },
       "mode_facts": {
         "mode": "FullAllow",
@@ -172,6 +174,18 @@
           "logs",
           "diagnostics",
           "notifications"
+        ],
+        "checked_and_projected_unit": "page.2",
+        "other_pages_not_dispatched": [
+          1,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
         ]
       }
     }

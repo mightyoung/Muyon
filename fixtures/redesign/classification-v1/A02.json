@@ -42,10 +42,10 @@
         }
       },
       "source_inheritance": {
-        "unit_ref": "unit.synthetic.1",
+        "unit_ref": "attachment.synthetic.1",
         "source_kind": "user_selected_attachment",
-        "trusted_event_ref": "host.synthetic.event.1",
-        "source_version": "source-v1",
+        "trusted_event_ref": "host.synthetic.attachment-selection.1",
+        "source_version": "attachment-source-v1",
         "claimed_source_kind": null,
         "inherited_sensitivity_units": [],
         "inherited_purpose_restrictions": [],
@@ -54,15 +54,83 @@
         "verification": "not_a_classification_or_authorization_fact",
         "field_path": null,
         "trusted_field_base": "personal",
-        "field_declaration_version": null
+        "field_declaration_version": null,
+        "page_sources": [
+          {
+            "unit_ref": "page.1",
+            "source_version": "page.1-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": true
+          },
+          {
+            "unit_ref": "page.2",
+            "source_version": "page.2-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": true
+          },
+          {
+            "unit_ref": "page.3",
+            "source_version": "page.3-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": true
+          },
+          {
+            "unit_ref": "page.4",
+            "source_version": "page.4-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": true
+          },
+          {
+            "unit_ref": "page.5",
+            "source_version": "page.5-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": true
+          },
+          {
+            "unit_ref": "page.6",
+            "source_version": "page.6-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": true
+          },
+          {
+            "unit_ref": "page.7",
+            "source_version": "page.7-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": true
+          },
+          {
+            "unit_ref": "page.8",
+            "source_version": "page.8-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": false
+          },
+          {
+            "unit_ref": "page.9",
+            "source_version": "page.9-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": false
+          },
+          {
+            "unit_ref": "page.10",
+            "source_version": "page.10-source-v1",
+            "attachment_source_ref": "attachment.synthetic.1",
+            "parsed": false
+          }
+        ]
       },
       "current_version": {
-        "input": "content-v1",
-        "normalized": "content-v1-normalized",
-        "checked": "content-v1-normalized",
-        "final": "content-v1-normalized",
+        "input": "attachment-content-v1",
+        "normalized": "parsed-pages.1-7-content-v1-normalized",
+        "checked": "parsed-pages.1-7-content-v1-normalized",
+        "final": null,
         "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
-        "evidence_current": true
+        "evidence_current": true,
+        "required_uncovered_units": [
+          "page.8",
+          "page.9",
+          "page.10"
+        ],
+        "final_payload_assembled": false
       },
       "purpose": {
         "current": "model_request",
@@ -88,7 +156,7 @@
           "rule_id": "CLS-ATTACH-001",
           "status": "proposed_unfrozen",
           "synthetic_version": "fixture-rule-v1-not-registered",
-          "assumed_current_purpose_coverage": "complete",
+          "assumed_current_purpose_coverage": "partial_required_document",
           "assumed_covered_units": [
             "page.1",
             "page.2",
@@ -97,45 +165,133 @@
             "page.5",
             "page.6",
             "page.7"
+          ],
+          "uncovered_required_units": [
+            "page.8",
+            "page.9",
+            "page.10"
           ]
         },
         {
           "rule_id": "CLS-CREDENTIAL-001",
           "status": "proposed_unfrozen",
           "synthetic_version": "fixture-rule-v1-not-registered",
-          "assumed_current_purpose_coverage": "complete",
+          "assumed_current_purpose_coverage": "partial_required_document",
           "assumed_covered_units": [
-            "unit.synthetic.1"
+            "page.1",
+            "page.2",
+            "page.3",
+            "page.4",
+            "page.5",
+            "page.6",
+            "page.7"
+          ],
+          "uncovered_required_units": [
+            "page.8",
+            "page.9",
+            "page.10"
           ]
         },
         {
           "rule_id": "CLS-PURPOSE-001",
           "status": "proposed_unfrozen",
           "synthetic_version": "fixture-rule-v1-not-registered",
-          "assumed_current_purpose_coverage": "complete",
+          "assumed_current_purpose_coverage": "partial_required_document",
           "assumed_covered_units": [
-            "unit.synthetic.1"
+            "page.1",
+            "page.2",
+            "page.3",
+            "page.4",
+            "page.5",
+            "page.6",
+            "page.7"
+          ],
+          "uncovered_required_units": [
+            "page.8",
+            "page.9",
+            "page.10"
           ]
         },
         {
           "rule_id": "CLS-TRIM-001",
           "status": "proposed_unfrozen",
           "synthetic_version": "fixture-rule-v1-not-registered",
-          "assumed_current_purpose_coverage": "complete",
-          "assumed_covered_units": [
-            "unit.synthetic.1"
+          "assumed_current_purpose_coverage": "cannot_preserve_whole_document_purpose_assumption",
+          "assumed_covered_units": [],
+          "uncovered_required_units": [
+            "page.8",
+            "page.9",
+            "page.10"
           ]
         }
       ],
       "actual_value_check": {
         "role": "host_check_assumption_not_classifier_result",
-        "target_ref": "content-v1-normalized",
+        "target_ref": "parsed-pages.1-7-content-v1-normalized",
         "target_is_actual_new_value": true,
-        "state": "complete_assumption",
+        "state": "complete_for_parsed_units_only_assumption",
         "signal": "none_assumption",
         "rule_id": "CLS-CREDENTIAL-001",
         "rule_status": "proposed_unfrozen",
-        "secret_plaintext_in_artifact": false
+        "secret_plaintext_in_artifact": false,
+        "checked_unit_refs": [
+          "page.1",
+          "page.2",
+          "page.3",
+          "page.4",
+          "page.5",
+          "page.6",
+          "page.7"
+        ],
+        "unchecked_unit_refs": [
+          "page.8",
+          "page.9",
+          "page.10"
+        ],
+        "page_bindings": [
+          {
+            "unit_ref": "page.1",
+            "source_version": "page.1-source-v1",
+            "checked_normalized_ref": "page.1-content-v1-normalized",
+            "signal": "none_assumption"
+          },
+          {
+            "unit_ref": "page.2",
+            "source_version": "page.2-source-v1",
+            "checked_normalized_ref": "page.2-content-v1-normalized",
+            "signal": "none_assumption"
+          },
+          {
+            "unit_ref": "page.3",
+            "source_version": "page.3-source-v1",
+            "checked_normalized_ref": "page.3-content-v1-normalized",
+            "signal": "none_assumption"
+          },
+          {
+            "unit_ref": "page.4",
+            "source_version": "page.4-source-v1",
+            "checked_normalized_ref": "page.4-content-v1-normalized",
+            "signal": "none_assumption"
+          },
+          {
+            "unit_ref": "page.5",
+            "source_version": "page.5-source-v1",
+            "checked_normalized_ref": "page.5-content-v1-normalized",
+            "signal": "none_assumption"
+          },
+          {
+            "unit_ref": "page.6",
+            "source_version": "page.6-source-v1",
+            "checked_normalized_ref": "page.6-content-v1-normalized",
+            "signal": "none_assumption"
+          },
+          {
+            "unit_ref": "page.7",
+            "source_version": "page.7-source-v1",
+            "checked_normalized_ref": "page.7-content-v1-normalized",
+            "signal": "none_assumption"
+          }
+        ]
       },
       "mode_facts": {
         "mode": "FullAllow",
@@ -190,7 +346,61 @@
           "logs",
           "diagnostics",
           "notifications"
-        ]
+        ],
+        "page_unit_results": [
+          {
+            "unit_ref": "page.1",
+            "sensitivity": "personal",
+            "actual_value_check": "complete_for_this_page_assumption"
+          },
+          {
+            "unit_ref": "page.2",
+            "sensitivity": "personal",
+            "actual_value_check": "complete_for_this_page_assumption"
+          },
+          {
+            "unit_ref": "page.3",
+            "sensitivity": "personal",
+            "actual_value_check": "complete_for_this_page_assumption"
+          },
+          {
+            "unit_ref": "page.4",
+            "sensitivity": "personal",
+            "actual_value_check": "complete_for_this_page_assumption"
+          },
+          {
+            "unit_ref": "page.5",
+            "sensitivity": "personal",
+            "actual_value_check": "complete_for_this_page_assumption"
+          },
+          {
+            "unit_ref": "page.6",
+            "sensitivity": "personal",
+            "actual_value_check": "complete_for_this_page_assumption"
+          },
+          {
+            "unit_ref": "page.7",
+            "sensitivity": "personal",
+            "actual_value_check": "complete_for_this_page_assumption"
+          },
+          {
+            "unit_ref": "page.8",
+            "sensitivity": "unreviewed",
+            "actual_value_check": "not_executable_unparsed_assumption"
+          },
+          {
+            "unit_ref": "page.9",
+            "sensitivity": "unreviewed",
+            "actual_value_check": "not_executable_unparsed_assumption"
+          },
+          {
+            "unit_ref": "page.10",
+            "sensitivity": "unreviewed",
+            "actual_value_check": "not_executable_unparsed_assumption"
+          }
+        ],
+        "whole_document_request_eligible": false,
+        "final_payload_assembled": false
       }
     }
   ],

@@ -275,7 +275,7 @@
         "auto_risk_rule": "synthetic_frozen_assumption_for_routing_only",
         "risk": "high",
         "new_endpoint": true,
-        "extra_risk_confirmation_is_required": false
+        "extra_risk_confirmation_is_required": true
       },
       "execution_prerequisites": {
         "scope": "valid_assumption",
