@@ -10,6 +10,8 @@ Use existing offline Rust dependencies and Linux filesystem APIs in a new privat
 
 An intent binds the complete synthetic ordering domain, operation, target and arguments. Exact duplicate requests preserve the original result and produce no additional effect after a process restart. The same intent with a different binding conflicts; changing the process epoch does not create a new intent.
 
+This lab uses one fixed ordering domain. Wrong-domain inputs fail closed; this does not implement stream rotation or backup restore. Stream changes must never re-mint an existing business intent. A snapshot at an existing watermark with different content conflicts rather than replacing the committed pair.
+
 Persist the binding and pending boundary before dispatch. The synthetic effect must modify a separate physical effect store, independently observed by tests. A pending record can mean that dispatch happened: missing receipt, missing effect evidence or an interrupted response cannot prove zero effects. Recovery and lookup never automatically redispatch. Preserve unknown until the trusted local synthetic effect source supplies matching evidence; lookup cannot manufacture a receipt from a client claim.
 
 Store the projection content and complete cursor domain/watermark as one recoverable committed pair. Receipt evidence and the visible projection are independent: stale epoch data cannot replace current projection, while verified old-effect evidence remains available. A stale snapshot or history gap cannot erase a receipt. This lab does not implement retention controls, chat persistence, memory/tombstone restore, backup migration, formal authority validation or trusted user instruction acknowledgement.
@@ -23,3 +25,5 @@ First collect real assertion RED from subprocess tests using actual temporary di
 Run inverse mutations for pending-before-effect ordering, unknown replay, and receipt/projection isolation or atomic pair recovery; each must fail a behavior assertion. Restore source bytes, rerun GREEN, and retain raw logs outside Git. Report exact source SHA, command exits, test counts, fault boundaries and limitations.
 
 Before any intake: immutable non-author review and fresh candidate CI on the latest develop combination. The original RD-P05 SQLite CI RED remains unexplained historical evidence; no rerun or inferred root-cause fix is authorized by this lab.
+
+Existing CI does not execute the new Rust lab. Record exact-source local subprocess/fault/mutation results separately from candidate CI's existing Flutter regression checks; a successful CI run cannot substitute for this lab's verification.
