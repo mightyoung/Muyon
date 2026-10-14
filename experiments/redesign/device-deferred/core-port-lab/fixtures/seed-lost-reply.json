@@ -1,0 +1,1 @@
+{"lab_only":true,"domain":{"store":"lab-store-1","scope":"lab-scope-1","stream":"lab-stream-1"},"display_epoch":"epoch-0","suppliers":[{"id":"supplier-a","name":"合成供应商","revision":"1"},{"id":"supplier-b","name":"合成供应商","revision":"1"}],"trusted_faults":{"drop_commit_reply_once":true}}
