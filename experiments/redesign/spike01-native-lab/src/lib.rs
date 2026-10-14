@@ -78,8 +78,17 @@ impl Drop for CallGuard<'_> {
         state.calls-=1;if self.callback { state.callbacks-=1; }self.session.idle.notify_all();
     }
 }
-struct CallbackGuard;
-impl Drop for CallbackGuard { fn drop(&mut self) { CALLBACK_STACK.with(|v|{v.borrow_mut().pop();}); } }
+struct CallbackGuard { active:bool }
+impl Drop for CallbackGuard { fn drop(&mut self) { if self.active { CALLBACK_STACK.with(|v|{v.borrow_mut().pop();}); } } }
+// Rust drops fields in declaration order, including during unwinding. Foreign
+// release may reenter this session: keep the TLS marker and counters alive until
+// the last observer reference has been released. This also covers early errors
+// before on_reply, not just successful callbacks.
+struct ObservedCall<'a> {
+    observer:Option<Arc<dyn LabObserver>>,
+    _callback:CallbackGuard,
+    _call:CallGuard<'a>,
+}
 impl Drop for LabSession { fn drop(&mut self) { LIVE_SESSIONS.fetch_sub(1,Ordering::SeqCst); } }
 
 #[uniffi::export]
@@ -115,10 +124,12 @@ impl LabSession {
         let mut s=self.state.lock().map_err(|_|bad("STATE_LOCK"))?;
         if s.closed { return Err(LabError::Closed); }
         let observer=s.observer.clone();s.calls+=1;if observer.is_some() { s.callbacks+=1; }drop(s);
-        let _call=CallGuard { session:self,callback:observer.is_some() };
+        let active=observer.is_some();
+        let call=CallGuard { session:self,callback:active };
+        if active { CALLBACK_STACK.with(|v|v.borrow_mut().push(self.id)); }
+        let observed=ObservedCall { observer,_callback:CallbackGuard { active },_call:call };
         let reply=evaluate_typed(request)?;
-        if let Some(observer)=observer {
-            CALLBACK_STACK.with(|v|v.borrow_mut().push(self.id));let _callback=CallbackGuard;
+        if let Some(ref observer)=observed.observer {
             observer.on_reply(reply.digest.clone()).map_err(|_|LabError::CallbackRejected)?;
         }
         Ok(reply)
@@ -175,6 +186,40 @@ mod tests {
     fn req(s: &str) -> LabRequest {
         LabRequest { protocol: 1, raw_utf16: s.encode_utf16().collect(), revision: 7,
             purpose: "spike01.name".into(), normalization: LabNormalization::Nfc, note: None }
+    }
+    #[test]
+    fn observer_release_keeps_reentry_marker_on_real_rust_unwind() {
+        use std::sync::Weak;
+        struct PanicObserver { session:Weak<LabSession>, rejected:Arc<AtomicUsize> }
+        impl std::fmt::Debug for PanicObserver {
+            fn fmt(&self,f:&mut std::fmt::Formatter<'_>)->std::fmt::Result { f.write_str("PanicObserver") }
+        }
+        impl LabObserver for PanicObserver {
+            fn on_reply(&self,_:String)->Result<(),LabCallbackError> {
+                self.session.upgrade().unwrap().set_observer(Arc::new(Quiet)).unwrap();
+                panic!("SYNTHETIC_REAL_CALLBACK_UNWIND");
+            }
+        }
+        impl Drop for PanicObserver {
+            fn drop(&mut self) {
+                let session=self.session.upgrade().unwrap();
+                if matches!(session.close_session(),Err(LabError::ReentrantClose)) {
+                    self.rejected.fetch_add(1,Ordering::SeqCst);
+                }
+                if matches!(session.unsubscribe(),Err(LabError::ReentrantClose)) {
+                    self.rejected.fetch_add(1,Ordering::SeqCst);
+                }
+            }
+        }
+        #[derive(Debug)] struct Quiet;
+        impl LabObserver for Quiet { fn on_reply(&self,_:String)->Result<(),LabCallbackError> { Ok(()) } }
+        let baseline=live_session_count();let session=LabSession::new();
+        let rejected=Arc::new(AtomicUsize::new(0));
+        session.set_observer(Arc::new(PanicObserver { session:Arc::downgrade(&session),rejected:rejected.clone() })).unwrap();
+        assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(||session.run(req("名字")))).is_err());
+        assert_eq!(rejected.load(Ordering::SeqCst),2);
+        session.run(req("新名字")).unwrap();session.unsubscribe().unwrap();session.close_session().unwrap();
+        drop(session);assert_eq!(live_session_count(),baseline);
     }
     #[test]
     fn same_source_json_and_typed_produce_same_semantics_and_digest() {
