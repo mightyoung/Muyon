@@ -87,3 +87,47 @@ Compose source requires no signature change because it consumes ScreenState and
 callbacks rather than Command. Compose compilation/rendering and Android actual
 load remain **NOT_RUN**. M03 remains **blocked_contract**. No dependencies,
 licenses, real models/data or device access added.
+
+## Independent R2 correction — receipt accounting versus display projection
+
+At fixed `3e3b29625b1a6594677f73ac9845f15d91d45771`, non-author follow-up closed
+R1 but found R2: original command expected r4/result r5 remained a genuine mock
+effect, yet its receipt overwrote a newer same-domain/current-generation snapshot
+coveredThrough8/object r8. C0 remained withheld. Before this correction the
+preserve-r8 assertion plus snapshot-vs-receipt regression failed: full suite
+**33 passed / 2 failed**, actual Java exit 1; the independent preserve-r5-ledger
+assertion already passed and remains unchanged.
+
+Effect validation/accounting remains first, bound to the original command. After
+ledger retention and generation/object gates, display compares only canonical mock
+counters for that same supplier. If the accepted current counter is newer than the
+effect result, the real older effect stays in the intent ledger while the current
+projection and every raw draft code unit stay untouched. Current status becomes
+READY instead of claiming that the older effect saved the newer current object.
+Object revision ordering is the explicit temporary numeric counter convention;
+it never compares coveredThrough, generation or different-domain versions.
+
+Snapshots still pass full domain/generation/watermark gates first. Snapshot
+projection also preserves the same supplier's already-known newer mock counter,
+including a prior receipt-derived projection; a greater snapshot watermark does
+not prove that an older object counter should replace it. Unsupported/malformed
+incoming object counter cannot replace an already valid newer projection. No
+receipt invents or advances an event watermark.
+
+All prior 32 cases retained. Complete scoped JVM suite **38 passed / 0 failed**,
+exit 0. Additional regressions cover r8 display/raw preserved with r5 receipt
+retained, stale snapshot not replacing r5, wrong-domain command not entering
+ledger/display, old-generation authentic receipt retained without changing r8/raw,
+and higher-watermark snapshot not regressing one object's counter.
+
+Three temporary reverse mutants compile and exit 1 at assertions: remove stale
+receipt display guard; remove snapshot object guard; discard genuine receipt
+ledger insertion. These prove both guards and positive retention are observed by
+tests. Original source is not mutated: copies/binaries are under
+`/tmp/rd-p04-projection-mutants/`; raw RED/GREEN/mutation logs are outside git at
+`/workspace/reports/device-deferred-rd-p04-20261014/r2/`. A fresh restored-source
+full suite and diff checks are required before the follow-up commit.
+
+Compose consumes the unchanged state/callback shape. Compose compile/render,
+Android actual load remain **NOT_RUN**, M03 remains **blocked_contract**; no new
+install/license/device/model permission, production schema or native wiring.
