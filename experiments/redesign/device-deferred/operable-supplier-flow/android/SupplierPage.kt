@@ -160,7 +160,10 @@ private fun SupplierEditor(model: SupplierScreenModel) {
             Text("结果未知不代表失败；只核对原操作，不创建替代意图或重发保存。")
             Action("核对原回执", enabled = model.canLookup, action = model::lookup)
         } else {
-            Action("预览修改", enabled = model.canPreview, action = model::preview)
+            if (model.canPreview && editor.status == "unavailable") {
+                Text("此预览尚未派发保存；保留原草稿，可重试预览或显式放弃。")
+            }
+            Action(if (editor.status == "unavailable" && model.canPreview) "重试预览" else "预览修改", enabled = model.canPreview, action = model::preview)
             Action("保存名称", enabled = model.canSave, action = model::save)
         }
         Action(if (model.saved) "结束本次编辑" else "取消编辑", enabled = model.canCancel, action = model::requestCancel)

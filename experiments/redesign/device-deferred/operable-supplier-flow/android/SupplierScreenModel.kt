@@ -50,26 +50,43 @@ class SupplierScreenModel(initial: HostProjection, private val port: SupplierAct
     var onChanged: () -> Unit = {}
     private var sequence = 0L
     private var activeRequest: Long? = null
-    private var transportUncertain = false
+    // Presentation-only correlation: leaving a session never clears its original save guard.
+    private data class OriginalOperation(val session: String, val intent: String)
+    private fun originalOperation(state: HostProjection) = state.editor?.let { OriginalOperation(state.session, it.intent) }
+    private fun knownPreviewOutage(editor: EditorProjection?) = editor?.status == "unavailable" && editor.reason == "preview_unavailable"
+    private fun requiresLookup(editor: EditorProjection?) = editor?.status in setOf("unknown", "saving") ||
+        (editor?.status == "unavailable" && !knownPreviewOutage(editor)) ||
+        (editor?.status == "saved" && editor.receipt == null)
+    private fun resolvedOriginal(editor: EditorProjection?) = editor?.status == "rejected" ||
+        (editor?.status == "conflict" && editor.reason == "Revision") ||
+        (editor?.status == "saved" && editor.receipt != null)
+    private val uncertainOperations = mutableSetOf<OriginalOperation>().apply {
+        if (requiresLookup(initial.editor)) originalOperation(initial)?.let { add(it) }
+    }
+    private val transportUncertain get() = uncertainOperations.any {
+        it.session == projection.session && (projection.editor == null || it.intent == projection.editor?.intent)
+    }
     private var syncingDraft = false
     private val dirty get() = buffer != projection.editor?.raw.orEmpty()
-    private val editableStatus get() = projection.editor?.status in setOf("editing", "prepared", "rejected")
+    // The exact host reason proves preview failed before dispatch; arbitrary unavailable does not.
+    private val editableStatus get() = projection.editor?.status in setOf("editing", "prepared", "rejected") || knownPreviewOutage(projection.editor)
     val canChangeRaw get() = editableStatus && !transportUncertain && (!busy || syncingDraft)
     val canRestoreSession get() = !busy && !dirty
     val canEdit get() = !busy && !transportUncertain && projection.selected != null && projection.editor == null
     val canPreview get() = !busy && canChangeRaw && !dirty
     val canSave get() = !busy && !transportUncertain && !dirty && projection.editor?.status == "prepared" && projection.editor?.preview != null
-    val canLookup get() = !busy && projection.editor != null && (transportUncertain || projection.editor?.status in setOf("unknown", "saving", "unavailable") || (projection.editor?.status == "saved" && !saved))
-    val canCancel get() = !busy && !transportUncertain && (projection.editor?.status in setOf("editing", "prepared", "rejected") || saved || (projection.editor?.status == "conflict" && projection.editor?.reason == "Revision"))
+    val canLookup get() = !busy && projection.editor != null && (transportUncertain || requiresLookup(projection.editor))
+    val canCancel get() = !busy && !transportUncertain && (editableStatus || saved || (projection.editor?.status == "conflict" && projection.editor?.reason == "Revision"))
     val saved get() = projection.editor?.status == "saved" && originalReceipt != null && !transportUncertain
     val statusText get() = when {
+        projection.editor?.status == "saving" -> "保存中，等待原回执"
         transportUncertain -> "结果未知，请核对原回执"
         saved -> "已保存"
+        knownPreviewOutage(projection.editor) -> "预览暂不可用，尚未派发；可编辑、重试预览或放弃草稿"
         else -> when (projection.editor?.status) {
             null -> "未编辑"
             "editing" -> "草稿未保存"
             "prepared" -> "Rust 校验通过，尚未保存"
-            "saving" -> "保存中，等待原回执"
             "conflict" -> "版本冲突，保留原输入"
             "unknown" -> "结果未知，请核对原回执"
             "rejected" -> "主机拒绝，请查看原因"
@@ -161,6 +178,7 @@ class SupplierScreenModel(initial: HostProjection, private val port: SupplierAct
     ) {
         if (busy) return
         val request = ++sequence
+        val requestOperation = originalOperation(projection)
         activeRequest = request; busy = true; syncingDraft = draftRequest; transportMessage = null; changed()
         val receive: (PortReply) -> Unit = receive@{ reply ->
             if (activeRequest != request) return@receive
@@ -171,11 +189,15 @@ class SupplierScreenModel(initial: HostProjection, private val port: SupplierAct
                 // Once a host result is uncertain/dispatched, its original raw wins.
                 val keep = preserveLocal && priorIntent == projection.editor?.intent && editableStatus
                 if (!keep) buffer = projection.editor?.raw.orEmpty()
-                // A refresh of a stale prepared projection cannot prove an uncertain save resolved.
-                if (projection.editor?.status in setOf("saved", "conflict", "rejected", "unknown", "saving")) transportUncertain = false
+                // Only this returned original operation's authoritative resolution clears its guard.
+                // A different session/intent, stale prepared or preview outage cannot resolve it.
+                originalOperation(projection)?.let { returnedOperation ->
+                    if (requiresLookup(projection.editor)) uncertainOperations.add(returnedOperation)
+                    else if (resolvedOriginal(projection.editor)) uncertainOperations.remove(returnedOperation)
+                }
                 success()
             } else {
-                if (uncertainOnFailure) transportUncertain = true
+                if (uncertainOnFailure && requestOperation != null) uncertainOperations.add(requestOperation)
                 transportMessage = "主机暂不可用；保留草稿与原操作，请刷新或核对。"
             }
             changed()

@@ -24,6 +24,72 @@ private class RecordingPort : SupplierActionPort {
 }
 private fun expect(condition: Boolean, reason: String) { check(condition) { reason } }
 private val tests = linkedMapOf<String, () -> Unit>(
+    "original resolution clears only its own uncertainty before explicit fresh edit" to {
+        val port = RecordingPort(); val m = SupplierScreenModel(projection(editor("prepared")), port)
+        m.save(); port.calls.last().reply(PortReply.Unavailable); m.lookup()
+        port.succeed(projection(editor("rejected").copy(reason = "Required")))
+        expect(m.canCancel && m.canChangeRaw && !m.canLookup, "same original verified rejection resolves its local save guard")
+        m.requestCancel(); m.confirmDiscard(); port.succeed(projection()); m.edit()
+        expect(port.calls.last().action == HostAction.Edit, "fresh edit is explicit and only follows host-confirmed original cancellation")
+    },
+    "stale preview outage cannot unlock original uncertain save" to {
+        val port = RecordingPort(); val m = SupplierScreenModel(projection(editor("prepared")), port)
+        m.save(); port.calls.last().reply(PortReply.Unavailable)
+        m.restoreOriginalSession("original-session")
+        port.succeed(projection(editor("unavailable").copy(reason = "preview_unavailable")))
+        expect(!m.canChangeRaw && !m.canPreview && !m.canCancel && m.canLookup, "pre-dispatch-looking stale result cannot clear original uncertain dispatch")
+    },
+    "authoritative saving phase stays distinct from unknown transport outcome" to {
+        val m = SupplierScreenModel(projection(editor("saving")), RecordingPort())
+        expect(m.statusText == "保存中，等待原回执" && m.canLookup && !m.canSave, "host saving label remains saving while original lookup guard persists")
+    },
+    "known undispatched preview outage permits exact raw editing" to {
+        val port = RecordingPort(); val outage = editor("unavailable", " retained raw ").copy(reason = "preview_unavailable")
+        val m = SupplierScreenModel(projection(outage), port)
+        expect(m.canChangeRaw && m.canPreview && m.canCancel && !m.canLookup && !m.canSave, "host preview outage is undispatched, not lookup-only")
+        m.changeRaw(" \tnew\uD800raw ")
+        expect(port.calls.single().action == HostAction.Draft(" \tnew\uD800raw "), "outage edit must keep exact UTF16")
+        port.succeed(projection(editor(raw = " \tnew\uD800raw ")))
+        expect(m.projection.editor?.intent == "original-intent" && !m.canSave, "draft uses same host intent and invalidates preview")
+    },
+    "preview outage retry keeps original intent raw and expected revision" to {
+        val port = RecordingPort(); val outage = editor("unavailable", " raw to retry ").copy(reason = "preview_unavailable")
+        val m = SupplierScreenModel(projection(outage), port)
+        m.preview(); expect(port.calls.size == 1 && port.calls.single().action == HostAction.Preview, "retry preview must dispatch preview only; no save or lookup")
+        port.succeed(projection(outage.copy(status = "prepared", preview = PreviewProjection("raw to retry", "2"), reason = null)))
+        expect(m.projection.editor?.intent == outage.intent && m.buffer == outage.raw && m.projection.editor?.expected_revision == "1", "no new intent or revision rebase")
+        expect(m.canSave, "only new host preparation enables save")
+    },
+    "preview outage discard keeps original raw until host confirms" to {
+        val port = RecordingPort(); val m = SupplierScreenModel(projection(editor("unavailable").copy(reason = "preview_unavailable")), port)
+        m.requestCancel(); expect(m.discardConfirmation && port.calls.isEmpty(), "outage requires explicit discard")
+        m.confirmDiscard(); expect(port.calls.single().action == HostAction.Cancel && m.buffer == " 新名称 ", "retain raw pending host cancellation")
+        port.succeed(projection()); expect(m.projection.editor == null && m.buffer.isEmpty(), "host confirms original undispatched discard")
+    },
+    "unavailable without exact preview reason remains locked" to {
+        val port = RecordingPort(); val m = SupplierScreenModel(projection(editor("unavailable").copy(reason = "unknown_outage")), port)
+        expect(!m.canChangeRaw && !m.canPreview && !m.canCancel && m.canLookup, "ambiguous unavailable must not gain pre-dispatch authority")
+        m.preview(); m.changeRaw("replacement"); m.requestCancel(); expect(port.calls.isEmpty(), "ambiguous outage cannot replace original operation")
+    },
+    "initial host unknown remains guarded after visiting another session" to {
+        val port = RecordingPort(); val sessions = listOf(RecoverableSession("original-session", "S1", "unknown"), RecoverableSession("other-session", "S2", "editing"))
+        val m = SupplierScreenModel(projection(editor("unknown")).copy(recoverable_sessions = sessions), port)
+        m.restoreOriginalSession("other-session")
+        port.succeed(projection(editor().copy(intent = "other-intent", supplier = "S2")).copy(session = "other-session", recoverable_sessions = sessions))
+        expect(m.canChangeRaw && !m.canLookup, "other original session stays independent")
+        m.restoreOriginalSession("original-session")
+        port.succeed(projection(editor("prepared")).copy(recoverable_sessions = sessions))
+        expect(!m.canSave && m.canLookup, "stale prepared cannot replace previously observed unknown for original operation")
+    },
+    "different intent resolution cannot clear original session uncertainty" to {
+        val port = RecordingPort(); val m = SupplierScreenModel(projection(editor("prepared")), port)
+        m.save(); port.calls.last().reply(PortReply.Unavailable)
+        m.restoreOriginalSession("original-session")
+        port.succeed(projection(editor("rejected").copy(intent = "different-intent", reason = "Required")))
+        expect(m.canChangeRaw, "different operation does not inherit original uncertainty")
+        m.restoreOriginalSession("original-session"); port.succeed(projection(editor("prepared")))
+        expect(!m.canSave && m.canLookup, "only same original session AND intent resolution may clear uncertainty")
+    },
     "input is locked during save and preview callbacks" to {
         val port = RecordingPort(); val m = SupplierScreenModel(projection(editor("prepared")), port)
         m.save(); m.changeRaw("new input during save")
