@@ -71,3 +71,14 @@ For example r9→r10 is accepted; strings are never ordered lexicographically.
 This mock encoding is replaceable, not the M03 encoding of product/opaque revisions.
 Invalid effects never enter the receipt ledger or set SAVED; a later correctly
 bound original receipt may resolve unknown. This is not durable disk persistence.
+
+## Receipt ledger and current projection (R2 follow-up)
+
+A correctly bound older effect remains in the original intent ledger even when a
+newer same-object snapshot is already displayed. This lab compares only its
+explicit numeric mock counters within the accepted domain/supplier: r5 cannot
+replace r8. Display status then remains READY rather than presenting the old
+receipt as a save of the current r8 projection; raw drafts are retained. Likewise,
+a stale object counter in a snapshot cannot regress a receipt-derived projection.
+Snapshot watermark and object counter remain separate axes; neither is a product
+opaque-version ordering or a frozen wire type, and receipts never fabricate cursors.

@@ -11,9 +11,12 @@ data class Command(val intent: String, val supplierId: String, val plan: String,
 /** Mock-only revision grammar. No product wire encoding or opaque-version ordering.
  * Canonical r<decimal u64> counter, one effect increments exactly once; max has no successor.
  */
-private fun mockRevisionSuccessor(revision: String): String? {
+private fun mockRevisionValue(revision: String): ULong? {
     if(!Regex("r(?:0|[1-9][0-9]*)").matches(revision)) return null
-    val value=revision.substring(1).toULongOrNull() ?: return null
+    return revision.substring(1).toULongOrNull()
+}
+private fun mockRevisionSuccessor(revision: String): String? {
+    val value=mockRevisionValue(revision) ?: return null
     if(value==ULong.MAX_VALUE) return null
     return "r${value+1uL}"
 }
@@ -59,7 +62,15 @@ class SupplierPresenter(private val port: RustCorePort) {
     private fun applySnapshot(snapshot: Snapshot, generation: Long) {
         if(generation!=state.generation || (domain!=null && snapshot.domain!=domain) || snapshot.coveredThrough<watermark) return
         domain=snapshot.domain; watermark=snapshot.coveredThrough
-        state=state.copy(suppliers=snapshot.suppliers.toList(), saved=state.saved?.let { old->snapshot.suppliers.find {it.id==old.id} },status=if(state.status==Status.LOADING) Status.READY else state.status)
+        // Watermark orders snapshots within one domain; mock object counters order
+        // an individual supplier projection against an independently accounted receipt.
+        val projected=snapshot.suppliers.map { incoming->
+            val current=state.saved?.takeIf {it.id==incoming.id} ?: state.suppliers.find {it.id==incoming.id}
+            val currentValue=current?.let {mockRevisionValue(it.revision)}
+            val incomingValue=mockRevisionValue(incoming.revision)
+            if(current!=null && currentValue!=null && (incomingValue==null || incomingValue<currentValue)) current else incoming
+        }
+        state=state.copy(suppliers=projected, saved=state.saved?.let { old->projected.find {it.id==old.id} },status=if(state.status==Status.LOADING) Status.READY else state.status)
     }
     fun select(id: String) {
         val supplier=state.suppliers.find {it.id==id} ?: return
@@ -125,6 +136,16 @@ class SupplierPresenter(private val port: RustCorePort) {
             is Outcome.Effect->Status.SAVED
         }
         if(command.generation!=state.generation || command.supplierId!=state.saved?.id) return
+        if(outcome is Outcome.Effect) {
+            val currentValue=state.saved?.let {mockRevisionValue(it.revision)}
+            val resultValue=mockRevisionValue(outcome.supplier.revision) ?: return
+            if(currentValue==null || resultValue<currentValue) {
+                // The original effect is real and already accounted. It cannot claim
+                // or replace the newer current snapshot; keep every raw draft byte.
+                state=state.copy(status=Status.READY)
+                return
+            }
+        }
         // A terminal effect cannot be downgraded by a late timeout or conflict.
         if(outcome !is Outcome.Effect && retainedReceipts.containsKey(command.intent)) return
         state=when(outcome) {
