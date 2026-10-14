@@ -1,0 +1,19 @@
+# G1 ChatGPT 对照线索（序列化名大量哈希混淆）
+jbm.java:
+new jbm("UserMemory", 0, "user_memory")
+new jbm("GeneralMemory", 1, "general_memory")
+new jbm("PastConversation", 2, "past_conversation")
+new jbm("UserInstructions", 3, "user_instructions")
+new jbm("Unknown", 4, "unknown")
+nm60.java:
+20:        pluginGeneratedSerialDescriptor.l("memories", true);
+21:        pluginGeneratedSerialDescriptor.l("memoryMaxTokens", false);
+22:        pluginGeneratedSerialDescriptor.l("memoryNumTokens", false);
+z9r0.java:
+new z9r0("Unknown", 0, "unknown")
+new z9r0("MemorySaved", 1, "memory_saved")
+new z9r0("Hangup", 2, "hangup")
+new z9r0("Mute", 3, "mute")
+fdq0.java:
+e7a0("context_compaction"
+e7a0("close"

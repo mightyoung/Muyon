@@ -1,0 +1,67 @@
+{
+ "task": "MEMORY-LIFECYCLE-04",
+ "created": "2026-10-13 (Asia/Shanghai)",
+ "mode": "static only; no login/no model calls/no upload",
+ "samples": {
+  "muse": {
+   "pkg": "com.facebook.aura",
+   "version": "11.0.0.8.164",
+   "sha256": "c7e788b5df855912dffbefc4c017f2e621b54aaeef954424f56339bd994fcefa",
+   "signer_sha256": "a16bbe0247a738bc8f09fef50d890dc177ec875a83a121f877329b1b89667e99",
+   "signature_source": "APKMirror reference match",
+   "coverage": "jadx 1.5.3, 138 method errors (saveContent/loadContent/writeFile body not decompiled)"
+  },
+  "claude": {
+   "pkg": "com.anthropic.claude",
+   "version": "1.261009.20",
+   "sha256": "9807d321245e3a2ac2736e8c2e1b9215147ff566cea55431189e643d5786122a",
+   "signer_sha256": "305a1e8a432e5ec0c612b2465359c3b88e3c95d6253599ac6088562b818b64a0",
+   "signature_source": "Play App Signing form, user-accepted medium trust",
+   "coverage": "base only (missing abi/density); jadx 23311 classes, 162 errors"
+  },
+  "chatgpt": {
+   "pkg": "com.openai.chatgpt",
+   "version": "1.2026.272",
+   "sha256": "47d8350ad995eb54283bce326fed77d099467f6222318eb1c8509b7f8831e40a",
+   "signer_sha256": "b24f4bfbb3cf293f938703b9d87027c1102cc36dc4fa206910e08927db40473c",
+   "signature_source": "Play App Signing form, user-accepted medium trust",
+   "coverage": "base only; jadx stopped ~66%; serial names hashed"
+  }
+ },
+ "tools": {
+  "jadx": "1.5.3",
+  "rea": "6.4.0",
+  "apktool": "present (not rerun)"
+ },
+ "official_sources_accessed_2026-10-13": [
+  "https://www.meta.com/help/artificial-intelligence/2225571704857152/",
+  "https://www.meta.com/help/artificial-intelligence/995796179982326/",
+  "https://muse.ai/privacy",
+  "https://support.claude.com/en/articles/11817273",
+  "https://support.claude.com/en/articles/12260368-use-incognito-chats",
+  "https://claude.com/blog/claudes-memory-works-everywhere-and-you-decide-whats-in-it",
+  "https://support.claude.com/en/articles/12123587",
+  "https://help.openai.com/en/articles/8590148",
+  "https://help.openai.com/en/articles/8914046",
+  "https://help.openai.com/en/articles/8983778"
+ ],
+ "evidence_sha256": {
+  "chatgpt-G1-clues.txt": "249397ae6b1f104e6f5c0c839093bde7081afb77bdcab925e107ef43bdfa5f31",
+  "claude-C1-memory-settings.txt": "1e168aacd0a79f2ddf6fa5d7b9488596e8f5cbe1d3e476a3d14f082e825fab7e",
+  "claude-C2-memory-edit.txt": "2da2c001a50a2a853e28de36791da957be9a8372d6e241be47cba1dd8ce63574",
+  "claude-C3-memory-schema.txt": "9eb8d2902827882549fdcff58b7c7c639aa4d96f30868135cc1bdee92126afce",
+  "claude-C4-chat-fields.txt": "62ab972819f47c7e5cc2aac80cfe05aa3ba81bbc678910edb97c3a07613ceb15",
+  "claude-C5-compaction.txt": "1095546923cb79cbab531edc8675aaeeb6ad4cae6cc0b77cf72f5bae05d0b5f0",
+  "muse-M1-memory-save.txt": "2bd27654bbcf45602bcbc48c560687044408a37305bf916952eaa607b8eed3a2",
+  "muse-M2-writefile.txt": "5eb427d24828bf93b2963cc6bafd595a2efe307ee81f5af2dadea89340bb9dd9",
+  "muse-M3-identity-save.txt": "0b915b382f78795d64653df44b1a1dd29df1dd9082639210e8600ac9e02bcaf5",
+  "muse-M4-import-and-delete-copy.txt": "ecbefd963bbccc44d232e7fa1a859733c6bde4583af24c2a290bce32c49fef26"
+ },
+ "deliverables": [
+  "muse.md",
+  "claude.md",
+  "chatgpt.md",
+  "muyon.md",
+  "report.docx"
+ ]
+}

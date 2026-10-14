@@ -1,0 +1,22 @@
+# M2 HatchFileOperations.writeFile$default 默认值 + multipart 字段（无 etag/版本/预期 mtime）
+    public static /* synthetic */ Object writeFile$default(HatchFileOperations hatchFileOperations, String str, String str2, AA1 aa1, boolean z, boolean z2, boolean z3, String str3, C0M8 c0m8, int i, Object obj) {
+        boolean zA1I = C3UN.A1I(i, z);
+        boolean zA1J = C3UN.A1J(i, z2);
+        if ((i & 32) != 0) {
+            z3 = true;
+        }
+        if ((i & 64) != 0) {
+            str3 = null;
+        }
+        return hatchFileOperations.writeFile(str, str2, aa1, zA1I, zA1J, z3, str3, c0m8);
+    }
+        Iterator itA0h = AnonymousClass003.A0h(map);
+        while (itA0h.hasNext()) {
+            Map.Entry entryA0o = C3UN.A0o(itA0h);
+            c25999XvA19.add(INSTANCE.formField(C3UN.A0h(entryA0o), (String) entryA0o.getValue()));
+        }
+        HatchFileOperations hatchFileOperations = INSTANCE;
+        c25999XvA19.add(hatchFileOperations.formField("path", str));
+        c25999XvA19.add(hatchFileOperations.formField("create_parent", "true"));
+        c25999XvA19.add(hatchFileOperations.formField("overwrite", "true"));
+        return new HatchRequestBody.Multipart(AbstractC25819Vf.A1A(c25999XvA19), Collections.singletonList(new HatchMultipartFilePart("file", strA0Y, "application/octet-stream", file)));

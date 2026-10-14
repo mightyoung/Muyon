@@ -1,0 +1,60 @@
+# M3 IdentityViewModel 保存 IDENTITY.md：overwrite=true, append=false, createParent=true, expectedGatewayUrl=null；originalContent 仅本地
+                } while (!c2l0.A6F(value, UiState.copy$default(value, null, null, null, true, false, null, false, false, null, null, 983, null)));
+                strA0a = IdentityViewModel.this._uiState.getValue().content;
+                HatchFileOperations hatchFileOperations = HatchFileOperations.INSTANCE;
+                AA1 aa1 = IdentityViewModel.this.userSession;
+                this.L$0 = strA0a;
+                this.label = 1;
+                objWriteFile = hatchFileOperations.writeFile(IdentityViewModelKt.IDENTITY_FILE_PATH, strA0a, aa1, true, false, true, null, this);
+                if (objWriteFile == enumC21398i6) {
+                    return enumC21398i6;
+                }
+            } else {
+                if (i != 1) {
+                    throw AnonymousClass002.A0v();
+                }
+                strA0a = C3UN.A0a(this.L$0, objWriteFile);
+            }
+            HatchFileOperations.WriteResult writeResult = (HatchFileOperations.WriteResult) objWriteFile;
+            if (writeResult instanceof HatchFileOperations.WriteResult.Success) {
+                IdentityViewModel identityViewModel = IdentityViewModel.this;
+                identityViewModel.originalContent = strA0a;
+                C2L0<UiState> c2l02 = identityViewModel._uiState;
+                do {
+                    value3 = c2l02.getValue();
+                    UiState uiState = value3;
+                    loadingState = uiState.loadingState;
+                    str = uiState.content;
+                    aiIdentity = uiState.identity;
+                    str2 = uiState.soulModifiedDate;
+                    str3 = uiState.memoryModifiedDate;
+                    AnonymousClass004.A10(loadingState, str);
+                } while (!c2l02.A6F(value3, new UiState(loadingState, str, aiIdentity, false, false, null, false, false, str2, str3)));
+                IdentityViewModel.this.gateway.refreshIdentity();
+...
+            goto L3e
+        L75:
+            X.C8mv.A03(r4)
+            com.facebook.aura.gateway.HatchFileOperations r2 = com.facebook.aura.gateway.HatchFileOperations.INSTANCE
+            X.AA1 r1 = r14.userSession
+            r6.label = r0
+            java.lang.String r0 = "SOUL.md"
+            java.lang.Object r4 = r2.statFile(r0, r1, r6)
+            if (r4 != r5) goto L8a
+            return r5
+        L87:
+            X.C8mv.A03(r4)
+        L8a:
+            com.facebook.aura.gateway.HatchFileOperations$StatResult r4 = (com.facebook.aura.gateway.HatchFileOperations.StatResult) r4
+            com.facebook.aura.gateway.HatchFileOperations r2 = com.facebook.aura.gateway.HatchFileOperations.INSTANCE
+            X.AA1 r1 = r14.userSession
+            r6.L$0 = r4
+            r6.label = r3
+            java.lang.String r0 = "MEMORY.md"
+            java.lang.Object r0 = r2.statFile(r0, r1, r6)
+            if (r0 == r5) goto L72
+            r1 = r4
+            r4 = r0
+            goto L27
+        L9f:
+            com.facebook.aura.status.viewmodel.IdentityViewModel$fetchFileDatesInternal$1 r6 = new com.facebook.aura.status.viewmodel.IdentityViewModel$fetchFileDatesInternal$1

@@ -1,0 +1,19 @@
+# M4 导入记忆：addMemory 只发聊天消息让 agent 自行写入（非直接写文件）
+    public final void addMemory(String str) {
+        C25519Tj.A0p(str, 0);
+        String strA0y = AnonymousClass007.A0y(this._uiState.getValue().pastedText);
+        if (strA0y.length() == 0 || this._uiState.getValue().isSending) {
+            return;
+        }
+        AnonymousClass001.A1P(AnonymousClass001.A15(), new AnonymousClass1(str, strA0y, null), C6Q8.A00(this));
+            try {
+            } catch (CancellationException e) {
+                throw e;
+            } catch (Exception e2) {
+                C18737eM.A0J(HatchImportMemoryToHatchViewModel.TAG, e2, "addMemory: sendChatMessage failed");
+                C2L0<HatchImportMemoryToHatchUiState> c2l0 = HatchImportMemoryToHatchViewModel.this._uiState;
+--- res_en.txt 相关提示词/文案
+You can delete messages you’ve sent. Messages you delete are removed from the conversation but may stay in the agent’s memory. %1$s
+Permanently deletes your %1$s data, including chat history, files and active tasks.
+I just uploaded an export of my chats from another AI assistant to my workspace at `%1$s`. Please read it, extract durable facts about me — interests, preferences, recurring topics, ongoing projects — and remember them via your memory tooling. Skip anything ephemeral or sensitive. Confirm what you stored.
+%1$s will read this and remember the durable facts. This is not a verbatim copy.

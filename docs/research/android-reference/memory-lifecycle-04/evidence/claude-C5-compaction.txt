@@ -1,0 +1,37 @@
+# C5 stw.java:9-11 stop_reason 'compaction' 非终止
+    public static final Set a = kc1.B0(new String[]{"end_turn", "max_tokens", "stop_sequence", "refusal", "prompt_injection_risk", "conversation_length_limit", "model_context_window_exceeded", "user_canceled", "error"});
+
+    public static boolean a(String str) {
+        return (str == null || str.equals("tool_use") || str.equals("pause_turn") || str.equals("compaction")) ? false : true;
+    }
+
+# o48.java CompactionStatus.Status 值
+new String[]{"compacting", "complete", "failed"}
+# p89.java CompactionStatus 字段: status, message
+# sjm.java NotSentReason 序列化名
+new cpd("failed"
+new cpd("lost_to_compaction"
+new cpd("not_delivered"
+new cpd("stopped_before_reply"
+# z9p.java:1478-1486 NotSentReason 分支
+                return true;
+            }
+        } else if (!(bqmVarA instanceof upm)) {
+            if (n7i.l(bqmVarA, wpm.INSTANCE) || n7i.l(bqmVarA, rpm.INSTANCE) || n7i.l(bqmVarA, aqm.INSTANCE) || n7i.l(bqmVarA, vpm.INSTANCE)) {
+                return true;
+            }
+            uqa.a();
+            return false;
+        }
+# l130.java:1118-1130 k(): 置 CompactionCleared 并给特定状态条目打时间戳
+    public static final void k(n2m n2mVar, kvw kvwVar) {
+        yb20.g(n2mVar, yqm.a);
+        for (Map.Entry entry : n2mVar.p().entrySet()) {
+            zhl zhlVar = (zhl) entry.getKey();
+            String str = zhlVar.a;
+            eqz eqzVar = (eqz) entry.getValue();
+            if (!eqzVar.f()) {
+                t89 t89Var = eqzVar.K;
+                if ((t89Var != null ? t89Var.a : null) == s89.w) {
+                    n2mVar.c0(n2mVar.p().q(zhlVar, eqz.a(eqzVar, null, null, null, null, null, 0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, false, 
+                }

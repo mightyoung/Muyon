@@ -1,0 +1,60 @@
+# C2 x0n.b: POST melange/edit {path, instruction}，Accept: text/event-stream；无 If-Match
+    }
+
+    public final Object b(String str, String str2, g4l g4lVar) {
+        Map map = this.f.b().a;
+        ArrayList arrayList = new ArrayList();
+        for (Map.Entry entry : map.entrySet()) {
+            String str3 = (String) entry.getKey();
+            k8l k8lVarA = ((h8l) entry.getValue()).a();
+            kun kunVar = k8lVarA != null ? new kun(str3, k8lVarA) : null;
+            if (kunVar != null) {
+                arrayList.add(kunVar);
+            }
+        }
+        ArrayList arrayList2 = new ArrayList();
+        int size = arrayList.size();
+        int i = 0;
+        while (i < size) {
+            Object obj = arrayList.get(i);
+            i++;
+            Object obj2 = ((kun) obj).w;
+            if (obj2 == k8l.w || obj2 == k8l.y) {
+                arrayList2.add(obj);
+            }
+        }
+        e5l e5lVar = new e5l(this.e, bak.f0(arrayList2));
+        String str4 = this.b.d;
+        i5l i5lVar = new i5l(str2, str);
+        z0n z0nVar = ((n4l) this.a).b;
+        vv0 vv0VarM = w0k.m(2, "organizations/{organization_uuid}/melange/edit", "organization_uuid", str4);
+        vv0VarM.c("Accept", "text/event-stream");
+        vv0VarM.d(i5l.Companion.serializer(), i5lVar);
+        dsr dsrVarA = z0nVar.a(vv0VarM.b());
+        xs4 xs4Var = new xs4(1, f3i.Z(g4lVar));
+        xs4Var.t();
+        xs4Var.x(new bf8((Object) this.c.a(dsrVarA, new q6e(e5lVar, this, xs4Var, (byte) 1)), (byte) 19));
+        return xs4Var.r();
+    }
+}
+# 对照 o29: Claude Code user_settings 才带 If-Match
+        vi00 vi00Var = new vi00(map);
+        String strP = str != null ? w0k.p("\"", str, "\"") : null;
+        gv0 gv0Var = this.a.a;
+        vv0 vv0VarM = w0k.m(3, "api/claude_code/organizations/{organizationId}/user_settings", "organizationId", this.b);
+        if (strP != null) {
+            vv0VarM.c("If-Match", strP);
+        }
+        vv0VarM.d(vi00.Companion.serializer(), vi00Var);
+        return gv0Var.a(vv0VarM.b(), tvz.b, b1qVar);
+    }
+}
+# n4l sensitive_cleanup
+    public final Object a(String str, o4u o4uVar, y7a y7aVar) {
+        vv0 vv0VarM = w0k.m(2, "organizations/{organization_uuid}/melange/sensitive_cleanup", "organization_uuid", str);
+        if (o4uVar != null) {
+            vv0VarM.d(o4u.Companion.serializer(), o4uVar);
+        }
+        return this.a.a(vv0VarM.b(), u4u.Companion.serializer(), y7aVar);
+    }
+}

@@ -1,0 +1,20 @@
+# C4 CreateChatRequest(m1b.java) 字段
+l("uuid" l("name" l("summary" l("model" l("project_uuid" l("compass_mode" l("is_temporary" l("include_conversation_preferences" l("enabled_imagine" l("chat_memory_mode" 
+# ChatConversationSettings(gy5.java)
+l("enabled_mcp_tools" l("enabled_web_search" l("enabled_monkeys_in_a_barrel" l("compass_mode" l("tool_search_mode" l("thinking_mode" l("effort_level" l("preview_feature_uses_artifacts" l("enabled_turmeric" l("chat_memory_mode" 
+# SessionContext(jeu.java) / SessionConfigViewV2(feu.java) 含 memory_mode —— Claude Code 远程会话类型
+# ksu.java 失败原因枚举
+public enum ksu {
+    DISMISSED("dismissed"),
+    EXPIRED("expired"),
+    SUPERSEDED("superseded"),
+    RACED("raced"),
+    INPUTS_CHANGED("inputs_changed"),
+    UNRECONCILABLE("unreconcilable"),
+    PRECHECK_FAILED("precheck_failed"),
+    ADOPT_FAILED("adopt_failed"),
+    DEVICE_ELECTION("device_election"),
+    DEFAULT_DEVICE("default_device"),
+    MEMORY_MODE("memory_mode_mismatch"),
+    CREATE_REPLAY("create_replay");
+

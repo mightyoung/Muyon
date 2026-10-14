@@ -1,0 +1,75 @@
+# C1 s2l: GET memory(project_uuid) / POST memory/settings
+    public final Object a(String str, String str2, y7a y7aVar) {
+        vv0 vv0VarM = w0k.m(1, "organizations/{organization_uuid}/memory", "organization_uuid", str);
+        if (str2 == null) {
+            str2 = null;
+        }
+        vv0VarM.i("project_uuid", str2);
+        return this.a.a(vv0VarM.b(), z7l.Companion.serializer(), y7aVar);
+    }
+
+    public final Object b(String str, p7l p7lVar, jjx jjxVar) {
+        vv0 vv0VarM = w0k.m(2, "organizations/{organization_uuid}/memory/settings", "organization_uuid", str);
+        vv0VarM.d(p7l.Companion.serializer(), p7lVar);
+        return this.a.a(vv0VarM.b(), s7l.Companion.serializer(), jjxVar);
+    }
+}
+# MemorySettingsGesture 预设 o7l + 模式映射 nen.a(u7l: MEMORY_FILES/CLASSIC/OFF)
+public final class o7l {
+    public static p7l a() {
+        return new p7l(24, Boolean.FALSE, Boolean.TRUE, null, null);
+    }
+
+    public static p7l b() {
+        return new p7l(28, Boolean.TRUE, null, null, null);
+    }
+
+    public static p7l c(boolean z) {
+        Boolean bool = Boolean.FALSE;
+        return new p7l(8, bool, bool, null, z ? Boolean.TRUE : null);
+    }
+
+    public static /* synthetic */ p7l d(o7l o7lVar) {
+        o7lVar.getClass();
+        return c(false);
+    }
+
+    public static p7l e() {
+        return new p7l(26, null, Boolean.TRUE, null, null);
+    }
+
+    public static p7l a(u7l u7lVar, boolean z) {
+        int iOrdinal = u7lVar.ordinal();
+        if (iOrdinal == 0) {
+            p7l.Companion.getClass();
+            return o7l.b();
+        }
+        if (iOrdinal == 1) {
+            p7l.Companion.getClass();
+            return o7l.a();
+        }
+        if (iOrdinal == 2) {
+            p7l.Companion.getClass();
+            return o7l.c(z);
+        }
+        uqa.a();
+        return null;
+    }
+# qt4 开关：saffron on/off
+                boolean zBooleanValue = ((Boolean) obj).booleanValue();
+                ben benVarB = yt4Var.y.b();
+                if (zBooleanValue) {
+                    p7l.Companion.getClass();
+                    p7lVarD = o7l.e();
+                } else {
+                    p7lVarD = o7l.d(p7l.Companion);
+                }
+                gu20.h(benVarB, p7lVarD);
+                break;
+            case 1:
+                Boolean bool = (Boolean) obj;
+                bool.booleanValue();
+                ben benVarB2 = yt4Var.y.b();
+                p7l.Companion.getClass();
+                gu20.h(benVarB2, new p7l(22, null, null, bool, null));
+                break;

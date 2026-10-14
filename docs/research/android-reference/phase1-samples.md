@@ -24,4 +24,8 @@ SHA-256 5ce90433…34e3；versionCode 852；arm64-v8a 单APK；签名 v2，证�
 
 ## 更新 2026-10-13 16:32：用户 Drive 文件夹
 - Muse 11.0.0.8.164：已取得，签名与公开 Meta 摘要一致（muse/11.0.0.8.164/）
-- Claude 1.261009.20、ChatGPT 1.2026.272：只有 base，缺必需的 abi/density split；签名是 Google Play 应用签名形式，没有公开参照；未分析
+- Claude 1.261009.20、ChatGPT 1.2026.272：只有 base，缺必需的 abi/density split；签名是 Google Play 应用签名形式，没有公开参照；用户已接受中等可信后完成静态分析（claude/1.261009.20/、chatgpt/1.2026.272/）
+
+## 更新 2026-10-13 22:38：MEMORY-LIFECYCLE-04
+- 记忆/偏好/身份/压缩对照与 Muyon 建议已落地：memory-lifecycle-04/（muse.md、claude.md、chatgpt.md、muyon.md、evidence/、manifest.json、report.docx）
+- 仍为静态分析；未登录、未调用真实模型
