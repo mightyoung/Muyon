@@ -104,3 +104,22 @@ AppState 缺身份、unknown 或读取失败均强制确认。这是可接受安
 外仓身份、CI 与逐测试摘要位于 /workspace/reports/oc-triple-independent-20261014。
 未运行真实模型/Android，未导出 MUYON_EVAL_REAL；未改作者分支、forcepush、delete 或 deploy。
 
+## 最新 develop 身份补核
+
+远端再次读取：develop 已为 `1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d`，
+三个作者分支仍为上表完整 SHA，原报告提交为 `f036903835e2f02d7831ac9c5c1298894eac8597`。
+`git diff --name-only 01e56cc2d729dab70e1b1def05c3aa93b28f421a 1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d -- apps packages .github pubspec.yaml pubspec.lock scripts/ci.sh`
+exit 0、输出为空：本次前进未改变受测产品、依赖清单或 CI 工作流。
+
+原独立工作区以原文相同五文件命令新跑目标测试，exit 0、39 pass / 0 skip / 0 fail；
+这是代码等价基线的本地复跑，不冒称在新 SHA 工作区执行。工作区仍干净，原始 JSON 日志留仓库外。
+逆变异继续引用前文实际执行证据，未重复施加或增加失败数。
+
+[最新 develop CI 38493563519](https://github.com/mightyoung/Muyon/actions/runs/38493563519)
+精确 head SHA `1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d`，completed/success，
+2026-10-14 01:22:33 UTC 终态。`gh run view --json headSha,status,conclusion,url,updatedAt`
+重新读取 exit 0；完整解码日志 SHA-256 `5866a89941633a8a07038735f0ba8d90729d75ceb83c1c2c1b68cce46e3fea6a`
+已与外仓证据核验相同，checkout 完整 SHA 存在；八套计数仍为 4199 pass / 207 skip / 0 fail，
+module_api 276。此最新组合没有新增产品阻断；生产身份接线及 unknown 强制确认边界保持前文结论。
+本补核只更新独立 review 报告，不执行 develop/main 合入。
+
