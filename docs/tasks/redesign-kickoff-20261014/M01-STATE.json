@@ -24,6 +24,23 @@
       "checkout_sha_verified": true,
       "analyze_suites": 8,
       "test_suites": 8
+    },
+    "entry_candidate": {
+      "sha": "bc5b2c37a98bfa417c0f35f5383b76dfb03be85a",
+      "run": 38488260486,
+      "job": 115607058441,
+      "status": "completed",
+      "conclusion": "success",
+      "checkout_sha_verified": true,
+      "analyze_suites": 8,
+      "test_suites": 8,
+      "passed": 4199,
+      "skipped": 207,
+      "failed": 0,
+      "doctor_scenarios": 23,
+      "coverage": "success",
+      "laya": "success",
+      "scope": "M01/intake/M02/D01a/D03a drafts and entry patch only, not later fixtures/scripts or M03 runtime acceptance"
     }
   },
   "leader": {
@@ -40,10 +57,10 @@
     "authority": "user Sentinel_3b08b7b589a4819184fd7c9f3323bad5; formal development Sentinel_e6ce5e0c57808191920e687495a03d35"
   },
   "m01": {
-    "status": "first-slice documentation owners recorded and independently reviewed; integration CI pending",
+    "status": "first-slice ownership/entry and draft contracts independently reviewed; broader first-batch candidate preparation",
     "writer": "Leader B",
     "exit_missing": [
-      "exact candidate full CI terminal before unique develop integration"
+      "exact final first-batch candidate CI terminal before unique develop integration"
     ],
     "first_slice_reservations": [
       {
@@ -53,7 +70,7 @@
           "docs/tasks/REDESIGN-M01-20261014.md",
           "docs/tasks/redesign-kickoff-20261014/"
         ],
-        "status": "active; entry files await precise integration list"
+        "status": "two existing-file entry patch statically reviewed; first-batch status registration active"
       },
       {
         "task": "M01/A00 independent review",
@@ -62,17 +79,19 @@
         "paths": [
           "read-only repository; reports outside Git"
         ],
-        "status": "running; no implementation writer"
+        "status": "completed static non-author C0; source and delta reports preserved"
       },
       {
         "task": "M02 supplier-name contract draft",
         "writer": "/root/redesign_m02_contract",
-        "source_sha": "421e7332807d0f8a2f7a6a36819601dcad442130",
         "paths": [
           "docs/contracts/redesign-v1.3.2/supplier-name-contract.md",
           "docs/tasks/REDESIGN-M02-SUPPLIER-NAME-20261014.md"
         ],
-        "status": "running draft; no M03 freeze or product implementation"
+        "status": "completed Draft, non-author C0 plus delta C0, fixed source normally pushed; no M03 freeze",
+        "base_sha": "421e7332807d0f8a2f7a6a36819601dcad442130",
+        "source_sha": "2fd91b03a7b5f0888c1e11ab0ba559a580e970d0",
+        "branch": "leader-b/redesign-m02-supplier-name-20261014"
       },
       {
         "task": "D01a authorization minimal draft",
@@ -83,7 +102,7 @@
           "docs/contracts/redesign-v1.3.2/authorization-minimal-contract.md",
           "docs/tasks/REDESIGN-D01A-20261014.md"
         ],
-        "status": "draft received; original and corrective delta non-author C0"
+        "status": "completed reviewed Draft, normally pushed; subsequent fixtures separately reserved"
       },
       {
         "task": "D03a recovery minimal draft",
@@ -94,7 +113,52 @@
           "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
           "docs/tasks/REDESIGN-D03A-20261014.md"
         ],
-        "status": "draft received; non-author C0; all fixture not_run"
+        "status": "completed reviewed Draft, normally pushed; subsequent fixtures separately reserved"
+      },
+      {
+        "task": "M04 supplier-name inputs",
+        "writer": "/root/redesign_m02_contract",
+        "branch": "leader-b/redesign-m04-supplier-name-20261014",
+        "source_sha": "8c5995515fa14ca3592a1c33c71afb4e4c1e5def",
+        "paths": [
+          "fixtures/redesign/supplier-name-v1/",
+          "docs/tasks/REDESIGN-M04-SUPPLIER-NAME-20261014.md"
+        ],
+        "status": "completed reviewed input material; originally not_run/planned, golden null"
+      },
+      {
+        "task": "M05 fixed Dart reference",
+        "writer": "/root/redesign_d03a_contract",
+        "branch": "task/leader-b-redesign-m05-supplier-name-20261014",
+        "source_sha": "962daee22c2ee2108440d9b30f2fcf7a88948f40",
+        "paths": [
+          "scripts/redesign/supplier-name-reference/",
+          "docs/tasks/REDESIGN-M05-SUPPLIER-NAME-20261014.md"
+        ],
+        "status": "completed reviewed actual function-level run; no complete entry/runtime or Rust equivalence claim"
+      },
+      {
+        "task": "A00 classification synthetic inputs",
+        "writer": "/root/redesign_d01a_contract",
+        "branch": "task/leader-b-redesign-a00-classification-20261014",
+        "source_sha": "7a8128ca86c583b0bbf1191c4baa4f3e732ca547",
+        "original_sha": "fe5896f5edbf4400de2b885cf7d3791636a0d98d",
+        "paths": [
+          "fixtures/redesign/classification-v1/",
+          "docs/tasks/REDESIGN-A00-CLASSIFICATION-20261014.md"
+        ],
+        "status": "completed non-author C0 input intake after two corrective findings; 29/77 all not_run; pre-M03 current-purpose flag I retained"
+      },
+      {
+        "task": "D03a recovery synthetic inputs",
+        "writer": "/root/redesign_d03a_contract",
+        "branch": "task/leader-b-redesign-d03a-fixtures-20261014",
+        "source_sha": "55480f06490983a54e38908b043b06b4b02df451",
+        "paths": [
+          "fixtures/redesign/recovery-minimal-v1/",
+          "docs/tasks/REDESIGN-D03A-FIXTURES-20261014.md"
+        ],
+        "status": "completed non-author C0 material intake; 19 groups/72 scenarios all not_run"
       }
     ]
   },
@@ -294,13 +358,40 @@
       "sha256": "4d081426b26d49cb302a09b9431b177b6ef2349034b54fa91f5cbacb316f176a",
       "zip_and_internal_sums_verified": true
     },
-    "applicability_clarification": "A00-APPLICABILITY-CLARIFICATION.md; normative fixed books override overbroad local-write reading of input catalog L51; original bytes preserved"
+    "applicability_clarification": "A00-APPLICABILITY-CLARIFICATION.md; normative fixed books override overbroad local-write reading of input catalog L51; original bytes preserved",
+    "synthetic_fixture_material": {
+      "source_sha": "7a8128ca86c583b0bbf1191c4baa4f3e732ca547",
+      "case_count": 29,
+      "variant_count": 77,
+      "status": "all not_run; static input consistency C0",
+      "rules": "14 proposed_unfrozen",
+      "review_findings_closed": [
+        "F10 high flag inconsistent with expectation",
+        "A01 page2 actual check/purpose coverage missing mapping"
+      ],
+      "remaining_format_condition": "current-purpose eligibility only; other body flags confer no permission and require not_applicable or single-purpose representation before M03/runner"
+    }
   },
   "implementation_frontier": {
-    "M02": "2fd91b received, limited domain decisions recorded and non-author delta C0; fixture/oracle engineering not executed",
-    "D01a_D03a_SPIKE01": "D01a99c4d and D03a40f3 reviewed drafts, all fixtures not_run; SPIKE-01 real Android load not executed",
-    "M03": "not frozen; requires D01a/D03a actual fixture validation, M04/M05 Unicode oracle and SPIKE-01 evidence",
-    "Rust_Android_Electron": "not dispatched beyond prerequisites"
+    "M02": "2fd91b reviewed Draft; M04 8c59955 fixtures and M05 962daee actual fixed Dart function reference independently reviewed C0; complete entry/CAS/receipt lanes remain not_run",
+    "D01a_D03a_SPIKE01": "D01a99c4d and D03a40f3 reviewed Drafts plus classification7a8128/recovery55480 synthetic inputs; no classifier/recovery runtime run; SPIKE-01 real Android library load absent",
+    "M03": "blocked_contract: actual D01a/D03a fixture validation, complete name-entry/state reference and cross-end Unicode equivalence, SPIKE-01 actual Android load/dual-transport semantics, single-source schema not frozen; non-current body flags must be resolved before runner/M03",
+    "Rust_Android_Electron": "not dispatched beyond prerequisites",
+    "M04_M05": {
+      "M04": "8c5995515fa14ca3592a1c33c71afb4e4c1e5def",
+      "M05": "962daee22c2ee2108440d9b30f2fcf7a88948f40",
+      "status": "non-author C0 and actual rerun; 32 function pass, 14 partial, 8 not_run",
+      "actual_invocations": 47,
+      "independent_comparisons": 39,
+      "mismatches": 0,
+      "cross_end_unicode_equivalence": "not_proven"
+    },
+    "D03a_fixture_material": {
+      "sha": "55480f06490983a54e38908b043b06b4b02df451",
+      "groups": 19,
+      "scenarios": 72,
+      "status": "all not_run; static input consistency C0"
+    }
   },
   "legacy_workspace": {
     "registered_worktrees": 90,
@@ -320,12 +411,14 @@
         {
           "sha": "5436f68c2ba57ae2ea99d6cbc749a5bd92a3cdb0",
           "run": 38485490388,
-          "last_observed": "in_progress"
+          "last_observed": "completed/failure",
+          "included_in_redesign_integration": false
         },
         {
           "sha": "7df93d7228693c71767cd4ab88d46d11da7c6064",
           "run": 38485489896,
-          "last_observed": "in_progress"
+          "last_observed": "completed/failure",
+          "included_in_redesign_integration": false
         }
       ],
       "included_in_redesign_integration": false
@@ -385,11 +478,35 @@
       "path": "independent-reviews/entry-review.md",
       "sha256": "24c2a7738d1efc502a0d32b558ca53c991ba51f29883c8f45f218791861fce3b",
       "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "m04-m05-review",
+      "path": "independent-reviews/m04-m05-review.md",
+      "sha256": "584b22c0a2b4dd7ba552a8cd56fc7e4317401bdadce73bb631e3a5dc2906ac28",
+      "kind": "static non-author review plus actual fixed Dart function rerun and negative controls; not complete target runtime"
+    },
+    {
+      "label": "recovery-fixture-review",
+      "path": "independent-reviews/recovery-fixture-review.md",
+      "sha256": "5e97c3a8fad366c0249e7f39aa4b06b148a9781e14dd5f57b7ca76fb04efdd26",
+      "kind": "static non-author fixed-source fixture material review; not runtime execution"
+    },
+    {
+      "label": "classification-fixture-initial",
+      "path": "independent-reviews/classification-fixture-initial.md",
+      "sha256": "aa0e679bac2f5f0d0a265d890ca133668342a595f970dd533ba3d7d0a80324af",
+      "kind": "static non-author fixed-source fixture material review; not runtime execution"
+    },
+    {
+      "label": "classification-fixture-delta",
+      "path": "independent-reviews/classification-fixture-delta.md",
+      "sha256": "5751ebfb2cea16a690ed18dc6a668b0a0d8f9d11e82d56ecfa6609bc2445b1db",
+      "kind": "static non-author fixed-source fixture material review; not runtime execution"
     }
   ],
   "candidate_integration": {
-    "status": "prepared and statically independently reviewed; full CI pending",
-    "scope": "original design95 + M01/A00 intake + reviewed M02/D01a/D03a drafts + two entry append/prefix + narrow A00 input clarification; product code unchanged",
+    "status": "all fixed inputs/contract deltas statically reviewed and function reference independently rerun; final batch registration review and exact candidate CI pending",
+    "scope": "original design95 + M01/A00 intake + reviewed M02/D01a/D03a Drafts + two entry append/prefix + narrow A00 applicability clarification + M04/M05 input/function reference + classification/recovery synthetic input + preserved independent reviews",
     "exclude": [
       "old C6/product branches",
       "21 additional historical header migrations pending coordinated separate scope",
@@ -398,6 +515,8 @@
       "real data/model/device operations"
     ],
     "baseline_product": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
-    "baseline_design": "58fe9c62612d74a973614c41677e62a54332e6d6"
-  }
+    "baseline_design": "58fe9c62612d74a973614c41677e62a54332e6d6",
+    "branch": "task/leader-b-redesign-first-batch-20261014"
+  },
+  "snapshot_phase": "pre-integration first batch preparation; earlier evidence and input bytes preserved"
 }

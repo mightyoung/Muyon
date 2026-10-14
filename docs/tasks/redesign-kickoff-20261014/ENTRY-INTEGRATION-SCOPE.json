@@ -1,5 +1,5 @@
 {
-  "status": "exact existing-file scope statically independently reviewed C0; candidate CI pending",
+  "status": "entry exact bc5b CI success; broader first-batch preserves same existing-file patch, final candidate CI still required",
   "base": "58fe9c62612d74a973614c41677e62a54332e6d6",
   "product_base": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
   "entry_writer": "Leader B",
