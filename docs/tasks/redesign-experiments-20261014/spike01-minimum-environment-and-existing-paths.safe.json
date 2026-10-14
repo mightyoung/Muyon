@@ -1,0 +1,141 @@
+{
+  "task": "SPIKE01 minimum requirements and existing execution paths; readonly appendix",
+  "timestamp_utc": "2026-10-14T02:19:31.861509+00:00",
+  "baseline_source_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "experiment_candidate_sha": "6a6664b1094c94c8db45f4ed274a170570c0cbb7",
+  "candidate_merge_authorization_is_not_read_back_merge_proof": true,
+  "design_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "original_inventory_hashes_unchanged": {
+    "inventory.md": "e28aaf6c97da053cf4f9f4a352c14286c82eff0ad9e0beeef703d69898149096",
+    "inventory.safe.json": "18afc0dc16bae0a6fa7c6b544668ccca24972b71b223fb1d0ab7cc0311dabbd0"
+  },
+  "source_references": [
+    {
+      "source_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+      "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+      "relevant_lines": "574-592,985,1162-1166,1733-1738",
+      "read_exit": 0,
+      "sha256": "705a642fc7ec7b2e46e4c84e4e4990a4e9fe12628eaadbdbb526b833a12d16f9"
+    },
+    {
+      "source_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+      "path": ".github/workflows/ci.yml",
+      "relevant_lines": "28-40",
+      "read_exit": 0,
+      "sha256": "7bce99cece4de729a8bab3bf658d011ac2fdb0b21266cb0ee55c05c19f6d1602"
+    },
+    {
+      "source_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+      "path": ".github/workflows/package-artifacts.yml",
+      "relevant_lines": "26,65-84,107",
+      "read_exit": 0,
+      "sha256": "86a37c551a29aa65f5df1871f92c35326c92d8a50253665f22de8e034fa49911"
+    },
+    {
+      "source_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+      "path": "apps/muyon/android/settings.gradle.kts",
+      "relevant_lines": "21-25",
+      "read_exit": 0,
+      "sha256": "a9b5756048f668d4ebf355116678fd334cd5f2169b7d4518ad19b8df14d3af36"
+    },
+    {
+      "source_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+      "path": "apps/muyon/android/app/build.gradle.kts",
+      "relevant_lines": "9-39,51-57",
+      "read_exit": 0,
+      "sha256": "e58820905310fb7ccb06dcb91d30ea6a469c5833362374603d9f750ceacb9f9c"
+    },
+    {
+      "source_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+      "path": "apps/muyon/android/gradle/wrapper/gradle-wrapper.properties",
+      "relevant_lines": "1-5",
+      "read_exit": 0,
+      "sha256": "b690d26223576fe4e63889fad9a00df81945cb870b9476cc5a563152a1a88a74"
+    },
+    {
+      "source_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+      "path": "scripts/redesign/supplier-name-reference/README.md",
+      "relevant_lines": "1-42",
+      "read_exit": 0,
+      "sha256": "0d4e11f2009955de6fe2cec48363ace79ef218fcb0b481957510b581e4fa0a9a"
+    },
+    {
+      "source_sha": "6a6664b1094c94c8db45f4ed274a170570c0cbb7",
+      "path": "experiments/redesign/d01a-contract/README.md",
+      "relevant_lines": "1-50",
+      "read_exit": 0,
+      "sha256": "7256a1d0f4a22f827a4013bfaabfb6b6b064749968e0313c5d34f1b9a6dd9c79"
+    },
+    {
+      "source_sha": "6a6664b1094c94c8db45f4ed274a170570c0cbb7",
+      "path": "experiments/redesign/d03a-contract/README.md",
+      "relevant_lines": "1-64",
+      "read_exit": 0,
+      "sha256": "d7bd63ae24b2772b4ac827f07043d97c255332fc9b35741ffe0865205d6595c8"
+    },
+    {
+      "source_sha": "6a6664b1094c94c8db45f4ed274a170570c0cbb7",
+      "path": "docs/tasks/REDESIGN-CONTRACT-EXPERIMENTS-20261014.md",
+      "relevant_lines": "1-69",
+      "read_exit": 0,
+      "sha256": "5f701953060ab0ed016871dc45d368b609b6edbcb00c6a4b025e02ac8ca7aee3"
+    }
+  ],
+  "actual_version_command": {
+    "command": "command -v python3 && python3 --version && /workspace/flutter-sdk/bin/cache/dart-sdk/bin/dart --version",
+    "cwd": "/workspace/Muyon-leader-b-redesign-m01-20261014",
+    "exit": 0,
+    "python_path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "python_version": "3.12.14",
+    "cached_dart_version": "3.13.4 stable linux_x64"
+  },
+  "cache_unorm_lib_path": {
+    "path": "/workspace/pub-cache/hosted/pub.dev/unorm_dart-0.3.1/lib",
+    "exists": true,
+    "reinstalled": false
+  },
+  "selected_worktree_paths": {
+    "scripts/redesign/supplier-name-reference/run_reference.py": false,
+    "experiments/redesign/d01a-contract": false,
+    "experiments/redesign/d03a-contract": false
+  },
+  "currently_confirmed_runnable_tools": [
+    "Python interpreter startup/version",
+    "cached Dart interpreter startup/version"
+  ],
+  "existing_source_execution_paths": [
+    "1dc scripts/redesign/supplier-name-reference/run_reference.py",
+    "6a experiments/redesign/d01a-contract Python stdlib experiment",
+    "6a experiments/redesign/d03a-contract Python stdlib/SQLite experiment"
+  ],
+  "paths_executed_this_appendix": false,
+  "configured_only": [
+    "existing GitHub ubuntu-latest Flutter CI",
+    "existing GitHub ubuntu-24.04 Android Flutter APK packaging with setup Java17/Flutter3.47.5"
+  ],
+  "missing_per_original_inventory": [
+    "Rust/Cargo/rustup and installed Android std targets",
+    "Android SDK/NDK compiler/sysroot",
+    "javac/JDK compiler",
+    "Gradle distribution/Kotlin compiler CLI",
+    "UniFFI generator/native bindings/JNA dependencies verified for actual load",
+    "adb and live device/runner execution evidence"
+  ],
+  "abi_candidates_not_frozen": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "rust_target_candidates_to_verify": [
+    "aarch64-linux-android",
+    "x86_64-linux-android"
+  ],
+  "page_size_runtime_requirements_not_executed": [
+    "4KB",
+    "16KB with all native dependencies"
+  ],
+  "native_library_load_proven": false,
+  "m03_product_writer": "paused_after_this_round",
+  "m03_freeze_allowed": false,
+  "no_build_dispatch_device_install_download_or_credentials": true,
+  "repository_modified": false
+}

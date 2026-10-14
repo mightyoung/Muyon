@@ -1,0 +1,14 @@
+{
+  "head_sha": "325e798d37044cbc0617f5bddbd14ccb9adec390",
+  "CI_run": 38500307094,
+  "CI_conclusion": "success",
+  "raw_log_sha256": "2d581f0e30c28b34eec1f82de6a91869b5f987c705a401874465d00499696e4a",
+  "raw_checkout_counts_snapshot_independently_verified": true,
+  "legacy_CI_counts": {
+    "pass": 4199,
+    "skip": 207,
+    "fail": 0
+  },
+  "CI_does_not_execute_new_python_experiments": true,
+  "M03": "blocked_contract"
+}

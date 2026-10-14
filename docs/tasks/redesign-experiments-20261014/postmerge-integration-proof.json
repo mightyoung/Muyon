@@ -1,0 +1,71 @@
+{
+  "merge_sha": "325e798d37044cbc0617f5bddbd14ccb9adec390",
+  "base_sha": "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+  "candidate_sha": "6a6664b1094c94c8db45f4ed274a170570c0cbb7",
+  "merge_parents": [
+    "1dc7678684c573f7f7e26ff8c6aa2a31f4d7c22d",
+    "6a6664b1094c94c8db45f4ed274a170570c0cbb7"
+  ],
+  "merge_tree": "37edd3f71eb6ddf3a2bc567c891eb189f9d7faf1",
+  "tree_equals_tested_candidate": true,
+  "no_conflict": true,
+  "scope_33_additions_only": true,
+  "protected_product_design_contract_v1_unchanged": true,
+  "working_tree_clean": true,
+  "diff_check_exit": 0,
+  "purpose_v2_hash_checks_exit": 0,
+  "postmerge_experiment_suites": {
+    "D01a": {
+      "tests": 33,
+      "exit": 0
+    },
+    "D03a": {
+      "tests": 24,
+      "exit": 0
+    }
+  },
+  "postmerge_matrix": {
+    "D01a": {
+      "partial_experimental": 61,
+      "not_run": 16,
+      "partial_comparison_mismatches": 0
+    },
+    "D03a": {
+      "partial": 63,
+      "not_run": 9
+    }
+  },
+  "historical_partial_not_run_preserved": true,
+  "existing_CI_runs_new_experiments": false,
+  "M03": "blocked_contract",
+  "initial_readonly_preflight_wrong_cwd": "/workspace git commands failed; corrected to repository before any mutation",
+  "push": "normal_success",
+  "CI": {
+    "run": 38500307094,
+    "head_sha": "325e798d37044cbc0617f5bddbd14ccb9adec390",
+    "status": "completed",
+    "conclusion": "success",
+    "completed_at": "2026-10-14T02:37:32Z",
+    "counts": {
+      "pass": 4199,
+      "skip": 207,
+      "fail": 0
+    },
+    "new_python_experiments_executed_by_CI": false
+  },
+  "logs_external": true,
+  "remote_develop": "325e798d37044cbc0617f5bddbd14ccb9adec390",
+  "remote_main": "cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003",
+  "SPIKE01_minimum_environment_report_received": true,
+  "SPIKE01_minimum_report_sha256": "ef0e434a4b22d45f84e46683ce96d912e389f211ec634b3021a98bd4515afab4",
+  "M03_product_writers_paused": true,
+  "pause_messages_delivered_to": [
+    "redesign_d01a_contract",
+    "redesign_d03a_contract"
+  ],
+  "new_native_product_writer_started": false,
+  "logs_sha256": {
+    "d01a-tests.log": "b9ee8014287f756a77b184986d1f8d50ae4aa21a8ad59938b93a5ca63060ddac",
+    "d03a-tests.log": "30bd017066019325499649fc2c20bb37fabdd9bcd416f28ab3e4b24f918576f7"
+  }
+}
