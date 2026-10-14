@@ -67,3 +67,11 @@ D03a矩阵63partial/9not_run/0完整场景PASS，274matched/0mismatch；非作�
 独立组合候选将正常推送触发既有CI；此登记时CI仍pending，不冒称终态。既有CI不包含新Python实验，
 其Flutter/Doctor/Laya门禁只作为该候选整体回归证据，新接缝由以上实际轻量命令及非作者复验支持。
 本批不执行develop/main合入，不改作者分支。SPIKE01仍只读盘点，缺Android/Rust工具链与真实native load，M03 blocked。
+
+## 用户最新开发顺序调整（2026-10-14）
+
+设备验证后置；不再以缺 Android runner 暂停全部后续研发。
+按[四路可逆研发补充计划](REDESIGN-DEVICE-DEFERRED-PLAN-20261014.md)开展 Rust 纯领域、Rust 恢复、
+Electron 界面/mock 和 Kotlin/Compose 界面/mock。原实验及 fixture 历史、授权规则均保留。
+上文 SPIKE 只读盘点/工具缺失为历史状态，不覆盖后续独立 H1 修复与 Linux/JVM 实测。
+M03 仍 blocked_contract，Android actual load NOT_RUN；临时接缝不冻结 DTO，设备与发布门不取消。
