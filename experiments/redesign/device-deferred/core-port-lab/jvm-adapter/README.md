@@ -75,3 +75,17 @@ the core owner's suite; this adapter's actual runs use the two bounded shared
 seeds, with generic unknown handling. Android actual load and Compose are
 **NOT_RUN**. M03 is **blocked_contract**. No model, user store, Android runner,
 new install/licence/account/paid/security/deployment permission is used.
+
+## Review correction and evidence routing
+
+The strict decoder enforces reply kind/data consistency and empty invalid-request
+correlation only with three null data fields. Unbound committed receipt cannot set
+committed UI status; it remains unknown and never enters the receipt ledger.
+Validated receipt with null snapshot may account an effect without fabricating a
+projection. The scoped suite now includes the seven review/validation regressions.
+
+Set RD_P05_EVIDENCE_DIR for test stderr; otherwise it follows RD_P05_OUTPUT. Driver
+stderr is beside its external output, named `<report>.core-stderr.log`. Original
+hardcoded diagnostic routing may have allowed an earlier independent-output root
+run to overwrite a shared temporary log; that historical limitation is recorded
+in the task and is not represented as globally untouched artifacts.

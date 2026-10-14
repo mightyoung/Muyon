@@ -18,7 +18,7 @@ fun main(args:Array<String>) {
     val steps=fixture["steps"] as? List<*> ?: error("Steps array");require(steps.size<=1000)
     val replies=mutableListOf<Map<String,Any?>>()
     Files.createDirectories(output.parent)
-    CorePort.open(seed,fixtures,Path.of("/tmp/rd-p05-jvm-output/driver-core-stderr.log")).use {port->
+    CorePort.open(seed,fixtures,output.parent.resolve(output.fileName.toString()+".core-stderr.log")).use {port->
         steps.forEachIndexed {index,value->
             val step=value.objectValue();require(step.keys.all {it in setOf("request","plan_id_from")})
             val request=linkedMapOf<String,Any?>("protocol" to 0,"request_id" to "step-$index","domain" to domain.wire(),"display_epoch" to "epoch-0")

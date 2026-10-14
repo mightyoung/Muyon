@@ -74,3 +74,41 @@ private /tmp output and do not replace the trusted core binary or original Kotli
 sources. mutation-proof.json records before/after source equality. The complete
 restored 6+5+12 scoped suite is rerun before commit; git diff checks cover only the
 owned lab/task files.
+
+## Non-author blocking correction at 5c0fcc0
+
+Non-author actual negative evidence (compile0/java1, 0 passed/4 failed) was
+reproduced in the author suite before correction: committed with missing receipt;
+unknown carrying receipt; sanitized invalid_request carrying data; wrong digest
+ledger0 but statuscommitted. These are now strict decoder/projection rejections.
+Committed requires receipt; unknown/rejected/conflict cannot claim a receipt;
+prepared requires plan/no receipt; hello/snapshot require snapshot/no receipt.
+Sanitized empty correlation is admitted only with all snapshot/plan/receipt null.
+Presentation only sets committed for an actually bound synthetic receipt; invalid
+binding remains unknown/ledger0. Genuine stale receipts still account independently
+before current-display gates. No Kotlin result-revision arithmetic/business rule added.
+
+Four original review assertions GREEN4; strengthened validation suite GREEN7 adds
+independent sanitized snapshot/plan rejection, allowed verified receipt with null
+snapshot (no invented projection), and reply_limit unknown/no receipt projection.
+All original23 tests retained: restored complete **6+5+12+7=30 passed**, zero failed
+or skipped. Three temporary inverse copies (kind-payload checks disabled, sanitized
+data allowed, unbound committed status restored) compile0 and fail at assertions
+exit1; original source hashes before/after equal. Fresh three driver actual outputs
+remain13/8/8 replies. Raw logs in the external `fix/` subdirectory only.
+
+### Temporary diagnostic collision correction
+
+Original ActualTest and Driver hardcoded stderr beneath
+`/tmp/rd-p05-jvm-output`. B's earlier run with RD_P05_OUTPUT pointing elsewhere may
+have overwritten the shared temporary actual-core-stderr.log. This is explicitly
+**not** a claim that all temporary artifacts were untouched; author source and
+external report evidence were not changed by that composition run. ActualTest now
+uses RD_P05_EVIDENCE_DIR, else RD_P05_OUTPUT, else the documented default. Harness
+exports its resolved output. Driver stderr is adjacent to its unique external
+report filename. New verification uses an independently owned fix directory;
+private diagnostic routing no longer depends on a shared hardcoded test path.
+
+M03 blocked_contract and Compose/Android actual load NOT_RUN remain. No new
+installation/licence/device/account/model scope. Final correction requires fixed
+head non-author re-review and B candidate checks; author does not self-sign C0.

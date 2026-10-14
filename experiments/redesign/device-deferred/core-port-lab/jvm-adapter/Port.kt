@@ -32,6 +32,7 @@ data class Reply(val wire:Map<String,Any?>) {
             val w=Json.parse(text).objectValue()
             require(w.keys==setOf("protocol","request_id","kind","reason","domain","display_epoch","display_admission","snapshot","plan","receipt")){"Reply fields"}
             val invalidRequest=w["kind"]=="rejected" && w["reason"]=="invalid_request" && w["request_id"]=="" && w["display_epoch"]==""
+                &&w["snapshot"]==null && w["plan"]==null && w["receipt"]==null
             require(w["protocol"]==JsonNumber("0") && (w["request_id"]==requestId || invalidRequest)){"Reply correlation"}
             require(w["kind"] in setOf("hello","snapshot","prepared","committed","conflict","rejected","unknown"))
             require(w["reason"]==null || w["reason"] is String)
@@ -54,6 +55,12 @@ data class Reply(val wire:Map<String,Any?>) {
                 require(r["kind"]=="synthetic");listOf("id","intent","object_id","normalized_name","parameters_digest").forEach {r.text(it)}
                 decimal(r["expected_revision"]);decimal(r["result_revision"])
                 val cursor=r["commit_cursor"].objectValue();require(cursor.keys==setOf("store","scope","stream","seq"));decimal(cursor["seq"]);Domain.from(cursor.filterKeys {it!="seq"})
+            }
+            when(w["kind"]) {
+                "committed"->require(w["receipt"]!=null){"Committed requires receipt"}
+                "unknown","rejected","conflict"->require(w["receipt"]==null){"Non-effect cannot carry receipt"}
+                "prepared"->require(w["plan"]!=null && w["receipt"]==null){"Prepared is not an effect"}
+                "hello","snapshot"->require(w["snapshot"]!=null && w["receipt"]==null){"Read requires snapshot, no effect"}
             }
             return Reply(w)
         }
@@ -112,4 +119,13 @@ data class Business(val objectId:String,val intent:String,val expectedRevision:S
         if(planId!=null)m["plan_id"]=planId
         return m
     }
+}
+
+/** Trusted harness diagnostics always stay in its independently owned output directory. */
+fun ownedEvidence(name:String):Path {
+    require(name.matches(Regex("[a-zA-Z0-9._-]+")))
+    val root=Path.of(System.getenv("RD_P05_EVIDENCE_DIR") ?: System.getenv("RD_P05_OUTPUT") ?: "/tmp/rd-p05-jvm-output").toAbsolutePath().normalize()
+    require(root.startsWith(Path.of("/tmp")) || root.startsWith(Path.of("/workspace/reports"))){"External evidence directory required"}
+    java.nio.file.Files.createDirectories(root)
+    return root.resolve(name)
 }
