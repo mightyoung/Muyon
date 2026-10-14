@@ -1,0 +1,203 @@
+{
+  "artifact_kind": "fixture_semantic_record_not_product_DTO",
+  "case_id": "V131-T02/A01",
+  "parent_case": "V131-T02",
+  "status": "draft",
+  "execution_status": "not_run",
+  "catalog_group": "A",
+  "title": "仅使用已覆盖第2页",
+  "source_catalog_section": "5.1",
+  "rule_ids": [
+    "CLS-ATTACH-001",
+    "CLS-CREDENTIAL-001",
+    "CLS-PURPOSE-001"
+  ],
+  "all_rules_status": "proposed_unfrozen",
+  "variants": [
+    {
+      "variant_id": "page2_only",
+      "input": {
+        "clean_text": null,
+        "opaque_secret_refs": [],
+        "mutations": [],
+        "attachment": {
+          "pages": 10,
+          "parsed_pages": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "unparsed_pages": [
+            8,
+            9,
+            10
+          ],
+          "page2_clean_text": "合成附件第2页内容",
+          "parser_version": "synthetic-parser-v1-not-installed",
+          "selected_for_current_purpose": [
+            2
+          ]
+        }
+      },
+      "source_inheritance": {
+        "unit_ref": "page.2",
+        "source_kind": "user_selected_attachment",
+        "trusted_event_ref": "host.synthetic.attachment-selection.1",
+        "source_version": "page.2-source-v1",
+        "claimed_source_kind": null,
+        "inherited_sensitivity_units": [],
+        "inherited_purpose_restrictions": [],
+        "source_rights": "valid_assumption",
+        "taint": "none_assumption",
+        "verification": "not_a_classification_or_authorization_fact",
+        "field_path": null,
+        "trusted_field_base": "personal",
+        "field_declaration_version": null,
+        "attachment_source_ref": "attachment.synthetic.1"
+      },
+      "current_version": {
+        "input": "page.2-content-v1",
+        "normalized": "page.2-content-v1-normalized",
+        "checked": "page.2-content-v1-normalized",
+        "final": "page.2-content-v1-normalized",
+        "normalization": "fixture-NFC-example; production Unicode/trim equivalence not frozen",
+        "evidence_current": true
+      },
+      "purpose": {
+        "current": "model_request",
+        "task_ref": "task.synthetic.1",
+        "scope_ref": "scope.synthetic.1",
+        "required_units": [
+          "page.2"
+        ],
+        "partial_result_allowed": false,
+        "actual_range": [
+          "page.2"
+        ]
+      },
+      "rule_coverage": [
+        {
+          "rule_id": "CLS-ATTACH-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "page.2"
+          ]
+        },
+        {
+          "rule_id": "CLS-CREDENTIAL-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "page.2"
+          ]
+        },
+        {
+          "rule_id": "CLS-PURPOSE-001",
+          "status": "proposed_unfrozen",
+          "synthetic_version": "fixture-rule-v1-not-registered",
+          "assumed_current_purpose_coverage": "complete",
+          "assumed_covered_units": [
+            "page.2"
+          ]
+        }
+      ],
+      "actual_value_check": {
+        "role": "host_check_assumption_not_classifier_result",
+        "target_ref": "page.2-content-v1-normalized",
+        "target_is_actual_new_value": true,
+        "state": "complete_assumption",
+        "signal": "none_assumption",
+        "rule_id": "CLS-CREDENTIAL-001",
+        "rule_status": "proposed_unfrozen",
+        "secret_plaintext_in_artifact": false,
+        "checked_unit_refs": [
+          "page.2"
+        ],
+        "source_version": "page.2-source-v1"
+      },
+      "mode_facts": {
+        "mode": "FullAllow",
+        "mode_grant": "valid_finite_synthetic_assumption",
+        "grant_created_at": "2026-10-14T00:00:00Z",
+        "expires_at": "2026-10-14T00:10:00Z",
+        "evaluated_at": "2026-10-14T00:01:00Z",
+        "fixture_expiry_is_product_default": false,
+        "auto_risk_rule": "unfrozen_not_required_by_FullAllow",
+        "risk": "high_advice_assumption",
+        "new_endpoint": true,
+        "extra_risk_confirmation_is_required": false
+      },
+      "execution_prerequisites": {
+        "scope": "valid_assumption",
+        "read_right": "valid_assumption",
+        "write_right": "valid_assumption",
+        "identity": "valid_assumption",
+        "tls": "valid_assumption_if_transport",
+        "capability": "valid_assumption",
+        "plan_revision": "valid_assumption",
+        "cas": "valid_assumption",
+        "business_validity": "valid_assumption",
+        "ledger": "valid_assumption",
+        "capability_hold": "absent_assumption"
+      },
+      "expected": {
+        "classification": {
+          "unit_sensitivity": "personal",
+          "attempt_result": "classified_expected",
+          "terminal": true,
+          "no_infinite_wait": true
+        },
+        "action_result": "eligible_under_fixture_assumptions_not_executed",
+        "local_body_allowed": true,
+        "model_body_allowed": true,
+        "business_outbound_allowed": true,
+        "extra_risk_confirmations": 0,
+        "real_model_requests": 0,
+        "real_external_sends": 0,
+        "database_changes": "not_observed_not_run",
+        "receipt": "not_observed_not_run",
+        "runtime_payload": "not_captured_not_run",
+        "safe_observation": "only minimal permitted metadata; no secret body/log copies",
+        "uncovered_pages_sensitivity": "unreviewed",
+        "claimed_document_completeness": false,
+        "body_allowance_scope": "current scenario and stated purpose only; not a global local-write ban or outbound grant",
+        "disallowed_secret_copies": [
+          "model body",
+          "business body",
+          "logs",
+          "diagnostics",
+          "notifications"
+        ],
+        "checked_and_projected_unit": "page.2",
+        "other_pages_not_dispatched": [
+          1,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ]
+      }
+    }
+  ],
+  "notes": "8–10页不发送；第2页任务完整不等整份覆盖。",
+  "evidence_required_not_yet_available": [
+    "real implementation SHA and command",
+    "host current-purpose ValueCheck and coverage evidence",
+    "source/permission/version evidence",
+    "final model/tool payload capture where applicable",
+    "authoritative receipt and database diff where applicable",
+    "independent review"
+  ],
+  "runtime_acceptance_claim": false
+}

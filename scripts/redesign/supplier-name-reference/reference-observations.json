@@ -1,0 +1,1354 @@
+{
+  "format": "m05-dart-reference-observations-v1",
+  "product_source_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "design_source_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "fixture_commit_sha": "8c5995515fa14ca3592a1c33c71afb4e4c1e5def",
+  "oracle_worktree_base_sha": "bc5b2c37a98bfa417c0f35f5383b76dfb03be85a",
+  "oracle_file_sha256": "bd3645e6a0a1dae939bb44be4cbc11d8dc9ce225fd6967753065479ced3882d2",
+  "driver_file_sha256": "371e4ae2fac4d0980886b2e50339c49fb93a760f21cfcd2ee2f658610984fca3",
+  "dart_version": "Dart SDK version: 3.13.4 (stable) (Tue Sep 15 01:01:15 2026 -0700) on \"linux_x64\"",
+  "normalization_dependency": {
+    "package": "unorm_dart",
+    "version": "0.3.1",
+    "declared_unicode_data": "8.0 (package pubspec description)",
+    "lib_sha256": {
+      "lib/src/composite_iterator.dart": "8dd75df590e26b50cf624508ec5bebd6343f3f7576fb7ffc6ee3acb7a6ed1c4e",
+      "lib/src/decomposite_iterator.dart": "f13b6b0f408ca8891d795b841ba117e3f047d8f5646911c415a04623543e2e03",
+      "lib/src/iterator.dart": "01d12a5227cda4b810c0e749e898af1ad1628cb5fc0c4a1478f49372c133f662",
+      "lib/src/recursive_decomposite_iterator.dart": "9d4757d61a623e985f516eb1d1ceae6fb66d3421264b6302d694b6dfcd342b28",
+      "lib/src/uchar.dart": "76092cd836be925a4a13d9033e9348fab141626f3e0454dda7eb243416b73a26",
+      "lib/src/uchar_iterator.dart": "4dba958b779e352c2a1ab49c3148dcf380822bb2a4111f5ebdd7a80ac2cdfc2d",
+      "lib/src/unorm_dart_base.dart": "40f71ac5cddce25fccd08e69c099b3ede9b114fc3e7fa57e2de31ddedbad1175",
+      "lib/src/unormdata.dart": "0e0251270ad885a95bec95de5595b05ad7f2cb387d2d54df5369c773b2f2469a",
+      "lib/src/utils.dart": "35d03b962051a8b534285e559a7d6047d08cea39a4d185e1ff83ad88d2ae2458",
+      "lib/unorm_dart.dart": "95ab0ca47a8a2c602e845e84c5bc76a15fd069efe68424bfe45526f1cb30fdea"
+    }
+  },
+  "source_sha256": {
+    "packages/supplier_core/lib/src/values.dart": "047230bc6de12ac9bd4a3c6c5b8800146fb2cb40ff8a44bb99c569a7565f278d",
+    "packages/supplier_core/lib/src/entities.dart": "aa9980a6cb84150d773e012c7a79e13ffda28efb1e170d78b86db01c9a052a46",
+    "packages/supplier_core/lib/src/inquiry.dart": "afbf9ad3ee708159f0d1194922570423661ddcd9205a3691db78c32450877722"
+  },
+  "fixture_sha256": {
+    "name-domain-vectors.json": "164cb94b4d5f585d13a6c87358fdbca61d8b52d568156b27d8d720b8f58f5178",
+    "entry-comparisons.json": "bbf8169294eb80bd92d0ec7f7f9b0eeddb028fd5094bced55468160997083766",
+    "planned-state-semantics.json": "0956e12edc84e492e2700ea88dfb858ed7681c2603d3f3c02dc24f86faabf2ae"
+  },
+  "command": [
+    "/workspace/flutter-sdk/bin/cache/dart-sdk/bin/dart",
+    "--packages=/workspace/reports/redesign-m05-reference-20261014/package_config.json",
+    "/workspace/Muyon-leader-b-redesign-m05-20261014/scripts/redesign/supplier-name-reference/oracle.dart",
+    "/workspace/reports/redesign-m05-reference-20261014/invocations.json"
+  ],
+  "dart_exit_code": 0,
+  "anti_vacuity": "pass",
+  "cross_end_unicode_equivalence": "not_proven",
+  "M03": "blocked_contract",
+  "cases": [
+    {
+      "case_id": "M04-NAME-chinese",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-chinese",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 6,
+            "outcome": "accepted",
+            "normalized": "\u5408\u6210\u4f9b\u5e94\u5546\u7532",
+            "normalized_codepoints": 6,
+            "normalized_utf16_units": 6
+          },
+          "status": "pass"
+        },
+        {
+          "entry": "Supplier.fromJson supplementary positive",
+          "actual": {
+            "invocation_id": "M04-NAME-chinese/complete-supplier-constructor",
+            "entry_point": "Supplier.fromJson",
+            "input_utf16_units": 6,
+            "outcome": "accepted",
+            "normalized": "\u5408\u6210\u4f9b\u5e94\u5546\u7532",
+            "normalized_codepoints": 6,
+            "normalized_utf16_units": 6
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-chinese-edges",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-chinese-edges",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 10,
+            "outcome": "accepted",
+            "normalized": "\u5408\u6210\u4f9b\u5e94\u5546\u7532",
+            "normalized_codepoints": 6,
+            "normalized_utf16_units": 6
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-nfc-compose",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-nfc-compose",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2,
+            "outcome": "accepted",
+            "normalized": "\u00e9",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 1
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-nfc-canonical-angstrom",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-nfc-canonical-angstrom",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 1,
+            "outcome": "accepted",
+            "normalized": "\u00c5",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 1
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-not-nfkc",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-not-nfkc",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 3,
+            "outcome": "accepted",
+            "normalized": "\uff21\u5408\u6210",
+            "normalized_codepoints": 3,
+            "normalized_utf16_units": 3
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-no-casefold",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-no-casefold",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 13,
+            "outcome": "accepted",
+            "normalized": "Synthetic ABC",
+            "normalized_codepoints": 13,
+            "normalized_utf16_units": 13
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-cjk-200",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-cjk-200",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 200,
+            "outcome": "accepted",
+            "normalized": "\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532\u7532",
+            "normalized_codepoints": 200,
+            "normalized_utf16_units": 200
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-cjk-201",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-cjk-201",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 201,
+            "outcome": "rejected",
+            "reason": "name: exceeds 200 codepoints"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-emoji-200",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-emoji-200",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 400,
+            "outcome": "accepted",
+            "normalized": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00",
+            "normalized_codepoints": 200,
+            "normalized_utf16_units": 400
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-emoji-201",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-emoji-201",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 402,
+            "outcome": "rejected",
+            "reason": "name: exceeds 200 codepoints"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-decomposed-200",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-decomposed-200",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 400,
+            "outcome": "accepted",
+            "normalized": "\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9\u00e9",
+            "normalized_codepoints": 200,
+            "normalized_utf16_units": 200
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-decomposed-201",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-decomposed-201",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 402,
+            "outcome": "rejected",
+            "reason": "name: exceeds 200 codepoints"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-empty",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-empty",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 0,
+            "outcome": "rejected",
+            "reason": "name: required"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-trim-empty-xml-whitespace",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-trim-empty-xml-whitespace",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 5,
+            "outcome": "rejected",
+            "reason": "name: required"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-trim-valid-edges",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-trim-valid-edges",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 9,
+            "outcome": "accepted",
+            "normalized": "\u7532",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 1
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-internal-whitespace",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-internal-whitespace",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 7,
+            "outcome": "accepted",
+            "normalized": "\u7532\t\n\r  \u4e59",
+            "normalized_codepoints": 7,
+            "normalized_utf16_units": 7
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-raw2000-bmp",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-raw2000-bmp",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2000,
+            "outcome": "accepted",
+            "normalized": "\u7532",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 1
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-raw2001-bmp-domain-only",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-raw2001-bmp-domain-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2001,
+            "outcome": "accepted",
+            "normalized": "\u7532",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 1
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-raw2000-supplementary",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-raw2000-supplementary",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2000,
+            "outcome": "accepted",
+            "normalized": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00",
+            "normalized_codepoints": 101,
+            "normalized_utf16_units": 202
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-raw2001-supplementary-domain-only",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-raw2001-supplementary-domain-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2001,
+            "outcome": "accepted",
+            "normalized": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00",
+            "normalized_codepoints": 101,
+            "normalized_utf16_units": 202
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-nul",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-nul",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-vt-edge",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-vt-edge",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-ff-edge",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-ff-edge",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-vt-ff-edges",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-vt-ff-edges",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 3,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-vt-internal",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-vt-internal",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 3,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-ff-internal",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-ff-internal",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 3,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-fffe",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-fffe",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 1,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-ffff",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-ffff",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 1,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-replacement-character",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-replacement-character",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 1,
+            "outcome": "accepted",
+            "normalized": "\ufffd",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 1
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-isolated-high-surrogate",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-isolated-high-surrogate",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 1,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-isolated-low-surrogate",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-isolated-low-surrogate",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 1,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-NAME-valid-surrogate-pair",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "normalizeText",
+          "actual": {
+            "invocation_id": "M04-NAME-valid-surrogate-pair",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2,
+            "outcome": "accepted",
+            "normalized": "\ud83d\ude00",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 2
+          },
+          "status": "pass"
+        }
+      ],
+      "coverage": "exact_declared_normalizer_entry_only",
+      "actual_status": "pass"
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-false",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "Supplier.fromJson",
+          "actual": {
+            "invocation_id": "M04-ENTRY-supplier-name-false",
+            "entry_point": "Supplier.fromJson",
+            "input_utf16_units": null,
+            "outcome": "rejected",
+            "reason": "name: expected text"
+          },
+          "status": "pass"
+        },
+        {
+          "entry": "validatePayload dispatch",
+          "status": "not_run",
+          "reason": "only actual supplier branch constructor invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_for_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_schema_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-zero",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "Supplier.fromJson",
+          "actual": {
+            "invocation_id": "M04-ENTRY-supplier-name-zero",
+            "entry_point": "Supplier.fromJson",
+            "input_utf16_units": null,
+            "outcome": "rejected",
+            "reason": "name: expected text"
+          },
+          "status": "pass"
+        },
+        {
+          "entry": "validatePayload dispatch",
+          "status": "not_run",
+          "reason": "only actual supplier branch constructor invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_for_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_schema_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-null",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "Supplier.fromJson",
+          "actual": {
+            "invocation_id": "M04-ENTRY-supplier-name-null",
+            "entry_point": "Supplier.fromJson",
+            "input_utf16_units": null,
+            "outcome": "rejected",
+            "reason": "name: expected text"
+          },
+          "status": "pass"
+        },
+        {
+          "entry": "validatePayload dispatch",
+          "status": "not_run",
+          "reason": "only actual supplier branch constructor invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_for_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_schema_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-array",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "Supplier.fromJson",
+          "actual": {
+            "invocation_id": "M04-ENTRY-supplier-name-array",
+            "entry_point": "Supplier.fromJson",
+            "input_utf16_units": null,
+            "outcome": "rejected",
+            "reason": "name: expected text"
+          },
+          "status": "pass"
+        },
+        {
+          "entry": "validatePayload dispatch",
+          "status": "not_run",
+          "reason": "only actual supplier branch constructor invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_for_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_schema_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-object",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "Supplier.fromJson",
+          "actual": {
+            "invocation_id": "M04-ENTRY-supplier-name-object",
+            "entry_point": "Supplier.fromJson",
+            "input_utf16_units": null,
+            "outcome": "rejected",
+            "reason": "name: expected text"
+          },
+          "status": "pass"
+        },
+        {
+          "entry": "validatePayload dispatch",
+          "status": "not_run",
+          "reason": "only actual supplier branch constructor invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_for_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_schema_values_name",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-omitted",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "Supplier.fromJson",
+          "actual": {
+            "invocation_id": "M04-ENTRY-supplier-name-omitted",
+            "entry_point": "Supplier.fromJson",
+            "input_utf16_units": null,
+            "outcome": "rejected",
+            "reason": "payload: missing or unknown keys"
+          },
+          "status": "pass"
+        },
+        {
+          "entry": "validatePayload dispatch",
+          "status": "not_run",
+          "reason": "only actual supplier branch constructor invoked"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-old-form-vt-prefix",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "old_catalog_form_pretrim_then_existing_supplier_validator",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_tool_raw_name_and_direct_normalizer",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "new_end_raw_to_rust_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "normalizeText supplementary observation",
+          "actual": {
+            "invocation_id": "M04-ENTRY-old-form-vt-prefix/raw-normalizer-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "observed_only"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-old-form-ff-suffix",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "old_catalog_form_pretrim_then_existing_supplier_validator",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_tool_raw_name_and_direct_normalizer",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "new_end_raw_to_rust_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "normalizeText supplementary observation",
+          "actual": {
+            "invocation_id": "M04-ENTRY-old-form-ff-suffix/raw-normalizer-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "observed_only"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-old-form-vt-ff-edges",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "old_catalog_form_pretrim_then_existing_supplier_validator",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_tool_raw_name_and_direct_normalizer",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "new_end_raw_to_rust_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "normalizeText supplementary observation",
+          "actual": {
+            "invocation_id": "M04-ENTRY-old-form-vt-ff-edges/raw-normalizer-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 3,
+            "outcome": "rejected",
+            "reason": "name: invalid XML character or isolated surrogate"
+          },
+          "status": "observed_only"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-old-form-empty",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "old_catalog_form",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "direct_normalizer_raw",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "new_end_raw_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "normalizeText supplementary observation",
+          "actual": {
+            "invocation_id": "M04-ENTRY-old-form-empty/raw-normalizer-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 5,
+            "outcome": "rejected",
+            "reason": "name: required"
+          },
+          "status": "observed_only"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-bmp-cap2000",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "declared_raw_utf16_code_units",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_and_new_raw_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "direct_normalizer_and_old_form_pretrim",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "normalizeText supplementary observation",
+          "actual": {
+            "invocation_id": "M04-ENTRY-bmp-cap2000/raw-normalizer-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2000,
+            "outcome": "accepted",
+            "normalized": "\u7532",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 1
+          },
+          "status": "observed_only"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-bmp-cap2001",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "declared_raw_utf16_code_units",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_and_new_raw_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "direct_normalizer_and_old_form_pretrim",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "normalizeText supplementary observation",
+          "actual": {
+            "invocation_id": "M04-ENTRY-bmp-cap2001/raw-normalizer-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2001,
+            "outcome": "accepted",
+            "normalized": "\u7532",
+            "normalized_codepoints": 1,
+            "normalized_utf16_units": 1
+          },
+          "status": "observed_only"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-supplementary-cap2000",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "declared_raw_utf16_code_units",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_and_new_raw_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "direct_normalizer_and_old_form_pretrim",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "normalizeText supplementary observation",
+          "actual": {
+            "invocation_id": "M04-ENTRY-supplementary-cap2000/raw-normalizer-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2000,
+            "outcome": "accepted",
+            "normalized": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00",
+            "normalized_codepoints": 101,
+            "normalized_utf16_units": 202
+          },
+          "status": "observed_only"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-supplementary-cap2001",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "declared_raw_utf16_code_units",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "legacy_tool_guard_and_new_raw_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "direct_normalizer_and_old_form_pretrim",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "normalizeText supplementary observation",
+          "actual": {
+            "invocation_id": "M04-ENTRY-supplementary-cap2001/raw-normalizer-only",
+            "entry_point": "normalizeText",
+            "input_utf16_units": 2001,
+            "outcome": "accepted",
+            "normalized": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00",
+            "normalized_codepoints": 101,
+            "normalized_utf16_units": 202
+          },
+          "status": "observed_only"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "partial"
+    },
+    {
+      "case_id": "M04-ENTRY-legacy-patch-name-omitted",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "legacy_update_nonempty_allowed_patch",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "new_name_only_command_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "not_run"
+    },
+    {
+      "case_id": "M04-ENTRY-legacy-empty-values",
+      "fixture_status": "not_run",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "legacy_update_values_guard",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        },
+        {
+          "entry": "new_name_only_command_target",
+          "status": "not_run",
+          "reason": "actual controller/private host guard/schema/target not invoked"
+        }
+      ],
+      "coverage": "partial_or_source_only_entry_comparison",
+      "actual_status": "not_run"
+    },
+    {
+      "case_id": "M04-STATE-new-intent-same-canonical-name",
+      "fixture_status": "planned",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "planned state runner",
+          "status": "not_run",
+          "reason": "no actual trusted scope CAS intent receipt path invoked"
+        }
+      ],
+      "coverage": "planned_state_contract_not_executed",
+      "actual_status": "not_run"
+    },
+    {
+      "case_id": "M04-STATE-same-intent-redelivery",
+      "fixture_status": "planned",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "planned state runner",
+          "status": "not_run",
+          "reason": "no actual trusted scope CAS intent receipt path invoked"
+        }
+      ],
+      "coverage": "planned_state_contract_not_executed",
+      "actual_status": "not_run"
+    },
+    {
+      "case_id": "M04-STATE-expired-cas",
+      "fixture_status": "planned",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "planned state runner",
+          "status": "not_run",
+          "reason": "no actual trusted scope CAS intent receipt path invoked"
+        }
+      ],
+      "coverage": "planned_state_contract_not_executed",
+      "actual_status": "not_run"
+    },
+    {
+      "case_id": "M04-STATE-scope-changed",
+      "fixture_status": "planned",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "planned state runner",
+          "status": "not_run",
+          "reason": "no actual trusted scope CAS intent receipt path invoked"
+        }
+      ],
+      "coverage": "planned_state_contract_not_executed",
+      "actual_status": "not_run"
+    },
+    {
+      "case_id": "M04-STATE-readonly-receipt",
+      "fixture_status": "planned",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "planned state runner",
+          "status": "not_run",
+          "reason": "no actual trusted scope CAS intent receipt path invoked"
+        }
+      ],
+      "coverage": "planned_state_contract_not_executed",
+      "actual_status": "not_run"
+    },
+    {
+      "case_id": "M04-STATE-unknown-key-change-is-not-new-intent",
+      "fixture_status": "planned",
+      "rust_target_status": "not_run",
+      "entries": [
+        {
+          "entry": "planned state runner",
+          "status": "not_run",
+          "reason": "no actual trusted scope CAS intent receipt path invoked"
+        }
+      ],
+      "coverage": "planned_state_contract_not_executed",
+      "actual_status": "not_run"
+    }
+  ],
+  "summary": {
+    "pass": 32,
+    "partial": 14,
+    "not_run": 8
+  },
+  "checked_invocations": 39,
+  "actual_invocations": 47,
+  "mismatches": 0
+}

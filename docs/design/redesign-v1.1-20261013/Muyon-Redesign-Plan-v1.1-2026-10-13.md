@@ -1,0 +1,1285 @@
+# Muyon 架构与详细改造方案
+
+桌面 Electron　Android Kotlin Compose　共享 Rust 本机内核
+
+第一册　设计版本 1.1　｜　2026年10月13日 北京时间
+
+本文面向 Muyon 的产品决策、架构拆分和后续实施评审。目标是把助手、科研与 PDF、询价业务组织成可持续使用的双端产品，并明确从现有 Flutter 与 Dart 代码迁移的顺序、验证标准和风险边界。
+
+核心结论：保留一份 Rust 业务与执行语义，分别建立桌面和 Android 原生交互；先完成“只读业务切片 → 受控单项写入”的闭环，再逐模块扩展。旧数据迁移与同步继续后置，首阶段使用隔离测试数据。本次交付是设计方案，不执行产品代码改造。
+
+阅读导航：第1至3章看决策、参考与当前源码；第4至6章看架构、合同与安全；第7章连接页面手册；第8至10章覆盖首片、全业务波次与验证回退；第11章列风险和待定决策。逐页布局、字段和交互规范见第二册《Muyon 逐页设计手册》。
+
+## 1 决策摘要与范围
+
+### 本版变更摘要
+
+本版沿用1.0的章节、固定源码盘点、20个迁移单元、28项首片任务和8个业务波次，在对应章节修订产品语义及验收。新增和澄清集中于生成卡交互、执行模式、记忆与身份边界、产物能力分类，以及安全审查暂停和恢复。工程内容仍为计划，未启动产品代码迁移。
+
+已存在的对象版本校验、旧卡失效、撤权、幂等和执行账本继续保留，不列为本版新发现。新增Auto与全部允许的区别是用户决策；模式候选的精简、默认档位及尚未确认的产品范围仍列待决。竞品材料只提供设计线索，不替代Muyon运行测试或授权证明。
+
+### 明确决定与待决边界
+
+| 事项 | 当前结论 | 对本版的约束 |
+| --- | --- | --- |
+| 技术路线 | 已确认 | Electron桌面、Kotlin Compose Android、Rust本地离线内核 |
+| 生成卡交互 | 已确认 | 已有卡片本地交互直接响应；确定性业务动作进Rust；理解或重规划才另调模型 |
+| 全部允许 | 已确认 | 已选工作区和现有访问权限内免额外询问；高风险不追加确认 |
+| 独立Auto | 已确认 | 与其他档位并列；规则判低风险自动、高风险确认、禁止类拒绝 |
+| 其余模式和默认档位 | 设计建议待定 | 第6章保留每次询问、只读、低风险候选；不把建议写成用户批准 |
+| Android屏幕读取 | 待决 | 不默认实施、申请权限或承诺持续后台读取 |
+| 临时会话与记忆容量 | 待决 | 先分开能力合同，是否启用、配额和清理策略另定 |
+| 个人账号限定 | 待决 | 不预设仅个人账号，也不承诺组织或多租户支持 |
+
+“全部允许”是产品内的免确认模式，不是模型获得自行扩权的能力。系统和第三方不可绕过的限制、现有访问权限、用户撤销、版本和回执校验依然有效。此产品语义不改变后续工程在真实设备、账号和数据上的独立执行授权。
+
+### 已确认的技术路线
+
+| 层级 | 本次路线 | 边界 |
+| --- | --- | --- |
+| 桌面应用 | Electron | Windows 和 macOS 为待验证平台；React 与 TypeScript 是本方案推荐界面实现 |
+| Android 应用 | Kotlin 与 Jetpack Compose | 采用平台原生导航、输入、文件和生命周期能力 |
+| 共享内核 | Rust 本机 core | 领域规则、任务、存储、权限、执行账本及契约语义共用 |
+| 未来 iOS | Swift 与 SwiftUI／UIKit 接入位置 | 仅预留接口，不列入本批实施和工期 |
+| 数据与同步 | 每台设备独立本地存储 | 旧数据迁移、设备间同步、跨设备任务协调继续后置 |
+
+桌面和手机运行同一 Rust 内核的不同平台构建，各自持有本地数据库与账本。“共享内核”指共享代码和合同，不意味着两台设备自动共享数据、审批或运行状态。桌面 Rust 采用受控侧进程；Android 将 Rust 库嵌入应用，不增加一个常驻 HTTP 后台。
+
+### 本方案要解决的问题
+
+- 助手说清正在做什么、需要用户决定什么，并把最终产物放回有身份、有版本的业务对象
+- 科研能够从问题走到证据和可编辑结论，PDF 能从选区走到可核对字段，询价能从条件走到比较、草稿和台账
+- 两端共享业务真值、错误和恢复语义，避免在 TypeScript 与 Kotlin 各建一套规则
+- 权限、幂等、商敏投影和回执在可信内核闭合，不能靠 UI 按钮状态或模型自述保证安全
+
+### 范围与阶段边界
+
+同步后置特指尚未设计的新跨设备任务、权限、审批与统一数据协调；现有询价资料交换、文件夹及LAN传输是独立迁移对象，按W5逐项保留、验证或明确延期，不能借同步后置删除原业务。
+
+本批方案覆盖产品结构、页面行为、跨语言合同、单设备本机执行、分阶段迁移、测试和回退设计。现有 Flutter 体验版保留为参考与回退入口；已有任务不因选型变化自动取消。真实生产数据切换、云服务部署、数据同步、完整 iOS 客户端和所有功能的全面迁移不进入首阶段承诺。
+
+28项任务估算只用于首个可验证闭环的拆分。尚未完成全模块成本盘点、设备矩阵和实际工程速度测量，因此不能据此承诺“一月全量迁完”。
+
+## 2 参考证据与当前代码事实
+
+### 参考产品如何用于 Muyon
+
+| 参考 | 有证据支持的观察 | Muyon 采用方式 |
+| --- | --- | --- |
+| Muse | 官方展示图呈现目标、活动记录与明确审批 | 用任务面板、活动时间线和可信审批呈现后台行为 |
+| Claude | 官方帮助文档把可持续编辑的产物与对话关联；移动招聘明确原生技术要求 | 把产物做成稳定业务对象；Android 采用 Kotlin Compose |
+| ChatGPT | 官方 Projects 文档组织相关对话、文件和项目上下文；Canvas 承载持续编辑 | 项目成为上下文范围，结果能打开工作台继续编辑 |
+
+Muse 官方视觉素材已经查看；Claude 与 ChatGPT 的本轮参考主要来自官方文档，未做 Android 实机交互验证。竞品截图能支持信息组织和视觉判断，不能证明其内部权限、任务恢复和技术栈实现。本文所有页面与架构图均为 Muyon 原创方案，不是竞品截图复刻。
+
+[Muse 设计说明](https://introducing.muse.ai/)　[Claude Artifacts](https://support.claude.com/en/articles/17153992-what-are-artifacts-and-how-do-i-use-them)　[ChatGPT Projects](https://help.openai.com/en/articles/10169521-projects-in-chatgpt)　[ChatGPT Canvas](https://openai.com/index/introducing-canvas/)
+
+### Claude 移动端框架的证据强度
+
+Anthropic 的 Android 官方招聘列出 Kotlin、Jetpack Compose 与 Android SDK；iOS 招聘列出 Swift、UIKit 与 SwiftUI。结合 Mike Lewis 早期关于原生 Swift／Kotlin 的公开说明，可支持“以原生移动栈为参考”的选择。招聘要求和公开说明不构成当前客户端全部模块的源码审计，不能推断所有屏幕都只使用某一个 UI 框架。
+
+[Android 官方招聘](https://job-boards.greenhouse.io/anthropic/jobs/4899511008)　[iOS 官方招聘](https://job-boards.greenhouse.io/anthropic/jobs/4572744008)　[Mike Lewis 公开说明](https://www.linkedin.com/posts/mikerlewis_careers-activity-7173804945295466497-JDNw)
+
+Muse 移动端内部框架目前没有足够可靠证据，因此只作为交互参考，不写成 React Native、Flutter 或原生框架的已知实例。
+
+### 竞品证据的更正与采用边界
+
+Claude当前记忆帮助页区分新版与legacy体验：新版按主题管理记忆，旧版摘要每24小时更新的描述仅适用于legacy，不能作为全部用户的现行机制。Muyon据此把“结构化记录、用户可读编辑、历史检索”分开设计，不照搬更新周期。[Claude聊天搜索与记忆](https://support.claude.com/en/articles/11817273-use-claude-s-chat-search-and-memory-to-build-on-previous-context)
+
+Claude可分享包含MCP使用的聊天快照；官方说明隐藏原始MCP工具数据，但保留最终回答与对话。隐藏raw结果并不能证明回答不含敏感信息。Muyon的分享或导出必须再次按目标受众投影，并检查正文、引用和附件；不能依据“原工具结果未显示”就开放分享。[Claude分享说明](https://support.claude.com/en/articles/10593882-share-and-unshare-chats)
+
+ChatGPT静态材料中的DIL8动作只是一份观察到的动作清单，不是ChatGPT全部交互能力的上限。官方Apps参考明确提供组件调用工具的callTool能力，工具的标准可见性默认包含model与app；组件可发起工具调用，不要求每次都重新让模型理解。“回模型”不是授权安全边界，schema验证和沙箱也不等于业务授权。[OpenAI Apps参考](https://developers.openai.com/plugins/reference)
+
+Meta官方Muse安全说明已经描述宿主侧Sentinel作为连接器动作与网络出口权限权威，并按目的、连接器或目标及许可范围检查后续调用。Muyon采用Rust可信授权与目的限定投影，是针对本地双端产品的具体取舍，不声称这一原则由Muyon首创。[Muse安全架构](https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse)
+
+静态竞品代码或研究报告中的INSERT OR IGNORE至多提示某张表有去重登记，不能证明外部效果至多一次。必须进一步验证登记、派发、回执与崩溃恢复的完整链，才能描述相应保证。本文第5章的账本方案是Muyon待实施合同，不由竞品截图、方法名或单条SQL证明已经有效。
+
+### 固定代码基线
+
+本版沿用1.0锁定的 Muyon develop 历史快照：
+
+01e56cc2d729dab70e1b1def05c3aa93b28f421a
+
+该快照核验时间为2026年10月13日北京时间00:48；1.1修订没有重新检查最新develop。前次研究基线为 9836bb87e9f86a866ad05e83cee8beb9fe1eec8e，两者之间有19个提交。当前盘点与差异证据见第3章；历史链接仍按其原SHA引用，不把旧证据改名为新基线。分支名称和任务状态会变化，实施前须再次固定提交与在途所有权。
+
+本次现状对路线的直接影响：supplier_core 的81个lib Dart文件没有直接Flutter或flutter_*导入，但仍依赖Dart运行时与平台库，因此优先复用规则与fixture；inquiry_module 的92个文件有84个直接UI或插件耦合，页面必须实质重建；LocalExportLedger虽有实现，当前未发现生产实例化，不能把本机导出当成已完成接线。第3章逐项给出文件、符号、测试和判据，第9章据此分8个业务波次。
+
+本文区分当前源码事实、目标方案与待验证项。后文接口、页面、阈值和任务均为设计；代码存在、历史CI绿色或组件调试页可见，不等于新跨端路径已经接入或通过验收。
+
+## 3 当前源码盘点与迁移映射
+
+### 证据范围与结论
+
+本章保留1.0的只读盘点及原始证据范围。下文“当前”“在途”均指所列固定快照和当时核验时点，不是1.1修订时的实时仓库状态；实施前由M01重新核对差异。
+
+本文件是迁移设计输入，不是实施报告。固定源码：`mightyoung/Muyon@01e56cc2d729dab70e1b1def05c3aa93b28f421a`，2026-10-12 16:48 UTC实时读取时为develop HEAD；与review/leader-a-batch-20261012c同SHA。旧基线9836bb87e9f86a866ad05e83cee8beb9fe1eec8e到此为ahead 19 / behind 0。所有源码定位都使用完整SHA，不链接浮动develop。
+
+读取范围：GitHub递归tree共2127项，truncated=false；462份lib Dart/pubspec文件及29份选定测试已读取，并将491份内容与Git blob SHA逐份核对一致。分析为静态源码/调用关系/测试用例阅读，没有在本任务运行Dart、Flutter、Rust、Electron或Android测试，也没有变更仓库。未完整读过的测试明确只作为已存在的待迁移测试定位，不宣称通过。源码行号来自该固定SHA。
+
+关键结论：要搬的是业务真值、授权和事务状态机，不是把Flutter Widget逐段翻译成React/Compose。最可复用的是supplier商业规则与ui_contract语义；最需拆开的是真实宿主生命周期、Flutter observable repository、UI controller内部publication原子操作、PDF/OCR和文件/secret平台能力。
+
+### 静态耦合计数（直接import/export，非传递依赖图）
+
+|包|lib Dart文件|直接Flutter或flutter_* import/export文件|迁移含义|
+|---|---:|---:|---|
+|apps/muyon|166|44|host虽有大量纯逻辑，但启动/数据通知/平台服务仍耦合UI|
+|supplier_core|81|0|优先抽商业语义，仍需替换Dart运行时与第三方库|
+|muyon_module_api|38|3|将ModuleSession/Widget页面合同与纯DTO/语义合同拆开|
+|muyon_ui|27|21|两个原生实现重建视觉，权限/原子controller下沉|
+|research_module|38|17|特别注意core中的Rect/pdfrx，不按目录名判纯净|
+|inquiry_module|92|84|保业务能力与调用语义，页面重新设计实现|
+|prototype_module|11|4|sandbox/webview另设平台适配与内容隔离|
+
+计数正则针对import/export package:flutter/或package:flutter_，不包含dart:ui、part文件传递依赖和pdfrx等非flutter前缀插件；所以数值是可重现的直接耦合下界，不是“余下全纯净”。
+
+### 20个可分派的迁移单元
+
+每个“建议目标”都是本次设计判断，表示终局职责归属，不代表首片或本期全部实现；不是当前仓库已经拥有Rust crates或跨端IDL。首片使用隔离新测试库；物理旧库、旧收据与历史fixture转换/兼容验证统一受后置P3数据迁移门禁约束，未经授权不写真实生产目录。跨设备执行/审批同步另立方案。
+
+#### 01. 宿主启动、模块注册与关闭
+
+- 源码定位：[MuyonHost.open / close](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/bootstrap.dart#L256)；[ModuleHost.activate / revokeCapability / close](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/module_host.dart#L308)；[main](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/main.dart)
+- 当前职责：宿主打开muyon数据库，挂接schema目录与中断恢复；构造模型、工具、授权、模块、知识和传输服务；依赖延迟闭包解决host与module互引；关闭时先撤销准入，再排空agent、传输、平台操作和模块，最后关闭存储。bootstrap传入uiPlanningEnabled:false，但PersonalAgent在presentationPreference非空时将harness enabled设为true，并由presentation模式、请求冻结、模型能力及授权另行gate；不能由这一个参数推断产品AIUI关闭。
+- Flutter/运行时耦合：bootstrap本体没有直接Flutter import，但构造MethodChannelSecretStore并连接到Flutter host、FoundationRepository和模块页面；不能因此称它已经是跨语言可嵌入内核。
+- 建议目标边界：Rust RuntimeOwner负责启动状态机、唯一服务/数据库寿命、ShutdownBarrier；Electron主进程与Android宿主只提供PlatformPorts与宿主生命周期事件。UI订阅RuntimeReady/ModuleStateChanged，不持有模块runtime对象。
+- 现有测试：[module_host_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/module_host_test.dart)（已读取源码，未执行）；[model_capabilities_migration_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/model_capabilities_migration_test.dart)（已读取源码，未执行）；[module_lifecycle_regression_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/module_lifecycle_regression_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：先定义ports、错误与事件合同，再搬启动。恢复/导入/撤销期间的late callback与双重close是优先回归点；不要把close退化为简单kill进程。
+- 迁移交付判据：相同数据目录只产生一个writer owner；两次close等待同一drain；启动失败不留下半打开模块；默认AIUI策略显式可配置且与当前开关语义一致。
+
+#### 02. 存储所有权、事务队列与schema迁移
+
+- 源码定位：[ManagedConnection.write / exclusiveAsync / StorageManager.open](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/storage_manager.dart#L13)；[ManagedDatabase / ModuleSchema](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/storage.dart#L1)；[host schema compatibility](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/host_schema_compatibility.dart)
+- 当前职责：ManagedConnection使用BEGIN IMMEDIATE同步事务体、_tail串行队列、COMMIT后通知；exclusiveAsync允许整段异步排他操作但不自动在异步文件IO外再包事务；结构digest、连续迁移、ahead version拒绝、quiesce和close属于宿主。
+- Flutter/运行时耦合：直接依赖Dart sqlite3 Database并通过ManagedDatabase.raw外泄连接；这不是适合跨IPC保留的接口。onCommit观察者失败已被隔离为commit_observer_failed，不会把已提交业务误报失败。
+- 建议目标边界：Rust storage crate拥有连接池/单writer、短事务与migration registry；跨端只暴露typed queries/commands与revision，禁止renderer/Kotlin传SQL或raw database handle。先保持schema版本/digest校验与拒绝超前等兼容语义；首期在隔离测试库工作，物理schema与历史库转换作为后置迁移单独验证，不预设必须保留原物理表。
+- 现有测试：[storage_manager_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/storage_manager_test.dart)（已读取源码，未执行）；[managed_connection_commit_observer_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/managed_connection_commit_observer_test.dart)（已读取源码，未执行）；[storage_recovery_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/storage_recovery_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：现有模块有自己管理的短SQL事务；不能一律套第二层事务。新旧进程同时写同目录会破坏唯一owner。旧库转换进入后置P3门禁时，需要真实旧库fixture与备份回退演练，而不只是空库建表。
+- 迁移交付判据：保留事务体异常回滚、队列不毒化、postcommit观察者异常不改业务成功、close drain、schema超前拒绝；逐库比对表结构/数据/收据而非只比行数。
+
+#### 03. module_api合同与插件边界
+
+- 源码定位：[BusinessModuleV2 / ModuleSection](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/module_v2.dart#L10)；[ModuleRuntime / ModuleSession](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/module.dart)；[optional capabilities](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/optional_capabilities.dart)；[ToolRegistrar](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/tool_registrar.dart)
+- 当前职责：统一manifest、ontology、capability coverage、辅助库、工具注册、会话、ObjectRef及导入等可选能力。v2扩展v1；inquiry adapter仍需HostToolRegistrar与ManagedConnection具体类型。
+- Flutter/运行时耦合：module.dart/module_v2.dart/optional_capabilities.dart直接导入Flutter，ModuleSection.builder是Widget Function(BuildContext,host)，WorkspaceSectionHost直接返回Widget，存储合同带sqlite3类型。
+- 建议目标边界：拆为Rust domain contracts、版本化wire DTO/IDL、端侧screen registry三层。SectionId/ObjectPageRoute替代Widget builder；Query/Command能力替代runtime泛型和raw DB；业务模块仍需声明能力与操作覆盖，不能把manifest当授权。
+- 现有测试：[contract_v2_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/test/contract_v2_test.dart)（已核文件存在，未逐项读取/执行）；[write_contract_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/test/write_contract_test.dart)（已核文件存在，未逐项读取/执行）；[module_host_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/module_host_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：不能按package原封不动编译到Rust，也不能用同名TS/Kotlin接口假装已互通。需显式定义unknown field、enum扩展、nullable、64位整数、decimal string和版本协商。
+- 迁移交付判据：Electron与Compose分别注册同一业务route ID；拒绝未声明能力；core不含Flutter/Widget/BuildContext/JS引擎/Kotlin UI依赖。
+
+#### 04. supplier_core商业域：记录、价格、预算、比价
+
+- 源码定位：[Store.save / delete / restore](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/store.dart#L378)；[micros / roundedDivide / priceInTaxMode](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/pricing.dart#L1)；[compareQuotes / priceHistory](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/compare.dart#L75)；[预算与BudgetLine](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/budget.dart)；[规格匹配](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/spec_match.dart)
+- 当前职责：记录版本、字段变更、软删除/恢复、引用检查、报价有效性、单位/含税转换、阶梯价、成交价、预算与规格匹配。目前价格使用BigInt百万分定点，roundedDivide为半值远离零；不同币种不做FX；未知单位/税基保守返回不可比较。
+- Flutter/运行时耦合：完整supplier_core/lib的81个Dart文件无直接Flutter或Flutter插件import/export；但仍依赖Dart IO、isolate、sqlite3、archive、crypto、pdf、xml等，属于“业务可分离”，不属于“零成本搬迁”。
+- 建议目标边界：Rust supplier-domain + storage repositories。价格/数量使用Decimal6或等价定点类型，wire用规范十进制字符串；运算、有效性与比较排序为唯一核心实现，两端只格式化和输入。
+- 现有测试：[pricing_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/test/pricing_test.dart)（已读取源码，未执行）；[store_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/test/store_test.dart)（已读取源码，未执行）；[spec_match_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/test/spec_match_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：最危险的回归不是UI像不像，而是舍入、阶梯边界、已成交快照、报价币种不可混合、暂停供应商、税率缺失的语义。先纯函数差分，再读写与exchange。
+- 迁移交付判据：Dart旧实现与Rust对同fixture逐字段输出一致；覆盖负数半值、6位小数、税率缺失、数量跨档、同币种/跨币种、历史快照不被新报价污染。
+
+#### 05. Folio询价应用状态、导入与业务页面
+
+- 源码定位：[AppState](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/app_state.dart#L25)；[Section / build page switch](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/shell.dart#L24)；[InquiryImportPipeline](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/ai/import_pipeline.dart)；[InquiryBusinessModule / InquiryModuleRuntime](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/adapters/inquiry_module.dart#L32)
+- 当前职责：AppState同时承接Store、AI jobs、sync、LAN、settings、hub/模型凭据及ChangeNotifier；inquiry adapter复用既有owner而不复制数据库；导入有prepare/commit/receipt，页面有项目、报价、供应商、产品、交换、数据中心与Hub。
+- Flutter/运行时耦合：92个lib Dart文件中84个直接Flutter/plugin import/export；AppState既是业务服务容器又是UI可观察对象。大部分页面不能机械翻译为Compose或React。
+- 建议目标边界：把Store读写、导入流程、job协调和settings domain移到Rust；两端分别重建SupplierViewModel/ProjectViewModel/QuoteEditorState。输入焦点和临时编辑缓冲留在UI；需要恢复或跨页共用的草稿由内核持久化并版本化，正式业务验证与写入在core。
+- 现有测试：[ai_import_resume_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/test/ai_import_resume_test.dart)（已核文件存在，未逐项读取/执行）；[host_attachment_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/test/host_attachment_test.dart)（已核文件存在，未逐项读取/执行）；[module_host_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/module_host_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：保留hosted/standalone的差异：当前hosted Ask入口会回Home，不要不经业务决策就恢复另一套独立agent。UI并非权限边界，需从core限制导入项目/工作区变化。
+- 迁移交付判据：导入重新打开、撤销/丢弃、来源文件改变、工作区切换、重复commit和回执恢复有相同结果；页面改版独立于数据迁移。
+
+#### 06. 科研对象、卡片、大纲、人工运行
+
+- 源码定位：[WorkbenchStore / scoped / manual runs](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/store.dart#L16)；[OutlineStore extension / deleteSection / cite](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/outline_store.dart#L29)；[CardStore](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/cards/card_store.dart)；[registerResearchTools](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/module_tools.dart)
+- 当前职责：研究项目、文档、entry、批注、卡片修订、引用、大纲及task/run由真实本机存储维护；manual run只建/更新本机记录，不能当作远端执行能力。scoped/checkedProject/checkedObject承担项目边界。
+- Flutter/运行时耦合：core/store.dart仍直接导入Flutter visibleForTesting；ResearchRuntime/ResearchSession既解析对象又返回Widget页面。目录名core并不保证框架无关。
+- 建议目标边界：Rust research-domain统一版本、关系、删除影响与保存；两端NativeResearchViews消费route与snapshot。保留人工运行记录与未来执行器能力的独立状态，不把“已记录”显示成“已运行”。
+- 现有测试：[research_runtime_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/research_runtime_test.dart)（已读取源码，未执行）；[reg3d_research_writes_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/reg3d_research_writes_test.dart)（已读取源码，未执行）；[section_delete_preview_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/section_delete_preview_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：大纲顺序、级联删除、evidence kind与digest必须兼容；迁移不可通过简化对象表删除现有批注/卡片/关系功能。需在域命令内检查scope，不能只依赖页面筛选。
+- 迁移交付判据：同数据库fixture迁移后对象可逐个解析；删除影响预览与实际操作一致；manual task/run revision与外来来源边界保留。
+
+#### 07. PDF阅读、来源锚点与引用定位
+
+- 源码定位：[QuoteLocation / ExactMatch](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/source_locator.dart#L1)；[CitationResolver / PdfrxCitationPageProvider](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/citation_resolver.dart#L40)；[ReaderPage](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/reader_page.dart)；[SourceRef](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/source_ref.dart)
+- 当前职责：引用定位区分PageOnly、ExactMatch、AmbiguousMatch、SourceUnavailable。ExactMatch保存左上原点0..1页面比例Rect；页跳转和精确高亮是不同承诺，重复文本不能猜定位。
+- Flutter/运行时耦合：source_locator.dart以Flutter Rect作为跨层数据；citation_resolver.dart同时负责证据解析与pdfrx提取，直接导入flutter/painting和pdfrx；reader是Flutter Widget。
+- 建议目标边界：Rust保留SourceRef、digest/revision检查、消歧和归一化几何DTO；DocumentTextPort提供页文本与字形rect。Electron PDF viewer与Android PDF原生view各自实现视口、选择、缩放/旋转坐标映射。
+- 现有测试：[citation_resolver_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/citation_resolver_test.dart)（已核文件存在，未逐项读取/执行）；[citation_resolution_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/citation_resolution_test.dart)（已核文件存在，未逐项读取/执行）；[reader_evidence_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/reader_evidence_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：单纯重写阅读器会丢字符offset和旧锚点兼容。PDF后端选型是独立验证项，本清单不宣称已选定跨端库；不同文本抽取需固定parserVersion和fallback语义。
+- 迁移交付判据：同一来源在两端命中同page/quote或同一保守降级状态；旋转/缩放高亮测试、重复文本、扫描件、替换文件、源删除全部覆盖。
+
+#### 08. PersonalAgent执行、模型回合与工具调度
+
+- 源码定位：[PersonalAgent.start / confirm / cancel / resume](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/personal_agent.dart#L59)；[AgentModelTurn.drain](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_model_turn.dart#L586)；[AgentDispatch.executeCard](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_dispatch.dart#L645)；[ExecutionStore](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/execution_store.dart)
+- 当前职责：任务状态、预算、草稿、模型审批、流收集、工具卡片确认、取消/暂停/恢复和事件分散成协作组件。drain把ToolCallDelta仅作为展示，完整ToolCallComplete收集到结束后才由后续路径执行。
+- Flutter/运行时耦合：agent多为Dart逻辑，但经FoundationRepository与host UI规划源间接依赖Flutter；Future/Stream/cancellation与renderer UI状态共享寿命。
+- 建议目标边界：Rust AgentRuntime + durable task/event store拥有执行和恢复；UI直接处理纯本地展示交互；需要业务执行时发送明确Command，渲染TaskSnapshot/TaskEvent，理解或重规划才新建模型轮次。模型流、工具流、UI规划流分类型，不把所有流塞到无类型JSON日志。
+- 现有测试：[personal_agent_streaming_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/personal_agent_streaming_test.dart)（已读取源码，未执行）；[personal_agent_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/personal_agent_test.dart)（已核文件存在，未逐项读取/执行）；[cf2_independent_production_paths_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/cf2_independent_production_paths_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：移进Electron renderer会把刷新、关闭页面变成执行生命周期；Android页面重建不能使任务重新执行。resume不得回放已完成副作用；需定义cancel请求/收到/终止/未知结果区别。
+- 迁移交付判据：两端断订阅不会恢复授权或重复动作；流中断不执行半个tool call；恢复使用checkpoint/receipt，重新连接只replay事件。
+
+#### 09. 语义UI合同、流编译、session与publication
+
+- 源码定位：[pure ui_contract export surface](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/ui_contract.dart#L1)；[validateUiPlan](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ui/validation.dart)；[UiSessionState.prepareRebase / dispatch](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ui/state.dart#L41)；[UiPublicationCoordinator](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ui/publication.dart#L38)；[UiStreamCompiler.addLine](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/ui/stream_compiler.dart#L63)
+- 当前职责：已有DataSnapshot/InteractionIntent/UIPlan、typed edit spec、collection、validated plan、draft/view分离、revision/refs、stream compiler、publication fencing和recompute freshness。01e56cc2已含旧计算结果previous标签状态。
+- Flutter/运行时耦合：ui_contract独立导出层本身不导出host/storage/IO/tool；这套语义可保留为跨语言合同。问题在合同依赖Dart对象身份、同步probe、内部不可伪造类型，而不是所有字段都含Flutter。
+- 建议目标边界：Rust ui-semantics/plan-validator/session-owner统一验证、dispatch准入、publication与draft revision。IDL生成只读DTO；ValidatedUiPlan等权限句柄不由UI构造；需业务语义的事件提交event与opaque lease，纯本地展示交互由前端直接处理，不一律送模型。
+- 现有测试：[ui_contract_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/test/ui_contract_test.dart)（已读取源码，未执行）；[ui_publication_coordinator_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/test/ui_publication_coordinator_test.dart)（已读取源码，未执行）；[cf_fix_t5_freshness_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/test/cf_fix_t5_freshness_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：不能把Dart identical/object identity简单序列化为字符串并信任客户端。保持final probe与session rebase同一个核心原子提交点；异步桥接后旧capture/旧callback必须被epoch拒绝。
+- 迁移交付判据：非法binding/action/catalog、stale revision、reentrant cancellation、recompute失败恢复编辑、previous/current freshness及publication原子性在Rust及两端合同测试一致。
+
+#### 10. 动态UI renderer、controller与公式重算接线
+
+- 源码定位：[UiSurfaceController / DynamicUiSurface](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/lib/src/dynamic/surface.dart#L81)；[UiAdapterContext / render adapters](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/lib/src/dynamic/component_adapter.dart#L24)；[UiLiveFormulaRecomputePort / UiFormulaRecomputeAdapter](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/ui_recompute_adapter.dart#L28)；[UiFormulaRegistry](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/ui_formula_registry.dart)
+- 当前职责：Flutter controller不只是绘图：它持有session/publication、prepareRebase/commit、pending action/receipts、render capture、dispatch、撤销探测和recompute。公式adapter还从muyon_ui导入library2UiCatalog。
+- Flutter/运行时耦合：27个muyon_ui lib文件有21个直接Flutter import/export；host侧公式adapter反向依赖UI package说明catalog合同与视觉实现尚未彻底分离。
+- 建议目标边界：React renderer与Compose renderer各自实现组件、布局、焦点、可访问性与本地输入；controller内的权限/原子状态搬到Rust；catalog schema抽成无视觉依赖的版本化共享数据，公式仅由Rust执行。
+- 现有测试：[cf_fix_t5_stale_result_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/test/cf_fix_t5_stale_result_test.dart)（已读取源码，未执行）；[ui_library2_recompute_adapter_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/ui_library2_recompute_adapter_test.dart)（已读取源码，未执行）；[aiui5_stateful_capture_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/test/aiui5_stateful_capture_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：只移validator留下两份端侧controller会重新制造不同步事实源。先拆controller职责再重写视图；视觉库扩展不应自动增业务action权限。
+- 迁移交付判据：同事件序列两端显示同事实/失败原因/旧结果标签；键盘焦点、scroll、text scale、screen reader状态分别验收，golden并不能替代真实交互。
+
+#### 11. 权限、scope、taint与实时撤销
+
+- 源码定位：[HostScopeAuthority](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/host_scope_authority.dart)；[HostAuthorizationFacts](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/host_authorization_facts.dart#L55)；[HostModelAuthorization / HostModelPermission](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/host_model_authorization.dart#L32)；[prepare / approveWithGrant / invoke](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/tool_registry.dart#L348)
+- 当前职责：作用域解析、实时模块authority revision、来源污点、模型请求body/endpoint绑定、tool grant、policy revision与实时撤销各自有状态。HostAuthorizationFacts用共享latched事实通知阻断已在途通道。
+- Flutter/运行时耦合：facts用Flutter ChangeNotifier做安全相关的及时通知；raw数据库和Dart对象身份参与proof。UI侧“确认”文本不是授权事实本身。
+- 建议目标边界：Rust AuthorityService形成唯一policy/grant owner；事件总线代替ChangeNotifier但保留先锁存后持久化的保守顺序；UI持有短寿命approval presentation ID，不接收可重建的内部permission对象。
+- 现有测试：[host_authorization_notifications_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/host_authorization_notifications_test.dart)（已读取源码，未执行）；[tool_registry_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/tool_registry_test.dart)（已核文件存在，未逐项读取/执行）；[scope_resolver_differential_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/scope_resolver_differential_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：撤权以内核受理并锁存为线性化点；其后不得开始新的受限动作，UI/IPC通知延迟不得恢复旧权限；已发出的动作按账本核对，不能承诺撤回。未知来源、模块失活、scope变更、数据库写失败必须继续拒绝。平台permission如文件选择/系统权限需与业务grant分开。
+- 迁移交付判据：重放approval、换endpoint/body/scope、撤销后晚回调、事实写入失败等反例零越权；不以“本机应用可信”省掉renderer边界。
+
+#### 12. 业务写入、CAS、幂等与回执完整性
+
+- 源码定位：[inquiry write tool commands](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/inquiry_write_tools.dart)；[GenericWriteIdentity](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/inquiry_write_receipts.dart#L23)；[lookupInquiryReceipt](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/inquiry_receipt_lookup.dart)；[business receipt contracts](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/business_receipts.dart)；[atomic batch contracts](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/atomic_batch_write.dart)
+- 当前职责：写入identity绑定operation/invocation/scope/arguments；业务对象版本、change log、receipt和历史只读lookup保留；研究写操作也由host registrar及receipt路径连接。
+- Flutter/运行时耦合：合同部分可分离，但receipt与CAS依赖当前数据库事务与source ref语义；页面或model不能从历史receipt推导新授权。
+- 建议目标边界：Rust CommandExecutor以expected revision+idempotency key为入口，在同事务完成业务、change log与receipt；结果区分applied/alreadyApplied/conflict/unknown。NativeReceiptProjection与ModelReceiptProjection分别定义。
+- 现有测试：[reg3d_research_writes_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/reg3d_research_writes_test.dart)（已读取源码，未执行）；[inquiry_write_conflicts_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/inquiry_write_conflicts_test.dart)（已核文件存在，未逐项读取/执行）；[wc_d_inquiry_receipt_lookup_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/wc_d_inquiry_receipt_lookup_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：不能重写成“UI POST成功就成功”；超时可能已commit。Receipt schema/digest顺序与json canonicalization是持久合同；迁移需要从旧receipt读回且不能放宽校验。
+- 迁移交付判据：重复提交只写一次；payload/scope同ID冲突拒绝；进程在commit前后故障可解释；historical lookup只读且无恢复授权副作用。
+
+#### 13. 模型gateway、SSE、超时与外发账本
+
+- 源码定位：[OpenAiModelGateway / _GatewayChannel](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/model_gateway.dart#L156)；[OpenAI-compatible provider](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/openai_compat_provider.dart)；[ModelEvent typed events](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/model_provider.dart)；[OutboundLedger](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/outbound_ledger.dart)
+- 当前职责：chat/embed/request/chatStream统一出口；凭据解析、policy/grant watch、beforeSend、外发先记账、超时、取消、最终outcome、安全错误。不同model capability影响native-tools/compat与流式，不能自动换端点逃过拒绝。
+- Flutter/运行时耦合：核心HTTP使用dart:io；凭据从平台SecretStore读；Dart Stream订阅取消语义需要重新设计到IPC/FFI而不是直接照搬。
+- 建议目标边界：Rust model-runtime负责HTTP、SSE parser、payload-finalization、ledger和取消；UI只获允许的draft与typed event。一个request ID贯穿authorization、wire payload hash、ledger、tool-call assembly和telemetry。
+- 现有测试：[model_stream_ledger_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/model_stream_ledger_test.dart)（已读取源码，未执行）；[personal_agent_streaming_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/personal_agent_streaming_test.dart)（已读取源码，未执行）；[openai_compat_provider_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/openai_compat_provider_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：网络断连、静默timeout、慢流总时限、HTTP400重试规则和key回显脱敏都有真实现测试；不得因新HTTP库默认retry而重发带副作用上下文。
+- 迁移交付判据：保留先落账再wire发送、账本不可写则零网络、midstream cancel与listener失联终态、首字节/idle/总时限、错误不带key；平台网络差异单独验收。
+
+#### 14. 模型披露与本机展示分层
+
+- 源码定位：[InquiryUiPlanningSource.read](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/inquiry_ui_planning_source.dart#L19)；[SectionDeletePreview.toModel](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/section_delete_preview.dart#L32)；[history replay / request view](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/request_view.dart)；[redactCredentials / maskSecret](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/credential_redaction.dart#L27)
+- 当前职责：当前有多处局部防线：询价read-only UI源将格式化值标为unverified/notDisclosed并不给checkpoint草稿披露权；N2模型投影不携带本机ID/digest；错误credential redaction与history replay各自存在。不能把“可在本机看”当作“可送模型”。
+- Flutter/运行时耦合：数据分层主要是Dart对象/Map与入口约定，不应从单个redactor存在推断全出站链统一覆盖。C6/opaque-reference分支仍在途，不能视作当前已完整接线。
+- 建议目标边界：Rust强类型NativeView、ModelView、AuditView与DisclosureContext；每次最终payload封包前检查allowlist及source proof。UI只提交披露选择，不自行把raw对象serialize到模型。secret redaction与数据披露规则分别处理。
+- 现有测试：[n2_projection_boundary_regression_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/n2_projection_boundary_regression_test.dart)（已读取源码，未执行）；[cf2_independent_production_paths_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/cf2_independent_production_paths_test.dart)（已读取源码，未执行）；[model_stream_ledger_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/model_stream_ledger_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：统一deserializer/serializer若默认包含所有字段，会重新泄露路径、native ID、hidden digest、商业值和旧history内容。必须逐入口记录模型可见字段，不可只靠正则删除。
+- 迁移交付判据：同canary覆盖live request、历史重放、compaction、UI planning、错误、receipt和日志；模型不可见字段在最终wire bytes中不存在；C6未合内容独立评审后再移植。
+
+#### 15. 文档解析、知识索引、OCR与搜索
+
+- 源码定位：[DocumentParser.parse](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/documents/document_parser.dart#L14)；[KnowledgeService.index / search / isCurrent](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/knowledge/knowledge_service.dart#L49)；[PaddleOcrService.recognizePdf](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/ocr/paddle_ocr_service.dart#L56)；[SearchService](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/search/search_service.dart)
+- 当前职责：解析前后digest复核、文件/页数/文本上限；知识库导入与索引、projection变更使索引失效、当前来源校验；OCR管理模型、图像归一化、推理与PDF渲染，search另有scope过滤。
+- Flutter/运行时耦合：DocumentParser调用pdfrxFlutterInitialize；PaddleOcrService直接依赖flutter_onnxruntime/pdfrx，属于深平台/引擎耦合，不是普通纯Dart服务。KnowledgeService还导入research对象。
+- 建议目标边界：Rust knowledge-domain负责索引身份、chunk/metadata、digest、query/ranking与失效；DocumentText/OcrInference ports承担引擎调用。可用Rust原生后端或平台native adapter，需先验证分发包、线程、内存与模型许可。
+- 现有测试：[public_services_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/public_services_test.dart)（已读取源码，未执行）；[search_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/search_test.dart)（已核文件存在，未逐项读取/执行）；[ocr_real_model_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/ocr_real_model_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：OCR真实模型测试文件存在不等于本次模型可用或真机通过。PDF engine变化可能改变文本/offset，须标parserVersion并触发可控重索引；不得为索引而隐式外发文档。
+- 迁移交付判据：相同文档边界/页码/来源保持；文件改动立即使旧索引不可当current；离线OCR取消/恢复、模型缺失、空文本与超大输入给稳定状态。
+
+#### 16. 导入冻结、工作区激活与备份恢复
+
+- 源码定位：[FileGateway.freeze](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/file_gateway.dart#L10)；[ImportCoordinator.commit / recover](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/workspace/import_coordinator.dart#L8)；[BackupService](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/backup_service.dart)；[_restore / checkpoint lifecycle](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/app_shell.dart#L137)
+- 当前职责：文件选择后冻结快照，拒绝symlink、限制512MiB/10000文件；导入intent与业务receipt分离，recover按已提交事实激活工作区；恢复前checkpoint、退出旧页面/引用lease、close host、restore、reopen。
+- Flutter/运行时耦合：FileGateway把file_picker和文件冻结揉在一起；app_shell用Navigator/WidgetsBinding/mounted保证旧树先退出后关数据库。端侧生命周期细节不能搬成通用Rust函数。
+- 建议目标边界：平台PickerPort返回短寿命FileGrant；Rust snapshot/verify/import/backup协调；UI负责unsaved input提示、视图detach与rebind，但核心restore barrier和导入幂等统一。
+- 现有测试：[restore_flow_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/restore_flow_test.dart)（已核文件存在，未逐项读取/执行）；[workspace_binding_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/workspace_binding_test.dart)（已核文件存在，未逐项读取/执行）；[research_runtime_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/research_runtime_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：Android内容URI不等于路径；Electron renderer传路径不能自动获访问权。恢复期间旧snapshot/subscription不可继续写新库；备份必须保留来源版本和可回退的旧目录。
+- 迁移交付判据：旧库到新库迁移与备份restore分开验收；中断导入只恢复已提交结果；权限失效/源变化/超限/目录逃逸/引用lease未释放均有反例。
+
+#### 17. LAN传输、任务信封、聊天与文件夹同步
+
+- 源码定位：[TransferService / send / receive](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/transfer/transfer_service.dart#L65)；[TaskCoordinator](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/transfer/task_coordinator.dart#L8)；[LanNode / transport](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/lan.dart)；[syncWithFolder](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/folder_sync.dart#L44)
+- 当前职责：paired peer、待核验收件、包/消息去重、用户接纳、task offer/accept/start/complete/applyResult、聊天已读/重试；supplier_core还提供folder exchange/sync。收到加密且配对的task信封不等于获准执行。
+- Flutter/运行时耦合：host TransferService直接用flutter_secure_storage；LAN/同步核心是dart:io网络、文件与加密；任务队列和UI接收通知相互回调。
+- 建议目标边界：Rust transport/sync/runtime + PlatformSecretPort、NetworkAvailabilityPort；端侧权限提示和前后台联网政策由平台adapter处理。Envelope schema、device identity、replay protection与acceptance state统一。本条是终局能力盘点，不等于本期全量恢复；W5仅分阶段迁移已批准的文件/服务传输，文件夹数据同步、跨设备执行与审批同步另立方案，未实现不显示可用。
+- 现有测试：[task_coordinator_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/task_coordinator_test.dart)（已读取源码，未执行）；[transfer_states_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/transfer_states_test.dart)（已读取源码，未执行）；[folder_sync_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/test/folder_sync_test.dart)（已读取源码，未执行）；[lan_security_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/test/lan_security_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：不能把文件夹同步等同实时多设备一致性协议，也不能承诺Android后台常驻与桌面相同。pending收到与业务import完成必须分别显示。
+- 迁移交付判据：paired TLS到达仍等待本人accept；restart running不重复execute；重复包/消息不重复导入；设备撤销、网络切换、进程重启和幂等恢复逐平台测。
+
+#### 18. 凭据与平台安全存储
+
+- 源码定位：[MethodChannelSecretStore](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/secret_store.dart#L9)；[Folio secret adapter](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/app/secret_store.dart)；[FlutterLanSecretStore](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/transfer/transfer_service.dart#L22)
+- 当前职责：模型secret store在Windows用flutter_secure_storage，其它平台调用com.mightyoung.muyon/secrets MethodChannel；LAN另有muyon-lan- key namespace；model profile保存引用而非把key当普通配置。
+- Flutter/运行时耦合：存在不止一个secret adapter与命名空间。不能只移模型页输入框就认为所有凭据已迁移；各平台native实现本次未逐行审计。
+- 建议目标边界：Rust只持有SecretRef并在受控IO发送阶段调用SecretPort；Electron主进程/受信helper与Android Keystore adapter完成安全存储；renderer与Compose screen state不接收读回的明文key。
+- 现有测试：[secret_store_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/secret_store_test.dart)（已读取源码，未执行）；[model_stream_ledger_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/model_stream_ledger_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：旧Flutter存储项不会自动出现在新adapter里；需设计用户介入的重新认证或明确迁移路径，不能把密钥导入SQLite/JSON备份。MethodChannel mock测试不能证明OS keychain行为。
+- 迁移交付判据：验证三类namespace、升级/重装/锁屏/权限拒绝/secret不存在/撤销；错误、日志、crash附件与导出均不含secret。
+
+#### 19. 本机导出：冻结准备、分阶段授权、账本与保存适配
+
+- 源码定位：[LocalExportPreparation / stages](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/local_export.dart)；[ResearchExchange.prepareReport](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/exchange.dart#L1132)；[ResearchClaimDraftPreparer](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/claim_draft_preparation.dart#L71)；[LocalExportLedger.execute / check](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/local_export_ledger.dart#L235)；[LocalExportTargetIssuer](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/local_export_target.dart#L52)
+- 当前职责：已有冻结bytes/manifest/source refs、generate与save两阶段、一次性目标capability、pending先持久化再callback、终态未知不自动重试和只读check。当前完整lib检索未找到LocalExportLedger生产import/构造调用；research模块工具未接prepareReport/prepareClaimDrafts，coverage仍标导出deferred。
+- Flutter/运行时耦合：账本为纯Dart/SQLite逻辑，可移核心；最终安全保存需要本机文件grant/handle、原子写/rename及cleanup adapter，不能把displayName当真实目标身份。E01的stager文件不在当前develop。
+- 建议目标边界：Rust ExportCoordinator拥有frozen preparation、identity、审批revision、ledger；DesktopFilePort/AndroidDocumentPort持有系统授予handle；生成成功、保存成功、用户取消、cleanup residue与unknown分别投影。
+- 现有测试：[local_export_contract_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/test/local_export_contract_test.dart)（已读取源码，未执行）；[local_export_ledger_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/local_export_ledger_test.dart)（已读取源码，未执行）；[le05_local_export_intent_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/le05_local_export_intent_test.dart)（已读取源码，未执行）；[report_preparation_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/report_preparation_test.dart)（已读取源码，未执行）
+- 风险与先后依赖：不得把“LE06文件已合”写成端到端导出已上线。E02 preparation/presentation digest与A/B identity尚在分支且CI失败，需单独验证后决定沿用；锁冲突与数据损坏错误不能合并为一类。
+- 迁移交付判据：先持久pending后产生外部文件；completion记录失败不再次执行；save取消不抹掉已生成事实；恢复不重建目标权；两个进程竞争最多一个callback。
+
+#### 20. 持久通知、任务事件与后台作业
+
+- 源码定位：[FoundationRepository.notify / updateTask](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/foundation_repository.dart#L997)；[TaskEvent / task records](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/task_records.dart)；[AiJobStore / AiJobSession](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/ai_jobs.dart#L32)；[Store.inBackground](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/background.dart#L13)
+- 当前职责：FoundationRepository将站内通知写入notifications表、维护read状态并ChangeNotifier刷新；任务和事件持久化。AiJobStore保存步骤、请求摘要与checkpoint；supplier background通过isolate或host executor执行。不能从notify方法推断已实现OS推送。
+- Flutter/运行时耦合：持久状态与Flutter通知绑在一个repository；Dart isolate/finally与Android process death、Electron helper退出不是等价语义。
+- 建议目标边界：Rust JobScheduler/EventLog/NotificationInbox统一持久化；OSNotificationPort是可选adapter，只接收已脱敏通知摘要；React/Compose订阅序号化delta并支持snapshot重同步。
+- 现有测试：[ai_jobs_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/test/ai_jobs_test.dart)（已读取源码，未执行）；[task_coordinator_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/task_coordinator_test.dart)（已读取源码，未执行）；[task_events_test.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/task_events_test.dart)（已核文件存在，未逐项读取/执行）
+- 风险与先后依赖：移动系统可随时停进程，不能承诺Dart式常驻后台；恢复必须区分安全纯计算retry与不可知外部效果。通知投递失败不得把已成功任务改为失败。
+- 迁移交付判据：保留SIGKILL后的已完成WAL步骤、变更请求使旧suffix失效、重复事件去重、同设备多视图read状态同步；OS通知点击只导航，不自动执行旧确认。
+
+### 六条已核实的真实调用链，以及迁移时不能切断的位置
+
+这里写的是当前代码中的调用段，不是假设的新架构。调用间的箭头用于解释现有控制流；新Rust/IPC API名称不能倒灌成现有符号。
+
+#### C1. 模型流是先受控收集，再决定执行
+
+[AgentModelTurn._collect](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_model_turn.dart#L549) → 同文件drain（586行） → [OpenAiModelGateway.chatStream](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/model_gateway.dart#L377) → gateway channel受控打开/记账/发送 → TextDelta/ToolCallDelta/ToolCallComplete/Done归集 → 后续native或compat判定路径。
+
+- drain里的ToolCallDelta只触发“准备工具调用”的展示，不能开始执行；TextDelta进入内存draft，任务事件只记长度/digest而非草稿全文
+- gateway在每次尝试里执行beforeSend与policy/grant checks，订阅消失、取消、HTTP错误和timeout都有明确ledger outcome
+- 迁移时将网络事件放到IPC后，必须把“已显示一段参数”与“完整、已校验、获授权的调用”继续区分。客户端不得从partial JSON直接dispatch
+- 证据：[先写账本/不可写则零网络/取消及超时用例](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/model_stream_ledger_test.dart#L133)；[agent流测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/personal_agent_streaming_test.dart)
+
+#### C2. 已确认工具卡片仍会在真正invoke前重新验证
+
+[AgentDispatch.executeCard](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_dispatch.dart#L645) → ctx.tools.prepare → prepared.identityDigest与卡片绑定digest比较 → authorization.review/sign或confirm（或显式tools.approve） → [_invokeOne](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_dispatch.dart#L497) → [ToolRegistry.invoke / _dispatch](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/tool_registry.dart#L858) → 真实registered handler。
+
+- 每个调用有独立invocation；scope可能被本卡片前一个写操作改变，因此确认后不能跳过reprepare
+- _invokeOne在外部来源调用前先标taint，返回objectRefs后继续锁存来源；取消/closing/当前task state在多处复核
+- 迁移时approve ID必须绑定core里准备好的调用身份、scope revision与effect，UI不能传一个boolean绕过这些检查
+- 证据：[registry测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/tool_registry_test.dart); [研究写操作集成测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/test/reg3d_research_writes_test.dart)
+
+#### C3. 动态界面的原子发布不全在纯合同包里
+
+[UiSurfaceController.recompute](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/lib/src/dynamic/surface.dart#L164) → UiRecomputePort → _publishPrepared → validateUiPlan → UiSessionState.prepareRebase → UiPublicationCoordinator.completeRecompute（final token probe + fence） → commitPreparedRebase → notifyListeners。
+
+另一条接线：[HostDynamicWorkspace.load](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/dynamic_workspace.dart#L171) → [UiWorkspaceController](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/lib/src/dynamic/workspace.dart#L12) → 内含UiSurfaceController；持久化checkpoint先完成，host event回调再检查task/presentation/pending identity/taint，最后router.dispatch。
+
+- 当前不可只把validateUiPlan搬Rust，留两端各自acceptPlan/session/publication；那会把本来同线程无await的原子状态切分成多个IPC往返
+- 建议把核心session/publication/dispatch owner一起下沉，UI仅持render revision与编辑缓冲；一个publish命令返回整个已接受bundle。UI中焦点/布局状态留本地
+- 证据：[final probe / stale token / reentrant dispose测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/test/ui_publication_coordinator_test.dart#L178)；[旧结果标签及semantics测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_ui/test/cf_fix_t5_stale_result_test.dart#L142)
+
+#### C4. 引用定位的“core”仍依赖PDF/Flutter几何
+
+[ReaderPage locator.locate调用](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/reader_page.dart#L100) → QuoteLocator（可由[ResearchServices.quoteLocator](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/research_services.dart#L43)提供） → [CitationQuoteLocator](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/citation_resolver.dart#L265) → CitationResolver.resolve → CitationPageProvider.loadPage → PdfrxCitationPageProvider。
+
+- 当前Rect已经明确为页面0..1比例、左上原点；页跳转、精确高亮、歧义、来源不可用有不同类型
+- 迁移应在PageText/NormalizedRect DTO处切开，保留判定在Rust，渲染及PDF引擎在明确adapter；不能让Electron和Compose各自猜同一quote的位置
+- 证据：[四类定位状态与坐标注释](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/source_locator.dart#L3)；[引用定位测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/citation_resolution_test.dart)
+
+#### C5. 导入业务提交与工作区激活是两段可恢复动作
+
+[FileGateway.freeze](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/file_gateway.dart#L29)冻结选择输入 → 模块prepare → [ImportCoordinator.record](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/workspace/import_coordinator.dart#L22)记录intent → [ImportCoordinator.commit](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/workspace/import_coordinator.dart#L174)核对prepared.matches、markSourceExternal → runtime.commitImport → activate(receipt)。中断后的recover读取模块receipt决定后续激活，不重新猜有没有写入。
+
+- 核心知道prepared identity，平台只负责取得可读句柄；Android URI必须先按授权冻结，不能假设它是普通磁盘路径
+- 不可将这一整链简化成前端上传后切换页面；import成功与workspace activated需要分别可审计
+- 证据：[ResearchRuntime.commitImport](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/research_module.dart#L342)；[runtime导入/对象寿命测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/test/research_runtime_test.dart)
+
+#### C6. 比价、预算和UI试算必须共享同一价格语义
+
+[compareQuotes](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/compare.dart#L75) → priceInTaxMode/priceInUnit；[预算选价及阶梯价格链](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/budget.dart#L202) → atQuantity → priceInUnit → _convertedPrice → roundedDivide/micros。[UiFormulaRegistry商业公式](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/ui_formula_registry.dart)的tax计算调用supplier pricing，而不是让UI自行使用浮点运算。
+
+- 当前价格是十进制文本+BigInt百万分；中间状态中的unknown税基/单位/币种不能被新UI默认成0
+- Rust迁移应一份domain价格实现供预算、比价和“试算”使用；JS number与Kotlin Double不能作为金额真值
+- 证据：[税转换/单位归一/历史及阶梯价测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/test/pricing_test.dart#L37)；[合计/合同阈值/不同币种拒绝测试](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/test/store_test.dart#L174)
+
+### 已存在的边界断裂与改造位置
+
+1. module API有Widget builder。[ModuleSection.builder](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/module_v2.dart#L91)把业务可用页面与Flutter构造函数绑住。新合同应声明route/section ID和数据能力，再由两端映射页面；不能在Rust反射一个BuildContext
+2. 存储合同公开Database raw。[ManagedDatabase.raw](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/storage.dart#L7)使调用者能绕过事务/actor边界。新API是typed command/query；旧库迁移工具单独受控访问SQL
+3. host计算依赖UI catalog。[UI catalog import](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/ui_recompute_adapter.dart#L1)直接import muyon_ui/dynamic_ui。抽catalog contract/schema与纯语义，不把整个renderer当core dependency
+4. core引用返回Flutter Rect。[Flutter/pdfrx imports](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/citation_resolver.dart#L1)与source_locator需要归一化几何DTO和DocumentTextPort，不能仅删import
+5. 安全事实通知使用ChangeNotifier。[_HostFactNotifications](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/host_authorization_facts.dart#L10)不仅为了刷新UI，还参与及时撤销；替换为Rust广播时必须保留锁存/内存拒绝优先于可能失败的持久化
+6. 导出存在构件但生产链未闭合。对当前完整apps/muyon/lib及packages/*/lib做“local_export_ledger / LocalExportLedger(”检索，仅见定义本身，无生产import或实例化；research module_tools不含prepareReport/prepareClaimDrafts接线。[researchCoverage](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/module_declarations.dart)仍将report/claim_drafts导出标deferred。故迁移清单不能从账本单测推断已有完整导出UI流程
+7. 凭据有三类入口。model MethodChannel/Windows adapter、Folio adapter与LAN secure storage均要做namespace和平台恢复清单；迁移不会自动合并OS已存密钥
+8. 通知名称容易误导。[notify](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/foundation_repository.dart#L997)写站内表并notifyListeners，不能据此说已实现Android系统通知或跨设备通知同步
+
+### 当前开发状态只保留对迁移有影响的差异
+
+#### 当前固定HEAD与旧9836基线
+
+17:04 UTC再次读取develop，仍为`01e56cc2d729dab70e1b1def05c3aa93b28f421a`。该SHA的develop push [CI 38279219941](https://github.com/mightyoung/Muyon/actions/runs/38279219941) 在17:01:19 UTC completed/success；同SHA组合分支的[CI 38265618988](https://github.com/mightyoung/Muyon/actions/runs/38265618988) 在15:11:51 UTC success。本次只读取workflow元数据，未重新跑或逐job审计该次CI，因此它不能扩展为本次测试/真机/系统打包通过声明。
+
+[9836bb87...01e56cc2对比](https://github.com/mightyoung/Muyon/compare/9836bb87e9f86a866ad05e83cee8beb9fe1eec8e...01e56cc2d729dab70e1b1def05c3aa93b28f421a)新增19提交，生产代码差异主要是：
+- CF-FIX-T5：publication计算freshness与renderer旧结果标签；已有值在重算pending/失败时不能假装current
+- CF-FIX-B：空end-only stream归model_no_card、用户切textOnly归user_text_only、撤销不把完整流伪装未完成；涉及personal_agent/ui_planning/stream_ui_planning/reason及ui_stream_task_view
+- LE06-NARROW实现135074064cb9c2625292cfba06bba5eb85bc2ce8已在当前祖先链；仅SQLite busy/locked结果码映射ledger_pending_failed，损坏或其他read失败保留ledger_read_failed
+- B17脱敏盘点、C6评审、export-N2设计/ADR等文档变化不等于对应功能已经上线
+
+若主册其他章节引用9836作为旧研究时间切片，必须明确它是旧证据。涉及上述行为的新设计基线应使用本清单01e56cc2，不能把新功能的测试结论倒写到9836。
+
+#### 仍在途的精确tip及处理建议
+
+分支列表与open PR为2026年10月12日16:48–16:49 UTC快照；下列CI查询为当日16:53–16:54 UTC快照（该HEAD的CI另于当日17:04复核）。compare数字是“task-tip...固定develop”，ahead为develop独有，behind为task独有。它证明提交祖先关系，不自动证明代码从未cherry-pick；已逐项说明已合核心实现与未合尾部区别。
+
+|对象|固定tip / ancestry|最近读取CI|对迁移的实际影响|
+|---|---|---|---|
+|组合batch-20261012c|01e56cc2d729dab70e1b1def05c3aa93b28f421a，与develop相同|develop<br>38279219941<br>success|当前源码基线，不能继续列为在途组合|
+|LE06-NARROW|3a8df824eeb2c722a66d9c5e4119b8a3cfb31285，diverged 25/2，merge-base是已合实现13507406|[38264347152 success](https://github.com/mightyoung/Muyon/actions/runs/38264347152)|只剩task文档与child Flutter build-dir隔离测试修补未在develop；不能称锁分类实现未合，也不能称整个tip全合|
+|C6 fix1 / fix2|43632fe02834dc1e6711a60e1657a4f134b23d74 diverged 51/14；另一后续分支fix2=5aae763e98a215b1cfc79d41d478cdeb5f94c3c5 diverged 51/11|fix2 [38260024613 cancelled](https://github.com/mightyoung/Muyon/actions/runs/38260024613)|opaque-reference与model disclosure改造仍需独立评审，不能当当前统一披露合同完成；本次未穷尽所有C6相关分支的内容关系|
+|E01 bounded staging|923e556d78a98dfe8ce696a9c1244cbb3011e6df diverged27/2|[38264730838 success](https://github.com/mightyoung/Muyon/actions/runs/38264730838)|新增export_file_system/local_export_staging和测试不在当前HEAD；Rust保存port可参考候选，先评审边界和平台适配，不标已集成|
+|E02 frozen facts|285c107e3973e84d911719e6de1356fcdd9e09b4 diverged27/2|[38264782856 failure](https://github.com/mightyoung/Muyon/actions/runs/38264782856)|preparationDigest/presentationDigest与A/B call identity是候选变化；定义wire合同前消除旧新身份规则分叉，本次没有诊断其失败原因|
+|OC21 redaction去重|ab9e9faa2a163ab5a469dbe0fec78195f7b0afb4 diverged19/2|[38270487843 failure](https://github.com/mightyoung/Muyon/actions/runs/38270487843)|只是部分credential masking helper去重候选，不替代模型披露系统；不能把失败原因猜成安全回归|
+
+GitHub当时有15个open PR，其中包括旧/独立证据PR。示例：[PR59](https://github.com/mightyoung/Muyon/pull/59)仍open，不代表LocalExportLedger不在develop；[PR30](https://github.com/mightyoung/Muyon/pull/30)仍open，也不能据此否认当前publication代码。导出恢复测试[PR63](https://github.com/mightyoung/Muyon/pull/63)、模型披露canary[PR65](https://github.com/mightyoung/Muyon/pull/65)和打包[PR67](https://github.com/mightyoung/Muyon/pull/67)为各自证据/范围，不能一键算成当前端到端发布验收。迁移应冻结选定代码/合同，依据当前行为与用例迁移，避免把旧PR进度表直接抄成模块完成率。
+
+### 本次明确未证明的事项
+
+- 未运行当前Flutter app、Rust内核原型、Electron或Compose，也未执行选定29测试
+- 未逐行审计所有库代码；全量lib读取/grep及hash证明只用于覆盖文件与可复核定位，不能替代代码审查或安全审计
+- 未验证C6/E01/E02/OC21候选相互组合后的行为；未将它们混入当前develop源码事实
+- 未验证OS keychain、Android文件授权、OCR真模型、PDF后端性能、通知/后台策略、Windows/macOS/Linux安装与签名
+- 未选择并实现Rust/Android/Electron具体FFI、进程协议与PDF/OCR发行依赖；这需要独立spike与许可/分发验证
+- 未承诺旧数据库物理结构永久不变，未迁移生产数据；旧库转换、备份/回滚与历史收据兼容须过P3门禁
+- 未执行merge、push、删除分支或任何源仓库写操作
+
+## 4 分层架构与双端职责
+
+```diagram architecture
+桌面 React TypeScript → preload → Electron main → stdio → 桌面 Rust CoreHost
+Android Compose → ViewModel Repository → UniFFI → Android Rust CoreHost
+共享 Rust 代码：application / domain / policy / agent / contract / store
+每台设备：SQLite / 附件 / 任务检查点 / 执行账本
+平台端口：密钥 / 文件 / PDF OCR / 通知 / 网络
+两台设备独立存储；本期不新增任务与权限同步；既有业务交换按W5迁移
+```
+
+架构图表达同一代码在两台设备的独立实例。桌面运行受控侧进程，Android 将库嵌入应用；无需常驻HTTP后台。联网模型或外部工具失败时，只让依赖它们的步骤等待，不影响已支持的本地浏览、编辑与恢复。
+
+### Rust 内核的分层
+
+Rust workspace 建议分为以下 crates，依赖方向始终指向领域层：
+
+- `muyon-domain`：对象标识、供应商等业务实体、规则与领域错误，不依赖 UI、数据库或平台 SDK
+- `muyon-contract`：命令、查询、事件、投影、版本协商及校验；作为 TypeScript、Kotlin 契约生成与一致性测试的依据
+- `muyon-application`：用例、任务状态机、取消、重试分类、权限检查与事务边界
+- `muyon-store`：SQLite 仓储、事件日志、执行账本、任务检查点、附件索引及 schema 升级
+- `muyon-policy`：能力授权、外发数据选择、操作计划绑定与脱敏投影
+- `muyon-agent`：模型适配、工具调度和结果归一化；模型输出只能提出操作，不能赋予执行权限
+- `muyon-platform`：密钥、文件句柄、网络凭据、时钟、通知、PDF/OCR 等端口；平台实现不能反向改变领域规则
+- `muyon-desktop-host` 与 `muyon-android-ffi`：分别承载进程协议与 UniFFI 导出，保持薄层
+
+界面端负责导航、交互、布局和本地展示状态。业务事实、权限结论、实际执行结果必须来自内核，禁止两端各写一套规则。当前设计对齐基线为 `01e56cc2d729dab70e1b1def05c3aa93b28f421a`。历史 `9836bb87` 的盘点曾发现 `module_api` 混有 Widget／BuildContext，并把 `supplier_core` 等纯 Dart 逻辑列为规则提取候选；这部分是历史证据，须以新基线盘点逐项确认，不冒充已核验的新代码结论。移植时复用测试用例、数据语义和算法规范，再逐项转写并做差异测试；不以把全部 Dart 嵌进 Kotlin 作为默认路线。
+
+移植时先把模块 API 拆为纯数据的模块清单、能力声明及业务用例，与两端各自的展示注册表。Widget 构建器、BuildContext、主题和导航全部留在界面层。每个领域先冻结当前有效样例与安全不变量，再移植 Rust，最后以正常、边界、拒绝和损坏数据样例对照结果；发现旧行为缺陷应单独记录，不能将“结果一致”当作安全保证。UIPlan 只使用版本化组件词汇和数据引用，不成为任意 JavaScript、HTML 或 Kotlin 的执行入口。schema限定可表达结构，沙箱限定运行边界；最终业务授权仍由Rust决定。
+
+### 桌面进程与可信桥
+
+调用链为 React renderer → 受限 preload → Electron main → Rust 侧进程。main 从安装包固定位置启动签名配套的可执行文件，不执行用户提供路径、不拼接 shell 命令。第一版采用专用 stdin／stdout 管道，无本机监听端口；stdout 仅传协议帧，stderr 仅输出脱敏诊断。帧建议采用四字节大端长度加 UTF-8 JSON，初始上限 1 MiB，附件走受控 blob 句柄。分片读取、粘包、超长帧、非法编码均须测试。
+
+管道仅由 main 创建并交给指定子进程，不把控制凭据放入命令行、可读文件或 renderer；子进程不请求提升权限。协议解码拒绝重复 JSON 键、过深嵌套、未知方法和越界字段，对在途请求数与总缓冲量另设预算。一次请求超时只表示等待结束，不证明底层已取消，必须继续查任务终态。
+
+renderer 显式启用 sandbox、contextIsolation，关闭 nodeIntegration；使用严格 CSP，禁止任意导航、新窗口和远程脚本。preload 只暴露具名业务方法，不暴露原始 ipcRenderer、任意频道、文件系统或命令执行接口；main 校验 senderFrame、来源、参数和窗口会话。以上对应 [Electron 安全建议](https://www.electronjs.org/docs/latest/tutorial/security/) 与 [contextBridge 使用边界](https://www.electronjs.org/docs/latest/tutorial/context-isolation)。Rust 侧进程的崩溃隔离不等同于操作系统权限沙箱，main 或同一用户账户被攻陷仍是剩余风险。
+
+### Android 原生生命周期
+
+Kotlin/Compose 经 Repository 进入生成的 UniFFI Kotlin 接口，Rust 编译为随应用分发的原生库。官方当前 Kotlin 路径通过 JNA 调用原生代码，不能笼统描述为“UniFFI 自动生成 JNI”；若包体、启动或回调性能无法达标，再以实机证据决定是否采用窄 JNI 桥，并单独承担绑定维护成本。参见 [UniFFI Gradle 与 JNA 集成](https://mozilla.github.io/uniffi-rs/latest/kotlin/gradle.html)。
+
+FFI 明确定义对象、缓冲区和回调的所有权，不跨边界传原始指针或界面对象。Rust panic 不允许跨 FFI 展开，可恢复失败转为类型化错误；同进程原生崩溃仍可能终止 Android 应用，不能照搬桌面侧进程的故障隔离承诺。
+
+每个进程只创建一个受控 CoreHost，由应用级组件管理；ViewModel 持有订阅与 UI 状态，不随 Compose 重组反复创建内核。数据库和阻塞 FFI 不运行在主线程，事件以有界批次转为 Flow。句柄明确关闭，订阅解绑后禁止继续回调；关闭应等待在途调用安全收束。不能依赖 onDestroy 或析构落盘，因为 Android 杀进程时它们可能不执行，见 [UniFFI 对象生命周期](https://mozilla.github.io/application-services/book/howtos/uniffi-object-destruction-on-kotlin.html)。需要持久后台执行的步骤经 [WorkManager](https://developer.android.com/develop/background-work/background-tasks/persistent) 调度，但任务状态归内核，调度器不构成无限后台常驻保证。Worker 与前台共享同一宿主入口；若以后引入独立进程，必须额外解决唯一写者和 IPC，不能各开内核抢写。
+
+### 平台适配与能力声明
+
+Android屏幕读取尚未确认，不纳入默认平台能力。不以文件读取、分享或普通应用权限推导屏幕捕获、无障碍服务或持续后台读取许可；若以后决定支持，需单列系统机制、可见提示、敏感窗口、会话寿命和撤销验收。
+
+文件 picker、分享、通知和权限提示留在宿主；Android 使用 [Storage Access Framework](https://developer.android.com/guide/topics/providers/document-provider) 授予的 URI，经平台适配读流或复制到应用受控目录，不伪造普通文件路径。PDF/OCR 由平台能力适配器承接，返回带页码、坐标、置信度及来源摘要的结果；大型或不可信解析应考虑独立工作进程，不能默认在 Electron main 解析。内核负责流程和结果校验，具体引擎、许可证、离线模型体积另行验证。
+
+统一错误包含 code、脱敏 message、request_id／task_id、可选 field_path 与明确 recovery_action。至少区分 INVALID_ARGUMENT、SCOPE_DENIED、REVISION_CONFLICT、CAPABILITY_REQUIRED、CAPABILITY_STALE、PROTOCOL_UNSUPPORTED、CURSOR_EXPIRED、STORE_BUSY、STORE_FULL、CORE_UNAVAILABLE、EXTERNAL_OUTCOME_UNKNOWN。不要只返回可重试布尔值；恢复动作应区分稍后查询、刷新计划、重新授权、用户核实及禁止重试。
+
+## 5 统一合同与可恢复执行
+
+### 一份语义合同
+
+stdio 用 JSON，UniFFI 用类型化记录；二者必须通过相同契约样例，不能各自定义成功、取消和授权语义。启动握手返回协议主次版本、内核构建号、支持能力、数据库版本和随机进程 epoch。主版本不兼容拒绝工作；次版本按能力协商，未知安全字段不能忽略后继续执行。协议版本、业务 schema、数据库 schema、界面投影版本独立演进。
+
+下面仅示意可信宿主内部的执行契约形态，不是已经实现的 API，也不授予模型或 renderer 直接写入的权限。模型和普通界面先提交类型化意图，内核确定计划并按当前模式判定是否需要确认，再由可信宿主附加能力引用；已有完整动作参数可以直接进入此路径，不要求先开模型新一轮。执行入口仍须校验计划、能力、scope 和 revision。示例中的能力引用是占位值，不能由普通界面自行填入来取得执行权：
+
+```json
+{
+  "protocol": {"major": 1, "minor": 0},
+  "request_id": "req-01",
+  "scope_id": "workspace-01",
+  "method": "supplier.update",
+  "idempotency_key": "op-01",
+  "expected_revision": "7",
+  "plan_ref": {"id": "plan-01", "revision": "3"},
+  "capability_ref": "cap-opaque-placeholder",
+  "params": {"supplier_id": "sup-01", "name": "示例供应商"}
+}
+```
+
+`request_id` 只关联一次传输；`task_id` 标识持久任务；`scope_id` 限定工作区与授权边界，不能代替权限检查；`idempotency_key` 标识一次业务意图。相同 scope／操作／幂等键只能对应同一规范化参数摘要，不同摘要返回冲突；返回 accepted 前必须持久化任务。重连先按任务或幂等键查询，再决定后续动作。金额采用币种加十进制定点值，跨 JSON 的 64 位计数用十进制字符串；时间同时保留 UTC 时刻和必要的业务时区，空值与字段缺省分别定义。
+
+查询返回 `result＋revision`；异步命令返回 `accepted＋task_id`，终态由 `task.get` 或事件取得。业务修改采用 expected_revision 比较交换，过期页面不能覆盖新状态；批量操作明确全成全败或逐项回执。公共接口只接收数据，可信宿主另附会话身份与能力引用，不能从模型或普通页面参数中读取身份。规范化摘要算法、字段顺序、缺省值和 schema 版本要纳入共享契约样例。
+
+任务运行状态、等待原因、取消请求与外部效果分开建模。建议运行状态为 queued／running／waiting／succeeded／failed／cancelled，waiting_reason 区分补充信息、模式要求的确认、离线、执行器不可用、外部依赖、结果核实、user_paused和security_review；取消请求另记时间与阶段。仅执行器支持安全检查点暂停时才显示暂停入口，暂停不撤回已发出的外部动作。界面的“暂停”“取消中”“结果待核对”是这些字段的投影，不另造相互矛盾的事实。生成内容完成不代表外部操作成功，任务完成必须满足其承诺的回执条件。
+
+### 事件 流控与重连
+
+生成卡的纯本地状态可以独立更新，例如折叠、排序、筛选、分页、输入草稿和图表视角；这类事件不必成为模型轮次或持久业务任务。真正改变业务对象、外发或读取新受限数据的事件，走具名命令或查询并返回可信结果；本地显示不能预先制造成功回执。
+
+持久事件至少包含 `scope_id、task_id、seq、kind、payload_version、payload`，seq 在 scope 内单调递增且以字符串传输。响应不保证先于事件，客户端按任务归并。订阅携带 last_seen_seq，事件采用至少一次投递，客户端去重；ACK 仅代表已处理游标，不代表业务执行成功。游标已被清理时返回 CURSOR_EXPIRED，由内核原子提供“状态快照＋其游标”后续接流，避免快照与事件间丢更新。
+
+建议初始窗口为 128 条或 1 MiB 未确认事件，最终参数由压力测试确定。任务终态、授权结果、外发回执必须先落盘，不能被背压丢弃；瞬时进度可以合并，并明确它不属于可重放事实。满窗口暂停发送或断开慢订阅，保留可重放游标，不能无限缓存拖垮内核。模型文本按批次／字节限流，完整结果另存对象；敏感全文不默认进入日志。
+
+main 发现 EOF、超时或进程退出后，冻结写入口并显示恢复状态；确认旧写者退出并重新取得数据目录锁后，有界退避重启侧进程，重新握手、核对版本并恢复订阅，不重放所有未返回请求。进程 epoch 防止旧回调覆盖新会话。连续崩溃进入只读诊断，保留数据库与账本。取消是持久请求：尚未外发可取消；已完成返回原结果；外部效果不明返回待核实；不能用一个 cancelled 标签掩盖已经发生的副作用。
+
+### 本地事务与文件一致性
+
+每台设备各自持有 SQLite 与附件库，同一数据目录只有一个 CoreHost 写入口；多窗口共享它。应用用有界单写者队列串行修改，短读事务使用快照。WAL 支持读写并行，但每个数据库仍只有一个写者，参见 [SQLite WAL](https://www.sqlite.org/wal.html)。写事务内同时提交对象变更、revision、幂等记录、任务检查点和领域事件；不跨网络调用持有事务。存储繁忙可有限退避，磁盘满、损坏和校验失败必须显式阻断，不能回退为空库。
+
+文件与数据库不是同一事务：导入先写临时文件、校验摘要，再登记附件与提交状态，通过恢复日志完成重命名和孤立文件回收。禁止把外部任意路径直接授予内核；附件返回带 scope、用途和有效期的受控引用。
+
+外发采用执行账本：prepared → authorized → dispatching → succeeded／failed／outcome_unknown。发送前先持久化目标、规范化负载摘要、能力引用和外部幂等键，再执行调用，再保存回执。数据库事务无法使第三方请求获得 exactly-once。崩溃发生在“已发送、未记回执”窗口时，先查询提供方回执；仅在提供方明确支持幂等且契约允许时使用原键恢复。没有可靠核实路径就保留 outcome_unknown并展示核实入口；仅在确需补充事实或新的执行意图时请用户处理，不把它变成全部允许档的常规确认弹窗，也绝不把超时当失败自动重发。纯计算、只读请求和外发任务采用不同恢复策略。
+
+### 原子组与独立操作集的提交边界
+
+内核返回并锁定batchMode及原子组成员，UI不得用逐行呈现改变原子性。atomic组整组提交或回滚，使用组级回执、原operationId与幂等键核对，不能报告组内部分成功或提供单行续办。independent操作集才可逐项结算和汇总；仅续办确定未执行且允许重试的项，未知项先核对回执。计划摘要与revision绑定模式、成员、目标和数据范围，预览后任何变化都使旧计划及其授权绑定失效；刷新后是否需要确认仍按当前模式决定。
+
+此约束继承当前[AtomicBatchForm合同](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/muyon_module_api/lib/src/atomic_batch_write.dart)，适用于科研R07、询价批量写入与导入。验收必须同时覆盖“第N项失败导致atomic全组无写入”和“independent部分成功后按真实回执续办”，不能以同一套逐行重试逻辑替代两者。
+
+### 任务状态的产品含义
+
+| 状态 | 确定含义 | 用户可做什么 |
+| --- | --- | --- |
+| queued／running | 任务已落盘，等待或正在执行 | 查看步骤、补充指定任务、请求取消 |
+| waiting + 确认原因 | 当前模式要求对具体计划作出决定 | 查看目标和差异，确认或拒绝 |
+| waiting + 离线原因 | 某一步确实依赖网络 | 稍后恢复，仍可阅读本地结果 |
+| 取消请求字段 | 已接收取消，尚未收束 | 显示取消中，不显示假终态 |
+| succeeded／failed／cancelled | 内核确认的终态 | 查看结果、原因或已发生的副作用 |
+| 账本 outcome_unknown | 外部效果尚无法确认，任务等待核实 | 先核实回执，不能无条件重试写入 |
+
+状态名称是建议合同，实施前须固定状态转移表。UI不能从模型文案推断成功；瞬时进度不是事实账本。退出页面、停止生成、取消任务和撤销权限是四类动作。
+
+动作卡的四个基础文案字段是“动作名、进行中、已完成、失败”，它们是呈现模板，不是完整状态机，也不是只能出现四种结果。需要确认、已阻止、结果未知、取消中、已取消及安全审查暂停各有独立状态与原因，不强塞进四个字段。尤其不能把未知结果归为失败后重试；“已完成”只能由满足合同的确定结果或回执驱动。文案来自结构化状态，不参与授权判定。
+
+建议ActionRecord至少包含action_id、task_id、object_ref、expected_revision、canonical_params_digest、mode_revision、policy_revision、grant_ref、execution_phase、waiting_reason、effect_outcome、receipt_ref及cancel_requested_at。允许转移表与不可达组合在合同测试中固定；用户关页或模型生成停止不得把派发中标成取消。全部允许影响是否等待确认，不改变派发、回执和未知结果的状态机。
+
+### 记忆的结构化真值与可读编辑接口
+
+记忆采用结构化底层作为可验证真值，可读文本是查看和编辑接口，不是无版本的唯一大字符串。建议MemoryRecord包含稳定ID、scope、主题、陈述内容、显式或推断标记、来源引用及源revision、允许用途、置信或待核实状态、创建与更新时间、有效期、记录revision和撤销标记；记录内容与索引分离，检索索引可以重建。
+
+用户可以按主题查看和修改自然语言文本。保存时先把编辑解析为新增、更新或删除的类型化补丁，附原记录ID与expected_revision；Rust校验来源、用途和CAS后提交。解析歧义或冲突时显示具体差异让用户选择，不静默覆盖别处新修改，不因某段文本未出现就删除隐藏字段、来源或整批记录。人工修改与自动归纳分别保留来源，不能把推断升级为用户确认事实。
+
+记忆写入、记忆读取和聊天历史检索是独立能力；聊天保存另属留存设置。关闭写入不隐含关闭读取，关闭读取不阻止管理页编辑，允许历史检索不隐含允许写记忆。历史检索按当前来源权限返回可定位片段，不能凭旧摘要跳过授权。设置分别说明各项影响，页面最终组合仍为设计建议。
+
+用于模型的上下文由按用途获准的MemoryProjection、历史检索结果和当前任务资料组装，记录source_set_digest及authority_revision。来源撤销后先锁存拒绝，随后使相关检索缓存、向量命中、主题摘要及未发送的已拼接上下文失效；排队中的归纳任务在开始、读取和提交前都重查权限，晚到结果不得复活已撤销来源。已发送内容无法承诺被第三方撤回；只保留必要审计元数据，不继续以旧缓存供后续模型调用。
+
+撤销来源访问、停止记忆使用和删除记忆记录是不同动作。由用户独立录入且已明确允许保留的事实，可按其自身来源继续有效；源内容的复制或推导不能靠改名为“用户记忆”规避撤销。删除或改正源内容时，关联记录标记待重建或失效，并在下一次使用前核对；审计历史的最小保留范围也不构成继续读取原文的授权。
+
+记忆容量上限、按主题配额、归档、压缩与过期清理策略尚未确定。不写入固定容量或“永久保存”承诺；先让统计、配额原因、清理预览和可恢复性进入合同。临时会话同样待决：若后续启用，必须单列是否写历史、读记忆、写记忆、任务产物保留及诊断留存，不能仅用一个隐身图标承诺零留存。
+
+### 助手身份只影响表达与偏好
+
+名称、称呼、语气与语言属于IdentityPreference，只影响表达。修改仅更新偏好版本，不含凭据、不创建grant、不切模式、不恢复已撤销来源。账号、成员与设备身份由可信宿主另管；个人账号限定仍待决定。
+
+## 6 权限 商敏与发布安全
+
+### 可信授权与目的限定投影
+
+有副作用的业务操作先在Rust形成可校验的确定性计划，列明对象、目标、参数、数据范围及影响；这不等于每次都弹窗，也不等于每次调用模型。模式、已选工作区、现有访问权限与用户配置决定授权来源和是否需要当次确认。不能接受renderer或模型传来的approved布尔值，也不能把缺失计划、未知参数或不可验证来源当作用户已经授权。
+
+全部允许档在用户选定工作区及其现有访问权限内提供免确认授权，不要求再逐对象询问。Rust由这份有效模式授权派生本次受约束能力，并在执行点检查对象、用途、参数、版本、有效期和撤销状态。若全部条件有效，即使风险规则标记为高风险也不再加Muyon确认；风险结果用于记录、展示和选择恢复策略。配置全部允许不是默认开放未知工作区、已撤销来源或系统未授予的能力。
+
+权限有效与当次确认分别记录：受信宿主产生不透明能力引用，可来自有效模式授权，也可来自模式要求的一次性确认。真正执行前核验scope、动作、目标、数据类别、计划摘要、有效期、使用次数和撤销状态；能力消费与dispatching登记按既定事务规则提交。修改对象或参数后旧计划失效，需要重新确定性校验，但是否重新询问仍由当前模式决定，不把刷新计划偷换为强制人审。
+
+内核持有完整业务对象，界面、模型、导出和日志分别取得目的限定投影。供应商底价、联系人信息、凭据等字段在查询阶段按允许列表裁剪；UIPlan只引用已授权投影，不携带完整对象再靠前端隐藏。读取本地文件、传给模型与传给第三方分别判定用途与范围，第三方文档或模型中的指令不构成授权。切换scope时撤销订阅并清理相关缓存；事件回放、搜索摘要、错误详情、埋点和崩溃报告同样重新检查权限。
+
+密钥由平台保管：Android Keystore 保存不可导出的加密密钥，用其保护凭据密文；它不是任意字符串保险箱。macOS 使用 Keychain，Windows 使用系统凭据保护或 DPAPI，内核只持引用或短时必要明文，不把密钥送入 renderer、事件或诊断。DPAPI 不保证隔离同一用户下的恶意应用；Linux 若无合格秘密存储应拒绝持久保存，不静默降级。参见 [Android Keystore](https://developer.android.com/privacy-and-security/keystore) 与 [Electron safeStorage 的平台差异](https://www.electronjs.org/docs/latest/api/safe-storage)。
+
+### 执行模式总表与确定性风险规则
+
+下表保留五个并列候选，避免改写已有每次询问、只读和低风险的产品概念。已确认的是新增独立Auto，以及全部允许免额外询问的语义；其余档位名称、最终是否同时保留和默认值均为设计建议，实施前仍需决定。模式作用于明确选择的工作区及现有能力，状态栏和动作详情可查看其范围、有效期和版本。
+
+| 模式 | 授权范围内的读取 | 确定性业务动作 | 超档或禁止动作 |
+| --- | --- | --- | --- |
+| 每次询问 建议 | 建议已选来源读取直接进行 | 每个需授权的执行意图先确认 | 禁止类拒绝；可主动改档 |
+| 只读 建议 | 直接读取获准投影 | 仅预览和试算，不提交业务变更 | 显示原因与主动切档入口 |
+| 低风险 建议 | 直接读取获准投影 | 固定白名单内低风险自动执行 | 高风险本档不执行，可主动切Auto或其他档 |
+| Auto 已确认 | 直接读取获准投影 | 确定性规则低风险自动，高风险确认 | 禁止类拒绝 |
+| 全部允许 已确认 | 直接读取获准投影 | 不追加Muyon询问，高风险亦直接执行 | 缺少现有权限或遇系统及第三方硬限制时阻断 |
+
+此处低风险档建议作为固定能力上限，Auto作为按确定性风险结果路由到自动或确认的策略，二者不靠模糊名称区分；若决定精简档位，需要明确迁移现有配置，而不是静默合并。只读或低风险遇到超档动作时，保留草稿并解释原因，用户可以主动修改档位；系统不得替用户自动转档。每次询问的读取细分仍待确认，本版不伪称已有完整设置决定。
+
+RiskDecision由Rust对版本化规则计算，建议输出risk_class、reason_codes、matched_rule_ids、policy_revision和decision_digest。输入包括动作种类、数据类别、目标、金额或影响数量、可逆性、外部接收者和来源可验证性；模型描述只作待验证输入，不能自行声明“低风险”。Auto所需风险规则缺失时不自动执行，明确显示风险规则不可用；不随机调用模型猜风险。全部允许不依赖风险分级才能执行，纯风险评分缺失不追加确认也不阻断；授权、参数、来源或账本事实缺失则按对应硬性校验失败处理，不能借风险标签掩盖真实原因。
+
+Auto在已授权对象、用途和有效期内，低风险自动执行；高风险交可信宿主确认；明确禁止类拒绝。确认绑定当时计划与revision，改目标或扩大数据后按新计划重新判定。全部允许使用同一事实和版本校验，Auto风险规则中的高风险、建议确认或仅因风险设定的禁止不另设为全允许的确认或拒绝门槛；无权访问、系统/第三方硬限制及业务合同非法动作仍阻断。全部允许不把高风险或规则中的“建议确认”再变成额外询问；只有无法满足系统、第三方或确定性执行前提时停下，并给出具体原因。系统授权提示、登录或对象冲突处理不是伪装的风险确认，必须分别标记。
+
+模式变化更新mode_revision并通知在途任务：尚未派发动作在执行点使用最新事实；已派发动作继续核对回执，不承诺撤回。撤权先锁存，再取消相关待执行项和缓存；不能从旧卡、旧配置备份或已存在回执恢复授权。切为全部允许不自动重发结果未知动作，也不自动重开安全审查暂停。
+
+### 生成卡的本地交互与确定性动作
+
+生成卡可直接处理折叠、分页、筛选、选择、输入和其他纯本地展示交互；无需为了每次点击打开新模型轮次。业务计算和写入使用登记的类型化查询或命令，经可信桥进入Rust，进行当前授权、对象存在与版本、参数约束和模式检查后执行；写入或外部副作用另须幂等与账本校验，纯只读查询不强制幂等键。完整确定性参数已存在时，从点击到结果可以完全不调用模型。
+
+已有卡片的交互只有需要理解新自然语言意图、补足语义或重新规划时才另调模型。用户要求创作新内容时仍可启动正常生成任务，这不意味着确定性按钮必须绕经模型。模型调用本身也要通过对应来源披露与网络权限检查。若简单版本冲突能由刷新对象和确定性规则解决，不以“安全”为由强迫模型重规划；若更换对象或目标确需重新理解，才进入新轮次，并保留原动作未执行或已发生效果的事实。
+
+UIPlan只描述白名单组件、授权数据引用、局部交互和已登记动作意图，不携带任意JavaScript、任意IPC频道、文件路径或凭据。保存转为类型化命令；历史卡片引用稳定对象及revision，失效卡先刷新并按当前模式处理。普通renderer、模型或可生成页面不能凭JSON布尔值发放能力。schema校验、沙箱隔离、模型是否参与，均不能替代Rust授权。
+
+需要确认时，由可信宿主固定组件显示确定计划，直接把结果交回Rust；不通过模型转述获得批准。客户端维护版本化组件注册表、schema和能力列表，未知组件降级只读，未知动作拒绝；未完整JSON和流式预览不能触发业务写入。渲染失败不改变业务状态，普通UI卡只展示投影，既不能冒充可信确认组件，也不能伪造回执。
+
+### 安全审查的暂停与恢复判据
+
+安全审查暂停用于不能证明执行边界有效的情况，包括授权或来源证明失真、撤权传播异常、scope或投影越界、账本损坏、回执不一致、原子性无法验证及相关未关闭阻断缺陷。单纯被判高风险不是全部允许档的暂停理由。暂停要记录被阻断的具体能力、原因、证据版本、受影响任务和恢复条件，尽量只关受影响路径，保留获准的只读浏览、草稿和已完成产物。
+
+进入暂停时，Rust锁存阻断事实并持久化review_hold；尚未派发动作停止准入，已派发动作进入回执核对。界面显示“安全审查暂停”及可执行的恢复步骤，不用“待确认”掩盖工程缺陷。用户停止任务、模式切换或重开应用均不能清除该记录；临时清理缓存也不是关闭证据。
+
+恢复必须同时满足：阻断原因已定位；准确构建和合同版本的修复或范围隔离已记录；对应反例、撤权与故障恢复测试通过；非作者审查给出可开放范围；遗留未知外部效果已经核实或保持隔离；当前对象版本、模式和权限重查通过。恢复清除的是指定review_hold，不补发全部历史请求、不复用过期批准。用户决定仅能接受已说明的剩余风险或调整产品范围，不能使缺失回执变成成功证据。
+
+### 构建升级与数据边界
+
+桌面应用与 Rust 可执行文件作为同一签名发布单元，安装后校验版本清单及文件摘要；Android AAR／应用包纳入所支持 ABI 的库、JNA 与生成绑定，锁定 Rust、NDK、UniFFI 和依赖版本。候选首批 ABI 为 arm64-v8a 及测试用 x86_64，覆盖范围仍待产品设备矩阵确定。须实测 JNI/JNA 线程附着、取消、句柄释放、杀进程恢复与 [16 KB 页面兼容](https://developer.android.com/guide/practices/page-sizes)。签名更新、侧进程路径、旧版本回退和依赖供应链检查列入发布门禁。
+
+后置的范围仅为历史用户数据迁移及跨设备同步的实施；OS／ABI 兼容属于本期必须验证的工程门禁，不能推迟到历史迁移阶段。现在即保留 schema 版本、只读旧快照和转换验证契约。升级前使用受支持的 [SQLite 备份方式](https://www.sqlite.org/backup.html) 制作一致快照；旧应用不得写入未知新 schema。以后用真实样本副本验证记录数、引用完整性、金额、附件摘要与任务状态，再决定切换和回退，不承诺现有数据已经可无损迁移。
+
+跨端共享代码不会自动同步数据。两台设备的数据库、授权和任务账本默认独立；同步、冲突合并、设备身份、密钥共享与离线多主合并需另立方案，不能直接同步正在使用的 SQLite 文件。进入实施前的最低门禁是：同一契约双传输一致、重复请求不重复写、越权投影不可读、慢订阅内存有界、外发关键窗口故障注入不重复发送、升级失败保留可验证快照。以上均为待实施和验证的要求。
+
+未来 iOS 已规划 Swift 与 SwiftUI／UIKit；本轮只预留平台端口和不含 Android 类型的契约，不实现第三套客户端。Swift 绑定接入、后台策略及分发验证留到 iOS 实施阶段，也不据此扩大第一阶段抽象层。
+
+## 7 产品结构与页面手册衔接
+
+当前代码的顶层导航是“助手、任务、资料、设置”；目标方案调整为“助手、工作台、任务”三个主入口，并保留固定设置入口。这是信息架构改动。工作台聚合科研、PDF、询价及通用数据入口，不意味着现有资料功能消失或业务对象只留在聊天内。
+
+| 用户路径 | 第二册页面ID | 与内核的关键合同 |
+| --- | --- | --- |
+| 表达意图与找历史 | A01–A03 | 消息、项目scope、附件引用、任务关联与草稿 |
+| 找项目和最近产物 | W01 | 对象身份、版本、可用能力和授权摘要 |
+| 科研与PDF | R01–R08 | 文献身份、页码锚点、选区、证据类型、笔记大纲与版本 |
+| 询价与试算 | Q01–Q06 | 条件版本、报价口径、税率规则、未知字段、比较快照 |
+| 任务 活动与批准 | T01–T03 | 真实状态、持久事件、可信计划、回执和取消 |
+| 数据 记忆与设置 | D01、S01–S07 | schema、模型路由、连接、权限、存储、记忆与身份偏好 |
+
+三个主要闭环是“问题 → 文献证据 → 可编辑结论”，“PDF选区 → 字段草稿 → 按模式校验保存”，以及“询价条件 → 候选证据 → 比较试算 → 草稿或台账”。助手负责表达意图，工作台负责持续操作业务对象，任务页负责进度与控制。
+
+第二册逐页给出手机与桌面布局、字段、关键交互、空态、失败、离线、权限失效和验收样例，并附8组原创线框。本册不重复具体控件尺寸。页面设计完成不是上线证明；各页是否可开放取决于对应业务波次和平台门禁。
+
+### 产物按能力分类
+
+产物应有稳定身份、版本、来源与用途，而不按“看起来是卡片还是网页”授予能力。下列是可组合的能力类别；固定界面和生成界面均使用同一授权路径，生成来源不能扩大权限。
+
+| 产物能力 | 例子 | 允许交互与执行边界 |
+| --- | --- | --- |
+| 静态可阅读 | 回答、研究摘要、只读报告 | 查看和复制已获准内容；分享与导出另按目标投影 |
+| 本地可交互 | 筛选表格、图表、演示、试算面板 | 本地状态直接响应；业务公式由确定性内核统一语义 |
+| 业务可编辑 | 科研大纲、报价草稿、记忆主题编辑 | 类型化补丁、对象revision、CAS、模式授权和持久回执 |
+| 可调用外部动作 | 发送、导出到目标、受控工具面板 | 声明动作、目的地和数据用途，执行账本与系统能力检查 |
+
+一个产物可以同时具备多类能力，但能力清单由可信注册表和Rust返回，不能由生成内容自报。新鲜度、只读/可编辑、已保存/未保存、来源失效和外部效果是不同字段；不能仅用“可交互”承诺可保存或可发送。历史产物仍可在许可范围内阅读，原有动作引用是否可执行必须重新核对当前事实。
+
+助手页应能看见当前模式、来源及执行去向；工作台支持继续编辑持久对象；任务页显示真实账本和安全审查暂停。记忆管理提供主题、来源、用途、版本及编辑冲突，不把身份偏好混进授权设置。临时会话、Android屏幕读取和个人账号限定只在决策清单出现，不先放一个默认启用入口暗示功能已定。
+
+## 8 渐进迁移与首个可验证闭环
+
+### 建议的迁移原则
+
+1. 先提炼语言无关合同，再移植业务规则。金额精度、单位转换、null 与省略的区别、版本冲突、权限判断、回执语义必须在切换前有明确约定
+2. 首片选择一个有明确输入、输出和错误路径的只读业务流程，随后才接入有幂等回执的单项写入。不要将完整 AIUI、导入、同步和所有模块作为首片
+3. 现有 Dart 实现、已审查测试和业务样本共同作为对照。已知缺陷不能因为“旧实现也是这样”就进入新的正确性基线
+4. Rust 负责业务规则与可信状态变更；两前端只作平台交互与视图状态映射。平台权限和安全存储通过最小能力接口提供，不能把路径、数据库连接或任意执行能力直接交给 UI
+5. 每片拥有独立开关、独立测试数据和明确回退入口。功能开关只能切路由，不能保证已经发生的数据格式变化可逆
+
+### 模块迁移分类与留用规则
+
+| 范围 | 建议处理 | 保留条件 |
+| --- | --- | --- |
+| 领域规则、金额和单位语义 | 提炼合同后移植 Rust | 保留业务约束与反例，不机械保留语言细节；首片仅单供应商详情与名称更新 |
+| supplier_core Dart 实现 | 保留为行为对照和旧体验版依赖 | 不与 Rust 同时写生产数据库 |
+| supplier_core SQLite 存储 | 重写适配，不默认保留物理 schema | 事务、revision、变更日志与回执语义保留；旧库转换后置 |
+| module_api 数据、动作、回执语义 | 保留语义，重新定义跨语言合同 | 与 Widget、BuildContext、宿主生命周期解耦 |
+| Flutter Widget、ChangeNotifier、导航和呈现层 | 分别重写 Electron 与 Kotlin 平台绑定 | 复用交互验收目标，不承诺复用 UI 源码 |
+| OCR/PDF、安全存储和文件选择 | 平台适配，逐项验证 | 授权、取消、失败和资源释放必须形成合同 |
+| 宿主可信确认与权限 | Rust模式策略加必要的平台确认适配 | 保留实时事实重查、计划绑定、拒绝和撤权；全部允许不追加风险确认 |
+| AI运行时、动态UI、工具执行 | 保留规则与反例，重写接线 | 模型无权自授权；首片不调用真实模型或真实外发工具 |
+| 科研模块、批量写入与复杂导入 | 后续独立业务切片 | 证据类型、引用、原子性、持久回执不能因后置而删除 |
+| 旧数据库迁移、同步 | 暂缓独立设计 | 在正式数据切换前完成备份、恢复与冲突策略 |
+| 多设备审批与iOS | 仅预留 | 不承诺跨设备统一账本；不创建Swift项目或估iOS工期 |
+| 未关闭审查项 C6、CF、LE06 等 | 继承待复核 | 不因技术栈迁移自动关闭或默认开放相关能力 |
+
+本表是设计分类，第3章已提供固定基线清点，实施时由M01复核基线差异和在途所有权。复用须满足行为被理解、测试能检出相应错误、没有带入已知未解决缺陷；旧测试通过不能覆盖最新安全要求。
+
+### 渐进替换阶段和依赖
+
+#### P0 固定所有权和合同
+
+保存旧体验包、固定提交、依赖锁、重要测试和开放风险。清点旧线在途任务，逐项区分继续完成、仅回移关键修复、另行决定；不直接停掉全部任务。首片建议选择单供应商只读详情、受控名称更新和合成JSON导出，不涉及联系人、报价、外部发送或真实模型。
+
+出口G0：范围、合同、数据规则、差异和所有权明确；与在途工作无重复writer。未通过时停在设计，保留旧体验。
+
+#### P1 双端最小纵向切片
+
+先有Rust规则、独立测试库和Dart对照，再接桌面stdio与Android原生绑定。两前端调用同一应用层，显示同一语义结果；随后补受控写入、幂等回执、取消、事件恢复和导出。两端页面可在合同锁定后并行，不能分别设计业务规则。
+
+出口G1：同一fixture经Dart、Rust及两端适配执行，差异均已解释或修复；权限、重复提交、取消和恢复反例可重放。下述28项涵盖P0/P1及其包级验证，不代表全量业务迁移完成。
+
+#### P2 逐业务扩展
+
+建议按基础对象与文件、一个完整科研/PDF闭环、一个完整询价闭环、多步骤工具与动态UI、批量与复杂恢复逐片规划。实际业务先后可调整，权限、存储和回执依赖不能跳过。每片独立列范围、对照集、风险、接线、设备验收与回退证据。未迁移功能明确不可用，或继续在独立旧体验中使用，不在新客户端做虚假入口。
+
+出口G2：拟开放功能在目标平台有真实包证据；受影响历史风险已复核，无阻断的数据损失或商敏泄漏问题。
+
+#### P3 历史数据和同步另立方案
+
+功能切片稳定后，另行确认正式数据范围、迁移窗口、备份恢复和回滚代价。先转换副本、核对后再决定写入权转移。共享Rust不会自动同步数据；设备身份、冲突、密钥、审批和执行账本需单独设计。
+
+出口G3：已批准数据的副本迁移与恢复演练通过，用户明确接受切换和回滚边界。此前生产库仍由旧客户端持有。
+
+#### P4 正式切换和旧版退役
+
+完成准确版本的签名包、升级、未知schema拒绝写、故障回退和支持说明，再逐功能开放。旧版退役需明确决定，不随首片完成自动发生。分支删除不属于本方案的实施范围。
+
+### 首阶段28项可验收任务
+
+每项0.5至1人日是有限切片的设计估计，不是交付日期或全项目总工期。前提是开发机、Windows/macOS/Android runner与基本工具链可用；设备采购、账号申请、签名凭据配置、生产数据迁移、全量视觉打磨和反复架构探索不含在内。超出时间盒的问题应重新拆分估算，不能靠删验收压进一天。
+
+建议角色：C1为Codex内核/合同，C2为Codex存储/恢复，A1为Claude桌面，A2为Claude Android，G1为grokbot合同/安全测试，G2为grokbot设备/集成测试。只是责任建议，未实际联系或派发；可由具备相应能力的人或工具替代。合同保持单一owner，每项由非作者复审，集成负责人另行指定。
+
+新代码组织采用架构篇的Rust crates：muyon-domain、muyon-contract、muyon-application、muyon-store、muyon-policy、muyon-desktop-host、muyon-android-ffi。样例建议放contracts/fixtures/supplier-v1，证据按完整SHA归档。目录是设计建议，实际落点在M01确认，不为对齐目录而移动旧包。
+
+公共接口子集沿用架构篇的CommandEnvelope、Response、Event语义。首片方法限定supplier.get、supplier.update、task.get、task.cancel、supplier.export；request_id关联传输，scope_id限定范围，idempotency_key绑定一次写意图，expected_revision采用十进制字符串。supplier.update初期只开放name，缺省/null/空值按M02从旧实现提取并审查后的规则处理，不自行放宽。读接口不要求幂等键；可信宿主根据模式授权或该模式要求的确认产生能力引用，不能接受普通UI的approved=true。首片以确定性fixture覆盖Auto与全部允许，不依赖模型为每次操作作判断。
+
+每项实现都先记录预期失败的测试，再实现、重跑目标测试与受影响回归，交付准确提交、红绿日志和非作者审查。表内“通过”均为验收目标，本轮没有实际执行。
+
+| ID | 独立交付物与验收 | 前置 | 建议责任 | 估计 |
+| --- | --- | --- | --- | --- |
+| M01 | 固定基线及首片文件/在途所有权清单；入口可定位，不触碰旧库和活跃writer | 无 | C1，G2复核 | 0.5人日 |
+| M02 | 首片领域合同和差异表；锁定名称校验、错误、revision、权限与回执，疑点先列差异 | M01 | C1，G1复核 | 0.5人日 |
+| M03 | 最小请求/响应/Event schema与正负解析测试；未知版本、类型错、越界字段不静默通过 | M02 | C1，A1/A2复核 | 1人日 |
+| M04 | 合成fixture和可解释golden；固定时钟/ID，正常、错误、拒绝、旧版本各有样本 | M02 | G1，C2复核 | 0.5人日 |
+| M05 | 固定Dart对照runner；独立临时库执行首片并输出规范化结果，失败不改golden掩盖 | M04 | C2，G1复核 | 1人日 |
+| M06 | Rust纯领域首片；相同fixture得到合同结果，含中文/Unicode边界及超范围字段拒绝 | M03、M05 | C1，G1复核 | 1人日 |
+| M07 | 新测试库和单写入口；对象、revision、回执能原子提交，故障注入无半写 | M03 | C2，C1复核 | 1人日 |
+| M08 | 只读详情scope/字段投影；跨scope对象和未授权字段不出现于响应或错误 | M06、M07 | C1，G1复核 | 0.5人日 |
+| M09 | Rust受控单字段更新；提交前核验scope/能力/计划/revision，缺省/null按合同处理，失效授权或旧revision拒绝且库不变 | M06、M07 | C2，C1复核 | 1人日 |
+| M10 | 幂等键和持久回执；同键同摘要不重复写，同键异摘要冲突，重启后可查原回执 | M09 | C1，G1复核 | 1人日 |
+| M11 | 首片取消状态机；提交前取消无副作用，提交后返回已提交事实，不丢回执 | M10 | C2，G1复核 | 1人日 |
+| M12 | 首片事件和恢复；重复事件去重，旧epoch失效，游标过期转快照，慢订阅有界 | M08、M11 | C1，G2复核 | 1人日 |
+| M13 | 桌面stdio编解码/握手；分包、粘包、超长帧、版本错、EOF都有明确结果 | M03、M08 | A1，C1复核 | 1人日 |
+| M14 | Electron可信桥接/模式路由；错误来源、频道、伪造批准被拒，按模式确认，renderer无法直接读库或执行命令 | M10、M13 | A1，G1复核 | 1人日 |
+| M15 | Electron首片详情/编辑/任务页；加载、冲突、取消、双击和重启走真实桥接 | M11、M12、M14 | A1，G2复核 | 1人日 |
+| M16 | Android最小Rust绑定；锁定UniFFI/依赖，成功/错误/非法参数通过真实原生调用 | M03、M08 | A2，C1复核 | 1人日 |
+| M17 | Android CoreHost/Flow生命周期；旋转重组不重建内核，解绑无旧回调，阻塞不占主线程 | M11、M12、M16 | A2，G2复核 | 1人日 |
+| M18 | Compose首片页面/模式所需确认；返回、进程重建、重复点击不丢草稿或重复提交 | M10、M17 | A2，G1复核 | 1人日 |
+| M19 | 独立权限反例；授权后scope/revision/计划/权限变化拒绝，探针异常不放行；全部允许不增风险确认 | M14、M18 | G1，C1复核 | 0.5人日 |
+| M20 | 确定性崩溃注入；提交前、提交后响应前、重启查账可验证，不重复写或伪造取消 | M10、M11 | G2，C2复核 | 1人日 |
+| M21 | 合成供应商JSON导出/两端目的地适配；受限句柄、摘要、同意图重试、半文件恢复 | M08、M14、M18 | C2主责，A1/A2配合 | 1人日 |
+| M22 | 同command双前端E2E；隔离副本产生相同规范化响应、回执和状态，页面无mock成功 | M15、M18、M19、M20、M21 | G1，G2复核 | 1人日 |
+| M23 | Windows安装包冒烟/基础测量；配套Rust加载、离线读写、退出重开，记录包体/进程总量 | M22 | G2，A1复核 | 1人日 |
+| M24 | macOS安装包冒烟/基础测量；目标架构、路径、权限与重开通过，不能继承Windows结果 | M22 | A1，G2复核 | 1人日 |
+| M25 | Android arm64真包/x86_64测试包；设备/模拟器执行首片，原生库/16KB检查及资源记录 | M22 | A2，G2复核 | 1人日 |
+| M26 | 权限、模式、revision、幂等、脱敏定向变异；规定变异有对应红灯，还原后准确版本为绿 | M19、M20、M22 | G1，C2复核 | 0.5人日 |
+| M27 | 新旧隔离/回退演练；新包不误开旧库，未知schema拒写，停新体验后旧包及旧数据可用 | M23、M24、M25 | C2，G2复核 | 1人日 |
+| M28 | 独立组合审查/G1证据包；列pass/fail/未跑/skip、SHA、包hash、设备和风险，只决定首片可否试用 | M23–M27 | G2整理，未参与相关实现者审查 | 0.5人日 |
+
+合计24.5人日，是有限首片的建议工程量，不能按六个角色简单除以六换算日历天。M03前以合同为关键路径；M13–M15与M16–M18可并行；M22以后的包验证依赖完整首片。角色切换、环境等待、返工和用户决定会增加实际耗时。M12/M21/M25若发现协议、平台或依赖问题应追加任务，不能承诺复杂问题一天解决。
+
+### 本版新增的独立设计落实任务
+
+以下D01至D10是设计补充对应的后续工程任务，不是已派发或已实现清单，也不包含在原28项24.5人日估计内。先冻结跨端合同，再按所有权分派；已有对象版本、旧卡失效和账本不是新增功能，相关任务重点是继承并补齐新模式反例。
+
+#### D01 固定模式与风险合同
+
+交付五档候选及最终产品决定映射、ModeGrant与RiskDecision schema、版本化风险表和缺事实行为。验收：相同参数、事实与规则版本得到同一结果；Auto低风险自动、高风险确认、禁止类拒绝；全部允许高风险不多弹确认；未决默认档不以常量擅自定。依赖M02与产品待决。
+
+#### D02 接通生成卡三类事件
+
+交付local_interaction、domain_command、model_intent三类入口及两端适配。验收：折叠筛选不发模型请求；完整保存参数直接进入Rust；已有卡片仅在语义理解或重规划时另建ModelTurn，正常新内容生成任务不受此限制；伪造动作和越权对象拒绝；旧卡仍按既有revision失效规则处理。依赖M03、D01和M14/M18。
+
+#### D03 固定动作状态与回执恢复
+
+交付动作记录、合法转移表、四文案映射及对未知结果的恢复规则。验收：去重登记、派发前后、回执持久化前后分别故障注入；INSERT OR IGNORE不能单独作为外部至多一次证据；全允许切换不重发未知动作。依赖M10至M12、D01。
+
+#### D04 落实安全审查暂停
+
+交付review_hold、受影响能力清单、精确版本证据和恢复入口。验收：高风险标签不导致全允许额外确认；真实授权或账本异常先锁存阻断；重启、换档及旧卡不能清除；只有对应反例、独立审查和事实重查齐备才恢复。依赖D01、D03和M19/M20。
+
+#### D05 建立记忆记录与文本编辑
+
+交付MemoryRecord、来源/用途映射、主题文本编辑到类型化补丁、CAS和人工/推断标记。验收：并发编辑冲突显式显示；文本省略不能误删隐藏记录；归纳不得覆盖较新人工编辑；可追溯每条记录的来源和当前可用用途。依赖M03/M07和对象合同。
+
+#### D06 分离记忆权限与撤权传播
+
+交付独立记忆读、记忆写、历史搜索控制及缓存/上下文/归纳队列失效链。验收：四个撤权时间窗覆盖排队、读取、拼上下文、提交；晚结果不能恢复撤销内容；未发送上下文可验证不含失效来源；已发内容明确无法本地撤回。依赖D05及W4基础投影合同；D06完成后再进入W4组合接线/验收，不以整个W4先完成为前提。
+
+#### D07 限定身份与账号边界
+
+交付IdentityPreference与账号/工作区身份隔离合同。验收：修改名称、语气或身份文本不产生grant，不切模式，不重开来源；个人账号限定尚未决时不实现隐含组织限制，也不承诺未做的多租户隔离。依赖D01、D05及W7。
+
+#### D08 登记产物能力清单
+
+交付静态、本地交互、业务编辑和外部动作的能力声明与查询。验收：同一组件在不同能力下显示正确入口；生成内容不能自报可执行能力；可阅读不推导可分享或可送模型；静态产物无隐藏副作用。依赖D02及W1/W2/W3。
+
+#### D09 处理四项产品待决
+
+交付Android屏幕读取、临时会话、记忆容量及个人账号限定的选项、成本和验收边界。验收：决策结果有明确范围与生效版本；未决定前不申请额外系统权限、不按未决临时会话或容量策略擅自启用留存/清理、不默认启用待决能力。该任务可先完成设计分析，不以等待决策阻塞无关离线切片；已明确启用的普通记忆读写不因此被冻结。
+
+#### D10 进行跨端模式与记忆组合验收
+
+交付双端同fixture的模式/记忆/生成卡/任务组合证据及非作者审查。验收：断网的纯本地交互及确定性已配置业务动作仍可用；同模式无端侧自行改判；撤权、CAS、旧卡、未知结果、安全暂停和恢复均可重放。依赖D01至D08及M22，D09未定部分明确排除。
+
+可并行：D05的记录合同、D08的能力分类与D09的选项分析可在各自输入明确后开展；D02两端接线可并行但共用一个合同owner。D04和D06不能在底层事实/账本合同未固定时以UI占位“完成”。
+
+## 9 全业务改造波次
+
+本章接续28项首片任务，说明科研、PDF、询价、Agent、导入导出、传输、OCR、检索与设置如何逐步迁移。28项只证明最小纵向切片，不覆盖下列全部业务，也不能作为全项目工期。以下波次不硬估人日；每波启动前再拆成可验收任务。
+
+代码定位固定于 [01e56cc2d729dab70e1b1def05c3aa93b28f421a](https://github.com/mightyoung/Muyon/tree/01e56cc2d729dab70e1b1def05c3aa93b28f421a)，依据本轮只读源码盘点与该提交的本地快照。较早9836bb87的材料只是历史基线，不能代替本章源码证据。本章描述目标方案，未实施、未运行实验或判定相关CI全部通过。
+
+目标模块均为新Rust架构中的建议职责，不表示现仓库已经存在这些Rust实现。桌面采用Electron，Android采用Kotlin Compose；两端共享领域合同和业务规则，各自在自己的隔离测试数据库执行。未来iOS仅预留端口，同步与正式历史数据迁移另立方案。
+
+### 双轨原则与总体依赖
+
+旧Flutter线维持体验可用、必要安全修复和已确认继续的在途工作；新架构线按波次建设。两线不共写数据库，不安排第二个writer改同一任务文件，也不把“迁移”解释为撤销原任务。每个迁移合同有一位owner，每个旧线修复记录原提交、缺陷、反例与适用范围，再判断新Rust是否需同样修复。
+
+旧Dart作为行为对照须有边界：正确语义与经审查的修复进入fixture；已知缺陷进入负例和风险列表，不能机械复制成golden。C6、CF、LE06及其他未关项保留原身份和证据链，迁移后仍需对应层复核，不能靠改文件名、改语言或重写UI自动关闭。
+
+波次编号用于范围归属，不等于全部串行排队：
+
+- 首片门禁通过后，W1文件/PDF、W3询价和W7基础设置可按文件所有权并行
+- W2科研证据依赖W1；W6文档OCR与检索依赖W1及对应模块的源对象查询接口
+- W4可先做离线协议与只读工具，但开放真实业务工具须等待W2/W3对应命令；开放模型/外发须等待W7授权配置和W5相关执行账本
+- W5的本地文件导入导出先依赖首片与W1；业务接受依赖W2/W3；网络传输单列子阶段，不能与“已导入”混同
+- W7是跨波次基础，不应拖到最后才补权限或秘密存储。完整设置体验可随能力落地，但能力开启的前置条件必须先通过
+- 最后W8做组合验收，所有仍后置能力明确标记，不能以一个绿色总开关开放全部功能
+
+### W1 文件身份与PDF阅读基础
+
+#### 目标边界
+
+先实现本地文档登记、受控文件访问、PDF打开、翻页、缩放、选择和稳定来源跳转。PDF渲染留在各平台适配器，Rust统一文档身份、摘要、页序和锚点合同。先支持已存在文本层的文件，扫描页通过明确的页级定位降级；OCR属于W6。文件导入后可作为隔离测试对象使用，不触碰用户旧资料库。
+
+#### 前置依赖
+
+首片的scope、存储、受控句柄、错误与任务取消合同；W7的文件访问能力和平台权限最小配置。大文件解析应离开UI线程，资源限制先成为合同再选解析器。
+
+#### 现有文件与迁移落点
+
+- [document_parser.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/documents/document_parser.dart)：当前PDF/文本解析与内容摘要入口
+- [file_gateway.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/file_gateway.dart)：文件选择、冻结输入与受控文件边界
+- [reader_page.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/reader_page.dart)、[source_locator.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/source_locator.dart)、[source_jump_banner.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/reader/source_jump_banner.dart)：现有阅读和定位体验
+- 目标：muyon-domain文档/来源类型，muyon-application文档用例，muyon-store附件索引，muyon-platform PDF与文件端口；Electron/Compose分别实现阅读器和文件选择
+
+#### 数据契约
+
+DocumentRef至少区分scope、稳定文档ID、内容摘要、revision、显示名与受控blob引用。PDF Anchor记录内容摘要、零基物理页码、解析器版本、坐标空间、文本片段与可选精确范围；显示页码/印刷页码不得替代物理页身份。
+
+现有source_locator明确区分页级定位、唯一精确匹配和歧义；新的合同保留这种区分。现有citation_resolver使用UTF-16字符偏移，而Rust字符串通常采用UTF-8字节访问，必须定义跨端偏移编码与转换，不把emoji、代理对或组合字符当作等长。精确高亮只能在摘要与定位证据吻合时提供。
+
+#### 关键反例与完成门槛
+
+- 同名不同内容、文件导入后被改写、失效URI、越scope引用、路径穿越/符号链接、密码PDF、损坏PDF、页码越界、大页数、大文件、取消后旧回调
+- 双栏/旋转页、相同引文多次出现、emoji/组合字符、缺文本层：不猜高亮，显示页级或歧义状态
+- 两端用相同字节和Anchor能到同一物理页；精确范围可独立核对，返回后保留位置，摘要变化立即失效；限额、取消与释放有真实设备证据
+- 完成只代表文档阅读基础；不代表OCR、科研写入或历史库迁移完成
+
+### W2 科研证据与大纲闭环
+
+本波中的人工核对是用户编辑或质量核验路径，“接受”是业务状态，均不意味着每次持久化必弹额外授权框。参数完整、证据约束满足且当前模式允许时，Rust可以确定性保存；证据歧义需要补充事实时明确说明缺项。
+
+#### 目标边界
+
+把研究项目、文献、记录、阅读笔记、已接受运行结果、主张草稿与大纲连接起来。先完成“从PDF证据生成草稿 → 人工核对 → 保存引用 → 大纲编辑 → 打开原始来源”的闭环，再扩展多对象/批量操作。未接受运行结果不得自动当作可靠证据，阅读页的只读对象详情不得绕过编辑用例直接写库。
+
+#### 前置依赖
+
+W1文档/锚点；首片的写入版本、回执和授权；完整报告导出依赖W5。本波可先使用离线合成研究数据，不依赖联网模型生成。
+
+#### 现有文件与迁移落点
+
+- [models.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/models.dart)、[outline_store.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/outline_store.dart)：研究对象与有序大纲
+- [citation_resolver.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/citation_resolver.dart)、[claim_draft_preparation.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/core/claim_draft_preparation.dart)：引用解析和主张准备
+- [writing_page.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/app/writing_page.dart)、[object_pages.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/research_module/lib/src/app/object_pages.dart)：大纲编辑及只读详情
+- 目标：muyon-domain研究对象/证据类型，muyon-application科研命令和草稿流程，muyon-store关系/大纲事务；两端科研工作台只渲染投影和发命令
+
+#### 数据契约
+
+EvidenceRef必须含module、对象类型、对象ID、项目、revision与来源摘要，不能只传一个可能在多个表同号的ID。Citation另外携带Anchor、引用文字与解析状态。OutlineNode含稳定ID、父节点、顺序、标题、论点、支持等级与显式类型引用；移动/删除以预览和expected_revision提交。
+
+Draft区分提取值、人工编辑、证据与接受状态；刷新不能覆盖人工修改。ResearchRunRef携带运行身份、接受状态与结果摘要。事务内冻结变更和回执，不能提交后重新读取另一个对象形成“成功摘要”。
+
+#### 关键反例与完成门槛
+
+- entry、note、run同号；未接受run；来源删掉或换内容；跨项目引用；相同引文多匹配；人工改字段后重新生成
+- 大纲循环、移动到自身后代、同位置无变化、父节删除的关联影响、旧revision提交、批次中一项失败
+- Rust与已核业务规则对照一致；每条引用能定位批准的原始字节；类型歧义拒绝，事务回执对应真正变更；移动/删除预览与最终影响一致
+- 两端完成项目/证据/大纲主路径、取消/恢复和只读降级；W5未完成前不把“报告导出按钮”标为可用
+
+### W3 询价报价比较与试算
+
+#### 目标边界
+
+从首片供应商扩展到产品、联系人、报价、询价、项目预算、规格请求/响应和证据。拆为“金额与口径 → 报价生命周期 → 同口径比较 → 项目试算 → 按模式授权保存”。比较、试算和采用报价是不同命令，试算不能偷偷改项目预算，读取比较结果也不等于授权对外询价。
+
+#### 前置依赖
+
+首片领域与事务基础；附件证据依赖W1，批量导入依赖W5。单条报价可先用合成输入独立迁移，与W2科研并行。AI提取只是后续输入来源，不能替代报价验证规则。
+
+#### 现有文件与迁移落点
+
+- [pricing.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/pricing.dart)、[compare.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/compare.dart)、[spec_compare.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/supplier_core/lib/src/spec_compare.dart)：定价、报价可比性和规格比较
+- [quote_form.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/quotes/quote_form.dart)、[compare_view.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/quotes/compare_view.dart)、[budget_table.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/projects/budget_table.dart)：当前报价和预算交互
+- [ui_formula_registry.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/ui_formula_registry.dart)、[ui_recompute_adapter.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/ui_recompute_adapter.dart)：宿主公式和重算接线
+- 目标：muyon-domain询价/定点数/单位/报价规则，muyon-application比较与试算用例，muyon-store预算快照；两端分别实现密集表格与移动比较卡
+
+#### 数据契约
+
+Money使用币种和十进制定点值，禁止经JavaScript Number或浮点四舍五入改变账面意义。PriceBasis至少区分含税/未税/未知、税率是否已知、计价单位、数量、阶梯条件、附加费用、有效时间和来源。未知税率不等于0%，不同币种不能暗中换汇，不兼容单位不混入同一最低价排序。
+
+QuoteComparison返回可比较分组、被排除/需核实原因和证据，不输出一个遮掉缺项的全局“最优”。ScenarioInput绑定输入revision和条件，ScenarioResult是只读试算；采用结果必须提交单独命令并重新校验版本。历史预算快照保留原口径，报价变更不静默重写旧成本。规格满足、未知、冲突要分开。
+
+#### 关键反例与完成门槛
+
+- 金额极值/精度、0与空、税率缺失、含税切换、单位转换不全、阶梯边界、币种不一致、附加费未知、报价过期/未来/未注明日期
+- 供应商停用/删除，报价与产品不符，修改源报价后历史预算漂移，多次试算误落库，确认后条件变化，商敏底价进入普通摘要
+- 对照样本覆盖金额、税率、单位和快照；关键舍入与口径由明确合同解释，没有未经批准的规则漂移
+- 桌面表格与Android卡片展示相同分组/原因/数值；试算前后库不变，只有授权采用才产生一次回执和预算变更
+- 本波完成不代表外发询价、LAN同步或全部AI导入已可用
+
+### W4 Agent流式协议工具与scope投影
+
+本波同时承接D01至D04的模式、三类生成卡事件和安全审查合同，以及D06的记忆披露接线；这些是目标设计，不是对固定Dart基线已有能力的宣称。依赖顺序为W4基础投影合同、D06撤权链、W4组合接线与验收，避免把整个波次互设为完成前置。
+
+#### 目标边界
+
+迁移会话、任务、模型轮次、工具选择/执行、事件流、取消、恢复、权限卡和只读/可写UI投影。先用确定性模型回放和假外部服务测试协议，再逐个开放真实模型或工具。模型文本、结构化协议、工具参数和业务回执分开：预览不是执行结果，模型不能授予自己scope或批准写入。
+
+#### 前置依赖
+
+首片的事件/账本/权限；W2/W3提供相应领域命令；W7提供已授权模型配置与秘密端口；W5提供导出/传输的副作用核对。只读模型回放可先做，真正外发或业务写入不能先于依赖门禁。
+
+#### 现有文件与迁移落点
+
+- [personal_agent.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/personal_agent.dart)、[agent_model_turn.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_model_turn.dart)、[agent_dispatch.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_dispatch.dart)
+- [protocol_stream_view.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/protocol_stream_view.dart)、[stream_ui_planning.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/stream_ui_planning.dart)、[agent_resume.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/assistant/agent_resume.dart)
+- [tool_registry.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/tool_registry.dart)、[scope_resolver.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/scope_resolver.dart)、[projection_service.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/projection_service.dart)
+- 目标：muyon-agent适配模型，muyon-application任务状态与工具调度，muyon-policy scope/能力/投影，muyon-store事件/回执；前端承载本地交互、可信任务投影与有限UI组件，业务动作统一进入Rust
+
+#### 数据契约
+
+Task、Attempt、ModelTurn、ToolInvocation、EffectReceipt分开标识。事件带scope/task/seq/epoch/版本；完成内容经严格验证后成为正式结果。UIPlan引用授权后的ObjectRef/投影，不带全量对象再让前端隐藏。ObjectCatalog是可重建的查找投影，实际打开、导出或喂模型仍向拥有模块重查对象存在、scope与revision。
+
+授权绑定具体计划、对象、版本、目的地和数据范围。恢复只能复用已确认成功回执；结果不明的写/导出不能因resume自动重放。当前agent_resume已明确这些边界，新实现应保留并用反例验证，不因重写而简化成“一键重试全部”。
+
+#### 关键反例与完成门槛
+
+- JSON字符串/Unicode跨chunk，协议半截、工具参数混入正文、错误终态、提示注入、模型伪造批准或对象引用
+- 用户取消而辅助UI异常、撤权后旧卡仍能执行、scope切换后旧缓存/事件外泄、老attempt回调覆盖新attempt、慢消费者无限缓存
+- 已成功工具在恢复时重跑；网络超时却外部已执行；projection游标重放使已删除对象复活；同名跨项目对象被错选
+- 确定性回放在两端产生相同任务/工具/回执状态；严格结果校验与展示预览分开；关键守卫有定向变异红灯
+- 所有宣称可用工具经真实Rust应用层执行，权限与副作用账本可查；未核对结果停在待核实，C6/CF相关路径未复核时保持关闭
+
+### W5 导入导出与受控传输
+
+导入接受和导出目标选择是业务步骤；是否追加确认统一服从第6章模式。全部允许可以免Muyon询问，但不能捏造用户未选的保存目标、绕过系统文件授权、覆盖未经当前权限允许的对象，或跳过未知结果核对。
+
+#### 目标边界
+
+分成三个可单独验收的子阶段：本地文件冻结/预览/接受；本地导出及回执；经批准的设备或服务传输。导入接受、文件已到达、附件完整、已读和业务接受是不同状态。文件传输不等于多设备数据同步，不把收件自动变为业务采纳。
+
+#### 前置依赖
+
+首片的受控目标与幂等账本、W1文件身份；科研/询价接受分别依赖W2/W3；网络传输还需W7配对/证书/秘密与外发授权。可以先离线验收，不自动联系真实设备或外部接收者。
+
+#### 现有文件与迁移落点
+
+- [import_coordinator.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/workspace/import_coordinator.dart)、[import_review_projection.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/app/import_review_projection.dart)、[file_gateway.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/file_gateway.dart)
+- [local_export_ledger.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/local_export_ledger.dart)、[local_export_target.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/platform/grants/local_export_target.dart)
+- [transfer_service.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/transfer/transfer_service.dart)、[task_coordinator.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/transfer/task_coordinator.dart)
+- 目标：muyon-application导入/导出/传输用例，muyon-store意图与回执/暂存记录，muyon-policy目标与外发数据，muyon-platform文件URI和传输端口；平台UI负责可信预览和当前模式所需确认
+
+#### 数据契约
+
+FrozenInput包含内容摘要、大小、文件类型、受控blob、目录清单和版本；预览与最终接受必须绑定同一冻结输入。ImportDraft独立于正式记录，保存时重新校验scope/revision及关联对象。ExportIntent绑定选中数据、投影版本、目标能力、覆盖策略与摘要；build intent不等于已授权执行。
+
+TransferReceipt包含传输身份、对端指纹、内容摘要和接收状态，业务接受另有回执。新合同应保留当前transfer_service区分的状态，不用一个success吞掉“已传输但未完整导入”。数据库提交不能使文件系统或网络操作天然exactly-once；恢复必须按阶段核对。
+
+#### 关键反例与完成门槛
+
+- ZIP穿越/膨胀、重复文件名、符号链接、扫描后文件变更、缺附件、摘要不符、文件名欺骗、部分解析、磁盘满和取消
+- 预览后目标改变、覆盖超出模式许可或缺系统能力、导出成功但回执未落盘、已批准scope过期、同意图重试生成多份或多次外发
+- 对端身份改变、证书/配对失效、重放包、收到文件但业务拒绝、断点中断后重复接受
+- 两端合成样本可完成预览/接受/导出闭环；失败可恢复且原数据不被半写；回执能够分别证明传输和业务接受
+- LE06及相关导出风险按原证据复核通过才开放对应入口。真实接收者、正式文件、覆盖、配对和持续访问依然需要相应授权
+
+### W6 OCR与检索增强
+
+记忆检索和聊天历史搜索可复用索引基础，但不合并为文档OCR权限。D05/D06的来源、用途和撤权合同优先于索引命中；相同文字来自不同来源时不能因去重而合并授权。记忆容量与自动清理策略仍待决。
+
+#### 目标边界
+
+先迁移本地文本检索，再补OCR文本和几何，最后根据明确需求加入向量检索/联网embedding。OCR输出是带来源和置信度的提取结果，不自动成为业务事实；索引是可重建派生数据，不能成为权限或源对象存在性的权威。
+
+#### 前置依赖
+
+W1文件/PDF/坐标；W2/W3提供类型明确的源对象与投影；W7控制模型下载、存储位置、资源预算和联网目的地。可先用合成图像/文本做离线检测，真实模型下载或付费embedding单独批准。
+
+#### 现有文件与迁移落点
+
+- [paddle_ocr_service.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/ocr/paddle_ocr_service.dart)、[ocr_geometry.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/ocr/ocr_geometry.dart)、[download_models.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/ocr/download_models.dart)
+- [search_service.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/search/search_service.dart)、[knowledge_service.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/knowledge/knowledge_service.dart)、[index_invalidation.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/knowledge/index_invalidation.dart)
+- 目标：muyon-platform OCR/解析端口，muyon-application索引任务，muyon-store索引/游标/模型元数据，muyon-policy检索投影；Rust统一结果语义，推理后端另经包体/性能/许可证验证
+
+#### 数据契约
+
+当前OCR结果已有sourceDigest、width/height、pageIndex、EXIF orientation、文本/检测置信度和点坐标。新结果合同保留这些信息，显式标注coordinateSpace、模型/算法版本、解析时间和是否人工修订，不能只传一个拼接字符串。
+
+SearchHit绑定源ObjectRef、内容摘要、page/anchor、片段、匹配理由与当前性；Result同时报告partial和unavailable。索引版本区分解析器、tokenizer、embedding模型及维度。删除、撤权、文件换摘要后失效，展示/导出前仍向来源模块检查。
+
+#### 关键反例与完成门槛
+
+- EXIF旋转、PDF旋转页、透视/低清、混合中英文、数值单位误读、空结果、低置信度、OCR和原文本冲突
+- 模型损坏/版本错/下载中断、内存峰值、Android后台中止、取消后的临时文件与句柄泄漏
+- 索引含已删/已撤权对象、旧摘要、同号不同类型、中文分词边界、embedding维度变化、模型不可用被伪装成零命中
+- 本地检索在网络不可用时仍准确报告其可用范围；OCR坐标在两端能回到正确页/图像，低置信度不自动当真值
+- 增量重建/失效可证明，不泄漏无权源内容；实际包的CPU/内存/模型体积与取消回落有测量，不能继承首片小数据性能结论
+
+### W7 设置安全存储与能力状态
+
+设置加入模式范围/版本、记忆读写与历史检索分离控制、身份偏好及安全审查原因。默认模式、临时会话、Android屏幕读取和个人账号限定不在本版擅自启用；设置必须区分尚未决定、平台不支持、未授权和暂时故障。
+
+#### 目标边界
+
+将模型与执行位置、文件/数据目录、设备身份、连接、权限、OCR资源、隐私与日志、外观/无障碍设置做成明确能力状态。初期先实现阻断未配置能力的基础设置，再随每波补配置页面；不因存在一个开关就表示底层能力可用。
+
+#### 前置依赖
+
+首片平台端口与能力枚举。安全存储/模型目的地配置是W4联网前置，文件能力是W1/W5前置，OCR下载设置是W6前置。普通偏好与安全权限分开，不让恢复外观设置恢复旧授权。
+
+#### 现有文件与迁移落点
+
+- [platform_shell_personal.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/screens/platform_shell_personal.dart)：宿主个人与设置相关界面，属于platform_shell的part
+- [model_gateway.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/model_gateway.dart)、[secret_store.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/apps/muyon/lib/services/models/secret_store.dart)：模型端点与秘密引用
+- [settings_page.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/settings/settings_page.dart)、[ai_settings.dart](https://github.com/mightyoung/Muyon/blob/01e56cc2d729dab70e1b1def05c3aa93b28f421a/packages/inquiry_module/lib/src/features/settings/ai_settings.dart)：询价子设置
+- 目标：muyon-contract能力/配置视图，muyon-policy允许范围，muyon-platform系统秘密与权限，muyon-store非秘密偏好；两端分别采用平台合适的设置交互
+
+#### 数据契约
+
+CapabilityState区分可用、未配置、缺权限、不支持、临时故障，不合并为bool。ModelProfile区分本机/自己的设备/远程、用途、模型ID、规范化完整端点、身份和credentialRef。界面、执行计划预览及模式要求时的批准内容与实际请求目的地必须一致，凭据本体不进入renderer或普通合同。
+
+配置改变带revision，对在途任务明确“继续有效配置/下次生效/刷新计划并按模式重新判定”的规则。敏感目的地、模型供应方或外发数据范围变化使旧计划授权失效；刷新后若仍在全部允许的有效范围内，不机械追加逐次确认。普通外观偏好不能产生安全授权；设备级身份与工作区级配置不混同。
+
+#### 关键反例与完成门槛
+
+- 秘密存储不可用、凭据丢失/撤销、端点补全后与预览不一致、切供应方沿用旧许可、未配置本地模型却显示离线可生成
+- 恢复备份后错误恢复已撤销权限、调试日志带token、设备名称/路径异常输入、不可用开关仍可点击执行
+- 两端能够看清实际执行位置与数据目的地；安全能力fail-closed，秘密不出日志/事件/页面；普通偏好不扩大授权
+- 只有已通过相关业务波次的能力可标为可用；配置导出排除秘密与不可转移授权，iOS或同步相关项不冒充现有能力
+
+### W8 全业务组合与切换评审
+
+W8不再新增大功能，负责证明已经迁移的能力能组合工作。使用有版本的合成科研/询价案例，串联文件输入、阅读定位、提取草稿、人工修改、比较试算、模式授权或必要确认、落库、检索、导出与取消/恢复。至少包含同一command在两端隔离副本的语义对照，以及一端真实包连续操作的完整用户路径。
+
+现有文件定位沿用W1–W7清单和仓库inventory，不把文档目录中的设计或任务书当作已实现能力。目标是准确版本的双前端包、同版Rust、合同/fixture锁文件和审查证据，不是一个“全部迁移完成”口号。
+
+完成门槛：
+
+1. 每波有范围、准确源码SHA、合同版本、正负fixture、红绿/变异、真实包/设备、未关风险及owner；失败、取消、跳过和未跑分别记录
+2. 历史风险均有明确处理：已用对应反例关闭、受影响能力关闭，或经明确决定后置；不把缺测试写为低风险
+3. Windows/macOS及所宣称Android ABI/API矩阵实际执行；PDF/OCR/模型载入的资源开销重新测，不使用首片结果背书
+4. 接口、权限、取消、旧卡、索引、回执和升级组合没有新增数据丢失/商敏泄漏；独立审查者可从日志复核
+5. 测试库与旧生产库仍隔离；正式迁移、同步、发布、签名访问、外部接收者、真实模型数据/费用按单独授权执行
+6. 旧Flutter退役必须另行决定；若正式迁移尚未通过，完成状态应写“新架构业务试用版”，不能写“已无损替代旧系统”
+
+到此为止仍不承诺iOS、云同步或跨设备审批统一结算。已有架构为它们预留稳定合同，只在相应方案、授权和验收完成后开放。
+
+## 10 验证 平台测量与数据回退
+
+### 验证框架
+
+#### 行为和合同
+
+- 统一 fixture 使用固定时钟、固定随机源、稳定标识、显式权限和初始数据；对比规范化业务结果、错误码、回执和最终状态
+- 两个前端在各自独立副本上执行同一条 command，验证返回语义、业务状态变化、权限拒绝及重试结果一致。不能以共写同一数据库作为“一致性”证据
+- 每个切片至少保留成功、输入错误、权限拒绝、过期版本、重复提交、取消、崩溃恢复和敏感数据不泄漏的用例
+- 先得到预期失败的红灯，再实现绿灯；保存关键守卫的变异验证，证明移除权限检查、版本检查或幂等键会让测试失败
+- golden 只用于稳定且可解释的输出，避免把整段含随机 UUID 的 JSON 当作业务正文安全断言
+- 金额、单位换算、显式清空、历史快照、删除引用及批量原子性须单列。若新设计有意改变旧行为，应形成经确认的差异条目
+
+#### 生命周期和权限
+
+- 取消必须定义提交前、提交中和已提交后的不同结果；UI 取消不应把已落盘操作伪装成未执行
+- 模拟进程在事务前、提交后但回执前、导出临时文件写入后等位置终止；重启后根据事务和回执恢复，不盲目重放
+- 导出重试应验证幂等、目的地授权、文件完整性和临时文件处理；业务敏感内容不得进入遥测、无权限视图或通用错误文本
+- Electron 测试覆盖 renderer 到主进程边界：来源校验、输入验证、上下文隔离、沙箱与受限桥接。具体实现应遵循官方安全指导：[Electron Security](https://www.electronjs.org/docs/latest/tutorial/security)
+
+#### 真实包与平台
+
+- CI 应分开记录 Rust 合同测试、前端测试、跨边界集成测试、打包与已安装应用测试，避免把“构建成功”写成“设备通过”
+- Windows 和 macOS 需要实际安装包验证。Android 需按支持范围列出 ABI、最低与目标 API、模拟器和真实设备的证据；未跑平台明确标记未验证
+- 原生库打包还需核查 16 KB 页支持及其依赖库。Android 官方分别说明了 ABI 和页大小要求：[Android ABIs](https://developer.android.com/ndk/guides/abis)、[16 KB page sizes](https://developer.android.com/guide/practices/page-sizes)
+- Kotlin 与 Rust 的 UniFFI 可作为桥接候选，但其官方说明明确区分绑定生成和完整平台分发；因此仍需实际包的加载、生命周期和错误传播验证：[UniFFI user guide](https://mozilla.github.io/uniffi-rs/latest/)
+
+### 关键反例和证据格式
+
+对照规范分为必须保持的语义、明确批准的改进、待判断差异。Dart与Rust不一致时先输出最小差异，不自动选旧结果或更新golden。fixture版本、源码SHA、seed、时钟和初始库摘要一起保存；只按约定规范化非业务随机值，不过滤权限、金额或状态差异。
+
+测试顺序是纯领域、合同解析、存储事务、跨进程/FFI、两前端真实路径、安装包与设备。UI快照通过不是落库、权限或取消通过。
+
+| 风险 | 必须注入的反例 | 合格结果 |
+| --- | --- | --- |
+| 合同漂移 | 未知主版本、缺字段、超长帧、64位越界、null/省略混淆 | 明确拒绝或按书面规则处理，两端一致 |
+| 业务失真 | Unicode、零/负/极值、引用类型不明、历史快照被重算 | 当前切片规则一致；超范围能力不以默认值冒充支持 |
+| 授权失效 | 模式授权或确认后切scope、revision改变、撤权、计划变、探针异常 | 提交前重查并拒绝，无部分写或旧授权复活 |
+| 重复动作 | 双击、同键重试、同键异payload、重启 | 最多一次本地业务提交，返回真实回执 |
+| 取消竞态 | 入队前、事务前、提交边界、提交后、退出页面 | 区分取消请求与已取消，保留已提交事实 |
+| 崩溃恢复 | 写后未提交、提交后未响应、导出中途、磁盘满 | 原子回滚或可查回执，无静默空库和重复动作 |
+| 商敏泄漏 | 越权字段、过期缓存、搜索摘要、错误、日志、崩溃报告 | 目的限定投影，未授权字段及秘密不出现 |
+| 事件失序 | 重复/乱序、游标过期、旧epoch、慢订阅 | 去重或快照恢复，旧回调不串任务，内存有界 |
+| 导出幂等 | 同意图重复、目标撤权、路径变、半文件、回执丢失 | 摘要可核对，无静默覆盖；结果不明先查账 |
+| 平台生命周期 | Compose重组、旋转、进程死亡、桌面关闭/休眠 | 不重复任务，订阅释放，恢复显示真实状态 |
+
+金额/税率/单位、批量原子性、科研证据类型、OCR置信度及真实外发在后续相应切片补齐，不能永久忽略。外部服务不保证exactly-once；第三方已执行而本地未记回执时保留“结果待核实”，仅在提供方幂等/查询合同允许时恢复，否则请用户判断。
+
+每项关键守卫保存红灯、实现绿灯、反转守卫再次红灯、还原后最终绿灯。例如跳过权限、revision、幂等表或直接返回完整对象。变异存活需要解释并由独立审查判断，不以总覆盖率代替。安全断言针对具体字段和输出渠道，不对含随机UUID整段文本做模糊搜索。
+
+证据包至少记录完整SHA、oracle SHA、fixture hash、工具链锁版本、命令、OS/设备/ABI/API、包hash、红绿/变异结果、审查者和剩余风险。区分pass、fail、skipped、not-run、cancelled；跳过不能计为平台通过。真实商敏样本、密钥和未授权崩溃转储不进入证据包。
+
+### 本版补充的模式与记忆验收
+
+| 场景 | 应观察的结果 | 失败判据 |
+| --- | --- | --- |
+| 生成卡折叠 筛选 输入 | 本地立即响应，无模型新轮次 | 所有点击被迫送模型，或出现隐含写入 |
+| 已完整参数的业务保存 | 直达Rust校验与执行 | 以“安全”强制模型再理解一次 |
+| Auto三种风险结果 | 低风险自动、高风险确认、禁止类拒绝 | 模型自报低风险可绕过规则 |
+| 全部允许的高风险动作 | 有效工作区权限内直接执行并记账 | 另按风险弹确认，或逐对象隐形补授权 |
+| 全部允许遇旧revision | 返回冲突并刷新校验 | 免询问被误写为免版本检查 |
+| 超档动作与主动切档 | 保留草稿及明确切档入口 | 静默切到Auto或无理由吞掉动作 |
+| 模式变化和撤权竞态 | 执行点采用最新事实，派发后核对回执 | 旧卡、旧配置或晚回调恢复权限 |
+| 安全审查恢复 | 准确版本反例及审查齐备，限定能力开放 | 换档或重启自动解除阻断 |
+| 记忆并发编辑 | CAS冲突保留两方修改供核对 | 自动摘要覆盖新人工修改 |
+| 来源撤权后上下文待发 | 缓存和已拼上下文失效，零新增披露 | 旧摘要或排队任务重新引入来源 |
+| 记忆读写与历史检索 | 三个能力独立按设置执行 | 开启其中一个隐含开启另外两个 |
+| 产物与身份越权探针 | 能力由可信注册表给出，身份只改偏好 | 生成文本或名称变化产生新授权 |
+
+这些验收需同时记录ModeGrant来源、规则版本、对象revision、派发时间和receipt，不能仅截图确认框存在或不存在。Auto和全部允许至少各有断网、重复点击、撤权、杀进程及outcome_unknown恢复样例；所有结果仍待后续实际工程验证。
+
+### CI与真实安装包矩阵
+
+以下为建议范围，不是当前已有runner或设备的声明。实施前确认目标设备；缺少执行环境不能用交叉编译替代设备证据。
+
+| 层级 | 建议目标 | 验证内容 | 放行条件 |
+| --- | --- | --- | --- |
+| 内核 | Rust受支持host工具链 | fmt/lint、领域、合同、store、权限、恢复 | 每个相关提交，依赖锁和准确SHA |
+| 对照 | 固定Dart与Rust | 首片fixture差异、负例、批准差异表 | 合同/规则/存储变化必跑 |
+| 桌面开发 | Electron与配套Rust，Windows/macOS | 真stdio、来源校验、断连、取消、离线 | 两OS分别运行，不只跑浏览器组件 |
+| Windows包 | 首批建议x64；ARM64另立条目 | 从包安装、Rust路径、文件授权、启动退出 | 候选包在Windows执行，记录hash |
+| macOS包 | 优先arm64；支持Intel时另测x64 | 配套二进制架构、路径、权限、升级回退 | 每个宣称支持架构有执行证据 |
+| Android绑定 | arm64-v8a与测试x86_64 | 库装载、绑定校验、错误/取消/释放 | 真FFI，绑定与库同一版本 |
+| Android应用 | arm64真机；x86_64模拟器；最低/目标API | 安装、离线、旋转、进程恢复、URI、TalkBack首片 | 真机为发布门禁，模拟器不替代所有真机项 |
+| Android原生兼容 | 4KB及16KB页环境 | 所有原生依赖对齐、安装及实际加载 | 不能只检查主Rust库 |
+| 发布候选 | 最终组合SHA | 全相关回归、包hash、版本清单、升级回退 | 签名/公证/商店发布另需相应授权 |
+
+APK中Rust及绑定依赖均需检查16KB兼容，按[Android官方指南](https://developer.android.com/guide/practices/page-sizes)落实；ABI覆盖以[NDK官方文档](https://developer.android.com/ndk/guides/abis)为依据。UniFFI生成绑定不等于完成平台分发，需以包内实际加载和生命周期证据验收。[UniFFI官方说明](https://mozilla.github.io/uniffi-rs/latest/)
+
+### 资源测量的条件与限制
+
+首轮应在批准的目标本机或测试机测真实release安装包。固定设备/CPU/RAM、OS/架构、电源与温度、包hash、同一数据集/功能范围、网络/模型状态与缓存状态。旧Flutter与新包必须走可比路径，不能拿全功能旧包与空壳新包比较后宣称整体收益。
+
+| 指标 | 记录方法 | 限制 |
+| --- | --- | --- |
+| 包体 | 下载包与落盘体积分开，列原生库、模型、缓存 | 模型是否包含保持一致 |
+| 启动 | 到可交互与到首个业务结果分别计时 | 冷/热各至少5次，列每次及中位数；小样本不宣称可靠p95 |
+| 空闲 | 固定稳定窗口采样，合计Electron进程及Rust | 不只报renderer；后台任务一致 |
+| 峰值 | 固定列表/文件/任务与完成后回落 | 首片不覆盖OCR/大模型，不能外推全功能 |
+| 交互 | 输入、滚动、切页、取消响应与长阻塞 | 相同屏幕和数据，主观顺滑不替代记录 |
+| 恢复 | 终止到可查状态/继续操作耗时 | 正确性优先于速度 |
+
+阈值在第一轮测量后结合目标硬件确认，不预先保证。超标时定位进程、列表、解析、桥接并重估，不通过取消沙箱、跳过校验或泄漏日志换性能。[Electron性能指导](https://www.electronjs.org/docs/latest/tutorial/performance)
+
+### 数据切换门禁与回滚
+
+首期新旧应用使用独立数据目录；新包不得自动开旧库，未知schema拒写。回退只停新体验并用原旧包/旧数据，不反向同步测试库变化。
+
+P3先停相应写入口，做一致备份并验证可读与可恢复；转换副本后核对记录、版本、引用、金额、附件摘要和任务状态，确定新库唯一writer再切换。文件与数据库非同一事务，导出另有临时文件、摘要、完成记录和恢复步骤；恢复旧库不能撤回外部动作。
+
+| 门禁 | 必须具备的证据 | 不满足时 |
+| --- | --- | --- |
+| G0开始首片 | 固定合同、所有权、合成样本、旧版可用及授权范围 | 停在设计，不抢占writer |
+| G1试用首片 | M01–M28证据、双端一致、红绿/变异、真包、无阻断风险 | 继续修首片，功能保持关闭 |
+| G2扩大能力 | 每片业务/权限/恢复/设备证据，相关历史风险复核 | 不开放受影响能力，不改名关闭风险 |
+| G3碰正式数据 | 已批准范围、副本迁移/恢复、写入权及回滚代价 | 生产库仍由旧客户端持有 |
+| G4正式替换 | 最终SHA、签名包、平台矩阵、升级回退、支持说明及切换决定 | 保留旧体验，不称全量完成 |
+
+新库正式写入后，回旧版须用已验证的反向转换/导出，或恢复迁移前备份并明确处理新增写入；不能静默丢弃恢复点后的变化。任务取消、切路由、软件降级与数据库恢复是不同动作。
+
+## 11 风险 待定项与决策清单
+
+### 必须继承的风险
+
+C6 的商敏投影与句柄生命周期、CF 的原因和旧值重算恢复、LE06 的外部结果未知不重试、锁与子进程及 native assets，均作为迁移必须复核的风险主题。本文不把这些动态事项列为已完成或未完成的实时状态表；进入相关切片时应查最新提交、审查意见和 CI，再明确关闭证据。
+
+新语言和新 UI 会引入原先不存在的传输、线程、生命周期与打包边界。现有绿色测试用于发现语义，不直接证明新实现安全。Rust 编译通过也不能证明授权目标正确、商敏投影无泄漏或外部请求不会重复。
+
+| 风险 | 触发条件 | 阻断或缓解 |
+| --- | --- | --- |
+| 规则双写 | 前端自算业务状态或私自写库 | 内核唯一写入口，双传输共享合同测试 |
+| 迁移过宽 | 同时重写 UI 规则 数据与同步 | 按只读切片、受控写入、模块扩展推进 |
+| 权限绕过 | renderer 或生成内容伪造批准 | 内核验证能力与计划摘要，敏感投影在查询侧裁剪 |
+| 不明外部结果 | 请求发送后进程退出或超时 | 执行账本和回执核实，禁止盲重试 |
+| 数据损失 | 新旧客户端共写、降级到旧 schema | 独立数据根目录，迁移备份与恢复门禁 |
+| 桥接与生命周期 | JNA 包体或性能、回调竞态、杀进程 | 真机测量，句柄和取消测试，必要时评估窄 JNI |
+| 体验不一致 | 两端仅复刻外观，缺失恢复行为 | 按业务路径和错误状态共同验收 |
+| 工期失真 | 把首片人日总量当全功能排期 | 完成盘点和首片实测后重估，不承诺一月全迁 |
+
+### 实施前需要锁定的选择
+
+以下保留原技术选项，并补充产品待决；本版没有替用户作出后四项决定。
+
+1. 桌面首发操作系统和版本、Android 最低 API 与设备 ABI，以及是否包含平板作为正式支持范围
+2. 第一条只读切片的业务样本与固定期望，建议从供应商或询价候选详情选一个边界明确的查询开始
+3. PDF 渲染和 OCR 引擎、离线能力、依赖许可证和包体预算
+4. 模型供应商、文件外发规则、日志保留与本地诊断导出范围
+5. React 与 TypeScript 作为 Electron 界面实现的确认，以及 UniFFI 性能和实际包验证的退出门槛
+6. 性能预算、正式数据切换时点与恢复标准；这些决策晚于首个隔离闭环，不提前执行同步或旧数据迁移
+7. 每次询问、只读和低风险候选是否全部保留，其精确范围、默认档位和旧配置迁移；Auto与全部允许的已确认语义不能在此被反向改写
+8. Android屏幕读取是否需要，若需要是手动单次还是明确会话范围；系统能力、提示与后台寿命须另行设计
+9. 临时会话是否加入，以及历史、记忆读写、任务产物和诊断留存各自语义；不先承诺“无痕”
+10. 记忆容量与保留策略，包括配额、主题组织、压缩归档、过期和删除恢复；本版不硬编码未批准的容量
+11. 是否限定个人账号；如需组织或多账号，成员隔离、共享范围和管理责任要单列验收，不由身份偏好推导
+
+### 设计完成与实施完成的区分
+
+本版已统一全允许与Auto、生成卡执行路径、记忆和审查边界的文档语义。待决事项有明确标识，产品选项尚未定不等于设计内部存在两套相互冲突的执行规则。D01至D10只有交付物及验收要求，没有实际代码、测试或发布状态。
+
+本报告完成后可以审查路线、合同、任务依赖和验收样例。只有后续实际实现、测试、真机安装与审查证据满足相应关卡，才能宣称某个切片完成。全量生产切换必须另行确认数据迁移、真实用户数据、发布签名与风险接受，不能从“同意制定方案”推导开工或上线授权。
+
+### 进入实际执行前的确认范围
+
+以下事项需在具体执行前明确范围并取得必要授权，本方案未代为批准：
+
+- 正式数据库、联系人、供应商报价或商敏样本的使用，尤其向模型、服务或测试人员传输时的数据、目的地与用途
+- 真实模型/API实验的提供方、数据、预算上限和外发行为；合成离线fixture不授权付费调用
+- 新凭据、长期访问、签名证书、商店账号和权限扩展；准备工作不能隐含扩大授权
+- 安装到用户电脑、替换旧体验、生产迁移、导出覆盖已有文件、发布分发或旧版退役
+- 设备采购、付费CI、云机或新订阅；环境未验证前不承诺测试日期
+
+本方案完成的是可评审的实施路径和验收标准。没有生成产品代码、修改数据库、调用真实模型、派发外部角色、运行CI/设备测试或取得资源实测结果。
+
+## 附录 证据索引与术语
+
+### 证据使用原则
+
+源码链接固定到完整 SHA；产品文档、官方招聘和平台文档沿用原注明时点；第2章新增更正于2026年10月13日再次核对对应官方页面，未重查全部历史链接。后续内容可能变化。引用用于支持特定事实或技术约束，不表示参考产品内部采用本报告设计。
+
+### 关键术语
+
+- CoreHost：每个设备上管理内核生命周期、数据库写入与订阅的受控运行实例
+- Projection：按访问目的和权限筛选后的数据视图
+- Capability：限定动作、目标、计划、时效与次数的授权引用，可来自有效模式或必要确认，不是布尔批准标记
+- Revision：业务对象版本，用于冲突检查和审批绑定
+- Idempotency key：一次业务意图的稳定去重标识，不等同于一次传输的 request_id
+- Execution ledger：外部动作的执行账本，记录准备、模式授权或必要确认、派发与确定或未知结果
+
+- ModeGrant：来自用户所选模式与范围的可信授权记录；全部允许据此免额外询问，不等于忽略现有访问权限
+- RiskDecision：确定性规则对动作和事实给出的风险与原因；Auto据此选择自动或确认，全部允许不追加风险确认
+- MemoryProjection：按来源权限和当前用途投影的记忆内容，区别于底层完整记录与历史检索
+- Review hold：限定能力的安全审查阻断记录，只能由对应证据和恢复检查清除
+- Cutover：在验证后转移某一范围的使用或数据写入权，不只是切换一个界面开关

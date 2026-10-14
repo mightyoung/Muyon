@@ -1,0 +1,26 @@
+{
+  "status": "entry exact bc5b CI success; broader first-batch preserves same existing-file patch, final candidate CI still required",
+  "base": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "product_base": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "entry_writer": "Leader B",
+  "exact_existing_files": [
+    {
+      "path": "docs/adr/0001-leadership-and-scope-freeze.md",
+      "operation": "append only",
+      "original_body_sha256": "6d8d60f5be4b7015a2db87310e7f928f849e0596ad4e421bcb1f00a0cc0df7b8"
+    },
+    {
+      "path": "docs/tasks/HANDOVER-LEADER.md",
+      "operation": "prefix only",
+      "original_body_sha256": "a9c8452debb3be2aace2489cfb0318202554d51a6e0ef0d7d8a6b5f04b5f0aeb"
+    }
+  ],
+  "original_body_preserved": true,
+  "design_source": "six original commits, 95 added files in five original design directories byte preserved",
+  "other_existing_files_modified": false,
+  "other_21_legacy_migration_headers": "registered by fixed source; excluded from this two-file first entry patch until coordinated precise list",
+  "new_adr_0006_0007": "not allocated",
+  "old_product_branches_included": false,
+  "implementation_or_schema_freeze_claimed": false,
+  "entry_review": "independent-reviews/entry-review.md"
+}

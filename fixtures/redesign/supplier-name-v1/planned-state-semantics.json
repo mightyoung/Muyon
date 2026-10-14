@@ -1,0 +1,176 @@
+{
+  "fixture_format": "m04-supplier-name-harness-v1",
+  "format_scope": "offline test input recipes and semantic expectations; not a business DTO or M03 wire schema",
+  "kind": "planned_state_semantics_only",
+  "product_source_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "design_source_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "m02_decision_sha": "2fd91b03a7b5f0888c1e11ab0ba559a580e970d0",
+  "source_references": {
+    "normalize": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/values.dart",
+      "lines": "43-69"
+    },
+    "supplier": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/entities.dart",
+      "lines": "11-46"
+    },
+    "validate_payload": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/quotation.dart",
+      "lines": "10-25"
+    },
+    "tool_guard": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "138-179"
+    },
+    "tool_schema": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "80-134"
+    },
+    "tool_transaction": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "390-465,518-570"
+    },
+    "old_form": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/inquiry_module/lib/src/features/catalog/catalog_form.dart",
+      "lines": "251-268,295-303"
+    },
+    "store_version": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/store.dart",
+      "lines": "378-398,435-439,502-514"
+    },
+    "receipt_lookup": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_receipt_lookup.dart",
+      "lines": "8-59"
+    },
+    "receipt_identity": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_write_receipts.dart",
+      "lines": "7-65"
+    }
+  },
+  "execution": "not_run",
+  "golden": null,
+  "golden_status": "pending_independent_dart_reference",
+  "classification_or_authorization_proof": "not_supplied",
+  "cases": [
+    {
+      "case_id": "M04-STATE-new-intent-same-canonical-name",
+      "status": "planned",
+      "input_semantics": [
+        "S1 current name B revision 2",
+        "Trusted new intent submits raw space-B-space with fresh current plan and key"
+      ],
+      "proposed_semantics": [
+        "canonical name B",
+        "revision 3 and one independent committed receipt",
+        "other fields unchanged; name-change log may have no item"
+      ],
+      "source_refs": [
+        "store_version",
+        "tool_transaction"
+      ],
+      "golden": null,
+      "requires": "future real isolated Store/controller/receipt runner plus current scope/purpose proof; not supplied by these files",
+      "classification_or_scope_grant_fixture": null
+    },
+    {
+      "case_id": "M04-STATE-same-intent-redelivery",
+      "status": "planned",
+      "input_semantics": [
+        "Original committed intent / plan / key / payload is redelivered"
+      ],
+      "proposed_semantics": [
+        "reuse original receipt; no second business write or revision bump",
+        "old snapshot entering main handler may scope_changed; keep selection guard and use independent readonly receipt lookup"
+      ],
+      "source_refs": [
+        "tool_transaction",
+        "receipt_identity",
+        "receipt_lookup"
+      ],
+      "golden": null,
+      "requires": "future real isolated Store/controller/receipt runner plus current scope/purpose proof; not supplied by these files",
+      "classification_or_scope_grant_fixture": null
+    },
+    {
+      "case_id": "M04-STATE-expired-cas",
+      "status": "planned",
+      "input_semantics": [
+        "Read revision1; another trusted writer saves revision2; old name plan submitted"
+      ],
+      "proposed_semantics": [
+        "reject stale CAS; no new domain write",
+        "preserve draft; do not swap revision to overwrite same field"
+      ],
+      "source_refs": [
+        "tool_transaction"
+      ],
+      "golden": null,
+      "requires": "future real isolated Store/controller/receipt runner plus current scope/purpose proof; not supplied by these files",
+      "classification_or_scope_grant_fixture": null
+    },
+    {
+      "case_id": "M04-STATE-scope-changed",
+      "status": "planned",
+      "input_semantics": [
+        "Selected identity/revision/digest/workspace binding changes before effect"
+      ],
+      "proposed_semantics": [
+        "scope_changed or current scope rejection; no new domain write",
+        "never weaken selection guard to allow a retry"
+      ],
+      "source_refs": [
+        "tool_transaction"
+      ],
+      "golden": null,
+      "requires": "future real isolated Store/controller/receipt runner plus current scope/purpose proof; not supplied by these files",
+      "classification_or_scope_grant_fixture": null
+    },
+    {
+      "case_id": "M04-STATE-readonly-receipt",
+      "status": "planned",
+      "input_semantics": [
+        "Original effect response lost; query original receipt with original request/domain proof"
+      ],
+      "proposed_semantics": [
+        "identity-verified authoritative receipt may establish effect",
+        "return only current scope/purpose allowed minimum projection; lookup grants nothing",
+        "notFound/unreadable alone leaves unknown; no automatic resubmit"
+      ],
+      "source_refs": [
+        "receipt_lookup",
+        "receipt_identity"
+      ],
+      "golden": null,
+      "requires": "future real isolated Store/controller/receipt runner plus current scope/purpose proof; not supplied by these files",
+      "classification_or_scope_grant_fixture": null
+    },
+    {
+      "case_id": "M04-STATE-unknown-key-change-is-not-new-intent",
+      "status": "planned",
+      "input_semantics": [
+        "Unresolved old effect; client changes UUID/key without trusted new user intent"
+      ],
+      "proposed_semantics": [
+        "not legitimate retry authorization",
+        "retain unknown and use verification/isolation; no silent resend or fabricated success"
+      ],
+      "source_refs": [
+        "tool_transaction",
+        "receipt_lookup"
+      ],
+      "golden": null,
+      "requires": "future real isolated Store/controller/receipt runner plus current scope/purpose proof; not supplied by these files",
+      "classification_or_scope_grant_fixture": null
+    }
+  ]
+}

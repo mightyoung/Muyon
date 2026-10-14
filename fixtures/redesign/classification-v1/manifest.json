@@ -1,0 +1,87 @@
+{
+  "artifact_kind": "offline_fixture_index_not_product_schema",
+  "status": "draft",
+  "execution_status": "not_run",
+  "base_commit": "bc5b2c37a98bfa417c0f35f5383b76dfb03be85a",
+  "product_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "design_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "reviewed_D01a_sha": "99c4d779bb5b94e3388637228f42869d6e81152d",
+  "main_cases": {
+    "count": 52,
+    "status": "not_run",
+    "added": 0
+  },
+  "classification_subcases": {
+    "count": 29,
+    "status": "not_run",
+    "added": 0
+  },
+  "rules": {
+    "count": 14,
+    "status": "proposed_unfrozen",
+    "file": "rules.json"
+  },
+  "variant_count": 77,
+  "case_files": [
+    "U01.json",
+    "U02.json",
+    "U03.json",
+    "A01.json",
+    "A02.json",
+    "P01.json",
+    "P02.json",
+    "D01.json",
+    "D02.json",
+    "M01.json",
+    "M02.json",
+    "F01.json",
+    "F02.json",
+    "F03.json",
+    "F04.json",
+    "F05.json",
+    "F06.json",
+    "F07.json",
+    "F08.json",
+    "F09.json",
+    "F10.json",
+    "F11.json",
+    "C01.json",
+    "C02.json",
+    "C03.json",
+    "C04.json",
+    "N01.json",
+    "N02.json",
+    "N03.json"
+  ],
+  "inputs": [
+    {
+      "path": "docs/tasks/redesign-kickoff-20261014/Muyon-A00-Classification-Fixture-Catalog.md",
+      "sha256": "70be7c0c164e68be721e76fe1125e9e674e651d54b3161a27ca8a32420802cb4"
+    },
+    {
+      "path": "docs/tasks/redesign-kickoff-20261014/A00-APPLICABILITY-CLARIFICATION.md",
+      "sha256": "4e002a5ced9f691d523031dce04c52754771ea51d816418abbb9fa90921eb25d"
+    },
+    {
+      "path": "docs/contracts/redesign-v1.3.2/authorization-minimal-contract.md",
+      "sha256": "921f82b724d20774967ce72a1408ed886164128527eb4fdffc223eed63465834"
+    },
+    {
+      "path": "docs/contracts/redesign-v1.3.2/supplier-name-contract.md",
+      "sha256": "c5bc0a89de55e144cf15dac6730258e1127dfc46b59c05a33f5407036e6e337a"
+    },
+    {
+      "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md",
+      "sha256": "705a642fc7ec7b2e46e4c84e4e4990a4e9fe12628eaadbdbb526b833a12d16f9"
+    },
+    {
+      "path": "docs/design/redesign-v1.3.2-20261014/Muyon-Page-Design-Handbook-v1.3.2-2026-10-14.md",
+      "sha256": "9e0b44c55d05d4c22ac5255a77fe773706d0369fc861093358559370c2fd5608"
+    }
+  ],
+  "secret_representation": "opaque sentinel metadata only; no real key or secret body/log values",
+  "runtime_checks_executed": false,
+  "classification_engine_implemented": false,
+  "m03_schema_frozen": false,
+  "structural_validation_is_runtime_acceptance": false
+}

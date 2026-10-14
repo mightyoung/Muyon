@@ -1,0 +1,529 @@
+{
+  "product_baseline": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "design_source": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "design_branch": "task/redesign-v11-claude-review-20261013",
+  "compare": {
+    "ahead": 6,
+    "behind": 0,
+    "added_files": 95,
+    "design_directories": 5
+  },
+  "ci": {
+    "design": {
+      "run": 38439338859,
+      "checkout_sha_verified": true,
+      "conclusion": "success",
+      "analyze_suites": 8,
+      "test_suites": 8,
+      "passed": 4199,
+      "skipped": 207
+    },
+    "product": {
+      "run": 38279219941,
+      "job_conclusion": "success",
+      "checkout_sha_verified": true,
+      "analyze_suites": 8,
+      "test_suites": 8
+    },
+    "entry_candidate": {
+      "sha": "bc5b2c37a98bfa417c0f35f5383b76dfb03be85a",
+      "run": 38488260486,
+      "job": 115607058441,
+      "status": "completed",
+      "conclusion": "success",
+      "checkout_sha_verified": true,
+      "analyze_suites": 8,
+      "test_suites": 8,
+      "passed": 4199,
+      "skipped": 207,
+      "failed": 0,
+      "doctor_scenarios": 23,
+      "coverage": "success",
+      "laya": "success",
+      "scope": "M01/intake/M02/D01a/D03a drafts and entry patch only, not later fixtures/scripts or M03 runtime acceptance"
+    }
+  },
+  "leader": {
+    "current": "Leader B",
+    "responsibilities": [
+      "dispatch",
+      "task contracts",
+      "review organization",
+      "registration",
+      "independent validation",
+      "unique develop integration"
+    ],
+    "Leader A": "paused",
+    "authority": "user Sentinel_3b08b7b589a4819184fd7c9f3323bad5; formal development Sentinel_e6ce5e0c57808191920e687495a03d35"
+  },
+  "m01": {
+    "status": "first-slice ownership/entry and draft contracts independently reviewed; broader first-batch candidate preparation",
+    "writer": "Leader B",
+    "exit_missing": [
+      "exact final first-batch candidate CI terminal before unique develop integration"
+    ],
+    "first_slice_reservations": [
+      {
+        "task": "M01 registration / current entry integration",
+        "writer": "Leader B",
+        "paths": [
+          "docs/tasks/REDESIGN-M01-20261014.md",
+          "docs/tasks/redesign-kickoff-20261014/"
+        ],
+        "status": "two existing-file entry patch statically reviewed; first-batch status registration active"
+      },
+      {
+        "task": "M01/A00 independent review",
+        "owner": "/root/redesign_m01_review",
+        "source_sha": "421e7332807d0f8a2f7a6a36819601dcad442130",
+        "paths": [
+          "read-only repository; reports outside Git"
+        ],
+        "status": "completed static non-author C0; source and delta reports preserved"
+      },
+      {
+        "task": "M02 supplier-name contract draft",
+        "writer": "/root/redesign_m02_contract",
+        "paths": [
+          "docs/contracts/redesign-v1.3.2/supplier-name-contract.md",
+          "docs/tasks/REDESIGN-M02-SUPPLIER-NAME-20261014.md"
+        ],
+        "status": "completed Draft, non-author C0 plus delta C0, fixed source normally pushed; no M03 freeze",
+        "base_sha": "421e7332807d0f8a2f7a6a36819601dcad442130",
+        "source_sha": "2fd91b03a7b5f0888c1e11ab0ba559a580e970d0",
+        "branch": "leader-b/redesign-m02-supplier-name-20261014"
+      },
+      {
+        "task": "D01a authorization minimal draft",
+        "writer": "/root/redesign_d01a_contract",
+        "branch": "task/redesign-d01a-20261014",
+        "source_sha": "99c4d779bb5b94e3388637228f42869d6e81152d",
+        "paths": [
+          "docs/contracts/redesign-v1.3.2/authorization-minimal-contract.md",
+          "docs/tasks/REDESIGN-D01A-20261014.md"
+        ],
+        "status": "completed reviewed Draft, normally pushed; subsequent fixtures separately reserved"
+      },
+      {
+        "task": "D03a recovery minimal draft",
+        "writer": "/root/redesign_d03a_contract",
+        "branch": "task/leader-b-redesign-d03a-20261014",
+        "source_sha": "40f3cddb6e62baa2374bde288120d2385cb14c3f",
+        "paths": [
+          "docs/contracts/redesign-v1.3.2/recovery-minimal-contract.md",
+          "docs/tasks/REDESIGN-D03A-20261014.md"
+        ],
+        "status": "completed reviewed Draft, normally pushed; subsequent fixtures separately reserved"
+      },
+      {
+        "task": "M04 supplier-name inputs",
+        "writer": "/root/redesign_m02_contract",
+        "branch": "leader-b/redesign-m04-supplier-name-20261014",
+        "source_sha": "8c5995515fa14ca3592a1c33c71afb4e4c1e5def",
+        "paths": [
+          "fixtures/redesign/supplier-name-v1/",
+          "docs/tasks/REDESIGN-M04-SUPPLIER-NAME-20261014.md"
+        ],
+        "status": "completed reviewed input material; originally not_run/planned, golden null"
+      },
+      {
+        "task": "M05 fixed Dart reference",
+        "writer": "/root/redesign_d03a_contract",
+        "branch": "task/leader-b-redesign-m05-supplier-name-20261014",
+        "source_sha": "962daee22c2ee2108440d9b30f2fcf7a88948f40",
+        "paths": [
+          "scripts/redesign/supplier-name-reference/",
+          "docs/tasks/REDESIGN-M05-SUPPLIER-NAME-20261014.md"
+        ],
+        "status": "completed reviewed actual function-level run; no complete entry/runtime or Rust equivalence claim"
+      },
+      {
+        "task": "A00 classification synthetic inputs",
+        "writer": "/root/redesign_d01a_contract",
+        "branch": "task/leader-b-redesign-a00-classification-20261014",
+        "source_sha": "7a8128ca86c583b0bbf1191c4baa4f3e732ca547",
+        "original_sha": "fe5896f5edbf4400de2b885cf7d3791636a0d98d",
+        "paths": [
+          "fixtures/redesign/classification-v1/",
+          "docs/tasks/REDESIGN-A00-CLASSIFICATION-20261014.md"
+        ],
+        "status": "completed non-author C0 input intake after two corrective findings; 29/77 all not_run; pre-M03 current-purpose flag I retained"
+      },
+      {
+        "task": "D03a recovery synthetic inputs",
+        "writer": "/root/redesign_d03a_contract",
+        "branch": "task/leader-b-redesign-d03a-fixtures-20261014",
+        "source_sha": "55480f06490983a54e38908b043b06b4b02df451",
+        "paths": [
+          "fixtures/redesign/recovery-minimal-v1/",
+          "docs/tasks/REDESIGN-D03A-FIXTURES-20261014.md"
+        ],
+        "status": "completed non-author C0 material intake; 19 groups/72 scenarios all not_run"
+      }
+    ]
+  },
+  "a00": {
+    "classification_catalog": "received and byte-verified; contract draft, not runtime implementation",
+    "rule_count": 14,
+    "rules": [
+      {
+        "id": "CLS-DECL-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-CREDENTIAL-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "USER-TEXT-v1",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-ATTACH-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-PROVIDER-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-MODEL-FIELD-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-MODEL-FREE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-DERIVE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-TEMPLATE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-METADATA-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-REUSE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-PURPOSE-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-TRIM-001",
+        "status": "proposed_unfrozen"
+      },
+      {
+        "id": "CLS-AUTH-CHANNEL-001",
+        "status": "proposed_unfrozen"
+      }
+    ],
+    "subcase_count": 29,
+    "cases": [
+      {
+        "id": "V131-T02/U01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/U02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/U03",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/A01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/A02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/P01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/P02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/D01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/D02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/M01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/M02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F03",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F04",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F05",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F06",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F07",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F08",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F09",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F10",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/F11",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/C01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/C02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/C03",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/C04",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/N01",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/N02",
+        "status": "not_run"
+      },
+      {
+        "id": "V131-T02/N03",
+        "status": "not_run"
+      }
+    ],
+    "main_acceptance_count": 52,
+    "main_acceptance_status": "not_run",
+    "inventory_23_units": {
+      "status": "received, internal hashes and 109 distinct fixed-source git blobs root verified; source author task ended",
+      "source_report": "a00-inventory/Muyon-A00-Readonly-Inventory-2026-10-14.json",
+      "root_proof": "a00-inventory/root-independent-proof.json",
+      "source_author": "external read-only inventory thread; no implementation writer",
+      "implementation_writer_freeze": "pending B assignment; null in source report does not mean files free",
+      "duplicate_dispatch": false
+    },
+    "inventory_zip": {
+      "library_id": "libfile_3476f5ecc4648191bbcd3deb6cd2c57b",
+      "bytes": 27354,
+      "sha256": "4d081426b26d49cb302a09b9431b177b6ef2349034b54fa91f5cbacb316f176a",
+      "zip_and_internal_sums_verified": true
+    },
+    "applicability_clarification": "A00-APPLICABILITY-CLARIFICATION.md; normative fixed books override overbroad local-write reading of input catalog L51; original bytes preserved",
+    "synthetic_fixture_material": {
+      "source_sha": "7a8128ca86c583b0bbf1191c4baa4f3e732ca547",
+      "case_count": 29,
+      "variant_count": 77,
+      "status": "all not_run; static input consistency C0",
+      "rules": "14 proposed_unfrozen",
+      "review_findings_closed": [
+        "F10 high flag inconsistent with expectation",
+        "A01 page2 actual check/purpose coverage missing mapping"
+      ],
+      "remaining_format_condition": "current-purpose eligibility only; other body flags confer no permission and require not_applicable or single-purpose representation before M03/runner"
+    }
+  },
+  "implementation_frontier": {
+    "M02": "2fd91b reviewed Draft; M04 8c59955 fixtures and M05 962daee actual fixed Dart function reference independently reviewed C0; complete entry/CAS/receipt lanes remain not_run",
+    "D01a_D03a_SPIKE01": "D01a99c4d and D03a40f3 reviewed Drafts plus classification7a8128/recovery55480 synthetic inputs; no classifier/recovery runtime run; SPIKE-01 real Android library load absent",
+    "M03": "blocked_contract: actual D01a/D03a fixture validation, complete name-entry/state reference and cross-end Unicode equivalence, SPIKE-01 actual Android load/dual-transport semantics, single-source schema not frozen; non-current body flags must be resolved before runner/M03",
+    "Rust_Android_Electron": "not dispatched beyond prerequisites",
+    "M04_M05": {
+      "M04": "8c5995515fa14ca3592a1c33c71afb4e4c1e5def",
+      "M05": "962daee22c2ee2108440d9b30f2fcf7a88948f40",
+      "status": "non-author C0 and actual rerun; 32 function pass, 14 partial, 8 not_run",
+      "actual_invocations": 47,
+      "independent_comparisons": 39,
+      "mismatches": 0,
+      "cross_end_unicode_equivalence": "not_proven"
+    },
+    "D03a_fixture_material": {
+      "sha": "55480f06490983a54e38908b043b06b4b02df451",
+      "groups": 19,
+      "scenarios": 72,
+      "status": "all not_run; static input consistency C0"
+    }
+  },
+  "legacy_workspace": {
+    "registered_worktrees": 90,
+    "dirty_worktrees": 14,
+    "dirty_files_preserved": true,
+    "recovered_commit_objects": [
+      "5436f68c2ba57ae2ea99d6cbc749a5bd92a3cdb0",
+      "7df93d7228693c71767cd4ab88d46d11da7c6064",
+      "cfd7f7b9e081a7cd49b0a66adf87df4994f8db71"
+    ],
+    "recovery_does_not_prove_integration_or_review": true,
+    "c6_remote_recovery": {
+      "method": "normal atomic fast-forward push; git ls-remote full SHA verified",
+      "task/tool-model-disclosure-20261012": "5436f68c2ba57ae2ea99d6cbc749a5bd92a3cdb0",
+      "task/model-disclosure-opaque-reference-20261012": "7df93d7228693c71767cd4ab88d46d11da7c6064",
+      "ci_runs": [
+        {
+          "sha": "5436f68c2ba57ae2ea99d6cbc749a5bd92a3cdb0",
+          "run": 38485490388,
+          "last_observed": "completed/failure",
+          "included_in_redesign_integration": false
+        },
+        {
+          "sha": "7df93d7228693c71767cd4ab88d46d11da7c6064",
+          "run": 38485489896,
+          "last_observed": "completed/failure",
+          "included_in_redesign_integration": false
+        }
+      ],
+      "included_in_redesign_integration": false
+    }
+  },
+  "handoff_zip": {
+    "library_id": "libfile_064b8c79e34c8191959d7e87826e7e0f",
+    "bytes": 23001,
+    "sha256": "e5871071a10068ade3c0a4c50a27b4cc19644958484c4288c6f299c3d077ad21",
+    "zip_and_internal_sums_verified": true
+  },
+  "repository_mutations": {
+    "product_code_changed": false,
+    "original_design_documents_changed": false,
+    "original_worktrees_changed": false,
+    "main_changed": false,
+    "develop_merged": false,
+    "existing_entry_files_modified": [
+      "docs/adr/0001-leadership-and-scope-freeze.md append only",
+      "docs/tasks/HANDOVER-LEADER.md prefix only"
+    ],
+    "historical_entry_body_bytes_preserved": true
+  },
+  "independent_reviews": [
+    {
+      "label": "m01-review",
+      "path": "independent-reviews/m01-review.md",
+      "sha256": "2b83f7879d7d419d661cc5ef116cf280435a1f7542aac791aaeaa05588d7f1a1",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "m02-review",
+      "path": "independent-reviews/m02-review.md",
+      "sha256": "d5c9ecd8c16d84f4fd70c083fc744dc3c0bb87c4f104657dd2cf110e041fa185",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "m02-delta",
+      "path": "independent-reviews/m02-delta.md",
+      "sha256": "e11aadb51ee812280da7a6254f8912f6b7eb0d1eb49e8c830b53656c8f7ae71f",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "d01a-d03a-review",
+      "path": "independent-reviews/d01a-d03a-review.md",
+      "sha256": "3126ed9eb1b2109192a278be79a2bd62a96afd3e8d9f66c7c73271a5c01e0e1d",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "d01a-delta",
+      "path": "independent-reviews/d01a-delta.md",
+      "sha256": "55b899485f52bafdbfb182d97e4420db51832bb4faf36fdd486a6f7b170aa4e2",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "entry-review",
+      "path": "independent-reviews/entry-review.md",
+      "sha256": "24c2a7738d1efc502a0d32b558ca53c991ba51f29883c8f45f218791861fce3b",
+      "kind": "static non-author review; not runtime tests"
+    },
+    {
+      "label": "m04-m05-review",
+      "path": "independent-reviews/m04-m05-review.md",
+      "sha256": "584b22c0a2b4dd7ba552a8cd56fc7e4317401bdadce73bb631e3a5dc2906ac28",
+      "kind": "static non-author review plus actual fixed Dart function rerun and negative controls; not complete target runtime"
+    },
+    {
+      "label": "recovery-fixture-review",
+      "path": "independent-reviews/recovery-fixture-review.md",
+      "sha256": "5e97c3a8fad366c0249e7f39aa4b06b148a9781e14dd5f57b7ca76fb04efdd26",
+      "kind": "static non-author fixed-source fixture material review; not runtime execution"
+    },
+    {
+      "label": "classification-fixture-initial",
+      "path": "independent-reviews/classification-fixture-initial.md",
+      "sha256": "aa0e679bac2f5f0d0a265d890ca133668342a595f970dd533ba3d7d0a80324af",
+      "kind": "static non-author fixed-source fixture material review; not runtime execution"
+    },
+    {
+      "label": "classification-fixture-delta",
+      "path": "independent-reviews/classification-fixture-delta.md",
+      "sha256": "5751ebfb2cea16a690ed18dc6a668b0a0d8f9d11e82d56ecfa6609bc2445b1db",
+      "kind": "static non-author fixed-source fixture material review; not runtime execution"
+    },
+    {
+      "label": "final-batch-review",
+      "source_sha": "f0ca8fd3e11c1a7ebd3cffdfc3875cdc4365c5ab",
+      "path": "independent-reviews/final-batch-review.md",
+      "sha256": "2dc47836299fb577aaab411b0fa80260b2d255e2e49e549241abb05cffd46316",
+      "kind": "static non-author final batch registration and source-identity review, C0; requires exact candidate CI before integration"
+    }
+  ],
+  "candidate_integration": {
+    "status": "fixed final batch registration non-author C0; exact candidate CI and post-integration CI required",
+    "scope": "original design95 + M01/A00 intake + reviewed M02/D01a/D03a Drafts + two entry append/prefix + narrow A00 applicability clarification + M04/M05 input/function reference + classification/recovery synthetic input + preserved independent reviews",
+    "exclude": [
+      "old C6/product branches",
+      "21 additional historical header migrations pending coordinated separate scope",
+      "ADR0006/0007 allocation",
+      "schema freeze",
+      "real data/model/device operations"
+    ],
+    "baseline_product": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+    "baseline_design": "58fe9c62612d74a973614c41677e62a54332e6d6",
+    "branch": "task/leader-b-redesign-first-batch-20261014"
+  },
+  "snapshot_phase": "pre-integration first batch preparation; earlier evidence and input bytes preserved"
+}

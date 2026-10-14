@@ -1,0 +1,576 @@
+{
+  "fixture_format": "m04-supplier-name-harness-v1",
+  "format_scope": "offline test input recipes and semantic expectations; not a business DTO or M03 wire schema",
+  "kind": "source_proven_entry_comparisons",
+  "product_source_sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+  "design_source_sha": "58fe9c62612d74a973614c41677e62a54332e6d6",
+  "m02_decision_sha": "2fd91b03a7b5f0888c1e11ab0ba559a580e970d0",
+  "source_references": {
+    "normalize": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/values.dart",
+      "lines": "43-69"
+    },
+    "supplier": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/entities.dart",
+      "lines": "11-46"
+    },
+    "validate_payload": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/quotation.dart",
+      "lines": "10-25"
+    },
+    "tool_guard": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "138-179"
+    },
+    "tool_schema": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "80-134"
+    },
+    "tool_transaction": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_record_tools.dart",
+      "lines": "390-465,518-570"
+    },
+    "old_form": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/inquiry_module/lib/src/features/catalog/catalog_form.dart",
+      "lines": "251-268,295-303"
+    },
+    "store_version": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "packages/supplier_core/lib/src/store.dart",
+      "lines": "378-398,435-439,502-514"
+    },
+    "receipt_lookup": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_receipt_lookup.dart",
+      "lines": "8-59"
+    },
+    "receipt_identity": {
+      "sha": "01e56cc2d729dab70e1b1def05c3aa93b28f421a",
+      "path": "apps/muyon/lib/platform/inquiry_write_receipts.dart",
+      "lines": "7-65"
+    }
+  },
+  "execution": "not_run",
+  "golden": null,
+  "golden_status": "pending_independent_dart_reference",
+  "classification_or_authorization_proof": "not_supplied",
+  "cases": [
+    {
+      "case_id": "M04-ENTRY-supplier-name-false",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": {
+          "name": false,
+          "aliases": [],
+          "address": null,
+          "categories": [],
+          "notes": null,
+          "merged_into": null,
+          "rating": null,
+          "rating_note": null
+        }
+      },
+      "source_refs": [
+        "supplier",
+        "normalize",
+        "validate_payload",
+        "tool_guard",
+        "tool_schema"
+      ],
+      "proposed_semantics_by_entry": {
+        "Supplier.fromJson": {
+          "outcome": "FormatException",
+          "field": "name",
+          "reason": "expected text"
+        },
+        "legacy_tool_guard_for_values_name": {
+          "outcome": "reject_ontology_text_type"
+        },
+        "legacy_schema_values_name": {
+          "outcome": "reject_wrong_json_type"
+        }
+      },
+      "scope_limit": "Only the full existing Supplier payload and source-proven tool guard/schema differences; not a complete request outcome, no fabricated approval context. Old TextEditingController.text is String, so typed values are not old form input.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-zero",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": {
+          "name": 0,
+          "aliases": [],
+          "address": null,
+          "categories": [],
+          "notes": null,
+          "merged_into": null,
+          "rating": null,
+          "rating_note": null
+        }
+      },
+      "source_refs": [
+        "supplier",
+        "normalize",
+        "validate_payload",
+        "tool_guard",
+        "tool_schema"
+      ],
+      "proposed_semantics_by_entry": {
+        "Supplier.fromJson": {
+          "outcome": "FormatException",
+          "field": "name",
+          "reason": "expected text"
+        },
+        "legacy_tool_guard_for_values_name": {
+          "outcome": "reject_ontology_text_type"
+        },
+        "legacy_schema_values_name": {
+          "outcome": "reject_wrong_json_type"
+        }
+      },
+      "scope_limit": "Only the full existing Supplier payload and source-proven tool guard/schema differences; not a complete request outcome, no fabricated approval context. Old TextEditingController.text is String, so typed values are not old form input.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-null",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": {
+          "name": null,
+          "aliases": [],
+          "address": null,
+          "categories": [],
+          "notes": null,
+          "merged_into": null,
+          "rating": null,
+          "rating_note": null
+        }
+      },
+      "source_refs": [
+        "supplier",
+        "normalize",
+        "validate_payload",
+        "tool_guard",
+        "tool_schema"
+      ],
+      "proposed_semantics_by_entry": {
+        "Supplier.fromJson": {
+          "outcome": "FormatException",
+          "field": "name",
+          "reason": "expected text"
+        },
+        "legacy_tool_guard_for_values_name": {
+          "outcome": "defer_null_to_complete_payload_validation"
+        },
+        "legacy_schema_values_name": {
+          "outcome": "nullable_string_admits_null"
+        }
+      },
+      "scope_limit": "Only the full existing Supplier payload and source-proven tool guard/schema differences; not a complete request outcome, no fabricated approval context. Old TextEditingController.text is String, so typed values are not old form input.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-array",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": {
+          "name": [],
+          "aliases": [],
+          "address": null,
+          "categories": [],
+          "notes": null,
+          "merged_into": null,
+          "rating": null,
+          "rating_note": null
+        }
+      },
+      "source_refs": [
+        "supplier",
+        "normalize",
+        "validate_payload",
+        "tool_guard",
+        "tool_schema"
+      ],
+      "proposed_semantics_by_entry": {
+        "Supplier.fromJson": {
+          "outcome": "FormatException",
+          "field": "name",
+          "reason": "expected text"
+        },
+        "legacy_tool_guard_for_values_name": {
+          "outcome": "reject_ontology_text_type"
+        },
+        "legacy_schema_values_name": {
+          "outcome": "reject_wrong_json_type"
+        }
+      },
+      "scope_limit": "Only the full existing Supplier payload and source-proven tool guard/schema differences; not a complete request outcome, no fabricated approval context. Old TextEditingController.text is String, so typed values are not old form input.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-object",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": {
+          "name": {},
+          "aliases": [],
+          "address": null,
+          "categories": [],
+          "notes": null,
+          "merged_into": null,
+          "rating": null,
+          "rating_note": null
+        }
+      },
+      "source_refs": [
+        "supplier",
+        "normalize",
+        "validate_payload",
+        "tool_guard",
+        "tool_schema"
+      ],
+      "proposed_semantics_by_entry": {
+        "Supplier.fromJson": {
+          "outcome": "FormatException",
+          "field": "name",
+          "reason": "expected text"
+        },
+        "legacy_tool_guard_for_values_name": {
+          "outcome": "reject_ontology_text_type"
+        },
+        "legacy_schema_values_name": {
+          "outcome": "reject_wrong_json_type"
+        }
+      },
+      "scope_limit": "Only the full existing Supplier payload and source-proven tool guard/schema differences; not a complete request outcome, no fabricated approval context. Old TextEditingController.text is String, so typed values are not old form input.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-supplier-name-omitted",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": {
+          "aliases": [],
+          "address": null,
+          "categories": [],
+          "notes": null,
+          "merged_into": null,
+          "rating": null,
+          "rating_note": null
+        }
+      },
+      "source_refs": [
+        "supplier",
+        "validate_payload"
+      ],
+      "proposed_semantics_by_entry": {
+        "Supplier.fromJson": {
+          "outcome": "FormatException",
+          "field": "payload",
+          "reason": "missing or unknown keys"
+        }
+      },
+      "scope_limit": "Missing required full payload key, not patch omission. Does not call normalizeText(null) as an API substitute.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-old-form-vt-prefix",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": "\u000b\u7532"
+      },
+      "source_refs": [
+        "old_form",
+        "normalize",
+        "supplier"
+      ],
+      "proposed_semantics_by_entry": {
+        "old_catalog_form_pretrim_then_existing_supplier_validator": {
+          "outcome": "value",
+          "name": "\u7532"
+        },
+        "legacy_tool_raw_name_and_direct_normalizer": {
+          "outcome": "reject_invalid_xml_character"
+        },
+        "new_end_raw_to_rust_target": {
+          "outcome": "reject_invalid_xml_character",
+          "pretrim_allowed": false
+        }
+      },
+      "scope_limit": "Old form transformation is source evidence, not an executed controller/UI test. M05 must invoke the real path or label a narrower source-only comparison; no copied normalizer or fabricated UI pass.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-old-form-ff-suffix",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": "\u7532\f"
+      },
+      "source_refs": [
+        "old_form",
+        "normalize",
+        "supplier"
+      ],
+      "proposed_semantics_by_entry": {
+        "old_catalog_form_pretrim_then_existing_supplier_validator": {
+          "outcome": "value",
+          "name": "\u7532"
+        },
+        "legacy_tool_raw_name_and_direct_normalizer": {
+          "outcome": "reject_invalid_xml_character"
+        },
+        "new_end_raw_to_rust_target": {
+          "outcome": "reject_invalid_xml_character",
+          "pretrim_allowed": false
+        }
+      },
+      "scope_limit": "Old form transformation is source evidence, not an executed controller/UI test. M05 must invoke the real path or label a narrower source-only comparison; no copied normalizer or fabricated UI pass.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-old-form-vt-ff-edges",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": "\u000b\u7532\f"
+      },
+      "source_refs": [
+        "old_form",
+        "normalize",
+        "supplier"
+      ],
+      "proposed_semantics_by_entry": {
+        "old_catalog_form_pretrim_then_existing_supplier_validator": {
+          "outcome": "value",
+          "name": "\u7532"
+        },
+        "legacy_tool_raw_name_and_direct_normalizer": {
+          "outcome": "reject_invalid_xml_character"
+        },
+        "new_end_raw_to_rust_target": {
+          "outcome": "reject_invalid_xml_character",
+          "pretrim_allowed": false
+        }
+      },
+      "scope_limit": "Old form transformation is source evidence, not an executed controller/UI test. M05 must invoke the real path or label a narrower source-only comparison; no copied normalizer or fabricated UI pass.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-old-form-empty",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": "\t\r\n  "
+      },
+      "source_refs": [
+        "old_form",
+        "normalize",
+        "supplier"
+      ],
+      "proposed_semantics_by_entry": {
+        "old_catalog_form": {
+          "transformed_name": null,
+          "then_supplier_error": "name: expected text"
+        },
+        "direct_normalizer_raw": {
+          "error": "name: required"
+        },
+        "new_end_raw_target": {
+          "error": "name: required"
+        }
+      },
+      "scope_limit": "String controller raw input; preserve distinct error layers.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-bmp-cap2000",
+      "status": "not_run",
+      "input_recipe": {
+        "concat": [
+          {
+            "repeat": {
+              "literal": " ",
+              "count": 1999
+            }
+          },
+          {
+            "literal": "\u7532"
+          }
+        ]
+      },
+      "source_refs": [
+        "tool_guard",
+        "old_form",
+        "normalize"
+      ],
+      "proposed_semantics_by_entry": {
+        "declared_raw_utf16_code_units": 2000,
+        "legacy_tool_guard_and_new_raw_target": {
+          "outcome": "pass_raw_size_guard_then_domain"
+        },
+        "direct_normalizer_and_old_form_pretrim": {
+          "outcome": "domain_valid_after_trim",
+          "does_not_prove_tool_guard": true
+        }
+      },
+      "scope_limit": "UTF-16 raw size counts supplementary scalar as two; test input recipe construction is not a validation implementation. No API success inferred from passing size guard.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-bmp-cap2001",
+      "status": "not_run",
+      "input_recipe": {
+        "concat": [
+          {
+            "repeat": {
+              "literal": " ",
+              "count": 2000
+            }
+          },
+          {
+            "literal": "\u7532"
+          }
+        ]
+      },
+      "source_refs": [
+        "tool_guard",
+        "old_form",
+        "normalize"
+      ],
+      "proposed_semantics_by_entry": {
+        "declared_raw_utf16_code_units": 2001,
+        "legacy_tool_guard_and_new_raw_target": {
+          "outcome": "reject_raw_size_limit_2000"
+        },
+        "direct_normalizer_and_old_form_pretrim": {
+          "outcome": "domain_valid_after_trim",
+          "does_not_prove_tool_guard": true
+        }
+      },
+      "scope_limit": "UTF-16 raw size counts supplementary scalar as two; test input recipe construction is not a validation implementation. No API success inferred from passing size guard.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-supplementary-cap2000",
+      "status": "not_run",
+      "input_recipe": {
+        "concat": [
+          {
+            "repeat": {
+              "literal": " ",
+              "count": 1798
+            }
+          },
+          {
+            "repeat": {
+              "literal": "\ud83d\ude00",
+              "count": 101
+            }
+          }
+        ]
+      },
+      "source_refs": [
+        "tool_guard",
+        "old_form",
+        "normalize"
+      ],
+      "proposed_semantics_by_entry": {
+        "declared_raw_utf16_code_units": 2000,
+        "legacy_tool_guard_and_new_raw_target": {
+          "outcome": "pass_raw_size_guard_then_domain"
+        },
+        "direct_normalizer_and_old_form_pretrim": {
+          "outcome": "domain_valid_after_trim",
+          "does_not_prove_tool_guard": true
+        }
+      },
+      "scope_limit": "UTF-16 raw size counts supplementary scalar as two; test input recipe construction is not a validation implementation. No API success inferred from passing size guard.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-supplementary-cap2001",
+      "status": "not_run",
+      "input_recipe": {
+        "concat": [
+          {
+            "repeat": {
+              "literal": " ",
+              "count": 1799
+            }
+          },
+          {
+            "repeat": {
+              "literal": "\ud83d\ude00",
+              "count": 101
+            }
+          }
+        ]
+      },
+      "source_refs": [
+        "tool_guard",
+        "old_form",
+        "normalize"
+      ],
+      "proposed_semantics_by_entry": {
+        "declared_raw_utf16_code_units": 2001,
+        "legacy_tool_guard_and_new_raw_target": {
+          "outcome": "reject_raw_size_limit_2000"
+        },
+        "direct_normalizer_and_old_form_pretrim": {
+          "outcome": "domain_valid_after_trim",
+          "does_not_prove_tool_guard": true
+        }
+      },
+      "scope_limit": "UTF-16 raw size counts supplementary scalar as two; test input recipe construction is not a validation implementation. No API success inferred from passing size guard.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-legacy-patch-name-omitted",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": {
+          "notes": "\u5408\u6210\u5907\u6ce8"
+        }
+      },
+      "source_refs": [
+        "tool_guard",
+        "tool_transaction"
+      ],
+      "proposed_semantics_by_entry": {
+        "legacy_update_nonempty_allowed_patch": {
+          "outcome": "preserve_previous_name_after_complete_payload_merge"
+        },
+        "new_name_only_command_target": {
+          "outcome": "reject_missing_name_or_extra_field"
+        }
+      },
+      "scope_limit": "A different valid-field patch proves legacy omission preservation, not clearing. Target one-field rule belongs to M02, no new wire schema.",
+      "golden": null
+    },
+    {
+      "case_id": "M04-ENTRY-legacy-empty-values",
+      "status": "not_run",
+      "input_recipe": {
+        "literal": {}
+      },
+      "source_refs": [
+        "tool_guard"
+      ],
+      "proposed_semantics_by_entry": {
+        "legacy_update_values_guard": {
+          "outcome": "reject_empty_values"
+        },
+        "new_name_only_command_target": {
+          "outcome": "reject_missing_name"
+        }
+      },
+      "scope_limit": "Source-proven values-map guard only; do not claim normalizeText validates an update API.",
+      "golden": null
+    }
+  ]
+}
