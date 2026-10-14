@@ -1,5 +1,7 @@
 //! Replaceable synthetic lab protocol, deliberately independent of formal M03.
 mod sqlite;
+mod facts;
+use facts::Facts;
 use rd_p01_domain_experiment::{edit_candidate,ProvisionalSnapshot};
 use serde::{Deserialize,Serialize};
 use serde_json::{json,Value};
@@ -102,11 +104,12 @@ fn verified(db:&Db,b:&Binding)->Result<Option<Value>> {
     let actual:Value=serde_json::from_str(cell(r,6)?).map_err(|_|"invalid receipt JSON")?;
     if actual!=expected {return Err("receipt mismatch".into());} Ok(Some(actual))
 }
-fn existing(db:&Db,b:&Binding)->Result<Option<Value>> {
+fn existing(db:&Db,domain:&str,b:&Binding)->Result<Option<Value>> {
     let rows=db.query("SELECT binding,status,rejection FROM intents WHERE intent=?",&[&b.intent])?;
     if rows.is_empty() {return Ok(None);} if rows.len()!=1 {return Err("intent multiplicity".into());}
     let original:Binding=serde_json::from_str(cell(&rows[0],0)?).map_err(|_|"invalid intent binding")?;
     if original!=*b {return Ok(Some(json!({"status":"conflict"})));} // MUTATION_BINDING
+    if original.domain!=domain {return Err("stored intent domain does not match physical database".into());}
     let result=match cell(&rows[0],1)? {
         "committed"=>match verified(db,b)? {Some(r)=>json!({"status":"committed","receipt":r}),None=>json!({"status":"unknown"})},
         "pending"=>json!({"status":"unknown"}), // MUTATION_UNKNOWN
@@ -126,19 +129,24 @@ fn commit(db:&Db,domain:&str,b:&Binding,control:&Option<String>)->Result<Value> 
     {
         let claim=db.transaction()?;
         if validate(db)?!=domain {return Err("database identity changed".into());}
-        if let Some(result)=existing(db,b)? {return Ok(result);} // MUTATION_DUPLICATE
+        if let Some(result)=existing(db,domain,b)? {return Ok(result);} // MUTATION_DUPLICATE
         if b.domain!=domain {return Err("domain mismatch".into());}
+        let mut claim_facts=Facts::capture(db)?;
+        claim_facts.add_pending(&b.intent,&binding);
         if db.exec("INSERT INTO intents(intent,binding,status) VALUES(?,?,'pending')",&[&b.intent,&binding])?!=1 {return Err("pending claim failed".into());}
+        claim_facts.verify(db,"pending phase")?;
         claim.commit()?;
     }
     fault(control,"pending");
     let tx=db.transaction()?; // MUTATION_TRANSACTION
     if validate(db)?!=domain {return Err("database identity changed".into());}
-    let mut expected_rows=db.query("SELECT id,scope,name,revision,untouched FROM suppliers ORDER BY id",&[])?;
+    let mut effect_facts=Facts::capture(db)?;
     let snap=snapshot(db,domain,&read_binding(b))?;
     let candidate=if b.operation!="supplier.name" {Err("Operation".to_owned())} else {edit_candidate(&snap,&b.scope,&b.supplier,revision(&b.expected_revision)?,&b.raw_utf16).map_err(|e|format!("{e:?}"))};
     let c=match candidate {Ok(c)=>c,Err(reason)=> {
+        effect_facts.finish_intent(&b.intent,&binding,"rejected",Some(&reason))?;
         if db.exec("UPDATE intents SET status='rejected',rejection=? WHERE intent=? AND status='pending' AND binding=?",&[&reason,&b.intent,&binding])?!=1 {return Err("rejection ownership lost".into());}
+        effect_facts.verify(db,"rejection phase")?;
         tx.commit()?;return Ok(json!({"status":"rejected","reason":reason}));
     }};
     let next=c.candidate_revision.to_string();
@@ -160,15 +168,20 @@ fn commit(db:&Db,domain:&str,b:&Binding,control:&Option<String>)->Result<Value> 
     // Check the four final facts after all SQL/fixture-trigger work, inside this
     // transaction. Also prove that the target's other fields and other rows survive.
     let mut target_found=false;
-    for row in &mut expected_rows {
+    for row in &mut effect_facts.suppliers {
         if cell(row,0)?==b.supplier {
             row[2]=Some(c.normalized_name.clone()); row[3]=Some(next.clone()); target_found=true;
         }
     }
-    let final_rows=db.query("SELECT id,scope,name,revision,untouched FROM suppliers ORDER BY id",&[])?;
-    let final_fact=existing(db,b).map_err(|e|format!("final consistency: {e}"))?;
+    effect_facts.finish_intent(&b.intent,&binding,"committed",None)?;
+    effect_facts.history.push(vec![Some(b.intent.clone()),Some(b.supplier.clone()),Some(snap.name.clone()),Some(c.normalized_name.clone()),Some(b.expected_revision.clone()),Some(next.clone()),Some(binding.clone())]);
+    effect_facts.history.sort();
+    effect_facts.receipts.push(vec![Some(b.intent.clone()),Some(body)]);
+    effect_facts.receipts.sort();
+    let final_fact=existing(db,domain,b).map_err(|e|format!("final consistency: {e}"))?;
     let expected_fact=json!({"status":"committed","receipt":r});
-    if !target_found || final_rows!=expected_rows || final_fact!=Some(expected_fact) || validate(db)?!=domain {return Err("final consistency mismatch".into());}
+    if !target_found || final_fact!=Some(expected_fact) || validate(db)?!=domain {return Err("final consistency mismatch".into());}
+    effect_facts.verify(db,"final")?;
     tx.commit()?; fault(control,"commit");
     Ok(json!({"status":"committed","receipt":r}))
 }
@@ -211,7 +224,7 @@ fn run()->Result<Value> {
         Request::Read(r)=>{let s=snapshot(&db,&domain,&r)?;json!({"status":"read","supplier":{"id":s.supplier_id,"name":s.name,"revision":s.revision.to_string()}})},
         Request::Preview(b)=>{let s=snapshot(&db,&domain,&read_binding(&b))?;if b.operation!="supplier.name" {json!({"status":"rejected","reason":"Operation"})} else {match edit_candidate(&s,&b.scope,&b.supplier,revision(&b.expected_revision)?,&b.raw_utf16) {Ok(c)=>json!({"status":"preview","normalized_name":c.normalized_name,"candidate_revision":c.candidate_revision.to_string()}),Err(e)=>json!({"status":"rejected","reason":format!("{e:?}")})}}},
         Request::Commit(b)=>commit(&db,&domain,&b,&control)?,
-        Request::Lookup(b)=>{if let Some(result)=existing(&db,&b)? {result} else {if b.domain!=domain {return Err("domain mismatch".into());}json!({"status":"unknown","receipt_found":false})}},
+        Request::Lookup(b)=>{if let Some(result)=existing(&db,&domain,&b)? {result} else {if b.domain!=domain {return Err("domain mismatch".into());}json!({"status":"unknown","receipt_found":false})}},
         Request::Init(_)=>unreachable!(),
     };
     if read_tx {db.exec("COMMIT",&[])?;} Ok(out)

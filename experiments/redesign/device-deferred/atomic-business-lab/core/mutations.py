@@ -17,12 +17,12 @@ def cas(s):
     s=replace(s,'AND revision=?",&[&c.normalized_name,&next,&b.supplier,&b.scope,&b.expected_revision]', '",&[&c.normalized_name,&next,&b.supplier,&b.scope]')
     return s
 def duplicate(s):
-    return replace(s,'if let Some(result)=existing(db,b)? {return Ok(result);} // MUTATION_DUPLICATE','let _=existing(db,b)?; // MUTATION_DUPLICATE')
+    return replace(s,'if let Some(result)=existing(db,domain,b)? {return Ok(result);} // MUTATION_DUPLICATE','let _=existing(db,domain,b)?; // MUTATION_DUPLICATE')
 def binding(s):
     return replace(s,'if original!=*b {return Ok(Some(json!({"status":"conflict"})));} // MUTATION_BINDING','if false {return Ok(Some(json!({"status":"conflict"})));} // MUTATION_BINDING')
 def unknown(s):
     s=replace(s,'"pending"=>json!({"status":"unknown"}), // MUTATION_UNKNOWN','"pending"=>return Ok(None), // MUTATION_UNKNOWN')
-    return replace(s,'if db.exec("INSERT INTO intents(intent,binding,status)', 'db.exec("DELETE FROM intents WHERE intent=? AND status=\'pending\'",&[&b.intent])?;\n        if db.exec("INSERT INTO intents(intent,binding,status)')
+    return replace(s,'let mut claim_facts=Facts::capture(db)?;', 'db.exec("DELETE FROM intents WHERE intent=? AND status=\'pending\'",&[&b.intent])?;\n        let mut claim_facts=Facts::capture(db)?;')
 MUTANTS=[('shared_transaction',transaction,'Process.test_receipt_insert_failure','Lists differ'),('cas_guard',cas,'Process.test_cas_rejection','unavailable: final consistency: invalid history effect'),('duplicate_guard',duplicate,'Process.test_replay_before_stale_cas_and_current_separate','UNIQUE constraint failed: intents.intent'),('binding_comparison',binding,'Process.test_pending_binding_and_absent_receipt',"'unknown' != 'conflict'"),('unknown_no_dispatch',unknown,'Process.test_sql_exit_faults',"'committed' != 'unknown'")]
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--evidence-dir',required=True);a=parser.parse_args()

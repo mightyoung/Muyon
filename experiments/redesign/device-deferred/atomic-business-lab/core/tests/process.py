@@ -151,6 +151,64 @@ class Process(unittest.TestCase):
                     self.assert_effects(0,'1','Before'); self.assertEqual(self.rows('SELECT status FROM intents'),[('pending',)])
                     state=self.state(); self.assertEqual(self.call()['status'],'unknown'); self.assertEqual(self.state(),state)
                 finally: self.db=previous
+    def test_original_source_matches_current_domain(self):
+        for status in ('committed','pending','rejected'):
+            with self.subTest(status=status):
+                db=pathlib.Path(self.temp.name)/('source-'+status+'.sqlite')
+                with sqlite3.connect(db) as c: c.executescript(SCHEMA)
+                previous=self.db; self.db=db
+                try:
+                    original=request(expected_revision='2' if status=='rejected' else '1')
+                    if status=='pending': self.assertEqual(self.invoke(original,fault='exit:pending').returncode,86)
+                    else: self.assertEqual(self.call(original)['status'],status)
+                    with sqlite3.connect(db) as c: c.execute("UPDATE meta SET domain='synthetic-B'")
+                    state=self.state()
+                    for op in ('lookup','commit'):
+                        p=self.invoke(dict(original,op=op)); self.assertNotEqual(p.returncode,0,'original A fact accepted from current B database')
+                        self.assertIn('stored intent domain',p.stderr); self.assertEqual(self.state(),state)
+                        # Altered request binding must retain conflict semantics, even when
+                        # its domain happens to equal the changed physical source domain.
+                        altered=dict(original,op=op,domain='synthetic-B')
+                        self.assertEqual(self.call(altered)['status'],'conflict'); self.assertEqual(self.state(),state)
+                finally: self.db=previous
+    def phase_probe(self,rejection):
+        changes=[
+            ("business", "UPDATE suppliers SET name='trigger business effect' WHERE id='S1'"),
+            ("other-row", "UPDATE suppliers SET untouched='changed' WHERE id='S2'"),
+            ("domain", "UPDATE meta SET domain='synthetic-B'"),
+            ("history", "UPDATE history SET old_name='changed history' WHERE intent='old'"),
+            ("receipt", "UPDATE receipts SET body='{}' WHERE intent='old'"),
+            ("other-intent", "UPDATE intents SET rejection='changed other fact' WHERE intent='other'"),
+            ("own-binding", "UPDATE intents SET binding='{}' WHERE intent=NEW.intent"),
+            ("own-status", "UPDATE intents SET status='committed' WHERE intent=NEW.intent"),
+            ("own-reason", "UPDATE intents SET rejection='forged reason' WHERE intent=NEW.intent"),
+        ]
+        for label,change in changes:
+            with self.subTest(phase='rejection' if rejection else 'pending',change=label):
+                db=pathlib.Path(self.temp.name)/('phase-'+str(rejection)+'-'+label+'.sqlite')
+                with sqlite3.connect(db) as c: c.executescript(SCHEMA)
+                previous=self.db; self.db=db
+                try:
+                    self.call(request(intent='old'))
+                    self.assertEqual(self.invoke(request(intent='other',expected_revision='2'),fault='exit:pending').returncode,86)
+                    before=self.state()
+                    event="AFTER UPDATE OF status ON intents WHEN NEW.status='rejected'" if rejection else 'AFTER INSERT ON intents'
+                    with sqlite3.connect(db) as c: c.execute('CREATE TRIGGER phase '+event+' BEGIN '+change+'; END')
+                    r=request(expected_revision='1' if rejection else '2')
+                    p=self.invoke(r,fault=None if rejection else 'exit:pending'); self.assertEqual(p.returncode,2,p.stdout+p.stderr)
+                    self.assertIn('rejection phase consistency' if rejection else 'pending phase consistency',p.stderr)
+                    after=self.state()
+                    for table in ('meta','suppliers','history','receipts'):
+                        self.assertEqual(after[table],before[table],table+' changed during nonbusiness phase')
+                    if rejection:
+                        self.assertEqual([row for row in after['intents'] if row[0]!='I1'],before['intents'])
+                        own=[row for row in after['intents'] if row[0]=='I1']; self.assertEqual(len(own),1)
+                        self.assertEqual(own[0][2:],('pending',None)); self.assertEqual(json.loads(own[0][1]),{k:v for k,v in r.items() if k!='op'})
+                        state=self.state(); self.assertEqual(self.call(r)['status'],'unknown'); self.assertEqual(self.state(),state)
+                    else: self.assertEqual(after['intents'],before['intents'])
+                finally: self.db=previous
+    def test_pending_claim_phase_invariants(self): self.phase_probe(False)
+    def test_rejection_phase_invariants(self): self.phase_probe(True)
     def test_receipt_tampering(self):
         self.call()
         with sqlite3.connect(self.db) as c: c.execute("UPDATE receipts SET body='{}'")
