@@ -486,6 +486,9 @@ class WireProcessTests(unittest.TestCase):
         self.assertEqual(completed['status'],'completed');self.assertEqual(completed['confirmations'],'2')
         final=self.assert_effects(directory,2);self.assertEqual(final['rows'][0],original['rows'][0])
         self.assertEqual(bytes.fromhex(final['value']).decode(),'wire-second')
+        for row, expected_value in zip(final['rows'], ['wire-first', 'wire-second']):
+            self.assertEqual(bytes.fromhex(row[6]).decode('utf-8'), expected_value,
+                             'physical receipt row value differs from independent fixture input')
         assert_native_pair(read_request(directory/'wire-capture/request-1.json'),
                            read_request(directory/'wire-capture/request-2.json'),
                            'wire-first', final['rows'][0][7])
