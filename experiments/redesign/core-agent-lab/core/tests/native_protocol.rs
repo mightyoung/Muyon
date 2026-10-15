@@ -2,7 +2,14 @@ use muyon_core_agent_lab::{model::{ToolDefinition,ModelRequest,ModelEvent},wire_
 fn tools()->Vec<ToolDefinition>{vec![ToolDefinition{name:"weather.peek".into(),wire_name:"t_42".into(),parameters:wire_json::parse(br#"{"type":"object","properties":{"station_key":{"type":"string"},"include_history":{"type":"boolean"}},"required":["station_key"],"additionalProperties":false}"#).unwrap()}]}
 fn request()->ModelRequest{ModelRequest{task:"t1".into(),attempt:"a1".into(),turn:1,messages:vec![],tools:vec!["weather.peek".into()]}}
 fn history()->Json{Json::Array(vec![object([("role",string("user")),("content",string("weather?"))])])}
-fn stream(name:&str,args:&str,terminal:bool)->Vec<u8>{let chunk=object([("choices",Json::Array(vec![object([("index",Json::Number("0".into())),("delta",object([("tool_calls",Json::Array(vec![object([("index",Json::Number("0".into())),("id",string("c1")),("type",string("function")),("function",object([("name",string(name)),("arguments",string(args))]))]) )])),("finish_reason",string("tool_calls"))])]))]);let tail=if terminal{"data: [DONE]\n\n"}else{""};format!("data: {}\n\n{}",chunk.encode(),tail).into_bytes()}
+fn stream(name:&str,args:&str,terminal:bool)->Vec<u8>{
+ let function=object([("name",string(name)),("arguments",string(args))]);
+ let call=object([("index",Json::Number("0".into())),("id",string("c1")),("type",string("function")),("function",function)]);
+ let delta=object([("tool_calls",Json::Array(vec![call]))]);
+ let choice=object([("index",Json::Number("0".into())),("delta",delta),("finish_reason",string("tool_calls"))]);
+ let chunk=object([("choices",Json::Array(vec![choice]))]);
+ let tail=if terminal{"data: [DONE]\n\n"}else{""};format!("data: {}\n\n{}",chunk.encode(),tail).into_bytes()
+}
 #[test]
 fn registered_protocol_preserves_arguments_and_schema(){let t=tools();let result=encode_registered_request(&request(),&history(),&t,"offline-native");if result.as_ref().err().map(String::as_str)==Some("native_protocol_unsupported"){eprintln!("NATIVE_PROTOCOL_STUB_REACHED");}let bytes=result.expect("NATIVE_PROTOCOL_RED: registered schema reaches native payload");let json=wire_json::parse(&bytes).unwrap();let encoded=&json.object().unwrap()["tools"].array().unwrap()[0].object().unwrap()["function"];assert_eq!(encoded.object().unwrap()["name"],string("t_42"));assert_eq!(encoded.object().unwrap()["parameters"],t[0].parameters);let mut d=Decoder::with_tools(&t).unwrap();for b in stream("t_42",r#"{"station_key":"s1","include_history":false}"#,true){d.feed(b).unwrap();}assert_eq!(d.finish().unwrap().event,ModelEvent::HostTool{call_ref:"c1".into(),name:"weather.peek".into(),arguments:object([("station_key",string("s1")),("include_history",Json::Bool(false))])});}
 #[test]
