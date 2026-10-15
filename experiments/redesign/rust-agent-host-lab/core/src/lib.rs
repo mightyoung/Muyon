@@ -2,6 +2,7 @@
 //! the child admits contracts/tickets, while host-installed Rust handlers read.
 pub mod plugin_process;
 pub mod store;
+pub mod model_gateway;
 use std::{cell::RefCell,collections::BTreeMap,io::Read,path::Path,rc::Rc,time::Duration};
 use muyon_core_agent_lab::{Result,agent::{Agent,State},agent_ports::AgentPorts,model::{Message,Role}};
 use muyon_plugin_contract_lab::{Json,object,string};
@@ -21,7 +22,7 @@ pub struct RawRead{pub raw:Json,pub projection:Json}
 pub trait ReadHandler{fn read(&mut self,canonical_args:&Json)->Result<RawRead>;}
 impl<F:FnMut(&Json)->Result<RawRead>> ReadHandler for F{fn read(&mut self,args:&Json)->Result<RawRead>{self(args)}}
 pub struct Enrollment{pub bundle:Json,pub operation:String,pub tool_id:String,pub binding_id:String,pub handler:Box<dyn ReadHandler>}
-struct Installed{operation:String,tool_id:String,binding:String,handler:Box<dyn ReadHandler>}
+struct Installed{operation:String,tool_id:String,binding:String,parameters:Json,handler:Box<dyn ReadHandler>}
 #[derive(Clone)]
 struct Projection{value:Json,authority:AuthoritySnapshot,receipt:Json}
 pub struct NativeSession{pub store:NativeStore,process:PluginProcess,authority:Rc<dyn AuthoritySource>,review:Rc<dyn PurposeReview>,installed:BTreeMap<String,Installed>,history:Vec<Json>,projections:Vec<Projection>,pub dispatch_attempts:usize,pub handler_calls:usize,pub model_sends:usize,cancelled:bool}
@@ -33,12 +34,14 @@ impl NativeSession{
  }
  pub fn register(&mut self,enrollment:Enrollment)->Result<()>{
   if self.cancelled||self.installed.values().any(|v|v.operation==enrollment.operation||v.tool_id==enrollment.tool_id||v.binding==enrollment.binding_id){return Err("duplicate_enrollment".into())}
+  let operations=field(&enrollment.bundle,"operations")?.array()?;let declared=operations.iter().find(|d|text(d,"binding_id").ok().as_deref()==Some(&enrollment.binding_id)).ok_or("binding_declaration")?;let parameters=field(declared,"input_schema")?.clone();
   success(self.process.request(request("register",vec![("bundle",enrollment.bundle),("host_bindings",Json::Array(vec![string(&enrollment.binding_id)]))]))?)?;
-  self.installed.insert(enrollment.operation.clone(),Installed{operation:enrollment.operation,tool_id:enrollment.tool_id,binding:enrollment.binding_id,handler:enrollment.handler});Ok(())
+  self.installed.insert(enrollment.operation.clone(),Installed{operation:enrollment.operation,tool_id:enrollment.tool_id,binding:enrollment.binding_id,parameters,handler:enrollment.handler});Ok(())
  }
  pub fn discover(&mut self)->Result<Json>{let a=self.authority.snapshot()?;success(self.process.request(request("discover",vec![("authority",a.read)]))?)}
  pub fn cancel(&mut self){self.cancelled=true;self.process.close();}
  pub fn child_pid(&self)->u32{self.process.pid()}
+ pub fn definitions(&self)->Vec<muyon_core_agent_lab::model::ToolDefinition>{self.installed.values().enumerate().map(|(index,v)|muyon_core_agent_lab::model::ToolDefinition{name:v.tool_id.clone(),wire_name:format!("registered_{index}"),parameters:v.parameters.clone()}).collect()}
  pub fn model_history(&self)->Json{Json::Array(self.history.clone())}
  pub fn review_payload(&self,payload:&[u8])->Result<()>{
   if self.cancelled{return Err("native_cancelled".into())}let current=self.authority.snapshot()?;
