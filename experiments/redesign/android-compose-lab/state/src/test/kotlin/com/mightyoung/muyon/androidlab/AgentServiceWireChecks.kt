@@ -3,7 +3,7 @@ package com.mightyoung.muyon.androidlab
 fun runAgentServiceWireChecks() {
     val build="a".repeat(40);val epoch="b".repeat(32);val meta=UiAgentMeta(1u,build,epoch,4)
     val intent=UiAgentIntent("original_1",UiAgentVariant.EQUIPMENT,build)
-    val identity=UiAgentRunIdentity("c".repeat(32),epoch,UiAgentTask("task-1","attempt-1"))
+    val identity=UiAgentRunIdentity("c".repeat(32),epoch,UiAgentTask("t-4231-1792012800000000000","a-4231-1792012800000000000"))
     val receipt=UiAgentReceipt("receipt-1",UiAgentReceiptOutcome.RECORDED_SUCCESS)
     val terminal=UiAgentRun.Terminal(UiAgentSummary(intent,identity,UiAgentTerminal.CANCELLED,UiAgentReason.CANCELLED,receipt))
     fun roundtrip(reply:UiAgentWireReply) {val bytes=AgentServiceWire.encode(reply,build) ?: error("closed reply encode refused");check(bytes.size<=AgentServiceWire.MAX_PAYLOAD_BYTES);check(AgentServiceWire.decode(bytes,build)==reply)}
