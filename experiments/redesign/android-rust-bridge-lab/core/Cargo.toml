@@ -1,0 +1,33 @@
+[package]
+name = "muyon-android-contract-bridge-lab"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "muyon_android_contract_bridge"
+crate-type = ["rlib", "cdylib"]
+
+[features]
+default = []
+bindings = ["uniffi/cli"]
+ffi-test-probes = []
+
+[dependencies]
+muyon-plugin-contract-lab = { path = "../../plugin-contract-lab/core" }
+uniffi = "=0.32.2"
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
+required-features = ["bindings"]
+
+[profile.dev]
+debug = 0
+incremental = false
+
+[profile.release]
+panic = "unwind"
+debug = 0
+incremental = false
+strip = "debuginfo"
