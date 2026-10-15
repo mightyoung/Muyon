@@ -18,7 +18,7 @@ HOST = LAB / 'core'
 PLUGIN = Path('experiments/redesign/plugin-contract-lab/core')
 LIB = HOST / 'src/lib.rs'
 TARGET = 'native_inverse'
-FILTERED = 25  # Fixed original host25 plus one independent final-send oracle.
+FILTERED = 26  # Fixed host25 plus independent final-send and early-scope oracles.
 MUTANTS = [
     dict(name='native_prehandler_fresh_authority',
          before='if fresh != original {', after='if false && fresh != original {',
@@ -26,8 +26,9 @@ MUTANTS = [
          marker='revocation after the returned pre-invoke snapshot must prevent physical read'),
     dict(name='native_selected_record_scope',
          before='return Err("selected_record_not_authorized".into());', after='return Ok(());',
-         test='missing_selected_refs_execute_zero_before_physical_read', left=1, right=0,
-         marker='empty current refs must deny before physical handler reads'),
+         test='selected_scope_denies_before_dispatch_facts', left=1, right=0,
+         marker='NATIVE_SELECTED_SCOPE_BOUNDARY: missing refs must deny before dispatch facts',
+         reach='NATIVE_SELECTED_SCOPE_REACHED sibling=completed dispatches=1 reads=0 receipts=0'),
     dict(name='native_final_model_admission',
          before='if self.authority.snapshot()? != current {',
          after='if false && self.authority.snapshot()? != current {',

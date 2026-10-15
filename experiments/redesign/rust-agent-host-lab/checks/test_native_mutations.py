@@ -50,7 +50,7 @@ class NativeMutationTests(unittest.TestCase):
                 bad = result(True); bad['returncode'] = code
                 self.assertFalse(oracle(raw, bad, contract, True))
             for bad in [raw.replace('Finished', 'Compiling'), raw.replace(contract['marker'], 'wrong failure'),
-                        raw.replace('25 filtered out', '24 filtered out'), raw + raw,
+                        raw.replace(f'{FILTERED} filtered out', f'{FILTERED - 1} filtered out'), raw + raw,
                         raw.replace('Running tests/native_inverse.rs', 'Running tests/other.rs'), raw + 'signal: 6 SIGABRT\n']:
                 self.assertFalse(oracle(bad, result(True), contract, True))
             bad = result(True); bad['timeout'] = True
@@ -69,6 +69,17 @@ class NativeMutationTests(unittest.TestCase):
         contract = MUTANTS[-1]; raw = transcript(contract, True)
         self.assertFalse(oracle(raw.replace(contract['reach'], ''), result(True), contract, True))
         self.assertFalse(oracle(raw.replace(contract['reach'] + '\n', '') + contract['reach'], result(True), contract, True))
+
+    def test_scope_boundary_is_early_facts_not_masked_zero_physical_handler(self):
+        contract = MUTANTS[1]
+        self.assertEqual(FILTERED, 26)
+        self.assertEqual(contract['test'], 'selected_scope_denies_before_dispatch_facts')
+        raw = transcript(contract, True)
+        self.assertFalse(oracle(raw.replace(contract['marker'], 'empty current refs must deny before physical handler reads'), result(True), contract, True))
+        self.assertFalse(oracle(raw.replace(contract['reach'], ''), result(True), contract, True))
+        self.assertFalse(oracle(raw.replace('26 filtered out', '25 filtered out'), result(True), contract, True))
+        survived = transcript(contract, False)
+        self.assertFalse(oracle(survived, result(False), contract, True))
 
     def test_real_owned_watchdog_reaps_child_and_marks_timeout_invalid(self):
         self.assertEqual(ctypes.CDLL(None).prctl(36, 1, 0, 0, 0), 0)

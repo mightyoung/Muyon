@@ -50,3 +50,39 @@ fn final_native_send_admission_rechecks_after_policy() {
     assert_eq!(sent.borrow().len(), 1, "NATIVE_FINAL_SEND_BOUNDARY: post-policy revoke must deny second endpoint bytes");
     assert_ne!(a.state.status, "completed");
 }
+
+#[test]
+fn selected_scope_denies_before_dispatch_facts() {
+    for permitted in [true, false] {
+        let auth = authority();
+        if !permitted {
+            put(&mut auth.0.borrow_mut().read, "refs", Json::Array(Vec::new()));
+        }
+        let s = session(auth);
+        assert!(s.borrow().store.ensure_healthy().is_ok(), "NATIVE_SELECTED_SCOPE_REACH: initial store must be healthy");
+        assert_eq!(s.borrow().store.receipt_count(), 0, "NATIVE_SELECTED_SCOPE_REACH: initial receipt count");
+        assert_eq!(field(s.borrow().store.facts(), "external_read").unwrap(), &Json::Bool(false));
+        assert_eq!(field(s.borrow().store.facts(), "unknown_source").unwrap(), &Json::Bool(false));
+        let a = run(&s);
+        assert_eq!(s.borrow().dispatch_attempts, 1, "NATIVE_SELECTED_SCOPE_REACH: actual common-driver dispatch required");
+        if permitted {
+            assert_eq!(a.state.status, "completed", "NATIVE_SELECTED_SCOPE_REACH: valid sibling must complete");
+            assert_eq!(s.borrow().handler_calls, 1, "NATIVE_SELECTED_SCOPE_REACH: valid sibling must read");
+            assert_eq!(s.borrow().store.receipt_count(), 1, "NATIVE_SELECTED_SCOPE_REACH: valid sibling original receipt");
+            assert!(s.borrow().store.ensure_healthy().is_ok());
+        } else {
+            assert_eq!(s.borrow().handler_calls, 0, "NATIVE_SELECTED_SCOPE_REACH: independent durable guard still prevents physical read");
+            assert_eq!(s.borrow().store.receipt_count(), 0, "NATIVE_SELECTED_SCOPE_REACH: no receipt may commit");
+            eprintln!("NATIVE_SELECTED_SCOPE_REACHED sibling=completed dispatches=1 reads=0 receipts=0");
+            let admitted = match field(s.borrow().store.facts(), "external_read").unwrap() {
+                Json::Bool(value) => usize::from(*value),
+                _ => panic!("NATIVE_SELECTED_SCOPE_REACH: external_read must be boolean"),
+            };
+            assert_eq!(admitted, 0, "NATIVE_SELECTED_SCOPE_BOUNDARY: missing refs must deny before dispatch facts");
+            assert_eq!(field(s.borrow().store.facts(), "unknown_source").unwrap(), &Json::Bool(false));
+            assert!(s.borrow().store.ensure_healthy().is_ok(), "NATIVE_SELECTED_SCOPE_BOUNDARY: early denial must preserve healthy store");
+            assert_eq!(a.state.status, "failed");
+            assert_eq!(a.state.reason, "native_host_refused");
+        }
+    }
+}
