@@ -467,6 +467,9 @@ class AgentDispatch {
   final _premarked = <String>{};
   bool _external(ToolCallRequest request) {
     final info = ctx.tools.inspect(request.toolId);
+    if (ctx.pluginReadPort != null && info?.descriptor.effect == ToolEffect.read) {
+      return ctx.pluginReadPort!.requiresSourceFacts(request);
+    }
     return info != null &&
         !ctx.tools.isPureLocalWrite(request) &&
         (info.accessLevel == ToolAccessLevel.external ||
@@ -517,7 +520,11 @@ class AgentDispatch {
         task.conversationId,
         ctx.tools.inspect(request.toolId)?.descriptor.effect,
       );
-      final result = await ctx.tools.invoke(request, cancellation: token);
+      final port = ctx.pluginReadPort;
+      final result = port != null &&
+              ctx.tools.inspect(request.toolId)?.descriptor.effect == ToolEffect.read
+          ? await port.invoke(task, request, token)
+          : await ctx.tools.invoke(request, cancellation: token);
       if (external) {
         // Persist stable returned sources before content acceptance. The
         // premarker remains durable on failure after the real invocation.

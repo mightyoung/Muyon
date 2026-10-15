@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
 
 import '../platform/foundation_repository.dart';
+import '../platform/plugin_contract/read_bridge.dart';
 import '../platform/task_records.dart';
 import '../services/models/model_gateway.dart';
 import '../services/models/model_provider.dart';
@@ -33,6 +34,7 @@ class AgentContext {
     required this.tools,
     this.toolReviewer,
     this.modelAuthorization,
+    this.pluginReadPort,
     required this.executionDeviceId,
     required this.budget,
     required this.events,
@@ -50,6 +52,7 @@ class AgentContext {
   final ToolRegistry tools;
   final OutboundContentReviewer? toolReviewer;
   final HostModelAuthorization? modelAuthorization;
+  final PluginReadBridge? pluginReadPort;
   // Invocation ownership is created by the live dispatcher, not task/model JSON.
   final invocationTasks = <String, String>{};
   final invocationRequests = <String, ToolCallRequest>{};

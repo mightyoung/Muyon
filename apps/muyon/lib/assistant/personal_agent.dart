@@ -17,6 +17,7 @@ import 'agent_budget.dart';
 import 'agent_event_sink.dart';
 import 'context_compactor.dart';
 import 'core_agent_process.dart';
+import '../platform/plugin_contract/read_bridge.dart';
 import 'model_request_gate.dart';
 import 'tool_selection.dart';
 import 'agent_compaction_flow.dart';
@@ -63,6 +64,7 @@ class PersonalAgent {
     required this.gateway,
     required this.tools,
     this.coreAgentProcess,
+    this.pluginReadPort,
     this.executionDeviceId = 'this-device',
     this.toolReviewer,
     this.modelAuthorization,
@@ -441,6 +443,7 @@ class PersonalAgent {
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;
   final CoreAgentProcessConfig? coreAgentProcess;
+  final PluginReadBridge? pluginReadPort;
   final String executionDeviceId;
   final OutboundContentReviewer? toolReviewer;
   final HostModelAuthorization? modelAuthorization;
@@ -508,6 +511,7 @@ class PersonalAgent {
     tools: tools,
     toolReviewer: toolReviewer,
     modelAuthorization: modelAuthorization,
+    pluginReadPort: pluginReadPort,
     executionDeviceId: executionDeviceId,
     budget: budget,
     events: events,

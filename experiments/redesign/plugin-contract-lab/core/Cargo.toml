@@ -1,0 +1,16 @@
+[package]
+name = "muyon-plugin-contract-lab"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+muyon-core-agent-lab = { path = "../../core-agent-lab/core" }
+
+[lib]
+name = "muyon_plugin_contract_lab"
+path = "src/lib.rs"
+
+[[bin]]
+name = "muyon-plugin-contract-lab"
+path = "src/main.rs"

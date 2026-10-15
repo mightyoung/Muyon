@@ -12,6 +12,8 @@ Checkpoint: review covers protocol/schema/generation split, trusted source seam,
 
 ## 2. Compile stubs and assert behavior RED
 
+Execution batch update (2026-10-15, root-authorized sequencing): the first source handoff contains 16 Rust integration test definitions and only D07, the required real-Agent Dart behavioral test. The other 11 Dart cases remain planned/not_run, not empty placeholders. Both required RED runs happen before GREEN behavior is implemented; the remaining cases will each be written and observed RED before their implementation. Final full acceptance remains 16 Rust + 12 Dart and the nine existing regression files. The first Dart shell wires only nullable port injection and refusing read dispatch/source conservatism; catalog selection, sensitivity copying, accepted projection isolation and final send admission stay deliberately unimplemented until their tests are observed RED. The process stub opens no child and returns unsupported; its real transport/lifecycle is a later test-first batch, not claimed verified by D07.
+
 After review create new crate `muyon-plugin-contract-lab` (binary of same name) at `experiments/redesign/plugin-contract-lab/core`. Keep public stubs type-correct and return explicit unsupported/rejected outcomes. Reuse existing bounded parser through the local path dependency; do not modify it. Add the 16 Rust cases below; first establish compile success separately. Add Dart interfaces/nullable injection and 12 tests with real Agent/ToolRegistry/fake gateway harness, with the bridge stub refusing the positive read. Existing legacy path stays untouched.
 
 The two required RED targets are:
