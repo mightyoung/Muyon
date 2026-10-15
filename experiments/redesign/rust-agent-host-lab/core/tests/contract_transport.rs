@@ -271,3 +271,28 @@ fn wire_close_retains_child_command_inspection_semantics() {
         "plugin_closed"
     );
 }
+
+#[test]
+fn embedded_line_feed_is_fatal_but_crlf_sibling_is_valid() {
+    let mut t = InProcessCatalog::new();
+    healthy(&mut t);
+    let valid = t
+        .request_line(b"{\"protocol_version\":1,\"command\":\"inspect\"}\r\n")
+        .unwrap();
+    assert!(
+        okay(&valid),
+        "valid CRLF sibling must inspect the same live Catalog"
+    );
+    let reply = t
+        .request_line(b"{\n\"protocol_version\":1,\"command\":\"inspect\"}\n")
+        .unwrap();
+    assert_eq!(
+        field(&reply, "code"),
+        Ok(&string("invalid_json")),
+        "TRANSPORT_LINE_BOUNDARY: first LF ends the JSON frame, never parse a multiline object"
+    );
+    assert_eq!(
+        t.request(req("inspect", vec![])).unwrap_err(),
+        "plugin_closed"
+    );
+}
