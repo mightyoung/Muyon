@@ -101,3 +101,15 @@ download, HOME override or positive fake binary run was used. Raw logs are
 outside Git under `/tmp/rd-core-agent-host-evidence-20261015/local-checker/`.
 This is static checker/helper validation; full real-Rust GREEN and compiling
 DUT semantic inverse controls remain pending root's exact integration CI.
+
+First live combination5e9b81a / CI38687677301: root reported45 passed/5 failed.
+One checker defect was verified against fixed existing source: AgentTaskFactory
+filters category-disabled tools with `tools.permitsCategory`; `_Session.run`
+requires inquiry.object among those frozen candidates before process/model
+launch. The disabled-read test's historical one-HTTP expectation was therefore
+overly strict. It now requires the actual early tool_denied gate, exclusion from
+candidateIds, zero HTTP/ledger/receipt/launch and no fabricated authority. The
+separate revocation barrier still starts an actual model request before policy
+withdrawal and requires zero prepare/invoke/receipt. This correction is grounded
+in the two existing source gates, not a relaxation to match DUT output. The
+original failing CI log remains outside Git.

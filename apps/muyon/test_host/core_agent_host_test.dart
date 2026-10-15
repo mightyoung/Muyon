@@ -241,11 +241,14 @@ void main() {
     final task = await f.start();
     expect(task.state, PersonalTaskState.failed);
     f.assertRejection(task.error, 'tool_denied');
-    expect(f.transport.bodies, hasLength(1));
+    // Existing AgentTaskFactory excludes category-disabled tools from frozen
+    // candidates; the host backend refuses that candidate before launch/send.
+    expect(task.payload['candidateIds'], isNot(contains('inquiry.object')));
+    expect(f.transport.bodies, isEmpty);
+    expect(f.host.outbound.recent(), isEmpty);
     expect(f.receiptRows, isEmpty);
-    expect(f.frames('core.bin').where((frame) => frame['kind'] == 'invoke'), isEmpty);
+    expect(f.evidence.existsSync(), isFalse);
     f.assertNoManufacturedAuthority();
-    f.assertReaped();
   });
 
   test('read policy revoked while model pending cannot proceed to prepare or invoke', () async {
