@@ -133,6 +133,26 @@ fun runAgentServiceChecks() {
     cases["settlement requested during return stays with actual waiter"]={val work=ServiceManualExecutor();var settled=0;lateinit var pump:AgentSettlementPump;pump=AgentSettlementPump(work,{settled++;if(settled==1)check(pump.request())},{error("unexpected failure")});check(pump.request());work.next();check(settled==2 && work.jobs.isEmpty())}
     cases["settlement rejection and failure do not strand next explicit request"]={var attempts=0;var settled=0;var failed=0;val work=ServiceManualExecutor();val backend=Executor{if(attempts++==0)throw RejectedExecutionException()else work.execute(it)};val pump=AgentSettlementPump(backend,{settled++;if(settled==1)throw IllegalStateException("safe settlement failure")},{failed++});check(!pump.request());check(pump.request());work.next();check(settled==1 && failed==1);check(pump.request());work.next();check(settled==2 && failed==1)}
     cases["blocked settlement admits no concurrent waiter and preserves new request"]={val entered=CountDownLatch(1);val release=CountDownLatch(1);val done=CountDownLatch(1);val calls=java.util.concurrent.atomic.AtomicInteger();val active=java.util.concurrent.atomic.AtomicInteger();val overlap=java.util.concurrent.atomic.AtomicBoolean();val backend=Executor{job->Thread{try{job.run()}finally{done.countDown()}}.apply{isDaemon=true}.start()};val pump=AgentSettlementPump(backend,{if(active.incrementAndGet()!=1)overlap.set(true);try{if(calls.incrementAndGet()==1){entered.countDown();check(release.await(5,TimeUnit.SECONDS))}}finally{active.decrementAndGet()}},{error("unexpected failure")});check(pump.request());try{check(entered.await(5,TimeUnit.SECONDS));repeat(10){check(pump.request())}}finally{release.countDown()};check(done.await(5,TimeUnit.SECONDS));check(calls.get()==2 && !overlap.get())}
+    cases["concurrent settlement request is not acknowledged before rejected dispatch"]={
+        val entered=CountDownLatch(1);val reject=CountDownLatch(1);val done=CountDownLatch(1);val work=ServiceManualExecutor();val attempts=java.util.concurrent.atomic.AtomicInteger();var settled=0
+        val backend=Executor{job->if(attempts.getAndIncrement()==0){entered.countDown();check(reject.await(5,TimeUnit.SECONDS));throw RejectedExecutionException()}else work.execute(job)}
+        val pump=AgentSettlementPump(backend,{settled++},{error("unexpected failure")});val first=java.util.concurrent.atomic.AtomicReference<Boolean>()
+        Thread{try{first.set(pump.request())}finally{done.countDown()}}.apply{isDaemon=true}.start()
+        val accepted:Boolean
+        try{check(entered.await(5,TimeUnit.SECONDS));accepted=pump.request()}finally{reject.countDown()}
+        check(done.await(5,TimeUnit.SECONDS));check(first.get()==false)
+        check(!accepted || settled>0){"PUMP_REJECT_RED: acknowledged request must not be stranded"}
+        check(pump.request());work.next();check(settled==1)
+    }
+    cases["throwing failure listener cannot strand accepted settlement request"]={
+        val entered=CountDownLatch(1);val finish=CountDownLatch(1);val done=CountDownLatch(1);val work=ServiceManualExecutor();val settled=java.util.concurrent.atomic.AtomicInteger()
+        val pump=AgentSettlementPump(work,{if(settled.incrementAndGet()==1)throw IllegalStateException("safe settle failure")},{entered.countDown();check(finish.await(5,TimeUnit.SECONDS));throw IllegalStateException("safe listener failure")})
+        check(pump.request());Thread{try{runCatching{work.next()}}finally{done.countDown()}}.apply{isDaemon=true}.start()
+        val accepted:Boolean
+        try{check(entered.await(5,TimeUnit.SECONDS));accepted=pump.request()}finally{finish.countDown()}
+        check(done.await(5,TimeUnit.SECONDS));check(!accepted || settled.get()==2){"PUMP_LISTENER_RED: accepted request must survive listener failure"}
+        check(pump.request());work.next();check(settled.get()==3)
+    }
     var failures=0
     cases.forEach{(name,test)->try{test();println("PASS B service $name")}catch(e:Throwable){failures++;println("FAIL B service $name: ${e.message}")}}
     check(failures==0){"$failures/${cases.size} B service state checks failed"}
