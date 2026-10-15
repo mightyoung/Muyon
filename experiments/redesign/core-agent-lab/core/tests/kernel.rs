@@ -129,3 +129,37 @@ fn resume_confirmation_requires_an_existing_exact_pending_invocation(){
     assert!(command(&dir,"run",&[]).contains("status=waiting\n"));
     assert!(command(&dir,"run",&["--confirmed","true"]).contains("status=completed\n"));
 }
+#[test]
+fn restoring_receipt_preserves_completed_control_barrier(){
+    let dir=fixture("tool\tc1\tfixture.record\t6869\nanswer\t646f6e65\ntool\tc2\tfixture.record\t6c61746572\nanswer\t6c61746572\n",&[]);
+    let done=command(&dir,"run",&[]);assert!(done.contains("status=completed\n"));assert!(done.contains("model_calls=2\n"));
+    let physical=fs::read_to_string(dir.join("effects.db")).unwrap();
+    fs::rename(dir.join("effects.db"),dir.join("preserved-effects.db")).unwrap();
+    assert!(command(&dir,"run",&[]).contains("status=outcome_unknown\n"));
+    fs::rename(dir.join("preserved-effects.db"),dir.join("effects.db")).unwrap();
+    assert!(command(&dir,"lookup",&[]).contains("status=completed\n"));
+    assert_eq!(command(&dir,"run",&[]),done);assert_eq!(fs::read_to_string(dir.join("effects.db")).unwrap(),physical);
+}
+#[test]
+fn restoring_receipt_preserves_context_budget_barrier(){
+    let dir=fixture("tool\tc1\tfixture.record\t6869\nanswer\t\n",&["--max-context","40"]);
+    let stopped=command(&dir,"run",&[]);assert!(stopped.contains("status=budget_exhausted\n"));assert!(stopped.contains("model_calls=1\n"));
+    fs::rename(dir.join("effects.db"),dir.join("preserved-effects.db")).unwrap();
+    assert!(command(&dir,"run",&[]).contains("status=outcome_unknown\n"));
+    fs::rename(dir.join("preserved-effects.db"),dir.join("effects.db")).unwrap();
+    assert!(command(&dir,"lookup",&[]).contains("status=budget_exhausted\n"));
+    assert_eq!(command(&dir,"run",&[]),stopped);
+}
+#[test]
+fn repeated_provider_reference_replays_original_receipt_without_permission_consumption(){
+    let dir=fixture("tool\tc1\tfixture.record\t6869\ntool\tc1\tfixture.record\t6869\nanswer\t7b7b746f6f6c5f726573756c747d7d\n",&["--mode","ask-every-time","--confirmed","true"]);
+    let done=command(&dir,"run",&[]);assert!(done.contains("status=completed\n"));assert!(done.contains("effects=1\n"));assert!(done.contains("model_calls=3\n"));assert!(done.contains("confirmations=1\n"));assert!(done.contains("receipt=r-i-1\n"));
+    assert!(done.contains(&format!("answer_hex={}\n",muyon_core_agent_lab::hex("receipt=r-i-1;value=hi"))));
+}
+#[test]
+fn repeated_reference_mapping_survives_unknown_and_restart(){
+    let dir=fixture("tool\tc1\tfixture.record\t6869\ntool\tc1\tfixture.record\t6869\nanswer\t7b7b746f6f6c5f726573756c747d7d\n",&["--tool-behavior","lose-response"]);
+    let unknown=command(&dir,"run",&[]);assert!(unknown.contains("status=outcome_unknown\n"));assert_eq!(command(&dir,"run",&[]),unknown);
+    let physical=fs::read_to_string(dir.join("effects.db")).unwrap();command(&dir,"lookup",&[]);
+    let done=command(&dir,"run",&[]);assert!(done.contains("status=completed\n"));assert!(done.contains("model_calls=3\n"));assert!(done.contains("receipt=r-i-1\n"));assert_eq!(fs::read_to_string(dir.join("effects.db")).unwrap(),physical);
+}
