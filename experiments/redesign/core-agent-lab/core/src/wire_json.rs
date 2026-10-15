@@ -23,7 +23,8 @@ impl Parser<'_>{
     fn take(&mut self,b:u8)->bool{if self.bytes.get(self.pos)==Some(&b){self.pos+=1;true}else{false}}
     fn require(&mut self,b:u8)->Result<()>{if self.take(b){Ok(())}else{Err("wire_json_syntax".into())}}
     fn value(&mut self,depth:usize)->Result<Json>{
-        self.space();self.nodes+=1;if depth>32||self.nodes>32768{return Err("wire_json_depth".into());}
+        self.space();self.nodes+=1;if self.nodes>32768{return Err("wire_json_depth".into());}
+        if matches!(self.bytes.get(self.pos),Some(b'{'|b'['))&&depth>=32{return Err("wire_json_depth".into());}
         match self.bytes.get(self.pos).copied(){
             Some(b'"')=>Ok(Json::String(self.text()?)),
             Some(b'{')=>{self.pos+=1;self.space();let mut map=BTreeMap::new();if self.take(b'}'){return Ok(Json::Object(map));}loop{self.space();let key=self.text()?;self.space();self.require(b':')?;let value=self.value(depth+1)?;if map.insert(key,value).is_some(){return Err("wire_json_duplicate".into());}self.space();if self.take(b'}'){break;}self.require(b',')?;}Ok(Json::Object(map))},

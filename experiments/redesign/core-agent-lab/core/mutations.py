@@ -13,6 +13,12 @@ args = parser.parse_args()
 args.evidence_dir.mkdir(parents=True, exist_ok=True)
 source = Path(__file__).resolve().parent
 mutations = [
+    ('wire_container_depth', 'src/wire_json.rs',
+     "&&depth>=32{return Err(\"wire_json_depth\".into());}",
+     "&&depth>32{return Err(\"wire_json_depth\".into());}"),
+    ('wire_native_value_identity', 'src/wire_provider.rs',
+     'if pending!=Some((call_ref.as_str(),value.as_str()))||!identifier(receipt)',
+     'if pending.map(|p|p.0)!=Some(call_ref.as_str())||!identifier(receipt)'),
     ('wire_stream_cancel_bypass', 'src/agent.rs',
      'if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}',
      'if false && self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}'),

@@ -1,20 +1,21 @@
 //! Native request mapping and bounded stdio provider boundary.
 use crate::{Result,identifier,model::{ModelRequest,NativeMessage},wire_json::{self,Json,object,string}};
 pub fn native_json(history:&[NativeMessage])->Result<Json>{
-    let mut messages=Vec::new();let mut pending:Option<&str>=None;
+    let mut messages=Vec::new();let mut pending:Option<(&str,&str)>=None;let mut identities=std::collections::BTreeMap::new();let mut receipts=std::collections::BTreeMap::new();
     for message in history {
         if pending.is_some()&&!matches!(message,NativeMessage::ToolResult{..}){return Err("wire_unpaired_history".into());}
         let item=match message {
             NativeMessage::User(text)=>object([("role",string("user")),("content",string(text))]),
             NativeMessage::Assistant(text)=>object([("role",string("assistant")),("content",string(text))]),
             NativeMessage::AssistantCall{call_ref,name,value}=>{
-                if !identifier(call_ref)||name!="fixture.record"{return Err("wire_history_call".into());}pending=Some(call_ref);
+                if !identifier(call_ref)||name!="fixture.record"{return Err("wire_history_call".into());}if let Some((old_name,old_value))=identities.get(call_ref){if old_name!=name||old_value!=value{return Err("wire_history_conflict".into());}}else{identities.insert(call_ref.clone(),(name.clone(),value.clone()));}pending=Some((call_ref,value));
                 let function=object([("name",string("fixture__record")),("arguments",string(object([("value",string(value))]).encode()))]);
                 let call=object([("id",string(call_ref)),("type",string("function")),("function",function)]);
                 object([("role",string("assistant")),("content",Json::Null),("tool_calls",Json::Array(vec![call]))])
             },
             NativeMessage::ToolResult{call_ref,value,receipt}=>{
-                if pending!=Some(call_ref.as_str())||!identifier(receipt){return Err("wire_unpaired_history".into());}pending=None;
+                if pending!=Some((call_ref.as_str(),value.as_str()))||!identifier(receipt){return Err("wire_unpaired_history".into());}pending=None;
+                if let Some(original)=receipts.get(call_ref){if original!=receipt{return Err("wire_history_receipt_conflict".into());}}else{receipts.insert(call_ref.clone(),receipt.clone());}
                 object([("role",string("tool")),("tool_call_id",string(call_ref)),("content",string(object([("value",string(value)),("receipt",string(receipt))]).encode()))])
             },
         };messages.push(item);

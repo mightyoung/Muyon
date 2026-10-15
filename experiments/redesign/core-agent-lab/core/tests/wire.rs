@@ -125,3 +125,21 @@ fn silent_stream_cancellation_is_observed_before_timeout(){
 fn blocked_request_writer_is_bounded_by_deadline(){
     let input="x".repeat(50000);let dir=fixture(TOOL,&["--input",&input,"--wire-idle-ms","100","--wire-total-ms","500"]);fs::write(dir.parent().unwrap().join("no-read"),"").unwrap();let result=command(&dir,"run",&[]);assert_eq!(field(&result,"effects"),"0");assert!(field(&result,"reason").ends_with("timeout"));let sent:u64=field(&result,"wire_sent_bytes").parse().unwrap();assert!(sent>0&&sent<50000);let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();assert!(!Path::new(&format!("/proc/{pid}")).exists());
 }
+#[test]
+fn unsupported_multiple_choices_calls_and_wrong_types_reject_whole_turn(){
+    let one=r#"{"index":0,"delta":{},"finish_reason":"stop"}"#;
+    let choices=format!("data: {{\"choices\":[{one},{one}]}}\n\ndata: [DONE]\n\n");assert!(decode(choices.as_bytes()).is_err());
+    let call=r#"{"index":0,"id":"c1","function":{"name":"fixture__record","arguments":"{\"value\":\"hi\"}"}}"#;
+    let calls=format!("data: {{\"choices\":[{{\"index\":0,\"delta\":{{\"tool_calls\":[{call},{call}]}},\"finish_reason\":\"tool_calls\"}}]}}\n\ndata: [DONE]\n\n");assert!(decode(calls.as_bytes()).is_err());
+    for change in [TOOL.replace("\"index\":0","\"index\":\"0\""),TOOL.replace("\"id\":\"c1\"","\"id\":true"),TOOL.replace("\"delta\":{},","\"delta\":{\"content\":5},"),TOOL.replace("\"delta\":{},","\"delta\":{\"content\":\"mixed\"},")]{assert!(decode(change.as_bytes()).is_err());}
+}
+#[test]
+fn malformed_duplicate_and_nonobject_arguments_are_rejected(){
+    for args in [r#"{"value":"hi","value":"evil"}"#,r#"["hi"]"#,r#"{"value":"hi","scope":"privileged"}"#,r#"{"value":"hi"} trailing"#]{let escaped=muyon_core_agent_lab::wire_json::quote(args);let stream=format!("data: {{\"choices\":[{{\"index\":0,\"delta\":{{\"tool_calls\":[{{\"index\":0,\"id\":\"c1\",\"function\":{{\"name\":\"fixture__record\",\"arguments\":{escaped}}}}}]}},\"finish_reason\":\"tool_calls\"}}]}}\n\ndata: [DONE]\n\n");assert!(decode(stream.as_bytes()).is_err(),"{args}");}
+}
+#[test]
+fn metadata_repeats_and_null_fragments_are_supported_but_limits_hold(){
+    let identical=TOOL.replace("\"delta\":{},", "\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"c1\",\"function\":{\"name\":\"fixture__record\",\"arguments\":null}}]},");assert!(decode(identical.as_bytes()).is_ok());
+    let oversized=format!(":{}\n\n{}","x".repeat(16385),TOOL);assert!(decode(oversized.as_bytes()).is_err());
+    let mut invalid=TOOL.as_bytes().to_vec();invalid[0]=255;assert!(decode(&invalid).is_err());
+}
