@@ -576,3 +576,48 @@ fn host_final_terminal_backpressure_consumes_control_and_preserves_original_resu
         assert!(partial.len() < declared, "partial final terminal is abandoned without appending another frame");
     }
 }
+
+#[test]
+fn host_truncated_second_turn_eof_delivers_protocol_terminal_and_retains_result() {
+    unsafe extern "C" { fn fcntl(fd: i32, cmd: i32, ...) -> i32; }
+    let mut process = HostProcess::new();
+    assert_eq!(unsafe { fcntl(process.output.as_raw_fd(), 1031, 4096) }, 4096);
+    let invocation = admit_tool(&mut process);
+    result(&mut process, &invocation, projected_result());
+    request(&mut process, "model_request", 4, 2);
+    process.send_raw(&100u32.to_be_bytes()); process.send_raw(b"{"); process.close_input();
+    let value = terminal(&mut process, "failed", "host_protocol", 1);
+    assert_eq!(text(&value, "receipt_ref"), "receipt:original");
+    assert_eq!(field(&value, "projection"), &projected_result());
+    let journal = wire_json::parse(&fs::read(process.root.join("host-task/host-attempt/host.db")).unwrap()).unwrap();
+    assert_eq!(text(&journal, "reason"), "host_protocol", "processed truncated EOF cannot be rediscovered as clean EOF during terminal delivery");
+}
+
+#[test]
+fn host_new_eof_during_final_terminal_backpressure_is_not_ignored() {
+    unsafe extern "C" { fn fcntl(fd: i32, cmd: i32, ...) -> i32; }
+    let mut process = HostProcess::new();
+    assert_eq!(unsafe { fcntl(process.output.as_raw_fd(), 1031, 4096) }, 4096);
+    let invocation = admit_tool(&mut process);
+    result(&mut process, &invocation, projected_result());
+    request(&mut process, "model_request", 4, 2);
+    process.send(callback("model_reply", 4, 2, vec![("reply", object([
+        ("kind", string("answer")), ("text", string("x".repeat(8000))),
+    ]))]));
+    let mut header = [0u8; 4]; process.output.read_exact(&mut header).unwrap();
+    let declared = u32::from_be_bytes(header) as usize; assert!(declared > 4096);
+    // New EOF is observed while final output is blocked; known EOF must later
+    // stay latched, without suppressing live input/control polling globally.
+    process.close_input();
+    assert_eq!(process.child.wait().unwrap().code(), Some(2));
+    let mut stderr = String::new(); process.child.stderr.take().unwrap().read_to_string(&mut stderr).unwrap();
+    assert_eq!(stderr, "error=host_partial_output\n");
+    let journal = wire_json::parse(&fs::read(process.root.join("host-task/host-attempt/host.db")).unwrap()).unwrap();
+    assert_eq!(text(&journal, "status"), "interrupted");
+    assert_eq!(text(&journal, "reason"), "host_eof");
+    assert_eq!(field(&journal, "answer"), &Json::Null);
+    assert_eq!(text(&journal, "receipt_ref"), "receipt:original");
+    assert_eq!(field(&journal, "projection"), &projected_result());
+    let mut partial = Vec::new(); process.output.read_to_end(&mut partial).unwrap();
+    assert!(partial.len() < declared, "no new terminal after a partial output frame");
+}

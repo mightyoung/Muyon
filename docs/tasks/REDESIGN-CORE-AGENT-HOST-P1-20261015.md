@@ -104,3 +104,24 @@ then leaves stdout unread and asserts exact control journal status, null answer,
 retained receipt/projection and no completed/second frame. Both cancel and close
 are covered. This targeted test was added before the correction. Local corrected
 Rust/runtime verification remains NOT_RUN pending exact CI and scoped re-review.
+
+## Scoped round3 — processed EOF and live control remain distinct
+
+The final-write control fix exposed persistent POLLHUP after an already handled
+clean/truncated EOF. Transport now latches `input_closed` when read returns zero;
+terminal writes skip only that closed input, retaining the original EOF/protocol
+reason. Live input still receives the same bounded cancel/close polling, including
+under final-terminal backpressure. No deadline is reset and no partial output is
+followed by another terminal.
+
+Existing clean/truncated header/body tests remain unchanged. Added orthogonal
+cases cover truncated turn2 EOF after an accepted original result (its precise
+protocol terminal/reference must be delivered), and newly arriving EOF while the
+large final terminal is physically blocked (truthful interrupted journal and
+original result retained). Existing live cancel/close final-backpressure coverage
+remains. Tests were added before this minimal transport correction. Local runtime
+remains NOT_RUN; prior-source CI is not claimed as validation of round3.
+
+Further product expansion is paused by the new architecture direction. This fix
+adds no business interface/adapter and freezes no inquiry-specific public core
+contract; existing experimental source, branches and failure evidence are retained.

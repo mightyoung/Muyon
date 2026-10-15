@@ -132,14 +132,14 @@ struct PollFd { fd: i32, events: i16, revents: i16 }
 unsafe extern "C" { fn fcntl(fd: i32, cmd: i32, ...) -> i32; fn poll(fds: *mut PollFd, count: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
 struct Transport {
     started: Instant, active: Instant, idle: Duration, total: Duration, bytes: usize,
-    task: String, attempt: String, next: u64, shutdown: Option<Shutdown>, terminal_delivery: bool, invoke_admitted: bool, output_incomplete: bool, old_flags: [i32; 2],
+    task: String, attempt: String, next: u64, shutdown: Option<Shutdown>, terminal_delivery: bool, invoke_admitted: bool, output_incomplete: bool, input_closed: bool, old_flags: [i32; 2],
 }
 impl Drop for Transport { fn drop(&mut self) { for fd in 0..2 { unsafe { fcntl(fd, 4, self.old_flags[fd as usize]); } } } }
 impl Transport {
     fn new(config: &HostSessionConfig) -> Result<Self> {
         let started = Instant::now(); let mut old_flags = [0; 2];
         for fd in 0..2 { let flags = unsafe { fcntl(fd, 3) }; if flags < 0 || unsafe { fcntl(fd, 4, flags | 2048) } < 0 { return Err("host_pipe_setup".into()); } old_flags[fd as usize] = flags; }
-        Ok(Self { started, active: started, idle: Duration::from_millis(config.idle_ms), total: Duration::from_millis(config.total_ms), bytes: 0, task: String::new(), attempt: String::new(), next: 1, shutdown: None, terminal_delivery: false, invoke_admitted: false, output_incomplete: false, old_flags })
+        Ok(Self { started, active: started, idle: Duration::from_millis(config.idle_ms), total: Duration::from_millis(config.total_ms), bytes: 0, task: String::new(), attempt: String::new(), next: 1, shutdown: None, terminal_delivery: false, invoke_admitted: false, output_incomplete: false, input_closed: false, old_flags })
     }
     fn deadline(&self) -> Result<()> {
         let reserve = Duration::from_millis((self.total.as_millis() as u64 / 10).min(100));
@@ -166,7 +166,7 @@ impl Transport {
             let remaining = buffer.len() - position;
             if remaining > self.remaining() { return Err("host_budget".into()); }
             let n = unsafe { read(0, buffer[position..].as_mut_ptr(), remaining) };
-            if n == 0 { return Err(if clean_eof && position == 0 { "host_eof" } else { "host_protocol" }.into()); }
+            if n == 0 { self.input_closed = true; return Err(if clean_eof && position == 0 { "host_eof" } else { "host_protocol" }.into()); }
             if n < 0 { let kind = io::Error::last_os_error().kind(); if matches!(kind, io::ErrorKind::Interrupted | io::ErrorKind::WouldBlock) { continue; } return Err("host_io_failed".into()); }
             self.charge(n as usize)?; position += n as usize;
         }
@@ -190,7 +190,7 @@ impl Transport {
         let mut position = 0;
         while position < bytes.len() {
             // A full output pipe must never hide host Stop/close until idle timeout.
-            if self.ready(0, 1, false)? {
+            if !self.input_closed && self.ready(0, 1, false)? {
                 let incoming = self.receive()?;
                 if !self.control(&incoming)? { return Err("callback_mismatch".into()); }
                 return Err(self.shutdown.unwrap().error().into());
