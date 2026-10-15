@@ -93,3 +93,54 @@ integration盘点含18个Kotlin文件（含宿主、测试和探针）。Muyon�
 依照明确的“遇安全警告不绕过”要求，本轮没有提交该表单、构造confirm-token请求或尝试绕过入口。**APK尚未下载，SHA-256/包名/版本未从原包核验，资源ZIP/字体许可未检查。**这不是自动审批拒绝，也不能再笼统归因“Drive没权限”。进一步原包检查需用户先处理正常Drive安全确认并提供已批准的可读文件/交付方式；不因此暂停现有页面清单。
 
 实际请求与可见提示证据在独立临时报告的 `drive-review/public-download-attempts.json`、`security-warning.json`；无凭据原值或隐藏表单字段。原先只读结论仍成立：已有10张资源PNG不是完整页面截图；REA未提供且未使用；许可未明资源不直接复制。
+
+## 追加：页面/组件/状态实施分片（仅文档）
+
+
+2026-10-15追加。范围仅UI线文档与只读映射；不扩大APK/REA线，不等待core/plugin研究才产出UI清单。没有再次请求Drive下载、提交安全确认或安装工具；产品代码未修改。
+
+## 证据标记与使用规则
+
+- `directpixel`：仅指已逐张查看的10张资源PNG的像素；可判断资源形状、资源尺寸和配色。**没有任何页面获此标签。**机器人海报、图标拼图不能提升为完整页面/状态截图。
+- `静态线索`：固定WorkBuddy提交 `dca32eebd723e5a4e577cb63a39bea1f8588fd04` 中的资源名、类名、路由、文案、常量/枚举。只证明字符串/资产存在，不证明调用点与页面组合。
+- `未知`：页面位置、顺序、尺寸、真实交互、主题映射、字体分配或适用许可未证实，等待原图/明确证据。
+- `Muyon源码`：已有实现事实，来源于现有只读文件；不能宣称为WorkBuddy事实。下文组件名均为既有符号或明确写作“候选组件”，没有新建产品接口/状态。
+
+## 主流程分片清单
+
+以下路径相对仓库根。分片是后续实施边界，**本轮已完成的是证据/映射文档，不是这些产品分片的实现**。Flutter路径是现有产品接触点，Compose路径是未来原生实验接触点，二者不暗示本轮改变技术路线。各片完成视觉实现前均需对应真实原图。
+
+| 分片 / 页面 | 组件与状态清单 | WorkBuddy证据标签 | 现有Muyon/Android落点 | 现在可独立完成 / 真实像素阻塞 |
+|---|---|---|---|---|
+| UI-00 参考台账 | 10资源、32证据文件、图像类别/许可/原图缺口；原图与截图版本关联 | `directpixel`仅资源；完整页面`未知` | 独立/tmp报告；本docs文件 | 已完成哈希/像素/类型核验；可接收原图后绑定页ID，不能以拼图补页 |
+| UI-01 基础视觉候选 | 明/暗画布、层级文字、强调/警告、字号/行高、边距/圆角；默认/暗色/字体放大 | `directpixel`图标与资源明暗；F14/15/16`静态线索`；组件token映射`未知` | `packages/muyon_ui/lib/src/{tokens,theme,motion}.dart`；`apps/muyon/assets/brand/`；Android `res/values{,-night}/styles.xml` | 可列候选与现有token差异、保留自有资产；精确配色分配/字体/尺寸待同页明暗原图。不得先改共享UI包影响其他writer |
+| UI-02 任务入口与目录 | 顶栏、导航、任务行、搜索入口、更多菜单、空态；有内容/空/选中/加载/失败 | F08 tabs/drawer/search资产、F11文案为`静态线索`；顺序/卡片/顶底栏`未知` | `screens/platform_shell.dart` 的destinations；`platform_shell_home.dart` 的`home()`/`tasks()`；`chat/chat_list_page.dart` | 可清点稳定任务/会话ID与已有导航回调；默认页、5入口组合、任务行构图待首页/列表/菜单原图。不根据5个图标强加频道/自动化功能 |
+| UI-03 对话与过程 | 顶栏、用户/助手内容、过程组、步骤卡、任务状态、引用、附件/产物组、操作行；空/准备/运行/待确认/完成/失败/暂停/取消中/中断 | ChatPage、F17块/滚动枚举、F11文案为`静态线索`；块间距、气泡、折叠/跟随阈值`未知` | `screens/assistant_page.dart` 的`AssistantPage`；`execution_panel.dart` 的`ExecutionPanel`/`_TaskCard`；`chat/chat_thread_page.dart` 的`_Bubble` | 可按现有状态列展示字段/动作表；保持`ObjectRef`回访和任务ID。原图决定排版/过程折叠/滚动提示；不把资源名当流式行为已复刻 |
+| UI-04 输入区 | 原始输入、模型、附件/本地工具、语音入口、权限标记、发送/停止候选、最大化候选；空文本/输入中/准备中/组字/键盘起落/忙/不可用 | F08 input-*图标`静态线索`；拼图的形状`directpixel`；排列/共用按钮时序/高度`未知` | `assistant_page.dart` 的`_input`/`_profileId`/`_busy`/`_send()`/`_tool()`；`screens/platform_shell_personal.dart`模型选择 | 可记录已有回调与disabled来源，区分发送准备与真实执行。键盘、IME、输入区尺寸/控件位置待原图；不凭图标增加未支持语音/附件能力 |
+| UI-05 选择弹层 | 模型、附件来源、执行位置、范围候选：标题、选项、选中、取消、空/不可用/加载 | F06各Sheet名为`静态线索`；实际Sheet样式/高度/拖动柄`未知` | 现`assistant_page.dart`及`platform_shell_personal.dart`使用Dialog/选择器；`devices_page.dart`仅现有设备能力 | 可列模型profile与真实执行位置数据来源；不默认所有Dialog改BottomSheet。待3个完整弹层原图；电脑/云端资产不授予跨设备执行 |
+| UI-06 授权与结果 | 权限范围摘要、确认正文、允许/拒绝/取消、撤权后显示、历史/当前回执、结果未知核对 | shield图形`directpixel`；standard/fullAccess/confirmThenApply名为`静态线索`；权限语义/绑定`未知` | `assistant_page.dart`的`_confirm()`与agent回调；`screens/data_flow_page.dart`；现有Rust/宿主授权边界只读 | 可列哪些文字消费宿主事实、哪些动作必须走原回调；UI不新造grant/receipt。盾牌和确认卡样式待原图；绝不把“完全访问”外观映射为Muyon授权变化 |
+| UI-07 产物与预览 | 产物行/卡、类型图标、标题/版本、加载/错误/可打开/历史、预览顶栏/返回/分享候选 | F07 preview路径、F06 ArtifactFileSheet、F08文件图标为`静态线索`；完整预览布局`未知` | `screens/knowledge_preview.dart`的`KnowledgePreview`；`platform_shell.dart`打开记录/资料与`ObjectRef`回调；`packages/prototype_module/lib/src/prototype_screens.dart` | 可列现支持PDF/图片/有界文本及错误/等待展示；WorkBuddy代码/diff/视频路径不等于Muyon已支持。待产物卡+预览页原图，不自动加导出/分享副作用 |
+| UI-08 我的/设置 | 入口行、分组标题、模型配置、个人资料、记忆、存储、主题/减少动效；正常/空/编辑/确认/失败 | F07 settings、mine、memory路由为`静态线索`；分组/开关/列表布局`未知` | `platform_shell.dart`的`mine()`；`platform_shell_personal.dart`的`personal()`/`settings()`；`memory_page.dart`、`data_storage_page.dart` | 可列现有设置绑定和授权来源；会员/积分/运营能力不因视觉引用加入。待我的/设置/记忆原图，保存行为保留原实现 |
+| UI-09 搜索/历史/回访 | 搜索输入、结果行、空/失败、原对象定位、历史标记、归档候选 | F07 search路径、F08 drawer/search/archive、F11空文案为`静态线索`；实际搜索页`未知` | `platform_shell_knowledge.dart`的`knowledge()`及查找业务对象；`platform_shell_home.dart`会话回访；`chat_list_page.dart` | 可列各入口返回的稳定引用与回退路径；不能假定业务对象搜索等于全局任务搜索。待任务历史/搜索页原图，跨域查询范围不扩大 |
+| UI-10 自有业务页适配 | 供应商列表/详情/编辑、当前值/原草稿/预览/历史回执、取消确认；partial/unavailable/editing/prepared/saving/conflict/unknown/rejected/saved | WorkBuddy无供应商页面，属于`未知`，不能宣称复刻对应页 | RD-P08 `operable-supplier-flow/android/{SupplierPage,SupplierScreenModel}.kt`的LIST/DETAIL/EDITOR；产品`packages/inquiry_module/lib/src/features/` | 可按原状态列同一基础视觉的组件映射；不碰Rust合同/原始UTF-16/回执绑定。Compose仅源码未编译运行；字体放大/IME/TalkBack仍需后续真实验收 |
+| UI-11 发现/频道/自动化/登录 | 各入口、能力卡/团队行/任务表单/登录表单候选 | 资产/路由/Sheet名`静态线索`；登录海报`directpixel`仅插画；全页`未知` | 未发现等价完整WorkBuddy功能页；现有`McpServersPage`/设备/科研工具也不能自动等同竞品页面 | 可记录功能适用差距与原图需求；没有原图和业务授权时不建假入口、假账号页或复制品牌海报 |
+
+## 状态与动作绑定：不得按竞品名称强行对齐
+
+| 状态来源 | 已有事实 | 后续UI允许表示 | 禁止的推定 |
+|---|---|---|---|
+| `FoundationRepository.PersonalTaskState` | queued/waitingConfirmation/running/succeeded/failed/cancelled/paused/interrupted | 直接消费原任务状态、stage、waitingFor、error、summary、executionDeviceId、references | 枚举没有unknown；不能把interrupted直接等于结果未知/未执行，也不能靠视觉增加枚举 |
+| `AssistantPage._busy` | 发送准备过程的页面本地标志 | 禁重复触发准备、显示已有“准备中”；在状态表明确区别执行状态 | `_busy=false`不能证明任务完成/外部动作停止 |
+| `ExecutionPanel._TaskCard` | 取消/暂停/恢复由任务状态及platform owner决定；stage=cancelling另判 | 沿用onCancel/onPause/onResume/onOpenObject回调和原guard | 不为显示停止图标绕过guard；请求取消不等于已取消 |
+| RD-P08 `SupplierScreenModel` | `canSave`要求prepared+preview+同步草稿且无未决；`canLookup`核对原操作；saved要求真实receipt | 展示当前读值和原历史回执，unknown保留原草稿/会话；只核对原操作 | 不把prepared当已保存；不自动重发；不将旧回执当当前版本 |
+| WorkBuddy F17 | 存在dispatchAmbiguous、reconcilePending、streamingFollow等枚举名 | 仅作为待观察的视觉/流程问题清单 | 不据此证明其服务端幂等、滚动实现或Muyon已有同名能力 |
+
+候选组件如导航项、任务行、状态徽标、过程组、输入工具条、选择行、预览顶栏、设置组，后续应先绑定已批准的单页原图和现有回调再实现。组件样式不能代替权限判定；缺状态时先报合同缺口，不由UI writer改核心。
+
+## 可实施与阻塞边界
+
+**当前可独立交付：**UI-00台账、UI-01候选token差异表、UI-02至UI-10的页面/状态/回调映射、本页分片清单、原图接收模板。已完成的文档本身不依赖APK或core/plugin新增结果；也不因此获得修改产品代码的授权。
+
+**获得对应原图后可提请具体实施：**以UI-02任务列表、UI-03/04对话输入、UI-05三个弹层、UI-07产物预览、UI-08设置为顺序，一片一次交付可查看结果。每片评审包须包含原图版本/设备、目标组件、未覆盖状态、实际渲染图和对比结论；原图参考尺寸与Muyon无障碍适配分开记录。没有实测渲染就不标“像素一致”。
+
+**仍阻塞：**真实完整页面像素；资源许可；若继续原包解析，Drive大文件安全确认与工具缺失。三路并行不是批准Download anyway或REA安装，本轮未触及它们。独立UI owner只改本docs和/tmp审查材料，不接管/挪动core writer，品牌与自有素材不变。
