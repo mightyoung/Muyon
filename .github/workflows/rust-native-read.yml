@@ -105,9 +105,6 @@ jobs:
       fail-fast: false
       matrix:
         component: [core, plugin, host]
-    env:
-      CARGO_TARGET_DIR: ${{ runner.temp }}/rust-native-target-${{ matrix.component }}
-      EVIDENCE_DIR: ${{ runner.temp }}/rust-native-full-${{ matrix.component }}
     defaults:
       run:
         shell: bash
@@ -115,6 +112,9 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Freeze exact source tools and fixture inventory
         run: |
+          EVIDENCE_DIR="$RUNNER_TEMP/rust-native-full-${{ matrix.component }}"
+          echo "EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+          echo "CARGO_TARGET_DIR=$RUNNER_TEMP/rust-native-target-${{ matrix.component }}" >> "$GITHUB_ENV"
           mkdir -p "$EVIDENCE_DIR"
           git rev-parse HEAD | tee "$EVIDENCE_DIR/source-sha.txt"
           rustc --version | tee "$EVIDENCE_DIR/rustc-version.txt"
