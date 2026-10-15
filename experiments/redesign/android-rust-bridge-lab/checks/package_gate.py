@@ -115,6 +115,13 @@ def apk_entries(apk, inputs):
     return expected
 
 
+def apk_sdk_and_abi(badging):
+    # Pinned build-tools35 emits minSdkVersion (not legacy sdkVersion).
+    return (re.findall(r'^minSdkVersion:(.*)$', badging, re.M) == ["'24'"]
+            and re.findall(r'^targetSdkVersion:(.*)$', badging, re.M) == ["'36'"]
+            and re.findall(r'^native-code:(.*)$', badging, re.M) == [" 'arm64-v8a' 'x86_64'"])
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--artifacts', type=Path, required=True)
@@ -178,7 +185,7 @@ def main():
                        if any(field in line for field in ['sdkVersion', 'SdkVersion', 'native-code'])][:8]
         print('ANDROID_BRIDGE_AAPT_BADGING ' + json.dumps(dict(
             rows=badging_rows, raw_sha256=sha(evidence / 'apk-badging.log'), bounded=True)), flush=True)
-        if not re.search(r"^sdkVersion:'24'$", badging, re.M) or "native-code: 'arm64-v8a' 'x86_64'" not in badging:
+        if not apk_sdk_and_abi(badging):
             raise RuntimeError('apk_sdk_or_abi')
         for name, path in [('app-debug.apk', apk), ('app-debug-androidTest.apk', test_apk)]:
             shutil.copyfile(path, evidence / name)

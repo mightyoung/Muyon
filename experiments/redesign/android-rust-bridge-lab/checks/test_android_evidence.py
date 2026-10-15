@@ -84,6 +84,21 @@ class ElfControls(unittest.TestCase):
 
 
 class PackageControls(unittest.TestCase):
+    def test_actual_pinned_badging_shape_requires_single_minimum_target_and_abi_pair(self):
+        actual_shape = "package: name='com.mightyoung.muyon.androidlab'\nminSdkVersion:'24'\ntargetSdkVersion:'36'\nnative-code: 'arm64-v8a' 'x86_64'\n"
+        self.assertTrue(package.apk_sdk_and_abi(actual_shape))
+        for bad in [actual_shape.replace("minSdkVersion:'24'", "minSdkVersion:'26'"),
+                    actual_shape.replace("targetSdkVersion:'36'", "targetSdkVersion:'24'"),
+                    actual_shape.replace("minSdkVersion:'24'", "sdkVersion:'24'"),
+                    actual_shape.replace("minSdkVersion:'24'\n", ''),
+                    actual_shape.replace("targetSdkVersion:'36'\n", ''),
+                    actual_shape.replace(" 'x86_64'", ''),
+                    actual_shape.replace(" 'x86_64'", " 'x86_64' 'armeabi-v7a'"),
+                    actual_shape + "minSdkVersion:'24'\n",
+                    actual_shape + "native-code: 'arm64-v8a' 'x86_64'\n"]:
+            with self.subTest(bad=bad):
+                self.assertFalse(package.apk_sdk_and_abi(bad))
+
     def test_synthetic_matching_source_aggregate_and_stale_hash_reject(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);artifacts=root/'artifacts';artifacts.mkdir();source='a'*40
