@@ -4,11 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteException
-import android.system.ErrnoException
-import android.system.Os
-import android.system.OsConstants
 import com.mightyoung.muyon.androidlab.*
-import java.io.File
 import java.util.UUID
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -57,10 +53,11 @@ class AgentRuntimeService:Service() {
     }
     /** Only Service Context-derived canonical private storage. No UI/Binder path parameter. */
     private fun privateRoot():String {
-        val root=File(filesDir.canonicalFile,"native-agent-service-v1")
-        if(!root.exists()) try{Os.mkdir(root.absolutePath,448)}catch(error:ErrnoException){if(error.errno!=OsConstants.EEXIST)throw error}
-        check(root.absolutePath==root.canonicalPath){"root_unavailable"}
-        return root.absolutePath // Rust still validates owner/mode/symlink, lock, quota and index.
+        // The Rust root owner alone creates native-agent-service-v1 underneath this
+        // platform parent. Do not double-create its namespace or chmod platform filesDir.
+        return filesDir.canonicalFile.absolutePath
+        // Rust validates strict owner/mode/symlink, lock, quota and index; incompatible
+        // device directory mode fails closed instead of changing the storage contract.
     }
     override fun onBind(intent:Intent?):IBinder=binder
     override fun onUnbind(intent:Intent?):Boolean { stopPlatform(dispose=false);return true }
