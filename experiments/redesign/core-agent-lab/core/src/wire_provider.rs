@@ -44,7 +44,7 @@ pub fn encode_history(history:&[NativeMessage])->String{
     }).collect()).encode()
 }
 pub fn decode_history(raw:&str)->Result<Vec<NativeMessage>>{
-    let json=wire_json::parse_bounded(raw.as_bytes(),262144)?;let mut result=Vec::new();
+    let json=wire_json::parse_bounded(raw.as_bytes(),1_048_576)?;let mut result=Vec::new();
     for row in json.array()?{let row=row.array()?;let s:Vec<&str>=row.iter().map(Json::string).collect::<Result<_>>()?;let m=match s.as_slice(){
         ["user",t]=>NativeMessage::User((*t).into()),["assistant",t]=>NativeMessage::Assistant((*t).into()),
         ["call",c,n,v]=>NativeMessage::AssistantCall{call_ref:(*c).into(),name:(*n).into(),value:(*v).into()},

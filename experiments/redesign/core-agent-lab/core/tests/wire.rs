@@ -173,3 +173,21 @@ fn encoder_structure_exact_schema_and_role_pair_are_verified(){
     use muyon_core_agent_lab::wire_json::{parse,Json};let r=ModelRequest{task:"t".into(),attempt:"a".into(),turn:2,messages:vec![],tools:vec!["fixture.record".into()]};let h=vec![NativeMessage::AssistantCall{call_ref:"c1".into(),name:"fixture.record".into(),value:"hi".into()},NativeMessage::ToolResult{call_ref:"c1".into(),value:"hi".into(),receipt:"r-original".into()}];let bytes=encode_request(&r,&h).unwrap();let body=parse(&bytes).unwrap();let o=body.object().unwrap();let schema=o["tools"].array().unwrap()[0].object().unwrap()["function"].object().unwrap()["parameters"].object().unwrap();assert_eq!(schema["additionalProperties"],Json::Bool(false));assert_eq!(schema["required"].array().unwrap()[0].string().unwrap(),"value");let messages=o["messages"].array().unwrap();let call=messages[0].object().unwrap()["tool_calls"].array().unwrap()[0].object().unwrap();assert_eq!(call["id"].string().unwrap(),"c1");let tool=messages[1].object().unwrap();assert_eq!(tool["role"].string().unwrap(),"tool");assert_eq!(tool["tool_call_id"],call["id"]);let result=parse(tool["content"].string().unwrap().as_bytes()).unwrap();assert_eq!(result.object().unwrap()["receipt"].string().unwrap(),"r-original");assert_eq!(result.object().unwrap()["value"].string().unwrap(),"hi");
     assert!(encode_request(&r,&[h[1].clone()]).is_err());assert!(encode_request(&r,&[h[0].clone(),NativeMessage::User("forged result".into())]).is_err());
 }
+fn usage_waiting_fixture()->PathBuf{
+    let stream=TOOL.replace("data: [DONE]","data: {\"choices\":[],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":6}}\n\ndata: [DONE]");
+    let dir=fixture(&stream,&["--mode","ask-every-time"]);let waiting=command(&dir,"run",&[]);assert_eq!(field(&waiting,"status"),"waiting");assert_eq!(field(&waiting,"usage_prompt"),"5");assert_eq!(field(&waiting,"usage_completion"),"6");dir
+}
+#[test]
+fn prior_usage_is_unknown_on_later_failed_turn_and_reopen(){
+    let dir=usage_waiting_fixture();fs::write(dir.parent().unwrap().join("turn-2.sse"),"data: {\"choices\":").unwrap();let failed=command(&dir,"run",&["--confirmed","true"]);assert_eq!(field(&failed,"model_calls"),"2");assert_eq!(field(&failed,"effects"),"1");assert_eq!(field(&failed,"status"),"failed");assert_eq!(field(&failed,"usage_prompt"),"unknown");assert_eq!(field(&failed,"usage_completion"),"unknown");assert_eq!(command(&dir,"inspect",&[]),failed);assert_eq!(command(&dir,"run",&[]),failed);
+}
+#[test]
+fn prior_usage_is_unknown_during_later_inflight_and_after_cancel(){
+    use std::{thread,time::{Duration,Instant}};let dir=usage_waiting_fixture();fs::write(dir.parent().unwrap().join("silent"),"").unwrap();let child=Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab")).args(["run","--dir"]).arg(&dir).args(["--confirmed","true"]).stdout(std::process::Stdio::piped()).spawn().unwrap();let start=Instant::now();while !dir.join("wire-capture/request-2.json").exists(){assert!(start.elapsed()<Duration::from_secs(5));thread::sleep(Duration::from_millis(2));}
+    let state=muyon_core_agent_lab::agent::State::load(&dir).unwrap();
+    command(&dir,"cancel",&[]);let output=child.wait_with_output().unwrap();assert!(output.status.success());assert!(state.wire_counters.inflight);assert_eq!(state.wire_counters.usage.prompt,None);assert_eq!(state.wire_counters.usage.completion,None);let cancelled=String::from_utf8(output.stdout).unwrap();assert_eq!(field(&cancelled,"status"),"cancelled");assert_eq!(field(&cancelled,"usage_prompt"),"unknown");assert_eq!(field(&cancelled,"usage_completion"),"unknown");assert_eq!(field(&cancelled,"effects"),"1");assert_eq!(command(&dir,"inspect",&[]),cancelled);
+}
+#[test]
+fn escaped_private_history_remains_loadable_without_relaxing_wire_limit(){
+    let input="\u{1}".repeat(50000);let dir=fixture(TOOL,&["--input",&input]);let initial=command(&dir,"inspect",&[]);assert_eq!(field(&initial,"status"),"ready");assert_eq!(field(&initial,"model_calls"),"0");let failed=command(&dir,"run",&[]);assert_eq!(field(&failed,"reason"),"wire_request_limit");assert_eq!(field(&failed,"effects"),"0");assert_eq!(field(&failed,"wire_total_bytes"),"0");assert_eq!(field(&failed,"model_calls"),"1");assert!(!dir.join("wire-capture").exists());assert_eq!(command(&dir,"inspect",&[]),failed);assert_eq!(command(&dir,"run",&[]),failed);
+}

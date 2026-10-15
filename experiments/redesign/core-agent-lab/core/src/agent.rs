@@ -202,6 +202,7 @@ impl Agent {
             if self.state.counters.steps>=self.state.limits.steps||self.state.counters.calls>=self.state.limits.calls||size>self.state.limits.context||self.state.counters.total.saturating_add(size)>self.state.limits.total||self.state.counters.output>=self.state.limits.output {self.state.stop("budget_exhausted","admission");break;}
             self.state.counters.steps+=1;self.state.counters.calls+=1;self.state.counters.total+=size;
             self.state.wire_counters.inflight=self.state.wire.is_some();
+            if self.state.wire.is_some(){self.state.wire_counters.usage=crate::wire_sse::Usage::default();}
             self.state.stop("failed","provider_interrupted");self.state.save(&self.dir)?;
             let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools:vec!["fixture.record".into()]};
             let position=self.state.position;let history=self.state.native.clone();
@@ -257,6 +258,6 @@ struct AgentControl<'a>{agent:&'a mut Agent,h:&'a Hooks}
 impl ProviderControl for AgentControl<'_>{
     fn poll(&mut self)->Result<()>{if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}}
     fn remaining(&self)->u64{self.agent.state.wire.as_ref().map(|c|c.max_total.saturating_sub(self.agent.state.wire_counters.total())).unwrap_or(u64::MAX)}
-    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{if bytes as u64>self.remaining(){return Err("wire_total_limit".into());}let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};*target=target.checked_add(bytes as u64).ok_or("wire_total_limit")?;self.agent.state.save(&self.agent.dir)}
-    fn checkpoint(&mut self,name:&str)->Result<()>{self.agent.state.save(&self.agent.dir)?;self.h.checkpoint(name)}
+    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{if bytes as u64>self.remaining(){return Err("wire_total_limit".into());}let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};*target=target.checked_add(bytes as u64).ok_or("wire_total_limit")?;self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".into())}
+    fn checkpoint(&mut self,name:&str)->Result<()>{self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
 }
