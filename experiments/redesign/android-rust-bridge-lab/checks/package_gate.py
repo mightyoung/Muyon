@@ -172,6 +172,12 @@ def main():
         run([tools / 'zipalign', '-c', '-P', '16', '4', test_apk], evidence / 'zipalign-test.log', env)
         run([tools / 'aapt2', 'dump', 'badging', apk], evidence / 'apk-badging.log', env)
         badging = (evidence / 'apk-badging.log').read_text()
+        result.update(apk_sha256=sha(apk), test_apk_sha256=sha(test_apk),
+                      apk_native_entries=entries, zipalign_app=True, zipalign_test=True, lint=True)
+        badging_rows = [line[:512] for line in badging.splitlines()
+                       if any(field in line for field in ['sdkVersion', 'SdkVersion', 'native-code'])][:8]
+        print('ANDROID_BRIDGE_AAPT_BADGING ' + json.dumps(dict(
+            rows=badging_rows, raw_sha256=sha(evidence / 'apk-badging.log'), bounded=True)), flush=True)
         if not re.search(r"^sdkVersion:'24'$", badging, re.M) or "native-code: 'arm64-v8a' 'x86_64'" not in badging:
             raise RuntimeError('apk_sdk_or_abi')
         for name, path in [('app-debug.apk', apk), ('app-debug-androidTest.apk', test_apk)]:
