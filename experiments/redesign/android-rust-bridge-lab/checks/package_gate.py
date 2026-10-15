@@ -60,6 +60,18 @@ def apk_entries(apk, inputs):
     expected.update({f'lib/{abi}/libjnidispatch.so': JNI_SHA[abi] for abi in ABIS})
     import hashlib
     with zipfile.ZipFile(apk) as archive, apk.open('rb') as raw:
+        # Inspect every member before selecting lib/*.so; no extraction occurs.
+        names = []
+        for member in archive.infolist():
+            name = member.orig_filename
+            components = (name[:-1] if name.endswith('/') else name).split('/')
+            if (name != member.filename or name.startswith('/') or '\\' in name
+                    or '\x00' in name or re.match(r'^[A-Za-z]:', name)
+                    or any(part in ['', '.', '..'] for part in components)):
+                raise RuntimeError('apk_member_path')
+            names.append(name)
+        if len(names) != len(set(names)):
+            raise RuntimeError('apk_duplicate_member')
         native = [entry.filename for entry in archive.infolist() if entry.filename.startswith('lib/') and entry.filename.endswith('.so')]
         if len(native) != 4 or set(native) != set(expected):
             raise RuntimeError('apk_exact_native_entries')

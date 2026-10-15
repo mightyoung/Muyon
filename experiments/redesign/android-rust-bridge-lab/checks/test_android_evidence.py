@@ -119,6 +119,19 @@ class PackageControls(unittest.TestCase):
                         archive.writestr(info,raw)
             with patch.object(package,'JNI_SHA',jni):
                 build(True);self.assertEqual(set(package.apk_entries(apk,inputs)),set(contents))
+                for unsafe in ['../lib/arm64-v8a/extra.so', '/lib/arm64-v8a/extra.so',
+                               'lib/../extra.so', 'assets/./config', 'assets//config',
+                               'C:/lib/extra.so', 'lib\\arm64-v8a\\extra.so']:
+                    build(True)
+                    with zipfile.ZipFile(apk, 'a') as archive:
+                        archive.writestr(unsafe, b'not-native-payload')
+                    with self.subTest(unsafe=unsafe):
+                        with self.assertRaisesRegex(RuntimeError, '^apk_member_path$'):
+                            package.apk_entries(apk, inputs)
+                build(True)
+                with zipfile.ZipFile(apk, 'a') as archive:
+                    archive.writestr('assets/safe', b'safe member')
+                self.assertEqual(set(package.apk_entries(apk, inputs)), set(contents))
                 bad=copy.deepcopy(inputs);bad['rust_libraries']['x86_64']['sha256']='0'*64
                 with self.assertRaisesRegex(RuntimeError,'apk_native_hash'):package.apk_entries(apk,bad)
                 build(False)

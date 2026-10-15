@@ -174,10 +174,23 @@ jobs:
 
   required-full:
     needs: [select, required-linux, required-android]
-    if: needs.select.outputs.mode == 'full'
+    if: always() && (needs.select.outputs.mode == 'full' || needs.select.result != 'success')
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
+      - name: Require every full producer to complete successfully
+        env:
+          SELECT_RESULT: ${{ needs.select.result }}
+          LINUX_RESULT: ${{ needs.required-linux.result }}
+          ANDROID_RESULT: ${{ needs.required-android.result }}
+        run: |
+          python3 - <<'PY'
+          import os
+          results = [os.environ[key] for key in ['SELECT_RESULT', 'LINUX_RESULT', 'ANDROID_RESULT']]
+          if results != ['success', 'success', 'success']:
+              raise SystemExit('ANDROID_BRIDGE_PRODUCER_REQUIRED')
+          print('ANDROID_BRIDGE_ALL_PRODUCERS_SUCCESS')
+          PY
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
