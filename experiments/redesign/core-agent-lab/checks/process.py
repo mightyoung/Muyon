@@ -481,7 +481,9 @@ class AgentProcessTests(unittest.TestCase):
 
     def test_r1_budget_receipt_restore_cannot_clear_exhausted_context_or_answer(self):
         directory = self.new_directory()
-        self.start(directory, 'r1-context-budget.tsv', mode='full_allow', input_text='', max_context=40)
+        # First effect is admitted with sufficient context; the next provider
+        # admission exhausts a separate persistent call budget.
+        self.start(directory, 'happy.tsv', mode='full_allow', max_calls=1)
         exhausted = self.command('run', directory)
         self.assertEqual(exhausted['status'], 'budget_exhausted')
         self.assertEqual(exhausted['model_calls'], '1')
@@ -504,6 +506,50 @@ class AgentProcessTests(unittest.TestCase):
             self.assertEqual(resumed[counter], exhausted[counter])
         self.assertEqual(physical(directory), original)
         self.assertEqual(resumed['receipt'], original['rows'][0][7])
+
+    def test_known_tool_result_context_budget_checked_before_first_effect(self):
+        directory = self.new_directory()
+        self.start(directory, 'r1-context-budget.tsv', mode='full_allow', input_text='', max_context=40)
+        exhausted = self.command('run', directory)
+        self.assertEqual(exhausted['status'], 'budget_exhausted')
+        self.assertEqual(exhausted['model_calls'], '1')
+        self.assertEqual(exhausted['answer_hex'], '')
+        original = self.assert_effects(directory, 0)
+        for operation in ['inspect', 'lookup', 'run']:
+            resumed = self.command(operation, directory)
+            self.assertEqual(resumed['status'], 'budget_exhausted')
+            self.assertEqual(resumed['receipt'], '')
+            for counter in ['model_calls', 'steps', 'context_bytes', 'output_bytes', 'total_units']:
+                self.assertEqual(resumed[counter], exhausted[counter])
+            self.assertEqual(physical(directory), original)
+
+    def test_same_provider_reference_persistently_looks_up_original_binding(self):
+        for recovery in ['projection_sigkill', 'lost_response']:
+            with self.subTest(recovery=recovery):
+                directory = self.new_directory()
+                facts = {'mode': 'ask', 'confirmed': True}
+                if recovery == 'lost_response':
+                    facts['tool_behavior'] = 'lose-response'
+                self.start(directory, 'duplicate.tsv', **facts)
+                if recovery == 'projection_sigkill':
+                    self.kill_at(directory, 'projection')
+                else:
+                    uncertain = self.command('run', directory)
+                    self.assertEqual(uncertain['status'], 'outcome_unknown')
+                    still_unknown = self.command('run', directory)
+                    self.assertEqual(still_unknown['status'], 'outcome_unknown')
+                    self.assertEqual(still_unknown['model_calls'], '1')
+                    self.assert_effects(directory, 1)
+                    self.command('lookup', directory)
+                original = self.assert_effects(directory, 1)
+                completed = self.command('run', directory)
+                self.assertEqual(completed['status'], 'completed')
+                self.assertEqual(bytes.fromhex(completed['answer_hex']).decode(), 'once')
+                self.assertEqual(completed['receipt'], original['rows'][0][7])
+                self.assertEqual(completed['invocation'], original['rows'][0][1])
+                self.assertEqual(completed['confirmations'], '1', 'receipt reuse consumed another authorization')
+                self.assertEqual(completed['model_calls'], '3')
+                self.assertEqual(physical(directory), original)
 
     def test_exclusive_owner_rejects_competing_process_and_sigkill_releases(self):
         directory = self.new_directory()

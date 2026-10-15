@@ -179,9 +179,8 @@
       "assertions": {
         "effects": 1,
         "original_receipt_reused": true,
-        "success_answer": false,
-        "reason": "duplicate_or_unknown_call",
-        "original_value": "one"
+        "original_value": "one",
+        "answer": "once"
       }
     },
     {
@@ -193,7 +192,8 @@
       "assertions": {
         "effects": 1,
         "original_value": "one",
-        "success_answer": false
+        "success_answer": false,
+        "reason": "binding_conflict"
       }
     }
   ]
