@@ -551,6 +551,77 @@ class AgentProcessTests(unittest.TestCase):
                 self.assertEqual(completed['model_calls'], '3')
                 self.assertEqual(physical(directory), original)
 
+    def test_r2_waiting_next_invocation_preserves_prior_receipt_evidence_and_confirmation(self):
+        # Adapted from the final non-author reviewer's external waiting-receipt
+        # probe. Only input and physical receipt bytes are supplied; no task edits.
+        directory = self.new_directory()
+        self.start(directory, 'two-effects.tsv', mode='ask', confirmed=True)
+        waiting = self.command('run', directory)
+        self.assertEqual(waiting['status'], 'waiting')
+        self.assertEqual(waiting['model_calls'], '2')
+        self.assertEqual(waiting['confirmations'], '1')
+        original = self.assert_effects(directory, 1)
+        self.assertEqual(waiting['receipt'], original['rows'][0][7])
+        self.assertNotEqual(waiting['invocation'], original['rows'][0][1])
+        original_pending = journal(directory)['pending_hex']
+        effect = directory / 'effects.db'
+        withheld = directory / 'r2-original-effects-evidence.db'
+        original_bytes = effect.read_bytes()
+        effect.rename(withheld)
+        missing = self.command('inspect', directory)
+        missing_lookup = self.command('lookup', directory)
+        # Exit2 or a structured unknown stop are allowed; either must be truthful
+        # and must not consume authorization or dispatch the waiting invocation.
+        args = [str(BINARY), 'run', '--dir', str(directory), '--confirmed', 'true']
+        attempt = subprocess.run(args, capture_output=True, text=True, timeout=20)
+        self.record(args, attempt)
+        missing_journal = journal(directory)
+        absent_before_restore = not effect.exists()
+        withheld.rename(effect)
+        restored = self.command('lookup', directory)
+        restored_journal = journal(directory)
+        unchanged_before_new_authorization = effect.read_bytes() == original_bytes
+        # Capture the entire old-source regression trace even if fresh admission
+        # is now rejected because an earlier invalid dispatch poisoned the state.
+        later = subprocess.run(args, capture_output=True, text=True, timeout=20)
+        self.record(args, later)
+        final_physical = physical(directory)
+        trace = {'waiting': waiting, 'missing': missing, 'missing_lookup': missing_lookup,
+                 'confirmed_while_missing': {'exit': attempt.returncode, 'stdout': attempt.stdout, 'stderr': attempt.stderr},
+                 'journal_while_missing': missing_journal, 'restored': restored,
+                 'after_new_authorization': {'exit': later.returncode, 'stdout': later.stdout, 'stderr': later.stderr},
+                 'original_physical': original, 'final_physical': final_physical,
+                 'unchanged_before_new_authorization': unchanged_before_new_authorization}
+        (directory / 'r2-trace.json').write_text(json.dumps(trace, indent=2) + '\n')
+        self.assertIn(attempt.returncode, [0, 2])
+        if attempt.returncode == 0:
+            stopped = observation(attempt.stdout)
+            self.assertEqual(stopped['status'], 'outcome_unknown')
+            self.assertEqual(stopped['confirmations'], waiting['confirmations'])
+            self.assertEqual(stopped['model_calls'], waiting['model_calls'])
+        else:
+            self.assertIn('error=', attempt.stderr)
+        self.assertTrue(absent_before_restore, 'missing original evidence was reseeded')
+        self.assertTrue(unchanged_before_new_authorization, 'lookup changed original physical evidence')
+        for actual in [missing, missing_lookup, restored]:
+            for key in ['task', 'attempt', 'invocation', 'model_calls', 'steps',
+                        'context_bytes', 'output_bytes', 'total_units', 'provider_position', 'confirmations']:
+                self.assertEqual(actual[key], waiting[key], f'waiting identity/counter changed: {key}')
+        self.assertEqual(missing['status'], 'outcome_unknown')
+        self.assertEqual(missing_lookup['status'], 'outcome_unknown')
+        self.assertEqual(restored['status'], 'waiting')
+        self.assertEqual(restored['receipt'], original['rows'][0][7])
+        self.assertEqual(restored_journal['pending_hex'], original_pending)
+        self.assertEqual(later.returncode, 0, later.stderr)
+        completed = observation(later.stdout)
+        self.assertEqual(completed['status'], 'completed')
+        self.assertEqual(completed['model_calls'], '3')
+        self.assertEqual(completed['confirmations'], '2')
+        self.assertEqual(final_physical['count'], 2)
+        self.assertEqual(final_physical['rows'][0], original['rows'][0])
+        self.assertEqual(final_physical['rows'][1][1], waiting['invocation'])
+        self.assertEqual(bytes.fromhex(final_physical['rows'][1][6]).decode(), 'second')
+
     def test_exclusive_owner_rejects_competing_process_and_sigkill_releases(self):
         directory = self.new_directory()
         self.start(directory, mode='full_allow')
