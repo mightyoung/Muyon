@@ -6,7 +6,7 @@ pub struct Message { pub role: Role, pub text: String }
 #[derive(Clone, Debug)]
 pub struct ModelRequest { pub task: String, pub attempt: String, pub turn: u64, pub messages: Vec<Message>, pub tools: Vec<String> }
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum ModelEvent { Tool { call_ref: String, name: String, value: String }, Answer(String), Fail(String) }
+pub enum ModelEvent { Tool { call_ref: String, name: String, value: String }, HostTool { call_ref: String, name: String, arguments: crate::wire_json::Json }, Answer(String), Fail(String) }
 pub trait ProviderControl {
     fn poll(&mut self)->Result<()>;
     fn remaining(&self)->u64;
@@ -67,7 +67,7 @@ pub fn decode_context(text: &str) -> Result<Vec<Message>> {
     Ok(out)
 }
 pub fn context_bytes(messages: &[Message]) -> u64 { messages.iter().map(|m| m.text.len() as u64).sum() }
-pub fn event_bytes(e: &ModelEvent) -> u64 { match e { ModelEvent::Tool{call_ref,name,value} => (call_ref.len()+name.len()+value.len()) as u64, ModelEvent::Answer(s)|ModelEvent::Fail(s)=>s.len() as u64 } }
+pub fn event_bytes(e: &ModelEvent) -> u64 { match e { ModelEvent::Tool{call_ref,name,value} => (call_ref.len()+name.len()+value.len()) as u64, ModelEvent::HostTool{call_ref,name,arguments} => (call_ref.len()+name.len()+arguments.encode().len()) as u64, ModelEvent::Answer(s)|ModelEvent::Fail(s)=>s.len() as u64 } }
 
 /// Structural native history. Never reconstructed from message text.
 #[derive(Clone, Debug, PartialEq, Eq)]

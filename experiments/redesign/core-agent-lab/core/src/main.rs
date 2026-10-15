@@ -8,6 +8,15 @@ fn execute()->Result<()> {
     let mut args=std::env::args().skip(1);let command=args.next().ok_or("missing_command")?;
     let mut opts=BTreeMap::new();
     while let Some(key)=args.next(){if !key.starts_with("--"){return Err("invalid_option".into());}let value=args.next().ok_or("missing_value")?;if value.len()>65536||opts.insert(key,value).is_some(){return Err("invalid_duplicate_option".into());}}
+    if command=="host-session" {
+        let config=muyon_core_agent_lab::host_session::HostSessionConfig{
+            root:PathBuf::from(opts.remove("--root").ok_or("host_config_invalid")?),
+            idle_ms:number(&mut opts,"--idle-ms",5000)?,
+            total_ms:number(&mut opts,"--total-ms",30000)?,
+        };
+        require_empty(&opts)?;
+        return muyon_core_agent_lab::host_session::run_stdio(config);
+    }
     let dir=PathBuf::from(opts.remove("--dir").ok_or("missing_dir")?);
     if command=="start" {
         let provider=take(&mut opts,"--provider","script");

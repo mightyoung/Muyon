@@ -1,0 +1,104 @@
+name: Core Agent actual host
+
+on:
+  push:
+    branches:
+      - 'review/core-agent-*'
+      - 'task/core-agent-host-*'
+      - develop
+    paths:
+      - 'apps/muyon/lib/**'
+      - 'apps/muyon/test_host/**'
+      - 'experiments/redesign/core-agent-lab/**'
+      - '.github/workflows/core-agent-host.yml'
+      - 'pubspec*'
+  pull_request:
+    branches: [develop]
+    paths:
+      - 'apps/muyon/lib/**'
+      - 'apps/muyon/test_host/**'
+      - 'experiments/redesign/core-agent-lab/**'
+      - '.github/workflows/core-agent-host.yml'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Full required suite or explicit first compiling-stub RED subset'
+        type: choice
+        options: [full, positive-red]
+        default: full
+
+permissions:
+  contents: read
+
+jobs:
+  actual-host:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Existing Flutter runner setup
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: true
+      - name: Record exact source and preinstalled Rust tools
+        run: |
+          mkdir -p "$RUNNER_TEMP/core-agent-host-evidence"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/core-agent-host-evidence/source-sha.txt"
+          rustc --version | tee "$RUNNER_TEMP/core-agent-host-evidence/rustc-version.txt"
+          cargo --version | tee "$RUNNER_TEMP/core-agent-host-evidence/cargo-version.txt"
+          flutter --version | tee "$RUNNER_TEMP/core-agent-host-evidence/flutter-version.txt"
+      - name: Build same Rust executable offline
+        run: |
+          set -o pipefail
+          cargo build --offline --locked --release --manifest-path experiments/redesign/core-agent-lab/core/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/core-agent-host-evidence/build.log"
+          test -x experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab
+          sha256sum experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab | tee "$RUNNER_TEMP/core-agent-host-evidence/binary-sha256.txt"
+      - name: Resolve existing Flutter workspace
+        run: flutter pub get
+      - name: Independent recorder self checks
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/host-checks/test_record_process.py
+          python3 -B experiments/redesign/core-agent-lab/host-checks/test_host_inverses.py
+      - name: Required actual facade and compiled Rust tests
+        env:
+          MUYON_HOST_SUITE: ${{ inputs.suite || 'full' }}
+        run: |
+          set -o pipefail
+          unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
+          export NO_PROXY=localhost,127.0.0.1,::1
+          export MUYON_TEST_CORE_AGENT_BIN="$GITHUB_WORKSPACE/experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab"
+          export MUYON_TEST_CORE_AGENT_EVIDENCE_DIR="$RUNNER_TEMP/core-agent-host-evidence/processes"
+          test -x "$MUYON_TEST_CORE_AGENT_BIN"
+          cd apps/muyon
+          args=()
+          if [[ "$MUYON_HOST_SUITE" == positive-red ]]; then
+            args+=(--plain-name 'real facade real Rust registered inquiry roundtrip')
+            echo 'Explicit compiling-stub RED subset: positive roundtrip only'
+          fi
+          flutter test test_host/core_agent_host_test.dart --no-pub --reporter expanded --timeout 45s "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/core-agent-host-evidence/flutter-tests.log"
+          python3 ../../experiments/redesign/core-agent-lab/host-checks/verify_run.py "$RUNNER_TEMP/core-agent-host-evidence/flutter-tests.log"
+      - name: Required real host boundary DUT inverses
+        if: ${{ inputs.suite != 'positive-red' }}
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/host-checks/host_inverses.py \
+            --binary "$GITHUB_WORKSPACE/experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab" \
+            --evidence-dir "$RUNNER_TEMP/core-agent-host-evidence/dut-inverses"
+      - name: Required Rust host callback and admission inverses
+        if: ${{ inputs.suite != 'positive-red' }}
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/core/host_mutations.py \
+            --evidence-dir "$RUNNER_TEMP/core-agent-host-evidence/host-mutations"
+      - name: Retain raw evidence outside Git
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: core-agent-host-${{ github.sha }}-${{ inputs.suite || 'full' }}
+          path: ${{ runner.temp }}/core-agent-host-evidence/
+          if-no-files-found: error
+          retention-days: 1
