@@ -13,6 +13,7 @@ import time
 import urllib.request
 
 from ffi_evidence import SERVICE_MODES, classify
+from host_checkpoint import inventory as checkpoint_inventory, target_green as checkpoint_target_green
 from full_evidence import rust_full, jvm_full, panic_full
 from binding_source import PINS as BINDING_SOURCE_PINS, emit as emit_android_binding
 
@@ -148,9 +149,52 @@ def download(url, output, expected):
         raise RuntimeError('official_tool_hash_mismatch')
 
 
+def host_checkpoint(evidence, work, source):
+    contract = checkpoint_inventory(ROOT)
+    host = ROOT / contract['manifest']
+    env = dict(os.environ, CARGO_TERM_COLOR='never', CARGO_INCREMENTAL='0',
+               CARGO_TARGET_DIR=str(work / 'host-target'))
+    run(['rustc', '--version'], evidence / 'rustc.log', env)
+    run(['cargo', '--version'], evidence / 'cargo.log', env)
+    if not (evidence / 'rustc.log').read_text().startswith('rustc 1.99.0 '):
+        raise RuntimeError('pinned_rust_toolchain_missing')
+    run(['cargo', 'fetch', '--locked'], evidence / 'host-fetch.log', env, cwd=host.parent)
+    run(['cargo', 'test', '--offline', '--locked', '--release', '--no-run'],
+        evidence / 'host-compile.log', env, cwd=host.parent)
+    plugin = ROOT / 'experiments/redesign/plugin-contract-lab/core'
+    run(['cargo', 'build', '--offline', '--locked', '--release', '--bin', 'muyon-plugin-contract-lab'],
+        evidence / 'plugin-build.log', env, cwd=plugin)
+    binary = work / 'host-target/release/muyon-plugin-contract-lab'
+    if not binary.is_file():
+        raise RuntimeError('actual_plugin_binary_missing')
+    env['MUYON_PLUGIN_CONTRACT_BIN'] = str(binary)
+    results = []
+    for target in contract['targets']:
+        raw = evidence / (target + '.log')
+        status = run(['cargo', 'test', '--offline', '--locked', '--release', '--test', target],
+                     raw, env, cwd=host.parent, required=False)
+        row = checkpoint_target_green(target, raw.read_text(errors='replace'), status)
+        row.update(raw_sha256=sha(raw), source=contract['targets'][target])
+        results.append(row)
+        print(raw.read_text(errors='replace'), flush=True)
+        print('SERVICE_HOST_CHECKPOINT_TARGET ' + json.dumps(row, sort_keys=True), flush=True)
+    return dict(accepted=all(row['accepted'] for row in results),
+        classification='HOST_CHECKPOINT_GREEN' if all(row['accepted'] for row in results) else 'INVALID',
+        source_sha=source, plugin_binary_sha256=sha(binary), shipping_or_service_green=False,
+        host_cargo_lock_sha256=sha(host.parent / 'Cargo.lock'),
+        descriptor_sha256=sha(Path(__file__).with_name('host_checkpoint_cases.json')),
+        author_test_commit=contract['author_commit'], targets=results,
+        executed_tests=sum(row['observed_tests'] for row in results),
+        not_run={'service_controller': 'initial refusal; not executed by this partial checkpoint',
+                 'service_jvm': 'NOT_RUN', 'service_inverses': 'NOT_RUN',
+                 'unit_doc_tests': 'NOT_RUN; whole host test executables compiled only',
+                 'legacy_and_native_inverses': 'NOT_RUN by partial checkpoint; mandatory final gates unchanged',
+                 'android_runtime': 'NOT_RUN'})
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full'] + SERVICE_MODES, required=True)
+    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full', 'service-host-checkpoint'] + SERVICE_MODES, required=True)
     parser.add_argument('--evidence-dir', type=Path, required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--emit-android-source', action='store_true')
@@ -169,6 +213,9 @@ def main():
             raise RuntimeError('source_identity')
         if subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT).strip():
             raise RuntimeError('unclean_source')
+        if args.mode == 'service-host-checkpoint':
+            result.update(host_checkpoint(evidence, work, source))
+            return 0 if result['accepted'] else 1
         inventory()
         service = service_inventory() if args.mode in SERVICE_MODES else None
         env = dict(os.environ, MUYON_BRIDGE_BUILD_ID=source, CARGO_TERM_COLOR='never',
