@@ -450,6 +450,61 @@ class AgentProcessTests(unittest.TestCase):
             self.assertEqual(actual['model_calls'], completed['model_calls'])
             self.assertEqual(physical(directory), original)
 
+    def test_r1_completed_receipt_restore_cannot_reopen_terminal_provider_tail(self):
+        directory = self.new_directory()
+        self.start(directory, 'r1-terminal-tail.tsv', mode='full_allow')
+        completed = self.command('run', directory)
+        self.assertEqual(completed['status'], 'completed')
+        self.assertEqual(completed['model_calls'], '2')
+        self.assertEqual(bytes.fromhex(completed['answer_hex']).decode(), 'done')
+        original = self.assert_effects(directory, 1)
+        effect = directory / 'effects.db'
+        withheld = directory / 'r1-original-effects-evidence.db'
+        original_bytes = effect.read_bytes()
+        effect.rename(withheld)
+        uncertain = self.command('run', directory)
+        self.assertEqual(uncertain['status'], 'outcome_unknown')
+        self.assertFalse(effect.exists(), 'unknown run must not reseed effects')
+        withheld.rename(effect)
+        self.assertEqual(effect.read_bytes(), original_bytes)
+        # Capture the complete regression trace before asserting: old lookup may
+        # reopen ready, then actually execute the hidden post-answer tool event.
+        reconciled = self.command('lookup', directory)
+        resumed = self.command('run', directory)
+        after = physical(directory)
+        self.assertEqual(after, original, 'receipt reconciliation reexecuted terminal provider tail')
+        self.assertEqual(reconciled['status'], 'completed')
+        self.assertEqual(resumed['status'], 'completed')
+        self.assertEqual(resumed['model_calls'], completed['model_calls'])
+        self.assertEqual(resumed['answer_hex'], completed['answer_hex'])
+        self.assertEqual(resumed['receipt'], original['rows'][0][7])
+
+    def test_r1_budget_receipt_restore_cannot_clear_exhausted_context_or_answer(self):
+        directory = self.new_directory()
+        self.start(directory, 'r1-context-budget.tsv', mode='full_allow', input_text='', max_context=40)
+        exhausted = self.command('run', directory)
+        self.assertEqual(exhausted['status'], 'budget_exhausted')
+        self.assertEqual(exhausted['model_calls'], '1')
+        original = self.assert_effects(directory, 1)
+        effect = directory / 'effects.db'
+        withheld = directory / 'r1-original-effects-evidence.db'
+        original_bytes = effect.read_bytes()
+        effect.rename(withheld)
+        uncertain = self.command('run', directory)
+        self.assertEqual(uncertain['status'], 'outcome_unknown')
+        self.assertFalse(effect.exists(), 'unknown run must not reseed effects')
+        withheld.rename(effect)
+        self.assertEqual(effect.read_bytes(), original_bytes)
+        reconciled = self.command('lookup', directory)
+        resumed = self.command('run', directory)
+        self.assertEqual(reconciled['status'], 'budget_exhausted', 'lookup cleared terminal context budget')
+        self.assertEqual(resumed['status'], 'budget_exhausted')
+        self.assertEqual(resumed['answer_hex'], '')
+        for counter in ['model_calls', 'steps', 'context_bytes', 'output_bytes', 'total_units']:
+            self.assertEqual(resumed[counter], exhausted[counter])
+        self.assertEqual(physical(directory), original)
+        self.assertEqual(resumed['receipt'], original['rows'][0][7])
+
     def test_exclusive_owner_rejects_competing_process_and_sigkill_releases(self):
         directory = self.new_directory()
         self.start(directory, mode='full_allow')
