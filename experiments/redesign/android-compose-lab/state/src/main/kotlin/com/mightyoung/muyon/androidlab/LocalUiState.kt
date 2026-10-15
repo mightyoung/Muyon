@@ -37,6 +37,11 @@ data class LocalUiState(
     fun storeMemory(id: Int, memory: PageMemory): LocalUiState = copy(
         conversations = conversations.map { if (it.id == id) it.copy(memory = memory) else it },
     )
+    fun updateDraft(id: Int, raw: String): LocalUiState = editMemory(id) { it.copy(draft = raw) }
+    fun rememberDraftFocus(id: Int): LocalUiState = editMemory(id) { it.copy(focus = FocusSlot.DRAFT) }
+    private fun editMemory(id: Int, edit: (PageMemory) -> PageMemory): LocalUiState = copy(
+        conversations = conversations.map { if (it.id == id) it.copy(memory = edit(it.memory)) else it },
+    )
 
     fun createConversation(): LocalUiState {
         val id = Math.addExact(conversations.maxOf { it.id }, 1)

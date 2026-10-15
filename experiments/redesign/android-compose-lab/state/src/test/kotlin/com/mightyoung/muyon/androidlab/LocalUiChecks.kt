@@ -13,6 +13,13 @@ fun runLocalUiChecks() {
         },
         "draft remains exact raw UTF16" to {
             localExpect(LocalUiState().withDraft(raw).active.memory.draft.toCharArray().contentEquals(raw.toCharArray()), "raw draft changed")
+            var state = LocalUiState()
+            val actions = localInputActions(1, readState = { state }, writeState = { state = it })
+            actions.draftChanged(raw)
+            state = state.storeMemory(1, state.active.memory.copy(firstVisibleItemIndex = 7, firstVisibleItemOffset = 19))
+            actions.draftFocused()
+            localExpect(state.active.memory.draft == raw, "later focus callback erased newer raw input")
+            localExpect(state.active.memory.firstVisibleItemIndex == 7 && state.active.memory.firstVisibleItemOffset == 19, "focus callback erased later scroll")
         },
         "blank local note does not create records" to {
             val s = LocalUiState().withDraft(" \n\t")
@@ -51,6 +58,17 @@ fun runLocalUiChecks() {
             val lateScroll = s.selectConversation(2).storeMemory(1, memory.copy(firstVisibleItemIndex = 9))
             localExpect(lateScroll.active.memory.draft == "second", "inactive scroll callback overwrote active input")
             localExpect(lateScroll.selectConversation(1).active.memory.firstVisibleItemIndex == 9, "inactive memory update lost")
+            var state = LocalUiState()
+            val actions = localInputActions(1, readState = { state }, writeState = { state = it })
+            actions.draftFocused()
+            state = state.storeMemory(1, state.active.memory.copy(firstVisibleItemIndex = 8, firstVisibleItemOffset = 23))
+            actions.draftChanged(raw)
+            localExpect(state.active.memory.focus == FocusSlot.DRAFT, "later input callback erased latest focus")
+            localExpect(state.active.memory.firstVisibleItemIndex == 8 && state.active.memory.firstVisibleItemOffset == 23, "input callback erased later scroll")
+            state = state.createConversation().withDraft("active second input")
+            actions.draftChanged("late first input")
+            localExpect(state.active.memory.draft == "active second input", "late callback changed active conversation")
+            localExpect(state.selectConversation(1).active.memory.draft == "late first input", "late callback missed captured conversation id")
         },
         "invalid conversation selection changes nothing" to {
             val s = LocalUiState().copy(overlay = LocalOverlay.History)

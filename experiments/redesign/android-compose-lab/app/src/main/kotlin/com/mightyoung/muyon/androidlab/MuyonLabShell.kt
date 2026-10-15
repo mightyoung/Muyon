@@ -27,6 +27,7 @@ fun MuyonLabShell(
     val layout = navigationLayout(windowWidthDp ?: LocalConfiguration.current.screenWidthDp.toFloat())
     val conversationScrolls = remember { mutableMapOf<Int, LazyListState>() }
     val conversation = local.active
+    val inputActions = localInputActions(conversation.id, readState = { local }, writeState = { local = it })
     val assistantScroll = conversationScrolls.getOrPut(conversation.id) {
         LazyListState(conversation.memory.firstVisibleItemIndex, conversation.memory.firstVisibleItemOffset)
     }
@@ -91,7 +92,7 @@ fun MuyonLabShell(
                     when (shell.selected) {
                         Destination.ASSISTANT -> AssistantLocalPage(
                             local, assistantScroll, draftFocus,
-                            onMemory = { memory -> local = local.storeMemory(conversation.id, memory) },
+                            inputActions = inputActions,
                             onMounted = { draftMounted = it },
                             onSave = { local = local.saveLocalNote() },
                             onOptions = { show(LocalOverlay.Capabilities) },

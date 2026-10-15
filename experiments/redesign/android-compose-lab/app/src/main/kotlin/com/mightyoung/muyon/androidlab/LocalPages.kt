@@ -42,7 +42,7 @@ internal fun AssistantLocalPage(
     state: LocalUiState,
     scroll: LazyListState,
     draftFocus: FocusRequester,
-    onMemory: (PageMemory) -> Unit,
+    inputActions: LocalInputActions,
     onMounted: (Boolean) -> Unit,
     onSave: () -> Unit,
     onOptions: () -> Unit,
@@ -78,12 +78,12 @@ internal fun AssistantLocalPage(
             Column(Modifier.fillMaxWidth().imePadding().padding(horizontal = 12.dp, vertical = 8.dp)) {
                 OutlinedTextField(
                     value = conversation.memory.draft,
-                    onValueChange = { onMemory(conversation.memory.copy(draft = it)) },
+                    onValueChange = inputActions.draftChanged,
                     label = { Text("写下内容") },
                     supportingText = { Text("本地记录 · 未发送给模型 · 关闭后不保证保留") },
                     minLines = 2, maxLines = 6,
                     modifier = Modifier.fillMaxWidth().testTag("assistant-draft").focusRequester(draftFocus)
-                        .onFocusChanged { if (it.isFocused) onMemory(conversation.memory.copy(focus = FocusSlot.DRAFT)) },
+                        .onFocusChanged { if (it.isFocused) inputActions.draftFocused() },
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = onOptions, modifier = Modifier.testTag("input-options")) { Text("输入选项") }
