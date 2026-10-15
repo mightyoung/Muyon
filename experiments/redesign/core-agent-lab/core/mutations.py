@@ -123,6 +123,15 @@ if compiled and checker.is_file():
 else:
     check_text = 'MUTANT_SETUP_INVALID: compilation or independent checker unavailable\n'
 check_log.write_text(check_text)
+# Retain the full fixture-only log as an artifact, and expose the actual oracle
+# evidence in standard CI logs when artifact delivery is unavailable.
+print(f'{name}: independent checker excerpt BEGIN', flush=True)
+for line in check_text.splitlines():
+    if ('RUST_WIRE_ARGS_ACK_OBSERVED' in line or line.startswith('FAIL: ')
+            or line.startswith('AssertionError: ') or line.startswith('FAILED (')
+            or line.startswith('MUTANT_SETUP_')):
+        print(line, flush=True)
+print(f'{name}: independent checker excerpt END full_log={check_log}', flush=True)
 acknowledged = 'RUST_WIRE_ARGS_ACK_OBSERVED' in check_text
 physical_failure = re.search(r'AssertionError: 1 != 0[^\n]*PRETERMINAL_(?:PHYSICAL_EFFECT|CONFIRMATION_CONSUMED)', check_text) is not None
 killed = compiled and returncode != 0 and acknowledged and physical_failure and 'MUTANT_SETUP_TIMEOUT' not in check_text and 'FAILED (failures=1)' in check_text
