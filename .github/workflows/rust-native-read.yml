@@ -144,3 +144,33 @@ jobs:
           path: ${{ runner.temp }}/rust-native-full-${{ matrix.component }}/
           retention-days: 1
           if-no-files-found: error
+
+  required-native-inverses:
+    needs: [select, required-full]
+    if: needs.select.outputs.mode == 'full'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Independent inverse classifier and owned watchdog controls
+        run: |
+          mkdir -p "$RUNNER_TEMP/rust-native-inverse-evidence"
+          set -o pipefail
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/test_native_mutations.py 2>&1 | tee "$RUNNER_TEMP/rust-native-inverse-evidence/controls.log"
+      - name: Required actual native baselines and three precise guard inverses
+        run: |
+          set -o pipefail
+          rustc --version | tee "$RUNNER_TEMP/rust-native-inverse-evidence/rustc-version.txt"
+          cargo --version | tee "$RUNNER_TEMP/rust-native-inverse-evidence/cargo-version.txt"
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/native_mutations.py --evidence-dir "$RUNNER_TEMP/rust-native-inverse-evidence" 2>&1 | tee "$RUNNER_TEMP/rust-native-inverse-evidence/native-inverses.log"
+      - name: Retain actual native inverse raw evidence outside Git
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rust-native-inverses-${{ github.sha }}
+          path: ${{ runner.temp }}/rust-native-inverse-evidence/
+          retention-days: 1
+          if-no-files-found: error
