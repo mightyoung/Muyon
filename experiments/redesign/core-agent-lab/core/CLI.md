@@ -81,3 +81,14 @@ Missing/corrupt effect store is never reseeded. Readers bound files at 1MiB.
 fixture files are private regular files; directory owned by current UID and
 mode0700; no symlink fixture paths. `cancel.request` is an independent durable
 host signal. Private directory assumes a trusted owner, not hostile same-UID edits.
+
+`context_hex` decodes to zero or more exact lines
+`ROLE<TAB>hex-UTF8-text<NEWLINE>`, where ROLE is exactly `user`, `assistant`,
+or `tool`. Assistant tool requests are text `tool=fixture.record;call=REF;value=VALUE`.
+Only the host adds tool-role text, exactly `receipt=ID;value=VALUE` from physical
+original receipt. Both repeated and conflicting provider call-ref reuse fail
+with `duplicate_or_unknown_call` and never allocate a second effect. Exact
+host Binding replay is separately supported by the typed ToolPort and returns
+the same original Receipt; a provider call-ref is not a replay capability.
+Concurrent cancel output may still show the executor's durable pending status,
+with `cancelled=true`; the executor consumes the durable request on release.

@@ -37,3 +37,79 @@ fn actual_loop_commits_once_and_followup_uses_tool_result() {
     assert!(out.contains("model_calls=2\n"), "{out}");
     assert!(!out.contains("answer_hex=\n"), "{out}");
 }
+
+fn fixture(script_text:&str,extra:&[&str])->std::path::PathBuf {
+    let root=std::env::temp_dir().join(format!("core-agent-check-{}-{}",std::process::id(),NEXT.fetch_add(1,Ordering::SeqCst)));
+    fs::create_dir(&root).unwrap();let script=root.join("script");fs::write(&script,script_text).unwrap();let dir=root.join("store");
+    let output=Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab")).args(["start","--dir"]).arg(&dir).arg("--script").arg(script).args(extra).output().unwrap();
+    assert!(output.status.success(),"{}",String::from_utf8_lossy(&output.stderr));dir
+}
+fn command(dir:&std::path::Path,verb:&str,extra:&[&str])->String {
+    let output=Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab")).args([verb,"--dir"]).arg(dir).args(extra).output().unwrap();
+    assert!(output.status.success(),"{}",String::from_utf8_lossy(&output.stderr));String::from_utf8(output.stdout).unwrap()
+}
+const SCRIPT:&str="tool\tc1\tfixture.record\t6869\nanswer\t7b7b746f6f6c5f726573756c747d7d\n";
+#[test]
+fn lost_response_reopens_lookup_only_and_preserves_original_receipt(){
+    let dir=fixture(SCRIPT,&["--tool-behavior","lose-response"]);
+    assert!(command(&dir,"run",&[]).contains("status=outcome_unknown\n"));
+    let physical=fs::read_to_string(dir.join("effects.db")).unwrap();
+    let again=command(&dir,"run",&[]);assert!(again.contains("model_calls=1\n"));assert!(again.contains("status=outcome_unknown\n"));
+    assert!(command(&dir,"lookup",&[]).contains("receipt=r-i-1\n"));
+    let done=command(&dir,"run",&[]);assert!(done.contains("status=completed\n"));
+    let expected=muyon_core_agent_lab::hex("receipt=r-i-1;value=hi");assert!(done.contains(&format!("answer_hex={expected}\n")));
+    assert_eq!(fs::read_to_string(dir.join("effects.db")).unwrap(),physical);
+}
+#[test]
+fn physical_binding_replay_returns_original_and_altered_binding_conflicts(){
+    use muyon_core_agent_lab::store::{Binding,FixtureTool,ToolPort,EffectStore};
+    let dir=fixture("answer\t\n",&[]);let mut tool=FixtureTool{dir:dir.clone()};
+    let binding=Binding{invocation:"i-test".into(),task:"t-test".into(),attempt:"a-test".into(),turn:1,scope:"fixture".into(),value:"actual".into()};
+    let original=tool.execute_once(&binding).unwrap();assert_eq!(tool.execute_once(&binding).unwrap(),original);
+    let mut changed=binding.clone();changed.value="altered".into();assert!(tool.execute_once(&changed).is_err());
+    changed=binding.clone();changed.scope="other".into();assert!(tool.execute_once(&changed).is_err());
+    changed=binding.clone();changed.attempt="stale".into();assert!(tool.lookup(&changed).is_err());
+    assert_eq!(EffectStore::load(&dir).unwrap().receipts.len(),1);
+}
+#[test]
+fn exhausted_budget_survives_reopen_and_does_not_request_followup(){
+    let dir=fixture(SCRIPT,&["--max-steps","1"]);let first=command(&dir,"run",&[]);
+    assert!(first.contains("status=budget_exhausted\n"));assert!(first.contains("model_calls=1\n"));assert!(first.contains("effects=1\n"));
+    assert_eq!(command(&dir,"run",&[]),first);
+}
+#[test]
+fn confirmation_is_current_exact_pending_and_does_not_override_hard_denial(){
+    let dir=fixture(SCRIPT,&["--mode","ask-every-time"]);let waiting=command(&dir,"run",&[]);
+    assert!(waiting.contains("status=waiting\n"));assert!(waiting.contains("effects=0\n"));
+    assert_eq!(command(&dir,"run",&[]),waiting);
+    let denied=command(&dir,"run",&["--confirmed","true","--revoked","true"]);assert!(denied.contains("status=denied\n"));assert!(denied.contains("effects=0\n"));
+    let dir=fixture(SCRIPT,&["--mode","ask-every-time"]);command(&dir,"run",&[]);
+    let done=command(&dir,"run",&["--confirmed","true"]);assert!(done.contains("status=completed\n"));assert!(done.contains("confirmations=1\n"));
+}
+#[test]
+fn cancellation_before_dispatch_and_after_commit_preserves_truth(){
+    let before=fixture(SCRIPT,&[]);command(&before,"cancel",&[]);let out=command(&before,"run",&[]);assert!(out.contains("effects=0\n"));assert!(out.contains("model_calls=0\n"));
+    let after=fixture(SCRIPT,&["--tool-behavior","lose-response"]);command(&after,"run",&[]);let cancelled=command(&after,"cancel",&[]);
+    assert!(cancelled.contains("receipt=r-i-1\n"));assert!(cancelled.contains("effects=1\n"));assert!(cancelled.contains("status=cancelled\n"));assert!(command(&after,"run",&[]).contains("model_calls=1\n"));
+}
+#[test]
+fn malformed_or_model_authority_script_is_rejected(){
+    use muyon_core_agent_lab::model::ScriptedProvider;
+    for script in ["tool\tc1\tfixture.record\t61\tapproved=true\n","tool\tc1\tfixture.alias\t61\n","tool\tc1\tfixture.record\tf\n","tool\tc1\tfixture.record\tff\n","tool\tc1\tfixture.record\n","answer\t61\textra\n","partial\tc1\n"] {assert!(ScriptedProvider::parse(script).is_err(),"{script}");}
+}
+#[test]
+fn corrupt_or_absent_original_evidence_never_replays_unknown(){
+    let dir=fixture(SCRIPT,&["--tool-behavior","lose-response"]);command(&dir,"run",&[]);
+    fs::write(dir.join("effects.db"),"corrupt\n").unwrap();assert!(command(&dir,"lookup",&[]).contains("status=outcome_unknown\n"));
+    assert!(command(&dir,"run",&[]).contains("model_calls=1\n"));
+    fs::rename(dir.join("effects.db"),dir.join("preserved-corrupt.db")).unwrap();assert!(command(&dir,"lookup",&[]).contains("status=outcome_unknown\n"));assert!(command(&dir,"run",&[]).contains("effects=unknown\n"));assert!(!dir.join("effects.db").exists());
+}
+#[test]
+fn duplicate_provider_reference_cannot_mint_second_invocation(){
+    let dir=fixture("tool\tc1\tfixture.record\t61\ntool\tc1\tfixture.record\t62\n",&[]);let out=command(&dir,"run",&[]);assert!(out.contains("status=failed\n"));assert!(out.contains("effects=1\n"));assert!(out.contains("value_hex=61\n"));
+}
+#[test]
+fn provider_failure_and_definite_tool_failure_never_fabricate_success(){
+    let dir=fixture("fail\tunavailable\n",&[]);let out=command(&dir,"run",&[]);assert!(out.contains("status=failed\n"));assert!(out.contains("effects=0\n"));
+    let dir=fixture(SCRIPT,&["--tool-behavior","fail"]);let out=command(&dir,"run",&[]);assert!(out.contains("status=failed\n"));assert!(out.contains("effects=0\n"));assert!(out.contains("receipt=\n"));
+}

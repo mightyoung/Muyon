@@ -9,3 +9,15 @@ intentionally denies all permissions and does no work. Expected RED failures
 are semantic assertions, not compile/import errors. Local rustc/cargo absent:
 compilation and Rust RED are NOT_RUN until the independent CI executes this SHA.
 Root owns runner invocation and independent review. No product/old lab changes.
+
+RED execution confirmed by root: CI run38665093404 / job116195102695, source
+f68db20364caf38a48f09750d5137c88a70af552 compiled using preinstalled Rust1.99.0;
+1 test passed and 3 failed semantically (Auto low, FullAllow high, actual loop).
+Logs remain external under /workspace/reports/rd-core-agent-20261015/.
+
+Implementation candidate now contains typed Provider/ModelRequest/context,
+Authorizer/HostFacts, ToolPort/Binding/Receipt, strict bounded durable snapshots,
+actual synthetic execution, Linux flock, cancellation signal, lookup-only
+uncertainty, exact receipt reconciliation and persistent byte/step/call limits.
+14 Rust integration tests authored; implementation compilation and GREEN pending
+independent runner. Source diff whitespace check passed; this is not Rust evidence.
