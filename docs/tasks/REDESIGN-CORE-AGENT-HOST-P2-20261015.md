@@ -23,3 +23,66 @@ pass is claimed; root will run the existing GitHub runner against this compiling
 API candidate and preserve its first semantic test failure before full behavior
 implementation. No tests, business handlers, registry, grant policy, old runtime
 defaults, or Rust sources changed at this checkpoint.
+
+## Full adapter implementation checkpoint
+
+The compiling stub is preserved at `3a37c8fccd7c0cde0c944ece41c600c006380e2e`.
+Root verified actual semantic RED in CI38686248722 at exact combined
+313bcc8b9f432774c7bd47da9f979c77adaebc96: successful Rust offline build,
+Flutter dependency setup and compilation, then the positive product task assertion
+expected succeeded / actual failed. Raw evidence is external at
+`/tmp/rd-core-agent-host-evidence-20261015/dart-red-first-full.log`.
+
+The enabled facade now persists its backend ownership and services the common
+Rust Agent's callbacks through a private, bounded child session. The child gets
+only sanitized prompt, actual registered descriptor, correlated callback replies
+and five-field typed reference projection. Process environment is explicit;
+strict UTF8/JSON framing rejects duplicates, unknown fields, malformed types,
+wrong correlation and oversized aggregate traffic. One session, two model turns
+and one actual readonly invocation are bounded separately from legacy execution.
+
+`AgentModelTurn.preparePermission` accepts an optional exact `ModelRequest` and
+shares the existing HostModelAuthorization payload review helper. Core callbacks
+map registered/native function names through the existing frozen name helpers,
+construct the exact request and digest, obey category gate and effective review,
+and enter the original gateway under its one-use permission and beforeSend
+scope/profile/memory/policy checks. GateConfirm alone does not imply manual review.
+The legacy caller retains its original request construction and compatibility
+payload behavior. No fallback, automatic capability changes or approval creation
+is introduced.
+
+Readonly authority follows the existing registered read path: actual prepare,
+current category/scope/identity checks, invoke and receiptFor. Root corrected an
+earlier proposed extra readonly reviewer gate; no effectIntent, grant, approval
+or new read-content requirement is invented. Inquiry invocation and actual object
+source facts are marked through the same authorizationFacts rules as the existing
+AgentDispatch. Original result and receipt stay host-local, and their invocation
+link is stored before admission. Successful projection uses actual returned
+version metadata and excludes record, name, summary and nativeProjectId.
+
+Existing gateway.mask handles credential echoes before any provider answer,
+call identity, prompt or projected metadata can enter IPC; frozen profile fields
+are also excluded. Tools with a sensitive identity are refused rather than
+rewritten. This can read the synthetic SecretStore for masking independently of
+the two actual model sends; gateway ledger rows remain the send evidence.
+
+Cancel/close abort model requests and send process controls. Once admitted, a
+read drains to its original receipt instead of cancelling its tool token; no
+subsequent callback starts. Child exit/reap precedes facade completion. Stored
+backend ownership fences resume, pause, confirmation, compaction and optional UI
+continuations across restart. Legacy startTool and disabled backend remain intact.
+
+Root extended Task2 ownership to
+`apps/muyon/test/core_agent_process_owner_test.dart`: unsafe optional metadata
+is rejected, and real in-memory registry reads are held behind Completers so
+cancel/close occurs after admission and before original return. These are narrow
+owner unit boundaries, not substitutes for the independent compiled Rust/product
+roundtrip. Test/analyzer runtime evidence will be updated after execution.
+
+The preinstalled SDK became available during implementation. Formatting and a
+focused analyzer run succeeded using cached packages, temporary analyzer state
+and `DASH__SUPPRESS_ANALYTICS=true`; HOME was not changed for these checks. No
+package install/download, model service, credential configuration or real data
+was used. Full combined runtime, independent checker, inverse controls, non-author
+review and exact terminal CI remain root integration gates; this checkpoint does
+not claim product GREEN, device acceptance or M03 completion.

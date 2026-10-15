@@ -238,6 +238,7 @@ class MuyonHost {
     /// Replaces the module catalog; for tests of the generic module path.
     Iterable<BusinessModule>? modules,
   }) async {
+    coreAgentProcess?.validate();
     final storage = StorageManager(rootPath);
     try {
       final database = await storage.open('muyon', WorkspaceRepository.schema);

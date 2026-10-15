@@ -242,6 +242,7 @@ class PersonalAgent {
   }
 
   Future<UiPlannedPresentation> planUiFromUserControl(String taskId) {
+    _requireLegacy(taskId);
     _freezePresentation(taskId, UiPresentationRequest.explicitControl());
     return planUi(taskId);
   }
@@ -261,10 +262,13 @@ class PersonalAgent {
   Future<UiPlannedPresentation> planUi(
     String taskId, {
     Map<String, Object?>? expected,
-  }) async =>
-      await _ctx.uiPlanning?.plan(taskId, expected: expected) ??
-      UiPlanningHarness.fallback('planning_disabled');
+  }) async {
+    _requireLegacy(taskId);
+    return await _ctx.uiPlanning?.plan(taskId, expected: expected) ??
+        UiPlanningHarness.fallback('planning_disabled');
+  }
   Future<PersonalTask> startUiSemantic(String taskId, String prompt) {
+    _requireLegacy(taskId);
     final task = repository.task(taskId);
     if (task == null) return Future.error(StateError('task_unavailable'));
     return _start(
@@ -519,6 +523,14 @@ class PersonalAgent {
   late final AgentModelTurn _model = AgentModelTurn(_ctx);
   late final AgentCompactionFlow _compaction = AgentCompactionFlow(_ctx);
   late final AgentResume _resume = AgentResume(_ctx);
+  late final CoreAgentProcess? _core = coreAgentProcess?.enabled == true
+      ? CoreAgentProcess(coreAgentProcess!, _ctx, _model)
+      : null;
+
+  bool _coreOwned(String id) => repository.task(id)?.payload['backend'] == 'rust_core';
+  void _requireLegacy(String id) {
+    if (_coreOwned(id)) throw StateError('core_continuation_unsupported');
+  }
 
   Future<PersonalTask> _trackStart(Future<PersonalTask> Function() run) {
     if (_ctx.closing) return Future.error(StateError("Assistant is closing"));
@@ -561,14 +573,17 @@ class PersonalAgent {
   }) => _trackStart(() async {
     if (_ctx.closing) throw StateError('Assistant is closing');
     coreAgentProcess?.validate();
-    final (task, selection) = _factory.chatTask(
+    final (built, selection) = _factory.chatTask(
       conversationId: conversationId,
       prompt: prompt,
       profile: profile,
       scope: scope,
       previousAttemptId: previousAttemptId,
-      uiPlanningAvailable: canExposeUiPlanning(profile),
+      uiPlanningAvailable: _core == null && canExposeUiPlanning(profile),
     );
+    final task = _core == null ? built : built.copy({
+      'backend': 'rust_core', 'uiPlanningDisabled': true,
+    });
     _freezePresentation(task.id, UiPresentationRequest.ordinary());
     await repository.createTask(task);
     if (profile != null && trustedProfileChoice) {
@@ -576,11 +591,7 @@ class PersonalAgent {
     }
     await repository.appendMessage(conversationId, 'user', prompt.trim());
     if (coreAgentProcess?.enabled == true) {
-      await _ctx.fail(
-        task,
-        'core_backend_unavailable',
-        code: 'core_backend_unavailable',
-      );
+      await _core!.run(task);
     } else if (profile == null) {
       if (selection.ruleToolId == null) {
         await _ctx.finish(task, '当前使用离线模式。请选择下方已注册工具进行真实查询或计算，或选择模型开始对话。', []);
@@ -634,11 +645,16 @@ class PersonalAgent {
   /// only while the next model request is waiting for confirmation, never
   /// while an approval for a tool call is pending: nothing of a pending
   /// approval or its preview is touched.
-  Future<void> compactNow(String taskId) => _compaction.compactNow(taskId);
+  Future<void> compactNow(String taskId) async {
+    _requireLegacy(taskId);
+    await _compaction.compactNow(taskId);
+  }
 
   /// The person declines to send the summary request: clearing only.
-  Future<void> declineCompaction(String taskId) =>
-      _compaction.declineCompaction(taskId);
+  Future<void> declineCompaction(String taskId) async {
+    _requireLegacy(taskId);
+    await _compaction.declineCompaction(taskId);
+  }
 
   /// Trusted host UI only: display preview before supplying its exact digest.
   ///
@@ -652,6 +668,9 @@ class PersonalAgent {
     required String requestDigest,
     List<String>? selectedInvocationIds,
   }) {
+    if (_coreOwned(taskId)) {
+      return Future.error(StateError('core_continuation_unsupported'));
+    }
     if (_ctx.closing || _ctx.operations.containsKey(taskId)) {
       return Future.error(StateError('Task unavailable'));
     }
@@ -766,6 +785,10 @@ class PersonalAgent {
   Future<void> cancel(String id) async {
     var task = repository.task(id);
     if (task == null || task.terminal) return;
+    if (_coreOwned(id)) {
+      await _core?.cancel(id);
+      return;
+    }
     // The synchronous prefix revokes this task's capability before the first
     // await. The listener keeps a later diagnostics failure from going
     // unhandled while the original cancellation proceeds on its own.
@@ -837,6 +860,7 @@ class PersonalAgent {
   }
 
   Future<void> pause(String id) async {
+    _requireLegacy(id);
     final task = repository.task(id);
     if (task == null || task.state != PersonalTaskState.waitingConfirmation) {
       throw StateError('只能在等待确认的安全边界暂停');
@@ -847,6 +871,7 @@ class PersonalAgent {
   }
 
   Future<PersonalTask> resume(String id) async {
+    _requireLegacy(id);
     final task = repository.task(id);
     if (task?.payload['uiPlanningInternal'] == true) {
       throw StateError('planning_session_expired');
@@ -898,6 +923,7 @@ class PersonalAgent {
 
   Future<void> close() async {
     _ctx.closing = true;
+    _core?.close();
     // Withdraw UI synchronously, but enqueue the host's interrupted terminal
     // before yielding to a blocked prepare or awaiting presentation cleanup.
     final presentationClosing = presentationPreference?.close();

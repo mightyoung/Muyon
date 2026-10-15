@@ -363,7 +363,10 @@ class AgentModelTurn {
     }
   }
 
-  Future<HostModelReview> preparePermission(PersonalTask task) {
+  Future<HostModelReview> preparePermission(
+    PersonalTask task, {
+    ModelRequest? exactRequest,
+  }) {
     final authority = ctx.modelAuthorization!;
     final profile = ctx.profile(task);
     final modules = <String>{
@@ -373,9 +376,9 @@ class AgentModelTurn {
     return authority.prepare(
       task: task,
       profile: profile,
-      payload: jsonEncode(ctx.provider.encode(_modelRequest(task, profile))),
+      payload: jsonEncode(ctx.provider.encode(exactRequest ?? _modelRequest(task, profile))),
       compatiblePayload:
-          !profile.capabilities.streaming && !profile.capabilities.nativeTools
+          exactRequest == null && !profile.capabilities.streaming && !profile.capabilities.nativeTools
           ? jsonEncode(
               ctx.provider.encode(
                 _modelRequest(task, profile).withoutJsonObject(),
