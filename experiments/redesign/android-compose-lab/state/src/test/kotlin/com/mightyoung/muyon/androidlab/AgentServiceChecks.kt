@@ -113,6 +113,22 @@ fun runAgentServiceChecks() {
         try{check(signalEntered.await(5,TimeUnit.SECONDS));firstReturn.countDown();check(initDone.await(5,TimeUnit.SECONDS))}finally{firstReturn.countDown();signalReturn.countDown()}
         check(retireDone.await(5,TimeUnit.SECONDS));check(!premature.get() && waits.get()==1 && ready==0);check(backend.jobs.size==1);backend.next();check(waits.get()==2 && stopped.get())
     }
+    for (lateRevision in listOf(3L,2L)) {
+        cases["new historical selection rejects reverse delivery at revision $lateRevision"]={
+            val r=ClientRig();r.ready();r.start("active")
+            r.apply(UiAgentRun.Running(intent("active"),runIdentity()),2)
+            val old=r.c.captureLookup(intent("historical_a"))!!
+            val newest=r.c.captureLookup(intent("historical_b"))!!
+            val expected=snap(completed(intent("historical_b")),3)
+            check(r.c.apply(newest,expected)==UiAgentApply.APPLIED)
+            check(r.c.apply(old,snap(completed(intent("historical_a")),lateRevision))==UiAgentApply.STALE)
+            check(r.c.historical==expected)
+            check(r.c.selectedIntent==intent("active") && r.c.snapshot?.run is UiAgentRun.Running)
+            check(r.c.apply(newest,expected)==UiAgentApply.APPLIED)
+            val intentional=r.c.captureLookup(intent("historical_a"))!!
+            check(r.c.apply(intentional,snap(completed(intent("historical_a")),3))==UiAgentApply.APPLIED)
+        }
+    }
     var failures=0
     cases.forEach{(name,test)->try{test();println("PASS B service $name")}catch(e:Throwable){failures++;println("FAIL B service $name: ${e.message}")}}
     check(failures==0){"$failures/${cases.size} B service state checks failed"}
