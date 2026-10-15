@@ -935,6 +935,11 @@ class PersonalAgent {
       t.cancel();
     }
     for (final t in repository.tasks()) {
+      if (t.payload['backend'] == 'rust_core') {
+        // The core adapter drains an admitted read before choosing the final
+        // interrupted/unknown outcome and preserves its original receipt.
+        continue;
+      }
       if (t.payload['owner'] == 'platform') {
         continue;
       }

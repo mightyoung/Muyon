@@ -619,6 +619,26 @@ final class _Session {
   Future<void> fail(String code) async {
     final latest = ctx.repository.task(task.id);
     if (latest == null || latest.terminal) return;
+    final transportFailure = const {
+      'host_protocol',
+      'callback_mismatch',
+      'host_eof',
+      'callback_timeout',
+      'core_backend_unavailable',
+      'tool_outcome_unknown',
+    }.contains(code);
+    if (invokeAdmitted && projection == null && transportFailure) {
+      await ctx.settle(
+        latest,
+        PersonalTaskState.interrupted,
+        'tool_outcome_unknown',
+      );
+      return;
+    }
+    if (invokeAdmitted && code == 'projection_rejected') {
+      await ctx.fail(latest, code, code: code);
+      return;
+    }
     if (stopped || ctx.closing) {
       await ctx.settle(
         latest,
