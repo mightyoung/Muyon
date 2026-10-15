@@ -53,3 +53,40 @@ These are synthetic protocol peer tests; product facade/registry acceptance is
 the independent checker owner's work. Local compilation/runtime remain NOT_RUN.
 Static diff validation and all18 original mutation replacement sites were checked;
 the original53 tests and17 mutants have not been executed locally.
+
+## Task 1 round1 corrections and verification entry points
+
+Root observed CI38687051586 completed/success for prior author checkpoint
+`3be2b55ec9e2b2f8518dd59e0d516f12f0eb03e8` (integration4e265d4), including original
+Rust/process/SSE and17 inverse steps. That evidence does not validate these fixes.
+
+- T1-I1: issue a256-bit OS-random opaque invocation from `/dev/urandom`; persist
+  exact task/attempt/scope/turn/tool/callId/arguments binding before preparation.
+  Entropy failure is fixed `host_identity_unavailable`, without PID/time fallback.
+  Tests cover distinct attempts in the same process, failed entropy and the actual
+  durable binding observed at the prepare callback.
+- T1-I2: fully matching but oversized/invalid projection is `projection_rejected`
+  with null accepted result/reference. Tests include8193-byte metadata, raw record
+  injection, matching projection-error callback and unmatched prepared reference.
+- T1-I3: structurally valid inadmissible argument identifiers become `model_failed`
+  before preparation; unknown fields/wrong scalar types remain `host_protocol`.
+  Tests cover129-byte IDs, newline/NUL IDs and wrong JSON scalar type.
+- T1-I4: bounded writes check stdin control while stdout is backpressured. Partial
+  output is never followed by an invented terminal frame; journal truthful state
+  and exit with fixed `host_partial_output`. The Linux pipe-capacity/header barrier
+  tests assert consumed cancel/close rather than an idle timeout, without sleeps.
+- T1-O1: no-fixture-write assertions now inspect the actual Agent attempt directory.
+
+The host transport and `/dev/urandom` evidence are Linux-only; other target OSes
+explicitly reject this host command. No cross-platform/device acceptance is claimed.
+Extra tests cover partial/zero/oversized/duplicate-key/invalid-UTF8 frames, clean EOF,
+one-byte framing and rejection of a reused attempt.
+
+New inverse entry point (separate from original17):
+`python3 -B experiments/redesign/core-agent-lab/core/host_mutations.py --evidence-dir /tmp/HOST-INVERSES`.
+Its two retained private source copies weaken request correlation and single-tool
+admission. KILLED requires compilation plus the selected test's exact semantic
+assertion; setup errors/timeouts are invalid. Workflow wiring belongs to checker.
+Python syntax, diff whitespace and the18 original mutation source anchors were
+checked locally. Corrected Rust tests and both host inverses remain NOT_RUN locally
+until root runs their exact source in CI; cargo/rustc remain unavailable.

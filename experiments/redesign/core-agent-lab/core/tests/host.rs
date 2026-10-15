@@ -2,11 +2,12 @@
 //! They do not claim a product registry, model, credential or device execution.
 use muyon_core_agent_lab::wire_json::{self, Json, object, string};
 use std::{fs, io::{Read, Write}, path::PathBuf, process::{Command, Stdio}, sync::atomic::{AtomicU64, Ordering}};
+use std::os::fd::AsRawFd;
 
 static NEXT: AtomicU64 = AtomicU64::new(0);
 struct HostProcess {
     child: std::process::Child,
-    input: std::process::ChildStdin,
+    input: Option<std::process::ChildStdin>,
     output: std::process::ChildStdout,
     root: PathBuf,
 }
@@ -20,13 +21,19 @@ impl HostProcess {
             .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().unwrap();
         let input = child.stdin.take().unwrap();
         let output = child.stdout.take().unwrap();
-        Self { child, input, output, root }
+        Self { child, input: Some(input), output, root }
     }
     fn send(&mut self, value: Json) {
         let bytes = value.encode().into_bytes();
-        self.input.write_all(&(bytes.len() as u32).to_be_bytes()).unwrap();
-        self.input.write_all(&bytes).unwrap();
-        self.input.flush().unwrap();
+        self.send_raw(&(bytes.len() as u32).to_be_bytes());
+        self.send_raw(&bytes);
+    }
+    fn send_raw(&mut self, bytes: &[u8]) {
+        self.input.as_mut().unwrap().write_all(bytes).unwrap();
+        self.input.as_mut().unwrap().flush().unwrap();
+    }
+    fn close_input(&mut self) {
+        self.input.take();
     }
     fn receive(&mut self) -> Json {
         let mut header = [0u8; 4];
@@ -155,7 +162,9 @@ fn host_roundtrip_pairs_the_original_projected_result_in_turn_two() {
     assert_eq!(field(&terminal, "model_turns"), &number(2));
     assert_eq!(field(&terminal, "tool_invocations"), &number(1));
     assert!(process.child.wait().unwrap().success());
-    assert!(!process.root.join("effects.db").exists(), "host invokes must not create fixture effects");
+    let attempt_dir = process.root.join("host-task/host-attempt");
+    assert!(!attempt_dir.join("effects.db").exists(), "host invokes must not create fixture effects in the actual Agent directory");
+    assert!(!attempt_dir.join("task.db").exists(), "host snapshots must remain separate from fixture snapshots");
 }
 
 fn propose(process: &mut HostProcess) -> Json {
@@ -341,4 +350,194 @@ fn host_request_id_requires_an_integer_not_a_json_float() {
     reply.insert("request_id".into(), Json::Number("1.0".into()));
     process.send(Json::Object(reply));
     terminal(&mut process, "failed", "host_protocol", 0);
+}
+
+#[test]
+fn host_matching_oversized_projection_is_rejected_without_unknown_or_result() {
+    let mut process = HostProcess::new();
+    let invocation = admit_tool(&mut process);
+    let projection = object([
+        ("found", Json::Bool(true)),
+        ("objectRefs", Json::Array(vec![object([
+            ("moduleId", string("inquiry")), ("objectType", string("supplier")),
+            ("objectId", string("synthetic-id")), ("revisionRef", string("x".repeat(8193))),
+            ("contentDigest", Json::Null),
+        ])])),
+    ]);
+    result(&mut process, &invocation, projection);
+    let value = terminal(&mut process, "failed", "projection_rejected", 1);
+    assert_eq!(field(&value, "receipt_ref"), &Json::Null);
+    assert_eq!(field(&value, "projection"), &Json::Null);
+}
+
+#[test]
+fn host_invocation_identity_is_nonce_issued_and_durably_bound_to_its_attempt() {
+    let mut first = HostProcess::new();
+    let first_request = propose(&mut first);
+    let first_id = text(&first_request, "invocation_id");
+    assert!(first_id.starts_with("core:"));
+    assert_eq!(first_id.len(), 69, "256-bit OS nonce, never PID/turn or model ID");
+    assert!(first_id[5..].bytes().all(|b| b.is_ascii_hexdigit()));
+    let bytes = fs::read(first.root.join("host-task/host-attempt/host.db")).unwrap();
+    let journal = wire_json::parse(&bytes).unwrap();
+    let binding = field(&journal, "binding");
+    assert_eq!(text(binding, "invocation_id"), first_id);
+    assert_eq!(text(binding, "task_id"), "host-task");
+    assert_eq!(text(binding, "attempt_id"), "host-attempt");
+    assert_eq!(text(binding, "scope_ref"), "scope:synthetic");
+    assert_eq!(field(binding, "turn"), &number(1));
+    assert_eq!(text(binding, "call_id"), "provider-call");
+    assert_eq!(field(binding, "arguments"), &args());
+    let mut second = HostProcess::new();
+    let second_request = propose(&mut second);
+    assert_ne!(text(&second_request, "invocation_id"), first_id, "new attempts cannot collide on a reused PID/turn");
+}
+
+#[test]
+fn host_clean_eof_is_distinct_from_a_truncated_header() {
+    let mut clean = HostProcess::new();
+    clean.send(start()); request(&mut clean, "model_request", 1, 1); clean.close_input();
+    terminal(&mut clean, "interrupted", "host_eof", 0);
+    let mut partial = HostProcess::new();
+    partial.send(start()); request(&mut partial, "model_request", 1, 1);
+    partial.send_raw(&[0, 0]); partial.close_input();
+    terminal(&mut partial, "failed", "host_protocol", 0);
+}
+
+#[test]
+fn host_truncated_body_is_a_protocol_failure() {
+    let mut process = HostProcess::new();
+    process.send(start()); request(&mut process, "model_request", 1, 1);
+    process.send_raw(&100u32.to_be_bytes()); process.send_raw(b"{"); process.close_input();
+    terminal(&mut process, "failed", "host_protocol", 0);
+}
+
+#[test]
+fn host_frame_size_is_checked_before_body_allocation() {
+    for (length, status, reason) in [(0u32, "failed", "host_protocol"), (65537u32, "budget_exhausted", "host_budget")] {
+        let mut process = HostProcess::new();
+        process.send(start()); request(&mut process, "model_request", 1, 1);
+        process.send_raw(&length.to_be_bytes());
+        terminal(&mut process, status, reason, 0);
+    }
+}
+
+#[test]
+fn host_duplicate_keys_and_invalid_utf8_never_become_callbacks() {
+    for body in [br#"{"v":1,"v":1,"kind":"model_reply"}"#.to_vec(), vec![b'{', 255, b'}']] {
+        let mut process = HostProcess::new();
+        process.send(start()); request(&mut process, "model_request", 1, 1);
+        process.send_raw(&(body.len() as u32).to_be_bytes()); process.send_raw(&body);
+        terminal(&mut process, "failed", "host_protocol", 0);
+    }
+}
+
+#[test]
+fn host_each_byte_framing_is_equivalent_for_a_direct_answer() {
+    let mut process = HostProcess::new();
+    let bytes = start().encode().into_bytes();
+    for byte in (bytes.len() as u32).to_be_bytes().into_iter().chain(bytes) { process.send_raw(&[byte]); }
+    request(&mut process, "model_request", 1, 1);
+    process.send(callback("model_reply", 1, 1, vec![("reply", object([
+        ("kind", string("answer")), ("text", string("synthetic direct answer")),
+    ]))]));
+    let value = process.receive();
+    assert_eq!(text(&value, "status"), "completed");
+    assert_eq!(text(&value, "answer"), "synthetic direct answer");
+    assert_eq!(field(&value, "model_turns"), &number(1));
+    assert_eq!(field(&value, "tool_invocations"), &number(0));
+    assert_eq!(field(&value, "receipt_ref"), &Json::Null);
+    assert!(process.child.wait().unwrap().success());
+}
+
+#[test]
+fn host_existing_attempt_is_never_reopened_or_resent() {
+    let mut first = HostProcess::new(); first.send(start()); request(&mut first, "model_request", 1, 1);
+    control(&mut first, "cancel"); terminal(&mut first, "cancelled", "cancel_requested", 0);
+    let mut child = Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab"))
+        .arg("host-session").arg("--root").arg(&first.root)
+        .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().unwrap();
+    let mut input = child.stdin.take().unwrap(); let body = start().encode();
+    input.write_all(&(body.len() as u32).to_be_bytes()).unwrap(); input.write_all(body.as_bytes()).unwrap(); drop(input);
+    let output = child.wait_with_output().unwrap();
+    assert_eq!(output.status.code(), Some(2));
+    assert!(output.stdout.is_empty(), "no provider callback on reused attempt");
+    assert_eq!(String::from_utf8(output.stderr).unwrap(), "error=host_attempt_exists\n");
+    assert!(!first.root.join("host-task/host-attempt/effects.db").exists());
+}
+
+#[test]
+fn host_semantically_invalid_complete_ids_stop_as_model_failure_before_prepare() {
+    for id in ["x".repeat(129), "synthetic\nid".into(), "synthetic\u{0}id".into()] {
+        let mut process = HostProcess::new();
+        process.send(start()); request(&mut process, "model_request", 1, 1);
+        process.send(callback("model_reply", 1, 1, vec![("reply", object([
+            ("kind", string("tool")), ("call_id", string("provider-call")), ("name", string("inquiry.object")),
+            ("arguments", object([("type", string("supplier")), ("id", string(id))])),
+        ]))]));
+        terminal(&mut process, "failed", "model_failed", 0);
+    }
+}
+
+#[test]
+fn host_wrong_argument_scalar_type_is_a_protocol_failure() {
+    let mut process = HostProcess::new();
+    process.send(start()); request(&mut process, "model_request", 1, 1);
+    process.send(callback("model_reply", 1, 1, vec![("reply", object([
+        ("kind", string("tool")), ("call_id", string("provider-call")), ("name", string("inquiry.object")),
+        ("arguments", object([("type", string("supplier")), ("id", Json::Bool(true))])),
+    ]))]));
+    terminal(&mut process, "failed", "host_protocol", 0);
+}
+
+#[test]
+fn host_cancel_and_close_are_consumed_while_output_is_physically_backpressured() {
+    unsafe extern "C" { fn fcntl(fd: i32, cmd: i32, ...) -> i32; }
+    for (kind, status, reason) in [("cancel", "cancelled", "cancel_requested"), ("close", "interrupted", "host_closed")] {
+        let mut process = HostProcess::new();
+        assert_eq!(unsafe { fcntl(process.output.as_raw_fd(), 1031, 4096) }, 4096, "Linux F_SETPIPE_SZ is the deterministic physical barrier");
+        let mut starting = start().object().unwrap().clone();
+        starting.insert("prompt".into(), string("x".repeat(8000)));
+        process.send(Json::Object(starting));
+        let mut header = [0u8; 4];
+        process.output.read_exact(&mut header).unwrap();
+        let declared = u32::from_be_bytes(header) as usize;
+        assert!(declared > 4096, "the remaining frame cannot fit in the unread pipe");
+        // Do not drain stdout. Header observation proves real partial output;
+        // control must be consumed while the rest is physically unable to finish.
+        control(&mut process, kind);
+        assert_eq!(process.child.wait().unwrap().code(), Some(2));
+        let mut stderr = String::new(); process.child.stderr.take().unwrap().read_to_string(&mut stderr).unwrap();
+        assert_eq!(stderr, "error=host_partial_output\n");
+        let journal = wire_json::parse(&fs::read(process.root.join("host-task/host-attempt/host.db")).unwrap()).unwrap();
+        assert_eq!(text(&journal, "status"), status, "control was consumed, not replaced by idle timeout");
+        assert_eq!(text(&journal, "reason"), reason);
+        assert_eq!(field(&journal, "tool_invocations"), &number(0));
+        let mut partial = Vec::new(); process.output.read_to_end(&mut partial).unwrap();
+        assert!(partial.len() < declared, "no fabricated completion of the abandoned frame");
+        assert!(!String::from_utf8_lossy(&partial).contains("\"kind\":\"terminal\""), "no terminal appended inside a partial frame");
+    }
+}
+
+#[test]
+fn host_unmatched_invoke_result_keeps_unknown_instead_of_accepting_a_receipt() {
+    let mut process = HostProcess::new();
+    let invocation = admit_tool(&mut process);
+    process.send(callback("tool_result", 3, 1, vec![
+        ("invocation_id", string(invocation)), ("prepared_ref", string("prepared:different")),
+        ("receipt_ref", string("receipt:forged")), ("projection", projected_result()),
+    ]));
+    let value = terminal(&mut process, "interrupted", "tool_outcome_unknown", 1);
+    assert_eq!(field(&value, "receipt_ref"), &Json::Null);
+    assert_eq!(field(&value, "projection"), &Json::Null);
+}
+
+#[test]
+fn host_matching_projection_error_callback_is_definite_rejection() {
+    let mut process = HostProcess::new();
+    admit_tool(&mut process);
+    process.send(callback("callback_error", 3, 1, vec![("code", string("projection_rejected"))]));
+    let value = terminal(&mut process, "failed", "projection_rejected", 1);
+    assert_eq!(field(&value, "receipt_ref"), &Json::Null);
+    assert_eq!(field(&value, "projection"), &Json::Null);
 }

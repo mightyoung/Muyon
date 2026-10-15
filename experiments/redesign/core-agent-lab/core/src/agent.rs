@@ -202,10 +202,10 @@ impl Agent {
         if let Some(ports)=ports{ports.persist(self)}else{self.state.save(&self.dir)}
     }
     fn drive(&mut self,provider:&mut dyn Provider,mut ports:Option<&mut crate::host_session::HostPorts>,h:&Hooks)->Result<()> {
-        if self.state.wire_counters.inflight{self.state.stop("failed","wire_interrupted");return self.state.save(&self.dir);}
+        if self.state.wire_counters.inflight{self.state.stop("failed","wire_interrupted");return self.save_drive(ports.as_deref());}
         if self.state.evidence_hold || self.state.unresolved{return Ok(());}
-        if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.state.save(&self.dir);}
-        if self.state.status=="waiting"{self.dispatch(h)?;}
+        if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.save_drive(ports.as_deref());}
+        if self.state.status=="waiting"{if ports.is_some(){self.state.stop("failed","host_protocol");return self.save_drive(ports.as_deref());}self.dispatch(h)?;}
         while self.state.status=="ready" {
             if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.check_control(){host.failure(&mut self.state,&reason);break;}}
             if self.cancelled()?{self.state.stop("cancelled","cancel_requested");break;}
@@ -218,7 +218,7 @@ impl Agent {
             let tools=if ports.is_some(){if self.state.counters.steps==1{vec!["inquiry.object".into()]}else{Vec::new()}}else{vec!["fixture.record".into()]};
             let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools};
             let position=self.state.position;let history=self.state.native.clone();
-            let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h});
+            let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h,host:ports.is_some()});
             self.state.wire_counters.inflight=false;
             let event=match response{Ok(e)=>e,Err(reason)=>{if let Some(host)=ports.as_deref_mut(){host.failure(&mut self.state,&reason);}else if self.state.wire.is_some(){if reason=="wire_cancelled"{self.state.stop("cancelled",&reason);}else if reason.ends_with("_limit"){self.state.stop("budget_exhausted",&reason);}else{self.state.stop("failed",&reason);}}else{self.state.stop("failed","provider_error");}break;}};
             let (prompt,completion)=provider.reported_usage();self.state.wire_counters.usage=crate::wire_sse::Usage{prompt,completion};
@@ -234,9 +234,11 @@ impl Agent {
                 },
                 ModelEvent::Fail(reason)=>self.state.stop("failed",&reason),
                 ModelEvent::Answer(text)=>{
+                    if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.admit_answer(&self.state,&text){host.failure(&mut self.state,&reason);break;}}
                     if size.saturating_add(text.len() as u64)>self.state.limits.context{self.state.stop("budget_exhausted","context");}else{if self.state.wire.is_some(){self.state.native.push(NativeMessage::Assistant(text.clone()));}self.state.answer=text.clone();self.state.context.push(Message{role:Role::Assistant,text});self.state.stop("completed","");}
                 },
                 ModelEvent::Tool{call_ref,name,value}=>{
+                    if ports.is_some(){self.state.stop("failed","host_protocol");break;}
                     if name!="fixture.record"{self.state.stop("failed","unknown_tool");break;}
                     let original=self.state.correlations.get(&call_ref).cloned();
                     if let Some(b)=&original{if b.value!=value||b.scope!=self.state.scope{self.state.stop("failed","binding_conflict");break;}}
@@ -262,6 +264,7 @@ impl Agent {
             }
             self.save_drive(ports.as_deref())?;
         }
+        if ports.is_some() && self.state.status=="budget_exhausted"{self.state.reason="host_budget".into();}
         self.save_drive(ports.as_deref())
     }
     pub fn observe(&self)->String {
@@ -271,10 +274,10 @@ impl Agent {
     }
 }
 
-struct AgentControl<'a>{agent:&'a mut Agent,h:&'a Hooks}
+struct AgentControl<'a>{agent:&'a mut Agent,h:&'a Hooks,host:bool}
 impl ProviderControl for AgentControl<'_>{
     fn poll(&mut self)->Result<()>{if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}}
     fn remaining(&self)->u64{self.agent.state.wire.as_ref().map(|c|c.max_total.saturating_sub(self.agent.state.wire_counters.total())).unwrap_or(u64::MAX)}
-    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{if bytes as u64>self.remaining(){return Err("wire_total_limit".into());}let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};*target=target.checked_add(bytes as u64).ok_or("wire_total_limit")?;self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".into())}
-    fn checkpoint(&mut self,name:&str)->Result<()>{self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
+    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{if self.host{return Err("host_control_unsupported".into());}if bytes as u64>self.remaining(){return Err("wire_total_limit".into());}let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};*target=target.checked_add(bytes as u64).ok_or("wire_total_limit")?;self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".into())}
+    fn checkpoint(&mut self,name:&str)->Result<()>{if self.host{return Err("host_control_unsupported".into());}self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
 }

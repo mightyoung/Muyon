@@ -1,6 +1,7 @@
 //! Private product callbacks. Agent owns the only drive loop; the host owns authority.
 use crate::{Result, agent::{Agent, State, Limits, Counters, Hooks}, model::{ModelRequest, ModelEvent, Provider, Message, Role}, policy::{HostFacts, Mode}, store, wire_provider::WireCounters, wire_json::{self, Json, object, string}};
 use std::{cell::RefCell, collections::BTreeMap, fs, io, path::{Path, PathBuf}, rc::Rc, time::{Duration, Instant}};
+use std::io::Read;
 pub const FRAME_LIMIT: usize = 65536;
 pub const IPC_LIMIT: usize = 262144;
 fn number(n: u64) -> Json { Json::Number(n.to_string()) }
@@ -72,8 +73,20 @@ fn validate_schema(schema: &Json) -> Result<()> {
     Ok(())
 }
 
-#[derive(Clone, Debug)]
-pub struct HostInvocation { pub invocation_id: String, pub call_id: String, pub tool: String, pub arguments: Json, pub turn: u64 }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct HostInvocation { pub invocation_id: String, pub task_id: String, pub attempt_id: String, pub scope_ref: String, pub call_id: String, pub tool: String, pub arguments: Json, pub turn: u64 }
+fn nonce_identity(entropy: &mut dyn Read) -> Result<String> {
+    let mut nonce = [0u8; 32];
+    entropy.read_exact(&mut nonce).map_err(|_| "host_identity_unavailable")?;
+    Ok(format!("core:{}", nonce.iter().map(|byte| format!("{byte:02x}")).collect::<String>()))
+}
+impl HostInvocation {
+    fn issue(state: &State, call_id: String, tool: String, arguments: Json) -> Result<Self> {
+        let mut entropy = fs::File::open("/dev/urandom").map_err(|_| "host_identity_unavailable")?;
+        let invocation_id = nonce_identity(&mut entropy)?;
+        Ok(Self { invocation_id, task_id: state.task.clone(), attempt_id: state.attempt.clone(), scope_ref: state.scope.clone(), call_id, tool, arguments, turn: state.counters.steps })
+    }
+}
 #[derive(Clone, Debug)]
 pub struct PreparedInvocation { pub invocation: HostInvocation, pub prepared_ref: String }
 pub enum PrepareDecision { Permit(PreparedInvocation), Denied, ConfirmationRequired }
@@ -92,11 +105,11 @@ impl ProjectedToolResult {
         ])]))])
     }
     fn parse(value: &Json, prepared: &PreparedInvocation) -> Result<Self> {
-        if text(value, "invocation_id")? != prepared.invocation.invocation_id || text(value, "prepared_ref")? != prepared.prepared_ref { return Err("callback_mismatch".into()); }
-        let receipt_ref = text(value, "receipt_ref")?;
-        if !opaque(receipt_ref) { return Err("projection_rejected".into()); }
+        if text(value, "invocation_id").map_err(|_| "host_protocol")? != prepared.invocation.invocation_id || text(value, "prepared_ref").map_err(|_| "host_protocol")? != prepared.prepared_ref { return Err("callback_mismatch".into()); }
+        let receipt_ref = text(value, "receipt_ref").map_err(|_| "host_protocol")?;
+        if !opaque(receipt_ref) { return Err("host_protocol".into()); }
         let projection = get(value, "projection")?;
-        if projection.encoded_len()? > 8192 { return Err("host_budget".into()); }
+        if projection.encoded_len()? > 8192 { return Err("projection_rejected".into()); }
         keys(projection, &["found", "objectRefs"]).map_err(|_| "projection_rejected")?;
         if get(projection, "found")? != &Json::Bool(true) { return Err("projection_rejected".into()); }
         let refs = get(projection, "objectRefs")?.array().map_err(|_| "projection_rejected")?;
@@ -119,14 +132,14 @@ struct PollFd { fd: i32, events: i16, revents: i16 }
 unsafe extern "C" { fn fcntl(fd: i32, cmd: i32, ...) -> i32; fn poll(fds: *mut PollFd, count: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
 struct Transport {
     started: Instant, active: Instant, idle: Duration, total: Duration, bytes: usize,
-    task: String, attempt: String, next: u64, shutdown: Option<Shutdown>, terminal_delivery: bool, invoke_admitted: bool, old_flags: [i32; 2],
+    task: String, attempt: String, next: u64, shutdown: Option<Shutdown>, terminal_delivery: bool, invoke_admitted: bool, output_incomplete: bool, old_flags: [i32; 2],
 }
 impl Drop for Transport { fn drop(&mut self) { for fd in 0..2 { unsafe { fcntl(fd, 4, self.old_flags[fd as usize]); } } } }
 impl Transport {
     fn new(config: &HostSessionConfig) -> Result<Self> {
         let started = Instant::now(); let mut old_flags = [0; 2];
         for fd in 0..2 { let flags = unsafe { fcntl(fd, 3) }; if flags < 0 || unsafe { fcntl(fd, 4, flags | 2048) } < 0 { return Err("host_pipe_setup".into()); } old_flags[fd as usize] = flags; }
-        Ok(Self { started, active: started, idle: Duration::from_millis(config.idle_ms), total: Duration::from_millis(config.total_ms), bytes: 0, task: String::new(), attempt: String::new(), next: 1, shutdown: None, terminal_delivery: false, invoke_admitted: false, old_flags })
+        Ok(Self { started, active: started, idle: Duration::from_millis(config.idle_ms), total: Duration::from_millis(config.total_ms), bytes: 0, task: String::new(), attempt: String::new(), next: 1, shutdown: None, terminal_delivery: false, invoke_admitted: false, output_incomplete: false, old_flags })
     }
     fn deadline(&self) -> Result<()> {
         let reserve = Duration::from_millis((self.total.as_millis() as u64 / 10).min(100));
@@ -134,7 +147,7 @@ impl Transport {
         if self.started.elapsed() >= total || (!self.terminal_delivery && self.active.elapsed() >= self.idle) { Err("callback_timeout".into()) } else { Ok(()) }
     }
     fn remaining(&self) -> usize {
-        let cap = if self.terminal_delivery { IPC_LIMIT } else { IPC_LIMIT - 32768 };
+        let cap = if self.terminal_delivery { IPC_LIMIT } else { IPC_LIMIT - FRAME_LIMIT - 4 };
         cap.saturating_sub(self.bytes)
     }
     fn charge(&mut self, n: usize) -> Result<()> { if n > self.remaining() { return Err("host_budget".into()); } self.bytes += n; self.active = Instant::now(); Ok(()) }
@@ -148,7 +161,8 @@ impl Transport {
     fn read_exact(&mut self, buffer: &mut [u8], clean_eof: bool) -> Result<()> {
         let mut position = 0;
         while position < buffer.len() {
-            self.deadline()?; if !self.ready(0, 1, true)? { continue; }
+            let classify = |reason: String| if reason == "callback_timeout" && (!clean_eof || position > 0) { "host_protocol".into() } else { reason };
+            self.deadline().map_err(&classify)?; if !self.ready(0, 1, true).map_err(&classify)? { continue; }
             let remaining = buffer.len() - position;
             if remaining > self.remaining() { return Err("host_budget".into()); }
             let n = unsafe { read(0, buffer[position..].as_mut_ptr(), remaining) };
@@ -172,12 +186,22 @@ impl Transport {
         let length = value.encoded_len()?;
         if length == 0 || length > FRAME_LIMIT || length.saturating_add(4) > self.remaining() { return Err("host_budget".into()); }
         let body = value.encode().into_bytes(); let mut bytes = Vec::with_capacity(length + 4); bytes.extend_from_slice(&(length as u32).to_be_bytes()); bytes.extend_from_slice(&body);
+        let invoking = text(value, "kind").ok() == Some("invoke");
         let mut position = 0;
         while position < bytes.len() {
+            // A full output pipe must never hide host Stop/close until idle timeout.
+            if !self.terminal_delivery && self.ready(0, 1, false)? {
+                let incoming = self.receive()?;
+                if !self.control(&incoming)? { return Err("callback_mismatch".into()); }
+                return Err(self.shutdown.unwrap().error().into());
+            }
             if !self.ready(1, 4, true)? { continue; }
             let n = unsafe { write(1, bytes[position..].as_ptr(), bytes.len() - position) };
             if n <= 0 { let kind = io::Error::last_os_error().kind(); if n < 0 && matches!(kind, io::ErrorKind::Interrupted | io::ErrorKind::WouldBlock) { continue; } return Err("host_io_failed".into()); }
-            self.charge(n as usize)?; position += n as usize;
+            position += n as usize;
+            self.output_incomplete = position < bytes.len();
+            if invoking { self.invoke_admitted = true; }
+            self.charge(n as usize)?;
         }
         Ok(())
     }
@@ -199,7 +223,6 @@ impl Transport {
         let request_id = self.next; self.next += 1;
         let mut outgoing = vec![("v", number(1)), ("kind", string(kind)), ("request_id", number(request_id)), ("task_id", string(&self.task)), ("attempt_id", string(&self.attempt)), ("turn", number(turn))];
         outgoing.extend(fields);
-        if kind == "invoke" { self.invoke_admitted = true; }
         self.send(&object(outgoing))?;
         loop {
             let value = self.receive()?;
@@ -239,9 +262,10 @@ impl Provider for CallbackProvider {
                 keys(reply, &["kind", "call_id", "name", "arguments"])?;
                 let call = text(reply, "call_id")?; let name = text(reply, "name")?; let arguments = get(reply, "arguments")?; keys(arguments, &["type", "id"])?;
                 let kind = text(arguments, "type")?;
-                if !call_id(call) || name != "inquiry.object" || !object_type(kind) || !metadata(text(arguments, "id")?) || arguments.encoded_len()? > 8192 { return Err("host_protocol".into()); }
+                let id = text(arguments, "id")?;
+                if !call_id(call) || name != "inquiry.object" || !object_type(kind) || !metadata(id) || arguments.encoded_len()? > 8192 { return Err("model_failed".into()); }
                 let values = get(get(get(&self.tool, "parameters")?, "properties")?, "type")?;
-                if !get(values, "enum")?.array()?.contains(&string(kind)) { return Err("host_protocol".into()); }
+                if !get(values, "enum")?.array()?.contains(&string(kind)) { return Err("model_failed".into()); }
                 Ok(ModelEvent::HostTool { call_ref: call.into(), name: name.into(), arguments: arguments.clone() })
             },
             _ => Err("host_protocol".into()),
@@ -266,22 +290,38 @@ impl HostToolPort for CallbackPorts {
     fn invoke(&mut self, prepared: &PreparedInvocation) -> Result<ProjectedToolResult> {
         let mut fields = invocation_fields(&prepared.invocation); fields.push(("prepared_ref", string(&prepared.prepared_ref)));
         let response = self.io.borrow_mut().exchange("invoke", prepared.invocation.turn, fields, "tool_result", &["invocation_id", "prepared_ref", "receipt_ref", "projection"])?;
-        ProjectedToolResult::parse(&response, prepared).map_err(|reason| match reason.as_str() { "callback_mismatch" | "host_budget" => reason, _ => "projection_rejected".into() })
+        ProjectedToolResult::parse(&response, prepared).map_err(|reason| match reason.as_str() { "callback_mismatch" | "host_budget" | "host_protocol" => reason, _ => "projection_rejected".into() })
     }
 }
 
 /// Authorization and tool ports injected into Agent's common model/admission loop.
 pub struct HostPorts {
     pub authorizer: Box<dyn HostAuthorizer>, pub tool: Box<dyn HostToolPort>,
-    io: SharedTransport, history: SharedHistory, pub result: Option<ProjectedToolResult>, pub invocations: u64, invoke_pending: bool,
+    io: SharedTransport, history: SharedHistory, pub result: Option<ProjectedToolResult>, pub invocations: u64, invoke_pending: bool, current: Option<HostInvocation>,
 }
 impl HostPorts {
-    pub fn persist(&self, agent: &Agent) -> Result<()> { store::atomic(&agent.dir, "host.db", &self.terminal(&agent.state).encode()).map_err(|_| "host_journal_failed".into()) }
+    pub fn persist(&self, agent: &Agent) -> Result<()> {
+        let mut journal = self.terminal(&agent.state).object()?.clone();
+        journal.insert("scope_ref".into(), string(&agent.state.scope));
+        journal.insert("binding".into(), self.current.as_ref().map(|call| object([
+            ("invocation_id", string(&call.invocation_id)), ("task_id", string(&call.task_id)), ("attempt_id", string(&call.attempt_id)),
+            ("scope_ref", string(&call.scope_ref)), ("turn", number(call.turn)), ("call_id", string(&call.call_id)), ("tool", string(&call.tool)), ("arguments", call.arguments.clone()),
+        ])).unwrap_or(Json::Null));
+        store::atomic(&agent.dir, "host.db", &Json::Object(journal).encode()).map_err(|_| "host_journal_failed".into())
+    }
     pub fn check_control(&mut self) -> Result<()> { self.io.borrow_mut().before_callback() }
+    pub fn admit_answer(&self, state: &State, answer: &str) -> Result<()> {
+        let mut terminal_state = state.clone();
+        terminal_state.status = "completed".into(); terminal_state.reason.clear(); terminal_state.answer = answer.into();
+        if self.terminal(&terminal_state).encoded_len()? > FRAME_LIMIT { return Err("host_budget".into()); }
+        Ok(())
+    }
     pub fn dispatch(&mut self, agent: &mut Agent, call_ref: String, name: String, arguments: Json) -> Result<()> {
         if agent.state.counters.steps != 1 || self.invocations != 0 { return Err("unsupported_tool_turn".into()); }
-        let call = HostInvocation { invocation_id: format!("core:{}:{}", std::process::id(), agent.state.counters.steps), call_id: call_ref, tool: name, arguments, turn: agent.state.counters.steps };
+        let call = HostInvocation::issue(&agent.state, call_ref, name, arguments)?;
+        self.current = Some(call.clone()); self.persist(agent)?;
         let prepared = match self.authorizer.prepare(&call)? { PrepareDecision::Denied => return Err("tool_denied".into()), PrepareDecision::ConfirmationRequired => return Err("core_confirmation_required".into()), PrepareDecision::Permit(value) => value };
+        if prepared.invocation != call || !opaque(&prepared.prepared_ref) { return Err("host_protocol".into()); }
         self.check_control()?;
         if crate::model::context_bytes(&agent.state.context).saturating_add(call.arguments.encoded_len()? as u64).saturating_add(8192) > agent.state.limits.context { return Err("host_budget".into()); }
         self.invocations += 1; self.invoke_pending = true;
@@ -305,12 +345,12 @@ impl HostPorts {
     }
     pub fn failure(&mut self, state: &mut State, reason: &str) {
         let (status, code) = match reason {
-            "host_eof" | "callback_timeout" | "host_io_failed" | "host_protocol" | "callback_mismatch" | "host_budget" if self.invoke_pending => ("interrupted", "tool_outcome_unknown"),
+            "host_eof" | "callback_timeout" | "host_io_failed" | "host_protocol" | "callback_mismatch" | "host_budget" | "cancel_requested" | "host_closed" if self.invoke_pending => ("interrupted", "tool_outcome_unknown"),
             "host_budget" => ("budget_exhausted", "host_budget"), "cancel_requested" => ("cancelled", "cancel_requested"), "host_closed" => ("interrupted", "host_closed"),
             "model_denied" | "tool_denied" => ("denied", reason),
             "core_confirmation_required" | "model_confirmation_required" | "tool_confirmation_required" => ("denied", "core_confirmation_required"),
             "host_eof" => ("interrupted", "host_eof"),
-            "callback_timeout" | "callback_mismatch" | "projection_rejected" | "unsupported_tool_turn" | "model_failed" | "tool_failed" | "host_journal_failed" | "host_protocol" => ("failed", reason),
+            "callback_timeout" | "callback_mismatch" | "projection_rejected" | "unsupported_tool_turn" | "model_failed" | "tool_failed" | "host_journal_failed" | "host_identity_unavailable" | "host_protocol" => ("failed", reason),
             _ => ("failed", "host_protocol"),
         };
         state.status = status.into(); state.reason = code.into(); state.answer.clear();
@@ -331,6 +371,7 @@ fn session_dir(root: &Path, start: &HostStart) -> Result<PathBuf> {
     let attempt = task.join(&start.attempt_id); store::create_dir(&attempt).map_err(|_| "host_attempt_exists")?; Ok(attempt)
 }
 pub fn run_stdio(config: HostSessionConfig) -> Result<()> {
+    if !cfg!(target_os = "linux") { return Err("host_platform_unsupported".into()); }
     let mut transport = Transport::new(&config)?; config.validate()?;
     let start = HostStart::parse(&transport.receive()?).map_err(|_| "host_start_invalid")?;
     transport.task = start.task_id.clone(); transport.attempt = start.attempt_id.clone();
@@ -339,11 +380,41 @@ pub fn run_stdio(config: HostSessionConfig) -> Result<()> {
     let history = Rc::new(RefCell::new(vec![object([("role", string("user")), ("content", string(&start.prompt))])]));
     let shared = Rc::new(RefCell::new(transport)); let callbacks = CallbackPorts { io: shared.clone() };
     let mut provider = CallbackProvider { io: shared.clone(), history: history.clone(), tool: start.tool };
-    let mut ports = HostPorts { authorizer: Box::new(callbacks.clone()), tool: Box::new(callbacks), io: shared.clone(), history, result: None, invocations: 0, invoke_pending: false };
+    let mut ports = HostPorts { authorizer: Box::new(callbacks.clone()), tool: Box::new(callbacks), io: shared.clone(), history, result: None, invocations: 0, invoke_pending: false, current: None };
     ports.persist(&agent)?;
     if let Err(reason) = agent.run_with_ports(&mut provider, &mut ports, &Hooks::default()) { ports.failure(&mut agent.state, &reason); }
     ports.persist(&agent)?;
+    // Appending another frame to an incomplete frame would fabricate a protocol.
+    // The truthful journal and host's own control request remain authoritative.
+    if shared.borrow().output_incomplete { return Err("host_partial_output".into()); }
     // Reserve bytes and time for this terminal inside the original total budget.
     shared.borrow_mut().terminal_delivery = true;
-    let terminal = ports.terminal(&agent.state); shared.borrow_mut().send(&terminal)?; Ok(())
+    let terminal = ports.terminal(&agent.state);
+    let sent = shared.borrow_mut().send(&terminal);
+    if shared.borrow().output_incomplete { return Err("host_partial_output".into()); }
+    sent
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn invocation_identity_distinguishes_attempts_in_the_same_process() {
+        let start = HostStart { task_id: "t-one".into(), attempt_id: "a-one".into(), scope_ref: "scope:one".into(), prompt: String::new(), tool: Json::Null };
+        let mut first = start.state(); first.counters.steps = 1;
+        let mut second = first.clone(); second.task = "t-two".into(); second.attempt = "a-two".into();
+        let args = object([("type", string("supplier")), ("id", string("synthetic-id"))]);
+        let a = HostInvocation::issue(&first, "same-model-id".into(), "inquiry.object".into(), args.clone()).unwrap();
+        let b = HostInvocation::issue(&second, "same-model-id".into(), "inquiry.object".into(), args.clone()).unwrap();
+        assert_ne!(a.invocation_id, b.invocation_id);
+        assert_eq!((&a.task_id, &a.attempt_id, a.turn), (&first.task, &first.attempt, 1));
+        assert_eq!((&b.task_id, &b.attempt_id, b.turn), (&second.task, &second.attempt, 1));
+        assert_eq!(a.arguments, args); assert_eq!(b.arguments, args);
+        assert_ne!(a.invocation_id, a.call_id);
+    }
+    #[test]
+    fn incomplete_entropy_fails_closed_without_a_pid_or_time_fallback() {
+        let mut unavailable = std::io::Cursor::new(vec![0u8; 31]);
+        assert_eq!(nonce_identity(&mut unavailable), Err("host_identity_unavailable".into()));
+    }
 }
