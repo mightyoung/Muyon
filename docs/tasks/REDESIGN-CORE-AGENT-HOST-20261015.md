@@ -12,7 +12,7 @@
 - Base3836149416020a0ac58f9e7ca788c20e66688e0e; preserve all legacy defaults and fixture/SSE contracts.
 - Config default-off; no silent fallback, parallel legacy drive, model-issued approval or callId replay authority.
 - No true model/credential/real data/write/history migration/default-permission change/M03 freeze/device claims.
-- Raw validation logs outside Git. Local toolchains absent; real RED/GREEN comes from existing GitHub runners, not invented local PASS.
+- Raw validation logs outside Git. Rust toolchain absent; restored Flutter may be used with /tmp caches. Real compiled Rust RED/GREEN comes from existing GitHub runners, not invented local PASS.
 - Isolated clones in/tmp; root sole pusher/integrator. Draft PR only; this task does NOT authorize merge.
 
 ## Review focus
@@ -29,20 +29,20 @@
 **Consumes:** Exact internal protocol and metadata projection in HOST-CONTRACT.
 **Produces:** Existing binary's explicit `host-session` command, `Agent::run_with_ports` or equivalent common-loop injection; existing CLI/Provider APIs retained. Trusted CLI `--root ABS --idle-ms N --total-ms N`; defaults5000/30000, positive capped overrides.
 
-- [ ] Add compileable types/command stub and behavior tests first; stub returns host_not_implemented. Commit immutable RED checkpoint before logic.
-- [ ] Run actual Rust test CI; observe assertion failure for a valid host roundtrip, not build/transport error.
+- [x] Add compileable types/command stub and behavior tests first; stub returns host_not_implemented. Commit immutable RED checkpoint before logic.
+- [x] Run actual Rust test CI; observe assertion failure for a valid host roundtrip, not build/transport error.
 - [ ] Inject host ports into SAME Agent loop; genuine inquiry arguments/result, separate invocation identity, control/limits and matching callback handling.
 - [ ] Run targeted host units and retained legacy Rust/process/mutation checks. Add precise inverse for callback identity or one-loop budget guard, requiring compiled semantic failure.
 - [ ] Commit source/report; non-author review fixed SHA; same owner fixes scoped findings.
 
 ## Task 2 — Actual Dart product backend (host_dart_owner)
 
-**Files:** Own `apps/muyon/lib/assistant/**`, narrow `apps/muyon/lib/app/bootstrap.dart`, and `docs/tasks/REDESIGN-CORE-AGENT-HOST-P2-20261015.md`. Do not change registry/business handlers/grant defaults.
+**Files:** Own `apps/muyon/lib/assistant/**`, narrow `apps/muyon/lib/app/bootstrap.dart`, owner-only `apps/muyon/test/core_agent_process_owner_test.dart`, and `docs/tasks/REDESIGN-CORE-AGENT-HOST-P2-20261015.md`. Do not change registry/business handlers/grant defaults.
 **Consumes:** host-session contract; actual AgentContext, ToolRegistry and model-gateway authority.
 **Produces:** `CoreAgentProcessConfig` in `assistant/core_agent_process.dart`; nullable `coreAgentProcess` on PersonalAgent/MuyonHost.open; `modelClientFactory` narrow test transport hook; actual default-off facade routing.
 
-- [ ] Add compileable default-off config/facade stub first. Enabled stub fails with fixed core_backend_unavailable; legacy path intact. Commit before complete behavior.
-- [ ] Independent Task3 tests compile and fail assertions against this stub and actual Rust stub.
+- [x] Add compileable default-off config/facade stub first. Enabled stub fails with fixed core_backend_unavailable; legacy path intact. Commit before complete behavior.
+- [x] Independent Task3 tests compile and fail assertions against this stub and actual Rust stub.
 - [ ] Implement framed process/lifecycle adapter and genuine host callbacks, exact-request model admission, live prepared reference, original receipt lookup and field-by-field projection.
 - [ ] Route cancel/close and unsupported continuations; no default changes/no fallback/raw errors. Add owner unit tests where blackbox cannot deterministically expose result/cancel race.
 - [ ] Validate against actual Task3 tests and app analyze/regression; commit report; non-author fixed-SHA review.
@@ -53,10 +53,10 @@
 **Consumes:** Public config/facade/MuyonHost APIs and protocol contract, not implementation output as expected values.
 **Produces:** Offline real-facade/compiled-Rust integration suite, transparent process recorder and real gateway offline HttpClient; required CI with source/binary SHA and no-skipped-test evidence.
 
-- [ ] Freeze synthetic supplier store + actual selected ObjectRef using existing business_tools_test setup; model returns one native inquiry.object call then answer dependent on captured actual result.
+- [x] Freeze synthetic supplier store + actual selected ObjectRef using existing business_tools_test setup; model returns one native inquiry.object call then answer dependent on captured actual result.
 - [ ] Write semantic assertions for all Required offline evidence and five Review focus cases. No chat/chatStream override, substitute business handler or separate demo driver for positive case.
 - [ ] Required CI builds Rust `--offline`, uses existing Flutter setup, invokes `flutter test test_host/core_agent_host_test.dart --reporter expanded` with `MUYON_TEST_CORE_AGENT_BIN` absolute binary. Missing binary is error, never skip/pass.
-- [ ] Run first fixed compiling stub RED; preserve raw logs outside Git and fixture/input provenance. No output-driven golden rewrite.
+- [x] Run first fixed compiling stub RED; preserve raw logs outside Git and fixture/input provenance. No output-driven golden rewrite.
 - [ ] Run GREEN on exact combo. Add minimal semantic inverse controls for projection leakage/authority-correlation/one-driver behavior, in isolated copies; compiler/timeout/unrelated failure does not count.
 - [ ] Non-author review checker/helpers/workflow separately; keep original assertions during owner fixes.
 
@@ -64,8 +64,8 @@
 
 **Files:** Root owns this plan, HOST-CONTRACT, final task-review doc and external per-plan ledger/evidence only. Root does not implement product code.
 
-- [ ] Formal short SPEC/QUALITY review before implementation; resolve only genuine scope/interface conflicts.
-- [ ] Separate task branches/clone directories; cherry-pick into one review branch, prove owned blobs equal fixed author sources.
+- [x] Formal short SPEC/QUALITY review before implementation; resolve only genuine scope/interface conflicts.
+- [x] Separate task branches/clone directories; cherry-pick into one review branch, prove owned blobs equal fixed author sources.
 - [ ] Preserve RED branch and logs, all source failures and independent expectations; actual semantic negative controls.
 - [ ] Non-author Task1/Task2 and checker review, then whole exact-candidate review. Fix same owners; scoped re-review.
 - [ ] Exact final host/Core Agent/full-regression CI terminal and actual checkout SHA/source/binary evidence; all required gates success.
