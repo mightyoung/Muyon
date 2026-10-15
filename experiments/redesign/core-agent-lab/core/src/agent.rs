@@ -13,6 +13,7 @@ pub struct State {
     pub binding:Option<Binding>,pub unresolved:bool,pub receipt:String,pub answer:String,pub cancelled:bool,
     pub correlations:BTreeMap<String,Binding>,pub behavior:String,
     pub resume_status:String,pub resume_reason:String,pub result_pending:bool,
+    pub receipt_binding:Option<Binding>,pub evidence_hold:bool,
 }
 fn mode_name(mode:Mode)->&'static str {match mode{Mode::ReadOnly=>"read-only",Mode::AskEveryTime=>"ask-every-time",Mode::Auto=>"auto",Mode::FullAllow=>"full-allow"}}
 pub fn parse_mode(s:&str)->Result<Mode>{match s{"read-only"=>Ok(Mode::ReadOnly),"ask-every-time"=>Ok(Mode::AskEveryTime),"auto"=>Ok(Mode::Auto),"full-allow"=>Ok(Mode::FullAllow),_=>Err("invalid_mode".into())}}
@@ -24,7 +25,7 @@ impl State {
         if input.len() as u64>limits.context{return Err("input_context_limit".into());}
         let nonce=SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_|"clock")?.as_nanos();
         let task=format!("t-{}-{nonce}",std::process::id());
-        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script,scope,facts,limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior,resume_status:String::new(),resume_reason:String::new(),result_pending:false})
+        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script,scope,facts,limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior,resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false})
     }
     pub fn encode(&self)->String{
         let mut m=BTreeMap::new();
@@ -36,6 +37,7 @@ impl State {
         put!("steps",self.counters.steps);put!("calls",self.counters.calls);put!("output",self.counters.output);put!("total",self.counters.total);put!("confirmations",self.counters.confirmations);
         put!("context_hex",hex(&model::encode_context(&self.context)));put!("position",self.position);
         put!("pending_hex",hex(&self.binding.as_ref().map(|b|b.encode()).unwrap_or_default()));put!("unresolved",self.unresolved);put!("receipt",self.receipt);put!("answer_hex",hex(&self.answer));put!("cancelled",self.cancelled);put!("correlations_hex",hex(&self.correlations.iter().map(|(k,b)|format!("{}\t{}\n",k,hex(&b.encode()))).collect::<String>()));put!("behavior",self.behavior);
+        put!("receipt_binding_hex",hex(&self.receipt_binding.as_ref().map(|b|b.encode()).unwrap_or_default()));put!("evidence_hold",self.evidence_hold);
         put!("resume_status",self.resume_status);put!("resume_reason",self.resume_reason);put!("result_pending",self.result_pending);
         let mut out=String::from("CORE_TASK_V1\n");for(k,v)in m{out.push_str(&format!("{k}\t{v}\n"));}out
     }
@@ -58,15 +60,20 @@ impl State {
             if !identifier(call)||correlations.insert(call.to_string(),Binding::decode(&unhex(raw)?)?).is_some(){return Err("correlation_identity".into());}
         }
         let behavior=take(&mut m,"behavior")?;
+        let raw_receipt_binding=unhex(&take(&mut m,"receipt_binding_hex")?)?;
+        let receipt_binding=if raw_receipt_binding.is_empty(){None}else{Some(Binding::decode(&raw_receipt_binding)?)};
+        let evidence_hold=flag(&mut m,"evidence_hold")?;
         let resume_status=take(&mut m,"resume_status")?;let resume_reason=take(&mut m,"resume_reason")?;let result_pending=flag(&mut m,"result_pending")?;
         if !m.is_empty() || !identifier(&task)||!identifier(&attempt)||!matches!(status.as_str(),"ready"|"waiting"|"completed"|"denied"|"failed"|"cancelled"|"outcome_unknown"|"budget_exhausted") || !matches!(behavior.as_str(),"normal"|"fail"|"lose-response") || scope.is_empty()||scope.len()>1024 || position>128 || counters.steps>1_000_000||counters.calls>1_000_000||counters.output>2_000_000||counters.total>4_000_000 || correlations.len()>128 || (!receipt.is_empty()&&!identifier(&receipt)) {return Err("invalid_task_state".into());}
         if (unresolved||status=="waiting")&&binding.is_none(){return Err("missing_binding".into());}
         if let Some(b)=&binding{if b.task!=task||b.attempt!=attempt||b.scope!=scope||b.turn>counters.steps{return Err("task_binding_mismatch".into());}}
-        if !matches!(resume_status.as_str(),""|"ready"|"completed"|"cancelled"|"denied"|"failed"|"budget_exhausted")||(!resume_status.is_empty()&&!unresolved){return Err("invalid_resume_barrier".into());}
+        if !matches!(resume_status.as_str(),""|"ready"|"waiting"|"outcome_unknown"|"completed"|"cancelled"|"denied"|"failed"|"budget_exhausted")||evidence_hold!=!resume_status.is_empty(){return Err("invalid_resume_barrier".into());}
+        if receipt.is_empty()!=receipt_binding.is_none() || (evidence_hold&&receipt_binding.is_none()){return Err("missing_receipt_binding".into());}
+        if let Some(b)=&receipt_binding{if receipt!=format!("r-{}",b.invocation)||!correlations.values().any(|original|original==b){return Err("receipt_binding_identity".into());}}
         for b in correlations.values(){if b.task!=task||b.attempt!=attempt||b.scope!=scope||b.turn>counters.steps{return Err("correlation_binding_mismatch".into());}}
         if let Some(b)=&binding{if !correlations.values().any(|original|original==b){return Err("missing_correlation_binding".into());}}
         ScriptedProvider::parse(&script)?;
-        Ok(Self{task,attempt,status,reason,script,scope,facts,limits,counters,context,position,binding,unresolved,receipt,answer,cancelled,correlations,behavior,resume_status,resume_reason,result_pending})
+        Ok(Self{task,attempt,status,reason,script,scope,facts,limits,counters,context,position,binding,unresolved,receipt,answer,cancelled,correlations,behavior,resume_status,resume_reason,result_pending,receipt_binding,evidence_hold})
     }
     pub fn save(&self,dir:&Path)->Result<()>{store::atomic(dir,"task.db",&self.encode())}
     fn stop(&mut self,status:&str,reason:&str){self.status=status.into();self.reason=reason.into();}
@@ -82,14 +89,12 @@ impl Agent {
     pub fn start(dir:&Path,state:State)->Result<Self>{store::create_dir(dir)?;let _lock=store::lock(dir)?;store::atomic(dir,"effects.db",&EffectStore::empty().encode())?;state.save(dir)?;Ok(Self{dir:dir.to_path_buf(),state})}
     pub fn open(dir:&Path)->Result<Self>{
         let mut state=State::load(dir)?;
-        // A cached task projection cannot substitute for original tool evidence.
-        if !state.unresolved {
-            if let Some(binding)=state.binding.clone() {
-                if state.receipt==format!("r-{}",binding.invocation) {
-                    if !matches!((FixtureTool{dir:dir.to_path_buf()}).lookup(&binding),Ok(Some(_))) {
-                        state.resume_status=state.status.clone();state.resume_reason=state.reason.clone();
-                        state.unresolved=true;state.stop("outcome_unknown","receipt_unavailable");
-                    }
+        // Historical receipt evidence owns a binding distinct from the next pending call.
+        if !state.evidence_hold {
+            if let Some(binding)=state.receipt_binding.clone() {
+                if !matches!((FixtureTool{dir:dir.to_path_buf()}).lookup(&binding),Ok(Some(_))) {
+                    state.resume_status=state.status.clone();state.resume_reason=state.reason.clone();
+                    state.evidence_hold=true;state.stop("outcome_unknown","receipt_unavailable");
                 }
             }
         }
@@ -102,21 +107,34 @@ impl Agent {
     }
     fn apply_receipt(&mut self,r:Receipt)->Result<()> {
         if self.state.binding.as_ref()!=Some(&r.binding){return Err("receipt_binding_mismatch".into());}
+        self.state.receipt_binding=Some(r.binding.clone());
         if self.state.result_pending || self.state.receipt!=r.id {
             let text=r.message();self.state.receipt=r.id;self.state.result_pending=false;
             if model::context_bytes(&self.state.context).saturating_add(text.len() as u64)>self.state.limits.context {self.state.unresolved=false;self.state.stop("budget_exhausted","context");return Ok(());}
             self.state.context.push(Message{role:Role::Tool,text});
         }
         self.state.unresolved=false;
-        let resume_status=std::mem::take(&mut self.state.resume_status);
-        let resume_reason=std::mem::take(&mut self.state.resume_reason);
         if self.state.cancelled{self.state.stop("cancelled","cancel_after_commit");}
-        else if !resume_status.is_empty(){self.state.stop(&resume_status,&resume_reason);}
         else{self.state.stop("ready","");}Ok(())
     }
     pub fn lookup(&mut self)->Result<()> {
-        if !self.state.unresolved{return Ok(());}
+        if !self.state.evidence_hold && !self.state.unresolved{return Ok(());}
         self.cancelled()?;
+        if self.state.evidence_hold {
+            let original=self.state.receipt_binding.clone().ok_or("missing_receipt_binding")?;
+            match (FixtureTool{dir:self.dir.clone()}).lookup(&original) {
+                Ok(Some(r)) if r.id==self.state.receipt=>{
+                    self.state.evidence_hold=false;
+                    let resume_status=std::mem::take(&mut self.state.resume_status);
+                    let resume_reason=std::mem::take(&mut self.state.resume_reason);
+                    if self.state.cancelled && !self.state.unresolved{self.state.stop("cancelled","cancel_requested");}
+                    else{self.state.stop(&resume_status,&resume_reason);}
+                },
+                _=>{self.state.stop("outcome_unknown","receipt_unavailable");return self.state.save(&self.dir);},
+            }
+        }
+        // Restoring historical evidence alone never dispatches the newer prepared call.
+        if !self.state.unresolved{return self.state.save(&self.dir);}
         let binding=self.state.binding.clone().ok_or("missing_binding")?;
         match (FixtureTool{dir:self.dir.clone()}).lookup(&binding) {
             Ok(Some(r))=>self.apply_receipt(r)?,
@@ -127,7 +145,7 @@ impl Agent {
     }
     pub fn cancel(&mut self)->Result<()> {
         self.state.cancelled=true;
-        if self.state.unresolved {self.lookup()?;} else {self.state.stop("cancelled","cancel_requested");}
+        if self.state.evidence_hold || self.state.unresolved {self.lookup()?;} else {self.state.stop("cancelled","cancel_requested");}
         self.state.save(&self.dir)
     }
     fn dispatch(&mut self,h:&Hooks)->Result<()> {
@@ -154,7 +172,7 @@ impl Agent {
         h.fault("projection")?;self.apply_receipt(receipt)?;self.state.save(&self.dir)?;h.checkpoint("projection")?;Ok(())
     }
     pub fn run(&mut self,h:&Hooks)->Result<()> {
-        if self.state.unresolved{return Ok(());}
+        if self.state.evidence_hold || self.state.unresolved{return Ok(());}
         if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.state.save(&self.dir);}
         if self.state.status=="waiting"{self.dispatch(h)?;}
         let mut provider=ScriptedProvider::parse(&self.state.script)?;
@@ -203,6 +221,6 @@ impl Agent {
     }
     pub fn observe(&self)->String {
         let effect=EffectStore::load(&self.dir);let (count,value)=match effect{Ok(s)=>(s.receipts.len().to_string(),hex(&s.value)),Err(_)=>("unknown".into(),String::new())};
-        format!("status={}\ntask={}\nattempt={}\nturn={}\ninvocation={}\nreceipt={}\neffects={}\nvalue_hex={}\nanswer_hex={}\nmodel_calls={}\nsteps={}\ncontext_bytes={}\noutput_bytes={}\ntotal_units={}\nprovider_position={}\ncancelled={}\nconfirmations={}\nreason={}\n",self.state.status,self.state.task,self.state.attempt,self.state.counters.steps,self.state.binding.as_ref().map(|b|b.invocation.as_str()).unwrap_or(""),self.state.receipt,count,value,hex(&self.state.answer),self.state.counters.calls,self.state.counters.steps,model::context_bytes(&self.state.context),self.state.counters.output,self.state.counters.total,self.state.position,self.state.cancelled,self.state.counters.confirmations,self.state.reason)
+        format!("status={}\ntask={}\nattempt={}\nturn={}\ninvocation={}\nreceipt={}\neffects={}\nvalue_hex={}\nanswer_hex={}\nmodel_calls={}\nsteps={}\ncontext_bytes={}\noutput_bytes={}\ntotal_units={}\nprovider_position={}\ncancelled={}\nconfirmations={}\nreason={}\nevidence_hold={}\ndispatch_unresolved={}\n",self.state.status,self.state.task,self.state.attempt,self.state.counters.steps,self.state.binding.as_ref().map(|b|b.invocation.as_str()).unwrap_or(""),self.state.receipt,count,value,hex(&self.state.answer),self.state.counters.calls,self.state.counters.steps,model::context_bytes(&self.state.context),self.state.counters.output,self.state.counters.total,self.state.position,self.state.cancelled,self.state.counters.confirmations,self.state.reason,self.state.evidence_hold,self.state.unresolved)
     }
 }

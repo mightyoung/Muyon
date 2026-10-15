@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run seven inverse mutants in private copies using existing offline Cargo only."""
+"""Run eight inverse mutants in private copies using existing offline Cargo only."""
 import argparse
 import json
 from pathlib import Path
@@ -16,8 +16,8 @@ mutations = [
     ('hard_policy_bypass', 'src/policy.rs',
      'if !hard_ok || mode == Mode::ReadOnly', 'if mode == Mode::ReadOnly'),
     ('unknown_redispatch', 'src/agent.rs',
-     'if self.state.unresolved{return Ok(());}',
-     'if self.state.unresolved { self.state.unresolved=false; self.state.status="ready".into(); self.state.position=0; self.state.correlations.clear(); }'),
+     'if self.state.evidence_hold || self.state.unresolved{return Ok(());}',
+     'if self.state.evidence_hold{return Ok(());} if self.state.unresolved { self.state.unresolved=false; self.state.status="ready".into(); self.state.position=0; self.state.correlations.clear(); }'),
     ('duplicate_effect', 'src/store.rs',
      'if let Some(r)=state.receipts.iter().find(|r|r.binding.invocation==b.invocation){if &r.binding!=b{return Err("binding_conflict".into());}return Ok(r.clone());}',
      ''),
@@ -25,10 +25,13 @@ mutations = [
      'if model::context_bytes(&self.state.context).saturating_add(result_bytes)>self.state.limits.context {',
      'if false && model::context_bytes(&self.state.context).saturating_add(result_bytes)>self.state.limits.context {'),
     ('terminal_resurrection', 'src/agent.rs',
-     'else if !resume_status.is_empty(){self.state.stop(&resume_status,&resume_reason);}',
-     'else if !resume_status.is_empty(){self.state.stop("ready","");}'),
+     'else{self.state.stop(&resume_status,&resume_reason);}',
+     'else{self.state.stop("ready","");}'),
     ('cached_receipt_trust', 'src/agent.rs',
-     'if !state.unresolved {', 'if false && !state.unresolved {'),
+     'if !state.evidence_hold {', 'if false && !state.evidence_hold {'),
+    ('receipt_current_binding_only', 'src/agent.rs',
+     'if !state.evidence_hold {',
+     'if !state.evidence_hold && state.receipt_binding.as_ref()==state.binding.as_ref() {'),
     ('budget_reset', 'src/agent.rs',
      'let mut state=State::load(dir)?;',
      'let mut state=State::load(dir)?;state.counters=Counters::default();'),

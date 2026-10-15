@@ -37,7 +37,7 @@ fn execute()->Result<()> {
         "run"=>{
             if let Some(v)=opts.remove("--confirmed"){
                 let confirmed=boolean(&v)?;
-                if confirmed && (agent.state.status!="waiting" || agent.state.binding.is_none() || agent.state.unresolved){return Err("confirmation_requires_pending_invocation".into());}
+                if confirmed && (agent.state.status!="waiting" || agent.state.binding.is_none() || agent.state.unresolved || agent.state.evidence_hold){return Err("confirmation_requires_pending_invocation".into());}
                 agent.state.facts.confirmed=confirmed;
             }
             if let Some(v)=opts.remove("--hard-ok"){agent.state.facts.hard_ok=boolean(&v)?;}

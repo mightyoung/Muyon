@@ -51,3 +51,18 @@ The frozen c571/4fd R1 context-budget reproducer remains historical evidence;
 final R1 budget restoration uses max-calls1 after a legitimate effect instead.
 Added separate pre-effect regression and seventh compiled semantic inverse.
 20 Rust tests authored; no fresh runtime claim before exact candidate CI.
+
+Final whole-review R2 found a distinct composition gap in source5002: retained
+receipt r-i1 was not checked once current binding advanced to waiting i2. Missing
+history then consumed confirmation2 and wrongly marked i2 dispatched. Actual RED
+CI38667159139 on unchanged core5002/combined7d81e0f8: Rust20 pass; independent26
+methods25 pass/1 R2 semantic failure0 errors (confirmation2 vs1).
+
+Tests-only5a45739 preserves a source regression covering missing and corrupt
+historical evidence. The fix adds durable receipt_binding_hex and evidence_hold,
+separate from pending_hex/unresolved. Historical evidence is checked against its
+own original binding; lookup restores the prior waiting/terminal control without
+new dispatch or authority consumption. Fresh confirmation after restoration may
+execute the preserved waiting call once. Eight inverse mutants now include the
+old current-binding-only receipt guard;21 Rust tests authored. Latest fixed source
+compilation/process/mutation results remain NOT_RUN until authorized exact CI.

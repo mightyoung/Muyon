@@ -95,9 +95,10 @@ Concurrent cancel output may still show the executor's durable pending status,
 with `cancelled=true`; the executor consumes the durable request on release.
 
 Author inverse mutations: `python3 core/mutations.py --evidence-dir /tmp/OUTPUT`
-requires preinstalled Cargo. Seven fresh private source copies weaken hard policy,
+requires preinstalled Cargo. Eight fresh private source copies weaken hard policy,
 unknown hold, duplicate suppression, original-receipt validation, terminal-control
-restoration, pre-effect context admission and persistent counters. Each must compile
+restoration, pre-effect context admission, receipt-own-binding validation and
+persistent counters. Each must compile
 and fail behavioral Rust assertions; source-under-review remains untouched.
 ToolPort direct callers must hold the private directory lock around lookup/execute;
 the CLI Agent commands do so. No cross-task/shared-host storage service is provided.
@@ -118,3 +119,19 @@ space before consuming confirmation or committing the first effect. A context
 limit40 with empty input and `tool c1 fixture.record hi` therefore stops with
 zero effects/confirmations. Total units remain measured request-context plus
 provider-event bytes; these are synthetic byte counters, not token/billing claims.
+
+R2 historical-evidence state: `receipt_binding_hex` stores the retained receipt's
+own exact host Binding, independently of `pending_hex` (which may describe a
+newer prepared/waiting invocation). `evidence_hold` records unavailable historical
+evidence; `unresolved` continues to mean the current invocation requires outcome
+lookup. Losing historical evidence does not set `unresolved` on a never-dispatched
+new call. Observations expose `evidence_hold` and `dispatch_unresolved` separately.
+
+While historical evidence is absent/corrupt/unavailable, status is outcome_unknown
+and fresh provider/tool work and positive confirmation are blocked. Explicit
+lookup verifies `receipt_binding_hex`, then restores `resume_status`/`resume_reason`
+without replacing the pending binding or consuming confirmation. If the current
+invocation was actually dispatched, its separate outcome lookup still applies.
+Restoring a waiting operation requires a subsequent fresh exact confirmation;
+restoring terminal controls never resumes execution. Cancellation remains durable
+and cannot manufacture a no-effect outcome for an actual unresolved dispatch.
