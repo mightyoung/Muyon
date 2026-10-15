@@ -1,27 +1,61 @@
 use muyon_rust_agent_host_lab::{service_controller::AgentServiceController, service_types::*};
 use std::{
     path::PathBuf,
-    sync::atomic::{AtomicUsize, Ordering},
+    sync::{
+        atomic::{AtomicUsize, Ordering},
+        Mutex, MutexGuard,
+    },
 };
+static SERIAL: Mutex<()> = Mutex::new(());
+struct OwnedController {
+    controller: AgentServiceController,
+    _serial: MutexGuard<'static, ()>,
+}
+impl std::ops::Deref for OwnedController {
+    type Target = AgentServiceController;
+    fn deref(&self) -> &Self::Target {
+        &self.controller
+    }
+}
+impl Drop for OwnedController {
+    fn drop(&mut self) {
+        self.controller.retire_service();
+        self.controller.await_settled();
+    }
+}
 static NEXT: AtomicUsize = AtomicUsize::new(0);
 // Explicit semantic-test identity, not an artifact/source provenance claim.
 const TEST_ID: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 fn root() -> PathBuf {
-    std::env::temp_dir().join(format!(
+    let path = std::env::temp_dir().join(format!(
         "muyon-service-{}-{}",
         std::process::id(),
         NEXT.fetch_add(1, Ordering::Relaxed)
-    ))
+    ));
+    muyon_core_agent_lab::store::create_dir(&path).unwrap();
+    path
 }
-fn controller() -> AgentServiceController {
-    AgentServiceController::new(AgentHostServiceConfig {
+fn controller() -> OwnedController {
+    let serial = SERIAL.lock().unwrap();
+    let controller = AgentServiceController::new(AgentHostServiceConfig {
         protocol: 1,
         private_root: root().to_string_lossy().into(),
         build_identity: TEST_ID.into(),
     })
-    .unwrap()
+    .unwrap();
+    OwnedController {
+        controller,
+        _serial: serial,
+    }
 }
 fn connected(c: &AgentServiceController) -> AgentClientRef {
+    assert!(matches!(
+        c.await_settled().outcome,
+        AgentSnapshotOutcome::Snapshot {
+            service_state: AgentServiceState::Ready,
+            run: None
+        }
+    ));
     let reply = c.connect(AgentConnectRequest {
         protocol: 1,
         platform_client_key: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb".into(),
@@ -53,17 +87,17 @@ fn service_controller_executes_registered_read() {
         request_id: "read_1".into(),
         variant: AgentReadVariant::Equipment,
     });
-    // This first seam guard proves native controller entry/refusal, NOT Agent dispatch.
-    assert!(
-        matches!(
-            start.outcome,
-            AgentStartOutcome::QueuedVolatile { .. }
-                | AgentStartOutcome::Rejected {
-                    error: AgentServiceError::InternalFailure
-                }
-        ),
-        "initial result must reach the known controller seam"
-    );
+    let AgentStartOutcome::QueuedVolatile {
+        snapshot: AgentRunSnapshot::QueuedVolatile { intent },
+    } = start.outcome
+    else {
+        panic!(
+            "GREEN requires actual successful admission, never Rejected plus a fabricated terminal"
+        );
+    };
+    assert_eq!(intent.request_id, "read_1");
+    assert_eq!(intent.variant, AgentReadVariant::Equipment);
+    assert_eq!(intent.source_build_identity, TEST_ID);
     let _ = c.await_settled();
     let observed = c.current(client.clone());
     let completed = matches!(&observed.outcome,AgentSnapshotOutcome::Snapshot{run:Some(AgentRunSnapshot::Terminal{summary}),..} if summary.terminal==AgentTerminal::Completed);
