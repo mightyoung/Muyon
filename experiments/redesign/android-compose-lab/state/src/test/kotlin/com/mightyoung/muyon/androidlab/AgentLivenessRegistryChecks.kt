@@ -22,6 +22,18 @@ fun runAgentLivenessRegistryChecks(){
     cases["inflight same token connect returns busy without second native call"]={val registry=AgentLivenessRegistry<RegistryToken>(AgentClientKeys("a".repeat(16))){};val token=RegistryToken();val result=registry.connect(token,token::link){key->check(registry.connect(token,token::link){error("second native call")}==UiAgentWireReply.Local(UiAgentLocalStatus.BUSY));connected(key)};check(result is UiAgentWireReply.Connected && token.links==1)}
     cases["native connect and gone listeners execute outside registry lock"]={lateinit var registry:AgentLivenessRegistry<RegistryToken>;fun independentRead(){val done=CountDownLatch(1);Thread{registry.retainedTokens();done.countDown()}.apply{isDaemon=true}.start();check(done.await(5,TimeUnit.SECONDS))};registry=AgentLivenessRegistry(AgentClientKeys("a".repeat(16))){independentRead()};val token=RegistryToken();check(registry.connect(token,token::link){key->independentRead();connected(key)} is UiAgentWireReply.Connected);token.die();check(registry.retainedTokens()==0)}
     cases["failed death-link setup cannot create an unobserved native lease"]={var calls=0;val registry=AgentLivenessRegistry<RegistryToken>(AgentClientKeys("a".repeat(16))){};val token=RegistryToken();check(registry.connect(token,{throw IllegalStateException("safe link failure")}){calls++;connected(it)}==UiAgentWireReply.Local(UiAgentLocalStatus.UNAVAILABLE));check(calls==0 && registry.retainedTokens()==0)}
+    cases["acknowledged release cannot be revived by inflight repeat connect"]={
+        var gone=0;val registry=AgentLivenessRegistry<RegistryToken>(AgentClientKeys("a".repeat(16))){gone++};val token=RegistryToken()
+        val first=registry.connect(token,token::link,::connected) as UiAgentWireReply.Connected
+        check(registry.connect(token,token::link,::connected)==first)
+        val entered=CountDownLatch(1);val returned=CountDownLatch(1);val done=CountDownLatch(1)
+        val result=java.util.concurrent.atomic.AtomicReference<UiAgentWireReply?>()
+        Thread{try{result.set(registry.connect(token,token::link){key->entered.countDown();check(returned.await(5,TimeUnit.SECONDS));connected(key)})}finally{done.countDown()}}.apply{isDaemon=true}.start()
+        try{check(entered.await(5,TimeUnit.SECONDS));check(registry.markReleased(first.client))}finally{returned.countDown()}
+        check(done.await(5,TimeUnit.SECONDS));check(result.get()==UiAgentWireReply.Local(UiAgentLocalStatus.UNAVAILABLE))
+        check(registry.retainedTokens()==1 && gone==0 && token.links==1)
+        var unexpected=0;check(registry.connect(token,token::link){unexpected++;connected(it)}==UiAgentWireReply.Local(UiAgentLocalStatus.UNAVAILABLE));check(unexpected==0)
+    }
     var failed=0;cases.forEach{(name,test)->try{test();println("PASS B liveness $name")}catch(e:Throwable){failed++;println("FAIL B liveness $name: ${e.message}")}}
     check(failed==0){"$failed/${cases.size} B liveness checks failed"}
     println("${cases.size}/${cases.size} B liveness checks passed; real Binder death/process runtime NOT_RUN")
