@@ -156,3 +156,5 @@ impl Catalog {
 }
 
 impl Default for Catalog {fn default()->Self {Self::new()}}
+
+pub mod mappings;
