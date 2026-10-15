@@ -37,7 +37,7 @@ android {
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    buildFeatures { compose = true; buildConfig = true }
+    buildFeatures { compose = true; buildConfig = true; aidl = true }
     packaging { jniLibs { keepDebugSymbols += setOf("**/libmuyon_android_contract_bridge.so", "**/libjnidispatch.so") } }
     if (bridgeRoot != null) sourceSets.getByName("main").jniLibs.srcDir(bridgeRoot.resolve("jniLibs"))
     compileOptions {
