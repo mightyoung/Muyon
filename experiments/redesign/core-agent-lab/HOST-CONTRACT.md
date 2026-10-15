@@ -46,6 +46,9 @@ with its frozen profile/tools, computes the existing digest, and uses the real
 model gate, HostModelAuthorization prepare/take/run, current-scope checks,
 beforeSend and gateway ledger. Authorization may not substitute ctx.view(task)
 for the projected request. No model capability auto-probe, retry or fallback.
+This limited backend requires the frozen profile's explicit native-tools
+capability; otherwise core_profile_unsupported before sending. Do not force a
+capability on, probe it or silently use the compatibility JSON loop.
 The product path consumes the gateway's typed events; it need not use the lab SSE
 codec. Only a complete call + Done(toolCalls), or text + Done(stop), is accepted.
 
