@@ -36,6 +36,10 @@ impl InProcessCatalog {
         };
         let (reply, fatal) = if body.len() > MAX_FRAME || !complete {
             (rejected("frame_limit_or_eof"), true)
+        } else if body.contains(&b'\n') {
+            // Exactly one complete frame, never a multiline JSON document/stream.
+            // CR before the final LF is valid JSON whitespace (CRLF sibling).
+            (rejected("invalid_json"), true)
         } else {
             match parse(body) {
                 Err(_) => (rejected("invalid_json"), true),
