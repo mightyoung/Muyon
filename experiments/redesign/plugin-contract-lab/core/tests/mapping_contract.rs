@@ -153,3 +153,15 @@ fn alter_first_ref(value:&mut Json,key:&str,replacement:Json)->bool {
     } else if let Json::Array(items)=value {for child in items {if alter_first_ref(child,key,replacement.clone()){return true}}}
     false
 }
+
+#[test]
+fn native_host_canonical_api_matches_catalog_integer_contract() {
+    use muyon_plugin_contract_lab::canonical_value;
+    let result=canonical_value(&json(r#"{"z":-0,"a":{"n":9007199254740991}}"#));
+    if let Err(code)=&result {assert_eq!(code,"native_canonical_api_unsupported");}
+    assert!(result.is_ok(),"NATIVE_CANONICAL_API_RED: host must use Catalog canonical bytes");
+    assert_eq!(result.unwrap().encode(),r#"{"a":{"n":9007199254740991},"z":0}"#);
+    for invalid in ["1.0","1e0","9007199254740992","-9007199254740992"] {
+        assert_eq!(canonical_value(&json(invalid)),Err("bounded_integer_required".into()));
+    }
+}

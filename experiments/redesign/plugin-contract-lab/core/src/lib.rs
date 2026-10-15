@@ -158,3 +158,9 @@ impl Catalog {
 impl Default for Catalog {fn default()->Self {Self::new()}}
 
 pub mod mappings;
+
+/// Canonical dispatch identity shared with the native host. The shell refuses
+/// until the native API test is observed; schema validation remains in Catalog.
+pub fn canonical_value(_value: &Json) -> Result<Json> {
+    Err("native_canonical_api_unsupported".into())
+}
