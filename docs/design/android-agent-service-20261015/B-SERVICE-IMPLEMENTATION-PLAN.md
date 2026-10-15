@@ -2,7 +2,7 @@
 
 2026-10-15。用户已授权“设计完成后开发”。B是当前必做，A首片/过渡取消；可信Catalog在:agent内作为明确设计选定，Linuxchild原路径保留。无需A审批或泛化开工确认。原owner并行、root唯一组合/推送/正常集成develop；main不动，无强推/删除/部署。
 
-基线0ab2c4f667681b9aacb017f8cd2eea6f576cf78e；最终合同ANDROID-AGENT-SERVICE-SLICE.md（SHA2565be6a11739f3d48153c18631ebbe9473bff7e2aa9adb7f44cc5a3ca5f8c58e18）、ABI B-SERVICE-ABI.md（SHA256b361f966ff15f92de762b47fbcfada2619bcfe086e2d7aa9bafd5aa1cd63aea4）与独立C0输入哈希随目录固定。早期author notes所引3c5 ABI仅历史对齐，最终以本版ABI为准。root先推docs提交，所有作者从其完整SHA建立新分支/工作区；保留旧a02/324/352与全部历史。实际docs SHA写入外部执行账本，避免文档提交自引用。
+基线0ab2c4f667681b9aacb017f8cd2eea6f576cf78e；最终合同ANDROID-AGENT-SERVICE-SLICE.md（SHA2565be6a11739f3d48153c18631ebbe9473bff7e2aa9adb7f44cc5a3ca5f8c58e18）、ABI B-SERVICE-ABI.md（SHA256af4dfd9e92751e38808ff17bc55aa0eaa1668643b0329232a5286e79ed7fee9b）与独立C0输入哈希随目录固定。早期author notes所引3c5 ABI仅历史对齐，最终以本版ABI为准。原 de83 激活版 b361 以及原独立审查输入保留历史；本次仅补充零 client 迟到构造退休接口及公共构造错误精确名称，窄审见 service-retire-abi-review.md。root先推docs提交，所有作者从其完整SHA建立新分支/工作区；保留旧a02/324/352与全部历史。实际docs SHA写入外部执行账本，避免文档提交自引用。
 
 ## 所有权
 
@@ -39,7 +39,7 @@ Native小提交序列：
 UI小提交序列：
 
 1. pure state/observation-key/端口codec GREEN与有效负例，独立control执行通道不被status/submit队列卡住。
-2. actual Service/AIDL/parcelables与Binder liveness映射；opaque client_key不由UI输入；Service-only client_gone/await_settled不出AIDL。初始化在后台，native构造迟到时close/drain，主线程不I/O/join；每进程Application不当跨进程单例。
+2. actual Service/AIDL/parcelables与Binder liveness映射；opaque client_key不由UI输入；Service-only client_gone/await_settled/retire_service不出AIDL。初始化在后台，native构造迟到时对捕获的旧对象调用无lease的retire_service/drain，主线程不I/O/join；每进程Application不当跨进程单例。
 3. 仅Service创建Rustcontroller/运行/store；UIconnect/current/lookup先核对再由显式新操作submit，lost Binder reply/未知/已确认终态不互相篡改。保留PR84无状态metadata原入口，非B执行证据。
 4. UI owner复制native实际生成的Android Kotlin（保留generated/MPL标记），提交真实ServiceAdapter/设置内独立离线实验面板；通用聊天/模型/附件/业务Send仍未接线。新Object cleaner/min24/JNA/lint须重新编译验证，不继承旧stateless兼容结论，不手改生成文件或抬API floor。
 
