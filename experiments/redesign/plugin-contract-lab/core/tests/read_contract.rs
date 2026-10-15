@@ -63,15 +63,31 @@ fn eof_and_concurrency_fail_closed() {
  }
  let register_request=muyon_plugin_contract_lab::object([("protocol_version",json("1")),("command",string("register")),("bundle",bundle()),("host_bindings",json(r#"["host-equipment-read"]"#))]);
  let prepare_request=muyon_plugin_contract_lab::object([("protocol_version",json("1")),("command",string("prepare")),("operation",string("equipment_loan/inspect_equipment@1")),("args",json(r#"{"equipment_key":"e1"}"#)),("authority",authority()),("invocation_id",string("i1")),("receipt_owner",string("ToolRegistry")),("receipt_identity",string("owner-digest"))]);
+ for bad in [r#"{"protocol_version":1}"#,r#"{"protocol_version":1,"command":7}"#] {
+  let lines=format!("{}\n{}\n{bad}\n{{\"protocol_version\":1,\"command\":\"inspect\"}}\n",register_request.encode(),prepare_request.encode());
+  let replies=wire(&lines);assert_eq!(replies.len(),3,"INVALID_ENVELOPE_MUST_END_PREPARED_SESSION: {bad}");assert!(ok(&replies[0]));assert!(ok(&replies[1]));expect_code(&replies[2],"protocol_envelope");
+ }
  let lines=format!("{}\n{}\n{{\"command\":\"inspect\",\"command\":\"inspect\"}}\n{{\"protocol_version\":1,\"command\":\"inspect\"}}\n",register_request.encode(),prepare_request.encode());
  let replies=wire(&lines);assert_eq!(replies.len(),3,"protocol fault must terminate the child session before another request");assert!(ok(&replies[0]));assert!(ok(&replies[1]));expect_code(&replies[2],"invalid_json");
  let oversized=wire(&format!("{}\n", "x".repeat(65537)));assert_eq!(oversized.len(),1);assert!(oversized[0].encode().len()<256);assert!(!ok(&oversized[0]));
 let mut c=admitted();let t=ticket(&mut c);assert!(!ok(&prepare(&mut c)),"one pending read only");assert!(ok(&call(&mut c,"close",vec![])));assert!(!ok(&invoke(&mut c,t,authority())));let s=stats(&mut c);assert_eq!(field(&s,"pending"),&json("0"));assert_eq!(field(&s,"execution_requests"),&json("0"));}
 
 fn wire(lines:&str)->Vec<muyon_plugin_contract_lab::Json> {
- use std::process::{Command,Stdio};use std::io::Write;
- let mut child=Command::new(env!("CARGO_BIN_EXE_muyon-plugin-contract-lab")).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().unwrap();
- let mut input=child.stdin.take().unwrap();let _=input.write_all(lines.as_bytes());drop(input);
- let output=child.wait_with_output().unwrap();assert!(output.status.success());
- String::from_utf8(output.stdout).unwrap().lines().map(json).collect()
+ use std::process::{Command,Stdio};use std::io::{Read,Write};use std::time::{Duration,Instant};use std::sync::mpsc;
+ let mut child=Command::new(env!("CARGO_BIN_EXE_muyon-plugin-contract-lab")).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).spawn().unwrap();
+ let mut input=child.stdin.take().unwrap();let output=child.stdout.take().unwrap();let owned=lines.as_bytes().to_vec();
+ let (tx,rx)=mpsc::channel();
+ std::thread::spawn(move||{let _=input.write_all(&owned);drop(input);});
+ std::thread::spawn(move||{let mut bytes=Vec::new();let result=output.take(1048577).read_to_end(&mut bytes);let _=tx.send((result,bytes));});
+ let deadline=Instant::now()+Duration::from_secs(5);
+ let status=loop {
+  if let Some(status)=child.try_wait().unwrap(){break status}
+  if Instant::now()>=deadline {let _=child.kill();let cleanup=Instant::now()+Duration::from_secs(1);
+   while child.try_wait().unwrap().is_none() && Instant::now()<cleanup{std::thread::sleep(Duration::from_millis(5));}
+   panic!("owned wire child exceeded bounded deadline");
+  }
+  std::thread::sleep(Duration::from_millis(5));
+ };
+ let (result,bytes)=rx.recv_timeout(Duration::from_secs(1)).expect("bounded stdout collection");result.unwrap();assert!(bytes.len()<=1048576);assert!(status.success());
+ String::from_utf8(bytes).unwrap().lines().map(json).collect()
 }
