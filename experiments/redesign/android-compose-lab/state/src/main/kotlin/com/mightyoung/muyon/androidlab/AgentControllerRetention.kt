@@ -15,7 +15,7 @@ class AgentControllerRetention {
 
 
 /** Refusing baseline: actual wrapper admission/disposal sealing is implemented after RED. */
-class AgentHandleAdmission {
+class AgentHandleAdmission(private val onDrained:()->Unit={}) {
     val cleanupComplete:Boolean get()=false
     fun <T> call(work:()->T):T=work()
     fun disposeIfIdle(actualClosed:Boolean,requested:Boolean,cleanup:()->Unit):Boolean {
