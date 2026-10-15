@@ -57,5 +57,5 @@ impl AgentPorts for RuntimePorts{
  fn check_control(&mut self)->Result<()>{if self.session.borrow().cancelled{Err("native_cancelled".into())}else{Ok(())}}
  fn dispatch(&mut self,agent:&mut Agent,call_ref:String,name:String,arguments:Json)->Result<()>{self.session.borrow_mut().dispatch(agent,call_ref,name,arguments)}
  fn admit_answer(&self,_state:&State,text:&str)->Result<()>{let s=self.session.borrow();if s.review.mask_answer(text)?!=text{return Err("unsafe_answer".into())}Ok(())}
- fn failure(&mut self,state:&mut State,_reason:&str){state.stop("failed","native_host_refused");}
+ fn failure(&mut self,state:&mut State,_reason:&str){state.status="failed".into();state.reason="native_host_refused".into();}
 }
