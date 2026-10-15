@@ -1,11 +1,33 @@
 //! Compiling refusing service seam. This checkpoint does not run an Agent.
-use crate::service_types::*;
+use crate::{service_runtime::BuiltinExecution, service_types::*};
+use std::sync::Arc;
+/// Rust test diagnostics only. No C/UniFFI export or UI-controlled selector.
+/// Observes immutable actual worker output; it cannot supply authority or a driver.
+#[doc(hidden)]
+pub trait ServiceEvidenceObserver: Send + Sync {
+    fn observe(&self, run: &AgentDurableRun, execution: &BuiltinExecution);
+}
 pub const SERVICE_STUB_REACHED: &str = "AGENT_SERVICE_STUB_REACHED";
 pub struct AgentServiceController {
     meta: AgentReplyMeta,
+    _observer: Option<Arc<dyn ServiceEvidenceObserver>>,
 }
 impl AgentServiceController {
     pub fn new(config: AgentHostServiceConfig) -> Result<Self, AgentServiceError> {
+        Self::construct(config, None)
+    }
+    /// Rust-only diagnostic constructor; shares the shipping controller implementation.
+    #[doc(hidden)]
+    pub fn new_with_observer(
+        config: AgentHostServiceConfig,
+        observer: Arc<dyn ServiceEvidenceObserver>,
+    ) -> Result<Self, AgentServiceError> {
+        Self::construct(config, Some(observer))
+    }
+    fn construct(
+        config: AgentHostServiceConfig,
+        observer: Option<Arc<dyn ServiceEvidenceObserver>>,
+    ) -> Result<Self, AgentServiceError> {
         if config.protocol != 1 {
             return Err(AgentServiceError::UnsupportedProtocol);
         }
@@ -19,6 +41,7 @@ impl AgentServiceController {
         }
         let epoch = crate::nonce().map_err(|_| AgentServiceError::InternalFailure)?;
         Ok(Self {
+            _observer: observer,
             meta: AgentReplyMeta {
                 protocol: 1,
                 build_identity: config.build_identity,
