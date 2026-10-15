@@ -653,3 +653,35 @@ fn host_complete_bad_frames_keep_the_same_failure_when_input_is_half_closed() {
         }
     }
 }
+
+#[test]
+fn host_old_cancel_then_matching_projection_rejection_survives_delivery_eof() {
+    unsafe extern "C" { fn kill(pid: i32, signal: i32) -> i32; fn waitpid(pid: i32, status: *mut i32, options: i32) -> i32; }
+    let mut process = HostProcess::new();
+    admit_tool(&mut process);
+    let pid = process.child.id() as i32;
+    assert_eq!(unsafe { kill(pid, 19) }, 0, "SIGSTOP setup must succeed");
+    let mut stopped = 0;
+    loop {
+        let waited = unsafe { waitpid(pid, &mut stopped, 2) };
+        if waited < 0 && std::io::Error::last_os_error().kind() == std::io::ErrorKind::Interrupted { continue; }
+        assert_eq!(waited, pid, "waitpid must acknowledge the exact stopped child"); break;
+    }
+    assert_eq!(stopped & 255, 127, "WUNTRACED acknowledges a stopped child, not exit");
+    assert_eq!((stopped >> 8) & 255, 19);
+    // This synthetic host peer retains its original result outside the core and
+    // reports that its projection was rejected. No real registry is exercised
+    // by this protocol unit and no original result/receipt body is sent to Rust.
+    // Stop acknowledgment makes the cancel + matching rejection + writer EOF
+    // order deterministic before the child can enter final delivery.
+    control(&mut process, "cancel");
+    process.send(callback("callback_error", 3, 1, vec![("code", string("projection_rejected"))]));
+    process.close_input();
+    assert_eq!(unsafe { kill(pid, 18) }, 0, "SIGCONT resumes the acknowledged child");
+    let value = terminal(&mut process, "failed", "projection_rejected", 1);
+    assert_eq!(field(&value, "receipt_ref"), &Json::Null);
+    assert_eq!(field(&value, "projection"), &Json::Null);
+    let journal = wire_json::parse(&fs::read(process.root.join("host-task/host-attempt/host.db")).unwrap()).unwrap();
+    assert_eq!(text(&journal, "reason"), "projection_rejected", "old latched cancel is not a new final-send control event");
+    assert!(!process.root.join("host-task/host-attempt/effects.db").exists(), "core must not fabricate a native fixture receipt");
+}

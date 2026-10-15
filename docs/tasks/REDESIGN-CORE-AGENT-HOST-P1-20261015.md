@@ -160,3 +160,25 @@ Product expansion remains paused; no inquiry-specific public contract is frozen.
 The latest parallel-work direction keeps generic loop/control/EOF and existing
 recovery fences active. New business ports/schema await plugin-contract alignment;
 this closure adds no research adapter, history migration or recovery feature.
+
+## Scoped round5 — current delivery cause versus historical shutdown
+
+The delivery helper now applies control handling only when the current send
+returns `cancel_requested` or `host_closed`. It no longer consults a historically
+latched shutdown as evidence that this delivery saw a new control. Thus an invoke
+that consumed cancel and then a fully correlated projection rejection retains
+failed/projection_rejected when final delivery later sees EOF, with null accepted
+receipt/projection. Existing genuine new-control mappings remain unchanged.
+
+The precise Linux-only synthetic-peer test observes invoke, acknowledges SIGSTOP
+with waitpid/WUNTRACED, queues cancel plus the matching projection-error callback
+and writer half-close, then resumes the child. This forces EOF to exist before
+final delivery, without sleeps. It asserts the original rejection, null result
+and absence of a fabricated fixture receipt. It does not execute a real registry
+or claim to validate a native host receipt. Existing new-control and EOF physical
+backpressure cases remain the contrasting coverage.
+
+Broader precedence of a genuinely new live control versus an already rejected
+terminal is unchanged and awaits public-contract review. No state-machine or
+business-interface expansion is included. This final scoped source still needs
+actual CI and non-author review; previous-source green tests cannot validate it.

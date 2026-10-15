@@ -363,10 +363,10 @@ impl HostPorts {
         state.status = status.into(); state.reason = code.into(); state.answer.clear();
     }
     fn delivery_failure(&mut self, state: &mut State, reason: &str) {
-        let control = self.io.borrow().shutdown;
-        if let Some(stop) = control {
-            // A genuine live control remains observable through final delivery.
-            self.failure(state, stop.error());
+        if matches!(reason, "cancel_requested" | "host_closed") {
+            // Only this send's actual control cause may change the decision;
+            // an old shutdown latch is not evidence of a new delivery event.
+            self.failure(state, reason);
         } else if !matches!(state.status.as_str(), "failed" | "denied" | "cancelled" | "interrupted" | "budget_exhausted") {
             // A completed answer is still unofficial if delivery fails. Once
             // failure is established, later EOF/I/O cannot replace its cause.
