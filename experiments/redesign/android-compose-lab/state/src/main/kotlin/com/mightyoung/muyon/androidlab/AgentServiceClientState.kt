@@ -70,6 +70,7 @@ class AgentServiceClientState(private val expectedBuild: String) {
         if (ticket.connection != connection || ticket.leaseGeneration != leaseGeneration ||
             ticket.displayGeneration != displayGeneration || ticket.client != client || transport != UiAgentTransport.CONNECTED)
             return UiAgentApply.STALE
+        if (ticket.kind == UiAgentObservationKind.STATUS && ticket.expectedIntent != selectedIntent) return UiAgentApply.STALE
         if (!validAgentSnapshot(incoming, expectedBuild)) return UiAgentApply.INVALID
         if (incoming.meta.serviceEpoch != client?.epoch) return UiAgentApply.STALE
         if (ticket.kind == UiAgentObservationKind.HISTORICAL &&
