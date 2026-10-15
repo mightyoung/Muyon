@@ -167,3 +167,9 @@ Parent independently confirmed remote run `38768672327` at `197b9d26` (tree-exac
 Implemented a single owned settlement slot with a coalesced pending bit, no waiting request queue. Requests arriving during actual settlement cause another settlement pass; the release/reacquire handoff prevents the old waiter's finally from clearing a replacement's slot. Rejected executor admission returns false and a future explicit request can acquire the slot. Settlement errors reach the failure callback; neither the pump nor its boolean admission result creates native terminal/Closed metadata. Native calls and failure listeners are outside any admission monitor.
 
 This is a **source-only GREEN candidate, GREEN NOT_RUN locally** under resource instructions. Parent runs the pinned remote Kotlin checks and non-author review before final integration; raw refusing checkpoint remains preserved.
+
+## Pump independent review: exceptional admission handoff, source-only tests
+
+The initial four pump cases did not cover a second request while the executor was still deciding whether to accept dispatch, nor a second request during a throwing failure listener. Added two deterministic source-only barriers: executor entry blocks before rejecting A while concurrent B requests settlement (`PUMP_REJECT_RED`), and failure-listener entry blocks before throwing while B requests settlement (`PUMP_LISTENER_RED`). Both positively require that any acknowledged request has actual drain responsibility, with a subsequent valid explicit-request sibling. They do not call native.await on a requester/Binder thread and do not create terminal metadata.
+
+These two new tests are **NOT_RUN locally**; implementation is still unfixed at this checkpoint. Parent uses the existing approved remote pure Kotlin command to establish semantic RED. The initial pump candidate/old four-case evidence is preserved, and no new test count is reported PASS from source inspection.
