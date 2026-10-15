@@ -13,13 +13,17 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
     private var retired = false
     private var controller: AgentControllerLifetime? = null
     private var workerActive = false
+    private var stopSignalled = false
     fun start() {
         synchronized(lock) { if (started || retired) return; started = true; workerActive = true }
         try { backend.execute {
             try {
                 val value = construct()
                 val discard = synchronized(lock) { controller = value; retired }
-                if (discard) value.retire()
+                if (discard) {
+                    value.retire()
+                    synchronized(lock) { stopSignalled = true }
+                }
                 value.awaitSettled()
                 // Retirement may occur while the initializer waiter returns. Handoff and
                 // the decision to wait for close share the lock with retire(); native work
@@ -27,7 +31,13 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
                 var retirementSettled = discard
                 while (true) {
                     val next = synchronized(lock) {
-                        if (retired && !retirementSettled) 1 else {
+                        if (retired && !stopSignalled) {
+                            // retire() owns the signal in progress. It must schedule the
+                            // close waiter after that signal returns; an earlier Ready
+                            // observation cannot settle a not-yet-signalled close.
+                            workerActive = false
+                            0
+                        } else if (retired && !retirementSettled) 1 else {
                             workerActive = false
                             if (retired) 0 else 2
                         }
@@ -53,11 +63,17 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
         val target = synchronized(lock) {
             if (retired) return
             retired = true
-            controller?.let { it to workerActive }
+            controller
         }
-        target?.let { (value, active) ->
+        target?.let { value ->
             value.retire()
-            if (!active) backend.execute { value.awaitSettled() }
+            val needsWaiter = synchronized(lock) {
+                stopSignalled = true
+                if (workerActive) false else { workerActive = true; true }
+            }
+            if (needsWaiter) backend.execute {
+                try { value.awaitSettled() } finally { synchronized(lock) { workerActive = false } }
+            }
         }
     }
 }

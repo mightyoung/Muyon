@@ -39,3 +39,18 @@ Raw logs and generated test jars remain under `/tmp/rd-android-agent-service-ui-
 | `phase1-green.log` | `9b10c5eceacb404a9e2bc6ae03a73e86558cd82527ebd87869eeb321893eed79` |
 | `phase1-interleaving-red.log` | `415c67b3f2039910b57d0cc3a5812c615111a63b17e1aaa8a01633a98f35072b` |
 | `phase1-verified-green.log` | `29e68e8222ef7a10c49a6bc5445a69b19757292ca20539e5ca3f1b1d4cec2a41` |
+
+## Query binding and independent review corrections
+
+The preceding 108-case checkpoint is preserved. Follow-up self-review found that historical queries lacked an exact original intent and incorrectly compared revisions across different query keys. Actual checkpoint `09b5c6b5` compiled and failed 2/43 new cases. `captureLookup(expectedIntent)` now validates and binds the original request/variant/source; historical publication requires that binding and compares equal revisions only within that key.
+
+Independent review then identified (1) a late STATUS ticket for A overwriting an explicitly selected and already observed B and (2) initialization observing old Ready while `retire()` had marked the object retired but had not actually completed the native stop signal. The deterministic review checkpoint `70d10901` compiled and failed both cases (2/45). The lifecycle case blocks at the fake retire entry **before** mutating stop state, releases the initializer waiter, and waits for that job to finish before permitting the real signal; it uses latches rather than sleeps. STATUS now rechecks its captured expected intent against current selection. Retirement now publishes signal completion only after `retire()` returns: an initializer encountering a signal in progress relinquishes settlement ownership, and the signal's completion schedules the actual close waiter if needed. Native work and listeners remain outside the coordination lock.
+
+Final review-fix source executes old 16 + 22 + 29 and new 45 named JVM cases: **112 PASS**, exit 0. This remains synthetic policy/lifecycle evidence, not Android Binder or Rust Agent runtime evidence. Final external log: `/tmp/rd-android-agent-service-ui-20261015/phase1-review-green.log`.
+
+| Follow-up log | SHA-256 |
+| --- | --- |
+| `phase1-lookup-red.log` | `cfeba2d2062e8f7cce2afcea344d162c7f5edd11ebca561e20d3890089605977` |
+| `phase1-lookup-green.log` | `c06727b8c29e9618fcabf1931bfd40a6b362e1d0873268fc7f3bb50e6cd2a739` |
+| `phase1-review-red.log` | `d18b036978e7fe925445d90b6781541ca96f37a2181081d06814871257a01d8d` |
+| `phase1-review-green.log` | `f6e10472ec1785e73d6fe6c92c4ea9cef9c8ea69e09e6732e6ab95df6fae295a` |
