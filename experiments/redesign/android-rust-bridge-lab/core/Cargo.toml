@@ -16,6 +16,7 @@ ffi-test-probes = []
 [dependencies]
 muyon-plugin-contract-lab = { path = "../../plugin-contract-lab/core" }
 uniffi = "=0.32.2"
+muyon-rust-agent-host-lab = { path = "../../rust-agent-host-lab/core" }
 
 [[bin]]
 name = "uniffi-bindgen"

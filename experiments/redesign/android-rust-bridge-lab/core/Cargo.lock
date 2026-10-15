@@ -296,6 +296,7 @@ name = "muyon-android-contract-bridge-lab"
 version = "0.1.0"
 dependencies = [
  "muyon-plugin-contract-lab",
+ "muyon-rust-agent-host-lab",
  "uniffi",
 ]
 
@@ -308,6 +309,14 @@ name = "muyon-plugin-contract-lab"
 version = "0.1.0"
 dependencies = [
  "muyon-core-agent-lab",
+]
+
+[[package]]
+name = "muyon-rust-agent-host-lab"
+version = "0.1.0"
+dependencies = [
+ "muyon-core-agent-lab",
+ "muyon-plugin-contract-lab",
 ]
 
 [[package]]

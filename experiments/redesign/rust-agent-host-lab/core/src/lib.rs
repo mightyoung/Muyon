@@ -565,3 +565,7 @@ fn require_scope(required: &[Json], authority: &Json) -> Result<()> {
     }
     Ok(())
 }
+
+// Private Android Service composition; legacy child-backed API is unchanged.
+pub mod service_types;
+pub mod service_controller;
