@@ -4,7 +4,7 @@ use muyon_plugin_contract_lab::{Json,object,string,parse};
 pub struct NativeStore{pub dir:PathBuf,_lock:DirectoryLock,receipts:Vec<Json>,facts:Json}
 impl NativeStore{
  pub fn create(dir:&Path)->Result<Self>{store::create_dir(dir)?;let lock=store::lock(dir)?;let result=Self{dir:dir.into(),_lock:lock,receipts:Vec::new(),facts:object([("external_read",Json::Bool(false)),("unknown_source",Json::Bool(false))])};result.persist()?;Ok(result)}
- pub fn open(dir:&Path)->Result<Self>{let lock=store::lock(dir)?;let value=parse(store::read(&dir.join("native.db"))?.as_bytes())?;let map=value.object()?;if map.get("version")!=Some(&string("native-read-1")){return Err("native_store_version".into())}let receipts=map.get("receipts").ok_or("native_receipts")?.array()?.clone();let facts=map.get("facts").ok_or("native_facts")?.clone();Ok(Self{dir:dir.into(),_lock:lock,receipts,facts})}
+ pub fn open(dir:&Path)->Result<Self>{let lock=store::lock(dir)?;let value=parse(store::read(&dir.join("native.db"))?.as_bytes())?;let map=value.object()?;if map.get("version")!=Some(&string("native-read-1")){return Err("native_store_version".into())}let receipts=map.get("receipts").ok_or("native_receipts")?.array()?.to_vec();let facts=map.get("facts").ok_or("native_facts")?.clone();Ok(Self{dir:dir.into(),_lock:lock,receipts,facts})}
  fn persist(&self)->Result<()>{store::atomic(&self.dir,"native.db",&object([("version",string("native-read-1")),("receipts",Json::Array(self.receipts.clone())),("facts",self.facts.clone())]).encode())}
  pub fn facts(&self)->&Json{&self.facts}
  pub fn receipt_count(&self)->usize{self.receipts.len()}
