@@ -21,6 +21,10 @@ model.advance/AgentDispatch recursion, no fallback after Rust failure. Existing
 start/confirm/cancel/close signatures and legacy startTool behavior remain.
 Core-owned tasks reject unsupported resume, pause, compaction or UI continuation
 explicitly, including after restart; they must not enter the legacy loop.
+At most one core session is active per facade; another start is explicitly
+core_busy without another process or legacy drive. Existing task status/reason
+channels carry runtime backend failures. An enabled structurally invalid config
+throws fixed core_config_invalid before launch; disabled config is not used.
 
 Rust exposes explicit `host-session`; legacy CLI/defaults, scripted/SSE providers,
 fixture snapshots, fixture-only replay semantics and their checks remain valid.
@@ -50,6 +54,10 @@ next model request. If the current model/tool policy requires manual confirmatio
 this first limited backend returns explicit `core_confirmation_required` denial;
 it does not auto-approve or fall through to legacy. Full confirmation UX is not
 claimed; the disabled legacy path retains its existing behavior.
+In particular HostPolicyModelGate GateConfirm is category fencing and MUST still
+proceed through HostModelAuthorization.prepare. review.automatic may permit the
+request. Only the EFFECTIVE host authorization review/manual requirement, not
+GateConfirm alone, produces core_confirmation_required. No test gate bypass.
 
 Use the actual ToolRegistry.prepare/invoke/receiptFor and inquiry.object handler
 with original task scope. Install ordinary invocation/task ownership before
@@ -97,6 +105,13 @@ tool is the actual frozen `{name,description,parameters}`, name=inquiry.object.
 Task/attempt IDs are host-issued `[A-Za-z0-9_-]{1,96}`; no model-selected path.
 Callbacks share `request_id,task_id,attempt_id,turn`; request_id is monotonically
 Rust-issued, one outstanding request. Every callback must echo all four exactly.
+request_id is a JSON integer1..16, turn a JSON integer1..2 (not double, exponent,
+string or boolean). scope_ref,invocation_id,prepared_ref,receipt_ref are host/core
+opaque ASCII strings matching `[A-Za-z0-9_.:-]{1,128}`; scope_ref never grants
+authority by itself. call_id is a nonempty non-control UTF-8 string<=128bytes,
+used only for pairing. Model arguments.type is ASCII `[a-z][a-z0-9_]{0,31}` and id
+uses the metadata character/length rules. Model descriptors/arguments remain
+objects, not double-encoded JSON, except history function.arguments below.
 
 | Kind/direction | Additional fields |
 | --- | --- |
@@ -124,6 +139,31 @@ status is completed,denied,cancelled,interrupted,failed,budget_exhausted.
 Messages use actual ModelMessage JSON roles/content/tool_calls/tool_call_id; calls
 contain original callId/name/JSON arguments; only the accepted projection becomes
 tool content. Neither side reconstructs tool evidence from display strings.
+More precisely the IPC history uses these exact structural shapes:
+
+```json
+{"role":"user","content":"prompt"}
+{"role":"assistant","content":"","tool_calls":[{"id":"call-1","type":"function","function":{"name":"inquiry.object","arguments":"{\"type\":\"supplier\",\"id\":\"synthetic-id\"}"}}]}
+{"role":"tool","content":"serialized accepted projection","tool_call_id":"call-1"}
+```
+
+IPC names are REGISTERED names (`inquiry.object`) everywhere, including start,
+model_request.tools/history and model_reply.name. The gateway ModelToolSpec and
+ModelToolCall use ENCODED names (`inquiry__object`). Host maps both descriptor and
+assistant-call names using the frozen actual ToolNameRegistry before constructing
+and authorizing the ModelRequest, and maps provider complete-call names back
+through that same registry exactly once. Unknown/colliding names reject; do not
+replace substrings or send registered names directly to gateway encoding. IDs
+and argument values are unchanged by name mapping.
+
+Terminal task_id/attempt_id/status/reason are required nonempty strings; reason
+is a fixed sanitized lower_snake_case code<=64bytes. answer is string-or-null,
+receipt_ref is opaque-string-or-null, projection is the exact object-or-null.
+receipt_ref/projection are either both null or both present. model_turns is a JSON
+integer0..2, tool_invocations a JSON integer0..1. completed requires answer string;
+other statuses have answer=null. An initial direct answer may complete in one
+turn. An accepted tool result remains present on later denied/cancelled/interrupted
+terminal, without inventing a final answer.
 
 Limits:2model turns,1invocation,8history messages,8192-byte prompt/arguments/
 projection,16384-byte answer,65536-byte request/frame,262144 aggregate IPC bytes.
@@ -138,6 +178,10 @@ After invoke admission, missing result→interrupted/tool_outcome_unknown. Retai
 accepted genuine result on cancellation and start no further model send. Host
 registry original receipt remains true even if the child disappears. Wrong or
 duplicate callback→failed/callback_mismatch; limit→budget_exhausted/host_budget.
+After cancel/close during admitted invoke, drain only its matching result until
+the existing bounded deadline; retain it if accepted, otherwise outcome_unknown.
+No new callback may be started. Start the process timer before its first frame;
+reject an existing/reused host attempt state directory rather than reopen/resend.
 
 ## Required offline evidence
 
