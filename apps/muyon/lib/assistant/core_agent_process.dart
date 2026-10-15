@@ -115,7 +115,6 @@ final class _Session {
   ModelCancellation get modelCancellation => lifecycle.modelCancellation;
   bool get stopped => lifecycle.stopped;
   bool get closing => lifecycle.closing;
-  bool get invokeAdmitted => lifecycle.admitted;
   int requestId = 0, turns = 0, invokes = 0, sent = 0, received = 0;
   Map<String, Object?>? proposed;
   Map<String, Object?>? projection;
@@ -651,45 +650,15 @@ final class _Session {
   Future<void> fail(String code) async {
     final latest = ctx.repository.task(task.id);
     if (latest == null || latest.terminal) return;
-    final transportFailure = const {
-      'host_protocol',
-      'callback_mismatch',
-      'host_eof',
-      'callback_timeout',
-      'core_backend_unavailable',
-      'tool_outcome_unknown',
-    }.contains(code);
-    if (invokeAdmitted && projection == null && transportFailure) {
-      await ctx.settle(
-        latest,
-        PersonalTaskState.interrupted,
-        'tool_outcome_unknown',
-      );
-      return;
-    }
-    if (invokeAdmitted && code == 'projection_rejected') {
-      await ctx.fail(latest, code, code: code);
-      return;
-    }
-    if (code == 'host_eof' && !stopped && !ctx.closing) {
-      await ctx.settle(latest, PersonalTaskState.interrupted, 'host_eof');
-      return;
-    }
-    if (stopped || ctx.closing) {
-      await ctx.settle(
-        latest,
-        closing || ctx.closing
-            ? PersonalTaskState.interrupted
-            : PersonalTaskState.cancelled,
-        closing || ctx.closing ? 'host_closed' : null,
-      );
+    final outcome = lifecycle.failure(
+      code,
+      hasProjection: projection != null,
+      hostClosing: ctx.closing,
+    );
+    if (outcome.state == PersonalTaskState.failed) {
+      await ctx.fail(latest, outcome.code!, code: outcome.code);
     } else {
-      final mapped =
-          code == 'model_confirmation_required' ||
-              code == 'tool_confirmation_required'
-          ? 'core_confirmation_required'
-          : code;
-      await ctx.fail(latest, mapped, code: mapped);
+      await ctx.settle(latest, outcome.state, outcome.code);
     }
   }
 }

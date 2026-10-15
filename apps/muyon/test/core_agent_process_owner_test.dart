@@ -250,4 +250,67 @@ void main() {
       },
     );
   }
+  for (final transport in ['oversized_header', 'aggregate']) {
+    test(
+      'admitted read $transport loss is unknown until matching projection',
+      () async {
+        final db = ManagedConnection(sqlite3.openInMemory());
+        installToolRegistrySchema(db.raw);
+        addTearDown(db.close);
+        final object = ref();
+        final entered = Completer<void>();
+        final release = Completer<void>();
+        final registry = ToolRegistry(
+          database: db,
+          resolveScope: (requested) async =>
+              ResolvedAssistantScope(requested: requested, objects: [object]),
+        );
+        registry.register(
+          providerId: 'unit-held-read',
+          descriptor: ToolDescriptor(
+            toolId: 'inquiry.object',
+            moduleId: 'inquiry',
+            effect: ToolEffect.read,
+            parameterSchema: const {'type': 'object'},
+          ),
+          handler: (_) async {
+            entered.complete();
+            await release.future;
+            return result(object);
+          },
+        );
+        final lifecycle = CoreAgentLifecycle();
+        final request = ToolCallRequest(
+          invocationId: 'held-native-read',
+          toolId: 'inquiry.object',
+          scope: AssistantScope.selectedObjects([object]),
+        );
+        final inFlight = lifecycle.invoke(registry, request);
+        await entered.future;
+        final bytes = transport == 'oversized_header'
+            ? <int>[0, 1, 0, 1]
+            : List<int>.filled(262145, 0);
+        CoreAgentFailure? failure;
+        try {
+          await coreFrames(Stream.value(bytes)).toList();
+        } on CoreAgentFailure catch (error) {
+          failure = error;
+        }
+        expect(failure?.code, 'host_budget');
+        final outcome = lifecycle.failure(failure!.code, hasProjection: false);
+        expect(outcome.state, PersonalTaskState.interrupted);
+        expect(outcome.code, 'tool_outcome_unknown');
+        release.complete();
+        final original = await inFlight;
+        expect(original.status, ToolCallStatus.succeeded);
+        expect(registry.receiptFor(request.invocationId)!.succeeded, isTrue);
+        // Once the genuine bounded result is accepted, later transport failure
+        // cannot relabel its known receipt as an unknown original result.
+        final accepted = lifecycle.failure(failure.code, hasProjection: true);
+        expect(accepted.state, PersonalTaskState.failed);
+        expect(accepted.code, 'host_budget');
+        await registry.close();
+      },
+    );
+  }
 }

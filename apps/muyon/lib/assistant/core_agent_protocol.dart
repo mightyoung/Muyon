@@ -54,8 +54,9 @@ Object? _normalizeMessage(Object? input) {
     _ => throw const CoreAgentFailure('host_protocol'),
   };
   coreKeys(message, keys);
-  if (message['content'] is! String)
+  if (message['content'] is! String) {
     throw const CoreAgentFailure('host_protocol');
+  }
   if (message['role'] == 'tool') {
     message['content'] = coreStrictJson(message['content'] as String);
   }
@@ -99,8 +100,9 @@ bool coreValidCallId(String value) {
   for (var i = 0; i < units.length; i++) {
     final unit = units[i];
     if (unit >= 0xd800 && unit <= 0xdbff) {
-      if (++i >= units.length || units[i] < 0xdc00 || units[i] > 0xdfff)
+      if (++i >= units.length || units[i] < 0xdc00 || units[i] > 0xdfff) {
         return false;
+      }
     } else if (unit >= 0xdc00 && unit <= 0xdfff) {
       return false;
     }
