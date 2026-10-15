@@ -95,9 +95,9 @@ Concurrent cancel output may still show the executor's durable pending status,
 with `cancelled=true`; the executor consumes the durable request on release.
 
 Author inverse mutations: `python3 core/mutations.py --evidence-dir /tmp/OUTPUT`
-requires preinstalled Cargo. Six fresh private source copies weaken hard policy,
+requires preinstalled Cargo. Seven fresh private source copies weaken hard policy,
 unknown hold, duplicate suppression, original-receipt validation, terminal-control
-restoration and persistent counters. Each must compile
+restoration, pre-effect context admission and persistent counters. Each must compile
 and fail behavioral Rust assertions; source-under-review remains untouched.
 ToolPort direct callers must hold the private directory lock around lookup/execute;
 the CLI Agent commands do so. No cross-task/shared-host storage service is provided.
@@ -111,3 +111,10 @@ receipt's original evidence is unavailable. Restoring original evidence restores
 that status/reason; completed/cancelled/failed/denied/budget_exhausted never become
 ready solely because lookup found a receipt. This unpublished snapshot revision
 fails closed on older incomplete task records; no product migration is implied.
+
+For the fixed synthetic tool, the complete trusted result-message size is known
+from the host binding/receipt ID before execution. Dispatch reserves that context
+space before consuming confirmation or committing the first effect. A context
+limit40 with empty input and `tool c1 fixture.record hi` therefore stops with
+zero effects/confirmations. Total units remain measured request-context plus
+provider-event bytes; these are synthetic byte counters, not token/billing claims.

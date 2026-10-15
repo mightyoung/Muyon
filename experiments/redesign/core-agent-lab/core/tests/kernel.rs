@@ -141,8 +141,8 @@ fn restoring_receipt_preserves_completed_control_barrier(){
     assert_eq!(command(&dir,"run",&[]),done);assert_eq!(fs::read_to_string(dir.join("effects.db")).unwrap(),physical);
 }
 #[test]
-fn restoring_receipt_preserves_context_budget_barrier(){
-    let dir=fixture("tool\tc1\tfixture.record\t6869\nanswer\t\n",&["--max-context","40"]);
+fn restoring_receipt_preserves_call_budget_barrier(){
+    let dir=fixture("tool\tc1\tfixture.record\t6869\nanswer\t\n",&["--max-calls","1"]);
     let stopped=command(&dir,"run",&[]);assert!(stopped.contains("status=budget_exhausted\n"));assert!(stopped.contains("model_calls=1\n"));
     fs::rename(dir.join("effects.db"),dir.join("preserved-effects.db")).unwrap();
     assert!(command(&dir,"run",&[]).contains("status=outcome_unknown\n"));
@@ -162,4 +162,11 @@ fn repeated_reference_mapping_survives_unknown_and_restart(){
     let unknown=command(&dir,"run",&[]);assert!(unknown.contains("status=outcome_unknown\n"));assert_eq!(command(&dir,"run",&[]),unknown);
     let physical=fs::read_to_string(dir.join("effects.db")).unwrap();command(&dir,"lookup",&[]);
     let done=command(&dir,"run",&[]);assert!(done.contains("status=completed\n"));assert!(done.contains("model_calls=3\n"));assert!(done.contains("receipt=r-i-1\n"));assert_eq!(fs::read_to_string(dir.join("effects.db")).unwrap(),physical);
+}
+
+#[test]
+fn tool_result_context_budget_is_admitted_before_first_effect_or_confirmation(){
+    let dir=fixture(SCRIPT,&["--max-context","40","--mode","ask-every-time","--confirmed","true"]);
+    let stopped=command(&dir,"run",&[]);assert!(stopped.contains("status=budget_exhausted\n"));assert!(stopped.contains("effects=0\n"));assert!(stopped.contains("confirmations=0\n"));assert!(stopped.contains("model_calls=1\n"));assert!(stopped.contains("receipt=\n"));
+    assert_eq!(command(&dir,"run",&[]),stopped);
 }

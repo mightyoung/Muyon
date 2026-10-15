@@ -132,8 +132,13 @@ impl Agent {
     }
     fn dispatch(&mut self,h:&Hooks)->Result<()> {
         if self.cancelled()?{self.state.stop("cancelled","before_dispatch");return self.state.save(&self.dir);}
-        match FixtureAuthorizer.check(&self.state.facts){Decision::Denied=>{self.state.stop("denied","host_policy");return self.state.save(&self.dir);},Decision::ConfirmationRequired=>{self.state.stop("waiting","confirmation_required");return self.state.save(&self.dir);},Decision::Permit=>{}}
         let binding=self.state.binding.clone().ok_or("missing_binding")?;
+        // Fixed fixture receipt shape is known before execution; reserve its context space.
+        let result_bytes=Receipt{binding:binding.clone(),id:format!("r-{}",binding.invocation)}.message().len() as u64;
+        if model::context_bytes(&self.state.context).saturating_add(result_bytes)>self.state.limits.context {
+            self.state.stop("budget_exhausted","tool_result_context");return self.state.save(&self.dir);
+        }
+        match FixtureAuthorizer.check(&self.state.facts){Decision::Denied=>{self.state.stop("denied","host_policy");return self.state.save(&self.dir);},Decision::ConfirmationRequired=>{self.state.stop("waiting","confirmation_required");return self.state.save(&self.dir);},Decision::Permit=>{}}
         if self.state.facts.confirmed{self.state.counters.confirmations+=1;self.state.facts.confirmed=false;}
         self.state.unresolved=true;self.state.stop("outcome_unknown","dispatch_started");
         h.fault("dispatch")?;self.state.save(&self.dir)?;

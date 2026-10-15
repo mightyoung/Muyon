@@ -43,3 +43,11 @@ identical same-ref requests now look up their persisted original host Binding an
 return original receipt with no new effect or confirmation consumption; changed
 arguments conflict. Durable correlation map and pending tool-result flag preserve
 this across unknown/restart. 19 authored Rust tests; new runtime still pending CI.
+
+Subsequent explicit root admission ruling: fixed fixture trusted-result context
+must fit before first effect or confirmation consumption. Preflight now reserves
+the known message size; max-context40/empty input/tool-hi stops with zero effects.
+The frozen c571/4fd R1 context-budget reproducer remains historical evidence;
+final R1 budget restoration uses max-calls1 after a legitimate effect instead.
+Added separate pre-effect regression and seventh compiled semantic inverse.
+20 Rust tests authored; no fresh runtime claim before exact candidate CI.
