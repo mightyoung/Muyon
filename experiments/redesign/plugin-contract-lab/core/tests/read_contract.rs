@@ -21,6 +21,9 @@ fn receipt_reference_has_original_owner() {
 }
 #[test]
 fn invalid_projection_and_refs_reject() {
+ let mut wrong_type=projection();let loan=field(&wrong_type,"loans").array().unwrap()[0].clone();put(&mut wrong_type,"equipment",loan);
+ let mut c=admitted();let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));
+ expect_code(&accept(&mut c,t,authority(),receipt(),wrong_type),"result_reference_type");
  for (key,value) in [("label",json("17")),("extra",string("raw-secret")),("equipment",json(r#"{"module_id":"foreign","type":"equipment","key":"e1","revision":"1"}"#)),("equipment",json(r#"{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"old"}"#))] {
  let mut c=admitted();let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));let mut p=projection();put(&mut p,key,value);assert!(!ok(&accept(&mut c,t,authority(),receipt(),p))); }
 }

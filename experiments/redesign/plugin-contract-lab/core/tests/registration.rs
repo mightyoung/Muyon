@@ -39,8 +39,9 @@ fn schema_subset_and_limits_fail_closed() {
   let mut c=Catalog::new();let mut b=bundle();put(row(&mut b,"data",0),"schema",json(schema));assert!(!ok(&register(&mut c,b)));
  }
  assert!(muyon_plugin_contract_lab::parse(br#"{"x":1,"x":2}"#).is_err());
- let mut c=admitted(); for bad in [json(r#"{"equipment_key":9}"#),json(r#"{"equipment_key":"e1","extra":true}"#),json(r#"{"equipment_key":"e1","include_loans":1e0}"#)] {
- let p=call(&mut c,"prepare",vec![("operation",string("equipment_loan/inspect_equipment@1")),("args",bad),("authority",authority())]);assert!(!ok(&p)); }
+ let mut c=admitted(); for (bad,code) in [(json(r#"{"equipment_key":9}"#),"string_required"),(json(r#"{"equipment_key":"e1","extra":true}"#),"extra_property"),(json(r#"{"equipment_key":"e1","include_loans":1e0}"#),"bounded_integer_required")] {
+ let p=prepare_args(&mut c,bad,authority());expect_code(&p,code); }
+
  let huge=string("x".repeat(65537));assert!(!ok(&call(&mut c,"register",vec![("bundle",huge)])));
 }
 #[test]
@@ -48,12 +49,34 @@ fn relation_and_view_refs_must_resolve() {
  for (array,key) in [("relations","to"),("relations","from"),("views","data_refs")] {
   let mut c=Catalog::new();let mut b=bundle(); let value=if key=="data_refs" {json(r#"["foreign/data@99"]"#)} else {string("foreign/data@99")}; put(row(&mut b,array,0),key,value);assert!(!ok(&register(&mut c,b)));
  }
+ let mut missing=bundle();
+ if let Json::Object(data)=row(&mut missing,"data",1) {if let Json::Object(schema)=data.get_mut("schema").unwrap() {if let Json::Object(props)=schema.get_mut("properties").unwrap() {remove(props.get_mut("equipment").unwrap(),"data_ref");}}}
+ let mut probe=Catalog::new();expect_code(&register(&mut probe,missing),"reference_schema_required");
  let mut c=admitted(); let s=stats(&mut c); assert_eq!(field(&s,"view_count"),&json("1"));assert_eq!(field(&s,"execution_requests"),&json("0"));
 }
 #[test]
 fn discovery_filters_current_authority() {
- let mut c=admitted(); let visible=call(&mut c,"discover",vec![("authority",authority())]); assert_eq!(field(&visible,"operations").array().unwrap().len(),1);assert!(!visible.object().unwrap().contains_key("ticket"));
+ let mut c=admitted();
+ for missing in ["available","scope_allowed","bindings","revision","binding_revision","source_revision","rule_revision","scope","refs"] {
+  let mut a=authority();remove(&mut a,missing);
+  let d=call(&mut c,"discover",vec![("authority",a.clone())]);
+  assert_eq!(field(&d,"operations"),&json("[]"),"MISSING_AUTHORITY_MUST_DENY: {missing}");
+  expect_code(&prepare_args(&mut c,json(r#"{"equipment_key":"e1"}"#),a),"denied");
+  assert_eq!(field(&stats(&mut c),"execution_requests"),&json("0"));
+ }
+ let mut unknown=authority();put(&mut unknown,"plugin_grant",Json::Bool(true));
+ assert_eq!(field(&call(&mut c,"discover",vec![("authority",unknown)]),"operations"),&json("[]"));
+ let visible=call(&mut c,"discover",vec![("authority",authority())]); assert_eq!(field(&visible,"operations").array().unwrap().len(),1);assert!(!visible.object().unwrap().contains_key("ticket"));
  for key in ["allowed","available","scope_allowed"] {let mut a=authority();put(&mut a,key,Json::Bool(false));assert_eq!(field(&call(&mut c,"discover",vec![("authority",a)]),"operations"),&json("[]"));}
+ let mut large=Catalog::new();let mut all_bindings=Vec::new();
+ for index in 0..8 {
+  let module=format!("module_{index}");let mut b=json(&bundle().encode().replace("equipment_loan",&module));let original=field(&b,"operations").array().unwrap()[0].clone();let mut ops=Vec::new();let mut ids=Vec::new();
+  for n in 0..8 {let binding=format!("binding_{index}_{n}");let mut op=original.clone();put(&mut op,"name",string(format!("read_{n}")));put(&mut op,"binding_id",string(&binding));
+   let mut input=field(&op,"input_schema").clone();let mut props=field(&input,"properties").clone();put(&mut props,"equipment_key",muyon_plugin_contract_lab::object([("type",string("string")),("enum",Json::Array(vec![string("x".repeat(3500))]))]));put(&mut input,"properties",props);put(&mut op,"input_schema",input);ops.push(op);ids.push(string(&binding));all_bindings.push(string(binding));
+  }
+  put(&mut b,"operations",Json::Array(ops));put(&mut b,"views",json("[]"));assert!(ok(&call(&mut large,"register",vec![("bundle",b),("host_bindings",Json::Array(ids))])));
+ }
+ let mut a=authority();put(&mut a,"bindings",Json::Array(all_bindings));let out=call(&mut large,"discover",vec![("authority",a)]);expect_code(&out,"response_limit");assert!(out.encode().len()<256);assert!(!out.object().unwrap().contains_key("operations"));
 }
 #[test]
 fn declaration_labels_cannot_authorize() {

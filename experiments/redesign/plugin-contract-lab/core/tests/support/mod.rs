@@ -12,7 +12,10 @@ pub fn call(c: &mut Catalog, command: &str, fields: Vec<(&str, Json)>) -> Json {
     let mut request = object(fields); put(&mut request, "command", string(command)); c.handle(request)
 }
 pub fn ok(j: &Json) -> bool { j.object().unwrap().get("ok") == Some(&Json::Bool(true)) }
-pub fn authority() -> Json { json(r#"{"allowed":true,"revision":"a1","binding_revision":"b1","source_revision":"s1","rule_revision":"r1","scope":"selected-e1","refs":[{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1"},{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1"}]}"#) }
+pub fn authority() -> Json { json(r#"{"allowed":true,"available":true,"scope_allowed":true,"bindings":["host-equipment-read"],"revision":"a1","binding_revision":"b1","source_revision":"s1","rule_revision":"r1","scope":"selected-e1","refs":[{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1"},{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1"}]}"#) }
+pub fn remove(j:&mut Json,key:&str) {if let Json::Object(m)=j {m.remove(key);}}
+pub fn expect_code(j:&Json,code:&str) {assert!(!ok(j),"expected {code}, got {}",j.encode());assert_eq!(field(j,"code"),&string(code));}
+pub fn prepare_args(c:&mut Catalog,args:Json,a:Json)->Json {call(c,"prepare",vec![("operation",string("equipment_loan/inspect_equipment@1")),("args",args),("authority",a),("invocation_id",string("i1")),("receipt_owner",string("ToolRegistry")),("receipt_identity",string("host-sha256-identity"))])}
 pub fn register(c: &mut Catalog, b: Json) -> Json { call(c,"register",vec![("bundle",b),("host_bindings",json(r#"["host-equipment-read"]"#))]) }
 pub fn admitted() -> Catalog { let mut c=Catalog::new(); assert!(ok(&register(&mut c,bundle())),"valid fixture must register"); c }
 pub fn prepare(c: &mut Catalog) -> Json {
