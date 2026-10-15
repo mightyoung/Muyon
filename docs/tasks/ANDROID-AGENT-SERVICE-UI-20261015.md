@@ -120,3 +120,11 @@ Full exact-source JVM check: old 123 + registry 11 = **134 PASS**, exit 0. Servi
 | --- | --- |
 | `phase2-registry-release-red.log` | `d996d0daaff50e0f3ed2a7651598bdd4cf957a4452f87f8e5cda298f218e84e9` |
 | `phase2-registry-release-green.log` | `e506eba686920281a764d74896f6fa4d89cf6c3aed655b195c31f18e626be502` |
+
+## Actual Android Object binding handoff
+
+Copied the unmodified actual Android-profile generated source from the independently verified ordinary-log handoff for remote run `38765354239`, source `c6287d403c7c3d465f7decdadd91930a0a4ad17c`. Local source candidate: `/tmp/rd-android-rust-bridge-20261015/service-android-binding-c628/muyon_android_contract_bridge.kt`; manifest in the same directory. Bytes 141263; SHA-256 `6fec4795a50cab1b629cb19c45562fb435a805f542bc2312da100995aa5636db`. This matches the earlier actual fresh Android generation at `fa064` and is not a JVM-profile substitute or handwritten binding.
+
+Pinned evidence manifest: Android config `543bab24b017d782b38aff958254db5bd185c3688eada2e6a96a5753dc98ab11`, bindgen `083a46313d5d5608a62a1883d1f3689aa6e8f98165afaef69cf25dbbff8bb73a`, actual default library `59b4061d346974ea50fcd13ce83be6df164ff0effeb68a3a88057be02ca63dc8`. That run establishes fresh generation/load and the expected refusing native semantic RED, not GREEN Agent execution.
+
+Original generated header/body retained byte-for-byte; existing UniFFI MPL notice/license remain. The Object source includes generated API34 SystemCleaner guards with JNA Cleaner fallback. This is source observation only: fresh Android compile/lint with minSdk 24 and actual ART cleanup behavior remain required, NOT_RUN locally. No hand modification or API floor increase is applied.
