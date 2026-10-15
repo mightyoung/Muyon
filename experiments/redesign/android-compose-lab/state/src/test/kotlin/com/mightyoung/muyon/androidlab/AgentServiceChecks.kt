@@ -229,6 +229,42 @@ fun runAgentServiceChecks() {
         check(holder.reserve()==null)
         obj.actualClosed=true;obj.cleaned=true;check(holder.releaseCleaned(lease,obj));check(holder.reserve()!=null)
     }
+    cases["zero active handle cleanup succeeds once and seals future calls"]={
+        val gate=AgentHandleAdmission();var freed=0;var called=0
+        check(gate.call{called++;7}==7 && called==1)
+        check(gate.disposeIfIdle(true,true){check(!gate.cleanupComplete);freed++}){"HANDLE_ZERO_RED: completed cleanup must become observable"}
+        check(gate.cleanupComplete && freed==1)
+        check(gate.disposeIfIdle(true,true){freed++});check(freed==1)
+        check(runCatching{gate.call{called++}}.isFailure);check(called==1)
+    }
+    cases["inflight handle call prevents cleanup while disposal seals replacement admission"]={
+        val gate=AgentHandleAdmission();val entered=CountDownLatch(1);val finish=CountDownLatch(1);val done=CountDownLatch(1);val freed=java.util.concurrent.atomic.AtomicInteger();var replacement=0
+        Thread{try{gate.call{entered.countDown();check(finish.await(5,TimeUnit.SECONDS))}}finally{done.countDown()}}.apply{isDaemon=true}.start()
+        try{
+            check(entered.await(5,TimeUnit.SECONDS));check(!gate.disposeIfIdle(true,true){freed.incrementAndGet()})
+            check(freed.get()==0 && !gate.cleanupComplete){"HANDLE_ACTIVE_RED: generated close must not defer behind an in-flight call"}
+            check(runCatching{gate.call{replacement++}}.isFailure);check(replacement==0)
+        }finally{finish.countDown()}
+        check(done.await(5,TimeUnit.SECONDS));check(freed.get()==0)
+        check(gate.disposeIfIdle(true,true){freed.incrementAndGet()});check(gate.cleanupComplete && freed.get()==1)
+    }
+    cases["throwing generated cleanup stays sealed incomplete without implicit retry"]={
+        val gate=AgentHandleAdmission();var frees=0
+        check(runCatching{gate.disposeIfIdle(true,true){frees++;println("HANDLE_CLEANUP_FAILURE_REACHED");throw UnsatisfiedLinkError("injected generated cleanup failure")}}.isFailure)
+        check(!gate.cleanupComplete && frees==1)
+        check(runCatching{gate.call{error("no replacement call")}}.isFailure)
+        var replacement=0
+        check(runCatching{gate.call{replacement++}}.isFailure){"HANDLE_FAILURE_RED: failed cleanup cannot reopen native calls"}
+        check(replacement==0)
+        check(!gate.disposeIfIdle(true,true){frees++});check(!gate.cleanupComplete && frees==1)
+    }
+    cases["nonclosed or nondisposing settlement cannot seal or release handle"]={
+        for((closed,requested) in listOf(false to false,false to true,true to false)){
+            val gate=AgentHandleAdmission();var frees=0
+            check(!gate.disposeIfIdle(closed,requested){frees++});check(frees==0 && !gate.cleanupComplete)
+            check(gate.call{11}==11)
+        }
+    }
     var failures=0
     cases.forEach{(name,test)->try{test();println("PASS B service $name")}catch(e:Throwable){failures++;println("FAIL B service $name: ${e.message}")}}
     check(failures==0){"$failures/${cases.size} B service state checks failed"}

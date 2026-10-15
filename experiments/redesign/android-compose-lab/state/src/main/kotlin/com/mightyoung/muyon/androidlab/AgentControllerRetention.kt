@@ -12,3 +12,14 @@ class AgentControllerRetention {
     fun failedBeforePublish(reservation:Reservation):Boolean=false
     fun releaseCleaned(reservation:Reservation,value:AgentRetainedLifetime):Boolean=false
 }
+
+
+/** Refusing baseline: actual wrapper admission/disposal sealing is implemented after RED. */
+class AgentHandleAdmission {
+    val cleanupComplete:Boolean get()=false
+    fun <T> call(work:()->T):T=work()
+    fun disposeIfIdle(actualClosed:Boolean,requested:Boolean,cleanup:()->Unit):Boolean {
+        if(actualClosed && requested)cleanup()
+        return false
+    }
+}
