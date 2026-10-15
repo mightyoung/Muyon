@@ -62,6 +62,14 @@ proceed through HostModelAuthorization.prepare. review.automatic may permit the
 request. Only the EFFECTIVE host authorization review/manual requirement, not
 GateConfirm alone, produces core_confirmation_required. No test gate bypass.
 
+For this readonly inquiry.object slice, existing ToolRegistry category/scope/current
+permission checks are the applicable tool authority. Do not add a new readonly
+content-review invocation: the existing effect-review service applies to writes
+with effectIntent, and its null-intent confirmation is not a readonly permission.
+No effectIntent, grant or approval may be fabricated. Explicit read denial/revocation
+must stop before invoke; model authorization and its effective review remain
+unchanged. Write/manual-confirmation behavior remains outside this readonly slice.
+
 Use the actual ToolRegistry.prepare/invoke/receiptFor and inquiry.object handler
 with original task scope. Install ordinary invocation/task ownership before
 registry calls. The host-issued opaque prepared_ref maps to the live prepared
