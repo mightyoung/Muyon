@@ -29,6 +29,14 @@ impl State {
         let task=format!("t-{}-{nonce}",std::process::id());
         Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script,scope,facts,limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior,resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false,wire:None,wire_counters:WireCounters::default(),native:Vec::new(),pending_call_ref:String::new()})
     }
+    /// Native host owns persistence and authority; this does not create fixture effects.
+    pub fn runtime(input:String,scope:String,limits:Limits)->Result<Self>{
+        limits.validate()?;
+        if input.len()>65536 || input.len() as u64>limits.context || scope.is_empty() || scope.len()>1024{return Err("invalid_start".into());}
+        let nonce=SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_|"clock")?.as_nanos();
+        let task=format!("t-{}-{nonce}",std::process::id());
+        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script:String::new(),scope,facts:HostFacts{mode:Mode::ReadOnly,high:true,hard_ok:false,revoked:true,scope_ok:false,classification_ok:false,confirmed:false,tainted:true,new_destination:true},limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior:"normal".into(),resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false,wire:None,wire_counters:WireCounters::default(),native:Vec::new(),pending_call_ref:String::new()})
+    }
     pub fn with_wire(mut self,config:WireConfig)->Result<Self>{config.validate()?;self.native=self.context.iter().map(|m|NativeMessage::User(m.text.clone())).collect();self.script.clear();self.wire=Some(config);Ok(self)}
     pub fn encode(&self)->String{
         let mut m=BTreeMap::new();
@@ -192,34 +200,56 @@ impl Agent {
         if let Some(config)=self.state.wire.clone(){let mut provider=WireProvider::new(config,&self.dir);self.run_with_provider(&mut provider,h)}else{let mut provider=ScriptedProvider::parse(&self.state.script)?;self.run_with_provider(&mut provider,h)}
     }
     pub fn run_with_provider(&mut self,provider:&mut dyn Provider,h:&Hooks)->Result<()> {
-        if self.state.wire_counters.inflight{self.state.stop("failed","wire_interrupted");return self.state.save(&self.dir);}
+        self.drive(provider,None,h)
+    }
+    /// Product host ports share this exact model/admission/control loop with fixtures.
+    pub fn run_with_ports(&mut self,provider:&mut dyn Provider,ports:&mut crate::host_session::HostPorts,h:&Hooks)->Result<()> {
+        self.drive(provider,Some(ports),h)
+    }
+    pub fn run_with_runtime_ports(&mut self,provider:&mut dyn Provider,ports:&mut dyn crate::agent_ports::AgentPorts,h:&Hooks)->Result<()> {
+        self.drive(provider,Some(ports),h)
+    }
+    fn save_drive(&self,ports:Option<&dyn crate::agent_ports::AgentPorts>)->Result<()> {
+        if let Some(ports)=ports{ports.persist(self)}else{self.state.save(&self.dir)}
+    }
+    fn drive(&mut self,provider:&mut dyn Provider,mut ports:Option<&mut dyn crate::agent_ports::AgentPorts>,h:&Hooks)->Result<()> {
+        if self.state.wire_counters.inflight{self.state.stop("failed","wire_interrupted");return self.save_drive(ports.as_deref());}
         if self.state.evidence_hold || self.state.unresolved{return Ok(());}
-        if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.state.save(&self.dir);}
-        if self.state.status=="waiting"{self.dispatch(h)?;}
+        if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.save_drive(ports.as_deref());}
+        if self.state.status=="waiting"{if ports.is_some(){self.state.stop("failed","host_protocol");return self.save_drive(ports.as_deref());}self.dispatch(h)?;}
         while self.state.status=="ready" {
+            if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.check_control(){host.failure(&mut self.state,&reason);break;}}
             if self.cancelled()?{self.state.stop("cancelled","cancel_requested");break;}
             let size=model::context_bytes(&self.state.context);
             if self.state.counters.steps>=self.state.limits.steps||self.state.counters.calls>=self.state.limits.calls||size>self.state.limits.context||self.state.counters.total.saturating_add(size)>self.state.limits.total||self.state.counters.output>=self.state.limits.output {self.state.stop("budget_exhausted","admission");break;}
             self.state.counters.steps+=1;self.state.counters.calls+=1;self.state.counters.total+=size;
             self.state.wire_counters.inflight=self.state.wire.is_some();
             if self.state.wire.is_some(){self.state.wire_counters.usage=crate::wire_sse::Usage::default();}
-            self.state.stop("failed","provider_interrupted");self.state.save(&self.dir)?;
-            let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools:vec!["fixture.record".into()]};
+            self.state.stop("failed","provider_interrupted");self.save_drive(ports.as_deref())?;
+            let tools=if let Some(host)=ports.as_deref_mut(){match host.advertised_tools(&self.state){Ok(tools)=>tools,Err(reason)=>{host.failure(&mut self.state,&reason);break;}}}else{vec!["fixture.record".into()]};
+            let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools};
             let position=self.state.position;let history=self.state.native.clone();
-            let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h});
+            let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h,host:ports.is_some()});
             self.state.wire_counters.inflight=false;
-            let event=match response{Ok(e)=>e,Err(reason)=>{if self.state.wire.is_some(){if reason=="wire_cancelled"{self.state.stop("cancelled",&reason);}else if reason.ends_with("_limit"){self.state.stop("budget_exhausted",&reason);}else{self.state.stop("failed",&reason);}}else{self.state.stop("failed","provider_error");}break;}};
+            let event=match response{Ok(e)=>e,Err(reason)=>{if let Some(host)=ports.as_deref_mut(){host.failure(&mut self.state,&reason);}else if self.state.wire.is_some(){if reason=="wire_cancelled"{self.state.stop("cancelled",&reason);}else if reason.ends_with("_limit"){self.state.stop("budget_exhausted",&reason);}else{self.state.stop("failed",&reason);}}else{self.state.stop("failed","provider_error");}break;}};
             let (prompt,completion)=provider.reported_usage();self.state.wire_counters.usage=crate::wire_sse::Usage{prompt,completion};
             if self.cancelled()?{self.state.stop("cancelled","cancel_requested");break;}
+            if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.check_control(){host.failure(&mut self.state,&reason);break;}}
             self.state.position+=1;let bytes=model::event_bytes(&event);self.state.counters.output+=bytes;self.state.counters.total+=bytes;
             if self.state.counters.output>self.state.limits.output||self.state.counters.total>self.state.limits.total {self.state.stop("budget_exhausted","response");break;}
             self.state.stop("ready","");
             match event {
+                ModelEvent::HostTool{call_ref,name,arguments}=>{
+                    if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.dispatch(self,call_ref,name,arguments){host.failure(&mut self.state,&reason);}}
+                    else{self.state.stop("failed","unknown_tool");}
+                },
                 ModelEvent::Fail(reason)=>self.state.stop("failed",&reason),
                 ModelEvent::Answer(text)=>{
+                    if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.admit_answer(&self.state,&text){host.failure(&mut self.state,&reason);break;}}
                     if size.saturating_add(text.len() as u64)>self.state.limits.context{self.state.stop("budget_exhausted","context");}else{if self.state.wire.is_some(){self.state.native.push(NativeMessage::Assistant(text.clone()));}self.state.answer=text.clone();self.state.context.push(Message{role:Role::Assistant,text});self.state.stop("completed","");}
                 },
                 ModelEvent::Tool{call_ref,name,value}=>{
+                    if ports.is_some(){self.state.stop("failed","host_protocol");break;}
                     if name!="fixture.record"{self.state.stop("failed","unknown_tool");break;}
                     let original=self.state.correlations.get(&call_ref).cloned();
                     if let Some(b)=&original{if b.value!=value||b.scope!=self.state.scope{self.state.stop("failed","binding_conflict");break;}}
@@ -243,9 +273,10 @@ impl Agent {
                     }
                 },
             }
-            self.state.save(&self.dir)?;
+            self.save_drive(ports.as_deref())?;
         }
-        self.state.save(&self.dir)
+        if ports.is_some() && self.state.status=="budget_exhausted"{self.state.reason="host_budget".into();}
+        self.save_drive(ports.as_deref())
     }
     pub fn observe(&self)->String {
         let effect=EffectStore::load(&self.dir);let (count,value)=match effect{Ok(s)=>(s.receipts.len().to_string(),hex(&s.value)),Err(_)=>("unknown".into(),String::new())};
@@ -254,10 +285,10 @@ impl Agent {
     }
 }
 
-struct AgentControl<'a>{agent:&'a mut Agent,h:&'a Hooks}
+struct AgentControl<'a>{agent:&'a mut Agent,h:&'a Hooks,host:bool}
 impl ProviderControl for AgentControl<'_>{
     fn poll(&mut self)->Result<()>{if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}}
     fn remaining(&self)->u64{self.agent.state.wire.as_ref().map(|c|c.max_total.saturating_sub(self.agent.state.wire_counters.total())).unwrap_or(u64::MAX)}
-    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{if bytes as u64>self.remaining(){return Err("wire_total_limit".into());}let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};*target=target.checked_add(bytes as u64).ok_or("wire_total_limit")?;self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".into())}
-    fn checkpoint(&mut self,name:&str)->Result<()>{self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
+    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{if self.host{return Err("host_control_unsupported".into());}if bytes as u64>self.remaining(){return Err("wire_total_limit".into());}let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};*target=target.checked_add(bytes as u64).ok_or("wire_total_limit")?;self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".into())}
+    fn checkpoint(&mut self,name:&str)->Result<()>{if self.host{return Err("host_control_unsupported".into());}self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
 }
