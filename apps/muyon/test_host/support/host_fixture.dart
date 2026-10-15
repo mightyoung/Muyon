@@ -4,10 +4,12 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:muyon/app/bootstrap.dart';
+import 'package:muyon/app/host_ui_grant_authority.dart';
 import 'package:muyon/assistant/core_agent_process.dart';
 import 'package:muyon/platform/business_tools.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/grants/outbound_content_reviewer.dart';
+import 'package:muyon/platform/grants/host_authorization_policy.dart';
 import 'package:muyon/services/models/model_gateway.dart';
 import 'package:muyon/services/models/model_provider.dart';
 import 'package:muyon_module_api/muyon_module_api.dart';
@@ -147,8 +149,30 @@ class HostFixture {
     for (final row in host.foundation.database.raw.select('SELECT * FROM tool_invocation_receipts')) Map<String, Object?>.from(row),
   ];
 
+  Future<void> disableRead() => withConfirmedHostUiGrant((token) => host.authorizationPolicy.update(
+    token: token, mode: AssistantAuthorizationMode.standard,
+    enabled: AssistantAuthorizationCategory.values.where((category) => category != AssistantAuthorizationCategory.read).toSet(),
+  ));
+
+  void assertNoManufacturedAuthority() {
+    expect(host.assistantGrants.list(), isEmpty);
+    expect(host.foundation.database.raw.select('SELECT * FROM tool_approvals'), isEmpty);
+    expect(host.foundation.database.raw.select('SELECT * FROM assistant_grant_audit'), isEmpty);
+  }
+
+  void assertRejection(String? error, String expected, {
+    int prepareCount = 0, int invokeCount = 0,
+  }) {
+    final oracle = p.join(repositoryRoot().path,
+      'experiments/redesign/core-agent-lab/host-checks/rejection_oracle.py');
+    final result = Process.runSync('/usr/bin/python3', [oracle,
+      '--error', error ?? '', '--expected', expected,
+      '--prepare-count', '$prepareCount', '--invoke-count', '$invokeCount']);
+    expect(result.exitCode, 0, reason: 'fixed-spec rejection must reach its intended boundary: ${result.stdout}');
+  }
+
   List<Map<String, dynamic>> frames(String filename) {
-    final bytes = File(p.join(evidence.path, filename)).readAsBytesSync();
+    final bytes = File(p.join(_soleLaunch.path, filename)).readAsBytesSync();
     final frames = <Map<String, dynamic>>[];
     var offset = 0;
     while (offset < bytes.length) {
@@ -163,12 +187,20 @@ class HostFixture {
     return frames;
   }
 
+  Directory get _soleLaunch => evidence.listSync().whereType<Directory>()
+      .where((entry) => p.basename(entry.path).startsWith('launch-')).single;
+
+  void assertExactlyOneLaunch({bool requireReaped = false}) {
+    final inspector = p.join(repositoryRoot().path,
+      'experiments/redesign/core-agent-lab/host-checks/inspect_process.py');
+    final result = Process.runSync('/usr/bin/python3', [inspector, evidence.path,
+      if (!requireReaped) '--allow-running']);
+    expect(result.exitCode, 0, reason: 'one launch must be retained; all required child reaps must be recorded: ${result.stdout}');
+  }
+
   void assertReaped() {
-    final exitFile = File(p.join(evidence.path, 'exit.json'));
-    expect(exitFile.existsSync(), isTrue, reason: 'real child must be waited/reaped before facade settles');
-    final exit = jsonDecode(exitFile.readAsStringSync()) as Map;
-    expect(exit['reaped'], true);
-    final launch = jsonDecode(File(p.join(evidence.path, 'launch.json')).readAsStringSync()) as Map;
+    assertExactlyOneLaunch(requireReaped: true);
+    final launch = jsonDecode(File(p.join(_soleLaunch.path, 'launch.json')).readAsStringSync()) as Map;
     expect(launch['binary'], childBinary);
     expect(launch['arguments'], contains('host-session'));
     expect(Directory('/proc/${launch['pid']}').existsSync(), isFalse);
@@ -178,16 +210,17 @@ class HostFixture {
 
   void assertPrivateBoundary() {
     final ipc = [
-      File(p.join(evidence.path, 'host.bin')).readAsBytesSync(),
-      File(p.join(evidence.path, 'core.bin')).readAsBytesSync(),
-      File(p.join(evidence.path, 'stderr.bin')).readAsBytesSync(),
+      File(p.join(_soleLaunch.path, 'host.bin')).readAsBytesSync(),
+      File(p.join(_soleLaunch.path, 'core.bin')).readAsBytesSync(),
+      File(p.join(_soleLaunch.path, 'stderr.bin')).readAsBytesSync(),
     ].map((bytes) => latin1.decode(bytes)).join();
     final messages = jsonEncode([for (final body in transport.bodies) body['messages']]);
     final errors = [
       for (final task in host.foundation.tasks()) task.error,
       for (final row in host.outbound.recent()) row['error'],
     ].join();
-    for (final marker in [secretCanary, credentialRefCanary, profileCanary, endpointCanary, privateName, privateNotes, 'SECOND_PRIVATE_NOTE']) {
+    for (final marker in [secretCanary, credentialRefCanary, profileCanary, endpointCanary,
+      profile().endpoint.toString(), profile().modelId, privateName, privateNotes, 'SECOND_PRIVATE_NOTE']) {
       expect(ipc.contains(marker), isFalse, reason: 'private marker escaped IPC');
       expect(messages.contains(marker), isFalse, reason: 'private marker escaped model messages');
       expect(errors.contains(marker), isFalse, reason: 'private marker escaped error logs');
@@ -209,8 +242,10 @@ class HostFixture {
     final destination = Platform.environment['MUYON_TEST_CORE_AGENT_EVIDENCE_DIR'];
     if (destination != null && evidence.existsSync()) {
       final retained = Directory(p.join(destination, p.basename(root.path)))..createSync(recursive: true);
-      for (final file in evidence.listSync().whereType<File>()) {
-        file.copySync(p.join(retained.path, p.basename(file.path)));
+      for (final file in evidence.listSync(recursive: true).whereType<File>()) {
+        final copy = File(p.join(retained.path, p.relative(file.path, from: evidence.path)));
+        copy.parent.createSync(recursive: true);
+        file.copySync(copy.path);
       }
     }
     if (root.existsSync()) root.deleteSync(recursive: true);

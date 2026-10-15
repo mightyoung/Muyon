@@ -8,6 +8,7 @@ import selectors
 import signal
 import subprocess
 import sys
+import tempfile
 
 
 def main():
@@ -15,14 +16,23 @@ def main():
     parser.add_argument('--binary', required=True)
     parser.add_argument('--evidence', required=True)
     options, arguments = parser.parse_known_args()
-    evidence = Path(options.evidence)
-    evidence.mkdir(parents=True, exist_ok=True)
+    collection = Path(options.evidence)
+    collection.mkdir(parents=True, exist_ok=True)
+    evidence = Path(tempfile.mkdtemp(prefix='launch-', dir=collection))
     child = subprocess.Popen([options.binary, *arguments], stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    (evidence / 'launch.json').write_text(json.dumps({
+    launch = {
+        'launch_id': evidence.name, 'launcher_pid': os.getpid(),
         'pid': child.pid, 'binary': options.binary, 'arguments': arguments,
         'environment_keys': sorted(os.environ),
-    }))
+    }
+    (evidence / 'launch.json').write_text(json.dumps(launch))
+    # One O_APPEND write per bounded record preserves concurrent launches.
+    manifest = os.open(collection / 'launches.jsonl', os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    try:
+        os.write(manifest, (json.dumps(launch, separators=(',', ':')) + '\n').encode())
+    finally:
+        os.close(manifest)
 
     def stop(signum, frame):
         if child.poll() is None:

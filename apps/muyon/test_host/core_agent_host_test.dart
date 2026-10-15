@@ -7,6 +7,7 @@ import 'package:muyon/app/bootstrap.dart';
 import 'package:muyon/assistant/core_agent_process.dart';
 import 'package:muyon/platform/foundation_repository.dart';
 import 'package:muyon/platform/grants/outbound_content_reviewer.dart';
+import 'package:muyon/platform/grants/host_authorization_policy.dart';
 import 'package:path/path.dart' as p;
 
 import 'support/host_fixture.dart';
@@ -96,11 +97,67 @@ void main() {
       final review = f.host.foundation.database.raw.select('SELECT * FROM assistant_review_decisions WHERE id=?', [row['review_decision_id']]).single;
       expect(review['payload_digest'], row['payload_sha256']);
     }
-    expect(f.secrets.reads, 2);
+    expect(f.secrets.reads, isPositive,
+      reason: 'gateway transport and masking may independently read the fake SecretStore');
     f.assertPrivateBoundary();
     f.assertReaped();
+    f.assertNoManufacturedAuthority();
     expect(Directory(f.stateRoot).listSync(recursive: true).where((entry) => p.basename(entry.path) == 'effects.db'), isEmpty);
   });
+
+  test('provider secret echo is masked by the actual gateway before IPC', () async {
+    final f = await HostFixture.open();
+    addTearDown(f.dispose);
+    f.transport.replies.add((_) => answerReply('Echo $secretCanary done.'));
+    final task = await f.start();
+    expect(task.state, PersonalTaskState.succeeded);
+    // Existing gateway.mask/maskSecret contract, read before adapter output.
+    expect(task.summary, 'Echo <redacted> done.');
+    expect(f.transport.bodies, hasLength(1));
+    expect(f.receiptRows, isEmpty);
+    expect(f.secrets.reads, isPositive);
+    f.assertPrivateBoundary();
+    f.assertNoManufacturedAuthority();
+    f.assertReaped();
+  });
+
+  test('provider secret echo in tool identity is rejected without rewriting arguments', () async {
+    final f = await HostFixture.open();
+    addTearDown(f.dispose);
+    f.transport.replies.add((_) => toolReply(secretCanary));
+    final task = await f.start();
+    expect(task.state, PersonalTaskState.failed);
+    final frames = f.frames('core.bin');
+    f.assertRejection(task.error, 'model_failed',
+      prepareCount: frames.where((frame) => frame['kind'] == 'prepare').length,
+      invokeCount: frames.where((frame) => frame['kind'] == 'invoke').length);
+    expect(f.transport.bodies, hasLength(1));
+    expect(f.receiptRows, isEmpty);
+    f.assertPrivateBoundary();
+    f.assertReaped();
+  });
+
+  for (final metadata in [profileCanary, credentialRefCanary, endpointCanary,
+    'http://127.0.0.1:9/v1/chat/completions', 'synthetic-model']) {
+    test('provider frozen profile metadata echo is cleaned or rejected ${metadata.length}', () async {
+      final f = await HostFixture.open();
+      addTearDown(f.dispose);
+      f.transport.replies.add((_) => answerReply('Echo $metadata done.'));
+      final task = await f.start();
+      expect(task.terminal, isTrue);
+      expect(task.state, anyOf(PersonalTaskState.succeeded, PersonalTaskState.failed));
+      if (task.state == PersonalTaskState.failed) {
+        f.assertRejection(task.error, 'model_failed');
+      } else {
+        expect(task.summary, isNotEmpty);
+      }
+      expect('${task.summary}'.contains(metadata), isFalse);
+      expect(f.transport.bodies, hasLength(1));
+      expect(f.receiptRows, isEmpty);
+      f.assertPrivateBoundary();
+      f.assertReaped();
+    });
+  }
 
   test('disabled configuration preserves legacy and never launches Rust', () async {
     final f = await HostFixture.open(enabled: false);
@@ -172,22 +229,48 @@ void main() {
     expect(f.receiptRows, isEmpty);
   });
 
-  for (final confirmation in [true, false]) {
-    test('effective tool review ${confirmation ? 'confirmation' : 'denial'} stops before invoke', () async {
-      final f = await HostFixture.open(toolReviewer: FixedReviewer(confirmation
-        ? const ReviewDecision.confirm('synthetic tool confirmation')
-        : const ReviewDecision.block('synthetic tool denial')));
-      addTearDown(f.dispose);
-      f.transport.replies.add((_) => toolReply(f.supplierId));
-      final task = await f.start();
-      expect(task.state, PersonalTaskState.failed);
-      if (confirmation) expect(task.error, contains('core_confirmation_required'));
-      expect(f.transport.bodies, hasLength(1));
-      expect(f.receiptRows, isEmpty);
-      expect(f.frames('core.bin').where((frame) => frame['kind'] == 'invoke'), isEmpty);
-      f.assertReaped();
-    });
-  }
+  // Contract59ddf6c corrects the original read-content-review assumptions:
+  // readonly authority is actual registry category/scope/current permission.
+  test('disabled read category refuses the actual inquiry before invoke', () async {
+    final f = await HostFixture.open();
+    addTearDown(f.dispose);
+    await f.disableRead();
+    expect(f.host.authorizationPolicy.current.allows(AssistantAuthorizationCategory.read), isFalse);
+    expect(f.host.authorizationPolicy.current.allows(AssistantAuthorizationCategory.model), isTrue);
+    f.transport.replies.add((_) => toolReply(f.supplierId));
+    final task = await f.start();
+    expect(task.state, PersonalTaskState.failed);
+    f.assertRejection(task.error, 'tool_denied');
+    expect(f.transport.bodies, hasLength(1));
+    expect(f.receiptRows, isEmpty);
+    expect(f.frames('core.bin').where((frame) => frame['kind'] == 'invoke'), isEmpty);
+    f.assertNoManufacturedAuthority();
+    f.assertReaped();
+  });
+
+  test('read policy revoked while model pending cannot proceed to prepare or invoke', () async {
+    final f = await HostFixture.open();
+    addTearDown(f.dispose);
+    final entered = Completer<void>();
+    final release = Completer<String>();
+    addTearDown(() { if (!release.isCompleted) release.complete(toolReply(f.supplierId)); });
+    f.transport.replies.add((_) { entered.complete(); return release.future; });
+    final pending = f.start();
+    await entered.future;
+    await f.disableRead();
+    expect(f.host.authorizationPolicy.current.allows(AssistantAuthorizationCategory.read), isFalse);
+    release.complete(toolReply(f.supplierId));
+    final task = await pending;
+    expect(task.state, PersonalTaskState.failed);
+    expect(task.error, anyOf(contains('model_failed'), contains('model_denied'), contains('tool_denied')));
+    expect(f.transport.bodies, hasLength(1));
+    expect(f.receiptRows, isEmpty);
+    final frames = f.frames('core.bin');
+    expect(frames.where((frame) => frame['kind'] == 'prepare'), isEmpty);
+    expect(frames.where((frame) => frame['kind'] == 'invoke'), isEmpty);
+    f.assertNoManufacturedAuthority();
+    f.assertReaped();
+  });
 
   for (final id in ['x' * 129, 'unsafe\nid', 'unsafe id', '供应商']) {
     test('unsupported identifier encoding or bound ${jsonEncode(id)} fails before invoke', () async {
@@ -196,9 +279,14 @@ void main() {
       f.transport.replies.add((_) => toolReply(id));
       final task = await f.start();
       expect(task.state, PersonalTaskState.failed);
+      final frames = f.frames('core.bin');
+      f.assertRejection(task.error, 'model_failed',
+        prepareCount: frames.where((frame) => frame['kind'] == 'prepare').length,
+        invokeCount: frames.where((frame) => frame['kind'] == 'invoke').length);
       expect(f.transport.bodies, hasLength(1));
       expect(f.receiptRows, isEmpty);
-      expect(f.frames('core.bin').where((frame) => frame['kind'] == 'invoke'), isEmpty);
+      expect(frames.where((frame) => frame['kind'] == 'prepare'), isEmpty,
+        reason: 'ordinary scope denial cannot substitute for identifier validation');
     });
   }
 
@@ -290,6 +378,7 @@ void main() {
     expect(second.state, PersonalTaskState.failed);
     expect(second.error, contains('core_busy'));
     expect(f.transport.bodies, hasLength(1));
+    f.assertExactlyOneLaunch();
     final first = f.host.foundation.tasks().singleWhere((task) => task.id != second.id);
     await f.host.personalAgent.cancel(first.id);
     expect((await pending).state, PersonalTaskState.cancelled);
@@ -370,16 +459,23 @@ void main() {
     expect(f.host.foundation.tasks(), hasLength(1));
   });
 
-  for (final mode in ['wrong_task', 'wrong_attempt', 'wrong_turn', 'unknown_key',
-    'double_request_id', 'boolean_request_id', 'duplicate_key', 'bad_utf8',
-    'zero_length', 'oversized_length', 'truncated_frame']) {
+  for (final entry in const {
+    'wrong_task': 'callback_mismatch', 'wrong_attempt': 'callback_mismatch',
+    'wrong_turn': 'callback_mismatch', 'unknown_key': 'host_protocol',
+    'double_request_id': 'host_protocol', 'boolean_request_id': 'host_protocol',
+    'duplicate_key': 'host_protocol', 'bad_utf8': 'host_protocol',
+    'zero_length': 'host_protocol', 'oversized_length': 'host_budget',
+    'truncated_frame': 'host_protocol', 'truncated_header': 'host_protocol',
+    'clean_eof': 'host_eof',
+  }.entries) {
+    final mode = entry.key;
     test('negative child rejects malformed or uncorrelated callback $mode', () async {
       final f = await HostFixture.open(negativeMode: mode);
       addTearDown(f.dispose);
       final task = await f.start();
-      expect(task.state, isNot(PersonalTaskState.succeeded));
+      expect(task.state, entry.value == 'host_eof' ? PersonalTaskState.interrupted : PersonalTaskState.failed);
       expect(task.terminal, isTrue);
-      expect(task.error, isNotEmpty);
+      f.assertRejection(task.error, entry.value);
       expect(f.transport.bodies, isEmpty);
       expect(f.receiptRows, isEmpty);
       f.assertReaped();

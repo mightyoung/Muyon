@@ -73,6 +73,12 @@ def main():
         sys.stdout.buffer.write(struct.pack('>I', 100) + b'{}')
         sys.stdout.buffer.flush()
         return
+    elif mode == 'truncated_header':
+        sys.stdout.buffer.write(b'\x00\x00')
+        sys.stdout.buffer.flush()
+        return
+    elif mode == 'clean_eof':
+        return
     elif mode == 'raw_stderr':
         sys.stderr.write('UNTRUSTED_CHILD_ERROR_CANARY_92d1')
         return
