@@ -47,8 +47,24 @@ final class CoreAgentProcess {
   final AgentContext ctx;
   final CoreAgentModel model;
   _Session? _active;
+  final _queuedCancels = <String>{};
 
   Future<void> run(PersonalTask task) async {
+    if (ctx.repository.task(task.id)?.terminal == true) {
+      _queuedCancels.remove(task.id);
+      return;
+    }
+    if (_queuedCancels.remove(task.id) || ctx.closing) {
+      await ctx.commit(
+        task.copy({
+          'state': ctx.closing ? 'interrupted' : 'cancelled',
+          'stage': ctx.closing ? 'interrupted' : 'cancelled',
+          'error': ctx.closing ? 'host_closed' : null,
+        }),
+        expected: {PersonalTaskState.queued, PersonalTaskState.running},
+      );
+      return;
+    }
     if (_active != null) {
       await ctx.fail(task, 'core_busy', code: 'core_busy');
       return;
@@ -64,7 +80,20 @@ final class CoreAgentProcess {
 
   Future<void> cancel(String id, {bool closing = false}) async {
     final session = _active;
-    if (session?.task.id == id) session!.stop(closing);
+    if (session?.task.id == id) {
+      session!.stop(closing);
+      return;
+    }
+    // Persisted facade ownership starts before appendMessage completes. Revoke
+    // synchronously so a resumed start cannot launch during the database await.
+    _queuedCancels.add(id);
+    final task = ctx.repository.task(id);
+    if (task != null && !task.terminal) {
+      await ctx.commit(
+        task.copy({'state': 'cancelled', 'stage': 'cancelled'}),
+        expected: {PersonalTaskState.queued, PersonalTaskState.running},
+      );
+    }
   }
 
   void close() => _active?.stop(true);
@@ -640,6 +669,10 @@ final class _Session {
     }
     if (invokeAdmitted && code == 'projection_rejected') {
       await ctx.fail(latest, code, code: code);
+      return;
+    }
+    if (code == 'host_eof' && !stopped && !ctx.closing) {
+      await ctx.settle(latest, PersonalTaskState.interrupted, 'host_eof');
       return;
     }
     if (stopped || ctx.closing) {
