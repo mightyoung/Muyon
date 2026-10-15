@@ -17,12 +17,29 @@ def transcript(component):
 
 class FullTests(unittest.TestCase):
     def test_each_source_inventory_accepts_only_complete_green(self):
-        for component, total in [('core', 94), ('plugin', 21), ('host', 20)]:
+        for component, total in [('core', 94), ('plugin', 21), ('host', 25)]:
             result = rust(component, transcript(component), 0)
             self.assertTrue(result['accepted'], component)
             self.assertEqual(result['observed_tests'], total)
         self.assertEqual(rust('core', transcript('core'), 0)['families']['legacy-core'], 88)
         self.assertEqual(rust('core', transcript('core'), 0)['unit_tests'], 4)
+
+    def test_host_twenty_five_rejects_previous_twenty_and_missing_safety_case(self):
+        added = {
+            'missing_selected_refs_execute_zero_before_physical_read',
+            'revoke_after_preinvoke_snapshot_executes_zero',
+            'native_store_restore_rejects_forged_receipts_and_facts',
+            'native_store_persist_budget_never_writes_unreadable_snapshot',
+            'cancel_during_handler_retains_raw_receipt_without_projection',
+        }
+        raw = transcript('host')
+        for name in added:
+            self.assertFalse(rust('host', raw.replace(f'test {name} ... ok', ''), 0)['accepted'])
+        old = raw
+        for name in added:
+            old = old.replace(f'test {name} ... ok\n', '')
+        old = old.replace('25 passed', '20 passed')
+        self.assertFalse(rust('host', old, 0)['accepted'])
 
     def test_multiple_failed_targets_remain_invalid_full(self):
         raw = transcript('core').replace(' ... ok', ' ... FAILED').replace('test result: ok.', 'test result: FAILED.')

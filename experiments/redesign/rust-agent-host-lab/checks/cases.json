@@ -232,6 +232,7 @@
             "actual_value_review_denies_sensitive_projection",
             "all_native_mappings_use_physical_store_and_same_two_turn_runtime",
             "cancel_closes_owned_child_and_executes_zero",
+            "cancel_during_handler_retains_raw_receipt_without_projection",
             "catalog_known_but_unadvertised_call_executes_zero",
             "duplicate_model_call_never_reexecutes_handler",
             "final_payload_policy_revoke_blocks_second_endpoint_admission",
@@ -240,10 +241,14 @@
             "invalid_host_enrollment_publishes_nothing_and_active_catalog_is_sealed",
             "ledger_failure_sends_zero_bytes",
             "malformed_oversize_eof_child_frames_invalidate_session",
+            "missing_selected_refs_execute_zero_before_physical_read",
             "native_host_executes_registered_read",
+            "native_store_persist_budget_never_writes_unreadable_snapshot",
+            "native_store_restore_rejects_forged_receipts_and_facts",
             "physical_handler_rejects_same_id_wrong_business_type",
             "receipt_time_revoke_exports_no_projection",
             "restart_retains_raw_evidence_without_live_export_authority",
+            "revoke_after_preinvoke_snapshot_executes_zero",
             "silent_child_deadline_is_bounded_and_reaped",
             "two_turn_model_bytes_contain_only_validated_projection",
             "unauthorized_read_executes_zero",
@@ -254,11 +259,11 @@
       },
       "sources": {
         "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs": {
-          "commit": "7e48c6ebf2ec796fbc376ed9c6749992c6a2e744",
-          "sha256": "b973f6598ac8b5121d0b0c65b467ec812a4ae9e0217296604ee6392f624a667d"
+          "commit": "5123a135d6ac0f73049ff389733f13b9b38f39c5",
+          "sha256": "bfc0021a6462374128733cd5a7c6dd3acdf85d09c368135581713b416a2ecd22"
         }
       },
-      "expected_total": 20
+      "expected_total": 25
     }
   },
   "python": {
