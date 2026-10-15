@@ -27,6 +27,10 @@ on:
         type: choice
         options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red]
         default: full
+      emit_android_source:
+        description: 'Diagnostic only: bounded generated Android source in service-jvm-red ordinary logs'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -86,11 +90,14 @@ jobs:
       - name: Required compiled reachable RED stays a CI failure
         env:
           BRIDGE_RED_MODE: ${{ matrix.suite }}
+          BRIDGE_EMIT_ANDROID_SOURCE: ${{ inputs.emit_android_source && 'true' || 'false' }}
         run: |
+          binding_args=()
+          if [[ "$BRIDGE_EMIT_ANDROID_SOURCE" == true ]]; then binding_args=(--emit-android-source); fi
           python3 -B experiments/redesign/android-rust-bridge-lab/checks/linux_gate.py \
             --mode "$BRIDGE_RED_MODE" \
             --evidence-dir "$RUNNER_TEMP/android-bridge-evidence" \
-            --work-dir "$RUNNER_TEMP/android-bridge-work"
+            --work-dir "$RUNNER_TEMP/android-bridge-work" "${binding_args[@]}"
       - name: Preserve raw setup build generation load and behavior evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
