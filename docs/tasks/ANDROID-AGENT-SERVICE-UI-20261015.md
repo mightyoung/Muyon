@@ -69,3 +69,16 @@ Final exact-source check: old groups 16 + 22 + 29 and new 47, **114 PASS**, exit
 | --- | --- |
 | `phase1-query-selection-red.log` | `3d81379da1cb2c6c06e4a9a96bed2a73c5fb9299bb8fd3220bad0b7783222ea0` |
 | `phase1-query-selection-green.log` | `908835c32be651ff07a084423f900b74e6d05d8310f36b74e724db5fadf83d9f` |
+
+## Phase 2a: closed IPC metadata codec
+
+Refusing codec checkpoint `4a83f0e9` compiles; existing 114 named checks pass and 6/9 newly defined codec cases fail (exit 1). The first five failures explicitly refuse valid closed replies; truncated-input coverage also fails because no valid encoded sibling exists yet. No claim that these six failures represent six separate native boundaries.
+
+Implemented a versioned binary metadata-only reply schema: local transport status without native identity, actual connected metadata/lease/phase, six sealed run snapshot shapes, queued versus Existing start, closed control/rejection/unknown/busy outcomes. The codec carries no raw data, answer/history, authority payload, counters, dynamic method/map or native object. It validates actual identity/receipt relationships; unsupported versions/tags, truncation/trailing bytes, invalid fields and oversized bytes cannot become a successful result. Payload cap 7680 bytes leaves room for a separately enforced actual Android 8KiB Parcel envelope; this is not a claim that bytes.length proves the Parcel cap.
+
+Exact-source JVM checks: old 114 + new 9 = **123 PASS**, exit 0. Android Parcel/Binder runtime remains NOT_RUN. Actual AIDL onTransact envelope checks, liveness registry and generated Object adapter are subsequent work. No permission/dependency/runtime change.
+
+| Phase 2a log | SHA-256 |
+| --- | --- |
+| `phase2-codec-red.log` | `a4d6c53e762d43eeda12d1c1db5d22b6623544211371212a7e954d9a7e53fd39` |
+| `phase2-codec-green.log` | `e7b5cd1ad15d3ed9558c70b5cc3ad6a77b405664ce6c76460be53e0b367d071e` |
