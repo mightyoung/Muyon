@@ -9,7 +9,6 @@ on:
       - 'experiments/redesign/core-agent-lab/**'
       - '.github/workflows/core-agent-lab.yml'
       - 'docs/tasks/REDESIGN-CORE-AGENT-*.md'
-  workflow_dispatch:
 
 permissions:
   contents: read
