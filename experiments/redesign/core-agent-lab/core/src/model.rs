@@ -81,3 +81,13 @@ pub enum NativeMessage {
 /// Host-bound operation name, reversible wire name and declared input schema.
 #[derive(Clone,Debug)]
 pub struct ToolDefinition { pub name:String, pub wire_name:String, pub parameters:crate::wire_json::Json }
+
+/// Validate the bound name table without manufacturing input-schema authority.
+pub(crate) fn validate_tools(tools:&[ToolDefinition])->Result<()> {
+    let mut names=std::collections::BTreeSet::new();let mut wire=std::collections::BTreeSet::new();
+    if tools.len()>128{return Err("wire_tool_catalog".into());}
+    for t in tools {
+        if !identifier(&t.name)||!identifier(&t.wire_name)||!names.insert(&t.name)||!wire.insert(&t.wire_name)||t.wire_name.contains('.')||t.parameters.object().is_err()||t.parameters.encoded_len()?>16384{return Err("wire_tool_catalog".into());}
+    }
+    Ok(())
+}

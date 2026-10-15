@@ -145,6 +145,52 @@ mod pump_tests {
 }
 
 /// Actual native payload encoder. Host must authorize the returned exact bytes.
-pub fn encode_registered_request(_request:&ModelRequest,_history:&Json,_tools:&[crate::model::ToolDefinition],_model:&str)->Result<Vec<u8>> {
-    Err("native_protocol_unsupported".into())
+pub fn encode_registered_request(request:&ModelRequest,history:&Json,tools:&[crate::model::ToolDefinition],model:&str)->Result<Vec<u8>> {
+    crate::model::validate_tools(tools)?;
+    if !identifier(&request.task)||!identifier(&request.attempt)||request.turn==0||!identifier(model){return Err("wire_request_identity".into());}
+    let mut published=std::collections::BTreeSet::new();let mut declarations=Vec::new();
+    for name in &request.tools{
+        let t=tools.iter().find(|t|&t.name==name).ok_or("wire_tool_catalog")?;
+        if !published.insert(name){return Err("wire_tool_catalog".into());}
+        declarations.push(object([("type",string("function")),("function",object([("name",string(&t.wire_name)),("parameters",t.parameters.clone())]))]));
+    }
+    let rows=history.array()?;if rows.is_empty()||rows.len()>512||history.encoded_len()?>65536{return Err("wire_request_limit".into());}
+    let mut mapped=Vec::new();let mut pending:Option<String>=None;let mut calls=std::collections::BTreeSet::new();
+    for row in rows {
+        let fields=row.object()?;let role=fields.get("role").ok_or("wire_history_call")?.string()?;
+        if pending.is_some()&&role!="tool"{return Err("wire_unpaired_history".into());}
+        let message=match role {
+            "user"=>{if fields.len()!=2{return Err("wire_history_call".into());}fields.get("content").ok_or("wire_history_call")?.string()?;row.clone()},
+            "assistant"=>{
+                let content=fields.get("content").ok_or("wire_history_call")?;
+                if !matches!(content,Json::String(_)|Json::Null){return Err("wire_history_call".into());}
+                if let Some(raw)=fields.get("tool_calls"){
+                    if fields.len()!=3 || !matches!(content,Json::Null) && content.string()? != ""{return Err("wire_history_call".into());}
+                    let raw=raw.array()?;if raw.len()!=1{return Err("wire_history_call".into());}
+                    let call=raw[0].object()?;if call.len()!=3||call.get("type")!=Some(&string("function")){return Err("wire_history_call".into());}
+                    let id=call.get("id").ok_or("wire_history_call")?.string()?;
+                    if !identifier(id)||!calls.insert(id.to_string()){return Err("wire_history_conflict".into());}
+                    let function=call.get("function").ok_or("wire_history_call")?.object()?;
+                    if function.len()!=2{return Err("wire_history_call".into());}
+                    let name=function.get("name").ok_or("wire_history_call")?.string()?;
+                    let t=tools.iter().find(|t|t.name==name).ok_or("wire_history_call")?;
+                    let arguments=function.get("arguments").ok_or("wire_history_call")?.string()?;
+                    if arguments.len()>8192{return Err("wire_request_limit".into());}wire_json::parse(arguments.as_bytes())?.object()?;
+                    pending=Some(id.to_string());
+                    let call=object([("id",string(id)),("type",string("function")),("function",object([("name",string(&t.wire_name)),("arguments",string(arguments))]))]);
+                    object([("role",string("assistant")),("content",content.clone()),("tool_calls",Json::Array(vec![call]))])
+                }else{if fields.len()!=2{ return Err("wire_history_call".into());}content.string()?;row.clone()}
+            },
+            "tool"=>{
+                if fields.len()!=3{return Err("wire_unpaired_history".into());}
+                let id=fields.get("tool_call_id").ok_or("wire_unpaired_history")?.string()?;
+                if pending.as_deref()!=Some(id){return Err("wire_unpaired_history".into());}
+                fields.get("content").ok_or("wire_unpaired_history")?.string()?;pending=None;row.clone()
+            },
+            _=>return Err("wire_history_call".into()),
+        };mapped.push(message);
+    }
+    if pending.is_some(){return Err("wire_unpaired_history".into());}
+    let body=object([("model",string(model)),("stream",Json::Bool(true)),("stream_options",object([("include_usage",Json::Bool(true))])),("messages",Json::Array(mapped)),("tools",Json::Array(declarations))]);
+    if body.encoded_len()?>65536{return Err("wire_request_limit".into());}Ok(body.encode().into_bytes())
 }

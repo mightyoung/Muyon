@@ -36,7 +36,8 @@ impl State {
         let nonce=SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_|"clock")?.as_nanos();
         let task=format!("t-{}-{nonce}",std::process::id());
         Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script:String::new(),scope,facts:HostFacts{mode:Mode::ReadOnly,high:true,hard_ok:false,revoked:true,scope_ok:false,classification_ok:false,confirmed:false,tainted:true,new_destination:true},limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior:"normal".into(),resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false,wire:None,wire_counters:WireCounters::default(),native:Vec::new(),pending_call_ref:String::new()})
-    }    pub fn with_wire(mut self,config:WireConfig)->Result<Self>{config.validate()?;self.native=self.context.iter().map(|m|NativeMessage::User(m.text.clone())).collect();self.script.clear();self.wire=Some(config);Ok(self)}
+    }
+    pub fn with_wire(mut self,config:WireConfig)->Result<Self>{config.validate()?;self.native=self.context.iter().map(|m|NativeMessage::User(m.text.clone())).collect();self.script.clear();self.wire=Some(config);Ok(self)}
     pub fn encode(&self)->String{
         let mut m=BTreeMap::new();
         macro_rules! put {($k:expr,$v:expr)=>{m.insert($k.to_string(),$v.to_string());};}
@@ -205,15 +206,13 @@ impl Agent {
     pub fn run_with_ports(&mut self,provider:&mut dyn Provider,ports:&mut crate::host_session::HostPorts,h:&Hooks)->Result<()> {
         self.drive(provider,Some(ports),h)
     }
-    pub fn run_with_runtime_ports(&mut self,_provider:&mut dyn Provider,ports:&mut dyn crate::agent_ports::AgentPorts,_h:&Hooks)->Result<()> {
-        ports.check_control()?;
-        ports.failure(&mut self.state,"native_ports_unsupported");
-        ports.persist(self)
+    pub fn run_with_runtime_ports(&mut self,provider:&mut dyn Provider,ports:&mut dyn crate::agent_ports::AgentPorts,h:&Hooks)->Result<()> {
+        self.drive(provider,Some(ports),h)
     }
-    fn save_drive(&self,ports:Option<&crate::host_session::HostPorts>)->Result<()> {
+    fn save_drive(&self,ports:Option<&dyn crate::agent_ports::AgentPorts>)->Result<()> {
         if let Some(ports)=ports{ports.persist(self)}else{self.state.save(&self.dir)}
     }
-    fn drive(&mut self,provider:&mut dyn Provider,mut ports:Option<&mut crate::host_session::HostPorts>,h:&Hooks)->Result<()> {
+    fn drive(&mut self,provider:&mut dyn Provider,mut ports:Option<&mut dyn crate::agent_ports::AgentPorts>,h:&Hooks)->Result<()> {
         if self.state.wire_counters.inflight{self.state.stop("failed","wire_interrupted");return self.save_drive(ports.as_deref());}
         if self.state.evidence_hold || self.state.unresolved{return Ok(());}
         if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.save_drive(ports.as_deref());}
@@ -227,7 +226,7 @@ impl Agent {
             self.state.wire_counters.inflight=self.state.wire.is_some();
             if self.state.wire.is_some(){self.state.wire_counters.usage=crate::wire_sse::Usage::default();}
             self.state.stop("failed","provider_interrupted");self.save_drive(ports.as_deref())?;
-            let tools=if ports.is_some(){if self.state.counters.steps==1{vec!["inquiry.object".into()]}else{Vec::new()}}else{vec!["fixture.record".into()]};
+            let tools=if let Some(host)=ports.as_deref_mut(){match host.advertised_tools(&self.state){Ok(tools)=>tools,Err(reason)=>{host.failure(&mut self.state,&reason);break;}}}else{vec!["fixture.record".into()]};
             let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools};
             let position=self.state.position;let history=self.state.native.clone();
             let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h,host:ports.is_some()});
