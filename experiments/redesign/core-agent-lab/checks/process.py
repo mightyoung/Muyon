@@ -98,9 +98,9 @@ class AgentProcessTests(unittest.TestCase):
         self.assertIn('error=', result.stderr)
         return result
 
-    def start(self, directory, script='happy.tsv', **facts):
+    def start(self, directory, script='happy.tsv', input_text='synthetic user input', **facts):
         aliases = {'read_only': 'read-only', 'ask': 'ask-every-time', 'full_allow': 'full-allow'}
-        args = ['--script', str(LAB / 'fixtures' / script), '--input', 'synthetic user input']
+        args = ['--script', str(LAB / 'fixtures' / script), '--input', input_text]
         for key, value in facts.items():
             if key == 'tool_failure':
                 if value:
@@ -398,7 +398,18 @@ class AgentProcessTests(unittest.TestCase):
         for option in ['max_context', 'max_output', 'max_total']:
             with self.subTest(option=option):
                 directory = self.new_directory()
-                self.start(directory, mode='full_allow', **{option: 1})
+                if option == 'max_context':
+                    # Oversized initial context must fail closed before task creation.
+                    rejected = self.new_directory()
+                    error = self.command('start', rejected, '--script', LAB / 'fixtures/happy.tsv',
+                                         '--input', 'synthetic user input', '--max-context', '1', code=2)
+                    self.assertIn('input_context_limit', error.stderr)
+                    self.assert_effects(rejected, 0)
+                    # A valid empty initial context then grows beyond 16 bytes on
+                    # the actual provider tool response, before any effect admission.
+                    self.start(directory, mode='full_allow', input_text='', max_context=16)
+                else:
+                    self.start(directory, mode='full_allow', **{option: 1})
                 stopped = self.command('run', directory)
                 self.assertEqual(stopped['status'], 'budget_exhausted')
                 self.assert_effects(directory, 0)
