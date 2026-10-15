@@ -120,3 +120,12 @@ fn cached_completed_projection_cannot_replace_original_evidence(){
     let inspect=command(&dir,"inspect",&[]);assert!(inspect.contains("status=outcome_unknown\n"));assert!(inspect.contains("effects=unknown\n"));
     let run=command(&dir,"run",&[]);assert!(run.contains("status=outcome_unknown\n"));assert!(run.contains("model_calls=2\n"));
 }
+#[test]
+fn resume_confirmation_requires_an_existing_exact_pending_invocation(){
+    let dir=fixture(SCRIPT,&["--mode","ask-every-time"]);
+    let output=Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab")).args(["run","--dir"]).arg(&dir).args(["--confirmed","true"]).output().unwrap();
+    assert!(!output.status.success(),"a resume confirmation must not preauthorize an unseen model call");
+    let before=command(&dir,"inspect",&[]);assert!(before.contains("model_calls=0\n"));assert!(before.contains("effects=0\n"));
+    assert!(command(&dir,"run",&[]).contains("status=waiting\n"));
+    assert!(command(&dir,"run",&["--confirmed","true"]).contains("status=completed\n"));
+}

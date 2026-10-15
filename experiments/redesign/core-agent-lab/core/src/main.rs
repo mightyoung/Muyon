@@ -35,7 +35,11 @@ fn execute()->Result<()> {
     let _guard=store::lock(&dir)?;let mut agent=Agent::open(&dir)?;
     match command.as_str(){
         "run"=>{
-            if let Some(v)=opts.remove("--confirmed"){agent.state.facts.confirmed=boolean(&v)?;}
+            if let Some(v)=opts.remove("--confirmed"){
+                let confirmed=boolean(&v)?;
+                if confirmed && (agent.state.status!="waiting" || agent.state.binding.is_none() || agent.state.unresolved){return Err("confirmation_requires_pending_invocation".into());}
+                agent.state.facts.confirmed=confirmed;
+            }
             if let Some(v)=opts.remove("--hard-ok"){agent.state.facts.hard_ok=boolean(&v)?;}
             if let Some(v)=opts.remove("--revoked"){agent.state.facts.revoked=boolean(&v)?;}
             if let Some(v)=opts.remove("--scope-ok"){agent.state.facts.scope_ok=boolean(&v)?;}
