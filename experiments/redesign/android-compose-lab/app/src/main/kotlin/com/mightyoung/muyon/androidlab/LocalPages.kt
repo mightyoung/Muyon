@@ -191,7 +191,7 @@ internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onThe
                 Text("内容仅在内存中，关闭或重建应用后不保证保留。", style = MaterialTheme.typography.bodySmall)
             }
             item { TextButton(onClick = onOptions) { Text("模型、附件与执行能力") } }
-            item { Text("Muyon", style = MaterialTheme.typography.titleMedium); Text("原创可调整布局；未验证与参考应用的完整页面像素一致性。", style = MaterialTheme.typography.bodySmall) }
+            item { Text("Muyon", style = MaterialTheme.typography.titleMedium); Text("本地模式 · 未连接执行服务", style = MaterialTheme.typography.bodySmall) }
         }
     }
 }
