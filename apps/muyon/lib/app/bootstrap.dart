@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import '../platform/inquiry_ui_planning_source.dart';
 import '../assistant/ui_presentation_preference.dart';
@@ -30,6 +31,7 @@ import 'accepted_research_imports.dart';
 import '../assistant/execution_store.dart';
 import '../assistant/dream/dream_service.dart';
 import '../assistant/personal_agent.dart';
+import '../assistant/core_agent_process.dart';
 import '../platform/foundation_repository.dart';
 import '../platform/memory_review.dart';
 import '../platform/tool_registry.dart';
@@ -229,6 +231,9 @@ class MuyonHost {
     Future<String?> Function(TaskOffer offer)? taskExecutor,
     OutboundContentReviewer? localToolReviewer,
     OutboundContentReviewer? localModelReviewer,
+    CoreAgentProcessConfig? coreAgentProcess,
+    /// Testing-only offline transport; the shared gateway still owns egress.
+    HttpClient Function()? modelClientFactory,
 
     /// Replaces the module catalog; for tests of the generic module path.
     Iterable<BusinessModule>? modules,
@@ -294,6 +299,7 @@ class MuyonHost {
         workspaces: host.workspaces,
         gateway: OpenAiModelGateway(
           const MethodChannelSecretStore(),
+          clientFactory: modelClientFactory,
           ledger: host.outbound,
           authorizationPolicy: host.authorizationPolicy,
         ),
@@ -333,6 +339,7 @@ class MuyonHost {
         );
       };
       host.personalAgent = PersonalAgent(
+        coreAgentProcess: coreAgentProcess,
         repository: host.foundation,
         gateway: host.services.gateway,
         tools: host.tools,

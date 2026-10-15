@@ -16,6 +16,7 @@ import '../platform/grants/host_scope_authority.dart';
 import 'agent_budget.dart';
 import 'agent_event_sink.dart';
 import 'context_compactor.dart';
+import 'core_agent_process.dart';
 import 'model_request_gate.dart';
 import 'tool_selection.dart';
 import 'agent_compaction_flow.dart';
@@ -61,6 +62,7 @@ class PersonalAgent {
     required this.repository,
     required this.gateway,
     required this.tools,
+    this.coreAgentProcess,
     this.executionDeviceId = 'this-device',
     this.toolReviewer,
     this.modelAuthorization,
@@ -434,6 +436,7 @@ class PersonalAgent {
   final FoundationRepository repository;
   final OpenAiModelGateway gateway;
   final ToolRegistry tools;
+  final CoreAgentProcessConfig? coreAgentProcess;
   final String executionDeviceId;
   final OutboundContentReviewer? toolReviewer;
   final HostModelAuthorization? modelAuthorization;
@@ -557,6 +560,7 @@ class PersonalAgent {
     String? previousAttemptId,
   }) => _trackStart(() async {
     if (_ctx.closing) throw StateError('Assistant is closing');
+    coreAgentProcess?.validate();
     final (task, selection) = _factory.chatTask(
       conversationId: conversationId,
       prompt: prompt,
@@ -571,7 +575,13 @@ class PersonalAgent {
       modelAuthorization?.bindLiveProfile(task.id, profile);
     }
     await repository.appendMessage(conversationId, 'user', prompt.trim());
-    if (profile == null) {
+    if (coreAgentProcess?.enabled == true) {
+      await _ctx.fail(
+        task,
+        'core_backend_unavailable',
+        code: 'core_backend_unavailable',
+      );
+    } else if (profile == null) {
       if (selection.ruleToolId == null) {
         await _ctx.finish(task, '当前使用离线模式。请选择下方已注册工具进行真实查询或计算，或选择模型开始对话。', []);
       } else {
