@@ -56,9 +56,9 @@ No observed package URI identifies a WorkBuddy application page. Absence from th
 | Draft, last input focus, per-page scroll memory | Approved Muyon behavior and immutable state checks | Existing `ShellState` and hoisted Compose objects; device behavior remains unexecuted |
 | Task/permission presentation | Approved Muyon interrupted/cancelling/platform-owner distinctions | Preserve safety copy and disconnected Rust port; do not fabricate tasks, grants or results |
 | Input icons, sheets, page routes | Prior static resource/name evidence, not page call sites | Candidate component inventory only; no new placement, enabled action or state transition inferred |
-| Complete page layout, theme mapping, typography, interaction timing | No screenshot, Widget tree or application call graph recovered | Block pixel implementation until a complete target-page reference or traceable layout/call-site evidence exists |
+| Complete page layout, theme mapping, typography, interaction timing | No screenshot, Widget tree or application call graph recovered | Per the later09:05 user authorization, continue a reasonable original adjustable layout from operating logic; only full-page fidelity claims require further evidence |
 
-The previously viewed10 PNG remain resource pixels, not runtime page screenshots. A minimum first-page reference remains a complete task/list or assistant page with top/bottom chrome, version, device dimensions/density, font scale and theme; applicable empty/populated/menu states must be identified. An APK resource or rebuilt collage does not substitute for that input. Existing original frontend work can continue against the approved Muyon behavior contract without inventing WorkBuddy pixel claims.
+The previously viewed10 PNG remain resource pixels, not runtime page screenshots. A minimum reference for a future pixel-comparison claim remains a complete task/list or assistant page with top/bottom chrome, version, device dimensions/density, font scale and theme; applicable empty/populated/menu states must be identified. This input does not block the later-authorized original frontend implementation. An APK resource or rebuilt collage does not substitute for that input. Existing original frontend work can continue against the approved Muyon behavior contract without inventing WorkBuddy pixel claims.
 
 ## Additional provider boundary
 
@@ -68,4 +68,4 @@ Actual Java method decompilation has **not run**. The official Android guide req
 
 Before this evidence-only change, [normal GitHub CI run38707183090](https://github.com/mightyoung/Muyon/actions/runs/38707183090) succeeded at `451b3a2cb9423c02294ed00266fa1f6cc5c61a60`: actual16/16 JVM state checks, `compileDebugKotlin`, `compileDebugAndroidTestKotlin`, `assembleDebug` and `assembleDebugAndroidTest`. Device installation/runtime/rendering remain **NOT_RUN**, Rust **NOT_CONNECTED**, full-page pixel fidelity **UNVERIFIED**. The earlier `VERIFICATION.md` records the initial local-tool baseline; it does not erase this later remote compilation evidence.
 
-No source behavior, Gradle dependency, workflow, Rust/plugin path, raw decompilation output or third-party asset changes in this commit. No additional local SDK/Gradle build was attempted.
+This initial evidence-only record was subsequently followed by the authorized original local-UI implementation described in LOCAL-UI-IMPLEMENTATION.md. Raw decompilation output and third-party assets remain outside Git. No additional local SDK/Gradle build was attempted.

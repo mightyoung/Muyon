@@ -94,5 +94,6 @@ fun main() {
         catch (error: Throwable) { failed++; println("FAIL $name: ${error.message}") }
     }
     check(failed == 0) { "$failed/${checks.size} state checks failed" }
+    runLocalUiChecks()
     println("${checks.size}/${checks.size} pure JVM state checks passed; Compose/Android runtime NOT_RUN")
 }

@@ -5,10 +5,10 @@ Independent UI slice at `31b9b6fc1f7f8b27952533ca141e901676ba90e8`, owned solely
 ## What exists
 
 - Kotlin immutable shell memory: assistant / tasks / data / settings, assistant default, 900 logical-pixel bar/rail boundary, exact raw UTF-16 draft, scroll coordinates, last input focus marker. This is in-process local UI memory, not durable storage or request state.
-- A Compose Android app source with hoisted scroll objects, keyed content, conditional focus restoration after the input is mounted, live disconnected status and a plain temporary input. The neutral Material scaffold is **not** a reconstructed WorkBuddy screen or measured visual design.
+- An original adjustable Compose frontend with four destinations, local conversation creation/switching/search/rename, user-authored notes, fixed composer, record search/details, capability sheets, local theme selection and retained task filter. Hoisted per-conversation scroll objects and input focus keep unsaved text separate. See LOCAL-UI-IMPLEMENTATION.md. The layout is **not** a measured WorkBuddy reconstruction.
 - `RustUiPort` intentionally has only `NOT_CONNECTED`. No successful task/receipt, authority, submit/cancel, HTTP/JNI transport, credential, real model or native library capability. No INTERNET permission. The default app shows the actual disconnected condition; synthetic task states occur only in display checks.
 - Safety copy distinguishes queued/waiting/running/succeeded/failed/cancelled/paused/interrupted; interruption retains unknown-outcome advice even for platform tasks; cancellation in flight cannot imply final cancellation. These strings do not grant actions or prove host results. Production Rust DTOs/authority remain owned elsewhere.
-- A source instrumentation check for draft/focus and 899→900 navigation. It has not run and is not device evidence.
+- Four source instrumentation checks cover draft/focus and899→900 navigation, local save/record return, conversation drafts/rename cancellation, and preferences/disabled capabilities. They are not executed device evidence.
 
 No APK assets, font files, proprietary illustration or recovered competitor source is copied. Muyon remains the lab name. Real WorkBuddy screenshots, runtime Widget tree, pixel comparison, Android execution/TalkBack/IME/rotation and process-death persistence remain absent. Workspace/back-stack business navigation is not implemented in this first skeleton.
 
@@ -24,7 +24,7 @@ MUYON_UI_KOTLINC=/tmp/muyon-native-ui-tools-20261015/kotlinc/bin/kotlinc bash ru
 
 `MUYON_UI_KOTLINC`, `MUYON_UI_JAVA` and `MUYON_UI_OUTPUT` allow other already-installed tools/private `/tmp` outputs. The script never installs dependencies. It compiles real Kotlin/JVM bytecode at target17 and executes the complete suite. JVM state checks do not compile or execute Compose or Rust.
 
-## Normal CI compilation path (not automatically enabled)
+## Independent normal CI compilation path
 
 Requirements: JDK17, Gradle8.13, existing approved Android SDK platform36/build-tools35.0.0; dependency resolution via Google Maven/Maven Central/Gradle plugin portal. The project pins AGP8.11.1, Kotlin+Compose compiler2.2.20, Compose BOM2025.09.01 and activity-compose1.11.0. No wrapper binary or SDK download/license acceptance script is added.
 
@@ -34,7 +34,7 @@ From this directory, with the SDK already available:
 MUYON_UI_GRADLE=gradle bash run-ci-checks.sh
 ```
 
-This runs `:state:check :app:assembleDebug :app:assembleDebugAndroidTest`; it compiles the app and test APK, without installation or Android execution. The script returns exit2 with `NOT_RUN` if required tools are absent. An existing CI runner may supply JDK/Gradle/SDK through its normal approved setup, then invoke the command. No root workflow or other owner's build is changed. Device tests require separate explicit authorization; this script never runs `connectedAndroidTest`.
+This runs `:state:check :app:assembleDebug :app:assembleDebugAndroidTest`; it compiles the app and test APK, without installation or Android execution. The script returns exit2 with `NOT_RUN` if required tools are absent. An existing CI runner may supply JDK/Gradle/SDK through its normal approved setup, then invoke the command. The dedicated android-compose-lab workflow runs only on its lab refs/eligible PRs or manual dispatch; no general CI or other owner's build is changed. Device tests require separate explicit authorization; this script never runs `connectedAndroidTest`.
 
 The state suite uses a standard-library `main` harness, not JUnit. Its Gradle `checkState` JavaExec runs the same compiled checks as `run-state-checks.sh`; `check` depends on it. The empty conventional JUnit `test` task is explicitly disabled rather than suggesting it executed these checks.
 
@@ -42,4 +42,4 @@ Version references: [Kotlin command-line compiler](https://kotlinlang.org/docs/c
 
 ## Remaining gates
 
-Compose/Gradle compilation: **NOT_RUN** locally until a real SDK/Gradle environment runs the command. Source test compilation, physical focus/scroll/keyboard/accessibility, native Rust adapter, host provenance, workspace restoration and real WorkBuddy page pixels remain unverified. No TDD/runtime claim is made for the source-only Compose adapter. The pure state suite has separately observed semantic RED→GREEN evidence.
+Compose/Gradle compilation: **NOT_RUN** locally until a real SDK/Gradle environment runs the command. Source test compilation, physical focus/scroll/keyboard/accessibility, native Rust adapter, host provenance, workspace restoration and real WorkBuddy page pixels remain unverified. No TDD/runtime claim is made for the source-only Compose adapter. The pure state suite has separately observed semantic RED→GREEN evidence. The baseline remote run38707183090 at451b3a2c actually passed app and Android-test source compilation plus16 JVM checks; this later local-UI increment adds22 named state checks and awaits its own remote compilation result.

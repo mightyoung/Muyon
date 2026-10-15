@@ -102,9 +102,12 @@ jobs:
           gradle_exit=${PIPESTATUS[0]}
           set -e
           required_exit=$gradle_exit
-          if [[ $gradle_exit -eq 0 ]] && ! grep -Fq \
-            '16/16 pure JVM state checks passed' "$LOG_DIRECTORY/required-build.log"; then
-            required_exit=1
+          if [[ $gradle_exit -eq 0 ]]; then
+            for marker in '16/16 pure JVM state checks passed' '22/22 local UI state checks passed'; do
+              if ! grep -Fq "$marker" "$LOG_DIRECTORY/required-build.log"; then
+                required_exit=1
+              fi
+            done
           fi
           printf 'gradle_exit=%s\nrequired_exit=%s\n' "$gradle_exit" "$required_exit" \
             > "$LOG_DIRECTORY/required-exit.txt"
