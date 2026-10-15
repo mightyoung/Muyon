@@ -29,7 +29,14 @@ impl State {
         let task=format!("t-{}-{nonce}",std::process::id());
         Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script,scope,facts,limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior,resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false,wire:None,wire_counters:WireCounters::default(),native:Vec::new(),pending_call_ref:String::new()})
     }
-    pub fn with_wire(mut self,config:WireConfig)->Result<Self>{config.validate()?;self.native=self.context.iter().map(|m|NativeMessage::User(m.text.clone())).collect();self.script.clear();self.wire=Some(config);Ok(self)}
+    /// Native host owns persistence and authority; this does not create fixture effects.
+    pub fn runtime(input:String,scope:String,limits:Limits)->Result<Self>{
+        limits.validate()?;
+        if input.len()>65536 || input.len() as u64>limits.context || scope.is_empty() || scope.len()>1024{return Err("invalid_start".into());}
+        let nonce=SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_|"clock")?.as_nanos();
+        let task=format!("t-{}-{nonce}",std::process::id());
+        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script:String::new(),scope,facts:HostFacts{mode:Mode::ReadOnly,high:true,hard_ok:false,revoked:true,scope_ok:false,classification_ok:false,confirmed:false,tainted:true,new_destination:true},limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior:"normal".into(),resume_status:String::new(),resume_reason:String::new(),result_pending:false,receipt_binding:None,evidence_hold:false,wire:None,wire_counters:WireCounters::default(),native:Vec::new(),pending_call_ref:String::new()})
+    }    pub fn with_wire(mut self,config:WireConfig)->Result<Self>{config.validate()?;self.native=self.context.iter().map(|m|NativeMessage::User(m.text.clone())).collect();self.script.clear();self.wire=Some(config);Ok(self)}
     pub fn encode(&self)->String{
         let mut m=BTreeMap::new();
         macro_rules! put {($k:expr,$v:expr)=>{m.insert($k.to_string(),$v.to_string());};}
@@ -197,6 +204,11 @@ impl Agent {
     /// Product host ports share this exact model/admission/control loop with fixtures.
     pub fn run_with_ports(&mut self,provider:&mut dyn Provider,ports:&mut crate::host_session::HostPorts,h:&Hooks)->Result<()> {
         self.drive(provider,Some(ports),h)
+    }
+    pub fn run_with_runtime_ports(&mut self,_provider:&mut dyn Provider,ports:&mut dyn crate::agent_ports::AgentPorts,_h:&Hooks)->Result<()> {
+        ports.check_control()?;
+        ports.failure(&mut self.state,"native_ports_unsupported");
+        ports.persist(self)
     }
     fn save_drive(&self,ports:Option<&crate::host_session::HostPorts>)->Result<()> {
         if let Some(ports)=ports{ports.persist(self)}else{self.state.save(&self.dir)}
