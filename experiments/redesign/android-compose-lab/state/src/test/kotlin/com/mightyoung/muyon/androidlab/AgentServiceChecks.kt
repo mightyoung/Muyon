@@ -102,6 +102,17 @@ fun runAgentServiceChecks() {
     cases["retirement after initialize waiter returns still performs close settlement"]={val work=ServiceManualExecutor();var settled=0;var retired=0;var ready=0;lateinit var b:AgentServiceBootstrap;val obj=object:AgentControllerLifetime{override fun retire(){retired++};override fun awaitSettled(){settled++;if(settled==1)b.retire()}};b=AgentServiceBootstrap(work,{obj},{ready++},{error("not setup failure")});b.start();work.next();check(ready==0 && retired==1 && settled==2)}
     cases["historical lookup rejects a different original request binding"]={val r=ClientRig();r.ready();val t=r.c.captureLookup(intent("original"))!!;check(r.c.apply(t,snap(completed(intent("wrong")),3))==UiAgentApply.CONFLICT);check(r.c.historical==null)}
     cases["different historical observation keys may share service revision"]={val r=ClientRig();r.ready();check(r.apply(completed(intent("one")),3,UiAgentObservationKind.HISTORICAL)==UiAgentApply.APPLIED);check(r.apply(completed(intent("two")),3,UiAgentObservationKind.HISTORICAL)==UiAgentApply.APPLIED);check(r.c.historical?.run?.intent==intent("two"))}
+    cases["old status ticket cannot replace a newer explicitly selected run"]={val r=ClientRig();r.ready();r.apply(completed(),3);val old=r.c.capture(UiAgentObservationKind.STATUS)!!;r.start("second");r.apply(UiAgentRun.Running(intent("second"),runIdentity().copy(runId="f".repeat(32))),4);check(r.c.apply(old,snap(completed(),5))==UiAgentApply.STALE);check(r.c.selectedIntent==intent("second"));val current=r.c.capture(UiAgentObservationKind.STATUS)!!;check(r.c.apply(current,snap(UiAgentRun.Running(intent("second"),runIdentity().copy(runId="f".repeat(32))),5))==UiAgentApply.APPLIED)}
+    cases["retirement signal handoff cannot settle before actual stop signal"]={
+        val backend=ServiceManualExecutor();val firstEntered=CountDownLatch(1);val firstReturn=CountDownLatch(1);val signalEntered=CountDownLatch(1);val signalReturn=CountDownLatch(1);val initDone=CountDownLatch(1);val retireDone=CountDownLatch(1)
+        val waits=java.util.concurrent.atomic.AtomicInteger();val stopped=java.util.concurrent.atomic.AtomicBoolean();val premature=java.util.concurrent.atomic.AtomicBoolean()
+        val obj=object:AgentControllerLifetime{override fun retire(){signalEntered.countDown();check(signalReturn.await(5,TimeUnit.SECONDS));stopped.set(true)};override fun awaitSettled(){if(waits.incrementAndGet()==1){firstEntered.countDown();check(firstReturn.await(5,TimeUnit.SECONDS))}else if(!stopped.get())premature.set(true)}}
+        var ready=0;val b=AgentServiceBootstrap(backend,{obj},{ready++},{error("not setup failure")});b.start()
+        Thread{try{backend.next()}finally{initDone.countDown()}}.apply{isDaemon=true}.start();check(firstEntered.await(5,TimeUnit.SECONDS))
+        Thread{try{b.retire()}finally{retireDone.countDown()}}.apply{isDaemon=true}.start()
+        try{check(signalEntered.await(5,TimeUnit.SECONDS));firstReturn.countDown();check(initDone.await(5,TimeUnit.SECONDS))}finally{firstReturn.countDown();signalReturn.countDown()}
+        check(retireDone.await(5,TimeUnit.SECONDS));check(!premature.get() && waits.get()==1 && ready==0);check(backend.jobs.size==1);backend.next();check(waits.get()==2 && stopped.get())
+    }
     var failures=0
     cases.forEach{(name,test)->try{test();println("PASS B service $name")}catch(e:Throwable){failures++;println("FAIL B service $name: ${e.message}")}}
     check(failures==0){"$failures/${cases.size} B service state checks failed"}
