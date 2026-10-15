@@ -13,7 +13,12 @@ impl PurposeReview for Review{
 static SERIAL:AtomicUsize=AtomicUsize::new(0);
 fn directory()->PathBuf{std::env::temp_dir().join(format!("muyon-native-{}-{}",std::process::id(),SERIAL.fetch_add(1,Ordering::SeqCst)))}
 fn authority()->Rc<Authority>{Rc::new(Authority(RefCell::new(AuthoritySnapshot{read:json(r#"{"allowed":true,"available":true,"scope_allowed":true,"bindings":["host-equipment-read"],"revision":"a1","binding_revision":"b1","source_revision":"s1","rule_revision":"r1","scope":"selected-e1","refs":[{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1","schema_version":1},{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1","schema_version":1}]}"#),model_allowed:true,profile:"offline-fixture".into()})))}
-fn session(a:Rc<Authority>)->SharedSession{session_handler(a,Box::new(|_:&Json|Ok(RawRead{raw:json(r#"{"label":"synthetic drill","borrower":"BORROWER_PRIVATE"}"#),projection:projection()})))}
+fn session(a:Rc<Authority>)->SharedSession{
+ let plugin=PathBuf::from(std::env::var("MUYON_PLUGIN_CONTRACT_BIN").expect("actual child binary"));let s=NativeSession::create(&directory(),&plugin,a,Rc::new(Review),"inspect selected equipment").unwrap();
+ let dir=s.borrow().store.dir.clone();let mut raw=projection();put(&mut raw,"borrower",Json::String("BORROWER_PRIVATE".into()));muyon_core_agent_lab::store::atomic(&dir,"synthetic-data.db",&raw.encode()).unwrap();
+ let handler=read_registry::PhysicalReadHandler::new(&dir,"synthetic-data.db","equipment_key","e1",vec!["equipment".into(),"label".into(),"loans".into()],Some(("include_loans".into(),"loans".into()))).unwrap();
+ s.borrow_mut().register(Enrollment{bundle:json(include_str!("../../../plugin-contract-lab/fixtures/equipment_loan.json")),operation:"equipment_loan/inspect_equipment@1".into(),tool_id:"equipment_loan.inspect_equipment".into(),binding_id:"host-equipment-read".into(),handler:Box::new(handler)}).unwrap();s
+}
 fn projection()->Json{json(r#"{"equipment":{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1","schema_version":1},"label":"synthetic drill","loans":[{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1","schema_version":1}]}"#)}
 fn session_handler(a:Rc<Authority>,handler:Box<dyn ReadHandler>)->SharedSession{
  let plugin=PathBuf::from(std::env::var("MUYON_PLUGIN_CONTRACT_BIN").expect("CI must provide actual absolute plugin child"));

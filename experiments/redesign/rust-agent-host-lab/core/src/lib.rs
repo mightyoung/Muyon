@@ -2,6 +2,7 @@
 //! the child admits contracts/tickets, while host-installed Rust handlers read.
 pub mod plugin_process;
 pub mod store;
+pub mod read_registry;
 pub mod model_gateway;
 use std::{cell::RefCell,collections::BTreeMap,io::Read,path::Path,rc::Rc,time::Duration};
 use muyon_core_agent_lab::{Result,agent::{Agent,State},agent_ports::AgentPorts,model::{Message,Role}};
