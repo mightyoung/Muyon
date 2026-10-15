@@ -291,6 +291,12 @@
             "root_lease_serializes_durable_admission_and_preserves_identity",
             "root_inventory_refuses_unowned_entries_and_peak_overflow"
           ]
+        },
+        "integration:service_oracle": {
+          "family": "service-oracle",
+          "names": [
+            "service_controller_observer_correlates_all_builtin_payloads"
+          ]
         }
       },
       "sources": {
@@ -313,9 +319,13 @@
         "experiments/redesign/rust-agent-host-lab/core/tests/service_root.rs": {
           "commit": "172be3556f708ae94147d3d2b33c5e3acd0fa749",
           "sha256": "e02398223d07ded359e8f64fbb9b1f3f9356a90a0ed1056117e0fbe08c34de68"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs": {
+          "commit": "b811412677811865d7e5c7a05ca3379b09329fcc",
+          "sha256": "882a88ef85525921a86079c8bb56d4cd2bb9c078124aed8a9e8469056dcf3b73"
         }
       },
-      "expected_total": 41
+      "expected_total": 42
     }
   },
   "python": {

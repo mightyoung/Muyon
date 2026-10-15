@@ -17,7 +17,7 @@ def transcript(component):
 
 class FullTests(unittest.TestCase):
     def test_each_source_inventory_accepts_only_complete_green(self):
-        for component, total in [('core', 94), ('plugin', 21), ('host', 41)]:
+        for component, total in [('core', 94), ('plugin', 21), ('host', 42)]:
             result = rust(component, transcript(component), 0)
             self.assertTrue(result['accepted'], component)
             self.assertEqual(result['observed_tests'], total)
@@ -26,7 +26,7 @@ class FullTests(unittest.TestCase):
 
     def test_source_fixed_service_group_preserves_native_twenty_five(self):
         result = rust('host', transcript('host'), 0)
-        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4, 'contract-transport': 8, 'service-runtime': 2, 'service-root': 2})
+        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4, 'contract-transport': 8, 'service-runtime': 2, 'service-root': 2, 'service-oracle': 1})
         service = CASES['components']['host']['groups'].get('integration:service_controller')
         self.assertIsNotNone(service, 'separate source-fixed service integration group is missing')
         self.assertEqual(service['names'], [
@@ -60,6 +60,7 @@ class FullTests(unittest.TestCase):
         expected = {
             'service_runtime': ['all_builtins_read_physical_file_and_journal_two_actual_payloads',
                                 'pre_cancelled_worker_never_bootstraps_or_reads'],
+            'service_oracle': ['service_controller_observer_correlates_all_builtin_payloads'],
             'service_root': ['root_lease_serializes_durable_admission_and_preserves_identity',
                              'root_inventory_refuses_unowned_entries_and_peak_overflow'],
         }

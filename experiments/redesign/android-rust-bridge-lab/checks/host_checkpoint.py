@@ -54,3 +54,38 @@ def target_green(target, raw, status):
     return dict(accepted=valid, classification='checkpoint_target_green' if valid else 'INVALID',
                 target=target, command_exit_code=status, observed_tests=len(rows),
                 expected_tests=len(group['names']) if group else None)
+
+
+ORACLE = json.loads(Path(__file__).with_name('service_oracle_red_cases.json').read_text())
+
+
+def oracle_inventory(root, contract=None):
+    contract = ORACLE if contract is None else contract
+    try:
+        if (set(contract) != {'version', 'author_commit', 'path', 'blob_sha', 'sha256', 'red'}
+                or type(contract['version']) is not int or contract['version'] != 1
+                or not re.fullmatch('[0-9a-f]{40}', contract['author_commit'])
+                or contract['path'] != PREFIX + 'tests/service_oracle.rs'
+                or not re.fullmatch('[0-9a-f]{40}', contract['blob_sha'])
+                or not re.fullmatch('[0-9a-f]{64}', contract['sha256'])
+                or contract['red'] != ORACLE['red']):
+            raise ValueError('shape')
+        data = (root / contract['path']).read_bytes()
+        blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+        if (hashlib.sha256(data).hexdigest() != contract['sha256'] or blob != contract['blob_sha']
+                or re.findall(r'#\[test\]\s*fn\s+(\w+)\s*\(', data.decode('utf-8')) != [contract['red']['test']]):
+            raise ValueError('source')
+        return contract
+    except (OSError, ValueError, TypeError, KeyError, AttributeError) as failure:
+        raise RuntimeError('service_oracle_inventory_invalid') from failure
+
+
+def oracle_red(raw, status, source, binary_sha):
+    # Reuse the reviewed strict Rust panic/row/summary/correlation classifier;
+    # this mode has no JVM phase or corresponding markers.
+    from ffi_evidence import service_red
+    red = dict(ORACLE['red'], jvm_reach='NOT_APPLICABLE', jvm_assert='NOT_APPLICABLE')
+    result = service_red('service-rust-red', raw, status, source, binary_sha, red)
+    result.update(mode='service-oracle-red',
+                  scope='controller entry/refusal only; worker/observer execution not reached')
+    return result
