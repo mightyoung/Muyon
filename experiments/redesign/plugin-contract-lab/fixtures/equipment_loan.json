@@ -48,15 +48,20 @@
               },
               "revision": {
                 "type": "string"
+              },
+              "schema_version": {
+                "type": "integer"
               }
             },
             "required": [
               "module_id",
               "type",
               "key",
-              "revision"
+              "revision",
+              "schema_version"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "data_ref": "equipment_loan/equipment@1"
           },
           "borrower": {
             "type": "string"
@@ -121,15 +126,20 @@
               },
               "revision": {
                 "type": "string"
+              },
+              "schema_version": {
+                "type": "integer"
               }
             },
             "required": [
               "module_id",
               "type",
               "key",
-              "revision"
+              "revision",
+              "schema_version"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "data_ref": "equipment_loan/equipment@1"
           },
           "label": {
             "type": "string"
@@ -150,15 +160,20 @@
                 },
                 "revision": {
                   "type": "string"
+                },
+                "schema_version": {
+                  "type": "integer"
                 }
               },
               "required": [
                 "module_id",
                 "type",
                 "key",
-                "revision"
+                "revision",
+                "schema_version"
               ],
-              "additionalProperties": false
+              "additionalProperties": false,
+              "data_ref": "equipment_loan/loan@1"
             },
             "maxItems": 128
           }

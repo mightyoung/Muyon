@@ -9,10 +9,10 @@ pub fn row<'a>(j: &'a mut Json, key: &str, index: usize) -> &'a mut Json {
     panic!("fixture array")
 }
 pub fn call(c: &mut Catalog, command: &str, fields: Vec<(&str, Json)>) -> Json {
-    let mut request = object(fields); put(&mut request, "command", string(command)); c.handle(request)
+    let mut request = object(fields); put(&mut request, "command", string(command)); put(&mut request,"protocol_version",json("1")); c.handle(request)
 }
 pub fn ok(j: &Json) -> bool { j.object().unwrap().get("ok") == Some(&Json::Bool(true)) }
-pub fn authority() -> Json { json(r#"{"allowed":true,"available":true,"scope_allowed":true,"bindings":["host-equipment-read"],"revision":"a1","binding_revision":"b1","source_revision":"s1","rule_revision":"r1","scope":"selected-e1","refs":[{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1"},{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1"}]}"#) }
+pub fn authority() -> Json { json(r#"{"allowed":true,"available":true,"scope_allowed":true,"bindings":["host-equipment-read"],"revision":"a1","binding_revision":"b1","source_revision":"s1","rule_revision":"r1","scope":"selected-e1","refs":[{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1","schema_version":1},{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1","schema_version":1}]}"#) }
 pub fn remove(j:&mut Json,key:&str) {if let Json::Object(m)=j {m.remove(key);}}
 pub fn expect_code(j:&Json,code:&str) {assert!(!ok(j),"expected {code}, got {}",j.encode());assert_eq!(field(j,"code"),&string(code));}
 pub fn prepare_args(c:&mut Catalog,args:Json,a:Json)->Json {call(c,"prepare",vec![("operation",string("equipment_loan/inspect_equipment@1")),("args",args),("authority",a),("invocation_id",string("i1")),("receipt_owner",string("ToolRegistry")),("receipt_identity",string("host-sha256-identity"))])}
@@ -23,7 +23,7 @@ pub fn prepare(c: &mut Catalog) -> Json {
 }
 pub fn ticket(c: &mut Catalog) -> Json { let p=prepare(c); assert!(ok(&p),"valid read must prepare"); field(&p,"ticket").clone() }
 pub fn invoke(c: &mut Catalog, t: Json, a: Json) -> Json { call(c,"invoke",vec![("ticket",t),("authority",a)]) }
-pub fn projection() -> Json { json(r#"{"equipment":{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1"},"label":"synthetic drill","loans":[{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1"}]}"#) }
+pub fn projection() -> Json { json(r#"{"equipment":{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1","schema_version":1},"label":"synthetic drill","loans":[{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1","schema_version":1}]}"#) }
 pub fn receipt() -> Json { json(r#"{"owner":"ToolRegistry","invocation_id":"i1","binding_id":"host-equipment-read","identity":"host-sha256-identity"}"#) }
 pub fn accept(c:&mut Catalog,t:Json,a:Json,r:Json,p:Json)->Json { call(c,"accept_result",vec![("ticket",t),("authority",a),("receipt_ref",r),("projection",p)]) }
 pub fn stats(c:&mut Catalog)->Json { call(c,"inspect",vec![]) }

@@ -99,5 +99,5 @@ fn renamed_bundle_is_semantically_equivalent() {
  let seed=0x1357_u32.wrapping_mul(1664525).wrapping_add(1013904223);let name=format!("module_{seed:x}");
  let renamed=bundle().encode().replace("equipment_loan",&name).replace("inspect_equipment","inspect_random").replace("host-equipment-read","opaque-random");
  let mut c=Catalog::new();let r=call(&mut c,"register",vec![("bundle",json(&renamed)),("host_bindings",json(r#"["opaque-random"]"#))]);assert!(ok(&r));
- let a=json(&authority().encode().replace("equipment_loan",&name));let d=call(&mut c,"discover",vec![("authority",a)]);assert_eq!(field(&d,"operations").array().unwrap().len(),1);
+ let a=json(&authority().encode().replace("equipment_loan",&name).replace("host-equipment-read","opaque-random"));let d=call(&mut c,"discover",vec![("authority",a)]);assert_eq!(field(&d,"operations").array().unwrap().len(),1);
 }

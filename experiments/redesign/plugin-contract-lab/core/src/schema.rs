@@ -36,9 +36,18 @@ pub fn canonical(j:&Json)->Result<Json> {
 }
 pub fn check(s:&Json)->Result<()> {
  match text(s,"type")?.as_str() {
-  "object"=>{keys(s,&["type","properties","required","additionalProperties"],&["type","properties","required","additionalProperties"])?;
+  "object"=>{keys(s,&["type","properties","required","additionalProperties","data_ref"],&["type","properties","required","additionalProperties"])?;
    if get(s,"additionalProperties")? != &Json::Bool(false){return Err("closed_schema_required".into())}
    let p=map(get(s,"properties")?)?;for schema in p.values(){check(schema)?}
+   if let Some(target)=map(s)?.get("data_ref") {
+    let target=target.string().map_err(|_|"reference_schema_required")?;
+    let (qualified,version_text)=target.rsplit_once('@').ok_or("reference_schema_required")?;
+    let (module,typ)=qualified.split_once('/').ok_or("reference_schema_required")?;
+    if !name(module)||!name(typ)||version_text.parse::<u64>().ok().filter(|n|*n>0).is_none(){return Err("reference_schema_required".into())}
+    let expected=["module_id","type","key","revision","schema_version"];
+    if p.len()!=expected.len()||expected.iter().any(|k|!p.contains_key(*k))||array(s,"required")?.len()!=expected.len(){return Err("reference_schema_required".into())}
+    for key in expected {if text(&p[key],"type")? != if key=="schema_version"{"integer"}else{"string"}{return Err("reference_schema_required".into())}}
+   }
    let mut seen=std::collections::BTreeSet::new();for key in array(s,"required")? {let k=key.string().map_err(|_|"required_key")?;if !p.contains_key(k)||!seen.insert(k){return Err("required_key".into())}}
   },
   "string"=>{keys(s,&["type","enum"],&["type"])?;if let Some(e)=map(s)?.get("enum"){let a=e.array().map_err(|_|"enum")?;if a.is_empty()||a.iter().any(|x|x.string().is_err()){return Err("enum".into())}}},
@@ -58,4 +67,30 @@ pub fn validate(s:&Json,v:&Json)->Result<()> {
   "array"=>{let a=v.array().map_err(|_|"array_required")?;if a.len()>get(s,"maxItems")?.integer().map_err(|_|"max_items")? as usize{return Err("max_items".into())}for x in a{validate(get(s,"items")?,x)?}},
   _=>return Err("unsupported_schema".into())
  } Ok(())
+}
+
+/// The annotation is a closed schema target, not a grant or a revision.
+pub fn references(s:&Json)->Result<Vec<String>> {
+ let mut targets=Vec::new();
+ if let Some(target)=map(s)?.get("data_ref"){targets.push(target.string().map_err(|_|"data_ref")?.to_owned());}
+ match text(s,"type")?.as_str(){
+  "object"=>for child in map(get(s,"properties")?)?.values(){targets.extend(references(child)?);},
+  "array"=>targets.extend(references(get(s,"items")?)?),_=>{}
+ }Ok(targets)
+}
+pub fn reference_value(v:&Json)->Result<String>{
+ let fields=["module_id","type","key","revision","schema_version"];keys(v,&fields,&fields)?;
+ let module=text(v,"module_id")?;let typ=text(v,"type")?;
+ if !name(&module)||!name(&typ)||text(v,"key")?.is_empty()||text(v,"revision")?.is_empty(){return Err("result_reference".into())}
+ Ok(format!("{module}/{typ}@{}",version(get(v,"schema_version")?)?))
+}
+pub fn validate_refs(s:&Json,v:&Json,a:&Json)->Result<()> {
+ if let Some(target)=map(s)?.get("data_ref"){
+  if reference_value(v)? != target.string().map_err(|_|"data_ref")? {return Err("result_reference_type".into())}
+  if !array(a,"refs")?.contains(v){return Err("result_reference".into())}return Ok(())
+ }
+ match text(s,"type")?.as_str(){
+  "object"=>for(k,value)in map(v)?{validate_refs(&map(get(s,"properties")?)?[k],value,a)?;},
+  "array"=>for value in v.array().map_err(|_|"array_required")?{validate_refs(get(s,"items")?,value,a)?;},_=>{}
+ }Ok(())
 }

@@ -13,6 +13,9 @@ fn prepared_bindings_are_exact() {
   let mut c=muyon_plugin_contract_lab::Catalog::new();assert!(ok(&register(&mut c,numeric.clone())));
   expect_code(&prepare_args(&mut c,json(&format!(r#"{{"equipment_key":"e1","count":{value}}}"#)),authority()),"bounded_integer_required");assert_eq!(field(&stats(&mut c),"execution_requests"),&json("0"));
  }
+ let mut typed=bundle();let ref_schema=field(field(field(row(&mut typed,"operations",0),"projection_schema"),"properties"),"equipment").clone();let mut input=field(row(&mut typed,"operations",0),"input_schema").clone();let mut props=field(&input,"properties").clone();put(&mut props,"selected",ref_schema);put(&mut input,"properties",props);put(row(&mut typed,"operations",0),"input_schema",input);
+ for in_scope in [false,true] {let mut c=muyon_plugin_contract_lab::Catalog::new();assert!(ok(&register(&mut c,typed.clone())));let mut selected=field(&projection(),"equipment").clone();if !in_scope{put(&mut selected,"key",string("outside"));}let args=muyon_plugin_contract_lab::object([("equipment_key",string("e1")),("selected",selected)]);let result=prepare_args(&mut c,args,authority());if in_scope{assert!(ok(&result))}else{expect_code(&result,"result_reference");}}
+
  let mut c=admitted();let t=ticket(&mut c);let mut a=authority();let first=row(&mut a,"refs",0);put(first,"revision",string("2"));expect_code(&invoke(&mut c,t,a),"stale_authority");
  let mut c=admitted();let t=ticket(&mut c);let b=json(&bundle().encode().replace("equipment_loan","new_module").replace("host-equipment-read","new_binding"));assert!(ok(&call(&mut c,"register",vec![("bundle",b),("host_bindings",json(r#"["new_binding"]"#))])));expect_code(&invoke(&mut c,t,authority()),"stale_authority");
  let mut old=admitted();let old_ticket=ticket(&mut old);let mut fresh=admitted();let fresh_ticket=ticket(&mut fresh);expect_code(&invoke(&mut fresh,old_ticket,authority()),"unknown_ticket");assert!(ok(&invoke(&mut fresh,fresh_ticket,authority())));
@@ -38,7 +41,15 @@ fn invalid_projection_and_refs_reject() {
  let mut wrong_type=projection();let loan=field(&wrong_type,"loans").array().unwrap()[0].clone();put(&mut wrong_type,"equipment",loan);
  let mut c=admitted();let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));
  expect_code(&accept(&mut c,t,authority(),receipt(),wrong_type),"result_reference_type");
- for (key,value) in [("label",json("17")),("extra",string("raw-secret")),("equipment",json(r#"{"module_id":"foreign","type":"equipment","key":"e1","revision":"1"}"#)),("equipment",json(r#"{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"old"}"#))] {
+ // Version confusion remains a type error even when that exact ref is in scope.
+ let mut p=projection();let mut wrong=field(&p,"equipment").clone();put(&mut wrong,"schema_version",json("2"));put(&mut p,"equipment",wrong.clone());
+ let mut a=authority();put(&mut a,"refs",Json::Array(vec![wrong,field(&projection(),"loans").array().unwrap()[0].clone()]));
+ let mut c=admitted();let prepared=prepare_args(&mut c,json(r#"{"equipment_key":"e1"}"#),a.clone());assert!(ok(&prepared));let t=field(&prepared,"ticket").clone();assert!(ok(&invoke(&mut c,t.clone(),a.clone())));expect_code(&accept(&mut c,t,a,receipt(),p),"result_reference_type");
+ // A business object with a revision field is not implicitly an object ref.
+ let mut b=bundle();let mut ps=field(row(&mut b,"operations",0),"projection_schema").clone();let mut props=field(&ps,"properties").clone();put(&mut props,"business",json(r#"{"type":"object","properties":{"revision":{"type":"string"}},"required":["revision"],"additionalProperties":false}"#));put(&mut ps,"properties",props);put(row(&mut b,"operations",0),"projection_schema",ps);
+ let mut c=muyon_plugin_contract_lab::Catalog::new();assert!(ok(&register(&mut c,b)));let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));let mut p=projection();put(&mut p,"business",json(r#"{"revision":"business-value"}"#));assert!(ok(&accept(&mut c,t,authority(),receipt(),p)));
+
+ for (key,value) in [("label",json("17")),("extra",string("raw-secret")),("equipment",json(r#"{"module_id":"foreign","type":"equipment","key":"e1","revision":"1","schema_version":1}"#)),("equipment",json(r#"{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"old","schema_version":1}"#))] {
  let mut c=admitted();let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));let mut p=projection();put(&mut p,key,value);assert!(!ok(&accept(&mut c,t,authority(),receipt(),p))); }
 }
 #[test]

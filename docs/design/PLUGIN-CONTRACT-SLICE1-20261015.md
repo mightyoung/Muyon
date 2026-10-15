@@ -107,3 +107,22 @@ A deterministic seeded random variant renames module, DATA, RELATION, operation 
 The implementation plan supplies 16 Rust and 12 Dart named behavioral cases. They are all planned, not run at this documentation commit. Both languages require a compiling stub and an actual assertion RED before implementation; a missing import/build failure is not evidence. Review must inspect the complete Agent read chain, not accept a standalone catalog demonstration.
 
 At completion report fixed RED/GREEN commit SHAs, normal CI run ids, compile results, test counts, negative-path handler/send counters and original receipt identity evidence. Preserve raw logs outside Git under `/tmp/rd-plugin-contract-slice1-20261015`; no real-model, device, production data or M03 claims.
+
+
+### Bounded reference representation (review correction)
+
+The experimental subset uses an optional `data_ref: "module/type@schemaVersion"`
+annotation on a closed object schema. Its value has exactly `module_id`, `type`,
+`key`, `revision` (strings), and `schema_version` (positive integer). Object
+revision and DATA schema version are separate. RELATION fields (or array items)
+must name their exact target DATA. Operation input and projection references
+must name declared `data_refs`; every value must also occur in the current host
+scope. Unannotated business objects, including objects with a `revision` field,
+are ordinary schema values. This annotation is metadata and grants nothing.
+
+Every process request includes outer `protocol_version: 1`; it is distinct from
+bundle protocol version, DATA schema version, and catalog generation. Malformed
+JSON, unknown command/version, or invalid envelope keys end the session after a
+small refusal. Discovery returns the permitted operation set and its transitive
+DATA schema closure. If the complete encoded response exceeds 65536 bytes, it
+returns only `response_limit`, with no partial directory. No pagination is added.

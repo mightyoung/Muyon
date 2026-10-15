@@ -7,7 +7,7 @@ mod schema;
 use schema::{get,text,array,map,keys};
 
 #[derive(Clone)]
-struct Operation { declaration:Json, module:String }
+struct Operation { declaration:Json }
 #[derive(Clone)]
 struct Ticket { operation:Operation, args:Json, authority:Json, generation:u64, invocation:String, identity:String, dispatched:bool }
 pub struct Catalog {
@@ -26,12 +26,19 @@ impl Catalog {
   Self{generation:0,modules:BTreeSet::new(),data:BTreeMap::new(),operations:BTreeMap::new(),bindings:BTreeSet::new(),relation_count:0,view_count:0,serial:0,tickets:BTreeMap::new(),executions:0,closed:false,epoch}
  }
  pub fn handle(&mut self, request:Json)->Json {
-  match self.run(&request) {Ok(reply)=>reply,Err(code)=>object([("ok",Json::Bool(false)),("code",string(code))])}
+  match self.run(&request) {
+   Ok(reply) if reply.encoded_len().is_ok_and(|n|n<=65536)=>reply,
+   Ok(_)=>object([("ok",Json::Bool(false)),("code",string("response_limit"))]),
+   Err(code)=>object([("ok",Json::Bool(false)),("code",string(code))])
+  }
  }
  fn run(&mut self,r:&Json)->Result<Json> {
-  schema::bounded(r)?; let command=text(r,"command")?;
-  if command=="inspect" {return Ok(success(vec![("generation",number(self.generation)),("data_count",number(self.data.len())),("operation_count",number(self.operations.len())),("relation_count",number(self.relation_count)),("view_count",number(self.view_count)),("execution_requests",number(self.executions)),("grants",number(0)),("receipts_created",number(0)),("pending",number(self.tickets.len()))]));}
-  if command=="close" {self.closed=true;self.tickets.clear();return Ok(success(vec![]));}
+  schema::bounded(r)?;
+  if map(r)?.get("protocol_version")!=Some(&number(1)){return Err("protocol_version".into())}
+  let command=text(r,"command")?;
+  let mut body=r.clone();if let Json::Object(m)=&mut body{m.remove("protocol_version");}let r=&body;
+  if command=="inspect" {keys(r,&["command"],&["command"])?;return Ok(success(vec![("generation",number(self.generation)),("data_count",number(self.data.len())),("operation_count",number(self.operations.len())),("relation_count",number(self.relation_count)),("view_count",number(self.view_count)),("execution_requests",number(self.executions)),("grants",number(0)),("receipts_created",number(0)),("pending",number(self.tickets.len()))]));}
+  if command=="close" {keys(r,&["command"],&["command"])?;self.closed=true;self.tickets.clear();return Ok(success(vec![]));}
   if self.closed{return Err("closed".into())}
   match command.as_str(){
    "register"=>self.register(r),"discover"=>self.discover(r),"prepare"=>self.prepare(r),"invoke"=>self.invoke(r),"accept_result"=>self.accept(r),
@@ -65,14 +72,20 @@ impl Catalog {
    let shape=fields.get(&field).ok_or("relation_field")?;
    let many=get(rel,"many")?;let expected=if many==&Json::Bool(true){"array"}else if many==&Json::Bool(false){"object"}else{return Err("relation_many".into())};
    if text(shape,"type")?!=expected{return Err("relation_field_type".into())}
+   let reference=if many==&Json::Bool(true){get(shape,"items")?}else{shape};
+   if map(reference)?.get("data_ref")!=Some(&string(&to)){return Err("reference_schema_required".into())}
   }
+  // Resolve every explicitly typed reference before publishing any row.
+  for d in data.values(){for target in schema::references(get(d,"schema")?)?{admitted_data(&target)?;}}
   for op in os {
    keys(op,&["name","schema_version","effect","input_schema","projection_schema","data_refs","binding_id"],&["name","schema_version","effect","input_schema","projection_schema","data_refs","binding_id"])?;
    if text(op,"effect")?!="read"{return Err("read_only".into())}
    for key in ["input_schema","projection_schema"]{let s=get(op,key)?;schema::check(s)?;if text(s,"type")?!="object"{return Err("root_object".into())}}
-   for reference in array(op,"data_refs")? {admitted_data(reference.string().map_err(|_|"data_ref")?)?;}
+   let refs=array(op,"data_refs")?;
+   for reference in refs {admitted_data(reference.string().map_err(|_|"data_ref")?)?;}
+   for key in ["input_schema","projection_schema"]{for target in schema::references(get(op,key)?)?{if !refs.contains(&string(target)){return Err("unresolved_data".into())}}}
    let binding=text(op,"binding_id")?;if binding.is_empty()||!host_bindings.contains(&binding)||self.bindings.contains(&binding)||!bindings.insert(binding){return Err("host_binding".into())}
-   if operations.insert(id(op)?,Operation{declaration:op.clone(),module:module.clone()}).is_some(){return Err("duplicate_operation".into())}
+   if operations.insert(id(op)?,Operation{declaration:op.clone()}).is_some(){return Err("duplicate_operation".into())}
   }
   for view in vs {
    keys(view,&["name","data_refs","operation_refs"],&["name","data_refs","operation_refs"])?;
@@ -84,26 +97,36 @@ impl Catalog {
   Ok(success(vec![("generation",number(self.generation))]))
  }
  fn allowed(a:&Json)->bool {
-  let Ok(m)=map(a) else{return false};
-  get(a,"allowed")==Ok(&Json::Bool(true)) && ["available","scope_allowed"].iter().all(|k|m.get(*k)!=Some(&Json::Bool(false))) &&
-  ["revision","binding_revision","source_revision","rule_revision","scope"].iter().all(|k|text(a,k).is_ok_and(|s|!s.is_empty())) && array(a,"refs").is_ok()
+  let fields=["allowed","available","scope_allowed","bindings","revision","binding_revision","source_revision","rule_revision","scope","refs"];
+  if keys(a,&fields,&fields).is_err(){return false}
+  ["allowed","available","scope_allowed"].iter().all(|k|get(a,k)==Ok(&Json::Bool(true))) &&
+  ["revision","binding_revision","source_revision","rule_revision","scope"].iter().all(|k|text(a,k).is_ok_and(|s|!s.is_empty())) &&
+  array(a,"bindings").is_ok_and(|xs|xs.iter().all(|x|x.string().is_ok_and(|s|!s.is_empty()))) &&
+  array(a,"refs").is_ok_and(|xs|xs.iter().all(|x|schema::reference_value(x).is_ok()))
  }
  fn operation_allowed(op:&Operation,a:&Json)->bool {
-  if !Self::allowed(a){return false}
-  if let Some(ids)=map(a).ok().and_then(|m|m.get("bindings")){if !ids.array().is_ok_and(|ids|ids.contains(get(&op.declaration,"binding_id").unwrap())){return false}}
-  true
+  Self::allowed(a) && array(a,"bindings").is_ok_and(|ids|ids.contains(get(&op.declaration,"binding_id").unwrap()))
  }
  fn discover(&self,r:&Json)->Result<Json> {
   keys(r,&["command","authority"],&["command","authority"])?;
-  let a=get(r,"authority")?;let visible=self.operations.iter().filter(|(_,op)|Self::operation_allowed(op,a)).map(|(id,op)|object([("operation",string(id)),("declaration",op.declaration.clone())])).collect();
-  Ok(success(vec![("generation",number(self.generation)),("operations",Json::Array(visible))]))
+  let a=get(r,"authority")?;let mut visible=Vec::new();let mut schemas=BTreeMap::new();
+  let mut pending=Vec::new();
+  for(id,op)in &self.operations {if Self::operation_allowed(op,a){
+   visible.push(object([("operation",string(id)),("declaration",op.declaration.clone())]));
+   for target in array(&op.declaration,"data_refs")?{pending.push(target.string().map_err(|_|"data_ref")?.to_owned());}
+  }}
+  while let Some(target)=pending.pop(){if schemas.contains_key(&target){continue}
+   let d=self.data.get(&target).ok_or("unresolved_data")?;
+   pending.extend(schema::references(get(d,"schema")?)?);schemas.insert(target,d.clone());
+  }
+  Ok(success(vec![("generation",number(self.generation)),("operations",Json::Array(visible)),("schemas",Json::Object(schemas))]))
  }
  fn prepare(&mut self,r:&Json)->Result<Json> {
   keys(r,&["command","operation","args","authority","invocation_id","receipt_owner","receipt_identity"],&["command","operation","args","authority","invocation_id","receipt_owner","receipt_identity"])?;
   if !self.tickets.is_empty(){return Err("busy".into())}
   let op=self.operations.get(&text(r,"operation")?).ok_or("unknown_operation")?.clone();let a=get(r,"authority")?;
   if !Self::operation_allowed(&op,a){return Err("denied".into())}
-  let args=schema::canonical(get(r,"args")?)?;if args.encode().len()>8192{return Err("args_limit".into())}schema::validate(get(&op.declaration,"input_schema")?,&args)?;
+  let args=schema::canonical(get(r,"args")?)?;if args.encode().len()>8192{return Err("args_limit".into())}schema::validate(get(&op.declaration,"input_schema")?,&args)?;schema::validate_refs(get(&op.declaration,"input_schema")?,&args,a)?;
   if text(r,"receipt_owner")?!="ToolRegistry"{return Err("receipt_owner".into())}
   let invocation=text(r,"invocation_id")?;let identity=text(r,"receipt_identity")?;if invocation.is_empty()||identity.is_empty(){return Err("receipt_identity".into())}
   self.serial+=1;let token=format!("read-{}-{}-{}",self.epoch,self.generation,self.serial);
@@ -126,23 +149,10 @@ impl Catalog {
   let receipt=get(r,"receipt_ref")?;keys(receipt,&["owner","invocation_id","binding_id","identity"],&["owner","invocation_id","binding_id","identity"])?;
   if text(receipt,"owner")?!="ToolRegistry"||text(receipt,"invocation_id")?!=t.invocation||get(receipt,"binding_id")?!=get(&t.operation.declaration,"binding_id")?||text(receipt,"identity")?!=t.identity{return Err("receipt_owner".into())}
   let p=get(r,"projection")?;schema::validate(get(&t.operation.declaration,"projection_schema")?,p)?;
-  Self::validate_refs(p,&t.operation,&t.authority)?;
+  schema::validate_refs(get(&t.operation.declaration,"projection_schema")?,p,&t.authority)?;
   Ok(success(vec![("receipt_ref",receipt.clone()),("projection",p.clone())]))
  }
- fn validate_refs(j:&Json,op:&Operation,a:&Json)->Result<()> {
-  match j {
-   Json::Object(m)=>{
-    if m.contains_key("module_id")||m.contains_key("revision") {
-     keys(j,&["module_id","type","key","revision"],&["module_id","type","key","revision"])?;
-     let module=text(j,"module_id")?;let typ=text(j,"type")?;text(j,"key")?;text(j,"revision")?;
-     let prefix=format!("{module}/{typ}@");if !array(&op.declaration,"data_refs")?.iter().any(|r|r.string().is_ok_and(|s|s.starts_with(&prefix)))||!array(a,"refs")?.contains(j){return Err("result_reference".into())}
-     // Cross-module references are admitted only through the registration's
-     // explicit host DATA admission; ordinary module reads stay scoped.
-     let _ = &op.module;
-    }else{for v in m.values(){Self::validate_refs(v,op,a)?}}
-   },Json::Array(v)=>for x in v{Self::validate_refs(x,op,a)?},_=>{}
-  }Ok(())
- }
+
 }
 
 impl Default for Catalog {fn default()->Self {Self::new()}}
