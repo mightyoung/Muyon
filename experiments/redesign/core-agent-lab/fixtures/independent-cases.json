@@ -1,0 +1,198 @@
+{
+  "format": "core-agent-independent-inputs-v0",
+  "scope": "synthetic host facts and provider stimuli; no expected values sent to DUT",
+  "cases": [
+    {
+      "id": "happy",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "full_allow",
+        "risk": "low"
+      },
+      "assertions": {
+        "effects": 1,
+        "answer": "recorded",
+        "original_value": "synthetic-value",
+        "trusted_tool_result_before_answer": true
+      }
+    },
+    {
+      "id": "readonly-write",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "read_only",
+        "risk": "low"
+      },
+      "assertions": {
+        "effects": 0,
+        "success_answer": false
+      }
+    },
+    {
+      "id": "ask-no-confirm",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "ask",
+        "risk": "low",
+        "confirmed": false
+      },
+      "assertions": {
+        "effects": 0
+      }
+    },
+    {
+      "id": "ask-confirm",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "ask",
+        "risk": "low",
+        "confirmed": true
+      },
+      "assertions": {
+        "effects": 1
+      }
+    },
+    {
+      "id": "auto-low",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "auto",
+        "risk": "low",
+        "confirmed": false
+      },
+      "assertions": {
+        "effects": 1,
+        "risk_asks": 0
+      }
+    },
+    {
+      "id": "auto-high-unconfirmed",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "auto",
+        "risk": "high",
+        "confirmed": false
+      },
+      "assertions": {
+        "effects": 0
+      }
+    },
+    {
+      "id": "auto-high-confirmed",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "auto",
+        "risk": "high",
+        "confirmed": true
+      },
+      "assertions": {
+        "effects": 1
+      }
+    },
+    {
+      "id": "full-high",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "full_allow",
+        "risk": "high",
+        "confirmed": false
+      },
+      "assertions": {
+        "effects": 1,
+        "risk_asks": 0
+      }
+    },
+    {
+      "id": "full-hard-denied",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "full_allow",
+        "risk": "high",
+        "hard_ok": false,
+        "confirmed": true
+      },
+      "assertions": {
+        "effects": 0
+      }
+    },
+    {
+      "id": "forged-approval",
+      "script": "forged-value.tsv",
+      "host": {
+        "mode": "ask",
+        "risk": "low",
+        "confirmed": false
+      },
+      "assertions": {
+        "effects": 0
+      }
+    },
+    {
+      "id": "unknown-tool",
+      "script": "unknown-tool.tsv",
+      "host": {
+        "mode": "full_allow"
+      },
+      "assertions": {
+        "effects": 0
+      }
+    },
+    {
+      "id": "forged-extra-fields",
+      "script": "forged-field.tsv",
+      "host": {
+        "mode": "full_allow"
+      },
+      "assertions": {
+        "effects": 0
+      }
+    },
+    {
+      "id": "provider-failure",
+      "script": "provider-fail.tsv",
+      "host": {
+        "mode": "full_allow"
+      },
+      "assertions": {
+        "effects": 0,
+        "success_answer": false
+      }
+    },
+    {
+      "id": "tool-failure",
+      "script": "happy.tsv",
+      "host": {
+        "mode": "full_allow",
+        "tool_failure": true
+      },
+      "assertions": {
+        "effects": 0,
+        "success_answer": false
+      }
+    },
+    {
+      "id": "duplicate-invocation",
+      "script": "duplicate.tsv",
+      "host": {
+        "mode": "full_allow"
+      },
+      "assertions": {
+        "effects": 1,
+        "answer": "once",
+        "original_receipt_reused": true
+      }
+    },
+    {
+      "id": "altered-binding",
+      "script": "altered.tsv",
+      "host": {
+        "mode": "full_allow"
+      },
+      "assertions": {
+        "effects": 1,
+        "original_value": "one",
+        "success_answer": false
+      }
+    }
+  ]
+}
