@@ -13,7 +13,7 @@
 
 ## 2. 核心结论：已有接线应继承，公共桥接尚缺
 
-**Dart 基线已经能让合格 V2 模块声明工具后进入通用 Agent 工具目录和执行链。** 科研自身就是此路径的实例：`ResearchModule.registerTools → registerResearchTools`；启动处通过 catalog 注册，ModuleHost 循环构建 registrar，AgentTaskFactory 从 ToolRegistry 按实际可用性、范围、类别及模型可见性筛选，生成 native function 或 compat 描述。这里不需要为“科研也接 AI”再写一套 adapter。[S01–S10,S29–S31]
+**Dart 基线已经能让合格 V2 模块声明工具后进入通用 Agent 工具目录和执行链。** 科研自身就是此路径的实例：`ResearchModule.registerTools → registerResearchTools`；启动处通过 catalog 注册，ModuleHost 循环构建 registrar，AgentTaskFactory 从 ToolRegistry 按实际可用性、范围、类别及模型可见性筛选，生成 native function 或 compat 描述。这里不需要为“科研也接 AI”再写一套 adapter。这个结论限于注册、候选选择和工具描述投影；不能外推为整条来源链已无业务特判。[S01–S10,S29–S31,S58]
 
 “自动接入”应精确定义为：**通过可信安装/登记、合同校验且当前可见的能力自动发现、生成工具投影，并统一调度已有业务 handler**。它不意味着发现全部业务方法，不意味着 capabilities 请求自动获准，不意味着能直接拿 model gateway，不意味着读取许可同时允许发送给模型，更不意味着安装不可信代码后能靠声明限制其所有进程权限。[S15,S16,S36,S40,S41]
 
@@ -21,16 +21,26 @@
 
 experimental host 使用了可继承的 provider/authorization/tool port 思路、活 prepared handle 和原回执核验，但三处仍是业务专用：Rust start/schema/result、Dart prepare/invoke、模型 tool-name 映射。直接增加 `research.*` 分支只会复制特殊通道；应该先定义一份通用 catalog/dispatch/projection 合同，再让两模块由同一个桥接使用。[S43–S48]
 
+来源与出口有四个不同事实，必须分别继承和补齐：
+
+1. **字段 sensitivity 传递仍缺**：ToolSpec.resultSensitivity没有进入HostToolRegistrar生成的ToolDescriptor，不能据此宣称字段/实际值分类及用途全链已闭合。[S20,S21]
+2. **宿主来源事实 owner 已有**：HostSourceFact稳定身份和HostTaskFacts独立于模型消息、任务快照、摘要；HostAuthorizationFacts只由host维护，缺事实为unknown，markExternal先锁存再持久化，持久化失败不能清除锁存。新设计应复用该来源身份和持久化边界，不能再造一份插件自报的事实owner。[S59]
+3. **来源识别仍有业务名分支**：AgentDispatch._external在排除pure local write后，按external effect、mcp provider或inquiry/knowledge/research模块名判断。_invokeOne命中才在invoke前记tool_invocation来源、结果后记objectRefs。因此合法注册的新本机read插件不因完成V2注册就自动继承这几类模块的来源事实路径；这是“不改Agent业务switch”验收前必须泛化的接缝，不是本研究已修复的实现。[S58]
+4. **最终模型payload审查已有**：AgentModelTurn.preparePermission编码实际请求与可选兼容变体，HostModelAuthorization.prepare读取host task facts并审查最终payload的UTF-8字节、重验policy；兼容payload变化有独立绑定/复核。此机制应继承，不能因resultSensitivity未传递而写成没有来源/授权/内容审查；它也不证明新版五类字段/实际值/用途门禁已经完整实现。[S60–S62]
+
+只继承来源身份、宿主事实持久化及不能自证的边界，不把旧HostTaskFacts.requiresConfirmation的tainted/unknown映射机械复制到新版FullAllow。较新的已定模式语义仍以v1.3.2为准。[S41,S59]
+
 ## 3. 真实链路与层间缺口
 
 | 环节 | adopted base 已存在 | 尚缺或受限 | 边界/归属 |
 | --- | --- | --- | --- |
-| 注册 | BusinessModuleV2、静态 catalog、ModuleRegistry 版本/依赖隔离、ToolRegistrar sealed 注册 [S01–S06] | 非任意动态插件加载器；兼容 inquiry host adapter 尚未独立 [S32] | 安装身份和可信级别由宿主决定；插件只能请求能力 |
+| 注册 | BusinessModuleV2、静态 catalog；重复module ID拒绝整个catalog构造，API/依赖/未知capability不兼容按模块隔离；ToolRegistrar sealed 注册 [S01–S06] | 非任意动态插件加载器；兼容 inquiry host adapter 尚未独立 [S32] | 安装身份和可信级别由宿主决定；插件只能请求能力 |
 | schema校验 | 参数/result schema受限子集；参数prepare时校验、成功结果dispatch后校验 [S06,S07,S11,S13] | resultSchema可空；不是全 JSON Schema；ontology/coverage不是同一运行时schema闸门 | 新公共合同声明schema dialect/version；不支持的安全字段拒绝，不能靠不同语言各自猜测 |
 | 能力发现 | 工具按scope/category/availability/modelSelectable筛选；coverage有exposed/deferred理由 [S08,S36] | “存在于目录”不证明当前可调用；feature声明也不证明端到端实现 | discovery回应仅元数据；invoke必须再次核当前 authority |
 | Agent工具投影 | native及compat都直接来自同一descriptor [S09] | experimental模型层硬编码inquiry.object [S47]；ToolSpec分类未投递到descriptor [S20,S21] | core只认识工具ID和注册schema，不认识业务名；模型候选不能签发权限 |
+| 来源事实/模型用途 | HostAuthorizationFacts独立来源身份/先锁存后持久化；最终编码payload已有授权/内容审查与兼容变体复核 [S59–S62] | AgentDispatch._external含业务moduleId分支；新read插件不能仅靠注册获得等价来源标记；resultSensitivity传递及完整新版用途链仍缺 [S20,S58] | 可信host绑定真实来源，插件/模型自报clean不得清洗；复用既有事实owner与最终payload入口 |
 | prepare/invoke | 一次性批准/host grant链、scope/current policy、generation检查；同key合并/冲突 [S10–S14] | 跨语言prepare handle尚未通用；effect-specific trusted intent不应由manifest或模型提供 | 插件handler保留业务校验；授权、dispatch ownership、消费、审计在可信host/core |
-| 回执/核对 | ToolRegistry原回执与receiptFor；BusinessReceiptLookup全身份只读核对合同 [S13,S33,S34] | 查询 `lookupBusinessReceipt` 的生产命中仅询价实现/接口声明，未发现通用Agent消费者；科研Runtime也未声明此接口 [S29,S35] | 通用回执路由可以设计，不能把所有插件都称已支持原业务核对；notFound≠未执行 |
+| 回执/核对 | ToolRegistry原回执与receiptFor；BusinessReceiptLookup全身份只读核对合同 [S13,S33,S34] | 查询 `lookupBusinessReceipt` 的生产命中仅询价实现/接口声明，未发现通用Agent消费者；科研Runtime的implements也未声明此接口 [S35,S63] | 通用回执路由可以设计，不能把所有插件都称已支持原业务核对；notFound≠未执行 |
 | 撤权/关闭/卸载 | ModuleHost epoch失效、withdraw、cancelProvider、持久撤权、防重新激活、close/drain [S17] | ModuleRuntime无dispose/unload；session.dispose≠动态卸载；没有通用安装/升级/卸载事务 [S25] | 最小先定义disable/revoke/drain语义，不急造热更新或卸载框架；持久回执不随卸载删除 |
 
 重要实现限制：注册方法决定 descriptor effect，不能据此声称任意本机 native 插件无法偷偷写入。`ModuleResources` 提供数据库/files，`ManagedDatabase.raw` 是直接数据库能力 [S16,S24,S25]；native 模块仍是受信任进程代码。公共合同的权限控制保证受控执行路径，不替代进程/存储隔离。不可信插件若将来成为范围，必须另定能力隔离与可信安装合同，本轮不建沙箱框架。
@@ -41,7 +51,7 @@ experimental host 使用了可继承的 provider/authorization/tool port 思路�
 | --- | --- | --- | --- |
 | 对象与动作 | ObjectRef、OntologyFieldSpec/ObjectTypeSpec/ActionSpec、ToolSpec [S18–S21] | 跨语言可编码的稳定对象身份与版本字段；单一schema事实源；所有工具参数仍由各自schema决定 | 科研project/document/entry/card与询价supplier/quote等模型、CAS/合法性/领域规则；不强迫工具都使用type/id |
 | 敏感度/用途 | 五类Sensitivity、unreviewed默认、trusted来源和目的限定 [S19,S40,S41] | 补齐字段/实际值分类证据→结果投影→最终model/outbound payload的可信关联；按用途和版本核对；声明自报标签只输入事实校验，不降类/授许可 | 已确认字段分类及实际领域内容；询价地址none等既定分类不随意重标，科研不一律commercial |
-| context来源 | ContextRef项目绑定、ScopeResolver、ModuleScopeSource/session resolve [S21–S23] | 通用context材料引用保留来源/对象修订/权限版本/用途；投影只披露当前获准字段，不传raw数据库/profile/credential | 取数、文档定位、科研引用、领域摘要；插件不能自报“用户指令/可信授权来源” |
+| context来源 | ContextRef项目绑定、ScopeResolver、ModuleScopeSource/session resolve，以及独立HostAuthorizationFacts；最终编码模型payload已有审查 [S21–S23,S59–S62] | 可信来源分类/绑定替代_external业务名分支；保留真实来源/对象修订/权限版本/用途并接既有事实owner；投影只披露当前获准字段 [S58] | 取数、文档定位、科研引用、领域摘要；插件不能自报“用户指令/可信授权来源”或clean来擦除事实 |
 | 版本/迁移 | API version/packageRevision与DB schema连续迁移 [S02,S24] | protocol/schema/database/projection版本分轴；注册schema摘要和authority revision参与冻结绑定；未知major或安全字段拒绝 [S39] | 各业务DB迁移由原owner实现；本轮不运行真实历史迁移 |
 | 生命周期 | 懒激活、并发合并、失败隔离、撤权持久化、close drain [S16,S17] | 一次注册snapshot绑定generation；disable/revoke使新发现和旧prepared handle失效；已派发回执独立收束；如后续需要unload再补有限close契约 | 模块资源清理及状态恢复，不引入第二业务数据库owner |
 | 事件订阅 | ChangeLog、ProjectionService原子cursor/catalog [S26,S27] | 需要时复用D03a的store/scope/stream/seq域、authority/schema、lease和有限buffer；增量失败重新快照；ACK不是成功 [S42] | 领域事件payload及事实生成；module change log不直接当跨端审计/授权流 |
@@ -52,7 +62,7 @@ experimental host 使用了可继承的 provider/authorization/tool port 思路�
 
 1. **注册目录快照**：由同一注册事实生成可模型选择的工具descriptor、schema版本/摘要、模块与注册generation；声明的read/write/outbound类别交可信注册器核定。筛选继承现有scope/category/modelSelectable。不给插件创建grant API。
 2. **统一执行路由**：core传tool ID和schema符合的参数，host/core可信侧解析为已有registry handler；prepare返回opaque、一次性、绑定task/attempt/参数摘要/scope/authority/generation的引用。invoke消费前重验。model callId仅配对消息，不当执行身份。原handler、原业务owner、原ToolRegistry回执保留。[S05,S11–S14,S45,S46]
-3. **受控结果投影与只读核对**：插件提供领域结果和schema，可信投影器依据允许字段/分类/用途/当前权生成模型材料；保留原回执引用和已验证objectRefs。核对能力仅在原owner已实现时公布，不存在则明确unsupported/unknown。无需先把所有产品函数、UI页面和动态插件安装器统一进来。
+3. **受控结果投影与只读核对**：插件提供领域结果和schema；可信来源适配器从真实provider/输入谱系及当前事实绑定来源，接入既有HostAuthorizationFacts，不能将插件标签直接升级为权威。泛化_external业务名判断后，可信投影器依据允许字段/分类/用途/当前权生成模型材料，再经已有最终payload授权与审查入口；保留原回执引用和已验证objectRefs。[S58–S62] 核对能力仅在原owner已实现时公布，不存在则明确unsupported/unknown。无需先把所有产品函数、UI页面和动态插件安装器统一进来。
 
 自动注册/发现不调用模型也不触发授予；无read权限时可以展示获准的能力元数据但不得取业务正文。拥有read只证明当前本机允许读取，进入模型上下文还必须过独立model和最终用途门禁。FullAllow沿已定范围内免风险重复询问，但无权/撤权/非法业务/缺必要分类事实仍拒绝；本研究不修改模式默认或旧grant迁移。[S15,S40,S41]
 
@@ -79,7 +89,7 @@ experimental host 使用了可继承的 provider/authorization/tool port 思路�
 
 ## 5. 第三合成插件验收设计（全部 planned / not_run）
 
-目标：在统一桥接冻结前发现隐藏的业务特判，而不是再做一个业务适配器。选用“设备借用”插件 `equipment_loan`：DATA有设备 `equipment` 和借用单 `loan`，虚构设备 `device-a`、借用单 `loan-a`、借用人主体引用 `actor-a`、工作区 `W`、版本 `r1`。RELATION为loan.equipment_ref→equipment（一对一从借用单视角、设备可有历史多单），borrower_ref指向host已允许的合成主体身份。所有内容纯合成。与科研/询价并列装入测试catalog；core源与适配层不得新增 `equipment_loan`、`research`、`inquiry` tool-name分支。插件仅实现公共注册、scope resolver、handler、必要的只读receipt接口。fake provider使用预设完整call，不启动真实模型服务；所有DB均临时合成。
+目标：在统一桥接冻结前发现隐藏的业务特判，而不是再做一个业务适配器。选用“设备借用”插件 `equipment_loan`：DATA有设备 `equipment` 和借用单 `loan`，虚构设备 `device-a`、借用单 `loan-a`、借用人主体引用 `actor-a`、工作区 `W`、版本 `r1`。RELATION为loan.equipment_ref→equipment（一对一从借用单视角、设备可有历史多单），borrower_ref指向host已允许的合成主体身份。所有内容纯合成。与科研/询价并列装入测试catalog；core源与适配层不得新增 `equipment_loan`、`research`、`inquiry` tool-name分支。noAgentBusinessSwitch必须同时覆盖现有AgentDispatch._external的moduleId来源分支；仅通过目录发现/handler执行不算满足。泛化来源识别由可信host绑定和既有事实owner承接，不能让新插件自报clean绕过标记。[S58,S59]插件仅实现公共注册、scope resolver、handler、必要的只读receipt接口。fake provider使用预设完整call，不启动真实模型服务；所有DB均临时合成。
 
 **输入schema示例**（候选dialect仅使用现有受限子集；名字故意与type/id不同）：
 
@@ -128,19 +138,26 @@ schema登记测试另外断言：重复type ID、悬空ref target、错误relati
 | T13 提交前取消 | controllable barrier停在effect guard前 | cancel_requested与cancelled有序；effect=0；有界结束，无sleep竞态 | not_run |
 | T14 提交后取消/EOF | 事务commit后、返回前中断 | 原成功回执仍在；主流程可interrupted但不得称回滚或自动重跑；只读核对取得同原回执 | not_run |
 | T15 核对负例 | notFound/unreadable/unknown/不同scopeDigest或domainIdentity | 不能判成功或未执行；不再写；matched必须验证全identity+applied | not_run |
-| T16 分类用途 | host将notes标personal/credential，插件自报none；未知字段unreviewed | 插件不能降类/增加purpose；credential不进投影/日志；unreviewed模型外发拒绝；本机read与外发分开断言 | not_run |
+| T16 来源事实/分类用途 | 第三插件及随机改名变体带合成外部来源；host将notes标personal/credential，插件自报clean/none；注入来源持久失败与payload变化 | 可信来源进入同一host事实路径；clean不能擦除、失败不能清洁降级；最终payload的授权/审查读取当前host facts，不把内部facts塞入模型正文；不降类/增purpose，不机械增加FullAllow风险确认。详见T16子场景 | not_run |
 | T17 结果伪造 | schema多字段、非法status/active_loan_count、伪receipt ID、额外ref | 失败且无伪success；只信registry/原owner receipt；原始异常不入IPC | not_run |
 | T18 生命周期 | disable/unload请求与inflight交错 | 新准入关闭、generation失效、已派发回执drain；dispose恰一次仅在公共close契约实现后验，不把现有close当已支持unload | not_run |
 | T19 版本 | 未知protocol major、未知安全字段、schema摘要变化 | 拒绝或明确unsupported；旧prepared冻结失效；无静默降级/默认放行 | not_run |
 | T20 有界预算 | 合成超inflight/bytes/deadline；插件或模型试图提高 | 硬上界由host给定；typed拒绝，无无限队列；未执行计数准确 | not_run |
 | T21 事件/撤权 | 同域重复、错store/scope/stream、过旧cursor、慢订阅 | 去重不重复apply；错域不混；有界补拉/快照；撤权清投影且不删原回执；ACK不作成功证据 | not_run |
 
+T16子场景均为planned/not_run，合计仍为23个主case：
+
+- **T16.a / 来源绑定等价**：equipment_loan及随机改名同构插件返回带合成外部来源的材料。由可信host fixture绑定真实provider与来源，不读取插件自填authority字段；断言invocation前标记及结果objectRef来源进入同一个HostAuthorizationFacts owner、按实际module/project/object身份计算source digest；不同模块不强求相同digest，但均不得因名称分流而漏记。名称替换无需增改Agent业务分支；测试当前基线时应明确暴露S58的缺口，不能绕过它使测试通过。
+- **T16.b / 清洗与持久故障**：manifest、工具结果和模型文本声称clean/none，不能抹除已记录来源或降分类。分别在invoke前来源写入与返回引用写入处注入故障；前者不派发，后者保留已存在原工具回执并拒绝把内容当清洁材料送入下一模型请求。缺事实维持unknown，已锁存事实不因持久失败回退clean；不伪称已发生效果失败或重执行。
+- **T16.c / 最终模型用途门**：以离线fake provider/reviewer核对实际编码payload的字节、请求摘要、scope及读取的host task facts；本机read通过不授model许可。模型类别关闭、用途不准、credential或外发unreviewed时零发送；payload及兼容变体发生变化须重新绑定/审查，不能复用另一payload的许可。无真实模型/网络。
+- **T16.d / 模式与事实分离**：taint/unknown来源证据仍保留，但新版FullAllow在有效权限用途内不因taint单独增加风险确认；真实无权/撤权/用途禁止/必要内容事实缺失仍拒绝。旧requiresConfirmation布尔值不是新版ModeGrant规则真源，也不能反过来把FullAllow当来源清洗开关。[S41,S59–S62]
+
 T18/T21为生命周期/事件公共面新设计的验收草案，不能冒充当前Dart或experimental支持。设备借用最小完整验收包含T01–T17/T19/T20/T22/T23（注册数据关系、发现、读取、拒绝、撤权、CAS、取消和原回执全部覆盖）；T18卸载与T21订阅只在该可选能力拟开放时成为对应发布门槛。分步实验可以先做read，但必须明确未完成write/CAS/receipt验收，不能据此声称公共插件完整通过。所有case使用可控barrier、假时钟和调用计数；禁止sleep决定时序、真模型、真设备或真实业务数据。新增第二个随机测试module/tool ID作为同一fixture参数，验证换名无需core改动。
 
 ## 6. 下一步与未解决问题
 
 1. 本研究和父线程外部近邻研究一起审阅，再确定最小公共catalog/dispatch/projection边界；先不冻结M03。保留目前Rust/Dart writer的实验成果，暂停增加业务专用接线。
-2. 需要明确首批支持的schema子集、trusted注册来源、结果投影/用途的可信事实入口，以及怎样把现有原业务receipt路由到统一核对。声明不能自授权限是前提，不是待决选项。
+2. 需要明确首批支持的schema子集、trusted注册来源、结果投影/用途的可信事实入口（复用既有HostAuthorizationFacts与最终模型payload审查，泛化_external业务名来源分支），以及怎样把现有原业务receipt路由到统一核对。声明不能自授权限是前提，不是待决选项。
 3. 源码可直接继承部分不需重建；跨语言生成/编码、DATA/RELATION统一登记、第三插件测试、通用unload、统一订阅与完整分类用途链均尚未实现。它们是设计/实施缺口，不是本只读研究的执行失败。
 4. 文档验证仅核SHA/blob/行号、范围、JSON可解析和diff whitespace。没有运行产品测试；不能把阅读测试源码、旧CI或文档检查写成运行时通过。root负责独立审查、sole push/integration。
 
@@ -148,11 +165,10 @@ T18/T21为生命周期/事件公共面新设计的验收草案，不能冒充当
 
 `existing`表示基线已存在机制，非全链验收通过；`gap`表示当前接口/调用链局限；`business`表示保留业务归属；`constraint`表示设计/审查来源；`experimental`仅指固定实验SHA。
 
-
 | ID | 判定 | 源码事实 | 固定定位 |
 | --- | --- | --- | --- |
 | S01 | existing | V2模块声明ontology、sections、tools、searchSources、coverage；工具启动时激活前注册。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/module_v2.dart:12`（至L30） |
-| S02 | existing | 静态catalog验证重复ID、API版本、依赖和已知capability；失败模块隔离。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/module_registry.dart:14`（至L67） |
+| S02 | existing | 重复module ID直接拒绝整个catalog构造；API/依赖/未知capability不兼容按模块标为不可用。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/module_registry.dart:14`（至L67） |
 | S03 | existing | 真实启动注入InquiryBusinessModule和moduleCatalog；支持modules测试注入。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/bootstrap.dart:241`（至L252） |
 | S04 | existing | 通用注册、registrar seal、失败withdraw；无逐业务tool名分支。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/module_host.dart:254`（至L280） |
 | S05 | existing | 模块命名空间+模型function名冲突检查；handler懒激活；descriptor承载schema/effect/cancel。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/host_tool_registrar.dart:93`（至L157） |
@@ -170,7 +186,7 @@ T18/T21为生命周期/事件公共面新设计的验收草案，不能冒充当
 | S17 | existing | 撤权同步epoch失效/withdraw/cancel后持久化；失败fail-closed；关闭drain工具。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/module_host.dart:498`（至L559） |
 | S18 | existing | ObjectRef拥有module/type/id/project/revision/contentDigest，不是inquiry.object形状。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/references.dart:12`（至L55） |
 | S19 | existing | Sensitivity五值、默认unreviewed；字段声明本身不代表实际值已核。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/ontology.dart:6`（至L47） |
-| S20 | gap | ToolSpec含resultSensitivity，但S05复制字段和ToolDescriptor没有该字段，通用出站链未闭合。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/tool_registrar.dart:55`（至L96） |
+| S20 | gap | ToolSpec含resultSensitivity，但S05复制字段和ToolDescriptor没有该字段；此字段传递缺口不否定S59–S62既有来源事实及最终payload审查。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/tool_registrar.dart:55`（至L96） |
 | S21 | existing | ContextRef检验项目绑定；ToolDescriptor为语言内JSON值schema，无resultSensitivity/purpose字段。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/context.dart:24`（至L96） |
 | S22 | existing | scope按workspace、实时resolve、identity/revision/digest验证；目录不是授权。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/platform/scope_resolver.dart:55`（至L112） |
 | S23 | existing | V2 ModuleScopeSource通过ScopeResolvable/session重新resolve目录候选。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/platform/scope_resolver.dart:118`（至L200） |
@@ -185,7 +201,7 @@ T18/T21为生命周期/事件公共面新设计的验收草案，不能冒充当
 | S32 | business | 询价V2兼容适配器仍依赖HostToolRegistrar和host owner；不能复制为不可信插件的权限入口。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/adapters/inquiry_module.dart:30`（至L115） |
 | S33 | existing | 业务回执全身份operation/request/tool/scope/domain；notFound并非未执行证明。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/business_receipts.dart:11`（至L111） |
 | S34 | existing | 核对严格比较身份，BusinessReceiptLookup只读不approve/重执行。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/business_receipts.dart:144`（至L191） |
-| S35 | business | 询价实现BusinessReceiptLookup；科研Runtime声明未实现，不能当两模块统一能力已闭合。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/adapters/inquiry_module.dart:159`（至L169） |
+| S35 | business | 询价实现BusinessReceiptLookup；科研Runtime未声明此接口的直接证据另见S63，不能当两模块统一能力已闭合。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/app/adapters/inquiry_module.dart:159`（至L169） |
 | S36 | existing | coverage是数据清单，支持notExposed/deferred，不等于运行时权限。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/coverage.dart:1`（至L65） |
 | S37 | constraint | 已采纳目标：模块自声明、宿主审批回执账本、范围单入口；不是创建第二代理框架。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:docs/adr/0004-module-contract-v2.md:9`（至L22） |
 | S38 | constraint | D2唯一模型网关；D5完整调用；D8摘要覆盖工具/能力快照。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:docs/adr/0005-model-adapter-and-agent-loop.md:64`（至L78） |
@@ -208,3 +224,9 @@ T18/T21为生命周期/事件公共面新设计的验收草案，不能冒充当
 | S55 | existing | view可继承SnapshotRef/BindingRef/SnapshotFact的事实与来源绑定，非任意业务对象直接渲染。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/ui/snapshot.dart:14`（至L57） |
 | S56 | existing | 已有local/business/semantic动作路由与UI组件schema；不是领域schema或授权owner。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/ui/plan.dart:4`（至L43） |
 | S57 | existing | ModuleSection拥有Flutter builder；新端应投影稳定route/view ID而不是搬Widget进core。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/muyon_module_api/lib/src/module_v2.dart:66`（至L95） |
+| S58 | gap | _external按effect/provider及inquiry/knowledge/research名称分流；命中后先记invocation来源，返回后记objectRefs，新本机read插件不会仅因V2登记而继承该来源路径。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/assistant/agent_dispatch.dart:468`（至L529） |
+| S59 | existing | 独立于模型消息的HostSourceFact/HostTaskFacts及host-only事实库已存在；缺事实unknown，markExternal先锁存再持久化，失败不洗成clean。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/platform/grants/host_authorization_facts.dart:16`（至L109） |
+| S60 | existing | preparePermission编码实际ModelRequest及兼容变体，将最终payload交给已有host model authority。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/assistant/agent_model_turn.dart:366`（至L389） |
+| S61 | existing | 模型授权入口检查model类别/当前profile/scope，读取HostTaskFacts并对payload UTF-8字节进行内容审查，再重验policy。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/platform/grants/host_model_authorization.dart:52`（至L133） |
+| S62 | existing | 兼容payload变体受绑定限制并重新内容审查/记录，不能沿用不同payload的批准。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:apps/muyon/lib/platform/grants/host_model_authorization.dart:260`（至L305） |
+| S63 | business | ResearchRuntime的implements仅ModuleRuntime/ImportCapable/ScopeResolvable/ScopeCandidates，未声明BusinessReceiptLookup。 | `3836149416020a0ac58f9e7ca788c20e66688e0e:packages/research_module/lib/src/research_module.dart:122`（至L123） |
