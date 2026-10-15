@@ -1,0 +1,6 @@
+data: {"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"a","function":{"name":"fixture__record","arguments":"{\"value\":\"a\"}"}},{"index":1,"id":"b","function":{"name":"fixture__record","arguments":"{\"value\":\"b\"}"}}]}}]}
+
+data: {"choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}]}
+
+data: [DONE]
+

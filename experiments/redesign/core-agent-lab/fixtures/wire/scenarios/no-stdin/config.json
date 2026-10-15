@@ -1,0 +1,9 @@
+{
+  "format": "core-wire-service-v1",
+  "turns": [
+    {
+      "response": "turn-1.sse",
+      "hold": "before_stdin"
+    }
+  ]
+}

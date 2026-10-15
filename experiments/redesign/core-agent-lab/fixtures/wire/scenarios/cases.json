@@ -1,0 +1,191 @@
+{
+  "format": "core-wire-independent-cases-v1",
+  "cases": [
+    {
+      "scenario": "happy",
+      "value": "wire-value",
+      "accept": true
+    },
+    {
+      "scenario": "unicode",
+      "value": "线😀",
+      "accept": true
+    },
+    {
+      "scenario": "escaped-pair",
+      "value": "😀",
+      "accept": true
+    },
+    {
+      "scenario": "crlf-comments",
+      "value": "wire-value",
+      "accept": true
+    },
+    {
+      "scenario": "multiline-data",
+      "value": "wire-value",
+      "accept": true
+    },
+    {
+      "scenario": "usage-only",
+      "value": "wire-value",
+      "accept": true
+    },
+    {
+      "scenario": "no-done",
+      "accept": false
+    },
+    {
+      "scenario": "no-finish",
+      "accept": false
+    },
+    {
+      "scenario": "wrong-stop",
+      "accept": false
+    },
+    {
+      "scenario": "length",
+      "accept": false
+    },
+    {
+      "scenario": "content-filter",
+      "accept": false
+    },
+    {
+      "scenario": "unknown-finish",
+      "accept": false
+    },
+    {
+      "scenario": "duplicate-done",
+      "accept": false
+    },
+    {
+      "scenario": "data-after-done",
+      "accept": false
+    },
+    {
+      "scenario": "delta-after-finish",
+      "accept": false
+    },
+    {
+      "scenario": "error-after-call",
+      "accept": false
+    },
+    {
+      "scenario": "unterminated-done",
+      "accept": false
+    },
+    {
+      "scenario": "unterminated-data",
+      "accept": false
+    },
+    {
+      "scenario": "unknown-tool",
+      "accept": false
+    },
+    {
+      "scenario": "forged-args",
+      "accept": false
+    },
+    {
+      "scenario": "duplicate-args",
+      "accept": false
+    },
+    {
+      "scenario": "escaped-duplicate-args",
+      "accept": false
+    },
+    {
+      "scenario": "array-args",
+      "accept": false
+    },
+    {
+      "scenario": "null-value",
+      "accept": false
+    },
+    {
+      "scenario": "numeric-value",
+      "accept": false
+    },
+    {
+      "scenario": "trailing-args",
+      "accept": false
+    },
+    {
+      "scenario": "lone-surrogate-args",
+      "accept": false
+    },
+    {
+      "scenario": "legacy-function-call",
+      "accept": false
+    },
+    {
+      "scenario": "mixed-text-call",
+      "accept": false
+    },
+    {
+      "scenario": "multi-call",
+      "accept": false
+    },
+    {
+      "scenario": "multi-choice",
+      "accept": false
+    },
+    {
+      "scenario": "conflicting-id",
+      "accept": false
+    },
+    {
+      "scenario": "conflicting-name",
+      "accept": false
+    },
+    {
+      "scenario": "float-index",
+      "accept": false
+    },
+    {
+      "scenario": "invalid-utf8",
+      "accept": false
+    },
+    {
+      "scenario": "invalid-json-number",
+      "accept": false
+    },
+    {
+      "scenario": "outer-duplicate-key",
+      "accept": false
+    },
+    {
+      "scenario": "deep-extension",
+      "accept": false
+    },
+    {
+      "scenario": "argument-limit",
+      "accept": false
+    },
+    {
+      "scenario": "line-limit",
+      "accept": false
+    },
+    {
+      "scenario": "event-limit",
+      "accept": false
+    },
+    {
+      "scenario": "response-limit",
+      "accept": false
+    },
+    {
+      "scenario": "args-then-trailing-fragment",
+      "accept": false
+    },
+    {
+      "scenario": "text-truncated",
+      "accept": false
+    },
+    {
+      "scenario": "nonzero-exit",
+      "accept": false
+    }
+  ]
+}

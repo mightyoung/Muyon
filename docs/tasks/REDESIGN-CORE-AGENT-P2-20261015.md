@@ -1,0 +1,16 @@
+# Core Agent P2 — independent offline protocol evidence
+
+Status: **raw input/helper/oracle checkpoint; Rust wire process runtime NOT_RUN**.
+Base75981959070a4b8d6a6158dbb132e48eea8858fa, approved public spec9b569f9ade3c7824bde23d969998f6f16c4655fb. Same original checker owner in `/tmp/Muyon-core-agent-protocol-checks-20261015`, old52 worktree retained. Only new wire_process.py, test_wire_harness.py, fixtures/wire/, scoped workflow extension and this P2 doc may change. No new Rust implementation has been read at this checkpoint.
+
+Independently authored raw SSE bytes/configurations precede implementation review; first SHA snapshot `/tmp/core-agent-wire-check-evidence-20261015/raw-fixtures-before-DUT.sha256`. There are45 enumerated semantic/negative inputs plus five transport/control scenarios; these are lab vectors, not native or real-provider acceptance cases. The helper captures actual stdin bytes before output and computes response2 from actual received tool value/receipt. It never reads the expected manifest or emits a preset business receipt.
+
+Local helper/oracle self-check RED: three methods/four intended assertion failures with empty native-pair oracle and non-derived answer scaffold. This is harness behavior detection, not a Rust/model defect. Implemented independent native-pair assertions and actual helper transformation then GREEN: three methods,0 failures,exit0. Negatives change tool role to user, mismatch tool_call_id, or remove assistant.tool_calls. Actual helper subprocess capture preserves stdin bytes and changing received tool content changes its emitted answer. Raw input hashes remain unchanged. Logs only `/tmp/core-agent-wire-check-evidence-20261015/`.
+
+No Rust executable/compiler is available locally; syntax or Python self-checks do not establish Agent execution. Root separately reports compiled core RED CI38673388381; that snapshot has no new independent wire process checker and is not claimed as process-wire RED here. Full process checks and dedicated workflow extension are the next owned work before final CI.
+
+Process synchronization will wait for Rust stdout checkpoint=wire-args, proving consumption/parse before terminal; helper flush/file capture alone is insufficient. Process evidence is ACK-after-complete-args/preterminal cancellation. Actual partial-argument cancellation is the Rust unit owner's separate evidence. All preterminal count/confirmation assertions will inspect physical state while the Rust ACK is paused.
+
+Root's explicit cleanup ruling: handled cancel/error/limit paths must kill/reap helper. External uncatchable SIGKILL only tests durable no-resend/counters; the checker must finally clean any surviving fixture child and record that as harness cleanup, not autonomous parent-death handling. No Linux parent-death/unsafe ABI is added solely for this experiment.
+
+Old process.py/test_harness.py/fixtures, core/, product and all prior evidence stay unchanged. No push/merge/install/HTTP/model/secret/device/credential/license work; no artifact403 bypass. Production egress ledger/profile/HTTP/usage/latency/native/M03 contracts remain unmet. A separate non-author must review this author's pack; no self-acceptance is claimed.
