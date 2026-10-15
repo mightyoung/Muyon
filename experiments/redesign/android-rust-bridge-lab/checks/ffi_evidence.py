@@ -39,11 +39,15 @@ def service_red(mode, raw, status, source, library_sha, contract):
                 and raw.splitlines().count(reach) == 1 and raw.index(reach) < raw.index("thread '"))
         elif mode == 'service-jvm-red':
             mapped = f'AGENT_SERVICE_JVM_MAPPED source={source} sha256={library_sha}'
-            failures = re.findall(r'^Exception in thread "main" java\.lang\.IllegalStateException: ([^\n]+)', raw, re.M)
+            # No auxiliary uncaught Java exception is valid service RED either.
+            # Enumerate all headers, not only the expected main exception type.
+            failures = re.findall(r'^Exception in thread "([^"]*)"([^\n]*)', raw, re.M)
+            primary = 'Exception in thread "main" java.lang.IllegalStateException: ' + contract['jvm_assert']
             markers = [mapped, reach, contract['jvm_reach']]
-            valid = (status == 1 and failures == [contract['jvm_assert']]
+            valid = (status == 1 and failures == [('main', ' java.lang.IllegalStateException: ' + contract['jvm_assert'])]
                 and all(raw.splitlines().count(marker) == 1 for marker in markers)
-                and all(raw.index(marker) < raw.index('Exception in thread') for marker in markers)
+                and all(raw.index(first) < raw.index(second)
+                        for first, second in zip(markers, markers[1:] + [primary]))
                 and not re.search(r'^AGENT_SERVICE_JVM_PASS ', raw, re.M))
     return dict(accepted=bool(valid), classification='semantic_red' if valid else 'INVALID',
         mode=mode, command_exit_code=status,

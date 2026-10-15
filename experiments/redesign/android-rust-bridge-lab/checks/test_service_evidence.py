@@ -72,6 +72,30 @@ class ServiceEvidenceControls(unittest.TestCase):
                     raw.replace(CONTRACT['jvm_reach'] + '\n', '') + CONTRACT['jvm_reach'] + '\n']:
             self.assertFalse(self.accepted('service-jvm-red', bad, 1))
 
+    def test_every_uncaught_main_exception_is_enumerated_not_only_expected_type(self):
+        raw = jvm_raw()
+        primary = 'Exception in thread "main" java.lang.IllegalStateException: ' + CONTRACT['jvm_assert']
+        for header in [
+                'Exception in thread "main" java.lang.NoSuchMethodError: setup/load failure',
+                'Exception in thread "main" java.lang.RuntimeException: unrelated failure',
+                'Exception in thread "main" java.lang.AssertionError: wrong assertion',
+                'Exception in thread "main" java.lang.IllegalStateException: wrong primary',
+                'Exception in thread "worker" java.lang.NoSuchMethodError: auxiliary setup failure',
+                'Exception in thread "main"', primary]:
+            for bad in [header + '\n' + raw, raw + header + '\n',
+                        raw.replace(primary, header + '\n' + primary)]:
+                with self.subTest(header=header, bad=bad):
+                    self.assertFalse(self.accepted('service-jvm-red', bad, 1))
+
+    def test_jvm_stage_markers_must_follow_actual_load_native_then_bridge_order(self):
+        raw = jvm_raw()
+        mapped = f'AGENT_SERVICE_JVM_MAPPED source={SOURCE} sha256={LIBRARY}'
+        native, bridge = CONTRACT['native_reach'], CONTRACT['jvm_reach']
+        suffix = raw.split(bridge + '\n', 1)[1]
+        for markers in [(native, mapped, bridge), (mapped, bridge, native),
+                        (bridge, native, mapped), (native, bridge, mapped), (bridge, mapped, native)]:
+            self.assertFalse(self.accepted('service-jvm-red', '\n'.join(markers) + '\n' + suffix, 1))
+
     def test_environment_signal_compile_faults_and_success_are_never_red(self):
         for mode, raw, expected in [('service-rust-red', rust_raw(), 101),
                                     ('service-jvm-red', jvm_raw(), 1)]:
