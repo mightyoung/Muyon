@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.collect
+import com.mightyoung.muyon.androidlab.agentipc.AgentRuntimePanel
 
 /** Original adjustable layout. User-created local notes never represent sent requests or results. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,6 +27,7 @@ fun MuyonLabShell(
 ) {
     val diagnosticCoordinator = diagnostics ?: (LocalContext.current.applicationContext as MuyonLabApplication).diagnostics
     var diagnosticOpen by remember { mutableStateOf(false) }
+    var agentOpen by remember { mutableStateOf(false) }
     var shell by remember { mutableStateOf(initialState) }
     var local by remember { mutableStateOf(LocalUiState().updateMemory(initialState.memory(Destination.ASSISTANT))) }
     val layout = navigationLayout(windowWidthDp ?: LocalConfiguration.current.screenWidthDp.toFloat())
@@ -58,7 +60,7 @@ fun MuyonLabShell(
     LaunchedEffect(shell.selected, conversation.id, draftMounted, local.overlay) {
         if (shell.selected == Destination.ASSISTANT && draftMounted && local.overlay == null && local.active.memory.focus == FocusSlot.DRAFT) draftFocus.requestFocus()
     }
-    fun select(destination: Destination) { diagnosticOpen = false; focusManager.clearFocus(); shell = shell.select(destination); local = local.copy(overlay = null) }
+    fun select(destination: Destination) { diagnosticOpen = false; agentOpen = false; focusManager.clearFocus(); shell = shell.select(destination); local = local.copy(overlay = null) }
     fun show(overlay: LocalOverlay) { focusManager.clearFocus(); local = local.copy(overlay = overlay) }
 
     MaterialTheme(colorScheme = colors) {
@@ -110,12 +112,14 @@ fun MuyonLabShell(
                             onNote = { ref -> local = local.openNote(ref.conversationId, ref.note.id) })
                         Destination.SETTINGS -> SettingsLocalPage(local, settingsScroll,
                             onTheme = { local = local.copy(theme = it) }, onOptions = { show(LocalOverlay.Capabilities) },
-                            onDiagnostic = { diagnosticOpen = true })
+                            onDiagnostic = { agentOpen = false; diagnosticOpen = true },
+                            onAgent = { diagnosticOpen = false; agentOpen = true })
                     }
                 }
             }
         }
         if (diagnosticOpen && shell.selected == Destination.SETTINGS) DiagnosticPanel(diagnosticCoordinator) { diagnosticOpen = false }
+        if(agentOpen && shell.selected==Destination.SETTINGS) AgentRuntimePanel((LocalContext.current.applicationContext as MuyonLabApplication).agents){agentOpen=false}
         LocalOverlays(
             local,
             onDismiss = { local = local.copy(overlay = null) },

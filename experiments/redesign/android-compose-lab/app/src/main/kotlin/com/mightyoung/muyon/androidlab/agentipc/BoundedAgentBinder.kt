@@ -22,6 +22,7 @@ abstract class BoundedAgentBinder:IAgentRuntime.Stub() {
             // byte-array overhead. Payload byte count alone is not this envelope limit.
             AgentParcelLimits.reply(encoded)
             reply.appendFrom(encoded,0,encoded.dataSize())
+            AgentParcelLimits.reply(reply)
             return handled
         } finally { encoded.recycle() }
     }
