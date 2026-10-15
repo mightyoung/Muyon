@@ -1,0 +1,53 @@
+name: Core Agent laboratory
+
+on:
+  push:
+    branches:
+      - 'review/core-agent-*'
+      - develop
+    paths:
+      - 'experiments/redesign/core-agent-lab/**'
+      - '.github/workflows/core-agent-lab.yml'
+      - 'docs/tasks/REDESIGN-CORE-AGENT-*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-core-agent:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Record source and preinstalled tools
+        run: |
+          mkdir -p "$RUNNER_TEMP/core-agent-lab-evidence"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/core-agent-lab-evidence/source-sha.txt"
+          rustc --version | tee "$RUNNER_TEMP/core-agent-lab-evidence/rustc-version.txt"
+          cargo --version | tee "$RUNNER_TEMP/core-agent-lab-evidence/cargo-version.txt"
+          python3 --version | tee "$RUNNER_TEMP/core-agent-lab-evidence/python-version.txt"
+      - name: Rust behavior tests (intentional RED must fail)
+        run: |
+          cargo test --offline --locked --manifest-path experiments/redesign/core-agent-lab/core/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/rust-tests.log"
+      - name: Build synthetic process executable
+        run: |
+          cargo build --offline --locked --release --manifest-path experiments/redesign/core-agent-lab/core/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/rust-build.log"
+          sha256sum experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab | tee "$RUNNER_TEMP/core-agent-lab-evidence/binary-sha256.txt"
+          cp experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab "$RUNNER_TEMP/core-agent-lab-evidence/muyon-core-agent-lab"
+      - name: Independent synthetic process checks (required)
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/checks/process.py --binary experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab --evidence-dir "$RUNNER_TEMP/core-agent-lab-evidence/process" 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/process-checks.log"
+      - name: Retain synthetic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: core-agent-lab-${{ github.sha }}
+          path: ${{ runner.temp }}/core-agent-lab-evidence/
+          retention-days: 1
+          compression-level: 9
+          if-no-files-found: error
