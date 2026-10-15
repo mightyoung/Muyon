@@ -1,0 +1,76 @@
+# Experimental Chat Completions byte adapter, slice P1
+
+Base `75981959070a4b8d6a6158dbb132e48eea8858fa`. This extends the existing C1 Rust lab; it is not M03, a production ABI, a provider capability declaration or real-model/network acceptance. The user authorized choosing and implementing the smallest offline model-adapter/core slice with the existing owners. All C1 authorization, Binding, original-receipt, R1/R2 and budget requirements remain in force.
+
+## Intent and selected boundary
+
+Execute actual request serialization -> controlled stdio byte exchange -> incremental Chat Completions SSE/JSON parsing -> validated complete turn -> existing Rust host authorization and physical fixture.record effect/original receipt -> actual follow-up request -> answer. Raw protocol bytes are inputs, not preconverted TSV events or expected-case outputs. A second fake-service answer must depend on the actual tool result it received, not a DUT answer placeholder.
+
+Alternatives considered: file-only transport is sufficient for decoder tests but weaker evidence of the emitted request boundary; stdio provides independent request capture without a network endpoint; real HTTP/credential integration has unresolved product dependencies. This slice selects stdio plus unit-level byte fixtures. No socket, HTTP client, endpoint, credentials, real model or data egress is added.
+
+Sources: accepted `docs/adr/0005-model-adapter-and-agent-loop.md` §§4–6, v1.3.2 plan W4 and current-source audit outside Git `current-seam-audit.md`. ADR §2 is historical: the current Dart product already has native/streaming support. Use that implementation as a reference, not an oracle for weaker behavior. Official reference: https://developers.openai.com/api/docs/guides/function-calling (Chat Completions streaming and tool-result message sections, checked 2026-10-15). This lab's strict subset below is explicitly narrower than broad endpoint compatibility.
+
+## Supported profile and typed boundary
+
+- One choice, index0, and at most one tool-call index0 per turn. Multiple choices/calls reject the entire turn before policy/confirmation/effect; no silently selecting the first. No batch claim.
+- Fixed model label `fixture-model`; fixed advertised registered wire tool `fixture__record` maps by an explicit host registry to `fixture.record`. Name decoding is a lookup, never generic replace-and-dispatch.
+- Tool schema is `{type:object, properties:{value:{type:string}}, required:[value], additionalProperties:false}`. Final arguments must be exactly one JSON object with `value` string, no extra fields. `approved`, `scope`, identity, risk and destination fields cannot convey authority.
+- Introduce an actual provider injection point in Agent; existing scripted CLI/path stays supported with unchanged C1 checks/fixtures. State creation/load distinguishes a host-frozen script versus wire provider. No wire path converts events into the old script before running Agent.
+- Add structured native message/correlation metadata owned by the core. Encode assistant.tool_calls plus exactly paired role=tool/tool_call_id using validated call metadata and verified tool result. Never reconstruct IDs/arguments/receipt by parsing an untrusted content string such as `tool=...`.
+- Wire tool result content is a JSON string containing at least the actual original `value` and `receipt`; they derive from the verified original tool result, not current pending identity, cached projection or model text. Host filesystem paths and process-control settings do not enter request bytes.
+- Keep current script observations/semantics intact. Rust API signatures are experimental; core writer records their final exact signatures in the owned implementation doc before checker integration. Black-box CLI/transport interface below is fixed for both owners.
+
+## Controlled stdio service interface
+
+Existing `start/run/cancel/lookup/inspect` remain. `start` adds host-only flags:
+
+```
+--provider chat-sse
+--wire-helper ABSOLUTE_PYTHON_FILE
+--wire-fixtures ABSOLUTE_DIRECTORY
+--wire-chunk-size N       # default8192, range1..8192
+--wire-idle-ms N          # default2000, range1..10000
+--wire-total-ms N         # default5000, range1..30000
+--max-wire-total N        # default262144, range1..1048576
+```
+
+Script remains the default provider and retains existing `--script`. Wire flags are frozen host fixture configuration at start; later model data cannot replace helper/paths/limits. Reject incompatible or incomplete provider options before starting a task. Host-supplied fixture files are private trusted test inputs, not untrusted product renderer commands. No production immutability/issuer claim is inferred from a stored helper pathname.
+
+For each admitted model turn the core spawns the installed `python3 -B HELPER --fixture-dir FIXTURES --turn TURN --capture-dir TASKDIR/wire-capture`. TURN is the persisted 1-based model-call number. Core writes the exact serialized UTF8 JSON request bytes to child stdin, then closes stdin. Helper captures those received bytes before emitting raw SSE bytes on stdout. Stderr is not model output and must not be reflected into task errors; use fixed sanitized error codes. Clear credential/proxy/real-eval environment from the helper (prefer env_clear with only a trusted interpreter PATH); helper contains no network client. Root-owned synthetic fixture directories contain no real user data.
+
+The independent checker owns the helper and raw protocol fixtures. The core does not read expected manifests or fixture case IDs. Happy helper response2 computes its answer from the actual request2 tool content; independently compare that content with physical effects.db. Helpers may block at deterministic flushed checkpoints for cancel/SIGKILL tests, not wall-clock sleeps to establish ordering.
+
+Bounded reads/queues and a polling control path must allow cancellation and idle/total expiry even if child emits no more bytes. Kill and reap the helper on cancellation/error/limit; no orphan service or unbounded blocked-reader accumulation. There is no automatic retry/fallback/provider switch. Child EOF without valid protocol terminal or nonzero child exit is a failed turn, even if it previously sent a complete-looking call.
+
+## Decoder and completion rules
+
+Accept arbitrary byte fragmentation, including inside UTF8 characters, JSON escapes, CRLF, SSE field prefixes and argument strings. Decode strictly, never lossy replacement. Support LF/CRLF, blank-line dispatched SSE events, multiple data lines joined with newline, comments and unknown SSE fields. JSON is a fully consumed, bounded strict grammar: reject duplicate object keys, malformed escapes/surrogates/UTF8/numbers, trailing garbage and excessive nesting. Unknown JSON extension fields may be ignored only after valid bounded parsing; recognized fields must have correct types.
+
+`choices[0].delta.content` string fragments form untrusted draft text. Tool metadata freezes at first nonempty id/name; missing/null later fields and identical repeats are allowed, conflicting nonempty id/name rejects. Index must be explicit0. Function arguments are string fragments (missing/null contributes empty); concatenate exactly, parse once as the final object. Reject legacy function_call, unknown/unadvertised names, wrong field types, unsupported indices and multiple calls. Treat DSML/tool-like content text as ordinary text, never executable protocol. This first subset rejects a mixed nonempty answer-text + tool-call turn instead of dropping text or silently executing a subset.
+
+A tool turn requires exactly one valid complete call plus finish_reason=`tool_calls` and `[DONE]`. A text answer requires zero calls plus finish_reason=`stop` and `[DONE]`. Missing either finish reason or DONE, tool+stop, no-call+tool_calls, length, content_filter, unknown finish reason, error object, stream I/O failure, cancellation or timeout cannot yield a callable Tool/official Answer. EOF alone does not imply success. A usage-only chunk may follow finish and precede DONE. No further choice delta/second finish after finish; after DONE only blank/comment/ignored non-data SSE extension framing is allowed until clean helper EOF. Duplicate DONE or data after DONE is an error. The complete event is released to Agent only after the entire supported exchange has validated, including helper exit.
+
+Reported usage is optional nonnegative integer data; missing prompt/completion usage is `None`/unknown, not zero. No tokenizer/price claim. Raw error message bodies and partial output do not enter official answer, successful tool history or the next model request. Errors use stable sanitized codes. Partial observation may report counts only.
+
+## Limits, cancellation and persistent progress
+
+Per-turn wire request/response caps are each65536 bytes. SSE line/event caps are16384 bytes; cumulative argument-text cap8192 bytes; JSON nesting cap32. Apply bounds before excessive allocation, with checked arithmetic. The host `max-wire-total` counts actual emitted request bytes plus actual received response bytes across the attempt, including failed/cancelled/truncated exchanges; reject before admitting work beyond the limit. Wire counters supplement, not replace, current persistent C1 step/model-call/context/output/total byte gates. Do not call wire bytes tokens.
+
+Cancellation and limits are checked before starting the service, between chunks, before releasing a complete turn and before tool confirmation/dispatch. Existing hard host gates are rechecked at dispatch. Bounded known tool-result context is admitted before effect/confirmation as in C1. Cancellation before validated tool completion means zero physical effects and no confirmation consumed; cancellation after a committed effect retains original receipt and prevents the next provider call.
+
+Persist a provider-in-flight admission marker and charged model-call identity before exposing request bytes. A crash after that marker must not make reopen implicitly resend the request, reset charged counters or execute partial tool arguments. Reopen fails/holds as interrupted with fixed reason; no automatic turn retry. A later explicit new task/attempt is separate. Preserve original C1 pending dispatch lookup and separate historical receipt evidence_hold; loss of historical receipt must still prevent new model exchange/confirmation. Identical correlation replay returns original Binding/receipt with zero additional effect/confirmation; changed arguments conflict. Native history must remain correctly paired, without conflicting duplicate call IDs or invented tool results.
+
+## Required independent evidence and negative controls
+
+1. Same raw SSE bytes under whole, every-byte and selected UTF8/escape/CRLF chunk boundaries yield equivalent results. Real encoder request1 advertises the exact tool schema; helper capture proves request2 contains assistant tool call and matching tool role/id with the physical original value/receipt. Answer depends on that actual content.
+2. Complete args before finish/DONE yield zero effect/confirmation at a deterministic observation checkpoint. Delete DONE, change finish to stop/length/content_filter, interrupt after text/call, append error/trailing data or exit helper nonzero: no execution/official answer/retry.
+3. Forged host fields, unadvertised tool, conflicting metadata, legacy function_call, malformed/duplicate-key args, arrays/non-object args, multi-choice/call, invalid UTF8/surrogate/oversize input reject before any effect.
+4. Trusted Ask/Auto/FullAllow/readOnly and hard-denial cases run through the new wire path. Native call arguments cannot confer approval/scope. No new FullAllow risk questions.
+5. Deterministic mid-args cancellation, silent-service cancellation/timeout, post-effect cancellation, process SIGKILL/reopen and persistent step/call/wire budgets; independently inspect physical requests/effects/receipts and no redispatch. R1 terminal and R2 historical-receipt waiting barriers remain covered, including on new adapter path.
+6. Checker self-negatives must reject captured request2 changed to role=user, mismatched tool_call_id or missing assistant.tool_calls. Add compiling semantic inverse mutations for missing terminal admission, lost/mismatched native pairing and wire-budget/stream-cancel bypass as practical; compile/setup errors cannot count KILLED. Existing C1 21 Rust tests/26 process methods/6 harness checks/8 mutations remain required and are not weakened.
+
+## Ownership and remaining product contracts
+
+Core owner `rd_core_agent_writer`: existing core/ plus `docs/tasks/REDESIGN-CORE-AGENT-P1-20261015.md`. Checker owner `next_contract_evidence`: new checks/wire_process.py, new checks/test_wire_harness.py, new fixtures/wire/, extension of dedicated core-agent-lab.yml, own `...-P2-...` taskdoc. Preserve existing checks/process.py, test_harness.py and old fixtures byte-for-byte. Root owns this WIRE-CONTRACT, parent task/plan and integration. Non-author reviewers inspect immutable sources; no author self-acceptance. Only LeaderB normal develop merge after exact candidate and postmerge gates; no main/force/delete/deploy.
+
+Still unmet: production normalized request/digest/disclosure source proof, outbound ledger before network, authorized profile/secret port, HTTP/TLS/redirect/cancel behavior, real vendor capability/usage/latency, multiple tool batch semantics, product event/FFI/IPC integration, platform/native acceptance and M03 cross-end schema freeze. This contract selects none of those. Local Rust remains NOT_RUN absent compiler; use preinstalled offline standard CI Rust, never fake runtime success or bypass artifact403. All raw logs external; preserve RED, initial errors and reviewer findings.
