@@ -1,0 +1,108 @@
+# Plugin contract slice 1: bounded registered reads
+
+Status: proposed, authorized first slice; interface review pending. This is neither M03 completion nor a public interface freeze. Source base is exactly `16df5d9a34cfb8fb6d56d1f6b753a800889a6ace`; all source locations below refer to that commit. Work branch: `task/plugin-contract-slice1-20261015`.
+
+## 1. Outcome and scope
+
+Register DATA, RELATION, read operation and view-reference contributions atomically in an isolated Rust registry. Project its permission-filtered operation directory into the existing Dart Agent selection path, and execute selected reads through a host-owned port, the existing ToolRegistry and its original receipt. Research, inquiry and a synthetic equipment-loan module use the same protocol. Renaming the third module and operation must not require an Agent edit.
+
+The adopted v1.3.2 target places domain registries in Rust. Current Dart ModuleRegistry, ToolRegistry, ModuleOntology, host authorization facts and model authorization remain real authorities during this experiment. This slice adds an opt-in bridge; it does not claim the Rust experiment already replaces those authorities. ADR-0004 keeps approvals, receipts and ledgers host-owned. The source research in `PLUGIN-CONTRACT-SOURCE-RESEARCH-20261015.md` remains evidence, not this interface's approval.
+
+Included: bounded schema validation, namespace/reference checks, atomic publication, permission-filtered discovery, prepared read binding, one-shot dispatch, cancellation, returned reference/schema validation, host provenance and purpose-limited model projection. View registration only records references; it neither renders UI nor runs a handler.
+
+Deferred: writes/CAS, DDL/data migration, live install/hot replacement, restart/resume of prepared calls, event subscriptions, full JSON Schema/IDL, cross-device sync, real models/devices and production enablement. No default grants, permission modes, Agent loop or existing core-agent Rust files change.
+
+## 2. Why the real host seam is necessary
+
+| Existing seam | Inherited behavior / required delta |
+| --- | --- |
+| `packages/muyon_module_api/lib/src/context.dart:61` | ToolDescriptor holds schemas but omits resultSensitivity. Add an immutable map with the same enum/default as ToolSpec; absence remains unreviewed, never safe. |
+| `apps/muyon/lib/app/host_tool_registrar.dart:125` | Copy ToolSpec.resultSensitivity. Register a separate host-owned source binding; plugin declaration labels cannot create it or grant authority. |
+| `apps/muyon/lib/assistant/agent_dispatch.dart:468` | `_external` currently recognizes inquiry/knowledge/research module names. Opt-in read-port path uses trusted source metadata exclusively. Legacy no-port branch remains compatibility behavior; this is not removal of every existing business switch. |
+| `apps/muyon/lib/assistant/agent_dispatch.dart:487` | Preserve pre-dispatch HostAuthorizationFacts marking and post-result source facts. Unknown/external remains contaminating even on failure; plugin labels cannot clear facts. |
+| `apps/muyon/lib/assistant/agent_dispatch.dart:846` | `_complete` currently serializes original result and raw summary into model messages/toolLog. Port-owned reads use only verified ModelReadProjection for result, summary and citations. Original receipt stays separate. |
+| `apps/muyon/lib/assistant/agent_model_turn.dart:366` | Existing final encoded request and compatible-body HostModelAuthorization review remains mandatory. No bypass, new model sender or modifications to this file. |
+
+The existing final model gate and facts ledger are inherited, not newly invented. A valid tool-read permission is insufficient for model use. The new bridge must fail before model emission on missing/failed result validation or purpose review. A fake gateway in tests records attempted sends; a refusal must yield zero sends containing rejected data.
+
+## 3. Ownership and dependency boundary
+
+Single implementation owner: plugin_contract_research_owner. Root is sole integrator/pusher. Review remains independent. Approved exact file boundary:
+
+| Owner | Files |
+| --- | --- |
+| Plugin owner, new Rust | `experiments/redesign/plugin-contract-lab/core/Cargo.toml`, `Cargo.lock`, `src/{lib,main,schema,catalog,read}.rs`, `tests/{registration,read_contract}.rs`; `experiments/redesign/plugin-contract-lab/fixtures/*.json` |
+| Plugin owner, new Dart | `apps/muyon/lib/platform/plugin_contract/{catalog,read_bridge,process,source_policy,model_projection}.dart`; `apps/muyon/test_plugin_contract/{catalog_contract,read_bridge,agent_read_port}_test.dart` |
+| Plugin owner, minimum shared edits | `packages/muyon_module_api/lib/src/context.dart`; `apps/muyon/lib/app/host_tool_registrar.dart`; `apps/muyon/lib/platform/tool_registry.dart`; `apps/muyon/lib/assistant/{agent_dispatch,agent_context,personal_agent}.dart` |
+| CI checker only | New `.github/workflows/plugin-contract-slice.yml` |
+| Documentation | This file and `docs/tasks/PLUGIN-CONTRACT-SLICE1-PLAN-20261015.md` |
+
+No modifications to bootstrap, business handlers, UI, `agent_model_turn.dart`, `core_agent_*`, or `experiments/redesign/core-agent-lab`. The new Rust crate may reuse the existing public bounded wire_json parser through a local path dependency `../../core-agent-lab/core`; that is read-only reuse, not a shared-file ownership transfer. No new network dependency is necessary.
+
+## 4. Three independent versions and bounded schemas
+
+- `protocol_version = 1`: private host/process envelope. Unknown version rejects the message without dispatch.
+- `schema_version`: positive integer on each DATA, RELATION and operation declaration; references bind namespace/name/version exactly. Changing it does not execute DDL or migrate anything.
+- `catalog_generation`: Rust monotonic publication counter. Failed registration leaves it unchanged. Each successful whole-bundle registration increments it once. A process epoch prevents old tickets surviving restart.
+
+Namespace is the host-assigned module id matching `[a-z][a-z0-9_]{0,63}`. Local names use the same grammar; tool identifiers remain opaque host bindings, not parsable capability or business semantics. Cross-module relation targets require an already registered versioned DATA reference and explicit host admission; declaration cannot invent that admission. No wildcard or unresolved references.
+
+A registration bundle has exact keys: `module_id`, `protocol_version`, `data`, `relations`, `operations`, `views`. DATA records contain local `name`, `schema_version`, `schema`, and informational classification declarations. RELATION records contain `name`, `schema_version`, `from`, `field`, `to`, `many`. Operation records contain `name`, `schema_version`, `effect: read`, `input_schema`, `projection_schema`, `data_refs`, and an opaque host binding id. Views contain `name`, DATA references and operation references only. No grant, credentials, handler source, SQL, executable path or UI code is accepted in a bundle.
+
+Schema subset: object/properties/required/additionalProperties=false; string with optional enum; boolean; integer bounded to signed 53-bit values; arrays/items/maxItems; typed object-reference fields declared in the operation's data_refs. Reject unknown schema keywords, unresolved references, cyclic schema structure and unknown required/property names. No union, recursion, float, defaults/coercion, regex or remote `$ref`. Optional fields remain absent; do not inject defaults. The input and projection roots are objects.
+
+Limits: one UTF-8 JSON frame <=65,536 bytes, depth <=16, <=4,096 nodes, each string <=4,096 bytes; bundle <=16 DATA, 32 RELATION, 16 operations, 16 views; whole registry <=8 modules; arrays <=128; arguments <=8,192 canonical bytes. Reject oversized declarations as a whole. Duplicate JSON keys are rejected by the parser. Registration is deterministic validate-then-publish; an invalid last relation/view must leave zero partial contributions, handler calls, grants, data reads or generation change.
+
+Canonical argument identity uses sorted object keys, no whitespace, exact booleans/strings and normalized bounded integer spelling. Reject nonintegral JSON number syntax rather than accept equivalent exponent/decimal spellings. Store canonical bytes in the Rust ticket; do not pretend the existing parser's raw numeric strings are canonical. The host retains existing SHA-256 ToolRegistry identityDigest. No new noncryptographic hash substitutes for it.
+
+## 5. Minimal host/process interface
+
+Private local child process `muyon-plugin-contract-lab`, one JSON request/response line at a time. The host owns its launch, transport and callbacks. Frames from the model/plugin cannot supply authority snapshots. Unknown fields or unsolicited child callback IDs fail closed. One in-flight invocation per port; excess calls return busy without queuing unbounded work. Child EOF/protocol failure invalidates its epoch and all outstanding tickets.
+
+| Request | Result and authority rule |
+| --- | --- |
+| `register(bundle, host_bindings)` | Validate complete bundle and host-owned operation bindings; atomically publish metadata only. The host bindings are sent on the private driver channel and cannot be copied out of plugin-supplied JSON. |
+| `discover(host_scope, host_authority)` | Return only currently admitted read operation projections plus referenced schemas. No executable token. Scope comes from the existing resolver; authority includes profile/category, module availability and host binding revision. Omitted or stale authority denies. |
+| `prepare(operation, args, host_scope, host_authority)` | Validate operation/schema/ref/permission and return an opaque epoch-bound ticket. Bind canonical args, exact resolved scope/ref versions, host authority revision, binding revision, catalog generation, invocation id and owner receipt identity. No handler/data read. |
+| `invoke(ticket, current_host_snapshot)` | Consume ticket once, revalidate all bindings/availability/permissions and emit one bound host execution request. Host rechecks current scope and invokes the original ToolRegistry path. Rust never calls a module handler directly. |
+| `accept_result(ticket, receipt_ref, candidate_projection)` | Verify pending invocation and original owner reference, strict projection schema and object refs. Complete once. Does not manufacture a second receipt or change the original result. |
+| `cancel(ticket)` | Invalidate ticket; host cancels existing ToolCancellationToken. Before dispatch: zero handler calls. After dispatch: no accepted model projection; original ToolRegistry records actual result/unknown according to its existing semantics. |
+
+`host_authority` is a host snapshot, not a grant and not a Rust replacement for current policy. Before callback the host checks it against live policy/category, availability and resolved scope; ToolRegistry then does its own current checks. Discovery may become stale, but stale discovery never authorizes invocation. Revoke or scope/generation mismatch consumes/refuses the attempted ticket without executing. Repeating a consumed ticket cannot run a second handler. Read failure is not silently retried.
+
+The read port contract is conceptually `PluginReadPort.invoke(request, cancellation) -> original ToolCallResult`, plus host-only `sourceFor(request)` and `projectionFor(invocationId, receiptIdentity)`. It is injected as a nullable host-owned PersonalAgent/AgentContext dependency, never selected by plugin/model parameters. Exact Dart signatures may use existing types; security roles and this data flow must not change during implementation without review.
+
+No port: existing default selection/dispatch behavior. Port present: read candidates are the intersection of the permission-filtered registered directory and existing ToolRegistry eligible candidates, using the existing ToolSelectionStrategy injection. At invocation every read in that Agent is port-controlled; unknown/unregistered reads are refused, never sent through a legacy fallback. Write paths are outside this slice and retain existing behavior. No new business-name switch is introduced in Agent core.
+
+## 6. Provenance, original receipt and model data flow
+
+1. Host enrollment binds the registered operation to an existing ToolRegistry descriptor/handler, expected source policy, result projection rule and reviewed classification policy. Copy resultSensitivity faithfully as metadata. Missing/unreviewed labels remain unreviewed; even `none` is not permission or value evidence.
+2. The port validates scope/authority and prepares. AgentDispatch uses the trusted host binding to premark the existing HostAuthorizationFacts before actual data access. Externally sourced and unknown provenance are conservative; no plugin-supplied `trusted`, `clean` or sensitivity label can clear the ledger.
+3. Rust's consumed ticket asks the host to invoke the exact original ToolRegistry request, preserving invocation id. ToolRegistry alone executes the handler and owns receipt persistence, identityDigest and reconciliation. Rust retains only a transient pointer to that original receipt, never a copied durable receipt/result ledger.
+4. The host resolves the receipt reference through `receiptFor(invocationId)` and verifies tool/invocation/identity and result status. Raw provider result remains in that original receipt. Returned object refs must match admitted module/type/version and current scope; relation endpoints must resolve within the same admitted scope. Unknown/foreign/stale refs fail. Mark returned sources in the existing facts ledger before model acceptance.
+5. A host projection rule constructs a bounded candidate from allowlisted fields, then Rust validates the strict projection schema/ref constraints. An existing provider resultSchema, when nonempty, is also validated before projection; unsupported provider schema fails enrollment. Legacy empty resultSchema does not become a claim that arbitrary raw provider data was validated. Raw fields outside the projection never reach model messages, summary, citations or toolLog.
+6. The trusted host classification rule examines actual selected values and source facts for the purpose `model_context`, binding rule version, source/ref revisions, projection bytes and current authority. A plugin sensitivity claim cannot issue this evidence. Unknown/unreviewed classification or denied purpose yields no ModelReadProjection. Synthetic fixtures use an explicit deterministic host policy with both allow and deny cases; this does not claim a general production classifier.
+7. Only host-created, invocation/receipt-bound ModelReadProjection supplies `_complete`'s model-visible result, sanitized summary, citations and `_logEntry`. Failed/invalid argument paths use host static diagnostics, not provider summary/error/data. Original result is retained for host outcomes/receipt only. No valid projection after cancellation/EOF/revoke means no raw-result fallback. Live projection absence after resume/restart is an unsupported/refused read, not reconstruction from task JSON.
+8. The existing Agent model turn encodes the final actual payload and passes it through HostModelAuthorization, including current facts and compatible-payload review. Final refusal prevents send. New source/classification evidence supplements this gate; it never authorizes past it.
+
+This sequence deliberately keeps read permission, content validation, source facts, model-use permission and final emitted-byte review separate. Both successful raw summary injection and invalidArguments error injection need tests, including toolLog on the next turn. A projection is not a receipt or capability.
+
+## 7. Three mappings and a renamed third module
+
+Mappings live in the new host adapter, outside Agent core. They consume actual existing ontology/ToolDescriptor declarations and retain each operation's native argument shape. No universal inquiry.object argument shape is introduced.
+
+| Contribution | First-slice mapping and synthetic runtime evidence |
+| --- | --- |
+| Research | Existing `researchOntology` DATA project/document, `document_project` relation; existing research.read_object input narrowed to project/document from its declared enum. Its queryTool outside this slice is not advertised as executable. Original handler input remains `{type,id}`. First projection is reference-only `{objects:[ObjectRef]}` with static summary. No promise that arbitrary research payload fields have output schemas. |
+| Inquiry | Existing `inquiryOntology` DATA supplier and product plus their valid relation closure where declared; existing inquiry.object native `{type,id}` narrowed to admitted types. First projection is reference-only with static summary. Original `data.record` remains only in original receipt. Excluded field kinds/types are explicitly reported as not enrolled, never silently represented by a permissive schema. |
+| Equipment loan | Synthetic DATA equipment@1 `{equipment_key:string,label:string}` and loan@1 `{loan_key:string,equipment:EquipmentRef,borrower:string}`; RELATION loan_equipment@1 from loan.equipment to equipment. Operation inspect_equipment@1 input required `equipment_key:string`, optional `include_loans:boolean`; no type/id aliases. Projection `{equipment:EquipmentRef,label:string,loans:[LoanRef]}` with all fields required and additionalProperties=false. If include_loans is absent/false, loans is empty. View equipment_details references these DATA/operation ids only. |
+
+Bounded DATA conversion uses the listed schema subset. Relation closure includes only admitted DATA; incomplete closure rejects registration. Production stores are never opened by registration. Tests exercise existing Agent dispatch against synthetic in-memory ToolRegistry handlers with real declaration mapping; they do not claim real business databases were executed. Equipment loan borrower values stay outside the model projection; label values are subject to the trusted actual-value classification fixture.
+
+A deterministic seeded random variant renames module, DATA, RELATION, operation and opaque tool binding, updating only declarations and host enrollment. Inputs and behavior stay identical. Agent files, model selector, source classifier implementation and Rust registry contain no special case for any of those names. The same trusted host source policy attached to the renamed binding must still contaminate facts correctly and trigger the final purpose gate.
+
+## 8. Acceptance boundary
+
+The implementation plan supplies 16 Rust and 12 Dart named behavioral cases. They are all planned, not run at this documentation commit. Both languages require a compiling stub and an actual assertion RED before implementation; a missing import/build failure is not evidence. Review must inspect the complete Agent read chain, not accept a standalone catalog demonstration.
+
+At completion report fixed RED/GREEN commit SHAs, normal CI run ids, compile results, test counts, negative-path handler/send counters and original receipt identity evidence. Preserve raw logs outside Git under `/tmp/rd-plugin-contract-slice1-20261015`; no real-model, device, production data or M03 claims.
