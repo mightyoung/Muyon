@@ -153,7 +153,8 @@ More precisely the IPC history uses these exact structural shapes:
 IPC names are REGISTERED names (`inquiry.object`) everywhere, including start,
 model_request.tools/history and model_reply.name. The gateway ModelToolSpec and
 ModelToolCall use ENCODED names (`inquiry__object`). Host maps both descriptor and
-assistant-call names using the frozen actual ToolNameRegistry before constructing
+assistant-call names using the frozen mapping built with the existing
+encodeToolName/toolIdsByFunctionNameOf helpers before constructing
 and authorizing the ModelRequest, and maps provider complete-call names back
 through that same registry exactly once. Unknown/colliding names reject; do not
 replace substrings or send registered names directly to gateway encoding. IDs
