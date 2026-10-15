@@ -135,3 +135,18 @@ invocation was actually dispatched, its separate outcome lookup still applies.
 Restoring a waiting operation requires a subsequent fresh exact confirmation;
 restoring terminal controls never resumes execution. Cancellation remains durable
 and cannot manufacture a no-effect outcome for an actual unresolved dispatch.
+
+## P1 offline stdio provider
+
+`start --dir TASK --provider chat-sse --wire-helper ABSOLUTE_PYTHON_FILE --wire-fixtures ABSOLUTE_DIRECTORY`
+selects the frozen WIRE-CONTRACT profile. Optional start flags: `--wire-chunk-size` (8192, 1..8192), `--wire-idle-ms` (2000, 1..10000), `--wire-total-ms` (5000, 1..30000), `--max-wire-total` (262144, 1..1048576). `--script` is incompatible. Script remains the default provider. All settings are persisted; run accepts no replacements.
+
+The core launches `python3 -B HELPER --fixture-dir FIXTURES --turn N --capture-dir TASK/wire-capture`, clears its environment except `/usr/bin:/bin` PATH, writes request JSON and closes stdin, consumes raw SSE, and requires clean EOF plus successful exit. Linux nonblocking pipe I/O handles blocked input, silent output, and EOF followed by a hanging child. Handled cancellation/failure/limit kills and reaps the child. External SIGKILL has no supervisor guarantee; the independent harness cleans surviving fake helpers.
+
+`run --checkpoint wire-open|wire-args` uses the existing flushed `checkpoint=NAME` / stdin-newline handshake. `wire-open` means request bytes were written and stdin closed. `wire-args` means Rust consumed a complete supported argument event but has not consumed finish/DONE or admitted a tool. It fires once at most; later argument fragments remain subject to final validation. State is saved before ACK; cancellation is checked after resume. Hooks are host test barriers, not provider text.
+
+Additional CLI and task.db rows: `wire_sent_bytes`, `wire_received_bytes`, `wire_total_bytes` (sum), `provider_inflight`, `usage_prompt`, `usage_completion`. Usage is decimal or `unknown`, never inferred zero. Original task.db `calls`, `steps`, `confirmations` remain directly readable at a paused hook; CLI retains `model_calls`. Bytes are measured protocol bytes, not tokens/prices/billing. A successful/handled exchange accounts actual writes and reads, including invalid/truncated data. Read counters may include later bytes buffered but not yet parsed at `wire-args`. An external SIGKILL between syscall and snapshot leaves a durable measured lower bound; the already-persisted inflight marker permanently blocks resend and further admission for that task, so it cannot reopen its budget.
+
+Private snapshot additions: `provider` (`script`/`chat-sse`), `wire_config_hex` (UTF8 JSON config), `native_history_hex` (UTF8 JSON tagged arrays), `pending_call_ref`, and counters above. Native rows are `["user",text]`, `["assistant",text]`, `["call",call_ref,registered_name,value]`, `["tool",call_ref,original_value,original_receipt]`. These typed rows are never inferred from semantic message text. Existing snapshot version marker is retained for this unpublished lab; new loader requires the added rows. Existing script CLI and fixtures are unchanged.
+
+Reported usage describes the latest admitted wire turn: admission persists `unknown` before any bytes, and only a successful current turn fills the values. Failed, cancelled and interrupted turns cannot inherit previous usage. Private history escape expansion is bounded by the existing1MiB task-file envelope; this storage bound does not relax the65536-byte wire request/response limits.

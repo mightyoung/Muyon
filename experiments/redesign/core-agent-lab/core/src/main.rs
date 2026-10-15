@@ -1,4 +1,4 @@
-use muyon_core_agent_lab::{Result, agent::{Agent,State,Limits,Hooks,parse_mode,boolean},policy::HostFacts,store};
+use muyon_core_agent_lab::{Result, agent::{Agent,State,Limits,Hooks,parse_mode,boolean},policy::HostFacts,store,wire_provider::WireConfig};
 use std::{collections::BTreeMap,path::PathBuf};
 fn take(m:&mut BTreeMap<String,String>,key:&str,default:&str)->String{m.remove(key).unwrap_or_else(||default.into())}
 fn flag(m:&mut BTreeMap<String,String>,key:&str,default:bool)->Result<bool>{boolean(&take(m,key,if default{"true"}else{"false"}))}
@@ -10,14 +10,16 @@ fn execute()->Result<()> {
     while let Some(key)=args.next(){if !key.starts_with("--"){return Err("invalid_option".into());}let value=args.next().ok_or("missing_value")?;if value.len()>65536||opts.insert(key,value).is_some(){return Err("invalid_duplicate_option".into());}}
     let dir=PathBuf::from(opts.remove("--dir").ok_or("missing_dir")?);
     if command=="start" {
-        let script=store::read(&PathBuf::from(opts.remove("--script").ok_or("missing_script")?))?;
+        let provider=take(&mut opts,"--provider","script");
+        let wire=match provider.as_str(){"script"=>None,"chat-sse"=>Some(WireConfig{helper:PathBuf::from(opts.remove("--wire-helper").ok_or("missing_wire_helper")?),fixtures:PathBuf::from(opts.remove("--wire-fixtures").ok_or("missing_wire_fixtures")?),chunk:usize::try_from(number(&mut opts,"--wire-chunk-size",8192)?).map_err(|_|"invalid_wire_chunk")?,idle_ms:number(&mut opts,"--wire-idle-ms",2000)?,total_ms:number(&mut opts,"--wire-total-ms",5000)?,max_total:number(&mut opts,"--max-wire-total",262144)?}),_=>return Err("invalid_provider".into())};
+        let script=if wire.is_some(){"answer\t\n".into()}else{store::read(&PathBuf::from(opts.remove("--script").ok_or("missing_script")?))?};
         let input=take(&mut opts,"--input","");let scope=take(&mut opts,"--scope","fixture");
         let mode=parse_mode(&take(&mut opts,"--mode","auto"))?;
         let high=match take(&mut opts,"--risk","low").as_str(){"low"=>false,"high"=>true,_=>return Err("invalid_risk".into())};
         let facts=HostFacts{mode,high,hard_ok:flag(&mut opts,"--hard-ok",true)?,revoked:flag(&mut opts,"--revoked",false)?,scope_ok:flag(&mut opts,"--scope-ok",true)?,classification_ok:flag(&mut opts,"--classification-ok",true)?,confirmed:flag(&mut opts,"--confirmed",false)?,tainted:flag(&mut opts,"--tainted",false)?,new_destination:flag(&mut opts,"--new-destination",false)?};
         let limits=Limits{steps:number(&mut opts,"--max-steps",16)?,calls:number(&mut opts,"--max-calls",16)?,context:number(&mut opts,"--max-context",65536)?,output:number(&mut opts,"--max-output",16384)?,total:number(&mut opts,"--max-total",262144)?};
         let behavior=take(&mut opts,"--tool-behavior","normal");require_empty(&opts)?;
-        let state=State::new(script,input,scope,facts,limits,behavior)?;let agent=Agent::start(&dir,state)?;print!("{}",agent.observe());return Ok(());
+        let mut state=State::new(script,input,scope,facts,limits,behavior)?;if let Some(config)=wire{state=state.with_wire(config)?;}let agent=Agent::start(&dir,state)?;print!("{}",agent.observe());return Ok(());
     }
     if !matches!(command.as_str(),"run"|"cancel"|"lookup"|"inspect"){return Err("unknown_command".into());}
     store::validate_dir(&dir)?;
@@ -45,7 +47,7 @@ fn execute()->Result<()> {
             if let Some(v)=opts.remove("--scope-ok"){agent.state.facts.scope_ok=boolean(&v)?;}
             if let Some(v)=opts.remove("--classification-ok"){agent.state.facts.classification_ok=boolean(&v)?;}
             let hooks=Hooks{checkpoint:opts.remove("--checkpoint"),io_fault:opts.remove("--io-fault")};
-            for point in [&hooks.checkpoint,&hooks.io_fault].into_iter().flatten(){if !matches!(point.as_str(),"dispatch"|"effect"|"projection"){return Err("invalid_checkpoint".into());}}
+            for point in [&hooks.checkpoint,&hooks.io_fault].into_iter().flatten(){if !matches!(point.as_str(),"dispatch"|"effect"|"projection"|"wire-open"|"wire-args"){return Err("invalid_checkpoint".into());}}
             require_empty(&opts)?;agent.state.save(&dir)?;agent.run(&hooks)?;
         },
         "lookup"=>{require_empty(&opts)?;agent.lookup()?;},

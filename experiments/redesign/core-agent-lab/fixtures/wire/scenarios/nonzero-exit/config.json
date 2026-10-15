@@ -1,0 +1,10 @@
+{
+  "format": "core-wire-service-v1",
+  "turns": [
+    {
+      "response": "turn-1.sse",
+      "exit_code": 7,
+      "stderr": "SYNTHETIC_HELPER_DETAIL"
+    }
+  ]
+}

@@ -33,6 +33,9 @@ jobs:
       - name: Independent checker harness self-checks
         run: |
           python3 -B experiments/redesign/core-agent-lab/checks/test_harness.py 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/harness-selfchecks.log"
+      - name: Independent wire checker harness self-checks
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/checks/test_wire_harness.py 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/wire-harness-selfchecks.log"
       - name: Rust behavior tests
         run: |
           cargo test --offline --locked --manifest-path experiments/redesign/core-agent-lab/core/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/rust-tests.log"
@@ -44,6 +47,9 @@ jobs:
       - name: Independent synthetic process checks (required)
         run: |
           python3 -B experiments/redesign/core-agent-lab/checks/process.py --binary experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab --evidence-dir "$RUNNER_TEMP/core-agent-lab-evidence/process" 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/process-checks.log"
+      - name: Independent offline SSE process checks (required)
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/checks/wire_process.py --binary experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab --evidence-dir "$RUNNER_TEMP/core-agent-lab-evidence/wire-process" 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/wire-process-checks.log"
       - name: Core inverse behavior mutations
         run: |
           python3 experiments/redesign/core-agent-lab/core/mutations.py --evidence-dir "$RUNNER_TEMP/core-agent-lab-evidence/mutations" 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/mutations.log"

@@ -7,7 +7,17 @@ pub struct Message { pub role: Role, pub text: String }
 pub struct ModelRequest { pub task: String, pub attempt: String, pub turn: u64, pub messages: Vec<Message>, pub tools: Vec<String> }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ModelEvent { Tool { call_ref: String, name: String, value: String }, Answer(String), Fail(String) }
-pub trait Provider { fn respond(&mut self, request: &ModelRequest, position: usize) -> Result<ModelEvent>; }
+pub trait ProviderControl {
+    fn poll(&mut self)->Result<()>;
+    fn remaining(&self)->u64;
+    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>;
+    fn checkpoint(&mut self,name:&str)->Result<()>;
+}
+pub trait Provider {
+    fn respond(&mut self, request: &ModelRequest, position: usize) -> Result<ModelEvent>;
+    fn respond_controlled(&mut self,request:&ModelRequest,position:usize,_history:&[NativeMessage],control:&mut dyn ProviderControl)->Result<ModelEvent>{control.poll()?;self.respond(request,position)}
+    fn reported_usage(&self)->(Option<u64>,Option<u64>){(None,None)}
+}
 #[derive(Clone, Debug)]
 pub struct ScriptedProvider { pub events: Vec<ModelEvent> }
 impl ScriptedProvider {
@@ -58,3 +68,12 @@ pub fn decode_context(text: &str) -> Result<Vec<Message>> {
 }
 pub fn context_bytes(messages: &[Message]) -> u64 { messages.iter().map(|m| m.text.len() as u64).sum() }
 pub fn event_bytes(e: &ModelEvent) -> u64 { match e { ModelEvent::Tool{call_ref,name,value} => (call_ref.len()+name.len()+value.len()) as u64, ModelEvent::Answer(s)|ModelEvent::Fail(s)=>s.len() as u64 } }
+
+/// Structural native history. Never reconstructed from message text.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum NativeMessage {
+    User(String),
+    Assistant(String),
+    AssistantCall { call_ref:String, name:String, value:String },
+    ToolResult { call_ref:String, value:String, receipt:String },
+}
