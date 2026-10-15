@@ -4,6 +4,11 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteException
+import android.os.Process
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
+import java.io.File
 import com.mightyoung.muyon.androidlab.*
 import java.util.UUID
 import java.util.concurrent.ArrayBlockingQueue
@@ -53,11 +58,22 @@ class AgentRuntimeService:Service() {
     }
     /** Only Service Context-derived canonical private storage. No UI/Binder path parameter. */
     private fun privateRoot():String {
-        // The Rust root owner alone creates native-agent-service-v1 underneath this
-        // platform parent. Do not double-create its namespace or chmod platform filesDir.
-        return filesDir.canonicalFile.absolutePath
-        // Rust validates strict owner/mode/symlink, lock, quota and index; incompatible
-        // device directory mode fails closed instead of changing the storage contract.
+        val parent=filesDir.canonicalFile
+        val expected=File(parent,"agent-service-root")
+        val stat=try{Os.lstat(expected.absolutePath)}catch(error:ErrnoException){
+            if(error.errno!=OsConstants.ENOENT)throw error
+            try{Os.mkdir(expected.absolutePath,448)}catch(race:ErrnoException){
+                if(race.errno!=OsConstants.EEXIST)throw race
+            }
+            Os.lstat(expected.absolutePath) // Reinspect creation and EEXIST races without following symlinks.
+        }
+        check((stat.st_mode and OsConstants.S_IFMT)==OsConstants.S_IFDIR &&
+            (stat.st_mode and 4095)==448 && stat.st_uid==Process.myUid()){"root_unavailable"}
+        val canonical=expected.canonicalFile
+        check(canonical==expected && canonical.parentFile==parent){"root_unavailable"}
+        // Rust alone owns native-agent-service-v1 below this dedicated 0700 parent.
+        // Existing entries are never chmodded, repaired or removed by bootstrap.
+        return canonical.absolutePath
     }
     override fun onBind(intent:Intent?):IBinder=binder
     override fun onUnbind(intent:Intent?):Boolean { stopPlatform(dispose=false);return true }
