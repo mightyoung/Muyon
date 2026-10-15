@@ -170,3 +170,24 @@ fn tool_result_context_budget_is_admitted_before_first_effect_or_confirmation(){
     let stopped=command(&dir,"run",&[]);assert!(stopped.contains("status=budget_exhausted\n"));assert!(stopped.contains("effects=0\n"));assert!(stopped.contains("confirmations=0\n"));assert!(stopped.contains("model_calls=1\n"));assert!(stopped.contains("receipt=\n"));
     assert_eq!(command(&dir,"run",&[]),stopped);
 }
+#[test]
+fn historical_receipt_hold_preserves_new_waiting_binding_and_confirmation(){
+    for corrupt in [false,true] {
+        let dir=fixture("tool\tc1\tfixture.record\t6669727374\ntool\tc2\tfixture.record\t7365636f6e64\nanswer\t646f6e65\n",&["--mode","ask-every-time","--confirmed","true"]);
+        let waiting=command(&dir,"run",&[]);assert!(waiting.contains("status=waiting\n"));assert!(waiting.contains("invocation=i-2\n"));assert!(waiting.contains("receipt=r-i-1\n"));
+        let original=fs::read_to_string(dir.join("effects.db")).unwrap();
+        if corrupt {fs::write(dir.join("effects.db"),"corrupt\n").unwrap();}
+        else {fs::rename(dir.join("effects.db"),dir.join("preserved-effects.db")).unwrap();}
+        assert!(command(&dir,"inspect",&[]).contains("status=outcome_unknown\n"));
+        assert!(command(&dir,"lookup",&[]).contains("status=outcome_unknown\n"));
+        let attempted=Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab")).args(["run","--dir"]).arg(&dir).args(["--confirmed","true"]).output().unwrap();
+        assert!(!attempted.status.success(),"historical evidence hold must reject new confirmation");
+        let held=command(&dir,"inspect",&[]);assert!(held.contains("confirmations=1\n"));assert!(held.contains("model_calls=2\n"));assert!(held.contains("invocation=i-2\n"));assert!(held.contains("receipt=r-i-1\n"));
+        assert!(fs::read_to_string(dir.join("task.db")).unwrap().contains("unresolved\tfalse\n"),"never-dispatched pending invocation must remain distinct from missing historical evidence");
+        if corrupt {fs::write(dir.join("effects.db"),&original).unwrap();}
+        else {fs::rename(dir.join("preserved-effects.db"),dir.join("effects.db")).unwrap();}
+        assert_eq!(command(&dir,"lookup",&[]),waiting);assert_eq!(fs::read_to_string(dir.join("effects.db")).unwrap(),original);
+        let done=command(&dir,"run",&["--confirmed","true"]);assert!(done.contains("status=completed\n"));assert!(done.contains("effects=2\n"));assert!(done.contains("confirmations=2\n"));
+        let physical=fs::read_to_string(dir.join("effects.db")).unwrap();let first=original.lines().find(|l|l.starts_with("receipt\t")).unwrap();assert!(physical.lines().any(|l|l==first));
+    }
+}
