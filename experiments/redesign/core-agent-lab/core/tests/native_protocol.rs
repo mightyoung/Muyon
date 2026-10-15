@@ -30,6 +30,9 @@ fn registered_protocol_advertises_current_subset_and_preserves_history(){
  let encoded=wire_json::parse(&encode_registered_request(&r,&full,&t,"offline-native").unwrap()).unwrap();
  assert!(encoded.object().unwrap()["tools"].array().unwrap().is_empty());
  let mapped=&encoded.object().unwrap()["messages"].array().unwrap()[1].object().unwrap()["tool_calls"].array().unwrap()[0];assert_eq!(mapped.object().unwrap()["function"].object().unwrap()["name"],string("t_42"));
+ let expected_call=object([("id",string("c1")),("type",string("function")),("function",object([("name",string("t_42")),("arguments",string(args))]))]);
+ let expected=Json::Array(vec![object([("role",string("user")),("content",string("weather?"))]),object([("role",string("assistant")),("content",Json::Null),("tool_calls",Json::Array(vec![expected_call]))]),object([("role",string("tool")),("tool_call_id",string("c1")),("content",string("safe-projection"))])]);
+ assert_eq!(encoded.object().unwrap()["messages"],expected);
  let mut broken=rows[2].object().unwrap().clone();broken.insert("tool_call_id".into(),string("wrong"));rows[2]=Json::Object(broken);
  assert_eq!(encode_registered_request(&r,&Json::Array(rows),&t,"offline-native").unwrap_err(),"wire_unpaired_history");
  let mut unknown=t.clone();unknown.remove(0);assert_eq!(encode_registered_request(&r,&full,&unknown,"offline-native").unwrap_err(),"wire_history_call");
