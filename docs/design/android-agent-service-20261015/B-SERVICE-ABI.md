@@ -8,6 +8,9 @@ Plain Rust semantic controller/types live in nativehost crate; UniFFI derives/th
 
 Constructor `new(AgentServiceConfig) -> Result<Arc<AgentServiceController>, AgentServiceSetupError>` runs from Service-owned background bootstrap, not Binder/main. Config `{ protocol:u32=1, private_root:String }` is supplied only by Service Context/bootstrap, never exposed in AIDL/UI request. Constructor can create a controller/epoch and launch asynchronous inventory worker; connect may observe Initializing. Existing diagnostic functions remain byte/signature/checksum-identical. Generated files gain new definitions naturally; no manual body changes.
 
+Storage-root clarification: Service background bootstrap prepares `canonical filesDir/agent-service-root` as a distinct owner-UID0700 directory; this canonical directory is config.private_root. Rust alone owns `private_root/native-agent-service-v1`. The parent preparation rejects unexpected existing entries instead of chmod/repair; see `SERVICE-ROOT-CONTRACT-AMENDMENT.md`. No generated type, field, method or ABI checksum changes; no AIDL/UI root argument.
+
+
 ## Exact proposed Rust method spellings
 
 ```
