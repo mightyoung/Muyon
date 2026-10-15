@@ -124,6 +124,16 @@ class WireProcessTests(unittest.TestCase):
         return {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
                 for p in sorted((directory/'wire-capture').glob('*')) if p.is_file()}
 
+    def wait_fixture_capture(self, directory, turn=1):
+        # Only service/PID readiness, never proof Rust consumed argument bytes.
+        # Release depends on observed files, not an elapsed sleep interval.
+        paths = [directory/f'wire-capture/request-{turn}.json', directory/f'wire-capture/child-{turn}.pid']
+        deadline = time.monotonic()+5
+        while not all(path.exists() for path in paths):
+            remaining = deadline-time.monotonic()
+            self.assertGreater(remaining,0,'fake service did not capture admitted request')
+            time.sleep(min(0.005,remaining))
+
     def cleanup_children(self, directory):
         # SIGKILL cannot run Rust Drop. This is harness cleanup of trusted fake
         # children, not a parent-death guarantee. Normal path asserts gone first.
@@ -330,6 +340,7 @@ class WireProcessTests(unittest.TestCase):
     def test_silent_service_cancel_and_idle_deadline_reap_real_child(self):
         directory=self.directory();self.start(directory,'silent')
         running=self.pause(directory,'wire-open')
+        self.wait_fixture_capture(directory)
         self.command('cancel',directory);stopped=self.release(running)
         self.assertNotEqual(stopped['status'],'completed');self.assert_effects(directory,0)
         self.assert_children_reaped(directory)
@@ -346,7 +357,7 @@ class WireProcessTests(unittest.TestCase):
         self.assertNotEqual(failed['status'],'completed');self.assertEqual(failed['answer_hex'],'')
         self.assert_effects(directory,0);self.assert_children_reaped(directory)
 
-    def test_total_deadline_includes_blocked_request_stdin_write(self):
+    def test_total_deadline_with_controlled_nonreading_stdin_child(self):
         directory=self.directory();self.start(directory,'no-stdin',input='X'*50000,wire_idle_ms=1000,wire_total_ms=300)
         before=time.monotonic();failed=self.command('run',directory)
         self.assertLess(time.monotonic()-before,5)
