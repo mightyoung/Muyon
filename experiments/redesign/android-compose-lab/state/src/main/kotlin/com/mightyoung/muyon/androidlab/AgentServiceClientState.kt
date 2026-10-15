@@ -113,7 +113,23 @@ class AgentServiceClientState(private val expectedBuild: String) {
         }
         return UiAgentApply.APPLIED
     }
-    fun rejectedStart(ticket:UiAgentObservationTicket,reply:UiAgentWireReply):Boolean = false
+    /** Only a real native Busy/Rejected start reply can clear local admission pending.
+     * This does not claim NoAdmission or a terminal; authoritative current reconciliation
+     * is still required before another explicit operation. Lost transport stays unknown. */
+    fun rejectedStart(ticket:UiAgentObservationTicket,reply:UiAgentWireReply):Boolean {
+        if(!pending || ticket.kind!=UiAgentObservationKind.STATUS || ticket.expectedIntent!=selectedIntent ||
+            ticket.connection!=connection || ticket.leaseGeneration!=leaseGeneration ||
+            ticket.displayGeneration!=displayGeneration || ticket.client!=client || transport!=UiAgentTransport.CONNECTED) return false
+        val meta=when(reply) {
+            is UiAgentWireReply.Busy -> reply.meta
+            is UiAgentWireReply.Rejected -> reply.meta
+            else -> return false
+        }
+        if(!validAgentMeta(meta,expectedBuild) || meta.serviceEpoch!=client?.epoch) return false
+        pending=false
+        reconciled=false
+        return true
+    }
     fun detachDisplay() { displayGeneration = Math.incrementExact(displayGeneration) }
     fun activityVisibility(activityId: String, isVisible: Boolean): UiAgentVisibility? {
         require(activityId.isNotEmpty())

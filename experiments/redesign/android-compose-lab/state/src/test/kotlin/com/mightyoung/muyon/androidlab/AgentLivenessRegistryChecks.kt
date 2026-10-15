@@ -38,6 +38,17 @@ fun runAgentLivenessRegistryChecks(){
     cases["dispose during death-link setup detaches the eventual link"]={val registry=AgentLivenessRegistry<RegistryToken>(AgentClientKeys("a".repeat(16))){};val token=RegistryToken();val entered=CountDownLatch(1);val finish=CountDownLatch(1);val done=CountDownLatch(1);var unlinked=0;var calls=0;val result=java.util.concurrent.atomic.AtomicReference<UiAgentWireReply?>();Thread{try{result.set(registry.connectLinked(token,{death->token.link(death);entered.countDown();check(finish.await(5,TimeUnit.SECONDS));true},{unlinked++}){calls++;connected(it)})}finally{done.countDown()}}.apply{isDaemon=true}.start();try{check(entered.await(5,TimeUnit.SECONDS));registry.dispose();check(unlinked==0)}finally{finish.countDown()};check(done.await(5,TimeUnit.SECONDS));check(result.get()==UiAgentWireReply.Local(UiAgentLocalStatus.UNAVAILABLE) && unlinked==1 && calls==0)}
     cases["dispose rejects late native connect and stops only its original key"]={val gone=mutableListOf<String>();val registry=AgentLivenessRegistry<RegistryToken>(AgentClientKeys("a".repeat(16))){gone+=it};val token=RegistryToken();var unlinked=0;var key="";val result=registry.connectLinked(token,token::link,{unlinked++}){value->key=value;registry.dispose();connected(value)};check(result==UiAgentWireReply.Local(UiAgentLocalStatus.UNAVAILABLE));check(unlinked==1 && gone==listOf(key));check(registry.retainedTokens()==0)}
     cases["unlink callback executes outside registry admission lock"]={lateinit var registry:AgentLivenessRegistry<RegistryToken>;registry=AgentLivenessRegistry(AgentClientKeys("a".repeat(16))){};val token=RegistryToken();var called=false;registry.connectLinked(token,token::link,{called=true;val done=CountDownLatch(1);Thread{registry.retainedTokens();done.countDown()}.apply{isDaemon=true}.start();check(done.await(5,TimeUnit.SECONDS))},::connected);registry.dispose();check(called)}
+    cases["dispose attempts second unlink when first unlink fails"]={
+        var first=0;var second=0;var gone=0
+        val registry=AgentLivenessRegistry<RegistryToken>(AgentClientKeys("a".repeat(16))){gone++}
+        val one=RegistryToken();val two=RegistryToken()
+        check(registry.connectLinked(one,one::link,{first++;println("DISPOSAL_UNLINK_FAILURE_REACHED");throw IllegalStateException("safe unlink failure")},::connected) is UiAgentWireReply.Connected)
+        check(registry.connectLinked(two,two::link,{second++},::connected) is UiAgentWireReply.Connected)
+        runCatching{registry.dispose()}
+        check(second==1){"DISPOSAL_RED: second recipient must still be attempted"}
+        check(first==1 && gone==0 && registry.retainedTokens()==0)
+        registry.dispose();check(first==1 && second==1 && gone==0)
+    }
     var failed=0;cases.forEach{(name,test)->try{test();println("PASS B liveness $name")}catch(e:Throwable){failed++;println("FAIL B liveness $name: ${e.message}")}}
     check(failed==0){"$failed/${cases.size} B liveness checks failed"}
     println("${cases.size}/${cases.size} B liveness checks passed; real Binder death/process runtime NOT_RUN")

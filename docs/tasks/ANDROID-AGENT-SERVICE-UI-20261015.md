@@ -139,3 +139,11 @@ Final JVM result: prior 123 + liveness 15 = **138 PASS**, exit 0; real Binder, S
 | --- | --- |
 | `phase2-disposal-red.log` | `f43ce7c2e5ec4c9bc56db482658072ec56fafdf0e9937334e621d62b3f9b6d24` |
 | `phase2-disposal-green.log` | `ee299c5e447b3e8ca0ac089a7bd635b68f62664d2cf724ac8a614eb5ed13e47b` |
+
+## Pending remote-only state checkpoints after local resource pause
+
+The last already-running local compilation completed before the no-new-build resource instruction: `phase2-start-refusal-red.log`, compilation succeeded, process exit 1, 2/12 IPC cases failed. Registry cases are sequenced after IPC and were not executed in that failing run. Refusing start-reply source is preserved in the preceding test commit. The implementation now distinguishes actual native Busy/Rejected from uncertain transport/unrelated ACK/stale selection and forces current reconciliation; its GREEN is **NOT_RUN** locally and awaits remote validation.
+
+Independent disposal review found that the first throwing unlink interrupts the second detach attempt after entries have been cleared. Added source-only deterministic test `dispose attempts second unlink when first unlink fails`: two actual registered pure-token entries, first unlink prints `DISPOSAL_UNLINK_FAILURE_REACHED` and throws, test catches the injected exception then positively requires the second detach attempt. It also requires exactly once on repeat disposal, no native gone calls and empty retained inventory; the prior valid disposal sibling remains. **This new test has NOT_RUN**: no RED is claimed until the parent runs the approved remote Kotlin command on this fixed checkpoint. The disposing implementation is deliberately still unfixed here.
+
+Remote command (existing runner Kotlin/JDK; no Android runtime): `bash experiments/redesign/android-compose-lab/run-state-checks.sh`. The dedicated workflow already supplies its pinned compiler environment. No local compile/Gradle/SDK/install/cleanup after the pause. Subsequent Service teardown must call explicit native retire/await through a finally path even if platform unlink cleanup fails.
