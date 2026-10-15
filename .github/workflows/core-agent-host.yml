@@ -33,7 +33,7 @@ permissions:
 jobs:
   actual-host:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     defaults:
       run:
         shell: bash
@@ -62,7 +62,9 @@ jobs:
       - name: Resolve existing Flutter workspace
         run: flutter pub get
       - name: Independent recorder self checks
-        run: python3 -B experiments/redesign/core-agent-lab/host-checks/test_record_process.py
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/host-checks/test_record_process.py
+          python3 -B experiments/redesign/core-agent-lab/host-checks/test_host_inverses.py
       - name: Required actual facade and compiled Rust tests
         env:
           MUYON_HOST_SUITE: ${{ inputs.suite || 'full' }}
@@ -81,6 +83,17 @@ jobs:
           fi
           flutter test test_host/core_agent_host_test.dart --no-pub --reporter expanded --timeout 45s "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/core-agent-host-evidence/flutter-tests.log"
           python3 ../../experiments/redesign/core-agent-lab/host-checks/verify_run.py "$RUNNER_TEMP/core-agent-host-evidence/flutter-tests.log"
+      - name: Required real host boundary DUT inverses
+        if: ${{ inputs.suite != 'positive-red' }}
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/host-checks/host_inverses.py \
+            --binary "$GITHUB_WORKSPACE/experiments/redesign/core-agent-lab/core/target/release/muyon-core-agent-lab" \
+            --evidence-dir "$RUNNER_TEMP/core-agent-host-evidence/dut-inverses"
+      - name: Required Rust host callback and admission inverses
+        if: ${{ inputs.suite != 'positive-red' }}
+        run: |
+          python3 -B experiments/redesign/core-agent-lab/core/host_mutations.py \
+            --evidence-dir "$RUNNER_TEMP/core-agent-host-evidence/host-mutations"
       - name: Retain raw evidence outside Git
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

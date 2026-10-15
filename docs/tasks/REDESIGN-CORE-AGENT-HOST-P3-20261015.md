@@ -113,3 +113,49 @@ separate revocation barrier still starts an actual model request before policy
 withdrawal and requires zero prepare/invoke/receipt. This correction is grounded
 in the two existing source gates, not a relaxation to match DUT output. The
 original failing CI log remains outside Git.
+
+## Required compiling DUT inverses
+
+The three inverse anchors were selected from fixed Dartb3f012e and the Rust
+common-loop source3be2b55, without changing an author branch. New independent
+boundary oracles supplement the original positive test; its assertions remain
+unchanged. Projection and one-driver baselines/mutants always use the real
+compiled Rust binary and original registered inquiry handler. The artificial
+child is confined to the negative wrong-native-call correlation oracle.
+
+- Projection: add the genuine result reference's forbidden nativeProjectId field
+  to `projectCoreInquiryResult`. The oracle reads captured host-to-core
+  tool_result first and checks the exact frozen five-field reference projection
+  with `HOST_PROJECTION_FIELDS`, before checking task state. Later Rust refusal
+  alone cannot kill this mutant.
+- Authority correlation: remove only the call_id comparison in common
+  checkProposal. The negative child attempts prepare/invoke with a different
+  native model call ID. The oracle checks zero actual registry receipts first
+  with `HOST_AUTHORITY_BINDING`, preventing a different protocol/task error from
+  counting as the expected failure.
+- One driver: disable only the active-session guard. Both ordinary starts settle
+  through the real binary; the oracle first checks the append manifest has one
+  physical launch with `HOST_ONE_DRIVER_LAUNCH_COUNT`, then checks task status.
+
+`host_inverses.py` runs each exact unchanged oracle on a private baseline copy
+before its own private mutant copy. Package roots are remapped into each copy,
+and every mutant runs real Flutter compilation via `flutter test --no-pub`.
+JSON reporter evidence must show the exact named test started and ended in one
+matcher failure with its boundary marker, one failed test, terminal failure and
+exit1. Compilation/setup errors, exceptions, timeouts, skipped tests, extra
+failures and survivors do not count as KILLED. Logs, reporter JSON, source/binary
+hashes, patches and mutated source artifacts stay outside Git; original source
+and binary hashes must remain unchanged. Copies are removed after execution.
+
+The required host workflow now invokes these three DUT inverses and, separately,
+the Rust owner's `core/host_mutations.py` two host-callback/admission inverses.
+The existing laboratory inverse suite is unchanged. Initial positive-red
+dispatch skips these full-GREEN gates explicitly. Local Python classifier/copy
+self checks and strict analysis validate only the harness; actual baseline
+GREEN and compiled mutant KILLED counts remain pending exact runner evidence.
+
+Inverse harness local verification: classifier/copy self checks **3/3 PASS**;
+existing recorder/rejection self checks **4/4 PASS**; each proposed anchor occurs
+exactly once at fixed Dartb3f012e. Strict local analysis of all test_host files,
+including the new oracle file, reports **No issues found!**. These results do not
+claim any actual DUT mutant KILLED or replace the pending real-binary CI runs.

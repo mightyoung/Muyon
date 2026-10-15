@@ -96,6 +96,37 @@ def main():
         })
         read()
         return
+    elif mode == 'wrong_call_id':
+        send(request)
+        reply = read()['reply']
+        prepare = {
+            'v': 1, 'kind': 'prepare', 'request_id': 2,
+            'task_id': start['task_id'], 'attempt_id': start['attempt_id'],
+            'turn': 1, 'invocation_id': 'negative-invocation-1',
+            'call_id': 'wrong-model-pair', 'tool': 'inquiry.object',
+            'arguments': reply['arguments'],
+        }
+        send(prepare)
+        response = read()
+        projection = receipt = None
+        invocations = 0
+        if response['kind'] == 'decision' and response['decision'] == 'permit':
+            invoke = dict(prepare, kind='invoke', request_id=3,
+                          prepared_ref=response['prepared_ref'])
+            send(invoke)
+            response = read()
+            if response['kind'] == 'tool_result':
+                projection = response['projection']
+                receipt = response['receipt_ref']
+                invocations = 1
+        send({
+            'v': 1, 'kind': 'terminal', 'task_id': start['task_id'],
+            'attempt_id': start['attempt_id'], 'status': 'failed',
+            'reason': 'negative_child_stopped', 'answer': None,
+            'receipt_ref': receipt, 'projection': projection,
+            'model_turns': 1, 'tool_invocations': invocations,
+        })
+        return
     send(request)
     read()
     if mode == 'duplicate_callback':
