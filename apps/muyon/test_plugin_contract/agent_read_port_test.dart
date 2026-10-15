@@ -175,6 +175,8 @@ void main() {
     final conversation = await f.loop.repo.createConversation();
     final task = await legacy.startTool(conversationId: conversation.id,
       toolId: f.id, parameters: {'equipment_key': 'e1'});
+    // ignore: avoid_print
+    print('LEGACY_READ_DIAGNOSTIC error=${task.error}; handlerCalls=${f.handlerCalls}; receipts=${f.loop.receipts()}');
     expect(task.state, PersonalTaskState.succeeded,
         reason: 'LEGACY_READ_DIAGNOSTIC error=${task.error}; handlerCalls=${f.handlerCalls}; receipts=${f.loop.receipts()}');
     expect(f.handlerCalls, 1);
