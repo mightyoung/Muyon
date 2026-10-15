@@ -15,6 +15,7 @@ class AgentServiceClientState(private val expectedBuild: String) {
     private var displayGeneration = 0L
     private var phase: UiAgentServicePhase? = null
     private var epoch: String? = null
+    private var historicalIntent: UiAgentIntent? = null
     private var reconciled = false
     private var pending = false
     private var stopIssued = false
@@ -61,14 +62,21 @@ class AgentServiceClientState(private val expectedBuild: String) {
         return UiAgentObservationTicket(connection, leaseGeneration, displayGeneration, ref, kind,
             if (kind == UiAgentObservationKind.STATUS) selectedIntent else null)
     }
-    fun captureLookup(expected: UiAgentIntent): UiAgentObservationTicket? = capture(UiAgentObservationKind.HISTORICAL)
+    fun captureLookup(expected: UiAgentIntent): UiAgentObservationTicket? {
+        if (!validIntent(expected)) return null
+        return capture(UiAgentObservationKind.HISTORICAL)?.copy(expectedIntent = expected)
+    }
     fun apply(ticket: UiAgentObservationTicket, incoming: UiAgentSnapshot): UiAgentApply {
         if (ticket.connection != connection || ticket.leaseGeneration != leaseGeneration ||
             ticket.displayGeneration != displayGeneration || ticket.client != client || transport != UiAgentTransport.CONNECTED)
             return UiAgentApply.STALE
         if (!validAgentSnapshot(incoming, expectedBuild)) return UiAgentApply.INVALID
         if (incoming.meta.serviceEpoch != client?.epoch) return UiAgentApply.STALE
-        val old = if (ticket.kind == UiAgentObservationKind.HISTORICAL) historical else snapshot
+        if (ticket.kind == UiAgentObservationKind.HISTORICAL &&
+            (ticket.expectedIntent == null || incoming.run?.intent != ticket.expectedIntent)) return UiAgentApply.CONFLICT
+        val old = if (ticket.kind == UiAgentObservationKind.HISTORICAL) {
+            if (historicalIntent == ticket.expectedIntent) historical else null
+        } else snapshot
         if (old?.meta?.serviceEpoch == incoming.meta.serviceEpoch) {
             if (incoming.meta.revision < old.meta.revision) return UiAgentApply.STALE
             if (incoming.meta.revision == old.meta.revision && old != incoming) return UiAgentApply.CONFLICT
@@ -88,6 +96,7 @@ class AgentServiceClientState(private val expectedBuild: String) {
             return UiAgentApply.CONFLICT
         if (ticket.kind == UiAgentObservationKind.HISTORICAL) {
             historical = incoming
+            historicalIntent = ticket.expectedIntent
         } else {
             snapshot = incoming
             phase = incoming.phase
