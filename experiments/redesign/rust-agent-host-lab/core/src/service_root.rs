@@ -45,7 +45,7 @@ fn closed(j: &Json, names: &[&str]) -> Result<()> {
         Ok(())
     }
 }
-fn encode_run(run: &AgentDurableRun) -> Json {
+pub(crate) fn encode_run(run: &AgentDurableRun) -> Json {
     let task = run
         .identity
         .actual_task
@@ -72,7 +72,7 @@ fn encode_run(run: &AgentDurableRun) -> Json {
         ("actual_task", task),
     ])
 }
-fn decode_run(j: &Json) -> Result<AgentDurableRun> {
+pub(crate) fn decode_run(j: &Json) -> Result<AgentDurableRun> {
     closed(
         j,
         &[
@@ -375,6 +375,12 @@ impl ServiceRoot {
         } else {
             Err("service_run_unknown".into())
         }
+    }
+    pub(crate) fn is_poisoned(&self) -> bool {
+        self.poisoned
+    }
+    pub(crate) fn poison(&mut self) {
+        self.poisoned = true;
     }
     pub fn runs(&self) -> &[AgentDurableRun] {
         &self.runs

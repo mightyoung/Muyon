@@ -20,6 +20,9 @@ impl RunControl {
             deadline: Instant::now() + Duration::from_secs(5),
         }
     }
+    pub(crate) fn cancelled(&self) -> bool {
+        self.cancelled.load(Ordering::Acquire)
+    }
     pub fn request_cancel(&self) {
         self.cancelled.store(true, Ordering::Release)
     }

@@ -36,7 +36,9 @@ fn root() -> PathBuf {
     path
 }
 fn controller() -> OwnedController {
-    let serial = SERIAL.lock().unwrap();
+    let serial = SERIAL
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let controller = AgentServiceController::new(AgentHostServiceConfig {
         protocol: 1,
         private_root: root().to_string_lossy().into(),

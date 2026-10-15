@@ -9,6 +9,13 @@ use std::{
 };
 static SERIAL: Mutex<()> = Mutex::new(());
 static NEXT: AtomicUsize = AtomicUsize::new(0);
+struct Drain<'a>(&'a AgentServiceController);
+impl Drop for Drain<'_> {
+    fn drop(&mut self) {
+        self.0.retire_service();
+        self.0.await_settled();
+    }
+}
 const SOURCE: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 fn root() -> PathBuf {
     let p = std::env::temp_dir().join(format!(
@@ -314,6 +321,7 @@ fn close_and_reconnect_preserve_original_durable_outcome() {
     );
     assert_eq!(summary(&r.c, &readonly), done);
     let replacement = AgentServiceController::new(config(&r.root)).unwrap();
+    let _drain = Drain(&replacement);
     let settled = replacement.await_settled();
     assert!(matches!(
         settled.outcome,
