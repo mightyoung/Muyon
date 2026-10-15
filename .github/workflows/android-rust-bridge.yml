@@ -25,7 +25,7 @@ on:
       suite:
         description: 'Full gate, immutable assertion RED, or explicitly partial host checkpoint'
         type: choice
-        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red, service-host-checkpoint, service-oracle-red, service-host-green]
+        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red, service-host-checkpoint, service-oracle-red, service-host-green, mapper-control-red]
         default: full
       emit_android_source:
         description: 'Diagnostic only: bounded generated Android source in service-jvm-red ordinary logs'
@@ -54,8 +54,8 @@ jobs:
           suite = os.environ['REQUESTED_SUITE']
           ref = os.environ['SOURCE_REF']
           if not suite:
-              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
-          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green']:
+              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
+          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red']:
               raise SystemExit('invalid_suite')
           red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') and suite != 'service-oracle-red' else []
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
@@ -77,7 +77,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
-        if: endsWith(matrix.suite, 'jvm-red')
+        if: endsWith(matrix.suite, 'jvm-red') || matrix.suite == 'mapper-control-red'
         with:
           distribution: temurin
           java-version: '17'

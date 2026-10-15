@@ -15,6 +15,7 @@ import urllib.request
 from ffi_evidence import SERVICE_MODES, classify
 from host_checkpoint import inventory as checkpoint_inventory, target_green as checkpoint_target_green, oracle_inventory, oracle_red
 from full_evidence import rust_full, jvm_full, panic_full
+from mapper_control import inventory as mapper_inventory, classify as classify_mapper_control
 from binding_source import PINS as BINDING_SOURCE_PINS, emit as emit_android_binding
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -215,7 +216,7 @@ def host_checkpoint(evidence, work, source, oracle=False, green=False):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green'] + SERVICE_MODES, required=True)
+    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red'] + SERVICE_MODES, required=True)
     parser.add_argument('--evidence-dir', type=Path, required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--emit-android-source', action='store_true')
@@ -239,6 +240,7 @@ def main():
                                           green=args.mode == 'service-host-green'))
             return result.get('command_exit_code', 0) if result['accepted'] else 1
         inventory()
+        mapper = mapper_inventory(ROOT) if args.mode == 'mapper-control-red' else None
         service = service_inventory() if args.mode in SERVICE_MODES else None
         env = dict(os.environ, MUYON_BRIDGE_BUILD_ID=source, CARGO_TERM_COLOR='never',
                    CARGO_INCREMENTAL='0', CARGO_TARGET_DIR=str(work / 'shipping-target'))
@@ -259,6 +261,9 @@ def main():
         result.update(source_sha=source, library_sha256=shipping_sha, cargo_lock_sha256=sha(CORE / 'Cargo.lock'),
                       shipping_features=[], test_inventory_source='631e148f4ea467639d0ed9c0244ed1e821348900',
                       integration_names=sorted(INTEGRATION), unit_names=sorted(UNIT))
+        if mapper:
+            result.update(mapper_test_inventory=mapper,
+                          mapper_contract_sha256=sha(Path(__file__).with_name('mapper_control_cases.json')))
         if service:
             result.update(service_test_inventory_source=service['author_test_commit'],
                           service_test_names=service['test_names'], service_target=service['red']['target'],
@@ -306,6 +311,9 @@ def main():
             probe_sources = [Path(__file__).with_name('BridgeProbe.kt')]
             if service:
                 probe_sources.append(Path(__file__).with_name('ServiceProbe.kt'))
+            if mapper:
+                probe_sources.append(Path(__file__).with_name('MapperProbe.kt'))
+                probe_sources.extend(ROOT / path for path in mapper['sources'])
             run(['bash', tools / 'kotlinc/bin/kotlinc', binding, *probe_sources,
                  '-jvm-target', '17', '-classpath', tools / 'jna.jar', '-include-runtime', '-d', work / 'probe.jar'],
                 evidence / 'kotlin-compile.log', env)
@@ -313,9 +321,9 @@ def main():
                 raise RuntimeError('probe_export_in_shipping_binding')
             result['probe_jar_sha256'] = sha(work / 'probe.jar')
             behavior = evidence / 'behavior.log'
-            probe_class = 'muyon.bridgechecks.ServiceProbe' if service else 'muyon.bridgechecks.BridgeProbe'
+            probe_class = 'muyon.bridgechecks.MapperProbe' if mapper else 'muyon.bridgechecks.ServiceProbe' if service else 'muyon.bridgechecks.BridgeProbe'
             probe_mode = args.mode if service else 'full' if args.mode == 'full' else 'jvm-red'
-            probe_args = [probe_mode, source, shipping] + ([work] if service else [])
+            probe_args = [source, shipping] if mapper else [probe_mode, source, shipping] + ([work] if service else [])
             status = run(['java', '-cp', str(work / 'probe.jar') + ':' + str(tools / 'jna.jar'),
                          probe_class, *probe_args], behavior, env,
                          timeout=30, required=False)
@@ -360,6 +368,8 @@ def main():
         if args.mode == 'full':
             result.update(accepted=True, classification='GREEN', rust_unit_passed=3, rust_integration_passed=6,
                           rust_doc_passed=0, jvm_shipping_passed=5, load_negative_passed=1, panic_recovery_passed=1)
+        elif mapper:
+            result.update(classify_mapper_control(behavior.read_text(errors='replace'), status, source, shipping_sha))
         else:
             result.update(classify(args.mode, behavior.read_text(errors='replace'), status, source, shipping_sha,
                                    service=service['red'] if service else None))
