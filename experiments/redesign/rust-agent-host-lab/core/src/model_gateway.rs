@@ -18,7 +18,8 @@ impl Provider for ModelGateway{
   {let mut s=self.session.borrow_mut();s.review_payload(&bytes)?;s.model_sends+=1;}
   let response=match self.endpoint.exchange(&bytes,control){Ok(v) if v.len()<=65536=>v,_=>{self.session.borrow().store.ledger("failed",&bytes)?;return Err("model_transport_failed".into())}};
   self.session.borrow().store.ledger("sent",&bytes)?;
-  let mut decoder=Decoder::with_tools(&definitions)?;for byte in response{control.poll()?;decoder.feed(byte)?;}
+  let advertised:Vec<_>=definitions.iter().filter(|d|request.tools.contains(&d.name)).cloned().collect();
+  let mut decoder=Decoder::with_tools(&advertised)?;for byte in response{control.poll()?;decoder.feed(byte)?;}
   let decoded=decoder.finish()?;self.usage=decoded.usage;
   match decoded.event{
    ModelEvent::Answer(text)=>{let mut s=self.session.borrow_mut();let safe=s.review.mask_answer(&text)?;s.history.push(crate::object([("role",string("assistant")),("content",string(&safe))]));Ok(ModelEvent::Answer(safe))},
