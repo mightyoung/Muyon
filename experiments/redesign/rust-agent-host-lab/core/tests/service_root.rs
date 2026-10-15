@@ -39,13 +39,15 @@ fn root_lease_serializes_durable_admission_and_preserves_identity() {
     assert_eq!(run.identity.actual_task, None);
     let run_dir = lease.run_dir(&run.identity.run_id).unwrap();
     store::validate_dir(&run_dir).unwrap();
-    let task = AgentTaskIdentity {
-        task_id: "c".repeat(32),
-        attempt_id: "d".repeat(32),
-    };
-    lease
-        .attach_task(&run.identity.run_id, task.clone())
-        .unwrap();
+    let state = muyon_core_agent_lab::agent::State::runtime(
+        "synthetic identity only".into(), "selected-record".into(), Default::default()
+    ).unwrap();
+    let task = AgentTaskIdentity { task_id: state.task, attempt_id: state.attempt };
+    assert!(lease.attach_task(&run.identity.run_id, AgentTaskIdentity {
+        task_id: "../escape".into(), attempt_id: task.attempt_id.clone()
+    }).is_err());
+    let attached = lease.attach_task(&run.identity.run_id, task.clone());
+    assert!(attached.is_ok(), "SERVICE_TASK_ID_RED: preserve actual Core task and attempt identifiers without re-signing");
     let before = store::read(&dir.join("native-agent-service-v1/index.db")).unwrap();
     assert!(before.contains(&run.identity.run_id));
     assert!(before.contains(&task.task_id));
