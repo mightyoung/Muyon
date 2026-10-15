@@ -541,3 +541,38 @@ fn host_matching_projection_error_callback_is_definite_rejection() {
     assert_eq!(field(&value, "receipt_ref"), &Json::Null);
     assert_eq!(field(&value, "projection"), &Json::Null);
 }
+
+#[test]
+fn host_final_terminal_backpressure_consumes_control_and_preserves_original_result() {
+    unsafe extern "C" { fn fcntl(fd: i32, cmd: i32, ...) -> i32; }
+    for (kind, status, reason) in [("cancel", "cancelled", "cancel_requested"), ("close", "interrupted", "host_closed")] {
+        let mut process = HostProcess::new();
+        assert_eq!(unsafe { fcntl(process.output.as_raw_fd(), 1031, 4096) }, 4096);
+        let invocation = admit_tool(&mut process);
+        result(&mut process, &invocation, projected_result());
+        request(&mut process, "model_request", 4, 2);
+        process.send(callback("model_reply", 4, 2, vec![("reply", object([
+            ("kind", string("answer")), ("text", string("x".repeat(8000))),
+        ]))]));
+        let mut header = [0u8; 4]; process.output.read_exact(&mut header).unwrap();
+        let declared = u32::from_be_bytes(header) as usize;
+        assert!(declared > 4096, "final terminal cannot fit in the unread pipe");
+        // This barrier observes the actual final-terminal write, after the
+        // matching original result and complete second model turn were accepted.
+        // No more stdout is drained until the controlled child exits.
+        control(&mut process, kind);
+        assert_eq!(process.child.wait().unwrap().code(), Some(2));
+        let mut stderr = String::new(); process.child.stderr.take().unwrap().read_to_string(&mut stderr).unwrap();
+        assert_eq!(stderr, "error=host_partial_output\n");
+        let journal = wire_json::parse(&fs::read(process.root.join("host-task/host-attempt/host.db")).unwrap()).unwrap();
+        assert_eq!(text(&journal, "status"), status, "final delivery consumed control rather than timing out with stale completed state");
+        assert_eq!(text(&journal, "reason"), reason);
+        assert_eq!(field(&journal, "answer"), &Json::Null);
+        assert_eq!(text(&journal, "receipt_ref"), "receipt:original");
+        assert_eq!(field(&journal, "projection"), &projected_result());
+        assert_eq!(field(&journal, "model_turns"), &number(2));
+        assert_eq!(field(&journal, "tool_invocations"), &number(1));
+        let mut partial = Vec::new(); process.output.read_to_end(&mut partial).unwrap();
+        assert!(partial.len() < declared, "partial final terminal is abandoned without appending another frame");
+    }
+}

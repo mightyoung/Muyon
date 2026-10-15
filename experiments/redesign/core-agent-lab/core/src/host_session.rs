@@ -190,7 +190,7 @@ impl Transport {
         let mut position = 0;
         while position < bytes.len() {
             // A full output pipe must never hide host Stop/close until idle timeout.
-            if !self.terminal_delivery && self.ready(0, 1, false)? {
+            if self.ready(0, 1, false)? {
                 let incoming = self.receive()?;
                 if !self.control(&incoming)? { return Err("callback_mismatch".into()); }
                 return Err(self.shutdown.unwrap().error().into());
@@ -391,8 +391,32 @@ pub fn run_stdio(config: HostSessionConfig) -> Result<()> {
     shared.borrow_mut().terminal_delivery = true;
     let terminal = ports.terminal(&agent.state);
     let sent = shared.borrow_mut().send(&terminal);
-    if shared.borrow().output_incomplete { return Err("host_partial_output".into()); }
-    sent
+    match sent {
+        Ok(()) => Ok(()),
+        Err(reason) => {
+            // Final delivery is still part of the controlled session. A consumed
+            // Stop/close must replace the pre-delivery completed projection,
+            // retaining the genuine original tool result in the journal.
+            let control_reason = shared.borrow().shutdown.map(Shutdown::error);
+            let effective = match control_reason { Some(code) => code, None => reason.as_str() };
+            ports.failure(&mut agent.state, effective);
+            ports.persist(&agent)?;
+            if shared.borrow().output_incomplete { return Err("host_partial_output".into()); }
+            // No byte of this terminal was emitted. One corrected terminal may
+            // be sent inside the same original time/byte bounds; never retry a
+            // partially emitted frame or start another callback.
+            let corrected = ports.terminal(&agent.state);
+            let retry = shared.borrow_mut().send(&corrected);
+            if let Err(failure) = &retry {
+                let control_reason = shared.borrow().shutdown.map(Shutdown::error);
+                let effective = match control_reason { Some(code) => code, None => failure.as_str() };
+                ports.failure(&mut agent.state, effective);
+                ports.persist(&agent)?;
+            }
+            if shared.borrow().output_incomplete { return Err("host_partial_output".into()); }
+            retry
+        },
+    }
 }
 
 #[cfg(test)]

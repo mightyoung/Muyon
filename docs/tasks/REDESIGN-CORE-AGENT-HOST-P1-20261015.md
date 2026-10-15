@@ -90,3 +90,17 @@ assertion; setup errors/timeouts are invalid. Workflow wiring belongs to checker
 Python syntax, diff whitespace and the18 original mutation source anchors were
 checked locally. Corrected Rust tests and both host inverses remain NOT_RUN locally
 until root runs their exact source in CI; cargo/rustc remain unavailable.
+
+## Scoped round2 — final terminal delivery
+
+T1-I4's final-delivery residual is corrected in source: the terminal byte/time
+reserve no longer disables stdin control polling. Final send errors update the
+journal from the consumed cancel/close and retain the accepted original result.
+Partial output exits `host_partial_output` without another frame; zero output
+permits one corrected terminal within the existing original bounds, never a new
+callback. The new final-terminal backpressure test uses the4096-byte physical
+pipe/header barrier after a genuine result and complete second model answer,
+then leaves stdout unread and asserts exact control journal status, null answer,
+retained receipt/projection and no completed/second frame. Both cancel and close
+are covered. This targeted test was added before the correction. Local corrected
+Rust/runtime verification remains NOT_RUN pending exact CI and scoped re-review.
