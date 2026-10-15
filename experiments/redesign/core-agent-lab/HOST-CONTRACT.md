@@ -188,7 +188,12 @@ or dispatch. Timeout/EOF/wrong correlation cannot count as success or trigger re
 
 Before invoke: cancel→cancelled/cancel_requested; close→interrupted/host_closed.
 Model/prepare timeout→failed/callback_timeout; EOF→interrupted/host_eof.
-After invoke admission, missing result→interrupted/tool_outcome_unknown. Retain any
+After invoke admission, missing result→interrupted/tool_outcome_unknown. A fully
+correlated tool_result with an invalid projection, or matching callback_error
+projection_rejected, instead fails with projection_rejected; no projection or
+receipt_ref is accepted into the terminal. The original registry receipt stays
+host-local. Post-admission transport/protocol/correlation failure without a matching
+result remains tool_outcome_unknown. Retain any
 accepted genuine result on cancellation and start no further model send. Host
 registry original receipt remains true even if the child disappears. Wrong or
 duplicate callback→failed/callback_mismatch; limit→budget_exhausted/host_budget.
