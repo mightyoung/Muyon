@@ -23,9 +23,9 @@ on:
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Full required gate or immutable compiled assertion RED'
+        description: 'Full gate, immutable assertion RED, or explicitly partial host checkpoint'
         type: choice
-        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red]
+        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red, service-host-checkpoint]
         default: full
       emit_android_source:
         description: 'Diagnostic only: bounded generated Android source in service-jvm-red ordinary logs'
@@ -54,12 +54,12 @@ jobs:
           suite = os.environ['REQUESTED_SUITE']
           ref = os.environ['SOURCE_REF']
           if not suite:
-              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
-          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red']:
+              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
+          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint']:
               raise SystemExit('invalid_suite')
           red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') else []
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('mode=' + ('red' if red else 'full') + '\nred=' + json.dumps(red) + '\n')
+              output.write('mode=' + ('red' if red else suite) + '\nred=' + json.dumps(red) + '\n')
           PY
 
   compiling-red:
@@ -104,6 +104,36 @@ jobs:
         with:
           name: android-bridge-${{ github.sha }}-${{ matrix.suite }}
           path: ${{ runner.temp }}/android-bridge-evidence/
+          retention-days: 1
+          if-no-files-found: error
+
+  service-host-checkpoint:
+    needs: select
+    if: needs.select.outputs.mode == 'service-host-checkpoint'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Exact official Rust on temporary remote runner
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          dirname "$(rustup which --toolchain 1.99.0 rustc)" >> "$GITHUB_PATH"
+      - name: Independent checkpoint and existing classifier controls
+        run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
+      - name: Required partial host checkpoint; controller remains NOT_RUN
+        run: |
+          python3 -B experiments/redesign/android-rust-bridge-lab/checks/linux_gate.py \
+            --mode service-host-checkpoint --evidence-dir "$RUNNER_TEMP/service-host-checkpoint-evidence" \
+            --work-dir "$RUNNER_TEMP/service-host-checkpoint-work"
+      - name: Preserve complete host checkpoint raw evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: service-host-checkpoint-${{ github.sha }}
+          path: ${{ runner.temp }}/service-host-checkpoint-evidence/
           retention-days: 1
           if-no-files-found: error
 

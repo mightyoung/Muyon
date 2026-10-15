@@ -277,6 +277,20 @@
             "wire_close_retains_child_command_inspection_semantics",
             "embedded_line_feed_is_fatal_but_crlf_sibling_is_valid"
           ]
+        },
+        "integration:service_runtime": {
+          "family": "service-runtime",
+          "names": [
+            "all_builtins_read_physical_file_and_journal_two_actual_payloads",
+            "pre_cancelled_worker_never_bootstraps_or_reads"
+          ]
+        },
+        "integration:service_root": {
+          "family": "service-root",
+          "names": [
+            "root_lease_serializes_durable_admission_and_preserves_identity",
+            "root_inventory_refuses_unowned_entries_and_peak_overflow"
+          ]
         }
       },
       "sources": {
@@ -291,9 +305,17 @@
         "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs": {
           "commit": "58192794baf64780eae05ce6fb6be4dab3a50f49",
           "sha256": "2fab93189b6615b623185db505f2b61e4bc53d0a4853670a94193d81d13907b3"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_runtime.rs": {
+          "commit": "172be3556f708ae94147d3d2b33c5e3acd0fa749",
+          "sha256": "165b2e903aac273d5cb4f31deb9974b1c4fe20561735662923644fdafbfa4b8b"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_root.rs": {
+          "commit": "172be3556f708ae94147d3d2b33c5e3acd0fa749",
+          "sha256": "e02398223d07ded359e8f64fbb9b1f3f9356a90a0ed1056117e0fbe08c34de68"
         }
       },
-      "expected_total": 37
+      "expected_total": 41
     }
   },
   "python": {
