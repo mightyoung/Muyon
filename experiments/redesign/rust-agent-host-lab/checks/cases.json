@@ -264,6 +264,19 @@
             "build_identity_is_explicit_without_host_build_environment",
             "zero_client_initialization_retirement_requires_real_settlement"
           ]
+        },
+        "integration:contract_transport": {
+          "family": "contract-transport",
+          "names": [
+            "persistent_catalog_keeps_generation_and_one_shot_ticket",
+            "tickets_cannot_cross_catalog_instances",
+            "recoverable_schema_rejection_preserves_catalog",
+            "fatal_envelope_replies_latch_transport_closed",
+            "raw_frames_enforce_utf8_duplicates_depth_and_limits",
+            "explicit_transport_close_rejects_future_inspection",
+            "wire_close_retains_child_command_inspection_semantics",
+            "embedded_line_feed_is_fatal_but_crlf_sibling_is_valid"
+          ]
         }
       },
       "sources": {
@@ -274,9 +287,13 @@
         "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs": {
           "commit": "9a7e02adec28f764477e1893387c8699142ec528",
           "sha256": "5c9541e6124bb08faef857c9948117d8161e75810467657b6f8fe0d023b5ee19"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs": {
+          "commit": "58192794baf64780eae05ce6fb6be4dab3a50f49",
+          "sha256": "2fab93189b6615b623185db505f2b61e4bc53d0a4853670a94193d81d13907b3"
         }
       },
-      "expected_total": 29
+      "expected_total": 37
     }
   },
   "python": {

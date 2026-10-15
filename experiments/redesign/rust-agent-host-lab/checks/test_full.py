@@ -17,7 +17,7 @@ def transcript(component):
 
 class FullTests(unittest.TestCase):
     def test_each_source_inventory_accepts_only_complete_green(self):
-        for component, total in [('core', 94), ('plugin', 21), ('host', 29)]:
+        for component, total in [('core', 94), ('plugin', 21), ('host', 37)]:
             result = rust(component, transcript(component), 0)
             self.assertTrue(result['accepted'], component)
             self.assertEqual(result['observed_tests'], total)
@@ -26,7 +26,7 @@ class FullTests(unittest.TestCase):
 
     def test_source_fixed_service_group_preserves_native_twenty_five(self):
         result = rust('host', transcript('host'), 0)
-        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4})
+        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4, 'contract-transport': 8})
         service = CASES['components']['host']['groups'].get('integration:service_controller')
         self.assertIsNotNone(service, 'separate source-fixed service integration group is missing')
         self.assertEqual(service['names'], [
@@ -37,6 +37,23 @@ class FullTests(unittest.TestCase):
         ])
         raw = transcript('host')
         for name in service['names']:
+            self.assertFalse(rust('host', raw.replace(f'test {name} ... ok', ''), 0)['accepted'])
+
+    def test_source_fixed_transport_group_cannot_replace_existing_families(self):
+        transport = CASES['components']['host']['groups'].get('integration:contract_transport')
+        self.assertIsNotNone(transport, 'separate source-fixed transport group is missing')
+        self.assertEqual(transport['names'], [
+            'persistent_catalog_keeps_generation_and_one_shot_ticket',
+            'tickets_cannot_cross_catalog_instances',
+            'recoverable_schema_rejection_preserves_catalog',
+            'fatal_envelope_replies_latch_transport_closed',
+            'raw_frames_enforce_utf8_duplicates_depth_and_limits',
+            'explicit_transport_close_rejects_future_inspection',
+            'wire_close_retains_child_command_inspection_semantics',
+            'embedded_line_feed_is_fatal_but_crlf_sibling_is_valid',
+        ])
+        raw = transcript('host')
+        for name in transport['names']:
             self.assertFalse(rust('host', raw.replace(f'test {name} ... ok', ''), 0)['accepted'])
 
     def test_host_twenty_five_rejects_previous_twenty_and_missing_safety_case(self):
