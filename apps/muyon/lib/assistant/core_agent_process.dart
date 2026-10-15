@@ -648,21 +648,6 @@ final class _Session {
         closing || ctx.closing ? 'host_closed' : null,
       );
     } else {
-      if (invokeAdmitted &&
-          const {
-            'host_protocol',
-            'callback_mismatch',
-            'host_eof',
-            'callback_timeout',
-            'core_backend_unavailable',
-          }.contains(code)) {
-        await ctx.settle(
-          latest,
-          PersonalTaskState.interrupted,
-          'tool_outcome_unknown',
-        );
-        return;
-      }
       final mapped =
           code == 'model_confirmation_required' ||
               code == 'tool_confirmation_required'
