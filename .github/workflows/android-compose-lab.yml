@@ -33,15 +33,21 @@ jobs:
       LAB_DIRECTORY: experiments/redesign/android-compose-lab
       GRADLE_VERSION: '8.13'
       GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
-      GRADLE_USER_HOME: ${{ runner.temp }}/muyon-compose-gradle-cache
-      ANDROID_USER_HOME: ${{ runner.temp }}/muyon-compose-android-user
-      LOG_DIRECTORY: ${{ runner.temp }}/muyon-compose-evidence
     steps:
       - name: Checkout exact source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+      - name: Initialize isolated temporary directories
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/muyon-compose-evidence" "$RUNNER_TEMP/muyon-compose-android-user"
+          {
+            printf 'GRADLE_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-gradle-cache"
+            printf 'ANDROID_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-android-user"
+            printf 'LOG_DIRECTORY=%s\n' "$RUNNER_TEMP/muyon-compose-evidence"
+          } >> "$GITHUB_ENV"
       - name: JDK 17
         uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
         with:
@@ -119,6 +125,6 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: android-compose-lab-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.LOG_DIRECTORY }}
+          path: ${{ runner.temp }}/muyon-compose-evidence
           if-no-files-found: warn
           retention-days: 7
