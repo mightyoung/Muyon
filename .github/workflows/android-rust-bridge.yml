@@ -75,6 +75,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - name: Install exact official Rust toolchain on temporary remote runner
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          dirname "$(rustup which --toolchain 1.99.0 rustc)" >> "$GITHUB_PATH"
       - name: Independent strict verifier and evidence classifier controls
         run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
       - name: Required compiled reachable RED stays a CI failure
@@ -91,6 +95,40 @@ jobs:
         with:
           name: android-bridge-${{ github.sha }}-${{ matrix.suite }}
           path: ${{ runner.temp }}/android-bridge-evidence/
+          retention-days: 1
+          if-no-files-found: error
+
+  required-linux:
+    needs: select
+    if: needs.select.outputs.mode == 'full'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install exact official Rust toolchain on temporary remote runner
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal
+          dirname "$(rustup which --toolchain 1.99.0 rustc)" >> "$GITHUB_PATH"
+      - name: Independent strict controls
+        run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
+      - name: Required native nine plus real JVM shipping load-negative and panic recovery
+        run: |
+          python3 -B experiments/redesign/android-rust-bridge-lab/checks/linux_gate.py \
+            --mode full --evidence-dir "$RUNNER_TEMP/android-bridge-linux-evidence" \
+            --work-dir "$RUNNER_TEMP/android-bridge-linux-work"
+      - name: Retain complete Linux evidence and fresh Android binding
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-bridge-linux-${{ github.sha }}
+          path: ${{ runner.temp }}/android-bridge-linux-evidence/
           retention-days: 1
           if-no-files-found: error
 

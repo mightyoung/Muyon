@@ -12,6 +12,7 @@ import sys
 import urllib.request
 
 from ffi_evidence import classify
+from full_evidence import rust_full, jvm_full, panic_full
 
 ROOT = Path(__file__).resolve().parents[4]
 CORE = ROOT / 'experiments/redesign/android-rust-bridge-lab/core'
@@ -93,7 +94,7 @@ def download(url, output, expected):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', choices=['rust-red', 'jvm-red'], required=True)
+    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full'], required=True)
     parser.add_argument('--evidence-dir', type=Path, required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
     args = parser.parse_args()
@@ -126,6 +127,11 @@ def main():
         result.update(source_sha=source, library_sha256=shipping_sha, cargo_lock_sha256=sha(CORE / 'Cargo.lock'),
                       shipping_features=[], test_inventory_source='631e148f4ea467639d0ed9c0244ed1e821348900',
                       integration_names=sorted(INTEGRATION), unit_names=sorted(UNIT))
+        if args.mode == 'full':
+            run(['cargo', 'test', '--offline', '--locked', '--release', '--no-fail-fast'],
+                evidence / 'rust-full.log', env)
+            if not rust_full((evidence / 'rust-full.log').read_text(), UNIT, INTEGRATION):
+                raise RuntimeError('rust_full_names_or_counts')
         if args.mode == 'rust-red':
             behavior = evidence / 'behavior.log'
             status = run(['cargo', 'test', '--offline', '--locked', '--release', '--test',
@@ -153,14 +159,54 @@ def main():
             run(['bash', tools / 'kotlinc/bin/kotlinc', binding, Path(__file__).with_name('BridgeProbe.kt'),
                  '-jvm-target', '17', '-classpath', tools / 'jna.jar', '-include-runtime', '-d', work / 'probe.jar'],
                 evidence / 'kotlin-compile.log', env)
+            if 'ffiTestPanicProbe' in binding.read_text():
+                raise RuntimeError('probe_export_in_shipping_binding')
             result['probe_jar_sha256'] = sha(work / 'probe.jar')
             behavior = evidence / 'behavior.log'
             status = run(['java', '-cp', str(work / 'probe.jar') + ':' + str(tools / 'jna.jar'),
-                         'muyon.bridgechecks.BridgeProbe', 'jvm-red', source, shipping], behavior, env,
+                         'muyon.bridgechecks.BridgeProbe', 'full' if args.mode == 'full' else 'jvm-red', source, shipping], behavior, env,
                          timeout=30, required=False)
+            if args.mode == 'full':
+                if status != 0 or not jvm_full(behavior.read_text(), source, shipping_sha):
+                    raise RuntimeError('jvm_full_names_or_identity')
+                run(['java', '-cp', str(work / 'probe.jar') + ':' + str(tools / 'jna.jar'),
+                     'muyon.bridgechecks.BridgeProbe', 'load-negative', source, work / 'absent.so'],
+                    evidence / 'load-negative.log', env, timeout=30)
+                if (evidence / 'load-negative.log').read_text() != 'ANDROID_BRIDGE_JVM_PASS missing_native_load_stays_unavailable\n':
+                    raise RuntimeError('load_negative_not_observed')
+                committed = ROOT / 'experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'
+                generated = evidence / 'android/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'
+                if committed.read_bytes() != generated.read_bytes():
+                    raise RuntimeError('android_generated_binding_byte_mismatch')
+                probe_env = dict(env, CARGO_TARGET_DIR=str(work / 'panic-target'))
+                run(['cargo', 'build', '--offline', '--locked', '--release', '--lib', '--features', 'ffi-test-probes'],
+                    evidence / 'panic-build.log', probe_env)
+                panic_lib = evidence / 'panic/libmuyon_android_contract_bridge.so'
+                panic_lib.parent.mkdir()
+                shutil.copyfile(work / 'panic-target/release/libmuyon_android_contract_bridge.so', panic_lib)
+                panic_sha = sha(panic_lib)
+                run([bindgen, 'generate', panic_lib, '--crate', 'muyon_android_contract_bridge', '--language', 'kotlin',
+                     '--config', CORE / 'uniffi.jvm.toml', '--no-format', '--out-dir', evidence / 'panic/jvm'],
+                    evidence / 'generate-panic.log', cli_env)
+                panic_binding = evidence / 'panic/jvm/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'
+                if 'ffiTestPanicProbe' not in panic_binding.read_text():
+                    raise RuntimeError('panic_export_missing')
+                run(['bash', tools / 'kotlinc/bin/kotlinc', panic_binding, Path(__file__).with_name('BridgeProbe.kt'),
+                     Path(__file__).with_name('PanicProbe.kt'), '-jvm-target', '17', '-classpath', tools / 'jna.jar',
+                     '-include-runtime', '-d', work / 'panic.jar'], evidence / 'panic-compile.log', env)
+                run(['java', '-cp', str(work / 'panic.jar') + ':' + str(tools / 'jna.jar'),
+                     'muyon.bridgechecks.PanicProbe', source, panic_lib], evidence / 'panic.log', env, timeout=30)
+                if not panic_full((evidence / 'panic.log').read_text(), source, panic_sha) or sha(panic_lib) != panic_sha:
+                    raise RuntimeError('panic_recovery_not_observed')
+                result.update(panic_library_sha256=panic_sha, panic_features=['ffi-test-probes'],
+                              panic_binding_sha256=sha(panic_binding), panic_jar_sha256=sha(work / 'panic.jar'))
         if sha(shipping) != shipping_sha:
             raise RuntimeError('shipping_library_changed')
-        result.update(classify(args.mode, behavior.read_text(errors='replace'), status, source, shipping_sha))
+        if args.mode == 'full':
+            result.update(accepted=True, classification='GREEN', rust_unit_passed=3, rust_integration_passed=6,
+                          rust_doc_passed=0, jvm_shipping_passed=5, load_negative_passed=1, panic_recovery_passed=1)
+        else:
+            result.update(classify(args.mode, behavior.read_text(errors='replace'), status, source, shipping_sha))
         result['raw_sha256'] = sha(behavior)
         print(behavior.read_text(errors='replace')[-6000:], flush=True)
         return status if result['accepted'] else 1
