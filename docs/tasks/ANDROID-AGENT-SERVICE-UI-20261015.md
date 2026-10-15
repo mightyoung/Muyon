@@ -159,3 +159,11 @@ The correction attempts every at-most-two unlink outside the registry lock, reme
 Added four deterministic pure policy cases before implementing the Service settlement pump: coalesced requests/no waiting queue, a request arriving from actual waiter's return, rejection/failure recovery, and a latch-blocked waiter that coalesces further requests without overlapping another waiter. This helper schedules only native settlement, never business admission or control. Its implementation deliberately refuses (`request=false`) at this checkpoint.
 
 The four new cases are **NOT_RUN locally** under the low-space instruction; no RED/PASS is claimed. Parent may execute the same pinned remote `run-state-checks.sh` command. Existing disposal-failure correction is separate in `6e459c69`; the new refusing pump is not its GREEN evidence. Actual Service integration will use this helper instead of duplicating untested waiter handoff state.
+
+## Settlement pump remote RED and source-only implementation
+
+Parent independently confirmed remote run `38768672327` at `197b9d26` (tree-exact `543b9522`): Kotlin compilation exit 0, exactly the four newly named settlement pump cases failed, 4/51 B-service cases, process exit 1. IPC/registry groups sequenced later did not execute; this run is not disposal GREEN evidence.
+
+Implemented a single owned settlement slot with a coalesced pending bit, no waiting request queue. Requests arriving during actual settlement cause another settlement pass; the release/reacquire handoff prevents the old waiter's finally from clearing a replacement's slot. Rejected executor admission returns false and a future explicit request can acquire the slot. Settlement errors reach the failure callback; neither the pump nor its boolean admission result creates native terminal/Closed metadata. Native calls and failure listeners are outside any admission monitor.
+
+This is a **source-only GREEN candidate, GREEN NOT_RUN locally** under resource instructions. Parent runs the pinned remote Kotlin checks and non-author review before final integration; raw refusing checkpoint remains preserved.

@@ -93,5 +93,29 @@ class AgentRpcLanes(private val observation: Executor, private val control: Exec
 
 /** Coalesced actual settlement only. Admission/control remain independent and Rust-owned. */
 class AgentSettlementPump(private val backend:Executor,private val settle:()->Unit,private val failure:()->Unit) {
-    fun request():Boolean = false
+    private val requested=AtomicBoolean()
+    private val running=AtomicBoolean()
+    fun request():Boolean {
+        requested.set(true)
+        if(!running.compareAndSet(false,true))return true
+        try { backend.execute { drain() } }
+        catch(_:RejectedExecutionException){running.set(false);return false}
+        return true
+    }
+    private fun drain() {
+        var ownsSlot=true
+        try {
+            while(true) {
+                requested.set(false)
+                try { settle() } catch(_:LinkageError){failure()} catch(_:Exception){failure()}
+                if(requested.get())continue
+                running.set(false)
+                ownsSlot=false
+                // A requester can take ownership after release. Do not let this old
+                // waiter's finally clear its replacement's slot.
+                if(requested.get() && running.compareAndSet(false,true)){ownsSlot=true;continue}
+                break
+            }
+        } finally { if(ownsSlot)running.set(false) }
+    }
 }
