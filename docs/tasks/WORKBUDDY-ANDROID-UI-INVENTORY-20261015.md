@@ -4,11 +4,19 @@
 
 **结论：可以继续页面/组件映射；完整页面像素还原仍缺真实截图。**已逐张查看10张已入库 PNG，都是 APK 内置资源的渲染/拷贝，不能作为完整页面截图。没有将竞品 PNG、字体、原 APK、反编译源码或凭据加入本提交。
 
+## 最新状态：用户已批准下载且原包核实完成
+
+用户明确批准“仍然下载”后，已从唯一指定Drive文件正常下载至/tmp隔离目录。**实测293687392字节，SHA-256 `5ce904337ba2821fb1cdb7965075445746d198bc82d40b12d6842d24f1da34e3`；原AndroidManifest实读com.tencent.workbuddy.app /2.6.1/build852。**ZIP1837项CRC全部通过，688SVG/544PNG/23字体；详细报告见文末“原APK实际静态核验”章节。
+
+本文件中此前“未下载/未hash/警告待批准”均为历史阶段记录，已被本次授权及核验结果替代；当前仍缺完整页面截图/Widget调用点，未安装或运行APK/Android，未安装REA，未向仓库加入专有资产。
+
+最新产品路线是**Android Kotlin/Compose +桌面Electron，目标全面退出Dart**。现存Flutter代码/测试仅作旧实现行为迁移对照，本文件前述Flutter路径与命令不授权新增Flutter实现。此提交为文档，未声称Dart产品代码已移除；原品牌、自有素材与Rust授权/回执语义保持。
+
 ## 固定来源与真实性
 
 - [PR69](https://github.com/mightyoung/Muyon/pull/69) 本轮 GitHub 只读查询：`closed`、`merged=false`；完整 head 为 `dca32eebd723e5a4e577cb63a39bea1f8588fd04`，base 为 `01e56cc2d729dab70e1b1def05c3aa93b28f421a`。
 - 固定树 `docs/research/android-reference/workbuddy/2.6.1/` 含32文件：18条静态证据片段、10 PNG、report.md/.docx、manifest.json、findings-index.md。实际树已含图片，旧设计矩阵“visual未提交/配图缺失”的结论过时；PR旧描述也不能覆盖实际树。
-- [样本 manifest](https://github.com/mightyoung/Muyon/blob/dca32eebd723e5a4e577cb63a39bea1f8588fd04/docs/research/android-reference/workbuddy/2.6.1/manifest.json)：`com.tencent.workbuddy.app`，2.6.1/build852，293687392字节，APK SHA-256 `5ce904337ba2821fb1cdb7965075445746d198bc82d40b12d6842d24f1da34e3`。这是既有记录复核；本轮未持有原 APK，不能声称重算该哈希。
+- [样本 manifest](https://github.com/mightyoung/Muyon/blob/dca32eebd723e5a4e577cb63a39bea1f8588fd04/docs/research/android-reference/workbuddy/2.6.1/manifest.json)：`com.tencent.workbuddy.app`，2.6.1/build852，293687392字节，APK SHA-256 `5ce904337ba2821fb1cdb7965075445746d198bc82d40b12d6842d24f1da34e3`。初次阶段只复核既有记录；最新已实际下载并重算匹配，见最新状态及文末原包核验。
 - [原报告](https://github.com/mightyoung/Muyon/blob/dca32eebd723e5a4e577cb63a39bea1f8588fd04/docs/research/android-reference/workbuddy/2.6.1/report.md) 明确：没有安装运行、没有真机截图；blutter只恢复常量/枚举，拿不到完整Widget树、调用点和条件分支。资源名称与路由字符串不能证明页面布局及运行行为。
 
 | PNG类别 | 个数/尺寸 | 像素核实结果 |
@@ -84,7 +92,7 @@ integration盘点含18个Kotlin文件（含宿主、测试和探针）。Muyon�
 
 完成固定提交tree/show、SHA-256副本校验32/32、10 PNG完整解码与逐张查看、源路径/类/Compose函数清单核查。本文档提交仅新增本文件；无产品代码变动，不声称Android已编译/运行或像素已对齐。剩余阻塞是真实页面原图；原包/工具/明确许可仅在继续资源核验或直接复用时需要。
 
-## 追加：Drive候选已实际尝试，停止在安全警告
+## 历史阶段：Drive候选曾停止在未批准的安全警告
 
 用户授权文件夹 `https://drive.google.com/drive/folders/1ifCHLvXiRAThyWUyCb6FbP8CfvKjnrVi`。主线程列出的 `base (2).apk` 候选293687392字节与既有manifest同大小，ID为 `12u0R5_dyUPamFlX2VSQUX8Wg6G8-cQWh`；大小一致不等于身份验证。连接器413对应268435456字节单文件上限，不是访问权限拒绝。
 
@@ -293,3 +301,69 @@ integration盘点含18个Kotlin文件（含宿主、测试和探针）。Muyon�
 ## 自审与后续视觉片范围
 
 Task1覆盖B01/B02/B05/B06/B07，Task2覆盖B03/B04及状态/主题/无派发回归入口，Task3核可评审交付与授权边界。原图像素、未见页面状态、TalkBack/IME设备测试和竞品素材许可明确不在本首片通过范围。后续视觉片先只做UI-02任务列表，组件结构/尺寸来自完整原图，行为接口仍取本spec；原图前不引入猜测布局。
+
+## 追加：原APK实际静态核验（已获得下载授权）
+
+
+2026-10-15追加。用户在父线程明确批准大文件扫描警告后，正常提交Drive“仍然下载”表单；没有另行索取确认，没有登录竞品、安装/运行APK、安装REA或调用任何竞品服务。唯一指定文件ID `12u0R5_dyUPamFlX2VSQUX8Wg6G8-cQWh`。
+
+## 最新结论（替代此前“未下载/未hash”的当前状态）
+
+- 实际文件：`/tmp/rd-workbuddy-android-ui-20261015/apk-static-review/workbuddy-drive-base2.apk`。
+- 实际字节数：**293687392**。
+- 实际SHA-256：**`5ce904337ba2821fb1cdb7965075445746d198bc82d40b12d6842d24f1da34e3`**，与既有报告逐字相同。父线程另行stat/hash也确认一致。
+- 原包二进制AndroidManifest实际读取：`com.tencent.workbuddy.app`、`versionName=2.6.1`、`versionCode=852`；compileSdk36、minSdk24、targetSdk36。
+- 主Flutter Activity是`com.tencent.workbuddy.app.MainActivity`，`windowSoftInputMode`原值16（adjustResize）；另有SDK的登录/回调/WebView/推送Activity，**不能概括为整个Manifest仅一个Activity**。
+- ZIP全1837项CRC通过；没有将APK/字体/SVG/专有PNG加入仓库或公开交付。APK仅/tmp隔离审查。
+
+前述Drive警告停止记录是当时遵守未批准边界的历史，不再是当前下载阻塞。下载证明仅记录状态、host、bytes/hash及用户批准，不保存cookie/隐藏表单值。未重新验证APK签名证书/签名方案，旧签名记录不能当本轮apksigner结果。
+
+## 方法与可复核证据
+
+没有REA/jadx/apktool/aapt/androguard；现成Python标准库zipfile/struct、Pillow、fontTools足够进行本范围核查。`inspect_static.py`是自写静态读取器，只读取AXML字符串池与选定属性、ZIP目录、字体name/cmap/OS2字段和SVG属性；不执行APK字节、不反编译/复制竞品业务源码。
+
+| 文件 | 内容 |
+|---|---|
+| download-proof.json | 正常Drive下载、实际字节/完整SHA、无执行记录 |
+| manifest-proof.json | AXML解析方式、选定元素属性、原AndroidManifest SHA-256 `623f97a84d49312c52b2a641a087b71ae96321872153dd9b752f01f5eb770c36` |
+| resource-proof.json | 资源计数、ABI、Flutter文件、SVG viewBox/显式色、选定资源名、NOTICES身份/命中偏移 |
+| font-metadata.json | FontManifest与23字体的hash/字形数/cmap/name许可字段；不含字体原始文件 |
+| asset-provenance.json | 2原PNG完全相同、6 SVG来源、2组合图性质与CRC结果 |
+| third-party-NOTICES.txt | 既有NOTICES.Z解压后的第三方声明，仅/tmp本地阅读，未加入仓库 |
+
+## 原包资源范围与页面真实性
+
+原ZIP1837项，解压后总计310659778字节；688 SVG、544 PNG、23字体。ABI仅arm64-v8a；`libflutter.so`、`libapp.so`、`AssetManifest.bin`和`FontManifest.json`实存。没有用静态文件计数冒充功能/页面数量。
+
+SVG解析见viewBox `0 0 16 16`共146，`0 0 20 20`共90，`0 0 24 24`共86；这是全SVG解析口径，可能含非图标及第三方资源，不必与旧报告某子集计数相同。显式十六进制色包含中性灰、`#00C29A`、`#1DBF41`、`#13B2BF`等；只是SVG内颜色，不能直接变成运行时主题映射或测量出的页面token。
+
+5对`tab-{tasks,channel,discover,automation,mine}-{outline,filled}.svg`直接存在；同目录另有发现能力图标。**这仍不证明五项真实排序/默认入口/可见条件或完整页面排布。**
+
+既有10 PNG的实际来源精度提高：
+
+| 既有PNG | 原包对照 | 真实性范围 |
+|---|---|---|
+| login_hero_light_poster.png、login_hero_dark_poster.png | 对应assets/images原PNG，SHA完全相同，960×960 | 原包海报资源原样拷贝；不是登录页面截图 |
+| assistant-empty-illustration-light/dark、empty-state-illustration-light/dark | 对应assets/icons下4 SVG实存，原SVG SHA记录 | 既有240×180 PNG为资源渲染；本轮未重现原渲染器/调用参数 |
+| state_load_failed、state_load_failed_dark | 对应assets/images下2 SVG实存，原SVG SHA记录 | 资源渲染；不是失败页面截图 |
+| icon-sheet.png、empty-error-light-dark.png | 组合图，不是原包同名完整页面资产 | 研究拼图；不能用来恢复实际控件位置 |
+
+**完整运行页面截图仍为0；Widget树与调用点没有恢复。**资源SVG自身的viewBox不是手机页面边距/按钮大小；AOT文件、路由/常量旧片段与包内技术评估文档不能给出完整运行布局。此次未重跑blutter或从二进制提取未知业务实现。原图依赖没有因下载成功消失。
+
+## 字体/许可证据矩阵（只报原包事实，不扩为全部素材授权）
+
+| 对象 | 新核实事实 | 当前使用边界 |
+|---|---|---|
+| AlimamaShuHeiTi-Bold.ttf | SHA `3ef4ec3f5bac4b71cdee9190aabd5b20995016a59ffee60de87c9a204ac2a684`；7027 glyph、6991 cmap码点，含U+4E00；name表有Alibaba版权，未见nameID13/14许可/URL；fsType=8 | **fsType不是商业/复制/分发许可。**在NOTICES中查Alimama/ShuHei/阿里妈妈均0命中，不代表外部没有许可证；现包证据不足，仍不从竞品字体直接复用 |
+| MaterialIcons-Regular.otf | SHA `48091a5527eed3fd1337a78df127e426d359beffdbcdd12e986500a7b284fe9e`；仅12 glyph/11码点，fsType0，name表无许可字段 | 可见裁剪后的字体范围事实，不能拿fsType0作所有图标/字形再分发授权 |
+| CupertinoIcons.ttf | SHA `e1d5a0fecfb3d21c06d545e1b604ca2b4f8bc40ce008de245c55d787da9f6edd`；139 glyph/cmap，name无许可字段；Flutter NOTICES中`cupertino_icons`对应MIT文字 | 有包级声明线索，仍需针对预期文件/版本/用途核适用范围与声明保留；不覆盖WorkBuddy自有SVG/机器人。当前不复制到产品 |
+| flutter_math_fork内20份KaTeX字体 | 字体nameID13明确写SIL Open Font License1.1，nameID14为scripts.sil.org/OFL，含各Reserved Font Name；fsType0 | 比之前只有字体族名更强的**字体内嵌声明证据**。不自动授予其它字体/图标/插画许可；当前仍沿用Muyon字体，不复制KaTeX文件 |
+| 明暗机器人、登录海报、自定义SVG | 原包实存并有hash；只发现3个文件名匹配的许可/NOTICE入口，NOTICES包含大量第三方包 | 第三方MIT/Apache/OFL不因此覆盖App自有素材；没有对这些具体素材建立明确适用许可，继续本地审查/自有素材/自绘路线 |
+
+NOTICES.Z解压1627349字节；出现cupertino_icons、flutter_math_fork和多份MIT/Apache声明，Alimama/KaTeX名称未在该总声明命中。**总声明的包名出现、字体内name许可和fsType分别是不同证据，不能合并成“APK全部资产开源”。**没有对pem/bks/推送配置读取原值，也没有复制这些文件。
+
+## 迁移路线与下一步
+
+用户已明确新实现路线：**Android Kotlin/Compose + 桌面Electron，全面退出Dart新产品实现。**既有Flutter源码/行为/widget用例仅作为迁移对照与现状证据；不为Flutter新增UI实现。12切片中的Flutter路径保留为旧实现映射；后续视觉片在Kotlin/Compose/Electron规划和实现，原宿主授权/回执/防重复/未知核对语义不变。
+
+现在可继续：原包静态资源台账、素材适用许可逐文件审查、迁移组件/状态合同与原图需求。仍不能完成：没有完整原图的页面像素复刻，没有调用点的完整Widget树恢复，Android设备运行/键盘/TalkBack/动画验收。REA等工具未安装/未使用，资源许可未明的内容不进入产品或公开仓库。
