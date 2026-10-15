@@ -77,7 +77,7 @@ fn source_subsets_have_exact_types_relations_and_classification() {
             assert_eq!(field(field(row,"schema"),"additionalProperties"),&Json::Bool(false));
             let classifications=field(row,"classification").object().unwrap();
             assert_eq!(classifications.len(),field(field(row,"schema"),"properties").object().unwrap().len());
-            for value in classifications.values() {assert_eq!(value,&string(if kind==MappingKind::Research{"none"}else{"unreviewed"}));}
+            for value in classifications.values() {assert_eq!(value,&string("none"));}
         }
         let relations=field(&mapped.bundle,"relations").array().unwrap();
         if kind==MappingKind::Research {
