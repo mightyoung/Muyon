@@ -9,7 +9,9 @@ pub fn native_json(history:&[NativeMessage])->Result<Json>{
             NativeMessage::Assistant(text)=>object([("role",string("assistant")),("content",string(text))]),
             NativeMessage::AssistantCall{call_ref,name,value}=>{
                 if !identifier(call_ref)||name!="fixture.record"{return Err("wire_history_call".into());}pending=Some(call_ref);
-                object([("role",string("assistant")),("content",Json::Null),("tool_calls",Json::Array(vec![object([("id",string(call_ref)),("type",string("function")),("function",object([("name",string("fixture__record")),("arguments",string(object([("value",string(value))]).encode()))]))]))])
+                let function=object([("name",string("fixture__record")),("arguments",string(object([("value",string(value))]).encode()))]);
+                let call=object([("id",string(call_ref)),("type",string("function")),("function",function)]);
+                object([("role",string("assistant")),("content",Json::Null),("tool_calls",Json::Array(vec![call]))])
             },
             NativeMessage::ToolResult{call_ref,value,receipt}=>{
                 if pending!=Some(call_ref.as_str())||!identifier(receipt){return Err("wire_unpaired_history".into());}pending=None;
@@ -21,8 +23,11 @@ pub fn native_json(history:&[NativeMessage])->Result<Json>{
 }
 pub fn encode_request(request:&ModelRequest,history:&[NativeMessage])->Result<Vec<u8>>{
     if !identifier(&request.task)||!identifier(&request.attempt)||request.turn==0||request.tools!=["fixture.record"]{return Err("wire_request_identity".into());}
-    let schema=object([("type",string("object")),("properties",object([("value",object([("type",string("string"))]))])),("required",Json::Array(vec![string("value")])),("additionalProperties",Json::Bool(false))]);
-    let result=object([("model",string("fixture-model")),("stream",Json::Bool(true)),("stream_options",object([("include_usage",Json::Bool(true))])),("messages",native_json(history)?),("tools",Json::Array(vec![object([("type",string("function")),("function",object([("name",string("fixture__record")),("parameters",schema)]))])]))]).encode().into_bytes();
+    let properties=object([("value",object([("type",string("string"))]))]);
+    let schema=object([("type",string("object")),("properties",properties),("required",Json::Array(vec![string("value")])),("additionalProperties",Json::Bool(false))]);
+    let function=object([("name",string("fixture__record")),("parameters",schema)]);
+    let tool=object([("type",string("function")),("function",function)]);
+    let result=object([("model",string("fixture-model")),("stream",Json::Bool(true)),("stream_options",object([("include_usage",Json::Bool(true))])),("messages",native_json(history)?),("tools",Json::Array(vec![tool]))]).encode().into_bytes();
     if result.len()>65536{return Err("wire_request_limit".into());}Ok(result)
 }
 /// Private snapshot encoding is structured and is independent of semantic text.
