@@ -105,7 +105,7 @@ fn decode_run(j: &Json) -> Result<AgentDurableRun> {
         closed(task, &["task_id", "attempt_id"])?;
         let t = field(task, "task_id")?.string()?;
         let a = field(task, "attempt_id")?.string()?;
-        if !hex_id(t, 32) || !hex_id(a, 32) {
+        if !muyon_core_agent_lab::identifier(t) || !muyon_core_agent_lab::identifier(a) {
             return Err("service_index_task".into());
         }
         Some(AgentTaskIdentity {
@@ -328,7 +328,9 @@ impl ServiceRoot {
         Ok(run)
     }
     pub fn attach_task(&mut self, run: &str, task: AgentTaskIdentity) -> Result<()> {
-        if !hex_id(&task.task_id, 32) || !hex_id(&task.attempt_id, 32) {
+        if !muyon_core_agent_lab::identifier(&task.task_id)
+            || !muyon_core_agent_lab::identifier(&task.attempt_id)
+        {
             return Err("service_index_task".into());
         }
         let mut candidate = self.runs.clone();
