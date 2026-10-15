@@ -107,3 +107,16 @@ Added private explicit AIDL methods connect/start/status/current/lookup/setVisib
 `BoundedAgentBinder` checks the actual complete incoming `Parcel.dataSize()` against 4096 before generated request decoding, rejects cross-UID and oneway calls, then checks the complete outgoing temporary Parcel against 8192 after generated exception/object/byte-array framing. `AgentReplyParcel` also checks the actual source/destination Parcel and bounded payload. Encoding/validation failure becomes local transport Unavailable, never business NoAdmission, terminal success or proof of no side effect.
 
 AGP AIDL generation is enabled without new dependencies or permissions. Three device-only instrumentation cases cover interface-token/array overhead, valid local reply with exception/presence framing, and complete reply oversize rejection. These tests are source only: **Android/AIDL compilation, Parcel tests and Binder runtime NOT_RUN locally**; remote normal Gradle compilation is required. They are not counted in the 133 pure JVM result. Service class/manifest entry, UI proxy and actual generated Object adapter are not yet added by this checkpoint; no fake implementation or Agent construction exists.
+
+## Registry independent review: release versus repeated connect
+
+The previous 133-case checkpoint did not cover an acknowledged native release racing a repeated live-token connect. Deterministic RED `fe2dc2091e436865c79b41876b5fc21ae8a57390` blocks inside the repeated native connect, marks the original lease released, then lets connect return. The case fails on the prior implementation (1/11 registry failures, compilation succeeded, exit 1).
+
+Post-native publication now checks both dead and released state under the registry lock. A late Connected result cannot revive a released-live tombstone. The tombstone retains capacity; this correction adds no native gone/release invocation. The test includes a valid same-live repeat sibling, checks retained count 1 and gone count 0 after the race, and verifies future connect cannot invoke native for the released token.
+
+Full exact-source JVM check: old 123 + registry 11 = **134 PASS**, exit 0. Service integration depending on the registry remains paused until independent scoped re-review. Android/Binder/native runtime remains NOT_RUN.
+
+| Release-race log | SHA-256 |
+| --- | --- |
+| `phase2-registry-release-red.log` | `d996d0daaff50e0f3ed2a7651598bdd4cf957a4452f87f8e5cda298f218e84e9` |
+| `phase2-registry-release-green.log` | `e506eba686920281a764d74896f6fa4d89cf6c3aed655b195c31f18e626be502` |
