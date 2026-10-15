@@ -26,3 +26,102 @@ fn encoder_uses_structural_native_pair_and_original_tool_result(){
     let body=String::from_utf8(encode_request(&request,&history).unwrap()).unwrap();
     assert!(body.contains("\"tool_calls\""),"{body}");assert!(body.contains("\"tool_call_id\":\"c1\""),"{body}");assert!(body.contains("r-original"),"{body}");assert!(!body.contains("approved"));
 }
+
+#[test]
+fn strict_json_rejects_duplicate_keys_bad_numbers_unicode_and_depth(){
+    use muyon_core_agent_lab::wire_json::parse;
+    for raw in [r#"{"a":1,"\u0061":2}"#,r#"01"#,r#"1."#,r#"+1"#,r#"1e"#,r#""\uD800""#,r#""\uDE00""#,r#"{} true"#]{assert!(parse(raw.as_bytes()).is_err(),"{raw}");}
+    assert!(parse(format!("{}0{}","[".repeat(34),"]".repeat(34)).as_bytes()).is_err());
+    assert!(parse(b"\"\xff\"").is_err());assert!(parse(br#"{"unknown":[-1.25e+3,true,null,"\uD83D\uDE00"]}"#).is_ok());
+}
+#[test]
+fn final_arguments_revalidate_after_early_observation(){
+    let first=TOOL.split("data: {\"choices\":[{\"index\":0,\"delta\":{},").next().unwrap();let mut d=Decoder::new();let mut seen=0;
+    for b in first.bytes(){if d.feed(b).unwrap().is_some(){seen+=1;}}assert_eq!(seen,1);
+    let extra="data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"evil\"}}]},\"finish_reason\":\"tool_calls\"}]}\n\ndata: [DONE]\n\n";
+    for b in extra.bytes(){d.feed(b).unwrap();}assert!(d.finish().is_err());
+}
+#[test]
+fn schema_metadata_and_terminal_conflicts_are_errors(){
+    for bad in [TOOL.replace("fixture__record","unadvertised"),TOOL.replace("\\\"hi\\\"","4"),TOOL.replace("\\\"value\\\":","\\\"approved\\\":true,\\\"value\\\":"),TOOL.replace("\"index\":0","\"index\":1"),TOOL.replace("\"tool_calls\":[","\"function_call\":["),TOOL.replace("tool_calls\"}]}","length\"}]}"),format!("{TOOL}data: [DONE]\n\n"),TOOL.trim_end().to_string()]{assert!(decode(bad.as_bytes()).is_err(),"{bad}");}
+    let conflict=TOOL.replace("\"delta\":{},", "\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"other\"}]},");assert!(decode(conflict.as_bytes()).is_err());
+}
+#[test]
+fn multiline_data_comments_and_ignored_framing_are_supported(){
+    let raw="event: ignored\n: comment\ndata: {\"choices\":\ndata: [{\"index\":0,\"delta\":{\"content\":\"ok\"},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n: trailing\n\n";
+    assert_eq!(decode(raw.as_bytes()).unwrap().event,ModelEvent::Answer("ok".into()));
+}
+#[test]
+fn native_pair_mismatch_is_not_encoded(){
+    let r=ModelRequest{task:"t".into(),attempt:"a".into(),turn:1,messages:vec![],tools:vec!["fixture.record".into()]};
+    let h=vec![NativeMessage::AssistantCall{call_ref:"c".into(),name:"fixture.record".into(),value:"v".into()},NativeMessage::ToolResult{call_ref:"other".into(),value:"v".into(),receipt:"r".into()}];assert!(encode_request(&r,&h).is_err());
+}
+use std::{fs,path::{Path,PathBuf},process::Command,sync::atomic::{AtomicU64,Ordering}};
+static NEXT:AtomicU64=AtomicU64::new(0);
+const HELPER:&str=r#"import argparse,json,pathlib,sys,os,signal
+p=argparse.ArgumentParser();p.add_argument('--fixture-dir');p.add_argument('--turn');p.add_argument('--capture-dir');a=p.parse_args()
+f=pathlib.Path(a.fixture_dir);c=pathlib.Path(a.capture_dir);c.mkdir(exist_ok=True)
+(c/('pid-'+a.turn)).write_text(str(os.getpid()))
+if (f/'no-read').exists():
+ while True: signal.pause()
+raw=sys.stdin.buffer.read();(c/('request-'+a.turn+'.json')).write_bytes(raw)
+if (f/'silent').exists():
+ while True: signal.pause()
+response=f/('turn-'+a.turn+'.sse')
+if response.exists(): data=response.read_bytes()
+else:
+ r=json.loads(raw);m=r['messages'];tool=m[-1];call=m[-2]['tool_calls'][0]
+ assert tool['role']=='tool' and tool['tool_call_id']==call['id']
+ result=json.loads(tool['content']);args=json.loads(call['function']['arguments']);assert result['value']==args['value']
+ text=result['receipt']+'|'+result['value']
+ data=('data: '+json.dumps({'choices':[{'index':0,'delta':{'content':text},'finish_reason':'stop'}]})+'\n\ndata: [DONE]\n\n').encode()
+sys.stdout.buffer.write(data);sys.stdout.buffer.flush()
+if (f/'exit-fail').exists(): sys.exit(3)
+if (f/'eof-hang').exists():
+ os.close(1)
+ while True: signal.pause()
+"#;
+fn fixture(stream:&str,extra:&[&str])->PathBuf{
+    let root=std::env::temp_dir().join(format!("wire-core-{}-{}",std::process::id(),NEXT.fetch_add(1,Ordering::SeqCst)));fs::create_dir(&root).unwrap();fs::write(root.join("helper.py"),HELPER).unwrap();fs::write(root.join("turn-1.sse"),stream).unwrap();let dir=root.join("task");
+    let out=Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab")).args(["start","--dir"]).arg(&dir).args(["--provider","chat-sse","--wire-helper"]).arg(root.join("helper.py")).arg("--wire-fixtures").arg(&root).args(extra).output().unwrap();assert!(out.status.success(),"{}",String::from_utf8_lossy(&out.stderr));dir
+}
+fn command(dir:&Path,verb:&str,extra:&[&str])->String{let out=Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab")).args([verb,"--dir"]).arg(dir).args(extra).output().unwrap();assert!(out.status.success(),"{}",String::from_utf8_lossy(&out.stderr));String::from_utf8(out.stdout).unwrap()}
+fn field<'a>(text:&'a str,key:&str)->&'a str{text.lines().find_map(|s|s.strip_prefix(&format!("{key}="))).unwrap()}
+#[test]
+fn stdio_roundtrip_uses_actual_original_result_and_persistent_counters(){
+    let dir=fixture(TOOL,&["--wire-chunk-size","1"]);let result=command(&dir,"run",&[]);assert_eq!(field(&result,"status"),"completed");assert_eq!(field(&result,"effects"),"1");assert_eq!(field(&result,"answer_hex"),muyon_core_agent_lab::hex("r-i-1|hi"));assert_eq!(field(&result,"model_calls"),"2");
+    let captured=fs::read(dir.join("wire-capture/request-2.json")).unwrap();let text=String::from_utf8(captured).unwrap();assert!(text.contains("r-i-1")&&text.contains("tool_call_id"));
+    let sent:u64=field(&result,"wire_sent_bytes").parse().unwrap();let a=fs::metadata(dir.join("wire-capture/request-1.json")).unwrap().len();let b=fs::metadata(dir.join("wire-capture/request-2.json")).unwrap().len();assert_eq!(sent,a+b);assert_eq!(command(&dir,"run",&[]),result);
+}
+#[test]
+fn missing_done_never_reaches_physical_tool(){
+    let dir=fixture(&TOOL.replace("data: [DONE]\n\n",""),&[]);let result=command(&dir,"run",&[]);assert_eq!(field(&result,"effects"),"0");assert_eq!(field(&result,"confirmations"),"0");assert_eq!(field(&result,"status"),"failed");assert_eq!(command(&dir,"run",&[]),result);
+}
+#[test]
+fn nonzero_exit_after_complete_turn_never_reaches_physical_tool(){
+    let dir=fixture(TOOL,&[]);fs::write(dir.parent().unwrap().join("exit-fail"),"").unwrap();let result=command(&dir,"run",&[]);assert_eq!(field(&result,"effects"),"0");assert_eq!(field(&result,"reason"),"wire_child_exit");
+}
+#[test]
+fn wire_budget_stops_before_request_and_does_not_reset(){
+    let dir=fixture(TOOL,&["--max-wire-total","1"]);let result=command(&dir,"run",&[]);assert_eq!(field(&result,"status"),"budget_exhausted");assert_eq!(field(&result,"effects"),"0");assert_eq!(field(&result,"wire_total_bytes"),"0");assert!(!dir.join("wire-capture").exists());assert_eq!(command(&dir,"run",&[]),result);
+}
+#[test]
+fn silent_and_eof_hanging_children_are_killed_and_reaped(){
+    for mode in ["silent","eof-hang"]{let dir=fixture(TOOL,&["--wire-idle-ms","100","--wire-total-ms","500"]);fs::write(dir.parent().unwrap().join(mode),"").unwrap();let result=command(&dir,"run",&[]);assert_eq!(field(&result,"effects"),"0");assert!(field(&result,"reason").ends_with("timeout"));let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();assert!(!Path::new(&format!("/proc/{pid}")).exists(),"child must be reaped");}
+}
+#[test]
+fn reopened_inflight_is_terminal_and_never_resends(){
+    use muyon_core_agent_lab::agent::{State,Agent,Hooks};let dir=fixture(TOOL,&[]);let mut state=State::load(&dir).unwrap();state.wire_counters.inflight=true;state.counters.calls=1;state.counters.steps=1;state.wire_counters.sent=10;state.save(&dir).unwrap();let mut agent=Agent::open(&dir).unwrap();agent.run(&Hooks::default()).unwrap();assert_eq!(agent.state.reason,"wire_interrupted");assert_eq!(agent.state.counters.calls,1);assert_eq!(agent.state.wire_counters.sent,10);assert!(!dir.join("wire-capture").exists());
+}
+#[test]
+fn silent_stream_cancellation_is_observed_before_timeout(){
+    use std::{thread,time::{Duration,Instant}};
+    let dir=fixture(TOOL,&["--wire-idle-ms","1000","--wire-total-ms","2000"]);fs::write(dir.parent().unwrap().join("silent"),"").unwrap();
+    let child=Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab")).args(["run","--dir"]).arg(&dir).stdout(std::process::Stdio::piped()).spawn().unwrap();
+    let start=Instant::now();while !dir.join("wire-capture/request-1.json").exists(){assert!(start.elapsed()<Duration::from_secs(5));thread::sleep(Duration::from_millis(2));}
+    command(&dir,"cancel",&[]);let output=child.wait_with_output().unwrap();assert!(output.status.success());let text=String::from_utf8(output.stdout).unwrap();assert_eq!(field(&text,"reason"),"wire_cancelled");assert_eq!(field(&text,"effects"),"0");let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();assert!(!Path::new(&format!("/proc/{pid}")).exists());
+}
+#[test]
+fn blocked_request_writer_is_bounded_by_deadline(){
+    let input="x".repeat(50000);let dir=fixture(TOOL,&["--input",&input,"--wire-idle-ms","100","--wire-total-ms","500"]);fs::write(dir.parent().unwrap().join("no-read"),"").unwrap();let result=command(&dir,"run",&[]);assert_eq!(field(&result,"effects"),"0");assert!(field(&result,"reason").ends_with("timeout"));let sent:u64=field(&result,"wire_sent_bytes").parse().unwrap();assert!(sent>0&&sent<50000);let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();assert!(!Path::new(&format!("/proc/{pid}")).exists());
+}

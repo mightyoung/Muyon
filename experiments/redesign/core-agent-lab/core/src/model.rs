@@ -7,7 +7,17 @@ pub struct Message { pub role: Role, pub text: String }
 pub struct ModelRequest { pub task: String, pub attempt: String, pub turn: u64, pub messages: Vec<Message>, pub tools: Vec<String> }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ModelEvent { Tool { call_ref: String, name: String, value: String }, Answer(String), Fail(String) }
-pub trait Provider { fn respond(&mut self, request: &ModelRequest, position: usize) -> Result<ModelEvent>; }
+pub trait ProviderControl {
+    fn poll(&mut self)->Result<()>;
+    fn remaining(&self)->u64;
+    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>;
+    fn checkpoint(&mut self,name:&str)->Result<()>;
+}
+pub trait Provider {
+    fn respond(&mut self, request: &ModelRequest, position: usize) -> Result<ModelEvent>;
+    fn respond_controlled(&mut self,request:&ModelRequest,position:usize,_history:&[NativeMessage],control:&mut dyn ProviderControl)->Result<ModelEvent>{control.poll()?;self.respond(request,position)}
+    fn reported_usage(&self)->(Option<u64>,Option<u64>){(None,None)}
+}
 #[derive(Clone, Debug)]
 pub struct ScriptedProvider { pub events: Vec<ModelEvent> }
 impl ScriptedProvider {

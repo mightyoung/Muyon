@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run eight inverse mutants in private copies using existing offline Cargo only."""
+"""Run compiled semantic inverse mutants in private copies using existing offline Cargo only."""
 import argparse
 import json
 from pathlib import Path
@@ -13,6 +13,17 @@ args = parser.parse_args()
 args.evidence_dir.mkdir(parents=True, exist_ok=True)
 source = Path(__file__).resolve().parent
 mutations = [
+    ('wire_stream_cancel_bypass', 'src/agent.rs',
+     'if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}',
+     'if false && self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}'),
+    ('wire_missing_done', 'src/wire_sse.rs',
+     '||!self.done{return Err("wire_stream_truncated".into());}',
+     '||(false && !self.done){return Err("wire_stream_truncated".into());}'),
+    ('wire_native_pair', 'src/wire_provider.rs',
+     '("tool_call_id",string(call_ref))', '("tool_call_id",string("wrong-pair"))'),
+    ('wire_budget_bypass', 'src/wire_provider.rs',
+     'if bytes.len() as u64>control.remaining(){return Err("wire_total_limit".into());}',
+     'if false && bytes.len() as u64>control.remaining(){return Err("wire_total_limit".into());}'),
     ('hard_policy_bypass', 'src/policy.rs',
      'if !hard_ok || mode == Mode::ReadOnly', 'if mode == Mode::ReadOnly'),
     ('unknown_redispatch', 'src/agent.rs',
