@@ -99,3 +99,11 @@ Final JVM result: previous 123 + new 10 = **133 PASS**, exit 0. These are synthe
 | `phase2-registry-green.log` | `8950b8ae78a500ba99a98669b06a81d73e2d6d8eb97e4e9c32dbbe4c2bcabd6a` |
 | `phase2-registry-link-red.log` | `00ffeaadfcbe9e97d1ce4b935c44b50db86130ed645967cd582e7e8db66be81f` |
 | `phase2-registry-verified-green.log` | `e2fa86022c9694d3ea50328df1129fc42a0c1ec68383e0fd015675b8fdddedc1` |
+
+## Phase 2c: explicit AIDL and actual Parcel envelope source
+
+Added private explicit AIDL methods connect/start/status/current/lookup/setVisibility/release/cancel/close. No callbacks, oneway stream, dynamic dispatch, private platform key, root/path input or Service-only native lifecycle function appears in AIDL. Requests use closed primitive fields and will be validated by the actual Service adapter before native calls. The single reply Parcelable carries only the closed metadata codec above.
+
+`BoundedAgentBinder` checks the actual complete incoming `Parcel.dataSize()` against 4096 before generated request decoding, rejects cross-UID and oneway calls, then checks the complete outgoing temporary Parcel against 8192 after generated exception/object/byte-array framing. `AgentReplyParcel` also checks the actual source/destination Parcel and bounded payload. Encoding/validation failure becomes local transport Unavailable, never business NoAdmission, terminal success or proof of no side effect.
+
+AGP AIDL generation is enabled without new dependencies or permissions. Three device-only instrumentation cases cover interface-token/array overhead, valid local reply with exception/presence framing, and complete reply oversize rejection. These tests are source only: **Android/AIDL compilation, Parcel tests and Binder runtime NOT_RUN locally**; remote normal Gradle compilation is required. They are not counted in the 133 pure JVM result. Service class/manifest entry, UI proxy and actual generated Object adapter are not yet added by this checkpoint; no fake implementation or Agent construction exists.
