@@ -98,5 +98,6 @@ fun main() {
     runDiagnosticChecks()
     runAgentServiceChecks()
     runAgentServiceWireChecks()
+    runAgentLivenessRegistryChecks()
     println("${checks.size}/${checks.size} pure JVM state checks passed; Compose/Android runtime NOT_RUN")
 }
