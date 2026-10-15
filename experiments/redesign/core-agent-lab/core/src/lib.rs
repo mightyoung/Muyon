@@ -18,3 +18,4 @@ pub fn identifier(s: &str) -> bool { !s.is_empty() && s.len() <= 64 && s.bytes()
 pub mod wire_sse;
 pub mod wire_provider;
 pub mod wire_json;
+pub mod host_session;
