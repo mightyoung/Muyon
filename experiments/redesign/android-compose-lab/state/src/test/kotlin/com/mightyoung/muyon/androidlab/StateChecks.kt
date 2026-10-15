@@ -96,5 +96,6 @@ fun main() {
     check(failed == 0) { "$failed/${checks.size} state checks failed" }
     runLocalUiChecks()
     runDiagnosticChecks()
+    runAgentServiceChecks()
     println("${checks.size}/${checks.size} pure JVM state checks passed; Compose/Android runtime NOT_RUN")
 }
