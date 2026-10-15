@@ -79,6 +79,8 @@ fn session(a: Rc<dyn AuthoritySource>) -> SharedSession {
         vec!["equipment".into(), "label".into(), "loans".into()],
         Some(("include_loans".into(), "loans".into())),
     )
+    .unwrap()
+    .bind_record(equipment_scope()[0].clone(), None)
     .unwrap();
     s.borrow_mut()
         .register(Enrollment {
@@ -88,6 +90,7 @@ fn session(a: Rc<dyn AuthoritySource>) -> SharedSession {
             operation: "equipment_loan/inspect_equipment@1".into(),
             tool_id: "equipment_loan.inspect_equipment".into(),
             binding_id: "host-equipment-read".into(),
+            scope_refs: equipment_scope(),
             handler: Box::new(handler),
         })
         .unwrap();
@@ -119,6 +122,7 @@ fn session_handler(a: Rc<dyn AuthoritySource>, handler: Box<dyn ReadHandler>) ->
             operation: "equipment_loan/inspect_equipment@1".into(),
             tool_id: "equipment_loan.inspect_equipment".into(),
             binding_id: "host-equipment-read".into(),
+            scope_refs: equipment_scope(),
             handler,
         })
         .unwrap();
@@ -540,6 +544,7 @@ fn final_payload_policy_revoke_blocks_second_endpoint_admission() {
             operation: "equipment_loan/inspect_equipment@1".into(),
             tool_id: "equipment_loan.inspect_equipment".into(),
             binding_id: "host-equipment-read".into(),
+            scope_refs: equipment_scope(),
             handler: Box::new(|_: &Json| {
                 Ok(RawRead {
                     raw: projection(),
@@ -692,7 +697,7 @@ fn all_native_mappings_use_physical_store_and_same_two_turn_runtime() {
         put(
             &mut auth.0.borrow_mut().read,
             "refs",
-            Json::Array(vec![reference]),
+            Json::Array(vec![reference.clone()]),
         );
         let plugin = PathBuf::from(std::env::var("MUYON_PLUGIN_CONTRACT_BIN").unwrap());
         let s = NativeSession::create(
@@ -726,12 +731,23 @@ fn all_native_mappings_use_physical_store_and_same_two_turn_runtime() {
                 .require_argument("type", Json::String(data_type.into()))
                 .unwrap();
         }
+        handler = handler
+            .bind_record(
+                reference.clone(),
+                if native_key == "id" {
+                    Some("type".into())
+                } else {
+                    None
+                },
+            )
+            .unwrap();
         s.borrow_mut()
             .register(Enrollment {
                 bundle: d.bundle,
                 operation: d.operation,
                 tool_id: d.tool_id.clone(),
                 binding_id: d.binding_id,
+                scope_refs: vec![reference.clone()],
                 handler: Box::new(handler),
             })
             .unwrap();
@@ -782,7 +798,31 @@ fn physical_handler_rejects_same_id_wrong_business_type() {
     )
     .unwrap()
     .require_argument("type", Json::String("supplier".into()))
-    .unwrap();
+    .unwrap().bind_record(json(r#"{"module_id":"inquiry","type":"supplier","key":"s1","revision":"1","schema_version":1}"#),Some("type".into())).unwrap();
+    let bound = json(
+        r#"{"module_id":"inquiry","type":"supplier","key":"s1","revision":"1","schema_version":1}"#,
+    );
+    let valid_args = json(r#"{"id":"s1","type":"supplier"}"#);
+    assert!(handler.admit_read(&valid_args, &[bound.clone()]).is_ok());
+    let mut other = bound.clone();
+    put(&mut other, "key", Json::String("s2".into()));
+    assert_eq!(
+        handler.admit_read(&valid_args, &[other]).unwrap_err(),
+        "physical_reference_scope",
+        "another allowed record cannot authorize this physical read"
+    );
+    assert_eq!(
+        handler
+            .admit_read(&json(r#"{"id":"s2","type":"supplier"}"#), &[bound.clone()])
+            .unwrap_err(),
+        "physical_record_scope"
+    );
+    let mut stale = bound;
+    put(&mut stale, "revision", Json::String("2".into()));
+    assert_eq!(
+        handler.admit_read(&valid_args, &[stale]).unwrap_err(),
+        "physical_reference_scope"
+    );
     assert!(handler
         .read(&json(r#"{"id":"s1","type":"supplier"}"#))
         .is_ok());
@@ -806,6 +846,7 @@ fn invalid_host_enrollment_publishes_nothing_and_active_catalog_is_sealed() {
         operation: "equipment_loan/inspect_equipment@1".into(),
         tool_id: tool.into(),
         binding_id: "host-equipment-read".into(),
+        scope_refs: equipment_scope(),
         handler: Box::new(|_: &Json| {
             Ok(RawRead {
                 raw: projection(),
@@ -825,6 +866,7 @@ fn invalid_host_enrollment_publishes_nothing_and_active_catalog_is_sealed() {
         operation: d.operation,
         tool_id: d.tool_id,
         binding_id: d.binding_id,
+        scope_refs: equipment_scope(),
         handler: Box::new(|_: &Json| {
             Ok(RawRead {
                 raw: projection(),
@@ -839,12 +881,279 @@ fn invalid_host_enrollment_publishes_nothing_and_active_catalog_is_sealed() {
     assert_eq!(s.borrow().handler_calls, 1);
 }
 #[test]
-fn missing_selected_refs_execute_zero_before_physical_read(){for permitted in [true,false]{let auth=authority();if !permitted{put(&mut auth.0.borrow_mut().read,"refs",Json::Array(Vec::new()));}let s=session(auth);let a=run(&s);if permitted{assert_eq!(a.state.status,"completed");assert_eq!(s.borrow().handler_calls,1);}else{assert_eq!(s.borrow().handler_calls,0,"empty current refs must deny before physical handler reads");assert!(!s.borrow().store.receipts().iter().any(|r|r.encode().contains("BORROWER_PRIVATE")));assert_ne!(a.state.status,"completed");}}}
-struct RevokeAfterReturnedSnapshot{authority:Rc<Authority>,calls:std::cell::Cell<usize>,revoke:bool}
-impl AuthoritySource for RevokeAfterReturnedSnapshot{fn snapshot(&self)->Result<AuthoritySnapshot>{let call=self.calls.get()+1;self.calls.set(call);let value=self.authority.0.borrow().clone();if self.revoke&&call==3{put(&mut self.authority.0.borrow_mut().read,"allowed",Json::Bool(false));put(&mut self.authority.0.borrow_mut().read,"revision",Json::String("a2".into()));}Ok(value)}}
+fn missing_selected_refs_execute_zero_before_physical_read() {
+    for permitted in [true, false] {
+        let auth = authority();
+        if !permitted {
+            put(
+                &mut auth.0.borrow_mut().read,
+                "refs",
+                Json::Array(Vec::new()),
+            );
+        }
+        let s = session(auth);
+        let a = run(&s);
+        if permitted {
+            assert_eq!(a.state.status, "completed");
+            assert_eq!(s.borrow().handler_calls, 1);
+        } else {
+            assert_eq!(
+                s.borrow().handler_calls,
+                0,
+                "empty current refs must deny before physical handler reads"
+            );
+            assert!(!s
+                .borrow()
+                .store
+                .receipts()
+                .iter()
+                .any(|r| r.encode().contains("BORROWER_PRIVATE")));
+            assert_ne!(a.state.status, "completed");
+        }
+    }
+}
+struct RevokeAfterReturnedSnapshot {
+    authority: Rc<Authority>,
+    calls: std::cell::Cell<usize>,
+    revoke: bool,
+}
+impl AuthoritySource for RevokeAfterReturnedSnapshot {
+    fn snapshot(&self) -> Result<AuthoritySnapshot> {
+        let call = self.calls.get() + 1;
+        self.calls.set(call);
+        let value = self.authority.0.borrow().clone();
+        if self.revoke && call == 3 {
+            put(
+                &mut self.authority.0.borrow_mut().read,
+                "allowed",
+                Json::Bool(false),
+            );
+            put(
+                &mut self.authority.0.borrow_mut().read,
+                "revision",
+                Json::String("a2".into()),
+            );
+        }
+        Ok(value)
+    }
+}
 #[test]
-fn revoke_after_preinvoke_snapshot_executes_zero(){for revoke in [false,true]{let a=authority();let source=Rc::new(RevokeAfterReturnedSnapshot{authority:a.clone(),calls:std::cell::Cell::new(0),revoke});let s=session(source.clone());let result=run(&s);assert!(source.calls.get()>=3);if revoke{assert_eq!(field(&a.0.borrow().read,"allowed").unwrap(),&Json::Bool(false));assert_eq!(s.borrow().handler_calls,0,"revocation after the returned pre-invoke snapshot must prevent physical read");assert_ne!(result.state.status,"completed");assert!(!s.borrow().store.receipts().iter().any(|r|r.encode().contains("BORROWER_PRIVATE")));}else{assert_eq!(result.state.status,"completed");assert_eq!(s.borrow().handler_calls,1);}}}
+fn revoke_after_preinvoke_snapshot_executes_zero() {
+    for revoke in [false, true] {
+        let a = authority();
+        let source = Rc::new(RevokeAfterReturnedSnapshot {
+            authority: a.clone(),
+            calls: std::cell::Cell::new(0),
+            revoke,
+        });
+        let s = session(source.clone());
+        let result = run(&s);
+        assert!(source.calls.get() >= 3);
+        if revoke {
+            assert_eq!(
+                field(&a.0.borrow().read, "allowed").unwrap(),
+                &Json::Bool(false)
+            );
+            assert_eq!(
+                s.borrow().handler_calls,
+                0,
+                "revocation after the returned pre-invoke snapshot must prevent physical read"
+            );
+            assert_ne!(result.state.status, "completed");
+            assert!(!s
+                .borrow()
+                .store
+                .receipts()
+                .iter()
+                .any(|r| r.encode().contains("BORROWER_PRIVATE")));
+        } else {
+            assert_eq!(result.state.status, "completed");
+            assert_eq!(s.borrow().handler_calls, 1);
+        }
+    }
+}
 #[test]
-fn native_store_restore_rejects_forged_receipts_and_facts(){let s=session(authority());let _=run(&s);let dir=s.borrow().store.dir.clone();drop(s);let valid=json(&std::fs::read_to_string(dir.join("native.db")).unwrap());let original_receipt=field(&valid,"receipts").unwrap().array().unwrap()[0].clone();let mut malformed=Vec::new();let mut v=valid.clone();put(&mut v,"facts",Json::Null);malformed.push(v);let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![Json::Null]));malformed.push(v);let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![original_receipt.clone(),original_receipt.clone()]));malformed.push(v);let mut v=valid.clone();put(&mut v,"facts",json(r#"{"external_read":false,"unknown_source":false}"#));malformed.push(v);let mut r=original_receipt.clone();put(&mut r,"status",Json::String("invented".into()));let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![r]));malformed.push(v);let mut r=original_receipt.clone();put(&mut r,"status",Json::String("running".into()));let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![r]));malformed.push(v);let mut r=original_receipt.clone();put(&mut r,"binding",Json::Null);let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![r]));malformed.push(v);let mut r=original_receipt;let mut identity=field(&r,"identity").unwrap().clone();put(&mut identity,"owner",Json::String("foreign".into()));put(&mut r,"identity",identity);let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![r]));malformed.push(v);assert_eq!(store::NativeStore::open(&dir).unwrap().receipt_count(),1);for (i,v) in malformed.into_iter().enumerate(){let d=directory();muyon_core_agent_lab::store::create_dir(&d).unwrap();muyon_core_agent_lab::store::atomic(&d,"native.db",&v.encode()).unwrap();assert!(store::NativeStore::open(&d).is_err(),"forged store variant {i} must refuse");}}
+fn native_store_restore_rejects_forged_receipts_and_facts() {
+    let s = session(authority());
+    let _ = run(&s);
+    let dir = s.borrow().store.dir.clone();
+    drop(s);
+    let valid = json(&std::fs::read_to_string(dir.join("native.db")).unwrap());
+    let original_receipt = field(&valid, "receipts").unwrap().array().unwrap()[0].clone();
+    let mut malformed = Vec::new();
+    let mut v = valid.clone();
+    put(&mut v, "facts", Json::Null);
+    malformed.push(v);
+    let mut v = valid.clone();
+    put(&mut v, "receipts", Json::Array(vec![Json::Null]));
+    malformed.push(v);
+    let mut v = valid.clone();
+    put(
+        &mut v,
+        "receipts",
+        Json::Array(vec![original_receipt.clone(), original_receipt.clone()]),
+    );
+    malformed.push(v);
+    let mut v = valid.clone();
+    put(
+        &mut v,
+        "facts",
+        json(r#"{"external_read":false,"unknown_source":false}"#),
+    );
+    malformed.push(v);
+    let mut r = original_receipt.clone();
+    put(&mut r, "status", Json::String("invented".into()));
+    let mut v = valid.clone();
+    put(&mut v, "receipts", Json::Array(vec![r]));
+    malformed.push(v);
+    let mut r = original_receipt.clone();
+    put(&mut r, "status", Json::String("running".into()));
+    let mut v = valid.clone();
+    put(&mut v, "receipts", Json::Array(vec![r]));
+    malformed.push(v);
+    let mut r = original_receipt.clone();
+    put(&mut r, "binding", Json::Null);
+    let mut v = valid.clone();
+    put(&mut v, "receipts", Json::Array(vec![r]));
+    malformed.push(v);
+    let mut r = original_receipt;
+    let mut identity = field(&r, "identity").unwrap().clone();
+    put(&mut identity, "owner", Json::String("foreign".into()));
+    put(&mut r, "identity", identity);
+    let mut v = valid.clone();
+    put(&mut v, "receipts", Json::Array(vec![r]));
+    malformed.push(v);
+    assert_eq!(store::NativeStore::open(&dir).unwrap().receipt_count(), 1);
+    for (i, v) in malformed.into_iter().enumerate() {
+        let d = directory();
+        muyon_core_agent_lab::store::create_dir(&d).unwrap();
+        muyon_core_agent_lab::store::atomic(&d, "native.db", &v.encode()).unwrap();
+        assert!(
+            store::NativeStore::open(&d).is_err(),
+            "forged store variant {i} must refuse"
+        );
+    }
+}
 #[test]
-fn native_store_persist_budget_never_writes_unreadable_snapshot(){let s=session(authority());let _=run(&s);let dir=s.borrow().store.dir.clone();drop(s);let mut store=store::NativeStore::open(&dir).unwrap();let first=store.receipts()[0].clone();let mut identity=field(&first,"identity").unwrap().clone();put(&mut identity,"invocation_id",Json::String("i-extra".into()));put(&mut identity,"identity",Json::String("another-identity".into()));let index=store.begin(identity,field(&first,"binding").unwrap().clone()).unwrap();let before=std::fs::read(dir.join("native.db")).unwrap();assert!(store.finish(index,Json::String("x".repeat(70000)),true).is_err(),"a successful persist must stay inside restore parser budget");assert_eq!(std::fs::read(dir.join("native.db")).unwrap(),before);drop(store);let restored=store::NativeStore::open(&dir).unwrap();assert_eq!(restored.receipt_count(),2);assert_eq!(field(&restored.receipts()[1],"status").unwrap(),&Json::String("running".into()));}
+fn native_store_persist_budget_never_writes_unreadable_snapshot() {
+    let s = session(authority());
+    let _ = run(&s);
+    let dir = s.borrow().store.dir.clone();
+    drop(s);
+    let mut store = store::NativeStore::open(&dir).unwrap();
+    let first = store.receipts()[0].clone();
+    let mut identity = field(&first, "identity").unwrap().clone();
+    put(
+        &mut identity,
+        "invocation_id",
+        Json::String("i-extra".into()),
+    );
+    put(
+        &mut identity,
+        "identity",
+        Json::String("another-identity".into()),
+    );
+    let index = store
+        .begin(identity, field(&first, "binding").unwrap().clone())
+        .unwrap();
+    let before = std::fs::read(dir.join("native.db")).unwrap();
+    assert!(
+        store
+            .finish(index, Json::String("x".repeat(70000)), true)
+            .is_err(),
+        "a successful persist must stay inside restore parser budget"
+    );
+    assert_eq!(std::fs::read(dir.join("native.db")).unwrap(), before);
+    assert_eq!(
+        field(&store.receipts()[index], "status").unwrap(),
+        &Json::String("running".into()),
+        "failed candidate must not mutate accepted in-memory receipt"
+    );
+    assert_eq!(field(&store.receipts()[index], "raw").unwrap(), &Json::Null);
+    assert!(
+        store.ensure_healthy().is_err(),
+        "uncertain persistence poisons further export/execution"
+    );
+    assert_eq!(
+        field(store.facts(), "unknown_source").unwrap(),
+        &Json::Bool(true)
+    );
+    drop(store);
+    let restored = store::NativeStore::open(&dir).unwrap();
+    assert_eq!(restored.receipt_count(), 2);
+    assert_eq!(
+        field(&restored.receipts()[1], "status").unwrap(),
+        &Json::String("running".into())
+    );
+    let s = session_handler(
+        authority(),
+        Box::new(|_: &Json| {
+            Ok(RawRead {
+                raw: Json::String("x".repeat(70000)),
+                projection: projection(),
+            })
+        }),
+    );
+    let (mut provider, sent) = gateway(&s);
+    let mut agent = agent(&s);
+    agent
+        .run_with_runtime_ports(
+            &mut provider,
+            &mut RuntimePorts { session: s.clone() },
+            &Hooks::default(),
+        )
+        .unwrap();
+    assert_eq!(s.borrow().handler_calls, 1);
+    assert_eq!(
+        sent.borrow().len(),
+        1,
+        "no second model send after raw persistence failure"
+    );
+    assert_eq!(s.borrow().model_history().array().unwrap().len(), 1);
+    assert!(s.borrow().store.ensure_healthy().is_err());
+    assert_eq!(
+        field(&s.borrow().store.receipts()[0], "status").unwrap(),
+        &Json::String("running".into())
+    );
+    assert_eq!(
+        field(s.borrow().store.facts(), "unknown_source").unwrap(),
+        &Json::Bool(true)
+    );
+}
+
+fn equipment_scope() -> Vec<Json> {
+    let p = projection();
+    vec![
+        field(&p, "equipment").unwrap().clone(),
+        field(&p, "loans").unwrap().array().unwrap()[0].clone(),
+    ]
+}
+#[test]
+fn cancel_during_handler_retains_raw_receipt_without_projection() {
+    let path = Rc::new(RefCell::new(None::<PathBuf>));
+    let signal = path.clone();
+    let s = session_handler(
+        authority(),
+        Box::new(move |_: &Json| {
+            muyon_core_agent_lab::store::atomic(
+                signal.borrow().as_ref().unwrap(),
+                "cancel.request",
+                "CORE_CANCEL_V1\n",
+            )?;
+            Ok(RawRead {
+                raw: projection(),
+                projection: projection(),
+            })
+        }),
+    );
+    *path.borrow_mut() = Some(s.borrow().store.dir.clone());
+    let a = run(&s);
+    assert_eq!(s.borrow().handler_calls, 1);
+    assert_eq!(s.borrow().store.receipt_count(), 1);
+    assert_ne!(a.state.status, "completed");
+    assert_eq!(
+        s.borrow().model_history().array().unwrap().len(),
+        1,
+        "cancel after raw read must not admit a model projection"
+    );
+}

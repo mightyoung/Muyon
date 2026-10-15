@@ -62,6 +62,11 @@ pub struct RawRead {
     pub projection: Json,
 }
 pub trait ReadHandler {
+    /// Pure trusted-host argument/scope admission, before physical execution.
+    /// Native closures are trusted code; filesystem handlers bind exact records.
+    fn admit_read(&self, _canonical_args: &Json, _scope_refs: &[Json]) -> Result<()> {
+        Ok(())
+    }
     fn read(&mut self, canonical_args: &Json) -> Result<RawRead>;
 }
 impl<F: FnMut(&Json) -> Result<RawRead>> ReadHandler for F {
@@ -74,6 +79,8 @@ pub struct Enrollment {
     pub operation: String,
     pub tool_id: String,
     pub binding_id: String,
+    /// Trusted installation binds every physical record this handler may read.
+    pub scope_refs: Vec<Json>,
     pub handler: Box<dyn ReadHandler>,
 }
 struct Installed {
@@ -82,6 +89,7 @@ struct Installed {
     binding: String,
     parameters: Json,
     handler: Box<dyn ReadHandler>,
+    scope_refs: Vec<Json>,
 }
 #[derive(Clone)]
 struct Projection {
@@ -161,6 +169,23 @@ impl NativeSession {
             .find(|d| text(d, "binding_id").ok().as_deref() == Some(&enrollment.binding_id))
             .ok_or("binding_declaration")?;
         let parameters = field(declared, "input_schema")?.clone();
+        let data_refs = field(declared, "data_refs")?.array()?;
+        if enrollment.scope_refs.is_empty() || enrollment.scope_refs.len() > 128 {
+            return Err("unbound_read_scope".into());
+        }
+        let mut seen = std::collections::BTreeSet::new();
+        for reference in &enrollment.scope_refs {
+            validate_reference(reference)?;
+            let target = format!(
+                "{}/{}@{}",
+                text(reference, "module_id")?,
+                text(reference, "type")?,
+                field(reference, "schema_version")?.integer()?
+            );
+            if !data_refs.contains(&string(target)) || !seen.insert(reference.encode()) {
+                return Err("scope_reference_target".into());
+            }
+        }
         let module = text(&enrollment.bundle, "module_id")?;
         let operation_name = text(declared, "name")?;
         let version = field(declared, "schema_version")?.integer()?;
@@ -187,6 +212,7 @@ impl NativeSession {
                 binding: enrollment.binding_id,
                 parameters,
                 handler: enrollment.handler,
+                scope_refs: enrollment.scope_refs,
             },
         );
         Ok(())
@@ -223,6 +249,7 @@ impl NativeSession {
         if self.cancelled {
             return Err("native_cancelled".into());
         }
+        self.store.ensure_healthy()?;
         let current = self.authority.snapshot()?;
         if !current.model_allowed || current.profile != "offline-fixture" {
             return Err("model_authority_denied".into());
@@ -251,6 +278,23 @@ impl NativeSession {
         }
         Ok(())
     }
+    fn check_agent_cancel(&self, agent: &mut Agent) -> Result<()> {
+        let path = agent.dir.join("cancel.request");
+        match std::fs::symlink_metadata(&path) {
+            Ok(_) => {
+                if muyon_core_agent_lab::store::read(&path)? != "CORE_CANCEL_V1\n" {
+                    return Err("invalid_cancel_signal".into());
+                }
+                agent.state.cancelled = true;
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err("cancel_signal_unavailable".into()),
+        }
+        if self.cancelled || agent.state.cancelled {
+            return Err("native_cancelled".into());
+        }
+        Ok(())
+    }
     fn dispatch(
         &mut self,
         agent: &mut Agent,
@@ -275,10 +319,13 @@ impl NativeSession {
             .ok_or("unenrolled_operation")?;
         let operation = entry.operation.clone();
         let binding = entry.binding.clone();
+        let scope_refs = entry.scope_refs.clone();
         let original = self.authority.snapshot()?;
         if text(&original.read, "scope")? != agent.state.scope {
             return Err("read_scope_mismatch".into());
         }
+        entry.handler.admit_read(&arguments, &scope_refs)?;
+        require_scope(&scope_refs, &original.read)?;
         self.review.review(
             &Json::Array(vec![string(&name), string(&call_ref), arguments.clone()]),
             self.store.facts(),
@@ -335,8 +382,23 @@ impl NativeSession {
             ("operation", string(&operation)),
             ("args", args.clone()),
             ("authority", original.read.clone()),
+            ("scope_refs", Json::Array(scope_refs.clone())),
         ]);
         let index = self.store.begin(receipt.clone(), durable_binding)?;
+        // Final synchronous read admission: child IPC and durable receipt writes
+        // may outlive the earlier snapshot. No IPC or persistence follows this
+        // current-authority/ref check before the host handler is entered.
+        self.installed
+            .get(&operation)
+            .ok_or("unenrolled_operation")?
+            .handler
+            .admit_read(&args, &scope_refs)?;
+        self.check_agent_cancel(agent)?;
+        let fresh = self.authority.snapshot()?;
+        if fresh != original {
+            return Err("read_authority_changed".into());
+        }
+        require_scope(&scope_refs, &fresh.read)?;
         self.handler_calls += 1;
         let outcome = self
             .installed
@@ -354,6 +416,7 @@ impl NativeSession {
                 return Err("handler_failed".into());
             }
         };
+        self.check_agent_cancel(agent)?;
         // No raw/provider/error fallback. Unknown-source facts remain durable even
         // when strict projection validation or later authority rejects the result.
         self.store.mark_read()?;
@@ -376,6 +439,10 @@ impl NativeSession {
         let value = field(&accepted, "projection")?.clone();
         self.review
             .review(&value, self.store.facts(), "model_context")?;
+        self.check_agent_cancel(agent)?;
+        if self.authority.snapshot()? != original {
+            return Err("read_authority_changed".into());
+        }
         self.projections.push(Projection {
             value: value.clone(),
             authority: original,
@@ -470,4 +537,31 @@ impl AgentPorts for RuntimePorts {
             "native_host_refused".into()
         };
     }
+}
+
+pub(crate) fn validate_reference(value: &Json) -> Result<()> {
+    let m = value.object()?;
+    if m.len() != 5
+        || !["module_id", "type", "key", "revision"].iter().all(|key| {
+            m.get(*key)
+                .is_some_and(|v| v.string().is_ok_and(|s| !s.is_empty() && s.len() <= 128))
+        })
+        || !m
+            .get("schema_version")
+            .is_some_and(|v| v.integer().is_ok_and(|n| n > 0 && n <= 9007199254740991))
+    {
+        return Err("invalid_scope_reference".into());
+    }
+    Ok(())
+}
+fn require_scope(required: &[Json], authority: &Json) -> Result<()> {
+    let available = field(authority, "refs")?.array()?;
+    if required.is_empty()
+        || required
+            .iter()
+            .any(|reference| !available.contains(reference))
+    {
+        return Err("selected_record_not_authorized".into());
+    }
+    Ok(())
 }

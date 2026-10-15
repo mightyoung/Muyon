@@ -11,8 +11,25 @@ pub struct PhysicalReadHandler {
     fields: Vec<String>,
     optional_array: Option<(String, String)>,
     required_arguments: std::collections::BTreeMap<String, Json>,
+    record_ref: Option<Json>,
+    type_argument: Option<String>,
 }
 impl PhysicalReadHandler {
+    pub fn bind_record(mut self, reference: Json, type_argument: Option<String>) -> Result<Self> {
+        crate::validate_reference(&reference)?;
+        if field(&reference, "key")?.string()? != self.expected_key {
+            return Err("physical_record_binding".into());
+        }
+        if let Some(argument) = &type_argument {
+            if self.required_arguments.get(argument) != Some(field(&reference, "type")?) {
+                return Err("physical_type_binding".into());
+            }
+        }
+        self.record_ref = Some(reference);
+        self.type_argument = type_argument;
+        Ok(self)
+    }
+
     pub fn require_argument(mut self, key: &str, value: Json) -> Result<Self> {
         if !identifier(key) || value.encode().len() > 256 {
             return Err("physical_argument_config".into());
@@ -47,11 +64,35 @@ impl PhysicalReadHandler {
             fields,
             optional_array,
             required_arguments: std::collections::BTreeMap::new(),
+            record_ref: None,
+            type_argument: None,
         })
     }
 }
 impl ReadHandler for PhysicalReadHandler {
+    fn admit_read(&self, args: &Json, scope_refs: &[Json]) -> Result<()> {
+        let record = self.record_ref.as_ref().ok_or("unbound_physical_record")?;
+        if !scope_refs.contains(record) {
+            return Err("physical_reference_scope".into());
+        }
+        if field(args, &self.key_argument)? != field(record, "key")? {
+            return Err("physical_record_scope".into());
+        }
+        if let Some(argument) = &self.type_argument {
+            if field(args, argument)? != field(record, "type")? {
+                return Err("physical_argument_scope".into());
+            }
+        }
+        for (key, value) in &self.required_arguments {
+            if field(args, key)? != value {
+                return Err("physical_argument_scope".into());
+            }
+        }
+        Ok(())
+    }
     fn read(&mut self, args: &Json) -> Result<RawRead> {
+        let record = self.record_ref.clone().ok_or("unbound_physical_record")?;
+        self.admit_read(args, &[record])?;
         for (key, value) in &self.required_arguments {
             if field(args, key)? != value {
                 return Err("physical_argument_scope".into());
