@@ -1,103 +1,473 @@
 //! Private Linux-only native read composition. Uses the existing Agent drive;
 //! the child admits contracts/tickets, while host-installed Rust handlers read.
-pub mod plugin_process;
-pub mod store;
-pub mod read_registry;
 pub mod model_gateway;
-use std::{cell::RefCell,collections::BTreeMap,io::Read,path::Path,rc::Rc,time::Duration};
-use muyon_core_agent_lab::{Result,agent::{Agent,State},agent_ports::AgentPorts,model::{Message,Role}};
-use muyon_plugin_contract_lab::{Json,object,string};
+pub mod plugin_process;
+pub mod read_registry;
+pub mod store;
+use muyon_core_agent_lab::{
+    agent::{Agent, State},
+    agent_ports::AgentPorts,
+    model::{Message, Role},
+    Result,
+};
+use muyon_plugin_contract_lab::{object, string, Json};
 use plugin_process::PluginProcess;
+use std::{cell::RefCell, collections::BTreeMap, io::Read, path::Path, rc::Rc, time::Duration};
 use store::NativeStore;
-pub const STUB_REACHED:&str="NATIVE_HOST_STUB_REACHED";
-pub fn field<'a>(j:&'a Json,key:&str)->Result<&'a Json>{j.object()?.get(key).ok_or_else(||format!("missing_{key}"))}
-fn text(j:&Json,key:&str)->Result<String>{Ok(field(j,key)?.string()?.into())}
-fn request(command:&str,fields:Vec<(&str,Json)>)->Json{let mut pairs=fields;pairs.push(("command",string(command)));pairs.push(("protocol_version",Json::Number("1".into())));object(pairs)}
-fn success(reply:Json)->Result<Json>{if field(&reply,"ok")?==&Json::Bool(true){Ok(reply)}else{Err(format!("contract_{}",text(&reply,"code").unwrap_or_else(|_|"rejected".into())))}}
-fn nonce()->Result<String>{let mut bytes=[0u8;16];std::fs::File::open("/dev/urandom").and_then(|mut f|f.read_exact(&mut bytes)).map_err(|_|"identity_entropy")?;Ok(bytes.iter().map(|b|format!("{b:02x}")).collect())}
-#[derive(Clone,Debug,PartialEq,Eq)]
-pub struct AuthoritySnapshot{pub read:Json,pub model_allowed:bool,pub profile:String}
-pub trait AuthoritySource{fn snapshot(&self)->Result<AuthoritySnapshot>;}
-pub trait PurposeReview{fn review(&self,value:&Json,facts:&Json,purpose:&str)->Result<()>;fn mask_answer(&self,text:&str)->Result<String>;}
-pub struct RawRead{pub raw:Json,pub projection:Json}
-pub trait ReadHandler{fn read(&mut self,canonical_args:&Json)->Result<RawRead>;}
-impl<F:FnMut(&Json)->Result<RawRead>> ReadHandler for F{fn read(&mut self,args:&Json)->Result<RawRead>{self(args)}}
-pub struct Enrollment{pub bundle:Json,pub operation:String,pub tool_id:String,pub binding_id:String,pub handler:Box<dyn ReadHandler>}
-struct Installed{operation:String,tool_id:String,binding:String,parameters:Json,handler:Box<dyn ReadHandler>}
-#[derive(Clone)]
-struct Projection{value:Json,authority:AuthoritySnapshot,receipt:Json}
-pub struct NativeSession{pub store:NativeStore,process:PluginProcess,authority:Rc<dyn AuthoritySource>,review:Rc<dyn PurposeReview>,installed:BTreeMap<String,Installed>,history:Vec<Json>,projections:Vec<Projection>,pub dispatch_attempts:usize,pub handler_calls:usize,pub model_sends:usize,cancelled:bool,advertised:Vec<String>,call_ids:std::collections::BTreeSet<String>}
-pub type SharedSession=Rc<RefCell<NativeSession>>;
-impl NativeSession{
- pub fn create(dir:&Path,plugin:&Path,authority:Rc<dyn AuthoritySource>,review:Rc<dyn PurposeReview>,input:&str)->Result<SharedSession>{
-  if input.len()>8192{return Err("input_limit".into())}let store=NativeStore::create(dir)?;let process=PluginProcess::spawn(plugin,Duration::from_secs(5))?;
-  Ok(Rc::new(RefCell::new(Self{store,process,authority,review,installed:BTreeMap::new(),history:vec![object([("role",string("user")),("content",string(input))])],projections:Vec::new(),dispatch_attempts:0,handler_calls:0,model_sends:0,cancelled:false,advertised:Vec::new(),call_ids:std::collections::BTreeSet::new()})))
- }
- pub fn register(&mut self,enrollment:Enrollment)->Result<()>{
-  if self.cancelled||self.installed.values().any(|v|v.operation==enrollment.operation||v.tool_id==enrollment.tool_id||v.binding==enrollment.binding_id){return Err("duplicate_enrollment".into())}
-  let operations=field(&enrollment.bundle,"operations")?.array()?;let declared=operations.iter().find(|d|text(d,"binding_id").ok().as_deref()==Some(&enrollment.binding_id)).ok_or("binding_declaration")?;let parameters=field(declared,"input_schema")?.clone();
-  success(self.process.request(request("register",vec![("bundle",enrollment.bundle),("host_bindings",Json::Array(vec![string(&enrollment.binding_id)]))]))?)?;
-  self.installed.insert(enrollment.operation.clone(),Installed{operation:enrollment.operation,tool_id:enrollment.tool_id,binding:enrollment.binding_id,parameters,handler:enrollment.handler});Ok(())
- }
- pub fn discover(&mut self)->Result<Json>{let a=self.authority.snapshot()?;success(self.process.request(request("discover",vec![("authority",a.read)]))?)}
- pub fn cancel(&mut self){self.cancelled=true;self.process.close();}
- pub fn child_pid(&self)->u32{self.process.pid()}
- pub fn definitions(&self)->Vec<muyon_core_agent_lab::model::ToolDefinition>{self.installed.values().enumerate().map(|(index,v)|muyon_core_agent_lab::model::ToolDefinition{name:v.tool_id.clone(),wire_name:format!("registered_{index}"),parameters:v.parameters.clone()}).collect()}
- pub fn model_history(&self)->Json{Json::Array(self.history.clone())}
- pub fn review_payload(&self,payload:&[u8])->Result<()>{
-  if self.cancelled{return Err("native_cancelled".into())}let current=self.authority.snapshot()?;
-  if !current.model_allowed||current.profile!="offline-fixture"{return Err("model_authority_denied".into())}
-  for p in &self.projections{if current!=p.authority{return Err("projection_revoked".into())}self.review.review(&p.value,self.store.facts(),"model_context")?;if !self.store.receipts().iter().any(|r|field(r,"identity")==Ok(&p.receipt)){return Err("projection_receipt_missing".into())}}
-  let json=muyon_plugin_contract_lab::parse(payload)?;self.review.review(&json,self.store.facts(),"model_payload")?;
-  // This synchronous final revision equality is the send admission point.
-  if self.authority.snapshot()?!=current{return Err("send_authority_changed".into())}Ok(())
- }
- fn dispatch(&mut self,agent:&mut Agent,call_ref:String,name:String,arguments:Json)->Result<()>{
-  self.dispatch_attempts+=1;
-  if self.cancelled{return Err("native_cancelled".into())}
-  if !self.advertised.contains(&name){return Err("tool_not_advertised".into())}
-  if !muyon_core_agent_lab::identifier(&call_ref)||!self.call_ids.insert(call_ref.clone()){return Err("duplicate_model_call".into())}
-  let entry=self.installed.values().find(|v|v.tool_id==name).ok_or("unenrolled_operation")?;
-  let operation=entry.operation.clone();let binding=entry.binding.clone();
-  let original=self.authority.snapshot()?;
-  if text(&original.read,"scope")?!=agent.state.scope{return Err("read_scope_mismatch".into())}
-  let args=muyon_plugin_contract_lab::canonical_value(&arguments)?;
-  let invocation=format!("i-{}",nonce()?);let identity=nonce()?;
-  let prepared=success(self.process.request(request("prepare",vec![("operation",string(&operation)),("args",args.clone()),("authority",original.read.clone()),("invocation_id",string(&invocation)),("receipt_owner",string("ToolRegistry")),("receipt_identity",string(&identity))]))?)?;
-  let ticket=field(&prepared,"ticket")?.clone();let current=self.authority.snapshot()?;
-  if current!=original{return Err("read_authority_changed".into())}
-  self.store.mark_read()?;
-  let invoked=success(self.process.request(request("invoke",vec![("ticket",ticket.clone()),("authority",current.read.clone())]))?)?;
-  let dispatch=field(&invoked,"dispatch")?;
-  let expected=object([("binding_id",string(&binding)),("args",args.clone()),("invocation_id",string(&invocation)),("receipt_identity",string(&identity))]);
-  if dispatch!=&expected{return Err("dispatch_identity_mismatch".into())}
-  let receipt=object([("owner",string("ToolRegistry")),("invocation_id",string(&invocation)),("binding_id",string(&binding)),("identity",string(&identity))]);
-  let durable_binding=object([("task",string(&agent.state.task)),("attempt",string(&agent.state.attempt)),("turn",Json::Number(agent.state.counters.steps.to_string())),("scope",string(&agent.state.scope)),("operation",string(&operation)),("args",args.clone()),("authority",original.read.clone())]);
-  let index=self.store.begin(receipt.clone(),durable_binding)?;
-  self.handler_calls+=1;
-  let outcome=self.installed.get_mut(&operation).ok_or("unenrolled_operation")?.handler.read(&args);
-  let result=match outcome{Ok(result)=>{self.store.finish(index,result.raw,true)?;result.projection},Err(error)=>{self.store.finish(index,string(error),false)?;return Err("handler_failed".into())}};
-  // No raw/provider/error fallback. Unknown-source facts remain durable even
-  // when strict projection validation or later authority rejects the result.
-  self.store.mark_read()?;
-  let current=self.authority.snapshot()?;
-  if current!=original{return Err("read_authority_changed".into())}
-  let accepted=success(self.process.request(request("accept_result",vec![("ticket",ticket),("authority",current.read.clone()),("receipt_ref",receipt.clone()),("projection",result)]))?)?;
-  if field(&accepted,"receipt_ref")?!=&receipt{return Err("receipt_identity_mismatch".into())}
-  let value=field(&accepted,"projection")?.clone();self.review.review(&value,self.store.facts(),"model_context")?;
-  self.projections.push(Projection{value:value.clone(),authority:original,receipt:receipt.clone()});
-  let function=object([("name",string(&name)),("arguments",string(args.encode()))]);
-  self.history.push(object([("role",string("assistant")),("content",Json::Null),("tool_calls",Json::Array(vec![object([("id",string(&call_ref)),("type",string("function")),("function",function)])]))]));
-  self.history.push(object([("role",string("tool")),("tool_call_id",string(&call_ref)),("content",string(object([("projection",value.clone()),("receipt_ref",receipt)]).encode()))]));
-  agent.state.context.push(Message{role:Role::Tool,text:value.encode()});agent.state.receipt=invocation;Ok(())
- }
+pub const STUB_REACHED: &str = "NATIVE_HOST_STUB_REACHED";
+pub fn field<'a>(j: &'a Json, key: &str) -> Result<&'a Json> {
+    j.object()?.get(key).ok_or_else(|| format!("missing_{key}"))
 }
-pub struct RuntimePorts{pub session:SharedSession}
-impl AgentPorts for RuntimePorts{
- fn advertised_tools(&self,_state:&State)->Result<Vec<String>>{let mut s=self.session.borrow_mut();let d=s.discover()?;let mut tools=Vec::new();for row in field(&d,"operations")?.array()?{let operation=text(row,"operation")?;let installed=s.installed.get(&operation).ok_or("unenrolled_operation")?;tools.push(installed.tool_id.clone());}s.advertised=tools.clone();Ok(tools)}
- fn persist(&self,agent:&Agent)->Result<()>{muyon_core_agent_lab::store::atomic(&self.session.borrow().store.dir,"task.db",&agent.state.encode())}
- fn check_control(&mut self)->Result<()>{if self.session.borrow().cancelled{Err("native_cancelled".into())}else{Ok(())}}
- fn dispatch(&mut self,agent:&mut Agent,call_ref:String,name:String,arguments:Json)->Result<()>{self.session.borrow_mut().dispatch(agent,call_ref,name,arguments)}
- fn admit_answer(&self,_state:&State,text:&str)->Result<()>{let s=self.session.borrow();if s.review.mask_answer(text)?!=text{return Err("unsafe_answer".into())}Ok(())}
- fn failure(&mut self,state:&mut State,_reason:&str){state.status="failed".into();state.reason=if _reason=="tool_not_advertised"{"tool_not_advertised".into()}else{"native_host_refused".into()};}
+fn text(j: &Json, key: &str) -> Result<String> {
+    Ok(field(j, key)?.string()?.into())
+}
+fn request(command: &str, fields: Vec<(&str, Json)>) -> Json {
+    let mut pairs = fields;
+    pairs.push(("command", string(command)));
+    pairs.push(("protocol_version", Json::Number("1".into())));
+    object(pairs)
+}
+fn success(reply: Json) -> Result<Json> {
+    if field(&reply, "ok")? == &Json::Bool(true) {
+        Ok(reply)
+    } else {
+        Err(format!(
+            "contract_{}",
+            text(&reply, "code").unwrap_or_else(|_| "rejected".into())
+        ))
+    }
+}
+fn nonce() -> Result<String> {
+    let mut bytes = [0u8; 16];
+    std::fs::File::open("/dev/urandom")
+        .and_then(|mut f| f.read_exact(&mut bytes))
+        .map_err(|_| "identity_entropy")?;
+    Ok(bytes.iter().map(|b| format!("{b:02x}")).collect())
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AuthoritySnapshot {
+    pub read: Json,
+    pub model_allowed: bool,
+    pub profile: String,
+}
+pub trait AuthoritySource {
+    fn snapshot(&self) -> Result<AuthoritySnapshot>;
+}
+pub trait PurposeReview {
+    fn review(&self, value: &Json, facts: &Json, purpose: &str) -> Result<()>;
+    fn mask_answer(&self, text: &str) -> Result<String>;
+}
+pub struct RawRead {
+    pub raw: Json,
+    pub projection: Json,
+}
+pub trait ReadHandler {
+    fn read(&mut self, canonical_args: &Json) -> Result<RawRead>;
+}
+impl<F: FnMut(&Json) -> Result<RawRead>> ReadHandler for F {
+    fn read(&mut self, args: &Json) -> Result<RawRead> {
+        self(args)
+    }
+}
+pub struct Enrollment {
+    pub bundle: Json,
+    pub operation: String,
+    pub tool_id: String,
+    pub binding_id: String,
+    pub handler: Box<dyn ReadHandler>,
+}
+struct Installed {
+    operation: String,
+    tool_id: String,
+    binding: String,
+    parameters: Json,
+    handler: Box<dyn ReadHandler>,
+}
+#[derive(Clone)]
+struct Projection {
+    value: Json,
+    authority: AuthoritySnapshot,
+    receipt: Json,
+}
+pub struct NativeSession {
+    pub store: NativeStore,
+    process: PluginProcess,
+    authority: Rc<dyn AuthoritySource>,
+    review: Rc<dyn PurposeReview>,
+    installed: BTreeMap<String, Installed>,
+    history: Vec<Json>,
+    projections: Vec<Projection>,
+    pub dispatch_attempts: usize,
+    pub handler_calls: usize,
+    pub model_sends: usize,
+    cancelled: bool,
+    advertised: Vec<String>,
+    call_ids: std::collections::BTreeSet<String>,
+    catalog_sealed: bool,
+}
+pub type SharedSession = Rc<RefCell<NativeSession>>;
+impl NativeSession {
+    pub fn create(
+        dir: &Path,
+        plugin: &Path,
+        authority: Rc<dyn AuthoritySource>,
+        review: Rc<dyn PurposeReview>,
+        input: &str,
+    ) -> Result<SharedSession> {
+        if input.len() > 8192 {
+            return Err("input_limit".into());
+        }
+        let store = NativeStore::create(dir)?;
+        let process = PluginProcess::spawn(plugin, Duration::from_secs(5))?;
+        Ok(Rc::new(RefCell::new(Self {
+            store,
+            process,
+            authority,
+            review,
+            installed: BTreeMap::new(),
+            history: vec![object([
+                ("role", string("user")),
+                ("content", string(input)),
+            ])],
+            projections: Vec::new(),
+            dispatch_attempts: 0,
+            handler_calls: 0,
+            model_sends: 0,
+            cancelled: false,
+            advertised: Vec::new(),
+            call_ids: std::collections::BTreeSet::new(),
+            catalog_sealed: false,
+        })))
+    }
+    pub fn register(&mut self, enrollment: Enrollment) -> Result<()> {
+        if self.catalog_sealed {
+            return Err("active_catalog_sealed".into());
+        }
+        if self.cancelled
+            || self.installed.values().any(|v| {
+                v.operation == enrollment.operation
+                    || v.tool_id == enrollment.tool_id
+                    || v.binding == enrollment.binding_id
+            })
+        {
+            return Err("duplicate_enrollment".into());
+        }
+        let operations = field(&enrollment.bundle, "operations")?.array()?;
+        if operations.len() != 1 {
+            return Err("enrollment_operation_count".into());
+        }
+        let declared = operations
+            .iter()
+            .find(|d| text(d, "binding_id").ok().as_deref() == Some(&enrollment.binding_id))
+            .ok_or("binding_declaration")?;
+        let parameters = field(declared, "input_schema")?.clone();
+        let module = text(&enrollment.bundle, "module_id")?;
+        let operation_name = text(declared, "name")?;
+        let version = field(declared, "schema_version")?.integer()?;
+        if enrollment.tool_id != format!("{module}.{operation_name}")
+            || enrollment.operation != format!("{module}/{operation_name}@{version}")
+        {
+            return Err("enrollment_identity".into());
+        }
+        success(self.process.request(request(
+            "register",
+            vec![
+                ("bundle", enrollment.bundle),
+                (
+                    "host_bindings",
+                    Json::Array(vec![string(&enrollment.binding_id)]),
+                ),
+            ],
+        ))?)?;
+        self.installed.insert(
+            enrollment.operation.clone(),
+            Installed {
+                operation: enrollment.operation,
+                tool_id: enrollment.tool_id,
+                binding: enrollment.binding_id,
+                parameters,
+                handler: enrollment.handler,
+            },
+        );
+        Ok(())
+    }
+    pub fn discover(&mut self) -> Result<Json> {
+        let a = self.authority.snapshot()?;
+        success(
+            self.process
+                .request(request("discover", vec![("authority", a.read)]))?,
+        )
+    }
+    pub fn cancel(&mut self) {
+        self.cancelled = true;
+        self.process.close();
+    }
+    pub fn child_pid(&self) -> u32 {
+        self.process.pid()
+    }
+    pub fn definitions(&self) -> Vec<muyon_core_agent_lab::model::ToolDefinition> {
+        self.installed
+            .values()
+            .enumerate()
+            .map(|(index, v)| muyon_core_agent_lab::model::ToolDefinition {
+                name: v.tool_id.clone(),
+                wire_name: format!("registered_{index}"),
+                parameters: v.parameters.clone(),
+            })
+            .collect()
+    }
+    pub fn model_history(&self) -> Json {
+        Json::Array(self.history.clone())
+    }
+    pub fn review_payload(&self, payload: &[u8]) -> Result<()> {
+        if self.cancelled {
+            return Err("native_cancelled".into());
+        }
+        let current = self.authority.snapshot()?;
+        if !current.model_allowed || current.profile != "offline-fixture" {
+            return Err("model_authority_denied".into());
+        }
+        for p in &self.projections {
+            if current != p.authority {
+                return Err("projection_revoked".into());
+            }
+            self.review
+                .review(&p.value, self.store.facts(), "model_context")?;
+            if !self
+                .store
+                .receipts()
+                .iter()
+                .any(|r| field(r, "identity") == Ok(&p.receipt))
+            {
+                return Err("projection_receipt_missing".into());
+            }
+        }
+        let json = muyon_plugin_contract_lab::parse(payload)?;
+        self.review
+            .review(&json, self.store.facts(), "model_payload")?;
+        // This synchronous final revision equality is the send admission point.
+        if self.authority.snapshot()? != current {
+            return Err("send_authority_changed".into());
+        }
+        Ok(())
+    }
+    fn dispatch(
+        &mut self,
+        agent: &mut Agent,
+        call_ref: String,
+        name: String,
+        arguments: Json,
+    ) -> Result<()> {
+        self.dispatch_attempts += 1;
+        if self.cancelled {
+            return Err("native_cancelled".into());
+        }
+        if !self.advertised.contains(&name) {
+            return Err("tool_not_advertised".into());
+        }
+        if !muyon_core_agent_lab::identifier(&call_ref) || !self.call_ids.insert(call_ref.clone()) {
+            return Err("duplicate_model_call".into());
+        }
+        let entry = self
+            .installed
+            .values()
+            .find(|v| v.tool_id == name)
+            .ok_or("unenrolled_operation")?;
+        let operation = entry.operation.clone();
+        let binding = entry.binding.clone();
+        let original = self.authority.snapshot()?;
+        if text(&original.read, "scope")? != agent.state.scope {
+            return Err("read_scope_mismatch".into());
+        }
+        self.review.review(
+            &Json::Array(vec![string(&name), string(&call_ref), arguments.clone()]),
+            self.store.facts(),
+            "model_context",
+        )?;
+        let args = muyon_plugin_contract_lab::canonical_value(&arguments)?;
+        let invocation = format!("i-{}", nonce()?);
+        let identity = nonce()?;
+        let prepared = success(self.process.request(request(
+            "prepare",
+            vec![
+                ("operation", string(&operation)),
+                ("args", args.clone()),
+                ("authority", original.read.clone()),
+                ("invocation_id", string(&invocation)),
+                ("receipt_owner", string("ToolRegistry")),
+                ("receipt_identity", string(&identity)),
+            ],
+        ))?)?;
+        let ticket = field(&prepared, "ticket")?.clone();
+        let current = self.authority.snapshot()?;
+        if current != original {
+            return Err("read_authority_changed".into());
+        }
+        self.store.mark_read()?;
+        let invoked = success(self.process.request(request(
+            "invoke",
+            vec![
+                ("ticket", ticket.clone()),
+                ("authority", current.read.clone()),
+            ],
+        ))?)?;
+        let dispatch = field(&invoked, "dispatch")?;
+        let expected = object([
+            ("binding_id", string(&binding)),
+            ("args", args.clone()),
+            ("invocation_id", string(&invocation)),
+            ("receipt_identity", string(&identity)),
+        ]);
+        if dispatch != &expected {
+            return Err("dispatch_identity_mismatch".into());
+        }
+        let receipt = object([
+            ("owner", string("ToolRegistry")),
+            ("invocation_id", string(&invocation)),
+            ("binding_id", string(&binding)),
+            ("identity", string(&identity)),
+        ]);
+        let durable_binding = object([
+            ("task", string(&agent.state.task)),
+            ("attempt", string(&agent.state.attempt)),
+            ("turn", Json::Number(agent.state.counters.steps.to_string())),
+            ("scope", string(&agent.state.scope)),
+            ("operation", string(&operation)),
+            ("args", args.clone()),
+            ("authority", original.read.clone()),
+        ]);
+        let index = self.store.begin(receipt.clone(), durable_binding)?;
+        self.handler_calls += 1;
+        let outcome = self
+            .installed
+            .get_mut(&operation)
+            .ok_or("unenrolled_operation")?
+            .handler
+            .read(&args);
+        let result = match outcome {
+            Ok(result) => {
+                self.store.finish(index, result.raw, true)?;
+                result.projection
+            }
+            Err(error) => {
+                self.store.finish(index, string(error), false)?;
+                return Err("handler_failed".into());
+            }
+        };
+        // No raw/provider/error fallback. Unknown-source facts remain durable even
+        // when strict projection validation or later authority rejects the result.
+        self.store.mark_read()?;
+        let current = self.authority.snapshot()?;
+        if current != original {
+            return Err("read_authority_changed".into());
+        }
+        let accepted = success(self.process.request(request(
+            "accept_result",
+            vec![
+                ("ticket", ticket),
+                ("authority", current.read.clone()),
+                ("receipt_ref", receipt.clone()),
+                ("projection", result),
+            ],
+        ))?)?;
+        if field(&accepted, "receipt_ref")? != &receipt {
+            return Err("receipt_identity_mismatch".into());
+        }
+        let value = field(&accepted, "projection")?.clone();
+        self.review
+            .review(&value, self.store.facts(), "model_context")?;
+        self.projections.push(Projection {
+            value: value.clone(),
+            authority: original,
+            receipt: receipt.clone(),
+        });
+        let function = object([
+            ("name", string(&name)),
+            ("arguments", string(args.encode())),
+        ]);
+        self.history.push(object([
+            ("role", string("assistant")),
+            ("content", Json::Null),
+            (
+                "tool_calls",
+                Json::Array(vec![object([
+                    ("id", string(&call_ref)),
+                    ("type", string("function")),
+                    ("function", function),
+                ])]),
+            ),
+        ]));
+        self.history.push(object([
+            ("role", string("tool")),
+            ("tool_call_id", string(&call_ref)),
+            (
+                "content",
+                string(object([("projection", value.clone()), ("receipt_ref", receipt)]).encode()),
+            ),
+        ]));
+        agent.state.context.push(Message {
+            role: Role::Tool,
+            text: value.encode(),
+        });
+        agent.state.receipt = invocation;
+        Ok(())
+    }
+}
+pub struct RuntimePorts {
+    pub session: SharedSession,
+}
+impl AgentPorts for RuntimePorts {
+    fn advertised_tools(&self, _state: &State) -> Result<Vec<String>> {
+        let mut s = self.session.borrow_mut();
+        s.catalog_sealed = true;
+        let d = s.discover()?;
+        let mut tools = Vec::new();
+        for row in field(&d, "operations")?.array()? {
+            let operation = text(row, "operation")?;
+            let installed = s.installed.get(&operation).ok_or("unenrolled_operation")?;
+            tools.push(installed.tool_id.clone());
+        }
+        s.advertised = tools.clone();
+        Ok(tools)
+    }
+    fn persist(&self, agent: &Agent) -> Result<()> {
+        muyon_core_agent_lab::store::atomic(
+            &self.session.borrow().store.dir,
+            "task.db",
+            &agent.state.encode(),
+        )
+    }
+    fn check_control(&mut self) -> Result<()> {
+        if self.session.borrow().cancelled {
+            Err("native_cancelled".into())
+        } else {
+            Ok(())
+        }
+    }
+    fn dispatch(
+        &mut self,
+        agent: &mut Agent,
+        call_ref: String,
+        name: String,
+        arguments: Json,
+    ) -> Result<()> {
+        self.session
+            .borrow_mut()
+            .dispatch(agent, call_ref, name, arguments)
+    }
+    fn admit_answer(&self, _state: &State, text: &str) -> Result<()> {
+        let s = self.session.borrow();
+        if s.review.mask_answer(text)? != text {
+            return Err("unsafe_answer".into());
+        }
+        Ok(())
+    }
+    fn failure(&mut self, state: &mut State, _reason: &str) {
+        state.status = "failed".into();
+        state.reason = if _reason == "tool_not_advertised" {
+            "tool_not_advertised".into()
+        } else {
+            "native_host_refused".into()
+        };
+    }
 }
