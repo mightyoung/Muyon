@@ -113,6 +113,7 @@ class AgentServiceClientState(private val expectedBuild: String) {
         }
         return UiAgentApply.APPLIED
     }
+    fun rejectedStart(ticket:UiAgentObservationTicket,reply:UiAgentWireReply):Boolean = false
     fun detachDisplay() { displayGeneration = Math.incrementExact(displayGeneration) }
     fun activityVisibility(activityId: String, isVisible: Boolean): UiAgentVisibility? {
         require(activityId.isNotEmpty())
