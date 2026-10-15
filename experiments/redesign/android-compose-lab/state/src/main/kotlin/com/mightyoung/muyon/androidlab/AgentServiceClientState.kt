@@ -16,6 +16,9 @@ class AgentServiceClientState(private val expectedBuild: String) {
     private var phase: UiAgentServicePhase? = null
     private var epoch: String? = null
     private var historicalIntent: UiAgentIntent? = null
+    // A separate opaque selection generation: only the most recently captured lookup
+    // ticket may publish. Data-class value equality is deliberately insufficient.
+    private var selectedHistoricalTicket: UiAgentObservationTicket? = null
     private var reconciled = false
     private var pending = false
     private var stopIssued = false
@@ -64,13 +67,16 @@ class AgentServiceClientState(private val expectedBuild: String) {
     }
     fun captureLookup(expected: UiAgentIntent): UiAgentObservationTicket? {
         if (!validIntent(expected)) return null
-        return capture(UiAgentObservationKind.HISTORICAL)?.copy(expectedIntent = expected)
+        val ticket = capture(UiAgentObservationKind.HISTORICAL)?.copy(expectedIntent = expected) ?: return null
+        selectedHistoricalTicket = ticket
+        return ticket
     }
     fun apply(ticket: UiAgentObservationTicket, incoming: UiAgentSnapshot): UiAgentApply {
         if (ticket.connection != connection || ticket.leaseGeneration != leaseGeneration ||
             ticket.displayGeneration != displayGeneration || ticket.client != client || transport != UiAgentTransport.CONNECTED)
             return UiAgentApply.STALE
         if (ticket.kind == UiAgentObservationKind.STATUS && ticket.expectedIntent != selectedIntent) return UiAgentApply.STALE
+        if (ticket.kind == UiAgentObservationKind.HISTORICAL && ticket !== selectedHistoricalTicket) return UiAgentApply.STALE
         if (!validAgentSnapshot(incoming, expectedBuild)) return UiAgentApply.INVALID
         if (incoming.meta.serviceEpoch != client?.epoch) return UiAgentApply.STALE
         if (ticket.kind == UiAgentObservationKind.HISTORICAL &&
