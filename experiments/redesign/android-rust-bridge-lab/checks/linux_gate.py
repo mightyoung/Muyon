@@ -14,6 +14,7 @@ import urllib.request
 
 from ffi_evidence import SERVICE_MODES, classify
 from full_evidence import rust_full, jvm_full, panic_full
+from binding_source import PINS as BINDING_SOURCE_PINS, emit as emit_android_binding
 
 ROOT = Path(__file__).resolve().parents[4]
 CORE = ROOT / 'experiments/redesign/android-rust-bridge-lab/core'
@@ -152,7 +153,10 @@ def main():
     parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full'] + SERVICE_MODES, required=True)
     parser.add_argument('--evidence-dir', type=Path, required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
+    parser.add_argument('--emit-android-source', action='store_true')
     args = parser.parse_args()
+    if args.emit_android_source and args.mode != 'service-jvm-red':
+        parser.error('android source emission requires service-jvm-red')
     evidence, work = args.evidence_dir.resolve(), args.work_dir.resolve()
     evidence.mkdir(parents=True, exist_ok=True)
     work.mkdir(parents=True, exist_ok=True)
@@ -227,6 +231,9 @@ def main():
                     '--out-dir', evidence / profile], evidence / f'generate-{profile}.log', cli_env)
             binding = evidence / 'jvm/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'
             result.update(android_config_sha256=sha(CORE / 'uniffi.android.toml'), jvm_config_sha256=sha(CORE / 'uniffi.jvm.toml'), jvm_binding_sha256=sha(binding), android_binding_sha256=sha(evidence / 'android/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'))
+            if args.emit_android_source:
+                emit_android_binding(evidence, {key: result[key] for key in BINDING_SOURCE_PINS})
+                result['android_binding_source_emitted'] = True
             probe_sources = [Path(__file__).with_name('BridgeProbe.kt')]
             if service:
                 probe_sources.append(Path(__file__).with_name('ServiceProbe.kt'))
