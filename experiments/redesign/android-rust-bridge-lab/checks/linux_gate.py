@@ -9,6 +9,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import time
 import urllib.request
 
 from ffi_evidence import classify
@@ -49,7 +50,7 @@ def inventory():
 def tracked_inputs():
     paths = subprocess.check_output(['git', 'ls-files', '-z',
         'experiments/redesign/core-agent-lab', 'experiments/redesign/plugin-contract-lab',
-        'experiments/redesign/android-rust-bridge-lab',
+        'experiments/redesign/android-rust-bridge-lab', 'experiments/redesign/android-compose-lab',
         '.github/workflows/android-rust-bridge.yml'], cwd=ROOT).decode().split('\0')
     return {name: sha(ROOT / name) for name in paths if name}
 
@@ -57,7 +58,7 @@ def tracked_inputs():
 def run(command, log, env, cwd=CORE, timeout=600, required=True):
     with log.open('wb') as output:
         child = subprocess.Popen([str(x) for x in command], cwd=cwd, env=env,
-                                 stdout=output, stderr=subprocess.STDOUT, start_new_session=True)
+                                 stdin=subprocess.DEVNULL, stdout=output, stderr=subprocess.STDOUT, start_new_session=True)
         timed_out = False
         forced = False
         try:
@@ -66,20 +67,41 @@ def run(command, log, env, cwd=CORE, timeout=600, required=True):
             timed_out = True
             status = 124
         finally:
-            try:
-                os.killpg(child.pid, 0)
-            except ProcessLookupError:
-                pass
-            else:
+            child.wait(timeout=0) if child.poll() is not None else None
+            def live_group():
+                live = []
+                for stat in Path('/proc').glob('[0-9]*/stat'):
+                    try:
+                        fields = stat.read_text().rsplit(')', 1)[1].split()
+                        if int(fields[2]) == child.pid and fields[0] != 'Z':
+                            live.append(int(stat.parent.name))
+                    except (OSError, ValueError, IndexError):
+                        continue
+                return live
+            # A no-daemon Gradle worker may still be shutting down when its
+            # launcher exits. Give owned group members a bounded natural exit.
+            deadline = time.monotonic() + (0 if timed_out else 3)
+            while live_group() and time.monotonic() < deadline:
+                time.sleep(0.05)
+            live_before_cleanup = live_group()
+            if live_before_cleanup:
                 forced = True
-                os.killpg(child.pid, signal.SIGKILL)
+                try:
+                    os.killpg(child.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
             child.wait(timeout=10)
+            deadline = time.monotonic() + 3
+            while live_group() and time.monotonic() < deadline:
+                time.sleep(0.05)
+            live_after_cleanup = live_group()
     record = dict(command=[str(x) for x in command], cwd=str(cwd), exit_code=status,
                   timed_out=timed_out, forced_owned_group_cleanup=forced,
+                  live_before_cleanup=live_before_cleanup, live_after_cleanup=live_after_cleanup,
                   raw_sha256=sha(log))
     log.with_suffix(log.suffix + '.json').write_text(json.dumps(record, indent=2) + '\n')
     print(f'{log.name}: exit={status} timeout={timed_out} forced_cleanup={forced}', flush=True)
-    if timed_out or forced or (required and status != 0):
+    if timed_out or forced or live_after_cleanup or (required and status != 0):
         print(log.read_text(errors='replace')[-6000:], flush=True)
         raise RuntimeError('command_invalid_or_failed')
     return status
@@ -132,6 +154,7 @@ def main():
                 evidence / 'rust-full.log', env)
             if not rust_full((evidence / 'rust-full.log').read_text(), UNIT, INTEGRATION):
                 raise RuntimeError('rust_full_names_or_counts')
+            print((evidence / 'rust-full.log').read_text(), flush=True)
         if args.mode == 'rust-red':
             behavior = evidence / 'behavior.log'
             status = run(['cargo', 'test', '--offline', '--locked', '--release', '--test',
@@ -155,7 +178,7 @@ def main():
                     '--language', 'kotlin', '--config', CORE / f'uniffi.{profile}.toml', '--no-format',
                     '--out-dir', evidence / profile], evidence / f'generate-{profile}.log', cli_env)
             binding = evidence / 'jvm/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'
-            result.update(jvm_binding_sha256=sha(binding), android_binding_sha256=sha(evidence / 'android/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'))
+            result.update(android_config_sha256=sha(CORE / 'uniffi.android.toml'), jvm_config_sha256=sha(CORE / 'uniffi.jvm.toml'), jvm_binding_sha256=sha(binding), android_binding_sha256=sha(evidence / 'android/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'))
             run(['bash', tools / 'kotlinc/bin/kotlinc', binding, Path(__file__).with_name('BridgeProbe.kt'),
                  '-jvm-target', '17', '-classpath', tools / 'jna.jar', '-include-runtime', '-d', work / 'probe.jar'],
                 evidence / 'kotlin-compile.log', env)
@@ -198,6 +221,8 @@ def main():
                      'muyon.bridgechecks.PanicProbe', source, panic_lib], evidence / 'panic.log', env, timeout=30)
                 if not panic_full((evidence / 'panic.log').read_text(), source, panic_sha) or sha(panic_lib) != panic_sha:
                     raise RuntimeError('panic_recovery_not_observed')
+                print((evidence / 'load-negative.log').read_text(), flush=True)
+                print((evidence / 'panic.log').read_text(), flush=True)
                 result.update(panic_library_sha256=panic_sha, panic_features=['ffi-test-probes'],
                               panic_binding_sha256=sha(panic_binding), panic_jar_sha256=sha(work / 'panic.jar'))
         if sha(shipping) != shipping_sha:
@@ -221,6 +246,7 @@ def main():
         if original != current:
             result.update(classification='INVALID', accepted=False, failure='source_inputs_changed')
         (evidence / 'verdict.json').write_text(json.dumps(result, indent=2) + '\n')
+        print('ANDROID_BRIDGE_LINUX_VERDICT ' + json.dumps(result, sort_keys=True), flush=True)
         if not result['source_inputs_unchanged']:
             raise RuntimeError('source_inputs_changed')
 

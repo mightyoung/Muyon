@@ -132,13 +132,86 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
-  required-full:
+  required-android:
     needs: select
     if: needs.select.outputs.mode == 'full'
     runs-on: ubuntu-24.04
-    timeout-minutes: 2
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: [arm64-v8a, x86_64]
     steps:
-      - name: Full Android packaging gate pending subsequent checker batch
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Exact official Rust and Android target components on temporary remote runner
         run: |
-          echo '::error::Full mode is not implemented in this initial RED-only checkpoint. Rust/JVM/Android full gates remain NOT_RUN.'
-          exit 1
+          rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android --target x86_64-linux-android
+          dirname "$(rustup which --toolchain 1.99.0 rustc)" >> "$GITHUB_PATH"
+      - name: Independent strict controls
+        run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
+      - name: Required fresh API24 link ELF JNI and NDK stub compatibility
+        env:
+          BRIDGE_ABI: ${{ matrix.abi }}
+        run: |
+          python3 -B experiments/redesign/android-rust-bridge-lab/checks/android_gate.py \
+            --abi "$BRIDGE_ABI" --evidence-dir "$RUNNER_TEMP/android-bridge-abi-evidence" \
+            --work-dir "$RUNNER_TEMP/android-bridge-abi-work"
+      - name: Retain raw actual link ELF and ABI identity evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-bridge-${{ matrix.abi }}-${{ github.sha }}
+          path: ${{ runner.temp }}/android-bridge-abi-evidence/
+          retention-days: 1
+          if-no-files-found: error
+
+  required-full:
+    needs: [select, required-linux, required-android]
+    if: needs.select.outputs.mode == 'full'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Download exact current-head Linux producer evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: android-bridge-linux-${{ github.sha }}
+          path: ${{ runner.temp }}/android-bridge-input-artifacts/linux
+      - name: Download exact current-head arm64 producer evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: android-bridge-arm64-v8a-${{ github.sha }}
+          path: ${{ runner.temp }}/android-bridge-input-artifacts/arm64-v8a
+      - name: Download exact current-head x86 producer evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: android-bridge-x86_64-${{ github.sha }}
+          path: ${{ runner.temp }}/android-bridge-input-artifacts/x86_64
+      - name: Required same-source input verification 67 state checks lint build and APK native bytes
+        run: |
+          python3 -B experiments/redesign/android-rust-bridge-lab/checks/package_gate.py \
+            --artifacts "$RUNNER_TEMP/android-bridge-input-artifacts" \
+            --evidence-dir "$RUNNER_TEMP/android-bridge-package-evidence" \
+            --work-dir "$RUNNER_TEMP/android-bridge-package-work"
+      - name: Retain raw packaging lint APK zipalign and identity evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-bridge-package-${{ github.sha }}
+          path: ${{ runner.temp }}/android-bridge-package-evidence/
+          retention-days: 1
+          if-no-files-found: error
