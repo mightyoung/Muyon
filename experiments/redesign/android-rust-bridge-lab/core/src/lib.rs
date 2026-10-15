@@ -75,32 +75,123 @@ pub fn bridge_info() -> BridgeInfo {
 }
 #[uniffi::export]
 pub fn validate_bundled_contract(
-    _request: DiagnosticRequest,
+    request: DiagnosticRequest,
 ) -> Result<DiagnosticReport, BridgeError> {
-    eprintln!("ANDROID_BRIDGE_STUB_REACHED code=internal_failure");
-    Err(BridgeError::InternalFailure)
+    boundary(|| {
+        if request.protocol != 1 {
+            return Err(BridgeError::UnsupportedProtocol);
+        }
+        if request.request_id.is_empty()
+            || request.request_id.len() > 64
+            || !request
+                .request_id
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+        {
+            return Err(BridgeError::InvalidRequestId);
+        }
+        use muyon_plugin_contract_lab::mappings::{declaration, renamed_equipment, MappingKind};
+        let declared = match request.variant {
+            DiagnosticVariant::Equipment => declaration(MappingKind::Equipment),
+            DiagnosticVariant::Research => declaration(MappingKind::Research),
+            DiagnosticVariant::Inquiry => declaration(MappingKind::Inquiry),
+            DiagnosticVariant::SeededEquipment => renamed_equipment(0x7631),
+        }
+        .map_err(|_| BridgeError::DeclarationRejected)?;
+        let (
+            namespace,
+            (catalog_generation, data_count, operation_count, relation_count, view_count),
+        ) = inspect_declaration(declared)?;
+        Ok(DiagnosticReport {
+            protocol: request.protocol,
+            request_id: request.request_id,
+            build_identity: env!("MUYON_BRIDGE_BUILD_ID").into(),
+            variant: request.variant,
+            namespace,
+            catalog_generation,
+            data_count,
+            operation_count,
+            relation_count,
+            view_count,
+        })
+    })
 }
 type CatalogCounts = (u64, u32, u32, u32, u32);
-fn parse_inspection(
-    _reply: &muyon_plugin_contract_lab::Json,
-) -> Result<CatalogCounts, BridgeError> {
-    Err(BridgeError::InternalFailure)
+fn parse_inspection(reply: &muyon_plugin_contract_lab::Json) -> Result<CatalogCounts, BridgeError> {
+    use muyon_plugin_contract_lab::Json;
+    let Json::Object(fields) = reply else {
+        return Err(BridgeError::InternalFailure);
+    };
+    if fields.get("ok") != Some(&Json::Bool(true)) {
+        return Err(BridgeError::InternalFailure);
+    }
+    let integer = |name: &str| -> Result<u64, BridgeError> {
+        let Some(Json::Number(n)) = fields.get(name) else {
+            return Err(BridgeError::InternalFailure);
+        };
+        if n.is_empty()
+            || !n.bytes().all(|b| b.is_ascii_digit())
+            || (n.len() > 1 && n.starts_with('0'))
+        {
+            return Err(BridgeError::InternalFailure);
+        }
+        n.parse().map_err(|_| BridgeError::InternalFailure)
+    };
+    let count = |name| u32::try_from(integer(name)?).map_err(|_| BridgeError::InternalFailure);
+    Ok((
+        integer("generation")?,
+        count("data_count")?,
+        count("operation_count")?,
+        count("relation_count")?,
+        count("view_count")?,
+    ))
 }
 fn inspect_declaration(
-    _declaration: muyon_plugin_contract_lab::mappings::ReadDeclaration,
+    declaration: muyon_plugin_contract_lab::mappings::ReadDeclaration,
 ) -> Result<(String, CatalogCounts), BridgeError> {
-    Err(BridgeError::InternalFailure)
+    use muyon_plugin_contract_lab::{object, string, Catalog, Json};
+    let namespace = declaration
+        .bundle
+        .object()
+        .map_err(|_| BridgeError::DeclarationRejected)?
+        .get("module_id")
+        .ok_or(BridgeError::DeclarationRejected)?
+        .string()
+        .map_err(|_| BridgeError::DeclarationRejected)?
+        .to_owned();
+    let mut catalog = Catalog::new();
+    let registered = catalog.handle(object([
+        ("protocol_version", Json::Number("1".into())),
+        ("command", string("register")),
+        ("bundle", declaration.bundle),
+        (
+            "host_bindings",
+            Json::Array(vec![string(declaration.binding_id)]),
+        ),
+    ]));
+    if registered.object().ok().and_then(|m| m.get("ok")) != Some(&Json::Bool(true)) {
+        return Err(BridgeError::DeclarationRejected);
+    }
+    let inspected = catalog.handle(object([
+        ("protocol_version", Json::Number("1".into())),
+        ("command", string("inspect")),
+    ]));
+    Ok((namespace, parse_inspection(&inspected)?))
 }
 fn boundary(
-    _action: impl FnOnce() -> Result<DiagnosticReport, BridgeError>,
+    action: impl FnOnce() -> Result<DiagnosticReport, BridgeError>,
 ) -> Result<DiagnosticReport, BridgeError> {
-    Err(BridgeError::InternalFailure)
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(action))
+        .unwrap_or(Err(BridgeError::InternalFailure))
 }
 /// Linux evidence artifact only. Absent from default/Android bindings and library.
 #[cfg(feature = "ffi-test-probes")]
 #[uniffi::export]
 pub fn ffi_test_panic_probe() -> Result<DiagnosticReport, BridgeError> {
-    boundary(|| panic!("ANDROID_BRIDGE_TEST_PANIC"))
+    boundary(|| {
+        eprintln!("ANDROID_BRIDGE_PANIC_ACTION_ENTERED");
+        panic!("ANDROID_BRIDGE_TEST_PANIC")
+    })
 }
 
 #[cfg(test)]
