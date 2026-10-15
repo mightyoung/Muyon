@@ -265,6 +265,18 @@ fun runAgentServiceChecks() {
             check(gate.call{11}==11)
         }
     }
+    cases["last active return hands sealed cleanup to existing background owner exactly once"]={
+        val work=ServiceManualExecutor();val entered=CountDownLatch(1);val finish=CountDownLatch(1);val done=CountDownLatch(1)
+        var signals=0;var frees=0;lateinit var gate:AgentHandleAdmission
+        gate=AgentHandleAdmission{signals++;work.execute{check(gate.disposeIfIdle(true,true){frees++})}}
+        Thread{try{gate.call{entered.countDown();check(finish.await(5,TimeUnit.SECONDS))};println("HANDLE_LAST_RETURN_REACHED")}finally{done.countDown()}}.apply{isDaemon=true}.start()
+        try{check(entered.await(5,TimeUnit.SECONDS));gate.disposeIfIdle(true,true){frees++}}finally{finish.countDown()}
+        check(done.await(5,TimeUnit.SECONDS))
+        check(signals==1 && work.jobs.size==1){"HANDLE_HANDOFF_RED: last return must hand cleanup to its retained background owner"}
+        check(frees==0 && !gate.cleanupComplete) // No generated cleanup on the returning/Binder caller.
+        work.next();check(frees==1 && gate.cleanupComplete && work.jobs.isEmpty())
+        check(gate.disposeIfIdle(true,true){frees++});check(signals==1 && frees==1)
+    }
     var failures=0
     cases.forEach{(name,test)->try{test();println("PASS B service $name")}catch(e:Throwable){failures++;println("FAIL B service $name: ${e.message}")}}
     check(failures==0){"$failures/${cases.size} B service state checks failed"}
