@@ -36,7 +36,10 @@ class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val
         }
         var nativeStarted=false
         try {
-            if(needsLink && !link { died(entry) }) died(entry)
+            if(needsLink) {
+                val linked=try { link { died(entry) } } catch (_: Exception) { false }
+                if(!linked) died(entry)
+            }
             if(synchronized(lock){entry.dead}) return unavailable()
             nativeStarted=true
             val result=native(entry.key)
