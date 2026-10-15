@@ -61,6 +61,9 @@ class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val
             if(dead && nativeStarted) gone(entry.key)
         }
     }
+    fun connectLinked(token:T,link:((()->Unit)->Boolean),unlink:()->Unit,native:(String)->UiAgentWireReply):UiAgentWireReply = connect(token,link,native)
+    /** Seals platform registration and detaches death links; the Service separately retires Rust. */
+    fun dispose() = Unit
     private fun died(entry:Entry<T>) {
         val notify=synchronized(lock) {
             if(entry.dead) false else {
