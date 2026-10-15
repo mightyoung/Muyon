@@ -157,3 +157,188 @@ fn host_roundtrip_pairs_the_original_projected_result_in_turn_two() {
     assert!(process.child.wait().unwrap().success());
     assert!(!process.root.join("effects.db").exists(), "host invokes must not create fixture effects");
 }
+
+fn propose(process: &mut HostProcess) -> Json {
+    process.send(start());
+    request(process, "model_request", 1, 1);
+    process.send(callback("model_reply", 1, 1, vec![("reply", object([
+        ("kind", string("tool")), ("call_id", string("provider-call")),
+        ("name", string("inquiry.object")), ("arguments", args()),
+    ]))]));
+    request(process, "prepare", 2, 1)
+}
+fn admit_tool(process: &mut HostProcess) -> String {
+    let prepared = propose(process);
+    let invocation = text(&prepared, "invocation_id").to_string();
+    process.send(callback("decision", 2, 1, vec![
+        ("invocation_id", string(&invocation)), ("decision", string("permit")),
+        ("prepared_ref", string("prepared:original")),
+    ]));
+    request(process, "invoke", 3, 1);
+    invocation
+}
+fn result(process: &mut HostProcess, invocation: &str, projection: Json) {
+    process.send(callback("tool_result", 3, 1, vec![
+        ("invocation_id", string(invocation)), ("prepared_ref", string("prepared:original")),
+        ("receipt_ref", string("receipt:original")), ("projection", projection),
+    ]));
+}
+fn terminal(process: &mut HostProcess, status: &str, reason: &str, invocations: u64) -> Json {
+    let value = process.receive();
+    assert_eq!(text(&value, "kind"), "terminal", "{}", value.encode());
+    assert_eq!(text(&value, "status"), status, "{}", value.encode());
+    assert_eq!(text(&value, "reason"), reason, "{}", value.encode());
+    assert_eq!(field(&value, "tool_invocations"), &number(invocations));
+    assert_eq!(field(&value, "answer"), &Json::Null);
+    assert!(process.child.wait().unwrap().success());
+    value
+}
+fn control(process: &mut HostProcess, kind: &str) {
+    process.send(object([
+        ("v", number(1)), ("kind", string(kind)),
+        ("task_id", string("host-task")), ("attempt_id", string("host-attempt")),
+    ]));
+}
+
+#[test]
+fn host_denial_stops_before_the_first_invocation() {
+    let mut process = HostProcess::new();
+    let prepared = propose(&mut process);
+    process.send(callback("decision", 2, 1, vec![
+        ("invocation_id", field(&prepared, "invocation_id").clone()),
+        ("decision", string("denied")), ("prepared_ref", Json::Null),
+    ]));
+    terminal(&mut process, "denied", "tool_denied", 0);
+}
+
+#[test]
+fn host_confirmation_requirement_never_becomes_automatic_approval() {
+    let mut process = HostProcess::new();
+    let prepared = propose(&mut process);
+    process.send(callback("decision", 2, 1, vec![
+        ("invocation_id", field(&prepared, "invocation_id").clone()),
+        ("decision", string("confirmation_required")), ("prepared_ref", Json::Null),
+    ]));
+    terminal(&mut process, "denied", "core_confirmation_required", 0);
+}
+
+#[test]
+fn host_wrong_callback_identity_cannot_invoke_or_start_another_turn() {
+    let mut process = HostProcess::new();
+    process.send(start());
+    request(&mut process, "model_request", 1, 1);
+    process.send(callback("model_reply", 2, 1, vec![("reply", object([
+        ("kind", string("answer")), ("text", string("untrusted")),
+    ]))]));
+    terminal(&mut process, "failed", "callback_mismatch", 0);
+}
+
+#[test]
+fn host_forged_approval_in_model_arguments_is_rejected() {
+    let mut process = HostProcess::new();
+    process.send(start());
+    request(&mut process, "model_request", 1, 1);
+    process.send(callback("model_reply", 1, 1, vec![("reply", object([
+        ("kind", string("tool")), ("call_id", string("provider-call")),
+        ("name", string("inquiry.object")),
+        ("arguments", object([("type", string("supplier")), ("id", string("synthetic-id")), ("approved", Json::Bool(true))])),
+    ]))]));
+    terminal(&mut process, "failed", "host_protocol", 0);
+}
+
+#[test]
+fn host_cancel_during_model_callback_is_terminal_without_a_tool() {
+    let mut process = HostProcess::new();
+    process.send(start());
+    request(&mut process, "model_request", 1, 1);
+    control(&mut process, "cancel");
+    terminal(&mut process, "cancelled", "cancel_requested", 0);
+}
+
+#[test]
+fn host_close_during_model_callback_is_terminal_and_reaped() {
+    let mut process = HostProcess::new();
+    process.send(start());
+    request(&mut process, "model_request", 1, 1);
+    control(&mut process, "close");
+    terminal(&mut process, "interrupted", "host_closed", 0);
+}
+
+#[test]
+fn host_silent_callback_has_a_semantic_timeout_terminal() {
+    let mut process = HostProcess::new();
+    process.send(start());
+    request(&mut process, "model_request", 1, 1);
+    terminal(&mut process, "failed", "callback_timeout", 0);
+}
+
+#[test]
+fn host_cancel_after_invoke_keeps_the_original_result_and_stops() {
+    let mut process = HostProcess::new();
+    let invocation = admit_tool(&mut process);
+    control(&mut process, "cancel");
+    result(&mut process, &invocation, projected_result());
+    let value = terminal(&mut process, "cancelled", "cancel_requested", 1);
+    assert_eq!(text(&value, "receipt_ref"), "receipt:original");
+    assert_eq!(field(&value, "projection"), &projected_result());
+}
+
+#[test]
+fn host_close_after_invoke_keeps_the_original_result_and_stops() {
+    let mut process = HostProcess::new();
+    let invocation = admit_tool(&mut process);
+    control(&mut process, "close");
+    result(&mut process, &invocation, projected_result());
+    let value = terminal(&mut process, "interrupted", "host_closed", 1);
+    assert_eq!(text(&value, "receipt_ref"), "receipt:original");
+    assert_eq!(field(&value, "projection"), &projected_result());
+}
+
+#[test]
+fn host_cancel_after_invoke_without_result_stays_unknown() {
+    let mut process = HostProcess::new();
+    admit_tool(&mut process);
+    control(&mut process, "cancel");
+    let value = terminal(&mut process, "interrupted", "tool_outcome_unknown", 1);
+    assert_eq!(field(&value, "receipt_ref"), &Json::Null);
+    assert_eq!(field(&value, "projection"), &Json::Null);
+}
+
+#[test]
+fn host_projection_cannot_smuggle_a_raw_record() {
+    let mut process = HostProcess::new();
+    let invocation = admit_tool(&mut process);
+    let mut projection = projected_result().object().unwrap().clone();
+    projection.insert("record".into(), string("PRIVATE_RECORD_CANARY"));
+    result(&mut process, &invocation, Json::Object(projection));
+    let value = terminal(&mut process, "failed", "projection_rejected", 1);
+    assert!(!value.encode().contains("PRIVATE_RECORD_CANARY"));
+    assert_eq!(field(&value, "projection"), &Json::Null);
+}
+
+#[test]
+fn host_second_tool_proposal_never_dispatches_again() {
+    let mut process = HostProcess::new();
+    let invocation = admit_tool(&mut process);
+    result(&mut process, &invocation, projected_result());
+    request(&mut process, "model_request", 4, 2);
+    process.send(callback("model_reply", 4, 2, vec![("reply", object([
+        ("kind", string("tool")), ("call_id", string("another-provider-call")),
+        ("name", string("inquiry.object")), ("arguments", args()),
+    ]))]));
+    let value = terminal(&mut process, "failed", "unsupported_tool_turn", 1);
+    assert_eq!(field(&value, "projection"), &projected_result());
+}
+
+#[test]
+fn host_request_id_requires_an_integer_not_a_json_float() {
+    let mut process = HostProcess::new();
+    process.send(start());
+    request(&mut process, "model_request", 1, 1);
+    let mut reply = callback("model_reply", 1, 1, vec![("reply", object([
+        ("kind", string("answer")), ("text", string("invalid correlation")),
+    ]))]).object().unwrap().clone();
+    reply.insert("request_id".into(), Json::Number("1.0".into()));
+    process.send(Json::Object(reply));
+    terminal(&mut process, "failed", "host_protocol", 0);
+}

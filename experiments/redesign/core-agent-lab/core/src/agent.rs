@@ -192,29 +192,46 @@ impl Agent {
         if let Some(config)=self.state.wire.clone(){let mut provider=WireProvider::new(config,&self.dir);self.run_with_provider(&mut provider,h)}else{let mut provider=ScriptedProvider::parse(&self.state.script)?;self.run_with_provider(&mut provider,h)}
     }
     pub fn run_with_provider(&mut self,provider:&mut dyn Provider,h:&Hooks)->Result<()> {
+        self.drive(provider,None,h)
+    }
+    /// Product host ports share this exact model/admission/control loop with fixtures.
+    pub fn run_with_ports(&mut self,provider:&mut dyn Provider,ports:&mut crate::host_session::HostPorts,h:&Hooks)->Result<()> {
+        self.drive(provider,Some(ports),h)
+    }
+    fn save_drive(&self,ports:Option<&crate::host_session::HostPorts>)->Result<()> {
+        if let Some(ports)=ports{ports.persist(self)}else{self.state.save(&self.dir)}
+    }
+    fn drive(&mut self,provider:&mut dyn Provider,mut ports:Option<&mut crate::host_session::HostPorts>,h:&Hooks)->Result<()> {
         if self.state.wire_counters.inflight{self.state.stop("failed","wire_interrupted");return self.state.save(&self.dir);}
         if self.state.evidence_hold || self.state.unresolved{return Ok(());}
         if self.cancelled()?{self.state.stop("cancelled","cancel_requested");return self.state.save(&self.dir);}
         if self.state.status=="waiting"{self.dispatch(h)?;}
         while self.state.status=="ready" {
+            if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.check_control(){host.failure(&mut self.state,&reason);break;}}
             if self.cancelled()?{self.state.stop("cancelled","cancel_requested");break;}
             let size=model::context_bytes(&self.state.context);
             if self.state.counters.steps>=self.state.limits.steps||self.state.counters.calls>=self.state.limits.calls||size>self.state.limits.context||self.state.counters.total.saturating_add(size)>self.state.limits.total||self.state.counters.output>=self.state.limits.output {self.state.stop("budget_exhausted","admission");break;}
             self.state.counters.steps+=1;self.state.counters.calls+=1;self.state.counters.total+=size;
             self.state.wire_counters.inflight=self.state.wire.is_some();
             if self.state.wire.is_some(){self.state.wire_counters.usage=crate::wire_sse::Usage::default();}
-            self.state.stop("failed","provider_interrupted");self.state.save(&self.dir)?;
-            let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools:vec!["fixture.record".into()]};
+            self.state.stop("failed","provider_interrupted");self.save_drive(ports.as_deref())?;
+            let tools=if ports.is_some(){if self.state.counters.steps==1{vec!["inquiry.object".into()]}else{Vec::new()}}else{vec!["fixture.record".into()]};
+            let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools};
             let position=self.state.position;let history=self.state.native.clone();
             let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h});
             self.state.wire_counters.inflight=false;
-            let event=match response{Ok(e)=>e,Err(reason)=>{if self.state.wire.is_some(){if reason=="wire_cancelled"{self.state.stop("cancelled",&reason);}else if reason.ends_with("_limit"){self.state.stop("budget_exhausted",&reason);}else{self.state.stop("failed",&reason);}}else{self.state.stop("failed","provider_error");}break;}};
+            let event=match response{Ok(e)=>e,Err(reason)=>{if let Some(host)=ports.as_deref_mut(){host.failure(&mut self.state,&reason);}else if self.state.wire.is_some(){if reason=="wire_cancelled"{self.state.stop("cancelled",&reason);}else if reason.ends_with("_limit"){self.state.stop("budget_exhausted",&reason);}else{self.state.stop("failed",&reason);}}else{self.state.stop("failed","provider_error");}break;}};
             let (prompt,completion)=provider.reported_usage();self.state.wire_counters.usage=crate::wire_sse::Usage{prompt,completion};
             if self.cancelled()?{self.state.stop("cancelled","cancel_requested");break;}
+            if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.check_control(){host.failure(&mut self.state,&reason);break;}}
             self.state.position+=1;let bytes=model::event_bytes(&event);self.state.counters.output+=bytes;self.state.counters.total+=bytes;
             if self.state.counters.output>self.state.limits.output||self.state.counters.total>self.state.limits.total {self.state.stop("budget_exhausted","response");break;}
             self.state.stop("ready","");
             match event {
+                ModelEvent::HostTool{call_ref,name,arguments}=>{
+                    if let Some(host)=ports.as_deref_mut(){if let Err(reason)=host.dispatch(self,call_ref,name,arguments){host.failure(&mut self.state,&reason);}}
+                    else{self.state.stop("failed","unknown_tool");}
+                },
                 ModelEvent::Fail(reason)=>self.state.stop("failed",&reason),
                 ModelEvent::Answer(text)=>{
                     if size.saturating_add(text.len() as u64)>self.state.limits.context{self.state.stop("budget_exhausted","context");}else{if self.state.wire.is_some(){self.state.native.push(NativeMessage::Assistant(text.clone()));}self.state.answer=text.clone();self.state.context.push(Message{role:Role::Assistant,text});self.state.stop("completed","");}
@@ -243,9 +260,9 @@ impl Agent {
                     }
                 },
             }
-            self.state.save(&self.dir)?;
+            self.save_drive(ports.as_deref())?;
         }
-        self.state.save(&self.dir)
+        self.save_drive(ports.as_deref())
     }
     pub fn observe(&self)->String {
         let effect=EffectStore::load(&self.dir);let (count,value)=match effect{Ok(s)=>(s.receipts.len().to_string(),hex(&s.value)),Err(_)=>("unknown".into(),String::new())};
