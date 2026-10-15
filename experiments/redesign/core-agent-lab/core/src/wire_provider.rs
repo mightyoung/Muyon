@@ -80,13 +80,24 @@ fn pipe_end(fd:i32)->(bool,bool){
 }
 #[cfg(not(target_os="linux"))]
 fn pipe_end(_fd:i32)->(bool,bool){(false,true)}
+struct ExchangeDeadline {start:Instant,active:Instant,idle:Duration,total:Duration}
+impl ExchangeDeadline {
+    fn new(config:&WireConfig)->Self{let now=Instant::now();Self{start:now,active:now,idle:Duration::from_millis(config.idle_ms),total:Duration::from_millis(config.total_ms)}}
+    fn check(&self,control:&mut dyn ProviderControl)->Result<()>{control.poll()?;if self.start.elapsed()>=self.total{return Err("wire_total_timeout".into());}if self.active.elapsed()>=self.idle{return Err("wire_idle_timeout".into());}Ok(())}
+}
+fn write_request_step(pipe:&mut dyn Write,bytes:&[u8],written:usize,chunk:usize,control:&mut dyn ProviderControl,deadline:&ExchangeDeadline)->Result<usize>{
+    deadline.check(control)?;
+    let end=written.saturating_add(chunk).min(bytes.len()).min(written.saturating_add(usize::try_from(control.remaining()).unwrap_or(usize::MAX)));
+    if end==written{return Err("wire_total_limit".into());}
+    match pipe.write(&bytes[written..end]){Ok(0)=>Err("wire_stdin_closed".into()),Ok(n)=>{control.charge(true,n)?;Ok(n)},Err(e) if e.kind()==std::io::ErrorKind::WouldBlock=>Ok(0),Err(_)=>Err("wire_write".into())}
+}
 impl Provider for WireProvider {
     fn respond(&mut self,_request:&ModelRequest,_position:usize)->Result<ModelEvent>{Err("wire_control_required".into())}
     fn reported_usage(&self)->(Option<u64>,Option<u64>){(self.usage.prompt,self.usage.completion)}
     fn respond_controlled(&mut self,request:&ModelRequest,_position:usize,history:&[NativeMessage],control:&mut dyn ProviderControl)->Result<ModelEvent>{
         control.poll()?;self.config.validate()?;let bytes=encode_request(request,history)?;
         if bytes.len() as u64>control.remaining(){return Err("wire_total_limit".into());}
-        let start=Instant::now();let mut active=start;
+        let mut deadline=ExchangeDeadline::new(&self.config);
         let mut child=Command::new("python3").arg("-B").arg(&self.config.helper).arg("--fixture-dir").arg(&self.config.fixtures).arg("--turn").arg(request.turn.to_string()).arg("--capture-dir").arg(self.dir.join("wire-capture"))
             .env_clear().env("PATH","/usr/bin:/bin").stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).spawn().map_err(|_|"wire_spawn")?;
         let result=(||{
@@ -94,12 +105,9 @@ impl Provider for WireProvider {
             nonblocking(input.as_ref().ok_or("wire_stdin")?.as_raw_fd())?;nonblocking(output.as_raw_fd())?;
             let mut written=0;let mut received=0usize;let mut eof=false;let mut decoder=Decoder::new();let mut buffer=vec![0u8;self.config.chunk];let mut exit=None;
             loop{
-                control.poll()?;
-                if start.elapsed()>=Duration::from_millis(self.config.total_ms){return Err("wire_total_timeout".into());}
-                if active.elapsed()>=Duration::from_millis(self.config.idle_ms){return Err("wire_idle_timeout".into());}
+                deadline.check(control)?;
                 let mut progress=false;
-                if let Some(pipe)=input.as_mut(){let end=(written+self.config.chunk).min(bytes.len());let allowance=usize::try_from(control.remaining()).unwrap_or(usize::MAX);let end=end.min(written.saturating_add(allowance));if end==written{return Err("wire_total_limit".into());}
-                    match pipe.write(&bytes[written..end]){Ok(0)=>return Err("wire_stdin_closed".into()),Ok(n)=>{written+=n;control.charge(true,n)?;progress=true;},Err(e) if e.kind()==std::io::ErrorKind::WouldBlock=>{},Err(_)=>return Err("wire_write".into())}
+                if let Some(pipe)=input.as_mut(){let n=write_request_step(pipe,&bytes,written,self.config.chunk,control,&deadline)?;written+=n;progress|=n>0;
                     if written==bytes.len(){drop(input.take());control.checkpoint("wire-open")?;control.poll()?;}
                 }
                 if !eof {
@@ -113,9 +121,25 @@ impl Provider for WireProvider {
                 if exit.is_none(){exit=child.try_wait().map_err(|_|"wire_wait")?;}
                 if exit.is_some_and(|status|!status.success()){return Err("wire_child_exit".into());}
                 if eof&&input.is_none()&&exit.is_some(){control.poll()?;let turn=decoder.finish()?;self.usage=turn.usage;return Ok(turn.event);}
-                if progress{active=Instant::now();}else{std::thread::sleep(Duration::from_millis(2));}
+                if progress{deadline.active=Instant::now();}else{std::thread::sleep(Duration::from_millis(2));}
             }
         })();
         if result.is_err(){let _=child.kill();let _=child.wait();}result
+    }
+}
+
+#[cfg(test)]
+mod pump_tests {
+    use super::*;
+    #[derive(Default)]struct Control{cancel:bool,charged:usize,polls:usize}
+    impl ProviderControl for Control{fn poll(&mut self)->Result<()>{self.polls+=1;if self.cancel{Err("wire_cancelled".into())}else{Ok(())}}fn remaining(&self)->u64{100}fn charge(&mut self,_sent:bool,n:usize)->Result<()>{self.charged+=n;Ok(())}fn checkpoint(&mut self,_name:&str)->Result<()>{Ok(())}}
+    #[derive(Default)]struct Blocked{calls:usize}
+    impl Write for Blocked{fn write(&mut self,_bytes:&[u8])->std::io::Result<usize>{self.calls+=1;Err(std::io::ErrorKind::WouldBlock.into())}fn flush(&mut self)->std::io::Result<()>{Ok(())}}
+    #[test]
+    fn actual_wouldblock_step_cannot_bypass_cancel_or_total_deadline(){
+        let now=Instant::now();let mut deadline=ExchangeDeadline{start:now,active:now,idle:Duration::from_secs(10),total:Duration::from_secs(10)};let mut pipe=Blocked::default();let mut control=Control::default();
+        assert_eq!(write_request_step(&mut pipe,b"request",0,8192,&mut control,&deadline).unwrap(),0);assert_eq!(pipe.calls,1);assert_eq!(control.charged,0);
+        control.cancel=true;assert_eq!(write_request_step(&mut pipe,b"request",0,8192,&mut control,&deadline).unwrap_err(),"wire_cancelled");assert_eq!(pipe.calls,1);
+        control.cancel=false;deadline.start=Instant::now().checked_sub(Duration::from_secs(11)).unwrap();assert_eq!(write_request_step(&mut pipe,b"request",0,8192,&mut control,&deadline).unwrap_err(),"wire_total_timeout");assert_eq!(pipe.calls,1);assert_eq!(control.charged,0);assert_eq!(control.polls,3);
     }
 }

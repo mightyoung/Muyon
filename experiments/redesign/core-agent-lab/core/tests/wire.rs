@@ -122,8 +122,11 @@ fn silent_stream_cancellation_is_observed_before_timeout(){
     command(&dir,"cancel",&[]);let output=child.wait_with_output().unwrap();assert!(output.status.success());let text=String::from_utf8(output.stdout).unwrap();assert_eq!(field(&text,"reason"),"wire_cancelled");assert_eq!(field(&text,"effects"),"0");let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();assert!(!Path::new(&format!("/proc/{pid}")).exists());
 }
 #[test]
-fn blocked_request_writer_is_bounded_by_deadline(){
-    let input="x".repeat(50000);let dir=fixture(TOOL,&["--input",&input,"--wire-idle-ms","100","--wire-total-ms","500"]);fs::write(dir.parent().unwrap().join("no-read"),"").unwrap();let result=command(&dir,"run",&[]);assert_eq!(field(&result,"effects"),"0");assert!(field(&result,"reason").ends_with("timeout"));let sent:u64=field(&result,"wire_sent_bytes").parse().unwrap();assert!(sent>0&&sent<50000);let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();assert!(!Path::new(&format!("/proc/{pid}")).exists());
+fn nonreading_child_is_bounded_by_total_deadline(){
+    let input="x".repeat(50000);let dir=fixture(TOOL,&["--input",&input,"--wire-idle-ms","2000","--wire-total-ms","300"]);fs::write(dir.parent().unwrap().join("no-read"),"").unwrap();let start=std::time::Instant::now();let result=command(&dir,"run",&[]);let elapsed=start.elapsed();let sent:u64=field(&result,"wire_sent_bytes").parse().unwrap();
+    // A 50KB request may fit the OS pipe; this process test claims no blocked-write phase.
+    use std::io::Write;std::io::stdout().write_all(format!("nonreading diagnostic: sent={sent} reason={} elapsed_ms={}\n",field(&result,"reason"),elapsed.as_millis()).as_bytes()).unwrap();
+    assert_eq!(field(&result,"effects"),"0","{result}");assert_eq!(field(&result,"reason"),"wire_total_timeout","{result}");assert!(sent>0&&sent<=65536,"sent={sent}; {result}");assert!(elapsed<std::time::Duration::from_secs(5));let pid=fs::read_to_string(dir.join("wire-capture/pid-1")).unwrap();assert!(!Path::new(&format!("/proc/{pid}")).exists());
 }
 #[test]
 fn unsupported_multiple_choices_calls_and_wrong_types_reject_whole_turn(){
