@@ -86,3 +86,34 @@ package install/download, model service, credential configuration or real data
 was used. Full combined runtime, independent checker, inverse controls, non-author
 review and exact terminal CI remain root integration gates; this checkpoint does
 not claim product GREEN, device acceptance or M03 completion.
+
+## Non-author review round 1 and first combined runtime
+
+Fixed-source review of b3f012e requested three Important corrections and one
+Minor call-ID correction. The first actual combo CI38687677301 at root5e9b81a
+had45 passing /5 failing product tests; its unchanged raw first-failure log stays
+at `/tmp/rd-core-agent-host-evidence-20261015/first-combo-live.log`. Corrections
+below are source fixes awaiting exact combined runtime verification, not a claim
+that a source inspection turned those failures GREEN.
+
+| Review / evidence | Owned source correction | Covering evidence |
+| --- | --- | --- |
+| T2-I1: admitted unknown, accepted result, early close settlement | fdf2067/e77165b: adapter owns core close finalization; accepted projection distinguishes known result; d1f3019: shared production failure selector includes framing/aggregate host_budget before matching result | Real registry Completer tests preserve original read on cancel/close; oversized_header/aggregate barriers exercise actual parser and shared failure selector before/after accepted projection. Independent cancel-second-model/close tests cover product paths; full repository lifecycle review/CI remains a gate. |
+| T2-I2: clean EOF | 3000d51: clean EOF maps interrupted/host_eof; truncation remains failed/host_protocol before admission | Existing independent clean_eof oracle retained. |
+| T2-I3: queued cancellation lost before active session | 3000d51: synchronous queued revocation plus persisted cancelled state; run refuses terminal/revoked task before launch | Actual PersonalAgent start/cancel test pauses appendMessage after task publication and checks cancelled/no process-state directory/no tool receipt. |
+| T2-O1: C1 call-ID controls | a390683: reject C0/C1 and unpaired UTF16, retain valid Unicode scalars | Owner call-ID unit checks C1, Chinese/emoji, valid U+FFFD, malformed surrogate and byte limit. |
+| Cross-runtime JSON history ordering | 5579708: compare embedded arguments/projection as strict parsed structures; retain exact role/call/tool pairing; authorize the actual received Rust messages | Rust owner confirmed BTreeMap key reserialization. Independent positive keeps its original paired actual-result assertions. |
+
+The read-category pre-start test had an independently identified overstrong
+expectation: AgentTaskFactory already filters unavailable categories, so zero
+model sends/ledger/launch is the actual path. No policy checks were relaxed to
+force preparation. CoreAgentModel's ModelPolicyGuard remains unchanged from the
+initial full implementation, including its checks after a response.
+
+Local owner-unit execution was attempted with the preinstalled Flutter snapshot,
+`--no-pub`, analytics suppressed and unchanged HOME. It loaded zero tests because
+the clone lacks `.dart_tool/package_graph.json`; this is setup failure/NOT_RUN,
+not a test pass or semantic RED. Raw log:
+`/tmp/rd-core-agent-host-reports-20261015/evidence/task-2/owner-units-first.log`.
+No packages or SDK updates were installed to bypass it. Root's full regression
+and dedicated actual-Rust host workflow remain required to execute these tests.
