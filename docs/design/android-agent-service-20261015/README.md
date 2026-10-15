@@ -33,3 +33,9 @@ UI 只经有界 Binder/AIDL 发请求、查状态和取消；同一 Rust Agent �
 源码固定 `0ab2c4f667681b9aacb017f8cd2eea6f576cf78e`；产品代码未变。原owner并行只读报告：[NativeSession与执行链](process-options-native.md)、[Service/UI及Binder](process-options-ui.md)、[隔离与权限](process-options-security.md)、[验证矩阵](process-options-checker.md)。其中早期候选与最终修订不同处，以完整修订为准。
 
 [独立合同复审](process-service-contract-review.md)与[固定输入哈希](process-service-contract-review-inputs.json)同目录交付；[实施计划](B-SERVICE-IMPLEMENTATION-PLAN.md)、[精确ABI](B-SERVICE-ABI.md)、[ABI复审](process-service-abi-review.md)及[checker计划](B-SERVICE-CHECKS-PLAN.md)约束原owner测试先行。官方资料证明平台机制可用，不是当前APK已运行成功。原有 PR84 声明诊断可留UI且不作为B执行证据。此前 [c0e20c5f文档](https://github.com/mightyoung/Muyon/tree/c0e20c5f1dc68bbd1bae6404586be96bac138d1e/docs/design/android-agent-read-20261015) 为已被新方向替代的历史方案，不等待A审批。实施授权来源是用户最新“设计完成后开发”，父级意见/审查C0不冒充用户发言；具体合同和ABI无阻断后，root直接协调原owner实施。新后台常驻/权限/真实模型凭据或额外资源仍先报告。
+
+## 已激活的测试先行实施与窄修订
+
+原 owner 已从固定设计提交 `de83e44758ba036b94779cc00d439224b1d06973` 开工。native 可编译拒绝 checkpoint `9a7e02adec28f764477e1893387c8699142ec528` 已有宿主语义 RED；UI 初始状态 RED `ccbe0412ad00918563514e029a5da0eab53ed1d8` 已固定。它们不代表实现通过或 Android 运行验收。检查器正在建立远端 Rust/真实生成 JVM 两道语义 RED；native GREEN 等两门实际确认。
+
+ABI af4dfd9e 为本次权威修订：增加 Service-only `retire_service`，解决零 client 的迟到初始化对象退休，不伪造 lease；构造错误统一为闭合 AgentServiceSetupError。原 b361 设计通过记录仍保留其固定输入，本次增量独立审查见 [退休接口窄审](service-retire-abi-review.md)，SPEC PASS / QUALITY C0。用户“设计完成后开发”授权持续有效，原有 owner 按计划继续，无重复开工确认。
