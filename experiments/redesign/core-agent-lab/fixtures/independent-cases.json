@@ -178,8 +178,10 @@
       },
       "assertions": {
         "effects": 1,
-        "answer": "once",
-        "original_receipt_reused": true
+        "original_receipt_reused": true,
+        "success_answer": false,
+        "reason": "duplicate_or_unknown_call",
+        "original_value": "one"
       }
     },
     {

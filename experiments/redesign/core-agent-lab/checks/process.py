@@ -64,6 +64,16 @@ def journal(directory):
     return fields
 
 
+def context_messages(directory):
+    text = bytes.fromhex(journal(directory)['context_hex']).decode('utf-8')
+    messages = []
+    for line in text.splitlines():
+        role, separator, body = line.partition('\t')
+        assert separator and role in {'user', 'assistant', 'tool'}, 'invalid trusted context role'
+        messages.append((role, bytes.fromhex(body).decode('utf-8')))
+    return messages
+
+
 class AgentProcessTests(unittest.TestCase):
     serial = 0
 
@@ -159,6 +169,15 @@ class AgentProcessTests(unittest.TestCase):
                 if expected.get('success_answer') is False:
                     self.assertNotEqual(actual['status'], 'completed')
                     self.assertEqual(actual['answer_hex'], '')
+                if 'reason' in expected:
+                    self.assertEqual(actual['reason'], expected['reason'])
+                if expected.get('trusted_tool_result_before_answer'):
+                    messages = context_messages(directory)
+                    tool_text = f"receipt={state['rows'][0][7]};value={bytes.fromhex(state['value']).decode()}"
+                    self.assertIn(('tool', tool_text), messages[:-1])
+                    self.assertEqual(messages[-1], ('assistant', bytes.fromhex(actual['answer_hex']).decode()))
+                if expected.get('original_receipt_reused'):
+                    self.assertEqual(actual['receipt'], state['rows'][0][7])
                 if expected.get('risk_asks') == 0:
                     self.assertEqual(actual['confirmations'], '0')
                 if expected['effects']:
@@ -173,11 +192,10 @@ class AgentProcessTests(unittest.TestCase):
         row = state['rows'][0]
         self.assertEqual(bytes.fromhex(actual['answer_hex']).decode(),
                          f'answer sees receipt={row[7]};value=tool-result-data')
-        context = bytes.fromhex(journal(directory)['context_hex']).decode()
-        self.assertIn('user', context)
-        self.assertIn('assistant', context)
-        self.assertIn('tool', context)
-        self.assertIn(row[7], context)
+        messages = context_messages(directory)
+        self.assertEqual(messages[0], ('user', 'synthetic user input'))
+        self.assertIn(('tool', f'receipt={row[7]};value=tool-result-data'), messages[:-1])
+        self.assertEqual(messages[-1], ('assistant', bytes.fromhex(actual['answer_hex']).decode()))
         self.assertEqual(row[2:4], [actual['task'], actual['attempt']])
 
     def test_confirmation_is_current_and_cannot_fix_hard_denial(self):
