@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run five inverse mutants in private copies using existing offline Cargo only."""
+"""Run six inverse mutants in private copies using existing offline Cargo only."""
 import argparse
 import json
 from pathlib import Path
@@ -17,10 +17,13 @@ mutations = [
      'if !hard_ok || mode == Mode::ReadOnly', 'if mode == Mode::ReadOnly'),
     ('unknown_redispatch', 'src/agent.rs',
      'if self.state.unresolved{return Ok(());}',
-     'if self.state.unresolved { self.state.unresolved=false; self.state.status="ready".into(); self.state.position=0; self.state.seen.clear(); }'),
+     'if self.state.unresolved { self.state.unresolved=false; self.state.status="ready".into(); self.state.position=0; self.state.correlations.clear(); }'),
     ('duplicate_effect', 'src/store.rs',
      'if let Some(r)=state.receipts.iter().find(|r|r.binding.invocation==b.invocation){if &r.binding!=b{return Err("binding_conflict".into());}return Ok(r.clone());}',
      ''),
+    ('terminal_resurrection', 'src/agent.rs',
+     'else if !resume_status.is_empty(){self.state.stop(&resume_status,&resume_reason);}',
+     'else if !resume_status.is_empty(){self.state.stop("ready","");}'),
     ('cached_receipt_trust', 'src/agent.rs',
      'if !state.unresolved {', 'if false && !state.unresolved {'),
     ('budget_reset', 'src/agent.rs',

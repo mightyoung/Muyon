@@ -86,17 +86,28 @@ host signal. Private directory assumes a trusted owner, not hostile same-UID edi
 `ROLE<TAB>hex-UTF8-text<NEWLINE>`, where ROLE is exactly `user`, `assistant`,
 or `tool`. Assistant tool requests are text `tool=fixture.record;call=REF;value=VALUE`.
 Only the host adds tool-role text, exactly `receipt=ID;value=VALUE` from physical
-original receipt. Both repeated and conflicting provider call-ref reuse fail
-with `duplicate_or_unknown_call` and never allocate a second effect. Exact
-host Binding replay is separately supported by the typed ToolPort and returns
-the same original Receipt; a provider call-ref is not a replay capability.
+original receipt. Identical repeated provider call-ref/tool/value uses its persisted original host
+Binding to look up and return the original Receipt/tool result with zero added
+effects or confirmation consumption. Changed arguments produce `binding_conflict`.
+Missing/corrupt/unresolved original evidence stays lookup-only unknown. The
+provider reference never creates a new invocation or grants authority.
 Concurrent cancel output may still show the executor's durable pending status,
 with `cancelled=true`; the executor consumes the durable request on release.
 
 Author inverse mutations: `python3 core/mutations.py --evidence-dir /tmp/OUTPUT`
-requires preinstalled Cargo. Five fresh private source copies weaken hard policy,
-unknown hold, duplicate suppression, original-receipt validation and persistent
-counters. Each must compile
+requires preinstalled Cargo. Six fresh private source copies weaken hard policy,
+unknown hold, duplicate suppression, original-receipt validation, terminal-control
+restoration and persistent counters. Each must compile
 and fail behavioral Rust assertions; source-under-review remains untouched.
 ToolPort direct callers must hold the private directory lock around lookup/execute;
 the CLI Agent commands do so. No cross-task/shared-host storage service is provided.
+
+Task journal now persists `correlations_hex`: decoded lines are
+`call-ref<TAB>hex-UTF8-binding<NEWLINE>`; the binding decodes to the same six
+fields as pending_hex / physical receipt binding. `result_pending` tracks whether
+the admitted tool call still needs its trusted tool-result context message.
+`resume_status`/`resume_reason` preserve the prior control barrier while a cached
+receipt's original evidence is unavailable. Restoring original evidence restores
+that status/reason; completed/cancelled/failed/denied/budget_exhausted never become
+ready solely because lookup found a receipt. This unpublished snapshot revision
+fails closed on older incomplete task records; no product migration is implied.

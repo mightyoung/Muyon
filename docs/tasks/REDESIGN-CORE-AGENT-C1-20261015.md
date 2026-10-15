@@ -30,3 +30,16 @@ source2a919c06: completed task projection now revalidates original effect eviden
 its new14th Rust test rejects trusting cached completion after evidence damage.
 Five isolated inverse mutants now include restoring that earlier cache trust.
 Latest source and mutation runtime remain pending the next exact-candidate CI.
+
+Independent review R1 found terminal resurrection after cached receipt evidence
+was withheld/restored: lookup could reset completed/budget_exhausted to ready.
+Tests-only checkpoint c57133a preserves both counterexamples plus updated
+same-correlation requirements against prior source. The fix durably records prior
+control status/reason independently of unknown evidence, preserving terminal
+barriers after lookup. A sixth inverse mutant restores the erroneous ready reset.
+
+Root CONTRACT914ba02 supersedes the earlier reject-all correlation interpretation:
+identical same-ref requests now look up their persisted original host Binding and
+return original receipt with no new effect or confirmation consumption; changed
+arguments conflict. Durable correlation map and pending tool-result flag preserve
+this across unknown/restart. 19 authored Rust tests; new runtime still pending CI.

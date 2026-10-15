@@ -106,7 +106,7 @@ fn corrupt_or_absent_original_evidence_never_replays_unknown(){
 }
 #[test]
 fn duplicate_provider_reference_cannot_mint_second_invocation(){
-    let dir=fixture("tool\tc1\tfixture.record\t61\ntool\tc1\tfixture.record\t62\n",&[]);let out=command(&dir,"run",&[]);assert!(out.contains("status=failed\n"));assert!(out.contains("effects=1\n"));assert!(out.contains("value_hex=61\n"));
+    let dir=fixture("tool\tc1\tfixture.record\t61\ntool\tc1\tfixture.record\t62\n",&[]);let out=command(&dir,"run",&[]);assert!(out.contains("status=failed\n"));assert!(out.contains("effects=1\n"));assert!(out.contains("value_hex=61\n"));assert!(out.contains("reason=binding_conflict\n"));
 }
 #[test]
 fn provider_failure_and_definite_tool_failure_never_fabricate_success(){

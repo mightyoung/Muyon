@@ -11,7 +11,8 @@ pub struct State {
     pub task:String,pub attempt:String,pub status:String,pub reason:String,pub script:String,pub scope:String,
     pub facts:HostFacts,pub limits:Limits,pub counters:Counters,pub context:Vec<Message>,pub position:usize,
     pub binding:Option<Binding>,pub unresolved:bool,pub receipt:String,pub answer:String,pub cancelled:bool,
-    pub seen:Vec<String>,pub behavior:String,
+    pub correlations:BTreeMap<String,Binding>,pub behavior:String,
+    pub resume_status:String,pub resume_reason:String,pub result_pending:bool,
 }
 fn mode_name(mode:Mode)->&'static str {match mode{Mode::ReadOnly=>"read-only",Mode::AskEveryTime=>"ask-every-time",Mode::Auto=>"auto",Mode::FullAllow=>"full-allow"}}
 pub fn parse_mode(s:&str)->Result<Mode>{match s{"read-only"=>Ok(Mode::ReadOnly),"ask-every-time"=>Ok(Mode::AskEveryTime),"auto"=>Ok(Mode::Auto),"full-allow"=>Ok(Mode::FullAllow),_=>Err("invalid_mode".into())}}
@@ -23,7 +24,7 @@ impl State {
         if input.len() as u64>limits.context{return Err("input_context_limit".into());}
         let nonce=SystemTime::now().duration_since(UNIX_EPOCH).map_err(|_|"clock")?.as_nanos();
         let task=format!("t-{}-{nonce}",std::process::id());
-        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script,scope,facts,limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,seen:Vec::new(),behavior})
+        Ok(Self{attempt:format!("a-{}-{nonce}",std::process::id()),task,status:"ready".into(),reason:String::new(),script,scope,facts,limits,counters:Counters::default(),context:vec![Message{role:Role::User,text:input}],position:0,binding:None,unresolved:false,receipt:String::new(),answer:String::new(),cancelled:false,correlations:BTreeMap::new(),behavior,resume_status:String::new(),resume_reason:String::new(),result_pending:false})
     }
     pub fn encode(&self)->String{
         let mut m=BTreeMap::new();
@@ -34,7 +35,8 @@ impl State {
         put!("max_steps",self.limits.steps);put!("max_calls",self.limits.calls);put!("max_context",self.limits.context);put!("max_output",self.limits.output);put!("max_total",self.limits.total);
         put!("steps",self.counters.steps);put!("calls",self.counters.calls);put!("output",self.counters.output);put!("total",self.counters.total);put!("confirmations",self.counters.confirmations);
         put!("context_hex",hex(&model::encode_context(&self.context)));put!("position",self.position);
-        put!("pending_hex",hex(&self.binding.as_ref().map(|b|b.encode()).unwrap_or_default()));put!("unresolved",self.unresolved);put!("receipt",self.receipt);put!("answer_hex",hex(&self.answer));put!("cancelled",self.cancelled);put!("seen_hex",hex(&self.seen.join("\n")));put!("behavior",self.behavior);
+        put!("pending_hex",hex(&self.binding.as_ref().map(|b|b.encode()).unwrap_or_default()));put!("unresolved",self.unresolved);put!("receipt",self.receipt);put!("answer_hex",hex(&self.answer));put!("cancelled",self.cancelled);put!("correlations_hex",hex(&self.correlations.iter().map(|(k,b)|format!("{}\t{}\n",k,hex(&b.encode()))).collect::<String>()));put!("behavior",self.behavior);
+        put!("resume_status",self.resume_status);put!("resume_reason",self.resume_reason);put!("result_pending",self.result_pending);
         let mut out=String::from("CORE_TASK_V1\n");for(k,v)in m{out.push_str(&format!("{k}\t{v}\n"));}out
     }
     pub fn load(dir:&Path)->Result<Self>{
@@ -50,12 +52,21 @@ impl State {
         let context=model::decode_context(&unhex(&take(&mut m,"context_hex")?)?)?;let position=usize::try_from(number(&mut m,"position")?).map_err(|_|"position_overflow")?;
         let raw=unhex(&take(&mut m,"pending_hex")?)?;let binding=if raw.is_empty(){None}else{Some(Binding::decode(&raw)?)};
         let unresolved=flag(&mut m,"unresolved")?;let receipt=take(&mut m,"receipt")?;let answer=unhex(&take(&mut m,"answer_hex")?)?;let cancelled=flag(&mut m,"cancelled")?;
-        let seen:Vec<String>=unhex(&take(&mut m,"seen_hex")?)?.lines().map(str::to_string).collect();let behavior=take(&mut m,"behavior")?;
-        if !m.is_empty() || !identifier(&task)||!identifier(&attempt)||!matches!(status.as_str(),"ready"|"waiting"|"completed"|"denied"|"failed"|"cancelled"|"outcome_unknown"|"budget_exhausted") || !matches!(behavior.as_str(),"normal"|"fail"|"lose-response") || scope.is_empty()||scope.len()>1024 || position>128 || counters.steps>1_000_000||counters.calls>1_000_000||counters.output>2_000_000||counters.total>4_000_000 || seen.len()>128||seen.iter().any(|s|!identifier(s)) || (!receipt.is_empty()&&!identifier(&receipt)) {return Err("invalid_task_state".into());}
+        let mut correlations=BTreeMap::new();
+        for line in unhex(&take(&mut m,"correlations_hex")?)?.lines(){
+            let (call,raw)=line.split_once('\t').ok_or("correlation_row")?;
+            if !identifier(call)||correlations.insert(call.to_string(),Binding::decode(&unhex(raw)?)?).is_some(){return Err("correlation_identity".into());}
+        }
+        let behavior=take(&mut m,"behavior")?;
+        let resume_status=take(&mut m,"resume_status")?;let resume_reason=take(&mut m,"resume_reason")?;let result_pending=flag(&mut m,"result_pending")?;
+        if !m.is_empty() || !identifier(&task)||!identifier(&attempt)||!matches!(status.as_str(),"ready"|"waiting"|"completed"|"denied"|"failed"|"cancelled"|"outcome_unknown"|"budget_exhausted") || !matches!(behavior.as_str(),"normal"|"fail"|"lose-response") || scope.is_empty()||scope.len()>1024 || position>128 || counters.steps>1_000_000||counters.calls>1_000_000||counters.output>2_000_000||counters.total>4_000_000 || correlations.len()>128 || (!receipt.is_empty()&&!identifier(&receipt)) {return Err("invalid_task_state".into());}
         if (unresolved||status=="waiting")&&binding.is_none(){return Err("missing_binding".into());}
         if let Some(b)=&binding{if b.task!=task||b.attempt!=attempt||b.scope!=scope||b.turn>counters.steps{return Err("task_binding_mismatch".into());}}
+        if !matches!(resume_status.as_str(),""|"ready"|"completed"|"cancelled"|"denied"|"failed"|"budget_exhausted")||(!resume_status.is_empty()&&!unresolved){return Err("invalid_resume_barrier".into());}
+        for b in correlations.values(){if b.task!=task||b.attempt!=attempt||b.scope!=scope||b.turn>counters.steps{return Err("correlation_binding_mismatch".into());}}
+        if let Some(b)=&binding{if !correlations.values().any(|original|original==b){return Err("missing_correlation_binding".into());}}
         ScriptedProvider::parse(&script)?;
-        Ok(Self{task,attempt,status,reason,script,scope,facts,limits,counters,context,position,binding,unresolved,receipt,answer,cancelled,seen,behavior})
+        Ok(Self{task,attempt,status,reason,script,scope,facts,limits,counters,context,position,binding,unresolved,receipt,answer,cancelled,correlations,behavior,resume_status,resume_reason,result_pending})
     }
     pub fn save(&self,dir:&Path)->Result<()>{store::atomic(dir,"task.db",&self.encode())}
     fn stop(&mut self,status:&str,reason:&str){self.status=status.into();self.reason=reason.into();}
@@ -76,6 +87,7 @@ impl Agent {
             if let Some(binding)=state.binding.clone() {
                 if state.receipt==format!("r-{}",binding.invocation) {
                     if !matches!((FixtureTool{dir:dir.to_path_buf()}).lookup(&binding),Ok(Some(_))) {
+                        state.resume_status=state.status.clone();state.resume_reason=state.reason.clone();
                         state.unresolved=true;state.stop("outcome_unknown","receipt_unavailable");
                     }
                 }
@@ -90,13 +102,17 @@ impl Agent {
     }
     fn apply_receipt(&mut self,r:Receipt)->Result<()> {
         if self.state.binding.as_ref()!=Some(&r.binding){return Err("receipt_binding_mismatch".into());}
-        if self.state.receipt!=r.id {
-            let text=r.message();self.state.receipt=r.id;
+        if self.state.result_pending || self.state.receipt!=r.id {
+            let text=r.message();self.state.receipt=r.id;self.state.result_pending=false;
             if model::context_bytes(&self.state.context).saturating_add(text.len() as u64)>self.state.limits.context {self.state.unresolved=false;self.state.stop("budget_exhausted","context");return Ok(());}
             self.state.context.push(Message{role:Role::Tool,text});
         }
         self.state.unresolved=false;
-        if self.state.cancelled{self.state.stop("cancelled","cancel_after_commit");}else{self.state.stop("ready","");}Ok(())
+        let resume_status=std::mem::take(&mut self.state.resume_status);
+        let resume_reason=std::mem::take(&mut self.state.resume_reason);
+        if self.state.cancelled{self.state.stop("cancelled","cancel_after_commit");}
+        else if !resume_status.is_empty(){self.state.stop(&resume_status,&resume_reason);}
+        else{self.state.stop("ready","");}Ok(())
     }
     pub fn lookup(&mut self)->Result<()> {
         if !self.state.unresolved{return Ok(());}
@@ -154,12 +170,26 @@ impl Agent {
                     if size.saturating_add(text.len() as u64)>self.state.limits.context{self.state.stop("budget_exhausted","context");}else{self.state.answer=text.clone();self.state.context.push(Message{role:Role::Assistant,text});self.state.stop("completed","");}
                 },
                 ModelEvent::Tool{call_ref,name,value}=>{
-                    if name!="fixture.record"||self.state.seen.contains(&call_ref){self.state.stop("failed","duplicate_or_unknown_call");break;}
+                    if name!="fixture.record"{self.state.stop("failed","unknown_tool");break;}
+                    let original=self.state.correlations.get(&call_ref).cloned();
+                    if let Some(b)=&original{if b.value!=value||b.scope!=self.state.scope{self.state.stop("failed","binding_conflict");break;}}
                     let call_text=format!("tool={name};call={call_ref};value={value}");
                     if size.saturating_add(call_text.len() as u64)>self.state.limits.context{self.state.stop("budget_exhausted","context");break;}
-                    self.state.context.push(Message{role:Role::Assistant,text:call_text});self.state.seen.push(call_ref);
-                    self.state.binding=Some(Binding{invocation:format!("i-{}",self.state.counters.steps),task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,scope:self.state.scope.clone(),value});
-                    self.dispatch(h)?;
+                    self.state.context.push(Message{role:Role::Assistant,text:call_text});self.state.result_pending=true;
+                    if let Some(binding)=original {
+                        self.state.binding=Some(binding.clone());
+                        // Existing correlation is a receipt lookup, never new authorization or execution.
+                        self.state.unresolved=true;self.state.stop("outcome_unknown","receipt_lookup");self.state.save(&self.dir)?;
+                        match (FixtureTool{dir:self.dir.clone()}).lookup(&binding){
+                            Ok(Some(r))=>self.apply_receipt(r)?,
+                            Ok(None)=>self.state.stop("outcome_unknown","receipt_not_found"),
+                            Err(_)=>self.state.stop("outcome_unknown","receipt_unavailable"),
+                        }
+                    } else {
+                        let binding=Binding{invocation:format!("i-{}",self.state.counters.steps),task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,scope:self.state.scope.clone(),value};
+                        self.state.correlations.insert(call_ref,binding.clone());self.state.binding=Some(binding);
+                        self.dispatch(h)?;
+                    }
                 },
             }
             self.state.save(&self.dir)?;
