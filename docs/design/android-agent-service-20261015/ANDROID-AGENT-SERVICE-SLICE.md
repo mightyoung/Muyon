@@ -79,7 +79,7 @@ minSdk24 不能仅依赖 API26 onBindingDied 或 API28 onNullBinding；使用 AP
 
 ## 6. Service 存储所有权和执行上限
 
-Service bootstrap 从自身 Context 获取 canonical filesDir，Rust 在 `native-agent-service-v1` 下维护私有实验布局；UI 不传路径、不打开运行库。UID/0700/0600、祖先 symlink 检查、strict restore/atomic fsync/rename、原始 NativeStore 单回执所有权保留。普通同 UID 不阻止其他受信 app 组件访问，不能称为 hostile same-UID 沙箱。
+Service 后台 bootstrap 从自身 Context 获取 canonical filesDir，在其下准备专用 `agent-service-root` 0700 父目录，并只把该目录的 canonical 路径作为 private_root 交给 Rust。Rust 唯一维护其下的 `native-agent-service-v1` 私有实验布局；UI 不传路径、不打开运行库。创建与现存目录拒绝规则见 `SERVICE-ROOT-CONTRACT-AMENDMENT.md`：不 chmod 平台 filesDir，不修复异常现存条目，不放宽 Rust 的 UID/0700/0600 或祖先 symlink 检查。strict restore/atomic fsync/rename、原始 NativeStore 单回执所有权保留。普通同 UID 不阻止其他受信 app 组件访问，不能称为 hostile same-UID 沙箱。
 
 Service 控制壳持唯一 RootLease（仅有 Send 文件租约，不含 Rc），初始化后台 worker 完成有界 inventory/恢复读取后才能 Ready；根锁为非阻塞独占，冲突 Busy/RecoveryRequired。该租约覆盖本 Service runtime 的索引、扫描、配额预留和 run mkdir，并保持至全部 worker 真正 join/关闭；控制路径不等待此文件锁。OS 死亡释放锁是待平台验证的恢复前提，不能用连接异常假定它已释放。
 
