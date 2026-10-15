@@ -72,6 +72,13 @@ class AgentServiceClientState(private val expectedBuild: String) {
             if (incoming.meta.revision < old.meta.revision) return UiAgentApply.STALE
             if (incoming.meta.revision == old.meta.revision && old != incoming) return UiAgentApply.CONFLICT
         }
+        if (ticket.kind != UiAgentObservationKind.HISTORICAL && old?.meta?.serviceEpoch == incoming.meta.serviceEpoch) {
+            if (old.phase == UiAgentServicePhase.CLOSED && incoming.phase != UiAgentServicePhase.CLOSED)
+                return UiAgentApply.CONFLICT
+            if (old.phase == UiAgentServicePhase.CLOSING && incoming.phase != UiAgentServicePhase.CLOSING && incoming.phase != UiAgentServicePhase.CLOSED)
+                return UiAgentApply.CONFLICT
+            if (old.run != null && incoming.run == null) return UiAgentApply.CONFLICT
+        }
         if (ticket.kind == UiAgentObservationKind.STATUS &&
             (ticket.expectedIntent == null || incoming.run?.intent != ticket.expectedIntent)) return UiAgentApply.CONFLICT
         if (ticket.kind != UiAgentObservationKind.HISTORICAL && pending && incoming.run?.intent != selectedIntent)

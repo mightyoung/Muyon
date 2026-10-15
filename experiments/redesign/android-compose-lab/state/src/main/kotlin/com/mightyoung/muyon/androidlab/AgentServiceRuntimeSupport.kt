@@ -21,8 +21,26 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
                 val discard = synchronized(lock) { controller = value; retired }
                 if (discard) value.retire()
                 value.awaitSettled()
-                // The app's install callback also checks its platform generation before publication.
-                if (!synchronized(lock) { retired }) installed(value)
+                // Retirement may occur while the initializer waiter returns. Handoff and
+                // the decision to wait for close share the lock with retire(); native work
+                // and listener invocation stay outside it.
+                var retirementSettled = discard
+                while (true) {
+                    val next = synchronized(lock) {
+                        if (retired && !retirementSettled) 1 else {
+                            workerActive = false
+                            if (retired) 0 else 2
+                        }
+                    }
+                    if (next == 1) {
+                        value.awaitSettled()
+                        retirementSettled = true
+                    } else {
+                        // App install also checks its platform generation before publication.
+                        if (next == 2) installed(value)
+                        break
+                    }
+                }
             } catch (_: Exception) {
                 if (!synchronized(lock) { retired }) unavailable()
             } finally { synchronized(lock) { workerActive = false } }
