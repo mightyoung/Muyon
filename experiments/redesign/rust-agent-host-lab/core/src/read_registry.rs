@@ -5,6 +5,7 @@ use muyon_core_agent_lab::{Result,identifier,store};
 use crate::{field,Json,RawRead,ReadHandler};
 pub struct PhysicalReadHandler{dir:PathBuf,file:String,key_argument:String,expected_key:String,fields:Vec<String>,optional_array:Option<(String,String)>}
 impl PhysicalReadHandler{
+ pub fn require_argument(self,_key:&str,_value:Json)->Result<Self>{Err("physical_argument_scope_unsupported".into())}
  pub fn new(dir:&Path,file:&str,key_argument:&str,expected_key:&str,fields:Vec<String>,optional_array:Option<(String,String)>)->Result<Self>{
   store::validate_dir(dir)?;if !identifier(file)||!identifier(key_argument)||expected_key.is_empty()||expected_key.len()>128||fields.is_empty()||fields.len()>16||fields.iter().any(|f|!identifier(f)){return Err("physical_handler_config".into())}
   Ok(Self{dir:dir.into(),file:file.into(),key_argument:key_argument.into(),expected_key:expected_key.into(),fields,optional_array})
