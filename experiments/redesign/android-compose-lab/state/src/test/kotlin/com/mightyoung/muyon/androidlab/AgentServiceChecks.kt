@@ -26,7 +26,7 @@ private class ClientRig {
     }
     fun start(id:String="read_1"):UiAgentStartDecision.Submit = (c.userStart(id,UiAgentVariant.EQUIPMENT) as? UiAgentStartDecision.Submit) ?: error("explicit submit not admitted")
     fun apply(r:UiAgentRun?,revision:Long=2,kind:UiAgentObservationKind=UiAgentObservationKind.CURRENT,phase:UiAgentServicePhase=UiAgentServicePhase.READY):UiAgentApply =
-        c.apply(c.capture(kind) ?: error("observation ticket missing"),snap(r,revision,phase))
+        c.apply((if (kind==UiAgentObservationKind.HISTORICAL) c.captureLookup(r?.intent ?: error("lookup key missing")) else c.capture(kind)) ?: error("observation ticket missing"),snap(r,revision,phase))
 }
 private class ServiceManualExecutor:Executor {
     val jobs=ArrayDeque<Runnable>()
@@ -100,6 +100,8 @@ fun runAgentServiceChecks() {
     cases["known terminal cannot be erased by a later empty current"]={val r=ClientRig();r.ready();r.apply(completed(),3);check(r.apply(null,4)==UiAgentApply.CONFLICT);check(r.c.snapshot?.run==completed())}
     cases["closed service phase cannot reopen on a later revision"]={val r=ClientRig();r.ready();r.apply(null,3,phase=UiAgentServicePhase.CLOSED);check(r.apply(null,4,phase=UiAgentServicePhase.READY)==UiAgentApply.CONFLICT);check(r.c.snapshot?.phase==UiAgentServicePhase.CLOSED)}
     cases["retirement after initialize waiter returns still performs close settlement"]={val work=ServiceManualExecutor();var settled=0;var retired=0;var ready=0;lateinit var b:AgentServiceBootstrap;val obj=object:AgentControllerLifetime{override fun retire(){retired++};override fun awaitSettled(){settled++;if(settled==1)b.retire()}};b=AgentServiceBootstrap(work,{obj},{ready++},{error("not setup failure")});b.start();work.next();check(ready==0 && retired==1 && settled==2)}
+    cases["historical lookup rejects a different original request binding"]={val r=ClientRig();r.ready();val t=r.c.captureLookup(intent("original"))!!;check(r.c.apply(t,snap(completed(intent("wrong")),3))==UiAgentApply.CONFLICT);check(r.c.historical==null)}
+    cases["different historical observation keys may share service revision"]={val r=ClientRig();r.ready();check(r.apply(completed(intent("one")),3,UiAgentObservationKind.HISTORICAL)==UiAgentApply.APPLIED);check(r.apply(completed(intent("two")),3,UiAgentObservationKind.HISTORICAL)==UiAgentApply.APPLIED);check(r.c.historical?.run?.intent==intent("two"))}
     var failures=0
     cases.forEach{(name,test)->try{test();println("PASS B service $name")}catch(e:Throwable){failures++;println("FAIL B service $name: ${e.message}")}}
     check(failures==0){"$failures/${cases.size} B service state checks failed"}

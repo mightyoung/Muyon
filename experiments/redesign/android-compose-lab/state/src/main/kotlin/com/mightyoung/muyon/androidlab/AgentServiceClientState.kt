@@ -61,6 +61,7 @@ class AgentServiceClientState(private val expectedBuild: String) {
         return UiAgentObservationTicket(connection, leaseGeneration, displayGeneration, ref, kind,
             if (kind == UiAgentObservationKind.STATUS) selectedIntent else null)
     }
+    fun captureLookup(expected: UiAgentIntent): UiAgentObservationTicket? = capture(UiAgentObservationKind.HISTORICAL)
     fun apply(ticket: UiAgentObservationTicket, incoming: UiAgentSnapshot): UiAgentApply {
         if (ticket.connection != connection || ticket.leaseGeneration != leaseGeneration ||
             ticket.displayGeneration != displayGeneration || ticket.client != client || transport != UiAgentTransport.CONNECTED)
