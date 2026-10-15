@@ -1,0 +1,172 @@
+name: Plugin contract slice
+
+on:
+  push:
+    branches:
+      - 'review/plugin-contract-slice1-*'
+    paths:
+      - 'experiments/redesign/plugin-contract-lab/**'
+      - 'apps/muyon/lib/platform/plugin_contract/**'
+      - 'apps/muyon/lib/platform/tool_registry.dart'
+      - 'apps/muyon/lib/app/host_tool_registrar.dart'
+      - 'apps/muyon/lib/assistant/agent_dispatch.dart'
+      - 'apps/muyon/lib/assistant/agent_context.dart'
+      - 'apps/muyon/lib/assistant/agent_model_turn.dart'
+      - 'apps/muyon/lib/assistant/personal_agent.dart'
+      - 'apps/muyon/test_plugin_contract/**'
+      - 'packages/muyon_module_api/lib/src/context.dart'
+      - '.github/workflows/plugin-contract-slice.yml'
+      - 'pubspec*'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Actual failing semantic RED, or required full GREEN'
+        type: choice
+        options: [rust-red, dart-red, full]
+        default: full
+
+permissions:
+  contents: read
+
+env:
+  PLUGIN_SUITE: ${{ inputs.suite || (startsWith(github.ref_name, 'review/plugin-contract-slice1-rust-red-') && 'rust-red') || (startsWith(github.ref_name, 'review/plugin-contract-slice1-dart-red-') && 'dart-red') || 'full' }}
+  CARGO_TERM_COLOR: never
+
+jobs:
+  registered-read-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Record exact source and preinstalled tools
+        run: |
+          mkdir -p "$RUNNER_TEMP/plugin-contract-slice-evidence"
+          echo "PLUGIN_EVIDENCE_DIR=$RUNNER_TEMP/plugin-contract-slice-evidence" >> "$GITHUB_ENV"
+          echo "MUYON_PLUGIN_CONTRACT_BIN=$GITHUB_WORKSPACE/experiments/redesign/plugin-contract-lab/core/target/debug/muyon-plugin-contract-lab" >> "$GITHUB_ENV"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/plugin-contract-slice-evidence/source-sha.txt"
+          printf '%s\n' "$PLUGIN_SUITE" | tee "$RUNNER_TEMP/plugin-contract-slice-evidence/suite.txt"
+          rustc --version | tee "$RUNNER_TEMP/plugin-contract-slice-evidence/rustc-version.txt"
+          cargo --version | tee "$RUNNER_TEMP/plugin-contract-slice-evidence/cargo-version.txt"
+          git ls-files -z experiments/redesign/plugin-contract-lab experiments/redesign/core-agent-lab/core apps/muyon/lib apps/muyon/test apps/muyon/test_plugin_contract packages/muyon_module_api/lib packages/muyon_module_api/test .github/workflows/plugin-contract-slice.yml docs/design/PLUGIN-CONTRACT-SLICE1-20261015.md docs/tasks/PLUGIN-CONTRACT-SLICE1-PLAN-20261015.md pubspec.yaml pubspec.lock | xargs -0 sha256sum > "$RUNNER_TEMP/plugin-contract-slice-evidence/source-input-sha256.txt"
+      - name: Independent evidence classifier self checks
+        run: |
+          set -o pipefail
+          python3 -B experiments/redesign/plugin-contract-lab/checks/test_ci_evidence.py 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/classifier-selfchecks.log"
+      - name: Compile all Rust tests without running behavior
+        run: |
+          set -o pipefail
+          cargo test --offline --locked --no-run --manifest-path experiments/redesign/plugin-contract-lab/core/Cargo.toml 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/rust-compile.log"
+      - name: Build required actual executable offline
+        run: |
+          set -o pipefail
+          cargo build --offline --locked --manifest-path experiments/redesign/plugin-contract-lab/core/Cargo.toml --bin muyon-plugin-contract-lab 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/rust-build.log"
+          test -x "$MUYON_PLUGIN_CONTRACT_BIN"
+          sha256sum "$MUYON_PLUGIN_CONTRACT_BIN" | tee "$PLUGIN_EVIDENCE_DIR/binary-sha256.txt"
+      - name: Required Rust behavior
+        if: ${{ env.PLUGIN_SUITE == 'rust-red' || env.PLUGIN_SUITE == 'full' }}
+        run: |
+          set -o pipefail
+          args=()
+          mode=full
+          if [[ "$PLUGIN_SUITE" == rust-red ]]; then
+            mode=red
+            args+=(--test registration atomic_registration_publishes_only_valid_bundle -- --exact --nocapture)
+          fi
+          set +e
+          cargo test --offline --locked --manifest-path experiments/redesign/plugin-contract-lab/core/Cargo.toml "${args[@]}" 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/rust-behavior.log"
+          command_statuses=("${PIPESTATUS[@]}")
+          command_status=${command_statuses[0]}
+          set -e
+          python3 -B experiments/redesign/plugin-contract-lab/checks/ci_evidence.py --language rust --mode "$mode" --log "$PLUGIN_EVIDENCE_DIR/rust-behavior.log" --exit-code "$command_status" --output "$PLUGIN_EVIDENCE_DIR/rust-verdict.json"
+          if (( command_statuses[1] != 0 )); then exit "${command_statuses[1]}"; fi
+          exit "$command_status"
+      - name: Existing Flutter runner setup
+        if: ${{ env.PLUGIN_SUITE != 'rust-red' }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: true
+      - name: Resolve existing Flutter workspace
+        if: ${{ env.PLUGIN_SUITE != 'rust-red' }}
+        run: |
+          set -o pipefail
+          flutter --version | tee "$PLUGIN_EVIDENCE_DIR/flutter-version.txt"
+          flutter pub get 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/pub-get.log"
+      - name: Analyze affected Dart packages
+        if: ${{ env.PLUGIN_SUITE == 'full' }}
+        run: |
+          set -o pipefail
+          (cd apps/muyon && flutter analyze --no-pub) 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/analyze-host.log"
+          (cd packages/muyon_module_api && flutter analyze --no-pub) 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/analyze-module-api.log"
+      - name: Required actual Dart registered reads
+        if: ${{ env.PLUGIN_SUITE != 'rust-red' }}
+        run: |
+          set -o pipefail
+          unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
+          export NO_PROXY=localhost,127.0.0.1,::1
+          test -x "$MUYON_PLUGIN_CONTRACT_BIN"
+          args=(test_plugin_contract/catalog_contract_test.dart test_plugin_contract/read_bridge_test.dart test_plugin_contract/agent_read_port_test.dart)
+          mode=full
+          if [[ "$PLUGIN_SUITE" == dart-red ]]; then
+            mode=red
+            args=(test_plugin_contract/agent_read_port_test.dart --plain-name 'registered read reaches original receipt and reviewed model projection')
+          fi
+          cd apps/muyon
+          set +e
+          flutter test "${args[@]}" --no-pub --reporter expanded --file-reporter "json:$PLUGIN_EVIDENCE_DIR/dart-tests.jsonl" --timeout 45s 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/dart-tests.log"
+          command_statuses=("${PIPESTATUS[@]}")
+          command_status=${command_statuses[0]}
+          set -e
+          python3 -B ../../experiments/redesign/plugin-contract-lab/checks/ci_evidence.py --language dart --mode "$mode" --log "$PLUGIN_EVIDENCE_DIR/dart-tests.jsonl" --exit-code "$command_status" --output "$PLUGIN_EVIDENCE_DIR/dart-verdict.json"
+          if (( command_statuses[1] != 0 )); then exit "${command_statuses[1]}"; fi
+          exit "$command_status"
+      - name: Required existing host regressions
+        if: ${{ env.PLUGIN_SUITE == 'full' }}
+        run: |
+          set -o pipefail
+          unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
+          export NO_PROXY=localhost,127.0.0.1,::1
+          cd apps/muyon
+          set +e
+          flutter test test/tool_registry_test.dart test/agent_dispatch_safety_verification_test.dart test/assistant_authorization_facts_test.dart test/host_tool_registrar_test.dart test/module_registry_test.dart test/module_registry_v2_test.dart --no-pub --reporter expanded --file-reporter "json:$PLUGIN_EVIDENCE_DIR/host-regressions.jsonl" --timeout 120s 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/host-regressions.log"
+          command_statuses=("${PIPESTATUS[@]}")
+          command_status=${command_statuses[0]}
+          set -e
+          python3 -B ../../experiments/redesign/plugin-contract-lab/checks/ci_evidence.py --language dart --mode regressions --log "$PLUGIN_EVIDENCE_DIR/host-regressions.jsonl" --exit-code "$command_status" --output "$PLUGIN_EVIDENCE_DIR/host-regressions-verdict.json"
+          if (( command_statuses[1] != 0 )); then exit "${command_statuses[1]}"; fi
+          exit "$command_status"
+      - name: Required existing Module API contracts
+        if: ${{ env.PLUGIN_SUITE == 'full' }}
+        run: |
+          set -o pipefail
+          unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
+          export NO_PROXY=localhost,127.0.0.1,::1
+          cd packages/muyon_module_api
+          set +e
+          flutter test test/contract_v1_test.dart test/contract_v2_test.dart test/contracts_test.dart --no-pub --reporter expanded --file-reporter "json:$PLUGIN_EVIDENCE_DIR/module-api-regressions.jsonl" --timeout 120s 2>&1 | tee "$PLUGIN_EVIDENCE_DIR/module-api-regressions.log"
+          command_statuses=("${PIPESTATUS[@]}")
+          command_status=${command_statuses[0]}
+          set -e
+          python3 -B ../../experiments/redesign/plugin-contract-lab/checks/ci_evidence.py --language dart --mode regressions --log "$PLUGIN_EVIDENCE_DIR/module-api-regressions.jsonl" --exit-code "$command_status" --output "$PLUGIN_EVIDENCE_DIR/module-api-regressions-verdict.json"
+          if (( command_statuses[1] != 0 )); then exit "${command_statuses[1]}"; fi
+          exit "$command_status"
+      - name: Verify source and executable unchanged
+        if: always()
+        run: |
+          sha256sum --check "$RUNNER_TEMP/plugin-contract-slice-evidence/source-input-sha256.txt" > "$RUNNER_TEMP/plugin-contract-slice-evidence/source-integrity.log"
+          if [[ -f "$RUNNER_TEMP/plugin-contract-slice-evidence/binary-sha256.txt" ]]; then
+            sha256sum --check "$RUNNER_TEMP/plugin-contract-slice-evidence/binary-sha256.txt" > "$RUNNER_TEMP/plugin-contract-slice-evidence/binary-integrity.log"
+          fi
+      - name: Retain complete actual evidence outside Git
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: plugin-contract-slice-${{ github.sha }}-${{ env.PLUGIN_SUITE }}
+          path: ${{ runner.temp }}/plugin-contract-slice-evidence/
+          if-no-files-found: error
+          retention-days: 1
