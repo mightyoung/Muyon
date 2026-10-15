@@ -80,6 +80,7 @@ def main():
     else:
         parsed = json.loads(request.decode('utf-8'), object_pairs_hook=unique)
         response = encode_answer(emitted_answer(parsed))
+    (args.capture_dir / f'emitted-{args.turn}.sse').write_bytes(response)
     sys.stdout.buffer.write(response)
     sys.stdout.buffer.flush()
     if turn.get('hold') == 'after_eof':

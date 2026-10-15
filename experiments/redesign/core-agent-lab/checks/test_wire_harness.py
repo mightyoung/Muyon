@@ -7,7 +7,7 @@ import sys
 from tempfile import TemporaryDirectory
 import unittest
 
-from wire_process import assert_native_pair
+from wire_process import assert_native_pair, wait_rust_ack
 
 LAB = Path(__file__).resolve().parent.parent
 HELPER = LAB / 'fixtures/wire/fake_service.py'
@@ -61,6 +61,39 @@ class WireHarnessTests(unittest.TestCase):
             other = subprocess.run(command, input=json.dumps(changed).encode(), capture_output=True, timeout=10, check=True)
             self.assertNotEqual(result.stdout, other.stdout)
             self.assertIn(b'physical-r2', other.stdout)
+
+    def test_helper_raw_response_matches_input_bytes_and_bad_config_fails(self):
+        with TemporaryDirectory(prefix='wire-helper-raw-') as temporary:
+            captures = Path(temporary)/'capture'
+            command = [sys.executable,'-B',str(HELPER),'--fixture-dir',str(SCENARIOS/'happy'),
+                       '--turn','1','--capture-dir',str(captures)]
+            actual = subprocess.run(command,input=b'{"actual":"request"}',capture_output=True,check=True,timeout=10)
+            self.assertEqual(actual.stdout,(SCENARIOS/'happy/turn-1.sse').read_bytes())
+            self.assertEqual((captures/'emitted-1.sse').read_bytes(),actual.stdout)
+            self.assertEqual((captures/'request-1.json').read_bytes(),b'{"actual":"request"}')
+            invalid = Path(temporary)/'invalid';invalid.mkdir()
+            (invalid/'config.json').write_text('{"format":"core-wire-service-v1","turns":[{"response":"x","oracle":true}]}')
+            command[command.index('--fixture-dir')+1] = str(invalid)
+            command[-1] = str(Path(temporary)/'rejected')
+            rejected = subprocess.run(command,input=b'{}',capture_output=True,timeout=10)
+            self.assertNotEqual(rejected.returncode,0)
+            self.assertEqual(rejected.stdout,b'')
+
+    def test_ack_harness_rejects_helper_flush_and_requires_consumption_marker(self):
+        # Marker-only subprocess tests the checker handshake, not Rust consumption.
+        for marker,valid in [('checkpoint=wire-args',True),('helper-flushed',False),('data: {}',False)]:
+            code = 'import sys; print('+repr(marker)+',flush=True); sys.stdin.readline()'
+            child = subprocess.Popen([sys.executable,'-u','-c',code],stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+            try:
+                if valid:
+                    wait_rust_ack(child,'wire-args',timeout=2)
+                    self.assertIsNone(child.poll())
+                else:
+                    with self.assertRaises(AssertionError):
+                        wait_rust_ack(child,'wire-args',timeout=2)
+            finally:
+                child.kill();child.communicate(timeout=5)
 
 
 if __name__ == '__main__':
