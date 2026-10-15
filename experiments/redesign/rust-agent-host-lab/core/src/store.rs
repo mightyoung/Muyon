@@ -222,7 +222,11 @@ impl NativeStore {
             if snapshot.encoded_len()? > MAX_SNAPSHOT {
                 return Err("native_store_budget".into());
             }
-            store::atomic(&self.dir, "native.db", &snapshot.encode())
+            let encoded = snapshot.encode();
+            // Validate the complete envelope with the exact restore parser,
+            // including depth/node constraints, before publishing any bytes.
+            parse(encoded.as_bytes())?;
+            store::atomic(&self.dir, "native.db", &encoded)
         })();
         match write {
             Ok(()) => {

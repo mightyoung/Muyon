@@ -1036,8 +1036,8 @@ fn native_store_restore_rejects_forged_receipts_and_facts() {
 }
 #[test]
 fn native_store_persist_budget_never_writes_unreadable_snapshot() {
-    assert_structural_store_candidate(1,true);
-    assert_structural_store_candidate(31,false);
+    assert_structural_store_candidate(1, true);
+    assert_structural_store_candidate(31, false);
     let s = session(authority());
     let _ = run(&s);
     let dir = s.borrow().store.dir.clone();
@@ -1160,16 +1160,79 @@ fn cancel_during_handler_retains_raw_receipt_without_projection() {
     );
 }
 
-fn assert_structural_store_candidate(depth:usize,permitted:bool){
+fn assert_structural_store_candidate(depth: usize, permitted: bool) {
     // Fresh store/receipt for each sibling: prior byte-budget poison cannot be
     // the cause of a structural rejection.
-    let session=session(authority());let _=run(&session);let dir=session.borrow().store.dir.clone();drop(session);
-    let mut store=store::NativeStore::open(&dir).unwrap();let first=store.receipts()[0].clone();let mut identity=field(&first,"identity").unwrap().clone();put(&mut identity,"invocation_id",Json::String(format!("i-depth-{depth}")));put(&mut identity,"identity",Json::String(format!("depth-{depth}")));
-    let index=store.begin(identity,field(&first,"binding").unwrap().clone()).unwrap();assert!(store.ensure_healthy().is_ok());
-    let before=std::fs::read(dir.join("native.db")).unwrap();let raw_text=format!("{}null{}","[".repeat(depth),"]".repeat(depth));let raw=muyon_plugin_contract_lab::parse(raw_text.as_bytes()).expect("raw alone is structurally valid");
-    let mut candidate=json(std::str::from_utf8(&before).unwrap());if let Json::Object(root)=&mut candidate{if let Some(Json::Array(receipts))=root.get_mut("receipts"){put(&mut receipts[index],"status",Json::String("succeeded".into()));put(&mut receipts[index],"raw",raw.clone());}}
-    assert!(candidate.encode().len()<65536,"negative is structural, not byte budget");let reparsed=muyon_plugin_contract_lab::parse(candidate.encode().as_bytes());if permitted{assert!(reparsed.is_ok());}else{assert_eq!(reparsed.unwrap_err(),"wire_json_depth");}
-    let result=store.finish(index,raw.clone(),true);
-    if !permitted&&result.is_ok(){drop(store);let error=store::NativeStore::open(&dir).err().expect("original accepted snapshot cannot restore");assert_eq!(error,"wire_json_depth");eprintln!("STORE_DEPTH_RED raw_depth={depth} raw_parse=ok candidate_parse=wire_json_depth finish=ok reopen=wire_json_depth");panic!("STORE_DEPTH_RED: finish must reject an unreadable complete snapshot");}
-    if permitted{result.unwrap();drop(store);let reopened=store::NativeStore::open(&dir).unwrap();assert_eq!(field(&reopened.receipts()[index],"raw").unwrap(),&raw);}else{assert_eq!(result.unwrap_err(),"wire_json_depth");assert_eq!(std::fs::read(dir.join("native.db")).unwrap(),before);assert_eq!(field(&store.receipts()[index],"status").unwrap(),&Json::String("running".into()));assert!(store.ensure_healthy().is_err());drop(store);assert_eq!(store::NativeStore::open(&dir).unwrap().receipt_count(),2);}
+    let session = session(authority());
+    let _ = run(&session);
+    let dir = session.borrow().store.dir.clone();
+    drop(session);
+    let mut store = store::NativeStore::open(&dir).unwrap();
+    let first = store.receipts()[0].clone();
+    let mut identity = field(&first, "identity").unwrap().clone();
+    put(
+        &mut identity,
+        "invocation_id",
+        Json::String(format!("i-depth-{depth}")),
+    );
+    put(
+        &mut identity,
+        "identity",
+        Json::String(format!("depth-{depth}")),
+    );
+    let index = store
+        .begin(identity, field(&first, "binding").unwrap().clone())
+        .unwrap();
+    assert!(store.ensure_healthy().is_ok());
+    let before = std::fs::read(dir.join("native.db")).unwrap();
+    let raw_text = format!("{}null{}", "[".repeat(depth), "]".repeat(depth));
+    let raw = muyon_plugin_contract_lab::parse(raw_text.as_bytes())
+        .expect("raw alone is structurally valid");
+    let mut candidate = json(std::str::from_utf8(&before).unwrap());
+    if let Json::Object(root) = &mut candidate {
+        if let Some(Json::Array(receipts)) = root.get_mut("receipts") {
+            put(
+                &mut receipts[index],
+                "status",
+                Json::String("succeeded".into()),
+            );
+            put(&mut receipts[index], "raw", raw.clone());
+        }
+    }
+    assert!(
+        candidate.encode().len() < 65536,
+        "negative is structural, not byte budget"
+    );
+    let reparsed = muyon_plugin_contract_lab::parse(candidate.encode().as_bytes());
+    if permitted {
+        assert!(reparsed.is_ok());
+    } else {
+        assert_eq!(reparsed.unwrap_err(), "wire_json_depth");
+    }
+    let result = store.finish(index, raw.clone(), true);
+    if !permitted && result.is_ok() {
+        drop(store);
+        let error = store::NativeStore::open(&dir)
+            .err()
+            .expect("original accepted snapshot cannot restore");
+        assert_eq!(error, "wire_json_depth");
+        eprintln!("STORE_DEPTH_RED raw_depth={depth} raw_parse=ok candidate_parse=wire_json_depth finish=ok reopen=wire_json_depth");
+        panic!("STORE_DEPTH_RED: finish must reject an unreadable complete snapshot");
+    }
+    if permitted {
+        result.unwrap();
+        drop(store);
+        let reopened = store::NativeStore::open(&dir).unwrap();
+        assert_eq!(field(&reopened.receipts()[index], "raw").unwrap(), &raw);
+    } else {
+        assert_eq!(result.unwrap_err(), "wire_json_depth");
+        assert_eq!(std::fs::read(dir.join("native.db")).unwrap(), before);
+        assert_eq!(
+            field(&store.receipts()[index], "status").unwrap(),
+            &Json::String("running".into())
+        );
+        assert!(store.ensure_healthy().is_err());
+        drop(store);
+        assert_eq!(store::NativeStore::open(&dir).unwrap().receipt_count(), 2);
+    }
 }

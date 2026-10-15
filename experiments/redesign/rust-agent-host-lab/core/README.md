@@ -19,7 +19,9 @@ the raw read retains the original receipt and prevents projection admission.
 
 The entire `native.db` snapshot is limited to **65,536 UTF-8 JSON bytes**, matching
 its restore parser. The store is deliberately small, not a general business DB.
-All writes use validated transaction candidates. If a raw handler outcome would
+All writes use validated transaction candidates. The complete encoded snapshot
+must pass the same restore parser, including its depth/node limits, before any
+atomic write; validating an isolated raw value is insufficient. If a raw handler outcome would
 exceed this total budget, the old physical and in-memory running receipt remains;
 its outcome is unknown, never promoted to success, exported, or automatically
 retried. Any uncertain write poisons further execution/export through that store.
