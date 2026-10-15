@@ -17,3 +17,4 @@ pub fn unhex(s: &str) -> Result<String> {
 pub fn identifier(s: &str) -> bool { !s.is_empty() && s.len() <= 64 && s.bytes().all(|c| c.is_ascii_alphanumeric() || b"_.-".contains(&c)) }
 pub mod wire_sse;
 pub mod wire_provider;
+pub mod wire_json;
