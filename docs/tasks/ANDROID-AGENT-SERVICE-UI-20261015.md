@@ -153,3 +153,9 @@ Remote command (existing runner Kotlin/JDK; no Android runtime): `bash experimen
 Parent/non-author confirmed remote run `38767513905` at `ef373451` (tree-exact to `e4837d54`): Kotlin compilation exit 0, IPC 12/12 including the new start-refusal cases passed, prior 15 liveness cases passed, and the sole new failure reached `DISPOSAL_UNLINK_FAILURE_REACHED` then the positive assertion `DISPOSAL_RED: second recipient must still be attempted`. It was a 1/16 semantic failure with exit 1, not timeout/setup failure.
 
 The correction attempts every at-most-two unlink outside the registry lock, remembers the first failure and rethrows it only after the remaining detach attempts. No native gone/release/Closed is invented, and repeated disposal still does not duplicate attempts. The Service must run explicit retirement in finally regardless of that platform failure. This correction is **source-only GREEN candidate; local/remote GREEN NOT_RUN at this checkpoint**. No further local compilation was started after the parent's low-space instruction.
+
+## Service settlement pump: source-only refusing checkpoint
+
+Added four deterministic pure policy cases before implementing the Service settlement pump: coalesced requests/no waiting queue, a request arriving from actual waiter's return, rejection/failure recovery, and a latch-blocked waiter that coalesces further requests without overlapping another waiter. This helper schedules only native settlement, never business admission or control. Its implementation deliberately refuses (`request=false`) at this checkpoint.
+
+The four new cases are **NOT_RUN locally** under the low-space instruction; no RED/PASS is claimed. Parent may execute the same pinned remote `run-state-checks.sh` command. Existing disposal-failure correction is separate in `6e459c69`; the new refusing pump is not its GREEN evidence. Actual Service integration will use this helper instead of duplicating untested waiter handoff state.
