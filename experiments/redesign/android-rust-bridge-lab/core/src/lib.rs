@@ -92,13 +92,12 @@ pub fn validate_bundled_contract(
             return Err(BridgeError::InvalidRequestId);
         }
         use muyon_plugin_contract_lab::mappings::{declaration, renamed_equipment, MappingKind};
-        let declared = match request.variant {
+        let declared = mapping_result(match request.variant {
             DiagnosticVariant::Equipment => declaration(MappingKind::Equipment),
             DiagnosticVariant::Research => declaration(MappingKind::Research),
             DiagnosticVariant::Inquiry => declaration(MappingKind::Inquiry),
             DiagnosticVariant::SeededEquipment => renamed_equipment(0x7631),
-        }
-        .map_err(|_| BridgeError::DeclarationRejected)?;
+        })?;
         let (
             namespace,
             (catalog_generation, data_count, operation_count, relation_count, view_count),
@@ -116,6 +115,11 @@ pub fn validate_bundled_contract(
             view_count,
         })
     })
+}
+fn mapping_result(
+    result: muyon_plugin_contract_lab::Result<muyon_plugin_contract_lab::mappings::ReadDeclaration>,
+) -> Result<muyon_plugin_contract_lab::mappings::ReadDeclaration, BridgeError> {
+    result.map_err(|_| BridgeError::InternalFailure)
 }
 type CatalogCounts = (u64, u32, u32, u32, u32);
 fn parse_inspection(reply: &muyon_plugin_contract_lab::Json) -> Result<CatalogCounts, BridgeError> {
@@ -254,6 +258,12 @@ mod tests {
     }
     #[test]
     fn declaration_rejection_is_closed_and_has_valid_sibling() {
+        assert!(mapping_result(declaration(MappingKind::Equipment)).is_ok());
+        assert_eq!(
+            mapping_result(Err("private mapping construction detail".into())).err(),
+            Some(BridgeError::InternalFailure),
+            "MAPPING_FAILURE_RED: unexpected construction failure is internal, not register rejection"
+        );
         assert!(inspect_declaration(declaration(MappingKind::Equipment).unwrap()).is_ok());
         let mut rejected = declaration(MappingKind::Equipment).unwrap();
         put(
