@@ -143,3 +143,8 @@ mod pump_tests {
         control.cancel=false;deadline.start=Instant::now().checked_sub(Duration::from_secs(11)).unwrap();assert_eq!(write_request_step(&mut pipe,b"request",0,8192,&mut control,&deadline).unwrap_err(),"wire_total_timeout");assert_eq!(pipe.calls,1);assert_eq!(control.charged,0);assert_eq!(control.polls,3);
     }
 }
+
+/// Actual native payload encoder. Host must authorize the returned exact bytes.
+pub fn encode_registered_request(_request:&ModelRequest,_history:&Json,_tools:&[crate::model::ToolDefinition],_model:&str)->Result<Vec<u8>> {
+    Err("native_protocol_unsupported".into())
+}

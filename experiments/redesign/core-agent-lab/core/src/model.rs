@@ -77,3 +77,7 @@ pub enum NativeMessage {
     AssistantCall { call_ref:String, name:String, value:String },
     ToolResult { call_ref:String, value:String, receipt:String },
 }
+
+/// Host-bound operation name, reversible wire name and declared input schema.
+#[derive(Clone,Debug)]
+pub struct ToolDefinition { pub name:String, pub wire_name:String, pub parameters:crate::wire_json::Json }

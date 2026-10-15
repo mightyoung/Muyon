@@ -16,6 +16,7 @@ fn nullable_text(value:Option<&Json>)->Result<Option<&str>>{match value{None|Som
 fn freeze(target:&mut String,value:Option<&Json>)->Result<()>{if let Some(s)=nullable_text(value)?{if !s.is_empty(){if !target.is_empty()&&target!=s{return Err("wire_metadata_conflict".into());}if s.len()>64{return Err("wire_metadata_size".into());}*target=s.into();}}Ok(())}
 impl Decoder {
     pub fn new()->Self{Self::default()}
+    pub fn with_tools(_tools:&[crate::model::ToolDefinition])->Result<Self>{Err("native_protocol_unsupported".into())}
     pub fn cancel(&mut self){self.failure=Some("wire_cancelled".into());}
     pub fn feed(&mut self,byte:u8)->Result<Option<ArgumentObservation>>{
         if let Some(e)=&self.failure{return Err(e.clone());}
