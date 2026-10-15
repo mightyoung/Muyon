@@ -22,6 +22,65 @@ bool coreSame(Object? a, Object? b) {
   return a == b;
 }
 
+Object? coreStrictJson(String text) {
+  try {
+    _StrictJson(text).check();
+    return jsonDecode(text);
+  } catch (_) {
+    throw const CoreAgentFailure('host_protocol');
+  }
+}
+
+/// Role, call identity and pairing are exact. JSON inside arguments/tool
+/// content is compared structurally, since the two runtimes serialize object
+/// keys in different orders. The actual received messages are still what the
+/// host constructs, authorizes and sends in its ModelRequest.
+bool coreHistoryMatches(Object? actual, List<Map<String, Object?>> expected) {
+  Object? normalized(Object? input) {
+    if (input is! List) return null;
+    return [for (final message in input) _normalizeMessage(message)];
+  }
+
+  return coreSame(normalized(actual), normalized(expected));
+}
+
+Object? _normalizeMessage(Object? input) {
+  if (input is! Map) return null;
+  final message = Map<Object?, Object?>.from(input);
+  final keys = switch (message['role']) {
+    'user' => {'role', 'content'},
+    'assistant' => {'role', 'content', 'tool_calls'},
+    'tool' => {'role', 'content', 'tool_call_id'},
+    _ => throw const CoreAgentFailure('host_protocol'),
+  };
+  coreKeys(message, keys);
+  if (message['content'] is! String)
+    throw const CoreAgentFailure('host_protocol');
+  if (message['role'] == 'tool') {
+    message['content'] = coreStrictJson(message['content'] as String);
+  }
+  if (message['tool_calls'] case final List calls) {
+    message['tool_calls'] = [for (final call in calls) _normalizeCall(call)];
+  }
+  return message;
+}
+
+Object? _normalizeCall(Object? input) {
+  if (input is! Map) return null;
+  final call = Map<Object?, Object?>.from(input);
+  coreKeys(call, {'id', 'type', 'function'});
+  if (call['function'] case final Map raw) {
+    final function = Map<Object?, Object?>.from(raw);
+    coreKeys(function, {'name', 'arguments'});
+    if (function['arguments'] is! String) {
+      throw const CoreAgentFailure('host_protocol');
+    }
+    function['arguments'] = coreStrictJson(function['arguments'] as String);
+    call['function'] = function;
+  }
+  return call;
+}
+
 void coreKeys(Map value, Set<String> keys) {
   if (value.length != keys.length || !value.keys.every(keys.contains)) {
     throw const CoreAgentFailure('host_protocol');
@@ -98,8 +157,7 @@ Stream<Map<String, Object?>> coreFrames(
       Object? value;
       try {
         final text = utf8.decode(buffer.sublist(4, size + 4));
-        _StrictJson(text).check();
-        value = jsonDecode(text);
+        value = coreStrictJson(text);
       } catch (_) {
         throw const CoreAgentFailure('host_protocol');
       }

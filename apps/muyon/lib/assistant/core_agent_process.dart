@@ -375,7 +375,7 @@ final class _Session {
     if (frame['turn'] != turns + 1 ||
         turns >= 2 ||
         (turns == 1 && projection == null) ||
-        !coreSame(frame['messages'], history) ||
+        !coreHistoryMatches(frame['messages'], history) ||
         !coreSame(frame['tools'], turns == 0 ? [tool] : [])) {
       throw const CoreAgentFailure('callback_mismatch');
     }
@@ -384,7 +384,10 @@ final class _Session {
     ctx.modelTokens[task.id] = modelCancellation;
     final reply = await owner.model.reply(
       task,
-      history,
+      [
+        for (final message in frame['messages'] as List)
+          Map<String, Object?>.from(message as Map),
+      ],
       tool,
       turns,
       modelCancellation,
