@@ -1,3 +1,4 @@
+import 'ontology.dart';
 import 'dart:convert';
 
 import 'references.dart';
@@ -66,6 +67,7 @@ class ToolDescriptor {
     required this.effect,
     Map<String, Object?> parameterSchema = const {},
     Map<String, Object?> resultSchema = const {},
+    Map<String, Sensitivity> resultSensitivity = const {},
     Set<String> contextTypes = const {},
     this.supportsCancel = false,
     this.supportsPause = false,
@@ -81,6 +83,8 @@ class ToolDescriptor {
   final ToolEffect effect;
   final Map<String, Object?> parameterSchema;
   final Map<String, Object?> resultSchema;
+  // Refusing metadata shell until the sensitivity propagation test is RED.
+  final Map<String, Sensitivity> resultSensitivity = const {};
   final Set<String> contextTypes;
   final bool supportsCancel;
   final bool supportsPause;

@@ -10,11 +10,12 @@ class PluginHostSnapshot {
   PluginHostSnapshot({required this.revision, required this.allowed,
     required this.bindingRevision, required this.sourceRevision,
     required this.ruleRevision, required this.scope,
-    required Iterable<ObjectRef> objects}) : objects = List.unmodifiable(objects);
+    required Iterable<ObjectRef> objects, required this.requireCurrent}) : objects = List.unmodifiable(objects);
   final String revision, bindingRevision, sourceRevision, ruleRevision;
   final bool allowed;
   final AssistantScope scope;
   final List<ObjectRef> objects;
+  final void Function() requireCurrent;
 }
 
 /// Host-owned adapter binding. Projection is not permission or a receipt.
@@ -50,6 +51,8 @@ class PluginReadBridge {
   /// Stub source is unknown and therefore conservative. No plugin label is
   /// interpreted as trusted/clean before host metadata is implemented.
   bool requiresSourceFacts(ToolCallRequest request) => true;
+
+  Future<List<String>> discover(ToolCallRequest request) async => [];
 
   Object? projectionFor(String invocationId, String receiptIdentity) => null;
   Future<void> close() => process.close();

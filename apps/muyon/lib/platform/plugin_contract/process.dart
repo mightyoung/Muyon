@@ -7,5 +7,10 @@ class PluginContractProcess {
   final Duration deadline;
   Future<Map<String, Object?>> request(Map<String, Object?> request) async =>
       const {'ok': false, 'code': 'unsupported'};
+  Future<void> start() async => throw UnsupportedError('plugin process not implemented');
+  Future<int>? get exitCode => null;
+  int? get pid => null;
+  int get pendingCount => 0;
+  bool get isClosed => false;
   Future<void> close() async {}
 }
