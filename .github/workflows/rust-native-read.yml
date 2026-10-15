@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
     inputs:
       suite:
-        description: 'Reachable compiling RED; required command still fails CI'
+        description: 'Full required Rust gates, or an immutable reachable RED'
         type: choice
-        options: [red, core-red, protocol-red, plugin-red, host-red]
-        default: red
+        options: [full, red, core-red, protocol-red, plugin-red, host-red]
+        default: full
 
 permissions:
   contents: read
@@ -23,13 +23,28 @@ env:
   CARGO_TERM_COLOR: never
 
 jobs:
+  select:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
+      red: ${{ steps.mode.outputs.red }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - id: mode
+        env:
+          REQUESTED_SUITE: ${{ inputs.suite }}
+          SOURCE_REF: ${{ github.ref_name }}
+        run: python3 -B experiments/redesign/rust-agent-host-lab/checks/select.py --suite "$REQUESTED_SUITE" --ref "$SOURCE_REF" --output "$GITHUB_OUTPUT"
   compiling-red:
+    needs: select
+    if: needs.select.outputs.mode == 'red'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        suite: ${{ fromJSON(inputs.suite == 'host-red' && '["host-red"]' || inputs.suite == 'core-red' && '["core-red"]' || inputs.suite == 'protocol-red' && '["protocol-red"]' || inputs.suite == 'plugin-red' && '["plugin-red"]' || inputs.suite == 'red' && '["core-red","protocol-red","plugin-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-host-red-') && '["host-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-core-red-') && '["core-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-protocol-red-') && '["protocol-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-plugin-red-') && '["plugin-red"]' || '["core-red","protocol-red","plugin-red"]') }}
+        suite: ${{ fromJSON(needs.select.outputs.red) }}
     defaults:
       run:
         shell: bash
@@ -78,5 +93,54 @@ jobs:
         with:
           name: rust-native-${{ github.sha }}-${{ matrix.suite }}
           path: ${{ runner.temp }}/rust-native-evidence/
+          retention-days: 1
+          if-no-files-found: error
+
+  required-full:
+    needs: select
+    if: needs.select.outputs.mode == 'full'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [core, plugin, host]
+    env:
+      CARGO_TARGET_DIR: ${{ runner.temp }}/rust-native-target-${{ matrix.component }}
+      EVIDENCE_DIR: ${{ runner.temp }}/rust-native-full-${{ matrix.component }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Freeze exact source tools and fixture inventory
+        run: |
+          mkdir -p "$EVIDENCE_DIR"
+          git rev-parse HEAD | tee "$EVIDENCE_DIR/source-sha.txt"
+          rustc --version | tee "$EVIDENCE_DIR/rustc-version.txt"
+          cargo --version | tee "$EVIDENCE_DIR/cargo-version.txt"
+          python3 --version | tee "$EVIDENCE_DIR/python-version.txt"
+          cp experiments/redesign/rust-agent-host-lab/checks/cases.json "$EVIDENCE_DIR/frozen-inputs.json"
+          git ls-files -z experiments/redesign/core-agent-lab experiments/redesign/plugin-contract-lab experiments/redesign/rust-agent-host-lab .github/workflows/rust-native-read.yml | xargs -0 sha256sum > "$EVIDENCE_DIR/source-fixture-sha256.txt"
+      - name: Independent classifier controls
+        run: |
+          set -o pipefail
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/test_full.py 2>&1 | tee "$EVIDENCE_DIR/full-classifier-controls.log"
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/test_red.py 2>&1 | tee "$EVIDENCE_DIR/red-classifier-controls.log"
+      - name: Required actual compiled full behavior and component gates
+        run: bash experiments/redesign/rust-agent-host-lab/checks/full.sh '${{ matrix.component }}'
+      - name: Verify source fixtures and every baseline executable unchanged
+        if: always()
+        run: |
+          sha256sum --check "$EVIDENCE_DIR/source-fixture-sha256.txt" > "$EVIDENCE_DIR/source-integrity.log"
+          if [[ -f "$EVIDENCE_DIR/binary-sha256.txt" ]]; then
+            sha256sum --check "$EVIDENCE_DIR/binary-sha256.txt" > "$EVIDENCE_DIR/binary-integrity.log"
+          fi
+      - name: Retain exact full raw evidence outside Git
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rust-native-full-${{ github.sha }}-${{ matrix.component }}
+          path: ${{ runner.temp }}/rust-native-full-${{ matrix.component }}/
           retention-days: 1
           if-no-files-found: error
