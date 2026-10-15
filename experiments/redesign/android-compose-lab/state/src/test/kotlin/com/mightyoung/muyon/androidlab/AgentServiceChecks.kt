@@ -35,6 +35,15 @@ private class ServiceManualExecutor:Executor {
 }
 private class Lifetime:AgentControllerLifetime { var retired=0; var settled=0; override fun retire(){retired++}; override fun awaitSettled(){settled++} }
 
+private class RetainedLifetime:AgentRetainedLifetime {
+    var retires=0;var waits=0;var cleanupCalls=0
+    var actualClosed=false;var cleaned=false
+    var onRetire:()->Unit={};var onAwait:()->Unit={}
+    override val cleanupComplete get()=actualClosed && cleaned
+    override fun retire(){retires++;onRetire()}
+    override fun awaitSettled(){waits++;onAwait()}
+}
+
 fun runAgentServiceChecks() {
     val cases=linkedMapOf<String,()->Unit>()
     cases["precontroller initializing has no native identity or admission"]={
@@ -152,6 +161,73 @@ fun runAgentServiceChecks() {
         try{check(entered.await(5,TimeUnit.SECONDS));accepted=pump.request()}finally{finish.countDown()}
         check(done.await(5,TimeUnit.SECONDS));check(!accepted || settled.get()==2){"PUMP_LISTENER_RED: accepted request must survive listener failure"}
         check(pump.request());work.next();check(settled.get()==3)
+    }
+    cases["retirement holder reserves one construction before any object exists"]={
+        val holder=AgentControllerRetention();val first=holder.reserve() ?: error("initial reservation missing")
+        check(holder.retained()==null)
+        check(holder.reserve()==null){"RETENTION_RESERVATION_RED: second construction must be denied"}
+        check(holder.failedBeforePublish(first));check(holder.reserve()!=null)
+    }
+    cases["retirement holder publishes strong object before first await"]={
+        val holder=AgentControllerRetention();val lease=holder.reserve()!!;val obj=RetainedLifetime()
+        check(holder.publish(lease,obj));obj.onAwait={println("RETENTION_PUBLICATION_REACHED");check(holder.retained()===obj){"RETENTION_PUBLICATION_RED: first await must have process owner"}}
+        obj.awaitSettled();check(obj.waits==1 && obj.cleanupCalls==0)
+    }
+    cases["throwing retirement retains original object and denies replacement"]={
+        val holder=AgentControllerRetention();val lease=holder.reserve()!!;val obj=RetainedLifetime();check(holder.publish(lease,obj))
+        obj.onRetire={throw IllegalStateException("injected retire failure")};check(runCatching{obj.retire()}.isFailure)
+        println("RETENTION_RETIRE_FAILURE_REACHED");check(obj.retires==1 && obj.waits==0 && !obj.cleanupComplete)
+        check(holder.retained()===obj){"RETENTION_RETIRE_RED: native failure cannot abandon original object"}
+        check(holder.reserve()==null && !holder.releaseCleaned(lease,obj));check(obj.cleanupCalls==0)
+    }
+    for((label,error) in listOf("exception" to IllegalStateException("injected await failure"),"linkage" to UnsatisfiedLinkError("injected await linkage"))) {
+        cases["throwing await $label retains original object without retry"]={
+            val holder=AgentControllerRetention();val lease=holder.reserve()!!;val obj=RetainedLifetime();check(holder.publish(lease,obj))
+            obj.onAwait={throw error};check(runCatching{obj.awaitSettled()}.isFailure)
+            println("RETENTION_AWAIT_${label.uppercase()}_REACHED");check(obj.waits==1 && obj.cleanupCalls==0 && !obj.cleanupComplete)
+            check(holder.retained()===obj){"RETENTION_AWAIT_RED: failed await must retain original object"}
+            check(holder.reserve()==null && !holder.releaseCleaned(lease,obj));check(obj.waits==1)
+        }
+    }
+    cases["nonclosed settlement retains owner until later actual closed cleanup"]={
+        val holder=AgentControllerRetention();val lease=holder.reserve()!!;val obj=RetainedLifetime();check(holder.publish(lease,obj))
+        obj.awaitSettled();check(!obj.actualClosed && !obj.cleanupComplete)
+        check(holder.retained()===obj){"RETENTION_NONCLOSED_RED: a returned waiter alone is not Closed"}
+        check(!holder.releaseCleaned(lease,obj) && holder.reserve()==null)
+        obj.onAwait={obj.actualClosed=true;obj.cleanupCalls++;obj.cleaned=true};obj.awaitSettled()
+        check(holder.releaseCleaned(lease,obj) && holder.retained()==null);check(obj.waits==2 && obj.cleanupCalls==1)
+    }
+    cases["closed with throwing handle cleanup retains owner until successful cleanup"]={
+        val holder=AgentControllerRetention();val lease=holder.reserve()!!;val obj=RetainedLifetime();check(holder.publish(lease,obj))
+        obj.onAwait={obj.actualClosed=true;obj.cleanupCalls++;throw IllegalStateException("injected handle cleanup failure")}
+        check(runCatching{obj.awaitSettled()}.isFailure);println("RETENTION_CLEANUP_FAILURE_REACHED")
+        check(obj.actualClosed && !obj.cleanupComplete && obj.cleanupCalls==1)
+        check(holder.retained()===obj){"RETENTION_CLEANUP_RED: Closed without successful cleanup must remain retained"}
+        check(!holder.releaseCleaned(lease,obj) && holder.reserve()==null)
+        obj.onAwait={obj.cleanupCalls++;obj.cleaned=true};obj.awaitSettled();check(holder.releaseCleaned(lease,obj));check(holder.retained()==null && obj.cleanupCalls==2)
+    }
+    cases["stale retirement token cannot clear replacement after genuine cleanup"]={
+        val holder=AgentControllerRetention();val a=holder.reserve()!!;val old=RetainedLifetime();check(holder.publish(a,old))
+        old.actualClosed=true;old.cleaned=true;check(holder.releaseCleaned(a,old)){"RETENTION_CLEAN_RELEASE_RED: proven cleanup must release once"}
+        check(!holder.releaseCleaned(a,old));val b=holder.reserve()!!;val fresh=RetainedLifetime();check(holder.publish(b,fresh))
+        check(!holder.releaseCleaned(a,old) && !holder.failedBeforePublish(a));check(holder.retained()===fresh && holder.reserve()==null)
+        fresh.actualClosed=true;fresh.cleaned=true;check(!holder.releaseCleaned(a,fresh));check(holder.retained()===fresh);check(holder.releaseCleaned(b,fresh))
+    }
+    cases["definite preobject failure releases only its unpublished reservation"]={
+        val holder=AgentControllerRetention();val a=holder.reserve()!!
+        check(runCatching{error("injected before object creation")}.isFailure)
+        check(holder.failedBeforePublish(a)){"RETENTION_PREOBJECT_RED: definite preobject failure must release reservation"}
+        val b=holder.reserve()!!;val fresh=RetainedLifetime();check(holder.publish(b,fresh))
+        check(!holder.failedBeforePublish(a) && !holder.failedBeforePublish(b));check(holder.retained()===fresh && holder.reserve()==null)
+    }
+    cases["destroyed service late constructor remains owned through explicit retirement"]={
+        val holder=AgentControllerRetention();val lease=holder.reserve()!!;val obj=RetainedLifetime();val work=ServiceManualExecutor();var installed=0
+        val bootstrap=AgentServiceBootstrap(work,{check(holder.publish(lease,obj));obj},{installed++},{error("unexpected constructor failure")})
+        bootstrap.start();bootstrap.retire();work.next()
+        check(installed==0 && obj.retires==1 && obj.waits==1 && !obj.cleanupComplete)
+        check(holder.retained()===obj){"RETENTION_LATE_CONSTRUCTOR_RED: destroyed Service cannot abandon late controller"}
+        check(holder.reserve()==null)
+        obj.actualClosed=true;obj.cleaned=true;check(holder.releaseCleaned(lease,obj));check(holder.reserve()!=null)
     }
     var failures=0
     cases.forEach{(name,test)->try{test();println("PASS B service $name")}catch(e:Throwable){failures++;println("FAIL B service $name: ${e.message}")}}
