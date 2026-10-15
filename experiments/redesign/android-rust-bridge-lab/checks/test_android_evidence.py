@@ -1,5 +1,7 @@
 """Synthetic ELF/provenance controls; no NDK/Android result is fabricated."""
 import copy
+import contextlib
+import io
 import hashlib
 import json
 import os
@@ -134,6 +136,19 @@ class PackageControls(unittest.TestCase):
                 self.assertEqual(set(package.apk_entries(apk, inputs)), set(contents))
                 bad=copy.deepcopy(inputs);bad['rust_libraries']['x86_64']['sha256']='0'*64
                 with self.assertRaisesRegex(RuntimeError,'apk_native_hash'):package.apk_entries(apk,bad)
+                build(True)
+                with zipfile.ZipFile(apk, 'a') as archive:
+                    archive.writestr('lib/arm64-v8a/unexpected.so', b'fixture extra native')
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    with self.assertRaisesRegex(RuntimeError, '^apk_exact_native_entries$'):
+                        package.apk_entries(apk, inputs)
+                observed = json.loads(output.getvalue().removeprefix('ANDROID_BRIDGE_APK_NATIVE_INVENTORY '))
+                self.assertEqual(observed['apk_sha256'], package.sha(apk))
+                self.assertEqual(observed['count'], 5)
+                self.assertEqual(len(observed['expected']), 4)
+                self.assertIn('lib/arm64-v8a/unexpected.so', observed['observed'])
+                self.assertTrue(observed['bounded'])
                 build(False)
                 with self.assertRaisesRegex(RuntimeError,'apk_native_zip_alignment'):package.apk_entries(apk,inputs)
 
