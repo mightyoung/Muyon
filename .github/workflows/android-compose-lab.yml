@@ -97,7 +97,8 @@ jobs:
           set +e
           "$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" \
             --no-daemon --stacktrace --console=plain -p "$LAB_DIRECTORY" \
-            :state:check :app:assembleDebug :app:assembleDebugAndroidTest 2>&1 |
+            :state:check :app:assembleDebug :app:assembleDebugAndroidTest \
+            :app:compileDebugUnitTestKotlin :app:lintDebug 2>&1 |
             tee "$LOG_DIRECTORY/required-build.log"
           gradle_exit=${PIPESTATUS[0]}
           set -e
@@ -121,7 +122,7 @@ jobs:
             printf 'gradle_exit=NOT_RUN\nrequired_exit=NOT_RUN\n' > "$LOG_DIRECTORY/required-exit.txt"
           fi
           printf '%s\n' 'Android installation/runtime=NOT_RUN' 'Compose rendering=NOT_RUN' \
-            'Rust integration=NOT_CONNECTED' 'WorkBuddy pixel fidelity=UNVERIFIED' \
+            'Rust integration runtime=NOT_RUN' 'WorkBuddy pixel fidelity=UNVERIFIED' \
             > "$LOG_DIRECTORY/unexecuted-boundaries.txt"
       - name: Upload compilation evidence only
         if: always()
