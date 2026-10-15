@@ -37,3 +37,19 @@ fn registered_protocol_advertises_current_subset_and_preserves_history(){
  assert_eq!(encode_registered_request(&r,&Json::Array(rows),&t,"offline-native").unwrap_err(),"wire_unpaired_history");
  let mut unknown=t.clone();unknown.remove(0);assert_eq!(encode_registered_request(&r,&full,&unknown,"offline-native").unwrap_err(),"wire_history_call");
 }
+
+#[test]
+fn registered_protocol_current_decoder_rejects_known_but_unadvertised_tool(){
+ let visible=tools();let mut catalog=visible.clone();
+ catalog.push(ToolDefinition{name:"hidden.read".into(),wire_name:"t_99".into(),parameters:visible[0].parameters.clone()});
+ let payload=wire_json::parse(&encode_registered_request(&request(),&history(),&catalog,"offline-native").unwrap()).unwrap();
+ assert_eq!(payload.object().unwrap()["tools"].array().unwrap().len(),1);
+ let mut decoder=Decoder::with_tools(&visible).unwrap();let mut failure=None;
+ for byte in stream("t_99",r#"{"station_key":"s1"}"#,true){if let Err(error)=decoder.feed(byte){failure=Some(error);break;}}
+ assert_eq!(failure.as_deref(),Some("wire_unknown_tool"));
+ assert_eq!(decoder.finish().unwrap_err(),"wire_unknown_tool");
+ // The exact same declared operation is decodable when it is actually advertised.
+ let mut sibling=Decoder::with_tools(&catalog[1..]).unwrap();
+ for byte in stream("t_99",r#"{"station_key":"s1"}"#,true){sibling.feed(byte).unwrap();}
+ assert_eq!(sibling.finish().unwrap().event,ModelEvent::HostTool{call_ref:"c1".into(),name:"hidden.read".into(),arguments:object([("station_key",string("s1"))])});
+}
