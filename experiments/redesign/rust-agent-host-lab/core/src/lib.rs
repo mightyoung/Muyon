@@ -652,3 +652,5 @@ pub mod contract_transport;
 pub mod service_controller;
 pub mod service_runtime;
 pub mod service_types;
+
+pub mod service_root;
