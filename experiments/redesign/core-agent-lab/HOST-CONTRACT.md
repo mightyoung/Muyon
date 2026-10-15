@@ -213,7 +213,16 @@ rejected as model_failed before any registry prepare/invoke. These error reasons
 are independent test oracles, not inferred from implementation output.
 After cancel/close during admitted invoke, drain only its matching result until
 the existing bounded deadline; retain it if accepted, otherwise outcome_unknown.
-No new callback may be started. Start the process timer before its first frame;
+No new callback may be started. Nonblocking output also polls input controls at
+most every20ms. If cancel/close arrives before any output-frame byte is written,
+a terminal can be emitted normally. If a frame was partially emitted under
+backpressure, do not append a terminal into it: persist the truthful host journal
+control state and exit nonzero with only fixed host_partial_output diagnostics.
+The host uses its own known cancel/close to map the product task; an admitted
+invocation without matching result still has unknown outcome and any original
+registry receipt remains host-local. Without such a known control, truncated
+output remains host_protocol. This transport evidence is currently Linux-only.
+Start the process timer before its first frame;
 reject an existing/reused host attempt state directory rather than reopen/resend.
 
 ## Required offline evidence
