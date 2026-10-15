@@ -158,6 +158,22 @@ fn service_controller_observer_correlates_all_builtin_payloads() {
         assert_eq!(evidence.payloads.len(), 2);
         assert_eq!(evidence.receipts.len(), 1);
         let receipt = &evidence.receipts[0];
+        assert_eq!(
+            field(receipt, "status").unwrap().string().unwrap(),
+            "succeeded"
+        );
+        let original_binding = field(receipt, "binding").unwrap();
+        assert_eq!(
+            field(original_binding, "task").unwrap().string().unwrap(),
+            evidence.task
+        );
+        assert_eq!(
+            field(original_binding, "attempt")
+                .unwrap()
+                .string()
+                .unwrap(),
+            evidence.attempt
+        );
         let receipt_id = field(field(receipt, "identity").unwrap(), "identity")
             .unwrap()
             .string()
