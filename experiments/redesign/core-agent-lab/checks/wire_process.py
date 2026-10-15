@@ -87,6 +87,35 @@ EVIDENCE = None
 WIRE_KEYS = ['wire_sent_bytes', 'wire_received_bytes', 'wire_total_bytes']
 
 
+def wire_status_diagnostic(directory, actual):
+    """Bounded metadata only: no payloads, paths, config strings or environment."""
+    def number(value):
+        text = str(value)
+        return text if text.isascii() and text.isdecimal() and len(text) <= 20 else '<invalid>'
+
+    def code(value):
+        text = str(value)
+        return text if 0 < len(text) <= 64 and all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_' for c in text) else '<other>'
+
+    result = {key: code(actual.get(key, '')) for key in ['status', 'reason']}
+    for key in ['steps', 'model_calls', 'provider_position', 'wire_sent_bytes',
+                'wire_received_bytes', 'wire_total_bytes', 'context_bytes',
+                'output_bytes', 'total_units']:
+        result[key] = number(actual.get(key, '<missing>'))
+    try:
+        journal = c1_readers.journal(directory)
+        config = json.loads(bytes.fromhex(journal['wire_config_hex']))
+        result['wire_limits'] = {key: number(config.get(key, '<missing>'))
+                                 for key in ['chunk', 'idle_ms', 'total_ms', 'max_total']}
+        captures = directory / 'wire-capture'
+        for kind, pattern in [('requests', 'request-*.json'), ('emitted', 'emitted-*.sse')]:
+            files = list(captures.glob(pattern))[:512]
+            result[kind] = {'count': len(files), 'bytes': sum(path.stat().st_size for path in files)}
+    except (OSError, ValueError, KeyError, TypeError, AssertionError):
+        result['metadata'] = 'unavailable'
+    return 'WIRE_STATUS_DIAGNOSTIC ' + json.dumps(result, sort_keys=True)
+
+
 def wait_rust_ack(child, boundary, timeout=20):
     selector = selectors.DefaultSelector()
     try:
@@ -226,7 +255,7 @@ class WireProcessTests(unittest.TestCase):
         return physical
 
     def assert_happy(self, directory, actual, value='wire-value', call_id='call_native_1', turns=2):
-        self.assertEqual(actual['status'], 'completed')
+        self.assertEqual(actual['status'], 'completed', wire_status_diagnostic(directory, actual))
         physical = self.assert_effects(directory, 1)
         receipt = physical['rows'][0][7]
         self.assertEqual(bytes.fromhex(physical['value']).decode(), value)
