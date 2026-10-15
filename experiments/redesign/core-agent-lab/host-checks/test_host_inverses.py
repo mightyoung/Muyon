@@ -5,7 +5,7 @@ import subprocess
 from tempfile import TemporaryDirectory
 import unittest
 
-from host_inverses import classify, copy_sources
+from host_inverses import classify, copy_sources, diagnostic_excerpt, events
 
 
 def observation(*, failure=True, marker='HOST_BOUNDARY', is_failure=True):
@@ -20,6 +20,24 @@ def observation(*, failure=True, marker='HOST_BOUNDARY', is_failure=True):
 
 
 class InverseRunnerTests(unittest.TestCase):
+    def test_reporter_events_read_exact_json_and_reject_malformed_files(self):
+        with TemporaryDirectory(prefix='host-reporter-check-') as temporary:
+            path = Path(temporary) / 'report.jsonl'
+            self.assertEqual(events(path), [])
+            path.write_text(json.dumps({'type': 'done', 'success': True}) + '\n')
+            self.assertEqual(events(path), [{'type': 'done', 'success': True}])
+            path.write_text('compiler diagnostic, not reporter JSON\n')
+            self.assertEqual(events(path), [])
+
+    def test_failed_baseline_diagnostic_is_bounded_and_redacts_synthetic_canaries(self):
+        text = 'setup failed sk-HOST_AUTH_CANARY_460a HOST_PROFILE_95c1 PRIVATE_HOST_NOTES_c391\n' + ('x' * 500 + '\n') * 100
+        excerpt = diagnostic_excerpt(text)
+        self.assertLessEqual(len(excerpt), 8000)
+        self.assertIn('setup failed', excerpt)
+        self.assertNotIn('sk-HOST_AUTH_CANARY_460a', excerpt)
+        self.assertNotIn('HOST_PROFILE_95c1', excerpt)
+        self.assertNotIn('PRIVATE_HOST_NOTES_c391', excerpt)
+
     def test_only_compiled_single_target_matcher_failure_is_accepted(self):
         self.assertTrue(classify(observation(), 1, 'exact target', 'HOST_BOUNDARY')['accepted'])
         cases = [

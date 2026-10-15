@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -55,6 +56,17 @@ def events(path):
         return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
     except (ValueError, OSError):
         return []
+
+
+def diagnostic_excerpt(text):
+    lines = text.splitlines()
+    selected = lines if len(lines) <= 50 else lines[:30] + ['... bounded diagnostic excerpt ...'] + lines[-20:]
+    excerpt = '\n'.join(selected)[:8000]
+    excerpt = re.sub(r'sk-[A-Za-z0-9._-]+', '<synthetic-secret-redacted>', excerpt)
+    excerpt = re.sub(r'HOST_(?:AUTH_CANARY|CREDENTIAL_REF|PROFILE|ENDPOINT)_[A-Za-z0-9_-]+',
+                     '<synthetic-profile-redacted>', excerpt)
+    excerpt = re.sub(r'PRIVATE_HOST_[A-Za-z0-9_-]+', '<synthetic-business-redacted>', excerpt)
+    return excerpt.replace('http://127.0.0.1:9/v1/chat/completions', '<synthetic-endpoint-redacted>')[:8000]
 
 
 def classify(rows, returncode, target, marker=None):
@@ -139,9 +151,14 @@ def run_oracle(work, binary, flutter, evidence, label, mutation=None):
     except subprocess.TimeoutExpired as error:
         output = error.stdout or b''
         log.write_bytes(output.encode() if isinstance(output, str) else output)
+        print(label + ': runner_timeout; complete raw output retained in ' + str(log), flush=True)
+        print(diagnostic_excerpt(output if isinstance(output, str) else output.decode(errors='replace')), flush=True)
         return dict(record, compiled=False, accepted=False, reason='runner_timeout')
     log.write_text(run.stdout)
     verdict = classify(events(machine), run.returncode, target, mutation['marker'] if mutation else None)
+    if not verdict['accepted']:
+        print(label + ': ' + json.dumps(dict(returncode=run.returncode, **verdict)), flush=True)
+        print(diagnostic_excerpt(run.stdout), flush=True)
     return dict(record, returncode=run.returncode, **verdict)
 
 
