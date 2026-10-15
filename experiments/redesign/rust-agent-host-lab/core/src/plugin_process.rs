@@ -6,9 +6,10 @@ unsafe extern "C" { fn fcntl(fd:i32,cmd:i32,...)->i32; }
 fn nonblock(fd:i32)->Result<()> {let flags=unsafe{fcntl(fd,3)};if flags<0||unsafe{fcntl(fd,4,flags|2048)}<0{return Err("plugin_pipe_flags".into())}Ok(())}
 pub struct PluginProcess {child:Child,input:Option<ChildStdin>,output:ChildStdout,closed:bool,timeout:Duration}
 impl PluginProcess {
- pub fn spawn(binary:&Path,timeout:Duration)->Result<Self>{
+ pub fn spawn(binary:&Path,timeout:Duration)->Result<Self>{Self::spawn_with_args(binary,&[],timeout)}
+ pub fn spawn_with_args(binary:&Path,args:&[&str],timeout:Duration)->Result<Self>{
   if !binary.is_absolute()||timeout.is_zero()||timeout>Duration::from_secs(5){return Err("plugin_config".into())}
-  let mut child=Command::new(binary).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).env_clear().spawn().map_err(|_|"plugin_spawn")?;
+  let mut child=Command::new(binary).args(args).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).env_clear().spawn().map_err(|_|"plugin_spawn")?;
   let input=child.stdin.take().ok_or("plugin_stdin")?;let output=child.stdout.take().ok_or("plugin_stdout")?;
   if nonblock(input.as_raw_fd()).and_then(|_|nonblock(output.as_raw_fd())).is_err(){let _=child.kill();let _=child.wait();return Err("plugin_pipe_flags".into())}
   Ok(Self{child,input:Some(input),output,closed:false,timeout})
