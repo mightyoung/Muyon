@@ -37,13 +37,13 @@ F06有46行组件名；F07混有API/路由，不能按路径数计算页面。F1
 
 ## Flutter宿主与Compose实验的实际落点
 
-当前产品源码位于 `apps/muyon/`，Android宿主不是独立Compose应用。只读盘点的 `/workspace/Muyon` 是 `work@cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003`；后续活动integration会由其owner继续推进，不能把本报告当作冻结writer。
+产品源码位于 `apps/muyon/`，Android宿主不是独立Compose应用。初次历史只读盘点的 `/workspace/Muyon` 是 `work@cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003`；后续活动integration会由其owner继续推进，不能把本报告当作冻结writer。
 
 | 源码位置 | 当前职责/页面 | 边界 |
 |---|---|---|
 | apps/muyon/android/app/src/main/kotlin/com/mightyoung/muyon/MainActivity.kt | FlutterActivity、系统凭据MethodChannel/AndroidKeyStore适配 | 不是Kotlin页面；不因视觉参考改凭据行为 |
 | apps/muyon/android/app/build.gradle.kts、AndroidManifest.xml | com.mightyoung.muyon、Flutter Gradle、Java/Kotlin17、adjustResize、Muyon名称 | 没有独立Compose app装配 |
-| apps/muyon/lib/app/app_shell.dart、screens/platform_shell*.dart | 工作台/助手/资料/我的；窄屏底栏、宽屏侧栏和可选侧面板 | 现有Flutter页面，不是WorkBuddy已还原页面 |
+| apps/muyon/lib/app/app_shell.dart、screens/platform_shell*.dart | 初次cc7c8d盘点为工作台/助手/资料/我的；3836149基线已为助手/任务/资料/设置，见追加分片 | Flutter页面历史版本须区分，不是WorkBuddy已还原页面 |
 | screens/assistant_page.dart、execution_panel.dart、chat/ | 助手、执行卡片、对话入口/目录/线程/消息泡泡 | 绑定原有业务与真实授权状态 |
 | screens/其它文件 | MemoryPage、DevicesPage、McpServersPage、DataStoragePage、DataFlowPage、KnowledgePreview、ExperienceSection、DreamSection | 源码存在不代表Android逐页已验 |
 | packages/inquiry_module、research_module、prototype_module | 询价/报价/比较/规格/项目/目录/AI审阅/交换、阅读/关系/写作、原型页面等 | 保留业务合同，不因外观擅自改功能 |
@@ -110,11 +110,13 @@ integration盘点含18个Kotlin文件（含宿主、测试和探针）。Muyon�
 
 以下路径相对仓库根。分片是后续实施边界，**本轮已完成的是证据/映射文档，不是这些产品分片的实现**。Flutter路径是现有产品接触点，Compose路径是未来原生实验接触点，二者不暗示本轮改变技术路线。各片完成视觉实现前均需对应真实原图。
 
+本追加以主线程指定产品基线 `3836149416020a0ac58f9e7ca788c20e66688e0e` 的源码为准：壳内页面为助手/任务/资料/设置，`taskHub()`承接任务入口；初次盘点 `/workspace/Muyon@cc7c8d14...` 的工作台/助手/资料/我的四入口仅属旧版本记录。不能混用两版方法名或把旧版当当前布局。
+
 | 分片 / 页面 | 组件与状态清单 | WorkBuddy证据标签 | 现有Muyon/Android落点 | 现在可独立完成 / 真实像素阻塞 |
 |---|---|---|---|---|
 | UI-00 参考台账 | 10资源、32证据文件、图像类别/许可/原图缺口；原图与截图版本关联 | `directpixel`仅资源；完整页面`未知` | 独立/tmp报告；本docs文件 | 已完成哈希/像素/类型核验；可接收原图后绑定页ID，不能以拼图补页 |
 | UI-01 基础视觉候选 | 明/暗画布、层级文字、强调/警告、字号/行高、边距/圆角；默认/暗色/字体放大 | `directpixel`图标与资源明暗；F14/15/16`静态线索`；组件token映射`未知` | `packages/muyon_ui/lib/src/{tokens,theme,motion}.dart`；`apps/muyon/assets/brand/`；Android `res/values{,-night}/styles.xml` | 可列候选与现有token差异、保留自有资产；精确配色分配/字体/尺寸待同页明暗原图。不得先改共享UI包影响其他writer |
-| UI-02 任务入口与目录 | 顶栏、导航、任务行、搜索入口、更多菜单、空态；有内容/空/选中/加载/失败 | F08 tabs/drawer/search资产、F11文案为`静态线索`；顺序/卡片/顶底栏`未知` | `screens/platform_shell.dart` 的destinations；`platform_shell_home.dart` 的`home()`/`tasks()`；`chat/chat_list_page.dart` | 可清点稳定任务/会话ID与已有导航回调；默认页、5入口组合、任务行构图待首页/列表/菜单原图。不根据5个图标强加频道/自动化功能 |
+| UI-02 任务入口与目录 | 顶栏、导航、任务行、搜索入口、更多菜单、空态；有内容/空/选中/加载/失败 | F08 tabs/drawer/search资产、F11文案为`静态线索`；顺序/卡片/顶底栏`未知` | `screens/platform_shell.dart` 的`ConversationDestination`；`platform_shell_home.dart` 的`taskHub()`/`tasks()`；`chat/chat_list_page.dart` | 可清点稳定任务/会话ID与已有导航回调；默认页、5入口组合、任务行构图待首页/列表/菜单原图。不根据5个图标强加频道/自动化功能 |
 | UI-03 对话与过程 | 顶栏、用户/助手内容、过程组、步骤卡、任务状态、引用、附件/产物组、操作行；空/准备/运行/待确认/完成/失败/暂停/取消中/中断 | ChatPage、F17块/滚动枚举、F11文案为`静态线索`；块间距、气泡、折叠/跟随阈值`未知` | `screens/assistant_page.dart` 的`AssistantPage`；`execution_panel.dart` 的`ExecutionPanel`/`_TaskCard`；`chat/chat_thread_page.dart` 的`_Bubble` | 可按现有状态列展示字段/动作表；保持`ObjectRef`回访和任务ID。原图决定排版/过程折叠/滚动提示；不把资源名当流式行为已复刻 |
 | UI-04 输入区 | 原始输入、模型、附件/本地工具、语音入口、权限标记、发送/停止候选、最大化候选；空文本/输入中/准备中/组字/键盘起落/忙/不可用 | F08 input-*图标`静态线索`；拼图的形状`directpixel`；排列/共用按钮时序/高度`未知` | `assistant_page.dart` 的`_input`/`_profileId`/`_busy`/`_send()`/`_tool()`；`screens/platform_shell_personal.dart`模型选择 | 可记录已有回调与disabled来源，区分发送准备与真实执行。键盘、IME、输入区尺寸/控件位置待原图；不凭图标增加未支持语音/附件能力 |
 | UI-05 选择弹层 | 模型、附件来源、执行位置、范围候选：标题、选项、选中、取消、空/不可用/加载 | F06各Sheet名为`静态线索`；实际Sheet样式/高度/拖动柄`未知` | 现`assistant_page.dart`及`platform_shell_personal.dart`使用Dialog/选择器；`devices_page.dart`仅现有设备能力 | 可列模型profile与真实执行位置数据来源；不默认所有Dialog改BottomSheet。待3个完整弹层原图；电脑/云端资产不授予跨设备执行 |
