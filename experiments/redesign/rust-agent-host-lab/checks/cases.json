@@ -259,8 +259,8 @@
       },
       "sources": {
         "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs": {
-          "commit": "5123a135d6ac0f73049ff389733f13b9b38f39c5",
-          "sha256": "bfc0021a6462374128733cd5a7c6dd3acdf85d09c368135581713b416a2ecd22"
+          "commit": "5fc2b42b33901123e3f832e4458666ef5fecee0c",
+          "sha256": "04aed51dd17ab035f6a4210fcf7d4c30c2c9458f64dd44642c974dc22c59e188"
         }
       },
       "expected_total": 25
