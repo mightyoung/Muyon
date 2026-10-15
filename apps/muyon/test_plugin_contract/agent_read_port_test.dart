@@ -175,7 +175,8 @@ void main() {
     final conversation = await f.loop.repo.createConversation();
     final task = await legacy.startTool(conversationId: conversation.id,
       toolId: f.id, parameters: {'equipment_key': 'e1'});
-    expect(task.state, PersonalTaskState.succeeded);
+    expect(task.state, PersonalTaskState.succeeded,
+        reason: 'LEGACY_READ_DIAGNOSTIC error=${task.error}; handlerCalls=${f.handlerCalls}; receipts=${f.loop.receipts()}');
     expect(f.handlerCalls, 1);
     // Existing registered but non-enrolled read must not fall through the port.
     final other = await f.loop.repo.createConversation();
