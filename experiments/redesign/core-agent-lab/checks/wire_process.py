@@ -15,7 +15,7 @@ def read_request(path):
     return json.loads(path.read_bytes().decode('utf-8'), object_pairs_hook=unique_object)
 
 
-def assert_native_pair(first, second, value, receipt, call_id='call_native_1'):
+def assert_native_pair(first, second, value, receipt, call_id='call_native_1', physical_pairs=None):
     expected_schema = {'type': 'object', 'properties': {'value': {'type': 'string'}},
                        'required': ['value'], 'additionalProperties': False}
     for request in [first, second]:
@@ -26,22 +26,43 @@ def assert_native_pair(first, second, value, receipt, call_id='call_native_1'):
         assert spec['type'] == 'function'
         assert spec['function']['name'] == 'fixture__record'
         assert spec['function']['parameters'] == expected_schema
-    messages = second['messages']
-    tool_index = max(index for index, message in enumerate(messages) if message.get('role') == 'tool') if any(message.get('role') == 'tool' for message in messages) else -1
-    assert tool_index > 0, 'actual request has no role=tool result'
-    tool = messages[tool_index]
-    assert tool.get('tool_call_id') == call_id, 'tool result call ID differs'
-    assistant = messages[tool_index - 1]
-    assert assistant.get('role') == 'assistant', 'tool result has no preceding assistant call'
-    calls = assistant.get('tool_calls')
-    assert isinstance(calls, list) and len(calls) == 1, 'actual assistant.tool_calls missing'
-    call = calls[0]
-    assert call['id'] == call_id and call['type'] == 'function'
-    assert call['function']['name'] == 'fixture__record'
-    arguments = json.loads(call['function']['arguments'], object_pairs_hook=unique_object)
-    assert arguments == {'value': value}, 'captured arguments differ from physical effect'
-    content = json.loads(tool['content'], object_pairs_hook=unique_object)
-    assert content.get('value') == value and content.get('receipt') == receipt, 'captured tool content differs from original physical receipt'
+    # Expected identities come from independent physical rows, never from request history.
+    expected = dict(physical_pairs or {call_id: (value, receipt)})
+    assert expected.get(call_id) == (value, receipt)
+    last_pair = None
+    observed = {}
+    for request in [first, second]:
+        messages = request['messages']
+        index = 0
+        while index < len(messages):
+            message = messages[index]
+            assert message.get('role') != 'tool', 'orphan role=tool result'
+            calls = message.get('tool_calls')
+            if calls is None:
+                index += 1
+                continue
+            assert message.get('role') == 'assistant', 'native call has wrong role'
+            assert isinstance(calls, list) and len(calls) == 1, 'actual assistant.tool_calls missing'
+            call = calls[0]
+            native_id = call['id']
+            assert call['type'] == 'function'
+            assert call['function']['name'] == 'fixture__record'
+            assert native_id in expected, 'native history has no matching physical receipt'
+            expected_value, expected_receipt = expected[native_id]
+            arguments = json.loads(call['function']['arguments'], object_pairs_hook=unique_object)
+            assert arguments == {'value': expected_value}, 'captured arguments differ from physical effect'
+            assert index + 1 < len(messages), 'orphan assistant tool call'
+            tool = messages[index + 1]
+            assert tool.get('role') == 'tool', 'tool result has no preceding assistant call'
+            assert tool.get('tool_call_id') == native_id, 'tool result call ID differs'
+            content = json.loads(tool['content'], object_pairs_hook=unique_object)
+            assert content.get('value') == expected_value and content.get('receipt') == expected_receipt, 'captured tool content differs from original physical receipt'
+            identity = (expected_value, expected_receipt)
+            assert observed.setdefault(native_id, identity) == identity, 'repeated native ID changes original binding'
+            if request is second:
+                last_pair = (native_id, expected_value, expected_receipt)
+            index += 2
+    assert last_pair == (call_id, value, receipt), 'actual request has no expected final native pair'
 
 
 # The process layer invokes only the actual Rust executable. Existing C1 readers
@@ -213,8 +234,9 @@ class WireProcessTests(unittest.TestCase):
         self.assertEqual(int(actual['model_calls']), turns)
         self.assertEqual(len(self.captures(directory)), turns)
         first = read_request(directory/'wire-capture/request-1.json')
-        second = read_request(directory/f'wire-capture/request-{turns}.json')
-        assert_native_pair(first, second, value, receipt, call_id)
+        for turn in range(2, turns + 1):
+            following = read_request(directory/f'wire-capture/request-{turn}.json')
+            assert_native_pair(first, following, value, receipt, call_id)
         self.assertEqual(json.loads(bytes.fromhex(actual['answer_hex']).decode()), {'value':value,'receipt':receipt})
         for path in self.captures(directory):
             self.assertNotIn(str(directory).encode(), path.read_bytes())
@@ -264,10 +286,11 @@ class WireProcessTests(unittest.TestCase):
         self.start(directory, 'preterminal', mode='ask-every-time', confirmed=True)
         running = self.pause(directory, 'wire-args')
         persisted = c1_readers.journal(directory)
-        self.assert_effects(directory, 0)
+        print('RUST_WIRE_ARGS_ACK_OBSERVED', flush=True)
+        self.assertEqual(c1_readers.physical(directory)['count'], 0, 'PRETERMINAL_PHYSICAL_EFFECT')
         self.assertEqual(persisted['calls'], '1')
         self.assertEqual(persisted['steps'], '1')
-        self.assertEqual(persisted['confirmations'], '0')
+        self.assertEqual(persisted['confirmations'], '0', 'PRETERMINAL_CONFIRMATION_CONSUMED')
         self.assertGreater(int(persisted['wire_sent_bytes']),0)
         self.assertGreater(int(persisted['wire_received_bytes']),0)
         self.assertIn(persisted['provider_inflight'], {'1','true'})
@@ -464,8 +487,13 @@ class WireProcessTests(unittest.TestCase):
         final=self.assert_effects(directory,2);self.assertEqual(final['rows'][0],original['rows'][0])
         self.assertEqual(bytes.fromhex(final['value']).decode(),'wire-second')
         assert_native_pair(read_request(directory/'wire-capture/request-1.json'),
+                           read_request(directory/'wire-capture/request-2.json'),
+                           'wire-first', final['rows'][0][7])
+        assert_native_pair(read_request(directory/'wire-capture/request-1.json'),
                            read_request(directory/'wire-capture/request-3.json'),
-                           'wire-second',final['rows'][1][7],'call_native_2')
+                           'wire-second',final['rows'][1][7],'call_native_2',
+                           physical_pairs={'call_native_1': ('wire-first', final['rows'][0][7]),
+                                           'call_native_2': ('wire-second', final['rows'][1][7])})
         self.assert_children_reaped(directory)
 
     def test_invalid_or_mutable_wire_configuration_is_not_model_authority(self):

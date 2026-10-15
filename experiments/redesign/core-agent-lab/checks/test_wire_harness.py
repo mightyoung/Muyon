@@ -43,6 +43,44 @@ class WireHarnessTests(unittest.TestCase):
             with self.subTest(mutant=mutant), self.assertRaises(AssertionError):
                 assert_native_pair(first, mutant, 'wire-value', 'physical-r1')
 
+    def test_complete_history_rejects_conflicts_and_orphans_before_valid_tail(self):
+        first, second = requests()
+        original = deepcopy(second['messages'][-2:])
+        mutants = []
+        for field in ['arguments', 'receipt', 'result_value']:
+            earlier = deepcopy(original)
+            if field == 'arguments':
+                earlier[0]['tool_calls'][0]['function']['arguments'] = '{"value":"forged-earlier-value"}'
+                earlier[1]['content'] = '{"value":"forged-earlier-value","receipt":"invented-earlier-receipt"}'
+            elif field == 'receipt':
+                earlier[1]['content'] = '{"value":"wire-value","receipt":"invented-earlier-receipt"}'
+            else:
+                earlier[1]['content'] = '{"value":"wrong-result","receipt":"physical-r1"}'
+            mutant = deepcopy(second); mutant['messages'][1:1] = earlier; mutants.append((field, mutant))
+        mutant = deepcopy(second); mutant['messages'][1:1] = [deepcopy(original[1])]
+        mutants.append(('orphan_tool', mutant))
+        mutant = deepcopy(second); mutant['messages'][1:1] = [deepcopy(original[0])]
+        mutants.append(('orphan_call', mutant))
+        for label, mutant in mutants:
+            with self.subTest(history=label), self.assertRaises(AssertionError):
+                assert_native_pair(first, mutant, 'wire-value', 'physical-r1')
+
+    def test_complete_history_accepts_identical_replay(self):
+        first, second = requests()
+        second['messages'][1:1] = deepcopy(second['messages'][-2:])
+        assert_native_pair(first, second, 'wire-value', 'physical-r1')
+        # Distinct later native calls retain the independently supplied earlier receipt.
+        third = deepcopy(second)
+        pair = deepcopy(second['messages'][-2:])
+        pair[0]['tool_calls'][0]['id'] = 'call_native_2'
+        pair[0]['tool_calls'][0]['function']['arguments'] = '{"value":"wire-second"}'
+        pair[1]['tool_call_id'] = 'call_native_2'
+        pair[1]['content'] = '{"value":"wire-second","receipt":"physical-r2"}'
+        third['messages'] += pair
+        assert_native_pair(first, third, 'wire-second', 'physical-r2', 'call_native_2',
+                           physical_pairs={'call_native_1': ('wire-value', 'physical-r1'),
+                                           'call_native_2': ('wire-second', 'physical-r2')})
+
     def test_helper_captures_actual_bytes_and_answer_depends_on_received_tool(self):
         _, second = requests()
         with TemporaryDirectory(prefix='wire-helper-selfcheck-') as temporary:
