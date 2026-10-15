@@ -1,0 +1,82 @@
+name: Rust native read
+
+on:
+  push:
+    branches: ['lab/rust-native-read-*']
+    paths:
+      - 'experiments/redesign/core-agent-lab/**'
+      - 'experiments/redesign/plugin-contract-lab/**'
+      - 'experiments/redesign/rust-agent-host-lab/**'
+      - '.github/workflows/rust-native-read.yml'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Reachable compiling RED; required command still fails CI'
+        type: choice
+        options: [red, core-red, protocol-red, plugin-red]
+        default: red
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: never
+
+jobs:
+  compiling-red:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ${{ fromJSON(inputs.suite == 'core-red' && '["core-red"]' || inputs.suite == 'protocol-red' && '["protocol-red"]' || inputs.suite == 'plugin-red' && '["plugin-red"]' || inputs.suite == 'red' && '["core-red","protocol-red","plugin-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-core-red-') && '["core-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-protocol-red-') && '["protocol-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-plugin-red-') && '["plugin-red"]' || '["core-red","protocol-red","plugin-red"]') }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Record immutable source and reviewed target
+        run: |
+          mkdir -p "$RUNNER_TEMP/rust-native-evidence"
+          echo "EVIDENCE_DIR=$RUNNER_TEMP/rust-native-evidence" >> "$GITHUB_ENV"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/rust-native-evidence/source-sha.txt"
+          rustc --version | tee "$RUNNER_TEMP/rust-native-evidence/rustc-version.txt"
+          cargo --version | tee "$RUNNER_TEMP/rust-native-evidence/cargo-version.txt"
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/red.py describe --suite '${{ matrix.suite }}' --github-env "$GITHUB_ENV" --output "$RUNNER_TEMP/rust-native-evidence/contract.json"
+          git ls-files -z experiments/redesign/core-agent-lab experiments/redesign/plugin-contract-lab experiments/redesign/rust-agent-host-lab .github/workflows/rust-native-read.yml | xargs -0 sha256sum > "$RUNNER_TEMP/rust-native-evidence/source-fixture-sha256.txt"
+      - name: Independent classifier controls
+        run: |
+          set -o pipefail
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/test_red.py 2>&1 | tee "$EVIDENCE_DIR/classifier-controls.log"
+      - name: Compile complete selected manifest without running tests
+        run: |
+          set -o pipefail
+          cargo test --offline --locked --no-run --manifest-path "$MANIFEST" 2>&1 | tee "$EVIDENCE_DIR/compile.log"
+          cargo build --offline --locked --manifest-path "$MANIFEST" --bin "$BINARY" 2>&1 | tee "$EVIDENCE_DIR/build.log"
+          test -x "$BINARY_PATH"
+          sha256sum "$BINARY_PATH" | tee "$EVIDENCE_DIR/binary-sha256.txt"
+      - name: Required actual reachable assertion RED
+        run: |
+          set -o pipefail
+          set +e
+          cargo test --offline --locked --no-fail-fast --manifest-path "$MANIFEST" --test "$TEST_TARGET" "$TEST_NAME" -- --exact --nocapture 2>&1 | tee "$EVIDENCE_DIR/behavior.log"
+          command_statuses=("${PIPESTATUS[@]}")
+          set -e
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/red.py classify --suite '${{ matrix.suite }}' --log "$EVIDENCE_DIR/behavior.log" --exit-code "${command_statuses[0]}" --output "$EVIDENCE_DIR/verdict.json"
+          if (( command_statuses[1] != 0 )); then exit "${command_statuses[1]}"; fi
+          exit "${command_statuses[0]}"
+      - name: Verify original source fixtures and binary unchanged
+        if: always()
+        run: |
+          sha256sum --check "$RUNNER_TEMP/rust-native-evidence/source-fixture-sha256.txt" > "$RUNNER_TEMP/rust-native-evidence/source-integrity.log"
+          if [[ -f "$RUNNER_TEMP/rust-native-evidence/binary-sha256.txt" ]]; then
+            sha256sum --check "$RUNNER_TEMP/rust-native-evidence/binary-sha256.txt" > "$RUNNER_TEMP/rust-native-evidence/binary-integrity.log"
+          fi
+      - name: Retain actual raw evidence outside Git
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rust-native-${{ github.sha }}-${{ matrix.suite }}
+          path: ${{ runner.temp }}/rust-native-evidence/
+          retention-days: 1
+          if-no-files-found: error
