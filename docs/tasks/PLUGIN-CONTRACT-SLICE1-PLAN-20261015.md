@@ -6,7 +6,7 @@ Design: [bounded registered reads](../design/PLUGIN-CONTRACT-SLICE1-20261015.md)
 
 ## 1. Documentation and ownership gate
 
-Commit only design and this plan with `[skip ci]`; hand fixed SHA to root for independent contract review. No source/API/workflow changes in that commit. The design's ownership table is exhaustive. Any additional shared file requires owner alignment first. Parent-approved AgentDispatch carve-out includes `_complete` and `_logEntry` only for port-owned model projections, plus external-source/read dispatch. No changes to Agent model loop, bootstrap defaults, UI or core-agent experiment.
+Commit only design and this plan with `[skip ci]`; hand fixed SHA to root for independent contract review. No source/API/workflow changes in that commit. The design's ownership table is exhaustive. Any additional shared file requires owner alignment first. Parent-approved AgentDispatch carve-out includes `_complete` and `_logEntry` only for port-owned model projections, plus external-source/read dispatch. The only additional shared carve-out is one generic read-port send-admission callback at the end of AgentModelTurn._beforeSend (base agent_model_turn.dart:315–344), reused by existing chat and chatStream callbacks. No changes to Agent model loop, sender, bootstrap defaults, UI or core-agent experiment.
 
 Checkpoint: review covers protocol/schema/generation split, trusted source seam, raw result/summary isolation, real Agent routing, original receipt ownership, classification and final model gate. Resolve contract findings before writing stubs.
 
@@ -23,7 +23,7 @@ CI owner runs each RED separately; workflow must genuinely fail on the assertion
 
 ## 3. Minimal Rust implementation GREEN
 
-Implement schema/namespace/ref validation and canonical arguments first, then atomic registry publication and filtered discovery. Add prepared ticket state with one pending invocation per port; revision/generation/epoch checks; consume before callback. Accept results only for the exact pending owner receipt reference and strict projection schema; reject unsolicited/duplicate frames. Add cancel and EOF invalidation with deterministic tests (no sleeps).
+Implement schema/namespace/ref validation and canonical arguments first, then atomic registry publication and filtered discovery. Add prepared ticket state with one pending invocation per port; revision/generation/epoch checks; consume before callback. Accept results only for the exact pending owner receipt reference and strict projection schema; reject unsolicited/duplicate frames. Add cancel and EOF invalidation with deterministic tests (no sleeps). New child transport owns bounded request deadlines and idempotent close; timeout/cancel/EOF/close must invalidate completions, close subscriptions/stdin, terminate then kill within the design bounds, and settle all pending futures without orphan child/timer/listener resources. Do not edit or copy business shapes from the old core-agent transport.
 
 Do not implement business handlers, grant creation, SQL, writes/CAS, migrations, restarts or a second execution ledger. Original ToolRegistry remains actual execution/receipt owner. Rust binding checks are necessary admission checks, not a substitute for live host policy.
 
@@ -33,8 +33,8 @@ Do not implement business handlers, grant creation, SQL, writes/CAS, migrations,
 2. Add host-owned source metadata lookup to ToolRegistry registration/inspection path; no metadata accepted from tool arguments. Preserve current receipt owner and identity.
 3. Implement process transport, catalog mapping, read bridge, source policy and model projection in the five new files. Use a private host driver and an explicit absolute binary path passed from host/test; no model-controlled executable path.
 4. Inject nullable PluginReadPort through PersonalAgent/AgentContext. Existing ToolSelectionStrategy injection intersects current registered eligible tools with permission-filtered Rust discovery. Port-enabled reads all route through the port; unavailable/unregistered reads refuse rather than falling back. Without port behavior remains unchanged.
-5. AgentDispatch source marking uses host metadata on the port branch, preserves premark/post-ref HostAuthorizationFacts and original ToolRegistry invocation. Reference checks and result validation precede model projection. Use current live authority again at dispatch and model purpose review.
-6. `_complete`/toolLog/citations use only host-validated ModelReadProjection for port-owned invocations. Static host errors handle denied/invalid paths. Raw summary/data/errors never enter model history/toolLog. The final existing HostModelAuthorization actual-byte and compatible-body gates still run.
+5. AgentDispatch source marking uses host metadata on the port branch, preserves premark/post-ref HostAuthorizationFacts and original ToolRegistry invocation. Reference checks and result validation precede model projection. Use current live authority again at dispatch, accept_result after original receipt completion, and model purpose review. accept_result explicitly receives a freshly host-verified current snapshot, not child/plugin currentness claims.
+6. `_complete`/toolLog/citations use only host-validated ModelReadProjection for port-owned invocations. Static host errors handle denied/invalid paths. Raw summary/data/errors never enter model history/toolLog. The final existing HostModelAuthorization actual-byte and compatible-body gates still run. Add the one generic `_beforeSend` guard to recheck current read/source/binding authority and all visible live projections (including older history/toolLog; conservative conversation-wide superset is allowed). Its final synchronous currentness check defines send admission after any awaited work. Missing live evidence refuses. The callback is reused for every actual/compatible attempt; no new sender or business switch.
 7. Add declaration-derived research/inquiry narrow mappings and equipment-loan fixture, then seeded random rename. Fixtures contain synthetic data only; registration has data-access/grant counters at zero.
 
 ## 5. Fixed behavioral matrix
@@ -52,27 +52,27 @@ Each row is one named top-level test; parameterized adversarial values remain wi
 | R07 | registration::declaration_labels_cannot_authorize | Forged grant/trusted/clean fields reject; sensitivity declarations do not add authority. |
 | R08 | registration::renamed_bundle_is_semantically_equivalent | Seeded names do not affect schema/permission/ref behavior. |
 | R09 | read_contract::prepared_bindings_are_exact | Canonical keys equivalent; arg/scope/ref revision/authority/generation/epoch changes reject. |
-| R10 | read_contract::revoke_before_invoke_executes_zero | Current snapshot revoke rejects with no host callback. |
+| R10 | read_contract::revoke_before_invoke_executes_zero | Current snapshot revoke rejects with no host callback; accept_result with newly revoked authority rejects after an existing receipt without accepting a projection. |
 | R11 | read_contract::ticket_is_one_shot | Repeat invoke/result cannot dispatch or accept twice. |
 | R12 | read_contract::receipt_reference_has_original_owner | Foreign invocation/tool/identity receipt references reject; valid pointer accepted, no receipt minted. |
 | R13 | read_contract::invalid_projection_and_refs_reject | Missing/extra/type-invalid fields and foreign/stale/out-of-scope refs yield no accepted projection. |
 | R14 | read_contract::cancel_before_dispatch_executes_zero | Cancellation invalidates prepared ticket; no callback. |
 | R15 | read_contract::cancel_after_dispatch_accepts_no_projection | Late response cannot produce model projection; original owner outcome untouched. |
-| R16 | read_contract::eof_and_concurrency_fail_closed | EOF invalidates epoch; second concurrent read gets busy; no replay on restart. |
+| R16 | read_contract::eof_and_concurrency_fail_closed | EOF invalidates epoch; second concurrent read gets busy; no replay on restart. Timeout/cancel/close settle pending work within bounds; no owned child/listener/timer remains. |
 
 | ID | Dart target/name | Observable assertion |
 | --- | --- | --- |
 | D01 | catalog_contract::registrar preserves sensitivity without granting | Descriptor immutable exact metadata, missing unreviewed; registration zero grants/data accesses. |
 | D02 | catalog_contract::actual declarations map three distinct read contracts | Real research/inquiry declaration mapping plus equipment schema; native arguments preserved; view refs only. |
 | D03 | catalog_contract::permission filtered catalog drives selection | Existing selection injection sees only registered currently eligible operations; stale directory cannot permit dispatch. |
-| D04 | read_bridge::live revoke and scope changes prevent handler execution | Live host changes after prepare: handler count zero; no fallback. |
+| D04 | read_bridge::live revoke and scope changes prevent handler execution | Barriers after prepare/before invoke: live change gives handler=0. After original receipt/before accept_result: revoke read/source/binding, retain receipt, no projection or data send; model category remains allowed. No fallback/re-execution. |
 | D05 | read_bridge::owner receipt survives projection rejection | Original receipt identity/result retained, malformed result/foreign ref yields no ModelReadProjection. |
-| D06 | read_bridge::cancel and process failure preserve owner semantics | Before dispatch zero executions; after dispatch no accepted projection; no duplicate receipt/replay. |
+| D06 | read_bridge::cancel and process failure preserve owner semantics | Before dispatch zero executions; after dispatch no accepted projection; no duplicate receipt/replay. Deadline/EOF/cancel/idempotent-close cases assert bounded owned-child exit and all pending futures/timers/listeners settled. |
 | D07 | agent_read_port::registered read reaches original receipt and reviewed model projection | Real Agent read dispatch calls original handler once; one original receipt; only valid projection reaches fake gateway. Required RED target. |
 | D08 | agent_read_port::renamed third module retains source and purpose gates | Seeded rename follows same Agent path; trusted source premark/postrefs and final gate preserved without name switch. |
 | D09 | agent_read_port::raw summary result and toolLog cannot leak | Success/invalidArguments raw poison strings absent from tool/user messages, next-turn toolLog and citations; schema/ref rejection yields zero data sends. |
-| D10 | agent_read_port::plugin labels cannot clear source facts or classify values | Forged clean/none cannot erase existing ledger contamination; actual-value host deny/unreviewed yields zero data sends. |
-| D11 | agent_read_port::final model payload review remains authoritative | Valid read/projection but denied final payload or compatible-body review yields zero model sends; assert actual reviewed bytes. |
+| D10 | agent_read_port::plugin labels cannot clear source facts or classify values | Forged clean/none cannot erase ledger contamination; actual-value host deny/unreviewed gives zero data sends. Inject premark persistence failure: handler=0, contamination latch remains. Inject postref persistence failure after receipt: original receipt retained, no projection/raw fallback/data send/re-execution. Handler failure and projection refusal retain premark/postref contamination; no second facts ledger. |
+| D11 | agent_read_port::final model payload review remains authoritative | Valid projection but denied final payload/compatible-body review gives zero sends; assert actual reviewed bytes. Barrier after projection/before send admission: revoke read/source/binding while model category remains allowed; original receipt unchanged and zero sends containing that projection. Include older projection visible only through history/toolLog, not just newest invocation. Barrier is before the final synchronous admission check; do not claim revocation retracts admitted bytes. |
 | D12 | agent_read_port::no port preserves legacy and missing projection fails closed | Legacy no-port read unchanged; enabled unknown read or lost live projection refuses, never raw fallback. |
 
 Tests must assert event order (premark before handler, receipt before projection, source/ref/classification before final review, review before gateway send), not merely final text. Counters and deterministic barriers replace sleeps. The fake gateway is local and uses no credentials. Static grep is supplementary; rename and ledger behavior are decisive.
@@ -107,7 +107,7 @@ cargo test --offline --locked --manifest-path experiments/redesign/plugin-contra
 flutter test test_plugin_contract/catalog_contract_test.dart test_plugin_contract/read_bridge_test.dart test_plugin_contract/agent_read_port_test.dart --reporter expanded
 ```
 
-Dart commands run from `apps/muyon`; Rust command from repo root. Existing affected regressions also required: `test/tool_registry_test.dart`, `test/agent_dispatch_safety_verification_test.dart`, `test/assistant_authorization_facts_test.dart`, and relevant host registrar/module-contract tests located before code edits. Preserve existing assertions. Analyze changed Dart files with the repository's existing Flutter setup; do not generate/push unrelated lock/cache changes.
+Dart commands run from `apps/muyon`; Rust command from repo root. Existing affected regressions also required: `test/tool_registry_test.dart`, `test/agent_dispatch_safety_verification_test.dart`, `test/assistant_authorization_facts_test.dart`, `test/host_tool_registrar_test.dart`, `test/module_registry_test.dart`, `test/module_registry_v2_test.dart`; from `packages/muyon_module_api`, run `flutter test test/contract_v1_test.dart test/contract_v2_test.dart test/contracts_test.dart`. Rust expected 16 counts only the 8 registration plus 8 read_contract integration tests; unit/doc tests (expected zero) are reported separately, never mixed into that total. Preserve existing assertions. Analyze changed Dart files with the repository's existing Flutter setup; do not generate/push unrelated lock/cache changes.
 
 ## 7. Finish and evidence
 
