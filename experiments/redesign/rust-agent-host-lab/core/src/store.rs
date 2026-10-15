@@ -176,12 +176,14 @@ impl NativeStore {
     /// Initialize only a fresh already-admitted private run directory, never reset evidence.
     pub(crate) fn initialize_private(dir: &Path) -> Result<Self> {
         store::validate_dir(dir)?;
+        // Hold the same exclusive lease across absence validation and first write.
+        // A caller paused before lock acquisition must never reset a completed run.
+        let lock = store::lock(dir)?;
         match std::fs::symlink_metadata(dir.join("native.db")) {
             Ok(_) => return Err("native_store_exists".into()),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
             Err(_) => return Err("native_store_unavailable".into()),
         }
-        let lock = store::lock(dir)?;
         let mut result = Self {
             dir: dir.into(),
             _lock: lock,
