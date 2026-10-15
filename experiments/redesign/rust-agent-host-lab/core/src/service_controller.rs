@@ -377,6 +377,17 @@ impl AgentServiceController {
         if !request_id(&req.request_id) {
             return rejected(&g, AgentServiceError::InvalidRequestId);
         }
+        if g.sealed
+            || matches!(
+                g.phase,
+                AgentServiceState::Closing | AgentServiceState::Closed
+            )
+        {
+            return rejected(&g, AgentServiceError::Closed);
+        }
+        if g.phase == AgentServiceState::RecoveryRequired {
+            return rejected(&g, AgentServiceError::RecoveryRequired);
+        }
         if let Some(old) = g
             .runs
             .iter()
@@ -394,17 +405,6 @@ impl AgentServiceController {
                     snapshot: old.clone(),
                 },
             };
-        }
-        if g.sealed
-            || matches!(
-                g.phase,
-                AgentServiceState::Closing | AgentServiceState::Closed
-            )
-        {
-            return rejected(&g, AgentServiceError::Closed);
-        }
-        if g.phase == AgentServiceState::RecoveryRequired {
-            return rejected(&g, AgentServiceError::RecoveryRequired);
         }
         if !g.clients[client].visible {
             return rejected(&g, AgentServiceError::ClientNotVisible);
@@ -524,6 +524,20 @@ impl AgentServiceController {
                 },
             );
         }
+        if req.visible
+            && (g.sealed
+                || matches!(
+                    g.phase,
+                    AgentServiceState::Closing | AgentServiceState::Closed
+                ))
+        {
+            return control_reply(
+                &g,
+                AgentControlOutcome::Rejected {
+                    error: AgentServiceError::Closed,
+                },
+            );
+        }
         if let Some((old, value)) = &g.clients[index].observation {
             if req.observation_generation < *old
                 || req.observation_generation == *old && value != &Observation::Visible(req.visible)
@@ -538,20 +552,6 @@ impl AgentServiceController {
             if req.observation_generation == *old {
                 return control_reply(&g, AgentControlOutcome::Applied);
             }
-        }
-        if req.visible
-            && (g.sealed
-                || matches!(
-                    g.phase,
-                    AgentServiceState::Closing | AgentServiceState::Closed
-                ))
-        {
-            return control_reply(
-                &g,
-                AgentControlOutcome::Rejected {
-                    error: AgentServiceError::Closed,
-                },
-            );
         }
         if !g.bump() {
             return control_reply(
@@ -761,12 +761,12 @@ impl AgentServiceController {
                 }
                 None => {}
             }
+            g.bump();
         }
         let root_to_drop = {
             let mut g = self.shared.lock();
             if !g.sealed {
                 g.joining = false;
-                g.bump();
                 if !g.sealed {
                     return g.current();
                 }
