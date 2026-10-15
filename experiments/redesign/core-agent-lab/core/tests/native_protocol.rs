@@ -16,3 +16,21 @@ fn registered_protocol_preserves_arguments_and_schema(){let t=tools();let result
 fn registered_protocol_rejects_unknown_and_incomplete(){let t=tools();let mut d=Decoder::with_tools(&t).unwrap();let mut failed=false;for b in stream("unknown",r#"{"station_key":"s1"}"#,true){if d.feed(b).is_err(){failed=true;break;}}assert!(failed||d.finish().is_err());let mut d=Decoder::with_tools(&t).unwrap();for b in stream("t_42",r#"{"station_key":"s1"}"#,false){d.feed(b).unwrap();}assert_eq!(d.finish().unwrap_err(),"wire_stream_truncated");}
 #[test]
 fn registered_protocol_rejects_name_collisions(){let mut t=tools();let mut duplicate=t[0].clone();duplicate.name="other.read".into();t.push(duplicate);assert_eq!(encode_registered_request(&request(),&history(),&t,"offline-native").unwrap_err(),"wire_tool_catalog");assert!(Decoder::with_tools(&t).is_err());let mut r=request();r.tools=vec!["absent".into()];assert_eq!(encode_registered_request(&r,&history(),&tools(),"offline-native").unwrap_err(),"wire_tool_catalog");}
+
+#[test]
+fn registered_protocol_advertises_current_subset_and_preserves_history(){
+ let mut t=tools();t.push(ToolDefinition{name:"hidden.read".into(),wire_name:"t_99".into(),parameters:t[0].parameters.clone()});
+ let visible=wire_json::parse(&encode_registered_request(&request(),&history(),&t,"offline-native").unwrap()).unwrap();
+ let advertised=visible.object().unwrap()["tools"].array().unwrap();assert_eq!(advertised.len(),1);assert_eq!(advertised[0].object().unwrap()["function"].object().unwrap()["name"],string("t_42"));
+ let args=r#"{"station_key":"s1"}"#;
+ let call=object([("id",string("c1")),("type",string("function")),("function",object([("name",string("weather.peek")),("arguments",string(args))]))]);
+ let mut rows=history().array().unwrap().to_vec();rows.push(object([("role",string("assistant")),("content",Json::Null),("tool_calls",Json::Array(vec![call]))]));
+ rows.push(object([("role",string("tool")),("tool_call_id",string("c1")),("content",string("safe-projection"))]));
+ let mut r=request();r.turn=2;r.tools.clear();let full=Json::Array(rows.clone());
+ let encoded=wire_json::parse(&encode_registered_request(&r,&full,&t,"offline-native").unwrap()).unwrap();
+ assert!(encoded.object().unwrap()["tools"].array().unwrap().is_empty());
+ let mapped=&encoded.object().unwrap()["messages"].array().unwrap()[1].object().unwrap()["tool_calls"].array().unwrap()[0];assert_eq!(mapped.object().unwrap()["function"].object().unwrap()["name"],string("t_42"));
+ let mut broken=rows[2].object().unwrap().clone();broken.insert("tool_call_id".into(),string("wrong"));rows[2]=Json::Object(broken);
+ assert_eq!(encode_registered_request(&r,&Json::Array(rows),&t,"offline-native").unwrap_err(),"wire_unpaired_history");
+ let mut unknown=t.clone();unknown.remove(0);assert_eq!(encode_registered_request(&r,&full,&unknown,"offline-native").unwrap_err(),"wire_history_call");
+}
