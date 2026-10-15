@@ -75,7 +75,13 @@ class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val
             disposed=true
             entries.values.toList().also { values -> values.forEach{it.dead=true};entries.clear() }
         }
-        retiring.forEach { unlinkDead(it) }
+        var failure:Throwable?=null
+        retiring.forEach { entry ->
+            try { unlinkDead(entry) } catch(error:Throwable) { if(failure==null)failure=error }
+        }
+        // Preserve failure for the Service's finally-retire path, after every bounded
+        // platform detach attempt. This does not manufacture any native settlement.
+        failure?.let{throw it}
     }
     private fun unlinkDead(entry:Entry<T>) {
         val claim=synchronized(lock) {
