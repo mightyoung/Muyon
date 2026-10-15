@@ -150,7 +150,7 @@ def oracle(text, result, contract, mutant):
              and rows == [(contract['test'], expected_status)]
              and summaries == [(expected_status, '0' if mutant else '1', '1' if mutant else '0', '0', '0', str(FILTERED))])
     if mutant:
-        panics = re.findall(r"thread '([^']+)' panicked at [^\n]+:\n([^\n]+)\n\s*left: (\d+)\n\s*right: (\d+)", text)
+        panics = re.findall(r"thread '([^']+)'(?: \(\d+\))? panicked at [^\n]+:\n([^\n]+)\n\s*left: (\d+)\n\s*right: (\d+)", text)
         valid = (valid and len(panics) == 1 and panics[0][0] == contract['test']
                  and panics[0][1].endswith(contract['marker'])
                  and panics[0][2:] == (str(contract['left']), str(contract['right'])))

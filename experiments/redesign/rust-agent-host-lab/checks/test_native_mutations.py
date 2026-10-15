@@ -32,6 +32,17 @@ class NativeMutationTests(unittest.TestCase):
             for mutant in [False, True]:
                 self.assertTrue(oracle(transcript(contract, mutant), result(mutant), contract, mutant))
 
+    def test_numeric_thread_id_matches_actual_new_rust_panic_format(self):
+        for contract in MUTANTS:
+            raw = transcript(contract, True)
+            actual = raw.replace("' panicked at", "' (323) panicked at")
+            self.assertTrue(oracle(actual, result(True), contract, True))
+            for bad in [actual.replace('(323)', '(abc)'),
+                        actual.replace('(323)', '(-323)'),
+                        actual.replace(contract['marker'], 'different assertion'),
+                        actual.replace(f"left: {contract['left']}", 'left: 999')]:
+                self.assertFalse(oracle(bad, result(True), contract, True))
+
     def test_compile_timeout_signal_setup_wrong_assertion_and_count_invalid(self):
         for contract in MUTANTS:
             raw = transcript(contract, True)
