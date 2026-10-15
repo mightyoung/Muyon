@@ -8,13 +8,19 @@ impl Json {
     pub fn array(&self)->Result<&[Json]>{if let Self::Array(v)=self{Ok(v)}else{Err("wire_json_array".into())}}
     pub fn string(&self)->Result<&str>{if let Self::String(v)=self{Ok(v)}else{Err("wire_json_string".into())}}
     pub fn integer(&self)->Result<u64>{match self{Self::Number(s) if !s.is_empty()&&s.bytes().all(|b|b.is_ascii_digit())=>s.parse().map_err(|_|"wire_json_integer".into()),_=>Err("wire_json_integer".into())}}
+    pub fn encoded_len(&self)->Result<usize>{
+        fn add(a:usize,b:usize)->Result<usize>{a.checked_add(b).ok_or_else(||"wire_json_size".into())}
+        fn quoted(s:&str)->Result<usize>{let mut n=2;for c in s.chars(){n=add(n,match c{'"'|'\\'|'\n'|'\r'|'\t'=>2,c if c<'\u{20}'=>6,c=>c.len_utf8()})?;}Ok(n)}
+        match self{Self::Null=>Ok(4),Self::Bool(b)=>Ok(if *b{4}else{5}),Self::Number(n)=>Ok(n.len()),Self::String(s)=>quoted(s),Self::Array(a)=>{let mut n=2;for(i,v)in a.iter().enumerate(){n=add(n,usize::from(i>0))?;n=add(n,v.encoded_len()?)?;}Ok(n)},Self::Object(o)=>{let mut n=2;for(i,(k,v))in o.iter().enumerate(){n=add(n,usize::from(i>0)+1)?;n=add(n,quoted(k)?)?;n=add(n,v.encoded_len()?)?;}Ok(n)}}
+    }
     pub fn encode(&self)->String{match self{Self::Null=>"null".into(),Self::Bool(b)=>b.to_string(),Self::Number(n)=>n.clone(),Self::String(s)=>quote(s),Self::Array(a)=>format!("[{}]",a.iter().map(Json::encode).collect::<Vec<_>>().join(",")),Self::Object(o)=>format!("{{{}}}",o.iter().map(|(k,v)|format!("{}:{}",quote(k),v.encode())).collect::<Vec<_>>().join(","))}}
 }
 pub fn object(fields:impl IntoIterator<Item=(impl Into<String>,Json)>)->Json{Json::Object(fields.into_iter().map(|(k,v)|(k.into(),v)).collect())}
 pub fn string(s:impl Into<String>)->Json{Json::String(s.into())}
 pub fn quote(s:&str)->String{let mut out=String::from("\"");for c in s.chars(){match c{'"'=>out.push_str("\\\""),'\\'=>out.push_str("\\\\"),'\n'=>out.push_str("\\n"),'\r'=>out.push_str("\\r"),'\t'=>out.push_str("\\t"),c if c<'\u{20}'=>out.push_str(&format!("\\u{:04x}",c as u32)),c=>out.push(c)}}out.push('"');out}
-pub fn parse(bytes:&[u8])->Result<Json>{
-    if bytes.len()>65536{return Err("wire_json_size".into());}std::str::from_utf8(bytes).map_err(|_|"wire_utf8")?;
+pub fn parse(bytes:&[u8])->Result<Json>{parse_bounded(bytes,65536)}
+pub(crate) fn parse_bounded(bytes:&[u8],limit:usize)->Result<Json>{
+    if bytes.len()>limit{return Err("wire_json_size".into());}std::str::from_utf8(bytes).map_err(|_|"wire_utf8")?;
     let mut p=Parser{bytes,pos:0,nodes:0};let value=p.value(0)?;p.space();if p.pos!=bytes.len(){return Err("wire_json_trailing".into());}Ok(value)
 }
 struct Parser<'a>{bytes:&'a[u8],pos:usize,nodes:usize}

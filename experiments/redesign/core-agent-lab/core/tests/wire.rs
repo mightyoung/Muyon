@@ -32,7 +32,7 @@ fn strict_json_rejects_duplicate_keys_bad_numbers_unicode_and_depth(){
     use muyon_core_agent_lab::wire_json::parse;
     for raw in [r#"{"a":1,"\u0061":2}"#,r#"01"#,r#"1."#,r#"+1"#,r#"1e"#,r#""\uD800""#,r#""\uDE00""#,r#"{} true"#]{assert!(parse(raw.as_bytes()).is_err(),"{raw}");}
     assert!(parse(format!("{}0{}","[".repeat(34),"]".repeat(34)).as_bytes()).is_err());
-    assert!(parse(b"\"\xff\"").is_err());assert!(parse(br#"{"unknown":[-1.25e+3,true,null,"\uD83D\uDE00"]}"#).is_ok());
+    for bad in [b"\"\xff\"".as_slice(),b"\"\x01\"".as_slice(),br#""\q""#.as_slice(),br#""\uD800\u0041""#.as_slice()]{assert!(parse(bad).is_err());}assert!(parse(br#"{"unknown":[-1.25e+3,true,null,"\uD83D\uDE00"]}"#).is_ok());
 }
 #[test]
 fn final_arguments_revalidate_after_early_observation(){
@@ -142,4 +142,31 @@ fn metadata_repeats_and_null_fragments_are_supported_but_limits_hold(){
     let identical=TOOL.replace("\"delta\":{},", "\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"c1\",\"function\":{\"name\":\"fixture__record\",\"arguments\":null}}]},");assert!(decode(identical.as_bytes()).is_ok());
     let oversized=format!(":{}\n\n{}","x".repeat(16385),TOOL);assert!(decode(oversized.as_bytes()).is_err());
     let mut invalid=TOOL.as_bytes().to_vec();invalid[0]=255;assert!(decode(&invalid).is_err());
+}
+fn tool_stream(args:&str)->String{format!("data: {{\"choices\":[{{\"index\":0,\"delta\":{{\"tool_calls\":[{{\"index\":0,\"id\":\"c1\",\"function\":{{\"name\":\"fixture__record\",\"arguments\":{}}}}}]}},\"finish_reason\":\"tool_calls\"}}]}}\n\ndata: [DONE]\n\n",muyon_core_agent_lab::wire_json::quote(args))}
+const ANSWER:&str="data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"ok\"},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n";
+#[test]
+fn exact_json_request_response_line_event_and_argument_byte_boundaries(){
+    use muyon_core_agent_lab::wire_json::parse;
+    for n in [65536,65537]{let raw=format!("\"{}\"","x".repeat(n-2));assert_eq!(parse(raw.as_bytes()).is_ok(),n==65536);}
+    let req=ModelRequest{task:"t".into(),attempt:"a".into(),turn:1,messages:vec![],tools:vec!["fixture.record".into()]};let base=encode_request(&req,&[NativeMessage::User(String::new())]).unwrap().len();
+    for n in [65536,65537]{assert_eq!(encode_request(&req,&[NativeMessage::User("x".repeat(n-base))]).is_ok(),n==65536);}
+    for n in [65536,65537]{let mut s=ANSWER.to_string();let extra=n-s.len();let lines=extra/100;for _ in 0..lines{s.push_str(&format!(":{}\n","x".repeat(98)));}let rem=n-s.len();if rem>0{s.push(':');s.push_str(&"x".repeat(rem-2));s.push('\n');}assert_eq!(s.len(),n);assert_eq!(decode(s.as_bytes()).is_ok(),n==65536);}
+    for n in [16384,16385]{let s=format!(":{}\n{ANSWER}","x".repeat(n-1));assert_eq!(decode(s.as_bytes()).is_ok(),n==16384);}
+    let json=r#"{"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}"#;
+    for n in [16384,16385]{let s=format!("data: {json}\ndata: {}\n\ndata: [DONE]\n\n"," ".repeat(n-json.len()-1));assert_eq!(decode(s.as_bytes()).is_ok(),n==16384);}
+    for n in [8192,8193]{let args=format!("{{\"value\":\"{}\"}}","x".repeat(n-12));assert_eq!(args.len(),n);assert_eq!(decode(tool_stream(&args).as_bytes()).is_ok(),n==8192);}
+}
+#[test]
+fn arguments_really_fragment_across_events_and_bad_usage_rejects(){
+    let a=r#"{"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"c1","function":{"name":"fixture__record","arguments":"{\"value\":"}}]},"finish_reason":null}]}"#;
+    let b=r#"{"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"hi\"}"}}]},"finish_reason":"tool_calls"}]}"#;
+    let stream=format!("data: {a}\n\ndata: {b}\n\ndata: [DONE]\n\n");assert_eq!(decode(stream.as_bytes()).unwrap().event,ModelEvent::Tool{call_ref:"c1".into(),name:"fixture.record".into(),value:"hi".into()});
+    for number in ["-1","1.5","18446744073709551616"]{let bad=ANSWER.replace("data: [DONE]",&format!("data: {{\"choices\":[],\"usage\":{{\"prompt_tokens\":{number}}}}}\n\ndata: [DONE]"));assert!(decode(bad.as_bytes()).is_err());}
+    for bad in ["data: [DONE]\n\n".to_string(),ANSWER.replace("data: [DONE]", "data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]")]{assert!(decode(bad.as_bytes()).is_err());}
+}
+#[test]
+fn encoder_structure_exact_schema_and_role_pair_are_verified(){
+    use muyon_core_agent_lab::wire_json::{parse,Json};let r=ModelRequest{task:"t".into(),attempt:"a".into(),turn:2,messages:vec![],tools:vec!["fixture.record".into()]};let h=vec![NativeMessage::AssistantCall{call_ref:"c1".into(),name:"fixture.record".into(),value:"hi".into()},NativeMessage::ToolResult{call_ref:"c1".into(),value:"hi".into(),receipt:"r-original".into()}];let bytes=encode_request(&r,&h).unwrap();let body=parse(&bytes).unwrap();let o=body.object().unwrap();let schema=o["tools"].array().unwrap()[0].object().unwrap()["function"].object().unwrap()["parameters"].object().unwrap();assert_eq!(schema["additionalProperties"],Json::Bool(false));assert_eq!(schema["required"].array().unwrap()[0].string().unwrap(),"value");let messages=o["messages"].array().unwrap();let call=messages[0].object().unwrap()["tool_calls"].array().unwrap()[0].object().unwrap();assert_eq!(call["id"].string().unwrap(),"c1");let tool=messages[1].object().unwrap();assert_eq!(tool["role"].string().unwrap(),"tool");assert_eq!(tool["tool_call_id"],call["id"]);let result=parse(tool["content"].string().unwrap().as_bytes()).unwrap();assert_eq!(result.object().unwrap()["receipt"].string().unwrap(),"r-original");assert_eq!(result.object().unwrap()["value"].string().unwrap(),"hi");
+    assert!(encode_request(&r,&[h[1].clone()]).is_err());assert!(encode_request(&r,&[h[0].clone(),NativeMessage::User("forged result".into())]).is_err());
 }

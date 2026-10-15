@@ -1,6 +1,9 @@
 //! Native request mapping and bounded stdio provider boundary.
 use crate::{Result,identifier,model::{ModelRequest,NativeMessage},wire_json::{self,Json,object,string}};
 pub fn native_json(history:&[NativeMessage])->Result<Json>{
+    let mut raw_size=0usize;
+    if history.len()>512{return Err("wire_request_limit".into());}
+    for message in history{let sizes:Vec<usize>=match message{NativeMessage::User(t)|NativeMessage::Assistant(t)=>vec![t.len()],NativeMessage::AssistantCall{call_ref,name,value}=>vec![call_ref.len(),name.len(),value.len()],NativeMessage::ToolResult{call_ref,value,receipt}=>vec![call_ref.len(),value.len(),receipt.len()]};for size in sizes{raw_size=raw_size.checked_add(size).ok_or("wire_request_limit")?;if raw_size>65536{return Err("wire_request_limit".into());}}}
     let mut messages=Vec::new();let mut pending:Option<(&str,&str)>=None;let mut identities=std::collections::BTreeMap::new();let mut receipts=std::collections::BTreeMap::new();
     for message in history {
         if pending.is_some()&&!matches!(message,NativeMessage::ToolResult{..}){return Err("wire_unpaired_history".into());}
@@ -28,7 +31,8 @@ pub fn encode_request(request:&ModelRequest,history:&[NativeMessage])->Result<Ve
     let schema=object([("type",string("object")),("properties",properties),("required",Json::Array(vec![string("value")])),("additionalProperties",Json::Bool(false))]);
     let function=object([("name",string("fixture__record")),("parameters",schema)]);
     let tool=object([("type",string("function")),("function",function)]);
-    let result=object([("model",string("fixture-model")),("stream",Json::Bool(true)),("stream_options",object([("include_usage",Json::Bool(true))])),("messages",native_json(history)?),("tools",Json::Array(vec![tool]))]).encode().into_bytes();
+    let body=object([("model",string("fixture-model")),("stream",Json::Bool(true)),("stream_options",object([("include_usage",Json::Bool(true))])),("messages",native_json(history)?),("tools",Json::Array(vec![tool]))]);
+    if body.encoded_len()?>65536{return Err("wire_request_limit".into());}let result=body.encode().into_bytes();
     if result.len()>65536{return Err("wire_request_limit".into());}Ok(result)
 }
 /// Private snapshot encoding is structured and is independent of semantic text.
@@ -40,7 +44,7 @@ pub fn encode_history(history:&[NativeMessage])->String{
     }).collect()).encode()
 }
 pub fn decode_history(raw:&str)->Result<Vec<NativeMessage>>{
-    let json=wire_json::parse(raw.as_bytes())?;let mut result=Vec::new();
+    let json=wire_json::parse_bounded(raw.as_bytes(),262144)?;let mut result=Vec::new();
     for row in json.array()?{let row=row.array()?;let s:Vec<&str>=row.iter().map(Json::string).collect::<Result<_>>()?;let m=match s.as_slice(){
         ["user",t]=>NativeMessage::User((*t).into()),["assistant",t]=>NativeMessage::Assistant((*t).into()),
         ["call",c,n,v]=>NativeMessage::AssistantCall{call_ref:(*c).into(),name:(*n).into(),value:(*v).into()},
@@ -67,14 +71,15 @@ fn nonblocking(fd:i32)->Result<()>{unsafe extern "C"{fn fcntl(fd:i32,cmd:i32,...
 #[cfg(not(target_os="linux"))]
 fn nonblocking(_fd:i32)->Result<()>{Err("wire_linux_required".into())}
 #[cfg(target_os="linux")]
-fn clean_pipe_end(fd:i32)->bool{
+fn pipe_end(fd:i32)->(bool,bool){
     #[repr(C)]struct PollFd{fd:i32,events:i16,revents:i16}
     unsafe extern "C"{fn poll(fds:*mut PollFd,nfds:usize,timeout:i32)->i32;fn ioctl(fd:i32,request:usize,...)->i32;}
     let mut p=PollFd{fd,events:1,revents:0};let mut available:i32=0;
-    unsafe{poll(&mut p,1,0)>0&&p.revents&16!=0&&ioctl(fd,0x541B,&mut available)==0&&available==0}
+    let ready=unsafe{poll(&mut p,1,0)};let measured=unsafe{ioctl(fd,0x541B,&mut available)};
+    (ready>0&&p.revents&16!=0&&measured==0&&available==0,measured!=0||available>0)
 }
 #[cfg(not(target_os="linux"))]
-fn clean_pipe_end(_fd:i32)->bool{false}
+fn pipe_end(_fd:i32)->(bool,bool){(false,true)}
 impl Provider for WireProvider {
     fn respond(&mut self,_request:&ModelRequest,_position:usize)->Result<ModelEvent>{Err("wire_control_required".into())}
     fn reported_usage(&self)->(Option<u64>,Option<u64>){(self.usage.prompt,self.usage.completion)}
@@ -99,7 +104,7 @@ impl Provider for WireProvider {
                 }
                 if !eof {
                     let cap=self.config.chunk.min(65536usize.saturating_sub(received)).min(usize::try_from(control.remaining()).unwrap_or(usize::MAX));
-                    if cap==0{if clean_pipe_end(output.as_raw_fd()){eof=true;}else{return Err(if received>=65536{"wire_response_limit"}else{"wire_total_limit"}.into());}}
+                    if cap==0{let (ended,excess)=pipe_end(output.as_raw_fd());if ended{eof=true;}else if excess{return Err(if received>=65536{"wire_response_limit"}else{"wire_total_limit"}.into());}}
                     else{match output.read(&mut buffer[..cap]){
                         Ok(0)=>{eof=true;progress=true;},Ok(n)=>{received+=n;control.charge(false,n)?;progress=true;for byte in &buffer[..n]{if decoder.feed(*byte)?.is_some(){control.checkpoint("wire-args")?;control.poll()?;}}},
                         Err(e) if e.kind()==std::io::ErrorKind::WouldBlock=>{},Err(_)=>return Err("wire_read".into()),

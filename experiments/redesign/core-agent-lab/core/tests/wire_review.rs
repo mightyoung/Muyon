@@ -22,3 +22,7 @@ fn repeated_call_id_cannot_change_value_or_original_receipt(){
     let mut good=pair("hi","r1");good.extend(pair("hi","r1"));assert!(encode_request(&request(),&good).is_ok());
     for (value,receipt) in [("changed","r2"),("hi","r2")] {let mut bad=pair("hi","r1");bad.extend(pair(value,receipt));assert!(encode_request(&request(),&bad).is_err(),"same correlation must retain original value and receipt");}
 }
+#[test]
+fn mixed_and_unknown_extension_containers_share_the_same_depth_limit(){
+    for n in [31,32]{let mut nested="0".to_string();for i in 0..n{nested=if i%2==0{format!("[{nested}]")}else{format!("{{\"a\":{nested}}}")};}let extension=format!("{{\"unknown\":{nested}}}");assert_eq!(parse(extension.as_bytes()).is_ok(),n==31);}
+}
