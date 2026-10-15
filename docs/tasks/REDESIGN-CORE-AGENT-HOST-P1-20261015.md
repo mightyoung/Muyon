@@ -125,3 +125,38 @@ remains NOT_RUN; prior-source CI is not claimed as validation of round3.
 Further product expansion is paused by the new architecture direction. This fix
 adds no business interface/adapter and freezes no inquiry-specific public core
 contract; existing experimental source, branches and failure evidence are retained.
+
+## Final generic closure — delivery precedence and idle admission
+
+One delivery-error helper now applies the following precedence, without changing
+the public experimental fields or introducing a business interface:
+
+| Existing decision / transport | Later event | Result |
+| --- | --- | --- |
+| Failed/denied/cancelled/interrupted/budget terminal | EOF or non-control delivery error | Preserve first status/reason and original accepted result |
+| Completed answer not fully delivered | New EOF | interrupted/host_eof; null answer; original tool result retained |
+| Any session with live stdin | Valid cancel/close | Existing control mapping remains; unresolved admitted invoke stays unknown |
+| Previously read-zero input | Persistent POLLHUP | Skip only closed input; do not rediscover EOF or overwrite its classification |
+| Any partial output frame | Stop/failure/EOF | Persist truthful decision, fixed partial-output exit, no appended frame |
+| Zero output bytes | Delivery correction | At most one corrected terminal within original total/bytes; no callback |
+
+Paired tests send identical complete invalid UTF8/JSON/duplicate-key/zero-length/
+oversize frames with stdin either alive or immediately half-closed. Exact original
+protocol/budget reasons must agree. Existing clean/truncated EOF and physical final
+backpressure tests remain unchanged.
+
+Root's a178 CI38688878379 compiled but had28 host tests pass and2 unexpected
+callback timeouts; these are not target RED or evidence that this closure passes.
+The source idle clock incorrectly spanned Rust-owned journal/entropy gaps between
+callbacks. Fresh wait admission now starts idle there; pending RPC/read/write and
+backpressure loops never reset it, and the absolute process total never resets.
+A no-sleep clock test verifies idle exclusion and the continuing total/pending-idle
+guards. Non-deadline helpers now use contract defaults5000/30000; silent/missing
+result tests retain explicit1000/5000 and all expected statuses are unchanged.
+The old logs lack per-process timing, so whether each observed timeout was idle
+or total is unproven. Failure diagnostics now include process elapsed time. New
+exact-source CI and scoped review remain required; local Rust is still NOT_RUN.
+Product expansion remains paused; no inquiry-specific public contract is frozen.
+The latest parallel-work direction keeps generic loop/control/EOF and existing
+recovery fences active. New business ports/schema await plugin-contract alignment;
+this closure adds no research adapter, history migration or recovery feature.

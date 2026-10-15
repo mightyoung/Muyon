@@ -146,6 +146,12 @@ impl Transport {
         let total = if self.terminal_delivery { self.total } else { self.total.saturating_sub(reserve) };
         if self.started.elapsed() >= total || (!self.terminal_delivery && self.active.elapsed() >= self.idle) { Err("callback_timeout".into()) } else { Ok(()) }
     }
+    fn admit_wait(&mut self) {
+        // Rust-owned journal/entropy work is bounded by the absolute total;
+        // peer idle time starts only when a fresh I/O/control wait is admitted.
+        // Pending RPC, frame read/write and backpressure loops never call this.
+        self.active = Instant::now();
+    }
     fn remaining(&self) -> usize {
         let cap = if self.terminal_delivery { IPC_LIMIT } else { IPC_LIMIT - FRAME_LIMIT - 4 };
         cap.saturating_sub(self.bytes)
@@ -213,6 +219,7 @@ impl Transport {
         Ok(true)
     }
     fn before_callback(&mut self) -> Result<()> {
+        self.admit_wait();
         if let Some(stop) = self.shutdown { return Err(stop.error().into()); }
         if self.ready(0, 1, false)? { let value = self.receive()?; if !self.control(&value)? { return Err("callback_mismatch".into()); } }
         if let Some(stop) = self.shutdown { return Err(stop.error().into()); } Ok(())
@@ -355,6 +362,17 @@ impl HostPorts {
         };
         state.status = status.into(); state.reason = code.into(); state.answer.clear();
     }
+    fn delivery_failure(&mut self, state: &mut State, reason: &str) {
+        let control = self.io.borrow().shutdown;
+        if let Some(stop) = control {
+            // A genuine live control remains observable through final delivery.
+            self.failure(state, stop.error());
+        } else if !matches!(state.status.as_str(), "failed" | "denied" | "cancelled" | "interrupted" | "budget_exhausted") {
+            // A completed answer is still unofficial if delivery fails. Once
+            // failure is established, later EOF/I/O cannot replace its cause.
+            self.failure(state, reason);
+        }
+    }
     fn terminal(&self, state: &State) -> Json {
         let (receipt, projection) = match &self.result { Some(result) => (string(&result.receipt_ref), result.projection()), None => (Json::Null, Json::Null) };
         object([
@@ -372,7 +390,7 @@ fn session_dir(root: &Path, start: &HostStart) -> Result<PathBuf> {
 }
 pub fn run_stdio(config: HostSessionConfig) -> Result<()> {
     if !cfg!(target_os = "linux") { return Err("host_platform_unsupported".into()); }
-    let mut transport = Transport::new(&config)?; config.validate()?;
+    let mut transport = Transport::new(&config)?; config.validate()?; transport.admit_wait();
     let start = HostStart::parse(&transport.receive()?).map_err(|_| "host_start_invalid")?;
     transport.task = start.task_id.clone(); transport.attempt = start.attempt_id.clone();
     let dir = session_dir(&config.root, &start)?; let _guard = store::lock(&dir).map_err(|_| "host_state_invalid")?;
@@ -397,9 +415,7 @@ pub fn run_stdio(config: HostSessionConfig) -> Result<()> {
             // Final delivery is still part of the controlled session. A consumed
             // Stop/close must replace the pre-delivery completed projection,
             // retaining the genuine original tool result in the journal.
-            let control_reason = shared.borrow().shutdown.map(Shutdown::error);
-            let effective = match control_reason { Some(code) => code, None => reason.as_str() };
-            ports.failure(&mut agent.state, effective);
+            ports.delivery_failure(&mut agent.state, &reason);
             ports.persist(&agent)?;
             if shared.borrow().output_incomplete { return Err("host_partial_output".into()); }
             // No byte of this terminal was emitted. One corrected terminal may
@@ -408,9 +424,7 @@ pub fn run_stdio(config: HostSessionConfig) -> Result<()> {
             let corrected = ports.terminal(&agent.state);
             let retry = shared.borrow_mut().send(&corrected);
             if let Err(failure) = &retry {
-                let control_reason = shared.borrow().shutdown.map(Shutdown::error);
-                let effective = match control_reason { Some(code) => code, None => failure.as_str() };
-                ports.failure(&mut agent.state, effective);
+                ports.delivery_failure(&mut agent.state, failure);
                 ports.persist(&agent)?;
             }
             if shared.borrow().output_incomplete { return Err("host_partial_output".into()); }
@@ -422,6 +436,26 @@ pub fn run_stdio(config: HostSessionConfig) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn fresh_admission_excludes_host_work_from_idle_without_resetting_total() {
+        let now = Instant::now();
+        // Clock-only instance: no descriptor was opened or changed, so suppress
+        // the fd-restoring Drop while testing deadline policy without I/O/sleeps.
+        let mut timer = std::mem::ManuallyDrop::new(Transport {
+            started: now, active: now - Duration::from_secs(2), idle: Duration::from_secs(1), total: Duration::from_secs(10),
+            bytes: 0, task: String::new(), attempt: String::new(), next: 1, shutdown: None, terminal_delivery: false,
+            invoke_admitted: false, output_incomplete: false, input_closed: false, old_flags: [0; 2],
+        });
+        assert_eq!(timer.deadline(), Err("callback_timeout".into()));
+        timer.admit_wait();
+        assert_eq!(timer.deadline(), Ok(()), "host-owned work must not count as a silent peer wait");
+        assert_eq!(timer.started, now, "fresh admission never resets the attempt total");
+        timer.active = now - Duration::from_secs(2);
+        assert_eq!(timer.deadline(), Err("callback_timeout".into()), "a pending silent wait still exhausts idle");
+        timer.started = now - Duration::from_secs(11);
+        timer.admit_wait();
+        assert_eq!(timer.deadline(), Err("callback_timeout".into()), "admission cannot revive an exhausted total");
+    }
     #[test]
     fn invocation_identity_distinguishes_attempts_in_the_same_process() {
         let start = HostStart { task_id: "t-one".into(), attempt_id: "a-one".into(), scope_ref: "scope:one".into(), prompt: String::new(), tool: Json::Null };

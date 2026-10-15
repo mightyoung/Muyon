@@ -1,7 +1,7 @@
 //! Protocol tests use the compiled core and an in-process synthetic host.
 //! They do not claim a product registry, model, credential or device execution.
 use muyon_core_agent_lab::wire_json::{self, Json, object, string};
-use std::{fs, io::{Read, Write}, path::PathBuf, process::{Command, Stdio}, sync::atomic::{AtomicU64, Ordering}};
+use std::{fs, io::{Read, Write}, path::PathBuf, process::{Command, Stdio}, sync::atomic::{AtomicU64, Ordering}, time::Instant};
 use std::os::fd::AsRawFd;
 
 static NEXT: AtomicU64 = AtomicU64::new(0);
@@ -10,18 +10,23 @@ struct HostProcess {
     input: Option<std::process::ChildStdin>,
     output: std::process::ChildStdout,
     root: PathBuf,
+    started: Instant,
 }
 impl HostProcess {
     fn new() -> Self {
+        Self::with_deadlines(5000, 30000)
+    }
+    fn with_deadlines(idle_ms: u64, total_ms: u64) -> Self {
         let root = std::env::temp_dir().join(format!("core-host-test-{}-{}", std::process::id(), NEXT.fetch_add(1, Ordering::SeqCst)));
         fs::create_dir(&root).unwrap();
+        let started = Instant::now();
         let mut child = Command::new(env!("CARGO_BIN_EXE_muyon-core-agent-lab"))
             .arg("host-session").arg("--root").arg(&root)
-            .args(["--idle-ms", "1000", "--total-ms", "5000"])
+            .arg("--idle-ms").arg(idle_ms.to_string()).arg("--total-ms").arg(total_ms.to_string())
             .stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn().unwrap();
         let input = child.stdin.take().unwrap();
         let output = child.stdout.take().unwrap();
-        Self { child, input: Some(input), output, root }
+        Self { child, input: Some(input), output, root, started }
     }
     fn send(&mut self, value: Json) {
         let bytes = value.encode().into_bytes();
@@ -90,7 +95,7 @@ fn field<'a>(value: &'a Json, key: &str) -> &'a Json { value.object().unwrap().g
 fn text<'a>(value: &'a Json, key: &str) -> &'a str { field(value, key).string().unwrap() }
 fn request(process: &mut HostProcess, expected: &str, request_id: u64, turn: u64) -> Json {
     let value = process.receive();
-    assert_eq!(text(&value, "kind"), expected, "HOST_ROUNDTRIP_REQUIRES_REAL_AGENT_CALLBACK: {}", value.encode());
+    assert_eq!(text(&value, "kind"), expected, "HOST_ROUNDTRIP_REQUIRES_REAL_AGENT_CALLBACK: elapsed_ms={} {}", process.started.elapsed().as_millis(), value.encode());
     assert_eq!(field(&value, "request_id"), &number(request_id));
     assert_eq!(field(&value, "turn"), &number(turn));
     assert_eq!(text(&value, "task_id"), "host-task");
@@ -275,7 +280,7 @@ fn host_close_during_model_callback_is_terminal_and_reaped() {
 
 #[test]
 fn host_silent_callback_has_a_semantic_timeout_terminal() {
-    let mut process = HostProcess::new();
+    let mut process = HostProcess::with_deadlines(1000, 5000);
     process.send(start());
     request(&mut process, "model_request", 1, 1);
     terminal(&mut process, "failed", "callback_timeout", 0);
@@ -305,7 +310,7 @@ fn host_close_after_invoke_keeps_the_original_result_and_stops() {
 
 #[test]
 fn host_cancel_after_invoke_without_result_stays_unknown() {
-    let mut process = HostProcess::new();
+    let mut process = HostProcess::with_deadlines(1000, 5000);
     admit_tool(&mut process);
     control(&mut process, "cancel");
     let value = terminal(&mut process, "interrupted", "tool_outcome_unknown", 1);
@@ -620,4 +625,31 @@ fn host_new_eof_during_final_terminal_backpressure_is_not_ignored() {
     assert_eq!(field(&journal, "projection"), &projected_result());
     let mut partial = Vec::new(); process.output.read_to_end(&mut partial).unwrap();
     assert!(partial.len() < declared, "no new terminal after a partial output frame");
+}
+
+#[test]
+fn host_complete_bad_frames_keep_the_same_failure_when_input_is_half_closed() {
+    fn frame(body: &[u8]) -> Vec<u8> {
+        let mut bytes = (body.len() as u32).to_be_bytes().to_vec(); bytes.extend_from_slice(body); bytes
+    }
+    let cases = [
+        ("invalid_utf8", frame(&[b'{', 255, b'}']), "failed", "host_protocol"),
+        ("invalid_json", frame(b"{"), "failed", "host_protocol"),
+        ("duplicate_key", frame(br#"{"v":1,"v":1,"kind":"model_reply"}"#), "failed", "host_protocol"),
+        ("zero_length", 0u32.to_be_bytes().to_vec(), "failed", "host_protocol"),
+        ("oversize_header", 65537u32.to_be_bytes().to_vec(), "budget_exhausted", "host_budget"),
+    ];
+    for (label, bytes, status, reason) in cases {
+        for half_close in [false, true] {
+            let mut process = HostProcess::new();
+            process.send(start()); request(&mut process, "model_request", 1, 1);
+            process.send_raw(&bytes);
+            if half_close { process.close_input(); }
+            let value = terminal(&mut process, status, reason, 0);
+            assert_eq!(field(&value, "projection"), &Json::Null);
+            let journal = wire_json::parse(&fs::read(process.root.join("host-task/host-attempt/host.db")).unwrap()).unwrap();
+            assert_eq!(text(&journal, "status"), status, "{label} half_close={half_close}: delivery EOF cannot replace an established failure");
+            assert_eq!(text(&journal, "reason"), reason, "{label} half_close={half_close}: preserve the first failure classification");
+        }
+    }
 }
