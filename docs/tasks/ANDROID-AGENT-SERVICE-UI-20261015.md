@@ -54,3 +54,18 @@ Final review-fix source executes old 16 + 22 + 29 and new 45 named JVM cases: **
 | `phase1-lookup-green.log` | `c06727b8c29e9618fcabf1931bfd40a6b362e1d0873268fc7f3bb50e6cd2a739` |
 | `phase1-review-red.log` | `d18b036978e7fe925445d90b6781541ca96f37a2181081d06814871257a01d8d` |
 | `phase1-review-green.log` | `f6e10472ec1785e73d6fe6c92c4ea9cef9c8ea69e09e6732e6ab95df6fae295a` |
+
+## Independent review round 2: historical selection
+
+Review found a remaining historical selection race in `7e53b03f`: capture A, capture B, accept B, then late A could replace B because the accepted-key comparison alone did not bind the **currently selected query**. The original 112-case evidence above remains preserved; it did not cover this reverse delivery.
+
+Compiling RED checkpoint `e9625170c0a29a8af10f736d44bf697966b8ba23` adds two named cases: late A at the same revision 3 and at lower revision 2 after B at revision 3. Both fail on the prior implementation (2/47), process exit 1. Each case also requires the active Running request to stay untouched, accepts the current B ticket's identical response, and accepts a newly captured explicit A query at the same server revision.
+
+`captureLookup` now establishes the current historical selection at successful capture using the returned ticket's unique object identity as an opaque query generation. Historical delivery must carry that exact current ticket; data-class value equality does not make an older selection current. This state is separate from active-run selection, connection/lease/display generations and accepted historical evidence. No DTO/FFI, native coordination or listener-lock behavior changes.
+
+Final exact-source check: old groups 16 + 22 + 29 and new 47, **114 PASS**, exit 0. Command is the same existing compiler invocation above with `MUYON_UI_OUTPUT=/tmp/rd-android-agent-service-ui-20261015/query-selection-green`. Android Binder/native runtime remains **NOT_RUN**; independent review of this correction is still required.
+
+| Round 2 log | SHA-256 |
+| --- | --- |
+| `phase1-query-selection-red.log` | `3d81379da1cb2c6c06e4a9a96bed2a73c5fb9299bb8fd3220bad0b7783222ea0` |
+| `phase1-query-selection-green.log` | `908835c32be651ff07a084423f900b74e6d05d8310f36b74e724db5fadf83d9f` |
