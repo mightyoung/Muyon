@@ -16,7 +16,7 @@ fn revoke_before_invoke_executes_zero() {
 fn ticket_is_one_shot() {let mut c=admitted();let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));assert!(!ok(&invoke(&mut c,t.clone(),authority())));assert!(ok(&accept(&mut c,t.clone(),authority(),receipt(),projection())));assert!(!ok(&accept(&mut c,t,authority(),receipt(),projection())));assert_eq!(field(&stats(&mut c),"execution_requests"),&json("1"));}
 #[test]
 fn receipt_reference_has_original_owner() {
- for key in ["owner","invocation_id","binding_id"] {let mut c=admitted();let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));let mut r=receipt();put(&mut r,key,string("foreign"));assert!(!ok(&accept(&mut c,t,authority(),r,projection())));}
+ for key in ["owner","invocation_id","binding_id","identity"] {let mut c=admitted();let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));let mut r=receipt();put(&mut r,key,string("foreign"));assert!(!ok(&accept(&mut c,t,authority(),r,projection())));}
  let mut c=admitted();let t=ticket(&mut c);assert!(ok(&invoke(&mut c,t.clone(),authority())));let r=accept(&mut c,t,authority(),receipt(),projection());assert!(ok(&r));assert_eq!(field(&r,"receipt_ref"),&receipt());assert_eq!(field(&stats(&mut c),"receipts_created"),&json("0"));
 }
 #[test]

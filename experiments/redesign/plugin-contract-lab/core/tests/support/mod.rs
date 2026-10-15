@@ -16,7 +16,7 @@ pub fn authority() -> Json { json(r#"{"allowed":true,"revision":"a1","binding_re
 pub fn register(c: &mut Catalog, b: Json) -> Json { call(c,"register",vec![("bundle",b),("host_bindings",json(r#"["host-equipment-read"]"#))]) }
 pub fn admitted() -> Catalog { let mut c=Catalog::new(); assert!(ok(&register(&mut c,bundle())),"valid fixture must register"); c }
 pub fn prepare(c: &mut Catalog) -> Json {
-    call(c,"prepare",vec![("operation",string("equipment_loan/inspect_equipment@1")),("args",json(r#"{"equipment_key":"e1","include_loans":true}"#)),("authority",authority()),("invocation_id",string("i1")),("receipt_owner",string("ToolRegistry"))])
+    call(c,"prepare",vec![("operation",string("equipment_loan/inspect_equipment@1")),("args",json(r#"{"equipment_key":"e1","include_loans":true}"#)),("authority",authority()),("invocation_id",string("i1")),("receipt_owner",string("ToolRegistry")),("receipt_identity",string("host-sha256-identity"))])
 }
 pub fn ticket(c: &mut Catalog) -> Json { let p=prepare(c); assert!(ok(&p),"valid read must prepare"); field(&p,"ticket").clone() }
 pub fn invoke(c: &mut Catalog, t: Json, a: Json) -> Json { call(c,"invoke",vec![("ticket",t),("authority",a)]) }
