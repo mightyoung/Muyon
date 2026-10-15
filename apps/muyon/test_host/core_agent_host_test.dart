@@ -356,7 +356,7 @@ void main() {
         () => f.host.personalAgent.compactNow(task.id),
         () => f.host.personalAgent.confirm(task.id, requestDigest: 'unsupported'),
       ]) {
-        await expectLater(action(), throwsA(isA<StateError>().having((e) => '${e.message}', 'code', contains('core_'))));
+        await expectLater(action(), throwsA(isA<StateError>().having((e) => e.message, 'code', contains('core_'))));
       }
     }
     await unsupported();
