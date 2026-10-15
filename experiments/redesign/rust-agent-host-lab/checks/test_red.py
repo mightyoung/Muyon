@@ -16,6 +16,11 @@ def transcript(suite):
 
 
 class RedTests(unittest.TestCase):
+    def test_protocol_four_case_contract_rejects_old_filtered_count(self):
+        self.assertEqual(CONTRACTS['protocol-red']['filtered'], 3)
+        old = transcript('protocol-red').replace('3 filtered out', '2 filtered out')
+        self.assertFalse(classify('protocol-red', old, 101)['accepted'])
+
     def test_each_exact_guard_and_assertion_is_recognized(self):
         for suite in CONTRACTS:
             self.assertTrue(classify(suite, transcript(suite), 101)['accepted'])
