@@ -28,11 +28,15 @@ def service_red(mode, raw, status, source, library_sha, contract):
     if valid_contract and identity and no_fault:
         reach = contract['native_reach']
         if mode == 'service-rust-red':
+            # Count headers independently of message content: an auxiliary
+            # empty-message panic must not disappear from the failure oracle.
+            panic_headers = re.findall(r"^thread '([^']*)'(?: \(\d+\))? panicked at\b", raw, re.M)
             panics = re.findall(r"thread '([^']+)'(?: \(\d+\))? panicked at [^\n]+:\n([^\n]+)", raw)
             rows = re.findall(r'^test (\S+) \.\.\. (ok|FAILED|ignored)\s*$', raw, re.M)
             summaries = re.findall(r'^test result: (ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;', raw, re.M)
             valid = (status == 101 and 'Finished `release` profile' in raw
                 and len(re.findall(r'Running tests/' + re.escape(contract['target']) + r'\.rs \(', raw)) == 1
+                and panic_headers == [contract['test']]
                 and panics == [(contract['test'], contract['rust_assert'])]
                 and rows == [(contract['test'], 'FAILED')]
                 and summaries == [('FAILED', '0', '1', '0', '0', str(contract['filtered']))]

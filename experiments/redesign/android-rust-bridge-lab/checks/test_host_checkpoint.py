@@ -143,6 +143,20 @@ class HostCheckpointControls(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertEqual(output,{'mode':'service-oracle-red','red':'[]'})
 
+    def test_any_additional_panic_header_invalidates_oracle_red(self):
+        raw = oracle_transcript()
+        # Healthy modern and legacy primary siblings remain valid.
+        for sibling in [raw, raw.replace("' (901) panicked", "' panicked")]:
+            self.assertTrue(oracle_red(sibling, 101, 'a' * 40, '0' * 64)['accepted'])
+        for thread in ['worker', ORACLE['red']['test']]:
+            for suffix in ['', ' (15)']:
+                for message in ['', 'auxiliary setup failure']:
+                    extra = f"thread '{thread}'{suffix} panicked at tests/setup.rs:1:1:\n{message}\n"
+                    for bad in [extra + raw, raw + extra,
+                                raw.replace('test result:', extra + 'test result:')]:
+                        with self.subTest(thread=thread, suffix=suffix, message=message, placement=bad.index(extra)):
+                            self.assertFalse(oracle_red(bad, 101, 'a' * 40, '0' * 64)['accepted'])
+
     def test_main_preserves_required_red_nonzero_after_recognition(self):
         import contextlib
         import io
