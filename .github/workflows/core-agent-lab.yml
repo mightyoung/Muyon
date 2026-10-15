@@ -30,7 +30,7 @@ jobs:
           rustc --version | tee "$RUNNER_TEMP/core-agent-lab-evidence/rustc-version.txt"
           cargo --version | tee "$RUNNER_TEMP/core-agent-lab-evidence/cargo-version.txt"
           python3 --version | tee "$RUNNER_TEMP/core-agent-lab-evidence/python-version.txt"
-      - name: Rust behavior tests (intentional RED must fail)
+      - name: Rust behavior tests
         run: |
           cargo test --offline --locked --manifest-path experiments/redesign/core-agent-lab/core/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/core-agent-lab-evidence/rust-tests.log"
       - name: Build synthetic process executable
