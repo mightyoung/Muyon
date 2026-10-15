@@ -47,3 +47,13 @@ internal fun projectAgentReply(reply:AgentCloseReply):UiAgentWireReply=when(val 
     AgentCloseOutcome.Closed -> UiAgentWireReply.Ack(reply.meta.ui(),UiAgentAck.CLOSED)
     is AgentCloseOutcome.Rejected -> UiAgentWireReply.Rejected(reply.meta.ui(),o.error.ui())
 }
+
+
+/** Correlation only; this seam never decides native cancellation or a business outcome. */
+internal fun agentControlRunId(run:UiAgentRun?,selected:UiAgentIntent?):String? = when(run) {
+    is UiAgentRun.Admitted -> run.identity
+    is UiAgentRun.Running -> run.identity
+    is UiAgentRun.Terminal -> run.summary.identity
+    is UiAgentRun.Unresolved -> run.identity
+    else -> null
+}?.runId

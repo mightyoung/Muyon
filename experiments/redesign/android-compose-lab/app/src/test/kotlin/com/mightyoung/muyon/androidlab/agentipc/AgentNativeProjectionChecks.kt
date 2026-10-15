@@ -14,6 +14,16 @@ fun main() {
     cases["settled no admission stays sealed without synthetic identities"]={val r=projectAgentReply(AgentSnapshotReply(m,AgentSnapshotOutcome.Snapshot(AgentServiceState.CLOSING,AgentRunSnapshot.SettledNoAdmission(AgentNoAdmissionSettlement(i,AgentNoAdmissionReason.QUOTA_EXCEEDED))))) as UiAgentWireReply.Snapshot;check(r.value.run==UiAgentRun.SettledNoAdmission(UiAgentIntent(i.requestId,UiAgentVariant.EQUIPMENT,i.sourceBuildIdentity),UiAgentNoAdmissionReason.QUOTA_EXCEEDED))}
     cases["requested control and close remain acknowledgements not business terminals"]={check(projectAgentReply(AgentControlReply(m,AgentControlOutcome.Requested))==UiAgentWireReply.Ack(UiAgentMeta(1u,m.buildIdentity,m.serviceEpoch,9),UiAgentAck.REQUESTED));check(projectAgentReply(AgentCloseReply(m,AgentCloseOutcome.Closing)) is UiAgentWireReply.Ack);check(projectAgentReply(AgentSnapshotReply(m,AgentSnapshotOutcome.Unresolved)) is UiAgentWireReply.Unresolved)}
     cases["start existing preserves original native run and rejected unit"]={val run=AgentRunSnapshot.QueuedVolatile(i);val r=projectAgentReply(AgentStartReply(m,AgentStartOutcome.Existing(run))) as UiAgentWireReply.Started;check(r.existing && r.run.intent.requestId==i.requestId);check(projectAgentReply(AgentStartReply(m,AgentStartOutcome.Rejected(AgentServiceError.REQUEST_CONFLICT))) is UiAgentWireReply.Rejected)}
+    cases["new selected request never sends prior snapshot run identity on cancel"]={
+        val original=UiAgentIntent("original",UiAgentVariant.EQUIPMENT,i.sourceBuildIdentity)
+        val next=original.copy(requestId="next")
+        val prior=UiAgentRun.Running(original,UiAgentRunIdentity(identity.runId,identity.admittedServiceEpoch,null))
+        check(agentControlRunId(prior,original)==identity.runId)
+        check(agentControlRunId(prior,next)==null){"CONTROL_TARGET_RED: old run identity cannot control selected new request"}
+        check(agentControlRunId(prior,null)==null)
+        check(agentControlRunId(prior.copy(intent=next),next)==identity.runId)
+        check(agentControlRunId(UiAgentRun.Queued(next),next)==null)
+    }
     cases.forEach{(name,test)->test();println("PASS B generated projection $name")}
     println("${cases.size}/${cases.size} B generated projection checks passed; metadata only, Android runtime NOT_RUN")
 }
