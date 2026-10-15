@@ -13,7 +13,7 @@ import time
 import urllib.request
 
 from ffi_evidence import SERVICE_MODES, classify
-from host_checkpoint import inventory as checkpoint_inventory, target_green as checkpoint_target_green
+from host_checkpoint import inventory as checkpoint_inventory, target_green as checkpoint_target_green, oracle_inventory, oracle_red
 from full_evidence import rust_full, jvm_full, panic_full
 from binding_source import PINS as BINDING_SOURCE_PINS, emit as emit_android_binding
 
@@ -149,8 +149,9 @@ def download(url, output, expected):
         raise RuntimeError('official_tool_hash_mismatch')
 
 
-def host_checkpoint(evidence, work, source):
+def host_checkpoint(evidence, work, source, oracle=False):
     contract = checkpoint_inventory(ROOT)
+    oracle_contract = oracle_inventory(ROOT) if oracle else None
     host = ROOT / contract['manifest']
     env = dict(os.environ, CARGO_TERM_COLOR='never', CARGO_INCREMENTAL='0',
                CARGO_TARGET_DIR=str(work / 'host-target'))
@@ -178,7 +179,7 @@ def host_checkpoint(evidence, work, source):
         results.append(row)
         print(raw.read_text(errors='replace'), flush=True)
         print('SERVICE_HOST_CHECKPOINT_TARGET ' + json.dumps(row, sort_keys=True), flush=True)
-    return dict(accepted=all(row['accepted'] for row in results),
+    result = dict(accepted=all(row['accepted'] for row in results),
         classification='HOST_CHECKPOINT_GREEN' if all(row['accepted'] for row in results) else 'INVALID',
         source_sha=source, plugin_binary_sha256=sha(binary), shipping_or_service_green=False,
         host_cargo_lock_sha256=sha(host.parent / 'Cargo.lock'),
@@ -190,11 +191,25 @@ def host_checkpoint(evidence, work, source):
                  'unit_doc_tests': 'NOT_RUN; whole host test executables compiled only',
                  'legacy_and_native_inverses': 'NOT_RUN by partial checkpoint; mandatory final gates unchanged',
                  'android_runtime': 'NOT_RUN'})
+    if oracle_contract:
+        result['oracle_test_source'] = oracle_contract
+        result['oracle'] = dict(accepted=False, classification='NOT_RUN', reason='component_gate_failed')
+        if result['accepted']:
+            red = oracle_contract['red']; raw = evidence / 'service-oracle-red.log'
+            status = run(['cargo', 'test', '--offline', '--locked', '--release', '--test',
+                red['target'], red['test'], '--', '--exact', '--nocapture'],
+                raw, env, cwd=host.parent, required=False)
+            verdict = oracle_red(raw.read_text(errors='replace'), status, source, sha(binary))
+            result.update(accepted=verdict['accepted'], classification=verdict['classification'],
+                          command_exit_code=status, oracle=dict(verdict, raw_sha256=sha(raw)))
+            print(raw.read_text(errors='replace'), flush=True)
+            print('SERVICE_CONTROLLER_ORACLE_VERDICT ' + json.dumps(result['oracle'], sort_keys=True), flush=True)
+    return result
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full', 'service-host-checkpoint'] + SERVICE_MODES, required=True)
+    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full', 'service-host-checkpoint', 'service-oracle-red'] + SERVICE_MODES, required=True)
     parser.add_argument('--evidence-dir', type=Path, required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--emit-android-source', action='store_true')
@@ -213,9 +228,9 @@ def main():
             raise RuntimeError('source_identity')
         if subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT).strip():
             raise RuntimeError('unclean_source')
-        if args.mode == 'service-host-checkpoint':
-            result.update(host_checkpoint(evidence, work, source))
-            return 0 if result['accepted'] else 1
+        if args.mode in ['service-host-checkpoint', 'service-oracle-red']:
+            result.update(host_checkpoint(evidence, work, source, oracle=args.mode == 'service-oracle-red'))
+            return result.get('command_exit_code', 0) if result['accepted'] else 1
         inventory()
         service = service_inventory() if args.mode in SERVICE_MODES else None
         env = dict(os.environ, MUYON_BRIDGE_BUILD_ID=source, CARGO_TERM_COLOR='never',
