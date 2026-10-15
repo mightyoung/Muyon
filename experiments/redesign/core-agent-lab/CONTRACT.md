@@ -24,6 +24,8 @@ Budget checks remain required before the first admitted side effect and persist 
 
 Recovery reconciliation updates original effect facts without resurrecting terminal task control state: completed/cancelled/denied/failed/budget_exhausted remain terminal unless a separately authorized explicit new operation exists. Restoring original receipt evidence is not that authorization. A missing-evidence projection may be unknown while retaining its prior terminal-control barrier.
 
+A retained historical receipt is validated with its own original host Binding even when a different new invocation is prepared/waiting. Historical-evidence unavailability freezes fresh provider/tool admission and confirmation consumption while preserving the newer invocation as undispatched. Lookup after identical original evidence returns restores the prior usable waiting/control state without turning the newer invocation into a nonexistent dispatched operation.
+
 Persist cancellation/budget/context/provider position so a normal subsequent `run` does not repeat completed calls and an unknown run cannot dispatch. Explicit `lookup` may reconcile the original receipt, then a later explicit `run` may request the next scripted response; it must never replay an unresolved invocation. Cancellation after commit keeps receipt and prevents further provider turns.
 
 Private one-owner directory, std atomic replacement/fsync under Linux assumptions; strict versioned bounded parser/checks; directory lock. No production schema, crypto authentication, SQLite migration, power-loss/remote exactly-once, Android/Electron or real model claim.
