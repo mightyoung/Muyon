@@ -348,3 +348,55 @@ fn close_and_reconnect_preserve_original_durable_outcome() {
     replacement.retire_service();
     replacement.await_settled();
 }
+
+#[test]
+fn incomplete_temp_evidence_blocks_ready_without_cleanup() {
+    let r = Runtime::new();
+    let client = r.client('b');
+    assert_eq!(
+        visible(&r.c, &client, 1, true).outcome,
+        AgentControlOutcome::Applied
+    );
+    assert!(matches!(
+        start(&r.c, &client, "original", AgentReadVariant::Equipment).outcome,
+        AgentStartOutcome::QueuedVolatile { .. }
+    ));
+    r.c.await_settled();
+    let done = summary(&r.c, &client);
+    let path = r
+        .root
+        .join("native-agent-service-v1")
+        .join(&done.identity.run_id);
+    let native = store::read(&path.join("native.db")).unwrap();
+    let task = store::read(&path.join("task.db")).unwrap();
+    r.c.retire_service();
+    r.c.await_settled();
+    // Separate fresh controller/lease: valid committed evidence restores normally.
+    let healthy = AgentServiceController::new(config(&r.root)).unwrap();
+    let healthy_drain = Drain(&healthy);
+    assert!(matches!(
+        healthy.await_settled().outcome,
+        AgentSnapshotOutcome::Snapshot {
+            service_state: AgentServiceState::Ready,
+            ..
+        }
+    ));
+    let healthy_client = connect(&healthy, 'c');
+    assert_eq!(summary(&healthy, &healthy_client), done);
+    healthy.retire_service();
+    healthy.await_settled();
+    drop(healthy_drain);
+    let remnant = ".task.db.9.1";
+    store::atomic(&path, remnant, "unfinished task candidate").unwrap();
+    let interrupted = AgentServiceController::new(config(&r.root)).unwrap();
+    let _drain = Drain(&interrupted);
+    let state = interrupted.await_settled();
+    assert!(matches!(state.outcome,AgentSnapshotOutcome::Snapshot{service_state:AgentServiceState::RecoveryRequired,..}),
+        "SERVICE_TEMP_RED: incomplete durable candidate forbids Ready even with a valid prior terminal");
+    assert_eq!(
+        store::read(&path.join(remnant)).unwrap(),
+        "unfinished task candidate"
+    );
+    assert_eq!(store::read(&path.join("native.db")).unwrap(), native);
+    assert_eq!(store::read(&path.join("task.db")).unwrap(), task);
+}
