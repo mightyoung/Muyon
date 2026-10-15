@@ -21,3 +21,12 @@ actual synthetic execution, Linux flock, cancellation signal, lookup-only
 uncertainty, exact receipt reconciliation and persistent byte/step/call limits.
 14 Rust integration tests authored; implementation compilation and GREEN pending
 independent runner. Source diff whitespace check passed; this is not Rust evidence.
+
+First implementation6d25066: CI38665364085 compiled and passed all13 Rust tests
+and release build. Independent process suite initially had3 checker/interface
+assumption failures, corrected by its separate owner (duplicate-ref rejection,
+context hex roles, pre-start input limit). These are distinct from proactive
+source2a919c06: completed task projection now revalidates original effect evidence;
+its new14th Rust test rejects trusting cached completion after evidence damage.
+Five isolated inverse mutants now include restoring that earlier cache trust.
+Latest source and mutation runtime remain pending the next exact-candidate CI.

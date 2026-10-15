@@ -94,8 +94,9 @@ Concurrent cancel output may still show the executor's durable pending status,
 with `cancelled=true`; the executor consumes the durable request on release.
 
 Author inverse mutations: `python3 core/mutations.py --evidence-dir /tmp/OUTPUT`
-requires preinstalled Cargo. Four fresh private source copies weaken hard policy,
-unknown hold, duplicate suppression and persistent counters. Each must compile
+requires preinstalled Cargo. Five fresh private source copies weaken hard policy,
+unknown hold, duplicate suppression, original-receipt validation and persistent
+counters. Each must compile
 and fail behavioral Rust assertions; source-under-review remains untouched.
 ToolPort direct callers must hold the private directory lock around lookup/execute;
 the CLI Agent commands do so. No cross-task/shared-host storage service is provided.

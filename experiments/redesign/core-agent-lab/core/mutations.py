@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run four inverse mutants in private copies using existing offline Cargo only."""
+"""Run five inverse mutants in private copies using existing offline Cargo only."""
 import argparse
 import json
 from pathlib import Path
@@ -21,6 +21,8 @@ mutations = [
     ('duplicate_effect', 'src/store.rs',
      'if let Some(r)=state.receipts.iter().find(|r|r.binding.invocation==b.invocation){if &r.binding!=b{return Err("binding_conflict".into());}return Ok(r.clone());}',
      ''),
+    ('cached_receipt_trust', 'src/agent.rs',
+     'if !state.unresolved {', 'if false && !state.unresolved {'),
     ('budget_reset', 'src/agent.rs',
      'let mut state=State::load(dir)?;',
      'let mut state=State::load(dir)?;state.counters=Counters::default();'),
