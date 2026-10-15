@@ -58,3 +58,12 @@ pub fn decode_context(text: &str) -> Result<Vec<Message>> {
 }
 pub fn context_bytes(messages: &[Message]) -> u64 { messages.iter().map(|m| m.text.len() as u64).sum() }
 pub fn event_bytes(e: &ModelEvent) -> u64 { match e { ModelEvent::Tool{call_ref,name,value} => (call_ref.len()+name.len()+value.len()) as u64, ModelEvent::Answer(s)|ModelEvent::Fail(s)=>s.len() as u64 } }
+
+/// Structural native history. Never reconstructed from message text.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum NativeMessage {
+    User(String),
+    Assistant(String),
+    AssistantCall { call_ref:String, name:String, value:String },
+    ToolResult { call_ref:String, value:String, receipt:String },
+}
