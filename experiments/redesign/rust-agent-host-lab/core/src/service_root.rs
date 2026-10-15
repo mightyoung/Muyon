@@ -4,6 +4,7 @@ use muyon_core_agent_lab::store::{self, DirectoryLock};
 use muyon_plugin_contract_lab::{object, parse, string, Json};
 use std::{
     fs,
+    io::Read,
     os::unix::fs::{MetadataExt, PermissionsExt},
     path::{Path, PathBuf},
 };
@@ -126,6 +127,27 @@ fn decode_run(j: &Json) -> Result<AgentDurableRun> {
         },
     })
 }
+// Enforce the narrower Service index limit on the actual read, independently
+// of the existing Core reader's 1 MiB file bound. Keep the extra byte for growth.
+fn read_index(path: &Path) -> Result<String> {
+    let metadata = fs::symlink_metadata(path).map_err(|e| e.to_string())?;
+    if !metadata.is_file() || metadata.file_type().is_symlink() {
+        return Err("service_index_file".into());
+    }
+    if metadata.len() > INDEX_BYTES as u64 {
+        return Err("service_index_bound".into());
+    }
+    let mut bytes = Vec::new();
+    fs::File::open(path)
+        .map_err(|e| e.to_string())?
+        .take(INDEX_BYTES as u64 + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|e| e.to_string())?;
+    if bytes.len() > INDEX_BYTES {
+        return Err("service_index_bound".into());
+    }
+    String::from_utf8(bytes).map_err(|_| "service_index_utf8".into())
+}
 impl ServiceRoot {
     pub fn open(private_root: &Path) -> Result<Self> {
         store::validate_dir(private_root)?;
@@ -149,7 +171,7 @@ impl ServiceRoot {
             poisoned: false,
         };
         if result.dir.join("index.db").exists() {
-            let data = store::read(&result.dir.join("index.db"))?;
+            let data = read_index(&result.dir.join("index.db"))?;
             if data.len() > INDEX_BYTES {
                 return Err("service_index_bound".into());
             }

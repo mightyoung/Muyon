@@ -85,6 +85,17 @@ fn root_lease_serializes_durable_admission_and_preserves_identity() {
 }
 #[test]
 fn root_inventory_refuses_unowned_entries_and_peak_overflow() {
+    let oversized = root();
+    let ns = oversized.join("native-agent-service-v1");
+    store::create_dir(&ns).unwrap();
+    store::atomic(&ns, "index.db", &"x".repeat(65537)).unwrap();
+    assert!(matches!(ServiceRoot::open(&oversized),Err(ref e) if e=="service_index_bound"));
+    let linked = root();
+    let ns = linked.join("native-agent-service-v1");
+    store::create_dir(&ns).unwrap();
+    store::atomic(&linked, "outside.db", "private unrelated file").unwrap();
+    std::os::unix::fs::symlink(linked.join("outside.db"), ns.join("index.db")).unwrap();
+    assert!(matches!(ServiceRoot::open(&linked),Err(ref e) if e=="service_index_file"));
     let bad = root();
     let namespace = bad.join("native-agent-service-v1");
     store::create_dir(&namespace).unwrap();
