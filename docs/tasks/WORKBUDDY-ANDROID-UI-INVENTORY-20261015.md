@@ -83,3 +83,13 @@ integration盘点含18个Kotlin文件（含宿主、测试和探针）。Muyon�
 完整临时审查报告：`/tmp/rd-workbuddy-android-ui-20261015/inventory.md`；同目录含reference-manifest.json、SHA256SUMS、pr69-identity.json、source-inventory.json及固定证据副本。原始图像/manifest仅临时目录审查，不随此文档提交。
 
 完成固定提交tree/show、SHA-256副本校验32/32、10 PNG完整解码与逐张查看、源路径/类/Compose函数清单核查。本文档提交仅新增本文件；无产品代码变动，不声称Android已编译/运行或像素已对齐。剩余阻塞是真实页面原图；原包/工具/明确许可仅在继续资源核验或直接复用时需要。
+
+## 追加：Drive候选已实际尝试，停止在安全警告
+
+用户授权文件夹 `https://drive.google.com/drive/folders/1ifCHLvXiRAThyWUyCb6FbP8CfvKjnrVi`。主线程列出的 `base (2).apk` 候选293687392字节与既有manifest同大小，ID为 `12u0R5_dyUPamFlX2VSQUX8Wg6G8-cQWh`；大小一致不等于身份验证。连接器413对应268435456字节单文件上限，不是访问权限拒绝。
+
+本轮已对候选正常公开view页、`drive.usercontent.google.com/download?id=12u0R5_dyUPamFlX2VSQUX8Wg6G8-cQWh&export=download`执行未经认证的正常GET，无cookie/凭据/确认token。两者HTTP200，但都是HTML；下载入口返回2552字节，实际可见安全警告“**This file is too large for Google to scan for viruses.**”，并要求Download anyway确认。
+
+依照明确的“遇安全警告不绕过”要求，本轮没有提交该表单、构造confirm-token请求或尝试绕过入口。**APK尚未下载，SHA-256/包名/版本未从原包核验，资源ZIP/字体许可未检查。**这不是自动审批拒绝，也不能再笼统归因“Drive没权限”。进一步原包检查需用户先处理正常Drive安全确认并提供已批准的可读文件/交付方式；不因此暂停现有页面清单。
+
+实际请求与可见提示证据在独立临时报告的 `drive-review/public-download-attempts.json`、`security-warning.json`；无凭据原值或隐藏表单字段。原先只读结论仍成立：已有10张资源PNG不是完整页面截图；REA未提供且未使用；许可未明资源不直接复制。
