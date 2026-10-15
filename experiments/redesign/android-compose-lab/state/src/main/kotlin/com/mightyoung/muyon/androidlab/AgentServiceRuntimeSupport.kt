@@ -90,3 +90,8 @@ class AgentRpcLanes(private val observation: Executor, private val control: Exec
         return true
     }
 }
+
+/** Coalesced actual settlement only. Admission/control remain independent and Rust-owned. */
+class AgentSettlementPump(private val backend:Executor,private val settle:()->Unit,private val failure:()->Unit) {
+    fun request():Boolean = false
+}
