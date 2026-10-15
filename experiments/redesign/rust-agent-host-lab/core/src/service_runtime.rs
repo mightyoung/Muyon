@@ -139,6 +139,17 @@ pub fn run_builtin(
     variant: AgentReadVariant,
     control: Arc<RunControl>,
 ) -> Result<BuiltinExecution> {
+    run_builtin_admitted(dir, variant, control, |_| Ok(()))
+}
+
+// The controller persists the ORIGINAL State pair before the SAME Agent drive.
+// This callback cannot supply a different provider, handler, authority or driver.
+pub(crate) fn run_builtin_admitted(
+    dir: &Path,
+    variant: AgentReadVariant,
+    control: Arc<RunControl>,
+    mut admit_state: impl FnMut(&State) -> Result<()>,
+) -> Result<BuiltinExecution> {
     use crate::{
         model_gateway::ModelGateway, read_registry::PhysicalReadHandler, AuthoritySnapshot,
         Enrollment, NativeSession, RuntimePorts,
@@ -262,7 +273,7 @@ pub fn run_builtin(
         Box::new(BuiltinEndpoint {
             args,
             frames: frames.clone(),
-            control,
+            control: control.clone(),
         }),
     );
     let state = State::runtime(
@@ -276,6 +287,13 @@ pub fn run_builtin(
             total: 65536,
         },
     )?;
+    let initial = state.encode();
+    if initial.len() > 128 * 1024 {
+        return Err("service_task_budget".into());
+    }
+    store::atomic(dir, "task.db", &initial)?;
+    admit_state(&state)?;
+    control.poll()?;
     let mut agent = Agent {
         dir: dir.into(),
         state,
