@@ -11,16 +11,21 @@ class AgentClientKeys(private val processPrefix: String) {
 }
 /** The app owns Binder linking; all link/native/gone work runs outside this registry's lock. */
 class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val gone:(String)->Unit) {
-    private class Entry<T>(val token:T,val key:String) {
+    private class Entry<T>(val token:T,val key:String,val unlink:()->Unit) {
         var connecting=true
         var dead=false
         var released=false
         var client:UiAgentClientRef?=null
+        var linkFinished=false
+        var unlinked=false
     }
     private val lock=Any()
     private val entries=mutableMapOf<T,Entry<T>>()
-    fun connect(token:T, link:((()->Unit)->Boolean), native:(String)->UiAgentWireReply):UiAgentWireReply {
+    private var disposed=false
+    fun connect(token:T, link:((()->Unit)->Boolean), native:(String)->UiAgentWireReply):UiAgentWireReply = connectLinked(token,link,{},native)
+    fun connectLinked(token:T,link:((()->Unit)->Boolean),unlink:()->Unit,native:(String)->UiAgentWireReply):UiAgentWireReply {
         val (entry,needsLink)=synchronized(lock) {
+            if(disposed) return unavailable()
             val existing=entries[token]
             if(existing!=null) {
                 if(existing.dead || existing.released) return unavailable()
@@ -29,7 +34,7 @@ class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val
                 existing to false
             } else {
                 if(entries.size>=2) return UiAgentWireReply.Local(UiAgentLocalStatus.BUSY)
-                val value=Entry(token,keys.next())
+                val value=Entry(token,keys.next(),unlink)
                 entries[token]=value
                 value to true
             }
@@ -38,7 +43,9 @@ class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val
         try {
             if(needsLink) {
                 val linked=try { link { died(entry) } } catch (_: Exception) { false }
+                synchronized(lock) { entry.linkFinished=true }
                 if(!linked) died(entry)
+                unlinkDead(entry)
             }
             if(synchronized(lock){entry.dead}) return unavailable()
             nativeStarted=true
@@ -58,12 +65,24 @@ class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val
             }
             // Death can have reached Rust before connect itself. Reissue only the original
             // key after the late connect so it cannot leave a newly created live lease.
-            if(dead && nativeStarted) gone(entry.key)
+            try { if(dead) unlinkDead(entry) } finally { if(dead && nativeStarted) gone(entry.key) }
         }
     }
-    fun connectLinked(token:T,link:((()->Unit)->Boolean),unlink:()->Unit,native:(String)->UiAgentWireReply):UiAgentWireReply = connect(token,link,native)
-    /** Seals platform registration and detaches death links; the Service separately retires Rust. */
-    fun dispose() = Unit
+    /** Platform links only: explicit Service retire/await still owns native cleanup. */
+    fun dispose() {
+        val retiring=synchronized(lock) {
+            if(disposed) return
+            disposed=true
+            entries.values.toList().also { values -> values.forEach{it.dead=true};entries.clear() }
+        }
+        retiring.forEach { unlinkDead(it) }
+    }
+    private fun unlinkDead(entry:Entry<T>) {
+        val claim=synchronized(lock) {
+            if(entry.dead && entry.linkFinished && !entry.unlinked) { entry.unlinked=true;true } else false
+        }
+        if(claim) entry.unlink()
+    }
     private fun died(entry:Entry<T>) {
         val notify=synchronized(lock) {
             if(entry.dead) false else {
@@ -72,7 +91,7 @@ class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val
                 true
             }
         }
-        if(notify) gone(entry.key)
+        if(notify) try { unlinkDead(entry) } finally { gone(entry.key) }
     }
     /** Call only after actual native release acknowledgement; not a Rust stop implementation. */
     fun markReleased(client:UiAgentClientRef):Boolean = synchronized(lock) {

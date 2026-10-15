@@ -128,3 +128,14 @@ Copied the unmodified actual Android-profile generated source from the independe
 Pinned evidence manifest: Android config `543bab24b017d782b38aff958254db5bd185c3688eada2e6a96a5753dc98ab11`, bindgen `083a46313d5d5608a62a1883d1f3689aa6e8f98165afaef69cf25dbbff8bb73a`, actual default library `59b4061d346974ea50fcd13ce83be6df164ff0effeb68a3a88057be02ca63dc8`. That run establishes fresh generation/load and the expected refusing native semantic RED, not GREEN Agent execution.
 
 Original generated header/body retained byte-for-byte; existing UniFFI MPL notice/license remain. The Object source includes generated API34 SystemCleaner guards with JNA Cleaner fallback. This is source observation only: fresh Android compile/lint with minSdk 24 and actual ART cleanup behavior remain required, NOT_RUN locally. No hand modification or API floor increase is applied.
+
+## Bounded death-link disposal seam
+
+Compiling RED `5888f07a1fef3c6abe0d10366ac68ddd4a62cabd` adds four deterministic cases and fails 4/15 liveness cases. Final registry links retain their own unlink closure inside the same at-most-two entry inventory, with no separate recipient map. `dispose` seals registration, detaches live/released tokens once outside the lock and does not claim native cancellation. A link still being installed is detached only after its setup returns. Late native connect after disposal is rejected and its original private key is stopped; no replacement key is affected. Explicit Service retire/await remains responsible for Rust cleanup.
+
+Final JVM result: prior 123 + liveness 15 = **138 PASS**, exit 0; real Binder, Service and Android runtime NOT_RUN. This is a small independent registry delta for scoped review before Service integration uses it. Original logs/source commits remain preserved. Future small compiler runs reuse the current `disposal-green` output directory per parent resource instruction; no new toolchain/SDK/large target or cache cleanup.
+
+| Disposal log | SHA-256 |
+| --- | --- |
+| `phase2-disposal-red.log` | `f43ce7c2e5ec4c9bc56db482658072ec56fafdf0e9937334e621d62b3f9b6d24` |
+| `phase2-disposal-green.log` | `ee299c5e447b3e8ca0ac089a7bd635b68f62664d2cf724ac8a614eb5ed13e47b` |
