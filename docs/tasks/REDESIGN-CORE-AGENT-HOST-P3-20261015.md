@@ -30,3 +30,14 @@ checks are executable locally. Device and real-model evidence: NOT_RUN.
 
 Raw outputs remain outside Git. Root owns fixed-SHA integration, runner evidence,
 non-author review and the draft PR. No merge is authorized.
+
+Additional negative tests use a clearly separate artificial child to exercise
+malformed frame lengths/UTF-8/keys, integer typing, wrong correlation, duplicate
+callbacks, untrusted stderr and fabricated receipt terminals. They are never
+substitutes for the positive Rust roundtrip. Effective tool confirmation/denial,
+identifier bounds and incomplete SSE responses are also covered.
+
+Local checker verification: `python3 -B
+experiments/redesign/core-agent-lab/host-checks/test_record_process.py` reports
+2 tests OK, covering byte transparency/reaping and terminal no-skip enforcement.
+`git diff --check` passes. This is helper evidence only, not Rust/Dart execution.

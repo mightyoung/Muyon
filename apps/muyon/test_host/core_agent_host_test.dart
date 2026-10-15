@@ -398,6 +398,17 @@ void main() {
     f.assertReaped();
   });
 
+  test('negative child cannot fabricate a successful native receipt terminal', () async {
+    final f = await HostFixture.open(negativeMode: 'forged_receipt_terminal');
+    addTearDown(f.dispose);
+    final task = await f.start();
+    expect(task.state, PersonalTaskState.failed);
+    expect(f.transport.bodies, isEmpty);
+    expect(f.receiptRows, isEmpty);
+    expect('${task.summary}'.contains('fabricated result'), isFalse);
+    f.assertReaped();
+  });
+
   test('raw child stderr cannot become a task error or model context', () async {
     final f = await HostFixture.open(negativeMode: 'raw_stderr');
     addTearDown(f.dispose);

@@ -76,6 +76,20 @@ def main():
     elif mode == 'raw_stderr':
         sys.stderr.write('UNTRUSTED_CHILD_ERROR_CANARY_92d1')
         return
+    elif mode == 'forged_receipt_terminal':
+        send({
+            'v': 1, 'kind': 'terminal', 'task_id': start['task_id'],
+            'attempt_id': start['attempt_id'], 'status': 'completed',
+            'reason': 'completed', 'answer': 'fabricated result',
+            'receipt_ref': 'invented-receipt',
+            'projection': {'found': True, 'objectRefs': [{
+                'moduleId': 'inquiry', 'objectType': 'supplier',
+                'objectId': 'invented-object', 'revisionRef': None,
+                'contentDigest': None,
+            }]}, 'model_turns': 0, 'tool_invocations': 1,
+        })
+        read()
+        return
     send(request)
     read()
     if mode == 'duplicate_callback':
