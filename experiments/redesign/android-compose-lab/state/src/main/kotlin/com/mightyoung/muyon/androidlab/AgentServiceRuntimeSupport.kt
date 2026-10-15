@@ -95,19 +95,41 @@ class AgentRpcLanes(private val observation: Executor, private val control: Exec
 class AgentSettlementPump(private val backend:Executor,private val settle:()->Unit,private val failure:()->Unit) {
     private val requested=AtomicBoolean()
     private val running=AtomicBoolean()
+    private val admission=Any()
+    private class Dispatch { @Volatile var accepted=false }
+    private var dispatch:Dispatch?=null
     fun request():Boolean {
+        // Set before admission so the normal release/reacquire handoff sees this request.
         requested.set(true)
-        if(!running.compareAndSet(false,true))return true
-        try { backend.execute { drain() } }
-        catch(_:RejectedExecutionException){running.set(false);return false}
+        val attempt=synchronized(admission) {
+            // An executor can still reject its first submission. Do not acknowledge
+            // coalesced work until execute returned or that actual worker has started.
+            if(!running.compareAndSet(false,true))return dispatch?.accepted==true
+            Dispatch().also{dispatch=it}
+        }
+        try {
+            backend.execute { attempt.accepted=true;drain() }
+            attempt.accepted=true
+        } catch(_:RejectedExecutionException) {
+            synchronized(admission) {
+                // An inline executor may already have returned its slot to a new owner.
+                if(dispatch===attempt)running.set(false)
+            }
+            return false
+        }
         return true
+    }
+    private fun notifyFailure() {
+        // A presentation listener cannot abandon an already acknowledged pending pass.
+        // It runs outside admission; only an explicit pending request causes another pass.
+        try{failure()}catch(_:Throwable){}
     }
     private fun drain() {
         var ownsSlot=true
         try {
             while(true) {
                 requested.set(false)
-                try { settle() } catch(_:LinkageError){failure()} catch(_:Exception){failure()}
+                try { settle() } catch(_:LinkageError){notifyFailure()} catch(_:Exception){notifyFailure()}
                 if(requested.get())continue
                 running.set(false)
                 ownsSlot=false
