@@ -1,4 +1,4 @@
-"""Fixed partial host checkpoint; never a full Service GREEN classifier."""
+"""Source-fixed host checkpoints and Rust Service groups; Android runtime is separate."""
 from collections import Counter
 import hashlib
 import json
@@ -7,21 +7,24 @@ import re
 
 CONTRACT = json.loads(Path(__file__).with_name('host_checkpoint_cases.json').read_text())
 TARGET_COUNTS = dict(native_read=25, contract_transport=8, service_runtime=2, service_root=2)
+GREEN_CONTRACT = json.loads(Path(__file__).with_name('service_host_green_cases.json').read_text())
+GREEN_COUNTS = dict(TARGET_COUNTS, service_controller=4, service_oracle=1, service_lifecycle=3)
 PREFIX = 'experiments/redesign/rust-agent-host-lab/core/'
 
 
-def inventory(root, contract=None):
-    contract = CONTRACT if contract is None else contract
+def inventory(root, contract=None, *, service=False):
+    contract = (GREEN_CONTRACT if service else CONTRACT) if contract is None else contract
+    counts = GREEN_COUNTS if service else TARGET_COUNTS
     try:
         if (set(contract) != {'version', 'author_commit', 'manifest', 'targets', 'not_run'}
                 or type(contract['version']) is not int or contract['version'] != 1
                 or not re.fullmatch('[0-9a-f]{40}', contract['author_commit'])
                 or contract['manifest'] != PREFIX + 'Cargo.toml'
-                or set(contract['targets']) != set(TARGET_COUNTS)
-                or set(contract['not_run']) != {'service_controller'}):
+                or set(contract['targets']) != set(counts)
+                or set(contract['not_run']) != (set() if service else {'service_controller'})):
             raise ValueError('shape')
         for target, group in (contract['targets'] | contract['not_run']).items():
-            count = TARGET_COUNTS.get(target, 4)
+            count = counts.get(target, 4)
             if (set(group) != {'path', 'blob_sha', 'sha256', 'names'}
                     or group['path'] != PREFIX + 'tests/' + target + '.rs'
                     or not re.fullmatch('[0-9a-f]{40}', group['blob_sha'])
@@ -36,13 +39,17 @@ def inventory(root, contract=None):
             if (hashlib.sha256(data).hexdigest() != group['sha256'] or blob != group['blob_sha']
                     or Counter(names) != Counter(group['names'])):
                 raise ValueError('source')
+        if service:
+            actual = {str(p.relative_to(root)) for p in (root / PREFIX / 'tests').rglob('*.rs')}
+            if actual != {group['path'] for group in contract['targets'].values()}:
+                raise ValueError('unknown integration source')
         return contract
     except (OSError, ValueError, TypeError, KeyError, AttributeError) as failure:
         raise RuntimeError('host_checkpoint_inventory_invalid') from failure
 
 
-def target_green(target, raw, status):
-    group = CONTRACT['targets'].get(target)
+def target_green(target, raw, status, *, service=False):
+    group = (GREEN_CONTRACT if service else CONTRACT)['targets'].get(target)
     rows = re.findall(r'^test (\S+) \.\.\. (ok|FAILED|ignored)\s*$', raw, re.M)
     summaries = re.findall(r'^test result: (ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;', raw, re.M)
     targets = re.findall(r'^\s*Running tests/(\w+)\.rs \(', raw, re.M)

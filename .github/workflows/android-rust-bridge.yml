@@ -25,7 +25,7 @@ on:
       suite:
         description: 'Full gate, immutable assertion RED, or explicitly partial host checkpoint'
         type: choice
-        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red, service-host-checkpoint, service-oracle-red]
+        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red, service-host-checkpoint, service-oracle-red, service-host-green]
         default: full
       emit_android_source:
         description: 'Diagnostic only: bounded generated Android source in service-jvm-red ordinary logs'
@@ -54,8 +54,8 @@ jobs:
           suite = os.environ['REQUESTED_SUITE']
           ref = os.environ['SOURCE_REF']
           if not suite:
-              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
-          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red']:
+              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
+          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green']:
               raise SystemExit('invalid_suite')
           red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') and suite != 'service-oracle-red' else []
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
@@ -109,7 +109,7 @@ jobs:
 
   service-host-checkpoint:
     needs: select
-    if: needs.select.outputs.mode == 'service-host-checkpoint' || needs.select.outputs.mode == 'service-oracle-red'
+    if: needs.select.outputs.mode == 'service-host-checkpoint' || needs.select.outputs.mode == 'service-oracle-red' || needs.select.outputs.mode == 'service-host-green'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -123,7 +123,7 @@ jobs:
           dirname "$(rustup which --toolchain 1.99.0 rustc)" >> "$GITHUB_PATH"
       - name: Independent checkpoint and existing classifier controls
         run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
-      - name: Required partial host or exact controller-oracle RED
+      - name: Required source-fixed host checkpoint or controller oracle
         env:
           BRIDGE_HOST_MODE: ${{ needs.select.outputs.mode }}
         run: |

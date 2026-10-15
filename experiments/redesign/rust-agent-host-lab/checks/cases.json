@@ -297,6 +297,14 @@
           "names": [
             "service_controller_observer_correlates_all_builtin_payloads"
           ]
+        },
+        "integration:service_lifecycle": {
+          "family": "service-lifecycle",
+          "names": [
+            "client_epochs_generations_and_visibility_are_fail_closed",
+            "same_request_is_existing_without_a_second_worker",
+            "close_and_reconnect_preserve_original_durable_outcome"
+          ]
         }
       },
       "sources": {
@@ -305,8 +313,8 @@
           "sha256": "04aed51dd17ab035f6a4210fcf7d4c30c2c9458f64dd44642c974dc22c59e188"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs": {
-          "commit": "9a7e02adec28f764477e1893387c8699142ec528",
-          "sha256": "5c9541e6124bb08faef857c9948117d8161e75810467657b6f8fe0d023b5ee19"
+          "commit": "81424c87f5d121ecc0ccaa6252c52483675df0ae",
+          "sha256": "6653361134043202b9bf71b4f5fe3e07fb9e019d25b7e48fb50f3ee2cc5ed694"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs": {
           "commit": "58192794baf64780eae05ce6fb6be4dab3a50f49",
@@ -321,11 +329,15 @@
           "sha256": "e02398223d07ded359e8f64fbb9b1f3f9356a90a0ed1056117e0fbe08c34de68"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs": {
-          "commit": "b811412677811865d7e5c7a05ca3379b09329fcc",
-          "sha256": "882a88ef85525921a86079c8bb56d4cd2bb9c078124aed8a9e8469056dcf3b73"
+          "commit": "81424c87f5d121ecc0ccaa6252c52483675df0ae",
+          "sha256": "f792140578cc8dbdf130dde0298eda21aca8bcf70afbc52dfa83f3f00e9b5d36"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_lifecycle.rs": {
+          "commit": "81424c87f5d121ecc0ccaa6252c52483675df0ae",
+          "sha256": "d84a70e877b77d9389a6b6f1c321fae0a4cc29696bc9474cedf907520dbc8b01"
         }
       },
-      "expected_total": 42
+      "expected_total": 45
     }
   },
   "python": {

@@ -149,8 +149,10 @@ def download(url, output, expected):
         raise RuntimeError('official_tool_hash_mismatch')
 
 
-def host_checkpoint(evidence, work, source, oracle=False):
-    contract = checkpoint_inventory(ROOT)
+def host_checkpoint(evidence, work, source, oracle=False, green=False):
+    if green and oracle:
+        raise RuntimeError('invalid_host_mode')
+    contract = checkpoint_inventory(ROOT, service=True) if green else checkpoint_inventory(ROOT)
     oracle_contract = oracle_inventory(ROOT) if oracle else None
     host = ROOT / contract['manifest']
     env = dict(os.environ, CARGO_TERM_COLOR='never', CARGO_INCREMENTAL='0',
@@ -174,16 +176,16 @@ def host_checkpoint(evidence, work, source, oracle=False):
         raw = evidence / (target + '.log')
         status = run(['cargo', 'test', '--offline', '--locked', '--release', '--test', target],
                      raw, env, cwd=host.parent, required=False)
-        row = checkpoint_target_green(target, raw.read_text(errors='replace'), status)
+        row = checkpoint_target_green(target, raw.read_text(errors='replace'), status, service=True) if green else checkpoint_target_green(target, raw.read_text(errors='replace'), status)
         row.update(raw_sha256=sha(raw), source=contract['targets'][target])
         results.append(row)
         print(raw.read_text(errors='replace'), flush=True)
         print('SERVICE_HOST_CHECKPOINT_TARGET ' + json.dumps(row, sort_keys=True), flush=True)
     result = dict(accepted=all(row['accepted'] for row in results),
-        classification='HOST_CHECKPOINT_GREEN' if all(row['accepted'] for row in results) else 'INVALID',
+        classification=('SERVICE_HOST_GREEN' if green else 'HOST_CHECKPOINT_GREEN') if all(row['accepted'] for row in results) else 'INVALID',
         source_sha=source, plugin_binary_sha256=sha(binary), shipping_or_service_green=False,
         host_cargo_lock_sha256=sha(host.parent / 'Cargo.lock'),
-        descriptor_sha256=sha(Path(__file__).with_name('host_checkpoint_cases.json')),
+        descriptor_sha256=sha(Path(__file__).with_name('service_host_green_cases.json' if green else 'host_checkpoint_cases.json')),
         author_test_commit=contract['author_commit'], targets=results,
         executed_tests=sum(row['observed_tests'] for row in results),
         not_run={'service_controller': 'initial refusal; not executed by this partial checkpoint',
@@ -191,6 +193,10 @@ def host_checkpoint(evidence, work, source, oracle=False):
                  'unit_doc_tests': 'NOT_RUN; whole host test executables compiled only',
                  'legacy_and_native_inverses': 'NOT_RUN by partial checkpoint; mandatory final gates unchanged',
                  'android_runtime': 'NOT_RUN'})
+    if green:
+        result['rust_service_host_green'] = result['accepted']
+        result['not_run'].pop('service_controller')
+        result['scope'] = 'source-fixed Rust Service controller/worker/oracle groups only; JVM and Android runtime separate'
     if oracle_contract:
         result['oracle_test_source'] = oracle_contract
         result['oracle'] = dict(accepted=False, classification='NOT_RUN', reason='component_gate_failed')
@@ -209,7 +215,7 @@ def host_checkpoint(evidence, work, source, oracle=False):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full', 'service-host-checkpoint', 'service-oracle-red'] + SERVICE_MODES, required=True)
+    parser.add_argument('--mode', choices=['rust-red', 'jvm-red', 'full', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green'] + SERVICE_MODES, required=True)
     parser.add_argument('--evidence-dir', type=Path, required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--emit-android-source', action='store_true')
@@ -228,8 +234,9 @@ def main():
             raise RuntimeError('source_identity')
         if subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT).strip():
             raise RuntimeError('unclean_source')
-        if args.mode in ['service-host-checkpoint', 'service-oracle-red']:
-            result.update(host_checkpoint(evidence, work, source, oracle=args.mode == 'service-oracle-red'))
+        if args.mode in ['service-host-checkpoint', 'service-oracle-red', 'service-host-green']:
+            result.update(host_checkpoint(evidence, work, source, oracle=args.mode == 'service-oracle-red',
+                                          green=args.mode == 'service-host-green'))
             return result.get('command_exit_code', 0) if result['accepted'] else 1
         inventory()
         service = service_inventory() if args.mode in SERVICE_MODES else None
