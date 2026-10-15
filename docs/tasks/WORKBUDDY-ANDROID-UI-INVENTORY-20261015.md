@@ -131,7 +131,7 @@ integration盘点含18个Kotlin文件（含宿主、测试和探针）。Muyon�
 
 | 状态来源 | 已有事实 | 后续UI允许表示 | 禁止的推定 |
 |---|---|---|---|
-| `FoundationRepository.PersonalTaskState` | queued/waitingConfirmation/running/succeeded/failed/cancelled/paused/interrupted | 直接消费原任务状态、stage、waitingFor、error、summary、executionDeviceId、references | 枚举没有unknown；不能把interrupted直接等于结果未知/未执行，也不能靠视觉增加枚举 |
+| `FoundationRepository.PersonalTaskState` | queued/waitingConfirmation/running/succeeded/failed/cancelled/paused/interrupted | 直接消费原任务状态、stage、waitingFor、error、summary、executionDeviceId、references | 枚举没有unknown；不能从枚举推断外部执行结果；现有ExecutionPanel已显示interrupted未知警示，必须保留，不靠视觉增加枚举 |
 | `AssistantPage._busy` | 发送准备过程的页面本地标志 | 禁重复触发准备、显示已有“准备中”；在状态表明确区别执行状态 | `_busy=false`不能证明任务完成/外部动作停止 |
 | `ExecutionPanel._TaskCard` | 取消/暂停/恢复由任务状态及platform owner决定；stage=cancelling另判 | 沿用onCancel/onPause/onResume/onOpenObject回调和原guard | 不为显示停止图标绕过guard；请求取消不等于已取消 |
 | RD-P08 `SupplierScreenModel` | `canSave`要求prepared+preview+同步草稿且无未决；`canLookup`核对原操作；saved要求真实receipt | 展示当前读值和原历史回执，unknown保留原草稿/会话；只核对原操作 | 不把prepared当已保存；不自动重发；不将旧回执当当前版本 |
@@ -146,3 +146,150 @@ integration盘点含18个Kotlin文件（含宿主、测试和探针）。Muyon�
 **获得对应原图后可提请具体实施：**以UI-02任务列表、UI-03/04对话输入、UI-05三个弹层、UI-07产物预览、UI-08设置为顺序，一片一次交付可查看结果。每片评审包须包含原图版本/设备、目标组件、未覆盖状态、实际渲染图和对比结论；原图参考尺寸与Muyon无障碍适配分开记录。没有实测渲染就不标“像素一致”。
 
 **仍阻塞：**真实完整页面像素；资源许可；若继续原包解析，Drive大文件安全确认与工具缺失。三路并行不是批准Download anyway或REA安装，本轮未触及它们。独立UI owner只改本docs和/tmp审查材料，不接管/挪动core writer，品牌与自有素材不变。
+
+## 追加：UI首片规格与实施准备计划（不改产品）
+
+本追加延续UI owner，固定基线3836149，运行测试保持NOT_RUN；完整JSON台账位于独立/tmp。
+
+# UI首片规格：当前导航、任务状态与自有素材验收基线
+
+2026-10-15。UI独立owner续接；源码基线 `3836149416020a0ac58f9e7ca788c20e66688e0e`，先前UI准备提交 `68211a2af35a605decae5fdd5b92875d30742c26`。本规格对应UI-00/UI-02的实施准备，引用UI-01自有素材和UI-03状态边界；不等待core/plugin研究，也不接管其目录。
+
+## 目标与交付边界
+
+首片先固定后续视觉改造必须保持的真实行为和验收入口，使工程师不依赖WorkBuddy原图也能准备回归与素材台账。**当前交付为spec/plan/静态清单；没有更改或运行产品。**不新建视觉风格、不复制竞品资源、不改变四入口顺序/业务权限，不运行Android、安装REA、重试APK下载或提交Drive安全确认。
+
+首片行为验收与后续像素验收分别记录：widget回归可以在离线合成夹具中执行，WorkBuddy像素验收仍需要同版本完整原图；前者通过不意味着后者通过。
+
+## 固定行为（Muyon源码事实，不是WorkBuddy页面推断）
+
+| ID | 精确规格 | 现有符号/文件 |
+|---|---|---|
+| B01 | 默认入口索引0；顺序严格为助手、任务、资料、设置；不加第五项或运营入口 | `screens/platform_shell.dart`：`ConversationDestination`、`section=0` |
+| B02 | 宽度以`MediaQuery.sizeOf(context).width`判断：<900用NavigationBar，≥900用NavigationRail；不把内部LayoutBuilder宽度误当全窗宽 | 同文件`desktop`、`showSection(int value)` |
+| B03 | 四页由同一IndexedStack承载；非当前页ExcludeFocus、TickerMode disabled；助手实例、未发送草稿、选中模型、滚动位置在切页/390↔1280变化后保留；切页不派发任务/工具 | 同文件`KeyedSubtree(ValueKey(ConversationDestination.values[i]))`；`AssistantPage`已有控制器/草稿持久化 |
+| B04 | 返回关闭当前工作区，再回原助手；不重复挂载workspace或丢原焦点；导航项selected语义正确，触摸目标≥48×48逻辑像素 | `ConversationWorkspaceHost`、`conversation_shell_accessibility_test.dart`的既有断言 |
+| B05 | 任务入口是`taskHub()`；快捷入口为执行面板、消息中心、数据交换；任务点击使用原`conversationId`打开任务对话；不根据名称复制/合并对象 | `platform_shell_home.dart`：`taskHub()`、`tasks()`；`platform_shell.dart`：`assistant(...)` |
+| B06 | `ExecutionPanel`只显示宿主提供的prompt/state/stage/device/wait/error/summary/ObjectRef；事件仍走传入回调 | `ExecutionPanel({tasks,onCancel,onPause,onResume,onOpenObject})`，回调类型分别`Future<void> Function(PersonalTask)`和`void Function(ObjectRef)` |
+| B07 | 明/暗与减少动效读取现有设置；Noto Sans SC及自有品牌引用保持；没有竞品字体/图像进入资源表 | `MuyonApp`、`packages/muyon_ui/lib/src/theme.dart`、pubspec；theme/reduce-motion既有用例 |
+
+不把布局相似当行为授权。现有`showSection`返回原焦点、`action`忙态防重入、`AssistantPage._send`草稿检查都保留，不由视觉组件替代宿主事实。
+
+## 任务状态与动作基线
+
+表格针对`ExecutionPanel._TaskCard`，不概括其它任务表。`PersonalTask.terminal`在该基线含succeeded/failed/cancelled/paused/interrupted；不能把paused当正在运行。
+
+| 状态 | 当前文案 | 可见动作（非platform owner、非cancelling） |
+|---|---|---|
+| queued | 排队中 | 取消 |
+| waitingConfirmation | 等待你确认 | 取消、暂停 |
+| running | 执行中 | 取消 |
+| succeeded | 已完成 | 无 |
+| failed | 失败 | 恢复（再次确认） |
+| cancelled | 已取消 | 无 |
+| paused | 已暂停 | 恢复（再次确认） |
+| interrupted | 已中断（结果未知）；另显示“结果未知，重试前请先核实。” | 恢复（再次确认），不自动重试 |
+
+补充优先级：`owner=platform`不提供逐项取消/暂停/恢复；`stage=cancelling`且未terminal显示“取消中…”并移除第二次取消；回调必须收到原任务对象/ID，ObjectRef回调保持原引用。
+
+**状态表精度修正：**枚举没有名为unknown的值，但当前`ExecutionPanel`已明确把interrupted显示为“结果未知”警示，且有既有测试固定。上一轮“不能把interrupted等同未知”仅应理解为不能凭枚举新增独立unknown/推断外部执行事实；**不能据此删改当前未知警示或恢复再确认流程。**
+
+**现有两处guard不同：**`taskHub.tasks()`更多菜单对所有非terminal任务列暂停/取消；`ExecutionPanel`仅waitingConfirmation列暂停，且额外处理cancelling。此处只是记录两处事实；首片不统一规则、不扩大按钮权限，若视觉提取跨两处共享组件，需先提出具体行为合同差异，禁止顺手改core。
+
+## 自有素材与当前引用
+
+| 资源 | 实测像素/字节 | SHA-256与引用边界 |
+|---|---|---|
+| assets/brand/header-mark-v3.png | 256×256 RGBA，43470B | `a1c6224ed91e221153b16eb56538a4f4533a96f06fd014f27e3987fa2a7b1f93`；pubspec assets已声明 |
+| assets/brand/launcher-master-v3.png | 1254×1254 RGBA，1246085B | `0ccadcf7e661a95eb7a8e548670a89270b03ec89b8c351ea2ed27df291cb72bc`；源素材存在，不能称当前widget已引用 |
+| assets/brand/mark-v3.png | 1254×1254 RGBA，416500B | `809de63a91dc2bc85378df97a4f2a1ae2cc6c120c86a9775700577da3f78caa5`；源素材存在，不能称当前widget已引用 |
+| assets/fonts/NotoSansSC-VF.ttf | 17773132B | `d68bafcb48a2707749396aa12bbbd833cb70401f3a9a689fd2902c7e0d295964`；pubspec的Noto Sans SC字体族与theme已引用 |
+| assets/fonts/OFL.txt | 4301B | `6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2`；仓库既有许可文本，非竞品字体许可证明 |
+
+这五项只做现有文件身份与引用核验；本轮不改素材、颜色或字体。WorkBuddy10资源的`directpixel`标签仅是参考证据，不进入此自有资产清单。
+
+## 独立可测试范围与现成用例
+
+下列**仅核对源码中的用例存在和断言，未在本轮执行Flutter/widget测试**。夹具只应使用隔离临时数据；已有NavigationFixture会创建本地合成SQLite/注册页，不是纯mock，也不代表Android真机。不要使用用户业务目录或真实模型端点。
+
+| 验收 | 可复用文件/精确用例 | 本片补充或限制 |
+|---|---|---|
+| 默认/四入口与字体放大 | `responsive_shell_test.dart`：`assistant_is_default_and_four_destinations_are_exact`；参数化`four_destinations_320_390_430_900_1250_1280_at_200_percent` | 已覆盖6种宽度与2倍文字；尚未单独锁899边缘，后续仅在改断点/壳结构时补899/900断言 |
+| 草稿/模型/滚动/实例保留 | `conversation_shell_navigation_test.dart`：`switching_destinations_keeps_unsent_parent_draft_and_scroll` | 已断言任务/工具/消息计数不增加；不点发送/暂停/恢复 |
+| 返回与引用回访 | 同文件`root_back_closes_workspace_before_exit`、`data_and_answer_open_same_registered_business_page` | 只验证原导航与原注册页，不调用外部模型 |
+| 触摸/焦点/选中语义 | `conversation_shell_accessibility_test.dart`：`navigation_workspace_and_back_have_48_targets_and_selected_semantics`、`keyboard_focus_returns_to_source_node` | widget语义测试不是TalkBack/IME实机；不在本轮扩为设备验收 |
+| 状态/取消中/平台owner/原对象回调 | `execution_panel_test.dart`：`actions follow the actual task state`、`a cancel request in flight shows 取消中… and no second cancel`、`interrupted states say the outcome is unknown`、`platform-owned tasks offer no per-item actions`、`buttons call back with the exact task` | 当前动作表未单列running，但canceling用例使用running；若改卡片再补running普通态、platform+cancelling组合，当前不为文档添加镜像实现测试 |
+| 主题/动效 | `theme_persistence_test.dart`三个用例；`reduce_motion_readback_test.dart`两用例 | 只表示设置持久化/读回，不能证明WorkBuddy主题映射或实际逐像素外观 |
+
+已有命令模板在应用目录：`flutter test --no-pub test/responsive_shell_test.dart test/conversation_shell_navigation_test.dart test/conversation_shell_accessibility_test.dart test/execution_panel_test.dart test/theme_persistence_test.dart test/reduce_motion_readback_test.dart`。仅在已有可信Flutter SDK/解析配置/离线依赖均可用、所有写入定位到批准的/tmp后执行；**本轮没有启动此命令**。当前PATH没有flutter/dart，`/workspace/flutter-sdk`目录存在不等于可无写入调用；不能为跑准备文档测试自动升级/安装依赖。
+
+独立验收的预期为命令退出0、所有选定用例通过、无widget异常、无任务/工具额外派发；测试进程如缺缓存/配置应记录阻塞，不将未执行改成通过。真实Android键盘/TalkBack/旋转、完整WorkBuddy像素、未见状态视觉、资源许可不在此命令证明范围。
+
+## 进入产品视觉首片前的具体输入
+
+只需要UI-02目标页的原图：同一目标版本、完整顶/底栏、默认/有内容任务列表，以及设备px/density/字体缩放/主题。先交单页组件布局方案，写明映射现有导航/任务回调，新增外观只来自该原图；保留上述B01–B07及状态guard。无原图时此规格已可独立审查，产品视觉更改仍不开始。
+
+# UI首片验收基线 Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Execution remains with the existing UI owner; no subagents are authorized by this plan.
+
+**Goal:** 在修改视觉之前固定当前导航、状态动作、自有素材与离线回归入口，给单页高保真实施一个可检查的起点。
+
+**Architecture:** 沿用现有Flutter宿主与组件接口；本阶段只补文档和/tmp台账，复用已有widget测试。WorkBuddy资源证据、Muyon行为基线、后续真实页面像素分别登记，不引入产品适配层或状态协议。
+
+**Tech Stack:** 既有Flutter/Dart源码与flutter_test；本轮静态核验用Python标准库/Pillow和git只读命令，不新增依赖，不运行Android。
+
+**Spec:** `/tmp/rd-workbuddy-android-ui-20261015/first-slice-spec.md`，同时纳入`docs/tasks/WORKBUDDY-ANDROID-UI-INVENTORY-20261015.md`的追加首片章节。
+
+## Global Constraints
+
+- 源码基线`3836149416020a0ac58f9e7ca788c20e66688e0e`；承接UI准备提交`68211a2af35a605decae5fdd5b92875d30742c26`。
+- 仅原UI owner/clone/branch；root sole pusher；不改core/plugin目录或其它writer。
+- 当前授权为独立实现准备；本阶段不改产品代码、共享token/字体/图片，不开始视觉实现。
+- 默认助手；顺序助手/任务/资料/设置；断点900逻辑像素；保留B01–B07与既有状态guard。
+- 不重试Drive确认、不安装REA、不运行Android；不复制竞品APK/字体/插画/源码。
+
+## Review Focus
+
+1. 899/900边缘：现有参数化用例覆盖900但未覆盖899；未来改壳时应同时断言bar/rail切换且实例/草稿不丢，归Task2。
+2. 小屏320且2倍文字：沿用现有responsive用例，不凭正常390截图判定可用，归Task2。
+3. interrupted有未知警示：枚举无unknown不意味着可删现有警示，复用execution_panel精确用例，归Task2。
+4. platform owner与取消中组合：当前单独用例已存在，未来改卡片时再补组合，归Task2；未执行前不声称覆盖。
+5. 资产存在与实际引用：header/font已声明，另外两张品牌源素材未声明；清单必须分别记录，归Task1。
+
+### Task 1: 固定当前入口/接口/自有资源台账（本轮准备）
+
+**Files:** 只读`apps/muyon/lib/screens/{platform_shell,platform_shell_home,execution_panel}.dart`、`apps/muyon/lib/platform/foundation_repository.dart`、`apps/muyon/pubspec.yaml`与既有brand/font；创建`/tmp/rd-workbuddy-android-ui-20261015/first-slice-baseline.json`。
+
+**Interfaces:** Consumes固定git blob和现有组件签名；Produces JSON包含source_base、source_files(path/sha256)、destinations、breakpoint_logical_width、assets(path/sha256/size/declared)、runtime_tests_status。
+
+- [x] 逐文件核对与固定基线字节相同，记录SHA-256；不是只读当前活动branch名。
+- [x] 记录4入口、断点900、taskHub及ExecutionPanel回调签名；不创建新组件。
+- [x] 完整解码3张自有PNG，记录5项资源身份与pubspec声明区别。
+- [x] 用JSON结构和固定源码断言校验台账；任何不符停止提交并修正文档，不改产品来迎合台账。
+
+### Task 2: 固定可复用回归入口与未覆盖项（本轮准备；运行留后续）
+
+**Files:** 只读spec所列6个`apps/muyon/test/*.dart`和support夹具；更新同一/tmp JSON的existing_tests与not_run。
+
+**Interfaces:** Consumes原测试源码/夹具；Produces测试文件、精确用例、覆盖目的、当前执行状态；没有新的测试API。
+
+- [x] 核验spec列的用例名和关键断言真实存在，记录文件hash；不能从文件名推断测试覆盖。
+- [x] 写明6套widget测试的离线命令与/tmp写入前置条件；本轮状态设`NOT_RUN`。
+- [x] 标注899/900普通边缘、running普通态及platform+cancelling组合仅在后续相应产品改动时补；复用现有320/2倍文字/interrupted/owner/回调用例，避免为文档写镜像测试。
+- [ ] 后续执行者若只跑已有回归：先核现有SDK/配置/离线缓存，不安装/联网取包；在独立/tmp环境运行spec命令并保存完整退出码/测试汇总。没有环境则报告阻塞，不改`NOT_RUN`为通过。
+
+### Task 3: 单页实施交接与文档验证（本轮准备）
+
+**Files:** 修改仅`docs/tasks/WORKBUDDY-ANDROID-UI-INVENTORY-20261015.md`；本地spec/plan/JSON留/tmp。保留先前32参考文件与10资源证据。
+
+**Interfaces:** Consumes Task1/2台账及spec B01–B07；Produces docs-only提交和完整SHA给root，不push。
+
+- [x] 自审精确状态：当前ExecutionPanel的interrupted未知警示保留；两处暂停guard差异不在视觉片中统一。
+- [x] 将首片spec与plan纳入既有来源文档，保持先前68211a2内容与证据来源历史可追溯；只补明确的状态表解释。
+- [ ] 验证`git diff --check`、base→HEAD仅一个docs文件，JSON/source/asset/test引用逐项通过；不以此冒称widget/Android运行通过。
+- [ ] docs提交后给root完整SHA、报告和NOT_RUN清单；root负责推送/草稿。没有原图的视觉实现继续保留输入门槛，本计划不触发额外用户确认或安装。
+
+## 自审与后续视觉片范围
+
+Task1覆盖B01/B02/B05/B06/B07，Task2覆盖B03/B04及状态/主题/无派发回归入口，Task3核可评审交付与授权边界。原图像素、未见页面状态、TalkBack/IME设备测试和竞品素材许可明确不在本首片通过范围。后续视觉片先只做UI-02任务列表，组件结构/尺寸来自完整原图，行为接口仍取本spec；原图前不引入猜测布局。
