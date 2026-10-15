@@ -29,10 +29,13 @@ fn registration_neither_grants_nor_reads() {
 }
 #[test]
 fn namespace_duplicates_and_versions_reject() {
- let mut c=admitted(); let before=stats(&mut c); assert!(!ok(&register(&mut c,bundle())));
- for (key,value) in [("module_id",string("bad/name")),("protocol_version",json("2"))] {let mut b=bundle();put(&mut b,key,value);assert!(!ok(&register(&mut c,b)));}
- let mut b=bundle(); put(row(&mut b,"data",0),"schema_version",json("0")); assert!(!ok(&register(&mut c,b))); assert_eq!(stats(&mut c),before);
+ let mut c=admitted(); let before=stats(&mut c);expect_code(&register(&mut c,bundle()),"module_identity");assert_eq!(stats(&mut c),before);
+ for (key,value,code) in [("module_id",string("bad/name"),"module_identity"),("protocol_version",json("2"),"protocol_version")] {
+  let mut fresh=Catalog::new();let mut b=bundle();put(&mut b,key,value);expect_code(&register(&mut fresh,b),code);
+ }
+ let mut fresh=Catalog::new();let mut b=bundle();put(row(&mut b,"data",0),"schema_version",json("0"));expect_code(&register(&mut fresh,b),"schema_version");
 }
+
 #[test]
 fn schema_subset_and_limits_fail_closed() {
  for schema in [r#"{"type":"object","additionalProperties":true}"#,r#"{"type":"object","properties":{},"required":["ghost"],"additionalProperties":false}"#,r#"{"type":"string","pattern":".*"}"#] {
@@ -64,6 +67,14 @@ fn discovery_filters_current_authority() {
   expect_code(&prepare_args(&mut c,json(r#"{"equipment_key":"e1"}"#),a),"denied");
   assert_eq!(field(&stats(&mut c),"execution_requests"),&json("0"));
  }
+ for key in ["allowed","available","scope_allowed","bindings","revision","binding_revision","source_revision","rule_revision","scope","refs"] {
+  for value in [Json::Null,json("7")] {let mut a=authority();put(&mut a,key,value);let d=call(&mut c,"discover",vec![("authority",a)]);assert_eq!(field(&d,"operations"),&json("[]"),"wrong type: {key}");}
+ }
+ let mut second=json(&bundle().encode().replace("equipment_loan","other_module").replace("host-equipment-read","other_binding"));
+ put(&mut second,"views",json("[]"));assert!(ok(&call(&mut c,"register",vec![("bundle",second),("host_bindings",json(r#"["other_binding"]"#))])));
+ let limited=call(&mut c,"discover",vec![("authority",authority())]);assert_eq!(field(&limited,"operations").array().unwrap().len(),1);
+ assert_eq!(field(&limited,"schemas").object().unwrap().len(),2,"only the admitted operation's referenced DATA closure");
+ assert!(field(&limited,"schemas").object().unwrap().keys().all(|k|k.starts_with("equipment_loan/")));
  let mut unknown=authority();put(&mut unknown,"plugin_grant",Json::Bool(true));
  assert_eq!(field(&call(&mut c,"discover",vec![("authority",unknown)]),"operations"),&json("[]"));
  let visible=call(&mut c,"discover",vec![("authority",authority())]); assert_eq!(field(&visible,"operations").array().unwrap().len(),1);assert!(!visible.object().unwrap().contains_key("ticket"));
