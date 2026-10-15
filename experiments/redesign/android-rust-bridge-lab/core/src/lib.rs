@@ -176,9 +176,34 @@ mod tests {
     }
     #[test]
     fn panic_boundary_contains_failure_and_remains_usable() {
+        let entered = std::cell::Cell::new(false);
         assert_eq!(
-            boundary(|| panic!("ANDROID_BRIDGE_TEST_PANIC")),
+            boundary(|| {
+                entered.set(true);
+                panic!("ANDROID_BRIDGE_TEST_PANIC")
+            }),
             Err(BridgeError::InternalFailure)
+        );
+        assert!(
+            entered.get(),
+            "PANIC_BOUNDARY_ACTION_NOT_ENTERED: permanent refusal is not panic containment"
+        );
+        let sentinel = DiagnosticReport {
+            protocol: 1,
+            request_id: "sentinel".into(),
+            build_identity: env!("MUYON_BRIDGE_BUILD_ID").into(),
+            variant: DiagnosticVariant::Inquiry,
+            namespace: "sentinel_namespace".into(),
+            catalog_generation: 7,
+            data_count: 8,
+            operation_count: 9,
+            relation_count: 10,
+            view_count: 11,
+        };
+        assert_eq!(
+            boundary(|| Ok(sentinel.clone())),
+            Ok(sentinel),
+            "same wrapper must preserve a complete successful result"
         );
         assert!(validate_bundled_contract(DiagnosticRequest {
             protocol: 1,
