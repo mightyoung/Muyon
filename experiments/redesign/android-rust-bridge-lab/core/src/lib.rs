@@ -75,8 +75,9 @@ pub fn bridge_info() -> BridgeInfo {
 }
 #[uniffi::export]
 pub fn validate_bundled_contract(
-    request: DiagnosticRequest,
+    _request: DiagnosticRequest,
 ) -> Result<DiagnosticReport, BridgeError> {
+    let request = _request;
     boundary(|| {
         if request.protocol != 1 {
             return Err(BridgeError::UnsupportedProtocol);
