@@ -192,6 +192,13 @@ After invoke admission, missing result→interrupted/tool_outcome_unknown. Retai
 accepted genuine result on cancellation and start no further model send. Host
 registry original receipt remains true even if the child disappears. Wrong or
 duplicate callback→failed/callback_mismatch; limit→budget_exhausted/host_budget.
+Malformed JSON/UTF-8, duplicate/unknown keys, invalid scalar types, zero length or
+truncated header/body use fixed host_protocol. An advertised frame length over
+65536 is rejected immediately with host_budget, without waiting for its body.
+A clean EOF before a complete terminal uses host_eof; truncated frames are not
+clean EOF. Complete provider calls with invalid bounded argument identifiers are
+rejected as model_failed before any registry prepare/invoke. These error reasons
+are independent test oracles, not inferred from implementation output.
 After cancel/close during admitted invoke, drain only its matching result until
 the existing bounded deadline; retain it if accepted, otherwise outcome_unknown.
 No new callback may be started. Start the process timer before its first frame;
