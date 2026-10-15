@@ -263,7 +263,12 @@ impl AgentServiceController {
             return Err(AgentServiceError::InvalidIdentity);
         }
         let path = PathBuf::from(&config.private_root);
-        if !path.is_absolute() || muyon_core_agent_lab::store::validate_dir(&path).is_err() {
+        if !path.is_absolute()
+            || muyon_core_agent_lab::store::validate_dir(&path).is_err()
+            || std::fs::canonicalize(&path)
+                .map(|p| p.as_os_str() != path.as_os_str())
+                .unwrap_or(true)
+        {
             return Err(AgentServiceError::InvalidRoot);
         }
         let epoch = crate::nonce().map_err(|_| AgentServiceError::InternalFailure)?;

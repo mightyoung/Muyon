@@ -164,6 +164,13 @@ fn build_identity_is_explicit_without_host_build_environment() {
         build_identity: "not-a-source-sha".into(),
     });
     assert!(matches!(bad, Err(AgentServiceError::InvalidIdentity)));
+    let alias = root().join(".");
+    let bad_root = AgentServiceController::new(AgentHostServiceConfig {
+        protocol: 1,
+        private_root: alias.to_string_lossy().into(),
+        build_identity: TEST_ID.into(),
+    });
+    assert!(matches!(bad_root, Err(AgentServiceError::InvalidRoot)));
 }
 #[test]
 fn zero_client_initialization_retirement_requires_real_settlement() {
