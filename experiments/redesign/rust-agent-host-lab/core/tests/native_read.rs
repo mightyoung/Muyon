@@ -52,7 +52,7 @@ fn authority() -> Rc<Authority> {
         profile: "offline-fixture".into(),
     })))
 }
-fn session(a: Rc<Authority>) -> SharedSession {
+fn session(a: Rc<dyn AuthoritySource>) -> SharedSession {
     let plugin =
         PathBuf::from(std::env::var("MUYON_PLUGIN_CONTRACT_BIN").expect("actual child binary"));
     let s = NativeSession::create(
@@ -98,7 +98,7 @@ fn projection() -> Json {
         r#"{"equipment":{"module_id":"equipment_loan","type":"equipment","key":"e1","revision":"1","schema_version":1},"label":"synthetic drill","loans":[{"module_id":"equipment_loan","type":"loan","key":"l1","revision":"1","schema_version":1}]}"#,
     )
 }
-fn session_handler(a: Rc<Authority>, handler: Box<dyn ReadHandler>) -> SharedSession {
+fn session_handler(a: Rc<dyn AuthoritySource>, handler: Box<dyn ReadHandler>) -> SharedSession {
     let plugin = PathBuf::from(
         std::env::var("MUYON_PLUGIN_CONTRACT_BIN")
             .expect("CI must provide actual absolute plugin child"),
@@ -838,3 +838,13 @@ fn invalid_host_enrollment_publishes_nothing_and_active_catalog_is_sealed() {
     );
     assert_eq!(s.borrow().handler_calls, 1);
 }
+#[test]
+fn missing_selected_refs_execute_zero_before_physical_read(){for permitted in [true,false]{let auth=authority();if !permitted{put(&mut auth.0.borrow_mut().read,"refs",Json::Array(Vec::new()));}let s=session(auth);let a=run(&s);if permitted{assert_eq!(a.state.status,"completed");assert_eq!(s.borrow().handler_calls,1);}else{assert_eq!(s.borrow().handler_calls,0,"empty current refs must deny before physical handler reads");assert!(!s.borrow().store.receipts().iter().any(|r|r.encode().contains("BORROWER_PRIVATE")));assert_ne!(a.state.status,"completed");}}}
+struct RevokeAfterReturnedSnapshot{authority:Rc<Authority>,calls:std::cell::Cell<usize>,revoke:bool}
+impl AuthoritySource for RevokeAfterReturnedSnapshot{fn snapshot(&self)->Result<AuthoritySnapshot>{let call=self.calls.get()+1;self.calls.set(call);let value=self.authority.0.borrow().clone();if self.revoke&&call==3{put(&mut self.authority.0.borrow_mut().read,"allowed",Json::Bool(false));put(&mut self.authority.0.borrow_mut().read,"revision",Json::String("a2".into()));}Ok(value)}}
+#[test]
+fn revoke_after_preinvoke_snapshot_executes_zero(){for revoke in [false,true]{let a=authority();let source=Rc::new(RevokeAfterReturnedSnapshot{authority:a.clone(),calls:std::cell::Cell::new(0),revoke});let s=session(source.clone());let result=run(&s);assert!(source.calls.get()>=3);if revoke{assert_eq!(field(&a.0.borrow().read,"allowed").unwrap(),&Json::Bool(false));assert_eq!(s.borrow().handler_calls,0,"revocation after the returned pre-invoke snapshot must prevent physical read");assert_ne!(result.state.status,"completed");assert!(!s.borrow().store.receipts().iter().any(|r|r.encode().contains("BORROWER_PRIVATE")));}else{assert_eq!(result.state.status,"completed");assert_eq!(s.borrow().handler_calls,1);}}}
+#[test]
+fn native_store_restore_rejects_forged_receipts_and_facts(){let s=session(authority());let _=run(&s);let dir=s.borrow().store.dir.clone();drop(s);let valid=json(&std::fs::read_to_string(dir.join("native.db")).unwrap());let original_receipt=field(&valid,"receipts").unwrap().array().unwrap()[0].clone();let mut malformed=Vec::new();let mut v=valid.clone();put(&mut v,"facts",Json::Null);malformed.push(v);let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![Json::Null]));malformed.push(v);let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![original_receipt.clone(),original_receipt.clone()]));malformed.push(v);let mut v=valid.clone();put(&mut v,"facts",json(r#"{"external_read":false,"unknown_source":false}"#));malformed.push(v);let mut r=original_receipt.clone();put(&mut r,"status",Json::String("invented".into()));let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![r]));malformed.push(v);let mut r=original_receipt.clone();put(&mut r,"status",Json::String("running".into()));let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![r]));malformed.push(v);let mut r=original_receipt.clone();put(&mut r,"binding",Json::Null);let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![r]));malformed.push(v);let mut r=original_receipt;let mut identity=field(&r,"identity").unwrap().clone();put(&mut identity,"owner",Json::String("foreign".into()));put(&mut r,"identity",identity);let mut v=valid.clone();put(&mut v,"receipts",Json::Array(vec![r]));malformed.push(v);assert_eq!(store::NativeStore::open(&dir).unwrap().receipt_count(),1);for (i,v) in malformed.into_iter().enumerate(){let d=directory();muyon_core_agent_lab::store::create_dir(&d).unwrap();muyon_core_agent_lab::store::atomic(&d,"native.db",&v.encode()).unwrap();assert!(store::NativeStore::open(&d).is_err(),"forged store variant {i} must refuse");}}
+#[test]
+fn native_store_persist_budget_never_writes_unreadable_snapshot(){let s=session(authority());let _=run(&s);let dir=s.borrow().store.dir.clone();drop(s);let mut store=store::NativeStore::open(&dir).unwrap();let first=store.receipts()[0].clone();let mut identity=field(&first,"identity").unwrap().clone();put(&mut identity,"invocation_id",Json::String("i-extra".into()));put(&mut identity,"identity",Json::String("another-identity".into()));let index=store.begin(identity,field(&first,"binding").unwrap().clone()).unwrap();let before=std::fs::read(dir.join("native.db")).unwrap();assert!(store.finish(index,Json::String("x".repeat(70000)),true).is_err(),"a successful persist must stay inside restore parser budget");assert_eq!(std::fs::read(dir.join("native.db")).unwrap(),before);drop(store);let restored=store::NativeStore::open(&dir).unwrap();assert_eq!(restored.receipt_count(),2);assert_eq!(field(&restored.receipts()[1],"status").unwrap(),&Json::String("running".into()));}
