@@ -172,7 +172,7 @@ internal class AgentServiceClient(private val context:Context,private val build:
         requireMain()
         val api=remote ?: return;val localTicket=ticket ?: return;val client=state.client ?: return
         val intent=state.selectedIntent
-        val run=when(val value=state.snapshot?.run){is UiAgentRun.Admitted->value.identity;is UiAgentRun.Running->value.identity;is UiAgentRun.Terminal->value.summary.identity;is UiAgentRun.Unresolved->value.identity;else->null}?.runId
+        val run=agentControlRunId(state.snapshot?.run,intent)
         val admitted=lanes.control {
             val reply=try{work(api,client,intent,run)?.decode(build)}catch(_:Exception){null}
             main.post{
