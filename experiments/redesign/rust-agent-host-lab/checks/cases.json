@@ -255,15 +255,28 @@
             "wrong_projection_preserves_raw_receipt",
             "wrong_reference_version_retains_only_original_receipt"
           ]
+        },
+        "integration:service_controller": {
+          "family": "service-controller",
+          "names": [
+            "service_controller_executes_registered_read",
+            "controller_is_send_sync_without_moving_native_session",
+            "build_identity_is_explicit_without_host_build_environment",
+            "zero_client_initialization_retirement_requires_real_settlement"
+          ]
         }
       },
       "sources": {
         "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs": {
           "commit": "5fc2b42b33901123e3f832e4458666ef5fecee0c",
           "sha256": "04aed51dd17ab035f6a4210fcf7d4c30c2c9458f64dd44642c974dc22c59e188"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs": {
+          "commit": "9a7e02adec28f764477e1893387c8699142ec528",
+          "sha256": "5c9541e6124bb08faef857c9948117d8161e75810467657b6f8fe0d023b5ee19"
         }
       },
-      "expected_total": 25
+      "expected_total": 29
     }
   },
   "python": {

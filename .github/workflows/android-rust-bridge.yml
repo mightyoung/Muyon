@@ -8,6 +8,7 @@ on:
       - 'experiments/redesign/android-compose-lab/**'
       - 'experiments/redesign/core-agent-lab/**'
       - 'experiments/redesign/plugin-contract-lab/**'
+      - 'experiments/redesign/rust-agent-host-lab/**'
       - 'docs/design/ANDROID-RUST-*'
       - '.github/workflows/android-rust-bridge.yml'
   pull_request:
@@ -17,13 +18,14 @@ on:
       - 'experiments/redesign/android-compose-lab/**'
       - 'experiments/redesign/core-agent-lab/**'
       - 'experiments/redesign/plugin-contract-lab/**'
+      - 'experiments/redesign/rust-agent-host-lab/**'
       - '.github/workflows/android-rust-bridge.yml'
   workflow_dispatch:
     inputs:
       suite:
         description: 'Full required gate or immutable compiled assertion RED'
         type: choice
-        options: [full, red, rust-red, jvm-red]
+        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red]
         default: full
 
 permissions:
@@ -48,8 +50,8 @@ jobs:
           suite = os.environ['REQUESTED_SUITE']
           ref = os.environ['SOURCE_REF']
           if not suite:
-              suite = next((name for name in ['rust-red', 'jvm-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
-          if suite not in ['full', 'red', 'rust-red', 'jvm-red']:
+              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
+          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red']:
               raise SystemExit('invalid_suite')
           red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') else []
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
@@ -71,7 +73,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
-        if: matrix.suite == 'jvm-red'
+        if: endsWith(matrix.suite, 'jvm-red')
         with:
           distribution: temurin
           java-version: '17'

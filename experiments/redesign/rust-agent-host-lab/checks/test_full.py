@@ -17,12 +17,27 @@ def transcript(component):
 
 class FullTests(unittest.TestCase):
     def test_each_source_inventory_accepts_only_complete_green(self):
-        for component, total in [('core', 94), ('plugin', 21), ('host', 25)]:
+        for component, total in [('core', 94), ('plugin', 21), ('host', 29)]:
             result = rust(component, transcript(component), 0)
             self.assertTrue(result['accepted'], component)
             self.assertEqual(result['observed_tests'], total)
         self.assertEqual(rust('core', transcript('core'), 0)['families']['legacy-core'], 88)
         self.assertEqual(rust('core', transcript('core'), 0)['unit_tests'], 4)
+
+    def test_source_fixed_service_group_preserves_native_twenty_five(self):
+        result = rust('host', transcript('host'), 0)
+        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4})
+        service = CASES['components']['host']['groups'].get('integration:service_controller')
+        self.assertIsNotNone(service, 'separate source-fixed service integration group is missing')
+        self.assertEqual(service['names'], [
+            'service_controller_executes_registered_read',
+            'controller_is_send_sync_without_moving_native_session',
+            'build_identity_is_explicit_without_host_build_environment',
+            'zero_client_initialization_retirement_requires_real_settlement',
+        ])
+        raw = transcript('host')
+        for name in service['names']:
+            self.assertFalse(rust('host', raw.replace(f'test {name} ... ok', ''), 0)['accepted'])
 
     def test_host_twenty_five_rejects_previous_twenty_and_missing_safety_case(self):
         added = {

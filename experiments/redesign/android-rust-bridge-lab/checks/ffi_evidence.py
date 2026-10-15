@@ -10,9 +10,50 @@ RUST_REACH = 'ANDROID_BRIDGE_STUB_REACHED code=internal_failure'
 RUST_ASSERT = 'ANDROID_BRIDGE_RED: bundled declaration must be registered and inspected in Rust'
 JVM_REACH = 'ANDROID_BRIDGE_JVM_STUB_REACHED code=internal_failure'
 JVM_ASSERT = 'ANDROID_BRIDGE_JVM_RED: actual Rust bundled declaration must validate'
+SERVICE_MODES = ['service-rust-red', 'service-jvm-red']
 
 
-def classify(mode, raw, status, source, library_sha):
+def service_red(mode, raw, status, source, library_sha, contract):
+    keys = {'target', 'test', 'filtered', 'native_reach', 'rust_assert', 'jvm_reach', 'jvm_assert'}
+    valid_contract = (isinstance(contract, dict) and set(contract) == keys
+        and type(contract['filtered']) is int and contract['filtered'] >= 0
+        and all(isinstance(contract[key], str) and re.fullmatch(r'[A-Za-z_]\w*', contract[key])
+                for key in ['target', 'test'])
+        and all(isinstance(contract[key], str) and 0 < len(contract[key]) <= 512
+                and contract[key].isascii() and '\n' not in contract[key] and '\r' not in contract[key]
+                for key in ['native_reach', 'rust_assert', 'jvm_reach', 'jvm_assert']))
+    identity = bool(re.fullmatch('[0-9a-f]{40}', source) and re.fullmatch('[0-9a-f]{64}', library_sha))
+    no_fault = not re.search(r'Timeout|timed out|SIGABRT|SIGKILL|signal:|could not compile|error\[E\d+\]|UnsatisfiedLinkError|NoClassDefFoundError|checksum mismatch|\ufffd', raw)
+    valid = False
+    if valid_contract and identity and no_fault:
+        reach = contract['native_reach']
+        if mode == 'service-rust-red':
+            panics = re.findall(r"thread '([^']+)'(?: \(\d+\))? panicked at [^\n]+:\n([^\n]+)", raw)
+            rows = re.findall(r'^test (\S+) \.\.\. (ok|FAILED|ignored)\s*$', raw, re.M)
+            summaries = re.findall(r'^test result: (ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;', raw, re.M)
+            valid = (status == 101 and 'Finished `release` profile' in raw
+                and len(re.findall(r'Running tests/' + re.escape(contract['target']) + r'\.rs \(', raw)) == 1
+                and panics == [(contract['test'], contract['rust_assert'])]
+                and rows == [(contract['test'], 'FAILED')]
+                and summaries == [('FAILED', '0', '1', '0', '0', str(contract['filtered']))]
+                and raw.splitlines().count(reach) == 1 and raw.index(reach) < raw.index("thread '"))
+        elif mode == 'service-jvm-red':
+            mapped = f'AGENT_SERVICE_JVM_MAPPED source={source} sha256={library_sha}'
+            failures = re.findall(r'^Exception in thread "main" java\.lang\.IllegalStateException: ([^\n]+)', raw, re.M)
+            markers = [mapped, reach, contract['jvm_reach']]
+            valid = (status == 1 and failures == [contract['jvm_assert']]
+                and all(raw.splitlines().count(marker) == 1 for marker in markers)
+                and all(raw.index(marker) < raw.index('Exception in thread') for marker in markers)
+                and not re.search(r'^AGENT_SERVICE_JVM_PASS ', raw, re.M))
+    return dict(accepted=bool(valid), classification='semantic_red' if valid else 'INVALID',
+        mode=mode, command_exit_code=status,
+        scope='actual service Rust controller' if mode == 'service-rust-red' else
+              'actual generated Kotlin/JNA shipping service controller; Android Binder/process runtime NOT_RUN')
+
+
+def classify(mode, raw, status, source, library_sha, service=None):
+    if mode in SERVICE_MODES:
+        return service_red(mode, raw, status, source, library_sha, service)
     no_fault = not re.search(r'Timeout|timed out|SIGABRT|SIGKILL|signal:|UnsatisfiedLinkError|NoClassDefFoundError|checksum mismatch', raw)
     if mode == 'rust-red':
         panics = re.findall(r"thread '([^']+)'(?: \(\d+\))? panicked at [^\n]+:\n([^\n]+)", raw)
