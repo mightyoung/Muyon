@@ -79,7 +79,15 @@ let mut c=admitted();let t=ticket(&mut c);assert!(!ok(&prepare(&mut c)),"one pen
 
 fn wire(lines:&str)->Vec<muyon_plugin_contract_lab::Json> {
  use std::process::{Command,Stdio};use std::io::{Read,Write};use std::time::{Duration,Instant};use std::sync::mpsc;
- let mut child=Command::new(env!("CARGO_BIN_EXE_muyon-plugin-contract-lab")).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).spawn().unwrap();
+ struct OwnedChild(std::process::Child);
+ impl Drop for OwnedChild {fn drop(&mut self){
+  if self.0.try_wait().ok().flatten().is_some(){return}
+  // A panicking test kills only its owned child and polls to reap it.
+  let _=self.0.kill();let until=Instant::now()+Duration::from_secs(1);
+  while self.0.try_wait().ok().flatten().is_none() && Instant::now()<until {std::thread::sleep(Duration::from_millis(5));}
+ }}
+ let mut owned=OwnedChild(Command::new(env!("CARGO_BIN_EXE_muyon-plugin-contract-lab")).stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::null()).spawn().unwrap());
+ let child=&mut owned.0;
  let mut input=child.stdin.take().unwrap();let output=child.stdout.take().unwrap();let owned=lines.as_bytes().to_vec();
  let (tx,rx)=mpsc::channel();
  std::thread::spawn(move||{let _=input.write_all(&owned);drop(input);});

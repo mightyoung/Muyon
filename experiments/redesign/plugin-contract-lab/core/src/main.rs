@@ -22,6 +22,6 @@ fn main() {
             Err(_) => {terminal=true;object([("ok", Json::Bool(false)), ("code", string("invalid_json"))])},
         }};
         if writeln!(stdout, "{}", reply.encode()).and_then(|_| stdout.flush()).is_err() { break; }
-        if terminal || !complete || line.len()>65536 || reply.object().ok().and_then(|m|m.get("code")).and_then(|v|v.string().ok()).is_some_and(|code|matches!(code,"protocol_version"|"unsupported_command"|"unexpected_or_missing_field")) {break;}
+        if terminal || !complete || line.len()>65536 || reply.object().ok().and_then(|m|m.get("code")).and_then(|v|v.string().ok()).is_some_and(|code|matches!(code,"protocol_envelope"|"protocol_version"|"unsupported_command"|"unexpected_or_missing_field")) {break;}
     }
 }

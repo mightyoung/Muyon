@@ -35,7 +35,7 @@ impl Catalog {
  fn run(&mut self,r:&Json)->Result<Json> {
   schema::bounded(r)?;
   if map(r)?.get("protocol_version")!=Some(&number(1)){return Err("protocol_version".into())}
-  let command=text(r,"command")?;
+  let command=map(r)?.get("command").and_then(|value|value.string().ok()).ok_or("protocol_envelope")?.to_owned();
   let mut body=r.clone();if let Json::Object(m)=&mut body{m.remove("protocol_version");}let r=&body;
   if command=="inspect" {keys(r,&["command"],&["command"])?;return Ok(success(vec![("generation",number(self.generation)),("data_count",number(self.data.len())),("operation_count",number(self.operations.len())),("relation_count",number(self.relation_count)),("view_count",number(self.view_count)),("execution_requests",number(self.executions)),("grants",number(0)),("receipts_created",number(0)),("pending",number(self.tickets.len()))]));}
   if command=="close" {keys(r,&["command"],&["command"])?;self.closed=true;self.tickets.clear();return Ok(success(vec![]));}
