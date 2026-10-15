@@ -107,10 +107,11 @@ class PackageControls(unittest.TestCase):
     def test_actual_zip_structure_hash_duplicates_and_alignment(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);apk=root/'fixture.apk'
-            contents={f'lib/{abi}/{name}':(abi+name).encode() for abi in package.ABIS for name in ['libmuyon_android_contract_bridge.so','libjnidispatch.so']}
+            contents={f'lib/{abi}/{name}':(abi+name).encode() for abi in package.ABIS for name in ['libmuyon_android_contract_bridge.so','libjnidispatch.so','libandroidx.graphics.path.so']}
             digest=lambda b:hashlib.sha256(b).hexdigest()
             inputs={'rust_libraries':{abi:{'sha256':digest(contents[f'lib/{abi}/libmuyon_android_contract_bridge.so'])} for abi in package.ABIS}}
             jni={abi:digest(contents[f'lib/{abi}/libjnidispatch.so']) for abi in package.ABIS}
+            graphics={abi:digest(contents[f'lib/{abi}/libandroidx.graphics.path.so']) for abi in package.ABIS}
             def build(aligned):
                 with zipfile.ZipFile(apk,'w') as archive:
                     for name,raw in contents.items():
@@ -119,7 +120,7 @@ class PackageControls(unittest.TestCase):
                             padding=(-archive.fp.tell()-30-len(name)-4)%16384
                             info.extra=struct.pack('<HH',0xcafe,padding)+b'\0'*padding
                         archive.writestr(info,raw)
-            with patch.object(package,'JNI_SHA',jni):
+            with patch.object(package,'JNI_SHA',jni), patch.object(package,'GRAPHICS_JNI_SHA',graphics):
                 build(True);self.assertEqual(set(package.apk_entries(apk,inputs)),set(contents))
                 for unsafe in ['../lib/arm64-v8a/extra.so', '/lib/arm64-v8a/extra.so',
                                'lib/../extra.so', 'assets/./config', 'assets//config',
@@ -145,10 +146,34 @@ class PackageControls(unittest.TestCase):
                         package.apk_entries(apk, inputs)
                 observed = json.loads(output.getvalue().removeprefix('ANDROID_BRIDGE_APK_NATIVE_INVENTORY '))
                 self.assertEqual(observed['apk_sha256'], package.sha(apk))
-                self.assertEqual(observed['count'], 5)
-                self.assertEqual(len(observed['expected']), 4)
+                self.assertEqual(observed['count'], 7)
+                self.assertEqual(len(observed['expected']), 6)
                 self.assertIn('lib/arm64-v8a/unexpected.so', observed['observed'])
                 self.assertTrue(observed['bounded'])
+                name = 'lib/arm64-v8a/libandroidx.graphics.path.so'
+                original = contents.pop(name)
+                build(True)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaisesRegex(RuntimeError, '^apk_exact_native_entries$'):
+                        package.apk_entries(apk, inputs)
+                contents[name] = b'changed graphics bytes'
+                build(True)
+                with self.assertRaisesRegex(RuntimeError, '^apk_native_hash_or_compression:lib/arm64-v8a/libandroidx.graphics.path.so$'):
+                    package.apk_entries(apk, inputs)
+                contents[name] = original
+                build(True)
+                self.assertEqual(len(package.apk_entries(apk, inputs)), 6)
+                fixture_aar = root / 'fixture-graphics.aar'
+                with zipfile.ZipFile(fixture_aar, 'w') as archive:
+                    for abi in package.ABIS:
+                        archive.writestr(f'jni/{abi}/libandroidx.graphics.path.so', contents[f'lib/{abi}/libandroidx.graphics.path.so'])
+                with patch.object(package, 'GRAPHICS_AAR_SHA', package.sha(fixture_aar)):
+                    package.check_graphics_aar(fixture_aar)
+                    with patch.object(package, 'GRAPHICS_JNI_SHA', dict(graphics, **{'arm64-v8a': '0'*64})):
+                        with self.assertRaisesRegex(RuntimeError, '^resolved_graphics_jni_hash$'):
+                            package.check_graphics_aar(fixture_aar)
+                with self.assertRaisesRegex(RuntimeError, '^resolved_graphics_aar_hash$'):
+                    package.check_graphics_aar(fixture_aar)
                 build(False)
                 with self.assertRaisesRegex(RuntimeError,'apk_native_zip_alignment'):package.apk_entries(apk,inputs)
 

@@ -1,5 +1,6 @@
 """Aggregate exact-source ABI inputs, invoke shared validator and inspect actual APK."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -16,6 +17,14 @@ from verify_inputs import ABIS, BINDING, CONFIG, decode, verify
 GRADLE_URL = 'https://services.gradle.org/distributions/gradle-8.13-bin.zip'
 GRADLE_SHA = '20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78'
 UI = ROOT / 'experiments/redesign/android-compose-lab'
+# Existing ComposeBOM2025.09.01 -> ui-graphics-android1.9.2 -> graphics-path1.0.1.
+# Pins are official published AAR bytes, independently frozen before APK diagnosis.
+GRAPHICS_AAR_SHA = '8ca4032b6d79b351f0b59ad4b580eddbb9423e1652f7c958830687f1eee2ec03'
+GRAPHICS_JNI_SHA = {
+    'arm64-v8a': '41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6',
+    'x86_64': '4e56c996f13670e70082658de7880c4020eabf4f25e43387f88ed78a713fc9f0',
+}
+
 MARKERS = ['16/16 pure JVM state checks passed', '22/22 local UI state checks passed',
            '29/29 diagnostic coordinator checks passed; native FFI/Android runtime NOT_RUN']
 
@@ -55,10 +64,20 @@ def aggregate(artifacts, target, source):
     return value
 
 
+def check_graphics_aar(path):
+    if path.is_symlink() or not path.is_file() or sha(path) != GRAPHICS_AAR_SHA:
+        raise RuntimeError('resolved_graphics_aar_hash')
+    with zipfile.ZipFile(path) as archive:
+        for abi, digest in GRAPHICS_JNI_SHA.items():
+            name = f'jni/{abi}/libandroidx.graphics.path.so'
+            if archive.namelist().count(name) != 1 or hashlib.sha256(archive.read(name)).hexdigest() != digest:
+                raise RuntimeError('resolved_graphics_jni_hash')
+
+
 def apk_entries(apk, inputs):
     expected = {f'lib/{abi}/libmuyon_android_contract_bridge.so': inputs['rust_libraries'][abi]['sha256'] for abi in ABIS}
     expected.update({f'lib/{abi}/libjnidispatch.so': JNI_SHA[abi] for abi in ABIS})
-    import hashlib
+    expected.update({f'lib/{abi}/libandroidx.graphics.path.so': GRAPHICS_JNI_SHA[abi] for abi in ABIS})
     with zipfile.ZipFile(apk) as archive, apk.open('rb') as raw:
         # Inspect every member before selecting lib/*.so; no extraction occurs.
         names = []
@@ -73,14 +92,18 @@ def apk_entries(apk, inputs):
         if len(names) != len(set(names)):
             raise RuntimeError('apk_duplicate_member')
         native = [entry.filename for entry in archive.infolist() if entry.filename.startswith('lib/') and entry.filename.endswith('.so')]
-        if len(native) != 4 or set(native) != set(expected):
+        if len(native) != len(expected) or set(native) != set(expected):
             print('ANDROID_BRIDGE_APK_NATIVE_INVENTORY ' + json.dumps(dict(
                 apk_sha256=sha(apk), count=len(native), expected=sorted(expected),
                 observed=[name[:160] for name in native[:50]], bounded=True)), flush=True)
             raise RuntimeError('apk_exact_native_entries')
         for name, digest in expected.items():
             info = archive.getinfo(name)
-            if info.compress_type != zipfile.ZIP_STORED or hashlib.sha256(archive.read(name)).hexdigest() != digest:
+            actual_digest = hashlib.sha256(archive.read(name)).hexdigest()
+            if info.compress_type != zipfile.ZIP_STORED or actual_digest != digest:
+                print('ANDROID_BRIDGE_APK_NATIVE_MISMATCH ' + json.dumps(dict(
+                    path=name, expected_sha256=digest, actual_sha256=actual_digest,
+                    compression=info.compress_type)), flush=True)
                 raise RuntimeError('apk_native_hash_or_compression:' + name)
             raw.seek(info.header_offset)
             header = raw.read(30)
@@ -131,6 +154,11 @@ def main():
         if len(resolved) != 1:
             raise RuntimeError('resolved_jna_aar_inventory')
         verify(evidence / 'bridge-inputs', source, ROOT / BINDING, ROOT / CONFIG, resolved[0])
+        graphics = list((work / 'gradle-cache/caches/modules-2/files-2.1/androidx.graphics/graphics-path/1.0.1').glob('*/graphics-path-1.0.1.aar'))
+        if len(graphics) != 1:
+            raise RuntimeError('resolved_graphics_aar_inventory')
+        check_graphics_aar(graphics[0])
+        result.update(resolved_graphics_aar_sha256=sha(graphics[0]), graphics_path_version='1.0.1')
         result.update(source_sha=source, protocol=1, min_api=24,
                       bridge_inputs_sha256=sha(evidence / 'bridge-inputs/bridge-inputs.json'),
                       resolved_jna_aar_sha256=sha(resolved[0]), state_passed=16,
