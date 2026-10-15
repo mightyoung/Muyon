@@ -43,6 +43,7 @@ class HostFixture {
   late String otherId;
   late ObjectRef selected;
   late AssistantConversation conversation;
+  late String childBinary;
   bool closed = false;
   Directory get evidence => Directory(p.join(root.path, 'process'));
   String get stateRoot => p.join(root.path, 'core-state');
@@ -52,6 +53,7 @@ class HostFixture {
     bool enabled = true,
     OutboundContentReviewer? modelReviewer,
     OutboundContentReviewer? toolReviewer,
+    String? negativeMode,
   }) async {
     final f = HostFixture._(
       Directory.systemTemp.createTempSync('core-agent-host-'),
@@ -61,10 +63,23 @@ class HostFixture {
     f.secrets.install();
     final recorder = p.join(repositoryRoot().path,
       'experiments/redesign/core-agent-lab/host-checks/record_process.py');
+    f.childBinary = requiredBinary();
+    if (negativeMode != null) {
+      final negative = p.join(repositoryRoot().path,
+        'experiments/redesign/core-agent-lab/host-checks/negative_child.py');
+      f.childBinary = p.join(f.root.path, 'negative-child');
+      File(f.childBinary).writeAsStringSync([
+        '#!/usr/bin/python3', 'import runpy, sys',
+        'sys.argv = ${jsonEncode([negative, negativeMode])} + sys.argv[1:]',
+        'runpy.run_path(${jsonEncode(negative)}, run_name="__main__")', '',
+      ].join('\n'));
+      final mode = await Process.run('/bin/chmod', ['700', f.childBinary]);
+      if (mode.exitCode != 0) throw StateError('negative_child_not_executable');
+    }
     File(f.launcher).writeAsStringSync([
       '#!/usr/bin/python3',
       'import runpy, sys',
-      'sys.argv = ${jsonEncode([recorder, '--binary', requiredBinary(), '--evidence', f.evidence.path])} + sys.argv[1:]',
+      'sys.argv = ${jsonEncode([recorder, '--binary', f.childBinary, '--evidence', f.evidence.path])} + sys.argv[1:]',
       'runpy.run_path(${jsonEncode(recorder)}, run_name="__main__")',
       '',
     ].join('\n'));
@@ -154,7 +169,7 @@ class HostFixture {
     final exit = jsonDecode(exitFile.readAsStringSync()) as Map;
     expect(exit['reaped'], true);
     final launch = jsonDecode(File(p.join(evidence.path, 'launch.json')).readAsStringSync()) as Map;
-    expect(launch['binary'], requiredBinary());
+    expect(launch['binary'], childBinary);
     expect(launch['arguments'], contains('host-session'));
     expect(Directory('/proc/${launch['pid']}').existsSync(), isFalse);
     final keys = (launch['environment_keys'] as List).cast<String>();

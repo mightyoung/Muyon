@@ -8,6 +8,22 @@ import unittest
 
 
 class RecorderTests(unittest.TestCase):
+    def test_terminal_gate_rejects_missing_success_and_skips(self):
+        with TemporaryDirectory(prefix='host-gate-selfcheck-') as temporary:
+            log = Path(temporary, 'test.log')
+            checker = Path(__file__).with_name('verify_run.py')
+            cases = [('00:01 +1: All tests passed!\n', 0),
+                     ('00:01 +1 ~1: All tests passed!\n', 1),
+                     ('00:01 +0: skipped\nAll tests passed!\n', 1),
+                     ('00:01 +0 -1: Some tests failed.\n', 1),
+                     ('compiler error\n', 1)]
+            for text, expected in cases:
+                with self.subTest(text=text):
+                    log.write_text(text)
+                    result = subprocess.run([sys.executable, str(checker), str(log)],
+                                            capture_output=True, timeout=5)
+                    self.assertEqual(result.returncode, expected)
+
     def test_exact_binary_roundtrip_and_reaped_child(self):
         with TemporaryDirectory(prefix='host-recorder-selfcheck-') as temporary:
             root = Path(temporary)

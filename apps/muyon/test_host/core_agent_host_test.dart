@@ -172,6 +172,52 @@ void main() {
     expect(f.receiptRows, isEmpty);
   });
 
+  for (final confirmation in [true, false]) {
+    test('effective tool review ${confirmation ? 'confirmation' : 'denial'} stops before invoke', () async {
+      final f = await HostFixture.open(toolReviewer: FixedReviewer(confirmation
+        ? const ReviewDecision.confirm('synthetic tool confirmation')
+        : const ReviewDecision.block('synthetic tool denial')));
+      addTearDown(f.dispose);
+      f.transport.replies.add((_) => toolReply(f.supplierId));
+      final task = await f.start();
+      expect(task.state, PersonalTaskState.failed);
+      if (confirmation) expect(task.error, contains('core_confirmation_required'));
+      expect(f.transport.bodies, hasLength(1));
+      expect(f.receiptRows, isEmpty);
+      expect(f.frames('core.bin').where((frame) => frame['kind'] == 'invoke'), isEmpty);
+      f.assertReaped();
+    });
+  }
+
+  for (final id in ['x' * 129, 'unsafe\nid', 'unsafe id', '供应商']) {
+    test('unsupported identifier encoding or bound ${jsonEncode(id)} fails before invoke', () async {
+      final f = await HostFixture.open();
+      addTearDown(f.dispose);
+      f.transport.replies.add((_) => toolReply(id));
+      final task = await f.start();
+      expect(task.state, PersonalTaskState.failed);
+      expect(f.transport.bodies, hasLength(1));
+      expect(f.receiptRows, isEmpty);
+      expect(f.frames('core.bin').where((frame) => frame['kind'] == 'invoke'), isEmpty);
+    });
+  }
+
+  test('incomplete SSE model reply cannot dispatch a tool', () async {
+    final f = await HostFixture.open();
+    addTearDown(f.dispose);
+    f.transport.replies.add((_) => 'data: ${jsonEncode({
+      'choices': [{'delta': {'tool_calls': [{
+        'index': 0, 'id': modelCallId, 'type': 'function',
+        'function': {'name': 'inquiry__object', 'arguments': jsonEncode({'type': 'supplier', 'id': f.supplierId})},
+      }]}}],
+    })}\n\n');
+    final task = await f.start(withProfile: f.profile(streaming: true));
+    expect(task.state, PersonalTaskState.failed);
+    expect(f.transport.bodies, hasLength(1));
+    expect(f.receiptRows, isEmpty);
+    expect(f.frames('core.bin').where((frame) => frame['kind'] == 'invoke'), isEmpty);
+  });
+
   for (final extra in [
     <String, Object?>{'approved': true}, {'scope': 'global'}, {'credentialRef': credentialRefCanary},
   ]) {
@@ -322,5 +368,46 @@ void main() {
     await unsupported();
     expect(f.transport.bodies, hasLength(1));
     expect(f.host.foundation.tasks(), hasLength(1));
+  });
+
+  for (final mode in ['wrong_task', 'wrong_attempt', 'wrong_turn', 'unknown_key',
+    'double_request_id', 'boolean_request_id', 'duplicate_key', 'bad_utf8',
+    'zero_length', 'oversized_length', 'truncated_frame']) {
+    test('negative child rejects malformed or uncorrelated callback $mode', () async {
+      final f = await HostFixture.open(negativeMode: mode);
+      addTearDown(f.dispose);
+      final task = await f.start();
+      expect(task.state, isNot(PersonalTaskState.succeeded));
+      expect(task.terminal, isTrue);
+      expect(task.error, isNotEmpty);
+      expect(f.transport.bodies, isEmpty);
+      expect(f.receiptRows, isEmpty);
+      f.assertReaped();
+    });
+  }
+
+  test('negative child callback replay cannot start a second model send', () async {
+    final f = await HostFixture.open(negativeMode: 'duplicate_callback');
+    addTearDown(f.dispose);
+    f.transport.replies.add((_) => answerReply('first completed model callback'));
+    final task = await f.start();
+    expect(task.state, PersonalTaskState.failed);
+    expect(task.error, contains('callback_mismatch'));
+    expect(f.transport.bodies, hasLength(1));
+    expect(f.receiptRows, isEmpty);
+    f.assertReaped();
+  });
+
+  test('raw child stderr cannot become a task error or model context', () async {
+    final f = await HostFixture.open(negativeMode: 'raw_stderr');
+    addTearDown(f.dispose);
+    final task = await f.start();
+    expect(task.state, isNot(PersonalTaskState.succeeded));
+    expect(task.terminal, isTrue);
+    expect('${task.error}'.contains('UNTRUSTED_CHILD_ERROR_CANARY_92d1'), isFalse);
+    expect(jsonEncode(f.transport.bodies).contains('UNTRUSTED_CHILD_ERROR_CANARY_92d1'), isFalse);
+    expect(f.transport.bodies, isEmpty);
+    expect(f.receiptRows, isEmpty);
+    f.assertReaped();
   });
 }
