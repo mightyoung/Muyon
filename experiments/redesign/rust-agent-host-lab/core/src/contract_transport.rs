@@ -102,3 +102,15 @@ impl ContractTransport for InProcessCatalog {
         self.catalog.take();
     }
 }
+
+impl ContractTransport for crate::plugin_process::PluginProcess {
+    fn request(&mut self, request: Json) -> Result<Json> {
+        crate::plugin_process::PluginProcess::request(self, request)
+    }
+    fn close(&mut self) {
+        crate::plugin_process::PluginProcess::close(self)
+    }
+    fn child_pid(&self) -> Option<u32> {
+        Some(self.pid())
+    }
+}

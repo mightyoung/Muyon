@@ -171,6 +171,16 @@ fn validate_snapshot(receipts: &[Json], facts: &Json) -> Result<()> {
 impl NativeStore {
     pub fn create(dir: &Path) -> Result<Self> {
         store::create_dir(dir)?;
+        Self::initialize_private(dir)
+    }
+    /// Initialize only a fresh already-admitted private run directory, never reset evidence.
+    pub(crate) fn initialize_private(dir: &Path) -> Result<Self> {
+        store::validate_dir(dir)?;
+        match std::fs::symlink_metadata(dir.join("native.db")) {
+            Ok(_) => return Err("native_store_exists".into()),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err("native_store_unavailable".into()),
+        }
         let lock = store::lock(dir)?;
         let mut result = Self {
             dir: dir.into(),

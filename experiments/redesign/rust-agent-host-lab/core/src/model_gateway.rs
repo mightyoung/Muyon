@@ -35,6 +35,7 @@ impl Provider for ModelGateway {
         _history: &[NativeMessage],
         control: &mut dyn ProviderControl,
     ) -> Result<ModelEvent> {
+        self.session.borrow().poll_service_control()?;
         control.poll()?;
         let (history, definitions) = {
             let s = self.session.borrow();
@@ -70,6 +71,7 @@ impl Provider for ModelGateway {
             .collect();
         let mut decoder = Decoder::with_tools(&advertised)?;
         for byte in response {
+            self.session.borrow().poll_service_control()?;
             control.poll()?;
             decoder.feed(byte)?;
         }
