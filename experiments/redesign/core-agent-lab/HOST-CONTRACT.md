@@ -1,5 +1,11 @@
 # Experimental product host seam v1
 
+Status 2026-10-15: business integration is PAUSED for a generic research/inquiry
+plugin-contract study. This inquiry.object-specific shape remains experimental
+and is NOT a frozen public core interface. No second business-specific adapter,
+M03 freeze or merge is authorized. Existing generic cancellation/EOF repairs and
+their regression evidence may finish; prior implementation and failures remain.
+
 Base: `3836149416020a0ac58f9e7ca788c20e66688e0e`. This is the default-off,
 transitional PersonalAgent integration, not M03 or the final policy/store migration.
 ADR-0005 D2/D5/D8 still apply: one gateway, complete calls only, authorization of

@@ -1,5 +1,12 @@
 # Product Rust Agent Host Seam Implementation Plan
 
+Status 2026-10-15: PRESERVED / BUSINESS INTEGRATION PAUSED. A newer user direction
+requires generic research/inquiry plugin-contract source study and combined design
+review before further business integration. The existing single-tool experiment
+is not a public core contract. Finish only existing generic cancellation/EOF
+repairs; preserve all sources, RED/GREEN/failure evidence and unrun inverse work.
+Do not merge this slice, add a research-specific adapter or freeze M03.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: use superpowers:subagent-driven-development. Root owns integration; directory owners implement and independent tests remain separate.
 
 **Goal:** Real PersonalAgent facade drives the same Rust Agent through a default-off host backend and a genuine readonly inquiry.object roundtrip.
