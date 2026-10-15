@@ -113,3 +113,10 @@ fn provider_failure_and_definite_tool_failure_never_fabricate_success(){
     let dir=fixture("fail\tunavailable\n",&[]);let out=command(&dir,"run",&[]);assert!(out.contains("status=failed\n"));assert!(out.contains("effects=0\n"));
     let dir=fixture(SCRIPT,&["--tool-behavior","fail"]);let out=command(&dir,"run",&[]);assert!(out.contains("status=failed\n"));assert!(out.contains("effects=0\n"));assert!(out.contains("receipt=\n"));
 }
+#[test]
+fn cached_completed_projection_cannot_replace_original_evidence(){
+    let dir=fixture(SCRIPT,&[]);assert!(command(&dir,"run",&[]).contains("status=completed\n"));
+    fs::write(dir.join("effects.db"),"damaged\n").unwrap();
+    let inspect=command(&dir,"inspect",&[]);assert!(inspect.contains("status=outcome_unknown\n"));assert!(inspect.contains("effects=unknown\n"));
+    let run=command(&dir,"run",&[]);assert!(run.contains("status=outcome_unknown\n"));assert!(run.contains("model_calls=2\n"));
+}

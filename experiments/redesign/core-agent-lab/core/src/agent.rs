@@ -69,7 +69,20 @@ impl Hooks {
 pub struct Agent {pub dir:PathBuf,pub state:State}
 impl Agent {
     pub fn start(dir:&Path,state:State)->Result<Self>{store::create_dir(dir)?;let _lock=store::lock(dir)?;store::atomic(dir,"effects.db",&EffectStore::empty().encode())?;state.save(dir)?;Ok(Self{dir:dir.to_path_buf(),state})}
-    pub fn open(dir:&Path)->Result<Self>{Ok(Self{dir:dir.to_path_buf(),state:State::load(dir)?})}
+    pub fn open(dir:&Path)->Result<Self>{
+        let mut state=State::load(dir)?;
+        // A cached task projection cannot substitute for original tool evidence.
+        if !state.unresolved {
+            if let Some(binding)=state.binding.clone() {
+                if state.receipt==format!("r-{}",binding.invocation) {
+                    if !matches!((FixtureTool{dir:dir.to_path_buf()}).lookup(&binding),Ok(Some(_))) {
+                        state.unresolved=true;state.stop("outcome_unknown","receipt_unavailable");
+                    }
+                }
+            }
+        }
+        Ok(Self{dir:dir.to_path_buf(),state})
+    }
     fn cancelled(&mut self)->Result<bool>{
         let path=self.dir.join("cancel.request");
         match std::fs::symlink_metadata(&path){Ok(_)=>{if store::read(&path)?!="CORE_CANCEL_V1\n"{return Err("invalid_cancel_signal".into());}self.state.cancelled=true;},Err(e) if e.kind()==io::ErrorKind::NotFound=>{},Err(e)=>return Err(e.to_string())}

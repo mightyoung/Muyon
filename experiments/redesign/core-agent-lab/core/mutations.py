@@ -22,8 +22,8 @@ mutations = [
      'if let Some(r)=state.receipts.iter().find(|r|r.binding.invocation==b.invocation){if &r.binding!=b{return Err("binding_conflict".into());}return Ok(r.clone());}',
      ''),
     ('budget_reset', 'src/agent.rs',
-     'pub fn open(dir:&Path)->Result<Self>{Ok(Self{dir:dir.to_path_buf(),state:State::load(dir)?})}',
-     'pub fn open(dir:&Path)->Result<Self>{let mut state=State::load(dir)?;state.counters=Counters::default();Ok(Self{dir:dir.to_path_buf(),state})}'),
+     'let mut state=State::load(dir)?;',
+     'let mut state=State::load(dir)?;state.counters=Counters::default();'),
 ]
 results = []
 for name, file, before, after in mutations:
