@@ -42,6 +42,16 @@ class ElfControls(unittest.TestCase):
         raw=elf_fixture(); result=inspect(raw,'arm64-v8a')
         self.assertEqual(result['declared_android_api'],24)
         self.assertEqual(result['load_alignments'],[16384])
+        unmapped = copy.copy(raw)
+        struct.pack_into('<Q', unmapped, 64 + 3*56 + 16, 0x100000)
+        with self.assertRaisesRegex(ElfInvalid, '^elf_relro_mapping$'):
+            inspect(unmapped, 'arm64-v8a')
+        page_tail = copy.copy(raw)
+        struct.pack_into('<Q', page_tail, 64 + 3*56 + 40, 16384 - 0x400)
+        self.assertTrue(inspect(page_tail, 'arm64-v8a')['relro'])
+        struct.pack_into('<Q', page_tail, 64 + 3*56 + 40, 16384 - 0x400 + 1)
+        with self.assertRaisesRegex(ElfInvalid, '^elf_relro_mapping$'):
+            inspect(page_tail, 'arm64-v8a')
         variants=[]
         bad=copy.copy(raw);struct.pack_into('<H',bad,18,62);variants.append(bad)
         bad=copy.copy(raw);struct.pack_into('<Q',bad,64+48,4096);variants.append(bad)

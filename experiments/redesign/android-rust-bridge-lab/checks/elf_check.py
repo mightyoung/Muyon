@@ -43,6 +43,18 @@ def inspect(raw, abi, rust=True):
         reject(filesz > memsz or align < 0x4000 or align & (align - 1) != 0 or offset % align != vaddr % align, 'elf_load_alignment')
     relro = [p for p in programs if p[0] == 0x6474e552]
     reject(len(relro) != 1 or relro[0][6] == 0, 'elf_relro')
+    region = relro[0]
+    start, end = region[3], region[3] + region[6]
+    reject(end > 1 << 64 or region[5] > region[6], 'elf_relro_mapping')
+    blob(region[2], region[5])
+    # Linkers may round p_memsz to the final mapped 16KB page. The region
+    # must start in real LOAD memory; only its end may occupy that page tail.
+    covering = [p for p in loads
+                if p[3] <= start < p[3] + p[6]
+                and end <= ((p[3] + p[6] + 0x3fff) & ~0x3fff)
+                and region[2] == p[2] + start - p[3]
+                and region[2] + region[5] <= p[2] + p[5]]
+    reject(len(covering) != 1, 'elf_relro_mapping')
     stack = [p for p in programs if p[0] == 0x6474e551]
     reject(len(stack) != 1 or stack[0][1] & 1 != 0, 'elf_executable_stack')
     dynamics = [p for p in programs if p[0] == 2]
