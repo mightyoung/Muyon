@@ -66,6 +66,24 @@ class EvidenceTests(unittest.TestCase):
         self.assertFalse(rust_result(raw + 'test extra ... ok\n', 0)['accepted'])
         self.assertFalse(rust_result(raw.replace('tests/registration.rs', 'tests/other.rs'), 0)['accepted'])
 
+    def test_full_multiple_failed_targets_are_observed_but_never_accepted(self):
+        raw = 'Finished `test` profile [unoptimized]\n'
+        for target, names in [('read_contract', RUST_CASES - REGISTRATION_CASES),
+                              ('registration', REGISTRATION_CASES)]:
+            raw += f'Running tests/{target}.rs (target/debug/deps/{target})\n'
+            for index, name in enumerate(sorted(names)):
+                raw += f'test {name} ... ' + ('FAILED' if index == 0 else 'ok') + '\n'
+            raw += 'test result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out;\n'
+        raw += 'error: 2 targets failed:\n    --test read_contract\n    --test registration\n'
+        result = rust_result(raw, 101)
+        self.assertFalse(result['accepted'])
+        self.assertEqual(result['reason'], 'invalid_full')
+        self.assertTrue(result['compiled'])
+        self.assertEqual(result['test_count'], 16)
+        self.assertEqual([group['target'] for group in result['harness_groups']],
+                         ['tests/read_contract.rs', 'tests/registration.rs'])
+        self.assertTrue(all(group['summaries'][0][0] == 'FAILED' for group in result['harness_groups']))
+
     def test_dart_red_rejects_timeout_setup_extra_errors_and_skips(self):
         rows = dart_rows(True)
         self.assertTrue(dart_result(rows, 1, True)['accepted'])

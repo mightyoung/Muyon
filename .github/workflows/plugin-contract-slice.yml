@@ -70,7 +70,7 @@ jobs:
         if: ${{ env.PLUGIN_SUITE == 'rust-red' || env.PLUGIN_SUITE == 'full' }}
         run: |
           set -o pipefail
-          args=()
+          args=(--no-fail-fast)
           mode=full
           if [[ "$PLUGIN_SUITE" == rust-red ]]; then
             mode=red
