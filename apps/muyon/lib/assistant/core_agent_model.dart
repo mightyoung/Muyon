@@ -181,9 +181,7 @@ final class CoreAgentModel {
             byName[call.name] != 'inquiry.object' ||
             done?.reason != FinishReason.toolCalls ||
             text.toString().isNotEmpty ||
-            call.callId.isEmpty ||
-            utf8.encode(call.callId).length > 128 ||
-            call.callId.runes.any((r) => r < 32 || r == 127)) {
+            !coreValidCallId(call.callId)) {
           throw const CoreAgentFailure('model_failed');
         }
         final args = call.arguments!;

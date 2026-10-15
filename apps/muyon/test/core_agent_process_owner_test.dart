@@ -41,6 +41,15 @@ class _HeldUserMessageRepository extends FoundationRepository {
 }
 
 void main() {
+  test('call pairing IDs reject C0/C1 and preserve valid Unicode scalars', () {
+    for (final control in [0, 31, 127, 128, 159]) {
+      expect(coreValidCallId('pair${String.fromCharCode(control)}'), isFalse);
+    }
+    expect(coreValidCallId('调用🙂'), isTrue);
+    expect(coreValidCallId('\u00a0\ufffd'), isTrue);
+    expect(coreValidCallId(String.fromCharCode(0xd800)), isFalse);
+    expect(coreValidCallId('🙂' * 33), isFalse);
+  });
   test(
     'facade cancel while user message awaits prevents backend ownership launch',
     () async {

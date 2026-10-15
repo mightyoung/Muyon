@@ -87,6 +87,27 @@ void coreKeys(Map value, Set<String> keys) {
   }
 }
 
+bool coreValidCallId(String value) {
+  if (value.isEmpty ||
+      utf8.encode(value).length > 128 ||
+      value.runes.any((r) => r < 32 || (r >= 127 && r <= 159))) {
+    return false;
+  }
+  // Reject unpaired UTF16 surrogates instead of allowing the encoder to change
+  // identity into a replacement character. Other Unicode remains valid.
+  final units = value.codeUnits;
+  for (var i = 0; i < units.length; i++) {
+    final unit = units[i];
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      if (++i >= units.length || units[i] < 0xdc00 || units[i] > 0xdfff)
+        return false;
+    } else if (unit >= 0xdc00 && unit <= 0xdfff) {
+      return false;
+    }
+  }
+  return true;
+}
+
 String coreMetadata(Object? value) {
   if (value is! String ||
       value.isEmpty ||
