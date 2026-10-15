@@ -6,9 +6,21 @@ fn atomic_registration_publishes_only_valid_bundle() {
  let mut c=Catalog::new(); let result=register(&mut c,bundle());
  assert!(ok(&result),"PLUGIN_SLICE_RED_RUST_ATOMIC_PUBLICATION: valid atomic bundle must publish");
  assert_eq!(field(&result,"generation"),&json("1"));
- let before=stats(&mut c); let mut invalid=bundle(); put(&mut invalid,"module_id",string("another")); put(row(&mut invalid,"views",0),"operation_refs",json(r#"["missing/read@1"]"#));
- assert!(!ok(&register(&mut c,invalid))); assert_eq!(stats(&mut c),before);
+ let before=stats(&mut c);
+ // Rename the entire namespace and binding, including all self references.
+ // The only invalid field is the last view's operation reference.
+ let valid_second=json(&bundle().encode().replace("equipment_loan","another").replace("host-equipment-read","host-another-read"));
+ let second_bindings=json(r#"["host-another-read"]"#);
+ let mut invalid=valid_second.clone();
+ put(row(&mut invalid,"views",0),"operation_refs",json(r#"["another/missing@1"]"#));
+ let rejected=call(&mut c,"register",vec![("bundle",invalid),("host_bindings",second_bindings.clone())]);
+ assert!(!ok(&rejected)); assert_eq!(stats(&mut c),before);
  assert_eq!(field(&before,"data_count"),&json("2")); assert_eq!(field(&before,"operation_count"),&json("1"));
+ // Repair only that tail: acceptance proves no other admission error caused
+ // the negative result, and failed publication reserved no namespace/binding.
+ let repaired=call(&mut c,"register",vec![("bundle",valid_second),("host_bindings",second_bindings)]);
+ assert!(ok(&repaired),"the otherwise identical second bundle must publish after repairing only its last view");
+ assert_eq!(field(&repaired,"generation"),&json("2"));
 }
 #[test]
 fn registration_neither_grants_nor_reads() {

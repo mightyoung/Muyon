@@ -11,6 +11,18 @@ void main() {
     // review must make this fail. The bridge is the actual concrete DUT.
     final f = await PluginFixture.open();
     final task = await f.runRead();
+    if (f.handlerCalls == 0) {
+      // Fail independently for setup/schema/model/policy failures. Only the
+      // concrete bridge's existing refusal may reach the semantic RED marker.
+      expect(task.error, contains('plugin_contract_unsupported'),
+          reason: 'READ_STUB_REACH_GUARD: a zero handler count alone does not prove bridge dispatch');
+      expect(task.state, PersonalTaskState.failed,
+          reason: 'READ_STUB_REACH_GUARD: the bridge refusal must settle the real task');
+      // Synthetic fixed evidence, emitted only after observing the real task
+      // error; no test hook, mocked bridge, or provider payload is involved.
+      // ignore: avoid_print
+      print('PLUGIN_SLICE_STUB_REACHED code=plugin_contract_unsupported handlerCalls=0');
+    }
     expect(f.handlerCalls, 1,
         reason: 'PLUGIN_SLICE_RED_DART_AGENT_READ: registered read must execute through the real Agent port');
     expect(task.state, PersonalTaskState.succeeded);
