@@ -1,0 +1,106 @@
+name: Android Rust bridge
+
+on:
+  push:
+    branches: ['lab/android-rust-bridge-*']
+    paths:
+      - 'experiments/redesign/android-rust-bridge-lab/**'
+      - 'experiments/redesign/android-compose-lab/**'
+      - 'experiments/redesign/core-agent-lab/**'
+      - 'experiments/redesign/plugin-contract-lab/**'
+      - 'docs/design/ANDROID-RUST-*'
+      - '.github/workflows/android-rust-bridge.yml'
+  pull_request:
+    branches: [develop]
+    paths:
+      - 'experiments/redesign/android-rust-bridge-lab/**'
+      - 'experiments/redesign/android-compose-lab/**'
+      - 'experiments/redesign/core-agent-lab/**'
+      - 'experiments/redesign/plugin-contract-lab/**'
+      - '.github/workflows/android-rust-bridge.yml'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Full required gate or immutable compiled assertion RED'
+        type: choice
+        options: [full, red, rust-red, jvm-red]
+        default: full
+
+permissions:
+  contents: read
+
+jobs:
+  select:
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'lab/android-rust-bridge-')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
+      red: ${{ steps.mode.outputs.red }}
+    steps:
+      - id: mode
+        env:
+          REQUESTED_SUITE: ${{ inputs.suite }}
+          SOURCE_REF: ${{ github.head_ref || github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          suite = os.environ['REQUESTED_SUITE']
+          ref = os.environ['SOURCE_REF']
+          if not suite:
+              suite = next((name for name in ['rust-red', 'jvm-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
+          if suite not in ['full', 'red', 'rust-red', 'jvm-red']:
+              raise SystemExit('invalid_suite')
+          red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') else []
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('mode=' + ('red' if red else 'full') + '\nred=' + json.dumps(red) + '\n')
+          PY
+
+  compiling-red:
+    needs: select
+    if: needs.select.outputs.mode == 'red'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ${{ fromJSON(needs.select.outputs.red) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        if: matrix.suite == 'jvm-red'
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Independent strict verifier and evidence classifier controls
+        run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
+      - name: Required compiled reachable RED stays a CI failure
+        env:
+          BRIDGE_RED_MODE: ${{ matrix.suite }}
+        run: |
+          python3 -B experiments/redesign/android-rust-bridge-lab/checks/linux_gate.py \
+            --mode "$BRIDGE_RED_MODE" \
+            --evidence-dir "$RUNNER_TEMP/android-bridge-evidence" \
+            --work-dir "$RUNNER_TEMP/android-bridge-work"
+      - name: Preserve raw setup build generation load and behavior evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-bridge-${{ github.sha }}-${{ matrix.suite }}
+          path: ${{ runner.temp }}/android-bridge-evidence/
+          retention-days: 1
+          if-no-files-found: error
+
+  required-full:
+    needs: select
+    if: needs.select.outputs.mode == 'full'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Full Android packaging gate pending subsequent checker batch
+        run: |
+          echo '::error::Full mode is not implemented in this initial RED-only checkpoint. Rust/JVM/Android full gates remain NOT_RUN.'
+          exit 1
