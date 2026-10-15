@@ -570,3 +570,4 @@ fn require_scope(required: &[Json], authority: &Json) -> Result<()> {
 pub mod service_types;
 pub mod service_controller;
 pub mod contract_transport;
+pub mod service_runtime;
