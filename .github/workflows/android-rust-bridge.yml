@@ -25,7 +25,7 @@ on:
       suite:
         description: 'Full gate, immutable assertion RED, or explicitly partial host checkpoint'
         type: choice
-        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red, service-host-checkpoint, service-oracle-red, service-host-green, mapper-control-red]
+        options: [full, red, rust-red, jvm-red, service-rust-red, service-jvm-red, service-host-checkpoint, service-oracle-red, service-host-green, mapper-control-red, service-temp-red]
         default: full
       emit_android_source:
         description: 'Diagnostic only: bounded generated Android source in service-jvm-red ordinary logs'
@@ -54,10 +54,10 @@ jobs:
           suite = os.environ['REQUESTED_SUITE']
           ref = os.environ['SOURCE_REF']
           if not suite:
-              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
-          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red']:
+              suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red', 'service-temp-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
+          if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red', 'service-temp-red']:
               raise SystemExit('invalid_suite')
-          red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') and suite != 'service-oracle-red' else []
+          red = ['rust-red', 'jvm-red'] if suite == 'red' else [suite] if suite.endswith('-red') and suite not in ['service-oracle-red', 'service-temp-red'] else []
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('mode=' + ('red' if red else suite) + '\nred=' + json.dumps(red) + '\n')
           PY
@@ -109,7 +109,7 @@ jobs:
 
   service-host-checkpoint:
     needs: select
-    if: needs.select.outputs.mode == 'service-host-checkpoint' || needs.select.outputs.mode == 'service-oracle-red' || needs.select.outputs.mode == 'service-host-green'
+    if: needs.select.outputs.mode == 'service-host-checkpoint' || needs.select.outputs.mode == 'service-oracle-red' || needs.select.outputs.mode == 'service-host-green' || needs.select.outputs.mode == 'service-temp-red'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

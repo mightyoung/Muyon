@@ -9,19 +9,23 @@ CONTRACT = json.loads(Path(__file__).with_name('host_checkpoint_cases.json').rea
 TARGET_COUNTS = dict(native_read=25, contract_transport=8, service_runtime=2, service_root=2)
 GREEN_CONTRACT = json.loads(Path(__file__).with_name('service_host_green_cases.json').read_text())
 GREEN_COUNTS = dict(TARGET_COUNTS, service_controller=4, service_oracle=1, service_lifecycle=3)
+TEMP_CONTRACT = json.loads(Path(__file__).with_name('service_temp_red_cases.json').read_text())
+TEMP_COUNTS = dict(GREEN_COUNTS, service_lifecycle=4)
 PREFIX = 'experiments/redesign/rust-agent-host-lab/core/'
 
 
-def inventory(root, contract=None, *, service=False):
-    contract = (GREEN_CONTRACT if service else CONTRACT) if contract is None else contract
-    counts = GREEN_COUNTS if service else TARGET_COUNTS
+def inventory(root, contract=None, *, service=False, temp=False):
+    contract = (TEMP_CONTRACT if temp else GREEN_CONTRACT if service else CONTRACT) if contract is None else contract
+    counts = TEMP_COUNTS if temp else GREEN_COUNTS if service else TARGET_COUNTS
     try:
-        if (set(contract) != {'version', 'author_commit', 'manifest', 'targets', 'not_run'}
+        if (service and temp
+                or set(contract) != ({'version', 'author_commit', 'manifest', 'targets', 'not_run', 'red'} if temp else {'version', 'author_commit', 'manifest', 'targets', 'not_run'})
+                or (temp and contract['red'] != TEMP_CONTRACT['red'])
                 or type(contract['version']) is not int or contract['version'] != 1
                 or not re.fullmatch('[0-9a-f]{40}', contract['author_commit'])
                 or contract['manifest'] != PREFIX + 'Cargo.toml'
                 or set(contract['targets']) != set(counts)
-                or set(contract['not_run']) != (set() if service else {'service_controller'})):
+                or set(contract['not_run']) != (set() if service or temp else {'service_controller'})):
             raise ValueError('shape')
         for target, group in (contract['targets'] | contract['not_run']).items():
             count = counts.get(target, 4)
@@ -39,7 +43,7 @@ def inventory(root, contract=None, *, service=False):
             if (hashlib.sha256(data).hexdigest() != group['sha256'] or blob != group['blob_sha']
                     or Counter(names) != Counter(group['names'])):
                 raise ValueError('source')
-        if service:
+        if service or temp:
             actual = {str(p.relative_to(root)) for p in (root / PREFIX / 'tests').rglob('*.rs')}
             if actual != {group['path'] for group in contract['targets'].values()}:
                 raise ValueError('unknown integration source')
@@ -96,3 +100,25 @@ def oracle_red(raw, status, source, binary_sha):
     result.update(mode='service-oracle-red',
                   scope='controller entry/refusal only; worker/observer execution not reached')
     return result
+
+
+def temp_red(raw, status):
+    red = TEMP_CONTRACT['red']
+    expected = [(name, 'FAILED' if name == red['test'] else 'ok')
+                for name in TEMP_CONTRACT['targets'][red['target']]['names']]
+    headers = re.findall(r"^thread '([^']*)'(?: \(\d+\))? panicked at\b", raw, re.M)
+    panics = re.findall(r"thread '([^']+)'(?: \(\d+\))? panicked at [^\n]+:\n([^\n]+)", raw)
+    rows = re.findall(r'^test (\S+) \.\.\. (ok|FAILED|ignored)\s*$', raw, re.M)
+    summaries = re.findall(r'^test result: (ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;', raw, re.M)
+    targets = re.findall(r'^\s*Running tests/(\w+)\.rs \(', raw, re.M)
+    valid = bool(status == 101 and 'Finished `release` profile' in raw
+        and targets == [red['target']] and headers == [red['test']]
+        and panics == [(red['test'], red['rust_assert'])]
+        and Counter(rows) == Counter(expected)
+        and summaries == [('FAILED', '3', '1', '0', '0', '0')]
+        and not re.search(r'could not compile|error\[E\d+\]|timed out|Timeout|signal:|SIGABRT|SIGKILL|\ufffd', raw))
+    return dict(accepted=valid, classification='semantic_red' if valid else 'INVALID',
+        mode='service-temp-red', command_exit_code=status, observed_tests=len(rows),
+        lifecycle_passed=3 if valid else None, expected_failed=red['test'],
+        post_assertion_bytes='NOT_RUN',
+        scope='healthy restore sibling reached; RecoveryRequired assertion failed; later byte-preservation tail not reached')
