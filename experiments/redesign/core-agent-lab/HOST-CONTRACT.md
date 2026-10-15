@@ -89,8 +89,10 @@ nativeProjectId, arbitrary business string, profile, endpoint, credentialRef,
 header, secret, raw stderr or exception text enters IPC/model context/logs.
 Missing records follow the real tool failure, not fabricated found=false success.
 
-Expose only a narrow `@visibleForTesting HttpClient Function()? modelClientFactory`
-on MuyonHost.open, passed into the existing OpenAiModelGateway clientFactory. Tests
+Expose only a narrow, documented testing-transport parameter
+`HttpClient Function()? modelClientFactory` on MuyonHost.open, passed into the
+existing OpenAiModelGateway clientFactory. No annotation on the parameter is
+required; do not mark the production open method testing-only. Tests
 use that real gateway/ledger/auth with an offline HttpClient, fake SecretStore and
 synthetic temporary inquiry database. Do not override chat/chatStream to bypass
 the real gateway. The shipped default transport remains unchanged.
