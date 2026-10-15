@@ -5,6 +5,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.atomic.AtomicInteger
 
 private const val BUILD = "1234567890abcdef1234567890abcdef12345678"
 private fun info() = UiBridgeInfo(1u, BUILD, UiDiagnosticCapability.BUNDLED_DECLARATION_VALIDATION, false, false, false, false, false)
@@ -63,7 +64,11 @@ fun runDiagnosticChecks() {
     for (mode in listOf("dismiss", "timeout", "holder recreation")) {
         cases["blocking native across $mode stays single flight until actual return"] = {
             val entered=CountDownLatch(1); val release=CountDownLatch(1); val finished=CountDownLatch(1)
-            val native=object : Backend() { override fun validateBundledContract(request: UiDiagnosticRequest): UiDiagnosticReport { entered.countDown(); check(release.await(5,TimeUnit.SECONDS)); return report(request) } }
+            val entries=AtomicInteger(); val active=AtomicInteger(); val maximum=AtomicInteger()
+            val native=object : Backend() { override fun validateBundledContract(request: UiDiagnosticRequest): UiDiagnosticReport {
+                entries.incrementAndGet(); maximum.accumulateAndGet(active.incrementAndGet(), ::maxOf)
+                try { entered.countDown(); check(release.await(5,TimeUnit.SECONDS)); return report(request) } finally { active.decrementAndGet() }
+            } }
             val w=Executor { work -> Thread { try { work.run() } finally { finished.countDown() } }.apply { isDaemon=true }.start() }
             // Handshake deliberately synchronous to prepare, validation actual blocked worker.
             var calls=0; val c=diagnosticCoordinator(native, Executor { if(calls++==0) it.run() else w.execute(it) }) { it() }
@@ -71,8 +76,8 @@ fun runDiagnosticChecks() {
             val token=(c.startValidation(la,UiDiagnosticVariant.EQUIPMENT) as DiagnosticAdmission.Accepted).token
             try { check(entered.await(5,TimeUnit.SECONDS)); if(mode=="timeout") c.expire(la,token) else c.detach(la)
                 val b=Observer(); val lb=c.attach(b::receive); check(b.last.nativeBusy); check(c.startHandshake(lb)==DiagnosticAdmission.Busy); check(c.startValidation(lb,UiDiagnosticVariant.INQUIRY)==DiagnosticAdmission.Busy)
-                check(calls==2); check(b.last.presentation==DiagnosticPresentation.Idle)
-                release.countDown(); check(finished.await(5,TimeUnit.SECONDS)); check(!b.last.nativeBusy); check(b.last.presentation==DiagnosticPresentation.Idle)
+                check(calls==2); check(entries.get()==1 && active.get()==1 && maximum.get()==1); check(b.last.presentation==DiagnosticPresentation.Idle)
+                release.countDown(); check(finished.await(5,TimeUnit.SECONDS)); check(!b.last.nativeBusy); check(entries.get()==1 && active.get()==0 && maximum.get()==1); check(b.last.presentation==DiagnosticPresentation.Idle)
                 if(mode=="timeout") check(a.last.presentation is DiagnosticPresentation.LocallyTimedOut)
                 check(c.startHandshake(lb) is DiagnosticAdmission.Accepted)
             } finally { release.countDown() }

@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -21,7 +22,10 @@ fun MuyonLabShell(
     port: RustUiPort = DisconnectedRustUiPort,
     windowWidthDp: Float? = null,
     initialState: ShellState = ShellState(),
+    diagnostics: RustDiagnosticCoordinator? = null,
 ) {
+    val diagnosticCoordinator = diagnostics ?: (LocalContext.current.applicationContext as MuyonLabApplication).diagnostics
+    var diagnosticOpen by remember { mutableStateOf(false) }
     var shell by remember { mutableStateOf(initialState) }
     var local by remember { mutableStateOf(LocalUiState().updateMemory(initialState.memory(Destination.ASSISTANT))) }
     val layout = navigationLayout(windowWidthDp ?: LocalConfiguration.current.screenWidthDp.toFloat())
@@ -54,7 +58,7 @@ fun MuyonLabShell(
     LaunchedEffect(shell.selected, conversation.id, draftMounted, local.overlay) {
         if (shell.selected == Destination.ASSISTANT && draftMounted && local.overlay == null && local.active.memory.focus == FocusSlot.DRAFT) draftFocus.requestFocus()
     }
-    fun select(destination: Destination) { focusManager.clearFocus(); shell = shell.select(destination); local = local.copy(overlay = null) }
+    fun select(destination: Destination) { diagnosticOpen = false; focusManager.clearFocus(); shell = shell.select(destination); local = local.copy(overlay = null) }
     fun show(overlay: LocalOverlay) { focusManager.clearFocus(); local = local.copy(overlay = overlay) }
 
     MaterialTheme(colorScheme = colors) {
@@ -105,11 +109,13 @@ fun MuyonLabShell(
                             onQuery = { local = local.copy(recordQuery = it) },
                             onNote = { ref -> local = local.openNote(ref.conversationId, ref.note.id) })
                         Destination.SETTINGS -> SettingsLocalPage(local, settingsScroll,
-                            onTheme = { local = local.copy(theme = it) }, onOptions = { show(LocalOverlay.Capabilities) })
+                            onTheme = { local = local.copy(theme = it) }, onOptions = { show(LocalOverlay.Capabilities) },
+                            onDiagnostic = { diagnosticOpen = true })
                     }
                 }
             }
         }
+        if (diagnosticOpen && shell.selected == Destination.SETTINGS) DiagnosticPanel(diagnosticCoordinator) { diagnosticOpen = false }
         LocalOverlays(
             local,
             onDismiss = { local = local.copy(overlay = null) },

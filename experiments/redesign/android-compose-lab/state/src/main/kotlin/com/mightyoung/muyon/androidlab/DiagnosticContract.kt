@@ -27,7 +27,9 @@ sealed interface DiagnosticAvailability {
     data class Ready(val info: UiBridgeInfo) : DiagnosticAvailability
     data class Unavailable(val code: DiagnosticError) : DiagnosticAvailability
 }
+@ConsistentCopyVisibility
 data class DiagnosticLease internal constructor(val generation: Long)
+@ConsistentCopyVisibility
 data class DiagnosticCallToken internal constructor(val requestId: String, val ownerGeneration: Long)
 sealed interface DiagnosticAdmission {
     data class Accepted(val token: DiagnosticCallToken) : DiagnosticAdmission

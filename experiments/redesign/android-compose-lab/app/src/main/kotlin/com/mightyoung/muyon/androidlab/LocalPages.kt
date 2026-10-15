@@ -168,7 +168,7 @@ internal fun RecordsLocalPage(state: LocalUiState, scroll: LazyListState, onQuer
 }
 
 @Composable
-internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onTheme: (LabTheme) -> Unit, onOptions: () -> Unit) {
+internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onTheme: (LabTheme) -> Unit, onOptions: () -> Unit, onDiagnostic: () -> Unit) {
     Column(Modifier.fillMaxSize()) {
         LocalConnectionNotice()
         LazyColumn(state = scroll, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -190,6 +190,7 @@ internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onThe
                 Text("${state.conversations.size} 个本地会话 · ${state.conversations.sumOf { it.notes.size }} 条用户记录")
                 Text("内容仅在内存中，关闭或重建应用后不保证保留。", style = MaterialTheme.typography.bodySmall)
             }
+            item { TextButton(onClick = onDiagnostic, modifier = Modifier.testTag("open-rust-diagnostic")) { Text("本地 Rust 检查") } }
             item { TextButton(onClick = onOptions) { Text("模型、附件与执行能力") } }
             item { Text("Muyon", style = MaterialTheme.typography.titleMedium); Text("本地模式 · 未连接执行服务", style = MaterialTheme.typography.bodySmall) }
         }
