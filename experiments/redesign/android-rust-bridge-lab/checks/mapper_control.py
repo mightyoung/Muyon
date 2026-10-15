@@ -37,16 +37,18 @@ def inventory(root,contract=None):
 def classify(raw,status,source,library_sha):
     mapped=f'AGENT_MAPPER_JVM_MAPPED source={source} sha256={library_sha}'
     primary='Exception in thread "main" java.lang.IllegalStateException: '+CONTRACT['assertion']
+    mappings=re.findall(r'^AGENT_MAPPER_JVM_MAPPED[^\n]*',raw,re.M)
     passes=['PASS B generated projection '+name for name in CONTRACT['case_names'][:5]]
     stages=[mapped]+passes+[primary]
     exceptions=re.findall(r'^Exception in thread "([^"]*)"([^\n]*)',raw,re.M)
     valid=bool(status==1 and re.fullmatch('[0-9a-f]{40}',source) and re.fullmatch('[0-9a-f]{64}',library_sha)
+        and mappings==[mapped]
         and exceptions==[('main',' java.lang.IllegalStateException: '+CONTRACT['assertion'])]
         and re.findall(r'^PASS B generated projection ([^\n]+)',raw,re.M)==CONTRACT['case_names'][:5]
         and all(raw.splitlines().count(stage)==1 for stage in stages)
         and all(raw.index(a)<raw.index(b) for a,b in zip(stages,stages[1:]))
         and raw.count(CONTRACT['assertion'])==1
-        and not re.search(r'checks passed; metadata only|panicked at|timed out|Timeout|signal:|SIGABRT|SIGKILL|\ufffd',raw))
+        and not re.search(r'checks passed; metadata only|panicked at|timed out|Timeout|signal:|SIGABRT|SIGKILL|UnsatisfiedLinkError|NoClassDefFoundError|NoSuchMethodError|NoSuchFieldError|ClassNotFoundException|ExceptionInInitializerError|LinkageError|UnsupportedClassVersionError|IncompatibleClassChangeError|VerifyError|checksum mismatch|\ufffd',raw))
     return dict(accepted=valid,classification='semantic_red' if valid else 'INVALID',
         mode='mapper-control-red',command_exit_code=status,mapper_passed=5 if valid else None,
         mapper_expected_failed=CONTRACT['case_names'][5],

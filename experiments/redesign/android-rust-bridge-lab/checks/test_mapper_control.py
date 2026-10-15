@@ -38,6 +38,25 @@ class MapperControlTests(unittest.TestCase):
         for status in [0,101,124,-6,-9]:
             self.assertFalse(classify(raw,status,SOURCE,LIBRARY)['accepted'])
 
+    def test_mixed_load_faults_and_any_extra_mapping_header_are_invalid(self):
+        raw=transcript()
+        extras=['UnsatisfiedLinkError: missing native library',
+                'NoClassDefFoundError: generated record class',
+                'NoSuchMethodError: incompatible generated type',
+                'checksum mismatch: generated contract',
+                'ClassNotFoundException: generated record class',
+                'ExceptionInInitializerError: incompatible binding',
+                'LinkageError: incompatible native component',
+                'UnsupportedClassVersionError: incompatible compiler',
+                'AGENT_MAPPER_JVM_MAPPED source='+SOURCE+' sha256='+'c'*64,
+                'AGENT_MAPPER_JVM_MAPPED source='+'c'*40+' sha256='+LIBRARY,
+                'AGENT_MAPPER_JVM_MAPPED malformed extra header']
+        for extra in extras:
+            for bad in [extra+'\n'+raw,raw+extra+'\n']:
+                with self.subTest(extra=extra,placement=bad.index(extra)):
+                    self.assertFalse(classify(bad,1,SOURCE,LIBRARY)['accepted'])
+        self.assertTrue(classify(raw,1,SOURCE,LIBRARY)['accepted'])
+
     def test_inventory_freezes_all_inputs_and_six_case_source(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);c=copy.deepcopy(CONTRACT)
