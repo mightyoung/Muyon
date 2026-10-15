@@ -67,6 +67,11 @@ fn eof_and_concurrency_fail_closed() {
   let lines=format!("{}\n{}\n{bad}\n{{\"protocol_version\":1,\"command\":\"inspect\"}}\n",register_request.encode(),prepare_request.encode());
   let replies=wire(&lines);assert_eq!(replies.len(),3,"INVALID_ENVELOPE_MUST_END_PREPARED_SESSION: {bad}");assert!(ok(&replies[0]));assert!(ok(&replies[1]));expect_code(&replies[2],"protocol_envelope");
  }
+ // Actual stdin EOF while a prepared ticket exists: helper observes bounded
+ // process exit. A new child cannot inherit that transient Catalog.
+ let eof=wire(&format!("{}\n{}\n",register_request.encode(),prepare_request.encode()));assert_eq!(eof.len(),2);assert!(ok(&eof[0]));assert!(ok(&eof[1]));
+ let old_ticket=field(&eof[1],"ticket").clone();let invoke_old=muyon_plugin_contract_lab::object([("protocol_version",json("1")),("command",string("invoke")),("ticket",old_ticket),("authority",authority())]);
+ let fresh=wire(&format!("{}\n{}\n",register_request.encode(),invoke_old.encode()));assert_eq!(fresh.len(),2);assert!(ok(&fresh[0]));expect_code(&fresh[1],"unknown_ticket");
  let lines=format!("{}\n{}\n{{\"command\":\"inspect\",\"command\":\"inspect\"}}\n{{\"protocol_version\":1,\"command\":\"inspect\"}}\n",register_request.encode(),prepare_request.encode());
  let replies=wire(&lines);assert_eq!(replies.len(),3,"protocol fault must terminate the child session before another request");assert!(ok(&replies[0]));assert!(ok(&replies[1]));expect_code(&replies[2],"invalid_json");
  let oversized=wire(&format!("{}\n", "x".repeat(65537)));assert_eq!(oversized.len(),1);assert!(oversized[0].encode().len()<256);assert!(!ok(&oversized[0]));
