@@ -7,7 +7,13 @@ import re
 
 CORE = 'experiments/redesign/core-agent-lab/core'
 PLUGIN = 'experiments/redesign/plugin-contract-lab/core'
+HOST = 'experiments/redesign/rust-agent-host-lab/core'
 CONTRACTS = {
+    'host-red': dict(crate=HOST, build_crate=PLUGIN, binary='muyon-plugin-contract-lab',
+        target='native_read', test='native_host_executes_registered_read', filtered=16,
+        reach='NATIVE_HOST_STUB_REACHED handlerCalls=0',
+        assertion='NATIVE_READ_RED: native host must execute exactly one admitted registered read',
+        contract_source='2f057120144bf5f9ed6b2935ba8437a71bc97690'),
     'core-red': dict(crate=CORE, binary='muyon-core-agent-lab', target='native_ports',
         test='generic_ports_share_driver_without_inquiry_names', filtered=0,
         reach='NATIVE_PORT_STUB_REACHED persists=1 dispatches=0',
@@ -61,9 +67,14 @@ def main():
         result = CONTRACTS[args.suite]
         if args.github_env:
             with args.github_env.open('a') as output:
-                for key, value in dict(MANIFEST=result['crate'] + '/Cargo.toml',
+                build_crate = result.get('build_crate', result['crate'])
+                values = dict(MANIFEST=result['crate'] + '/Cargo.toml',
+                    BUILD_MANIFEST=build_crate + '/Cargo.toml',
                     BINARY=result['binary'], TEST_TARGET=result['target'], TEST_NAME=result['test'],
-                    BINARY_PATH=result['crate'] + '/target/debug/' + result['binary']).items():
+                    BINARY_PATH=build_crate + '/target/debug/' + result['binary'])
+                if args.suite == 'host-red':
+                    values['MUYON_PLUGIN_CONTRACT_BIN'] = str(Path(values['BINARY_PATH']).resolve())
+                for key, value in values.items():
                     output.write(key + '=' + value + '\n')
     else:
         raw = args.log.read_bytes() if args.log and args.log.is_file() else b''

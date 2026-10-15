@@ -13,7 +13,7 @@ on:
       suite:
         description: 'Reachable compiling RED; required command still fails CI'
         type: choice
-        options: [red, core-red, protocol-red, plugin-red]
+        options: [red, core-red, protocol-red, plugin-red, host-red]
         default: red
 
 permissions:
@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: ${{ fromJSON(inputs.suite == 'core-red' && '["core-red"]' || inputs.suite == 'protocol-red' && '["protocol-red"]' || inputs.suite == 'plugin-red' && '["plugin-red"]' || inputs.suite == 'red' && '["core-red","protocol-red","plugin-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-core-red-') && '["core-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-protocol-red-') && '["protocol-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-plugin-red-') && '["plugin-red"]' || '["core-red","protocol-red","plugin-red"]') }}
+        suite: ${{ fromJSON(inputs.suite == 'host-red' && '["host-red"]' || inputs.suite == 'core-red' && '["core-red"]' || inputs.suite == 'protocol-red' && '["protocol-red"]' || inputs.suite == 'plugin-red' && '["plugin-red"]' || inputs.suite == 'red' && '["core-red","protocol-red","plugin-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-host-red-') && '["host-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-core-red-') && '["core-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-protocol-red-') && '["protocol-red"]' || startsWith(github.ref_name, 'lab/rust-native-read-plugin-red-') && '["plugin-red"]' || '["core-red","protocol-red","plugin-red"]') }}
     defaults:
       run:
         shell: bash
@@ -52,7 +52,7 @@ jobs:
         run: |
           set -o pipefail
           cargo test --offline --locked --no-run --manifest-path "$MANIFEST" 2>&1 | tee "$EVIDENCE_DIR/compile.log"
-          cargo build --offline --locked --manifest-path "$MANIFEST" --bin "$BINARY" 2>&1 | tee "$EVIDENCE_DIR/build.log"
+          cargo build --offline --locked --manifest-path "$BUILD_MANIFEST" --bin "$BINARY" 2>&1 | tee "$EVIDENCE_DIR/build.log"
           test -x "$BINARY_PATH"
           sha256sum "$BINARY_PATH" | tee "$EVIDENCE_DIR/binary-sha256.txt"
       - name: Required actual reachable assertion RED

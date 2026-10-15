@@ -16,6 +16,15 @@ def transcript(suite):
 
 
 class RedTests(unittest.TestCase):
+    def test_host_core_stub_or_setup_guard_cannot_replace_reached_host_dispatch(self):
+        self.assertEqual(CONTRACTS['host-red']['filtered'], 16)
+        raw = transcript('host-red')
+        wrong = raw.replace(CONTRACTS['host-red']['reach'], 'NATIVE_PORT_STUB_REACHED persists=1 dispatches=0')
+        self.assertFalse(classify('host-red', wrong, 101)['accepted'])
+        wrong = raw.replace(CONTRACTS['host-red']['assertion'], 'real common drive must reach native dispatch before interpreting RED')
+        self.assertFalse(classify('host-red', wrong, 101)['accepted'])
+        self.assertFalse(classify('host-red', raw.replace('16 filtered out', '12 filtered out'), 101)['accepted'])
+
     def test_protocol_four_case_contract_rejects_old_filtered_count(self):
         self.assertEqual(CONTRACTS['protocol-red']['filtered'], 3)
         old = transcript('protocol-red').replace('3 filtered out', '2 filtered out')
