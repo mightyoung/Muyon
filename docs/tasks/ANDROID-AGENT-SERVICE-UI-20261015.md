@@ -82,3 +82,20 @@ Exact-source JVM checks: old 114 + new 9 = **123 PASS**, exit 0. Android Parcel/
 | --- | --- |
 | `phase2-codec-red.log` | `a4d6c53e762d43eeda12d1c1db5d22b6623544211371212a7e954d9a7e53fd39` |
 | `phase2-codec-green.log` | `e7b5cd1ad15d3ed9558c70b5cc3ad6a77b405664ce6c76460be53e0b367d071e` |
+
+## Phase 2b: bounded liveness registry
+
+Codec review Minor corrected tests only in `f1b3d21f`: magic mutation remains, VERSION byte index 4 is now independently mutated; unknown reply tag and noncanonical boolean flag also have valid encoded siblings. The codec implementation is unchanged. All 9 codec cases pass in the subsequent full JVM run.
+
+Refusing registry checkpoint `68f099254b19a3fda9165eed5496b1debd1fa858` compiles and fails all 9 new cases. Initial registry implementation passed those cases. An additional real setup-failure case then failed at `e8be2bf1`: a throwing death-link setup must not create an unobserved native lease. Final implementation returns local Unavailable after failed link, retains no token and never invokes native connect for it.
+
+The pure registry retains at most 2 tokens including released-live tombstones, links a live token once, preserves the private key on repeated connect, remembers death during linking/connect, and reissues only the original key's stop after a late native connect if death raced it. Dead entries can be removed; duplicate late callbacks remain bound to the dead entry and cannot remove a replacement. Native and link/gone callbacks run outside the registry lock. Private keys use a process-prefix and checked monotonically increasing sequence; the eventual Service adapter must share this key source for its process lifetime and must never accept private keys from UI parameters. `markReleased` is called only after native acknowledgement; it does not implement Rust cancellation or business authorization.
+
+Final JVM result: previous 123 + new 10 = **133 PASS**, exit 0. These are synthetic liveness/control seams, not real Binder death, Android process, Rust authority or runtime evidence. No actual platform callback/Rust Object is substituted.
+
+| Registry log | SHA-256 |
+| --- | --- |
+| `phase2-registry-red-fixed-tests.log` | `ea348b9f815d8512fa36efe1f983382543ca031395787269401442d515693c98` |
+| `phase2-registry-green.log` | `8950b8ae78a500ba99a98669b06a81d73e2d6d8eb97e4e9c32dbbe4c2bcabd6a` |
+| `phase2-registry-link-red.log` | `00ffeaadfcbe9e97d1ce4b935c44b50db86130ed645967cd582e7e8db66be81f` |
+| `phase2-registry-verified-green.log` | `e2fa86022c9694d3ea50328df1129fc42a0c1ec68383e0fd015675b8fdddedc1` |
