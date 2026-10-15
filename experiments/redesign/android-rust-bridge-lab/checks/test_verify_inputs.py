@@ -2,6 +2,8 @@
 import copy
 import hashlib
 import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -75,6 +77,26 @@ class InputTests(unittest.TestCase):
         for raw in [b'{"protocol":1,"protocol":1}', b'{"jna":{"version":1,"version":1}}', b'{}{}', b'\xff', b'{"x":NaN}']:
             with self.assertRaises(verifier.Invalid):
                 verifier.decode(raw)
+
+    def test_deep_valid_json_cli_fails_closed_and_valid_sibling_remains_usable(self):
+        script = self.root / 'experiments/redesign/android-rust-bridge-lab/checks/verify_inputs.py'
+        script.parent.mkdir(parents=True, exist_ok=True)
+        script.write_bytes(Path(verifier.__file__).read_bytes())
+        manifest = self.inputs / 'bridge-inputs.json'
+        raw = b'[' * 30000 + b'0' + b']' * 30000
+        self.assertEqual(len(raw), 60001)
+        manifest.write_bytes(raw)
+        result = subprocess.run([
+            sys.executable, '-B', str(script), '--input-root', str(self.inputs),
+            '--expected-source-sha', self.source, '--binding', str(self.binding),
+            '--android-config', str(self.config), '--jna-aar', str(self.aar),
+        ], capture_output=True, timeout=10)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b'')
+        self.assertEqual(result.stderr, b'BRIDGE_INPUTS_INVALID json\n')
+        self.write()
+        self.assertEqual(verifier.decode(manifest.read_bytes()), self.value)
+        self.verify_without_official_aar()
 
     def test_mixed_missing_extra_and_modified_native_inputs_reject(self):
         library = self.inputs / self.value['rust_libraries']['arm64-v8a']['path']

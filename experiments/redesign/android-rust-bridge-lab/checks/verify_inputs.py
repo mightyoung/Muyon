@@ -44,7 +44,7 @@ def decode(raw):
     try:
         return json.loads(raw.decode('utf-8'), object_pairs_hook=pairs,
                           parse_constant=lambda _: fail('json_constant'))
-    except (UnicodeError, json.JSONDecodeError):
+    except (UnicodeError, json.JSONDecodeError, RecursionError):
         fail('json')
 
 
