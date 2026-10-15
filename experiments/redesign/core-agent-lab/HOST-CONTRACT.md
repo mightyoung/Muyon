@@ -96,6 +96,13 @@ do not rewrite a reference into a different identity. No record/data/name/summar
 nativeProjectId, arbitrary business string, profile, endpoint, credentialRef,
 header, secret, raw stderr or exception text enters IPC/model context/logs.
 Missing records follow the real tool failure, not fabricated found=false success.
+Before provider replies enter IPC, use the existing gateway masking operation;
+never read/export credentials in this adapter. Reject a tool proposal if masking
+would alter its identity or arguments, instead of rewriting it into another call.
+Sanitize answers and reject known frozen profile/endpoint/credential-reference
+metadata echoes. Additional SecretStore reads for existing masking are not model
+sends; model-call counts are established by actual gateway requests and ledger.
+Tests include synthetic provider credential echoes, not only passive canary scans.
 
 Expose only a narrow, documented testing-transport parameter
 `HttpClient Function()? modelClientFactory` on MuyonHost.open, passed into the
