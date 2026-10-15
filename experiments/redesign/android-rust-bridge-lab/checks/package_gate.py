@@ -74,6 +74,9 @@ def apk_entries(apk, inputs):
             raise RuntimeError('apk_duplicate_member')
         native = [entry.filename for entry in archive.infolist() if entry.filename.startswith('lib/') and entry.filename.endswith('.so')]
         if len(native) != 4 or set(native) != set(expected):
+            print('ANDROID_BRIDGE_APK_NATIVE_INVENTORY ' + json.dumps(dict(
+                apk_sha256=sha(apk), count=len(native), expected=sorted(expected),
+                observed=[name[:160] for name in native[:50]], bounded=True)), flush=True)
             raise RuntimeError('apk_exact_native_entries')
         for name, digest in expected.items():
             info = archive.getinfo(name)
@@ -121,11 +124,17 @@ def main():
         for marker in MARKERS:
             if raw.count(marker) != 1:
                 raise RuntimeError('required_state_marker:' + marker)
+        print('\n'.join(line for line in raw.splitlines() if re.match(r'^(PASS|FAIL) ', line)), flush=True)
+        print('\n'.join(marker for marker in MARKERS), flush=True)
         # Recheck against the actually resolved Gradle AAR, not only a second download.
         resolved = list((work / 'gradle-cache/caches/modules-2/files-2.1/net.java.dev.jna/jna/5.19.1').glob('*/jna-5.19.1.aar'))
         if len(resolved) != 1:
             raise RuntimeError('resolved_jna_aar_inventory')
         verify(evidence / 'bridge-inputs', source, ROOT / BINDING, ROOT / CONFIG, resolved[0])
+        result.update(source_sha=source, protocol=1, min_api=24,
+                      bridge_inputs_sha256=sha(evidence / 'bridge-inputs/bridge-inputs.json'),
+                      resolved_jna_aar_sha256=sha(resolved[0]), state_passed=16,
+                      local_ui_passed=22, diagnostic_passed=29, gradle_required_exit=0)
         apk = UI / 'app/build/outputs/apk/debug/app-debug.apk'
         test_apk = UI / 'app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk'
         if not apk.is_file() or not test_apk.is_file():
@@ -146,8 +155,7 @@ def main():
             gradle_zip_sha256=sha(work / 'gradle.zip'), resolved_jna_aar_sha256=sha(resolved[0]),
             apk_sha256=sha(apk), test_apk_sha256=sha(test_apk), apk_native_entries=entries,
             zipalign_app=True, zipalign_test=True, lint=True)
-        print('\n'.join(line for line in raw.splitlines() if re.match(r'^(PASS|FAIL) ', line)), flush=True)
-        print('\n'.join(marker for marker in MARKERS), flush=True)
+
         print((evidence / 'zipalign-app.log').read_text(), flush=True)
         print((evidence / 'apk-badging.log').read_text()[-4000:], flush=True)
         return 0
