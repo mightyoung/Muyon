@@ -43,11 +43,13 @@ class AgentLivenessRegistry<T:Any>(private val keys:AgentClientKeys, private val
             if(synchronized(lock){entry.dead}) return unavailable()
             nativeStarted=true
             val result=native(entry.key)
-            val dead=synchronized(lock) {
-                if(!entry.dead && result is UiAgentWireReply.Connected) entry.client=result.client
-                entry.dead
+            val unavailable=synchronized(lock) {
+                // An acknowledged release may have established a live tombstone while
+                // repeat native connect was in flight. Never publish that late lease.
+                if(!entry.dead && !entry.released && result is UiAgentWireReply.Connected) entry.client=result.client
+                entry.dead || entry.released
             }
-            return if(dead) unavailable() else result
+            return if(unavailable) unavailable() else result
         } finally {
             val dead=synchronized(lock) {
                 entry.connecting=false
