@@ -36,10 +36,11 @@ Directory repositoryRoot() {
 }
 
 class HostFixture {
-  HostFixture._(this.root, this.transport, this.secrets);
+  HostFixture._(this.root, this.transport, this.secrets, {this.directEvidence = false});
   final Directory root;
   final OfflineModel transport;
   final FakeSecretStore secrets;
+  final bool directEvidence;
   late MuyonHost host;
   late String supplierId;
   late String otherId;
@@ -47,7 +48,12 @@ class HostFixture {
   late AssistantConversation conversation;
   late String childBinary;
   bool closed = false;
-  Directory get evidence => Directory(p.join(root.path, 'process'));
+  Directory get evidence {
+    final retained = Platform.environment['MUYON_TEST_CORE_AGENT_EVIDENCE_DIR'];
+    return directEvidence && retained != null
+        ? Directory(p.join(retained, p.basename(root.path)))
+        : Directory(p.join(root.path, 'process'));
+  }
   String get stateRoot => p.join(root.path, 'core-state');
   String get launcher => p.join(root.path, 'launch-core');
 
@@ -56,11 +62,13 @@ class HostFixture {
     OutboundContentReviewer? modelReviewer,
     OutboundContentReviewer? toolReviewer,
     String? negativeMode,
+    bool directEvidence = false,
   }) async {
     final f = HostFixture._(
       Directory.systemTemp.createTempSync('core-agent-host-'),
       OfflineModel(),
       FakeSecretStore(),
+      directEvidence: directEvidence,
     );
     f.secrets.install();
     final recorder = p.join(repositoryRoot().path,
@@ -208,6 +216,43 @@ class HostFixture {
     expect(keys.where((key) => RegExp(r'(TOKEN|SECRET|API_KEY|PROXY|AGENT_EVAL)', caseSensitive: false).hasMatch(key)), isEmpty);
   }
 
+  Map<String, Object?> _inspectAllInverseChildren() {
+    if (!evidence.existsSync()) return {'ok': true, 'launch_count': 0};
+    final inspector = p.join(
+      repositoryRoot().path,
+      'experiments/redesign/core-agent-lab/host-checks/inspect_process.py',
+    );
+    final result = Process.runSync('/usr/bin/python3', [
+      inspector,
+      evidence.path,
+      '--all-launches',
+    ]);
+    return {
+      'ok': result.exitCode == 0,
+      'diagnostic': '${result.stdout}'.trim(),
+    };
+  }
+
+  Future<void> closeAndVerifyInverseChildren() async {
+    final before = _inspectAllInverseChildren();
+    try {
+      await closeHost();
+    } finally {
+      final after = _inspectAllInverseChildren();
+      evidence.createSync(recursive: true);
+      File(p.join(evidence.path, 'inverse-cleanup.json')).writeAsStringSync(
+        jsonEncode({
+          'before_host_close': before,
+          'after_host_close': after,
+          'cleanup_kind': before['ok'] == true
+              ? 'natural_before_finally'
+              : 'host_close_after_oracle',
+        }),
+      );
+      expect(after['ok'], isTrue, reason: 'HOST_INVERSE_CLEANUP');
+    }
+  }
+
   void assertPrivateBoundary() {
     final ipc = [
       File(p.join(_soleLaunch.path, 'host.bin')).readAsBytesSync(),
@@ -240,7 +285,7 @@ class HostFixture {
     secrets.uninstall();
     await transport.dispose();
     final destination = Platform.environment['MUYON_TEST_CORE_AGENT_EVIDENCE_DIR'];
-    if (destination != null && evidence.existsSync()) {
+    if (!directEvidence && destination != null && evidence.existsSync()) {
       final retained = Directory(p.join(destination, p.basename(root.path)))..createSync(recursive: true);
       for (final file in evidence.listSync(recursive: true).whereType<File>()) {
         final copy = File(p.join(retained.path, p.relative(file.path, from: evidence.path)));

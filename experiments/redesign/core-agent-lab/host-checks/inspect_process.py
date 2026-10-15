@@ -9,7 +9,7 @@ def inspect(evidence, expected_launches=1, require_reaped=True):
     manifest = evidence / 'launches.jsonl'
     assert manifest.is_file(), 'launch_manifest_missing'
     records = [json.loads(line) for line in manifest.read_text().splitlines()]
-    assert len(records) == expected_launches, 'unexpected_launch_count'
+    assert expected_launches is None or len(records) == expected_launches, 'unexpected_launch_count'
     identities = [record['launch_id'] for record in records]
     assert len(set(identities)) == len(identities), 'duplicate_launch_identity'
     directories = {path.name for path in evidence.glob('launch-*') if path.is_dir()}
@@ -31,9 +31,11 @@ def main():
     parser.add_argument('evidence')
     parser.add_argument('--expected-launches', type=int, default=1)
     parser.add_argument('--allow-running', action='store_true')
+    parser.add_argument('--all-launches', action='store_true')
     arguments = parser.parse_args()
     try:
-        result = inspect(arguments.evidence, arguments.expected_launches, not arguments.allow_running)
+        result = inspect(arguments.evidence, None if arguments.all_launches else arguments.expected_launches,
+                         not arguments.allow_running)
     except (AssertionError, KeyError, ValueError, OSError) as error:
         print(str(error) if isinstance(error, AssertionError) else 'invalid_process_evidence')
         return 1

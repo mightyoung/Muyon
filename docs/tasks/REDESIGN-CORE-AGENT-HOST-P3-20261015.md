@@ -159,3 +159,50 @@ existing recorder/rejection self checks **4/4 PASS**; each proposed anchor occur
 exactly once at fixed Dartb3f012e. Strict local analysis of all test_host files,
 including the new oracle file, reports **No issues found!**. These results do not
 claim any actual DUT mutant KILLED or replace the pending real-binary CI runs.
+
+## Existing inverse infrastructure repair after research pause
+
+CI38689639311 (source4c4a336) retained the main host suite's 50 PASS but
+rejected the first inverse baseline before creating a mutant. Diagnostic-only
+commit18e1ebe preserved that failure and added bounded sanitized diagnostics.
+CI38690490578 (source9692108) then established the actual setup cause: Flutter
+could not read the private copy's `.dart_tool/package_graph.json`; the target
+never started. This is setup failure, not semantic RED or a mutation kill.
+
+The private copier now includes that existing resolver dependency graph,
+byte-identical to the source workspace, after verifying all copied tracked
+pubspec/lock inputs are byte-identical. Its package config still redirects
+local packages to the private source copy. Dependency input/config/graph hashes
+join the source manifest and final unchanged check. No prior build/test output
+or native-assets result is copied, and no local dependency download is used.
+
+T3-INV-1: all three inverse tests unconditionally run full-launch verification
+in finally, after any target assertion. The inverse-specific fixture writes
+recorder evidence directly to the retained directory so watchdog interruption
+cannot hide an extra launch. The runner independently requires each manifest
+entry to match its launch directory/record, each actual child to have exit/reap
+evidence, and every recorded child/launcher PID to be absent. It checks all
+actual launches, including the one-driver mutant's extra process. A target
+marker without valid cleanup evidence is INVALID, never KILLED.
+
+T3-INV-2: the watchdog owns a private process session and verifies recorded PID
+start identities. Linux subreaper adoption permits waiting/reaping orphaned
+workers. Normal exit is followed by a bounded ownership scan; remaining owned
+processes receive TERM then KILL if needed. The final record distinguishes
+natural completion, host.close cleanup after the oracle and watchdog-forced
+cleanup, with owned/adopted/remaining PIDs. Baselines require natural reap;
+mutants require complete verified cleanup. Timeout remains INVALID even when
+cleanup succeeds. No machine-wide process termination is used.
+
+Local verification: inverse infrastructure Python self checks **8/8 PASS**,
+including real timeout cleanup of a TERM-ignoring grandchild in a separate
+session, normal exit without forced cleanup, and rejection of a missing exit
+record for either of two launches. Existing recorder/rejection self checks
+**4/4 PASS**. Strict `dart analyze --fatal-infos apps/muyon/test_host` reports
+**No issues found!** in the existing isolated compile clone; raw logs are
+retained externally. These helper checks
+are not DUT mutant evidence: actual compiled baseline GREEN and precise mutant
+KILLED remain pending the next exact CI candidate. Original positive expected
+projection/receipt/call pairing and all three boundary markers remain unchanged.
+The inquiry integration remains paused and is not a public plugin API freeze
+or an authorization to merge.

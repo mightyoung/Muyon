@@ -15,6 +15,9 @@ import subprocess
 import tempfile
 from urllib.parse import unquote, urlsplit
 
+from inspect_process import inspect
+from owned_process import run_owned
+
 
 ORACLE = 'test_host/core_agent_host_inverse_oracles_test.dart'
 MUTATIONS = [
@@ -108,6 +111,8 @@ def copy_sources(source, destination):
         copied = destination / relative
         copied.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(origin, copied, follow_symlinks=False)
+        if relative.name in ('pubspec.yaml', 'pubspec.lock') and digest(origin) != digest(copied):
+            raise RuntimeError('private_copy_dependency_inputs_changed')
     config_path = source / '.dart_tool/package_config.json'
     config = json.loads(config_path.read_text())
     for package in config['packages']:
@@ -129,6 +134,39 @@ def copy_sources(source, destination):
     config_copy = destination / '.dart_tool/package_config.json'
     config_copy.parent.mkdir(parents=True, exist_ok=True)
     config_copy.write_text(json.dumps(config, indent=2) + '\n')
+    # Confirmed by CI38690490578: Flutter --no-pub requires this existing
+    # resolver output as well as package_config. It describes dependencies,
+    # not a prior DUT compile/test result. Dependency inputs above are equal.
+    graph = source / '.dart_tool/package_graph.json'
+    if not graph.is_file():
+        raise RuntimeError('resolved_package_graph_missing')
+    shutil.copy2(graph, destination / '.dart_tool/package_graph.json')
+    if digest(graph) != digest(destination / '.dart_tool/package_graph.json'):
+        raise RuntimeError('private_copy_package_graph_changed')
+
+
+def verify_cleanup(evidence, watchdog, *, baseline):
+    fixtures = sorted(path for path in Path(evidence).glob('*') if path.is_dir())
+    observations = []
+    errors = []
+    for fixture in fixtures:
+        try:
+            process = inspect(fixture, expected_launches=None)
+            dart = json.loads((fixture / 'inverse-cleanup.json').read_text())
+            if dart.get('after_host_close', {}).get('ok') is not True:
+                raise AssertionError('dart_finally_cleanup_failed')
+            observations.append({'fixture': str(fixture), 'process': process,
+                                 'before_host_close': dart.get('before_host_close', {}).get('ok') is True,
+                                 'after_host_close': True})
+        except (AssertionError, KeyError, ValueError, OSError) as error:
+            errors.append(str(error) if isinstance(error, AssertionError) else 'cleanup_evidence_invalid')
+    natural = bool(observations) and not errors and watchdog.get('natural') is True and all(
+        row['before_host_close'] for row in observations)
+    valid = (bool(observations) and not errors and watchdog.get('safe') is True
+             and (not baseline or natural))
+    return {'valid': valid, 'natural': natural, 'watchdog': watchdog,
+            'host_close_after_oracle': any(not row['before_host_close'] for row in observations),
+            'fixtures': observations, 'errors': errors}
 
 
 def run_oracle(work, binary, flutter, evidence, label, mutation=None):
@@ -145,21 +183,21 @@ def run_oracle(work, binary, flutter, evidence, label, mutation=None):
     environment['NO_PROXY'] = 'localhost,127.0.0.1,::1'
     record = {'name': label, 'target': target, 'command': command, 'copy': str(work),
               'binary_sha256': digest(binary), 'log': str(log), 'json': str(machine)}
-    try:
-        run = subprocess.run(command, cwd=work / 'apps/muyon', env=environment,
-                             text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=240)
-    except subprocess.TimeoutExpired as error:
-        output = error.stdout or b''
-        log.write_bytes(output.encode() if isinstance(output, str) else output)
-        print(label + ': runner_timeout; complete raw output retained in ' + str(log), flush=True)
-        print(diagnostic_excerpt(output if isinstance(output, str) else output.decode(errors='replace')), flush=True)
-        return dict(record, compiled=False, accepted=False, reason='runner_timeout')
-    log.write_text(run.stdout)
-    verdict = classify(events(machine), run.returncode, target, mutation['marker'] if mutation else None)
+    process_evidence = evidence / (label + '-processes')
+    run = run_owned(command, cwd=work / 'apps/muyon', environment=environment,
+                    evidence=process_evidence, timeout=240)
+    log.write_text(run['stdout'])
+    cleanup = verify_cleanup(process_evidence, run['cleanup'], baseline=not mutation or mutation['marker'] is None)
+    (evidence / (label + '.cleanup.json')).write_text(json.dumps(cleanup, indent=2) + '\n')
+    verdict = classify(events(machine), run['returncode'], target, mutation['marker'] if mutation else None)
+    if run['timed_out']:
+        verdict.update(accepted=False, reason='runner_timeout')
+    elif verdict['accepted'] and not cleanup['valid']:
+        verdict.update(accepted=False, reason='owned_cleanup_invalid')
     if not verdict['accepted']:
-        print(label + ': ' + json.dumps(dict(returncode=run.returncode, **verdict)), flush=True)
-        print(diagnostic_excerpt(run.stdout), flush=True)
-    return dict(record, returncode=run.returncode, **verdict)
+        print(label + ': ' + json.dumps(dict(returncode=run['returncode'], **verdict)), flush=True)
+        print(diagnostic_excerpt(run['stdout']), flush=True)
+    return dict(record, returncode=run['returncode'], cleanup=cleanup, **verdict)
 
 
 def main():
@@ -176,8 +214,14 @@ def main():
         raise SystemExit('required_real_binary_or_flutter_missing')
     original = {mutation['file']: digest(source / mutation['file']) for mutation in MUTATIONS}
     original_binary = digest(binary)
+    tracked = subprocess.check_output(['git', '-C', str(source), 'ls-files', '-z']).split(b'\0')
+    dependency_paths = [Path(os.fsdecode(path)) for path in tracked if path
+                        and Path(os.fsdecode(path)).name in ('pubspec.yaml', 'pubspec.lock')]
+    dependency_paths += [Path('.dart_tool/package_config.json'), Path('.dart_tool/package_graph.json')]
+    dependency_inputs = {str(path): digest(source / path) for path in dependency_paths}
     manifest = {'source_sha': subprocess.check_output(['git', '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip(),
                 'binary_sha256': original_binary, 'dut_sources': original,
+                'dependency_inputs': dependency_inputs,
                 'oracle_sha256': digest(source / 'apps/muyon' / ORACLE)}
     (evidence / 'source-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     results = []
@@ -212,7 +256,9 @@ def main():
                 if not result['accepted']:
                     raise RuntimeError('mutant_not_target_assertion:' + mutation['name'])
     finally:
-        unchanged = all(digest(source / file) == value for file, value in original.items()) and digest(binary) == original_binary
+        unchanged = (all(digest(source / file) == value for file, value in original.items())
+                     and digest(binary) == original_binary
+                     and all(digest(source / file) == value for file, value in dependency_inputs.items()))
         summary = {'baselines_passed': sum(row['accepted'] for row in results if row['name'].startswith('baseline-')),
                    'killed': sum(row['accepted'] for row in results if not row['name'].startswith('baseline-')),
                    'required': len(MUTATIONS), 'original_sources_unchanged': unchanged, 'results': results}

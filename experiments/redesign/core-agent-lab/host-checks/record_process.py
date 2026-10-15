@@ -11,6 +11,10 @@ import sys
 import tempfile
 
 
+def start_ticks(pid):
+    return Path('/proc', str(pid), 'stat').read_text().rsplit(') ', 1)[1].split()[19]
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--binary', required=True)
@@ -24,6 +28,7 @@ def main():
     launch = {
         'launch_id': evidence.name, 'launcher_pid': os.getpid(),
         'pid': child.pid, 'binary': options.binary, 'arguments': arguments,
+        'pid_start': start_ticks(child.pid), 'launcher_pid_start': start_ticks(os.getpid()),
         'environment_keys': sorted(os.environ),
     }
     (evidence / 'launch.json').write_text(json.dumps(launch))
