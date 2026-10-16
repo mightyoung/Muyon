@@ -1,0 +1,147 @@
+# W1 (user-approved 2026-10-12): push on this task branch only. No main changes.
+# workflow_dispatch kept for later default-branch registration; push is the approved path.
+name: windows-experience-package
+run-name: Windows experience package at ${{ github.event_name == 'push' && github.sha || inputs.target_sha }}
+
+on:
+  push:
+    branches:
+      - task/packaging-android-windows-20261012
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: 'Reviewed final experience candidate: full lowercase 40-character SHA'
+        required: true
+        type: string
+      artifact_storage_approved:
+        description: 'Approved one-day artifact storage and public-repository download scope'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-experience-package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: windows-2022
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      TARGET_SHA: ${{ github.event_name == 'push' && github.sha || inputs.target_sha }}
+      STORAGE_APPROVED: ${{ github.event_name == 'push' && 'true' || inputs.artifact_storage_approved }}
+      PACKAGE_PLATFORM: windows
+      WORKFLOW_SHA: ${{ github.sha }}
+      WORKFLOW_REF: ${{ github.workflow_ref }}
+    steps:
+      - name: Validate inputs / push binding
+        run: |
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Full lowercase commit SHA required'; exit 1; }
+          test "$STORAGE_APPROVED" = true || { echo 'Artifact storage and download scope approval required'; exit 1; }
+          test "$GITHUB_REF_NAME" = 'task/packaging-android-windows-20261012' || {
+            echo "Refused: packaging only on task/packaging-android-windows-20261012 (got $GITHUB_REF_NAME)"
+            exit 1
+          }
+
+      - name: Checkout packaging tools at exact SHA
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          path: workflow
+          persist-credentials: false
+
+      - name: Checkout exact source at same SHA
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          path: source
+          persist-credentials: false
+
+      - name: Verify immutable checkouts and Windows project
+        run: |
+          test "$(git -C source rev-parse HEAD)" = "$TARGET_SHA"
+          test "$(git -C workflow rev-parse HEAD)" = "$WORKFLOW_SHA"
+          test -d source/apps/muyon/windows
+          test -f workflow/scripts/package_artifacts/package.py
+
+      - name: No-key static check on workflow and packaging script
+        run: |
+          # Construct patterns so this step does not match itself.
+          d='dart'
+          if grep -nE "flutter[[:space:]]+build.*--${d}-define|--${d}-define=|--${d}-define-from-file" \
+            workflow/.github/workflows/windows-experience-package.yml; then
+            echo 'Forbidden dart-define injection in Windows packaging workflow'
+            exit 1
+          fi
+          if ! grep -qF 'flutter build windows --release --no-pub' \
+            workflow/.github/workflows/windows-experience-package.yml; then
+            echo 'Expected release Windows build command missing'
+            exit 1
+          fi
+          if grep -nE 'BEGIN (RSA |OPENSSH )?PRIVATE KEY' \
+            workflow/.github/workflows/windows-experience-package.yml \
+            workflow/scripts/package_artifacts/package.py; then
+            echo 'Forbidden private-key material in packaging inputs'
+            exit 1
+          fi
+          echo 'No-key static check passed'
+
+      - name: Set up pinned Flutter without persistent cache
+        uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e # v2.21.0
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: false
+
+      - name: Resolve existing locked workspace dependencies
+        working-directory: source
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build complete unsigned Windows Release bundle
+        working-directory: source/apps/muyon
+        run: flutter build windows --release --no-pub
+
+      - name: List Windows Release bundle before packaging
+        run: |
+          root=source/apps/muyon/build/windows/x64/runner/Release
+          ls -la "$root"
+          ls -la "$root/data" || true
+          # Fail early with explicit missing names (icudtl.dat is the ICU file name)
+          for f in muyon.exe flutter_windows.dll data/icudtl.dat data/app.so data/flutter_assets; do
+            test -e "$root/$f" || echo "MISSING $f"
+          done
+
+      - name: Package only build output with provenance and SHA256
+        run: python workflow/scripts/package_artifacts/package.py
+
+      - name: Record artifact digests
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          m = json.loads(Path('packages/manifest.json').read_text())
+          print('source_sha=', m['source_sha'])
+          print('workflow_sha=', m['workflow_sha'])
+          print('signing=', m['signing'])
+          for f in m['files']:
+              print(f"file={f['path']} bytes={f['bytes']} sha256={f['sha256']}")
+          assert m['signing']['method'] == 'unsigned'
+          PY
+
+      - name: Keep only ZIP and manifest for one day
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: muyon-windows-${{ env.TARGET_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            packages/muyon-windows-*.zip
+            packages/manifest.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+          include-hidden-files: false

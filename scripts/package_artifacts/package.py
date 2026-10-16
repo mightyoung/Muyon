@@ -82,9 +82,9 @@ def main():
         signer = max(candidates, key=lambda p: tuple(int(n) for n in re.findall(r'\d+', p.parent.name)))
         certificate = command(str(signer), 'verify', '--print-certs', str(source))
         require('CN=Android Debug' in certificate, 'Expected internal debug-signed APK')
-        digest = re.search(r'Signer #1 certificate SHA-256 digest: (\w+)', certificate)
+        digest = re.search(r'Signer #1 certificate SHA-256 digest:\s*([0-9A-Fa-f:]+)', certificate)
         require(digest, 'Certificate digest missing')
-        signing = {'method': 'android-debug-key', 'certificate_sha256': digest[1], 'distribution': False}
+        signing = {'method': 'android-debug-key', 'certificate_sha256': digest[1].replace(':', '').lower(), 'distribution': False}
         tools['java'] = command('java', '-version')
         tools['android_build_tools'] = signer.parent.name
         gradle = command(str((app / 'android/gradlew').resolve()), '--version')
@@ -113,9 +113,9 @@ def main():
         source = app / 'build/windows/x64/runner/Release'
         require(source.is_dir(), 'Windows Release directory missing')
         check_windows_tree(source)
-        require(all((source / name).exists() for name in
-                    ['muyon.exe', 'flutter_windows.dll', 'data/icu.dat', 'data/app.so', 'data/flutter_assets']),
-                'Complete Windows Release bundle missing')
+        required = ['muyon.exe', 'flutter_windows.dll', 'data/icudtl.dat', 'data/app.so', 'data/flutter_assets']
+        missing = [name for name in required if not (source / name).exists()]
+        require(not missing, f'Complete Windows Release bundle missing: {missing}')
         check_paths(p.relative_to(source) for p in source.rglob('*'))
         signature = command('powershell', '-NoProfile', '-Command',
                             f"(Get-AuthenticodeSignature -LiteralPath '{source}/muyon.exe').Status")

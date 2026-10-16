@@ -1,0 +1,154 @@
+# A1 (user-approved 2026-10-12): push on this task branch only. No main changes.
+# Uses runner-preinstalled Android SDK if present; never runs sdkmanager / NDK fetch.
+name: android-experience-package
+run-name: Android experience package at ${{ github.sha }}
+
+on:
+  push:
+    branches:
+      - task/packaging-android-windows-20261012
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-experience-package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      BUILD_SHA: ${{ github.sha }}
+    steps:
+      - name: Refuse off-branch runs
+        run: |
+          [[ "$BUILD_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Full lowercase commit SHA required'; exit 1; }
+          test "$GITHUB_REF_NAME" = 'task/packaging-android-windows-20261012' || {
+            echo "Refused: packaging only on task/packaging-android-windows-20261012 (got $GITHUB_REF_NAME)"
+            exit 1
+          }
+
+      - name: Checkout exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.BUILD_SHA }}
+          persist-credentials: false
+
+      - name: Verify HEAD binding
+        run: test "$(git rev-parse HEAD)" = "$BUILD_SHA"
+
+      - name: No-key static check on workflow and packaging script
+        run: |
+          d='dart'
+          if grep -nE "package_android\\.py.*--${d}-define|--${d}-define=|--${d}-define-from-file" \
+            .github/workflows/android-experience-package.yml; then
+            echo 'Forbidden dart-define injection in Android packaging workflow'
+            exit 1
+          fi
+          if ! grep -qF 'scripts/package_android/package_android.py' \
+            .github/workflows/android-experience-package.yml; then
+            echo 'Expected package_android.py invocation missing'
+            exit 1
+          fi
+          if grep -nE 'BEGIN (RSA |OPENSSH )?PRIVATE KEY' \
+            .github/workflows/android-experience-package.yml \
+            scripts/package_android/package_android.py; then
+            echo 'Forbidden private-key material in packaging inputs'
+            exit 1
+          fi
+          echo 'No-key static check passed'
+
+      - name: Set up Java 17 (pinned action; no Android SDK download)
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up pinned Flutter without persistent cache
+        uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e # v2.21.0
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: false
+
+      - name: Locate preinstalled Android SDK only (never fetch)
+        run: |
+          set -euo pipefail
+          found=''
+          for d in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}" \
+            "$HOME/Android/Sdk" /usr/local/lib/android/sdk /opt/android-sdk; do
+            if [[ -n "$d" && -d "$d/platforms" && -d "$d/build-tools" && -d "$d/platform-tools" ]]; then
+              found="$d"
+              break
+            fi
+          done
+          if [[ -z "$found" ]]; then
+            echo 'Android SDK not preinstalled on runner; refusing to download SDK/NDK (A1)'
+            echo "ANDROID_HOME=${ANDROID_HOME:-unset} ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+            ls -la "$HOME/Android/Sdk" 2>/dev/null || true
+            ls -la /usr/local/lib/android/sdk 2>/dev/null || true
+            exit 1
+          fi
+          echo "Using preinstalled Android SDK at $found"
+          echo "ANDROID_HOME=$found" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$found" >> "$GITHUB_ENV"
+          # NDK: package_android.py requires ndk/ by default; report presence only
+          if [[ -d "$found/ndk" ]]; then
+            echo "NDK dirs:"; ls "$found/ndk"
+          else
+            echo 'Android NDK not preinstalled under SDK ndk/; refusing to run sdkmanager (A1)'
+            exit 1
+          fi
+          # Flutter 3.47.5 declares ndkVersion 28.2.x; runner may only ship 27.x.
+          # AGP may reconcile during flutter build; our packaging script never calls sdkmanager.
+
+      - name: Resolve locked workspace dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build and package keyless Android experience APK
+        run: |
+          python3 scripts/package_android/package_android.py \
+            --repo "$GITHUB_WORKSPACE" \
+            --output "$GITHUB_WORKSPACE/packages" \
+            --flutter flutter \
+            --build-sha "$BUILD_SHA" \
+
+      - name: Verify manifest bind and experience-only signing note
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          m = json.loads(Path('packages/manifest.json').read_text())
+          sha = os.environ['BUILD_SHA']
+          assert m['build_sha'] == sha, (m['build_sha'], sha)
+          assert m.get('keyless') is True
+          assert m.get('dart_defines') == []
+          assert m['signing']['method'] == 'android-debug-key'
+          # Experience-only note required by PACKAGING-BUILD
+          note = '仅供体验，非发布签名'
+          m['signing']['experience_only_note'] = note
+          m['internal_validation_only'] = True
+          Path('packages/manifest.json').write_text(json.dumps(m, indent=2) + '\n', encoding='utf-8')
+          print('build_sha=', m['build_sha'])
+          print('signing=', m['signing'])
+          for f in m['files']:
+              print(f"file={f['path']} bytes={f['bytes']} sha256={f['sha256']}")
+          PY
+
+      - name: Keep APK, sha256 sidecar, and manifest for one day
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: muyon-android-${{ env.BUILD_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            packages/muyon-android-*.apk
+            packages/muyon-android-*.apk.sha256
+            packages/manifest.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+          include-hidden-files: false

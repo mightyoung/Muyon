@@ -84,7 +84,7 @@ class PackagingTests(unittest.TestCase):
 
     def windows(self):
         root = 'source/apps/muyon/build/windows/x64/runner/Release/'
-        for name in ['muyon.exe', 'flutter_windows.dll', 'data/icu.dat', 'data/app.so', 'data/flutter_assets/AssetManifest.bin']:
+        for name in ['muyon.exe', 'flutter_windows.dll', 'data/icudtl.dat', 'data/app.so', 'data/flutter_assets/AssetManifest.bin']:
             self.file(root + name)
 
     def macos(self):

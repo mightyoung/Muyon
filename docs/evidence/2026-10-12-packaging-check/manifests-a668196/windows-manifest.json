@@ -1,0 +1,44 @@
+{
+  "source_sha": "a66819630e9b8072deb3c6a8f41ea98bf3adfd58",
+  "workflow_sha": "a66819630e9b8072deb3c6a8f41ea98bf3adfd58",
+  "workflow_ref": "mightyoung/Muyon/.github/workflows/windows-experience-package.yml@refs/heads/task/packaging-android-windows-20261012",
+  "run_id": "38261835192",
+  "run_attempt": "1",
+  "platform": "windows",
+  "os": "Windows-2022Server-10.0.20348-SP0",
+  "architecture": "AMD64",
+  "runner_arch": "X64",
+  "tools": {
+    "flutter": {
+      "frameworkVersion": "3.47.5",
+      "channel": "stable",
+      "repositoryUrl": "https://github.com/flutter/flutter.git",
+      "frameworkRevision": "6a19cca56475dbfba1478ee68d7bd0c2ef891da1",
+      "frameworkCommitDate": "2026-09-17 14:13:22 -0400",
+      "engineRevision": "af7e796e161ae0bb1ff0758c71a7105418bd9ded",
+      "engineCommitDate": "2026-09-16 18:35:09.000Z",
+      "engineContentHash": "ab598368592da0064197e2bc15c7f5b0a2c6bb1f",
+      "engineBuildDate": "2026-09-16 19:35:21.428",
+      "dartSdkVersion": "3.13.4",
+      "devToolsVersion": "2.60.0",
+      "flutterVersion": "3.47.5",
+      "flutterRoot": "C:\\hostedtoolcache\\windows\\flutter\\stable-3.47.5-x64"
+    },
+    "dart": "Dart SDK version: 3.13.4 (stable) (Tue Sep 15 01:01:15 2026 -0700) on \"windows_x64\"",
+    "python": "3.12.10",
+    "cmake": "cmake version 3.31.6",
+    "visual_studio": "17.14.37710.0"
+  },
+  "signing": {
+    "method": "unsigned",
+    "authenticode": false
+  },
+  "internal_validation_only": true,
+  "files": [
+    {
+      "path": "muyon-windows-a66819630e9b8072deb3c6a8f41ea98bf3adfd58-Release.zip",
+      "bytes": 41296801,
+      "sha256": "7ff7eaf286117182aef86035a8d08942b66e106fb81d329d22a5f6e46582c83c"
+    }
+  ]
+}

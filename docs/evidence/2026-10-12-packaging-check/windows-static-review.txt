@@ -1,0 +1,19 @@
+=== windows-experience-package.yml static review @ branch HEAD ===
+workflow_dispatch only: True
+contents read: True
+windows-2022: True
+no dart-define in build: True
+retention-days 1: True
+artifact_storage_approved gate: True
+pinned actions:
+  actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+  actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+  subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e
+  actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+flutter build windows --release --no-pub: True
+package.py reused: True
+=== package.py windows guards ===
+unsigned required: True
+rejects reparse/symlink: True
+filename includes target sha: True
+sha256 in manifest: True

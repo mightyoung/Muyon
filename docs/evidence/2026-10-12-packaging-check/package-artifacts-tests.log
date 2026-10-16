@@ -1,0 +1,31 @@
+test_android_provenance (test_package.PackagingTests.test_android_provenance) ... ok
+test_apk_embedded_key_fails (test_package.PackagingTests.test_apk_embedded_key_fails) ... ok
+test_apk_keys_directory_without_directory_entry_fails (test_package.PackagingTests.test_apk_keys_directory_without_directory_entry_fails) ... ok
+test_apk_rawlogs_directory_without_directory_entry_fails (test_package.PackagingTests.test_apk_rawlogs_directory_without_directory_entry_fails) ... ok
+test_failed_apksigner_command_propagates (test_package.PackagingTests.test_failed_apksigner_command_propagates) ... ok
+test_failed_codesign_command_propagates (test_package.PackagingTests.test_failed_codesign_command_propagates) ... ok
+test_failed_windows_signature_command_propagates (test_package.PackagingTests.test_failed_windows_signature_command_propagates) ... ok
+test_forbidden_output_paths (test_package.PackagingTests.test_forbidden_output_paths) ... ok
+test_macos_complete_bundle (test_package.PackagingTests.test_macos_complete_bundle) ... ok
+test_missing_macos_bundle_fails (test_package.PackagingTests.test_missing_macos_bundle_fails) ... ok
+test_multiple_macos_bundles_fail (test_package.PackagingTests.test_multiple_macos_bundles_fail) ... ok
+test_normal_zip_paths_pass (test_package.PackagingTests.test_normal_zip_paths_pass) ... ok
+test_sha_formats_fail_before_packaging (test_package.PackagingTests.test_sha_formats_fail_before_packaging) ... ok
+test_source_mismatch_fails (test_package.PackagingTests.test_source_mismatch_fails) ... ok
+test_windows_complete_bundle (test_package.PackagingTests.test_windows_complete_bundle) ... ok
+test_windows_external_directory_link_fails (test_package.PackagingTests.test_windows_external_directory_link_fails) ... ok
+test_windows_external_file_link_fails (test_package.PackagingTests.test_windows_external_file_link_fails) ... ok
+test_windows_internal_link_policy_fails (test_package.PackagingTests.test_windows_internal_link_policy_fails) ... ok
+test_windows_missing_runtime_fails (test_package.PackagingTests.test_windows_missing_runtime_fails) ... ok
+test_windows_reparse_point_fails (test_package.PackagingTests.test_windows_reparse_point_fails) ... ok
+test_windows_resolve_outside_release_fails (test_package.PackagingTests.test_windows_resolve_outside_release_fails) ... ok
+test_workflow_mismatch_fails_before_packaging (test_package.PackagingTests.test_workflow_mismatch_fails_before_packaging) ... ok
+test_wrong_android_signature_fails (test_package.PackagingTests.test_wrong_android_signature_fails) ... ok
+test_wrong_macos_signature_fails (test_package.PackagingTests.test_wrong_macos_signature_fails) ... ok
+test_wrong_windows_signature_fails (test_package.PackagingTests.test_wrong_windows_signature_fails) ... ok
+test_zip_unsafe_paths_without_directory_entries_fail (test_package.PackagingTests.test_zip_unsafe_paths_without_directory_entries_fail) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.052s
+
+OK
