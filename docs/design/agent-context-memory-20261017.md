@@ -19,7 +19,7 @@ REMORY v2（2026-10-11）通过冻结 actor、训练连续记忆补充摘要，�
 | 当前事实 | 目标动作 | 不得推断 |
 |---|---|---|
 | [Rust agent State/drive](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/experiments/redesign/core-agent-lab/core/src/agent.rs#L215-L231)保存完整历史，遇 unresolved/evidence_hold 或预算限制停下 | 在受控请求投影前增加压缩候选与发布接口 | 实验 lab 已是生产记忆系统；压缩能解除 unknown |
-| [原生消息类型](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/experiments/redesign/core-agent-lab/core/src/model.rs#L68-L75)区分调用与结果 | 从结构化事实提取，不从摘要重造调用 ID | 摘要可充当执行账本 |
+| [原生消息类型](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/experiments/redesign/core-agent-lab/core/src/model.rs#L72-L79)区分调用与结果 | 从结构化事实提取，不从摘要重造调用 ID | 摘要可充当执行账本 |
 | [宿主复核](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/experiments/redesign/rust-agent-host-lab/core/src/lib.rs#L245-L279)检查请求权限/投影/载荷 | 补充记忆走同一发送前复核链 | 独立拼 prompt 可绕过投影 |
 | [旧压缩器](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/apps/muyon/lib/assistant/context_compactor.dart#L272-L348)清旧工具结果，再生成四字段摘要 | 提取测试样本与行为对照，Rust 重写 | 继续新增 Dart 实现；Rust 已迁移完成 |
 | [v1.3.2 来源与版本合同](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md#L698-L710)为目标态 | 复用字段和版本域，逐项实现 | task.db 的存在已证明跨对象原子提交 |
