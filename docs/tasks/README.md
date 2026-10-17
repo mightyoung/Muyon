@@ -1,3 +1,5 @@
+> 2026-10-17 新增设计任务入口：[CTX-MEMORY 上下文与记忆补强](CTX-MEMORY-20261017.md)。三类记录、事务式压缩和页面增量为目标合同，新增14项验收均未运行；不取消既有任务。当前唯一合入执行者为 LeaderB。下方旧阶段、人员、环境及“当前”措辞均为原时点记录，不能据此恢复旧授权或认定新架构已完成；其余项目最新进度仍需读取对应固定提交与CI。
+
 # 任务派发索引
 
 **当前入口：先读[当前状态与默认开启计划](CURRENT-STATUS-2026-10-10.md)，再读[当前交接](HANDOVER-LEADER.md)与[本批集成审查](AIUI-36-39-integration-review.md)。** [较早状态快照 v1](CURRENT-STATUS-2026-10-10-v1.md)固定8deb，只作历史记录；[下一批交付队列 v1](NEXT-DELIVERIES-2026-10-10-v1.md)保留7773时点规划。角色与规则见 [ADR-0001](../adr/0001-leadership-and-scope-freeze.md)。**当前是第二阶段**：范围见 [ADR-0003](../adr/0003-phase2-scope.md)，计划见[第二至第四阶段路线图](../superpowers/plans/2026-10-07-roadmap-phase2-4.md)（第一阶段已于 2026-10-07 退出）。

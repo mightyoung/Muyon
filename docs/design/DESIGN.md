@@ -1,3 +1,5 @@
+> 2026-10-17 Agent 上下文设计增量入口：[核心合同](agent-context-memory-20261017.md)与[页面规范](agent-context-memory-pages-20261017.md)。配合 [v1.3.2 两册](redesign-v1.3.2-20261014/README.md)阅读；本增量已获设计更新授权、尚未实现。以下原文是 Flutter/Folio 历史视觉记录，不覆盖 Rust/Compose/Electron 新路线或本增量状态语义。原记录完整保留。
+
 > 通用组件库以 [Muyon 设计系统 v6](muyon-design-system.md) 为准；本文其余内容保留为原设计记录。
 <!-- Muyon 设计基准：用户 2026-10-04 指定全部页面沿用 Folio（software-cost-calculator）设计风格。
      本文件逐字复制自 software-cost-calculator@b35eccbe9ddf458a6538fa107baa9b456972a4f8:DESIGN.md（与 origin/main 一致），
