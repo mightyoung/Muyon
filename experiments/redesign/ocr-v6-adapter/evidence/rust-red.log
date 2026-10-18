@@ -1,0 +1,105 @@
+    Updating crates.io index
+     Locking 11 packages to highest compatible versions
+      Adding serde v1.0.228 (available: v1.0.229)
+      Adding serde_core v1.0.228 (available: v1.0.229)
+      Adding serde_derive v1.0.228 (available: v1.0.229)
+      Adding serde_json v1.0.145 (available: v1.0.154)
+ Downloading crates ...
+  Downloaded unicode-ident v1.0.27
+  Downloaded quote v1.0.47
+  Downloaded serde_derive v1.0.228
+  Downloaded proc-macro2 v1.0.107
+  Downloaded memchr v2.8.3
+  Downloaded itoa v1.0.18
+  Downloaded serde_core v1.0.228
+  Downloaded serde v1.0.228
+  Downloaded ryu v1.0.23
+  Downloaded serde_json v1.0.145
+  Downloaded syn v2.0.119
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling serde_core v1.0.228
+   Compiling serde v1.0.228
+   Compiling serde_json v1.0.145
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling ryu v1.0.23
+   Compiling syn v2.0.119
+   Compiling serde_derive v1.0.228
+   Compiling muyon-ocr-v6-contract v0.1.0 (/workspace/muyon-ocr-v6/experiments/redesign/ocr-v6-adapter/core)
+warning: field `request` is never read
+  --> src/lib.rs:31:19
+   |
+31 | pub struct Task { request:Request,state:State }
+   |            ----   ^^^^^^^
+   |            |
+   |            field in this struct
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `muyon-ocr-v6-contract` (lib) generated 1 warning
+warning: `muyon-ocr-v6-contract` (lib test) generated 1 warning (1 duplicate)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.95s
+     Running unittests src/lib.rs (experiments/redesign/ocr-v6-adapter/core/target/debug/deps/muyon_ocr_v6_contract-ebfe3b2e1f297ba0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/contract.rs (experiments/redesign/ocr-v6-adapter/core/target/debug/deps/contract-98c5dbc92c180960)
+
+running 7 tests
+test maps_to_source_coordinates_and_preserves_provenance ... FAILED
+test cancelled_or_expired_result_cannot_persist ... FAILED
+test empty_page_is_a_valid_extraction_but_bad_transform_is_not ... FAILED
+test rejects_model_digest_geometry_and_confidence_mismatches ... FAILED
+test revoked_source_and_atomic_commit_failure_are_not_success ... FAILED
+test validates_source_transform_budgets_and_authorization_before_dispatch ... FAILED
+test wire_roundtrip_rejects_unknown_fields ... ok
+
+failures:
+
+---- maps_to_source_coordinates_and_preserves_provenance stdout ----
+
+thread 'maps_to_source_coordinates_and_preserves_provenance' (1368) panicked at src/lib.rs:33:100:
+not yet implemented: dispatch validation
+
+---- cancelled_or_expired_result_cannot_persist stdout ----
+
+thread 'cancelled_or_expired_result_cannot_persist' (1366) panicked at src/lib.rs:33:100:
+not yet implemented: dispatch validation
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- empty_page_is_a_valid_extraction_but_bad_transform_is_not stdout ----
+
+thread 'empty_page_is_a_valid_extraction_but_bad_transform_is_not' (1367) panicked at src/lib.rs:33:100:
+not yet implemented: dispatch validation
+
+---- rejects_model_digest_geometry_and_confidence_mismatches stdout ----
+
+thread 'rejects_model_digest_geometry_and_confidence_mismatches' (1369) panicked at src/lib.rs:33:100:
+not yet implemented: dispatch validation
+
+---- revoked_source_and_atomic_commit_failure_are_not_success stdout ----
+
+thread 'revoked_source_and_atomic_commit_failure_are_not_success' (1370) panicked at src/lib.rs:33:100:
+not yet implemented: dispatch validation
+
+---- validates_source_transform_budgets_and_authorization_before_dispatch stdout ----
+
+thread 'validates_source_transform_budgets_and_authorization_before_dispatch' (1371) panicked at src/lib.rs:33:100:
+not yet implemented: dispatch validation
+
+
+failures:
+    cancelled_or_expired_result_cannot_persist
+    empty_page_is_a_valid_extraction_but_bad_transform_is_not
+    maps_to_source_coordinates_and_preserves_provenance
+    rejects_model_digest_geometry_and_confidence_mismatches
+    revoked_source_and_atomic_commit_failure_are_not_success
+    validates_source_transform_budgets_and_authorization_before_dispatch
+
+test result: FAILED. 1 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test contract`

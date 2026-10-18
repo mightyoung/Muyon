@@ -1,0 +1,290 @@
+{
+  "runtime": "1.21.1",
+  "opencv": "5.0.0",
+  "provider": "CPUExecutionProvider",
+  "reference": "desktop NumPy/OpenCV diagnostic, not Android runtime parity",
+  "font": {
+    "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a"
+  },
+  "models": {
+    "tiny": {
+      "english": {
+        "text": [
+          "Total 123.45"
+        ],
+        "boxes": [
+          [
+            [
+              41,
+              71
+            ],
+            [
+              314,
+              71
+            ],
+            [
+              314,
+              125
+            ],
+            [
+              41,
+              125
+            ]
+          ]
+        ],
+        "recognitionConfidence": [
+          0.9750254154205322
+        ],
+        "tensorSha256": "2a6d164bd9a9666cb29cacb2fcffddfa99a3754241d0252ae864d6ef4e15f1f1",
+        "deterministic": true,
+        "desktopElapsedMs": 30.63462900001923,
+        "inputPixelsSha256": "dc66799c47125cced7e82a5f5e6d55fb9f27c145ab92fec2f887f416e5eee1fc"
+      },
+      "chinese": {
+        "text": [
+          "材料采购金额678.90"
+        ],
+        "boxes": [
+          [
+            [
+              44,
+              71
+            ],
+            [
+              498,
+              71
+            ],
+            [
+              498,
+              121
+            ],
+            [
+              44,
+              121
+            ]
+          ]
+        ],
+        "recognitionConfidence": [
+          0.9998239874839783
+        ],
+        "tensorSha256": "b33c39374bebcf10d61b0cc7c31688f19562e5eb00a4018c85cdec1faa8e98f8",
+        "deterministic": true,
+        "desktopElapsedMs": 27.54691100005857,
+        "inputPixelsSha256": "951c859a7cabaf33f5c2372efa9b8116d4e92c1b1f6cb309d717b1c840e62b85"
+      },
+      "color": {
+        "text": [
+          "材料 Total 678.90"
+        ],
+        "boxes": [
+          [
+            [
+              43,
+              69
+            ],
+            [
+              419,
+              71
+            ],
+            [
+              419,
+              125
+            ],
+            [
+              43,
+              123
+            ]
+          ]
+        ],
+        "recognitionConfidence": [
+          0.9335507750511169
+        ],
+        "tensorSha256": "7845267b79773dfd1e22d4492808676d68d9c68291026769d1cc4b2d721cb3ec",
+        "deterministic": true,
+        "desktopElapsedMs": 30.028448000052776,
+        "inputPixelsSha256": "68a99a2ac6df368c88d0c4ae0a75bbbccd7d3e9d6e78e8cbec343e6ff74fa639"
+      },
+      "blank": {
+        "text": [],
+        "boxes": [],
+        "recognitionConfidence": [],
+        "tensorSha256": "1c0bfb1496bf1f92f2d8283499bf505e363b6d739e6d7ab72dea1219ff283fe1",
+        "deterministic": true,
+        "desktopElapsedMs": 20.533325000087643,
+        "inputPixelsSha256": "6e7e75b908c764e4f9cb70e165c6799120a9b8015e3e26e8fbc17a2332b35ca1"
+      },
+      "rotated": {
+        "text": [
+          "Total 123.45"
+        ],
+        "boxes": [
+          [
+            [
+              36,
+              153
+            ],
+            [
+              311,
+              96
+            ],
+            [
+              323,
+              155
+            ],
+            [
+              49,
+              212
+            ]
+          ]
+        ],
+        "recognitionConfidence": [
+          0.9968268275260925
+        ],
+        "tensorSha256": "5375c67a2f907c66785b548dabafdcb6fde15c62c30cea80afbdd589d15a2be0",
+        "deterministic": true,
+        "desktopElapsedMs": 24.023753999927067,
+        "inputPixelsSha256": "012ef9d07d898521f771e3af0b66d3674f14c90a82e091f11b2ff9b197cd7873"
+      }
+    },
+    "small": {
+      "english": {
+        "text": [
+          "Total 123.45"
+        ],
+        "boxes": [
+          [
+            [
+              42,
+              69
+            ],
+            [
+              315,
+              71
+            ],
+            [
+              314,
+              126
+            ],
+            [
+              41,
+              124
+            ]
+          ]
+        ],
+        "recognitionConfidence": [
+          0.9998834133148193
+        ],
+        "tensorSha256": "0e4a171a9be0df61db727d72e55be356a7ac9b3d2b0fe2d9f901c29342049021",
+        "deterministic": true,
+        "desktopElapsedMs": 89.07825400001457,
+        "inputPixelsSha256": "dc66799c47125cced7e82a5f5e6d55fb9f27c145ab92fec2f887f416e5eee1fc"
+      },
+      "chinese": {
+        "text": [
+          "材料采购 金额 678.90"
+        ],
+        "boxes": [
+          [
+            [
+              43,
+              71
+            ],
+            [
+              499,
+              71
+            ],
+            [
+              499,
+              125
+            ],
+            [
+              43,
+              125
+            ]
+          ]
+        ],
+        "recognitionConfidence": [
+          0.9598344564437866
+        ],
+        "tensorSha256": "c4bf36273a6c8a325bf40bc44171864a45d4ab4d1be17f6495409c38d761f1a2",
+        "deterministic": true,
+        "desktopElapsedMs": 88.77450900001804,
+        "inputPixelsSha256": "951c859a7cabaf33f5c2372efa9b8116d4e92c1b1f6cb309d717b1c840e62b85"
+      },
+      "color": {
+        "text": [
+          "材料 Total 678.90"
+        ],
+        "boxes": [
+          [
+            [
+              41,
+              69
+            ],
+            [
+              421,
+              69
+            ],
+            [
+              421,
+              126
+            ],
+            [
+              41,
+              126
+            ]
+          ]
+        ],
+        "recognitionConfidence": [
+          0.9994927048683167
+        ],
+        "tensorSha256": "0061420b5fcb8011e783d0d1c6b9d77c0b5dab0e76fd8c0d7f708ce756f49a83",
+        "deterministic": true,
+        "desktopElapsedMs": 124.70502000007855,
+        "inputPixelsSha256": "68a99a2ac6df368c88d0c4ae0a75bbbccd7d3e9d6e78e8cbec343e6ff74fa639"
+      },
+      "blank": {
+        "text": [],
+        "boxes": [],
+        "recognitionConfidence": [],
+        "tensorSha256": "32809a79a22508943d38b7e3d6cc3161a8132039475bb4d86aa97120befe93dd",
+        "deterministic": true,
+        "desktopElapsedMs": 102.27321499996833,
+        "inputPixelsSha256": "6e7e75b908c764e4f9cb70e165c6799120a9b8015e3e26e8fbc17a2332b35ca1"
+      },
+      "rotated": {
+        "text": [
+          "Total 123.45"
+        ],
+        "boxes": [
+          [
+            [
+              40,
+              154
+            ],
+            [
+              310,
+              99
+            ],
+            [
+              322,
+              154
+            ],
+            [
+              52,
+              208
+            ]
+          ]
+        ],
+        "recognitionConfidence": [
+          0.9999050498008728
+        ],
+        "tensorSha256": "9cc676a25bf838709302039c475868ddaab6bae7df8171ac450105e9b1f9aab3",
+        "deterministic": true,
+        "desktopElapsedMs": 122.16573799992148,
+        "inputPixelsSha256": "012ef9d07d898521f771e3af0b66d3674f14c90a82e091f11b2ff9b197cd7873"
+      }
+    }
+  }
+}

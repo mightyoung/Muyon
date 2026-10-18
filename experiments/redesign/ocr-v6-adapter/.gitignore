@@ -1,0 +1,6 @@
+.gradle/
+build/
+core/target/
+__pycache__/
+*.onnx
+*.aar

@@ -1,0 +1,40 @@
+{
+  "productBase": "3f1be180bb009a91e659c113ba5b1916e5360332",
+  "sourceFile": "apps/muyon/lib/services/ocr/ocr_models.dart",
+  "sourceFileSha256": "f81279fbc9bf9588bab0589595a045662995384eb795d1340eb963ffa6823910",
+  "status": "retained unchanged; original Dart regression NOT_RUN",
+  "assets": [
+    {
+      "name": "det.onnx",
+      "repository": "PaddlePaddle/PP-OCRv5_mobile_det_onnx",
+      "revision": "e6f4fa85f00e168c862bc462aebca69eef9b3d3d",
+      "file": "inference.onnx",
+      "bytes": 4826518,
+      "sha256": "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d"
+    },
+    {
+      "name": "det.yml",
+      "repository": "PaddlePaddle/PP-OCRv5_mobile_det_onnx",
+      "revision": "e6f4fa85f00e168c862bc462aebca69eef9b3d3d",
+      "file": "inference.yml",
+      "bytes": 903,
+      "sha256": "98069072e1b6b37d727fd9d9f11725faa46d6ea0de012f2ed26caea011c37699"
+    },
+    {
+      "name": "rec.onnx",
+      "repository": "PaddlePaddle/PP-OCRv5_mobile_rec_onnx",
+      "revision": "ed152b8b495f84de93cda5709d768548a9127622",
+      "file": "inference.onnx",
+      "bytes": 16534782,
+      "sha256": "da72dc72ca4dc220df0dfde68c1dedc31c58d3e76a25871122e5056227d50092"
+    },
+    {
+      "name": "rec.yml",
+      "repository": "PaddlePaddle/PP-OCRv5_mobile_rec_onnx",
+      "revision": "ed152b8b495f84de93cda5709d768548a9127622",
+      "file": "inference.yml",
+      "bytes": 148345,
+      "sha256": "5dfeb2777f6d0db8177d8128a8acfcf6e6276dc4ac73ea3bf0dc06d6a5e85d8e"
+    }
+  ]
+}

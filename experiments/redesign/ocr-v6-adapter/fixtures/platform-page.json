@@ -1,0 +1,33 @@
+{
+  "jobId": "job-1",
+  "rasterDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "modelVersion": "PP-OCRv6_tiny-det-2ba1506c-rec-2612ab37",
+  "parametersVersion": "ppocr-android-dab3fe35-defaults-v1",
+  "width": 200,
+  "height": 100,
+  "lines": [
+    {
+      "text": "合计 123.45",
+      "quad": [
+        [
+          20.0,
+          10.0
+        ],
+        [
+          180.0,
+          10.0
+        ],
+        [
+          180.0,
+          40.0
+        ],
+        [
+          20.0,
+          40.0
+        ]
+      ],
+      "recognitionConfidence": 0.95,
+      "detectionConfidence": null
+    }
+  ]
+}

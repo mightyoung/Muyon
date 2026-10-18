@@ -1,0 +1,19 @@
+{
+  "commit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+  "files": [
+    {
+      "upstreamPath": "ppocr/postprocess/db_postprocess.py",
+      "upstreamSha256": "a7123cfab47c9f326f9442f4e3ec963694c53a12556fc13eb541169a8e66b67f",
+      "localFile": "vendor_db_postprocess.py",
+      "localSha256": "90c30403bbf9e1b74dd4755e23b59e7c7398e64fae3cd2f7775a9f969a15960a",
+      "changes": "Remove only paddle import and PaddleTensor-to-numpy branch; inputs are real ONNX numpy arrays."
+    },
+    {
+      "upstreamPath": "tools/infer/utility.py",
+      "upstreamSha256": "edcc41ccd78dee86737a67cc5ed825fba1bdb7fca77cb42ed558a6b3dfa9f634",
+      "localFile": "vendor_crop.py",
+      "changes": "Extract unchanged get_rotate_crop_image; numpy/cv2 imports only.",
+      "localSha256": "fcab13cd6c53ba278450fa8fe50ddd49bea16a5200a144566920558a84362f3c"
+    }
+  ]
+}

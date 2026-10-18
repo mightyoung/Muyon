@@ -1,0 +1,34 @@
+{
+  "jobId": "job-1",
+  "document": {
+    "scope": "local:test",
+    "documentId": "doc-1",
+    "revision": 7,
+    "sourceDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "blobRef": "opaque-blob-1"
+  },
+  "raster": {
+    "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "pageIndex": 0,
+    "width": 200,
+    "height": 100,
+    "exifOrientation": 1,
+    "sourceWidth": 100.0,
+    "sourceHeight": 50.0,
+    "coordinateSpace": "pdf_points",
+    "rasterToSource": [
+      0.5,
+      0,
+      0,
+      0,
+      0.5,
+      0,
+      0,
+      0,
+      1
+    ]
+  },
+  "modelVersion": "PP-OCRv6_tiny-det-2ba1506c-rec-2612ab37",
+  "parametersVersion": "ppocr-android-dab3fe35-defaults-v1",
+  "expiresAtMs": 1000
+}

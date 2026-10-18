@@ -1,0 +1,16 @@
+E
+======================================================================
+ERROR: test_real_det_rec_on_synthetic_english_chinese_and_blank (test_cpu_reference.CpuReferenceTests.test_real_det_rec_on_synthetic_english_chinese_and_blank)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/muyon-ocr-v6/experiments/redesign/ocr-v6-adapter/checks/test_cpu_reference.py", line 8, in test_real_det_rec_on_synthetic_english_chinese_and_blank
+    report=evaluate(Path(os.environ['OCR_ASSETS']))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/muyon-ocr-v6/experiments/redesign/ocr-v6-adapter/checks/cpu_reference.py", line 3, in evaluate
+    raise NotImplementedError('real ONNX det/rec diagnostic')
+NotImplementedError: real ONNX det/rec diagnostic
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

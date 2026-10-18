@@ -1,0 +1,50 @@
+
+Welcome to Gradle 8.13!
+
+Here are the highlights of this release:
+ - Daemon JVM auto-provisioning
+ - Enhancements for Scala plugin and JUnit testing
+ - Improvements for build authors and plugin developers
+
+For more details see https://docs.gradle.org/8.13/release-notes.html
+
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+The message received from the daemon indicates that the daemon has disappeared.
+Build request sent: Build{id=56ee4de6-c0a9-4fd4-ac7b-ab0f16557dfc, currentDir=/workspace/muyon-ocr-v6}
+Attempting to read last messages from the daemon log...
+Daemon pid: 1424
+  log file: /workspace/toolchain/gradle-home/daemon/8.13/daemon-1424.out.log
+----- Last 20 lines from daemon log file - daemon-1424.out.log -----
+2026-10-18T05:21:00.841+0000 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] Command execution: started DaemonCommandExecution[command = Build{id=56ee4de6-c0a9-4fd4-ac7b-ab0f16557dfc, currentDir=/workspace/muyon-ocr-v6}, connection = DefaultDaemonConnection: socket connection from /127.0.0.1:33249 to /127.0.0.1:54924] after 0.0013166666666666667 minutes of idle
+2026-10-18T05:21:00.842+0000 [INFO] [org.gradle.launcher.daemon.server.DaemonRegistryUpdater] Marking the daemon as busy, address: [f405510b-f4bb-483b-9236-165c17ea6d5c port:33249, addresses:[localhost/127.0.0.1]]
+2026-10-18T05:21:00.842+0000 [DEBUG] [org.gradle.launcher.daemon.registry.PersistentDaemonRegistry] Marking busy by address: [f405510b-f4bb-483b-9236-165c17ea6d5c port:33249, addresses:[localhost/127.0.0.1]]
+2026-10-18T05:21:00.842+0000 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Waiting to acquire exclusive lock on daemon addresses registry.
+2026-10-18T05:21:00.843+0000 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Lock acquired on daemon addresses registry.
+2026-10-18T05:21:00.844+0000 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Releasing lock on daemon addresses registry.
+2026-10-18T05:21:00.844+0000 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] resetting idle timer
+2026-10-18T05:21:00.844+0000 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] daemon is running. Sleeping until state changes.
+2026-10-18T05:21:00.846+0000 [INFO] [org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy] Daemon is about to start building Build{id=56ee4de6-c0a9-4fd4-ac7b-ab0f16557dfc, currentDir=/workspace/muyon-ocr-v6}. Dispatching build started information...
+2026-10-18T05:21:00.846+0000 [DEBUG] [org.gradle.launcher.daemon.server.SynchronizedDispatchConnection] thread 31: dispatching org.gradle.launcher.daemon.protocol.BuildStarted@4ca47a4
+2026-10-18T05:21:00.847+0000 [DEBUG] [org.gradle.launcher.daemon.server.exec.EstablishBuildEnvironment] Configuring env variables: [PATH, NO_PROXY, CAAS_IMAGE_VERSION, https_proxy, GIT_PAGER, CODEX_PRIMARY_RUNTIME, CODEX_BROWSER_DEFER_ACTIVATION, GH_PAGER, PLAYWRIGHT_NODEJS_PATH, CODEX_EXEC_SERVER_PROXY_PRIVATE_IPS_VIA_UPSTREAM, CODEX_PRIMARY_RUNTIME_ROOT, COLORTERM, CODEX_NO_UPDATE, CODEX_PRIMARY_RUNTIME_BUNDLE_VERSION, NPM_CONFIG_AUDIT, PWD, NETWORK, SHELL, PAGER, REQUESTS_CA_BUNDLE, CODEX_HOME, NPM_CONFIG_PREFIX, CODEX_PERMISSION_PROFILE, GRPC_DEFAULT_SSL_ROOTS_FILE_PATH, NPM_CONFIG_FUND, DEBIAN_FRONTEND, LC_ALL, CODEX_EXEC_SERVER_REMOTE_BASE_URL, LC_CTYPE, CODEX_SESSION_ID, SHLVL, CAAS_IMAGE_GIT_COMMIT_SHA, RUST_LOG, DOCKER_TLS_CERTDIR, CODEX_PRIMARY_RUNTIME_NODE_MODULES, CODEX_ENVIRONMENT_ID, TERM, HTTP_PROXY, LANG, CODEX_APPLY_PATCH_PRESERVE_LINE_ENDINGS, HTTPS_PROXY, NODE_EXTRA_CA_CERTS, CODEX_THREAD_ID, NO_COLOR, CODEX_CAAS_SESSION_ID, NODE_PATH, _, CODEX_CI, no_proxy, http_proxy, SSL_CERT_FILE, CODEX_TOOL_CALL_ID, CODEX_PRIMARY_RUNTIME_PYTHON, USER, GH_TOKEN, DOCKER_IGNORE_BR_NETFILTER_ERROR, BROWSER_MANAGEMENT_SOCKET_PATH, CODEX_PROXY_CERT, CAAS_DIND_STORAGE_DRIVER, CODEX_PRIMARY_RUNTIME_NODE, CODEX_VERSION, HOME, OPENAI_CLUSTER]
+2026-10-18T05:21:00.851+0000 [DEBUG] [org.gradle.launcher.daemon.server.exec.LogToClient] About to start relaying all logs to the client via the connection.
+2026-10-18T05:21:00.851+0000 [INFO] [org.gradle.launcher.daemon.server.exec.LogToClient] The client will now receive all logging from the daemon (pid: 1424). The daemon log file: /workspace/toolchain/gradle-home/daemon/8.13/daemon-1424.out.log
+2026-10-18T05:21:00.853+0000 [DEBUG] [org.gradle.launcher.daemon.server.exec.RequestStopIfSingleUsedDaemon] Requesting daemon stop after processing Build{id=56ee4de6-c0a9-4fd4-ac7b-ab0f16557dfc, currentDir=/workspace/muyon-ocr-v6}
+2026-10-18T05:21:00.853+0000 [LIFECYCLE] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] Daemon will be stopped at the end of the build 
+2026-10-18T05:21:00.853+0000 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] Stop as soon as idle requested. The daemon is busy
+2026-10-18T05:21:00.854+0000 [DEBUG] [org.gradle.launcher.daemon.server.exec.ExecuteBuild] The daemon has started executing the build.
+2026-10-18T05:21:00.854+0000 [DEBUG] [org.gradle.launcher.daemon.server.exec.ExecuteBuild] Executing build with daemon context: DefaultDaemonContext[uid=6d604f2c-023c-49dc-b288-61c4185f7805,javaHome=/usr/lib/jvm/java-21-openjdk-amd64,javaVersion=21,javaVendor=Debian,daemonRegistryDir=/workspace/toolchain/gradle-home/daemon,pid=1424,idleTimeout=120000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=384m,-XX:+HeapDumpOnOutOfMemoryError,-Xms256m,-Xmx512m,-Dfile.encoding=UTF-8,-Duser.country,-Duser.language=en,-Duser.variant]
+2026-10-18T05:21:00.855+0000 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] daemon stop has been requested. Sleeping until state changes.
+Daemon vm is shutting down... The daemon has exited normally or was terminated in response to a user interrupt.----- End of the daemon log -----
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.

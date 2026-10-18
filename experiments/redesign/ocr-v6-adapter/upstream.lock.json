@@ -1,0 +1,113 @@
+{
+  "repository": "https://github.com/PaddlePaddle/PaddleOCR",
+  "commit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+  "upstreamPath": "deploy/ppocr-android/ppocr-sdk/src/main/java",
+  "license": "Apache-2.0",
+  "modifications": [],
+  "files": [
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/EngineConfig.kt",
+      "sha256": "886b7ef3dd4600ff92ff77c44643ce800e3f0da2d74de43112dbd79648ecdcda"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/PaddleOCR.kt",
+      "sha256": "961945f4532b6339d20afa8415f8e6e289eeef20d2e142f67d37cc35b9310ede"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/PaddleOCRConfig.kt",
+      "sha256": "ebe53f5f21e127857b7b947995a19b5baa966d996104daa5c36ac5c07affa7d5"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/engine/DetectionEngine.kt",
+      "sha256": "b99dfce96cc2819e28a068e535fd096185b4abf41d1038079bf6836c8a1a985a"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/engine/OCREngine.kt",
+      "sha256": "ad235c1c01522fa41729d58d5a9405ffaff3ad6f391e920cb6a942ef78256446"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/engine/OCREngineResult.kt",
+      "sha256": "6f1b7853dfc5b2ba1a70cb1d77518a10bbff45d71f3a689105f675c4d3be9a7a"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/engine/ORTSessionManager.kt",
+      "sha256": "edc1b780d5277bcef93d052f3f1bddcad49830dcfa0a3b13ae63e18300e6f394"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/engine/RecognitionEngine.kt",
+      "sha256": "00e683a56ec2741a0daca0ff8f2ceb001ae690f30e03dc6118cd49828b747396"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/model/ModelConfig.kt",
+      "sha256": "e64e9262839b9e4da57d00a5cfef7ab3f81dcb5be1b96f47c4067449f306ddf0"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/model/OCRBox.kt",
+      "sha256": "4db761a2e541db9145ba9512c4a5e8719ee70b09e241616525afcbf61abbcbc9"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/model/OCRError.kt",
+      "sha256": "e360a2aa3580692d6ef8d98c9a740260566d5731f5f20f3633feadd55337fe6e"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/model/OCRResult.kt",
+      "sha256": "0f492da6f396886ad68c5d0dc09a853715e50e1c23cd9f4c1fbbde7eedbb5264"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/model/OCRRunResult.kt",
+      "sha256": "ba90ee5a89fa3bba36e4325dd1ed1b18e90e6c10401eb00df29937bfadccbed4"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/postprocess/BoxSorter.kt",
+      "sha256": "d298db1421a7a0250db3c76627f640c13cccd66e4c6960116286a3b2399f7ccc"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/postprocess/CTCDecoder.kt",
+      "sha256": "ae5ee6c3bd3e5993e80f20f2e35e90c7b50801d0b84fd9caff74966af4337a1f"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/postprocess/DBPostProcessor.kt",
+      "sha256": "53923f88a025a4810d009223a79d15e9e27200673f40722ff0f9e105d2b12276"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/postprocess/PolygonUnclip.kt",
+      "sha256": "bc575aba1d0f7618473b87c64ca0a7d0219d3bbfe57f356fd2a51d1cc2703cdd"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/postprocess/QuadGeometry.kt",
+      "sha256": "936674693f20b2120663fb33576a6ee9264c44b28e2a1e3a01dbab0d6023ded5"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/postprocess/QuadTextCrop.kt",
+      "sha256": "49f8889430ca8aeda4ef5e90f8de4b0e695696de64fdd97d8ed7421d21198109"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/preprocess/DetPreprocessor.kt",
+      "sha256": "9e16244a57d8d8be5aba3eff85c676d0b08282f396868fa244bf35dd572dcff8"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/preprocess/RecPreprocessor.kt",
+      "sha256": "edf40bd7e4cec5411a92dda05291cff524794f00bf63615f82e184b54dee9fab"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/util/BitmapUtils.kt",
+      "sha256": "66b5771266ad5166453b428d01ea707efcc56e076c7d4813347d672629e2330c"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/util/ImageUtils.kt",
+      "sha256": "205fd17a1dcfacdbbc8f5bb76e059aba7c0fffecfaff443812a1960272ecfbbe"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/util/MathUtils.kt",
+      "sha256": "7465d79388376ccbbd4c575d1c03fe4524877db79cf92e74d3c35d1b7e22efd8"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/util/OpenCVUtils.kt",
+      "sha256": "ed3fd0918df9ccff85c6f2da3ea22a1cabe31d1cd68f11a3a3c1915a758bb5f5"
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/util/YamlUtils.kt",
+      "sha256": "d61f540ed2420dea704dc381d91eb5e154191817745a8ecb2f1e712d58938f1a"
+    }
+  ]
+}

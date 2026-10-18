@@ -1,0 +1,53 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :unpackNative
+> Task :processResources NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :compileKotlin
+> Task :compileJava NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :jar
+> Task :compileTestKotlin
+> Task :compileTestJava NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :test FAILED
+
+AdapterTest > repeated_jobs_and_runtime_failure_release_all_sessions FAILED
+    kotlin.NotImplementedError at AdapterTest.kt:65
+
+AdapterTest > timeout_after_native_run_discards_result_and_releases FAILED
+    kotlin.NotImplementedError at AdapterTest.kt:26
+
+AdapterTest > invalid_runtime_geometry_is_not_emitted FAILED
+    kotlin.NotImplementedError at AdapterTest.kt:26
+
+AdapterTest > corrupt_or_missing_models_fail_before_factory FAILED
+    kotlin.NotImplementedError at AdapterTest.kt:26
+
+AdapterTest > cancelled_before_load_and_during_inference_never_return_success FAILED
+    kotlin.NotImplementedError at AdapterTest.kt:26
+
+AdapterTest > api24_and_25_never_load_native_runtime FAILED
+    kotlin.NotImplementedError at AdapterTest.kt:26
+
+AdapterTest > returns_det_rec_envelope_and_releases_once FAILED
+    kotlin.NotImplementedError at AdapterTest.kt:28
+
+AdapterTest > wrong_raster_model_and_budget_fail_before_factory FAILED
+    kotlin.NotImplementedError at AdapterTest.kt:26
+
+8 tests completed, 8 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':test'.
+> There were failing tests. See the report at: file:///workspace/muyon-ocr-v6/experiments/redesign/ocr-v6-adapter/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights.
+
+BUILD FAILED in 24s
+5 actionable tasks: 5 executed

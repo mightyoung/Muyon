@@ -1,0 +1,199 @@
+{
+  "artifacts": {
+    "ort": [
+      "com.microsoft.onnxruntime:onnxruntime-android:1.21.1",
+      "30e594a4b9246fe3ca25768570e90f71e6d33ceb7b7dd72f92dcd7c267611d3f"
+    ],
+    "opencv": [
+      "com.quickbirdstudios:opencv:4.5.3",
+      "a07523cb265b26a5d0c4fa01d925ca4855f5a181d70d2f5d99ec47fc4328826a"
+    ]
+  },
+  "manifests": {
+    "ort": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    package=\"ai.onnxruntime\" >\n\n    <uses-sdk android:minSdkVersion=\"24\" />\n\n</manifest>",
+    "opencv": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    package=\"org.opencv\" >\n\n    <uses-sdk\n        android:minSdkVersion=\"21\"\n        android:targetSdkVersion=\"30\" />\n\n</manifest>"
+  },
+  "libraries": [
+    {
+      "artifact": "ort",
+      "entry": "jni/arm64-v8a/libonnxruntime.so",
+      "bytes": 17908496,
+      "sha256": "11ef853b751532dc827bd7799f557f9495e2ee7523b9b355753fc0344576bd5e",
+      "loadAlignments": [
+        "0x4000",
+        "0x4000",
+        "0x4000"
+      ],
+      "elf16KiBAligned": true
+    },
+    {
+      "artifact": "ort",
+      "entry": "jni/arm64-v8a/libonnxruntime4j_jni.so",
+      "bytes": 100632,
+      "sha256": "f657216254a2f88fcbd89c5e73a2f7ae5a8145d092f8700951aedba8e4a60ef2",
+      "loadAlignments": [
+        "0x4000",
+        "0x4000"
+      ],
+      "elf16KiBAligned": true
+    },
+    {
+      "artifact": "ort",
+      "entry": "jni/armeabi-v7a/libonnxruntime.so",
+      "bytes": 13039136,
+      "sha256": "2e55ddb9df17bba226a2b3eb4ccd7029010c7631cee93a69a00f928c0e955972",
+      "loadAlignments": [
+        "0x4000",
+        "0x4000",
+        "0x4000"
+      ],
+      "elf16KiBAligned": true
+    },
+    {
+      "artifact": "ort",
+      "entry": "jni/armeabi-v7a/libonnxruntime4j_jni.so",
+      "bytes": 73676,
+      "sha256": "8b53e40fc127190b18e69a524371cd4ce9b52e059354d8fe8f228a345bb8355d",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "ort",
+      "entry": "jni/x86/libonnxruntime.so",
+      "bytes": 21195040,
+      "sha256": "6b829b3634e13c76b38e35a82ae97d24ef991caa21de400e6f2a0dd6b6d7845e",
+      "loadAlignments": [
+        "0x4000",
+        "0x4000",
+        "0x4000"
+      ],
+      "elf16KiBAligned": true
+    },
+    {
+      "artifact": "ort",
+      "entry": "jni/x86/libonnxruntime4j_jni.so",
+      "bytes": 84684,
+      "sha256": "1e2ded4a31b09c9138d826a36fc36dfda800ddfcfea6c92890b961b6004ddcf7",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "ort",
+      "entry": "jni/x86_64/libonnxruntime.so",
+      "bytes": 21420512,
+      "sha256": "66032672c3f62a42c6345e5cf3931c88e3cf9443ba104fee5370e8e3f6640ca8",
+      "loadAlignments": [
+        "0x4000",
+        "0x4000",
+        "0x4000"
+      ],
+      "elf16KiBAligned": true
+    },
+    {
+      "artifact": "ort",
+      "entry": "jni/x86_64/libonnxruntime4j_jni.so",
+      "bytes": 90712,
+      "sha256": "cc9fc0591222fc5c90a07ef055d7bacde08e62c49a5ec9e629be2c6b535cf94b",
+      "loadAlignments": [
+        "0x4000",
+        "0x4000"
+      ],
+      "elf16KiBAligned": true
+    },
+    {
+      "artifact": "opencv",
+      "entry": "jni/arm64-v8a/libc++_shared.so",
+      "bytes": 6238016,
+      "sha256": "546b32b0e19e6872f42238d751ad9a6f0f73ee55562ce1ffb394df9892ddcb4a",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "opencv",
+      "entry": "jni/arm64-v8a/libopencv_java4.so",
+      "bytes": 17109960,
+      "sha256": "20f98317542a993031e998def9603ec07fd7f64b0719146360545cfc87ea74cb",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "opencv",
+      "entry": "jni/armeabi-v7a/libc++_shared.so",
+      "bytes": 4173552,
+      "sha256": "737d3b160f68bb499fd50c661b7d98b828f525da961188daac72a65cf518de44",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "opencv",
+      "entry": "jni/armeabi-v7a/libopencv_java4.so",
+      "bytes": 10442416,
+      "sha256": "8cf101d0cc03ed46fc9aacc3d3afbdaeac590953b52e90312ab1a38c14735e05",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "opencv",
+      "entry": "jni/x86/libc++_shared.so",
+      "bytes": 5538104,
+      "sha256": "0d9bb9fada250f33957d0dff0ea2081db253e9e9b8d0b88943fbf2ff6d909c38",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "opencv",
+      "entry": "jni/x86/libopencv_java4.so",
+      "bytes": 36529732,
+      "sha256": "ef8e724ce323ba330a34b292e2790884c32ee476e6ea8bd6b60b40452bd713aa",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "opencv",
+      "entry": "jni/x86_64/libc++_shared.so",
+      "bytes": 6377448,
+      "sha256": "92ca966d5969b25ff7e263dce5f981c4f92d0343cde94f4a9d5d16f60c839e20",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    },
+    {
+      "artifact": "opencv",
+      "entry": "jni/x86_64/libopencv_java4.so",
+      "bytes": 52047552,
+      "sha256": "8e048f2cd64ff813355284071a7b4e3489afa4a37cfab22b04a6edd3287851e8",
+      "loadAlignments": [
+        "0x1000",
+        "0x1000"
+      ],
+      "elf16KiBAligned": false
+    }
+  ],
+  "shippingGate": "BLOCKED"
+}

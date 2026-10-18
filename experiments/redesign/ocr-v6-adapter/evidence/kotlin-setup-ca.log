@@ -1,0 +1,45 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :unpackNative FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':unpackNative'.
+> Could not resolve all files for configuration ':nativeCompile'.
+   > Could not resolve com.microsoft.onnxruntime:onnxruntime-android:1.21.1.
+     Required by:
+         root project :
+      > Could not resolve com.microsoft.onnxruntime:onnxruntime-android:1.21.1.
+         > Could not get resource 'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.21.1/onnxruntime-android-1.21.1.pom'.
+            > Could not GET 'https://repo.maven.apache.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.21.1/onnxruntime-android-1.21.1.pom'.
+               > Got SSL handshake exception during request. It might be caused by SSL misconfiguration
+                  > (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+      > Could not resolve com.microsoft.onnxruntime:onnxruntime-android:1.21.1.
+         > Could not get resource 'https://dl.google.com/dl/android/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.21.1/onnxruntime-android-1.21.1.pom'.
+            > Could not GET 'https://dl.google.com/dl/android/maven2/com/microsoft/onnxruntime/onnxruntime-android/1.21.1/onnxruntime-android-1.21.1.pom'.
+               > Got SSL handshake exception during request. It might be caused by SSL misconfiguration
+                  > (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+   > Could not resolve com.quickbirdstudios:opencv:4.5.3.
+     Required by:
+         root project :
+      > Could not resolve com.quickbirdstudios:opencv:4.5.3.
+         > Could not get resource 'https://repo.maven.apache.org/maven2/com/quickbirdstudios/opencv/4.5.3/opencv-4.5.3.pom'.
+            > Could not GET 'https://repo.maven.apache.org/maven2/com/quickbirdstudios/opencv/4.5.3/opencv-4.5.3.pom'.
+               > Got SSL handshake exception during request. It might be caused by SSL misconfiguration
+                  > (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+      > Could not resolve com.quickbirdstudios:opencv:4.5.3.
+         > Could not get resource 'https://dl.google.com/dl/android/maven2/com/quickbirdstudios/opencv/4.5.3/opencv-4.5.3.pom'.
+            > Could not GET 'https://dl.google.com/dl/android/maven2/com/quickbirdstudios/opencv/4.5.3/opencv-4.5.3.pom'.
+               > Got SSL handshake exception during request. It might be caused by SSL misconfiguration
+                  > (certificate_unknown) PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 12s
+1 actionable task: 1 executed
