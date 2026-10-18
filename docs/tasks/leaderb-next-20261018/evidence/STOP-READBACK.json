@@ -24,7 +24,427 @@
       "remote_push": "confirmed earlier before disconnect notice; not freshly rechecked"
     }
   },
-  "local_builder_processes": [
+  "a_generic": {
+    "run_id": 39102166368,
+    "source_sha": "3f3a2368648db5e9767f11adcae4548ac5da2527",
+    "last_confirmed": "in_progress at Analyze and test every package; terminal UNKNOWN",
+    "instruction": "Read-only collect this SAME ORIGINAL run; no replacement rerun"
+  },
+  "known_terminal_runs": {
+    "a_android_39102166352": "completed/success",
+    "b_generic_39102012787": "completed/success",
+    "c_scoped_39102209762": "completed/success"
+  },
+  "i04": "DENIED_BEFORE_EXECUTION/BLOCKED; no retry/split/reroute",
+  "source_write_stop": true,
+  "integration_transfer": "Ready for parent to assign successor; no automatic merge or authority transfer",
+  "local_active_builder_processes": [],
+  "exited_zombie_processes": [
+    {
+      "pid": 2523,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 4816,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 5134,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 5639,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 5678,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 6908,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 6928,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 6961,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7563,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7595,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7616,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7777,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7806,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7834,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7918,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7938,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 7958,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8069,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8107,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8153,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8277,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8330,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8350,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8487,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8509,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 8529,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 9959,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10281,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10301,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10331,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10548,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10578,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10602,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10763,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10784,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10805,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 10995,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11016,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11035,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11094,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11114,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11139,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11496,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11682,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11903,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 11989,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12009,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12019,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12243,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12264,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12285,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12305,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12325,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12351,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12514,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12561,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 12806,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13338,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13377,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13406,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13704,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13725,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13745,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13921,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13941,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 13987,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    },
+    {
+      "pid": 18158,
+      "ppid": 1,
+      "state": "Z",
+      "comm": "dart:dartdev_ao"
+    }
+  ],
+  "process_correction": "Initial name-only scan listed exited dart zombies as builders; stat-aware recheck confirms all entries Z/PPID1, not executing/writing. Original list retained below.",
+  "initial_name_only_scan": [
     "2523 dart:dartdev_ao",
     "4816 dart:dartdev_ao",
     "5134 dart:dartdev_ao",
@@ -93,18 +513,11 @@
     "13987 dart:dartdev_ao",
     "18158 dart:dartdev_ao"
   ],
-  "a_generic": {
-    "run_id": 39102166368,
-    "source_sha": "3f3a2368648db5e9767f11adcae4548ac5da2527",
-    "last_confirmed": "in_progress at Analyze and test every package; terminal UNKNOWN",
-    "instruction": "Read-only collect this SAME ORIGINAL run; no replacement rerun"
+  "stop_acknowledgements": {
+    "a": "author explicit STOP: source clean3f3a, no further source/evidence writes or active local build/watch",
+    "b": "author final STOP: clean190477fe, all children/builds exited",
+    "c": "author final STOP: cleanfdc9aea1, no owned cargo/rustc/rustup",
+    "reviewer": "explicit STOP: no writer/build/watch or exec session"
   },
-  "known_terminal_runs": {
-    "a_android_39102166352": "completed/success",
-    "b_generic_39102012787": "completed/success",
-    "c_scoped_39102209762": "completed/success"
-  },
-  "i04": "DENIED_BEFORE_EXECUTION/BLOCKED; no retry/split/reroute",
-  "source_write_stop": true,
-  "integration_transfer": "Ready for parent to assign successor; no automatic merge or authority transfer"
+  "last_local_check_utc": "2026-10-18T06:23:35.652177+00:00"
 }
