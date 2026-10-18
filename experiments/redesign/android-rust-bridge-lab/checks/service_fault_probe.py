@@ -53,7 +53,7 @@ def instrument(sources, case):
 
 def classify(case, raw, status):
     contract = CONTRACT['cases'][case]
-    green = case == 'c3_failed_ledger'
+    green = contract['observed'] == contract['expected']
     rows = re.findall(r'^test (\S+) \.\.\. (ok|FAILED|ignored)$', raw, re.M)
     summaries = re.findall(r'^test result: (ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;', raw, re.M)
     panic_messages = re.findall(r"^thread '[^']+'(?: \(\d+\))? panicked at [^\n]+:\n([^\n]+)", raw, re.M)
@@ -64,7 +64,7 @@ def classify(case, raw, status):
     markers = ['FAULT_RECORDED actual_read=success receipt=RecordedSuccess', observed]
     if case != 'c2_worker_panic':
         markers.append('FAULT_CANCEL turn=2 before_original_poll=true')
-    if green:
+    if case == 'c3_failed_ledger':
         markers.append('FAULT_LEDGER error=probe_failed_ledger_io not_diskfull=true')
     actual_markers = re.findall(r'^FAULT_[^\n]+$', raw, re.M)
     valid = (status == (0 if green else 101)

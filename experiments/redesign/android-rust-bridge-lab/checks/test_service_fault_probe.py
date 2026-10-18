@@ -4,14 +4,14 @@ from service_fault_probe import ASSERTION, CONTRACT, classify, instrument, repla
 
 
 def transcript(case):
-    green = case == 'c3_failed_ledger'
+    green = CONTRACT['cases'][case]['observed'] == CONTRACT['cases'][case]['expected']
     lines = ['Finished `release` profile [optimized]', 'Running tests/service_private_fault.rs (target/release/deps/service_private_fault-abc)',
         'test service_private_fault_contract ... ' + ('ok' if green else 'FAILED'),
         'FAULT_RECORDED actual_read=success receipt=RecordedSuccess',
         f"FAULT_OBSERVED {case} terminal={CONTRACT['cases'][case]['observed']}"]
     if case != 'c2_worker_panic':
         lines += ['FAULT_CANCEL turn=2 before_original_poll=true']
-    if green:
+    if case == 'c3_failed_ledger':
         lines += ['FAULT_LEDGER error=probe_failed_ledger_io not_diskfull=true']
     if case == 'c2_worker_panic':
         lines += ["thread '<unnamed>' (123) panicked at src/service_controller.rs:1:1:", 'SERVICE_PRIVATE_WORKER_PANIC']
@@ -24,7 +24,7 @@ def transcript(case):
 class ServiceFaultControls(unittest.TestCase):
     def test_closed_classifier_rejects_setup_auxiliary_panics_and_wrong_receipts(self):
         for case in CONTRACT['cases']:
-            raw = transcript(case); status = 0 if case == 'c3_failed_ledger' else 101
+            raw = transcript(case); status = 0 if CONTRACT['cases'][case]['observed'] == CONTRACT['cases'][case]['expected'] else 101
             self.assertTrue(classify(case, raw, status)['accepted'])
             self.assertFalse(classify(case, raw, 124)['accepted'])
             for bad in [raw + raw, raw.replace('Finished', 'Compiling'), raw.replace('0 filtered out', '1 filtered out'),
