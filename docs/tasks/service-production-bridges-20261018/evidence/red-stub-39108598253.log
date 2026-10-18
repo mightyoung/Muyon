@@ -1,0 +1,140 @@
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	﻿2026-10-18T07:41:23.6253406Z ##[group]Run set -euo pipefail
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6254068Z [36;1mset -euo pipefail[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6254541Z [36;1mmkdir -p "$RUNNER_TEMP/bridge-evidence"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6255079Z [36;1mgit rev-parse HEAD > "$RUNNER_TEMP/bridge-evidence/source-sha.txt"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6255722Z [36;1mrustup toolchain install 1.99.0 --profile minimal[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6256343Z [36;1mrustup default 1.99.0[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6257134Z [36;1mexport CARGO_TARGET_DIR="$RUNNER_TEMP/bridge-target"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6258298Z [36;1mcargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test supplier_scope_bridge --test service_provider --test service_host_controller -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/rust.log"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6259313Z [36;1mgit diff --exit-code[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6459606Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.6460282Z ##[endgroup]
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:23.8041719Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:24.0872460Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:24.0873449Z info: downloading 3 components
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.0813180Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.0888959Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.0889650Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.0961914Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.4616377Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.4617944Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.4695830Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.4696568Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.6132684Z     Updating crates.io index
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:34.8599089Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2395874Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2397662Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2398302Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2398905Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2399658Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2400118Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2400569Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2401150Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2401875Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2402694Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2403228Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2403502Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2403806Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2404479Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2405312Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2405749Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2406532Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2406947Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2407410Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2408048Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2408905Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2409555Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.2409829Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.4015743Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:35.6638091Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3127873Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3567696Z warning: associated function `install_host_scope_in_run` is never used
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3568866Z    --> src/supplier_store.rs:379:19
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3569800Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3570441Z 371 | impl SupplierReader {
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3571333Z     | ------------------- associated function in this implementation
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3572182Z ...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3572822Z 379 |     pub(crate) fn install_host_scope_in_run(
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3573372Z     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3573837Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3574400Z     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3574842Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3575187Z warning: fields `identity`, `namespace`, `root`, and `db` are never read
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3575887Z   --> src/supplier_scope_bridge.rs:7:16
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3576674Z    |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3577115Z  6 | pub struct HostSupplierSource {
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3577709Z    |            ------------------ fields in this struct
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3578248Z  7 |     pub(crate) identity: String,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3578747Z    |                ^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3579204Z  8 |     pub(crate) namespace: String,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3579661Z    |                ^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3580189Z  9 |     pub(crate) root: PathBuf,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3580656Z    |                ^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3581089Z 10 |     pub(crate) db: PathBuf,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3581588Z    |                ^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3581808Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3582141Z warning: fields `source` and `current` are never read
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3582627Z   --> src/supplier_scope_bridge.rs:35:16
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3582971Z    |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3583271Z 34 | pub struct HostSupplierScopeBridge {
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3583689Z    |            ----------------------- fields in this struct
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3584100Z 35 |     pub(crate) source: HostSupplierSource,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3584504Z    |                ^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3584899Z 36 |     current: Rc<dyn Fn() -> Result<SupplierScopeDecision>>,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3585339Z    |     ^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3585499Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3585702Z warning: multiple fields are never read
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3586516Z   --> src/service_provider.rs:59:5
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3586913Z    |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3587210Z 58 | pub struct PreparedProviderCall {
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3587583Z    |            -------------------- fields in this struct
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3588183Z 59 |     owner: Rc<dyn ServiceProviderHost>, binding: ProviderBinding, handle: CredentialHandle,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3588724Z    |     ^^^^^                               ^^^^^^^                   ^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3589294Z 60 |     request_id: String, payload: Vec<u8>, budget: CallBudget, reservation: String,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3590038Z    |     ^^^^^^^^^^          ^^^^^^^           ^^^^^^              ^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3590264Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3590410Z warning: field `host` is never read
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3590795Z   --> src/service_provider.rs:71:36
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3591145Z    |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3591532Z 71 | pub struct ServiceProviderBridge { host: Rc<dyn ServiceProviderHost> }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3592002Z    |            ---------------------   ^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3592447Z    |            |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3592795Z    |            field in this struct
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3592983Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3597815Z warning: fields `owner`, `mode`, and `budget` are never read
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3598248Z   --> src/service_host.rs:20:16
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3598579Z    |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3599035Z 19 | pub struct ServiceHostPorts {
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3599570Z    |            ---------------- fields in this struct
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3600011Z 20 |     pub(crate) owner: Arc<dyn ServiceHostOwner>,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3600576Z    |                ^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3601072Z 21 |     pub(crate) mode: ServiceHostMode,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3601586Z    |                ^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3602059Z 22 |     pub(crate) budget: CallBudget,
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3602567Z    |                ^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.3602837Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:36.9040560Z warning: `muyon-rust-agent-host-lab` (lib) generated 6 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0438435Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 3.56s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0449954Z      Running tests/service_host_controller.rs (/home/runner/work/_temp/bridge-target/debug/deps/service_host_controller-7dfa33ed1175336a)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0463110Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0464651Z running 2 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0465928Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0466842Z thread 'host_read_uses_same_controller_and_rechecks_revocation_on_redisclosure_and_restart' (2505) panicked at tests/service_host_controller.rs:24:164:
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0474122Z called `Result::unwrap()` on an `Err` value: InternalFailure
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0474791Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0475462Z test host_read_uses_same_controller_and_rechecks_revocation_on_redisclosure_and_restart ... FAILED
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0475883Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0476650Z thread 'configured_session_missing_profile_fails_closed_without_synthetic_read' (2504) panicked at tests/service_host_controller.rs:24:164:
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0477433Z called `Result::unwrap()` on an `Err` value: InternalFailure
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0477995Z test configured_session_missing_profile_fails_closed_without_synthetic_read ... FAILED
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0478393Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0478550Z failures:
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0478800Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0478940Z failures:
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0479463Z     configured_session_missing_profile_fails_closed_without_synthetic_read
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0480321Z     host_read_uses_same_controller_and_rechecks_revocation_on_redisclosure_and_restart
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0480888Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0481353Z test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0481928Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0482314Z error: test failed, to rerun pass `--test service_host_controller`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:41:38.0503105Z ##[error]Process completed with exit code 101.

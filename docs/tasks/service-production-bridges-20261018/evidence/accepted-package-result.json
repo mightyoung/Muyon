@@ -1,0 +1,18 @@
+{
+  "source_sha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+  "min_api": 26,
+  "native_entries": {
+    "lib/arm64-v8a/libmuyon_android_contract_bridge.so": "00e051c0cb35c16038f17320c8b524de9ab9e1429810dd79fac087f6d7fbc605",
+    "lib/x86_64/libmuyon_android_contract_bridge.so": "ef0afe5d88f8af2d48b944324558c73cc29fec997cd62cb8cbb8dd8e3a855d6b",
+    "lib/arm64-v8a/libjnidispatch.so": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06",
+    "lib/x86_64/libjnidispatch.so": "3809247e9b804a05ed8377b87d545cf5b5e97f960f75e725bc8497b40260e417",
+    "lib/arm64-v8a/libandroidx.graphics.path.so": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6",
+    "lib/x86_64/libandroidx.graphics.path.so": "4e56c996f13670e70082658de7880c4020eabf4f25e43387f88ed78a713fc9f0"
+  },
+  "apk_sha256": "6dfdc49cad9beed6b93275b66b42c72e8b0c28898eea79656c0d215c6b989198",
+  "test_apk_sha256": "df34b0e20563708430e3bb42fc24d159ca55724aaf0e57ab4fabc2fe970a731b",
+  "build": "PASS",
+  "Android_runtime": "NOT_RUN",
+  "business_source": "synthetic schema12",
+  "model_api_called": false
+}

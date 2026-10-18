@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/usr/local/lib/android/sdk/build-tools/35.0.0/aapt2",
+    "dump",
+    "badging",
+    "/home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/build/outputs/apk/debug/app-debug.apk"
+  ],
+  "cwd": "/home/runner/work/Muyon/Muyon/experiments/redesign/android-rust-bridge-lab/core",
+  "exit_code": 0,
+  "timed_out": false,
+  "forced_owned_group_cleanup": false,
+  "live_before_cleanup": [],
+  "live_after_cleanup": [],
+  "raw_sha256": "b707822269b1c4eb3385d5f2302af933e64e817205aba4446b0bdd8107400acb"
+}

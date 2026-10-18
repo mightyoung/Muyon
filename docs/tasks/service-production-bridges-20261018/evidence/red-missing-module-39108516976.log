@@ -1,0 +1,71 @@
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	﻿2026-10-18T07:40:08.8307418Z ##[group]Run set -euo pipefail
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8307817Z [36;1mset -euo pipefail[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8308125Z [36;1mmkdir -p "$RUNNER_TEMP/bridge-evidence"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8308556Z [36;1mgit rev-parse HEAD > "$RUNNER_TEMP/bridge-evidence/source-sha.txt"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8308993Z [36;1mrustup toolchain install 1.99.0 --profile minimal[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8309317Z [36;1mrustup default 1.99.0[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8309634Z [36;1mexport CARGO_TARGET_DIR="$RUNNER_TEMP/bridge-target"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8310472Z [36;1mcargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test supplier_scope_bridge --test service_provider -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/rust.log"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8311211Z [36;1mgit diff --exit-code[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8568542Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8568968Z ##[endgroup]
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:08.8957480Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:09.0855434Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:09.0856137Z info: downloading 3 components
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6070002Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6131256Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6131816Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6206068Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6214253Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6214611Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6267274Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6267759Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.6524613Z     Updating crates.io index
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:15.7610508Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0418926Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0419988Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0420622Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0421191Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0422048Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0422487Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0422926Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0423641Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0424427Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0425194Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0425735Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0426073Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0426366Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0427139Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0427706Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0428157Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0429220Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0429600Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0430025Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0430693Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0431637Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0432658Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.0432945Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.1610174Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.3633220Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.3842744Z error[E0583]: file not found for module `supplier_scope_bridge`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.3871993Z  --> src/lib.rs:7:1
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.3901987Z   |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.3922013Z 7 | pub mod supplier_scope_bridge;
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.3962175Z   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.3991938Z   |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4012554Z   = help: to create the module `supplier_scope_bridge`, create file "src/supplier_scope_bridge.rs" or "src/supplier_scope_bridge/mod.rs"
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4058673Z   = note: if there is a `mod supplier_scope_bridge` elsewhere in the crate already, import it with `use crate::...` instead
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4071852Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4112324Z error[E0583]: file not found for module `service_provider`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4142063Z  --> src/lib.rs:8:1
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4171980Z   |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4201944Z 8 | pub mod service_provider;
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4232003Z   | ^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4261980Z   |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4292401Z   = help: to create the module `service_provider`, create file "src/service_provider.rs" or "src/service_provider/mod.rs"
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4322320Z   = note: if there is a `mod service_provider` elsewhere in the crate already, import it with `use crate::...` instead
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.4351762Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.8743229Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.8768542Z For more information about this error, try `rustc --explain E0583`.
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.8789773Z error: could not compile `muyon-rust-agent-host-lab` (lib) due to 2 previous errors
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:40:16.8838729Z ##[error]Process completed with exit code 101.

@@ -1,0 +1,28 @@
+{
+  "format_version": 2,
+  "source_sha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+  "build_identity": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+  "protocol": 1,
+  "namespace": "muyon_android_contract_bridge",
+  "min_api": 26,
+  "android_binding_sha256": "0422df1001841d8a487e1f47a78c306febc7fa52973d86f942d2d2dae78e76a7",
+  "android_config_sha256": "543bab24b017d782b38aff958254db5bd185c3688eada2e6a96a5753dc98ab11",
+  "rust_libraries": {
+    "arm64-v8a": {
+      "path": "jniLibs/arm64-v8a/libmuyon_android_contract_bridge.so",
+      "sha256": "00e051c0cb35c16038f17320c8b524de9ab9e1429810dd79fac087f6d7fbc605"
+    },
+    "x86_64": {
+      "path": "jniLibs/x86_64/libmuyon_android_contract_bridge.so",
+      "sha256": "ef0afe5d88f8af2d48b944324558c73cc29fec997cd62cb8cbb8dd8e3a855d6b"
+    }
+  },
+  "jna": {
+    "version": "5.19.1",
+    "aar_sha256": "b57125cb7d16253f0d65a80f7d3a4c3664effa711b8bdbb7f87fb572ce1624ed",
+    "jni_sha256": {
+      "arm64-v8a": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06",
+      "x86_64": "3809247e9b804a05ed8377b87d545cf5b5e97f960f75e725bc8497b40260e417"
+    }
+  }
+}

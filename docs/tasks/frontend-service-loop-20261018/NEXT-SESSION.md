@@ -22,3 +22,7 @@ Recommended next order: read-only approved-profile/source-owner preflight → de
 PR87 fixed38b59db43f2487700ff15971ee008f0024673a13 remains separate:21 synthetic Python PASS, eight actual Dart fixtures UNCOMPILED/NOT_RUN. Its static ledger semantic/error-body findings require validation before any provider reuse; no zero-leak or production canary claim is established.
 
 I04 original legacy script→HTTP→original-state reopen is still denied; no retry, rewrite, split or alternate executor. Dependent merge holds remain. Preserve the store worker's accidental broad-test incident and every earlier failure/cancellation in FINAL-VERIFICATION and raw logs. No such test was run during this delivery-only follow-up.
+
+## Subsequent independent slice
+
+The next code slice is frozen at fc8ffd7e061736fdf9f4897d7c1c7914d429400a / Draft PR89. See [its handoff](../service-production-bridges-20261018/FINAL-HANDOFF.md), [verification](../service-production-bridges-20261018/FINAL-VERIFICATION.md), and [next-session boundary](../service-production-bridges-20261018/NEXT-SESSION.md). Prior evidence and failure records above remain historical and unchanged.

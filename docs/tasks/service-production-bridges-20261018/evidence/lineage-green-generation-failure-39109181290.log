@@ -1,0 +1,269 @@
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	﻿2026-10-18T07:50:41.9853518Z ##[group]Run set -euo pipefail
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9853744Z [36;1mset -euo pipefail[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9853922Z [36;1mmkdir -p "$RUNNER_TEMP/android-owner-evidence"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9854192Z [36;1mgit rev-parse HEAD > "$RUNNER_TEMP/android-owner-evidence/source-sha.txt"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9854440Z [36;1mrustup toolchain install 1.99.0 --profile minimal[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9854620Z [36;1mrustup default 1.99.0[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9854822Z [36;1mexport CARGO_TARGET_DIR="$RUNNER_TEMP/android-owner-target"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9855269Z [36;1mexport MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9855756Z [36;1mcargo test --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --test service_host_bridge -- --nocapture 2>&1 | tee "$RUNNER_TEMP/android-owner-evidence/test.log"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9856323Z [36;1mcargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:41.9857087Z [36;1m"$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config experiments/redesign/android-rust-bridge-lab/core/uniffi.android.toml --out-dir "$RUNNER_TEMP/android-owner-evidence/generated" --no-format[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:42.0074288Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:42.0074507Z ##[endgroup]
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:42.0546893Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:42.1911216Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:42.1911555Z info: downloading 3 components
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.3744904Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.3796787Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.3797060Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.3868152Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.3873851Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.3874171Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.3921205Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.3921547Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.4162206Z     Updating crates.io index
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.7559762Z  Downloading crates ...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8107855Z   Downloaded askama_macros v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8148549Z   Downloaded anyhow v1.0.104
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8247357Z   Downloaded cargo_metadata v0.23.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8259931Z   Downloaded askama v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8279736Z   Downloaded askama_derive v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8310550Z   Downloaded autocfg v1.5.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8324175Z   Downloaded log v0.4.34
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8341346Z   Downloaded askama_parser v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8372894Z   Downloaded heck v0.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8381767Z   Downloaded once_cell v1.21.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8399815Z   Downloaded textwrap v0.16.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8418365Z   Downloaded fs-err v3.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8431803Z   Downloaded percent-encoding v2.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8437785Z   Downloaded glob v0.3.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8448885Z   Downloaded equivalent v1.0.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8456198Z   Downloaded minimal-lexical v0.2.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8488567Z   Downloaded rustc-hash v2.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8498167Z   Downloaded scroll_derive v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8512140Z   Downloaded uniffi_pipeline v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8512786Z   Downloaded uniffi_internal_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8518374Z   Downloaded basic-toml v0.1.10
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8601413Z   Downloaded cargo-platform v0.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8610429Z   Downloaded itoa v1.0.18
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8621185Z   Downloaded memchr v2.8.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8661502Z   Downloaded nom v7.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8697102Z   Downloaded semver v1.0.28
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8713281Z   Downloaded quote v1.0.47
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8732170Z   Downloaded cfg-if v1.0.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8741049Z   Downloaded serde_spanned v1.1.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8748996Z   Downloaded uniffi v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8760165Z   Downloaded uniffi_udl v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8770449Z   Downloaded toml_datetime v1.1.2+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8778741Z   Downloaded camino v1.2.6
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8789764Z   Downloaded errno v0.3.14
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8800382Z   Downloaded fastrand v2.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8809800Z   Downloaded serde_core v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8828754Z   Downloaded siphasher v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8838909Z   Downloaded smawk v0.3.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8850499Z   Downloaded toml_writer v1.1.3+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8860026Z   Downloaded unicode-ident v1.0.27
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8879389Z   Downloaded plain v0.2.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8886859Z   Downloaded thiserror-impl v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8896783Z   Downloaded serde_derive v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8918006Z   Downloaded thiserror v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8964428Z   Downloaded zmij v1.0.23
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.8976761Z   Downloaded bitflags v2.13.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9008282Z   Downloaded static_assertions v1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9018223Z   Downloaded uniffi_meta v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9025663Z   Downloaded weedle2 v5.0.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9036917Z   Downloaded scroll v0.12.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9046282Z   Downloaded toml v1.1.8+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9074835Z   Downloaded uniffi_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9091409Z   Downloaded getrandom v0.4.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9117762Z   Downloaded indexmap v2.14.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9151113Z   Downloaded proc-macro2 v1.0.107
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9173396Z   Downloaded serde v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9197515Z   Downloaded serde_json v1.0.154
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9249346Z   Downloaded tempfile v3.27.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9267094Z   Downloaded toml_parser v1.1.5+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9282953Z   Downloaded uniffi_core v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9299007Z   Downloaded bytes v1.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9323384Z   Downloaded hashbrown v0.17.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9360403Z   Downloaded winnow v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9428605Z   Downloaded goblin v0.8.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9469156Z   Downloaded unicode-width v0.2.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9507882Z   Downloaded uniffi_bindgen v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9639385Z   Downloaded syn v2.0.119
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9713259Z   Downloaded syn v3.0.9
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9787472Z   Downloaded rustix v1.1.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:48.9980701Z   Downloaded libc v0.2.190
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.0330291Z   Downloaded linux-raw-sys v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.2036328Z    Compiling proc-macro2 v1.0.107
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.2036869Z    Compiling quote v1.0.47
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.2037257Z    Compiling unicode-ident v1.0.27
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.2037599Z    Compiling serde_core v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.2439507Z    Compiling anyhow v1.0.104
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.3570600Z    Compiling libc v0.2.190
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.4931370Z    Compiling getrandom v0.4.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.5606275Z    Compiling rustix v1.1.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:49.7927070Z    Compiling syn v3.0.9
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:50.1806080Z    Compiling linux-raw-sys v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:50.3676861Z    Compiling serde v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:50.4556114Z    Compiling hashbrown v0.17.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:50.5416080Z    Compiling once_cell v1.21.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:50.6186177Z    Compiling equivalent v1.0.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:50.6456267Z    Compiling cfg-if v1.0.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:50.6636202Z    Compiling bitflags v2.13.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:50.7696278Z    Compiling indexmap v2.14.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.1815993Z    Compiling syn v2.0.119
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.1846112Z    Compiling autocfg v1.5.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.2416436Z    Compiling serde_derive v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.3615987Z    Compiling zmij v1.0.23
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.4435171Z    Compiling fastrand v2.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.5436604Z    Compiling fs-err v3.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.6023497Z    Compiling winnow v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.7887039Z    Compiling tempfile v3.27.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.8375856Z    Compiling heck v0.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.9086778Z    Compiling camino v1.2.6
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:51.9686207Z    Compiling thiserror v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.0793431Z    Compiling serde_json v1.0.154
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.1302147Z    Compiling toml_parser v1.1.5+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.3206569Z    Compiling thiserror-impl v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.4556395Z    Compiling serde_spanned v1.1.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.4965973Z    Compiling toml_datetime v1.1.2+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.6076186Z    Compiling memchr v2.8.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.9103364Z    Compiling toml_writer v1.1.3+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.9246375Z    Compiling siphasher v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.9687239Z    Compiling itoa v1.0.18
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:52.9952423Z    Compiling toml v1.1.8+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:53.7266083Z    Compiling cargo-platform v0.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:53.7706297Z    Compiling semver v1.0.28
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:53.8186480Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:53.8325922Z    Compiling uniffi_internal_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:53.8610796Z    Compiling bytes v1.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:53.9206192Z    Compiling static_assertions v1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:53.9475976Z    Compiling cargo_metadata v0.23.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1646283Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1685993Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1710065Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1710670Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1711212Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1711549Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1711843Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1712357Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1712923Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1713503Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1713875Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1735175Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1735835Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1736615Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1737170Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1737602Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1738143Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1738560Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1738989Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1739540Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1740191Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1741188Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1741482Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.1791287Z    Compiling uniffi_core v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.3207505Z    Compiling uniffi_pipeline v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.3756374Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.4265508Z    Compiling uniffi_meta v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.7317676Z    Compiling muyon-android-contract-bridge-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/android-rust-bridge-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.7448544Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.8336106Z    Compiling uniffi_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:54.8466512Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:55.7353708Z    Compiling uniffi v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5241367Z     Finished `test` profile [unoptimized] target(s) in 8.12s
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5431810Z      Running tests/service_host_bridge.rs (/home/runner/work/_temp/android-owner-target/debug/deps/service_host_bridge-127e482bb7b3233d)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5445541Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5445700Z running 2 tests
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5447407Z test unconfigured_service_owner_fails_closed_and_is_queried_fresh ... ok
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5447751Z test service_callback_maps_current_scope_and_handle_existence_without_transport ... ok
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5448030Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5448474Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5448741Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.5695702Z  Downloading crates ...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6138411Z   Downloaded strsim v0.11.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6148552Z   Downloaded clap_lex v1.1.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6161201Z   Downloaded clap_builder v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6206850Z   Downloaded anstyle v1.0.14
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6216699Z   Downloaded clap v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6286071Z   Downloaded clap_derive v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6599605Z    Compiling serde_core v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6601632Z    Compiling syn v3.0.9
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6618183Z    Compiling memchr v2.8.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6628152Z    Compiling rustc-hash v2.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.6936380Z    Compiling minimal-lexical v0.2.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.7936179Z    Compiling glob v0.3.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.9379996Z    Compiling winnow v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:56.9856209Z    Compiling nom v7.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:57.5796335Z    Compiling scroll_derive v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:57.8306226Z    Compiling smawk v0.3.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:57.8388525Z    Compiling scroll v0.12.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:57.8665852Z    Compiling textwrap v0.16.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:57.9566095Z    Compiling indexmap v2.14.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:57.9957753Z    Compiling serde_json v1.0.154
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.0516043Z    Compiling cargo-platform v0.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.1470729Z    Compiling semver v1.0.28
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.2886322Z    Compiling serde_spanned v1.1.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.3249071Z    Compiling uniffi_pipeline v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.3337227Z    Compiling camino v1.2.6
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.4251272Z    Compiling uniffi_meta v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.4913143Z    Compiling toml_datetime v1.1.2+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.5606682Z    Compiling weedle2 v5.0.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.6036346Z    Compiling toml_parser v1.1.5+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.7236124Z    Compiling serde_derive v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.8525968Z    Compiling thiserror-impl v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.9366490Z    Compiling plain v0.2.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:58.9656115Z    Compiling log v0.4.34
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:59.0303271Z    Compiling strsim v0.11.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:59.1636128Z    Compiling clap_lex v1.1.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:59.2466142Z    Compiling anstyle v1.0.14
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:59.3306109Z    Compiling clap_builder v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:59.4536237Z    Compiling thiserror v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:59.4816071Z    Compiling goblin v0.8.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:50:59.8036615Z    Compiling uniffi_udl v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:00.2426249Z    Compiling toml v1.1.8+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:00.3225012Z    Compiling serde v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:00.6564566Z    Compiling askama_parser v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:01.0596068Z    Compiling basic-toml v0.1.10
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:01.4186966Z    Compiling cargo_metadata v0.23.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:01.4256367Z    Compiling clap_derive v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.2322586Z    Compiling askama_derive v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3168194Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3196532Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3220561Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3245806Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3246629Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3275553Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3305696Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3335519Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3336342Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3365695Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3395513Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3425316Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3425882Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3446013Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3485369Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3485938Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3515532Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3545422Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3575613Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3576304Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3605772Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3635501Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3636060Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3665638Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.3695525Z    Compiling uniffi_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.5126007Z    Compiling clap v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:02.5354164Z    Compiling muyon-android-contract-bridge-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/android-rust-bridge-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:03.5369519Z    Compiling askama_macros v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:03.6148311Z    Compiling askama v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:03.7333628Z    Compiling uniffi_bindgen v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:12.3463327Z    Compiling uniffi v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:14.8745658Z     Finished `dev` profile [unoptimized] target(s) in 18.31s
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:14.8937537Z error running cargo metadata
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:14.8937776Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:14.8938173Z Caused by:
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:14.8938609Z     `cargo metadata` exited with an error: error: could not find `Cargo.toml` in `/home/runner/work/Muyon/Muyon` or any parent directory
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:14.8939052Z     
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:51:14.8952490Z ##[error]Process completed with exit code 1.

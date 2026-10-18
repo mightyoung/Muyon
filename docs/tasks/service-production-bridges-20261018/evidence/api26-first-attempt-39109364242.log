@@ -1,0 +1,292 @@
+package-device	API26 actual UI Binder native supplier read	﻿2026-10-18T07:58:02.9729942Z ##[group]Run set -euo pipefail
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9730175Z [36;1mset -euo pipefail[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9730448Z [36;1mevidence="$RUNNER_TEMP/loop-package"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9730660Z [36;1mexport ANDROID_AVD_HOME="$RUNNER_TEMP/muyon-loop-avds"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9730863Z [36;1mmkdir -p "$ANDROID_AVD_HOME"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9731065Z [36;1mmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9731336Z [36;1m# Uses runner's existing SDK licenses; never accepts a new license.[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9731731Z [36;1m"$manager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/emulator-setup.log"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9732092Z [36;1mexport PATH="$ANDROID_HOME/platform-tools:$PATH"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9732303Z [36;1mtest -x "$ANDROID_HOME/platform-tools/adb"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9732474Z [36;1msudo chmod a+rw /dev/kvm[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9732841Z [36;1mprintf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-loop-api26 -k 'system-images;android-26;google_apis;x86_64' --force[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9733438Z [36;1m"$ANDROID_HOME/emulator/emulator" -avd muyon-loop-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$evidence/emulator.log" 2>&1 &[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9733831Z [36;1mtimeout 300 adb wait-for-device[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9734129Z [36;1mfor attempt in $(seq 1 120); do if [[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9734464Z [36;1mtest "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9734723Z [36;1mtest "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = 26[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9734933Z [36;1madb shell input keyevent 82[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9735111Z [36;1madb install -r "$evidence/app-debug.apk"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9735326Z [36;1madb install -r "$evidence/app-debug-androidTest.apk"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9735579Z [36;1mif ! timeout 15 adb logcat -c > "$evidence/logcat-clear.log" 2>&1; then[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9735939Z [36;1m  printf 'UNAVAILABLE: API26 log buffer clear; instrumentation still required\n' > "$evidence/logcat-clear-status.txt"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9736231Z [36;1mfi[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9736702Z [36;1mtimeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9737255Z [36;1mif ! timeout 30 adb logcat -d > "$evidence/logcat.txt" 2>&1; then[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9737526Z [36;1m  printf 'UNAVAILABLE: API26 logcat dump\n' > "$evidence/logcat-status.txt"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9737741Z [36;1mfi[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9737895Z [36;1madb shell ps -A > "$evidence/device-processes.txt"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9738123Z [36;1mgrep -F 'OK (2 tests)' "$evidence/instrumentation.log"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9738444Z [36;1mif grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9738865Z [36;1mprintf 'API26 UI/Binder/native/synthetic schema12 read PASS; model API NOT_RUN\n' > "$evidence/device-result.txt"[0m
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9790122Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9790386Z env:
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9790563Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9790835Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:02.9791047Z ##[endgroup]
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:03.4782100Z Loading package information...                                                  
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:03.5512261Z Loading local repository...                                                     
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:03.5515644Z [                                       ] 3% Loading local repository...        
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:03.7696653Z [                                       ] 3% Fetch remote repository...         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.0161506Z [=                                      ] 3% Fetch remote repository...         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.0596799Z [=                                      ] 4% Fetch remote repository...         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.0740117Z [=                                      ] 5% Fetch remote repository...         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.1068822Z [==                                     ] 5% Fetch remote repository...         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.1669670Z [==                                     ] 6% Fetch remote repository...         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.2333362Z [==                                     ] 7% Fetch remote repository...         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.2370779Z [==                                     ] 7% Computing updates...               
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.2421219Z [===                                    ] 8% Computing updates...               
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.2635101Z [===                                    ] 10% Computing updates...              
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.3323433Z [===                                    ] 10% Installing Android Emulator       
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.3941511Z [===                                    ] 10% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.4444063Z [====                                   ] 10% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.5370114Z [====                                   ] 11% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.6236838Z [====                                   ] 12% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.7109275Z [=====                                  ] 13% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.7878184Z [=====                                  ] 14% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.8355337Z [=====                                  ] 15% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.8737803Z [======                                 ] 15% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:04.9585667Z [======                                 ] 16% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.0423013Z [======                                 ] 17% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.1248435Z [=======                                ] 18% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.1825816Z [=======                                ] 19% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.2071182Z [=======                                ] 20% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.2382486Z [========                               ] 20% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.2759073Z [========                               ] 21% Downloading emulator-linux_x64-164
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.3553003Z [========                               ] 21% Unzipping...                      
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.3580820Z [========                               ] 21% Unzipping... emulator/            
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.3601011Z [========                               ] 21% Unzipping... emulator/resources/  
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.3851578Z [========                               ] 21% Unzipping... emulator/qsn         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.4610601Z [========                               ] 21% Unzipping... emulator/emulator    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.4782767Z [========                               ] 21% Unzipping... emulator/netsimd     
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.5500221Z [========                               ] 22% Unzipping... emulator/netsimd     
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.5500894Z [========                               ] 22% Unzipping... emulator/bin64/      
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.5510870Z [========                               ] 22% Unzipping... emulator/qemu/       
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.5511210Z [========                               ] 22% Unzipping... emulator/NOTICE.txt  
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.6613219Z [========                               ] 22% Unzipping... emulator/crashpad_han
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.6616085Z [========                               ] 22% Unzipping... emulator/source.prope
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7097826Z [========                               ] 22% Unzipping... emulator/nimble_bridg
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7099573Z [========                               ] 22% Unzipping... emulator/LICENSE     
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7100104Z [========                               ] 22% Unzipping... emulator/lib/        
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7161416Z [========                               ] 22% Unzipping... emulator/qemu-img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7170867Z [========                               ] 22% Unzipping... emulator/include/    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7171255Z [========                               ] 22% Unzipping... emulator/NOTICE.csv  
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7171605Z [========                               ] 22% Unzipping... emulator/lib64/      
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7288153Z [========                               ] 22% Unzipping... emulator/emulator-che
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7441035Z [========                               ] 22% Unzipping... emulator/crashreport 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7443669Z [========                               ] 22% Unzipping... emulator/mksdcard    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7582208Z [========                               ] 22% Unzipping... emulator/resources/To
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7630674Z [========                               ] 22% Unzipping... emulator/resources/de
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7632032Z [========                               ] 22% Unzipping... emulator/resources/To
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7640585Z [========                               ] 22% Unzipping... emulator/resources/de
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7736645Z [========                               ] 22% Unzipping... emulator/resources/To
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7740915Z [========                               ] 22% Unzipping... emulator/resources/ma
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7754670Z [========                               ] 22% Unzipping... emulator/resources/de
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7755089Z [========                               ] 22% Unzipping... emulator/resources/sk
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7778450Z [========                               ] 22% Unzipping... emulator/resources/de
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7780738Z [========                               ] 22% Unzipping... emulator/resources/ma
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7787318Z [========                               ] 22% Unzipping... emulator/resources/po
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7832209Z [========                               ] 22% Unzipping... emulator/resources/ma
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.7836338Z [=========                              ] 23% Unzipping... emulator/resources/ma
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.8830765Z [=========                              ] 23% Unzipping... emulator/resources/sk
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.8838584Z [=========                              ] 23% Unzipping... emulator/resources/ma
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.8863148Z [=========                              ] 23% Unzipping... emulator/bin64/e2fsck
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.8887369Z [=========                              ] 23% Unzipping... emulator/bin64/fsck.e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.8903059Z [=========                              ] 23% Unzipping... emulator/bin64/tune2f
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.8913726Z [=========                              ] 23% Unzipping... emulator/bin64/resize
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:05.8930913Z [=========                              ] 23% Unzipping... emulator/bin64/mkfs.e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:06.2860172Z [=========                              ] 23% Unzipping... emulator/qemu/linux-x
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:06.7391483Z [=========                              ] 24% Unzipping... emulator/qemu/linux-x
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:06.9781159Z [=========                              ] 25% Unzipping... emulator/qemu/linux-x
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.2275251Z [==========                             ] 25% Unzipping... emulator/qemu/linux-x
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.2276684Z [==========                             ] 25% Unzipping... emulator/lib/emulator
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.2278318Z [==========                             ] 25% Unzipping... emulator/lib/rtc_serv
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3343361Z [==========                             ] 25% Unzipping... emulator/lib/advanced
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3349533Z [==========                             ] 25% Unzipping... emulator/lib/cmake/  
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3349914Z [==========                             ] 25% Unzipping... emulator/lib/emulator
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3350246Z [==========                             ] 25% Unzipping... emulator/lib/control_
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3350689Z [==========                             ] 25% Unzipping... emulator/lib/emulated
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3351014Z [==========                             ] 25% Unzipping... emulator/lib/rtc_serv
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3351947Z [==========                             ] 25% Unzipping... emulator/lib/emu-orig
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3371086Z [==========                             ] 25% Unzipping... emulator/lib/hardware
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3371485Z [==========                             ] 25% Unzipping... emulator/lib/pkgconfi
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3371816Z [==========                             ] 25% Unzipping... emulator/lib/pc-bios/
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3372161Z [==========                             ] 25% Unzipping... emulator/lib/snapshot
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3372481Z [==========                             ] 25% Unzipping... emulator/lib/adb_serv
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3372802Z [==========                             ] 25% Unzipping... emulator/lib/hostapd.
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3373118Z [==========                             ] 25% Unzipping... emulator/lib/grpc_end
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3379960Z [==========                             ] 25% Unzipping... emulator/lib/ca-bundl
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3380465Z [==========                             ] 25% Unzipping... emulator/lib/ui_contr
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3380678Z [==========                             ] 25% Unzipping... emulator/lib/snapshot
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3401035Z [==========                             ] 25% Unzipping... emulator/lib/ice_conf
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3477591Z [==========                             ] 25% Unzipping... emulator/lib/libflatb
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3634631Z [==========                             ] 26% Unzipping... emulator/lib/libflatb
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3639347Z [==========                             ] 26% Unzipping... emulator/lib/emulator
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3641004Z [==========                             ] 26% Unzipping... emulator/lib/waterfal
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3642902Z [==========                             ] 26% Unzipping... emulator/lib/emulated
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3649293Z [==========                             ] 26% Unzipping... emulator/lib/cmake/fl
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3653282Z [==========                             ] 26% Unzipping... emulator/lib/pkgconfi
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.3747980Z [==========                             ] 26% Unzipping... emulator/lib/pc-bios/
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.4179891Z [==========                             ] 26% Unzipping... emulator/include/flat
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.4232911Z [==========                             ] 26% Unzipping... emulator/lib64/libgli
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.4324564Z [==========                             ] 26% Unzipping... emulator/lib64/libpro
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.4324941Z [==========                             ] 26% Unzipping... emulator/lib64/qt/   
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.4622210Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.5140580Z [==========                             ] 26% Unzipping... emulator/lib64/libgfx
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.5140925Z [==========                             ] 26% Unzipping... emulator/lib64/gles_l
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.5146322Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.5146909Z [==========                             ] 26% Unzipping... emulator/lib64/vulkan
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.5150965Z [==========                             ] 26% Unzipping... emulator/lib64/gles_s
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.5151310Z [==========                             ] 26% Unzipping... emulator/lib64/libemu
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.5237701Z [==========                             ] 26% Unzipping... emulator/lib64/libpro
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7433276Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7448672Z [==========                             ] 26% Unzipping... emulator/lib64/libtcm
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7450240Z [==========                             ] 26% Unzipping... emulator/lib64/libima
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7496922Z [==========                             ] 26% Unzipping... emulator/lib64/libc++
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7702010Z [==========                             ] 26% Unzipping... emulator/lib64/liband
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7734908Z [==========                             ] 26% Unzipping... emulator/lib64/libabs
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7741000Z [==========                             ] 26% Unzipping... emulator/lib64/gles_a
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7786351Z [==========                             ] 26% Unzipping... emulator/lib64/libsha
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7835118Z [==========                             ] 26% Unzipping... emulator/lib64/libc++
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7835546Z [==========                             ] 26% Unzipping... emulator/lib64/qt/res
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7836023Z [==========                             ] 26% Unzipping... emulator/lib64/qt/lib
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7836714Z [==========                             ] 26% Unzipping... emulator/lib64/qt/tra
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7837179Z [==========                             ] 26% Unzipping... emulator/lib64/qt/plu
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.7860964Z [==========                             ] 26% Unzipping... emulator/lib64/qt/res
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:07.9374365Z [==========                             ] 27% Unzipping... emulator/lib64/qt/res
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:08.0180611Z [==========                             ] 27% Unzipping... emulator/lib64/qt/lib
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:08.3971283Z [===========                            ] 28% Unzipping... emulator/lib64/qt/lib
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:08.7038936Z [===========                            ] 29% Unzipping... emulator/lib64/qt/lib
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:09.5896233Z [===========                            ] 30% Unzipping... emulator/lib64/qt/lib
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:09.6701832Z [============                           ] 30% Unzipping... emulator/lib64/qt/lib
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:09.7682557Z [============                           ] 30% Unzipping... emulator/lib64/qt/tra
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:09.7763877Z [============                           ] 30% Unzipping... emulator/lib64/qt/plu
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:09.7921595Z [============                           ] 30% Unzipping... emulator/lib64/gles_l
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:09.9318750Z [============                           ] 31% Unzipping... emulator/lib64/gles_l
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:10.1999563Z [============                           ] 31% Unzipping... emulator/lib64/vulkan
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:10.9221643Z [============                           ] 32% Unzipping... emulator/lib64/vulkan
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:10.9736503Z [============                           ] 32% Unzipping... emulator/lib64/gles_s
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:11.0170200Z [============                           ] 32% Unzipping... emulator/lib64/gles_a
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:11.0752643Z [=============                          ] 33% Unzipping... emulator/lib64/gles_a
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:11.2629985Z [=====================                  ] 55% Unzipping... emulator/lib64/gles_a
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:11.3913436Z [=====================                  ] 55% Installing Google APIs Intel x86_6
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:12.0154170Z [=====================                  ] 55% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:12.7284969Z [======================                 ] 55% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:14.3356186Z [======================                 ] 56% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:15.9430548Z [======================                 ] 57% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:17.5507451Z [=======================                ] 58% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:18.9766618Z [=======================                ] 59% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:19.8712952Z [=======================                ] 60% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:20.5844758Z [========================               ] 60% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:22.2794220Z [========================               ] 61% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:23.8888611Z [========================               ] 62% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:25.5000041Z [=========================              ] 63% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:27.1737368Z [=========================              ] 64% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:27.8782504Z [=========================              ] 65% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:28.7839518Z [==========================             ] 65% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:29.8447646Z [==========================             ] 66% Downloading x86_64-26_r16.zip... e
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:29.8453554Z [==========================             ] 66% Unzipping... emulator/lib64/gles_a
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:29.8453899Z [==========================             ] 66% Unzipping... x86_64/              
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:29.8456262Z [==========================             ] 66% Unzipping... x86_64/advancedFeatur
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:29.8619264Z [==========================             ] 66% Unzipping... x86_64/kernel-ranchu 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:29.8716788Z [==========================             ] 66% Unzipping... x86_64/NOTICE.txt    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:29.8717896Z [==========================             ] 66% Unzipping... x86_64/build.prop    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:34.0177452Z [==========================             ] 66% Unzipping... x86_64/userdata.img  
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:34.0179432Z [==========================             ] 67% Unzipping... x86_64/userdata.img  
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:34.0185245Z [==========================             ] 67% Unzipping... x86_64/source.propert
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:34.0185757Z [==========================             ] 67% Unzipping... x86_64/data/         
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:34.0187076Z [==========================             ] 67% Unzipping... x86_64/data/misc/    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:34.0191335Z [==========================             ] 67% Unzipping... x86_64/data/misc/wifi
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:34.0306705Z [==========================             ] 67% Unzipping... x86_64/ramdisk.img   
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:34.9054022Z [==========================             ] 67% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:35.7420555Z [===========================            ] 68% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:36.3864339Z [===========================            ] 69% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:36.8303941Z [===========================            ] 70% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:37.2852029Z [============================           ] 70% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:38.1247303Z [============================           ] 71% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:38.9507040Z [============================           ] 72% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:39.8322345Z [=============================          ] 73% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:40.5057041Z [=============================          ] 74% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:40.9800690Z [=============================          ] 75% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:41.3670811Z [==============================         ] 75% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:42.0945051Z [==============================         ] 76% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:52.9631476Z [==============================         ] 77% Unzipping... x86_64/system.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:53.7321722Z [==============================         ] 77% Unzipping... x86_64/vendor.img    
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:53.7348888Z [==============================         ] 77% Unzipping... x86_64/encryptionkey.
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:53.8292858Z [==============================         ] 78% Unzipping... x86_64/encryptionkey.
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:53.8293480Z [=======================================] 100% Unzipping... x86_64/encryptionkey
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:53.8348961Z 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:54.3178309Z Loading local repository...                                                     
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:54.3179461Z [=========                              ] 25% Loading local repository...       
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:54.3179937Z [=========                              ] 25% Fetch remote repository...        
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:54.3180597Z [=======================================] 100% Fetch remote repository...       
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:54.4419455Z Auto-selecting single ABI x86_64
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:54.8359270Z * daemon not running; starting now at tcp:5037
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:58:54.8979084Z * daemon started successfully
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:59:57.1203162Z Do you wish to create a custom hardware profile? [no] Performing Streamed Install
+package-device	API26 actual UI Binder native supplier read	2026-10-18T07:59:57.1204220Z Success
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:00.4609881Z Performing Streamed Install
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:00.4613405Z Success
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:03.7614324Z INSTRUMENTATION_STATUS: numtests=2
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:03.7615726Z INSTRUMENTATION_STATUS: stream=
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:03.7616263Z com.mightyoung.muyon.androidlab.FrontendServiceLoopTest:
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:03.7616895Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:03.7617366Z INSTRUMENTATION_STATUS: test=invalidInputCannotDispatchAndSaveRemainsLocal
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:03.7617988Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.FrontendServiceLoopTest
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:03.7618501Z INSTRUMENTATION_STATUS: current=1
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:03.7618827Z INSTRUMENTATION_STATUS_CODE: 1
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5796495Z INSTRUMENTATION_STATUS: numtests=2
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5796990Z INSTRUMENTATION_STATUS: stream=
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5797569Z Error in invalidInputCannotDispatchAndSaveRemainsLocal(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest):
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5799207Z java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains '你 · 本地记录，未发送' (ignoreCase: false) is not displayed!
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5800018Z 	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5801020Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.invalidInputCannotDispatchAndSaveRemainsLocal(FrontendServiceLoopTest.kt:122)
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5801619Z 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5801749Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5802167Z INSTRUMENTATION_STATUS: test=invalidInputCannotDispatchAndSaveRemainsLocal
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5802720Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.FrontendServiceLoopTest
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5803744Z INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains '你 · 本地记录，未发送' (ignoreCase: false) is not displayed!
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5804626Z 	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5805470Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.invalidInputCannotDispatchAndSaveRemainsLocal(FrontendServiceLoopTest.kt:122)
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5806081Z 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5806181Z INSTRUMENTATION_STATUS: current=1
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5806463Z INSTRUMENTATION_STATUS_CODE: -2
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5896040Z INSTRUMENTATION_STATUS: numtests=2
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5899168Z INSTRUMENTATION_STATUS: stream=
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5899549Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5900094Z INSTRUMENTATION_STATUS: test=realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5901001Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.FrontendServiceLoopTest
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5901468Z INSTRUMENTATION_STATUS: current=2
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:07.5901758Z INSTRUMENTATION_STATUS_CODE: 1
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8118727Z INSTRUMENTATION_STATUS: numtests=2
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8119911Z INSTRUMENTATION_STATUS: stream=.
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8120826Z INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8121637Z INSTRUMENTATION_STATUS: test=realPrivateServiceReadRendersSyntheticProjectionAndOriginalReceipt
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8122377Z INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.androidlab.FrontendServiceLoopTest
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8122915Z INSTRUMENTATION_STATUS: current=2
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8123189Z INSTRUMENTATION_STATUS_CODE: 0
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8269382Z INSTRUMENTATION_RESULT: stream=
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8269840Z 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8270059Z Time: 7.053
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8270447Z There was 1 failure:
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8271027Z 1) invalidInputCannotDispatchAndSaveRemainsLocal(com.mightyoung.muyon.androidlab.FrontendServiceLoopTest)
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8272369Z java.lang.AssertionError: Assert failed: The component with Text + InputText + EditableText contains '你 · 本地记录，未发送' (ignoreCase: false) is not displayed!
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8273262Z 	at androidx.compose.ui.test.AssertionsKt.assertIsDisplayed(Assertions.kt:34)
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8274118Z 	at com.mightyoung.muyon.androidlab.FrontendServiceLoopTest.invalidInputCannotDispatchAndSaveRemainsLocal(FrontendServiceLoopTest.kt:122)
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8274694Z 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8274774Z FAILURES!!!
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8274968Z Tests run: 2,  Failures: 1
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8275110Z 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8275114Z 
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.8275213Z INSTRUMENTATION_CODE: -1
+package-device	API26 actual UI Binder native supplier read	2026-10-18T08:00:10.9766928Z ##[error]Process completed with exit code 1.

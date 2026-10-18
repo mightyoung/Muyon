@@ -1,0 +1,514 @@
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	﻿2026-10-18T07:48:17.8471629Z ##[group]Run set -euo pipefail
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8472148Z [36;1mset -euo pipefail[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8472627Z [36;1mmkdir -p "$RUNNER_TEMP/android-owner-evidence"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8473164Z [36;1mgit rev-parse HEAD > "$RUNNER_TEMP/android-owner-evidence/source-sha.txt"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8473681Z [36;1mrustup toolchain install 1.99.0 --profile minimal[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8474092Z [36;1mrustup default 1.99.0[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8474522Z [36;1mexport CARGO_TARGET_DIR="$RUNNER_TEMP/android-owner-target"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8475318Z [36;1mexport MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8476181Z [36;1mcargo test --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --test service_host_bridge -- --nocapture 2>&1 | tee "$RUNNER_TEMP/android-owner-evidence/test.log"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8477176Z [36;1mcargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8478479Z [36;1m"$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config experiments/redesign/android-rust-bridge-lab/core/uniffi.android.toml --out-dir "$RUNNER_TEMP/android-owner-evidence/generated" --no-format[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8642551Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.8643049Z ##[endgroup]
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:17.9094742Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:18.1471023Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:18.1471803Z info: downloading 3 components
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5467293Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5529148Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5529970Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5585425Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5592266Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5592735Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5650803Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5651181Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.5917014Z     Updating crates.io index
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9155689Z  Downloading crates ...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9672237Z   Downloaded anyhow v1.0.104
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9693238Z   Downloaded autocfg v1.5.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9775364Z   Downloaded askama_macros v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9831679Z   Downloaded equivalent v1.0.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9836138Z   Downloaded askama_parser v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9865404Z   Downloaded glob v0.3.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9872038Z   Downloaded askama v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9917810Z   Downloaded heck v0.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9924311Z   Downloaded percent-encoding v2.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9945824Z   Downloaded plain v0.2.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:25.9997332Z   Downloaded serde_spanned v1.1.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0004719Z   Downloaded rustc-hash v2.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0015562Z   Downloaded scroll_derive v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0016968Z   Downloaded uniffi_internal_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0046279Z   Downloaded itoa v1.0.18
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0083173Z   Downloaded errno v0.3.14
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0091157Z   Downloaded siphasher v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0132384Z   Downloaded cfg-if v1.0.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0179645Z   Downloaded cargo-platform v0.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0185773Z   Downloaded thiserror v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0212978Z   Downloaded uniffi_pipeline v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0217817Z   Downloaded fastrand v2.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0225360Z   Downloaded toml_datetime v1.1.2+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0232962Z   Downloaded uniffi v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0241382Z   Downloaded scroll v0.12.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0248734Z   Downloaded thiserror-impl v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0255868Z   Downloaded uniffi_udl v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0265927Z   Downloaded smawk v0.3.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0275335Z   Downloaded cargo_metadata v0.23.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0285203Z   Downloaded basic-toml v0.1.10
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0327894Z   Downloaded fs-err v3.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0337589Z   Downloaded quote v1.0.47
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0351103Z   Downloaded weedle2 v5.0.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0360516Z   Downloaded zmij v1.0.23
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0373544Z   Downloaded static_assertions v1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0381080Z   Downloaded uniffi_meta v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0386615Z   Downloaded semver v1.0.28
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0397904Z   Downloaded toml_parser v1.1.5+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0410603Z   Downloaded toml_writer v1.1.3+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0418672Z   Downloaded tempfile v3.27.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0433227Z   Downloaded unicode-ident v1.0.27
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0454309Z   Downloaded uniffi_core v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0467005Z   Downloaded bitflags v2.13.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0487602Z   Downloaded camino v1.2.6
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0496728Z   Downloaded once_cell v1.21.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0508734Z   Downloaded proc-macro2 v1.0.107
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0532311Z   Downloaded textwrap v0.16.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0550047Z   Downloaded toml v1.1.8+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0571187Z   Downloaded getrandom v0.4.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0589776Z   Downloaded log v0.4.34
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0608760Z   Downloaded askama_derive v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0631114Z   Downloaded serde_core v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0645428Z   Downloaded serde_derive v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0660726Z   Downloaded uniffi_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0672835Z   Downloaded bytes v1.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0691332Z   Downloaded serde v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0709433Z   Downloaded minimal-lexical v0.2.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0731643Z   Downloaded memchr v2.8.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0757287Z   Downloaded indexmap v2.14.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0779839Z   Downloaded nom v7.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0806235Z   Downloaded hashbrown v0.17.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0836023Z   Downloaded serde_json v1.0.154
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0872310Z   Downloaded goblin v0.8.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0903470Z   Downloaded winnow v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.0951919Z   Downloaded uniffi_bindgen v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.1029318Z   Downloaded syn v3.0.9
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.1087844Z   Downloaded unicode-width v0.2.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.1126480Z   Downloaded syn v2.0.119
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.1183988Z   Downloaded rustix v1.1.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.1305096Z   Downloaded libc v0.2.190
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.1522069Z   Downloaded linux-raw-sys v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.2182106Z    Compiling proc-macro2 v1.0.107
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.2184080Z    Compiling unicode-ident v1.0.27
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.2184793Z    Compiling quote v1.0.47
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.2185239Z    Compiling serde_core v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.2700565Z    Compiling anyhow v1.0.104
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.3397386Z    Compiling libc v0.2.190
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.4483702Z    Compiling getrandom v0.4.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.5231484Z    Compiling rustix v1.1.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:26.7930401Z    Compiling syn v3.0.9
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:27.4540485Z    Compiling bitflags v2.13.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:27.5599586Z    Compiling linux-raw-sys v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:27.7803629Z    Compiling hashbrown v0.17.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:27.9640725Z    Compiling once_cell v1.21.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.0690221Z    Compiling equivalent v1.0.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.0971100Z    Compiling cfg-if v1.0.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.1141882Z    Compiling serde v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.1850186Z    Compiling indexmap v2.14.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.4040427Z    Compiling syn v2.0.119
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.5013815Z    Compiling serde_derive v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.6540483Z    Compiling autocfg v1.5.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.8660125Z    Compiling fastrand v2.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:28.9729987Z    Compiling zmij v1.0.23
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:29.0730180Z    Compiling fs-err v3.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:29.1301315Z    Compiling serde_json v1.0.154
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:29.1860182Z    Compiling camino v1.2.6
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:29.2951041Z    Compiling winnow v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:29.5290112Z    Compiling tempfile v3.27.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:29.6050226Z    Compiling heck v0.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:29.7440142Z    Compiling thiserror v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:29.8210087Z    Compiling toml_parser v1.1.5+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:30.1240242Z    Compiling thiserror-impl v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:30.2480312Z    Compiling serde_spanned v1.1.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:30.3010449Z    Compiling toml_datetime v1.1.2+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:30.4510160Z    Compiling itoa v1.0.18
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:30.5400935Z    Compiling memchr v2.8.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:30.5571444Z    Compiling toml_writer v1.1.3+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:30.6560064Z    Compiling siphasher v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:30.7480171Z    Compiling toml v1.1.8+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:31.7480717Z    Compiling uniffi_internal_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:31.7911241Z    Compiling cargo-platform v0.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:31.8640125Z    Compiling semver v1.0.28
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:31.9141035Z    Compiling bytes v1.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:31.9380409Z    Compiling static_assertions v1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:31.9566870Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.0301917Z    Compiling cargo_metadata v0.23.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.3160172Z    Compiling uniffi_core v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.3272476Z    Compiling uniffi_pipeline v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4041104Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4061290Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4090060Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4120617Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4122039Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4149927Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4180300Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4210069Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4211348Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4240063Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4270040Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4287080Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4288206Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4289353Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4290239Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4290891Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4291668Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4292257Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4292872Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4293679Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4294990Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4296183Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4319516Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.4579635Z    Compiling uniffi_meta v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.5528843Z    Compiling muyon-android-contract-bridge-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/android-rust-bridge-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.6168323Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:32.9850126Z    Compiling uniffi_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:33.0445370Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:33.1748744Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:34.2288755Z    Compiling uniffi v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2277081Z     Finished `test` profile [unoptimized] target(s) in 9.65s
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2491751Z      Running tests/service_host_bridge.rs (/home/runner/work/_temp/android-owner-target/debug/deps/service_host_bridge-127e482bb7b3233d)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2500931Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2501587Z running 2 tests
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2502538Z test unconfigured_service_owner_fails_closed_and_is_queried_fresh ... ok
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2503295Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2503890Z thread 'service_callback_maps_current_scope_and_handle_existence_without_transport' (3136) panicked at tests/service_host_bridge.rs:71:5:
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2504893Z assertion `left == right` failed
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2505388Z   left: Some("provider_payload_invalid")
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2505888Z  right: Some("provider_payload_denied")
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2506516Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2507288Z test service_callback_maps_current_scope_and_handle_existence_without_transport ... FAILED
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2507763Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2507918Z failures:
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2508074Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2508227Z failures:
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2508684Z     service_callback_maps_current_scope_and_handle_existence_without_transport
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2508976Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2509351Z test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2509818Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2513727Z error: test failed, to rerun pass `--test service_host_bridge`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:48:35.2549051Z ##[error]Process completed with exit code 101.
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	﻿2026-10-18T07:48:17.6810470Z ##[group]Run set -euo pipefail
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6811019Z [36;1mset -euo pipefail[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6811347Z [36;1mmkdir -p "$RUNNER_TEMP/bridge-evidence"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6811775Z [36;1mgit rev-parse HEAD > "$RUNNER_TEMP/bridge-evidence/source-sha.txt"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6812243Z [36;1mrustup toolchain install 1.99.0 --profile minimal[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6812584Z [36;1mrustup default 1.99.0[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6813280Z [36;1mexport CARGO_TARGET_DIR="$RUNNER_TEMP/bridge-target"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6813693Z [36;1mresult=0[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6814545Z [36;1mfor target in supplier_scope_bridge service_provider service_host_controller supplier_store supplier_lab_source supplier_business_controller; do[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6815514Z [36;1m  cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test "$target" -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/$target.log" || result=1[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6816168Z [36;1mdone[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6817011Z [36;1mcargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --lib supplier_business::terminal_regressions -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/terminal-regressions.log" || result=1[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6817776Z [36;1mtest "$result" = 0[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6818082Z [36;1mgit diff --exit-code[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6980372Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.6980807Z ##[endgroup]
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:17.7453218Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:18.0108979Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:18.0109594Z info: downloading 3 components
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8476458Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8536173Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8536516Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8597787Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8607969Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8608331Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8665387Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8665846Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:24.8908321Z     Updating crates.io index
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.0934245Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3937901Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3939148Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3939884Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3940558Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3941281Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3941755Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3942205Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3943140Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3943910Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3945127Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3945650Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3946021Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3946306Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3947124Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3947757Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3948455Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3949113Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3949594Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3950125Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3950842Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3951750Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3952641Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.3953147Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.5130488Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:25.7223185Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.1420481Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.8449860Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 1.97s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.8457800Z      Running tests/supplier_scope_bridge.rs (/home/runner/work/_temp/bridge-target/debug/deps/supplier_scope_bridge-d024d091012016ed)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.8466500Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.8466909Z running 7 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.8780502Z test missing_current_resolver_never_falls_back_to_a_cached_grant ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.8781218Z test each_missing_or_denied_scope_proof_fails_closed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.8784318Z test owner_revocation_during_final_sample_prevents_installation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.8909658Z test revoked_current_authority_blocks_new_read_and_redisclosure ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9019160Z test unsupported_or_ambiguous_host_source_path_is_denied ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9061181Z test source_owner_namespace_revision_and_selection_changes_are_current_evidence ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9147509Z test trusted_typed_resolver_installs_registered_read_without_grant_or_path_from_request ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9147962Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9148387Z test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9148742Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9293493Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9294369Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9295028Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9295692Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9296429Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9296956Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9297371Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9297992Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9298638Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9299362Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9299718Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9299964Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9300154Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9300691Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9301112Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9301471Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9301985Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9302270Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9302614Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9303202Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9303801Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9304342Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9304555Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9314258Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:26.9314951Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1052952Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1055992Z      Running tests/service_provider.rs (/home/runner/work/_temp/bridge-target/debug/deps/service_provider-cd444b25029c56b8)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1062482Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1063002Z running 15 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1069700Z test configured_handle_bridge_admits_exact_payload_without_secret_or_transport ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1070588Z test malformed_stream_or_tools_are_rejected_before_reservation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1071635Z test current_policy_profile_and_budget_are_rechecked_at_final_admission ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1077251Z test missing_binding_and_handle_fail_closed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1079706Z test multiple_or_malformed_choices_are_rejected_before_reservation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1082024Z test every_configuration_and_authorization_component_is_bound ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1082603Z test oversized_wire_token_caps_are_rejected_before_reservation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1083472Z test payload_model_must_match_configured_profile_and_payload_is_bounded ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1084057Z test readiness_checks_binding_without_reservation_or_outbound_admission ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1084639Z test readiness_never_accepts_ambiguous_or_local_endpoint_forms ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1085170Z test reservation_race_and_cross_host_prepared_call_are_rejected ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1085755Z test wire_capabilities_cannot_exceed_approved_call_requirements ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1086334Z test revocation_review_or_ledger_failure_never_admits ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1086906Z test single_choice_and_explicit_token_caps_within_budget_preserve_exact_bytes ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1087574Z test unsupported_output_token_dialect_is_rejected_before_reservation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1087923Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1088207Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1088592Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1224004Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1224889Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1225434Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1225991Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1226859Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1227228Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1227642Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1228204Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1228976Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1229774Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1230129Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1230402Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1230608Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1231149Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1231570Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1231967Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1232425Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1232888Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1233248Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1233714Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1234325Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1234882Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1235109Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1235293Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.1235845Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.2894335Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.2899411Z      Running tests/service_host_controller.rs (/home/runner/work/_temp/bridge-target/debug/deps/service_host_controller-7dfa33ed1175336a)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.2907613Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.2907807Z running 4 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.2967887Z test configured_session_missing_profile_fails_closed_without_synthetic_read ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3181511Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3182358Z thread 'atomic_database_replacement_cannot_inherit_retained_projection_or_receipt_after_restart' (2340) panicked at tests/service_host_controller.rs:86:5:
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3183231Z a replacement database inherited cached projection disclosure
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3183797Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3184404Z test atomic_database_replacement_cannot_inherit_retained_projection_or_receipt_after_restart ... FAILED
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3374666Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3375343Z thread 'replacement_managed_root_with_same_database_inode_cannot_inherit_history' (2343) panicked at tests/service_host_controller.rs:117:5:
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3376319Z replacement root inherited cached source lineage
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3376917Z test replacement_managed_root_with_same_database_inode_cannot_inherit_history ... FAILED
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3552579Z test host_read_uses_same_controller_and_rechecks_revocation_on_redisclosure_and_restart ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3553110Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3553268Z failures:
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3553423Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3553486Z failures:
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3553901Z     atomic_database_replacement_cannot_inherit_retained_projection_or_receipt_after_restart
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3554474Z     replacement_managed_root_with_same_database_inode_cannot_inherit_history
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3554811Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3555316Z test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3555635Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3555864Z error: test failed, to rerun pass `--test service_host_controller`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3690263Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3691049Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3691507Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3691931Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3692600Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3693078Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3693474Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3694015Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3694549Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3695041Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3695414Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3695638Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3695854Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3696385Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3696780Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3697085Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3697476Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3697798Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3698124Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3698578Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3699124Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3699644Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3699885Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3700025Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.3700561Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.5283968Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.5293981Z      Running tests/supplier_store.rs (/home/runner/work/_temp/bridge-target/debug/deps/supplier_store-57d15bb408c5c647)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.5295132Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.5295391Z running 12 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.5658353Z test authority_unavailable_during_registered_dispatch_revokes_publication ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.5661165Z test fixture_domain_contract_is_tied_to_actual_dart_schema_source ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.5949397Z test identity_and_request_shape_are_not_sql_or_path_authority ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.5993605Z test current_reads_reject_pinned_revision_drift_and_pending_or_revoked_authority ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.6063730Z test current_projection_rereads_name_while_historical_receipt_identity_stays_original ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.6296622Z test mode_change_and_symlink_ancestor_are_denied ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.6501439Z BUSINESS_READ_EVIDENCE {"projection":{"name":"合成供应商甲","supplier":{"key":"11111111-1111-4111-8111-111111111111","module_id":"inquiry","revision":"7","schema_version":1,"type":"supplier"}},"receipt_ref":{"binding_id":"host-supplier-name-read","identity":"99e8664057addbb661ea927ef2a51983","invocation_id":"i-fcdab2807ccca6afbd889810d0f6c1eb","owner":"ToolRegistry"}}
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.6519208Z test registered_read_yields_business_name_and_original_durable_receipt_without_business_write ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.6595491Z test replaced_file_symlinks_owner_mode_and_no_create_fail_closed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.7094460Z test same_revision_tamper_without_host_source_stamp_change_is_denied ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.8694728Z test meta_shape_and_storage_types_are_checked ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.9769163Z test actual_source_mutation_in_each_final_host_sample_denies_publication ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.9864962Z test unknown_schema_missing_deleted_malformed_and_oversized_sources_fail_closed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.9865296Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.9865523Z test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.9865839Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:27.9999826Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0000496Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0000938Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0001303Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0001808Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0002088Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0002401Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0003066Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0003750Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0004509Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0004961Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0005222Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0005502Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0006153Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0006567Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0006870Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0007313Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0007582Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0007900Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0008304Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0008963Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0009513Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0009709Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0009839Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.0010360Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1121784Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1126027Z      Running tests/supplier_lab_source.rs (/home/runner/work/_temp/bridge-target/debug/deps/supplier_lab_source-3593509b51bbca4b)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1132978Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1133147Z running 5 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1136772Z test cancellation_cannot_publish_or_create_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1137484Z test symlink_synthetic_source_is_refused ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1139489Z test ui_request_cannot_install_other_scope_or_source ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1247264Z SYNTHETIC_REGISTERED_SUPPLIER_READ projection={"name":"合成供应商甲","supplier":{"key":"11111111-1111-4111-8111-111111111111","module_id":"inquiry","revision":"7","schema_version":1,"type":"supplier"}} receipt={"binding_id":"host-supplier-name-read","identity":"22b95b73d5da2a2aa783250c0d5bd2ee","invocation_id":"i-9d02fa38c557d9572d3589eeae7f6b62","owner":"ToolRegistry"}
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1252072Z test synthetic_schema12_read_uses_same_run_original_durable_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1255793Z test replay_revalidates_source_and_exact_projection_without_creating_new_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1256271Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1256524Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1256868Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1388664Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1389540Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1390056Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1390629Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1391423Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1391732Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1392056Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1392531Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1393179Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1393749Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1394109Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1394332Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1394546Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1395069Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1395461Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1395842Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1396253Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1396536Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1396863Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1397286Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1397841Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1398354Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1398570Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1398726Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.1399226Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.2641794Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.2645440Z      Running tests/supplier_business_controller.rs (/home/runner/work/_temp/bridge-target/debug/deps/supplier_business_controller-5348d60a828b97c1)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.2654262Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.2654561Z running 1 test
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.2868958Z test business_read_is_real_durable_and_reconnect_never_executes_again ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.2869435Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.2869667Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.2870145Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3015509Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3016385Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3016962Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3017551Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3018661Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3019005Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3019417Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3019890Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3020516Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3021130Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3021523Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3021770Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3022004Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3022588Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3023239Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3023625Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3024084Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3024400Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3024766Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3025259Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3025854Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3026489Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3026686Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3026857Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:28.3027426Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1195729Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.82s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1198581Z      Running unittests src/lib.rs (/home/runner/work/_temp/bridge-target/debug/deps/muyon_rust_agent_host_lab-1052fe828ffb81af)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1207539Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1207687Z running 3 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1388000Z test supplier_business::terminal_regressions::failed_final_ledger_is_unknown_terminal_not_pending_or_completed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1403996Z test supplier_business::terminal_regressions::task_identity_is_durable_before_dispatch_creates_a_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1412112Z test supplier_business::terminal_regressions::interrupted_receipt_survives_restart_without_projection_or_new_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1412586Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1412996Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.02s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1413280Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:48:29.1438710Z ##[error]Process completed with exit code 1.

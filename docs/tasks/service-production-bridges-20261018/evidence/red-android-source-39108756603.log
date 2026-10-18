@@ -1,0 +1,306 @@
+compile	Required JVM checks and Android source compilation	﻿2026-10-18T07:44:06.0783666Z ##[group]Run set +e
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0783954Z [36;1mset +e[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0784304Z [36;1m"$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0784832Z [36;1m  --no-daemon --stacktrace --console=plain -p "$LAB_DIRECTORY" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0785312Z [36;1m  :state:check :app:assembleDebug :app:assembleDebugAndroidTest \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0785759Z [36;1m  :app:compileDebugUnitTestKotlin :app:lintDebug 2>&1 |[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0786134Z [36;1m  tee "$LOG_DIRECTORY/required-build.log"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0786443Z [36;1mgradle_exit=${PIPESTATUS[0]}[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0786723Z [36;1mset -e[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0786934Z [36;1mrequired_exit=$gradle_exit[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0787223Z [36;1mif [[ $gradle_exit -eq 0 ]]; then[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0787668Z [36;1m  for marker in '16/16 pure JVM state checks passed' '22/22 local UI state checks passed'; do[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0788212Z [36;1m    if ! grep -Fq "$marker" "$LOG_DIRECTORY/required-build.log"; then[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0788624Z [36;1m      required_exit=1[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0788856Z [36;1m    fi[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0789041Z [36;1m  done[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0789222Z [36;1mfi[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0789552Z [36;1mprintf 'gradle_exit=%s\nrequired_exit=%s\n' "$gradle_exit" "$required_exit" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0789984Z [36;1m  > "$LOG_DIRECTORY/required-exit.txt"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0790275Z [36;1mexit "$required_exit"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0852014Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0852750Z env:
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0853042Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0853379Z   GRADLE_VERSION: 8.13
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0853741Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0854252Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0854730Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0855189Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0855636Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0856142Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0856545Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.0856814Z ##[endgroup]
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:06.7990029Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:08.1980220Z Daemon will be stopped at the end of the build 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:55.4003348Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:55.4023840Z > Configure project :app
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:55.4054082Z w: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/build.gradle.kts:82:61: Unnecessary non-null assertion (!!) on a non-null receiver of type String
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:58.8977237Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:44:58.9004822Z > Task :state:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:03.1001818Z > Task :state:processResources NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:03.1003223Z > Task :state:processTestResources NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:03.1015727Z > Task :app:preBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:03.1016598Z > Task :app:preDebugBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:03.1017414Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:11.6992330Z > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:11.7995304Z > Task :app:generateDebugBuildConfig
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:12.4033519Z > Task :app:generateDebugResValues
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:12.4034575Z > Task :app:checkDebugAarMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:12.6006476Z > Task :app:mapDebugSourceSetPaths
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:12.6025859Z > Task :app:generateDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:12.8003339Z > Task :app:compileDebugAidl
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:14.5977807Z > Task :app:packageDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:16.0003517Z > Task :app:createDebugCompatibleScreenManifests
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:16.0977845Z > Task :app:extractDeepLinksDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:16.1978788Z > Task :app:mergeDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:16.1998489Z > Task :app:parseDebugLocalResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:16.5003425Z > Task :app:processDebugMainManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:16.7003607Z > Task :app:processDebugManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:16.7004298Z > Task :app:processDebugManifestForPackage
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:16.7004992Z > Task :app:javaPreCompileDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:17.7039949Z > Task :app:mergeDebugShaders
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:17.7051052Z > Task :app:compileDebugShaders NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:17.7103865Z > Task :app:generateDebugAssets UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:17.8980346Z > Task :app:mergeDebugAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:17.9027052Z > Task :app:compressDebugAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:17.9039369Z > Task :app:desugarDebugFileDependencies
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:18.9978204Z > Task :app:processDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:18.9979686Z > Task :app:mergeDebugJniLibFolders
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:18.9980219Z > Task :app:checkDebugDuplicateClasses
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:20.4003526Z > Task :app:validateSigningDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:28.9013989Z > Task :state:compileKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:45:50.3986274Z > Task :app:mergeExtDexDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:01.8003490Z > Task :state:compileJava NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:01.8118249Z > Task :state:classes UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:01.9978387Z > Task :state:jar
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.2993526Z > Task :app:mergeLibDexDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.4979551Z > Task :app:writeDebugAppMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.6008386Z > Task :app:mergeDebugNativeLibs
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.6009874Z > Task :app:writeDebugSigningConfigVersions
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.6033166Z > Task :app:preDebugAndroidTestBuild SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.6063171Z > Task :app:compileDebugAndroidTestAidl NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.7978441Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.8003384Z > Task :app:stripDebugDebugSymbols
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:12.8033734Z Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:14.5028332Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:14.5029888Z > Task :app:processDebugAndroidTestManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:14.5053324Z > Task :app:generateDebugAndroidTestBuildConfig
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:14.5083148Z > Task :app:checkDebugAndroidTestAarMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:14.5113097Z > Task :app:generateDebugAndroidTestResValues
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:14.6063532Z > Task :app:mapDebugAndroidTestSourceSetPaths
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:14.6073151Z > Task :app:generateDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.3009272Z > Task :app:javaPreCompileDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.3025730Z > Task :app:mergeDebugAndroidTestShaders
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.3031945Z > Task :app:compileDebugAndroidTestShaders NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.3034486Z > Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.3036540Z > Task :app:mergeDebugAndroidTestAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.3999040Z > Task :app:compressDebugAndroidTestAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.4023217Z > Task :app:desugarDebugAndroidTestFileDependencies
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.4053036Z > Task :app:mergeDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:15.7996387Z > Task :app:checkDebugAndroidTestDuplicateClasses
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:16.4977599Z > Task :app:processDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:16.5993377Z > Task :state:compileTestKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:21.6978358Z > Task :state:compileTestJava NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:21.6979442Z > Task :state:testClasses UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.2997281Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3043363Z > Task :state:checkState FAILED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3064503Z PASS default and ordered destinations
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3123092Z PASS selection changes page without modifying previous state
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3163135Z PASS 899 and 900 logical width boundary
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3199210Z PASS invalid width rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3242950Z PASS raw draft survives navigation without normalization
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3300082Z PASS draft focus and scroll retained together
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3312960Z PASS page memories and prior state remain independent
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3383106Z PASS width changes do not own or replace state
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3400434Z PASS negative list coordinates rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3413040Z PASS Rust port has no connected or success default
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3442833Z PASS interrupted keeps explicit unknown warning
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3472833Z PASS cancelling never claims cancelled
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3482937Z PASS platform task note takes priority
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3512916Z PASS platform ownership cannot erase interrupted warning
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3532802Z PASS ordinary queued waiting and running copy
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3543980Z PASS paused failed succeeded and cancelled stay distinct
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3573123Z PASS 31 pending chat cancellation/late bootstrap checks; Android runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3655849Z ##[error]Exception in thread "main" java.lang.IllegalStateException: Check failed.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3667509Z 	at com.mightyoung.muyon.androidlab.ChatReadChecksKt.runChatReadChecks(ChatReadChecks.kt:22)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3668697Z 	at com.mightyoung.muyon.androidlab.StateChecksKt.main(StateChecks.kt:98)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.3669654Z 	at com.mightyoung.muyon.androidlab.StateChecksKt.main(StateChecks.kt)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.4982898Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:22.5003179Z > Task :app:mergeExtDexDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:32.1987067Z > Task :app:compileDebugKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.1988484Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.1989794Z FAILURE: Build failed with an exception.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.1991060Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.1992241Z * What went wrong:
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.1994413Z Execution failed for task ':state:checkState'.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.1996707Z > Process 'command '/usr/lib/jvm/temurin-17-jdk-amd64/bin/java'' finished with non-zero exit value 1
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.1998875Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.1999775Z * Try:
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2001053Z > Run with --info or --debug option to get more log output.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2003319Z > Run with --scan to get full insights.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2005127Z > Get more help at https://help.gradle.org.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2006459Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2007052Z * Exception is:
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2009279Z org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':state:checkState'.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2013036Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:130)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2014950Z 	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:293)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2031434Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:128)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2034802Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:116)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2080934Z 	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:40)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2083507Z 	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2085655Z 	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2087839Z 	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2089732Z 	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2091559Z 	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2093532Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2095191Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2097035Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2098816Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2100876Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2102992Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2104573Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2106158Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2108070Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2110681Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2189553Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2200263Z 	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2221313Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2223695Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2225968Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2227953Z 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2229871Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2232096Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2234295Z 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2235822Z 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2237415Z 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2239320Z 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2241184Z Caused by: org.gradle.process.internal.ExecException: Process 'command '/usr/lib/jvm/temurin-17-jdk-amd64/bin/java'' finished with non-zero exit value 1
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2243464Z 	at org.gradle.process.internal.DefaultExecHandle$ExecResultImpl.assertNormalExitValue(DefaultExecHandle.java:442)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2245163Z 	at org.gradle.process.internal.DefaultJavaExecAction.execute(DefaultJavaExecAction.java:58)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2246432Z 	at org.gradle.api.tasks.JavaExec.exec(JavaExec.java:166)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2247524Z 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2248970Z 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2250630Z 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2252110Z 	at org.gradle.internal.reflect.JavaMethod.invoke(JavaMethod.java:125)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2253784Z 	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.doExecute(StandardTaskAction.java:58)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2256811Z 	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:51)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2258573Z 	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:29)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2260130Z 	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:244)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2262609Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2264473Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2266634Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2268464Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2270310Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2272167Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2274198Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2276105Z 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:229)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2286667Z 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:212)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2288669Z 	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:195)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2291010Z 	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:162)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2292810Z 	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:105)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2294266Z 	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:44)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2295537Z 	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:59)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2296744Z 	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:56)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2298452Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2300564Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2302719Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2305842Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2318302Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2325982Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2327971Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2329624Z 	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:56)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2330899Z 	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:44)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2332612Z 	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:42)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2334180Z 	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:75)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2335743Z 	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2339898Z 	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:50)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2341754Z 	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:28)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2344052Z 	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2345793Z 	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.execute(RemovePreviousOutputsStep.java:37)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2347618Z 	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:61)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2349459Z 	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:26)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2351351Z 	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2353727Z 	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2355705Z 	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:40)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2357340Z 	at org.gradle.internal.execution.steps.ResolveInputChangesStep.execute(ResolveInputChangesStep.java:29)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2358933Z 	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2360460Z 	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$1(BuildCacheStep.java:75)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2361639Z 	at org.gradle.internal.Either$Right.fold(Either.java:175)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2362909Z 	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2364588Z 	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:73)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2365952Z 	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2367499Z 	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2369221Z 	at org.gradle.internal.execution.steps.StoreExecutionStateStep.execute(StoreExecutionStateStep.java:35)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2370825Z 	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2372638Z 	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2374156Z 	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2375578Z 	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2377380Z 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2379874Z 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2382115Z 	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:49)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2384860Z 	at org.gradle.internal.execution.steps.ResolveIncrementalCachingStateStep.executeDelegate(ResolveIncrementalCachingStateStep.java:27)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2387123Z 	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:71)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2389103Z 	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:39)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2391096Z 	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:65)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2393262Z 	at org.gradle.internal.execution.steps.ResolveChangesStep.execute(ResolveChangesStep.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2394698Z 	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:107)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2396002Z 	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:56)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2398042Z 	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:64)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2400328Z 	at org.gradle.internal.execution.steps.AbstractCaptureStateBeforeExecutionStep.execute(AbstractCaptureStateBeforeExecutionStep.java:43)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2402721Z 	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.executeWithNonEmptySources(AbstractSkipEmptyWorkStep.java:125)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2404732Z 	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:56)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2406478Z 	at org.gradle.internal.execution.steps.AbstractSkipEmptyWorkStep.execute(AbstractSkipEmptyWorkStep.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2408393Z 	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2410508Z 	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2412610Z 	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.execute(LoadPreviousExecutionStateStep.java:23)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2414369Z 	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:75)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2415972Z 	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.execute(HandleStaleOutputsStep.java:41)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2417667Z 	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$execute$0(AssignMutableWorkspaceStep.java:35)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2419358Z 	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:289)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2420965Z 	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:31)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2423041Z 	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.execute(AssignMutableWorkspaceStep.java:22)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2455335Z 	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2456855Z 	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2458779Z 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2461013Z 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2463468Z 	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2466253Z 	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2467725Z 	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2516078Z 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2520914Z 	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:35)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2522798Z 	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:61)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2524793Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:127)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2526726Z 	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:116)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2528766Z 	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:40)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2530869Z 	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2533097Z 	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2536550Z 	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2539772Z 	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2543692Z 	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2546652Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2548379Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2550077Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2551994Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2554395Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2556377Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2558117Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2559834Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2581542Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2583694Z 	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2585444Z 	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2587129Z 	at org.gradle.execution.plan.LocalTaskNodeExecutor.execute(LocalTaskNodeExecutor.java:42)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2588937Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:331)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2591023Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:318)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2593457Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:314)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2595481Z 	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2597714Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:314)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2599995Z 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2602111Z 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2604480Z 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2606107Z 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2607747Z 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2608774Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2608933Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2609260Z BUILD FAILED in 2m 27s
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.2609857Z 49 actionable tasks: 49 executed
+compile	Required JVM checks and Android source compilation	2026-10-18T07:46:33.7225305Z ##[error]Process completed with exit code 1.

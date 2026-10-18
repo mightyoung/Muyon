@@ -1,0 +1,6 @@
+10-18 08:10:22.296  4517  4517 I System.out: API26_LOCAL_SAVE_VIEWPORT stage=before-scroll label_bounds=[Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)] list_bounds=[Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)] decor_height=640 window_visible=Rect(0, 24 - 320, 391)
+10-18 08:10:22.797  4517  4517 I System.out: API26_LOCAL_SAVE_VIEWPORT stage=after-scroll label_bounds=[Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)] list_bounds=[Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)] decor_height=640 window_visible=Rect(0, 24 - 320, 391)
+10-18 08:10:23.329  4517  4517 I System.out: API26_LOCAL_SAVE_VIEWPORT stage=after-display-wait label_bounds=[Rect.fromLTRB(175.0, 191.0, 296.0, 207.0)] list_bounds=[Rect.fromLTRB(0.0, 112.0, 320.0, 356.0)] decor_height=640 window_visible=Rect(0, 24 - 320, 640)
+10-18 08:10:23.345  4517  4534 I System.out: API26_FRONTEND_INPUT_VALIDATION_PASS no_send_clicked=true model_api_called=false
+10-18 08:10:25.813  4517  4534 I System.out: API26_REAL_PRIVATE_READ_PASS ui_pid=4517 agent_pid=4593 receipt_identity=6c9ccfad25db054ce145ff4ca74e48ba synthetic_schema12=true model_api_called=false
+10-18 08:10:26.862  4517  4534 I System.out: API26_REAL_BINDER_RECOVERY_PASS old_agent_pid=4593 new_agent_pid=4617 original_receipt_identity=6c9ccfad25db054ce145ff4ca74e48ba lookup_only=true model_api_called=false

@@ -1,0 +1,265 @@
+ci	Set up job	﻿2026-10-18T07:44:53.3678682Z Current runner version: '2.337.0'
+ci	Set up job	2026-10-18T07:44:53.3708401Z ##[group]Runner Image Provisioner
+ci	Set up job	2026-10-18T07:44:53.3709480Z Hosted Compute Agent
+ci	Set up job	2026-10-18T07:44:53.3710108Z Version: 20261012.601
+ci	Set up job	2026-10-18T07:44:53.3710785Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+ci	Set up job	2026-10-18T07:44:53.3711658Z Build Date: 2026-10-12T17:48:21Z
+ci	Set up job	2026-10-18T07:44:53.3712364Z Worker ID: {94fedc57-cc6c-4c07-b3ca-e3829c5aecca}
+ci	Set up job	2026-10-18T07:44:53.3713127Z Region: westus
+ci	Set up job	2026-10-18T07:44:53.3713708Z Cloud: Azure
+ci	Set up job	2026-10-18T07:44:53.3714295Z ##[endgroup]
+ci	Set up job	2026-10-18T07:44:53.3716123Z ##[group]Operating System
+ci	Set up job	2026-10-18T07:44:53.3717024Z Ubuntu
+ci	Set up job	2026-10-18T07:44:53.3717648Z 24.04.5
+ci	Set up job	2026-10-18T07:44:53.3718233Z LTS
+ci	Set up job	2026-10-18T07:44:53.3718756Z ##[endgroup]
+ci	Set up job	2026-10-18T07:44:53.3719381Z ##[group]Runner Image
+ci	Set up job	2026-10-18T07:44:53.3720025Z Image: ubuntu-24.04
+ci	Set up job	2026-10-18T07:44:53.3720590Z Version: 20261012.334.1
+ci	Set up job	2026-10-18T07:44:53.3721780Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+ci	Set up job	2026-10-18T07:44:53.3724228Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+ci	Set up job	2026-10-18T07:44:53.3725250Z ##[endgroup]
+ci	Set up job	2026-10-18T07:44:53.3726492Z ##[group]GITHUB_TOKEN Permissions
+ci	Set up job	2026-10-18T07:44:53.3729655Z Contents: read
+ci	Set up job	2026-10-18T07:44:53.3730288Z Metadata: read
+ci	Set up job	2026-10-18T07:44:53.3730994Z ##[endgroup]
+ci	Set up job	2026-10-18T07:44:53.3733440Z Secret source: Actions
+ci	Set up job	2026-10-18T07:44:53.3734558Z Cache mode: write
+ci	Set up job	2026-10-18T07:44:53.3735349Z Prepare workflow directory
+ci	Set up job	2026-10-18T07:44:53.4170435Z Prepare all required actions
+ci	Set up job	2026-10-18T07:44:53.4224048Z Getting action download info
+ci	Set up job	2026-10-18T07:44:53.7879568Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+ci	Set up job	2026-10-18T07:44:53.9066435Z Download action repository 'subosito/flutter-action@v2' (SHA:1a449444c387b1966244ae4d4f8c696479add0b2)
+ci	Set up job	2026-10-18T07:44:54.1712190Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+ci	Set up job	2026-10-18T07:44:54.4423997Z Getting action download info
+ci	Set up job	2026-10-18T07:44:54.5843014Z Download action repository 'actions/cache@v5' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+ci	Set up job	2026-10-18T07:44:54.7433967Z Complete job name: ci
+ci	Run actions/checkout@v4	﻿2026-10-18T07:44:54.8469701Z ##[group]Run actions/checkout@v4
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8470923Z with:
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8471497Z   repository: mightyoung/Muyon
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8475877Z   token: ***
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8476399Z   ssh-strict: true
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8477238Z   ssh-user: git
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8477832Z   persist-credentials: true
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8478424Z   clean: true
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8478957Z   sparse-checkout-cone-mode: true
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8479576Z   fetch-depth: 1
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8480102Z   fetch-tags: false
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8480649Z   show-progress: true
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8481216Z   lfs: false
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8481765Z   submodules: false
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8482316Z   set-safe-directory: true
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8482959Z   allow-unsafe-pr-checkout: false
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.8483911Z ##[endgroup]
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9619387Z Syncing repository: mightyoung/Muyon
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9622675Z ##[group]Getting Git version info
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9624135Z Working directory is '/home/runner/work/Muyon/Muyon'
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9626176Z [command]/usr/bin/git version
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9704558Z git version 2.55.0
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9818128Z ##[endgroup]
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9828614Z Temporarily overriding HOME='/home/runner/work/_temp/c7fe2ff5-1ec8-4a3c-b715-5c619576d5a9' before making global git config changes
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9831097Z Adding repository directory to the temporary git global config as a safe directory
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9833134Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9835508Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9837830Z ##[group]Initializing the repository
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9839327Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9952593Z hint: Using 'master' as the name for the initial branch. This default branch name
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9954865Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9956690Z hint: to use in all of your new repositories, which will suppress this warning,
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9958395Z hint: call:
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9959285Z hint:
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9960324Z hint: 	git config --global init.defaultBranch <name>
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9961573Z hint:
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9962770Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9964656Z hint: 'development'. The just-created branch can be renamed via this command:
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9966167Z hint:
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9967418Z hint: 	git branch -m <name>
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9968428Z hint:
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9969656Z hint: Disable this message with "git config set advice.defaultBranchName false"
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9971506Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+ci	Run actions/checkout@v4	2026-10-18T07:44:54.9975930Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0033400Z ##[endgroup]
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0034981Z ##[group]Disabling automatic garbage collection
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0038190Z [command]/usr/bin/git config --local gc.auto 0
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0083773Z ##[endgroup]
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0085250Z ##[group]Setting up auth
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0091998Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0138944Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0550190Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0602676Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0860702Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.0905977Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.1165017Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.1216615Z ##[endgroup]
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.1218109Z ##[group]Fetching the repository
+ci	Run actions/checkout@v4	2026-10-18T07:44:55.1228256Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +710169747f5672104e2e990f853a1ce33a3cdaa4:refs/remotes/origin/task/service-production-bridges-20261018
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.7919083Z From https://github.com/mightyoung/Muyon
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.7921660Z  * [new ref]         710169747f5672104e2e990f853a1ce33a3cdaa4 -> origin/task/service-production-bridges-20261018
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.7925157Z ##[endgroup]
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.7925751Z ##[group]Determining the checkout info
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.7927450Z ##[endgroup]
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.7934396Z [command]/usr/bin/git sparse-checkout disable
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.7997984Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.8039770Z ##[group]Checking out the ref
+ci	Run actions/checkout@v4	2026-10-18T07:44:57.8048296Z [command]/usr/bin/git checkout --progress --force -B task/service-production-bridges-20261018 refs/remotes/origin/task/service-production-bridges-20261018
+ci	Run actions/checkout@v4	2026-10-18T07:44:58.3202488Z Switched to a new branch 'task/service-production-bridges-20261018'
+ci	Run actions/checkout@v4	2026-10-18T07:44:58.3207271Z branch 'task/service-production-bridges-20261018' set up to track 'origin/task/service-production-bridges-20261018'.
+ci	Run actions/checkout@v4	2026-10-18T07:44:58.3233699Z ##[endgroup]
+ci	Run actions/checkout@v4	2026-10-18T07:44:58.3287346Z [command]/usr/bin/git log -1 --format=%H
+ci	Run actions/checkout@v4	2026-10-18T07:44:58.3320027Z 710169747f5672104e2e990f853a1ce33a3cdaa4
+ci	Run subosito/flutter-action@v2	﻿2026-10-18T07:44:58.3745708Z ##[group]Run subosito/flutter-action@v2
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3746144Z with:
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3746372Z   flutter-version: 3.47.5
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3746621Z   channel: stable
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3747132Z   cache: true
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3747367Z   architecture: X64
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3747604Z   pub-cache-path: default
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3747843Z   dry-run: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3748141Z   git-source: https://github.com/flutter/flutter.git
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3748479Z ##[endgroup]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3822371Z ##[start-action display=Make yq tool available on Windows runners;id=__subosito_flutter-action.__run]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3850018Z ##[end-action id=__subosito_flutter-action.__run;outcome=skipped;conclusion=skipped;duration_ms=0]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3853017Z ##[start-action display=Make setup script executable;id=__subosito_flutter-action.__run_2]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3901221Z ##[group]Run chmod +x "$GITHUB_ACTION_PATH/setup.sh"
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.3901775Z [36;1mchmod +x "$GITHUB_ACTION_PATH/setup.sh"[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4166614Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4167466Z ##[endgroup]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4322167Z ##[end-action id=__subosito_flutter-action.__run_2;outcome=success;conclusion=success;duration_ms=46]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4325284Z ##[start-action display=Set action inputs;id=__subosito_flutter-action.flutter-action]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4376118Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh -p \
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4376593Z [36;1m$GITHUB_ACTION_PATH/setup.sh -p \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4377655Z [36;1m  -n '3.47.5' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4377944Z [36;1m  -f '' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4378177Z [36;1m  -a 'X64' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4378406Z [36;1m  -k '' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4378631Z [36;1m  -c '' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4378849Z [36;1m  -l '' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4379080Z [36;1m  -d 'default' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4379566Z [36;1m  -g 'https://github.com/flutter/flutter.git' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4379956Z [36;1m  stable[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4446592Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.4447428Z ##[endgroup]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6243999Z ##[end-action id=__subosito_flutter-action.flutter-action;outcome=success;conclusion=success;duration_ms=191]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6250318Z ##[start-action display=Cache Flutter;id=__subosito_flutter-action.cache-flutter]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6322097Z ##[group]Run actions/cache@v5
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6322439Z with:
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6322729Z   path: /opt/hostedtoolcache/flutter/stable-3.47.5-x64
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6323251Z   key: flutter-linux-stable-3.47.5-x64-6a19cca56475dbfba1478ee68d7bd0c2ef891da1
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6323725Z   enableCrossOsArchive: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6324000Z   fail-on-cache-miss: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6324260Z   lookup-only: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6324492Z   save-always: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:58.6324742Z ##[endgroup]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.0285668Z Cache not found for input keys: flutter-linux-stable-3.47.5-x64-6a19cca56475dbfba1478ee68d7bd0c2ef891da1
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.0350633Z ##[end-action id=__subosito_flutter-action.cache-flutter;outcome=success;conclusion=success;duration_ms=409]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.0353669Z ##[start-action display=Cache pub dependencies;id=__subosito_flutter-action.cache-pub]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4343046Z ##[group]Run actions/cache@v5
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4343344Z with:
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4343567Z   path: /home/runner/.pub-cache
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4344358Z   key: flutter-pub-linux-stable-3.47.5-x64-6a19cca56475dbfba1478ee68d7bd0c2ef891da1-b45685280e4ac6350911355a02429502a20d0af656a27490ac4d99efcc97ddec
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4345197Z   enableCrossOsArchive: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4345475Z   fail-on-cache-miss: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4345732Z   lookup-only: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4345966Z   save-always: false
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.4346201Z ##[endgroup]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8318207Z Cache not found for input keys: flutter-pub-linux-stable-3.47.5-x64-6a19cca56475dbfba1478ee68d7bd0c2ef891da1-b45685280e4ac6350911355a02429502a20d0af656a27490ac4d99efcc97ddec
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8428106Z ##[end-action id=__subosito_flutter-action.cache-pub;outcome=success;conclusion=success;duration_ms=807]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8431288Z ##[start-action display=Run setup script;id=__subosito_flutter-action.__run_3]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8474414Z ##[group]Run $GITHUB_ACTION_PATH/setup.sh \
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8474814Z [36;1m$GITHUB_ACTION_PATH/setup.sh \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8475130Z [36;1m  -n '3.47.5' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8475374Z [36;1m  -a 'x64' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8475690Z [36;1m  -c '/opt/hostedtoolcache/flutter/stable-3.47.5-x64' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8476083Z [36;1m  -d '/home/runner/.pub-cache' \[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8476374Z [36;1m  stable[0m
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8541947Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+ci	Run subosito/flutter-action@v2	2026-10-18T07:44:59.8542415Z ##[endgroup]
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:00.0228213Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:00.0229380Z                                  Dload  Upload   Total   Spent    Left  Speed
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:00.0229907Z 
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:00.4350322Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:01.4359357Z   4 1503M    4 66.8M    0     0   162M      0  0:00:09 --:--:--  0:00:09  161M
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:02.4350651Z  19 1503M   19  289M    0     0   204M      0  0:00:07  0:00:01  0:00:06  204M
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:03.4400065Z  33 1503M   33  510M    0     0   211M      0  0:00:07  0:00:02  0:00:05  211M
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:04.4355804Z  48 1503M   48  722M    0     0   211M      0  0:00:07  0:00:03  0:00:04  211M
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:05.4383650Z  62 1503M   62  934M    0     0   211M      0  0:00:07  0:00:04  0:00:03  211M
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:06.4358219Z  76 1503M   76 1152M    0     0   212M      0  0:00:07  0:00:05  0:00:02  217M
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:07.0086033Z  91 1503M   91 1374M    0     0   214M      0  0:00:07  0:00:06  0:00:01  217M
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:07.0087521Z 100 1503M  100 1503M    0     0   215M      0  0:00:06  0:00:06 --:--:--  217M
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:32.6642646Z ##[error]The operation was canceled.
+ci	Run subosito/flutter-action@v2	2026-10-18T07:45:32.6647507Z ##[end-action id=__subosito_flutter-action.__run_3;outcome=cancelled;conclusion=cancelled;duration_ms=32821]
+ci	Coverage summary	﻿2026-10-18T07:45:32.6741251Z ##[group]Run if [[ -f .coverage-run/summary.json ]]; then
+ci	Coverage summary	2026-10-18T07:45:32.6741763Z [36;1mif [[ -f .coverage-run/summary.json ]]; then[0m
+ci	Coverage summary	2026-10-18T07:45:32.6742110Z [36;1m  python3 - <<'PY'[0m
+ci	Coverage summary	2026-10-18T07:45:32.6742387Z [36;1mimport base64, gzip, json, os[0m
+ci	Coverage summary	2026-10-18T07:45:32.6742679Z [36;1mfrom pathlib import Path[0m
+ci	Coverage summary	2026-10-18T07:45:32.6743068Z [36;1mdata = json.loads(Path('.coverage-run/summary.json').read_text())[0m
+ci	Coverage summary	2026-10-18T07:45:32.6743553Z [36;1mdata['actions_run_id'] = os.environ['GITHUB_RUN_ID'][0m
+ci	Coverage summary	2026-10-18T07:45:32.6744121Z [36;1mdata['suite_outcomes'] = json.loads(Path('.coverage-run/suite-summary.json').read_text())[0m
+ci	Coverage summary	2026-10-18T07:45:32.6744737Z [36;1msnapshot = json.dumps(data, separators=(',', ':')).encode()[0m
+ci	Coverage summary	2026-10-18T07:45:32.6745339Z [36;1mprint('COVERAGE_SNAPSHOT_GZIP_BASE64=' + base64.b64encode(gzip.compress(snapshot, mtime=0)).decode())[0m
+ci	Coverage summary	2026-10-18T07:45:32.6745950Z [36;1mwith open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as out:[0m
+ci	Coverage summary	2026-10-18T07:45:32.6746523Z [36;1m    out.write('Loaded executable line coverage; whole-package denominator unknown.\n\n')[0m
+ci	Coverage summary	2026-10-18T07:45:32.6747365Z [36;1m    out.write('| Package | Hit / loaded executable | % | Unloaded files |\n|---|---:|---:|---:|\n')[0m
+ci	Coverage summary	2026-10-18T07:45:32.6747879Z [36;1m    for package, p in data['packages'].items():[0m
+ci	Coverage summary	2026-10-18T07:45:32.6748534Z [36;1m        out.write(f"| {package} | {p['hit_lines']} / {p['loaded_executable_lines']} | {p['loaded_line_percent']} | {len(p['unloaded_source_files'])} |\n")[0m
+ci	Coverage summary	2026-10-18T07:45:32.6749383Z [36;1m    out.write('\nLinux self-skips and platform/model limitations remain; UI behavior tests are included.\n')[0m
+ci	Coverage summary	2026-10-18T07:45:32.6750142Z [36;1mPY[0m
+ci	Coverage summary	2026-10-18T07:45:32.6750344Z [36;1mfi[0m
+ci	Coverage summary	2026-10-18T07:45:32.6816418Z shell: /usr/bin/bash -e {0}
+ci	Coverage summary	2026-10-18T07:45:32.6816738Z ##[endgroup]
+ci	Keep coverage summaries	﻿2026-10-18T07:45:32.6964297Z ##[group]Run actions/upload-artifact@v4
+ci	Keep coverage summaries	2026-10-18T07:45:32.6964647Z with:
+ci	Keep coverage summaries	2026-10-18T07:45:32.6964869Z   name: coverage-summary
+ci	Keep coverage summaries	2026-10-18T07:45:32.6965412Z   path: .coverage-run/summary.json
+ci	Keep coverage summaries	.coverage-run/suite-summary.json
+ci	Keep coverage summaries	.coverage-run/da-details.json
+ci	Keep coverage summaries	
+ci	Keep coverage summaries	2026-10-18T07:45:32.6966037Z   if-no-files-found: error
+ci	Keep coverage summaries	2026-10-18T07:45:32.6966292Z   compression-level: 6
+ci	Keep coverage summaries	2026-10-18T07:45:32.6966521Z   overwrite: false
+ci	Keep coverage summaries	2026-10-18T07:45:32.6966748Z   include-hidden-files: false
+ci	Keep coverage summaries	2026-10-18T07:45:32.6967358Z ##[endgroup]
+ci	Keep coverage summaries	2026-10-18T07:45:32.9088845Z (node:2566) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+ci	Keep coverage summaries	2026-10-18T07:45:32.9090332Z (Use `node --trace-deprecation ...` to show where the warning was created)
+ci	Keep coverage summaries	2026-10-18T07:45:32.9170109Z Multiple search paths detected. Calculating the least common ancestor of all paths
+ci	Keep coverage summaries	2026-10-18T07:45:32.9176109Z The least common ancestor is /home/runner/work/Muyon/Muyon/.coverage-run. This will be the root directory of the artifact
+ci	Keep coverage summaries	2026-10-18T07:45:32.9196743Z ##[error]No files were found with the provided path: .coverage-run/summary.json
+ci	Keep coverage summaries	.coverage-run/suite-summary.json
+ci	Keep coverage summaries	.coverage-run/da-details.json. No artifacts will be uploaded.
+ci	Keep the log	﻿2026-10-18T07:45:32.9342616Z ##[group]Run actions/upload-artifact@v4
+ci	Keep the log	2026-10-18T07:45:32.9342967Z with:
+ci	Keep the log	2026-10-18T07:45:32.9343178Z   name: ci-log
+ci	Keep the log	2026-10-18T07:45:32.9343395Z   path: ci.log
+ci	Keep the log	2026-10-18T07:45:32.9343722Z   if-no-files-found: ignore
+ci	Keep the log	2026-10-18T07:45:32.9344082Z   compression-level: 6
+ci	Keep the log	2026-10-18T07:45:32.9344319Z   overwrite: false
+ci	Keep the log	2026-10-18T07:45:32.9344555Z   include-hidden-files: false
+ci	Keep the log	2026-10-18T07:45:32.9344818Z ##[endgroup]
+ci	Keep the log	2026-10-18T07:45:33.1795122Z (node:2579) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+ci	Keep the log	2026-10-18T07:45:33.1796629Z (Use `node --trace-deprecation ...` to show where the warning was created)
+ci	Keep the log	2026-10-18T07:45:33.1812725Z No files were found with the provided path: ci.log. No artifacts will be uploaded.
+ci	Post Run subosito/flutter-action@v2	﻿2026-10-18T07:45:33.2121285Z Post job cleanup.
+ci	Post Run subosito/flutter-action@v2	2026-10-18T07:45:33.2127284Z ##[start-action display=Cache pub dependencies;id=__ad08db87-c778-4cab-ab6c-671a06f65b83.cache-pub]
+ci	Post Run subosito/flutter-action@v2	2026-10-18T07:45:33.2130562Z ##[end-action id=__ad08db87-c778-4cab-ab6c-671a06f65b83.cache-pub;outcome=skipped;conclusion=skipped;duration_ms=0]
+ci	Post Run subosito/flutter-action@v2	2026-10-18T07:45:33.2133105Z ##[start-action display=Cache Flutter;id=__ad08db87-c778-4cab-ab6c-671a06f65b83.cache-flutter]
+ci	Post Run subosito/flutter-action@v2	2026-10-18T07:45:33.2135811Z ##[end-action id=__ad08db87-c778-4cab-ab6c-671a06f65b83.cache-flutter;outcome=skipped;conclusion=skipped;duration_ms=0]
+ci	Post Run actions/checkout@v4	﻿2026-10-18T07:45:33.2249707Z Post job cleanup.
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.3526020Z [command]/usr/bin/git version
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.3583198Z git version 2.55.0
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.3634855Z Temporarily overriding HOME='/home/runner/work/_temp/f297afa7-4fc4-4b1a-ba5d-4c907395c841' before making global git config changes
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.3637788Z Adding repository directory to the temporary git global config as a safe directory
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.3640077Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.3711688Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.3809615Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.4149968Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.4180387Z http.https://github.com/.extraheader
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.4215796Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.4274485Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.4671513Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+ci	Post Run actions/checkout@v4	2026-10-18T07:45:33.4720541Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+ci	Complete job	﻿2026-10-18T07:45:33.5245983Z Cleaning up orphan processes
+ci	Complete job	2026-10-18T07:45:33.5499255Z Terminate orphan process: pid (2459) (setup.sh)
+ci	Complete job	2026-10-18T07:45:33.5523997Z Terminate orphan process: pid (2559) (tar)
+ci	Complete job	2026-10-18T07:45:33.5548141Z Terminate orphan process: pid (2560) (xz)
+ci	Complete job	2026-10-18T07:45:33.5592535Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

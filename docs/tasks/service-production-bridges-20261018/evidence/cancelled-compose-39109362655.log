@@ -1,0 +1,401 @@
+compile	Set up job	﻿2026-10-18T07:53:35.5086817Z Current runner version: '2.337.0'
+compile	Set up job	2026-10-18T07:53:35.5107321Z ##[group]Runner Image Provisioner
+compile	Set up job	2026-10-18T07:53:35.5108490Z Hosted Compute Agent
+compile	Set up job	2026-10-18T07:53:35.5108982Z Version: 20261012.601
+compile	Set up job	2026-10-18T07:53:35.5109478Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+compile	Set up job	2026-10-18T07:53:35.5110162Z Build Date: 2026-10-12T17:48:21Z
+compile	Set up job	2026-10-18T07:53:35.5110712Z Worker ID: {1a018242-852d-49fa-b7e2-8d3b4165ca6e}
+compile	Set up job	2026-10-18T07:53:35.5111305Z Region: westus3
+compile	Set up job	2026-10-18T07:53:35.5111804Z Cloud: Azure
+compile	Set up job	2026-10-18T07:53:35.5112263Z ##[endgroup]
+compile	Set up job	2026-10-18T07:53:35.5113517Z ##[group]Operating System
+compile	Set up job	2026-10-18T07:53:35.5114037Z Ubuntu
+compile	Set up job	2026-10-18T07:53:35.5114515Z 24.04.5
+compile	Set up job	2026-10-18T07:53:35.5114959Z LTS
+compile	Set up job	2026-10-18T07:53:35.5115408Z ##[endgroup]
+compile	Set up job	2026-10-18T07:53:35.5115901Z ##[group]Runner Image
+compile	Set up job	2026-10-18T07:53:35.5116397Z Image: ubuntu-24.04
+compile	Set up job	2026-10-18T07:53:35.5116853Z Version: 20261012.334.1
+compile	Set up job	2026-10-18T07:53:35.5118023Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+compile	Set up job	2026-10-18T07:53:35.5119731Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+compile	Set up job	2026-10-18T07:53:35.5120515Z ##[endgroup]
+compile	Set up job	2026-10-18T07:53:35.5121445Z ##[group]GITHUB_TOKEN Permissions
+compile	Set up job	2026-10-18T07:53:35.5123175Z Contents: read
+compile	Set up job	2026-10-18T07:53:35.5123712Z Metadata: read
+compile	Set up job	2026-10-18T07:53:35.5124189Z ##[endgroup]
+compile	Set up job	2026-10-18T07:53:35.5125774Z Secret source: Actions
+compile	Set up job	2026-10-18T07:53:35.5126624Z Cache mode: write
+compile	Set up job	2026-10-18T07:53:35.5127402Z Prepare workflow directory
+compile	Set up job	2026-10-18T07:53:35.5431699Z Prepare all required actions
+compile	Set up job	2026-10-18T07:53:35.5469904Z Getting action download info
+compile	Set up job	2026-10-18T07:53:35.8211070Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+compile	Set up job	2026-10-18T07:53:35.9089927Z Download action repository 'actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00' (SHA:c5195efecf7bdfc987ee8bae7a71cb8b11521c00)
+compile	Set up job	2026-10-18T07:53:36.8848617Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+compile	Set up job	2026-10-18T07:53:37.1482171Z Complete job name: compile
+compile	Checkout exact source	﻿2026-10-18T07:53:37.2263833Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+compile	Checkout exact source	2026-10-18T07:53:37.2265894Z with:
+compile	Checkout exact source	2026-10-18T07:53:37.2266701Z   ref: f5b058ebaa44e786e6d24df964937968e92e8840
+compile	Checkout exact source	2026-10-18T07:53:37.2267903Z   persist-credentials: false
+compile	Checkout exact source	2026-10-18T07:53:37.2268804Z   repository: mightyoung/Muyon
+compile	Checkout exact source	2026-10-18T07:53:37.2275927Z   token: ***
+compile	Checkout exact source	2026-10-18T07:53:37.2276636Z   ssh-strict: true
+compile	Checkout exact source	2026-10-18T07:53:37.2277364Z   ssh-user: git
+compile	Checkout exact source	2026-10-18T07:53:37.2278211Z   clean: true
+compile	Checkout exact source	2026-10-18T07:53:37.2278951Z   sparse-checkout-cone-mode: true
+compile	Checkout exact source	2026-10-18T07:53:37.2279821Z   fetch-depth: 1
+compile	Checkout exact source	2026-10-18T07:53:37.2280556Z   fetch-tags: false
+compile	Checkout exact source	2026-10-18T07:53:37.2281299Z   show-progress: true
+compile	Checkout exact source	2026-10-18T07:53:37.2282053Z   lfs: false
+compile	Checkout exact source	2026-10-18T07:53:37.2282753Z   submodules: false
+compile	Checkout exact source	2026-10-18T07:53:37.2283510Z   set-safe-directory: true
+compile	Checkout exact source	2026-10-18T07:53:37.2284596Z env:
+compile	Checkout exact source	2026-10-18T07:53:37.2285446Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Checkout exact source	2026-10-18T07:53:37.2286524Z   GRADLE_VERSION: 8.13
+compile	Checkout exact source	2026-10-18T07:53:37.2287820Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Checkout exact source	2026-10-18T07:53:37.2289102Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:53:37.3139809Z Syncing repository: mightyoung/Muyon
+compile	Checkout exact source	2026-10-18T07:53:37.3142788Z ##[group]Getting Git version info
+compile	Checkout exact source	2026-10-18T07:53:37.3144337Z Working directory is '/home/runner/work/Muyon/Muyon'
+compile	Checkout exact source	2026-10-18T07:53:37.3146683Z [command]/usr/bin/git version
+compile	Checkout exact source	2026-10-18T07:53:37.3198749Z git version 2.55.0
+compile	Checkout exact source	2026-10-18T07:53:37.3217127Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:53:37.3240725Z Temporarily overriding HOME='/home/runner/work/_temp/4d9198c7-ae57-4e09-933d-c7c775c5a398' before making global git config changes
+compile	Checkout exact source	2026-10-18T07:53:37.3244390Z Adding repository directory to the temporary git global config as a safe directory
+compile	Checkout exact source	2026-10-18T07:53:37.3247279Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+compile	Checkout exact source	2026-10-18T07:53:37.3288095Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+compile	Checkout exact source	2026-10-18T07:53:37.3293857Z ##[group]Initializing the repository
+compile	Checkout exact source	2026-10-18T07:53:37.3296581Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+compile	Checkout exact source	2026-10-18T07:53:37.3382050Z hint: Using 'master' as the name for the initial branch. This default branch name
+compile	Checkout exact source	2026-10-18T07:53:37.3384446Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+compile	Checkout exact source	2026-10-18T07:53:37.3386857Z hint: to use in all of your new repositories, which will suppress this warning,
+compile	Checkout exact source	2026-10-18T07:53:37.3388825Z hint: call:
+compile	Checkout exact source	2026-10-18T07:53:37.3389788Z hint:
+compile	Checkout exact source	2026-10-18T07:53:37.3391000Z hint: 	git config --global init.defaultBranch <name>
+compile	Checkout exact source	2026-10-18T07:53:37.3392442Z hint:
+compile	Checkout exact source	2026-10-18T07:53:37.3393840Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+compile	Checkout exact source	2026-10-18T07:53:37.3396124Z hint: 'development'. The just-created branch can be renamed via this command:
+compile	Checkout exact source	2026-10-18T07:53:37.3398124Z hint:
+compile	Checkout exact source	2026-10-18T07:53:37.3399094Z hint: 	git branch -m <name>
+compile	Checkout exact source	2026-10-18T07:53:37.3400216Z hint:
+compile	Checkout exact source	2026-10-18T07:53:37.3401724Z hint: Disable this message with "git config set advice.defaultBranchName false"
+compile	Checkout exact source	2026-10-18T07:53:37.3408601Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+compile	Checkout exact source	2026-10-18T07:53:37.3418090Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+compile	Checkout exact source	2026-10-18T07:53:37.3465976Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:53:37.3467721Z ##[group]Disabling automatic garbage collection
+compile	Checkout exact source	2026-10-18T07:53:37.3474336Z [command]/usr/bin/git config --local gc.auto 0
+compile	Checkout exact source	2026-10-18T07:53:37.3495803Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:53:37.3496980Z ##[group]Setting up auth
+compile	Checkout exact source	2026-10-18T07:53:37.3501766Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile	Checkout exact source	2026-10-18T07:53:37.3529428Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile	Checkout exact source	2026-10-18T07:53:37.3851701Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile	Checkout exact source	2026-10-18T07:53:37.3885731Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile	Checkout exact source	2026-10-18T07:53:37.4080450Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+compile	Checkout exact source	2026-10-18T07:53:37.4116746Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:53:37.4118842Z ##[group]Fetching the repository
+compile	Checkout exact source	2026-10-18T07:53:37.4125632Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin f5b058ebaa44e786e6d24df964937968e92e8840
+compile	Checkout exact source	2026-10-18T07:53:40.7701439Z From https://github.com/mightyoung/Muyon
+compile	Checkout exact source	2026-10-18T07:53:40.7703412Z  * branch            f5b058ebaa44e786e6d24df964937968e92e8840 -> FETCH_HEAD
+compile	Checkout exact source	2026-10-18T07:53:40.7705955Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:53:40.7706787Z ##[group]Determining the checkout info
+compile	Checkout exact source	2026-10-18T07:53:40.7707761Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:53:40.7712375Z [command]/usr/bin/git sparse-checkout disable
+compile	Checkout exact source	2026-10-18T07:53:40.7911905Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+compile	Checkout exact source	2026-10-18T07:53:40.8117991Z ##[group]Checking out the ref
+compile	Checkout exact source	2026-10-18T07:53:40.8122044Z [command]/usr/bin/git checkout --progress --force f5b058ebaa44e786e6d24df964937968e92e8840
+compile	Checkout exact source	2026-10-18T07:53:41.2897043Z Note: switching to 'f5b058ebaa44e786e6d24df964937968e92e8840'.
+compile	Checkout exact source	2026-10-18T07:53:41.2898224Z 
+compile	Checkout exact source	2026-10-18T07:53:41.2898837Z You are in 'detached HEAD' state. You can look around, make experimental
+compile	Checkout exact source	2026-10-18T07:53:41.2899694Z changes and commit them, and you can discard any commits you make in this
+compile	Checkout exact source	2026-10-18T07:53:41.2900226Z state without impacting any branches by switching back to a branch.
+compile	Checkout exact source	2026-10-18T07:53:41.2900543Z 
+compile	Checkout exact source	2026-10-18T07:53:41.2900793Z If you want to create a new branch to retain commits you create, you may
+compile	Checkout exact source	2026-10-18T07:53:41.2901762Z do so (now or later) by using -c with the switch command. Example:
+compile	Checkout exact source	2026-10-18T07:53:41.2902070Z 
+compile	Checkout exact source	2026-10-18T07:53:41.2902191Z   git switch -c <new-branch-name>
+compile	Checkout exact source	2026-10-18T07:53:41.2902356Z 
+compile	Checkout exact source	2026-10-18T07:53:41.2902465Z Or undo this operation with:
+compile	Checkout exact source	2026-10-18T07:53:41.2902601Z 
+compile	Checkout exact source	2026-10-18T07:53:41.2902674Z   git switch -
+compile	Checkout exact source	2026-10-18T07:53:41.2902842Z 
+compile	Checkout exact source	2026-10-18T07:53:41.2903010Z Turn off this advice by setting config variable advice.detachedHead to false
+compile	Checkout exact source	2026-10-18T07:53:41.2903260Z 
+compile	Checkout exact source	2026-10-18T07:53:41.2903486Z HEAD is now at f5b058e build(android): regenerate and verify trusted Service owner Kotlin bindings
+compile	Checkout exact source	2026-10-18T07:53:41.2999063Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:53:41.3040624Z [command]/usr/bin/git log -1 --format=%H
+compile	Checkout exact source	2026-10-18T07:53:41.3065480Z f5b058ebaa44e786e6d24df964937968e92e8840
+compile	Checkout exact source	2026-10-18T07:53:41.3072345Z ##[group]Removing auth
+compile	Checkout exact source	2026-10-18T07:53:41.3075204Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile	Checkout exact source	2026-10-18T07:53:41.3103070Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile	Checkout exact source	2026-10-18T07:53:41.3293878Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile	Checkout exact source	2026-10-18T07:53:41.3319188Z http.https://github.com/.extraheader
+compile	Checkout exact source	2026-10-18T07:53:41.3324502Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+compile	Checkout exact source	2026-10-18T07:53:41.3448808Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile	Checkout exact source	2026-10-18T07:53:41.3636473Z ##[endgroup]
+compile	Initialize isolated temporary directories	﻿2026-10-18T07:53:41.3913687Z ##[group]Run mkdir -p "$RUNNER_TEMP/muyon-compose-evidence" "$RUNNER_TEMP/muyon-compose-android-user"
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.3914347Z [36;1mmkdir -p "$RUNNER_TEMP/muyon-compose-evidence" "$RUNNER_TEMP/muyon-compose-android-user"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.3914739Z [36;1m{[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.3915001Z [36;1m  printf 'GRADLE_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-gradle-cache"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.3915403Z [36;1m  printf 'ANDROID_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-android-user"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.3915812Z [36;1m  printf 'LOG_DIRECTORY=%s\n' "$RUNNER_TEMP/muyon-compose-evidence"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.3916114Z [36;1m} >> "$GITHUB_ENV"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.5004264Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.5004626Z env:
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.5004871Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.5005144Z   GRADLE_VERSION: 8.13
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.5005426Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Initialize isolated temporary directories	2026-10-18T07:53:41.5005808Z ##[endgroup]
+compile	JDK 17	﻿2026-10-18T07:53:41.6107811Z ##[group]Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+compile	JDK 17	2026-10-18T07:53:41.6108195Z with:
+compile	JDK 17	2026-10-18T07:53:41.6108368Z   distribution: temurin
+compile	JDK 17	2026-10-18T07:53:41.6108556Z   java-version: 17
+compile	JDK 17	2026-10-18T07:53:41.6108745Z   java-package: jdk
+compile	JDK 17	2026-10-18T07:53:41.6108925Z   check-latest: false
+compile	JDK 17	2026-10-18T07:53:41.6109102Z   server-id: github
+compile	JDK 17	2026-10-18T07:53:41.6109281Z   server-username: GITHUB_ACTOR
+compile	JDK 17	2026-10-18T07:53:41.6109490Z   server-password: GITHUB_TOKEN
+compile	JDK 17	2026-10-18T07:53:41.6109686Z   overwrite-settings: true
+compile	JDK 17	2026-10-18T07:53:41.6109877Z   job-status: success
+compile	JDK 17	2026-10-18T07:53:41.6111862Z   token: ***
+compile	JDK 17	2026-10-18T07:53:41.6112031Z env:
+compile	JDK 17	2026-10-18T07:53:41.6112245Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	JDK 17	2026-10-18T07:53:41.6112510Z   GRADLE_VERSION: 8.13
+compile	JDK 17	2026-10-18T07:53:41.6112792Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	JDK 17	2026-10-18T07:53:41.6113181Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	JDK 17	2026-10-18T07:53:41.6113586Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	JDK 17	2026-10-18T07:53:41.6114103Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	JDK 17	2026-10-18T07:53:41.6114373Z ##[endgroup]
+compile	JDK 17	2026-10-18T07:53:41.7352903Z ##[group]Installed distributions
+compile	JDK 17	2026-10-18T07:53:41.7500784Z Resolved Java 17.0.20+1 from tool-cache
+compile	JDK 17	2026-10-18T07:53:41.7501249Z Setting Java 17.0.20+1 as the default
+compile	JDK 17	2026-10-18T07:53:41.7508514Z (node:2109) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compile	JDK 17	2026-10-18T07:53:41.7509279Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compile	JDK 17	2026-10-18T07:53:41.7511021Z Creating toolchains.xml for JDK version 17 from temurin
+compile	JDK 17	2026-10-18T07:53:41.7564893Z Writing to /home/runner/.m2/toolchains.xml
+compile	JDK 17	2026-10-18T07:53:41.7565289Z 
+compile	JDK 17	2026-10-18T07:53:41.7565492Z Java configuration:
+compile	JDK 17	2026-10-18T07:53:41.7565821Z   Distribution: temurin
+compile	JDK 17	2026-10-18T07:53:41.7566130Z   Version: 17.0.20+1
+compile	JDK 17	2026-10-18T07:53:41.7566604Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	JDK 17	2026-10-18T07:53:41.7567015Z 
+compile	JDK 17	2026-10-18T07:53:41.7567389Z ##[endgroup]
+compile	JDK 17	2026-10-18T07:53:41.7588932Z Creating settings.xml with server-id: github
+compile	JDK 17	2026-10-18T07:53:41.7589387Z Writing to /home/runner/.m2/settings.xml
+compile	Record source and declared pins	﻿2026-10-18T07:53:41.8046386Z ##[group]Run mkdir -p "$LOG_DIRECTORY" "$ANDROID_USER_HOME"
+compile	Record source and declared pins	2026-10-18T07:53:41.8046987Z [36;1mmkdir -p "$LOG_DIRECTORY" "$ANDROID_USER_HOME"[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8047337Z [36;1mgit rev-parse HEAD > "$LOG_DIRECTORY/source-sha.txt"[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8047867Z [36;1mgit ls-files -z "$LAB_DIRECTORY" .github/workflows/android-compose-lab.yml |[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8048308Z [36;1m  sort -z | xargs -0 sha256sum > "$LOG_DIRECTORY/source-files.sha256"[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8048621Z [36;1m{[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8048805Z [36;1m  java -version 2>&1[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8049098Z [36;1m  printf '%s\n' 'Gradle=8.13; AGP=8.11.1; Kotlin/ComposeCompiler=2.2.20'[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8049477Z [36;1m  printf '%s\n' 'ComposeBOM=2025.09.01; compileSdk=36; buildTools=35.0.0'[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8049889Z [36;1m  printf '%s\n' 'Android installation/runtime/emulator/rendering=NOT_RUN'[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8050217Z [36;1m} > "$LOG_DIRECTORY/tool-pins.txt"[0m
+compile	Record source and declared pins	2026-10-18T07:53:41.8111958Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Record source and declared pins	2026-10-18T07:53:41.8112311Z env:
+compile	Record source and declared pins	2026-10-18T07:53:41.8112540Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Record source and declared pins	2026-10-18T07:53:41.8112810Z   GRADLE_VERSION: 8.13
+compile	Record source and declared pins	2026-10-18T07:53:41.8113093Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Record source and declared pins	2026-10-18T07:53:41.8113523Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Record source and declared pins	2026-10-18T07:53:41.8113895Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Record source and declared pins	2026-10-18T07:53:41.8114242Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Record source and declared pins	2026-10-18T07:53:41.8114590Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Record source and declared pins	2026-10-18T07:53:41.8114970Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Record source and declared pins	2026-10-18T07:53:41.8115285Z ##[endgroup]
+compile	Fetch and verify official Gradle distribution	﻿2026-10-18T07:53:42.0149892Z ##[group]Run distribution="$RUNNER_TEMP/gradle-$GRADLE_VERSION-bin.zip"
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0150367Z [36;1mdistribution="$RUNNER_TEMP/gradle-$GRADLE_VERSION-bin.zip"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0150760Z [36;1mcurl --fail --location --retry 3 --output "$distribution" \[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0151186Z [36;1m  "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0151592Z [36;1mprintf '%s  %s\n' "$GRADLE_SHA256" "$distribution" |[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0151926Z [36;1m  sha256sum --check | tee "$LOG_DIRECTORY/gradle-checksum.txt"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0152290Z [36;1munzip -q "$distribution" -d "$RUNNER_TEMP/muyon-compose-tools"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0152693Z [36;1m"$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" --version \[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0153060Z [36;1m  > "$LOG_DIRECTORY/gradle-version.txt"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0215615Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0215917Z env:
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0216186Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0216453Z   GRADLE_VERSION: 8.13
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0216733Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0217121Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0217602Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0217977Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0218335Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0218705Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0219004Z ##[endgroup]
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0425635Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0426362Z                                  Dload  Upload   Total   Spent    Left  Speed
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0426936Z 
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0998020Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.0998644Z 100   169  100   169    0     0   2949      0 --:--:-- --:--:-- --:--:--  2964
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.2563221Z 
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.2563697Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.6623705Z 
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.6624362Z 100  130M  100  130M    0     0   210M      0 --:--:-- --:--:-- --:--:--  210M
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:53:42.7563793Z /home/runner/work/_temp/gradle-8.13-bin.zip: OK
+compile	Ensure official SDK build packages	﻿2026-10-18T07:53:44.1640895Z ##[group]Run sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1641279Z [36;1msdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1641549Z [36;1mtest -n "$sdk_root"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1641812Z [36;1mmanager="$sdk_root/cmdline-tools/latest/bin/sdkmanager"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1642110Z [36;1mtest -x "$manager"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1642375Z [36;1m"$manager" --version > "$LOG_DIRECTORY/sdkmanager-version.txt"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1642693Z [36;1m"$manager" --sdk_root="$sdk_root" --install \[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1642976Z [36;1m  'platforms;android-36' 'build-tools;35.0.0' 2>&1 |[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1643253Z [36;1m  tee "$LOG_DIRECTORY/sdk-packages.txt"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1643545Z [36;1mtest -f "$sdk_root/platforms/android-36/android.jar"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1643823Z [36;1mtest -x "$sdk_root/build-tools/35.0.0/aapt2"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1644109Z [36;1mprintf 'ANDROID_HOME=%s\n' "$sdk_root" >> "$GITHUB_ENV"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1699788Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1700061Z env:
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1700275Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1700531Z   GRADLE_VERSION: 8.13
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1700810Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1701208Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1701561Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1701905Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1702250Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1702622Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Ensure official SDK build packages	2026-10-18T07:53:44.1702917Z ##[endgroup]
+compile	Ensure official SDK build packages	2026-10-18T07:53:45.6609180Z Loading package information...                                                  
+compile	Ensure official SDK build packages	2026-10-18T07:53:45.7310240Z Loading local repository...                                                     
+compile	Ensure official SDK build packages	2026-10-18T07:53:45.7313045Z [                                       ] 3% Loading local repository...        
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.0890865Z [                                       ] 3% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.4303162Z [=                                      ] 3% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.4759717Z [=                                      ] 4% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.4928719Z [=                                      ] 5% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.5257169Z [==                                     ] 5% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.5668948Z [==                                     ] 6% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.6298884Z [==                                     ] 7% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.6318374Z [==                                     ] 7% Computing updates...               
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.6401790Z [===                                    ] 8% Computing updates...               
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.6456665Z [===                                    ] 10% Computing updates...              
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.6457827Z [=======================================] 100% Computing updates...             
+compile	Ensure official SDK build packages	2026-10-18T07:53:46.6458397Z 
+compile	Required JVM checks and Android source compilation	﻿2026-10-18T07:53:46.6675185Z ##[group]Run set +e
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6675415Z [36;1mset +e[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6675699Z [36;1m"$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6676112Z [36;1m  --no-daemon --stacktrace --console=plain -p "$LAB_DIRECTORY" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6676512Z [36;1m  :state:check :app:assembleDebug :app:assembleDebugAndroidTest \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6676875Z [36;1m  :app:compileDebugUnitTestKotlin :app:lintDebug 2>&1 |[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6677173Z [36;1m  tee "$LOG_DIRECTORY/required-build.log"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6677416Z [36;1mgradle_exit=${PIPESTATUS[0]}[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6677802Z [36;1mset -e[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6677980Z [36;1mrequired_exit=$gradle_exit[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6678203Z [36;1mif [[ $gradle_exit -eq 0 ]]; then[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6678568Z [36;1m  for marker in '16/16 pure JVM state checks passed' '22/22 local UI state checks passed'; do[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6678996Z [36;1m    if ! grep -Fq "$marker" "$LOG_DIRECTORY/required-build.log"; then[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6679311Z [36;1m      required_exit=1[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6679502Z [36;1m    fi[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6679660Z [36;1m  done[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6679815Z [36;1mfi[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6680082Z [36;1mprintf 'gradle_exit=%s\nrequired_exit=%s\n' "$gradle_exit" "$required_exit" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6680414Z [36;1m  > "$LOG_DIRECTORY/required-exit.txt"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6680646Z [36;1mexit "$required_exit"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6736369Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6736653Z env:
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6736876Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6737128Z   GRADLE_VERSION: 8.13
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6737412Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6737998Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6738452Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6738802Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6739143Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6739506Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6739827Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:46.6740036Z ##[endgroup]
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:47.2351038Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:53:48.0310798Z Daemon will be stopped at the end of the build 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:27.7358017Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:27.7388118Z > Configure project :app
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:27.7439572Z w: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/build.gradle.kts:82:61: Unnecessary non-null assertion (!!) on a non-null receiver of type String
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:30.5303619Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:30.5328456Z > Task :state:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:34.7310545Z > Task :state:processResources NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:34.7326023Z > Task :state:processTestResources NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:34.7338108Z > Task :app:preBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:34.8312776Z > Task :app:preDebugBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:34.8334647Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:43.8303923Z > Task :state:compileKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:45.4329263Z > Task :state:compileJava NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:45.4358065Z > Task :state:classes UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:45.5316309Z > Task :state:jar
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:45.6378554Z > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:45.6408179Z > Task :app:generateDebugBuildConfig
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:46.4308372Z > Task :app:compileDebugAidl
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:46.4388426Z > Task :app:generateDebugResValues
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:46.4476933Z > Task :app:checkDebugAarMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:46.5321359Z > Task :app:mapDebugSourceSetPaths
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:46.6305759Z > Task :app:generateDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:54:47.9052627Z ##[error]The operation was canceled.
+compile	Record unexecuted boundaries even after setup failure	﻿2026-10-18T07:54:47.9734867Z ##[group]Run mkdir -p "$LOG_DIRECTORY"
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9735314Z [36;1mmkdir -p "$LOG_DIRECTORY"[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9735745Z [36;1mif [[ ! -f "$LOG_DIRECTORY/required-exit.txt" ]]; then[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9736408Z [36;1m  printf 'gradle_exit=NOT_RUN\nrequired_exit=NOT_RUN\n' > "$LOG_DIRECTORY/required-exit.txt"[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9736996Z [36;1mfi[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9737451Z [36;1mprintf '%s\n' 'Android installation/runtime=NOT_RUN' 'Compose rendering=NOT_RUN' \[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9738347Z [36;1m  'Rust integration runtime=NOT_RUN' 'WorkBuddy pixel fidelity=UNVERIFIED' \[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9738918Z [36;1m  > "$LOG_DIRECTORY/unexecuted-boundaries.txt"[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9905571Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9905981Z env:
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9906270Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9906639Z   GRADLE_VERSION: 8.13
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9907024Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9907743Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9908236Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9908715Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9909195Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9909723Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9910167Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:54:47.9910460Z ##[endgroup]
+compile	Upload compilation evidence only	﻿2026-10-18T07:54:48.1639074Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1639648Z with:
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1639990Z   name: android-compose-lab-evidence-39109362655-1
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1640477Z   path: /home/runner/work/_temp/muyon-compose-evidence
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1640885Z   if-no-files-found: warn
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1641184Z   retention-days: 7
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1641759Z   compression-level: 6
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1642046Z   overwrite: false
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1642320Z   include-hidden-files: false
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1642612Z env:
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1642924Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1643330Z   GRADLE_VERSION: 8.13
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1643765Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1644686Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1645281Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1645893Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1646461Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1647081Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1647790Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	Upload compilation evidence only	2026-10-18T07:54:48.1648129Z ##[endgroup]
+compile	Upload compilation evidence only	2026-10-18T07:54:48.6249352Z (node:2534) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compile	Upload compilation evidence only	2026-10-18T07:54:48.6258503Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compile	Upload compilation evidence only	2026-10-18T07:54:48.7018102Z With the provided path, there will be 10 files uploaded
+compile	Upload compilation evidence only	2026-10-18T07:54:48.7026813Z Artifact name is valid!
+compile	Upload compilation evidence only	2026-10-18T07:54:48.7027365Z Root directory input is valid!
+compile	Upload compilation evidence only	2026-10-18T07:54:49.0693654Z Beginning upload of artifact content to blob storage
+compile	Upload compilation evidence only	2026-10-18T07:54:49.1665141Z (node:2534) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+compile	Upload compilation evidence only	2026-10-18T07:54:49.4048566Z Uploaded bytes 7033
+compile	Upload compilation evidence only	2026-10-18T07:54:49.4748656Z Finished uploading artifact content to blob storage!
+compile	Upload compilation evidence only	2026-10-18T07:54:49.4749425Z SHA256 digest of uploaded artifact zip is 82ecfed6db68ab6f6be9dfc4e65776af9b9e1909e8b6281591cc82281a8bc153
+compile	Upload compilation evidence only	2026-10-18T07:54:49.4850325Z Finalizing artifact upload
+compile	Upload compilation evidence only	2026-10-18T07:54:49.7228537Z Artifact android-compose-lab-evidence-39109362655-1.zip successfully finalized. Artifact ID 12129806741
+compile	Upload compilation evidence only	2026-10-18T07:54:49.7288417Z Artifact android-compose-lab-evidence-39109362655-1 has been successfully uploaded! Final size is 7033 bytes. Artifact ID is 12129806741
+compile	Upload compilation evidence only	2026-10-18T07:54:49.7331890Z Artifact download URL: https://github.com/mightyoung/Muyon/actions/runs/39109362655/artifacts/12129806741
+compile	Post JDK 17	﻿2026-10-18T07:54:49.7785814Z Post job cleanup.
+compile	Post JDK 17	2026-10-18T07:54:50.2298736Z (node:2550) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compile	Post JDK 17	2026-10-18T07:54:50.2392413Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compile	Post Checkout exact source	﻿2026-10-18T07:54:50.3094264Z Post job cleanup.
+compile	Post Checkout exact source	2026-10-18T07:54:50.7848815Z [command]/usr/bin/git version
+compile	Post Checkout exact source	2026-10-18T07:54:50.8498997Z git version 2.55.0
+compile	Post Checkout exact source	2026-10-18T07:54:50.9644619Z Temporarily overriding HOME='/home/runner/work/_temp/126c1887-2d95-476c-9c7c-9ab6402cf9d8' before making global git config changes
+compile	Post Checkout exact source	2026-10-18T07:54:50.9698381Z Adding repository directory to the temporary git global config as a safe directory
+compile	Post Checkout exact source	2026-10-18T07:54:50.9746976Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+compile	Post Checkout exact source	2026-10-18T07:54:50.9898398Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile	Post Checkout exact source	2026-10-18T07:54:50.9958941Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile	Post Checkout exact source	2026-10-18T07:54:50.9980489Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile	Post Checkout exact source	2026-10-18T07:54:50.9982383Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile	Complete job	﻿2026-10-18T07:54:51.0227219Z Cleaning up orphan processes
+compile	Complete job	2026-10-18T07:54:51.0904669Z Terminate orphan process: pid (2308) (java)
+compile	Complete job	2026-10-18T07:54:51.0963462Z Terminate orphan process: pid (2309) (tee)
+compile	Complete job	2026-10-18T07:54:51.1049835Z Terminate orphan process: pid (2347) (java)
+compile	Complete job	2026-10-18T07:54:51.1100978Z Terminate orphan process: pid (2475) (java)
+compile	Complete job	2026-10-18T07:54:51.1182985Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

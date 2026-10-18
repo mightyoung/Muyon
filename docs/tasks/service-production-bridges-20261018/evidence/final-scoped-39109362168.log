@@ -1,0 +1,864 @@
+scoped	Set up job	﻿2026-10-18T07:53:34.1570546Z Current runner version: '2.337.0'
+scoped	Set up job	2026-10-18T07:53:34.1598808Z ##[group]Runner Image Provisioner
+scoped	Set up job	2026-10-18T07:53:34.1599677Z Hosted Compute Agent
+scoped	Set up job	2026-10-18T07:53:34.1600383Z Version: 20261012.601
+scoped	Set up job	2026-10-18T07:53:34.1601127Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+scoped	Set up job	2026-10-18T07:53:34.1601925Z Build Date: 2026-10-12T17:48:21Z
+scoped	Set up job	2026-10-18T07:53:34.1602855Z Worker ID: {a18cc7ae-7a88-4c05-8ff3-b2674e2c69cc}
+scoped	Set up job	2026-10-18T07:53:34.1603591Z Region: northcentralus
+scoped	Set up job	2026-10-18T07:53:34.1604252Z Cloud: Azure
+scoped	Set up job	2026-10-18T07:53:34.1604788Z ##[endgroup]
+scoped	Set up job	2026-10-18T07:53:34.1606437Z ##[group]Operating System
+scoped	Set up job	2026-10-18T07:53:34.1607119Z Ubuntu
+scoped	Set up job	2026-10-18T07:53:34.1607641Z 24.04.5
+scoped	Set up job	2026-10-18T07:53:34.1608329Z LTS
+scoped	Set up job	2026-10-18T07:53:34.1608843Z ##[endgroup]
+scoped	Set up job	2026-10-18T07:53:34.1609379Z ##[group]Runner Image
+scoped	Set up job	2026-10-18T07:53:34.1610034Z Image: ubuntu-24.04
+scoped	Set up job	2026-10-18T07:53:34.1610596Z Version: 20261012.334.1
+scoped	Set up job	2026-10-18T07:53:34.1611690Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+scoped	Set up job	2026-10-18T07:53:34.1614080Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+scoped	Set up job	2026-10-18T07:53:34.1615222Z ##[endgroup]
+scoped	Set up job	2026-10-18T07:53:34.1616347Z ##[group]GITHUB_TOKEN Permissions
+scoped	Set up job	2026-10-18T07:53:34.1618826Z Contents: read
+scoped	Set up job	2026-10-18T07:53:34.1619460Z Metadata: read
+scoped	Set up job	2026-10-18T07:53:34.1620120Z ##[endgroup]
+scoped	Set up job	2026-10-18T07:53:34.1622274Z Secret source: Actions
+scoped	Set up job	2026-10-18T07:53:34.1623601Z Cache mode: write
+scoped	Set up job	2026-10-18T07:53:34.1624331Z Prepare workflow directory
+scoped	Set up job	2026-10-18T07:53:34.1976587Z Prepare all required actions
+scoped	Set up job	2026-10-18T07:53:34.2026756Z Getting action download info
+scoped	Set up job	2026-10-18T07:53:34.4588506Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+scoped	Set up job	2026-10-18T07:53:34.5766122Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+scoped	Set up job	2026-10-18T07:53:34.7953310Z Complete job name: scoped
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-18T07:53:34.8748122Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8749569Z with:
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8750051Z   persist-credentials: false
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8750584Z   repository: mightyoung/Muyon
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8755089Z   token: ***
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8755556Z   ssh-strict: true
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8756012Z   ssh-user: git
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8756437Z   clean: true
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8756878Z   sparse-checkout-cone-mode: true
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8757401Z   fetch-depth: 1
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8757833Z   fetch-tags: false
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8758287Z   show-progress: true
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8758743Z   lfs: false
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8759161Z   submodules: false
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8759610Z   set-safe-directory: true
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.8760496Z ##[endgroup]
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9782445Z Syncing repository: mightyoung/Muyon
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9784950Z ##[group]Getting Git version info
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9785680Z Working directory is '/home/runner/work/Muyon/Muyon'
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9786764Z [command]/usr/bin/git version
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9893701Z git version 2.55.0
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9929939Z ##[endgroup]
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9940712Z Temporarily overriding HOME='/home/runner/work/_temp/c9746f47-9446-436a-b880-e45c971e3507' before making global git config changes
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9943586Z Adding repository directory to the temporary git global config as a safe directory
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9947596Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0003713Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0008570Z ##[group]Initializing the repository
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0015254Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0127812Z hint: Using 'master' as the name for the initial branch. This default branch name
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0129549Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0131560Z hint: to use in all of your new repositories, which will suppress this warning,
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0133052Z hint: call:
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0133694Z hint:
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0134509Z hint: 	git config --global init.defaultBranch <name>
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0135608Z hint:
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0136614Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0138169Z hint: 'development'. The just-created branch can be renamed via this command:
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0139369Z hint:
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0140063Z hint: 	git branch -m <name>
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0140917Z hint:
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0141969Z hint: Disable this message with "git config set advice.defaultBranchName false"
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0143776Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0148465Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0208177Z ##[endgroup]
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0209699Z ##[group]Disabling automatic garbage collection
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0212938Z [command]/usr/bin/git config --local gc.auto 0
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0250447Z ##[endgroup]
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0252116Z ##[group]Setting up auth
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0260023Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0302019Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0710322Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0748467Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0982874Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1048140Z ##[endgroup]
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1049590Z ##[group]Fetching the repository
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1059377Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f5b058ebaa44e786e6d24df964937968e92e8840:refs/remotes/origin/task/service-production-bridges-20261018
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5616049Z From https://github.com/mightyoung/Muyon
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5618853Z  * [new ref]         f5b058ebaa44e786e6d24df964937968e92e8840 -> origin/task/service-production-bridges-20261018
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5625371Z ##[endgroup]
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5627700Z ##[group]Determining the checkout info
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5630238Z ##[endgroup]
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5631766Z [command]/usr/bin/git sparse-checkout disable
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5693356Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5733411Z ##[group]Checking out the ref
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:37.5738489Z [command]/usr/bin/git checkout --progress --force -B task/service-production-bridges-20261018 refs/remotes/origin/task/service-production-bridges-20261018
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.0821242Z Switched to a new branch 'task/service-production-bridges-20261018'
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.0844146Z branch 'task/service-production-bridges-20261018' set up to track 'origin/task/service-production-bridges-20261018'.
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.0856751Z ##[endgroup]
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.0918614Z [command]/usr/bin/git log -1 --format=%H
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.0950864Z f5b058ebaa44e786e6d24df964937968e92e8840
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.0961121Z ##[group]Removing auth
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.0965443Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.1003154Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.1240639Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.1274774Z http.https://github.com/.extraheader
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.1283807Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.1322325Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+scoped	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.1557589Z ##[endgroup]
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	﻿2026-10-18T07:53:38.1767542Z ##[group]Run set -euo pipefail
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1768067Z [36;1mset -euo pipefail[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1768425Z [36;1mmkdir -p "$RUNNER_TEMP/bridge-evidence"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1768923Z [36;1mgit rev-parse HEAD > "$RUNNER_TEMP/bridge-evidence/source-sha.txt"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1769458Z [36;1mrustup toolchain install 1.99.0 --profile minimal[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1769856Z [36;1mrustup default 1.99.0[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1770227Z [36;1mexport CARGO_TARGET_DIR="$RUNNER_TEMP/bridge-target"[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1770650Z [36;1mresult=0[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1771322Z [36;1mfor target in supplier_scope_bridge service_provider service_host_controller supplier_store supplier_lab_source supplier_business_controller; do[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1772897Z [36;1m  cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test "$target" -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/$target.log" || result=1[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1773801Z [36;1mdone[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1774805Z [36;1mcargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --lib supplier_business::terminal_regressions -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/terminal-regressions.log" || result=1[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1775856Z [36;1mtest "$result" = 0[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.1776155Z [36;1mgit diff --exit-code[0m
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.2076166Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.2076790Z ##[endgroup]
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.2679988Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.5448688Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:38.5449735Z info: downloading 3 components
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6401447Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6471466Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6471969Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6581185Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6586959Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6587336Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6654303Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6655079Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.6974539Z     Updating crates.io index
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:46.7402929Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1388688Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1389700Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1390334Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1390914Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1391668Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1392169Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1393044Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1394000Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1394847Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1396012Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1396512Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1396859Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1397171Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1397987Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1398577Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1399191Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1399845Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1400265Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1400715Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1401432Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1402366Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1403407Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.1403654Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.3066712Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:47.6135604Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:48.2797899Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.2780249Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 2.60s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.2791515Z      Running tests/supplier_scope_bridge.rs (/home/runner/work/_temp/bridge-target/debug/deps/supplier_scope_bridge-d024d091012016ed)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.2805695Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.2805891Z running 7 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3254952Z test each_missing_or_denied_scope_proof_fails_closed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3264327Z test missing_current_resolver_never_falls_back_to_a_cached_grant ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3268093Z test owner_revocation_during_final_sample_prevents_installation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3434031Z test revoked_current_authority_blocks_new_read_and_redisclosure ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3620922Z test unsupported_or_ambiguous_host_source_path_is_denied ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3641095Z test source_owner_namespace_revision_and_selection_changes_are_current_evidence ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3794685Z test trusted_typed_resolver_installs_registered_read_without_grant_or_path_from_request ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3795509Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3796770Z test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.3797542Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4007703Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4008606Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4009202Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4010117Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4010881Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4011344Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4011889Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4012888Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4014152Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4015354Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4015850Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4016191Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4016493Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4017262Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4017844Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4018248Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4018966Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4019329Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4019736Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4020325Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4021101Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4021850Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4022111Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4022284Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.4023185Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6294666Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6299546Z      Running tests/service_provider.rs (/home/runner/work/_temp/bridge-target/debug/deps/service_provider-cd444b25029c56b8)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6310987Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6311193Z running 15 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6324077Z test configured_handle_bridge_admits_exact_payload_without_secret_or_transport ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6325582Z test current_policy_profile_and_budget_are_rechecked_at_final_admission ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6326911Z test missing_binding_and_handle_fail_closed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6328114Z test every_configuration_and_authorization_component_is_bound ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6329171Z test malformed_stream_or_tools_are_rejected_before_reservation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6330270Z test multiple_or_malformed_choices_are_rejected_before_reservation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6333753Z test payload_model_must_match_configured_profile_and_payload_is_bounded ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6335085Z test readiness_checks_binding_without_reservation_or_outbound_admission ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6336363Z test oversized_wire_token_caps_are_rejected_before_reservation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6337886Z test reservation_race_and_cross_host_prepared_call_are_rejected ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6339007Z test readiness_never_accepts_ambiguous_or_local_endpoint_forms ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6340056Z test revocation_review_or_ledger_failure_never_admits ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6341147Z test single_choice_and_explicit_token_caps_within_budget_preserve_exact_bytes ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6342375Z test unsupported_output_token_dialect_is_rejected_before_reservation ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6343732Z test wire_capabilities_cannot_exceed_approved_call_requirements ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6344297Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6344739Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6345371Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6542876Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6544128Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6544967Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6545465Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6546360Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6546693Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6547057Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6547589Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6548372Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6549286Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6549694Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6549975Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6550236Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6619350Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6620389Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6621053Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6621928Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6622720Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6623294Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6624114Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6625176Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6626340Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6626811Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6627075Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.6628159Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.8796180Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.8800889Z      Running tests/service_host_controller.rs (/home/runner/work/_temp/bridge-target/debug/deps/service_host_controller-7dfa33ed1175336a)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.8815103Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.8815281Z running 5 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9049064Z test atomic_database_replacement_cannot_inherit_retained_projection_or_receipt_after_restart ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9096073Z test configured_session_missing_profile_fails_closed_without_synthetic_read ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9341056Z test host_read_uses_same_controller_and_rechecks_revocation_on_redisclosure_and_restart ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9574126Z test replacement_managed_root_with_same_database_inode_cannot_inherit_history ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9621639Z test valid_configured_readiness_still_blocks_transport_without_scope_or_admission ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9622110Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9622373Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9623015Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9821831Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9823759Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9824563Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9825546Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9826851Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9827688Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9828250Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9828884Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9829988Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9830781Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9831271Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9831602Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9831973Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9833586Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9834180Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9834604Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9835205Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9835600Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9836035Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9836668Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9837352Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9838008Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9838241Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9838392Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:49.9839010Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.1848237Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.1851957Z      Running tests/supplier_store.rs (/home/runner/work/_temp/bridge-target/debug/deps/supplier_store-57d15bb408c5c647)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.1865559Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.1865812Z running 12 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.2374133Z test authority_unavailable_during_registered_dispatch_revokes_publication ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.2375659Z test fixture_domain_contract_is_tied_to_actual_dart_schema_source ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.2792181Z test identity_and_request_shape_are_not_sql_or_path_authority ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.2861802Z test current_projection_rereads_name_while_historical_receipt_identity_stays_original ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.2867626Z test current_reads_reject_pinned_revision_drift_and_pending_or_revoked_authority ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.3334394Z test mode_change_and_symlink_ancestor_are_denied ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.3422076Z BUSINESS_READ_EVIDENCE {"projection":{"name":"合成供应商甲","supplier":{"key":"11111111-1111-4111-8111-111111111111","module_id":"inquiry","revision":"7","schema_version":1,"type":"supplier"}},"receipt_ref":{"binding_id":"host-supplier-name-read","identity":"3521d69e53720a073b5451d4a1b6a22f","invocation_id":"i-79109cbf11830edf3a4275f1bd917455","owner":"ToolRegistry"}}
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.3464910Z test registered_read_yields_business_name_and_original_durable_receipt_without_business_write ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.3767251Z test replaced_file_symlinks_owner_mode_and_no_create_fail_closed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.4355085Z test same_revision_tamper_without_host_source_stamp_change_is_denied ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.6645727Z test meta_shape_and_storage_types_are_checked ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8133207Z test actual_source_mutation_in_each_final_host_sample_denies_publication ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8596666Z test unknown_schema_missing_deleted_malformed_and_oversized_sources_fail_closed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8597229Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8597589Z test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8598051Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8792845Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8794814Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8795712Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8796575Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8797780Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8798444Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8799246Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8799925Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8800814Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8801678Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8802215Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8802899Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8803408Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8804204Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8804691Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8805051Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8805545Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8805856Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8806215Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8806738Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8807423Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8808075Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8808314Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8808473Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:50.8809091Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0245087Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0248877Z      Running tests/supplier_lab_source.rs (/home/runner/work/_temp/bridge-target/debug/deps/supplier_lab_source-3593509b51bbca4b)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0261806Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0262028Z running 5 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0268436Z test cancellation_cannot_publish_or_create_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0280227Z test symlink_synthetic_source_is_refused ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0287158Z test ui_request_cannot_install_other_scope_or_source ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0430503Z SYNTHETIC_REGISTERED_SUPPLIER_READ projection={"name":"合成供应商甲","supplier":{"key":"11111111-1111-4111-8111-111111111111","module_id":"inquiry","revision":"7","schema_version":1,"type":"supplier"}} receipt={"binding_id":"host-supplier-name-read","identity":"4d09899a559807ea52e6f1361e63f4fc","invocation_id":"i-61d98d02a19091e569a603c0f63b36f0","owner":"ToolRegistry"}
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0433381Z test synthetic_schema12_read_uses_same_run_original_durable_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0434839Z test replay_revalidates_source_and_exact_projection_without_creating_new_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0435430Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0435827Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0436379Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0638295Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0640260Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0641408Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0642094Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0643862Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0644566Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0645211Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0646324Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0647287Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0648083Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0648573Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0648911Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0649221Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0650023Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0650611Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0651039Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0651642Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0652042Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0652743Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0653424Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0654263Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0655069Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0655348Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0655527Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.0656287Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2206785Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2211251Z      Running tests/supplier_business_controller.rs (/home/runner/work/_temp/bridge-target/debug/deps/supplier_business_controller-5348d60a828b97c1)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2224814Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2224982Z running 1 test
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2460377Z test business_read_is_real_durable_and_reconnect_never_executes_again ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2460792Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2461052Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2461434Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2650975Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2652206Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2653275Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2654253Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2655491Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2656252Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2656713Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2657350Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2658173Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2659207Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2659697Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2660025Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2660336Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2661353Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2662036Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2662395Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2663220Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2663539Z     |
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2663908Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2664455Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2665140Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2665788Z     = help: allow this lint if the signature is compatible
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2666020Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2666169Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:51.2666793Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4324599Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 1.17s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4327634Z      Running unittests src/lib.rs (/home/runner/work/_temp/bridge-target/debug/deps/muyon_rust_agent_host_lab-1052fe828ffb81af)
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4342077Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4342359Z running 3 tests
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4518711Z test supplier_business::terminal_regressions::failed_final_ledger_is_unknown_terminal_not_pending_or_completed ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4533037Z test supplier_business::terminal_regressions::task_identity_is_durable_before_dispatch_creates_a_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4542082Z test supplier_business::terminal_regressions::interrupted_receipt_survives_restart_without_projection_or_new_receipt ... ok
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4543279Z 
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4543694Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.02s
+scoped	Exact scoped Rust tests (no HTTP or legacy reopen modules)	2026-10-18T07:53:52.4544310Z 
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	﻿2026-10-18T07:53:52.5258896Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.5259339Z with:
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.5259574Z   name: service-production-bridges-scoped
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.5259909Z   path: /home/runner/work/_temp/bridge-evidence
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.5260228Z   if-no-files-found: warn
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.5260481Z   compression-level: 6
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.5260701Z   overwrite: false
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.5260935Z   include-hidden-files: false
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.5261174Z ##[endgroup]
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.7001336Z (node:2768) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.7002292Z (Use `node --trace-deprecation ...` to show where the warning was created)
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.7118276Z With the provided path, there will be 8 files uploaded
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.7119602Z Artifact name is valid!
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.7120200Z Root directory input is valid!
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.9449172Z Beginning upload of artifact content to blob storage
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:52.9881401Z (node:2768) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:53.0881843Z Uploaded bytes 8461
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:53.1204719Z Finished uploading artifact content to blob storage!
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:53.1206764Z SHA256 digest of uploaded artifact zip is 1a3e9dd0891069f7940ff7628276040a2babcfc6de96621f8f1880905b13cd6a
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:53.1208405Z Finalizing artifact upload
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:53.3373863Z Artifact service-production-bridges-scoped.zip successfully finalized. Artifact ID 12129701859
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:53.3375568Z Artifact service-production-bridges-scoped has been successfully uploaded! Final size is 8461 bytes. Artifact ID is 12129701859
+scoped	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:53:53.3382239Z Artifact download URL: https://github.com/mightyoung/Muyon/actions/runs/39109362168/artifacts/12129701859
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-18T07:53:53.3611899Z Post job cleanup.
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.4501095Z [command]/usr/bin/git version
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.4552423Z git version 2.55.0
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.4596019Z Temporarily overriding HOME='/home/runner/work/_temp/a30ec0bc-1494-4414-90c7-8405a7982e10' before making global git config changes
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.4597362Z Adding repository directory to the temporary git global config as a safe directory
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.4604466Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.4651430Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.4705814Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.4982739Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+scoped	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:53.5020053Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+scoped	Complete job	﻿2026-10-18T07:53:53.5478256Z Cleaning up orphan processes
+scoped	Complete job	2026-10-18T07:53:53.5806745Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+android-owner-bridge	Set up job	﻿2026-10-18T07:53:34.2160665Z Current runner version: '2.337.0'
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2188269Z ##[group]Runner Image Provisioner
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2189331Z Hosted Compute Agent
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2190015Z Version: 20261012.601
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2190670Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2191367Z Build Date: 2026-10-12T17:48:21Z
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2192080Z Worker ID: {3de865bc-8c3e-4904-9300-966a247c2b7a}
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2192789Z Region: centralus
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2193335Z Cloud: Azure
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2193916Z ##[endgroup]
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2195339Z ##[group]Operating System
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2195979Z Ubuntu
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2196524Z 24.04.5
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2197043Z LTS
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2197564Z ##[endgroup]
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2198323Z ##[group]Runner Image
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2198980Z Image: ubuntu-24.04
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2199574Z Version: 20261012.334.1
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2200594Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2202656Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2203638Z ##[endgroup]
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2204705Z ##[group]GITHUB_TOKEN Permissions
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2207018Z Contents: read
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2207604Z Metadata: read
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2208393Z ##[endgroup]
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2210518Z Secret source: Actions
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2211470Z Cache mode: write
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2212139Z Prepare workflow directory
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2531392Z Prepare all required actions
+android-owner-bridge	Set up job	2026-10-18T07:53:34.2581521Z Getting action download info
+android-owner-bridge	Set up job	2026-10-18T07:53:34.5383546Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+android-owner-bridge	Set up job	2026-10-18T07:53:34.6553552Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+android-owner-bridge	Set up job	2026-10-18T07:53:34.9023302Z Complete job name: android-owner-bridge
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-18T07:53:34.9717148Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9718473Z with:
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9719031Z   persist-credentials: false
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9719684Z   repository: mightyoung/Muyon
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9723464Z   token: ***
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9723970Z   ssh-strict: true
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9724522Z   ssh-user: git
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9725030Z   clean: true
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9725573Z   sparse-checkout-cone-mode: true
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9726179Z   fetch-depth: 1
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9726674Z   fetch-tags: false
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9727252Z   show-progress: true
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9727782Z   lfs: false
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9728451Z   submodules: false
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9728990Z   set-safe-directory: true
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:34.9729700Z ##[endgroup]
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0795019Z Syncing repository: mightyoung/Muyon
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0796932Z ##[group]Getting Git version info
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0797725Z Working directory is '/home/runner/work/Muyon/Muyon'
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0799599Z [command]/usr/bin/git version
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0879503Z git version 2.55.0
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0898818Z ##[endgroup]
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0912100Z Temporarily overriding HOME='/home/runner/work/_temp/9aa9d53a-d90a-47fe-9dd9-c32ac4d77a7f' before making global git config changes
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0914542Z Adding repository directory to the temporary git global config as a safe directory
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0916412Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0969210Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0974145Z ##[group]Initializing the repository
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.0979263Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1197193Z hint: Using 'master' as the name for the initial branch. This default branch name
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1200674Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1202922Z hint: to use in all of your new repositories, which will suppress this warning,
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1204120Z hint: call:
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1204758Z hint:
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1206117Z hint: 	git config --global init.defaultBranch <name>
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1207094Z hint:
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1208191Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1209693Z hint: 'development'. The just-created branch can be renamed via this command:
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1210503Z hint:
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1211100Z hint: 	git branch -m <name>
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1211676Z hint:
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1212736Z hint: Disable this message with "git config set advice.defaultBranchName false"
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1213905Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1220620Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1269201Z ##[endgroup]
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1270724Z ##[group]Disabling automatic garbage collection
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1271965Z [command]/usr/bin/git config --local gc.auto 0
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1309199Z ##[endgroup]
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1310747Z ##[group]Setting up auth
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1316321Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1353318Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1709521Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1745412Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1952759Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1993541Z ##[endgroup]
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.1994920Z ##[group]Fetching the repository
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:35.2005005Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f5b058ebaa44e786e6d24df964937968e92e8840:refs/remotes/origin/task/service-production-bridges-20261018
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2611206Z From https://github.com/mightyoung/Muyon
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2613528Z  * [new ref]         f5b058ebaa44e786e6d24df964937968e92e8840 -> origin/task/service-production-bridges-20261018
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2651645Z ##[endgroup]
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2653625Z ##[group]Determining the checkout info
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2655139Z ##[endgroup]
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2656047Z [command]/usr/bin/git sparse-checkout disable
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2713434Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2750127Z ##[group]Checking out the ref
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.2756943Z [command]/usr/bin/git checkout --progress --force -B task/service-production-bridges-20261018 refs/remotes/origin/task/service-production-bridges-20261018
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8303090Z Switched to a new branch 'task/service-production-bridges-20261018'
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8308733Z branch 'task/service-production-bridges-20261018' set up to track 'origin/task/service-production-bridges-20261018'.
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8328403Z ##[endgroup]
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8380166Z [command]/usr/bin/git log -1 --format=%H
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8411071Z f5b058ebaa44e786e6d24df964937968e92e8840
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8419632Z ##[group]Removing auth
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8423244Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8451845Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8641135Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8666496Z http.https://github.com/.extraheader
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8673359Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8704882Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+android-owner-bridge	Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:53:38.8882725Z ##[endgroup]
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	﻿2026-10-18T07:53:38.9072115Z ##[group]Run set -euo pipefail
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9072785Z [36;1mset -euo pipefail[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9073317Z [36;1mmkdir -p "$RUNNER_TEMP/android-owner-evidence"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9073938Z [36;1mgit rev-parse HEAD > "$RUNNER_TEMP/android-owner-evidence/source-sha.txt"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9074545Z [36;1mrustup toolchain install 1.99.0 --profile minimal[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9075410Z [36;1mrustup default 1.99.0[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9075969Z [36;1mexport CARGO_TARGET_DIR="$RUNNER_TEMP/android-owner-target"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9076579Z [36;1mexport MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9077622Z [36;1mcargo test --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --test service_host_bridge -- --nocapture 2>&1 | tee "$RUNNER_TEMP/android-owner-evidence/test.log"[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9079077Z [36;1mcargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9079894Z [36;1m([0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9080316Z [36;1m  cd experiments/redesign/android-rust-bridge-lab/core[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9081504Z [36;1m  "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config uniffi.android.toml --out-dir "$RUNNER_TEMP/android-owner-evidence/generated" --no-format[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9082543Z [36;1m)[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9083596Z [36;1mcmp "$RUNNER_TEMP/android-owner-evidence/generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt" experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9084771Z [36;1mgit diff --exit-code[0m
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9309747Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9310477Z ##[endgroup]
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:38.9823818Z info: syncing channel updates for 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:39.2216736Z info: latest update on 2026-10-01 for version 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:39.2217456Z info: downloading 3 components
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1201353Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1271523Z   1.99.0-x86_64-unknown-linux-gnu installed - rustc 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1272176Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1346454Z info: using existing install for 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1356424Z info: default toolchain set to 1.99.0-x86_64-unknown-linux-gnu
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1357335Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1423073Z   1.99.0-x86_64-unknown-linux-gnu unchanged - rustc 1.99.0 (b940084d7 2026-09-28)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1423752Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.1750436Z     Updating crates.io index
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.4927624Z  Downloading crates ...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5695994Z   Downloaded autocfg v1.5.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5708365Z   Downloaded bitflags v2.13.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5736117Z   Downloaded anyhow v1.0.104
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5842896Z   Downloaded askama_macros v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5850131Z   Downloaded errno v0.3.14
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5918741Z   Downloaded uniffi_internal_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5936968Z   Downloaded itoa v1.0.18
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5946782Z   Downloaded percent-encoding v2.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.5954254Z   Downloaded serde_spanned v1.1.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6015681Z   Downloaded scroll_derive v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6029538Z   Downloaded heck v0.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6128620Z   Downloaded cfg-if v1.0.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6136727Z   Downloaded uniffi_pipeline v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6178172Z   Downloaded equivalent v1.0.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6244843Z   Downloaded plain v0.2.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6251540Z   Downloaded siphasher v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6340627Z   Downloaded cargo-platform v0.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6357655Z   Downloaded rustc-hash v2.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6366116Z   Downloaded glob v0.3.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6375988Z   Downloaded thiserror v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6409493Z   Downloaded uniffi v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6419922Z   Downloaded uniffi_udl v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6429595Z   Downloaded zmij v1.0.23
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6440600Z   Downloaded smawk v0.3.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6452494Z   Downloaded thiserror-impl v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6461946Z   Downloaded toml_writer v1.1.3+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6473107Z   Downloaded weedle2 v5.0.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6483649Z   Downloaded fastrand v2.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6492716Z   Downloaded cargo_metadata v0.23.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6504736Z   Downloaded quote v1.0.47
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6521043Z   Downloaded uniffi_meta v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6528146Z   Downloaded askama v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6545027Z   Downloaded basic-toml v0.1.10
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6613593Z   Downloaded scroll v0.12.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6622202Z   Downloaded semver v1.0.28
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6636455Z   Downloaded toml_parser v1.1.5+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6651967Z   Downloaded static_assertions v1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6661871Z   Downloaded toml_datetime v1.1.2+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6670973Z   Downloaded camino v1.2.6
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6683998Z   Downloaded once_cell v1.21.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6700790Z   Downloaded unicode-ident v1.0.27
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6719568Z   Downloaded fs-err v3.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6731331Z   Downloaded askama_parser v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6761510Z   Downloaded uniffi_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6776684Z   Downloaded serde_derive v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6797852Z   Downloaded toml v1.1.8+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6846007Z   Downloaded log v0.4.34
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6863335Z   Downloaded textwrap v0.16.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6880352Z   Downloaded serde_core v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6898587Z   Downloaded uniffi_core v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6928028Z   Downloaded getrandom v0.4.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6956342Z   Downloaded proc-macro2 v1.0.107
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6977190Z   Downloaded tempfile v3.27.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.6992711Z   Downloaded minimal-lexical v0.2.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7024354Z   Downloaded bytes v1.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7046754Z   Downloaded serde v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7069046Z   Downloaded askama_derive v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7095431Z   Downloaded memchr v2.8.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7129614Z   Downloaded nom v7.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7161829Z   Downloaded indexmap v2.14.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7190107Z   Downloaded hashbrown v0.17.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7226747Z   Downloaded serde_json v1.0.154
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7271898Z   Downloaded goblin v0.8.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7312636Z   Downloaded winnow v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7370935Z   Downloaded uniffi_bindgen v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7468038Z   Downloaded unicode-width v0.2.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7514574Z   Downloaded syn v2.0.119
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7586412Z   Downloaded syn v3.0.9
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7657524Z   Downloaded rustix v1.1.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.7810326Z   Downloaded libc v0.2.190
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.8097565Z   Downloaded linux-raw-sys v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.9069197Z    Compiling proc-macro2 v1.0.107
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.9070303Z    Compiling unicode-ident v1.0.27
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.9070965Z    Compiling quote v1.0.47
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.9071517Z    Compiling serde_core v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:48.9654297Z    Compiling anyhow v1.0.104
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:49.0729356Z    Compiling libc v0.2.190
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:49.2201064Z    Compiling getrandom v0.4.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:49.3154406Z    Compiling rustix v1.1.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:49.6719090Z    Compiling syn v3.0.9
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:50.5399908Z    Compiling serde v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:50.6739355Z    Compiling bitflags v2.13.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:50.8119389Z    Compiling linux-raw-sys v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:51.1086863Z    Compiling hashbrown v0.17.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:51.1549414Z    Compiling cfg-if v1.0.5
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:51.1782184Z    Compiling once_cell v1.21.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:51.3023162Z    Compiling equivalent v1.0.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:51.6109500Z    Compiling indexmap v2.14.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:51.7350430Z    Compiling syn v2.0.119
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:51.9269855Z    Compiling serde_derive v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:52.2029531Z    Compiling zmij v1.0.23
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:52.3149954Z    Compiling fastrand v2.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:52.4563270Z    Compiling autocfg v1.5.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:52.7399376Z    Compiling fs-err v3.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:52.8199278Z    Compiling thiserror v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:52.9747062Z    Compiling tempfile v3.27.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:53.1338424Z    Compiling serde_json v1.0.154
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:53.2058732Z    Compiling winnow v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:53.2320260Z    Compiling heck v0.5.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:53.3449574Z    Compiling camino v1.2.6
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:53.5041163Z    Compiling toml_parser v1.1.5+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:53.9350322Z    Compiling thiserror-impl v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:54.0369273Z    Compiling serde_spanned v1.1.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:54.0949463Z    Compiling toml_datetime v1.1.2+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:54.2862681Z    Compiling memchr v2.8.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:54.6219837Z    Compiling itoa v1.0.18
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:54.7419472Z    Compiling toml_writer v1.1.3+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:54.8559364Z    Compiling siphasher v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:54.8662147Z    Compiling toml v1.1.8+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.1019430Z    Compiling uniffi_internal_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.1089357Z    Compiling cargo-platform v0.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.2683720Z    Compiling semver v1.0.28
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.2700516Z    Compiling bytes v1.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.3669717Z    Compiling static_assertions v1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.3974965Z    Compiling muyon-core-agent-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.4879303Z    Compiling cargo_metadata v0.23.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.8133867Z    Compiling uniffi_core v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.8799661Z    Compiling uniffi_pipeline v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.9799786Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.9829615Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.9858864Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.9889499Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.9918707Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.9948689Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:56.9979061Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0008773Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0039126Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0068686Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0093316Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0118231Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0148902Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0179086Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0208832Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0238847Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0268846Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0318721Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0328941Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0329808Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0330960Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0332536Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0332926Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.0539236Z    Compiling uniffi_meta v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.1520436Z    Compiling muyon-android-contract-bridge-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/android-rust-bridge-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.2440571Z    Compiling muyon-plugin-contract-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/plugin-contract-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.7319295Z    Compiling uniffi_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.7754992Z    Compiling muyon-rust-agent-host-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/rust-agent-host-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:57.9638728Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:53:59.3795153Z    Compiling uniffi v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6501470Z     Finished `test` profile [unoptimized] target(s) in 12.49s
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6805339Z      Running tests/service_host_bridge.rs (/home/runner/work/_temp/android-owner-target/debug/deps/service_host_bridge-127e482bb7b3233d)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6818055Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6818760Z running 2 tests
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6820902Z test unconfigured_service_owner_fails_closed_and_is_queried_fresh ... ok
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6822305Z test service_callback_maps_current_scope_and_handle_existence_without_transport ... ok
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6822760Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6823020Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.6823468Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.7153429Z  Downloading crates ...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.7688878Z   Downloaded clap_derive v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.7742773Z   Downloaded clap_lex v1.1.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8007309Z   Downloaded strsim v0.11.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8017148Z   Downloaded clap_builder v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8061037Z   Downloaded anstyle v1.0.14
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8070748Z   Downloaded clap v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8382177Z    Compiling serde_core v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8382822Z    Compiling syn v3.0.9
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8397375Z    Compiling memchr v2.8.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8428872Z    Compiling rustc-hash v2.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:00.8919384Z    Compiling minimal-lexical v0.2.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:01.0597391Z    Compiling glob v0.3.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:01.3156908Z    Compiling winnow v1.0.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:01.3780878Z    Compiling nom v7.1.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:02.3519353Z    Compiling scroll_derive v0.12.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:02.7589529Z    Compiling smawk v0.3.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:02.8129336Z    Compiling textwrap v0.16.4
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:02.8159134Z    Compiling scroll v0.12.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:02.9979774Z    Compiling indexmap v2.14.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:02.9980920Z    Compiling toml_datetime v1.1.2+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:03.1109306Z    Compiling camino v1.2.6
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:03.1810095Z    Compiling serde_json v1.0.154
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:03.3849404Z    Compiling serde_spanned v1.1.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:03.4459141Z    Compiling cargo-platform v0.3.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:03.6079459Z    Compiling uniffi_pipeline v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:03.6199165Z    Compiling semver v1.0.28
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:03.7659358Z    Compiling uniffi_meta v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:03.8284951Z    Compiling weedle2 v5.0.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:04.1389433Z    Compiling toml_parser v1.1.5+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:04.2951127Z    Compiling serde_derive v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:04.4598757Z    Compiling thiserror-impl v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:04.6749408Z    Compiling strsim v0.11.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:04.8909393Z    Compiling plain v0.2.3
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:04.9339467Z    Compiling anstyle v1.0.14
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:05.0584044Z    Compiling log v0.4.34
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:05.1691483Z    Compiling clap_lex v1.1.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:05.2868815Z    Compiling clap_builder v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:05.4569400Z    Compiling thiserror v2.0.21
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:05.4960240Z    Compiling uniffi_udl v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:05.9786414Z    Compiling goblin v0.8.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:06.2489234Z    Compiling toml v1.1.8+spec-1.1.0
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:06.9899541Z    Compiling serde v1.0.229
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:07.4462441Z    Compiling askama_parser v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:07.4519167Z    Compiling basic-toml v0.1.10
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:08.1579843Z    Compiling clap_derive v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:08.5239455Z    Compiling cargo_metadata v0.23.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6717794Z warning: suspicious definition of the runtime `read` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6749228Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6750871Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6779306Z 132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6809017Z     |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6839566Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6840563Z     = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6841514Z             found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6842786Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6843912Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6844684Z     = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6845259Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6845774Z warning: suspicious definition of the runtime `write` symbol used by the standard library
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6846953Z    --> /home/runner/work/Muyon/Muyon/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6847864Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6850046Z 132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6851010Z     |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6851807Z     |
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6852579Z     = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6853618Z             found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6854832Z     = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6856550Z     = help: allow this lint if the signature is compatible
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6857092Z 
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6857483Z warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.6858345Z    Compiling uniffi_macros v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.9129063Z    Compiling clap v4.6.7
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:09.9400024Z    Compiling muyon-android-contract-bridge-lab v0.1.0 (/home/runner/work/Muyon/Muyon/experiments/redesign/android-rust-bridge-lab/core)
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:10.0167371Z    Compiling askama_derive v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:12.1969614Z    Compiling askama_macros v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:12.3096757Z    Compiling askama v0.16.1
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:12.5340911Z    Compiling uniffi_bindgen v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:26.2534547Z    Compiling uniffi v0.32.2
+android-owner-bridge	Typed Service owner bridge and generated Kotlin	2026-10-18T07:54:30.2241657Z     Finished `dev` profile [unoptimized] target(s) in 29.52s
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	﻿2026-10-18T07:54:31.0356316Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.0356818Z with:
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.0357123Z   name: android-service-owner-bridge
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.0357594Z   path: /home/runner/work/_temp/android-owner-evidence
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.0358141Z   if-no-files-found: warn
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.0358486Z   compression-level: 6
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.0358810Z   overwrite: false
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.0359137Z   include-hidden-files: false
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.0359519Z ##[endgroup]
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.2087185Z (node:4005) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.2088594Z (Use `node --trace-deprecation ...` to show where the warning was created)
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.2178914Z With the provided path, there will be 3 files uploaded
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.2183923Z Artifact name is valid!
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.2184646Z Root directory input is valid!
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.5156949Z Beginning upload of artifact content to blob storage
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.5414897Z (node:4005) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.7518325Z Uploaded bytes 25644
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.7950678Z Finished uploading artifact content to blob storage!
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.7951516Z SHA256 digest of uploaded artifact zip is 4bbc0c8ffa3cede985486cec2949f0424b8e467a594bdcef8843d9f3edf2c5f4
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:31.7952592Z Finalizing artifact upload
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:32.0299944Z Artifact android-service-owner-bridge.zip successfully finalized. Artifact ID 12129726805
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:32.0301443Z Artifact android-service-owner-bridge has been successfully uploaded! Final size is 25644 bytes. Artifact ID is 12129726805
+android-owner-bridge	Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02	2026-10-18T07:54:32.0311865Z Artifact download URL: https://github.com/mightyoung/Muyon/actions/runs/39109362168/artifacts/12129726805
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	﻿2026-10-18T07:54:32.0523569Z Post job cleanup.
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1399204Z [command]/usr/bin/git version
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1435855Z git version 2.55.0
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1479552Z Temporarily overriding HOME='/home/runner/work/_temp/30a572a3-016d-422f-9c50-9d25b02b1da1' before making global git config changes
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1480522Z Adding repository directory to the temporary git global config as a safe directory
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1486851Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1527627Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1561184Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1789103Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+android-owner-bridge	Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683	2026-10-18T07:54:32.1829228Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+android-owner-bridge	Complete job	﻿2026-10-18T07:54:32.2205507Z Cleaning up orphan processes
+android-owner-bridge	Complete job	2026-10-18T07:54:32.2503048Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

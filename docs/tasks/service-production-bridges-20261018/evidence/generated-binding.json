@@ -1,0 +1,15 @@
+{
+  "generator": "UniFFI 0.32.2, official CI pinned Rust 1.99.0",
+  "producer_source": "9b9b354392d2505adc008cfe861a7bf57823442f",
+  "producer_ci": 39109250035,
+  "artifact_id": 12129488369,
+  "zip_sha256": "0dd5d4de49106a3dd8a4f1337d30219ca3d3e99ff1dc32599ff1b002e65f7523",
+  "kotlin_bytes": 184236,
+  "kotlin_sha256": "0422df1001841d8a487e1f47a78c306febc7fa52973d86f942d2d2dae78e76a7",
+  "final_exact_reproduction_source": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+  "final_exact_reproduction_ci": 39109951880,
+  "manual_generated_edits": false,
+  "artifact_download": "Direct gh route returned HTTP403; authorized GitHub app artifact download succeeded. Download URL not persisted.",
+  "prior_exact_reproduction_source": "f5b058ebaa44e786e6d24df964937968e92e8840",
+  "prior_exact_reproduction_ci": 39109362168
+}

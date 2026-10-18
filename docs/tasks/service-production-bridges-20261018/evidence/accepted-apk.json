@@ -1,0 +1,10 @@
+{
+  "source": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+  "ci": 39109953658,
+  "artifact_id": 12129383864,
+  "archive_sha256": "0f48320be9a37a82e0213821b80aa0bf1990a40bd0d76ff45dea266a9eb3fef0",
+  "apk_bytes": 23581948,
+  "apk_sha256": "6dfdc49cad9beed6b93275b66b42c72e8b0c28898eea79656c0d215c6b989198",
+  "installation": "CI emulator only; no user-device install/uninstall",
+  "live_model": "NOT_RUN"
+}

@@ -1,0 +1,685 @@
+compile	Set up job	﻿2026-10-18T07:55:48.7902403Z Current runner version: '2.337.0'
+compile	Set up job	2026-10-18T07:55:48.7938784Z ##[group]Runner Image Provisioner
+compile	Set up job	2026-10-18T07:55:48.7940264Z Hosted Compute Agent
+compile	Set up job	2026-10-18T07:55:48.7941194Z Version: 20261012.601
+compile	Set up job	2026-10-18T07:55:48.7942333Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+compile	Set up job	2026-10-18T07:55:48.7943651Z Build Date: 2026-10-12T17:48:21Z
+compile	Set up job	2026-10-18T07:55:48.7944755Z Worker ID: {a6bca2c5-cc87-4470-a290-20b5d7ecfae6}
+compile	Set up job	2026-10-18T07:55:48.7946093Z Region: eastus
+compile	Set up job	2026-10-18T07:55:48.7947445Z Cloud: Azure
+compile	Set up job	2026-10-18T07:55:48.7948478Z ##[endgroup]
+compile	Set up job	2026-10-18T07:55:48.7950842Z ##[group]Operating System
+compile	Set up job	2026-10-18T07:55:48.7951848Z Ubuntu
+compile	Set up job	2026-10-18T07:55:48.7952836Z 24.04.5
+compile	Set up job	2026-10-18T07:55:48.7953670Z LTS
+compile	Set up job	2026-10-18T07:55:48.7955096Z ##[endgroup]
+compile	Set up job	2026-10-18T07:55:48.7956053Z ##[group]Runner Image
+compile	Set up job	2026-10-18T07:55:48.7957360Z Image: ubuntu-24.04
+compile	Set up job	2026-10-18T07:55:48.7958385Z Version: 20261012.334.1
+compile	Set up job	2026-10-18T07:55:48.7960209Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+compile	Set up job	2026-10-18T07:55:48.7963407Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+compile	Set up job	2026-10-18T07:55:48.7965176Z ##[endgroup]
+compile	Set up job	2026-10-18T07:55:48.7967431Z ##[group]GITHUB_TOKEN Permissions
+compile	Set up job	2026-10-18T07:55:48.7970531Z Contents: read
+compile	Set up job	2026-10-18T07:55:48.7971622Z Metadata: read
+compile	Set up job	2026-10-18T07:55:48.7972554Z ##[endgroup]
+compile	Set up job	2026-10-18T07:55:48.7975730Z Secret source: Actions
+compile	Set up job	2026-10-18T07:55:48.7977439Z Cache mode: write
+compile	Set up job	2026-10-18T07:55:48.7979101Z Prepare workflow directory
+compile	Set up job	2026-10-18T07:55:48.8558040Z Prepare all required actions
+compile	Set up job	2026-10-18T07:55:48.8632332Z Getting action download info
+compile	Set up job	2026-10-18T07:55:49.0515031Z Download action repository 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' (SHA:11bd71901bbe5b1630ceea73d27597364c9af683)
+compile	Set up job	2026-10-18T07:55:49.1949506Z Download action repository 'actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00' (SHA:c5195efecf7bdfc987ee8bae7a71cb8b11521c00)
+compile	Set up job	2026-10-18T07:55:49.4380794Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+compile	Set up job	2026-10-18T07:55:49.7497183Z Complete job name: compile
+compile	Checkout exact source	﻿2026-10-18T07:55:49.8519158Z ##[group]Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+compile	Checkout exact source	2026-10-18T07:55:49.8520845Z with:
+compile	Checkout exact source	2026-10-18T07:55:49.8521606Z   ref: f5b058ebaa44e786e6d24df964937968e92e8840
+compile	Checkout exact source	2026-10-18T07:55:49.8522661Z   persist-credentials: false
+compile	Checkout exact source	2026-10-18T07:55:49.8523519Z   repository: mightyoung/Muyon
+compile	Checkout exact source	2026-10-18T07:55:49.8532396Z   token: ***
+compile	Checkout exact source	2026-10-18T07:55:49.8533070Z   ssh-strict: true
+compile	Checkout exact source	2026-10-18T07:55:49.8533751Z   ssh-user: git
+compile	Checkout exact source	2026-10-18T07:55:49.8534398Z   clean: true
+compile	Checkout exact source	2026-10-18T07:55:49.8535110Z   sparse-checkout-cone-mode: true
+compile	Checkout exact source	2026-10-18T07:55:49.8535988Z   fetch-depth: 1
+compile	Checkout exact source	2026-10-18T07:55:49.8536806Z   fetch-tags: false
+compile	Checkout exact source	2026-10-18T07:55:49.8537518Z   show-progress: true
+compile	Checkout exact source	2026-10-18T07:55:49.8538253Z   lfs: false
+compile	Checkout exact source	2026-10-18T07:55:49.8538909Z   submodules: false
+compile	Checkout exact source	2026-10-18T07:55:49.8539629Z   set-safe-directory: true
+compile	Checkout exact source	2026-10-18T07:55:49.8540712Z env:
+compile	Checkout exact source	2026-10-18T07:55:49.8541563Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Checkout exact source	2026-10-18T07:55:49.8542704Z   GRADLE_VERSION: 8.13
+compile	Checkout exact source	2026-10-18T07:55:49.8544044Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Checkout exact source	2026-10-18T07:55:49.8545445Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:55:49.9625131Z Syncing repository: mightyoung/Muyon
+compile	Checkout exact source	2026-10-18T07:55:49.9629294Z ##[group]Getting Git version info
+compile	Checkout exact source	2026-10-18T07:55:49.9631198Z Working directory is '/home/runner/work/Muyon/Muyon'
+compile	Checkout exact source	2026-10-18T07:55:49.9633953Z [command]/usr/bin/git version
+compile	Checkout exact source	2026-10-18T07:55:49.9722998Z git version 2.55.0
+compile	Checkout exact source	2026-10-18T07:55:49.9764612Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:55:49.9773237Z Temporarily overriding HOME='/home/runner/work/_temp/b66a66ae-aa7f-4533-97a3-7a573a3f454b' before making global git config changes
+compile	Checkout exact source	2026-10-18T07:55:49.9776170Z Adding repository directory to the temporary git global config as a safe directory
+compile	Checkout exact source	2026-10-18T07:55:49.9779618Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+compile	Checkout exact source	2026-10-18T07:55:49.9836018Z Deleting the contents of '/home/runner/work/Muyon/Muyon'
+compile	Checkout exact source	2026-10-18T07:55:49.9846572Z ##[group]Initializing the repository
+compile	Checkout exact source	2026-10-18T07:55:49.9848793Z [command]/usr/bin/git init /home/runner/work/Muyon/Muyon
+compile	Checkout exact source	2026-10-18T07:55:49.9971579Z hint: Using 'master' as the name for the initial branch. This default branch name
+compile	Checkout exact source	2026-10-18T07:55:49.9974942Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+compile	Checkout exact source	2026-10-18T07:55:49.9977515Z hint: to use in all of your new repositories, which will suppress this warning,
+compile	Checkout exact source	2026-10-18T07:55:49.9979832Z hint: call:
+compile	Checkout exact source	2026-10-18T07:55:49.9980606Z hint:
+compile	Checkout exact source	2026-10-18T07:55:49.9981467Z hint: 	git config --global init.defaultBranch <name>
+compile	Checkout exact source	2026-10-18T07:55:49.9982560Z hint:
+compile	Checkout exact source	2026-10-18T07:55:49.9983527Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+compile	Checkout exact source	2026-10-18T07:55:49.9985310Z hint: 'development'. The just-created branch can be renamed via this command:
+compile	Checkout exact source	2026-10-18T07:55:49.9987588Z hint:
+compile	Checkout exact source	2026-10-18T07:55:49.9988615Z hint: 	git branch -m <name>
+compile	Checkout exact source	2026-10-18T07:55:49.9989397Z hint:
+compile	Checkout exact source	2026-10-18T07:55:49.9990479Z hint: Disable this message with "git config set advice.defaultBranchName false"
+compile	Checkout exact source	2026-10-18T07:55:49.9992368Z Initialized empty Git repository in /home/runner/work/Muyon/Muyon/.git/
+compile	Checkout exact source	2026-10-18T07:55:49.9995968Z [command]/usr/bin/git remote add origin https://github.com/mightyoung/Muyon
+compile	Checkout exact source	2026-10-18T07:55:50.0053795Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:55:50.0055958Z ##[group]Disabling automatic garbage collection
+compile	Checkout exact source	2026-10-18T07:55:50.0058454Z [command]/usr/bin/git config --local gc.auto 0
+compile	Checkout exact source	2026-10-18T07:55:50.0097668Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:55:50.0099743Z ##[group]Setting up auth
+compile	Checkout exact source	2026-10-18T07:55:50.0106020Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile	Checkout exact source	2026-10-18T07:55:50.0149686Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile	Checkout exact source	2026-10-18T07:55:50.0539650Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile	Checkout exact source	2026-10-18T07:55:50.0582166Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile	Checkout exact source	2026-10-18T07:55:50.0818319Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+compile	Checkout exact source	2026-10-18T07:55:50.0891844Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:55:50.0894803Z ##[group]Fetching the repository
+compile	Checkout exact source	2026-10-18T07:55:50.0904690Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin f5b058ebaa44e786e6d24df964937968e92e8840
+compile	Checkout exact source	2026-10-18T07:55:52.3257395Z From https://github.com/mightyoung/Muyon
+compile	Checkout exact source	2026-10-18T07:55:52.3278304Z  * branch            f5b058ebaa44e786e6d24df964937968e92e8840 -> FETCH_HEAD
+compile	Checkout exact source	2026-10-18T07:55:52.3281433Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:55:52.3282715Z ##[group]Determining the checkout info
+compile	Checkout exact source	2026-10-18T07:55:52.3283686Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:55:52.3284310Z [command]/usr/bin/git sparse-checkout disable
+compile	Checkout exact source	2026-10-18T07:55:52.3339905Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+compile	Checkout exact source	2026-10-18T07:55:52.3375960Z ##[group]Checking out the ref
+compile	Checkout exact source	2026-10-18T07:55:52.3381719Z [command]/usr/bin/git checkout --progress --force f5b058ebaa44e786e6d24df964937968e92e8840
+compile	Checkout exact source	2026-10-18T07:55:52.8492931Z Note: switching to 'f5b058ebaa44e786e6d24df964937968e92e8840'.
+compile	Checkout exact source	2026-10-18T07:55:52.8493879Z 
+compile	Checkout exact source	2026-10-18T07:55:52.8494138Z You are in 'detached HEAD' state. You can look around, make experimental
+compile	Checkout exact source	2026-10-18T07:55:52.8494682Z changes and commit them, and you can discard any commits you make in this
+compile	Checkout exact source	2026-10-18T07:55:52.8495203Z state without impacting any branches by switching back to a branch.
+compile	Checkout exact source	2026-10-18T07:55:52.8495503Z 
+compile	Checkout exact source	2026-10-18T07:55:52.8495738Z If you want to create a new branch to retain commits you create, you may
+compile	Checkout exact source	2026-10-18T07:55:52.8497191Z do so (now or later) by using -c with the switch command. Example:
+compile	Checkout exact source	2026-10-18T07:55:52.8497481Z 
+compile	Checkout exact source	2026-10-18T07:55:52.8497607Z   git switch -c <new-branch-name>
+compile	Checkout exact source	2026-10-18T07:55:52.8497820Z 
+compile	Checkout exact source	2026-10-18T07:55:52.8497926Z Or undo this operation with:
+compile	Checkout exact source	2026-10-18T07:55:52.8498095Z 
+compile	Checkout exact source	2026-10-18T07:55:52.8498182Z   git switch -
+compile	Checkout exact source	2026-10-18T07:55:52.8498372Z 
+compile	Checkout exact source	2026-10-18T07:55:52.8498597Z Turn off this advice by setting config variable advice.detachedHead to false
+compile	Checkout exact source	2026-10-18T07:55:52.8498909Z 
+compile	Checkout exact source	2026-10-18T07:55:52.8499187Z HEAD is now at f5b058e build(android): regenerate and verify trusted Service owner Kotlin bindings
+compile	Checkout exact source	2026-10-18T07:55:52.8528147Z ##[endgroup]
+compile	Checkout exact source	2026-10-18T07:55:52.8589213Z [command]/usr/bin/git log -1 --format=%H
+compile	Checkout exact source	2026-10-18T07:55:52.8618728Z f5b058ebaa44e786e6d24df964937968e92e8840
+compile	Checkout exact source	2026-10-18T07:55:52.8628583Z ##[group]Removing auth
+compile	Checkout exact source	2026-10-18T07:55:52.8632906Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile	Checkout exact source	2026-10-18T07:55:52.8670270Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile	Checkout exact source	2026-10-18T07:55:52.8911099Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile	Checkout exact source	2026-10-18T07:55:52.8942158Z http.https://github.com/.extraheader
+compile	Checkout exact source	2026-10-18T07:55:52.8950201Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+compile	Checkout exact source	2026-10-18T07:55:52.8988599Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile	Checkout exact source	2026-10-18T07:55:52.9222218Z ##[endgroup]
+compile	Initialize isolated temporary directories	﻿2026-10-18T07:55:52.9518070Z ##[group]Run mkdir -p "$RUNNER_TEMP/muyon-compose-evidence" "$RUNNER_TEMP/muyon-compose-android-user"
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9519033Z [36;1mmkdir -p "$RUNNER_TEMP/muyon-compose-evidence" "$RUNNER_TEMP/muyon-compose-android-user"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9519565Z [36;1m{[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9519914Z [36;1m  printf 'GRADLE_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-gradle-cache"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9520454Z [36;1m  printf 'ANDROID_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-android-user"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9520969Z [36;1m  printf 'LOG_DIRECTORY=%s\n' "$RUNNER_TEMP/muyon-compose-evidence"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9521351Z [36;1m} >> "$GITHUB_ENV"[0m
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9813001Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9813515Z env:
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9813872Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9814288Z   GRADLE_VERSION: 8.13
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9814720Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Initialize isolated temporary directories	2026-10-18T07:55:52.9815276Z ##[endgroup]
+compile	JDK 17	﻿2026-10-18T07:55:53.0072601Z ##[group]Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+compile	JDK 17	2026-10-18T07:55:53.0073081Z with:
+compile	JDK 17	2026-10-18T07:55:53.0073302Z   distribution: temurin
+compile	JDK 17	2026-10-18T07:55:53.0073534Z   java-version: 17
+compile	JDK 17	2026-10-18T07:55:53.0073751Z   java-package: jdk
+compile	JDK 17	2026-10-18T07:55:53.0073972Z   check-latest: false
+compile	JDK 17	2026-10-18T07:55:53.0074194Z   server-id: github
+compile	JDK 17	2026-10-18T07:55:53.0074417Z   server-username: GITHUB_ACTOR
+compile	JDK 17	2026-10-18T07:55:53.0074679Z   server-password: GITHUB_TOKEN
+compile	JDK 17	2026-10-18T07:55:53.0074934Z   overwrite-settings: true
+compile	JDK 17	2026-10-18T07:55:53.0075181Z   job-status: success
+compile	JDK 17	2026-10-18T07:55:53.0077866Z   token: ***
+compile	JDK 17	2026-10-18T07:55:53.0078090Z env:
+compile	JDK 17	2026-10-18T07:55:53.0078358Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	JDK 17	2026-10-18T07:55:53.0078695Z   GRADLE_VERSION: 8.13
+compile	JDK 17	2026-10-18T07:55:53.0079067Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	JDK 17	2026-10-18T07:55:53.0079574Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	JDK 17	2026-10-18T07:55:53.0080091Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	JDK 17	2026-10-18T07:55:53.0080727Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	JDK 17	2026-10-18T07:55:53.0081071Z ##[endgroup]
+compile	JDK 17	2026-10-18T07:55:53.1759067Z ##[group]Installed distributions
+compile	JDK 17	2026-10-18T07:55:53.1968148Z Resolved Java 17.0.20+1 from tool-cache
+compile	JDK 17	2026-10-18T07:55:53.1968770Z Setting Java 17.0.20+1 as the default
+compile	JDK 17	2026-10-18T07:55:53.1980915Z (node:2336) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compile	JDK 17	2026-10-18T07:55:53.1982161Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compile	JDK 17	2026-10-18T07:55:53.1985980Z Creating toolchains.xml for JDK version 17 from temurin
+compile	JDK 17	2026-10-18T07:55:53.2068893Z Writing to /home/runner/.m2/toolchains.xml
+compile	JDK 17	2026-10-18T07:55:53.2069411Z 
+compile	JDK 17	2026-10-18T07:55:53.2069822Z Java configuration:
+compile	JDK 17	2026-10-18T07:55:53.2070274Z   Distribution: temurin
+compile	JDK 17	2026-10-18T07:55:53.2070719Z   Version: 17.0.20+1
+compile	JDK 17	2026-10-18T07:55:53.2071351Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	JDK 17	2026-10-18T07:55:53.2071906Z 
+compile	JDK 17	2026-10-18T07:55:53.2073050Z ##[endgroup]
+compile	JDK 17	2026-10-18T07:55:53.2093871Z Creating settings.xml with server-id: github
+compile	JDK 17	2026-10-18T07:55:53.2097755Z Writing to /home/runner/.m2/settings.xml
+compile	Record source and declared pins	﻿2026-10-18T07:55:53.2243190Z ##[group]Run mkdir -p "$LOG_DIRECTORY" "$ANDROID_USER_HOME"
+compile	Record source and declared pins	2026-10-18T07:55:53.2243915Z [36;1mmkdir -p "$LOG_DIRECTORY" "$ANDROID_USER_HOME"[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2244551Z [36;1mgit rev-parse HEAD > "$LOG_DIRECTORY/source-sha.txt"[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2245338Z [36;1mgit ls-files -z "$LAB_DIRECTORY" .github/workflows/android-compose-lab.yml |[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2246202Z [36;1m  sort -z | xargs -0 sha256sum > "$LOG_DIRECTORY/source-files.sha256"[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2247031Z [36;1m{[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2247351Z [36;1m  java -version 2>&1[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2247917Z [36;1m  printf '%s\n' 'Gradle=8.13; AGP=8.11.1; Kotlin/ComposeCompiler=2.2.20'[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2248714Z [36;1m  printf '%s\n' 'ComposeBOM=2025.09.01; compileSdk=36; buildTools=35.0.0'[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2249552Z [36;1m  printf '%s\n' 'Android installation/runtime/emulator/rendering=NOT_RUN'[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2250246Z [36;1m} > "$LOG_DIRECTORY/tool-pins.txt"[0m
+compile	Record source and declared pins	2026-10-18T07:55:53.2340483Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Record source and declared pins	2026-10-18T07:55:53.2340935Z env:
+compile	Record source and declared pins	2026-10-18T07:55:53.2341222Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Record source and declared pins	2026-10-18T07:55:53.2341556Z   GRADLE_VERSION: 8.13
+compile	Record source and declared pins	2026-10-18T07:55:53.2341903Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Record source and declared pins	2026-10-18T07:55:53.2342424Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Record source and declared pins	2026-10-18T07:55:53.2342891Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Record source and declared pins	2026-10-18T07:55:53.2343337Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Record source and declared pins	2026-10-18T07:55:53.2343786Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Record source and declared pins	2026-10-18T07:55:53.2344265Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Record source and declared pins	2026-10-18T07:55:53.2344657Z ##[endgroup]
+compile	Fetch and verify official Gradle distribution	﻿2026-10-18T07:55:54.4657004Z ##[group]Run distribution="$RUNNER_TEMP/gradle-$GRADLE_VERSION-bin.zip"
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4657662Z [36;1mdistribution="$RUNNER_TEMP/gradle-$GRADLE_VERSION-bin.zip"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4658132Z [36;1mcurl --fail --location --retry 3 --output "$distribution" \[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4658669Z [36;1m  "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4659155Z [36;1mprintf '%s  %s\n' "$GRADLE_SHA256" "$distribution" |[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4659573Z [36;1m  sha256sum --check | tee "$LOG_DIRECTORY/gradle-checksum.txt"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4660032Z [36;1munzip -q "$distribution" -d "$RUNNER_TEMP/muyon-compose-tools"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4660553Z [36;1m"$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" --version \[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4661023Z [36;1m  > "$LOG_DIRECTORY/gradle-version.txt"[0m
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4724033Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4724393Z env:
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4724705Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4725034Z   GRADLE_VERSION: 8.13
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4725385Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4725892Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4726681Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4727143Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4727594Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4728077Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4728455Z ##[endgroup]
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4903516Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4904396Z                                  Dload  Upload   Total   Spent    Left  Speed
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.4904866Z 
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.5265547Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.5266562Z 100   169  100   169    0     0   4646      0 --:--:-- --:--:-- --:--:--  4694
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.5566188Z 
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.5567284Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.9575289Z 
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:54.9576464Z 100  130M  100  130M    0     0   279M      0 --:--:-- --:--:-- --:--:--  279M
+compile	Fetch and verify official Gradle distribution	2026-10-18T07:55:55.0625863Z /home/runner/work/_temp/gradle-8.13-bin.zip: OK
+compile	Ensure official SDK build packages	﻿2026-10-18T07:55:57.1754928Z ##[group]Run sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1755408Z [36;1msdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1755749Z [36;1mtest -n "$sdk_root"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1756076Z [36;1mmanager="$sdk_root/cmdline-tools/latest/bin/sdkmanager"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1756801Z [36;1mtest -x "$manager"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1757146Z [36;1m"$manager" --version > "$LOG_DIRECTORY/sdkmanager-version.txt"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1757558Z [36;1m"$manager" --sdk_root="$sdk_root" --install \[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1757925Z [36;1m  'platforms;android-36' 'build-tools;35.0.0' 2>&1 |[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1758281Z [36;1m  tee "$LOG_DIRECTORY/sdk-packages.txt"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1758640Z [36;1mtest -f "$sdk_root/platforms/android-36/android.jar"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1759015Z [36;1mtest -x "$sdk_root/build-tools/35.0.0/aapt2"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1759389Z [36;1mprintf 'ANDROID_HOME=%s\n' "$sdk_root" >> "$GITHUB_ENV"[0m
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1821421Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1821782Z env:
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1822053Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1822384Z   GRADLE_VERSION: 8.13
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1822741Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1823262Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1823726Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1824167Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1824617Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1825138Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Ensure official SDK build packages	2026-10-18T07:55:57.1825529Z ##[endgroup]
+compile	Ensure official SDK build packages	2026-10-18T07:56:01.4277575Z Loading package information...                                                  
+compile	Ensure official SDK build packages	2026-10-18T07:56:01.5452662Z Loading local repository...                                                     
+compile	Ensure official SDK build packages	2026-10-18T07:56:01.5456695Z [                                       ] 3% Loading local repository...        
+compile	Ensure official SDK build packages	2026-10-18T07:56:02.7867716Z [                                       ] 3% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.3097734Z [=                                      ] 3% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.3882124Z [=                                      ] 4% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.4488838Z [=                                      ] 5% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.4980610Z [==                                     ] 5% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.5656977Z [==                                     ] 6% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.7827515Z [==                                     ] 7% Fetch remote repository...         
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.7857191Z [==                                     ] 7% Computing updates...               
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.7957477Z [===                                    ] 8% Computing updates...               
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.8032950Z [===                                    ] 10% Computing updates...              
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.8034820Z [=======================================] 100% Computing updates...             
+compile	Ensure official SDK build packages	2026-10-18T07:56:03.8039115Z 
+compile	Required JVM checks and Android source compilation	﻿2026-10-18T07:56:03.8326035Z ##[group]Run set +e
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8326799Z [36;1mset +e[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8327174Z [36;1m"$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8327710Z [36;1m  --no-daemon --stacktrace --console=plain -p "$LAB_DIRECTORY" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8328208Z [36;1m  :state:check :app:assembleDebug :app:assembleDebugAndroidTest \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8328658Z [36;1m  :app:compileDebugUnitTestKotlin :app:lintDebug 2>&1 |[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8329035Z [36;1m  tee "$LOG_DIRECTORY/required-build.log"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8329350Z [36;1mgradle_exit=${PIPESTATUS[0]}[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8329621Z [36;1mset -e[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8329840Z [36;1mrequired_exit=$gradle_exit[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8330119Z [36;1mif [[ $gradle_exit -eq 0 ]]; then[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8330594Z [36;1m  for marker in '16/16 pure JVM state checks passed' '22/22 local UI state checks passed'; do[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8331137Z [36;1m    if ! grep -Fq "$marker" "$LOG_DIRECTORY/required-build.log"; then[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8331533Z [36;1m      required_exit=1[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8331772Z [36;1m    fi[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8331970Z [36;1m  done[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8332156Z [36;1mfi[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8332495Z [36;1mprintf 'gradle_exit=%s\nrequired_exit=%s\n' "$gradle_exit" "$required_exit" \[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8332925Z [36;1m  > "$LOG_DIRECTORY/required-exit.txt"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8333217Z [36;1mexit "$required_exit"[0m
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8395695Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8396048Z env:
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8396615Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8396969Z   GRADLE_VERSION: 8.13
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8397321Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8397838Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8398299Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8398745Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8399214Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8399697Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8400104Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:03.8400381Z ##[endgroup]
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:04.5719756Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:05.9710797Z Daemon will be stopped at the end of the build 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:53.5746820Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:53.5788246Z > Configure project :app
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:53.5808576Z w: file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/build.gradle.kts:82:61: Unnecessary non-null assertion (!!) on a non-null receiver of type String
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:57.0717637Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:56:57.0738018Z > Task :state:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:01.4710919Z > Task :state:processResources NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:01.4738656Z > Task :state:processTestResources NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:01.4790130Z > Task :app:preBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:01.4797516Z > Task :app:preDebugBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:01.4805422Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:09.8727563Z > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:09.9731198Z > Task :app:generateDebugBuildConfig
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:10.4727961Z > Task :app:generateDebugResValues
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:10.6705517Z > Task :app:checkDebugAarMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:10.6726889Z > Task :app:compileDebugAidl
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:10.7717379Z > Task :app:mapDebugSourceSetPaths
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:10.7767175Z > Task :app:generateDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:12.2717344Z > Task :app:packageDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:13.5705848Z > Task :app:createDebugCompatibleScreenManifests
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:13.5729410Z > Task :app:extractDeepLinksDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:13.6716155Z > Task :app:mergeDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:13.6737276Z > Task :app:parseDebugLocalResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:14.0707686Z > Task :app:processDebugMainManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:14.2742601Z > Task :app:processDebugManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:14.2796847Z > Task :app:processDebugManifestForPackage
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:14.2816990Z > Task :app:javaPreCompileDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:15.0737763Z > Task :app:mergeDebugShaders
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:15.0767279Z > Task :app:compileDebugShaders NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:15.0827150Z > Task :app:generateDebugAssets UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:15.2767381Z > Task :app:mergeDebugAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:15.2827080Z > Task :app:desugarDebugFileDependencies
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:15.2877000Z > Task :app:compressDebugAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:16.4717415Z > Task :app:processDebugResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:16.4726928Z > Task :app:mergeDebugJniLibFolders
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:16.4750132Z > Task :app:checkDebugDuplicateClasses
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:17.9717229Z > Task :app:validateSigningDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:20.8747292Z > Task :state:compileKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:57:47.9717282Z > Task :app:mergeExtDexDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:01.4710460Z > Task :state:compileJava NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:01.4735050Z > Task :state:classes UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:01.5722191Z > Task :state:jar
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.1721602Z > Task :app:mergeLibDexDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.1722577Z > Task :app:writeDebugAppMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.2710703Z > Task :app:mergeDebugNativeLibs
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.2767111Z > Task :app:writeDebugSigningConfigVersions
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.2818337Z > Task :app:preDebugAndroidTestBuild SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.2846848Z > Task :app:compileDebugAndroidTestAidl NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.3726790Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.3748061Z > Task :app:stripDebugDebugSymbols
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:11.3800170Z Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.0726737Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.0727817Z > Task :app:processDebugAndroidTestManifest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.1737869Z > Task :app:generateDebugAndroidTestBuildConfig
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.1766817Z > Task :app:checkDebugAndroidTestAarMetadata
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.1783277Z > Task :app:generateDebugAndroidTestResValues
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.2757035Z > Task :app:mapDebugAndroidTestSourceSetPaths
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.2787082Z > Task :app:generateDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.9727323Z > Task :app:javaPreCompileDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.9760382Z > Task :app:mergeDebugAndroidTestShaders
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.9824251Z > Task :app:compileDebugAndroidTestShaders NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:13.9879371Z > Task :app:generateDebugAndroidTestAssets UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:14.0747555Z > Task :app:mergeDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:14.0804669Z > Task :app:mergeDebugAndroidTestAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:14.1777312Z > Task :app:compressDebugAndroidTestAssets
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:14.1806969Z > Task :app:desugarDebugAndroidTestFileDependencies
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:14.5707209Z > Task :app:processDebugAndroidTestResources
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:14.6717510Z > Task :app:checkDebugAndroidTestDuplicateClasses
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:14.6747060Z > Task :app:mergeDebugAndroidTestJniLibFolders
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:18.9704911Z > Task :state:compileTestKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:21.2717213Z > Task :state:compileTestJava NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:21.2777028Z > Task :state:testClasses UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.6786773Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.6827229Z > Task :state:checkState
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.6876947Z PASS default and ordered destinations
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.6997432Z PASS selection changes page without modifying previous state
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7087026Z PASS 899 and 900 logical width boundary
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7116853Z PASS invalid width rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7187023Z PASS raw draft survives navigation without normalization
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7246915Z PASS draft focus and scroll retained together
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7267068Z PASS page memories and prior state remain independent
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7347153Z PASS width changes do not own or replace state
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7396860Z PASS negative list coordinates rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7426844Z PASS Rust port has no connected or success default
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7456865Z PASS interrupted keeps explicit unknown warning
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7486712Z PASS cancelling never claims cancelled
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7516673Z PASS platform task note takes priority
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7546757Z PASS platform ownership cannot erase interrupted warning
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7576688Z PASS ordinary queued waiting and running copy
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7606831Z PASS paused failed succeeded and cancelled stay distinct
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7607728Z PASS 31 pending chat cancellation/late bootstrap checks; Android runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7637052Z PASS 21 chat read bounds, identity and immutable Service source checks; Binder/native NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7651292Z PASS frontend input/status policy (21 assertions; no Android/model execution)
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7652251Z PASS local UI: empty local session never fabricates a message
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7652991Z PASS local UI: draft remains exact raw UTF16
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7667070Z PASS local UI: blank local note does not create records
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7696854Z PASS local UI: nonblank local note can be saved
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7756966Z PASS local UI: local save preserves text and clears only composer
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7817100Z PASS local UI: repeated empty save cannot duplicate a note
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7847043Z PASS local UI: local note ids stay unique and ordered
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7876859Z PASS local UI: new conversation retains prior unsaved draft
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7907003Z PASS local UI: conversation switching retains individual scroll and focus
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7907793Z PASS local UI: invalid conversation selection changes nothing
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7908435Z PASS local UI: selection closes overlay but keeps search query
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7909083Z PASS local UI: create resets history filter and closes overlay
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7909724Z PASS local UI: history filter searches own title and note text
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7910340Z PASS local UI: record filter exposes only user saved content
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7910904Z PASS local UI: rename opens correct current title
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7911454Z PASS local UI: rename cancellation leaves title unchanged
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7912025Z PASS local UI: rename confirmation preserves exact title
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7912575Z PASS local UI: blank rename cannot overwrite title
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7913140Z PASS local UI: record details bind exact conversation and note
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7914221Z PASS local UI: invalid note or rename cannot invent an overlay
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7914929Z PASS local UI: local preferences retain drafts without changing host capability
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7915769Z PASS local UI: snapshot selection and ids remain valid after many sessions
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7916781Z 22/22 local UI state checks passed; no model or Rust action executed
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7917762Z PASS conversation candidate: platform snapshot rejects oversized text without truncating live state
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7918944Z PASS conversation candidate: snapshot restores two independent drafts and selected conversation
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7920150Z PASS conversation candidate: restore preserves user records and preferences but dismisses transient overlay
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7921401Z PASS conversation candidate: repeated restoration never adds assistant messages or execution results
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7922386Z PASS conversation candidate: every truncated snapshot is rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7923280Z PASS conversation candidate: incompatible version and trailing payload are rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7924353Z PASS conversation candidate: invalid selection enum counts and coordinates are rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7947032Z PASS conversation candidate: duplicate conversation and note identifiers are rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.7976975Z 8/8 conversation snapshot checks passed; Android rendering NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8006806Z PASS diagnostic construction never calls native
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8066901Z PASS diagnostic validation requires actual handshake
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8067646Z PASS diagnostic handshake is worker only and busy before entry
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8127078Z PASS diagnostic missing library has safe unavailable result
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8186943Z PASS diagnostic handshake rejects protocol mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8216890Z PASS diagnostic handshake rejects build mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8246946Z PASS diagnostic handshake rejects model mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8257019Z PASS diagnostic handshake rejects execute mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8306917Z PASS diagnostic handshake rejects read mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8326845Z PASS diagnostic handshake rejects write mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8356884Z PASS diagnostic handshake rejects attachment mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8387371Z PASS diagnostic four variants carry internal bounded identifiers and unsigned counts
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8426790Z PASS diagnostic report rejects id mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8446888Z PASS diagnostic report rejects variant mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8447629Z PASS diagnostic report rejects protocol mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8448241Z PASS diagnostic report rejects build mismatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8449088Z PASS diagnostic native typed UNSUPPORTED_PROTOCOL remains closed and slot releases
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8487091Z PASS diagnostic native typed INVALID_REQUEST_ID remains closed and slot releases
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8537061Z PASS diagnostic native typed DECLARATION_REJECTED remains closed and slot releases
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8547059Z PASS diagnostic native typed INTERNAL_FAILURE remains closed and slot releases
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8577019Z PASS diagnostic unexpected native error never exposes raw reason
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8577862Z PASS diagnostic expired handshake cannot publish readiness
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8578507Z PASS diagnostic detached lease cannot start work
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8579151Z PASS diagnostic rejected worker submission releases admission
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8579927Z PASS diagnostic delayed delivery rechecks lease and current snapshot
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8580849Z PASS diagnostic blocking native across dismiss stays single flight until actual return
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8581855Z PASS diagnostic blocking native across timeout stays single flight until actual return
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8582920Z PASS diagnostic blocking native across holder recreation stays single flight until actual return
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8584045Z PASS diagnostic listener reentrant detach cannot deadlock admission
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8585332Z 29/29 diagnostic coordinator checks passed; native FFI/Android runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8586452Z PASS B service precontroller initializing has no native identity or admission
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8587346Z PASS B service new connection ignores late constructor transport update
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8588116Z PASS B service connection rejects invalid native meta and lease
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8589046Z PASS B service fresh lease is invisible and reconciles before explicit user submit
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8616942Z PASS B service busy explicit double click never creates a second submit
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8646900Z PASS B service invalid user request identities cannot become native work
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8657116Z PASS B service native initializing recovery and closed remain unavailable
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8706907Z PASS B service old display lease cannot apply a later terminal
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8747061Z PASS B service old connection cannot erase original known terminal
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8747919Z PASS B service lower revision cannot regress same run
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8766989Z PASS B service higher revision cannot turn a settled run back into running
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8768312Z PASS B service equal revision requires identical authoritative snapshot
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8769080Z PASS B service same live connect is idempotent without dropping observations
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8769813Z PASS B service old epoch rejects active replies after reconnect
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8770494Z PASS B service current recovers lost request without producing submit
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8771262Z PASS B service status wrong request variant source or durable binding conflicts
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8772034Z PASS B service historical lookup is separate from a newer active run
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8772747Z PASS B service historical source build and admitted epoch stay original
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8773512Z PASS B service unknown transport is not native failed cancelled or no admission
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8774292Z PASS B service recorded read success remains success when run is cancelled
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8775001Z PASS B service settled no admission is distinct and cannot regress
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8775741Z PASS B service completed requires actual task receipt identity and reason none
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8776732Z PASS B service malformed IDs and negative revision rejected without defaults
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8777507Z PASS B service all sealed snapshot variants have a valid sibling
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8778374Z PASS B service multiple visible activity identities do not release the last lease early
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8779287Z PASS B service old visibility ACK cannot enable a newer invisible state
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8780107Z PASS B service rotation retains run identity but cannot clear issued stop
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8781004Z PASS B service release invalidates old observation and does not claim native closed
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8781813Z PASS B service panel detach is not visibility release
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8782525Z PASS B service post terminal new request requires explicit user action
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8783345Z PASS B service bootstrap late constructor is explicitly retired and drained
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8784269Z PASS B service bootstrap initialized object settles before install and does not repeat
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8785229Z PASS B service bootstrap retirement during actual constructor discards late object
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8786074Z PASS B service bootstrap failure never installs invented Ready
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8787162Z PASS B service blocked observation cannot queue another observation but control runs
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8788132Z PASS B service control lane is bounded independently and releases after error
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8789047Z PASS B service RPC rejection cannot strand its local lane
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8807172Z PASS B service new lease forwards existing activity visibility without implicit start
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8816856Z PASS B service known terminal cannot be erased by a later empty current
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8836865Z PASS B service closed service phase cannot reopen on a later revision
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8877095Z PASS B service retirement after initialize waiter returns still performs close settlement
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8906967Z PASS B service historical lookup rejects a different original request binding
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8930466Z PASS B service different historical observation keys may share service revision
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8931585Z PASS B service old status ticket cannot replace a newer explicitly selected run
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8957187Z PASS B service retirement signal handoff cannot settle before actual stop signal
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8966939Z PASS B service new historical selection rejects reverse delivery at revision 3
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.8999481Z PASS B service new historical selection rejects reverse delivery at revision 2
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9008926Z PASS B service settlement pump coalesces requests without a waiting queue
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9057012Z PASS B service settlement requested during return stays with actual waiter
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9067271Z PASS B service settlement rejection and failure do not strand next explicit request
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9086988Z PASS B service blocked settlement admits no concurrent waiter and preserves new request
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9117481Z PASS B service concurrent settlement request is not acknowledged before rejected dispatch
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9138407Z PASS B service throwing failure listener cannot strand accepted settlement request
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9157139Z PASS B service retirement holder reserves one construction before any object exists
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9176783Z RETENTION_PUBLICATION_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9204830Z PASS B service retirement holder publishes strong object before first await
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9226804Z RETENTION_RETIRE_FAILURE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9239276Z PASS B service throwing retirement retains original object and denies replacement
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9256838Z RETENTION_AWAIT_EXCEPTION_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9287026Z PASS B service throwing await exception retains original object without retry
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9316788Z RETENTION_AWAIT_LINKAGE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9330576Z PASS B service throwing await linkage retains original object without retry
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9377086Z PASS B service nonclosed settlement retains owner until later actual closed cleanup
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9404217Z RETENTION_CLEANUP_FAILURE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9407723Z PASS B service closed with throwing handle cleanup retains owner until successful cleanup
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9408860Z PASS B service stale retirement token cannot clear replacement after genuine cleanup
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9409888Z PASS B service definite preobject failure releases only its unpublished reservation
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9410984Z PASS B service destroyed service late constructor remains owned through explicit retirement
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9412047Z PASS B service zero active handle cleanup succeeds once and seals future calls
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9413105Z PASS B service inflight handle call prevents cleanup while disposal seals replacement admission
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9413979Z HANDLE_CLEANUP_FAILURE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9414739Z PASS B service throwing generated cleanup stays sealed incomplete without implicit retry
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9415787Z PASS B service nonclosed or nondisposing settlement cannot seal or release handle
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9416804Z HANDLE_LAST_RETURN_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9417563Z PASS B service last active return hands sealed cleanup to existing background owner exactly once
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9418583Z 68/68 B service state checks passed; Android Binder/native runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9419433Z PASS B IPC local initialization remains distinct from native metadata
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9420182Z PASS B IPC connected lease and actual native phase survive codec
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9420954Z PASS B IPC all six snapshot shapes retain original identity and receipt
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9422303Z PASS B IPC queued admission differs from original existing result
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9423099Z PASS B IPC control rejection busy and unknown use closed units
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9423977Z PASS B IPC truncated trailing and wrong version bytes cannot become a result
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9424838Z PASS B IPC oversize bytes and unstructured input are rejected
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9425665Z PASS B IPC invalid native identity protocol and build cannot be encoded
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9426764Z PASS B IPC invalid completed result is not repaired into success
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9427599Z PASS B IPC actual typed start refusal requires reconciliation without fabricating terminal
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9428517Z PASS B IPC uncertain transport and unrelated control cannot clear pending start
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9429387Z PASS B IPC stale start refusal cannot clear a replacement connection pending request
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9430210Z 12/12 B IPC codec checks passed; Android Parcel/Binder runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9430967Z PASS B liveness private keys never repeat after dead token replacement
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9431763Z PASS B liveness same live token links once and keeps its native correlation key
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9432832Z PASS B liveness released live tombstone consumes capacity and cannot resurrect
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9433653Z PASS B liveness death during link cannot gain a native lease
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9434460Z PASS B liveness death inside native connect rejects late lease and stops original key again
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9435393Z PASS B liveness late original death callback cannot remove replacement
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9436168Z PASS B liveness unknown lease cannot tombstone a registered client
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9467432Z PASS B liveness inflight same token connect returns busy without second native call
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9468383Z PASS B liveness native connect and gone listeners execute outside registry lock
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9469279Z PASS B liveness failed death-link setup cannot create an unobserved native lease
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9470193Z PASS B liveness acknowledged release cannot be revived by inflight repeat connect
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9471114Z PASS B liveness dispose unlinks live and released tokens without claiming native stop
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9472005Z PASS B liveness dispose during death-link setup detaches the eventual link
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9472858Z PASS B liveness dispose rejects late native connect and stops only its original key
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9473703Z PASS B liveness unlink callback executes outside registry admission lock
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9474333Z DISPOSAL_UNLINK_FAILURE_REACHED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9474916Z PASS B liveness dispose attempts second unlink when first unlink fails
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9475712Z 16/16 B liveness checks passed; real Binder death/process runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9476703Z 16/16 pure JVM state checks passed; Compose/Android runtime NOT_RUN
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9477210Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9477391Z > Task :state:test SKIPPED
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9477837Z > Task :state:check
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9478252Z > Task :app:mergeLibDexDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9478887Z > Task :app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9479508Z > Task :app:mergeExtDexDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9480052Z > Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9480662Z > Task :app:validateSigningDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9481304Z > Task :app:writeDebugAndroidTestSigningConfigVersions
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9481926Z > Task :app:extractProguardFiles
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:22.9482443Z > Task :app:preDebugUnitTestBuild UP-TO-DATE
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:31.8710228Z > Task :app:compileDebugKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:39.5728073Z > Task :app:compileDebugJavaWithJavac
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:41.8704812Z > Task :app:dexBuilderDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:41.9704755Z > Task :app:mergeDebugGlobalSynthetics
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:41.9705788Z > Task :app:processDebugJavaRes
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:42.8704867Z > Task :app:bundleDebugClassesToCompileJar
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:43.0704742Z > Task :app:mergeProjectDexDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:43.3707402Z > Task :app:mergeDebugJavaResource
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:44.5717482Z > Task :app:generateDebugLintReportModel
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:45.5705267Z > Task :app:generateDebugAndroidTestLintModel
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:45.5710120Z > Task :app:generateDebugUnitTestLintModel
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:46.9767362Z > Task :app:compileDebugUnitTestKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:48.0710541Z > Task :app:compileDebugAndroidTestKotlin
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:50.9704545Z > Task :app:packageDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:50.9743868Z > Task :app:createDebugApkListingFileRedirect
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:50.9744760Z > Task :app:assembleDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.4705476Z > Task :app:compileDebugAndroidTestJavaWithJavac
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.5717453Z > Task :app:dexBuilderDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.5737037Z > Task :app:mergeDebugAndroidTestGlobalSynthetics
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.5756803Z > Task :app:processDebugAndroidTestJavaRes
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.7704736Z > Task :app:mergeProjectDexDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.8727195Z > Task :app:mergeDebugAndroidTestJavaResource
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.9717382Z > Task :app:packageDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.9718865Z > Task :app:createDebugAndroidTestApkListingFileRedirect
+compile	Required JVM checks and Android source compilation	2026-10-18T07:58:51.9747190Z > Task :app:assembleDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:04.2718115Z > Task :app:lintAnalyzeDebugUnitTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:07.3704556Z > Task :app:lintAnalyzeDebugAndroidTest
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:15.5704406Z > Task :app:lintAnalyzeDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:30.5710643Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:30.5711729Z > Task :app:lintReportDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:30.5713226Z Wrote HTML report to file:///home/runner/work/Muyon/Muyon/experiments/redesign/android-compose-lab/app/build/reports/lint-results-debug.html
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:30.5714488Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:30.5714874Z > Task :app:lintDebug
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:30.5715345Z 
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:30.5715683Z BUILD SUCCESSFUL in 3m 26s
+compile	Required JVM checks and Android source compilation	2026-10-18T07:59:30.5716558Z 81 actionable tasks: 81 executed
+compile	Record unexecuted boundaries even after setup failure	﻿2026-10-18T07:59:30.9352678Z ##[group]Run mkdir -p "$LOG_DIRECTORY"
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9353057Z [36;1mmkdir -p "$LOG_DIRECTORY"[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9353393Z [36;1mif [[ ! -f "$LOG_DIRECTORY/required-exit.txt" ]]; then[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9353919Z [36;1m  printf 'gradle_exit=NOT_RUN\nrequired_exit=NOT_RUN\n' > "$LOG_DIRECTORY/required-exit.txt"[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9354369Z [36;1mfi[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9354727Z [36;1mprintf '%s\n' 'Android installation/runtime=NOT_RUN' 'Compose rendering=NOT_RUN' \[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9355307Z [36;1m  'Rust integration runtime=NOT_RUN' 'WorkBuddy pixel fidelity=UNVERIFIED' \[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9355778Z [36;1m  > "$LOG_DIRECTORY/unexecuted-boundaries.txt"[0m
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9420991Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9421340Z env:
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9421606Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9421942Z   GRADLE_VERSION: 8.13
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9422295Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9422843Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9423305Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9423747Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9424193Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9424675Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9425087Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	Record unexecuted boundaries even after setup failure	2026-10-18T07:59:30.9425357Z ##[endgroup]
+compile	Upload compilation evidence only	﻿2026-10-18T07:59:30.9595492Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9595907Z with:
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9596153Z   name: android-compose-lab-evidence-39109496219-1
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9596848Z   path: /home/runner/work/_temp/muyon-compose-evidence
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9597182Z   if-no-files-found: warn
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9597616Z   retention-days: 7
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9597829Z   compression-level: 6
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9598051Z   overwrite: false
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9598265Z   include-hidden-files: false
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9598495Z env:
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9598737Z   LAB_DIRECTORY: experiments/redesign/android-compose-lab
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9599096Z   GRADLE_VERSION: 8.13
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9599438Z   GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9599925Z   GRADLE_USER_HOME: /home/runner/work/_temp/muyon-compose-gradle-cache
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9600379Z   ANDROID_USER_HOME: /home/runner/work/_temp/muyon-compose-android-user
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9600884Z   LOG_DIRECTORY: /home/runner/work/_temp/muyon-compose-evidence
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9601337Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9601815Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9602224Z   ANDROID_HOME: /usr/local/lib/android/sdk
+compile	Upload compilation evidence only	2026-10-18T07:59:30.9602493Z ##[endgroup]
+compile	Upload compilation evidence only	2026-10-18T07:59:31.1442937Z (node:3018) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compile	Upload compilation evidence only	2026-10-18T07:59:31.1444241Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compile	Upload compilation evidence only	2026-10-18T07:59:31.1588222Z With the provided path, there will be 10 files uploaded
+compile	Upload compilation evidence only	2026-10-18T07:59:31.1596165Z Artifact name is valid!
+compile	Upload compilation evidence only	2026-10-18T07:59:31.1597112Z Root directory input is valid!
+compile	Upload compilation evidence only	2026-10-18T07:59:31.3893398Z Beginning upload of artifact content to blob storage
+compile	Upload compilation evidence only	2026-10-18T07:59:31.4332720Z (node:3018) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+compile	Upload compilation evidence only	2026-10-18T07:59:31.4611086Z Uploaded bytes 11883
+compile	Upload compilation evidence only	2026-10-18T07:59:31.4810171Z Finished uploading artifact content to blob storage!
+compile	Upload compilation evidence only	2026-10-18T07:59:31.4811657Z SHA256 digest of uploaded artifact zip is b0ae55429d42f9a73843a3011501df957446f360fdc0f42764568a924df80c50
+compile	Upload compilation evidence only	2026-10-18T07:59:31.4814388Z Finalizing artifact upload
+compile	Upload compilation evidence only	2026-10-18T07:59:31.6800188Z Artifact android-compose-lab-evidence-39109496219-1.zip successfully finalized. Artifact ID 12130350537
+compile	Upload compilation evidence only	2026-10-18T07:59:31.6801830Z Artifact android-compose-lab-evidence-39109496219-1 has been successfully uploaded! Final size is 11883 bytes. Artifact ID is 12130350537
+compile	Upload compilation evidence only	2026-10-18T07:59:31.6807897Z Artifact download URL: https://github.com/mightyoung/Muyon/actions/runs/39109496219/artifacts/12130350537
+compile	Post JDK 17	﻿2026-10-18T07:59:31.7003895Z Post job cleanup.
+compile	Post JDK 17	2026-10-18T07:59:31.8303820Z (node:3031) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+compile	Post JDK 17	2026-10-18T07:59:31.8305097Z (Use `node --trace-deprecation ...` to show where the warning was created)
+compile	Post Checkout exact source	﻿2026-10-18T07:59:31.8542124Z Post job cleanup.
+compile	Post Checkout exact source	2026-10-18T07:59:31.9459368Z [command]/usr/bin/git version
+compile	Post Checkout exact source	2026-10-18T07:59:31.9504630Z git version 2.55.0
+compile	Post Checkout exact source	2026-10-18T07:59:31.9546555Z Temporarily overriding HOME='/home/runner/work/_temp/759bccd0-d629-4de6-a635-65be4a9f6599' before making global git config changes
+compile	Post Checkout exact source	2026-10-18T07:59:31.9548007Z Adding repository directory to the temporary git global config as a safe directory
+compile	Post Checkout exact source	2026-10-18T07:59:31.9553837Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Muyon/Muyon
+compile	Post Checkout exact source	2026-10-18T07:59:31.9598336Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+compile	Post Checkout exact source	2026-10-18T07:59:31.9635456Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+compile	Post Checkout exact source	2026-10-18T07:59:31.9908772Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+compile	Post Checkout exact source	2026-10-18T07:59:31.9981298Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+compile	Complete job	﻿2026-10-18T07:59:32.0584924Z Cleaning up orphan processes
+compile	Complete job	2026-10-18T07:59:32.0907135Z Terminate orphan process: pid (2703) (java)
+compile	Complete job	2026-10-18T07:59:32.0925561Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683, actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

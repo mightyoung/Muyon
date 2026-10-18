@@ -1,0 +1,13 @@
+{
+  "source": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+  "source_package_bridge_identity": "PASS",
+  "apk_hash_agreement": "PASS",
+  "min_api": 26,
+  "abis": [
+    "arm64-v8a",
+    "x86_64"
+  ],
+  "generated_binding_hash": "PASS",
+  "actual_instrumentation": "2/2 PASS",
+  "build_stage_runtime_field": "NOT_RUN unchanged; later device-result and instrumentation establish runtime"
+}
