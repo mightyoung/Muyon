@@ -16,3 +16,9 @@ Evidence:
 - `android-logs/binding-generation.log` and `generated-sha256.log`: actual 0.32.2 bindgen run using repository Android config and real Linux .so. Kotlin output was copied from generator; no handcrafted FFI definitions.
 
 Limitations: no Android SDK/device/emulator here, so Android AIDL/Compose compilation, Binder transport, process death and API26 end-to-end instrumentation remain NOT_RUN pending integrated CI. Pure bounds/state tests do not certify the Android JSON decoder or Binder runtime. Native build ID used for generator preparation was B06 `6635bc6be057fd36c0e0c6c0aafaf034aca2ecaa`; final native library must be rebuilt with the integrator's fixed source SHA and matching BuildConfig. No credentials, paid calls or licenses were configured or accepted. I04 remains untouched.
+
+## Fixed-SHA review: pending bootstrap cancellation
+
+Review found that cancelling a submitting chat before its first lease did not remove the deferred submit closure. Added a main-thread PendingChatAction token whose unsent cancellation and dispatch are mutually exclusive. Only a matching original request can revoke it. The client removes the deferred closure, releases the original in-flight slot, and returns definitive local not-sent cancellation. Late bootstrap cannot dispatch that token. Once handed to the RPC lane, cancellation uses native control and waits for settlement; invalid/no ACK is UNKNOWN, never cancel_requested.
+
+Targeted test-first evidence: `pending-cancel-red.log` fails compilation before the token exists; `pending-cancel-green.log` passes seven checks including cancel-before-bootstrap, mismatched request, late dispatch prevention, and dispatch-before-cancel uncertainty. The check is wired into StateChecks; broad suite was deliberately not rerun for this focused fix. Android race instrumentation remains pending integrated CI.

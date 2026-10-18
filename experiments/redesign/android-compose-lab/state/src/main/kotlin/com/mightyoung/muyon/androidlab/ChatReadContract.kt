@@ -18,3 +18,16 @@ object ChatReadBounds {
 
 /** Loss hides disclosure and restarts only event lookup; stable request/run/receipt identities survive. */
 fun ChatReadConversation.disclosureLost(reason:String)=copy(status="unknown",reason=reason,answer="",projection=null,receipt=null,cursor=0)
+
+/** Main-thread ownership token. Dispatch and unsent cancellation are mutually exclusive. */
+class PendingChatAction(private val requestId:String) {
+    private var pending=true
+    fun cancel(id:String):Boolean {
+        if(!pending || id!=requestId)return false
+        pending=false;return true
+    }
+    fun dispatch():Boolean {
+        if(!pending)return false
+        pending=false;return true
+    }
+}

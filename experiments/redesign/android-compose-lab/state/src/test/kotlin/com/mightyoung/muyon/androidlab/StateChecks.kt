@@ -94,6 +94,7 @@ fun main() {
         catch (error: Throwable) { failed++; println("FAIL $name: ${error.message}") }
     }
     check(failed == 0) { "$failed/${checks.size} state checks failed" }
+    runPendingChatActionChecks()
     runChatReadChecks()
     runFrontendChatChecks()
     runLocalUiChecks()

@@ -1,0 +1,6 @@
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/PendingChatActionChecks.kt:3:19: error: unresolved reference 'PendingChatAction'.
+    val cancelled=PendingChatAction("original")
+                  ^^^^^^^^^^^^^^^^^
+experiments/redesign/android-compose-lab/state/src/test/kotlin/com/mightyoung/muyon/androidlab/PendingChatActionChecks.kt:8:14: error: unresolved reference 'PendingChatAction'.
+    val sent=PendingChatAction("sent")
+             ^^^^^^^^^^^^^^^^^

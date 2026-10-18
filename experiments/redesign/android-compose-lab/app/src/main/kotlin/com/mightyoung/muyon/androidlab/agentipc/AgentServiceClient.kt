@@ -45,15 +45,19 @@ internal class AgentServiceClient(private val context:Context,private val build:
     private var ticket:UiAgentConnectionTicket?=null
     private var remote:BoundedAgentProxy?=null
     private var chatHandshakeAttempts=0
+    private var pendingSubmit:PendingChatAction?=null
     private var pendingChat:(()->Unit)?=null
     private var pendingChatFailure:(()->Unit)?=null
     internal val chats:ChatReadPort by lazy { AgentChatReadSession(context,this) }
-    internal fun chatRpc(work:(BoundedAgentProxy,UiAgentClientRef)->String,done:(String?)->Unit) {
+    internal fun chatRpc(submitId:String?=null,work:(BoundedAgentProxy,UiAgentClientRef)->String,done:(String?)->Unit) {
         requireMain()
         val api=remote;val client=state.client;val captured=ticket
         if(api==null || client==null || captured==null) {
             if(pendingChat!=null){done(null);return}
-            pendingChat={chatRpc(work,done)};pendingChatFailure={done(null)};chatHandshakeAttempts=0;connect();return
+            val action=submitId?.let(::PendingChatAction)
+            pendingSubmit=action
+            pendingChat={if(action==null || action.dispatch()){pendingSubmit=null;chatRpc(submitId,work,done)}}
+            pendingChatFailure={pendingSubmit=null;done(null)};chatHandshakeAttempts=0;connect();return
         }
         val accepted=lanes.observe {
             val reply=try{work(api,client)}catch(_:Exception){null}
@@ -63,11 +67,18 @@ internal class AgentServiceClient(private val context:Context,private val build:
     }
     internal fun chatCancel(id:String,run:String?,done:(String?)->Unit) {
         requireMain()
+        // This branch is definitive: no worker/IPC was scheduled for this token.
+        if(pendingSubmit?.cancel(id)==true) {
+            val failure=pendingChatFailure
+            pendingChat=null;pendingChatFailure=null;pendingSubmit=null
+            failure?.invoke() // releases the original UI in-flight slot
+            done("not_sent_cancelled");return
+        }
         val api=remote;val client=state.client;val captured=ticket
         if(api==null || client==null || captured==null){done(null);return}
         val accepted=lanes.control {
             val reply=try{api.cancel(client.epoch,client.lease,id,UiAgentVariant.INQUIRY.ordinal,run).decode(build)}catch(_:Exception){null}
-            main.post{done(if(ticket===captured && state.client==client && reply is UiAgentWireReply.Ack)"cancel_requested" else null)}
+            main.post{done(if(ticket===captured && state.client==client && reply is UiAgentWireReply.Ack && (reply.value==UiAgentAck.APPLIED || reply.value==UiAgentAck.REQUESTED))"cancel_requested" else null)}
         }
         if(!accepted)done(null)
     }

@@ -41,7 +41,7 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
         // Persist identity before the very first Binder submission. Failure prevents dispatch.
         try{update(conversationId,value)}catch(_:Exception){snapshot=snapshot.copy(conversations=snapshot.conversations+(conversationId to value.copy(status="failed",reason="请求身份持久化失败；未提交")));return}
         val selected=snapshot.selected
-        rpc(conversationId){api,ref->api.submitSupplierRead(ref.epoch,ref.lease,value.requestId!!,text,selected.key,selected.revision)}
+        rpc(conversationId,submitId=value.requestId){api,ref->api.submitSupplierRead(ref.epoch,ref.lease,value.requestId!!,text,selected.key,selected.revision)}
     }
     override fun reconcile(conversationId:String) {
         val value=snapshot.conversations[conversationId] ?: return
@@ -52,13 +52,17 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
         val value=snapshot.conversations[conversationId] ?: return
         val id=value.requestId ?: return
         client.chatCancel(id,value.runId){result->
+            if(result=="not_sent_cancelled") {
+                update(conversationId,(snapshot.conversations[conversationId] ?: value).copy(status="cancelled",reason="已撤销尚未发送的请求；未执行供应商读取"))
+                return@chatCancel
+            }
             update(conversationId,(snapshot.conversations[conversationId] ?: value).copy(status=if(result!=null)"cancel_requested" else "unknown",reason=if(result!=null)"已请求取消；以原运行终态与回执为准" else "取消未确认；核实原运行"))
             reconcile(conversationId)
         }
     }
-    private fun rpc(conversation:String,work:(BoundedAgentProxy,UiAgentClientRef)->String) {
+    private fun rpc(conversation:String,submitId:String?=null,work:(BoundedAgentProxy,UiAgentClientRef)->String) {
         if(!inFlight.add(conversation))return
-        client.chatRpc(work){raw->
+        client.chatRpc(submitId,work){raw->
             inFlight.remove(conversation)
             val old=snapshot.conversations[conversation] ?: return@chatRpc
             val result=try{if(raw==null)error("transport_lost");decode(old,raw)}catch(_:Exception){old.disclosureLost("连接或协议不可核实；保留原请求，不自动重发")}
