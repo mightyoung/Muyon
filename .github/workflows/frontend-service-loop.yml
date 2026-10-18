@@ -28,6 +28,9 @@ jobs:
           rustup default 1.99.0
           python3 -B -m unittest discover -s experiments/redesign/frontend-service-loop-lab -v 2>&1 | tee "$RUNNER_TEMP/loop-scoped/oracle.log"
           cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test supplier_store --test supplier_lab_source --test supplier_business_controller -- --nocapture 2>&1 | tee "$RUNNER_TEMP/loop-scoped/rust.log"
+          # Exact module filter: never execute the unrelated HTTP/reopen unit module.
+          cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --lib supplier_business::terminal_regressions -- --nocapture 2>&1 | tee "$RUNNER_TEMP/loop-scoped/recovery.log"
+          grep -F "3 passed; 0 failed" "$RUNNER_TEMP/loop-scoped/recovery.log"
           cargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings 2>&1 | tee "$RUNNER_TEMP/loop-scoped/bridge.log"
           "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config experiments/redesign/android-rust-bridge-lab/core/uniffi.android.toml --out-dir "$RUNNER_TEMP/loop-generated" --no-format
           generated="$RUNNER_TEMP/loop-generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt"

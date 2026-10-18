@@ -41,3 +41,16 @@ Store worker erroneously ran `/workspace/toolchains/cargo/bin/cargo test -- --no
 ## Latest read-only inherited CI/ref observation
 
 A original generic run39102166368 remained `in_progress` at the latest check; same original SHA3f3a2368, not cancelled or retried. Dedicated39102166352 is green but cannot substitute its outcome. Remote main `cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003`, develop `0ab2c4f667681b9aacb017f8cd2eea6f576cf78e`, PR86 OPEN/unmerged at source3f1be180 on latest readback. These refs were not modified.
+
+## First platform CI and review correction
+
+- Source `4836aeee94afe871443b852d08b637fe0c7e23f0`: [Compose build39104528534](https://github.com/mightyoung/Muyon/actions/runs/39104528534) SUCCESS (actual AIDL/Kotlin/app/test APK compilation, lint, JVM checks; runtime NOT_RUN).
+- [Loop39104528559](https://github.com/mightyoung/Muyon/actions/runs/39104528559) FAILURE: native arm64-v8a and x86_64 producers SUCCESS; scoped supplier tests had 2 FAIL because new test helpers inherited runner umask022. Package/device correctly SKIPPED. Test helper corrected at `0d15d5cb` using explicit private creation; same umask022 RED→GREEN 5/5. Production mode checks unchanged.
+- Independent immutable review at `e74138c3` found four blockers (final-ledger UNKNOWN polling, pending-submit cancellation, historical receipt availability, bootstrap callback completion). New immutable review at `93beaf18ff553db0e5d54feabb54c949cfc1a4e3` marked all four ADDRESSED with no new serious defect. Raw reports retained.
+- `ccbc3a72`, `d14b9426`, `a9c13341`, `93beaf18`: cancel/no-dispatch token, exactly-once bounded submit/query completion, historical receipt display, UNKNOWN terminal/history, before-dispatch task identity persistence and payload-only receipt recovery.
+- Additional wire correction `2a763bdf`: legitimate unknown+terminal replies preserve their native reason; no poll/resubmit.
+- Root separately ran the exact `--lib supplier_business::terminal_regressions` filter: 3/3 PASS, seven unrelated unit tests filtered out. No broad or HTTP suite run by root. CI explicitly uses the same module filter and asserts the three-test count.
+- Actual implementation wire is documented in [WIRE.md](WIRE.md); preparatory oracle remains a design model, not Android JSON codec conformance proof.
+- Source whitespace checks PASS for `.rs/.kt/.py/.yml/.toml`. Raw logs are preserved byte-for-byte, including trailing blank lines; full patch whitespace checks may report those evidence-only lines.
+
+Next exact-SHA CI result is still pending until its own jobs complete. Earlier native/compile successes are not substituted for the corrected composition.
