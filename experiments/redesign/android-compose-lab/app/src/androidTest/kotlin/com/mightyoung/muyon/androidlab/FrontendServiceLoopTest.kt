@@ -2,6 +2,7 @@ package com.mightyoung.muyon.androidlab
 
 import android.app.ActivityManager
 import android.content.Context
+import android.graphics.Rect
 import android.os.Process
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -36,6 +37,20 @@ class FrontendServiceLoopTest {
     private fun awaitTag(tag:String) {
         compose.waitUntil(timeoutMillis=60_000) {
             compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    /** Geometry only: distinguish an absent note from a clipped/settling viewport. */
+    private fun localSaveViewport(stage:String) {
+        val labelBounds=compose.onAllNodesWithText("你 · 本地记录，未发送")
+            .fetchSemanticsNodes().map { it.boundsInRoot }
+        val listBounds=compose.onAllNodesWithTag("local-chat-list")
+            .fetchSemanticsNodes().map { it.boundsInRoot }
+        compose.activityRule.scenario.onActivity { activity->
+            val decor=activity.window.decorView
+            val visible=Rect()
+            decor.getWindowVisibleDisplayFrame(visible)
+            println("API26_LOCAL_SAVE_VIEWPORT stage=$stage label_bounds=$labelBounds list_bounds=$listBounds decor_height=${decor.height} window_visible=$visible")
         }
     }
 
@@ -118,7 +133,18 @@ class FrontendServiceLoopTest {
         hideKeyboard()
         compose.onNodeWithTag("assistant-draft").assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
         compose.onNodeWithTag("send-service-read").assertIsNotEnabled()
+        localSaveViewport("before-scroll")
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasText("你 · 本地记录，未发送"))
+        localSaveViewport("after-scroll")
+        // hideSoftInputFromWindow does not await API26 window resize; note-save also
+        // schedules frame-based auto-scroll. Wait for the actual display predicate.
+        try {
+            compose.waitUntil(timeoutMillis=10_000) {
+                compose.onNodeWithText("你 · 本地记录，未发送").isDisplayed()
+            }
+        } finally {
+            localSaveViewport("after-display-wait")
+        }
         compose.onNodeWithText("你 · 本地记录，未发送").assertIsDisplayed()
         println("API26_FRONTEND_INPUT_VALIDATION_PASS no_send_clicked=true model_api_called=false")
     }
