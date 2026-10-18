@@ -36,7 +36,10 @@ jobs:
         working-directory: apps/muyon
         run: |
           set -o pipefail
-          flutter build apk --release --no-pub 2>&1 | tee "$RUNNER_TEMP/shipping-build.log"
+          # Flutter 3.47.5 skips release plugin regeneration with --no-pub;
+          # pub get alone leaves dev-plugin registration incompatible with release Gradle.
+          flutter build apk --release 2>&1 | tee "$RUNNER_TEMP/shipping-build.log"
+          git diff --exit-code -- ../../pubspec.lock
           cd android
           ./gradlew --no-daemon :agent-observation:checkObservation :app:lintRelease 2>&1 | tee "$RUNNER_TEMP/shipping-lint.log"
       - name: Inspect actual APK minimum API and source provenance
