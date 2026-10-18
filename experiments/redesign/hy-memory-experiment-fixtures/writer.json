@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "synthetic_only": true,
+  "evidence_status": "UNVERIFIED",
+  "sources": [
+    {
+      "id": "source-synthetic-1",
+      "revision": 3,
+      "content": "Synthetic project uses copper labels.",
+      "content_digest": "sha256:809b25be2310d437d17bb3bce29ec0ed599dc8fef81e426a0b5bbe37050734fa"
+    }
+  ],
+  "proposal_template": {
+    "intent_id": "intent-synthetic-1",
+    "object_id": "memory-synthetic-1",
+    "expected_revision": 7,
+    "authority_revision": 4,
+    "policy_generation": 2,
+    "source_refs": [
+      {
+        "id": "source-synthetic-1",
+        "revision": 3,
+        "content_digest": "sha256:809b25be2310d437d17bb3bce29ec0ed599dc8fef81e426a0b5bbe37050734fa"
+      }
+    ],
+    "content": "Synthetic project uses copper labels.",
+    "verification": "candidate",
+    "lineage": [
+      "source-synthetic-1"
+    ]
+  },
+  "cases": [
+    {
+      "id": "valid_candidate",
+      "host_condition": "all_current",
+      "expected_host_outcome": "COMMIT_CANDIDATE",
+      "expected_business_writes": 1
+    },
+    {
+      "id": "manual_edit_race",
+      "host_condition": "cas_changed",
+      "expected_host_outcome": "REJECT_CAS",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "authority_revoked",
+      "host_condition": "authority_revoked",
+      "expected_host_outcome": "REJECT_AUTHORITY",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "policy_closed_after_queue",
+      "host_condition": "policy_closed",
+      "expected_host_outcome": "REJECT_POLICY",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "policy_closed_then_reopened",
+      "host_condition": "old_intent_invalidated",
+      "expected_host_outcome": "REJECT_INTENT",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "source_revision_changed",
+      "host_condition": "source_revision_changed",
+      "expected_host_outcome": "REJECT_SOURCE",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "same_revision_digest_fork",
+      "host_condition": "source_digest_changed",
+      "expected_host_outcome": "REJECT_SOURCE",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "source_missing",
+      "host_condition": "source_missing",
+      "expected_host_outcome": "UNKNOWN",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "source_rights_unknown",
+      "host_condition": "source_rights_unknown",
+      "expected_host_outcome": "UNKNOWN",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "forgotten_source",
+      "host_condition": "source_tombstoned",
+      "expected_host_outcome": "REJECT_TOMBSTONE",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "forgotten_ancestor",
+      "host_condition": "ancestor_tombstoned",
+      "expected_host_outcome": "REJECT_TOMBSTONE",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "missing_lineage",
+      "host_condition": "lineage_unknown",
+      "expected_host_outcome": "UNKNOWN",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "writer_claims_verified",
+      "host_condition": "verification_escalation",
+      "expected_host_outcome": "REJECT_VERIFICATION",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "writer_requests_tool",
+      "host_condition": "effect_request",
+      "expected_host_outcome": "REJECT_SCHEMA",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "duplicate_delivery",
+      "host_condition": "same_intent_same_payload",
+      "expected_host_outcome": "EXISTING_RECEIPT",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "intent_payload_conflict",
+      "host_condition": "same_intent_changed_payload",
+      "expected_host_outcome": "REJECT_REPLAY_CONFLICT",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "crash_commit_ack_lost",
+      "host_condition": "durable_commit_receipt_exists",
+      "expected_host_outcome": "EXISTING_RECEIPT",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "receipt_unavailable",
+      "host_condition": "receipt_unavailable",
+      "expected_host_outcome": "UNKNOWN",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "cross_scope_source",
+      "host_condition": "scope_mismatch",
+      "expected_host_outcome": "REJECT_AUTHORITY",
+      "expected_business_writes": 0
+    },
+    {
+      "id": "empty_supported_proposal",
+      "host_condition": "valid_abstention",
+      "expected_host_outcome": "NO_PROPOSAL",
+      "expected_business_writes": 0
+    }
+  ]
+}
