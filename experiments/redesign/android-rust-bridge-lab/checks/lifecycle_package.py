@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -64,11 +65,31 @@ def main():
     run(['unzip', '-q', work / 'gradle.zip', '-d', work], evidence / 'gradle-extract.log', env)
     gradle = work / 'gradle-8.13/bin/gradle'
     ui = ROOT / 'experiments/redesign/android-compose-lab'
-    run([gradle, '--no-daemon', '--stacktrace', '--console=plain', '-p', ui,
-         '-PmuyonBridgeInputs=' + str(inputs), '-PmuyonBridgeSourceSha=' + source,
-         '-PmuyonLifecycleInstrumentation=true',
-         ':app:assembleLifecycle', ':app:assembleLifecycleAndroidTest', ':app:lintLifecycle'],
-        evidence / 'combined-build.log', env, cwd=ui, timeout=1800)
+    build_log = evidence / 'combined-build.log'
+    try:
+        run([gradle, '--no-daemon', '--stacktrace', '--console=plain', '-p', ui,
+             '-PmuyonBridgeInputs=' + str(inputs), '-PmuyonBridgeSourceSha=' + source,
+             '-PmuyonLifecycleInstrumentation=true',
+             ':app:assembleLifecycle', ':app:assembleLifecycleAndroidTest', ':app:lintLifecycle'],
+            build_log, env, cwd=ui, timeout=1800)
+    except Exception:
+        # run() preserves the stack-trace tail. Emit only compiler diagnostic lines
+        # from this build's own log, so the source error survives that bounded tail.
+        remaining = 16_384
+        print('LIFECYCLE_BUILD_COMPILER_DIAGNOSTICS_BEGIN', flush=True)
+        try:
+            with build_log.open(encoding='utf-8', errors='replace') as log:
+                for line in log:
+                    if re.search(r'^(?:e:|error:)|\S+\.kt:\d+(?::\d+)?', line):
+                        diagnostic = line.rstrip('\r\n')[:remaining]
+                        print(diagnostic, flush=True)
+                        remaining -= len(diagnostic) + 1
+                        if remaining <= 0:
+                            break
+        except OSError:
+            print('compiler_diagnostics_unavailable', flush=True)
+        print('LIFECYCLE_BUILD_COMPILER_DIAGNOSTICS_END', flush=True)
+        raise
     app = ui / 'app/build/outputs/apk/lifecycle/app-lifecycle.apk'
     tests = ui / 'app/build/outputs/apk/androidTest/lifecycle/app-lifecycle-androidTest.apk'
     entries = apk_entries(app, manifest)

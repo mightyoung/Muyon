@@ -118,8 +118,15 @@ class LifecycleFixtureApplication:MuyonLabApplication() {
             }
             Os.fsync(fd)
         } finally { Os.close(fd) }
-        val directory=Os.open(root.absolutePath,OsConstants.O_RDONLY or OsConstants.O_DIRECTORY or OsConstants.O_NOFOLLOW,0)
-        try { Os.fsync(directory) } finally { Os.close(directory) }
+        val directory=Os.open(root.absolutePath,OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW,0)
+        try {
+            // O_DIRECTORY is not an Android public SDK constant. Verify the opened descriptor
+            // itself before syncing, using only API21+ public APIs on the API26 fixture.
+            val stat=Os.fstat(directory)
+            check((stat.st_mode and OsConstants.S_IFMT)==OsConstants.S_IFDIR &&
+                stat.st_uid==Process.myUid() && (stat.st_mode and 4095)==448){"fixture_schedule_root_invalid"}
+            Os.fsync(directory)
+        } finally { Os.close(directory) }
     }
     private fun started(root:File,name:String):Boolean {
         val fd=try { Os.open(File(root,name).absolutePath,OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW,0) }

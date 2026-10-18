@@ -118,7 +118,10 @@ jobs:
             printf 'UNAVAILABLE: API26 log buffer clear; instrumentation still required\n' > "$evidence/logcat-clear-status.txt"
           fi
           timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.agentipc.LifecycleServiceAdmissionTest com.mightyoung.muyon.androidlab.lifecycle.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
-          if ! timeout 30 adb logcat -d > "$evidence/logcat.txt" 2>&1; then
+          if timeout 30 adb logcat -d > "$evidence/logcat.txt" 2>&1; then
+            # Fixed non-secret test metadata only; required instrumentation guards remain below.
+            grep -m 4 -E 'API26_SERVICE_(LIFECYCLE|PROCESS_RECREATION)_PASS ' "$evidence/logcat.txt" || true
+          else
             printf 'UNAVAILABLE: API26 logcat dump\n' > "$evidence/logcat-status.txt"
           fi
           adb shell ps -A > "$evidence/device-processes.txt"
