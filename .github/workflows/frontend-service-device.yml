@@ -69,9 +69,13 @@ jobs:
           "$adb_bin" shell input keyevent 82
           "$adb_bin" install -r "$RUNNER_TEMP/immutable-apk/app-debug.apk"
           "$adb_bin" install -r "$RUNNER_TEMP/immutable-apk/app-debug-androidTest.apk"
-          "$adb_bin" logcat -c
+          if ! timeout 15 "$adb_bin" logcat -c > "$evidence/logcat-clear.log" 2>&1; then
+            printf 'UNAVAILABLE: API26 log buffer clear; instrumentation still required\n' > "$evidence/logcat-clear-status.txt"
+          fi
           "$adb_bin" shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
-          "$adb_bin" logcat -d > "$evidence/logcat.txt"
+          if ! timeout 30 "$adb_bin" logcat -d > "$evidence/logcat.txt" 2>&1; then
+            printf 'UNAVAILABLE: API26 logcat dump\n' > "$evidence/logcat-status.txt"
+          fi
           "$adb_bin" shell ps -A > "$evidence/device-processes.txt"
           grep -F 'OK (2 tests)' "$evidence/instrumentation.log"
           if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi
