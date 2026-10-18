@@ -49,21 +49,33 @@ internal class AgentServiceClient(private val context:Context,private val build:
     private var pendingChat:(()->Unit)?=null
     private var pendingChatFailure:(()->Unit)?=null
     internal val chats:ChatReadPort by lazy { AgentChatReadSession(context,this) }
+    private fun failPendingChat() {
+        pendingSubmit?.fail();pendingSubmit=null
+        val failure=pendingChatFailure
+        pendingChat=null;pendingChatFailure=null
+        failure?.invoke()
+    }
     internal fun chatRpc(submitId:String?=null,work:(BoundedAgentProxy,UiAgentClientRef)->String,done:(String?)->Unit) {
         requireMain()
+        val completion=ChatReadCompletion(done)
         val api=remote;val client=state.client;val captured=ticket
         if(api==null || client==null || captured==null) {
-            if(pendingChat!=null){done(null);return}
+            if(pendingChat!=null){completion.complete(null);return}
             val action=submitId?.let(::PendingChatAction)
             pendingSubmit=action
-            pendingChat={if(action==null || action.dispatch()){pendingSubmit=null;chatRpc(submitId,work,done)}}
-            pendingChatFailure={pendingSubmit=null;done(null)};chatHandshakeAttempts=0;connect();return
+            val deferred={if(action==null || action.dispatch()){pendingSubmit=null;chatRpc(submitId,work){completion.complete(it)}};Unit}
+            pendingChat=deferred
+            pendingChatFailure={completion.complete(null);Unit};chatHandshakeAttempts=0
+            // Binding, initializing and visibility acknowledgement all have a bounded exit.
+            main.postDelayed({if(pendingChat===deferred)failPendingChat()},5000)
+            connect();return
         }
         val accepted=lanes.observe {
             val reply=try{work(api,client)}catch(_:Exception){null}
-            main.post{if(ticket!==captured || state.client!=client)done(null)else done(reply)}
+            main.post{completion.complete(if(ticket!==captured || state.client!=client)null else reply)}
         }
-        if(!accepted)done(null)
+        if(!accepted)completion.complete(null)
+        else main.postDelayed({completion.complete(null)},5000) // Unknown if native RPC does not return; never redispatch.
     }
     internal fun chatCancel(id:String,run:String?,done:(String?)->Unit) {
         requireMain()
@@ -108,8 +120,8 @@ internal class AgentServiceClient(private val context:Context,private val build:
     fun detach(){requireMain();state.detachDisplay();publish()}
     fun connect() {
         requireMain()
-        if(!state.visible){publish("请在界面可见时连接");return}
-        if(stopping || (remote==null && lifecycleOutstanding.get()>0)){publish("停止请求尚未返回；请先核实原运行");return}
+        if(!state.visible){publish("请在界面可见时连接");failPendingChat();return}
+        if(stopping || (remote==null && lifecycleOutstanding.get()>0)){publish("停止请求尚未返回；请先核实原运行");failPendingChat();return}
         if(remote!=null){handshake();return}
         if(connection!=null){publish("正在绑定独立执行进程");return}
         val localTicket=state.beginBinding();ticket=localTicket
@@ -133,8 +145,8 @@ internal class AgentServiceClient(private val context:Context,private val build:
         } catch(_:Exception){connection=null;lost(localTicket)}
     }
     private fun handshake() {
-        val api=remote ?: return;val localTicket=ticket ?: return
-        observe(localTicket,{api.connect(liveness).decode(build)}) { reply ->
+        val api=remote ?: run{failPendingChat();return};val localTicket=ticket ?: run{failPendingChat();return}
+        val scheduled=observe(localTicket,{api.connect(liveness).decode(build)}) { reply ->
             when(reply) {
                 is UiAgentWireReply.Connected -> {
                     if(state.connected(localTicket,reply.meta,reply.client.lease,reply.phase)==UiAgentApply.APPLIED){
@@ -142,22 +154,23 @@ internal class AgentServiceClient(private val context:Context,private val build:
                         publish("已连接独立进程；先核实当前记录")
                         // This is a read-only reconciliation, never automatic execution.
                         main.post{if(pendingChat==null)refresh()}
-                    }
+                    } else failPendingChat()
                 }
                 is UiAgentWireReply.Local -> {
                     if(reply.status==UiAgentLocalStatus.INITIALIZING) {
                         state.transportInitializing(localTicket)
                         // Only lease/bootstrap observation retries. No admitted request is retried.
                         if(pendingChat!=null && chatHandshakeAttempts++<20) main.postDelayed({if(ticket===localTicket)handshake()},250)
-                        else if(pendingChat!=null){val failure=pendingChatFailure;pendingChat=null;pendingChatFailure=null;failure?.invoke()}
-                    } else if(pendingChat!=null){val failure=pendingChatFailure;pendingChat=null;pendingChatFailure=null;failure?.invoke()}
+                        else if(pendingChat!=null)failPendingChat()
+                    } else if(pendingChat!=null)failPendingChat()
                     publish(localLabel(reply.status))
                 }
-                is UiAgentWireReply.Busy -> publish("独立执行进程忙；未自动重试")
-                is UiAgentWireReply.Rejected -> publish("连接返回 ${reply.error.name}；未自动重试")
+                is UiAgentWireReply.Busy -> {publish("独立执行进程忙；未自动重试");failPendingChat()}
+                is UiAgentWireReply.Rejected -> {publish("连接返回 ${reply.error.name}；未自动重试");failPendingChat()}
                 else -> lost(localTicket)
             }
         }
+        if(!scheduled)failPendingChat()
     }
     fun refresh() {
         requireMain()
@@ -245,12 +258,12 @@ internal class AgentServiceClient(private val context:Context,private val build:
                 state.visibilityAcknowledged(change.client,change.generation,accepted)
                 if(!change.visible){state.release();unbind();publish("已请求停止并解除绑定；原结果须核实，不能认定已取消")}
                 else if(accepted){publish("可见性已确认；离线运行仍须显式开始");val work=pendingChat;pendingChat=null;pendingChatFailure=null;work?.invoke()}
-                else {publish("可见性未确认；不会开始新运行");val failure=pendingChatFailure;pendingChat=null;pendingChatFailure=null;failure?.invoke()}
+                else {publish("可见性未确认；不会开始新运行");failPendingChat()}
             }
-        }}catch(_:RejectedExecutionException){lifecycleOutstanding.decrementAndGet();publish("可见性控制通道不可用；结果须核实");if(!change.visible){unbind();state.release()}}
+        }}catch(_:RejectedExecutionException){lifecycleOutstanding.decrementAndGet();failPendingChat();publish("可见性控制通道不可用；结果须核实");if(!change.visible){unbind();state.release()}}
     }
-    private fun observe(localTicket:UiAgentConnectionTicket,work:()->UiAgentWireReply?,deliver:(UiAgentWireReply)->Unit) {
-        if(observationBusy){publish("状态通道忙；未排队或自动重试");return}
+    private fun observe(localTicket:UiAgentConnectionTicket,work:()->UiAgentWireReply?,deliver:(UiAgentWireReply)->Unit):Boolean {
+        if(observationBusy){publish("状态通道忙；未排队或自动重试");return false}
         observationBusy=true
         val admitted=lanes.observe {
             val reply=try{work()}catch(_:Exception){null}
@@ -263,6 +276,7 @@ internal class AgentServiceClient(private val context:Context,private val build:
         }
         if(!admitted)observationBusy=false
         publish()
+        return admitted
     }
     /** Delivers the captured LOCAL ticket object; never reconstructs one from an IPC DTO. */
     private fun applyObservation(observation:UiAgentObservationTicket,reply:UiAgentWireReply) {
@@ -279,8 +293,8 @@ internal class AgentServiceClient(private val context:Context,private val build:
             else -> ticket?.let(::lost)
         }
     }
-    private fun lost(localTicket:UiAgentConnectionTicket){if(ticket!==localTicket)return;state.transportLost(localTicket);(chats as AgentChatReadSession).transportLost();val failure=pendingChatFailure;pendingChat=null;pendingChatFailure=null;failure?.invoke();publish("连接不可用，结果未知；请核实原运行，未自动重发")}
-    private fun unbind(){val failure=pendingChatFailure;pendingChat=null;pendingChatFailure=null;failure?.invoke();(chats as AgentChatReadSession).transportLost();val old=connection;connection=null;remote=null;ticket=null;sentVisibility=null;try{if(old!=null)context.unbindService(old)}catch(_:IllegalArgumentException){};stopping=false}
+    private fun lost(localTicket:UiAgentConnectionTicket){if(ticket!==localTicket)return;state.transportLost(localTicket);(chats as AgentChatReadSession).transportLost();failPendingChat();publish("连接不可用，结果未知；请核实原运行，未自动重发")}
+    private fun unbind(){failPendingChat();(chats as AgentChatReadSession).transportLost();val old=connection;connection=null;remote=null;ticket=null;sentVisibility=null;try{if(old!=null)context.unbindService(old)}catch(_:IllegalArgumentException){};stopping=false}
     companion object {
         private fun executor(name:String,queue:Int)=ThreadPoolExecutor(1,1,0L,TimeUnit.MILLISECONDS,ArrayBlockingQueue<Runnable>(queue),{job->Thread(job,name)},ThreadPoolExecutor.AbortPolicy())
         private fun localLabel(value:UiAgentLocalStatus)=when(value){UiAgentLocalStatus.INITIALIZING->"独立执行进程初始化中；尚无原生连接身份";UiAgentLocalStatus.BUSY->"执行进程忙；未自动重试";UiAgentLocalStatus.INVALID_REQUEST->"请求格式被拒绝；请核实当前状态";UiAgentLocalStatus.UNAVAILABLE->"执行进程不可用；结果须核实"}

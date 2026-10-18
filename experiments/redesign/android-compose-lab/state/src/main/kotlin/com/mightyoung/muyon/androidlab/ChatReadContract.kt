@@ -26,8 +26,21 @@ class PendingChatAction(private val requestId:String) {
         if(!pending || id!=requestId)return false
         pending=false;return true
     }
+    fun fail():Boolean {
+        if(!pending)return false
+        pending=false;return true
+    }
     fun dispatch():Boolean {
         if(!pending)return false
         pending=false;return true
+    }
+}
+
+/** Main-thread completion; duplicate transport/timeout/late callbacks cannot complete twice. */
+class ChatReadCompletion(private val deliver:(String?)->Unit) {
+    private var completed=false
+    fun complete(value:String?):Boolean {
+        if(completed)return false
+        completed=true;deliver(value);return true
     }
 }
