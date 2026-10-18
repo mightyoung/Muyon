@@ -23,7 +23,7 @@ class AdapterTest {
     private fun adapter(runtime: Runtime, clock: () -> Long = { 1 }, open: (String) -> java.io.InputStream = { ByteArrayInputStream(model) }, factory: suspend () -> OcrRuntime = { runtime }) =
         OcrExecutor(assets(), open, factory, clock)
     private suspend fun errorCode(expected: OcrError, block: suspend () -> Unit) {
-        try { block(); fail("Expected $expected") } catch(e: OcrFailure) { assertEquals(expected,e.code) }
+        try { block(); fail("Expected $expected") } catch(e: OcrFailure) { assertEquals(expected,e.code);assertEquals(expected.name,e.message);assertNull(e.cause) }
     }
     @Test fun returns_det_rec_envelope_and_releases_once() = runBlocking {
         val rt=Runtime(); val page=adapter(rt).execute(request(),image,26,Cancellation())
@@ -78,6 +78,15 @@ class AdapterTest {
         val job=launch { ex.execute(request(),image,26,Cancellation()) }
         loading.await();job.cancel();resume.complete(Unit);job.join()
         assertEquals(0,rt.calls);assertEquals(1,rt.closes)
+    }
+    @Test fun native_linkage_errors_are_controlled_and_do_not_expose_loader_text() = runBlocking {
+        val rt=Runtime()
+        errorCode(OcrError.INFERENCE_FAILED) {
+            adapter(rt,factory={throw UnsatisfiedLinkError("private-loader-path")}).execute(request(),image,26,Cancellation())
+        }
+        rt.afterRun={throw ExceptionInInitializerError("private-loader-path")}
+        errorCode(OcrError.INFERENCE_FAILED) { adapter(rt).execute(request(),image,26,Cancellation()) }
+        assertEquals(1,rt.closes)
     }
     @Test fun invalid_runtime_geometry_is_not_emitted() = runBlocking {
         val rt=object: OcrRuntime {

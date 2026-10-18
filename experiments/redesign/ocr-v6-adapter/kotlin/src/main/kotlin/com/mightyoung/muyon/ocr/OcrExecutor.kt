@@ -65,6 +65,7 @@ class OcrExecutor internal constructor(private val assets:List<Asset>,private va
         } catch(e: CancellationException) { throw e }
         catch(e: OcrFailure) { throw e }
         catch(e: Exception) { throw OcrFailure(OcrError.INFERENCE_FAILED) }
+        catch(e: LinkageError) { throw OcrFailure(OcrError.INFERENCE_FAILED) }
     }
     private suspend fun checkActive(r:ExecutionRequest,c:Cancellation) {
         currentCoroutineContext().ensureActive()

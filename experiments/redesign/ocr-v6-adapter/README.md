@@ -77,6 +77,12 @@ is not copied into results/logs. Empty valid page is distinct from unavailable.
 Resources: one det/rec session pair per job, release in a non-cancellable finally;
 source sessions/tensors/mats retain upstream ownership. Native error/OOM cleanup
 and peak memory still require device tests; JVM port tests do not prove them.
+Independent review confirmed inherited missing-finally paths in QuadTextCrop and
+DetPreprocessor can leak temporary Mats on native exceptions. Their cleanup
+adaptation plus injected-failure/device memory tests is an explicit integration
+blocker, not just an unmeasured performance item. The adapter specifically maps
+LinkageError/initialization failures to controlled INFERENCE_FAILED; fatal VM
+errors are not indiscriminately swallowed.
 
 ## Android compatibility: shipping blocked
 

@@ -1,0 +1,48 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :unpackNative UP-TO-DATE
+> Task :processResources NO-SOURCE
+> Task :processTestResources NO-SOURCE
+> Task :compileKotlin
+> Task :compileJava NO-SOURCE
+> Task :classes UP-TO-DATE
+> Task :jar
+> Task :compileTestKotlin
+> Task :compileTestJava NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :test
+
+AdapterTest > coroutine_cancel_during_factory_still_releases_created_session PASSED
+
+AdapterTest > repeated_jobs_and_runtime_failure_release_all_sessions PASSED
+
+AdapterTest > native_linkage_errors_are_controlled_and_do_not_expose_loader_text PASSED
+
+AdapterTest > timeout_after_native_run_discards_result_and_releases PASSED
+
+AdapterTest > invalid_runtime_geometry_is_not_emitted PASSED
+
+AdapterTest > corrupt_or_missing_models_fail_before_factory PASSED
+
+AdapterTest > cancelled_before_load_and_during_inference_never_return_success PASSED
+
+AdapterTest > api24_and_25_never_load_native_runtime PASSED
+
+AdapterTest > returns_det_rec_envelope_and_releases_once PASSED
+
+AdapterTest > wrong_raster_model_and_budget_fail_before_factory PASSED
+
+LifetimeTest > repeated_release_is_idempotent_and_use_after_close_is_rejected PASSED
+
+UpstreamTest > locked_dictionaries_match_full_yaml_parser_codepoints_and_model_classes PASSED
+
+UpstreamTest > official_ctc_preserves_blank_separated_repeats_and_unicode_characters PASSED
+
+WireTest > rust_request_and_kotlin_result_have_identical_wire_geometry PASSED
+
+WireTest > malformed_and_oversized_request_are_controlled_errors PASSED
+
+BUILD SUCCESSFUL in 14s
+5 actionable tasks: 4 executed, 1 up-to-date

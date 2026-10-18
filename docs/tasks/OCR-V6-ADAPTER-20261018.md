@@ -39,3 +39,10 @@ raw RED/GREEN logs, desktop tensor/geometry results and ABI/ELF audit. Review an
 sealed commit identities are appended after independent review; LeaderB decides
 integration only after the remaining gates, without treating mock/desktop results
 as an App or device pass.
+
+Independent review of `8684e1ca` reran Rust9/Kotlin14/Python3 successfully.
+It identified inherited OpenCV temporary-Mat exception cleanup gaps (QuadTextCrop
+and DetPreprocessor), which remain an explicit App integration blocker. A second
+finding, native LinkageError escaping the controlled envelope, was reproduced by
+a new failing test and mapped to INFERENCE_FAILED; its follow-up verification is
+recorded with the sealed candidate in module evidence.
