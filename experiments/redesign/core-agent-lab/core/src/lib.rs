@@ -21,3 +21,4 @@ pub mod wire_json;
 pub mod host_session;
 
 pub mod agent_ports;
+pub mod http_transport;
