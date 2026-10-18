@@ -68,3 +68,42 @@ Android/API26 Binder and native artifact composition: delegated to Android worke
 and integrator; this report alone does not establish device execution. Live model:
 NOT_RUN. Production current ScopeResolver authority bridge: unavailable/fail-closed.
 There is no model API/credential configuration or model call in this change.
+
+## Independent review corrections
+
+The terminal stream now reconciles the actual controller snapshot first. Both
+`Terminal(OutcomeUnknown)` and `Unresolved` settle visibly; a failed final event
+ledger cannot become an empty nonterminal stream. Unknown/disclosure-unavailable
+responses set `terminal=true`, including cursor reconciliation failures.
+
+Historical metadata is separate from business disclosure. A receipt-bearing
+interruption emits exactly the original `receipt` event (cursor 1) followed by
+`terminal {state: outcome_unknown, ...}` (cursor 2). It emits no answer or supplier
+projection. The original native row must still match the admitted task/attempt,
+operation, args, selected ref and receipt identity. Success and failure receipt
+outcomes are preserved; a completed terminal still requires recorded success.
+Invalid historical metadata fails closed. Fixed synthetic metadata lookup scope
+does not grant access to current business values.
+
+The business worker now passes a callback into the existing reader. It persists
+the actual Agent task/attempt in the same Service admission index **before** the
+first `session.dispatch`. This closes the previous native-receipt/attach-task crash
+window. A payload-only ledger after an interrupted read reconciles the original
+receipt to UNKNOWN without executing another read.
+
+Review regressions: **3 PASS**, in `rust-logs/review-fixes-green.log`:
+
+- Failed final-ledger state produces an UNKNOWN terminal with original historical
+  receipt, no success/projection and no indefinite polling.
+- Receipt-bearing interruption restores exact metadata and rejects a forged
+  receipt; native.db bytes remain unchanged by replay.
+- Before-dispatch callback observes no receipt, fixes actual task in the durable
+  index, and the receipt-before-event crash window restores to UNKNOWN+receipt.
+
+The final-ledger regression uses the pure production terminal-response helper with
+its exact post-failure state. It does not claim injected OS fsync failure. No
+production test-only hook was added. Test-first failures are retained in
+`rust-logs/terminal-red.log` (behavior assertions) and `admission-red.log` (missing
+callback entry point). The original **7 scoped controller/runtime/business tests
+also PASS**, in `rust-logs/review-controller-green.log`. No complete suite, HTTP,
+network model or credential operation was run.

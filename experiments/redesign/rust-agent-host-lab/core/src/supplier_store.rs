@@ -407,13 +407,21 @@ impl SupplierReader {
             source_stamp: RefCell::new(None),
         });
         authority.snapshot()?;
-        Ok(Self { authority, receipts: dir.into() })
+        Ok(Self {
+            authority,
+            receipts: dir.into(),
+        })
     }
     /// Fresh source/authority validation for disclosure; creates no receipt.
     pub(crate) fn validate_projection(&self, projection: &Json) -> Result<()> {
         let (_, record) = self.authority.current()?;
-        let current = object([("supplier", record.reference), ("name", string(record.name))]);
-        if &current != projection { return Err("supplier_projection_changed".into()); }
+        let current = object([
+            ("supplier", record.reference),
+            ("name", string(record.name)),
+        ]);
+        if &current != projection {
+            return Err("supplier_projection_changed".into());
+        }
         Ok(())
     }
     pub fn read_current(&self, id: &str) -> Result<SupplierReadResult> {
@@ -422,10 +430,29 @@ impl SupplierReader {
         }
         let dir = self.receipts.join(format!("read-{}", crate::nonce()?));
         muyon_core_agent_lab::store::create_dir(&dir)?;
-        self.read_in_run(&dir, "read selected supplier name", id, Arc::new(RunControl::new()))
+        self.read_in_run(
+            &dir,
+            "read selected supplier name",
+            id,
+            Arc::new(RunControl::new()),
+        )
     }
     pub(crate) fn read_in_run(
-        &self, dir: &Path, text: &str, id: &str, control: Arc<RunControl>,
+        &self,
+        dir: &Path,
+        text: &str,
+        id: &str,
+        control: Arc<RunControl>,
+    ) -> Result<SupplierReadResult> {
+        self.read_in_run_admitted(dir, text, id, control, |_| Ok(()))
+    }
+    pub(crate) fn read_in_run_admitted(
+        &self,
+        dir: &Path,
+        text: &str,
+        id: &str,
+        control: Arc<RunControl>,
+        admitted: impl FnOnce(&State) -> Result<()>,
     ) -> Result<SupplierReadResult> {
         control.poll()?;
         if id != self.authority.store.id {
@@ -467,6 +494,9 @@ impl SupplierReader {
             )?,
         };
         agent.state.counters.steps = 1;
+        // Persist the actual task/attempt before the first receipt can exist.
+        admitted(&agent.state)?;
+        control.poll()?;
         session.dispatch(
             &mut agent,
             "supplier-read".into(),

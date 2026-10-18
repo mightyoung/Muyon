@@ -621,22 +621,17 @@ impl AgentServiceController {
                 b.cancel_before_admission();
             }
         }
-        let unresolved = g
+        let snapshot = g
             .runs
             .iter()
             .find(|s| intent_of(s).request_id == request_id)
-            .map(|s| matches!(s, AgentRunSnapshot::Unresolved { .. }))
-            .unwrap_or(false);
+            .cloned();
         drop(g);
-        if unresolved {
-            return supplier_business::reply(
-                "unknown",
-                "OUTCOME_UNKNOWN",
-                &request_id,
-                identity.as_ref(),
-                None,
-                after,
-            );
+        if let Some(
+            snapshot @ (AgentRunSnapshot::Unresolved { .. } | AgentRunSnapshot::Terminal { .. }),
+        ) = snapshot.as_ref()
+        {
+            return supplier_business::snapshot_reply(snapshot, business.as_ref(), after);
         }
         match business.as_ref() {
             Some(b) => supplier_business::reply(
