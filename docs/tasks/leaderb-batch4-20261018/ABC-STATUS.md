@@ -1,0 +1,13 @@
+# ABC completed checkpoint — 2026-10-18 04:42 UTC
+
+Product source `3f1be180bb009a91e659c113ba5b1916e5360332`, PR86 remains Draft. No develop/main merge. All A/B/C source and provenance branches pushed; original49d/ff932 baselines immutable.
+
+Exact product formal Rust CI39097184291 completed/success (five matrix jobs/all steps executed); exact product Android full CI39097188799 completed/success (select/Linux/twoABI/package-full all executed, nonfull RED/checkpoint modes intentionally skipped). Generic CI39097188758 still in progress; no generic PASS claimed.
+
+Local same-source A ten stages and total runner exit0; API24 arm64/x86, Rust9/JVM5/loadnegative/panic, shipping four variants/durable oracle and7 record controls, three actual compiled shipping inverses, private Service13, actual163 state checks, lint0errors/6warnings, six native APK entries source/bytes/16KiB, APK zipalign, AIDL, ordinary clean/build71tasks, checker71/verification13. Independent A115 checks scope C0. B actual115/22/59,37 classifier controls, physical26/wire18/harness6+7, native3/HTTP7 and legacy17/precise16 re-audited from freshF2 raw. C PID observation synchronization and real cleanup inverse verified; original budgets remain, no historical scheduling/disk trace or broad stability claim.
+
+All ABC writers/builders stopped before this snapshot. Bounded additions now separate: I05 real SIGKILL test-only probe in isolated branch under review; timing repetitions/IO instrumentation in external timing-stability still running; I04 agent startup denied by platform possible cybersecurity risk before execution, not retried/rerouted. These additions are excluded from ABC raw acceptance except the saved I04 blocked status. Whole merge remains held. Separate design/memory session ownership is respected.
+
+Durable original log snapshot: ABC-RAW-EVIDENCE.tar.gz SHA256 `d300092bcd638ce874fbd283a1be2d12a9ec9a37e32cb443a4cc9f8d9dc59a4d`,4,975,662bytes,4348 raw files plus raw index. All4348 bytes/hash records re-read from tar and checked before commit.78 compiled objects/archives are described in index but excluded from remote raw; actual binaries retained at listed local paths and short-lived CI artifacts, never assumed available in a fresh environment. This is an ABC checkpoint, not a final seal of in-progress supplements.
+
+AppAPK `3ed45cf1d8fd22737854dc38a2477f379f188840397ab25613c6ccb805bddcb9`; testAPK `b56883010fb985fe1eb0ef682efb065434865245a143cdcca91ff6f3076c0289`. Device ART/Binder/UID/fsync/kill/rebind, real-model and production wiring remain NOT_RUN. Remote CI lint/AIDL output files were not uploaded; raw task success is separate from locally retained original reports/source.
