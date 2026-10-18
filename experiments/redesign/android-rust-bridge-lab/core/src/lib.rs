@@ -318,3 +318,5 @@ mod tests {
 uniffi::setup_scaffolding!();
 
 pub mod agent_service;
+
+pub mod service_host_bridge;
