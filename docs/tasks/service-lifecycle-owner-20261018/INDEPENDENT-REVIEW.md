@@ -50,3 +50,31 @@ Final pre-freeze SHA256 deltas:
 - AgentRuntimeService.kt 4deac5a8a2779076602ebdc682eadba503712c54aa92348e083bcf35b12f8721
 
 Observed /tmp/muyon-service-lifecycle-probe.log: exact one native probe test passed. Reviewer's own actions remain reads and scratch report only; no tests run or repo changes.
+
+## Pre-push automatic trigger audit
+
+Independent audit of every .github/workflows file: current branch `lab/service-lifecycle-owner-20261018` matches only dedicated service-lifecycle-owner push branch. Existing ci.yml includes develop/main/task/**/review/** only; choosing lab scope avoids its broad Dart suite without modifying existing workflow. Other automatic push filters require their own explicit task/ui/lab/android-compose/lab/android-rust-bridge/lab/rust-native-read/lab/leaderb/core-review/durable branch identities and do not match this branch. No workflow_run chained triggers exist. verify and package-artifacts remain manual only.
+
+Draft PR to `lab/service-durable-owner-20261018`: ci.yml main/develop and Android Rust bridge develop PR base filters do not match. Android Compose PR workflow can be created by paths but its sole job explicitly requires head prefix lab/android-compose-, which this head lacks; job skips. No forbidden/broad suite auto-execution is expected from this branch push + specified Draft PR base.
+
+Dedicated workflow branch changed only task/service-lifecycle-owner-20261018 -> lab/service-lifecycle-owner-20261018, plus path filters for app/bridge/host code and dedicated workflow; evidence-only docs commit will not match. Previously reviewed exact execution graph remains unchanged. This trigger isolation does not authorize dispatching any existing broad workflow, modifying main/develop, or releasing HOLD. Static pre-push trigger gate CLEAR; waiting frozen source SHA association.
+
+## Frozen-source association
+
+Final static code/spec/pre-execution and push/PR trigger approval associates to immutable source `f8d3bfea3606d187479ed6d16621b342eca74760` on `lab/service-lifecycle-owner-20261018`. Worktree verified clean after commit; no implementation edits after review. Intended Draft PR base `lab/service-durable-owner-20261018` only. Exact focused test/device graph and dedicated path-filtered workflow remain as reviewed above. No blocking static finding; API26/package/native CI outcomes still require terminal evidence and must be tied to this source. Prior limitations/HOLD remain.
+
+## Process-restart scheduling clarification during frozen CI
+
+Read-only assessment of f8d3bfea3606d187479ed6d16621b342eca74760: in-memory fixture ordinal prevents primary/secondary resubmission on normal Service rebind in the same :agent process, as scoped CONTRACT §6 describes. It resets after process death and would automatically attempt the same fixed metadata fixture requests again. Durable uniqueness/quota rejects those attempts, and no transport exists, but rejection is not absence of an automatic resubmission attempt. The unqualified no-auto-resubmit-on-restart requirement is therefore not fully satisfied across process recreation. This is confined to the compile-time fixture driver; ordinary Application has no such automatic probe schedule.
+
+Process-death acceptance remains unrun, and frozen-source CI must not be represented as proof for that case. Recommended follow-up after current CI reaches terminal: use only dedicated-ledger read-only fixture history as a scheduling guard to skip previous primary/secondary operations; never derive approval/authority/budget/path from that history. For a stronger guarantee covering crash before the first reservation, persist an explicit trusted bootstrap-start marker (separate reviewed lifecycle metadata) before invoking probes. Any code change needs new frozen SHA and focused revalidation; preserve f8 results and failures. No running-source edits or new experiments performed by reviewer.
+
+## Follow-up durable schedule and own fixture process-death static gate
+
+First frozen CI run 39129510104 for f8d3bfea3606d187479ed6d16621b342eca74760 was reported terminal SUCCESS before these edits. That evidence remains source-exact. New follow-up changes only LifecycleFixtureApplication and LifecycleServiceAdmissionTest (plus eventual documentation); reviewer executed no tests.
+
+STATIC EXECUTION GATE CLEAR for follow-up two-file diff: fixed Context-derived admission-root marker names, O_EXCL|O_NOFOLLOW 0600 create, bounded exact constant bytes, file fsync and parent directory fsync before first probe. Existing marker opens O_NOFOLLOW and checks fstat regular type/UID/exact mode/exact bounded size and exact content; malformed or partial markers throw before probes, duplicate create races fail closed. Marker history controls scheduling only; compile-time fixed approvals remain unchanged. Both markers -> phase3 has zero native probes and no authority approval replacement; opaque admission identity/counts reloaded only by SELECT from dedicated new ledger. Primary schedule cannot be automatically repeated merely because process-local ordinal reset.
+
+Process.killProcess occurs only after nativeCleaned2/leaseClosed2. Runtime guards require target package exactly com.mightyoung.muyon.androidlab.lifecycle, process exactly its :agent, same current app UID, original observed PID, different instrumentation PID. Test waits that child disappears, binds its own Service anew, verifies distinct new PID/same own UID, phase3, zero probes, empty process-local result proof, same durable receipt and rows. This is expressly the fresh test APK's own child/new schema operation, not denied old script/task.db/HTTP/original-state reopening. No production process target, shell script, credential or network call introduced.
+
+Allowed invocation remains only exact `com.mightyoung.muyon.androidlab.agentipc.LifecycleServiceAdmissionTest` via previously reviewed dedicated API26 workflow, tied to a NEW frozen source SHA. No broad suite or manual legacy workflow dispatch authorized. Need new immutable association and runtime terminal evidence. Remaining limitations: process death is tested after complete native/lease cleanup, not active/in-flight native work; no corruption/partial-marker fault injection or fsync failure acceptance; setup/constructor failure and retained-native onDestroy remain unrun.

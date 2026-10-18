@@ -108,6 +108,10 @@ class LifecycleServiceAdmissionTest {
             assertEquals("provider_credential_unavailable", results.getString("credentialRevokedDeniedCode"))
             assertEquals("admitted_metadata_only", results.getString("secondaryAdmittedCode"))
             assertEquals(0, initial.getInt("restartProbeCount"))
+            assertEquals(1, initial.getInt("schedulePhase"))
+            assertEquals(5, initial.getInt("probeAttempts"))
+            assertTrue(initial.getBoolean("phase1Started"))
+            assertFalse(initial.getBoolean("phase2Started"))
             val before = rows()
             assertEquals("cancellation leaves one replay tombstone", 1, before.expired)
             assertEquals(1, before.consumed)
@@ -130,6 +134,10 @@ class LifecycleServiceAdmissionTest {
                 val restarted = awaitEvidence { it.optBoolean("complete") && it.optInt("bootstrapOrdinal") == 2 }
                 assertEquals("normal Service restart remains in same private process", pid, restarted.getInt("pid"))
                 assertEquals(1, restarted.getInt("restartProbeCount"))
+                assertEquals(2, restarted.getInt("schedulePhase"))
+                assertEquals(1, restarted.getInt("probeAttempts"))
+                assertTrue(restarted.getBoolean("phase1Started"))
+                assertTrue(restarted.getBoolean("phase2Started"))
                 assertTrue(restarted.getJSONObject("results").getBoolean("restartExhaustedDenied"))
                 assertEquals("provider_budget_reservation_failed", restarted.getJSONObject("results").getString("restartExhaustedDeniedCode"))
                 assertEquals(before.admissions.single(), restarted.getString("admissionIdentity"))
@@ -137,6 +145,41 @@ class LifecycleServiceAdmissionTest {
                 println("API26_SERVICE_LIFECYCLE_PASS agent_pid=$pid bootstrap_count=2 admissions=1 consumed=1 held=0 expired=${before.expired} admission_identity=${before.admissions.single()} normal_rebind=true model_api_called=false")
             }
             awaitEvidence { it.optInt("nativeCleaned") >= 2 && it.optInt("leaseClosed") >= 2 }
+            // Only this fresh fixture APK's own private child, after native and owner cleanup.
+            // No original app state, legacy database, shell script, HTTP or model is involved.
+            val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val target = manager.runningAppProcesses.orEmpty().single { it.processName == "${context.packageName}:agent" }
+            check(context.packageName == "com.mightyoung.muyon.androidlab.lifecycle")
+            check(target.processName == "com.mightyoung.muyon.androidlab.lifecycle:agent")
+            check(target.uid == Process.myUid() && target.pid == pid && target.pid != Process.myPid())
+            Process.killProcess(target.pid)
+            val goneDeadline = SystemClock.elapsedRealtime() + 30_000
+            while (SystemClock.elapsedRealtime() < goneDeadline && manager.runningAppProcesses.orEmpty().any {
+                    it.pid == target.pid && it.uid == Process.myUid() && it.processName == "${context.packageName}:agent"
+                }) SystemClock.sleep(50)
+            assertFalse("fresh fixture child must disappear before reconnect", manager.runningAppProcesses.orEmpty().any {
+                it.pid == target.pid && it.uid == Process.myUid() && it.processName == "${context.packageName}:agent"
+            })
+            Binding(context).use { recreated ->
+                connect(recreated)
+                val afterDeath = awaitEvidence {
+                    it.optBoolean("complete") && it.optInt("schedulePhase") == 3 && it.optInt("pid") != pid
+                }
+                val newPid = afterDeath.getInt("pid")
+                val newAgent = manager.runningAppProcesses.orEmpty().single { it.processName == "${context.packageName}:agent" }
+                assertEquals(newPid, newAgent.pid)
+                assertEquals(Process.myUid(), newAgent.uid)
+                assertNotEquals(Process.myPid(), newPid)
+                assertEquals(1, afterDeath.getInt("bootstrapOrdinal"))
+                assertEquals("durable schedule must run zero probes after process recreation", 0, afterDeath.getInt("probeAttempts"))
+                assertTrue(afterDeath.getBoolean("phase1Started"))
+                assertTrue(afterDeath.getBoolean("phase2Started"))
+                assertEquals("process-local results must not inherit old proof", 0, afterDeath.getJSONObject("results").length())
+                assertEquals(before.admissions.single(), afterDeath.getString("admissionIdentity"))
+                assertEquals("process recreation preserves the same admission and tombstones", before, rows())
+                println("API26_SERVICE_PROCESS_RECREATION_PASS old_agent_pid=$pid new_agent_pid=$newPid schedule_phase=3 probe_attempts=0 admission_identity=${before.admissions.single()} synthetic=true model_api_called=false")
+            }
+            awaitEvidence { it.optInt("schedulePhase") == 3 && it.optInt("nativeCleaned") >= 1 && it.optInt("leaseClosed") >= 1 }
         } finally {
             first.close()
         }

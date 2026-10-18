@@ -3,6 +3,9 @@ package com.mightyoung.muyon.androidlab.agentipc
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.os.Process
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
 import android.util.AtomicFile
 import com.mightyoung.muyon.androidbridge.*
 import com.mightyoung.muyon.androidlab.MuyonLabApplication
@@ -18,6 +21,8 @@ class LifecycleFixtureApplication:MuyonLabApplication() {
     private val authority=ServiceAdmissionAuthority(denied())
     private val owner=ServiceAdmissionProcessOwner(authority)
     private var ordinal=0
+    private var schedulePhase=0
+    private var probeAttempts=0
     private var cleaned=0
     private var admissionIdentity=""
     private val results=JSONObject()
@@ -32,25 +37,42 @@ class LifecycleFixtureApplication:MuyonLabApplication() {
     }
     @Synchronized private fun ready(controller:GeneratedAgentController) {
         ordinal++
-        if(ordinal==1) {
+        probeAttempts=0
+        val root=privateAdmissionRoot(checkNotNull(serviceContext))
+        val primaryStarted=started(root,PRIMARY_STARTED)
+        val exhaustionStarted=started(root,EXHAUSTION_STARTED)
+        check(!exhaustionStarted || primaryStarted){"fixture_schedule_invalid"}
+        schedulePhase=when {
+            !primaryStarted -> { markStarted(root,PRIMARY_STARTED);1 }
+            !exhaustionStarted -> { markStarted(root,EXHAUSTION_STARTED);2 }
+            else -> 3
+        }
+        if(schedulePhase==1) {
             // Same actual installed callback owner begins with no approval facts.
-            record("unconfiguredDenied",controller.serviceAdmissionProbe(ServiceAdmissionProbeOperation.PRIMARY_COMMIT),false)
+            record("unconfiguredDenied",probe(controller,ServiceAdmissionProbeOperation.PRIMARY_COMMIT),false)
             authority.replace(approved())
-            val cancelled=controller.serviceAdmissionProbe(ServiceAdmissionProbeOperation.PRIMARY_CANCEL)
+            val cancelled=probe(controller,ServiceAdmissionProbeOperation.PRIMARY_CANCEL)
             results.put("cancelReleased",!cancelled.admitted && cancelled.code=="release_requested")
-            record("cancelReplayDenied",controller.serviceAdmissionProbe(ServiceAdmissionProbeOperation.PRIMARY_COMMIT),false)
+            record("cancelReplayDenied",probe(controller,ServiceAdmissionProbeOperation.PRIMARY_COMMIT),false)
             authority.replace(approved(exists=false))
-            record("credentialRevokedDenied",controller.serviceAdmissionProbe(ServiceAdmissionProbeOperation.SECONDARY_COMMIT),false)
+            record("credentialRevokedDenied",probe(controller,ServiceAdmissionProbeOperation.SECONDARY_COMMIT),false)
             authority.replace(approved())
-            val committed=controller.serviceAdmissionProbe(ServiceAdmissionProbeOperation.SECONDARY_COMMIT)
+            val committed=probe(controller,ServiceAdmissionProbeOperation.SECONDARY_COMMIT)
             record("secondaryAdmitted",committed,true)
             admissionIdentity=committed.recordId
-        } else if(ordinal==2) {
+        } else if(schedulePhase==2) {
+            // Fixed fixture authority comes from this compile-time installer, never from markers.
+            authority.replace(approved())
             // Explicit fixed test-only NEW request after restart; primary/secondary are never replayed.
-            record("restartExhaustedDenied",controller.serviceAdmissionProbe(ServiceAdmissionProbeOperation.TERTIARY_COMMIT),false)
+            record("restartExhaustedDenied",probe(controller,ServiceAdmissionProbeOperation.TERTIARY_COMMIT),false)
         }
-        // Recreated Service never re-submits primary/secondary; only this fixed quota check runs.
+        // Both durable started markers mean no probes, including after fresh process startup.
+        // A crash anywhere after a marker is created permanently skips its original schedule.
         writeEvidence()
+    }
+    private fun probe(controller:GeneratedAgentController,operation:ServiceAdmissionProbeOperation):ServiceAdmissionProbeReply {
+        probeAttempts++
+        return controller.serviceAdmissionProbe(operation)
     }
     private fun record(key:String,reply:ServiceAdmissionProbeReply,expected:Boolean) {
         results.put(key,reply.admitted==expected && if(expected)reply.recordId.isNotEmpty() else reply.recordId.isEmpty())
@@ -64,15 +86,62 @@ class LifecycleFixtureApplication:MuyonLabApplication() {
         SQLiteDatabase.openDatabase(File(root,DurableServiceHostOwner.DATABASE_NAME).path,null,SQLiteDatabase.OPEN_READONLY).use { db->
             db.rawQuery("SELECT state,COUNT(*) FROM reservations GROUP BY state",null).use { c->while(c.moveToNext())counts[c.getString(0)]=c.getInt(1)}
             db.rawQuery("SELECT COUNT(*) FROM admissions",null).use { c->check(c.moveToFirst());admissions=c.getInt(0)}
+            check(admissions<=1){"fixture_admission_count_invalid"}
+            // Opaque receipt comes from the durable ledger; prior evidence never grants authority.
+            db.rawQuery("SELECT a.id FROM admissions a JOIN reservations r ON r.token=a.token WHERE r.state='consumed'",null).use { c->
+                admissionIdentity=if(c.moveToFirst())c.getString(0) else ""
+                check(!c.moveToNext()){"fixture_admission_count_invalid"}
+            }
         }
         val json=JSONObject().put("protocol",1).put("synthetic",true).put("complete",true)
             .put("pid",Process.myPid()).put("bootstrapOrdinal",ordinal).put("nativeCleaned",cleaned)
             .put("leaseClosed",cleaned).put("admissionIdentity",admissionIdentity).put("results",results)
             .put("held",counts["held"]).put("consumed",counts["consumed"]).put("expired",counts["expired"])
-            .put("admissions",admissions).put("restartProbeCount",if(ordinal>=2)1 else 0)
+            .put("admissions",admissions).put("restartProbeCount",if(schedulePhase==2)1 else 0)
+            .put("schedulePhase",schedulePhase).put("probeAttempts",probeAttempts)
+            .put("phase1Started",started(root,PRIMARY_STARTED)).put("phase2Started",started(root,EXHAUSTION_STARTED))
         val file=AtomicFile(File(root,"lifecycle-evidence.json"))
         val stream=file.startWrite()
         try{stream.write(json.toString().toByteArray(Charsets.UTF_8));file.finishWrite(stream)}catch(error:Throwable){file.failWrite(stream);throw error}
+    }
+    /** Fixed private scheduling receipts only. They cannot provide approval or reset quota.
+     * Persist the started receipt BEFORE invoking native; interrupted schedules are never retried.
+     */
+    private fun markStarted(root:File,name:String) {
+        val fd=Os.open(File(root,name).absolutePath,
+            OsConstants.O_WRONLY or OsConstants.O_CREAT or OsConstants.O_EXCL or OsConstants.O_NOFOLLOW,384)
+        try {
+            var offset=0
+            while(offset<MARKER_BYTES.size) {
+                val written=Os.write(fd,MARKER_BYTES,offset,MARKER_BYTES.size-offset)
+                check(written>0){"fixture_schedule_unavailable"};offset+=written
+            }
+            Os.fsync(fd)
+        } finally { Os.close(fd) }
+        val directory=Os.open(root.absolutePath,OsConstants.O_RDONLY or OsConstants.O_DIRECTORY or OsConstants.O_NOFOLLOW,0)
+        try { Os.fsync(directory) } finally { Os.close(directory) }
+    }
+    private fun started(root:File,name:String):Boolean {
+        val fd=try { Os.open(File(root,name).absolutePath,OsConstants.O_RDONLY or OsConstants.O_NOFOLLOW,0) }
+        catch(error:ErrnoException){if(error.errno==OsConstants.ENOENT)return false else throw error}
+        try {
+            val stat=Os.fstat(fd)
+            check((stat.st_mode and OsConstants.S_IFMT)==OsConstants.S_IFREG && stat.st_uid==Process.myUid() &&
+                (stat.st_mode and 4095)==384 && stat.st_size==MARKER_BYTES.size.toLong()){"fixture_schedule_invalid"}
+            val bytes=ByteArray(MARKER_BYTES.size)
+            var offset=0
+            while(offset<bytes.size) {
+                val count=Os.read(fd,bytes,offset,bytes.size-offset)
+                check(count>0){"fixture_schedule_invalid"};offset+=count
+            }
+            check(bytes.contentEquals(MARKER_BYTES)){"fixture_schedule_invalid"}
+            return true
+        } finally { Os.close(fd) }
+    }
+    private companion object {
+        const val PRIMARY_STARTED="lifecycle-primary-started-v1"
+        const val EXHAUSTION_STARTED="lifecycle-exhaustion-started-v1"
+        val MARKER_BYTES="synthetic-schedule-started-v1\n".toByteArray(Charsets.UTF_8)
     }
     private fun denied()=ServiceAdmissionAuthority.State(null,null,{_,_->false},{_,_,_->null})
     private fun approved(exists:Boolean=true):ServiceAdmissionAuthority.State {
