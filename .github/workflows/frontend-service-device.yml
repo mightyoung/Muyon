@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      SOURCE_SHA: 98923e71ef1e89f653dc18031e09c734c474c1bb
-      PRODUCER_RUN: '39105160635'
+      SOURCE_SHA: 73a582d3c948d70450a45da4205435a715eeb6b4
+      PRODUCER_RUN: '39106124839'
       HARNESS_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -72,7 +72,7 @@ jobs:
           if ! timeout 15 "$adb_bin" logcat -c > "$evidence/logcat-clear.log" 2>&1; then
             printf 'UNAVAILABLE: API26 log buffer clear; instrumentation still required\n' > "$evidence/logcat-clear-status.txt"
           fi
-          "$adb_bin" shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
+          timeout 240 "$adb_bin" shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
           if ! timeout 30 "$adb_bin" logcat -d > "$evidence/logcat.txt" 2>&1; then
             printf 'UNAVAILABLE: API26 logcat dump\n' > "$evidence/logcat-status.txt"
           fi
