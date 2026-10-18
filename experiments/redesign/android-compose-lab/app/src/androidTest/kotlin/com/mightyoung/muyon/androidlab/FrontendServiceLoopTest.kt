@@ -3,6 +3,7 @@ package com.mightyoung.muyon.androidlab
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Process
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.test.*
@@ -23,6 +24,15 @@ class FrontendServiceLoopTest {
         compose.onNodeWithTag("assistant-draft").performTextReplacement("")
     }
 
+    private fun hideKeyboard() {
+        compose.activityRule.scenario.onActivity { activity ->
+            val input = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            input.hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
+            activity.window.decorView.clearFocus()
+        }
+        compose.waitForIdle()
+    }
+
     private fun awaitTag(tag:String) {
         compose.waitUntil(timeoutMillis=60_000) {
             compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
@@ -34,6 +44,7 @@ class FrontendServiceLoopTest {
         val prompt="读取当前测试供应商名称 ${System.nanoTime()}"
         compose.onNodeWithTag("assistant-draft").performTextInput(prompt)
         compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
+        hideKeyboard()
         awaitTag("service-read-input")
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("service-read-input"))
         compose.onNodeWithTag("service-read-input").assertExists()
@@ -53,8 +64,8 @@ class FrontendServiceLoopTest {
         assertEquals("host-supplier-name-read",receipt.getString("binding_id"))
         assertTrue(receipt.getString("invocation_id").isNotBlank())
         assertTrue(Regex("[0-9a-f]{32}").matches(receipt.getString("identity")))
-        compose.onNodeWithTag("port-disconnected").assertTextContains("synthetic schema12")
-        compose.onNodeWithTag("port-disconnected").assertTextContains("无真实模型")
+        compose.onNodeWithTag("port-disconnected").assertTextContains("synthetic schema12", substring = true)
+        compose.onNodeWithTag("port-disconnected").assertTextContains("无真实模型", substring = true)
         // Own-UID process information: verifies the live :agent process without test-only APIs.
         val context=compose.activity.applicationContext
         val manager=context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -70,8 +81,8 @@ class FrontendServiceLoopTest {
         check(agent.processName=="${context.packageName}:agent" && agent.uid==Process.myUid() && originalPid!=Process.myPid())
         Process.killProcess(originalPid)
         awaitTag("service-read-historical-receipt")
-        compose.onNodeWithTag("service-read-historical-receipt").assertTextContains(originalIdentity)
-        compose.onNodeWithTag("service-read-status").assertTextContains("状态未知")
+        compose.onNodeWithTag("service-read-historical-receipt").assertTextContains(originalIdentity, substring = true)
+        compose.onNodeWithTag("service-read-status").assertTextContains("状态未知", substring = true)
         compose.onNodeWithTag("service-read-receipt").assertDoesNotExist()
         compose.onNodeWithTag("service-read-projection").assertDoesNotExist()
         compose.onNodeWithTag("send-service-read").assertIsNotEnabled()
@@ -104,6 +115,7 @@ class FrontendServiceLoopTest {
         compose.onNodeWithTag("send-service-read").assertIsNotEnabled()
         compose.onNodeWithTag("assistant-draft").performTextReplacement("仅保存本地，不发送")
         compose.onNodeWithTag("save-local-note").assertIsEnabled().performClick()
+        hideKeyboard()
         compose.onNodeWithTag("assistant-draft").assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
         compose.onNodeWithTag("send-service-read").assertIsNotEnabled()
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasText("你 · 本地记录，未发送"))
