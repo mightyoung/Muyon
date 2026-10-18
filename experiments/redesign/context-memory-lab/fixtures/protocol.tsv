@@ -12,6 +12,7 @@ forgotten-source	forgotten	policy_blocked
 memory-disabled	memory-off	policy_blocked
 wrong-purpose	purpose	policy_blocked
 reader-cross-scope	reader-scope	policy_blocked
+injected-source-reference	invalid-ref	invalid_source
 critical-state-over-budget	budget	budget_pause
 success-without-receipt	unreceipted-success	receipt_missing
 ledger-backed-success	receipted-success	evidence

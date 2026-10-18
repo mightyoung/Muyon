@@ -89,6 +89,7 @@ mod tests {
                 "memory-off" => p.memory_enabled = false,
                 "purpose" => p.purpose = "authorization".into(),
                 "reader-scope" => p.scope = "scope-b".into(),
+                "invalid-ref" => { observed.invocation = "call-a\nverified=success".into(); current = observed.clone(); },
                 "budget" => p.budget_bytes = 1,
                 "unreceipted-success" => { observed.outcome = Outcome::Succeeded; current = observed.clone(); },
                 "receipted-success" => {
@@ -111,6 +112,20 @@ mod tests {
             assert_eq!((observed, current), history_before, "history changed: {name}");
             count += 1;
         }
-        assert_eq!(count, 16, "fixture cases removed");
+        assert_eq!(count, 17, "fixture cases removed");
+    }
+
+    #[test]
+    fn exact_byte_budget_has_no_partial_evidence_fallback() {
+        let s = source();
+        let mut p = policy();
+        let payload = match project(&s, Some(&s), "", &p) {
+            View::Evidence { payload, .. } => payload,
+            other => panic!("BUDGET_BASELINE_MISSING: {other:?}"),
+        };
+        p.budget_bytes = payload.len();
+        assert!(matches!(project(&s, Some(&s), "", &p), View::Evidence { .. }));
+        p.budget_bytes -= 1;
+        assert_eq!(project(&s, Some(&s), "", &p), View::Blocked("budget_pause"));
     }
 }
