@@ -6,6 +6,7 @@ pub mod read_registry;
 pub mod supplier_store;
 pub mod supplier_scope_bridge;
 pub mod service_provider;
+pub mod service_host;
 pub mod supplier_lab_source;
 mod supplier_business;
 pub mod store;

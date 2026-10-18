@@ -369,6 +369,23 @@ pub struct SupplierReadResult {
     pub attempt_id: String,
 }
 impl SupplierReader {
+    pub fn install_host_scope(
+        _receipts: &Path,
+        _id: &str,
+        _bridge: Rc<crate::supplier_scope_bridge::HostSupplierScopeBridge>,
+    ) -> Result<Self> {
+        Err("supplier_scope_bridge_unavailable".into())
+    }
+    pub(crate) fn install_host_scope_in_run(
+        _dir: &Path,
+        _id: &str,
+        _bridge: Rc<crate::supplier_scope_bridge::HostSupplierScopeBridge>,
+    ) -> Result<Self> {
+        Err("supplier_scope_bridge_unavailable".into())
+    }
+    pub fn validate_current_projection(&self, _projection: &Json) -> Result<()> {
+        Err("supplier_scope_bridge_unavailable".into())
+    }
     pub fn install(
         db: &Path,
         receipts: &Path,

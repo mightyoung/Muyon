@@ -261,6 +261,13 @@ pub struct AgentServiceController {
     observer: Option<Arc<dyn ServiceEvidenceObserver>>,
 }
 impl AgentServiceController {
+    /// Host-only injection; never exposed by the UI/FFI request DTOs.
+    pub fn new_with_host(
+        _config: AgentHostServiceConfig,
+        _host: Arc<crate::service_host::ServiceHostPorts>,
+    ) -> Result<Self, AgentServiceError> {
+        Err(AgentServiceError::InternalFailure)
+    }
     pub fn new(config: AgentHostServiceConfig) -> Result<Self, AgentServiceError> {
         Self::construct(config, None)
     }
