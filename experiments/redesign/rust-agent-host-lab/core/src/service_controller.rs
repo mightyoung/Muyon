@@ -240,6 +240,7 @@ fn settled(s: &AgentRunSnapshot) -> bool {
 pub struct AgentServiceController {
     shared: Arc<Shared>,
     observer: Option<Arc<dyn ServiceEvidenceObserver>>,
+    private_root: PathBuf,
 }
 impl AgentServiceController {
     pub fn new(config: AgentHostServiceConfig) -> Result<Self, AgentServiceError> {
@@ -307,6 +308,7 @@ impl AgentServiceController {
                 owns_process_slot: true,
             }),
         });
+        let private_root = path.clone();
         match thread::Builder::new()
             .name("muyon-agent-inventory".into())
             .spawn(move || {
@@ -322,7 +324,7 @@ impl AgentServiceController {
                 return Err(AgentServiceError::InternalFailure);
             }
         }
-        Ok(Self { shared, observer })
+        Ok(Self { shared, observer, private_root })
     }
     pub fn connect(&self, req: AgentConnectRequest) -> AgentConnectReply {
         let mut g = self.shared.lock();
@@ -722,6 +724,35 @@ impl AgentServiceController {
         };
         // The only blocking join is on the Service backend waiter, never under the mutex.
         let completion = handle.map(JoinHandle::join);
+        // A joined panic has dropped the worker's lease. Reacquire it and read
+        // original durable evidence on this backend waiter, outside the mutex.
+        // Never restore a normal terminal after failed worker cleanup.
+        let interrupted = if matches!(&completion, Some(Err(_))) {
+            let pending = self.shared.lock().runs.last().filter(|s| !settled(s)).cloned();
+            pending.map(|last| {
+                let intent = intent_of(&last);
+                let identity = identity_of(&last);
+                let root = ServiceRoot::open(&self.private_root).ok();
+                let recovered = root.as_ref().and_then(|root| {
+                    let run = root.runs().iter().find(|run| {
+                        run.intent == intent && identity.as_ref().map(|id| {
+                            id.run_id == run.identity.run_id
+                                && id.admitted_service_epoch == run.identity.admitted_service_epoch
+                                && id.actual_task.as_ref().map(|t| Some(t) == run.identity.actual_task.as_ref()).unwrap_or(true)
+                        }).unwrap_or(true)
+                    })?;
+                    let dir = root.run_dir(&run.identity.run_id).ok()?;
+                    let mut receipt = service_evidence::receipt(&dir, run).ok()?;
+                    if receipt.outcome == AgentReceiptOutcome::NotStarted {
+                        receipt.outcome = AgentReceiptOutcome::Unknown;
+                    }
+                    Some(service_evidence::unknown(run, receipt))
+                }).unwrap_or_else(|| unknown(intent, identity));
+                (root, recovered)
+            })
+        } else {
+            None
+        };
         {
             let mut g = self.shared.lock();
             match completion {
@@ -761,10 +792,9 @@ impl AgentServiceController {
                     g.owner = None;
                 }
                 Some(Err(_)) => {
-                    if let Some(last) = g.runs.last().cloned() {
-                        if !settled(&last) {
-                            g.publish(unknown(intent_of(&last), identity_of(&last)))
-                        }
+                    if let Some((root, snapshot)) = interrupted {
+                        g.root = root;
+                        g.publish(snapshot);
                     }
                     g.control = None;
                     g.owner = None;
