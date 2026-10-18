@@ -1,0 +1,5 @@
+# External queue — no integration in this batch
+
+Parent reported OCR followup stopped/clean: tested source `9a2ac7864d7bccf7fc2622dd561b22a58ca3498a`; fixed handoff `ede18bfd3e20f6f9f0b325933c4820d62802699b`, docs/tasks/OCR-V6-API26-FOLLOWUP-20261018.md. Reported changes: three Mat exceptional/cancellation releases, official OpenCV4.12.0, min26 AAR/APK and API26 symbols/64-bit ELF RELRO/ZIP16KiB checks; Rust9/Kotlin22/Python3 and desktop10 images/44 stages. These are parent-provided queue facts, not independently reviewed/retested acceptance by this LeaderB batch. API26/16KiB-device loading, OCR performance and actual Service/W1/store remain NOT_RUN. No OCR branch source or old OCR evidence is combined with A's full App floor work.
+
+DeepSeek/PIP is now authorized separately; parent task 01a14d94-610e-7725-9f34-84d3ff3990c7 owns independent registry/lifecycle differential work. Current B/C exact paths are published separately. No PIP framework, REMORY gate or RSI change enters this batch. LeaderB remains sole integrator; future tasks must recheck then-current source/ownership and preserve I04 hold.

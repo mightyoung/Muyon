@@ -10,7 +10,7 @@ LeaderB remains sole integrator. This is a path ownership release only, not acce
 - `experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs`
 - all other existing host runtime source except the module declaration path below
 
-PIP may inspect/use these paths on its independent branch. Changes to Catalog/NativeSession/read authority or projection semantics require explicit integration review against the fixed store candidate; source ownership release does not waive compatibility.
+PIP may use the released plugin-contract-lab paths for its independent registry/lifecycle scope. Host runtime paths above are listed as not written by C, not as a grant to expand PIP into runtime/store work; any host edit needs a narrow ownership assignment from LeaderB/parent first. Changes to Catalog/NativeSession/read authority or projection semantics require explicit integration review against the fixed store candidate; source ownership release does not waive compatibility.
 
 ## C reserved paths
 
