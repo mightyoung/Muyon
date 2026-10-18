@@ -1,0 +1,33 @@
+name: Service production bridges scoped
+on:
+  push:
+    branches: ['task/service-production-bridges-20261018']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: service-production-bridges-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  scoped:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Exact scoped Rust tests (no HTTP or legacy reopen modules)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bridge-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/bridge-evidence/source-sha.txt"
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/bridge-target"
+          cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test supplier_scope_bridge --test service_provider -- --nocapture 2>&1 | tee "$RUNNER_TEMP/bridge-evidence/rust.log"
+          git diff --exit-code
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: service-production-bridges-scoped
+          path: ${{ runner.temp }}/bridge-evidence

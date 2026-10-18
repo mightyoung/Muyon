@@ -4,6 +4,8 @@ pub mod model_gateway;
 pub mod plugin_process;
 pub mod read_registry;
 pub mod supplier_store;
+pub mod supplier_scope_bridge;
+pub mod service_provider;
 pub mod supplier_lab_source;
 mod supplier_business;
 pub mod store;
