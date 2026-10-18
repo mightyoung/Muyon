@@ -1,0 +1,30 @@
+{
+  "source_sha": "2f8f4da674e871708880dcc792a1c9dafb3a17f3",
+  "loop_run": 39107347147,
+  "compose_run": 39107350771,
+  "ci": "PASS",
+  "scoped_rust_tests": 21,
+  "design_oracle_tests": 18,
+  "emulator": {
+    "api": 26,
+    "abi": "x86_64",
+    "tests": 2,
+    "result": "PASS",
+    "ui_pid": 4599,
+    "old_agent_pid": 4672,
+    "new_agent_pid": 4699,
+    "original_receipt_identity": "01fb3a3c7b7745a22cf8a810378e3d74",
+    "receipt_invocation_equality_asserted": true,
+    "lookup_only": true
+  },
+  "physical_device": "NOT_RUN",
+  "arm64_runtime": "NOT_RUN",
+  "model_api": "NOT_RUN",
+  "production_store_authority": "NOT_IMPLEMENTED_FAIL_CLOSED",
+  "business": "deterministic trusted read from synthetic schema12 SQLite",
+  "stream": "ordered result batch, not model tokens",
+  "artifact_id": 12129012677,
+  "apk_sha256": "67bca372b01973b46926406efcbfd4fb6aaf95c42a94643690444f58c7efce41",
+  "raw_predevice_manifest_runtime": "NOT_RUN",
+  "raw_manifest_stage_note": "device success recorded separately, raw manifest unchanged"
+}
