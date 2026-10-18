@@ -119,7 +119,9 @@ jobs:
           adb install -r "$LAB_DIRECTORY/app/build/outputs/apk/debug/app-debug.apk"
           adb install -r "$LAB_DIRECTORY/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
           timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$LOG_DIRECTORY/instrumentation.log"
-          grep -Eq '^OK \([1-9][0-9]* tests?\)' "$LOG_DIRECTORY/instrumentation.log"
+          expected_tests=$(grep -c '@Test fun' "$LAB_DIRECTORY/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/DurableServiceHostOwnerTest.kt")
+          test "$expected_tests" -gt 0
+          grep -F "OK ($expected_tests tests)" "$LOG_DIRECTORY/instrumentation.log"
           if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$LOG_DIRECTORY/instrumentation.log"; then exit 1; fi
           printf '%s\n' 'Named durable ledger tests only; no legacy task database, HTTP, native controller or model API.' > "$LOG_DIRECTORY/device-boundary.txt"
       - name: Record unexecuted boundaries even after setup failure
