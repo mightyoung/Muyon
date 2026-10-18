@@ -2,7 +2,7 @@
 
 Product source is fixed at `aa0bc2cf9527911c8764b8578ee706f3499fe82f` (b1 plus native f60). All12 Kotlin input blobs/SHA256s and the original6 fixture names match b1 exactly. This is a checks-only runner; it does not change generated bindings, fixtures, product source, or original RED descriptors/classifiers.
 
-Run from an environment with official JDK17 on PATH/JAVA_HOME, Kotlin2.2.20 and pinned JNA5.14.0 (`4fb141dd8ef6b0585ffceea4bc49602fbc6312fa977e2c488794ea3e6aafecae`). Use a new evidence directory:
+Run from an environment with official JDK17 on PATH/JAVA_HOME, Kotlin2.2.20 and pinned JNA5.19.1 (`4fb141dd8ef6b0585ffceea4bc49602fbc6312fa977e2c488794ea3e6aafecae`). Use a new evidence directory:
 
 ```sh
 python3 -B /path/to/checks/mapper_control_green.py \
@@ -10,7 +10,7 @@ python3 -B /path/to/checks/mapper_control_green.py \
   --library /path/to/shipping/libmuyon_android_contract_bridge.so \
   --bindgen /path/to/uniffi-bindgen \
   --kotlinc /path/to/kotlin-2.2.20/bin/kotlinc \
-  --jna /path/to/jna-5.14.0.jar \
+  --jna /path/to/jna-5.19.1.jar \
   --evidence-dir /tmp/new-mapper-evidence
 ```
 

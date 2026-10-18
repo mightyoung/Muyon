@@ -35,8 +35,8 @@ python3 -B "$checks/full.py" rust --name "$component" --log "$EVIDENCE_DIR/behav
 if (( command_statuses[0] != 0 )); then exit "${command_statuses[0]}"; fi
 if [[ "$component" != core ]]; then exit 0; fi
 
-# Existing core88 is counted separately from six new native cases. These are
-# independent physical process44 and harness13 gates, not additional Rust cases.
+# Core107 counts legacy90, native6 and synthetic HTTP11 Rust tests. The following
+# physical process44 and harness13 gates are separate obligations, not Rust cases.
 for suite in test_harness test_wire_harness process wire_process; do
   arguments=()
   if [[ "$suite" == process || "$suite" == wire_process ]]; then
