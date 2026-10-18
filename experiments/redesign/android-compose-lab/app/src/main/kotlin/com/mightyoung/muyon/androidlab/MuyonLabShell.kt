@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,7 +50,7 @@ fun MuyonLabShell(
     var agentOpen by remember { mutableStateOf(false) }
     var selectedName by rememberSaveable { mutableStateOf(initialState.selected.name) }
     val shell = initialState.select(Destination.valueOf(selectedName))
-    val activity = LocalContext.current as ComponentActivity
+    val activity = checkNotNull(LocalActivity.current as? ComponentActivity)
     val retained = remember(activity) { ViewModelProvider(activity)[ConversationUiMemory::class.java] }
     val uiSaver = remember(retained) { Saver<ConversationUiMemory, ArrayList<String>>(
         save = {
