@@ -8,7 +8,7 @@ static NEXT: AtomicUsize = AtomicUsize::new(0);
 const ID: &str = "11111111-1111-4111-8111-111111111111";
 struct Owner { root: PathBuf, current: Mutex<SupplierScopeDecision>, provider_calls: AtomicUsize }
 impl ServiceHostOwner for Owner {
- fn current_scope(&self)->Result<ServiceHostScope> { Ok(ServiceHostScope { source_identity:"test-host-owner".into(), namespace:"test-host-namespace".into(), managed_root:self.root.clone(), database:self.root.join("source.siq"), decision:self.current.lock().unwrap().clone() }) }
+ fn current_scope(&self)->Result<ServiceHostScope> { let decision=self.current.lock().unwrap().clone(); Ok(ServiceHostScope { source_identity:decision.source_identity.clone(), namespace:decision.namespace.clone(), managed_root:self.root.clone(), database:self.root.join("source.siq"), decision }) }
  fn provider(&self)->Result<ServiceProviderBridge> { self.provider_calls.fetch_add(1,Ordering::SeqCst); Err("configured_profile_unavailable".into()) }
 }
 fn fixture()->(PathBuf,Arc<Owner>) {
@@ -38,7 +38,11 @@ fn host_read_uses_same_controller_and_rechecks_revocation_on_redisclosure_and_re
  owner.current.lock().unwrap().allowed=false;
  let denied=parse(c.supplier_read_events(client,"host1".into(),0).as_bytes()).unwrap(); assert_eq!(denied.object().unwrap()["reason"],string("DISCLOSURE_UNAVAILABLE")); assert!(denied.object().unwrap()["events"].array().unwrap().is_empty()); stop(c);
  let (c,client)=open(&root,owner.clone(),ServiceHostMode::LocalRead);
- let replay=parse(c.supplier_read_events(client,"host1".into(),0).as_bytes()).unwrap(); assert!(replay.object().unwrap()["events"].array().unwrap().is_empty()); assert_eq!(files_before,std::fs::read_dir(root.join("service")).unwrap().count()); assert_eq!(owner.provider_calls.load(Ordering::SeqCst),0); stop(c);std::fs::remove_dir_all(root).unwrap();
+ let replay=parse(c.supplier_read_events(client,"host1".into(),0).as_bytes()).unwrap(); assert!(replay.object().unwrap()["events"].array().unwrap().is_empty()); assert_eq!(files_before,std::fs::read_dir(root.join("service")).unwrap().count()); assert_eq!(owner.provider_calls.load(Ordering::SeqCst),0); stop(c);
+ // A different currently allowed owner at the same physical DB cannot inherit history.
+ { let mut d=owner.current.lock().unwrap(); d.allowed=true;d.source_identity="replacement-owner".into();d.namespace="replacement-namespace".into(); }
+ let (c,client)=open(&root,owner.clone(),ServiceHostMode::LocalRead);
+ let replaced=parse(c.supplier_read_events(client,"host1".into(),0).as_bytes()).unwrap();assert!(replaced.object().unwrap()["events"].array().unwrap().is_empty());stop(c);std::fs::remove_dir_all(root).unwrap();
 }
 #[test]
 fn configured_session_missing_profile_fails_closed_without_synthetic_read(){
