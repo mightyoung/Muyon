@@ -1,0 +1,89 @@
+{
+  "module_id": "inquiry",
+  "protocol_version": 1,
+  "data": [
+    {
+      "name": "supplier",
+      "schema_version": 1,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ],
+  "relations": [],
+  "operations": [
+    {
+      "name": "supplier_name",
+      "schema_version": 1,
+      "effect": "read",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "projection_schema": {
+        "type": "object",
+        "properties": {
+          "supplier": {
+            "type": "object",
+            "properties": {
+              "module_id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "revision": {
+                "type": "string"
+              },
+              "schema_version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "module_id",
+              "type",
+              "key",
+              "revision",
+              "schema_version"
+            ],
+            "additionalProperties": false,
+            "data_ref": "inquiry/supplier@1"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "supplier",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "data_refs": [
+        "inquiry/supplier@1"
+      ],
+      "binding_id": "host-supplier-name-read"
+    }
+  ],
+  "views": []
+}

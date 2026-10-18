@@ -3,6 +3,8 @@
 pub mod model_gateway;
 pub mod plugin_process;
 pub mod read_registry;
+#[cfg(target_os = "linux")]
+pub mod supplier_store;
 pub mod store;
 use contract_transport::{ContractTransport, InProcessCatalog};
 use muyon_core_agent_lab::{
