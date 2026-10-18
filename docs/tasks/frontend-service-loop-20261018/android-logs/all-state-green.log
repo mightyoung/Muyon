@@ -14,6 +14,8 @@ PASS platform task note takes priority
 PASS platform ownership cannot erase interrupted warning
 PASS ordinary queued waiting and running copy
 PASS paused failed succeeded and cancelled stay distinct
+PASS 11 chat read UTF-8 bounds and immutable identity checks; Binder/native NOT_RUN
+PASS frontend input/status policy (21 assertions; no Android/model execution)
 PASS local UI: empty local session never fabricates a message
 PASS local UI: draft remains exact raw UTF16
 PASS local UI: blank local note does not create records

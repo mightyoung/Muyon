@@ -19,7 +19,7 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
     init {
         val restored=mutableMapOf<String,ChatReadConversation>()
         preferences.all.entries.take(64).forEach{(conversation,value)->
-            try{val o=JSONObject(value as String);require(ChatReadBounds.validText(o.string("text")) && o.string("key")==snapshot.selected.key && o.string("revision")==snapshot.selected.revision);restored[conversation]=ChatReadConversation(text=o.string("text"),requestId=o.string("request"),runId=o.optString("run").takeIf{it.isNotBlank()},admittedServiceEpoch=o.optString("epoch").takeIf{it.isNotBlank()},originalReceiptIdentity=o.optString("receiptIdentity").takeIf{it.isNotBlank()},status="unknown",reason="进程恢复；请核实原请求，未重新执行")}catch(_:Exception){}
+            try{val o=JSONObject(value as String);require(ChatReadBounds.validText(o.string("text")) && o.string("key")==snapshot.selected.key && o.string("revision")==snapshot.selected.revision);restored[conversation]=ChatReadConversation(text=o.string("text"),requestId=o.string("request"),runId=o.optString("run").takeIf{it.isNotBlank()},admittedServiceEpoch=o.optString("epoch").takeIf{it.isNotBlank()},originalReceiptIdentity=o.optString("receiptIdentity").takeIf{it.isNotBlank()},status="unknown",reason="进程恢复；请核实原请求，未重新执行")}catch(_:Exception){restored[conversation]=ChatReadConversation(status="unknown",reason="恢复记录不可核实；禁止重新提交")}
         }
         snapshot=ChatReadView(restored)
     }
@@ -62,7 +62,7 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
             inFlight.remove(conversation)
             val old=snapshot.conversations[conversation] ?: return@chatRpc
             val result=try{if(raw==null)error("transport_lost");decode(old,raw)}catch(_:Exception){old.disclosureLost("连接或协议不可核实；保留原请求，不自动重发")}
-            try{update(conversation,result)}catch(_:Exception){snapshot=snapshot.copy(conversations=snapshot.conversations+(conversation to result.copy(status="unknown",reason="身份记录写入失败")))}
+            try{update(conversation,result)}catch(_:Exception){snapshot=snapshot.copy(conversations=snapshot.conversations+(conversation to result.disclosureLost("身份记录写入失败")))}
             if(result.status in setOf("accepted","existing","events"))main.postDelayed({reconcile(conversation)},250)
         }
     }
