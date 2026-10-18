@@ -14,7 +14,11 @@ answer masking. The adapter registers no plugins/tools and adds no authority or
 budget state. Numeric loopback validation and no-retry behavior remain in core.
 Gateway preserves native stop, wire budget, cancellation and journal reasons.
 
-The endpoint must be constructed with the same SharedSession as its ModelGateway.
+Every ModelGateway::respond_controlled entry invokes endpoint.validate_session.
+LoopbackEndpoint rejects a different SharedSession using Rc::ptr_eq before
+authority polls, ledger admission, or socket work. This also covers later
+replacement of the public Gateway session/endpoint fields. Historical synthetic
+endpoints retain a default compatible hook.
 `model_sends` counts admission attempts, not socket bytes. Actual HTTP request
 headers/body and response headers/body are counted by the core AgentControl,
 which persists through the existing RuntimePorts and charges existing total.
@@ -23,10 +27,10 @@ partial I/O failure records `failed` and makes no delivery certainty claim.
 
 ## Evidence
 
-Native-only source commits: `75f3ce6e`, `99909d24`, `fe359f37`.
+Native-only source commits: `75f3ce6e`, `99909d24`, `fe359f37`, `ba52cae3`.
 Dependency: core owner `5d1fdf00` (host charge/checkpoint/shared total/inflight).
 Exact tested isolated combination:
-`207c045655efdc9ab79a6bb35e7e40f8bd1923bd`, at
+`21acf36875da91c75157fddf6ef88e68c677a2ee`, at
 `/tmp/Muyon-host-http-combination-review`.
 
 Default-parallel full host command, no RUST_TEST_THREADS override:
@@ -40,9 +44,11 @@ MUYON_PLUGIN_CONTRACT_BIN=/tmp/Muyon-host-http-combination-target/debug/muyon-pl
  cargo test --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml
 ```
 
-Result: **53 passed / 0 failed** (prior host 48 + dedicated HTTP 5).
+Result: **54 passed / 0 failed** (prior host 48 + dedicated HTTP 6).
 Dedicated HTTP tests cover:
 
+- Different endpoint/Gateway sessions refused before ledger creation or connection,
+  with zero sent/received bytes and zero admission attempts (1 RED then 1 GREEN).
 - Completed masked answer, exact observed request/response byte counters, shared
   total equality, and durable task fields/ledger.
 - Truncated response, cancellation during pending read, and authority revocation
@@ -60,7 +66,10 @@ Raw logs and SHA256 inventory are in `/tmp/Muyon-host-http-evidence/`.
 `combination-http.log` retains the first combination (3 pass/2 failed) due to
 incorrect test assertions expecting equals instead of actual tab task fields;
 `combination-http-green.log` is 5 pass after correcting those assertions.
-`final-full-host.log` is the final 53-pass exact-source result.
+`final-full-host.log` is the earlier 53-pass result before the session guard.
+`session-mismatch-red.log` records the real pre-fix unwanted connection;
+`session-mismatch-green.log` records 1 pass with zero connection/bytes.
+`session-guard-full-host.log` is the final 54-pass exact-source result.
 `native-read-baseline.log` separately confirms existing native_read 25 pass with
 only adapter changes. Compiler emits existing FFI read/write signature warnings.
 
