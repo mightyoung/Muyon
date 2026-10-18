@@ -1,0 +1,1624 @@
+{
+  "scope": "desktop Python OpenCV 4.5.3 to 4.12.0 diagnostic only; NOT Quickbird Android versus official Android JNI parity",
+  "androidInference": "NOT_RUN",
+  "modelLockSha256": "7c8f155c188a606183b125646b0e8a0e25ae86fa24dfb33d7919bc4e5f349c3d",
+  "default": "PP-OCRv6_tiny",
+  "comparison": "PP-OCRv6_small",
+  "modelFiles": {
+    "/workspace/ocr-assets/PP-OCRv6_tiny_det_onnx/inference.onnx": "193bab7a04fca699a6c82e6abb5b81bdb28177f0abd4062552b04908dafb19f8",
+    "/workspace/ocr-assets/PP-OCRv6_tiny_det_onnx/inference.yml": "3ac018be6f97499a08faa3bbdeb33640968d9307f6736d152902747a9f259593",
+    "/workspace/ocr-assets/PP-OCRv6_tiny_det_onnx/README.md": "f48628931a5dc994ce5c67e32c94d71b4a7e96b8c5c1b00663284999c3c566bc",
+    "/workspace/ocr-assets/PP-OCRv6_tiny_rec_onnx/inference.onnx": "9ef676d6ed3c88256a2d92c640c44f25b0c40947e111b14b8be8f594091563e6",
+    "/workspace/ocr-assets/PP-OCRv6_tiny_rec_onnx/inference.yml": "66170210bad538e83fff3c4a3867e547d6bf20b50d64b20347c4b913f3034ea1",
+    "/workspace/ocr-assets/PP-OCRv6_tiny_rec_onnx/README.md": "e83dd03e515a2d064eaba8ec82248f21dbf6a0813550bafe4c70ee2f6e8fdf2a",
+    "/workspace/ocr-assets/PP-OCRv6_small_det_onnx/inference.onnx": "d73e0058b7a8086bbd57f3d10b8bcd4ff95363f67e06e2762b5e814fe9c9410e",
+    "/workspace/ocr-assets/PP-OCRv6_small_det_onnx/inference.yml": "193f435274bf9f0b5f71a929bbfbcf148282df7e633b34e7c373e8f44741b516",
+    "/workspace/ocr-assets/PP-OCRv6_small_det_onnx/README.md": "e9403667f0f92055d8ce9e73a2beb1002fc489d9342697db74039eb7178bb5fb",
+    "/workspace/ocr-assets/PP-OCRv6_small_rec_onnx/inference.onnx": "5435fd747c9e0efe15a96d0b378d5bd157e9492ed8fd80edf08f30d02fa24634",
+    "/workspace/ocr-assets/PP-OCRv6_small_rec_onnx/inference.yml": "ab078671bb49f06228eadccd34f1bb501e157f7a047095ffb943ba81512c77d1",
+    "/workspace/ocr-assets/PP-OCRv6_small_rec_onnx/README.md": "7d46dbd183ac09bd5a2e6b4577dcb29240751b1c00eb6813eca308d529f86806"
+  },
+  "fixtures": {
+    "font": {
+      "path": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+      "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a"
+    },
+    "files": {
+      "rotated.npy": "49301590952870b2b1308ab0791a74799fbb144367e6562666d76708ab226414",
+      "blank.npy": "85da84dc5367b34310245af456d95cbc3cd8b817caf84d18f9657011f0dac8a5",
+      "color.npy": "7f17266d77da5e0dcbd6d3952f72d8311adce8862ed234166261e0890fa9806d",
+      "chinese.npy": "0cb6b6baeaf4b3d1223300694b418fbc5691256f7558635a4e84e6d43c327753",
+      "english.npy": "4a0129a1a5c78b1341326937788e54ca5604cf44a5fc1a58c2938e67a7be7b8b"
+    }
+  },
+  "runtimes": {
+    "4.5.3": {
+      "opencv": {
+        "python": "3.9.25 (main, Oct 31 2025, 23:00:23) \n[Clang 21.1.4 ]",
+        "numpy": "1.26.4",
+        "opencv": "4.5.3",
+        "opencvBuild": "\nGeneral configuration for OpenCV 4.5.3 =====================================\n  Version control:               4.5.3\n\n  Platform:\n    Timestamp:                   2021-07-09T12:10:15Z\n    Host:                        Linux 5.8.0-1036-azure x86_64\n    CMake:                       3.20.5\n    CMake generator:             Unix Makefiles\n    CMake build tool:            /bin/gmake\n    Configuration:               Release\n\n  CPU/HW features:\n    Baseline:                    SSE SSE2 SSE3\n      requested:                 SSE3\n    Dispatched code generation:  SSE4_1 SSE4_2 FP16 AVX AVX2 AVX512_SKX\n      requested:                 SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX\n      SSE4_1 (15 files):         + SSSE3 SSE4_1\n      SSE4_2 (1 files):          + SSSE3 SSE4_1 POPCNT SSE4_2\n      FP16 (0 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 FP16 AVX\n      AVX (4 files):             + SSSE3 SSE4_1 POPCNT SSE4_2 AVX\n      AVX2 (29 files):           + SSSE3 SSE4_1 POPCNT SSE4_2 FP16 FMA3 AVX AVX2\n      AVX512_SKX (4 files):      + SSSE3 SSE4_1 POPCNT SSE4_2 FP16 FMA3 AVX AVX2 AVX_512F AVX512_COMMON AVX512_SKX\n\n  C/C++:\n    Built as dynamic libs?:      NO\n    C++ standard:                11\n    C++ Compiler:                /usr/lib/ccache/compilers/c++  (ver 9.3.1)\n    C++ flags (Release):         -Wl,-strip-all   -fsigned-char -W -Wall -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -Wformat -Werror=format-security -Wmissing-declarations -Wundef -Winit-self -Wpointer-arith -Wshadow -Wsign-promo -Wuninitialized -Wsuggest-override -Wno-delete-non-virtual-dtor -Wno-comment -Wimplicit-fallthrough=3 -Wno-strict-overflow -fdiagnostics-show-option -Wno-long-long -pthread -fomit-frame-pointer -ffunction-sections -fdata-sections  -msse -msse2 -msse3 -fvisibility=hidden -fvisibility-inlines-hidden -O3 -DNDEBUG  -DNDEBUG\n    C++ flags (Debug):           -Wl,-strip-all   -fsigned-char -W -Wall -Werror=return-type -Werror=non-virtual-dtor -Werror=address -Werror=sequence-point -Wformat -Werror=format-security -Wmissing-declarations -Wundef -Winit-self -Wpointer-arith -Wshadow -Wsign-promo -Wuninitialized -Wsuggest-override -Wno-delete-non-virtual-dtor -Wno-comment -Wimplicit-fallthrough=3 -Wno-strict-overflow -fdiagnostics-show-option -Wno-long-long -pthread -fomit-frame-pointer -ffunction-sections -fdata-sections  -msse -msse2 -msse3 -fvisibility=hidden -fvisibility-inlines-hidden -g  -O0 -DDEBUG -D_DEBUG\n    C Compiler:                  /usr/lib/ccache/compilers/cc\n    C flags (Release):           -Wl,-strip-all   -fsigned-char -W -Wall -Werror=return-type -Werror=address -Werror=sequence-point -Wformat -Werror=format-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wundef -Winit-self -Wpointer-arith -Wshadow -Wuninitialized -Wno-comment -Wimplicit-fallthrough=3 -Wno-strict-overflow -fdiagnostics-show-option -Wno-long-long -pthread -fomit-frame-pointer -ffunction-sections -fdata-sections  -msse -msse2 -msse3 -fvisibility=hidden -O3 -DNDEBUG  -DNDEBUG\n    C flags (Debug):             -Wl,-strip-all   -fsigned-char -W -Wall -Werror=return-type -Werror=address -Werror=sequence-point -Wformat -Werror=format-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wundef -Winit-self -Wpointer-arith -Wshadow -Wuninitialized -Wno-comment -Wimplicit-fallthrough=3 -Wno-strict-overflow -fdiagnostics-show-option -Wno-long-long -pthread -fomit-frame-pointer -ffunction-sections -fdata-sections  -msse -msse2 -msse3 -fvisibility=hidden -g  -O0 -DDEBUG -D_DEBUG\n    Linker flags (Release):      -Wl,--exclude-libs,libippicv.a -Wl,--exclude-libs,libippiw.a -L/root/ffmpeg_build/lib  -Wl,--gc-sections -Wl,--as-needed  \n    Linker flags (Debug):        -Wl,--exclude-libs,libippicv.a -Wl,--exclude-libs,libippiw.a -L/root/ffmpeg_build/lib  -Wl,--gc-sections -Wl,--as-needed  \n    ccache:                      YES\n    Precompiled headers:         NO\n    Extra dependencies:          /lib64/libpng.so /lib64/libz.so dl m pthread rt\n    3rdparty dependencies:       libprotobuf ade ittnotify libjpeg-turbo libwebp libtiff libopenjp2 IlmImf quirc ippiw ippicv\n\n  OpenCV modules:\n    To be built:                 calib3d core dnn features2d flann gapi highgui imgcodecs imgproc ml objdetect photo python3 stitching video videoio\n    Disabled:                    world\n    Disabled by dependency:      -\n    Unavailable:                 java python2 ts\n    Applications:                -\n    Documentation:               NO\n    Non-free algorithms:         NO\n\n  GUI: \n    VTK support:                 NO\n\n  Media I/O: \n    ZLib:                        /lib64/libz.so (ver 1.2.7)\n    JPEG:                        libjpeg-turbo (ver 2.1.0-62)\n    WEBP:                        build (ver encoder: 0x020f)\n    PNG:                         /lib64/libpng.so (ver 1.5.13)\n    TIFF:                        build (ver 42 - 4.2.0)\n    JPEG 2000:                   build (ver 2.4.0)\n    OpenEXR:                     build (ver 2.3.0)\n    HDR:                         YES\n    SUNRASTER:                   YES\n    PXM:                         YES\n    PFM:                         YES\n\n  Video I/O:\n    DC1394:                      NO\n    FFMPEG:                      YES\n      avcodec:                   YES (58.109.100)\n      avformat:                  YES (58.61.100)\n      avutil:                    YES (56.60.100)\n      swscale:                   YES (5.8.100)\n      avresample:                NO\n    GStreamer:                   NO\n    v4l/v4l2:                    YES (linux/videodev2.h)\n\n  Parallel framework:            pthreads\n\n  Trace:                         YES (with Intel ITT)\n\n  Other third-party libraries:\n    Intel IPP:                   2020.0.0 Gold [2020.0.0]\n           at:                   /tmp/pip-req-build-2uwlt2pi/_skbuild/linux-x86_64-3.9/cmake-build/3rdparty/ippicv/ippicv_lnx/icv\n    Intel IPP IW:                sources (2020.0.0)\n              at:                /tmp/pip-req-build-2uwlt2pi/_skbuild/linux-x86_64-3.9/cmake-build/3rdparty/ippicv/ippicv_lnx/iw\n    VA:                          NO\n    Lapack:                      NO\n    Eigen:                       NO\n    Custom HAL:                  NO\n    Protobuf:                    build (3.5.1)\n\n  OpenCL:                        YES (no extra features)\n    Include path:                /tmp/pip-req-build-2uwlt2pi/opencv/3rdparty/include/opencl/1.2\n    Link libraries:              Dynamic load\n\n  Python 3:\n    Interpreter:                 /opt/python/cp39-cp39/bin/python (ver 3.9)\n    Libraries:                   libpython3.9.a (ver 3.9.0)\n    numpy:                       /tmp/pip-build-env-mb3pu_we/overlay/lib/python3.9/site-packages/numpy/core/include (ver 1.19.3)\n    install path:                python\n\n  Python (for build):            /bin/python2.7\n\n  Java:                          \n    ant:                         NO\n    JNI:                         NO\n    Java wrappers:               NO\n    Java tests:                  NO\n\n  Install to:                    /tmp/pip-req-build-2uwlt2pi/_skbuild/linux-x86_64-3.9/cmake-install\n-----------------------------------------------------------------\n\n",
+        "nativeBinaries": {
+          "/tmp/ocr-parity-old/lib/python3.9/site-packages/cv2/cv2.cpython-39-x86_64-linux-gnu.so": "de13672e998a2039d35cd31dcf0e53f2b58e9c0779e0ae57d24785dadc7aeab3"
+        },
+        "dependencies": {
+          "opencv-python-headless": "4.5.3.56",
+          "Pillow": "11.3.0",
+          "PyYAML": "6.0.3",
+          "shapely": "2.0.7",
+          "pyclipper": "1.3.0.post6"
+        },
+        "numpyMetadataOverride": false
+      },
+      "inference": {
+        "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "onnxruntime": "1.21.1",
+        "numpy": "2.5.4",
+        "provider": "CPUExecutionProvider",
+        "intraOpThreads": 2,
+        "interOpThreads": 1
+      }
+    },
+    "4.12.0": {
+      "opencv": {
+        "python": "3.9.25 (main, Oct 31 2025, 23:00:23) \n[Clang 21.1.4 ]",
+        "numpy": "1.26.4",
+        "opencv": "4.12.0",
+        "opencvBuild": "\nGeneral configuration for OpenCV 4.12.0 =====================================\n  Version control:               4.12.0\n\n  Platform:\n    Timestamp:                   2025-07-04T16:39:24Z\n    Host:                        Linux 6.8.0-1029-azure x86_64\n    CMake:                       4.0.2\n    CMake generator:             Unix Makefiles\n    CMake build tool:            /bin/gmake\n    Configuration:               Release\n    Algorithm Hint:              ALGO_HINT_ACCURATE\n\n  CPU/HW features:\n    Baseline:                    SSE SSE2 SSE3\n      requested:                 SSE3\n    Dispatched code generation:  SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX\n      SSE4_1 (17 files):         + SSSE3 SSE4_1\n      SSE4_2 (1 files):          + SSSE3 SSE4_1 POPCNT SSE4_2\n      AVX (9 files):             + SSSE3 SSE4_1 POPCNT SSE4_2 AVX\n      FP16 (0 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16\n      AVX2 (37 files):           + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3\n      AVX512_SKX (6 files):      + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3 AVX_512F AVX512_COMMON AVX512_SKX\n\n  C/C++:\n    Built as dynamic libs?:      NO\n    C++ standard:                11\n    C++ Compiler:                /opt/rh/devtoolset-10/root/usr/bin/c++  (ver 10.2.1)\n    C++ flags (Release):         -Wl,-strip-all   -fsigned-char -W -Wall -Wreturn-type -Wnon-virtual-dtor -Waddress -Wsequence-point -Wformat -Wformat-security -Wmissing-declarations -Wundef -Winit-self -Wpointer-arith -Wshadow -Wsign-promo -Wuninitialized -Wsuggest-override -Wno-delete-non-virtual-dtor -Wno-comment -Wimplicit-fallthrough=3 -Wno-strict-overflow -fdiagnostics-show-option -pthread -fomit-frame-pointer -ffunction-sections -fdata-sections  -msse3 -fvisibility=hidden -fvisibility-inlines-hidden -O3 -DNDEBUG  -DNDEBUG\n    C++ flags (Debug):           -Wl,-strip-all   -fsigned-char -W -Wall -Wreturn-type -Wnon-virtual-dtor -Waddress -Wsequence-point -Wformat -Wformat-security -Wmissing-declarations -Wundef -Winit-self -Wpointer-arith -Wshadow -Wsign-promo -Wuninitialized -Wsuggest-override -Wno-delete-non-virtual-dtor -Wno-comment -Wimplicit-fallthrough=3 -Wno-strict-overflow -fdiagnostics-show-option -pthread -fomit-frame-pointer -ffunction-sections -fdata-sections  -msse3 -fvisibility=hidden -fvisibility-inlines-hidden -g  -O0 -DDEBUG -D_DEBUG\n    C Compiler:                  /opt/rh/devtoolset-10/root/usr/bin/cc\n    C flags (Release):           -Wl,-strip-all   -fsigned-char -W -Wall -Wreturn-type -Waddress -Wsequence-point -Wformat -Wformat-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wundef -Winit-self -Wpointer-arith -Wshadow -Wuninitialized -Wno-comment -Wimplicit-fallthrough=3 -Wno-strict-overflow -fdiagnostics-show-option -pthread -fomit-frame-pointer -ffunction-sections -fdata-sections  -msse3 -fvisibility=hidden -O3 -DNDEBUG  -DNDEBUG\n    C flags (Debug):             -Wl,-strip-all   -fsigned-char -W -Wall -Wreturn-type -Waddress -Wsequence-point -Wformat -Wformat-security -Wmissing-declarations -Wmissing-prototypes -Wstrict-prototypes -Wundef -Winit-self -Wpointer-arith -Wshadow -Wuninitialized -Wno-comment -Wimplicit-fallthrough=3 -Wno-strict-overflow -fdiagnostics-show-option -pthread -fomit-frame-pointer -ffunction-sections -fdata-sections  -msse3 -fvisibility=hidden -g  -O0 -DDEBUG -D_DEBUG\n    Linker flags (Release):      -Wl,--exclude-libs,libippicv.a -Wl,--exclude-libs,libippiw.a -L/ffmpeg_build/lib  -Wl,--gc-sections -Wl,--as-needed -Wl,--no-undefined  \n    Linker flags (Debug):        -Wl,--exclude-libs,libippicv.a -Wl,--exclude-libs,libippiw.a -L/ffmpeg_build/lib  -Wl,--gc-sections -Wl,--as-needed -Wl,--no-undefined  \n    ccache:                      YES\n    Precompiled headers:         NO\n    Extra dependencies:          /usr/lib64/libopenblas.so avif /usr/local/lib/libpng.so /usr/lib64/libz.so dl m pthread rt\n    3rdparty dependencies:       libprotobuf ade ittnotify libjpeg-turbo libwebp libtiff libopenjp2 IlmImf ipphal ippiw ippicv\n\n  OpenCV modules:\n    To be built:                 calib3d core dnn features2d flann gapi highgui imgcodecs imgproc ml objdetect photo python3 stitching video videoio\n    Disabled:                    world\n    Disabled by dependency:      -\n    Unavailable:                 java python2 ts\n    Applications:                -\n    Documentation:               NO\n    Non-free algorithms:         NO\n\n  GUI:                           NONE\n    VTK support:                 NO\n\n  Media I/O: \n    ZLib:                        /usr/lib64/libz.so (ver 1.2.7)\n    JPEG:                        build-libjpeg-turbo (ver 3.1.0-70)\n      SIMD Support Request:      YES\n      SIMD Support:              YES\n    WEBP:                        build (ver decoder: 0x0209, encoder: 0x020f, demux: 0x0107)\n    AVIF:                        avif (ver 1.3.0)\n    PNG:                         /usr/local/lib/libpng.so (ver 1.6.48)\n    TIFF:                        build (ver 42 - 4.6.0)\n    JPEG 2000:                   build (ver 2.5.3)\n    OpenEXR:                     build (ver 2.3.0)\n    GIF:                         YES\n    HDR:                         YES\n    SUNRASTER:                   YES\n    PXM:                         YES\n    PFM:                         YES\n\n  Video I/O:\n    FFMPEG:                      YES\n      avcodec:                   YES (59.37.100)\n      avformat:                  YES (59.27.100)\n      avutil:                    YES (57.28.100)\n      swscale:                   YES (6.7.100)\n      avresample:                NO\n    GStreamer:                   NO\n    v4l/v4l2:                    YES (linux/videodev2.h)\n\n  Parallel framework:            pthreads\n\n  Trace:                         YES (with Intel ITT(3.25.4))\n\n  Other third-party libraries:\n    Intel IPP:                   2022.1.0 [2022.1.0]\n           at:                   /io/_skbuild/linux-x86_64-3.9/cmake-build/3rdparty/ippicv/ippicv_lnx/icv\n    Intel IPP IW:                sources (2022.1.0)\n              at:                /io/_skbuild/linux-x86_64-3.9/cmake-build/3rdparty/ippicv/ippicv_lnx/iw\n    VA:                          NO\n    Lapack:                      YES (/usr/lib64/libopenblas.so)\n    Eigen:                       NO\n    Custom HAL:                  YES (ipp (ver 0.0.1))\n    Protobuf:                    build (3.19.1)\n    Flatbuffers:                 builtin/3rdparty (23.5.9)\n\n  OpenCL:                        YES (no extra features)\n    Include path:                /io/opencv/3rdparty/include/opencl/1.2\n    Link libraries:              Dynamic load\n\n  Python 3:\n    Interpreter:                 /opt/python/cp39-cp39/bin/python3.9 (ver 3.9.23)\n    Libraries:                   libpython3.9m.a (ver 3.9.23)\n    Limited API:                 YES (ver 0x03060000)\n    numpy:                       /home/ci/.local/lib/python3.9/site-packages/numpy/_core/include (ver 2.0.2)\n    install path:                python/cv2/python-3\n\n  Python (for build):            /opt/python/cp39-cp39/bin/python3.9\n\n  Java:                          \n    ant:                         NO\n    Java:                        NO\n    JNI:                         NO\n    Java wrappers:               NO\n    Java tests:                  NO\n\n  Install to:                    /io/_skbuild/linux-x86_64-3.9/cmake-install\n-----------------------------------------------------------------\n\n",
+        "nativeBinaries": {
+          "/tmp/ocr-parity-new/lib/python3.9/site-packages/cv2/cv2.abi3.so": "992ae98dec8d23f1ccf8352d1e8ce60d5ee49526ef2dded1fd8c071aca7cffd7"
+        },
+        "dependencies": {
+          "opencv-python-headless": "4.12.0.88",
+          "Pillow": "11.3.0",
+          "PyYAML": "6.0.3",
+          "shapely": "2.0.7",
+          "pyclipper": "1.3.0.post6"
+        },
+        "numpyMetadataOverride": true
+      },
+      "inference": {
+        "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+        "onnxruntime": "1.21.1",
+        "numpy": "2.5.4",
+        "provider": "CPUExecutionProvider",
+        "intraOpThreads": 2,
+        "interOpThreads": 1
+      }
+    }
+  },
+  "cases": {
+    "tiny/english": {
+      "passed": true,
+      "old": {
+        "boxes": [
+          [
+            [
+              41,
+              71
+            ],
+            [
+              314,
+              71
+            ],
+            [
+              314,
+              125
+            ],
+            [
+              41,
+              125
+            ]
+          ]
+        ],
+        "text": [
+          "Total 123.45"
+        ],
+        "recognitionConfidence": [
+          0.9750251173973083
+        ]
+      },
+      "new": {
+        "boxes": [
+          [
+            [
+              41,
+              71
+            ],
+            [
+              314,
+              71
+            ],
+            [
+              314,
+              125
+            ],
+            [
+              41,
+              125
+            ]
+          ]
+        ],
+        "text": [
+          "Total 123.45"
+        ],
+        "recognitionConfidence": [
+          0.9750251173973083
+        ]
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "crop-0.npy": {
+          "shapeA": [
+            54,
+            273,
+            3
+          ],
+          "shapeB": [
+            54,
+            273,
+            3
+          ],
+          "dtype": "uint8",
+          "sha256A": "0dcc42d2c375fd9fdc0418ad0e75d240d6f93d971ec8f2d37bb5078bba62983a",
+          "sha256B": "0dcc42d2c375fd9fdc0418ad0e75d240d6f93d971ec8f2d37bb5078bba62983a",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "5501b4db3e398646a846ead2f195791516cfc18cb0ab781bd72c63981fb55cdc",
+          "sha256B": "5501b4db3e398646a846ead2f195791516cfc18cb0ab781bd72c63981fb55cdc",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "c6f0954d194c7d5d016893629e335662f1a985f42263530d6202d0bdb92d78b1",
+          "sha256B": "c6f0954d194c7d5d016893629e335662f1a985f42263530d6202d0bdb92d78b1",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-input-0.npy": {
+          "shapeA": [
+            1,
+            3,
+            48,
+            243
+          ],
+          "shapeB": [
+            1,
+            3,
+            48,
+            243
+          ],
+          "dtype": "float32",
+          "sha256A": "f86bdc2c98109adb2f2a72c915c9fff4efe21a73eaca80a528e8f529e6187b77",
+          "sha256B": "f86bdc2c98109adb2f2a72c915c9fff4efe21a73eaca80a528e8f529e6187b77",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-output-0.npy": {
+          "shapeA": [
+            1,
+            30,
+            6906
+          ],
+          "shapeB": [
+            1,
+            30,
+            6906
+          ],
+          "dtype": "float32",
+          "sha256A": "f635c21904c4fcf9800560b9e2122df4ae5f77c55a617c0c6fb680ac4e074e2c",
+          "sha256B": "f635c21904c4fcf9800560b9e2122df4ae5f77c55a617c0c6fb680ac4e074e2c",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "tiny/chinese": {
+      "passed": true,
+      "old": {
+        "boxes": [
+          [
+            [
+              44,
+              71
+            ],
+            [
+              498,
+              71
+            ],
+            [
+              498,
+              121
+            ],
+            [
+              44,
+              121
+            ]
+          ]
+        ],
+        "text": [
+          "材料采购金额678.90"
+        ],
+        "recognitionConfidence": [
+          0.999823808670044
+        ]
+      },
+      "new": {
+        "boxes": [
+          [
+            [
+              44,
+              71
+            ],
+            [
+              498,
+              71
+            ],
+            [
+              498,
+              121
+            ],
+            [
+              44,
+              121
+            ]
+          ]
+        ],
+        "text": [
+          "材料采购金额678.90"
+        ],
+        "recognitionConfidence": [
+          0.999823808670044
+        ]
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "crop-0.npy": {
+          "shapeA": [
+            50,
+            454,
+            3
+          ],
+          "shapeB": [
+            50,
+            454,
+            3
+          ],
+          "dtype": "uint8",
+          "sha256A": "3fb3ca7319e73f79e3ad9e58e67f6cd1c9758b833aff694bd001bd74e88458e6",
+          "sha256B": "3fb3ca7319e73f79e3ad9e58e67f6cd1c9758b833aff694bd001bd74e88458e6",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "a2dfb7e488a6601f6ed3d197c0434c3f1a14c9b9834ec89f2a7c215a1067ea25",
+          "sha256B": "a2dfb7e488a6601f6ed3d197c0434c3f1a14c9b9834ec89f2a7c215a1067ea25",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "dd6e4857a33e7806e688fe91bf377fb870ea5af125f227cb3965466620333eb8",
+          "sha256B": "dd6e4857a33e7806e688fe91bf377fb870ea5af125f227cb3965466620333eb8",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-input-0.npy": {
+          "shapeA": [
+            1,
+            3,
+            48,
+            436
+          ],
+          "shapeB": [
+            1,
+            3,
+            48,
+            436
+          ],
+          "dtype": "float32",
+          "sha256A": "3a3a688ad5a9a7aaa825109f547b27f3f1463e5a8371d50920fc2c7a842b7293",
+          "sha256B": "3a3a688ad5a9a7aaa825109f547b27f3f1463e5a8371d50920fc2c7a842b7293",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-output-0.npy": {
+          "shapeA": [
+            1,
+            54,
+            6906
+          ],
+          "shapeB": [
+            1,
+            54,
+            6906
+          ],
+          "dtype": "float32",
+          "sha256A": "aa167357cf9ff6cd884364a097b958aebb11a9e197946f0d4d8fb6d342f52c5e",
+          "sha256B": "aa167357cf9ff6cd884364a097b958aebb11a9e197946f0d4d8fb6d342f52c5e",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "tiny/color": {
+      "passed": true,
+      "old": {
+        "boxes": [
+          [
+            [
+              43,
+              69
+            ],
+            [
+              419,
+              71
+            ],
+            [
+              419,
+              125
+            ],
+            [
+              43,
+              123
+            ]
+          ]
+        ],
+        "text": [
+          "材料 Total 678.90"
+        ],
+        "recognitionConfidence": [
+          0.9335840940475464
+        ]
+      },
+      "new": {
+        "boxes": [
+          [
+            [
+              43,
+              69
+            ],
+            [
+              419,
+              71
+            ],
+            [
+              419,
+              125
+            ],
+            [
+              43,
+              123
+            ]
+          ]
+        ],
+        "text": [
+          "材料 Total 678.90"
+        ],
+        "recognitionConfidence": [
+          0.9335840940475464
+        ]
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "crop-0.npy": {
+          "shapeA": [
+            54,
+            376,
+            3
+          ],
+          "shapeB": [
+            54,
+            376,
+            3
+          ],
+          "dtype": "uint8",
+          "sha256A": "32bdab52d4f4b6f3e4373d28bf9a47d80d49ba22c769294fea08a7a117f7b0e5",
+          "sha256B": "32bdab52d4f4b6f3e4373d28bf9a47d80d49ba22c769294fea08a7a117f7b0e5",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "3869cdd7cf82cf69e680588c0bcef3224e9ca42d8d656ab8542b304ee901d8b8",
+          "sha256B": "3869cdd7cf82cf69e680588c0bcef3224e9ca42d8d656ab8542b304ee901d8b8",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "2078de73f634965e8eea3799845b8c76b778106b053a69be1d3baddf531150da",
+          "sha256B": "2078de73f634965e8eea3799845b8c76b778106b053a69be1d3baddf531150da",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-input-0.npy": {
+          "shapeA": [
+            1,
+            3,
+            48,
+            335
+          ],
+          "shapeB": [
+            1,
+            3,
+            48,
+            335
+          ],
+          "dtype": "float32",
+          "sha256A": "8edd042309d15f980c9fe04303acf5ae462cfadd9e7577a93f33e0c557c6f741",
+          "sha256B": "8edd042309d15f980c9fe04303acf5ae462cfadd9e7577a93f33e0c557c6f741",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-output-0.npy": {
+          "shapeA": [
+            1,
+            42,
+            6906
+          ],
+          "shapeB": [
+            1,
+            42,
+            6906
+          ],
+          "dtype": "float32",
+          "sha256A": "efbded548de754635c4720a8a4a68d426971c47dc5a8750572016af8a52ca719",
+          "sha256B": "efbded548de754635c4720a8a4a68d426971c47dc5a8750572016af8a52ca719",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "tiny/blank": {
+      "passed": true,
+      "old": {
+        "boxes": [],
+        "text": [],
+        "recognitionConfidence": []
+      },
+      "new": {
+        "boxes": [],
+        "text": [],
+        "recognitionConfidence": []
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "cc32e4a65aedfbdd6802484408edd1a375d880c6004c649f9e725e35fb630b5d",
+          "sha256B": "cc32e4a65aedfbdd6802484408edd1a375d880c6004c649f9e725e35fb630b5d",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "039fb46b24255608a8b4c5487ad0991b1d2503c845657e9bbe8e60933ae6e743",
+          "sha256B": "039fb46b24255608a8b4c5487ad0991b1d2503c845657e9bbe8e60933ae6e743",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "tiny/rotated": {
+      "passed": true,
+      "old": {
+        "boxes": [
+          [
+            [
+              36,
+              153
+            ],
+            [
+              311,
+              96
+            ],
+            [
+              323,
+              155
+            ],
+            [
+              49,
+              212
+            ]
+          ]
+        ],
+        "text": [
+          "Total 123.45"
+        ],
+        "recognitionConfidence": [
+          0.9968163967132568
+        ]
+      },
+      "new": {
+        "boxes": [
+          [
+            [
+              36,
+              153
+            ],
+            [
+              311,
+              96
+            ],
+            [
+              323,
+              155
+            ],
+            [
+              49,
+              212
+            ]
+          ]
+        ],
+        "text": [
+          "Total 123.45"
+        ],
+        "recognitionConfidence": [
+          0.9968163967132568
+        ]
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "crop-0.npy": {
+          "shapeA": [
+            60,
+            280,
+            3
+          ],
+          "shapeB": [
+            60,
+            280,
+            3
+          ],
+          "dtype": "uint8",
+          "sha256A": "32e5c41eee1099a480fa3a7e1ca0339011107e115296da0bac7ca272c2f05cc4",
+          "sha256B": "32e5c41eee1099a480fa3a7e1ca0339011107e115296da0bac7ca272c2f05cc4",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "89ae9c7a841acc717b78137d5b2e788fd9b223642d9cb4dfe9840461d94e2b9d",
+          "sha256B": "89ae9c7a841acc717b78137d5b2e788fd9b223642d9cb4dfe9840461d94e2b9d",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "a16ab3a8b2a7e0ffa287081d24b8a59b3ae8801b839014dcf49fb96c384798a5",
+          "sha256B": "a16ab3a8b2a7e0ffa287081d24b8a59b3ae8801b839014dcf49fb96c384798a5",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-input-0.npy": {
+          "shapeA": [
+            1,
+            3,
+            48,
+            224
+          ],
+          "shapeB": [
+            1,
+            3,
+            48,
+            224
+          ],
+          "dtype": "float32",
+          "sha256A": "490da71e7498399cf4fb3046a62e60ae539dc97c46b0c57fceb598fd9de9334b",
+          "sha256B": "490da71e7498399cf4fb3046a62e60ae539dc97c46b0c57fceb598fd9de9334b",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-output-0.npy": {
+          "shapeA": [
+            1,
+            28,
+            6906
+          ],
+          "shapeB": [
+            1,
+            28,
+            6906
+          ],
+          "dtype": "float32",
+          "sha256A": "c4d831906f5b1c59d41c4621fad9113b311e44d7ef91d59e2cd2ea347d4e3412",
+          "sha256B": "c4d831906f5b1c59d41c4621fad9113b311e44d7ef91d59e2cd2ea347d4e3412",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "small/english": {
+      "passed": true,
+      "old": {
+        "boxes": [
+          [
+            [
+              42,
+              69
+            ],
+            [
+              315,
+              71
+            ],
+            [
+              314,
+              126
+            ],
+            [
+              41,
+              124
+            ]
+          ]
+        ],
+        "text": [
+          "Total 123.45"
+        ],
+        "recognitionConfidence": [
+          0.9998858571052551
+        ]
+      },
+      "new": {
+        "boxes": [
+          [
+            [
+              42,
+              69
+            ],
+            [
+              315,
+              71
+            ],
+            [
+              314,
+              126
+            ],
+            [
+              41,
+              124
+            ]
+          ]
+        ],
+        "text": [
+          "Total 123.45"
+        ],
+        "recognitionConfidence": [
+          0.9998858571052551
+        ]
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "crop-0.npy": {
+          "shapeA": [
+            55,
+            273,
+            3
+          ],
+          "shapeB": [
+            55,
+            273,
+            3
+          ],
+          "dtype": "uint8",
+          "sha256A": "71a64fffe55685e2177dfaff612c6ea7a731866b7982d4367383f8f53eb13155",
+          "sha256B": "71a64fffe55685e2177dfaff612c6ea7a731866b7982d4367383f8f53eb13155",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "5501b4db3e398646a846ead2f195791516cfc18cb0ab781bd72c63981fb55cdc",
+          "sha256B": "5501b4db3e398646a846ead2f195791516cfc18cb0ab781bd72c63981fb55cdc",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "822e124cabe9794185fee5bf34c7214afdb573e0f5cced66596761968fa9b0f3",
+          "sha256B": "822e124cabe9794185fee5bf34c7214afdb573e0f5cced66596761968fa9b0f3",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-input-0.npy": {
+          "shapeA": [
+            1,
+            3,
+            48,
+            239
+          ],
+          "shapeB": [
+            1,
+            3,
+            48,
+            239
+          ],
+          "dtype": "float32",
+          "sha256A": "6f53de415b708973cdb37339a0c9734c8c59325a1ee9db26683da94d1fcd43a0",
+          "sha256B": "6f53de415b708973cdb37339a0c9734c8c59325a1ee9db26683da94d1fcd43a0",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-output-0.npy": {
+          "shapeA": [
+            1,
+            30,
+            18710
+          ],
+          "shapeB": [
+            1,
+            30,
+            18710
+          ],
+          "dtype": "float32",
+          "sha256A": "e1d5117f45503690a64134ac17a7e63345231c8a1fcbb3da443960cabe3e1be9",
+          "sha256B": "e1d5117f45503690a64134ac17a7e63345231c8a1fcbb3da443960cabe3e1be9",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "small/chinese": {
+      "passed": true,
+      "old": {
+        "boxes": [
+          [
+            [
+              43,
+              71
+            ],
+            [
+              499,
+              71
+            ],
+            [
+              499,
+              125
+            ],
+            [
+              43,
+              125
+            ]
+          ]
+        ],
+        "text": [
+          "材料采购 金额 678.90"
+        ],
+        "recognitionConfidence": [
+          0.959834635257721
+        ]
+      },
+      "new": {
+        "boxes": [
+          [
+            [
+              43,
+              71
+            ],
+            [
+              499,
+              71
+            ],
+            [
+              499,
+              125
+            ],
+            [
+              43,
+              125
+            ]
+          ]
+        ],
+        "text": [
+          "材料采购 金额 678.90"
+        ],
+        "recognitionConfidence": [
+          0.959834635257721
+        ]
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "crop-0.npy": {
+          "shapeA": [
+            54,
+            456,
+            3
+          ],
+          "shapeB": [
+            54,
+            456,
+            3
+          ],
+          "dtype": "uint8",
+          "sha256A": "adebde60d2653608b88aa6d225331666e5b77c74acf5a1e16014cc97a6407eb5",
+          "sha256B": "adebde60d2653608b88aa6d225331666e5b77c74acf5a1e16014cc97a6407eb5",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "a2dfb7e488a6601f6ed3d197c0434c3f1a14c9b9834ec89f2a7c215a1067ea25",
+          "sha256B": "a2dfb7e488a6601f6ed3d197c0434c3f1a14c9b9834ec89f2a7c215a1067ea25",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "e549b658325e01f4daf25299a41e27ee85a8621c62f23156411d9f18a3ba166f",
+          "sha256B": "e549b658325e01f4daf25299a41e27ee85a8621c62f23156411d9f18a3ba166f",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-input-0.npy": {
+          "shapeA": [
+            1,
+            3,
+            48,
+            406
+          ],
+          "shapeB": [
+            1,
+            3,
+            48,
+            406
+          ],
+          "dtype": "float32",
+          "sha256A": "16b853269e094542433fce3c7c1695f25dc7d659b2a415c8b02c417f9b500165",
+          "sha256B": "16b853269e094542433fce3c7c1695f25dc7d659b2a415c8b02c417f9b500165",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-output-0.npy": {
+          "shapeA": [
+            1,
+            51,
+            18710
+          ],
+          "shapeB": [
+            1,
+            51,
+            18710
+          ],
+          "dtype": "float32",
+          "sha256A": "010d9f617759b37743f93ed0fb78f2e5c92ad9274260e99907d6bcc5b95aa5c3",
+          "sha256B": "010d9f617759b37743f93ed0fb78f2e5c92ad9274260e99907d6bcc5b95aa5c3",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "small/color": {
+      "passed": true,
+      "old": {
+        "boxes": [
+          [
+            [
+              41,
+              69
+            ],
+            [
+              421,
+              69
+            ],
+            [
+              421,
+              126
+            ],
+            [
+              41,
+              126
+            ]
+          ]
+        ],
+        "text": [
+          "材料 Total 678.90"
+        ],
+        "recognitionConfidence": [
+          0.9994927048683167
+        ]
+      },
+      "new": {
+        "boxes": [
+          [
+            [
+              41,
+              69
+            ],
+            [
+              421,
+              69
+            ],
+            [
+              421,
+              126
+            ],
+            [
+              41,
+              126
+            ]
+          ]
+        ],
+        "text": [
+          "材料 Total 678.90"
+        ],
+        "recognitionConfidence": [
+          0.9994927048683167
+        ]
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "crop-0.npy": {
+          "shapeA": [
+            57,
+            380,
+            3
+          ],
+          "shapeB": [
+            57,
+            380,
+            3
+          ],
+          "dtype": "uint8",
+          "sha256A": "6bcc8518216966b8561261ac4b112f30ea054f547044303e792411c6a16ecb1b",
+          "sha256B": "6bcc8518216966b8561261ac4b112f30ea054f547044303e792411c6a16ecb1b",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "3869cdd7cf82cf69e680588c0bcef3224e9ca42d8d656ab8542b304ee901d8b8",
+          "sha256B": "3869cdd7cf82cf69e680588c0bcef3224e9ca42d8d656ab8542b304ee901d8b8",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "cb74bc5678561607ef87ca63d36b61141e0dafaf0b9a418f196a21fcf981d72d",
+          "sha256B": "cb74bc5678561607ef87ca63d36b61141e0dafaf0b9a418f196a21fcf981d72d",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-input-0.npy": {
+          "shapeA": [
+            1,
+            3,
+            48,
+            320
+          ],
+          "shapeB": [
+            1,
+            3,
+            48,
+            320
+          ],
+          "dtype": "float32",
+          "sha256A": "344f2ef043c399765d2589efb8245ba91c43f1464d84a3da40361ed0ab9a11af",
+          "sha256B": "344f2ef043c399765d2589efb8245ba91c43f1464d84a3da40361ed0ab9a11af",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-output-0.npy": {
+          "shapeA": [
+            1,
+            40,
+            18710
+          ],
+          "shapeB": [
+            1,
+            40,
+            18710
+          ],
+          "dtype": "float32",
+          "sha256A": "70c5a7f704f75ddef6fc26e27436f90125180d4d0a947a0881c2a369d3d8a768",
+          "sha256B": "70c5a7f704f75ddef6fc26e27436f90125180d4d0a947a0881c2a369d3d8a768",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "small/blank": {
+      "passed": true,
+      "old": {
+        "boxes": [],
+        "text": [],
+        "recognitionConfidence": []
+      },
+      "new": {
+        "boxes": [],
+        "text": [],
+        "recognitionConfidence": []
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "cc32e4a65aedfbdd6802484408edd1a375d880c6004c649f9e725e35fb630b5d",
+          "sha256B": "cc32e4a65aedfbdd6802484408edd1a375d880c6004c649f9e725e35fb630b5d",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "1a76c75f27ebf167def1e2679317bdf5daf2ea513cddfc7c3b2bfb212550642b",
+          "sha256B": "1a76c75f27ebf167def1e2679317bdf5daf2ea513cddfc7c3b2bfb212550642b",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    },
+    "small/rotated": {
+      "passed": true,
+      "old": {
+        "boxes": [
+          [
+            [
+              40,
+              154
+            ],
+            [
+              310,
+              99
+            ],
+            [
+              322,
+              154
+            ],
+            [
+              52,
+              208
+            ]
+          ]
+        ],
+        "text": [
+          "Total 123.45"
+        ],
+        "recognitionConfidence": [
+          0.9999039769172668
+        ]
+      },
+      "new": {
+        "boxes": [
+          [
+            [
+              40,
+              154
+            ],
+            [
+              310,
+              99
+            ],
+            [
+              322,
+              154
+            ],
+            [
+              52,
+              208
+            ]
+          ]
+        ],
+        "text": [
+          "Total 123.45"
+        ],
+        "recognitionConfidence": [
+          0.9999039769172668
+        ]
+      },
+      "confidenceMaxAbs": 0.0,
+      "stages": {
+        "crop-0.npy": {
+          "shapeA": [
+            56,
+            275,
+            3
+          ],
+          "shapeB": [
+            56,
+            275,
+            3
+          ],
+          "dtype": "uint8",
+          "sha256A": "5eec468358b5dbd74d2fe4ecf10ce00b08561c2dbb5989693c197ad44758c7ac",
+          "sha256B": "5eec468358b5dbd74d2fe4ecf10ce00b08561c2dbb5989693c197ad44758c7ac",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-input.npy": {
+          "shapeA": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            3,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "89ae9c7a841acc717b78137d5b2e788fd9b223642d9cb4dfe9840461d94e2b9d",
+          "sha256B": "89ae9c7a841acc717b78137d5b2e788fd9b223642d9cb4dfe9840461d94e2b9d",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "det-output.npy": {
+          "shapeA": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "shapeB": [
+            1,
+            1,
+            224,
+            896
+          ],
+          "dtype": "float32",
+          "sha256A": "acac13d07fb96b0b71027894e84220e7756c0474c2ca556b01cacfcedd9fca57",
+          "sha256B": "acac13d07fb96b0b71027894e84220e7756c0474c2ca556b01cacfcedd9fca57",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-input-0.npy": {
+          "shapeA": [
+            1,
+            3,
+            48,
+            236
+          ],
+          "shapeB": [
+            1,
+            3,
+            48,
+            236
+          ],
+          "dtype": "float32",
+          "sha256A": "32d47f135eb71ddd75056742821a95011756520ddd43c6b8144218f39c6a002e",
+          "sha256B": "32d47f135eb71ddd75056742821a95011756520ddd43c6b8144218f39c6a002e",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        },
+        "rec-output-0.npy": {
+          "shapeA": [
+            1,
+            29,
+            18710
+          ],
+          "shapeB": [
+            1,
+            29,
+            18710
+          ],
+          "dtype": "float32",
+          "sha256A": "4a8cdb5b9cb86d6d108f7f9fcf1f18d7c024c77b167a3740cfcaf9b9c2afd762",
+          "sha256B": "4a8cdb5b9cb86d6d108f7f9fcf1f18d7c024c77b167a3740cfcaf9b9c2afd762",
+          "finite": true,
+          "exact": true,
+          "maxAbs": 0.0,
+          "meanAbs": 0.0,
+          "changedElements": 0,
+          "withinTolerance": true
+        }
+      }
+    }
+  },
+  "tolerances": {
+    "tensorAtol": 1e-05,
+    "tensorRtol": 1e-05,
+    "boxesExact": true,
+    "textExact": true,
+    "confidenceAtol": 1e-05
+  },
+  "desktopDiagnosticPassed": true,
+  "rawTensorDirectory": "/tmp/ocr-native-parity",
+  "stageCount": 44,
+  "allStagesBitwiseIdentical": true,
+  "limitations": [
+    "Desktop cv2 wheels are not Quickbird or org.opencv Android binaries.",
+    "Existing cpu_reference uses NumPy normalization and upstream Python DB polygon/crop; this is not the Kotlin Android pipeline.",
+    "OpenCV 4.12 wheel NumPy>=2 metadata was overridden to keep NumPy1.26.4 identical to 4.5.3; actual imports and pipeline execute.",
+    "Synthetic five-image corpus per model is not a representative accuracy benchmark.",
+    "Android Bitmap conversion, JNI/ART, ABI packaging and Android ORT providers are untested here."
+  ],
+  "sources": {
+    "checks/native-parity-desktop/run.py": "253eaf59438342bbf636ba8e8153cf36457d58d072c97ca092b4191bdf5797de",
+    "checks/cpu_reference.py": "a34c5d7edaa38c1e80ae06dd245d25a01279bea7440d52bb43908e599893ee99",
+    "checks/vendor_db_postprocess.py": "90c30403bbf9e1b74dd4755e23b59e7c7398e64fae3cd2f7775a9f969a15960a",
+    "checks/vendor_crop.py": "fcab13cd6c53ba278450fa8fe50ddd49bea16a5200a144566920558a84362f3c"
+  }
+}

@@ -6,10 +6,19 @@ import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
 class LockTests(unittest.TestCase):
-    def test_unchanged_upstream_sources_and_licensed_fixtures(self):
+    def test_pinned_upstream_adaptations_and_licensed_fixtures(self):
         lock=json.loads((ROOT/'upstream.lock.json').read_text())
+        adaptation=json.loads((ROOT/'upstream-adaptations.lock.json').read_text())
+        self.assertEqual(adaptation['upstreamCommit'],lock['commit'])
+        changes={item['path']:item for item in adaptation['files']}
+        self.assertEqual(len(changes),len(adaptation['files']))
+        upstream={item['path']:item['sha256'] for item in lock['files']}
+        for path,change in changes.items():
+            self.assertEqual(change['upstreamSha256'],upstream[path])
+            self.assertTrue(change['reason'])
         for item in lock['files']:
-            self.assertEqual(hashlib.sha256((ROOT/item['path']).read_bytes()).hexdigest(),item['sha256'],item['path'])
+            expected=changes.get(item['path'],{}).get('localSha256',item['sha256'])
+            self.assertEqual(hashlib.sha256((ROOT/item['path']).read_bytes()).hexdigest(),expected,item['path'])
         models=json.loads((ROOT/'models.lock.json').read_text())
         for size in ['tiny','small']:
             m=next(m for m in models['models'] if m['repository']==f'PaddlePaddle/PP-OCRv6_{size}_rec_onnx')

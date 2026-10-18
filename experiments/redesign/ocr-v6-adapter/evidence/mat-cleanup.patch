@@ -1,0 +1,433 @@
+diff --git a/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/postprocess/QuadTextCrop.kt b/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/postprocess/QuadTextCrop.kt
+index e8b5bb2b..f4e06dc8 100644
+--- a/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/postprocess/QuadTextCrop.kt
++++ b/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/postprocess/QuadTextCrop.kt
+@@ -33,9 +33,12 @@ object QuadTextCrop {
+         // from the detected quad before perspective transform.
+         val rectPoints = box.points.map { Point(it.x.toDouble(), it.y.toDouble()) }
+         val rectInput = MatOfPoint2f()
+-        rectInput.fromList(rectPoints)
+-        val boundingBox = Imgproc.minAreaRect(rectInput)
+-        rectInput.release()
++        val boundingBox = try {
++            rectInput.fromList(rectPoints)
++            Imgproc.minAreaRect(rectInput)
++        } finally {
++            rectInput.release()
++        }
+ 
+         val boxPoints = Array(4) { Point() }
+         boundingBox.points(boxPoints)
+@@ -50,37 +53,48 @@ object QuadTextCrop {
+         val dstH = max(heightLeft, heightRight).toInt().coerceAtLeast(1)
+ 
+         val srcPts = MatOfPoint2f()
+-        srcPts.fromList(ordered)
+-        val dstPts = MatOfPoint2f()
+-        dstPts.fromList(
+-            listOf(
+-                Point(0.0, 0.0),
+-                Point(dstW.toDouble(), 0.0),
+-                Point(dstW.toDouble(), dstH.toDouble()),
+-                Point(0.0, dstH.toDouble()),
++        var dstPts: MatOfPoint2f? = null
++        var transform: Mat? = null
++        var dst: Mat? = null
++        var rotated: Mat? = null
++        var result: Mat? = null
++        try {
++            srcPts.fromList(ordered)
++            dstPts = MatOfPoint2f()
++            dstPts.fromList(
++                listOf(
++                    Point(0.0, 0.0),
++                    Point(dstW.toDouble(), 0.0),
++                    Point(dstW.toDouble(), dstH.toDouble()),
++                    Point(0.0, dstH.toDouble()),
++                )
++            )
++            transform = Imgproc.getPerspectiveTransform(srcPts, dstPts)
++            dst = Mat(dstH, dstW, CvType.CV_8UC3)
++            Imgproc.warpPerspective(
++                src,
++                dst,
++                transform,
++                Size(dstW.toDouble(), dstH.toDouble()),
++                Imgproc.INTER_CUBIC,
++                Core.BORDER_REPLICATE,
+             )
+-        )
+-        val m = Imgproc.getPerspectiveTransform(srcPts, dstPts)
+-        srcPts.release()
+-        dstPts.release()
+-
+-        val dst = Mat(dstH, dstW, CvType.CV_8UC3)
+-        Imgproc.warpPerspective(
+-            src,
+-            dst,
+-            m,
+-            Size(dstW.toDouble(), dstH.toDouble()),
+-            Imgproc.INTER_CUBIC,
+-            Core.BORDER_REPLICATE,
+-        )
+-        m.release()
+ 
+-        if (dst.rows().toDouble() / dst.cols() >= VERTICAL_CROP_RATIO) {
+-            val rotated = Mat()
+-            Core.rotate(dst, rotated, Core.ROTATE_90_COUNTERCLOCKWISE)
+-            dst.release()
+-            return rotated
++            if (dst.rows().toDouble() / dst.cols() >= VERTICAL_CROP_RATIO) {
++                rotated = Mat()
++                Core.rotate(dst, rotated, Core.ROTATE_90_COUNTERCLOCKWISE)
++                result = rotated
++                return rotated
++            }
++            result = dst
++            return dst
++        } finally {
++            // Transfer only the successful result; src remains borrowed from the caller.
++            if (rotated !== result) rotated?.release()
++            if (dst !== result) dst?.release()
++            transform?.release()
++            dstPts?.release()
++            srcPts.release()
+         }
+-        return dst
+     }
+ }
+diff --git a/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/preprocess/DetPreprocessor.kt b/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/preprocess/DetPreprocessor.kt
+index 7fd9d240..f882babc 100644
+--- a/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/preprocess/DetPreprocessor.kt
++++ b/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/preprocess/DetPreprocessor.kt
+@@ -59,45 +59,56 @@ object DetPreprocessor {
+     ): DetPreprocessResult {
+         val originalH = src.rows()
+         val originalW = src.cols()
+-        val input = if (imgMode.uppercase() == "RGB") {
+-            Mat().also { Imgproc.cvtColor(src, it, Imgproc.COLOR_BGR2RGB) }
+-        } else {
+-            src
+-        }
++        var input = src
++        var resized: Mat? = null
++        var floatMat: Mat? = null
++        val channels = mutableListOf<Mat>()
++        try {
++            if (imgMode.uppercase() == "RGB") {
++                input = Mat()
++                Imgproc.cvtColor(src, input, Imgproc.COLOR_BGR2RGB)
++            }
++            resized = ImageUtils.resizeToMultipleOf32(input, limitSideLen, limitType, maxSideLimit)
++            if (input !== src) {
++                input.release()
++                input = src
++            }
++            val h = resized.rows()
++            val w = resized.cols()
++            floatMat = Mat(h, w, CvType.CV_32FC3)
++            resized.convertTo(floatMat, CvType.CV_32F)
+ 
+-        val resized = ImageUtils.resizeToMultipleOf32(input, limitSideLen, limitType, maxSideLimit)
+-        if (input !== src) input.release()
++            Core.split(floatMat, channels)
++            for (c in 0..2) {
++                Core.multiply(channels[c], Scalar(scale), channels[c])
++                Core.subtract(channels[c], Scalar(mean[c]), channels[c])
++                Core.divide(channels[c], Scalar(std[c]), channels[c])
++            }
+ 
+-        val h = resized.rows()
+-        val w = resized.cols()
+-        val floatMat = Mat(h, w, CvType.CV_32FC3)
+-        resized.convertTo(floatMat, CvType.CV_32F)
++            resized.release()
++            resized = null
++            floatMat.release()
++            floatMat = null
+ 
+-        val channels = mutableListOf<Mat>()
+-        Core.split(floatMat, channels)
+-        for (c in 0..2) {
+-            Core.multiply(channels[c], Scalar(scale), channels[c])
+-            Core.subtract(channels[c], Scalar(mean[c]), channels[c])
+-            Core.divide(channels[c], Scalar(std[c]), channels[c])
+-        }
+-        resized.release()
+-        floatMat.release()
++            val channelSize = h * w
++            val tensorData = FloatArray(3 * channelSize)
++            for (c in 0..2) {
++                val buf = FloatArray(channelSize)
++                channels[c].get(0, 0, buf)
++                System.arraycopy(buf, 0, tensorData, c * channelSize, channelSize)
++            }
+ 
+-        val channelSize = h * w
+-        val tensorData = FloatArray(3 * channelSize)
+-        for (c in 0..2) {
+-            val chan = channels[c]
+-            val buf = FloatArray(channelSize)
+-            chan.get(0, 0, buf)
+-            System.arraycopy(buf, 0, tensorData, c * channelSize, channelSize)
+-            chan.release()
++            return DetPreprocessResult(
++                tensorData = tensorData,
++                shape = longArrayOf(1, 3, h.toLong(), w.toLong()),
++                originalH = originalH,
++                originalW = originalW,
++            )
++        } finally {
++            channels.forEach { it.release() }
++            floatMat?.release()
++            resized?.release()
++            if (input !== src) input.release()
+         }
+-
+-        return DetPreprocessResult(
+-            tensorData = tensorData,
+-            shape = longArrayOf(1, 3, h.toLong(), w.toLong()),
+-            originalH = originalH,
+-            originalW = originalW,
+-        )
+     }
+ }
+diff --git a/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/util/ImageUtils.kt b/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/util/ImageUtils.kt
+index c672a641..a62d8765 100644
+--- a/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/util/ImageUtils.kt
++++ b/experiments/redesign/ocr-v6-adapter/vendor/paddleocr/com/paddle/ocr/util/ImageUtils.kt
+@@ -46,7 +46,13 @@ object ImageUtils {
+         newH = maxOf(MathUtils.roundHalfToEven(newH / 32.0) * 32, 32)
+         newW = maxOf(MathUtils.roundHalfToEven(newW / 32.0) * 32, 32)
+         val dst = Mat()
+-        Imgproc.resize(src, dst, Size(newW.toDouble(), newH.toDouble()), 0.0, 0.0, Imgproc.INTER_LINEAR)
+-        return dst
++        var transferred = false
++        try {
++            Imgproc.resize(src, dst, Size(newW.toDouble(), newH.toDouble()), 0.0, 0.0, Imgproc.INTER_LINEAR)
++            transferred = true
++            return dst
++        } finally {
++            if (!transferred) dst.release()
++        }
+     }
+ }
+diff --git a/experiments/redesign/ocr-v6-adapter/kotlin/src/test/kotlin/com/mightyoung/muyon/ocr/MatOwnershipTest.kt b/experiments/redesign/ocr-v6-adapter/kotlin/src/test/kotlin/com/mightyoung/muyon/ocr/MatOwnershipTest.kt
+new file mode 100644
+--- /dev/null
++++ b/experiments/redesign/ocr-v6-adapter/kotlin/src/test/kotlin/com/mightyoung/muyon/ocr/MatOwnershipTest.kt
+@@ -0,0 +1,130 @@
++package com.mightyoung.muyon.ocr
++
++import android.graphics.PointF
++import com.paddle.ocr.model.OCRBox
++import com.paddle.ocr.postprocess.QuadTextCrop
++import com.paddle.ocr.preprocess.DetPreprocessor
++import com.paddle.ocr.util.ImageUtils
++import org.junit.Assert.*
++import org.junit.BeforeClass
++import org.junit.Test
++import org.opencv.core.CvException
++import org.opencv.core.CvType
++import org.opencv.core.Mat
++import org.opencv.core.Scalar
++import java.util.concurrent.CancellationException
++import sun.misc.Unsafe
++
++class MatOwnershipTest {
++    companion object {
++        @JvmStatic @BeforeClass fun loadNative() {
++            nu.pattern.OpenCV.loadLocally()
++            NativeMatTracker.install()
++        }
++    }
++
++    // Android's compile-only PointF constructor is a stub; populate its public data fields.
++    private fun point(x: Float, y: Float): PointF {
++        val field = Unsafe::class.java.getDeclaredField("theUnsafe").also { it.isAccessible = true }
++        return ((field.get(null) as Unsafe).allocateInstance(PointF::class.java) as PointF).also {
++            it.x = x; it.y = y
++        }
++    }
++    private fun box(vertical: Boolean = false) = OCRBox(
++        if (vertical) listOf(point(0f, 0f), point(8f, 0f), point(8f, 24f), point(0f, 24f))
++        else listOf(point(0f, 0f), point(24f, 0f), point(24f, 8f), point(0f, 8f))
++    )
++
++    private fun observe(cancelAt: String? = null, body: () -> Mat?) {
++        NativeMatTracker.start(cancelAt)
++        var returned: Mat? = null
++        try {
++            returned = body()
++            val owned = NativeMatTracker.allocated.filter { it !== returned }
++            assertTrue("test must observe actual temporary JNI Mats", owned.isNotEmpty())
++            val leaked = owned.filter { it !in NativeMatTracker.released || !it.empty() }
++            assertTrue("${leaked.size}/${owned.size} temporary Mats not released: ${leaked.map { it.javaClass.simpleName + ":" + it.rows() + "x" + it.cols() }}", leaked.isEmpty())
++            println("Mat ownership: created=${NativeMatTracker.allocated.size}, temporaries=${owned.size}, released=${NativeMatTracker.released.size}, returned=${returned != null}, cancellation=$cancelAt")
++            returned?.let {
++                assertFalse("returned crop belongs to caller", it in NativeMatTracker.released)
++                assertFalse(it.empty())
++            }
++        } finally {
++            NativeMatTracker.stop()
++            returned?.release()
++            // Clean leaked resources after RED assertions, without relying on GC/finalizers.
++            NativeMatTracker.allocated.filter { it !== returned }.forEach { it.release() }
++        }
++    }
++
++    @Test fun cropReleasesAllTemporariesOnRealNativeException() {
++        val src = Mat()
++        try { observe {
++            assertThrows(CvException::class.java) { QuadTextCrop.crop(src, box()) }
++            null
++        } } finally { src.release() }
++    }
++
++    @Test fun resizeReleasesDestinationOnRealNativeException() {
++        val src = Mat()
++        try { observe {
++            assertThrows(CvException::class.java) { ImageUtils.resizeToMultipleOf32(src, 32, "max", 4000) }
++            null
++        } } finally { src.release() }
++    }
++
++    @Test fun detectionReleasesAllTemporariesOnRealChannelException() {
++        val src = Mat(32, 32, CvType.CV_8UC1, Scalar(127.0))
++        try { observe {
++            assertThrows(IndexOutOfBoundsException::class.java) { DetPreprocessor.preprocess(src, 32, "max", 4000, "BGR") }
++            assertFalse("caller source remains owned by caller", src.empty())
++            null
++        } } finally { src.release() }
++    }
++
++    @Test fun detectionReleasesRgbWhenResizeRejectsArguments() {
++        val src = Mat(32, 32, CvType.CV_8UC3, Scalar(127.0, 127.0, 127.0))
++        try { observe {
++            assertThrows(IllegalArgumentException::class.java) { DetPreprocessor.preprocess(src, 32, "invalid", 4000, "RGB") }
++            null
++        } } finally { src.release() }
++    }
++
++    @Test fun detectionReleasesLargeIntermediatesBeforeTensorExtraction() {
++        val src = Mat(32, 32, CvType.CV_8UC3, Scalar(127.0, 127.0, 127.0))
++        try { observe {
++            DetPreprocessor.preprocess(src, 32, "max", 4000, "RGB")
++            assertEquals("only the three split channels stay live during tensor extraction", 3, NativeMatTracker.maximumLiveAtExtraction)
++            assertEquals("RGB, resized and float Mats must already be released", 0, NativeMatTracker.nonChannelAtExtraction)
++            null
++        } } finally { src.release() }
++    }
++
++    @Test fun normalAndRepeatedCallsPreserveResultsAndCallerOwnership() {
++        val src = Mat(32, 32, CvType.CV_8UC3, Scalar(127.0, 127.0, 127.0))
++        try { repeat(20) {
++            for (mode in listOf("BGR", "RGB")) observe {
++                val result = DetPreprocessor.preprocess(src, 32, "max", 4000, mode)
++                assertArrayEquals(longArrayOf(1, 3, 32, 32), result.shape)
++                assertEquals(((127.0 / 255 - .485) / .229).toFloat(), result.tensorData[0], .00001f)
++                assertFalse(src.empty())
++                null
++            }
++            observe { QuadTextCrop.crop(src, box()).also { assertEquals(24, it.cols()); assertEquals(8, it.rows()) } }
++            observe { QuadTextCrop.crop(src, box(true)).also { assertEquals(24, it.cols()); assertEquals(8, it.rows()) } }
++        } } finally { src.release() }
++    }
++
++    @Test fun cancellationReleasesCropAndDetectionTemporaries() {
++        val src = Mat(32, 32, CvType.CV_8UC3, Scalar(127.0, 127.0, 127.0))
++        try {
++            for (stage in listOf("warpPerspective", "rotate")) observe(stage) {
++                assertThrows(CancellationException::class.java) { QuadTextCrop.crop(src, box(true)) }; null
++            }
++            for (stage in listOf("cvtColor", "convertTo", "split")) observe(stage) {
++                assertThrows(CancellationException::class.java) { DetPreprocessor.preprocess(src, 32, "max", 4000, "RGB") }; null
++            }
++            assertFalse(src.empty())
++        } finally { src.release() }
++    }
++}
+diff --git a/experiments/redesign/ocr-v6-adapter/src/test/java/com/mightyoung/muyon/ocr/NativeMatTracker.java b/experiments/redesign/ocr-v6-adapter/src/test/java/com/mightyoung/muyon/ocr/NativeMatTracker.java
+new file mode 100644
+--- /dev/null
++++ b/experiments/redesign/ocr-v6-adapter/src/test/java/com/mightyoung/muyon/ocr/NativeMatTracker.java
+@@ -0,0 +1,79 @@
++package com.mightyoung.muyon.ocr;
++
++import java.lang.instrument.Instrumentation;
++import java.util.Collections;
++import java.util.IdentityHashMap;
++import java.util.Set;
++import java.util.concurrent.CancellationException;
++import net.bytebuddy.ByteBuddy;
++import net.bytebuddy.agent.ByteBuddyAgent;
++import net.bytebuddy.asm.Advice;
++import net.bytebuddy.dynamic.loading.ClassReloadingStrategy;
++import org.opencv.core.Mat;
++import org.opencv.core.Core;
++import org.opencv.imgproc.Imgproc;
++import static net.bytebuddy.matcher.ElementMatchers.*;
++
++/** Test-only observation of real JNI Mats; no native calls or allocations are mocked. */
++public final class NativeMatTracker {
++    public static final Set<Mat> allocated = Collections.newSetFromMap(new IdentityHashMap<>());
++    public static final Set<Mat> released = Collections.newSetFromMap(new IdentityHashMap<>());
++    public static String cancelAt;
++    public static boolean active;
++    public static int maximumLiveAtExtraction;
++    public static int nonChannelAtExtraction;
++    private static boolean installed;
++
++    public static void install() {
++        if (installed) return;
++        Instrumentation instrumentation = ByteBuddyAgent.install();
++        ClassReloadingStrategy strategy = ClassReloadingStrategy.of(instrumentation);
++        new ByteBuddy().redefine(Mat.class)
++            .visit(Advice.to(Allocated.class).on(isConstructor()))
++            .visit(Advice.to(Released.class).on(named("release")))
++            .visit(Advice.to(Cancel.class).on(named("convertTo")))
++            .visit(Advice.to(Extract.class).on(named("get").and(takesArguments(int.class, int.class, float[].class))))
++            .make().load(Mat.class.getClassLoader(), strategy);
++        new ByteBuddy().redefine(Imgproc.class)
++            .visit(Advice.to(Cancel.class).on(named("warpPerspective").or(named("cvtColor"))))
++            .make().load(Imgproc.class.getClassLoader(), strategy);
++        new ByteBuddy().redefine(Core.class)
++            .visit(Advice.to(Cancel.class).on(named("rotate").or(named("split"))))
++            .make().load(Core.class.getClassLoader(), strategy);
++        installed = true;
++    }
++
++    public static void start(String cancellation) {
++        allocated.clear(); released.clear(); cancelAt = cancellation;
++        maximumLiveAtExtraction = 0; nonChannelAtExtraction = 0; active = true;
++    }
++    public static void stop() { active = false; cancelAt = null; }
++    public static class Allocated {
++        @Advice.OnMethodExit public static void exit(@Advice.This Mat mat) {
++            if (active) allocated.add(mat);
++        }
++    }
++    public static class Released {
++        @Advice.OnMethodEnter public static void enter(@Advice.This Mat mat) {
++            if (active) released.add(mat);
++        }
++    }
++    public static class Extract {
++        @Advice.OnMethodEnter public static void enter() {
++            if (!active) return;
++            int live = 0;
++            for (Mat mat : allocated) {
++                if (!released.contains(mat)) {
++                    live++;
++                    if (mat.channels() != 1 || mat.depth() != org.opencv.core.CvType.CV_32F) nonChannelAtExtraction++;
++                }
++            }
++            maximumLiveAtExtraction = Math.max(maximumLiveAtExtraction, live);
++        }
++    }
++    public static class Cancel {
++        @Advice.OnMethodEnter public static void enter(@Advice.Origin("#m") String method) {
++            if (active && method.equals(cancelAt)) throw new CancellationException("injected cancellation at " + method);
++        }
++    }
++}

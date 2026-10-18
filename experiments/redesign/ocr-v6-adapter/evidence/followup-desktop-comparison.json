@@ -1,0 +1,129 @@
+{
+  "comparison": "same frozen desktop Python pipeline, not changed Android OpenCV parity",
+  "rows": [
+    {
+      "model": "tiny",
+      "case": "english",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": false,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 2.980232238769531e-07
+    },
+    {
+      "model": "tiny",
+      "case": "chinese",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": false,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 1.7881393432617188e-07
+    },
+    {
+      "model": "tiny",
+      "case": "color",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": true,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 0.0
+    },
+    {
+      "model": "tiny",
+      "case": "blank",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": true,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 0
+    },
+    {
+      "model": "tiny",
+      "case": "rotated",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": false,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 1.1920928955078125e-07
+    },
+    {
+      "model": "small",
+      "case": "english",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": true,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 0.0
+    },
+    {
+      "model": "small",
+      "case": "chinese",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": false,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 1.7881393432617188e-07
+    },
+    {
+      "model": "small",
+      "case": "color",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": true,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 0.0
+    },
+    {
+      "model": "small",
+      "case": "blank",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": true,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 0
+    },
+    {
+      "model": "small",
+      "case": "rotated",
+      "equal": {
+        "text": true,
+        "boxes": true,
+        "recognitionConfidence": true,
+        "tensorSha256": false,
+        "inputPixelsSha256": true
+      },
+      "maxConfidenceAbsoluteDifference": 0.0
+    }
+  ],
+  "allEqual": false,
+  "sameTextAndBoxesAndPixels": true,
+  "maxConfidenceAbsoluteDifference": 2.980232238769531e-07,
+  "limitations": "Different execution environment; tensor hash differences retained. No Android/ART inference or changed Android OpenCV numerical parity claim."
+}

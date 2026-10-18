@@ -1,0 +1,1117 @@
+ort jni/arm64-v8a/libonnxruntime.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 9 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0001f8 0x0001f8 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x10ae140 0x10ae140 R E 0x4000
+  LOAD           0x10ae140 0x00000000010b2140 0x00000000010b2140 0x063e48 0x063ec0 RW  0x4000
+  LOAD           0x1111f88 0x0000000001119f88 0x0000000001119f88 0x0019a8 0x00d118 RW  0x4000
+  DYNAMIC        0x110eed8 0x0000000001112ed8 0x0000000001112ed8 0x0001f0 0x0001f0 RW  0x8
+  GNU_RELRO      0x10ae140 0x00000000010b2140 0x00000000010b2140 0x063e48 0x063ec0 R   0x1
+  GNU_EH_FRAME   0x32c158 0x000000000032c158 0x000000000032c158 0x03e0c4 0x03e0c4 R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+  NOTE           0x000238 0x0000000000000238 0x0000000000000238 0x0000bc 0x0000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_d .gnu.version_r .gnu.hash .dynstr .rela.dyn .rela.plt .rodata .gcc_except_table protodesc_cold .eh_frame_hdr .eh_frame .text malloc_hook __lcxx_override .plt 
+   02     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   03     .data .bss 
+   04     .dynamic 
+   05     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   06     .eh_frame_hdr 
+   07     
+   08     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x110eed8 contains 31 entries:
+  Tag        Type                         Name/Value
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [liblog.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x000000000000000e (SONAME)             Library soname: [libonnxruntime.so]
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000007 (RELA)               0x2228
+ 0x0000000000000008 (RELASZ)             1115016 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          46450
+ 0x0000000000000017 (JMPREL)             0x1125b0
+ 0x0000000000000002 (PLTRELSZ)           4896 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x1115910
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000006 (SYMTAB)             0x2f8
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x1930
+ 0x000000000000000a (STRSZ)              2294 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x1900
+ 0x0000000000000019 (INIT_ARRAY)         0x1112e08
+ 0x000000000000001b (INIT_ARRAYSZ)       208 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x1112df8
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffff0 (VERSYM)             0x16c0
+ 0x000000006ffffffc (VERDEF)             0x1868
+ 0x000000006ffffffd (VERDEFNUM)          2
+ 0x000000006ffffffe (VERNEED)            0x18a0
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x0000000000000000 (NULL)               0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 18 00 00 00 72 32 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 30 30 34 31 30 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 4a63c077be0b99b877d50115dce8d62f9832af07
+ort jni/arm64-v8a/libonnxruntime4j_jni.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 8 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0001c0 0x0001c0 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x011d60 0x011d60 R E 0x4000
+  LOAD           0x011d60 0x0000000000015d60 0x0000000000015d60 0x000330 0x0012a0 RW  0x4000
+  DYNAMIC        0x011d98 0x0000000000015d98 0x0000000000015d98 0x000190 0x000190 RW  0x8
+  GNU_RELRO      0x011d60 0x0000000000015d60 0x0000000000015d60 0x000330 0x0012a0 R   0x1
+  GNU_EH_FRAME   0x005440 0x0000000000005440 0x0000000000005440 0x0005e4 0x0005e4 R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+  NOTE           0x000200 0x0000000000000200 0x0000000000000200 0x0000bc 0x0000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .dynstr .rela.dyn .rela.plt .rodata .eh_frame_hdr .eh_frame .text .plt 
+   02     .data.rel.ro .fini_array .dynamic .got.plt .relro_padding 
+   03     .dynamic 
+   04     .data.rel.ro .fini_array .dynamic .got.plt .relro_padding 
+   05     .eh_frame_hdr 
+   06     
+   07     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x11d98 contains 25 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libonnxruntime.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000007 (RELA)               0x43d8
+ 0x0000000000000008 (RELASZ)             168 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          7
+ 0x0000000000000017 (JMPREL)             0x4480
+ 0x0000000000000002 (PLTRELSZ)           1008 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x15f28
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000006 (SYMTAB)             0x2c0
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x1d04
+ 0x000000000000000a (STRSZ)              9939 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x1758
+ 0x000000000000001a (FINI_ARRAY)         0x15d88
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffff0 (VERSYM)             0x1568
+ 0x000000006ffffffe (VERNEED)            0x16f8
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x0000000000000000 (NULL)               0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 18 00 00 00 72 32 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 30 30 34 31 30 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: ed7ae243ae4555a6b76a6882b54d55cd2dd6f5d2
+ort jni/armeabi-v7a/libonnxruntime.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 9 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00120 0x00120 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0xc3c0c0 0xc3c0c0 R E 0x4000
+  LOAD           0xc3c0c0 0x00c400c0 0x00c400c0 0x31f20 0x31f40 RW  0x4000
+  LOAD           0xc6dfe0 0x00c75fe0 0x00c75fe0 0x00e94 0x068ac RW  0x4000
+  DYNAMIC        0xc6c7d8 0x00c707d8 0x00c707d8 0x000f8 0x000f8 RW  0x4
+  GNU_RELRO      0xc3c0c0 0x00c400c0 0x00c400c0 0x31f20 0x31f40 R   0x1
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0
+  NOTE           0x000154 0x00000154 0x00000154 0x000bc 0x000bc R   0x4
+  ARM_EXIDX      0x05bec8 0x0005bec8 0x0005bec8 0x2f298 0x2f298 R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_d .gnu.version_r .gnu.hash .dynstr .rel.dyn .ARM.exidx .rel.plt .ARM.extab .rodata protodesc_cold .ARM.extabmalloc_hook .ARM.extab__lcxx_override .text malloc_hook __lcxx_override .plt 
+   02     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   03     .data .bss 
+   04     .dynamic 
+   05     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   06     
+   07     .note.android.ident .note.gnu.build-id 
+   08     .ARM.exidx 
+
+Dynamic section at offset 0xc6c7d8 contains 31 entries:
+  Tag        Type                         Name/Value
+ 0x0000001d (RUNPATH)                    Library runpath: [$ORIGIN]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x00000001 (NEEDED)                     Shared library: [liblog.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x0000000e (SONAME)                     Library soname: [libonnxruntime.so]
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000011 (REL)                        0x1bf8
+ 0x00000012 (RELSZ)                      369360 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   46160
+ 0x00000017 (JMPREL)                     0x8b160
+ 0x00000002 (PLTRELSZ)                   1744 (bytes)
+ 0x00000003 (PLTGOT)                     0xc71c6c
+ 0x00000014 (PLTREL)                     REL
+ 0x00000006 (SYMTAB)                     0x210
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x12bc
+ 0x0000000a (STRSZ)                      2362 (bytes)
+ 0x6ffffef5 (GNU_HASH)                   0x128c
+ 0x00000019 (INIT_ARRAY)                 0xc70784
+ 0x0000001b (INIT_ARRAYSZ)               84 (bytes)
+ 0x0000001a (FINI_ARRAY)                 0xc7077c
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x6ffffff0 (VERSYM)                     0x1030
+ 0x6ffffffc (VERDEF)                     0x11f4
+ 0x6ffffffd (VERDEFNUM)                  2
+ 0x6ffffffe (VERNEED)                    0x122c
+ 0x6fffffff (VERNEEDNUM)                 3
+ 0x00000000 (NULL)                       0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 18 00 00 00 72 32 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 30 30 34 31 30 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 9c6dae45be59c3f4c80f6be5e6b132312fc4ea70
+ort jni/armeabi-v7a/libonnxruntime4j_jni.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 8 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00100 0x00100 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0x0bc10 0x0bc10 R E 0x1000
+  LOAD           0x00bc10 0x0000cc10 0x0000cc10 0x00198 0x003f0 RW  0x1000
+  DYNAMIC        0x00bc2c 0x0000cc2c 0x0000cc2c 0x000c8 0x000c8 RW  0x4
+  GNU_RELRO      0x00bc10 0x0000cc10 0x0000cc10 0x00198 0x003f0 R   0x1
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0
+  NOTE           0x000134 0x00000134 0x00000134 0x000bc 0x000bc R   0x4
+  ARM_EXIDX      0x003d50 0x00003d50 0x00003d50 0x00588 0x00588 R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .dynstr .rel.dyn .ARM.exidx .rel.plt .ARM.extab .rodata .text .plt 
+   02     .data.rel.ro .fini_array .dynamic .got .got.plt .relro_padding 
+   03     .dynamic 
+   04     .data.rel.ro .fini_array .dynamic .got .got.plt .relro_padding 
+   05     
+   06     .note.android.ident .note.gnu.build-id 
+   07     .ARM.exidx 
+
+Dynamic section at offset 0xbc2c contains 25 entries:
+  Tag        Type                         Name/Value
+ 0x00000001 (NEEDED)                     Shared library: [libonnxruntime.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000011 (REL)                        0x3d10
+ 0x00000012 (RELSZ)                      64 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   7
+ 0x00000017 (JMPREL)                     0x42d8
+ 0x00000002 (PLTRELSZ)                   328 (bytes)
+ 0x00000003 (PLTGOT)                     0xccf8
+ 0x00000014 (PLTREL)                     REL
+ 0x00000006 (SYMTAB)                     0x1f0
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x161c
+ 0x0000000a (STRSZ)                      9972 (bytes)
+ 0x6ffffef5 (GNU_HASH)                   0x1070
+ 0x0000001a (FINI_ARRAY)                 0xcc24
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x6ffffff0 (VERSYM)                     0xe70
+ 0x6ffffffe (VERNEED)                    0x1000
+ 0x6fffffff (VERNEEDNUM)                 3
+ 0x00000000 (NULL)                       0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 18 00 00 00 72 32 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 30 30 34 31 30 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 95137d2ca9f3f638620f916775f61f219b4603cd
+ort jni/x86/libonnxruntime.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 9 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00120 0x00120 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0x14038b0 0x14038b0 R E 0x4000
+  LOAD           0x14038b0 0x014078b0 0x014078b0 0x31a28 0x32750 RW  0x4000
+  LOAD           0x14352d8 0x0143d2d8 0x0143d2d8 0x00f54 0x0607c RW  0x4000
+  DYNAMIC        0x1433a9c 0x01437a9c 0x01437a9c 0x000f8 0x000f8 RW  0x4
+  GNU_RELRO      0x14038b0 0x014078b0 0x014078b0 0x31a28 0x32750 R   0x1
+  GNU_EH_FRAME   0x289510 0x00289510 0x00289510 0x3c674 0x3c674 R   0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0
+  NOTE           0x000154 0x00000154 0x00000154 0x000bc 0x000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_d .gnu.version_r .gnu.hash .dynstr .rel.dyn .rel.plt .rodata .gcc_except_table protodesc_cold .eh_frame_hdr .eh_frame .text malloc_hook __lcxx_override .plt 
+   02     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   03     .data .bss 
+   04     .dynamic 
+   05     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   06     .eh_frame_hdr 
+   07     
+   08     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x1433a9c contains 31 entries:
+  Tag        Type                         Name/Value
+ 0x0000001d (RUNPATH)                    Library runpath: [$ORIGIN]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x00000001 (NEEDED)                     Shared library: [liblog.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x0000000e (SONAME)                     Library soname: [libonnxruntime.so]
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000011 (REL)                        0x1b9c
+ 0x00000012 (RELSZ)                      368528 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   46057
+ 0x00000017 (JMPREL)                     0x5bb2c
+ 0x00000002 (PLTRELSZ)                   1704 (bytes)
+ 0x00000003 (PLTGOT)                     0x1438f78
+ 0x00000014 (PLTREL)                     REL
+ 0x00000006 (SYMTAB)                     0x210
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x1264
+ 0x0000000a (STRSZ)                      2360 (bytes)
+ 0x6ffffef5 (GNU_HASH)                   0x1234
+ 0x00000019 (INIT_ARRAY)                 0x1437a44
+ 0x0000001b (INIT_ARRAYSZ)               88 (bytes)
+ 0x0000001a (FINI_ARRAY)                 0x1437a3c
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x6ffffff0 (VERSYM)                     0xfe0
+ 0x6ffffffc (VERDEF)                     0x119c
+ 0x6ffffffd (VERDEFNUM)                  2
+ 0x6ffffffe (VERNEED)                    0x11d4
+ 0x6fffffff (VERNEEDNUM)                 3
+ 0x00000000 (NULL)                       0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 18 00 00 00 72 32 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 30 30 34 31 30 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 6601451ac962d2ac3ad5fa14850d8e6449511303
+ort jni/x86/libonnxruntime4j_jni.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 8 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00100 0x00100 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0x10870 0x10870 R E 0x1000
+  LOAD           0x010870 0x00011870 0x00011870 0x00170 0x00790 RW  0x1000
+  DYNAMIC        0x01088c 0x0001188c 0x0001188c 0x000c8 0x000c8 RW  0x4
+  GNU_RELRO      0x010870 0x00011870 0x00011870 0x00170 0x00790 R   0x1
+  GNU_EH_FRAME   0x004b28 0x00004b28 0x00004b28 0x005e4 0x005e4 R   0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0
+  NOTE           0x000134 0x00000134 0x00000134 0x000bc 0x000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .dynstr .rel.dyn .rel.plt .rodata .eh_frame_hdr .eh_frame .text .plt 
+   02     .data.rel.ro .fini_array .dynamic .got.plt .relro_padding 
+   03     .dynamic 
+   04     .data.rel.ro .fini_array .dynamic .got.plt .relro_padding 
+   05     .eh_frame_hdr 
+   06     
+   07     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x1088c contains 25 entries:
+  Tag        Type                         Name/Value
+ 0x00000001 (NEEDED)                     Shared library: [libonnxruntime.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000011 (REL)                        0x3cd0
+ 0x00000012 (RELSZ)                      56 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   7
+ 0x00000017 (JMPREL)                     0x3d08
+ 0x00000002 (PLTRELSZ)                   256 (bytes)
+ 0x00000003 (PLTGOT)                     0x11954
+ 0x00000014 (PLTREL)                     REL
+ 0x00000006 (SYMTAB)                     0x1f0
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x15fc
+ 0x0000000a (STRSZ)                      9939 (bytes)
+ 0x6ffffef5 (GNU_HASH)                   0x1050
+ 0x0000001a (FINI_ARRAY)                 0x11884
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x6ffffff0 (VERSYM)                     0xe60
+ 0x6ffffffe (VERNEED)                    0xff0
+ 0x6fffffff (VERNEEDNUM)                 3
+ 0x00000000 (NULL)                       0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 18 00 00 00 72 32 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 30 30 34 31 30 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: b664a26fcce680185aef125b1a9a56565ec68771
+ort jni/x86_64/libonnxruntime.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 9 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0001f8 0x0001f8 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x1409430 0x1409430 R E 0x4000
+  LOAD           0x1409430 0x000000000140d430 0x000000000140d430 0x062190 0x062bd0 RW  0x4000
+  LOAD           0x146b5c0 0x00000000014735c0 0x00000000014735c0 0x001a40 0x00acd0 RW  0x4000
+  DYNAMIC        0x146a868 0x000000000146e868 0x000000000146e868 0x0001f0 0x0001f0 RW  0x8
+  GNU_RELRO      0x1409430 0x000000000140d430 0x000000000140d430 0x062190 0x062bd0 R   0x1
+  GNU_EH_FRAME   0x33c510 0x000000000033c510 0x000000000033c510 0x03cfc4 0x03cfc4 R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+  NOTE           0x000238 0x0000000000000238 0x0000000000000238 0x0000bc 0x0000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_d .gnu.version_r .gnu.hash .dynstr .rela.dyn .rela.plt .rodata .gcc_except_table protodesc_cold .eh_frame_hdr .eh_frame .text malloc_hook __lcxx_override .plt 
+   02     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   03     .data .bss 
+   04     .dynamic 
+   05     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   06     .eh_frame_hdr 
+   07     
+   08     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x146a868 contains 31 entries:
+  Tag        Type                         Name/Value
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [liblog.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x000000000000000e (SONAME)             Library soname: [libonnxruntime.so]
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000007 (RELA)               0x2208
+ 0x0000000000000008 (RELASZ)             1091664 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          45477
+ 0x0000000000000017 (JMPREL)             0x10ca58
+ 0x0000000000000002 (PLTRELSZ)           4848 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x146ef58
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000006 (SYMTAB)             0x2f8
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x1918
+ 0x000000000000000a (STRSZ)              2284 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x18e8
+ 0x0000000000000019 (INIT_ARRAY)         0x146e7b8
+ 0x000000000000001b (INIT_ARRAYSZ)       176 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x146e7a8
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffff0 (VERSYM)             0x16a8
+ 0x000000006ffffffc (VERDEF)             0x184c
+ 0x000000006ffffffd (VERDEFNUM)          2
+ 0x000000006ffffffe (VERNEED)            0x1884
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x0000000000000000 (NULL)               0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 18 00 00 00 72 32 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 30 30 34 31 30 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 9eae3a65f437b3c85e9978b4a8341097cfa45d07
+ort jni/x86_64/libonnxruntime4j_jni.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 8 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0001c0 0x0001c0 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x0114c0 0x0114c0 R E 0x4000
+  LOAD           0x0114c0 0x00000000000154c0 0x00000000000154c0 0x0002e0 0x000b40 RW  0x4000
+  DYNAMIC        0x0114f8 0x00000000000154f8 0x00000000000154f8 0x000190 0x000190 RW  0x8
+  GNU_RELRO      0x0114c0 0x00000000000154c0 0x00000000000154c0 0x0002e0 0x000b40 R   0x1
+  GNU_EH_FRAME   0x0055e0 0x00000000000055e0 0x00000000000055e0 0x0005e4 0x0005e4 R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+  NOTE           0x000200 0x0000000000000200 0x0000000000000200 0x0000bc 0x0000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .dynstr .rela.dyn .rela.plt .rodata .eh_frame_hdr .eh_frame .text .plt 
+   02     .data.rel.ro .fini_array .dynamic .got.plt .relro_padding 
+   03     .dynamic 
+   04     .data.rel.ro .fini_array .dynamic .got.plt .relro_padding 
+   05     .eh_frame_hdr 
+   06     
+   07     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x114f8 contains 25 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libonnxruntime.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000007 (RELA)               0x43d8
+ 0x0000000000000008 (RELASZ)             168 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          7
+ 0x0000000000000017 (JMPREL)             0x4480
+ 0x0000000000000002 (PLTRELSZ)           768 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x15688
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000006 (SYMTAB)             0x2c0
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x1d04
+ 0x000000000000000a (STRSZ)              9939 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x1758
+ 0x000000000000001a (FINI_ARRAY)         0x154e8
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffff0 (VERSYM)             0x1568
+ 0x000000006ffffffe (VERNEED)            0x16f8
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x0000000000000000 (NULL)               0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 18 00 00 00 72 32 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 33 30 30 34 31 30 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 9ff5014572c42fe7a707447b42f430dbd5c6dae6
+opencv jni/x86_64/libc++_shared.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 10 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x000230 0x000230 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x098930 0x098930 R   0x4000
+  LOAD           0x098930 0x000000000009c930 0x000000000009c930 0x08eb20 0x08eb20 R E 0x4000
+  LOAD           0x127450 0x000000000012f450 0x000000000012f450 0x009ac8 0x009bb0 RW  0x4000
+  LOAD           0x130f20 0x000000000013cf20 0x000000000013cf20 0x000238 0x007d50 RW  0x4000
+  DYNAMIC        0x12f8c8 0x00000000001378c8 0x00000000001378c8 0x0001c0 0x0001c0 RW  0x8
+  GNU_RELRO      0x127450 0x000000000012f450 0x000000000012f450 0x009ac8 0x009bb0 R   0x1
+  GNU_EH_FRAME   0x079518 0x0000000000079518 0x0000000000079518 0x004ba4 0x004ba4 R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+  NOTE           0x000270 0x0000000000000270 0x0000000000000270 0x0000bc 0x0000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rela.dyn .rela.plt .gcc_except_table .rodata .eh_frame_hdr .eh_frame 
+   02     .text .plt 
+   03     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   04     .data .bss 
+   05     .dynamic 
+   06     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   07     .eh_frame_hdr 
+   08     
+   09     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x12f8c8 contains 28 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x000000000000000e (SONAME)             Library soname: [libc++_shared.so]
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000007 (RELA)               0x35b78
+ 0x0000000000000008 (RELASZ)             90672 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          1585
+ 0x0000000000000017 (JMPREL)             0x4bda8
+ 0x0000000000000002 (PLTRELSZ)           11184 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x138070
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000006 (SYMTAB)             0x330
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x18b78
+ 0x000000000000000a (STRSZ)              118781 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x10020
+ 0x0000000000000004 (HASH)               0x13db0
+ 0x0000000000000019 (INIT_ARRAY)         0x1378c0
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x1378b0
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffff0 (VERSYM)             0xec70
+ 0x000000006ffffffe (VERNEED)            0xffe0
+ 0x000000006fffffff (VERNEEDNUM)         2
+ 0x0000000000000000 (NULL)               0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 15 00 00 00 72 32 37 2d 62 65 74 61 31 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 31 38 38 33 33 38 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 29792d29860a216fdc2b694a7e435e459abfc194
+opencv jni/x86_64/libopencv_java4.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 9 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0001f8 0x0001f8 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x34648e0 0x34648e0 R E 0x4000
+  LOAD           0x34648e0 0x00000000034688e0 0x00000000034688e0 0x08db90 0x08e720 RW  0x4000
+  LOAD           0x34f2480 0x00000000034fa480 0x00000000034fa480 0x04bce8 0x15a4b0 RW  0x4000
+  DYNAMIC        0x34ec3a0 0x00000000034f03a0 0x00000000034f03a0 0x000210 0x000210 RW  0x8
+  GNU_RELRO      0x34648e0 0x00000000034688e0 0x00000000034688e0 0x08db90 0x08e720 R   0x1
+  GNU_EH_FRAME   0x719d10 0x0000000000719d10 0x0000000000719d10 0x045f8c 0x045f8c R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+  NOTE           0x000238 0x0000000000000238 0x0000000000000238 0x0000bc 0x0000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rela.dyn .rela.plt .gcc_except_table .rodata protodesc_cold .eh_frame_hdr .eh_frame .text .plt 
+   02     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   03     .data .bss 
+   04     .dynamic 
+   05     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   06     .eh_frame_hdr 
+   07     
+   08     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x34ec3a0 contains 33 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [liblog.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libjnigraphics.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libz.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libmediandk.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc++_shared.so]
+ 0x000000000000000e (SONAME)             Library soname: [libopencv_java4.so]
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000007 (RELA)               0xc4220
+ 0x0000000000000008 (RELASZ)             1660152 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          56478
+ 0x0000000000000017 (JMPREL)             0x259718
+ 0x0000000000000002 (PLTRELSZ)           63528 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x34f11a0
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000006 (SYMTAB)             0x2f8
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x574dc
+ 0x000000000000000a (STRSZ)              445763 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x38000
+ 0x0000000000000004 (HASH)               0x4622c
+ 0x0000000000000019 (INIT_ARRAY)         0x34f0208
+ 0x000000000000001b (INIT_ARRAYSZ)       408 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x34f01f8
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffff0 (VERSYM)             0x33af0
+ 0x000000006ffffffe (VERNEED)            0x37f9c
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x0000000000000000 (NULL)               0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 15 00 00 00 72 32 37 63 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 32 34 37 39 30 31 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 9e4159b7e7411a7e47402280ab6bf48a9bfad60c
+opencv jni/x86/libc++_shared.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 10 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00140 0x00140 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0x943f0 0x943f0 R   0x1000
+  LOAD           0x0943f0 0x000953f0 0x000953f0 0x98bc0 0x98bc0 R E 0x1000
+  LOAD           0x12cfb0 0x0012efb0 0x0012efb0 0x04ea4 0x05050 RW  0x1000
+  LOAD           0x131e54 0x00134e54 0x00134e54 0x00104 0x05dfc RW  0x1000
+  DYNAMIC        0x13132c 0x0013332c 0x0013332c 0x000e0 0x000e0 RW  0x4
+  GNU_RELRO      0x12cfb0 0x0012efb0 0x0012efb0 0x04ea4 0x05050 R   0x1
+  GNU_EH_FRAME   0x063bf8 0x00063bf8 0x00063bf8 0x04b64 0x04b64 R   0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0
+  NOTE           0x000174 0x00000174 0x00000174 0x000bc 0x000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rel.dyn .rel.plt .gcc_except_table .rodata .eh_frame_hdr .eh_frame 
+   02     .text .plt 
+   03     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   04     .data .bss 
+   05     .dynamic 
+   06     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   07     .eh_frame_hdr 
+   08     
+   09     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x13132c contains 28 entries:
+  Tag        Type                         Name/Value
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x0000000e (SONAME)                     Library soname: [libc++_shared.so]
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000011 (REL)                        0x30d6c
+ 0x00000012 (RELSZ)                      30552 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   1618
+ 0x00000017 (JMPREL)                     0x384c4
+ 0x00000002 (PLTRELSZ)                   3728 (bytes)
+ 0x00000003 (PLTGOT)                     0x133700
+ 0x00000014 (PLTREL)                     REL
+ 0x00000006 (SYMTAB)                     0x230
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x13d54
+ 0x0000000a (STRSZ)                      118806 (bytes)
+ 0x6ffffef5 (GNU_HASH)                   0xb1bc
+ 0x00000004 (HASH)                       0xef64
+ 0x00000019 (INIT_ARRAY)                 0x133328
+ 0x0000001b (INIT_ARRAYSZ)               4 (bytes)
+ 0x0000001a (FINI_ARRAY)                 0x133320
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x6ffffff0 (VERSYM)                     0x9e00
+ 0x6ffffffe (VERNEED)                    0xb17c
+ 0x6fffffff (VERNEEDNUM)                 2
+ 0x00000000 (NULL)                       0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 15 00 00 00 72 32 37 2d 62 65 74 61 31 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 31 38 38 33 33 38 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: e17da69a3236aa35b0bb64dbe4099e6c013f6f1e
+opencv jni/x86/libopencv_java4.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 9 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00120 0x00120 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0x274c010 0x274c010 R E 0x1000
+  LOAD           0x274c020 0x0274d020 0x0274d020 0x408b4 0x40fe0 RW  0x1000
+  LOAD           0x278c8e0 0x0278e8e0 0x0278e8e0 0x3e6ac 0x14668c RW  0x1000
+  DYNAMIC        0x2788d98 0x02789d98 0x02789d98 0x00108 0x00108 RW  0x4
+  GNU_RELRO      0x274c020 0x0274d020 0x0274d020 0x408b4 0x40fe0 R   0x1
+  GNU_EH_FRAME   0x50c2f0 0x0050c2f0 0x0050c2f0 0x4025c 0x4025c R   0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0
+  NOTE           0x000154 0x00000154 0x00000154 0x000bc 0x000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rel.dyn .rel.plt .gcc_except_table .rodata protodesc_cold .eh_frame_hdr .eh_frame .text .plt 
+   02     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   03     .data .bss 
+   04     .dynamic 
+   05     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   06     .eh_frame_hdr 
+   07     
+   08     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x2788d98 contains 33 entries:
+  Tag        Type                         Name/Value
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [liblog.so]
+ 0x00000001 (NEEDED)                     Shared library: [libjnigraphics.so]
+ 0x00000001 (NEEDED)                     Shared library: [libz.so]
+ 0x00000001 (NEEDED)                     Shared library: [libmediandk.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc++_shared.so]
+ 0x0000000e (SONAME)                     Library soname: [libopencv_java4.so]
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000011 (REL)                        0xb2db8
+ 0x00000012 (RELSZ)                      506520 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   51290
+ 0x00000017 (JMPREL)                     0x12e850
+ 0x00000002 (PLTRELSZ)                   21216 (bytes)
+ 0x00000003 (PLTGOT)                     0x278af58
+ 0x00000014 (PLTREL)                     REL
+ 0x00000006 (SYMTAB)                     0x210
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x461c0
+ 0x0000000a (STRSZ)                      445429 (bytes)
+ 0x6ffffef5 (GNU_HASH)                   0x26cc4
+ 0x00000004 (HASH)                       0x34ee8
+ 0x00000019 (INIT_ARRAY)                 0x2789ccc
+ 0x0000001b (INIT_ARRAYSZ)               204 (bytes)
+ 0x0000001a (FINI_ARRAY)                 0x2789cc4
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x6ffffff0 (VERSYM)                     0x227b0
+ 0x6ffffffe (VERNEED)                    0x26c64
+ 0x6fffffff (VERNEEDNUM)                 3
+ 0x00000000 (NULL)                       0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 15 00 00 00 72 32 37 63 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 32 34 37 39 30 31 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 96e50bdf5b393d2f6c9278762061d4ba98c5e2a2
+opencv jni/arm64-v8a/libc++_shared.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 12 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0002a0 0x0002a0 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x09aca8 0x09aca8 R   0x4000
+  LOAD           0x09acb0 0x000000000009ecb0 0x000000000009ecb0 0x096640 0x096640 R E 0x4000
+  LOAD           0x1312f0 0x00000000001392f0 0x00000000001392f0 0x009b50 0x009d10 RW  0x4000
+  LOAD           0x13ae40 0x0000000000146e40 0x0000000000146e40 0x000238 0x007d10 RW  0x4000
+  DYNAMIC        0x1397c0 0x00000000001417c0 0x00000000001417c0 0x0001d0 0x0001d0 RW  0x8
+  GNU_RELRO      0x1312f0 0x00000000001392f0 0x00000000001392f0 0x009b50 0x009d10 R   0x1
+  GNU_EH_FRAME   0x078e8c 0x0000000000078e8c 0x0000000000078e8c 0x004bec 0x004bec R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+  GNU_PROPERTY   0x0003a0 0x00000000000003a0 0x00000000000003a0 0x000020 0x000020 R   0x8
+  NOTE           0x0002e0 0x00000000000002e0 0x00000000000002e0 0x0000bc 0x0000bc R   0x4
+  NOTE           0x0003a0 0x00000000000003a0 0x00000000000003a0 0x000020 0x000020 R   0x8
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .note.gnu.property .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rela.dyn .rela.plt .gcc_except_table .rodata .eh_frame_hdr .eh_frame 
+   02     .text .plt 
+   03     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   04     .data .bss 
+   05     .dynamic 
+   06     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   07     .eh_frame_hdr 
+   08     
+   09     .note.gnu.property 
+   10     .note.android.ident .note.gnu.build-id 
+   11     .note.gnu.property 
+
+Dynamic section at offset 0x1397c0 contains 29 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x000000000000000e (SONAME)             Library soname: [libc++_shared.so]
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000007 (RELA)               0x35dd8
+ 0x0000000000000008 (RELASZ)             90912 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          1587
+ 0x0000000000000017 (JMPREL)             0x4c0f8
+ 0x0000000000000002 (PLTRELSZ)           11280 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x141f78
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000070000001 (AARCH64_BTI_PLT)    
+ 0x0000000000000006 (SYMTAB)             0x3c0
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x18d80
+ 0x000000000000000a (STRSZ)              118870 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x101b8
+ 0x0000000000000004 (HASH)               0x13f68
+ 0x0000000000000019 (INIT_ARRAY)         0x1417a8
+ 0x000000000000001b (INIT_ARRAYSZ)       24 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x141798
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffff0 (VERSYM)             0xedf0
+ 0x000000006ffffffe (VERNEED)            0x10174
+ 0x000000006fffffff (VERNEEDNUM)         2
+ 0x0000000000000000 (NULL)               0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 15 00 00 00 72 32 37 2d 62 65 74 61 31 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 31 38 38 33 33 38 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: b04675a35ad96f8a9dcaa073e3bd31d4536f00ad
+
+Displaying notes found in: .note.gnu.property
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0	      Properties: AArch64 feature: BTI, PAC
+opencv jni/arm64-v8a/libopencv_java4.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 9 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0001f8 0x0001f8 R   0x8
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x15ad950 0x15ad950 R E 0x4000
+  LOAD           0x15ad950 0x00000000015b1950 0x00000000015b1950 0x06c940 0x06d6b0 RW  0x4000
+  LOAD           0x161a290 0x0000000001622290 0x0000000001622290 0x0461d0 0x151410 RW  0x4000
+  DYNAMIC        0x16132b0 0x00000000016172b0 0x00000000016172b0 0x000210 0x000210 RW  0x8
+  GNU_RELRO      0x15ad950 0x00000000015b1950 0x00000000015b1950 0x06c940 0x06d6b0 R   0x1
+  GNU_EH_FRAME   0x492d88 0x0000000000492d88 0x0000000000492d88 0x03ebc4 0x03ebc4 R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0
+  NOTE           0x000238 0x0000000000000238 0x0000000000000238 0x0000bc 0x0000bc R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rela.dyn .rela.plt .gcc_except_table .rodata protodesc_cold .eh_frame_hdr .eh_frame .text .plt 
+   02     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   03     .data .bss 
+   04     .dynamic 
+   05     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   06     .eh_frame_hdr 
+   07     
+   08     .note.android.ident .note.gnu.build-id 
+
+Dynamic section at offset 0x16132b0 contains 33 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libdl.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [liblog.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libjnigraphics.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libz.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libmediandk.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc++_shared.so]
+ 0x000000000000000e (SONAME)             Library soname: [libopencv_java4.so]
+ 0x000000000000001e (FLAGS)              BIND_NOW
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW
+ 0x0000000000000007 (RELA)               0xc41a8
+ 0x0000000000000008 (RELASZ)             1293096 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffff9 (RELACOUNT)          42453
+ 0x0000000000000017 (JMPREL)             0x1ffcd0
+ 0x0000000000000002 (PLTRELSZ)           63240 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x1619020
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000006 (SYMTAB)             0x2f8
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000005 (STRTAB)             0x5750c
+ 0x000000000000000a (STRSZ)              445591 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x38030
+ 0x0000000000000004 (HASH)               0x4624c
+ 0x0000000000000019 (INIT_ARRAY)         0x1617028
+ 0x000000000000001b (INIT_ARRAYSZ)       648 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x1617018
+ 0x000000000000001c (FINI_ARRAYSZ)       16 (bytes)
+ 0x000000006ffffff0 (VERSYM)             0x33b20
+ 0x000000006ffffffe (VERNEED)            0x37fd0
+ 0x000000006fffffff (VERNEEDNUM)         3
+ 0x0000000000000000 (NULL)               0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 15 00 00 00 72 32 37 63 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 32 34 37 39 30 31 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 1aaa9c4d1e0fe8876532bfb8b2faaabd4e8d9b3e
+opencv jni/armeabi-v7a/libc++_shared.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 10 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00140 0x00140 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0x6961d 0x6961d R   0x1000
+  LOAD           0x069620 0x0006a620 0x0006a620 0x664c0 0x664c0 R E 0x1000
+  LOAD           0x0cfae0 0x000d1ae0 0x000d1ae0 0x04ea8 0x05520 RW  0x1000
+  LOAD           0x0d4988 0x000d7988 0x000d7988 0x000f4 0x05931 RW  0x1000
+  DYNAMIC        0x0d3e38 0x000d5e38 0x000d5e38 0x000e0 0x000e0 RW  0x4
+  GNU_RELRO      0x0cfae0 0x000d1ae0 0x000d1ae0 0x04ea8 0x05520 R   0x1
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0
+  NOTE           0x000174 0x00000174 0x00000174 0x000bc 0x000bc R   0x4
+  ARM_EXIDX      0x03857c 0x0003857c 0x0003857c 0x039d8 0x039d8 R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rel.dyn .ARM.exidx .rel.plt .ARM.extab .rodata 
+   02     .text .plt 
+   03     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   04     .data .bss 
+   05     .dynamic 
+   06     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   07     
+   08     .note.android.ident .note.gnu.build-id 
+   09     .ARM.exidx 
+
+Dynamic section at offset 0xd3e38 contains 28 entries:
+  Tag        Type                         Name/Value
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x0000000e (SONAME)                     Library soname: [libc++_shared.so]
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000011 (REL)                        0x30e74
+ 0x00000012 (RELSZ)                      30472 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   1609
+ 0x00000017 (JMPREL)                     0x3bf54
+ 0x00000002 (PLTRELSZ)                   3784 (bytes)
+ 0x00000003 (PLTGOT)                     0xd6218
+ 0x00000014 (PLTREL)                     REL
+ 0x00000006 (SYMTAB)                     0x230
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x13dfc
+ 0x0000000a (STRSZ)                      118901 (bytes)
+ 0x6ffffef5 (GNU_HASH)                   0xb228
+ 0x00000004 (HASH)                       0xefdc
+ 0x00000019 (INIT_ARRAY)                 0xd5e34
+ 0x0000001b (INIT_ARRAYSZ)               4 (bytes)
+ 0x0000001a (FINI_ARRAY)                 0xd5e2c
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x6ffffff0 (VERSYM)                     0x9e60
+ 0x6ffffffe (VERNEED)                    0xb1e8
+ 0x6fffffff (VERNEEDNUM)                 2
+ 0x00000000 (NULL)                       0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 15 00 00 00 72 32 37 2d 62 65 74 61 31 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 31 38 38 33 33 38 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: a760c680b329de8439f344bcfd47a1b7f0fdb446
+opencv jni/armeabi-v7a/libopencv_java4.so
+
+Elf file type is DYN (Shared object file)
+Entry point 0x0
+There are 9 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  PHDR           0x000034 0x00000034 0x00000034 0x00120 0x00120 R   0x4
+  LOAD           0x000000 0x00000000 0x00000000 0xe73e70 0xe73e70 R E 0x1000
+  LOAD           0xe73e70 0x00e74e70 0x00e74e70 0x3925c 0x3a190 RW  0x1000
+  LOAD           0xead0d0 0x00eaf0d0 0x00eaf0d0 0x389b0 0x13eb4a RW  0x1000
+  DYNAMIC        0xea9b78 0x00eaab78 0x00eaab78 0x00108 0x00108 RW  0x4
+  GNU_RELRO      0xe73e70 0x00e74e70 0x00e74e70 0x3925c 0x3a190 R   0x1
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0
+  NOTE           0x000154 0x00000154 0x00000154 0x000bc 0x000bc R   0x4
+  ARM_EXIDX      0x11affc 0x0011affc 0x0011affc 0x33360 0x33360 R   0x4
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .note.android.ident .note.gnu.build-id .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rel.dyn .ARM.exidx .rel.plt .ARM.extab .rodata protodesc_cold .text .plt 
+   02     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   03     .data .bss 
+   04     .dynamic 
+   05     .data.rel.ro .fini_array .init_array .dynamic .got .got.plt .relro_padding 
+   06     
+   07     .note.android.ident .note.gnu.build-id 
+   08     .ARM.exidx 
+
+Dynamic section at offset 0xea9b78 contains 33 entries:
+  Tag        Type                         Name/Value
+ 0x00000001 (NEEDED)                     Shared library: [libdl.so]
+ 0x00000001 (NEEDED)                     Shared library: [libm.so]
+ 0x00000001 (NEEDED)                     Shared library: [liblog.so]
+ 0x00000001 (NEEDED)                     Shared library: [libjnigraphics.so]
+ 0x00000001 (NEEDED)                     Shared library: [libz.so]
+ 0x00000001 (NEEDED)                     Shared library: [libmediandk.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc.so]
+ 0x00000001 (NEEDED)                     Shared library: [libc++_shared.so]
+ 0x0000000e (SONAME)                     Library soname: [libopencv_java4.so]
+ 0x0000001e (FLAGS)                      BIND_NOW
+ 0x6ffffffb (FLAGS_1)                    Flags: NOW
+ 0x00000011 (REL)                        0xb2f5c
+ 0x00000012 (RELSZ)                      426144 (bytes)
+ 0x00000013 (RELENT)                     8 (bytes)
+ 0x6ffffffa (RELCOUNT)                   41877
+ 0x00000017 (JMPREL)                     0x14e35c
+ 0x00000002 (PLTRELSZ)                   21224 (bytes)
+ 0x00000003 (PLTGOT)                     0xeab74c
+ 0x00000014 (PLTREL)                     REL
+ 0x00000006 (SYMTAB)                     0x210
+ 0x0000000b (SYMENT)                     16 (bytes)
+ 0x00000005 (STRTAB)                     0x46358
+ 0x0000000a (STRSZ)                      445444 (bytes)
+ 0x6ffffef5 (GNU_HASH)                   0x26de4
+ 0x00000004 (HASH)                       0x35000
+ 0x00000019 (INIT_ARRAY)                 0xeaaabc
+ 0x0000001b (INIT_ARRAYSZ)               188 (bytes)
+ 0x0000001a (FINI_ARRAY)                 0xeaaab4
+ 0x0000001c (FINI_ARRAYSZ)               8 (bytes)
+ 0x6ffffff0 (VERSYM)                     0x228b0
+ 0x6ffffffe (VERNEED)                    0x26d84
+ 0x6fffffff (VERNEEDNUM)                 3
+ 0x00000000 (NULL)                       0x0
+
+Displaying notes found in: .note.android.ident
+  Owner                Data size 	Description
+  Android              0x00000084	NT_VERSION (version)	   description data: 15 00 00 00 72 32 37 63 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 31 32 34 37 39 30 31 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 35ce767a9be2f2ef9ec974712c6149fcfdd751c4

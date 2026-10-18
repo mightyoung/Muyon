@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mightyoung.muyon.ocr.MatOwnershipTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-18T05:48:41.139Z" hostname="10f9d4826f06" time="0.174">
+  <properties/>
+  <testcase name="detectionReleasesLargeIntermediatesBeforeTensorExtraction" classname="com.mightyoung.muyon.ocr.MatOwnershipTest" time="0.067"/>
+  <testcase name="cropReleasesAllTemporariesOnRealNativeException" classname="com.mightyoung.muyon.ocr.MatOwnershipTest" time="0.058"/>
+  <testcase name="detectionReleasesRgbWhenResizeRejectsArguments" classname="com.mightyoung.muyon.ocr.MatOwnershipTest" time="0.002"/>
+  <testcase name="cancellationReleasesCropAndDetectionTemporaries" classname="com.mightyoung.muyon.ocr.MatOwnershipTest" time="0.004"/>
+  <testcase name="normalAndRepeatedCallsPreserveResultsAndCallerOwnership" classname="com.mightyoung.muyon.ocr.MatOwnershipTest" time="0.037"/>
+  <testcase name="detectionReleasesAllTemporariesOnRealChannelException" classname="com.mightyoung.muyon.ocr.MatOwnershipTest" time="0.002"/>
+  <testcase name="resizeReleasesDestinationOnRealNativeException" classname="com.mightyoung.muyon.ocr.MatOwnershipTest" time="0.001"/>
+  <system-out><![CDATA[Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=5, released=5, returned=false, cancellation=null
+Mat ownership: created=1, temporaries=1, released=1, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=5, released=5, returned=false, cancellation=warpPerspective
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=rotate
+Mat ownership: created=1, temporaries=1, released=1, returned=false, cancellation=cvtColor
+Mat ownership: created=3, temporaries=3, released=3, returned=false, cancellation=convertTo
+Mat ownership: created=3, temporaries=3, released=3, returned=false, cancellation=split
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=6, released=6, returned=false, cancellation=null
+Mat ownership: created=7, temporaries=7, released=7, returned=false, cancellation=null
+Mat ownership: created=5, temporaries=4, released=4, returned=true, cancellation=null
+Mat ownership: created=6, temporaries=5, released=5, returned=true, cancellation=null
+Mat ownership: created=4, temporaries=4, released=4, returned=false, cancellation=null
+Mat ownership: created=1, temporaries=1, released=1, returned=false, cancellation=null
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

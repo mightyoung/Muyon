@@ -33,9 +33,12 @@ object QuadTextCrop {
         // from the detected quad before perspective transform.
         val rectPoints = box.points.map { Point(it.x.toDouble(), it.y.toDouble()) }
         val rectInput = MatOfPoint2f()
-        rectInput.fromList(rectPoints)
-        val boundingBox = Imgproc.minAreaRect(rectInput)
-        rectInput.release()
+        val boundingBox = try {
+            rectInput.fromList(rectPoints)
+            Imgproc.minAreaRect(rectInput)
+        } finally {
+            rectInput.release()
+        }
 
         val boxPoints = Array(4) { Point() }
         boundingBox.points(boxPoints)
@@ -50,37 +53,48 @@ object QuadTextCrop {
         val dstH = max(heightLeft, heightRight).toInt().coerceAtLeast(1)
 
         val srcPts = MatOfPoint2f()
-        srcPts.fromList(ordered)
-        val dstPts = MatOfPoint2f()
-        dstPts.fromList(
-            listOf(
-                Point(0.0, 0.0),
-                Point(dstW.toDouble(), 0.0),
-                Point(dstW.toDouble(), dstH.toDouble()),
-                Point(0.0, dstH.toDouble()),
+        var dstPts: MatOfPoint2f? = null
+        var transform: Mat? = null
+        var dst: Mat? = null
+        var rotated: Mat? = null
+        var result: Mat? = null
+        try {
+            srcPts.fromList(ordered)
+            dstPts = MatOfPoint2f()
+            dstPts.fromList(
+                listOf(
+                    Point(0.0, 0.0),
+                    Point(dstW.toDouble(), 0.0),
+                    Point(dstW.toDouble(), dstH.toDouble()),
+                    Point(0.0, dstH.toDouble()),
+                )
             )
-        )
-        val m = Imgproc.getPerspectiveTransform(srcPts, dstPts)
-        srcPts.release()
-        dstPts.release()
+            transform = Imgproc.getPerspectiveTransform(srcPts, dstPts)
+            dst = Mat(dstH, dstW, CvType.CV_8UC3)
+            Imgproc.warpPerspective(
+                src,
+                dst,
+                transform,
+                Size(dstW.toDouble(), dstH.toDouble()),
+                Imgproc.INTER_CUBIC,
+                Core.BORDER_REPLICATE,
+            )
 
-        val dst = Mat(dstH, dstW, CvType.CV_8UC3)
-        Imgproc.warpPerspective(
-            src,
-            dst,
-            m,
-            Size(dstW.toDouble(), dstH.toDouble()),
-            Imgproc.INTER_CUBIC,
-            Core.BORDER_REPLICATE,
-        )
-        m.release()
-
-        if (dst.rows().toDouble() / dst.cols() >= VERTICAL_CROP_RATIO) {
-            val rotated = Mat()
-            Core.rotate(dst, rotated, Core.ROTATE_90_COUNTERCLOCKWISE)
-            dst.release()
-            return rotated
+            if (dst.rows().toDouble() / dst.cols() >= VERTICAL_CROP_RATIO) {
+                rotated = Mat()
+                Core.rotate(dst, rotated, Core.ROTATE_90_COUNTERCLOCKWISE)
+                result = rotated
+                return rotated
+            }
+            result = dst
+            return dst
+        } finally {
+            // Transfer only the successful result; src remains borrowed from the caller.
+            if (rotated !== result) rotated?.release()
+            if (dst !== result) dst?.release()
+            transform?.release()
+            dstPts?.release()
+            srcPts.release()
         }
-        return dst
     }
 }

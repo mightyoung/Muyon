@@ -59,45 +59,56 @@ object DetPreprocessor {
     ): DetPreprocessResult {
         val originalH = src.rows()
         val originalW = src.cols()
-        val input = if (imgMode.uppercase() == "RGB") {
-            Mat().also { Imgproc.cvtColor(src, it, Imgproc.COLOR_BGR2RGB) }
-        } else {
-            src
-        }
-
-        val resized = ImageUtils.resizeToMultipleOf32(input, limitSideLen, limitType, maxSideLimit)
-        if (input !== src) input.release()
-
-        val h = resized.rows()
-        val w = resized.cols()
-        val floatMat = Mat(h, w, CvType.CV_32FC3)
-        resized.convertTo(floatMat, CvType.CV_32F)
-
+        var input = src
+        var resized: Mat? = null
+        var floatMat: Mat? = null
         val channels = mutableListOf<Mat>()
-        Core.split(floatMat, channels)
-        for (c in 0..2) {
-            Core.multiply(channels[c], Scalar(scale), channels[c])
-            Core.subtract(channels[c], Scalar(mean[c]), channels[c])
-            Core.divide(channels[c], Scalar(std[c]), channels[c])
-        }
-        resized.release()
-        floatMat.release()
+        try {
+            if (imgMode.uppercase() == "RGB") {
+                input = Mat()
+                Imgproc.cvtColor(src, input, Imgproc.COLOR_BGR2RGB)
+            }
+            resized = ImageUtils.resizeToMultipleOf32(input, limitSideLen, limitType, maxSideLimit)
+            if (input !== src) {
+                input.release()
+                input = src
+            }
+            val h = resized.rows()
+            val w = resized.cols()
+            floatMat = Mat(h, w, CvType.CV_32FC3)
+            resized.convertTo(floatMat, CvType.CV_32F)
 
-        val channelSize = h * w
-        val tensorData = FloatArray(3 * channelSize)
-        for (c in 0..2) {
-            val chan = channels[c]
-            val buf = FloatArray(channelSize)
-            chan.get(0, 0, buf)
-            System.arraycopy(buf, 0, tensorData, c * channelSize, channelSize)
-            chan.release()
-        }
+            Core.split(floatMat, channels)
+            for (c in 0..2) {
+                Core.multiply(channels[c], Scalar(scale), channels[c])
+                Core.subtract(channels[c], Scalar(mean[c]), channels[c])
+                Core.divide(channels[c], Scalar(std[c]), channels[c])
+            }
 
-        return DetPreprocessResult(
-            tensorData = tensorData,
-            shape = longArrayOf(1, 3, h.toLong(), w.toLong()),
-            originalH = originalH,
-            originalW = originalW,
-        )
+            resized.release()
+            resized = null
+            floatMat.release()
+            floatMat = null
+
+            val channelSize = h * w
+            val tensorData = FloatArray(3 * channelSize)
+            for (c in 0..2) {
+                val buf = FloatArray(channelSize)
+                channels[c].get(0, 0, buf)
+                System.arraycopy(buf, 0, tensorData, c * channelSize, channelSize)
+            }
+
+            return DetPreprocessResult(
+                tensorData = tensorData,
+                shape = longArrayOf(1, 3, h.toLong(), w.toLong()),
+                originalH = originalH,
+                originalW = originalW,
+            )
+        } finally {
+            channels.forEach { it.release() }
+            floatMat?.release()
+            resized?.release()
+            if (input !== src) input.release()
+        }
     }
 }

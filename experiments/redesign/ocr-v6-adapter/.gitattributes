@@ -1,2 +1,5 @@
 # Keep raw tool output byte-for-byte, including tool-generated trailing whitespace.
 evidence/*.log -whitespace
+
+# Unified diff context lines retain their required leading space.
+evidence/*.patch -whitespace

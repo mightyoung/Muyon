@@ -46,7 +46,13 @@ object ImageUtils {
         newH = maxOf(MathUtils.roundHalfToEven(newH / 32.0) * 32, 32)
         newW = maxOf(MathUtils.roundHalfToEven(newW / 32.0) * 32, 32)
         val dst = Mat()
-        Imgproc.resize(src, dst, Size(newW.toDouble(), newH.toDouble()), 0.0, 0.0, Imgproc.INTER_LINEAR)
-        return dst
+        var transferred = false
+        try {
+            Imgproc.resize(src, dst, Size(newW.toDouble(), newH.toDouble()), 0.0, 0.0, Imgproc.INTER_LINEAR)
+            transferred = true
+            return dst
+        } finally {
+            if (!transferred) dst.release()
+        }
     }
 }

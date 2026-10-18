@@ -1,0 +1,25 @@
+{
+  "upstreamCommit": "dab3fe35379033fdcb2d0e9572fac0b36c9a9ebf",
+  "upstreamLock": "upstream.lock.json",
+  "license": "Apache-2.0; original headers retained",
+  "files": [
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/postprocess/QuadTextCrop.kt",
+      "upstreamSha256": "49f8889430ca8aeda4ef5e90f8de4b0e695696de64fdd97d8ed7421d21198109",
+      "localSha256": "56985e2795349933ae79e3e567adb282823a210b873fb8e57b18c3ef7a0a0600",
+      "reason": "Exception/cancellation-safe Mat ownership and success-only transfer; numerical preprocessing unchanged."
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/preprocess/DetPreprocessor.kt",
+      "upstreamSha256": "9e16244a57d8d8be5aba3eff85c676d0b08282f396868fa244bf35dd572dcff8",
+      "localSha256": "f463a8f6c96a8adc63ec1d6a983892191976879bd8784563911b2d0607772953",
+      "reason": "Exception/cancellation-safe Mat ownership and success-only transfer; numerical preprocessing unchanged."
+    },
+    {
+      "path": "vendor/paddleocr/com/paddle/ocr/util/ImageUtils.kt",
+      "upstreamSha256": "205fd17a1dcfacdbbc8f5bb76e059aba7c0fffecfaff443812a1960272ecfbbe",
+      "localSha256": "cafa3c8238501d9d4bd6cb294daab780a5abd237131e9c9c87d3c56a7cc327b4",
+      "reason": "Exception/cancellation-safe Mat ownership and success-only transfer; numerical preprocessing unchanged."
+    }
+  ]
+}

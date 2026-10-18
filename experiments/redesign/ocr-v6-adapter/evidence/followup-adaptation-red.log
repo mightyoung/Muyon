@@ -1,0 +1,20 @@
+.E
+======================================================================
+ERROR: test_unchanged_upstream_sources_and_licensed_fixtures (test_locks.LockTests.test_unchanged_upstream_sources_and_licensed_fixtures)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/ocr-v6-followup/experiments/redesign/ocr-v6-adapter/checks/test_locks.py", line 11, in test_unchanged_upstream_sources_and_licensed_fixtures
+    adaptation=json.loads((ROOT/'upstream-adaptations.lock.json').read_text())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/ocr-v6-followup/experiments/redesign/ocr-v6-adapter/upstream-adaptations.lock.json'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.002s
+
+FAILED (errors=1)

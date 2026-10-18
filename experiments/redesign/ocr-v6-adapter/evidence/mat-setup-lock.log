@@ -1,0 +1,21 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :unpackNative FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':unpackNative'.
+> Could not resolve all files for configuration ':nativeCompile'.
+   > Resolved 'org.opencv:opencv:4.12.0' which is not part of the dependency lock state
+   > Did not resolve 'com.quickbirdstudios:opencv:4.5.3' which is part of the dependency lock state
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 19s
+1 actionable task: 1 executed

@@ -1,0 +1,15 @@
+{
+  "tensor": {
+    "injected": true,
+    "rejected": true
+  },
+  "text": {
+    "injected": true,
+    "rejected": true
+  },
+  "missingStage": {
+    "injected": true,
+    "rejected": true
+  },
+  "restoredComparisonPassed": true
+}

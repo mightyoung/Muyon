@@ -7,6 +7,9 @@ sourceSets {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.openpnp:opencv:4.9.0-0")
+    testImplementation("net.bytebuddy:byte-buddy:1.15.11")
+    testImplementation("net.bytebuddy:byte-buddy-agent:1.15.11")
 }
 tasks.test { testLogging { events("passed", "failed", "skipped"); showStandardStreams = true } }
 // Compile the isolated Android adapter and unchanged SDK sources on the JVM.
@@ -27,7 +30,7 @@ val unpackNative by tasks.registering {
 sourceSets.main { kotlin.srcDirs("android/src/main/kotlin", "vendor/paddleocr") }
 dependencies {
     nativeCompile("com.microsoft.onnxruntime:onnxruntime-android:1.21.1@aar")
-    nativeCompile("com.quickbirdstudios:opencv:4.5.3@aar")
+    nativeCompile("org.opencv:opencv:4.12.0@aar")
     compileOnly(files(unpackNative.map { layout.buildDirectory.dir("native-compile").get().asFileTree.matching { include("*.jar") } }))
     compileOnly("com.google.android:android:4.1.1.4")
     testImplementation("com.google.android:android:4.1.1.4")

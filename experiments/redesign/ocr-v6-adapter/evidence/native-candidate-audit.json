@@ -1,0 +1,1397 @@
+{
+  "artifacts": {
+    "ort": {
+      "coordinate": "com.microsoft.onnxruntime:onnxruntime-android:1.21.1",
+      "sha256": "30e594a4b9246fe3ca25768570e90f71e6d33ceb7b7dd72f92dcd7c267611d3f",
+      "manifest": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    package=\"ai.onnxruntime\" >\n\n    <uses-sdk android:minSdkVersion=\"24\" />\n\n</manifest>"
+    },
+    "opencv": {
+      "coordinate": "org.opencv:opencv:4.12.0",
+      "sha256": "f71846a313388d9da667a59be1e921669fcf792d1ba264b3898253ca789bc3f0",
+      "manifest": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n    package=\"org.opencv\" >\n\n    <uses-sdk android:minSdkVersion=\"21\" />\n\n</manifest>"
+    }
+  },
+  "libraries": [
+    {
+      "bytes": 17908496,
+      "sha256": "11ef853b751532dc827bd7799f557f9495e2ee7523b9b355753fc0344576bd5e",
+      "bits": 64,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 17490240,
+          "memsz": 17490240,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 17490240,
+          "vaddr": 17506624,
+          "filesz": 409160,
+          "memsz": 409280,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 17899400,
+          "vaddr": 17932168,
+          "filesz": 6568,
+          "memsz": 53528,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 17490240,
+          "vaddr": 17506624,
+          "filesz": 409160,
+          "memsz": 409280,
+          "align": 1,
+          "endModulo16KiB": 8192,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libdl.so",
+        "liblog.so",
+        "libm.so",
+        "libc.so"
+      ],
+      "artifact": "ort",
+      "entry": "jni/arm64-v8a/libonnxruntime.so",
+      "abi": "arm64-v8a",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "abfc3e17c2babb61a88aa4a5f399505dffe19a24d7a57d8460406413e1c77edf"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "e38489e92d995f77ceef18918ca27183ac81115979ec295d3c8e74f41949328c"
+          },
+          {
+            "name": "liblog.so",
+            "sha256": "40a4e3e8c29ab14d7fabfca9d3707b73caf5b96ad9ead41d3f1d5407b5930cac"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "25eefefafd831de263619071cf85bc0cad8f77efcd741e071acc0ad264eedaa5"
+          }
+        ]
+      },
+      "importsCount": 205,
+      "importsSha256": "ae6d7a3a74c8a82c6956148240e25e49f91e519ef37c3aae8b4b0e499f294815",
+      "exportsCount": 8,
+      "exportsSha256": "b76d190da730fe1fa451a5b1e506cc2041b42600f6813ceab1ba4ba4f2ec1aff"
+    },
+    {
+      "bytes": 100632,
+      "sha256": "f657216254a2f88fcbd89c5e73a2f7ae5a8145d092f8700951aedba8e4a60ef2",
+      "bits": 64,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 73056,
+          "memsz": 73056,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 73056,
+          "vaddr": 89440,
+          "filesz": 816,
+          "memsz": 4768,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 73056,
+          "vaddr": 89440,
+          "filesz": 816,
+          "memsz": 4768,
+          "align": 1,
+          "endModulo16KiB": 12288,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libonnxruntime.so",
+        "libm.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "artifact": "ort",
+      "entry": "jni/arm64-v8a/libonnxruntime4j_jni.so",
+      "abi": "arm64-v8a",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "abfc3e17c2babb61a88aa4a5f399505dffe19a24d7a57d8460406413e1c77edf"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "25eefefafd831de263619071cf85bc0cad8f77efcd741e071acc0ad264eedaa5"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "e38489e92d995f77ceef18918ca27183ac81115979ec295d3c8e74f41949328c"
+          }
+        ]
+      },
+      "importsCount": 13,
+      "importsSha256": "791541318840925a0e9facea11ae4fd04f42713fe6a268a156aa1ecd73089290",
+      "exportsCount": 185,
+      "exportsSha256": "15e16dcb0e9cbd69699707fd2b1fb3a45840d2978cb0f24e03137bfd5bb7a6d5"
+    },
+    {
+      "bytes": 13039136,
+      "sha256": "2e55ddb9df17bba226a2b3eb4ccd7029010c7631cee93a69a00f928c0e955972",
+      "bits": 32,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 12828864,
+          "memsz": 12828864,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 12828864,
+          "vaddr": 12845248,
+          "filesz": 204576,
+          "memsz": 204608,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 13033440,
+          "vaddr": 13066208,
+          "filesz": 3732,
+          "memsz": 26796,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 12828864,
+          "vaddr": 12845248,
+          "filesz": 204576,
+          "memsz": 204608,
+          "align": 1,
+          "endModulo16KiB": 8192,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libdl.so",
+        "liblog.so",
+        "libm.so",
+        "libc.so"
+      ],
+      "artifact": "ort",
+      "entry": "jni/armeabi-v7a/libonnxruntime.so",
+      "abi": "armeabi-v7a",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "77ad5475625ba2cfb12943cffbbac77078247b970bc5a68f9203c5411b001e41"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "1bcfdb9527a432b31366aea7140a8600aa264443708f31490d46238da3f512d6"
+          },
+          {
+            "name": "liblog.so",
+            "sha256": "20ee80b65595d7f1162805b354593cdc35ec27be63c25161049d3edd5e3f53b1"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "c036165698eb057b97311768f6fd122fa61ae1d0ff6f9922ef018a70a4f997f6"
+          }
+        ]
+      },
+      "importsCount": 220,
+      "importsSha256": "5570cd4acbcf9fe73898e20f8774847086dcb5e16a987bc5c79d1d4ef5d68aa5",
+      "exportsCount": 8,
+      "exportsSha256": "b76d190da730fe1fa451a5b1e506cc2041b42600f6813ceab1ba4ba4f2ec1aff"
+    },
+    {
+      "bytes": 73676,
+      "sha256": "8b53e40fc127190b18e69a524371cd4ce9b52e059354d8fe8f228a345bb8355d",
+      "bits": 32,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 48144,
+          "memsz": 48144,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 48144,
+          "vaddr": 52240,
+          "filesz": 408,
+          "memsz": 1008,
+          "align": 4096
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 48144,
+          "vaddr": 52240,
+          "filesz": 408,
+          "memsz": 1008,
+          "align": 1,
+          "endModulo16KiB": 4096,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": false,
+      "needed": [
+        "libonnxruntime.so",
+        "libm.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "artifact": "ort",
+      "entry": "jni/armeabi-v7a/libonnxruntime4j_jni.so",
+      "abi": "armeabi-v7a",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "77ad5475625ba2cfb12943cffbbac77078247b970bc5a68f9203c5411b001e41"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "c036165698eb057b97311768f6fd122fa61ae1d0ff6f9922ef018a70a4f997f6"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "1bcfdb9527a432b31366aea7140a8600aa264443708f31490d46238da3f512d6"
+          }
+        ]
+      },
+      "importsCount": 14,
+      "importsSha256": "92e5ceb42842980fc2764b0f06e4af2d74a0d158a4d3d62ff03b8b3c5f423dc7",
+      "exportsCount": 185,
+      "exportsSha256": "15e16dcb0e9cbd69699707fd2b1fb3a45840d2978cb0f24e03137bfd5bb7a6d5"
+    },
+    {
+      "bytes": 21195040,
+      "sha256": "6b829b3634e13c76b38e35a82ae97d24ef991caa21de400e6f2a0dd6b6d7845e",
+      "bits": 32,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 20986032,
+          "memsz": 20986032,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 20986032,
+          "vaddr": 21002416,
+          "filesz": 203304,
+          "memsz": 206672,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 21189336,
+          "vaddr": 21222104,
+          "filesz": 3924,
+          "memsz": 24700,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 20986032,
+          "vaddr": 21002416,
+          "filesz": 203304,
+          "memsz": 206672,
+          "align": 1,
+          "endModulo16KiB": 8192,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libdl.so",
+        "liblog.so",
+        "libm.so",
+        "libc.so"
+      ],
+      "artifact": "ort",
+      "entry": "jni/x86/libonnxruntime.so",
+      "abi": "x86",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "5c9bf6d2b8d3bb06897de74be65bca865b85a00e901052f61f3e5c7cb0523358"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "9bb19c82fae09f800e78ef06e2eda9a1e5cf080be991b30ab2ed2e5b37862b9b"
+          },
+          {
+            "name": "liblog.so",
+            "sha256": "c33991c0d93cdac307c918e0afcc6bb69734ef258e08a2a7bd48de7c5189e488"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "c86fc3f2e95cce18b898001bc453a0ec2a459b52509c89ff6a5f40d40f6b7997"
+          }
+        ]
+      },
+      "importsCount": 215,
+      "importsSha256": "dce6f409a1bf697f5d9fdb99c02d3539be86d030cce814c227ce9390b99c8f9e",
+      "exportsCount": 8,
+      "exportsSha256": "b76d190da730fe1fa451a5b1e506cc2041b42600f6813ceab1ba4ba4f2ec1aff"
+    },
+    {
+      "bytes": 84684,
+      "sha256": "1e2ded4a31b09c9138d826a36fc36dfda800ddfcfea6c92890b961b6004ddcf7",
+      "bits": 32,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 67696,
+          "memsz": 67696,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 67696,
+          "vaddr": 71792,
+          "filesz": 368,
+          "memsz": 1936,
+          "align": 4096
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 67696,
+          "vaddr": 71792,
+          "filesz": 368,
+          "memsz": 1936,
+          "align": 1,
+          "endModulo16KiB": 8192,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": false,
+      "needed": [
+        "libonnxruntime.so",
+        "libm.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "artifact": "ort",
+      "entry": "jni/x86/libonnxruntime4j_jni.so",
+      "abi": "x86",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "5c9bf6d2b8d3bb06897de74be65bca865b85a00e901052f61f3e5c7cb0523358"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "c86fc3f2e95cce18b898001bc453a0ec2a459b52509c89ff6a5f40d40f6b7997"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "9bb19c82fae09f800e78ef06e2eda9a1e5cf080be991b30ab2ed2e5b37862b9b"
+          }
+        ]
+      },
+      "importsCount": 13,
+      "importsSha256": "afc8ed1ef2702d7f34f96475f7ebc7aae06446b659c07e3aefb3255a378e51c3",
+      "exportsCount": 185,
+      "exportsSha256": "15e16dcb0e9cbd69699707fd2b1fb3a45840d2978cb0f24e03137bfd5bb7a6d5"
+    },
+    {
+      "bytes": 21420512,
+      "sha256": "66032672c3f62a42c6345e5cf3931c88e3cf9443ba104fee5370e8e3f6640ca8",
+      "bits": 64,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 21009456,
+          "memsz": 21009456,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 21009456,
+          "vaddr": 21025840,
+          "filesz": 401808,
+          "memsz": 404432,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 21411264,
+          "vaddr": 21444032,
+          "filesz": 6720,
+          "memsz": 44240,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 21009456,
+          "vaddr": 21025840,
+          "filesz": 401808,
+          "memsz": 404432,
+          "align": 1,
+          "endModulo16KiB": 0,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libdl.so",
+        "liblog.so",
+        "libm.so",
+        "libc.so"
+      ],
+      "artifact": "ort",
+      "entry": "jni/x86_64/libonnxruntime.so",
+      "abi": "x86_64",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "a838ab3f9026b4678f3336eea1456b411345a0acab6cae58b8b0c6a47a8f4a13"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "03081bd559ed6e10614790686bba2dfcd740d0650a1d8c73864afd1eef8ebb07"
+          },
+          {
+            "name": "liblog.so",
+            "sha256": "06cd918bc30ec27315346d2b149850a8c8e5766ff96a2eccb1aa7a5e32480180"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "6d129144d4f65a2a18efb28607e1bb7a2f31a3cec2ce423e468541cc7f33cb09"
+          }
+        ]
+      },
+      "importsCount": 204,
+      "importsSha256": "2764764b544f104d55b701955500a3797d62bc1137e9d4902ac6d9136435b07d",
+      "exportsCount": 8,
+      "exportsSha256": "b76d190da730fe1fa451a5b1e506cc2041b42600f6813ceab1ba4ba4f2ec1aff"
+    },
+    {
+      "bytes": 90712,
+      "sha256": "cc9fc0591222fc5c90a07ef055d7bacde08e62c49a5ec9e629be2c6b535cf94b",
+      "bits": 64,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 70848,
+          "memsz": 70848,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 70848,
+          "vaddr": 87232,
+          "filesz": 736,
+          "memsz": 2880,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 70848,
+          "vaddr": 87232,
+          "filesz": 736,
+          "memsz": 2880,
+          "align": 1,
+          "endModulo16KiB": 8192,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libonnxruntime.so",
+        "libm.so",
+        "libdl.so",
+        "libc.so"
+      ],
+      "artifact": "ort",
+      "entry": "jni/x86_64/libonnxruntime4j_jni.so",
+      "abi": "x86_64",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "a838ab3f9026b4678f3336eea1456b411345a0acab6cae58b8b0c6a47a8f4a13"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "6d129144d4f65a2a18efb28607e1bb7a2f31a3cec2ce423e468541cc7f33cb09"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "03081bd559ed6e10614790686bba2dfcd740d0650a1d8c73864afd1eef8ebb07"
+          }
+        ]
+      },
+      "importsCount": 13,
+      "importsSha256": "791541318840925a0e9facea11ae4fd04f42713fe6a268a156aa1ecd73089290",
+      "exportsCount": 185,
+      "exportsSha256": "15e16dcb0e9cbd69699707fd2b1fb3a45840d2978cb0f24e03137bfd5bb7a6d5"
+    },
+    {
+      "bytes": 1252080,
+      "sha256": "db9609240e60ca18b816a5e95a6bbc784e799261efbd5b30c8e2e03b540b3fa8",
+      "bits": 64,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 4,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 624944,
+          "memsz": 624944,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 624944,
+          "vaddr": 641328,
+          "filesz": 584480,
+          "memsz": 584480,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 1209424,
+          "vaddr": 1242192,
+          "filesz": 39624,
+          "memsz": 39856,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 1249056,
+          "vaddr": 1298208,
+          "filesz": 568,
+          "memsz": 32080,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 1209424,
+          "vaddr": 1242192,
+          "filesz": 39624,
+          "memsz": 39856,
+          "align": 1,
+          "endModulo16KiB": 4096,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "artifact": "opencv",
+      "entry": "jni/x86_64/libc++_shared.so",
+      "abi": "x86_64",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libdl.so",
+            "sha256": "6d129144d4f65a2a18efb28607e1bb7a2f31a3cec2ce423e468541cc7f33cb09"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "03081bd559ed6e10614790686bba2dfcd740d0650a1d8c73864afd1eef8ebb07"
+          },
+          {
+            "name": "libc.so",
+            "sha256": "a838ab3f9026b4678f3336eea1456b411345a0acab6cae58b8b0c6a47a8f4a13"
+          }
+        ]
+      },
+      "importsCount": 157,
+      "importsSha256": "44e8d19ca2dddcf4b929e1642a13da4bd4552a10b32610de1296044061c294b8",
+      "exportsCount": 2330,
+      "exportsSha256": "6a26a9fd9cfdd6060ea039ad3dce9007e785d5aa2dc43cfc1aa51a8538f711e1"
+    },
+    {
+      "bytes": 55830920,
+      "sha256": "373e5a25a92bf6a683fecf4d9c73adaf478c04efad10171d865dcf78b242709a",
+      "bits": 64,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 54937824,
+          "memsz": 54937824,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 54937824,
+          "vaddr": 54954208,
+          "filesz": 580496,
+          "memsz": 583456,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 55518336,
+          "vaddr": 55551104,
+          "filesz": 310504,
+          "memsz": 1418416,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 54937824,
+          "vaddr": 54954208,
+          "filesz": 580496,
+          "memsz": 583456,
+          "align": 1,
+          "endModulo16KiB": 12288,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libdl.so",
+        "libm.so",
+        "liblog.so",
+        "libjnigraphics.so",
+        "libz.so",
+        "libmediandk.so",
+        "libc.so",
+        "libc++_shared.so"
+      ],
+      "artifact": "opencv",
+      "entry": "jni/x86_64/libopencv_java4.so",
+      "abi": "x86_64",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "a838ab3f9026b4678f3336eea1456b411345a0acab6cae58b8b0c6a47a8f4a13"
+          },
+          {
+            "name": "libmediandk.so",
+            "sha256": "8d4a231bff16ef76c096c5823a32264197f06f6485a0061509d7dac20fd36b6b"
+          },
+          {
+            "name": "libz.so",
+            "sha256": "4f49d636b5871e5d628a41ffacc0d666248e00d1602646aea90ba23d5504a79e"
+          },
+          {
+            "name": "libjnigraphics.so",
+            "sha256": "4c59c57308d43fd76845e539558dae6c5f8c9e603dd2c2d9ad15608222baf96e"
+          },
+          {
+            "name": "liblog.so",
+            "sha256": "06cd918bc30ec27315346d2b149850a8c8e5766ff96a2eccb1aa7a5e32480180"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "03081bd559ed6e10614790686bba2dfcd740d0650a1d8c73864afd1eef8ebb07"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "6d129144d4f65a2a18efb28607e1bb7a2f31a3cec2ce423e468541cc7f33cb09"
+          }
+        ]
+      },
+      "importsCount": 488,
+      "importsSha256": "ee662232d6b754f81e4c370d8074f36b9933246a38578a610fdc6e2b99122c1d",
+      "exportsCount": 8300,
+      "exportsSha256": "6fb14c9e62879fbc40113205aca11a58bd60e3b6f9b4b0ae182a11f939b3b4a3"
+    },
+    {
+      "bytes": 1254988,
+      "sha256": "318e833e6f7ec76cc73303da68004ebd63a1bbedd754e30440c78a90d80504d3",
+      "bits": 32,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 4,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 607216,
+          "memsz": 607216,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 607216,
+          "vaddr": 611312,
+          "filesz": 625600,
+          "memsz": 625600,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 1232816,
+          "vaddr": 1241008,
+          "filesz": 20132,
+          "memsz": 20560,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 1252948,
+          "vaddr": 1265236,
+          "filesz": 260,
+          "memsz": 24060,
+          "align": 4096
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 1232816,
+          "vaddr": 1241008,
+          "filesz": 20132,
+          "memsz": 20560,
+          "align": 1,
+          "endModulo16KiB": 0,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": false,
+      "needed": [
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "artifact": "opencv",
+      "entry": "jni/x86/libc++_shared.so",
+      "abi": "x86",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libdl.so",
+            "sha256": "c86fc3f2e95cce18b898001bc453a0ec2a459b52509c89ff6a5f40d40f6b7997"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "9bb19c82fae09f800e78ef06e2eda9a1e5cf080be991b30ab2ed2e5b37862b9b"
+          },
+          {
+            "name": "libc.so",
+            "sha256": "5c9bf6d2b8d3bb06897de74be65bca865b85a00e901052f61f3e5c7cb0523358"
+          }
+        ]
+      },
+      "importsCount": 157,
+      "importsSha256": "e1a677b70010a2780ed8afb859b05dcacffb61fa83f3f1e0fe5df3e7f0646a95",
+      "exportsCount": 2335,
+      "exportsSha256": "3589783dde3cb1aa51639b5484fbfd7a686dcb58cccb436dda0386b613acfa1c"
+    },
+    {
+      "bytes": 41727236,
+      "sha256": "d906a2c418230a79689922000e962a6c1cea95925f430183abf331ab3669bfcc",
+      "bits": 32,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 41205776,
+          "memsz": 41205776,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 41205792,
+          "vaddr": 41209888,
+          "filesz": 264372,
+          "memsz": 266208,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 41470176,
+          "vaddr": 41478368,
+          "filesz": 255660,
+          "memsz": 1336972,
+          "align": 4096
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 41205792,
+          "vaddr": 41209888,
+          "filesz": 264372,
+          "memsz": 266208,
+          "align": 1,
+          "endModulo16KiB": 8192,
+          "safe16KiB": false
+        }
+      ],
+      "elf16KiBAligned": false,
+      "needed": [
+        "libdl.so",
+        "libm.so",
+        "liblog.so",
+        "libjnigraphics.so",
+        "libz.so",
+        "libmediandk.so",
+        "libc.so",
+        "libc++_shared.so"
+      ],
+      "artifact": "opencv",
+      "entry": "jni/x86/libopencv_java4.so",
+      "abi": "x86",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "5c9bf6d2b8d3bb06897de74be65bca865b85a00e901052f61f3e5c7cb0523358"
+          },
+          {
+            "name": "libmediandk.so",
+            "sha256": "348832ca4423cbeb9c39dda39875e8763c5e71e5864560dc0deaf592848b5248"
+          },
+          {
+            "name": "libz.so",
+            "sha256": "06602db3a344bf7ec095882948849397c44800c6a510c2520ddfe674924d62a5"
+          },
+          {
+            "name": "libjnigraphics.so",
+            "sha256": "b46fed68a258d2103c6ef9ea27c7b879cf646714c128b20bfbf20a28fc8cd295"
+          },
+          {
+            "name": "liblog.so",
+            "sha256": "c33991c0d93cdac307c918e0afcc6bb69734ef258e08a2a7bd48de7c5189e488"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "9bb19c82fae09f800e78ef06e2eda9a1e5cf080be991b30ab2ed2e5b37862b9b"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "c86fc3f2e95cce18b898001bc453a0ec2a459b52509c89ff6a5f40d40f6b7997"
+          }
+        ]
+      },
+      "importsCount": 494,
+      "importsSha256": "f24a932d3be6eb965ca55defda8791a41d2ea518dc0d878ccc47957c76a91017",
+      "exportsCount": 8299,
+      "exportsSha256": "cdf002f68df0ffa03502f6b75730076d9f226246435feb4993a1d741b30f0631"
+    },
+    {
+      "bytes": 1292904,
+      "sha256": "4397241b4bd20a8e579bfb41d21107857e12985f6a01ca0c2a5f83380d1270b4",
+      "bits": 64,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 4,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 634024,
+          "memsz": 634024,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 634032,
+          "vaddr": 650416,
+          "filesz": 616000,
+          "memsz": 616000,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 1250032,
+          "vaddr": 1282800,
+          "filesz": 39760,
+          "memsz": 40208,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 1289792,
+          "vaddr": 1338944,
+          "filesz": 568,
+          "memsz": 32016,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 1250032,
+          "vaddr": 1282800,
+          "filesz": 39760,
+          "memsz": 40208,
+          "align": 1,
+          "endModulo16KiB": 12288,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "artifact": "opencv",
+      "entry": "jni/arm64-v8a/libc++_shared.so",
+      "abi": "arm64-v8a",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libdl.so",
+            "sha256": "25eefefafd831de263619071cf85bc0cad8f77efcd741e071acc0ad264eedaa5"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "e38489e92d995f77ceef18918ca27183ac81115979ec295d3c8e74f41949328c"
+          },
+          {
+            "name": "libc.so",
+            "sha256": "abfc3e17c2babb61a88aa4a5f399505dffe19a24d7a57d8460406413e1c77edf"
+          }
+        ]
+      },
+      "importsCount": 161,
+      "importsSha256": "9b01fdf8d9a09616cd1d415a9176edf3100bae02ffb2ec46868c42d24c8f4853",
+      "exportsCount": 2336,
+      "exportsSha256": "7293a60ce4bffcd7ad43002559223fec396cab1cb24160809458694d79dac31b"
+    },
+    {
+      "bytes": 23465088,
+      "sha256": "144bbc9ad0b0bac4ba58f7d53198aead64379e5314f68200968c703d2c1c14ab",
+      "bits": 64,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 22731088,
+          "memsz": 22731088,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 22731088,
+          "vaddr": 22747472,
+          "filesz": 444736,
+          "memsz": 448176,
+          "align": 16384
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 23175824,
+          "vaddr": 23208592,
+          "filesz": 287184,
+          "memsz": 1381392,
+          "align": 16384
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 22731088,
+          "vaddr": 22747472,
+          "filesz": 444736,
+          "memsz": 448176,
+          "align": 1,
+          "endModulo16KiB": 12288,
+          "safe16KiB": true
+        }
+      ],
+      "elf16KiBAligned": true,
+      "needed": [
+        "libdl.so",
+        "libm.so",
+        "liblog.so",
+        "libjnigraphics.so",
+        "libz.so",
+        "libmediandk.so",
+        "libc.so",
+        "libc++_shared.so"
+      ],
+      "artifact": "opencv",
+      "entry": "jni/arm64-v8a/libopencv_java4.so",
+      "abi": "arm64-v8a",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "abfc3e17c2babb61a88aa4a5f399505dffe19a24d7a57d8460406413e1c77edf"
+          },
+          {
+            "name": "libmediandk.so",
+            "sha256": "a5bce564c2ceebd1d36ea6da0c8d6107f838f96c4809e1a7afd596d276eb0746"
+          },
+          {
+            "name": "libz.so",
+            "sha256": "2a23b48e934f82a7002b8e8bef1e1295d0dad76c659e12e7a7eab1f32ec0bfe5"
+          },
+          {
+            "name": "libjnigraphics.so",
+            "sha256": "816e5d2d4a66a7a344e5b768e0a09fa96e010d182e929ba18cef9a535b627414"
+          },
+          {
+            "name": "liblog.so",
+            "sha256": "40a4e3e8c29ab14d7fabfca9d3707b73caf5b96ad9ead41d3f1d5407b5930cac"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "e38489e92d995f77ceef18918ca27183ac81115979ec295d3c8e74f41949328c"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "25eefefafd831de263619071cf85bc0cad8f77efcd741e071acc0ad264eedaa5"
+          }
+        ]
+      },
+      "importsCount": 493,
+      "importsSha256": "12baefcc90cd009e3cbdb179ea68247008126e08f105e0d2449e2961996bc223",
+      "exportsCount": 8297,
+      "exportsSha256": "3d733a7a7a9982a3f410fde0ab5b99d692c444501bf9cb1180e6c8b2d949541c"
+    },
+    {
+      "bytes": 872872,
+      "sha256": "91b49f121b3120538faff020fcf535ade1d945e65ccd793fc0b815b5799bbdf0",
+      "bits": 32,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 4,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 431645,
+          "memsz": 431645,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 431648,
+          "vaddr": 435744,
+          "filesz": 419008,
+          "memsz": 419008,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 850656,
+          "vaddr": 858848,
+          "filesz": 20136,
+          "memsz": 21792,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 870792,
+          "vaddr": 883080,
+          "filesz": 244,
+          "memsz": 22833,
+          "align": 4096
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 850656,
+          "vaddr": 858848,
+          "filesz": 20136,
+          "memsz": 21792,
+          "align": 1,
+          "endModulo16KiB": 12288,
+          "safe16KiB": false
+        }
+      ],
+      "elf16KiBAligned": false,
+      "needed": [
+        "libc.so",
+        "libm.so",
+        "libdl.so"
+      ],
+      "artifact": "opencv",
+      "entry": "jni/armeabi-v7a/libc++_shared.so",
+      "abi": "armeabi-v7a",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libdl.so",
+            "sha256": "c036165698eb057b97311768f6fd122fa61ae1d0ff6f9922ef018a70a4f997f6"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "1bcfdb9527a432b31366aea7140a8600aa264443708f31490d46238da3f512d6"
+          },
+          {
+            "name": "libc.so",
+            "sha256": "77ad5475625ba2cfb12943cffbbac77078247b970bc5a68f9203c5411b001e41"
+          }
+        ]
+      },
+      "importsCount": 161,
+      "importsSha256": "4f65ebb8c09d88e5c0b06d5a57d25ca6132ff073467c691f3abb7bc9cb1036c1",
+      "exportsCount": 2337,
+      "exportsSha256": "2d1b59197c013ed193eafdb852730704894331ccac70021a6c8dade937c7fc9e"
+    },
+    {
+      "bytes": 15622192,
+      "sha256": "933fe7879c07fe603ce5e0f6a04298fa4b07e553c6dc83744a2779161d47e773",
+      "bits": 32,
+      "loadSegments": [
+        {
+          "type": 1,
+          "flags": 5,
+          "offset": 0,
+          "vaddr": 0,
+          "filesz": 15154800,
+          "memsz": 15154800,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 15154800,
+          "vaddr": 15158896,
+          "filesz": 234076,
+          "memsz": 237968,
+          "align": 4096
+        },
+        {
+          "type": 1,
+          "flags": 6,
+          "offset": 15388880,
+          "vaddr": 15397072,
+          "filesz": 231856,
+          "memsz": 1305418,
+          "align": 4096
+        }
+      ],
+      "relroSegments": [
+        {
+          "type": 1685382482,
+          "flags": 4,
+          "offset": 15154800,
+          "vaddr": 15158896,
+          "filesz": 234076,
+          "memsz": 237968,
+          "align": 1,
+          "endModulo16KiB": 12288,
+          "safe16KiB": false
+        }
+      ],
+      "elf16KiBAligned": false,
+      "needed": [
+        "libdl.so",
+        "libm.so",
+        "liblog.so",
+        "libjnigraphics.so",
+        "libz.so",
+        "libmediandk.so",
+        "libc.so",
+        "libc++_shared.so"
+      ],
+      "artifact": "opencv",
+      "entry": "jni/armeabi-v7a/libopencv_java4.so",
+      "abi": "armeabi-v7a",
+      "api26ImportCheck": {
+        "status": "PASS",
+        "missing": [],
+        "missingLibraries": [],
+        "ndkApi26Stubs": [
+          {
+            "name": "libc.so",
+            "sha256": "77ad5475625ba2cfb12943cffbbac77078247b970bc5a68f9203c5411b001e41"
+          },
+          {
+            "name": "libmediandk.so",
+            "sha256": "abbf5de82de2fd55958a19bb9b6bff9c9e9ced128fd2c48427b8f31c3ae06042"
+          },
+          {
+            "name": "libz.so",
+            "sha256": "6d4fcf65bc08fe0879ab508d5c2c59758488de0e3e6a3218d91ee92bffff7bc2"
+          },
+          {
+            "name": "libjnigraphics.so",
+            "sha256": "0a756a029441465e661ce440082db728fa33aa20479fe8274540e1af0cf61934"
+          },
+          {
+            "name": "liblog.so",
+            "sha256": "20ee80b65595d7f1162805b354593cdc35ec27be63c25161049d3edd5e3f53b1"
+          },
+          {
+            "name": "libm.so",
+            "sha256": "1bcfdb9527a432b31366aea7140a8600aa264443708f31490d46238da3f512d6"
+          },
+          {
+            "name": "libdl.so",
+            "sha256": "c036165698eb057b97311768f6fd122fa61ae1d0ff6f9922ef018a70a4f997f6"
+          }
+        ]
+      },
+      "importsCount": 512,
+      "importsSha256": "59c2b307a50e9e0d6456fd284e2c9cb3e8467f82471dd18fe5b9ec7744c872bb",
+      "exportsCount": 8297,
+      "exportsSha256": "f6ce643ce6290a8a1f3bd88180aaf4ca1e45d91c63de65c59ea9024091768962"
+    }
+  ],
+  "deviceApi26": "NOT_RUN",
+  "device16KiB": "NOT_RUN",
+  "androidDetRecParity": "NOT_RUN",
+  "static64BitElfGate": "PASS",
+  "api26StrongImportGate": "PASS",
+  "apkZip16KiBGate": "NOT_RUN",
+  "apk64BitElfGate": "NOT_RUN",
+  "staticPackagingGate": "INCOMPLETE_OR_FAIL",
+  "shippingGate": "NOT_RUN_DEVICE_AND_HOST_INTEGRATION"
+}
