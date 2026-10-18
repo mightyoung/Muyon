@@ -20,7 +20,7 @@ abstract class FailureFixtureApplication(private val scenario:String):MuyonLabAp
     private val events=mutableListOf<String>()
     private val evidence=JSONObject().put("scenario",scenario).put("synthetic",true)
         .put("pid",android.os.Process.myPid()).put("uid",android.os.Process.myUid()).put("sdk",android.os.Build.VERSION.SDK_INT).also { json->
-        for(key in listOf("acquired","destroyed","destroyedReturned","ownerClosed","nativeClosed","slotReleased","ownerCloseAttempt","nativeCloseAttempt"))json.put(key,0)
+        for(key in listOf("acquired","destroyed","destroyedReturned","ownerClosed","nativeClosed","slotReleased","ownerCloseAttempt","nativeCloseAttempt","backendDrained"))json.put(key,0)
     }
     private val drain=CountDownLatch(1)
     private val connectedClient=CountDownLatch(1)
@@ -76,7 +76,15 @@ abstract class FailureFixtureApplication(private val scenario:String):MuyonLabAp
     override fun connected(){connectedClient.countDown()}
     override fun probeReturned(){record("callbackReturned")}
     override fun acquired(){synchronized(this){acquiredCount++;record("acquired",true)};if(scenario=="Setup" || scenario=="SetupOwner")error("fixed_pre_native_setup_failure")}
-    override fun constructed(){record("constructed");if(scenario=="Unknown"){record("retainedFailure");error("fixed_post_native_construction_uncertainty")}}
+    override fun constructed(){
+        record("constructed")
+        if(scenario=="ConstructDestroy" && synchronized(this){acquiredCount==1}) {
+            record("constructionHeld")
+            check(drain.await(30,TimeUnit.SECONDS)){"construction_drain_timeout"}
+            record("constructionReleased")
+        }
+        if(scenario=="Unknown"){record("retainedFailure");error("fixed_post_native_construction_uncertainty")}
+    }
     override fun beforeNativeClose(){record("nativeCloseAttempt",true);if(scenario=="Native"){record("retainedFailure");error("fixed_native_cleanup_uncertainty")}}
     override fun nativeClosed(){record("nativeClosed",true)}
     override fun unavailable(){record("unavailable")}
@@ -86,8 +94,9 @@ abstract class FailureFixtureApplication(private val scenario:String):MuyonLabAp
         record("destroyedReturned",true)
         // Actual replacement's destruction follows assertions while the original callback is held.
         // No file/IPC/Intent controls this fixed schedule; both platform callbacks must return.
-        if(scenario=="Inflight" && synchronized(this){evidence.optInt("destroyedReturned")>=2})drain.countDown()
+        if(scenario in listOf("Inflight","ConstructDestroy") && synchronized(this){evidence.optInt("destroyedReturned")>=2})drain.countDown()
     }
+    override fun backendDrained(){record("backendDrained",true)}
     override fun slotReleased(){
         controller?.let { value->
             val sealed=try{value.serviceAdmissionProbe(ServiceAdmissionProbeOperation.SECONDARY_COMMIT);false}catch(_:IllegalStateException){true}
@@ -119,3 +128,5 @@ class InflightFailureApplication:FailureFixtureApplication("Inflight")
 class ReadyFailureApplication:FailureFixtureApplication("Ready")
 
 class SetupOwnerFailureApplication:FailureFixtureApplication("SetupOwner")
+
+class ConstructDestroyFailureApplication:FailureFixtureApplication("ConstructDestroy")

@@ -72,7 +72,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [failSetup, failSetupOwner, failUnknown, failOwner, failNative, failInflight, failReady]
+        variant: [failSetup, failSetupOwner, failUnknown, failOwner, failNative, failInflight, failReady, failConstructDestroy]
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:

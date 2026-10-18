@@ -44,11 +44,11 @@ android {
             matchingFallbacks += listOf("debug")
         }
     }
-    val failureScenarios=listOf("Setup","SetupOwner","Unknown","Owner","Native","Inflight","Ready")
+    val failureScenarios=listOf("Setup","SetupOwner","Unknown","Owner","Native","Inflight","Ready","ConstructDestroy")
     failureScenarios.forEach { scenario->
         val variant="fail$scenario"
         buildTypes.create(variant) {
-            initWith(getByName("debug"))
+            initWith(buildTypes.getByName("debug"))
             applicationIdSuffix=".$variant"
             matchingFallbacks += listOf("debug")
         }

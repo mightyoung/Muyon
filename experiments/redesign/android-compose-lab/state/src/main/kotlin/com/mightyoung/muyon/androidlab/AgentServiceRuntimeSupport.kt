@@ -14,6 +14,7 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
     private var controller: AgentControllerLifetime? = null
     private var workerActive = false
     private var stopSignalled = false
+    private var asynchronousRetirement = false
     fun start() {
         synchronized(lock) { if (started || retired) return; started = true; workerActive = true }
         try { backend.execute {
@@ -31,7 +32,8 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
                 var retirementSettled = discard
                 while (true) {
                     val next = synchronized(lock) {
-                        if (retired && !stopSignalled) {
+                        if (retired && !stopSignalled && asynchronousRetirement) 3
+                        else if (retired && !stopSignalled) {
                             // retire() owns the signal in progress. It must schedule the
                             // close waiter after that signal returns; an earlier Ready
                             // observation cannot settle a not-yet-signalled close.
@@ -42,7 +44,12 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
                             if (retired) 0 else 2
                         }
                     }
-                    if (next == 1) {
+                    if (next == 3) {
+                        // Platform retirement marked under lock while construction/handoff
+                        // was active. This same worker owns the native signal and waiter.
+                        value.retire()
+                        synchronized(lock) { stopSignalled = true }
+                    } else if (next == 1) {
                         value.awaitSettled()
                         retirementSettled = true
                     } else {
@@ -61,6 +68,29 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
             unavailable()
         }
     }
+    /** Lock-only revocation on the caller; all foreign work stays on the backend. */
+    fun requestRetirement() {
+        synchronized(lock) {
+            if (retired) return
+            retired = true
+            asynchronousRetirement = true
+            if (workerActive) return
+            workerActive = true
+        }
+        try { backend.execute {
+            try {
+                val target = synchronized(lock) { controller }
+                target?.retire()
+                synchronized(lock) { stopSignalled = true }
+                target?.awaitSettled()
+            } catch (_: LinkageError) { unavailable() }
+            catch (_: Exception) { unavailable() }
+            finally { synchronized(lock) { workerActive = false } }
+        } } catch (_: RejectedExecutionException) {
+            synchronized(lock) { workerActive = false }
+            unavailable() // Keep the retained owner; failed dispatch is not settlement.
+        }
+    }
     fun retire() {
         val target = synchronized(lock) {
             if (retired) return
@@ -73,8 +103,14 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
                 stopSignalled = true
                 if (workerActive) false else { workerActive = true; true }
             }
-            if (needsWaiter) backend.execute {
-                try { value.awaitSettled() } finally { synchronized(lock) { workerActive = false } }
+            if (needsWaiter) try { backend.execute {
+                try { value.awaitSettled() }
+                catch (_: LinkageError) { unavailable() }
+                catch (_: Exception) { unavailable() }
+                finally { synchronized(lock) { workerActive = false } }
+            } } catch (_: RejectedExecutionException) {
+                synchronized(lock) { workerActive = false }
+                unavailable()
             }
         }
     }

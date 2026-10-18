@@ -31,8 +31,10 @@ class AgentRuntimeService:Service() {
     private var settlementPump:AgentSettlementPump?=null
     private val retirementRequested=AtomicBoolean()
     private val cleanupCompleted=AtomicBoolean()
-    private val backend=ThreadPoolExecutor(1,1,0L,TimeUnit.MILLISECONDS,ArrayBlockingQueue<Runnable>(1),
-        {work->Thread(work,"muyon-agent-settlement")},ThreadPoolExecutor.AbortPolicy())
+    private val backend=object:ThreadPoolExecutor(1,1,0L,TimeUnit.MILLISECONDS,ArrayBlockingQueue<Runnable>(1),
+        {work->Thread(work,"muyon-agent-settlement")},ThreadPoolExecutor.AbortPolicy()) {
+        override fun terminated(){try{hostLease?.hooks?.backendDrained()}finally{super.terminated()}}
+    }
     private var bootstrap:AgentServiceBootstrap?=null
     private var reservation:AgentControllerRetention.Reservation?=null
     private var hostLease:ServiceHostLease?=null
@@ -136,7 +138,7 @@ class AgentRuntimeService:Service() {
         try{hostLease?.hooks?.destroyed();stopPlatform(dispose=true)}finally{
             // The process holder and backend survive Service destruction until real cleanup.
             val slot=reservation
-            if(slot==null || cleanupCompleted.get() || (ServiceProcessKeys.controllers.retained()==null && synchronized(ownership){setupFailed}))backend.shutdown()
+            if(slot==null || cleanupCompleted.get())backend.shutdown()
             super.onDestroy()
             ServiceHostBindings.hooks(this)?.destroyedReturned()
         }
@@ -151,7 +153,7 @@ class AgentRuntimeService:Service() {
         try{if(dispose)captured.second?.dispose()}catch(_:Exception){synchronized(ownership){setupFailed=true}}finally{
             val value=captured.first
             if(value==null) {
-                try{backend.execute{bootstrap?.retire()}}catch(_:RejectedExecutionException){synchronized(ownership){setupFailed=true}}
+                bootstrap?.requestRetirement()
             } else {
                 // Rust retirement can wait on a callback-held mutex. Platform callbacks only
                 // revoke publication and enqueue; native settlement stays on the backend.

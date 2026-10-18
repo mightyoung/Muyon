@@ -26,7 +26,7 @@ def main():
     parser.add_argument('--artifacts', type=Path, required=True)
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--work', type=Path, required=True)
-    parser.add_argument('--failure-variant', choices=['failSetup','failSetupOwner','failUnknown','failOwner','failNative','failInflight','failReady'])
+    parser.add_argument('--failure-variant', choices=['failSetup','failSetupOwner','failUnknown','failOwner','failNative','failInflight','failReady','failConstructDestroy'])
     args = parser.parse_args()
     variant = args.failure_variant or 'lifecycle'
     task_variant = variant[0].upper() + variant[1:]

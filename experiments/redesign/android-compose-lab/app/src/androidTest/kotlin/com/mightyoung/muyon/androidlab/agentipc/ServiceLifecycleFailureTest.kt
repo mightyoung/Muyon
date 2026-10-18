@@ -47,11 +47,47 @@ class ServiceLifecycleFailureTest {
     }
     @Test fun fixedActualServiceFailureLifecycle() {
         val scenario=context.packageName.substringAfterLast('.')
-        assertTrue(scenario in listOf("failSetup","failSetupOwner","failUnknown","failOwner","failNative","failInflight","failReady"))
+        assertTrue(scenario in listOf("failSetup","failSetupOwner","failUnknown","failOwner","failNative","failInflight","failReady","failConstructDestroy"))
         assertFalse("fresh dedicated APK required",file.exists())
         val first=Binding(context)
         try {
-            if(scenario=="failInflight") {
+            if(scenario=="failConstructDestroy") {
+                val held=await{it.optBoolean("constructionHeld")}
+                val originalPid=held.getInt("pid")
+                first.close()
+                await{it.optInt("destroyedReturned")==1}
+                unavailable(first)
+                Binding(context).use{denied->
+                    unavailable(denied)
+                    val retained=await{it.optBoolean("replacementDenied")}
+                    assertFalse(retained.optBoolean("constructionReleased"))
+                    assertEquals(1,retained.getInt("acquired"))
+                    assertEquals(0,retained.getInt("nativeClosed"));assertEquals(0,retained.getInt("ownerClosed"))
+                    assertEquals(0,retained.getInt("slotReleased"));assertEquals(0,retained.getInt("backendDrained"))
+                }
+                val drained=await{it.optInt("backendDrained")==1 && it.optInt("slotReleased")==1}
+                assertEquals(originalPid,drained.getInt("pid"))
+                assertEquals(1,drained.getInt("acquired"));assertEquals(1,drained.getInt("nativeClosed"));assertEquals(1,drained.getInt("ownerClosed"))
+                assertEquals(1,drained.getInt("nativeCloseAttempt"));assertEquals(1,drained.getInt("ownerCloseAttempt"))
+                assertFalse("destroyed construction cannot publish Ready",drained.optBoolean("ready"))
+                for(key in listOf("held","consumed","expired","admissions"))assertEquals(key,0,drained.getInt(key))
+                val events=drained.getJSONArray("events").let{a->List(a.length()){a.getString(it)}}
+                assertTrue(events.indexOf("destroyedReturned")<events.indexOf("constructionReleased"))
+                assertTrue(events.indexOf("constructionReleased")<events.indexOf("nativeClosed"))
+                assertTrue(events.indexOf("nativeClosed")<events.indexOf("ownerClosed"))
+                assertTrue(events.indexOf("ownerClosed")<events.indexOf("slotReleased"))
+                assertTrue(events.indexOf("slotReleased")<events.indexOf("backendDrained"))
+                Binding(context).use{replacement->
+                    val ready=await{it.optBoolean("ready") && it.optInt("acquired")==2}
+                    assertEquals("private process survives original backend drain",originalPid,ready.getInt("pid"))
+                    val call=FutureTask {replacement.remote.connect(Binder()).decode(BuildConfig.MUYON_BRIDGE_SOURCE_SHA)}
+                    Thread(call,"bounded-replacement-connect").also{it.isDaemon=true;it.start()}
+                    assertTrue(call.get(5,TimeUnit.SECONDS) is UiAgentWireReply.Connected)
+                }
+                val complete=await{it.optInt("backendDrained")==2 && it.optInt("destroyedReturned")==3}
+                assertEquals(originalPid,complete.getInt("pid"))
+                for(key in listOf("nativeClosed","ownerClosed","slotReleased","nativeCloseAttempt","ownerCloseAttempt"))assertEquals(key,2,complete.getInt(key))
+            } else if(scenario=="failInflight") {
                 await{it.optBoolean("ready")}
                 val deadline=SystemClock.elapsedRealtime()+10_000
                 var connected=false

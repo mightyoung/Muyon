@@ -74,6 +74,7 @@ internal interface ServiceLifecycleHooks {
     fun nativeClosed(){}
     fun destroyed(){}
     fun destroyedReturned(){}
+    fun backendDrained(){}
     fun slotReleased(){}
     fun unavailable(){}
     fun replacementDenied(){}
