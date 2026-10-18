@@ -8,8 +8,17 @@
     "store.rs": "eaec3e50d7ddabfdbfa3250276228d4df395bbe4af8fcbcb872098eed722192e"
   },
   "cases": {
-    "c2_worker_panic": {"observed": "OutcomeUnknown receipt=Unknown opaque_match=false", "expected": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true"},
-    "c3_cancel": {"observed": "Failed receipt=RecordedSuccess opaque_match=true", "expected": "Cancelled receipt=RecordedSuccess opaque_match=true"},
-    "c3_failed_ledger": {"observed": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true", "expected": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true"}
+    "c2_worker_panic": {
+      "observed": "OutcomeUnknown receipt=Unknown opaque_match=false",
+      "expected": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true"
+    },
+    "c3_cancel": {
+      "observed": "Failed receipt=RecordedSuccess opaque_match=true",
+      "expected": "Cancelled receipt=RecordedSuccess opaque_match=true"
+    },
+    "c3_failed_ledger": {
+      "observed": "Failed receipt=RecordedSuccess opaque_match=true",
+      "expected": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true"
+    }
   }
 }
