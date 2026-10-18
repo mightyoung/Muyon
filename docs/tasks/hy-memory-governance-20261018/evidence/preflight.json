@@ -1,0 +1,39 @@
+{
+  "at_utc": "2026-10-18T04:33:00.487131+00:00",
+  "base": {
+    "command": "git rev-parse HEAD",
+    "exit": 0,
+    "stdout": "a3ee7df596b0375aa9f3e6ff4c7651efd5f778a0\n",
+    "stderr": ""
+  },
+  "status": {
+    "command": "git status --short --branch",
+    "exit": 0,
+    "stdout": "## task/hy-memory-governance-20261018\n",
+    "stderr": ""
+  },
+  "instructions": {
+    "command": "find /workspace -name AGENTS.md -print",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "governance_rust_search": {
+    "command": "rg -n 'MemoryRecord|MemoryProjection|ForgettingReceipt|source_span' experiments/redesign --glob '*.rs'",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  "remote_refs": {
+    "command": "git ls-remote origin HEAD refs/heads/develop",
+    "exit": 0,
+    "stdout": "cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\tHEAD\n0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\n",
+    "stderr": ""
+  },
+  "rust": {
+    "command": "CARGO_HOME=/workspace/hy-tools/cargo RUSTUP_HOME=/workspace/hy-tools/rustup /workspace/hy-tools/cargo/bin/rustc --version",
+    "exit": 0,
+    "stdout": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\n",
+    "stderr": ""
+  }
+}

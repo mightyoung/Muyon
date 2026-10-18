@@ -1,5 +1,7 @@
 # Muyon 架构与详细改造方案
 
+> 当前增量入口（2026-10-18）：[记忆治理、来源投影与页面状态补充](../hy-memory-governance-20261018.md)及[任务/验收追踪](../../tasks/HY-MEMORY-GOVERNANCE-20261018.md)。细化已不可读与清理状态、持久 outbox、组合成员现状核验及脱敏引用；生产接入未完成。以下 v1.3.2 正文保留为历史合同，增量不表示产品已实现，旧 SHA256SUMS/VERIFICATION 仍仅对应原修订包。
+
 桌面 Electron　Android Kotlin Compose　共享 Rust 本机内核
 
 第一册　设计版本 1.3.2　｜　2026年10月14日 北京时间
