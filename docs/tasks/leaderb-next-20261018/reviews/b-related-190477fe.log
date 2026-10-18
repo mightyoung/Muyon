@@ -1,0 +1,15 @@
+00:00 +0: loading /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart
+00:00 +0: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: child process fixture
+00:00 +1: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: disk pending failure rolls back and executes zero callbacks across process
+00:10 +2: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: disk pending failure rolls back and executes zero callbacks across process
+00:15 +3: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: process exit after completion failure retains pending and read-only unknown
+00:28 +4: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: process reopen separates generated success from save cancellation
+00:41 +5: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: disk replay rejects changed content scope and target identity
+00:41 +6: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: child Flutter runner leaves parent native asset manifest untouched
+LE06-ASSET-ISOLATION {"root":"/tmp/le06-flutter-project-KFAAPI/","manifest":"/tmp/le06-flutter-project-KFAAPI/build/unit_test_assets/NativeAssetsManifest.json","libraries":["/tmp/le06-flutter-project-KFAAPI/build/native_assets/linux/libpdfium.so","/tmp/le06-flutter-project-KFAAPI/build/native_assets/linux/libsqlite3.so"],"config":"/tmp/le06-flutter-project-KFAAPI/.dart_tool/package_config.json"}
+00:53 +7: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: two independently gated processes contend for one pending reservation
+LE06-CHILD-PROJECTS [{"root":"/tmp/le06-flutter-project-MFCPAJ/","manifest":"/tmp/le06-flutter-project-MFCPAJ/build/unit_test_assets/NativeAssetsManifest.json","libraries":["/tmp/le06-flutter-project-MFCPAJ/build/native_assets/linux/libpdfium.so","/tmp/le06-flutter-project-MFCPAJ/build/native_assets/linux/libsqlite3.so"],"config":"/tmp/le06-flutter-project-MFCPAJ/.dart_tool/package_config.json"},{"root":"/tmp/le06-flutter-project-VTCDCG/","manifest":"/tmp/le06-flutter-project-VTCDCG/build/unit_test_assets/NativeAssetsManifest.json","libraries":["/tmp/le06-flutter-project-VTCDCG/build/native_assets/linux/libpdfium.so","/tmp/le06-flutter-project-VTCDCG/build/native_assets/linux/libsqlite3.so"],"config":"/tmp/le06-flutter-project-VTCDCG/.dart_tool/package_config.json"}]
+LE06-RACE results=[{"calls":0,"state":null,"error":"ledger_pending_failed"},{"calls":1,"state":"succeeded","error":null}]
+01:17 +8: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: nested audits stay frozen on disk and all model error projections redact canaries
+01:17 +9: /tmp/leaderb-review-b190477fe/apps/muyon/test/le06_recovery_independent_test.dart: raw callback error survives disk reopen only in host audit
+01:17 +10: All tests passed!
