@@ -3,6 +3,11 @@ use muyon_android_contract_bridge::{agent_service::*, service_host_bridge::*};
 use std::{sync::{Arc, Mutex}, os::unix::fs::PermissionsExt};
 struct Owner { calls: Mutex<Vec<String>> }
 impl ServiceHostOwnerCallback for Owner {
+    fn current_chat_authority(&self,_:String,_:String)->Option<ServiceOwnerChatAuthority>{None}
+    fn credential_capability(&self,_:String,_:String)->Option<ServiceOwnerCredentialCapability>{None}
+    fn bind_chat_context(&self,_:String,_:ServiceOwnerAdmissionBinding,_:String,_:Vec<u8>,_:Vec<u8>,_:ServiceOwnerCredentialCapability)->bool{false}
+    fn exchange_chat(&self,_:String,_:ServiceOwnerAdmissionBinding,_:Vec<u8>,_:Vec<u8>,_:ServiceOwnerCredentialCapability)->Option<ServiceOwnerChatResponse>{None}
+
     fn current_scope(&self) -> Option<ServiceOwnerScope> { None }
     fn current_provider(&self) -> Option<ServiceOwnerProvider> {
         Some(ServiceOwnerProvider {

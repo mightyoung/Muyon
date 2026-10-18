@@ -73,10 +73,10 @@ pub struct ServiceOwnerCredentialCapability {pub identity:String,pub generation:
 pub struct ServiceOwnerChatResponse {pub answer:String,pub input_tokens:u64,pub output_tokens:u64,pub synthetic:bool}
 #[uniffi::export(with_foreign)]
 pub trait ServiceHostOwnerCallback: Send + Sync {
-    fn current_chat_authority(&self, conversation:String, text:String)->Option<ServiceOwnerChatAuthority>{let _=(conversation,text);None}
-    fn credential_capability(&self, profile:String, reference:String)->Option<ServiceOwnerCredentialCapability>{let _=(profile,reference);None}
-    fn bind_chat_context(&self,reservation:String,binding:ServiceOwnerAdmissionBinding,request_id:String,payload:Vec<u8>,context:Vec<u8>,capability:ServiceOwnerCredentialCapability)->bool{let _=(reservation,binding,request_id,payload,context,capability);false}
-    fn exchange_chat(&self, admission:String, binding:ServiceOwnerAdmissionBinding, context:Vec<u8>, payload:Vec<u8>, capability:ServiceOwnerCredentialCapability)->Option<ServiceOwnerChatResponse>{let _=(admission,binding,context,payload,capability);None}
+    fn current_chat_authority(&self, conversation:String, text:String)->Option<ServiceOwnerChatAuthority>;
+    fn credential_capability(&self, profile:String, reference:String)->Option<ServiceOwnerCredentialCapability>;
+    fn bind_chat_context(&self,reservation:String,binding:ServiceOwnerAdmissionBinding,request_id:String,payload:Vec<u8>,context:Vec<u8>,capability:ServiceOwnerCredentialCapability)->bool;
+    fn exchange_chat(&self, admission:String, binding:ServiceOwnerAdmissionBinding, context:Vec<u8>, payload:Vec<u8>, capability:ServiceOwnerCredentialCapability)->Option<ServiceOwnerChatResponse>;
     fn current_scope(&self) -> Option<ServiceOwnerScope>;
     fn current_provider(&self) -> Option<ServiceOwnerProvider>;
     /// Trusted current-policy review of exactly these bytes. Absence must deny.
