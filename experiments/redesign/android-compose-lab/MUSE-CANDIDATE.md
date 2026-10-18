@@ -31,7 +31,7 @@ No mascot/frame decides execution success, authority or tool use. This offline c
 
 ## Resources
 
-The approved original puppy ready cutout is included as `drawable-nodpi/muyon_ready.png`, SHA256 `1e5840b5a9caf9711ee3db83b9be0511b1a84ea312bf54bd2f3d4d34c6d66ff8`, Library `libfile_db2c777171808191b1a93ae1d587f47a`. Header displays it at32dp with padding; it conveys only local-mode identity. Six-state concept sheets are not production sprites. Function glyphs are original tintable Canvas vectors. Welcome illustration target192×144dp/transparent4:3; separate state sprites and adaptive my icon are follow-ups rather than improvised identity changes.
+The approved original puppy ready cutout is included as `drawable-nodpi/muyon_ready.png`, SHA256 `1e5840b5a9caf9711ee3db83b9be0511b1a84ea312bf54bd2f3d4d34c6d66ff8`, Library `libfile_db2c777171808191b1a93ae1d587f47a`. Header displays it at32dp with padding; it conveys only local-mode identity. The approved welcome cutout `libfile_ef6aefaaf8cc819185cca1ad6cd0ae83` is displayed at128dp in the empty conversation, preserving the supplied square transparent composition (SHA256 `a6b94360c85f3aa6be7399accfbcffadf4a57ca7341d6a5ccdc27c66074b1688`). Six-state concept sheets are not production sprites. Function glyphs are original tintable Canvas vectors. Separate state sprites and adaptive my icon are follow-ups rather than improvised identity changes.
 
 ## Validation and remaining gates
 

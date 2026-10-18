@@ -1,6 +1,7 @@
 package com.mightyoung.muyon.androidlab.conversation
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +22,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
@@ -85,7 +87,9 @@ internal fun ConversationPage(
                     item("fixture-failed") { SampleStatus("请求失败", "离线样例：服务未连接，无法重试。", failed=true) }
                 } else if (active.notes.isEmpty()) {
                     item("empty") {
-                        Column(Modifier.widthIn(max=640.dp).fillMaxWidth().padding(top=52.dp,bottom=40.dp), horizontalAlignment=Alignment.Start) {
+                        Column(Modifier.widthIn(max=640.dp).fillMaxWidth().padding(top=24.dp,bottom=24.dp), horizontalAlignment=Alignment.Start) {
+                            Image(painterResource(R.drawable.muyon_welcome), contentDescription=null,
+                                modifier=Modifier.size(128.dp).padding(bottom=12.dp))
                             Text("从一个想法开始", style=MaterialTheme.typography.headlineMedium, fontWeight=FontWeight.Medium,
                                 modifier=Modifier.semantics { heading() })
                             Spacer(Modifier.height(14.dp))
