@@ -1,0 +1,80 @@
+[
+  {
+    "path": "docs/tasks/memory-failure-validation-20261018/ADAPTER-LOG-AUDIT.md",
+    "bytes": 10211,
+    "sha256": "34735a8c358d159dd71928875cd4ecd195f3e971b85a14029b531984a2c2d137",
+    "source_blob": "efd5648b8368810190a5faa77695b2c168612d75"
+  },
+  {
+    "path": "docs/tasks/memory-failure-validation-20261018/COVERAGE.md",
+    "bytes": 5191,
+    "sha256": "5bbdd889c14e7fb138710d59d4f2a53f164dd6f04d177b46dfe5a0413d0e7d4b",
+    "source_blob": "d4980bb7bd35451f305cb05b4aaf5b02d6a85508"
+  },
+  {
+    "path": "docs/tasks/memory-failure-validation-20261018/HANDOFF.md",
+    "bytes": 4001,
+    "sha256": "210aee2e0403daa1d53e2d621fcc9278d85a3dfaa1072d39f80defbd5884d53c",
+    "source_blob": "6f3246ad959e5a70e59c153e105721be1fd27c82"
+  },
+  {
+    "path": "docs/tasks/memory-failure-validation-20261018/PR-BODY.md",
+    "bytes": 1866,
+    "sha256": "178d4b8a4b78102909dbfa0f1613a18e4182ffbc3957c108684bd3f751f50852",
+    "source_blob": "18f0cb6b36e1e662d4105894f0b4e7153e3a67c2"
+  },
+  {
+    "path": "docs/tasks/memory-failure-validation-20261018/REVIEW.md",
+    "bytes": 1444,
+    "sha256": "4109d699d2fa48cacef442578b676e380a684b33d7c97471dba01d3a30746a26",
+    "source_blob": "1299fa56862d0604b8e910ae1645972d6ecc4ded"
+  },
+  {
+    "path": "docs/tasks/memory-failure-validation-20261018/existing-coverage.json",
+    "bytes": 2694,
+    "sha256": "1157a9e1da5a37aa926050b97282065f00637707eb76199bfaa8b5fffa8799af",
+    "source_blob": "6532daea06f36962ffc8eb9e2e1d822017aefd67"
+  },
+  {
+    "path": "docs/tasks/memory-failure-validation-20261018/python-tests.txt",
+    "bytes": 3362,
+    "sha256": "5956eabbc0d7163fcdb19958580bb384a7261510d6a6a7cd3f11250089dab73d",
+    "source_blob": "c68d31b06637450dcc733ed0d7c0a04e41f4bdc6"
+  },
+  {
+    "path": "docs/tasks/memory-failure-validation-20261018/results.json",
+    "bytes": 1811,
+    "sha256": "22e673fb06a0c8b3089be2c85d877a9a3392a838297e2f409b16b6d25a758855",
+    "source_blob": "e796a3cf34a9faccd45f952a8b52925929207dea"
+  },
+  {
+    "path": "experiments/redesign/memory-failure-validation-lab/README.md",
+    "bytes": 2875,
+    "sha256": "589f626aa86589eae5ebd92527249153569d9f35ef19a32e5cfcc214d9af55b2",
+    "source_blob": "54c86b60bdb3328e8fcc4b263c474dac0dc59214"
+  },
+  {
+    "path": "experiments/redesign/memory-failure-validation-lab/actual_adapter_canary_test.dart",
+    "bytes": 8573,
+    "sha256": "2007045f95ac4e2ac975c6ff606c32c54a9965cde1c6dcee82fef6dac70b2bb4",
+    "source_blob": "9ac84e326ec0e4ae9e954e46c21b9589678f8e76"
+  },
+  {
+    "path": "experiments/redesign/memory-failure-validation-lab/failure_lab.py",
+    "bytes": 7508,
+    "sha256": "e9bf988cfb11b1f4ed2070dc3fad23bb1126472f89f0f1a8de4a255cb36bd771",
+    "source_blob": "fdf1c58e2a1e7d4e6365d9e46a37b7022e678bb1"
+  },
+  {
+    "path": "experiments/redesign/memory-failure-validation-lab/run_suite.py",
+    "bytes": 2764,
+    "sha256": "89d1bf69650bbc898621bf48c480a1e73ee1d633b4bc6987dc2e8aca6ee4a5a0",
+    "source_blob": "6eada87cf4b87cd56434e66f308882c293a80d19"
+  },
+  {
+    "path": "experiments/redesign/memory-failure-validation-lab/test_failure_lab.py",
+    "bytes": 10817,
+    "sha256": "7edc73ec8539290df5d4da0af7402cffb914eb0f6c503f441e9528b8bbb3ca68",
+    "source_blob": "e0c562ae51bcedec32ac53b7fa9d4a6e20535784"
+  }
+]

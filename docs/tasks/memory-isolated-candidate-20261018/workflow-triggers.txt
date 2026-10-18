@@ -1,0 +1,148 @@
+FILE .github/workflows/android-compose-lab.yml
+name: Android Compose lab
+
+on:
+  push:
+    branches: ['lab/android-compose-*']
+    paths:
+      - 'experiments/redesign/android-compose-lab/**'
+      - '.github/workflows/android-compose-lab.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'experiments/redesign/android-compose-lab/**'
+      - '.github/workflows/android-compose-lab.yml'
+  workflow_dispatch:
+
+
+FILE .github/workflows/android-rust-bridge.yml
+name: Android Rust bridge
+
+on:
+  push:
+    branches: ['lab/android-rust-bridge-*']
+    paths:
+      - 'experiments/redesign/android-rust-bridge-lab/**'
+      - 'experiments/redesign/android-compose-lab/**'
+      - 'experiments/redesign/core-agent-lab/**'
+      - 'experiments/redesign/plugin-contract-lab/**'
+      - 'docs/design/ANDROID-RUST-*'
+      - '.github/workflows/android-rust-bridge.yml'
+  pull_request:
+    branches: [develop]
+    paths:
+      - 'experiments/redesign/android-rust-bridge-lab/**'
+      - 'experiments/redesign/android-compose-lab/**'
+      - 'experiments/redesign/core-agent-lab/**'
+      - 'experiments/redesign/plugin-contract-lab/**'
+      - '.github/workflows/android-rust-bridge.yml'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Full required gate or immutable compiled assertion RED'
+        type: choice
+        options: [full, red, rust-red, jvm-red]
+        default: full
+
+
+FILE .github/workflows/ci.yml
+# Automatic gate: analyze and test every package on Linux for each push to the
+# integration/task branches and for pull requests into develop/main.
+# Tests self-skip where platform/font/model requirements are unavailable;
+# the manual `verify` workflow still runs them on macOS.
+name: ci
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - 'task/**'
+      - 'review/**'
+  pull_request:
+    branches:
+      - develop
+      - main
+
+
+FILE .github/workflows/core-agent-lab.yml
+name: Core Agent laboratory
+
+on:
+  push:
+    branches:
+      - 'review/core-agent-*'
+      - develop
+    paths:
+      - 'experiments/redesign/core-agent-lab/**'
+      - '.github/workflows/core-agent-lab.yml'
+      - 'docs/tasks/REDESIGN-CORE-AGENT-*.md'
+
+
+FILE .github/workflows/package-artifacts.yml
+# Manual internal packages only. Do not dispatch before storage budget approval.
+name: package-artifacts
+run-name: Package ${{ inputs.platform }} at ${{ inputs.target_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: 'Reviewed source commit (full lowercase 40-character SHA)'
+        required: true
+        type: string
+      platform:
+        description: 'One platform only (internal validation, not a release)'
+        required: true
+        type: choice
+        options:
+          - android
+          - macos
+          - windows
+
+
+FILE .github/workflows/reg4c-verification.yml
+name: reg4c-verification
+
+on:
+  push:
+    branches:
+      - task/reg-4c-general-writes
+
+
+FILE .github/workflows/rust-native-read.yml
+name: Rust native read
+
+on:
+  push:
+    branches: ['lab/rust-native-read-*']
+    paths:
+      - 'experiments/redesign/core-agent-lab/**'
+      - 'experiments/redesign/plugin-contract-lab/**'
+      - 'experiments/redesign/rust-agent-host-lab/**'
+      - '.github/workflows/rust-native-read.yml'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Full required Rust gates, or an immutable reachable RED'
+        type: choice
+        options: [full, red, core-red, protocol-red, plugin-red, host-red]
+        default: full
+
+
+FILE .github/workflows/ui-preview.yml
+name: ui-preview
+on:
+  workflow_dispatch:
+  push:
+    branches: ['task/ui-4a-dynamic-runtime', 'task/ui-3b-workspace-persistence', 'task/ui-4b-planning-port']
+
+FILE .github/workflows/verify.yml
+# Manual gate only: Actions → "verify" → Run workflow (pick a branch).
+# Runs the same scripts/verify.sh used locally. macOS because the inquiry
+# screenshot baselines were rendered there.
+name: verify
+
+on:
+  workflow_dispatch:
+

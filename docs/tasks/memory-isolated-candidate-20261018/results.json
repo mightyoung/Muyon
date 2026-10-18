@@ -1,0 +1,62 @@
+{
+  "candidate_source_sha": "0229fa75f7c0e4ff88d22ef845aa982a83f230a6",
+  "fixed_develop_sha": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e",
+  "original_pr87_sha": "38b59db43f2487700ff15971ee008f0024673a13",
+  "source_commits": [
+    "0090b6e394abcbd8556a0911f4d5be1ff18687f5",
+    "38b59db43f2487700ff15971ee008f0024673a13"
+  ],
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "/workspace/muyon-worker-b/experiments/redesign/memory-failure-validation-lab",
+    "-p",
+    "test_failure_lab.py",
+    "-v"
+  ],
+  "exit_code": 0,
+  "python": "3.12.14",
+  "scope": "SYNTHETIC_CONTRACT_ONLY",
+  "imports": {
+    "failure_lab.py": [
+      "dataclasses",
+      "json",
+      "sqlite3"
+    ],
+    "test_failure_lab.py": [
+      "failure_lab",
+      "os",
+      "pathlib",
+      "sqlite3",
+      "subprocess",
+      "sys",
+      "tempfile",
+      "unittest"
+    ],
+    "run_suite.py": [
+      "contextlib",
+      "failure_lab",
+      "io",
+      "json",
+      "pathlib",
+      "platform",
+      "sqlite3",
+      "subprocess",
+      "tempfile",
+      "unittest"
+    ]
+  },
+  "tests": 21,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "actual_dart_fixtures": "8 UNCOMPILED/NOT_RUN; prohibited execution this round; SDKs absent",
+  "last_two_semantic_assertions": "STATIC_EXPECTED_FAIL; NOT_RUN, not observed runtime failures",
+  "old_hy_24_tests": "NOT_RUN this round; unchanged historical inventory only",
+  "i04": "NOT_RUN; denial preserved, no retry/rewrite/split/alternate executor",
+  "original_13_files": "byte-for-byte preserved"
+}

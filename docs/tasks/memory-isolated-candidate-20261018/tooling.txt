@@ -1,0 +1,5 @@
+dart=UNAVAILABLE
+flutter=UNAVAILABLE
+python3=/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3
+.dart_tool/package_config.json: exists=False
+apps/muyon/.dart_tool/package_config.json: exists=False
