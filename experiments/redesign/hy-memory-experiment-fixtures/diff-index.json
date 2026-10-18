@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "synthetic_only": true,
+  "evidence_status": "UNVERIFIED",
+  "content_objects": [
+    {
+      "revision": "revision-synthetic-base-1",
+      "content": "label = \"copper\"\n",
+      "content_digest": "sha256:2412e37ed024c5aec444d512e69c88344a6e7078ce331bf24f1b46deeafc8602"
+    },
+    {
+      "revision": "revision-synthetic-target-2",
+      "content": "label = \"silver\"\n",
+      "content_digest": "sha256:db8de5a5e26c24d6f61468431f6601e2a7ec58513f69aafa6ee8f8ac686fd596"
+    }
+  ],
+  "events": [
+    {
+      "event_id": "event-synthetic-0001",
+      "repository_id": "repo-synthetic-1",
+      "path": "src/synthetic_label.py",
+      "base_revision": "revision-synthetic-base-1",
+      "target_revision": "revision-synthetic-target-2",
+      "base_digest": "sha256:2412e37ed024c5aec444d512e69c88344a6e7078ce331bf24f1b46deeafc8602",
+      "target_digest": "sha256:db8de5a5e26c24d6f61468431f6601e2a7ec58513f69aafa6ee8f8ac686fd596",
+      "patch_digest": "sha256:ab8b456fd56b611d447c70f32e413a13dd647ad3ab4e1b50cacdd695fa684bcd",
+      "patch": "-label = \"copper\"\n+label = \"silver\"\n"
+    },
+    {
+      "event_id": "event-synthetic-0002",
+      "repository_id": "repo-synthetic-1",
+      "path": "src/synthetic_label.py",
+      "base_revision": "revision-synthetic-base-1",
+      "target_revision": "revision-synthetic-target-2",
+      "base_digest": "sha256:2412e37ed024c5aec444d512e69c88344a6e7078ce331bf24f1b46deeafc8602",
+      "target_digest": "sha256:db8de5a5e26c24d6f61468431f6601e2a7ec58513f69aafa6ee8f8ac686fd596",
+      "patch_digest": "sha256:ab8b456fd56b611d447c70f32e413a13dd647ad3ab4e1b50cacdd695fa684bcd",
+      "patch": "-label = \"copper\"\n+label = \"silver\"\n"
+    }
+  ],
+  "baseline_git_event_refs": [
+    {
+      "repository_id": "repo-synthetic-1",
+      "event_id": "event-synthetic-0001",
+      "base_revision": "revision-synthetic-base-1",
+      "target_revision": "revision-synthetic-target-2",
+      "base_digest": "sha256:2412e37ed024c5aec444d512e69c88344a6e7078ce331bf24f1b46deeafc8602",
+      "target_digest": "sha256:db8de5a5e26c24d6f61468431f6601e2a7ec58513f69aafa6ee8f8ac686fd596",
+      "patch_digest": "sha256:ab8b456fd56b611d447c70f32e413a13dd647ad3ab4e1b50cacdd695fa684bcd"
+    },
+    {
+      "repository_id": "repo-synthetic-1",
+      "event_id": "event-synthetic-0002",
+      "base_revision": "revision-synthetic-base-1",
+      "target_revision": "revision-synthetic-target-2",
+      "base_digest": "sha256:2412e37ed024c5aec444d512e69c88344a6e7078ce331bf24f1b46deeafc8602",
+      "target_digest": "sha256:db8de5a5e26c24d6f61468431f6601e2a7ec58513f69aafa6ee8f8ac686fd596",
+      "patch_digest": "sha256:ab8b456fd56b611d447c70f32e413a13dd647ad3ab4e1b50cacdd695fa684bcd"
+    }
+  ],
+  "sidecar_candidate_refs": [
+    {
+      "repository_id": "repo-synthetic-1",
+      "event_id": "event-synthetic-0001",
+      "base_revision": "revision-synthetic-base-1",
+      "target_revision": "revision-synthetic-target-2",
+      "base_digest": "sha256:2412e37ed024c5aec444d512e69c88344a6e7078ce331bf24f1b46deeafc8602",
+      "target_digest": "sha256:db8de5a5e26c24d6f61468431f6601e2a7ec58513f69aafa6ee8f8ac686fd596",
+      "patch_digest": "sha256:ab8b456fd56b611d447c70f32e413a13dd647ad3ab4e1b50cacdd695fa684bcd"
+    },
+    {
+      "repository_id": "repo-synthetic-1",
+      "event_id": "event-synthetic-0002",
+      "base_revision": "revision-synthetic-base-1",
+      "target_revision": "revision-synthetic-target-2",
+      "base_digest": "sha256:2412e37ed024c5aec444d512e69c88344a6e7078ce331bf24f1b46deeafc8602",
+      "target_digest": "sha256:db8de5a5e26c24d6f61468431f6601e2a7ec58513f69aafa6ee8f8ac686fd596",
+      "patch_digest": "sha256:ab8b456fd56b611d447c70f32e413a13dd647ad3ab4e1b50cacdd695fa684bcd"
+    }
+  ],
+  "cases": [
+    {
+      "id": "exact_event",
+      "condition": "exact",
+      "expected_status": "FOUND",
+      "expected_event_ids": [
+        "event-synthetic-0001"
+      ],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "same_text_other_event",
+      "condition": "same_text_distinct_event",
+      "expected_status": "FOUND",
+      "expected_event_ids": [
+        "event-synthetic-0002"
+      ],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "session_label_only",
+      "condition": "session_text_identity",
+      "expected_status": "REJECT_IDENTITY",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "patch_literal_only",
+      "condition": "literal_text_identity",
+      "expected_status": "REJECT_IDENTITY",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "changed_target_revision",
+      "condition": "target_revision_mismatch",
+      "expected_status": "UNKNOWN",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "same_revision_digest_fork",
+      "condition": "digest_fork",
+      "expected_status": "UNKNOWN",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "duplicate_identical_event",
+      "condition": "idempotent_replay",
+      "expected_status": "FOUND",
+      "expected_event_ids": [
+        "event-synthetic-0001"
+      ],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "duplicate_conflicting_event",
+      "condition": "replay_conflict",
+      "expected_status": "UNKNOWN",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "missing_base",
+      "condition": "missing_base",
+      "expected_status": "UNKNOWN",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "corrupt_patch",
+      "condition": "corrupt_patch",
+      "expected_status": "UNKNOWN",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "corrupt_index",
+      "condition": "corrupt_index",
+      "expected_status": "UNKNOWN",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "index_stale_generation",
+      "condition": "stale_generation",
+      "expected_status": "UNKNOWN",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "revoked_source",
+      "condition": "authority_revoked",
+      "expected_status": "REJECT_AUTHORITY",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "confirmed_no_match",
+      "condition": "complete_authorized_empty",
+      "expected_status": "EMPTY",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "partial_history",
+      "condition": "coverage_unknown",
+      "expected_status": "UNKNOWN",
+      "expected_event_ids": [],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    },
+    {
+      "id": "path_rename",
+      "condition": "exact_rename_event",
+      "expected_status": "FOUND",
+      "expected_event_ids": [
+        "event-synthetic-0001"
+      ],
+      "comparison_arms": [
+        "baseline_git_event_refs",
+        "sidecar_candidate_refs"
+      ]
+    }
+  ]
+}
