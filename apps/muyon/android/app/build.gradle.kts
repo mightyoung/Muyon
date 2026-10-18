@@ -48,3 +48,6 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// Private summary consumer only; no Service/native package or enabled UI route yet.
+dependencies { implementation(project(":agent-observation")) }
