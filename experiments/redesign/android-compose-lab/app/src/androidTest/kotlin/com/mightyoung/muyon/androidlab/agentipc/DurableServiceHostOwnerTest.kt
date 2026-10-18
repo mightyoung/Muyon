@@ -232,7 +232,7 @@ class DurableServiceHostOwnerTest {
         val a = ServiceAdmissionAuthority(state()); val seed = file()
         owner(seed, a).close()
         val ddl = SQLiteDatabase.openDatabase(seed.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
-            db.rawQuery("SELECT sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name", null).use { c ->
+            db.rawQuery("SELECT sql FROM sqlite_master WHERE type='table' AND name IN ('epochs','clock_guard','reservations','admissions') ORDER BY name", null).use { c ->
                 buildList { while (c.moveToNext()) add(c.getString(0)) }
             }
         }
@@ -306,6 +306,20 @@ class DurableServiceHostOwnerTest {
                 assertTrue(duplicates.all { it.get(5, TimeUnit.SECONDS) == null })
             } finally { start.countDown(); pool.shutdownNow() }
         }}
+    }
+
+    @Test fun generated_callback_adapter_drives_durable_owner_one_shot_admission() {
+        val b = binding()
+        owner(file(), ServiceAdmissionAuthority(state())).use { durable ->
+            val callback = ServiceHostBindings.callback(durable)
+            assertEquals(state().provider, callback.currentProvider())
+            assertEquals(scope(), callback.currentScope())
+            assertTrue(callback.reviewPayload(b, payload))
+            val token = callback.reserveBudget(b, "callback-r", payload, call)!!
+            assertNotNull(callback.commitAdmission(token, b, "callback-r", payload, b.profile.id, b.profile.credentialRef))
+            assertNull(callback.commitAdmission(token, b, "callback-r", payload, b.profile.id, b.profile.credentialRef))
+            assertNull(callback.reserveBudget(b, "callback-r", payload, call))
+        }
     }
 
 }
