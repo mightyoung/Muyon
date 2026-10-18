@@ -42,14 +42,25 @@ def instrument(sources, case):
             raise RuntimeError('service_fault_source_invalid')
     result = {name: body.decode() for name, body in sources.items()}
     capture = CAPTURE + ('    panic!("SERVICE_PRIVATE_WORKER_PANIC");\n' if case == 'c2_worker_panic' else '')
+    if CONTRACT.get('deadline_probe'):
+        capture = '    assert_eq!(result.as_ref().unwrap().state.status, "budget_exhausted");\n    assert_eq!(result.as_ref().unwrap().state.reason, "host_budget");\n    control.request_cancel();\n    println!("FAULT_DEADLINE original_stop=host_budget deadline_poll=true late_cancel=true");\n' + capture
     result['service_controller.rs'] = replace_once(result['service_controller.rs'], CAPTURE_ANCHOR, capture + CAPTURE_ANCHOR)
     if CONTRACT.get('lease_probe'):
         anchor = '    pub fn await_settled(&self) -> AgentSnapshotReply {\n'
         helper = '    pub fn private_probe_worker_finished(&self) -> bool {\n        self.shared.lock().worker.as_ref().map(|h| h.is_finished()).unwrap_or(false)\n    }\n'
         result['service_controller.rs'] = replace_once(result['service_controller.rs'], anchor, helper + anchor)
-    if case != 'c2_worker_panic':
+    if case in {'c3_cancel', 'c3_failed_ledger'}:
         result['service_runtime.rs'] = replace_once(result['service_runtime.rs'], CANCEL_ANCHOR,
             '        if self.frames.borrow().len() == 1 {\n            println!("FAULT_CANCEL turn=2 before_original_poll=true");\n            self.control.request_cancel();\n        }\n' + CANCEL_ANCHOR)
+    if CONTRACT.get('deadline_probe'):
+        runtime = result['service_runtime.rs']
+        for anchor, replacement in [
+            ('    deadline: Instant,\n', '    deadline: std::sync::Mutex<Instant>,\n'),
+            ('            deadline: Instant::now() + Duration::from_secs(5),\n', '            deadline: std::sync::Mutex::new(Instant::now() + Duration::from_secs(5)),\n'),
+            ('        } else if Instant::now() >= self.deadline {\n', '        } else if Instant::now() >= *self.deadline.lock().unwrap() {\n            println!("FAULT_DEADLINE actual_poll=expired");\n')]:
+            runtime = replace_once(runtime, anchor, replacement)
+        result['service_runtime.rs'] = replace_once(runtime, CANCEL_ANCHOR,
+            '        if self.frames.borrow().len() == 1 {\n            *self.control.deadline.lock().unwrap() = Instant::now();\n        }\n' + CANCEL_ANCHOR)
     if case == 'c3_failed_ledger':
         result['store.rs'] = replace_once(result['store.rs'], LEDGER_ANCHOR, LEDGER_ANCHOR +
             '        if status == "failed" {\n            println!("FAULT_LEDGER error=probe_failed_ledger_io not_diskfull=true");\n            return Err("probe_failed_ledger_io".into());\n        }\n')
@@ -63,15 +74,17 @@ def classify(case, raw, status):
     rows = re.findall(r'^test (\S+) \.\.\. (ok|FAILED|ignored)$', raw, re.M)
     summaries = re.findall(r'^test result: (ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; (\d+) measured; (\d+) filtered out;', raw, re.M)
     panic_messages = re.findall(r"^thread '[^']+'(?: \(\d+\))? panicked at [^\n]+:\n([^\n]+)", raw, re.M)
-    expected_panics = [] if green else [ASSERTION]
+    expected_panics = [] if green else [contract.get('assertion', ASSERTION)]
     if case == 'c2_worker_panic':
         expected_panics.append('SERVICE_PRIVATE_WORKER_PANIC')
     observed = f'FAULT_OBSERVED {case} terminal=' + contract['observed']
     markers = ['FAULT_RECORDED actual_read=success receipt=RecordedSuccess', observed]
-    if case != 'c2_worker_panic':
+    if case in {'c3_cancel', 'c3_failed_ledger'}:
         markers.append('FAULT_CANCEL turn=2 before_original_poll=true')
     if case == 'c3_failed_ledger':
         markers.append('FAULT_LEDGER error=probe_failed_ledger_io not_diskfull=true')
+    if CONTRACT.get('deadline_probe'):
+        markers += ['FAULT_DEADLINE actual_poll=expired', 'FAULT_DEADLINE original_stop=host_budget deadline_poll=true late_cancel=true']
     if CONTRACT.get('lease_probe') and case == 'c2_worker_panic':
         markers += ['FAULT_LEASE worker_finished_before_join=busy', 'FAULT_LEASE after_join_before_close=busy', 'FAULT_LEASE after_closed=available']
     if lease_red:
@@ -107,7 +120,7 @@ def prepare(repo, destination, case):
     modified = instrument(originals, case)
     for name, body in modified.items():
         (src / name).write_text(body)
-    probe = HERE / ('service_lease_fault_probe.rs' if CONTRACT.get('lease_probe') else 'service_fault_probe.rs')
+    probe = HERE / ('service_deadline_fault_probe.rs' if CONTRACT.get('deadline_probe') else 'service_lease_fault_probe.rs' if CONTRACT.get('lease_probe') else 'service_fault_probe.rs')
     (destination / CORE / 'tests/service_private_fault.rs').write_bytes(probe.read_bytes())
     return dict(source_commit=CONTRACT['source_commit'], descriptor_sha256=hashlib.sha256(DESCRIPTOR.read_bytes()).hexdigest(),
         probe_sha256=hashlib.sha256(probe.read_bytes()).hexdigest(), lock_probe_sha256=hashlib.sha256((HERE / 'service_lease_lock_probe.py').read_bytes()).hexdigest(),
@@ -119,7 +132,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--descriptor', type=Path, default=DESCRIPTOR)
     parser.add_argument('--repo', type=Path, default=HERE.parents[3])
-    parser.add_argument('--case', choices=CONTRACT['cases'], required=True)
+    parser.add_argument('--case', choices=list(CONTRACT['cases']) + ['c3_deadline_late_cancel'], required=True)
     parser.add_argument('--work-dir', type=Path, required=True)
     parser.add_argument('--evidence-dir', type=Path, required=True)
     parser.add_argument('--prepare-only', action='store_true')

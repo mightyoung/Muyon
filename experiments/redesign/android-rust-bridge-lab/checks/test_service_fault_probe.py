@@ -62,6 +62,20 @@ class ServiceFaultControls(unittest.TestCase):
             self.assertFalse(classify('c2_worker_panic', raw.replace('before_join=available', 'before_join=busy'), 101)['accepted'])
             self.assertFalse(classify('c2_worker_panic', raw + 'FAULT_LEASE after_closed=available\n', 101)['accepted'])
 
+    def test_deadline_late_cancel_red_requires_original_real_stop_and_reason(self):
+        deadline = json.loads(Path(service_fault_probe.__file__).with_name('service_deadline_red_cases.json').read_text())
+        case = 'c3_deadline_late_cancel'
+        raw = transcript('c3_cancel')
+        raw = raw.replace('FAULT_OBSERVED c3_cancel terminal=' + CONTRACT['cases']['c3_cancel']['observed'],
+            'FAULT_OBSERVED ' + case + ' terminal=' + deadline['cases'][case]['observed'])
+        raw = raw.replace('FAULT_CANCEL turn=2 before_original_poll=true',
+            'FAULT_DEADLINE actual_poll=expired\nFAULT_DEADLINE original_stop=host_budget deadline_poll=true late_cancel=true')
+        raw = raw.replace(ASSERTION, deadline['cases'][case]['assertion'])
+        with patch.object(service_fault_probe, 'CONTRACT', deadline):
+            self.assertTrue(classify(case, raw, 101)['accepted'])
+            for bad in [raw.replace('actual_poll=expired', 'actual_poll=unknown'), raw.replace('reason=BudgetExceeded', 'reason=DeadlineExceeded'), raw.replace('late_cancel=true', 'late_cancel=false')]:
+                self.assertFalse(classify(case, bad, 101)['accepted'])
+
     def test_unique_anchors_and_hashes_fail_closed(self):
         self.assertEqual(replace_once('abc', 'b', 'X'), 'aXc')
         for source in ['', 'bb']:
