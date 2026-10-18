@@ -95,6 +95,7 @@ fun main() {
     }
     check(failed == 0) { "$failed/${checks.size} state checks failed" }
     runLocalUiChecks()
+    runConversationCandidateChecks()
     runDiagnosticChecks()
     runAgentServiceChecks()
     runAgentServiceWireChecks()
