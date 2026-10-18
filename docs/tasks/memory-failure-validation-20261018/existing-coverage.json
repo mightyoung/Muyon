@@ -1,0 +1,44 @@
+{
+  "candidate_shas": [
+    "e85bc0039185453f3f46d1a77494bb00b588c44a",
+    "379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c"
+  ],
+  "identical_all_lab_blobs": true,
+  "blobs": [
+    "100644 blob b83d22266ac8aa2f8df2edef68082c789727841d\texperiments/redesign/hy-memory-governance-lab/.gitignore",
+    "100644 blob 20799f6ca29c44ae228a7c2519da767095ca983e\texperiments/redesign/hy-memory-governance-lab/Cargo.lock",
+    "100644 blob ddc6c4c28967848584b9d51b50c7a6ad9cb98fa1\texperiments/redesign/hy-memory-governance-lab/Cargo.toml",
+    "100644 blob f5fc1e132903728cf61c294a30980c7433c46ca9\texperiments/redesign/hy-memory-governance-lab/README.md",
+    "100644 blob 2d50308b91329c96c2cdadf9bd99b7605b4f0b55\texperiments/redesign/hy-memory-governance-lab/src/bin/crash-worker.rs",
+    "100644 blob 12cff56564f01afcd36c1df14519d194027780ef\texperiments/redesign/hy-memory-governance-lab/src/lib.rs",
+    "100644 blob 950eaa10843a72c0aea6a44c57aaaa00cf97b218\texperiments/redesign/hy-memory-governance-lab/tests/governance.rs"
+  ],
+  "test_count": 24,
+  "test_ids": [
+    "atomic_precommit_crash_rolls_back_tombstone_and_outbox",
+    "commit_crash_reopens_in_other_process_and_blocks_read",
+    "replay_is_bound_to_complete_payload",
+    "stale_delete_has_no_half_writes",
+    "delete_management_survives_automatic_memory_switch_closed",
+    "cleanup_crash_retries_same_operation_after_lease_expiry",
+    "partial_failure_unknown_and_retry_are_persistent",
+    "every_member_current_field_is_checked_at_final_consume",
+    "revoke_before_consume_rejects_prebuilt_projection",
+    "consume_before_revoke_is_recorded_but_future_consumption_denied",
+    "utf8_ranges_and_redaction_do_not_forge_contiguous_quote",
+    "quotes_revalidate_source_identity_and_authority",
+    "redaction_reason_is_allowlisted_and_output_carries_marker",
+    "revocation_transaction_holds_shared_fence_until_consume_can_validate",
+    "automatic_write_control_is_independent_from_memory_read",
+    "cleanup_operation_identity_handles_colons_without_collision",
+    "all_controlled_sink_completion_removes_governed_body",
+    "stale_worker_acknowledgement_cannot_overwrite_new_claim_completion",
+    "quote_retains_source_identity_and_each_original_byte_range",
+    "independent_source_authority_and_memory_read_gates_block_current_tickets",
+    "body_forks_without_revision_change_are_not_consumed_or_quoted",
+    "independent_gate_facts_deny_even_without_generation_bump",
+    "actual_sqlite_read_error_and_missing_source_are_not_absent",
+    "deletion_explicitly_checks_current_tombstone_without_trusting_ticket_generation"
+  ],
+  "execution": "NOT_RUN: cargo absent; no claim that historical 24 passed in this environment"
+}
