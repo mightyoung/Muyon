@@ -89,6 +89,10 @@ def main():
         linker = tools / (clang_triple + '26-clang')
         readelf = tools / 'llvm-readelf'
         env['CARGO_TARGET_' + triple.upper().replace('-', '_') + '_LINKER'] = str(linker)
+        # Bundled readonly SQLite is C compiled for the same public API26 ABI.
+        # cc-rs must never accidentally use the Linux host compiler for Android.
+        env['CC_' + triple.replace('-', '_')] = str(linker)
+        env['AR_' + triple.replace('-', '_')] = str(tools / 'llvm-ar')
         env['RUSTFLAGS'] = '-C link-arg=-Wl,-z,max-page-size=16384 -C link-arg=-Wl,-z,common-page-size=16384'
         run(['rustc', '--version'], evidence / 'rustc.log', env)
         if not (evidence / 'rustc.log').read_text().startswith('rustc 1.99.0 '):

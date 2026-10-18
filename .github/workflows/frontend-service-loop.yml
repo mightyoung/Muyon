@@ -1,0 +1,113 @@
+name: Frontend private Service loop
+on:
+  push:
+    branches: ['lab/android-compose-frontend-loop-20261018']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: frontend-service-loop-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  scoped:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with: {distribution: temurin, java-version: '17'}
+      - name: Scoped tests and genuine binding reproduction
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/loop-scoped"
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/loop-rust-target"
+          export MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+          python3 -B -m unittest discover -s experiments/redesign/frontend-service-loop-lab -v 2>&1 | tee "$RUNNER_TEMP/loop-scoped/oracle.log"
+          cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --test supplier_store --test supplier_lab_source --test supplier_business_controller -- --nocapture 2>&1 | tee "$RUNNER_TEMP/loop-scoped/rust.log"
+          cargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings 2>&1 | tee "$RUNNER_TEMP/loop-scoped/bridge.log"
+          "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config experiments/redesign/android-rust-bridge-lab/core/uniffi.android.toml --out-dir "$RUNNER_TEMP/loop-generated" --no-format
+          generated="$RUNNER_TEMP/loop-generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt"
+          cmp "$generated" experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt
+          cp "$generated" "$RUNNER_TEMP/loop-scoped/generated-binding.kt"
+          git rev-parse HEAD > "$RUNNER_TEMP/loop-scoped/source-sha.txt"
+          git diff --exit-code
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: loop-scoped
+          path: ${{ runner.temp }}/loop-scoped
+  native:
+    strategy:
+      fail-fast: false
+      matrix: {abi: [arm64-v8a, x86_64]}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Existing exact-source API26 ABI producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android,x86_64-linux-android
+          rustup default 1.99.0
+          python3 experiments/redesign/android-rust-bridge-lab/checks/android_gate.py --abi '${{ matrix.abi }}' --evidence-dir "$RUNNER_TEMP/loop-native" --work-dir "$RUNNER_TEMP/loop-native-work"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: loop-${{ matrix.abi }}
+          path: ${{ runner.temp }}/loop-native
+  package-device:
+    needs: [scoped, native]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with: {distribution: temurin, java-version: '17'}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: loop-*
+          path: ${{ runner.temp }}/loop-artifacts
+      - name: Stage producer names and build actual combined APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/loop-producers"
+          for name in scoped arm64-v8a x86_64; do mv "$RUNNER_TEMP/loop-artifacts/loop-$name" "$RUNNER_TEMP/loop-producers/$name"; done
+          python3 experiments/redesign/frontend-service-loop-lab/platform_package.py --artifacts "$RUNNER_TEMP/loop-producers" --evidence "$RUNNER_TEMP/loop-package" --work "$RUNNER_TEMP/loop-package-work"
+      - name: API26 actual UI Binder native supplier read
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/loop-package"
+          manager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          # Uses runner's existing SDK licenses; never accepts a new license.
+          "$manager" --install 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/emulator-setup.log"
+          sudo chmod a+rw /dev/kvm
+          printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-loop-api26 -k 'system-images;android-26;google_apis;x86_64' --force
+          "$ANDROID_HOME/emulator/emulator" -avd muyon-loop-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$evidence/emulator.log" 2>&1 &
+          adb wait-for-device
+          for attempt in $(seq 1 120); do if [[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done
+          test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = 26
+          adb shell input keyevent 82
+          adb install -r "$evidence/app-debug.apk"
+          adb install -r "$evidence/app-debug-androidTest.apk"
+          adb logcat -c
+          adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
+          adb logcat -d > "$evidence/logcat.txt"
+          adb shell ps -A > "$evidence/device-processes.txt"
+          grep -F 'OK (2 tests)' "$evidence/instrumentation.log"
+          if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi
+          printf 'API26 UI/Binder/native/synthetic schema12 read PASS; model API NOT_RUN\n' > "$evidence/device-result.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: loop-package-device
+          path: ${{ runner.temp }}/loop-package
+          retention-days: 7
