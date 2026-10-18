@@ -58,11 +58,25 @@ pub trait ServiceProviderHost {
     fn credential_handle(&self, profile: &ConfiguredProfile) -> Result<Option<CredentialHandle>>;
     fn review_payload(&self, binding: &ProviderBinding, payload: &[u8]) -> Result<()>;
     fn reserve_budget(&self, binding: &ProviderBinding, request_id: &str, payload: &[u8], budget: &CallBudget) -> Result<String>;
+    /// Release only a still-held reservation, preserving its replay tombstone.
+    /// Consumed admissions must never be refunded. Unsupported owners fail closed.
+    fn release_reservation(&self, _reservation: &str) -> Result<()> {
+        Err("provider_release_unavailable".into())
+    }
     fn commit_admission(&self, reservation: &str, binding: &ProviderBinding, request_id: &str, payload: &[u8], handle: &CredentialHandle) -> Result<String>;
 }
 pub struct PreparedProviderCall {
     owner: Rc<dyn ServiceProviderHost>, binding: ProviderBinding, handle: CredentialHandle,
-    request_id: String, payload: Vec<u8>, budget: CallBudget, reservation: String,
+    request_id: String, payload: Vec<u8>, budget: CallBudget, reservation: String, committed: bool,
+}
+impl Drop for PreparedProviderCall {
+    fn drop(&mut self) {
+        if !self.committed {
+            // The trusted owner atomically releases held state only. A failed
+            // release remains a durable hold; no in-memory refund or retry.
+            let _ = self.owner.release_reservation(&self.reservation);
+        }
+    }
 }
 pub struct ProviderAdmission {
     profile: ConfiguredProfile, handle: CredentialHandle, payload: Vec<u8>, record_id: String,
@@ -135,15 +149,17 @@ impl ServiceProviderBridge {
         self.ensure_current(&binding, &budget)?;
         let reservation = self.host.reserve_budget(&binding, request_id, payload, &budget)
             .map_err(|_| "provider_budget_reservation_failed")?;
-        if !identity(&reservation) { return Err("provider_budget_reservation_failed".into()); }
-        self.ensure_current(&binding, &budget)?;
-        Ok(PreparedProviderCall { owner: self.host.clone(), binding, handle,
-            request_id: request_id.into(), payload: payload.to_vec(), budget, reservation })
+        // Establish cleanup before any further fallible policy/handle checks.
+        let prepared = PreparedProviderCall { owner: self.host.clone(), binding, handle,
+            request_id: request_id.into(), payload: payload.to_vec(), budget, reservation, committed: false };
+        if !identity(&prepared.reservation) { return Err("provider_budget_reservation_failed".into()); }
+        self.ensure_current(&prepared.binding, &prepared.budget)?;
+        Ok(prepared)
     }
     /// Consume one prepared call. The trusted host must atomically commit its
     /// exact-current policy, quota reservation and outbound row. This does not
     /// transmit bytes or authorize a transport fallback/retry.
-    pub fn final_admit(&self, prepared: PreparedProviderCall) -> Result<ProviderAdmission> {
+    pub fn final_admit(&self, mut prepared: PreparedProviderCall) -> Result<ProviderAdmission> {
         if !Rc::ptr_eq(&self.host, &prepared.owner) { return Err("provider_owner_mismatch".into()); }
         self.ensure_current(&prepared.binding, &prepared.budget)?;
         let handle = self.handle(&prepared.binding.profile)?;
@@ -152,8 +168,12 @@ impl ServiceProviderBridge {
         self.ensure_current(&prepared.binding, &prepared.budget)?;
         let record_id = self.host.commit_admission(&prepared.reservation, &prepared.binding,
             &prepared.request_id, &prepared.payload, &handle).map_err(|_| "provider_admission_failed")?;
+        // A successful commit consumed quota even if the returned metadata is
+        // malformed. Never turn that admission into a refund during cleanup.
+        prepared.committed = true;
         if !identity(&record_id) { return Err("provider_admission_failed".into()); }
-        Ok(ProviderAdmission { profile: prepared.binding.profile, handle, payload: prepared.payload, record_id })
+        Ok(ProviderAdmission { profile: prepared.binding.profile.clone(), handle,
+            payload: prepared.payload.clone(), record_id })
     }
     fn binding(&self, budget: &CallBudget) -> Result<ProviderBinding> {
         let binding = self.host.current_binding().map_err(|_| "provider_config_unavailable")?

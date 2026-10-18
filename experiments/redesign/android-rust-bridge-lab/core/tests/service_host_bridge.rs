@@ -6,6 +6,7 @@ use muyon_android_contract_bridge::service_host_bridge::*;
 
 struct UnconfiguredOwner { scope_reads: AtomicUsize, provider_reads: AtomicUsize }
 impl ServiceHostOwnerCallback for UnconfiguredOwner {
+    fn release_reservation(&self, _: String) -> bool { false }
     fn review_payload(&self, _: ServiceOwnerAdmissionBinding, _: Vec<u8>) -> bool { false }
     fn reserve_budget(&self, _: ServiceOwnerAdmissionBinding, _: String, _: Vec<u8>, _: ServiceOwnerCallBudget) -> Option<String> { None }
     fn commit_admission(&self, _: String, _: ServiceOwnerAdmissionBinding, _: String, _: Vec<u8>, _: String, _: String) -> Option<String> { None }
@@ -32,6 +33,7 @@ fn profile() -> ServiceOwnerProfile {
 }
 struct ConfiguredOwner { available: std::sync::atomic::AtomicBool }
 impl ServiceHostOwnerCallback for ConfiguredOwner {
+    fn release_reservation(&self, _: String) -> bool { false }
     fn review_payload(&self, _: ServiceOwnerAdmissionBinding, _: Vec<u8>) -> bool { false }
     fn reserve_budget(&self, _: ServiceOwnerAdmissionBinding, _: String, _: Vec<u8>, _: ServiceOwnerCallBudget) -> Option<String> { None }
     fn commit_admission(&self, _: String, _: ServiceOwnerAdmissionBinding, _: String, _: Vec<u8>, _: String, _: String) -> Option<String> { None }
@@ -147,6 +149,7 @@ fn admission_budget() -> muyon_rust_agent_host_lab::service_provider::CallBudget
     }
 }
 impl ServiceHostOwnerCallback for AdmissionOwner {
+    fn release_reservation(&self, _: String) -> bool { false }
     fn current_scope(&self) -> Option<ServiceOwnerScope> { None }
     fn current_provider(&self) -> Option<ServiceOwnerProvider> {
         let mut p = ConfiguredOwner { available: std::sync::atomic::AtomicBool::new(true) }.current_provider()?;

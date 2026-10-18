@@ -262,6 +262,20 @@ pub struct AgentServiceController {
     host: Option<Arc<crate::service_host::ServiceHostPorts>>,
 }
 impl AgentServiceController {
+    /// Service-bootstrap-only metadata probe. Serialize with retirement so no
+    /// owner callback can begin once native settlement/cleanup is published.
+    pub fn service_admission_probe(&self, operation: crate::service_host::ServiceAdmissionProbeOperation)
+        -> crate::service_host::ServiceAdmissionProbeReply {
+        use crate::service_host::ServiceAdmissionProbeReply;
+        let g = self.shared.lock();
+        if g.sealed || g.phase != AgentServiceState::Ready || g.worker.is_some() || g.joining {
+            return ServiceAdmissionProbeReply::rejected("service_probe_not_ready");
+        }
+        match &self.host {
+            Some(host) => host.admission_probe(operation),
+            None => ServiceAdmissionProbeReply::rejected("service_probe_owner_unavailable"),
+        }
+    }
     /// Host-only injection; never exposed by the UI/FFI request DTOs.
     pub fn new_with_host(
         config: AgentHostServiceConfig,

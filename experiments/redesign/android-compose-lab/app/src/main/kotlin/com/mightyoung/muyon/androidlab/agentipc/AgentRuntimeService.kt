@@ -35,6 +35,7 @@ class AgentRuntimeService:Service() {
         {work->Thread(work,"muyon-agent-settlement")},ThreadPoolExecutor.AbortPolicy())
     private var bootstrap:AgentServiceBootstrap?=null
     private var reservation:AgentControllerRetention.Reservation?=null
+    private var hostLease:ServiceHostLease?=null
     private val build get()=BuildConfig.MUYON_BRIDGE_SOURCE_SHA
 
     override fun onCreate() {
@@ -46,19 +47,37 @@ class AgentRuntimeService:Service() {
         bootstrap=AgentServiceBootstrap(backend,construct={
             try {
                 check(Regex("[0-9a-f]{40}").matches(build)){"native_unavailable"}
+                val root=privateRoot()
+                val lease=ServiceHostBindings.acquire(this)
+                hostLease=lease
+                ServiceProcessKeys.retainHost(slot,lease)
                 lateinit var value:GeneratedAgentController
-                value=GeneratedAgentController.open(privateRoot(),build,ServiceHostBindings.resolve(this),
+                value=GeneratedAgentController.open(root,build,lease,
                     onDrained={requestSettlement(value)},onCleaned={
+                        // Native close returned and admission is sealed before touching owner storage.
+                        lease.close()
+                        ServiceProcessKeys.releaseHost(slot)
                         if(ServiceProcessKeys.controllers.releaseCleaned(slot,value)) {
                             cleanupCompleted.set(true)
+                            lease.onCleaned()
                             if(synchronized(ownership){destroyed})backend.shutdown()
                         }
                     })
-                check(ServiceProcessKeys.controllers.publish(slot,value)){"owner_unavailable"}
+                if(!ServiceProcessKeys.controllers.publish(slot,value)){
+                    ServiceProcessKeys.retainUncertain(value)
+                    error("owner_unavailable")
+                }
                 value
             } catch(error:Throwable) {
                 // Releases only a definitely unpublished slot; never drops a published object.
-                if(ServiceProcessKeys.controllers.failedBeforePublish(slot) && synchronized(ownership){destroyed})backend.shutdown()
+                val lease=hostLease
+                if(lease?.nativeConstructionStarted!=true) {
+                    lease?.close()
+                    ServiceProcessKeys.releaseHost(slot)
+                    if(ServiceProcessKeys.controllers.failedBeforePublish(slot) && synchronized(ownership){destroyed})backend.shutdown()
+                }
+                // Once the foreign constructor was entered, missing ownership outcome is uncertain.
+                // The process roots retain slot and host; a second Service must remain unavailable.
                 throw error
             }
         },installed={lifetime->
@@ -70,6 +89,7 @@ class AgentRuntimeService:Service() {
                 if(retired || destroyed || generation!=platformGeneration) false
                 else {controller=value;registry=clients;true}
             }
+            if(accepted) hostLease?.onReady?.invoke(value)
             if(!accepted) {
                 try{clients.dispose()}finally{try{value.retire()}finally{value.awaitSettled()}}
             }
@@ -228,5 +248,10 @@ class AgentRuntimeService:Service() {
 /** :agent process lifetime, accessed only after actual Service background initialization. */
 private object ServiceProcessKeys {
     val controllers=AgentControllerRetention()
+    private val hosts=mutableMapOf<AgentControllerRetention.Reservation,ServiceHostLease>()
+    private val uncertain=mutableListOf<GeneratedAgentController>()
+    @Synchronized fun retainHost(slot:AgentControllerRetention.Reservation,lease:ServiceHostLease){check(hosts.put(slot,lease)==null)}
+    @Synchronized fun releaseHost(slot:AgentControllerRetention.Reservation){hosts.remove(slot)}
+    @Synchronized fun retainUncertain(value:GeneratedAgentController){uncertain.add(value)}
     val keys=AgentClientKeys(UUID.randomUUID().toString().replace("-","").take(16))
 }

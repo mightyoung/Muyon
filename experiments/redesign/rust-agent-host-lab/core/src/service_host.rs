@@ -121,3 +121,52 @@ impl ServiceHostPorts {
         Err("configured_transport_unavailable".into())
     }
 }
+
+/// Fixed metadata-only operations available to trusted Service bootstrap. These
+/// never take caller payloads, budgets, authority fields or send capabilities.
+#[derive(Clone, Copy)]
+pub enum ServiceAdmissionProbeOperation {
+    PrimaryCommit, PrimaryCancel, SecondaryCommit, SecondaryCancel, TertiaryCommit,
+}
+pub struct ServiceAdmissionProbeReply {
+    pub admitted: bool,
+    pub record_id: String,
+    pub code: String,
+}
+impl ServiceAdmissionProbeReply {
+    pub(crate) fn rejected(code: &str) -> Self {
+        Self { admitted: false, record_id: String::new(), code: code.into() }
+    }
+}
+impl ServiceHostPorts {
+    pub(crate) fn admission_probe(&self, operation: ServiceAdmissionProbeOperation) -> ServiceAdmissionProbeReply {
+        use ServiceAdmissionProbeOperation::*;
+        let (request, cancel) = match operation {
+            PrimaryCommit => ("service-lifecycle-primary-v1", false),
+            PrimaryCancel => ("service-lifecycle-primary-v1", true),
+            SecondaryCommit => ("service-lifecycle-secondary-v1", false),
+            SecondaryCancel => ("service-lifecycle-secondary-v1", true),
+            TertiaryCommit => ("service-lifecycle-tertiary-v1", false),
+        };
+        const PAYLOAD: &[u8] = br#"{"model":"service-lifecycle-fixture-model","messages":[{"role":"user","content":"synthetic admission metadata probe"}],"max_tokens":8,"n":1}"#;
+        let budget = CallBudget { max_tokens: 32, max_micros: 4,
+            requires_tools: false, requires_streaming: false };
+        let bridge = match self.owner.provider() {
+            Ok(bridge) => bridge,
+            Err(_) => return ServiceAdmissionProbeReply::rejected("service_probe_provider_unavailable"),
+        };
+        let prepared = match bridge.prepare(request, PAYLOAD, budget) {
+            Ok(prepared) => prepared,
+            Err(code) => return ServiceAdmissionProbeReply::rejected(&code),
+        };
+        if cancel {
+            drop(prepared);
+            return ServiceAdmissionProbeReply::rejected("release_requested");
+        }
+        match bridge.final_admit(prepared) {
+            Ok(admission) => ServiceAdmissionProbeReply { admitted: true,
+                record_id: admission.record_id().into(), code: "admitted_metadata_only".into() },
+            Err(code) => ServiceAdmissionProbeReply::rejected(&code),
+        }
+    }
+}

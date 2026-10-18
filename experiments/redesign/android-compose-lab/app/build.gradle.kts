@@ -37,6 +37,15 @@ android {
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    buildTypes {
+        create("lifecycle") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".lifecycle"
+            matchingFallbacks += listOf("debug")
+        }
+    }
+    // Dedicated synthetic Service composition; ordinary debug/release never contain its installer.
+    testBuildType = if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
     buildFeatures { compose = true; buildConfig = true; aidl = true }
     packaging { jniLibs { keepDebugSymbols += setOf("**/libmuyon_android_contract_bridge.so", "**/libjnidispatch.so") } }
     if (bridgeRoot != null) sourceSets.getByName("main").jniLibs.srcDir(bridgeRoot.resolve("jniLibs"))

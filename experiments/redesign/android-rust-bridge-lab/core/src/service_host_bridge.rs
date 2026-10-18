@@ -70,6 +70,8 @@ pub trait ServiceHostOwnerCallback: Send + Sync {
     /// Exposed binding drift fails closed; owner owns stranded hold release/expiry.
     fn reserve_budget(&self, binding: ServiceOwnerAdmissionBinding, request_id: String,
         payload: Vec<u8>, budget: ServiceOwnerCallBudget) -> Option<String>;
+    /// Atomically expire held state only; keep tombstone and never refund consumed quota.
+    fn release_reservation(&self, reservation: String) -> bool;
     /// Owner must atomically consume its exact reservation, including the full
     /// CallBudget captured at reserve. No credential value or send capability.
     fn commit_admission(&self, reservation: String, binding: ServiceOwnerAdmissionBinding,
@@ -139,6 +141,10 @@ impl ServiceProviderHost for CallbackProvider {
             ServiceOwnerCallBudget { max_tokens: budget.max_tokens, max_micros: budget.max_micros,
                 requires_tools: budget.requires_tools, requires_streaming: budget.requires_streaming })
             .ok_or_else(|| "service_budget_ledger_unavailable".into())
+    }
+    fn release_reservation(&self, reservation: &str) -> Result<(), String> {
+        if self.callback.release_reservation(reservation.into()) { Ok(()) }
+        else { Err("service_reservation_release_unavailable".into()) }
     }
     fn commit_admission(&self, reservation: &str, binding: &ProviderBinding, request_id: &str, payload: &[u8], handle: &CredentialHandle) -> Result<String, String> {
         // Correlation metadata only. The existence sentinel is never exported;

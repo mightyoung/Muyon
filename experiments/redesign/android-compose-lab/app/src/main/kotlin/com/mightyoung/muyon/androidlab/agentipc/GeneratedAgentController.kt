@@ -5,10 +5,13 @@ import com.mightyoung.muyon.androidlab.*
 
 /** Service-only adapter. Actual generated Object, no fallback controller or business logic. */
 internal class GeneratedAgentController private constructor(private val native:AgentServiceController, onDrained:()->Unit, private val onCleaned:()->Unit):AgentRetainedLifetime {
+    private val cleanupNotified=java.util.concurrent.atomic.AtomicBoolean()
     private val disposeRequested=java.util.concurrent.atomic.AtomicBoolean()
     private val admission=AgentHandleAdmission(onDrained)
     override val cleanupComplete get()=admission.cleanupComplete
     @Volatile private var disposedSettlement:UiAgentWireReply?=null
+    /** Only trusted compile-time Service bootstrap composition invokes this metadata operation. */
+    fun serviceAdmissionProbe(operation:ServiceAdmissionProbeOperation)=admission.call{native.serviceAdmissionProbe(operation)}
     fun connect(key:String)=admission.call{projectAgentReply(native.connect(AgentConnectRequest(1u,key)))}
     fun start(client:UiAgentClientRef,id:String,variant:UiAgentVariant)=admission.call{projectAgentReply(native.startRun(AgentStartRequest(client.native(),id,AgentReadVariant.valueOf(variant.name))))}
     fun status(client:UiAgentClientRef,id:String,variant:UiAgentVariant,runId:String?)=admission.call{projectAgentReply(native.status(AgentStatusRequest(client.native(),AgentRunRef(id,AgentReadVariant.valueOf(variant.name),runId))))}
@@ -25,7 +28,7 @@ internal class GeneratedAgentController private constructor(private val native:A
         val result=disposedSettlement ?: admission.call{projectAgentReply(native.awaitSettled())}
         val closed=result is UiAgentWireReply.Snapshot && result.value.phase==UiAgentServicePhase.CLOSED
         if(closed)disposedSettlement=result
-        if(admission.disposeIfIdle(closed,disposeRequested.get()){native.close()})onCleaned()
+        if(admission.disposeIfIdle(closed,disposeRequested.get()){native.close()} && cleanupNotified.compareAndSet(false,true))onCleaned()
         return result
     }
     override fun awaitSettled() { settle() }
@@ -40,13 +43,14 @@ internal class GeneratedAgentController private constructor(private val native:A
     private fun UiAgentClientRef.native()=AgentClientRef(1u,epoch,lease)
     companion object {
         /** Called exclusively by the Service bootstrap worker with its Context-derived root. */
-        fun open(privateRoot:String,expectedBuild:String,host:ServiceHostBinding,onDrained:()->Unit,onCleaned:()->Unit):GeneratedAgentController {
+        fun open(privateRoot:String,expectedBuild:String,hostLease:ServiceHostLease,onDrained:()->Unit,onCleaned:()->Unit):GeneratedAgentController {
             require(Regex("[0-9a-f]{40}").matches(expectedBuild)){"native_unavailable"}
             try {
                 val info=bridgeInfo()
                 check(info.protocol==1u && info.buildIdentity==expectedBuild){"native_incompatible"}
                 val config=AgentServiceConfig(1u,privateRoot)
-                val native=when(host) {
+                hostLease.enteringNativeConstruction()
+                val native=when(val host=hostLease.binding) {
                     ServiceHostBinding.SyntheticLab->AgentServiceController(config)
                     is ServiceHostBinding.Installed->AgentServiceController.withHost(config,ServiceHostBindings.callback(host.owner),host.mode,host.budget)
                 }

@@ -665,9 +665,12 @@ internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3 : com.
     fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
 }
-@Structure.FieldOrder("uniffiFree", "uniffiClone", "currentScope", "currentProvider", "reviewPayload", "reserveBudget", "commitAdmission")
+@Structure.FieldOrder("uniffiFree", "uniffiClone", "currentScope", "currentProvider", "reviewPayload", "reserveBudget", "releaseReservation", "commitAdmission")
 internal open class UniffiVTableCallbackInterfaceServiceHostOwnerCallback(
     @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
     @JvmField internal var `uniffiClone`: UniffiCallbackInterfaceClone? = null,
@@ -675,7 +678,8 @@ internal open class UniffiVTableCallbackInterfaceServiceHostOwnerCallback(
     @JvmField internal var `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
     @JvmField internal var `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
     @JvmField internal var `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
-    @JvmField internal var `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
+    @JvmField internal var `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
+    @JvmField internal var `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5? = null,
 ) : Structure() {
     class UniffiByValue(
         `uniffiFree`: UniffiCallbackInterfaceFree? = null,
@@ -684,8 +688,9 @@ internal open class UniffiVTableCallbackInterfaceServiceHostOwnerCallback(
         `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
         `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
         `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
-        `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
-    ): UniffiVTableCallbackInterfaceServiceHostOwnerCallback(`uniffiFree`,`uniffiClone`,`currentScope`,`currentProvider`,`reviewPayload`,`reserveBudget`,`commitAdmission`,), Structure.ByValue
+        `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
+        `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5? = null,
+    ): UniffiVTableCallbackInterfaceServiceHostOwnerCallback(`uniffiFree`,`uniffiClone`,`currentScope`,`currentProvider`,`reviewPayload`,`reserveBudget`,`releaseReservation`,`commitAdmission`,), Structure.ByValue
 
    internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceServiceHostOwnerCallback) {
         `uniffiFree` = other.`uniffiFree`
@@ -694,6 +699,7 @@ internal open class UniffiVTableCallbackInterfaceServiceHostOwnerCallback(
         `currentProvider` = other.`currentProvider`
         `reviewPayload` = other.`reviewPayload`
         `reserveBudget` = other.`reserveBudget`
+        `releaseReservation` = other.`releaseReservation`
         `commitAdmission` = other.`commitAdmission`
     }
 
@@ -745,6 +751,8 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_retire_service(
     ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_service_admission_probe(
+    ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_set_visibility(
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_start_run(
@@ -762,6 +770,8 @@ internal object IntegrityCheckingUniffiLib {
     external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_review_payload(
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_reserve_budget(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_release_reservation(
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission(
     ): Int
@@ -816,6 +826,8 @@ internal object UniffiLib {
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_retire_service(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_service_admission_probe(`ptr`: Long,`operation`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_set_visibility(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_start_run(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
@@ -840,6 +852,8 @@ internal object UniffiLib {
     ): Byte
     external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_reserve_budget(`ptr`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_release_reservation(`ptr`: Long,`reservation`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
     external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_commit_admission(`ptr`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_func_bridge_info(uniffi_out_err: UniffiRustCallStatus, 
@@ -998,6 +1012,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_retire_service() and 0xFFFF) != 33792) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_service_admission_probe() and 0xFFFF) != 25842) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_set_visibility() and 0xFFFF) != 437) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -1025,7 +1042,10 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_reserve_budget() and 0xFFFF) != 62703) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission() and 0xFFFF) != 8798) {
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_release_reservation() and 0xFFFF) != 7849) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission() and 0xFFFF) != 46079) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_new() and 0xFFFF) != 1391) {
@@ -1506,6 +1526,8 @@ public interface AgentServiceControllerInterface {
     
     fun `retireService`(): AgentCloseReply
     
+    fun `serviceAdmissionProbe`(`operation`: ServiceAdmissionProbeOperation): ServiceAdmissionProbeReply
+    
     fun `setVisibility`(`req`: AgentVisibilityRequest): AgentControlReply
     
     fun `startRun`(`req`: AgentStartRequest): AgentStartReply
@@ -1747,6 +1769,20 @@ open class AgentServiceController: Disposable, AutoCloseable, AgentServiceContro
     UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_retire_service(
         it,
         _status)
+}
+    }
+    )
+    }
+    
+
+    override fun `serviceAdmissionProbe`(`operation`: ServiceAdmissionProbeOperation): ServiceAdmissionProbeReply {
+            return FfiConverterTypeServiceAdmissionProbeReply.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_service_admission_probe(
+        it,
+        
+        FfiConverterTypeServiceAdmissionProbeOperation.lower(`operation`),_status)
 }
     }
     )
@@ -1999,6 +2035,11 @@ public interface ServiceHostOwnerCallback {
     fun `reserveBudget`(`binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `budget`: ServiceOwnerCallBudget): kotlin.String?
     
     /**
+     * Atomically expire held state only; keep tombstone and never refund consumed quota.
+     */
+    fun `releaseReservation`(`reservation`: kotlin.String): kotlin.Boolean
+    
+    /**
      * Owner must atomically consume its exact reservation, including the full
      * CallBudget captured at reserve. No credential value or send capability.
      */
@@ -2176,6 +2217,23 @@ open class ServiceHostOwnerCallbackImpl: Disposable, AutoCloseable, ServiceHostO
 
     
     /**
+     * Atomically expire held state only; keep tombstone and never refund consumed quota.
+     */override fun `releaseReservation`(`reservation`: kotlin.String): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_release_reservation(
+        it,
+        
+        FfiConverterString.lower(`reservation`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
      * Owner must atomically consume its exact reservation, including the full
      * CallBudget captured at reserve. No credential value or send capability.
      */override fun `commitAdmission`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `credentialProfileId`: kotlin.String, `credentialRef`: kotlin.String): kotlin.String? {
@@ -2265,7 +2323,19 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 {
+    internal object `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 {
+        override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`releaseReservation`(
+                    FfiConverterString.lift(`reservation`),
+                )
+            }
+            val writeReturn = { value: kotlin.Boolean -> uniffiOutReturn.setValue(FfiConverterBoolean.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5 {
         override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -2302,6 +2372,7 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
         `currentProvider`,
         `reviewPayload`,
         `reserveBudget`,
+        `releaseReservation`,
         `commitAdmission`,
     )
 
@@ -3561,6 +3632,49 @@ public object FfiConverterTypeDiagnosticRequest: FfiConverterRustBuffer<Diagnost
             FfiConverterUInt.write(value.`protocol`, buf)
             FfiConverterString.write(value.`requestId`, buf)
             FfiConverterTypeDiagnosticVariant.write(value.`variant`, buf)
+    }
+}
+
+
+
+data class ServiceAdmissionProbeReply (
+    val `admitted`: kotlin.Boolean
+    , 
+    val `recordId`: kotlin.String
+    , 
+    val `code`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceAdmissionProbeReply: FfiConverterRustBuffer<ServiceAdmissionProbeReply> {
+    override fun read(buf: ByteBuffer): ServiceAdmissionProbeReply {
+        return ServiceAdmissionProbeReply(
+            FfiConverterBoolean.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceAdmissionProbeReply) = (
+            FfiConverterBoolean.allocationSize(value.`admitted`) +
+            FfiConverterString.allocationSize(value.`recordId`) +
+            FfiConverterString.allocationSize(value.`code`)
+    )
+
+    override fun write(value: ServiceAdmissionProbeReply, buf: ByteBuffer) {
+            FfiConverterBoolean.write(value.`admitted`, buf)
+            FfiConverterString.write(value.`recordId`, buf)
+            FfiConverterString.write(value.`code`, buf)
     }
 }
 
@@ -5479,6 +5593,48 @@ public object FfiConverterTypeDiagnosticVariant: FfiConverterRustBuffer<Diagnost
     override fun allocationSize(value: DiagnosticVariant) = 4UL
 
     override fun write(value: DiagnosticVariant, buf: ByteBuffer) {
+        buf.putInt(value.ordinal + 1)
+    }
+}
+
+
+
+
+
+/**
+ * Trusted Service bootstrap only. No Binder command selects this operation.
+ */
+
+enum class ServiceAdmissionProbeOperation {
+    
+    PRIMARY_COMMIT,
+    PRIMARY_CANCEL,
+    SECONDARY_COMMIT,
+    SECONDARY_CANCEL,
+    TERTIARY_COMMIT;
+
+    
+
+
+    companion object
+}
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceAdmissionProbeOperation: FfiConverterRustBuffer<ServiceAdmissionProbeOperation> {
+    override fun read(buf: ByteBuffer) = try {
+        
+        ServiceAdmissionProbeOperation.entries[buf.getInt() - 1]
+        
+    } catch (e: IndexOutOfBoundsException) {
+        throw RuntimeException("invalid enum value, something is very wrong!!", e)
+    }
+
+    override fun allocationSize(value: ServiceAdmissionProbeOperation) = 4UL
+
+    override fun write(value: ServiceAdmissionProbeOperation, buf: ByteBuffer) {
         buf.putInt(value.ordinal + 1)
     }
 }

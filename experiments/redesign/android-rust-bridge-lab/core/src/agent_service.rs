@@ -63,6 +63,15 @@ impl std::fmt::Display for AgentServiceSetupError {
     }
 }
 impl std::error::Error for AgentServiceSetupError {}
+/// Trusted Service bootstrap only. No Binder command selects this operation.
+#[derive(Clone, Debug, uniffi::Enum)]
+pub enum ServiceAdmissionProbeOperation {
+    PrimaryCommit, PrimaryCancel, SecondaryCommit, SecondaryCancel, TertiaryCommit,
+}
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct ServiceAdmissionProbeReply {
+    pub admitted: bool, pub record_id: String, pub code: String,
+}
 #[derive(uniffi::Object)]
 pub struct AgentServiceController {
     inner: muyon_rust_agent_host_lab::service_controller::AgentServiceController,
@@ -109,6 +118,18 @@ impl AgentServiceController {
             _ => AgentServiceSetupError::InternalFailure,
         })?;
         Ok(Arc::new(Self { inner }))
+    }
+    pub fn service_admission_probe(&self, operation: ServiceAdmissionProbeOperation) -> ServiceAdmissionProbeReply {
+        use muyon_rust_agent_host_lab::service_host::ServiceAdmissionProbeOperation as HostOperation;
+        let operation = match operation {
+            ServiceAdmissionProbeOperation::PrimaryCommit => HostOperation::PrimaryCommit,
+            ServiceAdmissionProbeOperation::PrimaryCancel => HostOperation::PrimaryCancel,
+            ServiceAdmissionProbeOperation::SecondaryCommit => HostOperation::SecondaryCommit,
+            ServiceAdmissionProbeOperation::SecondaryCancel => HostOperation::SecondaryCancel,
+            ServiceAdmissionProbeOperation::TertiaryCommit => HostOperation::TertiaryCommit,
+        };
+        let reply = self.inner.service_admission_probe(operation);
+        ServiceAdmissionProbeReply { admitted: reply.admitted, record_id: reply.record_id, code: reply.code }
     }
     pub fn connect(&self, req: AgentConnectRequest) -> AgentConnectReply {
         self.inner.connect(req.to_host()).to_bridge()

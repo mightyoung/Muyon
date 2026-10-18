@@ -202,6 +202,15 @@ internal class DurableServiceHostOwner(
             }
         }
     }
+    /** Explicit cancellation uses the existing expired tombstone. Only held budget is refunded;
+     * request_id remains unique forever, and consumed admissions can never be refunded.
+     * Opaque unguessable reservation is a capability local to the bound native callback owner.
+     */
+    @Synchronized override fun releaseReservation(reservation: String): Boolean = transaction { database, _, _ ->
+        database.update("reservations", ContentValues().apply { put("state", "expired") },
+            "token=? AND state='held'", arrayOf(reservation)) == 1
+    } ?: false
+
     private fun signed(n: ULong): Long { require(n <= Long.MAX_VALUE.toULong()); return n.toLong() }
 }
 
