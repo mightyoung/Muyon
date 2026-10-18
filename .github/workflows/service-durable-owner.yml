@@ -1,0 +1,140 @@
+name: Service durable owner scoped API26
+on:
+  push:
+    branches: ['lab/service-durable-owner-20261018']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: service-durable-owner-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  compile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      LAB_DIRECTORY: experiments/redesign/android-compose-lab
+      GRADLE_VERSION: '8.13'
+      GRADLE_SHA256: 20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Initialize isolated temporary directories
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/muyon-compose-evidence" "$RUNNER_TEMP/muyon-compose-android-user"
+          {
+            printf 'GRADLE_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-gradle-cache"
+            printf 'ANDROID_USER_HOME=%s\n' "$RUNNER_TEMP/muyon-compose-android-user"
+            printf 'LOG_DIRECTORY=%s\n' "$RUNNER_TEMP/muyon-compose-evidence"
+          } >> "$GITHUB_ENV"
+      - name: JDK 17
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Record source and declared pins
+        shell: bash
+        run: |
+          mkdir -p "$LOG_DIRECTORY" "$ANDROID_USER_HOME"
+          git rev-parse HEAD > "$LOG_DIRECTORY/source-sha.txt"
+          git ls-files -z "$LAB_DIRECTORY" .github/workflows/android-compose-lab.yml |
+            sort -z | xargs -0 sha256sum > "$LOG_DIRECTORY/source-files.sha256"
+          {
+            java -version 2>&1
+            printf '%s\n' 'Gradle=8.13; AGP=8.11.1; Kotlin/ComposeCompiler=2.2.20'
+            printf '%s\n' 'ComposeBOM=2025.09.01; compileSdk=36; buildTools=35.0.0'
+            printf '%s\n' 'API26 named owner instrumentation required; native controller/model API NOT_RUN'
+          } > "$LOG_DIRECTORY/tool-pins.txt"
+      - name: Fetch and verify official Gradle distribution
+        shell: bash
+        run: |
+          distribution="$RUNNER_TEMP/gradle-$GRADLE_VERSION-bin.zip"
+          curl --fail --location --retry 3 --output "$distribution" \
+            "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"
+          printf '%s  %s\n' "$GRADLE_SHA256" "$distribution" |
+            sha256sum --check | tee "$LOG_DIRECTORY/gradle-checksum.txt"
+          unzip -q "$distribution" -d "$RUNNER_TEMP/muyon-compose-tools"
+          "$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" --version \
+            > "$LOG_DIRECTORY/gradle-version.txt"
+      - name: Ensure official SDK build packages
+        shell: bash
+        run: |
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          test -n "$sdk_root"
+          manager="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          test -x "$manager"
+          "$manager" --version > "$LOG_DIRECTORY/sdkmanager-version.txt"
+          "$manager" --sdk_root="$sdk_root" --install \
+            'platforms;android-36' 'build-tools;35.0.0' 2>&1 |
+            tee "$LOG_DIRECTORY/sdk-packages.txt"
+          test -f "$sdk_root/platforms/android-36/android.jar"
+          test -x "$sdk_root/build-tools/35.0.0/aapt2"
+          printf 'ANDROID_HOME=%s\n' "$sdk_root" >> "$GITHUB_ENV"
+      - name: Required JVM checks and Android source compilation
+        shell: bash
+        run: |
+          set +e
+          "$RUNNER_TEMP/muyon-compose-tools/gradle-$GRADLE_VERSION/bin/gradle" \
+            --no-daemon --stacktrace --console=plain -p "$LAB_DIRECTORY" \
+            :state:check :app:assembleDebug :app:assembleDebugAndroidTest \
+            :app:compileDebugUnitTestKotlin :app:lintDebug 2>&1 |
+            tee "$LOG_DIRECTORY/required-build.log"
+          gradle_exit=${PIPESTATUS[0]}
+          set -e
+          required_exit=$gradle_exit
+          if [[ $gradle_exit -eq 0 ]]; then
+            for marker in '16/16 pure JVM state checks passed' '22/22 local UI state checks passed'; do
+              if ! grep -Fq "$marker" "$LOG_DIRECTORY/required-build.log"; then
+                required_exit=1
+              fi
+            done
+          fi
+          printf 'gradle_exit=%s\nrequired_exit=%s\n' "$gradle_exit" "$required_exit" \
+            > "$LOG_DIRECTORY/required-exit.txt"
+          exit "$required_exit"
+      - name: API26 named durable admission owner tests only
+        shell: bash
+        run: |
+          set -euo pipefail
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/muyon-owner-avds"
+          mkdir -p "$ANDROID_AVD_HOME"
+          manager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          # Existing runner licenses only; never accepts a license.
+          "$manager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$LOG_DIRECTORY/emulator-setup.log"
+          export PATH="$ANDROID_HOME/platform-tools:$PATH"
+          sudo chmod a+rw /dev/kvm
+          printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-owner-api26 -k 'system-images;android-26;google_apis;x86_64'
+          "$ANDROID_HOME/emulator/emulator" -avd muyon-owner-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$LOG_DIRECTORY/emulator.log" 2>&1 &
+          timeout 300 adb wait-for-device
+          for attempt in $(seq 1 120); do if [[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done
+          test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1
+          test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = 26
+          adb install -r "$LAB_DIRECTORY/app/build/outputs/apk/debug/app-debug.apk"
+          adb install -r "$LAB_DIRECTORY/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+          timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.agentipc.DurableServiceHostOwnerTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$LOG_DIRECTORY/instrumentation.log"
+          grep -Eq '^OK \([1-9][0-9]* tests?\)' "$LOG_DIRECTORY/instrumentation.log"
+          if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$LOG_DIRECTORY/instrumentation.log"; then exit 1; fi
+          printf '%s\n' 'Named durable ledger tests only; no legacy task database, HTTP, native controller or model API.' > "$LOG_DIRECTORY/device-boundary.txt"
+      - name: Record unexecuted boundaries even after setup failure
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$LOG_DIRECTORY"
+          if [[ ! -f "$LOG_DIRECTORY/required-exit.txt" ]]; then
+            printf 'gradle_exit=NOT_RUN\nrequired_exit=NOT_RUN\n' > "$LOG_DIRECTORY/required-exit.txt"
+          fi
+          printf '%s\n' 'See instrumentation.log for named ledger runtime' 'Compose rendering=NOT_RUN' \
+            'Rust integration runtime=NOT_RUN' 'WorkBuddy pixel fidelity=UNVERIFIED' \
+            > "$LOG_DIRECTORY/unexecuted-boundaries.txt"
+      - name: Upload compilation evidence only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: service-durable-owner-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/muyon-compose-evidence
+          if-no-files-found: warn
+          retention-days: 7
