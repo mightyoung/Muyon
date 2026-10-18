@@ -207,3 +207,191 @@ fn loopback_post_io_wire_journal_is_unknown_without_resend() {
     assert_eq!(session.borrow().model_sends, 1);
     assert_eq!(listener.accept().unwrap_err().kind(), std::io::ErrorKind::WouldBlock);
 }
+
+// These barriers only observe real production writes and pause the test child.
+// The owning test process sends SIGKILL; no ledger bytes are manufactured.
+fn kill_barrier(dir: &Path, name: &str) {
+    std::fs::write(dir.join(format!("{name}.ready")), std::process::id().to_string()).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(8);
+    while !dir.join(format!("{name}.release")).exists() {
+        assert!(Instant::now() < deadline, "bounded test barrier expired");
+        thread::sleep(Duration::from_millis(2));
+    }
+}
+struct KillControl<'a> { inner: &'a mut dyn ProviderControl, dir: PathBuf, pause: bool }
+impl ProviderControl for KillControl<'_> {
+    fn poll(&mut self) -> Result<()> { self.inner.poll() }
+    fn remaining(&self) -> u64 { self.inner.remaining() }
+    fn checkpoint(&mut self, name: &str) -> Result<()> { self.inner.checkpoint(name) }
+    fn charge(&mut self, sent: bool, bytes: usize) -> Result<()> {
+        self.inner.charge(sent, bytes)?;
+        if !sent && self.pause {
+            let state = State::load(&self.dir).unwrap();
+            assert!(state.wire_counters.received >= bytes as u64 && state.wire_counters.inflight);
+            ledger(&self.dir);
+            kill_barrier(&self.dir, "charged");
+        }
+        Ok(())
+    }
+}
+struct KillEndpoint { inner: LoopbackEndpoint, dir: PathBuf, mode: String }
+impl OfflineEndpoint for KillEndpoint {
+    fn validate_session(&self, s: &SharedSession) -> Result<()> { self.inner.validate_session(s) }
+    fn exchange(&mut self, payload: &[u8], control: &mut dyn ProviderControl) -> Result<Vec<u8>> {
+        ledger(&self.dir); // ModelGateway's actual atomic begin, before transport/connect.
+        kill_barrier(&self.dir, "begin");
+        self.inner.exchange(payload, &mut KillControl { inner: control, dir: self.dir.clone(), pause: self.mode == "io" })
+    }
+}
+#[test]
+fn sigkill_probe_child() {
+    let Some(dir) = std::env::var_os("MUYON_SIGKILL_DIR") else { return; };
+    let dir = PathBuf::from(dir);
+    let address = std::env::var("MUYON_SIGKILL_ADDRESS").unwrap().parse().unwrap();
+    let mode = std::env::var("MUYON_SIGKILL_MODE").unwrap();
+    println!("pid={} mode={} dir={}", std::process::id(), mode, dir.display());
+    if mode.starts_with("recover") {
+        let original = std::fs::read(dir.join("original-identity")).unwrap();
+        let begin = std::fs::read(dir.join("outbound.db")).unwrap();
+        let native = std::fs::read(dir.join("native.db")).unwrap();
+        let mut agent = Agent::open(&dir).unwrap();
+        let expected = if mode == "recover_healthy" { ("completed", "") } else { ("outcome_unknown", "wire_interrupted") };
+        assert_eq!((agent.state.status.as_str(), agent.state.reason.as_str()), expected);
+        let counters = (agent.state.wire_counters.sent, agent.state.wire_counters.received);
+        let session = session(NativeStore::open(&dir).unwrap());
+        let mut provider = ModelGateway::new(session.clone(), Box::new(endpoint(&session, address)));
+        for _ in 0..2 {
+            drive(&mut agent, &mut provider, &session);
+            agent = Agent::open(&dir).unwrap();
+            assert_eq!((agent.state.status.as_str(), agent.state.reason.as_str()), expected);
+            assert_eq!(format!("{}\n{}\n", agent.state.task, agent.state.attempt).as_bytes(), original);
+            assert_eq!((agent.state.wire_counters.sent, agent.state.wire_counters.received), counters);
+        }
+        assert_eq!(session.borrow().model_sends, 0);
+        assert_eq!(std::fs::read(dir.join("outbound.db")).unwrap(), begin);
+        assert_eq!(std::fs::read(dir.join("native.db")).unwrap(), native);
+        println!("reopened_twice status={} reason={} sent={} received={} model_sends=0 identity_unchanged=true ledger_unchanged=true native_unchanged=true", expected.0, expected.1, counters.0, counters.1);
+        return;
+    }
+    let session = session(NativeStore::initialize_private(&dir).unwrap());
+    let mut agent = Agent { dir: dir.clone(), state: State::runtime("synthetic question".into(), "synthetic-scope".into(), Limits::default()).unwrap() };
+    std::fs::write(dir.join("original-identity"), format!("{}\n{}\n", agent.state.task, agent.state.attempt)).unwrap();
+    let inner = endpoint(&session, address);
+    let mut provider = ModelGateway::new(session.clone(), Box::new(KillEndpoint { inner, dir: dir.clone(), mode }));
+    drive(&mut agent, &mut provider, &session);
+    assert_eq!(agent.state.status, "completed");
+    assert_eq!(agent.state.answer, "complete");
+    assert_eq!(session.borrow().model_sends, 1);
+    println!("healthy completed answer=complete model_sends=1");
+}
+#[cfg(unix)]
+struct OwnedKillChild(std::process::Child);
+#[cfg(unix)]
+impl Drop for OwnedKillChild {
+    fn drop(&mut self) { let _ = self.0.kill(); let _ = self.0.wait(); }
+}
+#[cfg(unix)]
+fn spawn_kill_child(dir: &Path, address: SocketAddr, mode: &str) -> OwnedKillChild {
+    use std::process::Stdio;
+    OwnedKillChild(Command::new(std::env::current_exe().unwrap())
+        .args(["--exact", "http_recovery_tests::sigkill_probe_child", "--nocapture"])
+        .env("MUYON_SIGKILL_DIR", dir).env("MUYON_SIGKILL_ADDRESS", address.to_string()).env("MUYON_SIGKILL_MODE", mode)
+        .stdout(Stdio::from(std::fs::File::create(dir.join(format!("{mode}.stdout"))).unwrap()))
+        .stderr(Stdio::from(std::fs::File::create(dir.join(format!("{mode}.stderr"))).unwrap()))
+        .spawn().unwrap())
+}
+#[cfg(unix)]
+fn wait_probe(child: &mut OwnedKillChild, mut ready: impl FnMut() -> bool) {
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !ready() {
+        assert!(child.0.try_wait().unwrap().is_none(), "probe child exited prematurely");
+        assert!(Instant::now() < deadline, "probe observation timed out");
+        thread::sleep(Duration::from_millis(2));
+    }
+}
+#[cfg(unix)]
+fn snapshot_kill(dir: &Path, suffix: &str) {
+    for name in ["task.db", "outbound.db", "native.db"] {
+        std::fs::copy(dir.join(name), dir.join(format!("{name}.{suffix}"))).unwrap();
+    }
+}
+#[cfg(unix)]
+#[test]
+fn loopback_real_sigkill_windows_and_healthy_sibling() {
+    use std::os::unix::process::ExitStatusExt;
+    let root = std::env::var_os("MUYON_SIGKILL_EVIDENCE").map(PathBuf::from).unwrap_or_else(directory);
+    std::fs::create_dir_all(&root).unwrap();
+    for mode in ["begin", "io", "healthy"] {
+        let dir = root.join(mode);
+        std::fs::create_dir(&dir).unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        listener.set_nonblocking(true).unwrap();
+        let address = listener.local_addr().unwrap();
+        let mut log = std::fs::File::create(dir.join("parent-network.log")).unwrap();
+        let mut child = spawn_kill_child(&dir, address, mode);
+        let pid = child.0.id();
+        writeln!(log, "owned_child_pid={pid} address={address} mode={mode}").unwrap();
+        wait_probe(&mut child, || dir.join("begin.ready").exists());
+        assert_eq!(std::fs::read_to_string(dir.join("begin.ready")).unwrap(), pid.to_string());
+        ledger(&dir);
+        assert_eq!(listener.accept().unwrap_err().kind(), std::io::ErrorKind::WouldBlock);
+        writeln!(log, "begin_barrier real_begin=true accepts=0").unwrap();
+        if mode != "begin" {
+            std::fs::write(dir.join("begin.release"), b"release").unwrap();
+            let mut accepted = None;
+            wait_probe(&mut child, || match listener.accept() {
+                Ok((s, peer)) => { accepted = Some(s); writeln!(log, "accept=1 peer={peer}").unwrap(); true },
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => false,
+                e => panic!("accept error: {e:?}"),
+            });
+            let mut socket = accepted.unwrap();
+            socket.set_nonblocking(false).unwrap();
+            let request = read_request(&mut socket);
+            std::fs::write(dir.join("request.raw"), &request).unwrap();
+            let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: {}\r\n\r\n{}", SSE.len(), SSE);
+            let sent = if mode == "io" { response.len() - SSE.len() + 10 } else { response.len() };
+            socket.write_all(&response.as_bytes()[..sent]).unwrap();
+            std::fs::write(dir.join("response-sent.raw"), &response.as_bytes()[..sent]).unwrap();
+            writeln!(log, "request_bytes={} response_bytes_sent={sent} full_response_bytes={}", request.len(), response.len()).unwrap();
+            if mode == "io" {
+                wait_probe(&mut child, || dir.join("charged.ready").exists());
+                let state = State::load(&dir).unwrap();
+                assert_eq!(state.wire_counters.sent, request.len() as u64);
+                assert!(state.wire_counters.received > 0 && state.wire_counters.received <= sent as u64);
+                assert!(state.wire_counters.inflight);
+                writeln!(log, "charged_barrier durable_received={} durable_sent={} inflight=true", state.wire_counters.received, state.wire_counters.sent).unwrap();
+            } else { drop(socket); }
+        }
+        snapshot_kill(&dir, "before");
+        if mode == "healthy" {
+            wait_probe(&mut child, || State::load(&dir).is_ok_and(|s| s.status == "completed"));
+            let status = child.0.wait().unwrap();
+            assert!(status.success());
+            writeln!(log, "child_pid={pid} exit_code=0").unwrap();
+        } else {
+            if mode == "begin" {
+                let state = State::load(&dir).unwrap();
+                assert_eq!((state.wire_counters.sent, state.wire_counters.received), (0, 0));
+                assert!(state.wire_counters.inflight);
+            }
+            child.0.kill().unwrap(); // Unix Child::kill sends real SIGKILL to our child PID.
+            let status = child.0.wait().unwrap();
+            assert_eq!(status.signal(), Some(9));
+            writeln!(log, "parent_sent=SIGKILL child_pid={pid} signal={} returncode=-9 reaped=true", status.signal().unwrap()).unwrap();
+        }
+        snapshot_kill(&dir, "after_child");
+        let mut recovery = spawn_kill_child(&dir, address, if mode == "healthy" { "recover_healthy" } else { "recover_unknown" });
+        let recovery_pid = recovery.0.id();
+        let deadline = Instant::now() + Duration::from_secs(5);
+        let done = loop {
+            if let Some(status) = recovery.0.try_wait().unwrap() { break status; }
+            assert!(Instant::now() < deadline, "recovery child timed out");
+            thread::sleep(Duration::from_millis(2));
+        };
+        assert!(done.success(), "see recovery child stdout/stderr in {}", dir.display());
+        snapshot_kill(&dir, "after_recovery");
+        assert_eq!(listener.accept().unwrap_err().kind(), std::io::ErrorKind::WouldBlock, "no duplicate network request");
+        writeln!(log, "recovery_pid={recovery_pid} exit_code=0 reaped=true recovery_accepts=0 business_receipts_unchanged=true").unwrap();
+        println!("mode={mode} pid={pid} evidence={} recovery_pid={recovery_pid} cleanup=owned_children_reaped", dir.display());
+    }
+}
