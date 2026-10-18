@@ -1,10 +1,13 @@
 # Agent 上下文与可审计补充记忆增量设计
 
 版本：CTX-MEMORY-DESIGN-1，2026-10-17（北京时间）。
-状态：用户已批准落地借鉴设计；本文是待集成的目标合同，未实现、未运行新增验收。文档采纳不表示模型实验通过。
+状态：候选研究设计，未验证、未实现；2026-10-18 用户最新门禁覆盖此前设计落地措辞。
+
+REMORY 三项借鉴均为候选研究设计。用户最新要求是实验确实有效后才实施。当前未完成离线合同验证、真实模型效益对照或神经后端验证；现有 CI 不构成有效性证据。已有授权环境内低成本、本机合成软件验证及必要测量原型可继续，不逐个 fixture 重复审批；真实模型费用、GPU、新增敏感数据或环境权限等超出现有授权时另行确认。本文不授权产品实现或默认接入。验证结果只支持其实际测试过的组件与场景。
+完整方案见[隔离实验与实施门禁](remory-isolated-validation-20261018.md)，其中数值均为待冻结建议。
 代码核查基线：0ab2c4f667681b9aacb017f8cd2eea6f576cf78e。唯一合入执行者：LeaderB。
 范围：补充 v1.3.2 第一册上下文压缩、记忆、插件与恢复章节；页面以[页面增量](agent-context-memory-pages-20261017.md)为准；开发安排见[任务与验收](../tasks/CTX-MEMORY-20261017.md)。
-v1.3.2 两册、PNG、SHA256SUMS 作为已审归档不修改。其余既定范围、默认 Auto、FullAllow 语义、Rust 内核、Kotlin/Compose Android、Electron 桌面及 Android 独立进程适配要求保持不变。本补充只替代“压缩只需四字段摘要”的新架构目标理解，不撤销历史实现记录。
+v1.3.2 两册、PNG、SHA256SUMS 作为已审归档不修改。其余既定范围、默认 Auto、FullAllow 语义、Rust 内核、Kotlin/Compose Android、Electron 桌面及 Android 独立进程适配要求保持不变。本补充只提出“主线摘要＋补充信息”的研究假设，尚不替代现有行为或批准新架构实施，不撤销历史实现记录。
 归档入口：[第一册](redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md)、[第二册](redesign-v1.3.2-20261014/Muyon-Page-Design-Handbook-v1.3.2-2026-10-14.md)。
 
 ## 1. 依据与证据上限
@@ -16,7 +19,7 @@ REMORY v2（2026-10-11）通过冻结 actor、训练连续记忆补充摘要，�
 
 ## 2. 当前源码与迁移边界
 
-| 当前事实 | 目标动作 | 不得推断 |
+| 当前事实 | 待验证的候选方向 | 不得推断 |
 |---|---|---|
 | [Rust agent State/drive](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/experiments/redesign/core-agent-lab/core/src/agent.rs#L215-L231)保存完整历史，遇 unresolved/evidence_hold 或预算限制停下 | 在受控请求投影前增加压缩候选与发布接口 | 实验 lab 已是生产记忆系统；压缩能解除 unknown |
 | [原生消息类型](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/experiments/redesign/core-agent-lab/core/src/model.rs#L72-L79)区分调用与结果 | 从结构化事实提取，不从摘要重造调用 ID | 摘要可充当执行账本 |
@@ -24,7 +27,7 @@ REMORY v2（2026-10-11）通过冻结 actor、训练连续记忆补充摘要，�
 | [旧压缩器](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/apps/muyon/lib/assistant/context_compactor.dart#L272-L348)清旧工具结果，再生成[四字段摘要](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/apps/muyon/lib/assistant/context_compactor.dart#L401-L440) | 提取测试样本与行为对照，Rust 重写 | 继续新增 Dart 实现；Rust 已迁移完成 |
 | [v1.3.2 来源与版本合同](https://github.com/mightyoung/Muyon/blob/0ab2c4f667681b9aacb017f8cd2eea6f576cf78e/docs/design/redesign-v1.3.2-20261014/Muyon-Redesign-Plan-v1.3.2-2026-10-14.md#L698-L710)为目标态 | 复用字段和版本域，逐项实现 | task.db 的存在已证明跨对象原子提交 |
 
-所有新能力落于公共内核；业务插件只提供声明与查询适配。
+若对应候选经独立实验证明有效且具体实施范围已有授权，才考虑公共内核实现；业务插件届时仅提供声明与查询适配。当前 ContextContribution 不实施，既有基础 DATA/RELATION/operation/view 注册工作不受此研究门禁影响。
 
 ## 3. 分层与权威
 
@@ -91,7 +94,7 @@ source_refs 指向现有受控对象/回执，不接受模型自由路径或 URL
 
 ## 7. 插件注册扩展
 
-新增可选 ContextContribution 声明（待 schema 冻结），至少定义：
+候选可选 ContextContribution 声明（先过有效性门禁、具体实施范围有授权后再冻结 schema），可研究以下字段；当前不新增接口：
 - object_type/schema_version、稳定引用与版本提取规则；
 - 可用于摘要/证据索引的字段，以及宿主认可的分类与用途约束；
 - 错误分类和复查条件、结果未知的查询能力；
@@ -113,6 +116,6 @@ source_refs 指向现有受控对象/回执，不接受模型自由路径或 URL
 
 ## 9. 设计完成与工程完成的区别
 
-本文件定义设计目标。新增 fixture、Rust 实现、跨端接线、真实模型评测均未执行。
+本文件只定义待验证候选。CTX-T01–T14 仍全部未运行，新增三对象、压缩事务、跨端接线、真实模型效益与神经后端均未验收。V1 软件合同、V3/V4 真实模型收益、资源成本、生产实施授权四栏独立记录；任何旧 CI green 不得代填收益栏。
 实现不得越过原有独立审查、CI、数据迁移和权限门禁。LeaderB 按依赖安排，不因本补充自动取消原队列或推迟当前 Android Service 修复。
 验收与停止条件以[CTX-MEMORY 任务](../tasks/CTX-MEMORY-20261017.md)为准。
