@@ -1,0 +1,19 @@
+{
+  "number": 90,
+  "html_url": "https://github.com/mightyoung/Muyon/pull/90",
+  "state": "open",
+  "draft": true,
+  "changed_files": 19,
+  "additions": 1395,
+  "deletions": 0,
+  "observed_at": "2026-10-18T12:03:44.709423+00:00",
+  "base": {
+    "ref": "research/memory-fixed-develop-20261018",
+    "sha": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e"
+  },
+  "head": {
+    "ref": "research/memory-isolated-candidate-20261018",
+    "sha": "060e46f1359915e267f849f3807ec1999b29dd8d"
+  },
+  "workflow_runs": []
+}

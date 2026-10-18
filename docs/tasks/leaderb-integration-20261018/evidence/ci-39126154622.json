@@ -1,0 +1,104 @@
+{
+  "conclusion": "success",
+  "databaseId": 39126154622,
+  "headSha": "4b609602f76996ec69e9f51da8bc4261d6a2d94a",
+  "jobs": [
+    {
+      "completedAt": "2026-10-18T12:10:54Z",
+      "conclusion": "success",
+      "databaseId": 117671612834,
+      "name": "android-owner-bridge",
+      "startedAt": "2026-10-18T12:10:01Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Typed Service owner bridge and generated Kotlin",
+          "number": 3,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "number": 4,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "number": 8,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 9,
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39126154622/job/117671612834"
+    },
+    {
+      "completedAt": "2026-10-18T12:10:26Z",
+      "conclusion": "success",
+      "databaseId": 117671613016,
+      "name": "scoped",
+      "startedAt": "2026-10-18T12:10:01Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "number": 2,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Exact scoped Rust tests (no HTTP or legacy reopen modules)",
+          "number": 3,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+          "number": 4,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+          "number": 8,
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 9,
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39126154622/job/117671613016"
+    }
+  ],
+  "status": "completed",
+  "updatedAt": "2026-10-18T12:10:54Z",
+  "url": "https://github.com/mightyoung/Muyon/actions/runs/39126154622"
+}

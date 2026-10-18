@@ -1,0 +1,810 @@
+{
+  "observed_at": "2026-10-18T12:00:41.042016+00:00",
+  "runs": [
+    {
+      "conclusion": "cancelled",
+      "databaseId": 39109951834,
+      "headSha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T08:04:33Z",
+          "conclusion": "cancelled",
+          "databaseId": 117623730800,
+          "name": "ci",
+          "startedAt": "2026-10-18T08:03:01Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run subosito/flutter-action@v2",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "cancelled",
+              "name": "Analyze and test every package",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "skipped",
+              "name": "Laya script tests (no network, no .env)",
+              "number": 5,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Coverage summary",
+              "number": 6,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Keep coverage summaries",
+              "number": 7,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Keep the log",
+              "number": 8,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run subosito/flutter-action@v2",
+              "number": 15,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "number": 16,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 17,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109951834/job/117623730800"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-10-18T08:04:34Z",
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39109951834"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 39109951880,
+      "headSha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T08:03:27Z",
+          "conclusion": "success",
+          "databaseId": 117623730902,
+          "name": "scoped",
+          "startedAt": "2026-10-18T08:03:01Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Exact scoped Rust tests (no HTTP or legacy reopen modules)",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 8,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109951880/job/117623730902"
+        },
+        {
+          "completedAt": "2026-10-18T08:04:00Z",
+          "conclusion": "success",
+          "databaseId": 117623730995,
+          "name": "android-owner-bridge",
+          "startedAt": "2026-10-18T08:03:01Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Typed Service owner bridge and generated Kotlin",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 8,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109951880/job/117623730995"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-10-18T08:04:00Z",
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39109951880"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 39110008555,
+      "headSha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T08:06:42Z",
+          "conclusion": "success",
+          "databaseId": 117623910155,
+          "name": "compile",
+          "startedAt": "2026-10-18T08:03:54Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Checkout exact source",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize isolated temporary directories",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "JDK 17",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Record source and declared pins",
+              "number": 5,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch and verify official Gradle distribution",
+              "number": 6,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Ensure official SDK build packages",
+              "number": 7,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Required JVM checks and Android source compilation",
+              "number": 8,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Record unexecuted boundaries even after setup failure",
+              "number": 9,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload compilation evidence only",
+              "number": 10,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post JDK 17",
+              "number": 19,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Checkout exact source",
+              "number": 20,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 21,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39110008555/job/117623910155"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-10-18T08:06:43Z",
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39110008555"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 39109953658,
+      "headSha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T08:04:29Z",
+          "conclusion": "success",
+          "databaseId": 117623739722,
+          "name": "native (x86_64)",
+          "startedAt": "2026-10-18T08:03:04Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Existing exact-source API26 ABI producer",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 8,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109953658/job/117623739722"
+        },
+        {
+          "completedAt": "2026-10-18T08:04:03Z",
+          "conclusion": "success",
+          "databaseId": 117623739908,
+          "name": "scoped",
+          "startedAt": "2026-10-18T08:03:04Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Scoped tests and genuine binding reproduction",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 5,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00",
+              "number": 9,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 10,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 11,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109953658/job/117623739908"
+        },
+        {
+          "completedAt": "2026-10-18T08:04:52Z",
+          "conclusion": "success",
+          "databaseId": 117623739933,
+          "name": "native (arm64-v8a)",
+          "startedAt": "2026-10-18T08:03:04Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Existing exact-source API26 ABI producer",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 8,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109953658/job/117623739933"
+        },
+        {
+          "completedAt": "2026-10-18T08:10:31Z",
+          "conclusion": "success",
+          "databaseId": 117624099647,
+          "name": "package-device",
+          "startedAt": "2026-10-18T08:04:53Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage producer names and build actual combined APK",
+              "number": 5,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "API26 actual UI Binder native supplier read",
+              "number": 6,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 7,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00",
+              "number": 13,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 14,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109953658/job/117624099647"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-10-18T08:10:31Z",
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39109953658"
+    },
+    {
+      "conclusion": "cancelled",
+      "databaseId": 39109952120,
+      "headSha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T08:03:05Z",
+          "conclusion": "cancelled",
+          "databaseId": 117623733939,
+          "name": "compile",
+          "startedAt": "2026-10-18T08:03:02Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "cancelled",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109952120/job/117623733939"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-10-18T08:03:05Z",
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39109952120"
+    },
+    {
+      "conclusion": "skipped",
+      "databaseId": 39109955916,
+      "headSha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T08:03:05Z",
+          "conclusion": "skipped",
+          "databaseId": 117623769582,
+          "name": "compile",
+          "startedAt": "2026-10-18T08:03:11Z",
+          "status": "completed",
+          "steps": [],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109955916/job/117623769582"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-10-18T08:03:05Z",
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39109955916"
+    },
+    {
+      "conclusion": "failure",
+      "databaseId": 39109364242,
+      "headSha": "f5b058ebaa44e786e6d24df964937968e92e8840",
+      "jobs": [
+        {
+          "completedAt": "2026-10-18T07:54:35Z",
+          "conclusion": "success",
+          "databaseId": 117621958320,
+          "name": "scoped",
+          "startedAt": "2026-10-18T07:53:35Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Scoped tests and genuine binding reproduction",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 5,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00",
+              "number": 9,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 10,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 11,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109364242/job/117621958320"
+        },
+        {
+          "completedAt": "2026-10-18T07:55:08Z",
+          "conclusion": "success",
+          "databaseId": 117621958462,
+          "name": "native (x86_64)",
+          "startedAt": "2026-10-18T07:53:36Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Existing exact-source API26 ABI producer",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 8,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109364242/job/117621958462"
+        },
+        {
+          "completedAt": "2026-10-18T07:55:08Z",
+          "conclusion": "success",
+          "databaseId": 117621958473,
+          "name": "native (arm64-v8a)",
+          "startedAt": "2026-10-18T07:53:36Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Existing exact-source API26 ABI producer",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 8,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 9,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109364242/job/117621958473"
+        },
+        {
+          "completedAt": "2026-10-18T08:00:16Z",
+          "conclusion": "failure",
+          "databaseId": 117622240845,
+          "name": "package-device",
+          "startedAt": "2026-10-18T07:55:10Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "number": 1,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 2,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00",
+              "number": 3,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093",
+              "number": 4,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage producer names and build actual combined APK",
+              "number": 5,
+              "status": "completed"
+            },
+            {
+              "conclusion": "failure",
+              "name": "API26 actual UI Binder native supplier read",
+              "number": 6,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "number": 7,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00",
+              "number": 13,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+              "number": 14,
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "number": 15,
+              "status": "completed"
+            }
+          ],
+          "url": "https://github.com/mightyoung/Muyon/actions/runs/39109364242/job/117622240845"
+        }
+      ],
+      "status": "completed",
+      "updatedAt": "2026-10-18T08:00:16Z",
+      "url": "https://github.com/mightyoung/Muyon/actions/runs/39109364242"
+    }
+  ]
+}

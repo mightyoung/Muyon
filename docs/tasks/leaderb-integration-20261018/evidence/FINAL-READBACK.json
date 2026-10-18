@@ -1,0 +1,151 @@
+{
+  "observed_at": "2026-10-18T12:18:46.563046+00:00",
+  "prs": [
+    {
+      "number": 86,
+      "html_url": "https://github.com/mightyoung/Muyon/pull/86",
+      "state": "open",
+      "draft": true,
+      "changed_files": 160,
+      "additions": 16672,
+      "deletions": 225,
+      "base": {
+        "ref": "develop",
+        "sha": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e"
+      },
+      "head": {
+        "ref": "lab/leaderb-batch4-combined-20261018",
+        "sha": "3f1be180bb009a91e659c113ba5b1916e5360332"
+      }
+    },
+    {
+      "number": 87,
+      "html_url": "https://github.com/mightyoung/Muyon/pull/87",
+      "state": "open",
+      "draft": true,
+      "changed_files": 13,
+      "additions": 1032,
+      "deletions": 0,
+      "base": {
+        "ref": "docs/leaderb-next-20261018",
+        "sha": "6635bc6be057fd36c0e0c6c0aafaf034aca2ecaa"
+      },
+      "head": {
+        "ref": "research/memory-failure-validation-20261018",
+        "sha": "38b59db43f2487700ff15971ee008f0024673a13"
+      }
+    },
+    {
+      "number": 88,
+      "html_url": "https://github.com/mightyoung/Muyon/pull/88",
+      "state": "open",
+      "draft": true,
+      "changed_files": 276,
+      "additions": 27669,
+      "deletions": 119,
+      "base": {
+        "ref": "docs/leaderb-next-20261018",
+        "sha": "6635bc6be057fd36c0e0c6c0aafaf034aca2ecaa"
+      },
+      "head": {
+        "ref": "lab/android-compose-frontend-loop-20261018",
+        "sha": "2f8f4da674e871708880dcc792a1c9dafb3a17f3"
+      }
+    },
+    {
+      "number": 89,
+      "html_url": "https://github.com/mightyoung/Muyon/pull/89",
+      "state": "open",
+      "draft": true,
+      "changed_files": 25,
+      "additions": 2893,
+      "deletions": 214,
+      "base": {
+        "ref": "docs/frontend-service-loop-final-evidence-20261018",
+        "sha": "ff792336d3c52ee8874ccfa2b80b19beb71f72e5"
+      },
+      "head": {
+        "ref": "task/service-production-bridges-20261018",
+        "sha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a"
+      }
+    },
+    {
+      "number": 90,
+      "html_url": "https://github.com/mightyoung/Muyon/pull/90",
+      "state": "open",
+      "draft": true,
+      "changed_files": 19,
+      "additions": 1395,
+      "deletions": 0,
+      "base": {
+        "ref": "research/memory-fixed-develop-20261018",
+        "sha": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e"
+      },
+      "head": {
+        "ref": "research/memory-isolated-candidate-20261018",
+        "sha": "060e46f1359915e267f849f3807ec1999b29dd8d"
+      }
+    },
+    {
+      "number": 91,
+      "html_url": "https://github.com/mightyoung/Muyon/pull/91",
+      "state": "open",
+      "draft": true,
+      "changed_files": 24,
+      "additions": 1309,
+      "deletions": 11,
+      "base": {
+        "ref": "task/service-production-bridges-20261018",
+        "sha": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a"
+      },
+      "head": {
+        "ref": "lab/service-admission-bindings-20261018",
+        "sha": "4b609602f76996ec69e9f51da8bc4261d6a2d94a"
+      }
+    }
+  ],
+  "runs": [
+    {
+      "id": 39126115051,
+      "head_sha": "4b609602f76996ec69e9f51da8bc4261d6a2d94a",
+      "status": "completed",
+      "conclusion": "skipped",
+      "run_attempt": 1,
+      "event": "pull_request",
+      "html_url": "https://github.com/mightyoung/Muyon/actions/runs/39126115051"
+    },
+    {
+      "id": 39126154622,
+      "head_sha": "4b609602f76996ec69e9f51da8bc4261d6a2d94a",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "event": "workflow_dispatch",
+      "html_url": "https://github.com/mightyoung/Muyon/actions/runs/39126154622"
+    },
+    {
+      "id": 39126156490,
+      "head_sha": "4b609602f76996ec69e9f51da8bc4261d6a2d94a",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "event": "workflow_dispatch",
+      "html_url": "https://github.com/mightyoung/Muyon/actions/runs/39126156490"
+    },
+    {
+      "id": 39126158381,
+      "head_sha": "4b609602f76996ec69e9f51da8bc4261d6a2d94a",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "event": "workflow_dispatch",
+      "html_url": "https://github.com/mightyoung/Muyon/actions/runs/39126158381"
+    }
+  ],
+  "refs": [
+    "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop",
+    "cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main",
+    "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/research/memory-fixed-develop-20261018"
+  ],
+  "pr90_runs": []
+}

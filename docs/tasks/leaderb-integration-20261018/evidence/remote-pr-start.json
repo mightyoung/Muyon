@@ -1,0 +1,49 @@
+{
+  "observed_at": "2026-10-18T12:00:33.182665+00:00",
+  "prs": [
+    {
+      "baseRefName": "develop",
+      "headRefName": "lab/leaderb-batch4-combined-20261018",
+      "headRefOid": "3f1be180bb009a91e659c113ba5b1916e5360332",
+      "isDraft": true,
+      "number": 86,
+      "reviewDecision": "",
+      "state": "OPEN",
+      "title": "Integrate isolated Rust/Android Agent candidate with exact combined gates",
+      "url": "https://github.com/mightyoung/Muyon/pull/86"
+    },
+    {
+      "baseRefName": "docs/leaderb-next-20261018",
+      "headRefName": "research/memory-failure-validation-20261018",
+      "headRefOid": "38b59db43f2487700ff15971ee008f0024673a13",
+      "isDraft": true,
+      "number": 87,
+      "reviewDecision": "",
+      "state": "OPEN",
+      "title": "test(memory): isolate failure validation and actual adapter canary fixtures",
+      "url": "https://github.com/mightyoung/Muyon/pull/87"
+    },
+    {
+      "baseRefName": "docs/leaderb-next-20261018",
+      "headRefName": "lab/android-compose-frontend-loop-20261018",
+      "headRefOid": "2f8f4da674e871708880dcc792a1c9dafb3a17f3",
+      "isDraft": true,
+      "number": 88,
+      "reviewDecision": "",
+      "state": "OPEN",
+      "title": "feat(android): connect Muse input to private Rust supplier-read loop",
+      "url": "https://github.com/mightyoung/Muyon/pull/88"
+    },
+    {
+      "baseRefName": "docs/frontend-service-loop-final-evidence-20261018",
+      "headRefName": "task/service-production-bridges-20261018",
+      "headRefOid": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+      "isDraft": true,
+      "number": 89,
+      "reviewDecision": "",
+      "state": "OPEN",
+      "title": "Service: bridge current scope and configured provider handles",
+      "url": "https://github.com/mightyoung/Muyon/pull/89"
+    }
+  ]
+}

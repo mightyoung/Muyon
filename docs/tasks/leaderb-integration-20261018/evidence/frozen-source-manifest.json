@@ -1,0 +1,134 @@
+{
+  "a": {
+    "head": "4b609602f76996ec69e9f51da8bc4261d6a2d94a",
+    "clean": true,
+    "files": [
+      {
+        "path": ".github/workflows/frontend-service-loop.yml",
+        "sha256": "38fe69b492c94dae0d5976378984faff82603bce307733f2cecc6a48468b2dad",
+        "bytes": 7717
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/BINDGEN-2.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/BINDGEN-BUILD.log",
+        "sha256": "19fcc80fa43543b9e72c653dfaed7ae50e610ebe1b7b39f86a24287a51575bcc",
+        "bytes": 3444
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/BINDGEN.log",
+        "sha256": "f452d407e638f3e910f27980aa1d8870488afd12666f8eb7ead6edf58c8abc76",
+        "bytes": 167
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/DESIGN.md",
+        "sha256": "6f5c1958981fde73289cb54f338768193fdc977ccaf40cdb4d1ebdb9888de2d0",
+        "bytes": 7586
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/FINAL-BINDGEN-BUILD.log",
+        "sha256": "968be92077e06a6f158387b4f0ecc22bc0a233d367a5bb9325f78594442c3748",
+        "bytes": 1972
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/FINAL-BINDGEN.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/FINAL-RUST.log",
+        "sha256": "89f9cdc4e37c6149f78407a1b917ab4bcf62dc7a0dfe5d013b325929e4dd9e57",
+        "bytes": 2899
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/GREEN-2.log",
+        "sha256": "07193a9b1cb5fc93a8a5346581058350d992d91347f59a6a04f37bf966d2cd9b",
+        "bytes": 2899
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/GREEN.log",
+        "sha256": "4539dc4b80f93dbe8a641e4d1de94d2bdacc1c10da48a72029541ae0a551a7b9",
+        "bytes": 2822
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/PR89-AUDIT.md",
+        "sha256": "d3a3aeb7d99f02ad84c30987f99f30389676ea9a306d83f4f7e0cef8284d9601",
+        "bytes": 4498
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/PR89-CI-RUNS.json",
+        "sha256": "d01f7c428d2e2a7c9a4ef98bddc40bda2e7c3c9dda2800c3941afabb6a008ea8",
+        "bytes": 4839
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/PR89-STATUS.json",
+        "sha256": "0bd8974206bdb3e4965e2e7b32351bec38cb7a57d217abf6e06c5d1fe04f45f4",
+        "bytes": 1320
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/RED-BEHAVIOR-2.log",
+        "sha256": "07d52079f6b32a0e8d5a5593713af467e5582e8d683645e34db6c367186a0677",
+        "bytes": 4719
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/RED-COMPILE-UNIFFI-DEFAULT.log",
+        "sha256": "60b5f6f2245270cc0629d7fe9d372b79319d6660ebe89994d91e41b53390eff7",
+        "bytes": 2345
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/RED-COMPILE.log",
+        "sha256": "e07d094f80463c52f3874b1c6056fbe060119ba64dc4805667953049d3a87e4a",
+        "bytes": 4353
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/RED-MISSING-API.log",
+        "sha256": "7776472247617840c55101929664a9948041b610cd3e502fc9d635fafc3914af",
+        "bytes": 5268
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/WORKER-VERIFICATION.md",
+        "sha256": "565f925bfa1d5e064afa6348e6bd73a8badd41d6de0cb3c2ab905a0e570a95ce",
+        "bytes": 6640
+      },
+      {
+        "path": "docs/tasks/service-admission-bindings-20261018/cargo-fetch.log",
+        "sha256": "b964dfc7c073d8af659867c8e87c6be4e631c5245063bde75a376be57a5aaafa",
+        "bytes": 2721
+      },
+      {
+        "path": "experiments/redesign/android-compose-lab/app/src/androidTest/kotlin/com/mightyoung/muyon/androidlab/agentipc/ServiceHostBindingsTest.kt",
+        "sha256": "b4d6b713febe94c93445fce2b9a1611b61c41805080e47eb58f8ce856d0bb317",
+        "bytes": 4931
+      },
+      {
+        "path": "experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt",
+        "sha256": "9e1ab588ba5aa3cc0eb70cc7d7fba36ff34f84281547707959d5d431bf3a626d",
+        "bytes": 197937
+      },
+      {
+        "path": "experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidlab/agentipc/ServiceHostBindings.kt",
+        "sha256": "1af85111209f36bcedb186c511368d2e219199e78b9ffedbd088a1278ee972f9",
+        "bytes": 3482
+      },
+      {
+        "path": "experiments/redesign/android-rust-bridge-lab/core/src/service_host_bridge.rs",
+        "sha256": "882e7f78f219c5eac991ad52acd35286f95401ff849c8bb03c7212cabffddaa6",
+        "bytes": 10543
+      },
+      {
+        "path": "experiments/redesign/android-rust-bridge-lab/core/tests/service_host_bridge.rs",
+        "sha256": "35c560b6555d8fc390f2f3ec474438ba6411001ab1638d5c77872ff91589e470",
+        "bytes": 16048
+      }
+    ]
+  },
+  "b": {
+    "head": "060e46f1359915e267f849f3807ec1999b29dd8d",
+    "source_sha": "0229fa75f7c0e4ff88d22ef845aa982a83f230a6",
+    "clean": true,
+    "original_13_unchanged": true
+  }
+}

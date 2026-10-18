@@ -1,0 +1,142 @@
+{
+  "source_a": "4b609602f76996ec69e9f51da8bc4261d6a2d94a",
+  "source_b_executable": "0229fa75f7c0e4ff88d22ef845aa982a83f230a6",
+  "pr90_tip": "060e46f1359915e267f849f3807ec1999b29dd8d",
+  "files": [
+    {
+      "path": "FINAL-HANDOFF.md",
+      "bytes": 3220,
+      "sha256": "020918e048020f0107c34e5efb7148f481bac2abc96070f9fbe5b88068f0c09b"
+    },
+    {
+      "path": "FINAL-VERIFICATION.md",
+      "bytes": 12568,
+      "sha256": "d8fa08cc21aac8c26d53c7c04cc8895767e6bcece0787953ec1eac9f80606fc9"
+    },
+    {
+      "path": "NEXT-SESSION.md",
+      "bytes": 2574,
+      "sha256": "8a4ec9b36d9cbe6ba2060b9acb936b67e21168b4930dc0f1ff69d2927ed88c51"
+    },
+    {
+      "path": "PLAN.md",
+      "bytes": 3164,
+      "sha256": "b3d32fdd0f3359b3ae803bef524b71817895b997cf548bb5664896b92514ef14"
+    },
+    {
+      "path": "evidence/FINAL-READBACK.json",
+      "bytes": 4508,
+      "sha256": "4a0597a80be14a1174b3a150ed2071d011afe31a42d34a8dcc0bc597df613d79"
+    },
+    {
+      "path": "evidence/PR91-DELIVERY.json",
+      "bytes": 317,
+      "sha256": "48b6151b68039bd5ba54fcc212b8538c2e74300abb575cbfef726a504f246165"
+    },
+    {
+      "path": "evidence/artifacts-39126154622.json",
+      "bytes": 1820,
+      "sha256": "b783a3461cac60ef8911fc5afb287ac56496c89ee0c1dff712e20d1dd0bb655a"
+    },
+    {
+      "path": "evidence/artifacts-39126156490.json",
+      "bytes": 944,
+      "sha256": "a23340f11c15dad5460f710dcf15cd6aed55039e70fd4d6e66f8c008f2b543c9"
+    },
+    {
+      "path": "evidence/artifacts-39126158381.json",
+      "bytes": 3538,
+      "sha256": "0ef5539bcc0e6bff9650324d99d1efa7c907f2757c48058933b3c2edeb043596"
+    },
+    {
+      "path": "evidence/ci-39126154622.json",
+      "bytes": 3092,
+      "sha256": "109875926e23d48c4b35215a9be05dca3ac12b624ed6c9fc7d41e591c3ba4f40"
+    },
+    {
+      "path": "evidence/ci-39126154622.log",
+      "bytes": 134649,
+      "sha256": "074e8117e59c36cdbd98294a3897e864b0c3c129500c449f7b1ba2a7766023a0"
+    },
+    {
+      "path": "evidence/ci-39126156490.json",
+      "bytes": 2712,
+      "sha256": "81b91d5347d2f5bfb44a3f0b09fe9d08397bcd9fb38d5ee3e037e4cccf6cf3ef"
+    },
+    {
+      "path": "evidence/ci-39126156490.log",
+      "bytes": 90398,
+      "sha256": "3262b21fb5bce3ead893a6a56180bcf42332714cf80c5402ad22d3dfe1c4caa7"
+    },
+    {
+      "path": "evidence/ci-39126158381.json",
+      "bytes": 7059,
+      "sha256": "86525143ebe9c3079dd923ebc4e247a8bed36803d27d4653a67cdf8fb9a06594"
+    },
+    {
+      "path": "evidence/ci-39126158381.log",
+      "bytes": 228122,
+      "sha256": "8c58f54c0c75671c3362943dbbfdf483285984e29f6df65da94905877ca19905"
+    },
+    {
+      "path": "evidence/frozen-source-manifest.json",
+      "bytes": 5493,
+      "sha256": "4a218cc89fd3154acb1df54dea5e8750f862fd5fa665a416aa3cdf942dcd8bf4"
+    },
+    {
+      "path": "evidence/pr89-ci-readback.json",
+      "bytes": 26910,
+      "sha256": "1497a386a6a3e6c9d2bd0d9cbb71741f9abeb851b29ee413ef2401db3a354e69"
+    },
+    {
+      "path": "evidence/pr90-delivery.json",
+      "bytes": 507,
+      "sha256": "8fccbd9732930711693857930cadd9c9d9117fdcd25ca623e513c4d430cca32b"
+    },
+    {
+      "path": "evidence/pr91-ci-progress.json",
+      "bytes": 14926,
+      "sha256": "f6373a783b40e600b92fe869e31f9b506e514c24e85116532afdf4fbd4194b16"
+    },
+    {
+      "path": "evidence/pr91-ci-start.json",
+      "bytes": 1340,
+      "sha256": "4c70ba628e026929336281cd7514d09377aabe2ace07f446dba7b82a98aec157"
+    },
+    {
+      "path": "evidence/pr91-ci-terminal.json",
+      "bytes": 15368,
+      "sha256": "c82ff3ff85ddc65ae138adf8c858a6891001ed0b15bb4a44e3e0ad45c6761986"
+    },
+    {
+      "path": "evidence/remote-pr-start.json",
+      "bytes": 1814,
+      "sha256": "5f9cabd912d80ee4e5db808621e42cab2c6f9f87c39b0f249f1d4dbb694cdf3b"
+    },
+    {
+      "path": "reviews/admission-design-confirmed.md",
+      "bytes": 563,
+      "sha256": "828862abe4058025ca7b1d29c7046c544ec567fad709b09f22805a1b284d7e31"
+    },
+    {
+      "path": "reviews/admission-design-initial.md",
+      "bytes": 1445,
+      "sha256": "cc72f38c434cca38af295ccc0c4c21bc002986b1543b97f3d0bc3a57db7b3248"
+    },
+    {
+      "path": "reviews/admission-final-4b609602.md",
+      "bytes": 1763,
+      "sha256": "89e7572869dca2af5937cf3e306a8600d2a7fd66b473bdf816c4629809422858"
+    },
+    {
+      "path": "reviews/admission-uniffi-correction.md",
+      "bytes": 1139,
+      "sha256": "c260f81f6ecb805c9e69fb05d02a64ded35b767f24d1ac941ed0b3a3bf16562e"
+    },
+    {
+      "path": "reviews/memory-and-ci-independent.md",
+      "bytes": 3273,
+      "sha256": "0b257c3849594d1cc5a2f1a3e9e79896cc58ce42e4612a724881373dc14bb8f5"
+    }
+  ]
+}
