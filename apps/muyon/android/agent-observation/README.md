@@ -41,7 +41,7 @@ or a changed formal test inventory. This is not a Kotlin-to-Rust integration tes
   the UI cannot construct the native Agent controller or bypass it with a subprocess.
 - The shipping app does not package verified native inputs/JNA/generated bindings or
   implement the Service bootstrap/root owner. Flutter/Android SDK and full app build,
-  API24/ABI/native-package and device runtime verification remain pending work.
+  API26/ABI/native-package and device runtime verification remain pending work.
 - `rust-agent-host-lab/core/src/service_runtime.rs::run_builtin_admitted` writes a
   synthetic `source.db`, installs `BuiltinAuthority`/`BuiltinReview`, and uses an
   offline `BuiltinEndpoint`. It is not a real production store/authority adapter.

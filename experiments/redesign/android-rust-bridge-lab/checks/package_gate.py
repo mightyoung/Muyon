@@ -40,8 +40,8 @@ def aggregate(artifacts, target, source):
     binding = artifacts / 'linux/android/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'
     if binding.read_bytes() != (ROOT / BINDING).read_bytes():
         raise RuntimeError('generated_android_binding_mismatch')
-    value = dict(format_version=1, source_sha=source, build_identity=source, protocol=1,
-                 namespace='muyon_android_contract_bridge', min_api=24,
+    value = dict(format_version=2, source_sha=source, build_identity=source, protocol=1,
+                 namespace='muyon_android_contract_bridge', min_api=26,
                  android_binding_sha256=sha(ROOT / BINDING), android_config_sha256=sha(ROOT / CONFIG),
                  rust_libraries={}, jna=dict(version='5.19.1', aar_sha256=AAR_SHA, jni_sha256=JNI_SHA))
     target.mkdir()
@@ -50,7 +50,7 @@ def aggregate(artifacts, target, source):
         manifest = decode((directory / 'manifest.json').read_bytes())
         library = directory / 'libmuyon_android_contract_bridge.so'
         exact = dict(classification='GREEN', source_sha=source, build_identity=source, abi=abi,
-                     protocol=1, namespace='muyon_android_contract_bridge', min_api=24,
+                     protocol=1, namespace='muyon_android_contract_bridge', min_api=26,
                      shipping_features=[], ndk_version=NDK, source_inputs_unchanged=True,
                      cargo_lock_sha256=sha(CORE / 'Cargo.lock'), android_config_sha256=sha(ROOT / CONFIG),
                      jna_aar_sha256=AAR_SHA, jna_jni_sha256=JNI_SHA[abi], library_sha256=sha(library))
@@ -117,7 +117,7 @@ def apk_entries(apk, inputs):
 
 def apk_sdk_and_abi(badging):
     # Pinned build-tools35 emits minSdkVersion (not legacy sdkVersion).
-    return (re.findall(r'^minSdkVersion:(.*)$', badging, re.M) == ["'24'"]
+    return (re.findall(r'^minSdkVersion:(.*)$', badging, re.M) == ["'26'"]
             and re.findall(r'^targetSdkVersion:(.*)$', badging, re.M) == ["'36'"]
             and re.findall(r'^native-code:(.*)$', badging, re.M) == [" 'arm64-v8a' 'x86_64'"])
 
@@ -166,7 +166,7 @@ def main():
             raise RuntimeError('resolved_graphics_aar_inventory')
         check_graphics_aar(graphics[0])
         result.update(resolved_graphics_aar_sha256=sha(graphics[0]), graphics_path_version='1.0.1')
-        result.update(source_sha=source, protocol=1, min_api=24,
+        result.update(source_sha=source, protocol=1, min_api=26,
                       bridge_inputs_sha256=sha(evidence / 'bridge-inputs/bridge-inputs.json'),
                       resolved_jna_aar_sha256=sha(resolved[0]), state_passed=16,
                       local_ui_passed=22, diagnostic_passed=29, gradle_required_exit=0)
@@ -189,7 +189,7 @@ def main():
             raise RuntimeError('apk_sdk_or_abi')
         for name, path in [('app-debug.apk', apk), ('app-debug-androidTest.apk', test_apk)]:
             shutil.copyfile(path, evidence / name)
-        result.update(classification='GREEN', source_sha=source, protocol=1, min_api=24,
+        result.update(classification='GREEN', source_sha=source, protocol=1, min_api=26,
             state_passed=16, local_ui_passed=22, diagnostic_passed=29,
             generated_binding_sha256=sha(ROOT / BINDING), android_config_sha256=sha(ROOT / CONFIG),
             bridge_inputs_sha256=sha(evidence / 'bridge-inputs/bridge-inputs.json'),

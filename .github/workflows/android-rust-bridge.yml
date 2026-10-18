@@ -205,7 +205,7 @@ jobs:
           dirname "$(rustup which --toolchain 1.99.0 rustc)" >> "$GITHUB_PATH"
       - name: Independent strict controls
         run: python3 -B -m unittest discover -s experiments/redesign/android-rust-bridge-lab/checks -p 'test_*.py'
-      - name: Required fresh API24 link ELF JNI and NDK stub compatibility
+      - name: Required fresh API26 link ELF JNI and NDK stub compatibility
         env:
           BRIDGE_ABI: ${{ matrix.abi }}
         run: |

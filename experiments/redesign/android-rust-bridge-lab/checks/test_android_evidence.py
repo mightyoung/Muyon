@@ -13,7 +13,7 @@ from unittest.mock import patch
 import zipfile
 
 from elf_check import inspect, ElfInvalid
-from android_gate import symbols, api24_imports, AAR_SHA, JNI_SHA, NDK
+from android_gate import symbols, api26_imports, AAR_SHA, JNI_SHA, NDK
 import package_gate as package
 
 
@@ -32,7 +32,7 @@ def elf_fixture():
         offsets.append(len(strings)); strings += ('uniffi_muyon_android_contract_bridge_' + suffix).encode()+b'\0'
     raw[0x600:0x600+len(strings)] = strings
     for n, entry in enumerate([(5,0x600),(10,len(strings)),(1,1),(30,8),(0,0)]):struct.pack_into('<qQ',raw,0x400+n*16,*entry)
-    struct.pack_into('<III8sI',raw,0x500,8,4,1,b'Android\0',24)
+    struct.pack_into('<III8sI',raw,0x500,8,4,1,b'Android\0',26)
     for n, name in enumerate(offsets,1):struct.pack_into('<IBBHQQ',raw,0x700+n*24,name,16,0,1,1,1)
     struct.pack_into('<IIQQQQIIQQ',raw,0x940,0,3,2,0x600,0x600,len(strings),0,0,1,0)
     struct.pack_into('<IIQQQQIIQQ',raw,0x980,0,11,2,0x700,0x700,120,1,1,8,24)
@@ -40,9 +40,9 @@ def elf_fixture():
 
 
 class ElfControls(unittest.TestCase):
-    def test_synthetic_api24_elf_and_each_boundary_reject(self):
+    def test_synthetic_api26_elf_and_each_boundary_reject(self):
         raw=elf_fixture(); result=inspect(raw,'arm64-v8a')
-        self.assertEqual(result['declared_android_api'],24)
+        self.assertEqual(result['declared_android_api'],26)
         self.assertEqual(result['load_alignments'],[16384])
         unmapped = copy.copy(raw)
         struct.pack_into('<Q', unmapped, 64 + 3*56 + 16, 0x100000)
@@ -57,7 +57,7 @@ class ElfControls(unittest.TestCase):
         variants=[]
         bad=copy.copy(raw);struct.pack_into('<H',bad,18,62);variants.append(bad)
         bad=copy.copy(raw);struct.pack_into('<Q',bad,64+48,4096);variants.append(bad)
-        bad=copy.copy(raw);struct.pack_into('<I',bad,0x514,26);variants.append(bad)
+        bad=copy.copy(raw);struct.pack_into('<I',bad,0x514,24);variants.append(bad)
         bad=copy.copy(raw);struct.pack_into('<Q',bad,0x430+8,0);variants.append(bad)
         bad=copy.copy(raw);struct.pack_into('<I',bad,64+4*56+4,7);variants.append(bad)
         bad=copy.copy(raw);bad[0x600+1:0x600+8]=b'evil.so';variants.append(bad)
@@ -74,27 +74,27 @@ class ElfControls(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'unparsed_dynamic_symbols'):symbols('not readelf output')
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);lib=root/'lib.so';lib.write_bytes(b'fixture')
-            stub=root/'toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/24/libc.so'
+            stub=root/'toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/26/libc.so'
             stub.parent.mkdir(parents=True);stub.write_bytes(b'fixture stub')
             def fake_run(command, log, env):
                 log.write_text('  1: 0000 0 FUNC GLOBAL DEFAULT '+('1 malloc' if command[-1]==stub else 'UND forbidden_api')+'\n')
             with patch('android_gate.run',side_effect=fake_run):
-                with self.assertRaisesRegex(RuntimeError,'unresolved_api24_strong_imports:forbidden_api'):
-                    api24_imports(lib,{'needed':['libc.so']},'aarch64-linux-android',root,Path('/fixture-readelf'),root,{},'control')
+                with self.assertRaisesRegex(RuntimeError,'unresolved_api26_strong_imports:forbidden_api'):
+                    api26_imports(lib,{'needed':['libc.so']},'aarch64-linux-android',root,Path('/fixture-readelf'),root,{},'control')
 
 
 class PackageControls(unittest.TestCase):
     def test_actual_pinned_badging_shape_requires_single_minimum_target_and_abi_pair(self):
-        actual_shape = "package: name='com.mightyoung.muyon.androidlab'\nminSdkVersion:'24'\ntargetSdkVersion:'36'\nnative-code: 'arm64-v8a' 'x86_64'\n"
+        actual_shape = "package: name='com.mightyoung.muyon.androidlab'\nminSdkVersion:'26'\ntargetSdkVersion:'36'\nnative-code: 'arm64-v8a' 'x86_64'\n"
         self.assertTrue(package.apk_sdk_and_abi(actual_shape))
-        for bad in [actual_shape.replace("minSdkVersion:'24'", "minSdkVersion:'26'"),
+        for bad in [actual_shape.replace("minSdkVersion:'26'", "minSdkVersion:'24'"),
                     actual_shape.replace("targetSdkVersion:'36'", "targetSdkVersion:'24'"),
-                    actual_shape.replace("minSdkVersion:'24'", "sdkVersion:'24'"),
-                    actual_shape.replace("minSdkVersion:'24'\n", ''),
+                    actual_shape.replace("minSdkVersion:'26'", "sdkVersion:'26'"),
+                    actual_shape.replace("minSdkVersion:'26'\n", ''),
                     actual_shape.replace("targetSdkVersion:'36'\n", ''),
                     actual_shape.replace(" 'x86_64'", ''),
                     actual_shape.replace(" 'x86_64'", " 'x86_64' 'armeabi-v7a'"),
-                    actual_shape + "minSdkVersion:'24'\n",
+                    actual_shape + "minSdkVersion:'26'\n",
                     actual_shape + "native-code: 'arm64-v8a' 'x86_64'\n"]:
             with self.subTest(bad=bad):
                 self.assertFalse(package.apk_sdk_and_abi(bad))
@@ -110,7 +110,7 @@ class PackageControls(unittest.TestCase):
             (linux/'verdict.json').write_text(json.dumps(dict(accepted=True,classification='GREEN',source_sha=source,shipping_features=[],source_inputs_unchanged=True)))
             for abi in package.ABIS:
                 directory=artifacts/abi;directory.mkdir();library=directory/'libmuyon_android_contract_bridge.so';library.write_bytes(b'fixture '+abi.encode())
-                value=dict(classification='GREEN',source_sha=source,build_identity=source,abi=abi,protocol=1,namespace='muyon_android_contract_bridge',min_api=24,shipping_features=[],ndk_version=NDK,source_inputs_unchanged=True,cargo_lock_sha256=package.sha(core/'Cargo.lock'),android_config_sha256=package.sha(config),jna_aar_sha256=AAR_SHA,jna_jni_sha256=JNI_SHA[abi],library_sha256=package.sha(library))
+                value=dict(classification='GREEN',source_sha=source,build_identity=source,abi=abi,protocol=1,namespace='muyon_android_contract_bridge',min_api=26,shipping_features=[],ndk_version=NDK,source_inputs_unchanged=True,cargo_lock_sha256=package.sha(core/'Cargo.lock'),android_config_sha256=package.sha(config),jna_aar_sha256=AAR_SHA,jna_jni_sha256=JNI_SHA[abi],library_sha256=package.sha(library))
                 (directory/'manifest.json').write_text(json.dumps(value))
             with patch.object(package,'ROOT',root),patch.object(package,'CORE',core):
                 value=package.aggregate(artifacts,root/'inputs',source)
