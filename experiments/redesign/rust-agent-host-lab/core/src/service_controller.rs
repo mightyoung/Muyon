@@ -51,6 +51,10 @@ struct Inner {
 struct Shared {
     inner: Mutex<Inner>,
 }
+struct ExecutionSettlement {
+    snapshot: AgentRunSnapshot,
+    recovery: bool,
+}
 enum Completion {
     Initialized(Result<(ServiceRoot, Vec<AgentRunSnapshot>, bool), String>),
     Executed {
@@ -240,7 +244,6 @@ fn settled(s: &AgentRunSnapshot) -> bool {
 pub struct AgentServiceController {
     shared: Arc<Shared>,
     observer: Option<Arc<dyn ServiceEvidenceObserver>>,
-    private_root: PathBuf,
 }
 impl AgentServiceController {
     pub fn new(config: AgentHostServiceConfig) -> Result<Self, AgentServiceError> {
@@ -308,7 +311,6 @@ impl AgentServiceController {
                 owns_process_slot: true,
             }),
         });
-        let private_root = path.clone();
         match thread::Builder::new()
             .name("muyon-agent-inventory".into())
             .spawn(move || {
@@ -324,7 +326,7 @@ impl AgentServiceController {
                 return Err(AgentServiceError::InternalFailure);
             }
         }
-        Ok(Self { shared, observer, private_root })
+        Ok(Self { shared, observer })
     }
     pub fn connect(&self, req: AgentConnectRequest) -> AgentConnectReply {
         let mut g = self.shared.lock();
@@ -456,12 +458,34 @@ impl AgentServiceController {
         let epoch = g.meta.service_epoch.clone();
         let observer = self.observer.clone();
         let failure_intent = intent.clone();
+        // Retain the lease if spawn rejects the closure before it can run.
+        let root_transfer = Arc::new(Mutex::new(Some(root)));
+        let worker_root = root_transfer.clone();
         match thread::Builder::new()
             .name("muyon-agent-run".into())
-            .spawn(move || execute(root, intent, epoch, control, shared, observer))
+            .spawn(move || {
+                let mut root = worker_root.lock().unwrap().take().unwrap();
+                let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    execute(&mut root, intent, epoch, control, shared.clone(), observer)
+                }));
+                match result {
+                    Ok(settlement) => Completion::Executed {
+                        root,
+                        snapshot: settlement.snapshot,
+                        recovery: settlement.recovery,
+                    },
+                    Err(panic) => {
+                        // Preserve the original flock before continuing the original
+                        // panic. The actual JoinHandle still settles with Err.
+                        shared.lock().root = Some(root);
+                        std::panic::resume_unwind(panic)
+                    }
+                }
+            })
         {
             Ok(handle) => g.worker = Some(handle),
             Err(_) => {
+                g.root = root_transfer.lock().unwrap().take();
                 g.publish(unknown(failure_intent, None));
                 g.phase = AgentServiceState::RecoveryRequired;
                 g.control = None;
@@ -724,15 +748,15 @@ impl AgentServiceController {
         };
         // The only blocking join is on the Service backend waiter, never under the mutex.
         let completion = handle.map(JoinHandle::join);
-        // A joined panic has dropped the worker's lease. Reacquire it and read
-        // original durable evidence on this backend waiter, outside the mutex.
+        // The failed worker handed back the original lease before resuming its
+        // panic. Read durable evidence on this backend waiter, outside the mutex.
         // Never restore a normal terminal after failed worker cleanup.
         let interrupted = if matches!(&completion, Some(Err(_))) {
             let pending = self.shared.lock().runs.last().filter(|s| !settled(s)).cloned();
             pending.map(|last| {
                 let intent = intent_of(&last);
                 let identity = identity_of(&last);
-                let root = ServiceRoot::open(&self.private_root).ok();
+                let root = self.shared.lock().root.take();
                 let recovered = root.as_ref().and_then(|root| {
                     let run = root.runs().iter().find(|run| {
                         run.intent == intent && identity.as_ref().map(|id| {
@@ -859,13 +883,13 @@ fn close_reply(g: &Inner) -> AgentCloseReply {
     }
 }
 fn execute(
-    mut root: ServiceRoot,
+    root: &mut ServiceRoot,
     intent: AgentIntentBinding,
     epoch: String,
     control: Arc<RunControl>,
     shared: Arc<Shared>,
     observer: Option<Arc<dyn ServiceEvidenceObserver>>,
-) -> Completion {
+) -> ExecutionSettlement {
     if let Err(reason) = control.poll() {
         let cancelled = reason == "native_cancelled";
         let snapshot = if cancelled {
@@ -878,8 +902,7 @@ fn execute(
         } else {
             unknown(intent, None)
         };
-        return Completion::Executed {
-            root,
+        return ExecutionSettlement {
             snapshot,
             recovery: !cancelled,
         };
@@ -898,9 +921,8 @@ fn execute(
             } else {
                 unknown(intent, None)
             };
-            return Completion::Executed {
-                root,
-                snapshot,
+            return ExecutionSettlement {
+                    snapshot,
                 recovery: !known_quota,
             };
         }
@@ -911,9 +933,8 @@ fn execute(
     let dir = match root.run_dir(&run.identity.run_id) {
         Ok(d) => d,
         Err(_) => {
-            return Completion::Executed {
-                root,
-                snapshot: unknown(run.intent.clone(), Some(run.identity.clone())),
+            return ExecutionSettlement {
+                    snapshot: unknown(run.intent.clone(), Some(run.identity.clone())),
                 recovery: true,
             }
         }
@@ -978,13 +999,12 @@ fn execute(
                 std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| sink.observe(&run, done)));
         }
     }
-    if service_evidence::persist(&mut root, &run, &summary).is_err() {
+    if service_evidence::persist(root, &run, &summary).is_err() {
         summary.terminal = AgentTerminal::OutcomeUnknown;
         summary.reason = AgentReason::StorageFailure;
     }
     let recovery = summary.terminal == AgentTerminal::OutcomeUnknown || root.is_poisoned();
-    Completion::Executed {
-        root,
+    ExecutionSettlement {
         snapshot: AgentRunSnapshot::Terminal { summary },
         recovery,
     }
