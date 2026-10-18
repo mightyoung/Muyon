@@ -4,3 +4,5 @@ core/target/
 __pycache__/
 *.onnx
 *.aar
+
+.kotlin/

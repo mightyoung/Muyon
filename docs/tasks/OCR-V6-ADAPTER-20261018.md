@@ -46,3 +46,11 @@ and DetPreprocessor), which remain an explicit App integration blocker. A second
 finding, native LinkageError escaping the controlled envelope, was reproduced by
 a new failing test and mapped to INFERENCE_FAILED; its follow-up verification is
 recorded with the sealed candidate in module evidence.
+
+Final tested code candidate: `d1c8096d22e2281641cccc7f8e5e8cd5490f1a14`.
+Independent follow-up forced Kotlin15 to rerun and confirmed the linkage finding
+resolved, with no new incremental blocker. Rust9/Python3 were independently rerun
+on the unchanged corresponding sources at `8684e1ca`. Both review reports and
+`evidence/verification.json` retain source identities, raw-log hashes and gates.
+The final seal adds documentation/evidence and generated-cache ignore rules only;
+it does not change tested runtime/test/build source. No writer remains running.

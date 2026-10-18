@@ -1,0 +1,2 @@
+# Keep raw tool output byte-for-byte, including tool-generated trailing whitespace.
+evidence/*.log -whitespace
