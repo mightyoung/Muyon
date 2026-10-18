@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Process
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import org.json.JSONObject
@@ -36,7 +37,7 @@ class FrontendServiceLoopTest {
         awaitTag("service-read-input")
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("service-read-input"))
         compose.onNodeWithTag("service-read-input").assertExists()
-        compose.onNodeWithText(prompt).assertExists()
+        compose.onNode(hasText(prompt) and (hasTestTag("service-read-input") or hasAnyAncestor(hasTestTag("service-read-input")))).assertExists()
         awaitTag("service-read-receipt")
         compose.waitUntil(timeoutMillis=60_000) {
             compose.onAllNodes(hasTestTag("service-read-status") and hasText("已完成")).fetchSemanticsNodes().isNotEmpty()
@@ -103,7 +104,7 @@ class FrontendServiceLoopTest {
         compose.onNodeWithTag("send-service-read").assertIsNotEnabled()
         compose.onNodeWithTag("assistant-draft").performTextReplacement("仅保存本地，不发送")
         compose.onNodeWithTag("save-local-note").assertIsEnabled().performClick()
-        compose.onNodeWithTag("assistant-draft").assertTextEquals("")
+        compose.onNodeWithTag("assistant-draft").assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("")))
         compose.onNodeWithTag("send-service-read").assertIsNotEnabled()
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasText("你 · 本地记录，未发送"))
         compose.onNodeWithText("你 · 本地记录，未发送").assertIsDisplayed()
