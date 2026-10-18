@@ -94,7 +94,9 @@ jobs:
           evidence="$RUNNER_TEMP/loop-package"
           manager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           # Uses runner's existing SDK licenses; never accepts a new license.
-          "$manager" --install 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/emulator-setup.log"
+          "$manager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/emulator-setup.log"
+          export PATH="$ANDROID_HOME/platform-tools:$PATH"
+          test -x "$ANDROID_HOME/platform-tools/adb"
           sudo chmod a+rw /dev/kvm
           printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-loop-api26 -k 'system-images;android-26;google_apis;x86_64' --force
           "$ANDROID_HOME/emulator/emulator" -avd muyon-loop-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$evidence/emulator.log" 2>&1 &
