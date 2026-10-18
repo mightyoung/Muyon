@@ -34,7 +34,7 @@ These are digest inputs, not literal persisted digest values. Keep the existing
 function/encoding and migration callbacks; no Rust-schema-derived replacement
 or new digest is written. `StorageManager._open` rejects newer versions,
 same-version definition drift, structure drift, mismatched historical
-ID/digest/date, gaps/incomplete migrations, and foreign-key violations. Existing
+ID/digest or invalid applied_at, gaps/incomplete migrations, and foreign-key violations. Existing
 transaction and compatibility repair policy remain with the migration owner.
 `storage_manager_test.dart` already includes the same-version drift/preserve-data
 case; this session did not execute Dart tests and does not reopen that task.
