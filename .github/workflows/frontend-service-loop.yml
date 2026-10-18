@@ -112,14 +112,14 @@ jobs:
           if ! timeout 15 adb logcat -c > "$evidence/logcat-clear.log" 2>&1; then
             printf 'UNAVAILABLE: API26 log buffer clear; instrumentation still required\n' > "$evidence/logcat-clear-status.txt"
           fi
-          timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
+          timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest,com.mightyoung.muyon.androidlab.agentipc.ServiceHostBindingsTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
           if ! timeout 30 adb logcat -d > "$evidence/logcat.txt" 2>&1; then
             printf 'UNAVAILABLE: API26 logcat dump\n' > "$evidence/logcat-status.txt"
           fi
           adb shell ps -A > "$evidence/device-processes.txt"
-          grep -F 'OK (2 tests)' "$evidence/instrumentation.log"
+          grep -F 'OK (5 tests)' "$evidence/instrumentation.log"
           if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi
-          printf 'API26 UI/Binder/native/synthetic schema12 read PASS; model API NOT_RUN\n' > "$evidence/device-result.txt"
+          printf 'API26 UI/Binder/native/synthetic schema12 loop2 + trusted admission adapter3 =5 tests PASS; model API NOT_RUN\n' > "$evidence/device-result.txt"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

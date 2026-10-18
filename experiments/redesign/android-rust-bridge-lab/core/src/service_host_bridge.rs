@@ -44,6 +44,14 @@ pub struct ServiceOwnerProvider {
     /// Existence of an owner-held opaque handle, never a credential value.
     pub credential_handle_available: bool,
 }
+/// Exact owner snapshot for admission. Availability-only handle sentinels are excluded.
+#[derive(Clone, uniffi::Record)]
+pub struct ServiceOwnerAdmissionBinding {
+    pub profile: ServiceOwnerProfile,
+    pub profile_revision: String, pub policy_revision: String, pub grant_revision: String,
+    pub authorization_owner: String, pub model_allowed: bool, pub outbound_allowed: bool,
+    pub budget: ServiceOwnerBudget,
+}
 #[derive(Clone, uniffi::Enum)]
 pub enum ServiceOwnerMode { LocalRead, ConfiguredChat }
 #[derive(Clone, uniffi::Record)]
@@ -55,6 +63,18 @@ pub struct ServiceOwnerCallBudget {
 pub trait ServiceHostOwnerCallback: Send + Sync {
     fn current_scope(&self) -> Option<ServiceOwnerScope>;
     fn current_provider(&self) -> Option<ServiceOwnerProvider>;
+    /// Trusted current-policy review of exactly these bytes. Absence must deny.
+    fn review_payload(&self, binding: ServiceOwnerAdmissionBinding, payload: Vec<u8>) -> bool;
+    /// Durable owner must bind the full budget/request/payload/current owner and
+    /// conservatively bound total input+output tokens, one call/choice and spend.
+    /// Exposed binding drift fails closed; owner owns stranded hold release/expiry.
+    fn reserve_budget(&self, binding: ServiceOwnerAdmissionBinding, request_id: String,
+        payload: Vec<u8>, budget: ServiceOwnerCallBudget) -> Option<String>;
+    /// Owner must atomically consume its exact reservation, including the full
+    /// CallBudget captured at reserve. No credential value or send capability.
+    fn commit_admission(&self, reservation: String, binding: ServiceOwnerAdmissionBinding,
+        request_id: String, payload: Vec<u8>, credential_profile_id: String,
+        credential_ref: String) -> Option<String>;
 }
 
 struct CallbackOwner { callback: Arc<dyn ServiceHostOwnerCallback> }
@@ -110,13 +130,40 @@ impl ServiceProviderHost for CallbackProvider {
         // A stable existence-only sentinel. This is never a value-reading credential capability.
         CredentialHandle::new(&requested.id, &requested.credential_ref, "service-owner-existence-only-v1").map(Some)
     }
-    fn review_payload(&self, _binding: &ProviderBinding, _payload: &[u8]) -> Result<(), String> {
-        Err("service_payload_review_unavailable".into())
+    fn review_payload(&self, binding: &ProviderBinding, payload: &[u8]) -> Result<(), String> {
+        if self.callback.review_payload(admission_binding(binding), payload.to_vec()) { Ok(()) }
+        else { Err("service_payload_review_unavailable".into()) }
     }
-    fn reserve_budget(&self, _binding: &ProviderBinding, _request_id: &str, _payload: &[u8], _budget: &CallBudget) -> Result<String, String> {
-        Err("service_budget_ledger_unavailable".into())
+    fn reserve_budget(&self, binding: &ProviderBinding, request_id: &str, payload: &[u8], budget: &CallBudget) -> Result<String, String> {
+        self.callback.reserve_budget(admission_binding(binding), request_id.into(), payload.to_vec(),
+            ServiceOwnerCallBudget { max_tokens: budget.max_tokens, max_micros: budget.max_micros,
+                requires_tools: budget.requires_tools, requires_streaming: budget.requires_streaming })
+            .ok_or_else(|| "service_budget_ledger_unavailable".into())
     }
-    fn commit_admission(&self, _reservation: &str, _binding: &ProviderBinding, _request_id: &str, _payload: &[u8], _handle: &CredentialHandle) -> Result<String, String> {
-        Err("service_outbound_ledger_unavailable".into())
+    fn commit_admission(&self, reservation: &str, binding: &ProviderBinding, request_id: &str, payload: &[u8], handle: &CredentialHandle) -> Result<String, String> {
+        // Correlation metadata only. The existence sentinel is never exported;
+        // it proves neither a usable secret capability nor real handle rotation.
+        self.callback.commit_admission(reservation.into(), admission_binding(binding), request_id.into(),
+            payload.to_vec(), binding.profile.id.clone(), handle.reference().into())
+            .ok_or_else(|| "service_outbound_ledger_unavailable".into())
+    }
+}
+fn admission_binding(b: &ProviderBinding) -> ServiceOwnerAdmissionBinding {
+    let p = &b.profile;
+    ServiceOwnerAdmissionBinding {
+        profile: ServiceOwnerProfile {
+            id: p.id.clone(), endpoint: p.endpoint.clone(), endpoint_identity: p.endpoint_identity.clone(),
+            provider: p.provider.clone(), model: p.model.clone(), credential_ref: p.credential_ref.clone(),
+            location: match p.location { ModelLocation::Remote => ServiceOwnerLocation::Remote, ModelLocation::OwnDevice => ServiceOwnerLocation::OwnDevice },
+            purpose: match p.purpose { ModelPurpose::Chat => ServiceOwnerPurpose::Chat, ModelPurpose::Embedding => ServiceOwnerPurpose::Embedding },
+            declared: ServiceOwnerCapabilities { tool_calls: p.declared.tool_calls, streaming: p.declared.streaming },
+            tested: ServiceOwnerCapabilities { tool_calls: p.tested.tool_calls, streaming: p.tested.streaming },
+        },
+        profile_revision: b.profile_revision.clone(), policy_revision: b.policy_revision.clone(),
+        grant_revision: b.grant_revision.clone(), authorization_owner: b.authorization_owner.clone(),
+        model_allowed: b.model_allowed, outbound_allowed: b.outbound_allowed,
+        budget: ServiceOwnerBudget { revision: b.budget.revision.clone(), quota_proof: b.budget.quota_proof.clone(),
+            remaining_calls: b.budget.remaining_calls, remaining_tokens: b.budget.remaining_tokens,
+            remaining_micros: b.budget.remaining_micros },
     }
 }

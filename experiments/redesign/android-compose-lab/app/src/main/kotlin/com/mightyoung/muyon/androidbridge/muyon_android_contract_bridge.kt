@@ -658,25 +658,43 @@ internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0 : com.
 internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
 }
-@Structure.FieldOrder("uniffiFree", "uniffiClone", "currentScope", "currentProvider")
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+@Structure.FieldOrder("uniffiFree", "uniffiClone", "currentScope", "currentProvider", "reviewPayload", "reserveBudget", "commitAdmission")
 internal open class UniffiVTableCallbackInterfaceServiceHostOwnerCallback(
     @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
     @JvmField internal var `uniffiClone`: UniffiCallbackInterfaceClone? = null,
     @JvmField internal var `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0? = null,
     @JvmField internal var `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
+    @JvmField internal var `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
+    @JvmField internal var `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
+    @JvmField internal var `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
 ) : Structure() {
     class UniffiByValue(
         `uniffiFree`: UniffiCallbackInterfaceFree? = null,
         `uniffiClone`: UniffiCallbackInterfaceClone? = null,
         `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0? = null,
         `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
-    ): UniffiVTableCallbackInterfaceServiceHostOwnerCallback(`uniffiFree`,`uniffiClone`,`currentScope`,`currentProvider`,), Structure.ByValue
+        `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
+        `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
+        `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
+    ): UniffiVTableCallbackInterfaceServiceHostOwnerCallback(`uniffiFree`,`uniffiClone`,`currentScope`,`currentProvider`,`reviewPayload`,`reserveBudget`,`commitAdmission`,), Structure.ByValue
 
    internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceServiceHostOwnerCallback) {
         `uniffiFree` = other.`uniffiFree`
         `uniffiClone` = other.`uniffiClone`
         `currentScope` = other.`currentScope`
         `currentProvider` = other.`currentProvider`
+        `reviewPayload` = other.`reviewPayload`
+        `reserveBudget` = other.`reserveBudget`
+        `commitAdmission` = other.`commitAdmission`
     }
 
 }
@@ -740,6 +758,12 @@ internal object IntegrityCheckingUniffiLib {
     external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_scope(
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_provider(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_review_payload(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_reserve_budget(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission(
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_new(
     ): Int
@@ -811,6 +835,12 @@ internal object UniffiLib {
     external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_scope(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_provider(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_review_payload(`ptr`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_reserve_budget(`ptr`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_commit_admission(`ptr`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_func_bridge_info(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -987,6 +1017,15 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_provider() and 0xFFFF) != 11664) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_review_payload() and 0xFFFF) != 18686) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_reserve_budget() and 0xFFFF) != 62703) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission() and 0xFFFF) != 8798) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_new() and 0xFFFF) != 1391) {
@@ -1329,6 +1368,25 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
         val byteBuf = toUtf8(value)
         buf.putInt(byteBuf.limit())
         buf.put(byteBuf)
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterByteArray: FfiConverterRustBuffer<ByteArray> {
+    override fun read(buf: ByteBuffer): ByteArray {
+        val len = buf.getInt()
+        val byteArr = ByteArray(len)
+        buf.get(byteArr)
+        return byteArr
+    }
+    override fun allocationSize(value: ByteArray): ULong {
+        return 4UL + value.size.toULong()
+    }
+    override fun write(value: ByteArray, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        buf.put(value)
     }
 }
 
@@ -1928,6 +1986,24 @@ public interface ServiceHostOwnerCallback {
     
     fun `currentProvider`(): ServiceOwnerProvider?
     
+    /**
+     * Trusted current-policy review of exactly these bytes. Absence must deny.
+     */
+    fun `reviewPayload`(`binding`: ServiceOwnerAdmissionBinding, `payload`: kotlin.ByteArray): kotlin.Boolean
+    
+    /**
+     * Durable owner must bind the full budget/request/payload/current owner and
+     * conservatively bound total input+output tokens, one call/choice and spend.
+     * Exposed binding drift fails closed; owner owns stranded hold release/expiry.
+     */
+    fun `reserveBudget`(`binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `budget`: ServiceOwnerCallBudget): kotlin.String?
+    
+    /**
+     * Owner must atomically consume its exact reservation, including the full
+     * CallBudget captured at reserve. No credential value or send capability.
+     */
+    fun `commitAdmission`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `credentialProfileId`: kotlin.String, `credentialRef`: kotlin.String): kotlin.String?
+    
     companion object
 }
 
@@ -2059,6 +2135,69 @@ open class ServiceHostOwnerCallbackImpl: Disposable, AutoCloseable, ServiceHostO
     
 
     
+    /**
+     * Trusted current-policy review of exactly these bytes. Absence must deny.
+     */override fun `reviewPayload`(`binding`: ServiceOwnerAdmissionBinding, `payload`: kotlin.ByteArray): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_review_payload(
+        it,
+        
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterByteArray.lower(`payload`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Durable owner must bind the full budget/request/payload/current owner and
+     * conservatively bound total input+output tokens, one call/choice and spend.
+     * Exposed binding drift fails closed; owner owns stranded hold release/expiry.
+     */override fun `reserveBudget`(`binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `budget`: ServiceOwnerCallBudget): kotlin.String? {
+            return FfiConverterOptionalString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_reserve_budget(
+        it,
+        
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterTypeServiceOwnerCallBudget.lower(`budget`),_status)
+}
+    }
+    )
+    }
+    
+
+    
+    /**
+     * Owner must atomically consume its exact reservation, including the full
+     * CallBudget captured at reserve. No credential value or send capability.
+     */override fun `commitAdmission`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `credentialProfileId`: kotlin.String, `credentialRef`: kotlin.String): kotlin.String? {
+            return FfiConverterOptionalString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_commit_admission(
+        it,
+        
+        FfiConverterString.lower(`reservation`),
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterString.lower(`credentialProfileId`),
+        FfiConverterString.lower(`credentialRef`),_status)
+}
+    }
+    )
+    }
+    
+
+    
 
     
 
@@ -2098,6 +2237,51 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
+    internal object `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2 {
+        override fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`reviewPayload`(
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterByteArray.lift(`payload`),
+                )
+            }
+            val writeReturn = { value: kotlin.Boolean -> uniffiOutReturn.setValue(FfiConverterBoolean.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3 {
+        override fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`reserveBudget`(
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterString.lift(`requestId`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterTypeServiceOwnerCallBudget.lift(`budget`),
+                )
+            }
+            val writeReturn = { value: kotlin.String? -> uniffiOutReturn.setValue(FfiConverterOptionalString.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 {
+        override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`commitAdmission`(
+                    FfiConverterString.lift(`reservation`),
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterString.lift(`requestId`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterString.lift(`credentialProfileId`),
+                    FfiConverterString.lift(`credentialRef`),
+                )
+            }
+            val writeReturn = { value: kotlin.String? -> uniffiOutReturn.setValue(FfiConverterOptionalString.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
 
     internal object uniffiFree: UniffiCallbackInterfaceFree {
         override fun callback(handle: Long) {
@@ -2116,6 +2300,9 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
         uniffiClone,
         `currentScope`,
         `currentProvider`,
+        `reviewPayload`,
+        `reserveBudget`,
+        `commitAdmission`,
     )
 
     // Registers the foreign callback with the Rust side.
@@ -3374,6 +3561,77 @@ public object FfiConverterTypeDiagnosticRequest: FfiConverterRustBuffer<Diagnost
             FfiConverterUInt.write(value.`protocol`, buf)
             FfiConverterString.write(value.`requestId`, buf)
             FfiConverterTypeDiagnosticVariant.write(value.`variant`, buf)
+    }
+}
+
+
+
+/**
+ * Exact owner snapshot for admission. Availability-only handle sentinels are excluded.
+ */
+data class ServiceOwnerAdmissionBinding (
+    val `profile`: ServiceOwnerProfile
+    , 
+    val `profileRevision`: kotlin.String
+    , 
+    val `policyRevision`: kotlin.String
+    , 
+    val `grantRevision`: kotlin.String
+    , 
+    val `authorizationOwner`: kotlin.String
+    , 
+    val `modelAllowed`: kotlin.Boolean
+    , 
+    val `outboundAllowed`: kotlin.Boolean
+    , 
+    val `budget`: ServiceOwnerBudget
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerAdmissionBinding: FfiConverterRustBuffer<ServiceOwnerAdmissionBinding> {
+    override fun read(buf: ByteBuffer): ServiceOwnerAdmissionBinding {
+        return ServiceOwnerAdmissionBinding(
+            FfiConverterTypeServiceOwnerProfile.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterTypeServiceOwnerBudget.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerAdmissionBinding) = (
+            FfiConverterTypeServiceOwnerProfile.allocationSize(value.`profile`) +
+            FfiConverterString.allocationSize(value.`profileRevision`) +
+            FfiConverterString.allocationSize(value.`policyRevision`) +
+            FfiConverterString.allocationSize(value.`grantRevision`) +
+            FfiConverterString.allocationSize(value.`authorizationOwner`) +
+            FfiConverterBoolean.allocationSize(value.`modelAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`outboundAllowed`) +
+            FfiConverterTypeServiceOwnerBudget.allocationSize(value.`budget`)
+    )
+
+    override fun write(value: ServiceOwnerAdmissionBinding, buf: ByteBuffer) {
+            FfiConverterTypeServiceOwnerProfile.write(value.`profile`, buf)
+            FfiConverterString.write(value.`profileRevision`, buf)
+            FfiConverterString.write(value.`policyRevision`, buf)
+            FfiConverterString.write(value.`grantRevision`, buf)
+            FfiConverterString.write(value.`authorizationOwner`, buf)
+            FfiConverterBoolean.write(value.`modelAllowed`, buf)
+            FfiConverterBoolean.write(value.`outboundAllowed`, buf)
+            FfiConverterTypeServiceOwnerBudget.write(value.`budget`, buf)
     }
 }
 
