@@ -1,0 +1,80 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :adapter
+Unable to initialize metrics, ensure /home/agent/.android is writable, details: /home/agent/.android/analytics.settings (No such file or directory)
+
+> Task :adapter:verifyAssets
+All four v6 det/rec model and config bundles match models.lock.json
+
+> Task :adapter:stageAssets
+> Task :adapter:preBuild
+> Task :adapter:preDebugBuild
+> Task :adapter:mergeDebugJniLibFolders
+> Task :adapter:mergeDebugNativeLibs NO-SOURCE
+> Task :adapter:stripDebugDebugSymbols NO-SOURCE
+> Task :adapter:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :adapter:copyDebugJniLibsProjectAndLocalJars
+> Task :adapter:generateDebugResValues
+> Task :adapter:generateDebugResources
+> Task :adapter:packageDebugResources
+> Task :adapter:extractDeepLinksForAarDebug
+> Task :adapter:mergeDebugShaders
+> Task :adapter:compileDebugShaders NO-SOURCE
+> Task :adapter:generateDebugAssets UP-TO-DATE
+> Task :adapter:mergeDebugAssets
+> Task :adapter:prepareDebugArtProfile
+> Task :adapter:javaPreCompileDebug
+> Task :adapter:parseDebugLocalResources
+> Task :adapter:prepareLintJarForPublish
+> Task :probe:preBuild UP-TO-DATE
+> Task :probe:preDebugBuild UP-TO-DATE
+> Task :probe:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :adapter:generateDebugRFile
+> Task :adapter:writeDebugAarMetadata
+> Task :probe:javaPreCompileDebug
+> Task :adapter:processDebugManifest
+> Task :adapter:compileDebugLibraryResources
+> Task :probe:generateDebugResValues
+> Task :probe:checkDebugAarMetadata
+> Task :probe:mapDebugSourceSetPaths
+> Task :probe:generateDebugResources
+> Task :probe:packageDebugResources
+> Task :probe:createDebugCompatibleScreenManifests
+> Task :adapter:extractDeepLinksDebug
+> Task :probe:extractDeepLinksDebug
+> Task :probe:parseDebugLocalResources
+> Task :probe:processDebugMainManifest
+> Task :probe:processDebugManifest
+> Task :probe:mergeDebugShaders
+> Task :probe:compileDebugShaders NO-SOURCE
+> Task :probe:generateDebugAssets UP-TO-DATE
+> Task :probe:mergeDebugAssets
+> Task :probe:processDebugManifestForPackage
+> Task :probe:mergeDebugResources
+> Task :probe:processDebugJavaRes NO-SOURCE
+> Task :probe:checkDebugDuplicateClasses
+> Task :probe:desugarDebugFileDependencies
+> Task :probe:compressDebugAssets
+> Task :adapter:copyDebugJniLibsProjectOnly
+> Task :probe:processDebugResources
+> Task :probe:mergeDebugJniLibFolders
+> Task :probe:validateSigningDebug FAILED
+> Task :probe:mergeDebugNativeLibs
+> Task :probe:mergeExtDexDebug
+> Task :adapter:compileDebugKotlin
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':probe:validateSigningDebug'.
+> Keystore file '/workspace/ocr-v6-followup/experiments/redesign/ocr-v6-adapter/android-packaging/probe/build/ocr-probe-debug.keystore' not found for signing config 'debug'.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 41s
+44 actionable tasks: 44 executed
