@@ -1,0 +1,26 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running tests/publication.rs (docs/tasks/pip-registry-20261018/probe/target/debug/deps/publication-4f84d5e9a3d7c400)
+
+running 4 tests
+test closed_catalog_refuses_late_publication_and_new_admission ... ok
+test successful_publication_invalidates_previous_generation_before_dispatch ... ok
+test rejected_publication_preserves_existing_prepared_admission ... ok
+test every_declaration_stage_rejects_without_reserving_namespace_or_binding ... FAILED
+
+failures:
+
+---- every_declaration_stage_rejects_without_reserving_namespace_or_binding stdout ----
+
+thread 'every_declaration_stage_rejects_without_reserving_namespace_or_binding' panicked at tests/../../../../../experiments/redesign/plugin-contract-lab/core/tests/support/mod.rs:17:93:
+assertion `left == right` failed
+  left: String("unexpected_or_missing_field")
+ right: String("unknown_field")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    every_declaration_stage_rejects_without_reserving_namespace_or_binding
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test publication`

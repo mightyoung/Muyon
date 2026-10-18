@@ -1,0 +1,10 @@
+[package]
+name = "pip-registry-evidence"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+muyon-plugin-contract-lab = { path = "../../../../experiments/redesign/plugin-contract-lab/core" }
+
+[workspace]
