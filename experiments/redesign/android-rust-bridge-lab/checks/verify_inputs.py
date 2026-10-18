@@ -8,8 +8,8 @@ import sys
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[4]
-SCHEMA = Path('docs/design/ANDROID-RUST-BRIDGE-INPUTS-V1.schema.json')
-SCHEMA_SHA = '1e47b50edc6e85e352e5d931e10c7a1ef18f0b4b85b112e17bf71664c4a1bece'
+SCHEMA = Path('docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.schema.json')
+SCHEMA_SHA = '6a9c5168816de5188fa7ef15b8e9f00fc2b745278ef02206fac3806ab30f93c2'
 BINDING = Path('experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt')
 CONFIG = Path('experiments/redesign/android-rust-bridge-lab/core/uniffi.android.toml')
 ABIS = ('arm64-v8a', 'x86_64')

@@ -93,7 +93,7 @@ def inspect(raw, abi, rust=True):
             if name.rstrip(b'\0') == b'Android' and note_type == 1:
                 reject(descsz < 4, 'elf_android_note')
                 android_api.append(struct.unpack_from('<I', desc)[0])
-    reject((len(android_api) != 1 or android_api[0] != 24) if rust else (len(android_api) > 1 or bool(android_api) and not 1 <= android_api[0] <= 24), 'elf_android_api')
+    reject((len(android_api) != 1 or android_api[0] != 26) if rust else (len(android_api) > 1 or bool(android_api) and not 1 <= android_api[0] <= 26), 'elf_android_api')
     reject(shsize != 64 or shnum == 0 or shnum > 8192, 'elf_sections')
     sections = [unpack('<IIQQQQIIQQ', shoff + n * shsize) for n in range(shnum)]
     symbols = []
