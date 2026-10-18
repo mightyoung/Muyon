@@ -13,5 +13,10 @@ fun runChatReadChecks() {
     val recovered=original.disclosureLost("binder_lost")
     check(recovered.cursor==0L && recovered.answer.isEmpty() && recovered.projection==null && recovered.receipt==null)
     check(recovered.requestId==original.requestId && recovered.runId==original.runId && recovered.admittedServiceEpoch==original.admittedServiceEpoch && recovered.originalReceiptIdentity==original.originalReceiptIdentity)
-    println("PASS 11 chat read UTF-8 bounds and immutable identity checks; Binder/native NOT_RUN")
+    val disclosureDenied=original.copy(status="unknown",reason="DISCLOSURE_UNAVAILABLE").finishEnvelope(true,0)
+    check(disclosureDenied.status=="unknown" && disclosureDenied.reason=="DISCLOSURE_UNAVAILABLE")
+    check(disclosureDenied.answer.isEmpty() && disclosureDenied.projection==null && disclosureDenied.receipt==null && disclosureDenied.originalReceiptIdentity=="original")
+    check(runCatching{original.copy(status="unknown").finishEnvelope(true,1)}.isFailure)
+    check(runCatching{original.copy(status="events").finishEnvelope(true,0)}.isFailure)
+    println("PASS 15 chat read UTF-8 bounds and immutable identity checks; Binder/native NOT_RUN")
 }

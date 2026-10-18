@@ -103,7 +103,6 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
             }.copy(cursor=cursor)
         }
         require(o.get("next_cursor") is Int || o.get("next_cursor") is Long);require(o.getLong("next_cursor")==value.cursor)
-        require(!o.boolean("terminal") || value.status in setOf("completed","cancelled","failed","outcome_unknown"))
-        return if(value.status in setOf("unknown","rejected"))value.disclosureLost(value.reason)else value
+        return value.finishEnvelope(o.boolean("terminal"),events.length())
     }
 }
