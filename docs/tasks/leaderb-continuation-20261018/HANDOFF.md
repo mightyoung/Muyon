@@ -1,6 +1,6 @@
 # LeaderB continuation — fixed independent candidates
 
-Status draft: source writers stopped or source-frozen; final environment checks and CI still in progress. This file will be sealed only after their terminal states are recorded. LeaderB is the sole integrator; no candidate is merged to develop/main.
+Status draft: all this session's product writers/builders have stopped; final CI is still in progress and the integrator owns only this record. This file will be sealed only after terminal CI states are recorded. LeaderB is the sole integrator; no candidate is merged to develop/main.
 
 ## Ownership and unchanged holds
 
@@ -52,11 +52,17 @@ B remains a single-scope/direct-source isolated SQLite crate with synthetic inde
 
 Current-source generic CI: https://github.com/mightyoung/Muyon/actions/runs/39099707674 . Terminal result pending at draft time; it does not run this isolated Rust crate. Fresh local exact-source 24-test evidence is separate.
 
+The initial long-lived B CLI watcher exited1 with HTTP401; a fresh readback showed the CI run still in progress. The integrator initially misreported that observer exit as CI failure in commentary and immediately corrected it after actual run lookup. It was not a failed CI or a rerun. The A watcher was deliberately stopped143, with no CI cancellation. Raw observer errors/readback are retained; subsequent short read-only lookups determine actual CI status. The A author manifest's watcher file is the exact 1980-byte in-progress snapshot matched by its original SHA256; later CI evidence is separate.
+
+Record-archive whitespace checks retain original raw log lines and the literal `candidate.patch` context line. Whole-archive diff check returns2; authored docs/source check excluding only `evidence/**/*.log` and the raw `evidence/a/candidate.patch` passes. Raw artifacts are not reformatted to manufacture a clean archive verdict.
+
 ## Product capability and separate tasks
 
 See [PUBLIC-SERVICES-STATUS.md](PUBLIC-SERVICES-STATUS.md) for actual Dart services/callers versus migration. Existing OCR/knowledge/embedding/transfer/profile/secrets paths are implemented and wired in Dart; current installed-device availability was not tested here. W1 file/PDF -> W6 text/OCR -> vectors and W7 safe resource/credential dependencies are explicit. No test total is product cutover acceptance.
 
 The user selected PP-OCRv6; separate task `01a14d70-8afa-71c1-bea9-a871b2e090ce` owns its independent platform adapter/Rust result contract/tests. Tiny is the current candidate, minSDK24 stays, no host changes are duplicated here. That task remains separate from this session's stop state. No default embedding model has been selected; product profile endpoint/modelId are user-configured, `test-embedding` is synthetic, no replacement decision was supplied. Muse research is separate and was not awaited/repeated. Icon adaptation is untouched. REMORY efficacy gate remains and RSI is off.
+
+UI coordination and exact seven-file entry patch ownership are in [ENTRY-PATCH-BOUNDARY.md](ENTRY-PATCH-BOUNDARY.md). Latest direction preserves WorkBuddy for the main menu and uses Muse for pages/components and conversation/sidebar work in the separate UI session, not all business navigation. This does not change the frozen Service/core interfaces or block core/OCR progress.
 
 ## Next owner
 

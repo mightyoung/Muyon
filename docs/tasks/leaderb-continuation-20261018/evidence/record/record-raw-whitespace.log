@@ -1,0 +1,18 @@
+docs/tasks/leaderb-continuation-20261018/evidence/a/candidate.patch:355: trailing whitespace.
++ 
+docs/tasks/leaderb-continuation-20261018/evidence/a/gradle-module-check.log:12: trailing whitespace.
++Daemon will be stopped at the end of the build 
+docs/tasks/leaderb-continuation-20261018/evidence/a/gradle-module-jdk17-check.log:2: trailing whitespace.
++Daemon will be stopped at the end of the build 
+docs/tasks/leaderb-continuation-20261018/evidence/a/gradle-module-proxy-check.log:2: trailing whitespace.
++Daemon will be stopped at the end of the build 
+docs/tasks/leaderb-continuation-20261018/evidence/a/gradle-module-system-trust-check.log:2: trailing whitespace.
++Daemon will be stopped at the end of the build 
+docs/tasks/leaderb-continuation-20261018/evidence/a/rust-corroboration.log:45: new blank line at EOF.
+docs/tasks/leaderb-continuation-20261018/evidence/b/candidate-archive-raw-whitespace.log:2: trailing whitespace.
++++ 
+docs/tasks/leaderb-continuation-20261018/evidence/b/candidate-archive-raw-whitespace.log:5: trailing whitespace.
+++ 
+docs/tasks/leaderb-continuation-20261018/evidence/b/candidate-review-2.log:5: new blank line at EOF.
+docs/tasks/leaderb-continuation-20261018/evidence/b/candidate-review-4.log:75: new blank line at EOF.
+docs/tasks/leaderb-continuation-20261018/evidence/b/coordinator-suite.log:49: new blank line at EOF.
