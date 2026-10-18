@@ -205,4 +205,107 @@ class DurableServiceHostOwnerTest {
         }
     }
 
+    @Test fun duplicate_failure_after_expiry_cannot_resurrect_on_rollback_and_reconstruction() {
+        var now = 100L
+        val f = file(); val a = ServiceAdmissionAuthority(state())
+        val first = owner(f, a) { now }
+        val token = first.reserveBudget(binding(), "r", payload, call)!!
+        now = 111L
+        assertNull(first.reserveBudget(binding(), "r", payload, call))
+        first.close()
+        now = 105L
+        owner(f, a) { now }.use { reopened ->
+            assertNull(commit(reopened, token))
+            assertNull(reopened.reserveBudget(binding(), "rollback", payload, call))
+        }
+        SQLiteDatabase.openDatabase(f.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+            db.rawQuery("SELECT high_water FROM clock_guard WHERE id=1", null).use { c ->
+                assertTrue(c.moveToFirst()); assertEquals(111L, c.getLong(0))
+            }
+            db.rawQuery("SELECT state FROM reservations", null).use { c ->
+                assertTrue(c.moveToFirst()); assertEquals("expired", c.getString(0))
+            }
+        }
+    }
+
+    @Test fun missing_request_unique_in_otherwise_v1_schema_is_rejected_without_repair() {
+        val a = ServiceAdmissionAuthority(state()); val seed = file()
+        owner(seed, a).close()
+        val ddl = SQLiteDatabase.openDatabase(seed.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+            db.rawQuery("SELECT sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name", null).use { c ->
+                buildList { while (c.moveToNext()) add(c.getString(0)) }
+            }
+        }
+        val malformed = file()
+        SQLiteDatabase.openOrCreateDatabase(malformed, null).use { db ->
+            ddl.forEach { sql -> db.execSQL(sql.replace("request_id BLOB NOT NULL UNIQUE", "request_id BLOB NOT NULL")) }
+            db.execSQL("INSERT INTO clock_guard VALUES (1,0)")
+            db.version = 1
+        }
+        val originalBytes = malformed.readBytes()
+        owner(malformed, a).use { o ->
+            assertNull(o.currentProviderMetadata())
+            assertNull(o.reserveBudget(binding(), "r", payload, call))
+        }
+        assertArrayEquals(originalBytes, malformed.readBytes())
+        SQLiteDatabase.openDatabase(malformed.path, null, SQLiteDatabase.OPEN_READONLY).use { db ->
+            assertEquals(1, db.version)
+            db.rawQuery("SELECT sql FROM sqlite_master WHERE name='reservations'", null).use { c ->
+                assertTrue(c.moveToFirst()); assertFalse(c.getString(0).contains("request_id BLOB NOT NULL UNIQUE"))
+            }
+        }
+    }
+
+    @Test fun exact_expiry_boundary_denies_and_releases_only_the_hold() {
+        var now = 100L; val a = ServiceAdmissionAuthority(state())
+        owner(file(), a) { now }.use { o ->
+            val token = o.reserveBudget(binding(), "r", payload, call)!!
+            now = 110L
+            assertNull(commit(o, token))
+            assertNull(o.reserveBudget(binding(), "r", payload, call))
+            assertNotNull(o.reserveBudget(binding(), "fresh", payload, call))
+        }
+    }
+
+    @Test fun each_quota_dimension_independently_limits_consumed_calls_after_reopen_and_refresh() {
+        val ceilings = listOf(
+            ServiceOwnerBudget("epoch", "quota", 1uL, 700uL, 1100uL),
+            ServiceOwnerBudget("epoch", "quota", 100uL, 7uL, 1100uL),
+            ServiceOwnerBudget("epoch", "quota", 100uL, 700uL, 11uL))
+        for (ceiling in ceilings) {
+            val b = binding().copy(budget = ceiling); val a = ServiceAdmissionAuthority(state(b)); val f = file()
+            owner(f, a).use { first ->
+                val token = first.reserveBudget(b, "r", payload, call)!!
+                assertNotNull(commit(first, token, b))
+            }
+            a.replace(state(b))
+            owner(f, a).use { reopened ->
+                assertEquals(ceiling, reopened.currentProviderMetadata()!!.budget)
+                assertNull(reopened.reserveBudget(b, "fresh", payload, call))
+                assertNull(reopened.reserveBudget(b, "r", payload, call))
+            }
+        }
+    }
+
+    @Test fun competing_connections_admit_once_and_reject_duplicate_requests_and_replay() {
+        val f = file(); val a = ServiceAdmissionAuthority(state())
+        owner(f, a).use { one -> owner(f, a).use { two ->
+            val token = one.reserveBudget(binding(), "r", payload, call)!!
+            val start = java.util.concurrent.CountDownLatch(1)
+            val pool = Executors.newFixedThreadPool(2)
+            try {
+                val commits = listOf(one, two).map { o -> pool.submit<String?> {
+                    check(start.await(5, TimeUnit.SECONDS)); commit(o, token)
+                } }
+                start.countDown()
+                assertEquals(1, commits.count { it.get(5, TimeUnit.SECONDS) != null })
+                assertNull(commit(one, token)); assertNull(commit(two, token))
+                val duplicates = listOf(one, two).map { o -> pool.submit<String?> {
+                    o.reserveBudget(binding(), "r", payload, call)
+                } }
+                assertTrue(duplicates.all { it.get(5, TimeUnit.SECONDS) == null })
+            } finally { start.countDown(); pool.shutdownNow() }
+        }}
+    }
+
 }
