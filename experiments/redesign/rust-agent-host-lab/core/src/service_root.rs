@@ -204,7 +204,7 @@ impl ServiceRoot {
         result.census()?;
         Ok(result)
     }
-    fn census(&self) -> Result<u64> {
+    fn census(&mut self) -> Result<u64> {
         let mut bytes = 0u64;
         let mut entries = 0usize;
         let uid = fs::symlink_metadata(&self.dir)
@@ -255,6 +255,11 @@ impl ServiceRoot {
                     if !known.contains(&n.as_str()) && !temp {
                         return Err("service_root_inventory".into());
                     }
+                    if temp {
+                        // Recognized atomic candidates are evidence of interruption,
+                        // never garbage to remove or permission to admit another run.
+                        self.poisoned = true;
+                    }
                     let f = fs::symlink_metadata(file.path()).map_err(|e| e.to_string())?;
                     if !f.is_file()
                         || f.file_type().is_symlink()
@@ -272,6 +277,9 @@ impl ServiceRoot {
                     || (name.starts_with(".index.db.")
                         && name[10..].bytes().all(|b| b.is_ascii_digit() || b == b'.')))
             {
+                if name.starts_with(".index.db.") {
+                    self.poisoned = true;
+                }
                 bytes = bytes.checked_add(m.len()).ok_or("service_root_quota")?
             } else {
                 return Err("service_root_inventory".into());
@@ -334,6 +342,9 @@ impl ServiceRoot {
                 > ROOT_BYTES
         {
             return Err("service_root_quota".into());
+        }
+        if self.poisoned {
+            return Err("service_root_poisoned".into());
         }
         let run = AgentDurableRun {
             intent,
