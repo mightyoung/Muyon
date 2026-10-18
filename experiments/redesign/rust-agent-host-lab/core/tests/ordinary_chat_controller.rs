@@ -66,7 +66,7 @@ fn output_signals_post_commit_rotation_and_quota_preserve_no_retry_boundary(){
     for facts in [Facts{output_secret:true,..Facts::default()},Facts{rotate_on_commit:true,..Facts::default()}] {
         let f=Arc::new(Mutex::new(facts));let(path,c,client)=open(f.clone());let reply=submit(&c,&client,"bounded1","hello");assert!(reply.encode().contains("outcome_unknown"));assert!(!reply.encode().contains("synthetic-output-canary"));let sent=f.lock().unwrap().sends;submit(&c,&client,"bounded1","hello");assert_eq!(f.lock().unwrap().sends,sent);clean(path,c);
     }
-    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());submit(&c,&client,"quota1","hello");submit(&c,&client,"quota2","hello");let third=submit(&c,&client,"quota3","hello");assert!(!third.encode().contains("completed"));assert_eq!(f.lock().unwrap().sends,2);clean(path,c);
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let first=submit(&c,&client,"quota1","hello");assert!(first.encode().contains("completed"),"first {}",first.encode());let second=submit(&c,&client,"quota2","hello");assert!(second.encode().contains("completed"),"second {}",second.encode());let third=submit(&c,&client,"quota3","hello");assert!(!third.encode().contains("completed"));assert_eq!(f.lock().unwrap().sends,2);clean(path,c);
 }
 #[test]
 fn changed_frozen_usage_or_profile_evidence_cannot_disclose_completed_answer(){

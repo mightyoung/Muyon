@@ -102,7 +102,8 @@ internal class DurableServiceHostOwner(
         if(!ordinaryChat || !ordinaryTextSupported(text))null else state.chat?.copy(conversation=conversation)
     }
     @Synchronized override fun credentialCapability(profile:String,reference:String):ServiceOwnerCredentialCapability?=read {
-        if(ordinaryChat && it.provider?.profile?.id==profile && it.provider.profile.credentialRef==reference && it.provider.credentialHandleAvailable)it.credential else null
+        val p=it.provider
+        if(ordinaryChat && p!=null && p.profile.id==profile && p.profile.credentialRef==reference && p.credentialHandleAvailable)it.credential else null
     }
     private fun scopeBytes(s:ServiceAdmissionAuthority.State):ByteArray = if(ordinaryChat) {
         val a=checkNotNull(s.chat);val c=checkNotNull(s.credential)
