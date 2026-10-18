@@ -1,0 +1,39 @@
+{
+  "utc": "2026-10-18T05:38:32.064122+00:00",
+  "environment_id": "ccarenv_b64_Y2NhcmVudl9mZjZkZmM2MmI0Zjg4MTkxYTA1NzZjNTk4MGRjNGI5ZQ",
+  "remote_refs": {
+    "refs/heads/develop": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e",
+    "refs/heads/lab/leaderb-batch4-combined-20261018": "3f1be180bb009a91e659c113ba5b1916e5360332",
+    "refs/heads/main": "cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003",
+    "refs/heads/task/leaderb-hy-candidate-20261018": "379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c",
+    "refs/heads/task/leaderb-production-readonly-20261018": "7965f46beba6f52924e73e99fde6d69c18d985ff"
+  },
+  "local_product_worktrees": {
+    "original": {
+      "path": "/workspace/Muyon",
+      "head": "cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003",
+      "status": ""
+    },
+    "A": {
+      "path": "/workspace/leaderb-a",
+      "head": "7965f46beba6f52924e73e99fde6d69c18d985ff",
+      "status": ""
+    },
+    "B": {
+      "path": "/workspace/leaderb-b",
+      "head": "379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c",
+      "status": ""
+    }
+  },
+  "PR86": {
+    "baseRefName": "develop",
+    "headRefName": "lab/leaderb-batch4-combined-20261018",
+    "headRefOid": "3f1be180bb009a91e659c113ba5b1916e5360332",
+    "isDraft": true,
+    "mergedAt": null,
+    "state": "OPEN",
+    "url": "https://github.com/mightyoung/Muyon/pull/86"
+  },
+  "owned_builders": [],
+  "record_writer": "sealing only docs/tasks/leaderb-continuation-20261018; record branch checked clean after final commit/push separately"
+}
