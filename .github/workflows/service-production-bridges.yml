@@ -54,7 +54,10 @@ jobs:
           export MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"
           cargo test --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --test service_host_bridge -- --nocapture 2>&1 | tee "$RUNNER_TEMP/android-owner-evidence/test.log"
           cargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings
-          "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config experiments/redesign/android-rust-bridge-lab/core/uniffi.android.toml --out-dir "$RUNNER_TEMP/android-owner-evidence/generated" --no-format
+          (
+            cd experiments/redesign/android-rust-bridge-lab/core
+            "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config uniffi.android.toml --out-dir "$RUNNER_TEMP/android-owner-evidence/generated" --no-format
+          )
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
