@@ -131,6 +131,22 @@
             "registered_protocol_rejects_name_collisions",
             "registered_protocol_rejects_unknown_and_incomplete"
           ]
+        },
+        "integration:http_transport": {
+          "family": "synthetic-http-transport",
+          "names": [
+            "actual_loopback_http_returns_sse_without_changing_exact_reviewed_payload",
+            "ambiguous_framing_redirect_and_response_limit_are_rejected",
+            "cancellation_and_insufficient_budget_send_zero_bytes",
+            "cancellation_and_revocation_after_send_stop_before_response_admission",
+            "existing_agent_unknown_and_evidence_hold_never_enter_http_provider",
+            "final_review_after_connect_prevents_first_request_byte",
+            "idle_and_total_deadlines_bound_an_open_synthetic_stream",
+            "partial_sse_never_becomes_a_tool_event",
+            "remote_addresses_are_rejected_before_any_connection",
+            "response_budget_exhaustion_counts_actual_bytes_without_retry",
+            "truncated_http_response_is_an_error_with_one_send_and_no_retry"
+          ]
         }
       },
       "sources": {
@@ -165,9 +181,13 @@
         "experiments/redesign/core-agent-lab/core/tests/native_protocol.rs": {
           "commit": "9d6b2a15ed35259d01035cdb3a53aa1586503879",
           "sha256": "d9d2a8e306bb7b4fc70f9e63121ba9ed8eb83aa32e8ecee7b9972f78c60f9444"
+        },
+        "experiments/redesign/core-agent-lab/core/tests/http_transport.rs": {
+          "commit": "03c1628631a07762ac9961f7162d1e49343ca2b8",
+          "sha256": "98d874da58ba46adbce64688e931b371d3b4694d672b1bec83a4f18461dc04da"
         }
       },
-      "expected_total": 94
+      "expected_total": 105
     },
     "plugin": {
       "groups": {
@@ -177,6 +197,7 @@
             "atomic_registration_publishes_only_valid_bundle",
             "declaration_labels_cannot_authorize",
             "discovery_filters_current_authority",
+            "foreign_data_admission_requires_the_referenced_schema_closure",
             "namespace_duplicates_and_versions_reject",
             "registration_neither_grants_nor_reads",
             "relation_and_view_refs_must_resolve",
@@ -210,8 +231,8 @@
       },
       "sources": {
         "experiments/redesign/plugin-contract-lab/core/tests/registration.rs": {
-          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
-          "sha256": "f2e2b74e5dba306c9cfd4127a96f11a33e5642c7fc1fe8d52cdfdd378fffe75e"
+          "commit": "69a98a8ac9dcc356a2787ca96569fc589bb2d368",
+          "sha256": "8cfcb71a3ad8949e7b40748d4fbef426e660a86890c165ef6c5f82672bf36c4f"
         },
         "experiments/redesign/plugin-contract-lab/core/tests/read_contract.rs": {
           "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
@@ -222,7 +243,7 @@
           "sha256": "01708d733e83ad4319cf858fb849d020248f4db75df1d9ce12ff0839f57ace34"
         }
       },
-      "expected_total": 21
+      "expected_total": 22
     },
     "host": {
       "groups": {
@@ -303,7 +324,8 @@
           "names": [
             "client_epochs_generations_and_visibility_are_fail_closed",
             "same_request_is_existing_without_a_second_worker",
-            "close_and_reconnect_preserve_original_durable_outcome"
+            "close_and_reconnect_preserve_original_durable_outcome",
+            "incomplete_temp_evidence_blocks_ready_without_cleanup"
           ]
         }
       },
@@ -333,11 +355,11 @@
           "sha256": "f792140578cc8dbdf130dde0298eda21aca8bcf70afbc52dfa83f3f00e9b5d36"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/service_lifecycle.rs": {
-          "commit": "81424c87f5d121ecc0ccaa6252c52483675df0ae",
-          "sha256": "d84a70e877b77d9389a6b6f1c321fae0a4cc29696bc9474cedf907520dbc8b01"
+          "commit": "6e0f1c5752515c2bb8318897832912c57b8d1090",
+          "sha256": "36146445d5db8b8552cac3d3fccc36d7d90b9ef0d1691f6c83b4602c599f6123"
         }
       },
-      "expected_total": 45
+      "expected_total": 46
     }
   },
   "python": {

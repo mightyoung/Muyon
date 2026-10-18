@@ -99,3 +99,15 @@ Additional evidence SHA256:
 - `/tmp/service-fault-6e0-ledger-evidence/cargo.log`: `0aabc0c5400d437675a05dc597dff53b1a39ead85dcbe8da3bff4a41278cbdc1`
 - `/tmp/service-host-6e0-46-evidence/result.json`: `8247b299d126e0f3b384823bebaffde65094e82585a8a8d6da6028ac075ec882`
 - `/tmp/service-host-6e0-46-serial-evidence/result.json`: `586dcd59a3f95ad5835956a953cbace6be7960f35e7ef37dadf5662aedfa7581`
+
+## Full-gate source-first inventory delta
+
+`rust-agent-host-lab/checks/cases.json` now describes the intended integrated inventory; this is **not combined-run evidence**:
+
+- Core105 = existing94 plus `integration:http_transport`11, independent family `synthetic-http-transport`; source final03c1628631a07762ac9961f7162d1e49343ca2b8 (implementation d15d5a488e1150a1461d50215b09f99ad06e84d7).
+- Plugin22 = existing21 plus `foreign_data_admission_requires_the_referenced_schema_closure` in registration9; source final69a98a8ac9dcc356a2787ca96569fc589bb2d368 (implementation fc728271f9056f706a62e61036443f74080dff58).
+- Host46 = existing45 plus `incomplete_temp_evidence_blocks_ready_without_cleanup` in lifecycle4, final6e0f1c5752515c2bb8318897832912c57b8d1090.
+
+Names and test-source SHA256s were read directly from these immutable Git objects. Every old case, family, Python gate, and17 mutation obligations is preserved. `full.sh` and mandatory workflow scheduling/test concurrency are unchanged. Full classifier controls10 pass and reject missing new cases. Independent branch successes remain separate from future combined full-gate execution. The serial46 run is diagnostic only; the earlier default-parallel native lock failure remains open for writer investigation.
+
+C3 verification currently covers turn2cancel and explicit failedledger priority. Deadline-origin followed by latecancel is **NOT_RUN** and not implied closed by those probes.

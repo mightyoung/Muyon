@@ -17,16 +17,29 @@ def transcript(component):
 
 class FullTests(unittest.TestCase):
     def test_each_source_inventory_accepts_only_complete_green(self):
-        for component, total in [('core', 94), ('plugin', 21), ('host', 45)]:
+        for component, total in [('core', 105), ('plugin', 22), ('host', 46)]:
             result = rust(component, transcript(component), 0)
             self.assertTrue(result['accepted'], component)
             self.assertEqual(result['observed_tests'], total)
         self.assertEqual(rust('core', transcript('core'), 0)['families']['legacy-core'], 88)
         self.assertEqual(rust('core', transcript('core'), 0)['unit_tests'], 4)
 
+    def test_new_transport_and_registration_are_additive_required_groups(self):
+        core = CASES['components']['core']['groups']['integration:http_transport']
+        self.assertEqual(core['family'], 'synthetic-http-transport')
+        self.assertEqual(len(core['names']), 11)
+        self.assertEqual(rust('core', transcript('core'), 0)['families']['synthetic-http-transport'], 11)
+        registration = CASES['components']['plugin']['groups']['integration:registration']['names']
+        self.assertEqual(len(registration), 9)
+        self.assertIn('foreign_data_admission_requires_the_referenced_schema_closure', registration)
+        for component, names in [('core', core['names']), ('plugin', registration), ('host', CASES['components']['host']['groups']['integration:service_lifecycle']['names'])]:
+            raw = transcript(component)
+            for name in names:
+                self.assertFalse(rust(component, raw.replace(f'test {name} ... ok', ''), 0)['accepted'])
+
     def test_source_fixed_service_group_preserves_native_twenty_five(self):
         result = rust('host', transcript('host'), 0)
-        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4, 'contract-transport': 8, 'service-runtime': 2, 'service-root': 2, 'service-oracle': 1, 'service-lifecycle': 3})
+        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4, 'contract-transport': 8, 'service-runtime': 2, 'service-root': 2, 'service-oracle': 1, 'service-lifecycle': 4})
         service = CASES['components']['host']['groups'].get('integration:service_controller')
         self.assertIsNotNone(service, 'separate source-fixed service integration group is missing')
         self.assertEqual(service['names'], [
@@ -63,7 +76,7 @@ class FullTests(unittest.TestCase):
             'service_oracle': ['service_controller_observer_correlates_all_builtin_payloads'],
             'service_lifecycle': ['client_epochs_generations_and_visibility_are_fail_closed',
                                   'same_request_is_existing_without_a_second_worker',
-                                  'close_and_reconnect_preserve_original_durable_outcome'],
+                                  'close_and_reconnect_preserve_original_durable_outcome', 'incomplete_temp_evidence_blocks_ready_without_cleanup'],
             'service_root': ['root_lease_serializes_durable_admission_and_preserves_identity',
                              'root_inventory_refuses_unowned_entries_and_peak_overflow'],
         }
