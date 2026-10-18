@@ -399,7 +399,7 @@ pub(crate) fn unknown(run: &AgentDurableRun, receipt: AgentReceiptSummary) -> Ag
 }
 pub(crate) fn restore(root: &ServiceRoot) -> (Vec<AgentRunSnapshot>, bool) {
     let mut snapshots = Vec::new();
-    let mut recovery = false;
+    let mut recovery = root.is_poisoned();
     for run in root.runs() {
         let result = (|| {
             let dir = root.run_dir(&run.identity.run_id)?;
