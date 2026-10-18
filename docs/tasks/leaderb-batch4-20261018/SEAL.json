@@ -1,0 +1,8 @@
+{
+  "raw_archive": "/workspace/batch4/sealed/RAW-EVIDENCE.tar.gz",
+  "bytes": 5851093,
+  "sha256": "f29fb0ff7a16c334ef447c530cfbc109ae9e8469a0a9a326b0ce2b8fdc647e8c",
+  "raw_files": 8177,
+  "excluded_compiled_files": 83,
+  "index_sha256": "161e3547d7fca00907d9274df41575dbdf1bf71a67d9658854d0de9f4c2fa9e1"
+}

@@ -1,0 +1,20 @@
+{
+  "product_sha": "3f1be180bb009a91e659c113ba5b1916e5360332",
+  "product_tree": "30ccb7d1ceda6fe66baeee0266ce961a57fd3e2e",
+  "raw": {
+    "raw_archive": "/workspace/batch4/sealed/RAW-EVIDENCE.tar.gz",
+    "bytes": 5851093,
+    "sha256": "f29fb0ff7a16c334ef447c530cfbc109ae9e8469a0a9a326b0ce2b8fdc647e8c",
+    "raw_files": 8177,
+    "excluded_compiled_files": 83,
+    "index_sha256": "161e3547d7fca00907d9274df41575dbdf1bf71a67d9658854d0de9f4c2fa9e1"
+  },
+  "full_local": {
+    "path": "/workspace/batch4/FULL-EVIDENCE.tar.gz",
+    "bytes": 582836735,
+    "sha256": "e8821e990ad63ad2cf3ed99f23945c5b9e6852162e92d68ec955a4c1fc893085",
+    "files": 8260,
+    "availability": "Local only; fresh environments must not assume persistence. Compiled artifacts excluded from remote raw archive."
+  },
+  "verification": "Every indexed raw/full tar member reread and SHA256/size checked. Raw contains no ELF/ZIP/class magic. Cache directories omitted."
+}
