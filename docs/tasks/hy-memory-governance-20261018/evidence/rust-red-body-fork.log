@@ -1,0 +1,56 @@
+   Compiling hy-memory-governance-lab v0.1.0 (/workspace/Muyon/experiments/redesign/hy-memory-governance-lab)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running unittests src/lib.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/hy_memory_governance_lab-bc3284ee20f31f4e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/crash-worker.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/crash_worker-15606d8af0af361e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/governance.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/governance-bc323d989b1bbdaa)
+
+running 23 tests
+test automatic_write_control_is_independent_from_memory_read ... ok
+test actual_sqlite_read_error_and_missing_source_are_not_absent ... ok
+test all_controlled_sink_completion_removes_governed_body ... ok
+test atomic_precommit_crash_rolls_back_tombstone_and_outbox ... ok
+test body_forks_without_revision_change_are_not_consumed_or_quoted ... FAILED
+test cleanup_operation_identity_handles_colons_without_collision ... ok
+test consume_before_revoke_is_recorded_but_future_consumption_denied ... ok
+test cleanup_crash_retries_same_operation_after_lease_expiry ... ok
+test commit_crash_reopens_in_other_process_and_blocks_read ... ok
+test delete_management_survives_automatic_memory_switch_closed ... ok
+test partial_failure_unknown_and_retry_are_persistent ... ok
+test quote_retains_source_identity_and_each_original_byte_range ... ok
+test independent_source_authority_and_memory_read_gates_block_current_tickets ... ok
+test redaction_reason_is_allowlisted_and_output_carries_marker ... ok
+test quotes_revalidate_source_identity_and_authority ... ok
+test replay_is_bound_to_complete_payload ... ok
+test revoke_before_consume_rejects_prebuilt_projection ... ok
+test independent_gate_facts_deny_even_without_generation_bump ... ok
+test stale_worker_acknowledgement_cannot_overwrite_new_claim_completion ... ok
+test utf8_ranges_and_redaction_do_not_forge_contiguous_quote ... ok
+test every_member_current_field_is_checked_at_final_consume ... ok
+test stale_delete_has_no_half_writes ... ok
+test revocation_transaction_holds_shared_fence_until_consume_can_validate ... ok
+
+failures:
+
+---- body_forks_without_revision_change_are_not_consumed_or_quoted stdout ----
+
+thread 'body_forks_without_revision_change_are_not_consumed_or_quoted' (4292) panicked at tests/governance.rs:89:3:
+memory byte fork must fail closed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    body_forks_without_revision_change_are_not_consumed_or_quoted
+
+test result: FAILED. 22 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+error: test failed, to rerun pass `--test governance`

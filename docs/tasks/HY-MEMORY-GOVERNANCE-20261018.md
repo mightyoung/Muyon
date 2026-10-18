@@ -58,3 +58,31 @@
 ## 执行增量 1
 
 HMG-01 独立设计审查 PASS，无阻断，见[审查原文](hy-memory-governance-20261018/DESIGN-REVIEW.md)。该结论先于 Rust 实现，不是运行验收。原始证据目录为 `docs/tasks/hy-memory-governance-20261018/evidence/`；用户本任务明确要求保存原始输出，覆盖旧通用审查清单“不入库日志”的历史规则。
+
+## 执行增量 2（独立审查发现，未关闭时不交付）
+
+有界 writer/diff 方案与 fixture 已完成并独立审查：[原文](hy-memory-governance-20261018/EXPERIMENT-REVIEW.md)。36 项仅为 fixture 一致性向量，不是模型或检索有效性测试；收益 UNVERIFIED。
+
+Rust 首轮 GREEN01 为12项通过，但独审发现测试缺口与代码问题：读取错误绑定自动写开关；多字段用单一 valid 布尔值代替；来源独立权限/身份与生命周期核验不足；脱敏结果结构/标记不足；操作身份拼接歧义；租约过期 worker 无 fencing；主记忆正文未纳入清理。作者正在逐项补目标 RED 再修复，最终固定 SHA 复验前不能用首轮绿色抵消这些问题。独审初轮记录见 `evidence/review-initial-findings.md`。
+
+初轮 RED 全停 fixture seed；该完整日志被作者覆盖，协调者保留了当时工具观察摘录 `evidence/rust-initial-red-observation.md`，明确不计目标机制 RED。后续 `rust-red-targeted.*` 为真实 SQLite setup 后目标 RED（4项拒绝负例已过、8项目标失败），所有后续原始证据不再覆盖。该保留缺口不会被最终绿色抹去。
+
+## 最终执行状态（2026-10-18 UTC）
+
+测试与代码审查固定 source：`e85bc0039185453f3f46d1a77494bb00b588c44a`；实验 crate tree：`3ae05bff435b20d320570a021702b72fc7dd9201`。协调者与独立审查者各自在该提交运行完整 suite：**24 passed / 0 failed**；fmt、fixture 一致性/4项负变异及 diff 检查均 exit0。最终源码/输出哈希与完整命令分别见 [exact manifest](hy-memory-governance-20261018/evidence/exact-e85bc003.json)、[独审 manifest](hy-memory-governance-20261018/evidence/review-final-v2.json)及[独审报告](hy-memory-governance-20261018/evidence/review-final-v2-report.md)。上方“初始状态”和“执行增量2”保留历史，最终状态以下表为准。
+
+| 任务 | 本批最终状态 | 证据 / 仍后置 |
+| --- | --- | --- |
+| HMG-01 | 完成，独立设计审查 PASS | 两册/README短入口及增量设计，不重写历史正文 |
+| HMG-02 | 隔离 Rust/SQLite 合同完成 | T01–T04，原子事务、payload去重、真实进程重开；生产权威及域外凭据未接线 |
+| HMG-03 | 隔离三 sink 清理完成 | T05–T07，持久attempt/lease/retry、failed/unknown、fencing、逻辑正文回读；无全物理擦除保证 |
+| HMG-04 | 隔离组合/消费合同完成 | T08–T11，真实SQLite锁争用、独立当前字段/source校验、损坏/缺失不当空；一scope/context及direct-source lineage，非递归图或生产权限引擎 |
+| HMG-05 | 隔离范围/引用合同完成 | T12–T14，UTF8字节范围、结构化source元数据、allowlisted脱敏标记、跨缺口连续引文拒绝 |
+| HMG-06 | 审查与固定source复验完成 | 原始失败/成功、source tar/hash均归档；任务分支正常推送/远端回读由最终交接记录，无合入 |
+| HMG-07 | 方案/fixture完成，独立审查 PASS | 20 writer+16 diff一致性向量，DUT_runs=0；模型/检索/成本收益 UNVERIFIED |
+
+T15 未实现：生产域外凭据、整root恢复、防跨备份复活仍按D06后置；真实过期时钟、多来源递归lineage、生产sink适配、最终wire/工具发送与双端UI均未接入。实验SQLite绝不替代既定生产权威。REMORY T/P/N未实施，RSI未新增，未运行模型/付费/训练/权重/MemHub。
+
+遗留证据限制：首轮无效setup RED完整日志被覆盖，GREEN01也无同时刻完整source快照；均已如实披露，不归入最终source通过证据。有效target RED、后续修复RED/GREEN与两个最终exact运行证据完整。无剩余隔离lab阻断；生产集成不在本批完成范围。
+
+短交接：[HANDOFF](hy-memory-governance-20261018/HANDOFF.md)。

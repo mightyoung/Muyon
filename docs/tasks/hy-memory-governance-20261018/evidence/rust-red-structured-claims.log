@@ -1,0 +1,95 @@
+   Compiling hy-memory-governance-lab v0.1.0 (/workspace/Muyon/experiments/redesign/hy-memory-governance-lab)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running unittests src/lib.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/hy_memory_governance_lab-bc3284ee20f31f4e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/crash-worker.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/crash_worker-15606d8af0af361e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/governance.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/governance-bc323d989b1bbdaa)
+
+running 20 tests
+test all_controlled_sink_completion_removes_governed_body ... FAILED
+test automatic_write_control_is_independent_from_memory_read ... FAILED
+test cleanup_operation_identity_handles_colons_without_collision ... FAILED
+test atomic_precommit_crash_rolls_back_tombstone_and_outbox ... ok
+test cleanup_crash_retries_same_operation_after_lease_expiry ... ok
+test delete_management_survives_automatic_memory_switch_closed ... ok
+test consume_before_revoke_is_recorded_but_future_consumption_denied ... ok
+test independent_source_authority_and_memory_read_gates_block_current_tickets ... FAILED
+test commit_crash_reopens_in_other_process_and_blocks_read ... ok
+test quote_retains_source_identity_and_each_original_byte_range ... FAILED
+test partial_failure_unknown_and_retry_are_persistent ... ok
+test redaction_reason_is_allowlisted_and_output_carries_marker ... FAILED
+test replay_is_bound_to_complete_payload ... ok
+test revoke_before_consume_rejects_prebuilt_projection ... ok
+test quotes_revalidate_source_identity_and_authority ... ok
+test stale_worker_acknowledgement_cannot_overwrite_new_claim_completion ... FAILED
+test utf8_ranges_and_redaction_do_not_forge_contiguous_quote ... ok
+test stale_delete_has_no_half_writes ... ok
+test every_member_current_field_is_checked_at_final_consume ... ok
+test revocation_transaction_holds_shared_fence_until_consume_can_validate ... ok
+
+failures:
+
+---- all_controlled_sink_completion_removes_governed_body stdout ----
+
+thread 'all_controlled_sink_completion_removes_governed_body' (3604) panicked at tests/governance.rs:59:2:
+all controlled sinks cannot be done while governed body remains
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- automatic_write_control_is_independent_from_memory_read stdout ----
+
+thread 'automatic_write_control_is_independent_from_memory_read' (3606) panicked at tests/governance.rs:46:57:
+closed automatic writes still allow existing memory reads: Denied
+
+---- cleanup_operation_identity_handles_colons_without_collision stdout ----
+
+thread 'cleanup_operation_identity_handles_colons_without_collision' (3610) panicked at tests/governance.rs:52:64:
+distinct deletion identities must not collide: Storage
+
+---- independent_source_authority_and_memory_read_gates_block_current_tickets stdout ----
+
+thread 'independent_source_authority_and_memory_read_gates_block_current_tickets' (3617) panicked at tests/governance.rs:80:65:
+assertion `left == right` failed: fixture must independently vary source_revoked
+  left: Err(Denied)
+ right: Ok(())
+
+---- quote_retains_source_identity_and_each_original_byte_range stdout ----
+
+thread 'quote_retains_source_identity_and_each_original_byte_range' (3619) panicked at tests/governance.rs:74:2:
+assertion `left == right` failed
+  left: ""
+ right: "source:m"
+
+---- redaction_reason_is_allowlisted_and_output_carries_marker stdout ----
+
+thread 'redaction_reason_is_allowlisted_and_output_carries_marker' (3621) panicked at tests/governance.rs:26:2:
+assertion `left == right` failed
+  left: "sensitive"
+ right: "[redacted:sensitive]"
+
+---- stale_worker_acknowledgement_cannot_overwrite_new_claim_completion stdout ----
+
+thread 'stale_worker_acknowledgement_cannot_overwrite_new_claim_completion' (3627) panicked at tests/governance.rs:64:33:
+called `Result::unwrap()` on an `Err` value: Denied
+
+
+failures:
+    all_controlled_sink_completion_removes_governed_body
+    automatic_write_control_is_independent_from_memory_read
+    cleanup_operation_identity_handles_colons_without_collision
+    independent_source_authority_and_memory_read_gates_block_current_tickets
+    quote_retains_source_identity_and_each_original_byte_range
+    redaction_reason_is_allowlisted_and_output_carries_marker
+    stale_worker_acknowledgement_cannot_overwrite_new_claim_completion
+
+test result: FAILED. 13 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--test governance`

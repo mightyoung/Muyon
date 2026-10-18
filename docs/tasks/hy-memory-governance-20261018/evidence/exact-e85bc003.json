@@ -1,0 +1,83 @@
+{
+  "sha": "e85bc0039185453f3f46d1a77494bb00b588c44a",
+  "utc": "2026-10-18T04:40:48.694868+00:00",
+  "lab_tree": "3ae05bff435b20d320570a021702b72fc7dd9201",
+  "source_sha256": {
+    "experiments/redesign/hy-memory-experiment-fixtures/build_fixtures.py": "3e187ca322bf51bdd0ef1f5e1b4704781cb3fe18095dba58685a5b1ea5c0ad03",
+    "experiments/redesign/hy-memory-experiment-fixtures/diff-index.json": "2e466179678318637349011f4cbf7bd633c8e51d0c8836c36f32e142c2c22ead",
+    "experiments/redesign/hy-memory-experiment-fixtures/validate_fixtures.py": "6be3b099d002440e42d0e7259cc2cbd488c6c6ab3fd365eedd43369ef99fa7c7",
+    "experiments/redesign/hy-memory-experiment-fixtures/writer.json": "05c3b5fc755ede3f2794b283558ab65b10fbd0246c5e07fdb53fdd257c49e10b",
+    "experiments/redesign/hy-memory-governance-lab/.gitignore": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368",
+    "experiments/redesign/hy-memory-governance-lab/Cargo.lock": "a44c7d0a40dce72cd228c55dfa0b202b2f0f991f58a3cc43e6dedd1cd43b7152",
+    "experiments/redesign/hy-memory-governance-lab/Cargo.toml": "4e44a2b2c0d3a86fd3d9b59e484502825f322b6785cabfdd25f961c36abfdf02",
+    "experiments/redesign/hy-memory-governance-lab/README.md": "21ba2ba5a7a86362157995e7bdaa86317b98e39badc2cea1af1de0f6870fe596",
+    "experiments/redesign/hy-memory-governance-lab/src/bin/crash-worker.rs": "d732cb87c8e37da6796864b34744cf26e322bf5c10f82d5684db6b045568ffc6",
+    "experiments/redesign/hy-memory-governance-lab/src/lib.rs": "4a3865a558ff2d3335adc4c08ffd0a2a3b9e3e5ac4d47dc7bdc721070feac435",
+    "experiments/redesign/hy-memory-governance-lab/tests/governance.rs": "c8f28c28f06ffb51f783e48ca4a5db63f079cdc68082b429e99063e93ea124be"
+  },
+  "runs": [
+    {
+      "command": [
+        "rustc",
+        "--version"
+      ],
+      "exit": 0,
+      "log": "exact-e85bc003-0.log",
+      "sha256": "55cd0529c005d3f62869ea6e2271bfa9d5196f56dc65a8be00a371af114a4a98"
+    },
+    {
+      "command": [
+        "cargo",
+        "--version"
+      ],
+      "exit": 0,
+      "log": "exact-e85bc003-1.log",
+      "sha256": "c35608815f43d0b8788a9b826fad2bb17384f49fb328dc4fe64da9db5f5ef4d6"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "experiments/redesign/hy-memory-governance-lab/Cargo.toml"
+      ],
+      "exit": 0,
+      "log": "exact-e85bc003-2.log",
+      "sha256": "ffdd8d21bf6c15e02820ce9045e78c0650889c8eabf2273a7c9031d4b9a108f0"
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--check",
+        "--manifest-path",
+        "experiments/redesign/hy-memory-governance-lab/Cargo.toml"
+      ],
+      "exit": 0,
+      "log": "exact-e85bc003-3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": [
+        "python3",
+        "docs/tasks/hy-memory-governance-20261018/verify-fixtures.py"
+      ],
+      "exit": 0,
+      "log": "exact-e85bc003-4.log",
+      "sha256": "12ca5b57b9794ba442b8e88bd6f2c62118d2863fa516da36260b5e098155cb0f"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "log": "exact-e85bc003-5.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "status": "passed"
+}
