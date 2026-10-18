@@ -54,3 +54,9 @@ A original generic run39102166368 remained `in_progress` at the latest check; sa
 - Source whitespace checks PASS for `.rs/.kt/.py/.yml/.toml`. Raw logs are preserved byte-for-byte, including trailing blank lines; full patch whitespace checks may report those evidence-only lines.
 
 Next exact-SHA CI result is still pending until its own jobs complete. Earlier native/compile successes are not substituted for the corrected composition.
+
+## Additional platform verification source
+
+- `398a8b95` adds actual same-UID :agent process death and lookup-only restart to the existing API26 happy-path instrumentation. It checks a different restarted PID and unchanged original receipt identity/invocation; total two device tests remains unchanged. No production fault hook, fake port, extra Android permission or model operation.
+- Second loop CI39104985154 at28d3acc0 passed scoped supplier/three recovery regressions but failed bindgen because the new workflow invoked cargo metadata from repository root. Workflow now runs generation from its crate directory. Root reproduced the corrected command against the actual Linux .so and compared the generated Kotlin source byte-for-byte: PASS. Raw failed run retained; this is a new workflow issue, not a reclassification of the prior failed run.
+- Follow-up review at2a763bdf accepted the terminal-UNKNOWN decoder correction with no new issue.

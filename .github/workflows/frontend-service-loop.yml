@@ -32,7 +32,10 @@ jobs:
           cargo test --locked --manifest-path experiments/redesign/rust-agent-host-lab/core/Cargo.toml --lib supplier_business::terminal_regressions -- --nocapture 2>&1 | tee "$RUNNER_TEMP/loop-scoped/recovery.log"
           grep -F "3 passed; 0 failed" "$RUNNER_TEMP/loop-scoped/recovery.log"
           cargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings 2>&1 | tee "$RUNNER_TEMP/loop-scoped/bridge.log"
-          "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config experiments/redesign/android-rust-bridge-lab/core/uniffi.android.toml --out-dir "$RUNNER_TEMP/loop-generated" --no-format
+          (
+            cd experiments/redesign/android-rust-bridge-lab/core
+            "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config uniffi.android.toml --out-dir "$RUNNER_TEMP/loop-generated" --no-format
+          )
           generated="$RUNNER_TEMP/loop-generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt"
           cmp "$generated" experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt
           cp "$generated" "$RUNNER_TEMP/loop-scoped/generated-binding.kt"
