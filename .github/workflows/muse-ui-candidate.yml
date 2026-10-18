@@ -64,7 +64,7 @@ jobs:
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk" > "$evidence/signature.txt"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$apk" > "$evidence/badging.txt"
           unzip -l "$apk" > "$evidence/apk-entries.txt"
-          openssl rand -out "$RUNNER_TEMP/candidate-key" 32
+          openssl rand -hex -out "$RUNNER_TEMP/candidate-key" 32
           openssl enc -aes-256-cbc -salt -pbkdf2 -iter 200000 -in "$apk" -out "$evidence/candidate.apk.enc" -pass "file:$RUNNER_TEMP/candidate-key"
           openssl pkeyutl -encrypt -pubin -inkey "$LAB/candidate-public.pem" -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 -in "$RUNNER_TEMP/candidate-key" -out "$evidence/candidate-key.enc"
           rm "$RUNNER_TEMP/candidate-key"
