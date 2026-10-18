@@ -37,7 +37,6 @@ permissions:
 
 jobs:
   select:
-    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'lab/android-rust-bridge-')
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     outputs:
@@ -46,6 +45,7 @@ jobs:
     steps:
       - id: mode
         env:
+          EVENT_NAME: ${{ github.event_name }}
           REQUESTED_SUITE: ${{ inputs.suite }}
           SOURCE_REF: ${{ github.head_ref || github.ref_name }}
         run: |
@@ -53,6 +53,14 @@ jobs:
           import json, os
           suite = os.environ['REQUESTED_SUITE']
           ref = os.environ['SOURCE_REF']
+          # Select always runs: unrelated PRs are an explicit successful no-op,
+          # while a selector error still reaches the fail-closed full aggregate.
+          scoped = (ref.startswith('lab/android-rust-bridge-')
+                    or ref == 'lab/leaderb-batch4-combined-20261018')
+          if os.environ['EVENT_NAME'] == 'pull_request' and not scoped:
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+                  output.write('mode=unselected\nred=[]\n')
+              raise SystemExit(0)
           if not suite:
               suite = next((name for name in ['rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red', 'service-temp-red'] if ref.startswith('lab/android-rust-bridge-' + name + '-')), 'full')
           if suite not in ['full', 'red', 'rust-red', 'jvm-red', 'service-rust-red', 'service-jvm-red', 'service-host-checkpoint', 'service-oracle-red', 'service-host-green', 'mapper-control-red', 'service-temp-red']:
