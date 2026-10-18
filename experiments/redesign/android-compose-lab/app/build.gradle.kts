@@ -38,6 +38,11 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        create("ordinaryChat") {
+            initWith(getByName("debug"))
+            applicationIdSuffix=".ordinaryChat"
+            matchingFallbacks += listOf("debug")
+        }
         create("lifecycle") {
             initWith(getByName("debug"))
             applicationIdSuffix = ".lifecycle"
@@ -55,7 +60,7 @@ android {
         sourceSets.getByName(variant).java.srcDir("src/failureFixture/kotlin")
     }
     // Dedicated synthetic Service composition; ordinary debug/release never contain its installer.
-    testBuildType = providers.gradleProperty("muyonFailureInstrumentation").orNull?.also { require(it in failureScenarios.map{scenario->"fail$scenario"}) } ?: if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
+    testBuildType = if(providers.gradleProperty("muyonOrdinaryChatInstrumentation").orNull=="true")"ordinaryChat" else providers.gradleProperty("muyonFailureInstrumentation").orNull?.also { require(it in failureScenarios.map{scenario->"fail$scenario"}) } ?: if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
     buildFeatures { compose = true; buildConfig = true; aidl = true }
     packaging { jniLibs { keepDebugSymbols += setOf("**/libmuyon_android_contract_bridge.so", "**/libjnidispatch.so") } }
     if (bridgeRoot != null) sourceSets.getByName("main").jniLibs.srcDir(bridgeRoot.resolve("jniLibs"))

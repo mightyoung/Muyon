@@ -9,16 +9,16 @@ import com.mightyoung.muyon.androidbridge.*
 import java.io.File
 
 /** One trusted in-process authority per dedicated ledger; no UI or Binder installation surface. */
-internal class ServiceAdmissionProcessOwner(private val authority:ServiceAdmissionAuthority) {
+internal class ServiceAdmissionProcessOwner(private val authority:ServiceAdmissionAuthority,private val ordinaryChat:Boolean=false) {
     private var owner:DurableServiceHostOwner?=null
     private var ledgerPath:String?=null
     @Synchronized fun acquire(context:Context,budget:ServiceOwnerCallBudget,
         onReady:(GeneratedAgentController)->Unit={},onCleaned:()->Unit={}):ServiceHostLease {
         check(owner==null){"admission_owner_retained"}
-        val file=File(privateAdmissionRoot(context),DurableServiceHostOwner.DATABASE_NAME)
+        val file=File(privateAdmissionRoot(context),if(ordinaryChat)DurableServiceHostOwner.CHAT_DATABASE_NAME else DurableServiceHostOwner.DATABASE_NAME)
         check(ledgerPath==null || ledgerPath==file.absolutePath){"admission_owner_path_changed"}
         ledgerPath=file.absolutePath
-        val value=DurableServiceHostOwner(file,authority)
+        val value=DurableServiceHostOwner(file,authority,ordinaryChat=ordinaryChat)
         owner=value
         return ServiceHostLease(ServiceHostBinding.Installed(value,ServiceOwnerMode.CONFIGURED_CHAT,budget),release={
             synchronized(this){check(owner===value);value.close();owner=null}
@@ -27,7 +27,7 @@ internal class ServiceAdmissionProcessOwner(private val authority:ServiceAdmissi
     companion object {
         /** Production configuration has no approval/provider/credential facts. */
         fun unconfigured()=ServiceAdmissionProcessOwner(ServiceAdmissionAuthority(
-            ServiceAdmissionAuthority.State(null,null,{_,_->false},{_,_,_->null})))
+            ServiceAdmissionAuthority.State(null,null,{_,_->false},{_,_,_->null})),ordinaryChat=true)
     }
 }
 

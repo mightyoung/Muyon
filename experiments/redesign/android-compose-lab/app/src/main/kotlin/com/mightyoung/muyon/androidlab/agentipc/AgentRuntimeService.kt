@@ -199,6 +199,11 @@ class AgentRuntimeService:Service() {
         return if(ChatReadBounds.validReply(result))result else chatReply(id,"reply_limit")
     }
     private val binder=object:BoundedAgentBinder(){
+        override fun submitOrdinaryChat(epoch:String?,lease:String?,requestId:String?,conversation:String?,text:String?):String {
+            val ref=client(epoch,lease)
+            if(ref==null || !validRequest(requestId) || conversation==null || !ChatReadBounds.validSelection(conversation) || text==null || !ChatReadBounds.validText(text))return chatReply(requestId,"invalid_request")
+            return invokeChat(requestId!!){value->value.submitOrdinaryChat(ref,requestId,conversation,text).also{requestSettlement(value)}}
+        }
         override fun submitSupplierRead(epoch:String?,lease:String?,requestId:String?,text:String?,key:String?,revision:String?):String {
             val ref=client(epoch,lease)
             if(ref==null || !validRequest(requestId) || text==null || !ChatReadBounds.validText(text) || key==null || !ChatReadBounds.validSelection(key) || revision==null || !ChatReadBounds.validSelection(revision))return chatReply(requestId,"invalid_request")

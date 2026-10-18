@@ -12,20 +12,20 @@ import java.util.UUID
 
 /** UI proxy: no source access, model configuration or authority supplied by callers. */
 internal class AgentChatReadSession(context:Context,private val client:AgentServiceClient):ChatReadPort {
-    private val preferences=context.getSharedPreferences("supplier-read-identities-v1",Context.MODE_PRIVATE)
+    private val preferences=context.getSharedPreferences("ordinary-chat-identities-v2",Context.MODE_PRIVATE)
     private val main=Handler(Looper.getMainLooper())
     private val inFlight=mutableSetOf<String>()
     override var snapshot by mutableStateOf(ChatReadView());private set
     init {
         val restored=mutableMapOf<String,ChatReadConversation>()
         preferences.all.entries.take(64).forEach{(conversation,value)->
-            try{val o=JSONObject(value as String);require(ChatReadBounds.validText(o.string("text")) && o.string("key")==snapshot.selected.key && o.string("revision")==snapshot.selected.revision);restored[conversation]=ChatReadConversation(text=o.string("text"),requestId=o.string("request"),runId=o.optString("run").takeIf{it.isNotBlank()},admittedServiceEpoch=o.optString("epoch").takeIf{it.isNotBlank()},originalReceiptIdentity=o.optString("receiptIdentity").takeIf{it.isNotBlank()},synthetic=if(o.has("synthetic"))o.boolean("synthetic") else true,status="unknown",reason="进程恢复；请核实原请求，未重新执行")}catch(_:Exception){restored[conversation]=ChatReadConversation(status="unknown",reason="恢复记录不可核实；禁止重新提交")}
+            try{val o=JSONObject(value as String);require(ChatReadBounds.validText(o.string("text")));restored[conversation]=ChatReadConversation(text=o.string("text"),requestId=o.string("request"),runId=o.optString("run").takeIf{it.isNotBlank()},admittedServiceEpoch=o.optString("epoch").takeIf{it.isNotBlank()},originalReceiptIdentity=o.optString("receiptIdentity").takeIf{it.isNotBlank()},synthetic=if(o.has("synthetic"))o.boolean("synthetic") else true,status="unknown",reason="进程恢复；请核实原请求，未重新执行")}catch(_:Exception){restored[conversation]=ChatReadConversation(status="unknown",reason="恢复记录不可核实；禁止重新提交")}
         }
         snapshot=ChatReadView(restored)
     }
     private fun update(id:String,value:ChatReadConversation) {
         snapshot=snapshot.copy(conversations=snapshot.conversations+(id to value))
-        val record=JSONObject().put("receiptIdentity",value.originalReceiptIdentity ?: "").put("text",value.text).put("key",snapshot.selected.key).put("revision",snapshot.selected.revision).put("request",value.requestId).put("run",value.runId ?: "").put("epoch",value.admittedServiceEpoch ?: "").put("synthetic",value.synthetic)
+        val record=JSONObject().put("receiptIdentity",value.originalReceiptIdentity ?: "").put("text",value.text).put("request",value.requestId).put("run",value.runId ?: "").put("epoch",value.admittedServiceEpoch ?: "").put("synthetic",value.synthetic)
         check(preferences.edit().putString(id,record.toString()).commit()){ "request_identity_not_persisted" }
     }
     internal fun transportLost() {
@@ -37,11 +37,10 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
         val old=snapshot.conversations[conversationId]
         if(old!=null && old.status !in setOf("completed","cancelled","failed","rejected")){reconcile(conversationId);return}
         if(snapshot.conversations.size>=64 && old==null)return
-        val value=ChatReadConversation(text=text,requestId="chat_"+UUID.randomUUID().toString().replace("-",""),status="submitting",reason="等待私有 Service 核实来源与当前授权；未调用真实模型")
+        val value=ChatReadConversation(text=text,requestId="chat_"+UUID.randomUUID().toString().replace("-",""),status="submitting",reason="等待私有 Service 核实当前任务与授权；未调用真实模型")
         // Persist identity before the very first Binder submission. Failure prevents dispatch.
         try{update(conversationId,value)}catch(_:Exception){snapshot=snapshot.copy(conversations=snapshot.conversations+(conversationId to value.copy(status="failed",reason="请求身份持久化失败；未提交")));return}
-        val selected=snapshot.selected
-        rpc(conversationId,submitId=value.requestId){api,ref->api.submitSupplierRead(ref.epoch,ref.lease,value.requestId!!,text,selected.key,selected.revision)}
+        rpc(conversationId,submitId=value.requestId){api,ref->api.submitOrdinaryChat(ref.epoch,ref.lease,value.requestId!!,conversationId,text)}
     }
     override fun reconcile(conversationId:String) {
         val value=snapshot.conversations[conversationId] ?: return
@@ -53,7 +52,7 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
         val id=value.requestId ?: return
         client.chatCancel(id,value.runId){result->
             if(result=="not_sent_cancelled") {
-                update(conversationId,(snapshot.conversations[conversationId] ?: value).copy(status="cancelled",reason="已撤销尚未发送的请求；未执行供应商读取"))
+                update(conversationId,(snapshot.conversations[conversationId] ?: value).copy(status="cancelled",reason="已撤销尚未发送的请求；未执行请求"))
                 return@chatCancel
             }
             update(conversationId,(snapshot.conversations[conversationId] ?: value).copy(status=if(result!=null)"cancel_requested" else "unknown",reason=if(result!=null)"已请求取消；以原运行终态与回执为准" else "取消未确认；核实原运行"))
@@ -96,10 +95,16 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
             require(value.status !in setOf("completed","cancelled","failed","outcome_unknown"))
             val p=event.getJSONObject("payload")
             value=when(event.string("kind")) {
-                "answer_delta"->{require(p.keys().asSequence().toSet()==setOf("text") && p.get("text") is String);val delta=p.string("text");require(delta.toByteArray().size<=1024 && (value.answer+delta).toByteArray().size<=32768);value.copy(answer=value.answer+delta)}
+                "answer_delta"->{require(p.keys().asSequence().toSet()==setOf("text") && p.get("text") is String);val delta=p.string("text");require(delta.toByteArray().size<=4096 && (value.answer+delta).toByteArray().size<=32768);value.copy(answer=value.answer+delta)}
                 "supplier_projection"->{require(p.keys().asSequence().toSet()==setOf("supplier","name") && p.get("name") is String);val supplier=p.getJSONObject("supplier");require(supplier.keys().asSequence().toSet()==setOf("module_id","type","key","revision","schema_version") && supplier.get("schema_version") is Int);require(supplier.string("key")==snapshot.selected.key && supplier.string("revision")==snapshot.selected.revision && supplier.string("module_id")=="inquiry" && supplier.string("type")=="supplier" && supplier.getInt("schema_version")==1);val name=p.string("name");require(name.toByteArray().size<=512);value.copy(projection=name)}
+                "provider_receipt"->{
+                    require(p.keys().asSequence().toSet()==setOf("owner","identity","task","attempt","synthetic"))
+                    require(p.string("owner")=="ServiceProviderOwner" && p.boolean("synthetic") && p.string("identity").length in 1..512 && p.string("task").length in 1..256 && p.string("attempt").length in 1..256)
+                    val identity=p.string("identity");require(value.originalReceiptIdentity==null || value.originalReceiptIdentity==identity)
+                    value.copy(receipt=p.toString(),originalReceiptIdentity=identity,providerReceipt=true)
+                }
                 "receipt"->{require(p.keys().asSequence().toSet()==setOf("owner","invocation_id","binding_id","identity"));require(p.string("owner")=="ToolRegistry" && p.string("binding_id")=="host-supplier-name-read" && Regex("[0-9a-f]{32}").matches(p.string("identity")) && p.string("invocation_id").toByteArray().size<=256);val identity=p.string("identity");require(value.originalReceiptIdentity==null || value.originalReceiptIdentity==identity);val receipt=p.toString();require(receipt.toByteArray().size<=4096 && (value.receipt==null || value.receipt==receipt));value.copy(receipt=receipt,originalReceiptIdentity=identity)}
-                "terminal"->{require(p.keys().asSequence().toSet()==setOf("state","reason") && p.get("state") is String && p.get("reason") is String);val state=p.string("state");require(state in setOf("completed","cancelled","failed","outcome_unknown"));if(state=="completed")require(value.receipt!=null && value.projection!=null);value.copy(status=state,reason=p.string("reason").take(512))}
+                "terminal"->{require(p.keys().asSequence().toSet()==setOf("state","reason") && p.get("state") is String && p.get("reason") is String);val state=p.string("state");require(state in setOf("completed","cancelled","failed","outcome_unknown"));if(state=="completed")require(value.receipt!=null && (value.providerReceipt || value.projection!=null));value.copy(status=state,reason=p.string("reason").take(512))}
                 else->error("unknown_event")
             }.copy(cursor=cursor)
         }

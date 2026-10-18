@@ -20,6 +20,7 @@ internal class GeneratedAgentController private constructor(private val native:A
     fun visibility(client:UiAgentClientRef,generation:Long,visible:Boolean)=admission.call{projectAgentReply(native.setVisibility(AgentVisibilityRequest(client.native(),generation,visible)))}
     fun release(client:UiAgentClientRef,generation:Long)=admission.call{projectAgentReply(native.releaseClient(AgentReleaseRequest(client.native(),generation)))}
     fun cancel(client:UiAgentClientRef,id:String,variant:UiAgentVariant,runId:String?)=admission.call{projectAgentReply(native.cancel(AgentCancelRequest(client.native(),AgentRunRef(id,AgentReadVariant.valueOf(variant.name),runId))))}
+    fun submitOrdinaryChat(client:UiAgentClientRef,id:String,conversation:String,text:String)=admission.call{native.submitOrdinaryChat(client.native(),id,conversation,text)}
     fun submitSupplierRead(client:UiAgentClientRef,id:String,text:String,key:String,revision:String)=admission.call{native.submitSupplierRead(client.native(),id,text,key,revision)}
     fun supplierReadEvents(client:UiAgentClientRef,id:String,after:Long)=admission.call{native.supplierReadEvents(client.native(),id,after)}
     fun close(client:UiAgentClientRef)=admission.call{projectAgentReply(native.close(client.native()))}

@@ -59,8 +59,23 @@ pub struct ServiceOwnerCallBudget {
     pub max_tokens: u64, pub max_micros: u64,
     pub requires_tools: bool, pub requires_streaming: bool,
 }
+#[derive(Clone, uniffi::Record)]
+pub struct ServiceOwnerChatAuthority {
+    pub workspace:String, pub conversation:String, pub owner:String, pub mode:String,
+    pub policy_revision:String, pub grant_revision:String, pub rule_revision:String,
+    pub restriction_revision:String, pub sensitivity:String,
+    pub active:bool, pub model_allowed:bool, pub outbound_allowed:bool,
+    pub inherited_allowed:bool, pub synthetic:bool,
+}
+#[derive(Clone, uniffi::Record)]
+pub struct ServiceOwnerCredentialCapability {pub identity:String,pub generation:u64}
+#[derive(Clone, uniffi::Record)]
+pub struct ServiceOwnerChatResponse {pub answer:String,pub input_tokens:u64,pub output_tokens:u64,pub synthetic:bool}
 #[uniffi::export(with_foreign)]
 pub trait ServiceHostOwnerCallback: Send + Sync {
+    fn current_chat_authority(&self, conversation:String, text:String)->Option<ServiceOwnerChatAuthority>;
+    fn credential_capability(&self, profile:String, reference:String)->Option<ServiceOwnerCredentialCapability>;
+    fn exchange_chat(&self, admission:String, binding:ServiceOwnerAdmissionBinding, context:Vec<u8>, payload:Vec<u8>, capability:ServiceOwnerCredentialCapability)->Option<ServiceOwnerChatResponse>;
     fn current_scope(&self) -> Option<ServiceOwnerScope>;
     fn current_provider(&self) -> Option<ServiceOwnerProvider>;
     /// Trusted current-policy review of exactly these bytes. Absence must deny.
@@ -81,6 +96,10 @@ pub trait ServiceHostOwnerCallback: Send + Sync {
 
 struct CallbackOwner { callback: Arc<dyn ServiceHostOwnerCallback> }
 impl ServiceHostOwner for CallbackOwner {
+    fn chat_authority(&self,conversation:&str,text:&str)->Result<muyon_rust_agent_host_lab::ordinary_chat::ChatAuthority,String>{
+        let a=self.callback.current_chat_authority(conversation.into(),text.into()).ok_or("chat_authority_unconfigured")?;
+        Ok(muyon_rust_agent_host_lab::ordinary_chat::ChatAuthority{workspace:a.workspace,conversation:a.conversation,owner:a.owner,mode:a.mode,policy_revision:a.policy_revision,grant_revision:a.grant_revision,rule_revision:a.rule_revision,restriction_revision:a.restriction_revision,sensitivity:a.sensitivity,active:a.active,model_allowed:a.model_allowed,outbound_allowed:a.outbound_allowed,inherited_allowed:a.inherited_allowed,synthetic:a.synthetic})
+    }
     fn current_scope(&self) -> Result<ServiceHostScope, String> {
         let s = self.callback.current_scope().ok_or("service_scope_unconfigured")?;
         let d = s.decision;
@@ -115,6 +134,11 @@ fn profile(p: ServiceOwnerProfile) -> ConfiguredProfile {
 }
 struct CallbackProvider { callback: Arc<dyn ServiceHostOwnerCallback> }
 impl ServiceProviderHost for CallbackProvider {
+    fn exchange_chat(&self,admission:&ProviderAdmission,context:&muyon_rust_agent_host_lab::Json)->Result<muyon_rust_agent_host_lab::ordinary_chat::ChatResponse,String>{
+        let cap=ServiceOwnerCredentialCapability{identity:admission.credential_handle().identity().into(),generation:admission.credential_handle().generation().ok_or("chat_credential_unavailable")?};
+        let r=self.callback.exchange_chat(admission.record_id().into(),admission_binding(admission.binding()),context.encode().into_bytes(),admission.payload().to_vec(),cap).ok_or("chat_exchange_unavailable")?;
+        Ok(muyon_rust_agent_host_lab::ordinary_chat::ChatResponse{answer:r.answer,input_tokens:r.input_tokens,output_tokens:r.output_tokens,synthetic:r.synthetic})
+    }
     fn current_binding(&self) -> Result<Option<ProviderBinding>, String> {
         Ok(self.callback.current_provider().map(|p| ProviderBinding {
             profile: profile(p.profile), profile_revision: p.profile_revision,
@@ -129,6 +153,9 @@ impl ServiceProviderHost for CallbackProvider {
     fn credential_handle(&self, requested: &ConfiguredProfile) -> Result<Option<CredentialHandle>, String> {
         let Some(current) = self.callback.current_provider() else { return Ok(None) };
         if !current.credential_handle_available || profile(current.profile) != *requested { return Ok(None) }
+        if let Some(cap)=self.callback.credential_capability(requested.id.clone(),requested.credential_ref.clone()) {
+            return CredentialHandle::with_generation(&requested.id,&requested.credential_ref,&cap.identity,cap.generation).map(Some)
+        }
         // A stable existence-only sentinel. This is never a value-reading credential capability.
         CredentialHandle::new(&requested.id, &requested.credential_ref, "service-owner-existence-only-v1").map(Some)
     }

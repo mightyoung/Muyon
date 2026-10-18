@@ -8,7 +8,7 @@ import android.os.RemoteException
 
 /** Checks the complete request before generated decoding and the complete encoded reply. */
 abstract class BoundedAgentBinder:IAgentRuntime.Stub() {
-    private fun isChat(code:Int)=code==IAgentRuntime.Stub.TRANSACTION_submitSupplierRead || code==IAgentRuntime.Stub.TRANSACTION_supplierReadEvents
+    private fun isChat(code:Int)=code==IAgentRuntime.Stub.TRANSACTION_submitOrdinaryChat || code==IAgentRuntime.Stub.TRANSACTION_submitSupplierRead || code==IAgentRuntime.Stub.TRANSACTION_supplierReadEvents
     override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
         if(code in IBinder.FIRST_CALL_TRANSACTION..IBinder.LAST_CALL_TRANSACTION) {
             if(isChat(code)){if(data.dataSize()>16384)throw android.os.BadParcelableException("request_unavailable")}else AgentParcelLimits.request(data)

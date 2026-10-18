@@ -9,9 +9,9 @@ import android.content.Context
 /** Process ownership is intentional: UI recreation must not release or replace a blocked native slot. */
 @Suppress("EXPOSED_FUNCTION_RETURN_TYPE")
 open class MuyonLabApplication : Application(), ServiceHostOwnerInstallation {
-    // Ordinary offline UI keeps its explicit lab composition. No real authority is inferred.
-    override fun serviceHostBinding(serviceContext:Context):ServiceHostBinding=ServiceHostBinding.SyntheticLab
-    override fun acquireServiceHost(serviceContext:Context):ServiceHostLease=ServiceHostLease(serviceHostBinding(serviceContext))
+    private val chatOwner=ServiceAdmissionProcessOwner.unconfigured()
+    override fun serviceHostBinding(serviceContext:Context):ServiceHostBinding=error("ordinary_chat_requires_owned_lease")
+    override fun acquireServiceHost(serviceContext:Context):ServiceHostLease=chatOwner.acquire(serviceContext,com.mightyoung.muyon.androidbridge.ServiceOwnerCallBudget(1uL,1uL,false,false))
     // Every Android process gets its own Application. Service never reads this UI proxy.
     private val visibleActivities=mutableSetOf<String>()
     private var nextActivity=0L

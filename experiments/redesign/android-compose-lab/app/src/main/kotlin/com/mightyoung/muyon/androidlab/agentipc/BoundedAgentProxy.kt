@@ -19,6 +19,7 @@ internal class BoundedAgentProxy(private val remote:IAgentRuntime) {
     fun setVisibility(epoch:String,lease:String,generation:Long,visible:Boolean)=request({client(epoch,lease);writeLong(generation);writeInt(if(visible)1 else 0)}){remote.setVisibility(epoch,lease,generation,visible)}
     fun release(epoch:String,lease:String,generation:Long)=request({client(epoch,lease);writeLong(generation)}){remote.release(epoch,lease,generation)}
     fun cancel(epoch:String,lease:String,id:String,variant:Int,runId:String?)=request({client(epoch,lease);writeString(id);writeInt(variant);writeString(runId)}){remote.cancel(epoch,lease,id,variant,runId)}
+    fun submitOrdinaryChat(epoch:String,lease:String,id:String,conversation:String,text:String)=request({client(epoch,lease);writeString(id);writeString(conversation);writeString(text)},true){remote.submitOrdinaryChat(epoch,lease,id,conversation,text)}
     fun submitSupplierRead(epoch:String,lease:String,id:String,text:String,key:String,revision:String)=request({client(epoch,lease);writeString(id);writeString(text);writeString(key);writeString(revision)},true){remote.submitSupplierRead(epoch,lease,id,text,key,revision)}
     fun supplierReadEvents(epoch:String,lease:String,id:String,after:Long)=request({client(epoch,lease);writeString(id);writeLong(after)},true){remote.supplierReadEvents(epoch,lease,id,after)}
     fun close(epoch:String,lease:String)=request({client(epoch,lease)}){remote.close(epoch,lease)}

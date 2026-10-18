@@ -11,6 +11,9 @@ internal interface ServiceHostOwnerInstallation {
 
 /** Current non-secret metadata and existence-only lookup. No credential read/create operation. */
 internal interface ServiceHostOwnerSource {
+    fun currentChatAuthority(conversation:String,text:String):ServiceOwnerChatAuthority?=null
+    fun credentialCapability(profile:String,reference:String):ServiceOwnerCredentialCapability?=null
+    fun exchangeChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability):ServiceOwnerChatResponse?=null
     fun currentScope():ServiceOwnerScope?
     fun currentProviderMetadata():ServiceOwnerProvider?
     fun credentialHandleExists(profileId:String,credentialRef:String):Boolean
@@ -45,6 +48,9 @@ internal object ServiceHostBindings {
         (serviceContext.applicationContext as? ServiceHostOwnerInstallation)?.acquireServiceHost(serviceContext)
             ?: ServiceHostLease(ServiceHostBinding.SyntheticLab)
     fun callback(owner:ServiceHostOwnerSource):ServiceHostOwnerCallback=object:ServiceHostOwnerCallback {
+        override fun currentChatAuthority(conversation:String,text:String):ServiceOwnerChatAuthority?=try{owner.currentChatAuthority(conversation,text)}catch(_:Exception){null}
+        override fun credentialCapability(profile:String,reference:String):ServiceOwnerCredentialCapability?=try{owner.credentialCapability(profile,reference)}catch(_:Exception){null}
+        override fun exchangeChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability):ServiceOwnerChatResponse?=try{owner.exchangeChat(admission,binding,context,payload,capability)}catch(_:Exception){null}
         override fun currentScope():ServiceOwnerScope?=try{owner.currentScope()}catch(_:Exception){null}
         override fun currentProvider():ServiceOwnerProvider?=try {
             owner.currentProviderMetadata()?.let { metadata->

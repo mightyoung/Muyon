@@ -137,6 +137,9 @@ impl AgentServiceController {
     pub fn start_run(&self, req: AgentStartRequest) -> AgentStartReply {
         self.inner.start_run(req.to_host()).to_bridge()
     }
+    pub fn submit_ordinary_chat(&self,client:AgentClientRef,request_id:String,conversation:String,text:String)->String {
+        self.inner.submit_ordinary_chat(client.to_host(),request_id,conversation,text)
+    }
     pub fn submit_supplier_read(
         &self,
         client: AgentClientRef,

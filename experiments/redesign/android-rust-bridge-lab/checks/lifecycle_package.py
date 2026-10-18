@@ -27,8 +27,10 @@ def main():
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--work', type=Path, required=True)
     parser.add_argument('--failure-variant', choices=['failSetup','failSetupOwner','failUnknown','failOwner','failNative','failInflight','failReady','failConstructDestroy'])
+    parser.add_argument('--ordinary-chat', action='store_true')
     args = parser.parse_args()
-    variant = args.failure_variant or 'lifecycle'
+    assert not (args.ordinary_chat and args.failure_variant)
+    variant = 'ordinaryChat' if args.ordinary_chat else args.failure_variant or 'lifecycle'
     task_variant = variant[0].upper() + variant[1:]
     evidence, work = args.evidence.resolve(), args.work.resolve()
     evidence.mkdir(parents=True, exist_ok=True)
@@ -72,7 +74,7 @@ def main():
     try:
         run([gradle, '--no-daemon', '--stacktrace', '--console=plain', '-p', ui,
              '-PmuyonBridgeInputs=' + str(inputs), '-PmuyonBridgeSourceSha=' + source,
-             ('-PmuyonFailureInstrumentation=' + variant) if args.failure_variant else '-PmuyonLifecycleInstrumentation=true',
+             '-PmuyonOrdinaryChatInstrumentation=true' if args.ordinary_chat else ('-PmuyonFailureInstrumentation=' + variant) if args.failure_variant else '-PmuyonLifecycleInstrumentation=true',
              ':app:assemble' + task_variant, ':app:assemble' + task_variant + 'AndroidTest', ':app:lint' + task_variant],
             build_log, env, cwd=ui, timeout=1800)
     except Exception:
