@@ -125,3 +125,23 @@ fn loopback_receive_budget_stops_partial_response_without_retry() {
     listener.set_nonblocking(true).unwrap(); assert!(listener.accept().is_err());
     assert!(std::fs::read_to_string(agent.dir.join("outbound.db")).unwrap().contains("failed"));
 }
+#[test]
+fn loopback_mismatched_session_refuses_before_ledger_or_connection() {
+    let (revoked_a, cancelled_a) = flags();
+    let (session_a, mut agent) = setup(revoked_a, cancelled_a);
+    let (revoked_b, cancelled_b) = flags();
+    let (session_b, _) = setup(revoked_b, cancelled_b);
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let endpoint = LoopbackEndpoint::new(session_b, LoopbackHttpConfig {
+        address: listener.local_addr().unwrap(), idle_timeout: Duration::from_millis(20),
+        total_timeout: Duration::from_millis(50), max_response_bytes: 73728,
+    }).unwrap();
+    let mut gateway = ModelGateway::new(session_a.clone(), Box::new(endpoint));
+    drive(&mut agent, &mut gateway, &session_a);
+    listener.set_nonblocking(true).unwrap();
+    assert!(listener.accept().is_err(), "mismatched session must never connect");
+    assert_eq!(agent.state.wire_counters.sent, 0);
+    assert_eq!(agent.state.wire_counters.received, 0);
+    assert_eq!(session_a.borrow().model_sends, 0);
+    assert!(!agent.dir.join("outbound.db").exists());
+}
