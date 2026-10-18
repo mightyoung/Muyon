@@ -113,7 +113,9 @@
             "host_session::tests::fresh_admission_excludes_host_work_from_idle_without_resetting_total",
             "host_session::tests::incomplete_entropy_fails_closed_without_a_pid_or_time_fallback",
             "host_session::tests::invocation_identity_distinguishes_attempts_in_the_same_process",
-            "wire_provider::pump_tests::actual_wouldblock_step_cannot_bypass_cancel_or_total_deadline"
+            "wire_provider::pump_tests::actual_wouldblock_step_cannot_bypass_cancel_or_total_deadline",
+            "store::lock_tests::guard_drop_releases_lock_while_same_open_file_description_survives",
+            "store::lock_tests::live_guard_excludes_independent_open_until_explicit_owner_drop"
           ]
         },
         "integration:native_ports": {
@@ -185,9 +187,13 @@
         "experiments/redesign/core-agent-lab/core/tests/http_transport.rs": {
           "commit": "03c1628631a07762ac9961f7162d1e49343ca2b8",
           "sha256": "98d874da58ba46adbce64688e931b371d3b4694d672b1bec83a4f18461dc04da"
+        },
+        "experiments/redesign/core-agent-lab/core/src/store.rs": {
+          "commit": "c9a31c4cc9538ae7e480fc8920c833ba8966dd58",
+          "sha256": "716e8fb740c947410f08242138bc53d5b0b2a41d52c8ddf53556e8083896b09c"
         }
       },
-      "expected_total": 105
+      "expected_total": 107
     },
     "plugin": {
       "groups": {

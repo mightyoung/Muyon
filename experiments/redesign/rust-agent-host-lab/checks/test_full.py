@@ -17,12 +17,22 @@ def transcript(component):
 
 class FullTests(unittest.TestCase):
     def test_each_source_inventory_accepts_only_complete_green(self):
-        for component, total in [('core', 105), ('plugin', 22), ('host', 46)]:
+        for component, total in [('core', 107), ('plugin', 22), ('host', 46)]:
             result = rust(component, transcript(component), 0)
             self.assertTrue(result['accepted'], component)
             self.assertEqual(result['observed_tests'], total)
-        self.assertEqual(rust('core', transcript('core'), 0)['families']['legacy-core'], 88)
-        self.assertEqual(rust('core', transcript('core'), 0)['unit_tests'], 4)
+        self.assertEqual(rust('core', transcript('core'), 0)['families']['legacy-core'], 90)
+        self.assertEqual(rust('core', transcript('core'), 0)['unit_tests'], 6)
+
+    def test_core_lock_units_are_required_without_replacing_http_or_old_cases(self):
+        names = CASES['components']['core']['groups']['unit:src/lib.rs']['names']
+        required = {'store::lock_tests::guard_drop_releases_lock_while_same_open_file_description_survives',
+                    'store::lock_tests::live_guard_excludes_independent_open_until_explicit_owner_drop'}
+        self.assertTrue(required.issubset(names))
+        raw = transcript('core')
+        for name in required:
+            self.assertFalse(rust('core', raw.replace(f'test {name} ... ok', ''), 0)['accepted'])
+        self.assertEqual(len(CASES['components']['core']['groups']['integration:http_transport']['names']), 11)
 
     def test_new_transport_and_registration_are_additive_required_groups(self):
         core = CASES['components']['core']['groups']['integration:http_transport']
