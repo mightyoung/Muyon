@@ -1,0 +1,14 @@
+{
+  "observed_utc": "2026-10-18T05:47:32.240628+00:00",
+  "remote_refs": "0ab2c4f667681b9aacb017f8cd2eea6f576cf78e\trefs/heads/develop\n67e3f4f4561c306d8ff2ebd58c5c2728eedb2aed\trefs/heads/feat/ocr-v6-adapter\ncc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\trefs/heads/main\n379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c\trefs/heads/task/leaderb-hy-candidate-20261018\n7965f46beba6f52924e73e99fde6d69c18d985ff\trefs/heads/task/leaderb-production-readonly-20261018\n300bfebf95675e113498b667373c9c1cea5d1409\trefs/heads/ui/muse-chat-candidate-20261018\n",
+  "pr86": {
+    "baseRefName": "develop",
+    "headRefName": "lab/leaderb-batch4-combined-20261018",
+    "headRefOid": "3f1be180bb009a91e659c113ba5b1916e5360332",
+    "isDraft": true,
+    "number": 86,
+    "state": "OPEN"
+  },
+  "local_worktrees": "worktree /workspace/Muyon\nHEAD cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003\nbranch refs/heads/work\n\nworktree /workspace/leaderb-min26\nHEAD e49be079eb6f3367df9b5c6d5eb1f29b74c989ae\nbranch refs/heads/task/leaderb-min26-20261018\n\nworktree /workspace/leaderb-record\nHEAD 040eb0258f251b026f1fc777792cc97580c55e4e\nbranch refs/heads/docs/leaderb-next-20261018\n\nworktree /workspace/leaderb-sqlite\nHEAD 379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c\nbranch refs/heads/task/leaderb-sqlite-investigation-20261018\n\nworktree /workspace/leaderb-store\nHEAD 7965f46beba6f52924e73e99fde6d69c18d985ff\nbranch refs/heads/task/leaderb-store-readonly-20261018\n\n",
+  "historical_i04_sha256": "5c6ee3cd85a0df5fd6f5fcdc0333ff580d7ff2e055133c2f567c776a079a4868"
+}

@@ -1,0 +1,36 @@
+{
+  "mechanism": "--no-pub skips release platform-tooling regeneration; preceding pub get generates a dev-inclusive Java registry while Gradle release excludes dev_dependency projects",
+  "fix_source": "3f3a2368648db5e9767f11adcae4548ac5da2527",
+  "original_failure_source": "e49be079eb6f3367df9b5c6d5eb1f29b74c989ae",
+  "original_run": 39101690023,
+  "sdk_revision": "6a19cca56475dbfba1478ee68d7bd0c2ef891da1",
+  "official_sdk_sources": {
+    "packages/flutter_tools/lib/src/runner/flutter_command.dart": {
+      "sha256": "711ffb370b4b1e24ccb288887544ab71609d41ebd79d282a39d239ec0ca05a8f",
+      "excerpts": [
+        {
+          "1977-1988": "      project = await _updateCacheAndRunPubGet();\n    } finally {\n      globals.cache.releaseLock();\n    }\n\n    if (regeneratePlatformSpecificToolingDuringVerify) {\n      await regeneratePlatformSpecificToolingIfApplicable(\n        project,\n        releaseMode: getBuildMode().isRelease,\n      );\n    }\n"
+        },
+        {
+          "2048-2062": "  ///\n  /// - <https://github.com/flutter/flutter/issues/162649>.\n  @protected\n  @nonVirtual\n  Future<void> regeneratePlatformSpecificToolingIfApplicable(\n    FlutterProject project, {\n    required bool releaseMode,\n  }) async {\n    if (!shouldRunPub) {\n      return;\n    }\n    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);\n  }\n\n  /// The set of development artifacts required for this command."
+        }
+      ]
+    },
+    "packages/flutter_tools/lib/src/flutter_plugins.dart": {
+      "sha256": "004f504cd5b97f2dd7da01ff028c21904fefea8e9cae7430cb71822fcd89e272",
+      "excerpts": [
+        {
+          "1405-1426": "  );\n\n  // Filter out dev dependencies for release builds.\n  final List<Plugin> filteredPlugins;\n  if (releaseMode) {\n    filteredPlugins = plugins.where((Plugin p) => !p.isDevDependency).toList();\n  } else {\n    filteredPlugins = plugins;\n  }\n\n  final Map<String, List<Plugin>> filteredPluginsByPlatform = _resolvePluginImplementations(\n    filteredPlugins,\n    pluginResolutionType: _PluginResolutionType.nativeOrDart,\n  );\n\n  if (androidPlatform) {\n    await _writeAndroidPluginRegistrant(\n      project,\n      filteredPluginsByPlatform[AndroidPlugin.kConfigKey]!,\n    );\n  }\n  if (linuxPlatform) {"
+        }
+      ]
+    },
+    "packages/flutter_tools/gradle/src/main/kotlin/plugins/PluginHandler.kt": {
+      "sha256": "2e0aabbee4b6699ded8fb75fa38347d1fe6d1c719051a2177bfc6ea7595b4817",
+      "excerpts": [
+        {
+          "108-121": "            // compile/target/min sdk values.\n            pluginProject.extensions.create(\"flutter\", FlutterExtension::class.java)\n\n            // Add plugin dependency to the app project. We only want to add dependency\n            // for dev dependencies in non-release builds.\n            project.afterEvaluate {\n                getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->\n                    if (!(pluginObject[\"dev_dependency\"] as Boolean) || buildType.name != \"release\") {\n                        project.dependencies.add(\"${buildType.name}Api\", pluginProject)\n                    }\n                }\n            }\n\n            // Wait until the Android plugin loaded."
+        }
+      ]
+    }
+  }
+}

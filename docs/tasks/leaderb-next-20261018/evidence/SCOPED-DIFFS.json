@@ -1,0 +1,146 @@
+{
+  "a": {
+    "base": "7965f46beba6f52924e73e99fde6d69c18d985ff",
+    "source": "3f3a2368648db5e9767f11adcae4548ac5da2527",
+    "changed_paths": [
+      ".github/workflows/android-min26.yml",
+      ".github/workflows/android-rust-bridge.yml",
+      "apps/muyon/android/agent-observation/README.md",
+      "apps/muyon/android/app/build.gradle.kts",
+      "docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.md",
+      "docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.schema.json",
+      "experiments/redesign/android-compose-lab/RUST-DIAGNOSTICS.md",
+      "experiments/redesign/android-compose-lab/app/build.gradle.kts",
+      "experiments/redesign/android-rust-bridge-lab/checks/android_gate.py",
+      "experiments/redesign/android-rust-bridge-lab/checks/elf_check.py",
+      "experiments/redesign/android-rust-bridge-lab/checks/linux_gate.py",
+      "experiments/redesign/android-rust-bridge-lab/checks/package_gate.py",
+      "experiments/redesign/android-rust-bridge-lab/checks/test_android_evidence.py",
+      "experiments/redesign/android-rust-bridge-lab/checks/test_verify_inputs.py",
+      "experiments/redesign/android-rust-bridge-lab/checks/verify_inputs.py"
+    ],
+    "protected_path_checks": {
+      "experiments/redesign/plugin-contract-lab/core/src/lib.rs": {
+        "base_blob": "a0dab587f38e5cb01132148c7e088fbbfa52a54e",
+        "candidate_blob": "a0dab587f38e5cb01132148c7e088fbbfa52a54e",
+        "same": true
+      },
+      "experiments/redesign/plugin-contract-lab/core/src/schema.rs": {
+        "base_blob": "159d48f4d3586266ab1dc7402e3b0c7190616328",
+        "candidate_blob": "159d48f4d3586266ab1dc7402e3b0c7190616328",
+        "same": true
+      },
+      "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs": {
+        "base_blob": "2f56e13b856498ee0c348a097bd4734683c2f12b",
+        "candidate_blob": "2f56e13b856498ee0c348a097bd4734683c2f12b",
+        "same": true
+      },
+      "apps/muyon/android/app/src/main/AndroidManifest.xml": {
+        "base_blob": "bb03a15e90bcbdff39aff20a55969411c6daf8ac",
+        "candidate_blob": "bb03a15e90bcbdff39aff20a55969411c6daf8ac",
+        "same": true
+      },
+      "apps/muyon/android/app/src/main/kotlin/com/mightyoung/muyon/MainActivity.kt": {
+        "base_blob": "4648a7cd426715e66d12613dddaa742e65a7e11d",
+        "candidate_blob": "4648a7cd426715e66d12613dddaa742e65a7e11d",
+        "same": true
+      }
+    },
+    "diff_sha256": "822502ac134d9be9e7cddba893ddb1f9e49d9121ef49d3177f53856b5931ae54"
+  },
+  "b": {
+    "base": "379b1a6d8d5a5830fb3a74924fd5c41cfb234e1c",
+    "source": "190477fe0e5008d473508e45d2d835ddd5e0c09c",
+    "changed_paths": [
+      "apps/muyon/test/le06_recovery_independent_test.dart",
+      "apps/muyon/test/support/isolated_flutter_project.dart",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/INVESTIGATION.md",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/a-b-inputs.diff",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/a-original.log.gz",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/b-original.log.gz",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-green.exit",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-green.log",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-green2.exit",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-green2.log",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-green3.exit",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-green3.log",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-red-ci.exit",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-red-ci.log",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-red-proxy.exit",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-red-proxy.log",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-red.exit",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/manifest-regression-red.log",
+      "docs/tasks/leaderb-sqlite-native-assets-20261018/evidence/sdk-version.log"
+    ],
+    "protected_path_checks": {
+      "experiments/redesign/plugin-contract-lab/core/src/lib.rs": {
+        "base_blob": "a0dab587f38e5cb01132148c7e088fbbfa52a54e",
+        "candidate_blob": "a0dab587f38e5cb01132148c7e088fbbfa52a54e",
+        "same": true
+      },
+      "experiments/redesign/plugin-contract-lab/core/src/schema.rs": {
+        "base_blob": "159d48f4d3586266ab1dc7402e3b0c7190616328",
+        "candidate_blob": "159d48f4d3586266ab1dc7402e3b0c7190616328",
+        "same": true
+      },
+      "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs": {
+        "base_blob": "2f56e13b856498ee0c348a097bd4734683c2f12b",
+        "candidate_blob": "2f56e13b856498ee0c348a097bd4734683c2f12b",
+        "same": true
+      },
+      "apps/muyon/android/app/src/main/AndroidManifest.xml": {
+        "base_blob": "bb03a15e90bcbdff39aff20a55969411c6daf8ac",
+        "candidate_blob": "bb03a15e90bcbdff39aff20a55969411c6daf8ac",
+        "same": true
+      },
+      "apps/muyon/android/app/src/main/kotlin/com/mightyoung/muyon/MainActivity.kt": {
+        "base_blob": "4648a7cd426715e66d12613dddaa742e65a7e11d",
+        "candidate_blob": "4648a7cd426715e66d12613dddaa742e65a7e11d",
+        "same": true
+      }
+    },
+    "diff_sha256": "cbc5797d7b03931b8e8d532a996f213a505c43623d5d43bc2f992947f6bf29e5"
+  },
+  "c": {
+    "base": "7965f46beba6f52924e73e99fde6d69c18d985ff",
+    "source": "fdc9aea120925229aa592c3551efab9b3f67a825",
+    "changed_paths": [
+      ".github/workflows/leaderb-store-readonly.yml",
+      "docs/tasks/leaderb-store-readonly-20261018/CONTRACT.md",
+      "docs/tasks/leaderb-store-readonly-20261018/README.md",
+      "experiments/redesign/rust-agent-host-lab/core/src/lib.rs",
+      "experiments/redesign/rust-agent-host-lab/core/src/supplier_name_contract.json",
+      "experiments/redesign/rust-agent-host-lab/core/src/supplier_sqlite.rs",
+      "experiments/redesign/rust-agent-host-lab/core/src/supplier_store.rs",
+      "experiments/redesign/rust-agent-host-lab/core/tests/supplier_store.rs"
+    ],
+    "protected_path_checks": {
+      "experiments/redesign/plugin-contract-lab/core/src/lib.rs": {
+        "base_blob": "a0dab587f38e5cb01132148c7e088fbbfa52a54e",
+        "candidate_blob": "a0dab587f38e5cb01132148c7e088fbbfa52a54e",
+        "same": true
+      },
+      "experiments/redesign/plugin-contract-lab/core/src/schema.rs": {
+        "base_blob": "159d48f4d3586266ab1dc7402e3b0c7190616328",
+        "candidate_blob": "159d48f4d3586266ab1dc7402e3b0c7190616328",
+        "same": true
+      },
+      "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs": {
+        "base_blob": "2f56e13b856498ee0c348a097bd4734683c2f12b",
+        "candidate_blob": "2f56e13b856498ee0c348a097bd4734683c2f12b",
+        "same": true
+      },
+      "apps/muyon/android/app/src/main/AndroidManifest.xml": {
+        "base_blob": "bb03a15e90bcbdff39aff20a55969411c6daf8ac",
+        "candidate_blob": "bb03a15e90bcbdff39aff20a55969411c6daf8ac",
+        "same": true
+      },
+      "apps/muyon/android/app/src/main/kotlin/com/mightyoung/muyon/MainActivity.kt": {
+        "base_blob": "4648a7cd426715e66d12613dddaa742e65a7e11d",
+        "candidate_blob": "4648a7cd426715e66d12613dddaa742e65a7e11d",
+        "same": true
+      }
+    },
+    "diff_sha256": "fdf59d419b1658639d08f92880d0b425bec8c781656abde912a84b0c56186506"
+  }
+}

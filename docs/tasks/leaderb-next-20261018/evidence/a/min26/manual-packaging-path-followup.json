@@ -1,0 +1,25 @@
+{
+  "source_sha": "3f3a2368648db5e9767f11adcae4548ac5da2527",
+  "path": ".github/workflows/package-artifacts.yml",
+  "sha256": "86a37c551a29aa65f5df1871f92c35326c92d8a50253665f22de8e034fa49911",
+  "status": "NOT_RUN",
+  "dispatch": "none",
+  "budget_gate": {
+    "line": 1,
+    "text": "# Manual internal packages only. Do not dispatch before storage budget approval."
+  },
+  "relevant_lines": {
+    "76": "",
+    "77": "      - name: Resolve locked workspace dependencies",
+    "78": "        working-directory: source",
+    "79": "        run: flutter pub get --enforce-lockfile",
+    "80": "",
+    "81": "      - name: Build Android internal APK (release mode, debug key)",
+    "82": "        if: inputs.platform == 'android'",
+    "83": "        working-directory: source/apps/muyon",
+    "84": "        run: flutter build apk --release --no-pub"
+  },
+  "static_mechanism": "Android release uses --no-pub after pub get; same Flutter3.47.5 generator skip shown in release-plugin-regeneration-mechanism.json and current validation originalred. Manual workflow itself has not been executed/validated in this batch.",
+  "next_session": "Before using this budget-gated Android package path, review minimal release registry regeneration fix and lock/dependency equality, then validate authorized exact source. Current green validation workflow does not certify this separate path.",
+  "source_changed": false
+}

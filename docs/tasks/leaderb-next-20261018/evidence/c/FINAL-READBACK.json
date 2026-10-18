@@ -1,0 +1,15 @@
+{
+  "source_sha": "fdc9aea120925229aa592c3551efab9b3f67a825",
+  "remote_ref": "fdc9aea120925229aa592c3551efab9b3f67a825\trefs/heads/task/leaderb-store-readonly-20261018",
+  "worktree_status": "",
+  "active_owned_builders": [],
+  "source_stopped": true,
+  "ci_run": 39102209762,
+  "ci_terminal": "completed/success",
+  "generic_runs": {
+    "39102104505": "completed/cancelled",
+    "39102209693": "completed/cancelled"
+  },
+  "i04": "DENIED_BEFORE_EXECUTION/BLOCKED: never executed",
+  "timestamp_unix": 1792303046.5640736
+}
