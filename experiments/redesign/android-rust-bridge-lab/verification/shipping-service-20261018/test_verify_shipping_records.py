@@ -38,4 +38,10 @@ class Controls(unittest.TestCase):
         self.record['outbound']['bytes'] = json.dumps(body)
         with self.assertRaisesRegex(ValueError, 'outbound_original_receipt'):
             verify_record(self.row, self.record, SOURCE)
+    def test_second_payload_call_arguments_must_copy_admitted_binding(self):
+        body = json.loads(self.record['outbound']['bytes'])
+        body['messages'][1]['tool_calls'][0]['function']['arguments'] = '{"equipment_key":"wrong","include_loans":false}'
+        self.record['outbound']['bytes'] = json.dumps(body)
+        with self.assertRaisesRegex(ValueError, 'second_payload_original_call'):
+            verify_record(self.row, self.record, SOURCE)
 if __name__ == '__main__': unittest.main()

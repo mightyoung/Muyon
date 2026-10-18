@@ -51,6 +51,11 @@ def verify_record(row, record, source):
     messages = body['messages']
     require([m['role'] for m in messages] == ['user', 'assistant', 'tool'] and
         messages[0]['content'] == 'read selected synthetic record', 'second_payload_exact_messages')
+    assistant = messages[1]
+    calls = assistant.get('tool_calls', [])
+    require(assistant.get('content') is None and len(calls) == 1 and calls[0].get('id') == 'service_call1'
+        and calls[0].get('type') == 'function' and calls[0]['function'].get('name') == 'registered_0'
+        and json.loads(calls[0]['function']['arguments']) == receipt['binding']['args'], 'second_payload_original_call')
     tool = messages[2]
     require(tool['tool_call_id'] == 'service_call1', 'second_payload_call_binding')
     projected = json.loads(tool['content'])
