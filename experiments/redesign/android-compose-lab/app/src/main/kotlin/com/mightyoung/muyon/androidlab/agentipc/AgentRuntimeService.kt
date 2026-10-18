@@ -41,7 +41,7 @@ class AgentRuntimeService:Service() {
     override fun onCreate() {
         super.onCreate()
         val slot=ServiceProcessKeys.controllers.reserve()
-        if(slot==null){synchronized(ownership){setupFailed=true};return}
+        if(slot==null){synchronized(ownership){setupFailed=true};ServiceHostBindings.hooks(this)?.replacementDenied();return}
         reservation=slot
         val generation=synchronized(ownership){platformGeneration}
         bootstrap=AgentServiceBootstrap(backend,construct={
@@ -51,6 +51,7 @@ class AgentRuntimeService:Service() {
                 val lease=ServiceHostBindings.acquire(this)
                 hostLease=lease
                 ServiceProcessKeys.retainHost(slot,lease)
+                lease.hooks.acquired()
                 lateinit var value:GeneratedAgentController
                 value=GeneratedAgentController.open(root,build,lease,
                     onDrained={requestSettlement(value)},onCleaned={
@@ -59,10 +60,14 @@ class AgentRuntimeService:Service() {
                         ServiceProcessKeys.releaseHost(slot)
                         if(ServiceProcessKeys.controllers.releaseCleaned(slot,value)) {
                             cleanupCompleted.set(true)
+                            lease.hooks.slotReleased()
                             lease.onCleaned()
                             if(synchronized(ownership){destroyed})backend.shutdown()
                         }
                     })
+                try { lease.hooks.constructed() } catch(error:Throwable) {
+                    ServiceProcessKeys.retainUncertain(value);throw error
+                }
                 if(!ServiceProcessKeys.controllers.publish(slot,value)){
                     ServiceProcessKeys.retainUncertain(value)
                     error("owner_unavailable")
@@ -74,7 +79,11 @@ class AgentRuntimeService:Service() {
                 if(lease?.nativeConstructionStarted!=true) {
                     lease?.close()
                     ServiceProcessKeys.releaseHost(slot)
-                    if(ServiceProcessKeys.controllers.failedBeforePublish(slot) && synchronized(ownership){destroyed})backend.shutdown()
+                    if(ServiceProcessKeys.controllers.failedBeforePublish(slot)) {
+                        cleanupCompleted.set(true)
+                        lease?.hooks?.slotReleased()
+                        if(synchronized(ownership){destroyed})backend.shutdown()
+                    }
                 }
                 // Once the foreign constructor was entered, missing ownership outcome is uncertain.
                 // The process roots retain slot and host; a second Service must remain unavailable.
@@ -89,11 +98,17 @@ class AgentRuntimeService:Service() {
                 if(retired || destroyed || generation!=platformGeneration) false
                 else {controller=value;registry=clients;true}
             }
-            if(accepted) hostLease?.onReady?.invoke(value)
+            if(accepted) try {hostLease?.onReady?.invoke(value)} catch(error:Throwable) {
+                synchronized(ownership){setupFailed=true}
+                value.requestDisposal()
+                retirementRequested.set(true)
+                requestSettlement(value)
+                throw error
+            }
             if(!accepted) {
                 try{clients.dispose()}finally{try{value.retire()}finally{value.awaitSettled()}}
             }
-        },unavailable={synchronized(ownership){setupFailed=true}})
+        },unavailable={synchronized(ownership){setupFailed=true};hostLease?.hooks?.unavailable()})
         bootstrap?.start()
     }
     /** Only Service Context-derived canonical private storage. No UI/Binder path parameter. */
@@ -118,11 +133,12 @@ class AgentRuntimeService:Service() {
     override fun onBind(intent:Intent?):IBinder=binder
     override fun onUnbind(intent:Intent?):Boolean { stopPlatform(dispose=false);return true }
     override fun onDestroy() {
-        try{stopPlatform(dispose=true)}finally{
+        try{hostLease?.hooks?.destroyed();stopPlatform(dispose=true)}finally{
             // The process holder and backend survive Service destruction until real cleanup.
             val slot=reservation
             if(slot==null || cleanupCompleted.get() || (ServiceProcessKeys.controllers.retained()==null && synchronized(ownership){setupFailed}))backend.shutdown()
             super.onDestroy()
+            ServiceHostBindings.hooks(this)?.destroyedReturned()
         }
     }
     private fun stopPlatform(dispose:Boolean) {
@@ -134,8 +150,12 @@ class AgentRuntimeService:Service() {
         // Even an unexpected unlink failure cannot prevent the real Rust stop signal.
         try{if(dispose)captured.second?.dispose()}catch(_:Exception){synchronized(ownership){setupFailed=true}}finally{
             val value=captured.first
-            if(value==null) bootstrap?.retire()
-            else try{safe{value.retireRuntime(disposeHandle=dispose)}}finally{
+            if(value==null) {
+                try{backend.execute{bootstrap?.retire()}}catch(_:RejectedExecutionException){synchronized(ownership){setupFailed=true}}
+            } else {
+                // Rust retirement can wait on a callback-held mutex. Platform callbacks only
+                // revoke publication and enqueue; native settlement stays on the backend.
+                if(dispose)value.requestDisposal()
                 retirementRequested.set(true)
                 requestSettlement(value)
             }
@@ -156,7 +176,7 @@ class AgentRuntimeService:Service() {
     private fun local(status:UiAgentLocalStatus)=AgentReplyParcel.from(UiAgentWireReply.Local(status),build)
     private inline fun invoke(work:(GeneratedAgentController,AgentLivenessRegistry<IBinder>)->UiAgentWireReply):AgentReplyParcel {
         val capture=synchronized(ownership){
-            if(destroyed || setupFailed)null else controller?.let{value->registry?.let{clients->value to clients}}
+            if(destroyed || retired || setupFailed)null else controller?.let{value->registry?.let{clients->value to clients}}
         }
         if(capture==null)return local(synchronized(ownership){if(retired || setupFailed)UiAgentLocalStatus.UNAVAILABLE else UiAgentLocalStatus.INITIALIZING})
         return AgentReplyParcel.from(safe{work(capture.first,capture.second)} ?: UiAgentWireReply.Local(UiAgentLocalStatus.UNAVAILABLE),build)

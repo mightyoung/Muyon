@@ -1,0 +1,148 @@
+name: Service lifecycle failures
+on:
+  push:
+    branches: ['lab/service-lifecycle-failures-20261018']
+    paths:
+      - 'experiments/redesign/android-compose-lab/**'
+      - 'experiments/redesign/android-rust-bridge-lab/**'
+      - 'experiments/redesign/rust-agent-host-lab/**'
+      - '.github/workflows/service-lifecycle-failures.yml'
+permissions:
+  contents: read
+concurrency:
+  group: service-lifecycle-failures-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  scoped:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with: {distribution: temurin, java-version: '17'}
+      - name: Genuine binding reproduction only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/failures-scoped"
+          export CARGO_TARGET_DIR="$RUNNER_TEMP/failures-rust-target"
+          export MUYON_BRIDGE_BUILD_ID="$(git rev-parse HEAD)"
+          rustup toolchain install 1.99.0 --profile minimal
+          rustup default 1.99.0
+          # Build-only binding reproduction. No Rust test target or suite execution.
+          cargo build --locked --manifest-path experiments/redesign/android-rust-bridge-lab/core/Cargo.toml --features bindings 2>&1 | tee "$RUNNER_TEMP/failures-scoped/bridge.log"
+          (
+            cd experiments/redesign/android-rust-bridge-lab/core
+            "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config uniffi.android.toml --out-dir "$RUNNER_TEMP/failures-generated" --no-format
+          )
+          generated="$RUNNER_TEMP/failures-generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt"
+          cmp "$generated" experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt
+          cp "$generated" "$RUNNER_TEMP/failures-scoped/generated-binding.kt"
+          git rev-parse HEAD > "$RUNNER_TEMP/failures-scoped/source-sha.txt"
+          git diff --exit-code
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: failures-scoped
+          path: ${{ runner.temp }}/failures-scoped
+  native:
+    strategy:
+      fail-fast: false
+      matrix: {abi: [arm64-v8a, x86_64]}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Existing exact-source API26 ABI producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.99.0 --profile minimal --target aarch64-linux-android,x86_64-linux-android
+          rustup default 1.99.0
+          python3 experiments/redesign/android-rust-bridge-lab/checks/android_gate.py --abi '${{ matrix.abi }}' --evidence-dir "$RUNNER_TEMP/failures-native" --work-dir "$RUNNER_TEMP/failures-native-work"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: failures-${{ matrix.abi }}
+          path: ${{ runner.temp }}/failures-native
+  package-device:
+    needs: [scoped, native]
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [failSetup, failSetupOwner, failUnknown, failOwner, failNative, failInflight, failReady]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with: {distribution: temurin, java-version: '17'}
+      - name: Initialize explicit NOT_RUN evidence
+        run: |
+          mkdir -p "$RUNNER_TEMP/failures-package"
+          printf 'NOT_RUN: fixed actual Service failure instrumentation scenario=${{ matrix.variant }}\n' > "$RUNNER_TEMP/failures-package/device-result.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/failures-package/source-sha.txt"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: failures-scoped
+          path: ${{ runner.temp }}/failures-producers/scoped
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: failures-arm64-v8a
+          path: ${{ runner.temp }}/failures-producers/arm64-v8a
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: failures-x86_64
+          path: ${{ runner.temp }}/failures-producers/x86_64
+      - name: Stage producer names and build actual combined APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'printf "FAIL: packaging terminated; instrumentation NOT_RUN\n" > "$RUNNER_TEMP/failures-package/device-result.txt"' ERR
+          python3 experiments/redesign/android-rust-bridge-lab/checks/lifecycle_package.py --artifacts "$RUNNER_TEMP/failures-producers" --evidence "$RUNNER_TEMP/failures-package" --work "$RUNNER_TEMP/failures-package-work" --failure-variant "${{ matrix.variant }}"
+      - name: API26 fixed actual Service failure lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/failures-package"
+          trap 'printf "FAIL: instrumentation/setup terminated; see retained logs\n" > "$evidence/device-result.txt"' ERR
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/muyon-failures-avds"
+          mkdir -p "$ANDROID_AVD_HOME"
+          manager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          # Uses runner's existing SDK licenses; never accepts a new license.
+          "$manager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/emulator-setup.log"
+          export PATH="$ANDROID_HOME/platform-tools:$PATH"
+          test -x "$ANDROID_HOME/platform-tools/adb"
+          sudo chmod a+rw /dev/kvm
+          printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-failures-api26 -k 'system-images;android-26;google_apis;x86_64' --force
+          "$ANDROID_HOME/emulator/emulator" -avd muyon-failures-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$evidence/emulator.log" 2>&1 &
+          timeout 300 adb wait-for-device
+          for attempt in $(seq 1 120); do if [[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done
+          test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1
+          test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = 26
+          adb shell input keyevent 82
+          adb install -r "$evidence/app-lifecycle.apk"
+          adb install -r "$evidence/app-lifecycle-androidTest.apk"
+          if ! timeout 15 adb logcat -c > "$evidence/logcat-clear.log" 2>&1; then
+            printf 'UNAVAILABLE: API26 log buffer clear; instrumentation still required\n' > "$evidence/logcat-clear-status.txt"
+          fi
+          timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.agentipc.ServiceLifecycleFailureTest#fixedActualServiceFailureLifecycle com.mightyoung.muyon.androidlab.${{ matrix.variant }}.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
+          if timeout 30 adb logcat -d > "$evidence/logcat.txt" 2>&1; then
+            # Fixed non-secret test metadata only; required instrumentation guards remain below.
+            grep -m 4 -E 'API26_SERVICE_FAILURE_PASS ' "$evidence/logcat.txt" || true
+          else
+            printf 'UNAVAILABLE: API26 logcat dump\n' > "$evidence/logcat-status.txt"
+          fi
+          adb shell ps -A > "$evidence/device-processes.txt"
+          grep -F 'OK (1 test)' "$evidence/instrumentation.log"
+          if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi
+          printf 'API26 emulator private Service/genuine native/fixed synthetic failure lifecycle 1 test PASS; real model/network NOT_RUN\n' > "$evidence/device-result.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: failures-package-device-${{ matrix.variant }}
+          path: ${{ runner.temp }}/failures-package
+          retention-days: 7

@@ -44,8 +44,18 @@ android {
             matchingFallbacks += listOf("debug")
         }
     }
+    val failureScenarios=listOf("Setup","SetupOwner","Unknown","Owner","Native","Inflight","Ready")
+    failureScenarios.forEach { scenario->
+        val variant="fail$scenario"
+        buildTypes.create(variant) {
+            initWith(getByName("debug"))
+            applicationIdSuffix=".$variant"
+            matchingFallbacks += listOf("debug")
+        }
+        sourceSets.getByName(variant).java.srcDir("src/failureFixture/kotlin")
+    }
     // Dedicated synthetic Service composition; ordinary debug/release never contain its installer.
-    testBuildType = if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
+    testBuildType = providers.gradleProperty("muyonFailureInstrumentation").orNull?.also { require(it in failureScenarios.map{scenario->"fail$scenario"}) } ?: if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
     buildFeatures { compose = true; buildConfig = true; aidl = true }
     packaging { jniLibs { keepDebugSymbols += setOf("**/libmuyon_android_contract_bridge.so", "**/libjnidispatch.so") } }
     if (bridgeRoot != null) sourceSets.getByName("main").jniLibs.srcDir(bridgeRoot.resolve("jniLibs"))

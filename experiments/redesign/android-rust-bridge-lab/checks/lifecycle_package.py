@@ -26,7 +26,10 @@ def main():
     parser.add_argument('--artifacts', type=Path, required=True)
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--work', type=Path, required=True)
+    parser.add_argument('--failure-variant', choices=['failSetup','failSetupOwner','failUnknown','failOwner','failNative','failInflight','failReady'])
     args = parser.parse_args()
+    variant = args.failure_variant or 'lifecycle'
+    task_variant = variant[0].upper() + variant[1:]
     evidence, work = args.evidence.resolve(), args.work.resolve()
     evidence.mkdir(parents=True, exist_ok=True)
     work.mkdir(parents=True, exist_ok=True)
@@ -69,8 +72,8 @@ def main():
     try:
         run([gradle, '--no-daemon', '--stacktrace', '--console=plain', '-p', ui,
              '-PmuyonBridgeInputs=' + str(inputs), '-PmuyonBridgeSourceSha=' + source,
-             '-PmuyonLifecycleInstrumentation=true',
-             ':app:assembleLifecycle', ':app:assembleLifecycleAndroidTest', ':app:lintLifecycle'],
+             ('-PmuyonFailureInstrumentation=' + variant) if args.failure_variant else '-PmuyonLifecycleInstrumentation=true',
+             ':app:assemble' + task_variant, ':app:assemble' + task_variant + 'AndroidTest', ':app:lint' + task_variant],
             build_log, env, cwd=ui, timeout=1800)
     except Exception:
         # run() preserves the stack-trace tail. Emit only compiler diagnostic lines
@@ -90,21 +93,25 @@ def main():
             print('compiler_diagnostics_unavailable', flush=True)
         print('LIFECYCLE_BUILD_COMPILER_DIAGNOSTICS_END', flush=True)
         raise
-    app = ui / 'app/build/outputs/apk/lifecycle/app-lifecycle.apk'
-    tests = ui / 'app/build/outputs/apk/androidTest/lifecycle/app-lifecycle-androidTest.apk'
+    app = ui / f'app/build/outputs/apk/{variant}/app-{variant}.apk'
+    tests = ui / f'app/build/outputs/apk/androidTest/{variant}/app-{variant}-androidTest.apk'
     entries = apk_entries(app, manifest)
     run([sdk / 'build-tools/35.0.0/aapt2', 'dump', 'badging', app], evidence / 'apk-badging.log', env)
     badging = (evidence / 'apk-badging.log').read_text()
     assert apk_sdk_and_abi(badging)
-    assert "package: name='com.mightyoung.muyon.androidlab.lifecycle'" in badging
+    assert f"package: name='com.mightyoung.muyon.androidlab.{variant}'" in badging
     assert 'android.permission.INTERNET' not in badging
+    run([sdk / 'build-tools/35.0.0/aapt2', 'dump', 'badging', tests], evidence / 'test-apk-badging.log', env)
+    test_badging = (evidence / 'test-apk-badging.log').read_text()
+    assert f"package: name='com.mightyoung.muyon.androidlab.{variant}.test'" in test_badging
+    assert 'android.permission.INTERNET' not in test_badging
     for name, path in [('app-lifecycle.apk', app), ('app-lifecycle-androidTest.apk', tests)]:
         run([sdk / 'build-tools/35.0.0/zipalign', '-c', '-P', '16', '4', path], evidence / (name + '-alignment.log'), env)
         shutil.copyfile(path, evidence / name)
     (evidence / 'package-result.json').write_text(json.dumps(dict(
         source_sha=source, min_api=26, native_entries=entries, apk_sha256=sha(app),
         test_apk_sha256=sha(tests), build='PASS', Android_runtime='NOT_RUN',
-        business_source='compile-time synthetic metadata lifecycle fixture', model_api_called=False), indent=2) + '\n')
+        business_source='compile-time synthetic metadata lifecycle fixture', fixture_variant=variant, model_api_called=False), indent=2) + '\n')
     print('LIFECYCLE_NATIVE_COMPOSE_PACKAGE_PASS source=' + source, flush=True)
 
 

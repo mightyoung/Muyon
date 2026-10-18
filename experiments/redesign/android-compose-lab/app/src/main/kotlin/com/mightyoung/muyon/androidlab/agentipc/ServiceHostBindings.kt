@@ -39,6 +39,8 @@ internal object ServiceHostBindings {
         // Installation exceptions propagate to Service unavailable, never silently switch modes.
         return owner.serviceHostBinding(serviceContext)
     }
+    fun hooks(serviceContext:Context):ServiceLifecycleHooks? =
+        serviceContext.applicationContext as? ServiceLifecycleHooks
     fun acquire(serviceContext:Context):ServiceHostLease =
         (serviceContext.applicationContext as? ServiceHostOwnerInstallation)?.acquireServiceHost(serviceContext)
             ?: ServiceHostLease(ServiceHostBinding.SyntheticLab)
@@ -62,16 +64,39 @@ internal object ServiceHostBindings {
     }
 }
 
+/** Internal compile-time composition hooks; never selected from IPC or external state. */
+internal interface ServiceLifecycleHooks {
+    fun connected(){}
+    fun probeReturned(){}
+    fun acquired(){}
+    fun constructed(){}
+    fun beforeNativeClose(){}
+    fun nativeClosed(){}
+    fun destroyed(){}
+    fun destroyedReturned(){}
+    fun slotReleased(){}
+    fun unavailable(){}
+    fun replacementDenied(){}
+}
+
 /** Service bootstrap owns this lease until native handle cleanup is proven. */
 internal class ServiceHostLease(
     val binding:ServiceHostBinding,
     private val release:()->Unit={},
     val onReady:(GeneratedAgentController)->Unit={},
-    val onCleaned:()->Unit={}
+    val onCleaned:()->Unit={},
+    val hooks:ServiceLifecycleHooks=object:ServiceLifecycleHooks{}
 ):AutoCloseable {
-    private val closed=java.util.concurrent.atomic.AtomicBoolean()
+    private var closeAttempted=false
+    private var closed=false
     @Volatile var nativeConstructionStarted=false
         private set
     fun enteringNativeConstruction(){ nativeConstructionStarted=true }
-    override fun close(){ if(closed.compareAndSet(false,true))release() }
+    @Synchronized override fun close(){
+        if(closed)return
+        check(!closeAttempted){"owner_cleanup_uncertain"}
+        closeAttempted=true
+        release()
+        closed=true
+    }
 }
