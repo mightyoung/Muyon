@@ -1,0 +1,232 @@
+{
+  "baseline": "3f1be180bb009a91e659c113ba5b1916e5360332",
+  "candidate": "7965f46beba6f52924e73e99fde6d69c18d985ff",
+  "tracked_status": "",
+  "outcome": "PARTIAL: default-off production receipt observation dependency; no production Android Service/native/business-store loop",
+  "source": {
+    "apps/muyon/android/agent-observation/README.md": {
+      "sha256": "741f982a4410d14a45b75a3dc8ff79dd7fc90bbd2905948686cd60436f731236"
+    },
+    "apps/muyon/android/agent-observation/build.gradle.kts": {
+      "sha256": "788bd6f592a008e4b0ec44683fbcdc3c4ed3b802b79d3fa374a399774c5e09e4"
+    },
+    "apps/muyon/android/agent-observation/check-observation.sh": {
+      "sha256": "c5b844b92b494ed2b88d97829c8378461764d36422932e233b189610a5eedeb3"
+    },
+    "apps/muyon/android/agent-observation/src/main/kotlin/com/mightyoung/muyon/agent/ReceiptObserver.kt": {
+      "sha256": "674ec381ea1a12fc9f6cad42e2128e5f6c977259f5a4b2bbf3b23ef752b513b6"
+    },
+    "apps/muyon/android/agent-observation/src/test/kotlin/com/mightyoung/muyon/agent/ReceiptObserverChecks.kt": {
+      "sha256": "71e10b84b47eea40c1094f97e54554acde0d9e8f11314f4d09d690b0ee4fedb3"
+    },
+    "apps/muyon/android/app/build.gradle.kts": {
+      "sha256": "f26b2a19a50642d4d6fbc9b499205697fe6ba71e826939eec5c60f416cc034bf"
+    },
+    "apps/muyon/android/settings.gradle.kts": {
+      "sha256": "64a032902930cf5400409638ab1d91146ae0d761e102aa4b814d72ee68bc89bf"
+    }
+  },
+  "results": [
+    {
+      "log": "kotlin-red.log",
+      "exit": 1,
+      "classification": "initial default-off assertion failure; not primary semantic RED"
+    },
+    {
+      "log": "kotlin-semantic-red.log",
+      "exit": 1,
+      "marker": "PRODUCTION_RECEIPT_RED"
+    },
+    {
+      "log": "kotlin-conflict-red.log",
+      "exit": 1,
+      "marker": "REJECTED_SNAPSHOT_RED"
+    },
+    {
+      "log": "kotlin-release-red.log",
+      "exit": 1,
+      "classification": "intermediate outdated cleanup assertion; not lifecycle primary RED"
+    },
+    {
+      "log": "kotlin-release-semantic-red.log",
+      "exit": 1,
+      "marker": "FAILED_RELEASE_RED"
+    },
+    {
+      "log": "kotlin-unbind-red.log",
+      "exit": 1,
+      "marker": "UNBIND_OWNER_RED"
+    },
+    {
+      "log": "kotlin-final-green.log",
+      "exit": 0,
+      "runtime": "preinstalled JRE21.0.12.1; Kotlin2.2.20 target17"
+    },
+    {
+      "log": "kotlin-jdk17-green.log",
+      "exit": 0,
+      "runtime": "Temurin JDK17 restored; Kotlin2.2.20 target17"
+    },
+    {
+      "log": "original-state-green.log",
+      "exit": 0,
+      "checks": "22+29+68+12+16+16=163; no ART/Binder runtime"
+    },
+    {
+      "log": "rust-corroboration.log",
+      "exit": 0,
+      "tests": "existing service_controller4 and service_oracle1 (four variants)",
+      "warnings": "two preexisting suspicious_runtime_symbol_definitions read/write warnings; no Rust changes/inventory additions"
+    },
+    {
+      "log": "gradle-module-check.log",
+      "exit": 1,
+      "classification": "SETUP: JVM did not use proxy; Kotlin plugin resolution"
+    },
+    {
+      "log": "gradle-module-proxy-check.log",
+      "exit": 1,
+      "classification": "SETUP: system JRE missing JAVA_COMPILER"
+    },
+    {
+      "log": "gradle-module-jdk17-check.log",
+      "exit": 1,
+      "classification": "SETUP: downloaded JDK truststore missing environment proxy CA"
+    },
+    {
+      "log": "gradle-module-system-trust-check.log",
+      "exit": 0,
+      "scope": "actual frozen module configure/compileKotlin/compileTestKotlin/checkObservation on Gradle8.13 + JDK17; harmless isolated settings; existing system truststore with TLS verification retained; Android root NOT_RUN"
+    }
+  ],
+  "module_jar": {
+    "sha256": "ec8975ccc95a5913252cf3dff04d8bd0994dabe432b9340565712d3eb2218bb1",
+    "entries": "module-jar-entries.txt"
+  },
+  "remaining_owned_daemons": [],
+  "log_and_snapshot_hashes": {
+    "rust-corroboration.log": {
+      "sha256": "de976103a4e52f7b0bdf655f465ae8231d3710bcce3f97b825d92ccee3ce2996",
+      "bytes": 2998
+    },
+    "kotlin-unbind-red.log": {
+      "sha256": "87f11b0441bc45b0e99278d27e08803c41073ff47f1d0fc1ad0fea84125033bc",
+      "bytes": 298
+    },
+    "ReceiptObserver-conflict-red.kt": {
+      "sha256": "6c09a1150811a41ce0a3fae13d2284adeca43605a7adca6d145bab198b54f254",
+      "bytes": 4587
+    },
+    "kotlin-release-red.log": {
+      "sha256": "cb35e70623b835f984fc971c37035b4839081afa81d6adcb570d346b62cc7ce7",
+      "bytes": 249
+    },
+    "kotlin-jdk17-green.log": {
+      "sha256": "15fd10cf6da8c7811bcf6260b1fe0575c47ca8546811440be7be3569d661b524",
+      "bytes": 29
+    },
+    "source-commit.txt": {
+      "sha256": "ef7daa67c9deb60cb8dfb971a12ea9d3cd491f330aa2fed4f28d367dd98acb35",
+      "bytes": 815
+    },
+    "gradle-module-system-trust-check.log": {
+      "sha256": "c40003a09ff935f30558a1917df21ea5e693b4d93bf990c796063828da68bb6a",
+      "bytes": 976
+    },
+    "candidate.patch": {
+      "sha256": "6e997b5e52be1f190c73bf7f737e1a95155ccd48252c4281d1d60de65eb14728",
+      "bytes": 19962
+    },
+    "final-source-hashes.txt": {
+      "sha256": "34768641fe8e62d79dd07e849c437d99728ae99edc867189fa9a1ce3fb426843",
+      "bytes": 336
+    },
+    "run-kotlin.sh": {
+      "sha256": "f2fbd50ab25267674834ffcc35d631b91e0d0ad18cb767177e10b2d2531e67ff",
+      "bytes": 651
+    },
+    "module-jar-entries.txt": {
+      "sha256": "dc63fac1fbf118994eb043b8ffc16bf7d5dba53b7931a911f6afabb2506d1646",
+      "bytes": 3277
+    },
+    "kotlin-red.log": {
+      "sha256": "4c3e6f29d07fc26f2b76a9c44538ca4ff889936343fae8f4c2d48b85048f6a31",
+      "bytes": 249
+    },
+    "ReceiptObserver-red.kt": {
+      "sha256": "22ea5c6801c212097a5652712d32d1d4b1ceebd0f01d2810f5eb08e8f92658b6",
+      "bytes": 973
+    },
+    "ReceiptObserver-release-red.kt": {
+      "sha256": "97979cea78ae2dd25333556570762d9dcbce1c7f3e4857abb6b256c53cfbe3fe",
+      "bytes": 4599
+    },
+    "jdk17-version.log": {
+      "sha256": "8ffd2d05de22acb2a1f82845905d499e807c7595cf7c3e7f2a2cab7e576a26de",
+      "bytes": 193
+    },
+    "kotlin-green.log": {
+      "sha256": "15fd10cf6da8c7811bcf6260b1fe0575c47ca8546811440be7be3569d661b524",
+      "bytes": 29
+    },
+    "kotlin-conflict-red.log": {
+      "sha256": "1898907c4ab84b6349733f6d7e6a2302268d917032e5e7b9cc9988b0d2dda0ad",
+      "bytes": 307
+    },
+    "gradle-module-check.log": {
+      "sha256": "b3ae9e221840ddf22fb4e1acbf8b1044f25dfd3dc66a6d768e44734a6994c9bf",
+      "bytes": 1410
+    },
+    "ReceiptObserverChecks-red.kt": {
+      "sha256": "64349396f655e8a5fd681656aebd05298d3baa561efc52029288a65849e88c0c",
+      "bytes": 3175
+    },
+    "ci-watch.log": {
+      "sha256": "47e02c3e354d45f1229c059a1c995be358977c80132e1a23c5089a239eda6fdf",
+      "bytes": 1980
+    },
+    "kotlin-final-green.log": {
+      "sha256": "15fd10cf6da8c7811bcf6260b1fe0575c47ca8546811440be7be3569d661b524",
+      "bytes": 29
+    },
+    "original-state-green.log": {
+      "sha256": "e4ff0e3110029c9df7991b255f1935fd17d644f0b58c1e1b4b735cfb053ebc91",
+      "bytes": 11949
+    },
+    "ReceiptObserver-unbind-red.kt": {
+      "sha256": "b594532a1dcb6a87579cd939cc5a6653a65157906d43fa0ecef7c2c5bd054683",
+      "bytes": 4690
+    },
+    "gradle-stop.log": {
+      "sha256": "9bb9c19238f3fdde3213f2be84912b0c7e87b3e2295ec372ec245deab200d46d",
+      "bytes": 31
+    },
+    "kotlin-semantic-red.log": {
+      "sha256": "2119bde613e63386d3b6ea96d5f76d0ed150c11d3a91fbb7fcc42c83e742839c",
+      "bytes": 322
+    },
+    "kotlin-release-semantic-red.log": {
+      "sha256": "7477f9f032e32a2a4d2c8c328d2373864555a4c2649359d9b7d9463a1bea7d21",
+      "bytes": 303
+    },
+    "gradle-module-jdk17-check.log": {
+      "sha256": "66c2156a20ef348920395518c7efa2584c50838cd8414f2e61e2c544eb85c53c",
+      "bytes": 1631
+    },
+    "gradle-module-proxy-check.log": {
+      "sha256": "2fa723c0d93593a737b393f7b75ece910732c1aa2a1312ea90c5659e8e828068",
+      "bytes": 985
+    },
+    "kotlin-daemon-stop.json": {
+      "sha256": "ffc2c464e0f83f0707b1975e9b2c1e8cac8a32f895b093822111f9e835efe90b",
+      "bytes": 31
+    }
+  },
+  "not_run": [
+    "full shipping Flutter/Android app build",
+    "production Service/AIDL/native-package integration",
+    "ART/Binder/UID/device lifecycle",
+    "real production store/authority/current business projection"
+  ],
+  "I04": "DENIED_BEFORE_EXECUTION/BLOCKED preserved, not retried or routed; no task.db->HTTP->original-state reopen action executed"
+}

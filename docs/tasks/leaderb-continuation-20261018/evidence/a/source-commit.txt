@@ -1,0 +1,16 @@
+commit 7965f46beba6f52924e73e99fde6d69c18d985ff
+Author:     yi mu <wolfh1641713779@gmail.com>
+AuthorDate: Sun Oct 18 05:16:11 2026 +0000
+Commit:     yi mu <wolfh1641713779@gmail.com>
+CommitDate: Sun Oct 18 05:16:11 2026 +0000
+
+    Add default-off production receipt observation dependency
+
+ apps/muyon/android/agent-observation/README.md     |  58 +++++++++++
+ .../android/agent-observation/build.gradle.kts     |  19 ++++
+ .../android/agent-observation/check-observation.sh |  12 +++
+ .../com/mightyoung/muyon/agent/ReceiptObserver.kt  | 103 +++++++++++++++++++
+ .../muyon/agent/ReceiptObserverChecks.kt           | 111 +++++++++++++++++++++
+ apps/muyon/android/app/build.gradle.kts            |   3 +
+ apps/muyon/android/settings.gradle.kts             |   3 +-
+ 7 files changed, 308 insertions(+), 1 deletion(-)

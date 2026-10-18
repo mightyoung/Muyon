@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: FAILED_RELEASE_RED: failed lifecycle delivery must remain uncertain
+	at com.mightyoung.muyon.agent.ReceiptObserverChecksKt.main(ReceiptObserverChecks.kt:96)
+	at com.mightyoung.muyon.agent.ReceiptObserverChecksKt.main(ReceiptObserverChecks.kt)
