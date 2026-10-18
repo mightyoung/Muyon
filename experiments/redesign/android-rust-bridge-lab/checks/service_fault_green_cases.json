@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "source_commit": "6e0f1c5752515c2bb8318897832912c57b8d1090",
+  "source_sha256": {
+    "service_controller.rs": "bd833cf0a1b5788f29414e34b702ed285d0f6245b96c2ecda3480a20faed97c7",
+    "service_runtime.rs": "0790d6ebd5b04a776036bf2c05a13d19eec90379a120c786056a38f40c39164a",
+    "model_gateway.rs": "b1b981245464ba599136c513c97a3c1046421a1d543d3cd40342712b3687fb8e",
+    "store.rs": "eaec3e50d7ddabfdbfa3250276228d4df395bbe4af8fcbcb872098eed722192e"
+  },
+  "cases": {
+    "c2_worker_panic": {
+      "observed": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true",
+      "expected": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true"
+    },
+    "c3_cancel": {
+      "observed": "Cancelled receipt=RecordedSuccess opaque_match=true",
+      "expected": "Cancelled receipt=RecordedSuccess opaque_match=true"
+    },
+    "c3_failed_ledger": {
+      "observed": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true",
+      "expected": "OutcomeUnknown receipt=RecordedSuccess opaque_match=true"
+    }
+  },
+  "lease_probe": true
+}
