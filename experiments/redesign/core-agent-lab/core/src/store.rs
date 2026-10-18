@@ -85,3 +85,53 @@ impl ToolPort for FixtureTool {
         state.value=b.value.clone();state.receipts.push(r.clone());atomic(&self.dir,"effects.db",&state.encode())?;Ok(r)
     }
 }
+
+#[cfg(test)]
+mod lock_tests {
+    use super::*;
+
+    struct PrivateDirectory(PathBuf);
+    impl PrivateDirectory {
+        fn new() -> Self {
+            let path = std::env::temp_dir().join(format!("muyon-directory-lock-unit-{}-{}",
+                std::process::id(), SERIAL.fetch_add(1, Ordering::SeqCst)));
+            create_dir(&path).unwrap();
+            Self(path)
+        }
+    }
+    impl Drop for PrivateDirectory {
+        fn drop(&mut self) { let _ = fs::remove_dir_all(&self.0); }
+    }
+
+    #[test]
+    fn guard_drop_releases_lock_while_same_open_file_description_survives() {
+        let dir = PrivateDirectory::new();
+        let owner = lock(&dir.0).unwrap();
+        // dup shares the kernel open-file-description, exactly as an inherited
+        // descriptor does during the concurrent spawn-to-exec interval.
+        let inherited = owner._file.try_clone().unwrap();
+        assert!(matches!(lock(&dir.0), Err(e) if e == "directory_locked"));
+        drop(owner);
+        let successor = lock(&dir.0).unwrap_or_else(|e|
+            panic!("GUARD_DROP_OFD_RED: surviving duplicate must not retain ownership: {e}"));
+        // Keep the original OFD alive until after the successor obtained its
+        // independent lock; merely closing this old duplicate cannot unlock it.
+        assert!(inherited.metadata().unwrap().is_file());
+        drop(inherited);
+        assert!(matches!(lock(&dir.0), Err(e) if e == "directory_locked"));
+        drop(successor);
+        assert!(lock(&dir.0).is_ok());
+    }
+
+    #[test]
+    fn live_guard_excludes_independent_open_until_explicit_owner_drop() {
+        let dir = PrivateDirectory::new();
+        let owner = lock(&dir.0).unwrap();
+        assert!(matches!(lock(&dir.0), Err(e) if e == "directory_locked"));
+        drop(owner);
+        let successor = lock(&dir.0).unwrap();
+        assert!(matches!(lock(&dir.0), Err(e) if e == "directory_locked"));
+        drop(successor);
+        assert!(lock(&dir.0).is_ok());
+    }
+}
