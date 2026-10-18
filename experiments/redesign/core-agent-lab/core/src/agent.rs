@@ -223,13 +223,13 @@ impl Agent {
             let size=model::context_bytes(&self.state.context);
             if self.state.counters.steps>=self.state.limits.steps||self.state.counters.calls>=self.state.limits.calls||size>self.state.limits.context||self.state.counters.total.saturating_add(size)>self.state.limits.total||self.state.counters.output>=self.state.limits.output {self.state.stop("budget_exhausted","admission");break;}
             self.state.counters.steps+=1;self.state.counters.calls+=1;self.state.counters.total+=size;
-            self.state.wire_counters.inflight=self.state.wire.is_some();
-            if self.state.wire.is_some(){self.state.wire_counters.usage=crate::wire_sse::Usage::default();}
+            self.state.wire_counters.inflight=self.state.wire.is_some()||ports.is_some();
+            if self.state.wire_counters.inflight{self.state.wire_counters.usage=crate::wire_sse::Usage::default();}
             self.state.stop("failed","provider_interrupted");self.save_drive(ports.as_deref())?;
             let tools=if let Some(host)=ports.as_deref_mut(){match host.advertised_tools(&self.state){Ok(tools)=>tools,Err(reason)=>{host.failure(&mut self.state,&reason);break;}}}else{vec!["fixture.record".into()]};
             let request=ModelRequest{task:self.state.task.clone(),attempt:self.state.attempt.clone(),turn:self.state.counters.steps,messages:self.state.context.clone(),tools};
             let position=self.state.position;let history=self.state.native.clone();
-            let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h,host:ports.is_some()});
+            let response=provider.respond_controlled(&request,position,&history,&mut AgentControl{agent:self,h,ports:ports.as_mut().map(|p|&mut **p as &mut dyn crate::agent_ports::AgentPorts)});
             self.state.wire_counters.inflight=false;
             let event=match response{Ok(e)=>e,Err(reason)=>{if let Some(host)=ports.as_deref_mut(){host.failure(&mut self.state,&reason);}else if self.state.wire.is_some(){if reason=="wire_cancelled"{self.state.stop("cancelled",&reason);}else if reason.ends_with("_limit"){self.state.stop("budget_exhausted",&reason);}else{self.state.stop("failed",&reason);}}else{self.state.stop("failed","provider_error");}break;}};
             let (prompt,completion)=provider.reported_usage();self.state.wire_counters.usage=crate::wire_sse::Usage{prompt,completion};
@@ -285,10 +285,22 @@ impl Agent {
     }
 }
 
-struct AgentControl<'a>{agent:&'a mut Agent,h:&'a Hooks,host:bool}
-impl ProviderControl for AgentControl<'_>{
-    fn poll(&mut self)->Result<()>{if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}}
-    fn remaining(&self)->u64{self.agent.state.wire.as_ref().map(|c|c.max_total.saturating_sub(self.agent.state.wire_counters.total())).unwrap_or(u64::MAX)}
-    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{if self.host{return Err("host_control_unsupported".into());}if bytes as u64>self.remaining(){return Err("wire_total_limit".into());}let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};*target=target.checked_add(bytes as u64).ok_or("wire_total_limit")?;self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".into())}
-    fn checkpoint(&mut self,name:&str)->Result<()>{if self.host{return Err("host_control_unsupported".into());}self.agent.state.save(&self.agent.dir).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
+struct AgentControl<'a,'p>{agent:&'a mut Agent,h:&'a Hooks,ports:Option<&'p mut dyn crate::agent_ports::AgentPorts>}
+impl ProviderControl for AgentControl<'_,'_>{
+    fn poll(&mut self)->Result<()>{if let Some(p)=self.ports.as_deref_mut(){p.check_control()?;}if self.agent.cancelled()?{Err("wire_cancelled".into())}else{Ok(())}}
+    fn remaining(&self)->u64{
+        let wire=self.agent.state.wire.as_ref().map(|c|c.max_total.saturating_sub(self.agent.state.wire_counters.total())).unwrap_or(u64::MAX);
+        if self.ports.is_some(){wire.min(self.agent.state.limits.total.saturating_sub(self.agent.state.counters.total))}else{wire}
+    }
+    fn charge(&mut self,sent:bool,bytes:usize)->Result<()>{
+        let bytes=u64::try_from(bytes).map_err(|_|"wire_total_limit")?;
+        if bytes>self.remaining(){return Err("wire_total_limit".into());}
+        let counters=&mut self.agent.state.wire_counters;let target=if sent{&mut counters.sent}else{&mut counters.received};
+        *target=target.checked_add(bytes).ok_or("wire_total_limit")?;
+        // Host HTTP bytes use the existing task total budget; wire counters are
+        // its durable sent/received detail, not a second host budget.
+        if self.ports.is_some(){self.agent.state.counters.total=self.agent.state.counters.total.checked_add(bytes).ok_or("wire_total_limit")?;}
+        self.agent.save_drive(self.ports.as_deref()).map_err(|_|"wire_journal".into())
+    }
+    fn checkpoint(&mut self,name:&str)->Result<()>{self.agent.save_drive(self.ports.as_deref()).map_err(|_|"wire_journal".to_string())?;self.h.checkpoint(name)}
 }
