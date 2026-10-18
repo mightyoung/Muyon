@@ -63,6 +63,35 @@ class FrontendServiceLoopTest {
         assertTrue("Service must run outside the UI process",agent!!.pid!=Process.myPid())
         assertEquals(Process.myUid(),agent.uid)
         println("API26_REAL_PRIVATE_READ_PASS ui_pid=${Process.myPid()} agent_pid=${agent.pid} receipt_identity=${receipt.getString("identity")} synthetic_schema12=true model_api_called=false")
+        val originalIdentity=receipt.getString("identity")
+        val originalPid=agent.pid
+        // Bound strictly to this tested application's own private Service child.
+        check(agent.processName=="${context.packageName}:agent" && agent.uid==Process.myUid() && originalPid!=Process.myPid())
+        Process.killProcess(originalPid)
+        awaitTag("service-read-historical-receipt")
+        compose.onNodeWithTag("service-read-historical-receipt").assertTextContains(originalIdentity)
+        compose.onNodeWithTag("service-read-status").assertTextContains("状态未知")
+        compose.onNodeWithTag("service-read-receipt").assertDoesNotExist()
+        compose.onNodeWithTag("service-read-projection").assertDoesNotExist()
+        compose.onNodeWithTag("send-service-read").assertIsNotEnabled()
+        // Existing request lookup only: never click Send or replace the original input.
+        compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("reconcile-service-read"))
+        compose.onNodeWithTag("reconcile-service-read").performClick()
+        awaitTag("service-read-receipt")
+        compose.waitUntil(timeoutMillis=60_000) {
+            compose.onAllNodes(hasTestTag("service-read-status") and hasText("已完成")).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("service-read-projection").assertTextEquals("合成供应商甲")
+        val recoveredText=compose.onNodeWithTag("service-read-receipt").fetchSemanticsNode()
+            .config[SemanticsProperties.Text].joinToString("") { it.text }
+        val recoveredReceipt=JSONObject(recoveredText.removePrefix("原始回执："))
+        assertEquals("lookup must preserve the original receipt",originalIdentity,recoveredReceipt.getString("identity"))
+        assertEquals(receipt.getString("invocation_id"),recoveredReceipt.getString("invocation_id"))
+        val restartedAgent=manager.runningAppProcesses.orEmpty().singleOrNull { it.processName=="${context.packageName}:agent" }
+        assertNotNull("lookup must reconnect to a live private Service",restartedAgent)
+        assertEquals(Process.myUid(),restartedAgent!!.uid)
+        assertTrue(restartedAgent.pid!=originalPid && restartedAgent.pid!=Process.myPid())
+        println("API26_REAL_BINDER_RECOVERY_PASS old_agent_pid=$originalPid new_agent_pid=${restartedAgent.pid} original_receipt_identity=$originalIdentity lookup_only=true model_api_called=false")
     }
 
     @Test fun invalidInputCannotDispatchAndSaveRemainsLocal() {
