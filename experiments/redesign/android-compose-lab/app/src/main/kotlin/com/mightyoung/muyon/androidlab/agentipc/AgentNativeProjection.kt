@@ -50,7 +50,7 @@ internal fun projectAgentReply(reply:AgentCloseReply):UiAgentWireReply=when(val 
 
 
 /** Correlation only; this seam never decides native cancellation or a business outcome. */
-internal fun agentControlRunId(run:UiAgentRun?,selected:UiAgentIntent?):String? = when(run) {
+internal fun agentControlRunId(run:UiAgentRun?,selected:UiAgentIntent?):String? = if(selected==null || run?.intent!=selected)null else when(run) {
     is UiAgentRun.Admitted -> run.identity
     is UiAgentRun.Running -> run.identity
     is UiAgentRun.Terminal -> run.summary.identity

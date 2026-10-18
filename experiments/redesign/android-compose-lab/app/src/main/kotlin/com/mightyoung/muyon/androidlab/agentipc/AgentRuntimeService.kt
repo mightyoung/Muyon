@@ -30,17 +30,37 @@ class AgentRuntimeService:Service() {
     private var settlementTarget:GeneratedAgentController?=null
     private var settlementPump:AgentSettlementPump?=null
     private val retirementRequested=AtomicBoolean()
+    private val cleanupCompleted=AtomicBoolean()
     private val backend=ThreadPoolExecutor(1,1,0L,TimeUnit.MILLISECONDS,ArrayBlockingQueue<Runnable>(1),
         {work->Thread(work,"muyon-agent-settlement")},ThreadPoolExecutor.AbortPolicy())
-    private lateinit var bootstrap:AgentServiceBootstrap
+    private var bootstrap:AgentServiceBootstrap?=null
+    private var reservation:AgentControllerRetention.Reservation?=null
     private val build get()=BuildConfig.MUYON_BRIDGE_SOURCE_SHA
 
     override fun onCreate() {
         super.onCreate()
+        val slot=ServiceProcessKeys.controllers.reserve()
+        if(slot==null){synchronized(ownership){setupFailed=true};return}
+        reservation=slot
         val generation=synchronized(ownership){platformGeneration}
         bootstrap=AgentServiceBootstrap(backend,construct={
-            check(Regex("[0-9a-f]{40}").matches(build)){"native_unavailable"}
-            GeneratedAgentController.open(privateRoot(),build)
+            try {
+                check(Regex("[0-9a-f]{40}").matches(build)){"native_unavailable"}
+                lateinit var value:GeneratedAgentController
+                value=GeneratedAgentController.open(privateRoot(),build,
+                    onDrained={requestSettlement(value)},onCleaned={
+                        if(ServiceProcessKeys.controllers.releaseCleaned(slot,value)) {
+                            cleanupCompleted.set(true)
+                            if(synchronized(ownership){destroyed})backend.shutdown()
+                        }
+                    })
+                check(ServiceProcessKeys.controllers.publish(slot,value)){"owner_unavailable"}
+                value
+            } catch(error:Throwable) {
+                // Releases only a definitely unpublished slot; never drops a published object.
+                if(ServiceProcessKeys.controllers.failedBeforePublish(slot) && synchronized(ownership){destroyed})backend.shutdown()
+                throw error
+            }
         },installed={lifetime->
             val value=lifetime as GeneratedAgentController
             val clients=AgentLivenessRegistry<IBinder>(ServiceProcessKeys.keys){key->
@@ -54,7 +74,7 @@ class AgentRuntimeService:Service() {
                 try{clients.dispose()}finally{try{value.retire()}finally{value.awaitSettled()}}
             }
         },unavailable={synchronized(ownership){setupFailed=true}})
-        bootstrap.start()
+        bootstrap?.start()
     }
     /** Only Service Context-derived canonical private storage. No UI/Binder path parameter. */
     private fun privateRoot():String {
@@ -78,7 +98,12 @@ class AgentRuntimeService:Service() {
     override fun onBind(intent:Intent?):IBinder=binder
     override fun onUnbind(intent:Intent?):Boolean { stopPlatform(dispose=false);return true }
     override fun onDestroy() {
-        try{stopPlatform(dispose=true)}finally{backend.shutdown();super.onDestroy()}
+        try{stopPlatform(dispose=true)}finally{
+            // The process holder and backend survive Service destruction until real cleanup.
+            val slot=reservation
+            if(slot==null || cleanupCompleted.get() || (ServiceProcessKeys.controllers.retained()==null && synchronized(ownership){setupFailed}))backend.shutdown()
+            super.onDestroy()
+        }
     }
     private fun stopPlatform(dispose:Boolean) {
         val captured=synchronized(ownership){
@@ -89,7 +114,7 @@ class AgentRuntimeService:Service() {
         // Even an unexpected unlink failure cannot prevent the real Rust stop signal.
         try{if(dispose)captured.second?.dispose()}catch(_:Exception){synchronized(ownership){setupFailed=true}}finally{
             val value=captured.first
-            if(value==null) bootstrap.retire()
+            if(value==null) bootstrap?.retire()
             else try{safe{value.retireRuntime(disposeHandle=dispose)}}finally{
                 retirementRequested.set(true)
                 requestSettlement(value)
@@ -111,7 +136,7 @@ class AgentRuntimeService:Service() {
     private fun local(status:UiAgentLocalStatus)=AgentReplyParcel.from(UiAgentWireReply.Local(status),build)
     private inline fun invoke(work:(GeneratedAgentController,AgentLivenessRegistry<IBinder>)->UiAgentWireReply):AgentReplyParcel {
         val capture=synchronized(ownership){
-            if(destroyed)null else controller?.let{value->registry?.let{clients->value to clients}}
+            if(destroyed || setupFailed)null else controller?.let{value->registry?.let{clients->value to clients}}
         }
         if(capture==null)return local(synchronized(ownership){if(retired || setupFailed)UiAgentLocalStatus.UNAVAILABLE else UiAgentLocalStatus.INITIALIZING})
         return AgentReplyParcel.from(safe{work(capture.first,capture.second)} ?: UiAgentWireReply.Local(UiAgentLocalStatus.UNAVAILABLE),build)
@@ -184,4 +209,7 @@ class AgentRuntimeService:Service() {
     }
 }
 /** :agent process lifetime, accessed only after actual Service background initialization. */
-private object ServiceProcessKeys { val keys=AgentClientKeys(UUID.randomUUID().toString().replace("-","").take(16)) }
+private object ServiceProcessKeys {
+    val controllers=AgentControllerRetention()
+    val keys=AgentClientKeys(UUID.randomUUID().toString().replace("-","").take(16))
+}
