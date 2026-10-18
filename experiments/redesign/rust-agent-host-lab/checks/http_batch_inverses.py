@@ -31,13 +31,18 @@ def main():
     parser = argparse.ArgumentParser()
     for name in ('source-root', 'evidence-dir', 'work-dir'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--expected-source', help='Explicit immutable candidate; omitted preserves historical exact8e archive')
     args = parser.parse_args()
+    source = args.expected_source or SOURCE
+    if args.expected_source:
+        from source_identity import validate
+        validate(args.source_root, source)
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'android-rust-bridge-lab/checks'))
     from linux_gate import run, sha
     evidence, work = args.evidence_dir.resolve(), args.work_dir.resolve()
     evidence.mkdir(parents=True); work.mkdir(parents=True)
     roots = ['experiments/redesign/' + name for name in ('core-agent-lab', 'plugin-contract-lab', 'rust-agent-host-lab')]
-    archive = subprocess.check_output(['git', 'archive', SOURCE, *roots], cwd=args.source_root)
+    archive = subprocess.check_output(['git', 'archive', source, *roots], cwd=args.source_root)
     copy = work / 'source'; copy.mkdir()
     with tarfile.open(fileobj=io.BytesIO(archive)) as bundle:
         bundle.extractall(copy, filter='data')
@@ -64,7 +69,7 @@ def main():
         killed = inverse(mutant_log.read_text(), record, target, needles)
         rows.append(dict(name=name, target=target, baseline_green=True, mutation_killed=killed,
                          mutation_source_sha256=sha(copy / path), expected_needles=needles, mutant=record))
-        (evidence / 'summary.json').write_text(json.dumps(dict(source_sha=SOURCE, rows=rows,
+        (evidence / 'summary.json').write_text(json.dumps(dict(source_sha=source, rows=rows,
             accepted=len(rows) == len(MUTANTS) and all(row['mutation_killed'] for row in rows)), indent=2) + '\n')
         if not killed:
             raise RuntimeError('semantic_inverse_invalid:' + name)

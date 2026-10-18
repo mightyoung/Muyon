@@ -65,9 +65,13 @@ def main():
     parser = argparse.ArgumentParser()
     for name in ('source-root', 'evidence-dir', 'target-dir'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--expected-source', help='Explicit immutable candidate; omitted preserves historical exact8e contract')
     args = parser.parse_args()
     source = '8e0f6b1d0abfb0115bf48fa0bc8c790bfe30fa16'
+    source = args.expected_source or source
     root, evidence = args.source_root.resolve(), args.evidence_dir.resolve()
+    from source_identity import validate
+    validate(root, source)
     evidence.mkdir(parents=True)
     def git(*parts):
         return subprocess.check_output(['git', *parts], cwd=root, text=True).strip()
