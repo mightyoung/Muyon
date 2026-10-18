@@ -1,0 +1,84 @@
+name: Verify immutable supplier APK on API26
+on:
+  push:
+    branches: ['verify/frontend-service-device-20261018']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  device:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SOURCE_SHA: 98923e71ef1e89f653dc18031e09c734c474c1bb
+      PRODUCER_RUN: '39105160635'
+      HARNESS_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+        with: {distribution: temurin, java-version: '17'}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: loop-package-device
+          run-id: ${{ env.PRODUCER_RUN }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/immutable-apk
+      - name: Verify original combined producer and APK hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          export EVIDENCE="$RUNNER_TEMP/device-evidence"
+          mkdir -p "$EVIDENCE"
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'immutable-apk'
+          producer=json.loads((root/'package-result.json').read_text())
+          actual=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          assert actual==os.environ['SOURCE_SHA']==producer['source_sha']
+          assert producer['build']=='PASS' and producer['min_api']==26
+          for name,key in [('app-debug.apk','apk_sha256'),('app-debug-androidTest.apk','test_apk_sha256')]:
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==producer[key]
+          record=dict(source_sha=actual,harness_sha=os.environ['HARNESS_SHA'],producer_run=os.environ['PRODUCER_RUN'],producer=producer,model_api_called=False)
+          Path(os.environ['EVIDENCE'],'provenance.json').write_text(json.dumps(record,indent=2)+'\n')
+          print('IMMUTABLE_COMBINED_APK_VERIFIED source='+actual)
+          PY
+      - name: Real API26 UI Binder read and process-death recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/device-evidence"
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/muyon-device-avds"
+          mkdir -p "$ANDROID_AVD_HOME"
+          manager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          # Existing runner SDK license state only. No license acceptance command.
+          "$manager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/sdk-setup.log"
+          adb_bin="$ANDROID_HOME/platform-tools/adb"
+          test -x "$adb_bin"
+          "$adb_bin" version > "$evidence/adb-version.txt"
+          sudo chmod a+rw /dev/kvm
+          printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-loop-api26 -k 'system-images;android-26;google_apis;x86_64' --force
+          "$ANDROID_HOME/emulator/emulator" -avd muyon-loop-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$evidence/emulator.log" 2>&1 &
+          timeout 300 "$adb_bin" wait-for-device
+          for attempt in $(seq 1 120); do if [[ "$("$adb_bin" shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done
+          test "$("$adb_bin" shell getprop sys.boot_completed | tr -d '\r')" = 1
+          test "$("$adb_bin" shell getprop ro.build.version.sdk | tr -d '\r')" = 26
+          "$adb_bin" shell input keyevent 82
+          "$adb_bin" install -r "$RUNNER_TEMP/immutable-apk/app-debug.apk"
+          "$adb_bin" install -r "$RUNNER_TEMP/immutable-apk/app-debug-androidTest.apk"
+          "$adb_bin" logcat -c
+          "$adb_bin" shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
+          "$adb_bin" logcat -d > "$evidence/logcat.txt"
+          "$adb_bin" shell ps -A > "$evidence/device-processes.txt"
+          grep -F 'OK (2 tests)' "$evidence/instrumentation.log"
+          if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi
+          printf 'API26 UI/Binder/native/synthetic schema12 and original-receipt process recovery PASS; model API NOT_RUN\n' > "$evidence/device-result.txt"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: immutable-supplier-device-evidence
+          path: ${{ runner.temp }}/device-evidence
+          retention-days: 7
