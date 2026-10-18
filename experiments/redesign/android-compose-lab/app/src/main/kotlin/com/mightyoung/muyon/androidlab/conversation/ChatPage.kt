@@ -120,6 +120,10 @@ internal fun ConversationPage(
                             if(execution.answer.isNotEmpty()) RichContent(execution.answer)
                             execution.projection?.let { Text(it, modifier=Modifier.testTag("service-read-projection")) }
                             execution.receipt?.let { Text("原始回执：$it", style=MaterialTheme.typography.bodySmall, modifier=Modifier.testTag("service-read-receipt")) }
+                            if(execution.receipt == null) execution.originalReceiptIdentity?.let {
+                                Text("历史原回执 identity：$it\n历史记录不代表当前业务内容可披露，也不证明本次成功。", style=MaterialTheme.typography.bodySmall,
+                                    modifier=Modifier.testTag("service-read-historical-receipt"))
+                            }
                             if(execution.reason.isNotBlank()) Text("原因：${execution.reason}", style=MaterialTheme.typography.bodySmall, modifier=Modifier.testTag("service-read-reason"))
                             execution.requestId?.let { Text("request: $it", style=MaterialTheme.typography.labelSmall) }
                             execution.runId?.let { Text("run: $it", style=MaterialTheme.typography.labelSmall) }
