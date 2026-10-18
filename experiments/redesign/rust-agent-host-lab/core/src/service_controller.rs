@@ -259,17 +259,18 @@ fn settled(s: &AgentRunSnapshot) -> bool {
 pub struct AgentServiceController {
     shared: Arc<Shared>,
     observer: Option<Arc<dyn ServiceEvidenceObserver>>,
+    host: Option<Arc<crate::service_host::ServiceHostPorts>>,
 }
 impl AgentServiceController {
     /// Host-only injection; never exposed by the UI/FFI request DTOs.
     pub fn new_with_host(
-        _config: AgentHostServiceConfig,
-        _host: Arc<crate::service_host::ServiceHostPorts>,
+        config: AgentHostServiceConfig,
+        host: Arc<crate::service_host::ServiceHostPorts>,
     ) -> Result<Self, AgentServiceError> {
-        Err(AgentServiceError::InternalFailure)
+        Self::construct(config, None, Some(host))
     }
     pub fn new(config: AgentHostServiceConfig) -> Result<Self, AgentServiceError> {
-        Self::construct(config, None)
+        Self::construct(config, None, None)
     }
     /// Rust-only diagnostics; same admission, worker, controls and driver as shipping new.
     #[doc(hidden)]
@@ -277,11 +278,12 @@ impl AgentServiceController {
         config: AgentHostServiceConfig,
         observer: Arc<dyn ServiceEvidenceObserver>,
     ) -> Result<Self, AgentServiceError> {
-        Self::construct(config, Some(observer))
+        Self::construct(config, Some(observer), None)
     }
     fn construct(
         config: AgentHostServiceConfig,
         observer: Option<Arc<dyn ServiceEvidenceObserver>>,
+        host: Option<Arc<crate::service_host::ServiceHostPorts>>,
     ) -> Result<Self, AgentServiceError> {
         if config.protocol != 1 {
             return Err(AgentServiceError::UnsupportedProtocol);
@@ -334,13 +336,14 @@ impl AgentServiceController {
                 owns_process_slot: true,
             }),
         });
+        let inventory_host = host.clone();
         match thread::Builder::new()
             .name("muyon-agent-inventory".into())
             .spawn(move || {
                 Completion::Initialized((|| {
                     let root = ServiceRoot::open(&path)?;
                     let (runs, recovery) = service_evidence::restore(&root);
-                    let business = supplier_business::restore_all(&root);
+                    let business = supplier_business::restore_all(&root, inventory_host);
                     Ok((root, runs, recovery, business))
                 })())
             }) {
@@ -350,7 +353,7 @@ impl AgentServiceController {
                 return Err(AgentServiceError::InternalFailure);
             }
         }
-        Ok(Self { shared, observer })
+        Ok(Self { shared, observer, host })
     }
     pub fn connect(&self, req: AgentConnectRequest) -> AgentConnectReply {
         let mut g = self.shared.lock();
@@ -406,6 +409,10 @@ impl AgentServiceController {
         }
     }
     pub fn start_run(&self, req: AgentStartRequest) -> AgentStartReply {
+        if self.host.is_some() {
+            let g = self.shared.lock();
+            return AgentStartReply { meta: g.meta.clone(), outcome: AgentStartOutcome::Rejected { error: AgentServiceError::TargetUnavailable } };
+        }
         self.start_internal(req, None)
     }
     fn start_internal(
@@ -553,6 +560,19 @@ impl AgentServiceController {
     }
     /// Private closed business protocol. Queued acceptance is volatile until run identity appears.
     pub fn submit_supplier_read(
+        &self, client: AgentClientRef, request_id: String, text: String, key: String, revision: String,
+    ) -> String {
+        self.host_marker(self.submit_supplier_read_internal(client, request_id, text, key, revision))
+    }
+    fn host_marker(&self, reply: String) -> String {
+        if self.host.is_none() { return reply; }
+        let Ok(mut value) = muyon_plugin_contract_lab::parse(reply.as_bytes()) else { return reply; };
+        if let muyon_plugin_contract_lab::Json::Object(fields) = &mut value {
+            fields.insert("synthetic".into(), muyon_plugin_contract_lab::Json::Bool(false));
+        }
+        value.encode()
+    }
+    fn submit_supplier_read_internal(
         &self,
         client: AgentClientRef,
         request_id: String,
@@ -560,12 +580,13 @@ impl AgentServiceController {
         key: String,
         revision: String,
     ) -> String {
-        let business = match BusinessRead::new(text, key, revision) {
+        let mut business = match BusinessRead::new(text, key, revision) {
             Ok(b) => b,
             Err(reason) => {
                 return supplier_business::reply("rejected", &reason, &request_id, None, None, 0)
             }
         };
+        business.attach_host(self.host.clone());
         let reply = self.start_internal(
             AgentStartRequest {
                 client,
@@ -590,6 +611,11 @@ impl AgentServiceController {
     }
     /// Cursor polling and reconnect lookup share this operation; it never executes a read.
     pub fn supplier_read_events(
+        &self, client: AgentClientRef, request_id: String, after: i64,
+    ) -> String {
+        self.host_marker(self.supplier_read_events_internal(client, request_id, after))
+    }
+    fn supplier_read_events_internal(
         &self,
         client: AgentClientRef,
         request_id: String,

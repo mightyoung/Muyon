@@ -370,21 +370,32 @@ pub struct SupplierReadResult {
 }
 impl SupplierReader {
     pub fn install_host_scope(
-        _receipts: &Path,
-        _id: &str,
-        _bridge: Rc<crate::supplier_scope_bridge::HostSupplierScopeBridge>,
+        receipts: &Path,
+        id: &str,
+        bridge: Rc<crate::supplier_scope_bridge::HostSupplierScopeBridge>,
     ) -> Result<Self> {
-        Err("supplier_scope_bridge_unavailable".into())
+        // SupplierStore::open validates the selected record, so sample the live
+        // read owner before even that initial physical read. Installation then
+        // performs the original paired samples and source checks as well.
+        bridge.snapshot()?;
+        let db = bridge.source.db.clone();
+        Self::install(&db, receipts, id, bridge)
     }
+    /// Host-only Service installation preserves the admitted run directory and
+    /// durable receipt/admission path. The UI never supplies the database path.
     pub(crate) fn install_host_scope_in_run(
-        _dir: &Path,
-        _id: &str,
-        _bridge: Rc<crate::supplier_scope_bridge::HostSupplierScopeBridge>,
+        dir: &Path,
+        id: &str,
+        bridge: Rc<crate::supplier_scope_bridge::HostSupplierScopeBridge>,
     ) -> Result<Self> {
-        Err("supplier_scope_bridge_unavailable".into())
+        bridge.snapshot()?;
+        let db = bridge.source.db.clone();
+        Self::install_in_run(&db, dir, id, bridge)
     }
-    pub fn validate_current_projection(&self, _projection: &Json) -> Result<()> {
-        Err("supplier_scope_bridge_unavailable".into())
+    /// Re-read both current host authorization and the physical source before
+    /// disclosing a retained projection. A historical receipt grants no access.
+    pub fn validate_current_projection(&self, projection: &Json) -> Result<()> {
+        self.validate_projection(projection)
     }
     pub fn install(
         db: &Path,

@@ -130,3 +130,71 @@ fn payload_model_must_match_configured_profile_and_payload_is_bounded() {
     assert!(bridge.prepare("request-1",&vec![b'x';65537],cost()).is_err());
     assert_eq!(host.reservations.get(),0);
 }
+#[test]
+fn readiness_never_accepts_ambiguous_or_local_endpoint_forms() {
+    for endpoint in ["https://localhost/chat", "https://127.0.0.1/chat", "https://provider.invalid/chat?key=x",
+        "https://provider.invalid/chat#part", "https://provider.invalid:0/chat", "https://provider.invalid:bad/chat",
+        "https://provider.invalid/\\evil", "https://provider.invalid/white space"] {
+        let host=Host::new(); host.current.borrow_mut().as_mut().unwrap().profile.endpoint=endpoint.into();
+        assert!(ServiceProviderBridge::new(host.clone()).readiness(&cost()).is_err());
+        assert_eq!(host.reservations.get(),0);
+    }
+}
+#[test]
+fn wire_capabilities_cannot_exceed_approved_call_requirements() {
+    let host=Host::new(); let bridge=ServiceProviderBridge::new(host.clone());
+    assert!(bridge.prepare("request-1",br#"{"model":"approved-model","stream":true,"messages":[]}"#,cost()).is_err());
+    let mut no_tools=cost(); no_tools.requires_tools=false;
+    assert!(bridge.prepare("request-1",br#"{"model":"approved-model","tools":[{}],"messages":[]}"#,no_tools).is_err());
+    assert_eq!(host.reservations.get(),0);
+}
+#[test]
+fn oversized_wire_token_caps_are_rejected_before_reservation() {
+    for field in ["max_tokens", "max_completion_tokens"] {
+        for value in ["101", "18446744073709551615", "18446744073709551616", "0", "-1", "1.5", "\"100\"", "null", "true"] {
+            let host=Host::new(); let bridge=ServiceProviderBridge::new(host.clone());
+            let payload=format!(r#"{{"model":"approved-model","messages":[],"{field}":{value}}}"#);
+            assert!(bridge.prepare("request-1",payload.as_bytes(),cost()).is_err(),"{field}={value}");
+            assert_eq!(host.reservations.get(),0,"{field}={value}");
+        }
+    }
+}
+#[test]
+fn multiple_or_malformed_choices_are_rejected_before_reservation() {
+    for value in ["2", "100", "0", "-1", "1.0", "\"1\"", "null", "true"] {
+        let host=Host::new(); let bridge=ServiceProviderBridge::new(host.clone());
+        let payload=format!(r#"{{"model":"approved-model","messages":[],"n":{value}}}"#);
+        assert!(bridge.prepare("request-1",payload.as_bytes(),cost()).is_err(),"n={value}");
+        assert_eq!(host.reservations.get(),0,"n={value}");
+    }
+}
+#[test]
+fn malformed_stream_or_tools_are_rejected_before_reservation() {
+    for (field, values) in [("stream", vec!["\"false\"", "0", "null", "[]", "{}"]),
+        ("tools", vec!["\"none\"", "0", "null", "false", "{}"]) ] {
+        for value in values {
+            let host=Host::new(); let bridge=ServiceProviderBridge::new(host.clone());
+            let payload=format!(r#"{{"model":"approved-model","messages":[],"{field}":{value}}}"#);
+            assert!(bridge.prepare("request-1",payload.as_bytes(),cost()).is_err(),"{field}={value}");
+            assert_eq!(host.reservations.get(),0,"{field}={value}");
+        }
+    }
+}
+#[test]
+fn unsupported_output_token_dialect_is_rejected_before_reservation() {
+    let host=Host::new(); let bridge=ServiceProviderBridge::new(host.clone());
+    assert!(bridge.prepare("request-1",br#"{"model":"approved-model","messages":[],"max_output_tokens":1}"#,cost()).is_err());
+    assert_eq!(host.reservations.get(),0);
+}
+#[test]
+fn single_choice_and_explicit_token_caps_within_budget_preserve_exact_bytes() {
+    for field in ["max_tokens", "max_completion_tokens"] {
+        for tokens in [1,100] {
+            let host=Host::new(); let bridge=ServiceProviderBridge::new(host.clone());
+            let payload=format!(r#"{{"model":"approved-model","messages":[],"n":1,"stream":false,"tools":[],"{field}":{tokens}}}"#);
+            let pending=bridge.prepare("request-1",payload.as_bytes(),cost()).unwrap();
+            assert_eq!(host.reservations.get(),1);
+            assert_eq!(bridge.final_admit(pending).unwrap().payload(),payload.as_bytes());
+        }
+    }
+}

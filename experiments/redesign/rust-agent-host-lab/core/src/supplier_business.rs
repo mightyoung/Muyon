@@ -1,5 +1,5 @@
-//! Private bounded synthetic business protocol, owned by the existing Service worker.
-//! No model, endpoint, production authority, or UI supplied path is accepted here.
+//! Bounded business protocol owned by the existing Service worker.
+//! Host ports are trusted constructor injection, never request payload fields.
 use crate::{
     field, service_root::ServiceRoot, service_runtime::RunControl, service_types::*,
     store::NativeStore, Result,
@@ -15,6 +15,9 @@ use std::{
 #[derive(Clone)]
 pub(crate) struct BusinessRead {
     pub payload: Json,
+    mode: Option<crate::service_host::ServiceHostMode>,
+    source_binding: Option<Json>,
+    host: Option<Arc<crate::service_host::ServiceHostPorts>>,
     events: Vec<Json>,
     dir: Option<PathBuf>,
 }
@@ -37,9 +40,16 @@ impl BusinessRead {
                 ("key", string(key)),
                 ("revision", string(revision)),
             ]),
+            mode: None,
+            source_binding: None,
+            host: None,
             events: Vec::new(),
             dir: None,
         })
+    }
+    pub(crate) fn attach_host(&mut self, host: Option<Arc<crate::service_host::ServiceHostPorts>>) {
+        if let Some(host) = &host { self.mode = Some(host.mode); }
+        self.host = host;
     }
     pub(crate) fn cancel_before_admission(&mut self) {
         self.events.clear();
@@ -52,12 +62,21 @@ impl BusinessRead {
         );
     }
     fn save(&self, dir: &Path) -> Result<()> {
-        let data = object([
+        let mut data = object([
             ("version", string("supplier-business-1")),
             ("payload", self.payload.clone()),
             ("events", Json::Array(self.events.clone())),
-        ])
-        .encode();
+        ]);
+        if let Some(mode) = self.mode {
+            if let Json::Object(fields) = &mut data {
+                fields.insert("version".into(), string("supplier-business-2"));
+                fields.insert("host".into(), object([
+                    ("mode", string(mode.label())),
+                    ("source_binding", self.source_binding.clone().unwrap_or(Json::Null)),
+                ]));
+            }
+        }
+        let data = data.encode();
         if data.len() > 16384 {
             return Err("BUSINESS_LEDGER_BOUND".into());
         }
@@ -94,9 +113,11 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
         return Err("BUSINESS_LEDGER_BOUND".into());
     }
     let j = parse(&bytes)?;
-    closed(&j, &["version", "payload", "events"])?;
-    if field(&j, "version")? != &string("supplier-business-1") {
-        return Err("BUSINESS_VERSION".into());
+    let version=field(&j,"version")?.string()?;
+    match version {
+        "supplier-business-1" => closed(&j, &["version", "payload", "events"])?,
+        "supplier-business-2" => closed(&j, &["version", "payload", "events", "host"])?,
+        _ => return Err("BUSINESS_VERSION".into()),
     }
     let payload = field(&j, "payload")?;
     closed(payload, &["text", "key", "revision"])?;
@@ -105,6 +126,19 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
         field(payload, "key")?.string()?.into(),
         field(payload, "revision")?.string()?.into(),
     )?;
+    if version == "supplier-business-2" {
+        let host=field(&j,"host")?; closed(host,&["mode","source_binding"])?;
+        b.mode=Some(crate::service_host::ServiceHostMode::parse(field(host,"mode")?.string()?)?);
+        let binding=field(host,"source_binding")?;
+        if binding != &Json::Null {
+            closed(binding,&["source_identity","namespace","managed_root","database","source_revision"])?;
+            for key in ["source_identity","namespace","managed_root","database","source_revision"] {
+                let value=field(binding,key)?.string()?;
+                if value.is_empty() || value.len()>4096 { return Err("BUSINESS_HOST_BINDING".into()); }
+            }
+            b.source_binding=Some(binding.clone());
+        }
+    }
     b.events = field(&j, "events")?.array()?.to_vec();
     b.dir = Some(dir.into());
     if b.events.len() > 4 {
@@ -148,11 +182,12 @@ fn validate_events(b: &BusinessRead) -> Result<()> {
             let projection = field(&b.events[1], "payload")?;
             closed(projection, &["supplier", "name"])?;
             let name = field(projection, "name")?.string()?;
-            if name.len() > 512 || field(delta, "text")? != &string(format!("合成供应商：{name}"))
+            if name.len() > 512 || field(delta, "text")? != &string(format!("{}{name}", if b.mode.is_some() { "供应商：" } else { "合成供应商：" }))
             {
                 return Err("BUSINESS_ANSWER_BINDING".into());
             }
         }
+        "failed" if b.mode.is_some() && b.events.len() == 1 => (),
         "cancelled" | "outcome_unknown" if b.events.len() == 1 => (),
         "outcome_unknown"
             if b.events.len() == 2 && field(&b.events[0], "kind")? == &string("receipt") =>
@@ -163,14 +198,15 @@ fn validate_events(b: &BusinessRead) -> Result<()> {
     }
     Ok(())
 }
-pub(crate) fn restore_all(root: &ServiceRoot) -> BTreeMap<String, BusinessRead> {
+pub(crate) fn restore_all(root: &ServiceRoot, host: Option<Arc<crate::service_host::ServiceHostPorts>>) -> BTreeMap<String, BusinessRead> {
     root.runs()
         .iter()
         .filter_map(|run| {
-            Some((
-                run.intent.request_id.clone(),
-                load(&root.run_dir(&run.identity.run_id).ok()?).ok()?,
-            ))
+            let mut business=load(&root.run_dir(&run.identity.run_id).ok()?).ok()?;
+            // Never relabel history from a different execution mode.
+            if host.as_ref().is_some_and(|h|Some(h.mode)!=business.mode) { return None; }
+            business.host=host.as_ref().filter(|h|Some(h.mode)==business.mode).cloned();
+            Some((run.intent.request_id.clone(), business))
         })
         .collect()
 }
@@ -253,6 +289,9 @@ pub(crate) fn restore_snapshot(dir: &Path, run: &AgentDurableRun) -> Result<Agen
             return Err("BUSINESS_COMPLETION_RECEIPT".into());
         }
         (AgentTerminal::Completed, AgentReason::None, receipt)
+    } else if state == "failed" && b.mode.is_some() {
+        if dir.join("native.db").exists() { return Err("BUSINESS_FAILED_RECEIPT".into()); }
+        (AgentTerminal::Failed, AgentReason::InternalFailure, AgentReceiptSummary { opaque_id: None, outcome: AgentReceiptOutcome::NotStarted })
     } else if state == "cancelled" {
         (
             AgentTerminal::Cancelled,
@@ -322,25 +361,30 @@ pub(crate) fn execute(
     };
     // Durable semantic identity precedes any physical business read.
     let result = (|| {
+        if b.mode == Some(crate::service_host::ServiceHostMode::LocalRead) {
+            b.source_binding=Some(b.host.as_ref().ok_or("host_owner_unavailable")?.source_binding()?);
+        }
         b.save(dir)?;
         control.poll()?;
-        let result = crate::supplier_lab_source::run_lab_supplier_read_admitted(
-            dir,
-            field(&b.payload, "text")?.string()?,
-            field(&b.payload, "key")?.string()?,
-            field(&b.payload, "revision")?.string()?,
-            control.clone(),
-            |state| {
-                let actual = AgentTaskIdentity {
-                    task_id: state.task.clone(),
-                    attempt_id: state.attempt.clone(),
-                };
-                root.attach_task(&run.identity.run_id, actual.clone())?;
-                run.identity.actual_task = Some(actual);
-                summary.identity = run.identity.clone();
-                Ok(())
-            },
-        )?;
+        if b.mode == Some(crate::service_host::ServiceHostMode::ConfiguredChat) {
+            let error = b.host.as_ref().ok_or("host_owner_unavailable")?.configured_readiness().err().ok_or("configured_transport_unavailable")?;
+            summary.terminal=AgentTerminal::Failed;
+            summary.reason=AgentReason::InternalFailure;
+            summary.receipt=AgentReceiptSummary { opaque_id: None, outcome: AgentReceiptOutcome::NotStarted };
+            // Readiness performs no reservation, outbound commit, or model exchange.
+            b.push("terminal",object([("state",string("failed")),("reason",string(error))]));
+            return Ok(());
+        }
+        let mut admitted = |state: &muyon_core_agent_lab::agent::State| {
+            let actual=AgentTaskIdentity {task_id:state.task.clone(),attempt_id:state.attempt.clone()};
+            root.attach_task(&run.identity.run_id,actual.clone())?;
+            run.identity.actual_task=Some(actual); summary.identity=run.identity.clone(); Ok(())
+        };
+        let result = if b.mode.is_some() {
+            b.host.as_ref().ok_or("host_owner_unavailable")?.read_admitted(dir,&b.payload,b.source_binding.as_ref().ok_or("host_source_binding_unavailable")?,control.clone(),&mut admitted)?
+        } else {
+            crate::supplier_lab_source::run_lab_supplier_read_admitted(dir,field(&b.payload,"text")?.string()?,field(&b.payload,"key")?.string()?,field(&b.payload,"revision")?.string()?,control.clone(),&mut admitted)?
+        };
         let (rows, _) = NativeStore::read_service_evidence(dir)?;
         let row = rows.first().ok_or("BUSINESS_RECEIPT_MISSING")?;
         let binding = field(row, "binding")?;
@@ -357,7 +401,7 @@ pub(crate) fn execute(
         }
         b.push(
             "answer_delta",
-            object([("text", string(format!("合成供应商：{name}")))]),
+            object([("text", string(format!("{}{name}", if b.mode.is_some() { "供应商：" } else { "合成供应商：" })))]),
         );
         b.push("supplier_projection", result.projection);
         b.push("receipt", result.receipt_ref);
@@ -415,8 +459,10 @@ pub(crate) fn execute(
     let state = match summary.terminal {
         AgentTerminal::Completed => "completed",
         AgentTerminal::Cancelled => "cancelled",
+        AgentTerminal::Failed => "failed",
         _ => "outcome_unknown",
     };
+    let failure_reason = if state == "failed" { b.events.last().and_then(|e|field(e,"payload").ok()).and_then(|p|field(p,"reason").ok()).and_then(|r|r.string().ok()).unwrap_or("configured_provider_unavailable").to_owned() } else { String::new() };
     if b.events
         .last()
         .is_some_and(|e| field(e, "kind").ok() == Some(&string("terminal")))
@@ -429,7 +475,9 @@ pub(crate) fn execute(
             ("state", string(state)),
             (
                 "reason",
-                string(if state == "completed" {
+                string(if state == "failed" {
+                    &failure_reason
+                } else if state == "completed" {
                     "none"
                 } else if state == "cancelled" {
                     "cancelled"
@@ -475,6 +523,12 @@ pub(crate) fn reply(
     if let Some(b) = business {
         let disclosed = (|| {
             validate_events(b)?;
+            if let Some(mode)=b.mode.filter(|_|!b.events.is_empty()) {
+                let host=b.host.as_ref().filter(|h|h.mode==mode).ok_or("host_owner_unavailable")?;
+                if mode==crate::service_host::ServiceHostMode::LocalRead && b.source_binding.is_some() {
+                    host.validate(b.dir.as_ref().ok_or("host_run_unavailable")?,&b.payload,b.source_binding.as_ref().ok_or("host_source_binding_unavailable")?,None)?;
+                }
+            }
             if after > b.events.len() as i64 {
                 return Err("BUSINESS_CURSOR_AHEAD".into());
             }
@@ -501,12 +555,11 @@ pub(crate) fn reply(
                 .iter()
                 .find(|e| field(e, "kind").ok() == Some(&string("supplier_projection")))
             {
-                crate::supplier_lab_source::validate_lab_supplier_projection(
-                    dir,
-                    field(&b.payload, "key")?.string()?,
-                    field(&b.payload, "revision")?.string()?,
-                    field(projection, "payload")?,
-                )?;
+                if b.mode.is_some() {
+                    b.host.as_ref().ok_or("host_owner_unavailable")?.validate(dir,&b.payload,b.source_binding.as_ref().ok_or("host_source_binding_unavailable")?,Some(field(projection,"payload")?))?;
+                } else {
+                    crate::supplier_lab_source::validate_lab_supplier_projection(dir,field(&b.payload,"key")?.string()?,field(&b.payload,"revision")?.string()?,field(projection,"payload")?)?;
+                }
             }
             Ok(())
         })();
@@ -551,7 +604,7 @@ pub(crate) fn reply(
         ("events", Json::Array(events)),
         ("next_cursor", Json::Number(next.to_string())),
         ("terminal", Json::Bool(terminal)),
-        ("synthetic", Json::Bool(true)),
+        ("synthetic", Json::Bool(business.map(|b|b.mode.is_none()).unwrap_or(true))),
     ])
     .encode()
 }
@@ -613,9 +666,9 @@ fn unknown_business(
     run: &AgentDurableRun,
     expected: &AgentReceiptSummary,
 ) -> Result<BusinessRead> {
-    if field(&b.payload, "key")? != &string(crate::supplier_lab_source::LAB_SUPPLIER_KEY)
+    if b.mode.is_none() && (field(&b.payload, "key")? != &string(crate::supplier_lab_source::LAB_SUPPLIER_KEY)
         || field(&b.payload, "revision")?
-            != &string(crate::supplier_lab_source::LAB_SUPPLIER_REVISION)
+            != &string(crate::supplier_lab_source::LAB_SUPPLIER_REVISION))
     {
         return Err("BUSINESS_HISTORY_SCOPE".into());
     }
