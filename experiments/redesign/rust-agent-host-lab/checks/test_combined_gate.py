@@ -33,6 +33,35 @@ class CombinedGateTests(unittest.TestCase):
             (root / 'unexpected').write_text('dirty')
             with self.assertRaises(RuntimeError): validate(root, head)
 
+    def test_missing_manifest_is_never_reported_as_verified(self):
+        from combined_gate import binary_integrity
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            for component in ('core', 'plugin', 'host'):
+                result = binary_integrity(component, evidence, evidence)
+                self.assertFalse(result['verified'])
+                self.assertEqual(result['state'], 'missing_required_manifest')
+            result = binary_integrity('http', evidence, evidence)
+            self.assertIsNone(result['verified'])
+            self.assertEqual(result['state'], 'not_recorded')
+            result = binary_integrity('native', evidence, evidence)
+            self.assertFalse(result['verified'])
+            self.assertEqual(result['state'], 'missing_native_summary')
+
+    def test_retained_binary_manifest_detects_actual_byte_change(self):
+        from combined_gate import binary_integrity
+        import hashlib, tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            executable = evidence / 'baseline'
+            executable.write_bytes(b'compiled baseline bytes')
+            manifest = evidence / 'binary-sha256.txt'
+            manifest.write_text(hashlib.sha256(executable.read_bytes()).hexdigest() + '  ' + str(executable) + '\n')
+            self.assertTrue(binary_integrity('core', evidence, evidence)['verified'])
+            executable.write_bytes(b'changed baseline bytes')
+            self.assertFalse(binary_integrity('core', evidence, evidence)['verified'])
+
     def test_current_legacy_anchors_are_unique(self):
         core = Path(__file__).resolve().parents[2] / 'core-agent-lab/core'
         tree = ast.parse((core / 'mutations.py').read_text())
