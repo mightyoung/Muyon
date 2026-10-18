@@ -25,7 +25,8 @@ class DurableServiceHostOwnerTest {
     private fun state(b: ServiceOwnerAdmissionBinding = binding(), exists: Boolean = true,
                       proof: String? = "full-call-proof") = ServiceAdmissionAuthority.State(scope(),
         ServiceOwnerProvider(b.profile, b.profileRevision, b.policyRevision, b.grantRevision,
-            b.authorizationOwner, b.modelAllowed, b.outboundAllowed, b.budget, exists)) { binding, bytes, budget ->
+            b.authorizationOwner, b.modelAllowed, b.outboundAllowed, b.budget, exists),
+        payloadReview = { binding, bytes -> binding == b && bytes.contentEquals(payload) }) { binding, bytes, budget ->
         if (binding == b && bytes.contentEquals(payload) && budget == call) proof else null
     }
     private fun file(): File = File(InstrumentationRegistry.getInstrumentation().targetContext.cacheDir,
@@ -132,7 +133,7 @@ class DurableServiceHostOwnerTest {
             }
             assertNull(commit(o, token))
             SQLiteDatabase.openDatabase(f.path, null, SQLiteDatabase.OPEN_READWRITE).use { db ->
-                db.rawQuery("SELECT state FROM reservations WHERE request_id='r'", null).use { c ->
+                db.rawQuery("SELECT state FROM reservations", null).use { c ->
                     assertTrue(c.moveToFirst()); assertEquals("held", c.getString(0))
                 }
                 db.rawQuery("SELECT count(*) FROM admissions", null).use { c -> c.moveToFirst(); assertEquals(0, c.getInt(0)) }
@@ -154,4 +155,54 @@ class DurableServiceHostOwnerTest {
         val huge = binding().copy(budget = binding().budget.copy(remainingTokens = ULong.MAX_VALUE))
         owner(file(), ServiceAdmissionAuthority(state(huge))).use { assertNull(it.reserveBudget(huge, "r", payload, call)) }
     }
+    @Test fun mutation_waits_until_guarded_commit_finishes() {
+        val entered = java.util.concurrent.CountDownLatch(1)
+        val release = java.util.concurrent.CountDownLatch(1)
+        val mutationStarted = java.util.concurrent.CountDownLatch(1)
+        val mutationDone = java.util.concurrent.CountDownLatch(1)
+        val a = ServiceAdmissionAuthority(state())
+        owner(file(), a).use { o ->
+            val token = o.reserveBudget(binding(), "r", payload, call)!!
+            a.replace(ServiceAdmissionAuthority.State(scope(), state().provider,
+                payloadReview = { _, _ -> true }) { b, bytes, budget ->
+                assertEquals(binding(), b); assertArrayEquals(payload, bytes); assertEquals(call, budget)
+                entered.countDown(); check(release.await(5, TimeUnit.SECONDS)); "full-call-proof"
+            })
+            val pool = Executors.newFixedThreadPool(2)
+            try {
+                val admission = pool.submit<String?> { commit(o, token) }
+                assertTrue(entered.await(5, TimeUnit.SECONDS))
+                val mutation = pool.submit {
+                    mutationStarted.countDown(); a.replace(state(exists = false)); mutationDone.countDown()
+                }
+                assertTrue(mutationStarted.await(5, TimeUnit.SECONDS))
+                assertFalse(mutationDone.await(150, TimeUnit.MILLISECONDS))
+                release.countDown()
+                assertNotNull(admission.get(5, TimeUnit.SECONDS))
+                mutation.get(5, TimeUnit.SECONDS)
+                assertFalse(o.credentialHandleExists("p", "opaque-ref"))
+            } finally { release.countDown(); pool.shutdownNow() }
+        }
+    }
+
+    @Test fun independent_authority_is_denied_while_database_is_owned() {
+        val f = file(); val a = ServiceAdmissionAuthority(state())
+        owner(f, a).use { first ->
+            owner(f, ServiceAdmissionAuthority(state())).use { other -> assertNull(other.currentScope()) }
+            assertNotNull(first.reserveBudget(binding(), "r", payload, call))
+        }
+    }
+
+    @Test fun scope_and_proof_changes_invalidate_a_stored_hold() {
+        val a = ServiceAdmissionAuthority(state())
+        owner(file(), a).use { o ->
+            val token = o.reserveBudget(binding(), "r", payload, call)!!
+            a.replace(ServiceAdmissionAuthority.State(scope().copy(namespace = "changed"), state().provider,
+                payloadReview = { _, _ -> true }) { _, _, _ -> "full-call-proof" })
+            assertNull(commit(o, token))
+            a.replace(state(proof = "different-proof"))
+            assertNull(commit(o, token))
+        }
+    }
+
 }
