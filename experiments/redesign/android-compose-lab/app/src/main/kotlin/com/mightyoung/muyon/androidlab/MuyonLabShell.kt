@@ -26,6 +26,7 @@ import com.mightyoung.muyon.androidlab.conversation.ChatGlyph
 import com.mightyoung.muyon.androidlab.conversation.ChatGlyphKind
 import com.mightyoung.muyon.androidlab.conversation.ConversationUiMemory
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
@@ -45,7 +46,14 @@ fun MuyonLabShell(
     initialState: ShellState = ShellState(),
     diagnostics: RustDiagnosticCoordinator? = null,
 ) {
-    val diagnosticCoordinator = diagnostics ?: (LocalContext.current.applicationContext as MuyonLabApplication).diagnostics
+    val application = LocalContext.current.applicationContext as MuyonLabApplication
+    val diagnosticCoordinator = diagnostics ?: application.diagnostics
+    val chats = application.chats
+    var chatView by remember(chats) { mutableStateOf(chats.snapshot) }
+    // The Application owns the connection; leaving a page never cancels native work.
+    LaunchedEffect(chats) {
+        while (true) { chatView = chats.snapshot; delay(100) }
+    }
     var diagnosticOpen by remember { mutableStateOf(false) }
     var agentOpen by remember { mutableStateOf(false) }
     var selectedName by rememberSaveable { mutableStateOf(initialState.selected.name) }
@@ -188,6 +196,14 @@ fun MuyonLabShell(
                             onOptions = { show(LocalOverlay.Capabilities) },
                             onNote = { id -> local = local.openNote(conversation.id, id) },
                             availability = availability,
+                            execution = chatView.conversations[conversation.id.toString()] ?: ChatReadConversation(),
+                            onSend = {
+                                val id = conversation.id.toString()
+                                val text = conversation.memory.draft
+                                frontendSubmit(chats, id, text)
+                            },
+                            onCancel = { chats.cancel(conversation.id.toString()) },
+                            onReconcile = { chats.reconcile(conversation.id.toString()) },
                             sample = sample,
                             onSampleChange = { sample = it },
                             restorationNotice = memory.restorationNotice,

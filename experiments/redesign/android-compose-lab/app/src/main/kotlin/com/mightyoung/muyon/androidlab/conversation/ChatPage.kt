@@ -32,7 +32,7 @@ import com.mightyoung.muyon.androidlab.*
 import com.mightyoung.muyon.androidlab.R
 import kotlinx.coroutines.launch
 
-/** A local notebook until an execution projection is supplied by the integration owner. */
+/** Local notes and real private-service reads have distinct actions and displays. */
 @Composable
 internal fun ConversationPage(
     local: LocalUiState,
@@ -44,6 +44,10 @@ internal fun ConversationPage(
     onOptions: () -> Unit,
     onNote: (Int) -> Unit,
     availability: PortAvailability,
+    execution: ChatReadConversation = ChatReadConversation(),
+    onSend: () -> Unit = {},
+    onCancel: () -> Unit = {},
+    onReconcile: () -> Unit = {},
     sample: Boolean = false,
     onSampleChange: (Boolean) -> Unit = {},
     restorationNotice: String? = null,
@@ -55,9 +59,12 @@ internal fun ConversationPage(
     var priorCount by remember(active.id) { mutableIntStateOf(active.notes.size) }
     var unseen by remember(active.id) { mutableStateOf(false) }
     val atBottom by remember(messageScroll) { derivedStateOf { !messageScroll.canScrollForward } }
-    LaunchedEffect(active.id, active.notes.size) {
+    LaunchedEffect(active.id, active.notes.size, execution.answer, execution.status, execution.receipt) {
         if (active.notes.size > priorCount && !sample) {
             if (atBottom) messageScroll.jumpConversationToBottom() else unseen = true
+        }
+        if(!sample && execution.requestId != null) {
+            if(atBottom) messageScroll.jumpConversationToBottom() else unseen = true
         }
         priorCount = active.notes.size
     }
@@ -66,9 +73,7 @@ internal fun ConversationPage(
         if (restorationNotice != null) Text(restorationNotice, style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp).semantics { liveRegion = LiveRegionMode.Polite })
         Row(Modifier.fillMaxWidth().padding(start=20.dp,end=8.dp), verticalAlignment=Alignment.CenterVertically) {
-            Text(if (sample) "离线视觉样例 · 非真实回复" else when(availability) {
-                PortAvailability.NOT_CONNECTED -> "本地模式 · 执行服务未连接"
-            }, style=MaterialTheme.typography.labelSmall, color=MaterialTheme.colorScheme.onSurfaceVariant,
+            Text(if (sample) "离线视觉样例 · 非真实回复" else "私有 Service 只读联调 · synthetic schema12 副本 · 离线，无真实模型", style=MaterialTheme.typography.labelSmall, color=MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier=Modifier.weight(1f).testTag(if(sample) "sample-disclaimer" else "port-disconnected").semantics { liveRegion=LiveRegionMode.Polite })
             TextButton(onClick={onSampleChange(!sample)}, modifier=Modifier.testTag("toggle-chat-sample")) {
                 Text(if(sample) "返回会话" else "查看样例", style=MaterialTheme.typography.labelSmall)
@@ -86,7 +91,8 @@ internal fun ConversationPage(
                     item("fixture-tools") { ToolSample() }
                     item("fixture-stopped") { SampleStatus("已停止", "离线样例：停止后的内容保留。这里没有运行中的请求。") }
                     item("fixture-failed") { SampleStatus("请求失败", "离线样例：服务未连接，无法重试。", failed=true) }
-                } else if (active.notes.isEmpty()) {
+                } else {
+                  if (active.notes.isEmpty() && execution.requestId == null) {
                     item("empty") {
                         Column(Modifier.widthIn(max=640.dp).fillMaxWidth().padding(top=24.dp,bottom=24.dp), horizontalAlignment=Alignment.Start) {
                             Image(painterResource(R.drawable.muyon_welcome), contentDescription=null,
@@ -96,12 +102,32 @@ internal fun ConversationPage(
                             Spacer(Modifier.height(14.dp))
                             Text("写下你想做的事。", style=MaterialTheme.typography.bodyLarge, color=MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(Modifier.height(8.dp))
-                            Text("当前可以保存本地记录；模型、附件与工具尚未接入。", style=MaterialTheme.typography.bodyMedium,
+                            Text("发送会通过私有服务读取测试供应商；保存只添加本地记录。", style=MaterialTheme.typography.bodyMedium,
                                 color=MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
-                } else items(active.notes, key={"note-${it.id}"}) { note ->
+                  }
+                  items(active.notes, key={"note-${it.id}"}) { note ->
                     UserMessage(note.text, "你 · 本地记录，未发送", Modifier.testTag("chat-note-${note.id}").clickable(onClick={onNote(note.id)}))
+                  }
+                  if (execution.status != "idle" || execution.requestId != null || execution.reason.isNotBlank()) {
+                    item("service-read") {
+                      Column(verticalArrangement=Arrangement.spacedBy(26.dp)) {
+                        if(execution.text.isNotEmpty()) UserMessage(execution.text, "你 · 已提交私有执行服务", Modifier.testTag("service-read-input"))
+                        Column(Modifier.widthIn(max=720.dp).fillMaxWidth().testTag("service-read-result"), verticalArrangement=Arrangement.spacedBy(10.dp)) {
+                            Text("Muyon · 可信内置供应商只读工具", style=MaterialTheme.typography.labelMedium)
+                            Text(frontendStatusLabel(execution.status), modifier=Modifier.testTag("service-read-status").semantics { liveRegion=LiveRegionMode.Polite })
+                            if(execution.answer.isNotEmpty()) RichContent(execution.answer)
+                            execution.projection?.let { Text(it, modifier=Modifier.testTag("service-read-projection")) }
+                            execution.receipt?.let { Text("原始回执：$it", style=MaterialTheme.typography.bodySmall, modifier=Modifier.testTag("service-read-receipt")) }
+                            if(execution.reason.isNotBlank()) Text("原因：${execution.reason}", style=MaterialTheme.typography.bodySmall, modifier=Modifier.testTag("service-read-reason"))
+                            execution.requestId?.let { Text("request: $it", style=MaterialTheme.typography.labelSmall) }
+                            execution.runId?.let { Text("run: $it", style=MaterialTheme.typography.labelSmall) }
+                            if(frontendNeedsReconcile(execution.status)) TextButton(onClick=onReconcile, modifier=Modifier.testTag("reconcile-service-read")) { Text("查询原请求") }
+                        }
+                      }
+                    }
+                  }
                 }
             }
             if (!atBottom && messageScroll.layoutInfo.totalItemsCount > 0) {
@@ -124,14 +150,15 @@ internal fun ConversationPage(
                         decorationBox={ field -> Box { if(active.memory.draft.isEmpty()) Text("写下想法…",color=MaterialTheme.colorScheme.onSurfaceVariant); field() } })
                     Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically) {
                         IconButton(onClick=onOptions,modifier=Modifier.testTag("input-options").semantics { contentDescription="附件与输入能力说明" }) { ChatGlyph(ChatGlyphKind.ADD) }
-                        Text(if(sample) "样例只读" else "本地记录",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(if(sample) "样例只读" else "供应商只读",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.weight(1f))
-                        TextButton(onClick={},enabled=false,modifier=Modifier.testTag("send-unavailable")) { Text("发送") }
+                        if(frontendCanCancel(execution.status)) TextButton(onClick=onCancel, enabled=!sample, modifier=Modifier.testTag("cancel-service-read")) { Text("取消") }
+                        TextButton(onClick=onSend,enabled=!sample && frontendCanSend(active.memory.draft,execution.status),modifier=Modifier.testTag("send-service-read")) { Text("发送") }
                         Button(onClick=onSave,enabled=local.canSaveLocalNote && !sample,modifier=Modifier.testTag("save-local-note").semantics { contentDescription="保存本地记录，不发送" }) { Text("保存") }
                     }
                 }
             }
-            Text(if(sample) "返回会话后可编辑和保存 · 样例不发送请求" else "仅保存在当前内存中 · 不会生成助手回复",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant,
+            Text(if(sample) "返回会话后可编辑和保存 · 样例不发送请求" else "发送读取 synthetic schema12 副本 · 保存仅保留本地记录",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier=Modifier.padding(top=8.dp))
         }
     }
