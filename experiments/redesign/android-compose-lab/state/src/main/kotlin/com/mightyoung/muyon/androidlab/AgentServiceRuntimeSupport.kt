@@ -51,6 +51,8 @@ class AgentServiceBootstrap(private val backend: Executor, private val construct
                         break
                     }
                 }
+            } catch (_: LinkageError) {
+                if (!synchronized(lock) { retired }) unavailable()
             } catch (_: Exception) {
                 if (!synchronized(lock) { retired }) unavailable()
             } finally { synchronized(lock) { workerActive = false } }
