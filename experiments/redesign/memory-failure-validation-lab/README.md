@@ -1,6 +1,6 @@
 # Memory failure validation lab
 
-Offline, synthetic contract experiments only. This directory imports neither the existing Hy crate nor production stores/adapters. No weights, external model, paid service, credential or private data is needed. `FakeProvider` has no transport. I04 is forbidden and is not implemented here.
+The Python fixtures are offline, synthetic contract experiments only and import neither the existing Hy crate nor production stores/adapters. The separate Dart canary fixture imports actual Muyon adapters and uses a synthetic loopback server; it is NOT_RUN here. No weights, external model, paid service, credential or private data is needed. `FakeProvider` has no transport. I04 is forbidden and is not implemented here.
 
 From repository root:
 
