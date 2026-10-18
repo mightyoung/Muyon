@@ -9,8 +9,8 @@ import re
 CASES = json.loads(Path(__file__).with_name('cases.json').read_text())
 
 
-def rust(component, text, status):
-    expected = CASES['components'][component]
+def rust(component, text, status, *, contract=None):
+    expected = (CASES if contract is None else contract)['components'][component]
     groups = []
     current = None
     for line in text.splitlines():
