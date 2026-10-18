@@ -21,7 +21,7 @@ Historical HTTP runner defaults remain exact8e. `--expected-source` explicitly
 selects a new candidate and requires a full lowercase 40-character SHA matching
 clean HEAD before execution/archive. Formal full/native/HTTP execution always
 uses `combined_gate.py --expected-source SHA`, which also freezes every tracked
-source file and checks source and baseline-binary integrity afterwards. Evidence
+source file and checks source and scoped baseline-binary integrity afterwards. Full components require a retained executable manifest; native3 references and verifies its own summary baseline seals. HTTP7 has no retained outer baseline executable manifest and explicitly reports `not_recorded` with `verified: null`, never an inferred integrity pass. Evidence
 and target directories must be outside the checkout; default Rust parallelism
 is required. Source mismatch, dirty inputs or any failed gate fails closed.
 

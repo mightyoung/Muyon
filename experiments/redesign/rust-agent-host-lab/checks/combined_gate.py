@@ -10,6 +10,32 @@ import sys
 from source_identity import validate
 
 
+def binary_integrity(component, evidence, root):
+    """Report only actually recorded evidence; missing full manifests fail closed."""
+    manifest = evidence/'binary-sha256.txt'
+    if manifest.is_file():
+        with (evidence/'binary-integrity.log').open('w') as log:
+            verified = subprocess.call(['sha256sum', '--check', str(manifest)], cwd=root,
+                                       stdout=log, stderr=subprocess.STDOUT) == 0
+        return dict(scope='full_baseline_executables', state='verified' if verified else 'failed',
+                    verified=verified, manifest=str(manifest))
+    if component == 'native':
+        summary_path = evidence/'native/summary.json'
+        if not summary_path.is_file():
+            return dict(scope='native_runner_baselines', state='missing_native_summary', verified=False)
+        summary = json.loads(summary_path.read_text())
+        baselines = summary.get('baselines', [])
+        verified = (summary.get('accepted') is True and len(baselines) == 3
+                    and all(row.get('executables_unchanged') is True for row in baselines))
+        return dict(scope='native_runner_baselines', state='verified' if verified else 'failed',
+                    verified=verified, summary=str(summary_path),
+                    summary_sha256=hashlib.sha256(summary_path.read_bytes()).hexdigest())
+    if component == 'http':
+        return dict(scope='outer_baseline_executables', state='not_recorded', verified=None,
+                    reason='HTTP7 archives private mutation sources; outer runner has no retained baseline executable manifest')
+    return dict(scope='full_baseline_executables', state='missing_required_manifest', verified=False)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--expected-source', required=True)
@@ -40,14 +66,10 @@ def main():
     status = subprocess.call(command, cwd=root, env=env)
     unchanged = all((root/name).is_file() and hashlib.sha256((root/name).read_bytes()).hexdigest() == digest for name, digest in hashes.items())
     unchanged = unchanged and validate(root, args.expected_source) == identity
-    binary_integrity = True
-    manifest = evidence/'binary-sha256.txt'
-    if manifest.is_file():
-        with (evidence/'binary-integrity.log').open('w') as log:
-            binary_integrity = subprocess.call(['sha256sum', '--check', str(manifest)], cwd=root, stdout=log, stderr=subprocess.STDOUT) == 0
+    binaries = binary_integrity(args.component, evidence, root)
     result = dict(identity, component=args.component, command=command, exit_code=status,
-                  source_inputs_unchanged=unchanged, baseline_binaries_unchanged=binary_integrity,
-                  accepted=status == 0 and unchanged and binary_integrity)
+                  source_inputs_unchanged=unchanged, baseline_binary_integrity=binaries,
+                  accepted=status == 0 and unchanged and binaries['verified'] is not False)
     (evidence/'gate-verdict.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result))
     return 0 if result['accepted'] else 1
