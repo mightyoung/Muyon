@@ -92,6 +92,8 @@ jobs:
         run: |
           set -euo pipefail
           evidence="$RUNNER_TEMP/loop-package"
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/muyon-loop-avds"
+          mkdir -p "$ANDROID_AVD_HOME"
           manager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           # Uses runner's existing SDK licenses; never accepts a new license.
           "$manager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/emulator-setup.log"
@@ -100,8 +102,9 @@ jobs:
           sudo chmod a+rw /dev/kvm
           printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-loop-api26 -k 'system-images;android-26;google_apis;x86_64' --force
           "$ANDROID_HOME/emulator/emulator" -avd muyon-loop-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$evidence/emulator.log" 2>&1 &
-          adb wait-for-device
+          timeout 300 adb wait-for-device
           for attempt in $(seq 1 120); do if [[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done
+          test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1
           test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = 26
           adb shell input keyevent 82
           adb install -r "$evidence/app-debug.apk"
@@ -109,7 +112,7 @@ jobs:
           if ! timeout 15 adb logcat -c > "$evidence/logcat-clear.log" 2>&1; then
             printf 'UNAVAILABLE: API26 log buffer clear; instrumentation still required\n' > "$evidence/logcat-clear-status.txt"
           fi
-          adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
+          timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.FrontendServiceLoopTest com.mightyoung.muyon.androidlab.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
           if ! timeout 30 adb logcat -d > "$evidence/logcat.txt" 2>&1; then
             printf 'UNAVAILABLE: API26 logcat dump\n' > "$evidence/logcat-status.txt"
           fi
