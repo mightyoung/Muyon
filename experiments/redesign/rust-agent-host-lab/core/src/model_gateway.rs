@@ -45,7 +45,8 @@ impl Provider for ModelGateway {
         {
             let s = self.session.borrow();
             s.review_payload(&bytes)?;
-            s.store.ledger("begin", &bytes).map_err(|_| "model_ledger_failed")?;
+            s.store.ledger("begin", &bytes)
+                .map_err(|_| "model_ledger_failed")?;
             s.review_payload(&bytes)?;
         }
         control.poll()?;
@@ -63,12 +64,15 @@ impl Provider for ModelGateway {
                 self.session.borrow().store.ledger("failed", &bytes)
                     .map_err(|_| "model_ledger_failed")?;
                 return Err(match result {
-                    Err(reason) if matches!(reason.as_str(), "native_cancelled" | "native_deadline") => reason,
+                    Err(reason) if matches!(reason.as_str(), "native_cancelled" | "native_deadline") => {
+                        reason
+                    }
                     _ => "model_transport_failed".into(),
                 });
             }
         };
-        self.session.borrow().store.ledger("sent", &bytes).map_err(|_| "model_ledger_failed")?;
+        self.session.borrow().store.ledger("sent", &bytes)
+            .map_err(|_| "model_ledger_failed")?;
         let advertised: Vec<_> = definitions
             .iter()
             .filter(|d| request.tools.contains(&d.name))

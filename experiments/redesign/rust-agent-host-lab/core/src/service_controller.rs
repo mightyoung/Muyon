@@ -759,10 +759,15 @@ impl AgentServiceController {
                 let root = self.shared.lock().root.take();
                 let recovered = root.as_ref().and_then(|root| {
                     let run = root.runs().iter().find(|run| {
-                        run.intent == intent && identity.as_ref().map(|id| {
+                        if run.intent != intent {
+                            return false;
+                        }
+                        identity.as_ref().map(|id| {
                             id.run_id == run.identity.run_id
                                 && id.admitted_service_epoch == run.identity.admitted_service_epoch
-                                && id.actual_task.as_ref().map(|t| Some(t) == run.identity.actual_task.as_ref()).unwrap_or(true)
+                                && id.actual_task.as_ref().map(|task| {
+                                    Some(task) == run.identity.actual_task.as_ref()
+                                }).unwrap_or(true)
                         }).unwrap_or(true)
                     })?;
                     let dir = root.run_dir(&run.identity.run_id).ok()?;
@@ -922,7 +927,7 @@ fn execute(
                 unknown(intent, None)
             };
             return ExecutionSettlement {
-                    snapshot,
+                snapshot,
                 recovery: !known_quota,
             };
         }
@@ -934,7 +939,7 @@ fn execute(
         Ok(d) => d,
         Err(_) => {
             return ExecutionSettlement {
-                    snapshot: unknown(run.intent.clone(), Some(run.identity.clone())),
+                snapshot: unknown(run.intent.clone(), Some(run.identity.clone())),
                 recovery: true,
             }
         }
@@ -969,8 +974,9 @@ fn execute(
                 },
             ),
             "denied" | "failed" => (AgentTerminal::Failed, AgentReason::InternalFailure),
-            "outcome_unknown" if done.state.reason == "model_ledger_failed" =>
-                (AgentTerminal::OutcomeUnknown, AgentReason::StorageFailure),
+            "outcome_unknown" if done.state.reason == "model_ledger_failed" => {
+                (AgentTerminal::OutcomeUnknown, AgentReason::StorageFailure)
+            }
             _ => (AgentTerminal::OutcomeUnknown, AgentReason::Interrupted),
         },
         Err(_) => (AgentTerminal::OutcomeUnknown, AgentReason::StorageFailure),
