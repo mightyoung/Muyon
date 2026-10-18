@@ -73,3 +73,29 @@ Raw evidence SHA256 index (files remain external to source tree):
 - `/tmp/service-fault-c3-ledger-frozen-actual-evidence/cargo.log`: `648d83f06ae5067149bcbb3a1b943618ae71a97bb2249af6db5b3c2f4f49f190`
 - `/tmp/service-temp-red-actual-evidence/verdict.json`: `14cbf94268d50b1d097d2e57a9ba639ffb9332aaaee82520c9cfe5545176c20a`
 - `/tmp/service-temp-red-actual-evidence/service-temp-red.log`: `47a1ccfd4837e806a92316182fc368200a306abf44e126254e3e4a5dba74d2b5`
+
+## C2 lease regression and final native fix verification
+
+Receipt-only green on131 and d1 does not close C2: source review found a panic-unwind lease drop before reacquisition. The original green results are retained as diagnostic history, not complete C2 closure.
+
+A separate `service_fault_c2_lease_red_cases.json` pins131 and uses `service_lease_fault_probe.rs`. Only the private copy adds `private_probe_worker_finished`, which reads the real JoinHandle::is_finished. The test waits boundedly using yield until the real worker completes, **without calling await_settled**. A separate Python process opens the actual `.lock` and executes nonblocking kernel flock; no controller process slot participates. Old131 actual result: available before join, accepted exact semantic RED101; receipt inspection tail NOT_RUN. Evidence `/tmp/service-fault-131-lease-red-evidence`.
+
+Final native source is frozen at `6e0f1c5752515c2bb8318897832912c57b8d1090` in independent `service_fault_green_cases.json` and `service_host_46_green_cases.json`. The original RED descriptors stay unchanged. Three actual fault runs all accepted diagnostic GREEN0:
+
+- `/tmp/service-fault-6e0-c2-evidence`: Unknown+actualRecordedSuccess+originalopaque, unchanged native.db; worker-finished-before-join child flock Busy, afterjoin Busy, actualClosed Available.
+- `/tmp/service-fault-6e0-c3-evidence`: Cancelled+actualRecordedSuccess+originalopaque and unchanged bytes.
+- `/tmp/service-fault-6e0-ledger-evidence`: explicit failedledger IO yields Unknown+actualRecordedSuccess+originalopaque, unchanged bytes; Unknown takes priority over cancellation.
+
+The lock Python source hash, selected Rust probe hash, original/private controller hashes, exact source SHA and descriptor hash are recorded in per-run provenance.json. The independent reviewer received both old lease RED and final green evidence.
+
+Source-first host46 inventory is exactly native25+contract8+runtime2+root2+controller4+oracle1+lifecycle4. The first actual default-parallel run at `/tmp/service-host-6e0-46-evidence` is INVALID: native24P1F (`native_store_persist_budget_never_writes_unreadable_snapshot`, reopen after drop returned directory_locked); all other21 passed, including lifecycle4. Preserve this failure. A fresh full46 run using RUST_TEST_THREADS=1 is recorded separately in `/tmp/service-host-6e0-46-serial-evidence`; no source changes or skipped tests. Possible concurrent fork FD inheritance is only a hypothesis, not a proven cause.
+
+Serial final host46 actual result: accepted `diagnostic_host46_green`, exit0, all46 passed. This executes the original entire lifecycle4 test, including the byte-preservation tail that old RED could not reach. Controls:62 passed. Default-parallel failure remains an explicit limitation; no full shipping claim.
+
+Additional evidence SHA256:
+- `/tmp/service-fault-131-lease-red-evidence/cargo.log`: `df999aa452ca36672e0a8521d91103d60040ff2a27af1b9997259906f6ce9c13`
+- `/tmp/service-fault-6e0-c2-evidence/cargo.log`: `158d4218b12aefb234a2c95a16f65a71a8313d5d8449a9dc0ea45905a602b972`
+- `/tmp/service-fault-6e0-c3-evidence/cargo.log`: `5069272755aa5075ce7dde158c9b075007aa4e6fb663da500f930616ca34af5d`
+- `/tmp/service-fault-6e0-ledger-evidence/cargo.log`: `0aabc0c5400d437675a05dc597dff53b1a39ead85dcbe8da3bff4a41278cbdc1`
+- `/tmp/service-host-6e0-46-evidence/result.json`: `8247b299d126e0f3b384823bebaffde65094e82585a8a8d6da6028ac075ec882`
+- `/tmp/service-host-6e0-46-serial-evidence/result.json`: `586dcd59a3f95ad5835956a953cbace6be7960f35e7ef37dadf5662aedfa7581`
