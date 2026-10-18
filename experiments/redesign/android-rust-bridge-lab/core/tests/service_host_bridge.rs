@@ -68,7 +68,7 @@ fn service_callback_maps_current_scope_and_handle_existence_without_transport() 
         max_tokens: 1, max_micros: 1, requires_tools: true, requires_streaming: false,
     };
     assert_eq!(provider.readiness(&budget).expect("metadata readiness only").id, "approved-fixture");
-    assert_eq!(provider.prepare("request", b"payload", budget.clone()).err().as_deref(), Some("provider_payload_denied"));
+    assert_eq!(provider.prepare("request", br#"{"model":"fixture-chat","max_tokens":1}"#, budget.clone()).err().as_deref(), Some("provider_payload_denied"));
     callback.available.store(false, Ordering::SeqCst);
     assert!(!owner.current_scope().expect("current revoked decision").decision.allowed);
     assert!(provider.readiness(&budget).is_err());

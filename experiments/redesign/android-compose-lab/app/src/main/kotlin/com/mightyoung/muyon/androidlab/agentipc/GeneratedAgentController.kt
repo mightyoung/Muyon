@@ -40,12 +40,17 @@ internal class GeneratedAgentController private constructor(private val native:A
     private fun UiAgentClientRef.native()=AgentClientRef(1u,epoch,lease)
     companion object {
         /** Called exclusively by the Service bootstrap worker with its Context-derived root. */
-        fun open(privateRoot:String,expectedBuild:String,onDrained:()->Unit,onCleaned:()->Unit):GeneratedAgentController {
+        fun open(privateRoot:String,expectedBuild:String,host:ServiceHostBinding,onDrained:()->Unit,onCleaned:()->Unit):GeneratedAgentController {
             require(Regex("[0-9a-f]{40}").matches(expectedBuild)){"native_unavailable"}
             try {
                 val info=bridgeInfo()
                 check(info.protocol==1u && info.buildIdentity==expectedBuild){"native_incompatible"}
-                return GeneratedAgentController(AgentServiceController(AgentServiceConfig(1u,privateRoot)),onDrained,onCleaned)
+                val config=AgentServiceConfig(1u,privateRoot)
+                val native=when(host) {
+                    ServiceHostBinding.SyntheticLab->AgentServiceController(config)
+                    is ServiceHostBinding.Installed->AgentServiceController.withHost(config,ServiceHostBindings.callback(host.owner),host.mode,host.budget)
+                }
+                return GeneratedAgentController(native,onDrained,onCleaned)
             } catch(_:LinkageError) { throw IllegalStateException("native_unavailable") }
         }
     }

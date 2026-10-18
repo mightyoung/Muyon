@@ -53,6 +53,7 @@ internal fun ConversationPage(
     restorationNotice: String? = null,
 ) {
     val active = local.active
+    val awaitingServiceSource=execution.requestId!=null && execution.runId==null && execution.admittedServiceEpoch==null && execution.synthetic
     val sampleScroll = rememberLazyListState()
     val messageScroll = if (sample) sampleScroll else scroll
     val scope = rememberCoroutineScope()
@@ -73,7 +74,7 @@ internal fun ConversationPage(
         if (restorationNotice != null) Text(restorationNotice, style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp).semantics { liveRegion = LiveRegionMode.Polite })
         Row(Modifier.fillMaxWidth().padding(start=20.dp,end=8.dp), verticalAlignment=Alignment.CenterVertically) {
-            Text(if (sample) "离线视觉样例 · 非真实回复" else "私有 Service 只读联调 · synthetic schema12 副本 · 离线，无真实模型", style=MaterialTheme.typography.labelSmall, color=MaterialTheme.colorScheme.onSurfaceVariant,
+            Text(if (sample) "离线视觉样例 · 非真实回复" else if(awaitingServiceSource) "私有 Service 当前来源待核实 · 未调用真实模型" else if(execution.synthetic) "私有 Service 只读联调 · synthetic schema12 副本 · 离线，无真实模型" else "私有 Service 当前授权桥 · 真实模型传输未接通", style=MaterialTheme.typography.labelSmall, color=MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier=Modifier.weight(1f).testTag(if(sample) "sample-disclaimer" else "port-disconnected").semantics { liveRegion=LiveRegionMode.Polite })
             TextButton(onClick={onSampleChange(!sample)}, modifier=Modifier.testTag("toggle-chat-sample")) {
                 Text(if(sample) "返回会话" else "查看样例", style=MaterialTheme.typography.labelSmall)
@@ -162,7 +163,7 @@ internal fun ConversationPage(
                     }
                 }
             }
-            Text(if(sample) "返回会话后可编辑和保存 · 样例不发送请求" else "发送读取 synthetic schema12 副本 · 保存仅保留本地记录",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant,
+            Text(if(sample) "返回会话后可编辑和保存 · 样例不发送请求" else if(awaitingServiceSource) "当前来源由私有 Service 核实 · 保存仅保留本地记录" else if(execution.synthetic) "发送读取 synthetic schema12 副本 · 保存仅保留本地记录" else "当前授权来源由私有 Service 核实 · 保存仅保留本地记录",style=MaterialTheme.typography.labelSmall,color=MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier=Modifier.padding(top=8.dp))
         }
     }

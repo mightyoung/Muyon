@@ -131,10 +131,39 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
         b.mode=Some(crate::service_host::ServiceHostMode::parse(field(host,"mode")?.string()?)?);
         let binding=field(host,"source_binding")?;
         if binding != &Json::Null {
-            closed(binding,&["source_identity","namespace","managed_root","database","source_revision"])?;
+            closed(binding,&["source_identity","namespace","managed_root","database","source_revision","lineage"])?;
             for key in ["source_identity","namespace","managed_root","database","source_revision"] {
                 let value=field(binding,key)?.string()?;
                 if value.is_empty() || value.len()>4096 { return Err("BUSINESS_HOST_BINDING".into()); }
+            }
+            // v2 records without physical lineage are unavailable, never rebound
+            // to whichever source currently happens to occupy the same pathname.
+            let database=Path::new(field(binding,"database")?.string()?);
+            let managed_root=Path::new(field(binding,"managed_root")?.string()?);
+            crate::supplier_scope_bridge::HostSupplierSource::new(
+                field(binding,"source_identity")?.string()?,field(binding,"namespace")?.string()?,managed_root,database,
+            )?;
+            let lineage=field(binding,"lineage")?.array()?;
+            let components: Vec<_>=database.components().collect();
+            if lineage.is_empty() || lineage.len()>128 || lineage.len()!=components.len() {
+                return Err("BUSINESS_HOST_LINEAGE".into());
+            }
+            let mut current=PathBuf::new();
+            for (index,(component,identity)) in components.iter().zip(lineage).enumerate() {
+                current.push(component.as_os_str());
+                closed(identity,&["path","dev","ino","uid","mode"])?;
+                if field(identity,"path")?.string()?!=current.to_str().ok_or("BUSINESS_HOST_LINEAGE")? {
+                    return Err("BUSINESS_HOST_LINEAGE".into());
+                }
+                field(identity,"dev")?.integer()?;
+                if field(identity,"ino")?.integer()?==0 || field(identity,"uid")?.integer()?>u32::MAX as u64 {
+                    return Err("BUSINESS_HOST_LINEAGE".into());
+                }
+                let mode=field(identity,"mode")?.integer()?;
+                let expected_type=if index+1==lineage.len() {0o100000} else {0o040000};
+                if mode>u32::MAX as u64 || mode & 0o170000 != expected_type {
+                    return Err("BUSINESS_HOST_LINEAGE".into());
+                }
             }
             b.source_binding=Some(binding.clone());
         }

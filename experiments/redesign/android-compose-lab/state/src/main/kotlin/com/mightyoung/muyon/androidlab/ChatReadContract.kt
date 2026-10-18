@@ -20,7 +20,10 @@ object ChatReadBounds {
 fun ChatReadConversation.disclosureLost(reason:String)=copy(status="unknown",reason=reason,answer="",projection=null,receipt=null,cursor=0)
 
 /** Source kind is supplied by the Service and immutable once a run is admitted. */
-fun ChatReadConversation.withServiceSource(synthetic:Boolean):ChatReadConversation = this
+fun ChatReadConversation.withServiceSource(synthetic:Boolean):ChatReadConversation {
+    require((runId==null && admittedServiceEpoch==null) || this.synthetic==synthetic)
+    return copy(synthetic=synthetic)
+}
 
 /** Main-thread ownership token. Dispatch and unsent cancellation are mutually exclusive. */
 class PendingChatAction(private val requestId:String) {

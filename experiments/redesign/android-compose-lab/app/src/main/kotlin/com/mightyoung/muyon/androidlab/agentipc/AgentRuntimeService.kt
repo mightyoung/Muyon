@@ -47,7 +47,7 @@ class AgentRuntimeService:Service() {
             try {
                 check(Regex("[0-9a-f]{40}").matches(build)){"native_unavailable"}
                 lateinit var value:GeneratedAgentController
-                value=GeneratedAgentController.open(privateRoot(),build,
+                value=GeneratedAgentController.open(privateRoot(),build,ServiceHostBindings.resolve(this),
                     onDrained={requestSettlement(value)},onCleaned={
                         if(ServiceProcessKeys.controllers.releaseCleaned(slot,value)) {
                             cleanupCompleted.set(true)

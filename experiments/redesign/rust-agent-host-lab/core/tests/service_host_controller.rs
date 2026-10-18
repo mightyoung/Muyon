@@ -1,21 +1,23 @@
 #![cfg(target_os = "linux")]
 use muyon_plugin_contract_lab::{parse, string, Json};
-use muyon_rust_agent_host_lab::{service_controller::AgentServiceController, service_host::*, service_provider::{CallBudget, ServiceProviderBridge}, service_types::*, supplier_scope_bridge::{SupplierScopeDecision, SupplierSelection}};
-use std::{path::PathBuf, sync::{Arc, Mutex, atomic::{AtomicUsize,Ordering}}};
+use muyon_rust_agent_host_lab::{service_controller::AgentServiceController, service_host::*, service_provider::*, service_types::*, supplier_scope_bridge::{SupplierScopeDecision, SupplierSelection}};
+use std::{path::PathBuf, sync::{Arc, Mutex, atomic::{AtomicBool,AtomicUsize,Ordering}}};
 type Result<T> = std::result::Result<T,String>;
 static SERIAL: Mutex<()> = Mutex::new(());
 static NEXT: AtomicUsize = AtomicUsize::new(0);
 const ID: &str = "11111111-1111-4111-8111-111111111111";
-struct Owner { root: PathBuf, current: Mutex<SupplierScopeDecision>, provider_calls: AtomicUsize }
+struct Owner { root: PathBuf, current: Mutex<SupplierScopeDecision>, provider_calls: AtomicUsize, configured_available: AtomicBool, scope_calls: AtomicUsize, handle_calls: Arc<AtomicUsize>, mutations: Arc<AtomicUsize> }
 impl ServiceHostOwner for Owner {
- fn current_scope(&self)->Result<ServiceHostScope> { let decision=self.current.lock().unwrap().clone(); Ok(ServiceHostScope { source_identity:decision.source_identity.clone(), namespace:decision.namespace.clone(), managed_root:self.root.clone(), database:self.root.join("source.siq"), decision }) }
- fn provider(&self)->Result<ServiceProviderBridge> { self.provider_calls.fetch_add(1,Ordering::SeqCst); Err("configured_profile_unavailable".into()) }
+ fn current_scope(&self)->Result<ServiceHostScope> { self.scope_calls.fetch_add(1,Ordering::SeqCst); let decision=self.current.lock().unwrap().clone(); Ok(ServiceHostScope { source_identity:decision.source_identity.clone(), namespace:decision.namespace.clone(), managed_root:self.root.clone(), database:self.root.join("source.siq"), decision }) }
+ fn provider(&self)->Result<ServiceProviderBridge> { self.provider_calls.fetch_add(1,Ordering::SeqCst);
+  if self.configured_available.load(Ordering::SeqCst) { Ok(ServiceProviderBridge::new(std::rc::Rc::new(ConfiguredOwner { handle_calls:self.handle_calls.clone(),mutations:self.mutations.clone() }))) }
+  else { Err("configured_profile_unavailable".into()) } }
 }
 fn fixture()->(PathBuf,Arc<Owner>) {
  let root=std::env::temp_dir().join(format!("service-host-{}-{}",std::process::id(),NEXT.fetch_add(1,Ordering::SeqCst))); muyon_core_agent_lab::store::create_dir(&root).unwrap();
  let source=root.join("source"); muyon_core_agent_lab::store::create_dir(&source).unwrap();
  std::fs::write(source.join("source.siq"),include_bytes!("../../../android-compose-lab/app/src/main/assets/synthetic-supplier-schema12.siq")).unwrap();
- let owner=Arc::new(Owner { root:source, current:Mutex::new(SupplierScopeDecision { source_identity:"test-host-owner".into(),namespace:"test-host-namespace".into(),allowed:true,available:true,scope_allowed:true,bindings:vec!["host-supplier-name-read".into()], revision:"policy1".into(),binding_revision:"binding1".into(),source_revision:"source1".into(),rule_revision:"rule1".into(),scope:"selected-supplier".into(),selected:vec![SupplierSelection{key:ID.into(),revision:"7".into()}] }),provider_calls:AtomicUsize::new(0) });
+ let owner=Arc::new(Owner { root:source, current:Mutex::new(SupplierScopeDecision { source_identity:"test-host-owner".into(),namespace:"test-host-namespace".into(),allowed:true,available:true,scope_allowed:true,bindings:vec!["host-supplier-name-read".into()], revision:"policy1".into(),binding_revision:"binding1".into(),source_revision:"source1".into(),rule_revision:"rule1".into(),scope:"selected-supplier".into(),selected:vec![SupplierSelection{key:ID.into(),revision:"7".into()}] }),provider_calls:AtomicUsize::new(0),configured_available:AtomicBool::new(false),scope_calls:AtomicUsize::new(0),handle_calls:Arc::new(AtomicUsize::new(0)),mutations:Arc::new(AtomicUsize::new(0)) });
  (root,owner)
 }
 fn open(root:&PathBuf,owner:Arc<Owner>,mode:ServiceHostMode)->(AgentServiceController,AgentClientRef) {
@@ -117,4 +119,40 @@ fn replacement_managed_root_with_same_database_inode_cannot_inherit_history() {
     assert!(retained.object().unwrap()["events"].array().unwrap().is_empty(), "replacement root inherited cached source lineage");
     assert!(restarted.object().unwrap()["events"].array().unwrap().is_empty());
     assert_eq!(receipt, receipt_after_restart);
+}
+
+
+// In-memory trusted owner metadata only. No network, secret value, or ledger write.
+struct ConfiguredOwner { handle_calls: Arc<AtomicUsize>, mutations: Arc<AtomicUsize> }
+impl ServiceProviderHost for ConfiguredOwner {
+    fn current_binding(&self) -> Result<Option<ProviderBinding>> { Ok(Some(ProviderBinding {
+        profile: ConfiguredProfile { id:"fixture-profile".into(),endpoint:"https://provider.invalid/v1/chat/completions".into(),endpoint_identity:"fixture-endpoint".into(),provider:"openai-compatible".into(),model:"fixture-model".into(),location:ModelLocation::Remote,purpose:ModelPurpose::Chat,credential_ref:"fixture-handle-ref".into(),declared:Capabilities {tool_calls:true,streaming:false},tested:Capabilities {tool_calls:true,streaming:false} },
+        profile_revision:"fixture-profile1".into(),policy_revision:"fixture-policy1".into(),grant_revision:"fixture-grant1".into(),authorization_owner:"fixture-authorizer".into(),model_allowed:true,outbound_allowed:true,
+        budget:ProviderBudget {revision:"fixture-budget1".into(),quota_proof:"fixture-quota1".into(),remaining_calls:1,remaining_tokens:200,remaining_micros:100},
+    })) }
+    fn credential_handle(&self,p:&ConfiguredProfile)->Result<Option<CredentialHandle>> {
+        self.handle_calls.fetch_add(1,Ordering::SeqCst);
+        Ok(Some(CredentialHandle::new(&p.id,&p.credential_ref,"fixture-opaque-handle")?))
+    }
+    fn review_payload(&self,_:&ProviderBinding,_:&[u8])->Result<()> {self.mutations.fetch_add(1,Ordering::SeqCst);Err("unexpected_prepare".into())}
+    fn reserve_budget(&self,_:&ProviderBinding,_:&str,_:&[u8],_:&CallBudget)->Result<String> {self.mutations.fetch_add(1,Ordering::SeqCst);Err("unexpected_reservation".into())}
+    fn commit_admission(&self,_:&str,_:&ProviderBinding,_:&str,_:&[u8],_:&CredentialHandle)->Result<String> {self.mutations.fetch_add(1,Ordering::SeqCst);Err("unexpected_commit".into())}
+}
+#[test]
+fn valid_configured_readiness_still_blocks_transport_without_scope_or_admission() {
+    let _serial=SERIAL.lock().unwrap_or_else(|e|e.into_inner());
+    let(root,owner)=fixture();owner.configured_available.store(true,Ordering::SeqCst);
+    // A model profile does not grant source reads. This owner denies every read.
+    owner.current.lock().unwrap().allowed=false;
+    let(c,client)=open(&root,owner.clone(),ServiceHostMode::ConfiguredChat);
+    c.submit_supplier_read(client.clone(),"configured-valid".into(),"chat".into(),ID.into(),"7".into());c.await_settled();
+    let reply=parse(c.supplier_read_events(client,"configured-valid".into(),0).as_bytes()).unwrap();
+    stop(c);std::fs::remove_dir_all(root).unwrap();
+    assert!(reply.encode().contains("configured_transport_unavailable"),"valid profile/HANDLE must reach explicit transport gate");
+    assert_eq!(reply.object().unwrap()["synthetic"],Json::Bool(false));
+    assert_eq!(owner.provider_calls.load(Ordering::SeqCst),1);
+    assert!(owner.handle_calls.load(Ordering::SeqCst)>0,"readiness must check HANDLE availability");
+    assert_eq!(owner.mutations.load(Ordering::SeqCst),0,"no payload preparation, quota reservation, or outbound commit");
+    assert_eq!(owner.scope_calls.load(Ordering::SeqCst),0,"configured readiness must not infer or consume a read grant");
+    assert!(!reply.encode().contains("supplier_projection"));assert!(!reply.encode().contains("receipt"));
 }
