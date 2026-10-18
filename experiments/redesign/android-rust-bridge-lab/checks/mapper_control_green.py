@@ -49,11 +49,18 @@ def main():
     if sha(jna)!='4fb141dd8ef6b0585ffceea4bc49602fbc6312fa977e2c488794ea3e6aafecae':
         raise RuntimeError('mapper_green_jna_pin_invalid')
     commands=[]
-    def run(command,name,timeout=300):
-        command=[str(x) for x in command];commands.append(dict(command=command,log=name))
+    def run(command,name,timeout=300,cwd=None):
+        command=[str(x) for x in command]
+        cwd=root if cwd is None else cwd
+        record=dict(command=command,log=name,cwd=str(cwd),timeout_seconds=timeout,timed_out=False)
+        commands.append(record)
         with (evidence/name).open('w') as log:
-            try:return subprocess.run(command,cwd=root,stdout=log,stderr=subprocess.STDOUT,timeout=timeout).returncode
-            except subprocess.TimeoutExpired:return 124
+            try:
+                status=subprocess.run(command,cwd=cwd,stdout=log,stderr=subprocess.STDOUT,timeout=timeout).returncode
+            except subprocess.TimeoutExpired:
+                status=124;record['timed_out']=True
+        record['exit_code']=status
+        return status
     config=root/'experiments/redesign/android-rust-bridge-lab/core/uniffi.jvm.toml'
     provenance=dict(source_commit=source,library_path=str(library),library_sha256=original,
         descriptor_sha256=sha(HERE/'mapper_control_green_cases.json'),bindgen_sha256=sha(bindgen),
@@ -64,7 +71,7 @@ def main():
             raise RuntimeError('mapper_green_jdk17_missing')
         if run([kotlinc,'-version'],'kotlin-version.log')!=0 or 'kotlinc-jvm 2.2.20' not in (evidence/'kotlin-version.log').read_text():
             raise RuntimeError('mapper_green_kotlin_pin_invalid')
-        if run([bindgen,'generate',library,'--crate','muyon_android_contract_bridge','--language','kotlin','--config',config,'--no-format','--out-dir',evidence/'fresh-jvm'],'generate-jvm.log')!=0:
+        if run([bindgen,'generate',library,'--crate','muyon_android_contract_bridge','--language','kotlin','--config',config,'--no-format','--out-dir',evidence/'fresh-jvm'],'generate-jvm.log',cwd=config.parent)!=0:
             raise RuntimeError('mapper_green_generation_failed')
         binding=evidence/'fresh-jvm/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'
         if 'ffiTestPanicProbe' in binding.read_text():
