@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "author_commit": "b1a874c697a5db48d43bf19386ed3c0b8ee85206",
+  "entrypoint": "com.mightyoung.muyon.androidlab.agentipc.AgentNativeProjectionChecksKt",
+  "sources": {
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/AgentLivenessRegistry.kt": {
+      "blob_sha": "0062e3c64589067a3d2ed6889015fec5aebb9a2c",
+      "sha256": "61e846507764fcdaf24897a71d776cb5838a2c6e58c067ce2f3c0111f17afe7f"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/AgentServiceClientState.kt": {
+      "blob_sha": "a0ccb4aac9b78e3afa5750549c389c9bb60e3e20",
+      "sha256": "137c6ddefc700288612bde420eb131b88fa6842e43801cef1d0bdded4ab7d613"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/AgentServiceContract.kt": {
+      "blob_sha": "1b528ce982fd2d23a3ed03e6d97a76c810ef66ec",
+      "sha256": "94224d7280afce36c45a91beae4d62fd7b13f373088edc011adf990cc8f82722"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/AgentServiceRuntimeSupport.kt": {
+      "blob_sha": "54ed14bd749b8d80afb9fefdb169de170f6836df",
+      "sha256": "b50303040d0428f17f9a9981f33b4d52dc7013c834d1bf8c61798dee302d1fa7"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/AgentServiceWire.kt": {
+      "blob_sha": "082645ae59ef72441289f51fbae9a574fac96184",
+      "sha256": "ce63d101f5b9859399b9f7ae8f7446b0c651debf9de8ae8bb93e0ed0630c39ab"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/DiagnosticContract.kt": {
+      "blob_sha": "851554192980e70a9d5efa79fc23f43364d4a6a3",
+      "sha256": "09f3f0714a44b3958f272589c1b910501ea3ea10626a1ac52e943f6bbeafd9c6"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/LocalInputActions.kt": {
+      "blob_sha": "4511ed5cfc518da902707b65e2b6a93bd7062e5c",
+      "sha256": "ce7173fd0c1d421ce403ac3ffaf9f6cd8386e2fe4bc331212ec9a06440d64f29"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/LocalUiState.kt": {
+      "blob_sha": "ba865927a39d34cfb22c55586d837d17ce204613",
+      "sha256": "00bdbd40223f323b572df38731f1e2956468b7ef0ca1a20b45a60b43318dcc47"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/RustDiagnosticCoordinator.kt": {
+      "blob_sha": "16daf289d9c18865f32647964bc7abd3d7ed392f",
+      "sha256": "d606b36b5811ee4281d00e581e40f6b74a67eb331d66b3e2445e5533bb268178"
+    },
+    "experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab/ShellState.kt": {
+      "blob_sha": "58524e3f594ac5f0f77b8c5a6db3265bce98f022",
+      "sha256": "5879f12dc487f8433203c22dba3120e031ab1aa4752950c495d9aaa383aba1eb"
+    },
+    "experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidlab/agentipc/AgentNativeProjection.kt": {
+      "blob_sha": "24d3ceb6a48ae0527139bed7e5081710d9868599",
+      "sha256": "7b4fdc37492ee85e2e65fed477e903371ab7d0cd7deafb1e1b69bc96f0bf79d6"
+    },
+    "experiments/redesign/android-compose-lab/app/src/test/kotlin/com/mightyoung/muyon/androidlab/agentipc/AgentNativeProjectionChecks.kt": {
+      "blob_sha": "2b165c5982357cb1425e3713de9d9e9f414bf7f1",
+      "sha256": "fd11439e7a85e54a54a74c93abc1aedca2049893c512adfc6e98904d6879580b"
+    }
+  },
+  "case_names": [
+    "connect preserves actual phase and native metadata",
+    "cancelled terminal retains original task and recorded receipt success",
+    "settled no admission stays sealed without synthetic identities",
+    "requested control and close remain acknowledgements not business terminals",
+    "start existing preserves original native run and rejected unit",
+    "new selected request never sends prior snapshot run identity on cancel"
+  ],
+  "assertion": "CONTROL_TARGET_RED: old run identity cannot control selected new request"
+}

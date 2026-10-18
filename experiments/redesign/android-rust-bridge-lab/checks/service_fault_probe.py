@@ -54,10 +54,11 @@ def instrument(sources, case):
             '        if self.frames.borrow().len() == 1 {\n            println!("FAULT_CANCEL turn=2 before_original_poll=true");\n            self.control.request_cancel();\n        }\n' + CANCEL_ANCHOR)
     if CONTRACT.get('deadline_probe'):
         runtime = result['service_runtime.rs']
+        deadline_prefix = ' ' * CONTRACT.get('deadline_indent', 8)
         for anchor, replacement in [
             ('    deadline: Instant,\n', '    deadline: std::sync::Mutex<Instant>,\n'),
             ('            deadline: Instant::now() + Duration::from_secs(5),\n', '            deadline: std::sync::Mutex::new(Instant::now() + Duration::from_secs(5)),\n'),
-            ('        } else if Instant::now() >= self.deadline {\n', '        } else if Instant::now() >= *self.deadline.lock().unwrap() {\n            println!("FAULT_DEADLINE actual_poll=expired");\n')]:
+            (deadline_prefix + '} else if Instant::now() >= self.deadline {\n', deadline_prefix + '} else if Instant::now() >= *self.deadline.lock().unwrap() {\n' + deadline_prefix + '    println!("FAULT_DEADLINE actual_poll=expired");\n')]:
             runtime = replace_once(runtime, anchor, replacement)
         result['service_runtime.rs'] = replace_once(runtime, CANCEL_ANCHOR,
             '        if self.frames.borrow().len() == 1 {\n            *self.control.deadline.lock().unwrap() = Instant::now();\n        }\n' + CANCEL_ANCHOR)
