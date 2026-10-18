@@ -62,7 +62,7 @@ class InputTests(unittest.TestCase):
 
     def test_unknown_missing_wrong_types_and_constants_reject(self):
         for key, value in [('unknown', 1), ('protocol', True), ('format_version', 1.0),
-                           ('protocol', 2), ('min_api', 24), ('source_sha', 'A' * 40),
+                           ('format_version', 1), ('protocol', 2), ('min_api', 24), ('source_sha', 'A' * 40),
                            ('android_binding_sha256', '0' * 64 + '\n'), ('jna', None)]:
             with self.subTest(key=key, value=value):
                 bad = copy.deepcopy(self.value); bad[key] = value
