@@ -1,0 +1,74 @@
+{
+  "source_head_at_run": "0090b6e394abcbd8556a0911f4d5be1ff18687f5",
+  "baseline": "6635bc6be057fd36c0e0c6c0aafaf034aca2ecaa",
+  "scope": "SYNTHETIC_CONTRACT_ONLY",
+  "python": "3.12.14",
+  "sqlite": "3.53.1",
+  "tests": 21,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "success": true,
+  "scenarios": {
+    "insert_failure": {
+      "status": "NOT_COMMITTED",
+      "committed": false,
+      "projection": {
+        "status": "NOT_COMMITTED",
+        "bodies": []
+      },
+      "trace": [
+        "correction_intent_committed",
+        "old_retired_in_transaction",
+        "replacement_sql_rolled_back"
+      ],
+      "vector_calls": 0,
+      "vector_ids": [
+        "old"
+      ]
+    },
+    "vector_failure": {
+      "status": "COMMITTED_INDEX_PENDING",
+      "committed": true,
+      "projection": {
+        "status": "INDEX_PENDING",
+        "bodies": [
+          "synthetic: city B"
+        ]
+      },
+      "trace": [
+        "correction_intent_committed",
+        "old_retired_in_transaction",
+        "replacement_sql_committed",
+        "index_pending"
+      ],
+      "vector_calls": 1,
+      "vector_ids": [
+        "old"
+      ]
+    },
+    "success": {
+      "status": "COMMITTED",
+      "committed": true,
+      "projection": {
+        "status": "READY",
+        "bodies": [
+          "synthetic: city B"
+        ]
+      },
+      "trace": [
+        "correction_intent_committed",
+        "old_retired_in_transaction",
+        "replacement_sql_committed",
+        "index_ready"
+      ],
+      "vector_calls": 1,
+      "vector_ids": [
+        "new"
+      ]
+    }
+  },
+  "actual_adapter_canary": "NOT_RUN: Dart/Flutter SDK unavailable",
+  "old_hy_24_tests": "NOT_RUN: Cargo unavailable; source/blob inventory only",
+  "i04_operation": "NOT_EXECUTED: prior denial preserved; no retry/reroute"
+}

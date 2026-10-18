@@ -1,0 +1,26 @@
+test_explicit_json_empty_list_is_legitimate_no_change (test_failure_lab.ModelTests.test_explicit_json_empty_list_is_legitimate_no_change) ... ok
+test_invalid_model_body_leaves_store_unchanged (test_failure_lab.ModelTests.test_invalid_model_body_leaves_store_unchanged) ... ok
+test_missing_non_json_and_wrong_shapes_do_not_become_no_change (test_failure_lab.ModelTests.test_missing_non_json_and_wrong_shapes_do_not_become_no_change) ... ok
+test_none_empty_and_whitespace_are_failures_without_fake_success (test_failure_lab.ModelTests.test_none_empty_and_whitespace_are_failures_without_fake_success) ... ok
+test_unknown_fake_provider_is_invoked_once (test_failure_lab.ModelTests.test_unknown_fake_provider_is_invoked_once) ... ok
+test_valid_operation_is_only_a_proposal (test_failure_lab.ModelTests.test_valid_operation_is_only_a_proposal) ... ok
+test_oracle_rejects_blank_as_no_change_mutant (test_failure_lab.OracleSensitivityTests.test_oracle_rejects_blank_as_no_change_mutant) ... ok
+test_oracle_rejects_legacy_autocommit_retire_then_failed_insert (test_failure_lab.OracleSensitivityTests.test_oracle_rejects_legacy_autocommit_retire_then_failed_insert) ... ok
+test_oracle_rejects_rollback_that_reactivates_overruled_truth (test_failure_lab.OracleSensitivityTests.test_oracle_rejects_rollback_that_reactivates_overruled_truth) ... ok
+test_delete_after_sql_failure_blocks_late_repair (test_failure_lab.ReplacementTests.test_delete_after_sql_failure_blocks_late_repair) ... ok
+test_delete_after_vector_failure_blocks_late_index_repair (test_failure_lab.ReplacementTests.test_delete_after_vector_failure_blocks_late_index_repair) ... ok
+test_explicit_index_repair_does_not_repeat_sql_or_provider (test_failure_lab.ReplacementTests.test_explicit_index_repair_does_not_repeat_sql_or_provider) ... ok
+test_insert_failure_rolls_back_sql_but_does_not_restore_overruled_truth (test_failure_lab.ReplacementTests.test_insert_failure_rolls_back_sql_but_does_not_restore_overruled_truth) ... ok
+test_known_not_committed_can_be_explicitly_repaired_after_reopen (test_failure_lab.ReplacementTests.test_known_not_committed_can_be_explicitly_repaired_after_reopen) ... ok
+test_observer_cannot_see_half_replacement (test_failure_lab.ReplacementTests.test_observer_cannot_see_half_replacement) ... ok
+test_process_exit_after_sql_commit_preserves_rebuildable_new_truth (test_failure_lab.ReplacementTests.test_process_exit_after_sql_commit_preserves_rebuildable_new_truth) ... ok
+test_process_exit_between_retire_and_insert_keeps_pending_correction (test_failure_lab.ReplacementTests.test_process_exit_between_retire_and_insert_keeps_pending_correction) ... ok
+test_success_has_single_new_current_and_preserves_old_history (test_failure_lab.ReplacementTests.test_success_has_single_new_current_and_preserves_old_history) ... ok
+test_unique_index_rejects_two_current_facts (test_failure_lab.ReplacementTests.test_unique_index_rejects_two_current_facts) ... ok
+test_unknown_state_survives_reopen_and_is_not_replayed (test_failure_lab.ReplacementTests.test_unknown_state_survives_reopen_and_is_not_replayed) ... ok
+test_vector_failure_reports_committed_pending_and_sql_fallback (test_failure_lab.ReplacementTests.test_vector_failure_reports_committed_pending_and_sql_fallback) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.074s
+
+OK
