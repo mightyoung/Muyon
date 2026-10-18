@@ -4,6 +4,7 @@ use crate::{
     service_root::ServiceRoot,
     service_runtime::{run_builtin_admitted, BuiltinExecution, RunControl},
     service_types::*,
+    supplier_business::{self, BusinessRead},
 };
 use std::{
     path::PathBuf,
@@ -41,6 +42,7 @@ struct Inner {
     clients: Vec<Client>,
     client_leases: Vec<String>,
     runs: Vec<AgentRunSnapshot>,
+    business: std::collections::BTreeMap<String, BusinessRead>,
     root: Option<ServiceRoot>,
     worker: Option<JoinHandle<Completion>>,
     joining: bool,
@@ -56,7 +58,17 @@ struct ExecutionSettlement {
     recovery: bool,
 }
 enum Completion {
-    Initialized(Result<(ServiceRoot, Vec<AgentRunSnapshot>, bool), String>),
+    Initialized(
+        Result<
+            (
+                ServiceRoot,
+                Vec<AgentRunSnapshot>,
+                bool,
+                std::collections::BTreeMap<String, BusinessRead>,
+            ),
+            String,
+        >,
+    ),
     Executed {
         root: ServiceRoot,
         snapshot: AgentRunSnapshot,
@@ -190,6 +202,9 @@ fn hex_id(s: &str, n: usize) -> bool {
         && s.bytes()
             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
 }
+fn self_request_id_valid(s: &str) -> bool {
+    request_id(s)
+}
 fn request_id(s: &str) -> bool {
     !s.is_empty()
         && s.len() <= 64
@@ -303,6 +318,7 @@ impl AgentServiceController {
                 clients: Vec::new(),
                 client_leases,
                 runs: Vec::new(),
+                business: Default::default(),
                 root: None,
                 worker: None,
                 joining: false,
@@ -317,7 +333,8 @@ impl AgentServiceController {
                 Completion::Initialized((|| {
                     let root = ServiceRoot::open(&path)?;
                     let (runs, recovery) = service_evidence::restore(&root);
-                    Ok((root, runs, recovery))
+                    let business = supplier_business::restore_all(&root);
+                    Ok((root, runs, recovery, business))
                 })())
             }) {
             Ok(handle) => shared.lock().worker = Some(handle),
@@ -382,6 +399,13 @@ impl AgentServiceController {
         }
     }
     pub fn start_run(&self, req: AgentStartRequest) -> AgentStartReply {
+        self.start_internal(req, None)
+    }
+    fn start_internal(
+        &self,
+        req: AgentStartRequest,
+        business: Option<BusinessRead>,
+    ) -> AgentStartReply {
         let mut g = self.shared.lock();
         let rejected = |g: &Inner, error| AgentStartReply {
             meta: g.meta.clone(),
@@ -401,6 +425,17 @@ impl AgentServiceController {
             )
         {
             return rejected(&g, AgentServiceError::Closed);
+        }
+        if let Some(old) = g.business.get(&req.request_id) {
+            if business.as_ref().map(|b| &b.payload) != Some(&old.payload) {
+                return rejected(&g, AgentServiceError::RequestConflict);
+            }
+        } else if business.is_some()
+            && g.runs
+                .iter()
+                .any(|s| intent_of(s).request_id == req.request_id)
+        {
+            return rejected(&g, AgentServiceError::RequestConflict);
         }
         if g.phase == AgentServiceState::RecoveryRequired {
             return rejected(&g, AgentServiceError::RecoveryRequired);
@@ -450,6 +485,9 @@ impl AgentServiceController {
             g.root = Some(root);
             return rejected(&g, AgentServiceError::BudgetExceeded);
         }
+        if let Some(b) = &business {
+            g.business.insert(intent.request_id.clone(), b.clone());
+        }
         g.runs.push(queued.clone());
         let control = Arc::new(RunControl::new());
         g.control = Some(control.clone());
@@ -466,7 +504,15 @@ impl AgentServiceController {
             .spawn(move || {
                 let mut root = worker_root.lock().unwrap().take().unwrap();
                 let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    execute(&mut root, intent, epoch, control, shared.clone(), observer)
+                    execute(
+                        &mut root,
+                        intent,
+                        epoch,
+                        control,
+                        shared.clone(),
+                        observer,
+                        business,
+                    )
                 }));
                 match result {
                     Ok(settlement) => Completion::Executed {
@@ -481,8 +527,7 @@ impl AgentServiceController {
                         std::panic::resume_unwind(panic)
                     }
                 }
-            })
-        {
+            }) {
             Ok(handle) => g.worker = Some(handle),
             Err(_) => {
                 g.root = root_transfer.lock().unwrap().take();
@@ -497,6 +542,119 @@ impl AgentServiceController {
         AgentStartReply {
             meta: g.meta.clone(),
             outcome: AgentStartOutcome::QueuedVolatile { snapshot: queued },
+        }
+    }
+    /// Private closed business protocol. Queued acceptance is volatile until run identity appears.
+    pub fn submit_supplier_read(
+        &self,
+        client: AgentClientRef,
+        request_id: String,
+        text: String,
+        key: String,
+        revision: String,
+    ) -> String {
+        let business = match BusinessRead::new(text, key, revision) {
+            Ok(b) => b,
+            Err(reason) => {
+                return supplier_business::reply("rejected", &reason, &request_id, None, None, 0)
+            }
+        };
+        let reply = self.start_internal(
+            AgentStartRequest {
+                client,
+                request_id: request_id.clone(),
+                variant: AgentReadVariant::Inquiry,
+            },
+            Some(business),
+        );
+        let (status, reason) = match reply.outcome {
+            AgentStartOutcome::QueuedVolatile { .. } => ("accepted", "queued_volatile".into()),
+            AgentStartOutcome::Existing { .. } => ("existing", "none".into()),
+            AgentStartOutcome::Busy => ("rejected", "BUSY".into()),
+            AgentStartOutcome::Rejected { error } => ("rejected", format!("{:?}", error)),
+        };
+        let g = self.shared.lock();
+        let identity = g
+            .runs
+            .iter()
+            .find(|s| intent_of(s).request_id == request_id)
+            .and_then(identity_of);
+        supplier_business::reply(status, &reason, &request_id, identity.as_ref(), None, 0)
+    }
+    /// Cursor polling and reconnect lookup share this operation; it never executes a read.
+    pub fn supplier_read_events(
+        &self,
+        client: AgentClientRef,
+        request_id: String,
+        after: i64,
+    ) -> String {
+        let g = self.shared.lock();
+        if let Err(error) = g.validate(&client, false) {
+            return supplier_business::reply(
+                "rejected",
+                &format!("{:?}", error),
+                &request_id,
+                None,
+                None,
+                0,
+            );
+        }
+        if !self_request_id_valid(&request_id) || after < 0 || after > 4 {
+            return supplier_business::reply(
+                "rejected",
+                "INVALID_CURSOR_OR_ID",
+                &request_id,
+                None,
+                None,
+                0,
+            );
+        }
+        let identity = g
+            .runs
+            .iter()
+            .find(|s| intent_of(s).request_id == request_id)
+            .and_then(identity_of);
+        let mut business = g.business.get(&request_id).cloned();
+        let no_admission_cancelled = g.runs.iter().find(|s| intent_of(s).request_id == request_id).map(|s| matches!(s, AgentRunSnapshot::SettledNoAdmission { settlement } if settlement.reason == AgentNoAdmissionReason::CancelledBeforeAdmission)).unwrap_or(false);
+        if no_admission_cancelled {
+            if let Some(b) = &mut business {
+                b.cancel_before_admission();
+            }
+        }
+        let unresolved = g
+            .runs
+            .iter()
+            .find(|s| intent_of(s).request_id == request_id)
+            .map(|s| matches!(s, AgentRunSnapshot::Unresolved { .. }))
+            .unwrap_or(false);
+        drop(g);
+        if unresolved {
+            return supplier_business::reply(
+                "unknown",
+                "OUTCOME_UNKNOWN",
+                &request_id,
+                identity.as_ref(),
+                None,
+                after,
+            );
+        }
+        match business.as_ref() {
+            Some(b) => supplier_business::reply(
+                "events",
+                "none",
+                &request_id,
+                identity.as_ref(),
+                Some(b),
+                after,
+            ),
+            None => supplier_business::reply(
+                "unknown",
+                "UNKNOWN",
+                &request_id,
+                identity.as_ref(),
+                None,
+                after,
+            ),
         }
     }
     pub fn status(&self, req: AgentStatusRequest) -> AgentSnapshotReply {
@@ -752,31 +910,48 @@ impl AgentServiceController {
         // panic. Read durable evidence on this backend waiter, outside the mutex.
         // Never restore a normal terminal after failed worker cleanup.
         let interrupted = if matches!(&completion, Some(Err(_))) {
-            let pending = self.shared.lock().runs.last().filter(|s| !settled(s)).cloned();
+            let pending = self
+                .shared
+                .lock()
+                .runs
+                .last()
+                .filter(|s| !settled(s))
+                .cloned();
             pending.map(|last| {
                 let intent = intent_of(&last);
                 let identity = identity_of(&last);
                 let root = self.shared.lock().root.take();
-                let recovered = root.as_ref().and_then(|root| {
-                    let run = root.runs().iter().find(|run| {
-                        if run.intent != intent {
-                            return false;
+                let recovered = root
+                    .as_ref()
+                    .and_then(|root| {
+                        let run = root.runs().iter().find(|run| {
+                            if run.intent != intent {
+                                return false;
+                            }
+                            identity
+                                .as_ref()
+                                .map(|id| {
+                                    id.run_id == run.identity.run_id
+                                        && id.admitted_service_epoch
+                                            == run.identity.admitted_service_epoch
+                                        && id
+                                            .actual_task
+                                            .as_ref()
+                                            .map(|task| {
+                                                Some(task) == run.identity.actual_task.as_ref()
+                                            })
+                                            .unwrap_or(true)
+                                })
+                                .unwrap_or(true)
+                        })?;
+                        let dir = root.run_dir(&run.identity.run_id).ok()?;
+                        let mut receipt = service_evidence::receipt(&dir, run).ok()?;
+                        if receipt.outcome == AgentReceiptOutcome::NotStarted {
+                            receipt.outcome = AgentReceiptOutcome::Unknown;
                         }
-                        identity.as_ref().map(|id| {
-                            id.run_id == run.identity.run_id
-                                && id.admitted_service_epoch == run.identity.admitted_service_epoch
-                                && id.actual_task.as_ref().map(|task| {
-                                    Some(task) == run.identity.actual_task.as_ref()
-                                }).unwrap_or(true)
-                        }).unwrap_or(true)
-                    })?;
-                    let dir = root.run_dir(&run.identity.run_id).ok()?;
-                    let mut receipt = service_evidence::receipt(&dir, run).ok()?;
-                    if receipt.outcome == AgentReceiptOutcome::NotStarted {
-                        receipt.outcome = AgentReceiptOutcome::Unknown;
-                    }
-                    Some(service_evidence::unknown(run, receipt))
-                }).unwrap_or_else(|| unknown(intent, identity));
+                        Some(service_evidence::unknown(run, receipt))
+                    })
+                    .unwrap_or_else(|| unknown(intent, identity));
                 (root, recovered)
             })
         } else {
@@ -786,7 +961,8 @@ impl AgentServiceController {
             let mut g = self.shared.lock();
             match completion {
                 Some(Ok(Completion::Initialized(result))) => match result {
-                    Ok((root, runs, recovery)) => {
+                    Ok((root, runs, recovery, business)) => {
+                        g.business = business;
                         g.runs = runs;
                         g.root = Some(root);
                         if !g.sealed {
@@ -894,6 +1070,7 @@ fn execute(
     control: Arc<RunControl>,
     shared: Arc<Shared>,
     observer: Option<Arc<dyn ServiceEvidenceObserver>>,
+    business: Option<BusinessRead>,
 ) -> ExecutionSettlement {
     if let Err(reason) = control.poll() {
         let cancelled = reason == "native_cancelled";
@@ -944,6 +1121,18 @@ fn execute(
             }
         }
     };
+    if let Some(mut business) = business {
+        let summary = supplier_business::execute(root, &mut run, &dir, &mut business, control);
+        shared
+            .lock()
+            .business
+            .insert(run.intent.request_id.clone(), business);
+        let recovery = summary.terminal == AgentTerminal::OutcomeUnknown;
+        return ExecutionSettlement {
+            snapshot: AgentRunSnapshot::Terminal { summary },
+            recovery,
+        };
+    }
     let result = run_builtin_admitted(&dir, run.intent.variant.clone(), control.clone(), |state| {
         let actual = AgentTaskIdentity {
             task_id: state.task.clone(),

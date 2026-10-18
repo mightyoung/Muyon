@@ -401,6 +401,15 @@ pub(crate) fn restore(root: &ServiceRoot) -> (Vec<AgentRunSnapshot>, bool) {
     let mut snapshots = Vec::new();
     let mut recovery = root.is_poisoned();
     for run in root.runs() {
+        if let Ok(dir) = root.run_dir(&run.identity.run_id) {
+            if let Ok(snapshot) = crate::supplier_business::restore_snapshot(&dir, run) {
+                if matches!(snapshot, AgentRunSnapshot::Unresolved { .. }) {
+                    recovery = true;
+                }
+                snapshots.push(snapshot);
+                continue;
+            }
+        }
         let result = (|| {
             let dir = root.run_dir(&run.identity.run_id)?;
             let value = parse(read_bound(&dir.join("summary.db"), 4096)?.as_bytes())?;

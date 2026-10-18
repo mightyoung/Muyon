@@ -239,6 +239,7 @@ impl ServiceRoot {
                         .map_err(|_| "service_root_inventory")?;
                     let known = [
                         "source.db",
+                        "lab-supplier.siq",
                         "native.db",
                         "task.db",
                         "outbound.db",

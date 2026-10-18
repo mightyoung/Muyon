@@ -95,6 +95,26 @@ impl AgentServiceController {
     pub fn start_run(&self, req: AgentStartRequest) -> AgentStartReply {
         self.inner.start_run(req.to_host()).to_bridge()
     }
+    pub fn submit_supplier_read(
+        &self,
+        client: AgentClientRef,
+        request_id: String,
+        text: String,
+        key: String,
+        revision: String,
+    ) -> String {
+        self.inner
+            .submit_supplier_read(client.to_host(), request_id, text, key, revision)
+    }
+    pub fn supplier_read_events(
+        &self,
+        client: AgentClientRef,
+        request_id: String,
+        after: i64,
+    ) -> String {
+        self.inner
+            .supplier_read_events(client.to_host(), request_id, after)
+    }
     pub fn status(&self, req: AgentStatusRequest) -> AgentSnapshotReply {
         self.inner.status(req.to_host()).to_bridge()
     }
