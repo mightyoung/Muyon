@@ -39,3 +39,7 @@ No production Dart/Rust source or existing CI changed. Full B CI is pending; do 
 A current Android/minAPI branch is separate (`3f3a2368648db5e9767f11adcae4548ac5da2527`); shared Gradle/Android packaging and its CI remain LeaderB-owned, with UI/OCR external ownership unchanged.
 
 I04 remains DENIED_BEFORE_EXECUTION/BLOCKED. Nothing here permits its original legacy-provider→HTTP→reopen action, any retry/reroute, PR86/dependent combination or main/develop integration.
+
+## Fixed common core tree verification
+
+Integrator readback confirms `experiments/redesign/plugin-contract-lab/core` tree is exactly `685e9ca45c33c9f9b8017d313da5f79bebd1c2a0` at F2 `3f1be180`, C `fdc9aea1`, and PIP tested source `25c6cd7d`. PIP shared-core differential work is therefore not overwritten by this batch. PIP can proceed exclusively in plugin-contract-lab; host lib/controller/drain integration remains the frontend/backend integration lane, not a concurrent PIP writer.
