@@ -72,19 +72,13 @@ internal class DurableServiceHostOwner(
             opened.beginTransaction()
             try {
                 if (fresh) {
-                    opened.execSQL("CREATE TABLE epochs (epoch TEXT PRIMARY KEY, ceiling BLOB NOT NULL)")
-                    opened.execSQL("CREATE TABLE clock_guard (id INTEGER PRIMARY KEY CHECK(id=1), high_water INTEGER NOT NULL)")
+                    AdmissionSchema.tables.values.forEach { opened.execSQL(it) }
                     opened.execSQL("INSERT INTO clock_guard VALUES (1,0)")
-                    opened.execSQL("CREATE TABLE reservations (token TEXT PRIMARY KEY, request_id BLOB NOT NULL UNIQUE, epoch TEXT NOT NULL, owner TEXT NOT NULL, binding BLOB NOT NULL, scope BLOB NOT NULL, payload BLOB NOT NULL, budget BLOB NOT NULL, proof BLOB NOT NULL, tokens INTEGER NOT NULL, micros INTEGER NOT NULL, expires INTEGER NOT NULL, state TEXT NOT NULL CHECK(state IN ('held','consumed','expired')))")
-                    opened.execSQL("CREATE TABLE admissions (id TEXT PRIMARY KEY, token TEXT NOT NULL UNIQUE REFERENCES reservations(token))")
                     opened.version = 1
                 }
                 require(opened.version == 1) { "Unsupported admission schema" }
                 opened.rawQuery("PRAGMA quick_check", null).use { require(it.moveToFirst() && it.getString(0) == "ok") }
-                // Check expected columns immediately, without attempting upgrade or repair.
-                opened.rawQuery("SELECT token,request_id,epoch,owner,binding,scope,payload,budget,proof,tokens,micros,expires,state FROM reservations LIMIT 0", null).close()
-                opened.rawQuery("SELECT epoch,ceiling FROM epochs LIMIT 0", null).close()
-                opened.rawQuery("SELECT id,token FROM admissions LIMIT 0", null).close()
+                AdmissionSchema.validate(opened)
                 opened.rawQuery("SELECT high_water FROM clock_guard WHERE id=1", null).use { require(it.moveToFirst()) }
                 opened.setTransactionSuccessful()
             } finally { opened.endTransaction() }
@@ -114,21 +108,32 @@ internal class DurableServiceHostOwner(
     private fun <T> transaction(block: (SQLiteDatabase, ServiceAdmissionAuthority.State, Long) -> T?): T? = try {
         val database = db
         if (database == null) null else authority?.guarded { state ->
+            val now = clock()
+            // Persist clock observation/expiry BEFORE fallible reserve/consume work. A duplicate,
+            // proof exception or failed admission write must never erase an observed expiry.
             database.beginTransaction()
+            var clockAccepted = false
             try {
-                val now = clock()
                 val water = database.rawQuery("SELECT high_water FROM clock_guard WHERE id=1", null).use {
                     check(it.moveToFirst()); it.getLong(0)
                 }
-                // Rollback denies until wall time catches up, including after reconstruction.
-                val result = if (now < 0 || now < water) null else {
+                if (now >= 0 && now >= water) {
                     database.execSQL("UPDATE clock_guard SET high_water=? WHERE id=1", arrayOf(now))
                     database.execSQL("UPDATE reservations SET state='expired' WHERE state='held' AND expires<=?", arrayOf(now))
-                    block(database, state, now)
+                    clockAccepted = true
                 }
                 database.setTransactionSuccessful()
-                result
             } finally { database.endTransaction() }
+            if (!clockAccepted) null else {
+                // The shared authority guard also excludes other supported connections between
+                // these transactions. State consumption and admission metadata remain atomic.
+                database.beginTransaction()
+                try {
+                    val result = block(database, state, now)
+                    database.setTransactionSuccessful()
+                    result
+                } finally { database.endTransaction() }
+            }
         }
     } catch (_: Exception) { null }
 
@@ -198,6 +203,36 @@ internal class DurableServiceHostOwner(
         }
     }
     private fun signed(n: ULong): Long { require(n <= Long.MAX_VALUE.toULong()); return n.toLong() }
+}
+
+/** Exact supported SQLite manifest, including automatically created constraint indexes.
+ * Reject equivalent-but-different schemas rather than infer/repair constraints. Android's own
+ * locale metadata is permitted only with its standard definition; it has no admission authority.
+ */
+private object AdmissionSchema {
+    val tables = linkedMapOf(
+        "epochs" to "CREATE TABLE epochs (epoch TEXT PRIMARY KEY, ceiling BLOB NOT NULL)",
+        "clock_guard" to "CREATE TABLE clock_guard (id INTEGER PRIMARY KEY CHECK(id=1), high_water INTEGER NOT NULL)",
+        "reservations" to "CREATE TABLE reservations (token TEXT PRIMARY KEY, request_id BLOB NOT NULL UNIQUE, epoch TEXT NOT NULL, owner TEXT NOT NULL, binding BLOB NOT NULL, scope BLOB NOT NULL, payload BLOB NOT NULL, budget BLOB NOT NULL, proof BLOB NOT NULL, tokens INTEGER NOT NULL, micros INTEGER NOT NULL, expires INTEGER NOT NULL, state TEXT NOT NULL CHECK(state IN ('held','consumed','expired')))",
+        "admissions" to "CREATE TABLE admissions (id TEXT PRIMARY KEY, token TEXT NOT NULL UNIQUE REFERENCES reservations(token))")
+    fun validate(db: SQLiteDatabase) {
+        val expected = mutableMapOf<String, List<String?>>()
+        tables.forEach { (name, sql) -> expected[name] = listOf("table", name, sql) }
+        mapOf("epochs" to 1, "reservations" to 2, "admissions" to 2).forEach { (table, count) ->
+            for (i in 1..count) expected["sqlite_autoindex_${table}_$i"] = listOf("index", table, null)
+        }
+        val actual = mutableMapOf<String, List<String?>>()
+        db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master", null).use { c ->
+            while (c.moveToNext()) {
+                val name = c.getString(1)
+                if (name == "android_metadata") {
+                    require(c.getString(0) == "table" && c.getString(2) == name &&
+                        c.getString(3) == "CREATE TABLE android_metadata (locale TEXT)")
+                } else actual[name] = listOf(c.getString(0), c.getString(2), if (c.isNull(3)) null else c.getString(3))
+            }
+        }
+        require(actual == expected) { "Unsupported admission schema manifest" }
+    }
 }
 
 /** Versioned length-delimited UTF-16 code units preserve every Kotlin String, including surrogates. */
