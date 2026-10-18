@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.os.Process
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import org.junit.Assert.*
@@ -14,12 +15,20 @@ import java.io.File
 /** Exact named no-network test, only ordinaryChat compile-time APK and NEW schema/root. */
 class OrdinaryChatServiceLoopTest {
     @get:Rule val compose=createAndroidComposeRule<MainActivity>()
+    private fun hideKeyboard() {
+        compose.activityRule.scenario.onActivity { activity->
+            (activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(activity.window.decorView.windowToken,0)
+            activity.window.decorView.clearFocus()
+        }
+        compose.waitForIdle()
+    }
     private fun waitStatus(status:String) {compose.waitUntil(60_000){compose.onAllNodes(hasTestTag("service-read-status") and hasText(status)).fetchSemanticsNodes().isNotEmpty()}}
     @Test fun composeSendUsesPrivateServiceSameRustAgentAndDisplaysPlainProviderAnswer() {
         compose.onNodeWithTag("new-conversation").performClick()
         val prompt="请概括这条普通文本"
         compose.onNodeWithTag("assistant-draft").performTextReplacement(prompt)
         compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
+        hideKeyboard()
         waitStatus("已完成")
         val application=compose.activity.application as MuyonLabApplication
         var first:ChatReadConversation?=null
@@ -45,7 +54,8 @@ class OrdinaryChatServiceLoopTest {
         // Same conversation, second explicit request exceeds the synthetic durable one-call ceiling.
         compose.onNodeWithTag("assistant-draft").performTextReplacement("第二条普通文本")
         compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
-        waitStatus("读取失败")
+        hideKeyboard()
+        waitStatus("执行失败")
         assertEquals(1,attempts())
         println("ORDINARY_CHAT_COMPOSE_SERVICE_AGENT_PASS synthetic=true network=false original_run=${completed.runId} attempts=1 ui_pid=${Process.myPid()} agent_pid=${agent.pid}")
     }

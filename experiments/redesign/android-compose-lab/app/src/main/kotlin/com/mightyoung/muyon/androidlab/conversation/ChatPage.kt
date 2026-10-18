@@ -116,7 +116,7 @@ internal fun ConversationPage(
                       Column(verticalArrangement=Arrangement.spacedBy(26.dp)) {
                         if(execution.text.isNotEmpty()) UserMessage(execution.text, "你 · 已提交私有执行服务", Modifier.testTag("service-read-input"))
                         Column(Modifier.widthIn(max=720.dp).fillMaxWidth().testTag("service-read-result"), verticalArrangement=Arrangement.spacedBy(10.dp)) {
-                            Text("Muyon · 可信内置供应商只读工具", style=MaterialTheme.typography.labelMedium)
+                            Text("Muyon · 私有聊天服务", style=MaterialTheme.typography.labelMedium)
                             Text(frontendStatusLabel(execution.status), modifier=Modifier.testTag("service-read-status").semantics { liveRegion=LiveRegionMode.Polite })
                             if(execution.answer.isNotEmpty()) RichContent(execution.answer)
                             execution.projection?.let { Text(it, modifier=Modifier.testTag("service-read-projection")) }

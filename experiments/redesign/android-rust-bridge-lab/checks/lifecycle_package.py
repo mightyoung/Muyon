@@ -113,7 +113,7 @@ def main():
     (evidence / 'package-result.json').write_text(json.dumps(dict(
         source_sha=source, min_api=26, native_entries=entries, apk_sha256=sha(app),
         test_apk_sha256=sha(tests), build='PASS', Android_runtime='NOT_RUN',
-        business_source='compile-time synthetic metadata lifecycle fixture', fixture_variant=variant, model_api_called=False), indent=2) + '\n')
+        business_source='compile-time synthetic ordinary text chat' if args.ordinary_chat else 'compile-time synthetic metadata lifecycle fixture', fixture_variant=variant, model_api_called=False), indent=2) + '\n')
     print('LIFECYCLE_NATIVE_COMPOSE_PACKAGE_PASS source=' + source, flush=True)
 
 
