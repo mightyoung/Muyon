@@ -149,7 +149,24 @@ class AgentRuntimeService:Service() {
     private fun validRequest(value:String?)=value!=null && REQUEST.matches(value)
     private fun validRun(value:String?)=value==null || HEX.matches(value)
 
+    private fun chatReply(id:String?,reason:String)="""{"protocol":1,"status":"unknown","reason":"$reason","request_id":"${id?.takeIf{validRequest(it)} ?: ""}","run_id":null,"admitted_service_epoch":null,"events":[],"next_cursor":0,"terminal":false,"synthetic":true}"""
+    private fun invokeChat(id:String,work:(GeneratedAgentController)->String):String {
+        val value=synchronized(ownership){if(destroyed || retired || setupFailed)null else controller}
+            ?: return chatReply(id,"service_unavailable")
+        val result=safe{work(value)} ?: return chatReply(id,"native_unavailable")
+        return if(ChatReadBounds.validReply(result))result else chatReply(id,"reply_limit")
+    }
     private val binder=object:BoundedAgentBinder(){
+        override fun submitSupplierRead(epoch:String?,lease:String?,requestId:String?,text:String?,key:String?,revision:String?):String {
+            val ref=client(epoch,lease)
+            if(ref==null || !validRequest(requestId) || text==null || !ChatReadBounds.validText(text) || key==null || !ChatReadBounds.validSelection(key) || revision==null || !ChatReadBounds.validSelection(revision))return chatReply(requestId,"invalid_request")
+            return invokeChat(requestId!!){value->value.submitSupplierRead(ref,requestId,text,key,revision).also{requestSettlement(value)}}
+        }
+        override fun supplierReadEvents(epoch:String?,lease:String?,requestId:String?,after:Long):String {
+            val ref=client(epoch,lease)
+            if(ref==null || !validRequest(requestId) || after<0)return chatReply(requestId,"invalid_request")
+            return invokeChat(requestId!!){it.supplierReadEvents(ref,requestId,after)}
+        }
         override fun connect(liveness:IBinder?):AgentReplyParcel {
             if(liveness==null)return local(UiAgentLocalStatus.INVALID_REQUEST)
             return invoke{value,clients->

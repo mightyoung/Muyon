@@ -705,6 +705,10 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_status(
     ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_supplier_read(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_supplier_read_events(
+    ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_new(
     ): Int
     external fun ffi_muyon_android_contract_bridge_uniffi_contract_version(
@@ -756,6 +760,10 @@ internal object UniffiLib {
     external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_start_run(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_status(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_supplier_read(`ptr`: Long,`client`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`revision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_supplier_read_events(`ptr`: Long,`client`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`after`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_func_bridge_info(uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
@@ -920,6 +928,12 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_status() and 0xFFFF) != 7957) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_supplier_read() and 0xFFFF) != 60051) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_supplier_read_events() and 0xFFFF) != 43074) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_new() and 0xFFFF) != 1391) {
@@ -1353,6 +1367,10 @@ public interface AgentServiceControllerInterface {
     
     fun `status`(`req`: AgentStatusRequest): AgentSnapshotReply
     
+    fun `submitSupplierRead`(`client`: AgentClientRef, `requestId`: kotlin.String, `text`: kotlin.String, `key`: kotlin.String, `revision`: kotlin.String): kotlin.String
+    
+    fun `supplierReadEvents`(`client`: AgentClientRef, `requestId`: kotlin.String, `after`: kotlin.Long): kotlin.String
+    
     companion object
 }
 
@@ -1626,6 +1644,40 @@ open class AgentServiceController: Disposable, AutoCloseable, AgentServiceContro
         it,
         
         FfiConverterTypeAgentStatusRequest.lower(`req`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `submitSupplierRead`(`client`: AgentClientRef, `requestId`: kotlin.String, `text`: kotlin.String, `key`: kotlin.String, `revision`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_supplier_read(
+        it,
+        
+        FfiConverterTypeAgentClientRef.lower(`client`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterString.lower(`text`),
+        FfiConverterString.lower(`key`),
+        FfiConverterString.lower(`revision`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `supplierReadEvents`(`client`: AgentClientRef, `requestId`: kotlin.String, `after`: kotlin.Long): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_supplier_read_events(
+        it,
+        
+        FfiConverterTypeAgentClientRef.lower(`client`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterLong.lower(`after`),_status)
 }
     }
     )

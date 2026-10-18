@@ -20,6 +20,7 @@ class MuyonLabApplication : Application() {
         if(visible)visibleActivities.add(id)else visibleActivities.remove(id)
         agentValue?.visibility(id,visible)
     }
+    val chats:ChatReadPort get()=agents.chats
     val diagnostics: RustDiagnosticCoordinator by lazy {
         val main = Handler(Looper.getMainLooper())
         createRustDiagnosticCoordinator(GeneratedDiagnosticPort(BuildConfig.MUYON_BRIDGE_PROTOCOL.toUInt(), BuildConfig.MUYON_BRIDGE_SOURCE_SHA)) { deliver ->

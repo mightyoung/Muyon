@@ -5,9 +5,9 @@ import android.os.Parcel
 
 /** Preflights the complete generated-AIDL argument order, token and nullable framing. */
 internal class BoundedAgentProxy(private val remote:IAgentRuntime) {
-    private inline fun <T> request(write:Parcel.()->Unit,call:()->T):T {
+    private inline fun <T> request(write:Parcel.()->Unit,chat:Boolean=false,call:()->T):T {
         val parcel=Parcel.obtain()
-        try {parcel.writeInterfaceToken(DESCRIPTOR);parcel.write();AgentParcelLimits.request(parcel)}finally{parcel.recycle()}
+        try {parcel.writeInterfaceToken(DESCRIPTOR);parcel.write();if(chat){if(parcel.dataSize()>16384)throw android.os.BadParcelableException("request_unavailable")}else AgentParcelLimits.request(parcel)}finally{parcel.recycle()}
         return call()
     }
     private fun Parcel.client(epoch:String,lease:String){writeString(epoch);writeString(lease)}
@@ -19,6 +19,8 @@ internal class BoundedAgentProxy(private val remote:IAgentRuntime) {
     fun setVisibility(epoch:String,lease:String,generation:Long,visible:Boolean)=request({client(epoch,lease);writeLong(generation);writeInt(if(visible)1 else 0)}){remote.setVisibility(epoch,lease,generation,visible)}
     fun release(epoch:String,lease:String,generation:Long)=request({client(epoch,lease);writeLong(generation)}){remote.release(epoch,lease,generation)}
     fun cancel(epoch:String,lease:String,id:String,variant:Int,runId:String?)=request({client(epoch,lease);writeString(id);writeInt(variant);writeString(runId)}){remote.cancel(epoch,lease,id,variant,runId)}
+    fun submitSupplierRead(epoch:String,lease:String,id:String,text:String,key:String,revision:String)=request({client(epoch,lease);writeString(id);writeString(text);writeString(key);writeString(revision)},true){remote.submitSupplierRead(epoch,lease,id,text,key,revision)}
+    fun supplierReadEvents(epoch:String,lease:String,id:String,after:Long)=request({client(epoch,lease);writeString(id);writeLong(after)},true){remote.supplierReadEvents(epoch,lease,id,after)}
     fun close(epoch:String,lease:String)=request({client(epoch,lease)}){remote.close(epoch,lease)}
     companion object {private const val DESCRIPTOR="com.mightyoung.muyon.androidlab.agentipc.IAgentRuntime"}
 }

@@ -12,5 +12,7 @@ interface IAgentRuntime {
     AgentReplyParcel setVisibility(String epoch, String lease, long generation, boolean visible);
     AgentReplyParcel release(String epoch, String lease, long generation);
     AgentReplyParcel cancel(String epoch, String lease, String requestId, int variant, @nullable String runId);
+    String submitSupplierRead(String epoch, String lease, String requestId, String text, String key, String revision);
+    String supplierReadEvents(String epoch, String lease, String requestId, long after);
     AgentReplyParcel close(String epoch, String lease);
 }
