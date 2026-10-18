@@ -1,7 +1,8 @@
-//! The offline endpoint receives exactly the bytes admitted and durably journaled.
-//! It has no credentials, networking, or secondary sender.
+//! Synthetic endpoints receive exactly the bytes admitted and durably journaled.
+//! The optional HTTP adapter connects only to numeric loopback, without credentials.
 use crate::{string, Json, SharedSession};
 use muyon_core_agent_lab::{
+    http_transport::{LoopbackHttpConfig, LoopbackHttpTransport},
     model::{ModelEvent, ModelRequest, NativeMessage, Provider, ProviderControl},
     wire_provider::encode_registered_request,
     wire_sse::{Decoder, Usage},
@@ -9,6 +10,25 @@ use muyon_core_agent_lab::{
 };
 pub trait OfflineEndpoint {
     fn exchange(&mut self, payload: &[u8], control: &mut dyn ProviderControl) -> Result<Vec<u8>>;
+}
+/// Local synthetic HTTP adapter. Admission, journaling and budgets remain owned by
+/// ModelGateway and Agent; this adapter never retries or registers tools.
+pub struct LoopbackEndpoint {
+    session: SharedSession,
+    transport: LoopbackHttpTransport,
+}
+impl LoopbackEndpoint {
+    pub fn new(session: SharedSession, config: LoopbackHttpConfig) -> Result<Self> {
+        Ok(Self { session, transport: LoopbackHttpTransport::new(config)? })
+    }
+}
+impl OfflineEndpoint for LoopbackEndpoint {
+    fn exchange(&mut self, payload: &[u8], control: &mut dyn ProviderControl) -> Result<Vec<u8>> {
+        let session = &self.session;
+        self.transport.exchange(payload, control, &mut |bytes| {
+            session.borrow().review_payload(bytes)
+        })
+    }
 }
 pub struct ModelGateway {
     pub session: SharedSession,
