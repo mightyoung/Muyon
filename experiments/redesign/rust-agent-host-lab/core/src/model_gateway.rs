@@ -9,6 +9,9 @@ use muyon_core_agent_lab::{
     Result,
 };
 pub trait OfflineEndpoint {
+    fn validate_session(&self, _session: &SharedSession) -> Result<()> {
+        Ok(())
+    }
     fn exchange(&mut self, payload: &[u8], control: &mut dyn ProviderControl) -> Result<Vec<u8>>;
 }
 /// Local synthetic HTTP adapter. Admission, journaling and budgets remain owned by
@@ -23,6 +26,13 @@ impl LoopbackEndpoint {
     }
 }
 impl OfflineEndpoint for LoopbackEndpoint {
+    fn validate_session(&self, session: &SharedSession) -> Result<()> {
+        if std::rc::Rc::ptr_eq(&self.session, session) {
+            Ok(())
+        } else {
+            Err("model_endpoint_session_mismatch".into())
+        }
+    }
     fn exchange(&mut self, payload: &[u8], control: &mut dyn ProviderControl) -> Result<Vec<u8>> {
         let session = &self.session;
         self.transport.exchange(payload, control, &mut |bytes| {
@@ -55,6 +65,7 @@ impl Provider for ModelGateway {
         _history: &[NativeMessage],
         control: &mut dyn ProviderControl,
     ) -> Result<ModelEvent> {
+        self.endpoint.validate_session(&self.session)?;
         self.session.borrow().poll_service_control()?;
         control.poll()?;
         let (history, definitions) = {
