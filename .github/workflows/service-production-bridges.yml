@@ -58,6 +58,8 @@ jobs:
             cd experiments/redesign/android-rust-bridge-lab/core
             "$CARGO_TARGET_DIR/debug/uniffi-bindgen" generate --library "$CARGO_TARGET_DIR/debug/libmuyon_android_contract_bridge.so" --language kotlin --config uniffi.android.toml --out-dir "$RUNNER_TEMP/android-owner-evidence/generated" --no-format
           )
+          cmp "$RUNNER_TEMP/android-owner-evidence/generated/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt" experiments/redesign/android-compose-lab/app/src/main/kotlin/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt
+          git diff --exit-code
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
