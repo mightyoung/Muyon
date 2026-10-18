@@ -54,6 +54,7 @@ fn loopback_answer_uses_gateway_review_and_shared_durable_budget() {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap(); let mut gateway = gateway(&session, &listener);
     let server = thread::spawn(move || { let (mut socket, _) = listener.accept().unwrap(); let request = read_request(&mut socket); let response = format!("HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nContent-Length: {}\r\n\r\n{}", SSE.len(), SSE); socket.write_all(response.as_bytes()).unwrap(); (request, response.len()) });
     drive(&mut agent, &mut gateway, &session); let (request, received) = server.join().unwrap();
+    assert_eq!(Agent::open(&agent.dir).unwrap().state.status, "completed");
     assert_eq!(agent.state.status, "completed"); assert_eq!(agent.state.answer, "[redacted] complete");
     assert_eq!(agent.state.wire_counters.sent, request.len() as u64); assert_eq!(agent.state.wire_counters.received, received as u64);
     assert_eq!(agent.state.counters.total, "synthetic question".len() as u64 + request.len() as u64 + received as u64 + agent.state.answer.len() as u64);
@@ -104,7 +105,7 @@ fn loopback_unknown_inflight_crash_blocks_same_state_retry() {
     let listener = server.join().unwrap(); assert!(crash.is_err()); assert!(agent.state.wire_counters.inflight);
     let persisted = std::fs::read_to_string(agent.dir.join("task.db")).unwrap(); assert!(persisted.contains("provider_inflight\ttrue\n"));
     let sent = agent.state.wire_counters.sent; drive(&mut agent, &mut gateway, &session);
-    assert_eq!(agent.state.reason, "wire_interrupted"); assert_eq!(agent.state.wire_counters.sent, sent);
+    assert_eq!(agent.state.status, "outcome_unknown"); assert_eq!(agent.state.reason, "wire_interrupted"); assert_eq!(agent.state.wire_counters.sent, sent);
     listener.set_nonblocking(true).unwrap(); assert!(listener.accept().is_err());
     let ledger = std::fs::read_to_string(agent.dir.join("outbound.db")).unwrap(); assert!(ledger.contains("begin")); assert!(!ledger.contains("sent")); assert!(!ledger.contains("failed"));
 }
@@ -121,6 +122,8 @@ fn loopback_receive_budget_stops_partial_response_without_retry() {
     drive(&mut agent, &mut gateway, &session); let listener = server.join().unwrap();
     assert_ne!(agent.state.status, "completed"); assert!(agent.state.wire_counters.sent > 0); assert!(agent.state.wire_counters.received > 0);
     assert_eq!(agent.state.counters.total, agent.state.limits.total);
+    assert_eq!(agent.state.status, "budget_exhausted");
+    assert_eq!(agent.state.reason, "host_budget");
     let sent = agent.state.wire_counters.sent; drive(&mut agent, &mut gateway, &session); assert_eq!(agent.state.wire_counters.sent, sent);
     listener.set_nonblocking(true).unwrap(); assert!(listener.accept().is_err());
     assert!(std::fs::read_to_string(agent.dir.join("outbound.db")).unwrap().contains("failed"));

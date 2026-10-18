@@ -52,7 +52,7 @@ impl HostStart {
             context: vec![Message { role: Role::User, text: self.prompt.clone() }], position: 0,
             binding: None, unresolved: false, receipt: String::new(), answer: String::new(), cancelled: false,
             correlations: BTreeMap::new(), behavior: "host".into(), resume_status: String::new(), resume_reason: String::new(), result_pending: false,
-            receipt_binding: None, evidence_hold: false, wire: None, wire_counters: WireCounters::default(), native: Vec::new(), pending_call_ref: String::new(),
+            receipt_binding: None, evidence_hold: false, host_metered: false, wire: None, wire_counters: WireCounters::default(), native: Vec::new(), pending_call_ref: String::new(),
         }
     }
 }
