@@ -19,7 +19,6 @@ jobs:
     timeout-minutes: 15
     env:
       EXPECTED_SHA: ${{ github.event.inputs.source_sha || github.sha }}
-      CARGO_TARGET_DIR: ${{ runner.temp }}/leaderb-store-target
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -27,6 +26,7 @@ jobs:
           persist-credentials: false
       - name: Assert exact checkout and preserve source hashes
         run: |
+          echo "CARGO_TARGET_DIR=$RUNNER_TEMP/leaderb-store-target" >> "$GITHUB_ENV"
           mkdir store-read-evidence
           python3 - <<'PY'
           import hashlib, json, os, re, subprocess
