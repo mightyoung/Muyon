@@ -42,6 +42,7 @@ commands = [
     ['rustc', '--version'],
     ['cargo', '--version'],
     ['cargo', 'test', '--locked', '--offline', '--manifest-path', LAB + '/Cargo.toml'],
+    ['cargo', 'fmt', '--check', '--manifest-path', LAB + '/Cargo.toml'],
     ['python3', 'docs/tasks/hy-memory-governance-20261018/verify-fixtures.py'],
     ['git', 'diff', '--check'],
 ]

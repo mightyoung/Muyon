@@ -105,6 +105,7 @@ struct State {
     body: String,
     read: bool,
     manage: bool,
+    tombstone: bool,
 }
 pub struct Lab {
     db: Connection,
@@ -126,7 +127,7 @@ fn state(db: &Connection, id: &str) -> Result<State> {
   let unknown=r.get::<_,bool>(19)? || r.get::<_,bool>(22)?;
   let manage=r.get::<_,bool>(15)?;
   let read=r.get::<_,bool>(14)? && manage && !r.get::<_,bool>(16)? && !r.get::<_,bool>(17)? && !r.get::<_,bool>(18)? && r.get::<_,bool>(20)? && !r.get::<_,bool>(21)?;
-  Ok((State{member,source_body:r.get(13)?,body:r.get(23)?,read,manage},unknown))
+  Ok((State{member,source_body:r.get(13)?,body:r.get(23)?,read,manage,tombstone:r.get(18)?},unknown))
  }).optional()?.ok_or(Error::Unknown)?;
     if state.1 {
         return Err(Error::Unknown);
@@ -258,7 +259,7 @@ CREATE TABLE IF NOT EXISTS consumed(id INTEGER PRIMARY KEY,member_count INTEGER)
             };
         }
         let s = state(&tx, &m.id)?;
-        if !s.manage || s.member != *m || d.purpose != "manage" {
+        if !s.manage || s.tombstone || s.member != *m || d.purpose != "manage" {
             return Err(Error::Denied);
         }
         tx.execute(

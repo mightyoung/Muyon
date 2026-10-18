@@ -454,3 +454,13 @@ fn actual_sqlite_read_error_and_missing_source_are_not_absent() {
     db.execute("DROP TABLE memory", []).unwrap();
     assert_eq!(l.current("m"), Err(Error::Storage));
 }
+#[test]
+fn deletion_explicitly_checks_current_tombstone_without_trusting_ticket_generation() {
+    let (p, mut l, m) = setup();
+    rusqlite::Connection::open(p)
+        .unwrap()
+        .execute("UPDATE memory SET tombstone=1", [])
+        .unwrap();
+    assert_eq!(l.delete(&deletion(&m), Crash::None), Err(Error::Denied));
+    assert!(l.jobs("r").unwrap().is_empty());
+}
