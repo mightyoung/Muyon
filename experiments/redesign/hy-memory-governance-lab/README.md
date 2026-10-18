@@ -72,7 +72,8 @@ ForgettingReceipt persistence, restore ordering, cross-device recovery, real
 expiry clocks, multi-scope policy engines, and production sender fencing remain
 unimplemented. The fixture models a single local scope and the `context` read use;
 its independent flags are deterministic test facts, not a production permission
-model. Crash hooks and fixture mutation methods are deliberately lab-only APIs.
+model. Lineage is one direct source identity equality, not recursive multi-source
+graph or DAG evaluation. Crash hooks and fixture mutation methods are deliberately lab-only APIs.
 
 ## Evidence
 
