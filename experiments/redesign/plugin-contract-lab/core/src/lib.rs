@@ -4,10 +4,12 @@ pub use muyon_core_agent_lab::wire_json::{object, parse, string, Json};
 use std::collections::{BTreeMap,BTreeSet};
 pub type Result<T> = std::result::Result<T,String>;
 mod schema;
+mod lifecycle;
+pub use lifecycle::{DrainState, OwnerLease, WorkLease};
 use schema::{get,text,array,map,keys};
 
 #[derive(Clone)]
-struct Operation { declaration:Json }
+struct Operation { declaration:Json, module:String }
 #[derive(Clone)]
 struct Ticket { operation:Operation, args:Json, authority:Json, generation:u64, invocation:String, identity:String, dispatched:bool }
 pub struct Catalog {
@@ -15,6 +17,8 @@ pub struct Catalog {
  operations:BTreeMap<String,Operation>, bindings:BTreeSet<String>,
  relation_count:usize, view_count:usize, serial:u64, tickets:BTreeMap<String,Ticket>,
  executions:u64, closed:bool, epoch:u128,
+ identity:std::sync::Arc<()>, owner_serial:u64, work_serial:u64,
+ owners:BTreeMap<String,lifecycle::OwnerRecord>, work:BTreeMap<u64,lifecycle::WorkRecord>,
 }
 fn number(n:impl ToString)->Json {Json::Number(n.to_string())}
 fn success(fields:Vec<(&str,Json)>)->Json {let mut j=object(fields);if let Json::Object(m)=&mut j{m.insert("ok".into(),Json::Bool(true));}j}
@@ -23,7 +27,7 @@ impl Catalog {
   static NEXT:std::sync::atomic::AtomicU64=std::sync::atomic::AtomicU64::new(1);
   let serial=NEXT.fetch_add(1,std::sync::atomic::Ordering::Relaxed) as u128;
   let epoch=std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_nanos() ^ ((std::process::id() as u128)<<64) ^ serial;
-  Self{generation:0,modules:BTreeSet::new(),data:BTreeMap::new(),operations:BTreeMap::new(),bindings:BTreeSet::new(),relation_count:0,view_count:0,serial:0,tickets:BTreeMap::new(),executions:0,closed:false,epoch}
+  Self{generation:0,modules:BTreeSet::new(),data:BTreeMap::new(),operations:BTreeMap::new(),bindings:BTreeSet::new(),relation_count:0,view_count:0,serial:0,tickets:BTreeMap::new(),executions:0,closed:false,epoch,identity:std::sync::Arc::new(()),owner_serial:0,work_serial:0,owners:BTreeMap::new(),work:BTreeMap::new()}
  }
  pub fn handle(&mut self, request:Json)->Json {
   match self.run(&request) {
@@ -38,11 +42,11 @@ impl Catalog {
   let command=map(r)?.get("command").and_then(|value|value.string().ok()).ok_or("protocol_envelope")?.to_owned();
   let mut body=r.clone();if let Json::Object(m)=&mut body{m.remove("protocol_version");}let r=&body;
   if command=="inspect" {keys(r,&["command"],&["command"])?;return Ok(success(vec![("generation",number(self.generation)),("data_count",number(self.data.len())),("operation_count",number(self.operations.len())),("relation_count",number(self.relation_count)),("view_count",number(self.view_count)),("execution_requests",number(self.executions)),("grants",number(0)),("receipts_created",number(0)),("pending",number(self.tickets.len()))]));}
-  if command=="close" {keys(r,&["command"],&["command"])?;self.closed=true;self.tickets.clear();return Ok(success(vec![]));}
+  if command=="close" {keys(r,&["command"],&["command"])?;self.closed=true;for owner in self.owners.values_mut(){owner.stopping=true;}self.request_work_cancel(None);self.tickets.clear();return Ok(success(vec![]));}
   if self.closed{return Err("closed".into())}
   match command.as_str(){
    "register"=>self.register(r),"discover"=>self.discover(r),"prepare"=>self.prepare(r),"invoke"=>self.invoke(r),"accept_result"=>self.accept(r),
-   "cancel"=>{keys(r,&["command","ticket"],&["command","ticket"])?;let t=text(r,"ticket")?;self.tickets.remove(&t).ok_or("unknown_ticket")?;Ok(success(vec![]))},
+   "cancel"=>{keys(r,&["command","ticket"],&["command","ticket"])?;let t=text(r,"ticket")?;self.tickets.remove(&t).ok_or("unknown_ticket")?;self.request_work_cancel(Some(&t));Ok(success(vec![]))},
    _=>Err("unsupported_command".into())
   }
  }
@@ -64,7 +68,7 @@ impl Catalog {
    if data.insert(id(d)?,d.clone()).is_some(){return Err("duplicate_data".into())}
   }
   let admitted_data=|reference:&str|->Result<&Json>{
-   let resolve=|target:&str|->Result<&Json>{if let Some(d)=data.get(target){return Ok(d)}if admitted.contains(target){if let Some(d)=self.data.get(target){return Ok(d)}}Err("unresolved_data".into())};
+   let resolve=|target:&str|->Result<&Json>{if let Some(d)=data.get(target){return Ok(d)}if admitted.contains(target)&&target.split_once('/').is_some_and(|(m,_)|self.module_active(m)){if let Some(d)=self.data.get(target){return Ok(d)}}Err("unresolved_data".into())};
    let root=resolve(reference)?;let mut pending=vec![reference.to_owned()];let mut seen=BTreeSet::new();
    // Discovery expands typed references. Each foreign member of that closure
    // needs its own host admission; a reference annotation cannot admit it.
@@ -95,7 +99,7 @@ impl Catalog {
    for reference in refs {admitted_data(reference.string().map_err(|_|"data_ref")?)?;}
    for key in ["input_schema","projection_schema"]{for target in schema::references(get(op,key)?)?{if !refs.contains(&string(target)){return Err("unresolved_data".into())}}}
    let binding=text(op,"binding_id")?;if binding.is_empty()||!host_bindings.contains(&binding)||self.bindings.contains(&binding)||!bindings.insert(binding){return Err("host_binding".into())}
-   if operations.insert(id(op)?,Operation{declaration:op.clone()}).is_some(){return Err("duplicate_operation".into())}
+   if operations.insert(id(op)?,Operation{declaration:op.clone(),module:module.clone()}).is_some(){return Err("duplicate_operation".into())}
   }
   for view in vs {
    keys(view,&["name","data_refs","operation_refs"],&["name","data_refs","operation_refs"])?;
@@ -103,7 +107,11 @@ impl Catalog {
    for reference in array(view,"data_refs")? {admitted_data(reference.string().map_err(|_|"view_data")?)?;}
    for reference in array(view,"operation_refs")? {if !operations.contains_key(reference.string().map_err(|_|"view_operation")?){return Err("view_operation".into())}}
   }
-  self.data.extend(data);self.operations.extend(operations);self.bindings.extend(bindings);self.modules.insert(module);self.relation_count+=rs.len();self.view_count+=vs.len();self.generation+=1;
+  let next_generation=self.generation.checked_add(1).ok_or("generation_exhausted")?;
+  let next_owner=self.owner_serial.checked_add(1).ok_or("owner_epoch_exhausted")?;
+  let owner=lifecycle::OwnerRecord::new(next_owner,b,data.keys().cloned().collect(),operations.keys().cloned().collect(),bindings.clone())?;
+  self.owners.insert(module.clone(),owner);self.owner_serial=next_owner;
+  self.data.extend(data);self.operations.extend(operations);self.bindings.extend(bindings);self.modules.insert(module);self.relation_count+=rs.len();self.view_count+=vs.len();self.generation=next_generation;
   Ok(success(vec![("generation",number(self.generation))]))
  }
  fn allowed(a:&Json)->bool {
@@ -121,7 +129,7 @@ impl Catalog {
   keys(r,&["command","authority"],&["command","authority"])?;
   let a=get(r,"authority")?;let mut visible=Vec::new();let mut schemas=BTreeMap::new();
   let mut pending=Vec::new();
-  for(id,op)in &self.operations {if Self::operation_allowed(op,a){
+  for(id,op)in &self.operations {if self.module_active(&op.module)&&Self::operation_allowed(op,a){
    visible.push(object([("operation",string(id)),("declaration",op.declaration.clone())]));
    for target in array(&op.declaration,"data_refs")?{pending.push(target.string().map_err(|_|"data_ref")?.to_owned());}
   }}
@@ -135,6 +143,7 @@ impl Catalog {
   keys(r,&["command","operation","args","authority","invocation_id","receipt_owner","receipt_identity"],&["command","operation","args","authority","invocation_id","receipt_owner","receipt_identity"])?;
   if !self.tickets.is_empty(){return Err("busy".into())}
   let op=self.operations.get(&text(r,"operation")?).ok_or("unknown_operation")?.clone();let a=get(r,"authority")?;
+  if !self.module_active(&op.module){return Err("owner_stopping".into())}
   if !Self::operation_allowed(&op,a){return Err("denied".into())}
   let args=schema::canonical(get(r,"args")?)?;if args.encode().len()>8192{return Err("args_limit".into())}schema::validate(get(&op.declaration,"input_schema")?,&args)?;schema::validate_refs(get(&op.declaration,"input_schema")?,&args,a)?;
   if text(r,"receipt_owner")?!="ToolRegistry"{return Err("receipt_owner".into())}
@@ -147,8 +156,12 @@ impl Catalog {
   if t.generation!=self.generation||!Self::operation_allowed(&t.operation,a)||t.authority!=schema::canonical(a)?{return Err("stale_authority".into())}Ok(())
  }
  fn invoke(&mut self,r:&Json)->Result<Json> {
+  self.invoke_inner(r,false)
+ }
+ fn invoke_inner(&mut self,r:&Json,owned:bool)->Result<Json> {
   keys(r,&["command","ticket","authority"],&["command","ticket","authority"])?;
   let token=text(r,"ticket")?;if self.tickets.get(&token).is_some_and(|t|t.dispatched){return Err("consumed".into())}
+  if !owned&&self.tickets.get(&token).and_then(|t|self.owners.get(&t.operation.module)).is_some_and(|o|o.managed){return Err("owned_dispatch_required".into())}
   let mut t=self.tickets.remove(&token).ok_or("unknown_ticket")?;self.current(&t,get(r,"authority")?)?;t.dispatched=true;self.executions+=1;
   let reply=success(vec![("dispatch",object([("binding_id",get(&t.operation.declaration,"binding_id")?.clone()),("args",t.args.clone()),("invocation_id",string(&t.invocation)),("receipt_identity",string(&t.identity))]))]);
   self.tickets.insert(token,t);Ok(reply)

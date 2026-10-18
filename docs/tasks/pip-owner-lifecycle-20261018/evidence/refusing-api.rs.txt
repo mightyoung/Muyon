@@ -1,0 +1,26 @@
+//! Trusted Rust lifecycle API; no new plugin wire command.
+use crate::{object, string, Catalog, Json, Result};
+
+#[derive(Clone, Debug)]
+pub struct OwnerLease { epoch: u64 }
+impl OwnerLease { pub fn epoch(&self) -> u64 { self.epoch } }
+#[derive(Clone, Debug)]
+pub struct WorkLease { ticket: String }
+impl WorkLease { pub fn ticket(&self) -> &str { &self.ticket } }
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum DrainState { Active, Draining { in_flight: usize }, Released }
+
+impl Catalog {
+    pub fn register_owned(&mut self, bundle: Json, host_bindings: Vec<String>, host_data_admissions: Vec<String>) -> Result<OwnerLease> {
+        self.run(&object([("protocol_version", crate::number(1)), ("command", string("register")), ("bundle", bundle), ("host_bindings", Json::Array(host_bindings.into_iter().map(string).collect())), ("host_data_admissions", Json::Array(host_data_admissions.into_iter().map(string).collect()))]))?;
+        Ok(OwnerLease { epoch: self.generation })
+    }
+    pub fn owner_state(&self, _: &OwnerLease) -> Result<DrainState> { Ok(DrainState::Active) }
+    pub fn stop_owner(&mut self, _: &OwnerLease) -> Result<DrainState> { Err("owner_lifecycle_unimplemented".into()) }
+    pub fn release_owner(&mut self, _: &OwnerLease, _: impl FnOnce() -> Result<()>) -> Result<DrainState> { Err("owner_lifecycle_unimplemented".into()) }
+    pub fn dispatch_owned(&mut self, _: &OwnerLease, ticket: &str, authority: Json) -> Result<(Json, WorkLease)> {
+        let reply=self.run(&object([("protocol_version", crate::number(1)), ("command", string("invoke")), ("ticket", string(ticket)), ("authority", authority)]))?;
+        Ok((reply, WorkLease { ticket: ticket.into() }))
+    }
+    pub fn settle_work(&mut self, _: &WorkLease, _: impl FnOnce() -> Result<()>) -> Result<()> { Err("owner_lifecycle_unimplemented".into()) }
+}

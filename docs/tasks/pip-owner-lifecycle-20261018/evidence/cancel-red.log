@@ -1,0 +1,22 @@
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.82s
+     Running tests/owner_lifecycle.rs (/workspace/pip-lifecycle-target/debug/deps/owner_lifecycle-3852713d20280029)
+
+running 1 test
+test stop_wire_cancel_and_close_request_cooperative_cancel_without_settling_work ... FAILED
+
+failures:
+
+---- stop_wire_cancel_and_close_request_cooperative_cancel_without_settling_work stdout ----
+
+thread 'stop_wire_cancel_and_close_request_cooperative_cancel_without_settling_work' panicked at tests/owner_lifecycle.rs:246:9:
+missing cooperative cancellation on stop
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    stop_wire_cancel_and_close_request_cooperative_cancel_without_settling_work
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test owner_lifecycle`

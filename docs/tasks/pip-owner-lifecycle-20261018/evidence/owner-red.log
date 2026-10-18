@@ -1,0 +1,87 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.84s
+     Running tests/owner_lifecycle.rs (/workspace/pip-lifecycle-target/debug/deps/owner_lifecycle-3852713d20280029)
+
+running 9 tests
+test active_owner_cannot_release_and_dropped_work_does_not_fake_drain ... FAILED
+test cancel_and_close_do_not_claim_handler_quiescence_or_release_resource ... FAILED
+test dependent_bundle_must_be_released_before_provider_stop_without_partial_change ... FAILED
+test concurrent_stop_retains_blocked_work_until_host_settlement ... FAILED
+test stale_disposer_cannot_delete_replacement_epoch_or_close_its_resource ... FAILED
+test failed_persistence_or_close_retains_fencing_and_completion_is_idempotent ... FAILED
+test managed_dispatch_cannot_bypass_tracking_via_wire_and_authority_still_denies ... FAILED
+test foreign_catalog_leases_cannot_fence_dispatch_settle_or_release ... FAILED
+test stopping_fences_discovery_prepare_old_ticket_and_late_reenrollment ... FAILED
+
+failures:
+
+---- active_owner_cannot_release_and_dropped_work_does_not_fake_drain stdout ----
+
+thread 'active_owner_cannot_release_and_dropped_work_does_not_fake_drain' panicked at tests/owner_lifecycle.rs:147:5:
+assertion `left == right` failed
+  left: "owner_lifecycle_unimplemented"
+ right: "owner_active"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- cancel_and_close_do_not_claim_handler_quiescence_or_release_resource stdout ----
+
+thread 'cancel_and_close_do_not_claim_handler_quiescence_or_release_resource' panicked at tests/owner_lifecycle.rs:99:5:
+assertion `left == right` failed
+  left: Active
+ right: Draining { in_flight: 1 }
+
+---- dependent_bundle_must_be_released_before_provider_stop_without_partial_change stdout ----
+
+thread 'dependent_bundle_must_be_released_before_provider_stop_without_partial_change' panicked at tests/owner_lifecycle.rs:80:5:
+assertion `left == right` failed
+  left: "owner_lifecycle_unimplemented"
+ right: "owner_has_dependents"
+
+---- concurrent_stop_retains_blocked_work_until_host_settlement stdout ----
+
+thread 'concurrent_stop_retains_blocked_work_until_host_settlement' panicked at tests/owner_lifecycle.rs:136:39:
+called `Result::unwrap()` on an `Err` value: "owner_lifecycle_unimplemented"
+
+---- stale_disposer_cannot_delete_replacement_epoch_or_close_its_resource stdout ----
+
+thread 'stale_disposer_cannot_delete_replacement_epoch_or_close_its_resource' panicked at tests/owner_lifecycle.rs:24:37:
+called `Result::unwrap()` on an `Err` value: "owner_lifecycle_unimplemented"
+
+---- failed_persistence_or_close_retains_fencing_and_completion_is_idempotent stdout ----
+
+thread 'failed_persistence_or_close_retains_fencing_and_completion_is_idempotent' panicked at tests/owner_lifecycle.rs:109:26:
+called `Result::unwrap()` on an `Err` value: "owner_lifecycle_unimplemented"
+
+---- managed_dispatch_cannot_bypass_tracking_via_wire_and_authority_still_denies stdout ----
+
+thread 'managed_dispatch_cannot_bypass_tracking_via_wire_and_authority_still_denies' panicked at tests/support/mod.rs:17:40:
+expected owned_dispatch_required, got {"dispatch":{"args":{"equipment_key":"e1","include_loans":true},"binding_id":"host-equipment-read","invocation_id":"i1","receipt_identity":"host-sha256-identity"},"ok":true}
+
+---- foreign_catalog_leases_cannot_fence_dispatch_settle_or_release stdout ----
+
+thread 'foreign_catalog_leases_cannot_fence_dispatch_settle_or_release' panicked at tests/owner_lifecycle.rs:40:5:
+assertion `left == right` failed
+  left: "owner_lifecycle_unimplemented"
+ right: "foreign_owner"
+
+---- stopping_fences_discovery_prepare_old_ticket_and_late_reenrollment stdout ----
+
+thread 'stopping_fences_discovery_prepare_old_ticket_and_late_reenrollment' panicked at tests/owner_lifecycle.rs:54:26:
+called `Result::unwrap()` on an `Err` value: "owner_lifecycle_unimplemented"
+
+
+failures:
+    active_owner_cannot_release_and_dropped_work_does_not_fake_drain
+    cancel_and_close_do_not_claim_handler_quiescence_or_release_resource
+    concurrent_stop_retains_blocked_work_until_host_settlement
+    dependent_bundle_must_be_released_before_provider_stop_without_partial_change
+    failed_persistence_or_close_retains_fencing_and_completion_is_idempotent
+    foreign_catalog_leases_cannot_fence_dispatch_settle_or_release
+    managed_dispatch_cannot_bypass_tracking_via_wire_and_authority_still_denies
+    stale_disposer_cannot_delete_replacement_epoch_or_close_its_resource
+    stopping_fences_discovery_prepare_old_ticket_and_late_reenrollment
+
+test result: FAILED. 0 passed; 9 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test owner_lifecycle`

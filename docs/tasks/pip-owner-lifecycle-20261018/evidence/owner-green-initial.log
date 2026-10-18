@@ -1,0 +1,17 @@
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.99s
+     Running tests/owner_lifecycle.rs (/workspace/pip-lifecycle-target/debug/deps/owner_lifecycle-3852713d20280029)
+
+running 9 tests
+test active_owner_cannot_release_and_dropped_work_does_not_fake_drain ... ok
+test concurrent_stop_retains_blocked_work_until_host_settlement ... ok
+test cancel_and_close_do_not_claim_handler_quiescence_or_release_resource ... ok
+test dependent_bundle_must_be_released_before_provider_stop_without_partial_change ... ok
+test failed_persistence_or_close_retains_fencing_and_completion_is_idempotent ... ok
+test managed_dispatch_cannot_bypass_tracking_via_wire_and_authority_still_denies ... ok
+test foreign_catalog_leases_cannot_fence_dispatch_settle_or_release ... ok
+test stale_disposer_cannot_delete_replacement_epoch_or_close_its_resource ... ok
+test stopping_fences_discovery_prepare_old_ticket_and_late_reenrollment ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
