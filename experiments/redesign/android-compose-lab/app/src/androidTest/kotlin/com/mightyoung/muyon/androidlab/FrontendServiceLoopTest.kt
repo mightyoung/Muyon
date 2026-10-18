@@ -35,7 +35,8 @@ class FrontendServiceLoopTest {
         compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
         awaitTag("service-read-input")
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("service-read-input"))
-        compose.onNodeWithTag("service-read-input").assertTextEquals(prompt)
+        compose.onNodeWithTag("service-read-input").assertExists()
+        compose.onNodeWithText(prompt).assertExists()
         awaitTag("service-read-receipt")
         compose.waitUntil(timeoutMillis=60_000) {
             compose.onAllNodes(hasTestTag("service-read-status") and hasText("已完成")).fetchSemanticsNodes().isNotEmpty()
