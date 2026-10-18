@@ -1,0 +1,109 @@
+   Compiling hy-memory-governance-lab v0.1.0 (/workspace/Muyon/experiments/redesign/hy-memory-governance-lab)
+warning: unused import: `TransactionBehavior`
+ --> src/lib.rs:1:55
+  |
+1 | use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
+  |                                                       ^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `hy-memory-governance-lab` (lib test) generated 1 warning (1 duplicate)
+warning: `hy-memory-governance-lab` (lib) generated 1 warning (run `cargo fix --lib -p hy-memory-governance-lab` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.46s
+     Running unittests src/lib.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/hy_memory_governance_lab-bc3284ee20f31f4e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/crash-worker.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/crash_worker-15606d8af0af361e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/governance.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/governance-bc323d989b1bbdaa)
+
+running 12 tests
+test cleanup_crash_retries_same_operation_after_lease_expiry ... FAILED
+test consume_before_revoke_is_recorded_but_future_consumption_denied ... FAILED
+test delete_management_survives_automatic_memory_switch_closed ... FAILED
+
+thread 'main' (2496) panicked at src/bin/crash-worker.rs:9:86:
+called `Result::unwrap()` on an `Err` value: Denied
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'main' (2497) panicked at src/bin/crash-worker.rs:9:86:
+called `Result::unwrap()` on an `Err` value: Denied
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test commit_crash_reopens_in_other_process_and_blocks_read ... FAILED
+test atomic_precommit_crash_rolls_back_tombstone_and_outbox ... FAILED
+test partial_failure_unknown_and_retry_are_persistent ... FAILED
+test replay_is_bound_to_complete_payload ... FAILED
+test revoke_before_consume_rejects_prebuilt_projection ... ok
+test utf8_ranges_and_redaction_do_not_forge_contiguous_quote ... FAILED
+test quotes_revalidate_source_identity_and_authority ... ok
+test stale_delete_has_no_half_writes ... ok
+test every_member_current_field_is_checked_at_final_consume ... ok
+
+failures:
+
+---- cleanup_crash_retries_same_operation_after_lease_expiry stdout ----
+
+thread 'cleanup_crash_retries_same_operation_after_lease_expiry' (2492) panicked at tests/governance.rs:15:133:
+called `Result::unwrap()` on an `Err` value: Denied
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- consume_before_revoke_is_recorded_but_future_consumption_denied stdout ----
+
+thread 'consume_before_revoke_is_recorded_but_future_consumption_denied' (2494) panicked at tests/governance.rs:19:129:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- delete_management_survives_automatic_memory_switch_closed stdout ----
+
+thread 'delete_management_survives_automatic_memory_switch_closed' (2495) panicked at tests/governance.rs:14:209:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- commit_crash_reopens_in_other_process_and_blocks_read stdout ----
+
+thread 'commit_crash_reopens_in_other_process_and_blocks_read' (2493) panicked at tests/governance.rs:11:100:
+assertion `left == right` failed
+  left: Some(101)
+ right: Some(72)
+
+---- atomic_precommit_crash_rolls_back_tombstone_and_outbox stdout ----
+
+thread 'atomic_precommit_crash_rolls_back_tombstone_and_outbox' (2491) panicked at tests/governance.rs:10:101:
+assertion `left == right` failed
+  left: Some(101)
+ right: Some(71)
+
+---- partial_failure_unknown_and_retry_are_persistent stdout ----
+
+thread 'partial_failure_unknown_and_retry_are_persistent' (2499) panicked at tests/governance.rs:16:126:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- replay_is_bound_to_complete_payload stdout ----
+
+thread 'replay_is_bound_to_complete_payload' (2501) panicked at tests/governance.rs:12:134:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- utf8_ranges_and_redaction_do_not_forge_contiguous_quote stdout ----
+
+thread 'utf8_ranges_and_redaction_do_not_forge_contiguous_quote' (2504) panicked at tests/governance.rs:20:185:
+called `Result::unwrap()` on an `Err` value: Denied
+
+
+failures:
+    atomic_precommit_crash_rolls_back_tombstone_and_outbox
+    cleanup_crash_retries_same_operation_after_lease_expiry
+    commit_crash_reopens_in_other_process_and_blocks_read
+    consume_before_revoke_is_recorded_but_future_consumption_denied
+    delete_management_survives_automatic_memory_switch_closed
+    partial_failure_unknown_and_retry_are_persistent
+    replay_is_bound_to_complete_payload
+    utf8_ranges_and_redaction_do_not_forge_contiguous_quote
+
+test result: FAILED. 4 passed; 8 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--test governance`

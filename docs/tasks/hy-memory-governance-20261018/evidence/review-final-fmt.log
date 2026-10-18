@@ -1,0 +1,17 @@
+Diff in /workspace/Muyon/experiments/redesign/hy-memory-governance-lab/tests/governance.rs:456:
+ }
+ #[test]
+ fn deletion_explicitly_checks_current_tombstone_without_trusting_ticket_generation() {
+- let (p,mut l,m)=setup();
+- rusqlite::Connection::open(p).unwrap().execute("UPDATE memory SET tombstone=1",[]).unwrap();
+- assert_eq!(l.delete(&deletion(&m),Crash::None),Err(Error::Denied));
+- assert!(l.jobs("r").unwrap().is_empty());
++    let (p, mut l, m) = setup();
++    rusqlite::Connection::open(p)
++        .unwrap()
++        .execute("UPDATE memory SET tombstone=1", [])
++        .unwrap();
++    assert_eq!(l.delete(&deletion(&m), Crash::None), Err(Error::Denied));
++    assert!(l.jobs("r").unwrap().is_empty());
+ }
+ 

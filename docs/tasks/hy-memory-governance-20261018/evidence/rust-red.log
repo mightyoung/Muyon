@@ -1,0 +1,123 @@
+   Compiling hy-memory-governance-lab v0.1.0 (/workspace/Muyon/experiments/redesign/hy-memory-governance-lab)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running unittests src/lib.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/hy_memory_governance_lab-bc3284ee20f31f4e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/crash-worker.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/crash_worker-15606d8af0af361e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/governance.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/governance-bc323d989b1bbdaa)
+
+running 12 tests
+test cleanup_crash_retries_same_operation_after_lease_expiry ... FAILED
+test consume_before_revoke_is_recorded_but_future_consumption_denied ... FAILED
+test delete_management_survives_automatic_memory_switch_closed ... FAILED
+test every_member_current_field_is_checked_at_final_consume ... FAILED
+test partial_failure_unknown_and_retry_are_persistent ... FAILED
+test quotes_revalidate_source_identity_and_authority ... FAILED
+test revoke_before_consume_rejects_prebuilt_projection ... FAILED
+test replay_is_bound_to_complete_payload ... FAILED
+test stale_delete_has_no_half_writes ... FAILED
+test utf8_ranges_and_redaction_do_not_forge_contiguous_quote ... FAILED
+
+thread 'main' (2211) panicked at src/bin/crash-worker.rs:8:39:
+called `Result::unwrap()` on an `Err` value: Unknown
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'main' (2212) panicked at src/bin/crash-worker.rs:8:39:
+called `Result::unwrap()` on an `Err` value: Unknown
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test commit_crash_reopens_in_other_process_and_blocks_read ... FAILED
+test atomic_precommit_crash_rolls_back_tombstone_and_outbox ... FAILED
+
+failures:
+
+---- cleanup_crash_retries_same_operation_after_lease_expiry stdout ----
+
+thread 'cleanup_crash_retries_same_operation_after_lease_expiry' (2208) panicked at tests/governance.rs:15:133:
+called `Result::unwrap()` on an `Err` value: Denied
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- consume_before_revoke_is_recorded_but_future_consumption_denied stdout ----
+
+thread 'consume_before_revoke_is_recorded_but_future_consumption_denied' (2210) panicked at tests/governance.rs:19:129:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- delete_management_survives_automatic_memory_switch_closed stdout ----
+
+thread 'delete_management_survives_automatic_memory_switch_closed' (2213) panicked at tests/governance.rs:14:132:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- every_member_current_field_is_checked_at_final_consume stdout ----
+
+thread 'every_member_current_field_is_checked_at_final_consume' (2214) panicked at tests/governance.rs:17:336:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- partial_failure_unknown_and_retry_are_persistent stdout ----
+
+thread 'partial_failure_unknown_and_retry_are_persistent' (2215) panicked at tests/governance.rs:16:126:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- quotes_revalidate_source_identity_and_authority stdout ----
+
+thread 'quotes_revalidate_source_identity_and_authority' (2216) panicked at tests/governance.rs:21:185:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- revoke_before_consume_rejects_prebuilt_projection stdout ----
+
+thread 'revoke_before_consume_rejects_prebuilt_projection' (2218) panicked at tests/governance.rs:18:177:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- replay_is_bound_to_complete_payload stdout ----
+
+thread 'replay_is_bound_to_complete_payload' (2217) panicked at tests/governance.rs:12:134:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- stale_delete_has_no_half_writes stdout ----
+
+thread 'stale_delete_has_no_half_writes' (2219) panicked at tests/governance.rs:13:189:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- utf8_ranges_and_redaction_do_not_forge_contiguous_quote stdout ----
+
+thread 'utf8_ranges_and_redaction_do_not_forge_contiguous_quote' (2220) panicked at tests/governance.rs:20:185:
+called `Result::unwrap()` on an `Err` value: Denied
+
+---- commit_crash_reopens_in_other_process_and_blocks_read stdout ----
+
+thread 'commit_crash_reopens_in_other_process_and_blocks_read' (2209) panicked at tests/governance.rs:11:100:
+assertion `left == right` failed
+  left: Some(101)
+ right: Some(72)
+
+---- atomic_precommit_crash_rolls_back_tombstone_and_outbox stdout ----
+
+thread 'atomic_precommit_crash_rolls_back_tombstone_and_outbox' (2207) panicked at tests/governance.rs:10:101:
+assertion `left == right` failed
+  left: Some(101)
+ right: Some(71)
+
+
+failures:
+    atomic_precommit_crash_rolls_back_tombstone_and_outbox
+    cleanup_crash_retries_same_operation_after_lease_expiry
+    commit_crash_reopens_in_other_process_and_blocks_read
+    consume_before_revoke_is_recorded_but_future_consumption_denied
+    delete_management_survives_automatic_memory_switch_closed
+    every_member_current_field_is_checked_at_final_consume
+    partial_failure_unknown_and_retry_are_persistent
+    quotes_revalidate_source_identity_and_authority
+    replay_is_bound_to_complete_payload
+    revoke_before_consume_rejects_prebuilt_projection
+    stale_delete_has_no_half_writes
+    utf8_ranges_and_redaction_do_not_forge_contiguous_quote
+
+test result: FAILED. 0 passed; 12 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test governance`

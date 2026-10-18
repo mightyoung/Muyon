@@ -1,0 +1,38 @@
+   Compiling hy-memory-governance-lab v0.1.0 (/workspace/Muyon/experiments/redesign/hy-memory-governance-lab)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.42s
+     Running unittests src/lib.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/hy_memory_governance_lab-bc3284ee20f31f4e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/crash-worker.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/crash_worker-15606d8af0af361e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/governance.rs (experiments/redesign/hy-memory-governance-lab/target/debug/deps/governance-bc323d989b1bbdaa)
+
+running 12 tests
+test cleanup_crash_retries_same_operation_after_lease_expiry ... ok
+test consume_before_revoke_is_recorded_but_future_consumption_denied ... ok
+test delete_management_survives_automatic_memory_switch_closed ... ok
+test commit_crash_reopens_in_other_process_and_blocks_read ... ok
+test atomic_precommit_crash_rolls_back_tombstone_and_outbox ... ok
+test replay_is_bound_to_complete_payload ... ok
+test partial_failure_unknown_and_retry_are_persistent ... ok
+test revoke_before_consume_rejects_prebuilt_projection ... ok
+test utf8_ranges_and_redaction_do_not_forge_contiguous_quote ... ok
+test quotes_revalidate_source_identity_and_authority ... ok
+test stale_delete_has_no_half_writes ... ok
+test every_member_current_field_is_checked_at_final_consume ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests hy_memory_governance_lab
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
