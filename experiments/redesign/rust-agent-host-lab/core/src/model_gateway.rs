@@ -45,7 +45,7 @@ impl Provider for ModelGateway {
         {
             let s = self.session.borrow();
             s.review_payload(&bytes)?;
-            s.store.ledger("begin", &bytes)?;
+            s.store.ledger("begin", &bytes).map_err(|_| "model_ledger_failed")?;
             s.review_payload(&bytes)?;
         }
         control.poll()?;
@@ -58,12 +58,17 @@ impl Provider for ModelGateway {
         }
         let response = match self.endpoint.exchange(&bytes, control) {
             Ok(v) if v.len() <= 65536 => v,
-            _ => {
-                self.session.borrow().store.ledger("failed", &bytes)?;
-                return Err("model_transport_failed".into());
+            result => {
+                // A failed durable ledger takes priority over a cooperative stop.
+                self.session.borrow().store.ledger("failed", &bytes)
+                    .map_err(|_| "model_ledger_failed")?;
+                return Err(match result {
+                    Err(reason) if matches!(reason.as_str(), "native_cancelled" | "native_deadline") => reason,
+                    _ => "model_transport_failed".into(),
+                });
             }
         };
-        self.session.borrow().store.ledger("sent", &bytes)?;
+        self.session.borrow().store.ledger("sent", &bytes).map_err(|_| "model_ledger_failed")?;
         let advertised: Vec<_> = definitions
             .iter()
             .filter(|d| request.tools.contains(&d.name))

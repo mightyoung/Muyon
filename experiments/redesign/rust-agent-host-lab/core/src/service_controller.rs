@@ -948,6 +948,8 @@ fn execute(
                 },
             ),
             "denied" | "failed" => (AgentTerminal::Failed, AgentReason::InternalFailure),
+            "outcome_unknown" if done.state.reason == "model_ledger_failed" =>
+                (AgentTerminal::OutcomeUnknown, AgentReason::StorageFailure),
             _ => (AgentTerminal::OutcomeUnknown, AgentReason::Interrupted),
         },
         Err(_) => (AgentTerminal::OutcomeUnknown, AgentReason::StorageFailure),

@@ -599,6 +599,11 @@ impl AgentPorts for RuntimePorts {
     }
     fn failure(&mut self, state: &mut State, _reason: &str) {
         if self.session.borrow().service_control.is_some() {
+            if _reason == "model_ledger_failed" {
+                state.status = "outcome_unknown".into();
+                state.reason = "model_ledger_failed".into();
+                return;
+            }
             if _reason == "native_cancelled" {
                 state.cancelled = true;
                 state.status = "cancelled".into();
