@@ -1,0 +1,51 @@
+An unexpected error was encountered by the Dart CLI.
+Please file an issue at https://github.com/dart-lang/sdk/issues/new with the following details:
+
+Invocation: 'dart compile kernel --packages=/workspace/leaderb-sqlite/.dart_tool/package_config.json --output=/workspace/leaderb-sqlite/.dart_tool/hooks_runner/pdfium_dart/6b4ebf10e7/hook.dill --depfile=/workspace/leaderb-sqlite/.dart_tool/hooks_runner/pdfium_dart/6b4ebf10e7/hook.dill.d /workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart'
+Exception: 'FileSystemException: Creation failed, path = '/home/agent/.dart-tool' (OS Error: Read-only file system, errno = 30)'
+Stack Trace:
+#0      _Directory.createSync (dart:io/directory_impl.dart:136)
+#1      _File.createSync (dart:io/file_impl.dart:337)
+#2      ForwardingFile.createSync (package:file/src/forwarding/forwarding_file.dart:27)
+#3      createConfigFile (package:unified_analytics/src/initializer.dart:25)
+#4      runInitialization (package:unified_analytics/src/initializer.dart:86)
+#5      new Analytics (package:unified_analytics/src/analytics.dart:85)
+#6      createUnifiedAnalytics (package:dartdev/src/unified_analytics.dart:23)
+#7      DartdevRunner.runCommand (package:dartdev/dartdev.dart:242)
+<asynchronous suspension>
+#8      runDartdev (package:dartdev/dartdev.dart:54)
+<asynchronous suspension>
+#9      main (file:///b/s/w/ir/x/w/sdk/pkg/dartdev/bin/dartdev.dart:13)
+<asynchronous suspension>
+
+
+Building native assets for package:pdfium_dart failed.
+Compilation of hook returned with exit code: 255.
+To reproduce run:
+(cd /workspace/leaderb-sqlite/; /workspace/toolchains/flutter-3.47.5/bin/cache/dart-sdk/bin/dart compile kernel --packages=/workspace/leaderb-sqlite/.dart_tool/package_config.json --output=/workspace/leaderb-sqlite/.dart_tool/hooks_runner/pdfium_dart/6b4ebf10e7/hook.dill --depfile=/workspace/leaderb-sqlite/.dart_tool/hooks_runner/pdfium_dart/6b4ebf10e7/hook.dill.d /workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart )
+stderr:
+An unexpected error was encountered by the Dart CLI.
+Please file an issue at https://github.com/dart-lang/sdk/issues/new with the following details:
+
+Invocation: 'dart compile kernel --packages=/workspace/leaderb-sqlite/.dart_tool/package_config.json --output=/workspace/leaderb-sqlite/.dart_tool/hooks_runner/pdfium_dart/6b4ebf10e7/hook.dill --depfile=/workspace/leaderb-sqlite/.dart_tool/hooks_runner/pdfium_dart/6b4ebf10e7/hook.dill.d /workspace/toolchains/pub-bootstrap/hosted/pub.dev/pdfium_dart-0.3.1/hook/build.dart'
+Exception: 'FileSystemException: Creation failed, path = '/home/agent/.dart-tool' (OS Error: Read-only file system, errno = 30)'
+Stack Trace:
+#0      _Directory.createSync (dart:io/directory_impl.dart:136)
+#1      _File.createSync (dart:io/file_impl.dart:337)
+#2      ForwardingFile.createSync (package:file/src/forwarding/forwarding_file.dart:27)
+#3      createConfigFile (package:unified_analytics/src/initializer.dart:25)
+#4      runInitialization (package:unified_analytics/src/initializer.dart:86)
+#5      new Analytics (package:unified_analytics/src/analytics.dart:85)
+#6      createUnifiedAnalytics (package:dartdev/src/unified_analytics.dart:23)
+#7      DartdevRunner.runCommand (package:dartdev/dartdev.dart:242)
+<asynchronous suspension>
+#8      runDartdev (package:dartdev/dartdev.dart:54)
+<asynchronous suspension>
+#9      main (file:///b/s/w/ir/x/w/sdk/pkg/dartdev/bin/dartdev.dart:13)
+<asynchronous suspension>
+
+
+stdout:
+
+
+Building native assets failed. See the logs for more details.
