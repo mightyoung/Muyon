@@ -13,6 +13,7 @@ internal interface ServiceHostOwnerInstallation {
 internal interface ServiceHostOwnerSource {
     fun currentChatAuthority(conversation:String,text:String):ServiceOwnerChatAuthority?=null
     fun credentialCapability(profile:String,reference:String):ServiceOwnerCredentialCapability?=null
+    fun bindChatContext(reservation:String,binding:ServiceOwnerAdmissionBinding,requestId:String,payload:ByteArray,context:ByteArray,capability:ServiceOwnerCredentialCapability):Boolean=false
     fun exchangeChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability):ServiceOwnerChatResponse?=null
     fun currentScope():ServiceOwnerScope?
     fun currentProviderMetadata():ServiceOwnerProvider?
@@ -50,6 +51,7 @@ internal object ServiceHostBindings {
     fun callback(owner:ServiceHostOwnerSource):ServiceHostOwnerCallback=object:ServiceHostOwnerCallback {
         override fun currentChatAuthority(conversation:String,text:String):ServiceOwnerChatAuthority?=try{owner.currentChatAuthority(conversation,text)}catch(_:Exception){null}
         override fun credentialCapability(profile:String,reference:String):ServiceOwnerCredentialCapability?=try{owner.credentialCapability(profile,reference)}catch(_:Exception){null}
+        override fun bindChatContext(reservation:String,binding:ServiceOwnerAdmissionBinding,requestId:String,payload:ByteArray,context:ByteArray,capability:ServiceOwnerCredentialCapability):Boolean=try{owner.bindChatContext(reservation,binding,requestId,payload,context,capability)}catch(_:Exception){false}
         override fun exchangeChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability):ServiceOwnerChatResponse?=try{owner.exchangeChat(admission,binding,context,payload,capability)}catch(_:Exception){null}
         override fun currentScope():ServiceOwnerScope?=try{owner.currentScope()}catch(_:Exception){null}
         override fun currentProvider():ServiceOwnerProvider?=try {

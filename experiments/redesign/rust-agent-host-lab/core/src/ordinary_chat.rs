@@ -1,6 +1,6 @@
 //! Ordinary text intent on the existing Service worker and core Agent drive.
 //! Only explicitly synthetic, no-network transports are supported in this slice.
-use crate::{service_provider::ProviderAdmission, field, service_host::{ServiceHostMode, ServiceHostPorts}, service_root::ServiceRoot, service_runtime::RunControl, service_types::*, supplier_business::BusinessRead, Json, Result};
+use crate::{service_provider::{ProviderAdmission,ModelLocation}, field, service_host::{ServiceHostMode, ServiceHostPorts}, service_root::ServiceRoot, service_runtime::RunControl, service_types::*, supplier_business::BusinessRead, Json, Result};
 use muyon_core_agent_lab::{agent::{Agent, State, Limits, Hooks}, agent_ports::AgentPorts, model::{Provider, ProviderControl, ModelRequest, ModelEvent, NativeMessage}, store};
 use muyon_plugin_contract_lab::{object, string, parse};
 use std::{path::Path, sync::Arc, rc::Rc, cell::RefCell};
@@ -25,6 +25,7 @@ impl ChatAuthority {
     }
     pub fn json(&self)->Json { object([("workspace",string(&self.workspace)),("conversation",string(&self.conversation)),("owner",string(&self.owner)),("mode",string(&self.mode)),("policy_revision",string(&self.policy_revision)),("grant_revision",string(&self.grant_revision)),("input_rule",string(&self.rule_revision)),("restriction_revision",string(&self.restriction_revision)),("sensitivity",string(&self.sensitivity)),("output_rule",string("MODEL-TEXT-v1")),("synthetic",Json::Bool(self.synthetic))]) }
 }
+fn closed(j:&Json,names:&[&str])->Result<()>{let m=j.object()?;if m.len()!=names.len() || names.iter().any(|k|!m.contains_key(*k)){return Err("chat_evidence_fields".into())}Ok(())}
 fn id(v:&str,max:usize)->bool { !v.is_empty() && v.len()<=max && v.trim()==v && !v.chars().any(char::is_control) }
 /// Finite, versioned whole-string scan. Exact UTF-8 identity normalization;
 /// combining marks/control formats are unsupported, not silently normalized.
@@ -44,7 +45,7 @@ fn validate_binding(host:&ServiceHostPorts,payload:&Json,expected:&Json)->Result
 }
 pub(crate) fn disclose(b:&BusinessRead)->Result<()> { if b.events.iter().any(|e|field(e,"kind").ok()==Some(&string("answer_delta"))) {validate_binding(b.host.as_ref().ok_or("chat_owner_unavailable")?,&b.payload,b.source_binding.as_ref().ok_or("chat_binding_unavailable")?)?;receipt(b.dir.as_ref().ok_or("chat_run_unavailable")?,b)?;}Ok(()) }
 fn provider_evidence(a:&ProviderAdmission)->Json {
-    let b=a.binding();let p=a.profile();object([("profile_id",string(&p.id)),("endpoint",string(&p.endpoint)),("endpoint_identity",string(&p.endpoint_identity)),("provider",string(&p.provider)),("model",string(&p.model)),("profile_revision",string(&b.profile_revision)),("policy_revision",string(&b.policy_revision)),("grant_revision",string(&b.grant_revision)),("authorization_owner",string(&b.authorization_owner)),("credential_identity",string(a.credential_handle().identity())),("credential_generation",Json::Number(a.credential_handle().generation().unwrap_or(0).to_string())),("budget_revision",string(&b.budget.revision)),("quota_proof",string(&b.budget.quota_proof))])
+    let b=a.binding();let p=a.profile();object([("profile_id",string(&p.id)),("location",string(match p.location{ModelLocation::Remote=>"remote",ModelLocation::OwnDevice=>"own-device"})),("purpose",string("chat")),("credential_ref",string(&p.credential_ref)),("model_allowed",Json::Bool(b.model_allowed)),("outbound_allowed",Json::Bool(b.outbound_allowed)),("endpoint",string(&p.endpoint)),("endpoint_identity",string(&p.endpoint_identity)),("provider",string(&p.provider)),("model",string(&p.model)),("profile_revision",string(&b.profile_revision)),("policy_revision",string(&b.policy_revision)),("grant_revision",string(&b.grant_revision)),("authorization_owner",string(&b.authorization_owner)),("credential_identity",string(a.credential_handle().identity())),("credential_generation",Json::Number(a.credential_handle().generation().unwrap_or(0).to_string())),("budget_revision",string(&b.budget.revision)),("quota_proof",string(&b.budget.quota_proof)),("max_tokens",Json::Number(a.call_budget().max_tokens.to_string())),("max_micros",Json::Number(a.call_budget().max_micros.to_string()))])
 }
 fn write_send(dir:&Path,context:&Json,body:&Json,state:&str,admission:Option<&ProviderAdmission>,response:Option<&ChatResponse>)->Result<()> {
     store::atomic(dir,"ordinary-send-v1.db",&object([("version",string("ordinary-send-v1")),("context",context.clone()),("payload",body.clone()),("state",string(state)),("admission",string(admission.map(|a|a.record_id()).unwrap_or(""))),("provider",admission.map(provider_evidence).unwrap_or(Json::Null)),("answer",string(response.map(|r|r.answer.as_str()).unwrap_or(""))),("usage",response.map(|r|object([("input",Json::Number(r.input_tokens.to_string())),("output",Json::Number(r.output_tokens.to_string())),("counting_rule",string("synthetic-byte-bound-v1"))])).unwrap_or(Json::Null))]).encode())
@@ -70,7 +71,7 @@ impl Provider for ChatProvider<'_> {
         if output==0{return Err("chat_budget".into())}
         let body=make_body(output);
         let bytes=body.encode().into_bytes();write_send(self.dir,&self.context,&body,"prepared",None,None)?;
-        let prepared=bridge.prepare_chat(&self.request,&bytes,self.host.budget.clone())?;
+        let prepared=bridge.prepare_chat(&self.request,&bytes,self.host.budget.clone(),&self.context)?;
         validate_binding(self.host,self.intent,&self.context)?;control.poll()?;
         let admission=bridge.final_admit(prepared)?;
         self.shared.borrow_mut().admitted=true;
@@ -116,6 +117,7 @@ pub(crate) fn execute(root:&mut ServiceRoot,run:&mut AgentDurableRun,dir:&Path,b
         summary.receipt=AgentReceiptSummary{opaque_id:Some(record),outcome:AgentReceiptOutcome::RecordedSuccess};summary.terminal=AgentTerminal::Completed;summary.reason=AgentReason::None;Ok::<(),String>(())
     })();
     let reason=if let Err(reason)=result {b.events.clear();if shared.borrow().admitted{summary.terminal=AgentTerminal::OutcomeUnknown;summary.receipt.outcome=AgentReceiptOutcome::Unknown;}else if reason=="native_cancelled"{summary.terminal=AgentTerminal::Cancelled;summary.reason=AgentReason::Cancelled;}reason}else{"none".into()};
+    let reason=if ["none","chat_authority_unconfigured","chat_authority_denied","chat_owner_unconfigured","chat_text_unreviewed","chat_credential_signal","provider_budget_reservation_failed","provider_config_unavailable","chat_credential_capability_unavailable","provider_credential_changed","provider_binding_changed","native_cancelled","native_deadline"].contains(&reason.as_str()){reason}else{"chat_failed_or_unavailable".into()};
     let state=match summary.terminal{AgentTerminal::Completed=>"completed",AgentTerminal::Cancelled=>"cancelled",AgentTerminal::OutcomeUnknown=>"outcome_unknown",_=>"failed"};b.push("terminal",object([("state",string(state)),("reason",string(reason))]));
     // Never put rejected credential-bearing input into a durable business ledger.
     if b.source_binding.is_some() && b.save(dir).is_err(){root.poison();b.events.clear();b.push("terminal",object([("state",string("outcome_unknown")),("reason",string("chat_storage_failure"))]));summary.terminal=AgentTerminal::OutcomeUnknown;summary.receipt.outcome=AgentReceiptOutcome::Unknown;}
@@ -125,6 +127,7 @@ pub(crate) fn receipt(dir:&Path,b:&BusinessRead)->Result<String> {
     let path=dir.join("ordinary-send-v1.db");let meta=std::fs::symlink_metadata(&path).map_err(|_|"chat_receipt_missing")?;
     if !meta.is_file() || meta.file_type().is_symlink() || meta.len()>32768 {return Err("chat_receipt_bound".into())}
     let j=parse(&std::fs::read(path).map_err(|_|"chat_receipt_missing")?)?;
+    closed(&j,&["version","context","payload","state","admission","provider","answer","usage"])?;
     if field(&j,"version")?!=&string("ordinary-send-v1") || field(&j,"state")?!=&string("completed") || b.source_binding.as_ref()!=Some(field(&j,"context")?) {return Err("chat_receipt_binding".into())}
     let answer=field(&j,"answer")?.string()?;check_text(answer)?;
     let e=b.events.iter().find(|e|field(e,"kind").ok()==Some(&string("answer_delta"))).ok_or("chat_answer_missing")?;
@@ -132,10 +135,28 @@ pub(crate) fn receipt(dir:&Path,b:&BusinessRead)->Result<String> {
     let r=field(&j,"admission")?.string()?;if !id(r,512){return Err("chat_receipt_identity".into())}
     let evidence=b.events.iter().find(|e|field(e,"kind").ok()==Some(&string("provider_receipt"))).ok_or("chat_receipt_missing")?;let event=field(evidence,"payload")?;
     let context=field(&j,"context")?;
+    closed(context,&["authority","workspace","conversation","input_ref","task","attempt","input_version"])?;
+    for k in ["workspace","conversation","input_ref","task","attempt"]{if !id(field(context,k)?.string()?,512){return Err("chat_context_evidence".into())}}
+    if field(context,"input_version")?!=&string("utf8-exact-v1") || field(context,"conversation")?!=field(&b.payload,"conversation")? {return Err("chat_input_version".into())}
+    let authority=field(context,"authority")?;
+    closed(authority,&["workspace","conversation","owner","mode","policy_revision","grant_revision","input_rule","restriction_revision","sensitivity","output_rule","synthetic"])?;
+    if field(authority,"workspace")?!=field(context,"workspace")? || field(authority,"conversation")?!=field(context,"conversation")? || field(authority,"input_rule")?!=&string("USER-TEXT-v1") || field(authority,"output_rule")?!=&string("MODEL-TEXT-v1") || field(authority,"synthetic")?!=&Json::Bool(true) || !matches!(field(authority,"sensitivity")?.string()?,"personal"|"commercial") || !matches!(field(authority,"mode")?.string()?,"auto"|"full-allow"|"read-only"|"ask-every-time"){return Err("chat_rule_evidence".into())}
+    let provider=field(&j,"provider")?;
+    closed(provider,&["profile_id","location","purpose","credential_ref","model_allowed","outbound_allowed","endpoint","endpoint_identity","provider","model","profile_revision","policy_revision","grant_revision","authorization_owner","credential_identity","credential_generation","budget_revision","quota_proof","max_tokens","max_micros"])?;
+    for k in ["profile_id","credential_ref","endpoint_identity","provider","model","profile_revision","policy_revision","grant_revision","authorization_owner","credential_identity","budget_revision","quota_proof"]{if !id(field(provider,k)?.string()?,512){return Err("chat_profile_evidence".into())}}
+    if !crate::service_provider::https_endpoint(field(provider,"endpoint")?.string()?) || field(provider,"purpose")?!=&string("chat") || !matches!(field(provider,"location")?.string()?,"remote"|"own-device") || field(provider,"model_allowed")?!=&Json::Bool(true) || field(provider,"outbound_allowed")?!=&Json::Bool(true) || field(provider,"authorization_owner")?!=field(authority,"owner")? || field(provider,"policy_revision")?!=field(authority,"policy_revision")? || field(provider,"grant_revision")?!=field(authority,"grant_revision")? {return Err("chat_profile_evidence".into())}
+    let total=field(provider,"max_tokens")?.integer()?;
+    if total==0 || field(provider,"max_micros")?.integer()?==0 {return Err("chat_budget_evidence".into())}
     if field(event,"identity")?!=&string(r) || field(event,"owner")?!=&string("ServiceProviderOwner") || field(event,"synthetic")?!=&Json::Bool(true) || field(event,"task")?!=field(context,"task")? || field(event,"attempt")?!=field(context,"attempt")? {return Err("chat_receipt_binding".into())}
-    let wire=field(&j,"payload")?;let messages=field(wire,"messages")?.array()?;
+    let wire=field(&j,"payload")?;closed(wire,&["model","messages","n","stream","max_tokens"])?;let messages=field(wire,"messages")?.array()?;
+    let output=field(wire,"max_tokens")?.integer()?;
+    if output==0 || output>1024 || (wire.encode().len() as u64).checked_add(output).filter(|n|*n<=total).is_none() || field(wire,"n")?.integer()?!=1 || field(wire,"stream")?!=&Json::Bool(false){return Err("chat_wire_budget_evidence".into())}
+    if messages.len()!=1{return Err("chat_payload_binding".into())}closed(&messages[0],&["role","content"])?;check_text(field(&messages[0],"content")?.string()?)?;
+    if field(&messages[0],"role")?!=&string("user"){return Err("chat_payload_binding".into())}
     if messages.len()!=1 || field(&messages[0],"content")?!=field(&b.payload,"text")? || field(wire,"model")?!=field(field(&j,"provider")?,"model")? {return Err("chat_payload_binding".into())}
-    let usage=field(&j,"usage")?;if field(usage,"input")?.integer()?==0 || field(usage,"output")?.integer()?==0 || field(field(&j,"provider")?,"credential_generation")?.integer()?==0 {return Err("chat_usage_evidence".into())}
+    let usage=field(&j,"usage")?;closed(usage,&["input","output","counting_rule"])?;
+    let used_in=field(usage,"input")?.integer()?;let used_out=field(usage,"output")?.integer()?;
+    if field(usage,"counting_rule")?!=&string("synthetic-byte-bound-v1") || used_in==0 || used_out==0 || used_out>output || used_in.checked_add(used_out).filter(|n|*n<=total).is_none() || field(provider,"credential_generation")?.integer()?==0 {return Err("chat_usage_evidence".into())}
     Ok(r.into())
 }
 pub(crate) fn restore(dir:&Path,run:&AgentDurableRun,b:&BusinessRead)->Result<AgentRunSnapshot> {
@@ -143,6 +164,6 @@ pub(crate) fn restore(dir:&Path,run:&AgentDurableRun,b:&BusinessRead)->Result<Ag
     let completed=b.events.last().and_then(|e|field(e,"payload").ok()).and_then(|p|field(p,"state").ok())==Some(&string("completed"));
     if !completed{return Ok(crate::service_evidence::unknown(run,AgentReceiptSummary{opaque_id:None,outcome:AgentReceiptOutcome::Unknown}))}
     let record=receipt(dir,b)?;let context=b.source_binding.as_ref().ok_or("chat_binding_missing")?;let task=run.identity.actual_task.as_ref().ok_or("chat_task_missing")?;
-    if field(context,"task")?!=&string(&task.task_id) || field(context,"attempt")?!=&string(&task.attempt_id) || field(context,"conversation")?!=field(&b.payload,"conversation")? {return Err("chat_task_binding".into())}
+    if field(context,"input_ref")?!=&string(format!("{}:{}",run.identity.run_id,run.intent.request_id)) || field(context,"task")?!=&string(&task.task_id) || field(context,"attempt")?!=&string(&task.attempt_id) || field(context,"conversation")?!=field(&b.payload,"conversation")? {return Err("chat_task_binding".into())}
     Ok(AgentRunSnapshot::Terminal{summary:AgentRunSummary{request_id:run.intent.request_id.clone(),variant:run.intent.variant.clone(),source_build_identity:run.intent.source_build_identity.clone(),identity:run.identity.clone(),terminal:AgentTerminal::Completed,reason:AgentReason::None,receipt:AgentReceiptSummary{opaque_id:Some(record),outcome:AgentReceiptOutcome::RecordedSuccess}}})
 }

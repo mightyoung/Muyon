@@ -61,6 +61,7 @@ impl CredentialHandle {
 /// a returned row is admission only, never evidence that a request was sent.
 pub trait ServiceProviderHost {
     /// Default denies: existence-only bridges have no transport capability.
+    fn bind_chat_context(&self,_reservation:&str,_binding:&ProviderBinding,_request_id:&str,_payload:&[u8],_handle:&CredentialHandle,_context:&crate::Json)->Result<()> {Err("chat_context_binding_unavailable".into())}
     fn exchange_chat(&self, _admission: &ProviderAdmission, _context: &crate::Json) -> Result<crate::ordinary_chat::ChatResponse> { Err("configured_transport_unavailable".into()) }
     fn current_binding(&self) -> Result<Option<ProviderBinding>>;
     fn credential_handle(&self, profile: &ConfiguredProfile) -> Result<Option<CredentialHandle>>;
@@ -87,9 +88,10 @@ impl Drop for PreparedProviderCall {
     }
 }
 pub struct ProviderAdmission {
-    profile: ConfiguredProfile, handle: CredentialHandle, payload: Vec<u8>, record_id: String, binding: ProviderBinding,
+    profile: ConfiguredProfile, handle: CredentialHandle, payload: Vec<u8>, record_id: String, binding: ProviderBinding, budget: CallBudget,
 }
 impl ProviderAdmission {
+    pub fn call_budget(&self)->&CallBudget {&self.budget}
     pub fn binding(&self)->&ProviderBinding {&self.binding}
     pub fn profile(&self) -> &ConfiguredProfile { &self.profile }
     pub fn credential_handle(&self) -> &CredentialHandle { &self.handle }
@@ -109,11 +111,13 @@ impl ServiceProviderBridge {
     pub(crate) fn exchange_chat(&self, admission: &ProviderAdmission, context: &crate::Json) -> Result<crate::ordinary_chat::ChatResponse> {
         self.host.exchange_chat(admission, context)
     }
-    pub(crate) fn prepare_chat(&self,request_id:&str,payload:&[u8],budget:CallBudget)->Result<PreparedProviderCall> {
+    pub(crate) fn prepare_chat(&self,request_id:&str,payload:&[u8],budget:CallBudget,context:&crate::Json)->Result<PreparedProviderCall> {
         let binding=self.binding(&budget)?;
         if self.handle(&binding.profile)?.generation().is_none(){return Err("chat_credential_capability_unavailable".into())}
         let prepared=self.prepare(request_id,payload,budget)?;
-        if prepared.handle.generation().is_none(){return Err("chat_credential_capability_unavailable".into())}Ok(prepared)
+        if prepared.handle.generation().is_none(){return Err("chat_credential_capability_unavailable".into())}
+        self.host.bind_chat_context(&prepared.reservation,&prepared.binding,&prepared.request_id,&prepared.payload,&prepared.handle,context)?;
+        self.ensure_current(&prepared.binding,&prepared.budget)?;Ok(prepared)
     }
     pub fn prepare(&self, request_id: &str, payload: &[u8], budget: CallBudget) -> Result<PreparedProviderCall> {
         if !identity(request_id) || payload.is_empty() || payload.len() > 65536 {
@@ -191,7 +195,7 @@ impl ServiceProviderBridge {
         prepared.committed = true;
         if !identity(&record_id) { return Err("provider_admission_failed".into()); }
         Ok(ProviderAdmission { profile: prepared.binding.profile.clone(), handle,
-            payload: prepared.payload.clone(), record_id, binding: prepared.binding.clone() })
+            payload: prepared.payload.clone(), record_id, binding: prepared.binding.clone(), budget:prepared.budget.clone() })
     }
     fn binding(&self, budget: &CallBudget) -> Result<ProviderBinding> {
         let binding = self.host.current_binding().map_err(|_| "provider_config_unavailable")?
@@ -238,7 +242,7 @@ fn validate_binding(binding: &ProviderBinding, budget: &CallBudget) -> Result<()
 }
 /// Conservative canonical DNS/IPv4 HTTPS subset. Unsupported URI forms fail
 /// closed; no normalization, endpoint completion, DNS lookup or loopback adapter.
-fn https_endpoint(endpoint: &str) -> bool {
+pub(crate) fn https_endpoint(endpoint: &str) -> bool {
     if endpoint.len() > 2048 || !endpoint.is_ascii() || endpoint.bytes().any(|b| b <= 32 || b >= 127)
         || endpoint.contains(['@', '?', '#', '\\']) { return false; }
     let Some(rest) = endpoint.strip_prefix("https://") else { return false; };

@@ -25,7 +25,7 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
     }
     private fun update(id:String,value:ChatReadConversation) {
         snapshot=snapshot.copy(conversations=snapshot.conversations+(id to value))
-        val record=JSONObject().put("receiptIdentity",value.originalReceiptIdentity ?: "").put("text",value.text).put("request",value.requestId).put("run",value.runId ?: "").put("epoch",value.admittedServiceEpoch ?: "").put("synthetic",value.synthetic)
+        val record=JSONObject().put("receiptIdentity",value.originalReceiptIdentity ?: "").put("text",if(ordinaryTextSupported(value.text))value.text else "").put("request",value.requestId).put("run",value.runId ?: "").put("epoch",value.admittedServiceEpoch ?: "").put("synthetic",value.synthetic)
         check(preferences.edit().putString(id,record.toString()).commit()){ "request_identity_not_persisted" }
     }
     internal fun transportLost() {
@@ -36,6 +36,10 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
         if(!ChatReadBounds.validText(text) || conversationId.length !in 1..128)return
         val old=snapshot.conversations[conversationId]
         if(old!=null && old.status !in setOf("completed","cancelled","failed","rejected")){reconcile(conversationId);return}
+        if(!ordinaryTextSupported(text)) {
+            snapshot=snapshot.copy(conversations=snapshot.conversations+(conversationId to ChatReadConversation(status="rejected",reason="普通文本检查未通过；请修改输入")))
+            return
+        }
         if(snapshot.conversations.size>=64 && old==null)return
         val value=ChatReadConversation(text=text,requestId="chat_"+UUID.randomUUID().toString().replace("-",""),status="submitting",reason="等待私有 Service 核实当前任务与授权；未调用真实模型")
         // Persist identity before the very first Binder submission. Failure prevents dispatch.

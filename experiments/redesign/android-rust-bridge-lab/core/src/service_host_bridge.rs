@@ -75,6 +75,7 @@ pub struct ServiceOwnerChatResponse {pub answer:String,pub input_tokens:u64,pub 
 pub trait ServiceHostOwnerCallback: Send + Sync {
     fn current_chat_authority(&self, conversation:String, text:String)->Option<ServiceOwnerChatAuthority>;
     fn credential_capability(&self, profile:String, reference:String)->Option<ServiceOwnerCredentialCapability>;
+    fn bind_chat_context(&self,reservation:String,binding:ServiceOwnerAdmissionBinding,request_id:String,payload:Vec<u8>,context:Vec<u8>,capability:ServiceOwnerCredentialCapability)->bool;
     fn exchange_chat(&self, admission:String, binding:ServiceOwnerAdmissionBinding, context:Vec<u8>, payload:Vec<u8>, capability:ServiceOwnerCredentialCapability)->Option<ServiceOwnerChatResponse>;
     fn current_scope(&self) -> Option<ServiceOwnerScope>;
     fn current_provider(&self) -> Option<ServiceOwnerProvider>;
@@ -134,7 +135,11 @@ fn profile(p: ServiceOwnerProfile) -> ConfiguredProfile {
 }
 struct CallbackProvider { callback: Arc<dyn ServiceHostOwnerCallback> }
 impl ServiceProviderHost for CallbackProvider {
-    fn exchange_chat(&self,admission:&ProviderAdmission,context:&muyon_rust_agent_host_lab::Json)->Result<muyon_rust_agent_host_lab::ordinary_chat::ChatResponse,String>{
+    fn bind_chat_context(&self,reservation:&str,binding:&ProviderBinding,request_id:&str,payload:&[u8],handle:&CredentialHandle,context:&muyon_plugin_contract_lab::Json)->Result<(),String>{
+        let capability=ServiceOwnerCredentialCapability{identity:handle.identity().into(),generation:handle.generation().ok_or("chat_credential_unavailable")?};
+        if self.callback.bind_chat_context(reservation.into(),admission_binding(binding),request_id.into(),payload.to_vec(),context.encode().into_bytes(),capability){Ok(())}else{Err("chat_context_binding_denied".into())}
+    }
+    fn exchange_chat(&self,admission:&ProviderAdmission,context:&muyon_plugin_contract_lab::Json)->Result<muyon_rust_agent_host_lab::ordinary_chat::ChatResponse,String>{
         let cap=ServiceOwnerCredentialCapability{identity:admission.credential_handle().identity().into(),generation:admission.credential_handle().generation().ok_or("chat_credential_unavailable")?};
         let r=self.callback.exchange_chat(admission.record_id().into(),admission_binding(admission.binding()),context.encode().into_bytes(),admission.payload().to_vec(),cap).ok_or("chat_exchange_unavailable")?;
         Ok(muyon_rust_agent_host_lab::ordinary_chat::ChatResponse{answer:r.answer,input_tokens:r.input_tokens,output_tokens:r.output_tokens,synthetic:r.synthetic})

@@ -202,6 +202,11 @@ internal class DurableServiceHostOwner(
         val bytes = payload.copyOf()
         return transaction { database, state, _ ->
             if (!valid(state, binding) || credentialProfileId != binding.profile.id || credentialRef != binding.profile.credentialRef) return@transaction null
+            if(ordinaryChat) {
+                database.rawQuery("SELECT capability FROM chat_contexts WHERE token=?",arrayOf(reservation)).use { frozen->
+                    if(!frozen.moveToFirst() || !frozen.getBlob(0).contentEquals(capabilityBytes(checkNotNull(state.credential))))return@transaction null
+                }
+            }
             database.rawQuery("SELECT request_id,owner,binding,scope,payload,budget,proof,state,epoch,tokens,micros FROM reservations WHERE token=?", arrayOf(reservation)).use { c ->
                 if (!c.moveToFirst() || c.getString(7) != "held" || !c.getBlob(0).contentEquals(AdmissionEncoding.textValue(requestId)) ||
                     c.getString(1) != binding.authorizationOwner || !c.getBlob(2).contentEquals(AdmissionEncoding.binding(binding)) ||
@@ -232,6 +237,18 @@ internal class DurableServiceHostOwner(
             "token=? AND state='held'", arrayOf(reservation)) == 1
     } ?: false
 
+    private fun capabilityBytes(c:ServiceOwnerCredentialCapability)=AdmissionEncoding.textValue(c.identity+"\u0000"+c.generation)
+    @Synchronized override fun bindChatContext(reservation:String,binding:ServiceOwnerAdmissionBinding,requestId:String,payload:ByteArray,context:ByteArray,capability:ServiceOwnerCredentialCapability):Boolean=transaction { database,state,_->
+        if(!ordinaryChat || !valid(state,binding) || state.credential!=capability || context.size !in 1..16384)return@transaction null
+        // First immutable context write belongs to this exact held reservation.
+        database.rawQuery("SELECT request_id,binding,scope,payload,state FROM reservations WHERE token=?",arrayOf(reservation)).use { c->
+            if(!c.moveToFirst() || c.getString(4)!="held" || !c.getBlob(0).contentEquals(AdmissionEncoding.textValue(requestId)) || !c.getBlob(1).contentEquals(AdmissionEncoding.binding(binding)) || !c.getBlob(2).contentEquals(scopeBytes(state)) || !c.getBlob(3).contentEquals(payload))return@transaction null
+        }
+        val ctx=JSONObject(String(context,Charsets.UTF_8))
+        if(!ctx.getString("input_ref").endsWith(":"+requestId) || ctx.getString("task").isBlank() || ctx.getString("attempt").isBlank())return@transaction null
+        database.insertOrThrow("chat_contexts",null,ContentValues().apply {put("token",reservation);put("context",context.copyOf());put("capability",capabilityBytes(capability))})
+        true
+    } ?: false
     /** No-network only. Guard remains held from exact admission validation through fake handoff.
      * Attempt is committed before handoff; a lost/failed response can never retry that admission.
      */
@@ -244,8 +261,8 @@ internal class DurableServiceHostOwner(
         database.beginTransaction()
         var permitted=false
         try {
-            database.rawQuery("SELECT r.binding,r.scope,r.payload,r.state FROM admissions a JOIN reservations r ON r.token=a.token WHERE a.id=?",arrayOf(admission)).use { c->
-                if(c.moveToFirst() && c.getString(3)=="consumed" && c.getBlob(0).contentEquals(AdmissionEncoding.binding(binding)) && c.getBlob(1).contentEquals(scopeBytes(state)) && c.getBlob(2).contentEquals(payload) && state.payloadReview(binding,payload.copyOf())) {
+            database.rawQuery("SELECT r.binding,r.scope,r.payload,r.state,f.context,f.capability FROM admissions a JOIN reservations r ON r.token=a.token JOIN chat_contexts f ON f.token=r.token WHERE a.id=?",arrayOf(admission)).use { c->
+                if(c.moveToFirst() && c.getString(3)=="consumed" && c.getBlob(0).contentEquals(AdmissionEncoding.binding(binding)) && c.getBlob(1).contentEquals(scopeBytes(state)) && c.getBlob(2).contentEquals(payload) && c.getBlob(4).contentEquals(context) && c.getBlob(5).contentEquals(capabilityBytes(capability)) && state.payloadReview(binding,payload.copyOf())) {
                     database.rawQuery("SELECT id FROM chat_attempts WHERE id=?",arrayOf(admission)).use { prior->
                         if(!prior.moveToFirst()) {database.insertOrThrow("chat_attempts",null,ContentValues().apply{put("id",admission);put("context",context.copyOf())});permitted=true}
                     }
@@ -268,14 +285,14 @@ private object AdmissionSchema {
         "clock_guard" to "CREATE TABLE clock_guard (id INTEGER PRIMARY KEY CHECK(id=1), high_water INTEGER NOT NULL)",
         "reservations" to "CREATE TABLE reservations (token TEXT PRIMARY KEY, request_id BLOB NOT NULL UNIQUE, epoch TEXT NOT NULL, owner TEXT NOT NULL, binding BLOB NOT NULL, scope BLOB NOT NULL, payload BLOB NOT NULL, budget BLOB NOT NULL, proof BLOB NOT NULL, tokens INTEGER NOT NULL, micros INTEGER NOT NULL, expires INTEGER NOT NULL, state TEXT NOT NULL CHECK(state IN ('held','consumed','expired')))",
         "admissions" to "CREATE TABLE admissions (id TEXT PRIMARY KEY, token TEXT NOT NULL UNIQUE REFERENCES reservations(token))")
-    fun tables(chat:Boolean)=baseTables + if(chat)mapOf("chat_attempts" to "CREATE TABLE chat_attempts (id TEXT PRIMARY KEY REFERENCES admissions(id), context BLOB NOT NULL)") else emptyMap()
+    fun tables(chat:Boolean)=baseTables + if(chat)mapOf("chat_attempts" to "CREATE TABLE chat_attempts (id TEXT PRIMARY KEY REFERENCES admissions(id), context BLOB NOT NULL)","chat_contexts" to "CREATE TABLE chat_contexts (token TEXT PRIMARY KEY REFERENCES reservations(token), context BLOB NOT NULL, capability BLOB NOT NULL)") else emptyMap()
     fun validate(db: SQLiteDatabase,chat:Boolean) {
         val expected = mutableMapOf<String, List<String?>>()
         tables(chat).forEach { (name, sql) -> expected[name] = listOf("table", name, sql) }
         mapOf("epochs" to 1, "reservations" to 2, "admissions" to 2).forEach { (table, count) ->
             for (i in 1..count) expected["sqlite_autoindex_${table}_$i"] = listOf("index", table, null)
         }
-        if(chat)expected["sqlite_autoindex_chat_attempts_1"]=listOf("index","chat_attempts",null)
+        if(chat){expected["sqlite_autoindex_chat_attempts_1"]=listOf("index","chat_attempts",null);expected["sqlite_autoindex_chat_contexts_1"]=listOf("index","chat_contexts",null)}
         val actual = mutableMapOf<String, List<String?>>()
         db.rawQuery("SELECT type,name,tbl_name,sql FROM sqlite_master", null).use { c ->
             while (c.moveToNext()) {
