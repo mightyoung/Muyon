@@ -2,10 +2,14 @@ import os
 import json
 from pathlib import Path
 import unittest
+import subprocess
 from verify_shipping_records import load_record, verify_record
 
 BASE = Path(os.environ['MUYON_SERVICE_BASELINE'])
-SOURCE = '2fbdc13efd84cabf04623775f87e762cd0d08c11'
+SOURCE = os.environ['MUYON_SERVICE_SOURCE']
+actual_source = subprocess.check_output(['git','rev-parse','HEAD'],cwd=os.environ['MUYON_SERVICE_SOURCE_ROOT'],text=True).strip()
+if SOURCE != actual_source:
+    raise RuntimeError('durable_control_source_head_mismatch')
 
 class Controls(unittest.TestCase):
     def setUp(self):
