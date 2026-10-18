@@ -84,7 +84,9 @@ impl Provider for ModelGateway {
                 self.session.borrow().store.ledger("failed", &bytes)
                     .map_err(|_| "model_ledger_failed")?;
                 return Err(match result {
-                    Err(reason) if matches!(reason.as_str(), "native_cancelled" | "native_deadline") => {
+                    Err(reason) if matches!(reason.as_str(),
+                        "native_cancelled" | "native_deadline" | "wire_cancelled"
+                        | "wire_total_limit" | "wire_journal") => {
                         reason
                     }
                     _ => "model_transport_failed".into(),
