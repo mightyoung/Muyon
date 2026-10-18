@@ -101,3 +101,38 @@ fn renamed_bundle_is_semantically_equivalent() {
  let mut c=Catalog::new();let r=call(&mut c,"register",vec![("bundle",json(&renamed)),("host_bindings",json(r#"["opaque-random"]"#))]);assert!(ok(&r));
  let a=json(&authority().encode().replace("equipment_loan",&name).replace("host-equipment-read","opaque-random"));let d=call(&mut c,"discover",vec![("authority",a)]);assert_eq!(field(&d,"operations").array().unwrap().len(),1);
 }
+
+#[test]
+fn foreign_data_admission_requires_the_referenced_schema_closure() {
+ // The foreign loan schema references equipment. An explicit loan admission
+ // must not implicitly admit equipment when discovery expands that closure.
+ let mut consumer=bundle();
+ put(&mut consumer,"module_id",string("consumer"));
+ put(&mut consumer,"data",json("[]"));
+ put(&mut consumer,"relations",json("[]"));
+ put(&mut consumer,"views",json("[]"));
+ let op=row(&mut consumer,"operations",0);
+ put(op,"binding_id",string("consumer-read"));
+ put(op,"data_refs",json(r#"["equipment_loan/loan@1"]"#));
+ let mut projection=field(op,"projection_schema").clone();
+ let mut properties=field(&projection,"properties").clone();
+ remove(&mut properties,"equipment");remove(&mut properties,"label");
+ put(&mut projection,"properties",properties);
+ put(&mut projection,"required",json(r#"["loans"]"#));
+ put(op,"projection_schema",projection);
+ let mut catalog=admitted();let before=stats(&mut catalog);
+ for admissions in [json("[]"),json(r#"["equipment_loan/loan@1"]"#),json(r#"["equipment_loan/loan@1","equipment_loan/equipment@2"]"#)] {
+  let result=call(&mut catalog,"register",vec![("bundle",consumer.clone()),("host_bindings",json(r#"["consumer-read"]"#)),("host_data_admissions",admissions)]);
+  expect_code(&result,"unresolved_data");
+  assert_eq!(stats(&mut catalog),before,"rejection must not reserve module, binding or generation");
+ }
+ // Repair only the host admission list, retaining the exact same bundle.
+ let result=call(&mut catalog,"register",vec![("bundle",consumer),("host_bindings",json(r#"["consumer-read"]"#)),("host_data_admissions",json(r#"["equipment_loan/loan@1","equipment_loan/equipment@1"]"#))]);
+ assert!(ok(&result),"complete explicit foreign closure must register: {}",result.encode());
+ let mut a=authority();put(&mut a,"bindings",json(r#"["consumer-read"]"#));
+ let discovered=call(&mut catalog,"discover",vec![("authority",a)]);
+ assert_eq!(field(&discovered,"operations").array().unwrap().len(),1);
+ assert_eq!(field(&discovered,"schemas").object().unwrap().keys().map(String::as_str).collect::<Vec<_>>(),vec!["equipment_loan/equipment@1","equipment_loan/loan@1"]);
+ let s=stats(&mut catalog);assert_eq!(field(&s,"generation"),&json("2"));
+ for key in ["execution_requests","grants","receipts_created"] {assert_eq!(field(&s,key),&json("0"));}
+}
