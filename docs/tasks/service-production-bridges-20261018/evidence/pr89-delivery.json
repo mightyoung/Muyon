@@ -1,0 +1,13 @@
+{
+  "pr": 89,
+  "url": "https://github.com/mightyoung/Muyon/pull/89",
+  "state": "OPEN",
+  "draft": true,
+  "head": "fc8ffd7e061736fdf9f4897d7c1c7914d429400a",
+  "base": "docs/frontend-service-loop-final-evidence-20261018",
+  "initial_final_body_update": "gh pr edit failed on legacy projectCards GraphQL deprecation; subsequent body lookup confirmed no update",
+  "completed_final_body_update": "GitHub REST PATCH succeeded; body readback contains final CI39109953658",
+  "handoff_commit": "3e7c8dd41cd4fbf8b34f7471bc476e30429d1726",
+  "code_writers": "all stopped",
+  "product_branch": "clean/frozen; no merge or deployment"
+}
