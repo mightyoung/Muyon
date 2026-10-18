@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mightyoung.muyon.androidlab.*
+import com.mightyoung.muyon.androidlab.R
 import kotlinx.coroutines.launch
 
 /** A local notebook until an execution projection is supplied by the integration owner. */
