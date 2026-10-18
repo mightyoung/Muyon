@@ -6,6 +6,24 @@ from legacy_semantics import EXPECTED, accepted
 
 
 class LegacySemanticsTests(unittest.TestCase):
+    def test_pre_timing_fix_wire_source_locations_are_rejected(self):
+        old_locations = {
+            'wire_stale_reported_usage': 'wire.rs:182:306',
+            'wire_private_history_bound': 'wire.rs:88:180',
+            'wire_stream_cancel_bypass': 'wire.rs:122:161',
+            'wire_native_pair': 'wire.rs:173:1005',
+            'wire_budget_bypass': 'wire.rs:106:184',
+        }
+        targets = {name: test for name, _, test, _ in CONTRACTS}
+        for name, location in old_locations.items():
+            test = targets[name]
+            _, *needles = EXPECTED[name]
+            text = (f"thread '{test}' panicked at tests/{location}:\n" + '\n'.join(needles)
+                    + f'\ntest {test} ... FAILED\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 9 filtered out;\n')
+            record = dict(exit_code=101, timed_out=False, forced_owned_group_cleanup=False,
+                          live_after_cleanup=[], raw_sha256=hashlib.sha256(text.encode()).hexdigest())
+            self.assertFalse(accepted(dict(name=name, test=test, baseline_green=True), text, record), name)
+
     def test_exact_assertions_and_all_144_negative_controls(self):
         controls = 0
         for name, target, test, _ in CONTRACTS:

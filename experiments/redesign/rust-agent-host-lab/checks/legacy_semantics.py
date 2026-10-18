@@ -1,15 +1,16 @@
 """Exact semantic legacy inverse contract, retained from reviewed batch3 evidence."""
 import re, hashlib
 from http_batch import inverse
+# wire.rs locations follow timing-fix 7b0980b5 (blob 96f8b112); assertion bytes/columns unchanged.
 EXPECTED={
-'wire_stale_reported_usage':('wire.rs:182:306','left: "5"','right: "unknown"'),
-'wire_private_history_bound':('wire.rs:88:180','error=wire_json_size'),
+'wire_stale_reported_usage':('wire.rs:249:306','left: "5"','right: "unknown"'),
+'wire_private_history_bound':('wire.rs:93:180','error=wire_json_size'),
 'wire_container_depth':('wire_review.rs:9:9','33 containers exceed the frozen limit'),
 'wire_native_value_identity':('wire_review.rs:18:5','a paired ID cannot conceal changed original value'),
-'wire_stream_cancel_bypass':('wire.rs:122:161','right: "wire_cancelled"'),
+'wire_stream_cancel_bypass':('wire.rs:189:161','right: "wire_cancelled"'),
 'wire_missing_done':('http_transport.rs:161:5','left: "wire_tool_finish"','right: "wire_stream_truncated"'),
-'wire_native_pair':('wire.rs:173:1005','left: String("wrong-pair")','right: String("c1")'),
-'wire_budget_bypass':('wire.rs:106:184','left: "1"','right: "0"'),
+'wire_native_pair':('wire.rs:240:1005','left: String("wrong-pair")','right: String("c1")'),
+'wire_budget_bypass':('wire.rs:111:184','left: "1"','right: "0"'),
 'hard_policy_bypass':('kernel.rs:15:5','left: Permit','right: Denied'),
 'unknown_redispatch':('kernel.rs:104:5',r'assertion failed: command(&dir, "run", &[]).contains("model_calls=1\n")'),
 'duplicate_effect':('kernel.rs:72:40','called `Result::unwrap()` on an `Err` value: "receipt_identity"'),
