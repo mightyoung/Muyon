@@ -26,7 +26,9 @@ service_types.rs; this proposal does not widen those ABIs.
 
 Submission has exactly `protocol=1`, `epoch`, `lease`, `request_id`, `text`, and
 `selected`. The selected object has exactly `module_id='inquiry'`,
-`type='supplier'`, `key`, and `revision`. The text is nonempty UTF-8 <=4096 bytes;
+`type='supplier'`, `key`, `revision`, and exact integer `schema_version=1`
+(bool is rejected). Object schema version 1 is separate from database schema12.
+The text is nonempty, not whitespace-only, UTF-8 <=4096 bytes;
 identifiers are ASCII letters/digits/underscore/hyphen, 1..128 bytes. These
 limits/identifier grammar are proposed, not a guarantee that existing supplier
 keys/revisions fit them. Unknown fields at either level are rejected, including
@@ -37,20 +39,24 @@ Events have exactly `epoch`, `request_id`, `run_id`, `cursor`, `kind`, `payload`
 `epoch` is the **admitted Service epoch**, retained across reconnection. Cursor is
 an integer (not bool), contiguous from 1, at most 1024 per run. The four payloads:
 
-- `answer_delta`: `text` <=4096 UTF-8 bytes, total answer <=32768 bytes.
-- `receipt`: original durable `opaque_id` and `outcome` of `recorded_success` or
+- `answer_delta`: `text` <=1024 UTF-8 bytes, total answer <=32768 bytes.
+- `receipt`: original durable `opaque_id` (nonempty UTF-8 <=256 bytes, no
+  identifier grammar restriction) and `outcome` of `recorded_success` or
   `recorded_failure`. It is never generated from the selected object or cursor.
 - `supplier_projection`: `key`, `revision`, `name` <=512 UTF-8 bytes, `receipt_id`.
   It requires the exact selected object/revision and a matching successful receipt.
 - `terminal`: `outcome` in completed/cancelled/failed/budget_exhausted/unknown.
-  Completion requires an observed durable-success receipt.
+  Completion requires an observed durable-success receipt and its matching current projection.
 
 Identical cursor replay is idempotent; changed replay conflicts; gaps and identity
 mismatch do not mutate state. Termination is monotonic. Invalid events are rejected
 atomically. A conflicting receipt cannot overwrite historical receipt identity.
-Projection invalidation clears current display data and preserves historical receipt.
-A new projection after authority changes requires the future host authority gate:
-this oracle cannot establish that permission from event data alone.
+Projection invalidation clears both current projection and accumulated answer;
+it preserves historical receipt. It blocks further answer/projection events until
+`reauthorize_display()` explicitly models a trusted caller's completed host
+scope/policy check. Reconnection alone never reauthorizes. Receipt metadata and
+terminal observations remain separate. This oracle does not evaluate authority
+or make `reauthorize_display()` an IPC capability for UI callers.
 
 Binder loss marks a nonterminal run UNKNOWN and invalidates projection. It never
 creates a failure or successful receipt. `reconnect` only models a verified new
@@ -62,8 +68,8 @@ UNKNOWN. Cancel returns requested, never invents a terminal observation.
 
 ## Deliberately pending production design
 
-Event source authenticity, per-connection observation tickets, reauthorization on
-projection display/recovery, durable event storage, stream polling/page limits,
+Event source authenticity, per-connection observation tickets, actual host authority
+checks before display/recovery, durable event storage, stream polling/page limits,
 terminal failure reason codes, original receipt ID wire encoding, source namespace,
 and the match between supplier revision grammar and schema12 remain integration
 owner decisions. The bounded cursor overflow is a fail-closed invalid event here;
@@ -75,3 +81,14 @@ Android schema12 adapter, authoritative scope bridge, and approved model provide
 are **NOT_RUN / not implemented by this oracle**. The I04 legacy HTTP operation
 remains denied and is neither retried nor represented here. Main/develop, dependent
 merges, network calls, deployment, and credentials are untouched.
+
+## Review correction evidence
+
+The original RED/GREEN logs remain unchanged. `review-red.log` captures the new
+selected schema field initially rejected by the old validator (1 assertion failure,
+12 setup errors). After adding exact schema validation to unblock event setup,
+`review-red-after-schema.log` captures 18 tests / 6 assertion failures / 1 missing
+reauthorization-method error. `review-green.log` records the corrected 18 tests /
+0 failures. Changes enforce whitespace rejection, 1024-byte deltas, opaque receipt
+encoding, completion requiring matching projection, selected object schema1, and
+display invalidation/explicit trusted reauthorization. These remain oracle checks.

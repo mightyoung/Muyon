@@ -9,6 +9,7 @@ import re
 MAX_EVENTS = 1024
 MAX_TEXT_BYTES = 4096
 MAX_ANSWER_BYTES = 32768
+MAX_DELTA_BYTES = 1024
 
 
 def bounded(value, maximum):
@@ -34,8 +35,9 @@ def validate_submission(value):
     selected = value['selected']
     return (type(value['protocol']) is int and value['protocol'] == 1
             and all(identifier(value[key]) for key in ['epoch', 'lease', 'request_id'])
-            and bounded(value['text'], MAX_TEXT_BYTES)
-            and exact(selected, 'module_id type key revision')
+            and bounded(value['text'], MAX_TEXT_BYTES) and bool(value['text'].strip())
+            and exact(selected, 'module_id type key revision schema_version')
+            and type(selected['schema_version']) is int and selected['schema_version'] == 1
             and selected['module_id'] == 'inquiry' and selected['type'] == 'supplier'
             and identifier(selected['key']) and identifier(selected['revision']))
 
@@ -62,6 +64,7 @@ class ProjectionState:
         self.terminal = None
         self.can_submit = False  # An admitted identity can NEVER issue another submit.
         self._events = {}
+        self._display_authorized = True
 
     def apply(self, value):
         if not exact(value, 'epoch request_id run_id cursor kind payload'):
@@ -79,13 +82,15 @@ class ProjectionState:
         if cursor != self.cursor + 1:
             return 'gap'
         payload, kind = value['payload'], value['kind']
+        if kind in ('answer_delta', 'supplier_projection') and not self._display_authorized:
+            return 'display_not_authorized'
         if kind == 'answer_delta':
-            if (not exact(payload, 'text') or not bounded(payload['text'], MAX_TEXT_BYTES)
+            if (not exact(payload, 'text') or not bounded(payload['text'], MAX_DELTA_BYTES)
                     or len((self.answer + payload['text']).encode('utf-8')) > MAX_ANSWER_BYTES):
                 return 'invalid'
             self.answer += payload['text']
         elif kind == 'receipt':
-            if (not exact(payload, 'opaque_id outcome') or not identifier(payload['opaque_id'])
+            if (not exact(payload, 'opaque_id outcome') or not bounded(payload['opaque_id'], 256)
                     or payload['outcome'] not in ('recorded_success', 'recorded_failure')
                     or (self.receipt is not None and self.receipt != payload)):
                 return 'invalid'
@@ -103,7 +108,8 @@ class ProjectionState:
             if (not exact(payload, 'outcome') or payload['outcome'] not in (
                     'completed', 'cancelled', 'failed', 'budget_exhausted', 'unknown')
                     or (payload['outcome'] == 'completed' and (
-                        self.receipt is None or self.receipt['outcome'] != 'recorded_success'))):
+                        self.receipt is None or self.receipt['outcome'] != 'recorded_success'
+                        or self.projection is None))):
                 return 'invalid'
             self.status = self.terminal = payload['outcome']
             if self.terminal != 'completed':
@@ -116,6 +122,12 @@ class ProjectionState:
 
     def invalidate_projection(self):
         self.projection = None
+        self.answer = ''
+        self._display_authorized = False
+
+    def reauthorize_display(self):
+        """Trusted caller assertion after host scope/policy check; not an authority API."""
+        self._display_authorized = True
 
     def binder_lost(self):
         self.connection = None
