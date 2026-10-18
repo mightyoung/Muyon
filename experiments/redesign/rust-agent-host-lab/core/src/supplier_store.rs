@@ -1,4 +1,4 @@
-//! Private domain12 supplier-name dependency slice. No Android wire or model entry.
+//! Private domain12 supplier-name dependency slice. No model or external source configuration.
 //! Trusted host owns installation and MUST supply its current ScopeResolver authority.
 #[path = "supplier_sqlite.rs"]
 mod sqlite;
@@ -356,7 +356,8 @@ impl PurposeReview for LocalReadReview {
 }
 /// Local Rust consumer facade. Installation is a host-only operation.
 /// Each call rereads current values and creates its own original durable receipt.
-/// Android Service/Binder/JNI and Dart authority bridges are deliberately absent.
+/// Production Dart authority is separate; the Service synthetic lab uses a
+/// dedicated host-owned source and does not claim production authority.
 pub struct SupplierReader {
     authority: Rc<CurrentSupplierAuthority>,
     receipts: PathBuf,
@@ -364,6 +365,8 @@ pub struct SupplierReader {
 pub struct SupplierReadResult {
     pub projection: Json,
     pub receipt_ref: Json,
+    pub task_id: String,
+    pub attempt_id: String,
 }
 impl SupplierReader {
     pub fn install(
@@ -389,19 +392,52 @@ impl SupplierReader {
             receipts: receipts.into(),
         })
     }
+    /// Host-only installation for a Service run. The caller owns and validates
+    /// the existing run directory; NativeStore keeps its original durable path.
+    pub(crate) fn install_in_run(
+        db: &Path,
+        dir: &Path,
+        id: &str,
+        host: Rc<dyn AuthoritySource>,
+    ) -> Result<Self> {
+        let store = Rc::new(SupplierStore::open(db, id)?);
+        let authority = Rc::new(CurrentSupplierAuthority {
+            store,
+            host,
+            source_stamp: RefCell::new(None),
+        });
+        authority.snapshot()?;
+        Ok(Self { authority, receipts: dir.into() })
+    }
+    /// Fresh source/authority validation for disclosure; creates no receipt.
+    pub(crate) fn validate_projection(&self, projection: &Json) -> Result<()> {
+        let (_, record) = self.authority.current()?;
+        let current = object([("supplier", record.reference), ("name", string(record.name))]);
+        if &current != projection { return Err("supplier_projection_changed".into()); }
+        Ok(())
+    }
     pub fn read_current(&self, id: &str) -> Result<SupplierReadResult> {
         if id != self.authority.store.id {
             return Err("supplier_request_scope".into());
         }
-        let (pinned, record) = self.authority.current()?;
         let dir = self.receipts.join(format!("read-{}", crate::nonce()?));
         muyon_core_agent_lab::store::create_dir(&dir)?;
+        self.read_in_run(&dir, "read selected supplier name", id, Arc::new(RunControl::new()))
+    }
+    pub(crate) fn read_in_run(
+        &self, dir: &Path, text: &str, id: &str, control: Arc<RunControl>,
+    ) -> Result<SupplierReadResult> {
+        control.poll()?;
+        if id != self.authority.store.id {
+            return Err("supplier_request_scope".into());
+        }
+        let (pinned, record) = self.authority.current()?;
         let session = NativeSession::service_in_process(
-            &dir,
+            dir,
             self.authority.clone(),
             Rc::new(LocalReadReview),
-            "read selected supplier name",
-            Arc::new(RunControl::new()),
+            text,
+            control.clone(),
         )?;
         let mut session = session.borrow_mut();
         session.register(Enrollment {
@@ -423,9 +459,9 @@ impl SupplierReader {
         session.advertised = vec![TOOL.into()];
         session.catalog_sealed = true;
         let mut agent = Agent {
-            dir: dir.clone(),
+            dir: dir.into(),
             state: State::runtime(
-                "read selected supplier name".into(),
+                text.into(),
                 field(&pinned.read, "scope")?.string()?.into(),
                 Limits::default(),
             )?,
@@ -437,6 +473,7 @@ impl SupplierReader {
             TOOL.into(),
             object([("id", string(id))]),
         )?;
+        control.poll()?;
         if self.authority.snapshot()? != pinned {
             return Err("supplier_publication_changed".into());
         }
@@ -447,6 +484,8 @@ impl SupplierReader {
         Ok(SupplierReadResult {
             projection: accepted.value.clone(),
             receipt_ref: accepted.receipt.clone(),
+            task_id: agent.state.task.clone(),
+            attempt_id: agent.state.attempt.clone(),
         })
     }
 }

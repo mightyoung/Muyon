@@ -1,0 +1,142 @@
+warning: suspicious definition of the runtime `read` symbol used by the standard library
+   --> /workspace/Muyon-frontend-loop/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:124
+    |
+132 | ...ount: usize, timeout: i32) -> i32; fn read(fd: i32, buffer: *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8...
+    |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *mut c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *mut u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "read")]`, or `#[link_name = "read"]`
+    = help: allow this lint if the signature is compatible
+    = note: `#[warn(suspicious_runtime_symbol_definitions)]` on by default
+
+warning: suspicious definition of the runtime `write` symbol used by the standard library
+   --> /workspace/Muyon-frontend-loop/experiments/redesign/core-agent-lab/core/src/host_session.rs:132:182
+    |
+132 | ... *mut u8, count: usize) -> isize; fn write(fd: i32, buffer: *const u8, count: usize) -> isize; }
+    |                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: expected `unsafe extern "C" fn(i32, *const c_void, usize) -> isize` (for the current target)
+            found    `unsafe extern "C" fn(i32, *const u8, usize) -> isize`
+    = help: either fix the signature or remove any attributes like `#[unsafe(no_mangle)]`, `#[unsafe(export_name = "write")]`, or `#[link_name = "write"]`
+    = help: allow this lint if the signature is compatible
+
+warning: `muyon-core-agent-lab` (lib) generated 2 warnings
+   Compiling muyon-rust-agent-host-lab v0.1.0 (/workspace/Muyon-frontend-loop/experiments/redesign/rust-agent-host-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.63s
+     Running unittests src/lib.rs (/workspace/build-targets/store/debug/deps/muyon_rust_agent_host_lab-68ea8693a4f04d50)
+
+running 7 tests
+test http_recovery_tests::http_recovery_child ... ok
+test http_recovery_tests::loopback_post_io_wire_journal_is_unknown_without_resend ... ok
+test service_runtime::stop_cause_tests::observed_cancel_survives_later_deadline ... ok
+test service_runtime::stop_cause_tests::observed_deadline_survives_late_cancel ... ok
+
+running 1 test
+http_recovery_child pid=5277 mode=failed_ledger dir=/tmp/muyon-http-recovery-5266-1
+test http_recovery_tests::http_recovery_child ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+
+running 1 test
+http_recovery_child pid=5282 mode=recover_ledger dir=/tmp/muyon-http-recovery-5266-1
+test http_recovery_tests::http_recovery_child ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+evidence_dir=/tmp/muyon-http-recovery-5266-1 mode=failed_ledger sent=312 received=174 original_identity="t-5277-1792305003521220332\na-5277-1792305003521220332\n"
+test http_recovery_tests::loopback_post_io_failed_ledger_overrides_cancel_and_recovers_unknown_without_resend ... ok
+
+running 1 test
+http_recovery_child pid=5275 mode=sent_ledger dir=/tmp/muyon-http-recovery-5266-2
+test http_recovery_tests::http_recovery_child ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+
+running 1 test
+http_recovery_child pid=5283 mode=recover_ledger dir=/tmp/muyon-http-recovery-5266-2
+test http_recovery_tests::http_recovery_child ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+evidence_dir=/tmp/muyon-http-recovery-5266-2 mode=sent_ledger sent=312 received=174 original_identity="t-5275-1792305003521198099\na-5275-1792305003521198099\n"
+test http_recovery_tests::loopback_post_io_sent_ledger_failure_recovers_unknown_without_resend ... ok
+
+running 1 test
+http_recovery_child pid=5276 mode=crash dir=/tmp/muyon-http-recovery-5266-0
+
+running 1 test
+http_recovery_child pid=5284 mode=recover_crash dir=/tmp/muyon-http-recovery-5266-0
+test http_recovery_tests::http_recovery_child ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+evidence_dir=/tmp/muyon-http-recovery-5266-0 mode=crash sent=312 received=174 original_identity="t-5276-1792305003521501712\na-5276-1792305003521501712\n"
+test http_recovery_tests::loopback_cross_process_crash_preserves_unknown_begin_without_resend ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/bin/native-protocol-fixture.rs (/workspace/build-targets/store/debug/deps/native_protocol_fixture-e21767c09d88410a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/contract_transport.rs (/workspace/build-targets/store/debug/deps/contract_transport-473ed4acb66663f0)
+
+running 8 tests
+test embedded_line_feed_is_fatal_but_crlf_sibling_is_valid ... ok
+test fatal_envelope_replies_latch_transport_closed ... ok
+test explicit_transport_close_rejects_future_inspection ... ok
+test recoverable_schema_rejection_preserves_catalog ... ok
+test persistent_catalog_keeps_generation_and_one_shot_ticket ... ok
+test raw_frames_enforce_utf8_duplicates_depth_and_limits ... ok
+test wire_close_retains_child_command_inspection_semantics ... ok
+test tickets_cannot_cross_catalog_instances ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/host_http.rs (/workspace/build-targets/store/debug/deps/host_http-c9045bec9ee65141)
+
+running 6 tests
+
+thread 'loopback_answer_uses_gateway_review_and_shared_durable_budget' (5301) panicked at tests/host_http.rs:23:75:
+real plugin child binary: NotPresent
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'loopback_budget_and_initial_authority_refuse_before_socket_bytes' (5302) panicked at tests/host_http.rs:23:75:
+real plugin child binary: NotPresent
+
+thread 'loopback_mismatched_session_refuses_before_ledger_or_connection' (5303) panicked at tests/host_http.rs:23:75:
+real plugin child binary: NotPresent
+test loopback_answer_uses_gateway_review_and_shared_durable_budget ... FAILED
+test loopback_mismatched_session_refuses_before_ledger_or_connection ... 
+thread 'loopback_receive_budget_stops_partial_response_without_retry' (5304) panicked at tests/host_http.rs:23:75:
+real plugin child binary: NotPresent
+FAILED
+
+thread 'loopback_truncation_cancellation_and_revocation_never_resend' (5305) panicked at tests/host_http.rs:23:75:
+real plugin child binary: NotPresent
+test loopback_budget_and_initial_authority_refuse_before_socket_bytes ... FAILED
+test loopback_receive_budget_stops_partial_response_without_retry ... FAILED
+test loopback_truncation_cancellation_and_revocation_never_resend ... FAILED
+
+thread 'loopback_unknown_inflight_crash_blocks_same_state_retry' (5306) panicked at tests/host_http.rs:23:75:
+real plugin child binary: NotPresent
+test loopback_unknown_inflight_crash_blocks_same_state_retry ... FAILED
+
+failures:
+
+failures:
+    loopback_answer_uses_gateway_review_and_shared_durable_budget
+    loopback_budget_and_initial_authority_refuse_before_socket_bytes
+    loopback_mismatched_session_refuses_before_ledger_or_connection
+    loopback_receive_budget_stops_partial_response_without_retry
+    loopback_truncation_cancellation_and_revocation_never_resend
+    loopback_unknown_inflight_crash_blocks_same_state_retry
+
+test result: FAILED. 0 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test host_http`

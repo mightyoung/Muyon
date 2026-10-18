@@ -1,4 +1,4 @@
-//! Private read-only Linux SQLite C ABI seam, adapted from atomic-business-lab.
+//! Private read-only SQLite C ABI seam. Android uses the bundled public SQLite build.
 //! No create/write API is exposed. Every query has row/cell budgets.
 //! Connections and statements own their C handles; text buffers outlive statement finalization.
 use std::{
@@ -13,7 +13,11 @@ struct Sqlite {
 struct Statement {
     _private: [u8; 0],
 }
-#[link(name = "libsqlite3.so.0", kind = "dylib", modifiers = "+verbatim")]
+// Referencing the sys crate retains its bundled static link on Android. Never
+// link Android's private platform libsqlite.so (not part of the public NDK ABI).
+#[cfg(target_os = "android")]
+extern crate libsqlite3_sys;
+#[cfg_attr(target_os = "linux", link(name = "libsqlite3.so.0", kind = "dylib", modifiers = "+verbatim"))]
 unsafe extern "C" {
     fn sqlite3_open_v2(
         path: *const c_char,
