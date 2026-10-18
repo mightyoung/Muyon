@@ -17,12 +17,30 @@ def transcript(component):
 
 class FullTests(unittest.TestCase):
     def test_each_source_inventory_accepts_only_complete_green(self):
-        for component, total in [('core', 107), ('plugin', 22), ('host', 46)]:
+        for component, total in [('core', 107), ('plugin', 22), ('host', 48)]:
             result = rust(component, transcript(component), 0)
             self.assertTrue(result['accepted'], component)
             self.assertEqual(result['observed_tests'], total)
         self.assertEqual(rust('core', transcript('core'), 0)['families']['legacy-core'], 90)
         self.assertEqual(rust('core', transcript('core'), 0)['unit_tests'], 6)
+
+    def test_host_stop_cause_units_are_additive_and_old_46_is_invalid(self):
+        group = CASES['components']['host']['groups']['unit:src/lib.rs']
+        self.assertEqual(group['family'], 'service-stop-cause')
+        self.assertEqual(group['names'], [
+            'service_runtime::stop_cause_tests::observed_deadline_survives_late_cancel',
+            'service_runtime::stop_cause_tests::observed_cancel_survives_later_deadline',
+        ])
+        raw = transcript('host')
+        self.assertEqual(rust('host', raw, 0)['unit_tests'], 2)
+        for name in group['names']:
+            self.assertFalse(rust('host', raw.replace(f'test {name} ... ok', ''), 0)['accepted'])
+        old = raw
+        for name in group['names']:
+            old = old.replace(f'test {name} ... ok\n', '')
+        old = old.replace('2 passed', '0 passed')
+        self.assertFalse(rust('host', old, 0)['accepted'])
+        self.assertEqual(len(CASES['mutants']), 17)
 
     def test_core_lock_units_are_required_without_replacing_http_or_old_cases(self):
         names = CASES['components']['core']['groups']['unit:src/lib.rs']['names']
@@ -49,7 +67,7 @@ class FullTests(unittest.TestCase):
 
     def test_source_fixed_service_group_preserves_native_twenty_five(self):
         result = rust('host', transcript('host'), 0)
-        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4, 'contract-transport': 8, 'service-runtime': 2, 'service-root': 2, 'service-oracle': 1, 'service-lifecycle': 4})
+        self.assertEqual(result['families'], {'native-host': 25, 'service-controller': 4, 'contract-transport': 8, 'service-runtime': 2, 'service-root': 2, 'service-oracle': 1, 'service-lifecycle': 4, 'service-stop-cause': 2})
         service = CASES['components']['host']['groups'].get('integration:service_controller')
         self.assertIsNotNone(service, 'separate source-fixed service integration group is missing')
         self.assertEqual(service['names'], [

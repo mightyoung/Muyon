@@ -173,15 +173,15 @@
           "sha256": "3a8e7c958dcebb4f07e69f91908d6b90780810fd9ac7a5272cb06ba69eb3793e"
         },
         "experiments/redesign/core-agent-lab/core/src/wire_provider.rs": {
-          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
-          "sha256": "264341ffc58625760df0e7c01dffe9413a348a1323a2cdc91ab14a4a0b2cebc9"
+          "commit": "6ec4c47c6da6415f7b395f98a43d0d3794a16d60",
+          "sha256": "0544ed45b96667ba169d2b9586962504c6a8beb8249a58ca88a9fefb018a8538"
         },
         "experiments/redesign/core-agent-lab/core/tests/native_ports.rs": {
-          "commit": "9d6b2a15ed35259d01035cdb3a53aa1586503879",
+          "commit": "39148943a9a051b3f896f65fde30d67fd265d7f6",
           "sha256": "464497eee0c6238c9f8d802c23a87a01487d00ad0aeb136934f290e7f0768db2"
         },
         "experiments/redesign/core-agent-lab/core/tests/native_protocol.rs": {
-          "commit": "9d6b2a15ed35259d01035cdb3a53aa1586503879",
+          "commit": "7b1264075fecdd898690ffaf9b40880549834bd5",
           "sha256": "d9d2a8e306bb7b4fc70f9e63121ba9ed8eb83aa32e8ecee7b9972f78c60f9444"
         },
         "experiments/redesign/core-agent-lab/core/tests/http_transport.rs": {
@@ -245,8 +245,8 @@
           "sha256": "f071e733f87c08c41cba752ba133ed43bffdc6c18e5f01cda27e565cd7dc8fad"
         },
         "experiments/redesign/plugin-contract-lab/core/tests/mapping_contract.rs": {
-          "commit": "2c99ea7ceb138d5fd7d83d5aba05cc99f6193d7c",
-          "sha256": "01708d733e83ad4319cf858fb849d020248f4db75df1d9ce12ff0839f57ace34"
+          "commit": "698c40bc607ae111b8fed7707f38bb362207e247",
+          "sha256": "40f801e99eb9fa390329fba8942cf3b366b260e3e7858e94a3f3d7d3d2462c6b"
         }
       },
       "expected_total": 22
@@ -333,39 +333,50 @@
             "close_and_reconnect_preserve_original_durable_outcome",
             "incomplete_temp_evidence_blocks_ready_without_cleanup"
           ]
+        },
+        "unit:src/lib.rs": {
+          "family": "service-stop-cause",
+          "names": [
+            "service_runtime::stop_cause_tests::observed_deadline_survives_late_cancel",
+            "service_runtime::stop_cause_tests::observed_cancel_survives_later_deadline"
+          ]
         }
       },
       "sources": {
         "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs": {
-          "commit": "5fc2b42b33901123e3f832e4458666ef5fecee0c",
+          "commit": "a8e9b93b086e88548524fe43789db5a3172696b8",
           "sha256": "04aed51dd17ab035f6a4210fcf7d4c30c2c9458f64dd44642c974dc22c59e188"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs": {
-          "commit": "81424c87f5d121ecc0ccaa6252c52483675df0ae",
+          "commit": "cfe1e73c1e8f400926f7021b97b9d36892a9fac0",
           "sha256": "6653361134043202b9bf71b4f5fe3e07fb9e019d25b7e48fb50f3ee2cc5ed694"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs": {
-          "commit": "58192794baf64780eae05ce6fb6be4dab3a50f49",
+          "commit": "f4b0035dabb4a0819f50f0174a53e050fcfc1a16",
           "sha256": "2fab93189b6615b623185db505f2b61e4bc53d0a4853670a94193d81d13907b3"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/service_runtime.rs": {
-          "commit": "172be3556f708ae94147d3d2b33c5e3acd0fa749",
+          "commit": "1f5e138f853c4d0a2d962068d3b31b5db71d0d03",
           "sha256": "165b2e903aac273d5cb4f31deb9974b1c4fe20561735662923644fdafbfa4b8b"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/service_root.rs": {
-          "commit": "172be3556f708ae94147d3d2b33c5e3acd0fa749",
+          "commit": "ad1cdd0c5040e25cb4583a7d2fa7601dc6b56dbc",
           "sha256": "e02398223d07ded359e8f64fbb9b1f3f9356a90a0ed1056117e0fbe08c34de68"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs": {
-          "commit": "81424c87f5d121ecc0ccaa6252c52483675df0ae",
+          "commit": "f6bd92f0bf58d7fc4e13ca6b6b7bfb3a8bb90c43",
           "sha256": "f792140578cc8dbdf130dde0298eda21aca8bcf70afbc52dfa83f3f00e9b5d36"
         },
         "experiments/redesign/rust-agent-host-lab/core/tests/service_lifecycle.rs": {
           "commit": "6e0f1c5752515c2bb8318897832912c57b8d1090",
           "sha256": "36146445d5db8b8552cac3d3fccc36d7d90b9ef0d1691f6c83b4602c599f6123"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs": {
+          "commit": "f60f843007869ffd81b1dbe0f222728322eca7d6",
+          "sha256": "915f1b0c21c51471d3533c2970c7ec09da5eb9500d3d5dffc8b2e8f40a1455b2"
         }
       },
-      "expected_total": 46
+      "expected_total": 48
     }
   },
   "python": {
