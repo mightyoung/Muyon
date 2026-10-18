@@ -1,0 +1,66 @@
+name: LeaderB combined exact candidate
+
+on:
+  push:
+    branches: ['lab/leaderb-batch4-combined-20261018']
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: 'Required exact 40-character candidate commit SHA'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: never
+
+jobs:
+  formal-combined:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [core, plugin, host, native, http]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout requested immutable candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 1
+      - name: Validate exact source and record tools
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/combined-controls"
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/source_identity.py --expected-source "$EXPECTED_SOURCE" | tee "$RUNNER_TEMP/combined-controls/source.json"
+          rustc --version | tee "$RUNNER_TEMP/combined-controls/rustc.txt"
+          cargo --version | tee "$RUNNER_TEMP/combined-controls/cargo.txt"
+          python3 --version | tee "$RUNNER_TEMP/combined-controls/python.txt"
+      - name: All existing and combined classifier controls
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -v -s experiments/redesign/rust-agent-host-lab/checks -p 'test_*.py' 2>&1 | tee "$RUNNER_TEMP/combined-controls/classifier.log"
+      - name: Required compiled full, native3 or HTTP7 gate
+        env:
+          EXPECTED_SOURCE: ${{ inputs.source_sha || github.sha }}
+          COMPONENT: ${{ matrix.component }}
+        run: |
+          set -euo pipefail
+          python3 -B experiments/redesign/rust-agent-host-lab/checks/combined_gate.py --expected-source "$EXPECTED_SOURCE" --component "$COMPONENT" --evidence-dir "$RUNNER_TEMP/combined-evidence" --target-dir "$RUNNER_TEMP/combined-target" 2>&1 | tee "$RUNNER_TEMP/combined-controls/execution.log"
+      - name: Retain raw exact candidate evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: leaderb-combined-${{ inputs.source_sha || github.sha }}-${{ matrix.component }}
+          path: |
+            ${{ runner.temp }}/combined-controls/
+            ${{ runner.temp }}/combined-evidence/
+          retention-days: 7
+          if-no-files-found: error
