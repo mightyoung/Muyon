@@ -1,0 +1,28 @@
+{
+  "start_unix": 1792291147.8134208,
+  "source": {
+    "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+    "source_tree": "829f0d3d02bd5f8cf5f57ddef27f7fa4be3341db",
+    "contract_sha256": "2cfacaa4671b3c61c250e46369040b78e31504c6d431ef1e697d19336ee24d6c"
+  },
+  "runner_provenance_sha256": "4bacdf9001dda98358070bb6d5400ad431d115f87998da61c8f887c679808802",
+  "runner_sha256": {
+    "runners/combined_full.py": "28ad8bbe8845c8cf585023b7ebc33ba8e5c6cefeeb8f6252e3be378bf4eea530",
+    "runners/combined_full.sh": "afda1b4d1d4d20d256c0102eab3ad8a86474e99f87bebe8022d434131cdd9a5c",
+    "runners/combined_guard.py": "c4d785ed1cd2036ff9a0410214db66be63477d745aa9317480663982c2e9383e",
+    "runners/combined_mutations.py": "aa78b87795cc35e46f2091f29d805b54a5962b061601acbbf8e74833062ecac3",
+    "runners/http_batch.py": "cadde8222ed979d5560cde8c3719fd6206b7450384a3e8083ea1a50d962a4f1a",
+    "runners/http_batch_inverses.py": "e1a36b56e034df9cab9373b21646b8e3fb5f9866da83c299f1dc2819be88c563",
+    "runners/legacy_assertion_audit.py": "24ba443a049db56251997d92b31d0020db1b9e701e844a93fd2c4868fd72a339",
+    "runners/legacy_exact.py": "5cc85ed0fd6c3ebc7318971d8b3e74279d4e225b69cbf13797d3b5fa5f924fe3",
+    "runners/orchestrate.py": "d409fd77f8cf741f9f2ff7df3825ed163c5c0f36fbadb9c9402c0da14e750620",
+    "runners/recover_inventory.py": "79061ac8ed6b85339f310d82742dba2c5360402b76fc2f90ce7dfbf3f7c60f1f",
+    "runners/recover_physical.py": "ce7ea6681d732126a006899f00fb4352fe6bc90eaffe11c35f2d1247c327fca6"
+  },
+  "RUST_TEST_THREADS": null,
+  "command": [
+    "bash",
+    "/workspace/leaderb-b3-evidence/b/runners/combined_full.sh",
+    "core"
+  ]
+}

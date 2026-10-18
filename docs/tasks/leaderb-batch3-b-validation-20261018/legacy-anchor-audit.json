@@ -1,0 +1,149 @@
+{
+  "accepted": true,
+  "rows": [
+    {
+      "name": "wire_stale_reported_usage",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "if self.state.wire_counters.inflight{self.state.wire_counters.usage=crate::wire_sse::Usage::default();}",
+      "after": ""
+    },
+    {
+      "name": "wire_private_history_bound",
+      "path": "src/wire_provider.rs",
+      "anchor_count": 1,
+      "source_sha256": "0544ed45b96667ba169d2b9586962504c6a8beb8249a58ca88a9fefb018a8538",
+      "before": "wire_json::parse_bounded(raw.as_bytes(),1_048_576)?",
+      "after": "wire_json::parse_bounded(raw.as_bytes(),262144)?"
+    },
+    {
+      "name": "wire_container_depth",
+      "path": "src/wire_json.rs",
+      "anchor_count": 1,
+      "source_sha256": "5366bee2b1c0b25fe8495d9f2fa3eae326770ce33735c206d7a4cdd06817d6e6",
+      "before": "&&depth>=32{return Err(\"wire_json_depth\".into());}",
+      "after": "&&depth>32{return Err(\"wire_json_depth\".into());}"
+    },
+    {
+      "name": "wire_native_value_identity",
+      "path": "src/wire_provider.rs",
+      "anchor_count": 1,
+      "source_sha256": "0544ed45b96667ba169d2b9586962504c6a8beb8249a58ca88a9fefb018a8538",
+      "before": "if pending!=Some((call_ref.as_str(),value.as_str()))||!identifier(receipt)",
+      "after": "if pending.map(|p|p.0)!=Some(call_ref.as_str())||!identifier(receipt)"
+    },
+    {
+      "name": "wire_stream_cancel_bypass",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "if self.agent.cancelled()?{Err(\"wire_cancelled\".into())}else{Ok(())}",
+      "after": "if false && self.agent.cancelled()?{Err(\"wire_cancelled\".into())}else{Ok(())}"
+    },
+    {
+      "name": "wire_missing_done",
+      "path": "src/wire_sse.rs",
+      "anchor_count": 1,
+      "source_sha256": "e81a1a774e1c2d18d3eee76de89dff5b133073d319804263223005bbf7677c27",
+      "before": "||!self.done{return Err(\"wire_stream_truncated\".into());}",
+      "after": "||(false && !self.done){return Err(\"wire_stream_truncated\".into());}"
+    },
+    {
+      "name": "wire_native_pair",
+      "path": "src/wire_provider.rs",
+      "anchor_count": 1,
+      "source_sha256": "0544ed45b96667ba169d2b9586962504c6a8beb8249a58ca88a9fefb018a8538",
+      "before": "(\"tool_call_id\",string(call_ref))",
+      "after": "(\"tool_call_id\",string(\"wrong-pair\"))"
+    },
+    {
+      "name": "wire_budget_bypass",
+      "path": "src/wire_provider.rs",
+      "anchor_count": 1,
+      "source_sha256": "0544ed45b96667ba169d2b9586962504c6a8beb8249a58ca88a9fefb018a8538",
+      "before": "if bytes.len() as u64>control.remaining(){return Err(\"wire_total_limit\".into());}",
+      "after": "if false && bytes.len() as u64>control.remaining(){return Err(\"wire_total_limit\".into());}"
+    },
+    {
+      "name": "hard_policy_bypass",
+      "path": "src/policy.rs",
+      "anchor_count": 1,
+      "source_sha256": "0e4572e04bbe964c8e569435d9ff86906fbf90389370a52862ed37be3ec69dfd",
+      "before": "if !hard_ok || mode == Mode::ReadOnly",
+      "after": "if mode == Mode::ReadOnly"
+    },
+    {
+      "name": "unknown_redispatch",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "if self.state.evidence_hold || self.state.unresolved{return Ok(());}",
+      "after": "if self.state.evidence_hold{return Ok(());} if self.state.unresolved { self.state.unresolved=false; self.state.status=\"ready\".into(); self.state.position=0; self.state.correlations.clear(); }"
+    },
+    {
+      "name": "duplicate_effect",
+      "path": "src/store.rs",
+      "anchor_count": 1,
+      "source_sha256": "716e8fb740c947410f08242138bc53d5b0b2a41d52c8ddf53556e8083896b09c",
+      "before": "if let Some(r)=state.receipts.iter().find(|r|r.binding.invocation==b.invocation){if &r.binding!=b{return Err(\"binding_conflict\".into());}return Ok(r.clone());}",
+      "after": ""
+    },
+    {
+      "name": "pre_effect_context_bypass",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "if model::context_bytes(&self.state.context).saturating_add(result_bytes)>self.state.limits.context {",
+      "after": "if false && model::context_bytes(&self.state.context).saturating_add(result_bytes)>self.state.limits.context {"
+    },
+    {
+      "name": "terminal_resurrection",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "else{self.state.stop(&resume_status,&resume_reason);}",
+      "after": "else{self.state.stop(\"ready\",\"\");}"
+    },
+    {
+      "name": "cached_receipt_trust",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "if !state.evidence_hold {",
+      "after": "if false && !state.evidence_hold {"
+    },
+    {
+      "name": "receipt_current_binding_only",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "if !state.evidence_hold {",
+      "after": "if !state.evidence_hold && state.receipt_binding.as_ref()==state.binding.as_ref() {"
+    },
+    {
+      "name": "budget_reset",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "let mut state=State::load(dir)?;",
+      "after": "let mut state=State::load(dir)?;state.counters=Counters::default();"
+    },
+    {
+      "name": "wire_preterminal_physical_effect",
+      "path": "src/wire_provider.rs",
+      "anchor_count": 1,
+      "source_sha256": "0544ed45b96667ba169d2b9586962504c6a8beb8249a58ca88a9fefb018a8538",
+      "before": "if decoder.feed(*byte)?.is_some(){control.checkpoint(\"wire-args\")?;control.poll()?;}",
+      "after": "if let Some(call)=decoder.feed(*byte)?{let _=child.kill();let _=child.wait();return Ok(ModelEvent::Tool{call_ref:call.call_ref,name:call.name,value:call.value});}"
+    },
+    {
+      "name": "wire_preterminal_physical_effect",
+      "path": "src/agent.rs",
+      "anchor_count": 1,
+      "source_sha256": "89f2e88fbd97b3eb409b712c20001f2a74fa40e50dcaf868e76677ac2f502db7",
+      "before": "h.checkpoint(\"effect\")?;self.cancelled()?;",
+      "after": "h.checkpoint(\"wire-args\")?;h.checkpoint(\"effect\")?;self.cancelled()?;"
+    }
+  ]
+}

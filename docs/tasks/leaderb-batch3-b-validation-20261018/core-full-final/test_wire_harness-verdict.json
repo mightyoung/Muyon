@@ -1,0 +1,10 @@
+{
+  "accepted": true,
+  "classification": "full_green",
+  "suite": "test_wire_harness",
+  "expected_methods": 7,
+  "observed_methods": 7,
+  "command_exit_code": 0,
+  "raw_sha256": "26a8fb744e83161c233f9c39babec694fc59d5c9c6cd2545dee3082445c46df3",
+  "expectations_sha256": "ace2bde8937e735d797f4374cfc544565018ae9c615c5a51f851c5b1505de07b"
+}

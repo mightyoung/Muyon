@@ -1,0 +1,14 @@
+{
+  "source_unchanged": true,
+  "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+  "source_tree": "829f0d3d02bd5f8cf5f57ddef27f7fa4be3341db",
+  "source_clean": true,
+  "runners_unchanged": true,
+  "actual_start_seal_sha256": "4bacdf9001dda98358070bb6d5400ad431d115f87998da61c8f887c679808802",
+  "integrity_checks": {
+    "source-integrity-final": 0,
+    "core-binary-integrity-final": 0,
+    "plugin-binary-integrity-final": 0,
+    "host-binary-integrity-final": 0
+  }
+}

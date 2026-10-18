@@ -1,0 +1,9 @@
+{
+  "note": "Initial provenance retained. First and second full runs invoked pre-guard combined_full.py at Rust classification. Guard was added while second run was in physical gates; it did not affect completed Rust verdict. Final rerun will use final sealed runners.",
+  "versions": {
+    "runner-versions/combined_full.py.pre-final": "42ee146d2cd6be4b4c5104c54cbfc9be97b4d8e02c96d2bf64fc7f6fc9f6db2f",
+    "runner-versions/combined_full.sh.initial": "e55d22918576fe2dbb6218563109b05fef67c1ecbbcd616e8161e16948278f75",
+    "runner-versions/combined_full.sh.pre-final": "c68defb383ad75dd8491ec9632c76690aa81775977e67c6bb51858e4aac97dc2",
+    "runner-versions/combined_full.py.pre-guard": "bf922570afd387628b6bd7d9d145507e8d9587c4f8e2bea42ebf664b0ebb39e1"
+  }
+}

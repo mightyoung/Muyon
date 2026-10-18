@@ -1,0 +1,10 @@
+{
+  "accepted": true,
+  "classification": "full_green",
+  "suite": "process",
+  "expected_methods": 26,
+  "observed_methods": 26,
+  "command_exit_code": 0,
+  "raw_sha256": "61fd72e7a7ffbdd2393217c4878849d353d8a0fdce09f861f2f8624bf12fff43",
+  "expectations_sha256": "ace2bde8937e735d797f4374cfc544565018ae9c615c5a51f851c5b1505de07b"
+}

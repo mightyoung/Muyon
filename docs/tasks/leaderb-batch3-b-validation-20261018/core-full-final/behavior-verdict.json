@@ -1,0 +1,439 @@
+{
+  "accepted": true,
+  "classification": "full_green",
+  "component": "core",
+  "expected_tests": 115,
+  "observed_tests": 115,
+  "families": {
+    "legacy-core": 90,
+    "synthetic-http-transport": 11,
+    "native-ports": 6,
+    "native-protocol": 5,
+    "http-durable-restore": 3
+  },
+  "unit_tests": 6,
+  "doc_tests": 0,
+  "groups": [
+    {
+      "key": "unit:src/lib.rs",
+      "names": [
+        "host_session::tests::fresh_admission_excludes_host_work_from_idle_without_resetting_total",
+        "host_session::tests::incomplete_entropy_fails_closed_without_a_pid_or_time_fallback",
+        "host_session::tests::invocation_identity_distinguishes_attempts_in_the_same_process",
+        "wire_provider::pump_tests::actual_wouldblock_step_cannot_bypass_cancel_or_total_deadline",
+        "store::lock_tests::guard_drop_releases_lock_while_same_open_file_description_survives",
+        "store::lock_tests::live_guard_excludes_independent_open_until_explicit_owner_drop"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "6",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "unit:src/main.rs",
+      "names": [],
+      "statuses": [],
+      "summaries": [
+        [
+          "ok",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:host",
+      "names": [
+        "host_cancel_during_model_callback_is_terminal_without_a_tool",
+        "host_cancel_after_invoke_keeps_the_original_result_and_stops",
+        "host_clean_eof_is_distinct_from_a_truncated_header",
+        "host_close_after_invoke_keeps_the_original_result_and_stops",
+        "host_close_during_model_callback_is_terminal_and_reaped",
+        "host_confirmation_requirement_never_becomes_automatic_approval",
+        "host_denial_stops_before_the_first_invocation",
+        "host_duplicate_keys_and_invalid_utf8_never_become_callbacks",
+        "host_each_byte_framing_is_equivalent_for_a_direct_answer",
+        "host_existing_attempt_is_never_reopened_or_resent",
+        "host_complete_bad_frames_keep_the_same_failure_when_input_is_half_closed",
+        "host_forged_approval_in_model_arguments_is_rejected",
+        "host_frame_size_is_checked_before_body_allocation",
+        "host_cancel_and_close_are_consumed_while_output_is_physically_backpressured",
+        "host_matching_oversized_projection_is_rejected_without_unknown_or_result",
+        "host_invocation_identity_is_nonce_issued_and_durably_bound_to_its_attempt",
+        "host_matching_projection_error_callback_is_definite_rejection",
+        "host_new_eof_during_final_terminal_backpressure_is_not_ignored",
+        "host_old_cancel_then_matching_projection_rejection_survives_delivery_eof",
+        "host_projection_cannot_smuggle_a_raw_record",
+        "host_request_id_requires_an_integer_not_a_json_float",
+        "host_roundtrip_pairs_the_original_projected_result_in_turn_two",
+        "host_second_tool_proposal_never_dispatches_again",
+        "host_semantically_invalid_complete_ids_stop_as_model_failure_before_prepare",
+        "host_truncated_body_is_a_protocol_failure",
+        "host_truncated_second_turn_eof_delivers_protocol_terminal_and_retains_result",
+        "host_final_terminal_backpressure_consumes_control_and_preserves_original_result",
+        "host_unmatched_invoke_result_keeps_unknown_instead_of_accepting_a_receipt",
+        "host_wrong_argument_scalar_type_is_a_protocol_failure",
+        "host_wrong_callback_identity_cannot_invoke_or_start_another_turn",
+        "host_cancel_after_invoke_without_result_stays_unknown",
+        "host_silent_callback_has_a_semantic_timeout_terminal"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "32",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:http_transport",
+      "names": [
+        "cancellation_and_insufficient_budget_send_zero_bytes",
+        "existing_agent_unknown_and_evidence_hold_never_enter_http_provider",
+        "cancellation_and_revocation_after_send_stop_before_response_admission",
+        "final_review_after_connect_prevents_first_request_byte",
+        "actual_loopback_http_returns_sse_without_changing_exact_reviewed_payload",
+        "remote_addresses_are_rejected_before_any_connection",
+        "partial_sse_never_becomes_a_tool_event",
+        "truncated_http_response_is_an_error_with_one_send_and_no_retry",
+        "response_budget_exhaustion_counts_actual_bytes_without_retry",
+        "ambiguous_framing_redirect_and_response_limit_are_rejected",
+        "idle_and_total_deadlines_bound_an_open_synthetic_stream"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "11",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:kernel",
+      "names": [
+        "auto_low_risk_is_permitted",
+        "actual_loop_commits_once_and_followup_uses_tool_result",
+        "cached_completed_projection_cannot_replace_original_evidence",
+        "duplicate_provider_reference_cannot_mint_second_invocation",
+        "cancellation_before_dispatch_and_after_commit_preserves_truth",
+        "full_allow_high_risk_needs_no_confirmation",
+        "confirmation_is_current_exact_pending_and_does_not_override_hard_denial",
+        "exhausted_budget_survives_reopen_and_does_not_request_followup",
+        "malformed_or_model_authority_script_is_rejected",
+        "corrupt_or_absent_original_evidence_never_replays_unknown",
+        "physical_binding_replay_returns_original_and_altered_binding_conflicts",
+        "read_only_and_hard_gates_deny",
+        "repeated_provider_reference_replays_original_receipt_without_permission_consumption",
+        "lost_response_reopens_lookup_only_and_preserves_original_receipt",
+        "provider_failure_and_definite_tool_failure_never_fabricate_success",
+        "repeated_reference_mapping_survives_unknown_and_restart",
+        "restoring_receipt_preserves_completed_control_barrier",
+        "historical_receipt_hold_preserves_new_waiting_binding_and_confirmation",
+        "restoring_receipt_preserves_call_budget_barrier",
+        "tool_result_context_budget_is_admitted_before_first_effect_or_confirmation",
+        "resume_confirmation_requires_an_existing_exact_pending_invocation"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "21",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:native_ports",
+      "names": [
+        "host_transport_total_also_bounds_response_and_next_admission",
+        "generic_ports_share_driver_without_inquiry_names",
+        "host_charge_persistence_failure_stops_exchange_and_keeps_charged_bytes",
+        "host_wire_budget_rejects_without_charging_excess",
+        "host_persist_failure_and_inflight_prevent_provider_entry",
+        "host_wire_charges_share_budget_and_host_journal"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "6",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:native_protocol",
+      "names": [
+        "registered_protocol_advertises_current_subset_and_preserves_history",
+        "registered_protocol_rejects_name_collisions",
+        "registered_protocol_current_decoder_rejects_known_but_unadvertised_tool",
+        "registered_protocol_preserves_arguments_and_schema",
+        "registered_protocol_rejects_unknown_and_incomplete"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "5",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:native_runtime_restore",
+      "names": [
+        "native_host_metered_terminal_reopens_with_original_identity_and_counters",
+        "native_host_discriminator_rejects_unaccounted_or_over_budget_wire_bytes",
+        "native_host_discriminator_rejects_script_config_history_and_pending_call"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "3",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:wire",
+      "names": [
+        "encoder_uses_structural_native_pair_and_original_tool_result",
+        "encoder_structure_exact_schema_and_role_pair_are_verified",
+        "arguments_really_fragment_across_events_and_bad_usage_rejects",
+        "fragmented_answer_and_reported_usage",
+        "final_arguments_revalidate_after_early_observation",
+        "fragmented_valid_tool_requires_complete_exchange",
+        "malformed_duplicate_and_nonobject_arguments_are_rejected",
+        "metadata_repeats_and_null_fragments_are_supported_but_limits_hold",
+        "multiline_data_comments_and_ignored_framing_are_supported",
+        "native_pair_mismatch_is_not_encoded",
+        "exact_json_request_response_line_event_and_argument_byte_boundaries",
+        "missing_done_never_reaches_physical_tool",
+        "partial_argument_cancellation_is_not_a_completed_call",
+        "nonzero_exit_after_complete_turn_never_reaches_physical_tool",
+        "prior_usage_is_unknown_on_later_failed_turn_and_reopen",
+        "reopened_inflight_is_terminal_and_never_resends",
+        "prior_usage_is_unknown_during_later_inflight_and_after_cancel",
+        "schema_metadata_and_terminal_conflicts_are_errors",
+        "silent_stream_cancellation_is_observed_before_timeout",
+        "nonreading_child_is_bounded_by_total_deadline",
+        "strict_json_rejects_duplicate_keys_bad_numbers_unicode_and_depth",
+        "unsupported_multiple_choices_calls_and_wrong_types_reject_whole_turn",
+        "wire_budget_stops_before_request_and_does_not_reset",
+        "wrong_finish_missing_done_and_error_never_release_tool",
+        "escaped_private_history_remains_loadable_without_relaxing_wire_limit",
+        "silent_and_eof_hanging_children_are_killed_and_reaped",
+        "stdio_roundtrip_uses_actual_original_result_and_persistent_counters"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "27",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:wire_review",
+      "names": [
+        "tool_result_value_must_match_its_paired_call",
+        "exactly_32_container_levels_accept_and_33_reject",
+        "mixed_and_unknown_extension_containers_share_the_same_depth_limit",
+        "repeated_call_id_cannot_change_value_or_original_receipt"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "4",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "doc:muyon_core_agent_lab",
+      "names": [],
+      "statuses": [],
+      "summaries": [
+        [
+          "ok",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    }
+  ],
+  "command_exit_code": 0,
+  "raw_sha256": "42ba9b76a34792f2c380a3d4813da08296feab22edad1e483ec894dde23819af",
+  "expectations_sha256": "ace2bde8937e735d797f4374cfc544565018ae9c615c5a51f851c5b1505de07b",
+  "combined_source": {
+    "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+    "source_tree": "829f0d3d02bd5f8cf5f57ddef27f7fa4be3341db",
+    "contract_sha256": "2cfacaa4671b3c61c250e46369040b78e31504c6d431ef1e697d19336ee24d6c"
+  }
+}

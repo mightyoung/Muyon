@@ -1,0 +1,12 @@
+{
+  "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+  "source_tree": "829f0d3d02bd5f8cf5f57ddef27f7fa4be3341db",
+  "original_http_pin": "8e0f6b1d0abfb0115bf48fa0bc8c790bfe30fa16",
+  "note": "Independent combined-source runners: exact SHA substituted, original additive 115/22/59 contract and precise seven inverse gates retained. Repository runners untouched.",
+  "runner_sha256": {
+    "combined_full.sh": "e55d22918576fe2dbb6218563109b05fef67c1ecbbcd616e8161e16948278f75",
+    "combined_full.py": "bf922570afd387628b6bd7d9d145507e8d9587c4f8e2bea42ebf664b0ebb39e1",
+    "http_batch_inverses.py": "e1a36b56e034df9cab9373b21646b8e3fb5f9866da83c299f1dc2819be88c563",
+    "http_batch.py": "cadde8222ed979d5560cde8c3719fd6206b7450384a3e8083ea1a50d962a4f1a"
+  }
+}

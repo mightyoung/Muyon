@@ -1,0 +1,156 @@
+{
+  "physical_raw_sha256": "6c134d24885753100c2e9c61844039b21679b847e81c0d696df2dc6b342d45b4",
+  "physical_build_raw_sha256": "2ced2d5f3884a3bf5f7b1e63fe0cb5a3718aa674b31f738f2391897c3bcaeedc",
+  "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+  "accepted": true,
+  "precise_rust16": [
+    {
+      "name": "wire_stale_reported_usage",
+      "accepted": true,
+      "expected_panic_location": "tests/wire.rs:182:306",
+      "expected_needles": [
+        "left: \"5\"",
+        "right: \"unknown\""
+      ]
+    },
+    {
+      "name": "wire_private_history_bound",
+      "accepted": true,
+      "expected_panic_location": "tests/wire.rs:88:180",
+      "expected_needles": [
+        "error=wire_json_size"
+      ]
+    },
+    {
+      "name": "wire_container_depth",
+      "accepted": true,
+      "expected_panic_location": "tests/wire_review.rs:9:9",
+      "expected_needles": [
+        "33 containers exceed the frozen limit"
+      ]
+    },
+    {
+      "name": "wire_native_value_identity",
+      "accepted": true,
+      "expected_panic_location": "tests/wire_review.rs:18:5",
+      "expected_needles": [
+        "a paired ID cannot conceal changed original value"
+      ]
+    },
+    {
+      "name": "wire_stream_cancel_bypass",
+      "accepted": true,
+      "expected_panic_location": "tests/wire.rs:122:161",
+      "expected_needles": [
+        "right: \"wire_cancelled\""
+      ]
+    },
+    {
+      "name": "wire_missing_done",
+      "accepted": true,
+      "expected_panic_location": "tests/http_transport.rs:161:5",
+      "expected_needles": [
+        "left: \"wire_tool_finish\"",
+        "right: \"wire_stream_truncated\""
+      ]
+    },
+    {
+      "name": "wire_native_pair",
+      "accepted": true,
+      "expected_panic_location": "tests/wire.rs:173:1005",
+      "expected_needles": [
+        "left: String(\"wrong-pair\")",
+        "right: String(\"c1\")"
+      ]
+    },
+    {
+      "name": "wire_budget_bypass",
+      "accepted": true,
+      "expected_panic_location": "tests/wire.rs:106:184",
+      "expected_needles": [
+        "left: \"1\"",
+        "right: \"0\""
+      ]
+    },
+    {
+      "name": "hard_policy_bypass",
+      "accepted": true,
+      "expected_panic_location": "tests/kernel.rs:15:5",
+      "expected_needles": [
+        "left: Permit",
+        "right: Denied"
+      ]
+    },
+    {
+      "name": "unknown_redispatch",
+      "accepted": true,
+      "expected_panic_location": "tests/kernel.rs:104:5",
+      "expected_needles": [
+        "assertion failed: command(&dir, \"run\", &[]).contains(\"model_calls=1\\n\")"
+      ]
+    },
+    {
+      "name": "duplicate_effect",
+      "accepted": true,
+      "expected_panic_location": "tests/kernel.rs:72:40",
+      "expected_needles": [
+        "called `Result::unwrap()` on an `Err` value: \"receipt_identity\""
+      ]
+    },
+    {
+      "name": "pre_effect_context_bypass",
+      "accepted": true,
+      "expected_panic_location": "tests/kernel.rs:170:96",
+      "expected_needles": [
+        "assertion failed: stopped.contains(\"effects=0\\n\")"
+      ]
+    },
+    {
+      "name": "terminal_resurrection",
+      "accepted": true,
+      "expected_panic_location": "tests/kernel.rs:140:5",
+      "expected_needles": [
+        "assertion failed: command(&dir, \"lookup\", &[]).contains(\"status=completed\\n\")"
+      ]
+    },
+    {
+      "name": "cached_receipt_trust",
+      "accepted": true,
+      "expected_panic_location": "tests/kernel.rs:120:45",
+      "expected_needles": [
+        "assertion failed: inspect.contains(\"status=outcome_unknown\\n\")"
+      ]
+    },
+    {
+      "name": "receipt_current_binding_only",
+      "accepted": true,
+      "expected_panic_location": "tests/kernel.rs:181:9",
+      "expected_needles": [
+        "assertion failed: command(&dir, \"inspect\", &[]).contains(\"status=outcome_unknown\\n\")"
+      ]
+    },
+    {
+      "name": "budget_reset",
+      "accepted": true,
+      "expected_panic_location": "tests/kernel.rs:78:5",
+      "expected_needles": [
+        "assertion `left == right` failed",
+        "\\nmodel_calls=0\\n",
+        "\\nmodel_calls=1\\n"
+      ]
+    }
+  ],
+  "physical17": {
+    "name": "wire_preterminal_physical_effect",
+    "killed": true,
+    "returncode": 1,
+    "compiled": true,
+    "acknowledged": true,
+    "physical_failure": true,
+    "log": "/workspace/leaderb-b3-evidence/b/legacy17-combined/wire_preterminal_physical_effect.log",
+    "build_log": "/workspace/leaderb-b3-evidence/b/legacy17-combined/wire_preterminal_physical_effect-build.log",
+    "crate": "/tmp/core-agent-mutation-21ffcp0_/core"
+  },
+  "negative_control_checks": 144,
+  "broad_runner_false_positive": "wire_container_depth failed only at unrelated PID capture and did not reach wire_review; broad KILLED label is rejected. Precise rerun is authoritative."
+}

@@ -1,0 +1,326 @@
+{
+  "accepted": true,
+  "classification": "full_green",
+  "component": "host",
+  "expected_tests": 59,
+  "observed_tests": 59,
+  "families": {
+    "service-stop-cause": 7,
+    "contract-transport": 8,
+    "host-synthetic-http": 6,
+    "native-host": 25,
+    "service-controller": 4,
+    "service-lifecycle": 4,
+    "service-oracle": 1,
+    "service-root": 2,
+    "service-runtime": 2
+  },
+  "unit_tests": 7,
+  "doc_tests": 0,
+  "groups": [
+    {
+      "key": "unit:src/lib.rs",
+      "names": [
+        "http_recovery_tests::http_recovery_child",
+        "http_recovery_tests::loopback_post_io_wire_journal_is_unknown_without_resend",
+        "service_runtime::stop_cause_tests::observed_cancel_survives_later_deadline",
+        "http_recovery_tests::loopback_cross_process_crash_preserves_unknown_begin_without_resend",
+        "service_runtime::stop_cause_tests::observed_deadline_survives_late_cancel",
+        "http_recovery_tests::loopback_post_io_sent_ledger_failure_recovers_unknown_without_resend",
+        "http_recovery_tests::loopback_post_io_failed_ledger_overrides_cancel_and_recovers_unknown_without_resend"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "7",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "unit:src/bin/native-protocol-fixture.rs",
+      "names": [],
+      "statuses": [],
+      "summaries": [
+        [
+          "ok",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:contract_transport",
+      "names": [
+        "embedded_line_feed_is_fatal_but_crlf_sibling_is_valid",
+        "fatal_envelope_replies_latch_transport_closed",
+        "persistent_catalog_keeps_generation_and_one_shot_ticket",
+        "explicit_transport_close_rejects_future_inspection",
+        "raw_frames_enforce_utf8_duplicates_depth_and_limits",
+        "recoverable_schema_rejection_preserves_catalog",
+        "tickets_cannot_cross_catalog_instances",
+        "wire_close_retains_child_command_inspection_semantics"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "8",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:host_http",
+      "names": [
+        "loopback_answer_uses_gateway_review_and_shared_durable_budget",
+        "loopback_receive_budget_stops_partial_response_without_retry",
+        "loopback_mismatched_session_refuses_before_ledger_or_connection",
+        "loopback_budget_and_initial_authority_refuse_before_socket_bytes",
+        "loopback_unknown_inflight_crash_blocks_same_state_retry",
+        "loopback_truncation_cancellation_and_revocation_never_resend"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "6",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:native_read",
+      "names": [
+        "actual_value_review_denies_sensitive_projection",
+        "cancel_closes_owned_child_and_executes_zero",
+        "cancel_during_handler_retains_raw_receipt_without_projection",
+        "catalog_known_but_unadvertised_call_executes_zero",
+        "duplicate_model_call_never_reexecutes_handler",
+        "handler_failure_keeps_source_facts",
+        "historical_projection_revoke_blocks_actual_second_send",
+        "final_payload_policy_revoke_blocks_second_endpoint_admission",
+        "invalid_host_enrollment_publishes_nothing_and_active_catalog_is_sealed",
+        "ledger_failure_sends_zero_bytes",
+        "native_host_executes_registered_read",
+        "missing_selected_refs_execute_zero_before_physical_read",
+        "malformed_oversize_eof_child_frames_invalidate_session",
+        "physical_handler_rejects_same_id_wrong_business_type",
+        "all_native_mappings_use_physical_store_and_same_two_turn_runtime",
+        "native_store_restore_rejects_forged_receipts_and_facts",
+        "restart_retains_raw_evidence_without_live_export_authority",
+        "receipt_time_revoke_exports_no_projection",
+        "two_turn_model_bytes_contain_only_validated_projection",
+        "revoke_after_preinvoke_snapshot_executes_zero",
+        "unauthorized_read_executes_zero",
+        "wrong_reference_version_retains_only_original_receipt",
+        "wrong_projection_preserves_raw_receipt",
+        "native_store_persist_budget_never_writes_unreadable_snapshot",
+        "silent_child_deadline_is_bounded_and_reaped"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "25",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:service_controller",
+      "names": [
+        "controller_is_send_sync_without_moving_native_session",
+        "build_identity_is_explicit_without_host_build_environment",
+        "service_controller_executes_registered_read",
+        "zero_client_initialization_retirement_requires_real_settlement"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "4",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:service_lifecycle",
+      "names": [
+        "client_epochs_generations_and_visibility_are_fail_closed",
+        "close_and_reconnect_preserve_original_durable_outcome",
+        "incomplete_temp_evidence_blocks_ready_without_cleanup",
+        "same_request_is_existing_without_a_second_worker"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "4",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:service_oracle",
+      "names": [
+        "service_controller_observer_correlates_all_builtin_payloads"
+      ],
+      "statuses": [
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "1",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:service_root",
+      "names": [
+        "root_lease_serializes_durable_admission_and_preserves_identity",
+        "root_inventory_refuses_unowned_entries_and_peak_overflow"
+      ],
+      "statuses": [
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "2",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:service_runtime",
+      "names": [
+        "pre_cancelled_worker_never_bootstraps_or_reads",
+        "all_builtins_read_physical_file_and_journal_two_actual_payloads"
+      ],
+      "statuses": [
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "2",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "doc:muyon_rust_agent_host_lab",
+      "names": [],
+      "statuses": [],
+      "summaries": [
+        [
+          "ok",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    }
+  ],
+  "command_exit_code": 0,
+  "raw_sha256": "464966c8c343250b66cc00a38122b17e0e4e51cf563c2a56338a6f813f29e1de",
+  "expectations_sha256": "ace2bde8937e735d797f4374cfc544565018ae9c615c5a51f851c5b1505de07b"
+}

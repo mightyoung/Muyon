@@ -1,0 +1,158 @@
+{
+  "accepted": true,
+  "classification": "full_green",
+  "component": "plugin",
+  "expected_tests": 22,
+  "observed_tests": 22,
+  "families": {
+    "native-mapping": 5,
+    "legacy-plugin": 17
+  },
+  "unit_tests": 0,
+  "doc_tests": 0,
+  "groups": [
+    {
+      "key": "unit:src/lib.rs",
+      "names": [],
+      "statuses": [],
+      "summaries": [
+        [
+          "ok",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "unit:src/main.rs",
+      "names": [],
+      "statuses": [],
+      "summaries": [
+        [
+          "ok",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:mapping_contract",
+      "names": [
+        "native_host_canonical_api_matches_catalog_integer_contract",
+        "seeded_rename_preserves_closed_schema_and_separate_binding",
+        "native_declarations_register_without_grants_or_reads",
+        "mapped_reads_keep_native_arguments_and_typed_scope",
+        "source_subsets_have_exact_types_relations_and_classification"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "5",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:read_contract",
+      "names": [
+        "cancel_after_dispatch_accepts_no_projection",
+        "cancel_before_dispatch_executes_zero",
+        "invalid_projection_and_refs_reject",
+        "prepared_bindings_are_exact",
+        "revoke_before_invoke_executes_zero",
+        "receipt_reference_has_original_owner",
+        "ticket_is_one_shot",
+        "eof_and_concurrency_fail_closed"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "8",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "integration:registration",
+      "names": [
+        "atomic_registration_publishes_only_valid_bundle",
+        "foreign_data_admission_requires_the_referenced_schema_closure",
+        "declaration_labels_cannot_authorize",
+        "namespace_duplicates_and_versions_reject",
+        "registration_neither_grants_nor_reads",
+        "relation_and_view_refs_must_resolve",
+        "renamed_bundle_is_semantically_equivalent",
+        "schema_subset_and_limits_fail_closed",
+        "discovery_filters_current_authority"
+      ],
+      "statuses": [
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok",
+        "ok"
+      ],
+      "summaries": [
+        [
+          "ok",
+          "9",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    {
+      "key": "doc:muyon_plugin_contract_lab",
+      "names": [],
+      "statuses": [],
+      "summaries": [
+        [
+          "ok",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ]
+    }
+  ],
+  "command_exit_code": 0,
+  "raw_sha256": "1912126456159522426690eb6d678a918f9159c5f838b025bd040ef8981f6d33",
+  "expectations_sha256": "ace2bde8937e735d797f4374cfc544565018ae9c615c5a51f851c5b1505de07b"
+}

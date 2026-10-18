@@ -1,0 +1,11 @@
+{
+  "command": [
+    "bash",
+    "/workspace/leaderb-b3-evidence/b/runners/combined_full.sh",
+    "core"
+  ],
+  "exit_code": 0,
+  "seconds": 106.92642879486084,
+  "log": "/workspace/leaderb-b3-evidence/b/core-full-final.log",
+  "sha256": "10751eb36483489099ecbecf60093e77fa0c6c6fb872b6f76b2a889215736cd3"
+}

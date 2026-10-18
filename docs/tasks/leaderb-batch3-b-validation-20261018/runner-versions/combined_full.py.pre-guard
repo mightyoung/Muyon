@@ -1,0 +1,7 @@
+import sys
+sys.path.insert(0,'/workspace/leaderb-b3-b/experiments/redesign/rust-agent-host-lab/checks')
+import full
+from http_batch import contract
+full.CASES=contract()
+if __name__ == "__main__":
+    raise SystemExit(full.main())

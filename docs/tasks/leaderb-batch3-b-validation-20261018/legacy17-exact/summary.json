@@ -1,0 +1,867 @@
+{
+  "combined_source": {
+    "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+    "source_tree": "829f0d3d02bd5f8cf5f57ddef27f7fa4be3341db",
+    "contract_sha256": "2cfacaa4671b3c61c250e46369040b78e31504c6d431ef1e697d19336ee24d6c"
+  },
+  "rows": [
+    {
+      "name": "wire_stale_reported_usage",
+      "test_target": "wire",
+      "test": "prior_usage_is_unknown_on_later_failed_turn_and_reopen",
+      "needles": [
+        "left: \"5\"",
+        "right: \"unknown\""
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "ff2e1f3ebfa53c270913e42c8b833a3642dea79083e763d7b011e5b973466814",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "prior_usage_is_unknown_on_later_failed_turn_and_reopen",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "f87e921446ed8aa00325fa9b926e8a1dd8f1518c7f12e8bf98b459e9b166ed0f"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "prior_usage_is_unknown_on_later_failed_turn_and_reopen",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "1aed7c8016643d766d26935c4fbb85d9262804eac6a7bd52039772d372e03037"
+      }
+    },
+    {
+      "name": "wire_private_history_bound",
+      "test_target": "wire",
+      "test": "escaped_private_history_remains_loadable_without_relaxing_wire_limit",
+      "needles": [
+        "error=wire_json_size"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "77eee876e322320f2902647cca9ab44cfbe786f15f1fec3e4b23afa66408d6c5",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "escaped_private_history_remains_loadable_without_relaxing_wire_limit",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "1e81cbe43e6ef675e68883dc32e0a8941bb2c686276cc58219c4dc4974604eca"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "escaped_private_history_remains_loadable_without_relaxing_wire_limit",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "0eaf5b76a5f2ee9b1846f2057bd75beb7c3e3e2fcc0790cedd0152aefc906119"
+      }
+    },
+    {
+      "name": "wire_container_depth",
+      "test_target": "wire_review",
+      "test": "exactly_32_container_levels_accept_and_33_reject",
+      "needles": [
+        "33 containers exceed the frozen limit"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "3b107615ea38ca2b0c678f04c7265ddc52faa85fc4aa6827a28cd30a79e4fcc6",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire_review",
+          "exactly_32_container_levels_accept_and_33_reject",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "f86bc52e732dc68eb79bb27270c7610b62c787202df517574c7ad2768d65e07f"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire_review",
+          "exactly_32_container_levels_accept_and_33_reject",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "c34ae53bd19b5008d48843a632ea1e98d71e2c6d3ba9a301aac68dab428f38d3"
+      }
+    },
+    {
+      "name": "wire_native_value_identity",
+      "test_target": "wire_review",
+      "test": "tool_result_value_must_match_its_paired_call",
+      "needles": [
+        "a paired ID cannot conceal changed original value"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "7f08919aca465e79909f8adfc89f3f49b1758b63b143972aa39324b38924972d",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire_review",
+          "tool_result_value_must_match_its_paired_call",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "7e73246215b32314e3d474f575e7f4eafeec49c9e58faf478f0fb11594a02766"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire_review",
+          "tool_result_value_must_match_its_paired_call",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "0dd93029cb3ad8b1f1973ae1351441b57be2b94be8ee1bfb5776516570febb30"
+      }
+    },
+    {
+      "name": "wire_stream_cancel_bypass",
+      "test_target": "wire",
+      "test": "silent_stream_cancellation_is_observed_before_timeout",
+      "needles": [
+        "right: \"wire_cancelled\""
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "d2822f58997e313f613621755b7bf1a379190ff81fd57e32064f1526953b98fc",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "silent_stream_cancellation_is_observed_before_timeout",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "73ceb7e4e7cffff924518c9c2cbeb894286b4dafaacdbeb37558519907b1b93a"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "silent_stream_cancellation_is_observed_before_timeout",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "c77bf46473b566e8208e9c2280f9da70d2cdd80cc9448d467ea49782132cfbb1"
+      }
+    },
+    {
+      "name": "wire_missing_done",
+      "test_target": "http_transport",
+      "test": "partial_sse_never_becomes_a_tool_event",
+      "needles": [
+        "left: \"wire_tool_finish\"",
+        "right: \"wire_stream_truncated\""
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "b5b4c753ef633e069ec9f96ffe8aad7fbfe77811d5774bedbb575a9afbd77f71",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "http_transport",
+          "partial_sse_never_becomes_a_tool_event",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "d89f96047b137be6ae39f28d0f401f357cb8ad9f6cdcfa49eb957a7094184280"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "http_transport",
+          "partial_sse_never_becomes_a_tool_event",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "34e323d4842c5177effe80adaaca68edf6b8c526b5ce1366a705b5c6c9f2d1ac"
+      }
+    },
+    {
+      "name": "wire_native_pair",
+      "test_target": "wire",
+      "test": "encoder_structure_exact_schema_and_role_pair_are_verified",
+      "needles": [
+        "left: String(\"wrong-pair\")",
+        "right: String(\"c1\")"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "3d55840fc87cbb08f634c815d6c1ed2483b1162981454daa3b0bdf7ae87b41ec",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "encoder_structure_exact_schema_and_role_pair_are_verified",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "c5ac73cecc7df0808748d91db83e7dd43d9d1cfff6cdd6cfc05fd5ce8be4e048"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "encoder_structure_exact_schema_and_role_pair_are_verified",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "395b52b52551d8f58833b3533752045e3c0b3f3db09f93483ce6498f20da1dc6"
+      }
+    },
+    {
+      "name": "wire_budget_bypass",
+      "test_target": "wire",
+      "test": "wire_budget_stops_before_request_and_does_not_reset",
+      "needles": [
+        "left: \"1\"",
+        "right: \"0\""
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "408de42efe734bc64b2e285877d4aca47476e23337b50020f7b0f12699599a61",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "wire_budget_stops_before_request_and_does_not_reset",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "4b153e473c684bcdfa192fa579d48a407b0eb5e3530633bf1a82b090a33c1073"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "wire",
+          "wire_budget_stops_before_request_and_does_not_reset",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "58f8fba9233691da5f7205d404d308c65ee315adad9739f17c93f53ca8fa8530"
+      }
+    },
+    {
+      "name": "hard_policy_bypass",
+      "test_target": "kernel",
+      "test": "read_only_and_hard_gates_deny",
+      "needles": [
+        "left: Permit",
+        "right: Denied"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "ab73f4da8cc6d3d7841b1147c825953796bcd1dc3acb59f2ea478b62a16bf88f",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "read_only_and_hard_gates_deny",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "8b619795fe8a4b6f72ff52ec5a307c84401918db2f859a80482573284df0692a"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "read_only_and_hard_gates_deny",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "35c4ff415288ba97a583451a96ffa737d5a99def351679fe33fdc05a29a2c75d"
+      }
+    },
+    {
+      "name": "unknown_redispatch",
+      "test_target": "kernel",
+      "test": "corrupt_or_absent_original_evidence_never_replays_unknown",
+      "needles": [
+        "assertion failed:",
+        "model_calls=1"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "c91c8f1f4b87286e8c36dba0037bba71d56845de3e6fa6fa7d670297f1c84d6c",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "corrupt_or_absent_original_evidence_never_replays_unknown",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "3e9002cf1c196f6495707c386ac987bceff0835d4fc0796e931b24020c5c486b"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "corrupt_or_absent_original_evidence_never_replays_unknown",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "e91ea1e2d41dd45996334a15c5dfad5e84bdb37274e87ef7494eea05b5188d77"
+      }
+    },
+    {
+      "name": "duplicate_effect",
+      "test_target": "kernel",
+      "test": "physical_binding_replay_returns_original_and_altered_binding_conflicts",
+      "needles": [
+        "receipt_identity"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "3fe5587714afb9e767f6fd982cf3506509b691dd7a9992336eff1368bb30d809",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "physical_binding_replay_returns_original_and_altered_binding_conflicts",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "fe0c7eda7a6ef3f519d99d0396f7bb6132a62003bb20de88842f2ff03e34f724"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "physical_binding_replay_returns_original_and_altered_binding_conflicts",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "dcb8f5eee22493954e998ac4368571b07527b9ff99b119fcda459ba453d67d6d"
+      }
+    },
+    {
+      "name": "pre_effect_context_bypass",
+      "test_target": "kernel",
+      "test": "tool_result_context_budget_is_admitted_before_first_effect_or_confirmation",
+      "needles": [
+        "assertion failed:",
+        "effects=0"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "17e2a9d18e4138b8c4086730a397f8c337ab1743b6cbcb94413f41024b8bba63",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "tool_result_context_budget_is_admitted_before_first_effect_or_confirmation",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "7524a9ab14cbd59c25746aa6dd7a86886974b228d3672e42b6fda49aeb99bd78"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "tool_result_context_budget_is_admitted_before_first_effect_or_confirmation",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "8a74bc2b8ded684548c4ee86f2e169edbe748e855a475a0b4e1b61e8360de633"
+      }
+    },
+    {
+      "name": "terminal_resurrection",
+      "test_target": "kernel",
+      "test": "restoring_receipt_preserves_completed_control_barrier",
+      "needles": [
+        "assertion"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "a3510eaa846f1c7a113e90fb77827b8d5e89ba3ee2ebca9eee13d00f12c0e82b",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "restoring_receipt_preserves_completed_control_barrier",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "2ba870d4a97014bb7719b1a5b1a0f238738c1960c46c8d1bdf2078d9d7ac7615"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "restoring_receipt_preserves_completed_control_barrier",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "6c0fc5cb0721584798dd0293d43b2481866d38eff67d8173167f6fee87c6a335"
+      }
+    },
+    {
+      "name": "cached_receipt_trust",
+      "test_target": "kernel",
+      "test": "cached_completed_projection_cannot_replace_original_evidence",
+      "needles": [
+        "assertion failed:",
+        "status=outcome_unknown"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "480626181166a36f9ada3d3596742fb41a1369e48d3c34cce0059e49837de5d7",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "cached_completed_projection_cannot_replace_original_evidence",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "cb8bb826c365cd6961990a4bc3d3223656e05a1ac8960961bfb8f67a79bee25a"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "cached_completed_projection_cannot_replace_original_evidence",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "d4c658941a6f98b9cd8a9b373e319c8de3f93e0b518616230e66780df5bc5ef7"
+      }
+    },
+    {
+      "name": "receipt_current_binding_only",
+      "test_target": "kernel",
+      "test": "historical_receipt_hold_preserves_new_waiting_binding_and_confirmation",
+      "needles": [
+        "assertion failed:",
+        "status=outcome_unknown"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "bffb26b35c885c99c6d072250b2abe6e46f4860e640aa6cf070170ae3befd807",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "historical_receipt_hold_preserves_new_waiting_binding_and_confirmation",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "87bdb4d6ba6a1ab1fe0577ec4365dc5cce3bd9b7b70a80587f2e9cf791a54edb"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "historical_receipt_hold_preserves_new_waiting_binding_and_confirmation",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "c1ba1fe5c4f26452e4d7f295c936b5899a5d2d1a282ba097b128031144018909"
+      }
+    },
+    {
+      "name": "budget_reset",
+      "test_target": "kernel",
+      "test": "exhausted_budget_survives_reopen_and_does_not_request_followup",
+      "needles": [
+        "assertion"
+      ],
+      "baseline_green": true,
+      "mutation_killed": true,
+      "source_sha256": "e7c5f8e471948c0599b440e580e81d132b185a97bca97bd98e3f4132f34d8a8c",
+      "baseline": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "exhausted_budget_survives_reopen_and_does_not_request_followup",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-b/experiments/redesign/core-agent-lab/core",
+        "exit_code": 0,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "9cfb5a52f89565276037f3ba79931cf05391b0c6ff6ee5ec083eb88fefb24427"
+      },
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "kernel",
+          "exhausted_budget_survives_reopen_and_does_not_request_followup",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/legacy17-exact-work",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "965e045e23cc315e6213a5042dce2ffad13b7278eb6260c3c3e1987d3a4e79d7"
+      }
+    }
+  ],
+  "accepted": true
+}

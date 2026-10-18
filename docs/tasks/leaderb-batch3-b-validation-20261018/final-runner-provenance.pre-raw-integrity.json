@@ -1,0 +1,26 @@
+{
+  "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+  "source_tree": "829f0d3d02bd5f8cf5f57ddef27f7fa4be3341db",
+  "default_parallel": {
+    "RUST_TEST_THREADS": null,
+    "RUSTFLAGS": null
+  },
+  "note": "Final sealed runners for final core full; earlier versions and initial provenance retained. Exact legacy16 runner was run before semantic source-line audit was authored; audit independently cross-checks original frozen source locations and 144 negative controls.",
+  "runner_sha256": {
+    "runners/combined_full.py": "28ad8bbe8845c8cf585023b7ebc33ba8e5c6cefeeb8f6252e3be378bf4eea530",
+    "runners/combined_full.sh": "afda1b4d1d4d20d256c0102eab3ad8a86474e99f87bebe8022d434131cdd9a5c",
+    "runners/combined_guard.py": "c4d785ed1cd2036ff9a0410214db66be63477d745aa9317480663982c2e9383e",
+    "runners/combined_mutations.py": "aa78b87795cc35e46f2091f29d805b54a5962b061601acbbf8e74833062ecac3",
+    "runners/http_batch.py": "cadde8222ed979d5560cde8c3719fd6206b7450384a3e8083ea1a50d962a4f1a",
+    "runners/http_batch_inverses.py": "e1a36b56e034df9cab9373b21646b8e3fb5f9866da83c299f1dc2819be88c563",
+    "runners/legacy_assertion_audit.py": "5b3e30584e4d6d3a4e51db127486404af56ba991a6b23237ea54bf24db4159b7",
+    "runners/legacy_exact.py": "5cc85ed0fd6c3ebc7318971d8b3e74279d4e225b69cbf13797d3b5fa5f924fe3",
+    "runners/orchestrate.py": "d409fd77f8cf741f9f2ff7df3825ed163c5c0f36fbadb9c9402c0da14e750620",
+    "runners/recover_inventory.py": "79061ac8ed6b85339f310d82742dba2c5360402b76fc2f90ce7dfbf3f7c60f1f",
+    "runners/recover_physical.py": "ce7ea6681d732126a006899f00fb4352fe6bc90eaffe11c35f2d1247c327fca6"
+  },
+  "source_inventory_sha256": "c051c5456b0a5e2598987fd3a39527d1ed2bb220cf57379ddafe3b83b92337c7",
+  "combined_contract_sha256": "2cfacaa4671b3c61c250e46369040b78e31504c6d431ef1e697d19336ee24d6c",
+  "inventory_audit_sha256": "91ada4cdf09c71154453cee1e4f85030ca503d7279d33ace57be6fc509eebe88",
+  "recovery_note": "Added two recovery-only helpers before final core run; pre-recovery seal retained. They enumerate fresh raw cargo inventory and reproduce unchanged original seventeenth physical inverse when remote raw logs are absent."
+}

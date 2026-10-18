@@ -1,0 +1,207 @@
+[
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_stale_reported_usage/src/agent.rs",
+    "sha256": "ff2e1f3ebfa53c270913e42c8b833a3642dea79083e763d7b011e5b973466814"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_private_history_bound/src/wire_provider.rs",
+    "sha256": "77eee876e322320f2902647cca9ab44cfbe786f15f1fec3e4b23afa66408d6c5"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_container_depth/src/wire_json.rs",
+    "sha256": "3b107615ea38ca2b0c678f04c7265ddc52faa85fc4aa6827a28cd30a79e4fcc6"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_native_value_identity/src/wire_provider.rs",
+    "sha256": "7f08919aca465e79909f8adfc89f3f49b1758b63b143972aa39324b38924972d"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_stream_cancel_bypass/src/agent.rs",
+    "sha256": "d2822f58997e313f613621755b7bf1a379190ff81fd57e32064f1526953b98fc"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_missing_done/src/wire_sse.rs",
+    "sha256": "b5b4c753ef633e069ec9f96ffe8aad7fbfe77811d5774bedbb575a9afbd77f71"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_native_pair/src/wire_provider.rs",
+    "sha256": "3d55840fc87cbb08f634c815d6c1ed2483b1162981454daa3b0bdf7ae87b41ec"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_budget_bypass/src/wire_provider.rs",
+    "sha256": "408de42efe734bc64b2e285877d4aca47476e23337b50020f7b0f12699599a61"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/hard_policy_bypass/src/policy.rs",
+    "sha256": "ab73f4da8cc6d3d7841b1147c825953796bcd1dc3acb59f2ea478b62a16bf88f"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/unknown_redispatch/src/agent.rs",
+    "sha256": "c91c8f1f4b87286e8c36dba0037bba71d56845de3e6fa6fa7d670297f1c84d6c"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/duplicate_effect/src/store.rs",
+    "sha256": "3fe5587714afb9e767f6fd982cf3506509b691dd7a9992336eff1368bb30d809"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/pre_effect_context_bypass/src/agent.rs",
+    "sha256": "17e2a9d18e4138b8c4086730a397f8c337ab1743b6cbcb94413f41024b8bba63"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/terminal_resurrection/src/agent.rs",
+    "sha256": "a3510eaa846f1c7a113e90fb77827b8d5e89ba3ee2ebca9eee13d00f12c0e82b"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/cached_receipt_trust/src/agent.rs",
+    "sha256": "480626181166a36f9ada3d3596742fb41a1369e48d3c34cce0059e49837de5d7"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/receipt_current_binding_only/src/agent.rs",
+    "sha256": "bffb26b35c885c99c6d072250b2abe6e46f4860e640aa6cf070170ae3befd807"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/budget_reset/src/agent.rs",
+    "sha256": "e7c5f8e471948c0599b440e580e81d132b185a97bca97bd98e3f4132f34d8a8c"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_preterminal_physical_effect/src/agent.rs",
+    "sha256": "9c0a8c420145d16d66bfed2b97c996cfda9b1e3c209486cbf1701b19a840175c"
+  },
+  {
+    "kind": "actual_preserved_private_source",
+    "path": "mutant-sources/legacy-broad/wire_preterminal_physical_effect/src/wire_provider.rs",
+    "sha256": "a4e4a451ab5f1dee0080ea497d472f72592661d169bf8708462cfe80346b3be9"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/wire_stale_reported_usage/src/agent.rs",
+    "sha256": "ff2e1f3ebfa53c270913e42c8b833a3642dea79083e763d7b011e5b973466814"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/wire_private_history_bound/src/wire_provider.rs",
+    "sha256": "77eee876e322320f2902647cca9ab44cfbe786f15f1fec3e4b23afa66408d6c5"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/wire_container_depth/src/wire_json.rs",
+    "sha256": "3b107615ea38ca2b0c678f04c7265ddc52faa85fc4aa6827a28cd30a79e4fcc6"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/wire_native_value_identity/src/wire_provider.rs",
+    "sha256": "7f08919aca465e79909f8adfc89f3f49b1758b63b143972aa39324b38924972d"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/wire_stream_cancel_bypass/src/agent.rs",
+    "sha256": "d2822f58997e313f613621755b7bf1a379190ff81fd57e32064f1526953b98fc"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/wire_missing_done/src/wire_sse.rs",
+    "sha256": "b5b4c753ef633e069ec9f96ffe8aad7fbfe77811d5774bedbb575a9afbd77f71"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/wire_native_pair/src/wire_provider.rs",
+    "sha256": "3d55840fc87cbb08f634c815d6c1ed2483b1162981454daa3b0bdf7ae87b41ec"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/wire_budget_bypass/src/wire_provider.rs",
+    "sha256": "408de42efe734bc64b2e285877d4aca47476e23337b50020f7b0f12699599a61"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/hard_policy_bypass/src/policy.rs",
+    "sha256": "ab73f4da8cc6d3d7841b1147c825953796bcd1dc3acb59f2ea478b62a16bf88f"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/unknown_redispatch/src/agent.rs",
+    "sha256": "c91c8f1f4b87286e8c36dba0037bba71d56845de3e6fa6fa7d670297f1c84d6c"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/duplicate_effect/src/store.rs",
+    "sha256": "3fe5587714afb9e767f6fd982cf3506509b691dd7a9992336eff1368bb30d809"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/pre_effect_context_bypass/src/agent.rs",
+    "sha256": "17e2a9d18e4138b8c4086730a397f8c337ab1743b6cbcb94413f41024b8bba63"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/terminal_resurrection/src/agent.rs",
+    "sha256": "a3510eaa846f1c7a113e90fb77827b8d5e89ba3ee2ebca9eee13d00f12c0e82b"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/cached_receipt_trust/src/agent.rs",
+    "sha256": "480626181166a36f9ada3d3596742fb41a1369e48d3c34cce0059e49837de5d7"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/receipt_current_binding_only/src/agent.rs",
+    "sha256": "bffb26b35c885c99c6d072250b2abe6e46f4860e640aa6cf070170ae3befd807"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/legacy-exact/budget_reset/src/agent.rs",
+    "sha256": "e7c5f8e471948c0599b440e580e81d132b185a97bca97bd98e3f4132f34d8a8c"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/http7/budget_classification/lib.rs",
+    "sha256": "346dcd8966bb406abee32a51db4db7d405f2b81fbef9fcd9dbfc940e4ff05cb8"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/http7/journal_classification/lib.rs",
+    "sha256": "e85eafac7e140a057f764409946bc2a2b53ccf8fcc19e237b7616c6c04916084"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/http7/host_restore/agent.rs",
+    "sha256": "5caac6e01eba1697b44b40aa1f4afd572589966d34984dd27ac7b2e974842a6c"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/http7/inflight_unknown/agent.rs",
+    "sha256": "c59195d8dff18c6c95fe432fcc2d5329f937f816a44475ceda73d6d28bccda38"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/http7/completion_ledger_unknown/lib.rs",
+    "sha256": "c8b6bf82a6cf32b8fe9b847b7f84616b0120247d15a180b21e242cd73050091a"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/http7/unknown_over_late_cancel/agent.rs",
+    "sha256": "00e97d745a683bc6a79d5b8841adce54a303516e271b7d2af69adeda3da2c22c"
+  },
+  {
+    "kind": "reconstructed_matches_actual_execution_sha256",
+    "path": "mutant-sources/http7/shared_charge/agent.rs",
+    "sha256": "5e63d7670963fbbb0e10f11c0c374ae3ae1dfcb834ee488a0349c72ac6dec9de"
+  }
+]

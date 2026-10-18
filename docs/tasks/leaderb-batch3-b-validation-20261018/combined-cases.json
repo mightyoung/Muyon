@@ -1,0 +1,497 @@
+{
+  "base": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
+  "components": {
+    "core": {
+      "groups": {
+        "integration:host": {
+          "family": "legacy-core",
+          "names": [
+            "host_cancel_after_invoke_keeps_the_original_result_and_stops",
+            "host_cancel_after_invoke_without_result_stays_unknown",
+            "host_cancel_and_close_are_consumed_while_output_is_physically_backpressured",
+            "host_cancel_during_model_callback_is_terminal_without_a_tool",
+            "host_clean_eof_is_distinct_from_a_truncated_header",
+            "host_close_after_invoke_keeps_the_original_result_and_stops",
+            "host_close_during_model_callback_is_terminal_and_reaped",
+            "host_complete_bad_frames_keep_the_same_failure_when_input_is_half_closed",
+            "host_confirmation_requirement_never_becomes_automatic_approval",
+            "host_denial_stops_before_the_first_invocation",
+            "host_duplicate_keys_and_invalid_utf8_never_become_callbacks",
+            "host_each_byte_framing_is_equivalent_for_a_direct_answer",
+            "host_existing_attempt_is_never_reopened_or_resent",
+            "host_final_terminal_backpressure_consumes_control_and_preserves_original_result",
+            "host_forged_approval_in_model_arguments_is_rejected",
+            "host_frame_size_is_checked_before_body_allocation",
+            "host_invocation_identity_is_nonce_issued_and_durably_bound_to_its_attempt",
+            "host_matching_oversized_projection_is_rejected_without_unknown_or_result",
+            "host_matching_projection_error_callback_is_definite_rejection",
+            "host_new_eof_during_final_terminal_backpressure_is_not_ignored",
+            "host_old_cancel_then_matching_projection_rejection_survives_delivery_eof",
+            "host_projection_cannot_smuggle_a_raw_record",
+            "host_request_id_requires_an_integer_not_a_json_float",
+            "host_roundtrip_pairs_the_original_projected_result_in_turn_two",
+            "host_second_tool_proposal_never_dispatches_again",
+            "host_semantically_invalid_complete_ids_stop_as_model_failure_before_prepare",
+            "host_silent_callback_has_a_semantic_timeout_terminal",
+            "host_truncated_body_is_a_protocol_failure",
+            "host_truncated_second_turn_eof_delivers_protocol_terminal_and_retains_result",
+            "host_unmatched_invoke_result_keeps_unknown_instead_of_accepting_a_receipt",
+            "host_wrong_argument_scalar_type_is_a_protocol_failure",
+            "host_wrong_callback_identity_cannot_invoke_or_start_another_turn"
+          ]
+        },
+        "integration:kernel": {
+          "family": "legacy-core",
+          "names": [
+            "actual_loop_commits_once_and_followup_uses_tool_result",
+            "auto_low_risk_is_permitted",
+            "cached_completed_projection_cannot_replace_original_evidence",
+            "cancellation_before_dispatch_and_after_commit_preserves_truth",
+            "confirmation_is_current_exact_pending_and_does_not_override_hard_denial",
+            "corrupt_or_absent_original_evidence_never_replays_unknown",
+            "duplicate_provider_reference_cannot_mint_second_invocation",
+            "exhausted_budget_survives_reopen_and_does_not_request_followup",
+            "full_allow_high_risk_needs_no_confirmation",
+            "historical_receipt_hold_preserves_new_waiting_binding_and_confirmation",
+            "lost_response_reopens_lookup_only_and_preserves_original_receipt",
+            "malformed_or_model_authority_script_is_rejected",
+            "physical_binding_replay_returns_original_and_altered_binding_conflicts",
+            "provider_failure_and_definite_tool_failure_never_fabricate_success",
+            "read_only_and_hard_gates_deny",
+            "repeated_provider_reference_replays_original_receipt_without_permission_consumption",
+            "repeated_reference_mapping_survives_unknown_and_restart",
+            "restoring_receipt_preserves_call_budget_barrier",
+            "restoring_receipt_preserves_completed_control_barrier",
+            "resume_confirmation_requires_an_existing_exact_pending_invocation",
+            "tool_result_context_budget_is_admitted_before_first_effect_or_confirmation"
+          ]
+        },
+        "integration:wire": {
+          "family": "legacy-core",
+          "names": [
+            "arguments_really_fragment_across_events_and_bad_usage_rejects",
+            "encoder_structure_exact_schema_and_role_pair_are_verified",
+            "encoder_uses_structural_native_pair_and_original_tool_result",
+            "escaped_private_history_remains_loadable_without_relaxing_wire_limit",
+            "exact_json_request_response_line_event_and_argument_byte_boundaries",
+            "final_arguments_revalidate_after_early_observation",
+            "fragmented_answer_and_reported_usage",
+            "fragmented_valid_tool_requires_complete_exchange",
+            "malformed_duplicate_and_nonobject_arguments_are_rejected",
+            "metadata_repeats_and_null_fragments_are_supported_but_limits_hold",
+            "missing_done_never_reaches_physical_tool",
+            "multiline_data_comments_and_ignored_framing_are_supported",
+            "native_pair_mismatch_is_not_encoded",
+            "nonreading_child_is_bounded_by_total_deadline",
+            "nonzero_exit_after_complete_turn_never_reaches_physical_tool",
+            "partial_argument_cancellation_is_not_a_completed_call",
+            "prior_usage_is_unknown_during_later_inflight_and_after_cancel",
+            "prior_usage_is_unknown_on_later_failed_turn_and_reopen",
+            "reopened_inflight_is_terminal_and_never_resends",
+            "schema_metadata_and_terminal_conflicts_are_errors",
+            "silent_and_eof_hanging_children_are_killed_and_reaped",
+            "silent_stream_cancellation_is_observed_before_timeout",
+            "stdio_roundtrip_uses_actual_original_result_and_persistent_counters",
+            "strict_json_rejects_duplicate_keys_bad_numbers_unicode_and_depth",
+            "unsupported_multiple_choices_calls_and_wrong_types_reject_whole_turn",
+            "wire_budget_stops_before_request_and_does_not_reset",
+            "wrong_finish_missing_done_and_error_never_release_tool"
+          ]
+        },
+        "integration:wire_review": {
+          "family": "legacy-core",
+          "names": [
+            "exactly_32_container_levels_accept_and_33_reject",
+            "mixed_and_unknown_extension_containers_share_the_same_depth_limit",
+            "repeated_call_id_cannot_change_value_or_original_receipt",
+            "tool_result_value_must_match_its_paired_call"
+          ]
+        },
+        "unit:src/lib.rs": {
+          "family": "legacy-core",
+          "names": [
+            "host_session::tests::fresh_admission_excludes_host_work_from_idle_without_resetting_total",
+            "host_session::tests::incomplete_entropy_fails_closed_without_a_pid_or_time_fallback",
+            "host_session::tests::invocation_identity_distinguishes_attempts_in_the_same_process",
+            "wire_provider::pump_tests::actual_wouldblock_step_cannot_bypass_cancel_or_total_deadline",
+            "store::lock_tests::guard_drop_releases_lock_while_same_open_file_description_survives",
+            "store::lock_tests::live_guard_excludes_independent_open_until_explicit_owner_drop"
+          ]
+        },
+        "integration:native_ports": {
+          "family": "native-ports",
+          "names": [
+            "generic_ports_share_driver_without_inquiry_names",
+            "host_wire_charges_share_budget_and_host_journal",
+            "host_wire_budget_rejects_without_charging_excess",
+            "host_persist_failure_and_inflight_prevent_provider_entry",
+            "host_charge_persistence_failure_stops_exchange_and_keeps_charged_bytes",
+            "host_transport_total_also_bounds_response_and_next_admission"
+          ]
+        },
+        "integration:native_protocol": {
+          "family": "native-protocol",
+          "names": [
+            "registered_protocol_advertises_current_subset_and_preserves_history",
+            "registered_protocol_current_decoder_rejects_known_but_unadvertised_tool",
+            "registered_protocol_preserves_arguments_and_schema",
+            "registered_protocol_rejects_name_collisions",
+            "registered_protocol_rejects_unknown_and_incomplete"
+          ]
+        },
+        "integration:http_transport": {
+          "family": "synthetic-http-transport",
+          "names": [
+            "actual_loopback_http_returns_sse_without_changing_exact_reviewed_payload",
+            "ambiguous_framing_redirect_and_response_limit_are_rejected",
+            "cancellation_and_insufficient_budget_send_zero_bytes",
+            "cancellation_and_revocation_after_send_stop_before_response_admission",
+            "existing_agent_unknown_and_evidence_hold_never_enter_http_provider",
+            "final_review_after_connect_prevents_first_request_byte",
+            "idle_and_total_deadlines_bound_an_open_synthetic_stream",
+            "partial_sse_never_becomes_a_tool_event",
+            "remote_addresses_are_rejected_before_any_connection",
+            "response_budget_exhaustion_counts_actual_bytes_without_retry",
+            "truncated_http_response_is_an_error_with_one_send_and_no_retry"
+          ]
+        },
+        "integration:native_runtime_restore": {
+          "family": "http-durable-restore",
+          "names": [
+            "native_host_metered_terminal_reopens_with_original_identity_and_counters",
+            "native_host_discriminator_rejects_script_config_history_and_pending_call",
+            "native_host_discriminator_rejects_unaccounted_or_over_budget_wire_bytes"
+          ]
+        }
+      },
+      "sources": {
+        "experiments/redesign/core-agent-lab/core/tests/host.rs": {
+          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
+          "sha256": "f035000d0fb81aba93befc97075e93dc9042fe0d21bd2511011e3b60b19ae6b8"
+        },
+        "experiments/redesign/core-agent-lab/core/tests/kernel.rs": {
+          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
+          "sha256": "7af0cf86e9600ff55bb4ba3ccca08a79b7f3a741de9f35dba8b97157e585f901"
+        },
+        "experiments/redesign/core-agent-lab/core/tests/wire.rs": {
+          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
+          "sha256": "d70128329c0252aa0590b9ad20f486ccb6a27c95b9dbf6a1db33b73d5d7c4622"
+        },
+        "experiments/redesign/core-agent-lab/core/tests/wire_review.rs": {
+          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
+          "sha256": "3ab2209545c667d839d02f85adb6b5ac31c622b38c5a486da0b7aad95bb93a6a"
+        },
+        "experiments/redesign/core-agent-lab/core/src/host_session.rs": {
+          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
+          "sha256": "3a8e7c958dcebb4f07e69f91908d6b90780810fd9ac7a5272cb06ba69eb3793e"
+        },
+        "experiments/redesign/core-agent-lab/core/src/wire_provider.rs": {
+          "commit": "6ec4c47c6da6415f7b395f98a43d0d3794a16d60",
+          "sha256": "0544ed45b96667ba169d2b9586962504c6a8beb8249a58ca88a9fefb018a8538"
+        },
+        "experiments/redesign/core-agent-lab/core/tests/native_ports.rs": {
+          "commit": "39148943a9a051b3f896f65fde30d67fd265d7f6",
+          "sha256": "464497eee0c6238c9f8d802c23a87a01487d00ad0aeb136934f290e7f0768db2"
+        },
+        "experiments/redesign/core-agent-lab/core/tests/native_protocol.rs": {
+          "commit": "7b1264075fecdd898690ffaf9b40880549834bd5",
+          "sha256": "d9d2a8e306bb7b4fc70f9e63121ba9ed8eb83aa32e8ecee7b9972f78c60f9444"
+        },
+        "experiments/redesign/core-agent-lab/core/tests/http_transport.rs": {
+          "commit": "03c1628631a07762ac9961f7162d1e49343ca2b8",
+          "sha256": "98d874da58ba46adbce64688e931b371d3b4694d672b1bec83a4f18461dc04da"
+        },
+        "experiments/redesign/core-agent-lab/core/src/store.rs": {
+          "commit": "c9a31c4cc9538ae7e480fc8920c833ba8966dd58",
+          "sha256": "716e8fb740c947410f08242138bc53d5b0b2a41d52c8ddf53556e8083896b09c"
+        }
+      },
+      "expected_total": 115
+    },
+    "plugin": {
+      "groups": {
+        "integration:registration": {
+          "family": "legacy-plugin",
+          "names": [
+            "atomic_registration_publishes_only_valid_bundle",
+            "declaration_labels_cannot_authorize",
+            "discovery_filters_current_authority",
+            "foreign_data_admission_requires_the_referenced_schema_closure",
+            "namespace_duplicates_and_versions_reject",
+            "registration_neither_grants_nor_reads",
+            "relation_and_view_refs_must_resolve",
+            "renamed_bundle_is_semantically_equivalent",
+            "schema_subset_and_limits_fail_closed"
+          ]
+        },
+        "integration:read_contract": {
+          "family": "legacy-plugin",
+          "names": [
+            "cancel_after_dispatch_accepts_no_projection",
+            "cancel_before_dispatch_executes_zero",
+            "eof_and_concurrency_fail_closed",
+            "invalid_projection_and_refs_reject",
+            "prepared_bindings_are_exact",
+            "receipt_reference_has_original_owner",
+            "revoke_before_invoke_executes_zero",
+            "ticket_is_one_shot"
+          ]
+        },
+        "integration:mapping_contract": {
+          "family": "native-mapping",
+          "names": [
+            "mapped_reads_keep_native_arguments_and_typed_scope",
+            "native_declarations_register_without_grants_or_reads",
+            "native_host_canonical_api_matches_catalog_integer_contract",
+            "seeded_rename_preserves_closed_schema_and_separate_binding",
+            "source_subsets_have_exact_types_relations_and_classification"
+          ]
+        }
+      },
+      "sources": {
+        "experiments/redesign/plugin-contract-lab/core/tests/registration.rs": {
+          "commit": "69a98a8ac9dcc356a2787ca96569fc589bb2d368",
+          "sha256": "8cfcb71a3ad8949e7b40748d4fbef426e660a86890c165ef6c5f82672bf36c4f"
+        },
+        "experiments/redesign/plugin-contract-lab/core/tests/read_contract.rs": {
+          "commit": "31b9b6fc1f7f8b27952533ca141e901676ba90e8",
+          "sha256": "f071e733f87c08c41cba752ba133ed43bffdc6c18e5f01cda27e565cd7dc8fad"
+        },
+        "experiments/redesign/plugin-contract-lab/core/tests/mapping_contract.rs": {
+          "commit": "698c40bc607ae111b8fed7707f38bb362207e247",
+          "sha256": "40f801e99eb9fa390329fba8942cf3b366b260e3e7858e94a3f3d7d3d2462c6b"
+        }
+      },
+      "expected_total": 22
+    },
+    "host": {
+      "groups": {
+        "integration:native_read": {
+          "family": "native-host",
+          "names": [
+            "actual_value_review_denies_sensitive_projection",
+            "all_native_mappings_use_physical_store_and_same_two_turn_runtime",
+            "cancel_closes_owned_child_and_executes_zero",
+            "cancel_during_handler_retains_raw_receipt_without_projection",
+            "catalog_known_but_unadvertised_call_executes_zero",
+            "duplicate_model_call_never_reexecutes_handler",
+            "final_payload_policy_revoke_blocks_second_endpoint_admission",
+            "handler_failure_keeps_source_facts",
+            "historical_projection_revoke_blocks_actual_second_send",
+            "invalid_host_enrollment_publishes_nothing_and_active_catalog_is_sealed",
+            "ledger_failure_sends_zero_bytes",
+            "malformed_oversize_eof_child_frames_invalidate_session",
+            "missing_selected_refs_execute_zero_before_physical_read",
+            "native_host_executes_registered_read",
+            "native_store_persist_budget_never_writes_unreadable_snapshot",
+            "native_store_restore_rejects_forged_receipts_and_facts",
+            "physical_handler_rejects_same_id_wrong_business_type",
+            "receipt_time_revoke_exports_no_projection",
+            "restart_retains_raw_evidence_without_live_export_authority",
+            "revoke_after_preinvoke_snapshot_executes_zero",
+            "silent_child_deadline_is_bounded_and_reaped",
+            "two_turn_model_bytes_contain_only_validated_projection",
+            "unauthorized_read_executes_zero",
+            "wrong_projection_preserves_raw_receipt",
+            "wrong_reference_version_retains_only_original_receipt"
+          ]
+        },
+        "integration:service_controller": {
+          "family": "service-controller",
+          "names": [
+            "service_controller_executes_registered_read",
+            "controller_is_send_sync_without_moving_native_session",
+            "build_identity_is_explicit_without_host_build_environment",
+            "zero_client_initialization_retirement_requires_real_settlement"
+          ]
+        },
+        "integration:contract_transport": {
+          "family": "contract-transport",
+          "names": [
+            "persistent_catalog_keeps_generation_and_one_shot_ticket",
+            "tickets_cannot_cross_catalog_instances",
+            "recoverable_schema_rejection_preserves_catalog",
+            "fatal_envelope_replies_latch_transport_closed",
+            "raw_frames_enforce_utf8_duplicates_depth_and_limits",
+            "explicit_transport_close_rejects_future_inspection",
+            "wire_close_retains_child_command_inspection_semantics",
+            "embedded_line_feed_is_fatal_but_crlf_sibling_is_valid"
+          ]
+        },
+        "integration:service_runtime": {
+          "family": "service-runtime",
+          "names": [
+            "all_builtins_read_physical_file_and_journal_two_actual_payloads",
+            "pre_cancelled_worker_never_bootstraps_or_reads"
+          ]
+        },
+        "integration:service_root": {
+          "family": "service-root",
+          "names": [
+            "root_lease_serializes_durable_admission_and_preserves_identity",
+            "root_inventory_refuses_unowned_entries_and_peak_overflow"
+          ]
+        },
+        "integration:service_oracle": {
+          "family": "service-oracle",
+          "names": [
+            "service_controller_observer_correlates_all_builtin_payloads"
+          ]
+        },
+        "integration:service_lifecycle": {
+          "family": "service-lifecycle",
+          "names": [
+            "client_epochs_generations_and_visibility_are_fail_closed",
+            "same_request_is_existing_without_a_second_worker",
+            "close_and_reconnect_preserve_original_durable_outcome",
+            "incomplete_temp_evidence_blocks_ready_without_cleanup"
+          ]
+        },
+        "unit:src/lib.rs": {
+          "family": "service-stop-cause",
+          "names": [
+            "service_runtime::stop_cause_tests::observed_deadline_survives_late_cancel",
+            "service_runtime::stop_cause_tests::observed_cancel_survives_later_deadline",
+            "http_recovery_tests::http_recovery_child",
+            "http_recovery_tests::loopback_cross_process_crash_preserves_unknown_begin_without_resend",
+            "http_recovery_tests::loopback_post_io_sent_ledger_failure_recovers_unknown_without_resend",
+            "http_recovery_tests::loopback_post_io_failed_ledger_overrides_cancel_and_recovers_unknown_without_resend",
+            "http_recovery_tests::loopback_post_io_wire_journal_is_unknown_without_resend"
+          ]
+        },
+        "integration:host_http": {
+          "family": "host-synthetic-http",
+          "names": [
+            "loopback_answer_uses_gateway_review_and_shared_durable_budget",
+            "loopback_truncation_cancellation_and_revocation_never_resend",
+            "loopback_budget_and_initial_authority_refuse_before_socket_bytes",
+            "loopback_unknown_inflight_crash_blocks_same_state_retry",
+            "loopback_receive_budget_stops_partial_response_without_retry",
+            "loopback_mismatched_session_refuses_before_ledger_or_connection"
+          ]
+        }
+      },
+      "sources": {
+        "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs": {
+          "commit": "a8e9b93b086e88548524fe43789db5a3172696b8",
+          "sha256": "04aed51dd17ab035f6a4210fcf7d4c30c2c9458f64dd44642c974dc22c59e188"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs": {
+          "commit": "cfe1e73c1e8f400926f7021b97b9d36892a9fac0",
+          "sha256": "6653361134043202b9bf71b4f5fe3e07fb9e019d25b7e48fb50f3ee2cc5ed694"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs": {
+          "commit": "f4b0035dabb4a0819f50f0174a53e050fcfc1a16",
+          "sha256": "2fab93189b6615b623185db505f2b61e4bc53d0a4853670a94193d81d13907b3"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_runtime.rs": {
+          "commit": "1f5e138f853c4d0a2d962068d3b31b5db71d0d03",
+          "sha256": "165b2e903aac273d5cb4f31deb9974b1c4fe20561735662923644fdafbfa4b8b"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_root.rs": {
+          "commit": "ad1cdd0c5040e25cb4583a7d2fa7601dc6b56dbc",
+          "sha256": "e02398223d07ded359e8f64fbb9b1f3f9356a90a0ed1056117e0fbe08c34de68"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs": {
+          "commit": "f6bd92f0bf58d7fc4e13ca6b6b7bfb3a8bb90c43",
+          "sha256": "f792140578cc8dbdf130dde0298eda21aca8bcf70afbc52dfa83f3f00e9b5d36"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/tests/service_lifecycle.rs": {
+          "commit": "6e0f1c5752515c2bb8318897832912c57b8d1090",
+          "sha256": "36146445d5db8b8552cac3d3fccc36d7d90b9ef0d1691f6c83b4602c599f6123"
+        },
+        "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs": {
+          "commit": "f60f843007869ffd81b1dbe0f222728322eca7d6",
+          "sha256": "915f1b0c21c51471d3533c2970c7ec09da5eb9500d3d5dffc8b2e8f40a1455b2"
+        }
+      },
+      "expected_total": 59
+    }
+  },
+  "python": {
+    "process": [
+      "test_cancel_after_commit_preserves_original_receipt_and_stops_model",
+      "test_cancel_at_dispatch_prevents_effect_without_claiming_prior_zero_dispatch",
+      "test_cancel_before_run_has_zero_calls_and_effects",
+      "test_completed_task_reopen_preserves_receipt_and_counters",
+      "test_confirmation_consumed_for_only_one_invocation",
+      "test_confirmation_is_current_and_cannot_fix_hard_denial",
+      "test_context_output_total_limits_prevent_effects_and_survive_reopen",
+      "test_current_host_fact_revalidation_all_hard_gates_and_modes",
+      "test_deterministic_io_fault_boundaries_no_fabricated_success",
+      "test_exclusive_owner_rejects_competing_process_and_sigkill_releases",
+      "test_full_allow_taint_new_destination_adds_no_risk_confirmation",
+      "test_independently_authored_policy_and_provider_cases",
+      "test_invalid_limits_and_immutable_resume_overrides_reject",
+      "test_known_tool_result_context_budget_checked_before_first_effect",
+      "test_missing_or_corrupt_effect_store_stays_unknown_never_reseeds",
+      "test_persistent_step_and_call_budgets_do_not_reset",
+      "test_r1_budget_receipt_restore_cannot_clear_exhausted_context_or_answer",
+      "test_r1_completed_receipt_restore_cannot_reopen_terminal_provider_tail",
+      "test_r2_waiting_next_invocation_preserves_prior_receipt_evidence_and_confirmation",
+      "test_response_loss_requires_lookup_before_further_provider_work",
+      "test_same_provider_reference_persistently_looks_up_original_binding",
+      "test_sigkill_after_dispatch_keeps_notfound_unknown_and_never_replays",
+      "test_sigkill_after_effect_original_receipt_then_followup_no_second_effect",
+      "test_sigkill_after_projection_does_not_repeat_provider_or_effect",
+      "test_strict_malformed_provider_events_reject_before_execution",
+      "test_verified_physical_tool_context_drives_following_answer"
+    ],
+    "wire_process": [
+      "test_ack_preterminal_cancellation_not_partial_argument_process_claim",
+      "test_cancel_after_committed_effect_keeps_receipt_and_no_next_request",
+      "test_dsml_and_tool_like_content_is_plain_text_not_tool_authority",
+      "test_final_args_are_revalidated_after_early_completeness_ack",
+      "test_independent_raw_sse_valid_and_invalid_matrix",
+      "test_invalid_or_mutable_wire_configuration_is_not_model_authority",
+      "test_original_native_correlation_replay_and_conflict_remain_physical",
+      "test_persistent_model_call_and_wire_budget_do_not_reset_on_reopen",
+      "test_rust_consumed_complete_arguments_ack_before_terminal_has_no_effect",
+      "test_same_raw_bytes_with_whole_byte_and_seven_byte_reads",
+      "test_sigkill_after_consumption_ack_holds_admission_without_resend",
+      "test_silent_service_cancel_and_idle_deadline_reap_real_child",
+      "test_total_deadline_includes_child_wait_after_stdout_eof",
+      "test_total_deadline_with_controlled_nonreading_stdin_child",
+      "test_usage_only_chunk_is_optional_and_missing_is_unknown",
+      "test_wire_policy_modes_and_hard_gate_facts_remain_host_owned",
+      "test_wire_r1_terminal_receipt_restore_cannot_start_new_exchange",
+      "test_wire_r2_historical_receipt_hold_preserves_waiting_next_native_call"
+    ],
+    "test_harness": [
+      "test_checkpoint_observation_waits_for_actual_notification_then_sigkill",
+      "test_journal_duplicate_keys_fail",
+      "test_missing_effect_file_is_labeled_absent",
+      "test_observation_rejects_duplicate_or_non_fields",
+      "test_physical_count_value_and_receipt_uniqueness_are_independent",
+      "test_wrong_checkpoint_and_premature_exit_do_not_count_as_reached"
+    ],
+    "test_wire_harness": [
+      "test_ack_harness_rejects_helper_flush_and_requires_consumption_marker",
+      "test_complete_history_accepts_identical_replay",
+      "test_complete_history_rejects_conflicts_and_orphans_before_valid_tail",
+      "test_helper_captures_actual_bytes_and_answer_depends_on_received_tool",
+      "test_helper_raw_response_matches_input_bytes_and_bad_config_fails",
+      "test_native_pair_negatives_are_behavior_assertions",
+      "test_native_pair_oracle_accepts_exact_physical_pair"
+    ]
+  },
+  "mutants": [
+    "wire_stale_reported_usage",
+    "wire_private_history_bound",
+    "wire_container_depth",
+    "wire_native_value_identity",
+    "wire_stream_cancel_bypass",
+    "wire_missing_done",
+    "wire_native_pair",
+    "wire_budget_bypass",
+    "hard_policy_bypass",
+    "unknown_redispatch",
+    "duplicate_effect",
+    "pre_effect_context_bypass",
+    "terminal_resurrection",
+    "cached_receipt_trust",
+    "receipt_current_binding_only",
+    "budget_reset",
+    "wire_preterminal_physical_effect"
+  ]
+}

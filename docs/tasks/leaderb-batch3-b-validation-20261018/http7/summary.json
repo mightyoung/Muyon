@@ -1,0 +1,227 @@
+{
+  "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+  "rows": [
+    {
+      "name": "budget_classification",
+      "target": "loopback_receive_budget_stops_partial_response_without_retry",
+      "baseline_green": true,
+      "mutation_killed": true,
+      "mutation_source_sha256": "346dcd8966bb406abee32a51db4db7d405f2b81fbef9fcd9dbfc940e4ff05cb8",
+      "expected_needles": [
+        "left: \"failed\"",
+        "right: \"budget_exhausted\""
+      ],
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "host_http",
+          "loopback_receive_budget_stops_partial_response_without_retry",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/http7-work/source/experiments/redesign/rust-agent-host-lab/core",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "f27161dc2cd98fc3e17073a41ed52aae81f5d571ce154ff435139342306fde57"
+      }
+    },
+    {
+      "name": "journal_classification",
+      "target": "http_recovery_tests::loopback_post_io_wire_journal_is_unknown_without_resend",
+      "baseline_green": true,
+      "mutation_killed": true,
+      "mutation_source_sha256": "e85eafac7e140a057f764409946bc2a2b53ccf8fcc19e237b7616c6c04916084",
+      "expected_needles": [
+        "left: (\"failed\", \"native_host_refused\")",
+        "right: (\"outcome_unknown\", \"wire_journal\")"
+      ],
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--lib",
+          "http_recovery_tests::loopback_post_io_wire_journal_is_unknown_without_resend",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/http7-work/source/experiments/redesign/rust-agent-host-lab/core",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "7a7f54d9b40f9cd07afafc4fb5eb1040a7c02dbef4da3ed92821be68f952fd1a"
+      }
+    },
+    {
+      "name": "host_restore",
+      "target": "native_host_metered_terminal_reopens_with_original_identity_and_counters",
+      "baseline_green": true,
+      "mutation_killed": true,
+      "mutation_source_sha256": "5caac6e01eba1697b44b40aa1f4afd572589966d34984dd27ac7b2e974842a6c",
+      "expected_needles": [
+        "invalid_wire_state",
+        "called `Result::unwrap()`"
+      ],
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "native_runtime_restore",
+          "native_host_metered_terminal_reopens_with_original_identity_and_counters",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/http7-work/source/experiments/redesign/core-agent-lab/core",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "9d1b68bd63bca511e0fff7e5bb19aefc69204f5d98bbae8b52eadb8b495ee329"
+      }
+    },
+    {
+      "name": "inflight_unknown",
+      "target": "http_recovery_tests::loopback_cross_process_crash_preserves_unknown_begin_without_resend",
+      "baseline_green": true,
+      "mutation_killed": true,
+      "mutation_source_sha256": "c59195d8dff18c6c95fe432fcc2d5329f937f816a44475ceda73d6d28bccda38",
+      "expected_needles": [
+        "left: (\"failed\", \"wire_interrupted\")",
+        "right: (\"outcome_unknown\", \"wire_interrupted\")"
+      ],
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--lib",
+          "http_recovery_tests::loopback_cross_process_crash_preserves_unknown_begin_without_resend",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/http7-work/source/experiments/redesign/rust-agent-host-lab/core",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "4eff5245f74e4d9f2dcd78070e9e28546b59deb5e4455758cd0bf25dd4e3b058"
+      }
+    },
+    {
+      "name": "completion_ledger_unknown",
+      "target": "http_recovery_tests::loopback_post_io_sent_ledger_failure_recovers_unknown_without_resend",
+      "baseline_green": true,
+      "mutation_killed": true,
+      "mutation_source_sha256": "c8b6bf82a6cf32b8fe9b847b7f84616b0120247d15a180b21e242cd73050091a",
+      "expected_needles": [
+        "left: \"failed\"",
+        "right: \"outcome_unknown\""
+      ],
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--lib",
+          "http_recovery_tests::loopback_post_io_sent_ledger_failure_recovers_unknown_without_resend",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/http7-work/source/experiments/redesign/rust-agent-host-lab/core",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "c5f174fdd836cb8f40fdfc1b9e73a5f9058ff335d08daf5cb2ee05c3b43466ee"
+      }
+    },
+    {
+      "name": "unknown_over_late_cancel",
+      "target": "http_recovery_tests::loopback_post_io_failed_ledger_overrides_cancel_and_recovers_unknown_without_resend",
+      "baseline_green": true,
+      "mutation_killed": true,
+      "mutation_source_sha256": "00e97d745a683bc6a79d5b8841adce54a303516e271b7d2af69adeda3da2c22c",
+      "expected_needles": [
+        "left: (\"cancelled\", \"cancel_requested\")",
+        "right: (\"outcome_unknown\", \"model_ledger_failed\")"
+      ],
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--lib",
+          "http_recovery_tests::loopback_post_io_failed_ledger_overrides_cancel_and_recovers_unknown_without_resend",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/http7-work/source/experiments/redesign/rust-agent-host-lab/core",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "36f1c28ad22b9a8d47ed0c4f54937efe82e3e3135a7891c71dcc9799aab3feb1"
+      }
+    },
+    {
+      "name": "shared_charge",
+      "target": "host_wire_charges_share_budget_and_host_journal",
+      "baseline_green": true,
+      "mutation_killed": true,
+      "mutation_source_sha256": "5e63d7670963fbbb0e10f11c0c374ae3ae1dfcb834ee488a0349c72ac6dec9de",
+      "expected_needles": [
+        "host send uses the existing total budget",
+        "left: 9",
+        "right: 5"
+      ],
+      "mutant": {
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--test",
+          "native_ports",
+          "host_wire_charges_share_budget_and_host_journal",
+          "--",
+          "--exact",
+          "--nocapture"
+        ],
+        "cwd": "/workspace/leaderb-b3-evidence/b/http7-work/source/experiments/redesign/core-agent-lab/core",
+        "exit_code": 101,
+        "timed_out": false,
+        "forced_owned_group_cleanup": false,
+        "live_before_cleanup": [],
+        "live_after_cleanup": [],
+        "raw_sha256": "c3f89b119756c14b5cd01663d4a32513f35e235ec20223734db025bcf8669deb"
+      }
+    }
+  ],
+  "accepted": true
+}

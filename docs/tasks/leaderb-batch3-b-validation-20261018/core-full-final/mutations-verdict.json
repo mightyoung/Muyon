@@ -1,0 +1,9 @@
+{
+  "accepted": true,
+  "classification": "legacy_mutants_killed",
+  "expected_mutants": 17,
+  "observed_mutants": 17,
+  "command_exit_code": 0,
+  "raw_sha256": "e791d9111b6d7d0ab2a033cdebbb438ffde274cf5b3c99a89f6a5b2977a68ae0",
+  "expectations_sha256": "ace2bde8937e735d797f4374cfc544565018ae9c615c5a51f851c5b1505de07b"
+}

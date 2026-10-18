@@ -1,0 +1,45 @@
+{
+  "accepted": true,
+  "rows": [
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/native_read.rs",
+      "exit_code": 1,
+      "accepted": true
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_controller.rs",
+      "exit_code": 1,
+      "accepted": true
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/contract_transport.rs",
+      "exit_code": 1,
+      "accepted": true
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_runtime.rs",
+      "exit_code": 1,
+      "accepted": true
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_root.rs",
+      "exit_code": 1,
+      "accepted": true
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_oracle.rs",
+      "exit_code": 1,
+      "accepted": true
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/tests/service_lifecycle.rs",
+      "exit_code": 1,
+      "accepted": true
+    },
+    {
+      "path": "experiments/redesign/rust-agent-host-lab/core/src/service_runtime.rs",
+      "exit_code": 1,
+      "accepted": true
+    }
+  ]
+}

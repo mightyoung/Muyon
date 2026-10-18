@@ -1,0 +1,10 @@
+{
+  "accepted": true,
+  "classification": "full_green",
+  "suite": "test_harness",
+  "expected_methods": 6,
+  "observed_methods": 6,
+  "command_exit_code": 0,
+  "raw_sha256": "eedd45aee0ce6d41f3d4da97324884de26b36273a6baa86f084e705e5430583b",
+  "expectations_sha256": "ace2bde8937e735d797f4374cfc544565018ae9c615c5a51f851c5b1505de07b"
+}

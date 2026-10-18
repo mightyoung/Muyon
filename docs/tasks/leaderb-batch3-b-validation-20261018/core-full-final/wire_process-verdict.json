@@ -1,0 +1,10 @@
+{
+  "accepted": true,
+  "classification": "full_green",
+  "suite": "wire_process",
+  "expected_methods": 18,
+  "observed_methods": 18,
+  "command_exit_code": 0,
+  "raw_sha256": "62878d9421654ff0256cbf5ce8d0d658462b321c98be22a40f6d29c89d2a5423",
+  "expectations_sha256": "ace2bde8937e735d797f4374cfc544565018ae9c615c5a51f851c5b1505de07b"
+}
