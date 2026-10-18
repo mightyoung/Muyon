@@ -34,15 +34,21 @@ pub struct CallBudget {
 }
 /// Opaque platform handle, never credential bytes. It deliberately has no Debug.
 #[derive(PartialEq, Eq)]
-pub struct CredentialHandle { profile: String, reference: String, opaque: String }
+pub struct CredentialHandle { profile: String, reference: String, opaque: String, generation: Option<u64> }
 impl CredentialHandle {
     pub fn new(profile: &str, reference: &str, opaque: &str) -> Result<Self> {
         if profile.is_empty() || reference.is_empty() || opaque.is_empty() {
             return Err("credential_handle_unavailable".into());
         }
-        Ok(Self { profile: profile.into(), reference: reference.into(), opaque: opaque.into() })
+        Ok(Self { profile: profile.into(), reference: reference.into(), opaque: opaque.into(), generation: None })
     }
+    pub fn with_generation(profile:&str,reference:&str,opaque:&str,generation:u64)->Result<Self> {
+        if generation==0{return Err("credential_generation_invalid".into())}let mut h=Self::new(profile,reference,opaque)?;h.generation=Some(generation);Ok(h)
+    }
+    pub fn generation(&self)->Option<u64>{self.generation}
     pub fn reference(&self) -> &str { &self.reference }
+    /// Opaque capability identity including generation; never secret bytes.
+    pub fn identity(&self) -> &str { &self.opaque }
 }
 /// Implemented only by the trusted Service owner. No UI deserialization path.
 /// Reserve and commit must use the owner's durable quota/outbound ledger.
@@ -54,6 +60,8 @@ impl CredentialHandle {
 /// Commit must atomically recheck the exact binding, handle and reservation;
 /// a returned row is admission only, never evidence that a request was sent.
 pub trait ServiceProviderHost {
+    /// Default denies: existence-only bridges have no transport capability.
+    fn exchange_chat(&self, _admission: &ProviderAdmission, _context: &crate::Json) -> Result<crate::ordinary_chat::ChatResponse> { Err("configured_transport_unavailable".into()) }
     fn current_binding(&self) -> Result<Option<ProviderBinding>>;
     fn credential_handle(&self, profile: &ConfiguredProfile) -> Result<Option<CredentialHandle>>;
     fn review_payload(&self, binding: &ProviderBinding, payload: &[u8]) -> Result<()>;
@@ -79,9 +87,10 @@ impl Drop for PreparedProviderCall {
     }
 }
 pub struct ProviderAdmission {
-    profile: ConfiguredProfile, handle: CredentialHandle, payload: Vec<u8>, record_id: String,
+    profile: ConfiguredProfile, handle: CredentialHandle, payload: Vec<u8>, record_id: String, binding: ProviderBinding,
 }
 impl ProviderAdmission {
+    pub fn binding(&self)->&ProviderBinding {&self.binding}
     pub fn profile(&self) -> &ConfiguredProfile { &self.profile }
     pub fn credential_handle(&self) -> &CredentialHandle { &self.handle }
     pub fn payload(&self) -> &[u8] { &self.payload }
@@ -96,6 +105,15 @@ impl ServiceProviderBridge {
         self.handle(&binding.profile)?;
         self.ensure_current(&binding, budget)?;
         Ok(binding.profile)
+    }
+    pub(crate) fn exchange_chat(&self, admission: &ProviderAdmission, context: &crate::Json) -> Result<crate::ordinary_chat::ChatResponse> {
+        self.host.exchange_chat(admission, context)
+    }
+    pub(crate) fn prepare_chat(&self,request_id:&str,payload:&[u8],budget:CallBudget)->Result<PreparedProviderCall> {
+        let binding=self.binding(&budget)?;
+        if self.handle(&binding.profile)?.generation().is_none(){return Err("chat_credential_capability_unavailable".into())}
+        let prepared=self.prepare(request_id,payload,budget)?;
+        if prepared.handle.generation().is_none(){return Err("chat_credential_capability_unavailable".into())}Ok(prepared)
     }
     pub fn prepare(&self, request_id: &str, payload: &[u8], budget: CallBudget) -> Result<PreparedProviderCall> {
         if !identity(request_id) || payload.is_empty() || payload.len() > 65536 {
@@ -173,7 +191,7 @@ impl ServiceProviderBridge {
         prepared.committed = true;
         if !identity(&record_id) { return Err("provider_admission_failed".into()); }
         Ok(ProviderAdmission { profile: prepared.binding.profile.clone(), handle,
-            payload: prepared.payload.clone(), record_id })
+            payload: prepared.payload.clone(), record_id, binding: prepared.binding.clone() })
     }
     fn binding(&self, budget: &CallBudget) -> Result<ProviderBinding> {
         let binding = self.host.current_binding().map_err(|_| "provider_config_unavailable")?

@@ -19,7 +19,7 @@ impl ServiceHostOwner for Owner {
 }
 impl ServiceProviderHost for Owner {
     fn current_binding(&self)->Result<Option<ProviderBinding>> { Ok(Some(binding())) }
-    fn credential_handle(&self,p:&ConfiguredProfile)->Result<Option<CredentialHandle>> { let f=self.0.lock().unwrap();Ok(Some(CredentialHandle::new(&p.id,&p.credential_ref,&format!("fixture-generation-{}",f.generation))?)) }
+    fn credential_handle(&self,p:&ConfiguredProfile)->Result<Option<CredentialHandle>> { let f=self.0.lock().unwrap();Ok(Some(CredentialHandle::with_generation(&p.id,&p.credential_ref,&format!("fixture-generation-{}",f.generation),f.generation+1)?)) }
     fn review_payload(&self,_:&ProviderBinding,p:&[u8])->Result<()> { if self.0.lock().unwrap().revoked || p.is_empty(){Err("denied".into())}else{Ok(())} }
     fn reserve_budget(&self,_:&ProviderBinding,id:&str,_:&[u8],_:&CallBudget)->Result<String> { let mut f=self.0.lock().unwrap();if f.used.contains(id)||f.held.contains(id)||f.used.len()+f.held.len()>=2{return Err("quota".into())}f.held.insert(id.into());if f.rotate_on_reserve{f.generation+=1;}Ok(id.into()) }
     fn release_reservation(&self,id:&str)->Result<()> {let mut f=self.0.lock().unwrap();f.held.remove(id);f.used.insert(id.into());Ok(())}

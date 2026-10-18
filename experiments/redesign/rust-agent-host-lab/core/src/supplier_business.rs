@@ -15,11 +15,11 @@ use std::{
 #[derive(Clone)]
 pub(crate) struct BusinessRead {
     pub payload: Json,
-    mode: Option<crate::service_host::ServiceHostMode>,
-    source_binding: Option<Json>,
-    host: Option<Arc<crate::service_host::ServiceHostPorts>>,
-    events: Vec<Json>,
-    dir: Option<PathBuf>,
+    pub(crate) mode: Option<crate::service_host::ServiceHostMode>,
+    pub(crate) source_binding: Option<Json>,
+    pub(crate) host: Option<Arc<crate::service_host::ServiceHostPorts>>,
+    pub(crate) events: Vec<Json>,
+    pub(crate) dir: Option<PathBuf>,
 }
 impl BusinessRead {
     pub fn new(text: String, key: String, revision: String) -> Result<Self> {
@@ -61,7 +61,13 @@ impl BusinessRead {
             ]),
         );
     }
-    fn save(&self, dir: &Path) -> Result<()> {
+    pub(crate) fn ordinary(conversation:String,text:String)->Result<Self> {
+        Ok(Self { payload:crate::ordinary_chat::payload(conversation,text)?,mode:Some(crate::service_host::ServiceHostMode::ConfiguredChat),source_binding:None,host:None,events:Vec::new(),dir:None })
+    }
+    pub(crate) fn save(&self, dir: &Path) -> Result<()> {
+        if crate::ordinary_chat::is_chat(self) {
+            return store::atomic(dir,"source.db",&object([("version",string("ordinary-chat-1")),("payload",self.payload.clone()),("binding",self.source_binding.clone().unwrap_or(Json::Null)),("events",Json::Array(self.events.clone()))]).encode());
+        }
         let mut data = object([
             ("version", string("supplier-business-1")),
             ("payload", self.payload.clone()),
@@ -82,7 +88,7 @@ impl BusinessRead {
         }
         store::atomic(dir, "source.db", &data)
     }
-    fn push(&mut self, kind: &str, payload: Json) {
+    pub(crate) fn push(&mut self, kind: &str, payload: Json) {
         self.events.push(object([
             ("cursor", Json::Number((self.events.len() + 1).to_string())),
             ("kind", string(kind)),
@@ -114,6 +120,14 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
     }
     let j = parse(&bytes)?;
     let version=field(&j,"version")?.string()?;
+    if version=="ordinary-chat-1" {
+        closed(&j,&["version","payload","binding","events"])?;
+        let p=field(&j,"payload")?;closed(p,&["intent","conversation","text"])?;
+        let mut b=BusinessRead::ordinary(field(p,"conversation")?.string()?.into(),field(p,"text")?.string()?.into())?;
+        if &b.payload!=p {return Err("CHAT_PAYLOAD".into())}
+        let binding=field(&j,"binding")?;if binding!=&Json::Null{b.source_binding=Some(binding.clone())}
+        b.events=field(&j,"events")?.array()?.to_vec();b.dir=Some(dir.into());validate_events(&b)?;return Ok(b);
+    }
     match version {
         "supplier-business-1" => closed(&j, &["version", "payload", "events"])?,
         "supplier-business-2" => closed(&j, &["version", "payload", "events", "host"])?,
@@ -183,6 +197,24 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
     Ok(b)
 }
 fn validate_events(b: &BusinessRead) -> Result<()> {
+    if crate::ordinary_chat::is_chat(b) {
+        if b.events.is_empty(){return Ok(())}
+        let last=b.events.last().ok_or("CHAT_EVENTS")?;
+        closed(last,&["cursor","kind","payload"])?;
+        if field(last,"kind")?!=&string("terminal"){return Err("CHAT_TERMINAL".into())}
+        let terminal=field(last,"payload")?;closed(terminal,&["state","reason"])?;
+        match field(terminal,"state")?.string()? {
+            "completed" if b.events.len()==3 => {
+                if field(&b.events[0],"kind")?!=&string("answer_delta") || field(&b.events[1],"kind")?!=&string("provider_receipt") || field(terminal,"reason")?!=&string("none"){return Err("CHAT_ORDER".into())}
+                let answer=field(&b.events[0],"payload")?;closed(answer,&["text"])?;crate::ordinary_chat::check_text(field(answer,"text")?.string()?)?;
+                closed(field(&b.events[1],"payload")?,&["owner","identity","task","attempt","synthetic"])?;
+            },
+            "failed"|"cancelled"|"outcome_unknown" if b.events.len()==1 => (),
+            _=>return Err("CHAT_EVENTS".into())
+        }
+        for (i,e) in b.events.iter().enumerate(){closed(e,&["cursor","kind","payload"])?;if field(e,"cursor")?.integer()?!=i as u64+1{return Err("CHAT_CURSOR".into())}}
+        return Ok(())
+    }
     if b.events.is_empty() {
         return Ok(());
     }
@@ -301,6 +333,7 @@ fn receipt_evidence(
 }
 pub(crate) fn restore_snapshot(dir: &Path, run: &AgentDurableRun) -> Result<AgentRunSnapshot> {
     let b = load(dir)?;
+    if crate::ordinary_chat::is_chat(&b){return crate::ordinary_chat::restore(dir,run,&b)}
     // The payload-only ledger is the real crash window after native execution.
     // It must reconcile the original receipt using the pre-dispatch task binding.
     let state = match b.events.last() {
@@ -375,6 +408,7 @@ pub(crate) fn execute(
     b: &mut BusinessRead,
     control: Arc<RunControl>,
 ) -> AgentRunSummary {
+    if crate::ordinary_chat::is_chat(b){return crate::ordinary_chat::execute(root,run,dir,b,control)}
     b.dir = Some(dir.into());
     let mut summary = AgentRunSummary {
         request_id: run.intent.request_id.clone(),
@@ -552,6 +586,7 @@ pub(crate) fn reply(
     if let Some(b) = business {
         let disclosed = (|| {
             validate_events(b)?;
+            if crate::ordinary_chat::is_chat(b){crate::ordinary_chat::disclose(b)?;return Ok(())}
             if let Some(mode)=b.mode.filter(|_|!b.events.is_empty()) {
                 let host=b.host.as_ref().filter(|h|h.mode==mode).ok_or("host_owner_unavailable")?;
                 if mode==crate::service_host::ServiceHostMode::LocalRead && b.source_binding.is_some() {
@@ -633,7 +668,7 @@ pub(crate) fn reply(
         ("events", Json::Array(events)),
         ("next_cursor", Json::Number(next.to_string())),
         ("terminal", Json::Bool(terminal)),
-        ("synthetic", Json::Bool(business.map(|b|b.mode.is_none()).unwrap_or(true))),
+        ("synthetic", Json::Bool(business.map(|b|crate::ordinary_chat::is_chat(b)||b.mode.is_none()).unwrap_or(true))),
     ])
     .encode()
 }
@@ -695,6 +730,7 @@ fn unknown_business(
     run: &AgentDurableRun,
     expected: &AgentReceiptSummary,
 ) -> Result<BusinessRead> {
+    if crate::ordinary_chat::is_chat(b){let mut history=b.clone();history.events.clear();history.push("terminal",object([("state",string("outcome_unknown")),("reason",string("chat_outcome_unknown"))]));return Ok(history)}
     if b.mode.is_none() && (field(&b.payload, "key")? != &string(crate::supplier_lab_source::LAB_SUPPLIER_KEY)
         || field(&b.payload, "revision")?
             != &string(crate::supplier_lab_source::LAB_SUPPLIER_REVISION))

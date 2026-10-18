@@ -578,9 +578,17 @@ impl AgentServiceController {
     ) -> String {
         self.host_marker(self.submit_supplier_read_internal(client, request_id, text, key, revision))
     }
+    /// Ordinary input intent: no supplier key, revision, read grant or caller authority.
+    pub fn submit_ordinary_chat(&self,client:AgentClientRef,request_id:String,conversation:String,text:String)->String {
+        let business=match BusinessRead::ordinary(conversation,text){Ok(mut b)=>{b.attach_host(self.host.clone());b},Err(e)=>return supplier_business::reply("rejected",&e,&request_id,None,None,0)};
+        self.submit_business(client,request_id,business)
+    }
     fn host_marker(&self, reply: String) -> String {
         if self.host.is_none() { return reply; }
         let Ok(mut value) = muyon_plugin_contract_lab::parse(reply.as_bytes()) else { return reply; };
+        if let Some(request)=crate::field(&value,"request_id").ok().and_then(|v|v.string().ok()) {
+            if self.shared.lock().business.get(request).is_some_and(crate::ordinary_chat::is_chat){return reply}
+        }
         if let muyon_plugin_contract_lab::Json::Object(fields) = &mut value {
             fields.insert("synthetic".into(), muyon_plugin_contract_lab::Json::Bool(false));
         }
@@ -601,14 +609,11 @@ impl AgentServiceController {
             }
         };
         business.attach_host(self.host.clone());
+        self.submit_business(client,request_id,business)
+    }
+    fn submit_business(&self,client:AgentClientRef,request_id:String,business:BusinessRead)->String {
         let reply = self.start_internal(
-            AgentStartRequest {
-                client,
-                request_id: request_id.clone(),
-                variant: AgentReadVariant::Inquiry,
-            },
-            Some(business),
-        );
+            AgentStartRequest { client, request_id: request_id.clone(), variant: AgentReadVariant::Inquiry },Some(business));
         let (status, reason) = match reply.outcome {
             AgentStartOutcome::QueuedVolatile { .. } => ("accepted", "queued_volatile".into()),
             AgentStartOutcome::Existing { .. } => ("existing", "none".into()),

@@ -13,6 +13,7 @@ pub struct ServiceHostScope {
 }
 /// Construct thread-local Rc adapters from a trusted cross-thread owner.
 pub trait ServiceHostOwner: Send + Sync {
+    fn chat_authority(&self, _conversation: &str, _text: &str) -> Result<crate::ordinary_chat::ChatAuthority> { Err("chat_authority_unconfigured".into()) }
     fn current_scope(&self) -> Result<ServiceHostScope>;
     fn provider(&self) -> Result<ServiceProviderBridge>;
 }
