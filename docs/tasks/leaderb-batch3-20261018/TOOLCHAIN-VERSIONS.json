@@ -1,0 +1,51 @@
+{
+  "installed_at_utc": "2026-10-18T02:28:55.495130+00:00",
+  "sdk_install_exit": 0,
+  "source": "Google official dl.google.com SDK repositories through sdkmanager",
+  "cmdline_archive": "commandlinetools-linux-15859902_latest.zip",
+  "cmdline_archive_sha256": "4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583",
+  "packages": [
+    {
+      "path": "build-tools/35.0.0/source.properties",
+      "sha256": "084847d70abc41284feee7ea717e7c92eab0d1be05f048c27445a359cfe109d8",
+      "properties": "Pkg.UserSrc=false\nPkg.Revision=35.0.0\n#Pkg.Revision=35.0.0 rc4\n"
+    },
+    {
+      "path": "cmdline-tools/latest/source.properties",
+      "sha256": "166bcdfe54f73296b09e5e6aa6d96b9a752b78b418c56e9f3f3a13c15fac74e5",
+      "properties": "Pkg.Revision=22.0\nPkg.Path=cmdline-tools;22.0\nPkg.Desc=Android SDK Command-line Tools\n"
+    },
+    {
+      "path": "ndk/28.2.13676358/source.properties",
+      "sha256": "c00aa236fdb205e9be9edd9e2169763e48aca52735efff4e16f34205d49783b5",
+      "properties": "Pkg.Desc = Android NDK\nPkg.Revision = 28.2.13676358\nPkg.BaseRevision = 28.2.13676358\nPkg.ReleaseName = r28c\n"
+    },
+    {
+      "path": "platform-tools/source.properties",
+      "sha256": "2dccd788c0234d8cf7f7457377e57f57527a86a629c6ed54feb8af0f549dac38",
+      "properties": "Pkg.UserSrc=false\nPkg.Revision=37.0.1\n"
+    },
+    {
+      "path": "platforms/android-36/source.properties",
+      "sha256": "72291ff6611dbfc46fdfb6de2821c4a62c87befa5200713847eda426e3a501c2",
+      "properties": "Pkg.Desc=Android SDK Platform 16\nPkg.UserSrc=false\nPlatform.Version=16\nPlatform.CodeName=\nPkg.Revision=2\nAndroidVersion.ApiLevel=36\nAndroidVersion.ExtensionLevel=17\nAndroidVersion.IsBaseSdk=true\nLayoutlib.Api=15\nLayoutlib.Revision=1\nPlatform.MinToolsRev=22\n"
+    }
+  ],
+  "license_file": "24333f8a63b6825ea9c5514f83c2829b004d1fee",
+  "installed_license_files": [
+    "android-sdk-license"
+  ],
+  "rust": "rustc 1.99.0 (b940084d7 2026-09-28)",
+  "jdk": {
+    "build": 1,
+    "major": 17,
+    "minor": 0,
+    "openjdk_version": "17.0.20.1+1",
+    "patch": 1,
+    "security": 20,
+    "semver": "17.0.20+101"
+  },
+  "android_cli_bootstrap_version": "1.0.16625370",
+  "android_cli_info_sdk_log": "android-cli-sdk-info.log",
+  "note": "android supplied by verified official commandline-tools bootstrapped on --version; later invocations use --no-metrics. No android init or additional license prompt."
+}

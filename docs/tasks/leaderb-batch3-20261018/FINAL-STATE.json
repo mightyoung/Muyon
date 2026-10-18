@@ -1,0 +1,32 @@
+{
+  "time_utc": "2026-10-18T02:43:14.193564+00:00",
+  "owner_status": {
+    "a": "completed and stopped",
+    "b": "completed and stopped",
+    "skills": "completed and stopped",
+    "review": "completed and stopped"
+  },
+  "worktrees": {
+    "original": {
+      "path": "/workspace/Muyon",
+      "head": "cc7c8d14d30e3d3c4c7c6cb2bf2059a99e46e003",
+      "status": ""
+    },
+    "a": {
+      "path": "/workspace/leaderb-b3-a",
+      "head": "2fbdc13efd84cabf04623775f87e762cd0d08c11",
+      "status": ""
+    },
+    "b_verification": {
+      "path": "/workspace/leaderb-b3-b",
+      "head": "687bed55b60f0794ca95cb8efd07798674b51bc4",
+      "status": ""
+    }
+  },
+  "active_builders": [],
+  "candidate_ref": "d25a407830ef624802583983c0be2414bbd59dc4",
+  "b_verification_ref": "687bed55b60f0794ca95cb8efd07798674b51bc4",
+  "develop_merge": false,
+  "main_mutation": false,
+  "uncommitted_source_scope": "none; integrator archive Markdown/JSON/evidence files being sealed in separate archive worktree only"
+}

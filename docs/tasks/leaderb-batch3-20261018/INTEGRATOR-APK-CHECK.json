@@ -1,0 +1,49 @@
+{
+  "source_sha": "2fbdc13efd84cabf04623775f87e762cd0d08c11",
+  "apk_sha256": "ad5bdca75a9e486c8b591fa8991656992ee1ed167936ddfdacfd571dd3b0f0af",
+  "accepted": true,
+  "entries": [
+    {
+      "name": "lib/arm64-v8a/libmuyon_android_contract_bridge.so",
+      "sha256": "ec27b1787e05f8d750a98094305da7ac71f01097bc825af3e5b313426f940f4d",
+      "stored": true,
+      "data_offset": 10338304,
+      "aligned_16KiB": true
+    },
+    {
+      "name": "lib/x86_64/libmuyon_android_contract_bridge.so",
+      "sha256": "b40072d132e1c74104a700a6a86373e67da4469e82c324ae864c0208231ce395",
+      "stored": true,
+      "data_offset": 12353536,
+      "aligned_16KiB": true
+    },
+    {
+      "name": "lib/arm64-v8a/libjnidispatch.so",
+      "sha256": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06",
+      "stored": true,
+      "data_offset": 10158080,
+      "aligned_16KiB": true
+    },
+    {
+      "name": "lib/x86_64/libjnidispatch.so",
+      "sha256": "3809247e9b804a05ed8377b87d545cf5b5e97f960f75e725bc8497b40260e417",
+      "stored": true,
+      "data_offset": 12222464,
+      "aligned_16KiB": true
+    },
+    {
+      "name": "lib/arm64-v8a/libandroidx.graphics.path.so",
+      "sha256": "41e9a793c43a0f4fddb19e33f346bace464f30f888ba7b9eaf96294ea115bfb6",
+      "stored": true,
+      "data_offset": 10141696,
+      "aligned_16KiB": true
+    },
+    {
+      "name": "lib/x86_64/libandroidx.graphics.path.so",
+      "sha256": "4e56c996f13670e70082658de7880c4020eabf4f25e43387f88ed78a713fc9f0",
+      "stored": true,
+      "data_offset": 12206080,
+      "aligned_16KiB": true
+    }
+  ]
+}

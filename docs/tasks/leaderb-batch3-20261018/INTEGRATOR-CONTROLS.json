@@ -1,0 +1,42 @@
+{
+  "source_sha": "d25a407830ef624802583983c0be2414bbd59dc4",
+  "source_clean": true,
+  "rows": [
+    {
+      "name": "native",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "experiments/redesign/rust-agent-host-lab/checks",
+        "-p",
+        "test_*.py"
+      ],
+      "exit_code": 0,
+      "count": 29,
+      "log": "native-controls.log",
+      "raw_sha256": "9e49db70885d6c3d8a832895724cf5dd2bf834d490581456f0e46df9bff7fc47"
+    },
+    {
+      "name": "android",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "experiments/redesign/android-rust-bridge-lab/checks",
+        "-p",
+        "test_*.py"
+      ],
+      "exit_code": 0,
+      "count": 68,
+      "log": "android-controls.log",
+      "raw_sha256": "6f35c9bf252348a02cb1d7840c83733ccb36f13d54c7d7286abc773776188cab"
+    }
+  ]
+}

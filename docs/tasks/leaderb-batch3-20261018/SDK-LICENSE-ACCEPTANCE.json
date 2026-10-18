@@ -1,0 +1,17 @@
+{
+  "accepted": true,
+  "license_id": "android-sdk-license",
+  "agreement": "Android Software Development Kit License Agreement",
+  "license_text_date": "January 16, 2019",
+  "text_sha256": "a39a19da8cb7f4e9fc7792962fb8ffe61a9f1735821b705b14cedb7c31554fcc",
+  "accepted_at_utc": "2026-10-18T02:26:57.206544+00:00",
+  "input": "y at sdkmanager selected-package prompt only",
+  "authorization": "User explicitly approved Google Android SDK license for required official SDK/NDK in Muyon cloud, no payment/publication",
+  "requested_packages": [
+    "platforms;android-36",
+    "build-tools;35.0.0",
+    "ndk;28.2.13676358",
+    "platform-tools"
+  ],
+  "other_licenses_accepted": false
+}

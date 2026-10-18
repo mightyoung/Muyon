@@ -1,0 +1,128 @@
+{
+  "source_a": "2fbdc13efd84cabf04623775f87e762cd0d08c11",
+  "source_b": "d25a407830ef624802583983c0be2414bbd59dc4",
+  "b_verification": "687bed55b60f0794ca95cb8efd07798674b51bc4",
+  "raw_evidence_root": "/workspace/leaderb-b3-evidence",
+  "remote_raw_logs": {
+    "path": "docs/tasks/leaderb-batch3-20261018/RAW-EVIDENCE.tar.gz",
+    "bytes": 1575969,
+    "sha256": "5d44399e51939d0ae74f98225a58c2295e3003fc37df9cb7b13cb2605f929cd1",
+    "files": 2408,
+    "contains": "original logs, manifests, synthetic captured data, source, reviews; no compiled applications"
+  },
+  "local_full_archive": {
+    "path": "/workspace/leaderb-batch3-20261018-evidence.tar.gz",
+    "bytes": 34261359,
+    "sha256": "5f5a2f3cb833bfb417c975ed3d0599f859931bbc25da8d9cca21957cf3f8bf1c",
+    "files": 2419,
+    "contains": "full selected evidence including actual APK/JAR/SO; excludes rebuildable targets/tools/work copies",
+    "remote_upload": false
+  },
+  "key_files": [
+    {
+      "path": "initial-state.json",
+      "bytes": 846,
+      "sha256": "c98ece4d9c0ee117fb8fd6d9d8174201a94b0d579319722cf126074feb617f9e"
+    },
+    {
+      "path": "FINAL-STATE.json",
+      "bytes": 1007,
+      "sha256": "83ef51463491ff90ea9fa1c50a0cb1877d922d0b2ed810f57faeaa63c13b3f75"
+    },
+    {
+      "path": "sdk-license-acceptance.json",
+      "bytes": 685,
+      "sha256": "5215df00ab78f945b4a22130860f58faac8689170747e64fde6197779c7e8c8d"
+    },
+    {
+      "path": "toolchain-versions.json",
+      "bytes": 2421,
+      "sha256": "7781d188adca5c1b4e74f49ff826763ebf4912865d1160afcc518a3f89b4c566"
+    },
+    {
+      "path": "integrator-controls.json",
+      "bytes": 955,
+      "sha256": "5689ef761fd2fc88f4b32026dc72cd0067d26c093e0cc93a8b503f38798c3337"
+    },
+    {
+      "path": "integrator-apk-check.json",
+      "bytes": 1597,
+      "sha256": "3d56826bc8fafee85ef78a83db7b7f2115070c883a335b7ce80ab18845cd9a7a"
+    },
+    {
+      "path": "a/FINAL-MANIFEST.json",
+      "bytes": 34639,
+      "sha256": "937321504a558d81f3ff39084fc6ff4924b8691937d4c7b57d6d9ca2fce5d912"
+    },
+    {
+      "path": "a/OUTCOME.json",
+      "bytes": 2038,
+      "sha256": "b703069ce544fca67f924df1eef80b159ead4bdf6bcb20814d4276c56d265250"
+    },
+    {
+      "path": "a/package/verdict.json",
+      "bytes": 1868,
+      "sha256": "5df3fc8d0b517ab8b1b406b14fa94969d086571da8ed6461433f7d8f326de0d6"
+    },
+    {
+      "path": "b/OUTCOME.md",
+      "bytes": 3677,
+      "sha256": "07381aae17c002c430f2244cfcb3accf4c557f7a98dfe54046477cca735c883a"
+    },
+    {
+      "path": "b/final-runner-provenance.json",
+      "bytes": 2357,
+      "sha256": "4bacdf9001dda98358070bb6d5400ad431d115f87998da61c8f887c679808802"
+    },
+    {
+      "path": "b/final-core-start.json",
+      "bytes": 1655,
+      "sha256": "0631c1976f24f39a3cee926c8394e12f33d4defa67a4bc14364ced707efe1524"
+    },
+    {
+      "path": "b/core-full-final.json",
+      "bytes": 307,
+      "sha256": "e62fb722ae048a76ce6a2ca67937c9a3304fd39068e5eb7d2cecab56744b29f1"
+    },
+    {
+      "path": "b/final-integrity.json",
+      "bytes": 480,
+      "sha256": "089dba7e64858a354948ddcca4663a385a8023960d654da6f37542319840fc58"
+    },
+    {
+      "path": "b/legacy17-semantic-audit.json",
+      "bytes": 4788,
+      "sha256": "b0f710b6b4164966445ac60683558cc8f51b2abf24dfba2854b9ac943e9706d1"
+    },
+    {
+      "path": "b/legacy17-exact/summary.json",
+      "bytes": 27092,
+      "sha256": "65faf7f1173eba8e01f2cf346b0eafcb70b7f0e08e446dbdb3dc51435f4ad45e"
+    },
+    {
+      "path": "b/native3/summary.json",
+      "bytes": 94539,
+      "sha256": "858fd98e1a8fe059a6c8bb65457ccca8b0c1835336b19b1a12c9d31804eddc29"
+    },
+    {
+      "path": "b/http7/summary.json",
+      "bytes": 7998,
+      "sha256": "f3be991406dc82ec8a7b49ba695affc2aa1669d804c6ed69356d1e921161a960"
+    },
+    {
+      "path": "review/A-FINAL-REVIEW.md",
+      "bytes": 4516,
+      "sha256": "d8510df541e3da0d9f8e5ba788af05cbff79d512397d3b7e29d5e1d7bd91ec74"
+    },
+    {
+      "path": "review/B-FINAL-REVIEW.md",
+      "bytes": 7602,
+      "sha256": "5fa52be6765bcec2e7037345daab4c60e771ea038db39b3b8465f6f5d9647489"
+    },
+    {
+      "path": "evidence-index.json",
+      "bytes": 533290,
+      "sha256": "0f330ecf0ad545a0555ad0c60a205739390fad0f1169364d7fe96d7472f08c21"
+    }
+  ]
+}

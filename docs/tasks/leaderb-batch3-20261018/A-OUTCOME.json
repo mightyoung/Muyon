@@ -1,0 +1,63 @@
+{
+  "source_sha": "2fbdc13efd84cabf04623775f87e762cd0d08c11",
+  "verification_sha": "a0c14e13b700a57b92fabab19dd546a636da2741",
+  "checker_sha": "7481ba0daf8954bb54139d2cf2a248edfd0ca5d0",
+  "classification": "GREEN_SCOPED",
+  "runner_exits": {
+    "linux": 0,
+    "arm64-v8a": 0,
+    "x86_64": 0,
+    "package": 0,
+    "service": 0,
+    "ordinary": 0
+  },
+  "verified_zero_exit_natural_cleanup_sidecars": 65,
+  "active_owned_build_workers": [],
+  "source": {
+    "source_sha": "2fbdc13efd84cabf04623775f87e762cd0d08c11",
+    "status": "",
+    "tracked_product_inputs_unchanged": true,
+    "source_input_count": 340
+  },
+  "not_run": [
+    "ART",
+    "Binder",
+    "UID/permissions",
+    "Android fsync",
+    "kill/rebind",
+    "device/emulator",
+    "fresh compiled Service inverses",
+    "private Rust Service13 (separate previous batch evidence)"
+  ],
+  "limitations": [
+    "JVM durable oracle does not directly observe actual first payload or exact handler count.",
+    "Lint passed with 0 errors and 6 warnings.",
+    "Results apply only to exact product2f, not HTTP recovery candidate or integration."
+  ],
+  "artifacts": {
+    "linux": {
+      "path": "artifacts/linux/verdict.json",
+      "sha256": "d630b2fd14e83b609ad55327ecb7642d834cd9e72d74e6f61c8d4c5e30915409"
+    },
+    "arm64-v8a": {
+      "path": "artifacts/arm64-v8a/manifest.json",
+      "sha256": "f0e30e1c3fb29936616bd70af4035dcc1be2281493212123592b69621c5c42d3"
+    },
+    "x86_64": {
+      "path": "artifacts/x86_64/manifest.json",
+      "sha256": "51bc309740ff782ec570236d7cb607d04c8a0acd3699befc9d9cc584278eccb8"
+    },
+    "package": {
+      "path": "package/verdict.json",
+      "sha256": "5df3fc8d0b517ab8b1b406b14fa94969d086571da8ed6461433f7d8f326de0d6"
+    },
+    "service": {
+      "path": "service/verdict.json",
+      "sha256": "82483958e481000b57d0e2d38b71b0d2b4ff2d2c5844ccbfe8404667195123b2"
+    },
+    "ordinary": {
+      "path": "ordinary/verdict.json",
+      "sha256": "422c7b653f578b13b9f7e73740c12f3b0780525a236c5f169f6df658376655e0"
+    }
+  }
+}
