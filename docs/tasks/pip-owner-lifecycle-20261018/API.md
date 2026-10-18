@@ -50,6 +50,13 @@ execute that worker. Never hold its lock across await/join or reenter it from a
 callback. Dropping a handle performs no implicit success or cleanup. Unload never
 deletes business records or rolls back committed external effects.
 
+Callbacks may unwind after producing external effects. Catalog retains fencing,
+but a surrounding standard Mutex may be poisoned; the host must apply explicit
+recovery rather than automatically retry, clear unknown or assume rollback.
+Legacy consumers have no selective removal lease and remain dependencies even
+after wire close. Enroll consumers as managed from setup if selective unload is
+needed; do not force-remove a provider underneath a legacy consumer.
+
 The local tests exercise real Catalog admission and the lease transitions with
 controlled host callbacks. They do not replace the needed host wiring tests and
 actual Android acceptance. LeaderB owns all rust-agent-host-lab changes.

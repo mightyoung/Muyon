@@ -1,0 +1,43 @@
+#[path = "/workspace/Muyon/experiments/redesign/plugin-contract-lab/core/tests/support/mod.rs"]
+mod support;
+use support::*;
+use muyon_plugin_contract_lab::{Catalog, DrainState, Json, OwnerLease, string};
+use std::panic::{catch_unwind, AssertUnwindSafe};
+fn enroll(c: &mut Catalog) -> OwnerLease {
+ c.register_owned(bundle(), vec!["host-equipment-read".into()], vec![]).unwrap()
+}
+fn consumer_bundle() -> Json {
+ let mut b=bundle(); put(&mut b,"module_id",string("consumer"));
+ for key in ["data","relations","views"] {put(&mut b,key,json("[]"));}
+ put(row(&mut b,"operations",0),"binding_id",string("consumer-read")); b
+}
+#[test]
+fn actual_persistence_and_close_panics_preserve_recoverable_state() {
+ let mut c=Catalog::new(); let owner=enroll(&mut c); let t=ticket(&mut c);
+ let (_,w)=c.dispatch_owned(&owner,t.string().unwrap(),authority()).unwrap(); c.stop_owner(&owner).unwrap();
+ assert!(catch_unwind(AssertUnwindSafe(|| c.settle_work(&w,|| panic!("persist failure")))).is_err());
+ assert_eq!(c.owner_state(&owner).unwrap(),DrainState::Draining{in_flight:1});
+ c.settle_work(&w,|| Ok(())).unwrap(); let before=stats(&mut c);
+ assert!(catch_unwind(AssertUnwindSafe(|| c.release_owner(&owner,|| panic!("close failure")))).is_err());
+ assert_eq!(stats(&mut c),before); assert_eq!(c.owner_state(&owner).unwrap(),DrainState::Draining{in_flight:0});
+ c.release_owner(&owner,|| Ok(())).unwrap();
+}
+#[test]
+fn legacy_dependent_blocks_provider_without_partial_cancel_or_ticket_removal() {
+ let mut c=Catalog::new(); let owner=enroll(&mut c);
+ let r=call(&mut c,"register",vec![("bundle",consumer_bundle()),("host_bindings",json(r#"["consumer-read"]"#)),("host_data_admissions",json(r#"["equipment_loan/equipment@1","equipment_loan/loan@1"]"#))]); assert!(ok(&r));
+ let t=ticket(&mut c); let (_,w)=c.dispatch_owned(&owner,t.string().unwrap(),authority()).unwrap(); let before=stats(&mut c);
+ assert_eq!(c.stop_owner(&owner).unwrap_err(),"owner_has_dependents"); assert_eq!(stats(&mut c),before); assert!(!w.cancel_requested());
+ assert!(ok(&accept(&mut c,t,authority(),receipt(),projection())));
+ c.settle_work(&w,|| Ok(())).unwrap();
+}
+#[test]
+fn unrelated_generation_change_preserves_owner_lease_but_fences_old_ticket() {
+ let mut c=Catalog::new(); let owner=enroll(&mut c); let t=ticket(&mut c);
+ let b=json(&bundle().encode().replace("equipment_loan","other").replace("host-equipment-read","other-read"));
+ let second=c.register_owned(b,vec!["other-read".into()],vec![]).unwrap();
+ assert_eq!(c.owner_state(&owner).unwrap(),DrainState::Active);
+ assert_eq!(c.dispatch_owned(&owner,t.string().unwrap(),authority()).unwrap_err(),"stale_authority");
+ let t=ticket(&mut c); let (_,w)=c.dispatch_owned(&owner,t.string().unwrap(),authority()).unwrap(); c.settle_work(&w,||Ok(())).unwrap();
+ c.stop_owner(&owner).unwrap(); c.release_owner(&owner,||Ok(())).unwrap(); assert_eq!(c.owner_state(&second).unwrap(),DrainState::Active);
+}

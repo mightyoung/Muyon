@@ -1,0 +1,13 @@
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+   Compiling pip-registry-evidence v0.1.0 (/workspace/Muyon/docs/tasks/pip-registry-20261018/probe)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.88s
+     Running tests/publication.rs (/workspace/pip-lifecycle-review-target/debug/deps/publication-4f84d5e9a3d7c400)
+
+running 4 tests
+test rejected_publication_preserves_existing_prepared_admission ... ok
+test successful_publication_invalidates_previous_generation_before_dispatch ... ok
+test closed_catalog_refuses_late_publication_and_new_admission ... ok
+test every_declaration_stage_rejects_without_reserving_namespace_or_binding ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

@@ -1,0 +1,49 @@
+{
+  "sha": "853687cb0ce7d7e0133808f05a07258175c6b486",
+  "tree": "133e03b30b57f8ead0aa687537d149173b105bb6",
+  "start_utc": "2026-10-18T06:12:55.015603+00:00",
+  "runs": [
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "experiments/redesign/plugin-contract-lab/core/Cargo.toml"
+      ],
+      "exit": 0,
+      "log": "suite.log",
+      "sha256": "e36d2252080ca0a8b774a3cf69de1e864d85ecce7e5629e609d2204a9badc847"
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "docs/tasks/pip-registry-20261018/probe/Cargo.toml"
+      ],
+      "exit": 0,
+      "log": "audit-probe.log",
+      "sha256": "bb2503247a952f12bfe4815093167dd98170efaa1b91a46cd94a8ebfd5942b72"
+    },
+    {
+      "command": [
+        "rustfmt",
+        "--edition",
+        "2021",
+        "--config",
+        "skip_children=true",
+        "--check",
+        "experiments/redesign/plugin-contract-lab/core/src/lifecycle.rs",
+        "experiments/redesign/plugin-contract-lab/core/tests/owner_lifecycle.rs"
+      ],
+      "exit": 0,
+      "log": "fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "end_utc": "2026-10-18T06:12:58.497756+00:00"
+}

@@ -1,0 +1,25 @@
+$ git rev-parse HEAD HEAD^{tree}
+853687cb0ce7d7e0133808f05a07258175c6b486
+133e03b30b57f8ead0aa687537d149173b105bb6
+EXIT=0
+
+$ git status --porcelain
+EXIT=0
+
+$ git diff --name-only 05d224f4b4fb31b3e015ea88cdaa7a14b03978b8 853687cb0ce7d7e0133808f05a07258175c6b486
+docs/tasks/pip-owner-lifecycle-20261018/API.md
+docs/tasks/pip-owner-lifecycle-20261018/LEDGER.md
+docs/tasks/pip-owner-lifecycle-20261018/README.md
+docs/tasks/pip-owner-lifecycle-20261018/evidence/cancel-red.log
+docs/tasks/pip-owner-lifecycle-20261018/evidence/fmt.log
+docs/tasks/pip-owner-lifecycle-20261018/evidence/owner-green-initial.log
+docs/tasks/pip-owner-lifecycle-20261018/evidence/owner-red.log
+docs/tasks/pip-owner-lifecycle-20261018/evidence/refusing-api.rs.txt
+docs/tasks/pip-owner-lifecycle-20261018/evidence/suite-final.log
+docs/tasks/pip-owner-lifecycle-20261018/evidence/suite-green-cancel.log
+docs/tasks/pip-owner-lifecycle-20261018/evidence/suite-green-expanded.log
+docs/tasks/pip-owner-lifecycle-20261018/evidence/suite-green-initial.log
+experiments/redesign/plugin-contract-lab/core/src/lib.rs
+experiments/redesign/plugin-contract-lab/core/src/lifecycle.rs
+experiments/redesign/plugin-contract-lab/core/tests/owner_lifecycle.rs
+EXIT=0

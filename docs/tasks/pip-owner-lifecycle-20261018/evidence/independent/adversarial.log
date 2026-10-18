@@ -1,0 +1,19 @@
+['rustc', '--edition', '2021', '--test', '/workspace/pip-lifecycle-independent-review/adversarial.rs', '-L', 'dependency=/workspace/pip-lifecycle-review-target/debug/deps', '--extern', 'muyon_plugin_contract_lab=/workspace/pip-lifecycle-review-target/debug/deps/libmuyon_plugin_contract_lab-fc95ce1497c0caf9.rlib', '-o', '/workspace/pip-lifecycle-independent-review/adversarial']
+EXIT=0
+['/workspace/pip-lifecycle-independent-review/adversarial', '--nocapture']
+
+running 3 tests
+
+thread 'actual_persistence_and_close_panics_preserve_recoverable_state' panicked at /workspace/pip-lifecycle-independent-review/adversarial.rs:18:63:
+persist failure
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'actual_persistence_and_close_panics_preserve_recoverable_state' panicked at /workspace/pip-lifecycle-independent-review/adversarial.rs:21:69:
+close failure
+test actual_persistence_and_close_panics_preserve_recoverable_state ... ok
+test legacy_dependent_blocks_provider_without_partial_cancel_or_ticket_removal ... ok
+test unrelated_generation_change_preserves_owner_lease_but_fences_old_ticket ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+EXIT=0

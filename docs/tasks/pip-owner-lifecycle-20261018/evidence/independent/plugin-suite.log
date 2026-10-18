@@ -1,0 +1,82 @@
+   Compiling muyon-core-agent-lab v0.1.0 (/workspace/Muyon/experiments/redesign/core-agent-lab/core)
+   Compiling muyon-plugin-contract-lab v0.1.0 (/workspace/Muyon/experiments/redesign/plugin-contract-lab/core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.35s
+     Running unittests src/lib.rs (/workspace/pip-lifecycle-review-target/debug/deps/muyon_plugin_contract_lab-05365e82d882b3fd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (/workspace/pip-lifecycle-review-target/debug/deps/muyon_plugin_contract_lab-0338644ffc2264d9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/mapping_contract.rs (/workspace/pip-lifecycle-review-target/debug/deps/mapping_contract-b26377cb4bfda022)
+
+running 5 tests
+test native_host_canonical_api_matches_catalog_integer_contract ... ok
+test source_subsets_have_exact_types_relations_and_classification ... ok
+test seeded_rename_preserves_closed_schema_and_separate_binding ... ok
+test native_declarations_register_without_grants_or_reads ... ok
+test mapped_reads_keep_native_arguments_and_typed_scope ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/owner_lifecycle.rs (/workspace/pip-lifecycle-review-target/debug/deps/owner_lifecycle-3852713d20280029)
+
+running 15 tests
+test active_owner_cannot_release_and_dropped_work_does_not_fake_drain ... ok
+test concurrent_stop_retains_blocked_work_until_host_settlement ... ok
+test accepted_projection_and_old_completion_do_not_release_unsettled_new_epoch ... ok
+test cancel_and_close_do_not_claim_handler_quiescence_or_release_resource ... ok
+test durable_host_marker_precedes_resource_release_and_business_bytes_survive ... ok
+test dependent_bundle_must_be_released_before_provider_stop_without_partial_change ... ok
+test failed_persistence_or_close_retains_fencing_and_completion_is_idempotent ... ok
+test managed_dispatch_cannot_bypass_tracking_via_wire_and_authority_still_denies ... ok
+test exact_release_preserves_other_bundle_and_rejects_wrong_owner_dispatch ... ok
+test plugin_json_cannot_supply_owner_or_use_disposer_commands ... ok
+test foreign_catalog_leases_cannot_fence_dispatch_settle_or_release ... ok
+test stale_disposer_cannot_delete_replacement_epoch_or_close_its_resource ... ok
+test stop_wire_cancel_and_close_request_cooperative_cancel_without_settling_work ... ok
+test stopping_fences_discovery_prepare_old_ticket_and_late_reenrollment ... ok
+test owned_work_quota_refuses_without_consuming_ticket_and_settlement_restores_capacity ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/read_contract.rs (/workspace/pip-lifecycle-review-target/debug/deps/read_contract-9168b0aecbd8e2fb)
+
+running 8 tests
+test cancel_before_dispatch_executes_zero ... ok
+test cancel_after_dispatch_accepts_no_projection ... ok
+test receipt_reference_has_original_owner ... ok
+test invalid_projection_and_refs_reject ... ok
+test revoke_before_invoke_executes_zero ... ok
+test ticket_is_one_shot ... ok
+test prepared_bindings_are_exact ... ok
+test eof_and_concurrency_fail_closed ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/registration.rs (/workspace/pip-lifecycle-review-target/debug/deps/registration-66533f5c8f228cba)
+
+running 9 tests
+test foreign_data_admission_requires_the_referenced_schema_closure ... ok
+test atomic_registration_publishes_only_valid_bundle ... ok
+test registration_neither_grants_nor_reads ... ok
+test declaration_labels_cannot_authorize ... ok
+test namespace_duplicates_and_versions_reject ... ok
+test renamed_bundle_is_semantically_equivalent ... ok
+test relation_and_view_refs_must_resolve ... ok
+test schema_subset_and_limits_fail_closed ... ok
+test discovery_filters_current_authority ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+   Doc-tests muyon_plugin_contract_lab
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -40,7 +40,21 @@ locked/offline; no manifest/dependency additions.
    Full suite exit0:37 passed (22 original+15 lifecycle), `suite-green-cancel.log`.
 5. Formatted new module/test only with rustfmt --edition2021
    --config skip_children=true; preserve existing compact shared lib.rs style.
-   Final fixed-source tests/review evidence will be appended at handoff.
+6. Fixed implementation source `853687cb0ce7d7e0133808f05a07258175c6b486`,
+   tree `133e03b30b57f8ead0aa687537d149173b105bb6`. Author's fresh locked/offline
+   full crate37, unchanged audit supplement4 and scoped rustfmt all exit0.
+   Command arrays/time/exit/log hashes in `evidence/fixed/MANIFEST.json`.
+7. Fresh independent review at the same fixed source: full crate37, audit4,
+   rustfmt all exit0; three separate external probes pass. No blocking finding
+   or required source fix. See REVIEW.md and `evidence/independent/`; caught
+   panic output is intentionally preserved. External probes do not inflate the
+   committed37 count. Review record/doc clarifications do not change code/tests.
+
+Integration rulings accepted: trust preconditions for actual host quiescence and
+receipt persistence stand because those resources/paths are excluded; legacy
+consumer dependencies conservatively block selective provider unload; callback
+panic state retention does not certify host lock/external-effect recovery.
+These are documented limits, not waived test failures or production acceptance.
 
 Only this task's docs and plugin-contract-lab source/test files are changed.
 No host source/test suite, store migration, Android/UI/OCR, I04 flow/HTTP/reopen,
