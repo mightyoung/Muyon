@@ -33,3 +33,11 @@ The six Rust cases use a test-local Owner; they prove controller behavior and a 
 Provider receipt validation is now stricter about closed context/authority/profile/body/usage fields, policy-owner relationships, exact input bytes, completion/total bounds and restored input_ref. New evidence-tampering tests stay in the permitted fresh-root graph. Their outcomes remain NOT_RUN by the reviewer.
 
 The previous workflow graph allowance and restrictions remain: only ordinary chat lab push and PR94-stacked Draft; no develop/main Draft that launches ci.yml aggregate, no other suite/CI dispatch, no I04 or old 403 download, no key/.env access, real model, fee, deployment, merge, force push, deletion, PR90/Dart8 modification or HOLD removal. No real DeepSeek verification is claimed. Reviewer writer stopped after this file.
+
+## Inventory follow-up at 61e25a59
+
+Read-only reviewed delta c76687fd → immutable 61e25a59. The same six-case named integration target with `-- --test-threads=1`, bridge build-only and local binding generation are permitted with the actual source SHA updated. No I04/HTTP/Agent::open/historical-root route was introduced.
+
+ServiceRoot inventory adds only ordinary-agent-v1.db and ordinary-send-v1.db to its known-file list, permitting the existing active controller to admit another request after a successful ordinary run. Existing directory ownership/mode, file type/symlink/uid/0600, entry and byte limits remain; recognized interrupted atomic temporary files still poison the root. The changed quota test now asserts first and second completion before exhaustion, so the earlier census failure cannot masquerade as a successful quota rejection. The other Kotlin delta stores nullable provider in a local variable for the existing capability predicate; it does not change the graph or authority.
+
+Previously observed c76687fd 5 PASS / 1 FAIL and diagnostic failure remain failures, per parent's report and retained logs. This review did not rerun them or claim the fix passes. Generated binding remains incomplete until genuine reproduction. No old records may be reopened to validate this repair. Reviewer writer stopped again.

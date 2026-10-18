@@ -26,9 +26,12 @@ internal class ServiceAdmissionAuthority(initial: State) {
     class State(val scope: ServiceOwnerScope?, val provider: ServiceOwnerProvider?,
                 val payloadReview: (ServiceOwnerAdmissionBinding, ByteArray) -> Boolean,
                 val budgetProof: (ServiceOwnerAdmissionBinding, ByteArray, ServiceOwnerCallBudget) -> String?,
-                val chat:ServiceOwnerChatAuthority?=null,
-                val credential:ServiceOwnerCredentialCapability?=null,
-                val fakeExchange:((ByteArray)->ServiceOwnerChatResponse)?=null)
+                val chat:ServiceOwnerChatAuthority?,
+                val credential:ServiceOwnerCredentialCapability?,
+                val fakeExchange:((ByteArray)->ServiceOwnerChatResponse)?) {
+        // Preserve the existing four-argument/trailing budget-proof constructor.
+        constructor(scope:ServiceOwnerScope?,provider:ServiceOwnerProvider?,payloadReview:(ServiceOwnerAdmissionBinding,ByteArray)->Boolean,budgetProof:(ServiceOwnerAdmissionBinding,ByteArray,ServiceOwnerCallBudget)->String?):this(scope,provider,payloadReview,budgetProof,null,null,null)
+    }
     private val lock = ReentrantLock()
     private var state = snapshot(initial)
     private fun snapshot(s: State) = State(s.scope?.let { scope -> scope.copy(decision = scope.decision.copy(

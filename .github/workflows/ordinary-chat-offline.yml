@@ -113,8 +113,8 @@ jobs:
           adb shell input keyevent 82
           adb install "$evidence/app-lifecycle.apk"
           adb install "$evidence/app-lifecycle-androidTest.apk"
-          timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.OrdinaryChatServiceLoopTest com.mightyoung.muyon.androidlab.ordinaryChat.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
-          grep -F 'OK (1 test)' "$evidence/instrumentation.log"
+          timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.OrdinaryChatServiceLoopTest,com.mightyoung.muyon.androidlab.agentipc.OrdinaryChatOwnerContractTest com.mightyoung.muyon.androidlab.ordinaryChat.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
+          grep -F 'OK (2 tests)' "$evidence/instrumentation.log"
           if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi
           printf 'PASS: actual Compose Send to private Service same Rust Agent plain fake provider response; synthetic, no network/model call\n' > "$evidence/device-result.txt"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

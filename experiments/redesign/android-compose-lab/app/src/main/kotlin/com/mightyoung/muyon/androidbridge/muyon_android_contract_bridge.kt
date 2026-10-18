@@ -653,48 +653,72 @@ internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
     fun callback(`callbackData`: Long,`result`: UniffiForeignFutureResultVoid.UniffiByValue,)
 }
 internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`profile`: RustBuffer.ByValue,`reference`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 : com.sun.jna.Callback {
-    fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
 }
 internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod6 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod7 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod8 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,)
+}
+internal interface UniffiCallbackInterfaceServiceHostOwnerCallbackMethod9 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,)
 }
-@Structure.FieldOrder("uniffiFree", "uniffiClone", "currentScope", "currentProvider", "reviewPayload", "reserveBudget", "releaseReservation", "commitAdmission")
+@Structure.FieldOrder("uniffiFree", "uniffiClone", "currentChatAuthority", "credentialCapability", "bindChatContext", "exchangeChat", "currentScope", "currentProvider", "reviewPayload", "reserveBudget", "releaseReservation", "commitAdmission")
 internal open class UniffiVTableCallbackInterfaceServiceHostOwnerCallback(
     @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
     @JvmField internal var `uniffiClone`: UniffiCallbackInterfaceClone? = null,
-    @JvmField internal var `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0? = null,
-    @JvmField internal var `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
-    @JvmField internal var `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
-    @JvmField internal var `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
-    @JvmField internal var `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
-    @JvmField internal var `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5? = null,
+    @JvmField internal var `currentChatAuthority`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0? = null,
+    @JvmField internal var `credentialCapability`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
+    @JvmField internal var `bindChatContext`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
+    @JvmField internal var `exchangeChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
+    @JvmField internal var `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
+    @JvmField internal var `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5? = null,
+    @JvmField internal var `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod6? = null,
+    @JvmField internal var `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod7? = null,
+    @JvmField internal var `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod8? = null,
+    @JvmField internal var `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod9? = null,
 ) : Structure() {
     class UniffiByValue(
         `uniffiFree`: UniffiCallbackInterfaceFree? = null,
         `uniffiClone`: UniffiCallbackInterfaceClone? = null,
-        `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0? = null,
-        `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
-        `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
-        `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
-        `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
-        `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5? = null,
-    ): UniffiVTableCallbackInterfaceServiceHostOwnerCallback(`uniffiFree`,`uniffiClone`,`currentScope`,`currentProvider`,`reviewPayload`,`reserveBudget`,`releaseReservation`,`commitAdmission`,), Structure.ByValue
+        `currentChatAuthority`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0? = null,
+        `credentialCapability`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1? = null,
+        `bindChatContext`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2? = null,
+        `exchangeChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3? = null,
+        `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4? = null,
+        `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5? = null,
+        `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod6? = null,
+        `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod7? = null,
+        `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod8? = null,
+        `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod9? = null,
+    ): UniffiVTableCallbackInterfaceServiceHostOwnerCallback(`uniffiFree`,`uniffiClone`,`currentChatAuthority`,`credentialCapability`,`bindChatContext`,`exchangeChat`,`currentScope`,`currentProvider`,`reviewPayload`,`reserveBudget`,`releaseReservation`,`commitAdmission`,), Structure.ByValue
 
    internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceServiceHostOwnerCallback) {
         `uniffiFree` = other.`uniffiFree`
         `uniffiClone` = other.`uniffiClone`
+        `currentChatAuthority` = other.`currentChatAuthority`
+        `credentialCapability` = other.`credentialCapability`
+        `bindChatContext` = other.`bindChatContext`
+        `exchangeChat` = other.`exchangeChat`
         `currentScope` = other.`currentScope`
         `currentProvider` = other.`currentProvider`
         `reviewPayload` = other.`reviewPayload`
@@ -759,9 +783,19 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_status(
     ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_ordinary_chat(
+    ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_supplier_read(
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_supplier_read_events(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_chat_authority(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_credential_capability(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_bind_chat_context(
+    ): Int
+    external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_exchange_chat(
     ): Int
     external fun uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_scope(
     ): Int
@@ -834,6 +868,8 @@ internal object UniffiLib {
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_status(`ptr`: Long,`req`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_ordinary_chat(`ptr`: Long,`client`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_supplier_read(`ptr`: Long,`client`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`key`: RustBuffer.ByValue,`revision`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_supplier_read_events(`ptr`: Long,`client`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`after`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -844,6 +880,14 @@ internal object UniffiLib {
     ): Unit
     external fun uniffi_muyon_android_contract_bridge_fn_init_callback_vtable_servicehostownercallback(`vtable`: UniffiVTableCallbackInterfaceServiceHostOwnerCallback,
     ): Unit
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_chat_authority(`ptr`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_credential_capability(`ptr`: Long,`profile`: RustBuffer.ByValue,`reference`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_bind_chat_context(`ptr`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): Byte
+    external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_exchange_chat(`ptr`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+    ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_scope(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
     ): RustBuffer.ByValue
     external fun uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_provider(`ptr`: Long,uniffi_out_err: UniffiRustCallStatus, 
@@ -1024,28 +1068,43 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_status() and 0xFFFF) != 7957) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_ordinary_chat() and 0xFFFF) != 19128) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_submit_supplier_read() and 0xFFFF) != 60051) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_agentservicecontroller_supplier_read_events() and 0xFFFF) != 43074) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_scope() and 0xFFFF) != 58872) {
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_chat_authority() and 0xFFFF) != 44909) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_provider() and 0xFFFF) != 11664) {
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_credential_capability() and 0xFFFF) != 37752) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_review_payload() and 0xFFFF) != 18686) {
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_bind_chat_context() and 0xFFFF) != 59684) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_reserve_budget() and 0xFFFF) != 62703) {
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_exchange_chat() and 0xFFFF) != 60751) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_release_reservation() and 0xFFFF) != 7849) {
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_scope() and 0xFFFF) != 61219) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission() and 0xFFFF) != 46079) {
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_current_provider() and 0xFFFF) != 43422) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_review_payload() and 0xFFFF) != 13682) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_reserve_budget() and 0xFFFF) != 9068) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_release_reservation() and 0xFFFF) != 54811) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if ((lib.uniffi_muyon_android_contract_bridge_checksum_method_servicehostownercallback_commit_admission() and 0xFFFF) != 16459) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if ((lib.uniffi_muyon_android_contract_bridge_checksum_constructor_agentservicecontroller_new() and 0xFFFF) != 1391) {
@@ -1534,6 +1593,8 @@ public interface AgentServiceControllerInterface {
     
     fun `status`(`req`: AgentStatusRequest): AgentSnapshotReply
     
+    fun `submitOrdinaryChat`(`client`: AgentClientRef, `requestId`: kotlin.String, `conversation`: kotlin.String, `text`: kotlin.String): kotlin.String
+    
     fun `submitSupplierRead`(`client`: AgentClientRef, `requestId`: kotlin.String, `text`: kotlin.String, `key`: kotlin.String, `revision`: kotlin.String): kotlin.String
     
     fun `supplierReadEvents`(`client`: AgentClientRef, `requestId`: kotlin.String, `after`: kotlin.Long): kotlin.String
@@ -1831,6 +1892,23 @@ open class AgentServiceController: Disposable, AutoCloseable, AgentServiceContro
     }
     
 
+    override fun `submitOrdinaryChat`(`client`: AgentClientRef, `requestId`: kotlin.String, `conversation`: kotlin.String, `text`: kotlin.String): kotlin.String {
+            return FfiConverterString.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_agentservicecontroller_submit_ordinary_chat(
+        it,
+        
+        FfiConverterTypeAgentClientRef.lower(`client`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterString.lower(`conversation`),
+        FfiConverterString.lower(`text`),_status)
+}
+    }
+    )
+    }
+    
+
     override fun `submitSupplierRead`(`client`: AgentClientRef, `requestId`: kotlin.String, `text`: kotlin.String, `key`: kotlin.String, `revision`: kotlin.String): kotlin.String {
             return FfiConverterString.lift(
     callWithHandle {
@@ -2018,6 +2096,14 @@ public object FfiConverterTypeAgentServiceController: FfiConverter<AgentServiceC
 
 public interface ServiceHostOwnerCallback {
     
+    fun `currentChatAuthority`(`conversation`: kotlin.String, `text`: kotlin.String): ServiceOwnerChatAuthority?
+    
+    fun `credentialCapability`(`profile`: kotlin.String, `reference`: kotlin.String): ServiceOwnerCredentialCapability?
+    
+    fun `bindChatContext`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `context`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability): kotlin.Boolean
+    
+    fun `exchangeChat`(`admission`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `context`: kotlin.ByteArray, `payload`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability): ServiceOwnerChatResponse?
+    
     fun `currentScope`(): ServiceOwnerScope?
     
     fun `currentProvider`(): ServiceOwnerProvider?
@@ -2149,6 +2235,73 @@ open class ServiceHostOwnerCallbackImpl: Disposable, AutoCloseable, ServiceHostO
         }
     }
 
+    override fun `currentChatAuthority`(`conversation`: kotlin.String, `text`: kotlin.String): ServiceOwnerChatAuthority? {
+            return FfiConverterOptionalTypeServiceOwnerChatAuthority.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_current_chat_authority(
+        it,
+        
+        FfiConverterString.lower(`conversation`),
+        FfiConverterString.lower(`text`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `credentialCapability`(`profile`: kotlin.String, `reference`: kotlin.String): ServiceOwnerCredentialCapability? {
+            return FfiConverterOptionalTypeServiceOwnerCredentialCapability.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_credential_capability(
+        it,
+        
+        FfiConverterString.lower(`profile`),
+        FfiConverterString.lower(`reference`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `bindChatContext`(`reservation`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `requestId`: kotlin.String, `payload`: kotlin.ByteArray, `context`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability): kotlin.Boolean {
+            return FfiConverterBoolean.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_bind_chat_context(
+        it,
+        
+        FfiConverterString.lower(`reservation`),
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterString.lower(`requestId`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterByteArray.lower(`context`),
+        FfiConverterTypeServiceOwnerCredentialCapability.lower(`capability`),_status)
+}
+    }
+    )
+    }
+    
+
+    override fun `exchangeChat`(`admission`: kotlin.String, `binding`: ServiceOwnerAdmissionBinding, `context`: kotlin.ByteArray, `payload`: kotlin.ByteArray, `capability`: ServiceOwnerCredentialCapability): ServiceOwnerChatResponse? {
+            return FfiConverterOptionalTypeServiceOwnerChatResponse.lift(
+    callWithHandle {
+    uniffiRustCall() { _status ->
+    UniffiLib.uniffi_muyon_android_contract_bridge_fn_method_servicehostownercallback_exchange_chat(
+        it,
+        
+        FfiConverterString.lower(`admission`),
+        FfiConverterTypeServiceOwnerAdmissionBinding.lower(`binding`),
+        FfiConverterByteArray.lower(`context`),
+        FfiConverterByteArray.lower(`payload`),
+        FfiConverterTypeServiceOwnerCredentialCapability.lower(`capability`),_status)
+}
+    }
+    )
+    }
+    
+
     override fun `currentScope`(): ServiceOwnerScope? {
             return FfiConverterOptionalTypeServiceOwnerScope.lift(
     callWithHandle {
@@ -2273,7 +2426,66 @@ open class ServiceHostOwnerCallbackImpl: Disposable, AutoCloseable, ServiceHostO
 
 // Put the implementation in an object so we don't pollute the top-level namespace
 internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
-    internal object `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0 {
+    internal object `currentChatAuthority`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod0 {
+        override fun callback(`uniffiHandle`: Long,`conversation`: RustBuffer.ByValue,`text`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`currentChatAuthority`(
+                    FfiConverterString.lift(`conversation`),
+                    FfiConverterString.lift(`text`),
+                )
+            }
+            val writeReturn = { value: ServiceOwnerChatAuthority? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerChatAuthority.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `credentialCapability`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1 {
+        override fun callback(`uniffiHandle`: Long,`profile`: RustBuffer.ByValue,`reference`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`credentialCapability`(
+                    FfiConverterString.lift(`profile`),
+                    FfiConverterString.lift(`reference`),
+                )
+            }
+            val writeReturn = { value: ServiceOwnerCredentialCapability? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerCredentialCapability.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `bindChatContext`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2 {
+        override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`bindChatContext`(
+                    FfiConverterString.lift(`reservation`),
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterString.lift(`requestId`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterByteArray.lift(`context`),
+                    FfiConverterTypeServiceOwnerCredentialCapability.lift(`capability`),
+                )
+            }
+            val writeReturn = { value: kotlin.Boolean -> uniffiOutReturn.setValue(FfiConverterBoolean.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `exchangeChat`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3 {
+        override fun callback(`uniffiHandle`: Long,`admission`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`context`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`capability`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`exchangeChat`(
+                    FfiConverterString.lift(`admission`),
+                    FfiConverterTypeServiceOwnerAdmissionBinding.lift(`binding`),
+                    FfiConverterByteArray.lift(`context`),
+                    FfiConverterByteArray.lift(`payload`),
+                    FfiConverterTypeServiceOwnerCredentialCapability.lift(`capability`),
+                )
+            }
+            val writeReturn = { value: ServiceOwnerChatResponse? -> uniffiOutReturn.setValue(FfiConverterOptionalTypeServiceOwnerChatResponse.lower(value)) }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `currentScope`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 {
         override fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -2284,7 +2496,7 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod1 {
+    internal object `currentProvider`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5 {
         override fun callback(`uniffiHandle`: Long,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -2295,7 +2507,7 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod2 {
+    internal object `reviewPayload`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod6 {
         override fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -2308,7 +2520,7 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod3 {
+    internal object `reserveBudget`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod7 {
         override fun callback(`uniffiHandle`: Long,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`budget`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -2323,7 +2535,7 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod4 {
+    internal object `releaseReservation`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod8 {
         override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`uniffiOutReturn`: ByteByReference,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -2335,7 +2547,7 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
             uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
         }
     }
-    internal object `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod5 {
+    internal object `commitAdmission`: UniffiCallbackInterfaceServiceHostOwnerCallbackMethod9 {
         override fun callback(`uniffiHandle`: Long,`reservation`: RustBuffer.ByValue,`binding`: RustBuffer.ByValue,`requestId`: RustBuffer.ByValue,`payload`: RustBuffer.ByValue,`credentialProfileId`: RustBuffer.ByValue,`credentialRef`: RustBuffer.ByValue,`uniffiOutReturn`: RustBuffer,uniffiCallStatus: UniffiRustCallStatus,) {
             val uniffiObj = FfiConverterTypeServiceHostOwnerCallback.handleMap.get(uniffiHandle)
             val makeCall = { ->
@@ -2368,6 +2580,10 @@ internal object uniffiCallbackInterfaceServiceHostOwnerCallback {
     internal var vtable = UniffiVTableCallbackInterfaceServiceHostOwnerCallback.UniffiByValue(
         uniffiFree,
         uniffiClone,
+        `currentChatAuthority`,
+        `credentialCapability`,
+        `bindChatContext`,
+        `exchangeChat`,
         `currentScope`,
         `currentProvider`,
         `reviewPayload`,
@@ -3885,6 +4101,190 @@ public object FfiConverterTypeServiceOwnerCapabilities: FfiConverterRustBuffer<S
     override fun write(value: ServiceOwnerCapabilities, buf: ByteBuffer) {
             FfiConverterBoolean.write(value.`toolCalls`, buf)
             FfiConverterBoolean.write(value.`streaming`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerChatAuthority (
+    val `workspace`: kotlin.String
+    , 
+    val `conversation`: kotlin.String
+    , 
+    val `owner`: kotlin.String
+    , 
+    val `mode`: kotlin.String
+    , 
+    val `policyRevision`: kotlin.String
+    , 
+    val `grantRevision`: kotlin.String
+    , 
+    val `ruleRevision`: kotlin.String
+    , 
+    val `restrictionRevision`: kotlin.String
+    , 
+    val `sensitivity`: kotlin.String
+    , 
+    val `active`: kotlin.Boolean
+    , 
+    val `modelAllowed`: kotlin.Boolean
+    , 
+    val `outboundAllowed`: kotlin.Boolean
+    , 
+    val `inheritedAllowed`: kotlin.Boolean
+    , 
+    val `synthetic`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerChatAuthority: FfiConverterRustBuffer<ServiceOwnerChatAuthority> {
+    override fun read(buf: ByteBuffer): ServiceOwnerChatAuthority {
+        return ServiceOwnerChatAuthority(
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerChatAuthority) = (
+            FfiConverterString.allocationSize(value.`workspace`) +
+            FfiConverterString.allocationSize(value.`conversation`) +
+            FfiConverterString.allocationSize(value.`owner`) +
+            FfiConverterString.allocationSize(value.`mode`) +
+            FfiConverterString.allocationSize(value.`policyRevision`) +
+            FfiConverterString.allocationSize(value.`grantRevision`) +
+            FfiConverterString.allocationSize(value.`ruleRevision`) +
+            FfiConverterString.allocationSize(value.`restrictionRevision`) +
+            FfiConverterString.allocationSize(value.`sensitivity`) +
+            FfiConverterBoolean.allocationSize(value.`active`) +
+            FfiConverterBoolean.allocationSize(value.`modelAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`outboundAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`inheritedAllowed`) +
+            FfiConverterBoolean.allocationSize(value.`synthetic`)
+    )
+
+    override fun write(value: ServiceOwnerChatAuthority, buf: ByteBuffer) {
+            FfiConverterString.write(value.`workspace`, buf)
+            FfiConverterString.write(value.`conversation`, buf)
+            FfiConverterString.write(value.`owner`, buf)
+            FfiConverterString.write(value.`mode`, buf)
+            FfiConverterString.write(value.`policyRevision`, buf)
+            FfiConverterString.write(value.`grantRevision`, buf)
+            FfiConverterString.write(value.`ruleRevision`, buf)
+            FfiConverterString.write(value.`restrictionRevision`, buf)
+            FfiConverterString.write(value.`sensitivity`, buf)
+            FfiConverterBoolean.write(value.`active`, buf)
+            FfiConverterBoolean.write(value.`modelAllowed`, buf)
+            FfiConverterBoolean.write(value.`outboundAllowed`, buf)
+            FfiConverterBoolean.write(value.`inheritedAllowed`, buf)
+            FfiConverterBoolean.write(value.`synthetic`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerChatResponse (
+    val `answer`: kotlin.String
+    , 
+    val `inputTokens`: kotlin.ULong
+    , 
+    val `outputTokens`: kotlin.ULong
+    , 
+    val `synthetic`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerChatResponse: FfiConverterRustBuffer<ServiceOwnerChatResponse> {
+    override fun read(buf: ByteBuffer): ServiceOwnerChatResponse {
+        return ServiceOwnerChatResponse(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterULong.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerChatResponse) = (
+            FfiConverterString.allocationSize(value.`answer`) +
+            FfiConverterULong.allocationSize(value.`inputTokens`) +
+            FfiConverterULong.allocationSize(value.`outputTokens`) +
+            FfiConverterBoolean.allocationSize(value.`synthetic`)
+    )
+
+    override fun write(value: ServiceOwnerChatResponse, buf: ByteBuffer) {
+            FfiConverterString.write(value.`answer`, buf)
+            FfiConverterULong.write(value.`inputTokens`, buf)
+            FfiConverterULong.write(value.`outputTokens`, buf)
+            FfiConverterBoolean.write(value.`synthetic`, buf)
+    }
+}
+
+
+
+data class ServiceOwnerCredentialCapability (
+    val `identity`: kotlin.String
+    , 
+    val `generation`: kotlin.ULong
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeServiceOwnerCredentialCapability: FfiConverterRustBuffer<ServiceOwnerCredentialCapability> {
+    override fun read(buf: ByteBuffer): ServiceOwnerCredentialCapability {
+        return ServiceOwnerCredentialCapability(
+            FfiConverterString.read(buf),
+            FfiConverterULong.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: ServiceOwnerCredentialCapability) = (
+            FfiConverterString.allocationSize(value.`identity`) +
+            FfiConverterULong.allocationSize(value.`generation`)
+    )
+
+    override fun write(value: ServiceOwnerCredentialCapability, buf: ByteBuffer) {
+            FfiConverterString.write(value.`identity`, buf)
+            FfiConverterULong.write(value.`generation`, buf)
     }
 }
 
@@ -5841,6 +6241,102 @@ public object FfiConverterOptionalTypeAgentTaskIdentity: FfiConverterRustBuffer<
         } else {
             buf.put(1)
             FfiConverterTypeAgentTaskIdentity.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeServiceOwnerChatAuthority: FfiConverterRustBuffer<ServiceOwnerChatAuthority?> {
+    override fun read(buf: ByteBuffer): ServiceOwnerChatAuthority? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeServiceOwnerChatAuthority.read(buf)
+    }
+
+    override fun allocationSize(value: ServiceOwnerChatAuthority?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeServiceOwnerChatAuthority.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ServiceOwnerChatAuthority?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeServiceOwnerChatAuthority.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeServiceOwnerChatResponse: FfiConverterRustBuffer<ServiceOwnerChatResponse?> {
+    override fun read(buf: ByteBuffer): ServiceOwnerChatResponse? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeServiceOwnerChatResponse.read(buf)
+    }
+
+    override fun allocationSize(value: ServiceOwnerChatResponse?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeServiceOwnerChatResponse.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ServiceOwnerChatResponse?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeServiceOwnerChatResponse.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalTypeServiceOwnerCredentialCapability: FfiConverterRustBuffer<ServiceOwnerCredentialCapability?> {
+    override fun read(buf: ByteBuffer): ServiceOwnerCredentialCapability? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeServiceOwnerCredentialCapability.read(buf)
+    }
+
+    override fun allocationSize(value: ServiceOwnerCredentialCapability?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeServiceOwnerCredentialCapability.allocationSize(value)
+        }
+    }
+
+    override fun write(value: ServiceOwnerCredentialCapability?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeServiceOwnerCredentialCapability.write(value, buf)
         }
     }
 }
