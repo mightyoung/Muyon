@@ -967,7 +967,7 @@ fn execute(
             "cancelled" => (AgentTerminal::Cancelled, AgentReason::Cancelled),
             "budget_exhausted" => (
                 AgentTerminal::BudgetExhausted,
-                if matches!(control.poll(),Err(ref e)if e=="native_deadline") {
+                if control.observed_deadline() {
                     AgentReason::DeadlineExceeded
                 } else {
                     AgentReason::BudgetExceeded

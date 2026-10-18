@@ -4,19 +4,21 @@ use muyon_core_agent_lab::agent::State;
 use std::{
     path::Path,
     sync::{
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicU8, Ordering},
         Arc,
     },
     time::{Duration, Instant},
 };
 pub struct RunControl {
     cancelled: AtomicBool,
+    observed_stop: AtomicU8,
     deadline: Instant,
 }
 impl RunControl {
     pub fn new() -> Self {
         Self {
             cancelled: AtomicBool::new(false),
+            observed_stop: AtomicU8::new(0),
             deadline: Instant::now() + Duration::from_secs(5),
         }
     }
@@ -26,14 +28,32 @@ impl RunControl {
     pub fn request_cancel(&self) {
         self.cancelled.store(true, Ordering::Release)
     }
+    pub(crate) fn observed_deadline(&self) -> bool {
+        self.observed_stop.load(Ordering::Acquire) == 2
+    }
     pub fn poll(&self) -> Result<()> {
-        if self.cancelled.load(Ordering::Acquire) {
-            Err("native_cancelled".into())
-        } else if Instant::now() >= self.deadline {
-            Err("native_deadline".into())
-        } else {
-            Ok(())
+        let mut observed = self.observed_stop.load(Ordering::Acquire);
+        if observed == 0 {
+            let cause = if self.cancelled.load(Ordering::Acquire) {
+                1
+            } else if Instant::now() >= self.deadline {
+                2
+            } else {
+                return Ok(());
+            };
+            // A later control signal cannot rewrite an already observed stop.
+            observed = match self.observed_stop.compare_exchange(
+                0, cause, Ordering::AcqRel, Ordering::Acquire,
+            ) {
+                Ok(_) => cause,
+                Err(first) => first,
+            };
         }
+        Err(if observed == 1 {
+            "native_cancelled"
+        } else {
+            "native_deadline"
+        }.into())
     }
 }
 impl Default for RunControl {
@@ -321,4 +341,29 @@ pub(crate) fn run_builtin_admitted(
         payloads,
         handler_calls,
     })
+}
+
+#[cfg(test)]
+mod stop_cause_tests {
+    use super::*;
+
+    #[test]
+    fn observed_deadline_survives_late_cancel() {
+        let mut control = RunControl::new();
+        control.deadline = Instant::now();
+        assert_eq!(control.poll().unwrap_err(), "native_deadline");
+        control.request_cancel();
+        assert_eq!(control.poll().unwrap_err(), "native_deadline");
+        assert!(control.observed_deadline());
+    }
+
+    #[test]
+    fn observed_cancel_survives_later_deadline() {
+        let mut control = RunControl::new();
+        control.request_cancel();
+        assert_eq!(control.poll().unwrap_err(), "native_cancelled");
+        control.deadline = Instant::now();
+        assert_eq!(control.poll().unwrap_err(), "native_cancelled");
+        assert!(!control.observed_deadline());
+    }
 }
