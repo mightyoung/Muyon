@@ -46,6 +46,11 @@ impl CredentialHandle {
 }
 /// Implemented only by the trusted Service owner. No UI deserialization path.
 /// Reserve and commit must use the owner's durable quota/outbound ledger.
+/// The owner must prove and enforce a conservative bound on total input/output
+/// tokens, one choice/call, and spend for the exact payload. Optional wire caps
+/// checked here only reject obvious excess; absent caps do not authorize an
+/// unbounded request. A future transport must enforce the reserved bounds and
+/// fail closed if that guarantee is unavailable. No transport is implemented.
 /// Commit must atomically recheck the exact binding, handle and reservation;
 /// a returned row is admission only, never evidence that a request was sent.
 pub trait ServiceProviderHost {
@@ -88,12 +93,42 @@ impl ServiceProviderBridge {
         if fields.get("model").and_then(|v| v.string().ok()) != Some(binding.profile.model.as_str()) {
             return Err("provider_payload_model_mismatch".into());
         }
-        // Capabilities must describe the actual wire request, not only caller hints.
-        if fields.get("stream") == Some(&crate::Json::Bool(true)) && !budget.requires_streaming {
-            return Err("provider_payload_capability_mismatch".into());
+        // Wire hints cannot multiply the approved call or evade its token cap.
+        // Unknown token dialects are unsupported until their budget semantics
+        // are reviewed; never guess that they mean the same thing.
+        for (key, value) in fields {
+            if key == "max_tokens" || key == "max_completion_tokens" {
+                let limit = value.integer().map_err(|_| "provider_payload_budget_invalid")?;
+                if limit == 0 || limit > budget.max_tokens {
+                    return Err("provider_payload_budget_invalid".into());
+                }
+            } else if key.to_ascii_lowercase().contains("token") {
+                return Err("provider_payload_budget_invalid".into());
+            }
         }
-        if fields.get("tools").is_some_and(|v| !matches!(v, crate::Json::Array(a) if a.is_empty())) && !budget.requires_tools {
-            return Err("provider_payload_capability_mismatch".into());
+        if let Some(choices) = fields.get("n") {
+            if choices.integer().map_err(|_| "provider_payload_budget_invalid")? != 1 {
+                return Err("provider_payload_budget_invalid".into());
+            }
+        }
+        // Capabilities describe the actual typed wire fields, not caller hints.
+        if let Some(stream) = fields.get("stream") {
+            match stream {
+                crate::Json::Bool(true) if !budget.requires_streaming => {
+                    return Err("provider_payload_capability_mismatch".into());
+                }
+                crate::Json::Bool(_) => (),
+                _ => return Err("provider_payload_invalid".into()),
+            }
+        }
+        if let Some(tools) = fields.get("tools") {
+            match tools {
+                crate::Json::Array(tools) if !tools.is_empty() && !budget.requires_tools => {
+                    return Err("provider_payload_capability_mismatch".into());
+                }
+                crate::Json::Array(_) => (),
+                _ => return Err("provider_payload_invalid".into()),
+            }
         }
         let handle = self.handle(&binding.profile)?;
         self.host.review_payload(&binding, payload).map_err(|_| "provider_payload_denied")?;

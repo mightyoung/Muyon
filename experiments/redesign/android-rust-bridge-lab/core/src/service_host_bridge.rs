@@ -1,6 +1,6 @@
 //! Trusted Service-owner callbacks. These are bootstrap ports, never Binder requests.
-use muyon_rust_agent_host_lab::{service_host::{ServiceHostOwner, ServiceHostScope}, service_provider::ServiceProviderBridge};
-use std::sync::Arc;
+use muyon_rust_agent_host_lab::{service_host::{ServiceHostOwner, ServiceHostScope}, service_provider::*, supplier_scope_bridge::{SupplierScopeDecision, SupplierSelection}};
+use std::{sync::Arc, rc::Rc};
 
 #[derive(Clone, uniffi::Record)]
 pub struct ServiceOwnerSelection { pub key: String, pub revision: String }
@@ -57,15 +57,66 @@ pub trait ServiceHostOwnerCallback: Send + Sync {
     fn current_provider(&self) -> Option<ServiceOwnerProvider>;
 }
 
-struct CallbackOwner;
+struct CallbackOwner { callback: Arc<dyn ServiceHostOwnerCallback> }
 impl ServiceHostOwner for CallbackOwner {
     fn current_scope(&self) -> Result<ServiceHostScope, String> {
-        Err("service_scope_unconfigured".into())
+        let s = self.callback.current_scope().ok_or("service_scope_unconfigured")?;
+        let d = s.decision;
+        Ok(ServiceHostScope {
+            source_identity: s.source_identity, namespace: s.namespace,
+            managed_root: s.managed_root.into(), database: s.database.into(),
+            decision: SupplierScopeDecision {
+                source_identity: d.source_identity, namespace: d.namespace,
+                allowed: d.allowed, available: d.available, scope_allowed: d.scope_allowed,
+                bindings: d.bindings, revision: d.revision, binding_revision: d.binding_revision,
+                source_revision: d.source_revision, rule_revision: d.rule_revision, scope: d.scope,
+                selected: d.selected.into_iter().map(|s| SupplierSelection { key: s.key, revision: s.revision }).collect(),
+            },
+        })
     }
     fn provider(&self) -> Result<ServiceProviderBridge, String> {
-        Err("service_provider_unconfigured".into())
+        Ok(ServiceProviderBridge::new(Rc::new(CallbackProvider { callback: self.callback.clone() })))
     }
 }
-pub fn service_owner_adapter(_callback: Arc<dyn ServiceHostOwnerCallback>) -> Arc<dyn ServiceHostOwner> {
-    Arc::new(CallbackOwner)
+pub fn service_owner_adapter(callback: Arc<dyn ServiceHostOwnerCallback>) -> Arc<dyn ServiceHostOwner> {
+    Arc::new(CallbackOwner { callback })
+}
+fn profile(p: ServiceOwnerProfile) -> ConfiguredProfile {
+    ConfiguredProfile {
+        id: p.id, endpoint: p.endpoint, endpoint_identity: p.endpoint_identity,
+        provider: p.provider, model: p.model, credential_ref: p.credential_ref,
+        location: match p.location { ServiceOwnerLocation::Remote => ModelLocation::Remote, ServiceOwnerLocation::OwnDevice => ModelLocation::OwnDevice },
+        purpose: match p.purpose { ServiceOwnerPurpose::Chat => ModelPurpose::Chat, ServiceOwnerPurpose::Embedding => ModelPurpose::Embedding },
+        declared: Capabilities { tool_calls: p.declared.tool_calls, streaming: p.declared.streaming },
+        tested: Capabilities { tool_calls: p.tested.tool_calls, streaming: p.tested.streaming },
+    }
+}
+struct CallbackProvider { callback: Arc<dyn ServiceHostOwnerCallback> }
+impl ServiceProviderHost for CallbackProvider {
+    fn current_binding(&self) -> Result<Option<ProviderBinding>, String> {
+        Ok(self.callback.current_provider().map(|p| ProviderBinding {
+            profile: profile(p.profile), profile_revision: p.profile_revision,
+            policy_revision: p.policy_revision, grant_revision: p.grant_revision,
+            authorization_owner: p.authorization_owner, model_allowed: p.model_allowed,
+            outbound_allowed: p.outbound_allowed,
+            budget: ProviderBudget { revision: p.budget.revision, quota_proof: p.budget.quota_proof,
+                remaining_calls: p.budget.remaining_calls, remaining_tokens: p.budget.remaining_tokens,
+                remaining_micros: p.budget.remaining_micros },
+        }))
+    }
+    fn credential_handle(&self, requested: &ConfiguredProfile) -> Result<Option<CredentialHandle>, String> {
+        let Some(current) = self.callback.current_provider() else { return Ok(None) };
+        if !current.credential_handle_available || profile(current.profile) != *requested { return Ok(None) }
+        // A stable existence-only sentinel. This is never a value-reading credential capability.
+        CredentialHandle::new(&requested.id, &requested.credential_ref, "service-owner-existence-only-v1").map(Some)
+    }
+    fn review_payload(&self, _binding: &ProviderBinding, _payload: &[u8]) -> Result<(), String> {
+        Err("service_payload_review_unavailable".into())
+    }
+    fn reserve_budget(&self, _binding: &ProviderBinding, _request_id: &str, _payload: &[u8], _budget: &CallBudget) -> Result<String, String> {
+        Err("service_budget_ledger_unavailable".into())
+    }
+    fn commit_admission(&self, _reservation: &str, _binding: &ProviderBinding, _request_id: &str, _payload: &[u8], _handle: &CredentialHandle) -> Result<String, String> {
+        Err("service_outbound_ledger_unavailable".into())
+    }
 }

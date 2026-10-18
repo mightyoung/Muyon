@@ -182,9 +182,12 @@ fn malformed_stream_or_tools_are_rejected_before_reservation() {
 }
 #[test]
 fn unsupported_output_token_dialect_is_rejected_before_reservation() {
-    let host=Host::new(); let bridge=ServiceProviderBridge::new(host.clone());
-    assert!(bridge.prepare("request-1",br#"{"model":"approved-model","messages":[],"max_output_tokens":1}"#,cost()).is_err());
-    assert_eq!(host.reservations.get(),0);
+    for field in ["max_output_tokens", "max_new_tokens"] {
+        let host=Host::new(); let bridge=ServiceProviderBridge::new(host.clone());
+        let payload=format!(r#"{{"model":"approved-model","messages":[],"{field}":1}}"#);
+        assert!(bridge.prepare("request-1",payload.as_bytes(),cost()).is_err());
+        assert_eq!(host.reservations.get(),0);
+    }
 }
 #[test]
 fn single_choice_and_explicit_token_caps_within_budget_preserve_exact_bytes() {

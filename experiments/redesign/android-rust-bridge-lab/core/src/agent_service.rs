@@ -69,6 +69,27 @@ pub struct AgentServiceController {
 }
 #[uniffi::export]
 impl AgentServiceController {
+    /// Private Service bootstrap injection. Never populated from UI or Binder request fields.
+    #[uniffi::constructor]
+    pub fn with_host(
+        config: AgentServiceConfig,
+        owner: Arc<dyn crate::service_host_bridge::ServiceHostOwnerCallback>,
+        mode: crate::service_host_bridge::ServiceOwnerMode,
+        budget: crate::service_host_bridge::ServiceOwnerCallBudget,
+    ) -> Result<Arc<Self>, AgentServiceSetupError> {
+        use crate::service_host_bridge::{service_owner_adapter, ServiceOwnerMode};
+        use muyon_rust_agent_host_lab::{service_host::{ServiceHostMode, ServiceHostPorts}, service_provider::CallBudget};
+        let ports = ServiceHostPorts::new(service_owner_adapter(owner), match mode {
+            ServiceOwnerMode::LocalRead => ServiceHostMode::LocalRead,
+            ServiceOwnerMode::ConfiguredChat => ServiceHostMode::ConfiguredChat,
+        }, CallBudget { max_tokens: budget.max_tokens, max_micros: budget.max_micros,
+            requires_tools: budget.requires_tools, requires_streaming: budget.requires_streaming });
+        let inner = muyon_rust_agent_host_lab::service_controller::AgentServiceController::new_with_host(
+            host::AgentHostServiceConfig { protocol: config.protocol, private_root: config.private_root,
+                build_identity: env!("MUYON_BRIDGE_BUILD_ID").into() }, Arc::new(ports),
+        ).map_err(setup_error)?;
+        Ok(Arc::new(Self { inner }))
+    }
     #[uniffi::constructor]
     pub fn new(config: AgentServiceConfig) -> Result<Arc<Self>, AgentServiceSetupError> {
         let inner = muyon_rust_agent_host_lab::service_controller::AgentServiceController::new(
@@ -144,5 +165,15 @@ impl AgentServiceController {
     }
     pub fn await_settled(&self) -> AgentSnapshotReply {
         self.inner.await_settled().to_bridge()
+    }
+}
+
+fn setup_error(e: host::AgentServiceError) -> AgentServiceSetupError {
+    match e {
+        host::AgentServiceError::UnsupportedProtocol => AgentServiceSetupError::UnsupportedProtocol,
+        host::AgentServiceError::InvalidRoot => AgentServiceSetupError::InvalidRoot,
+        host::AgentServiceError::Busy => AgentServiceSetupError::Busy,
+        host::AgentServiceError::RecoveryRequired => AgentServiceSetupError::RecoveryRequired,
+        _ => AgentServiceSetupError::InternalFailure,
     }
 }
