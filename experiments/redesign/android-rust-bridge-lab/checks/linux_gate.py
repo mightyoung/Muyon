@@ -87,7 +87,9 @@ def tracked_inputs():
         'experiments/redesign/core-agent-lab', 'experiments/redesign/plugin-contract-lab',
         'experiments/redesign/rust-agent-host-lab',
         'experiments/redesign/android-rust-bridge-lab', 'experiments/redesign/android-compose-lab',
-        '.github/workflows/android-rust-bridge.yml'], cwd=ROOT).decode().split('\0')
+        '.github/workflows/android-rust-bridge.yml', '.github/workflows/android-min26.yml',
+        'docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.md',
+        'docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.schema.json'], cwd=ROOT).decode().split('\0')
     return {name: sha(ROOT / name) for name in paths if name}
 
 
