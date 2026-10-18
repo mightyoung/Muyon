@@ -39,6 +39,7 @@ struct Inner {
     sealed: bool,
     poison_observed: bool,
     clients: Vec<Client>,
+    client_leases: Vec<String>,
     runs: Vec<AgentRunSnapshot>,
     root: Option<ServiceRoot>,
     worker: Option<JoinHandle<Completion>>,
@@ -272,6 +273,12 @@ impl AgentServiceController {
             return Err(AgentServiceError::InvalidRoot);
         }
         let epoch = crate::nonce().map_err(|_| AgentServiceError::InternalFailure)?;
+        // Service bootstrap runs off Binder/main. Generate the entire lifetime lease
+        // budget here so prompt connect/control never performs entropy I/O under lock.
+        let client_leases = vec![
+            crate::nonce().map_err(|_| AgentServiceError::InternalFailure)?,
+            crate::nonce().map_err(|_| AgentServiceError::InternalFailure)?,
+        ];
         if PROCESS_OCCUPIED
             .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
             .is_err()
@@ -290,6 +297,7 @@ impl AgentServiceController {
                 sealed: false,
                 poison_observed: false,
                 clients: Vec::new(),
+                client_leases,
                 runs: Vec::new(),
                 root: None,
                 worker: None,
@@ -348,7 +356,7 @@ impl AgentServiceController {
                 outcome: AgentConnectOutcome::Busy,
             };
         }
-        let Ok(lease) = crate::nonce() else {
+        let Some(lease) = g.client_leases.pop() else {
             return reject(&g, AgentServiceError::InternalFailure);
         };
         if !g.bump() {
