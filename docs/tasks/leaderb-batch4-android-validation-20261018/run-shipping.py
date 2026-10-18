@@ -17,9 +17,14 @@ try:
  baseline=evidence/'baseline';baseline.mkdir()
  run(['java','-cp',str(jar)+':'+str(jna),'muyon.shippingverification.ShippingServiceProbe',source,lib,baseline],evidence/'baseline.log',env,timeout=90)
  run(['python3','-B',v/'verify_shipping_records.py','--runs',baseline/'runs.tsv','--source',source],evidence/'durable-oracle.log',env)
- run(['python3','-B','-m','unittest','discover','-s',v,'-p','test_verify_shipping_records.py'],evidence/'controls.log',dict(env,MUYON_SERVICE_BASELINE=str(baseline)))
+ run(['python3','-B','-m','unittest','discover','-s',v,'-p','test_verify_shipping_records.py'],evidence/'controls.log',dict(env,MUYON_SERVICE_BASELINE=str(baseline),MUYON_SERVICE_SOURCE=source,MUYON_SERVICE_SOURCE_ROOT=str(root)))
  result.update(classification='GREEN',library_sha256=sha(lib),jvm_binding_sha256=sha(binding),probe_sha256=sha(jar),probe_source_sha256=sha(v/'ShippingServiceProbe.kt'))
 finally:
  result['source_inputs_unchanged']=before==tracked_inputs()
+ if not result['source_inputs_unchanged']:
+  result.update(classification='INVALID',failure='source_inputs_changed')
  (evidence/'verdict.json').write_text(json.dumps(result,indent=2)+'\n')
  print(json.dumps(result))
+
+ if not result['source_inputs_unchanged']:
+  raise RuntimeError('source_inputs_changed')

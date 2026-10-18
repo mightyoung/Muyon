@@ -19,4 +19,9 @@ try:
  result.update(classification='GREEN',source_sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),artifacts=apks)
 finally:
  result['source_inputs_unchanged']=before==tracked_inputs()
+ if not result['source_inputs_unchanged']:
+  result.update(classification='INVALID',failure='source_inputs_changed')
  (e/'verdict.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
+
+ if not result['source_inputs_unchanged']:
+  raise RuntimeError('source_inputs_changed')

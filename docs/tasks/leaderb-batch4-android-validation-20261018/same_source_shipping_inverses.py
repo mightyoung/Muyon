@@ -56,8 +56,10 @@ def main():
         raise RuntimeError('same_run_source_inputs')
     if sha(base/'verification/ShippingServiceProbe.kt') != 'fd89033de3630a2805b419fd5f420e303912af2df467c9073a2bc3f7d3a11db2':
         raise RuntimeError('frozen_probe_source')
+    if service['probe_source_sha256'] != sha(base/'verification/ShippingServiceProbe.kt'):
+        raise RuntimeError('same_run_probe_source')
     binding = base/'artifacts/linux/jvm/com/mightyoung/muyon/androidbridge/muyon_android_contract_bridge.kt'
-    if sha(binding) != service['jvm_binding_sha256']:
+    if not sha(binding) == service['jvm_binding_sha256'] == linux['jvm_binding_sha256']:
         raise RuntimeError('same_run_binding')
     evidence, work = args.evidence_dir.resolve(), args.work_dir.resolve()
     evidence.mkdir(parents=True); work.mkdir(parents=True)
