@@ -1,11 +1,11 @@
 {
-  "scope": "This new task record only; raw evidence unchanged, separate scoped historical indices remain adjacent",
-  "a_generic_terminal": "UNKNOWN; successor read-only collection required",
+  "scope": "Entire new task record excluding only root index/seal; includes nested scoped indices",
+  "a_generic_terminal": "UNKNOWN; successor must read SAME ORIGINAL run39102166368 at3f3a2368648db5e9767f11adcae4548ac5da2527",
   "files": [
     {
       "path": "HANDOFF.md",
-      "bytes": 4922,
-      "sha256": "5943d76c571ba0ac8b96677988e2ab7e9d23677cfb388ba8128d43796e960879"
+      "bytes": 5718,
+      "sha256": "774e7a4ba683ded11ff02ac4bb40200fca75acc5043b604e46b2277b85e3b3a7"
     },
     {
       "path": "NEXT-REAL-LOOP.md",
@@ -49,8 +49,8 @@
     },
     {
       "path": "evidence/STOP-READBACK.json",
-      "bytes": 3704,
-      "sha256": "a4363763d1a956cee5d104579ca10296dcc6059d2a071c62822d1dfc75abb8d1"
+      "bytes": 11205,
+      "sha256": "a8031eea4bf3f659588ea7f20ad6e94af1c034c4ff8e0490c0b9dd26167655cc"
     },
     {
       "path": "evidence/a/min26/3f3a2368-android-artifacts.json",
@@ -351,6 +351,11 @@
       "path": "evidence/b/sqlite-author/source-hashes.json",
       "bytes": 255,
       "sha256": "8e073ecf0be59e760b3ca521404fb08cb00bb083005df05e3b1c73c3d53a4ead"
+    },
+    {
+      "path": "evidence/c/EVIDENCE-INDEX.json",
+      "bytes": 9774,
+      "sha256": "e934d75c92c4eff6903375f897e1f20c275ae3e53835533102562685f75e8c91"
     },
     {
       "path": "evidence/c/FINAL-READBACK.json",
