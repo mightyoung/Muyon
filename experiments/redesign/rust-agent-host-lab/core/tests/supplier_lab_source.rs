@@ -4,7 +4,7 @@ use muyon_plugin_contract_lab::{object,string};
 use std::{path::PathBuf,sync::{Arc,atomic::{AtomicUsize,Ordering}}};
 static SERIAL:AtomicUsize=AtomicUsize::new(0);
 struct Run(PathBuf);
-impl Run {fn new()->Self{let dir=std::env::temp_dir().join(format!("muyon-supplier-lab-source-{}-{}",std::process::id(),SERIAL.fetch_add(1,Ordering::SeqCst)));std::fs::create_dir(&dir).unwrap();Self(dir)}}
+impl Run {fn new()->Self{let dir=std::env::temp_dir().join(format!("muyon-supplier-lab-source-{}-{}",std::process::id(),SERIAL.fetch_add(1,Ordering::SeqCst)));muyon_core_agent_lab::store::create_dir(&dir).unwrap();Self(dir)}}
 impl Drop for Run {fn drop(&mut self){let _=std::fs::remove_dir_all(&self.0);}}
 #[test]
 fn synthetic_schema12_read_uses_same_run_original_durable_receipt(){
