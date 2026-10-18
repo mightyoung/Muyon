@@ -2,6 +2,9 @@ name: Service durable owner scoped API26
 on:
   push:
     branches: ['lab/service-durable-owner-20261018']
+    paths:
+      - 'experiments/redesign/android-compose-lab/**'
+      - '.github/workflows/service-durable-owner.yml'
   workflow_dispatch:
 permissions:
   contents: read
