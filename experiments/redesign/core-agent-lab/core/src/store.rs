@@ -4,6 +4,14 @@ const MAX_FILE: u64=1_048_576;
 static SERIAL: AtomicU64=AtomicU64::new(0);
 unsafe extern "C" { fn flock(fd:i32, operation:i32)->i32; fn geteuid()->u32; }
 pub struct DirectoryLock { _file: File }
+impl Drop for DirectoryLock {
+    fn drop(&mut self) {
+        // Closing only our FD can leave flock held by a duplicate/inherited
+        // reference to the same open-file-description during another spawn.
+        // Ownership ends with this guard, before its File is closed.
+        let _ = self._file.unlock();
+    }
+}
 pub fn validate_dir(dir:&Path)->Result<()> {
     let m=fs::symlink_metadata(dir).map_err(|e|e.to_string())?;
     if !m.is_dir() || m.file_type().is_symlink() || m.permissions().mode() & 0o777 != 0o700 || m.uid()!=unsafe{geteuid()} {return Err("private_directory_required".into());}
