@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mightyoung.muyon.ocr.LifetimeTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-18T05:52:18.971Z" hostname="10f9d4826f06" time="0.006">
+  <properties/>
+  <testcase name="repeated_release_is_idempotent_and_use_after_close_is_rejected" classname="com.mightyoung.muyon.ocr.LifetimeTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mightyoung.muyon.ocr.WireTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-18T05:52:20.509Z" hostname="10f9d4826f06" time="0.056">
+  <properties/>
+  <testcase name="rust_request_and_kotlin_result_have_identical_wire_geometry" classname="com.mightyoung.muyon.ocr.WireTest" time="0.054"/>
+  <testcase name="malformed_and_oversized_request_are_controlled_errors" classname="com.mightyoung.muyon.ocr.WireTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

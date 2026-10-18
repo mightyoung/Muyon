@@ -1,0 +1,12 @@
+source 9a2ac7864d7bccf7fc2622dd561b22a58ca3498a
+baseline 67e3f4f4561c306d8ff2ebd58c5c2728eedb2aed
+allowed changed paths 71
+unchanged models.lock.json
+unchanged fixtures
+unchanged core
+unchanged kotlin/src/main
+upstream baseline/local adapted hash PASS vendor/paddleocr/com/paddle/ocr/postprocess/QuadTextCrop.kt
+upstream baseline/local adapted hash PASS vendor/paddleocr/com/paddle/ocr/preprocess/DetPreprocessor.kt
+upstream baseline/local adapted hash PASS vendor/paddleocr/com/paddle/ocr/util/ImageUtils.kt
+locked official AAR hashes gradle/verification-metadata.xml
+locked official AAR hashes android-packaging/gradle/verification-metadata.xml

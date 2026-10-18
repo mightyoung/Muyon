@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mightyoung.muyon.ocr.UpstreamTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-18T05:52:20.386Z" hostname="10f9d4826f06" time="0.121">
+  <properties/>
+  <testcase name="locked_dictionaries_match_full_yaml_parser_codepoints_and_model_classes" classname="com.mightyoung.muyon.ocr.UpstreamTest" time="0.12"/>
+  <testcase name="official_ctc_preserves_blank_separated_repeats_and_unicode_characters" classname="com.mightyoung.muyon.ocr.UpstreamTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

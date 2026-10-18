@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mightyoung.muyon.ocr.AdapterTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-18T05:52:18.782Z" hostname="10f9d4826f06" time="0.187">
+  <properties/>
+  <testcase name="coroutine_cancel_during_factory_still_releases_created_session" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.091"/>
+  <testcase name="repeated_jobs_and_runtime_failure_release_all_sessions" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.045"/>
+  <testcase name="native_linkage_errors_are_controlled_and_do_not_expose_loader_text" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.024"/>
+  <testcase name="timeout_after_native_run_discards_result_and_releases" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.007"/>
+  <testcase name="invalid_runtime_geometry_is_not_emitted" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.003"/>
+  <testcase name="corrupt_or_missing_models_fail_before_factory" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.004"/>
+  <testcase name="cancelled_before_load_and_during_inference_never_return_success" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.003"/>
+  <testcase name="api24_and_25_never_load_native_runtime" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.002"/>
+  <testcase name="returns_det_rec_envelope_and_releases_once" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.003"/>
+  <testcase name="wrong_raster_model_and_budget_fail_before_factory" classname="com.mightyoung.muyon.ocr.AdapterTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

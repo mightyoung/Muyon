@@ -1,0 +1,32 @@
+[
+  {
+    "control": "LOAD alignment 4096",
+    "expected": false,
+    "observed": false
+  },
+  {
+    "control": "LOAD alignment 16384",
+    "expected": true,
+    "observed": true
+  },
+  {
+    "control": "missing-native",
+    "status": "REJECTED",
+    "reason": "APK native library set differs from locked AARs"
+  },
+  {
+    "control": "corrupt-model",
+    "status": "REJECTED",
+    "reason": "assets/ocr-v6/tiny/det/inference.onnx"
+  },
+  {
+    "control": "unaligned ZIP",
+    "status": "REJECTED",
+    "observed": "FAIL"
+  },
+  {
+    "control": "missing API26 symbol providers",
+    "status": "REJECTED",
+    "observed": "FAIL"
+  }
+]

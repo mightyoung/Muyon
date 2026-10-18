@@ -1,0 +1,52 @@
+[
+  {
+    "name": "com.mightyoung.muyon.ocr.AdapterTest",
+    "tests": "10",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-18T05:52:18.782Z",
+    "hostname": "10f9d4826f06",
+    "time": "0.187"
+  },
+  {
+    "name": "com.mightyoung.muyon.ocr.LifetimeTest",
+    "tests": "1",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-18T05:52:18.971Z",
+    "hostname": "10f9d4826f06",
+    "time": "0.006"
+  },
+  {
+    "name": "com.mightyoung.muyon.ocr.MatOwnershipTest",
+    "tests": "7",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-18T05:52:20.296Z",
+    "hostname": "10f9d4826f06",
+    "time": "0.088"
+  },
+  {
+    "name": "com.mightyoung.muyon.ocr.UpstreamTest",
+    "tests": "2",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-18T05:52:20.386Z",
+    "hostname": "10f9d4826f06",
+    "time": "0.121"
+  },
+  {
+    "name": "com.mightyoung.muyon.ocr.WireTest",
+    "tests": "2",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-18T05:52:20.509Z",
+    "hostname": "10f9d4826f06",
+    "time": "0.056"
+  }
+]

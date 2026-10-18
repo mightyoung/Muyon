@@ -1,5 +1,7 @@
 # OCR v6 isolated migration slice
 
+Current follow-up: [API26 ownership and packaging handoff](../../../docs/tasks/OCR-V6-API26-FOLLOWUP-20261018.md).
+
 Owner: OCR adapter writer. Base: product F2 `3f1be180bb009a91e659c113ba5b1916e5360332`.
 Owned paths: **this directory only**, plus `docs/tasks/OCR-V6-ADAPTER-20261018.md`.
 LeaderB `01a14d88-2a5f-76ac-886c-5feb4a2c40f5` owns all host/Service integration. This slice is not connected to the production App.

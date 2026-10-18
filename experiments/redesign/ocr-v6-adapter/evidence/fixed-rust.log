@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests src/lib.rs (core/target/debug/deps/muyon_ocr_v6_contract-ebfe3b2e1f297ba0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/contract.rs (core/target/debug/deps/contract-98c5dbc92c180960)
+
+running 9 tests
+test cancelled_or_expired_result_cannot_persist ... ok
+test accepts_shared_kotlin_wire_fixture ... ok
+test maps_to_source_coordinates_and_preserves_provenance ... ok
+test empty_page_is_a_valid_extraction_but_bad_transform_is_not ... ok
+test revoked_source_and_atomic_commit_failure_are_not_success ... ok
+test rejects_model_digest_geometry_and_confidence_mismatches ... ok
+test rotated_raster_maps_to_physical_pdf_page_without_losing_exif_metadata ... ok
+test validates_source_transform_budgets_and_authorization_before_dispatch ... ok
+test wire_roundtrip_rejects_unknown_fields ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests muyon_ocr_v6_contract
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
