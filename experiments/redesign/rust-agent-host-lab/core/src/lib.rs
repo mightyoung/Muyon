@@ -598,12 +598,17 @@ impl AgentPorts for RuntimePorts {
         Ok(())
     }
     fn failure(&mut self, state: &mut State, _reason: &str) {
+        if matches!(_reason, "model_ledger_failed" | "wire_journal") {
+            state.status = "outcome_unknown".into();
+            state.reason = _reason.into();
+            return;
+        }
+        if _reason == "wire_total_limit" {
+            state.status = "budget_exhausted".into();
+            state.reason = _reason.into();
+            return;
+        }
         if self.session.borrow().service_control.is_some() {
-            if _reason == "model_ledger_failed" {
-                state.status = "outcome_unknown".into();
-                state.reason = "model_ledger_failed".into();
-                return;
-            }
             if _reason == "native_cancelled" {
                 state.cancelled = true;
                 state.status = "cancelled".into();
@@ -661,3 +666,6 @@ pub mod service_types;
 pub mod service_root;
 
 mod service_evidence;
+
+#[cfg(test)]
+mod http_recovery_tests;
