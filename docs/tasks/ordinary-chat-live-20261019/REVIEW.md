@@ -1,5 +1,10 @@
 # Independent review record
 
+This is the historical preparation review. Its rejection is preserved as evidence;
+later implementation/review status is in [CURRENT.md](CURRENT.md) and
+[DEVICE-20261020.md](DEVICE-20261020.md). Do not treat this old component-only
+status as the current live wiring status.
+
 Reviewer `design_review` was independent of component writer `canary_budget` and leader/reference-renderer writer. Reviewer changed no files and made no model requests.
 
 ## Design gate

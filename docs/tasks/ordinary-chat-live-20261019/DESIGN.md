@@ -1,5 +1,10 @@
 # Ordinary chat live canary — design before implementation
 
+Historical preparation record. Current implementation and acceptance status:
+[CURRENT.md](CURRENT.md), [live design](LIVE-INTEGRATION-DESIGN.md),
+[device evidence](DEVICE-20261020.md). Later CNY confirmation and integrated
+HTTPS/credential wiring supersede the preparation blockers below.
+
 Base: 3abc1cae405de4c941d540f1043cdf31463b3f95; executable source d1df23200df0ffaccac6edddd3b2115aaa6cfb42. Preserve the existing Compose → Service → Rust Agent → same durable owner path, original history revalidation, credential generations and receipt checks. Search is outside scope. No real request before independent review, offline checks and local credential handover.
 
 ## Gates and ownership

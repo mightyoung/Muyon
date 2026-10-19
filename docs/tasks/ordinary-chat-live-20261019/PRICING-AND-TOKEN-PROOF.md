@@ -1,5 +1,11 @@
 # Official pricing and token-proof boundary
 
+Historical reference research and initial gate. Current installed trust basis,
+CNY confirmation and complete-payload proof are described in
+[LIVE-INTEGRATION-DESIGN.md](LIVE-INTEGRATION-DESIGN.md); current acceptance is
+[CURRENT.md](CURRENT.md). The standalone renderer still is not hosted billing
+proof by itself. Usage-derived peak cost remains an upper bound, not an invoice.
+
 Checked by an independent researcher on 2026-10-19. No credential, balance API or model request was used.
 
 Official current ID is `deepseek-flash`, serving DeepSeek-V4.1-Flash-1017. Peak CNY price per million tokens is cache-hit input 0.04, cache-miss input 2, output 8. Peak USD price is 0.006 / 0.30 / 1.20 respectively. Use peak/cache-miss only for reservation. `thinking` defaults enabled and must explicitly be disabled; `max_tokens=128` is within the documented 1–393216 range. Sources: [CNY pricing](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/), [USD pricing](https://api-docs.deepseek.com/quick_start/pricing/), [chat API](https://api-docs.deepseek.com/api/create-chat-completion/).

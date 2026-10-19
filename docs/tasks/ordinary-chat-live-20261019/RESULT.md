@@ -1,5 +1,9 @@
 # Delivery status: incomplete real bridge, zero live calls
 
+Historical result from the preparation commit `f826d045955bed5461598549f67d00e6bee7f1e2`.
+Superseded by [CURRENT.md](CURRENT.md). The statements below about absent HTTPS,
+missing credential entry and unconfirmed CNY describe that earlier snapshot only.
+
 The requested Muyon → real DeepSeek two-turn acceptance has **not** been completed. This branch contains reviewed offline prerequisites only. There is no installed production HTTPS adapter or secure Service-process credential entry, and no claim of successful real conversation, usage or billed cost.
 
 ## Workspace and source
