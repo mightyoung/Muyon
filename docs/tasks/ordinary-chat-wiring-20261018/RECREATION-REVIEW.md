@@ -22,3 +22,15 @@ Reviewer independently executed only the already compiled standalone policy jar:
 PASS. It explicitly proves presentation policy only, not Android/Binder recovery.
 New CI must establish actual reconnect/lookup/disclosure and second-send behavior;
 retain failure without automatically rerunning.
+
+## Terminal claims review
+
+The reviewer separately checked CI39184565190 terminal metadata, its own new
+device output, derived phase TSV, RESULT.json and final report/HANDOFF. Four jobs,
+six zero-exit phases, both test completion codes 0 and `OK (2 tests)` agree.
+Requested wording corrections were applied: second Send failure and attempts=1
+do not separately prove a specific budget failure code; two scoped regressions
+passing is not an aggregate-suite claim. With those corrections the claims are
+approved. Root-cause conclusion is supported by source plus new runtime evidence;
+old run unknowns and real/production boundaries remain intact. This final review
+was read-only, without network or test execution.

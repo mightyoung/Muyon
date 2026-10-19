@@ -1,5 +1,13 @@
 # LeaderB ordinary chat wiring handoff
 
+## Verified recreation repair (2026-10-19)
+
+- Tested source **f86804cce3f54888ef0cc42b0540d12fb82e42c7**; [CI39184565190](https://github.com/mightyoung/Muyon/actions/runs/39184565190) terminal SUCCESS, attempt1, no rerun. Scoped Rust6/binding, dual ABI, APK/test APK/lint/package and all six device phases PASS; Android `OK (2 tests)`.
+- Root cause: old test skipped required explicit lookup after Activity recreation caused last-lease stop/unknown disclosure; Send Disabled was correct. Test-only repair adds unknown/no-resend and identity/count checks, waits actual old-stop completion, clicks existing query once, restores original reply/identities, then retains second Send failure and durable attempts=1 assertions. A specific budget failure code is not separately asserted. The two scoped ordinaryChat synthetic regressions now PASS; production logic unchanged.
+- New job117844503603 own output read once successfully; evidence/recreation/ and RECREATION-RESULTS.md hold exact results/remaining conditions. CI39183528428 known failure and CI39144821029 unknown cause remain retained, never relabeled. No old denied evidence, I04/suite, real model/key/fee, merge/deploy or HOLD release. PR86/dependency combination and remaining physical/production/foreign-exception items remain separate.
+
+## Earlier follow-ups (retained)
+
 ## Authorized observability follow-up (2026-10-19)
 
 - Reviewed observation source **d9892a75775e507d585f3ddaa712305be30dcfac** records six device phases, exact SHA and exit codes. Seven disposable no-network tool-probe scenarios pass; red/green evidence retained. See OBSERVABILITY.md and OBSERVABILITY-REVIEW.md.
