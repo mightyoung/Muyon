@@ -74,7 +74,7 @@ internal fun ConversationPage(
         if (restorationNotice != null) Text(restorationNotice, style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp).semantics { liveRegion = LiveRegionMode.Polite })
         Row(Modifier.fillMaxWidth().padding(start=20.dp,end=8.dp), verticalAlignment=Alignment.CenterVertically) {
-            Text(if (sample) "离线视觉样例 · 非真实回复" else if(awaitingServiceSource) "私有 Service 当前来源待核实 · 未调用真实模型" else if(execution.synthetic) "私有 Service 普通聊天 · 离线合成 transport，无真实模型" else "私有 Service 当前授权桥 · 真实模型传输未接通", style=MaterialTheme.typography.labelSmall, color=MaterialTheme.colorScheme.onSurfaceVariant,
+            Text(if (sample) "离线视觉样例 · 非真实回复" else if(awaitingServiceSource) "私有 Service 当前来源待核实 · 未调用真实模型" else if(execution.synthetic) "私有 Service 普通聊天 · 离线合成 transport，无真实模型" else "私有 Service 当前授权来源 · 结果以本次请求回执为准", style=MaterialTheme.typography.labelSmall, color=MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier=Modifier.weight(1f).testTag(if(sample) "sample-disclaimer" else "port-disconnected").semantics { liveRegion=LiveRegionMode.Polite })
             TextButton(onClick={onSampleChange(!sample)}, modifier=Modifier.testTag("toggle-chat-sample")) {
                 Text(if(sample) "返回会话" else "查看样例", style=MaterialTheme.typography.labelSmall)

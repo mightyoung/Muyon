@@ -19,7 +19,19 @@ class OrdinaryChatLiveServiceLoopTest {
         val app=compose.activity.application as MuyonLabApplication
         compose.onNodeWithTag("new-conversation").performClick()
         fun send(text:String):ChatReadConversation {
+            var previous:ChatReadConversation?=null
+            compose.runOnIdle{previous=app.chats.snapshot.conversations.values.singleOrNull()}
             compose.onNodeWithTag("assistant-draft").performTextReplacement(text)
+            // Shell copies the Service snapshot every 100 ms. Its displayed status can
+            // lag the underlying terminal snapshot, especially when SECOND is unchanged.
+            compose.waitUntil(10000){
+                compose.runOnIdle{previous?.let{old->
+                    val current=app.chats.snapshot.conversations.values.single()
+                    assertEquals("previous request changed before explicit Send",old.requestId,current.requestId)
+                    assertEquals("previous terminal downgraded while waiting for UI",old.status,current.status)
+                }}
+                compose.onAllNodes(hasTestTag("send-service-read") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+            }
             compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
             lateinit var request:String
             compose.runOnIdle{request=checkNotNull(app.chats.snapshot.conversations.values.single().requestId)}
@@ -27,6 +39,25 @@ class OrdinaryChatLiveServiceLoopTest {
             compose.waitUntil(60000){var terminal=false;compose.runOnIdle{terminal=app.chats.snapshot.conversations.values.single().let{it.requestId==request && it.status in setOf("completed","failed","unknown","cancelled")}};terminal}
             lateinit var result:ChatReadConversation
             compose.runOnIdle{result=app.chats.snapshot.conversations.values.single()}
+            fun assertTerminalStable(){compose.runOnIdle{
+                val current=app.chats.snapshot.conversations.values.single()
+                assertEquals(request,current.requestId)
+                assertEquals("terminal downgraded before rendered acknowledgement",result.status,current.status)
+                assertEquals(result.answer,current.answer)
+            }}
+            compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("service-read-status"))
+            val label=frontendStatusLabel(result.status,result.reason)
+            compose.waitUntil(10000){
+                assertTerminalStable()
+                compose.onAllNodes(hasTestTag("service-read-status") and hasText(label)).fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithTag("service-read-status").assertTextEquals(label).assertIsDisplayed()
+            if(result.answer.isNotEmpty()){
+                val answer=hasText(result.answer) and hasAnyAncestor(hasTestTag("service-read-result"))
+                compose.onNodeWithTag("local-chat-list").performScrollToNode(answer)
+                compose.onNode(answer).assertIsDisplayed()
+            }
+            assertTerminalStable()
             return result
         }
         val first=send(OrdinaryChatProductionConfig.FIRST)
