@@ -1,0 +1,14 @@
+{
+  "run_id": 39214397484,
+  "job_id": 117934779992,
+  "source_sha": "d1df23200df0ffaccac6edddd3b2115aaa6cfb42",
+  "requested_at": "2026-10-19T07:14:35.451837+00:00",
+  "action": "one ordinary gh api job-log GET",
+  "outcome": "denied",
+  "gh_exit": 1,
+  "storage_error": "Forbidden (403)",
+  "retry": false,
+  "alternate_route": false,
+  "raw_content_received": false,
+  "followup": "Stop raw-log/artifact retrieval; track native run/job/step metadata only. No old denied resource accessed."
+}

@@ -1,13 +1,11 @@
 {
-  "source": "f6af8ac4e76127cffe89f7921e1421ab55a121c6",
+  "source": "d1df23200df0ffaccac6edddd3b2115aaa6cfb42",
   "pr": 97,
-  "final_acceptance": "BLOCKED_DEVICE_STEP_FAILURE",
-  "local_rust": {
-    "passed": 15,
-    "failed": 0,
-    "target": "ordinary_chat_controller"
-  },
-  "pure_kotlin": "PASS_NO_ANDROID_EXECUTION",
+  "final_acceptance": "PASS_DEDICATED_API26_CI_NATIVE_RESULT_GATES",
+  "verification_scope": "Synthetic offline only; native job/step metadata, no individual test stdout downloaded",
+  "local_request_wait": "PASS_SYNTHETIC_POLICY_ONLY",
+  "local_device_evidence_probe": "PASS_FAKE_TOOLS_ONLY",
+  "historical_result": "RESULT-f6af8ac4.json",
   "runs": [
     {
       "id": 39198555958,
@@ -66,19 +64,50 @@
           "conclusion": "failure"
         }
       ]
+    },
+    {
+      "id": 39214397484,
+      "source": "d1df23200df0ffaccac6edddd3b2115aaa6cfb42",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "jobs": [
+        {
+          "id": 117934779670,
+          "name": "native (x86_64)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117934779992,
+          "name": "scoped",
+          "conclusion": "success"
+        },
+        {
+          "id": 117934780077,
+          "name": "native (arm64-v8a)",
+          "conclusion": "success"
+        },
+        {
+          "id": 117935307330,
+          "name": "package-device",
+          "conclusion": "success"
+        }
+      ]
     }
   ],
-  "denied_own_log": {
-    "job": 117888967417,
+  "new_denied_own_log": {
+    "job": 117934779992,
     "status": 403,
     "attempts": 1,
     "retry": false,
     "alternate_retrieval": false
   },
-  "raw_device_output": "UNAVAILABLE",
-  "final_individual_device_outcomes": "UNKNOWN",
-  "cause": "UNKNOWN",
+  "raw_device_output": "NOT_RETRIEVED",
+  "individual_device_stdout": "NOT_OBTAINED",
+  "cause": "Second-request assertion could observe first-request completed rendering while real snapshot had new submitting request with empty answer; exact request terminal synchronization added",
   "artifacts_downloaded": false,
   "i04_executed": false,
-  "real_model_used": false
+  "real_model_used": false,
+  "merge_performed": false,
+  "pr86_dependency_hold": "UNCHANGED"
 }

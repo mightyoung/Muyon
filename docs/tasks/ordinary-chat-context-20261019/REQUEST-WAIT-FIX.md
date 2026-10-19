@@ -20,6 +20,26 @@ The private requestCompleted predicate is pure and test-only. evidence/RequestWa
 
 Read-only independent_review reviewed both whole JUnit methods, relevant runtime and the actual15-line patch. Approved after local targeted GREEN and diff check for dedicated CI verification; made no edits, tests or network log calls. Its independent diagnosis matched the stale Shell copy. All original assertions remain, including the later second-message/answer UI display checks that require rendering to catch up.
 
-Dedicated ordinary-chat-offline.yml is unchanged: only exact ordinary_chat_controller Rust integration tests (15), build-only bindings, API26 arm64-v8a/x86_64 producers, ordinaryChat APK/instrumentation APK/lint and the two explicitly named JUnit classes. The owner negative test touches only its new UUID synthetic owner database. No aggregate suite, old task.db/HTTP/reopen/I04, real model, key/.env, paid call, merge/deploy/delete or PR86/dependency HOLD change. New own-run logs may be read normally once; stop on any denial.
+Dedicated ordinary-chat-offline.yml is unchanged: only exact ordinary_chat_controller Rust integration tests (15), build-only bindings, API26 arm64-v8a/x86_64 producers, ordinaryChat APK/instrumentation APK/lint and the two explicitly named JUnit classes. The owner negative test touches only its new UUID synthetic owner database. No aggregate suite, old task.db/HTTP/reopen/I04, real model, key/.env, paid call, merge/deploy/delete or PR86/dependency HOLD change. A single normal raw-log GET for the NEW CI39214397484 scoped job117934779992 was storage403-denied. Raw log/artifact retrieval is now stopped, with no retry or alternate route; sanitized denial is retained in evidence/CI39214397484-OWN-SCOPED-READ.json. Native run/job/step metadata remains available. No individual test stdout was obtained.
 
 CI result for the new source must be recorded separately with full SHA. Prior CI39198555958 success does not accept this source; historical CI39198796362 failure remains retained.
+
+## Reproduction commands
+
+Use Kotlin2.2.20 (the version pinned by android-compose-lab/build.gradle.kts). The original RED run used /tmp/muyon-chat-probe/WaitRed.kt, archived verbatim as evidence/RequestWaitRed.kt, hence the retained WaitRedKt stack class. Its intentional assertion failure is the expected RED result. No Android/store/HTTP/native target is involved.
+
+```bash
+state=experiments/redesign/android-compose-lab/state/src/main/kotlin/com/mightyoung/muyon/androidlab
+evidence=docs/tasks/ordinary-chat-context-20261019/evidence
+kotlinc "$state/ChatReadContract.kt" "$state/FrontendChatPolicy.kt" "$evidence/RequestWaitRed.kt" -include-runtime -d /tmp/request-wait-red.jar
+java -jar /tmp/request-wait-red.jar # expected exit1; stale first status passes before new answer assertion
+kotlinc "$state/ChatReadContract.kt" "$state/FrontendChatPolicy.kt" "$evidence/RequestWaitProbe.kt" -include-runtime -d /tmp/request-wait-green.jar
+java -jar /tmp/request-wait-green.jar # expected exit0
+python3 experiments/redesign/android-rust-bridge-lab/checks/test_ordinary_chat_device_evidence.py
+```
+
+The GREEN predicate was extracted directly from OrdinaryChatServiceLoopTest.kt before compilation. Independent review compared the archived predicate and actual patch, and approved the complete evidence scope. The repository checkout contains no .agents/skills or AGENTS.md; available systematic-debugging, test-driven-development and verification-before-completion skill guidance was consulted, with the explicit user prohibition on aggregate/I04 execution taking precedence.
+
+## New-source terminal verification
+
+Frozen executable source **d1df23200df0ffaccac6edddd3b2115aaa6cfb42** passed dedicated CI39214397484, completed/success attempt1 at2026-10-19T07:19:06Z. Native metadata confirms all four jobs and both Build fixed offline chat APK / API26 exact Compose Service Agent ordinary chat steps succeeded. The unchanged device runner gates on OK (2 tests) and rejects failure markers; this is native CI gate evidence, not downloaded individual stdout. No cancellation/rerun, no source change after that acceptance. Scoped job117934779992 raw log remains403-denied and unretried; no artifacts downloaded. Old CI39198796362 failure remains archived. This source has fresh acceptance; previous success is not substituted.
