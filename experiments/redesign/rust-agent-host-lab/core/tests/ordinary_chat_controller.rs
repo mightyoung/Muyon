@@ -1,10 +1,10 @@
 //! New-root, no-network ordinary chat acceptance. Never invokes old HTTP/reopen paths.
 use muyon_plugin_contract_lab::{parse, string, Json};
 use muyon_rust_agent_host_lab::{service_controller::AgentServiceController, service_host::*, service_provider::*, service_types::*, ordinary_chat::*};
-use std::{collections::{BTreeSet,BTreeMap}, path::PathBuf, rc::Rc, sync::{Arc, Mutex}};
+use std::{collections::{BTreeSet,BTreeMap}, path::PathBuf, rc::Rc, sync::{Arc, Mutex, Condvar}};
 type Result<T> = std::result::Result<T,String>;
 #[derive(Default)]
-struct Facts { revoked: bool, generation: u64, sends: usize, held: BTreeSet<String>, used: BTreeSet<String>, payloads: Vec<Vec<u8>>, lose: bool, rotate_on_reserve: bool, rotate_on_commit:bool, output_secret:bool, profile_drift:bool, contexts:BTreeMap<String,Json>, attempts:BTreeSet<String>, call_limit:usize, denied_inputs:BTreeSet<String>, revoke_after_reserve:Option<String>, change_after_reserve:Option<PathBuf> }
+struct Facts { revoked: bool, generation: u64, sends: usize, held: BTreeSet<String>, used: BTreeSet<String>, payloads: Vec<Vec<u8>>, lose: bool, rotate_on_reserve: bool, rotate_on_commit:bool, output_secret:bool, profile_drift:bool, contexts:BTreeMap<String,Json>, attempts:BTreeSet<String>, call_limit:usize, denied_inputs:BTreeSet<String>, revoke_after_reserve:Option<String>, change_after_reserve:Option<PathBuf>, exchange_gate:Option<Arc<(Mutex<(bool,bool)>,Condvar)>> }
 struct Owner(Arc<Mutex<Facts>>);
 fn binding() -> ProviderBinding {
     ProviderBinding { profile: ConfiguredProfile { id:"fixture-profile".into(),endpoint:"https://ordinary-chat.invalid/v1/chat/completions".into(),endpoint_identity:"fixture-endpoint".into(),provider:"synthetic".into(),model:"fixture-chat-model".into(),location:ModelLocation::OwnDevice,purpose:ModelPurpose::Chat,credential_ref:"fixture-handle".into(),declared:Capabilities{tool_calls:false,streaming:false},tested:Capabilities{tool_calls:false,streaming:false}},profile_revision:"p1".into(),policy_revision:"policy1".into(),grant_revision:"grant1".into(),authorization_owner:"fixture-owner".into(),model_allowed:true,outbound_allowed:true,budget:ProviderBudget{revision:"synthetic-epoch1".into(),quota_proof:"synthetic-total-byte-bound1".into(),remaining_calls:2,remaining_tokens:16384,remaining_micros:2} }
@@ -36,7 +36,7 @@ impl ServiceProviderHost for Owner {
     fn bind_chat_context(&self,reservation:&str,_:&ProviderBinding,_:&str,_:&[u8],_:&CredentialHandle,context:&Json)->Result<()> {
         let mut f=self.0.lock().unwrap();if !f.held.contains(reservation)||f.contexts.insert(format!("admission-{reservation}"),context.clone()).is_some(){return Err("context".into())}Ok(())
     }
-    fn exchange_chat(&self,admission:&ProviderAdmission,context:&Json)->Result<ChatResponse>{let mut f=self.0.lock().unwrap();if f.revoked || admission.credential_handle().identity()!=format!("fixture-generation-{}",f.generation) || admission.credential_handle().generation()!=Some(f.generation+1) || f.contexts.get(admission.record_id())!=Some(context) || !f.attempts.insert(admission.record_id().into()){return Err("changed".into())}assert_eq!(context.object()?["workspace"],string("fixture-workspace"));f.sends+=1;f.payloads.push(admission.payload().to_vec());if f.lose{return Err("lost".into())}let answer:String=if f.output_secret{"Bearer synthetic-output-canary".into()}else{"离线普通文本响应".into()};Ok(ChatResponse{input_tokens:admission.payload().len() as u64,output_tokens:answer.len() as u64,answer,synthetic:true})}
+    fn exchange_chat(&self,admission:&ProviderAdmission,context:&Json)->Result<ChatResponse>{let mut f=self.0.lock().unwrap();if f.revoked || admission.credential_handle().identity()!=format!("fixture-generation-{}",f.generation) || admission.credential_handle().generation()!=Some(f.generation+1) || f.contexts.get(admission.record_id())!=Some(context) || !f.attempts.insert(admission.record_id().into()){return Err("changed".into())}assert_eq!(context.object()?["workspace"],string("fixture-workspace"));f.sends+=1;f.payloads.push(admission.payload().to_vec());if f.lose{return Err("lost".into())}let answer:String=if f.output_secret{"Bearer synthetic-output-canary".into()}else{"离线普通文本响应".into()};let gate=f.exchange_gate.clone();drop(f);if let Some(gate)=gate {let (lock,signal)=&*gate;let mut state=lock.lock().unwrap();state.0=true;signal.notify_all();while !state.1{state=signal.wait(state).unwrap();}}Ok(ChatResponse{input_tokens:admission.payload().len() as u64,output_tokens:answer.len() as u64,answer,synthetic:true})}
 }
 fn open(facts:Arc<Mutex<Facts>>)->(PathBuf,AgentServiceController,AgentClientRef) {
     let path=std::env::temp_dir().join(format!("ordinary-chat-new-{}-{}",std::process::id(),std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()));
@@ -253,4 +253,24 @@ fn oversized_history_evidence_fails_explicitly_instead_of_truncating() {
         std::fs::write(file,record.encode()).unwrap();
     }
     let denied=submit(&c,&client,"limit_b","current input");assert!(!completed(&denied));assert_eq!(reason(&denied),"chat_context_limit");assert_eq!(f.lock().unwrap().sends,1);clean(path,c);
+}
+
+#[test]
+fn cancellation_after_history_handoff_discards_late_answer_and_never_resends(){
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());
+    let first=submit(&c,&client,"cancel-first","first permitted turn");assert!(first.encode().contains("completed"));
+    let gate=Arc::new((Mutex::new((false,false)),Condvar::new()));f.lock().unwrap().exchange_gate=Some(gate.clone());
+    c.submit_ordinary_chat(client.clone(),"cancel-second".into(),"conversation-current".into(),"distinct current turn".into());
+    let (lock,signal)=&*gate;
+    let state=lock.lock().unwrap();let (mut state,timeout)=signal.wait_timeout_while(state,std::time::Duration::from_secs(10),|s|!s.0).unwrap();
+    let entered=state.0 && !timeout.timed_out();drop(state);
+    let cancellation=c.cancel(AgentCancelRequest{client:client.clone(),run:AgentRunRef{request_id:"cancel-second".into(),variant:AgentReadVariant::Inquiry,run_id:None}});
+    state=lock.lock().unwrap();state.1=true;signal.notify_all();drop(state);c.await_settled();
+    assert!(entered,"synthetic handoff must enter before cancellation");assert!(matches!(cancellation.outcome,AgentControlOutcome::Requested));
+    let result=parse(c.supplier_read_events(client.clone(),"cancel-second".into(),0).as_bytes()).unwrap();
+    assert!(result.encode().contains("outcome_unknown"));assert!(!result.encode().contains("离线普通文本响应"));
+    for _ in 0..3{let replay=submit(&c,&client,"cancel-second","distinct current turn");assert_eq!(replay,result);}
+    let facts=f.lock().unwrap();assert_eq!(facts.sends,2);assert_eq!(facts.attempts.len(),2);
+    let wire=parse(&facts.payloads[1]).unwrap();let messages=wire.object().unwrap()["messages"].array().unwrap();assert_eq!(messages.len(),3);
+    assert_eq!(messages[0].object().unwrap()["content"],string("first permitted turn"));assert_eq!(messages[2].object().unwrap()["content"],string("distinct current turn"));drop(facts);clean(path,c);
 }
