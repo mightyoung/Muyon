@@ -83,6 +83,15 @@ class OrdinaryChatServiceLoopTest {
             assertEquals(completed.answer,restored.answer);assertTrue(restored.providerReceipt);assertNotNull(restored.receipt)
         }
         assertEquals(1,attempts())
+        // The historical run keeps its admitted epoch. Unbind retires that
+        // Service controller; explicitly observe the replacement's current epoch.
+        compose.runOnIdle {application.agents.refresh()}
+        compose.waitUntil(60_000) {
+            val state=application.agents.presentation
+            state.transport==UiAgentTransport.CONNECTED && state.snapshot?.meta?.serviceEpoch!=null &&
+                state.snapshot?.meta?.serviceEpoch!=completed.admittedServiceEpoch
+        }
+        val currentEpoch=checkNotNull(application.agents.presentation.snapshot).meta.serviceEpoch
         // Same original conversation, new explicit request through the same owner/Service.
         val secondPrompt="第二条普通文本"
         compose.onNodeWithTag("assistant-draft").performTextReplacement(secondPrompt)
@@ -98,7 +107,7 @@ class OrdinaryChatServiceLoopTest {
             assertNotNull(second.requestId);assertNotEquals(completed.requestId,second.requestId)
             assertNotNull(second.runId);assertNotEquals(completed.runId,second.runId)
             assertNotNull(second.originalReceiptIdentity);assertNotEquals(completed.originalReceiptIdentity,second.originalReceiptIdentity)
-            assertEquals(completed.admittedServiceEpoch,second.admittedServiceEpoch)
+            assertEquals(currentEpoch,second.admittedServiceEpoch)
         }
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasText(secondPrompt))
         compose.onNodeWithText(secondPrompt).assertIsDisplayed()
