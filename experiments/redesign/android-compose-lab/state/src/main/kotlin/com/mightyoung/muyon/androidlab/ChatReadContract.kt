@@ -54,7 +54,7 @@ class ChatReadCompletion(private val deliver:(String?)->Unit) {
 /** A denied final disclosure is a terminal UNKNOWN envelope with no business events. */
 fun ChatReadConversation.finishEnvelope(terminal:Boolean,eventCount:Int):ChatReadConversation {
     require(!terminal || status in setOf("completed","cancelled","failed","outcome_unknown") || (status=="unknown" && eventCount==0))
-    return if(status in setOf("unknown","rejected"))disclosureLost(reason)else this
+    return if(status in setOf("unknown","rejected"))disclosureLost(reason)else if(status in setOf("failed","cancelled","outcome_unknown"))copy(answer="",projection=null,receipt=null,toolResult=null,toolReceipt=false)else this
 }
 
 /** Called only after the decoder validates request/run/epoch and source identity. */

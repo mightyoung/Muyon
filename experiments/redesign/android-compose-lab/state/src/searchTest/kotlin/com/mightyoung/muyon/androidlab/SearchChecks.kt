@@ -23,5 +23,6 @@ fun main() {
     verify("tainted result cannot promote instruction authority"){runCatching{result.copy(instructionAuthority=true)}.isFailure}
     verify("credential-bearing source URL rejected"){runCatching{result.copy(sources=listOf(ChatSource("fixture","https://user:pass@example.org",1)))}.isFailure}
     verify("empty success matches actual empty sources"){ChatToolResult("web_search.search","deepseek-search",emptyList(),"USD",0,true).empty}
+    verify("failed terminal cannot retain provisional source or spend disclosure"){original.copy(status="failed").finishEnvelope(true,1).let{it.toolResult==null && it.answer.isEmpty() && it.receipt==null && !it.toolReceipt && it.originalReceiptIdentity=="identity"}}
     println("SEARCH_CHECKS_PASS $checks")
 }

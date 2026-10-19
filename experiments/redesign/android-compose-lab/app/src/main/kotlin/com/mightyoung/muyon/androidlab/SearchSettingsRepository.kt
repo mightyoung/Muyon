@@ -33,7 +33,7 @@ internal class SearchSettingsRepository(context:Context,private val fixture:Bool
         }
     }catch(_:Exception){read().copy(message="保存失败；配置未确认生效")}
     /** Used only by trusted Service constructor; corrupt data stays explicitly invalid. */
-    fun snapshotJson():String=locked {
+    fun snapshotJson():String=try { locked {
         try{val s=load();JSONObject().put("version",1).put("enabled",s.enabled).put("provider",s.provider).put("connection",s.connection).put("revision",s.revision).toString()}catch(_:Exception){"{\"invalid\":true}"}
-    }
+    }}catch(_:Exception){"{\"invalid\":true}"}
 }
