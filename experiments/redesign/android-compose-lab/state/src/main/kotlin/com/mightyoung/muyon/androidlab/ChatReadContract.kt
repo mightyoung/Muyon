@@ -2,7 +2,7 @@ package com.mightyoung.muyon.androidlab
 
 /** Business selection is requested input, never a grant. The Service owns the source. */
 data class ChatReadSelection(val key:String="11111111-1111-4111-8111-111111111111",val revision:String="7",val synthetic:Boolean=true)
-data class ChatReadConversation(val text:String="",val requestId:String?=null,val runId:String?=null,val admittedServiceEpoch:String?=null,val answer:String="",val receipt:String?=null,val projection:String?=null,val status:String="idle",val reason:String="",val synthetic:Boolean=true,val cursor:Long=0,val originalReceiptIdentity:String?=null,val providerReceipt:Boolean=false)
+data class ChatReadConversation(val text:String="",val requestId:String?=null,val runId:String?=null,val admittedServiceEpoch:String?=null,val answer:String="",val receipt:String?=null,val projection:String?=null,val status:String="idle",val reason:String="",val synthetic:Boolean=true,val cursor:Long=0,val originalReceiptIdentity:String?=null,val providerReceipt:Boolean=false,val toolResult:ChatToolResult?=null,val toolReceipt:Boolean=false)
 data class ChatReadView(val conversations:Map<String,ChatReadConversation> = emptyMap(),val selected:ChatReadSelection=ChatReadSelection())
 interface ChatReadPort {
     val snapshot:ChatReadView
@@ -17,7 +17,7 @@ object ChatReadBounds {
 }
 
 /** Loss hides disclosure and restarts only event lookup; stable request/run/receipt identities survive. */
-fun ChatReadConversation.disclosureLost(reason:String)=copy(status="unknown",reason=reason,answer="",projection=null,receipt=null,cursor=0)
+fun ChatReadConversation.disclosureLost(reason:String)=copy(status="unknown",reason=reason,answer="",projection=null,receipt=null,toolResult=null,toolReceipt=false,cursor=0)
 
 /** Source kind is supplied by the Service and immutable once a run is admitted. */
 fun ChatReadConversation.withServiceSource(synthetic:Boolean):ChatReadConversation {

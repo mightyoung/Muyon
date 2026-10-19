@@ -85,7 +85,7 @@ def service_inventory(root=ROOT, descriptor=None):
 def tracked_inputs():
     paths = subprocess.check_output(['git', 'ls-files', '-z',
         'experiments/redesign/core-agent-lab', 'experiments/redesign/plugin-contract-lab',
-        'experiments/redesign/rust-agent-host-lab',
+        'experiments/redesign/rust-agent-host-lab', 'experiments/redesign/web-search-lab',
         'experiments/redesign/android-rust-bridge-lab', 'experiments/redesign/android-compose-lab',
         '.github/workflows/android-rust-bridge.yml', '.github/workflows/android-min26.yml',
         'docs/design/ANDROID-RUST-BRIDGE-INPUTS-V2.md',

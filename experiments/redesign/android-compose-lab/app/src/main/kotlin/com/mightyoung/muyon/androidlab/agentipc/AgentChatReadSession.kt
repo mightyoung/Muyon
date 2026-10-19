@@ -100,6 +100,13 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
             value=when(event.string("kind")) {
                 "answer_delta"->{require(p.keys().asSequence().toSet()==setOf("text") && p.get("text") is String);val delta=p.string("text");require(delta.toByteArray().size<=4096 && (value.answer+delta).toByteArray().size<=32768);value.copy(answer=value.answer+delta)}
                 "supplier_projection"->{require(p.keys().asSequence().toSet()==setOf("supplier","name") && p.get("name") is String);val supplier=p.getJSONObject("supplier");require(supplier.keys().asSequence().toSet()==setOf("module_id","type","key","revision","schema_version") && supplier.get("schema_version") is Int);require(supplier.string("key")==snapshot.selected.key && supplier.string("revision")==snapshot.selected.revision && supplier.string("module_id")=="inquiry" && supplier.string("type")=="supplier" && supplier.getInt("schema_version")==1);val name=p.string("name");require(name.toByteArray().size<=512);value.copy(projection=name)}
+                "tool_projection"->{require(value.toolResult==null);value.copy(toolResult=registeredToolProjection(p))}
+                "tool_receipt"->{
+                    require(p.keys().asSequence().toSet()==setOf("owner","invocation_id","binding_id","identity"))
+                    require(p.string("owner")=="ToolRegistry" && p.string("binding_id")=="host-web-search" && Regex("[0-9a-f]{32}").matches(p.string("identity")) && p.string("invocation_id").length in 1..256 && value.toolResult!=null)
+                    val identity=p.string("identity");require(value.originalReceiptIdentity==null || value.originalReceiptIdentity==identity)
+                    value.copy(receipt=p.toString(),originalReceiptIdentity=identity,toolReceipt=true)
+                }
                 "provider_receipt"->{
                     require(p.keys().asSequence().toSet()==setOf("owner","identity","task","attempt","synthetic"))
                     require(p.string("owner")=="ServiceProviderOwner" && p.boolean("synthetic") && p.string("identity").length in 1..512 && p.string("task").length in 1..256 && p.string("attempt").length in 1..256)
@@ -107,7 +114,7 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
                     value.copy(receipt=p.toString(),originalReceiptIdentity=identity,providerReceipt=true)
                 }
                 "receipt"->{require(p.keys().asSequence().toSet()==setOf("owner","invocation_id","binding_id","identity"));require(p.string("owner")=="ToolRegistry" && p.string("binding_id")=="host-supplier-name-read" && Regex("[0-9a-f]{32}").matches(p.string("identity")) && p.string("invocation_id").toByteArray().size<=256);val identity=p.string("identity");require(value.originalReceiptIdentity==null || value.originalReceiptIdentity==identity);val receipt=p.toString();require(receipt.toByteArray().size<=4096 && (value.receipt==null || value.receipt==receipt));value.copy(receipt=receipt,originalReceiptIdentity=identity)}
-                "terminal"->{require(p.keys().asSequence().toSet()==setOf("state","reason") && p.get("state") is String && p.get("reason") is String);val state=p.string("state");require(state in setOf("completed","cancelled","failed","outcome_unknown"));if(state=="completed")require(value.receipt!=null && (value.providerReceipt || value.projection!=null));value.copy(status=state,reason=p.string("reason").take(512))}
+                "terminal"->{require(p.keys().asSequence().toSet()==setOf("state","reason") && p.get("state") is String && p.get("reason") is String);val state=p.string("state");require(state in setOf("completed","cancelled","failed","outcome_unknown"));if(state=="completed")require(value.receipt!=null && (value.providerReceipt || value.projection!=null || (value.toolReceipt && value.toolResult!=null)));value.copy(status=state,reason=p.string("reason").take(512))}
                 else->error("unknown_event")
             }.copy(cursor=cursor)
         }

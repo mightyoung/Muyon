@@ -216,7 +216,7 @@ impl NativeStore {
         })
     }
     /// Bounded read-only reconciliation. Does not restore a session or permit dispatch.
-    pub(crate) fn read_service_evidence(dir: &Path) -> Result<(Vec<Json>, Json)> {
+    pub fn read_service_evidence(dir: &Path) -> Result<(Vec<Json>, Json)> {
         use std::io::Read;
         let _lock = store::lock(dir)?;
         let path = dir.join("native.db");

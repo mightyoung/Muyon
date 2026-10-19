@@ -216,7 +216,8 @@ fun MuyonLabShell(
                         Destination.SETTINGS -> SettingsLocalPage(local, settingsScroll,
                             onTheme = { local = local.copy(theme = it) }, onOptions = { show(LocalOverlay.Capabilities) },
                             onDiagnostic = { agentOpen = false; diagnosticOpen = true },
-                            onAgent = { diagnosticOpen = false; agentOpen = true })
+                            onAgent = { diagnosticOpen = false; agentOpen = true },
+                            searchSettings=(LocalContext.current.applicationContext as MuyonLabApplication).searchSettings)
                     }
                 }
             }

@@ -2,6 +2,7 @@
 //! Install into the existing native registry; only a trusted durable owner may send.
 pub use muyon_plugin_contract_lab::{object, parse, string, Json, Result};
 pub mod deepseek;
+pub mod chat_route;
 pub mod runtime;
 use muyon_core_agent_lab::policy::{authorize, Decision, HostFacts};
 use muyon_rust_agent_host_lab::service_provider::CredentialHandle;

@@ -168,10 +168,10 @@ internal fun RecordsLocalPage(state: LocalUiState, scroll: LazyListState, onQuer
 }
 
 @Composable
-internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onTheme: (LabTheme) -> Unit, onOptions: () -> Unit, onDiagnostic: () -> Unit, onAgent: () -> Unit = {}) {
+internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onTheme: (LabTheme) -> Unit, onOptions: () -> Unit, onDiagnostic: () -> Unit, onAgent: () -> Unit = {}, searchSettings:SearchSettingsPort?=null) {
     Column(Modifier.fillMaxSize()) {
         LocalConnectionNotice()
-        LazyColumn(state = scroll, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        LazyColumn(state = scroll, modifier = Modifier.fillMaxSize().testTag("settings-list"), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item { Text("设置", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() }) }
             item {
                 Text("界面主题", style = MaterialTheme.typography.titleMedium)
@@ -185,6 +185,7 @@ internal fun SettingsLocalPage(state: LocalUiState, scroll: LazyListState, onThe
                 Text("只影响本次界面；主题选择尚未持久化。", style = MaterialTheme.typography.bodySmall)
             }
             item { HorizontalDivider() }
+            if(searchSettings!=null)item { SearchSettingsCard(searchSettings) }
             item {
                 Text("本次本地内容", style = MaterialTheme.typography.titleMedium)
                 Text("${state.conversations.size} 个本地会话 · ${state.conversations.sumOf { it.notes.size }} 条用户记录")

@@ -241,6 +241,8 @@ impl ServiceRoot {
                         "source.db",
                         "ordinary-agent-v1.db",
                         "ordinary-send-v1.db",
+                        "registered-result.db",
+                        "search-outbound.db",
                         "lab-supplier.siq",
                         "native.db",
                         "task.db",

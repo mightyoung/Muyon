@@ -9,6 +9,7 @@ pub mod supplier_store;
 pub mod supplier_scope_bridge;
 pub mod service_provider;
 pub mod service_host;
+pub mod service_tools;
 pub mod supplier_lab_source;
 mod supplier_business;
 pub mod store;
@@ -175,7 +176,7 @@ impl NativeSession {
             catalog_sealed: false,
         }))
     }
-    pub(crate) fn service_in_process(
+    pub fn service_in_process(
         dir: &Path,
         authority: Rc<dyn AuthoritySource>,
         review: Rc<dyn PurposeReview>,

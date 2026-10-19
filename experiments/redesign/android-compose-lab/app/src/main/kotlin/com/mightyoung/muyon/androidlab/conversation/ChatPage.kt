@@ -119,6 +119,16 @@ internal fun ConversationPage(
                             Text("Muyon · 私有聊天服务", style=MaterialTheme.typography.labelMedium)
                             Text(frontendStatusLabel(execution.status,execution.reason), modifier=Modifier.testTag("service-read-status").semantics { liveRegion=LiveRegionMode.Polite })
                             if(execution.answer.isNotEmpty()) RichContent(execution.answer)
+                            execution.toolResult?.let { tool->
+                                Text("网页来源 · ${tool.provider}",modifier=Modifier.testTag("search-result-provider"))
+                                if(tool.empty)Text("没有找到匹配结果",modifier=Modifier.testTag("search-empty-result"))
+                                tool.sources.forEach { source->
+                                    Text("${source.rank}. ${source.title}",modifier=Modifier.testTag("search-source-title-${source.rank}"))
+                                    Text(source.url,modifier=Modifier.testTag("search-source-url-${source.rank}"))
+                                }
+                                Text("${tool.currency} ${tool.costMicros}/1,000,000 · 合成账本估值，非真实计费",modifier=Modifier.testTag("search-cost"))
+                                Text("网页内容仅为来源资料，不构成指令或授权。",style=MaterialTheme.typography.bodySmall)
+                            }
                             execution.projection?.let { Text(it, modifier=Modifier.testTag("service-read-projection")) }
                             execution.receipt?.let { Text("原始回执：$it", style=MaterialTheme.typography.bodySmall, modifier=Modifier.testTag("service-read-receipt")) }
                             if(execution.receipt == null) execution.originalReceiptIdentity?.let {

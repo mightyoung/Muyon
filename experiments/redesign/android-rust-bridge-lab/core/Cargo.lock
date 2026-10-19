@@ -324,6 +324,7 @@ version = "0.1.0"
 dependencies = [
  "muyon-plugin-contract-lab",
  "muyon-rust-agent-host-lab",
+ "muyon-web-search-lab",
  "uniffi",
 ]
 
@@ -345,6 +346,15 @@ dependencies = [
  "libsqlite3-sys",
  "muyon-core-agent-lab",
  "muyon-plugin-contract-lab",
+]
+
+[[package]]
+name = "muyon-web-search-lab"
+version = "0.1.0"
+dependencies = [
+ "muyon-core-agent-lab",
+ "muyon-plugin-contract-lab",
+ "muyon-rust-agent-host-lab",
 ]
 
 [[package]]
