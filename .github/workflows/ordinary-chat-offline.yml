@@ -97,26 +97,7 @@ jobs:
       - name: API26 exact Compose Service Agent ordinary chat
         shell: bash
         run: |
-          set -euo pipefail
-          evidence="$RUNNER_TEMP/chat-package"
-          export ANDROID_AVD_HOME="$RUNNER_TEMP/muyon-chat-avds"
-          mkdir -p "$ANDROID_AVD_HOME"
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install 'platform-tools' 'emulator' 'system-images;android-26;google_apis;x86_64' 2>&1 | tee "$evidence/emulator-setup.log"
-          export PATH="$ANDROID_HOME/platform-tools:$PATH"
-          sudo chmod a+rw /dev/kvm
-          printf 'no\n' | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n muyon-chat-api26 -k 'system-images;android-26;google_apis;x86_64' --force
-          "$ANDROID_HOME/emulator/emulator" -avd muyon-chat-api26 -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect > "$evidence/emulator.log" 2>&1 &
-          timeout 300 adb wait-for-device
-          for attempt in $(seq 1 120); do if [[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" == 1 ]]; then break; fi; sleep 2; done
-          test "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1
-          test "$(adb shell getprop ro.build.version.sdk | tr -d '\r')" = 26
-          adb shell input keyevent 82
-          adb install "$evidence/app-lifecycle.apk"
-          adb install "$evidence/app-lifecycle-androidTest.apk"
-          timeout 240 adb shell am instrument -w -r -e class com.mightyoung.muyon.androidlab.OrdinaryChatServiceLoopTest,com.mightyoung.muyon.androidlab.agentipc.OrdinaryChatOwnerContractTest com.mightyoung.muyon.androidlab.ordinaryChat.test/androidx.test.runner.AndroidJUnitRunner | tee "$evidence/instrumentation.log"
-          grep -F 'OK (2 tests)' "$evidence/instrumentation.log"
-          if grep -E 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$evidence/instrumentation.log"; then exit 1; fi
-          printf 'PASS: actual Compose Send to private Service same Rust Agent plain fake provider response; synthetic, no network/model call\n' > "$evidence/device-result.txt"
+          bash experiments/redesign/android-rust-bridge-lab/checks/ordinary_chat_device.sh
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
