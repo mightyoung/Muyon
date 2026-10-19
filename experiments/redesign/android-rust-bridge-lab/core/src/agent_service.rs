@@ -99,6 +99,15 @@ impl AgentServiceController {
         ).map_err(setup_error)?;
         Ok(Arc::new(Self { inner }))
     }
+    /// Additive Service-bootstrap tool route; UI/Binder cannot select installation.
+    #[uniffi::constructor]
+    pub fn with_registered_tools(config:AgentServiceConfig,owner:Arc<dyn crate::service_host_bridge::ServiceHostOwnerCallback>,mode:crate::service_host_bridge::ServiceOwnerMode,budget:crate::service_host_bridge::ServiceOwnerCallBudget,settings:Arc<dyn crate::registered_tools::RegisteredToolSettings>,synthetic_tools:bool)->Result<Arc<Self>,AgentServiceSetupError> {
+        use crate::service_host_bridge::{service_owner_adapter,ServiceOwnerMode};
+        use muyon_rust_agent_host_lab::{service_host::{ServiceHostMode,ServiceHostPorts},service_provider::CallBudget};
+        let ports=ServiceHostPorts::new(service_owner_adapter(owner),match mode{ServiceOwnerMode::LocalRead=>ServiceHostMode::LocalRead,ServiceOwnerMode::ConfiguredChat=>ServiceHostMode::ConfiguredChat},CallBudget{max_tokens:budget.max_tokens,max_micros:budget.max_micros,requires_tools:budget.requires_tools,requires_streaming:budget.requires_streaming}).with_tools(crate::registered_tools::route(settings,synthetic_tools));
+        let inner=muyon_rust_agent_host_lab::service_controller::AgentServiceController::new_with_host(host::AgentHostServiceConfig{protocol:config.protocol,private_root:config.private_root,build_identity:env!("MUYON_BRIDGE_BUILD_ID").into()},Arc::new(ports)).map_err(setup_error)?;
+        Ok(Arc::new(Self{inner}))
+    }
     #[uniffi::constructor]
     pub fn new(config: AgentServiceConfig) -> Result<Arc<Self>, AgentServiceSetupError> {
         let inner = muyon_rust_agent_host_lab::service_controller::AgentServiceController::new(

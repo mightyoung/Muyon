@@ -14,6 +14,7 @@ bindings = ["uniffi/cli"]
 ffi-test-probes = []
 
 [dependencies]
+muyon-web-search-lab = { path = "../../web-search-lab/core" }
 muyon-plugin-contract-lab = { path = "../../plugin-contract-lab/core" }
 uniffi = "=0.32.2"
 muyon-rust-agent-host-lab = { path = "../../rust-agent-host-lab/core" }

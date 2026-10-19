@@ -67,6 +67,9 @@ impl BusinessRead {
         Ok(Self { payload:crate::ordinary_chat::payload(conversation,text)?,mode:Some(crate::service_host::ServiceHostMode::ConfiguredChat),source_binding:None,host:None,events:Vec::new(),dir:None,chat_sources:Some(Vec::new()) })
     }
     pub(crate) fn save(&self, dir: &Path) -> Result<()> {
+        if crate::service_tools::is_registered(self) {
+            let data=crate::service_tools::record(self).encode();if data.len()>32768{return Err("tool_source_bound".into())}return store::atomic(dir,"source.db",&data);
+        }
         if crate::ordinary_chat::is_chat(self) {
             let encoded=self.ordinary_record().encode();
             if encoded.len()>32768{return Err("chat_context_limit".into())}
@@ -125,6 +128,7 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
     }
     let j = parse(&bytes)?;
     let version=field(&j,"version")?.string()?;
+    if version=="registered-chat-1" {return crate::service_tools::load(&j,dir)}
     if version=="ordinary-chat-1" {
         closed(&j,&["version","payload","binding","events"])?;
         let p=field(&j,"payload")?;closed(p,&["intent","conversation","text"])?;
@@ -203,6 +207,7 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
     Ok(b)
 }
 fn validate_events(b: &BusinessRead) -> Result<()> {
+    if crate::service_tools::is_registered(b){return crate::service_tools::validate_events(b)}
     if crate::ordinary_chat::is_chat(b) {
         if b.events.is_empty(){return Ok(())}
         let last=b.events.last().ok_or("CHAT_EVENTS")?;
@@ -339,6 +344,7 @@ fn receipt_evidence(
 }
 pub(crate) fn restore_snapshot(dir: &Path, run: &AgentDurableRun) -> Result<AgentRunSnapshot> {
     let b = load(dir)?;
+    if crate::service_tools::is_registered(&b){return crate::service_tools::restore(dir,run,&b)}
     if crate::ordinary_chat::is_chat(&b){return crate::ordinary_chat::restore(dir,run,&b)}
     // The payload-only ledger is the real crash window after native execution.
     // It must reconcile the original receipt using the pre-dispatch task binding.
@@ -414,6 +420,7 @@ pub(crate) fn execute(
     b: &mut BusinessRead,
     control: Arc<RunControl>,
 ) -> AgentRunSummary {
+    if crate::service_tools::is_registered(b){return crate::service_tools::execute(root,run,dir,b,control)}
     if crate::ordinary_chat::is_chat(b){return crate::ordinary_chat::execute(root,run,dir,b,control)}
     b.dir = Some(dir.into());
     let mut summary = AgentRunSummary {
@@ -592,6 +599,7 @@ pub(crate) fn reply(
     if let Some(b) = business {
         let disclosed = (|| {
             validate_events(b)?;
+            if crate::service_tools::is_registered(b){crate::service_tools::disclose(b,identity.ok_or("tool_identity_missing")?,request)?;return Ok(())}
             if crate::ordinary_chat::is_chat(b){crate::ordinary_chat::disclose(b)?;return Ok(())}
             if let Some(mode)=b.mode.filter(|_|!b.events.is_empty()) {
                 let host=b.host.as_ref().filter(|h|h.mode==mode).ok_or("host_owner_unavailable")?;

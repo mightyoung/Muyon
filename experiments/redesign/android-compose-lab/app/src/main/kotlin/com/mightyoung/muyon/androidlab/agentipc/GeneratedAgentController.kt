@@ -45,7 +45,7 @@ internal class GeneratedAgentController private constructor(private val native:A
     private fun UiAgentClientRef.native()=AgentClientRef(1u,epoch,lease)
     companion object {
         /** Called exclusively by the Service bootstrap worker with its Context-derived root. */
-        fun open(privateRoot:String,expectedBuild:String,hostLease:ServiceHostLease,onDrained:()->Unit,onCleaned:()->Unit):GeneratedAgentController {
+        fun open(privateRoot:String,expectedBuild:String,hostLease:ServiceHostLease,tools:RegisteredToolSettings?=null,syntheticTools:Boolean=false,onDrained:()->Unit,onCleaned:()->Unit):GeneratedAgentController {
             require(Regex("[0-9a-f]{40}").matches(expectedBuild)){"native_unavailable"}
             try {
                 val info=bridgeInfo()
@@ -54,7 +54,7 @@ internal class GeneratedAgentController private constructor(private val native:A
                 hostLease.enteringNativeConstruction()
                 val native=when(val host=hostLease.binding) {
                     ServiceHostBinding.SyntheticLab->AgentServiceController(config)
-                    is ServiceHostBinding.Installed->AgentServiceController.withHost(config,ServiceHostBindings.callback(host.owner),host.mode,host.budget)
+                    is ServiceHostBinding.Installed->if(tools==null)AgentServiceController.withHost(config,ServiceHostBindings.callback(host.owner),host.mode,host.budget) else AgentServiceController.withRegisteredTools(config,ServiceHostBindings.callback(host.owner),host.mode,host.budget,tools,syntheticTools)
                 }
                 return GeneratedAgentController(native,hostLease.hooks,onDrained,onCleaned)
             } catch(_:LinkageError) { throw IllegalStateException("native_unavailable") }

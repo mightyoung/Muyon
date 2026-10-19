@@ -21,10 +21,12 @@ pub struct ServiceHostPorts {
     pub(crate) owner: Arc<dyn ServiceHostOwner>,
     pub(crate) mode: ServiceHostMode,
     pub(crate) budget: CallBudget,
+    pub(crate) tools: Option<Arc<dyn crate::service_tools::RegisteredChatRoute>>,
 }
 impl ServiceHostPorts {
+    pub fn with_tools(mut self,tools:Arc<dyn crate::service_tools::RegisteredChatRoute>)->Self {self.tools=Some(tools);self}
     pub fn new(owner: Arc<dyn ServiceHostOwner>, mode: ServiceHostMode, budget: CallBudget) -> Self {
-        Self { owner, mode, budget }
+        Self { owner, mode, budget,tools:None }
     }
 }
 

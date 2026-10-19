@@ -55,7 +55,8 @@ class AgentRuntimeService:Service() {
                 ServiceProcessKeys.retainHost(slot,lease)
                 lease.hooks.acquired()
                 lateinit var value:GeneratedAgentController
-                value=GeneratedAgentController.open(root,build,lease,
+                val tools=SearchSettingsRepository(this,(application as MuyonLabApplication).syntheticRegisteredTools)
+                value=GeneratedAgentController.open(root,build,lease,tools=object:com.mightyoung.muyon.androidbridge.RegisteredToolSettings {override fun snapshot():String=tools.snapshotJson()},syntheticTools=(application as MuyonLabApplication).syntheticRegisteredTools,
                     onDrained={requestSettlement(value)},onCleaned={
                         // Native close returned and admission is sealed before touching owner storage.
                         lease.close()

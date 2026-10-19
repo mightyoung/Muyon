@@ -28,9 +28,10 @@ def main():
     parser.add_argument('--work', type=Path, required=True)
     parser.add_argument('--failure-variant', choices=['failSetup','failSetupOwner','failUnknown','failOwner','failNative','failInflight','failReady','failConstructDestroy'])
     parser.add_argument('--ordinary-chat', action='store_true')
+    parser.add_argument('--search-fixture', action='store_true')
     args = parser.parse_args()
-    assert not (args.ordinary_chat and args.failure_variant)
-    variant = 'ordinaryChat' if args.ordinary_chat else args.failure_variant or 'lifecycle'
+    assert sum([args.ordinary_chat,args.search_fixture,bool(args.failure_variant)])<=1
+    variant = 'searchFixture' if args.search_fixture else 'ordinaryChat' if args.ordinary_chat else args.failure_variant or 'lifecycle'
     task_variant = variant[0].upper() + variant[1:]
     evidence, work = args.evidence.resolve(), args.work.resolve()
     evidence.mkdir(parents=True, exist_ok=True)
@@ -74,7 +75,7 @@ def main():
     try:
         run([gradle, '--no-daemon', '--stacktrace', '--console=plain', '-p', ui,
              '-PmuyonBridgeInputs=' + str(inputs), '-PmuyonBridgeSourceSha=' + source,
-             '-PmuyonOrdinaryChatInstrumentation=true' if args.ordinary_chat else ('-PmuyonFailureInstrumentation=' + variant) if args.failure_variant else '-PmuyonLifecycleInstrumentation=true',
+             '-PmuyonSearchInstrumentation=true' if args.search_fixture else '-PmuyonOrdinaryChatInstrumentation=true' if args.ordinary_chat else ('-PmuyonFailureInstrumentation=' + variant) if args.failure_variant else '-PmuyonLifecycleInstrumentation=true',
              ':app:assemble' + task_variant, ':app:assemble' + task_variant + 'AndroidTest', ':app:lint' + task_variant],
             build_log, env, cwd=ui, timeout=1800)
     except Exception:
@@ -113,7 +114,7 @@ def main():
     (evidence / 'package-result.json').write_text(json.dumps(dict(
         source_sha=source, min_api=26, native_entries=entries, apk_sha256=sha(app),
         test_apk_sha256=sha(tests), build='PASS', Android_runtime='NOT_RUN',
-        business_source='compile-time synthetic ordinary text chat' if args.ordinary_chat else 'compile-time synthetic metadata lifecycle fixture', fixture_variant=variant, model_api_called=False), indent=2) + '\n')
+        business_source='compile-time synthetic registered tool chat' if args.search_fixture else 'compile-time synthetic ordinary text chat' if args.ordinary_chat else 'compile-time synthetic metadata lifecycle fixture', fixture_variant=variant, model_api_called=False), indent=2) + '\n')
     print('LIFECYCLE_NATIVE_COMPOSE_PACKAGE_PASS source=' + source, flush=True)
 
 

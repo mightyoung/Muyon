@@ -25,6 +25,8 @@ open class MuyonLabApplication : Application(), ServiceHostOwnerInstallation {
         if(visible)visibleActivities.add(id)else visibleActivities.remove(id)
         agentValue?.visibility(id,visible)
     }
+    internal open val syntheticRegisteredTools:Boolean get()=false
+    internal val searchSettings:SearchSettingsPort by lazy{SearchSettingsRepository(this,syntheticRegisteredTools)}
     val chats:ChatReadPort get()=agents.chats
     val diagnostics: RustDiagnosticCoordinator by lazy {
         val main = Handler(Looper.getMainLooper())

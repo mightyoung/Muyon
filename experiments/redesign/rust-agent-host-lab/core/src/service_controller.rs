@@ -580,14 +580,20 @@ impl AgentServiceController {
     }
     /// Ordinary input intent: no supplier key, revision, read grant or caller authority.
     pub fn submit_ordinary_chat(&self,client:AgentClientRef,request_id:String,conversation:String,text:String)->String {
-        let business=match BusinessRead::ordinary(conversation,text){Ok(mut b)=>{b.attach_host(self.host.clone());b},Err(e)=>return supplier_business::reply("rejected",&e,&request_id,None,None,0)};
+        // Duplicate identities retain their original frozen route, even after settings change.
+        let old={self.shared.lock().business.get(&request_id).cloned()};
+        if let Some(old)=old {if crate::field(&old.payload,"conversation").ok()!=Some(&crate::string(&conversation))||crate::field(&old.payload,"text").ok()!=Some(&crate::string(&text)){return supplier_business::reply("rejected","RequestConflict",&request_id,None,None,0)}return self.submit_business(client,request_id,old)}
+        if self.shared.lock().runs.iter().any(|r|intent_of(r).request_id==request_id){return supplier_business::reply("unknown","original_evidence_unavailable",&request_id,None,None,0)}
+        let frozen=self.host.as_ref().and_then(|h|h.tools.as_ref()).map(|r|r.prepare(&conversation,&text));
+        let prepared=match frozen {Some(Ok(Some(route)))=>crate::service_tools::make(conversation,text,route),Some(Err(_))=>crate::service_tools::make(conversation,text,crate::object([("tool",crate::string("unavailable")),("status",crate::string("search_config_corrupt"))])),_=>BusinessRead::ordinary(conversation,text)};
+        let business=match prepared{Ok(mut b)=>{b.attach_host(self.host.clone());b},Err(e)=>return supplier_business::reply("rejected",&e,&request_id,None,None,0)};
         self.submit_business(client,request_id,business)
     }
     fn host_marker(&self, reply: String) -> String {
         if self.host.is_none() { return reply; }
         let Ok(mut value) = muyon_plugin_contract_lab::parse(reply.as_bytes()) else { return reply; };
         if let Some(request)=crate::field(&value,"request_id").ok().and_then(|v|v.string().ok()) {
-            if self.shared.lock().business.get(request).is_some_and(crate::ordinary_chat::is_chat){return reply}
+            if self.shared.lock().business.get(request).is_some_and(|b|crate::ordinary_chat::is_chat(b)||crate::service_tools::is_registered(b)){return reply}
         }
         if let muyon_plugin_contract_lab::Json::Object(fields) = &mut value {
             fields.insert("synthetic".into(), muyon_plugin_contract_lab::Json::Bool(false));
