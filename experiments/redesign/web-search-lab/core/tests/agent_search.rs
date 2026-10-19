@@ -43,6 +43,57 @@ fn config() -> SearchConfig {
         max_response_bytes: 32768,
     }
 }
+fn call_json(call: &SearchCall) -> Json {
+    let c = &call.config;
+    let i = &call.invocation;
+    object([
+        (
+            "config",
+            object([
+                ("enabled", Json::Bool(c.enabled)),
+                ("id", string(&c.id)),
+                ("provider", string(&c.provider)),
+                ("revision", string(&c.revision)),
+                ("policy_revision", string(&c.policy_revision)),
+                ("endpoint", string(&c.endpoint)),
+                ("endpoint_identity", string(&c.endpoint_identity)),
+                ("credential_ref", string(&c.credential_ref)),
+                (
+                    "credential_generation",
+                    Json::Number(c.credential_generation.to_string()),
+                ),
+                ("currency", string(&c.price.currency)),
+                ("price_micros", Json::Number(c.price.micros.to_string())),
+                (
+                    "max_response_bytes",
+                    Json::Number(c.max_response_bytes.to_string()),
+                ),
+            ]),
+        ),
+        (
+            "invocation",
+            object([
+                ("task", string(&i.task)),
+                ("attempt", string(&i.attempt)),
+                ("scope", string(&i.scope)),
+                ("turn", Json::Number(i.turn.to_string())),
+                ("call_ref", string(&i.call_ref)),
+            ]),
+        ),
+        ("connection", call.connection.clone()),
+        (
+            "payload",
+            string(String::from_utf8(call.payload.clone()).unwrap()),
+        ),
+        (
+            "max_cost",
+            object([
+                ("currency", string(&call.max_cost.currency)),
+                ("micros", Json::Number(call.max_cost.micros.to_string())),
+            ]),
+        ),
+    ])
+}
 #[derive(Clone)]
 enum Behavior {
     Good,
@@ -63,7 +114,7 @@ enum Behavior {
 }
 #[derive(Clone)]
 struct Row {
-    call: SearchCall,
+    call: Json,
     status: String,
 }
 struct Owner {
@@ -74,6 +125,7 @@ struct Owner {
     rows: RefCell<BTreeMap<String, Row>>,
     sends: RefCell<usize>,
     max_calls: usize,
+    limit_micros: u64,
     session_dir: RefCell<Option<PathBuf>>,
     handle_generation: RefCell<u64>,
 }
@@ -93,35 +145,94 @@ impl Owner {
             rows: RefCell::new(BTreeMap::new()),
             sends: RefCell::new(0),
             max_calls: 3,
+            limit_micros: 2250,
             session_dir: RefCell::new(None),
             handle_generation: RefCell::new(1),
         })
     }
+    fn restore(&self) -> Result<()> {
+        let bytes = match std::fs::read(self.dir.join("search-ledger.json")) {
+            Ok(v) => v,
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound && self.rows.borrow().is_empty() => {
+                return Ok(())
+            }
+            Err(_) => return Err("fixture-ledger-unavailable".into()),
+        };
+        let value = parse(&bytes)?;
+        let m = value.object()?;
+        if m["max_calls"].integer()? != self.max_calls as u64
+            || m["limit_micros"].integer()? != self.limit_micros
+            || m["currency"].string()?
+                != self
+                    .config
+                    .borrow()
+                    .as_ref()
+                    .ok_or("fixture-config")?
+                    .price
+                    .currency
+        {
+            return Err("fixture-budget-config-mismatch".into());
+        }
+        let mut rows = BTreeMap::new();
+        for row in m["rows"].array()? {
+            let r = row.object()?;
+            let status = r["status"].string()?;
+            if !["held", "unknown", "nonempty", "empty", "failed", "released"].contains(&status) {
+                return Err("fixture-status".into());
+            }
+            if rows
+                .insert(
+                    r["reservation"].string()?.into(),
+                    Row {
+                        call: r["binding"].clone(),
+                        status: status.into(),
+                    },
+                )
+                .is_some()
+            {
+                return Err("fixture-duplicate-row".into());
+            }
+        }
+        *self.rows.borrow_mut() = rows;
+        Ok(())
+    }
     fn save(&self) {
         let rows = self.rows.borrow();
-        let value = Json::Array(
-            rows.iter()
-                .map(|(k, r)| {
-                    object([
-                        ("reservation", string(k)),
-                        ("task", string(&r.call.invocation.task)),
-                        ("attempt", string(&r.call.invocation.attempt)),
-                        ("model_call", string(&r.call.invocation.call_ref)),
-                        (
-                            "payload",
-                            string(String::from_utf8(r.call.payload.clone()).unwrap()),
-                        ),
-                        ("status", string(&r.status)),
-                        ("currency", string(&r.call.max_cost.currency)),
-                        (
-                            "max_micros",
-                            Json::Number(r.call.max_cost.micros.to_string()),
-                        ),
-                    ])
-                })
-                .collect(),
-        );
+        let value = object([
+            ("max_calls", Json::Number(self.max_calls.to_string())),
+            ("limit_micros", Json::Number(self.limit_micros.to_string())),
+            (
+                "currency",
+                string(&self.config.borrow().as_ref().unwrap().price.currency),
+            ),
+            (
+                "rows",
+                Json::Array(
+                    rows.iter()
+                        .map(|(k, r)| {
+                            object([
+                                ("reservation", string(k)),
+                                ("binding", r.call.clone()),
+                                ("status", string(&r.status)),
+                            ])
+                        })
+                        .collect(),
+                ),
+            ),
+        ]);
         store::atomic(&self.dir, "search-ledger.json", &value.encode()).unwrap();
+    }
+    fn bound_micros(&self) -> u64 {
+        self.rows
+            .borrow()
+            .values()
+            .filter(|r| ["held", "unknown", "nonempty"].contains(&r.status.as_str()))
+            .map(|r| {
+                r.call.object().unwrap()["max_cost"].object().unwrap()["micros"]
+                    .integer()
+                    .unwrap()
+            })
+            .sum()
     }
     fn statuses(&self) -> Vec<String> {
         self.rows
@@ -156,25 +267,21 @@ impl SearchHost for Owner {
         Ok(self.facts.borrow().clone())
     }
     fn reserve(&self, call: &SearchCall, _: &CredentialHandle) -> Result<String> {
-        // Replay check reads only this new-root search ledger, never task.db.
-        if let Ok(bytes) = std::fs::read(self.dir.join("search-ledger.json")) {
-            let saved = parse(&bytes)?;
-            if saved.array()?.iter().any(|r| {
-                r.object().is_ok_and(|m| {
-                    m.get("task") == Some(&string(&call.invocation.task))
-                        && m.get("attempt") == Some(&string(&call.invocation.attempt))
-                        && m.get("model_call") == Some(&string(&call.invocation.call_ref))
-                })
-            }) {
-                return Err("fixture-replay-tombstone".into());
-            }
-        }
+        // Reload full new-root fixture ledger, including quota and tombstones.
+        self.restore()?;
         let rows = self.rows.borrow();
+        let binding = call_json(call);
         if rows.len() >= self.max_calls
+            || self
+                .bound_micros()
+                .checked_add(call.max_cost.micros)
+                .is_none_or(|n| n > self.limit_micros)
             || rows.values().any(|r| {
-                r.call.invocation.task == call.invocation.task
-                    && r.call.invocation.attempt == call.invocation.attempt
-                    && r.call.invocation.call_ref == call.invocation.call_ref
+                let old = r.call.object().unwrap()["invocation"].object().unwrap();
+                let new = binding.object().unwrap()["invocation"].object().unwrap();
+                ["task", "attempt", "call_ref"]
+                    .iter()
+                    .all(|k| old[*k] == new[*k])
             })
         {
             return Err("fixture-budget-or-replay".into());
@@ -184,7 +291,7 @@ impl SearchHost for Owner {
         self.rows.borrow_mut().insert(
             id.clone(),
             Row {
-                call: call.clone(),
+                call: binding,
                 status: "held".into(),
             },
         );
@@ -198,6 +305,7 @@ impl SearchHost for Owner {
         Ok(id)
     }
     fn release_held(&self, id: &str) -> Result<()> {
+        self.restore()?;
         let mut rows = self.rows.borrow_mut();
         if let Some(r) = rows.get_mut(id) {
             if r.status == "held" {
@@ -209,6 +317,9 @@ impl SearchHost for Owner {
         Ok(())
     }
     fn exchange_once(&self, id: &str, call: &SearchCall, h: &CredentialHandle) -> Exchange {
+        if self.restore().is_err() {
+            return Exchange::NotSent;
+        }
         if self.current().unwrap().as_ref() != Some(&call.config)
             || self.handle(&call.config).unwrap() != *h
             || call.max_cost != call.config.price
@@ -219,7 +330,7 @@ impl SearchHost for Owner {
             .rows
             .borrow()
             .get(id)
-            .is_some_and(|r| r.status == "held" && r.call == *call)
+            .is_some_and(|r| r.status == "held" && r.call == call_json(call))
         {
             return Exchange::NotSent;
         }
@@ -269,12 +380,16 @@ impl SearchHost for Owner {
             body,
         }
     }
-    fn settle(&self, id: &str, _: &SearchCall, outcome: Settlement) -> Result<()> {
+    fn settle(&self, id: &str, call: &SearchCall, outcome: Settlement) -> Result<()> {
+        self.restore()?;
         if matches!(self.behavior, Behavior::SettlementFail) {
             return Err("fixture-settlement-failure".into());
         }
         let mut rows = self.rows.borrow_mut();
         let r = rows.get_mut(id).ok_or("fixture-row-missing")?;
+        if r.call != call_json(call) || !["held", "unknown"].contains(&r.status.as_str()) {
+            return Err("fixture-settlement-immutable".into());
+        }
         r.status = match outcome {
             Settlement::Nonempty => "nonempty",
             Settlement::Empty => "empty",
@@ -386,16 +501,25 @@ fn configured_registered_search_reaches_actual_agent_with_sources_and_cost() {
     assert!(history.contains("750"));
     let rows = owner.rows.borrow();
     let call = &rows.values().next().unwrap().call;
-    assert_eq!(call.invocation.task, agent.state.task);
-    assert_eq!(call.invocation.attempt, agent.state.attempt);
-    assert_eq!(call.invocation.call_ref, "call-1");
-    assert_eq!(call.invocation.scope, "search-scope");
     assert_eq!(
-        call.payload,
-        request("synthetic site:example.org", 10)
-            .unwrap()
-            .encode()
-            .into_bytes()
+        call.object().unwrap()["invocation"].object().unwrap()["task"],
+        string(&agent.state.task)
+    );
+    assert_eq!(
+        call.object().unwrap()["invocation"].object().unwrap()["attempt"],
+        string(&agent.state.attempt)
+    );
+    assert_eq!(
+        call.object().unwrap()["invocation"].object().unwrap()["call_ref"],
+        string("call-1")
+    );
+    assert_eq!(
+        call.object().unwrap()["invocation"].object().unwrap()["scope"],
+        string("search-scope")
+    );
+    assert_eq!(
+        call.object().unwrap()["payload"],
+        string(request("synthetic site:example.org", 10).unwrap().encode())
     );
     assert!(session.borrow().store.facts().encode().contains("true"));
     assert_eq!(
@@ -525,7 +649,9 @@ fn unknown_and_malformed_responses_never_resend_even_when_driven_again() {
 }
 #[test]
 fn known_errors_and_redirects_have_controlled_messages_without_raw_provider_text() {
-    for status in [400, 401, 402, 408, 413, 429, 500, 504, 302] {
+    for status in [
+        400, 401, 402, 408, 413, 429, 500, 504, 302, 201, 202, 204, 418, 502,
+    ] {
         let o = Owner::new(Behavior::Status(status));
         let (s, mut r, mut a) = setup(o.clone(), Rc::new(DeepSeek));
         r.run(&mut a, &mut Model::default()).unwrap();
@@ -534,7 +660,10 @@ fn known_errors_and_redirects_have_controlled_messages_without_raw_provider_text
         assert!(!s.borrow().store.receipts()[0]
             .encode()
             .contains("FIXTURE_CREDENTIAL"));
-        assert_eq!(a.state.status == "outcome_unknown", status == 302);
+        assert_eq!(
+            a.state.status == "outcome_unknown",
+            [302, 201, 202, 204, 418, 502].contains(&status)
+        );
     }
 }
 #[test]
@@ -611,7 +740,7 @@ fn durable_owner_replay_tombstone_rejects_same_identity_in_another_fresh_agent_s
     assert_ne!(a2.state.status, "completed");
     assert_eq!(o.statuses(), ["unknown"]);
     assert_eq!(*o2.sends.borrow(), 0);
-    assert!(o2.rows.borrow().is_empty());
+    assert_eq!(o2.statuses(), ["unknown"]);
 }
 #[test]
 fn budget_zero_does_not_send_or_use_any_chat_allowance() {
@@ -672,9 +801,11 @@ fn generic_registration_and_agent_entry_do_not_select_a_specific_provider() {
             .next()
             .unwrap()
             .call
-            .max_cost
-            .micros,
-        2
+            .object()
+            .unwrap()["max_cost"]
+            .object()
+            .unwrap()["micros"],
+        Json::Number("2".into())
     );
 }
 struct RevokeOnAnswer {
@@ -718,4 +849,73 @@ fn mere_configuration_does_not_claim_an_installed_transport_or_probe_a_service()
         availability(&UninstalledOwner, &DeepSeek).unwrap_err(),
         "search_transport_unavailable"
     );
+}
+fn reconstructed(o: &Rc<Owner>, behavior: Behavior) -> Rc<Owner> {
+    let mut next = Owner::new(behavior);
+    let n = Rc::get_mut(&mut next).unwrap();
+    n.dir = o.dir.clone();
+    n.max_calls = o.max_calls;
+    n.limit_micros = o.limit_micros;
+    *n.config.borrow_mut() = o.config.borrow().clone();
+    next
+}
+#[test]
+fn unknown_then_reconstructed_owner_new_call_preserves_old_tombstone_and_total_quota() {
+    let o = Owner::new(Behavior::Unknown);
+    let (_s, mut r, mut a) = setup(o.clone(), Rc::new(DeepSeek));
+    r.run(&mut a, &mut Model::default()).unwrap();
+    let o2 = reconstructed(&o, Behavior::Good);
+    let (_s2, mut r2, mut a2) = setup(o2.clone(), Rc::new(DeepSeek));
+    r2.run(&mut a2, &mut Model::default()).unwrap();
+    assert_eq!(*o2.sends.borrow(), 1);
+    assert_eq!(o2.bound_micros(), 1500);
+    let o3 = reconstructed(&o2, Behavior::Good);
+    let (_s3, mut r3, mut a3) = setup(o3.clone(), Rc::new(DeepSeek));
+    a3.state.task = a.state.task.clone();
+    a3.state.attempt = a.state.attempt.clone();
+    r3.run(&mut a3, &mut Model::default()).unwrap();
+    assert_eq!(*o3.sends.borrow(), 0);
+    assert_eq!(o3.statuses(), ["unknown", "nonempty"]);
+    let (_s4, mut r4, mut a4) = setup(o3.clone(), Rc::new(DeepSeek));
+    r4.run(&mut a4, &mut Model::default()).unwrap();
+    assert_eq!(*o3.sends.borrow(), 1);
+    assert_eq!(o3.bound_micros(), 2250);
+    let o4 = reconstructed(&o3, Behavior::Good);
+    let (_s5, mut r5, mut a5) = setup(o4.clone(), Rc::new(DeepSeek));
+    r5.run(&mut a5, &mut Model::default()).unwrap();
+    assert_eq!(*o4.sends.borrow(), 0);
+    assert_eq!(a5.state.reason, "search_budget_unavailable");
+    assert_eq!(o4.rows.borrow().len(), 3);
+}
+#[test]
+fn unknown_holds_spend_and_empty_releases_spend_but_completed_spend_cannot_be_refunded() {
+    let mut o = Owner::new(Behavior::Unknown);
+    Rc::get_mut(&mut o).unwrap().limit_micros = 750;
+    let (_s, mut r, mut a) = setup(o.clone(), Rc::new(DeepSeek));
+    r.run(&mut a, &mut Model::default()).unwrap();
+    assert_eq!(o.bound_micros(), 750);
+    let o2 = reconstructed(&o, Behavior::Good);
+    let (_s2, mut r2, mut a2) = setup(o2.clone(), Rc::new(DeepSeek));
+    r2.run(&mut a2, &mut Model::default()).unwrap();
+    assert_eq!(*o2.sends.borrow(), 0);
+    assert_eq!(o2.bound_micros(), 750);
+    let mut empty = Owner::new(Behavior::Empty);
+    Rc::get_mut(&mut empty).unwrap().limit_micros = 750;
+    let (_s3, mut r3, mut a3) = setup(empty.clone(), Rc::new(DeepSeek));
+    r3.run(&mut a3, &mut Model::default()).unwrap();
+    assert_eq!(empty.bound_micros(), 0);
+    let paid = reconstructed(&empty, Behavior::Good);
+    let (_s4, mut r4, mut a4) = setup(paid.clone(), Rc::new(DeepSeek));
+    r4.run(&mut a4, &mut Model::default()).unwrap();
+    assert_eq!(*paid.sends.borrow(), 1);
+    assert_eq!(paid.bound_micros(), 750);
+    assert_eq!(paid.statuses(), ["empty", "nonempty"]);
+    paid.release_held("held-1").unwrap();
+    assert_eq!(paid.bound_micros(), 750);
+    assert_eq!(paid.statuses(), ["empty", "nonempty"]);
+    let last = reconstructed(&paid, Behavior::Good);
+    let (_s5, mut r5, mut a5) = setup(last.clone(), Rc::new(DeepSeek));
+    r5.run(&mut a5, &mut Model::default()).unwrap();
+    assert_eq!(*last.sends.borrow(), 0);
+    assert_eq!(last.bound_micros(), 750);
 }

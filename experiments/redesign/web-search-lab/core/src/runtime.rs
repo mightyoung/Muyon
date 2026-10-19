@@ -20,7 +20,7 @@ struct Flight {
     seen: BTreeSet<(String, String, String)>,
     phase: Phase,
     reason: String,
-    projections: Vec<(SearchCall, Json)>,
+    projections: Vec<(SearchCall, Json, String)>,
 }
 impl Flight {
     fn new() -> Self {
@@ -158,10 +158,13 @@ impl Handler {
         };
         if status != 200 {
             // No provider body is propagated: it can contain credentials/query text.
-            let outcome = if (300..400).contains(&status) {
-                Settlement::Unknown
-            } else {
+            let outcome = if matches!(
+                status,
+                400 | 401 | 402 | 403 | 404 | 408 | 413 | 429 | 500 | 504
+            ) {
                 Settlement::Failed
+            } else {
+                Settlement::Unknown
             };
             self.host
                 .settle(&held.id, &call, outcome)
@@ -247,7 +250,7 @@ impl Handler {
         self.flight
             .borrow_mut()
             .projections
-            .push((call, value.clone()));
+            .push((call, value.clone(), handle.identity().into()));
         self.flight.borrow_mut().phase = Phase::ResultPrepared;
         Ok(RawRead {
             raw: value.clone(),
@@ -327,13 +330,16 @@ fn normalize(state: &mut State, flight: &Flight) {
 }
 impl SearchRuntime {
     fn review_current_results(&self) -> Result<()> {
-        for (call, value) in &self.flight.borrow().projections {
+        for (call, value, handle_identity) in &self.flight.borrow().projections {
             current(self.host.as_ref(), &call.config)?;
             let h = self
                 .host
                 .handle(&call.config)
                 .map_err(|_| "search_credential_unavailable")?;
             check_handle(&call.config, &h)?;
+            if h.identity() != handle_identity {
+                return Err("search_credential_changed".into());
+            }
             admitted(
                 self.host
                     .review(call, value, "search_result")
@@ -427,7 +433,7 @@ impl AgentPorts for SearchRuntime {
             return Err("search_outcome_unknown".into());
         }
         self.review_current_results()?;
-        for (call, _) in &self.flight.borrow().projections {
+        for (call, _, _) in &self.flight.borrow().projections {
             admitted(
                 self.host
                     .review(call, &string(answer), "model_answer")
