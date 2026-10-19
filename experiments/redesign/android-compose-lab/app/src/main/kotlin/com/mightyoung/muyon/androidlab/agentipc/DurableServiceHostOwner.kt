@@ -17,6 +17,9 @@ import java.util.UUID
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
+/** Preserve the ledger's versioned request identity encoding across chat validation files. */
+internal fun ordinaryRequestIdBytes(request:String):ByteArray = AdmissionEncoding.textValue(request)
+
 /** Trusted in-process authority. All facts are immutable snapshots; every mutation uses replace().
  * Proof/review callbacks must be pure, non-reentrant and must not consult mutable unguarded facts.
  * A proof certifies conservative total input+output tokens and maximum spend for the EXACT call.

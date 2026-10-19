@@ -44,7 +44,7 @@ internal fun ordinaryContextAllowed(db:SQLiteDatabase,state:ServiceAdmissionAuth
         check(ordered==seen.keys.filter { it in ordered })
         db.rawQuery("SELECT r.request_id,r.payload,r.state,f.context,t.context FROM admissions a JOIN reservations r ON r.token=a.token JOIN chat_contexts f ON f.token=r.token JOIN chat_attempts t ON t.id=a.id WHERE a.id=?",arrayOf(row.getString("receipt"))).use { old->
             check(old.moveToFirst() && old.getString(2)=="consumed")
-            check(old.getBlob(0).contentEquals(AdmissionEncoding.textValue(row.getString("request"))))
+            check(old.getBlob(0).contentEquals(ordinaryRequestIdBytes(row.getString("request"))))
             check(old.getBlob(3).contentEquals(old.getBlob(4)))
             val source=JSONObject(String(old.getBlob(3),Charsets.UTF_8))
             for(k in listOf("task","attempt","input_ref"))check(source.getString(k)==row.getString(k))
