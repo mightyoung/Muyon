@@ -25,7 +25,7 @@ internal class SearchSettingsRepository(context:Context,private val fixture:Bool
     override fun save(enabled:Boolean,connection:String):SearchSettingsView=try {
         locked {
             require(connection.isEmpty()||connection in connections)
-            val old=try{load()}catch(_:Exception){null};var revision:Long;do { revision=(java.security.SecureRandom().nextLong().ushr(11))+1 }while(revision==old?.revision)
+            val old=try{load()}catch(_:Exception){null};var revision:Long;do { revision=(java.security.SecureRandom().nextLong().ushr(11))+1 }while(revision==old?.revision || revision>9_007_199_254_740_991L)
             val j=JSONObject().put("version",1).put("enabled",enabled).put("provider","deepseek-search").put("connection",connection).put("revision",revision)
             var stream:java.io.FileOutputStream?=null
             try{stream=atomic.startWrite();stream.write(j.toString().toByteArray(Charsets.UTF_8));atomic.finishWrite(stream)}catch(e:Exception){if(stream!=null)atomic.failWrite(stream);throw e}
