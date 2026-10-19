@@ -51,6 +51,36 @@ class OrdinaryChatServiceLoopTest {
             val original=(compose.activity.application as MuyonLabApplication).chats.snapshot.conversations.values.single{it.text==prompt}
             assertEquals(completed.requestId,original.requestId);assertEquals(completed.runId,original.runId);assertEquals(completed.originalReceiptIdentity,original.originalReceiptIdentity)
         }
+        // Recreation stops the last visible lease. Its unknown disclosure must never
+        // be treated as a completed run or silently enable another admission.
+        waitStatus(frontendStatusLabel("unknown"))
+        compose.onNodeWithTag("assistant-draft").performTextReplacement("第二条普通文本")
+        compose.onNodeWithTag("send-service-read").assertIsNotEnabled()
+        hideKeyboard()
+        compose.runOnIdle {
+            val unknown=application.chats.snapshot.conversations.values.single{it.text==prompt}
+            assertEquals("unknown",unknown.status);assertTrue(unknown.answer.isEmpty());assertNull(unknown.receipt)
+            assertEquals(completed.admittedServiceEpoch,unknown.admittedServiceEpoch)
+            assertEquals(completed.originalReceiptIdentity,unknown.originalReceiptIdentity)
+        }
+        assertEquals(1,attempts())
+        // release() changes transport before the asynchronous stop finishes. Wait
+        // for its existing completion publication, not elapsed time or Send enabled.
+        compose.waitUntil(60_000) {
+            val state=application.agents.presentation
+            state.transport==UiAgentTransport.UNBOUND && state.message.startsWith("已请求停止并解除绑定")
+        }
+        compose.onNodeWithTag("local-chat-list").performScrollToNode(hasTestTag("reconcile-service-read"))
+        compose.onNodeWithTag("reconcile-service-read").performClick()
+        waitStatus("已完成")
+        compose.runOnIdle {
+            val restored=application.chats.snapshot.conversations.values.single{it.text==prompt}
+            assertEquals(completed.requestId,restored.requestId);assertEquals(completed.runId,restored.runId)
+            assertEquals(completed.admittedServiceEpoch,restored.admittedServiceEpoch)
+            assertEquals(completed.originalReceiptIdentity,restored.originalReceiptIdentity)
+            assertEquals(completed.answer,restored.answer);assertTrue(restored.providerReceipt);assertNotNull(restored.receipt)
+        }
+        assertEquals(1,attempts())
         // Same conversation, second explicit request exceeds the synthetic durable one-call ceiling.
         compose.onNodeWithTag("assistant-draft").performTextReplacement("第二条普通文本")
         compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
