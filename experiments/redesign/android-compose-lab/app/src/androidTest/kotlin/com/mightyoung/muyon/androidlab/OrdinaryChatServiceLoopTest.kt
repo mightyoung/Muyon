@@ -24,6 +24,7 @@ class OrdinaryChatServiceLoopTest {
         compose.waitForIdle()
     }
     private fun waitStatus(status:String) {compose.waitUntil(60_000){compose.onAllNodes(hasTestTag("service-read-status") and hasText(status)).fetchSemanticsNodes().isNotEmpty()}}
+    private fun requestCompleted(value:ChatReadConversation?,requestId:String)=value?.requestId==requestId && value.status=="completed"
     @Test fun composeSendUsesPrivateServiceSameRustAgentAndDisplaysPlainProviderAnswer() {
         compose.onNodeWithTag("new-conversation").performClick()
         val prompt="请概括这条普通文本"
@@ -96,12 +97,26 @@ class OrdinaryChatServiceLoopTest {
         val secondPrompt="第二条普通文本"
         compose.onNodeWithTag("assistant-draft").performTextReplacement(secondPrompt)
         compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
+        lateinit var secondRequestId:String
+        compose.runOnIdle {
+            secondRequestId=checkNotNull(application.chats.snapshot.conversations[conversationId]?.requestId)
+            assertNotEquals(completed.requestId,secondRequestId)
+        }
         hideKeyboard()
+        // Shell copies the chat snapshot every 100ms. Its rendered "completed"
+        // may still belong to the first request; wait for THIS request's terminal.
+        // Do not wait on the answer: completed-with-empty-answer must still fail below.
+        compose.waitUntil(60_000) {
+            var done=false
+            compose.runOnIdle {done=requestCompleted(application.chats.snapshot.conversations[conversationId],secondRequestId)}
+            done
+        }
         waitStatus("已完成")
         lateinit var second:ChatReadConversation
         compose.runOnIdle {
             second=checkNotNull(application.chats.snapshot.conversations[conversationId])
             assertEquals(1,application.chats.snapshot.conversations.size)
+            assertEquals(secondRequestId,second.requestId);assertEquals("completed",second.status)
             assertEquals(secondPrompt,second.text);assertEquals("离线普通文本响应",second.answer)
             assertTrue(second.providerReceipt);assertTrue(second.synthetic);assertNull(second.projection)
             assertNotNull(second.requestId);assertNotEquals(completed.requestId,second.requestId)

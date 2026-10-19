@@ -1,0 +1,3 @@
+Exception in thread "main" java.lang.IllegalStateException: old status-only wait passed for first request while second answer is empty
+	at com.mightyoung.muyon.androidlab.WaitRedKt.main(WaitRed.kt:8)
+	at com.mightyoung.muyon.androidlab.WaitRedKt.main(WaitRed.kt)
