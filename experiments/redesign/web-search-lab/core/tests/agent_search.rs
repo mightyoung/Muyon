@@ -259,7 +259,8 @@ impl SearchHost for Owner {
     }
     fn review(&self, _: &SearchCall, value: &Json, purpose: &str) -> Result<HostFacts> {
         // Explicit synthetic scan case, not a production scanner claim.
-        if value.encode().contains("FIXTURE_CREDENTIAL")
+        if (value.encode().contains("FIXTURE_CREDENTIAL")
+            || value.encode().contains("OWNER_ONLY_SECRET"))
             || (purpose == "search_result" && matches!(self.behavior, Behavior::RejectOutput))
         {
             return Err("synthetic-credential-hit".into());
@@ -918,4 +919,34 @@ fn unknown_holds_spend_and_empty_releases_spend_but_completed_spend_cannot_be_re
     r5.run(&mut a5, &mut Model::default()).unwrap();
     assert_eq!(*last.sends.borrow(), 0);
     assert_eq!(last.bound_micros(), 750);
+}
+#[test]
+fn owner_only_credential_refusal_precedes_native_argument_persistence() {
+    let o = Owner::new(Behavior::Good);
+    let (s, mut r, mut a) = setup(o.clone(), Rc::new(DeepSeek));
+    r.run(
+        &mut a,
+        &mut Model {
+            query: "OWNER_ONLY_SECRET".into(),
+            ..Model::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(*o.sends.borrow(), 0);
+    assert!(o.rows.borrow().is_empty());
+    assert!(
+        !std::fs::read_to_string(a.dir.join("native.db"))
+            .unwrap()
+            .contains("OWNER_ONLY_SECRET"),
+        "query must be reviewed by SearchHost before durable args"
+    );
+    assert_eq!(s.borrow().store.receipt_count(), 0);
+    assert!(!s
+        .borrow()
+        .model_history()
+        .encode()
+        .contains("OWNER_ONLY_SECRET"));
+    assert!(!std::fs::read_to_string(a.dir.join("task.db"))
+        .unwrap()
+        .contains("OWNER_ONLY_SECRET"));
 }

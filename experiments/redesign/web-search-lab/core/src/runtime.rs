@@ -68,7 +68,7 @@ fn current(h: &dyn SearchHost, c: &SearchConfig) -> Result<()> {
     }
 }
 impl Handler {
-    fn execute(&self, args: &Json) -> Result<RawRead> {
+    fn preflight(&self, args: &Json) -> Result<(SearchCall, Json)> {
         let invocation = self
             .flight
             .borrow()
@@ -100,6 +100,18 @@ impl Handler {
             payload: payload.encode().into_bytes(),
             max_cost: config.price.clone(),
         };
+        admitted(
+            self.host
+                .review(&call, &payload, "search_query")
+                .map_err(|_| "search_content_denied")?,
+        )?;
+        current(self.host.as_ref(), &config)?;
+        Ok((call, payload))
+    }
+    fn execute(&self, args: &Json) -> Result<RawRead> {
+        let (call, payload) = self.preflight(args)?;
+        let config = call.config.clone();
+        let count = get(args, "count")?.integer()?;
         let handle = self
             .host
             .handle(&config)
@@ -270,6 +282,10 @@ impl ReadHandler for Handler {
             get(args, "query")?.string()?,
             get(args, "count")?.integer()?,
         )?;
+        if let Err(e) = self.preflight(args) {
+            self.flight.borrow_mut().reason = e.clone();
+            return Err(e);
+        }
         Ok(())
     }
     fn read(&mut self, args: &Json) -> Result<RawRead> {
