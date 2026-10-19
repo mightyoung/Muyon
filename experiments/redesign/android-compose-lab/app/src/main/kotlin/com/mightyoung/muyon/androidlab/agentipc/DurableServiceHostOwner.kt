@@ -263,10 +263,10 @@ internal class DurableServiceHostOwner(
         val expected=mapOf("workspace" to a.workspace,"conversation" to ctx.getString("conversation"),"owner" to a.owner,"mode" to a.mode,"policy_revision" to a.policyRevision,"grant_revision" to a.grantRevision,"input_rule" to a.ruleRevision,"restriction_revision" to a.restrictionRevision,"sensitivity" to a.sensitivity,"output_rule" to "MODEL-TEXT-v1")
         if(auth.keys().asSequence().toSet()!=expected.keys+"synthetic" || expected.any{(k,v)->auth.opt(k)!=v} || auth.opt("synthetic")!=true || ctx.getString("workspace")!=a.workspace || ctx.getString("task").isBlank() || ctx.getString("attempt").isBlank() || ctx.getString("input_ref").isBlank())return@read null
         val database=checkNotNull(db)
-        if(!ordinaryContextAllowed(database,state,context,payload))return@read null
         database.beginTransaction()
         var permitted=false
         try {
+            if(!ordinaryContextAllowed(database,state,context,payload))return@read null
             database.rawQuery("SELECT r.binding,r.scope,r.payload,r.state,f.context,f.capability FROM admissions a JOIN reservations r ON r.token=a.token JOIN chat_contexts f ON f.token=r.token WHERE a.id=?",arrayOf(admission)).use { c->
                 if(c.moveToFirst() && c.getString(3)=="consumed" && c.getBlob(0).contentEquals(AdmissionEncoding.binding(binding)) && c.getBlob(1).contentEquals(scopeBytes(state)) && c.getBlob(2).contentEquals(payload) && c.getBlob(4).contentEquals(context) && c.getBlob(5).contentEquals(capabilityBytes(capability)) && state.payloadReview(binding,payload.copyOf())) {
                     database.rawQuery("SELECT id FROM chat_attempts WHERE id=?",arrayOf(admission)).use { prior->
