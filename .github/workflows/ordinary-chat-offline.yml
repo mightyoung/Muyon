@@ -1,7 +1,7 @@
 name: Ordinary chat offline
 on:
   push:
-    branches: ['lab/ordinary-chat-wiring-20261018', 'lab/ordinary-chat-continuation-20261019']
+    branches: ['lab/ordinary-chat-wiring-20261018', 'lab/ordinary-chat-continuation-20261019', 'lab/ordinary-chat-context-20261019']
     paths:
       - 'experiments/redesign/android-compose-lab/**'
       - 'experiments/redesign/android-rust-bridge-lab/**'

@@ -20,6 +20,7 @@ pub(crate) struct BusinessRead {
     pub(crate) host: Option<Arc<crate::service_host::ServiceHostPorts>>,
     pub(crate) events: Vec<Json>,
     pub(crate) dir: Option<PathBuf>,
+    pub(crate) chat_sources:Option<Vec<AgentDurableRun>>,
 }
 impl BusinessRead {
     pub fn new(text: String, key: String, revision: String) -> Result<Self> {
@@ -45,6 +46,7 @@ impl BusinessRead {
             host: None,
             events: Vec::new(),
             dir: None,
+            chat_sources:Some(Vec::new()),
         })
     }
     pub(crate) fn attach_host(&mut self, host: Option<Arc<crate::service_host::ServiceHostPorts>>) {
@@ -62,11 +64,13 @@ impl BusinessRead {
         );
     }
     pub(crate) fn ordinary(conversation:String,text:String)->Result<Self> {
-        Ok(Self { payload:crate::ordinary_chat::payload(conversation,text)?,mode:Some(crate::service_host::ServiceHostMode::ConfiguredChat),source_binding:None,host:None,events:Vec::new(),dir:None })
+        Ok(Self { payload:crate::ordinary_chat::payload(conversation,text)?,mode:Some(crate::service_host::ServiceHostMode::ConfiguredChat),source_binding:None,host:None,events:Vec::new(),dir:None,chat_sources:Some(Vec::new()) })
     }
     pub(crate) fn save(&self, dir: &Path) -> Result<()> {
         if crate::ordinary_chat::is_chat(self) {
-            return store::atomic(dir,"source.db",&object([("version",string("ordinary-chat-1")),("payload",self.payload.clone()),("binding",self.source_binding.clone().unwrap_or(Json::Null)),("events",Json::Array(self.events.clone()))]).encode());
+            let encoded=self.ordinary_record().encode();
+            if encoded.len()>32768{return Err("chat_context_limit".into())}
+            return store::atomic(dir,"source.db",&encoded);
         }
         let mut data = object([
             ("version", string("supplier-business-1")),
@@ -88,6 +92,7 @@ impl BusinessRead {
         }
         store::atomic(dir, "source.db", &data)
     }
+    pub(crate) fn ordinary_record(&self)->Json {object([("version",string("ordinary-chat-1")),("payload",self.payload.clone()),("binding",self.source_binding.clone().unwrap_or(Json::Null)),("events",Json::Array(self.events.clone()))])}
     pub(crate) fn push(&mut self, kind: &str, payload: Json) {
         self.events.push(object([
             ("cursor", Json::Number((self.events.len() + 1).to_string())),
@@ -106,16 +111,16 @@ fn closed(j: &Json, names: &[&str]) -> Result<()> {
 pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
     let path = dir.join("source.db");
     let m = std::fs::symlink_metadata(&path).map_err(|_| "BUSINESS_MISSING")?;
-    if !m.is_file() || m.file_type().is_symlink() || m.len() > 16384 {
+    if !m.is_file() || m.file_type().is_symlink() || m.len() > 32768 {
         return Err("BUSINESS_LEDGER_BOUND".into());
     }
     let mut bytes = Vec::new();
     std::fs::File::open(path)
         .map_err(|_| "BUSINESS_READ")?
-        .take(16385)
+        .take(32769)
         .read_to_end(&mut bytes)
         .map_err(|_| "BUSINESS_READ")?;
-    if bytes.len() > 16384 {
+    if bytes.len() > 32768 {
         return Err("BUSINESS_LEDGER_BOUND".into());
     }
     let j = parse(&bytes)?;
@@ -128,6 +133,7 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
         let binding=field(&j,"binding")?;if binding!=&Json::Null{b.source_binding=Some(binding.clone())}
         b.events=field(&j,"events")?.array()?.to_vec();b.dir=Some(dir.into());validate_events(&b)?;return Ok(b);
     }
+    if bytes.len()>16384{return Err("BUSINESS_LEDGER_BOUND".into())}
     match version {
         "supplier-business-1" => closed(&j, &["version", "payload", "events"])?,
         "supplier-business-2" => closed(&j, &["version", "payload", "events", "host"])?,

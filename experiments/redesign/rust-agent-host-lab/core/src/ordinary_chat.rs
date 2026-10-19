@@ -1,9 +1,9 @@
 //! Ordinary text intent on the existing Service worker and core Agent drive.
 //! Only explicitly synthetic, no-network transports are supported in this slice.
 use crate::{service_provider::{ProviderAdmission,ModelLocation}, field, service_host::{ServiceHostMode, ServiceHostPorts}, service_root::ServiceRoot, service_runtime::RunControl, service_types::*, supplier_business::BusinessRead, Json, Result};
-use muyon_core_agent_lab::{agent::{Agent, State, Limits, Hooks}, agent_ports::AgentPorts, model::{Provider, ProviderControl, ModelRequest, ModelEvent, NativeMessage}, store};
+use muyon_core_agent_lab::{agent::{Agent, State, Limits, Hooks}, agent_ports::AgentPorts, model::{Provider, ProviderControl, ModelRequest, ModelEvent, NativeMessage,Message,Role}, store};
 use muyon_plugin_contract_lab::{object, string, parse};
-use std::{path::Path, sync::Arc, rc::Rc, cell::RefCell};
+use std::{path::Path, sync::Arc, rc::Rc, cell::RefCell, io::Read};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ChatAuthority {
     pub workspace:String, pub conversation:String, pub owner:String, pub mode:String,
@@ -39,49 +39,60 @@ pub fn check_text(text:&str)->Result<()> {
 pub(crate) fn payload(conversation:String,text:String)->Result<Json> { if !id(&conversation,128) || text.trim().is_empty() || text.len()>4096 {return Err("INVALID_PAYLOAD".into())} Ok(object([("intent",string("ordinary-chat-v1")),("conversation",string(conversation)),("text",string(text))])) }
 pub(crate) fn is_chat(b:&BusinessRead)->bool { field(&b.payload,"intent").ok()==Some(&string("ordinary-chat-v1")) }
 fn current(host:&ServiceHostPorts,payload:&Json)->Result<ChatAuthority> { if host.mode!=ServiceHostMode::ConfiguredChat {return Err("chat_mode_unavailable".into())} let a=host.owner.chat_authority(field(payload,"conversation")?.string()?,field(payload,"text")?.string()?)?;a.validate(field(payload,"conversation")?.string()?)?;Ok(a) }
-fn validate_binding(host:&ServiceHostPorts,payload:&Json,expected:&Json)->Result<()> {
+fn validate_binding(host:&ServiceHostPorts,payload:&Json,expected:&Json,parent:&Path)->Result<()> {
     let a=current(host,payload)?;
-    if field(expected,"authority")?!=&a.json() {return Err("chat_authority_changed".into())}check_text(field(payload,"text")?.string()?)
+    if field(expected,"authority")?!=&a.json() {return Err("chat_authority_changed".into())}check_text(field(payload,"text")?.string()?)?;crate::chat_history::revalidate(parent,host,expected).map_err(crate::chat_history::failure)
 }
-pub(crate) fn disclose(b:&BusinessRead)->Result<()> { if b.events.iter().any(|e|field(e,"kind").ok()==Some(&string("answer_delta"))) {validate_binding(b.host.as_ref().ok_or("chat_owner_unavailable")?,&b.payload,b.source_binding.as_ref().ok_or("chat_binding_unavailable")?)?;receipt(b.dir.as_ref().ok_or("chat_run_unavailable")?,b)?;}Ok(()) }
+pub(crate) fn disclose(b:&BusinessRead)->Result<()> { if b.events.iter().any(|e|field(e,"kind").ok()==Some(&string("answer_delta"))) {validate_binding(b.host.as_ref().ok_or("chat_owner_unavailable")?,&b.payload,b.source_binding.as_ref().ok_or("chat_binding_unavailable")?,b.dir.as_ref().and_then(|d|d.parent()).ok_or("chat_run_unavailable")?)?;receipt(b.dir.as_ref().ok_or("chat_run_unavailable")?,b)?;}Ok(()) }
 fn provider_evidence(a:&ProviderAdmission)->Json {
     let b=a.binding();let p=a.profile();object([("profile_id",string(&p.id)),("location",string(match p.location{ModelLocation::Remote=>"remote",ModelLocation::OwnDevice=>"own-device"})),("purpose",string("chat")),("credential_ref",string(&p.credential_ref)),("model_allowed",Json::Bool(b.model_allowed)),("outbound_allowed",Json::Bool(b.outbound_allowed)),("endpoint",string(&p.endpoint)),("endpoint_identity",string(&p.endpoint_identity)),("provider",string(&p.provider)),("model",string(&p.model)),("profile_revision",string(&b.profile_revision)),("policy_revision",string(&b.policy_revision)),("grant_revision",string(&b.grant_revision)),("authorization_owner",string(&b.authorization_owner)),("credential_identity",string(a.credential_handle().identity())),("credential_generation",Json::Number(a.credential_handle().generation().unwrap_or(0).to_string())),("budget_revision",string(&b.budget.revision)),("quota_proof",string(&b.budget.quota_proof)),("max_tokens",Json::Number(a.call_budget().max_tokens.to_string())),("max_micros",Json::Number(a.call_budget().max_micros.to_string()))])
 }
 fn write_send(dir:&Path,context:&Json,body:&Json,state:&str,admission:Option<&ProviderAdmission>,response:Option<&ChatResponse>)->Result<()> {
-    store::atomic(dir,"ordinary-send-v1.db",&object([("version",string("ordinary-send-v1")),("context",context.clone()),("payload",body.clone()),("state",string(state)),("admission",string(admission.map(|a|a.record_id()).unwrap_or(""))),("provider",admission.map(provider_evidence).unwrap_or(Json::Null)),("answer",string(response.map(|r|r.answer.as_str()).unwrap_or(""))),("usage",response.map(|r|object([("input",Json::Number(r.input_tokens.to_string())),("output",Json::Number(r.output_tokens.to_string())),("counting_rule",string("synthetic-byte-bound-v1"))])).unwrap_or(Json::Null))]).encode())
+    let encoded=object([("version",string("ordinary-send-v1")),("context",context.clone()),("payload",body.clone()),("state",string(state)),("admission",string(admission.map(|a|a.record_id()).unwrap_or(""))),("provider",admission.map(provider_evidence).unwrap_or(Json::Null)),("answer",string(response.map(|r|r.answer.as_str()).unwrap_or(""))),("usage",response.map(|r|object([("input",Json::Number(r.input_tokens.to_string())),("output",Json::Number(r.output_tokens.to_string())),("counting_rule",string("synthetic-byte-bound-v1"))])).unwrap_or(Json::Null))]).encode();
+    if encoded.len()>65536{return Err("chat_context_limit".into())}
+    store::atomic(dir,"ordinary-send-v1.db",&encoded)
+}
+fn preflight(source:&BusinessRead,context:&Json,body:&Json,output:u64)->Result<()> {
+    let mut worst=source.clone();worst.events.clear();
+    worst.push("answer_delta",object([("text",string("\\".repeat(output as usize)))]));
+    worst.push("provider_receipt",object([("owner",string("ServiceProviderOwner")),("identity",string("r".repeat(512))),("task",field(context,"task")?.clone()),("attempt",field(context,"attempt")?.clone()),("synthetic",Json::Bool(true))]));
+    worst.push("terminal",object([("state",string("completed")),("reason",string("none"))]));
+    if worst.ordinary_record().encode().len()>32768 || context.encode().len()+body.encode().len()+2*output as usize+32768>65536 {return Err("chat_context_limit".into())}Ok(())
 }
 struct Shared { record:Option<String>, admitted:bool }
-struct ChatProvider<'a> { usage:(Option<u64>,Option<u64>), host:&'a ServiceHostPorts, authority:ChatAuthority, intent:&'a Json, context:Json, dir:&'a Path, request:String, shared:Rc<RefCell<Shared>> }
+struct ChatProvider<'a> { source:BusinessRead, usage:(Option<u64>,Option<u64>), host:&'a ServiceHostPorts, authority:ChatAuthority, intent:&'a Json, context:Json, dir:&'a Path, request:String, shared:Rc<RefCell<Shared>> }
 impl Provider for ChatProvider<'_> {
     fn reported_usage(&self)->(Option<u64>,Option<u64>){self.usage}
     fn respond(&mut self,_:&ModelRequest,_:usize)->Result<ModelEvent>{Err("controlled_chat_required".into())}
     fn respond_controlled(&mut self,request:&ModelRequest,_:usize,_:&[NativeMessage],control:&mut dyn ProviderControl)->Result<ModelEvent> {
-        if request.turn!=1 || !request.tools.is_empty() || request.messages.len()!=1 || request.messages[0].text!=field(self.intent,"text")?.string()? || request.task!=field(&self.context,"task")?.string()? || request.attempt!=field(&self.context,"attempt")?.string()? {return Err("chat_request_binding".into())}
-        control.poll()?;validate_binding(self.host,self.intent,&self.context)?;
+        let messages=crate::chat_history::wire_messages(&self.context,field(self.intent,"text")?.string()?)?;
+        let expected:Vec<Message>=messages.iter().map(|m|Ok(Message{role:if field(m,"role")?.string()?=="user"{Role::User}else{Role::Assistant},text:field(m,"content")?.string()?.into()})).collect::<Result<_>>()?;
+        if request.turn!=1 || !request.tools.is_empty() || request.messages!=expected || request.task!=field(&self.context,"task")?.string()? || request.attempt!=field(&self.context,"attempt")?.string()? {return Err("chat_request_binding".into())}
+        control.poll()?;validate_binding(self.host,self.intent,&self.context,self.dir.parent().ok_or("chat_run_unavailable")?)?;
         let bridge=self.host.owner.provider()?;let profile=bridge.readiness(&self.host.budget)?;
         // max_tokens on the wire is OUTPUT; reserve max_tokens remains TOTAL.
         // This conservative synthetic proof counts UTF-8 bytes plus fixed framing.
         if self.host.budget.requires_tools || self.host.budget.requires_streaming {return Err("chat_budget".into())}
         let mut output=1024u64;
-        let make_body=|limit:u64|object([("model",string(&profile.model)),("messages",Json::Array(vec![object([("role",string("user")),("content",string(&request.messages[0].text))])])),("n",Json::Number("1".into())),("stream",Json::Bool(false)),("max_tokens",Json::Number(limit.to_string()))]);
+        let make_body=|limit:u64|object([("model",string(&profile.model)),("messages",Json::Array(messages.clone())),("n",Json::Number("1".into())),("stream",Json::Bool(false)),("max_tokens",Json::Number(limit.to_string()))]);
         // Synthetic counting uses FULL serialized request bytes plus output bytes.
         // This is expressly not a real model tokenizer or currency price proof.
         let frame=make_body(output).encode().len() as u64;
-        output=output.min(self.host.budget.max_tokens.checked_sub(frame).ok_or("chat_budget")?);
-        if output==0{return Err("chat_budget".into())}
+        output=output.min(self.host.budget.max_tokens.checked_sub(frame).ok_or("chat_context_budget_exceeded")?);
+        if output==0{return Err("chat_context_budget_exceeded".into())}
         let body=make_body(output);
-        let bytes=body.encode().into_bytes();write_send(self.dir,&self.context,&body,"prepared",None,None)?;
+        let bytes=body.encode().into_bytes();if bytes.len()>8192{return Err("chat_context_budget_exceeded".into())}preflight(&self.source,&self.context,&body,output)?;write_send(self.dir,&self.context,&body,"prepared",None,None)?;
         let prepared=bridge.prepare_chat(&self.request,&bytes,self.host.budget.clone(),&self.context)?;
-        validate_binding(self.host,self.intent,&self.context)?;control.poll()?;
+        validate_binding(self.host,self.intent,&self.context,self.dir.parent().ok_or("chat_run_unavailable")?)?;control.poll()?;
         let admission=bridge.final_admit(prepared)?;
         self.shared.borrow_mut().admitted=true;
         write_send(self.dir,&self.context,&body,"admitted",Some(&admission),None)?;
-        validate_binding(self.host,self.intent,&self.context)?;control.poll()?;
+        validate_binding(self.host,self.intent,&self.context,self.dir.parent().ok_or("chat_run_unavailable")?)?;control.poll()?;
         // The same owner atomically validates and one-shot records the handoff.
         // No retries, fallback transport or refunds after this boundary.
         let reply=bridge.exchange_chat(&admission,&self.context)?;
-        if !reply.synthetic || !self.authority.synthetic || reply.input_tokens==0 || reply.output_tokens==0 || reply.output_tokens>output || reply.input_tokens.checked_add(reply.output_tokens).filter(|n|*n<=self.host.budget.max_tokens).is_none() {return Err("chat_usage_unavailable".into())}
-        check_text(&reply.answer)?;validate_binding(self.host,self.intent,&self.context)?;control.poll()?;
+        if !reply.synthetic || !self.authority.synthetic || reply.input_tokens==0 || reply.output_tokens==0 || reply.input_tokens!=bytes.len() as u64 || reply.output_tokens!=reply.answer.len() as u64 || reply.output_tokens>output || reply.input_tokens.checked_add(reply.output_tokens).filter(|n|*n<=self.host.budget.max_tokens).is_none() {return Err("chat_usage_unavailable".into())}
+        check_text(&reply.answer)?;validate_binding(self.host,self.intent,&self.context,self.dir.parent().ok_or("chat_run_unavailable")?)?;control.poll()?;
         write_send(self.dir,&self.context,&body,"completed",Some(&admission),Some(&reply))?;
         self.usage=(Some(reply.input_tokens),Some(reply.output_tokens));
         self.shared.borrow_mut().record=Some(admission.record_id().into());
@@ -102,13 +113,18 @@ pub(crate) fn execute(root:&mut ServiceRoot,run:&mut AgentDurableRun,dir:&Path,b
     let mut summary=AgentRunSummary{request_id:run.intent.request_id.clone(),variant:run.intent.variant.clone(),source_build_identity:run.intent.source_build_identity.clone(),identity:run.identity.clone(),terminal:AgentTerminal::Failed,reason:AgentReason::InternalFailure,receipt:AgentReceiptSummary{opaque_id:None,outcome:AgentReceiptOutcome::NotStarted}};
     let result=(||{
         let host=b.host.clone().ok_or("chat_owner_unconfigured")?;let authority=current(&host,&b.payload)?;check_text(field(&b.payload,"text")?.string()?)?;
-        let state=State::runtime(field(&b.payload,"text")?.string()?.into(),authority.workspace.clone(),Limits{steps:1,calls:1,context:16384,output:4096,total:32768})?;
+        let mut state=State::runtime(field(&b.payload,"text")?.string()?.into(),authority.workspace.clone(),Limits{steps:1,calls:1,context:16384,output:4096,total:32768})?;
         root.attach_task(&run.identity.run_id,AgentTaskIdentity{task_id:state.task.clone(),attempt_id:state.attempt.clone()})?;
         run.identity.actual_task=Some(AgentTaskIdentity{task_id:state.task.clone(),attempt_id:state.attempt.clone()});summary.identity=run.identity.clone();
-        let context=object([("authority",authority.json()),("workspace",string(&authority.workspace)),("conversation",field(&b.payload,"conversation")?.clone()),("input_ref",string(format!("{}:{}",run.identity.run_id,run.intent.request_id))),("task",string(&state.task)),("attempt",string(&state.attempt)),("input_version",string("utf8-exact-v1"))]);
+        let history=crate::chat_history::freeze(root,b).map_err(crate::chat_history::failure)?;
+        let context=object([("history_version",string(crate::chat_history::VERSION)),("history",Json::Array(history)),("authority",authority.json()),("workspace",string(&authority.workspace)),("conversation",field(&b.payload,"conversation")?.clone()),("input_ref",string(format!("{}:{}",run.identity.run_id,run.intent.request_id))),("task",string(&state.task)),("attempt",string(&state.attempt)),("input_version",string("utf8-exact-v1"))]);
+        if context.encode().len()>16384{return Err("chat_context_limit".into())}
+        let wire=crate::chat_history::wire_messages(&context,field(&b.payload,"text")?.string()?)?;
+        state.context=wire.iter().map(|m|Ok(Message{role:if field(m,"role")?.string()?=="user"{Role::User}else{Role::Assistant},text:field(m,"content")?.string()?.into()})).collect::<Result<_>>()?;
+        if muyon_core_agent_lab::model::context_bytes(&state.context)>state.limits.context{return Err("chat_context_limit".into())}
         b.source_binding=Some(context.clone());b.save(dir)?;
         let mut agent=Agent{dir:dir.into(),state};let mut ports=ChatPorts{control:control.clone(),shared:shared.clone()};
-        let mut provider=ChatProvider{usage:(None,None),host:&host,authority,intent:&b.payload,context,dir,request:run.intent.request_id.clone(),shared:shared.clone()};
+        let mut provider=ChatProvider{source:b.clone(),usage:(None,None),host:&host,authority,intent:&b.payload,context,dir,request:run.intent.request_id.clone(),shared:shared.clone()};
         agent.run_with_runtime_ports(&mut provider,&mut ports,&Hooks::default())?;
         if agent.state.status!="completed" {return Err(if agent.state.reason.is_empty(){"chat_incomplete".into()}else{agent.state.reason})}
         let record=shared.borrow().record.clone().ok_or("chat_receipt_unavailable")?;
@@ -117,7 +133,7 @@ pub(crate) fn execute(root:&mut ServiceRoot,run:&mut AgentDurableRun,dir:&Path,b
         summary.receipt=AgentReceiptSummary{opaque_id:Some(record),outcome:AgentReceiptOutcome::RecordedSuccess};summary.terminal=AgentTerminal::Completed;summary.reason=AgentReason::None;Ok::<(),String>(())
     })();
     let reason=if let Err(reason)=result {b.events.clear();if shared.borrow().admitted{summary.terminal=AgentTerminal::OutcomeUnknown;summary.receipt.outcome=AgentReceiptOutcome::Unknown;}else if reason=="native_cancelled"{summary.terminal=AgentTerminal::Cancelled;summary.reason=AgentReason::Cancelled;}reason}else{"none".into()};
-    let reason=if ["none","chat_authority_unconfigured","chat_authority_denied","chat_owner_unconfigured","chat_text_unreviewed","chat_credential_signal","provider_budget_reservation_failed","provider_config_unavailable","chat_credential_capability_unavailable","provider_credential_changed","provider_binding_changed","native_cancelled","native_deadline"].contains(&reason.as_str()){reason}else{"chat_failed_or_unavailable".into()};
+    let reason=if ["none","chat_authority_unconfigured","chat_authority_denied","chat_owner_unconfigured","chat_text_unreviewed","chat_credential_signal","provider_budget_reservation_failed","provider_config_unavailable","chat_credential_capability_unavailable","provider_credential_changed","provider_binding_changed","native_cancelled","native_deadline","chat_history_unavailable","chat_context_limit","chat_context_budget_exceeded"].contains(&reason.as_str()){reason}else{"chat_failed_or_unavailable".into()};
     let state=match summary.terminal{AgentTerminal::Completed=>"completed",AgentTerminal::Cancelled=>"cancelled",AgentTerminal::OutcomeUnknown=>"outcome_unknown",_=>"failed"};b.push("terminal",object([("state",string(state)),("reason",string(reason))]));
     // Never put rejected credential-bearing input into a durable business ledger.
     if b.source_binding.is_some() && b.save(dir).is_err(){root.poison();b.events.clear();b.push("terminal",object([("state",string("outcome_unknown")),("reason",string("chat_storage_failure"))]));summary.terminal=AgentTerminal::OutcomeUnknown;summary.receipt.outcome=AgentReceiptOutcome::Unknown;}
@@ -125,8 +141,9 @@ pub(crate) fn execute(root:&mut ServiceRoot,run:&mut AgentDurableRun,dir:&Path,b
 }
 pub(crate) fn receipt(dir:&Path,b:&BusinessRead)->Result<String> {
     let path=dir.join("ordinary-send-v1.db");let meta=std::fs::symlink_metadata(&path).map_err(|_|"chat_receipt_missing")?;
-    if !meta.is_file() || meta.file_type().is_symlink() || meta.len()>32768 {return Err("chat_receipt_bound".into())}
-    let j=parse(&std::fs::read(path).map_err(|_|"chat_receipt_missing")?)?;
+    if !meta.is_file() || meta.file_type().is_symlink() || meta.len()>65536 {return Err("chat_receipt_bound".into())}
+    let mut bytes=Vec::new();std::fs::File::open(path).map_err(|_|"chat_receipt_missing")?.take(65537).read_to_end(&mut bytes).map_err(|_|"chat_receipt_missing")?;
+    if bytes.len()>65536{return Err("chat_receipt_bound".into())}let j=parse(&bytes)?;
     closed(&j,&["version","context","payload","state","admission","provider","answer","usage"])?;
     if field(&j,"version")?!=&string("ordinary-send-v1") || field(&j,"state")?!=&string("completed") || b.source_binding.as_ref()!=Some(field(&j,"context")?) {return Err("chat_receipt_binding".into())}
     let answer=field(&j,"answer")?.string()?;check_text(answer)?;
@@ -135,7 +152,8 @@ pub(crate) fn receipt(dir:&Path,b:&BusinessRead)->Result<String> {
     let r=field(&j,"admission")?.string()?;if !id(r,512){return Err("chat_receipt_identity".into())}
     let evidence=b.events.iter().find(|e|field(e,"kind").ok()==Some(&string("provider_receipt"))).ok_or("chat_receipt_missing")?;let event=field(evidence,"payload")?;
     let context=field(&j,"context")?;
-    closed(context,&["authority","workspace","conversation","input_ref","task","attempt","input_version"])?;
+    let versioned=crate::chat_history::versioned(context)?;
+    if context.encode().len()>16384{return Err("chat_context_limit".into())}
     for k in ["workspace","conversation","input_ref","task","attempt"]{if !id(field(context,k)?.string()?,512){return Err("chat_context_evidence".into())}}
     if field(context,"input_version")?!=&string("utf8-exact-v1") || field(context,"conversation")?!=field(&b.payload,"conversation")? {return Err("chat_input_version".into())}
     let authority=field(context,"authority")?;
@@ -151,11 +169,10 @@ pub(crate) fn receipt(dir:&Path,b:&BusinessRead)->Result<String> {
     let wire=field(&j,"payload")?;closed(wire,&["model","messages","n","stream","max_tokens"])?;let messages=field(wire,"messages")?.array()?;
     let output=field(wire,"max_tokens")?.integer()?;
     if output==0 || output>1024 || (wire.encode().len() as u64).checked_add(output).filter(|n|*n<=total).is_none() || field(wire,"n")?.integer()?!=1 || field(wire,"stream")?!=&Json::Bool(false){return Err("chat_wire_budget_evidence".into())}
-    if messages.len()!=1{return Err("chat_payload_binding".into())}closed(&messages[0],&["role","content"])?;check_text(field(&messages[0],"content")?.string()?)?;
-    if field(&messages[0],"role")?!=&string("user"){return Err("chat_payload_binding".into())}
-    if messages.len()!=1 || field(&messages[0],"content")?!=field(&b.payload,"text")? || field(wire,"model")?!=field(field(&j,"provider")?,"model")? {return Err("chat_payload_binding".into())}
+    if messages!=crate::chat_history::wire_messages(context,field(&b.payload,"text")?.string()?)?.as_slice() || field(wire,"model")?!=field(field(&j,"provider")?,"model")? {return Err("chat_payload_binding".into())}
     let usage=field(&j,"usage")?;closed(usage,&["input","output","counting_rule"])?;
     let used_in=field(usage,"input")?.integer()?;let used_out=field(usage,"output")?.integer()?;
+    if versioned && (used_in!=wire.encode().len() as u64 || used_out!=answer.len() as u64){return Err("chat_usage_evidence".into())}
     if field(usage,"counting_rule")?!=&string("synthetic-byte-bound-v1") || used_in==0 || used_out==0 || used_out>output || used_in.checked_add(used_out).filter(|n|*n<=total).is_none() || field(provider,"credential_generation")?.integer()?==0 {return Err("chat_usage_evidence".into())}
     Ok(r.into())
 }

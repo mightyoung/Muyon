@@ -17,14 +17,19 @@ class OrdinaryChatFixtureApplication:MuyonLabApplication() {
         val provider=ServiceOwnerProvider(profile,"profile1","policy1","grant1","ordinary-fixture-owner",true,true,quota,true)
         val chat=ServiceOwnerChatAuthority("ordinary-fixture-workspace","*","ordinary-fixture-owner","full-allow","policy1","grant1","USER-TEXT-v1","source1","personal",true,true,true,true,true)
         fun review(bytes:ByteArray):Boolean=try {
-            val body=JSONObject(String(bytes,Charsets.UTF_8));val messages=body.getJSONArray("messages");val msg=messages.getJSONObject(0)
-            body.keys().asSequence().toSet()==setOf("model","messages","n","stream","max_tokens") && body.getString("model")==profile.model && messages.length()==1 && msg.keys().asSequence().toSet()==setOf("role","content") && msg.getString("role")=="user" && ordinaryTextSupported(msg.getString("content")) && body.getInt("n")==1 && !body.getBoolean("stream") && body.getLong("max_tokens") in 1..1024 && bytes.size<=8192
+            val body=JSONObject(String(bytes,Charsets.UTF_8));val messages=body.getJSONArray("messages");val count=messages.length()
+            val reviewed=count in 1..17 && count%2==1 && (0 until count).all { i->
+                val msg=messages.getJSONObject(i)
+                msg.keys().asSequence().toSet()==setOf("role","content") && msg.getString("role")== (if(i%2==0)"user" else "assistant") && ordinaryTextSupported(msg.getString("content"))
+            }
+            body.keys().asSequence().toSet()==setOf("model","messages","n","stream","max_tokens") && body.getString("model")==profile.model && reviewed && body.getInt("n")==1 && !body.getBoolean("stream") && body.getLong("max_tokens") in 1..1024 && bytes.size<=8192
         }catch(_:Exception){false}
         return ServiceAdmissionAuthority.State(null,provider,{_,bytes->review(bytes)},
-            {_,bytes,budget->if(review(bytes) && budget==call && bytes.size.toULong()+1024uL<=budget.maxTokens)"synthetic-total-bound-v1" else null},
+            {_,bytes,budget->if(review(bytes) && budget==call && bytes.size.toULong()+JSONObject(String(bytes,Charsets.UTF_8)).getLong("max_tokens").toULong()<=budget.maxTokens)"synthetic-total-bound-v1" else null},
             chat,ServiceOwnerCredentialCapability("synthetic-chat-handle",1uL),{bytes->
                 check(review(bytes))
-                ServiceOwnerChatResponse("离线普通文本响应",32uL,32uL,true)
+                val answer="离线普通文本响应"
+                ServiceOwnerChatResponse(answer,bytes.size.toULong(),answer.toByteArray(Charsets.UTF_8).size.toULong(),true)
             })
     }
 }

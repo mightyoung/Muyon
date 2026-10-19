@@ -128,8 +128,19 @@ class OrdinaryChatServiceLoopTest {
                     tasks+=binding.getString("task");taskAttempts+=binding.getString("attempt")
                     val body=JSONObject(String(rows.getBlob(1),Charsets.UTF_8))
                     assertEquals("ordinary-fixture-model",body.getString("model"))
-                    assertEquals(1,body.getJSONArray("messages").length())
-                    observed[binding.getString("input_ref")]=body.getJSONArray("messages").getJSONObject(0).getString("content")
+                    assertEquals("ordinary-context-v1",binding.getString("history_version"))
+                    val isSecond=binding.getString("input_ref")=="${second.runId}:${second.requestId}"
+                    val messages=body.getJSONArray("messages")
+                    assertEquals(if(isSecond)3 else 1,messages.length())
+                    assertEquals(if(isSecond)1 else 0,binding.getJSONArray("history").length())
+                    if(isSecond) {
+                        assertEquals("user",messages.getJSONObject(0).getString("role"));assertEquals(prompt,messages.getJSONObject(0).getString("content"))
+                        assertEquals("assistant",messages.getJSONObject(1).getString("role"));assertEquals(completed.answer,messages.getJSONObject(1).getString("content"))
+                        assertEquals(completed.requestId,binding.getJSONArray("history").getJSONObject(0).getString("request"))
+                        assertEquals(completed.originalReceiptIdentity,binding.getJSONArray("history").getJSONObject(0).getString("receipt"))
+                    }
+                    assertEquals("user",messages.getJSONObject(messages.length()-1).getString("role"))
+                    observed[binding.getString("input_ref")]=messages.getJSONObject(messages.length()-1).getString("content")
                 }
                 assertEquals(mapOf("${completed.runId}:${completed.requestId}" to prompt,"${second.runId}:${second.requestId}" to secondPrompt),observed)
                 assertEquals(2,tasks.size);assertEquals(2,taskAttempts.size)

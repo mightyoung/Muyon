@@ -2,6 +2,7 @@
 //! the child admits contracts/tickets, while host-installed Rust handlers read.
 pub mod model_gateway;
 pub mod ordinary_chat;
+mod chat_history;
 pub mod plugin_process;
 pub mod read_registry;
 pub mod supplier_store;

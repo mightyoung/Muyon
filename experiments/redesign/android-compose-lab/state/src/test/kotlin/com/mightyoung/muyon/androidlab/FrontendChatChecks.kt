@@ -23,6 +23,10 @@ fun runFrontendChatChecks() {
     check(frontendBudgetGuidance("failed", "provider_budget_reservation_failed")?.contains("保存") == true)
     check(frontendBudgetGuidance("failed", "provider_budget_reservation_failed")?.contains("手动发送") == true)
     check(frontendBudgetGuidance("unknown", "provider_budget_reservation_failed") == null)
+    check(frontendStatusLabel("failed","chat_context_budget_exceeded")=="上下文超出预算 · 未发送到 provider")
+    check(frontendBudgetGuidance("failed","chat_context_budget_exceeded")?.contains("不会自动删历史重试")==true)
+    check(frontendNeedsReconcile("failed","chat_context_budget_exceeded"))
+    check(frontendBudgetGuidance("unknown","chat_context_budget_exceeded")==null)
     val calls = mutableListOf<Pair<String,String>>()
     val port = object : ChatReadPort {
         override var snapshot = ChatReadView()

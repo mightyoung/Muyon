@@ -1169,6 +1169,19 @@ fn execute(
         }
     };
     if let Some(mut business) = business {
+        if crate::ordinary_chat::is_chat(&business) {
+            let g=shared.lock();let mut sources=Vec::new();let mut complete=true;
+            for indexed in root.runs().iter().filter(|r|r.intent.request_id!=run.intent.request_id) {
+                match g.runs.iter().find(|s|intent_of(s).request_id==indexed.intent.request_id) {
+                    Some(AgentRunSnapshot::Terminal{summary}) if summary.terminal==AgentTerminal::Completed=>{
+                        if summary.identity!=indexed.identity || summary.source_build_identity!=indexed.intent.source_build_identity || summary.variant!=indexed.intent.variant {complete=false;break}
+                        sources.push(indexed.clone());
+                    },
+                    Some(_)=>(),None=>{complete=false;break}
+                }
+            }
+            business.chat_sources=if complete{Some(sources)}else{None};
+        }
         let summary = supplier_business::execute(root, &mut run, &dir, &mut business, control);
         shared
             .lock()
