@@ -109,7 +109,7 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
                 }
                 "provider_receipt"->{
                     require(p.keys().asSequence().toSet()==setOf("owner","identity","task","attempt","synthetic"))
-                    require(p.string("owner")=="ServiceProviderOwner" && p.boolean("synthetic") && p.string("identity").length in 1..512 && p.string("task").length in 1..256 && p.string("attempt").length in 1..256)
+                    require(p.string("owner")=="ServiceProviderOwner" && p.boolean("synthetic")==source.synthetic && p.string("identity").length in 1..512 && p.string("task").length in 1..256 && p.string("attempt").length in 1..256)
                     val identity=p.string("identity");require(value.originalReceiptIdentity==null || value.originalReceiptIdentity==identity)
                     value.copy(receipt=p.toString(),originalReceiptIdentity=identity,providerReceipt=true)
                 }

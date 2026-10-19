@@ -9,7 +9,8 @@ internal fun ordinaryContextAllowed(db:SQLiteDatabase,state:ServiceAdmissionAuth
     val ctx=JSONObject(String(context,Charsets.UTF_8));val body=JSONObject(String(payload,Charsets.UTF_8))
     val a=checkNotNull(state.chat)
     fun closed(o:JSONObject,keys:Set<String>)=o.keys().asSequence().toSet()==keys
-    check(closed(body,setOf("model","messages","n","stream","max_tokens")))
+    check(closed(body,setOf("model","messages","n","stream","max_tokens") + if(a.synthetic)emptySet() else setOf("thinking")))
+    if(!a.synthetic)check(OrdinaryChatProductionConfig.prove(payload).fullInputTokenUpperBound<=16384)
     check(body.getString("model")==state.provider?.profile?.model && body.getInt("n")==1 && !body.getBoolean("stream") && body.getLong("max_tokens") in 1..1024)
     val base=setOf("authority","workspace","conversation","input_ref","task","attempt","input_version")
     fun history(c:JSONObject):JSONArray {
@@ -22,7 +23,7 @@ internal fun ordinaryContextAllowed(db:SQLiteDatabase,state:ServiceAdmissionAuth
     val rows=history(ctx)
     fun authority(auth:JSONObject):Boolean {
         val expected=mapOf("workspace" to a.workspace,"conversation" to ctx.getString("conversation"),"owner" to a.owner,"mode" to a.mode,"policy_revision" to a.policyRevision,"grant_revision" to a.grantRevision,"input_rule" to a.ruleRevision,"restriction_revision" to a.restrictionRevision,"sensitivity" to a.sensitivity,"output_rule" to "MODEL-TEXT-v1")
-        return closed(auth,expected.keys+"synthetic") && expected.all{(k,v)->auth.opt(k)==v} && auth.opt("synthetic")==true
+        return closed(auth,expected.keys+"synthetic") && expected.all{(k,v)->auth.opt(k)==v} && auth.opt("synthetic")==a.synthetic
     }
     check(ctx.getString("workspace")==a.workspace && authority(ctx.getJSONObject("authority")))
     check(ctx.getString("input_version")=="utf8-exact-v1")

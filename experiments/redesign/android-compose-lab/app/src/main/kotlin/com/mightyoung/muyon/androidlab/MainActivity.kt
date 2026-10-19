@@ -10,6 +10,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         visibilityIdentity=(application as MuyonLabApplication).newActivityIdentity()
         setContent { MuyonLabShell() }
+        if(savedInstanceState==null)(application as MuyonLabApplication).openChatCredentialEntry(this)
     }
     override fun onStart(){super.onStart();(application as MuyonLabApplication).activityVisibility(visibilityIdentity,true)}
     override fun onStop(){(application as MuyonLabApplication).activityVisibility(visibilityIdentity,false);super.onStop()}

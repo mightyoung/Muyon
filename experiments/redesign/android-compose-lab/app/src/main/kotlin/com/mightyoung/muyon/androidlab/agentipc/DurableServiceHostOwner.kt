@@ -31,7 +31,8 @@ internal class ServiceAdmissionAuthority(initial: State) {
                 val budgetProof: (ServiceOwnerAdmissionBinding, ByteArray, ServiceOwnerCallBudget) -> String?,
                 val chat:ServiceOwnerChatAuthority?,
                 val credential:ServiceOwnerCredentialCapability?,
-                val fakeExchange:((ByteArray)->ServiceOwnerChatResponse)?) {
+                val fakeExchange:((ByteArray)->ServiceOwnerChatResponse)?,
+                val live:OrdinaryChatLiveInstallation?=null) {
         // Preserve the existing four-argument/trailing budget-proof constructor.
         constructor(scope:ServiceOwnerScope?,provider:ServiceOwnerProvider?,payloadReview:(ServiceOwnerAdmissionBinding,ByteArray)->Boolean,budgetProof:(ServiceOwnerAdmissionBinding,ByteArray,ServiceOwnerCallBudget)->String?):this(scope,provider,payloadReview,budgetProof,null,null,null)
     }
@@ -39,10 +40,22 @@ internal class ServiceAdmissionAuthority(initial: State) {
     private var state = snapshot(initial)
     private fun snapshot(s: State) = State(s.scope?.let { scope -> scope.copy(decision = scope.decision.copy(
         bindings = java.util.Collections.unmodifiableList(scope.decision.bindings.toList()), selected = java.util.Collections.unmodifiableList(scope.decision.selected.toList()))) },
-        s.provider, s.payloadReview, s.budgetProof, s.chat, s.credential, s.fakeExchange)
+        s.provider, s.payloadReview, s.budgetProof, s.chat, s.credential, s.fakeExchange, s.live)
     fun replace(next: State) {
         check(!lock.isHeldByCurrentThread) { "Authority mutation during admission" }
         lock.withLock { state = snapshot(next) }
+    }
+    /** Credential generation and its authority snapshot publish at one guarded boundary. */
+    fun installLiveCredential(live:OrdinaryChatLiveInstallation,input:CharArray) {
+        check(!lock.isHeldByCurrentThread) { "Authority mutation during admission" }
+        lock.withLock {
+            val staged=live.credentials.prepare(input)
+            try {
+                val next=snapshot(live.facts(staged.capability))
+                live.credentials.commit(staged)
+                state=next
+            } finally {staged.discard()}
+        }
     }
     fun <T> guarded(block: (State) -> T): T {
         check(!lock.isHeldByCurrentThread) { "Reentrant authority operation" }
@@ -69,6 +82,9 @@ internal class DurableServiceHostOwner(
     companion object { const val DATABASE_NAME = "muyon-admission-v1.sqlite"; const val CHAT_DATABASE_NAME="muyon-ordinary-admission-v2.sqlite" }
     private var db: SQLiteDatabase? = null
     private var lease: AdmissionLease? = null
+    private val livePermits=mutableMapOf<String,OrdinaryChatCanaryBudget.Permit>()
+    private data class PendingLive(val installation:OrdinaryChatLiveInstallation,val binding:ServiceOwnerAdmissionBinding,val context:ByteArray,val payload:ByteArray,val capability:ServiceOwnerCredentialCapability,val control:ServiceOwnerRunControl,val candidate:OrdinaryChatLiveInstallation.Candidate)
+    private val pendingLive=mutableMapOf<String,PendingLive>()
     init {
         try {
             require(holdMillis > 0)
@@ -95,7 +111,12 @@ internal class DurableServiceHostOwner(
             } finally { opened.endTransaction() }
         } catch (_: Exception) { db?.close(); db = null; lease?.close(); lease = null }
     }
-    @Synchronized override fun close() { db?.close(); db = null; lease?.close(); lease = null }
+    @Synchronized override fun close() {
+        val live=read{it.live}
+        (livePermits.values.toList()+pendingLive.values.map{it.candidate.permit}).forEach{permit->try{live?.budget?.stop(permit)}catch(_:Exception){}}
+        livePermits.clear();pendingLive.clear()
+        db?.close(); db = null; lease?.close(); lease = null
+    }
     private fun <T> read(block: (ServiceAdmissionAuthority.State) -> T): T? = try {
         if (db == null) null else authority?.guarded(block)
     } catch (_: Exception) { null }
@@ -118,7 +139,7 @@ internal class DurableServiceHostOwner(
     private fun valid(s: ServiceAdmissionAuthority.State, b: ServiceOwnerAdmissionBinding): Boolean {
         val p = s.provider ?: return false
         val scopeAllowed=if(ordinaryChat) s.chat?.let { a->
-            a.synthetic && a.active && a.modelAllowed && a.outboundAllowed && a.inheritedAllowed &&
+            (a.synthetic || (s.live!=null && p.profile==OrdinaryChatProductionConfig.profile && s.fakeExchange==null)) && a.active && a.modelAllowed && a.outboundAllowed && a.inheritedAllowed &&
             a.workspace.isNotBlank() && a.owner==b.authorizationOwner && a.policyRevision==b.policyRevision &&
             a.grantRevision==b.grantRevision && a.ruleRevision=="USER-TEXT-v1" &&
             a.mode in setOf("auto","full-allow","read-only","ask-every-time") && a.sensitivity in setOf("personal","commercial") &&
@@ -200,6 +221,11 @@ internal class DurableServiceHostOwner(
                 put("tokens", costTokens); put("micros", costMicros)
                 put("expires", Math.addExact(now, holdMillis)); put("state", "held")
             })
+            if(state.chat?.synthetic==false) {
+                val live=checkNotNull(state.live)
+                val proof=OrdinaryChatProductionConfig.prove(bytes)
+                livePermits[token]=live.budget.reserve(requestId,bytes,proof,"CNY",OrdinaryChatProductionConfig.verifier)
+            }
             token
         }
     }
@@ -239,7 +265,8 @@ internal class DurableServiceHostOwner(
      * request_id remains unique forever, and consumed admissions can never be refunded.
      * Opaque unguessable reservation is a capability local to the bound native callback owner.
      */
-    @Synchronized override fun releaseReservation(reservation: String): Boolean = transaction { database, _, _ ->
+    @Synchronized override fun releaseReservation(reservation: String): Boolean = transaction { database, state, _ ->
+        livePermits.remove(reservation)?.let { checkNotNull(state.live).budget.stop(it) }
         database.update("reservations", ContentValues().apply { put("state", "expired") },
             "token=? AND state='held'", arrayOf(reservation)) == 1
     } ?: false
@@ -281,6 +308,93 @@ internal class DurableServiceHostOwner(
         } finally {database.endTransaction()}
         if(permitted)state.fakeExchange.invoke(payload.copyOf()) else null
     }
+
+    /** TLS connection/read occur outside all owner/authority locks. The exact one-shot POST
+     * gets a second guarded validation immediately before its bounded (2s) write. */
+    override fun exchangeLiveChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability,control:ServiceOwnerRunControl):ServiceOwnerChatResponse? {
+        var installation:OrdinaryChatLiveInstallation?=null
+        var permit:OrdinaryChatCanaryBudget.Permit?=null
+        try {
+            synchronized(this) {
+                transaction { database,state,_->
+                    require(ordinaryChat && state.chat?.synthetic==false && valid(state,binding) && state.credential==capability && control.allowed())
+                    require(liveAdmissionAllowed(database,state,admission,binding,context,payload,capability))
+                    installation=checkNotNull(state.live)
+                    val token=database.rawQuery("SELECT token FROM admissions WHERE id=?",arrayOf(admission)).use{check(it.moveToFirst());it.getString(0)}
+                    permit=checkNotNull(livePermits.remove(token))
+                    database.rawQuery("SELECT id FROM chat_attempts WHERE id=?",arrayOf(admission)).use{require(!it.moveToFirst())}
+                    database.insertOrThrow("chat_attempts",null,ContentValues().apply{put("id",admission);put("context",context.copyOf())})
+                    installation!!.budget.handoff(permit!!)
+                    true
+                } ?: error("chat_live_handoff_refused")
+            }
+            val live=checkNotNull(installation);val held=checkNotNull(permit)
+            val response=live.credentials.withCopy(capability) { credential ->
+                live.exchange(payload.copyOf(),credential,{control.allowed()}) { send ->
+                    synchronized(this) {
+                        read { state ->
+                            val database=checkNotNull(db)
+                            require(control.allowed() && valid(state,binding) && state.credential==capability)
+                            require(liveAdmissionAllowed(database,state,admission,binding,context,payload,capability))
+                            send();true
+                        } ?: false
+                    }
+                }
+            }
+            val candidate=live.decode(response,OrdinaryChatProductionConfig.prove(payload),held)
+            synchronized(this) {
+                read { state->
+                    require(control.allowed() && valid(state,binding) && state.credential==capability)
+                    require(liveAdmissionAllowed(checkNotNull(db),state,admission,binding,context,payload,capability))
+                    live.writeCandidate(admission,context,payload,candidate)
+                    pendingLive[admission]=PendingLive(live,binding,context.copyOf(),payload.copyOf(),capability,control,candidate)
+                    true
+                } ?: error("chat_candidate_refused")
+            }
+            return candidate.response
+        } catch(_:Exception) {
+            if(installation!=null && permit!=null)try{installation!!.budget.stop(permit!!)}catch(_:Exception){}
+            return null
+        }
+    }
+    /** Exact persisted admission/context and original lineage, reloaded at actual POST write. */
+    private fun liveAdmissionAllowed(database:SQLiteDatabase,state:ServiceAdmissionAuthority.State,admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability):Boolean {
+        if(context.size !in 1..16384 || payload.size !in 1..8192 || !ordinaryContextAllowed(database,state,context,payload))return false
+        return database.rawQuery("SELECT r.binding,r.scope,r.payload,r.state,f.context,f.capability FROM admissions a JOIN reservations r ON r.token=a.token JOIN chat_contexts f ON f.token=r.token WHERE a.id=?",arrayOf(admission)).use { c ->
+            c.moveToFirst() && c.getString(3)=="consumed" && c.getBlob(0).contentEquals(AdmissionEncoding.binding(binding)) && c.getBlob(1).contentEquals(scopeBytes(state)) && c.getBlob(2).contentEquals(payload) && c.getBlob(4).contentEquals(context) && c.getBlob(5).contentEquals(capabilityBytes(capability)) && state.payloadReview(binding,payload.copyOf())
+        }
+    }
+    /** Rust calls this only from its final controlled local publication point. */
+    @Synchronized override fun settleChat(admission:String,accepted:Boolean):Boolean {
+        val pending=pendingLive[admission] ?: run {
+            if(!accepted) {
+                return read { state->
+                    val token=checkNotNull(db).rawQuery("SELECT token FROM admissions WHERE id=?",arrayOf(admission)).use{if(it.moveToFirst())it.getString(0)else null}
+                    val permit=token?.let{livePermits.remove(it)}
+                    if(permit!=null){checkNotNull(state.live).budget.stop(permit);true}else false
+                } ?: false
+            }
+            return chatSettlement(admission)=="success"
+        }
+        if(!accepted) {
+            return try{pending.installation.budget.stop(pending.candidate.permit);pendingLive.remove(admission);true}catch(_:Exception){false}
+        }
+        return try {
+            val committed=read { state->
+                require(pending.control.allowed() && valid(state,pending.binding) && state.credential==pending.capability)
+                require(liveAdmissionAllowed(checkNotNull(db),state,admission,pending.binding,pending.context,pending.payload,pending.capability))
+                pending.installation.budget.success(pending.candidate.permit,pending.candidate.usage)
+                // No fallible disk operation after the durable success marker is committed.
+                true
+            }==true
+            if(committed)pendingLive.remove(admission) else try{pending.installation.budget.stop(pending.candidate.permit)}catch(_:Exception){}
+            committed
+        } catch(_:Exception) {
+            try{pending.installation.budget.stop(pending.candidate.permit)}catch(_:Exception){}
+            false
+        }
+    }
+    @Synchronized override fun chatSettlement(admission:String):String?=read {state->state.live?.lookup(admission)}
     private fun signed(n: ULong): Long { require(n <= Long.MAX_VALUE.toULong()); return n.toLong() }
 }
 

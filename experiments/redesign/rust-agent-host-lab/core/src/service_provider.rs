@@ -63,6 +63,9 @@ pub trait ServiceProviderHost {
     /// Default denies: existence-only bridges have no transport capability.
     fn bind_chat_context(&self,_reservation:&str,_binding:&ProviderBinding,_request_id:&str,_payload:&[u8],_handle:&CredentialHandle,_context:&crate::Json)->Result<()> {Err("chat_context_binding_unavailable".into())}
     fn exchange_chat(&self, _admission: &ProviderAdmission, _context: &crate::Json) -> Result<crate::ordinary_chat::ChatResponse> { Err("configured_transport_unavailable".into()) }
+    fn exchange_live_chat(&self, _admission: &ProviderAdmission, _context: &crate::Json, _control: std::sync::Arc<crate::service_runtime::RunControl>) -> Result<crate::ordinary_chat::ChatResponse> { Err("configured_transport_unavailable".into()) }
+    fn settle_chat(&self, _admission: &str, _accepted: bool) -> Result<()> { Err("chat_settlement_unavailable".into()) }
+    fn chat_settlement(&self, _admission: &str) -> Result<String> { Err("chat_settlement_unavailable".into()) }
     fn current_binding(&self) -> Result<Option<ProviderBinding>>;
     fn credential_handle(&self, profile: &ConfiguredProfile) -> Result<Option<CredentialHandle>>;
     fn review_payload(&self, binding: &ProviderBinding, payload: &[u8]) -> Result<()>;
@@ -111,6 +114,9 @@ impl ServiceProviderBridge {
     pub(crate) fn exchange_chat(&self, admission: &ProviderAdmission, context: &crate::Json) -> Result<crate::ordinary_chat::ChatResponse> {
         self.host.exchange_chat(admission, context)
     }
+    pub(crate) fn exchange_live_chat(&self, admission: &ProviderAdmission, context: &crate::Json, control: std::sync::Arc<crate::service_runtime::RunControl>) -> Result<crate::ordinary_chat::ChatResponse> { self.host.exchange_live_chat(admission, context, control) }
+    pub(crate) fn settle_chat(&self, admission: &str, accepted: bool) -> Result<()> { self.host.settle_chat(admission, accepted) }
+    pub(crate) fn chat_settlement(&self, admission: &str) -> Result<String> { self.host.chat_settlement(admission) }
     pub(crate) fn prepare_chat(&self,request_id:&str,payload:&[u8],budget:CallBudget,context:&crate::Json)->Result<PreparedProviderCall> {
         let binding=self.binding(&budget)?;
         if self.handle(&binding.profile)?.generation().is_none(){return Err("chat_credential_capability_unavailable".into())}

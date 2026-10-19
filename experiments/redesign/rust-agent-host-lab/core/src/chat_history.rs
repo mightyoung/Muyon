@@ -71,7 +71,7 @@ fn verify_source(host:&ServiceHostPorts,run:&AgentDurableRun,b:&BusinessRead)->R
     let conversation=text(&b.payload,"conversation")?;let user=text(&b.payload,"text")?;
     let authority=host.owner.chat_authority(conversation,user)?;authority.validate(conversation)?;
     if field(ctx,"authority")?!=&authority.json(){return Err("chat_history_unavailable".into())}
-    match ordinary_chat::restore(b.dir.as_ref().ok_or("chat_history_unavailable")?,run,b)? {
+    match ordinary_chat::restore_with_host(b.dir.as_ref().ok_or("chat_history_unavailable")?,run,b,Some(host))? {
         AgentRunSnapshot::Terminal{summary} if summary.terminal==AgentTerminal::Completed=>Ok(()),
         _=>Err("chat_history_unavailable".into())
     }

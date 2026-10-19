@@ -27,6 +27,7 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
     /** Reported evidence only; this component cannot verify the supplier's account invoice. */
     data class Usage(val inputTokens: Long, val outputTokens: Long, val reportedFeeMicroCny: Long, val currency: String)
     data class Snapshot(val attempts: Int, val reservedMicroCny: Long, val stopped: Boolean, val states: List<String>, val usage: List<Usage?>)
+    data class Record(val permit: Permit, val state: String, val usage: Usage?)
     class Refused internal constructor() : IllegalStateException("canary_budget_refused")
 
     private data class Entry(val request: String, val digest: String, val proof: String, val input: Long,
@@ -84,6 +85,13 @@ internal class OrdinaryChatCanaryBudget private constructor(private val director
     fun snapshot(): Snapshot = guarded {
         val ledger = read()
         Snapshot(ledger.entries.size, total(ledger), ledger.stopped, ledger.entries.map { it.state }, ledger.entries.map { it.usage })
+    }
+
+    /** Local correlation only; never resumes a pending send or manufactures a new permit. */
+    fun record(request: String): Record? = guarded {
+        read().entries.singleOrNull { it.request == request }?.let {
+            Record(Permit(it.request, it.digest, it.reserved), it.state, it.usage)
+        }
     }
 
     private fun entry(ledger: Ledger, permit: Permit): Entry = ledger.entries.single {

@@ -6,6 +6,9 @@ use muyon_android_contract_bridge::service_host_bridge::*;
 
 struct UnconfiguredOwner { scope_reads: AtomicUsize, provider_reads: AtomicUsize }
 impl ServiceHostOwnerCallback for UnconfiguredOwner {
+    fn exchange_live_chat(&self,_:String,_:ServiceOwnerAdmissionBinding,_:Vec<u8>,_:Vec<u8>,_:ServiceOwnerCredentialCapability,_:Arc<ServiceOwnerRunControl>)->Option<ServiceOwnerChatResponse>{None}
+    fn settle_chat(&self,_:String,_:bool)->bool{false}
+    fn chat_settlement(&self,_:String)->Option<String>{None}
     fn current_chat_authority(&self,_:String,_:String)->Option<ServiceOwnerChatAuthority>{None}
     fn credential_capability(&self,_:String,_:String)->Option<ServiceOwnerCredentialCapability>{None}
     fn bind_chat_context(&self,_:String,_:ServiceOwnerAdmissionBinding,_:String,_:Vec<u8>,_:Vec<u8>,_:ServiceOwnerCredentialCapability)->bool{false}
@@ -38,6 +41,9 @@ fn profile() -> ServiceOwnerProfile {
 }
 struct ConfiguredOwner { available: std::sync::atomic::AtomicBool }
 impl ServiceHostOwnerCallback for ConfiguredOwner {
+    fn exchange_live_chat(&self,_:String,_:ServiceOwnerAdmissionBinding,_:Vec<u8>,_:Vec<u8>,_:ServiceOwnerCredentialCapability,_:Arc<ServiceOwnerRunControl>)->Option<ServiceOwnerChatResponse>{None}
+    fn settle_chat(&self,_:String,_:bool)->bool{false}
+    fn chat_settlement(&self,_:String)->Option<String>{None}
     fn current_chat_authority(&self,_:String,_:String)->Option<ServiceOwnerChatAuthority>{None}
     fn credential_capability(&self,_:String,_:String)->Option<ServiceOwnerCredentialCapability>{None}
     fn bind_chat_context(&self,_:String,_:ServiceOwnerAdmissionBinding,_:String,_:Vec<u8>,_:Vec<u8>,_:ServiceOwnerCredentialCapability)->bool{false}
@@ -159,6 +165,9 @@ fn admission_budget() -> muyon_rust_agent_host_lab::service_provider::CallBudget
     }
 }
 impl ServiceHostOwnerCallback for AdmissionOwner {
+    fn exchange_live_chat(&self,_:String,_:ServiceOwnerAdmissionBinding,_:Vec<u8>,_:Vec<u8>,_:ServiceOwnerCredentialCapability,_:Arc<ServiceOwnerRunControl>)->Option<ServiceOwnerChatResponse>{None}
+    fn settle_chat(&self,_:String,_:bool)->bool{false}
+    fn chat_settlement(&self,_:String)->Option<String>{None}
     fn current_chat_authority(&self,_:String,_:String)->Option<ServiceOwnerChatAuthority>{None}
     fn credential_capability(&self,_:String,_:String)->Option<ServiceOwnerCredentialCapability>{None}
     fn bind_chat_context(&self,_:String,_:ServiceOwnerAdmissionBinding,_:String,_:Vec<u8>,_:Vec<u8>,_:ServiceOwnerCredentialCapability)->bool{false}

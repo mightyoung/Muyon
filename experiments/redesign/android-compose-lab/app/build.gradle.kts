@@ -38,6 +38,16 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        create("liveFixture") {
+            initWith(getByName("debug"))
+            applicationIdSuffix=".liveFixture"
+            matchingFallbacks += listOf("debug")
+        }
+        create("liveChat") {
+            initWith(getByName("debug"))
+            applicationIdSuffix=".liveChat"
+            matchingFallbacks += listOf("debug")
+        }
         create("searchFixture") {initWith(getByName("debug"));applicationIdSuffix=".searchFixture";matchingFallbacks += listOf("debug")}
 
         create("ordinaryChat") {
@@ -62,7 +72,7 @@ android {
         sourceSets.getByName(variant).java.srcDir("src/failureFixture/kotlin")
     }
     // Dedicated synthetic Service composition; ordinary debug/release never contain its installer.
-    testBuildType = if(providers.gradleProperty("muyonSearchInstrumentation").orNull=="true")"searchFixture" else if(providers.gradleProperty("muyonOrdinaryChatInstrumentation").orNull=="true")"ordinaryChat" else providers.gradleProperty("muyonFailureInstrumentation").orNull?.also { require(it in failureScenarios.map{scenario->"fail$scenario"}) } ?: if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
+    testBuildType = if(providers.gradleProperty("muyonLiveChatInstrumentation").orNull=="true")"liveFixture" else if(providers.gradleProperty("muyonSearchInstrumentation").orNull=="true")"searchFixture" else if(providers.gradleProperty("muyonOrdinaryChatInstrumentation").orNull=="true")"ordinaryChat" else providers.gradleProperty("muyonFailureInstrumentation").orNull?.also { require(it in failureScenarios.map{scenario->"fail$scenario"}) } ?: if(providers.gradleProperty("muyonLifecycleInstrumentation").orNull == "true") "lifecycle" else "debug"
     buildFeatures { compose = true; buildConfig = true; aidl = true }
     packaging { jniLibs { keepDebugSymbols += setOf("**/libmuyon_android_contract_bridge.so", "**/libjnidispatch.so") } }
     if (bridgeRoot != null) sourceSets.getByName("main").jniLibs.srcDir(bridgeRoot.resolve("jniLibs"))

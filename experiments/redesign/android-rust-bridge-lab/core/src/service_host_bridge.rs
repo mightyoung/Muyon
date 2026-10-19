@@ -71,12 +71,23 @@ pub struct ServiceOwnerChatAuthority {
 pub struct ServiceOwnerCredentialCapability {pub identity:String,pub generation:u64}
 #[derive(Clone, uniffi::Record)]
 pub struct ServiceOwnerChatResponse {pub answer:String,pub input_tokens:u64,pub output_tokens:u64,pub synthetic:bool}
+/// Rust-created capability for the exact controller run. No UI constructor.
+#[derive(uniffi::Object)]
+pub struct ServiceOwnerRunControl { control:Arc<muyon_rust_agent_host_lab::service_runtime::RunControl> }
+#[uniffi::export]
+impl ServiceOwnerRunControl {
+    pub fn allowed(&self)->bool { self.control.poll().is_ok() }
+}
 #[uniffi::export(with_foreign)]
 pub trait ServiceHostOwnerCallback: Send + Sync {
     fn current_chat_authority(&self, conversation:String, text:String)->Option<ServiceOwnerChatAuthority>;
     fn credential_capability(&self, profile:String, reference:String)->Option<ServiceOwnerCredentialCapability>;
     fn bind_chat_context(&self,reservation:String,binding:ServiceOwnerAdmissionBinding,request_id:String,payload:Vec<u8>,context:Vec<u8>,capability:ServiceOwnerCredentialCapability)->bool;
     fn exchange_chat(&self, admission:String, binding:ServiceOwnerAdmissionBinding, context:Vec<u8>, payload:Vec<u8>, capability:ServiceOwnerCredentialCapability)->Option<ServiceOwnerChatResponse>;
+    fn exchange_live_chat(&self, admission:String, binding:ServiceOwnerAdmissionBinding, context:Vec<u8>, payload:Vec<u8>, capability:ServiceOwnerCredentialCapability, control:Arc<ServiceOwnerRunControl>)->Option<ServiceOwnerChatResponse>;
+    /// Pure local, durable acceptance. true is irrevocable success only after Rust's final poll.
+    fn settle_chat(&self, admission:String, accepted:bool)->bool;
+    fn chat_settlement(&self, admission:String)->Option<String>;
     fn current_scope(&self) -> Option<ServiceOwnerScope>;
     fn current_provider(&self) -> Option<ServiceOwnerProvider>;
     /// Trusted current-policy review of exactly these bytes. Absence must deny.
@@ -144,6 +155,13 @@ impl ServiceProviderHost for CallbackProvider {
         let r=self.callback.exchange_chat(admission.record_id().into(),admission_binding(admission.binding()),context.encode().into_bytes(),admission.payload().to_vec(),cap).ok_or("chat_exchange_unavailable")?;
         Ok(muyon_rust_agent_host_lab::ordinary_chat::ChatResponse{answer:r.answer,input_tokens:r.input_tokens,output_tokens:r.output_tokens,synthetic:r.synthetic})
     }
+    fn exchange_live_chat(&self,admission:&ProviderAdmission,context:&muyon_plugin_contract_lab::Json,control:Arc<muyon_rust_agent_host_lab::service_runtime::RunControl>)->Result<muyon_rust_agent_host_lab::ordinary_chat::ChatResponse,String>{
+        let cap=ServiceOwnerCredentialCapability{identity:admission.credential_handle().identity().into(),generation:admission.credential_handle().generation().ok_or("chat_credential_unavailable")?};
+        let r=self.callback.exchange_live_chat(admission.record_id().into(),admission_binding(admission.binding()),context.encode().into_bytes(),admission.payload().to_vec(),cap,Arc::new(ServiceOwnerRunControl{control})).ok_or("chat_exchange_unavailable")?;
+        Ok(muyon_rust_agent_host_lab::ordinary_chat::ChatResponse{answer:r.answer,input_tokens:r.input_tokens,output_tokens:r.output_tokens,synthetic:r.synthetic})
+    }
+    fn settle_chat(&self,admission:&str,accepted:bool)->Result<(),String>{if self.callback.settle_chat(admission.into(),accepted){Ok(())}else{Err("chat_settlement_unavailable".into())}}
+    fn chat_settlement(&self,admission:&str)->Result<String,String>{self.callback.chat_settlement(admission.into()).ok_or_else(||"chat_settlement_unavailable".into())}
     fn current_binding(&self) -> Result<Option<ProviderBinding>, String> {
         Ok(self.callback.current_provider().map(|p| ProviderBinding {
             profile: profile(p.profile), profile_revision: p.profile_revision,

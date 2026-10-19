@@ -13,6 +13,7 @@ pub struct RunControl {
     cancelled: AtomicBool,
     observed_stop: AtomicU8,
     deadline: Instant,
+    live_deadline: std::sync::Mutex<Option<Instant>>,
 }
 impl RunControl {
     pub fn new() -> Self {
@@ -20,6 +21,7 @@ impl RunControl {
             cancelled: AtomicBool::new(false),
             observed_stop: AtomicU8::new(0),
             deadline: Instant::now() + Duration::from_secs(5),
+            live_deadline: std::sync::Mutex::new(None),
         }
     }
     pub(crate) fn cancelled(&self) -> bool {
@@ -31,12 +33,19 @@ impl RunControl {
     pub(crate) fn observed_deadline(&self) -> bool {
         self.observed_stop.load(Ordering::Acquire) == 2
     }
+    /// Called once only after trusted non-synthetic chat authority validation.
+    pub(crate) fn authorize_live_chat(&self) -> Result<()> {
+        self.poll()?;
+        let mut deadline = self.live_deadline.lock().map_err(|_| "native_deadline")?;
+        if deadline.is_none() { *deadline = Some(Instant::now() + Duration::from_secs(60)); }
+        Ok(())
+    }
     pub fn poll(&self) -> Result<()> {
         let mut observed = self.observed_stop.load(Ordering::Acquire);
         if observed == 0 {
             let cause = if self.cancelled.load(Ordering::Acquire) {
                 1
-            } else if Instant::now() >= self.deadline {
+            } else if Instant::now() >= self.live_deadline.lock().map_err(|_| "native_deadline")?.unwrap_or(self.deadline) {
                 2
             } else {
                 return Ok(());
@@ -346,6 +355,21 @@ pub(crate) fn run_builtin_admitted(
 #[cfg(test)]
 mod stop_cause_tests {
     use super::*;
+
+    #[test]
+    fn trusted_live_deadline_extends_only_unstopped_control_and_never_revives_stop() {
+        let mut live = RunControl::new();
+        live.authorize_live_chat().unwrap();
+        live.deadline = Instant::now();
+        assert!(live.poll().is_ok());
+        live.request_cancel();
+        assert_eq!(live.poll().unwrap_err(), "native_cancelled");
+        assert!(live.authorize_live_chat().is_err());
+        let mut legacy = RunControl::new();
+        legacy.deadline = Instant::now();
+        assert_eq!(legacy.poll().unwrap_err(), "native_deadline");
+        assert!(legacy.authorize_live_chat().is_err());
+    }
 
     #[test]
     fn observed_deadline_survives_late_cancel() {

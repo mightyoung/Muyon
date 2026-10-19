@@ -356,8 +356,19 @@ impl AgentServiceController {
             .spawn(move || {
                 Completion::Initialized((|| {
                     let root = ServiceRoot::open(&path)?;
-                    let (runs, recovery) = service_evidence::restore(&root);
+                    let (mut runs, _) = service_evidence::restore(&root);
                     let business = supplier_business::restore_all(&root, inventory_host);
+                    // Static disk evidence alone never upgrades a live canary to success.
+                    for run in root.runs() {
+                        if let Some(b)=business.get(&run.intent.request_id).filter(|b|crate::ordinary_chat::live(b)) {
+                            if let Ok(dir)=root.run_dir(&run.identity.run_id) {
+                                if let Ok(snapshot)=crate::ordinary_chat::restore(&dir,run,b) {
+                                    if let Some(old)=runs.iter_mut().find(|s|intent_of(s).request_id==run.intent.request_id){*old=snapshot;}
+                                }
+                            }
+                        }
+                    }
+                    let recovery=root.is_poisoned() || runs.iter().any(|s|matches!(s,AgentRunSnapshot::Unresolved{..}) || matches!(s,AgentRunSnapshot::Terminal{summary} if summary.terminal==AgentTerminal::OutcomeUnknown));
                     Ok((root, runs, recovery, business))
                 })())
             }) {
@@ -582,8 +593,8 @@ impl AgentServiceController {
     pub fn submit_ordinary_chat(&self,client:AgentClientRef,request_id:String,conversation:String,text:String)->String {
         // Duplicate identities retain their original frozen route, even after settings change.
         let old={self.shared.lock().business.get(&request_id).cloned()};
-        if let Some(old)=old {if crate::field(&old.payload,"conversation").ok()!=Some(&crate::string(&conversation))||crate::field(&old.payload,"text").ok()!=Some(&crate::string(&text)){return supplier_business::reply("rejected","RequestConflict",&request_id,None,None,0)}return self.submit_business(client,request_id,old)}
-        if self.shared.lock().runs.iter().any(|r|intent_of(r).request_id==request_id){return supplier_business::reply("unknown","original_evidence_unavailable",&request_id,None,None,0)}
+        if let Some(old)=old {if crate::field(&old.payload,"conversation").ok()!=Some(&crate::string(&conversation))||crate::field(&old.payload,"text").ok()!=Some(&crate::string(&text)){return self.host_marker(supplier_business::reply("rejected","RequestConflict",&request_id,None,None,0))}return self.submit_business(client,request_id,old)}
+        if self.shared.lock().runs.iter().any(|r|intent_of(r).request_id==request_id){return self.host_marker(supplier_business::reply("unknown","original_evidence_unavailable",&request_id,None,None,0))}
         let frozen=self.host.as_ref().and_then(|h|h.tools.as_ref()).map(|r|r.prepare(&conversation,&text));
         let prepared=match frozen {Some(Ok(Some(route)))=>crate::service_tools::make(conversation,text,route),Some(Err(_))=>crate::service_tools::make(conversation,text,crate::object([("tool",crate::string("unavailable")),("status",crate::string("search_config_corrupt"))])),_=>BusinessRead::ordinary(conversation,text)};
         let business=match prepared{Ok(mut b)=>{b.attach_host(self.host.clone());b},Err(e)=>return supplier_business::reply("rejected",&e,&request_id,None,None,0)};
@@ -593,7 +604,9 @@ impl AgentServiceController {
         if self.host.is_none() { return reply; }
         let Ok(mut value) = muyon_plugin_contract_lab::parse(reply.as_bytes()) else { return reply; };
         if let Some(request)=crate::field(&value,"request_id").ok().and_then(|v|v.string().ok()) {
-            if self.shared.lock().business.get(request).is_some_and(|b|crate::ordinary_chat::is_chat(b)||crate::service_tools::is_registered(b)){return reply}
+            let ordinary=self.shared.lock().business.get(request).filter(|b|crate::ordinary_chat::is_chat(b)).map(|b|b.chat_synthetic.unwrap_or(false));
+            if let Some(synthetic)=ordinary {if let muyon_plugin_contract_lab::Json::Object(fields)=&mut value{fields.insert("synthetic".into(),muyon_plugin_contract_lab::Json::Bool(synthetic));}return value.encode();}
+            if self.shared.lock().business.get(request).is_some_and(crate::service_tools::is_registered){return reply}
         }
         if let muyon_plugin_contract_lab::Json::Object(fields) = &mut value {
             fields.insert("synthetic".into(), muyon_plugin_contract_lab::Json::Bool(false));
@@ -632,7 +645,8 @@ impl AgentServiceController {
             .iter()
             .find(|s| intent_of(s).request_id == request_id)
             .and_then(identity_of);
-        supplier_business::reply(status, &reason, &request_id, identity.as_ref(), None, 0)
+        let ordinary=g.business.get(&request_id).filter(|b|crate::ordinary_chat::is_chat(b)).cloned().map(|mut b|{b.events.clear();b});
+        supplier_business::reply(status, &reason, &request_id, identity.as_ref(), ordinary.as_ref(), 0)
     }
     /// Cursor polling and reconnect lookup share this operation; it never executes a read.
     pub fn supplier_read_events(
@@ -691,6 +705,9 @@ impl AgentServiceController {
         {
             return supplier_business::snapshot_reply(snapshot, business.as_ref(), after);
         }
+        // A live worker may have saved candidate events before controller settlement.
+        // Publish only stable source metadata until its final owner acceptance.
+        if let Some(b)=business.as_mut().filter(|b|crate::ordinary_chat::is_chat(b) && b.chat_synthetic==Some(false)) {b.events.clear();}
         match business.as_ref() {
             Some(b) => supplier_business::reply(
                 "events",
@@ -1033,10 +1050,17 @@ impl AgentServiceController {
                     }
                 },
                 Some(Ok(Completion::Executed {
-                    root,
-                    snapshot,
-                    recovery,
+                    mut root,
+                    mut snapshot,
+                    mut recovery,
                 })) => {
+                    if let AgentRunSnapshot::Terminal{summary}=&mut snapshot {
+                        let control=g.control.clone();
+                        if let Some(b)=g.business.get_mut(&summary.request_id) {
+                            crate::ordinary_chat::finalize(&mut root,b,summary,control.as_deref());
+                            recovery|=summary.terminal==AgentTerminal::OutcomeUnknown || root.is_poisoned();
+                        }
+                    }
                     g.root = Some(root);
                     g.publish(snapshot);
                     if !g.sealed {
@@ -1050,7 +1074,24 @@ impl AgentServiceController {
                     g.owner = None;
                 }
                 Some(Err(_)) => {
-                    if let Some((root, snapshot)) = interrupted {
+                    if let Some((mut root, snapshot)) = interrupted {
+                        // Panics cannot strand an owner admission in a sendable live state.
+                        if let Some(root)=root.as_mut() {
+                            let request=intent_of(&snapshot).request_id;
+                            let indexed=root.runs().iter().find(|r|r.intent.request_id==request).cloned();
+                            if let Some(run)=indexed {
+                                if let Ok(dir)=root.run_dir(&run.identity.run_id) {
+                                    if let Ok(mut business)=supplier_business::load(&dir) {
+                                        business.attach_host(self.host.clone());
+                                        if crate::ordinary_chat::live(&business) {
+                                            let mut summary=AgentRunSummary{request_id:request.clone(),variant:run.intent.variant,source_build_identity:run.intent.source_build_identity,identity:run.identity,terminal:AgentTerminal::OutcomeUnknown,reason:AgentReason::Interrupted,receipt:AgentReceiptSummary{opaque_id:None,outcome:AgentReceiptOutcome::Unknown}};
+                                            crate::ordinary_chat::finalize(root,&mut business,&mut summary,None);
+                                            g.business.insert(request,business);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         g.root = root;
                         g.publish(snapshot);
                     }

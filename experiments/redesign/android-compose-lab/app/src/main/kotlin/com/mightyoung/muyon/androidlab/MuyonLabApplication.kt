@@ -9,6 +9,8 @@ import android.content.Context
 /** Process ownership is intentional: UI recreation must not release or replace a blocked native slot. */
 @Suppress("EXPOSED_FUNCTION_RETURN_TYPE")
 open class MuyonLabApplication : Application(), ServiceHostOwnerInstallation {
+    /** Only a dedicated trusted build supplies an in-process secure credential entry. */
+    internal open fun openChatCredentialEntry(activity:android.app.Activity) {}
     private val chatOwner by lazy {ServiceAdmissionProcessOwner.unconfigured()}
     override fun serviceHostBinding(serviceContext:Context):ServiceHostBinding=error("ordinary_chat_requires_owned_lease")
     override fun acquireServiceHost(serviceContext:Context):ServiceHostLease=chatOwner.acquire(serviceContext,com.mightyoung.muyon.androidbridge.ServiceOwnerCallBudget(1uL,1uL,false,false))

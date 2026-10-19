@@ -21,6 +21,8 @@ pub(crate) struct BusinessRead {
     pub(crate) events: Vec<Json>,
     pub(crate) dir: Option<PathBuf>,
     pub(crate) chat_sources:Option<Vec<AgentDurableRun>>,
+    /// Ordinary-chat source label frozen before queue/admission; never caller supplied.
+    pub(crate) chat_synthetic:Option<bool>,
 }
 impl BusinessRead {
     pub fn new(text: String, key: String, revision: String) -> Result<Self> {
@@ -47,9 +49,20 @@ impl BusinessRead {
             events: Vec::new(),
             dir: None,
             chat_sources:Some(Vec::new()),
+            chat_synthetic:None,
         })
     }
     pub(crate) fn attach_host(&mut self, host: Option<Arc<crate::service_host::ServiceHostPorts>>) {
+        if crate::ordinary_chat::is_chat(self) && self.chat_synthetic.is_none() {
+            self.chat_synthetic=Some(self.source_binding.as_ref()
+                .and_then(|c|field(c,"authority").ok()).and_then(|a|field(a,"synthetic").ok())
+                .and_then(|v|if let Json::Bool(value)=v{Some(*value)}else{None})
+                .or_else(||host.as_ref().and_then(|h|{
+                    let conversation=field(&self.payload,"conversation").ok()?.string().ok()?;
+                    let text=field(&self.payload,"text").ok()?.string().ok()?;
+                    h.owner.chat_authority(conversation,text).ok().map(|a|a.synthetic)
+                })).unwrap_or(false));
+        }
         if let Some(host) = &host { self.mode = Some(host.mode); }
         self.host = host;
     }
@@ -64,7 +77,7 @@ impl BusinessRead {
         );
     }
     pub(crate) fn ordinary(conversation:String,text:String)->Result<Self> {
-        Ok(Self { payload:crate::ordinary_chat::payload(conversation,text)?,mode:Some(crate::service_host::ServiceHostMode::ConfiguredChat),source_binding:None,host:None,events:Vec::new(),dir:None,chat_sources:Some(Vec::new()) })
+        Ok(Self { payload:crate::ordinary_chat::payload(conversation,text)?,mode:Some(crate::service_host::ServiceHostMode::ConfiguredChat),source_binding:None,host:None,events:Vec::new(),dir:None,chat_sources:Some(Vec::new()),chat_synthetic:None })
     }
     pub(crate) fn save(&self, dir: &Path) -> Result<()> {
         if crate::service_tools::is_registered(self) {
@@ -134,7 +147,7 @@ pub(crate) fn load(dir: &Path) -> Result<BusinessRead> {
         let p=field(&j,"payload")?;closed(p,&["intent","conversation","text"])?;
         let mut b=BusinessRead::ordinary(field(p,"conversation")?.string()?.into(),field(p,"text")?.string()?.into())?;
         if &b.payload!=p {return Err("CHAT_PAYLOAD".into())}
-        let binding=field(&j,"binding")?;if binding!=&Json::Null{b.source_binding=Some(binding.clone())}
+        let binding=field(&j,"binding")?;if binding!=&Json::Null{b.source_binding=Some(binding.clone());b.chat_synthetic=field(field(binding,"authority")?,"synthetic").ok().and_then(|v|if let Json::Bool(value)=v{Some(*value)}else{None});}
         b.events=field(&j,"events")?.array()?.to_vec();b.dir=Some(dir.into());validate_events(&b)?;return Ok(b);
     }
     if bytes.len()>16384{return Err("BUSINESS_LEDGER_BOUND".into())}
@@ -277,7 +290,8 @@ pub(crate) fn restore_all(root: &ServiceRoot, host: Option<Arc<crate::service_ho
             let mut business=load(&root.run_dir(&run.identity.run_id).ok()?).ok()?;
             // Never relabel history from a different execution mode.
             if host.as_ref().is_some_and(|h|Some(h.mode)!=business.mode) { return None; }
-            business.host=host.as_ref().filter(|h|Some(h.mode)==business.mode).cloned();
+            let attached=host.as_ref().filter(|h|Some(h.mode)==business.mode).cloned();
+            business.attach_host(attached);
             Some((run.intent.request_id.clone(), business))
         })
         .collect()
@@ -682,7 +696,7 @@ pub(crate) fn reply(
         ("events", Json::Array(events)),
         ("next_cursor", Json::Number(next.to_string())),
         ("terminal", Json::Bool(terminal)),
-        ("synthetic", Json::Bool(business.map(|b|crate::ordinary_chat::is_chat(b)||b.mode.is_none()).unwrap_or(true))),
+        ("synthetic", Json::Bool(business.map(|b|if crate::ordinary_chat::is_chat(b){b.chat_synthetic.unwrap_or(false)}else{b.mode.is_none()}).unwrap_or(true))),
     ])
     .encode()
 }
@@ -734,7 +748,11 @@ pub(crate) fn snapshot_reply(
             Some(&b),
             after,
         ),
-        Err(_) => reply("unknown", "OUTCOME_UNKNOWN", request, identity, None, after),
+        Err(_) => {
+            // Keep a known source label even when its values/receipt cannot be disclosed.
+            let fallback=business.map(|b|{let mut b=b.clone();b.events.clear();b.push("terminal",object([("state",string("outcome_unknown")),("reason",string("BUSINESS_HISTORY_UNAVAILABLE"))]));b});
+            reply("unknown", "OUTCOME_UNKNOWN", request, identity, fallback.as_ref(), after)
+        },
     }
 }
 /// Historical metadata has its own fixed lab lookup scope. It does not authorize
@@ -782,6 +800,23 @@ fn unknown_business(
         ]),
     );
     Ok(history)
+}
+
+#[cfg(test)]
+mod ordinary_source_flag_tests {
+    use super::*;
+    #[test]
+    fn unavailable_live_owner_and_unknown_clones_never_claim_synthetic() {
+        let identity=AgentRunIdentity{run_id:"a".repeat(32),admitted_service_epoch:"b".repeat(32),actual_task:None};
+        let snapshot=AgentRunSnapshot::Unresolved{observation:AgentUnresolvedObservation{
+            intent:AgentIntentBinding{request_id:"live-missing".into(),variant:AgentReadVariant::Inquiry,source_build_identity:"c".repeat(40)},
+            identity:Some(identity),receipt:AgentReceiptSummary{opaque_id:None,outcome:AgentReceiptOutcome::Unknown}}};
+        let mut ordinary=BusinessRead::ordinary("conversation".into(),"synthetic text".into()).unwrap();
+        ordinary.attach_host(None);
+        assert_eq!(ordinary.chat_synthetic,Some(false));
+        let failed=parse(snapshot_reply(&snapshot,Some(&ordinary),0).as_bytes()).unwrap();
+        assert_eq!(field(&failed,"synthetic").unwrap(),&Json::Bool(false));
+    }
 }
 
 #[cfg(test)]

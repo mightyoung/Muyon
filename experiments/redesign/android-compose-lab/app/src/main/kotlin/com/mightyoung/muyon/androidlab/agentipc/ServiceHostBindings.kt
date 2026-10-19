@@ -15,6 +15,9 @@ internal interface ServiceHostOwnerSource {
     fun credentialCapability(profile:String,reference:String):ServiceOwnerCredentialCapability?=null
     fun bindChatContext(reservation:String,binding:ServiceOwnerAdmissionBinding,requestId:String,payload:ByteArray,context:ByteArray,capability:ServiceOwnerCredentialCapability):Boolean=false
     fun exchangeChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability):ServiceOwnerChatResponse?=null
+    fun exchangeLiveChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability,control:ServiceOwnerRunControl):ServiceOwnerChatResponse?=null
+    fun settleChat(admission:String,accepted:Boolean):Boolean=false
+    fun chatSettlement(admission:String):String?=null
     fun currentScope():ServiceOwnerScope?
     fun currentProviderMetadata():ServiceOwnerProvider?
     fun credentialHandleExists(profileId:String,credentialRef:String):Boolean
@@ -39,7 +42,7 @@ internal object ServiceHostBindings {
     /** Only the private Service calls this with its Context-derived application owner. */
     fun resolve(serviceContext:Context):ServiceHostBinding {
         val owner=serviceContext.applicationContext as? ServiceHostOwnerInstallation
-            ?: return ServiceHostBinding.SyntheticLab
+            ?: error("service_owner_unavailable")
         // Installation exceptions propagate to Service unavailable, never silently switch modes.
         return owner.serviceHostBinding(serviceContext)
     }
@@ -47,12 +50,15 @@ internal object ServiceHostBindings {
         serviceContext.applicationContext as? ServiceLifecycleHooks
     fun acquire(serviceContext:Context):ServiceHostLease =
         (serviceContext.applicationContext as? ServiceHostOwnerInstallation)?.acquireServiceHost(serviceContext)
-            ?: ServiceHostLease(ServiceHostBinding.SyntheticLab)
+            ?: error("service_owner_unavailable")
     fun callback(owner:ServiceHostOwnerSource):ServiceHostOwnerCallback=object:ServiceHostOwnerCallback {
         override fun currentChatAuthority(conversation:String,text:String):ServiceOwnerChatAuthority?=try{owner.currentChatAuthority(conversation,text)}catch(_:Exception){null}
         override fun credentialCapability(profile:String,reference:String):ServiceOwnerCredentialCapability?=try{owner.credentialCapability(profile,reference)}catch(_:Exception){null}
         override fun bindChatContext(reservation:String,binding:ServiceOwnerAdmissionBinding,requestId:String,payload:ByteArray,context:ByteArray,capability:ServiceOwnerCredentialCapability):Boolean=try{owner.bindChatContext(reservation,binding,requestId,payload,context,capability)}catch(_:Exception){false}
         override fun exchangeChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability):ServiceOwnerChatResponse?=try{owner.exchangeChat(admission,binding,context,payload,capability)}catch(_:Exception){null}
+        override fun exchangeLiveChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability,control:ServiceOwnerRunControl):ServiceOwnerChatResponse?=try{owner.exchangeLiveChat(admission,binding,context,payload,capability,control)}catch(_:Exception){null}
+        override fun settleChat(admission:String,accepted:Boolean):Boolean=try{owner.settleChat(admission,accepted)}catch(_:Exception){false}
+        override fun chatSettlement(admission:String):String?=try{owner.chatSettlement(admission)}catch(_:Exception){null}
         override fun currentScope():ServiceOwnerScope?=try{owner.currentScope()}catch(_:Exception){null}
         override fun currentProvider():ServiceOwnerProvider?=try {
             owner.currentProviderMetadata()?.let { metadata->
