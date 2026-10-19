@@ -16,12 +16,12 @@
 
 ## Execution
 
-- [ ] Add pure policy assertions for controlled budget guidance, label and read-only query availability; run a standalone policy probe RED before changing policy.
-- [ ] Implement those presentation helpers and wire the existing result/query control. Preserve failed status, raw reason and Send gating.
-- [ ] Change compile-time quota to calls=2, tokens=16384, synthetic micros=2; per-call budget remains 8192/1. Strengthen the existing Compose test: recreation unknown/nonblank disabled → explicit original query → second success with distinct request/run/receipt, same conversation/Service PID/epoch, attempts=2 → third failed with exact budget code/no answer/receipt, then explicit query preserving identity/cursor/status and attempts=2. Original Rust and owner paths stay in use.
-- [ ] Strengthen only the named Rust integration target with exact event/payload/identity and quota-failure assertions, including duplicate/read-only no-exchange checks.
-- [ ] Independent source and transitive execution graph review at immutable source SHA. Only standalone Kotlin policy probe, named ordinary_chat_controller target, build-only binding/ABI/package and two named Android test classes are permitted. No aggregate suite.
-- [ ] Push isolated lab branch with dedicated workflow branch selector, create draft stacking PR95; follow its exact-source CI to terminal, retain fresh evidence and short handoff. Recheck remote branch conflict before push.
+- [x] Add pure policy assertions for controlled budget guidance, label and read-only query availability; run a standalone policy probe RED before changing policy.
+- [x] Implement those presentation helpers and wire the existing result/query control. Preserve failed status, raw reason and Send gating.
+- [x] Change compile-time quota to calls=2, tokens=16384, synthetic micros=2; per-call budget remains 8192/1. Strengthen the existing Compose test: recreation unknown/nonblank disabled → explicit original query → second success with distinct request/run/receipt, same conversation/agent PID, with second admission bound to the explicitly observed replacement Service epoch, attempts=2 → third failed with exact budget code/no answer/receipt, then explicit query preserving identity/cursor/status and attempts=2. Original Rust and owner paths stay in use.
+- [x] Strengthen only the named Rust integration target with exact event/payload/identity and quota-failure assertions, including duplicate/read-only no-exchange checks.
+- [x] Independent source and transitive execution graph review at immutable source SHA. Only standalone Kotlin policy probe, named ordinary_chat_controller target, build-only binding/ABI/package and two named Android test classes are permitted. No aggregate suite.
+- [x] Push isolated lab branch with dedicated workflow branch selector, create draft stacking PR95; follow its exact-source CI to terminal, retain fresh evidence and short handoff. Recheck remote branch conflict before push.
 
 ## Review focus
 
