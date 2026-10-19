@@ -110,7 +110,8 @@ class OrdinaryChatServiceLoopTest {
             assertEquals(currentEpoch,second.admittedServiceEpoch)
         }
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasText(secondPrompt))
-        compose.onNodeWithText(secondPrompt).assertIsDisplayed()
+        // Draft remains editable with the same text; assert only the submitted bubble.
+        compose.onNode(hasText(secondPrompt) and hasAnyAncestor(hasTestTag("service-read-input")),useUnmergedTree=true).assertIsDisplayed()
         compose.onNodeWithTag("local-chat-list").performScrollToNode(hasText("离线普通文本响应"))
         compose.onNodeWithText("离线普通文本响应").assertIsDisplayed()
         assertEquals(agent.pid,manager.runningAppProcesses.orEmpty().single{it.processName=="${context.packageName}:agent"}.pid)
