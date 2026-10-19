@@ -6,8 +6,11 @@ fun frontendCanSend(text: String, status: String): Boolean =
         status.lowercase() in setOf("idle", "completed", "cancelled", "failed", "budget_exhausted", "rejected", "not_admitted")
 
 fun frontendCanCancel(status: String): Boolean = status.lowercase() in setOf("submitting", "queued", "running", "streaming", "accepted", "existing", "events")
-fun frontendNeedsReconcile(status: String): Boolean = status.lowercase() in setOf("unknown", "outcome_unknown", "reconciling", "binder_lost", "disconnected")
-fun frontendStatusLabel(status: String): String = when (status.lowercase()) {
+private fun frontendBudgetRejected(status:String,reason:String)=status=="failed" && reason=="provider_budget_reservation_failed"
+fun frontendBudgetGuidance(status:String,reason:String):String? = if(frontendBudgetRejected(status,reason))
+    "当前预算无法接收这次请求，未发送到 provider。可查询原请求核实状态，或先保存本地记录。此页面不能调整预算；预算更新后请手动发送，不会自动重试。" else null
+fun frontendNeedsReconcile(status: String, reason:String=""): Boolean = frontendBudgetRejected(status,reason) || status.lowercase() in setOf("unknown", "outcome_unknown", "reconciling", "binder_lost", "disconnected")
+fun frontendStatusLabel(status: String, reason:String=""): String = if(frontendBudgetRejected(status,reason)) "预算不足 · 未发送到 provider" else when (status.lowercase()) {
     "idle" -> "尚未发送"
     "submitting" -> "正在提交"
     "queued", "accepted", "existing" -> "已接收 · 等待执行"

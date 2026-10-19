@@ -47,9 +47,11 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
         rpc(conversationId,submitId=value.requestId){api,ref->api.submitOrdinaryChat(ref.epoch,ref.lease,value.requestId!!,conversationId,text)}
     }
     override fun reconcile(conversationId:String) {
+        if(conversationId in inFlight)return
         val value=snapshot.conversations[conversationId] ?: return
         val id=value.requestId ?: return
-        rpc(conversationId){api,ref->api.supplierReadEvents(ref.epoch,ref.lease,id,value.cursor)}
+        snapshot=snapshot.copy(conversations=snapshot.conversations+(conversationId to value.copy(status="reconciling",reason="正在查询原请求")))
+        rpc(conversationId,lookup=value){api,ref->api.supplierReadEvents(ref.epoch,ref.lease,id,value.cursor)}
     }
     override fun cancel(conversationId:String) {
         val value=snapshot.conversations[conversationId] ?: return
@@ -63,11 +65,11 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
             reconcile(conversationId)
         }
     }
-    private fun rpc(conversation:String,submitId:String?=null,work:(BoundedAgentProxy,UiAgentClientRef)->String) {
+    private fun rpc(conversation:String,submitId:String?=null,lookup:ChatReadConversation?=null,work:(BoundedAgentProxy,UiAgentClientRef)->String) {
         if(!inFlight.add(conversation))return
         client.chatRpc(submitId,work){raw->
             inFlight.remove(conversation)
-            val old=snapshot.conversations[conversation] ?: return@chatRpc
+            val old=lookup ?: snapshot.conversations[conversation] ?: return@chatRpc
             val result=try{if(raw==null)error("transport_lost");decode(old,raw)}catch(_:Exception){old.disclosureLost("连接或协议不可核实；保留原请求，不自动重发")}
             try{update(conversation,result)}catch(_:Exception){snapshot=snapshot.copy(conversations=snapshot.conversations+(conversation to result.disclosureLost("身份记录写入失败")))}
             if(result.status in setOf("accepted","existing","events"))main.postDelayed({reconcile(conversation)},250)
@@ -89,10 +91,7 @@ internal class AgentChatReadSession(context:Context,private val client:AgentServ
         var value=source.copy(runId=run ?: old.runId,admittedServiceEpoch=epoch ?: old.admittedServiceEpoch,status=o.string("status"),reason=o.string("reason").take(512))
         require(value.status in setOf("accepted","existing","events","rejected","unknown"))
         val events=o.getJSONArray("events");require(events.length()<=32)
-        if(old.status in setOf("completed","cancelled","failed","outcome_unknown")) {
-            require(events.length()==0 && o.boolean("terminal") && o.getLong("next_cursor")==old.cursor)
-            if(value.status !in setOf("unknown","rejected"))value=value.copy(status=old.status)
-        }
+        value=value.preserveTerminalLookup(old,o.boolean("terminal"),events.length(),o.getLong("next_cursor"))
         for(index in 0 until events.length()) {
             val event=events.getJSONObject(index);require(event.keys().asSequence().toSet()==setOf("cursor","kind","payload"))
             require(event.get("cursor") is Int || event.get("cursor") is Long);val cursor=event.getLong("cursor");require(cursor==value.cursor+1)

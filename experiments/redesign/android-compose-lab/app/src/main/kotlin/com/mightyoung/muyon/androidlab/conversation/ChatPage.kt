@@ -117,7 +117,7 @@ internal fun ConversationPage(
                         if(execution.text.isNotEmpty()) UserMessage(execution.text, "你 · 已提交私有执行服务", Modifier.testTag("service-read-input"))
                         Column(Modifier.widthIn(max=720.dp).fillMaxWidth().testTag("service-read-result"), verticalArrangement=Arrangement.spacedBy(10.dp)) {
                             Text("Muyon · 私有聊天服务", style=MaterialTheme.typography.labelMedium)
-                            Text(frontendStatusLabel(execution.status), modifier=Modifier.testTag("service-read-status").semantics { liveRegion=LiveRegionMode.Polite })
+                            Text(frontendStatusLabel(execution.status,execution.reason), modifier=Modifier.testTag("service-read-status").semantics { liveRegion=LiveRegionMode.Polite })
                             if(execution.answer.isNotEmpty()) RichContent(execution.answer)
                             execution.projection?.let { Text(it, modifier=Modifier.testTag("service-read-projection")) }
                             execution.receipt?.let { Text("原始回执：$it", style=MaterialTheme.typography.bodySmall, modifier=Modifier.testTag("service-read-receipt")) }
@@ -126,9 +126,10 @@ internal fun ConversationPage(
                                     modifier=Modifier.testTag("service-read-historical-receipt"))
                             }
                             if(execution.reason.isNotBlank()) Text("原因：${execution.reason}", style=MaterialTheme.typography.bodySmall, modifier=Modifier.testTag("service-read-reason"))
+                            frontendBudgetGuidance(execution.status,execution.reason)?.let { Text(it,style=MaterialTheme.typography.bodySmall,modifier=Modifier.testTag("service-read-budget-guidance")) }
                             execution.requestId?.let { Text("request: $it", style=MaterialTheme.typography.labelSmall) }
                             execution.runId?.let { Text("run: $it", style=MaterialTheme.typography.labelSmall) }
-                            if(frontendNeedsReconcile(execution.status)) TextButton(onClick=onReconcile, modifier=Modifier.testTag("reconcile-service-read")) { Text("查询原请求") }
+                            if(frontendNeedsReconcile(execution.status,execution.reason)) TextButton(onClick=onReconcile, modifier=Modifier.testTag("reconcile-service-read")) { Text("查询原请求") }
                         }
                       }
                     }

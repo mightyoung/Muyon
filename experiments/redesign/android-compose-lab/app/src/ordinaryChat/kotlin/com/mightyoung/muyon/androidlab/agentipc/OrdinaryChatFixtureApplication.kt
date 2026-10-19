@@ -13,7 +13,7 @@ class OrdinaryChatFixtureApplication:MuyonLabApplication() {
     override fun acquireServiceHost(serviceContext:Context)=owner.acquire(serviceContext,call)
     private fun facts():ServiceAdmissionAuthority.State {
         val profile=ServiceOwnerProfile("ordinary-fixture-profile","https://ordinary-chat.invalid/v1/chat/completions","ordinary-fixture-endpoint","synthetic","ordinary-fixture-model",ServiceOwnerLocation.OWN_DEVICE,ServiceOwnerPurpose.CHAT,"synthetic-capability-ref",ServiceOwnerCapabilities(false,false),ServiceOwnerCapabilities(false,false))
-        val quota=ServiceOwnerBudget("ordinary-synthetic-epoch-v1","synthetic-byte-bound-v1",1uL,8192uL,1uL)
+        val quota=ServiceOwnerBudget("ordinary-synthetic-epoch-v1","synthetic-byte-bound-v1",2uL,16384uL,2uL)
         val provider=ServiceOwnerProvider(profile,"profile1","policy1","grant1","ordinary-fixture-owner",true,true,quota,true)
         val chat=ServiceOwnerChatAuthority("ordinary-fixture-workspace","*","ordinary-fixture-owner","full-allow","policy1","grant1","USER-TEXT-v1","source1","personal",true,true,true,true,true)
         fun review(bytes:ByteArray):Boolean=try {

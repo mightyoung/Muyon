@@ -17,6 +17,12 @@ fun runFrontendChatChecks() {
     check(frontendNeedsReconcile("outcome_unknown"))
     check(frontendStatusLabel("cancel_requested").contains("等待"))
     check(frontendStatusLabel("UNKNOWN").contains("未知"))
+    check(frontendStatusLabel("failed", "provider_budget_reservation_failed")=="预算不足 · 未发送到 provider")
+    check(frontendNeedsReconcile("failed", "provider_budget_reservation_failed"))
+    check(!frontendNeedsReconcile("failed", "chat_authority_denied"))
+    check(frontendBudgetGuidance("failed", "provider_budget_reservation_failed")?.contains("保存") == true)
+    check(frontendBudgetGuidance("failed", "provider_budget_reservation_failed")?.contains("手动发送") == true)
+    check(frontendBudgetGuidance("unknown", "provider_budget_reservation_failed") == null)
     val calls = mutableListOf<Pair<String,String>>()
     val port = object : ChatReadPort {
         override var snapshot = ChatReadView()
@@ -31,5 +37,5 @@ fun runFrontendChatChecks() {
     check(calls.size==1)
     check(frontendSubmit(port,"new-chat","另一个会话"))
     check(calls.last()=="new-chat" to "另一个会话")
-    println("PASS frontend input/status policy (21 assertions; no Android/model execution)")
+    println("PASS frontend input/status/budget policy (no Android/model execution)")
 }

@@ -56,3 +56,10 @@ fun ChatReadConversation.finishEnvelope(terminal:Boolean,eventCount:Int):ChatRea
     require(!terminal || status in setOf("completed","cancelled","failed","outcome_unknown") || (status=="unknown" && eventCount==0))
     return if(status in setOf("unknown","rejected"))disclosureLost(reason)else this
 }
+
+/** Called only after the decoder validates request/run/epoch and source identity. */
+fun ChatReadConversation.preserveTerminalLookup(old:ChatReadConversation,terminal:Boolean,eventCount:Int,nextCursor:Long):ChatReadConversation {
+    if(old.status !in setOf("completed","cancelled","failed","outcome_unknown"))return this
+    require(eventCount==0 && terminal && nextCursor==old.cursor)
+    return if(status !in setOf("unknown","rejected"))copy(status=old.status,reason=old.reason)else this
+}

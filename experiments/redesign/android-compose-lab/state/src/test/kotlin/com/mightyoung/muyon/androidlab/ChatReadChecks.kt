@@ -18,6 +18,14 @@ fun runChatReadChecks() {
     check(disclosureDenied.answer.isEmpty() && disclosureDenied.projection==null && disclosureDenied.receipt==null && disclosureDenied.originalReceiptIdentity=="original")
     check(runCatching{original.copy(status="unknown").finishEnvelope(true,1)}.isFailure)
     check(runCatching{original.copy(status="events").finishEnvelope(true,0)}.isFailure)
+    val failed=ChatReadConversation(requestId="budget-request",runId="budget-run",admittedServiceEpoch="epoch",status="failed",reason="provider_budget_reservation_failed",cursor=1)
+    val lookup=failed.copy(status="events",reason="none").preserveTerminalLookup(failed,true,0,1)
+    check(lookup==failed) { "read-only terminal lookup must preserve the original failure reason" }
+    val deniedLookup=failed.copy(status="unknown",reason="DISCLOSURE_UNAVAILABLE").preserveTerminalLookup(failed,true,0,1)
+    check(deniedLookup.status=="unknown" && deniedLookup.reason=="DISCLOSURE_UNAVAILABLE")
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,false,0,1)}.isFailure)
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,true,1,1)}.isFailure)
+    check(runCatching{lookup.copy(status="events").preserveTerminalLookup(failed,true,0,2)}.isFailure)
     val host=ChatReadConversation(requestId="host").withServiceSource(false)
     check(!host.synthetic)
     val boundHost=host.copy(runId="run",admittedServiceEpoch="epoch")
@@ -26,5 +34,5 @@ fun runChatReadChecks() {
     check(runCatching{ChatReadConversation(runId="run").withServiceSource(false)}.isFailure)
     check(ChatReadConversation(runId="run").withServiceSource(true).synthetic)
     check(runCatching{host.copy(admittedServiceEpoch="epoch").withServiceSource(true)}.isFailure)
-    println("PASS 21 chat read bounds, identity and immutable Service source checks; Binder/native NOT_RUN")
+    println("PASS chat read bounds, identity, terminal reason and immutable Service source checks; Binder/native NOT_RUN")
 }

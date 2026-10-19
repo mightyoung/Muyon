@@ -66,7 +66,46 @@ fn output_signals_post_commit_rotation_and_quota_preserve_no_retry_boundary(){
     for facts in [Facts{output_secret:true,..Facts::default()},Facts{rotate_on_commit:true,..Facts::default()}] {
         let f=Arc::new(Mutex::new(facts));let(path,c,client)=open(f.clone());let reply=submit(&c,&client,"bounded1","hello");assert!(reply.encode().contains("outcome_unknown"));assert!(!reply.encode().contains("synthetic-output-canary"));let sent=f.lock().unwrap().sends;submit(&c,&client,"bounded1","hello");assert_eq!(f.lock().unwrap().sends,sent);clean(path,c);
     }
-    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());let first=submit(&c,&client,"quota1","hello");assert!(first.encode().contains("completed"),"first {}",first.encode());let second=submit(&c,&client,"quota2","hello");assert!(second.encode().contains("completed"),"second {}",second.encode());let third=submit(&c,&client,"quota3","hello");assert!(!third.encode().contains("completed"));assert_eq!(f.lock().unwrap().sends,2);clean(path,c);
+    let f=Arc::new(Mutex::new(Facts::default()));let(path,c,client)=open(f.clone());
+    let first=submit(&c,&client,"quota1","first ordinary input");
+    let second=submit(&c,&client,"quota2","second ordinary input");
+    let mut contexts=Vec::new();let mut receipts=Vec::new();
+    for (reply,request,text) in [(&first,"quota1","first ordinary input"),(&second,"quota2","second ordinary input")] {
+        assert_eq!(reply.object().unwrap()["terminal"],Json::Bool(true));
+        let events=reply.object().unwrap()["events"].array().unwrap();assert_eq!(events.len(),3);
+        assert_eq!(events[0].object().unwrap()["kind"],string("answer_delta"));
+        assert_eq!(events[2].object().unwrap()["payload"].object().unwrap()["state"],string("completed"));
+        let run=reply.object().unwrap()["run_id"].string().unwrap();
+        let frozen=parse(&std::fs::read(path.join("native-agent-service-v1").join(run).join("ordinary-send-v1.db")).unwrap()).unwrap();
+        let context=frozen.object().unwrap()["context"].clone();
+        assert_eq!(context.object().unwrap()["conversation"],string("conversation-current"));
+        assert_eq!(context.object().unwrap()["input_ref"],string(format!("{run}:{request}")));
+        let wire=&frozen.object().unwrap()["payload"];
+        let messages=wire.object().unwrap()["messages"].array().unwrap();assert_eq!(messages.len(),1);
+        assert_eq!(messages[0].object().unwrap()["content"],string(text));
+        contexts.push(context);receipts.push(frozen.object().unwrap()["admission"].clone());
+    }
+    assert_ne!(first.object().unwrap()["run_id"],second.object().unwrap()["run_id"]);
+    assert_eq!(first.object().unwrap()["admitted_service_epoch"],second.object().unwrap()["admitted_service_epoch"]);
+    assert_ne!(contexts[0].object().unwrap()["task"],contexts[1].object().unwrap()["task"]);
+    assert_ne!(contexts[0].object().unwrap()["attempt"],contexts[1].object().unwrap()["attempt"]);
+    assert_ne!(receipts[0],receipts[1]);
+    let third=submit(&c,&client,"quota3","third ordinary input");
+    let events=third.object().unwrap()["events"].array().unwrap();assert_eq!(events.len(),1);
+    assert_eq!(events[0].object().unwrap()["kind"],string("terminal"));
+    let terminal=events[0].object().unwrap()["payload"].object().unwrap();
+    assert_eq!(terminal["state"],string("failed"));
+    assert_eq!(terminal["reason"],string("provider_budget_reservation_failed"));
+    let replay=submit(&c,&client,"quota3","third ordinary input");assert_eq!(third,replay);
+    for _ in 0..2 {
+        let lookup=parse(c.supplier_read_events(client.clone(),"quota3".into(),1).as_bytes()).unwrap();
+        assert_eq!(lookup.object().unwrap()["terminal"],Json::Bool(true));
+        assert!(lookup.object().unwrap()["events"].array().unwrap().is_empty());
+        assert_eq!(lookup.object().unwrap()["next_cursor"],Json::Number("1".into()));
+        for key in ["request_id","run_id","admitted_service_epoch"] {assert_eq!(lookup.object().unwrap()[key],third.object().unwrap()[key]);}
+    }
+    let facts=f.lock().unwrap();assert_eq!(facts.sends,2);assert_eq!(facts.attempts.len(),2);assert_eq!(facts.payloads.len(),2);drop(facts);
+    clean(path,c);
 }
 #[test]
 fn changed_frozen_usage_or_profile_evidence_cannot_disclose_completed_answer(){
