@@ -1,5 +1,14 @@
 # LeaderB ordinary chat wiring handoff
 
+## Authorized observability follow-up (2026-10-19)
+
+- Reviewed observation source **d9892a75775e507d585f3ddaa712305be30dcfac** records six device phases, exact SHA and exit codes. Seven disposable no-network tool-probe scenarios pass; red/green evidence retained. See OBSERVABILITY.md and OBSERVABILITY-REVIEW.md.
+- One explicitly authorized new [CI39183528428](https://github.com/mightyoung/Muyon/actions/runs/39183528428) reached terminal FAILURE. Producers and package/lint passed; SDK/AVD/boot/install/instrumentation exit0, result exit1. New job117841491609 own log was read successfully. No old denied log/artifact was accessed.
+- New run: owner test PASS; Compose test FAIL at OrdinaryChatServiceLoopTest.kt:56, second Send after Activity recreation was Disabled. Earlier first-answer assertions were reached/completed; entire Compose regression is still FAIL. Disabled-state cause not established. See OBSERVABILITY-RESULTS.md and evidence/observability/. No further device run or behavioral repair in this follow-up.
+- The original handoff below and CI39144821029 failure/access denial remain historical evidence; new results do not establish the old cause or old individual outcomes. All HOLD/I04/model/credential/fee restrictions remain.
+
+## Original frozen handoff
+
 - Draft [PR95](https://github.com/mightyoung/Muyon/pull/95), stacks PR94. Tested source **fbde72aa0420c522a94417f383ec17a8d0718677**; implementationcbc03836, later changes docs-only. All implementation writers stopped; no merge/HOLD release.
 - Actual ordinary Send intent now uses existing Compose→private Service→genuine UniFFI→same Rust controller/Agent drive. Workspace/task/input/context, versioned input/output checks, profile/budget, opaque handle generation and one-shot fake exchange bind to SAME durable owner. Supplier source owner remains. Default app unconfigured and denies; fake installer is compile-time only. No Dart business/UI expansion.
 - Local Rust6/6 PASS; genuine binding reproduction PASS. [CI39144821029](https://github.com/mightyoung/Muyon/actions/runs/39144821029) terminal FAILURE: scoped + both API26 ABI producers SUCCESS; APK/test APK/lint/package inspection SUCCESS; API26 device step FAILURE（包含SDK/boot/install/instrument/grep，不能确定仪表实际启动）. **Ordinary chat synthetic E2E NOT VERIFIED**, individual device test outcomes unknown. No rerun/cancel.
