@@ -10,6 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mightyoung.muyon.product.agentipc.ProductClient
@@ -207,14 +210,15 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
     }
 
     Column(Modifier.fillMaxSize().imePadding()) {
+        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ChatAvatar(displayName, memberNames)
                 Column(Modifier.weight(1f)) {
-                    Text(displayName, style = MaterialTheme.typography.titleLarge)
+                    Text(displayName, style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Text(if (memberNames.isEmpty()) "聊天与工作台" else "群组 · ${memberNames.size} 位成员", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                TextButton(onClick = { settingsOpen = true }) { Text("模型与预算设置") }
+                TextButton(onClick = { settingsOpen = true }, modifier = Modifier.semantics { contentDescription = "模型与预算设置" }) { Text("设置") }
             }
             if (memberNames.isNotEmpty()) Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 memberNames.forEach { name -> ChatMemberChip(name) }
@@ -232,7 +236,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
             Text(if (availability == null) "连接状态未读取" else "本地读取已连接；实际外发仍需通过计费证明与预算检查", Modifier.testTag("chat-availability"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .08f))
-        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (original == null && resultText.isEmpty() && source.isEmpty() && businessIntent == null && businessOriginalText.isEmpty()) {
             ChatEmptyState(displayName, memberNames, !loading, projectId != null,
                 onSuppliers = { read("supplier_list", 0) }, onPapers = { read("paper_list", 0) })
@@ -307,6 +311,7 @@ private fun ChatConversation(client: ProductClient, projectId: String?, conversa
                 OutlinedButton(onClick = { read(tool, (offset - 20).coerceAtLeast(0)) }, enabled = !loading && offset > 0) { Text("上一页") }
                 OutlinedButton(onClick = { read(tool, offset + 20) }, enabled = !loading && records.size == 20 && offset < 10_000) { Text("下一页") }
             }
+        }
         }
         }
         ChatInputDock(draft, { draft = it.take(4096) }, configured && scopeReady && draft.isNotBlank(),

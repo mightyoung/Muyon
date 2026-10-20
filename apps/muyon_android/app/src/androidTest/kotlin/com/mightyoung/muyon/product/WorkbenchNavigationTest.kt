@@ -65,7 +65,17 @@ class WorkbenchNavigationTest {
             assertNotEquals(agentConversation, groupConversation)
             capture("04-group-chat")
             compose.onNodeWithText("消息草稿").performTextInput("整理当前研究资料")
+            compose.waitUntil(10_000) {
+                androidx.core.view.ViewCompat.getRootWindowInsets(compose.activity.window.decorView)
+                    ?.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime()) == true
+            }
+            compose.waitForIdle()
+            compose.onNodeWithText("消息草稿").assertIsDisplayed().assertTextContains("整理当前研究资料")
             compose.onNodeWithTag("chat-send").assertIsDisplayed().assertIsNotEnabled()
+            val visible = android.graphics.Rect()
+            compose.activity.window.decorView.getWindowVisibleDisplayFrame(visible)
+            assertTrue("composer must stay above the expanded keyboard",
+                compose.onNodeWithTag("chat-send").fetchSemanticsNode().boundsInWindow.bottom <= visible.bottom)
             capture("05-chat-ime")
             assertEquals(originalRequest, saved.getString("original_request", null))
             assertEquals(originalIntent, saved.getString("original_business_intent", null))

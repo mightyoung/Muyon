@@ -1,0 +1,2 @@
+# Preserve runner output exactly; its final newline is part of the captured log.
+*.log whitespace=-blank-at-eof

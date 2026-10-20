@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mightyoung.muyon.product.R
@@ -67,6 +68,7 @@ fun WorkbenchShell(
     }
     BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val expanded = maxWidth >= 840.dp
+        val imeOpen = WindowInsets.ime.getBottom(LocalDensity.current) > 0
         val sidebar: @Composable () -> Unit = {
             Column(Modifier.width(240.dp).fillMaxHeight()
                 .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -114,7 +116,7 @@ fun WorkbenchShell(
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                         }
                     }, bottomBar = {
-                        if (!expanded) NavigationBar(containerColor = MaterialTheme.colorScheme.surface,
+                        if (!expanded && !imeOpen) NavigationBar(containerColor = MaterialTheme.colorScheme.surface,
                             tonalElevation = 0.dp) {
                             destinations.forEach { item ->
                                 NavigationBarItem(selected = selected == item.id, onClick = { onSelect(item.id) }, modifier = Modifier.testTag("nav-${item.id}"),
@@ -125,7 +127,7 @@ fun WorkbenchShell(
                             }
                         }
                     }) { padding ->
-                    Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+                    Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding), contentAlignment = Alignment.TopCenter) {
                         Box(Modifier.widthIn(max = 1120.dp).fillMaxSize()) { content() }
                     }
                 }
