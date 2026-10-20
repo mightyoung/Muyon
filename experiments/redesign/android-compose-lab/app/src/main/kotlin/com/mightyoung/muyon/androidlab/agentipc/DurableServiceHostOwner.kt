@@ -314,6 +314,7 @@ internal class DurableServiceHostOwner(
     override fun exchangeLiveChat(admission:String,binding:ServiceOwnerAdmissionBinding,context:ByteArray,payload:ByteArray,capability:ServiceOwnerCredentialCapability,control:ServiceOwnerRunControl):ServiceOwnerChatResponse? {
         var installation:OrdinaryChatLiveInstallation?=null
         var permit:OrdinaryChatCanaryBudget.Permit?=null
+        var stage=OrdinaryChatFailureStage.OWNER_HANDOFF
         try {
             synchronized(this) {
                 transaction { database,state,_->
@@ -329,8 +330,10 @@ internal class DurableServiceHostOwner(
                 } ?: error("chat_live_handoff_refused")
             }
             val live=checkNotNull(installation);val held=checkNotNull(permit)
+            stage=OrdinaryChatFailureStage.PREPARE
             val response=live.credentials.withCopy(capability) { credential ->
                 live.exchange(payload.copyOf(),credential,{control.allowed()}) { send ->
+                    stage=OrdinaryChatFailureStage.OWNER_AUTHORITY
                     synchronized(this) {
                         read { state ->
                             val database=checkNotNull(db)
@@ -341,19 +344,26 @@ internal class DurableServiceHostOwner(
                     }
                 }
             }
+            stage=OrdinaryChatFailureStage.RESPONSE_VALIDATION
             val candidate=live.decode(response,OrdinaryChatProductionConfig.prove(payload),held)
+            stage=OrdinaryChatFailureStage.OWNER_AUTHORITY
             synchronized(this) {
                 read { state->
                     require(control.allowed() && valid(state,binding) && state.credential==capability)
                     require(liveAdmissionAllowed(checkNotNull(db),state,admission,binding,context,payload,capability))
+                    stage=OrdinaryChatFailureStage.CANDIDATE_PERSIST
                     live.writeCandidate(admission,context,payload,candidate)
                     pendingLive[admission]=PendingLive(live,binding,context.copyOf(),payload.copyOf(),capability,control,candidate)
                     true
                 } ?: error("chat_candidate_refused")
             }
             return candidate.response
-        } catch(_:Exception) {
-            if(installation!=null && permit!=null)try{installation!!.budget.stop(permit!!)}catch(_:Exception){}
+        } catch(failure:Exception) {
+            if(installation!=null && permit!=null) {
+                try{installation!!.budget.stop(permit!!)}catch(_:Exception){}
+                val transport=failure as? OrdinaryChatHttpsFailure
+                installation!!.recordFailure(admission,transport?.stage ?: stage,transport?.httpStatus)
+            }
             return null
         }
     }

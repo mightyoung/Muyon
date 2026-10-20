@@ -6,6 +6,7 @@ import java.io.File
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 
@@ -26,6 +27,28 @@ internal class OrdinaryChatLiveInstallation(val root:File,val credentials:Ordina
     }
     data class Candidate(val permit:OrdinaryChatCanaryBudget.Permit,val response:ServiceOwnerChatResponse,val usage:OrdinaryChatCanaryBudget.Usage,val providerMetadata:JSONObject)
     fun candidateFile(admission:String)=File(root,"live-chat-${OrdinaryChatProductionConfig.sha(admission.toByteArray())}.json")
+    fun failureFile(admission:String)=File(root,"live-chat-failure-${OrdinaryChatProductionConfig.sha(admission.toByteArray())}.json")
+    /** Diagnostic only: never a settlement, never raw exception/response/credential text. */
+    fun recordFailure(admission:String,stage:OrdinaryChatFailureStage,httpStatus:Int?) {
+        var temporary:java.nio.file.Path?=null
+        try {
+            val path=failureFile(admission).toPath()
+            if(Files.exists(path,LinkOption.NOFOLLOW_LINKS))return
+            val value=JSONObject().put("version","ordinary-live-failure-v1")
+                .put("admission_sha256",OrdinaryChatProductionConfig.sha(admission.toByteArray()))
+                .put("stage",stage.name).put("outcome","unknown")
+            if(httpStatus!=null && httpStatus in 100..599)value.put("http_status",httpStatus)
+            val bytes=value.toString().toByteArray(Charsets.UTF_8);require(bytes.size<=1024)
+            val temp=Files.createTempFile(root.toPath(),".live-failure-",".pending");temporary=temp
+            FileChannel.open(temp,StandardOpenOption.WRITE).use { channel->
+                val buffer=ByteBuffer.wrap(bytes);while(buffer.hasRemaining())channel.write(buffer);channel.force(true)
+            }
+            Files.move(temp,path,StandardCopyOption.ATOMIC_MOVE)
+            FileChannel.open(root.toPath(),StandardOpenOption.READ).use{it.force(true)}
+        } catch(_:Exception) {
+            // Stopping the durable budget and the caller's unknown result take precedence.
+        } finally {try{temporary?.let{Files.deleteIfExists(it)}}catch(_:Exception){}}
+    }
     /** Only synthetic prompt/answer/usage are persisted, never headers or credential material. */
     fun writeCandidate(admission:String,context:ByteArray,payload:ByteArray,candidate:Candidate) {
         val value=JSONObject().put("version","ordinary-live-candidate-v1").put("admission",admission)

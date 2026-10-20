@@ -74,4 +74,34 @@ class OrdinaryChatLivePolicyTest {
             assertEquals(current,store.current());authority.guarded{assertEquals(current,it.credential)}
         } finally {root.deleteRecursively()}
     }
+    @Test fun failureDiagnosticsArePrivateBoundedImmutableAndCannotReleaseStoppedBudget() {
+        val context=InstrumentationRegistry.getInstrumentation().targetContext
+        val root=Files.createTempDirectory(context.cacheDir.toPath(),"live-diagnostic-new-root-").toFile()
+        val hidden=root.toPath().resolveSibling(root.name+"-unavailable")
+        try {
+            val live=OrdinaryChatLiveInstallation(root,OrdinaryChatTemporaryCredential())
+            val bytes=wire();val proof=OrdinaryChatProductionConfig.prove(bytes)
+            val permit=live.budget.reserve("diagnostic-offline",bytes,proof,"CNY",OrdinaryChatProductionConfig.verifier)
+            live.budget.handoff(permit);live.budget.stop(permit)
+            // Root unavailable after durable stop: diagnostic creation fails without changing outcome.
+            Files.move(root.toPath(),hidden)
+            try {live.recordFailure("admission",OrdinaryChatFailureStage.HTTP_STATUS,401);assertFalse(root.exists())}
+            finally {Files.move(hidden,root.toPath())}
+            val stopped=live.budget.snapshot();assertTrue(stopped.stopped);assertEquals(1,stopped.attempts)
+            assertEquals(permit.reservedMicroCny,stopped.reservedMicroCny)
+            assertEquals(listOf("unknown"),stopped.states)
+            live.recordFailure("admission",OrdinaryChatFailureStage.HTTP_STATUS,401)
+            val file=live.failureFile("admission");val first=file.readText();val value=JSONObject(first)
+            assertTrue(file.length() in 1..1024)
+            assertEquals(0x180,android.system.Os.stat(file.path).st_mode and 0x1ff)
+            assertEquals(setOf("version","admission_sha256","stage","outcome","http_status"),value.keys().asSequence().toSet())
+            live.recordFailure("admission",OrdinaryChatFailureStage.HTTP_BODY,200)
+            assertEquals(first,file.readText())
+            live.recordFailure("invalid-status",OrdinaryChatFailureStage.HTTP_STATUS,999)
+            assertFalse(JSONObject(live.failureFile("invalid-status").readText()).has("http_status"))
+            assertEquals(stopped,live.budget.snapshot())
+            try {live.budget.reserve("no-retry",bytes,proof,"CNY",OrdinaryChatProductionConfig.verifier);fail("stopped budget admitted retry")}
+            catch(_:OrdinaryChatCanaryBudget.Refused){}
+        } finally {root.deleteRecursively();hidden.toFile().deleteRecursively()}
+    }
 }

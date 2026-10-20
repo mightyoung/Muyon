@@ -91,6 +91,72 @@ fun main() {
     val poisoned = "synthetic-offline-key".toCharArray()
     reject { OrdinaryChatHttpsTransport().exchange(byteArrayOf(1), poisoned, { false }, { it(); true }) }
     check(poisoned.all { it == '\u0000' }); checks++
+    check(checks == 27) // Preserve every original protocol/bounds/watchdog check above.
+    fun failureAt(stage: OrdinaryChatFailureStage, status: Int? = null, block: () -> Unit): OrdinaryChatHttpsFailure {
+        try { block(); error("expected diagnostic failure") } catch (failure: OrdinaryChatHttpsFailure) {
+            check(failure.message == "ordinary_chat_https_failed" && failure.cause == null)
+            check(failure.stage == stage && failure.httpStatus == status)
+            check(failure.suppressed.isEmpty())
+            checks++
+            return failure
+        }
+    }
+    for (stage in OrdinaryChatFailureStage.entries) {
+        val failure = OrdinaryChatHttpsFailure(stage)
+        check(failure.stage == stage && failure.httpStatus == null && failure.cause == null)
+        check(failure.message == "ordinary_chat_https_failed")
+        checks++
+    }
+    check(OrdinaryChatHttpsFailure().stage == OrdinaryChatFailureStage.PREPARE); checks++
+    failureAt(OrdinaryChatFailureStage.PREPARE) { run("", allowed = { false }) }
+    failureAt(OrdinaryChatFailureStage.AUTHORIZE_WRITE) { run("", authorize = { false }) }
+    failureAt(OrdinaryChatFailureStage.HTTP_STATUS) { run("") }
+    failureAt(OrdinaryChatFailureStage.HTTP_HEADERS, 200) { run("HTTP/1.1 200 OK\r\nBroken header\r\n") }
+    failureAt(OrdinaryChatFailureStage.HTTP_HEADERS, 200) { run("HTTP/1.1 200 OK\r\nContent-Length: 65537\r\n\r\n") }
+    failureAt(OrdinaryChatFailureStage.HTTP_BODY, 200) { run("HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\n{}") }
+    for (line in listOf("HTTP/1.0 401 Forbidden", "HTTP/1.1 099 Bad", "HTTP/1.1 600 Bad",
+        "HTTP/1.1 20 OK", "HTTP/1.1 0200 OK", "HTTP/1.1  401 Bad", "HTTP/1.1 401", "HTTP/1.1\t401 Bad")) {
+        failureAt(OrdinaryChatFailureStage.HTTP_STATUS) { run("$line\r\n") }
+    }
+    for (status in listOf(100, 302, 401, 429, 500, 599)) {
+        val statusLine = "HTTP/1.1 $status sensitive-reason\r\n".toByteArray()
+        var offset = 0
+        failureAt(OrdinaryChatFailureStage.HTTP_STATUS, status) {
+            OrdinaryChatHttpsTransport.exchangeConnected(object : InputStream() {
+                override fun read(): Int {
+                    check(offset < statusLine.size) { "must not read headers or body" }
+                    return statusLine[offset++].toInt()
+                }
+            }, ByteArrayOutputStream(), byteArrayOf(1), credential, { true }, { it(); true })
+        }
+        check(offset == statusLine.size)
+    }
+    val preserved = OrdinaryChatHttpsFailure(OrdinaryChatFailureStage.OWNER_AUTHORITY)
+    check(failureAt(OrdinaryChatFailureStage.OWNER_AUTHORITY) {
+        run("", authorize = { throw preserved })
+    } === preserved); checks++
+    var failedWrites = 0
+    var failedRequest: ByteArray? = null
+    val sensitiveFailure = failureAt(OrdinaryChatFailureStage.WRITE) {
+        OrdinaryChatHttpsTransport.exchangeConnected(ByteArrayInputStream(byteArrayOf()), object : OutputStream() {
+            override fun write(value: Int) { error("unused") }
+            override fun write(bytes: ByteArray) {
+                failedWrites++
+                failedRequest = bytes
+                throw java.io.IOException("synthetic-offline-key secret-payload secret-response")
+            }
+        }, "secret-payload".toByteArray(), credential, { true }, { it(); true })
+    }
+    check(failedWrites == 1 && failedRequest!!.all { it == 0.toByte() }); checks++
+    // The diagnostic object contains only fixed enum/numeric fields, never a request, key, or original exception.
+    check(sensitiveFailure.javaClass.declaredFields.filterNot { java.lang.reflect.Modifier.isStatic(it.modifiers) }
+        .all { it.type == OrdinaryChatFailureStage::class.java || it.type == java.lang.Integer::class.java })
+    check(!sensitiveFailure.toString().contains("secret") && sensitiveFailure.cause == null); checks++
+    val outerPoisoned = "synthetic-offline-key".toCharArray()
+    failureAt(OrdinaryChatFailureStage.PREPARE) {
+        OrdinaryChatHttpsTransport().exchange(byteArrayOf(1), outerPoisoned, { false }, { it(); true })
+    }
+    check(outerPoisoned.all { it == '\u0000' }); checks++
     credential.fill('\u0000')
     println("HTTPS offline protocol checks passed: $checks; no network or real credential used")
 }

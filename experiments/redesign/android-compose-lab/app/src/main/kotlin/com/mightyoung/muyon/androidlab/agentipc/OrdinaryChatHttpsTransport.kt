@@ -26,6 +26,7 @@ internal class OrdinaryChatHttpsTransport {
         val finished = AtomicBoolean(false)
         val writeDeadline = AtomicLong(Long.MAX_VALUE)
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(45)
+        var stage = OrdinaryChatFailureStage.PREPARE
         try {
             require(payload.size in 1..8192)
             validateCredential(credential)
@@ -35,13 +36,16 @@ internal class OrdinaryChatHttpsTransport {
             startDeadlineWatchdog(finished, writeDeadline, deadline, allowed, { connection.close() })
             val connectDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10)
             // DNS itself can block; its daemon task has no credentials and cannot send a request.
+            stage = OrdinaryChatFailureStage.DNS
             val lookup = FutureTask { InetAddress.getByName(HOST) }
             Thread(lookup, "ordinary-chat-dns").apply { isDaemon = true; start() }
             val address = try {
                 lookup.get(remainingMillis(connectDeadline).toLong(), TimeUnit.MILLISECONDS)
             } finally { lookup.cancel(true) }
+            stage = OrdinaryChatFailureStage.TCP_CONNECT
             connection.connect(InetSocketAddress(address, 443), remainingMillis(connectDeadline))
             // Preserve the DNS peer host for certificate verification when connecting a resolved IP.
+            stage = OrdinaryChatFailureStage.TLS_HANDSHAKE
             val active = (SSLSocketFactory.getDefault() as SSLSocketFactory)
                 .createSocket(connection, HOST, 443, true) as SSLSocket
             socket = active
@@ -55,8 +59,10 @@ internal class OrdinaryChatHttpsTransport {
             return exchangeConnected(active.inputStream, active.outputStream, payload, credential,
                 { allowed() && System.nanoTime() < deadline }, authorizeAndWrite,
                 { writing -> writeDeadline.set(if (writing) System.nanoTime() + TimeUnit.SECONDS.toNanos(2) else Long.MAX_VALUE) })
+        } catch (failure: OrdinaryChatHttpsFailure) {
+            throw failure
         } catch (_: Exception) {
-            throw OrdinaryChatHttpsFailure()
+            throw OrdinaryChatHttpsFailure(stage)
         } finally {
             finished.set(true)
             credential.fill('\u0000')
@@ -108,6 +114,8 @@ internal class OrdinaryChatHttpsTransport {
         ): ByteArray {
             var request: ByteArray? = null
             var result: ByteArray? = null
+            var stage = OrdinaryChatFailureStage.PREPARE
+            var httpStatus: Int? = null
             try {
                 require(payload.size in 1..8192)
                 validateCredential(credential)
@@ -122,8 +130,10 @@ internal class OrdinaryChatHttpsTransport {
                 suffix.copyInto(bytes, prefix.size + credential.size)
                 payload.copyInto(bytes, prefix.size + credential.size + suffix.size)
                 val sent = AtomicBoolean(false)
+                stage = OrdinaryChatFailureStage.AUTHORIZE_WRITE
                 check(authorizeAndWrite {
                     check(sent.compareAndSet(false, true) && allowed())
+                    stage = OrdinaryChatFailureStage.WRITE
                     writing(true)
                     val started = System.nanoTime()
                     try {
@@ -133,16 +143,25 @@ internal class OrdinaryChatHttpsTransport {
                     } finally { writing(false) }
                 })
                 check(sent.get() && allowed())
-                result = readResponse(input, allowed)
+                result = readResponse(input, allowed, { stage = it }, { httpStatus = it })
                 check(allowed())
                 return result
+            } catch (failure: OrdinaryChatHttpsFailure) {
+                result?.fill(0)
+                throw failure
             } catch (_: Exception) {
                 result?.fill(0)
-                throw OrdinaryChatHttpsFailure()
+                throw OrdinaryChatHttpsFailure(stage, httpStatus)
             } finally { request?.fill(0) }
         }
 
-        private fun readResponse(input: InputStream, allowed: () -> Boolean): ByteArray {
+        private fun readResponse(
+            input: InputStream,
+            allowed: () -> Boolean,
+            stage: (OrdinaryChatFailureStage) -> Unit,
+            statusParsed: (Int) -> Unit,
+        ): ByteArray {
+            stage(OrdinaryChatFailureStage.HTTP_STATUS)
             var headerBytes = 0
             fun octet(): Int { check(allowed()); return input.read() }
             fun line(limit: Int): String {
@@ -163,7 +182,14 @@ internal class OrdinaryChatHttpsTransport {
                 return value
             }
             val status = headerLine()
-            check(status.startsWith("HTTP/1.1 200 "))
+            // Keep only the numeric code; never expose the untrusted reason phrase.
+            val match = Regex("HTTP/1\\.1 ([0-9]{3}) [\\t\\x20-\\x7e]*").matchEntire(status)
+            check(match != null)
+            val code = match.groupValues[1].toInt()
+            check(code in 100..599)
+            statusParsed(code)
+            check(code == 200)
+            stage(OrdinaryChatFailureStage.HTTP_HEADERS)
             val headers = mutableMapOf<String, String>()
             while (true) {
                 val value = headerLine()
@@ -178,13 +204,18 @@ internal class OrdinaryChatHttpsTransport {
             val length = headers["content-length"]
             val encoding = headers["transfer-encoding"]
             check(length == null || encoding == null)
+            check(encoding == null || encoding.equals("chunked", ignoreCase = true))
+            val contentLength = length?.let {
+                check(it.isNotEmpty() && it.all { char -> char in '0'..'9' })
+                it.toLong().also { count -> check(count <= 65_536) }.toInt()
+            }
+            stage(OrdinaryChatFailureStage.HTTP_BODY)
             val body = ByteArrayOutputStream()
             fun copy(count: Int) {
                 check(count >= 0 && body.size() + count <= 65_536)
                 repeat(count) { val value = octet(); check(value >= 0); body.write(value) }
             }
             if (encoding != null) {
-                check(encoding.equals("chunked", ignoreCase = true))
                 var framingBytes = 0
                 while (true) {
                     val chunkLine = line(128)
@@ -214,11 +245,8 @@ internal class OrdinaryChatHttpsTransport {
                     copy(count.toInt())
                     check(octet() == 13 && octet() == 10)
                 }
-            } else if (length != null) {
-                check(length.isNotEmpty() && length.all { it in '0'..'9' })
-                val count = length.toLong()
-                check(count <= 65_536)
-                copy(count.toInt())
+            } else if (contentLength != null) {
+                copy(contentLength)
             } else {
                 while (true) {
                     val value = octet()
@@ -232,4 +260,14 @@ internal class OrdinaryChatHttpsTransport {
     }
 }
 
-internal class OrdinaryChatHttpsFailure : Exception("ordinary_chat_https_failed")
+/** Local failure location only: a stage does not establish whether the provider received a request. */
+internal enum class OrdinaryChatFailureStage {
+    PREPARE, DNS, TCP_CONNECT, TLS_HANDSHAKE, AUTHORIZE_WRITE, WRITE,
+    HTTP_STATUS, HTTP_HEADERS, HTTP_BODY, RESPONSE_VALIDATION, CANDIDATE_PERSIST,
+    OWNER_HANDOFF, OWNER_AUTHORITY,
+}
+
+internal class OrdinaryChatHttpsFailure(
+    val stage: OrdinaryChatFailureStage = OrdinaryChatFailureStage.PREPARE,
+    val httpStatus: Int? = null,
+) : Exception("ordinary_chat_https_failed")
