@@ -95,8 +95,11 @@ class SystemPickerProductTest {
 
     /** Parent removes the exact generated PDF before running this independently. */
     @Test fun reopenPrivatePdfAfterOriginalRemoved() {
-        val sourceState = shellRead("if test -e /sdcard/Download/MuyonRefactorFixtures/picker-paper.pdf; then echo present; else echo absent; fi").trim()
-        assertEquals("Parent must remove only the generated original PDF first", "absent", sourceState)
+        // API26 UiAutomation executes an executable directly, not shell syntax.
+        val originalFiles = shellRead("/system/bin/ls -1 /sdcard/Download/MuyonRefactorFixtures")
+            .lineSequence().map(String::trim).filter(String::isNotEmpty).toSet()
+        assertTrue("directory must be readable, not merely an access-denied absence", originalFiles.containsAll(setOf("picker-workspace.zip", "picker-workspace")))
+        assertFalse("Parent must remove only the generated original PDF first", originalFiles.contains("picker-paper.pdf"))
         val title = requireNotNull(preferences.getString("paper_title", null)) { "Run the successful PDF picker test first" }
         openResearch()
         selectProject(requireNotNull(preferences.getString("project_name", null)))
