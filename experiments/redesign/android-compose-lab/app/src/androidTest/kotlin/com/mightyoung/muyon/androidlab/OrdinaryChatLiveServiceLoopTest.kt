@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.mightyoung.muyon.androidlab.agentipc.OrdinaryChatProductionConfig
 import org.json.JSONObject
 import org.junit.Assert.*
@@ -46,6 +48,14 @@ class OrdinaryChatLiveServiceLoopTest {
             var previous:ChatReadConversation?=null
             compose.runOnIdle{previous=app.chats.snapshot.conversations.values.singleOrNull()}
             compose.onNodeWithTag("assistant-draft").performTextReplacement(text)
+            // A physical click must not race the IME or its moving window controls.
+            compose.activityRule.scenario.onActivity{a->(a.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(a.window.decorView.windowToken,0);a.window.decorView.clearFocus()}
+            compose.waitUntil(10000){
+                var hidden=false
+                compose.runOnIdle{hidden=ViewCompat.getRootWindowInsets(compose.activity.window.decorView)?.let{!it.isVisible(WindowInsetsCompat.Type.ime())} ?: false}
+                hidden
+            }
+            compose.onNodeWithTag("assistant-draft").assertTextEquals(text)
             // Shell copies the Service snapshot every 100 ms. Its displayed status can
             // lag the underlying terminal snapshot, especially when SECOND is unchanged.
             compose.waitUntil(10000){
@@ -56,10 +66,20 @@ class OrdinaryChatLiveServiceLoopTest {
                 }}
                 compose.onAllNodes(hasTestTag("send-service-read") and isEnabled()).fetchSemanticsNodes().isNotEmpty()
             }
-            compose.onNodeWithTag("send-service-read").assertIsEnabled().performClick()
+            compose.onNodeWithTag("send-service-read").assertIsDisplayed().assertIsEnabled().performClick()
             lateinit var request:String
+            try {
+                compose.waitUntil(10000){
+                    var published=false
+                    compose.runOnIdle{published=app.chats.snapshot.conversations.values.singleOrNull()?.let{it.requestId!=null && it.requestId!=previous?.requestId} ?: false}
+                    published
+                }
+            } catch(failure:Exception) {
+                var state=""
+                compose.runOnIdle{state="count=${app.chats.snapshot.conversations.size}, statuses=${app.chats.snapshot.conversations.values.map{it.status}}"}
+                throw AssertionError("single Send did not publish a new local identity: $state",failure)
+            }
             compose.runOnIdle{request=checkNotNull(app.chats.snapshot.conversations.values.single().requestId)}
-            compose.activityRule.scenario.onActivity{a->(a.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(a.window.decorView.windowToken,0);a.window.decorView.clearFocus()}
             compose.waitUntil(60000){var terminal=false;compose.runOnIdle{terminal=app.chats.snapshot.conversations.values.single().let{it.requestId==request && it.status in setOf("completed","failed","unknown","cancelled")}};terminal}
             lateinit var result:ChatReadConversation
             compose.runOnIdle{result=app.chats.snapshot.conversations.values.single()}
