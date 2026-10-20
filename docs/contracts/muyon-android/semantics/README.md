@@ -1,0 +1,47 @@
+# Android business contract v1
+
+This is the bounded Android contract for P01, not a freeze of cross-platform M03. Executable authority is `crates/muyon-core/src/contract.rs`; schema is descriptive, never a replacement for Rust decoding. Protocol version, business version and store schema version are independent. Unknown protocol/business versions fail closed before any effect.
+
+## Command and permission binding
+
+`CommandEnvelope::decode` first parses recursively without duplicate object keys, then rejects unknown fields in every typed security structure and validates operation parameters. JSON bytes are limited to 1 MiB and serde's default recursion limit applies. Duplicate keys with escaped-equivalent names also fail. Only opaque imported `record` accepts arbitrary JSON fields. Revision, byte length and grant generation are canonical unsigned decimal **strings**, from zero through u64::MAX, with no sign, leading zero, exponent, decimal point or numeric JSON representation. A write requiring revision+1 rejects u64::MAX. Create starts at expected revision zero; supplier update/delete/restore requires nonzero revision.
+
+Every scope has a workspace; paper/import additionally needs a project. `authority` carries grant ID, generation and owner epoch, but this wire data never issues a grant. The store must find a persisted, active grant for the exact digest/scope/revision/epoch and serialize grant revocation/cancellation with commit. Generation must be nonzero. A caller supplying `user_confirmed`, capability or any unknown security property is rejected. Model-generated arguments cannot mint or renew grants. UI must send the entire unprocessed raw value. Grant admission for network/billing is separate from business authorization; receipt may correlate an admission ID without claiming two-database atomicity.
+
+Operations are the closed enum supplier_create/update/delete/restore, project_create, paper_create, research_import, blob_pin/release. Merge/contact/quotation operations are absent. Read/list/preview/original receipt lookup use separate read APIs, never this write dispatcher. Preview does not write pending rows or issue grants. Immutable file snapshots and SQL commits remain distinct operations.
+
+## Stable encoding
+
+`expected_plan_digest` is SHA-256 of compact UTF-8 JSON with recursively sorted keys containing exactly protocol_version, business_version, scope, expected_revision and command. No Unicode normalization is applied during hashing: parameters bind their exact raw text. Plan hash excludes intent, grant and itself. `binding_digest` includes the complete typed envelope, with optional fields serialized as null. Thus renewed grants, epochs, new intent, scope, parameters, expected revision, plan ID and plan digest alter retry identity. SHA-256 is lowercase hex. Unicode object-key ordering follows scalar order; contract field names are ASCII. Arrays retain order; aliases are normalized only for persisted business values, after raw binding. Imported numeric metadata uses serde_json's finite JSON number rendering; downstream encoders must consume the provided raw canonical JSON or demonstrate matching vectors before claiming cross-runtime digest parity.
+
+Lookup under original intent must compare the stored full binding and return the original receipt. Same intent with changed parameters is IntentConflict, even if normalized name equals the old one. A genuine new confirmed intent with the same normalized name still increments revision and returns a new receipt. JSON field order/insignificant whitespace do not alter identity.
+
+## Supplier fields and Unicode source
+
+Reuse `docs/contracts/redesign-v1.3.2/supplier-name-contract.md` and `experiments/redesign/device-deferred/rust-domain/src/lib.rs` (unicode-normalization 0.1.25). The raw name cap is 2,000 UTF-16 units. Invalid XML characters/isolated surrogates are rejected before trim, then Dart-compatible whitespace plus BOM trim, NFC, required nonempty and maximum 200 Unicode scalars. Internal TAB/LF/CR are preserved; no NFKC or case folding. `normalize_name(&[u16])` covers invalid surrogate vectors, while valid JSON strings cannot represent isolated surrogates. Existing M04 name fixture recipes remain source evidence; Kotlin execution and full Unicode-version equivalence remain downstream proof obligations, not established by Rust tests alone.
+
+The eight fields are name (required 200), aliases (20 × 200), address (optional 500), categories (20 × 100), notes (optional 2,000), merged_into (reserved null), rating (null/preferred/caution/disabled), rating_note (optional 500). Text XML/trim/NFC checks apply to all; raw per-text bound is ten times normalized scalar bound in UTF-16 units. Arrays normalize, deduplicate and sort by Unicode scalars. Missing rating/rating_note defaults null, following the Dart model; nullable optional text fields also decode omitted as null. Name and both arrays must be present. New commands cannot set merged_into. Same names are permitted because identity is the stable ID.
+
+## Research and controlled files
+
+Manual paper requires project scope, title nonempty ≤500 scalars, and a BlobRef with lowercase SHA-256 plus positive byte length ≤30 MiB. Authors (≤100 × 200), year (1–9999), DOI (≤500), URL (≤2,000) and notes (≤2,000) are optional. General BlobRef caps at 256 MiB and import snapshot at 150 MiB; these do not raise the manual PDF cap. No automatic network metadata lookup or PDF parser is implied. Blob identities are managed content addresses, never filesystem/URI paths. Pin/release requests still require a trusted grant and must obey persisted reference/reader protection in P05.
+
+Imported records differ: source_id/source_revision are not local paper IDs and JSON `record` can contain unknown fields, null/missing title or optional metadata. `raw_json` preserves the original JSON text and must strictly parse to `record`; both are digest-bound, including original whitespace. It remains inert metadata. Import outer envelope binds immutable snapshot digest/length and exact ordered records/attachments, max 10,000 records and max 100 attachments per record. P05/A01/R02 must additionally enforce path/ZIP/stream/CRC/aggregate quotas and preserve original JSON bytes/source revisions; this typed contract does not certify those implementations. Import source ID and per-record source ID are separate identities.
+
+## State, receipt and recovery
+
+| State | Meaning | Allowed recovery |
+| --- | --- | --- |
+| pending | Durable intent, no proven outcome | Query original; no automatic redispatch |
+| unknown | Dispatch/result cannot be proven, including lookup notFound/unreadable | Query original / inspect dependency; no replacement intent |
+| committed | Business effect, history and original receipt committed in one SQL transaction | Return original receipt under current read authority |
+| rejected | Proven refusal before business commit | Show stable error; explicit fresh intent may be prepared |
+| cancelled | Cancellation transaction won before effect commit | Show cancellation; never undo an existing committed effect |
+
+`notFound` is an error/projection fact, not a terminal execution status. Cancel-requested is not cancelled. Grant revoke/cancel/commit linearize at commits in the same business write queue. After business commit, reply loss/Service death is recovered from original receipt; a late receipt remains fact even when old UI epoch cannot update a newer draft. Receipt binds protocol version, original intent/full digest, scope, grant generation/epoch, optional admission ID, target stable ID, resulting revision, committed status and result. A receipt struct alone is not commit proof; store verification checks its persisted transactional origin. Errors are fixed typed enums with no raw secrets/SQL/path text.
+
+ContractError distinguishes invalid_json/version/identity/revision/payload/XML/raw_limit/required/text_limit, unsupported operation, scope mismatch, digest/authority/binding mismatch, intent/revision conflict, not_found/cancelled/unknown/storage/unsupported. Store maps actual SQLite failures without converting unknown into a proven rejection.
+
+`FileSource`, `ReadLease`, `ArchiveEntry` are bounded metadata types with pure shape/bounds/snapshot validation. A lease contains opaque ID, owner epoch and generation; real trusted owner resolves it and must reject forged/stale/revoked leases. Entry identifies relative regular-member name, stored/deflated method, CRC, data offset and compressed/expanded lengths. Entry range must fit the immutable snapshot; expanded member is capped at 30 MiB. The type does not claim ZIP type/flag/CEN/LOC/CRC verification: A01 must produce it from verified bytes and U02a must enforce read counts/CRC. Lookup must never open a write lease or run GC. Pending/unknown import pins cannot expire by wall clock alone. These runtime obligations remain open until actual ports exist.
+
+Upload pin identities are part of the exact plan/retry binding: manual paper optionally names `attachment_upload_id`; import names optional `snapshot_upload_id`, and each imported record has `attachment_upload_ids` keyed by the attachment digest. IDs are bounded and map keys must belong to that record's declared attachments. Runtime must consume that exact project/epoch-owned upload or prove an existing same-project readable reference; matching a digest alone never authorizes consuming another upload. Missing optional IDs encode null/empty map and do not grant attachment rights.

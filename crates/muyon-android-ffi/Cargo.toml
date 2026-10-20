@@ -1,0 +1,23 @@
+[package]
+name = "muyon-android-ffi"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "muyon_android_product"
+crate-type = ["rlib", "cdylib"]
+
+[features]
+bindings = ["uniffi/cli"]
+
+[dependencies]
+muyon-core = { path = "../muyon-core" }
+serde_json.workspace = true
+serde.workspace = true
+uniffi = "=0.32.2"
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
+required-features = ["bindings"]

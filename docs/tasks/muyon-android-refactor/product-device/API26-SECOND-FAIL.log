@@ -1,0 +1,136 @@
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.ProductRecoveryTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualServiceDeathChangesEpochAndOnlyOriginalReceiptRecovers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductRecoveryTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=actualServiceDeathChangesEpochAndOnlyOriginalReceiptRecovers
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.ProductRecoveryTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.research.ResearchProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=corruptStoredMemberCannotPublishSnapshotOrPaper
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=corruptStoredMemberCannotPublishSnapshotOrPaper
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=projectVisibleReviewThenActualPdfHostAndDetail
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+Error in projectVisibleReviewThenActualPdfHostAndDetail(com.mightyoung.muyon.product.research.ResearchProductTest):
+java.lang.IllegalStateException: unknown: StorageIo
+	at com.mightyoung.muyon.product.research.ResearchFileHost.rpc(ResearchFileHost.kt:54)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.upload(ResearchFileHost.kt:82)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.pdf(ResearchFileHost.kt:85)
+	at com.mightyoung.muyon.product.research.ResearchProductTest.projectVisibleReviewThenActualPdfHostAndDetail(ResearchProductTest.kt:116)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=projectVisibleReviewThenActualPdfHostAndDetail
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: stack=java.lang.IllegalStateException: unknown: StorageIo
+	at com.mightyoung.muyon.product.research.ResearchFileHost.rpc(ResearchFileHost.kt:54)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.upload(ResearchFileHost.kt:82)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.pdf(ResearchFileHost.kt:85)
+	at com.mightyoung.muyon.product.research.ResearchProductTest.projectVisibleReviewThenActualPdfHostAndDetail(ResearchProductTest.kt:116)
+
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=deflatedZipUsesFrozenArchiveAndSealsActualImport
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+Error in deflatedZipUsesFrozenArchiveAndSealsActualImport(com.mightyoung.muyon.product.research.ResearchProductTest):
+java.lang.IllegalStateException: unknown: StorageIo
+	at com.mightyoung.muyon.product.research.ResearchFileHost.rpc(ResearchFileHost.kt:54)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.upload(ResearchFileHost.kt:82)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.archive(ResearchFileHost.kt:121)
+	at com.mightyoung.muyon.product.research.ResearchProductTest.deflatedZipUsesFrozenArchiveAndSealsActualImport(ResearchProductTest.kt:147)
+
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=deflatedZipUsesFrozenArchiveAndSealsActualImport
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.research.ResearchProductTest
+INSTRUMENTATION_STATUS: stack=java.lang.IllegalStateException: unknown: StorageIo
+	at com.mightyoung.muyon.product.research.ResearchFileHost.rpc(ResearchFileHost.kt:54)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.upload(ResearchFileHost.kt:82)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.archive(ResearchFileHost.kt:121)
+	at com.mightyoung.muyon.product.research.ResearchProductTest.deflatedZipUsesFrozenArchiveAndSealsActualImport(ResearchProductTest.kt:147)
+
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+com.mightyoung.muyon.product.supplier.SupplierProductTest:
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=dismissingReviewKeepsDraftAndDoesNotWrite
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=dismissingReviewKeepsDraftAndDoesNotWrite
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=visibleReviewCrudUsesActualReceipts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: test=visibleReviewCrudUsesActualReceipts
+INSTRUMENTATION_STATUS: class=com.mightyoung.muyon.product.supplier.SupplierProductTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 10.116
+There were 2 failures:
+1) projectVisibleReviewThenActualPdfHostAndDetail(com.mightyoung.muyon.product.research.ResearchProductTest)
+java.lang.IllegalStateException: unknown: StorageIo
+	at com.mightyoung.muyon.product.research.ResearchFileHost.rpc(ResearchFileHost.kt:54)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.upload(ResearchFileHost.kt:82)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.pdf(ResearchFileHost.kt:85)
+	at com.mightyoung.muyon.product.research.ResearchProductTest.projectVisibleReviewThenActualPdfHostAndDetail(ResearchProductTest.kt:116)
+2) deflatedZipUsesFrozenArchiveAndSealsActualImport(com.mightyoung.muyon.product.research.ResearchProductTest)
+java.lang.IllegalStateException: unknown: StorageIo
+	at com.mightyoung.muyon.product.research.ResearchFileHost.rpc(ResearchFileHost.kt:54)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.upload(ResearchFileHost.kt:82)
+	at com.mightyoung.muyon.product.research.ResearchFileHost.archive(ResearchFileHost.kt:121)
+	at com.mightyoung.muyon.product.research.ResearchProductTest.deflatedZipUsesFrozenArchiveAndSealsActualImport(ResearchProductTest.kt:147)
+
+FAILURES!!!
+Tests run: 6,  Failures: 2
+
+
+INSTRUMENTATION_CODE: -1
+

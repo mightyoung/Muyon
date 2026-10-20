@@ -1,0 +1,2 @@
+# Raw failed-run evidence retains the instrumentation runner's final newline.
+*.log whitespace=-blank-at-eof
