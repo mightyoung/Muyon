@@ -270,6 +270,11 @@ class SystemPickerProductTest {
         // Open navigation roots so a prior provider/location cannot select an unrelated file.
         systemClick(setOf("Show roots", "显示根目录", "显示位置", "Open navigation drawer"), byDescription = true)
         systemClick(setOf("Downloads", "下载", "下载内容"))
+        // A chooser can reopen in the old target directory. Do not mistake that
+        // stale toolbar for arrival while the Downloads navigation is still queued.
+        waitSystem("Downloads root navigation is complete") { root ->
+            hasToolbarTitle(root, "Downloads") && !hasVisibleResource(root, "com.android.documentsui:id/roots_list")
+        }
         openPickerDirectory("Downloads", "MuyonRefactorFixtures")
     }
 
